@@ -37,6 +37,9 @@
   .card h3 { margin: 0 0 0.4rem; letter-spacing: 0.05em; }
   .card p { margin: 0; font-style: italic; color: #6b5a40; line-height: 1.5; }
   .how { line-height: 1.65; max-width: 46rem; }
+  .underhood { font-style: italic; color: #6b5a40; font-size: 0.92rem;
+    line-height: 1.6; max-width: 46rem; margin-top: 0.5rem; }
+  .underhood a { color: #7a5c2e; }
   code { background: #e6d9b8; padding: 0.1em 0.4em; border-radius: 3px;
     font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
   footer { margin-top: 4.5rem; text-align: center; letter-spacing: 0.25em;
@@ -110,16 +113,30 @@
 
 <section>
 <h2>How It Works</h2>
-<p class="how">Vellum is a zero-dependency TypeScript engine. Terrain comes from
-domain-warped gradient noise; priority-flood hydrology guarantees every river
-reaches the sea; a Whittaker-style climate model grows the biomes; settlements
-score harbors and river mouths; Dijkstra roads share corridors; realm borders
-follow ridges and rivers. Names come from syllable grammars for six invented
-cultures. The whole pipeline is deterministic — fork-labeled RNG streams mean
-the same seed always draws the same world.</p>
+<p class="how">Give Vellum a number, called a <em>seed</em>, and it builds an
+entire world from scratch. First it raises land out of noise: random bumpiness
+piled up at several scales, then pushed and pulled out of shape so the features
+wander and swirl instead of repeating in a regular pattern. That distortion is
+what gives coastlines their ragged, believable look instead of round, blobby
+islands. Next it runs water downhill until every river finds its way to the sea.
+A simple climate of temperature and rainfall decides where forests, deserts, and
+tundra grow. Towns settle where people really would, near sheltered harbors,
+river mouths, and good soil, and roads thread between them by the easiest route,
+sharing corridors the way real trade routes do. Borders follow the lay of the
+land, tracing ridgelines and rivers. Even the place names are invented, drawn
+from six made-up languages, one per culture. Best of all, it is repeatable: the
+same seed always draws exactly the same world, right down to the last coastline.</p>
+<p class="underhood">Under the hood: a zero-dependency TypeScript engine, using
+domain-warped <a href="https://en.wikipedia.org/wiki/Perlin_noise">gradient
+noise</a> for terrain, <a href="https://arxiv.org/abs/1511.04463">priority-flood</a>
+hydrology so every river drains to the sea, a
+<a href="https://en.wikipedia.org/wiki/Biome">Whittaker-style climate model</a>,
+<a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm">Dijkstra
+least-cost roads</a>, and a single seed feeding fork-labeled random streams for
+full <a href="https://en.wikipedia.org/wiki/Random_seed">reproducibility</a>.</p>
 <p class="how">Draw your own:
 <code>git clone https://github.com/ahl-gram/Vellum</code> then
-<code>npm run chart -- --seed 42</code> — or read the
+<code>npm run chart -- --seed 42</code>, or read the
 <a href="https://github.com/ahl-gram/Vellum#readme">README</a>.</p>
 </section>
 
