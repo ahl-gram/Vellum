@@ -16,6 +16,7 @@ import { glyphsLayer } from "./layers/glyphs.ts";
 import { cartoucheLayer, planCartouche } from "./layers/cartouche.ts";
 import { compassLayer, planCompass, rhumbLayer } from "./layers/compass.ts";
 import { planScalebar, scalebarLayer } from "./layers/scalebar.ts";
+import { legendLayer, planLegend } from "./layers/legend.ts";
 import { featureLabelsLayer } from "./layers/feature-labels.ts";
 import { seaDecorLayer } from "./layers/sea-decor.ts";
 import { textureDefs, textureOverlay } from "./layers/texture.ts";
@@ -27,6 +28,8 @@ import { windsLayer } from "./layers/winds.ts";
 export type RenderOptions = {
   widthPx?: number;
   style?: StyleName;
+  /** Draw a compact, style-aware key. Opt-in; off by default. */
+  legend?: boolean;
 };
 
 export function renderMap(world: World, opts: RenderOptions = {}): string {
@@ -72,6 +75,10 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   ctx.labels.claim(scalebarPlan.box);
   const compassPlan = planCompass(ctx, cartouchePlan, scalebarPlan.box);
   if (compassPlan) ctx.labels.claim(compassPlan.box);
+  const legendReserved = [cartouchePlan.rect, scalebarPlan.box];
+  if (compassPlan) legendReserved.push(compassPlan.box);
+  const legendPlan = opts.legend ? planLegend(ctx, legendReserved) : null;
+  if (legendPlan) ctx.labels.claim(legendPlan.box);
 
   // evaluation order = label priority: settlements claim space before
   // flexible feature labels, which claim before decorative art
@@ -102,6 +109,7 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     compassPlan ? compassLayer(ctx, compassPlan) : null,
     scalebarLayer(ctx, scalebarPlan),
     cartoucheLayer(ctx, cartouchePlan),
+    legendPlan ? legendLayer(ctx, legendPlan) : null,
   ];
 
   const defs = el("defs", {}, [

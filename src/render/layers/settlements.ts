@@ -36,10 +36,16 @@ export function labelCandidates(
   ];
 }
 
-function glyph(s: NamedSettlement, px: number, py: number, ctx: RenderCtx): SvgNode {
+/** The map mark for a settlement tier; reused by the legend so the two match. */
+export function settlementGlyph(
+  kind: NamedSettlement["kind"],
+  px: number,
+  py: number,
+  ctx: RenderCtx,
+): SvgNode {
   const { style } = ctx;
   const k = ctx.proj.widthPx / 1500;
-  if (s.kind === "capital") {
+  if (kind === "capital") {
     if (style.name === "antique" || style.name === "ink") {
       return castleGlyph(px, py, k, style.ink, style.labelHalo);
     }
@@ -53,7 +59,7 @@ function glyph(s: NamedSettlement, px: number, py: number, ctx: RenderCtx): SvgN
       el("path", { d: star, fill: style.ink }),
     ]);
   }
-  if (s.kind === "town") {
+  if (kind === "town") {
     return el("circle", {
       cx: px, cy: py, r: 3.4 * k,
       fill: style.ink, stroke: style.labelHalo, "stroke-width": 1.2 * k,
@@ -119,7 +125,7 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
   for (const s of ordered) {
     const px = proj.px(s.x);
     const py = proj.py(s.y);
-    nodes.push(glyph(s, px, py, ctx));
+    nodes.push(settlementGlyph(s.kind, px, py, ctx));
 
     const fs = FONT_SIZE[s.kind] * k;
     const gap = (s.kind === "capital" ? 10 : 7) * k;

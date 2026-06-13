@@ -20,7 +20,7 @@ async function main(): Promise<void> {
 
   const hero = generateWorld(defaultRecipe(HERO_SEED));
   for (const style of ["antique", "topographic", "ink", "nautical"] as const) {
-    const svg = renderMap(hero, { style });
+    const svg = renderMap(hero, { style, legend: true });
     await writeFile(resolve(chartsDir, `chart-${HERO_SEED}-${style}.svg`), svg, "utf8");
     console.log(`charts/chart-${HERO_SEED}-${style}.svg`);
   }
@@ -28,7 +28,7 @@ async function main(): Promise<void> {
   const nautical = generateWorld(defaultRecipe(NAUTICAL_SEED));
   await writeFile(
     resolve(chartsDir, `chart-${NAUTICAL_SEED}-nautical.svg`),
-    renderMap(nautical, { style: "nautical" }),
+    renderMap(nautical, { style: "nautical", legend: true }),
     "utf8",
   );
   console.log(`charts/chart-${NAUTICAL_SEED}-nautical.svg`);

@@ -30,6 +30,7 @@ Options:
   --count <n>     Gallery: number of worlds (default 12, max 48)
   --png           Also rasterize to PNG (uses an installed browser)
   --scale <n>     PNG pixel scale (default 2; poster default 1)
+  --legend        Draw a compact key explaining the symbols (default: off)
   --out <path>    Output file (default: out/chart-<seed>-<style>.svg)
 `;
 
@@ -93,6 +94,7 @@ export async function main(argv: string[]): Promise<void> {
       count: { type: "string" },
       png: { type: "boolean", default: false },
       scale: { type: "string" },
+      legend: { type: "boolean", default: false },
       out: { type: "string" },
       help: { type: "boolean", default: false },
     },
@@ -140,7 +142,7 @@ export async function main(argv: string[]): Promise<void> {
     const t0 = performance.now();
     const world = generateWorld(posterRecipe);
     const t1 = performance.now();
-    const svg = renderMap(world, { widthPx: posterWidth, style });
+    const svg = renderMap(world, { widthPx: posterWidth, style, legend: values.legend });
     const t2 = performance.now();
     const out = resolve(
       values.out ?? `out/${command}-${seed}-${style}.svg`,
@@ -212,7 +214,7 @@ export async function main(argv: string[]): Promise<void> {
     const world = generateWorld(recipe);
     console.log(`seed ${seed} · ${recipe.mapType} · ${world.title.title}`);
     for (const style of ["antique", "topographic", "ink", "nautical"] as const) {
-      const svg = renderMap(world, { widthPx, style });
+      const svg = renderMap(world, { widthPx, style, legend: values.legend });
       const out = resolve(`out/chart-${seed}-${style}.svg`);
       await writeOut(out, svg);
       console.log(`  ${out}`);
