@@ -57,6 +57,7 @@
   <ul>
     <li><a href="#about">About Vellum</a></li>
     <li><a href="#how">How a world is built</a></li>
+    <li><a href="#names">Names &amp; invented languages</a></li>
     <li><a href="#climate">Climate, styles &amp; map types</a></li>
     <li><a href="#making">Making &amp; reproducing maps</a></li>
   </ul>
@@ -117,15 +118,40 @@ shared trunk roads emerge naturally. Realms are formed by giving each capital
 the land nearest to it, with borders that prefer to follow rivers and
 ridgelines.</p>
 
-<p class="q">Where do the place names come from?</p>
-<p class="a">Each world picks one of six invented cultures, each with its own
-sound: syllable patterns that build names from scratch, plus templates for
-rivers, seas, peaks, and realms. Nothing is drawn from a real word list.</p>
-
 <p class="q">Is every map really repeatable?</p>
 <p class="a">Yes. Every random choice descends from the seed, so the same seed
 with the same options always draws a byte-for-byte identical map. It's a
 deliberate design goal, checked by the test suite.</p>
+
+<h2 id="names">Names &amp; invented languages</h2>
+
+<p class="q">Where do the names come from?</p>
+<p class="a">Every world picks one of six invented cultures, each with its own
+sound, and uses it for everything: towns, rivers, peaks, seas, and realms.
+Because a single map keeps to one culture, its names share a family resemblance,
+the way place names within one country do. Nothing is taken from a real word
+list; every name is built from scratch.</p>
+
+<p class="q">How does the name "grammar" work?</p>
+<p class="a">In two steps. First Vellum builds a bare stem by stringing together a
+culture's sound pieces: beginnings like "mar" or "dr," vowels like "a" or "ai,"
+and endings like "nd" or "mor," following that culture's syllable patterns. Then
+it wraps the stem in a template to fit the feature, for example "The Sea of
+___," "Mount ___," or a town ending such as "haven." A few tidy-up rules keep
+each name short and pronounceable, and no two names on one map repeat.</p>
+
+<p class="q">What are the six cultures?</p>
+<p class="a">Each is a different sound-world, loosely echoing a real one: a soft
+seafaring tongue, a hard northern one, a desert tongue rich in "sh" and "kh," an
+airy woodland one, an open island one heavy with vowels, and a harsh mountain
+one full of clusters. The chart's title page even credits an invented surveyor
+whose name comes from the same culture.</p>
+
+<p class="q">Do these names fill the gazetteer too?</p>
+<p class="a">Yes. The gazetteer, the atlas's directory of every town, lists them
+by these same invented names, grouped by realm, with a line or two of travelers'
+notes written in the same spirit. The labels on the map and the entries in the
+gazetteer come from one and the same source.</p>
 
 <h2 id="climate">Climate, styles &amp; map types</h2>
 
