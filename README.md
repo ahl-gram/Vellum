@@ -222,3 +222,11 @@ A few favorite emergent behaviors, none individually programmed:
   the dominant Dijkstra cost.
 - Realm borders follow rivers and ridgelines because crossing them
   costs extra.
+
+## License
+
+Vellum's source code is released under the [MIT License](LICENSE).
+
+Maps you generate with Vellum are dedicated to the public domain (CC0): use
+them for anything, including commercial work, with no restrictions and no
+attribution required.
