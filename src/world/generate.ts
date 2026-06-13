@@ -48,14 +48,18 @@ export function defaultRecipe(
   overrides: Partial<WorldRecipe> = {},
 ): WorldRecipe {
   const rng = createRng(seed).fork("recipe");
-  const mapType = overrides.mapType ?? weightedPick(MAP_TYPE_WEIGHTS, rng.next());
+  // the seed always rolls every pick — overrides replace results, never
+  // skip draws, so forcing one parameter cannot shift the others
+  const rolledType = weightedPick(MAP_TYPE_WEIGHTS, rng.next());
+  const rolledBand = weightedPick(BAND_WEIGHTS, rng.next());
+  const mapType = overrides.mapType ?? rolledType;
   return {
     seed,
     gridW: 320,
     gridH: 240,
     mapType,
     landFraction: LAND_FRACTION[mapType],
-    band: weightedPick(BAND_WEIGHTS, rng.next()),
+    band: rolledBand,
     ...stripUndefined(overrides),
   };
 }

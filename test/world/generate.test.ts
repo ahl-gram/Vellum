@@ -13,6 +13,22 @@ test("defaultRecipe is deterministic and respects overrides", () => {
   assert.equal(c.seed, 42);
 });
 
+test("forcing one parameter never shifts the seed's other derived picks", () => {
+  for (let seed = 1; seed <= 60; seed++) {
+    const plain = defaultRecipe(seed);
+    // forcing the type the seed would pick anyway must change nothing
+    const sameType = defaultRecipe(seed, { mapType: plain.mapType });
+    assert.equal(sameType.band, plain.band, `band shifted for seed ${seed}`);
+    // forcing the band must not change the derived type
+    const sameBand = defaultRecipe(seed, { band: plain.band });
+    assert.equal(sameBand.mapType, plain.mapType, `type shifted for seed ${seed}`);
+    // forcing a different type changes only type + its land fraction
+    const forced = defaultRecipe(seed, { mapType: "continent" });
+    assert.equal(forced.band, plain.band, `band must follow the seed (${seed})`);
+    assert.equal(forced.mapType, "continent");
+  }
+});
+
 test("generateWorld produces a coherent, fully-named world", () => {
   const world = generateWorld(defaultRecipe(42, { gridW: 160, gridH: 120 }));
 
