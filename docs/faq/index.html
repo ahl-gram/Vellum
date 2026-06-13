@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vellum — Questions &amp; Answers</title>
+<meta name="description" content="How Vellum works: seeds, determinism, terrain and rivers, climate and styles, and how to make and reproduce your own maps.">
+<style>
+  :root { color-scheme: light; }
+  body {
+    margin: 0; padding: 2.5rem 1.5rem 5rem;
+    background: #efe6cf; color: #3d2f1f;
+    font-family: 'Iowan Old Style', 'Palatino', Georgia, serif;
+    line-height: 1.6;
+  }
+  main { max-width: 760px; margin-inline: auto; }
+  header { text-align: center; margin-bottom: 1rem; }
+  h1 { font-size: 2rem; letter-spacing: 0.12em; margin: 0; }
+  h1 a { color: inherit; text-decoration: none; }
+  .tagline { font-style: italic; color: #6b5a40; margin: 0.3rem 0 0; }
+  nav { text-align: center; font-size: 0.8rem; letter-spacing: 0.12em;
+    color: #857257; margin: 0.9rem 0 0; }
+  nav a { color: inherit; }
+  h2 { letter-spacing: 0.06em; border-bottom: 1px solid #b9a77f;
+    padding-bottom: 0.3rem; margin-top: 2.8rem; }
+  .toc { background: #f4ecd8; border: 1.5px solid #b9a77f; border-radius: 4px;
+    padding: 1rem 1.4rem; margin: 2rem 0 1rem; }
+  .toc strong { letter-spacing: 0.08em; font-size: 0.8rem; color: #857257;
+    display: block; margin-bottom: 0.4rem; text-transform: uppercase; }
+  .toc ul { margin: 0; padding-left: 1.1rem; }
+  .toc a { color: #4a3826; }
+  .q { font-weight: 600; color: #4a3826; margin: 1.6rem 0 0.3rem;
+    font-size: 1.08rem; }
+  .a { margin: 0; }
+  a { color: #6b5a40; }
+  code { background: #e6d9b8; padding: 0.1em 0.4em; border-radius: 3px;
+    font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
+  footer { margin-top: 4rem; text-align: center; letter-spacing: 0.22em;
+    font-size: 0.72rem; color: #857257; }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1><a href="../">VELLUM</a></h1>
+  <p class="tagline">questions &amp; answers</p>
+  <nav>
+    <a href="../">Home</a> · <a href="../explorer/">Explorer</a> ·
+    <a href="../gallery/">Gallery</a> ·
+    <a href="https://github.com/ahl-gram/Vellum">GitHub</a>
+  </nav>
+</header>
+
+<div class="toc">
+  <strong>On this page</strong>
+  <ul>
+    <li><a href="#about">About Vellum</a></li>
+    <li><a href="#how">How a world is built</a></li>
+    <li><a href="#climate">Climate, styles &amp; map types</a></li>
+    <li><a href="#making">Making &amp; reproducing maps</a></li>
+  </ul>
+</div>
+
+<h2 id="about">About Vellum</h2>
+
+<p class="q">What is Vellum?</p>
+<p class="a">Vellum is a procedural cartography engine. Give it a number — a
+"seed" — and it invents an entire world (terrain, rivers, forests, towns, and
+their names) and draws it as an old-fashioned atlas chart.</p>
+
+<p class="q">Is this AI image generation?</p>
+<p class="a">No. There is no machine learning or image model involved. Vellum is
+a deterministic algorithm — layered noise, a water-flow simulation, and
+name grammars — so it draws crisp, infinitely scalable SVG maps, and the same
+seed always produces exactly the same one.</p>
+
+<p class="q">What is a "seed"?</p>
+<p class="a">A seed is a number that serves as a world's identity. Seed 42 always
+draws the same island; change the number for a different world. It is printed
+in every chart's margin, so you can always find your way back to a map you
+liked.</p>
+
+<p class="q">Do I need to install anything to try it?</p>
+<p class="a">No — the <a href="../explorer/">Explorer</a> runs the whole engine
+in your browser. Type a seed and draw; nothing is uploaded. To generate files
+on your own machine, clone the repo (see the
+<a href="https://github.com/ahl-gram/Vellum#readme">README</a>).</p>
+
+<p class="q">Can I use the maps I make?</p>
+<p class="a">The project is public on GitHub, but it doesn't carry a formal
+license yet. If you'd like to use a map for something, open an issue on the
+repo and ask.</p>
+
+<p class="q">Why "Vellum"?</p>
+<p class="a">Vellum is the prepared animal skin that real medieval maps and
+manuscripts were drawn on — a fitting surface for charts of places that were
+never real.</p>
+
+<h2 id="how">How a world is built</h2>
+
+<p class="q">How is the land shaped?</p>
+<p class="a">Layered "noise" produces a field of elevations. A sea level is then
+chosen so that the intended fraction of the map is land, and everything above
+the waterline becomes the coastline, hills, and mountains.</p>
+
+<p class="q">How do the rivers and lakes form?</p>
+<p class="a">Vellum simulates water. Rainfall runs downhill along the steepest
+path, and the algorithm guarantees every drop can reach the sea — so rivers
+always connect and flow the right way, widening toward their mouths. Where
+water collects below sea level inland, you get a lake.</p>
+
+<p class="q">Where do the towns, roads, and borders come from?</p>
+<p class="a">Towns are scored by good harbors, river mouths, and flat, fertile
+land. Roads are the cheapest paths between them, and they reuse one another, so
+shared trunk roads emerge naturally. Realms are formed by giving each capital
+the land nearest to it, with borders that prefer to follow rivers and
+ridgelines.</p>
+
+<p class="q">Where do the place names come from?</p>
+<p class="a">Each world picks one of six invented cultures, each with its own
+sound — syllable patterns that build names from scratch, plus templates for
+rivers, seas, peaks, and realms. Nothing is drawn from a real word list.</p>
+
+<p class="q">Is every map really repeatable?</p>
+<p class="a">Yes. Every random choice descends from the seed, so the same seed
+with the same options always draws a byte-for-byte identical map. It's a
+deliberate design goal, checked by the test suite.</p>
+
+<h2 id="climate">Climate, styles &amp; map types</h2>
+
+<p class="q">How does climate change the look?</p>
+<p class="a">Climate sets temperature, which sets the biomes — and biomes change
+the map's <em>symbols</em>, not its base color. A polar world shows pine woods
+and open tundra, with the snow line low on the hills. A tropical world shows
+palms, deserts marked with dunes, and snow only on the highest peaks. Temperate
+sits between, with broadleaf woods. The coastline of a given seed is identical
+in every climate.</p>
+
+<p class="q">So is a polar map white?</p>
+<p class="a">No — and that surprises people. The land is the same parchment (or
+elevation tint) in every climate; "cold" shows through the tree types, the
+beaches, the snow line, and the gazetteer's notes, not a change of palette.</p>
+
+<p class="q">What are the four styles?</p>
+<p class="a"><em>Antique</em> — parchment, hatched mountains, sea monsters.
+<em>Topographic</em> — elevation tints and contour lines.
+<em>Ink</em> — pen-and-ink monochrome.
+<em>Nautical</em> — a sea chart with depth soundings and prevailing-wind arrows.
+(The nautical style draws no land symbols, so climate is most muted there.)</p>
+
+<p class="q">What are the map types?</p>
+<p class="a"><em>Island</em> (one landmass), <em>archipelago</em> (scattered
+isles), <em>continent</em> (a large landmass), and <em>city-state</em> (one
+dominant free city and its hinterland). Leave it unset and the seed chooses.</p>
+
+<h2 id="making">Making &amp; reproducing maps</h2>
+
+<p class="q">How do I make a map on my own machine?</p>
+<p class="a">Clone the repo, run <code>npm install</code>, then
+<code>npm run chart -- --seed 42</code>. The chart lands in <code>out/</code> as
+an SVG you can open in any browser. All the options are in the
+<a href="https://github.com/ahl-gram/Vellum#readme">README</a>.</p>
+
+<p class="q">I found a map I love — how do I get it back?</p>
+<p class="a">Note its seed (printed in the margin) and re-run with it. One catch:
+if you forced the type, climate, or land amount, those aren't recorded on the
+chart — pass them again alongside the seed to redraw the same map.</p>
+
+<p class="q">Can I make a high-resolution print?</p>
+<p class="a">Yes — <code>npm run poster -- --seed 42</code> draws an oversized
+chart (about 14 inches at 300 dpi) and rasterizes it to a PNG, ready to print
+as wall art.</p>
+
+<p class="q">What are the atlas and the gallery?</p>
+<p class="a">The atlas binds one world into a small book — the chart in several
+styles, regional close-ups, and a gazetteer of every town with short
+travelers' notes. The <a href="../gallery/">gallery</a> is a contact sheet of
+many worlds at once, for browsing seeds.</p>
+
+<footer>
+  <a href="../">VELLUM</a> ·
+  <a href="https://github.com/ahl-gram/Vellum">GITHUB</a> ·
+  AN ATELIER OF IMAGINARY CARTOGRAPHY
+</footer>
+</main>
+</body>
+</html>

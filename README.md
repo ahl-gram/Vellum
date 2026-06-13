@@ -3,8 +3,9 @@
 *An atelier of imaginary cartography.*
 
 **Live gallery: <https://ahl-gram.github.io/Vellum/>** · draw your own
-in the **[Explorer](https://ahl-gram.github.io/Vellum/explorer/)** —
-the whole engine runs client-side.
+in the **[Explorer](https://ahl-gram.github.io/Vellum/explorer/)** (the
+whole engine runs client-side) · or read the
+**[FAQ](https://ahl-gram.github.io/Vellum/faq/)**.
 
 Vellum surveys worlds that don't exist and drafts them as atlas charts.
 Give it a seed; it invents an island, simulates the rain that carves its
