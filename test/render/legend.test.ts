@@ -81,3 +81,29 @@ test("the legend stays in frame and clears the other furniture", () => {
     }
   }
 });
+
+test("the key lists roads by rank, and only when present", () => {
+  assert.ok(world.roads.some((r) => r.rank === "trunk"), "fixture should have trunk roads");
+  assert.ok(world.roads.some((r) => r.rank === "lane"), "fixture should have lane roads");
+
+  const labels = (w: World): string[] => {
+    const plan = planLegend(ctxFor(w, "antique"), []);
+    return plan ? plan.rows.map((r) => r.label) : [];
+  };
+
+  const both = labels(world);
+  assert.ok(both.includes("Road"), "trunk roads should add a 'Road' row");
+  assert.ok(both.includes("Track"), "lane roads should add a 'Track' row");
+
+  const none = labels({ ...world, roads: [] });
+  assert.ok(!none.includes("Road"), "no roads should add no 'Road' row");
+  assert.ok(!none.includes("Track"), "no roads should add no 'Track' row");
+
+  const trunkOnly = labels({ ...world, roads: world.roads.filter((r) => r.rank === "trunk") });
+  assert.ok(trunkOnly.includes("Road"), "trunk-only should keep 'Road'");
+  assert.ok(!trunkOnly.includes("Track"), "trunk-only should omit 'Track'");
+
+  const laneOnly = labels({ ...world, roads: world.roads.filter((r) => r.rank === "lane") });
+  assert.ok(laneOnly.includes("Track"), "lane-only should keep 'Track'");
+  assert.ok(!laneOnly.includes("Road"), "lane-only should omit 'Road'");
+});
