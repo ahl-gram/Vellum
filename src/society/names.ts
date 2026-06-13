@@ -80,6 +80,34 @@ export const CULTURES: readonly Culture[] = [
     forestTemplates: ["The %wold", "Old %", "The Heart of %"],
     realmTemplates: ["The Vale of %", "The % Compact", "Fair %"],
   },
+  {
+    id: "oromi",
+    onsets: ["k", "t", "m", "n", "h", "r", "l", "p", "w", "kai", "tau", "moa"],
+    nuclei: ["a", "o", "u", "e", "ai", "au", "oa"],
+    codas: ["", "", "n", "ng", "ki", "lo"],
+    patterns: ["ONON", "ON", "ONONON", "ONC"],
+    townSuffixes: ["lua", "koa", "nui", "tani", "pua"],
+    riverTemplates: ["The Waters of %", "The % Falls", "River %"],
+    peakTemplates: ["The Fire Peaks of %", "Mount %", "The Smoking %"],
+    seaTemplates: ["The Great %", "The Sea of %", "The % Vast"],
+    lakeTemplates: ["The Eye of %", "Lake %", "The % Pool"],
+    forestTemplates: ["The % Groves", "The Ferns of %", "Deep %"],
+    realmTemplates: ["The % Atolls", "The Chiefdom of %", "Greater %"],
+  },
+  {
+    id: "draket",
+    onsets: ["dr", "kr", "gr", "th", "mal", "bar", "z", "d", "g", "vor", "skar"],
+    nuclei: ["a", "e", "o", "u", "ya"],
+    codas: ["", "k", "th", "rg", "d", "mar", "gat"],
+    patterns: ["ONC", "ONCONC", "ONCON", "ON"],
+    townSuffixes: ["hold", "spire", "gate", "keep", "burg"],
+    riverTemplates: ["The % Cut", "River %", "The Black %"],
+    peakTemplates: ["The % Fangs", "The Throne of %", "% Spire"],
+    seaTemplates: ["The % Maw", "The Sea of %", "The Iron %"],
+    lakeTemplates: ["The % Depths", "Lake %", "The Drowned %"],
+    forestTemplates: ["The % Thorns", "The Dark of %", "% Forest"],
+    realmTemplates: ["The Empire of %", "The % Dominion", "Iron %"],
+  },
 ];
 
 export type NameKind =
@@ -183,6 +211,7 @@ const TITLE_PATTERNS: Record<MapType, readonly string[]> = {
   island: ["The @ Isle of %", "The Isle of %", "% , the @ Isle"],
   archipelago: ["The @ Isles of %", "The % Archipelago", "The Scattered Isles of %"],
   continent: ["The @ Reaches of %", "The Realm of %", "Terra %"],
+  citystate: ["The Free City of %", "% and its Hinterland", "The City-State of %"],
 };
 
 export type MapTitle = {
@@ -195,9 +224,10 @@ export function makeMapTitle(
   rng: Rng,
   culture: Culture,
   mapType: MapType,
+  baseOverride?: string,
 ): MapTitle {
   const namer = createNamer(rng.fork("title-base"), culture);
-  const base = namer.name("bare");
+  const base = baseOverride ?? namer.name("bare");
   const pattern = rng.pick(TITLE_PATTERNS[mapType]);
   const title = pattern
     .replace("@", rng.pick(TITLE_ADJECTIVES))

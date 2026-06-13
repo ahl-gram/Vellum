@@ -11,7 +11,7 @@
     "chart": "node src/cli/main.ts chart",
     "atlas": "node src/cli/main.ts atlas",
     "demo": "node src/cli/main.ts demo",
-    "site": "node scripts/build-site.ts",
+    "site": "node scripts/build-site.ts && tsc -p tsconfig.browser.json",
     "test": "node --test",
     "check": "tsc --noEmit"
   },

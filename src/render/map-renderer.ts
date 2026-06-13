@@ -22,6 +22,7 @@ import { textureDefs, textureOverlay } from "./layers/texture.ts";
 import { roadsLayer } from "./layers/roads.ts";
 import { realmBordersLayer, realmTintsLayer } from "./layers/realms.ts";
 import { soundingsLayer } from "./layers/soundings.ts";
+import { windsLayer } from "./layers/winds.ts";
 
 export type RenderOptions = {
   widthPx?: number;
@@ -91,6 +92,7 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     roadsLayer(ctx),
     realmBordersLayer(ctx),
     soundingsLayer(ctx, cartouchePlan, compassPlan),
+    windsLayer(ctx, cartouchePlan, compassPlan),
     seaDecor,
     settlements,
     featureLabels.node,

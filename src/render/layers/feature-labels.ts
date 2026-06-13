@@ -25,6 +25,11 @@ const FOREST_BIOMES: ReadonlySet<number> = new Set<number>([
   BIOMES.taiga,
 ]);
 
+/** Offsets tried (in order) when a feature label's first spot is taken. */
+function offsetCandidates(y: number, k: number): number[] {
+  return [y, y - 26 * k, y + 26 * k, y - 52 * k, y + 52 * k];
+}
+
 /** Sea name, named rivers along their courses, mountain range, forest. */
 export function featureLabelsLayer(ctx: RenderCtx): {
   defs: SvgNode[];
@@ -86,13 +91,15 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     const c = centroidOf(pts);
     const fs = 16.5 * k;
     const ls = 4 * k;
-    const box = spacedTextBox(c.x, c.y, name, fs, ls);
-    if (!labels.tryClaim(box, 4)) return;
+    const placedY = offsetCandidates(c.y, k).find((cy) =>
+      labels.tryClaim(spacedTextBox(c.x, cy, name, fs, ls), 4),
+    );
+    if (placedY === undefined) return;
     nodes.push(
       el(
         "text",
         {
-          x: c.x, y: c.y, "text-anchor": "middle",
+          x: c.x, y: placedY, "text-anchor": "middle",
           "font-family": style.fontFamilyTitle,
           "font-size": fs.toFixed(1),
           "letter-spacing": ls.toFixed(1),
@@ -153,13 +160,15 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     const lx = proj.px(lake.x);
     const ly = proj.py(lake.y);
     const fs = 11.5 * k;
-    const box = textBox(lx, ly, lake.name, fs, "middle");
-    if (!labels.tryClaim(box, 3)) continue;
+    const placedY = [ly, ly - 15 * k, ly + 15 * k].find((cy) =>
+      labels.tryClaim(textBox(lx, cy, lake.name, fs, "middle"), 3),
+    );
+    if (placedY === undefined) continue;
     nodes.push(
       el(
         "text",
         {
-          x: lx, y: ly, "text-anchor": "middle",
+          x: lx, y: placedY, "text-anchor": "middle",
           "font-family": style.fontFamily,
           "font-size": fs.toFixed(1),
           "font-style": "italic",
@@ -185,14 +194,16 @@ export function featureLabelsLayer(ctx: RenderCtx): {
       const c = centroidOf(peaks);
       const angle = clamp((principalAngle(peaks) * 180) / Math.PI, -32, 32);
       const fs = 14.5 * k;
-      const box = spacedTextBox(c.x, c.y, world.names.range, fs, 3 * k);
-      if (labels.tryClaim(box, 4)) {
+      const placedY = offsetCandidates(c.y, k).find((cy) =>
+        labels.tryClaim(spacedTextBox(c.x, cy, world.names.range!, fs, 3 * k), 4),
+      );
+      if (placedY !== undefined) {
         nodes.push(
           el(
             "text",
             {
-              x: c.x, y: c.y, "text-anchor": "middle",
-              transform: `rotate(${angle.toFixed(1)} ${c.x.toFixed(1)} ${c.y.toFixed(1)})`,
+              x: c.x, y: placedY, "text-anchor": "middle",
+              transform: `rotate(${angle.toFixed(1)} ${c.x.toFixed(1)} ${placedY.toFixed(1)})`,
               "font-family": style.fontFamily,
               "font-size": fs.toFixed(1),
               "letter-spacing": (3 * k).toFixed(1),
@@ -219,13 +230,15 @@ export function featureLabelsLayer(ctx: RenderCtx): {
       }));
       const c = centroidOf(pts);
       const fs = 12.5 * k;
-      const box = textBox(c.x, c.y, world.names.forest, fs, "middle");
-      if (labels.tryClaim(box, 4)) {
+      const placedY = offsetCandidates(c.y, k).find((cy) =>
+        labels.tryClaim(textBox(c.x, cy, world.names.forest!, fs, "middle"), 4),
+      );
+      if (placedY !== undefined) {
         nodes.push(
           el(
             "text",
             {
-              x: c.x, y: c.y, "text-anchor": "middle",
+              x: c.x, y: placedY, "text-anchor": "middle",
               "font-family": style.fontFamily,
               "font-size": fs.toFixed(1),
               "font-style": "italic",

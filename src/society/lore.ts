@@ -14,6 +14,8 @@ const GOODS: Record<string, readonly string[]> = {
   norden: ["whale oil", "iron blooms", "pine tar", "sealskin", "smoked herring"],
   veshari: ["saffron", "indigo", "dates", "rose attar", "glazed tiles"],
   sylvan: ["heather honey", "cider", "willow-bark", "wool", "carved oak"],
+  oromi: ["dried fish", "black pearls", "feather cloaks", "obsidian", "palm wine"],
+  draket: ["iron ingots", "black granite", "wolf pelts", "siege timber", "bitter ale"],
 };
 
 const HARBOR_NOTES = [

@@ -14,9 +14,10 @@ import { partitionRealms } from "../society/realms.ts";
 import type { FeatureNames, World, WorldRecipe } from "./types.ts";
 
 const MAP_TYPE_WEIGHTS: ReadonlyArray<readonly [MapType, number]> = [
-  ["island", 0.45],
-  ["archipelago", 0.3],
-  ["continent", 0.25],
+  ["island", 0.4],
+  ["archipelago", 0.27],
+  ["continent", 0.23],
+  ["citystate", 0.1],
 ];
 
 const BAND_WEIGHTS: ReadonlyArray<readonly [ClimateBand, number]> = [
@@ -29,6 +30,7 @@ const LAND_FRACTION: Record<MapType, number> = {
   island: 0.34,
   archipelago: 0.24,
   continent: 0.46,
+  citystate: 0.3,
 };
 
 function weightedPick<T>(
@@ -99,6 +101,7 @@ export function generateWorld(recipe: WorldRecipe): World {
   });
   const biomes = classifyBiomes(elev, seaLevel, climate);
 
+  const citystate = mapType === "citystate";
   const settlements = placeSettlements(
     elev,
     seaLevel,
@@ -106,10 +109,17 @@ export function generateWorld(recipe: WorldRecipe): World {
     riverCells,
     biomes,
     rng.fork("sites"),
+    citystate ? { maxTowns: 2, maxVillages: 18 } : {},
   );
 
   const roads = buildRoads(elev, seaLevel, riverCells, settlements);
-  const realms = partitionRealms(elev, seaLevel, riverCells, settlements);
+  const realms = partitionRealms(
+    elev,
+    seaLevel,
+    riverCells,
+    settlements,
+    citystate ? { maxRealms: 1 } : {},
+  );
 
   const culture = rng.fork("culture").pick(CULTURES);
   const namer = createNamer(rng.fork("names"), culture);
@@ -161,7 +171,14 @@ export function generateWorld(recipe: WorldRecipe): World {
         : [],
   };
 
-  const title = makeMapTitle(rng.fork("title"), culture, mapType);
+  // a city-state's chart is named for its city
+  const capitalName = named.find((s) => s.kind === "capital")?.name;
+  const title = makeMapTitle(
+    rng.fork("title"),
+    culture,
+    mapType,
+    citystate ? capitalName : undefined,
+  );
 
   const oceanDist = bfsDistance(gridW, gridH, (x, y) =>
     (elev.data[x + y * gridW] as number) > seaLevel,

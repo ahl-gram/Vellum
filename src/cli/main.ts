@@ -8,11 +8,13 @@ import type { MapType } from "../terrain/heightfield.ts";
 import type { ClimateBand } from "../climate/climate.ts";
 import { buildAtlas } from "./atlas.ts";
 import { buildGallery } from "./gallery.ts";
+import { findBrowser, rasterizeSvg, NO_BROWSER_HINT } from "./raster.ts";
 
 const HELP = `vellum — an atelier of imaginary cartography
 
 Usage:
   node src/cli/main.ts chart [options]   Draft a single chart (SVG)
+  node src/cli/main.ts poster [options]    Wall-art chart: fine grid, 4200px, PNG
   node src/cli/main.ts atlas [options]     Bind a full atlas (HTML + charts)
   node src/cli/main.ts gallery [options]   Contact sheet of many worlds
   node src/cli/main.ts demo  [options]     Draft one chart in each style
@@ -20,12 +22,14 @@ Usage:
 Options:
   --seed <n>      World seed (default: random; always printed)
   --style <s>     antique | topographic | ink | nautical  (default: antique)
-  --type <t>      island | archipelago | continent  (default: by seed)
+  --type <t>      island | archipelago | continent | citystate  (default: by seed)
   --band <b>      temperate | tropical | polar      (default: by seed)
   --grid <WxH>    Simulation grid (default: 320x240)
   --width <px>    Output width in pixels (default: 1500)
   --land <f>      Land fraction 0.1–0.7 (default: by map type)
   --count <n>     Gallery: number of worlds (default 12, max 48)
+  --png           Also rasterize to PNG (uses an installed browser)
+  --scale <n>     PNG pixel scale (default 2; poster default 1)
   --out <path>    Output file (default: out/chart-<seed>-<style>.svg)
 `;
 
@@ -54,7 +58,12 @@ function validateStyle(s: string): StyleName {
 
 function validateType(s: string | undefined): MapType | undefined {
   if (s === undefined) return undefined;
-  if (s === "island" || s === "archipelago" || s === "continent") return s;
+  if (
+    s === "island" || s === "archipelago" || s === "continent" ||
+    s === "citystate"
+  ) {
+    return s;
+  }
   throw new Error(`unknown map type "${s}"`);
 }
 
@@ -82,6 +91,8 @@ export async function main(argv: string[]): Promise<void> {
       width: { type: "string" },
       land: { type: "string" },
       count: { type: "string" },
+      png: { type: "boolean", default: false },
+      scale: { type: "string" },
       out: { type: "string" },
       help: { type: "boolean", default: false },
     },
@@ -118,19 +129,46 @@ export async function main(argv: string[]): Promise<void> {
     ...(landFraction !== undefined ? { landFraction } : {}),
   });
 
-  if (command === "chart") {
+  if (command === "chart" || command === "poster") {
     const style = validateStyle(values.style as string);
+    const poster = command === "poster";
+    const posterRecipe = poster
+      ? { ...recipe, gridW: grid?.gridW ?? 480, gridH: grid?.gridH ?? 360 }
+      : recipe;
+    const posterWidth = poster && !values.width ? 4200 : widthPx;
+
     const t0 = performance.now();
-    const world = generateWorld(recipe);
+    const world = generateWorld(posterRecipe);
     const t1 = performance.now();
-    const svg = renderMap(world, { widthPx, style });
+    const svg = renderMap(world, { widthPx: posterWidth, style });
     const t2 = performance.now();
-    const out = resolve(values.out ?? `out/chart-${seed}-${style}.svg`);
+    const out = resolve(
+      values.out ?? `out/${command}-${seed}-${style}.svg`,
+    );
     await writeOut(out, svg);
-    console.log(`seed ${seed} · ${recipe.mapType} · ${world.title.title}`);
+    console.log(`seed ${seed} · ${posterRecipe.mapType} · ${world.title.title}`);
     console.log(
       `world ${(t1 - t0).toFixed(0)}ms · render ${(t2 - t1).toFixed(0)}ms · ${out}`,
     );
+
+    const wantPng = values.png || poster;
+    if (wantPng) {
+      const browser = findBrowser();
+      if (!browser) {
+        console.error(NO_BROWSER_HINT);
+        return;
+      }
+      const scale = values.scale ? Number(values.scale) : poster ? 1 : 2;
+      if (!Number.isFinite(scale) || scale < 0.5 || scale > 4) {
+        throw new Error("--scale must be between 0.5 and 4");
+      }
+      const pngOut = out.replace(/\.svg$/, ".png");
+      const t3 = performance.now();
+      await rasterizeSvg(browser, out, pngOut, scale);
+      console.log(
+        `png ${(performance.now() - t3).toFixed(0)}ms · scale ${scale} · ${pngOut}`,
+      );
+    }
     return;
   }
 

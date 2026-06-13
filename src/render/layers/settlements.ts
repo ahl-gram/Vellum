@@ -9,6 +9,33 @@ const FONT_SIZE: Record<NamedSettlement["kind"], number> = {
   village: 10.5,
 };
 
+export type LabelAnchor = "start" | "middle" | "end";
+
+export type LabelCandidate = {
+  readonly x: number;
+  readonly y: number;
+  readonly anchor: LabelAnchor;
+};
+
+/** Anchor positions in preference order: E, W, N, S, then diagonals. */
+export function labelCandidates(
+  px: number,
+  py: number,
+  fs: number,
+  gap: number,
+): LabelCandidate[] {
+  return [
+    { x: px + gap, y: py + fs * 0.34, anchor: "start" },
+    { x: px - gap, y: py + fs * 0.34, anchor: "end" },
+    { x: px, y: py - gap - 2, anchor: "middle" },
+    { x: px, y: py + gap + fs * 0.75, anchor: "middle" },
+    { x: px + gap * 0.8, y: py - gap * 0.7, anchor: "start" },
+    { x: px + gap * 0.8, y: py + gap * 0.7 + fs * 0.6, anchor: "start" },
+    { x: px - gap * 0.8, y: py - gap * 0.7, anchor: "end" },
+    { x: px - gap * 0.8, y: py + gap * 0.7 + fs * 0.6, anchor: "end" },
+  ];
+}
+
 function glyph(s: NamedSettlement, px: number, py: number, ctx: RenderCtx): SvgNode {
   const { style } = ctx;
   const k = ctx.proj.widthPx / 1500;
@@ -97,13 +124,7 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
     const fs = FONT_SIZE[s.kind] * k;
     const gap = (s.kind === "capital" ? 10 : 7) * k;
     const text = s.name;
-    // candidate anchor positions: E, W, N, S
-    const tries: Array<{ x: number; y: number; anchor: "start" | "middle" | "end" }> = [
-      { x: px + gap, y: py + fs * 0.34, anchor: "start" },
-      { x: px - gap, y: py + fs * 0.34, anchor: "end" },
-      { x: px, y: py - gap - 2, anchor: "middle" },
-      { x: px, y: py + gap + fs * 0.75, anchor: "middle" },
-    ];
+    const tries = labelCandidates(px, py, fs, gap);
     let placed = false;
     for (const t of tries) {
       const box = textBox(t.x, t.y, text, fs, t.anchor);

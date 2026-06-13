@@ -20,11 +20,16 @@ const MIN_SEAT_SPACING = 24;
  * capital and the most distant-from-each-other towns. Rivers and ridges
  * cost more to cross, so borders tend to follow natural features.
  */
+export type RealmOptions = {
+  maxRealms?: number;
+};
+
 export function partitionRealms(
   elev: Field,
   seaLevel: number,
   riverCells: Uint8Array,
   settlements: ReadonlyArray<Settlement>,
+  opts: RealmOptions = {},
 ): RealmsResult {
   const { w, h, data } = elev;
   const n = w * h;
@@ -35,7 +40,8 @@ export function partitionRealms(
     if ((data[i] as number) > seaLevel) landCells++;
   }
   // resolution-independent: bigger landmasses host more realms
-  const maxRealms = clamp(Math.round((landCells / n) * 8), 1, 5);
+  const maxRealms =
+    opts.maxRealms ?? clamp(Math.round((landCells / n) * 8), 1, 5);
 
   const capitalIdx = settlements.findIndex((s) => s.kind === "capital");
   const seats: number[] = capitalIdx >= 0 ? [capitalIdx] : [];

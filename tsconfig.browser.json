@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "docs/explorer/engine",
+    "rootDir": "src",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "rewriteRelativeImportExtensions": true,
+    "types": [],
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": [
+    "src/core/**/*.ts",
+    "src/noise/**/*.ts",
+    "src/terrain/**/*.ts",
+    "src/hydrology/**/*.ts",
+    "src/climate/**/*.ts",
+    "src/society/**/*.ts",
+    "src/render/**/*.ts",
+    "src/world/**/*.ts"
+  ]
+}

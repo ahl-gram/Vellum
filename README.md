@@ -2,12 +2,14 @@
 
 *An atelier of imaginary cartography.*
 
-**Live gallery: <https://ahl-gram.github.io/Vellum/>**
+**Live gallery: <https://ahl-gram.github.io/Vellum/>** · draw your own
+in the **[Explorer](https://ahl-gram.github.io/Vellum/explorer/)** —
+the whole engine runs client-side.
 
 Vellum surveys worlds that don't exist and drafts them as atlas charts.
 Give it a seed; it invents an island, simulates the rain that carves its
 rivers, grows its forests, founds its harbor towns, names everything in
-one of four invented languages, partitions the land into quarrelsome
+one of six invented languages, partitions the land into quarrelsome
 realms — and then sits down at the drafting table and draws the map,
 complete with parchment texture, hatched mountain ranges, a compass
 rose, a sea serpent, and a title cartouche.
@@ -17,7 +19,7 @@ from the number printed in its corner.
 
 ```
 $ npm run chart -- --seed 42
-seed 42 · island · The Isle of Mukhu
+seed 42 · island · The Isle of Rahai
 world 335ms · render 32ms · out/chart-42-antique.svg
 ```
 
@@ -30,13 +32,16 @@ npm run demo  -- --seed 42                     # all four styles
 npm run atlas -- --seed 42                     # full HTML atlas
 node src/cli/main.ts gallery --count 12        # contact sheet of worlds
 npm run site                                   # rebuild docs/ showcase
+npm run chart -- --seed 42 --png               # also rasterize to PNG
+node src/cli/main.ts poster --seed 42          # wall-art: 4200px + PNG
 npm test                                       # full test suite
 npm run check                                  # typecheck
 ```
 
 Options: `--seed n`, `--style antique|topographic|ink|nautical`,
-`--type island|archipelago|continent`, `--band temperate|tropical|polar`,
-`--land 0.1–0.7`, `--grid WxH`, `--width px`, `--count n`, `--out path`.
+`--type island|archipelago|continent|citystate`, `--band temperate|tropical|polar`,
+`--land 0.1–0.7`, `--grid WxH`, `--width px`, `--count n`, `--png`,
+`--scale n`, `--out path`.
 
 The **atlas** command binds a small book: the world chart in three
 styles, two regional close-up surveys, and a gazetteer of every
@@ -53,7 +58,7 @@ settlement with procedurally written travelers' notes
 - **ink** — monochrome pen-and-ink linework.
 - **nautical** — white-water sea chart: fathom soundings scattered over
   open water, a shoal tint out to the dashed danger line, rock-awash
-  marks, navy linework, prominent rhumb lines.
+  marks, prevailing-wind arrows, navy linework, prominent rhumb lines.
 
 ## How a world gets made
 
@@ -75,10 +80,10 @@ choice comes from a labeled fork of the master seed (`fork("names")`,
    fertile land; roads grown by Dijkstra with a reuse discount so trunk
    corridors emerge; realms partitioned by terrain-cost Voronoi, with
    borders that prefer ridges and rivers.
-5. **Names & lore** — syllable-grammar generators for four invented
-   cultures (thalassic, norden, veshari, sylvan) name every town,
-   river, sea, and realm; a template-grammar lore writer drafts the
-   gazetteer notes.
+5. **Names & lore** — syllable-grammar generators for six invented
+   cultures (thalassic, norden, veshari, sylvan, oromi, draket) name
+   every town, river, sea, and realm; a template-grammar lore writer
+   drafts the gazetteer notes.
 6. **Rendering** — marching-squares coastlines and contours (with
    saddle resolution and boundary closing), Chaikin smoothing, a tiny
    immutable SVG builder, and ~15 layer renderers up through the
@@ -102,8 +107,9 @@ src/
   society/    names, settlements, roads, realms, lore
   render/     styles, layers/ (15 of them), svg builder, projection
   world/      generate.ts (pipeline), region.ts (zoom windows)
-  cli/        main.ts, atlas.ts
-test/         137 tests, node:test — mirrors src/
+  cli/        main.ts, atlas.ts, gallery.ts, raster.ts (PNG/poster)
+test/         147 tests, node:test — mirrors src/
+docs/explorer the same engine, tsc-emitted as browser ES modules
 ```
 
 Zero runtime dependencies — Node 23.6+ runs the TypeScript directly

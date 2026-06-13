@@ -2,7 +2,7 @@ import { createField, type Field } from "../core/grid.ts";
 import { smoothstep } from "../core/math.ts";
 import { ridged2, warped2 } from "../noise/fbm.ts";
 
-export type MapType = "island" | "archipelago" | "continent";
+export type MapType = "island" | "archipelago" | "continent" | "citystate";
 
 export type UvWindow = {
   readonly u0: number;
@@ -62,6 +62,16 @@ const SHAPES: Record<MapType, Shape> = {
     falloffEnd: 1.12,
     baseKeep: 0.55,
     sinkDepth: 0.25,
+  },
+  // one compact landmass: a city and its hinterland
+  citystate: {
+    featureScale: 2.6,
+    warpStrength: 0.4,
+    ridgedWeight: 0.3,
+    falloffStart: 0.5,
+    falloffEnd: 0.92,
+    baseKeep: 0.36,
+    sinkDepth: 0.34,
   },
 };
 

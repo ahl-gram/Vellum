@@ -26,7 +26,7 @@
   figcaption { text-align: center; font-style: italic; color: #6b5a40; padding-top: 0.55rem; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; }
   @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
-  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-top: 1.5rem; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.4rem; margin-top: 1.5rem; }
   @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
   .card { display: block; border: 1.5px solid #4a3826; border-radius: 4px;
     padding: 1.4rem 1.6rem; background: #f4ecd8; text-decoration: none; color: inherit;
@@ -50,15 +50,15 @@
   <p class="lede">Vellum surveys worlds that don't exist and drafts them as atlas
   charts. Give it a seed; it invents an island, simulates the rain that carves
   its rivers, grows its forests, founds its harbor towns, names everything in
-  one of four invented languages — then sits down at the drafting table and
+  one of six invented languages — then sits down at the drafting table and
   draws the map. Same seed, same world, byte-identical chart.</p>
   <p class="seedline">EVERY CHART REPRODUCIBLE FROM THE NUMBER IN ITS MARGIN</p>
 </header>
 
 <figure>
   <a href="charts/chart-42-antique.svg"><img src="charts/chart-42-antique.svg"
-    alt="The Isle of Mukhu — antique chart" loading="eager"></a>
-  <figcaption>The Isle of Mukhu, drawn in the antique manner · seed 42</figcaption>
+    alt="The Isle of Rahai — antique chart" loading="eager"></a>
+  <figcaption>The Isle of Rahai, drawn in the antique manner · seed 42</figcaption>
 </figure>
 
 <section>
@@ -75,15 +75,20 @@
     <figcaption>Nautical chart, with fathom soundings</figcaption></figure>
   <figure><a href="charts/chart-2-nautical.svg"><img loading="lazy"
     src="charts/chart-2-nautical.svg" alt="The Scattered Isles, nautical"></a>
-    <figcaption>The Scattered Isles of Ishaimzaa · seed 2</figcaption></figure>
+    <figcaption>The Scattered Isles of Lurau · seed 2</figcaption></figure>
 </div>
 </section>
 
 <section>
 <h2>Go Deeper</h2>
 <div class="cards">
+  <a class="card" href="explorer/">
+    <h3>The Explorer →</h3>
+    <p>Draw your own: type a seed, pick a style and climate, and the
+    world is drafted live in your browser. Nothing is uploaded.</p>
+  </a>
   <a class="card" href="atlas/">
-    <h3>The Atlas of Mukhu →</h3>
+    <h3>The Atlas of Rahai →</h3>
     <p>A bound volume: the world chart in three styles, two regional
     close-up surveys of the same terrain, and a gazetteer of every
     settlement with travelers' notes.</p>
@@ -102,7 +107,7 @@
 domain-warped gradient noise; priority-flood hydrology guarantees every river
 reaches the sea; a Whittaker-style climate model grows the biomes; settlements
 score harbors and river mouths; Dijkstra roads share corridors; realm borders
-follow ridges and rivers. Names come from syllable grammars for four invented
+follow ridges and rivers. Names come from syllable grammars for six invented
 cultures. The whole pipeline is deterministic — fork-labeled RNG streams mean
 the same seed always draws the same world.</p>
 <p class="how">Draw your own:

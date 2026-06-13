@@ -7,6 +7,7 @@ import {
   pathFrom,
 } from "../../src/render/svg.ts";
 import { createProjection } from "../../src/render/transform.ts";
+import { labelCandidates } from "../../src/render/layers/settlements.ts";
 
 test("escapeXml handles the five specials", () => {
   assert.equal(
@@ -39,6 +40,18 @@ test("pathFrom emits rounded coordinates and closes rings", () => {
 
 test("pathFrom rejects NaN coordinates", () => {
   assert.throws(() => pathFrom([[NaN, 1], [2, 3]], false), /NaN/);
+});
+
+test("labelCandidates offers 8 distinct positions, east first", () => {
+  const cands = labelCandidates(100, 50, 12, 8);
+  assert.equal(cands.length, 8);
+  assert.equal(cands[0]!.anchor, "start");
+  assert.ok(cands[0]!.x > 100, "first candidate sits east of the glyph");
+  const keys = new Set(cands.map((c) => `${c.x},${c.y},${c.anchor}`));
+  assert.equal(keys.size, 8, "candidates must be distinct");
+  for (const c of cands) {
+    assert.ok(["start", "middle", "end"].includes(c.anchor));
+  }
 });
 
 test("projection maps grid corners to the framed map area", () => {

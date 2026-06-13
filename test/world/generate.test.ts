@@ -58,6 +58,20 @@ test("generateWorld produces a coherent, fully-named world", () => {
   assert.equal(world.oceanDist[cap.x + cap.y * world.elev.w], 0);
 });
 
+test("citystate worlds form a single realm around the free city", () => {
+  const world = generateWorld(
+    defaultRecipe(42, { mapType: "citystate", gridW: 160, gridH: 120 }),
+  );
+  assert.equal(world.realms.seats.length, 1, "one realm only");
+  assert.equal(world.names.realms.length, 0, "no rival realm names");
+  assert.equal(world.settlements.filter((s) => s.kind === "capital").length, 1);
+  assert.ok(
+    /Free City|Hinterland|City-State/.test(world.title.title),
+    `citystate title flavor missing: ${world.title.title}`,
+  );
+  assert.ok(world.settlements.filter((s) => s.kind === "village").length >= 5);
+});
+
 test("same seed yields byte-identical worlds", () => {
   const a = generateWorld(defaultRecipe(7, { gridW: 120, gridH: 90 }));
   const b = generateWorld(defaultRecipe(7, { gridW: 120, gridH: 90 }));

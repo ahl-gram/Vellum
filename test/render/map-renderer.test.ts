@@ -35,12 +35,14 @@ test("no NaN coordinates leak into the document", () => {
   }
 });
 
-test("nautical style carries soundings and the shoal wash", () => {
+test("nautical style carries soundings, winds, and the shoal wash", () => {
   const svg = renderMap(world, { style: "nautical" });
   assert.ok(svg.includes("layer-soundings"), "soundings missing");
+  assert.ok(svg.includes("layer-winds"), "wind arrows missing");
   assert.ok(!svg.includes("layer-glyphs"), "nautical land stays sparse");
   const antique = renderMap(world, { style: "antique" });
   assert.ok(!antique.includes("layer-soundings"));
+  assert.ok(!antique.includes("layer-winds"));
 });
 
 test("rendering is deterministic", () => {

@@ -1,0 +1,121 @@
+import { createRng } from "../core/rng.js";
+import { minMax } from "../core/grid.js";
+import { chaikinSmooth, closedIsoRings } from "../terrain/contours.js";
+import { createLabelArena } from "./context.js";
+import { createProjection } from "./transform.js";
+import { STYLES } from "./style.js";
+import { el, renderSvg } from "./svg.js";
+import { oceanLayer, waterlinesLayer } from "./layers/water.js";
+import { contoursLayer, hypsometricLayer, landLayer } from "./layers/land.js";
+import { riversLayer } from "./layers/rivers.js";
+import { settlementsLayer } from "./layers/settlements.js";
+import { frameLayer } from "./layers/frame.js";
+import { glyphSymbolDefs } from "./layers/glyph-symbols.js";
+import { glyphsLayer } from "./layers/glyphs.js";
+import { cartoucheLayer, planCartouche } from "./layers/cartouche.js";
+import { compassLayer, planCompass, rhumbLayer } from "./layers/compass.js";
+import { planScalebar, scalebarLayer } from "./layers/scalebar.js";
+import { featureLabelsLayer } from "./layers/feature-labels.js";
+import { seaDecorLayer } from "./layers/sea-decor.js";
+import { textureDefs, textureOverlay } from "./layers/texture.js";
+import { roadsLayer } from "./layers/roads.js";
+import { realmBordersLayer, realmTintsLayer } from "./layers/realms.js";
+import { soundingsLayer } from "./layers/soundings.js";
+import { windsLayer } from "./layers/winds.js";
+export function renderMap(world, opts = {}) {
+    const style = STYLES[opts.style ?? "antique"];
+    const widthPx = opts.widthPx ?? 1500;
+    const margin = Math.round(widthPx * 0.045);
+    const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
+    let coastRings = closedIsoRings(world.elev, world.seaLevel).map((c) => chaikinSmooth(c.points, true, 2).map(([x, y]) => [proj.px(x), proj.py(y)]));
+    if (coastRings.length === 0) {
+        const mid = world.elev.at(world.elev.w >> 1, world.elev.h >> 1);
+        if (mid > world.seaLevel) {
+            // window is solid land: the whole map area is the landmass
+            const m = margin;
+            coastRings = [[
+                    [m, m],
+                    [proj.widthPx - m, m],
+                    [proj.widthPx - m, proj.heightPx - m],
+                    [m, proj.heightPx - m],
+                ]];
+        }
+    }
+    const { max } = minMax(world.elev);
+    const ctx = {
+        world,
+        style,
+        proj,
+        coastRings,
+        elevSpan: Math.max(1e-9, max - world.seaLevel),
+        rng: createRng(world.recipe.seed).fork("render"),
+        labels: createLabelArena(),
+    };
+    // furniture is planned first so text layers can route around it
+    const cartouchePlan = planCartouche(ctx);
+    ctx.labels.claim(cartouchePlan.rect);
+    const compassPlan = planCompass(ctx, cartouchePlan);
+    if (compassPlan)
+        ctx.labels.claim(compassPlan.box);
+    const scalebarPlan = planScalebar(ctx);
+    ctx.labels.claim(scalebarPlan.box);
+    // evaluation order = label priority: settlements claim space before
+    // flexible feature labels, which claim before decorative art
+    const settlements = settlementsLayer(ctx);
+    const featureLabels = featureLabelsLayer(ctx);
+    const seaDecor = seaDecorLayer(ctx, cartouchePlan, compassPlan);
+    const mapLayers = [
+        oceanLayer(ctx),
+        compassPlan ? rhumbLayer(ctx, compassPlan) : null,
+        waterlinesLayer(ctx),
+        landLayer(ctx),
+        hypsometricLayer(ctx),
+        contoursLayer(ctx),
+        realmTintsLayer(ctx),
+        riversLayer(ctx),
+        glyphsLayer(ctx),
+        roadsLayer(ctx),
+        realmBordersLayer(ctx),
+        soundingsLayer(ctx, cartouchePlan, compassPlan),
+        windsLayer(ctx, cartouchePlan, compassPlan),
+        seaDecor,
+        settlements,
+        featureLabels.node,
+    ];
+    const furniture = [
+        compassPlan ? compassLayer(ctx, compassPlan) : null,
+        scalebarLayer(ctx, scalebarPlan),
+        cartoucheLayer(ctx, cartouchePlan),
+    ];
+    const defs = el("defs", {}, [
+        el("clipPath", { id: "map-clip" }, [
+            el("rect", {
+                x: margin,
+                y: margin,
+                width: proj.widthPx - 2 * margin,
+                height: proj.heightPx - 2 * margin,
+            }),
+        ]),
+        ...(style.glyphs ? glyphSymbolDefs(style) : []),
+        ...featureLabels.defs,
+        ...textureDefs(ctx),
+    ]);
+    const root = el("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: Math.round(proj.widthPx),
+        height: Math.round(proj.heightPx),
+        viewBox: `0 0 ${proj.widthPx} ${proj.heightPx}`,
+    }, [
+        defs,
+        el("rect", {
+            x: 0, y: 0,
+            width: proj.widthPx, height: proj.heightPx,
+            fill: style.paper,
+        }),
+        el("g", { id: "map", "clip-path": "url(#map-clip)" }, mapLayers.filter((l) => l !== null)),
+        el("g", { id: "furniture" }, furniture.filter((l) => l !== null)),
+        textureOverlay(ctx) ?? el("g", {}),
+        frameLayer(ctx),
+    ]);
+    return renderSvg(root);
+}
