@@ -2,6 +2,8 @@
 
 *An atelier of imaginary cartography.*
 
+[![CI](https://github.com/ahl-gram/Vellum/actions/workflows/ci.yml/badge.svg)](https://github.com/ahl-gram/Vellum/actions/workflows/ci.yml)
+
 **Live gallery: <https://ahl-gram.github.io/Vellum/>** · draw your own
 in the **[Explorer](https://ahl-gram.github.io/Vellum/explorer/)** (the
 whole engine runs client-side) · or read the
