@@ -15,6 +15,7 @@ import { glyphsLayer } from "./layers/glyphs.js";
 import { cartoucheLayer, planCartouche } from "./layers/cartouche.js";
 import { compassLayer, planCompass, rhumbLayer } from "./layers/compass.js";
 import { planScalebar, scalebarLayer } from "./layers/scalebar.js";
+import { legendLayer, planLegend } from "./layers/legend.js";
 import { featureLabelsLayer } from "./layers/feature-labels.js";
 import { seaDecorLayer } from "./layers/sea-decor.js";
 import { textureDefs, textureOverlay } from "./layers/texture.js";
@@ -54,11 +55,17 @@ export function renderMap(world, opts = {}) {
     // furniture is planned first so text layers can route around it
     const cartouchePlan = planCartouche(ctx);
     ctx.labels.claim(cartouchePlan.rect);
-    const compassPlan = planCompass(ctx, cartouchePlan);
-    if (compassPlan)
-        ctx.labels.claim(compassPlan.box);
     const scalebarPlan = planScalebar(ctx);
     ctx.labels.claim(scalebarPlan.box);
+    const compassPlan = planCompass(ctx, cartouchePlan, scalebarPlan.box);
+    if (compassPlan)
+        ctx.labels.claim(compassPlan.box);
+    const legendReserved = [cartouchePlan.rect, scalebarPlan.box];
+    if (compassPlan)
+        legendReserved.push(compassPlan.box);
+    const legendPlan = opts.legend ? planLegend(ctx, legendReserved) : null;
+    if (legendPlan)
+        ctx.labels.claim(legendPlan.box);
     // evaluation order = label priority: settlements claim space before
     // flexible feature labels, which claim before decorative art
     const settlements = settlementsLayer(ctx);
@@ -86,6 +93,7 @@ export function renderMap(world, opts = {}) {
         compassPlan ? compassLayer(ctx, compassPlan) : null,
         scalebarLayer(ctx, scalebarPlan),
         cartoucheLayer(ctx, cartouchePlan),
+        legendPlan ? legendLayer(ctx, legendPlan) : null,
     ];
     const defs = el("defs", {}, [
         el("clipPath", { id: "map-clip" }, [

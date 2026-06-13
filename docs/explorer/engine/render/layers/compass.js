@@ -1,11 +1,19 @@
 import { el } from "../svg.js";
-export function planCompass(ctx, cartouche) {
+import { boxesOverlap } from "../geometry.js";
+export function planCompass(ctx, cartouche, scalebarBox) {
     const { world, proj } = ctx;
     const k = proj.widthPx / 1500;
     const r = 47 * k;
     const { w, h } = world.elev;
     const cartCx = cartouche.rect.x + cartouche.rect.w / 2;
     const cartCy = cartouche.rect.y + cartouche.rect.h / 2;
+    // bounding box of the rose plus the "N" label above it
+    const boxAt = (px, py) => ({
+        x: px - r,
+        y: py - r - 18 * k,
+        w: 2 * r,
+        h: 2 * r + 18 * k,
+    });
     let best = null;
     for (let gy = 4; gy < h - 4; gy += 2) {
         for (let gx = 4; gx < w - 4; gx += 2) {
@@ -17,6 +25,12 @@ export function planCompass(ctx, cartouche) {
             const margin = proj.margin;
             const edge = Math.min(px - margin, py - margin, proj.widthPx - margin - px, proj.heightPx - margin - py);
             if (edge < r + 14 * k)
+                continue;
+            // keep clear of the fixed furniture so the rose never sits on them
+            const box = boxAt(px, py);
+            if (boxesOverlap(box, scalebarBox, 8 * k))
+                continue;
+            if (boxesOverlap(box, cartouche.rect, 6 * k))
                 continue;
             const dCart = Math.hypot(px - cartCx, py - cartCy);
             const score = Math.min(d, 14) * 8 + dCart * 0.18 + edge * -0.08;
@@ -30,7 +44,7 @@ export function planCompass(ctx, cartouche) {
         cx: best.px,
         cy: best.py,
         r,
-        box: { x: best.px - r, y: best.py - r - 18 * k, w: 2 * r, h: 2 * r + 18 * k },
+        box: boxAt(best.px, best.py),
     };
 }
 export function compassLayer(ctx, plan) {
