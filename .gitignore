@@ -1,0 +1,7 @@
+node_modules/
+out/
+*.log
+.DS_Store
+.claude/settings.local.json
+SESSION-NOTES.md
+RESUME-HERE.md

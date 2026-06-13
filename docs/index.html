@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vellum — an atelier of imaginary cartography</title>
+<meta name="description" content="Procedurally generated fantasy atlases: deterministic worlds drawn as antique, topographic, ink, and nautical SVG charts.">
+<style>
+  :root { color-scheme: light; }
+  body {
+    margin: 0; padding: 3rem 1.5rem 5rem;
+    background: #efe6cf; color: #3d2f1f;
+    font-family: 'Iowan Old Style', 'Palatino', Georgia, serif;
+  }
+  main { max-width: 1080px; margin-inline: auto; }
+  header { text-align: center; margin-bottom: 2.5rem; }
+  h1 { font-size: 3rem; letter-spacing: 0.12em; margin: 0; }
+  h2 { letter-spacing: 0.06em; border-bottom: 1px solid #b9a77f;
+    padding-bottom: 0.3rem; margin-top: 3.5rem; }
+  .tagline { font-style: italic; color: #6b5a40; font-size: 1.15rem; margin: 0.6rem 0 1rem; }
+  .lede { max-width: 44rem; margin-inline: auto; line-height: 1.6; }
+  .seedline { letter-spacing: 0.25em; font-size: 0.78rem; color: #857257; margin-top: 1rem; }
+  figure { margin: 1.5rem 0; }
+  figure img { width: 100%; height: auto; display: block;
+    border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+  figcaption { text-align: center; font-style: italic; color: #6b5a40; padding-top: 0.55rem; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-top: 1.5rem; }
+  @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+  .card { display: block; border: 1.5px solid #4a3826; border-radius: 4px;
+    padding: 1.4rem 1.6rem; background: #f4ecd8; text-decoration: none; color: inherit;
+    box-shadow: 0 6px 18px rgb(61 47 31 / 0.12); }
+  .card:hover { background: #f8f1e0; }
+  .card h3 { margin: 0 0 0.4rem; letter-spacing: 0.05em; }
+  .card p { margin: 0; font-style: italic; color: #6b5a40; line-height: 1.5; }
+  .how { line-height: 1.65; max-width: 46rem; }
+  code { background: #e6d9b8; padding: 0.1em 0.4em; border-radius: 3px;
+    font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
+  footer { margin-top: 4.5rem; text-align: center; letter-spacing: 0.25em;
+    font-size: 0.75rem; color: #857257; }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>VELLUM</h1>
+  <p class="tagline">an atelier of imaginary cartography</p>
+  <p class="lede">Vellum surveys worlds that don't exist and drafts them as atlas
+  charts. Give it a seed; it invents an island, simulates the rain that carves
+  its rivers, grows its forests, founds its harbor towns, names everything in
+  one of four invented languages — then sits down at the drafting table and
+  draws the map. Same seed, same world, byte-identical chart.</p>
+  <p class="seedline">EVERY CHART REPRODUCIBLE FROM THE NUMBER IN ITS MARGIN</p>
+</header>
+
+<figure>
+  <a href="charts/chart-42-antique.svg"><img src="charts/chart-42-antique.svg"
+    alt="The Isle of Mukhu — antique chart" loading="eager"></a>
+  <figcaption>The Isle of Mukhu, drawn in the antique manner · seed 42</figcaption>
+</figure>
+
+<section>
+<h2>One World, Four Hands</h2>
+<div class="grid2">
+  <figure><a href="charts/chart-42-topographic.svg"><img loading="lazy"
+    src="charts/chart-42-topographic.svg" alt="Topographic style"></a>
+    <figcaption>Topographic survey</figcaption></figure>
+  <figure><a href="charts/chart-42-ink.svg"><img loading="lazy"
+    src="charts/chart-42-ink.svg" alt="Pen and ink style"></a>
+    <figcaption>Pen &amp; ink</figcaption></figure>
+  <figure><a href="charts/chart-42-nautical.svg"><img loading="lazy"
+    src="charts/chart-42-nautical.svg" alt="Nautical style"></a>
+    <figcaption>Nautical chart, with fathom soundings</figcaption></figure>
+  <figure><a href="charts/chart-2-nautical.svg"><img loading="lazy"
+    src="charts/chart-2-nautical.svg" alt="The Scattered Isles, nautical"></a>
+    <figcaption>The Scattered Isles of Ishaimzaa · seed 2</figcaption></figure>
+</div>
+</section>
+
+<section>
+<h2>Go Deeper</h2>
+<div class="cards">
+  <a class="card" href="atlas/">
+    <h3>The Atlas of Mukhu →</h3>
+    <p>A bound volume: the world chart in three styles, two regional
+    close-up surveys of the same terrain, and a gazetteer of every
+    settlement with travelers' notes.</p>
+  </a>
+  <a class="card" href="gallery/">
+    <h3>A Gallery of Worlds →</h3>
+    <p>Twelve worlds from twelve seeds — archipelagos, islands, and
+    continents, each with its own name, realms, and coastline.</p>
+  </a>
+</div>
+</section>
+
+<section>
+<h2>How It Works</h2>
+<p class="how">Vellum is a zero-dependency TypeScript engine. Terrain comes from
+domain-warped gradient noise; priority-flood hydrology guarantees every river
+reaches the sea; a Whittaker-style climate model grows the biomes; settlements
+score harbors and river mouths; Dijkstra roads share corridors; realm borders
+follow ridges and rivers. Names come from syllable grammars for four invented
+cultures. The whole pipeline is deterministic — fork-labeled RNG streams mean
+the same seed always draws the same world.</p>
+<p class="how">Draw your own:
+<code>git clone https://github.com/ahl-gram/Vellum</code> then
+<code>npm run chart -- --seed 42</code> — or read the
+<a href="https://github.com/ahl-gram/Vellum#readme">README</a>.</p>
+</section>
+
+<footer>
+  <a href="https://github.com/ahl-gram/Vellum">GITHUB.COM/AHL-GRAM/VELLUM</a>
+  · DRAWN BY VELLUM · AN ATELIER OF IMAGINARY CARTOGRAPHY
+</footer>
+</main>
+</body>
+</html>

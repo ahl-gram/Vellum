@@ -1,0 +1,22 @@
+{
+  "name": "vellum",
+  "version": "0.1.0",
+  "description": "An atelier of imaginary cartography — procedurally surveys worlds that don't exist and drafts them as antique atlas charts.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=23.6"
+  },
+  "scripts": {
+    "chart": "node src/cli/main.ts chart",
+    "atlas": "node src/cli/main.ts atlas",
+    "demo": "node src/cli/main.ts demo",
+    "site": "node scripts/build-site.ts",
+    "test": "node --test",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "@types/node": "^24.0.0"
+  }
+}
