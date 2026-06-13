@@ -22,6 +22,8 @@
     align-items: center; margin: 1.2rem 0;
   }
   .controls label { font-size: 0.85rem; letter-spacing: 0.05em; color: #6b5a40; }
+  .controls label.check { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .controls input[type="checkbox"] { accent-color: #4a3826; width: 1rem; height: 1rem; }
   input[type="number"], select, button {
     font-family: inherit; font-size: 0.95rem; color: #3d2f1f;
     background: #f8f1e0; border: 1.5px solid #4a3826; border-radius: 4px;
@@ -79,6 +81,7 @@
       <option value="polar">polar</option>
     </select>
   </label>
+  <label class="check">legend <input id="legend" type="checkbox" checked></label>
   <button id="draw" class="primary">Draw</button>
   <button id="download">Download SVG</button>
 </div>
@@ -103,6 +106,7 @@ const seedInput = $("seed");
 const styleSel = $("style");
 const typeSel = $("type");
 const bandSel = $("band");
+const legendChk = $("legend");
 const status = $("status");
 const mapDiv = $("map");
 const caption = $("caption");
@@ -126,6 +130,8 @@ function readHash() {
   if ([...typeSel.options].some((o) => o.value === type)) typeSel.value = type;
   const band = params.get("band") ?? "";
   if ([...bandSel.options].some((o) => o.value === band)) bandSel.value = band;
+  const legend = params.get("legend");
+  if (legend !== null) legendChk.checked = legend === "1";
 }
 
 function writeHash() {
@@ -134,6 +140,7 @@ function writeHash() {
   params.set("style", styleSel.value);
   if (typeSel.value) params.set("type", typeSel.value);
   if (bandSel.value) params.set("band", bandSel.value);
+  params.set("legend", legendChk.checked ? "1" : "0");
   history.replaceState(null, "", "#" + params.toString());
 }
 
@@ -151,7 +158,11 @@ function draw() {
       if (bandSel.value) overrides.band = bandSel.value;
       const recipe = defaultRecipe(seed, overrides);
       const world = generateWorld(recipe);
-      lastSvg = renderMap(world, { style: styleSel.value, widthPx: 1500 });
+      lastSvg = renderMap(world, {
+        style: styleSel.value,
+        widthPx: 1500,
+        legend: legendChk.checked,
+      });
       lastTitle = world.title.title;
       mapDiv.innerHTML = lastSvg;
       const ms = (performance.now() - t0).toFixed(0);
@@ -182,7 +193,7 @@ $("download").addEventListener("click", () => {
 seedInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") draw();
 });
-for (const sel of [styleSel, typeSel, bandSel]) {
+for (const sel of [styleSel, typeSel, bandSel, legendChk]) {
   sel.addEventListener("change", draw);
 }
 
