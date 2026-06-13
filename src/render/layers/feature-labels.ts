@@ -1,7 +1,7 @@
 import { BIOMES } from "../../climate/biomes.ts";
 import { clamp } from "../../core/math.ts";
 import { chaikinSmooth } from "../../terrain/contours.ts";
-import { el, pathFrom, type SvgNode } from "../svg.ts";
+import { el, type SvgNode } from "../svg.ts";
 import { centroidOf, principalAngle, textBox } from "../geometry.ts";
 import { largestBlob } from "../blobs.ts";
 import type { RenderCtx } from "../context.ts";
@@ -28,6 +28,98 @@ const FOREST_BIOMES: ReadonlySet<number> = new Set<number>([
 /** Offsets tried (in order) when a feature label's first spot is taken. */
 function offsetCandidates(y: number, k: number): number[] {
   return [y, y - 26 * k, y + 26 * k, y - 52 * k, y + 52 * k];
+}
+
+export type RiverLabelPlacement = {
+  readonly x: number;
+  readonly y: number;
+  readonly angleDeg: number;
+};
+
+/** Total absolute turning (radians) of the polyline between indices i and j. */
+function reachTurn(
+  pts: ReadonlyArray<readonly [number, number]>,
+  i: number,
+  j: number,
+): number {
+  let turn = 0;
+  for (let m = i + 1; m < j; m++) {
+    const a1 = Math.atan2(pts[m]![1] - pts[m - 1]![1], pts[m]![0] - pts[m - 1]![0]);
+    const a2 = Math.atan2(pts[m + 1]![1] - pts[m]![1], pts[m + 1]![0] - pts[m]![0]);
+    let d = Math.abs(a2 - a1);
+    if (d > Math.PI) d = 2 * Math.PI - d;
+    turn += d;
+  }
+  return turn;
+}
+
+/**
+ * The straightest reach of a river polyline long enough to hold a label of
+ * `targetLen` px, returned as the reach's mid-point and a reading-friendly
+ * rotation. Following the whole winding course smears glyphs at bends; a
+ * single straight reach keeps the label legible while still river-aligned.
+ */
+export function straightestReach(
+  pts: ReadonlyArray<readonly [number, number]>,
+  targetLen: number,
+): RiverLabelPlacement | null {
+  if (pts.length < 2) return null;
+
+  const cum: number[] = [0];
+  for (let i = 1; i < pts.length; i++) {
+    cum[i] = (cum[i - 1] as number) +
+      Math.hypot(pts[i]![0] - pts[i - 1]![0], pts[i]![1] - pts[i - 1]![1]);
+  }
+  const total = cum[cum.length - 1] as number;
+
+  let lo = 0;
+  let hi = pts.length - 1;
+  if (total > targetLen) {
+    const wins: Array<{ i: number; j: number; turn: number; center: number }> = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      let j = i + 1;
+      while (j < pts.length && (cum[j] as number) - (cum[i] as number) < targetLen) j++;
+      if (j >= pts.length) break;
+      wins.push({
+        i, j,
+        turn: reachTurn(pts, i, j),
+        center: ((cum[i] as number) + (cum[j] as number)) / 2,
+      });
+    }
+    if (wins.length > 0) {
+      // straightest reach wins; among comparably-straight ones, the most
+      // centered (so the label sits mid-river, not jammed at an end)
+      const minTurn = Math.min(...wins.map((w) => w.turn));
+      const mid = total / 2;
+      let bestDc = Infinity;
+      for (const w of wins) {
+        if (w.turn > minTurn + 0.08) continue;
+        const dc = Math.abs(w.center - mid);
+        if (dc < bestDc) {
+          bestDc = dc;
+          lo = w.i;
+          hi = w.j;
+        }
+      }
+    }
+  }
+
+  let a = pts[lo]!;
+  let b = pts[hi]!;
+  if (b[0] < a[0]) [a, b] = [b, a]; // read left → right, never inverted
+  const angleDeg = clamp((Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI, -50, 50);
+
+  // position the label at the reach's arc-length midpoint, on the river
+  const midLen = ((cum[lo] as number) + (cum[hi] as number)) / 2;
+  let s = 0;
+  while (s < pts.length - 1 && (cum[s + 1] as number) < midLen) s++;
+  const seg = Math.max(1e-6, (cum[s + 1] as number) - (cum[s] as number));
+  const t = (midLen - (cum[s] as number)) / seg;
+  return {
+    x: pts[s]![0] + (pts[s + 1]![0] - pts[s]![0]) * t,
+    y: pts[s]![1] + (pts[s + 1]![1] - pts[s]![1]) * t,
+    angleDeg,
+  };
 }
 
 /** Sea name, named rivers along their courses, mountain range, forest. */
@@ -114,43 +206,38 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     );
   });
 
-  // --- river names along their courses ---
+  // --- river names along the straightest reach of each course ---
   const named = [...world.names.rivers.entries()]
-    .map(([idx, name]) => ({ river: world.rivers[idx]!, name, idx }))
+    .map(([idx, name]) => ({ river: world.rivers[idx]!, name }))
     .sort((a, b) => b.river.points.length - a.river.points.length)
     .slice(0, 3);
 
-  for (const { river, name, idx } of named) {
-    let pts = river.points.map(
-      (p) => [proj.px(p.x), proj.py(p.y)] as const,
-    );
-    // keep text upright: path must run left → right
-    if ((pts[pts.length - 1]![0] - pts[0]![0]) < 0) {
-      pts = [...pts].reverse();
-    }
-    const smooth = chaikinSmooth(pts, false, 2);
-    const pathId = `river-label-${idx}`;
-    defs.push(el("path", { id: pathId, d: pathFrom(smooth, false), fill: "none" }));
-    const mid = smooth[Math.floor(smooth.length / 2)]!;
+  for (const { river, name } of named) {
+    const raw = river.points.map((p) => [proj.px(p.x), proj.py(p.y)] as const);
+    const pts = chaikinSmooth(raw, false, 2);
     const fs = 10.5 * k;
-    const box = textBox(mid[0], mid[1], name, fs, "middle");
+    const place = straightestReach(pts, name.length * fs * 0.52);
+    if (!place) continue;
+    const box = textBox(place.x, place.y - 4 * k, name, fs, "middle");
     if (!labels.tryClaim(box, 2)) continue;
     nodes.push(
       el(
         "text",
         {
+          x: place.x.toFixed(1),
+          y: place.y.toFixed(1),
+          "text-anchor": "middle",
+          transform: `rotate(${place.angleDeg.toFixed(1)} ${place.x.toFixed(1)} ${place.y.toFixed(1)})`,
           "font-family": style.fontFamily,
           "font-size": fs.toFixed(1),
           "font-style": "italic",
           fill: style.river,
+          stroke: style.labelHalo,
+          "stroke-width": (2.4 * k).toFixed(1),
+          "paint-order": "stroke",
+          "stroke-linejoin": "round",
         },
-        [
-          el(
-            "textPath",
-            { href: `#${pathId}`, startOffset: "32%" },
-            [el("tspan", { dy: (-3.5 * k).toFixed(1) }, [name])],
-          ),
-        ],
+        [el("tspan", { dy: (-4 * k).toFixed(1) }, [name])],
       ),
     );
   }
