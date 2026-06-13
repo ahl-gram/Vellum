@@ -19,7 +19,8 @@ export async function buildGallery(
   const cards: string[] = [];
   for (let i = 0; i < count; i++) {
     const seed = (startSeed + i * SEED_STRIDE) >>> 0;
-    const world = generateWorld(defaultRecipe(seed, { gridW: 240, gridH: 180 }));
+    // use the default grid so a gallery seed matches its `chart` / Explorer render
+    const world = generateWorld(defaultRecipe(seed));
     const svg = renderMap(world, { style, widthPx: 900 });
     const file = `chart-${seed}.svg`;
     await writeFile(join(dir, file), svg, "utf8");
