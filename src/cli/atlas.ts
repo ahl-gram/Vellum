@@ -150,7 +150,7 @@ export async function buildAtlas(
   await mkdir(dir, { recursive: true });
 
   for (const style of ["antique", "topographic", "ink"] as const) {
-    const svg = renderMap(world, { style, widthPx: width });
+    const svg = renderMap(world, { style, widthPx: width, legend: true });
     await writeFile(join(dir, `world-${style}.svg`), svg, "utf8");
   }
 
@@ -179,7 +179,7 @@ export async function buildAtlas(
         gridH: recipe.gridH,
         title: t.label,
       });
-      const svg = renderMap(region, { style: "antique", widthPx: width });
+      const svg = renderMap(region, { style: "antique", widthPx: width, legend: true });
       const file = `region-${i + 1}.svg`;
       await writeFile(join(dir, file), svg, "utf8");
       regions.push({ file, title: t.label });
