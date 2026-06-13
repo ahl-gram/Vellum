@@ -1,5 +1,5 @@
 import { el, type SvgNode } from "../svg.ts";
-import type { Box } from "../geometry.ts";
+import { boxesOverlap, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { CartouchePlan } from "./cartouche.ts";
 
@@ -13,6 +13,7 @@ export type CompassPlan = {
 export function planCompass(
   ctx: RenderCtx,
   cartouche: CartouchePlan,
+  scalebarBox: Box,
 ): CompassPlan | null {
   const { world, proj } = ctx;
   const k = proj.widthPx / 1500;
@@ -21,6 +22,14 @@ export function planCompass(
 
   const cartCx = cartouche.rect.x + cartouche.rect.w / 2;
   const cartCy = cartouche.rect.y + cartouche.rect.h / 2;
+
+  // bounding box of the rose plus the "N" label above it
+  const boxAt = (px: number, py: number): Box => ({
+    x: px - r,
+    y: py - r - 18 * k,
+    w: 2 * r,
+    h: 2 * r + 18 * k,
+  });
 
   let best: { px: number; py: number; score: number } | null = null;
   for (let gy = 4; gy < h - 4; gy += 2) {
@@ -35,6 +44,10 @@ export function planCompass(
         proj.widthPx - margin - px, proj.heightPx - margin - py,
       );
       if (edge < r + 14 * k) continue;
+      // keep clear of the fixed furniture so the rose never sits on them
+      const box = boxAt(px, py);
+      if (boxesOverlap(box, scalebarBox, 8 * k)) continue;
+      if (boxesOverlap(box, cartouche.rect, 6 * k)) continue;
       const dCart = Math.hypot(px - cartCx, py - cartCy);
       const score = Math.min(d, 14) * 8 + dCart * 0.18 + edge * -0.08;
       if (!best || score > best.score) best = { px, py, score };
@@ -46,7 +59,7 @@ export function planCompass(
     cx: best.px,
     cy: best.py,
     r,
-    box: { x: best.px - r, y: best.py - r - 18 * k, w: 2 * r, h: 2 * r + 18 * k },
+    box: boxAt(best.px, best.py),
   };
 }
 

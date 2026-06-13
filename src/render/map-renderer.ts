@@ -68,10 +68,10 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   // furniture is planned first so text layers can route around it
   const cartouchePlan = planCartouche(ctx);
   ctx.labels.claim(cartouchePlan.rect);
-  const compassPlan = planCompass(ctx, cartouchePlan);
-  if (compassPlan) ctx.labels.claim(compassPlan.box);
   const scalebarPlan = planScalebar(ctx);
   ctx.labels.claim(scalebarPlan.box);
+  const compassPlan = planCompass(ctx, cartouchePlan, scalebarPlan.box);
+  if (compassPlan) ctx.labels.claim(compassPlan.box);
 
   // evaluation order = label priority: settlements claim space before
   // flexible feature labels, which claim before decorative art
