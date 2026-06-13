@@ -139,10 +139,10 @@ src/
   hydrology/  priority-flood, D8 flow, river tracing
   climate/    temperature, moisture, biomes
   society/    names, settlements, roads, realms, lore
-  render/     styles, layers/ (15 of them), svg builder, projection
+  render/     styles, layers/ (18 of them), svg builder, projection
   world/      generate.ts (pipeline), region.ts (zoom windows)
   cli/        main.ts, atlas.ts, gallery.ts, raster.ts (PNG/poster)
-test/         147 tests, node:test — mirrors src/
+test/         157 tests, node:test — mirrors src/
 docs/explorer the same engine, tsc-emitted as browser ES modules
 ```
 
