@@ -43,6 +43,7 @@ so they reach Vellum instead of npm:
 
 ```bash
 npm run chart   -- --seed 42 --style antique   # one chart → out/
+npm run chart   -- --seed 42 --legend          # add a key explaining the symbols
 npm run chart   -- --style nautical            # no --seed → random (and printed)
 npm run poster  -- --seed 42                   # wall art: 480x360 grid, 4200px + PNG
 npm run atlas   -- --seed 42                   # HTML book: 3 styles, regions, gazetteer
@@ -57,11 +58,11 @@ Run `node src/cli/main.ts help` for the built-in usage screen.
 
 | Command | Draws | Honors |
 |---|---|---|
-| `chart` | one SVG (add `--png` for a raster too) | `--seed --style --type --band --land --grid --width` |
-| `poster` | one large SVG **and** PNG — a 480×360 grid at 4200px (~14″ at 300 dpi) | `--seed --style --scale` |
-| `atlas` | a multi-page HTML atlas: the world in three styles, two regional close-ups, and a settlement gazetteer with procedural travelers' notes (*"Its quays smell of dates and old rope."*) | `--seed --type --band --land` — always renders every style, so `--style` is ignored |
+| `chart` | one SVG (add `--png` for a raster too) | `--seed --style --type --band --land --grid --width --legend` |
+| `poster` | one large SVG **and** PNG — a 480×360 grid at 4200px (~14″ at 300 dpi) | `--seed --style --scale --legend` |
+| `atlas` | a multi-page HTML atlas: the world in three styles, two regional close-ups, and a settlement gazetteer with procedural travelers' notes (*"Its quays smell of dates and old rope."*), each chart carrying a symbol key | `--seed --type --band --land` — always renders every style, so `--style` is ignored |
 | `gallery` | an HTML contact sheet of *N* worlds, walking outward from the seed | `--seed` (starting point), `--count`, `--style` |
-| `demo` | one world drawn in all four styles | `--seed --grid --width` |
+| `demo` | one world drawn in all four styles | `--seed --grid --width --legend` |
 
 ### Flags
 
@@ -72,6 +73,7 @@ Run `node src/cli/main.ts help` for the built-in usage screen.
 - `--land <f>` — land fraction, `0.1`–`0.7` *(default: set by map type)*
 - `--grid <WxH>` — simulation resolution *(default `320x240`; poster `480x360`)*
 - `--width <px>` — output width in pixels, `400`–`6000` *(default `1500`; poster `4200`)*
+- `--legend` — draw a compact, style-aware key explaining the chart's symbols and labels *(default: off; the atlas always includes one)*
 - `--png` — also rasterize to PNG using an installed browser; set `VELLUM_BROWSER` to choose which
 - `--scale <n>` — PNG pixel scale, `0.5`–`4` *(default `2`; poster `1`)*
 - `--count <n>` — gallery only: how many worlds, `1`–`48` *(default `12`)*
