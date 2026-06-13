@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vellum — Questions &amp; Answers</title>
+<title>Vellum: Questions &amp; Answers</title>
 <meta name="description" content="How Vellum works: seeds, determinism, terrain and rivers, climate and styles, and how to make and reproduce your own maps.">
 <style>
   :root { color-scheme: light; }
@@ -65,15 +65,15 @@
 <h2 id="about">About Vellum</h2>
 
 <p class="q">What is Vellum?</p>
-<p class="a">Vellum is a procedural cartography engine. Give it a number — a
-"seed" — and it invents an entire world (terrain, rivers, forests, towns, and
+<p class="a">Vellum is a procedural cartography engine. Give it a number, a
+"seed," and it invents an entire world (terrain, rivers, forests, towns, and
 their names) and draws it as an old-fashioned atlas chart.</p>
 
 <p class="q">Is this AI image generation?</p>
-<p class="a">No. There is no machine learning or image model involved. Vellum is
-a deterministic algorithm — layered noise, a water-flow simulation, and
-name grammars — so it draws crisp, infinitely scalable SVG maps, and the same
-seed always produces exactly the same one.</p>
+<p class="a">No. There is no machine learning or image model involved. Vellum
+follows a fixed set of rules (layered noise, a water-flow simulation, and name
+grammars), so it draws crisp, infinitely scalable SVG maps, and the same seed
+always produces exactly the same one.</p>
 
 <p class="q">What is a "seed"?</p>
 <p class="a">A seed is a number that serves as a world's identity. Seed 42 always
@@ -82,7 +82,7 @@ in every chart's margin, so you can always find your way back to a map you
 liked.</p>
 
 <p class="q">Do I need to install anything to try it?</p>
-<p class="a">No — the <a href="../explorer/">Explorer</a> runs the whole engine
+<p class="a">No. The <a href="../explorer/">Explorer</a> runs the whole engine
 in your browser. Type a seed and draw; nothing is uploaded. To generate files
 on your own machine, clone the repo (see the
 <a href="https://github.com/ahl-gram/Vellum#readme">README</a>).</p>
@@ -94,7 +94,7 @@ repo and ask.</p>
 
 <p class="q">Why "Vellum"?</p>
 <p class="a">Vellum is the prepared animal skin that real medieval maps and
-manuscripts were drawn on — a fitting surface for charts of places that were
+manuscripts were drawn on, a fitting surface for charts of places that were
 never real.</p>
 
 <h2 id="how">How a world is built</h2>
@@ -106,7 +106,7 @@ the waterline becomes the coastline, hills, and mountains.</p>
 
 <p class="q">How do the rivers and lakes form?</p>
 <p class="a">Vellum simulates water. Rainfall runs downhill along the steepest
-path, and the algorithm guarantees every drop can reach the sea — so rivers
+path, and the algorithm guarantees every drop can reach the sea, so rivers
 always connect and flow the right way, widening toward their mouths. Where
 water collects below sea level inland, you get a lake.</p>
 
@@ -119,7 +119,7 @@ ridgelines.</p>
 
 <p class="q">Where do the place names come from?</p>
 <p class="a">Each world picks one of six invented cultures, each with its own
-sound — syllable patterns that build names from scratch, plus templates for
+sound: syllable patterns that build names from scratch, plus templates for
 rivers, seas, peaks, and realms. Nothing is drawn from a real word list.</p>
 
 <p class="q">Is every map really repeatable?</p>
@@ -130,7 +130,7 @@ deliberate design goal, checked by the test suite.</p>
 <h2 id="climate">Climate, styles &amp; map types</h2>
 
 <p class="q">How does climate change the look?</p>
-<p class="a">Climate sets temperature, which sets the biomes — and biomes change
+<p class="a">Climate sets temperature, which sets the biomes, and biomes change
 the map's <em>symbols</em>, not its base color. A polar world shows pine woods
 and open tundra, with the snow line low on the hills. A tropical world shows
 palms, deserts marked with dunes, and snow only on the highest peaks. Temperate
@@ -138,16 +138,30 @@ sits between, with broadleaf woods. The coastline of a given seed is identical
 in every climate.</p>
 
 <p class="q">So is a polar map white?</p>
-<p class="a">No — and that surprises people. The land is the same parchment (or
+<p class="a">No, and that surprises people. The land is the same parchment (or
 elevation tint) in every climate; "cold" shows through the tree types, the
 beaches, the snow line, and the gazetteer's notes, not a change of palette.</p>
 
 <p class="q">What are the four styles?</p>
-<p class="a"><em>Antique</em> — parchment, hatched mountains, sea monsters.
-<em>Topographic</em> — elevation tints and contour lines.
-<em>Ink</em> — pen-and-ink monochrome.
-<em>Nautical</em> — a sea chart with depth soundings and prevailing-wind arrows.
+<p class="a"><em>Antique</em>: parchment, hatched mountains, sea monsters.
+<em>Topographic</em>: elevation tints and contour lines.
+<em>Ink</em>: pen-and-ink monochrome.
+<em>Nautical</em>: a sea chart with depth soundings and prevailing-wind arrows.
 (The nautical style draws no land symbols, so climate is most muted there.)</p>
+
+<p class="q">What do the colors on an antique chart mean?</p>
+<p class="a">Less than you might expect, because an antique chart shows most
+things by drawing rather than by color. The land is a single even parchment, the
+same cream at every elevation and in every climate; mountains are drawn as brown
+hatched ranges and forests as little tree marks, not painted on. The sea is a
+pale sage green, ringed by slightly darker "waterlines" that echo each coast in
+the old engraved manner. A dark brown line is the shoreline, thin blue lines are
+rivers, and faint brown lines are roads. The one place color really carries
+meaning is the soft washes of red, green, gold, blue, and mauve: each marks a
+realm, one tint apiece, so you can tell neighboring territories apart. Those are
+political regions, not terrain, so a single-realm island shows almost none while
+a continent of several realms shows them clearly. (Topographic charts are the
+exception: there the land color itself maps to elevation.)</p>
 
 <p class="q">What are the map types?</p>
 <p class="a"><em>Island</em> (one landmass), <em>archipelago</em> (scattered
@@ -162,18 +176,18 @@ dominant free city and its hinterland). Leave it unset and the seed chooses.</p>
 an SVG you can open in any browser. All the options are in the
 <a href="https://github.com/ahl-gram/Vellum#readme">README</a>.</p>
 
-<p class="q">I found a map I love — how do I get it back?</p>
+<p class="q">I found a map I love. How do I get it back?</p>
 <p class="a">Note its seed (printed in the margin) and re-run with it. One catch:
 if you forced the type, climate, or land amount, those aren't recorded on the
-chart — pass them again alongside the seed to redraw the same map.</p>
+chart, so pass them again alongside the seed to redraw the same map.</p>
 
 <p class="q">Can I make a high-resolution print?</p>
-<p class="a">Yes — <code>npm run poster -- --seed 42</code> draws an oversized
+<p class="a">Yes. <code>npm run poster -- --seed 42</code> draws an oversized
 chart (about 14 inches at 300 dpi) and rasterizes it to a PNG, ready to print
 as wall art.</p>
 
 <p class="q">What are the atlas and the gallery?</p>
-<p class="a">The atlas binds one world into a small book — the chart in several
+<p class="a">The atlas binds one world into a small book: the chart in several
 styles, regional close-ups, and a gazetteer of every town with short
 travelers' notes. The <a href="../gallery/">gallery</a> is a contact sheet of
 many worlds at once, for browsing seeds.</p>
