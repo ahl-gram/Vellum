@@ -17,37 +17,68 @@ rose, a sea serpent, and a title cartouche.
 Same seed, same world, byte-identical SVG. Every chart is reproducible
 from the number printed in its corner.
 
+## Quick start
+
+```bash
+git clone https://github.com/ahl-gram/Vellum
+cd Vellum
+npm install                       # dev-only: typescript + @types/node
+npm run chart -- --seed 42        # → out/chart-42-antique.svg
+open out/chart-42-antique.svg     # macOS; otherwise open the file in any browser
 ```
-$ npm run chart -- --seed 42
-seed 42 · island · The Isle of Rahai
-world 335ms · render 32ms · out/chart-42-antique.svg
-```
+
+Vellum needs **Node 23.6+** and runs its TypeScript directly — there is no
+build step. Everything it draws lands in `out/` (gitignored); each chart is a
+plain SVG you can open in a browser, drop into a document, or rasterize with
+`--png`.
+
+Nothing to install? The **[Explorer](https://ahl-gram.github.io/Vellum/explorer/)**
+runs the whole engine in your browser — type a seed and draw.
 
 ## Commands
 
+Every command is run the same way. Under `npm run`, put `--` before the flags
+so they reach Vellum instead of npm:
+
 ```bash
-npm run chart -- --seed 42 --style antique     # one chart
-npm run chart -- --style nautical              # random seed (printed)
-npm run demo  -- --seed 42                     # all four styles
-npm run atlas -- --seed 42                     # full HTML atlas
-node src/cli/main.ts gallery --count 12        # contact sheet of worlds
-npm run site                                   # rebuild docs/ showcase
-npm run chart -- --seed 42 --png               # also rasterize to PNG
-node src/cli/main.ts poster --seed 42          # wall-art: 4200px + PNG
+npm run chart   -- --seed 42 --style antique   # one chart → out/
+npm run chart   -- --style nautical            # no --seed → random (and printed)
+npm run poster  -- --seed 42                   # wall art: 480x360 grid, 4200px + PNG
+npm run atlas   -- --seed 42                   # HTML book: 3 styles, regions, gazetteer
+npm run gallery -- --seed 100 --count 12       # contact sheet of 12 worlds
+npm run demo    -- --seed 42                   # one world in all four styles
 npm test                                       # full test suite
 npm run check                                  # typecheck
+npm run site                                   # rebuild the docs/ showcase
 ```
 
-Options: `--seed n`, `--style antique|topographic|ink|nautical`,
-`--type island|archipelago|continent|citystate`, `--band temperate|tropical|polar`,
-`--land 0.1–0.7`, `--grid WxH`, `--width px`, `--count n`, `--png`,
-`--scale n`, `--out path`.
+Run `node src/cli/main.ts help` for the built-in usage screen.
 
-The **atlas** command binds a small book: the world chart in three
-styles, two regional close-up surveys, and a gazetteer of every
-settlement with procedurally written travelers' notes
-(*"Its quays smell of dates and old rope."*) — all in a single
-`index.html` you can open in a browser.
+| Command | Draws | Honors |
+|---|---|---|
+| `chart` | one SVG (add `--png` for a raster too) | `--seed --style --type --band --land --grid --width` |
+| `poster` | one large SVG **and** PNG — a 480×360 grid at 4200px (~14″ at 300 dpi) | `--seed --style --scale` |
+| `atlas` | a multi-page HTML atlas: the world in three styles, two regional close-ups, and a settlement gazetteer with procedural travelers' notes (*"Its quays smell of dates and old rope."*) | `--seed --type --band --land` — always renders every style, so `--style` is ignored |
+| `gallery` | an HTML contact sheet of *N* worlds, walking outward from the seed | `--seed` (starting point), `--count`, `--style` |
+| `demo` | one world drawn in all four styles | `--seed --grid --width` |
+
+### Flags
+
+- `--seed <n>` — the world's identity. Omit for a random seed (it's printed so you can reuse it).
+- `--style <s>` — `antique` (default) · `topographic` · `ink` · `nautical`
+- `--type <t>` — `island` · `archipelago` · `continent` · `citystate` *(default: chosen by the seed)*
+- `--band <b>` — climate: `temperate` · `tropical` · `polar` *(default: chosen by the seed)*
+- `--land <f>` — land fraction, `0.1`–`0.7` *(default: set by map type)*
+- `--grid <WxH>` — simulation resolution *(default `320x240`; poster `480x360`)*
+- `--width <px>` — output width in pixels, `400`–`6000` *(default `1500`; poster `4200`)*
+- `--png` — also rasterize to PNG using an installed browser; set `VELLUM_BROWSER` to choose which
+- `--scale <n>` — PNG pixel scale, `0.5`–`4` *(default `2`; poster `1`)*
+- `--count <n>` — gallery only: how many worlds, `1`–`48` *(default `12`)*
+- `--out <path>` — override where the file is written
+
+> **Reproducing a chart.** A chart's seed and style are printed on every run
+> and stamped in its margin — but `--type`, `--band`, and `--land` are not. If
+> you forced any of those, pass them again with the seed to redraw the same map.
 
 ## The styles
 
