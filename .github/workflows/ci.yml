@@ -21,3 +21,13 @@ jobs:
         run: npm run check
       - name: Test
         run: npm test
+      - name: Verify Explorer engine is in sync with source
+        run: |
+          rm -rf docs/explorer/engine
+          npx tsc -p tsconfig.browser.json
+          if [ -n "$(git status --porcelain -- docs/explorer/engine)" ]; then
+            echo "::error::docs/explorer/engine is stale. Run 'npm run site' and commit the regenerated engine."
+            git --no-pager diff -- docs/explorer/engine
+            git status --porcelain -- docs/explorer/engine
+            exit 1
+          fi
