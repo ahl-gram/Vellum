@@ -2,6 +2,7 @@ import { createRng } from "../core/rng.ts";
 import { minMax } from "../core/grid.ts";
 import { chaikinSmooth, closedIsoRings } from "../terrain/contours.ts";
 import type { World } from "../world/types.ts";
+import type { MapType } from "../terrain/heightfield.ts";
 import { createLabelArena, type RenderCtx } from "./context.ts";
 import { createProjection } from "./transform.ts";
 import { STYLES, type StyleName } from "./style.ts";
@@ -32,8 +33,38 @@ export type RenderOptions = {
   legend?: boolean;
 };
 
+const TYPE_NOUNS: Record<MapType, string> = {
+  island: "island",
+  archipelago: "archipelago",
+  continent: "continent",
+  citystate: "city-state",
+};
+
+const STYLE_ADJECTIVES: Record<StyleName, string> = {
+  antique: "Antique",
+  topographic: "Topographic",
+  ink: "Pen-and-ink",
+  nautical: "Nautical",
+};
+
+/**
+ * One-line accessible summary, e.g. "Antique chart of The Isle of Rahai, an
+ * island in a temperate climate." Every field is total over its type, so the
+ * sentence can never contain `undefined`; derived from the world, so it stays
+ * byte-deterministic for a given seed.
+ */
+function describeChart(world: World, styleName: StyleName): string {
+  const noun = TYPE_NOUNS[world.recipe.mapType];
+  const article = /^[aeiou]/.test(noun) ? "an" : "a";
+  return (
+    `${STYLE_ADJECTIVES[styleName]} chart of ${world.title.title}, ` +
+    `${article} ${noun} in a ${world.recipe.band} climate.`
+  );
+}
+
 export function renderMap(world: World, opts: RenderOptions = {}): string {
   const style = STYLES[opts.style ?? "antique"];
+  const description = describeChart(world, style.name);
   const widthPx = opts.widthPx ?? 1500;
   const margin = Math.round(widthPx * 0.045);
   const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
@@ -133,8 +164,14 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
       width: Math.round(proj.widthPx),
       height: Math.round(proj.heightPx),
       viewBox: `0 0 ${proj.widthPx} ${proj.heightPx}`,
+      // a chart is one graphic to assistive tech; a self-contained aria-label
+      // avoids the duplicate-id hazard of aria-labelledby on multi-chart pages
+      role: "img",
+      "aria-label": description,
     },
     [
+      el("title", {}, [world.title.title]),
+      el("desc", {}, [description]),
       defs,
       el("rect", {
         x: 0, y: 0,

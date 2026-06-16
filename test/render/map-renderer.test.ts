@@ -83,3 +83,13 @@ test("custom width scales the document", () => {
   const svg = renderMap(world, { style: "ink", widthPx: 800 });
   assert.ok(svg.includes(`width="800"`));
 });
+
+test("the SVG carries an accessible name and description", () => {
+  const svg = renderMap(world, { style: "antique" });
+  assert.match(svg, /<svg\b[^>]*\srole="img"/, "root needs role=img");
+  assert.match(svg, /<svg\b[^>]*\saria-label="[^"]+"/, "root needs aria-label");
+  assert.ok(/<title>.+<\/title>/.test(svg), "needs a <title>");
+  assert.ok(/<desc>.+<\/desc>/.test(svg), "needs a <desc>");
+  // accessible text is derived from the world (stays deterministic)
+  assert.ok(svg.includes(world.title.title), "name derived from the world");
+});
