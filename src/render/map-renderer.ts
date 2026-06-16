@@ -158,6 +158,10 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     ...textureDefs(ctx),
   ]);
 
+  // a regional inset also needs its zoom window to redraw, so it is not
+  // reproducible from a flat recipe; only standalone charts embed one
+  const reproducible = world.region === undefined;
+
   const root = el(
     "svg",
     {
@@ -169,12 +173,12 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
       // avoids the duplicate-id hazard of aria-labelledby on multi-chart pages
       role: "img",
       "aria-label": description,
-      ...recipeAttrs(world, style.name),
+      ...(reproducible ? recipeAttrs(world, style.name) : {}),
     },
     [
       el("title", {}, [world.title.title]),
       el("desc", {}, [description]),
-      recipeMetadataNode(world, style.name),
+      ...(reproducible ? [recipeMetadataNode(world, style.name)] : []),
       defs,
       el("rect", {
         x: 0, y: 0,

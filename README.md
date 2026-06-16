@@ -90,6 +90,8 @@ Run `node src/cli/main.ts help` for the built-in usage screen.
 > part of a world's identity). The seed and style are also printed on each run
 > and stamped in the margin, so if those are all you have, pass any forced
 > `--type`, `--band`, or `--land` again with the seed to redraw the same map.
+> Regional inset charts (the atlas's "Environs of ..." surveys) carry no recipe,
+> since redrawing one also needs its zoom window, not just the seed.
 
 ## The styles
 
