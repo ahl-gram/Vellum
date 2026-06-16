@@ -7,6 +7,7 @@ import { createLabelArena, type RenderCtx } from "./context.ts";
 import { createProjection } from "./transform.ts";
 import { STYLES, type StyleName } from "./style.ts";
 import { el, renderSvg, type SvgNode } from "./svg.ts";
+import { recipeAttrs, recipeMetadataNode } from "./recipe-meta.ts";
 import { oceanLayer, waterlinesLayer } from "./layers/water.ts";
 import { contoursLayer, hypsometricLayer, landLayer } from "./layers/land.ts";
 import { riversLayer } from "./layers/rivers.ts";
@@ -168,10 +169,12 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
       // avoids the duplicate-id hazard of aria-labelledby on multi-chart pages
       role: "img",
       "aria-label": description,
+      ...recipeAttrs(world, style.name),
     },
     [
       el("title", {}, [world.title.title]),
       el("desc", {}, [description]),
+      recipeMetadataNode(world, style.name),
       defs,
       el("rect", {
         x: 0, y: 0,
