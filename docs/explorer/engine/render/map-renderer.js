@@ -5,6 +5,7 @@ import { createLabelArena } from "./context.js";
 import { createProjection } from "./transform.js";
 import { STYLES } from "./style.js";
 import { el, renderSvg } from "./svg.js";
+import { recipeAttrs, recipeMetadataNode } from "./recipe-meta.js";
 import { oceanLayer, waterlinesLayer } from "./layers/water.js";
 import { contoursLayer, hypsometricLayer, landLayer } from "./layers/land.js";
 import { riversLayer } from "./layers/rivers.js";
@@ -23,8 +24,33 @@ import { roadsLayer } from "./layers/roads.js";
 import { realmBordersLayer, realmTintsLayer } from "./layers/realms.js";
 import { soundingsLayer } from "./layers/soundings.js";
 import { windsLayer } from "./layers/winds.js";
+const TYPE_NOUNS = {
+    island: "island",
+    archipelago: "archipelago",
+    continent: "continent",
+    citystate: "city-state",
+};
+const STYLE_ADJECTIVES = {
+    antique: "Antique",
+    topographic: "Topographic",
+    ink: "Pen-and-ink",
+    nautical: "Nautical",
+};
+/**
+ * One-line accessible summary, e.g. "Antique chart of The Isle of Rahai, an
+ * island in a temperate climate." Every field is total over its type, so the
+ * sentence can never contain `undefined`; derived from the world, so it stays
+ * byte-deterministic for a given seed.
+ */
+function describeChart(world, styleName) {
+    const noun = TYPE_NOUNS[world.recipe.mapType];
+    const article = /^[aeiou]/.test(noun) ? "an" : "a";
+    return (`${STYLE_ADJECTIVES[styleName]} chart of ${world.title.title}, ` +
+        `${article} ${noun} in a ${world.recipe.band} climate.`);
+}
 export function renderMap(world, opts = {}) {
     const style = STYLES[opts.style ?? "antique"];
+    const description = describeChart(world, style.name);
     const widthPx = opts.widthPx ?? 1500;
     const margin = Math.round(widthPx * 0.045);
     const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
@@ -113,7 +139,15 @@ export function renderMap(world, opts = {}) {
         width: Math.round(proj.widthPx),
         height: Math.round(proj.heightPx),
         viewBox: `0 0 ${proj.widthPx} ${proj.heightPx}`,
+        // a chart is one graphic to assistive tech; a self-contained aria-label
+        // avoids the duplicate-id hazard of aria-labelledby on multi-chart pages
+        role: "img",
+        "aria-label": description,
+        ...recipeAttrs(world, style.name),
     }, [
+        el("title", {}, [world.title.title]),
+        el("desc", {}, [description]),
+        recipeMetadataNode(world, style.name),
         defs,
         el("rect", {
             x: 0, y: 0,
