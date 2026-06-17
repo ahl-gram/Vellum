@@ -81,9 +81,17 @@ Run `node src/cli/main.ts help` for the built-in usage screen.
 - `--count <n>`: gallery only, how many worlds, `1`–`48` *(default `12`)*
 - `--out <path>`: override where the file is written
 
-> **Reproducing a chart.** A chart's seed and style are printed on every run
-> and stamped in its margin, but `--type`, `--band`, and `--land` are not. If
-> you forced any of those, pass them again with the seed to redraw the same map.
+> **Reproducing a chart.** Every chart embeds its full recipe, so a saved SVG is
+> self-describing: the root `<svg>` carries `data-vellum-*` attributes (seed,
+> type, band, land, grid, style, and engine version) alongside a readable
+> `<metadata>` summary. `recipeFromSvg()` in `src/render/recipe-meta.ts` reads
+> them back, and re-rendering `generateWorld(recipe)` at the default width
+> reproduces the map byte-for-byte (width and legend are display options, not
+> part of a world's identity). The seed and style are also printed on each run
+> and stamped in the margin, so if those are all you have, pass any forced
+> `--type`, `--band`, or `--land` again with the seed to redraw the same map.
+> Regional inset charts (the atlas's "Environs of ..." surveys) carry no recipe,
+> since redrawing one also needs its zoom window, not just the seed.
 
 ## The styles
 

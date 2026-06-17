@@ -142,11 +142,11 @@ the only item needing special re-roll handling whenever it is done.
 
 Update as work lands. `[x]` done, `[~]` in progress, `[ ]` not started.
 
-- Phase 0
-  - [ ] #16 Gazetteer lore pools
-  - [ ] #12 Accessibility (SVG title/desc + Explorer aria)
-  - [ ] #14 Embed recipe in SVG
-  - [ ] #7 Site header menu
+- Phase 0 (done: branch `phase-0-quick-wins`, 2026-06-16)
+  - [x] #16 Gazetteer lore pools
+  - [x] #12 Accessibility (SVG title/desc + Explorer aria)
+  - [x] #14 Embed recipe in SVG
+  - [x] #7 Site header menu
 - Phase 1
   - [ ] #20 Heraldry / arms & banners
 - Phase 2
