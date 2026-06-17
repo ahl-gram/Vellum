@@ -27,6 +27,7 @@
   .controls label { font-size: 0.85rem; letter-spacing: 0.05em; color: #6b5a40; }
   .controls label.check { display: inline-flex; align-items: center; gap: 0.35rem; }
   .controls input[type="checkbox"] { accent-color: #4a3826; width: 1rem; height: 1rem; }
+  .controls .exports { display: inline-flex; gap: 0.7rem; }
   input[type="number"], select, button {
     font-family: inherit; font-size: 0.95rem; color: #3d2f1f;
     background: #f8f1e0; border: 1.5px solid #4a3826; border-radius: 4px;
@@ -116,8 +117,10 @@
   </label>
   <label class="check">legend <input id="legend" type="checkbox" checked></label>
   <button id="draw" class="primary">Draw</button>
-  <button id="download">Download SVG</button>
-  <button id="bind">Bind as atlas</button>
+  <span class="exports">
+    <button id="download">Download SVG</button>
+    <button id="bind">Bind as atlas</button>
+  </span>
 </div>
 
 <p class="status" id="status" role="status" aria-live="polite"></p>
@@ -152,7 +155,16 @@ const atlasDiv = $("atlas");
 let lastSvg = "";
 let lastTitle = "";
 let lastWorld = null;
+let lastStyle = "antique";
 let atlasUrls = [];
+
+// Short captions for the style plates in the bound atlas (the composer's hero
+// caption is a full sentence, too long for the grid alongside the others).
+const STYLE_LABEL = {
+  antique: "The antique chart",
+  topographic: "Topographic survey",
+  ink: "Pen & ink",
+};
 
 // Plates are embedded as <img> with blob URLs, never inline <svg>: every chart
 // carries internal ids (map-clip, glyph/texture/label defs) referenced by
@@ -170,17 +182,22 @@ function plateFigure(svg, caption) {
   return `<figure><img src="${url}" alt="${c}" loading="lazy"><figcaption>${c}</figcaption></figure>`;
 }
 
-function atlasHtml(atlas) {
-  const draughtings = atlas.draughtings
-    .map((d) => plateFigure(d.svg, d.title))
+function atlasHtml(atlas, currentStyle) {
+  // The chart already on screen IS this world drawn in `currentStyle`, so the
+  // atlas shows the OTHER draughtings, the surveys, and the lore — not a second
+  // copy of what the reader is already looking at.
+  const others = [atlas.hero, ...atlas.draughtings].filter(
+    (p) => p.key !== currentStyle,
+  );
+  const draughtings = others
+    .map((p) => plateFigure(p.svg, STYLE_LABEL[p.key] ?? p.title))
     .join("\n");
   const surveys = atlas.regions.length
     ? `<section><h2>Regional Surveys</h2>${atlas.regions
         .map((r) => plateFigure(r.svg, r.title))
         .join("\n")}</section>`
     : "";
-  return `<section>${plateFigure(atlas.hero.svg, atlas.hero.title)}</section>
-<section><h2>Other Draughtings</h2><div class="styles">${draughtings}</div></section>
+  return `<section><h2>Other Draughtings</h2><div class="styles">${draughtings}</div></section>
 ${surveys}
 ${atlas.bannersHtml}
 ${atlas.gazetteerHtml}`;
@@ -232,8 +249,9 @@ function draw() {
       const recipe = defaultRecipe(seed, overrides);
       const world = generateWorld(recipe);
       lastWorld = world;
+      lastStyle = styleSel.value;
       lastSvg = renderMap(world, {
-        style: styleSel.value,
+        style: lastStyle,
         widthPx: 1500,
         legend: legendChk.checked,
       });
@@ -272,7 +290,7 @@ $("bind").addEventListener("click", () => {
   setTimeout(() => {
     try {
       const atlas = composeAtlas(lastWorld, { width: 1500 });
-      atlasDiv.innerHTML = atlasHtml(atlas);
+      atlasDiv.innerHTML = atlasHtml(atlas, lastStyle);
       status.textContent = "";
       atlasDiv.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
