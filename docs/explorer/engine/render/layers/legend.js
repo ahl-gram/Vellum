@@ -2,6 +2,7 @@ import { BIOMES } from "../../climate/biomes.js";
 import { el } from "../svg.js";
 import { boxesOverlap } from "../geometry.js";
 import { settlementGlyph } from "./settlements.js";
+import { terrainGlyphsPresent } from "./glyphs.js";
 function metrics(k) {
     return {
         pad: 11 * k,
@@ -55,10 +56,17 @@ function buildRows(ctx) {
             rows.push({ icon: { kind: "wind" }, label: "Prevailing wind" });
     }
     else if (style.glyphs) {
+        const terrain = terrainGlyphsPresent(ctx);
         rows.push({ icon: { kind: "glyph", sym: "gl-mtn-1" }, label: "Mountains" });
+        if (terrain.hill)
+            rows.push({ icon: { kind: "glyph", sym: "gl-hill-1" }, label: "Hills" });
         const tree = dominantTree(ctx);
         if (tree)
             rows.push({ icon: { kind: "glyph", sym: tree }, label: "Forest" });
+        if (terrain.marsh)
+            rows.push({ icon: { kind: "glyph", sym: "gl-marsh" }, label: "Marsh" });
+        if (terrain.dune)
+            rows.push({ icon: { kind: "glyph", sym: "gl-dune" }, label: "Dunes" });
     }
     else if (style.hypsometric) {
         rows.push({ icon: { kind: "hypso" }, label: "Low to high ground" });

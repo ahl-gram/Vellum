@@ -10,6 +10,47 @@ type Glyph = {
   scale: number;
 };
 
+// Relief thresholds on (elevation - seaLevel) / elevSpan. Shared with the
+// legend so its key can only list terrain the chart actually carries.
+export const GLYPH_MTN_REL = 0.5;
+export const GLYPH_HILL_REL = 0.34;
+
+export type TerrainGlyphs = {
+  readonly hill: boolean;
+  readonly marsh: boolean;
+  readonly dune: boolean;
+};
+
+/**
+ * Which non-mountain, non-tree terrain glyphs a glyph-style chart would draw.
+ * Mirrors the candidate gates in glyphsLayer exactly (interior land cells, the
+ * same relief thresholds, the same else-if order) so the legend never lists a
+ * symbol the map lacks, nor omits one it carries.
+ */
+export function terrainGlyphsPresent(ctx: RenderCtx): TerrainGlyphs {
+  const { world, elevSpan } = ctx;
+  const { w, h, data } = world.elev;
+  const sea = world.seaLevel;
+  let hill = false;
+  let marsh = false;
+  let dune = false;
+  for (let gy = 1; gy < h - 1; gy++) {
+    for (let gx = 1; gx < w - 1; gx++) {
+      const i = gx + gy * w;
+      const e = data[i] as number;
+      if (e <= sea) continue;
+      const rel = (e - sea) / elevSpan;
+      const b = world.biomes[i] as number;
+      if (rel > GLYPH_MTN_REL) continue;
+      else if (rel > GLYPH_HILL_REL) hill = true;
+      else if (b === BIOMES.marsh) marsh = true;
+      else if (b === BIOMES.desert) dune = true;
+      if (hill && marsh && dune) return { hill, marsh, dune };
+    }
+  }
+  return { hill, marsh, dune };
+}
+
 /**
  * Terrain glyph field for antique/ink styles: mountains on high ground,
  * hills below them, trees over forest biomes, marsh tufts, dune marks.
@@ -49,12 +90,12 @@ export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
       const rel = (e - sea) / elevSpan;
       const b = world.biomes[i] as number;
       const c = { x: gx, y: gy, rel, i };
-      if (rel > 0.5) mtn.push(c);
-      else if (rel > 0.34) hill.push(c);
+      if (rel > GLYPH_MTN_REL) mtn.push(c);
+      else if (rel > GLYPH_HILL_REL) hill.push(c);
       else if (b === BIOMES.marsh) marsh.push(c);
       else if (b === BIOMES.desert) dune.push(c);
       if (
-        rel <= 0.5 &&
+        rel <= GLYPH_MTN_REL &&
         (b === BIOMES.temperateForest ||
           b === BIOMES.rainforest ||
           b === BIOMES.taiga ||
