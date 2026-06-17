@@ -12,7 +12,7 @@ test("composeAtlas yields the hero, the other draughtings, and the surveys", () 
 
   assert.deepEqual(
     atlas.draughtings.map((d) => d.key),
-    ["topographic", "ink"],
+    ["topographic", "ink", "nautical"],
   );
   for (const d of atlas.draughtings) assert.match(d.svg, /^<svg/);
 

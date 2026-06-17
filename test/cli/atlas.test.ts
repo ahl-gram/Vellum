@@ -5,6 +5,23 @@ import { join } from "node:path";
 import { buildAtlas } from "../../src/cli/atlas.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
+test("the atlas includes the nautical plate under Other Draughtings", async () => {
+  const seed = 42;
+  const dir = "out/test-atlas-nautical";
+  await rm(dir, { recursive: true, force: true });
+  try {
+    await buildAtlas(seed, { out: dir });
+    const html = await readFile(join(dir, "index.html"), "utf8");
+    // the file is written and the index links + captions it
+    const svg = await readFile(join(dir, "world-nautical.svg"), "utf8");
+    assert.match(svg, /^<svg/);
+    assert.match(html, /world-nautical\.svg/);
+    assert.match(html, /Sea chart: soundings &amp; winds/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("the atlas carries a banner plate with one coat of arms per realm", async () => {
   const seed = 42;
   const dir = "out/test-atlas";
