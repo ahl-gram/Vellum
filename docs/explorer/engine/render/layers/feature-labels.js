@@ -174,10 +174,11 @@ export function featureLabelsLayer(ctx) {
         }, [name.toUpperCase()]));
     });
     // --- river names along the straightest reach of each course ---
+    // longest first so the major rivers win label space; collision avoidance
+    // (tryClaim) then limits density, so the count adapts to the chart size
     const named = [...world.names.rivers.entries()]
         .map(([idx, name]) => ({ river: world.rivers[idx], name }))
-        .sort((a, b) => b.river.points.length - a.river.points.length)
-        .slice(0, 3);
+        .sort((a, b) => b.river.points.length - a.river.points.length);
     for (const { river, name } of named) {
         const raw = river.points.map((p) => [proj.px(p.x), proj.py(p.y)]);
         const pts = chaikinSmooth(raw, false, 2);

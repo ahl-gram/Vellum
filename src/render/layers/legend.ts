@@ -3,6 +3,7 @@ import { el, type SvgNode } from "../svg.ts";
 import { boxesOverlap, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import { settlementGlyph } from "./settlements.ts";
+import { terrainGlyphsPresent } from "./glyphs.ts";
 
 /**
  * A compact, style-aware "key" panel. It lists only the symbols a given map
@@ -82,9 +83,13 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
     rows.push({ icon: { kind: "rock" }, label: "Rock awash" });
     if (style.winds) rows.push({ icon: { kind: "wind" }, label: "Prevailing wind" });
   } else if (style.glyphs) {
+    const terrain = terrainGlyphsPresent(ctx);
     rows.push({ icon: { kind: "glyph", sym: "gl-mtn-1" }, label: "Mountains" });
+    if (terrain.hill) rows.push({ icon: { kind: "glyph", sym: "gl-hill-1" }, label: "Hills" });
     const tree = dominantTree(ctx);
     if (tree) rows.push({ icon: { kind: "glyph", sym: tree }, label: "Forest" });
+    if (terrain.marsh) rows.push({ icon: { kind: "glyph", sym: "gl-marsh" }, label: "Marsh" });
+    if (terrain.dune) rows.push({ icon: { kind: "glyph", sym: "gl-dune" }, label: "Dunes" });
   } else if (style.hypsometric) {
     rows.push({ icon: { kind: "hypso" }, label: "Low to high ground" });
     if (style.contourStroke) rows.push({ icon: { kind: "contour" }, label: "Contour line" });
