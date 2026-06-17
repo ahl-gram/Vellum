@@ -11,6 +11,7 @@ import { CULTURES, createNamer, makeMapTitle } from "../society/names.js";
 import { placeSettlements } from "../society/sites.js";
 import { buildRoads } from "../society/roads.js";
 import { partitionRealms } from "../society/realms.js";
+import { blazonRealms } from "../society/heraldry.js";
 const MAP_TYPE_WEIGHTS = [
     ["island", 0.4],
     ["archipelago", 0.27],
@@ -90,6 +91,7 @@ export function generateWorld(recipe) {
     const roads = buildRoads(elev, seaLevel, riverCells, settlements);
     const realms = partitionRealms(elev, seaLevel, riverCells, settlements, citystate ? { maxRealms: 1 } : {});
     const culture = rng.fork("culture").pick(CULTURES);
+    const arms = blazonRealms(culture, realms.seats.length, rng.fork("heraldry"));
     const namer = createNamer(rng.fork("names"), culture);
     const named = settlements.map((s) => ({ ...s, name: namer.name("settlement") }));
     const riverNames = new Map();
@@ -149,6 +151,7 @@ export function generateWorld(recipe) {
         settlements: named,
         roads,
         realms,
+        arms,
         culture,
         title,
         names,
