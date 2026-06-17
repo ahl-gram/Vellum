@@ -1,94 +1,15 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { createRng } from "../core/rng.ts";
-import { renderMap } from "../render/map-renderer.ts";
-import { armsSvgDocument, paletteForStyle } from "../render/layers/heraldry.ts";
-import { STYLES } from "../render/style.ts";
 import { escapeXml } from "../render/svg.ts";
-import { createLoreWriter } from "../society/lore.ts";
+import { composeAtlas } from "../atlas/compose.ts";
 import { defaultRecipe, generateWorld } from "../world/generate.ts";
-import { generateRegionWorld, windowAround } from "../world/region.ts";
 import type { World, WorldRecipe } from "../world/types.ts";
-
-const KIND_LABEL: Record<string, string> = {
-  capital: "Capital",
-  town: "Town",
-  village: "Village",
-};
-
-function gazetteerHtml(world: World): string {
-  const lore = createLoreWriter(world, createRng(world.recipe.seed).fork("lore"));
-  const order = { capital: 0, town: 1, village: 2 };
-  const sorted = [...world.settlements].sort(
-    (a, b) => order[a.kind] - order[b.kind] || a.name.localeCompare(b.name),
-  );
-
-  const rows = sorted
-    .map((s) => {
-      const realmId = world.realms.labels[s.x + s.y * world.elev.w] as number;
-      const realm =
-        realmId >= 0 && world.names.realms.length > 0
-          ? (world.names.realms[realmId] ?? "—")
-          : "—";
-      const note = lore.settlementNote(s);
-      return `<tr>
-  <td class="name ${s.kind}">${escapeXml(s.name)}</td>
-  <td>${KIND_LABEL[s.kind]}</td>
-  <td>${escapeXml(realm)}</td>
-  <td class="note">${escapeXml(note)}</td>
-</tr>`;
-    })
-    .join("\n");
-
-  const realmLines =
-    world.names.realms.length > 1
-      ? `<p class="realms">${world.names.realms
-          .map((r) => escapeXml(lore.realmNote(r)))
-          .join(" ")}</p>`
-      : "";
-
-  return `<section>
-<h2>Gazetteer</h2>
-${realmLines}
-<table>
-<thead><tr><th>Place</th><th>Rank</th><th>Realm</th><th>Travelers' notes</th></tr></thead>
-<tbody>
-${rows}
-</tbody>
-</table>
-</section>`;
-}
-
-/** A plate of every realm's coat of arms. Iterates world.arms (one per seat),
- *  so a single-realm world still shows its banner, labelled by its seat. */
-function bannersHtml(world: World): string {
-  if (world.arms.length === 0) return "";
-  const pal = paletteForStyle(STYLES.antique);
-  const label = (realmId: number): string => {
-    const named = world.names.realms[realmId];
-    if (named) return named;
-    const seatIdx = world.realms.seats[realmId];
-    const seat = seatIdx !== undefined ? world.settlements[seatIdx] : undefined;
-    return seat ? `Arms of ${seat.name}` : `Realm ${realmId + 1}`;
-  };
-  const banners = world.arms
-    .map(
-      (arms, realmId) =>
-        `<figure class="banner">${armsSvgDocument(arms, 120, pal, `b${realmId}`)}` +
-        `<figcaption>${escapeXml(label(realmId))}</figcaption></figure>`,
-    )
-    .join("\n");
-  return `<section>
-<h2>Banners of the Realms</h2>
-<div class="banners">
-${banners}
-</div>
-</section>`;
-}
 
 function indexHtml(
   world: World,
   regions: ReadonlyArray<{ file: string; title: string }>,
+  bannersFragment: string,
+  gazetteerFragment: string,
 ): string {
   const t = world.title;
   return `<!doctype html>
@@ -164,9 +85,9 @@ ${regions
   .join("\n")}
 </section>
 
-${bannersHtml(world)}
+${bannersFragment}
 
-${gazetteerHtml(world)}
+${gazetteerFragment}
 
 <footer>DRAWN BY VELLUM · AN ATELIER OF IMAGINARY CARTOGRAPHY</footer>
 </body>
@@ -181,47 +102,27 @@ export async function buildAtlas(
   const width = opts.width ?? 1500;
   const recipe = defaultRecipe(seed, opts.recipe ?? {});
   const world = generateWorld(recipe);
+  const atlas = composeAtlas(world, { width });
 
   const dir = resolve(opts.out ?? `out/atlas-${seed}`);
   await mkdir(dir, { recursive: true });
 
-  for (const style of ["antique", "topographic", "ink"] as const) {
-    const svg = renderMap(world, { style, widthPx: width, legend: true });
-    await writeFile(join(dir, `world-${style}.svg`), svg, "utf8");
+  await writeFile(join(dir, `world-${atlas.hero.key}.svg`), atlas.hero.svg, "utf8");
+  for (const d of atlas.draughtings) {
+    await writeFile(join(dir, `world-${d.key}.svg`), d.svg, "utf8");
   }
 
-  // regional surveys: the capital's environs + the farthest town's
-  const capital = world.settlements.find((s) => s.kind === "capital");
   const regions: Array<{ file: string; title: string }> = [];
-  if (capital) {
-    const targets = [
-      { anchor: capital, label: `The Environs of ${capital.name}` },
-    ];
-    const towns = world.settlements.filter((s) => s.kind === "town");
-    if (towns.length > 0) {
-      const far = towns.reduce((a, b) =>
-        Math.hypot(b.x - capital.x, b.y - capital.y) >
-        Math.hypot(a.x - capital.x, a.y - capital.y)
-          ? b
-          : a,
-      );
-      targets.push({ anchor: far, label: `The Environs of ${far.name}` });
-    }
-
-    for (const [i, t] of targets.entries()) {
-      const region = generateRegionWorld(world, {
-        window: windowAround(world, t.anchor, 0.38),
-        gridW: recipe.gridW,
-        gridH: recipe.gridH,
-        title: t.label,
-      });
-      const svg = renderMap(region, { style: "antique", widthPx: width, legend: true });
-      const file = `region-${i + 1}.svg`;
-      await writeFile(join(dir, file), svg, "utf8");
-      regions.push({ file, title: t.label });
-    }
+  for (const r of atlas.regions) {
+    const file = `${r.key}.svg`;
+    await writeFile(join(dir, file), r.svg, "utf8");
+    regions.push({ file, title: r.title });
   }
 
-  await writeFile(join(dir, "index.html"), indexHtml(world, regions), "utf8");
+  await writeFile(
+    join(dir, "index.html"),
+    indexHtml(world, regions, atlas.bannersHtml, atlas.gazetteerHtml),
+    "utf8",
+  );
   return dir;
 }

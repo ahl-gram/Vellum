@@ -19,6 +19,7 @@
     "src/climate/**/*.ts",
     "src/society/**/*.ts",
     "src/render/**/*.ts",
-    "src/world/**/*.ts"
+    "src/world/**/*.ts",
+    "src/atlas/**/*.ts"
   ]
 }
