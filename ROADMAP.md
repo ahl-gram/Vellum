@@ -147,8 +147,8 @@ Update as work lands. `[x]` done, `[~]` in progress, `[ ]` not started.
   - [x] #12 Accessibility (SVG title/desc + Explorer aria)
   - [x] #14 Embed recipe in SVG
   - [x] #7 Site header menu
-- Phase 1
-  - [ ] #20 Heraldry / arms & banners
+- Phase 1 (done: branch `phase-1-heraldry`, 2026-06-16)
+  - [x] #20 Heraldry / arms & banners
 - Phase 2
   - [ ] #6 Explorer "bind as atlas" (keystone)
   - [ ] #18 Thematic plates

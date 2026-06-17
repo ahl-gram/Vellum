@@ -20,6 +20,7 @@ import { compassLayer, planCompass, rhumbLayer } from "./layers/compass.ts";
 import { planScalebar, scalebarLayer } from "./layers/scalebar.ts";
 import { legendLayer, planLegend } from "./layers/legend.ts";
 import { featureLabelsLayer } from "./layers/feature-labels.ts";
+import { heraldryLayer } from "./layers/heraldry.ts";
 import { seaDecorLayer } from "./layers/sea-decor.ts";
 import { textureDefs, textureOverlay } from "./layers/texture.ts";
 import { roadsLayer } from "./layers/roads.ts";
@@ -32,6 +33,8 @@ export type RenderOptions = {
   style?: StyleName;
   /** Draw a compact, style-aware key. Opt-in; off by default. */
   legend?: boolean;
+  /** Draw each realm's coat of arms beside its label. Opt-in; off by default. */
+  arms?: boolean;
 };
 
 const TYPE_NOUNS: Record<MapType, string> = {
@@ -117,6 +120,8 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   const settlements = settlementsLayer(ctx);
   const featureLabels = featureLabelsLayer(ctx);
   const seaDecor = seaDecorLayer(ctx, cartouchePlan, compassPlan);
+  // arms claim last: decorative and opt-in, they yield to every real label
+  const heraldry = opts.arms ? heraldryLayer(ctx, featureLabels.realmAnchors) : null;
 
   const mapLayers: Array<SvgNode | null> = [
     oceanLayer(ctx),
@@ -135,6 +140,7 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     seaDecor,
     settlements,
     featureLabels.node,
+    heraldry,
   ];
 
   const furniture: Array<SvgNode | null> = [

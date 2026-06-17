@@ -2,6 +2,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
 import { renderMap } from "../src/render/map-renderer.ts";
+import { armsSvgDocument, paletteForStyle } from "../src/render/layers/heraldry.ts";
+import { STYLES } from "../src/render/style.ts";
 import { buildAtlas } from "../src/cli/atlas.ts";
 import { buildGallery } from "../src/cli/gallery.ts";
 
@@ -23,6 +25,17 @@ async function main(): Promise<void> {
     const svg = renderMap(hero, { style, legend: true });
     await writeFile(resolve(chartsDir, `chart-${HERO_SEED}-${style}.svg`), svg, "utf8");
     console.log(`charts/chart-${HERO_SEED}-${style}.svg`);
+  }
+
+  // the hero world's realm arms, for the landing page "Arms of the Realms" strip
+  const heroArmsPalette = paletteForStyle(STYLES.antique);
+  for (let i = 0; i < hero.arms.length; i++) {
+    await writeFile(
+      resolve(chartsDir, `arms-${HERO_SEED}-${i}.svg`),
+      armsSvgDocument(hero.arms[i]!, 150, heroArmsPalette, `hero${i}`),
+      "utf8",
+    );
+    console.log(`charts/arms-${HERO_SEED}-${i}.svg`);
   }
 
   const nautical = generateWorld(defaultRecipe(NAUTICAL_SEED));

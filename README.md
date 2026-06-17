@@ -46,6 +46,7 @@ so they reach Vellum instead of npm:
 ```bash
 npm run chart   -- --seed 42 --style antique   # one chart → out/
 npm run chart   -- --seed 42 --legend          # add a key explaining the symbols
+npm run chart   -- --seed 42 --arms            # blazon each realm's coat of arms
 npm run chart   -- --style nautical            # no --seed → random (and printed)
 npm run poster  -- --seed 42                   # wall art: 480x360 grid, 4200px + PNG
 npm run atlas   -- --seed 42                   # HTML book: 3 styles, regions, gazetteer
@@ -60,11 +61,11 @@ Run `node src/cli/main.ts help` for the built-in usage screen.
 
 | Command | Draws | Honors |
 |---|---|---|
-| `chart` | one SVG (add `--png` for a raster too) | `--seed --style --type --band --land --grid --width --legend` |
-| `poster` | one large SVG **and** PNG, a 480×360 grid at 4200px (~14″ at 300 dpi) | `--seed --style --scale --legend` |
-| `atlas` | a multi-page HTML atlas: the world in three styles, two regional close-ups, and a settlement gazetteer with procedural travelers' notes (*"Its quays smell of dates and old rope."*), each chart carrying a symbol key | `--seed --type --band --land`: always renders every style, so `--style` is ignored |
+| `chart` | one SVG (add `--png` for a raster too) | `--seed --style --type --band --land --grid --width --legend --arms` |
+| `poster` | one large SVG **and** PNG, a 480×360 grid at 4200px (~14″ at 300 dpi) | `--seed --style --scale --legend --arms` |
+| `atlas` | a multi-page HTML atlas: the world in three styles, two regional close-ups, a settlement gazetteer with procedural travelers' notes (*"Its quays smell of dates and old rope."*), and a plate of every realm's coat of arms, each chart carrying a symbol key | `--seed --type --band --land`: always renders every style, so `--style` is ignored |
 | `gallery` | an HTML contact sheet of *N* worlds, walking outward from the seed | `--seed` (starting point), `--count`, `--style` |
-| `demo` | one world drawn in all four styles | `--seed --grid --width --legend` |
+| `demo` | one world drawn in all four styles | `--seed --grid --width --legend --arms` |
 
 ### Flags
 
@@ -76,6 +77,7 @@ Run `node src/cli/main.ts help` for the built-in usage screen.
 - `--grid <WxH>`: simulation resolution *(default `320x240`; poster `480x360`)*
 - `--width <px>`: output width in pixels, `400`–`6000` *(default `1500`; poster `4200`)*
 - `--legend`: draw a compact, style-aware key explaining the chart's symbols and labels *(default: off; the atlas always includes one)*
+- `--arms`: blazon each realm's coat of arms beside its label, one deterministic procedural shield per realm *(default: off; the atlas always shows them as a banner plate)*
 - `--png`: also rasterize to PNG using an installed browser; set `VELLUM_BROWSER` to choose which
 - `--scale <n>`: PNG pixel scale, `0.5`–`4` *(default `2`; poster `1`)*
 - `--count <n>`: gallery only, how many worlds, `1`–`48` *(default `12`)*
@@ -86,8 +88,12 @@ Run `node src/cli/main.ts help` for the built-in usage screen.
 > type, band, land, grid, style, and engine version) alongside a readable
 > `<metadata>` summary. `recipeFromSvg()` in `src/render/recipe-meta.ts` reads
 > them back, and re-rendering `generateWorld(recipe)` at the default width
-> reproduces the map byte-for-byte (width and legend are display options, not
-> part of a world's identity). The seed and style are also printed on each run
+> reproduces the map byte-for-byte. Display and output options are deliberately
+> left out of the recipe: `--width`, `--legend`, `--arms`, `--png`, and `--scale`
+> change how a world is drawn or exported, not the world itself, so they are not
+> stamped in the SVG and must be re-supplied to reproduce a particular view.
+> (Arms are still fully deterministic from the seed; only the choice to draw them
+> is a view option.) The seed and style are also printed on each run
 > and stamped in the margin, so if those are all you have, pass any forced
 > `--type`, `--band`, or `--land` again with the seed to redraw the same map.
 > Regional inset charts (the atlas's "Environs of ..." surveys) carry no recipe,
@@ -202,10 +208,10 @@ src/
   hydrology/  priority-flood, D8 flow, river tracing
   climate/    temperature, moisture, biomes
   society/    names, settlements, roads, realms, lore
-  render/     styles, layers/ (18 of them), svg builder, projection
+  render/     styles, layers/ (19 of them), svg builder, projection
   world/      generate.ts (pipeline), region.ts (zoom windows)
   cli/        main.ts, atlas.ts, gallery.ts, raster.ts (PNG/poster)
-test/         157 tests, node:test, mirrors src/
+test/         188 tests, node:test, mirrors src/
 docs/explorer the same engine, tsc-emitted as browser ES modules
 ```
 

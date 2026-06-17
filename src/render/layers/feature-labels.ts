@@ -122,16 +122,28 @@ export function straightestReach(
   };
 }
 
+export type RealmAnchor = {
+  readonly realm: number;
+  /** Center and half-extents of the placed realm label box, so a shield can be
+   *  tried on any side of it. */
+  readonly cx: number;
+  readonly cy: number;
+  readonly halfW: number;
+  readonly halfH: number;
+};
+
 /** Sea name, named rivers along their courses, mountain range, forest. */
 export function featureLabelsLayer(ctx: RenderCtx): {
   defs: SvgNode[];
   node: SvgNode;
+  realmAnchors: RealmAnchor[];
 } {
   const { world, proj, style, labels } = ctx;
   const k = proj.widthPx / 1500;
   const { w, h } = world.elev;
   const defs: SvgNode[] = [];
   const nodes: SvgNode[] = [];
+  const realmAnchors: RealmAnchor[] = [];
 
   // --- sea label in open water, shrinking until it fits ---
   const deep: Array<{ px: number; py: number; d: number }> = [];
@@ -187,6 +199,8 @@ export function featureLabelsLayer(ctx: RenderCtx): {
       labels.tryClaim(spacedTextBox(c.x, cy, name, fs, ls), 4),
     );
     if (placedY === undefined) return;
+    const labelW = name.length * (fs * 0.56 + ls);
+    realmAnchors.push({ realm, cx: c.x, cy: placedY - 0.4 * fs, halfW: labelW / 2, halfH: 0.6 * fs });
     nodes.push(
       el(
         "text",
@@ -342,5 +356,5 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     }
   }
 
-  return { defs, node: el("g", { id: "layer-feature-labels" }, nodes) };
+  return { defs, node: el("g", { id: "layer-feature-labels" }, nodes), realmAnchors };
 }

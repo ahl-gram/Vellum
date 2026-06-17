@@ -18,6 +18,7 @@ import { compassLayer, planCompass, rhumbLayer } from "./layers/compass.js";
 import { planScalebar, scalebarLayer } from "./layers/scalebar.js";
 import { legendLayer, planLegend } from "./layers/legend.js";
 import { featureLabelsLayer } from "./layers/feature-labels.js";
+import { heraldryLayer } from "./layers/heraldry.js";
 import { seaDecorLayer } from "./layers/sea-decor.js";
 import { textureDefs, textureOverlay } from "./layers/texture.js";
 import { roadsLayer } from "./layers/roads.js";
@@ -97,6 +98,8 @@ export function renderMap(world, opts = {}) {
     const settlements = settlementsLayer(ctx);
     const featureLabels = featureLabelsLayer(ctx);
     const seaDecor = seaDecorLayer(ctx, cartouchePlan, compassPlan);
+    // arms claim last: decorative and opt-in, they yield to every real label
+    const heraldry = opts.arms ? heraldryLayer(ctx, featureLabels.realmAnchors) : null;
     const mapLayers = [
         oceanLayer(ctx),
         compassPlan ? rhumbLayer(ctx, compassPlan) : null,
@@ -114,6 +117,7 @@ export function renderMap(world, opts = {}) {
         seaDecor,
         settlements,
         featureLabels.node,
+        heraldry,
     ];
     const furniture = [
         compassPlan ? compassLayer(ctx, compassPlan) : null,

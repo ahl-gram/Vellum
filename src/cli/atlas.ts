@@ -2,6 +2,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { createRng } from "../core/rng.ts";
 import { renderMap } from "../render/map-renderer.ts";
+import { armsSvgDocument, paletteForStyle } from "../render/layers/heraldry.ts";
+import { STYLES } from "../render/style.ts";
 import { escapeXml } from "../render/svg.ts";
 import { createLoreWriter } from "../society/lore.ts";
 import { defaultRecipe, generateWorld } from "../world/generate.ts";
@@ -57,6 +59,33 @@ ${rows}
 </section>`;
 }
 
+/** A plate of every realm's coat of arms. Iterates world.arms (one per seat),
+ *  so a single-realm world still shows its banner, labelled by its seat. */
+function bannersHtml(world: World): string {
+  if (world.arms.length === 0) return "";
+  const pal = paletteForStyle(STYLES.antique);
+  const label = (realmId: number): string => {
+    const named = world.names.realms[realmId];
+    if (named) return named;
+    const seatIdx = world.realms.seats[realmId];
+    const seat = seatIdx !== undefined ? world.settlements[seatIdx] : undefined;
+    return seat ? `Arms of ${seat.name}` : `Realm ${realmId + 1}`;
+  };
+  const banners = world.arms
+    .map(
+      (arms, realmId) =>
+        `<figure class="banner">${armsSvgDocument(arms, 120, pal, `b${realmId}`)}` +
+        `<figcaption>${escapeXml(label(realmId))}</figcaption></figure>`,
+    )
+    .join("\n");
+  return `<section>
+<h2>Banners of the Realms</h2>
+<div class="banners">
+${banners}
+</div>
+</section>`;
+}
+
 function indexHtml(
   world: World,
   regions: ReadonlyArray<{ file: string; title: string }>,
@@ -93,6 +122,11 @@ function indexHtml(
   td.name.capital { text-transform: uppercase; letter-spacing: 0.06em; }
   td.note { font-style: italic; color: #54452f; }
   .realms { font-style: italic; color: #6b5a40; }
+  .banners { display: flex; flex-wrap: wrap; gap: 1.1rem; justify-content: center; }
+  .banner { width: 120px; text-align: center; }
+  .banner svg { width: 100%; height: auto; }
+  .banner figcaption { font-style: italic; color: #6b5a40; font-size: 0.85rem;
+    padding-top: 0.35rem; }
   footer { margin-top: 4rem; text-align: center; letter-spacing: 0.25em;
     font-size: 0.75rem; color: #857257; }
   a { color: inherit; }
@@ -129,6 +163,8 @@ ${regions
   )
   .join("\n")}
 </section>
+
+${bannersHtml(world)}
 
 ${gazetteerHtml(world)}
 

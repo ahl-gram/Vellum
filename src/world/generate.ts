@@ -11,6 +11,7 @@ import { CULTURES, createNamer, makeMapTitle } from "../society/names.ts";
 import { placeSettlements } from "../society/sites.ts";
 import { buildRoads } from "../society/roads.ts";
 import { partitionRealms } from "../society/realms.ts";
+import { blazonRealms } from "../society/heraldry.ts";
 import type { FeatureNames, World, WorldRecipe } from "./types.ts";
 
 const MAP_TYPE_WEIGHTS: ReadonlyArray<readonly [MapType, number]> = [
@@ -122,6 +123,7 @@ export function generateWorld(recipe: WorldRecipe): World {
   );
 
   const culture = rng.fork("culture").pick(CULTURES);
+  const arms = blazonRealms(culture, realms.seats.length, rng.fork("heraldry"));
   const namer = createNamer(rng.fork("names"), culture);
   const named = settlements.map((s) => ({ ...s, name: namer.name("settlement") }));
 
@@ -196,6 +198,7 @@ export function generateWorld(recipe: WorldRecipe): World {
     settlements: named,
     roads,
     realms,
+    arms,
     culture,
     title,
     names,

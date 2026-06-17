@@ -106,6 +106,7 @@ export function featureLabelsLayer(ctx) {
     const { w, h } = world.elev;
     const defs = [];
     const nodes = [];
+    const realmAnchors = [];
     // --- sea label in open water, shrinking until it fits ---
     const deep = [];
     for (let gy = 3; gy < h - 3; gy += 2) {
@@ -158,6 +159,8 @@ export function featureLabelsLayer(ctx) {
         const placedY = offsetCandidates(c.y, k).find((cy) => labels.tryClaim(spacedTextBox(c.x, cy, name, fs, ls), 4));
         if (placedY === undefined)
             return;
+        const labelW = name.length * (fs * 0.56 + ls);
+        realmAnchors.push({ realm, cx: c.x, cy: placedY - 0.4 * fs, halfW: labelW / 2, halfH: 0.6 * fs });
         nodes.push(el("text", {
             x: c.x, y: placedY, "text-anchor": "middle",
             "font-family": style.fontFamilyTitle,
@@ -274,5 +277,5 @@ export function featureLabelsLayer(ctx) {
             }
         }
     }
-    return { defs, node: el("g", { id: "layer-feature-labels" }, nodes) };
+    return { defs, node: el("g", { id: "layer-feature-labels" }, nodes), realmAnchors };
 }
