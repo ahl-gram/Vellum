@@ -1,7 +1,8 @@
 import { parseArgs } from "node:util";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { defaultRecipe, generateWorld } from "../world/generate.ts";
+import { generateWorld } from "../world/generate.ts";
+import { recipeForCommand } from "./recipe.ts";
 import { renderMap } from "../render/map-renderer.ts";
 import type { StyleName } from "../render/style.ts";
 import type { MapType } from "../terrain/heightfield.ts";
@@ -14,7 +15,7 @@ const HELP = `vellum — an atelier of imaginary cartography
 
 Usage:
   node src/cli/main.ts chart [options]   Draft a single chart (SVG)
-  node src/cli/main.ts poster [options]    Wall-art chart: fine grid, 4200px, PNG
+  node src/cli/main.ts poster [options]    Wall-art chart: same world, 4200px, PNG
   node src/cli/main.ts atlas [options]     Bind a full atlas (HTML + charts)
   node src/cli/main.ts gallery [options]   Contact sheet of many worlds
   node src/cli/main.ts demo  [options]     Draft one chart in each style
@@ -126,7 +127,7 @@ export async function main(argv: string[]): Promise<void> {
     throw new Error("--land must be between 0.1 and 0.7");
   }
 
-  const recipe = defaultRecipe(seed, {
+  const recipe = recipeForCommand(command, seed, {
     ...(grid ?? {}),
     ...(mapType ? { mapType } : {}),
     ...(band ? { band } : {}),
@@ -136,13 +137,11 @@ export async function main(argv: string[]): Promise<void> {
   if (command === "chart" || command === "poster") {
     const style = validateStyle(values.style as string);
     const poster = command === "poster";
-    const posterRecipe = poster
-      ? { ...recipe, gridW: grid?.gridW ?? 480, gridH: grid?.gridH ?? 360 }
-      : recipe;
+    // a poster is the same world as the chart, only larger and rasterized
     const posterWidth = poster && !values.width ? 4200 : widthPx;
 
     const t0 = performance.now();
-    const world = generateWorld(posterRecipe);
+    const world = generateWorld(recipe);
     const t1 = performance.now();
     const svg = renderMap(world, { widthPx: posterWidth, style, legend: values.legend, arms: values.arms });
     const t2 = performance.now();
@@ -150,7 +149,7 @@ export async function main(argv: string[]): Promise<void> {
       values.out ?? `out/${command}-${seed}-${style}.svg`,
     );
     await writeOut(out, svg);
-    console.log(`seed ${seed} · ${posterRecipe.mapType} · ${world.title.title}`);
+    console.log(`seed ${seed} · ${recipe.mapType} · ${world.title.title}`);
     console.log(
       `world ${(t1 - t0).toFixed(0)}ms · render ${(t2 - t1).toFixed(0)}ms · ${out}`,
     );
