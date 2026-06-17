@@ -47,6 +47,30 @@
   footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;
     font-size: 0.72rem; color: #857257; }
   footer a { color: inherit; }
+  /* The bound atlas, drawn inline beneath the chart. Mirrors the standalone
+     atlas (src/cli/atlas.ts), scoped to #atlas so the CLI bytes stay untouched. */
+  #atlas { max-width: 1100px; margin: 2.5rem auto 0; }
+  #atlas:empty { margin: 0; }
+  #atlas h2 { letter-spacing: 0.06em; border-bottom: 1px solid #b9a77f;
+    padding-bottom: 0.3rem; margin-top: 2.6rem; }
+  #atlas figure { margin: 1.5rem 0; }
+  #atlas figure img { width: 100%; height: auto; display: block;
+    border: 1px solid #b9a77f; box-shadow: 0 10px 30px rgb(61 47 31 / 0.18); }
+  #atlas figcaption { text-align: center; font-style: italic; color: #6b5a40;
+    padding-top: 0.55rem; }
+  #atlas .styles { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  #atlas table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  #atlas th { text-align: left; border-bottom: 2px solid #4a3826; padding: 0.45rem 0.6rem; }
+  #atlas td { border-bottom: 1px solid #cdbd97; padding: 0.45rem 0.6rem; vertical-align: top; }
+  #atlas td.name { font-weight: 600; white-space: nowrap; }
+  #atlas td.name.capital { text-transform: uppercase; letter-spacing: 0.06em; }
+  #atlas td.note { font-style: italic; color: #54452f; }
+  #atlas .realms { font-style: italic; color: #6b5a40; }
+  #atlas .banners { display: flex; flex-wrap: wrap; gap: 1.1rem; justify-content: center; }
+  #atlas .banner { width: 120px; text-align: center; }
+  #atlas .banner svg { width: 100%; height: auto; }
+  #atlas .banner figcaption { font-style: italic; color: #6b5a40; font-size: 0.85rem;
+    padding-top: 0.35rem; }
 </style>
 </head>
 <body>
@@ -93,11 +117,13 @@
   <label class="check">legend <input id="legend" type="checkbox" checked></label>
   <button id="draw" class="primary">Draw</button>
   <button id="download">Download SVG</button>
+  <button id="bind">Bind as atlas</button>
 </div>
 
 <p class="status" id="status" role="status" aria-live="polite"></p>
 <div id="map"></div>
 <p class="caption" id="caption"></p>
+<div id="atlas"></div>
 
 <footer>
   <a href="../">Home</a> · <a href="../faq/">FAQ</a> ·
@@ -109,6 +135,8 @@
 <script type="module">
 import { defaultRecipe, generateWorld } from "./engine/world/generate.js";
 import { renderMap } from "./engine/render/map-renderer.js";
+import { composeAtlas } from "./engine/atlas/compose.js";
+import { escapeXml } from "./engine/render/svg.js";
 
 const $ = (id) => document.getElementById(id);
 const seedInput = $("seed");
@@ -119,9 +147,44 @@ const legendChk = $("legend");
 const status = $("status");
 const mapDiv = $("map");
 const caption = $("caption");
+const atlasDiv = $("atlas");
 
 let lastSvg = "";
 let lastTitle = "";
+let lastWorld = null;
+let atlasUrls = [];
+
+// Plates are embedded as <img> with blob URLs, never inline <svg>: every chart
+// carries internal ids (map-clip, glyph/texture/label defs) referenced by
+// url(#...), so injecting several inline into one document would collide them.
+function clearAtlas() {
+  for (const url of atlasUrls) URL.revokeObjectURL(url);
+  atlasUrls = [];
+  atlasDiv.innerHTML = "";
+}
+
+function plateFigure(svg, caption) {
+  const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+  atlasUrls.push(url);
+  const c = escapeXml(caption);
+  return `<figure><img src="${url}" alt="${c}" loading="lazy"><figcaption>${c}</figcaption></figure>`;
+}
+
+function atlasHtml(atlas) {
+  const draughtings = atlas.draughtings
+    .map((d) => plateFigure(d.svg, d.title))
+    .join("\n");
+  const surveys = atlas.regions.length
+    ? `<section><h2>Regional Surveys</h2>${atlas.regions
+        .map((r) => plateFigure(r.svg, r.title))
+        .join("\n")}</section>`
+    : "";
+  return `<section>${plateFigure(atlas.hero.svg, atlas.hero.title)}</section>
+<section><h2>Other Draughtings</h2><div class="styles">${draughtings}</div></section>
+${surveys}
+${atlas.bannersHtml}
+${atlas.gazetteerHtml}`;
+}
 
 function randomSeed() {
   return Math.floor(Math.random() * 0xffffffff);
@@ -157,6 +220,7 @@ function draw() {
   const seed = Number(seedInput.value) >>> 0;
   status.textContent = "Drafting…";
   caption.textContent = "";
+  clearAtlas();
   writeHash();
   // let the status paint before the ~half-second of cartography
   setTimeout(() => {
@@ -167,6 +231,7 @@ function draw() {
       if (bandSel.value) overrides.band = bandSel.value;
       const recipe = defaultRecipe(seed, overrides);
       const world = generateWorld(recipe);
+      lastWorld = world;
       lastSvg = renderMap(world, {
         style: styleSel.value,
         widthPx: 1500,
@@ -198,6 +263,22 @@ $("download").addEventListener("click", () => {
   a.download = `vellum-${seedInput.value}-${styleSel.value}-${slug}.svg`;
   a.click();
   URL.revokeObjectURL(a.href);
+});
+$("bind").addEventListener("click", () => {
+  if (!lastWorld) return;
+  clearAtlas();
+  status.textContent = "Binding the atlas…";
+  // let the status paint before the several renders + region surveys
+  setTimeout(() => {
+    try {
+      const atlas = composeAtlas(lastWorld, { width: 1500 });
+      atlasDiv.innerHTML = atlasHtml(atlas);
+      status.textContent = "";
+      atlasDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (err) {
+      status.textContent = "The bindery faltered: " + err.message;
+    }
+  }, 30);
 });
 seedInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") draw();
