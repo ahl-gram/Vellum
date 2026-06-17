@@ -7,6 +7,7 @@ import type { Culture, MapTitle } from "../society/names.ts";
 import type { Road } from "../society/roads.ts";
 import type { Settlement } from "../society/sites.ts";
 import type { RealmsResult } from "../society/realms.ts";
+import type { Arms } from "../society/heraldry.ts";
 
 export type WorldRecipe = {
   readonly seed: number;
@@ -48,6 +49,8 @@ export type World = {
   readonly settlements: ReadonlyArray<NamedSettlement>;
   readonly roads: ReadonlyArray<Road>;
   readonly realms: RealmsResult;
+  /** One coat of arms per realm, indexed by realm id (empty when no realms). */
+  readonly arms: ReadonlyArray<Arms>;
   readonly culture: Culture;
   readonly title: MapTitle;
   readonly names: FeatureNames;

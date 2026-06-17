@@ -27,6 +27,11 @@
   figure img { width: 100%; height: auto; display: block;
     border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
   figcaption { text-align: center; font-style: italic; color: #6b5a40; padding-top: 0.55rem; }
+  .banners { display: flex; flex-wrap: wrap; gap: 2.2rem; justify-content: center; margin-top: 1.8rem; }
+  .banner { width: 150px; text-align: center; }
+  .banner img { width: 100%; height: auto; border: 0; box-shadow: none;
+    filter: drop-shadow(0 6px 14px rgb(61 47 31 / 0.22)); }
+  .banner figcaption { font-style: italic; color: #6b5a40; padding-top: 0.55rem; letter-spacing: 0.03em; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; }
   @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.4rem; margin-top: 1.5rem; }
@@ -72,6 +77,21 @@
     alt="The Isle of Rahai — antique chart" loading="eager"></a>
   <figcaption>The Isle of Rahai, drawn in the antique manner · seed 42</figcaption>
 </figure>
+
+<section>
+<h2>Arms of the Realms</h2>
+<p class="how">Every realm is blazoned its own coat of arms, generated from the
+same seed and obeying the heraldic rule of tincture: no colour on colour, no metal
+on metal. Here are the three realms of the Isle of Rahai.</p>
+<div class="banners">
+  <figure class="banner"><img loading="lazy" src="charts/arms-42-0.svg"
+    alt="Arms of The Nelo Atolls"><figcaption>The Nelo Atolls</figcaption></figure>
+  <figure class="banner"><img loading="lazy" src="charts/arms-42-1.svg"
+    alt="Arms of The Main Atolls"><figcaption>The Main Atolls</figcaption></figure>
+  <figure class="banner"><img loading="lazy" src="charts/arms-42-2.svg"
+    alt="Arms of The Mai Atolls"><figcaption>The Mai Atolls</figcaption></figure>
+</div>
+</section>
 
 <section>
 <h2>One World, Four Hands</h2>

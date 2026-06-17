@@ -113,6 +113,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     settlements,
     roads,
     realms: { labels: new Int16Array(gridW * gridH).fill(-1), seats: [] },
+    arms: [],
     culture: world.culture,
     title: {
       title: spec.title,
