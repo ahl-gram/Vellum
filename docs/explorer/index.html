@@ -167,6 +167,7 @@ let lastSvg = "";
 let lastTitle = "";
 let lastWorld = null;
 let lastStyle = "antique";
+let lastTheme = "";
 let atlasUrls = [];
 
 // Short captions for the style plates in the bound atlas (the composer's hero
@@ -194,19 +195,26 @@ function plateFigure(svg, caption) {
   return `<figure><img src="${url}" alt="${c}" loading="lazy"><figcaption>${c}</figcaption></figure>`;
 }
 
-function atlasHtml(atlas, currentStyle) {
-  // The chart already on screen IS this world drawn in `currentStyle`, so the
-  // atlas shows the OTHER draughtings, the surveys, and the lore — not a second
-  // copy of what the reader is already looking at.
+function atlasHtml(atlas, currentStyle, currentTheme) {
+  // The chart on screen IS this world drawn either as a style (no theme) or as a
+  // theme plate. Show every OTHER plate so the atlas never repeats the on-screen
+  // map: a theme on screen drops that theme from Thematic Surveys and lets the
+  // antique chart return to Other Draughtings; otherwise the on-screen style drops
+  // from Other Draughtings.
+  const shownStyle = currentTheme ? null : currentStyle;
   const others = [atlas.hero, ...atlas.draughtings].filter(
-    (p) => p.key !== currentStyle,
+    (p) => p.key !== shownStyle,
   );
   const draughtings = others
     .map((p) => plateFigure(p.svg, STYLE_LABEL[p.key] ?? p.title))
     .join("\n");
-  const thematic = `<section><h2>Thematic Surveys</h2><div class="themes">${atlas.themes
-    .map((t) => plateFigure(t.svg, t.title))
-    .join("\n")}</div></section>`;
+  const shownTheme = currentTheme ? `theme-${currentTheme}` : null;
+  const themePlates = atlas.themes.filter((t) => t.key !== shownTheme);
+  const thematic = themePlates.length
+    ? `<section><h2>Thematic Surveys</h2><div class="themes">${themePlates
+        .map((t) => plateFigure(t.svg, t.title))
+        .join("\n")}</div></section>`
+    : "";
   const surveys = atlas.regions.length
     ? `<section><h2>Regional Surveys</h2>${atlas.regions
         .map((r) => plateFigure(r.svg, r.title))
@@ -269,11 +277,12 @@ function draw() {
       const world = generateWorld(recipe);
       lastWorld = world;
       lastStyle = styleSel.value;
+      lastTheme = themeSel.value;
       lastSvg = renderMap(world, {
         style: lastStyle,
         widthPx: 1500,
         legend: legendChk.checked,
-        theme: themeSel.value || undefined,
+        theme: lastTheme || undefined,
       });
       lastTitle = world.title.title;
       mapDiv.innerHTML = lastSvg;
@@ -310,7 +319,7 @@ $("bind").addEventListener("click", () => {
   setTimeout(() => {
     try {
       const atlas = composeAtlas(lastWorld, { width: 1500 });
-      atlasDiv.innerHTML = atlasHtml(atlas, lastStyle);
+      atlasDiv.innerHTML = atlasHtml(atlas, lastStyle, lastTheme);
       status.textContent = "";
       atlasDiv.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
