@@ -59,7 +59,7 @@
     border: 1px solid #b9a77f; box-shadow: 0 10px 30px rgb(61 47 31 / 0.18); }
   #atlas figcaption { text-align: center; font-style: italic; color: #6b5a40;
     padding-top: 0.55rem; }
-  #atlas .styles { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  #atlas .styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
   #atlas table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
   #atlas th { text-align: left; border-bottom: 2px solid #4a3826; padding: 0.45rem 0.6rem; }
   #atlas td { border-bottom: 1px solid #cdbd97; padding: 0.45rem 0.6rem; vertical-align: top; }
@@ -164,6 +164,7 @@ const STYLE_LABEL = {
   antique: "The antique chart",
   topographic: "Topographic survey",
   ink: "Pen & ink",
+  nautical: "Sea chart: soundings & winds",
 };
 
 // Plates are embedded as <img> with blob URLs, never inline <svg>: every chart

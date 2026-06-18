@@ -122,6 +122,11 @@ export function composeAtlas(world, opts = {}) {
             title: "Pen & ink",
             svg: renderMap(world, { style: "ink", widthPx: width, legend: true }),
         },
+        {
+            key: "nautical",
+            title: "Sea chart: soundings & winds",
+            svg: renderMap(world, { style: "nautical", widthPx: width, legend: true }),
+        },
     ];
     return {
         world,
