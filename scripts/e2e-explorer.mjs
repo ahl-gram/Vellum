@@ -103,6 +103,8 @@ function startServer() {
 }
 
 let server, brave, ws, userDataDir;
+let browserOut = "";
+let browserExit = null;
 const cleanup = () => {
   try { ws?.close(); } catch {}
   try { brave?.kill("SIGKILL"); } catch {}
@@ -119,15 +121,24 @@ function check(name, ok, detail = "") {
 }
 
 async function getPageTarget() {
-  for (let i = 0; i < 80; i++) {
+  let lastErr = "";
+  for (let i = 0; i < 160; i++) {
+    if (browserExit) break; // browser died — stop polling, report below
     try {
       const list = JSON.parse(await httpGet(`http://127.0.0.1:${DPORT}/json`));
       const page = list.find((t) => t.type === "page" && t.webSocketDebuggerUrl);
       if (page) return page;
-    } catch {}
+      lastErr = `/json had ${list.length} targets, none a page`;
+    } catch (e) {
+      lastErr = String(e.message || e);
+    }
     await sleep(125);
   }
-  throw new Error("no devtools page target");
+  throw new Error(
+    "no devtools page target" +
+      (browserExit ? ` (browser exited code=${browserExit.code} signal=${browserExit.signal})` : ` (last: ${lastErr})`) +
+      `\n--- browser output ---\n${browserOut.slice(0, 4000) || "(none captured)"}`,
+  );
 }
 
 let nextId = 1;
@@ -202,8 +213,11 @@ async function main() {
       "--window-size=1280,2400",
       "about:blank",
     ],
-    { stdio: "ignore" },
+    { stdio: ["ignore", "pipe", "pipe"] },
   );
+  brave.stdout.on("data", (d) => (browserOut += d));
+  brave.stderr.on("data", (d) => (browserOut += d));
+  brave.on("exit", (code, signal) => (browserExit = { code, signal }));
 
   const target = await getPageTarget();
   ws = new WebSocket(target.webSocketDebuggerUrl);

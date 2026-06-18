@@ -34,7 +34,10 @@ jobs:
       - name: Explorer e2e (headless browser)
         run: npm run test:e2e
         env:
-          # ubuntu-latest ships Google Chrome at /usr/bin/google-chrome, which
-          # findBrowser() locates. Require it here so a missing browser fails the
-          # build loud rather than skipping silently (local runs still skip).
+          # ubuntu-latest ships a real (non-snap) Google Chrome here. Point at it
+          # explicitly: findBrowser() would otherwise pick /usr/bin/chromium first,
+          # which is snap-confined and can't use a --user-data-dir under /tmp.
+          VELLUM_BROWSER: /usr/bin/google-chrome
+          # Require a browser so a missing one fails the build loud rather than
+          # skipping silently (local runs with no browser still skip).
           VELLUM_REQUIRE_BROWSER: '1'
