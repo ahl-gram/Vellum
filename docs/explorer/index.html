@@ -162,13 +162,26 @@ const status = $("status");
 const mapDiv = $("map");
 const caption = $("caption");
 const atlasDiv = $("atlas");
+const bindBtn = $("bind");
 
 let lastSvg = "";
 let lastTitle = "";
-let lastWorld = null;
+let lastSeed = 0;
+let lastOverrides = {};
 let lastStyle = "antique";
 let lastTheme = "";
 let atlasUrls = [];
+
+// Monotonic guards. drawGen is bumped by every draw; both a draw's own result and
+// any pending bind check it, so a fresh draw cancels a stale draw and a stale bind
+// (the bound atlas must always match the chart on screen). bindSeq guards rapid
+// re-binds of the same chart against one another.
+let drawGen = 0;
+let bindSeq = 0;
+// True while a draw's result is still in flight. Binding is suppressed during this
+// window so the bound atlas can never be composed from a seed the chart is about to
+// replace (the draw-then-bind race).
+let drawing = false;
 
 // Short captions for the style plates in the bound atlas (the composer's hero
 // caption is a full sentence, too long for the grid alongside the others).
@@ -260,40 +273,150 @@ function writeHash() {
   history.replaceState(null, "", "#" + params.toString());
 }
 
+// --- Render worker plumbing -------------------------------------------------
+// The heavy world-gen + SVG render runs in ./worker.js off the main thread so the
+// UI stays responsive. The worker is best-effort. If it cannot be constructed
+// (file://, strict CSP, an older browser) we fall back to running the same engine
+// inline on the main thread, so the page always works.
+let worker = null;
+let reqId = 0;
+const pending = new Map();
+
+function onJobMessage(e) {
+  const d = e.data;
+  if (!d || d.id == null) return; // ignore the ready handshake and stray messages
+  const p = pending.get(d.id);
+  if (!p) return;
+  pending.delete(d.id);
+  if (d.ok) p.resolve(d);
+  else p.reject(new Error(d.error || "worker error"));
+}
+
+// Mirrors worker.js: the composition's `world` carries Field methods that are not
+// structured-cloneable, so the inline path strips it too. Both paths then return
+// the same shape, keeping the worker/inline byte-identity check a clean compare.
+function serializableAtlas(a) {
+  return {
+    hero: a.hero,
+    draughtings: a.draughtings,
+    themes: a.themes,
+    regions: a.regions,
+    bannersHtml: a.bannersHtml,
+    gazetteerHtml: a.gazetteerHtml,
+  };
+}
+
+function runInline(msg) {
+  if (msg.kind === "draw") {
+    const recipe = defaultRecipe(msg.seed, msg.overrides);
+    const world = generateWorld(recipe);
+    return {
+      ok: true,
+      svg: renderMap(world, msg.render),
+      title: world.title.title,
+      mapType: recipe.mapType,
+      band: recipe.band,
+    };
+  }
+  const world = generateWorld(defaultRecipe(msg.seed, msg.overrides));
+  return { ok: true, atlas: serializableAtlas(composeAtlas(world, { width: msg.width })) };
+}
+
+function runJob(msg) {
+  if (worker) {
+    const id = ++reqId;
+    return new Promise((resolve, reject) => {
+      pending.set(id, { resolve, reject });
+      worker.postMessage({ ...msg, id });
+    });
+  }
+  // No worker: defer with a macrotask so the status line paints before the main
+  // thread blocks on the inline render.
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      try { resolve(runInline(msg)); }
+      catch (err) { reject(err); }
+    }, 0);
+  });
+}
+
+function initWorker() {
+  return new Promise((resolve) => {
+    let w;
+    try {
+      w = new Worker("./worker.js", { type: "module" });
+    } catch {
+      resolve(null);
+      return;
+    }
+    let settled = false;
+    const fail = () => {
+      if (settled) return;
+      settled = true;
+      try { w.terminate(); } catch {}
+      resolve(null);
+    };
+    const timer = setTimeout(fail, 4000);
+    w.onerror = fail;
+    w.onmessage = (e) => {
+      if (settled || !e.data || !e.data.ready) return;
+      settled = true;
+      clearTimeout(timer);
+      w.onmessage = onJobMessage;
+      w.onerror = (ev) => {
+        if (ev.preventDefault) ev.preventDefault();
+        worker = null; // a crashed worker degrades to the inline path
+        for (const [, p] of pending) p.reject(new Error("the render worker crashed"));
+        pending.clear();
+      };
+      resolve(w);
+    };
+  });
+}
+
 function draw() {
   const seed = Number(seedInput.value) >>> 0;
+  const myGen = ++drawGen;
+  drawing = true;
+  bindBtn.disabled = true;
   status.textContent = "Drafting…";
   caption.textContent = "";
   clearAtlas();
   writeHash();
-  // let the status paint before the ~half-second of cartography
-  setTimeout(() => {
-    try {
-      const t0 = performance.now();
-      const overrides = {};
-      if (typeSel.value) overrides.mapType = typeSel.value;
-      if (bandSel.value) overrides.band = bandSel.value;
-      const recipe = defaultRecipe(seed, overrides);
-      const world = generateWorld(recipe);
-      lastWorld = world;
-      lastStyle = styleSel.value;
-      lastTheme = themeSel.value;
-      lastSvg = renderMap(world, {
-        style: lastStyle,
-        widthPx: 1500,
-        legend: legendChk.checked,
-        theme: lastTheme || undefined,
-      });
-      lastTitle = world.title.title;
-      mapDiv.innerHTML = lastSvg;
+  const overrides = {};
+  if (typeSel.value) overrides.mapType = typeSel.value;
+  if (bandSel.value) overrides.band = bandSel.value;
+  const style = styleSel.value;
+  const theme = themeSel.value;
+  const legend = legendChk.checked;
+  const t0 = performance.now();
+  runJob({
+    kind: "draw",
+    seed,
+    overrides,
+    render: { style, widthPx: 1500, legend, theme: theme || undefined },
+  })
+    .then((res) => {
+      if (myGen !== drawGen) return; // a newer draw superseded this one
+      drawing = false;
+      bindBtn.disabled = false;
+      lastSvg = res.svg;
+      lastTitle = res.title;
+      lastSeed = seed;
+      lastOverrides = overrides;
+      lastStyle = style;
+      lastTheme = theme;
+      mapDiv.innerHTML = res.svg;
       const ms = (performance.now() - t0).toFixed(0);
       status.textContent = "";
-      caption.textContent =
-        `${world.title.title} · ${recipe.mapType} · ${recipe.band} · drawn in ${ms}ms`;
-    } catch (err) {
+      caption.textContent = `${res.title} · ${res.mapType} · ${res.band} · drawn in ${ms}ms`;
+    })
+    .catch((err) => {
+      if (myGen !== drawGen) return;
+      drawing = false;
+      bindBtn.disabled = false;
       status.textContent = "The cartographer spilled the ink: " + err.message;
-    }
-  }, 30);
+    });
 }
 
 $("draw").addEventListener("click", draw);
@@ -311,21 +434,26 @@ $("download").addEventListener("click", () => {
   a.click();
   URL.revokeObjectURL(a.href);
 });
-$("bind").addEventListener("click", () => {
-  if (!lastWorld) return;
+bindBtn.addEventListener("click", () => {
+  if (!lastSvg || drawing) return;
+  const myGen = drawGen;
+  const mySeq = ++bindSeq;
+  const style = lastStyle;
+  const theme = lastTheme;
   clearAtlas();
   status.textContent = "Binding the atlas…";
-  // let the status paint before the several renders + region surveys
-  setTimeout(() => {
-    try {
-      const atlas = composeAtlas(lastWorld, { width: 1500 });
-      atlasDiv.innerHTML = atlasHtml(atlas, lastStyle, lastTheme);
+  runJob({ kind: "atlas", seed: lastSeed, overrides: lastOverrides, width: 1500 })
+    .then((res) => {
+      // discard if a redraw or a newer bind has superseded this one
+      if (myGen !== drawGen || mySeq !== bindSeq) return;
+      atlasDiv.innerHTML = atlasHtml(res.atlas, style, theme);
       status.textContent = "";
       atlasDiv.scrollIntoView({ behavior: "smooth", block: "start" });
-    } catch (err) {
+    })
+    .catch((err) => {
+      if (myGen !== drawGen || mySeq !== bindSeq) return;
       status.textContent = "The bindery faltered: " + err.message;
-    }
-  }, 30);
+    });
 });
 seedInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") draw();
@@ -333,6 +461,12 @@ seedInput.addEventListener("keydown", (e) => {
 for (const sel of [styleSel, typeSel, bandSel, themeSel, legendChk]) {
   sel.addEventListener("change", draw);
 }
+
+worker = await initWorker();
+window.__vellumUsesWorker = () => worker !== null;
+// Verification hooks for the headless byte-identity check (harmless in prod).
+window.__vellumRunJob = runJob;
+window.__vellumRunInline = runInline;
 
 seedInput.value = String(randomSeed());
 readHash();
