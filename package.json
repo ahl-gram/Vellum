@@ -15,6 +15,7 @@
     "demo": "node src/cli/main.ts demo",
     "site": "node scripts/build-site.ts && tsc -p tsconfig.browser.json",
     "test": "node --test",
+    "test:e2e": "node scripts/e2e-explorer.mjs",
     "check": "tsc --noEmit"
   },
   "devDependencies": {

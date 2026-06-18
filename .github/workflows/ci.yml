@@ -31,3 +31,10 @@ jobs:
             git status --porcelain -- docs/explorer/engine
             exit 1
           fi
+      - name: Explorer e2e (headless browser)
+        run: npm run test:e2e
+        env:
+          # ubuntu-latest ships Google Chrome at /usr/bin/google-chrome, which
+          # findBrowser() locates. Require it here so a missing browser fails the
+          # build loud rather than skipping silently (local runs still skip).
+          VELLUM_REQUIRE_BROWSER: '1'
