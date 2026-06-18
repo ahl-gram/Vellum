@@ -51,6 +51,7 @@ npm run chart   -- --seed 42 --theme moisture  # a thematic data plate (rainfall
 npm run chart   -- --style nautical            # no --seed → random (and printed)
 npm run poster  -- --seed 42                   # wall art: 480x360 grid, 4200px + PNG
 npm run atlas   -- --seed 42                   # HTML book: 3 styles, regions, gazetteer
+npm run atlas   -- --seed 42 --pdf             # ...also bound into a single PDF
 npm run gallery -- --seed 100 --count 12       # contact sheet of 12 worlds
 npm run demo    -- --seed 42                   # one world in all four styles
 npm test                                       # full test suite
@@ -64,7 +65,7 @@ Run `node src/cli/main.ts help` for the built-in usage screen.
 |---|---|---|
 | `chart` | one SVG (add `--png` for a raster too) | `--seed --style --type --band --land --grid --width --legend --arms --theme` |
 | `poster` | one large SVG **and** PNG, a 480×360 grid at 4200px (~14″ at 300 dpi) | `--seed --style --scale --legend --arms --theme` |
-| `atlas` | a multi-page HTML atlas: the world in four styles, four thematic data plates (vegetation, temperature, rainfall, population), two regional close-ups, a settlement gazetteer with procedural travelers' notes (*"Its quays smell of dates and old rope."*), and a plate of every realm's coat of arms, each chart carrying a symbol key | `--seed --type --band --land`: always renders every style and plate, so `--style`/`--theme` are ignored |
+| `atlas` | a multi-page HTML atlas: the world in four styles, four thematic data plates (vegetation, temperature, rainfall, population), two regional close-ups, a settlement gazetteer with procedural travelers' notes (*"Its quays smell of dates and old rope."*), and a plate of every realm's coat of arms, each chart carrying a symbol key; add `--pdf` to bind the whole atlas into one shareable PDF | `--seed --type --band --land --pdf`: always renders every style and plate, so `--style`/`--theme` are ignored |
 | `gallery` | an HTML contact sheet of *N* worlds, walking outward from the seed | `--seed` (starting point), `--count`, `--style` |
 | `demo` | one world drawn in all four styles | `--seed --grid --width --legend --arms --theme` |
 
@@ -81,6 +82,7 @@ Run `node src/cli/main.ts help` for the built-in usage screen.
 - `--arms`: blazon each realm's coat of arms beside its label, one deterministic procedural shield per realm *(default: off; the atlas always shows them as a banner plate)*
 - `--theme <t>`: render a thematic data plate instead of the usual symbology, with its own key: `vegetation` (land by biome) · `climate` (temperature) · `moisture` (rainfall) · `population` (settlement density over realms) *(default: off; the atlas includes all four as a "Thematic Surveys" section)*
 - `--png`: also rasterize to PNG using an installed browser; set `VELLUM_BROWSER` to choose which
+- `--pdf`: atlas only. Also bind the atlas into a single PDF (`atlas-<seed>.pdf`) via an installed browser, in page order: cover, world chart, other styles, thematic surveys, regional close-ups, banners, gazetteer. Set `VELLUM_BROWSER` to choose which. With no browser it degrades gracefully (a hint is printed and the HTML atlas is still written)
 - `--scale <n>`: PNG pixel scale, `0.5`–`4` *(default `2`; poster `1`)*
 - `--count <n>`: gallery only, how many worlds, `1`–`48` *(default `12`)*
 - `--out <path>`: override where the file is written
@@ -91,7 +93,7 @@ Run `node src/cli/main.ts help` for the built-in usage screen.
 > `<metadata>` summary. `recipeFromSvg()` in `src/render/recipe-meta.ts` reads
 > them back, and re-rendering `generateWorld(recipe)` at the default width
 > reproduces the map byte-for-byte. Display and output options are deliberately
-> left out of the recipe: `--width`, `--legend`, `--arms`, `--theme`, `--png`, and `--scale`
+> left out of the recipe: `--width`, `--legend`, `--arms`, `--theme`, `--png`, `--pdf`, and `--scale`
 > change how a world is drawn or exported, not the world itself, so they are not
 > stamped in the SVG and must be re-supplied to reproduce a particular view.
 > (Arms are still fully deterministic from the seed; only the choice to draw them
@@ -212,7 +214,7 @@ src/
   society/    names, settlements, roads, realms, lore
   render/     styles, layers/ (19 of them), svg builder, projection
   world/      generate.ts (pipeline), region.ts (zoom windows)
-  cli/        main.ts, atlas.ts, gallery.ts, raster.ts (PNG/poster)
+  cli/        main.ts, atlas.ts, gallery.ts, raster.ts (PNG/PDF/poster)
 test/         188 tests, node:test, mirrors src/
 docs/explorer the same engine, tsc-emitted as browser ES modules
 ```

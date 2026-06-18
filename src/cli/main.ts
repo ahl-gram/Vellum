@@ -1,6 +1,6 @@
 import { parseArgs } from "node:util";
 import { mkdir, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { generateWorld } from "../world/generate.ts";
 import { recipeForCommand } from "./recipe.ts";
 import { renderMap } from "../render/map-renderer.ts";
@@ -10,7 +10,13 @@ import type { MapType } from "../terrain/heightfield.ts";
 import type { ClimateBand } from "../climate/climate.ts";
 import { buildAtlas } from "./atlas.ts";
 import { buildGallery } from "./gallery.ts";
-import { findBrowser, rasterizeSvg, NO_BROWSER_HINT } from "./raster.ts";
+import {
+  findBrowser,
+  rasterizeSvg,
+  printToPdf,
+  NO_BROWSER_HINT,
+  NO_BROWSER_HINT_PDF,
+} from "./raster.ts";
 
 const HELP = `vellum — an atelier of imaginary cartography
 
@@ -31,6 +37,7 @@ Options:
   --land <f>      Land fraction 0.1–0.7 (default: by map type)
   --count <n>     Gallery: number of worlds (default 12, max 48)
   --png           Also rasterize to PNG (uses an installed browser)
+  --pdf           Atlas: also bind the atlas into one PDF (uses a browser)
   --scale <n>     PNG pixel scale (default 2; poster default 1)
   --legend        Draw a compact key explaining the symbols (default: off)
   --arms          Draw each realm's coat of arms beside its label (default: off)
@@ -108,6 +115,7 @@ export async function main(argv: string[]): Promise<void> {
       land: { type: "string" },
       count: { type: "string" },
       png: { type: "boolean", default: false },
+      pdf: { type: "boolean", default: false },
       scale: { type: "string" },
       legend: { type: "boolean", default: false },
       arms: { type: "boolean", default: false },
@@ -204,6 +212,18 @@ export async function main(argv: string[]): Promise<void> {
     });
     console.log(`seed ${seed} · atlas bound in ${(performance.now() - t0).toFixed(0)}ms`);
     console.log(`  ${dir}/index.html`);
+
+    if (values.pdf) {
+      const browser = findBrowser();
+      if (!browser) {
+        console.error(NO_BROWSER_HINT_PDF);
+        return;
+      }
+      const pdfPath = join(dir, `atlas-${seed}.pdf`);
+      const t1 = performance.now();
+      await printToPdf(browser, join(dir, "index.html"), pdfPath);
+      console.log(`pdf ${(performance.now() - t1).toFixed(0)}ms · ${pdfPath}`);
+    }
     return;
   }
 

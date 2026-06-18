@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import {
   findBrowser,
+  printToPdf,
   rasterizeSvg,
   svgDimensions,
 } from "../../src/cli/raster.ts";
@@ -46,4 +47,32 @@ test("rasterizeSvg produces a real PNG (skipped without a browser)", async (t) =
     "missing PNG magic bytes",
   );
   await rm("out/test-tmp", { recursive: true, force: true });
+});
+
+test("printToPdf produces a real PDF (skipped without a browser)", async (t) => {
+  // Same rationale as the PNG test: the browser path is validated locally and
+  // skipped under CI (headless browser there is flaky).
+  const browser = process.env["CI"] ? null : findBrowser();
+  if (!browser) {
+    t.skip("no browser, or running in CI: skipping real PDF printing");
+    return;
+  }
+  await mkdir("out/test-tmp-pdf", { recursive: true });
+  const htmlPath = "out/test-tmp-pdf/doc.html";
+  const pdfPath = "out/test-tmp-pdf/doc.pdf";
+  await writeFile(
+    htmlPath,
+    `<!doctype html><html><head><meta charset="utf-8"><title>t</title></head>` +
+      `<body><h1>Vellum test page</h1></body></html>`,
+    "utf8",
+  );
+  await printToPdf(browser, htmlPath, pdfPath);
+  const pdf = await readFile(pdfPath);
+  assert.ok(pdf.length > 100, "pdf suspiciously small");
+  assert.deepEqual(
+    [...pdf.subarray(0, 5)],
+    [0x25, 0x50, 0x44, 0x46, 0x2d], // "%PDF-"
+    "missing PDF magic bytes",
+  );
+  await rm("out/test-tmp-pdf", { recursive: true, force: true });
 });
