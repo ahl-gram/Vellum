@@ -71,11 +71,11 @@ function indexHtml(
 <h2>Other Draughtings</h2>
 <div class="styles">
   <figure><a href="world-topographic.svg"><img src="world-topographic.svg" alt="Topographic"></a>
-    <figcaption>Topographic survey</figcaption></figure>
+    <figcaption>Topographic</figcaption></figure>
   <figure><a href="world-ink.svg"><img src="world-ink.svg" alt="Pen and ink"></a>
     <figcaption>Pen &amp; ink</figcaption></figure>
-  <figure><a href="world-nautical.svg"><img src="world-nautical.svg" alt="Sea chart"></a>
-    <figcaption>Sea chart: soundings &amp; winds</figcaption></figure>
+  <figure><a href="world-nautical.svg"><img src="world-nautical.svg" alt="Nautical"></a>
+    <figcaption>Nautical</figcaption></figure>
 </div>
 </section>
 

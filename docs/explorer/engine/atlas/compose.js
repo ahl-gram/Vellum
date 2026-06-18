@@ -121,7 +121,7 @@ export function composeAtlas(world, opts = {}) {
     const draughtings = [
         {
             key: "topographic",
-            title: "Topographic survey",
+            title: "Topographic",
             svg: renderMap(world, { style: "topographic", widthPx: width, legend: true }),
         },
         {
@@ -131,7 +131,7 @@ export function composeAtlas(world, opts = {}) {
         },
         {
             key: "nautical",
-            title: "Sea chart: soundings & winds",
+            title: "Nautical",
             svg: renderMap(world, { style: "nautical", widthPx: width, legend: true }),
         },
     ];

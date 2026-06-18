@@ -179,7 +179,7 @@ export function composeAtlas(
   const draughtings: AtlasPlate[] = [
     {
       key: "topographic",
-      title: "Topographic survey",
+      title: "Topographic",
       svg: renderMap(world, { style: "topographic", widthPx: width, legend: true }),
     },
     {
@@ -189,7 +189,7 @@ export function composeAtlas(
     },
     {
       key: "nautical",
-      title: "Sea chart: soundings & winds",
+      title: "Nautical",
       svg: renderMap(world, { style: "nautical", widthPx: width, legend: true }),
     },
   ];

@@ -16,7 +16,7 @@ test("the atlas includes the nautical plate under Other Draughtings", async () =
     const svg = await readFile(join(dir, "world-nautical.svg"), "utf8");
     assert.match(svg, /^<svg/);
     assert.match(html, /world-nautical\.svg/);
-    assert.match(html, /Sea chart: soundings &amp; winds/);
+    assert.match(html, /<figcaption>Nautical<\/figcaption>/);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
