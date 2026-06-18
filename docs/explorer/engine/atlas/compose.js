@@ -99,10 +99,17 @@ function regionPlates(world, width) {
         };
     });
 }
+/** The thematic data plates, in atlas order, with their reader-facing captions. */
+const THEMATIC = [
+    { theme: "vegetation", title: "Vegetation" },
+    { theme: "climate", title: "Temperature" },
+    { theme: "moisture", title: "Rainfall" },
+    { theme: "population", title: "Population" },
+];
 /**
  * Compose the atlas of a world: the antique hero chart, the other land styles,
- * the regional surveys, and the gazetteer/banners HTML fragments. Pure and
- * deterministic — same World in, same bytes out.
+ * the thematic data plates, the regional surveys, and the gazetteer/banners HTML
+ * fragments. Pure and deterministic — same World in, same bytes out.
  */
 export function composeAtlas(world, opts = {}) {
     const width = opts.width ?? 1500;
@@ -128,10 +135,16 @@ export function composeAtlas(world, opts = {}) {
             svg: renderMap(world, { style: "nautical", widthPx: width, legend: true }),
         },
     ];
+    const themes = THEMATIC.map(({ theme, title }) => ({
+        key: `theme-${theme}`,
+        title,
+        svg: renderMap(world, { style: "antique", widthPx: width, theme, legend: true }),
+    }));
     return {
         world,
         hero,
         draughtings,
+        themes,
         regions: regionPlates(world, width),
         bannersHtml: bannersHtml(world),
         gazetteerHtml: gazetteerHtml(world),
