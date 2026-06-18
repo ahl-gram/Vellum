@@ -58,12 +58,14 @@
 <header>
   <h1>VELLUM</h1>
   <p class="tagline">an atelier of imaginary cartography</p>
-  <p class="lede">Vellum surveys worlds that don't exist and drafts them as atlas
-  charts. Give it a seed; it invents an island, simulates the rain that carves
-  its rivers, grows its forests, founds its harbor towns, names everything in
-  one of six invented languages — then sits down at the drafting table and
-  draws the map. Same seed, same world, byte-identical chart.</p>
-  <p class="seedline">EVERY CHART REPRODUCIBLE FROM THE NUMBER IN ITS MARGIN</p>
+  <p class="lede">Vellum surveys worlds that don't exist and drafts them as atlas charts.
+Give it a seed and it invents a landmass, simulates the rain that carves its
+rivers, grows its forests, founds its harbor towns, names everything in
+one of six invented languages, and partitions the land into quarrelsome
+realms. Then Vellum sits down at the drafting table and draws the maps,
+complete with parchment texture, hatched mountain ranges, a compass
+rose, a sea serpent, and a title cartouche. Same seed, same world, identical SVG.</p>
+  <p class="seedline">EVERY CHART IS REPRODUCIBLE FROM THE NUMBER IN ITS MARGIN</p>
   <p class="topnav">
     <span aria-current="page">Home</span> · <a href="explorer/">Explorer</a> ·
     <a href="gallery/">Gallery</a> · <a href="atlas/">Atlas</a> ·
@@ -80,7 +82,7 @@
 
 <section>
 <h2>Arms of the Realms</h2>
-<p class="how">Every realm is blazoned its own coat of arms, generated from the
+<p class="how">Every realm is given its own coat of arms, generated from the
 same seed and obeying the heraldic rule of tincture: no colour on colour, no metal
 on metal. Here are the three realms of the Isle of Rahai.</p>
 <div class="banners">
@@ -94,7 +96,7 @@ on metal. Here are the three realms of the Isle of Rahai.</p>
 </section>
 
 <section>
-<h2>One World, Four Hands</h2>
+<h2>One World, Many Charts</h2>
 <div class="grid2">
   <figure><a href="charts/chart-42-topographic.svg"><img loading="lazy"
     src="charts/chart-42-topographic.svg" alt="Topographic style"></a>
@@ -145,8 +147,8 @@ A simple climate of temperature and rainfall decides where forests, deserts, and
 tundra grow. Towns settle where people really would, near sheltered harbors,
 river mouths, and good soil, and roads thread between them by the easiest route,
 sharing corridors the way real trade routes do. Borders follow the lay of the
-land, tracing ridgelines and rivers. Even the place names are invented, drawn
-from six made-up languages, one per culture. Best of all, it is repeatable: the
+land, tracing ridgelines and rivers. Place names are generated as well, drawn
+from six made-up languages, one per culture. And it is all repeatable: the
 same seed always draws exactly the same world, right down to the last coastline.</p>
 <p class="underhood">Under the hood: a zero-dependency TypeScript engine, using
 domain-warped <a href="https://en.wikipedia.org/wiki/Perlin_noise">gradient
@@ -156,16 +158,12 @@ hydrology so every river drains to the sea, a
 <a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm">Dijkstra
 least-cost roads</a>, and a single seed feeding fork-labeled random streams for
 full <a href="https://en.wikipedia.org/wiki/Random_seed">reproducibility</a>.</p>
-<p class="how">Draw your own:
-<code>git clone https://github.com/ahl-gram/Vellum</code> then
-<code>npm run chart -- --seed 42</code>, or read the
+<p class="how">Draw your own: read the
 <a href="https://github.com/ahl-gram/Vellum#readme">README</a>.</p>
 </section>
 
 <footer>
-  <a href="faq/">QUESTIONS &amp; ANSWERS</a> ·
-  <a href="https://github.com/ahl-gram/Vellum">GITHUB.COM/AHL-GRAM/VELLUM</a>
-  · AN ATELIER OF IMAGINARY CARTOGRAPHY
+  VELLUM · AN ATELIER OF IMAGINARY CARTOGRAPHY
 </footer>
 </main>
 </body>

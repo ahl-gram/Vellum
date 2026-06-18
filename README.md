@@ -10,14 +10,14 @@ whole engine runs client-side) · or read the
 **[FAQ](https://ahl-gram.github.io/Vellum/faq/)**.
 
 Vellum surveys worlds that don't exist and drafts them as atlas charts.
-Give it a seed; it invents an island, simulates the rain that carves its
+Give it a seed and it invents a landmass, simulates the rain that carves its
 rivers, grows its forests, founds its harbor towns, names everything in
-one of six invented languages, partitions the land into quarrelsome
-realms, and then sits down at the drafting table and draws the map,
+one of six invented languages, and partitions the land into quarrelsome
+realms. Then Vellum sits down at the drafting table and draws the maps,
 complete with parchment texture, hatched mountain ranges, a compass
 rose, a sea serpent, and a title cartouche.
 
-Same seed, same world, byte-identical SVG. Every chart is reproducible
+Same seed, same world, identical SVG. Every chart is reproducible
 from the number printed in its corner.
 
 ## Quick start
