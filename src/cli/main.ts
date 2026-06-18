@@ -5,6 +5,7 @@ import { generateWorld } from "../world/generate.ts";
 import { recipeForCommand } from "./recipe.ts";
 import { renderMap } from "../render/map-renderer.ts";
 import type { StyleName } from "../render/style.ts";
+import type { ThemeName } from "../render/layers/field.ts";
 import type { MapType } from "../terrain/heightfield.ts";
 import type { ClimateBand } from "../climate/climate.ts";
 import { buildAtlas } from "./atlas.ts";
@@ -33,6 +34,8 @@ Options:
   --scale <n>     PNG pixel scale (default 2; poster default 1)
   --legend        Draw a compact key explaining the symbols (default: off)
   --arms          Draw each realm's coat of arms beside its label (default: off)
+  --theme <t>     Thematic data plate: vegetation | climate | moisture |
+                  population  (chart/poster/demo)
   --out <path>    Output file (default: out/chart-<seed>-<style>.svg)
 `;
 
@@ -76,6 +79,16 @@ function validateBand(s: string | undefined): ClimateBand | undefined {
   throw new Error(`unknown climate band "${s}"`);
 }
 
+function validateTheme(s: string | undefined): ThemeName | undefined {
+  if (s === undefined) return undefined;
+  if (s === "vegetation" || s === "climate" || s === "moisture" || s === "population") {
+    return s;
+  }
+  throw new Error(
+    `unknown theme "${s}" (use vegetation | climate | moisture | population)`,
+  );
+}
+
 async function writeOut(path: string, content: string): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, content, "utf8");
@@ -98,6 +111,7 @@ export async function main(argv: string[]): Promise<void> {
       scale: { type: "string" },
       legend: { type: "boolean", default: false },
       arms: { type: "boolean", default: false },
+      theme: { type: "string" },
       out: { type: "string" },
       help: { type: "boolean", default: false },
     },
@@ -118,6 +132,7 @@ export async function main(argv: string[]): Promise<void> {
   const grid = parseGrid(values.grid);
   const mapType = validateType(values.type);
   const band = validateBand(values.band);
+  const theme = validateTheme(values.theme);
   const widthPx = values.width ? Number(values.width) : 1500;
   if (!Number.isFinite(widthPx) || widthPx < 400 || widthPx > 6000) {
     throw new Error("--width must be between 400 and 6000");
@@ -143,7 +158,7 @@ export async function main(argv: string[]): Promise<void> {
     const t0 = performance.now();
     const world = generateWorld(recipe);
     const t1 = performance.now();
-    const svg = renderMap(world, { widthPx: posterWidth, style, legend: values.legend, arms: values.arms });
+    const svg = renderMap(world, { widthPx: posterWidth, style, legend: values.legend, arms: values.arms, theme });
     const t2 = performance.now();
     const out = resolve(
       values.out ?? `out/${command}-${seed}-${style}.svg`,
@@ -215,7 +230,7 @@ export async function main(argv: string[]): Promise<void> {
     const world = generateWorld(recipe);
     console.log(`seed ${seed} · ${recipe.mapType} · ${world.title.title}`);
     for (const style of ["antique", "topographic", "ink", "nautical"] as const) {
-      const svg = renderMap(world, { widthPx, style, legend: values.legend, arms: values.arms });
+      const svg = renderMap(world, { widthPx, style, legend: values.legend, arms: values.arms, theme });
       const out = resolve(`out/chart-${seed}-${style}.svg`);
       await writeOut(out, svg);
       console.log(`  ${out}`);

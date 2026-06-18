@@ -16,6 +16,12 @@ test("composeAtlas yields the hero, the other draughtings, and the surveys", () 
   );
   for (const d of atlas.draughtings) assert.match(d.svg, /^<svg/);
 
+  assert.deepEqual(
+    atlas.themes.map((t) => t.key),
+    ["theme-vegetation", "theme-climate", "theme-moisture", "theme-population"],
+  );
+  for (const t of atlas.themes) assert.match(t.svg, /^<svg/);
+
   // seed 42 is an island with a capital and towns: two regional surveys
   assert.equal(atlas.regions.length, 2);
   for (const r of atlas.regions) {
@@ -51,6 +57,7 @@ test("composeAtlas is deterministic for a seed", () => {
 
   assert.equal(a.hero.svg, b.hero.svg);
   assert.deepEqual(a.draughtings, b.draughtings);
+  assert.deepEqual(a.themes, b.themes);
   assert.deepEqual(a.regions, b.regions);
   assert.equal(a.gazetteerHtml, b.gazetteerHtml);
   assert.equal(a.bannersHtml, b.bannersHtml);

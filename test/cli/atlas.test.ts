@@ -22,6 +22,24 @@ test("the atlas includes the nautical plate under Other Draughtings", async () =
   }
 });
 
+test("the atlas includes the thematic survey plates", async () => {
+  const seed = 42;
+  const dir = "out/test-atlas-themes";
+  await rm(dir, { recursive: true, force: true });
+  try {
+    await buildAtlas(seed, { out: dir });
+    const html = await readFile(join(dir, "index.html"), "utf8");
+    assert.match(html, /Thematic Surveys/);
+    for (const theme of ["vegetation", "climate", "moisture", "population"]) {
+      const svg = await readFile(join(dir, `theme-${theme}.svg`), "utf8");
+      assert.match(svg, /^<svg/, `${theme} plate written`);
+      assert.match(html, new RegExp(`theme-${theme}\\.svg`), `${theme} linked`);
+    }
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("the atlas carries a banner plate with one coat of arms per realm", async () => {
   const seed = 42;
   const dir = "out/test-atlas";

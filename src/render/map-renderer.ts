@@ -10,6 +10,7 @@ import { el, renderSvg, type SvgNode } from "./svg.ts";
 import { recipeAttrs, recipeMetadataNode } from "./recipe-meta.ts";
 import { oceanLayer, waterlinesLayer } from "./layers/water.ts";
 import { contoursLayer, hypsometricLayer, landLayer } from "./layers/land.ts";
+import { fieldLayer, type ThemeName } from "./layers/field.ts";
 import { riversLayer } from "./layers/rivers.ts";
 import { settlementsLayer } from "./layers/settlements.ts";
 import { frameLayer } from "./layers/frame.ts";
@@ -35,6 +36,8 @@ export type RenderOptions = {
   legend?: boolean;
   /** Draw each realm's coat of arms beside its label. Opt-in; off by default. */
   arms?: boolean;
+  /** Render a thematic data plate instead of the normal land symbology. */
+  theme?: ThemeName;
 };
 
 const TYPE_NOUNS: Record<MapType, string> = {
@@ -51,24 +54,34 @@ const STYLE_ADJECTIVES: Record<StyleName, string> = {
   nautical: "Nautical",
 };
 
+const THEME_LEADS: Record<ThemeName, string> = {
+  vegetation: "Vegetation map",
+  climate: "Temperature map",
+  moisture: "Rainfall map",
+  population: "Population map",
+};
+
 /**
  * One-line accessible summary, e.g. "Antique chart of The Isle of Rahai, an
- * island in a temperate climate." Every field is total over its type, so the
- * sentence can never contain `undefined`; derived from the world, so it stays
- * byte-deterministic for a given seed.
+ * island in a temperate climate." A thematic plate leads with its subject
+ * ("Vegetation map of …") so assistive tech announces what the colors mean.
+ * Every field is total over its type, so the sentence can never contain
+ * `undefined`; derived from the world, so it stays byte-deterministic.
  */
-function describeChart(world: World, styleName: StyleName): string {
+function describeChart(
+  world: World,
+  styleName: StyleName,
+  theme: ThemeName | undefined,
+): string {
   const noun = TYPE_NOUNS[world.recipe.mapType];
   const article = /^[aeiou]/.test(noun) ? "an" : "a";
-  return (
-    `${STYLE_ADJECTIVES[styleName]} chart of ${world.title.title}, ` +
-    `${article} ${noun} in a ${world.recipe.band} climate.`
-  );
+  const lead = theme ? THEME_LEADS[theme] : `${STYLE_ADJECTIVES[styleName]} chart`;
+  return `${lead} of ${world.title.title}, ${article} ${noun} in a ${world.recipe.band} climate.`;
 }
 
 export function renderMap(world: World, opts: RenderOptions = {}): string {
   const style = STYLES[opts.style ?? "antique"];
-  const description = describeChart(world, style.name);
+  const description = describeChart(world, style.name, opts.theme);
   const widthPx = opts.widthPx ?? 1500;
   const margin = Math.round(widthPx * 0.045);
   const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
@@ -101,6 +114,7 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     elevSpan: Math.max(1e-9, max - world.seaLevel),
     rng: createRng(world.recipe.seed).fork("render"),
     labels: createLabelArena(),
+    theme: opts.theme,
   };
 
   // furniture is planned first so text layers can route around it
@@ -123,16 +137,22 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   // arms claim last: decorative and opt-in, they yield to every real label
   const heraldry = opts.arms ? heraldryLayer(ctx, featureLabels.realmAnchors) : null;
 
+  // A thematic plate replaces the land symbology (elevation tint, contours,
+  // terrain glyphs, political wash) with its own colored cells; the coastline,
+  // water, rivers, roads, settlements, and labels stay as reference.
+  const themed = opts.theme !== undefined;
+
   const mapLayers: Array<SvgNode | null> = [
     oceanLayer(ctx),
     compassPlan ? rhumbLayer(ctx, compassPlan) : null,
     waterlinesLayer(ctx),
     landLayer(ctx),
-    hypsometricLayer(ctx),
-    contoursLayer(ctx),
-    realmTintsLayer(ctx),
+    themed ? fieldLayer(ctx) : null,
+    themed ? null : hypsometricLayer(ctx),
+    themed ? null : contoursLayer(ctx),
+    themed ? null : realmTintsLayer(ctx),
     riversLayer(ctx),
-    glyphsLayer(ctx),
+    themed ? null : glyphsLayer(ctx),
     roadsLayer(ctx),
     realmBordersLayer(ctx),
     soundingsLayer(ctx, cartouchePlan, compassPlan),

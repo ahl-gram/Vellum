@@ -60,6 +60,7 @@
   #atlas figcaption { text-align: center; font-style: italic; color: #6b5a40;
     padding-top: 0.55rem; }
   #atlas .styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+  #atlas .themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.25rem; }
   #atlas table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
   #atlas th { text-align: left; border-bottom: 2px solid #4a3826; padding: 0.45rem 0.6rem; }
   #atlas td { border-bottom: 1px solid #cdbd97; padding: 0.45rem 0.6rem; vertical-align: top; }
@@ -115,6 +116,15 @@
       <option value="polar">polar</option>
     </select>
   </label>
+  <label>theme
+    <select id="theme">
+      <option value="" selected>none</option>
+      <option value="vegetation">vegetation</option>
+      <option value="climate">temperature</option>
+      <option value="moisture">rainfall</option>
+      <option value="population">population</option>
+    </select>
+  </label>
   <label class="check">legend <input id="legend" type="checkbox" checked></label>
   <button id="draw" class="primary">Draw</button>
   <span class="exports">
@@ -146,6 +156,7 @@ const seedInput = $("seed");
 const styleSel = $("style");
 const typeSel = $("type");
 const bandSel = $("band");
+const themeSel = $("theme");
 const legendChk = $("legend");
 const status = $("status");
 const mapDiv = $("map");
@@ -193,12 +204,16 @@ function atlasHtml(atlas, currentStyle) {
   const draughtings = others
     .map((p) => plateFigure(p.svg, STYLE_LABEL[p.key] ?? p.title))
     .join("\n");
+  const thematic = `<section><h2>Thematic Surveys</h2><div class="themes">${atlas.themes
+    .map((t) => plateFigure(t.svg, t.title))
+    .join("\n")}</div></section>`;
   const surveys = atlas.regions.length
     ? `<section><h2>Regional Surveys</h2>${atlas.regions
         .map((r) => plateFigure(r.svg, r.title))
         .join("\n")}</section>`
     : "";
   return `<section><h2>Other Draughtings</h2><div class="styles">${draughtings}</div></section>
+${thematic}
 ${surveys}
 ${atlas.bannersHtml}
 ${atlas.gazetteerHtml}`;
@@ -220,6 +235,8 @@ function readHash() {
   if ([...typeSel.options].some((o) => o.value === type)) typeSel.value = type;
   const band = params.get("band") ?? "";
   if ([...bandSel.options].some((o) => o.value === band)) bandSel.value = band;
+  const theme = params.get("theme") ?? "";
+  if ([...themeSel.options].some((o) => o.value === theme)) themeSel.value = theme;
   const legend = params.get("legend");
   if (legend !== null) legendChk.checked = legend === "1";
 }
@@ -230,6 +247,7 @@ function writeHash() {
   params.set("style", styleSel.value);
   if (typeSel.value) params.set("type", typeSel.value);
   if (bandSel.value) params.set("band", bandSel.value);
+  if (themeSel.value) params.set("theme", themeSel.value);
   params.set("legend", legendChk.checked ? "1" : "0");
   history.replaceState(null, "", "#" + params.toString());
 }
@@ -255,6 +273,7 @@ function draw() {
         style: lastStyle,
         widthPx: 1500,
         legend: legendChk.checked,
+        theme: themeSel.value || undefined,
       });
       lastTitle = world.title.title;
       mapDiv.innerHTML = lastSvg;
@@ -302,7 +321,7 @@ $("bind").addEventListener("click", () => {
 seedInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") draw();
 });
-for (const sel of [styleSel, typeSel, bandSel, legendChk]) {
+for (const sel of [styleSel, typeSel, bandSel, themeSel, legendChk]) {
   sel.addEventListener("change", draw);
 }
 
