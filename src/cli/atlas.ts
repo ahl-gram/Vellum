@@ -7,6 +7,7 @@ import type { World, WorldRecipe } from "../world/types.ts";
 
 function indexHtml(
   world: World,
+  themes: ReadonlyArray<{ file: string; title: string }>,
   regions: ReadonlyArray<{ file: string; title: string }>,
   bannersFragment: string,
   gazetteerFragment: string,
@@ -36,6 +37,7 @@ function indexHtml(
     border: 1px solid #b9a77f; box-shadow: 0 10px 30px rgb(61 47 31 / 0.18); }
   figcaption { text-align: center; font-style: italic; color: #6b5a40; padding-top: 0.55rem; }
   .styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+  .themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.25rem; }
   table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
   th { text-align: left; border-bottom: 2px solid #4a3826; padding: 0.45rem 0.6rem; }
   td { border-bottom: 1px solid #cdbd97; padding: 0.45rem 0.6rem; vertical-align: top; }
@@ -69,11 +71,23 @@ function indexHtml(
 <h2>Other Draughtings</h2>
 <div class="styles">
   <figure><a href="world-topographic.svg"><img src="world-topographic.svg" alt="Topographic"></a>
-    <figcaption>Topographic survey</figcaption></figure>
+    <figcaption>Topographic</figcaption></figure>
   <figure><a href="world-ink.svg"><img src="world-ink.svg" alt="Pen and ink"></a>
     <figcaption>Pen &amp; ink</figcaption></figure>
-  <figure><a href="world-nautical.svg"><img src="world-nautical.svg" alt="Sea chart"></a>
-    <figcaption>Sea chart: soundings &amp; winds</figcaption></figure>
+  <figure><a href="world-nautical.svg"><img src="world-nautical.svg" alt="Nautical"></a>
+    <figcaption>Nautical</figcaption></figure>
+</div>
+</section>
+
+<section>
+<h2>Thematic Surveys</h2>
+<div class="themes">
+${themes
+  .map(
+    (t) => `  <figure><a href="${t.file}"><img src="${t.file}" alt="${escapeXml(t.title)}"></a>
+    <figcaption>${escapeXml(t.title)}</figcaption></figure>`,
+  )
+  .join("\n")}
 </div>
 </section>
 
@@ -114,6 +128,13 @@ export async function buildAtlas(
     await writeFile(join(dir, `world-${d.key}.svg`), d.svg, "utf8");
   }
 
+  const themes: Array<{ file: string; title: string }> = [];
+  for (const t of atlas.themes) {
+    const file = `${t.key}.svg`;
+    await writeFile(join(dir, file), t.svg, "utf8");
+    themes.push({ file, title: t.title });
+  }
+
   const regions: Array<{ file: string; title: string }> = [];
   for (const r of atlas.regions) {
     const file = `${r.key}.svg`;
@@ -123,7 +144,7 @@ export async function buildAtlas(
 
   await writeFile(
     join(dir, "index.html"),
-    indexHtml(world, regions, atlas.bannersHtml, atlas.gazetteerHtml),
+    indexHtml(world, themes, regions, atlas.bannersHtml, atlas.gazetteerHtml),
     "utf8",
   );
   return dir;

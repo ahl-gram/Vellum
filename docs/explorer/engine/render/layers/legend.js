@@ -3,6 +3,7 @@ import { el } from "../svg.js";
 import { boxesOverlap } from "../geometry.js";
 import { settlementGlyph } from "./settlements.js";
 import { terrainGlyphsPresent } from "./glyphs.js";
+import { THEMES } from "./field.js";
 function metrics(k) {
     return {
         pad: 11 * k,
@@ -40,8 +41,14 @@ function dominantTree(ctx) {
     return best >= 0 ? FOREST[best].sym : null;
 }
 function buildRows(ctx) {
-    const { style, world } = ctx;
+    const { style, world, theme } = ctx;
     const rows = [];
+    // A thematic plate leads with its color key; the terrain symbology is suppressed.
+    if (theme) {
+        for (const sw of THEMES[theme].legendRows(world)) {
+            rows.push({ icon: { kind: "swatch", color: sw.color }, label: sw.label });
+        }
+    }
     const tiers = new Set(world.settlements.map((s) => s.kind));
     if (tiers.has("capital"))
         rows.push({ icon: { kind: "settlement", tier: "capital" }, label: "Capital" });
@@ -49,7 +56,10 @@ function buildRows(ctx) {
         rows.push({ icon: { kind: "settlement", tier: "town" }, label: "Town" });
     if (tiers.has("village"))
         rows.push({ icon: { kind: "settlement", tier: "village" }, label: "Village" });
-    if (style.name === "nautical") {
+    if (theme) {
+        // terrain glyphs / hypso / nautical symbology are not drawn under a theme
+    }
+    else if (style.name === "nautical") {
         rows.push({ icon: { kind: "sounding" }, label: "Depth, fathoms" });
         rows.push({ icon: { kind: "rock" }, label: "Rock awash" });
         if (style.winds)
@@ -80,12 +90,14 @@ function buildRows(ctx) {
         rows.push({ icon: { kind: "road", rank: "trunk" }, label: "Road" });
     if (roadRanks.has("lane"))
         rows.push({ icon: { kind: "road", rank: "lane" }, label: "Track" });
-    if (style.politicalTints && world.realms.seats.length > 1) {
+    if (!theme && style.politicalTints && world.realms.seats.length > 1) {
         rows.push({ icon: { kind: "realm" }, label: "Realm & border" });
     }
-    const note = style.name === "nautical"
-        ? "italic = water · numbers = fathoms"
-        : "italic = water · SPACED CAPS = realm";
+    const note = theme
+        ? THEMES[theme].note
+        : style.name === "nautical"
+            ? "italic = water · numbers = fathoms"
+            : "italic = water · SPACED CAPS = realm";
     return { rows, note };
 }
 export function planLegend(ctx, reserved) {
@@ -223,6 +235,12 @@ function iconNode(icon, cx, cy, ctx) {
                 "stroke-opacity": 0.7, "stroke-linecap": "round",
             });
         }
+        case "swatch":
+            return el("rect", {
+                x: cx - 9 * k, y: cy - 6 * k, width: 18 * k, height: 12 * k, rx: 1.5 * k,
+                fill: icon.color,
+                stroke: style.inkSoft, "stroke-width": 0.6 * k, "stroke-opacity": 0.5,
+            });
     }
 }
 export function legendLayer(ctx, plan) {

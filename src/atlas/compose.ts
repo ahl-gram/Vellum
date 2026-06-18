@@ -1,6 +1,7 @@
 import { createRng } from "../core/rng.ts";
 import { renderMap } from "../render/map-renderer.ts";
 import { armsSvgDocument, paletteForStyle } from "../render/layers/heraldry.ts";
+import type { ThemeName } from "../render/layers/field.ts";
 import { STYLES } from "../render/style.ts";
 import { escapeXml } from "../render/svg.ts";
 import { createLoreWriter } from "../society/lore.ts";
@@ -31,8 +32,10 @@ export type AtlasComposition = {
   readonly world: World;
   /** The reference chart, drawn antique. */
   readonly hero: AtlasPlate;
-  /** The same world in the other land styles (topographic, ink). */
+  /** The same world in the other land styles (topographic, ink, nautical). */
   readonly draughtings: ReadonlyArray<AtlasPlate>;
+  /** Thematic data plates: vegetation, temperature, rainfall, population. */
+  readonly themes: ReadonlyArray<AtlasPlate>;
   /** Regional surveys: the capital's environs + the farthest town's. */
   readonly regions: ReadonlyArray<AtlasPlate>;
   /** "Banners of the Realms" section, or "" when the world has no arms. */
@@ -150,10 +153,18 @@ function regionPlates(world: World, width: number): AtlasPlate[] {
   });
 }
 
+/** The thematic data plates, in atlas order, with their reader-facing captions. */
+const THEMATIC: ReadonlyArray<{ theme: ThemeName; title: string }> = [
+  { theme: "vegetation", title: "Vegetation" },
+  { theme: "climate", title: "Temperature" },
+  { theme: "moisture", title: "Rainfall" },
+  { theme: "population", title: "Population" },
+];
+
 /**
  * Compose the atlas of a world: the antique hero chart, the other land styles,
- * the regional surveys, and the gazetteer/banners HTML fragments. Pure and
- * deterministic — same World in, same bytes out.
+ * the thematic data plates, the regional surveys, and the gazetteer/banners HTML
+ * fragments. Pure and deterministic — same World in, same bytes out.
  */
 export function composeAtlas(
   world: World,
@@ -168,7 +179,7 @@ export function composeAtlas(
   const draughtings: AtlasPlate[] = [
     {
       key: "topographic",
-      title: "Topographic survey",
+      title: "Topographic",
       svg: renderMap(world, { style: "topographic", widthPx: width, legend: true }),
     },
     {
@@ -178,14 +189,20 @@ export function composeAtlas(
     },
     {
       key: "nautical",
-      title: "Sea chart: soundings & winds",
+      title: "Nautical",
       svg: renderMap(world, { style: "nautical", widthPx: width, legend: true }),
     },
   ];
+  const themes: AtlasPlate[] = THEMATIC.map(({ theme, title }) => ({
+    key: `theme-${theme}`,
+    title,
+    svg: renderMap(world, { style: "antique", widthPx: width, theme, legend: true }),
+  }));
   return {
     world,
     hero,
     draughtings,
+    themes,
     regions: regionPlates(world, width),
     bannersHtml: bannersHtml(world),
     gazetteerHtml: gazetteerHtml(world),

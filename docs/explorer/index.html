@@ -60,6 +60,7 @@
   #atlas figcaption { text-align: center; font-style: italic; color: #6b5a40;
     padding-top: 0.55rem; }
   #atlas .styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+  #atlas .themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.25rem; }
   #atlas table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
   #atlas th { text-align: left; border-bottom: 2px solid #4a3826; padding: 0.45rem 0.6rem; }
   #atlas td { border-bottom: 1px solid #cdbd97; padding: 0.45rem 0.6rem; vertical-align: top; }
@@ -115,6 +116,15 @@
       <option value="polar">polar</option>
     </select>
   </label>
+  <label>theme
+    <select id="theme">
+      <option value="" selected>none</option>
+      <option value="vegetation">vegetation</option>
+      <option value="climate">temperature</option>
+      <option value="moisture">rainfall</option>
+      <option value="population">population</option>
+    </select>
+  </label>
   <label class="check">legend <input id="legend" type="checkbox" checked></label>
   <button id="draw" class="primary">Draw</button>
   <span class="exports">
@@ -146,6 +156,7 @@ const seedInput = $("seed");
 const styleSel = $("style");
 const typeSel = $("type");
 const bandSel = $("band");
+const themeSel = $("theme");
 const legendChk = $("legend");
 const status = $("status");
 const mapDiv = $("map");
@@ -156,15 +167,16 @@ let lastSvg = "";
 let lastTitle = "";
 let lastWorld = null;
 let lastStyle = "antique";
+let lastTheme = "";
 let atlasUrls = [];
 
 // Short captions for the style plates in the bound atlas (the composer's hero
 // caption is a full sentence, too long for the grid alongside the others).
 const STYLE_LABEL = {
   antique: "The antique chart",
-  topographic: "Topographic survey",
+  topographic: "Topographic",
   ink: "Pen & ink",
-  nautical: "Sea chart: soundings & winds",
+  nautical: "Nautical",
 };
 
 // Plates are embedded as <img> with blob URLs, never inline <svg>: every chart
@@ -183,22 +195,33 @@ function plateFigure(svg, caption) {
   return `<figure><img src="${url}" alt="${c}" loading="lazy"><figcaption>${c}</figcaption></figure>`;
 }
 
-function atlasHtml(atlas, currentStyle) {
-  // The chart already on screen IS this world drawn in `currentStyle`, so the
-  // atlas shows the OTHER draughtings, the surveys, and the lore — not a second
-  // copy of what the reader is already looking at.
+function atlasHtml(atlas, currentStyle, currentTheme) {
+  // The chart on screen IS this world drawn either as a style (no theme) or as a
+  // theme plate. Show every OTHER plate so the atlas never repeats the on-screen
+  // map: a theme on screen drops that theme from Thematic Surveys and lets the
+  // antique chart return to Other Draughtings; otherwise the on-screen style drops
+  // from Other Draughtings.
+  const shownStyle = currentTheme ? null : currentStyle;
   const others = [atlas.hero, ...atlas.draughtings].filter(
-    (p) => p.key !== currentStyle,
+    (p) => p.key !== shownStyle,
   );
   const draughtings = others
     .map((p) => plateFigure(p.svg, STYLE_LABEL[p.key] ?? p.title))
     .join("\n");
+  const shownTheme = currentTheme ? `theme-${currentTheme}` : null;
+  const themePlates = atlas.themes.filter((t) => t.key !== shownTheme);
+  const thematic = themePlates.length
+    ? `<section><h2>Thematic Surveys</h2><div class="themes">${themePlates
+        .map((t) => plateFigure(t.svg, t.title))
+        .join("\n")}</div></section>`
+    : "";
   const surveys = atlas.regions.length
     ? `<section><h2>Regional Surveys</h2>${atlas.regions
         .map((r) => plateFigure(r.svg, r.title))
         .join("\n")}</section>`
     : "";
   return `<section><h2>Other Draughtings</h2><div class="styles">${draughtings}</div></section>
+${thematic}
 ${surveys}
 ${atlas.bannersHtml}
 ${atlas.gazetteerHtml}`;
@@ -220,6 +243,8 @@ function readHash() {
   if ([...typeSel.options].some((o) => o.value === type)) typeSel.value = type;
   const band = params.get("band") ?? "";
   if ([...bandSel.options].some((o) => o.value === band)) bandSel.value = band;
+  const theme = params.get("theme") ?? "";
+  if ([...themeSel.options].some((o) => o.value === theme)) themeSel.value = theme;
   const legend = params.get("legend");
   if (legend !== null) legendChk.checked = legend === "1";
 }
@@ -230,6 +255,7 @@ function writeHash() {
   params.set("style", styleSel.value);
   if (typeSel.value) params.set("type", typeSel.value);
   if (bandSel.value) params.set("band", bandSel.value);
+  if (themeSel.value) params.set("theme", themeSel.value);
   params.set("legend", legendChk.checked ? "1" : "0");
   history.replaceState(null, "", "#" + params.toString());
 }
@@ -251,10 +277,12 @@ function draw() {
       const world = generateWorld(recipe);
       lastWorld = world;
       lastStyle = styleSel.value;
+      lastTheme = themeSel.value;
       lastSvg = renderMap(world, {
         style: lastStyle,
         widthPx: 1500,
         legend: legendChk.checked,
+        theme: lastTheme || undefined,
       });
       lastTitle = world.title.title;
       mapDiv.innerHTML = lastSvg;
@@ -291,7 +319,7 @@ $("bind").addEventListener("click", () => {
   setTimeout(() => {
     try {
       const atlas = composeAtlas(lastWorld, { width: 1500 });
-      atlasDiv.innerHTML = atlasHtml(atlas, lastStyle);
+      atlasDiv.innerHTML = atlasHtml(atlas, lastStyle, lastTheme);
       status.textContent = "";
       atlasDiv.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
@@ -302,7 +330,7 @@ $("bind").addEventListener("click", () => {
 seedInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") draw();
 });
-for (const sel of [styleSel, typeSel, bandSel, legendChk]) {
+for (const sel of [styleSel, typeSel, bandSel, themeSel, legendChk]) {
   sel.addEventListener("change", draw);
 }
 
