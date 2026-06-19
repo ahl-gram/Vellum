@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vellum: the seed of the day</title>
+<meta name="description" content="A new procedural world every day: today's date is the seed, drawn as an antique chart with a line from its gazetteer. Same day, same world, everywhere.">
+<link rel="icon" type="image/svg+xml" href="/Vellum/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Vellum">
+<meta property="og:url" content="https://ahl-gram.github.io/Vellum/seed-of-the-day/">
+<meta property="og:title" content="Vellum: the seed of the day">
+<meta property="og:description" content="A new procedural world every day: today's date is the seed, drawn as an antique chart with a line from its gazetteer.">
+<meta property="og:image" content="https://ahl-gram.github.io/Vellum/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A Vellum antique chart beside the Vellum wordmark.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Vellum: the seed of the day">
+<meta name="twitter:description" content="A new procedural world every day: today's date is the seed, drawn as an antique chart with a line from its gazetteer.">
+<meta name="twitter:image" content="https://ahl-gram.github.io/Vellum/og.png">
+<meta name="twitter:image:alt" content="A Vellum antique chart beside the Vellum wordmark.">
+<style>
+  :root { color-scheme: light; }
+  body {
+    margin: 0; padding: 2.5rem 1.5rem 5rem;
+    background: #efe6cf; color: #3d2f1f;
+    font-family: 'Iowan Old Style', 'Palatino', Georgia, serif;
+    line-height: 1.6;
+  }
+  main { max-width: 900px; margin-inline: auto; }
+  header { text-align: center; margin-bottom: 1.4rem; }
+  h1 { font-size: 2rem; letter-spacing: 0.1em; margin: 0; }
+  h1 a { color: inherit; text-decoration: none; }
+  .tagline { font-style: italic; color: #6b5a40; margin: 0.3rem 0 0; }
+  .topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: #857257; margin: 0.9rem 0 0; }
+  .topnav a { color: inherit; }
+  [aria-current="page"] { font-weight: 700; }
+  .dateline { text-align: center; letter-spacing: 0.18em; font-size: 0.82rem;
+    text-transform: uppercase; color: #857257; margin: 0.4rem 0 1.4rem; }
+  .status { text-align: center; font-style: italic; color: #6b5a40; min-height: 1.4rem; }
+  figure { margin: 0; }
+  #map svg { width: 100%; height: auto; display: block;
+    border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+  figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
+    margin-top: 1rem; }
+  .survey { text-align: center; font-style: italic; color: #6b5a40; margin: 0.3rem 0 0; }
+  .blurb { max-width: 44rem; margin: 1.2rem auto 0; }
+  .actions { text-align: center; margin-top: 1.6rem; }
+  .actions a { display: inline-block; border: 1.5px solid #4a3826; border-radius: 4px;
+    padding: 0.5rem 1rem; background: #f4ecd8; text-decoration: none; color: inherit;
+    letter-spacing: 0.04em; }
+  .actions a:hover { background: #fff7e4; }
+  .note { text-align: center; color: #857257; font-size: 0.85rem; margin-top: 1rem; }
+  footer { margin-top: 4rem; text-align: center; letter-spacing: 0.22em;
+    font-size: 0.72rem; color: #857257; }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1><a href="../">VELLUM</a></h1>
+  <p class="tagline">the seed of the day</p>
+  <nav class="topnav">
+    <a href="../">Home</a> · <span aria-current="page">Today</span> ·
+    <a href="../explorer/">Explorer</a> · <a href="../gallery/">Gallery</a> ·
+    <a href="../atlas/">Atlas</a> · <a href="../faq/">FAQ</a> ·
+    <a href="https://github.com/ahl-gram/Vellum">GitHub</a>
+  </nav>
+</header>
+
+<p class="dateline" id="dateline"></p>
+<p class="status" id="status">Drafting today's world&hellip;</p>
+
+<figure>
+  <div id="map"></div>
+  <figcaption id="caption"></figcaption>
+</figure>
+<p class="survey" id="survey"></p>
+<p class="blurb" id="blurb"></p>
+
+<div class="actions">
+  <a id="explore" href="../explorer/">Open today's seed in the Explorer</a>
+</div>
+
+<p class="note">The seed is today's date in UTC (YYYYMMDD), so everyone sees the
+same world on the same day. Come back tomorrow for a new one.</p>
+
+<noscript>
+  <p class="note">Today's world is drawn in your browser, so this page needs
+  JavaScript. You can still <a href="../explorer/">draw any seed in the
+  Explorer</a> or browse the <a href="../gallery/">gallery</a>.</p>
+</noscript>
+
+<footer>
+  <a href="../">VELLUM</a> ·
+  <a href="https://github.com/ahl-gram/Vellum">source</a>
+</footer>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>
