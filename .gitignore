@@ -6,6 +6,13 @@ out/
 # Built deploy artifact (assembled by `npm run build`, published by deploy.yml).
 dist/
 
+# Generated showcase output, rebuilt into dist/ at deploy time (see #37). No
+# longer committed now that Pages builds via Actions. (docs/charts/ stays
+# committed: the hand-authored homepage embeds it.)
+docs/explorer/engine/
+docs/atlas/
+docs/gallery/
+
 .claude/settings.local.json
 SESSION-NOTES.md
 RESUME-HERE.md
