@@ -25,7 +25,9 @@ import { findBrowser } from "../src/cli/raster.ts";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url)); // scripts/
 const REPO = resolve(HERE, "..");
-const DOCS = join(REPO, "docs");
+// Serve the built deploy artifact (dist/) so the e2e validates exactly what gets
+// published. Override with VELLUM_SITE_DIR. Run `npm run build` first to populate it.
+const SITE = process.env["VELLUM_SITE_DIR"] ? resolve(process.env["VELLUM_SITE_DIR"]) : join(REPO, "dist");
 const OUT = join(REPO, "out", "e2e");
 const PORT = 8765;
 const DPORT = 9222;
@@ -83,8 +85,8 @@ function startServer() {
         return;
       }
       if (pathname.endsWith("/")) pathname += "index.html";
-      const filePath = resolve(DOCS, "." + pathname);
-      if (filePath !== DOCS && !filePath.startsWith(DOCS + sep)) {
+      const filePath = resolve(SITE, "." + pathname);
+      if (filePath !== SITE && !filePath.startsWith(SITE + sep)) {
         res.writeHead(403).end("forbidden");
         return;
       }

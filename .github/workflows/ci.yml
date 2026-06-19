@@ -31,7 +31,12 @@ jobs:
             git status --porcelain -- docs/explorer/engine
             exit 1
           fi
-      - name: Explorer e2e (headless browser)
+      # Build the deploy artifact and run the e2e against it, so CI validates the
+      # exact dist/ that gets published. The engine-sync guard above still applies
+      # while the engine remains committed (it is removed in the eviction PR, #37).
+      - name: Build site into dist/
+        run: npm run build
+      - name: Explorer e2e (headless browser, against dist/)
         run: npm run test:e2e
         env:
           # ubuntu-latest ships a real (non-snap) Google Chrome here. Point at it
