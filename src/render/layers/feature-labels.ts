@@ -300,19 +300,36 @@ export function featureLabelsLayer(ctx: RenderCtx): {
         labels.tryClaim(spacedTextBox(c.x, cy, world.names.range!, fs, 3 * k), 4),
       );
       if (placedY !== undefined) {
+        // a soft paper casing clears a clean lane through the dense mountain
+        // glyphs so the spaced capitals read; the opaque fill + halo do the
+        // rest. Rotated with the label and drawn first, so text sits on top.
+        const box = spacedTextBox(c.x, placedY, world.names.range, fs, 3 * k);
+        const padX = 7 * k;
+        const padY = 4 * k;
+        const spin = `rotate(${angle.toFixed(1)} ${c.x.toFixed(1)} ${placedY.toFixed(1)})`;
         nodes.push(
+          el("rect", {
+            class: "range-casing",
+            x: (box.x - padX).toFixed(1),
+            y: (box.y - padY).toFixed(1),
+            width: (box.w + 2 * padX).toFixed(1),
+            height: (box.h + 2 * padY).toFixed(1),
+            rx: (5 * k).toFixed(1),
+            transform: spin,
+            fill: style.paper,
+            "fill-opacity": 0.72,
+          }),
           el(
             "text",
             {
               x: c.x, y: placedY, "text-anchor": "middle",
-              transform: `rotate(${angle.toFixed(1)} ${c.x.toFixed(1)} ${placedY.toFixed(1)})`,
+              transform: spin,
               "font-family": style.fontFamily,
               "font-size": fs.toFixed(1),
               "letter-spacing": (3 * k).toFixed(1),
               fill: style.labelColor,
-              "fill-opacity": 0.78,
               stroke: style.labelHalo,
-              "stroke-width": 2.4 * k,
+              "stroke-width": 3 * k,
               "paint-order": "stroke",
             },
             [world.names.range.toUpperCase()],
