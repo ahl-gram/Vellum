@@ -57,6 +57,7 @@ npm run demo    -- --seed 42                   # one world in all four styles
 npm test                                       # full test suite
 npm run check                                  # typecheck
 npm run site                                   # rebuild the docs/ showcase
+npm run og                                      # rebuild the committed social card (docs/og.png)
 ```
 
 Run `node src/cli/main.ts help` for the built-in usage screen.
@@ -246,6 +247,20 @@ Explorer always works. `window.__vellumUsesWorker()` reports which path is live.
 are not part of the tsc-emitted engine and are never used by the CLI. See
 [`docs/explorer/worker.js`](docs/explorer/worker.js) and
 [`docs/explorer/app.js`](docs/explorer/app.js) for the full detail.
+
+## Social preview and favicon
+
+The hand-authored pages carry Open Graph / Twitter Card tags and a favicon.
+Two assets are committed under `docs/` (not generated at deploy time, since the
+Pages build runs in CI with no browser to rasterize):
+
+- `docs/og.png`, the 1200x630 preview card: the hero chart (seed 42) letterboxed
+  beside the Vellum wordmark. Rebuild with `npm run og` (needs an installed
+  browser) whenever the hero map changes; the card SVG lands in `out/`.
+- `docs/favicon.svg`, a hand-drawn compass-rose mark, linked from every page.
+
+The Pages deploy build (`npm run build`) copies `docs/` into `dist/`, so both
+assets ship as-is.
 
 ## Development notes
 
