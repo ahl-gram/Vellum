@@ -14,6 +14,7 @@
     "gallery": "node src/cli/main.ts gallery",
     "demo": "node src/cli/main.ts demo",
     "site": "node scripts/build-site.ts && tsc -p tsconfig.browser.json",
+    "og": "node scripts/build-og.ts",
     "build": "node scripts/build-dist.ts && tsc -p tsconfig.browser.json --outDir dist/explorer/engine",
     "test": "node --test",
     "test:e2e": "node scripts/e2e-explorer.mjs",
