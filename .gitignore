@@ -2,6 +2,10 @@ node_modules/
 out/
 *.log
 .DS_Store
+
+# Built deploy artifact (assembled by `npm run build`, published by deploy.yml).
+dist/
+
 .claude/settings.local.json
 SESSION-NOTES.md
 RESUME-HERE.md

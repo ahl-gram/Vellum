@@ -1,0 +1,58 @@
+name: Deploy site to GitHub Pages
+
+# Builds the site into dist/ and publishes it via the GitHub Pages Actions
+# pipeline. Replaces the legacy "serve main:/docs verbatim" deploy.
+#
+# CUTOVER (do NOT skip the order — see PAGES-DEPLOY-SPIKE.md):
+#   1. Land this workflow + the build wiring with the generated files STILL
+#      committed, and confirm a manual run's build job is green.
+#   2. Switch the repo's Pages source to "GitHub Actions" (build_type: workflow).
+#      Until this is done, the deploy job below errors by design.
+#   3. Confirm the Actions deploy serves the live site.
+#   4. THEN land the eviction (.gitignore + git rm of engine/atlas/gallery).
+# Reversing 2 and 4 takes the live Explorer down (legacy Pages serves the
+# committed docs/, which would no longer contain the engine).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one in-flight deploy at a time; don't cancel a publish midway.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci
+      - name: Build site into dist/
+        run: npm run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: publish
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
