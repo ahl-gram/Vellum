@@ -149,12 +149,12 @@ Update as work lands. `[x]` done, `[~]` in progress, `[ ]` not started.
   - [x] #7 Site header menu
 - Phase 1 (done: branch `phase-1-heraldry`, 2026-06-16)
   - [x] #20 Heraldry / arms & banners
-- Phase 2
-  - [ ] #6 Explorer "bind as atlas" (keystone)
-  - [ ] #18 Thematic plates
-  - [ ] #10 Nautical atlas plate
-  - [ ] #5 Explorer Web Worker
-  - [ ] #2 Atlas PDF export
+- Phase 2 (done: the atlas epic, PRs #30/#31/#32/#34/#36, 2026-06-17 to 2026-06-18)
+  - [x] #6 Explorer "bind as atlas" (keystone) (PR #30)
+  - [x] #18 Thematic plates (PR #32)
+  - [x] #10 Nautical atlas plate (PR #31)
+  - [x] #5 Explorer Web Worker (PR #34)
+  - [x] #2 Atlas PDF export (PR #36)
 - Phase 3
   - [ ] #13 Social cards + favicon
   - [ ] #3 Seed-of-the-day page
