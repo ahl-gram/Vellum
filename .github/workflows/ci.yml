@@ -21,19 +21,10 @@ jobs:
         run: npm run check
       - name: Test
         run: npm test
-      - name: Verify Explorer engine is in sync with source
-        run: |
-          rm -rf docs/explorer/engine
-          npx tsc -p tsconfig.browser.json
-          if [ -n "$(git status --porcelain -- docs/explorer/engine)" ]; then
-            echo "::error::docs/explorer/engine is stale. Run 'npm run site' and commit the regenerated engine."
-            git --no-pager diff -- docs/explorer/engine
-            git status --porcelain -- docs/explorer/engine
-            exit 1
-          fi
       # Build the deploy artifact and run the e2e against it, so CI validates the
-      # exact dist/ that gets published. The engine-sync guard above still applies
-      # while the engine remains committed (it is removed in the eviction PR, #37).
+      # exact dist/ that gets published. (The old engine-sync guard is gone: the
+      # engine is no longer committed — every deploy rebuilds it into dist/ — so
+      # there is nothing committed left to drift.)
       - name: Build site into dist/
         run: npm run build
       - name: Explorer e2e (headless browser, against dist/)
