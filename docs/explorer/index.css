@@ -1,0 +1,67 @@
+:root { color-scheme: light; }
+body {
+  margin: 0; padding: 2rem 1.5rem 4rem;
+  background: #efe6cf; color: #3d2f1f;
+  font-family: 'Iowan Old Style', 'Palatino', Georgia, serif;
+}
+main { max-width: 1100px; margin-inline: auto; }
+header { text-align: center; margin-bottom: 1.4rem; }
+h1 { font-size: 2rem; letter-spacing: 0.1em; margin: 0; }
+h1 a { color: inherit; text-decoration: none; }
+.tagline { font-style: italic; color: #6b5a40; margin: 0.3rem 0 0; }
+.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: #857257; margin: 0.9rem 0 0; }
+.topnav a { color: inherit; }
+[aria-current="page"] { font-weight: 700; }
+.controls {
+  display: flex; flex-wrap: wrap; gap: 0.7rem; justify-content: center;
+  align-items: center; margin: 1.2rem 0;
+}
+.controls label { font-size: 0.85rem; letter-spacing: 0.05em; color: #6b5a40; }
+.controls label.check { display: inline-flex; align-items: center; gap: 0.35rem; }
+.controls input[type="checkbox"] { accent-color: #4a3826; width: 1rem; height: 1rem; }
+.controls .exports { display: inline-flex; gap: 0.7rem; }
+input[type="number"], select, button {
+  font-family: inherit; font-size: 0.95rem; color: #3d2f1f;
+  background: #f8f1e0; border: 1.5px solid #4a3826; border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+}
+input[type="number"] { width: 8.5rem; }
+button { cursor: pointer; }
+button:hover { background: #fff7e4; }
+button.primary { background: #4a3826; color: #f2e8cf; letter-spacing: 0.08em; }
+button.primary:hover { background: #5d4831; }
+.status { text-align: center; font-style: italic; color: #857257;
+  min-height: 1.4em; margin-bottom: 0.8rem; }
+#map { max-width: 1100px; margin-inline: auto; }
+#map svg { width: 100%; height: auto; display: block;
+  border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+.caption { text-align: center; font-style: italic; color: #6b5a40;
+  padding-top: 0.6rem; }
+footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;
+  font-size: 0.72rem; color: #857257; }
+footer a { color: inherit; }
+/* The bound atlas, drawn inline beneath the chart. Mirrors the standalone
+   atlas (src/cli/atlas.ts), scoped to #atlas so the CLI bytes stay untouched. */
+#atlas { max-width: 1100px; margin: 2.5rem auto 0; }
+#atlas:empty { margin: 0; }
+#atlas h2 { letter-spacing: 0.06em; border-bottom: 1px solid #b9a77f;
+  padding-bottom: 0.3rem; margin-top: 2.6rem; }
+#atlas figure { margin: 1.5rem 0; }
+#atlas figure img { width: 100%; height: auto; display: block;
+  border: 1px solid #b9a77f; box-shadow: 0 10px 30px rgb(61 47 31 / 0.18); }
+#atlas figcaption { text-align: center; font-style: italic; color: #6b5a40;
+  padding-top: 0.55rem; }
+#atlas .styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+#atlas .themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.25rem; }
+#atlas table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+#atlas th { text-align: left; border-bottom: 2px solid #4a3826; padding: 0.45rem 0.6rem; }
+#atlas td { border-bottom: 1px solid #cdbd97; padding: 0.45rem 0.6rem; vertical-align: top; }
+#atlas td.name { font-weight: 600; white-space: nowrap; }
+#atlas td.name.capital { text-transform: uppercase; letter-spacing: 0.06em; }
+#atlas td.note { font-style: italic; color: #54452f; }
+#atlas .realms { font-style: italic; color: #6b5a40; }
+#atlas .banners { display: flex; flex-wrap: wrap; gap: 1.1rem; justify-content: center; }
+#atlas .banner { width: 120px; text-align: center; }
+#atlas .banner svg { width: 100%; height: auto; }
+#atlas .banner figcaption { font-style: italic; color: #6b5a40; font-size: 0.85rem;
+  padding-top: 0.35rem; }

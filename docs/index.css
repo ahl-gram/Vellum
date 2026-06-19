@@ -1,0 +1,45 @@
+:root { color-scheme: light; }
+body {
+  margin: 0; padding: 3rem 1.5rem 5rem;
+  background: #efe6cf; color: #3d2f1f;
+  font-family: 'Iowan Old Style', 'Palatino', Georgia, serif;
+}
+main { max-width: 1080px; margin-inline: auto; }
+header { text-align: center; margin-bottom: 2.5rem; }
+h1 { font-size: 3rem; letter-spacing: 0.12em; margin: 0; }
+h2 { letter-spacing: 0.06em; border-bottom: 1px solid #b9a77f;
+  padding-bottom: 0.3rem; margin-top: 3.5rem; }
+.tagline { font-style: italic; color: #6b5a40; font-size: 1.15rem; margin: 0.6rem 0 1rem; }
+.lede { max-width: 44rem; margin-inline: auto; line-height: 1.6; }
+.seedline { letter-spacing: 0.25em; font-size: 0.78rem; color: #857257; margin-top: 1rem; }
+.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: #857257; margin-top: 1.1rem; }
+.topnav a { color: inherit; }
+[aria-current="page"] { font-weight: 700; }
+figure { margin: 1.5rem 0; }
+figure img { width: 100%; height: auto; display: block;
+  border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+figcaption { text-align: center; font-style: italic; color: #6b5a40; padding-top: 0.55rem; }
+.banners { display: flex; flex-wrap: wrap; gap: 2.2rem; justify-content: center; margin-top: 1.8rem; }
+.banner { width: 150px; text-align: center; }
+.banner img { width: 100%; height: auto; border: 0; box-shadow: none;
+  filter: drop-shadow(0 6px 14px rgb(61 47 31 / 0.22)); }
+.banner figcaption { font-style: italic; color: #6b5a40; padding-top: 0.55rem; letter-spacing: 0.03em; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; }
+@media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.4rem; margin-top: 1.5rem; }
+@media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+.card { display: block; border: 1.5px solid #4a3826; border-radius: 4px;
+  padding: 1.4rem 1.6rem; background: #f4ecd8; text-decoration: none; color: inherit;
+  box-shadow: 0 6px 18px rgb(61 47 31 / 0.12); }
+.card:hover { background: #f8f1e0; }
+.card h3 { margin: 0 0 0.4rem; letter-spacing: 0.05em; }
+.card p { margin: 0; font-style: italic; color: #6b5a40; line-height: 1.5; }
+.how { line-height: 1.65; max-width: 46rem; }
+.underhood { font-style: italic; color: #6b5a40; font-size: 0.92rem;
+  line-height: 1.6; max-width: 46rem; margin-top: 0.5rem; }
+.underhood a { color: #7a5c2e; }
+code { background: #e6d9b8; padding: 0.1em 0.4em; border-radius: 3px;
+  font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
+footer { margin-top: 4.5rem; text-align: center; letter-spacing: 0.25em;
+  font-size: 0.75rem; color: #857257; }
+footer a { color: inherit; }
