@@ -49,7 +49,7 @@ npm run chart   -- --seed 42 --legend          # add a key explaining the symbol
 npm run chart   -- --seed 42 --arms            # blazon each realm's coat of arms
 npm run chart   -- --seed 42 --theme moisture  # a thematic data plate (rainfall)
 npm run chart   -- --style nautical            # no --seed → random (and printed)
-npm run poster  -- --seed 42                   # wall art: 480x360 grid, 4200px + PNG
+npm run poster  -- --seed 42                   # wall art: same world, 4200px + PNG
 npm run atlas   -- --seed 42                   # HTML book: 3 styles, regions, gazetteer
 npm run atlas   -- --seed 42 --pdf             # ...also bound into a single PDF
 npm run gallery -- --seed 100 --count 12       # contact sheet of 12 worlds
@@ -64,7 +64,7 @@ Run `node src/cli/main.ts help` for the built-in usage screen.
 | Command | Draws | Honors |
 |---|---|---|
 | `chart` | one SVG (add `--png` for a raster too) | `--seed --style --type --band --land --grid --width --legend --arms --theme` |
-| `poster` | one large SVG **and** PNG, a 480×360 grid at 4200px (~14″ at 300 dpi) | `--seed --style --scale --legend --arms --theme` |
+| `poster` | one large SVG **and** PNG at 4200px (~14″ at 300 dpi); the same default 320×240 world as the chart, only larger | `--seed --style --scale --legend --arms --theme` |
 | `atlas` | a multi-page HTML atlas: the world in four styles, four thematic data plates (vegetation, temperature, rainfall, population), two regional close-ups, a settlement gazetteer with procedural travelers' notes (*"Its quays smell of dates and old rope."*), and a plate of every realm's coat of arms, each chart carrying a symbol key; add `--pdf` to bind the whole atlas into one shareable PDF | `--seed --type --band --land --pdf`: always renders every style and plate, so `--style`/`--theme` are ignored |
 | `gallery` | an HTML contact sheet of *N* worlds, walking outward from the seed | `--seed` (starting point), `--count`, `--style` |
 | `demo` | one world drawn in all four styles | `--seed --grid --width --legend --arms --theme` |
@@ -76,7 +76,7 @@ Run `node src/cli/main.ts help` for the built-in usage screen.
 - `--type <t>`: `island` · `archipelago` · `continent` · `citystate` *(default: chosen by the seed)*
 - `--band <b>`: climate `temperate` · `tropical` · `polar` *(default: chosen by the seed)*
 - `--land <f>`: land fraction, `0.1`–`0.7` *(default: set by map type)*
-- `--grid <WxH>`: simulation resolution *(default `320x240`; poster `480x360`)*
+- `--grid <WxH>`: simulation resolution *(default `320x240`)*
 - `--width <px>`: output width in pixels, `400`–`6000` *(default `1500`; poster `4200`)*
 - `--legend`: draw a compact, style-aware key explaining the chart's symbols and labels *(default: off; the atlas always includes one)*
 - `--arms`: blazon each realm's coat of arms beside its label, one deterministic procedural shield per realm *(default: off; the atlas always shows them as a banner plate)*
@@ -222,6 +222,30 @@ docs/explorer the same engine, tsc-emitted as browser ES modules
 Zero runtime dependencies. Node 23.6+ runs the TypeScript directly
 (`erasableSyntaxOnly`). Dev dependencies are `typescript` and
 `@types/node` for `tsc --noEmit`.
+
+## The Explorer's render path
+
+The web [Explorer](https://ahl-gram.github.io/Vellum/explorer/) runs the whole
+engine in your browser, off the main thread, so the page stays responsive while
+a world is drawn. `docs/explorer/index.html` loads `app.js`, which spawns a Web
+Worker with `new Worker("./worker.js", { type: "module" })`.
+
+The worker is a stateless request/response service. The page posts a job,
+`{ kind: "draw" | "atlas", seed, overrides, ... }`, and the worker regenerates
+the world from scratch and replies with the chart SVG (`draw`) or the fully
+bound atlas as strings (`atlas`). Nothing is kept between jobs, so the result is
+byte-identical to running the engine on the main thread. The worker imports the
+same browser engine the page uses: `docs/explorer/engine/`, emitted from the
+TypeScript source by `tsconfig.browser.json` as ES modules.
+
+If the worker can't be constructed (a `file://` page, a strict CSP, an older
+browser), `app.js` runs the identical engine inline on the main thread, so the
+Explorer always works. `window.__vellumUsesWorker()` reports which path is live.
+
+`worker.js`, `app.js`, and the Explorer's `index.html` are hand-authored: they
+are not part of the tsc-emitted engine and are never used by the CLI. See
+[`docs/explorer/worker.js`](docs/explorer/worker.js) and
+[`docs/explorer/app.js`](docs/explorer/app.js) for the full detail.
 
 ## Development notes
 
