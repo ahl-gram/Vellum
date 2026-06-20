@@ -31,6 +31,8 @@ export type MapStyle = {
   readonly soundings: boolean;
   /** Prevailing-wind arrows over open water (nautical). */
   readonly winds: boolean;
+  /** Ocean-current streamlines over open water (nautical). */
+  readonly currents: boolean;
   readonly realmTints: ReadonlyArray<string>;
 };
 
@@ -60,6 +62,7 @@ const ANTIQUE: MapStyle = {
   shoalTint: null,
   soundings: false,
   winds: false,
+  currents: false,
   realmTints: ["#c46d5e", "#7d9a6a", "#bf9b4f", "#7a8aa6", "#a97ba6"],
 };
 
@@ -98,6 +101,7 @@ const TOPOGRAPHIC: MapStyle = {
   shoalTint: null,
   soundings: false,
   winds: false,
+  currents: false,
   realmTints: ["#e74c3c", "#27ae60", "#f39c12", "#2980b9", "#8e44ad"],
 };
 
@@ -127,6 +131,7 @@ const INK: MapStyle = {
   shoalTint: null,
   soundings: false,
   winds: false,
+  currents: false,
   realmTints: ["#888", "#aaa", "#777", "#999", "#666"],
 };
 
@@ -156,6 +161,7 @@ const NAUTICAL: MapStyle = {
   shoalTint: "#d9eaf2",
   soundings: true,
   winds: true,
+  currents: true,
   realmTints: ["#c46d5e", "#7d9a6a", "#bf9b4f", "#7a8aa6", "#a97ba6"],
 };
 
