@@ -116,6 +116,15 @@ const REALM_MOODS = [
   "swears fealty with one hand on its sword",
 ];
 
+// Notes for a ruined settlement: every one references its history (the
+// founding year and its abandonment), so the gazetteer speaks of events.
+export const RUIN_NOTES = [
+  "Founded in the year %y, it was given up long ago; only wind moves in its lanes.",
+  "A dead place now, its people gone these many years; the chronicle marks it a ruin.",
+  "Nothing remains but stones and gulls; it was abandoned after the troubles.",
+  "Raised in hope in the year %y, it stands empty, its wells choked with leaves.",
+];
+
 const BIOME_NOTES: Partial<Record<number, string>> = {
   [BIOMES.marsh]: "Reed-cutters work the fens at low water.",
   [BIOMES.desert]: "Wells here are deep, and guarded jealously.",
@@ -133,6 +142,15 @@ export function createLoreWriter(world: World, rng: Rng): LoreWriter {
   const aromatic = AROMATIC_GOODS[world.culture.id] ?? AROMATIC_GOODS["thalassic"]!;
   const cargo = CARGO_GOODS[world.culture.id] ?? CARGO_GOODS["thalassic"]!;
   const used = new Map<readonly string[], Set<string>>();
+
+  // founding years of the notable settlements the chronicle records, keyed by
+  // name (unique within a world) so a gazetteer note can cite the event.
+  const foundingYear = new Map<string, number>();
+  for (const e of world.history.events) {
+    if (e.kind === "founding" && e.settlement !== undefined) {
+      foundingYear.set(world.settlements[e.settlement]!.name, e.year);
+    }
+  }
 
   // cycle the whole pool before any repeat: pick only from the unused
   // members, resetting when the pool is exhausted. Keeps distribution even
@@ -159,6 +177,9 @@ export function createLoreWriter(world: World, rng: Rng): LoreWriter {
 
   return {
     settlementNote(s: NamedSettlement): string {
+      if (s.ruined) {
+        return freshPick(RUIN_NOTES).replace("%y", String(s.founded));
+      }
       const parts: string[] = [];
       if (s.kind === "capital") {
         parts.push(freshPick(CAPITAL_NOTES));
@@ -169,6 +190,10 @@ export function createLoreWriter(world: World, rng: Rng): LoreWriter {
         parts.push(fill(freshPick(RIVER_NOTES)));
       } else {
         parts.push(fill(freshPick(INLAND_NOTES)));
+      }
+      const founded = foundingYear.get(s.name);
+      if (founded !== undefined) {
+        parts.push(`Its founding is set down in the year ${founded}.`);
       }
       const biome = world.biomes[s.x + s.y * world.elev.w] as number;
       const biomeNote = BIOME_NOTES[biome];

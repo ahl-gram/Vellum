@@ -93,6 +93,7 @@ function atlasHtml(atlas, currentStyle, currentTheme) {
 ${thematic}
 ${surveys}
 ${atlas.bannersHtml}
+${atlas.chronicleHtml}
 ${atlas.gazetteerHtml}`;
 }
 
@@ -158,6 +159,7 @@ function serializableAtlas(a) {
     themes: a.themes,
     regions: a.regions,
     bannersHtml: a.bannersHtml,
+    chronicleHtml: a.chronicleHtml,
     gazetteerHtml: a.gazetteerHtml,
   };
 }

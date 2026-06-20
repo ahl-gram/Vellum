@@ -41,6 +41,21 @@ test("the gazetteer fragment has one row per settlement", () => {
   assert.equal(rows, world.settlements.length + 1);
 });
 
+test("the chronicle fragment lists the world's dated events in order", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const atlas = composeAtlas(world);
+
+  assert.match(atlas.chronicleHtml, /<h2>Chronicle<\/h2>/);
+  const items = (atlas.chronicleHtml.match(/<li>/g) ?? []).length;
+  assert.equal(items, world.history.events.length);
+  for (const e of world.history.events) {
+    assert.ok(
+      atlas.chronicleHtml.includes(`<span class="year">${e.year}</span>`),
+      `year ${e.year} present`,
+    );
+  }
+});
+
 test("the banners fragment carries one banner per realm seat", () => {
   const world = generateWorld(defaultRecipe(42));
   const atlas = composeAtlas(world);
@@ -61,6 +76,7 @@ test("composeAtlas is deterministic for a seed", () => {
   assert.deepEqual(a.regions, b.regions);
   assert.equal(a.gazetteerHtml, b.gazetteerHtml);
   assert.equal(a.bannersHtml, b.bannersHtml);
+  assert.equal(a.chronicleHtml, b.chronicleHtml);
 });
 
 test("a single-realm world (city-state) still composes a banner and a survey", () => {

@@ -40,6 +40,8 @@ export type AtlasComposition = {
   readonly regions: ReadonlyArray<AtlasPlate>;
   /** "Banners of the Realms" section, or "" when the world has no arms. */
   readonly bannersHtml: string;
+  /** The "Chronicle" section: the world's dated history, or "" when empty. */
+  readonly chronicleHtml: string;
   /** The gazetteer section: settlements table + realm notes. */
   readonly gazetteerHtml: string;
 };
@@ -117,6 +119,25 @@ function bannersHtml(world: World): string {
 <div class="banners">
 ${banners}
 </div>
+</section>`;
+}
+
+/** The Chronicle: the world's history as a dated, ordered list of events. */
+function chronicleHtml(world: World): string {
+  const events = world.history.events;
+  if (events.length === 0) return "";
+  const items = events
+    .map(
+      (e) =>
+        `<li><span class="year">${e.year}</span> ${escapeXml(e.text)}</li>`,
+    )
+    .join("\n");
+  return `<section>
+<h2>Chronicle</h2>
+<p class="chronicle-intro">A brief history of ${escapeXml(world.title.title)}, in the years before the present survey.</p>
+<ol class="chronicle">
+${items}
+</ol>
 </section>`;
 }
 
@@ -205,6 +226,7 @@ export function composeAtlas(
     themes,
     regions: regionPlates(world, width),
     bannersHtml: bannersHtml(world),
+    chronicleHtml: chronicleHtml(world),
     gazetteerHtml: gazetteerHtml(world),
   };
 }

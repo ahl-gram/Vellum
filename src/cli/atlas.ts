@@ -10,6 +10,7 @@ function indexHtml(
   themes: ReadonlyArray<{ file: string; title: string }>,
   regions: ReadonlyArray<{ file: string; title: string }>,
   bannersFragment: string,
+  chronicleFragment: string,
   gazetteerFragment: string,
 ): string {
   const t = world.title;
@@ -50,6 +51,13 @@ function indexHtml(
   .banner svg { width: 100%; height: auto; }
   .banner figcaption { font-style: italic; color: #6b5a40; font-size: 0.85rem;
     padding-top: 0.35rem; }
+  .chronicle-intro { font-style: italic; color: #6b5a40; }
+  ol.chronicle { list-style: none; padding: 0; margin: 1rem 0 0;
+    max-width: 48rem; }
+  ol.chronicle li { padding: 0.4rem 0; border-bottom: 1px solid #cdbd97;
+    display: flex; gap: 0.9rem; }
+  ol.chronicle .year { flex: 0 0 3.2rem; text-align: right; font-variant-numeric: tabular-nums;
+    font-weight: 600; color: #857257; }
   footer { margin-top: 4rem; text-align: center; letter-spacing: 0.25em;
     font-size: 0.75rem; color: #857257; }
   a { color: inherit; }
@@ -103,6 +111,8 @@ ${regions
 
 ${bannersFragment}
 
+${chronicleFragment}
+
 ${gazetteerFragment}
 
 <footer>DRAWN BY VELLUM · AN ATELIER OF IMAGINARY CARTOGRAPHY</footer>
@@ -144,7 +154,7 @@ export async function buildAtlas(
 
   await writeFile(
     join(dir, "index.html"),
-    indexHtml(world, themes, regions, atlas.bannersHtml, atlas.gazetteerHtml),
+    indexHtml(world, themes, regions, atlas.bannersHtml, atlas.chronicleHtml, atlas.gazetteerHtml),
     "utf8",
   );
   return dir;
