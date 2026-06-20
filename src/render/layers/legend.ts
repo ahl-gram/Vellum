@@ -2,7 +2,7 @@ import { BIOMES } from "../../climate/biomes.ts";
 import { el, type SvgNode } from "../svg.ts";
 import { boxesOverlap, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
-import { settlementGlyph } from "./settlements.ts";
+import { settlementGlyph, ruinGlyph } from "./settlements.ts";
 import { terrainGlyphsPresent } from "./glyphs.ts";
 import { THEMES } from "./field.ts";
 
@@ -15,6 +15,7 @@ import { THEMES } from "./field.ts";
 
 type Icon =
   | { kind: "settlement"; tier: "capital" | "town" | "village" }
+  | { kind: "ruin" }
   | { kind: "glyph"; sym: string }
   | { kind: "river" }
   | { kind: "road"; rank: "trunk" | "lane" }
@@ -88,6 +89,7 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
   if (tiers.has("capital")) rows.push({ icon: { kind: "settlement", tier: "capital" }, label: "Capital" });
   if (tiers.has("town")) rows.push({ icon: { kind: "settlement", tier: "town" }, label: "Town" });
   if (tiers.has("village")) rows.push({ icon: { kind: "settlement", tier: "village" }, label: "Village" });
+  if (world.settlements.some((s) => s.ruined)) rows.push({ icon: { kind: "ruin" }, label: "Ruins" });
 
   if (theme) {
     // terrain glyphs / hypso / nautical symbology are not drawn under a theme
@@ -173,6 +175,8 @@ function iconNode(icon: Icon, cx: number, cy: number, ctx: RenderCtx): SvgNode {
   switch (icon.kind) {
     case "settlement":
       return settlementGlyph(icon.tier, cx, cy + (icon.tier === "capital" ? 3 * k : 0), ctx);
+    case "ruin":
+      return ruinGlyph(cx, cy + 3 * k, ctx);
     case "glyph":
       return el("use", {
         href: `#${icon.sym}`,
