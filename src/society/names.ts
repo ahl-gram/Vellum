@@ -1,5 +1,27 @@
 import type { Rng } from "../core/rng.ts";
 import type { MapType } from "../terrain/heightfield.ts";
+import { editDistanceWithin1 } from "../core/text.ts";
+
+// Common English words the syllable grammar can stumble into; a generated base
+// matching one reads as plain English ("the main atolls") rather than an
+// invented name, so it is rejected and re-rolled. Small and targeted, not
+// exhaustive — it covers the ordinary words the templates and phonemes invite.
+const ENGLISH_BLOCKLIST = new Set<string>([
+  "main", "deep", "reach", "run", "rest", "sand", "land", "band",
+  "mine", "mane", "mare", "more", "core", "bore", "sore", "lore", "gore",
+  "moan", "moor", "lord", "word", "ward", "born", "corn", "horn", "worn",
+  "barn", "darn", "yarn", "men", "man", "sun", "son", "sin", "din", "den",
+  "don", "dun", "ten", "tin", "tan", "ton", "ran", "van", "wan", "mist",
+  "mast", "most", "last", "lost", "cost", "rust", "dust", "must", "fast",
+  "vast", "then", "than", "thin", "dell", "hall", "hill", "well", "bell",
+  "tell", "sell", "fell", "mark", "dark", "lark", "bark", "stark", "stork",
+]);
+
+function isShortPrefix(a: string, b: string): boolean {
+  const shorter = a.length <= b.length ? a : b;
+  const longer = a.length <= b.length ? b : a;
+  return shorter.length <= 3 && longer.startsWith(shorter);
+}
 
 /**
  * Syllable-grammar name generator. Each culture defines phoneme inventories
@@ -133,6 +155,8 @@ function capitalize(s: string): string {
 
 export function createNamer(rng: Rng, culture: Culture): Namer {
   const used = new Set<string>();
+  // the raw stems accepted so far, screened so no two are near-duplicates
+  const usedBases: string[] = [];
   let overflow = 0;
 
   const rawBase = (): string => {
@@ -146,11 +170,19 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
     return s;
   };
 
+  // reject a stem that reads as English or sits within one edit (or is a short
+  // prefix) of one already used — "Mai"/"Main", "Vela"/"Veles" and the like
+  const tooSimilar = (stem: string): boolean =>
+    ENGLISH_BLOCKLIST.has(stem) ||
+    usedBases.some((b) => editDistanceWithin1(b, stem) || isShortPrefix(b, stem));
+
   const uniqueBase = (suffix: string): string => {
     for (let attempt = 0; attempt < 30; attempt++) {
       let s = rawBase();
       if (s.length < 3 || s.length > 9 || s.length + suffix.length > 13) continue;
       if (/[aeiou]{3}/.test(s) || /(.)\1\1/.test(s)) continue;
+      const stem = s.toLowerCase();
+      if (tooSimilar(stem)) continue;
       if (suffix) {
         if (s.endsWith(suffix[0] as string)) s = s.slice(0, -1);
         else if (/[aeiou]$/.test(s) && /^[aeiou]/.test(suffix)) s = s.slice(0, -1);
@@ -159,12 +191,21 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
       const full = capitalize(s + suffix);
       if (!used.has(full.toLowerCase())) {
         used.add(full.toLowerCase());
+        usedBases.push(stem);
         return full;
       }
     }
-    const fallback = `${capitalize(rawBase())} ${ROMAN[overflow++ % ROMAN.length]}`;
-    used.add(fallback.toLowerCase());
-    return fallback;
+    // tight namespace: a Roman-numeral base, kept unique by construction. The
+    // numeral disambiguates, so these are exempt from the similarity screen.
+    for (let tries = 0; tries < 1000; tries++) {
+      const fallback = `${capitalize(rawBase())} ${ROMAN[overflow++ % ROMAN.length]}`;
+      if (!used.has(fallback.toLowerCase())) {
+        used.add(fallback.toLowerCase());
+        return fallback;
+      }
+    }
+    // unreachable in practice; guarantees termination
+    return `${capitalize(rawBase())} ${overflow++}`;
   };
 
   const templated = (templates: readonly string[]): string => {
