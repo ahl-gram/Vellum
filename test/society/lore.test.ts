@@ -9,17 +9,20 @@ import {
   INLAND_NOTES,
   RIVER_NOTES,
 } from "../../src/society/lore.ts";
+import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import type { NamedSettlement, World } from "../../src/world/types.ts";
 
-// createLoreWriter only reads world.culture.id, world.elev.w, and
-// world.biomes[idx], so a minimal stub exercises the gazetteer prose
-// without standing up a whole world. biomes left as ocean (0) so no
-// biome note is appended and harbor lines are tested in isolation.
+// createLoreWriter reads world.culture.id, world.elev.w, world.biomes[idx],
+// and world.history.events (for event-driven notes), so a minimal stub
+// exercises the gazetteer prose without standing up a whole world. An empty
+// history means no founding/ruin clauses, isolating the situational lines.
+// biomes left as ocean (0) so no biome note is appended.
 function stubWorld(cultureId: string): World {
   return {
     culture: { id: cultureId },
     elev: { w: 64 },
     biomes: new Uint8Array(64 * 8),
+    history: { events: [] },
   } as unknown as World;
 }
 
@@ -84,6 +87,21 @@ test("lore is deterministic for a given seed", () => {
 
 // contract pins for the reworked pools (red was verified above against the
 // pre-refactor code; these guard the new behavior from regressing)
+
+test("gazetteer notes reference the world's history (ruins + dated foundings)", () => {
+  const w = generateWorld(defaultRecipe(42));
+  const writer = createLoreWriter(w, createRng(w.recipe.seed).fork("lore"));
+  const notes = w.settlements.map((s) => ({ s, note: writer.settlementNote(s) }));
+
+  const ruin = notes.find((n) => n.s.ruined);
+  assert.ok(ruin, "seed 42 has a ruined settlement");
+  assert.match(ruin!.note, /year \d+|abandon|ruin|empty|gone|stones|wind/i);
+
+  assert.ok(
+    notes.some((n) => /the year \d+/.test(n.note)),
+    "some note cites a founding year",
+  );
+});
 
 test("note pools are large enough to avoid clustering", () => {
   assert.ok(HARBOR_NOTES.length >= 12, `harbor pool is ${HARBOR_NOTES.length}`);

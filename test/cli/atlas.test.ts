@@ -61,3 +61,22 @@ test("the atlas carries a banner plate with one coat of arms per realm", async (
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("the atlas carries a Chronicle of the world's dated events", async () => {
+  const seed = 42;
+  const dir = "out/test-atlas-chronicle";
+  await rm(dir, { recursive: true, force: true });
+  try {
+    await buildAtlas(seed, { out: dir });
+    const html = await readFile(join(dir, "index.html"), "utf8");
+    const world = generateWorld(defaultRecipe(seed));
+
+    assert.match(html, /<h2>Chronicle<\/h2>/);
+    const items = (html.match(/<li><span class="year">/g) ?? []).length;
+    assert.equal(items, world.history.events.length, "one entry per event");
+    assert.ok(world.history.events.length >= 1, "fixture should have events");
+    assert.ok(!html.includes("NaN"), "no NaN in the chronicle");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

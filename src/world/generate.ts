@@ -12,6 +12,7 @@ import { placeSettlements } from "../society/sites.ts";
 import { buildRoads } from "../society/roads.ts";
 import { partitionRealms } from "../society/realms.ts";
 import { blazonRealms } from "../society/heraldry.ts";
+import { simulateHistory } from "../society/history.ts";
 import type { FeatureNames, World, WorldRecipe } from "./types.ts";
 
 const MAP_TYPE_WEIGHTS: ReadonlyArray<readonly [MapType, number]> = [
@@ -182,6 +183,23 @@ export function generateWorld(recipe: WorldRecipe): World {
     citystate ? capitalName : undefined,
   );
 
+  // history runs LAST on its own fork: appending it cannot reshuffle any
+  // earlier stream, so geography, names, and the title are unchanged.
+  const history = simulateHistory(
+    {
+      settlements: named,
+      seats: realms.seats,
+      realmNames: names.realms,
+      presentYear: title.year,
+    },
+    rng.fork("history"),
+  );
+  const settled = named.map((s, i) => ({
+    ...s,
+    founded: history.founded[i] as number,
+    ruined: history.ruined[i] as boolean,
+  }));
+
   const oceanDist = bfsDistance(gridW, gridH, (x, y) =>
     (elev.data[x + y * gridW] as number) > seaLevel,
   );
@@ -195,13 +213,14 @@ export function generateWorld(recipe: WorldRecipe): World {
     riverCells,
     climate,
     biomes,
-    settlements: named,
+    settlements: settled,
     roads,
     realms,
     arms,
     culture,
     title,
     names,
+    history: { events: history.events },
     oceanDist,
   };
 }

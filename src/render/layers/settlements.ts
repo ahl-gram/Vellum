@@ -71,6 +71,33 @@ export function settlementGlyph(
   });
 }
 
+/** A broken-tower mark for a ruined settlement; reused by the legend. */
+export function ruinGlyph(px: number, py: number, ctx: RenderCtx): SvgNode {
+  const { style } = ctx;
+  const s = ctx.proj.widthPx / 1500;
+  // a wall standing taller on the left, broken away in a jagged line to a
+  // shorter stub on the right
+  const d =
+    `M${px - 3 * s} ${py}` +
+    `L${px - 3 * s} ${py - 7 * s}` +
+    `L${px - 1.7 * s} ${py - 5.3 * s}` +
+    `L${px - 0.5 * s} ${py - 6.1 * s}` +
+    `L${px + 0.7 * s} ${py - 3.4 * s}` +
+    `L${px + 2.7 * s} ${py - 4.2 * s}` +
+    `L${px + 2.7 * s} ${py}Z`;
+  // a narrow dark window slit reads as a hollow, roofless tower
+  const slit =
+    `M${px - 2 * s} ${py}L${px - 2 * s} ${py - 3.4 * s}` +
+    `L${px - 1 * s} ${py - 3.4 * s}L${px - 1 * s} ${py}Z`;
+  return el("g", { class: "ruin" }, [
+    el("path", {
+      d, fill: style.labelHalo, stroke: style.ink,
+      "stroke-width": 1.2 * s, "stroke-linejoin": "round",
+    }),
+    el("path", { d: slit, fill: style.ink }),
+  ]);
+}
+
 function castleGlyph(
   px: number,
   py: number,
@@ -125,7 +152,7 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
   for (const s of ordered) {
     const px = proj.px(s.x);
     const py = proj.py(s.y);
-    nodes.push(settlementGlyph(s.kind, px, py, ctx));
+    nodes.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(s.kind, px, py, ctx));
 
     const fs = FONT_SIZE[s.kind] * k;
     const gap = (s.kind === "capital" ? 10 : 7) * k;
@@ -149,6 +176,7 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
             ...(s.kind === "capital"
               ? { "font-weight": "bold", "letter-spacing": "0.6" }
               : {}),
+            ...(s.ruined ? { "font-style": "italic", "fill-opacity": "0.7" } : {}),
             fill: style.labelColor,
             stroke: style.labelHalo,
             "stroke-width": 2.8 * k,

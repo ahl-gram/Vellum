@@ -65,3 +65,9 @@ footer a { color: inherit; }
 #atlas .banner svg { width: 100%; height: auto; }
 #atlas .banner figcaption { font-style: italic; color: #6b5a40; font-size: 0.85rem;
   padding-top: 0.35rem; }
+#atlas .chronicle-intro { font-style: italic; color: #6b5a40; }
+#atlas ol.chronicle { list-style: none; padding: 0; margin: 1rem 0 0; max-width: 48rem; }
+#atlas ol.chronicle li { padding: 0.4rem 0; border-bottom: 1px solid #cdbd97;
+  display: flex; gap: 0.9rem; }
+#atlas ol.chronicle .year { flex: 0 0 3.2rem; text-align: right;
+  font-variant-numeric: tabular-nums; font-weight: 600; color: #857257; }
