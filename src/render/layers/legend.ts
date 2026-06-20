@@ -24,6 +24,7 @@ type Icon =
   | { kind: "sounding" }
   | { kind: "rock" }
   | { kind: "wind" }
+  | { kind: "current" }
   | { kind: "swatch"; color: string };
 
 type Row = { icon: Icon; label: string };
@@ -94,6 +95,7 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
     rows.push({ icon: { kind: "sounding" }, label: "Depth, fathoms" });
     rows.push({ icon: { kind: "rock" }, label: "Rock awash" });
     if (style.winds) rows.push({ icon: { kind: "wind" }, label: "Prevailing wind" });
+    if (style.currents) rows.push({ icon: { kind: "current" }, label: "Ocean current" });
   } else if (style.glyphs) {
     const terrain = terrainGlyphsPresent(ctx);
     rows.push({ icon: { kind: "glyph", sym: "gl-mtn-1" }, label: "Mountains" });
@@ -263,6 +265,21 @@ function iconNode(icon: Icon, cx: number, cy: number, ctx: RenderCtx): SvgNode {
           `M${x1.toFixed(1)} ${cy.toFixed(1)}L${(x1).toFixed(1)} ${(cy - 4 * k).toFixed(1)}`,
         fill: "none", stroke: style.inkSoft, "stroke-width": (1.1 * k).toFixed(1),
         "stroke-opacity": 0.7, "stroke-linecap": "round",
+      });
+    }
+    case "current": {
+      // a curving stroke with one downstream chevron, echoing the layer glyph
+      const x1 = cx - 10 * k;
+      const x2 = cx + 10 * k;
+      const hl = 4 * k;
+      const a = Math.PI * 0.78;
+      return el("path", {
+        d:
+          `M${x1.toFixed(1)} ${(cy + 3 * k).toFixed(1)}Q${cx.toFixed(1)} ${(cy - 5 * k).toFixed(1)} ${x2.toFixed(1)} ${(cy + 2 * k).toFixed(1)}` +
+          `M${cx.toFixed(1)} ${(cy - 1.5 * k).toFixed(1)}L${(cx - Math.cos(a) * hl).toFixed(1)} ${(cy - 1.5 * k - Math.sin(a) * hl).toFixed(1)}` +
+          `M${cx.toFixed(1)} ${(cy - 1.5 * k).toFixed(1)}L${(cx - Math.cos(a) * hl).toFixed(1)} ${(cy - 1.5 * k + Math.sin(a) * hl).toFixed(1)}`,
+        fill: "none", stroke: style.inkSoft, "stroke-width": (1.0 * k).toFixed(1),
+        "stroke-opacity": 0.6, "stroke-linecap": "round",
       });
     }
     case "swatch":

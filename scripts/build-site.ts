@@ -13,7 +13,6 @@ import { buildGallery } from "../src/cli/gallery.ts";
  */
 
 const HERO_SEED = 42;
-const NAUTICAL_SEED = 2;
 const GALLERY_SEED = 100;
 
 async function main(): Promise<void> {
@@ -37,14 +36,6 @@ async function main(): Promise<void> {
     );
     console.log(`charts/arms-${HERO_SEED}-${i}.svg`);
   }
-
-  const nautical = generateWorld(defaultRecipe(NAUTICAL_SEED));
-  await writeFile(
-    resolve(chartsDir, `chart-${NAUTICAL_SEED}-nautical.svg`),
-    renderMap(nautical, { style: "nautical", legend: true }),
-    "utf8",
-  );
-  console.log(`charts/chart-${NAUTICAL_SEED}-nautical.svg`);
 
   await buildAtlas(HERO_SEED, { out: "docs/atlas" });
   console.log("atlas/");
