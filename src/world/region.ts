@@ -128,6 +128,9 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
       lakes: [],
       realms: [],
     },
+    // regional plates show no chronicle; founded/ruined ride along on the
+    // settlements (spread above), so ruins still render at the finer scale.
+    history: { events: [] },
     oceanDist,
     region: { window, worldGridW: recipe.gridW },
   };

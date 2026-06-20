@@ -8,6 +8,7 @@ import type { Road } from "../society/roads.ts";
 import type { Settlement } from "../society/sites.ts";
 import type { RealmsResult } from "../society/realms.ts";
 import type { Arms } from "../society/heraldry.ts";
+import type { History } from "../society/history.ts";
 
 export type WorldRecipe = {
   readonly seed: number;
@@ -18,7 +19,13 @@ export type WorldRecipe = {
   readonly band: ClimateBand;
 };
 
-export type NamedSettlement = Settlement & { readonly name: string };
+export type NamedSettlement = Settlement & {
+  readonly name: string;
+  /** Founding year, from the history simulation. */
+  readonly founded: number;
+  /** True when the settlement is a ruin (abandoned in the chronicle). */
+  readonly ruined: boolean;
+};
 
 export type NamedLake = {
   readonly x: number;
@@ -54,6 +61,8 @@ export type World = {
   readonly culture: Culture;
   readonly title: MapTitle;
   readonly names: FeatureNames;
+  /** The world's deterministic history: founding dates, ruins, a chronicle. */
+  readonly history: History;
   /** Hop distance from the nearest land cell, over water. */
   readonly oceanDist: Float64Array;
   /** Present on regional charts: ties scale back to the parent world. */
