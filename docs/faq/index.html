@@ -113,8 +113,7 @@ collapses, and the gazetteer notes cite dates where relevant
 
 <p class="q">Is every map really repeatable?</p>
 <p class="a">Yes. Every random choice descends from the seed, so the same seed
-with the same options always draws an identical map. It's a deliberate design
-goal, checked by the test suite.</p>
+with the same options always draws an identical map.</p>
 
 <h2 id="names">Names &amp; invented languages</h2>
 
@@ -174,9 +173,8 @@ ocean-current streamlines.
 actually on that map: the settlement marks, the terrain glyphs, rivers, and on
 sea charts the depth soundings and wind arrows. The lettering is a code too. Bold
 capitals mark a capital city, plain type a town or village, faded spaced capitals
-name a realm, and italics name water (seas, rivers, and lakes) and forests. Every
-atlas page carries a key, and you can add one to a chart you draw yourself with
-the <code>--legend</code> flag.</p>
+name a realm, and italics name water (seas, rivers, and lakes) and forests. Every atlas page carries a key, and you can turn one on for any chart you
+draw in the Explorer or generate locally.</p>
 
 <p class="q">What do the colors on an antique chart mean?</p>
 <p class="a">Less than you might expect, because an antique chart shows most
@@ -200,20 +198,23 @@ dominant free city and its hinterland). Leave it unset and the seed chooses.</p>
 <h2 id="making">Making &amp; reproducing maps</h2>
 
 <p class="q">How do I make a map on my own machine?</p>
-<p class="a">Clone the repo, run <code>npm install</code>, then
-<code>npm run chart -- --seed 42</code>. The chart lands in <code>out/</code> as
-an SVG you can open in any browser. All the options are in the
-<a href="https://github.com/ahl-gram/Vellum#readme">README</a>.</p>
+<p class="a">Download the source from
+<a href="https://github.com/ahl-gram/Vellum">GitHub</a> and follow the
+setup instructions in the
+<a href="https://github.com/ahl-gram/Vellum#readme">README</a>. Charts are
+generated as SVG files you can open in any browser.</p>
 
 <p class="q">I found a map I love. How do I get it back?</p>
-<p class="a">Note its seed (printed in the margin) and re-run with it. One catch:
-if you forced the type, climate, or land amount, those aren't recorded on the
-chart, so pass them again alongside the seed to redraw the same map.</p>
+<p class="a">Note its seed (printed in the margin) and enter it again. One catch:
+if you chose a specific type, climate, or land amount, those aren't saved on the
+chart itself, so you'll need to set them the same way again alongside the seed.</p>
 
 <p class="q">Can I make a high-resolution print?</p>
-<p class="a">Yes. <code>npm run poster -- --seed 42</code> draws an oversized
-chart (about 14 inches at 300 dpi) and rasterizes it to a PNG, ready to print
-as wall art.</p>
+<p class="a">Yes, if you have the source installed locally. The poster command
+draws an oversized chart (about 14 inches at 300 dpi) and saves it as a PNG,
+ready to print as wall art. See the
+<a href="https://github.com/ahl-gram/Vellum#readme">README</a> for
+details.</p>
 
 <p class="q">What is the Seed of the Day?</p>
 <p class="a">The <a href="../seed-of-the-day/">Seed of the Day</a> page draws a
@@ -227,10 +228,9 @@ fresh in your browser each time you visit.</p>
 styles, four thematic data plates (vegetation, temperature, rainfall, and
 population), two regional close-ups that zoom in on busy areas, a coat-of-arms
 plate for every realm, a Chronicle of the world's founding events and ruins, and
-a gazetteer of every town with travelers' notes. Run
-<code>npm run atlas -- --seed 42</code>, or open one in the
-<a href="../explorer/">Explorer</a>. Add <code>--pdf</code> to bind it into a
-single PDF.</p>
+a gazetteer of every town with travelers' notes. You can generate one from the
+<a href="../explorer/">Explorer</a>, or locally from the command line (see the
+<a href="https://github.com/ahl-gram/Vellum#readme">README</a>).</p>
 
 <p class="q">What is the gallery?</p>
 <p class="a">The <a href="../gallery/">gallery</a> is a contact sheet of many
