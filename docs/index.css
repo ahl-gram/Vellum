@@ -24,8 +24,8 @@ figcaption { text-align: center; font-style: italic; color: #6b5a40; padding-top
 .banner img { width: 100%; height: auto; border: 0; box-shadow: none;
   filter: drop-shadow(0 6px 14px rgb(61 47 31 / 0.22)); }
 .banner figcaption { font-style: italic; color: #6b5a40; padding-top: 0.55rem; letter-spacing: 0.03em; }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; }
-@media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.4rem; }
+@media (max-width: 720px) { .grid3 { grid-template-columns: 1fr; } }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.4rem; margin-top: 1.5rem; }
 @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
 .card { display: block; border: 1.5px solid #4a3826; border-radius: 4px;
