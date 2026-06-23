@@ -103,10 +103,18 @@ shared trunk roads emerge naturally. Realms are formed by giving each capital
 the land nearest to it, with borders that prefer to follow rivers and
 ridgelines.</p>
 
+<p class="q">Do the settlements have a history?</p>
+<p class="a">Yes. After the world is built, Vellum simulates a rough history:
+towns receive founding dates, and some villages fall into ruin before the survey
+is drawn. Ruins appear on the map as a broken-tower glyph with a dimmed label.
+The atlas adds a Chronicle section, a dated record of founding events and
+collapses, and the gazetteer notes cite dates where relevant
+(<em>"founded in the year 312; fell to ruin by 581"</em>).</p>
+
 <p class="q">Is every map really repeatable?</p>
 <p class="a">Yes. Every random choice descends from the seed, so the same seed
-with the same options always draws a byte-for-byte identical map. It's a
-deliberate design goal, checked by the test suite.</p>
+with the same options always draws an identical map. It's a deliberate design
+goal, checked by the test suite.</p>
 
 <h2 id="names">Names &amp; invented languages</h2>
 
@@ -157,7 +165,8 @@ beaches, the snow line, and the gazetteer's notes, not a change of palette.</p>
 <p class="a"><em>Antique</em>: parchment, hatched mountains, sea monsters.
 <em>Topographic</em>: elevation tints and contour lines.
 <em>Ink</em>: pen-and-ink monochrome.
-<em>Nautical</em>: a sea chart with depth soundings and prevailing-wind arrows.
+<em>Nautical</em>: a sea chart with depth soundings, prevailing-wind arrows, and
+ocean-current streamlines.
 (The nautical style draws no land symbols, so climate is most muted there.)</p>
 
 <p class="q">How do I read the symbols and labels?</p>
@@ -206,11 +215,26 @@ chart, so pass them again alongside the seed to redraw the same map.</p>
 chart (about 14 inches at 300 dpi) and rasterizes it to a PNG, ready to print
 as wall art.</p>
 
-<p class="q">What are the atlas and the gallery?</p>
+<p class="q">What is the Seed of the Day?</p>
+<p class="a">The <a href="../seed-of-the-day/">Seed of the Day</a> page draws a
+new world each day automatically. The seed is today's date in UTC read as a
+number (for example, June 22 2026 becomes seed 20260622), so everyone in the
+world sees the same chart on the same day. No reload needed: the page renders
+fresh in your browser each time you visit.</p>
+
+<p class="q">What is the atlas?</p>
 <p class="a">The atlas binds one world into a small book: the chart in several
-styles, regional close-ups, and a gazetteer of every town with short
-travelers' notes. The <a href="../gallery/">gallery</a> is a contact sheet of
-many worlds at once, for browsing seeds.</p>
+styles, four thematic data plates (vegetation, temperature, rainfall, and
+population), two regional close-ups that zoom in on busy areas, a coat-of-arms
+plate for every realm, a Chronicle of the world's founding events and ruins, and
+a gazetteer of every town with travelers' notes. Run
+<code>npm run atlas -- --seed 42</code>, or open one in the
+<a href="../explorer/">Explorer</a>. Add <code>--pdf</code> to bind it into a
+single PDF.</p>
+
+<p class="q">What is the gallery?</p>
+<p class="a">The <a href="../gallery/">gallery</a> is a contact sheet of many
+worlds at once, useful for browsing seeds until one catches your eye.</p>
 
 <footer>
   <a href="../">VELLUM</a> ·
