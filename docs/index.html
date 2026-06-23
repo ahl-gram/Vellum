@@ -104,18 +104,19 @@ on metal. Here are the three realms of the Isle of Rahai.</p>
 <section>
 <h2>How It Works</h2>
 <p class="how">Give Vellum a number, called a <em>seed</em>, and it builds an
-entire world from scratch. First it raises land out of noise: random bumpiness
-piled up at several scales, then pushed and pulled out of shape so the features
-wander and swirl instead of repeating in a regular pattern. That distortion is
-what gives coastlines their ragged, believable look instead of round, blobby
-islands. Next it runs water downhill until every river finds its way to the sea.
+entire world from scratch. First it raises land out of noise: noise layered at
+several scales, then pushed and pulled out of shape so the features wander and
+swirl instead of repeating in a regular pattern. That distortion is what gives
+coastlines their ragged, believable look instead of round, featureless blobs.
+Next it runs water downhill until every river finds its way to the sea.
 A simple climate of temperature and rainfall decides where forests, deserts, and
-tundra grow. Towns settle where people really would, near sheltered harbors,
+tundra grow.</p>
+<p class="how">Towns settle where any founder would, near sheltered harbors,
 river mouths, and good soil, and roads thread between them by the easiest route,
-sharing corridors the way real trade routes do. Borders follow the lay of the
-land, tracing ridgelines and rivers. Place names are generated as well, drawn
-from six made-up languages, one per culture. And it is all repeatable: the
-same seed always draws exactly the same world, right down to the last coastline.</p>
+sharing corridors. Borders follow the lay of the land, tracing ridgelines and
+rivers. Place names are drawn from six invented languages, one per culture.
+All of it is reproducible: the same seed always draws exactly the same world,
+right down to the last coastline.</p>
 <p class="underhood">Under the hood: a zero-dependency TypeScript engine, using
 domain-warped <a href="https://en.wikipedia.org/wiki/Perlin_noise">gradient
 noise</a> for terrain, <a href="https://arxiv.org/abs/1511.04463">priority-flood</a>
