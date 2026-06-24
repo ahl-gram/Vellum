@@ -312,6 +312,43 @@ async function main() {
   check("A8 worker renders a thematic (field) layer", await evaluate(`document.querySelector("#map svg").outerHTML.includes("layer-field")`));
   await shoot("explorer-worker-theme.png");
 
+  // --- A11: the Tide Wheel (#55) — sea-level slider floods/drains in place ---
+  // Placed before A9a so the console-health check also covers the slider gesture.
+  const landPresent = await evaluate(`!!document.getElementById("land")`);
+  if (!landPresent) {
+    check("A11 sea-level slider present", false, "#land control missing");
+  } else {
+    // flood: low land value, fire input then change (the real drag gesture)
+    await evaluate(`(()=>{
+      document.getElementById("seed").value="42";
+      document.getElementById("style").value="antique";
+      document.getElementById("theme").value="";
+      document.getElementById("type").value="";
+      const l=document.getElementById("land");
+      l.value="150";
+      l.dispatchEvent(new Event("input",{bubbles:true}));
+      l.dispatchEvent(new Event("change",{bubbles:true}));
+    })()`);
+    await waitSettled("land-flood");
+    const a11a = await evaluate(`({hash:location.hash.includes("land="),map:!!document.querySelector("#map svg"),cap:document.getElementById("caption").textContent.length>0})`);
+    check("A11a slider floods in place: fresh chart + land= in hash", a11a.hash && a11a.map && a11a.cap);
+
+    // direction: the drain (high) end bakes a larger land-fraction than the flood (low) end
+    await evaluate(`(()=>{const l=document.getElementById("land");l.value="650";l.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    await waitSettled("land-drain");
+    const drainLF = await evaluate(`Number(document.querySelector("#map svg").getAttribute("data-vellum-land-fraction"))`);
+    await evaluate(`(()=>{const l=document.getElementById("land");l.value="150";l.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    await waitSettled("land-flood2");
+    const floodLF = await evaluate(`Number(document.querySelector("#map svg").getAttribute("data-vellum-land-fraction"))`);
+    check("A11b flood waterline < drain waterline", Number.isFinite(floodLF) && Number.isFinite(drainLF) && floodLF < drainLF, `flood=${floodLF} drain=${drainLF}`);
+
+    // auto-reset: changing map type drops the manual tide from the hash
+    await evaluate(`(()=>{const t=document.getElementById("type");t.value="continent";t.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    await waitSettled("land-typereset");
+    const a11c = await evaluate(`({reset:!location.hash.includes("land="),hash:location.hash})`);
+    check("A11c changing type resets the slider to auto (land= dropped)", a11c.reset, `hash=${a11c.hash}`);
+  }
+
   // --- console / network health for the whole worker run ---
   check("A9a no JS exceptions or console errors", consoleErrors.length === 0, consoleErrors.join(" | ") || "clean");
   const bad4xx = http4xx.filter((u) => !/favicon/i.test(u));

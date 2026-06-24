@@ -4,6 +4,8 @@ import { buildHeightfield } from "../../src/terrain/heightfield.ts";
 import { pickSeaLevel, landMask, landFractionOf } from "../../src/terrain/sealevel.ts";
 import { slopeField } from "../../src/terrain/slope.ts";
 import { createField } from "../../src/core/grid.ts";
+import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import type { MapType } from "../../src/terrain/heightfield.ts";
 
 const RECIPE = {
   seed: 42,
@@ -93,4 +95,37 @@ test("slope of a flat field is zero; tilted plane is uniform", () => {
   const tilted = slopeField(createField(6, 6, (x) => x * 2));
   // interior central difference: d/dx = 2
   assert.ok(Math.abs(tilted.at(3, 3) - 2) < 1e-9);
+});
+
+// --- #55 Tide Wheel: the override the sea-level slider rides on -----------------
+// These lock the engine assumption behind the Explorer slider: landFraction is an
+// additive recipe override that only moves the waterline. The slider adds no engine
+// code, so these characterize existing behavior (they pass on first write) and act
+// as a regression guard. They exercise the FULL pipeline the worker runs, unlike the
+// pickSeaLevel + landMask test above which only covers the quantile layer.
+
+const MAP_TYPES: MapType[] = ["island", "archipelago", "continent", "citystate"];
+
+test("generateWorld survives the full slider landFraction band on every map type", () => {
+  for (const seed of [42, 7, 1234]) {
+    for (const mapType of MAP_TYPES) {
+      for (const landFraction of [0.1, 0.7]) {
+        const world = generateWorld(defaultRecipe(seed, { mapType, landFraction }));
+        assert.ok(
+          world.settlements.length > 0,
+          `seed ${seed} ${mapType} land ${landFraction}: no settlements`,
+        );
+      }
+    }
+  }
+});
+
+test("a landFraction override is additive: it shifts no other recipe roll", () => {
+  for (const seed of [42, 7, 1234]) {
+    const base = defaultRecipe(seed, {});
+    const forced = defaultRecipe(seed, { landFraction: 0.5 });
+    assert.equal(forced.landFraction, 0.5, "the override takes effect");
+    assert.equal(forced.mapType, base.mapType, "mapType unchanged by forcing land");
+    assert.equal(forced.band, base.band, "band unchanged by forcing land");
+  }
 });
