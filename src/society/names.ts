@@ -2,11 +2,13 @@ import type { Rng } from "../core/rng.ts";
 import type { MapType } from "../terrain/heightfield.ts";
 import { editDistanceWithin1 } from "../core/text.ts";
 
-// Common English words the syllable grammar can stumble into; a generated base
-// matching one reads as plain English ("the main atolls") rather than an
-// invented name, so it is rejected and re-rolled. Small and targeted, not
-// exhaustive — it covers the ordinary words the templates and phonemes invite.
-const ENGLISH_BLOCKLIST = new Set<string>([
+// Common English words the syllable grammar can stumble into. A base matching
+// one only reads as plain English when it surfaces as its OWN word in a name
+// ("the main atolls", "the sea of dad"); fused into a longer token — a town
+// suffix ("Manvik") or a glued template ("%ia" -> "Braia") — it reads as
+// invented and is fine. So this screen only fires for a standalone slot (see
+// uniqueBase). Small and targeted, not exhaustive.
+export const ENGLISH_BLOCKLIST = new Set<string>([
   "main", "deep", "reach", "run", "rest", "sand", "land", "band",
   "mine", "mane", "mare", "more", "core", "bore", "sore", "lore", "gore",
   "moan", "moor", "lord", "word", "ward", "born", "corn", "horn", "worn",
@@ -15,12 +17,23 @@ const ENGLISH_BLOCKLIST = new Set<string>([
   "mast", "most", "last", "lost", "cost", "rust", "dust", "must", "fast",
   "vast", "then", "than", "thin", "dell", "hall", "hill", "well", "bell",
   "tell", "sell", "fell", "mark", "dark", "lark", "bark", "stark", "stork",
+  "mom", "dad", "bra",
 ]);
 
 function isShortPrefix(a: string, b: string): boolean {
   const shorter = a.length <= b.length ? a : b;
   const longer = a.length <= b.length ? b : a;
   return shorter.length <= 3 && longer.startsWith(shorter);
+}
+
+// A template's "%" reads as its own word only when it is not glued to letters
+// on either side: "The Sea of %" / "Greater %" are standalone slots, while
+// "%ia" / "The %wood" fuse the base into a longer token.
+export function isStandaloneSlot(template: string): boolean {
+  const i = template.indexOf("%");
+  const isLetter = (c: string | undefined): boolean =>
+    c !== undefined && /[a-z]/i.test(c);
+  return !isLetter(template[i - 1]) && !isLetter(template[i + 1]);
 }
 
 /**
@@ -170,19 +183,23 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
     return s;
   };
 
-  // reject a stem that reads as English or sits within one edit (or is a short
-  // prefix) of one already used — "Mai"/"Main", "Vela"/"Veles" and the like
-  const tooSimilar = (stem: string): boolean =>
-    ENGLISH_BLOCKLIST.has(stem) ||
+  // reject a stem that sits within one edit (or is a short prefix) of one
+  // already used — "Mai"/"Main", "Vela"/"Veles" and the like
+  const nearDuplicate = (stem: string): boolean =>
     usedBases.some((b) => editDistanceWithin1(b, stem) || isShortPrefix(b, stem));
 
-  const uniqueBase = (suffix: string): string => {
+  // `standalone` is true when the base will read as its own word in the final
+  // name (a settlement with no suffix, or a template whose "%" is a standalone
+  // slot). Only then does an English-word base read as plain English and get
+  // re-rolled; fused into a longer token it is left alone.
+  const uniqueBase = (suffix: string, standalone: boolean): string => {
     for (let attempt = 0; attempt < 30; attempt++) {
       let s = rawBase();
       if (s.length < 3 || s.length > 9 || s.length + suffix.length > 13) continue;
       if (/[aeiou]{3}/.test(s) || /(.)\1\1/.test(s)) continue;
       const stem = s.toLowerCase();
-      if (tooSimilar(stem)) continue;
+      if (standalone && ENGLISH_BLOCKLIST.has(stem)) continue;
+      if (nearDuplicate(stem)) continue;
       if (suffix) {
         if (s.endsWith(suffix[0] as string)) s = s.slice(0, -1);
         else if (/[aeiou]$/.test(s) && /^[aeiou]/.test(suffix)) s = s.slice(0, -1);
@@ -196,9 +213,13 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
       }
     }
     // tight namespace: a Roman-numeral base, kept unique by construction. The
-    // numeral disambiguates, so these are exempt from the similarity screen.
+    // numeral disambiguates, so these are exempt from the near-dup screen — but
+    // the base still renders as its own word ("Bra II"), so the English-word
+    // screen always applies here.
     for (let tries = 0; tries < 1000; tries++) {
-      const fallback = `${capitalize(rawBase())} ${ROMAN[overflow++ % ROMAN.length]}`;
+      const base = rawBase();
+      if (ENGLISH_BLOCKLIST.has(base.toLowerCase())) continue;
+      const fallback = `${capitalize(base)} ${ROMAN[overflow++ % ROMAN.length]}`;
       if (!used.has(fallback.toLowerCase())) {
         used.add(fallback.toLowerCase());
         return fallback;
@@ -210,7 +231,7 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
 
   const templated = (templates: readonly string[]): string => {
     const t = rng.pick(templates);
-    return t.replace("%", uniqueBase(""));
+    return t.replace("%", uniqueBase("", isStandaloneSlot(t)));
   };
 
   return {
@@ -220,7 +241,7 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
         case "settlement": {
           const wantSuffix = rng.next() < 0.4;
           const suffix = wantSuffix ? rng.pick(culture.townSuffixes) : "";
-          return uniqueBase(suffix);
+          return uniqueBase(suffix, suffix === "");
         }
         case "river":
           return templated(culture.riverTemplates);
@@ -235,7 +256,7 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
         case "realm":
           return templated(culture.realmTemplates);
         case "bare":
-          return uniqueBase("");
+          return uniqueBase("", true);
       }
     },
   };

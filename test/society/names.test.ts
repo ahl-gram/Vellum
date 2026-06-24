@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import { createRng } from "../../src/core/rng.ts";
 import {
   CULTURES,
+  ENGLISH_BLOCKLIST,
   createNamer,
+  isStandaloneSlot,
   makeMapTitle,
 } from "../../src/society/names.ts";
 
@@ -100,7 +102,7 @@ test("no two bare bases within a world are near-duplicates (edit distance >= 2)"
 });
 
 test("generated bases avoid common English words", () => {
-  const sample = ["main", "deep", "reach", "run", "sand", "mine", "more", "rest"];
+  const sample = ["main", "deep", "reach", "run", "sand", "mine", "more", "rest", "mom", "dad", "bra"];
   for (const culture of CULTURES) {
     for (const seed of [1, 5, 13, 42, 99]) {
       const namer = createNamer(createRng(seed).fork("names"), culture);
@@ -110,6 +112,62 @@ test("generated bases avoid common English words", () => {
       }
     }
   }
+});
+
+test("a standalone-slot base is never a blocklisted word", () => {
+  // The English-word screen keeps a plain word from reading as its own word in a
+  // name ("The Sea of Dad", "Greater Bra"). A standalone template slot fills the
+  // base via the identical uniqueBase(_, true) path that `bare` uses, so testing
+  // `bare` over many worlds against the FULL blocklist covers every standalone
+  // slot. (Template descriptors like "The % Deep" are literal, not the base.)
+  for (const culture of CULTURES) {
+    for (let seed = 1; seed <= 120; seed++) {
+      const namer = createNamer(createRng(seed).fork("names"), culture);
+      for (let i = 0; i < 40; i++) {
+        const base = namer.name("bare").toLowerCase();
+        assert.ok(
+          !ENGLISH_BLOCKLIST.has(base),
+          `${culture.id} seed ${seed}: standalone base "${base}"`,
+        );
+      }
+    }
+  }
+});
+
+test("isStandaloneSlot classifies template slots by letter-adjacency", () => {
+  for (const t of ["The Sea of %", "Greater %", "The % March", "Mount %", "%"]) {
+    assert.ok(isStandaloneSlot(t), `expected standalone: "${t}"`);
+  }
+  for (const t of ["%ia", "The %wood", "The %water", "The %mark", "%flow"]) {
+    assert.ok(!isStandaloneSlot(t), `expected glued: "${t}"`);
+  }
+});
+
+test("a settlement keeps a blocklisted base when a town suffix fuses onto it", () => {
+  // The headline of #65: a blockword base must be KEPT, not re-rolled, when a
+  // town suffix fuses it into a longer word ("bra" + "vik" -> "Bravik"). Scoped
+  // to norden, whose phonemes cannot regenerate these fused forms as a single
+  // base, so a match can ONLY come from base+suffix fusion — impossible on the
+  // old always-screen code (verified red-green). Mirrors uniqueBase's elision.
+  const norden = CULTURES.find((c) => c.id === "norden")!;
+  const fused = new Set<string>();
+  for (const w of ENGLISH_BLOCKLIST) {
+    for (const suf of norden.townSuffixes) {
+      let s = w;
+      if (s.endsWith(suf[0]!)) s = s.slice(0, -1);
+      else if (/[aeiou]$/.test(s) && /^[aeiou]/.test(suf)) s = s.slice(0, -1);
+      if (s.length < 3) continue;
+      fused.add(s + suf);
+    }
+  }
+  let hits = 0;
+  for (let seed = 1; seed <= 200; seed++) {
+    const namer = createNamer(createRng(seed).fork("names"), norden);
+    for (let i = 0; i < 40; i++) {
+      if (fused.has(namer.name("settlement").toLowerCase())) hits++;
+    }
+  }
+  assert.ok(hits > 0, "expected norden blockword+suffix settlements (e.g. 'bravik') to appear");
 });
 
 test("the near-dup screen rarely forces the Roman-numeral fallback", () => {
