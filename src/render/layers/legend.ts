@@ -14,7 +14,7 @@ import { THEMES } from "./field.ts";
  */
 
 type Icon =
-  | { kind: "settlement"; tier: "capital" | "town" | "village" }
+  | { kind: "settlement"; tier: "capital" | "seat" | "town" | "village" }
   | { kind: "ruin" }
   | { kind: "glyph"; sym: string }
   | { kind: "river" }
@@ -87,6 +87,7 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
 
   const tiers = new Set(world.settlements.map((s) => s.kind));
   if (tiers.has("capital")) rows.push({ icon: { kind: "settlement", tier: "capital" }, label: "Capital" });
+  if (world.realms.seats.length > 1) rows.push({ icon: { kind: "settlement", tier: "seat" }, label: "Realm seat" });
   if (tiers.has("town")) rows.push({ icon: { kind: "settlement", tier: "town" }, label: "Town" });
   if (tiers.has("village")) rows.push({ icon: { kind: "settlement", tier: "village" }, label: "Village" });
   if (world.settlements.some((s) => s.ruined)) rows.push({ icon: { kind: "ruin" }, label: "Ruins" });
@@ -174,7 +175,7 @@ function iconNode(icon: Icon, cx: number, cy: number, ctx: RenderCtx): SvgNode {
   const k = ctx.proj.widthPx / 1500;
   switch (icon.kind) {
     case "settlement":
-      return settlementGlyph(icon.tier, cx, cy + (icon.tier === "capital" ? 3 * k : 0), ctx);
+      return settlementGlyph(icon.tier, cx, cy + (icon.tier === "capital" || icon.tier === "seat" ? 3 * k : 0), ctx);
     case "ruin":
       return ruinGlyph(cx, cy + 3 * k, ctx);
     case "glyph":

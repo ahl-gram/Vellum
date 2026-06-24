@@ -3,11 +3,21 @@ import { textBox } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { NamedSettlement } from "../../world/types.ts";
 
-const FONT_SIZE: Record<NamedSettlement["kind"], number> = {
-  capital: 17,
+/** Render tier for a settlement mark. "seat" is a non-capital realm seat: a town
+ *  that heads its own realm, drawn a notch grander than a plain town. */
+export type SettlementTier = NamedSettlement["kind"] | "seat";
+
+export const FONT_SIZE: Record<SettlementTier, number> = {
+  capital: 19,
+  seat: 14,
   town: 13,
   village: 10.5,
 };
+
+/** Grand capital and provincial-seat marks scale the same base glyph. */
+const CAPITAL_GLYPH_SCALE = 1.25;
+const SEAT_GLYPH_SCALE = 0.85;
+const HALO_OPACITY = 0.33;
 
 export type LabelAnchor = "start" | "middle" | "end";
 
@@ -36,30 +46,26 @@ export function labelCandidates(
   ];
 }
 
-/** The map mark for a settlement tier; reused by the legend so the two match. */
+/** The map mark for a settlement tier; reused by the legend so the two match.
+ *  Grand capitals and realm seats share one base glyph (a castle in the inked
+ *  styles, a star-in-circle otherwise), scaled so the capital reads grander. */
 export function settlementGlyph(
-  kind: NamedSettlement["kind"],
+  tier: SettlementTier,
   px: number,
   py: number,
   ctx: RenderCtx,
 ): SvgNode {
   const { style } = ctx;
   const k = ctx.proj.widthPx / 1500;
-  if (kind === "capital") {
-    if (style.name === "antique" || style.name === "ink") {
-      return castleGlyph(px, py, k, style.ink, style.labelHalo);
-    }
-    const r = 6.5 * k;
-    const star = starPath(px, py, r * 0.62, 5);
-    return el("g", {}, [
-      el("circle", {
-        cx: px, cy: py, r,
-        fill: style.labelHalo, stroke: style.ink, "stroke-width": 1.6 * k,
-      }),
-      el("path", { d: star, fill: style.ink }),
-    ]);
+  if (tier === "capital" || tier === "seat") {
+    const ks = k * (tier === "capital" ? CAPITAL_GLYPH_SCALE : SEAT_GLYPH_SCALE);
+    const mark =
+      style.name === "antique" || style.name === "ink"
+        ? castleGlyph(px, py, ks, style.ink, style.labelHalo)
+        : starInCircle(px, py, ks, ctx);
+    return el("g", { class: `settlement-${tier}` }, [mark]);
   }
-  if (kind === "town") {
+  if (tier === "town") {
     return el("circle", {
       cx: px, cy: py, r: 3.4 * k,
       fill: style.ink, stroke: style.labelHalo, "stroke-width": 1.2 * k,
@@ -68,6 +74,42 @@ export function settlementGlyph(
   return el("circle", {
     cx: px, cy: py, r: 2.3 * k,
     fill: style.labelHalo, stroke: style.ink, "stroke-width": 1.3 * k,
+  });
+}
+
+/** A star set in a haloed disc; the capital mark for the un-inked styles. */
+function starInCircle(px: number, py: number, ks: number, ctx: RenderCtx): SvgNode {
+  const { style } = ctx;
+  const r = 6.5 * ks;
+  const star = starPath(px, py, r * 0.62, 5);
+  return el("g", {}, [
+    el("circle", {
+      cx: px, cy: py, r,
+      fill: style.labelHalo, stroke: style.ink, "stroke-width": 1.6 * ks,
+    }),
+    el("path", { d: star, fill: style.ink }),
+  ]);
+}
+
+/** A soft realm-tint aura behind a seat mark; ties the seat to its territory.
+ *  Drawn before the glyph so the paper-filled mark sits on top, leaving a ring. */
+function seatHalo(
+  px: number,
+  py: number,
+  tier: SettlementTier,
+  color: string,
+  ctx: RenderCtx,
+): SvgNode {
+  const { style } = ctx;
+  const k = ctx.proj.widthPx / 1500;
+  const ks = k * (tier === "capital" ? CAPITAL_GLYPH_SCALE : SEAT_GLYPH_SCALE);
+  const castle = style.name === "antique" || style.name === "ink";
+  const r = (castle ? 9.5 : 9) * ks;
+  const cy = castle ? py - 3.5 * ks : py;
+  return el("circle", {
+    class: "seat-halo",
+    cx: px.toFixed(2), cy: cy.toFixed(2), r: r.toFixed(2),
+    fill: color, "fill-opacity": String(HALO_OPACITY),
   });
 }
 
@@ -138,25 +180,71 @@ function starPath(cx: number, cy: number, r: number, points: number): string {
   return d + "Z";
 }
 
+/** A settlement label, styled by tier: grand capitals shout in large spaced
+ *  caps, seats use smaller spaced caps, towns and villages stay as set. */
+function labelNode(
+  display: string,
+  tier: SettlementTier,
+  x: number,
+  y: number,
+  anchor: LabelAnchor,
+  fs: number,
+  ruined: boolean,
+  ctx: RenderCtx,
+): SvgNode {
+  const { style, proj } = ctx;
+  const k = proj.widthPx / 1500;
+  return el(
+    "text",
+    {
+      x, y, "text-anchor": anchor,
+      "font-family": style.fontFamily,
+      "font-size": fs.toFixed(1),
+      ...(tier === "capital" ? { "font-weight": "bold", "letter-spacing": "0.8" } : {}),
+      ...(tier === "seat" ? { "letter-spacing": "0.5" } : {}),
+      ...(ruined ? { "font-style": "italic", "fill-opacity": "0.7" } : {}),
+      fill: style.labelColor, stroke: style.labelHalo,
+      "stroke-width": 2.8 * k, "paint-order": "stroke", "stroke-linejoin": "round",
+    },
+    [display],
+  );
+}
+
 export function settlementsLayer(ctx: RenderCtx): SvgNode {
   const { world, proj, style, labels } = ctx;
   const k = proj.widthPx / 1500;
   const nodes: SvgNode[] = [];
 
-  // capitals first so they always win label space
-  const ordered = [...world.settlements].sort((a, b) => {
-    const rank = { capital: 0, town: 1, village: 2 };
-    return rank[a.kind] - rank[b.kind];
-  });
+  const seats = world.realms.seats;
+  const seatRealm = new Map<number, number>();
+  seats.forEach((idx, realmId) => seatRealm.set(idx, realmId));
+  const showHalo = style.politicalTints && seats.length > 1;
 
-  for (const s of ordered) {
+  const RANK: Record<SettlementTier, number> = { capital: 0, seat: 1, town: 2, village: 3 };
+  const tierOf = (s: NamedSettlement, i: number): SettlementTier =>
+    s.kind === "capital" ? "capital" : seatRealm.has(i) ? "seat" : s.kind;
+
+  // capitals then seats first so the seats of power always win label space
+  const ordered = world.settlements
+    .map((s, i) => ({ s, i, tier: tierOf(s, i) }))
+    .sort((a, b) => RANK[a.tier] - RANK[b.tier]);
+
+  for (const { s, i, tier } of ordered) {
     const px = proj.px(s.x);
     const py = proj.py(s.y);
-    nodes.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(s.kind, px, py, ctx));
 
-    const fs = FONT_SIZE[s.kind] * k;
-    const gap = (s.kind === "capital" ? 10 : 7) * k;
+    if (showHalo && (tier === "capital" || tier === "seat") && !s.ruined) {
+      const realmId = seatRealm.get(i) as number;
+      const color = style.realmTints[realmId % style.realmTints.length] as string;
+      nodes.push(seatHalo(px, py, tier, color, ctx));
+    }
+    nodes.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(tier, px, py, ctx));
+
+    const fs = FONT_SIZE[tier] * k;
+    const gap = (tier === "capital" ? 11 : tier === "seat" ? 8 : 7) * k;
+    const upper = tier === "capital" || tier === "seat";
     const text = s.name;
+    const display = upper ? text.toUpperCase() : text;
     const tries = labelCandidates(px, py, fs, gap);
     let placed = false;
     for (const t of tries) {
@@ -164,46 +252,14 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
       if (box.x < proj.margin + 4 || box.x + box.w > proj.widthPx - proj.margin - 4) continue;
       if (box.y < proj.margin + 4 || box.y + box.h > proj.heightPx - proj.margin - 4) continue;
       if (!labels.tryClaim(box)) continue;
-      nodes.push(
-        el(
-          "text",
-          {
-            x: t.x,
-            y: t.y,
-            "text-anchor": t.anchor,
-            "font-family": style.fontFamily,
-            "font-size": fs.toFixed(1),
-            ...(s.kind === "capital"
-              ? { "font-weight": "bold", "letter-spacing": "0.6" }
-              : {}),
-            ...(s.ruined ? { "font-style": "italic", "fill-opacity": "0.7" } : {}),
-            fill: style.labelColor,
-            stroke: style.labelHalo,
-            "stroke-width": 2.8 * k,
-            "paint-order": "stroke",
-            "stroke-linejoin": "round",
-          },
-          [s.kind === "capital" ? text.toUpperCase() : text],
-        ),
-      );
+      nodes.push(labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx));
       placed = true;
       break;
     }
-    if (!placed && s.kind !== "village") {
+    if (!placed && tier !== "village") {
       // important places keep their label even in a crowd
       const t = tries[0]!;
-      nodes.push(
-        el(
-          "text",
-          {
-            x: t.x, y: t.y, "text-anchor": t.anchor,
-            "font-family": style.fontFamily, "font-size": fs.toFixed(1),
-            fill: style.labelColor, stroke: style.labelHalo,
-            "stroke-width": 2.8 * k, "paint-order": "stroke",
-          },
-          [s.kind === "capital" ? text.toUpperCase() : text],
-        ),
-      );
+      nodes.push(labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx));
     }
   }
 
