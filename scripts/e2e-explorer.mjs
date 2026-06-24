@@ -349,6 +349,32 @@ async function main() {
     check("A11c changing type resets the slider to auto (land= dropped)", a11c.reset, `hash=${a11c.hash}`);
   }
 
+  // --- A12: the arms (heraldry) toggle (#44) — like the legend checkbox ---
+  // Placed before A9a so the console-health check also covers the gesture.
+  const armsPresent = await evaluate(`!!document.getElementById("arms")`);
+  if (!armsPresent) {
+    check("A12 arms checkbox present", false, "#arms control missing");
+  } else {
+    // start from a clean realm-bearing world, arms off
+    await evaluate(`(()=>{
+      document.getElementById("seed").value="42";
+      document.getElementById("style").value="antique";
+      document.getElementById("theme").value="";
+      document.getElementById("type").value="";
+      document.getElementById("arms").checked=false;
+      document.getElementById("draw").click();
+    })()`);
+    await waitSettled("arms-off");
+    const a12off = await evaluate(`({heraldry:document.querySelector("#map svg").outerHTML.includes("layer-heraldry"),hash:location.hash.includes("arms=0")})`);
+    check("A12a arms off: no heraldry layer, arms=0 in hash", !a12off.heraldry && a12off.hash, `heraldry=${a12off.heraldry} hash=${a12off.hash}`);
+
+    // toggle on via the change handler (the real gesture), expect heraldry + arms=1
+    await evaluate(`(()=>{const a=document.getElementById("arms");a.checked=true;a.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    await waitSettled("arms-on");
+    const a12on = await evaluate(`({heraldry:document.querySelector("#map svg").outerHTML.includes("layer-heraldry"),hash:location.hash.includes("arms=1")})`);
+    check("A12b arms on: heraldry layer drawn, arms=1 in hash", a12on.heraldry && a12on.hash, `heraldry=${a12on.heraldry} hash=${a12on.hash}`);
+  }
+
   // --- console / network health for the whole worker run ---
   check("A9a no JS exceptions or console errors", consoleErrors.length === 0, consoleErrors.join(" | ") || "clean");
   const bad4xx = http4xx.filter((u) => !/favicon/i.test(u));

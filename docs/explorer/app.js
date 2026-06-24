@@ -14,6 +14,7 @@ const typeSel = $("type");
 const bandSel = $("band");
 const themeSel = $("theme");
 const legendChk = $("legend");
+const armsChk = $("arms");
 const landSlider = $("land");
 const landReadout = $("land-readout");
 const status = $("status");
@@ -127,6 +128,8 @@ function readHash() {
   if ([...themeSel.options].some((o) => o.value === theme)) themeSel.value = theme;
   const legend = params.get("legend");
   if (legend !== null) legendChk.checked = legend === "1";
+  const arms = params.get("arms");
+  if (arms !== null) armsChk.checked = arms === "1";
   const land = params.get("land");
   if (land !== null) {
     const f = Number(land) / 1000;
@@ -146,6 +149,7 @@ function writeHash() {
   if (bandSel.value) params.set("band", bandSel.value);
   if (themeSel.value) params.set("theme", themeSel.value);
   params.set("legend", legendChk.checked ? "1" : "0");
+  params.set("arms", armsChk.checked ? "1" : "0");
   if (landTouched) params.set("land", String(Math.round(sliderToLand(landSlider.value) * 1000)));
   history.replaceState(null, "", "#" + params.toString());
 }
@@ -290,12 +294,13 @@ function draw() {
   const style = styleSel.value;
   const theme = themeSel.value;
   const legend = legendChk.checked;
+  const arms = armsChk.checked;
   const t0 = performance.now();
   runJob({
     kind: "draw",
     seed,
     overrides,
-    render: { style, widthPx: 1500, legend, theme: theme || undefined },
+    render: { style, widthPx: 1500, legend, arms, theme: theme || undefined },
   })
     .then((res) => {
       if (myGen !== drawGen) return; // a newer draw superseded this one
@@ -363,7 +368,7 @@ seedInput.addEventListener("keydown", (e) => {
     draw();
   }
 });
-for (const sel of [styleSel, bandSel, themeSel, legendChk]) {
+for (const sel of [styleSel, bandSel, themeSel, legendChk, armsChk]) {
   sel.addEventListener("change", draw);
 }
 // Changing the map type reshapes the terrain, so a manual tide no longer applies:
