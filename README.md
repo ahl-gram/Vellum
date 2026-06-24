@@ -4,10 +4,10 @@
 
 [![CI](https://github.com/ahl-gram/Vellum/actions/workflows/ci.yml/badge.svg)](https://github.com/ahl-gram/Vellum/actions/workflows/ci.yml)
 
-**Live gallery: <https://ahl-gram.github.io/Vellum/>** · draw your own
-in the **[Explorer](https://ahl-gram.github.io/Vellum/explorer/)** (the
+**Live gallery: <https://vellum.route12b.net/>** · draw your own
+in the **[Explorer](https://vellum.route12b.net/explorer/)** (the
 whole engine runs client-side) · or read the
-**[FAQ](https://ahl-gram.github.io/Vellum/faq/)**.
+**[FAQ](https://vellum.route12b.net/faq/)**.
 
 Vellum surveys worlds that don't exist and drafts them as atlas charts.
 Give it a seed and it invents a landmass, simulates the rain that carves its
@@ -35,7 +35,7 @@ build step. Everything it draws lands in `out/` (gitignored); each chart is a
 plain SVG you can open in a browser, drop into a document, or rasterize with
 `--png`.
 
-> **No Node.js?** The **[Explorer](https://ahl-gram.github.io/Vellum/explorer/)**
+> **No Node.js?** The **[Explorer](https://vellum.route12b.net/explorer/)**
 > runs the whole engine in your browser: type a seed and draw.
 
 ## Commands
@@ -210,7 +210,7 @@ Two things to know:
 
 ## Seed of the day
 
-[`docs/seed-of-the-day/`](https://ahl-gram.github.io/Vellum/seed-of-the-day/) is a
+[`docs/seed-of-the-day/`](https://vellum.route12b.net/seed-of-the-day/) is a
 hand-authored page that draws a fresh world each day. The seed is the current
 date in UTC read as an integer `YYYYMMDD` (2026-06-19 -> seed `20260619`), mapped
 by `seedForDate()` in `src/world/seed-of-the-day.ts`. UTC, so everyone sees the
@@ -279,7 +279,7 @@ Zero runtime dependencies. Node 23.6+ runs the TypeScript directly
 
 ### The Explorer's render path
 
-The web [Explorer](https://ahl-gram.github.io/Vellum/explorer/) runs the whole
+The web [Explorer](https://vellum.route12b.net/explorer/) runs the whole
 engine in your browser, off the main thread, so the page stays responsive while
 a world is drawn. `docs/explorer/index.html` loads `app.js`, which spawns a Web
 Worker with `new Worker("./worker.js", { type: "module" })`.
