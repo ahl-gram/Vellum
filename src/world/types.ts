@@ -17,6 +17,8 @@ export type WorldRecipe = {
   readonly mapType: MapType;
   readonly landFraction: number;
   readonly band: ClimateBand;
+  /** Coastline irregularity; 0 (default) is the pure radial island. */
+  readonly coastWarp?: number;
 };
 
 export type NamedSettlement = Settlement & {

@@ -113,6 +113,7 @@ export async function main(argv: string[]): Promise<void> {
       grid: { type: "string" },
       width: { type: "string" },
       land: { type: "string" },
+      "coast-warp": { type: "string" },
       count: { type: "string" },
       png: { type: "boolean", default: false },
       pdf: { type: "boolean", default: false },
@@ -149,12 +150,18 @@ export async function main(argv: string[]): Promise<void> {
   if (landFraction !== undefined && (landFraction < 0.1 || landFraction > 0.7)) {
     throw new Error("--land must be between 0.1 and 0.7");
   }
+  const coastWarp =
+    values["coast-warp"] !== undefined ? Number(values["coast-warp"]) : undefined;
+  if (coastWarp !== undefined && (!Number.isFinite(coastWarp) || coastWarp < 0 || coastWarp > 1)) {
+    throw new Error("--coast-warp must be between 0 and 1");
+  }
 
   const recipe = recipeForCommand(command, seed, {
     ...(grid ?? {}),
     ...(mapType ? { mapType } : {}),
     ...(band ? { band } : {}),
     ...(landFraction !== undefined ? { landFraction } : {}),
+    ...(coastWarp !== undefined ? { coastWarp } : {}),
   });
 
   if (command === "chart" || command === "poster") {

@@ -80,7 +80,13 @@ export function generateWorld(recipe: WorldRecipe): World {
   const { seed, gridW, gridH, mapType } = recipe;
   const rng = createRng(seed);
 
-  const elev = buildHeightfield({ seed, gridW, gridH, mapType });
+  const elev = buildHeightfield({
+    seed,
+    gridW,
+    gridH,
+    mapType,
+    ...(recipe.coastWarp !== undefined ? { coastWarp: recipe.coastWarp } : {}),
+  });
   const seaLevel = pickSeaLevel(elev, recipe.landFraction);
 
   // base moisture drives rainfall; final climate adds river wetness after

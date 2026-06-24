@@ -41,6 +41,24 @@ test("map border is deeply depressed (ocean guarantee)", () => {
   assert.ok(borderMax < interiorMax, "border should sit below the interior");
 });
 
+test("coast warp is on by default and reshapes the landmass", () => {
+  const warped = buildHeightfield(RECIPE);
+  const plain = buildHeightfield({ ...RECIPE, coastWarp: 0 });
+  // default must differ from the un-warped radial dome (the on-by-default guard)
+  assert.notDeepEqual(warped.data, plain.data);
+});
+
+test("coast warp still honors the deep-water border guarantee", () => {
+  // a bold warp must not push land into the framed ocean fringe
+  const f = buildHeightfield({ ...RECIPE, coastWarp: 0.55 });
+  for (let x = 0; x < f.w; x++) {
+    assert.ok(f.at(x, 0) < 0 && f.at(x, f.h - 1) < 0, `top/bottom edge land at x=${x}`);
+  }
+  for (let y = 0; y < f.h; y++) {
+    assert.ok(f.at(0, y) < 0 && f.at(f.w - 1, y) < 0, `left/right edge land at y=${y}`);
+  }
+});
+
 test("map types produce different terrain", () => {
   const island = buildHeightfield(RECIPE);
   const arch = buildHeightfield({ ...RECIPE, mapType: "archipelago" });
