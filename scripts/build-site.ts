@@ -1,40 +1,25 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
-import { renderMap } from "../src/render/map-renderer.ts";
-import { armsSvgDocument, paletteForStyle } from "../src/render/layers/heraldry.ts";
-import { STYLES } from "../src/render/style.ts";
 import { buildAtlas } from "../src/cli/atlas.ts";
 import { buildGallery } from "../src/cli/gallery.ts";
+import { HERO_SEED, heroChartSvgs } from "./hero-charts.ts";
 
 /**
  * Regenerates the generated parts of the docs/ showcase site.
  * docs/index.html is hand-authored and not touched here.
  */
 
-const HERO_SEED = 42;
 const GALLERY_SEED = 100;
 
 async function main(): Promise<void> {
   const chartsDir = resolve("docs/charts");
   await mkdir(chartsDir, { recursive: true });
 
-  const hero = generateWorld(defaultRecipe(HERO_SEED));
-  for (const style of ["antique", "topographic", "ink", "nautical"] as const) {
-    const svg = renderMap(hero, { style, legend: true });
-    await writeFile(resolve(chartsDir, `chart-${HERO_SEED}-${style}.svg`), svg, "utf8");
-    console.log(`charts/chart-${HERO_SEED}-${style}.svg`);
-  }
-
-  // the hero world's realm arms, for the landing page "Arms of the Realms" strip
-  const heroArmsPalette = paletteForStyle(STYLES.antique);
-  for (let i = 0; i < hero.arms.length; i++) {
-    await writeFile(
-      resolve(chartsDir, `arms-${HERO_SEED}-${i}.svg`),
-      armsSvgDocument(hero.arms[i]!, 150, heroArmsPalette, `hero${i}`),
-      "utf8",
-    );
-    console.log(`charts/arms-${HERO_SEED}-${i}.svg`);
+  // The committed hero charts + arms strip. heroChartSvgs() is the same source
+  // the drift guard (test/site/hero-charts.test.ts) checks these against.
+  for (const [name, svg] of heroChartSvgs()) {
+    await writeFile(resolve(chartsDir, name), svg, "utf8");
+    console.log(`charts/${name}`);
   }
 
   await buildAtlas(HERO_SEED, { out: "docs/atlas" });
