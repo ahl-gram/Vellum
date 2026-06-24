@@ -4,11 +4,11 @@ import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 
 /**
  * Golden snapshot of seed 42's IDENTITY (names + geography). It proved the #19
- * history work was additive (no earlier stream reshuffled), then was updated
- * once here in the #17 name-screen commit — the intended, one-time re-roll.
- * The realm names that triggered #17 ("The Main Atolls" / "The Mai Atolls")
- * are now distinct, and the geometry (realms.labels) is unchanged, since the
- * name screen never touches terrain.
+ * history work was additive (no earlier stream reshuffled), was updated once in
+ * the #17 name-screen commit, and again when coastline domain-warp landed: that
+ * change reshapes the terrain, so every terrain-derived value (realm names, sea
+ * name, the realms.labels geometry) re-rolled. Title/year/capital are drawn
+ * before terrain settles and stayed put.
  */
 
 function labelsChecksum(labels: Int16Array): number {
@@ -26,11 +26,10 @@ test("seed 42 golden identity (post #17 name re-roll)", () => {
   assert.equal(w.title.year, 1059);
   assert.equal(w.settlements[0]!.name, "Laukuwelua"); // capital
   assert.deepEqual(w.names.realms, [
-    "The Woaku Atolls",
-    "The Chiefdom of Tauwau",
     "The Chiefdom of Peroa",
+    "The Chiefdom of Rekekoa",
+    "The Hauwaiwa Atolls",
   ]);
-  assert.equal(w.names.sea, "The Sea of Roanono");
-  // geometry is untouched by the name screen
-  assert.equal(labelsChecksum(w.realms.labels), 2894501552);
+  assert.equal(w.names.sea, "The Great Mung");
+  assert.equal(labelsChecksum(w.realms.labels), 1218526613);
 });
