@@ -71,6 +71,12 @@
     </select>
   </label>
   <label class="check">legend <input id="legend" type="checkbox" checked></label>
+  <label class="sealevel">sea level
+    <span class="land-end">more sea</span>
+    <input id="land" type="range" min="100" max="700" step="2" aria-label="Sea level">
+    <span class="land-end">more land</span>
+    <span id="land-readout" class="land-readout"></span>
+  </label>
   <button id="draw" class="primary">Draw</button>
   <span class="exports">
     <button id="download">Download SVG</button>

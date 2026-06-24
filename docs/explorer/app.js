@@ -14,6 +14,8 @@ const typeSel = $("type");
 const bandSel = $("band");
 const themeSel = $("theme");
 const legendChk = $("legend");
+const landSlider = $("land");
+const landReadout = $("land-readout");
 const status = $("status");
 const mapDiv = $("map");
 const caption = $("caption");
@@ -27,6 +29,14 @@ let lastOverrides = {};
 let lastStyle = "antique";
 let lastTheme = "";
 let atlasUrls = [];
+
+// Sea-level slider (#55) state. landTouched gates the manual override and the
+// land= hash param; until the user moves the slider, it auto-tracks each world's
+// natural waterline. landDebounce throttles the redraw during a drag.
+let landTouched = false;
+let landDebounce = 0;
+const LAND_MIN = 0.1;
+const LAND_MAX = 0.7;
 
 // Monotonic guards. drawGen is bumped by every draw; both a draw's own result and
 // any pending bind check it, so a fresh draw cancels a stale draw and a stale bind
@@ -117,6 +127,15 @@ function readHash() {
   if ([...themeSel.options].some((o) => o.value === theme)) themeSel.value = theme;
   const legend = params.get("legend");
   if (legend !== null) legendChk.checked = legend === "1";
+  const land = params.get("land");
+  if (land !== null) {
+    const f = Number(land) / 1000;
+    if (Number.isFinite(f)) {
+      landTouched = true;
+      landSlider.value = String(landToSlider(f));
+      updateLandReadout();
+    }
+  }
 }
 
 function writeHash() {
@@ -127,7 +146,28 @@ function writeHash() {
   if (bandSel.value) params.set("band", bandSel.value);
   if (themeSel.value) params.set("theme", themeSel.value);
   params.set("legend", legendChk.checked ? "1" : "0");
+  if (landTouched) params.set("land", String(Math.round(sliderToLand(landSlider.value) * 1000)));
   history.replaceState(null, "", "#" + params.toString());
+}
+
+// --- Sea-level slider (#55) -------------------------------------------------
+// The slider value is landFraction x 1000 (an integer in [100, 700]); these are
+// trivial inverses so the gesture cannot ship backwards. clampLand keeps every
+// value strictly inside (0, 1) so pickSeaLevel never throws on a crafted hash.
+const clampLand = (f) => Math.min(LAND_MAX, Math.max(LAND_MIN, f));
+const sliderToLand = (v) => clampLand(Number(v) / 1000);
+const landToSlider = (f) => Math.round(clampLand(f) * 1000);
+
+function updateLandReadout() {
+  const pct = Math.round(sliderToLand(landSlider.value) * 100);
+  landReadout.textContent = `${pct}% land`;
+  landSlider.setAttribute("aria-valuetext", `${pct}% land`);
+}
+
+// Display-only: park the slider at the world's natural waterline. Must NOT mutate
+// the overrides passed to the worker (auto mode sends no landFraction override).
+function syncAutoSlider(seed, overrides) {
+  landSlider.value = String(landToSlider(defaultRecipe(seed, overrides).landFraction));
 }
 
 // --- Render worker plumbing -------------------------------------------------
@@ -244,6 +284,9 @@ function draw() {
   const overrides = {};
   if (typeSel.value) overrides.mapType = typeSel.value;
   if (bandSel.value) overrides.band = bandSel.value;
+  if (landTouched) overrides.landFraction = sliderToLand(landSlider.value);
+  else syncAutoSlider(seed, overrides);
+  updateLandReadout();
   const style = styleSel.value;
   const theme = themeSel.value;
   const legend = legendChk.checked;
@@ -280,6 +323,7 @@ function draw() {
 $("draw").addEventListener("click", draw);
 $("random").addEventListener("click", () => {
   seedInput.value = String(randomSeed());
+  landTouched = false;
   draw();
 });
 $("download").addEventListener("click", () => {
@@ -314,11 +358,33 @@ bindBtn.addEventListener("click", () => {
     });
 });
 seedInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") draw();
+  if (e.key === "Enter") {
+    landTouched = false;
+    draw();
+  }
 });
-for (const sel of [styleSel, typeSel, bandSel, themeSel, legendChk]) {
+for (const sel of [styleSel, bandSel, themeSel, legendChk]) {
   sel.addEventListener("change", draw);
 }
+// Changing the map type reshapes the terrain, so a manual tide no longer applies:
+// reset to auto so the slider re-derives from the new world.
+typeSel.addEventListener("change", () => {
+  landTouched = false;
+  draw();
+});
+// Drag: live readout + debounced redraw on input, an authoritative redraw on
+// release. Both bump drawGen, so a stale in-flight frame is discarded.
+landSlider.addEventListener("input", () => {
+  landTouched = true;
+  updateLandReadout();
+  clearTimeout(landDebounce);
+  landDebounce = setTimeout(draw, 100);
+});
+landSlider.addEventListener("change", () => {
+  landTouched = true;
+  clearTimeout(landDebounce);
+  draw();
+});
 
 worker = await initWorker();
 window.__vellumUsesWorker = () => worker !== null;
