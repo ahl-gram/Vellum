@@ -199,7 +199,12 @@ export function featureLabelsLayer(ctx: RenderCtx): {
       labels.tryClaim(spacedTextBox(c.x, cy, name, fs, ls), 4),
     );
     if (placedY === undefined) return;
-    const labelW = name.length * (fs * 0.56 + ls);
+    // The label renders all-caps (name.toUpperCase() below), which runs wider
+    // than spacedTextBox's 0.56 mixed-case factor. Size the shield anchor with a
+    // caps-aware width so a side-placed coat of arms clears the final letters
+    // instead of tucking over them. (Anchor-only: heraldry consumes this, so it
+    // does not move the no-arms committed charts.)
+    const labelW = name.length * (fs * 0.72 + ls);
     realmAnchors.push({ realm, cx: c.x, cy: placedY - 0.4 * fs, halfW: labelW / 2, halfH: 0.6 * fs });
     nodes.push(
       el(

@@ -4,6 +4,7 @@ import { renderSvg } from "../../src/render/svg.ts";
 import { STYLES } from "../../src/render/style.ts";
 import {
   armsNode,
+  armsPlacements,
   armsSvgDocument,
   paletteForStyle,
 } from "../../src/render/layers/heraldry.ts";
@@ -125,6 +126,82 @@ test("a single-realm world still shows its arms beside the seat", () => {
   const armed = renderMap(w, { style: "antique", arms: true });
   assert.ok(armed.includes("layer-heraldry"), "single-realm arms should still draw");
   assert.ok(!armed.includes("NaN"));
+});
+
+test("armsPlacements covers every realm: labelled realms keep their anchor, unlabelled fall back to their seat", () => {
+  // The bug (#44 follow-up): in a multi-realm world where only SOME realm
+  // labels place (the rest arena-blocked), the old code armed only the
+  // labelled realms and dropped the others, since the seat fallback was gated
+  // on zero anchors. armsPlacements must return one placement per realm.
+  const world = {
+    arms: [{}, {}, {}],
+    realms: { seats: [4, 5, 6] },
+    settlements: Array.from({ length: 7 }, (_, i) => ({ x: i * 10, y: i * 5 })),
+  };
+  const proj = { px: (x: number) => x + 1, py: (y: number) => y + 2 };
+  const anchors = [{ realm: 1, cx: 111, cy: 222, halfW: 9, halfH: 8 }]; // only realm 1 labelled
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const out = armsPlacements(world as any, anchors as any, proj as any, 1);
+  assert.equal(out.length, 3, "every realm gets a placement, not just labelled ones");
+  assert.deepEqual(out.map((p) => p.realm), [0, 1, 2]);
+  assert.equal(out.find((p) => p.realm === 1)!.cx, 111, "labelled realm keeps its label anchor");
+  const r0 = out.find((p) => p.realm === 0)!; // seat[0]=settlement 4 at (40,20) -> px 41, py 22
+  assert.equal(r0.cx, 41);
+  assert.equal(r0.cy, 22);
+});
+
+test("a multi-realm world where a realm's shield is boxed in beside its label still arms it (#44 follow-up repro)", () => {
+  // seed 40318157 (archipelago): 2 realms, both labelled, but pre-fix one
+  // realm's shield was boxed in on all four cardinal sides and silently
+  // dropped, so the chart drew 1 shield for 2 realms.
+  const w = generateWorld(defaultRecipe(40318157));
+  assert.ok(w.arms.length >= 2, "fixture must stay a multi-realm world to exercise the bug");
+  const armed = renderMap(w, { style: "antique", arms: true });
+  const shields = (armed.match(/class="vellum-arms"/g) ?? []).length;
+  assert.equal(shields, w.arms.length, `every realm should be armed, got ${shields}/${w.arms.length}`);
+});
+
+test("a side-placed shield clears its realm label's all-caps text (no covered letters, #44 follow-up)", () => {
+  // Realm labels render UPPERCASE, which runs wider than spacedTextBox's 0.56
+  // mixed-case factor. Pre-fix the shield anchored to the label's underestimated
+  // width and tucked over the final letters (seed 40318157 covered the last "N"
+  // of "...DOMINION"). The shield box must not overlap the label's true caps box.
+  const CAPS = 0.72; // serif all-caps advance width, the basis of the fix
+  const w = generateWorld(defaultRecipe(40318157));
+  const svg = renderMap(w, { style: "antique", arms: true });
+  const k = 1; // width 1500
+  const size = 30 * k;
+  const sh = size * 1.18;
+
+  const names = w.names.realms as unknown as string[];
+  for (let realm = 0; realm < w.arms.length; realm++) {
+    const label = names[realm]?.toUpperCase();
+    if (!label) continue;
+    const esc = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const lm = new RegExp(`<text\\b([^>]*)>${esc}</text>`).exec(svg);
+    if (!lm) continue; // realm has no placed label (seat fallback) — nothing to clear
+    const at = lm[1]!;
+    const lx = Number(/\bx="([\d.]+)"/.exec(at)![1]);
+    const ly = Number(/\by="([\d.]+)"/.exec(at)![1]);
+    const fs = Number(/font-size="([\d.]+)"/.exec(at)![1]);
+    const ls = Number(/letter-spacing="([\d.]+)"/.exec(at)![1]);
+    const trueW = label.length * (fs * CAPS + ls);
+    const labelBox = { x: lx - trueW / 2, y: ly - fs, w: trueW, h: fs * 1.2 };
+
+    const sm = new RegExp(`vellum-arms-m${realm}[^M]*M([\\d.]+) ([\\d.]+)`).exec(svg);
+    if (!sm) continue;
+    const shieldBox = { x: Number(sm[1]), y: Number(sm[2]), w: size, h: sh };
+
+    const overlap =
+      shieldBox.x < labelBox.x + labelBox.w &&
+      shieldBox.x + shieldBox.w > labelBox.x &&
+      shieldBox.y < labelBox.y + labelBox.h &&
+      shieldBox.y + shieldBox.h > labelBox.y;
+    assert.ok(
+      !overlap,
+      `realm ${realm} shield ${JSON.stringify(shieldBox)} overlaps its caps label ${JSON.stringify(labelBox)}`,
+    );
+  }
 });
 
 test("armsNode returns a group node, and the document is byte-deterministic", () => {
