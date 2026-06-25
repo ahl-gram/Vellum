@@ -4,6 +4,7 @@
 // output is byte-identical to running the same engine on the main thread.
 import { defaultRecipe, generateWorld } from "./engine/world/generate.js";
 import { renderMap } from "./engine/render/map-renderer.js";
+import { buildPlaceManifest } from "./engine/render/place-manifest.js";
 import { composeAtlas } from "./engine/atlas/compose.js";
 
 // The composition's `world` carries Field methods (at/index/inBounds) that are
@@ -30,6 +31,7 @@ self.onmessage = (e) => {
         id: msg.id,
         ok: true,
         svg: renderMap(world, msg.render),
+        manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
         title: world.title.title,
         mapType: recipe.mapType,
         band: recipe.band,
