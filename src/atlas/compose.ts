@@ -2,7 +2,7 @@ import { createRng } from "../core/rng.ts";
 import { renderMap } from "../render/map-renderer.ts";
 import { armsSvgDocument, paletteForStyle } from "../render/layers/heraldry.ts";
 import type { ThemeName } from "../render/layers/field.ts";
-import { STYLES } from "../render/style.ts";
+import { STYLES, type StyleName } from "../render/style.ts";
 import { escapeXml } from "../render/svg.ts";
 import { createLoreWriter } from "../society/lore.ts";
 import { generateRegionWorld, windowAround } from "../world/region.ts";
@@ -174,12 +174,20 @@ function regionPlates(world: World, width: number): AtlasPlate[] {
   });
 }
 
-/** The thematic data plates, in atlas order, with their reader-facing captions. */
-const THEMATIC: ReadonlyArray<{ theme: ThemeName; title: string }> = [
-  { theme: "vegetation", title: "Vegetation" },
-  { theme: "climate", title: "Temperature" },
-  { theme: "moisture", title: "Rainfall" },
-  { theme: "population", title: "Population" },
+/**
+ * The thematic data plates, in atlas order, with their reader-facing captions
+ * and the map style each is drawn in (#71). Each style appears once, chosen to
+ * suit the theme: vegetation keeps the parchment biome palette (antique),
+ * temperature reads cleanest on the bright topographic sheet, rainfall takes the
+ * navy nautical register, and population is a pen-and-ink density choropleth.
+ * The Explorer still crosses every style with every theme; this is just the
+ * curated set the bound atlas shows.
+ */
+const THEMATIC: ReadonlyArray<{ theme: ThemeName; title: string; style: StyleName }> = [
+  { theme: "vegetation", title: "Vegetation", style: "antique" },
+  { theme: "climate", title: "Temperature", style: "topographic" },
+  { theme: "moisture", title: "Rainfall", style: "nautical" },
+  { theme: "population", title: "Population", style: "ink" },
 ];
 
 /**
@@ -214,10 +222,10 @@ export function composeAtlas(
       svg: renderMap(world, { style: "nautical", widthPx: width, legend: true }),
     },
   ];
-  const themes: AtlasPlate[] = THEMATIC.map(({ theme, title }) => ({
+  const themes: AtlasPlate[] = THEMATIC.map(({ theme, title, style }) => ({
     key: `theme-${theme}`,
     title,
-    svg: renderMap(world, { style: "antique", widthPx: width, theme, legend: true }),
+    svg: renderMap(world, { style, widthPx: width, theme, legend: true }),
   }));
   return {
     world,
