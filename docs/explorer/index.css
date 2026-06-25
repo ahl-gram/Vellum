@@ -12,10 +12,16 @@ h1 a { color: inherit; text-decoration: none; }
 .topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: #857257; margin: 0.9rem 0 0; }
 .topnav a { color: inherit; }
 [aria-current="page"] { font-weight: 700; }
-.controls {
-  display: flex; flex-wrap: wrap; gap: 0.7rem; justify-content: center;
-  align-items: center; margin: 1.2rem 0;
-}
+/* #87: the controls read as three labeled bands (Map / Display / Actions)
+   instead of one wrapping blob. Each row is a quiet right-aligned label plus a
+   wrapping field group; rows stack into clean sections on a phone. */
+.controls { display: flex; flex-direction: column; gap: 0.8rem;
+  margin: 1.2rem auto; max-width: 960px; }
+.control-row { display: flex; align-items: baseline; gap: 0.9rem; }
+.row-label { flex: 0 0 4.5rem; text-align: right; text-transform: uppercase;
+  letter-spacing: 0.14em; font-size: 0.68rem; color: #9a8868; }
+.row-fields { display: flex; flex-wrap: wrap; align-items: center;
+  gap: 0.55rem 0.85rem; flex: 1; }
 .controls label { font-size: 0.85rem; letter-spacing: 0.05em; color: #6b5a40; }
 .controls label.check { display: inline-flex; align-items: center; gap: 0.35rem; }
 .controls input[type="checkbox"] { accent-color: #4a3826; width: 1rem; height: 1rem; }
@@ -24,7 +30,10 @@ h1 a { color: inherit; text-decoration: none; }
 .land-end { font-size: 0.72rem; font-style: italic; color: #857257; }
 .land-readout { font-style: italic; color: #6b5a40;
   font-variant-numeric: tabular-nums; min-width: 4.2rem; }
-.controls .exports { display: inline-flex; gap: 0.7rem; }
+@media (max-width: 560px) {
+  .control-row { flex-direction: column; align-items: stretch; gap: 0.35rem; }
+  .row-label { flex: none; text-align: left; }
+}
 input[type="number"], select, button {
   font-family: inherit; font-size: 0.95rem; color: #3d2f1f;
   background: #f8f1e0; border: 1.5px solid #4a3826; border-radius: 4px;

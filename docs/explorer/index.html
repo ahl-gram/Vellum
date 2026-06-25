@@ -34,56 +34,69 @@
 </header>
 
 <div class="controls">
-  <label>seed <input id="seed" type="number" min="0" max="4294967295" step="1"></label>
-  <button id="random" title="random seed" aria-label="Random seed">🎲</button>
-  <label>style
-    <select id="style">
-      <option value="antique" selected>antique</option>
-      <option value="topographic">topographic</option>
-      <option value="ink">ink</option>
-      <option value="nautical">nautical</option>
-    </select>
-  </label>
-  <label>type
-    <select id="type">
-      <option value="" selected>seed's choice</option>
-      <option value="island">island</option>
-      <option value="archipelago">archipelago</option>
-      <option value="continent">continent</option>
-      <option value="citystate">city-state</option>
-    </select>
-  </label>
-  <label>climate
-    <select id="band">
-      <option value="" selected>seed's choice</option>
-      <option value="temperate">temperate</option>
-      <option value="tropical">tropical</option>
-      <option value="polar">polar</option>
-    </select>
-  </label>
-  <label>theme
-    <select id="theme">
-      <option value="" selected>none</option>
-      <option value="vegetation">vegetation</option>
-      <option value="climate">temperature</option>
-      <option value="moisture">rainfall</option>
-      <option value="population">population</option>
-    </select>
-  </label>
-  <label class="check">legend <input id="legend" type="checkbox" checked></label>
-  <label class="check">arms <input id="arms" type="checkbox"></label>
-  <label class="check">chronicle <input id="chronicle" type="checkbox"></label>
-  <label class="sealevel">sea level
-    <span class="land-end">more sea</span>
-    <input id="land" type="range" min="100" max="700" step="2" aria-label="Sea level">
-    <span class="land-end">more land</span>
-    <span id="land-readout" class="land-readout"></span>
-  </label>
-  <button id="draw" class="primary">Draw</button>
-  <span class="exports">
-    <button id="download">Download SVG</button>
-    <button id="bind">Bind as atlas</button>
-  </span>
+  <div class="control-row" role="group" aria-labelledby="grp-map">
+    <span class="row-label" id="grp-map">Map</span>
+    <div class="row-fields">
+      <label>seed <input id="seed" type="number" min="0" max="4294967295" step="1"></label>
+      <button id="random" title="random seed" aria-label="Random seed">🎲</button>
+      <label>style
+        <select id="style">
+          <option value="antique" selected>antique</option>
+          <option value="topographic">topographic</option>
+          <option value="ink">ink</option>
+          <option value="nautical">nautical</option>
+        </select>
+      </label>
+      <label>type
+        <select id="type">
+          <option value="" selected>seed's choice</option>
+          <option value="island">island</option>
+          <option value="archipelago">archipelago</option>
+          <option value="continent">continent</option>
+          <option value="citystate">city-state</option>
+        </select>
+      </label>
+      <label>climate
+        <select id="band">
+          <option value="" selected>seed's choice</option>
+          <option value="temperate">temperate</option>
+          <option value="tropical">tropical</option>
+          <option value="polar">polar</option>
+        </select>
+      </label>
+    </div>
+  </div>
+  <div class="control-row" role="group" aria-labelledby="grp-display">
+    <span class="row-label" id="grp-display">Display</span>
+    <div class="row-fields">
+      <label>theme
+        <select id="theme">
+          <option value="" selected>none</option>
+          <option value="vegetation">vegetation</option>
+          <option value="climate">temperature</option>
+          <option value="moisture">rainfall</option>
+          <option value="population">population</option>
+        </select>
+      </label>
+      <label class="check">legend <input id="legend" type="checkbox" checked></label>
+      <label class="check">arms <input id="arms" type="checkbox"></label>
+      <label class="check">chronicle <input id="chronicle" type="checkbox"></label>
+      <label class="sealevel">sea level
+        <span class="land-end">more sea</span>
+        <input id="land" type="range" min="100" max="700" step="2" aria-label="Sea level">
+        <span class="land-end">more land</span>
+        <span id="land-readout" class="land-readout"></span>
+      </label>
+    </div>
+  </div>
+  <div class="control-row" role="group" aria-labelledby="grp-actions">
+    <span class="row-label" id="grp-actions">Actions</span>
+    <div class="row-fields">
+      <button id="draw" class="primary">Draw</button>
+      <button id="download">Download SVG</button>
+      <button id="bind">Bind as atlas</button>
+    </div>
+  </div>
 </div>
 
 <p class="status" id="status" role="status" aria-live="polite"></p>
