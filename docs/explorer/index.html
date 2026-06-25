@@ -72,6 +72,7 @@
   </label>
   <label class="check">legend <input id="legend" type="checkbox" checked></label>
   <label class="check">arms <input id="arms" type="checkbox"></label>
+  <label class="check">chronicle <input id="chronicle" type="checkbox"></label>
   <label class="sealevel">sea level
     <span class="land-end">more sea</span>
     <input id="land" type="range" min="100" max="700" step="2" aria-label="Sea level">
@@ -88,6 +89,14 @@
 <p class="status" id="status" role="status" aria-live="polite"></p>
 <div id="map"></div>
 <p class="caption" id="caption"></p>
+<div id="scrubber" class="scrubber" hidden>
+  <div class="scrub-controls">
+    <button id="scrub-play" type="button">Play</button>
+    <input id="scrub-range" type="range" aria-label="Chronicle year">
+    <span id="scrub-year" class="scrub-year" aria-hidden="true"></span>
+  </div>
+  <ol id="chronicle-strip" class="chronicle-strip"></ol>
+</div>
 <div id="atlas"></div>
 
 <footer>

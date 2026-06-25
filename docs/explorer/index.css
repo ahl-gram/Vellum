@@ -75,6 +75,44 @@ button.primary:hover { background: #5d4831; }
   letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.1rem; }
 .pc-founded { display: block; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
 .pc-tale { margin: 0.4rem 0 0; font-style: italic; color: #54452f; }
+
+/* Chronicle year-scrubber (#54). In scrub mode the baked settlement + road
+   layers are display:none and the overlay's hit-targets become time-controlled
+   dots. All dot styling is scoped behind .place-overlay.scrub so normal mode
+   stays byte-identical (idle parity): the global button{} rule must never paint
+   these. The dots are a visual time-layer (not a tab-stop, JS sets tabindex -1);
+   the chronicle strip lists the headline events as text. --scrub-mark per style. */
+.place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
+.place-overlay.scrub .place-hit::before {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 9px; height: 9px; border-radius: 50%; box-sizing: border-box;
+  display: none; box-shadow: 0 0 0 1.5px #f8f1e0;
+}
+.place-overlay.scrub .place-hit[data-state="living"]::before {
+  display: block; background: var(--scrub-mark, #4a3826); border: 0;
+}
+.place-overlay.scrub .place-hit[data-state="ruin"]::before {
+  display: block; background: transparent;
+  border: 2px solid var(--scrub-mark, #4a3826);
+}
+.scrubber[hidden] { display: none; }
+.scrubber { max-width: 1100px; margin: 0.8rem auto 0;
+  background: #f3ead2; border: 1px solid #b9a77f; border-radius: 6px;
+  padding: 0.8rem 1rem; }
+.scrub-controls { display: flex; align-items: center; gap: 0.8rem; }
+.scrub-controls #scrub-play { min-width: 5.2rem; }
+.scrub-controls input[type="range"] { flex: 1; accent-color: #7a5c2e; }
+.scrub-year { font-style: italic; color: #6b5a40;
+  font-variant-numeric: tabular-nums; min-width: 5rem; text-align: right; }
+.chronicle-strip { list-style: none; margin: 0.7rem 0 0; padding: 0;
+  max-height: 9rem; overflow-y: auto; }
+.chronicle-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
+  border-bottom: 1px solid #cdbd97; opacity: 0.4; transition: opacity 0.18s; }
+.chronicle-strip li.past { opacity: 1; }
+.chronicle-strip .cr-year { flex: 0 0 3rem; text-align: right;
+  font-variant-numeric: tabular-nums; font-weight: 600; color: #857257; }
+.chronicle-strip .cr-text { color: #54452f; }
 .caption { text-align: center; font-style: italic; color: #6b5a40;
   padding-top: 0.6rem; }
 footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;

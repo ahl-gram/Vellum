@@ -6,6 +6,14 @@ import { defaultRecipe, generateWorld } from "./engine/world/generate.js";
 import { renderMap } from "./engine/render/map-renderer.js";
 import { buildPlaceManifest } from "./engine/render/place-manifest.js";
 import { composePlaceCard, placeAriaLabel, cardSide } from "./engine/render/place-card.js";
+import {
+  scrubRange,
+  buildScrubMarks,
+  placeStateAt,
+  eventIsPast,
+  buildSweepPlan,
+  sweepYearAt,
+} from "./engine/render/chronicle-scrubber.js";
 import { composeAtlas } from "./engine/atlas/compose.js";
 import { escapeXml } from "./engine/render/svg.js";
 
@@ -24,6 +32,12 @@ const mapDiv = $("map");
 const caption = $("caption");
 const atlasDiv = $("atlas");
 const bindBtn = $("bind");
+const chronicleChk = $("chronicle");
+const scrubPanel = $("scrubber");
+const scrubPlayBtn = $("scrub-play");
+const scrubRangeEl = $("scrub-range");
+const scrubYearEl = $("scrub-year");
+const chronicleStrip = $("chronicle-strip");
 
 let lastSvg = "";
 let lastTitle = "";
@@ -39,7 +53,14 @@ let atlasUrls = [];
 // mapDiv.innerHTML = res.svg wipes #map's children. `pinned` keeps a tapped or
 // Enter/Space card open (touch has no mouseleave); `currentIdx` is the place the
 // card last showed, so a hover can move the open card without losing the pin.
-let placeOverlay = null; // { card, places, events, currentIdx, pinned } | null
+let placeOverlay = null; // { card, places, events, presentYear, currentIdx, pinned } | null
+
+// Chronicle scrubber (#54): a year-slider + Play that animates the world growing.
+// It reuses #53's overlay hit-targets as time-controlled dots over the hidden
+// baked layers, reading the #52 manifest. Client-only: no worker round-trip, no
+// re-render. `scrub` is the active session (null when the toggle is off).
+let scrub = null; // { marks, range, hits, strip, plan, playing, rafId, elapsed, year } | null
+const STYLE_MARK = { antique: "#7a2d12", topographic: "#1f5135", ink: "#1a1a1a", nautical: "#1d3a63" };
 
 // Sea-level slider (#55) state. landTouched gates the manual override and the
 // land= hash param; until the user moves the slider, it auto-tracks each world's
@@ -127,7 +148,7 @@ ${atlas.gazetteerHtml}`;
 // so they align at any rendered width.
 
 function showPlaceCard(idx) {
-  if (!placeOverlay) return;
+  if (!placeOverlay || scrub) return; // the hover card is suppressed while scrubbing
   const place = placeOverlay.places[idx];
   if (!place) return;
   const card = composePlaceCard(place, placeOverlay.events);
@@ -182,7 +203,7 @@ function buildPlaceOverlay(manifest) {
   // genuine click is always preceded by a preview of the same place, so keying
   // the toggle off currentIdx would dismiss instead of switch when pinning B
   // after A was pinned.
-  placeOverlay = { card, places: manifest.places, events: manifest.events, currentIdx: -1, pinned: false, pinnedIdx: -1 };
+  placeOverlay = { card, places: manifest.places, events: manifest.events, presentYear: manifest.presentYear, currentIdx: -1, pinned: false, pinnedIdx: -1 };
   manifest.places.forEach((place, idx) => {
     const hit = document.createElement("button");
     hit.type = "button";
@@ -210,6 +231,149 @@ function buildPlaceOverlay(manifest) {
   });
   mapDiv.appendChild(overlay);
   mapDiv.appendChild(card);
+}
+
+// --- Chronicle scrubber (#54) -----------------------------------------------
+// Toggles display on the baked #layer-settlements/#layer-roads groups and reads
+// the #52 manifest; never re-renders. Download SVG saves lastSvg (the string),
+// never the DOM, so the export is unaffected no matter the scrubbed frame.
+
+function toggleBakedLayers(visible) {
+  // Restore by CLEARING the inline style, never setting "block": the <g> carried
+  // no inline display originally, and an SVG <g> does not take display:block.
+  for (const id of ["layer-settlements", "layer-roads"]) {
+    const g = mapDiv.querySelector("#" + id);
+    if (g) g.style.display = visible ? "" : "none";
+  }
+}
+
+function cancelScrubRaf() {
+  if (scrub && scrub.rafId) {
+    cancelAnimationFrame(scrub.rafId);
+    scrub.rafId = 0;
+  }
+}
+
+function setPlayLabel(playing) {
+  // The label swap (Play/Pause) IS the state for AT; no aria-pressed, which on a
+  // label-swapping control announces a contradictory "Pause, pressed" while playing.
+  scrubPlayBtn.textContent = playing ? "Pause" : "Play";
+}
+
+function buildStrip(events) {
+  chronicleStrip.replaceChildren();
+  const rows = [];
+  for (const e of events) {
+    const li = document.createElement("li");
+    const year = document.createElement("span");
+    year.className = "cr-year";
+    year.textContent = String(e.year);
+    const text = document.createElement("span");
+    text.className = "cr-text";
+    text.textContent = e.text; // textContent: event prose is plain text
+    li.append(year, text);
+    chronicleStrip.appendChild(li);
+    rows.push({ li, year: e.year });
+  }
+  return rows;
+}
+
+// Paint one frame: the year readout, the slider thumb, each place's dot state,
+// and which chronicle rows have come to pass. Setting .value here does NOT fire
+// the slider's input event, so Play never trips the manual-scrub handler.
+function paintScrub(year) {
+  if (!scrub) return;
+  scrub.year = year;
+  scrubRangeEl.value = String(year);
+  // Year on the slider's aria-valuetext (like the sea-level slider), NOT a live
+  // region: programmatic value changes during Play stay silent, while a keyboard
+  // scrub announces "year N" once per arrow press. The #scrub-year span is visual.
+  scrubRangeEl.setAttribute("aria-valuetext", `year ${year}`);
+  scrubYearEl.textContent = `year ${year}`;
+  scrub.marks.forEach((m, i) => {
+    const el = scrub.hits[i];
+    if (el) el.dataset.state = placeStateAt(m, year);
+  });
+  for (const row of scrub.strip) {
+    row.li.classList.toggle("past", eventIsPast(row.year, year));
+  }
+}
+
+function applyScrub() {
+  if (!placeOverlay || !placeOverlay.places || !placeOverlay.places.length) return;
+  cancelScrubRaf();
+  hidePlaceCard();
+  const { places, events, presentYear } = placeOverlay;
+  const overlayEl = mapDiv.querySelector(".place-overlay");
+  const hits = overlayEl ? [...overlayEl.querySelectorAll(".place-hit")] : [];
+  if (overlayEl) {
+    overlayEl.classList.add("scrub");
+    overlayEl.style.setProperty("--scrub-mark", STYLE_MARK[lastStyle] ?? STYLE_MARK.antique);
+  }
+  // The dots are a visual time-layer, not a tab-stop; the dated chronicle strip
+  // below lists the world's headline events (a capped subset) as readable text.
+  for (const h of hits) h.tabIndex = -1;
+  toggleBakedLayers(false);
+  const range = scrubRange(places, presentYear);
+  scrubRangeEl.min = String(range.min);
+  scrubRangeEl.max = String(range.max);
+  scrubRangeEl.step = "1";
+  scrub = {
+    marks: buildScrubMarks(places, events, presentYear),
+    range,
+    hits,
+    strip: buildStrip(events),
+    plan: null,
+    playing: false,
+    rafId: 0,
+    elapsed: 0,
+    year: range.max,
+  };
+  scrubPanel.hidden = false;
+  setPlayLabel(false);
+  paintScrub(range.max); // park at the present: the world as just drawn, in dot form
+}
+
+function exitScrub() {
+  cancelScrubRaf();
+  scrubPanel.hidden = true;
+  const overlayEl = mapDiv.querySelector(".place-overlay");
+  if (overlayEl) {
+    overlayEl.classList.remove("scrub");
+    for (const h of overlayEl.querySelectorAll(".place-hit")) h.removeAttribute("tabindex");
+  }
+  toggleBakedLayers(true);
+  scrub = null;
+}
+
+function pauseScrub() {
+  if (!scrub) return;
+  cancelScrubRaf();
+  scrub.playing = false;
+  setPlayLabel(false);
+}
+
+function playScrub() {
+  if (!scrub) return;
+  scrub.plan = buildSweepPlan(scrub.range, placeOverlay.events.map((e) => e.year));
+  if (scrub.year >= scrub.range.max) scrub.elapsed = 0; // at the end: replay from the start
+  const begin = performance.now() - scrub.elapsed;
+  scrub.playing = true;
+  setPlayLabel(true);
+  const tick = (now) => {
+    if (!scrub || !scrub.playing) return;
+    const elapsed = now - begin;
+    scrub.elapsed = elapsed;
+    if (elapsed >= scrub.plan.totalMs) {
+      scrub.elapsed = scrub.plan.totalMs;
+      paintScrub(scrub.range.max);
+      pauseScrub(); // auto-pause at the present year, button back to "Play"
+      return;
+    }
+    paintScrub(sweepYearAt(scrub.plan, elapsed));
+    scrub.rafId = requestAnimationFrame(tick);
+  };
+  scrub.rafId = requestAnimationFrame(tick);
 }
 
 function randomSeed() {
@@ -385,6 +549,7 @@ function draw() {
   const seed = Number(seedInput.value) >>> 0;
   const myGen = ++drawGen;
   drawing = true;
+  cancelScrubRaf(); // a redraw is about to wipe the overlay; stop any running sweep
   bindBtn.disabled = true;
   status.textContent = "Drafting…";
   caption.textContent = "";
@@ -419,6 +584,11 @@ function draw() {
       lastTheme = theme;
       mapDiv.innerHTML = res.svg;
       buildPlaceOverlay(res.manifest); // #53: marks + card, appended after innerHTML wipes #map
+      // #54: if the chronicle toggle is on, re-apply the scrubber to THIS new world
+      // (fresh manifest, range, layers); applyScrub hides the just-rendered layers
+      // synchronously, so there is no flash of the present-day chart.
+      if (chronicleChk.checked) applyScrub();
+      else scrub = null;
       const ms = (performance.now() - t0).toFixed(0);
       status.textContent = "";
       caption.textContent = `${res.title} · ${res.mapType} · ${res.band} · drawn in ${ms}ms`;
@@ -427,6 +597,10 @@ function draw() {
       if (myGen !== drawGen) return;
       drawing = false;
       bindBtn.disabled = false;
+      // A redraw that fails leaves the OLD overlay in place; if a sweep was running,
+      // its rAF was already cancelled at draw() start, so restore the button to a
+      // consistent paused state rather than a frozen "Pause" with nothing animating.
+      if (scrub) pauseScrub();
       status.textContent = "The cartographer spilled the ink: " + err.message;
     });
 }
@@ -495,6 +669,25 @@ landSlider.addEventListener("change", () => {
   landTouched = true;
   clearTimeout(landDebounce);
   draw();
+});
+
+// Chronicle scrubber (#54): the toggle enters/leaves scrub mode without a
+// redraw (no re-roll); Play/Pause runs the event-proportional sweep; a manual
+// drag pauses Play and rebases it so the next Play restarts from the beginning.
+chronicleChk.addEventListener("change", () => {
+  if (chronicleChk.checked) applyScrub();
+  else exitScrub();
+});
+scrubPlayBtn.addEventListener("click", () => {
+  if (!scrub) return;
+  if (scrub.playing) pauseScrub();
+  else playScrub();
+});
+scrubRangeEl.addEventListener("input", () => {
+  if (!scrub) return;
+  if (scrub.playing) pauseScrub();
+  scrub.elapsed = 0; // a manual scrub restarts Play from the earliest founding
+  paintScrub(Number(scrubRangeEl.value));
 });
 
 // Living Chart overlay (#53): dismiss a pinned card with Escape or a click/tap
