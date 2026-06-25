@@ -13,6 +13,7 @@ import {
   buildClues,
   chooseQuarry,
   classifyDistanceBand,
+  legendExcluded,
   revealLore,
 } from "../explorer/engine/world/daily-hunt.js";
 import { createProjection } from "../explorer/engine/render/transform.js";
@@ -94,11 +95,42 @@ function prevSeed(s) {
   return seedForDate(dt);
 }
 
+// Read the rendered legend's box in the chart's pixel space (via the same
+// client-rect mapping the click handler uses) and ask the engine which
+// settlements fall under it. Empty if the legend isn't drawn or measurable.
+function legendExclusions(world, svg, proj) {
+  const el = svg.querySelector("#layer-legend");
+  const sr = svg.getBoundingClientRect();
+  if (!el || !sr.width || !sr.height) return new Set();
+  const lr = el.getBoundingClientRect();
+  const box = {
+    x: ((lr.left - sr.left) / sr.width) * proj.widthPx,
+    y: ((lr.top - sr.top) / sr.height) * proj.heightPx,
+    width: (lr.width / sr.width) * proj.widthPx,
+    height: (lr.height / sr.height) * proj.heightPx,
+  };
+  return legendExcluded(world, box, proj.widthPx);
+}
+
+// Show the warmer/colder line in its panel slot AND mirror it into the fixed
+// mobile bar, so the latest feedback stays in view without scrolling.
+function setHuntStatus(text) {
+  $("hunt-status").textContent = text;
+  const sticky = $("hunt-sticky");
+  if (!sticky) return;
+  sticky.textContent = text;
+  sticky.classList.toggle("active", text.length > 0);
+  sticky.hidden = text.length === 0;
+}
+
 function setupHunt(world) {
-  const quarry = chooseQuarry(world);
   const hunt = $("hunt");
   const svg = $("map").querySelector("svg");
-  if (!quarry || !hunt || !svg) return;
+  if (!hunt || !svg) return;
+
+  const proj = createProjection(world.elev.w, world.elev.h, 1500, MARGIN);
+  const quarry = chooseQuarry(world, { exclude: legendExclusions(world, svg, proj) });
+  if (!quarry) return;
 
   // clues: a plain antique ordered list
   const list = $("clues");
@@ -110,7 +142,6 @@ function setupHunt(world) {
   }
   hunt.hidden = false;
 
-  const proj = createProjection(world.elev.w, world.elev.h, 1500, MARGIN);
   const diagonal = Math.hypot(world.elev.w - 1, world.elev.h - 1);
   let guesses = 0;
 
@@ -153,9 +184,11 @@ function setupHunt(world) {
     placeStar();
     showReveal();
     $("share").hidden = false;
-    $("hunt-status").textContent = fromClick
-      ? `Found it in ${guesses} ${guesses === 1 ? "guess" : "guesses"}.`
-      : "Already found today. Come back tomorrow for a new world.";
+    setHuntStatus(
+      fromClick
+        ? `Found it in ${guesses} ${guesses === 1 ? "guess" : "guesses"}.`
+        : "Already found today. Come back tomorrow for a new world.",
+    );
     updateStreak();
   };
 
@@ -169,7 +202,7 @@ function setupHunt(world) {
       navigator.clipboard
         .writeText(text)
         .then(() => {
-          $("hunt-status").textContent = "Copied your result to the clipboard.";
+          setHuntStatus("Copied your result to the clipboard.");
         })
         .catch(() => {});
     }
@@ -209,7 +242,7 @@ function setupHunt(world) {
     } else {
       const ns = world.settlements[nearest];
       const dist = Math.hypot(ns.x - quarry.settlement.x, ns.y - quarry.settlement.y);
-      $("hunt-status").textContent = BAND_PROSE[classifyDistanceBand(dist, diagonal)];
+      setHuntStatus(BAND_PROSE[classifyDistanceBand(dist, diagonal)]);
     }
   });
 }

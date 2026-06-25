@@ -36,28 +36,33 @@
 <p class="dateline" id="dateline"></p>
 <p class="status" id="status">Drafting today's world&hellip;</p>
 
-<figure>
-  <div id="map"></div>
-  <figcaption id="caption"></figcaption>
-</figure>
+<div class="stage">
+  <figure>
+    <div id="map"></div>
+    <figcaption id="caption"></figcaption>
+  </figure>
+
+  <section class="hunt" id="hunt" hidden>
+    <h2>The Daily Hunt</h2>
+    <p class="hunt-intro">One forgotten place hides on today's chart. Read the
+    survey notes, then click the map to find it. Everyone hunting today's seed is
+    looking for the same place.</p>
+    <ol class="clues" id="clues"></ol>
+    <p class="hunt-status" id="hunt-status" aria-live="polite"></p>
+    <div class="reveal" id="reveal" hidden></div>
+    <div class="hunt-actions">
+      <button type="button" id="share" hidden>Share your find</button>
+      <span class="streak" id="streak"></span>
+    </div>
+    <p class="note">Your streak is kept on this device only: no account, no
+    backend.</p>
+  </section>
+</div>
+
 <p class="survey" id="survey"></p>
 <p class="blurb" id="blurb"></p>
 
-<section class="hunt" id="hunt" hidden>
-  <h2>The Daily Hunt</h2>
-  <p class="hunt-intro">One forgotten place hides on today's chart. Read the
-  survey notes, then click the map to find it. Everyone hunting today's seed is
-  looking for the same place.</p>
-  <ol class="clues" id="clues"></ol>
-  <p class="hunt-status" id="hunt-status" aria-live="polite"></p>
-  <div class="reveal" id="reveal" hidden></div>
-  <div class="hunt-actions">
-    <button type="button" id="share" hidden>Share your find</button>
-    <span class="streak" id="streak"></span>
-  </div>
-  <p class="note">Your streak is kept on this device only: no account, no
-  backend.</p>
-</section>
+<div id="hunt-sticky" class="hunt-sticky" aria-hidden="true" hidden></div>
 
 <div class="actions">
   <a id="explore" href="../explorer/">Open today's seed in the Explorer</a>

@@ -33,16 +33,28 @@ export async function run(ctx) {
   // own world, using the same engine + projection the page used to draw.
   const tgt = await evaluate(`(async()=>{
     const {defaultRecipe,generateWorld}=await import("../explorer/engine/world/generate.js");
-    const {chooseQuarry}=await import("../explorer/engine/world/daily-hunt.js");
+    const {chooseQuarry,legendExcluded}=await import("../explorer/engine/world/daily-hunt.js");
     const {createProjection}=await import("../explorer/engine/render/transform.js");
     const {seedForDate}=await import("../explorer/engine/world/seed-of-the-day.js");
     const seed=seedForDate(new Date());
     const world=generateWorld(defaultRecipe(seed));
-    const q=chooseQuarry(world);
-    const cap=world.settlements.find((s)=>s.kind==="capital")??world.settlements[0];
     const proj=createProjection(world.elev.w,world.elev.h,1500,Math.round(1500*0.045));
+    // mirror the page (#88): drop settlements hidden under the rendered legend,
+    // so the quarry computed here matches the one the page actually placed.
+    const svg=document.querySelector("#map svg");
+    const leg=svg&&svg.querySelector("#layer-legend");
+    const sr=svg&&svg.getBoundingClientRect();
+    let exclude=new Set(),legFrac=null;
+    if(leg&&sr&&sr.width&&sr.height){
+      const lr=leg.getBoundingClientRect();
+      legFrac={x0:(lr.left-sr.left)/sr.width,y0:(lr.top-sr.top)/sr.height,x1:(lr.right-sr.left)/sr.width,y1:(lr.bottom-sr.top)/sr.height};
+      const box={x:legFrac.x0*proj.widthPx,y:legFrac.y0*proj.heightPx,width:(lr.width/sr.width)*proj.widthPx,height:(lr.height/sr.height)*proj.heightPx};
+      exclude=legendExcluded(world,box,proj.widthPx);
+    }
+    const q=chooseQuarry(world,{exclude});
+    const cap=world.settlements.find((s)=>s.kind==="capital")??world.settlements[0];
     const frac=(s)=>({fx:proj.px(s.x)/proj.widthPx,fy:proj.py(s.y)/proj.heightPx});
-    return{seed,name:q.settlement.name,hit:frac(q.settlement),miss:frac(cap)};
+    return{seed,name:q.settlement.name,hit:frac(q.settlement),miss:frac(cap),legFrac};
   })()`, true);
   const clickHunt = (f) => evaluate(`(()=>{const svg=document.querySelector("#map svg");const r=svg.getBoundingClientRect();svg.dispatchEvent(new MouseEvent("click",{clientX:r.left+${f.fx}*r.width,clientY:r.top+${f.fy}*r.height,bubbles:true}));return{status:document.getElementById("hunt-status").textContent,solved:document.getElementById("map").classList.contains("solved")};})()`);
 
@@ -68,4 +80,13 @@ export async function run(ctx) {
   }
   check("H8 reload restores the solved state without inflating the streak", huntRestored);
   check("H9 the hunt run logged no JS exceptions or console errors", consoleErrors.length === huntErrBase, consoleErrors.slice(huntErrBase).join(" | ") || "clean");
+
+  // #88: the quarry must not be picked beneath the legend card. legFrac is the
+  // legend's measured box as viewport fractions; the chosen hit must fall clear
+  // of it (and a legend must actually have been drawn to make this meaningful).
+  const hitInLegend =
+    !!tgt.legFrac &&
+    tgt.hit.fx >= tgt.legFrac.x0 && tgt.hit.fx <= tgt.legFrac.x1 &&
+    tgt.hit.fy >= tgt.legFrac.y0 && tgt.hit.fy <= tgt.legFrac.y1;
+  check("H10 the day's quarry sits clear of the rendered legend", !!tgt.legFrac && !hitInLegend, JSON.stringify({ leg: tgt.legFrac, hit: tgt.hit }));
 }
