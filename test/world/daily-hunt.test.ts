@@ -5,10 +5,13 @@ import {
   buildClues,
   chooseQuarry,
   classifyDistanceBand,
+  legendExcluded,
   revealLore,
   type Clue,
+  type LegendBox,
   type Quarry,
 } from "../../src/world/daily-hunt.ts";
+import { createProjection } from "../../src/render/transform.ts";
 import type { World } from "../../src/world/types.ts";
 
 // This suite is world-generation heavy by design: acceptance #5 asks for the
@@ -283,4 +286,52 @@ test("a ruined quarry reveals its abandonment event verbatim", () => {
   const r = revealLore(ruined, q);
   assert.equal(r.line, event.text, "surfaces the chronicle's abandonment line");
   assert.equal(r.founded, q.settlement.founded, "still cites the founding year");
+});
+
+// --- #88: keep the quarry from hiding under the legend ------------------------
+
+/** Count of the broad non-seat village pool chooseQuarry normally draws from. */
+function villagePoolSize(world: World): number {
+  const seats = new Set(world.realms.seats);
+  return world.settlements.filter((s, i) => s.kind === "village" && !seats.has(i)).length;
+}
+
+test("chooseQuarry never returns an excluded settlement when alternatives exist", () => {
+  const world = SWEEP.find((w) => villagePoolSize(w) >= 2);
+  assert.ok(world, "fixture sanity: some swept world has >=2 candidate villages");
+  const q0 = chooseQuarry(world)!;
+  const q1 = chooseQuarry(world, { exclude: new Set([q0.idx]) })!;
+  assert.notEqual(q1.idx, q0.idx, "excluding the default pick yields a different place");
+  assert.equal(world.settlements[q1.idx], q1.settlement, "idx and settlement still agree");
+});
+
+test("chooseQuarry falls back to the full pool when exclusion would empty it", () => {
+  const world = DAILY[0]!;
+  const all = new Set(world.settlements.map((_, i) => i));
+  const q = chooseQuarry(world, { exclude: all });
+  assert.ok(q, "a target still exists even if every settlement is under the legend");
+  assert.equal(q!.idx, chooseQuarry(world)!.idx, "the fallback pool is the unconstrained one");
+});
+
+test("chooseQuarry is deterministic for a given exclusion set", () => {
+  const world = SWEEP.find((w) => villagePoolSize(w) >= 2)!;
+  const ex = new Set([chooseQuarry(world)!.idx]);
+  assert.equal(
+    chooseQuarry(world, { exclude: ex })!.idx,
+    chooseQuarry(world, { exclude: ex })!.idx,
+  );
+});
+
+test("legendExcluded flags settlements under the box and spares those outside it", () => {
+  const world = DAILY[0]!;
+  const widthPx = 1500;
+  const proj = createProjection(world.elev.w, world.elev.h, widthPx, Math.round(widthPx * 0.045));
+  const target = world.settlements[0]!;
+  const box: LegendBox = { x: proj.px(target.x) - 6, y: proj.py(target.y) - 6, width: 12, height: 12 };
+  assert.ok(legendExcluded(world, box, widthPx).has(0), "a settlement under the box is excluded");
+  // Every projected point sits at >= margin (68px), so a 4px corner box can
+  // never contain a settlement: a clean "spared" case independent of the world.
+  const corner: LegendBox = { x: 0, y: 0, width: 4, height: 4 };
+  assert.ok(!legendExcluded(world, corner, widthPx).has(0), "a settlement clear of the box is spared");
+  assert.equal(legendExcluded(world, null, widthPx).size, 0, "no legend box excludes nothing");
 });
