@@ -80,7 +80,7 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
 
   // A thematic plate leads with its color key; the terrain symbology is suppressed.
   if (theme) {
-    for (const sw of THEMES[theme].legendRows(world)) {
+    for (const sw of THEMES[theme].legendRows(world, style)) {
       rows.push({ icon: { kind: "swatch", color: sw.color }, label: sw.label });
     }
   }
