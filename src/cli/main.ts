@@ -18,7 +18,7 @@ import {
   NO_BROWSER_HINT_PDF,
 } from "./raster.ts";
 
-const HELP = `vellum — an atelier of imaginary cartography
+const HELP = `vellum: an atelier of imaginary cartography
 
 Usage:
   node src/cli/main.ts chart [options]   Draft a single chart (SVG)

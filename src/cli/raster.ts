@@ -86,9 +86,9 @@ export async function printToPdf(
 }
 
 export const NO_BROWSER_HINT =
-  "no Chromium-family browser found for PNG export — install Brave/Chrome, " +
+  "no Chromium-family browser found for PNG export: install Brave/Chrome, " +
   "or point VELLUM_BROWSER at a browser binary; the SVG was still written";
 
 export const NO_BROWSER_HINT_PDF =
-  "no Chromium-family browser found for PDF export — install Brave/Chrome, " +
+  "no Chromium-family browser found for PDF export: install Brave/Chrome, " +
   "or point VELLUM_BROWSER at a browser binary; the atlas HTML was still written";

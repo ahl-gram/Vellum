@@ -36,7 +36,7 @@ export async function buildGallery(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vellum gallery — ${count} worlds from seed ${startSeed}</title>
+<title>Vellum gallery: ${count} worlds from seed ${startSeed}</title>
 <style>
   body { margin: 0; padding: 2rem 1.5rem 4rem; background: #efe6cf; color: #3d2f1f;
     font-family: 'Iowan Old Style', 'Palatino', Georgia, serif; }
