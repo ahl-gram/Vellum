@@ -17,8 +17,18 @@ h1 a { color: inherit; text-decoration: none; }
   text-transform: uppercase; color: #857257; margin: 0.4rem 0 1.4rem; }
 .status { text-align: center; font-style: italic; color: #6b5a40; min-height: 1.4rem; }
 figure { margin: 0; }
+#map { position: relative; }
 #map svg { width: 100%; height: auto; display: block;
   border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+#map:not(.solved) svg { cursor: crosshair; }
+.hunt-star { position: absolute; transform: translate(-50%, -50%);
+  color: #7a1f12; font-size: 1.7rem; line-height: 1; pointer-events: none;
+  text-shadow: 0 0 4px #fff7e4, 0 1px 2px rgb(61 47 31 / 0.5);
+  animation: huntStarIn 0.5s ease-out both; }
+@keyframes huntStarIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.2) rotate(-40deg); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); }
+}
 figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
   margin-top: 1rem; }
 .survey { text-align: center; font-style: italic; color: #6b5a40; margin: 0.3rem 0 0; }
@@ -28,6 +38,28 @@ figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
   padding: 0.5rem 1rem; background: #f4ecd8; text-decoration: none; color: inherit;
   letter-spacing: 0.04em; }
 .actions a:hover { background: #fff7e4; }
+.hunt { max-width: 44rem; margin: 2rem auto 0; padding: 1.4rem 1.6rem;
+  border: 1px solid #b9a77f; border-radius: 6px; background: #f4ecd8; }
+.hunt h2 { text-align: center; font-size: 1.2rem; letter-spacing: 0.06em;
+  margin: 0 0 0.4rem; }
+.hunt-intro { text-align: center; font-size: 0.92rem; color: #6b5a40;
+  margin: 0 0 1rem; }
+.clues { margin: 0 auto; padding-left: 1.4rem; max-width: 36rem;
+  font-style: italic; color: #4a3826; }
+.clues li { margin: 0.3rem 0; }
+.hunt-status { text-align: center; min-height: 1.4rem; font-weight: 700;
+  letter-spacing: 0.03em; color: #7a1f12; margin: 1rem 0 0; }
+.reveal { margin-top: 1rem; padding: 1rem 1.2rem; border-radius: 4px;
+  background: #fff7e4; border: 1px solid #d8c79c; }
+.reveal strong { display: block; font-size: 1.1rem; margin-bottom: 0.4rem; }
+.reveal p { margin: 0; font-style: italic; color: #4a3826; }
+.hunt-actions { text-align: center; margin-top: 1.2rem; display: flex;
+  gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap; }
+#share { border: 1.5px solid #4a3826; border-radius: 4px; padding: 0.5rem 1rem;
+  background: #f4ecd8; color: inherit; letter-spacing: 0.04em; cursor: pointer;
+  font: inherit; }
+#share:hover { background: #fff7e4; }
+.streak { font-size: 0.9rem; color: #6b5a40; }
 .note { text-align: center; color: #857257; font-size: 0.85rem; margin-top: 1rem; }
 footer { margin-top: 4rem; text-align: center; letter-spacing: 0.22em;
   font-size: 0.72rem; color: #857257; }
