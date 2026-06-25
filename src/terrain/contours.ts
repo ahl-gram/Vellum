@@ -309,3 +309,17 @@ export function chaikinSmooth(
   }
   return cur;
 }
+
+/**
+ * Chaikin iterations for the coastline at a given output width. Returns the
+ * standard 2 at or below the 1500px chart width, so charts, the bound atlas,
+ * and the committed goldens render byte-identically (the call is unchanged
+ * there). Larger outputs, a 4200px poster above all, earn extra corner-cutting
+ * so grid-scale facets melt at render time without touching the world: same
+ * terrain, realms, and rivers, only a finer-drawn shore. Capped so a giant
+ * poster stays cheap; monotonic non-decreasing in width.
+ */
+export function coastSmoothingIterations(widthPx: number): number {
+  if (widthPx <= 1500) return 2;
+  return Math.min(4, 2 + Math.floor((widthPx - 1500) / 1300));
+}

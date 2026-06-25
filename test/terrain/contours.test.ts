@@ -4,6 +4,7 @@ import { createField } from "../../src/core/grid.ts";
 import {
   marchingSquares,
   chaikinSmooth,
+  coastSmoothingIterations,
   ringArea,
 } from "../../src/terrain/contours.ts";
 
@@ -111,4 +112,26 @@ test("ringArea computes the shoelace area", () => {
   assert.equal(Math.abs(ringArea(square)), 4);
   const reversed = [...square].reverse();
   assert.equal(ringArea(square), -ringArea(reversed));
+});
+
+test("coastSmoothingIterations is a no-op at or below chart width (#27)", () => {
+  // The 2 here is load-bearing: it keeps the 1500px chart, the bound atlas, and
+  // the committed goldens byte-identical, since the chaikinSmooth call is then
+  // unchanged. Anything <= 1500 must return exactly 2.
+  for (const w of [1, 500, 1000, 1499, 1500]) {
+    assert.equal(coastSmoothingIterations(w), 2, `width ${w} stays at 2`);
+  }
+});
+
+test("coastSmoothingIterations ramps up for big posters, monotonic and capped (#27)", () => {
+  assert.ok(coastSmoothingIterations(1501) >= 2, "just above chart width never drops below 2");
+  assert.ok(coastSmoothingIterations(4200) >= 3, "a 4200px poster gets extra smoothing");
+  assert.equal(coastSmoothingIterations(4200), 4, "poster width lands on the cap");
+  assert.equal(coastSmoothingIterations(100000), 4, "capped so a giant output stays cheap");
+  let prev = 0;
+  for (let w = 1000; w <= 8000; w += 100) {
+    const it = coastSmoothingIterations(w);
+    assert.ok(it >= prev, `non-decreasing at width ${w}`);
+    prev = it;
+  }
 });

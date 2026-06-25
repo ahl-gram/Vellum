@@ -1,6 +1,6 @@
 import { createRng } from "../core/rng.ts";
 import { minMax } from "../core/grid.ts";
-import { chaikinSmooth, closedIsoRings } from "../terrain/contours.ts";
+import { chaikinSmooth, closedIsoRings, coastSmoothingIterations } from "../terrain/contours.ts";
 import type { World } from "../world/types.ts";
 import type { MapType } from "../terrain/heightfield.ts";
 import { createLabelArena, type RenderCtx } from "./context.ts";
@@ -87,8 +87,13 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   const margin = Math.round(widthPx * 0.045);
   const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
 
+  // The coastline gets width-scaled corner-cutting: 2 iterations at chart width
+  // (byte-identical there) and more on big posters, so the shore reads as a fine
+  // plate at 4200px instead of showing grid-scale facets. Render-time only; the
+  // realm borders, names, and rivers are computed elsewhere and do not move.
+  const coastIters = coastSmoothingIterations(widthPx);
   let coastRings = closedIsoRings(world.elev, world.seaLevel).map((c) =>
-    chaikinSmooth(c.points, true, 2).map(
+    chaikinSmooth(c.points, true, coastIters).map(
       ([x, y]) => [proj.px(x), proj.py(y)] as const,
     ),
   );
