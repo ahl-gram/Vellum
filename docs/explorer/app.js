@@ -1,21 +1,25 @@
-// Explorer UI controller. Wires the controls to the render worker (worker.js),
-// draws the chart, binds the inline atlas, and keeps the URL hash in sync. The
-// heavy world-gen + SVG render runs off the main thread; this file only handles
-// the DOM, the worker handshake/fallback, and the draw/bind race guards.
-import { defaultRecipe, generateWorld } from "./engine/world/generate.js";
-import { renderMap } from "./engine/render/map-renderer.js";
-import { buildPlaceManifest } from "./engine/render/place-manifest.js";
-import { composePlaceCard, placeAriaLabel, cardSide } from "./engine/render/place-card.js";
+// Explorer UI conductor. Wires the controls to the render worker (via
+// worker-client.js), runs draw()/bind, and keeps the URL hash in sync. The heavy
+// world-gen + SVG render runs off the main thread; the feature logic lives in
+// sibling modules (worker-client, atlas-view, living-chart, sea-level) and this
+// file is the glue: DOM refs, the draw/bind race guards, the listener wiring, and
+// the bootstrap. Listeners attach here at module-eval time (module scripts are
+// deferred, so the DOM is parsed first).
+import { runJob, runInline, usesWorker, initWorker } from "./worker-client.js";
+import { clearAtlas, renderAtlas } from "./atlas-view.js";
+import { sliderToLand, landToSlider, updateLandReadout, syncAutoSlider } from "./sea-level.js";
 import {
-  scrubRange,
-  buildScrubMarks,
-  placeStateAt,
-  eventIsPast,
-  buildSweepPlan,
-  sweepYearAt,
-} from "./engine/render/chronicle-scrubber.js";
-import { composeAtlas } from "./engine/atlas/compose.js";
-import { escapeXml } from "./engine/render/svg.js";
+  buildPlaceOverlay,
+  applyScrub,
+  exitScrub,
+  clearScrub,
+  cancelScrubRaf,
+  pauseScrub,
+  togglePlay,
+  onManualScrub,
+  onDocKeydown,
+  onDocClick,
+} from "./living-chart.js";
 
 const $ = (id) => document.getElementById(id);
 const seedInput = $("seed");
@@ -26,18 +30,13 @@ const themeSel = $("theme");
 const legendChk = $("legend");
 const armsChk = $("arms");
 const landSlider = $("land");
-const landReadout = $("land-readout");
 const status = $("status");
 const mapDiv = $("map");
 const caption = $("caption");
-const atlasDiv = $("atlas");
 const bindBtn = $("bind");
 const chronicleChk = $("chronicle");
-const scrubPanel = $("scrubber");
 const scrubPlayBtn = $("scrub-play");
 const scrubRangeEl = $("scrub-range");
-const scrubYearEl = $("scrub-year");
-const chronicleStrip = $("chronicle-strip");
 
 let lastSvg = "";
 let lastTitle = "";
@@ -45,30 +44,12 @@ let lastSeed = 0;
 let lastOverrides = {};
 let lastStyle = "antique";
 let lastTheme = "";
-let atlasUrls = [];
 
-// Living Chart overlay (#53): the per-draw DOM marks over the baked chart. State
-// is module-level (not a draw closure) so the one-time Escape / outside-click
-// listeners always read the current overlay. Rebuilt every draw because
-// mapDiv.innerHTML = res.svg wipes #map's children. `pinned` keeps a tapped or
-// Enter/Space card open (touch has no mouseleave); `currentIdx` is the place the
-// card last showed, so a hover can move the open card without losing the pin.
-let placeOverlay = null; // { card, places, events, presentYear, currentIdx, pinned } | null
-
-// Chronicle scrubber (#54): a year-slider + Play that animates the world growing.
-// It reuses #53's overlay hit-targets as time-controlled dots over the hidden
-// baked layers, reading the #52 manifest. Client-only: no worker round-trip, no
-// re-render. `scrub` is the active session (null when the toggle is off).
-let scrub = null; // { marks, range, hits, strip, plan, playing, rafId, elapsed, year } | null
-const STYLE_MARK = { antique: "#7a2d12", topographic: "#1f5135", ink: "#1a1a1a", nautical: "#1d3a63" };
-
-// Sea-level slider (#55) state. landTouched gates the manual override and the
-// land= hash param; until the user moves the slider, it auto-tracks each world's
-// natural waterline. landDebounce throttles the redraw during a drag.
+// Sea-level slider (#55) gate. landTouched gates the manual override and the land=
+// hash param; until the user moves the slider, it auto-tracks each world's natural
+// waterline. landDebounce throttles the redraw during a drag.
 let landTouched = false;
 let landDebounce = 0;
-const LAND_MIN = 0.1;
-const LAND_MAX = 0.7;
 
 // Monotonic guards. drawGen is bumped by every draw; both a draw's own result and
 // any pending bind check it, so a fresh draw cancels a stale draw and a stale bind
@@ -80,301 +61,6 @@ let bindSeq = 0;
 // window so the bound atlas can never be composed from a seed the chart is about to
 // replace (the draw-then-bind race).
 let drawing = false;
-
-// Short captions for the style plates in the bound atlas (the composer's hero
-// caption is a full sentence, too long for the grid alongside the others).
-const STYLE_LABEL = {
-  antique: "The antique chart",
-  topographic: "Topographic",
-  ink: "Pen & ink",
-  nautical: "Nautical",
-};
-
-// Plates are embedded as <img> with blob URLs, never inline <svg>: every chart
-// carries internal ids (map-clip, glyph/texture/label defs) referenced by
-// url(#...), so injecting several inline into one document would collide them.
-function clearAtlas() {
-  for (const url of atlasUrls) URL.revokeObjectURL(url);
-  atlasUrls = [];
-  atlasDiv.innerHTML = "";
-}
-
-function plateFigure(svg, caption) {
-  const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
-  atlasUrls.push(url);
-  const c = escapeXml(caption);
-  return `<figure><img src="${url}" alt="${c}" loading="lazy"><figcaption>${c}</figcaption></figure>`;
-}
-
-function atlasHtml(atlas, currentStyle, currentTheme) {
-  // The chart on screen IS this world drawn either as a style (no theme) or as a
-  // theme plate. Show every OTHER plate so the atlas never repeats the on-screen
-  // map: a theme on screen drops that theme from Thematic Surveys and lets the
-  // antique chart return to Other Draughtings; otherwise the on-screen style drops
-  // from Other Draughtings.
-  const shownStyle = currentTheme ? null : currentStyle;
-  const others = [atlas.hero, ...atlas.draughtings].filter(
-    (p) => p.key !== shownStyle,
-  );
-  const draughtings = others
-    .map((p) => plateFigure(p.svg, STYLE_LABEL[p.key] ?? p.title))
-    .join("\n");
-  const shownTheme = currentTheme ? `theme-${currentTheme}` : null;
-  const themePlates = atlas.themes.filter((t) => t.key !== shownTheme);
-  const thematic = themePlates.length
-    ? `<section><h2>Thematic Surveys</h2><div class="themes">${themePlates
-        .map((t) => plateFigure(t.svg, t.title))
-        .join("\n")}</div></section>`
-    : "";
-  const surveys = atlas.regions.length
-    ? `<section><h2>Regional Surveys</h2>${atlas.regions
-        .map((r) => plateFigure(r.svg, r.title))
-        .join("\n")}</section>`
-    : "";
-  return `<section><h2>Other Draughtings</h2><div class="styles">${draughtings}</div></section>
-${thematic}
-${surveys}
-${atlas.bannersHtml}
-${atlas.chronicleHtml}
-${atlas.gazetteerHtml}`;
-}
-
-// --- Living Chart overlay (#53) ---------------------------------------------
-// After each draw we lay invisible focusable hit-targets over the baked glyphs
-// (the chart exposes no per-feature ids) and feed one reused parchment card.
-// Card text is composed CLIENT-SIDE from the manifest (composePlaceCard), never
-// createLoreWriter, whose order/rng-dependent prose would diverge from the
-// gazetteer for the same town. All marks are positioned by manifest fractions,
-// so they align at any rendered width.
-
-function showPlaceCard(idx) {
-  if (!placeOverlay || scrub) return; // the hover card is suppressed while scrubbing
-  const place = placeOverlay.places[idx];
-  if (!place) return;
-  const card = composePlaceCard(place, placeOverlay.events);
-  const el = placeOverlay.card;
-  // Rebuilt from textContent only (no innerHTML): the fields are plain strings.
-  el.replaceChildren();
-  const name = document.createElement("strong");
-  name.className = "pc-name";
-  name.textContent = card.name;
-  const rank = document.createElement("span");
-  rank.className = "pc-rank";
-  rank.textContent = card.rank;
-  const founded = document.createElement("span");
-  founded.className = "pc-founded";
-  founded.textContent = card.foundedLine;
-  el.append(name, rank, founded);
-  if (card.tale) {
-    const tale = document.createElement("p");
-    tale.className = "pc-tale";
-    tale.textContent = card.tale;
-    el.append(tale);
-  }
-  el.style.left = `${place.nx * 100}%`;
-  el.style.top = `${place.ny * 100}%`;
-  const side = cardSide(place.nx, place.ny);
-  el.classList.toggle("flip-h", side.h === "left");
-  el.classList.toggle("flip-v", side.v === "above");
-  el.hidden = false;
-  placeOverlay.currentIdx = idx;
-}
-
-function hidePlaceCard() {
-  if (!placeOverlay) return;
-  placeOverlay.pinned = false;
-  placeOverlay.pinnedIdx = -1;
-  placeOverlay.card.hidden = true;
-}
-
-function buildPlaceOverlay(manifest) {
-  if (!manifest || !manifest.places) return;
-  const overlay = document.createElement("div");
-  overlay.className = "place-overlay";
-  const card = document.createElement("div");
-  card.id = "place-card";
-  // role=tooltip + aria-describedby (set per hit below) is the robust path: it
-  // reads the card as the focused hit's description. No aria-live, which on a
-  // populate-while-hidden region announces unreliably and would double up.
-  card.setAttribute("role", "tooltip");
-  card.hidden = true;
-  // currentIdx tracks the place the card last PREVIEWED (moves on every hover/
-  // focus); pinnedIdx is the place a tap/Enter PINNED. They must be distinct: a
-  // genuine click is always preceded by a preview of the same place, so keying
-  // the toggle off currentIdx would dismiss instead of switch when pinning B
-  // after A was pinned.
-  placeOverlay = { card, places: manifest.places, events: manifest.events, presentYear: manifest.presentYear, currentIdx: -1, pinned: false, pinnedIdx: -1 };
-  manifest.places.forEach((place, idx) => {
-    const hit = document.createElement("button");
-    hit.type = "button";
-    hit.className = "place-hit";
-    hit.dataset.idx = String(idx);
-    hit.setAttribute("aria-label", placeAriaLabel(place));
-    hit.setAttribute("aria-describedby", "place-card");
-    hit.style.left = `${place.nx * 100}%`;
-    hit.style.top = `${place.ny * 100}%`;
-    // Hover / keyboard focus previews the card; the preview can move the open
-    // card between places, and the pin only governs whether leaving dismisses it.
-    hit.addEventListener("mouseenter", () => showPlaceCard(idx));
-    hit.addEventListener("focus", () => showPlaceCard(idx));
-    hit.addEventListener("mouseleave", () => { if (!placeOverlay.pinned) placeOverlay.card.hidden = true; });
-    hit.addEventListener("blur", () => { if (!placeOverlay.pinned) placeOverlay.card.hidden = true; });
-    // Tap / Enter / Space all fire a button click: pin the card open, or switch
-    // the pin to this place. Activating the already-pinned place toggles it off.
-    hit.addEventListener("click", () => {
-      if (placeOverlay.pinned && placeOverlay.pinnedIdx === idx) { hidePlaceCard(); return; }
-      placeOverlay.pinned = true;
-      placeOverlay.pinnedIdx = idx;
-      showPlaceCard(idx);
-    });
-    overlay.appendChild(hit);
-  });
-  mapDiv.appendChild(overlay);
-  mapDiv.appendChild(card);
-}
-
-// --- Chronicle scrubber (#54) -----------------------------------------------
-// Toggles display on the baked #layer-settlements/#layer-roads groups and reads
-// the #52 manifest; never re-renders. Download SVG saves lastSvg (the string),
-// never the DOM, so the export is unaffected no matter the scrubbed frame.
-
-function toggleBakedLayers(visible) {
-  // Restore by CLEARING the inline style, never setting "block": the <g> carried
-  // no inline display originally, and an SVG <g> does not take display:block.
-  for (const id of ["layer-settlements", "layer-roads"]) {
-    const g = mapDiv.querySelector("#" + id);
-    if (g) g.style.display = visible ? "" : "none";
-  }
-}
-
-function cancelScrubRaf() {
-  if (scrub && scrub.rafId) {
-    cancelAnimationFrame(scrub.rafId);
-    scrub.rafId = 0;
-  }
-}
-
-function setPlayLabel(playing) {
-  // The label swap (Play/Pause) IS the state for AT; no aria-pressed, which on a
-  // label-swapping control announces a contradictory "Pause, pressed" while playing.
-  scrubPlayBtn.textContent = playing ? "Pause" : "Play";
-}
-
-function buildStrip(events) {
-  chronicleStrip.replaceChildren();
-  const rows = [];
-  for (const e of events) {
-    const li = document.createElement("li");
-    const year = document.createElement("span");
-    year.className = "cr-year";
-    year.textContent = String(e.year);
-    const text = document.createElement("span");
-    text.className = "cr-text";
-    text.textContent = e.text; // textContent: event prose is plain text
-    li.append(year, text);
-    chronicleStrip.appendChild(li);
-    rows.push({ li, year: e.year });
-  }
-  return rows;
-}
-
-// Paint one frame: the year readout, the slider thumb, each place's dot state,
-// and which chronicle rows have come to pass. Setting .value here does NOT fire
-// the slider's input event, so Play never trips the manual-scrub handler.
-function paintScrub(year) {
-  if (!scrub) return;
-  scrub.year = year;
-  scrubRangeEl.value = String(year);
-  // Year on the slider's aria-valuetext (like the sea-level slider), NOT a live
-  // region: programmatic value changes during Play stay silent, while a keyboard
-  // scrub announces "year N" once per arrow press. The #scrub-year span is visual.
-  scrubRangeEl.setAttribute("aria-valuetext", `year ${year}`);
-  scrubYearEl.textContent = `year ${year}`;
-  scrub.marks.forEach((m, i) => {
-    const el = scrub.hits[i];
-    if (el) el.dataset.state = placeStateAt(m, year);
-  });
-  for (const row of scrub.strip) {
-    row.li.classList.toggle("past", eventIsPast(row.year, year));
-  }
-}
-
-function applyScrub() {
-  if (!placeOverlay || !placeOverlay.places || !placeOverlay.places.length) return;
-  cancelScrubRaf();
-  hidePlaceCard();
-  const { places, events, presentYear } = placeOverlay;
-  const overlayEl = mapDiv.querySelector(".place-overlay");
-  const hits = overlayEl ? [...overlayEl.querySelectorAll(".place-hit")] : [];
-  if (overlayEl) {
-    overlayEl.classList.add("scrub");
-    overlayEl.style.setProperty("--scrub-mark", STYLE_MARK[lastStyle] ?? STYLE_MARK.antique);
-  }
-  // The dots are a visual time-layer, not a tab-stop; the dated chronicle strip
-  // below lists the world's headline events (a capped subset) as readable text.
-  for (const h of hits) h.tabIndex = -1;
-  toggleBakedLayers(false);
-  const range = scrubRange(places, presentYear);
-  scrubRangeEl.min = String(range.min);
-  scrubRangeEl.max = String(range.max);
-  scrubRangeEl.step = "1";
-  scrub = {
-    marks: buildScrubMarks(places, events, presentYear),
-    range,
-    hits,
-    strip: buildStrip(events),
-    plan: null,
-    playing: false,
-    rafId: 0,
-    elapsed: 0,
-    year: range.max,
-  };
-  scrubPanel.hidden = false;
-  setPlayLabel(false);
-  paintScrub(range.max); // park at the present: the world as just drawn, in dot form
-}
-
-function exitScrub() {
-  cancelScrubRaf();
-  scrubPanel.hidden = true;
-  const overlayEl = mapDiv.querySelector(".place-overlay");
-  if (overlayEl) {
-    overlayEl.classList.remove("scrub");
-    for (const h of overlayEl.querySelectorAll(".place-hit")) h.removeAttribute("tabindex");
-  }
-  toggleBakedLayers(true);
-  scrub = null;
-}
-
-function pauseScrub() {
-  if (!scrub) return;
-  cancelScrubRaf();
-  scrub.playing = false;
-  setPlayLabel(false);
-}
-
-function playScrub() {
-  if (!scrub) return;
-  scrub.plan = buildSweepPlan(scrub.range, placeOverlay.events.map((e) => e.year));
-  if (scrub.year >= scrub.range.max) scrub.elapsed = 0; // at the end: replay from the start
-  const begin = performance.now() - scrub.elapsed;
-  scrub.playing = true;
-  setPlayLabel(true);
-  const tick = (now) => {
-    if (!scrub || !scrub.playing) return;
-    const elapsed = now - begin;
-    scrub.elapsed = elapsed;
-    if (elapsed >= scrub.plan.totalMs) {
-      scrub.elapsed = scrub.plan.totalMs;
-      paintScrub(scrub.range.max);
-      pauseScrub(); // auto-pause at the present year, button back to "Play"
-      return;
-    }
-    paintScrub(sweepYearAt(scrub.plan, elapsed));
-    scrub.rafId = requestAnimationFrame(tick);
-  };
-  scrub.rafId = requestAnimationFrame(tick);
-}
 
 function randomSeed() {
   return Math.floor(Math.random() * 0xffffffff);
@@ -422,129 +108,6 @@ function writeHash() {
   history.replaceState(null, "", "#" + params.toString());
 }
 
-// --- Sea-level slider (#55) -------------------------------------------------
-// The slider value is landFraction x 1000 (an integer in [100, 700]); these are
-// trivial inverses so the gesture cannot ship backwards. clampLand keeps every
-// value strictly inside (0, 1) so pickSeaLevel never throws on a crafted hash.
-const clampLand = (f) => Math.min(LAND_MAX, Math.max(LAND_MIN, f));
-const sliderToLand = (v) => clampLand(Number(v) / 1000);
-const landToSlider = (f) => Math.round(clampLand(f) * 1000);
-
-function updateLandReadout() {
-  const pct = Math.round(sliderToLand(landSlider.value) * 100);
-  landReadout.textContent = `${pct}% land`;
-  landSlider.setAttribute("aria-valuetext", `${pct}% land`);
-}
-
-// Display-only: park the slider at the world's natural waterline. Must NOT mutate
-// the overrides passed to the worker (auto mode sends no landFraction override).
-function syncAutoSlider(seed, overrides) {
-  landSlider.value = String(landToSlider(defaultRecipe(seed, overrides).landFraction));
-}
-
-// --- Render worker plumbing -------------------------------------------------
-// The heavy world-gen + SVG render runs in ./worker.js off the main thread so the
-// UI stays responsive. The worker is best-effort. If it cannot be constructed
-// (file://, strict CSP, an older browser) we fall back to running the same engine
-// inline on the main thread, so the page always works.
-let worker = null;
-let reqId = 0;
-const pending = new Map();
-
-function onJobMessage(e) {
-  const d = e.data;
-  if (!d || d.id == null) return; // ignore the ready handshake and stray messages
-  const p = pending.get(d.id);
-  if (!p) return;
-  pending.delete(d.id);
-  if (d.ok) p.resolve(d);
-  else p.reject(new Error(d.error || "worker error"));
-}
-
-// Mirrors worker.js: the composition's `world` carries Field methods that are not
-// structured-cloneable, so the inline path strips it too. Both paths then return
-// the same shape, keeping the worker/inline byte-identity check a clean compare.
-function serializableAtlas(a) {
-  return {
-    hero: a.hero,
-    draughtings: a.draughtings,
-    themes: a.themes,
-    regions: a.regions,
-    bannersHtml: a.bannersHtml,
-    chronicleHtml: a.chronicleHtml,
-    gazetteerHtml: a.gazetteerHtml,
-  };
-}
-
-function runInline(msg) {
-  if (msg.kind === "draw") {
-    const recipe = defaultRecipe(msg.seed, msg.overrides);
-    const world = generateWorld(recipe);
-    return {
-      ok: true,
-      svg: renderMap(world, msg.render),
-      manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
-      title: world.title.title,
-      mapType: recipe.mapType,
-      band: recipe.band,
-    };
-  }
-  const world = generateWorld(defaultRecipe(msg.seed, msg.overrides));
-  return { ok: true, atlas: serializableAtlas(composeAtlas(world, { width: msg.width })) };
-}
-
-function runJob(msg) {
-  if (worker) {
-    const id = ++reqId;
-    return new Promise((resolve, reject) => {
-      pending.set(id, { resolve, reject });
-      worker.postMessage({ ...msg, id });
-    });
-  }
-  // No worker: defer with a macrotask so the status line paints before the main
-  // thread blocks on the inline render.
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      try { resolve(runInline(msg)); }
-      catch (err) { reject(err); }
-    }, 0);
-  });
-}
-
-function initWorker() {
-  return new Promise((resolve) => {
-    let w;
-    try {
-      w = new Worker("./worker.js", { type: "module" });
-    } catch {
-      resolve(null);
-      return;
-    }
-    let settled = false;
-    const fail = () => {
-      if (settled) return;
-      settled = true;
-      try { w.terminate(); } catch {}
-      resolve(null);
-    };
-    const timer = setTimeout(fail, 4000);
-    w.onerror = fail;
-    w.onmessage = (e) => {
-      if (settled || !e.data || !e.data.ready) return;
-      settled = true;
-      clearTimeout(timer);
-      w.onmessage = onJobMessage;
-      w.onerror = (ev) => {
-        if (ev.preventDefault) ev.preventDefault();
-        worker = null; // a crashed worker degrades to the inline path
-        for (const [, p] of pending) p.reject(new Error("the render worker crashed"));
-        pending.clear();
-      };
-      resolve(w);
-    };
-  });
-}
-
 function draw() {
   const seed = Number(seedInput.value) >>> 0;
   const myGen = ++drawGen;
@@ -587,8 +150,8 @@ function draw() {
       // #54: if the chronicle toggle is on, re-apply the scrubber to THIS new world
       // (fresh manifest, range, layers); applyScrub hides the just-rendered layers
       // synchronously, so there is no flash of the present-day chart.
-      if (chronicleChk.checked) applyScrub();
-      else scrub = null;
+      if (chronicleChk.checked) applyScrub(style);
+      else clearScrub();
       const ms = (performance.now() - t0).toFixed(0);
       status.textContent = "";
       caption.textContent = `${res.title} · ${res.mapType} · ${res.band} · drawn in ${ms}ms`;
@@ -600,7 +163,7 @@ function draw() {
       // A redraw that fails leaves the OLD overlay in place; if a sweep was running,
       // its rAF was already cancelled at draw() start, so restore the button to a
       // consistent paused state rather than a frozen "Pause" with nothing animating.
-      if (scrub) pauseScrub();
+      pauseScrub();
       status.textContent = "The cartographer spilled the ink: " + err.message;
     });
 }
@@ -633,9 +196,8 @@ bindBtn.addEventListener("click", () => {
     .then((res) => {
       // discard if a redraw or a newer bind has superseded this one
       if (myGen !== drawGen || mySeq !== bindSeq) return;
-      atlasDiv.innerHTML = atlasHtml(res.atlas, style, theme);
+      renderAtlas(res.atlas, style, theme);
       status.textContent = "";
-      atlasDiv.scrollIntoView({ behavior: "smooth", block: "start" });
     })
     .catch((err) => {
       if (myGen !== drawGen || mySeq !== bindSeq) return;
@@ -671,41 +233,24 @@ landSlider.addEventListener("change", () => {
   draw();
 });
 
-// Chronicle scrubber (#54): the toggle enters/leaves scrub mode without a
-// redraw (no re-roll); Play/Pause runs the event-proportional sweep; a manual
-// drag pauses Play and rebases it so the next Play restarts from the beginning.
+// Chronicle scrubber (#54): the toggle enters/leaves scrub mode without a redraw
+// (no re-roll); Play/Pause runs the event-proportional sweep; a manual drag pauses
+// Play and rebases it so the next Play restarts from the beginning.
 chronicleChk.addEventListener("change", () => {
-  if (chronicleChk.checked) applyScrub();
+  if (chronicleChk.checked) applyScrub(lastStyle);
   else exitScrub();
 });
-scrubPlayBtn.addEventListener("click", () => {
-  if (!scrub) return;
-  if (scrub.playing) pauseScrub();
-  else playScrub();
-});
-scrubRangeEl.addEventListener("input", () => {
-  if (!scrub) return;
-  if (scrub.playing) pauseScrub();
-  scrub.elapsed = 0; // a manual scrub restarts Play from the earliest founding
-  paintScrub(Number(scrubRangeEl.value));
-});
+scrubPlayBtn.addEventListener("click", togglePlay);
+scrubRangeEl.addEventListener("input", onManualScrub);
 
-// Living Chart overlay (#53): dismiss a pinned card with Escape or a click/tap
-// off any mark. Added once; both read the module-level placeOverlay so they
-// stay correct across redraws. A click on a hit or the card itself is ignored
-// here (the hit's own handler owns pinning).
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && placeOverlay && !placeOverlay.card.hidden) hidePlaceCard();
-});
-document.addEventListener("click", (e) => {
-  if (!placeOverlay || placeOverlay.card.hidden) return;
-  const t = e.target;
-  if (t && t.closest && (t.closest(".place-hit") || t.closest("#place-card"))) return;
-  hidePlaceCard();
-});
+// Living Chart overlay (#53): dismiss a pinned card with Escape or a click/tap off
+// any mark. Added once; both read living-chart's current overlay so they stay
+// correct across redraws.
+document.addEventListener("keydown", onDocKeydown);
+document.addEventListener("click", onDocClick);
 
-worker = await initWorker();
-window.__vellumUsesWorker = () => worker !== null;
+await initWorker();
+window.__vellumUsesWorker = usesWorker;
 // Verification hooks for the headless byte-identity check (harmless in prod).
 window.__vellumRunJob = runJob;
 window.__vellumRunInline = runInline;

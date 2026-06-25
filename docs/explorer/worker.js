@@ -6,20 +6,7 @@ import { defaultRecipe, generateWorld } from "./engine/world/generate.js";
 import { renderMap } from "./engine/render/map-renderer.js";
 import { buildPlaceManifest } from "./engine/render/place-manifest.js";
 import { composeAtlas } from "./engine/atlas/compose.js";
-
-// The composition's `world` carries Field methods (at/index/inBounds) that are
-// not structured-cloneable; the plates and fragments are plain strings.
-function serializableAtlas(a) {
-  return {
-    hero: a.hero,
-    draughtings: a.draughtings,
-    themes: a.themes,
-    regions: a.regions,
-    bannersHtml: a.bannersHtml,
-    chronicleHtml: a.chronicleHtml,
-    gazetteerHtml: a.gazetteerHtml,
-  };
-}
+import { serializableAtlas } from "./serializable-atlas.js";
 
 self.onmessage = (e) => {
   const msg = e.data;
