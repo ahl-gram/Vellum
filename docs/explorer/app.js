@@ -4,6 +4,7 @@
 // the DOM, the worker handshake/fallback, and the draw/bind race guards.
 import { defaultRecipe, generateWorld } from "./engine/world/generate.js";
 import { renderMap } from "./engine/render/map-renderer.js";
+import { buildPlaceManifest } from "./engine/render/place-manifest.js";
 import { composeAtlas } from "./engine/atlas/compose.js";
 import { escapeXml } from "./engine/render/svg.js";
 
@@ -215,6 +216,7 @@ function runInline(msg) {
     return {
       ok: true,
       svg: renderMap(world, msg.render),
+      manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
       title: world.title.title,
       mapType: recipe.mapType,
       band: recipe.band,

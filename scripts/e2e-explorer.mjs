@@ -261,12 +261,14 @@ async function main() {
   check("A0 page loaded + initial auto-draw rendered", await waitReady());
   check("A1 worker active (no silent fallback)", await evaluate(`window.__vellumUsesWorker()===true`));
 
-  // A2 — worker draw === inline draw, byte-for-byte, in the browser
+  // A2: worker draw === inline draw, byte-for-byte, in the browser. Includes the
+  // #52 place manifest: a new structured-cloneable field that must be identical
+  // worker-vs-inline (same V8 runs both paths, so nx/ny are byte-identical).
   const a2 = await evaluate(
-    `(async()=>{const m={kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}};const j=await window.__vellumRunJob(m);const i=window.__vellumRunInline(m);return{svg:j.svg===i.svg,title:j.title===i.title,mt:j.mapType===i.mapType,band:j.band===i.band,len:j.svg.length};})()`,
+    `(async()=>{const m={kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}};const j=await window.__vellumRunJob(m);const i=window.__vellumRunInline(m);return{svg:j.svg===i.svg,title:j.title===i.title,mt:j.mapType===i.mapType,band:j.band===i.band,man:JSON.stringify(j.manifest)===JSON.stringify(i.manifest),places:j.manifest.places.length,len:j.svg.length};})()`,
     true,
   );
-  check("A2 draw: worker bytes === inline bytes", a2.svg && a2.title && a2.mt && a2.band, `${a2.len} code units`);
+  check("A2 draw: worker bytes === inline bytes (svg + manifest)", a2.svg && a2.title && a2.mt && a2.band && a2.man, `${a2.len} code units, ${a2.places} places, manifest eq=${a2.man}`);
 
   // A3 — worker atlas === inline atlas, in the browser (gazetteer locale matches)
   const a3 = await evaluate(
