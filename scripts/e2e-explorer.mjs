@@ -164,6 +164,18 @@ async function evaluate(expression, awaitPromise = false) {
   return r.result.value;
 }
 
+// The computed accessible description of the first element matching `selector`
+// (a button), via the Accessibility domain. Used to prove the #53 card body is
+// reachable AND readable through aria-describedby, not just that the attr is set.
+async function axDescription(selector) {
+  const doc = await send("DOM.getDocument", { depth: -1 });
+  const { nodeId } = await send("DOM.querySelector", { nodeId: doc.root.nodeId, selector });
+  if (!nodeId) return null;
+  const ax = await send("Accessibility.getPartialAXTree", { nodeId, fetchRelatives: false });
+  const node = ax.nodes.find((n) => n.role && n.role.value === "button");
+  return node && node.description ? node.description.value : null;
+}
+
 async function waitSettled(label = "") {
   for (let i = 0; i < 200; i++) {
     const s = await evaluate(
@@ -256,6 +268,8 @@ async function main() {
   await send("Runtime.enable");
   await send("Log.enable");
   await send("Network.enable");
+  await send("DOM.enable");
+  await send("Accessibility.enable"); // #53: read the computed AX description of a hit
   // Treat the headless page as focused so element.focus() fires real focus events
   // (and :focus-visible applies). Without this, the #53 keyboard-focus card path
   // silently no-ops under --headless. Best-effort: older builds may not support it.
@@ -464,6 +478,17 @@ async function main() {
     check("P12 pin-switch: pin A then activate B switches to B (not dismiss)", p12.pinnedA === pm.capName && p12.afterB === pm.ruinName, JSON.stringify(p12));
   } else {
     check("P12 pin-switch: seed 42 has a second place to switch to", false, "no ruin in manifest");
+  }
+
+  // A11y payoff: focusing a ruin, the hit's COMPUTED accessible description (what
+  // a screen reader reads via aria-describedby) must carry the founding year and
+  // the tale, and be readable (name separated from rank, not a "NameRank" run-on).
+  if (pm.ruinIdx >= 0) {
+    await evaluate(`(()=>{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();document.querySelector('.place-hit[data-idx="'+${pm.ruinIdx}+'"]').focus();})()`);
+    const axDesc = await axDescription(`.place-hit[data-idx="${pm.ruinIdx}"]`);
+    const readable = !!axDesc && axDesc.includes(pm.ruinName + " ") && axDesc.includes("Founded in the year") && axDesc.includes(pm.tale);
+    check("P13 card body reachable as a readable AX description (founding + tale, separated)", readable, JSON.stringify(axDesc));
+    await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
   }
 
   // Artifact: a card open over the chart, for the user to eyeball. Blur first so
