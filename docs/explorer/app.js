@@ -5,6 +5,7 @@
 import { defaultRecipe, generateWorld } from "./engine/world/generate.js";
 import { renderMap } from "./engine/render/map-renderer.js";
 import { buildPlaceManifest } from "./engine/render/place-manifest.js";
+import { composePlaceCard, placeAriaLabel, cardSide } from "./engine/render/place-card.js";
 import { composeAtlas } from "./engine/atlas/compose.js";
 import { escapeXml } from "./engine/render/svg.js";
 
@@ -31,6 +32,14 @@ let lastOverrides = {};
 let lastStyle = "antique";
 let lastTheme = "";
 let atlasUrls = [];
+
+// Living Chart overlay (#53): the per-draw DOM marks over the baked chart. State
+// is module-level (not a draw closure) so the one-time Escape / outside-click
+// listeners always read the current overlay. Rebuilt every draw because
+// mapDiv.innerHTML = res.svg wipes #map's children. `pinned` keeps a tapped or
+// Enter/Space card open (touch has no mouseleave); `currentIdx` is the place the
+// card last showed, so a hover can move the open card without losing the pin.
+let placeOverlay = null; // { card, places, events, currentIdx, pinned } | null
 
 // Sea-level slider (#55) state. landTouched gates the manual override and the
 // land= hash param; until the user moves the slider, it auto-tracks each world's
@@ -107,6 +116,100 @@ ${surveys}
 ${atlas.bannersHtml}
 ${atlas.chronicleHtml}
 ${atlas.gazetteerHtml}`;
+}
+
+// --- Living Chart overlay (#53) ---------------------------------------------
+// After each draw we lay invisible focusable hit-targets over the baked glyphs
+// (the chart exposes no per-feature ids) and feed one reused parchment card.
+// Card text is composed CLIENT-SIDE from the manifest (composePlaceCard), never
+// createLoreWriter, whose order/rng-dependent prose would diverge from the
+// gazetteer for the same town. All marks are positioned by manifest fractions,
+// so they align at any rendered width.
+
+function showPlaceCard(idx) {
+  if (!placeOverlay) return;
+  const place = placeOverlay.places[idx];
+  if (!place) return;
+  const card = composePlaceCard(place, placeOverlay.events);
+  const el = placeOverlay.card;
+  // Rebuilt from textContent only (no innerHTML): the fields are plain strings.
+  el.replaceChildren();
+  const name = document.createElement("strong");
+  name.className = "pc-name";
+  name.textContent = card.name;
+  const rank = document.createElement("span");
+  rank.className = "pc-rank";
+  rank.textContent = card.rank;
+  const founded = document.createElement("span");
+  founded.className = "pc-founded";
+  founded.textContent = card.foundedLine;
+  el.append(name, rank, founded);
+  if (card.tale) {
+    const tale = document.createElement("p");
+    tale.className = "pc-tale";
+    tale.textContent = card.tale;
+    el.append(tale);
+  }
+  el.style.left = `${place.nx * 100}%`;
+  el.style.top = `${place.ny * 100}%`;
+  const side = cardSide(place.nx, place.ny);
+  el.classList.toggle("flip-h", side.h === "left");
+  el.classList.toggle("flip-v", side.v === "above");
+  el.hidden = false;
+  placeOverlay.currentIdx = idx;
+}
+
+function hidePlaceCard() {
+  if (!placeOverlay) return;
+  placeOverlay.pinned = false;
+  placeOverlay.pinnedIdx = -1;
+  placeOverlay.card.hidden = true;
+}
+
+function buildPlaceOverlay(manifest) {
+  if (!manifest || !manifest.places) return;
+  const overlay = document.createElement("div");
+  overlay.className = "place-overlay";
+  const card = document.createElement("div");
+  card.id = "place-card";
+  // role=tooltip + aria-describedby (set per hit below) is the robust path: it
+  // reads the card as the focused hit's description. No aria-live, which on a
+  // populate-while-hidden region announces unreliably and would double up.
+  card.setAttribute("role", "tooltip");
+  card.hidden = true;
+  // currentIdx tracks the place the card last PREVIEWED (moves on every hover/
+  // focus); pinnedIdx is the place a tap/Enter PINNED. They must be distinct: a
+  // genuine click is always preceded by a preview of the same place, so keying
+  // the toggle off currentIdx would dismiss instead of switch when pinning B
+  // after A was pinned.
+  placeOverlay = { card, places: manifest.places, events: manifest.events, currentIdx: -1, pinned: false, pinnedIdx: -1 };
+  manifest.places.forEach((place, idx) => {
+    const hit = document.createElement("button");
+    hit.type = "button";
+    hit.className = "place-hit";
+    hit.dataset.idx = String(idx);
+    hit.setAttribute("aria-label", placeAriaLabel(place));
+    hit.setAttribute("aria-describedby", "place-card");
+    hit.style.left = `${place.nx * 100}%`;
+    hit.style.top = `${place.ny * 100}%`;
+    // Hover / keyboard focus previews the card; the preview can move the open
+    // card between places, and the pin only governs whether leaving dismisses it.
+    hit.addEventListener("mouseenter", () => showPlaceCard(idx));
+    hit.addEventListener("focus", () => showPlaceCard(idx));
+    hit.addEventListener("mouseleave", () => { if (!placeOverlay.pinned) placeOverlay.card.hidden = true; });
+    hit.addEventListener("blur", () => { if (!placeOverlay.pinned) placeOverlay.card.hidden = true; });
+    // Tap / Enter / Space all fire a button click: pin the card open, or switch
+    // the pin to this place. Activating the already-pinned place toggles it off.
+    hit.addEventListener("click", () => {
+      if (placeOverlay.pinned && placeOverlay.pinnedIdx === idx) { hidePlaceCard(); return; }
+      placeOverlay.pinned = true;
+      placeOverlay.pinnedIdx = idx;
+      showPlaceCard(idx);
+    });
+    overlay.appendChild(hit);
+  });
+  mapDiv.appendChild(overlay);
+  mapDiv.appendChild(card);
 }
 
 function randomSeed() {
@@ -315,6 +418,7 @@ function draw() {
       lastStyle = style;
       lastTheme = theme;
       mapDiv.innerHTML = res.svg;
+      buildPlaceOverlay(res.manifest); // #53: marks + card, appended after innerHTML wipes #map
       const ms = (performance.now() - t0).toFixed(0);
       status.textContent = "";
       caption.textContent = `${res.title} · ${res.mapType} · ${res.band} · drawn in ${ms}ms`;
@@ -391,6 +495,20 @@ landSlider.addEventListener("change", () => {
   landTouched = true;
   clearTimeout(landDebounce);
   draw();
+});
+
+// Living Chart overlay (#53): dismiss a pinned card with Escape or a click/tap
+// off any mark. Added once; both read the module-level placeOverlay so they
+// stay correct across redraws. A click on a hit or the card itself is ignored
+// here (the hit's own handler owns pinning).
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && placeOverlay && !placeOverlay.card.hidden) hidePlaceCard();
+});
+document.addEventListener("click", (e) => {
+  if (!placeOverlay || placeOverlay.card.hidden) return;
+  const t = e.target;
+  if (t && t.closest && (t.closest(".place-hit") || t.closest("#place-card"))) return;
+  hidePlaceCard();
 });
 
 worker = await initWorker();

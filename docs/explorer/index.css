@@ -37,9 +37,44 @@ button.primary { background: #4a3826; color: #f2e8cf; letter-spacing: 0.08em; }
 button.primary:hover { background: #5d4831; }
 .status { text-align: center; font-style: italic; color: #857257;
   min-height: 1.4em; margin-bottom: 0.8rem; }
-#map { max-width: 1100px; margin-inline: auto; }
+#map { max-width: 1100px; margin-inline: auto; position: relative; }
 #map svg { width: 100%; height: auto; display: block;
   border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+
+/* Living Chart overlay (#53): invisible focusable hit-targets sit over the baked
+   glyphs and feed one reused parchment card. The container ignores pointer
+   events so the rest of the page stays live; only the hits and card take them.
+   The .place-hit reset is load-bearing: the global button{} rule above would
+   otherwise paint 26 parchment boxes over the map, breaking idle parity. */
+.place-overlay { position: absolute; inset: 0; pointer-events: none; }
+.place-hit {
+  position: absolute; transform: translate(-50%, -50%);
+  width: 26px; height: 26px; box-sizing: border-box;
+  background: transparent; border: 0; border-radius: 0; padding: 0;
+  pointer-events: auto; cursor: pointer;
+}
+.place-hit:hover, .place-hit:focus-visible {
+  background: transparent;
+  outline: 2px solid #4a3826; outline-offset: -3px; border-radius: 50%;
+}
+#place-card {
+  position: absolute; z-index: 5; max-width: 16rem; pointer-events: none;
+  background: #f8f1e0; color: #4a3826;
+  border: 1px solid #4a3826; border-radius: 4px;
+  box-shadow: 0 8px 22px rgb(61 47 31 / 0.28);
+  padding: 0.6rem 0.75rem; font-size: 0.9rem; line-height: 1.35;
+  transform: translate(10px, 10px);
+}
+/* id+attr specificity beats the id-only rule above, so [hidden] really hides. */
+#place-card[hidden] { display: none; }
+#place-card.flip-h { transform: translate(calc(-100% - 10px), 10px); }
+#place-card.flip-v { transform: translate(10px, calc(-100% - 10px)); }
+#place-card.flip-h.flip-v { transform: translate(calc(-100% - 10px), calc(-100% - 10px)); }
+.pc-name { display: block; font-size: 1rem; letter-spacing: 0.02em; }
+.pc-rank { display: block; font-style: italic; color: #6b5a40; font-size: 0.82rem;
+  letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.1rem; }
+.pc-founded { display: block; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
+.pc-tale { margin: 0.4rem 0 0; font-style: italic; color: #54452f; }
 .caption { text-align: center; font-style: italic; color: #6b5a40;
   padding-top: 0.6rem; }
 footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;
