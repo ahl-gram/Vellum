@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { straightestReach } from "../../src/render/layers/feature-labels.ts";
+import { reachPlacements, straightestReach } from "../../src/render/layers/feature-labels.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 
@@ -43,6 +43,46 @@ test("the reach reads left to right (placement never inverts)", () => {
 
 test("returns null for a degenerate single-point river", () => {
   assert.equal(straightestReach([[5, 5]], 40), null);
+});
+
+// A named river used to get exactly one shot at a label (its straightest
+// reach); if that box collided, the river went nameless even when another
+// stretch was free. reachPlacements offers spread alternatives so the loop can
+// fall back to a free stretch. straightestReach is now its first element.
+
+test("reachPlacements offers several spread candidates along a long river", () => {
+  const pts = Array.from({ length: 31 }, (_, i) => [i * 10, 100] as const); // x 0..300
+  const places = reachPlacements(pts, 40);
+  assert.ok(places.length >= 2, `expected multiple candidates, got ${places.length}`);
+  // element 0 is exactly the single best reach (already-placed labels don't move)
+  assert.deepEqual(places[0], straightestReach(pts, 40));
+  // candidates name genuinely different stretches: their x-centers spread out
+  const xs = places.map((p) => p.x);
+  assert.ok(Math.max(...xs) - Math.min(...xs) >= 40, `candidates should spread, got ${xs}`);
+});
+
+test("reachPlacements returns [] for a degenerate river and one reach for a short one", () => {
+  assert.deepEqual(reachPlacements([[5, 5]], 40), []);
+  const shortRiver = reachPlacements([[0, 0], [10, 0], [20, 0]], 40); // total 20 < 40
+  assert.equal(shortRiver.length, 1, "a course shorter than the label gets one whole-reach candidate");
+});
+
+// #95 follow-up: the west river on seed 20260701 ("The Hjarggre Torrent") sits
+// in a crowded reach; its straightest spot collided, so it went unlabeled and
+// the Daily Hunt cited a name printed nowhere. With spread alternatives it now
+// labels. This is the render-side guarantee behind the pruned clue.
+test("a crowded named river recovers a label via an alternative reach", () => {
+  const world = generateWorld(defaultRecipe(20260701, {}));
+  assert.ok(world.names.rivers.size > 0, "fixture names rivers");
+  assert.ok(
+    [...world.names.rivers.values()].includes("The Hjarggre Torrent"),
+    "fixture still names The Hjarggre Torrent",
+  );
+  const svg = renderMap(world, { style: "antique", legend: true });
+  assert.ok(
+    svg.includes(">The Hjarggre Torrent<"),
+    "the crowded river now carries a visible label",
+  );
 });
 
 // #23: a chart named ~9 rivers but drew only the longest three, leaving
