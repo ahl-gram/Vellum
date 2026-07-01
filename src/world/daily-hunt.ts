@@ -211,6 +211,28 @@ export function buildClues(world: World, quarry: Quarry): Clue[] {
 }
 
 /**
+ * Drop feature clues that name a map feature the chart never labeled, so the
+ * hunt never sends a player looking for a name that is not printed anywhere.
+ *
+ * `buildClues` is a pure function of the World and (correctly) cites the nearest
+ * NAMED river/lake, but the renderer only draws a subset of those labels (short
+ * courses and collision losers are skipped, see `feature-labels.ts`). This prune
+ * runs AFTER `buildClues`, keying off each clue's `subject`, and keeps a
+ * `river`/`lake` clue only when `isLabeled(subject)` reports the label was drawn.
+ * The caller (the page, which owns the rendered SVG) supplies `isLabeled`; all
+ * other clue kinds pass through untouched. Returns a new array (never mutates).
+ */
+export function pruneUnlabeledFeatureClues(
+  clues: readonly Clue[],
+  isLabeled: (name: string) => boolean,
+): Clue[] {
+  return clues.filter((c) => {
+    if (c.kind !== "river" && c.kind !== "lake") return true;
+    return c.subject !== undefined && isLabeled(c.subject);
+  });
+}
+
+/**
  * Map a grid distance to a warmer/colder band for click feedback. Monotonic:
  * a direct hit (distance 0) is "hot", and increasing distance never warms.
  */

@@ -6,6 +6,7 @@ import {
   chooseQuarry,
   classifyDistanceBand,
   legendExcluded,
+  pruneUnlabeledFeatureClues,
   revealLore,
   type Clue,
   type LegendBox,
@@ -334,4 +335,50 @@ test("legendExcluded flags settlements under the box and spares those outside it
   const corner: LegendBox = { x: 0, y: 0, width: 4, height: 4 };
   assert.ok(!legendExcluded(world, corner, widthPx).has(0), "a settlement clear of the box is spared");
   assert.equal(legendExcluded(world, null, widthPx).size, 0, "no legend box excludes nothing");
+});
+
+// --- pruneUnlabeledFeatureClues: keep only clues a player can actually find ---
+// Uses a synthetic clue list (not a pinned seed) so the contract is tested
+// directly, independent of world-gen determinism.
+const SAMPLE_CLUES: readonly Clue[] = [
+  { kind: "framing", text: "Today's survey hides one small place." },
+  { kind: "ew", subject: "west", text: "It lies toward the western reach of the chart." },
+  { kind: "ns", subject: "north", text: "It lies in the northern part of the chart." },
+  {
+    kind: "river",
+    subject: "The Hjarggre Torrent",
+    text: "It stands within sight of the river The Hjarggre Torrent.",
+  },
+  { kind: "lake", subject: "The Still Mere", text: "Its prospect takes in the waters of The Still Mere." },
+  { kind: "onriver", text: "A river runs through its bounds." },
+  { kind: "realm", subject: "The Jarldom of Skaugre", text: "It answers to The Jarldom of Skaugre." },
+];
+
+test("pruneUnlabeledFeatureClues drops river/lake clues whose label was never drawn", () => {
+  const kept = pruneUnlabeledFeatureClues(SAMPLE_CLUES, () => false);
+  const kinds = kept.map((c) => c.kind);
+  assert.ok(!kinds.includes("river"), "an unlabeled river clue is removed");
+  assert.ok(!kinds.includes("lake"), "an unlabeled lake clue is removed");
+  // Non-feature clues (and the realm clue, which is out of scope) always survive.
+  assert.deepEqual(kinds, ["framing", "ew", "ns", "onriver", "realm"]);
+});
+
+test("pruneUnlabeledFeatureClues keeps every clue when all labels are drawn", () => {
+  const kept = pruneUnlabeledFeatureClues(SAMPLE_CLUES, () => true);
+  assert.deepEqual(kept, SAMPLE_CLUES);
+});
+
+test("pruneUnlabeledFeatureClues keeps a labeled feature and drops an unlabeled one", () => {
+  const kept = pruneUnlabeledFeatureClues(SAMPLE_CLUES, (name) => name === "The Hjarggre Torrent");
+  const river = kept.find((c) => c.kind === "river");
+  const lake = kept.find((c) => c.kind === "lake");
+  assert.ok(river, "the labeled river clue is kept");
+  assert.equal(lake, undefined, "the unlabeled lake clue is dropped");
+});
+
+test("pruneUnlabeledFeatureClues never mutates its input", () => {
+  const before = SAMPLE_CLUES.length;
+  const kept = pruneUnlabeledFeatureClues(SAMPLE_CLUES, () => false);
+  assert.equal(SAMPLE_CLUES.length, before, "input array length is unchanged");
+  assert.notStrictEqual(kept, SAMPLE_CLUES, "a new array is returned");
 });
