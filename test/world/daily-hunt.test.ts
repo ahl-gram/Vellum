@@ -4,6 +4,7 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import {
   buildClues,
   chooseQuarry,
+  classifyClick,
   classifyDistanceBand,
   legendExcluded,
   pruneUnlabeledFeatureClues,
@@ -381,4 +382,62 @@ test("pruneUnlabeledFeatureClues never mutates its input", () => {
   const kept = pruneUnlabeledFeatureClues(SAMPLE_CLUES, () => false);
   assert.equal(SAMPLE_CLUES.length, before, "input array length is unchanged");
   assert.notStrictEqual(kept, SAMPLE_CLUES, "a new array is returned");
+});
+
+// --- classifyClick: continuous warmer/colder + name the town you clicked -----
+// A synthetic world gives exact control over the geometry the click reads
+// (settlements + elev + the quarry).
+const clickWorld = {
+  elev: { w: 100, h: 100 },
+  recipe: { seed: 1 },
+  settlements: [
+    { x: 50, y: 50, name: "Quarrytown" }, // idx 0 = quarry
+    { x: 50, y: 55, name: "Cluster" }, //     idx 1, hard by the quarry
+    { x: 10, y: 10, name: "Farhold" }, //     idx 2, far off
+  ],
+} as unknown as World;
+const clickQuarry: Quarry = { idx: 0, settlement: clickWorld.settlements[0]! };
+const BAND_RANK: Record<string, number> = { cold: 0, cool: 1, warm: 2, hot: 3 };
+
+test("classifyClick returns a hit when the click lands in the quarry's cell", () => {
+  const fb = classifyClick(clickWorld, clickQuarry, { x: 50, y: 50 });
+  assert.equal(fb.kind, "hit");
+});
+
+test("classifyClick names the settlement nearest the click on a miss", () => {
+  const fb = classifyClick(clickWorld, clickQuarry, { x: 12, y: 12 });
+  assert.equal(fb.kind, "miss");
+  if (fb.kind === "miss") {
+    assert.equal(fb.pickedIdx, 2);
+    assert.equal(fb.pickedName, "Farhold");
+  }
+});
+
+test("classifyClick heat reflects the click's distance, not the nearest town's", () => {
+  // The click is far from the quarry but snaps to "Cluster", which sits right by
+  // the quarry. The band must read the CLICK's distance (cool), not saturate to
+  // Hot the way the old nearest-settlement scoring did.
+  const fb = classifyClick(clickWorld, clickQuarry, { x: 50, y: 95 });
+  assert.equal(fb.kind, "miss");
+  if (fb.kind === "miss") {
+    assert.equal(fb.pickedName, "Cluster", "still names the town the click selected");
+    assert.notEqual(fb.band, "hot", "a far click does not read Hot just because it snapped to a near town");
+    assert.equal(fb.band, "cool");
+  }
+});
+
+test("classifyClick heat never cools as the click steps straight toward the quarry", () => {
+  for (const world of DAILY.slice(0, 5)) {
+    const q = mustQuarry(world);
+    const { x: qx, y: qy } = q.settlement;
+    const steps = 12;
+    let prev = -1;
+    for (let k = steps; k >= 1; k--) {
+      const t = k / steps; // 1 (far) -> ~0 (at the quarry)
+      const fb = classifyClick(world, q, { x: qx + (5 - qx) * t, y: qy + (5 - qy) * t });
+      const r = fb.kind === "hit" ? BAND_RANK.hot! : BAND_RANK[fb.band]!;
+      assert.ok(r >= prev, `warming toward the quarry never cools (seed ${world.recipe.seed}, k=${k})`);
+      prev = r;
+    }
+  }
 });

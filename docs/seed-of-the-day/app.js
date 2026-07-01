@@ -12,7 +12,7 @@ import { createLoreWriter } from "../explorer/engine/society/lore.js";
 import {
   buildClues,
   chooseQuarry,
-  classifyDistanceBand,
+  classifyClick,
   legendExcluded,
   pruneUnlabeledFeatureClues,
   revealLore,
@@ -147,7 +147,6 @@ function setupHunt(world) {
   }
   hunt.hidden = false;
 
-  const diagonal = Math.hypot(world.elev.w - 1, world.elev.h - 1);
   let guesses = 0;
 
   const placeStar = () => {
@@ -229,25 +228,17 @@ function setupHunt(world) {
     const gx = (px - MARGIN) / proj.scale;
     const gy = (py - MARGIN) / proj.scale;
 
-    let nearest = -1;
-    let nd = Infinity;
-    world.settlements.forEach((st, i) => {
-      const d = Math.hypot(st.x - gx, st.y - gy);
-      if (d < nd) {
-        nd = d;
-        nearest = i;
-      }
-    });
-    if (nearest < 0) return;
-
+    const feedback = classifyClick(world, quarry, { x: gx, y: gy });
     guesses++;
-    if (nearest === quarry.idx) {
+    if (feedback.kind === "hit") {
       recordSolve();
       win(true);
     } else {
-      const ns = world.settlements[nearest];
-      const dist = Math.hypot(ns.x - quarry.settlement.x, ns.y - quarry.settlement.y);
-      setHuntStatus(BAND_PROSE[classifyDistanceBand(dist, diagonal)]);
+      // Continuous heat (from the click's own distance to the quarry) plus the
+      // name of the mark the click selected, so a cluster of identical village
+      // glyphs no longer reads as an indistinguishable dead-end.
+      const tail = feedback.pickedName ? ` The nearest mark is ${feedback.pickedName}.` : "";
+      setHuntStatus(`${BAND_PROSE[feedback.band]}${tail}`);
     }
   });
 }
