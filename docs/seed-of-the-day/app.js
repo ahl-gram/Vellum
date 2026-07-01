@@ -14,6 +14,7 @@ import {
   chooseQuarry,
   classifyDistanceBand,
   legendExcluded,
+  pruneUnlabeledFeatureClues,
   revealLore,
 } from "../explorer/engine/world/daily-hunt.js";
 import { createProjection } from "../explorer/engine/render/transform.js";
@@ -132,10 +133,14 @@ function setupHunt(world) {
   const quarry = chooseQuarry(world, { exclude: legendExclusions(world, svg, proj) });
   if (!quarry) return;
 
-  // clues: a plain antique ordered list
+  // clues: a plain antique ordered list. Prune any river/lake clue whose name
+  // the chart never labeled (short/collision-skipped courses), so the hunt never
+  // cites a feature the player cannot find. The rendered SVG is the source of
+  // truth for what was drawn: a label emits as ">Name<" in the markup.
+  const isLabeled = (name) => svg.outerHTML.includes(`>${name}<`);
   const list = $("clues");
   list.replaceChildren();
-  for (const c of buildClues(world, quarry)) {
+  for (const c of pruneUnlabeledFeatureClues(buildClues(world, quarry), isLabeled)) {
     const li = document.createElement("li");
     li.textContent = c.text;
     list.appendChild(li);

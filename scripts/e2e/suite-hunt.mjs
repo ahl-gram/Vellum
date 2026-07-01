@@ -1,4 +1,5 @@
-// The Daily Hunt checks (H1-H9, #56) on the seed-of-the-day page.
+// The Daily Hunt checks (H1-H11) on the seed-of-the-day page: #56 (H1-H9),
+// the #88 legend-clearance guard (H10), and the labeled-clue guard (H11).
 // Split from e2e-explorer.mjs; behavior + check order unchanged.
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitAtlas, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
@@ -89,4 +90,27 @@ export async function run(ctx) {
     tgt.hit.fx >= tgt.legFrac.x0 && tgt.hit.fx <= tgt.legFrac.x1 &&
     tgt.hit.fy >= tgt.legFrac.y0 && tgt.hit.fy <= tgt.legFrac.y1;
   check("H10 the day's quarry sits clear of the rendered legend", !!tgt.legFrac && !hitInLegend, JSON.stringify({ leg: tgt.legFrac, hit: tgt.hit }));
+
+  // A displayed river/lake clue must name a feature the chart actually LABELED.
+  // Pre-fix, buildClues cited the nearest NAMED river even when the renderer
+  // skipped its label (short course / collision loser, feature-labels.ts), so
+  // the clue sent the player after a name printed nowhere on the map. Extract
+  // each feature name from the two stable clue phrasings and assert it appears
+  // as a ">Name<" label node in the rendered SVG. Vacuous on days with no such
+  // clue; bites the moment the prune (pruneUnlabeledFeatureClues) regresses.
+  const labelCheck = await evaluate(`(()=>{
+    const svg=document.querySelector("#map svg");
+    const html=svg?svg.outerHTML:"";
+    const lis=Array.from(document.getElementById("clues").children).map((li)=>li.textContent);
+    const names=[];
+    for(const t of lis){
+      let m=t.match(/within sight of the river (.+)\\.$/);
+      if(m){names.push(m[1]);continue;}
+      m=t.match(/takes in the waters of (.+)\\.$/);
+      if(m){names.push(m[1]);}
+    }
+    const missing=names.filter((n)=>!html.includes(">"+n+"<"));
+    return{count:names.length,missing};
+  })()`);
+  check("H11 every displayed river/lake clue names a feature the chart labeled", labelCheck.missing.length === 0, JSON.stringify(labelCheck));
 }
