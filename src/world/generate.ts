@@ -89,6 +89,9 @@ export function generateWorld(recipe: WorldRecipe): World {
   });
   const seaLevel = pickSeaLevel(elev, recipe.landFraction);
 
+  // one prevailing direction per world; its own fork so no other stream shifts
+  const winds = { dir: rng.fork("winds").range(0, Math.PI * 2) };
+
   // base moisture drives rainfall; final climate adds river wetness after
   const preClimate = computeClimate(elev, seaLevel, seed, { band: recipe.band });
   const rain = new Float64Array(gridW * gridH);
@@ -214,6 +217,7 @@ export function generateWorld(recipe: WorldRecipe): World {
     recipe,
     elev,
     seaLevel,
+    winds,
     flow,
     rivers,
     riverCells,
