@@ -59,8 +59,26 @@ export async function run(ctx) {
   })()`, true);
   const clickHunt = (f) => evaluate(`(()=>{const svg=document.querySelector("#map svg");const r=svg.getBoundingClientRect();svg.dispatchEvent(new MouseEvent("click",{clientX:r.left+${f.fx}*r.width,clientY:r.top+${f.fy}*r.height,bubbles:true}));return{status:document.getElementById("hunt-status").textContent,solved:document.getElementById("map").classList.contains("solved")};})()`);
 
+  // Warmth word -> rank, for the #94 continuous-heat checks. "" if unrecognized.
+  const bandRank = (s) => (/^Hot/.test(s) ? 3 : /^Warmer/.test(s) ? 2 : /^Cool/.test(s) ? 1 : /^Cold/.test(s) ? 0 : -1);
+
   const miss = await clickHunt(tgt.miss);
-  check("H3 a miss reports warmer/colder prose and does not solve", miss.status.length > 0 && !miss.solved, JSON.stringify(miss));
+  check(
+    "H3 a miss names the town the click selected, reports warmer/colder prose, and does not solve",
+    miss.status.length > 0 && !miss.solved && /nearest mark is /i.test(miss.status),
+    JSON.stringify(miss),
+  );
+
+  // #94: heat is continuous -- a click halfway from the far capital to the quarry
+  // must not read COLDER than the capital click (it is nearer the quarry). Stays
+  // a miss (halfway is well clear of the quarry's cell).
+  const near = { fx: tgt.miss.fx + 0.5 * (tgt.hit.fx - tgt.miss.fx), fy: tgt.miss.fy + 0.5 * (tgt.hit.fy - tgt.miss.fy) };
+  const nearMiss = await clickHunt(near);
+  check(
+    "H3b a click nearer the quarry never reads colder than a far click (continuous heat)",
+    !nearMiss.solved && bandRank(nearMiss.status) >= bandRank(miss.status) && bandRank(nearMiss.status) >= 0,
+    JSON.stringify({ far: miss.status, near: nearMiss.status }),
+  );
 
   const won = await clickHunt(tgt.hit);
   check("H4 clicking the quarry snaps to it and solves the hunt", won.solved === true && /found it/i.test(won.status), JSON.stringify(won));
