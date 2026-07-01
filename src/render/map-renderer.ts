@@ -28,7 +28,7 @@ import { textureDefs, textureOverlay } from "./layers/texture.ts";
 import { roadsLayer } from "./layers/roads.ts";
 import { realmBordersLayer, realmTintsLayer } from "./layers/realms.ts";
 import { soundingsLayer } from "./layers/soundings.ts";
-import { windsLayer } from "./layers/winds.ts";
+import { windsLayer, windStreamsLayer } from "./layers/winds.ts";
 import { currentsLayer } from "./layers/currents.ts";
 
 export type RenderOptions = {
@@ -155,6 +155,7 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     waterlinesLayer(ctx),
     landLayer(ctx),
     themed ? fieldLayer(ctx) : null,
+    themed ? windStreamsLayer(ctx) : null,
     themed ? isoLayer(ctx) : null,
     themed ? null : hypsometricLayer(ctx),
     themed ? null : contoursLayer(ctx),

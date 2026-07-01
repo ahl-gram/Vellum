@@ -17,6 +17,7 @@ test("region world keeps the parent's waterline and terrain", () => {
     title: "Test Environs",
   });
   assert.equal(region.seaLevel, world.seaLevel);
+  assert.equal(region.winds.dir, world.winds.dir, "the same wind blows over the region");
   assert.equal(region.culture.id, world.culture.id);
   assert.ok(region.region, "region metadata present");
 

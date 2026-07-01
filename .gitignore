@@ -14,6 +14,8 @@ docs/atlas/
 docs/gallery/
 
 .claude/settings.local.json
+# Transient review worktrees spawned by Claude Code workflows.
+.claude/worktrees/
 SESSION-NOTES.md
 RESUME-HERE.md
 
