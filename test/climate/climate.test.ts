@@ -16,7 +16,7 @@ function flatIsland(w: number, h: number, elevation = 0.15) {
 
 test("south is warmer than north at equal elevation", () => {
   const f = flatIsland(30, 40);
-  const { temperature } = computeClimate(f, 0, 99, {});
+  const { temperature } = computeClimate(f, 0, 99, { windDir: 0 });
   const north = temperature.at(15, 2);
   const south = temperature.at(15, 37);
   assert.ok(south > north, `south ${south} should exceed north ${north}`);
@@ -27,13 +27,13 @@ test("high peaks are colder than nearby lowland", () => {
     if (x === 0 || y === 0 || x === 19 || y === 19) return -1;
     return x === 10 && y === 10 ? 1.4 : 0.1;
   });
-  const { temperature } = computeClimate(f, 0, 5, {});
+  const { temperature } = computeClimate(f, 0, 5, { windDir: 0 });
   assert.ok(temperature.at(10, 10) < temperature.at(12, 10) - 0.2);
 });
 
 test("coastal land is wetter than the deep interior on average", () => {
   const f = flatIsland(60, 40);
-  const { moisture } = computeClimate(f, 0, 7, {});
+  const { moisture } = computeClimate(f, 0, 7, { windDir: 0 });
   let coastSum = 0;
   let coastN = 0;
   let interiorSum = 0;
@@ -58,7 +58,9 @@ test("river corridors are wetter than dry plains", () => {
   const f = flatIsland(w, 40);
   const riverCells = new Uint8Array(w * 40);
   for (let y = 5; y < 35; y++) riverCells[20 + y * w] = 1; // vertical river at x=20
-  const { moisture } = computeClimate(f, 0, 7, { riverCells });
+  // wind from the east makes the far strip the maritime one, so the river
+  // corridor must out-wet a headwind handicap: this stays a pure river test
+  const { moisture } = computeClimate(f, 0, 7, { riverCells, windDir: Math.PI });
   let nearSum = 0;
   let nearN = 0;
   let farSum = 0;
@@ -82,7 +84,7 @@ test("climate bands order mean temperature: tropical > temperate > polar", () =>
   const f = buildHeightfield({ seed: 3, gridW: 60, gridH: 45, mapType: "island" });
   const sea = pickSeaLevel(f, 0.35);
   const mean = (band: "tropical" | "temperate" | "polar"): number => {
-    const { temperature } = computeClimate(f, sea, 3, { band });
+    const { temperature } = computeClimate(f, sea, 3, { band, windDir: 0 });
     let s = 0;
     let n = 0;
     for (let i = 0; i < f.data.length; i++) {
@@ -102,8 +104,8 @@ test("climate bands order mean temperature: tropical > temperate > polar", () =>
 test("climate fields stay in [0, 1] and are deterministic", () => {
   const f = buildHeightfield({ seed: 13, gridW: 50, gridH: 40, mapType: "island" });
   const sea = pickSeaLevel(f, 0.35);
-  const a = computeClimate(f, sea, 13, {});
-  const b = computeClimate(f, sea, 13, {});
+  const a = computeClimate(f, sea, 13, { windDir: 2.1 });
+  const b = computeClimate(f, sea, 13, { windDir: 2.1 });
   assert.deepEqual(a.temperature.data, b.temperature.data);
   assert.deepEqual(a.moisture.data, b.moisture.data);
   for (const v of a.temperature.data) assert.ok(v >= 0 && v <= 1);

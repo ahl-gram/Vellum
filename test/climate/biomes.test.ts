@@ -63,7 +63,7 @@ test("biomeName round-trips ids", () => {
 test("a real island grows a diverse, deterministic biome set", () => {
   const f = buildHeightfield({ seed: 42, gridW: 100, gridH: 75, mapType: "island" });
   const sea = pickSeaLevel(f, 0.36);
-  const climate = computeClimate(f, sea, 42, {});
+  const climate = computeClimate(f, sea, 42, { windDir: 0.9 });
   const a = classifyBiomes(f, sea, climate);
   const b = classifyBiomes(f, sea, climate);
   assert.deepEqual(a, b);

@@ -2,6 +2,7 @@ import { bfsDistance } from "../core/bfs-distance.ts";
 import { createField, type Field } from "../core/grid.ts";
 import { clamp, smoothstep } from "../core/math.ts";
 import { fbm2 } from "../noise/fbm.ts";
+import { computeWindMoisture } from "./moisture-wind.ts";
 
 export type ClimateBand = "temperate" | "tropical" | "polar";
 
@@ -13,6 +14,8 @@ export type Climate = {
 export type ClimateOptions = {
   band?: ClimateBand;
   riverCells?: Uint8Array;
+  /** Prevailing wind in radians, blown toward (world.winds.dir). */
+  windDir: number;
   /** World-space crop for regional charts (keeps latitude consistent). */
   window?: { u0: number; v0: number; u1: number; v1: number };
   worldAspect?: number;
@@ -57,9 +60,11 @@ export function computeClimate(
     return clamp(band.base + band.latSpan * lat + wobble - above * LAPSE, 0, 1);
   });
 
-  const isOcean = (x: number, y: number): boolean =>
-    (data[x + y * w] as number) <= seaLevel;
-  const coastDist = bfsDistance(w, h, isOcean);
+  // wind-driven rain replaces the old symmetric distance-to-coast bonus (#74);
+  // the noise floor drops with it so rain shadows can actually reach arid.
+  // Only a full world chart borders the true (forced-water) map edge; a
+  // windowed regional crop continues its border terrain instead of sea.
+  const windRain = computeWindMoisture(elev, seaLevel, opts.windDir, !opts.window);
 
   const riverCells = opts.riverCells;
   const riverDist = riverCells
@@ -70,17 +75,18 @@ export function computeClimate(
     const u = toU(x);
     const v = toV(y);
     const base =
-      0.45 +
+      0.31 +
       fbm2(u * 4 * aspect + 13.7, v * 4 + 71.3, (seed ^ MOIST_SEED_SALT) >>> 0, {
         octaves: 4,
       }) *
-        0.28;
+        0.22;
     const i = x + y * w;
-    const coastBonus = 0.2 * (1 - smoothstep(0, 18, coastDist[i] as number));
+    // spent air parches: deep rain shadows dip below the noise floor (#74)
+    const windBonus = 0.5 * (windRain[i] as number) - 0.06;
     const riverBonus = riverDist
       ? 0.3 * (1 - smoothstep(0, 6, riverDist[i] as number))
       : 0;
-    return clamp(base + coastBonus + riverBonus, 0, 1);
+    return clamp(base + windBonus + riverBonus, 0, 1);
   });
 
   return { temperature, moisture };
