@@ -4,16 +4,6 @@ import { createRng } from "../../src/core/rng.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 
-// FNV-1a over realm labels, mirroring test/world/golden-seed42.test.ts
-function labelsChecksum(labels: Int16Array): number {
-  let h = 0x811c9dc5 >>> 0;
-  for (const v of labels) {
-    h ^= v & 0xffff;
-    h = Math.imul(h, 0x01000193) >>> 0;
-  }
-  return h >>> 0;
-}
-
 test("the prevailing wind is a deterministic world property in [0, 2pi)", () => {
   const a = generateWorld(defaultRecipe(42));
   const b = generateWorld(defaultRecipe(42));
@@ -36,20 +26,11 @@ test("different seeds roll different winds", () => {
   assert.ok(dirs.size >= 3, `winds vary across seeds (got ${dirs.size} distinct)`);
 });
 
-test("the winds fork re-rolled nothing: seed 42 identity intact (fork independence)", () => {
-  // The named fork derives from seed + label, never stream position, so
-  // promoting the wind into generateWorld must leave every other stream
-  // byte-identical. These pins match test/world/golden-seed42.test.ts.
-  const w = generateWorld(defaultRecipe(42));
-  assert.equal(labelsChecksum(w.realms.labels), 1218526613);
-  assert.equal(w.settlements[0]!.name, "Laukuwelua");
-  assert.deepEqual(w.names.realms, [
-    "The Chiefdom of Peroa",
-    "The Chiefdom of Rekekoa",
-    "The Hauwaiwa Atolls",
-  ]);
-  assert.equal(w.names.sea, "The Great Mung");
-});
+// (The seed-42 identity pins that used to sit here proved #73's winds fork
+// reshuffled nothing. Since #74 the climate CONSUMES the wind by design, so
+// identity pins can no longer witness fork independence; the provenance
+// assertion above is the durable guard, and world identity is pinned once,
+// in test/world/golden-seed42.test.ts.)
 
 test("the nautical arrows read the world's wind", () => {
   const world = generateWorld(defaultRecipe(42));

@@ -5,10 +5,10 @@ import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 /**
  * Golden snapshot of seed 42's IDENTITY (names + geography). It proved the #19
  * history work was additive (no earlier stream reshuffled), was updated once in
- * the #17 name-screen commit, and again when coastline domain-warp landed: that
- * change reshapes the terrain, so every terrain-derived value (realm names, sea
- * name, the realms.labels geometry) re-rolled. Title/year/capital are drawn
- * before terrain settles and stayed put.
+ * the #17 name-screen commit, again when coastline domain-warp landed, and again
+ * for #74 wind-driven moisture: rainfall now follows world.winds, so rivers,
+ * biomes, settlements, and every downstream name re-rolled. Title/year/capital
+ * are drawn before terrain settles and stayed put.
  */
 
 function labelsChecksum(labels: Int16Array): number {
@@ -20,16 +20,16 @@ function labelsChecksum(labels: Int16Array): number {
   return h >>> 0;
 }
 
-test("seed 42 golden identity (post #17 name re-roll)", () => {
+test("seed 42 golden identity (post #74 orographic-moisture re-roll)", () => {
   const w = generateWorld(defaultRecipe(42));
   assert.equal(w.title.title, "The Isle of Rahai");
   assert.equal(w.title.year, 1059);
   assert.equal(w.settlements[0]!.name, "Laukuwelua"); // capital
   assert.deepEqual(w.names.realms, [
-    "The Chiefdom of Peroa",
     "The Chiefdom of Rekekoa",
     "The Hauwaiwa Atolls",
+    "The Ratoa Atolls",
   ]);
-  assert.equal(w.names.sea, "The Great Mung");
-  assert.equal(labelsChecksum(w.realms.labels), 1218526613);
+  assert.equal(w.names.sea, "The Great Woaku");
+  assert.equal(labelsChecksum(w.realms.labels), 778853820);
 });

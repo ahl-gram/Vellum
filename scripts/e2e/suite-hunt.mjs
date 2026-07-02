@@ -70,9 +70,12 @@ export async function run(ctx) {
   );
 
   // #94: heat is continuous -- a click halfway from the far capital to the quarry
-  // must not read COLDER than the capital click (it is nearer the quarry). Stays
-  // a miss (halfway is well clear of the quarry's cell).
-  const near = { fx: tgt.miss.fx + 0.5 * (tgt.hit.fx - tgt.miss.fx), fy: tgt.miss.fy + 0.5 * (tgt.hit.fy - tgt.miss.fy) };
+  // must not read COLDER than the capital click (it is nearer the quarry).
+  // The probe sits at 0.4 of the way, NOT halfway: the exact midpoint ties
+  // capital vs quarry and float noise in the rect roundtrip can snap it to
+  // the quarry on ~1 day in 5, silently solving and vacating H4's coverage.
+  // At 0.4 the capital is strictly nearer, so this is a guaranteed miss.
+  const near = { fx: tgt.miss.fx + 0.4 * (tgt.hit.fx - tgt.miss.fx), fy: tgt.miss.fy + 0.4 * (tgt.hit.fy - tgt.miss.fy) };
   const nearMiss = await clickHunt(near);
   check(
     "H3b a click nearer the quarry never reads colder than a far click (continuous heat)",

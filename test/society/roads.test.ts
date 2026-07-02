@@ -19,7 +19,7 @@ function makeWorld(seed: number) {
   for (const r of rivers) {
     for (const p of r.points) riverCells[p.x + p.y * elev.w] = 1;
   }
-  const climate = computeClimate(elev, sea, seed, { riverCells });
+  const climate = computeClimate(elev, sea, seed, { riverCells, windDir: 0.9 });
   const biomes = classifyBiomes(elev, sea, climate);
   const settlements = placeSettlements(elev, sea, flow, riverCells, biomes, createRng(seed));
   return { elev, sea, riverCells, biomes, settlements };

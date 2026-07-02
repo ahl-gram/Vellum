@@ -40,6 +40,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
 
   const preClimate = computeClimate(elev, seaLevel, recipe.seed, {
     band: recipe.band,
+    windDir: world.winds.dir, // the same wind blows over a region of the same world
     window,
     worldAspect,
   });
@@ -56,6 +57,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   const climate = computeClimate(elev, seaLevel, recipe.seed, {
     band: recipe.band,
     riverCells,
+    windDir: world.winds.dir,
     window,
     worldAspect,
   });

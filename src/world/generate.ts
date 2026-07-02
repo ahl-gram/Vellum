@@ -93,7 +93,10 @@ export function generateWorld(recipe: WorldRecipe): World {
   const winds = { dir: rng.fork("winds").range(0, Math.PI * 2) };
 
   // base moisture drives rainfall; final climate adds river wetness after
-  const preClimate = computeClimate(elev, seaLevel, seed, { band: recipe.band });
+  const preClimate = computeClimate(elev, seaLevel, seed, {
+    band: recipe.band,
+    windDir: winds.dir,
+  });
   const rain = new Float64Array(gridW * gridH);
   for (let i = 0; i < rain.length; i++) {
     rain[i] = 0.3 + 1.4 * (preClimate.moisture.data[i] as number);
@@ -109,6 +112,7 @@ export function generateWorld(recipe: WorldRecipe): World {
   const climate = computeClimate(elev, seaLevel, seed, {
     band: recipe.band,
     riverCells,
+    windDir: winds.dir,
   });
   const biomes = classifyBiomes(elev, seaLevel, climate);
 
