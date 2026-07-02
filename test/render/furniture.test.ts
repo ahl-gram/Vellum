@@ -8,6 +8,7 @@ import { createLabelArena, type RenderCtx } from "../../src/render/context.ts";
 import { planCartouche } from "../../src/render/layers/cartouche.ts";
 import { planCompass } from "../../src/render/layers/compass.ts";
 import { planScalebar } from "../../src/render/layers/scalebar.ts";
+import { planLegend } from "../../src/render/layers/legend.ts";
 import { boxesOverlap } from "../../src/render/geometry.ts";
 
 // The compass, scale bar, and cartouche are decorative "furniture" placed in
@@ -50,5 +51,27 @@ test("the compass rose clears the scale bar and cartouche", () => {
     );
   }
   // guard: the fix must reposition the compass, not quietly drop it
+  assert.ok(drawn >= 30, `expected most seeds to draw a compass, got ${drawn}/40`);
+});
+
+test("the compass rose clears the legend", () => {
+  // the legend is planned before the compass so the (flexible) compass yields to
+  // the (corner-anchored) legend; pins that the compass never lands on it
+  let drawn = 0;
+  for (let seed = 1; seed <= 40; seed++) {
+    const ctx = ctxFor(seed);
+    const cart = planCartouche(ctx);
+    const scale = planScalebar(ctx);
+    const legend = planLegend(ctx, [cart.rect, scale.box]);
+    const compass = planCompass(ctx, cart, scale.box, legend?.box);
+    if (!compass) continue;
+    drawn++;
+    if (legend) {
+      assert.ok(
+        !boxesOverlap(compass.box, legend.box),
+        `compass overlaps the legend for seed ${seed}`,
+      );
+    }
+  }
   assert.ok(drawn >= 30, `expected most seeds to draw a compass, got ${drawn}/40`);
 });

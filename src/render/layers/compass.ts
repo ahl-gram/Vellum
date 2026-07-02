@@ -1,5 +1,6 @@
 import { el, type SvgNode } from "../svg.ts";
 import { boxesOverlap, type Box } from "../geometry.ts";
+import { seaMask } from "../../hydrology/sea-mask.ts";
 import type { RenderCtx } from "../context.ts";
 import type { CartouchePlan } from "./cartouche.ts";
 
@@ -14,14 +15,17 @@ export function planCompass(
   ctx: RenderCtx,
   cartouche: CartouchePlan,
   scalebarBox: Box,
+  legendBox?: Box,
 ): CompassPlan | null {
   const { world, proj } = ctx;
   const k = proj.widthPx / 1500;
   const r = 47 * k;
   const { w, h } = world.elev;
 
-  const cartCx = cartouche.rect.x + cartouche.rect.w / 2;
-  const cartCy = cartouche.rect.y + cartouche.rect.h / 2;
+  // Only the open, border-connected sea is fair game. oceanDist runs just as
+  // deep inside an inland lake, so without this gate the rose can be dropped in
+  // a lake (it was, on some regional surveys).
+  const sea = seaMask(world.elev, world.seaLevel);
 
   // bounding box of the rose plus the "N" label above it
   const boxAt = (px: number, py: number): Box => ({
@@ -31,11 +35,16 @@ export function planCompass(
     h: 2 * r + 18 * k,
   });
 
-  let best: { px: number; py: number; score: number } | null = null;
+  // Take the most open water: the largest hop-distance from any shore that still
+  // clears the frame and the furniture. Openness alone keeps the rose out in the
+  // sea rather than in whatever corner is merely farthest from the title.
+  let best: { px: number; py: number; open: number } | null = null;
   for (let gy = 4; gy < h - 4; gy += 2) {
     for (let gx = 4; gx < w - 4; gx += 2) {
-      const d = world.oceanDist[gx + gy * w] as number;
-      if (d < 7) continue;
+      const i = gx + gy * w;
+      if (sea[i] === 0) continue;
+      const open = world.oceanDist[i] as number;
+      if (open < 7) continue;
       const px = proj.px(gx);
       const py = proj.py(gy);
       const margin = proj.margin;
@@ -48,9 +57,8 @@ export function planCompass(
       const box = boxAt(px, py);
       if (boxesOverlap(box, scalebarBox, 8 * k)) continue;
       if (boxesOverlap(box, cartouche.rect, 6 * k)) continue;
-      const dCart = Math.hypot(px - cartCx, py - cartCy);
-      const score = Math.min(d, 14) * 8 + dCart * 0.18 + edge * -0.08;
-      if (!best || score > best.score) best = { px, py, score };
+      if (legendBox && boxesOverlap(box, legendBox, 6 * k)) continue;
+      if (!best || open > best.open) best = { px, py, open };
     }
   }
   if (!best) return null;
