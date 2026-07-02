@@ -11,6 +11,7 @@ import { recipeAttrs, recipeMetadataNode } from "./recipe-meta.ts";
 import { oceanLayer, waterlinesLayer } from "./layers/water.ts";
 import { contoursLayer, hypsometricLayer, landLayer } from "./layers/land.ts";
 import { fieldLayer, type ThemeName } from "./layers/field.ts";
+import { isoLayer } from "./layers/iso.ts";
 import { riversLayer } from "./layers/rivers.ts";
 import { settlementsLayer } from "./layers/settlements.ts";
 import { frameLayer } from "./layers/frame.ts";
@@ -154,6 +155,7 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     waterlinesLayer(ctx),
     landLayer(ctx),
     themed ? fieldLayer(ctx) : null,
+    themed ? isoLayer(ctx) : null,
     themed ? null : hypsometricLayer(ctx),
     themed ? null : contoursLayer(ctx),
     themed ? null : realmTintsLayer(ctx),
