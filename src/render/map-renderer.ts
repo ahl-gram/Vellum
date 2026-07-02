@@ -129,12 +129,14 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   ctx.labels.claim(cartouchePlan.rect);
   const scalebarPlan = planScalebar(ctx);
   ctx.labels.claim(scalebarPlan.box);
-  const compassPlan = planCompass(ctx, cartouchePlan, scalebarPlan.box);
-  if (compassPlan) ctx.labels.claim(compassPlan.box);
-  const legendReserved = [cartouchePlan.rect, scalebarPlan.box];
-  if (compassPlan) legendReserved.push(compassPlan.box);
-  const legendPlan = opts.legend ? planLegend(ctx, legendReserved) : null;
+  // The legend anchors to a corner, so plan it before the (flexible) compass and
+  // let the rose route around it, not the other way round.
+  const legendPlan = opts.legend
+    ? planLegend(ctx, [cartouchePlan.rect, scalebarPlan.box])
+    : null;
   if (legendPlan) ctx.labels.claim(legendPlan.box);
+  const compassPlan = planCompass(ctx, cartouchePlan, scalebarPlan.box, legendPlan?.box);
+  if (compassPlan) ctx.labels.claim(compassPlan.box);
 
   // evaluation order = label priority: settlements claim space before
   // flexible feature labels, which claim before decorative art
