@@ -1,4 +1,4 @@
-import { el, type SvgNode } from "../svg.ts";
+import { el, pathFrom, type SvgNode } from "../svg.ts";
 import { prunePoints, boxesOverlap, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { CartouchePlan } from "./cartouche.ts";
@@ -18,8 +18,8 @@ export function windsLayer(
   if (!style.winds) return null;
   const k = proj.widthPx / 1500;
   const { w, h } = world.elev;
-  const wrng = rng.fork("winds");
-  const prevailing = wrng.range(0, Math.PI * 2);
+  const wrng = rng.fork("winds"); // placement and jitter only; direction is the world's
+  const prevailing = world.winds.dir;
 
   const avoid: Box[] = [cartouche.rect];
   if (compass) avoid.push(compass.box);
@@ -87,4 +87,56 @@ export function windsLayer(
 
   if (arrows.length === 0) return null;
   return el("g", { id: "layer-winds" }, arrows);
+}
+
+/**
+ * Faint streaks across the Rainfall plate's land, following the prevailing
+ * wind, so the plate shows the wind that (from #74) drives it. Null for any
+ * other theme. Clipped to the coastline; the nautical arrows keep the sea.
+ */
+export function windStreamsLayer(ctx: RenderCtx): SvgNode | null {
+  if (ctx.theme !== "moisture") return null;
+  const { style, world, proj, rng } = ctx;
+  const k = proj.widthPx / 1500;
+  const { w, h } = world.elev;
+  const srng = rng.fork("wind-streams");
+
+  const spots: Array<{ x: number; y: number }> = [];
+  for (let gy = 2; gy < h - 2; gy += 2) {
+    for (let gx = 2; gx < w - 2; gx += 2) {
+      if ((world.elev.data[gx + gy * w] as number) <= world.seaLevel) continue;
+      spots.push({ x: proj.px(gx), y: proj.py(gy) });
+    }
+  }
+
+  const picked = prunePoints(srng.shuffled(spots), 55 * k, 64);
+  const streaks: SvgNode[] = [];
+  for (const spot of picked) {
+    const a = world.winds.dir + srng.range(-0.06, 0.06);
+    const len = (26 + srng.range(0, 12)) * k;
+    const dx = Math.cos(a);
+    const dy = Math.sin(a);
+    const x1 = spot.x - (dx * len) / 2;
+    const y1 = spot.y - (dy * len) / 2;
+    streaks.push(
+      el("path", {
+        d: `M${x1.toFixed(1)} ${y1.toFixed(1)}L${(x1 + dx * len).toFixed(1)} ${(y1 + dy * len).toFixed(1)}`,
+        fill: "none",
+        // the strong ink: inkSoft washes out against the moisture fills
+        stroke: style.ink,
+        "stroke-width": (1.0 * k).toFixed(2),
+        "stroke-opacity": 0.35,
+        "stroke-linecap": "round",
+      }),
+    );
+  }
+  if (streaks.length === 0) return null;
+
+  const coastD = ctx.coastRings.map((r) => pathFrom(r, true)).join("");
+  return el("g", { id: "layer-wind-streams" }, [
+    el("clipPath", { id: "wind-streams-clip" }, [
+      el("path", { d: coastD, "clip-rule": "evenodd" }),
+    ]),
+    el("g", { "clip-path": "url(#wind-streams-clip)" }, streaks),
+  ]);
 }

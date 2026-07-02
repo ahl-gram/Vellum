@@ -46,10 +46,19 @@ export type FeatureNames = {
   readonly realms: ReadonlyArray<string>;
 };
 
+/**
+ * The prevailing wind: radians, the direction the wind blows toward, in grid
+ * coordinates (x east, y south). One roll per world on its own named fork;
+ * the nautical arrows read it, and (from #74) so does the climate. Consumers
+ * must read this value, never re-fork "winds" to derive their own.
+ */
+export type Winds = { readonly dir: number };
+
 export type World = {
   readonly recipe: WorldRecipe;
   readonly elev: Field;
   readonly seaLevel: number;
+  readonly winds: Winds;
   readonly flow: FlowResult;
   readonly rivers: ReadonlyArray<River>;
   readonly riverCells: Uint8Array;

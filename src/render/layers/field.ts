@@ -110,7 +110,7 @@ const MOISTURE = scalarTheme(
   "moisture",
   (world) => world.climate.moisture.data,
   MOIST_BANDS, MOIST_RAMPS, MOIST_KEY,
-  "dry to wet rainfall",
+  "dry to wet rainfall; streaks mark the prevailing wind",
 );
 
 // --- population: choropleth over realms, shaded by settlement density ----------
