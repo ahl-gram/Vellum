@@ -50,7 +50,7 @@ export function realmTintsLayer(ctx: RenderCtx): SvgNode | null {
     nodes.push(
       el("path", {
         d,
-        fill: style.realmTints[realm % style.realmTints.length] as string,
+        fill: style.realmTints[ctx.realmTint[realm] as number] as string,
         "fill-opacity": style.name === "topographic" ? 0.16 : 0.11,
         "fill-rule": "evenodd",
       }),

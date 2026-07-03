@@ -235,7 +235,7 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
 
     if (showHalo && (tier === "capital" || tier === "seat") && !s.ruined) {
       const realmId = seatRealm.get(i) as number;
-      const color = style.realmTints[realmId % style.realmTints.length] as string;
+      const color = style.realmTints[ctx.realmTint[realmId] as number] as string;
       nodes.push(seatHalo(px, py, tier, color, ctx));
     }
     nodes.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(tier, px, py, ctx));

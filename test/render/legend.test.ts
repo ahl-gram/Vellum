@@ -26,6 +26,7 @@ function ctxFor(w: World, name: StyleName): RenderCtx {
     coastRings: [],
     elevSpan: 1,
     rng: createRng(w.recipe.seed).fork("render"),
+    realmTint: w.realms.seats.map((_, i) => i),
     labels: createLabelArena(),
   };
 }
