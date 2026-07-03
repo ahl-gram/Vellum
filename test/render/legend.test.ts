@@ -82,6 +82,16 @@ test("the legend stays in frame and clears the other furniture", () => {
   }
 });
 
+test("the legend names the iso lines on the climate and moisture plates only", () => {
+  const w = generateWorld(defaultRecipe(42, { gridW: 160, gridH: 120 }));
+  assert.match(renderMap(w, { theme: "moisture", legend: true }), /Isohyet/);
+  assert.match(renderMap(w, { theme: "climate", legend: true }), /Isotherm/);
+  // the other plates and the plain chart carry no iso line, so none is named
+  assert.doesNotMatch(renderMap(w, { theme: "vegetation", legend: true }), /Isohyet|Isotherm/);
+  assert.doesNotMatch(renderMap(w, { theme: "population", legend: true }), /Isohyet|Isotherm/);
+  assert.doesNotMatch(renderMap(w, { legend: true }), /Isohyet|Isotherm/);
+});
+
 test("the key lists roads by rank, and only when present", () => {
   assert.ok(world.roads.some((r) => r.rank === "trunk"), "fixture should have trunk roads");
   assert.ok(world.roads.some((r) => r.rank === "lane"), "fixture should have lane roads");
