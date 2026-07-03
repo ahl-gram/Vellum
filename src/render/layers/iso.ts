@@ -16,9 +16,13 @@ export type IsolineSet = {
 
 const ISO_LEVELS = 9; // matches the elevation contours' level count
 
-/** Which thematic plates carry isolines, and over which field. #75 adds moisture. */
+/**
+ * Which thematic plates carry isolines, and over which field: isotherms on
+ * the Temperature plate, isohyets on the Rainfall plate.
+ */
 const ISO_FIELDS: Partial<Record<string, (world: World) => Field>> = {
   climate: (world) => world.climate.temperature,
+  moisture: (world) => world.climate.moisture,
 };
 
 /**
@@ -42,8 +46,8 @@ export function isolines(field: Field, levels: number): IsolineSet[] {
 
 /**
  * Stroked isolines over the active thematic plate: isotherms on the
- * Temperature plate (theme "climate"). Null for any other theme; #75 will
- * point the same layer at moisture for isohyets. Like the field cells, the
+ * Temperature plate (theme "climate"), isohyets on the Rainfall plate
+ * (theme "moisture"). Null for any other theme. Like the field cells, the
  * lines clip to the coastline; open sea stays clean.
  */
 export function isoLayer(ctx: RenderCtx): SvgNode | null {
