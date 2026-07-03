@@ -41,6 +41,8 @@ export type ThemeSpec = {
   legendRows(world: World, style: MapStyle): SwatchRow[];
   /** The legend's footnote for this theme. */
   readonly note: string;
+  /** Legend label for the plate's iso lines, when it carries any. */
+  readonly isoLabel?: string;
 };
 
 const isOcean = (world: World, i: number): boolean =>
@@ -82,6 +84,7 @@ function scalarTheme(
   ramps: Record<StyleName, string[]>,
   key: ReadonlyArray<[number, string]>,
   note: string,
+  isoLabel: string,
 ): ThemeSpec {
   return {
     name,
@@ -96,6 +99,7 @@ function scalarTheme(
     legendRows: (_world, style) =>
       key.map(([i, label]) => ({ color: ramps[style.name][i] as string, label })),
     note,
+    isoLabel,
   };
 }
 
@@ -104,6 +108,7 @@ const CLIMATE = scalarTheme(
   (world) => world.climate.temperature.data,
   TEMP_BANDS, TEMP_RAMPS, TEMP_KEY,
   "warm to cool, by latitude & height",
+  "Isotherm",
 );
 
 const MOISTURE = scalarTheme(
@@ -111,6 +116,7 @@ const MOISTURE = scalarTheme(
   (world) => world.climate.moisture.data,
   MOIST_BANDS, MOIST_RAMPS, MOIST_KEY,
   "dry to wet rainfall; streaks mark the prevailing wind",
+  "Isohyet",
 );
 
 // --- population: choropleth over realms, shaded by settlement density ----------

@@ -5,6 +5,7 @@ import type { RenderCtx } from "../context.ts";
 import { settlementGlyph, ruinGlyph } from "./settlements.ts";
 import { terrainGlyphsPresent } from "./glyphs.ts";
 import { THEMES } from "./field.ts";
+import { isoStroke } from "./iso.ts";
 
 /**
  * A compact, style-aware "key" panel. It lists only the symbols a given map
@@ -26,6 +27,7 @@ type Icon =
   | { kind: "rock" }
   | { kind: "wind" }
   | { kind: "current" }
+  | { kind: "iso" }
   | { kind: "swatch"; color: string };
 
 type Row = { icon: Icon; label: string };
@@ -83,6 +85,8 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
     for (const sw of THEMES[theme].legendRows(world, style)) {
       rows.push({ icon: { kind: "swatch", color: sw.color }, label: sw.label });
     }
+    const isoLabel = THEMES[theme].isoLabel;
+    if (isoLabel) rows.push({ icon: { kind: "iso" }, label: isoLabel });
   }
 
   const tiers = new Set(world.settlements.map((s) => s.kind));
@@ -285,6 +289,16 @@ function iconNode(icon: Icon, cx: number, cy: number, ctx: RenderCtx): SvgNode {
           `M${cx.toFixed(1)} ${(cy - 1.5 * k).toFixed(1)}L${(cx - Math.cos(a) * hl).toFixed(1)} ${(cy - 1.5 * k + Math.sin(a) * hl).toFixed(1)}`,
         fill: "none", stroke: style.inkSoft, "stroke-width": (1.0 * k).toFixed(1),
         "stroke-opacity": 0.6, "stroke-linecap": "round",
+      });
+    }
+    case "iso": {
+      // a short contour squiggle in the plate's own iso stroke: bold grey-brown
+      // for the rainfall isohyets, the faint style stroke for the isotherms
+      const s = isoStroke(ctx.theme ?? "", style);
+      return el("path", {
+        d: `M${(cx - 10 * k).toFixed(1)} ${(cy + 2 * k).toFixed(1)}Q${(cx - 3 * k).toFixed(1)} ${(cy - 4 * k).toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)}Q${(cx + 4 * k).toFixed(1)} ${(cy + 3 * k).toFixed(1)} ${(cx + 10 * k).toFixed(1)} ${(cy - 2 * k).toFixed(1)}`,
+        fill: "none", stroke: s.color, "stroke-width": (s.width * k).toFixed(2),
+        "stroke-opacity": s.opacity, "stroke-linecap": "round",
       });
     }
     case "swatch":

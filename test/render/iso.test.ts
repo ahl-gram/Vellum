@@ -41,6 +41,70 @@ test("isolines: a radial bump yields closed rings; a flat field yields nothing",
   assert.deepEqual(isolines(createField(8, 8, () => 0.5), 9), [], "flat field, no lines");
 });
 
+/** The larger of a ring's grid-space width and height, in cells. */
+function maxExtent(points: ReadonlyArray<readonly [number, number]>): number {
+  let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+  for (const [x, y] of points) {
+    if (x < minx) minx = x;
+    if (x > maxx) maxx = x;
+    if (y < miny) miny = y;
+    if (y > maxy) maxy = y;
+  }
+  return Math.max(maxx - minx, maxy - miny);
+}
+
+test("isolines: a lone spike keeps its broad low ring but culls the sub-pixel high one", () => {
+  // one cell above a flat floor. Its rings shrink toward the peak: the 0.1 ring
+  // rides ~0.9 cell out from the centre (a real ~1.8-cell diamond), the 0.9 ring
+  // hugs the corner at ~0.1 cell out (a degenerate ~0.2-cell speck to be culled).
+  const spike = createField(5, 5, (x, y) => (x === 2 && y === 2 ? 1 : 0));
+  const sets = isolines(spike, 9); // interior levels 0.1 .. 0.9
+  const low = sets.find((s) => Math.abs(s.value - 0.1) < 1e-9);
+  assert.ok(low?.contours.some((c) => c.closed), "the broad 0.1 ring survives");
+  const high = sets.find((s) => Math.abs(s.value - 0.9) < 1e-9);
+  assert.ok(
+    !high || high.contours.every((c) => !c.closed),
+    "the sub-pixel 0.9 ring is culled",
+  );
+});
+
+test("isolines: sub-pixel mottle rings are culled off the real rainfall field", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const closed = isolines(world.climate.moisture, 9)
+    .flatMap((s) => s.contours)
+    .filter((c) => c.closed);
+  assert.ok(closed.length > 100, "the noisy field still carries real rings");
+  for (const c of closed) {
+    assert.ok(
+      maxExtent(c.points) > 0.5,
+      `every surviving ring clears the sub-pixel floor (found ${maxExtent(c.points).toFixed(3)} cells)`,
+    );
+  }
+});
+
+test("the rainfall isohyets lead the plate; the temperature isotherms stay faint", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const isoGroup = (theme: "moisture" | "climate"): string =>
+    renderMap(world, { style: "nautical", theme }).match(
+      /<g id="layer-iso">[\s\S]*?<\/g><\/g>/,
+    )?.[0] ?? "";
+
+  const rain = isoGroup("moisture");
+  assert.match(rain, /stroke="#78765f"/, "isohyets take the bold grey-brown");
+  assert.match(rain, /stroke-width="1"/, "isohyets are 1.0px");
+  assert.match(rain, /stroke-opacity="0.72"/, "isohyets sit at 0.72 opacity");
+
+  const temp = isoGroup("climate");
+  assert.match(temp, /stroke-width="0.7"/, "isotherms stay 0.7px");
+  assert.match(temp, /stroke-opacity="0.45"/, "isotherms stay 0.45 opacity");
+  assert.match(
+    temp,
+    new RegExp(`stroke="${STYLES.nautical.contourStroke}"`),
+    "isotherms keep the style's soft contour stroke",
+  );
+  assert.doesNotMatch(temp, /stroke="#78765f"/, "the boldness never touches temperature");
+});
+
 test("the temperature plate carries coastline-clipped isotherms in every style", () => {
   const world = generateWorld(defaultRecipe(42));
   for (const style of STYLE_NAMES) {
