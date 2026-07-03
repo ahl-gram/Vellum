@@ -66,6 +66,29 @@ test("the temperature plate carries coastline-clipped isotherms in every style",
   }
 });
 
+test("the rainfall plate carries coastline-clipped isohyets in every style", () => {
+  const world = generateWorld(defaultRecipe(42));
+  for (const style of STYLE_NAMES) {
+    const svg = renderMap(world, { style, theme: "moisture" });
+    const layer = svg.match(/<g id="layer-iso">[\s\S]*?<\/g><\/g>/)?.[0];
+    assert.ok(layer, `${style}: isohyet layer present`);
+    assert.match(layer, /<clipPath id="iso-clip">/, `${style}: clip defined`);
+    assert.match(
+      layer,
+      /<g clip-path="url\(#iso-clip\)">/,
+      `${style}: clip applied, not just defined`,
+    );
+    const strokes = layer.match(/stroke="#[0-9a-f]{6}"/gi) ?? [];
+    assert.equal(strokes.length, 9, `${style}: nine visibly stroked levels`);
+    // #73's wind streaks and the isohyets share the plate; lines draw above streaks
+    const streamsAt = svg.indexOf('id="layer-wind-streams"');
+    const isoAt = svg.indexOf('id="layer-iso"');
+    assert.ok(streamsAt >= 0, `${style}: wind streamlines still on the plate`);
+    assert.ok(streamsAt < isoAt, `${style}: isohyets draw above the wind streaks`);
+    assert.ok(!svg.includes("NaN"), `${style}: no NaN coordinates`);
+  }
+});
+
 test("isoLayer geometry: nine open, projected chains at their level's height", () => {
   // a bare-bones ctx: vertical temperature gradient, anisotropic projection so
   // a dropped proj.px/py is caught, empty coast (clip markup only)
@@ -95,13 +118,13 @@ test("isoLayer geometry: nine open, projected chains at their level's height", (
   });
 });
 
-test("isotherms are exclusive to the temperature plate", () => {
+test("isolines stay off the vegetation and population plates", () => {
   const world = generateWorld(defaultRecipe(42));
   assert.ok(!renderMap(world, {}).includes('id="layer-iso"'), "no plate, no isolines");
-  for (const theme of ["vegetation", "moisture", "population"] as ThemeName[]) {
+  for (const theme of ["vegetation", "population"] as ThemeName[]) {
     assert.ok(
       !renderMap(world, { theme }).includes('id="layer-iso"'),
-      `${theme}: no isolines yet`,
+      `${theme}: no isolines`,
     );
   }
 });
