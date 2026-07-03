@@ -66,6 +66,7 @@ function glyphCtx(w: World, name: StyleName): RenderCtx {
     coastRings: [],
     elevSpan: Math.max(1e-9, max - w.seaLevel),
     rng: createRng(w.recipe.seed).fork("render"),
+    realmTint: w.realms.seats.map((_, i) => i),
     labels: createLabelArena(),
   };
 }

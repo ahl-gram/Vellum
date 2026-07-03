@@ -27,6 +27,7 @@ import { seaDecorLayer } from "./layers/sea-decor.ts";
 import { textureDefs, textureOverlay } from "./layers/texture.ts";
 import { roadsLayer } from "./layers/roads.ts";
 import { realmBordersLayer, realmTintsLayer } from "./layers/realms.ts";
+import { realmTintIndices } from "./realm-tints.ts";
 import { soundingsLayer } from "./layers/soundings.ts";
 import { windsLayer, windStreamsLayer } from "./layers/winds.ts";
 import { currentsLayer } from "./layers/currents.ts";
@@ -120,6 +121,13 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     coastRings,
     elevSpan: Math.max(1e-9, max - world.seaLevel),
     rng: createRng(world.recipe.seed).fork("render"),
+    realmTint: realmTintIndices(
+      world.realms.labels,
+      world.elev.w,
+      world.elev.h,
+      world.realms.seats.length,
+      style,
+    ),
     labels: createLabelArena(),
     theme: opts.theme,
   };

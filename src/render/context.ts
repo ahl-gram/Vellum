@@ -17,6 +17,9 @@ export type RenderCtx = {
   /** max elevation − sea level. */
   readonly elevSpan: number;
   readonly rng: Rng;
+  /** Palette index per realm id: identity within the base palette, distance-aware
+   *  beyond it (#78). Shared so washes and seat halos always agree on a colour. */
+  readonly realmTint: ReadonlyArray<number>;
   readonly labels: LabelArena;
   /** Active thematic plate, if any; suppresses the normal land-coloring layers. */
   readonly theme?: ThemeName;

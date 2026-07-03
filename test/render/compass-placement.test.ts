@@ -32,6 +32,7 @@ function synthCtx(elev: Field, seaLevel: number): RenderCtx {
     coastRings: [],
     elevSpan: 1,
     rng: createRng(1).fork("render"),
+    realmTint: [],
     labels: createLabelArena(),
   };
 }

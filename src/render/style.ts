@@ -63,7 +63,9 @@ const ANTIQUE: MapStyle = {
   soundings: false,
   winds: false,
   currents: false,
-  realmTints: ["#c46d5e", "#7d9a6a", "#bf9b4f", "#7a8aa6", "#a97ba6"],
+  // Frozen base 5 + #78 additions (teal, deep olive). Deep olive is deliberately
+  // dark: it dodges the deuteranopia collision the lighter olive had with ochre.
+  realmTints: ["#c46d5e", "#7d9a6a", "#bf9b4f", "#7a8aa6", "#a97ba6", "#5f9e91", "#5f6b2e"],
 };
 
 const TOPOGRAPHIC: MapStyle = {
@@ -102,7 +104,9 @@ const TOPOGRAPHIC: MapStyle = {
   soundings: false,
   winds: false,
   currents: false,
-  realmTints: ["#e74c3c", "#27ae60", "#f39c12", "#2980b9", "#8e44ad"],
+  // Frozen base 5 + #78 additions (turquoise, lime, magenta); the brights leave
+  // real hue room, so all three land and topographic reaches 8.
+  realmTints: ["#e74c3c", "#27ae60", "#f39c12", "#2980b9", "#8e44ad", "#1abc9c", "#9bc53d", "#e84393"],
 };
 
 const INK: MapStyle = {
