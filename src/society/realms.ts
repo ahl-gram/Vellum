@@ -2,6 +2,8 @@ import { NEIGHBORS_8, type Field } from "../core/grid.ts";
 import { createMinHeap } from "../core/heap.ts";
 import { clamp } from "../core/math.ts";
 import { slopeField } from "../terrain/slope.ts";
+import { labelLandmasses } from "../world/landmass.ts";
+import { attachSeatlessLandmasses } from "./sea-route.ts";
 import type { Settlement } from "./sites.ts";
 
 export type RealmsResult = {
@@ -15,12 +17,30 @@ const SLOPE_WEIGHT = 6;
 const RIVER_WEIGHT = 1.5;
 const MIN_SEAT_SPACING = 24;
 
+// #79 per-landmass realm budget: the pre-#79 world formula
+// `clamp(round((landCells/n)*8), 1, 5)`, now scoped to each landmass. Realm count
+// is a property of the fictional world (its grid FRACTION), so it stays
+// resolution-independent across the 320x240 production grid and the smaller grids
+// the unit/render tests use, rather than tracking pixel count.
+const REALM_LAND_DIVISOR = 8;
+const MAX_REALMS_PER_LANDMASS = 5;
+// A landmass below this fraction of the grid (~0.4%, about 300 cells at 320x240)
+// attaches to a neighbour by sea route even when settled (size wins): only a
+// substantial island governs itself.
+const SUBSTANTIAL_FRACTION = 0.004;
+// Overall realm ceiling per world; an over-ceiling archipelago attaches its
+// smallest islands to neighbours instead of minting more realms.
+const GENERATION_CEILING = 8;
+
 /**
- * Partition land into realms: terrain-cost Voronoi regions around the
- * capital and the most distant-from-each-other towns. Rivers and ridges
- * cost more to cross, so borders tend to follow natural features.
+ * Partition land into realms. Open water is a hard frontier: connected landmasses
+ * (from labelLandmasses) each host their own realms, the terrain-cost flood never
+ * crosses to another landmass, and a substantial inhabited island is its own
+ * realm. Small or empty islands attach to the nearest realm by sea route. Rivers
+ * and ridges cost more to cross, so internal borders follow natural features.
  */
 export type RealmOptions = {
+  /** Overall realm ceiling for the world (e.g. 1 for a city-state). */
   maxRealms?: number;
 };
 
@@ -31,31 +51,119 @@ export function partitionRealms(
   settlements: ReadonlyArray<Settlement>,
   opts: RealmOptions = {},
 ): RealmsResult {
-  const { w, h, data } = elev;
+  const { w, h } = elev;
   const n = w * h;
   const slope = slopeField(elev);
+  const { ids: landmassIds, sizes } = labelLandmasses(elev, seaLevel);
+  const lmOf = (s: Settlement): number => landmassIds[s.x + s.y * w] as number;
 
-  let landCells = 0;
-  for (let i = 0; i < n; i++) {
-    if ((data[i] as number) > seaLevel) landCells++;
-  }
-  // resolution-independent: bigger landmasses host more realms
-  const maxRealms =
-    opts.maxRealms ?? clamp(Math.round((landCells / n) * 8), 1, 5);
+  const seats = selectSeats(settlements, sizes, n, lmOf, opts);
+
+  const labels = new Int16Array(n).fill(-1);
+  if (seats.length === 0) return { labels, seats };
+
+  floodRealms(labels, elev, seaLevel, slope, riverCells, landmassIds, settlements, seats);
+  attachSeatlessLandmasses(
+    labels,
+    landmassIds,
+    sizes.length,
+    elev,
+    seaLevel,
+    seats,
+    settlements,
+  );
+
+  return { labels, seats };
+}
+
+/**
+ * Choose one seat per realm: the capital seats realm 0 and its landmass always
+ * governs itself; every other substantial, inhabited landmass adds realms up to
+ * its own area budget, largest first, until the world ceiling is reached.
+ */
+function selectSeats(
+  settlements: ReadonlyArray<Settlement>,
+  sizes: ReadonlyArray<number>,
+  n: number,
+  lmOf: (s: Settlement) => number,
+  opts: RealmOptions,
+): number[] {
+  const overallCap = opts.maxRealms ?? GENERATION_CEILING;
+  const budgetOf = (lm: number): number =>
+    clamp(
+      Math.round(((sizes[lm] as number) / n) * REALM_LAND_DIVISOR),
+      1,
+      MAX_REALMS_PER_LANDMASS,
+    );
+  const substantialArea = SUBSTANTIAL_FRACTION * n;
 
   const capitalIdx = settlements.findIndex((s) => s.kind === "capital");
-  const seats: number[] = capitalIdx >= 0 ? [capitalIdx] : [];
+  const capitalLm = capitalIdx >= 0 ? lmOf(settlements[capitalIdx] as Settlement) : -1;
+  const seats: number[] = [];
 
+  if (capitalIdx >= 0) {
+    seats.push(capitalIdx); // realm 0
+    const budget = Math.min(budgetOf(capitalLm), overallCap);
+    for (const idx of pickTownSeats(settlements, lmOf, capitalLm, budget, [capitalIdx])) {
+      if (!seats.includes(idx)) seats.push(idx);
+    }
+  }
+
+  const hasSettlement = new Uint8Array(sizes.length);
+  for (const s of settlements) {
+    const lm = lmOf(s);
+    if (lm >= 0) hasSettlement[lm] = 1;
+  }
+  const realmBearing: number[] = [];
+  for (let lm = 0; lm < sizes.length; lm++) {
+    if (lm === capitalLm) continue;
+    if ((sizes[lm] as number) >= substantialArea && hasSettlement[lm]) realmBearing.push(lm);
+  }
+  realmBearing.sort((a, b) => (sizes[b] as number) - (sizes[a] as number) || a - b);
+
+  for (const lm of realmBearing) {
+    if (seats.length >= overallCap) break;
+    const budget = Math.min(budgetOf(lm), overallCap - seats.length);
+    let picks = pickTownSeats(settlements, lmOf, lm, budget, []);
+    if (picks.length === 0) {
+      // Inhabited but seatless: promote its top settlement (a village) so the
+      // seats-indexed model still holds.
+      const top = topSettlementOnLandmass(settlements, lmOf, lm);
+      if (top >= 0) picks = [top];
+    }
+    for (const idx of picks) {
+      if (seats.length >= overallCap) break;
+      if (!seats.includes(idx)) seats.push(idx);
+    }
+  }
+
+  return seats;
+}
+
+/**
+ * Greedy farthest-point selection over the towns of one landmass, seeded with the
+ * seats already fixed on it. This is the pre-#79 global seat loop scoped to a
+ * single landmass; with every town on the mainland it reproduces the old
+ * selection exactly.
+ */
+function pickTownSeats(
+  settlements: ReadonlyArray<Settlement>,
+  lmOf: (s: Settlement) => number,
+  lm: number,
+  budget: number,
+  seeded: ReadonlyArray<number>,
+): number[] {
   const towns = settlements
     .map((s, i) => ({ s, i }))
-    .filter(({ s }) => s.kind === "town");
-  while (seats.length < maxRealms) {
+    .filter(({ s }) => s.kind === "town" && lmOf(s) === lm);
+  const chosen = [...seeded];
+  while (chosen.length < budget) {
     let best = -1;
     let bestMinDist = MIN_SEAT_SPACING;
     for (const { s, i } of towns) {
-      if (seats.includes(i)) continue;
+      if (chosen.includes(i)) continue;
       const minDist = Math.min(
-        ...seats.map((si) => {
+        ...chosen.map((si) => {
           const seat = settlements[si] as Settlement;
           return Math.hypot(seat.x - s.x, seat.y - s.y);
         }),
@@ -66,12 +174,54 @@ export function partitionRealms(
       }
     }
     if (best === -1) break;
-    seats.push(best);
+    chosen.push(best);
   }
+  return chosen;
+}
 
-  const labels = new Int16Array(n).fill(-1);
-  if (seats.length === 0) return { labels, seats };
+/** Highest-desirability settlement on a landmass; ties break by position (x, y). */
+function topSettlementOnLandmass(
+  settlements: ReadonlyArray<Settlement>,
+  lmOf: (s: Settlement) => number,
+  lm: number,
+): number {
+  let best = -1;
+  let bestScore = -Infinity;
+  let bestX = Infinity;
+  let bestY = Infinity;
+  settlements.forEach((s, i) => {
+    if (lmOf(s) !== lm) return;
+    if (
+      s.score > bestScore ||
+      (s.score === bestScore && (s.x < bestX || (s.x === bestX && s.y < bestY)))
+    ) {
+      best = i;
+      bestScore = s.score;
+      bestX = s.x;
+      bestY = s.y;
+    }
+  });
+  return best;
+}
 
+/**
+ * Terrain-cost Voronoi flood from the seats, confined to land and to a single
+ * landmass: the 8-connected step is blocked both at the sea (`<= seaLevel`) and at
+ * any diagonal corner where the neighbour belongs to a different landmass, so a
+ * realm never bleeds across open water.
+ */
+function floodRealms(
+  labels: Int16Array,
+  elev: Field,
+  seaLevel: number,
+  slope: Field,
+  riverCells: Uint8Array,
+  landmassIds: Int32Array,
+  settlements: ReadonlyArray<Settlement>,
+  seats: ReadonlyArray<number>,
+): void {
+  const { w, h, data } = elev;
+  const n = w * h;
   const dist = new Float64Array(n).fill(Infinity);
   const done = new Uint8Array(n);
   const heap = createMinHeap();
@@ -91,6 +241,7 @@ export function partitionRealms(
     const d = dist[i] as number;
     const x = i % w;
     const y = (i / w) | 0;
+    const lm = landmassIds[i] as number;
     for (const [dx, dy, stepDist] of NEIGHBORS_8) {
       const nx = x + dx;
       const ny = y + dy;
@@ -98,6 +249,7 @@ export function partitionRealms(
       const ni = nx + ny * w;
       if (done[ni]) continue;
       if ((data[ni] as number) <= seaLevel) continue;
+      if ((landmassIds[ni] as number) !== lm) continue;
       const step =
         stepDist *
         (1 +
@@ -111,24 +263,4 @@ export function partitionRealms(
       }
     }
   }
-
-  // offshore islets without settlements: claim for the nearest seat
-  for (let i = 0; i < n; i++) {
-    if (labels[i] !== -1 || (data[i] as number) <= seaLevel) continue;
-    const x = i % w;
-    const y = (i / w) | 0;
-    let best = 0;
-    let bestDist = Infinity;
-    seats.forEach((settlementIdx, realmId) => {
-      const s = settlements[settlementIdx] as Settlement;
-      const d = Math.hypot(s.x - x, s.y - y);
-      if (d < bestDist) {
-        bestDist = d;
-        best = realmId;
-      }
-    });
-    labels[i] = best;
-  }
-
-  return { labels, seats };
 }
