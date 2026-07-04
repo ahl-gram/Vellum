@@ -9,6 +9,11 @@ import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
  * for #74 wind-driven moisture: rainfall now follows world.winds, so rivers,
  * biomes, settlements, and every downstream name re-rolled. Title/year/capital
  * are drawn before terrain settles and stayed put.
+ *
+ * #79 (islands as realms) re-pinned the label checksum ONLY: seed 42's three
+ * realms are subdivisions of its one mainland (every seat on it), so the roster,
+ * title, capital, and sea are unchanged; the offshore islets now attach by sea
+ * route instead of straight-line, which moves only their per-cell labels.
  */
 
 function labelsChecksum(labels: Int16Array): number {
@@ -20,7 +25,7 @@ function labelsChecksum(labels: Int16Array): number {
   return h >>> 0;
 }
 
-test("seed 42 golden identity (post #74 orographic-moisture re-roll)", () => {
+test("seed 42 golden identity (post #79 islands-as-realms re-roll)", () => {
   const w = generateWorld(defaultRecipe(42));
   assert.equal(w.title.title, "The Isle of Rahai");
   assert.equal(w.title.year, 1059);
@@ -31,5 +36,5 @@ test("seed 42 golden identity (post #74 orographic-moisture re-roll)", () => {
     "The Ratoa Atolls",
   ]);
   assert.equal(w.names.sea, "The Great Woaku");
-  assert.equal(labelsChecksum(w.realms.labels), 778853820);
+  assert.equal(labelsChecksum(w.realms.labels), 2890117437);
 });

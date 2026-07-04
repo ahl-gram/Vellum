@@ -50,7 +50,7 @@ test("realm count stays within bounds", () => {
   const { elev, sea, riverCells, settlements } = makeWorld(7);
   const realms = partitionRealms(elev, sea, riverCells, settlements);
   assert.ok(realms.seats.length >= 1);
-  assert.ok(realms.seats.length <= 5);
+  assert.ok(realms.seats.length <= 8);
 });
 
 test("partition is deterministic", () => {
