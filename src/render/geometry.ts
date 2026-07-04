@@ -86,3 +86,15 @@ export function textBox(
   const left = anchor === "start" ? x : anchor === "end" ? x - w : x - w / 2;
   return { x: left, y: y - fontSize, w, h };
 }
+
+/** Text box widened for letter-spacing, centered on (x, y). */
+export function spacedTextBox(
+  x: number,
+  y: number,
+  text: string,
+  fontSize: number,
+  letterSpacing: number,
+): Box {
+  const w = text.length * (fontSize * 0.56 + letterSpacing);
+  return { x: x - w / 2, y: y - fontSize, w, h: fontSize * 1.2 };
+}

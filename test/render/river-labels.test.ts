@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { reachPlacements, straightestReach } from "../../src/render/layers/feature-labels.ts";
+import { reachPlacements, straightestReach } from "../../src/render/layers/river-label-placement.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 

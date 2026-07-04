@@ -15,6 +15,17 @@ import {
 } from "../../src/world/daily-hunt.ts";
 import { createProjection } from "../../src/render/transform.ts";
 import type { World } from "../../src/world/types.ts";
+import {
+  ALLOWED_KINDS,
+  expectedEW,
+  expectedNS,
+  mustQuarry,
+  NEAR,
+  nearestNamedLake,
+  nearestNamedRiver,
+  realmNameAt,
+  villagePoolSize,
+} from "../../test-support/daily-hunt-geometry.ts";
 
 // This suite is world-generation heavy by design: acceptance #5 asks for the
 // truthfulness sweep to run across ALL 30 June-2026 daily seeds. Worlds are
@@ -25,79 +36,6 @@ const DAILY: ReadonlyArray<World> = DAILY_SEEDS.map((s) => generateWorld(default
 // "a few off-grid seeds": arbitrary, non-date seeds, default recipe.
 const OFFGRID: ReadonlyArray<World> = [1, 7, 12345].map((s) => generateWorld(defaultRecipe(s)));
 const SWEEP: ReadonlyArray<World> = [...DAILY, ...OFFGRID];
-
-// Grid threshold (cells) within which buildClues will cite a named feature;
-// mirrored here so the test can bound an emitted feature clue's distance. The
-// test computes nearest features from raw geometry, independent of the module.
-const NEAR = 4;
-
-const ALLOWED_KINDS = new Set<Clue["kind"]>([
-  "framing",
-  "ew",
-  "ns",
-  "river",
-  "lake",
-  "coast",
-  "onriver",
-  "realm",
-]);
-
-// --- independent ground-truth geometry (never calls buildClues internals) ----
-
-function nearestNamed(
-  entries: Iterable<readonly [number, string]>,
-  pointsOf: (i: number) => ReadonlyArray<{ x: number; y: number }>,
-  x: number,
-  y: number,
-): { name: string; dist: number } | null {
-  let best: { name: string; dist: number } | null = null;
-  for (const [i, name] of entries) {
-    let d = Infinity;
-    for (const p of pointsOf(i)) d = Math.min(d, Math.hypot(p.x - x, p.y - y));
-    if (best === null || d < best.dist) best = { name, dist: d };
-  }
-  return best;
-}
-
-function nearestNamedRiver(world: World, x: number, y: number) {
-  return nearestNamed(
-    world.names.rivers.entries(),
-    (i) => world.rivers[i]?.points ?? [],
-    x,
-    y,
-  );
-}
-
-function nearestNamedLake(world: World, x: number, y: number) {
-  let best: { name: string; dist: number } | null = null;
-  for (const lk of world.names.lakes) {
-    const d = Math.hypot(lk.x - x, lk.y - y);
-    if (best === null || d < best.dist) best = { name: lk.name, dist: d };
-  }
-  return best;
-}
-
-function realmNameAt(world: World, x: number, y: number): string | null {
-  if (world.names.realms.length < 2) return null;
-  const id = world.realms.labels[x + y * world.elev.w] as number;
-  return id >= 0 ? (world.names.realms[id] ?? null) : null;
-}
-
-function expectedEW(world: World, x: number): "east" | "west" | "central" {
-  const c = (world.elev.w - 1) / 2;
-  return x < c ? "west" : x > c ? "east" : "central";
-}
-
-function expectedNS(world: World, y: number): "north" | "south" | "central" {
-  const c = (world.elev.h - 1) / 2;
-  return y < c ? "north" : y > c ? "south" : "central";
-}
-
-function mustQuarry(world: World): Quarry {
-  const q = chooseQuarry(world);
-  assert.ok(q, "every swept world has at least one settlement, so a quarry exists");
-  return q;
-}
 
 // --- tests -------------------------------------------------------------------
 
@@ -291,12 +229,6 @@ test("a ruined quarry reveals its abandonment event verbatim", () => {
 });
 
 // --- #88: keep the quarry from hiding under the legend ------------------------
-
-/** Count of the broad non-seat village pool chooseQuarry normally draws from. */
-function villagePoolSize(world: World): number {
-  const seats = new Set(world.realms.seats);
-  return world.settlements.filter((s, i) => s.kind === "village" && !seats.has(i)).length;
-}
 
 test("chooseQuarry never returns an excluded settlement when alternatives exist", () => {
   const world = SWEEP.find((w) => villagePoolSize(w) >= 2);

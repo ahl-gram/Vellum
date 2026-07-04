@@ -16,28 +16,23 @@ import type { NamedSettlement, World } from "./types.ts";
  * that cannot reshuffle any world-generation stream). No `World` field is
  * added, so nothing crosses the Explorer worker boundary and no chart bytes
  * change: there is no seed re-roll and no parity tax.
+ *
+ * Clue building and click scoring live in ./daily-hunt-clues.ts and
+ * ./daily-hunt-click.ts; they are re-exported here so importers keep this path.
  */
 
-export type ClueKind =
-  | "framing"
-  | "ew"
-  | "ns"
-  | "river"
-  | "lake"
-  | "coast"
-  | "onriver"
-  | "realm";
-
-/**
- * One antique survey line. `subject` carries the geometric fact a feature clue
- * asserts (a feature name, or a band token for the positional clues) so callers
- * and tests can verify truthfulness without parsing prose.
- */
-export type Clue = {
-  readonly kind: ClueKind;
-  readonly text: string;
-  readonly subject?: string;
-};
+export {
+  buildClues,
+  pruneUnlabeledFeatureClues,
+  type Clue,
+  type ClueKind,
+} from "./daily-hunt-clues.ts";
+export {
+  classifyClick,
+  classifyDistanceBand,
+  type ClickFeedback,
+  type DistanceBand,
+} from "./daily-hunt-click.ts";
 
 export type Quarry = {
   readonly idx: number;
@@ -62,11 +57,6 @@ export type Reveal = {
   readonly founded: number;
   readonly line: string;
 };
-
-export type DistanceBand = "cold" | "cool" | "warm" | "hot";
-
-/** Grid-cell radius within which a named river or lake is "near" the quarry. */
-const NEAR = 4;
 
 /**
  * Pick the day's target deterministically from the broad village pool (the
@@ -132,169 +122,6 @@ export function legendExcluded(
 }
 
 /**
- * Emit only geometrically truthful antique clues, always at least three: a
- * constant framing line plus an always-true east/west band and an always-true
- * north/south band (each with a central-tie wording so neither is ever empty).
- * Feature clues are appended only when each holds, so the floor of three is
- * guaranteed for any world, including featureless off-grid seeds.
- */
-export function buildClues(world: World, quarry: Quarry): Clue[] {
-  const s = quarry.settlement;
-  const { x, y } = s;
-  const clues: Clue[] = [];
-
-  clues.push({
-    kind: "framing",
-    text:
-      "Today's survey hides one small place, set down on the chart but left " +
-      "unnamed in these notes. Read the lines, then find it.",
-  });
-
-  const cx = (world.elev.w - 1) / 2;
-  const ew = x < cx ? "west" : x > cx ? "east" : "central";
-  clues.push({
-    kind: "ew",
-    subject: ew,
-    text:
-      ew === "east"
-        ? "It lies toward the eastern reach of the chart."
-        : ew === "west"
-          ? "It lies toward the western reach of the chart."
-          : "It sits near the chart's central meridian, neither east nor west.",
-  });
-
-  const cy = (world.elev.h - 1) / 2;
-  const ns = y < cy ? "north" : y > cy ? "south" : "central";
-  clues.push({
-    kind: "ns",
-    subject: ns,
-    text:
-      ns === "north"
-        ? "It lies in the northern part of the chart."
-        : ns === "south"
-          ? "It lies in the southern part of the chart."
-          : "It sits near the chart's middle latitude, neither north nor south.",
-  });
-
-  const river = nearestNamedRiver(world, x, y);
-  if (river && river.dist <= NEAR) {
-    clues.push({
-      kind: "river",
-      subject: river.name,
-      text: `It stands within sight of the river ${river.name}.`,
-    });
-  }
-
-  const lake = nearestNamedLake(world, x, y);
-  if (lake && lake.dist <= NEAR) {
-    clues.push({
-      kind: "lake",
-      subject: lake.name,
-      text: `Its prospect takes in the waters of ${lake.name}.`,
-    });
-  }
-
-  if (s.harbor) {
-    clues.push({ kind: "coast", text: "It is a harbor settlement, open to the sea." });
-  }
-
-  if (s.onRiver) {
-    clues.push({ kind: "onriver", text: "A river runs through its bounds." });
-  }
-
-  const realm = realmNameAt(world, x, y);
-  if (realm) {
-    clues.push({ kind: "realm", subject: realm, text: `It answers to ${realm}.` });
-  }
-
-  return clues;
-}
-
-/**
- * Drop feature clues that name a map feature the chart never labeled, so the
- * hunt never sends a player looking for a name that is not printed anywhere.
- *
- * `buildClues` is a pure function of the World and (correctly) cites the nearest
- * NAMED river/lake, but the renderer only draws a subset of those labels (short
- * courses and collision losers are skipped, see `feature-labels.ts`). This prune
- * runs AFTER `buildClues`, keying off each clue's `subject`, and keeps a
- * `river`/`lake` clue only when `isLabeled(subject)` reports the label was drawn.
- * The caller (the page, which owns the rendered SVG) supplies `isLabeled`; all
- * other clue kinds pass through untouched. Returns a new array (never mutates).
- */
-export function pruneUnlabeledFeatureClues(
-  clues: readonly Clue[],
-  isLabeled: (name: string) => boolean,
-): Clue[] {
-  return clues.filter((c) => {
-    if (c.kind !== "river" && c.kind !== "lake") return true;
-    return c.subject !== undefined && isLabeled(c.subject);
-  });
-}
-
-/**
- * Map a grid distance to a warmer/colder band for click feedback. Monotonic:
- * a direct hit (distance 0) is "hot", and increasing distance never warms.
- */
-export function classifyDistanceBand(gridDist: number, gridDiagonal: number): DistanceBand {
-  const ratio = gridDiagonal > 0 ? gridDist / gridDiagonal : 0;
-  if (ratio <= 0.1) return "hot";
-  if (ratio <= 0.25) return "warm";
-  if (ratio <= 0.5) return "cool";
-  return "cold";
-}
-
-/** The outcome of one hunt click: a win, or a miss with warmer/colder guidance. */
-export type ClickFeedback =
-  | { readonly kind: "hit" }
-  | {
-      readonly kind: "miss";
-      readonly band: DistanceBand;
-      readonly pickedIdx: number;
-      readonly pickedName: string;
-    };
-
-/**
- * Classify one map click (in grid coordinates) into hunt feedback. The player
- * "selects" the settlement nearest the click; if that is the quarry it is a win
- * (unchanged from the original hunt). Otherwise the warmer/colder band is scored
- * from the CLICK-to-quarry distance -- continuous, so stepping toward the quarry
- * always warms -- and the selected settlement is named so a cluster of identical
- * village glyphs is no longer an indistinguishable dead-end "Hot".
- */
-export function classifyClick(
-  world: World,
-  quarry: Quarry,
-  click: { readonly x: number; readonly y: number },
-): ClickFeedback {
-  const nearest = nearestSettlement(world, click.x, click.y);
-  if (nearest === quarry.idx) return { kind: "hit" };
-
-  const picked = world.settlements[nearest];
-  const diagonal = Math.hypot(world.elev.w - 1, world.elev.h - 1);
-  const dist = Math.hypot(click.x - quarry.settlement.x, click.y - quarry.settlement.y);
-  return {
-    kind: "miss",
-    band: classifyDistanceBand(dist, diagonal),
-    pickedIdx: nearest,
-    pickedName: picked ? picked.name : "",
-  };
-}
-
-function nearestSettlement(world: World, x: number, y: number): number {
-  let nearest = -1;
-  let nd = Infinity;
-  world.settlements.forEach((st, i) => {
-    const d = Math.hypot(st.x - x, st.y - y);
-    if (d < nd) {
-      nd = d;
-      nearest = i;
-    }
-  });
-  return nearest;
-}
-
-/**
  * The post-win payoff: the place's name, its founding year, and one secret
  * line. For a ruined quarry that is the chronicle's own abandonment event; for
  * a living one it is a fresh gazetteer note drawn on a fork distinct from the
@@ -314,41 +141,4 @@ export function revealLore(world: World, quarry: Quarry): Reveal {
   }
   const lore = createLoreWriter(world, createRng(world.recipe.seed).fork("daily-hunt-lore"));
   return { name: s.name, founded: s.founded, line: lore.settlementNote(s) };
-}
-
-// --- internal geometry -------------------------------------------------------
-
-function nearestNamedRiver(
-  world: World,
-  x: number,
-  y: number,
-): { name: string; dist: number } | null {
-  let best: { name: string; dist: number } | null = null;
-  for (const [i, name] of world.names.rivers) {
-    const river = world.rivers[i];
-    if (!river) continue;
-    let d = Infinity;
-    for (const p of river.points) d = Math.min(d, Math.hypot(p.x - x, p.y - y));
-    if (best === null || d < best.dist) best = { name, dist: d };
-  }
-  return best;
-}
-
-function nearestNamedLake(
-  world: World,
-  x: number,
-  y: number,
-): { name: string; dist: number } | null {
-  let best: { name: string; dist: number } | null = null;
-  for (const lk of world.names.lakes) {
-    const d = Math.hypot(lk.x - x, lk.y - y);
-    if (best === null || d < best.dist) best = { name: lk.name, dist: d };
-  }
-  return best;
-}
-
-function realmNameAt(world: World, x: number, y: number): string | null {
-  if (world.names.realms.length < 2) return null;
-  const id = world.realms.labels[x + y * world.elev.w];
-  return id >= 0 ? (world.names.realms[id] ?? null) : null;
 }
