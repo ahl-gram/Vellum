@@ -3,7 +3,7 @@ import { createRng } from "../core/rng.ts";
 import { classifyBiomes, BIOMES } from "../climate/biomes.ts";
 import { computeClimate, type ClimateBand } from "../climate/climate.ts";
 import { computeFlow } from "../hydrology/flow.ts";
-import { extractRivers } from "../hydrology/rivers.ts";
+import { extractRivers, isMajorRiver } from "../hydrology/rivers.ts";
 import { findLakes } from "../hydrology/lakes.ts";
 import { buildHeightfield, type MapType } from "../terrain/heightfield.ts";
 import { pickSeaLevel } from "../terrain/sealevel.ts";
@@ -128,13 +128,10 @@ export function generateWorld(recipe: WorldRecipe): World {
   );
 
   const roads = buildRoads(elev, seaLevel, riverCells, settlements);
-  const realms = partitionRealms(
-    elev,
-    seaLevel,
-    riverCells,
-    settlements,
-    citystate ? { maxRealms: 1 } : {},
-  );
+  const realms = partitionRealms(elev, seaLevel, riverCells, settlements, {
+    ...(citystate ? { maxRealms: 1 } : {}),
+    snap: { rivers, flow },
+  });
 
   const culture = rng.fork("culture").pick(CULTURES);
   const arms = blazonRealms(culture, realms.seats.length, rng.fork("heraldry"));
@@ -143,8 +140,7 @@ export function generateWorld(recipe: WorldRecipe): World {
 
   const riverNames = new Map<number, string>();
   rivers.forEach((r, i) => {
-    const mouthAcc = r.points[r.points.length - 1]?.acc ?? 0;
-    if (r.endsInOcean && r.points.length >= 14 && mouthAcc > 0) {
+    if (isMajorRiver(r)) {
       riverNames.set(i, namer.name("river"));
     }
   });

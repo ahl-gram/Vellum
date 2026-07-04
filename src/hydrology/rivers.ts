@@ -21,6 +21,17 @@ export type RiverOptions = {
   minLength?: number;
 };
 
+/**
+ * A "major" river: reaches the sea, runs long, and carries real flow at its
+ * mouth. This is the gate the namer uses (only major rivers are named) and, from
+ * #80, the gate for which rivers can pull a realm border onto themselves. One
+ * definition, so the two never drift apart.
+ */
+export function isMajorRiver(r: River): boolean {
+  const mouthAcc = r.points[r.points.length - 1]?.acc ?? 0;
+  return r.endsInOcean && r.points.length >= 14 && mouthAcc > 0;
+}
+
 export function extractRivers(
   elev: Field,
   flow: FlowResult,

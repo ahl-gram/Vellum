@@ -14,6 +14,11 @@ import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
  * realms are subdivisions of its one mainland (every seat on it), so the roster,
  * title, capital, and sea are unchanged; the offshore islets now attach by sea
  * route instead of straight-line, which moves only their per-cell labels.
+ *
+ * #80 (rivers + watershed divides as frontiers) re-pinned the label checksum
+ * ONLY, same shape: the three realms and every name are unchanged; the internal
+ * borders now snap onto the major rivers and watershed divides that run alongside
+ * them, which moves ~44 cells (0.06%) of the partition and nothing else.
  */
 
 function labelsChecksum(labels: Int16Array): number {
@@ -25,7 +30,7 @@ function labelsChecksum(labels: Int16Array): number {
   return h >>> 0;
 }
 
-test("seed 42 golden identity (post #79 islands-as-realms re-roll)", () => {
+test("seed 42 golden identity (post #80 river/watershed-frontier re-roll)", () => {
   const w = generateWorld(defaultRecipe(42));
   assert.equal(w.title.title, "The Isle of Rahai");
   assert.equal(w.title.year, 1059);
@@ -36,5 +41,5 @@ test("seed 42 golden identity (post #79 islands-as-realms re-roll)", () => {
     "The Ratoa Atolls",
   ]);
   assert.equal(w.names.sea, "The Great Woaku");
-  assert.equal(labelsChecksum(w.realms.labels), 2890117437);
+  assert.equal(labelsChecksum(w.realms.labels), 2474185067);
 });
