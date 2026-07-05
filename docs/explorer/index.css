@@ -162,8 +162,23 @@ footer a { color: inherit; }
 /* Print reveals every plate: a below-fold plate whose reveal-on-scroll never fired
    would otherwise print blank (it is hidden until .settling on screen). */
 @media print { #atlas figure { opacity: 1; } }
+/* #146: the bound plates react to the hand like the homepage chart plates, but
+   rest FLAT (no resting tilt) so the atlas grid stays crisp; on hover each lifts
+   with a slight tilt and a deeper shadow, and presses on tap. The gesture rides
+   the <img>, not the <figure>: the figure carries the settle animation, whose
+   forwards-fill keeps applying its own transform after it ends and would silently
+   override a hover transform placed on the same element. Reuses the #126 .plate
+   vocabulary (the --paper timing, the --ease-paper curve, and the one shared
+   reduced-motion collapse in /motion.css), so no new keyframes and no twin block. */
 #atlas figure img { width: 100%; height: auto; display: block;
-  border: 1px solid #b9a77f; box-shadow: 0 10px 30px rgb(61 47 31 / 0.18); }
+  border: 1px solid #b9a77f; box-shadow: 0 10px 30px rgb(61 47 31 / 0.18);
+  transition: transform var(--paper) var(--ease-paper),
+              box-shadow var(--paper) var(--ease-paper); }
+#atlas figure img:hover {
+  transform: translateY(-5px) rotate(-0.6deg);
+  box-shadow: 0 20px 44px rgb(61 47 31 / 0.28); }
+#atlas figure img:active {
+  transform: translateY(-1px) rotate(0deg); }
 #atlas figcaption { text-align: center; font-style: italic; color: #6b5a40;
   padding-top: 0.55rem; }
 #atlas .styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
