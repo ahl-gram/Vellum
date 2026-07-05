@@ -104,6 +104,54 @@ export async function run(ctx) {
     await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
   }
 
+  // #128 The slow unfurl. Showing a card mounts a persistent .pc-inner that carries
+  // the paperUnfurl ceremony; a pinned/tapped card plays the full --unfurl grade, a
+  // hover/focus preview the shorter grade. e2e reads the WIRED animation (name on the
+  // inner + the two graded durations differ + .pinned only on the pin). The actual 3D
+  // motion, the replay-on-each-unhide, and the reduced-motion collapse are CDP-probe
+  // verified (e2e cannot see an in-flight animation frame or emulate reduced motion).
+  const p14 = await evaluate(`(()=>{
+    const c = document.getElementById("place-card");
+    if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+    document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));
+    const cap = document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');
+    cap.dispatchEvent(new MouseEvent("mouseenter",{bubbles:true}));
+    const ih = c.querySelector(".pc-inner");
+    const csh = ih ? getComputedStyle(ih) : null;
+    const hoverName = csh ? csh.animationName : null;
+    const hoverDur = csh ? parseFloat(csh.animationDuration) : null;
+    const pinnedAtHover = c.classList.contains("pinned");
+    cap.dispatchEvent(new MouseEvent("mouseleave",{bubbles:true}));
+    cap.click();
+    const ip = c.querySelector(".pc-inner");
+    const csp = ip ? getComputedStyle(ip) : null;
+    const pinName = csp ? csp.animationName : null;
+    const pinDur = csp ? parseFloat(csp.animationDuration) : null;
+    const pinnedAtPin = c.classList.contains("pinned");
+    document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));
+    return {hoverName,hoverDur,pinName,pinDur,pinnedAtHover,pinnedAtPin};
+  })()`);
+  check("P14 card unfurl wired: .pc-inner runs paperUnfurl, pinned grade > hover grade, .pinned only on pin",
+    p14.hoverName === "paperUnfurl" && p14.pinName === "paperUnfurl" &&
+    p14.pinnedAtHover === false && p14.pinnedAtPin === true &&
+    Number.isFinite(p14.pinDur) && Number.isFinite(p14.hoverDur) && p14.pinDur > p14.hoverDur,
+    JSON.stringify(p14));
+
+  // P15 #128 The hover ring + idle-parity-ON-HOVER, verified with a REAL CDP mouse
+  // move. A synthetic mouseenter does not set the CSS :hover state, so P2's idle-only
+  // background read is blind to a hover regression: this asserts the hit stays
+  // transparent + borderless UNDER HOVER (the global button:hover cream must never
+  // paint a box over the glyph) AND that the ::after ring grows in (opacity 1). Guards
+  // the invisible-hit invariant on hover, which no other check reaches.
+  const p15c = await evaluate(`(()=>{const h=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');h.scrollIntoView({block:"center"});const r=h.getBoundingClientRect();return{x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)};})()`);
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5, buttons: 0 });
+  await sleep(40);
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: p15c.x, y: p15c.y, buttons: 0 });
+  await sleep(240);
+  const p15 = await evaluate(`(()=>{const h=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');const cs=getComputedStyle(h);const ring=getComputedStyle(h,"::after");return{bg:cs.backgroundColor,bw:cs.borderTopWidth,ringOp:Number(ring.opacity).toFixed(2)};})()`);
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5, buttons: 0 });
+  check("P15 hover keeps the hit transparent + borderless (no button:hover box) and grows the ring", p15.bg === "rgba(0, 0, 0, 0)" && p15.bw === "0px" && p15.ringOp === "1.00", JSON.stringify(p15));
+
   // Artifact: a card open over the chart, for the user to eyeball. Blur first so
   // the focus() always changes the active element and fires (the target may
   // already be focused, in which case a re-focus is a no-op event-wise).
