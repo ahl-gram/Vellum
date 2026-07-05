@@ -166,4 +166,29 @@ export async function run(ctx) {
   const d4 = await evaluate(`(()=>{const figs=[...document.querySelectorAll("#atlas figure")];return{n:figs.length,withI:figs.filter(f=>f.style.getPropertyValue("--i")!=="").length,settling:figs.filter(f=>f.classList.contains("settling")).length};})()`);
   check("D4 bound atlas plates carry --i and reveal on scroll (.settling)", d4.n > 0 && d4.withI === d4.n && d4.settling > 0, JSON.stringify(d4));
 
+  // D5: the bound plates react to the hand like the homepage chart plates (#146),
+  // but rest FLAT (no resting tilt) so the atlas grid stays crisp. e2e cannot
+  // emulate :hover, so this asserts the gesture is WIRED three ways: (a) the plate
+  // image carries a paper-timed transition (motion.css --paper resolves = the rule
+  // applied, the P2b-style plumbing check); (b) the image rests with no transform
+  // (the tidy-grid invariant); (c) a :hover rule with a transform actually exists in
+  // the stylesheet (so the committed check bites the lift itself, not just the
+  // plumbing). The lift's exact end state is CDP-probe verified (e2e can't hover).
+  const d5 = await evaluate(`(()=>{
+    const img=document.querySelector("#atlas figure img");
+    if(!img)return{img:false};
+    const cs=getComputedStyle(img);
+    let hoverLift=false;
+    for(const ss of document.styleSheets){let rules;try{rules=ss.cssRules;}catch(e){continue;}
+      if(!rules)continue;
+      for(const r of rules){
+        if(r.selectorText&&r.selectorText.includes("#atlas figure img:hover")&&r.style&&r.style.transform&&r.style.transform!=="none"){hoverLift=true;}
+      }
+    }
+    return{img:true,dur:cs.transitionDuration,prop:cs.transitionProperty,tform:cs.transform,hoverLift};
+  })()`);
+  check("D5a atlas plate hover is wired (paper-timed transform transition on the image)", d5.img && d5.dur.includes("0.26s") && d5.prop.includes("transform"), JSON.stringify(d5));
+  check("D5b atlas plate rests flat (no resting tilt; tidy grid)", d5.img && (d5.tform === "none" || d5.tform === "matrix(1, 0, 0, 1, 0, 0)"), JSON.stringify(d5));
+  check("D5c a :hover rule lifts the plate image (the gesture, not just the plumbing)", d5.hoverLift === true, JSON.stringify(d5));
+
 }
