@@ -60,6 +60,13 @@ export type RealmOptions = {
    * generate.ts and region.ts pass it to activate the snap.
    */
   snap?: { readonly rivers: ReadonlyArray<River>; readonly flow: FlowResult };
+  /**
+   * Major-river cells the realm flood may claim but never cross (#140). Where two
+   * realms grow toward each other across a major river they meet on it, so the
+   * river becomes their frontier. Opt-in, so unit-test partitions stay
+   * feature-agnostic; generate.ts builds it from rivers.filter(isMajorRiver).
+   */
+  barrier?: Uint8Array;
 };
 
 export function partitionRealms(
@@ -80,7 +87,10 @@ export function partitionRealms(
   const labels = new Int16Array(n).fill(-1);
   if (seats.length === 0) return { labels, seats };
 
-  floodRealms(labels, elev, seaLevel, slope, riverCells, landmassIds, settlements, seats);
+  floodRealms(labels, elev, seaLevel, slope, riverCells, landmassIds, settlements, seats, opts.barrier);
+  if (opts.barrier) {
+    fillBarrierStrandedLand(labels, elev, seaLevel, slope, riverCells, landmassIds, settlements, seats);
+  }
   if (opts.snap) {
     const seatCells = seats.map((si) => {
       const s = settlements[si] as Settlement;
@@ -274,6 +284,7 @@ function floodRealms(
   landmassIds: Int32Array,
   settlements: ReadonlyArray<Settlement>,
   seats: ReadonlyArray<number>,
+  barrier?: Uint8Array,
 ): void {
   const { w, h, data } = elev;
   const n = w * h;
@@ -281,11 +292,13 @@ function floodRealms(
   const done = new Uint8Array(n);
   const heap = createMinHeap();
 
+  const isSeatCell = new Uint8Array(n);
   seats.forEach((settlementIdx, realmId) => {
     const s = settlements[settlementIdx] as Settlement;
     const i = s.x + s.y * w;
     dist[i] = 0;
     labels[i] = realmId;
+    isSeatCell[i] = 1;
     heap.push(i, 0);
   });
 
@@ -293,6 +306,10 @@ function floodRealms(
     const i = heap.pop();
     if (done[i]) continue;
     done[i] = 1;
+    // #140 barrier: a major-river cell is claimable but never propagates (a
+    // membrane), so two realms meet on it -- except a seat, which must always
+    // flood its own realm even when the river runs through its cell.
+    if (barrier !== undefined && barrier[i] === 1 && isSeatCell[i] === 0) continue;
     const d = dist[i] as number;
     const x = i % w;
     const y = (i / w) | 0;
@@ -305,6 +322,16 @@ function floodRealms(
       if (done[ni]) continue;
       if ((data[ni] as number) <= seaLevel) continue;
       if ((landmassIds[ni] as number) !== lm) continue;
+      // #140: a diagonal step must not slip between two diagonally-adjacent barrier
+      // cells, or the flood would leak across a diagonal river.
+      if (
+        barrier !== undefined &&
+        dx !== 0 &&
+        dy !== 0 &&
+        barrier[x + dx + y * w] === 1 &&
+        barrier[x + (y + dy) * w] === 1
+      )
+        continue;
       const step =
         stepDist *
         (1 +
@@ -317,5 +344,58 @@ function floodRealms(
         heap.push(ni, nd);
       }
     }
+  }
+}
+
+/**
+ * A major-river barrier can strand land reachable only across a river (e.g. two
+ * rivers seal a landmass coast-to-coast, isolating a seatless half). Assign every
+ * such cell so no land is left unassigned: re-run the flood WITHOUT the barrier and
+ * adopt its label only where the barrier flood left -1. The annexing realm simply
+ * owns both banks there (the river is interior, not a frontier, where one realm
+ * holds both sides). Deterministic; the second flood is skipped unless a barrier
+ * actually walled off part of a SEATED landmass -- seatless islands, which are -1
+ * here too, are left for attachSeatlessLandmasses.
+ */
+function fillBarrierStrandedLand(
+  labels: Int16Array,
+  elev: Field,
+  seaLevel: number,
+  slope: Field,
+  riverCells: Uint8Array,
+  landmassIds: Int32Array,
+  settlements: ReadonlyArray<Settlement>,
+  seats: ReadonlyArray<number>,
+): void {
+  const { w, h, data } = elev;
+  const n = w * h;
+  // Genuine stranding is only on a SEATED landmass: a seatless island is -1 here too,
+  // but the barrier-free reflood (also landmass-confined) leaves it -1, so it is not
+  // stranded -- excluding it keeps the second flood from running on nearly every world.
+  const seatedLm = new Set<number>();
+  for (const si of seats) {
+    const s = settlements[si] as Settlement;
+    seatedLm.add(landmassIds[s.x + s.y * w] as number);
+  }
+  let stranded = false;
+  for (let i = 0; i < n; i++) {
+    if (
+      (data[i] as number) > seaLevel &&
+      (labels[i] as number) < 0 &&
+      seatedLm.has(landmassIds[i] as number)
+    ) {
+      stranded = true;
+      break;
+    }
+  }
+  if (!stranded) return;
+  // Re-flood with no barrier: this assigns every seated-landmass cell, so adopting
+  // its label wherever the barrier flood left -1 fills the stranded region without
+  // disturbing any cell the barrier already placed. Seatless landmasses stay -1 for
+  // attachSeatlessLandmasses to handle.
+  const full = new Int16Array(n).fill(-1);
+  floodRealms(full, elev, seaLevel, slope, riverCells, landmassIds, settlements, seats);
+  for (let i = 0; i < n; i++) {
+    if ((labels[i] as number) < 0 && (full[i] as number) >= 0) labels[i] = full[i] as number;
   }
 }
