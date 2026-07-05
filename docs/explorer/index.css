@@ -41,7 +41,10 @@ input[type="number"], select, button {
 }
 input[type="number"] { width: 8.5rem; }
 button { cursor: pointer; }
-button:hover { background: #fff7e4; }
+/* Exclude the invisible .place-hit overlay (its hover ring is an ::after, #128), the
+   same way motion.css excludes it from the universal lift; otherwise this cream would
+   paint an opaque box over each map glyph on hover. */
+button:not(.place-hit):hover { background: #fff7e4; }
 button.primary { background: #4a3826; color: #f2e8cf; letter-spacing: 0.08em; }
 button.primary:hover { background: #5d4831; }
 .status { text-align: center; font-style: italic; color: #857257;
@@ -79,16 +82,28 @@ button.primary:hover { background: #5d4831; }
   background: transparent; border: 0; border-radius: 0; padding: 0;
   pointer-events: auto; cursor: pointer;
 }
-.place-hit:hover, .place-hit:focus-visible {
-  background: transparent;
-  outline: 2px solid #4a3826; outline-offset: -3px; border-radius: 50%;
+/* #128: the hover/focus ring grows in softly from 0.85 with a fade. It rides an
+   ::after (the scrub dot is ::before) so the .place-hit ELEMENT keeps the zero-
+   transition reset suite-cards P2c guards and stays transparent/borderless at idle
+   for P2; the pseudo is invisible (opacity 0) at rest, so idle parity holds. In scrub
+   mode the hit is pointer-events:none and not focusable, so the ring never shows.
+   Collapses to instant via the shared reduced-motion block in /motion.css. */
+.place-hit::after {
+  content: ""; position: absolute; inset: 0; margin: auto;
+  width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box;
+  border: 2px solid #4a3826; pointer-events: none;
+  opacity: 0; transform: scale(0.85);
+  transition: opacity var(--paper-quick) var(--ease-paper),
+              transform var(--paper-quick) var(--ease-paper);
 }
+.place-hit:hover::after, .place-hit:focus-visible::after {
+  opacity: 1; transform: scale(1);
+}
+/* #place-card is the positioning shell only: its transform places the card by its
+   anchor corner (the flip variants below). The paper sheet + its #128 unfurl live on
+   the inner wrapper, so the unfurl's own transform never fights this positioning one. */
 #place-card {
   position: absolute; z-index: 5; max-width: 16rem; pointer-events: none;
-  background: #f8f1e0; color: #4a3826;
-  border: 1px solid #4a3826; border-radius: 4px;
-  box-shadow: 0 8px 22px rgb(61 47 31 / 0.28);
-  padding: 0.6rem 0.75rem; font-size: 0.9rem; line-height: 1.35;
   transform: translate(10px, 10px);
 }
 /* id+attr specificity beats the id-only rule above, so [hidden] really hides. */
@@ -96,6 +111,21 @@ button.primary:hover { background: #5d4831; }
 #place-card.flip-h { transform: translate(calc(-100% - 10px), 10px); }
 #place-card.flip-v { transform: translate(10px, calc(-100% - 10px)); }
 #place-card.flip-h.flip-v { transform: translate(calc(-100% - 10px), calc(-100% - 10px)); }
+/* #128 The slow unfurl. The sheet unrolls from the edge nearest its place: top when
+   the card hangs below the anchor, bottom when it sits above (the flip-v cases). A
+   pinned/tapped card plays the full --unfurl ceremony; a hover/focus preview runs the
+   same curve at --unfurl-quick so sweeping a crowded coast stays nimble. Collapses via
+   the shared reduced-motion block in /motion.css (the `both` fill rests at rotateX 0). */
+.pc-inner {
+  background: #f8f1e0; color: #4a3826;
+  border: 1px solid #4a3826; border-radius: 4px;
+  box-shadow: 0 8px 22px rgb(61 47 31 / 0.28);
+  padding: 0.6rem 0.75rem; font-size: 0.9rem; line-height: 1.35;
+  transform-origin: top center;
+  animation: paperUnfurl var(--unfurl-quick) var(--ease-unfurl) both;
+}
+#place-card.flip-v .pc-inner { transform-origin: bottom center; }
+#place-card.pinned .pc-inner { animation-duration: var(--unfurl); }
 .pc-name { display: block; font-size: 1rem; letter-spacing: 0.02em; }
 .pc-rank { display: block; font-style: italic; color: #6b5a40; font-size: 0.82rem;
   letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.1rem; }
@@ -109,23 +139,33 @@ button.primary:hover { background: #5d4831; }
    these. The dots are a visual time-layer (not a tab-stop, JS sets tabindex -1);
    the chronicle strip lists the headline events as text. --scrub-mark per style. */
 .place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
+/* #128: centre the dot with inset+margin (not a translate) so the stamp keyframe's
+   scale has the transform to itself and the dot never decentres mid-stamp. */
 .place-overlay.scrub .place-hit::before {
-  content: ""; position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
+  content: ""; position: absolute; inset: 0; margin: auto;
   width: 9px; height: 9px; border-radius: 50%; box-sizing: border-box;
   display: none; box-shadow: 0 0 0 1.5px #f8f1e0;
 }
+/* A town stamps onto the map at its founding year; a ruin's mark inks in as it falls.
+   Keyed on data-state, so the stamp plays exactly when a dot enters that state (as the
+   Play sweep or a manual scrub crosses the year). Collapse via the shared reduced block. */
 .place-overlay.scrub .place-hit[data-state="living"]::before {
   display: block; background: var(--scrub-mark, #4a3826); border: 0;
+  animation: inkStamp var(--paper) var(--ease-paper) both;
 }
 .place-overlay.scrub .place-hit[data-state="ruin"]::before {
   display: block; background: transparent;
   border: 2px solid var(--scrub-mark, #4a3826);
+  animation: dryingInk var(--paper) var(--ease-paper) both;
 }
 .scrubber[hidden] { display: none; }
 .scrubber { max-width: 1100px; margin: 0.8rem auto 0;
   background: #f3ead2; border: 1px solid #b9a77f; border-radius: 6px;
-  padding: 0.8rem 1rem; }
+  padding: 0.8rem 1rem; transform-origin: top center; }
+/* #128: the panel unrolls open from its top edge when chronicle mode turns on. It has
+   no positioning transform of its own, so the unfurl (self-perspective in the keyframe)
+   rides the panel directly; no wrapper. Collapses via the shared reduced-motion block. */
+.scrubber:not([hidden]) { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) both; }
 .scrub-controls { display: flex; align-items: center; gap: 0.8rem; }
 .scrub-controls #scrub-play { min-width: 5.2rem; }
 .scrub-controls input[type="range"] { flex: 1; accent-color: #7a5c2e; }
@@ -133,9 +173,12 @@ button.primary:hover { background: #5d4831; }
   font-variant-numeric: tabular-nums; min-width: 5rem; text-align: right; }
 .chronicle-strip { list-style: none; margin: 0.7rem 0 0; padding: 0;
   max-height: 9rem; overflow-y: auto; }
+/* #128: a row that has come to pass brightens AND slides a hair to the right, like
+   an entry inked into the ledger as its year arrives. */
 .chronicle-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
-  border-bottom: 1px solid #cdbd97; opacity: 0.4; transition: opacity 0.18s; }
-.chronicle-strip li.past { opacity: 1; }
+  border-bottom: 1px solid #cdbd97; opacity: 0.4;
+  transition: opacity 0.18s, transform 0.18s; }
+.chronicle-strip li.past { opacity: 1; transform: translateX(2px); }
 .chronicle-strip .cr-year { flex: 0 0 3rem; text-align: right;
   font-variant-numeric: tabular-nums; font-weight: 600; color: #857257; }
 .chronicle-strip .cr-text { color: #54452f; }

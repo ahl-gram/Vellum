@@ -51,8 +51,9 @@ function showPlaceCard(idx) {
   if (!place) return;
   const card = composePlaceCard(place, placeOverlay.events);
   const el = placeOverlay.card;
+  const inner = el.querySelector(".pc-inner");
   // Rebuilt from textContent only (no innerHTML): the fields are plain strings.
-  el.replaceChildren();
+  inner.replaceChildren();
   const name = document.createElement("strong");
   name.className = "pc-name";
   name.textContent = card.name;
@@ -62,19 +63,30 @@ function showPlaceCard(idx) {
   const founded = document.createElement("span");
   founded.className = "pc-founded";
   founded.textContent = card.foundedLine;
-  el.append(name, rank, founded);
+  inner.append(name, rank, founded);
   if (card.tale) {
     const tale = document.createElement("p");
     tale.className = "pc-tale";
     tale.textContent = card.tale;
-    el.append(tale);
+    inner.append(tale);
   }
   el.style.left = `${place.nx * 100}%`;
   el.style.top = `${place.ny * 100}%`;
   const side = cardSide(place.nx, place.ny);
   el.classList.toggle("flip-h", side.h === "left");
   el.classList.toggle("flip-v", side.v === "above");
+  // #128: a card pinned to THIS place plays the full unfurl grade; a hover/focus
+  // preview (pinned false, or pinned to another place) runs the short grade.
+  el.classList.toggle("pinned", placeOverlay.pinned && placeOverlay.pinnedIdx === idx);
   el.hidden = false;
+  // Restart the unfurl cleanly at the current grade on every show. A CSS animation
+  // would not otherwise replay while the card stays displayed across a content swap
+  // (sweep or pin-from-preview), and a mid-flight grade change would leave a partial
+  // roll; the none/reflow/restore reset guarantees a fresh roll every time. The short
+  // hover grade keeps a fast sweep nimble.
+  inner.style.animation = "none";
+  void inner.offsetWidth;
+  inner.style.animation = "";
   placeOverlay.currentIdx = idx;
 }
 
@@ -98,6 +110,12 @@ export function buildPlaceOverlay(manifest) {
   // populate-while-hidden region announces unreliably and would double up.
   card.setAttribute("role", "tooltip");
   card.hidden = true;
+  // #128: the paper sheet is a persistent inner wrapper. Content is swapped into it
+  // per place, but the element is stable, so the unfurl animation replays only on a
+  // real unhide (display:none -> block on the card), not on a content swap.
+  const inner = document.createElement("div");
+  inner.className = "pc-inner";
+  card.appendChild(inner);
   placeOverlay = { card, places: manifest.places, events: manifest.events, presentYear: manifest.presentYear, currentIdx: -1, pinned: false, pinnedIdx: -1 };
   manifest.places.forEach((place, idx) => {
     const hit = document.createElement("button");

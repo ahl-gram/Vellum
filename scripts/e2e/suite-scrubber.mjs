@@ -164,6 +164,31 @@ export async function run(ctx) {
   const resumed = await evaluate(`Number(document.getElementById("scrub-range").value)`);
   check("S10 Pause button freezes mid-sweep; Play resumes from the frozen year (not min/present)", frozen.lbl === "Play" && frozen.year > sm2.minFounded && frozen.year < sm2.present && stillFrozen === frozen.year && resumed > frozen.year && resumed <= sm2.present, `frozen=${frozen.year} still=${stillFrozen} resumed=${resumed} min=${sm2.minFounded} present=${sm2.present}`);
 
+  // S11-S13 #128 Paper physics on the scrubber. Park at the present year FIRST: S10
+  // leaves the sweep PLAYING mid-timeline, so setYear pauses it (onManualScrub) AND
+  // drives every dot to its final state, so a ruin dot exists for S12's fade half to
+  // actually bite (at a mid-timeline year no place has fallen yet). e2e reads the WIRED
+  // motion; the live animations + reduced-motion collapse are CDP-probe verified.
+  await setYear(sm2.present);
+  const s11 = await evaluate(`(()=>{const p=document.getElementById("scrubber");const cs=getComputedStyle(p);return{hidden:p.hidden,name:cs.animationName,dur:cs.animationDuration};})()`);
+  check("S11 scrubber panel unfurls on show (paperUnfurl at the full grade)", s11.hidden === false && s11.name === "paperUnfurl" && s11.dur.includes("0.65"), JSON.stringify(s11));
+
+  const s12 = await evaluate(`(()=>{
+    const live=document.querySelector('.place-overlay.scrub .place-hit[data-state="living"]');
+    const ruin=document.querySelector('.place-overlay.scrub .place-hit[data-state="ruin"]');
+    return{liveName:live?getComputedStyle(live,"::before").animationName:"(none)",ruinName:ruin?getComputedStyle(ruin,"::before").animationName:"(no ruin)",hasRuin:!!ruin};
+  })()`);
+  check("S12 dots stamp on founding (inkStamp), fade to a ruin mark (dryingInk)", s12.liveName === "inkStamp" && s12.hasRuin && s12.ruinName === "dryingInk", JSON.stringify(s12));
+
+  const s13 = await evaluate(`(()=>{
+    const li=document.querySelector(".chronicle-strip li");
+    if(!li)return{li:false};
+    const prop=getComputedStyle(li).transitionProperty;
+    li.classList.add("past");const pastTf=getComputedStyle(li).transform;li.classList.remove("past");
+    return{li:true,prop,pastTf};
+  })()`);
+  check("S13 chronicle strip past-rows slide (transform in the transition + a 2px indent)", s13.li && s13.prop.includes("transform") && s13.pastTf !== "none", JSON.stringify(s13));
+
   // Restore to a clean, chronicle-off state for the rest of the suite.
   await evaluate(`(()=>{const chk=document.getElementById("chronicle");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
 

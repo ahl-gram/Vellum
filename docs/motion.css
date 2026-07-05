@@ -16,7 +16,8 @@
   --paper-quick: 180ms;   /* press, lift, nav underline, term tip */
   --paper: 260ms;         /* standard settle */
   --paper-settle: 340ms;  /* larger arrivals */
-  --unfurl: 650ms;        /* the long rolled map opening */
+  --unfurl: 650ms;        /* the long rolled map opening (pinned cards, panels) */
+  --unfurl-quick: 400ms;  /* the same curve at ~60%, for hover previews */
   --ink-draw: 1200ms;     /* a stroke drawing itself (the coastline) */
   --ink-dry: 1200ms;      /* a wash or ink drying in */
 
@@ -66,12 +67,17 @@
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* The long roll opens: stiff start, a flex just past flat, then settle.
-   Pair with --ease-unfurl and --unfurl. (Sub 3: place cards and panels.) */
+/* The long roll opens: a rolled sheet tips down stiff from its anchored edge,
+   swings just past flat, flexes back, then settles (Alex's ruled dramatic unfurl,
+   2026-07-04). Self-perspective lives in the transform so a consumer needs no
+   perspective on an ancestor; the consumer sets transform-origin to the anchored
+   edge (top when the sheet hangs below its anchor, bottom when it sits above).
+   Pair with --ease-unfurl and --unfurl (or --unfurl-quick on hover). (#128: the
+   place card's inner sheet and the scrubber panel.) */
 @keyframes paperUnfurl {
-  from { transform: scaleY(0); transform-origin: top; }
-  72%  { transform: scaleY(1.03); transform-origin: top; }
-  to   { transform: scaleY(1); transform-origin: top; }
+  from { opacity: 0; transform: perspective(900px) rotateX(-62deg); }
+  72%  { opacity: 1; transform: perspective(900px) rotateX(7deg); }
+  to   { opacity: 1; transform: perspective(900px) rotateX(0); }
 }
 
 /* Ink drying: the stroke appears, then deepens to full. (Sub 2: the coast.) */
