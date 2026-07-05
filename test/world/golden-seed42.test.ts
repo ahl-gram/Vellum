@@ -23,9 +23,16 @@ import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
  * #140 (major rivers as hard flood frontiers) re-pinned the label checksum ONLY,
  * same shape: the three realms and every name are unchanged. Major rivers are now
  * a barrier the realm flood cannot cross, so a border falls ON the river where two
- * realms meet across it. (#80's snap is untouched -- rivers stay membranes there, so
- * the barrier is never undone; the now-redundant river snap is cleaned up in #141.)
- * This reshapes the partition, 2474185067 -> 1087747788, and nothing else.
+ * realms meet across it. Reshaped the partition, 2474185067 -> 1087747788.
+ *
+ * #141 (mountain crests as hard flood frontiers) re-pinned the label checksum ONLY,
+ * same shape: the three realms and every name are unchanged. Large mountain crests
+ * (elevation-gated watershed divides) now join major rivers as a barrier the realm
+ * flood cannot cross, and #80's border snap -- fully superseded by the two hard
+ * frontiers -- is removed. Reshapes the partition, 1087747788 -> 1792806240, and
+ * nothing else. (Seed 42's atoll realms reshape here from the added crest barrier
+ * and the removed #80 snap alike; the frontier upgrade simply reads far more on
+ * mountainous continents like seed 1889814795, where borders visibly trace ranges.)
  */
 
 function labelsChecksum(labels: Int16Array): number {
@@ -37,7 +44,7 @@ function labelsChecksum(labels: Int16Array): number {
   return h >>> 0;
 }
 
-test("seed 42 golden identity (post #140 rivers-as-hard-frontiers re-roll)", () => {
+test("seed 42 golden identity (post #141 mountain-crests re-roll)", () => {
   const w = generateWorld(defaultRecipe(42));
   assert.equal(w.title.title, "The Isle of Rahai");
   assert.equal(w.title.year, 1059);
@@ -48,5 +55,5 @@ test("seed 42 golden identity (post #140 rivers-as-hard-frontiers re-roll)", () 
     "The Ratoa Atolls",
   ]);
   assert.equal(w.names.sea, "The Great Woaku");
-  assert.equal(labelsChecksum(w.realms.labels), 1087747788);
+  assert.equal(labelsChecksum(w.realms.labels), 1792806240);
 });

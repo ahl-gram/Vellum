@@ -3,11 +3,7 @@ import { createMinHeap } from "../core/heap.ts";
 import { clamp } from "../core/math.ts";
 import { slopeField } from "../terrain/slope.ts";
 import { labelLandmasses } from "../world/landmass.ts";
-import { computeBasins, watershedDivides } from "../hydrology/basins.ts";
-import { isMajorRiver, type River } from "../hydrology/rivers.ts";
-import type { FlowResult } from "../hydrology/flow.ts";
 import { attachSeatlessLandmasses } from "./sea-route.ts";
-import { snapBordersToFeatures } from "./border-snap.ts";
 import type { Settlement } from "./sites.ts";
 
 export type RealmsResult = {
@@ -36,14 +32,6 @@ const SUBSTANTIAL_FRACTION = 0.004;
 // smallest islands to neighbours instead of minting more realms.
 const GENERATION_CEILING = 8;
 
-// #80 border snapping. Rivers run in valleys and divides on ridges lie within a
-// couple of cells of the cost-bisector where they run alongside it; a border only
-// snaps to a feature inside this many cells of it, so featureless stretches stay
-// straight. A basin must hold at least MAJOR_BASIN_FRACTION of the land to seed a
-// divide, or the thousands of coastal micro-basins would make every ridge one.
-const CORRIDOR_RADIUS = 6;
-const MAJOR_BASIN_FRACTION = 0.03;
-
 /**
  * Partition land into realms. Open water is a hard frontier: connected landmasses
  * (from labelLandmasses) each host their own realms, the terrain-cost flood never
@@ -55,16 +43,11 @@ export type RealmOptions = {
   /** Overall realm ceiling for the world (e.g. 1 for a city-state). */
   maxRealms?: number;
   /**
-   * When present, snap internal borders onto major rivers and watershed divides
-   * (#80). Omitted by the unit tests, so their partitions stay feature-agnostic;
-   * generate.ts and region.ts pass it to activate the snap.
-   */
-  snap?: { readonly rivers: ReadonlyArray<River>; readonly flow: FlowResult };
-  /**
-   * Major-river cells the realm flood may claim but never cross (#140). Where two
-   * realms grow toward each other across a major river they meet on it, so the
-   * river becomes their frontier. Opt-in, so unit-test partitions stay
-   * feature-agnostic; generate.ts builds it from rivers.filter(isMajorRiver).
+   * Natural-frontier cells the realm flood may claim but never cross (#140/#141):
+   * major rivers united with large mountain crests (elevation-gated watershed
+   * divides). Where two realms grow toward each other across one they meet on it, so
+   * the river or ridge becomes their frontier. Opt-in, so unit-test partitions stay
+   * feature-agnostic; generate.ts builds it in world/generate.ts.
    */
   barrier?: Uint8Array;
 };
@@ -91,13 +74,6 @@ export function partitionRealms(
   if (opts.barrier) {
     fillBarrierStrandedLand(labels, elev, seaLevel, slope, riverCells, landmassIds, settlements, seats);
   }
-  if (opts.snap) {
-    const seatCells = seats.map((si) => {
-      const s = settlements[si] as Settlement;
-      return s.x + s.y * w;
-    });
-    snapRealmBorders(labels, elev, seaLevel, landmassIds, seatCells, opts.snap);
-  }
   attachSeatlessLandmasses(
     labels,
     landmassIds,
@@ -109,36 +85,6 @@ export function partitionRealms(
   );
 
   return { labels, seats };
-}
-
-/**
- * Build the feature mask (major rivers united with major watershed divides) and
- * snap the freshly flooded partition onto it. Runs after floodRealms and before
- * the sea-route attach: the mainland borders exist by now, and seatless islands
- * (still -1) carry no internal border, so border-snap correctly ignores them.
- */
-function snapRealmBorders(
-  labels: Int16Array,
-  elev: Field,
-  seaLevel: number,
-  landmassIds: Int32Array,
-  seatCells: ReadonlyArray<number>,
-  snap: { readonly rivers: ReadonlyArray<River>; readonly flow: FlowResult },
-): void {
-  const { w, h } = elev;
-  const featureMask = new Uint8Array(w * h);
-  for (const r of snap.rivers) {
-    if (!isMajorRiver(r)) continue;
-    for (const p of r.points) {
-      const i = p.x + p.y * w;
-      if ((labels[i] as number) >= 0) featureMask[i] = 1; // land cells of the river
-    }
-  }
-  const basins = computeBasins(elev, snap.flow, seaLevel);
-  const divides = watershedDivides(basins, w, h, MAJOR_BASIN_FRACTION);
-  for (let i = 0; i < featureMask.length; i++) if (divides[i]) featureMask[i] = 1;
-
-  snapBordersToFeatures(labels, w, h, landmassIds, featureMask, CORRIDOR_RADIUS, seatCells);
 }
 
 /**
