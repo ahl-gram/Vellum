@@ -128,8 +128,19 @@ export function generateWorld(recipe: WorldRecipe): World {
   );
 
   const roads = buildRoads(elev, seaLevel, riverCells, settlements);
+  // #140 major rivers are hard realm frontiers: a distinct mask from riverCells
+  // (all rivers, soft cost) -- only isMajorRiver streams wall the flood.
+  const majorRiverMask = new Uint8Array(gridW * gridH);
+  for (const r of rivers) {
+    if (!isMajorRiver(r)) continue;
+    for (const p of r.points) {
+      const i = p.x + p.y * gridW;
+      if ((elev.data[i] as number) > seaLevel) majorRiverMask[i] = 1;
+    }
+  }
   const realms = partitionRealms(elev, seaLevel, riverCells, settlements, {
     ...(citystate ? { maxRealms: 1 } : {}),
+    barrier: majorRiverMask,
     snap: { rivers, flow },
   });
 
