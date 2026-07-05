@@ -108,7 +108,37 @@ function writeHash() {
   history.replaceState(null, "", "#" + params.toString());
 }
 
-function draw() {
+// #127 The Drafting Moment. After a fresh chart is injected, trigger its arrival
+// ceremony: the coastline draws itself in ink (stroke-dashoffset animated from the
+// path's own length) while the whole chart settles and the wash dries in behind
+// (CSS on .arriving). Purely DOM styling of the live SVG; the pristine lastSvg
+// string that Download blobs is never touched. On animationend the inline dash is
+// removed so the resting stroke is byte-for-byte the original (round joins intact).
+function startArrival(svg) {
+  if (!svg) return;
+  const coast = svg.querySelector("#layer-land path");
+  if (coast && typeof coast.getTotalLength === "function") {
+    const len = coast.getTotalLength();
+    if (Number.isFinite(len) && len > 0) {
+      coast.style.setProperty("--draw-len", String(len));
+      coast.style.strokeDasharray = String(len);
+      coast.addEventListener("animationend", function onDrawn(e) {
+        if (e.animationName !== "inkDraw") return; // ignore the wash (washDry)
+        coast.style.strokeDasharray = "";
+        coast.style.strokeDashoffset = "";
+        coast.style.removeProperty("--draw-len");
+        coast.removeEventListener("animationend", onDrawn);
+      });
+    }
+  }
+  svg.classList.add("arriving");
+}
+
+// opts.quiet suppresses the arrival ceremony, used only by the sea-level drag's
+// throttled mid-drag redraws, so the coastline does not perpetually redraw itself
+// while the slider moves. The release (change) redraw runs the full ceremony.
+function draw(opts) {
+  const quiet = !!(opts && opts.quiet);
   const seed = Number(seedInput.value) >>> 0;
   const myGen = ++drawGen;
   drawing = true;
@@ -147,6 +177,7 @@ function draw() {
       lastTheme = theme;
       mapDiv.innerHTML = res.svg;
       buildPlaceOverlay(res.manifest); // #53: marks + card, appended after innerHTML wipes #map
+      if (!quiet) startArrival(mapDiv.querySelector("svg")); // #127: the arrival ceremony
       // #54: if the chronicle toggle is on, re-apply the scrubber to THIS new world
       // (fresh manifest, range, layers); applyScrub hides the just-rendered layers
       // synchronously, so there is no flash of the present-day chart.
@@ -225,7 +256,9 @@ landSlider.addEventListener("input", () => {
   landTouched = true;
   updateLandReadout();
   clearTimeout(landDebounce);
-  landDebounce = setTimeout(draw, 100);
+  // #127: the mid-drag redraws are quiet (no arrival ceremony); the release (change)
+  // handler below runs the full ceremony once the tide settles.
+  landDebounce = setTimeout(() => draw({ quiet: true }), 100);
 });
 landSlider.addEventListener("change", () => {
   landTouched = true;

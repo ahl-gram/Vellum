@@ -6,6 +6,7 @@ import { escapeXml } from "./engine/render/svg.js";
 
 const atlasDiv = document.getElementById("atlas");
 let atlasUrls = [];
+let plateObserver = null; // #127: the reveal-on-scroll observer for the current atlas
 
 // Short captions for the style plates (the composer's hero caption is a full
 // sentence, too long for the grid alongside the others).
@@ -19,6 +20,8 @@ const STYLE_LABEL = {
 export function clearAtlas() {
   for (const url of atlasUrls) URL.revokeObjectURL(url);
   atlasUrls = [];
+  // Release the previous atlas's reveal observer before its figures are detached.
+  if (plateObserver) { plateObserver.disconnect(); plateObserver = null; }
   atlasDiv.innerHTML = "";
 }
 
@@ -66,5 +69,39 @@ ${atlas.gazetteerHtml}`;
 // SVGs are engine output and captions are escapeXml'd in atlasHtml.
 export function renderAtlas(atlas, currentStyle, currentTheme) {
   atlasDiv.innerHTML = atlasHtml(atlas, currentStyle, currentTheme);
-  atlasDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+  const figs = [...atlasDiv.querySelectorAll("figure")];
+  // #127: seed each plate with a fallback stagger index, then settle them in as they
+  // scroll INTO VIEW (revealPlates). Injecting them animated at the top of the page
+  // meant the cascade finished off-screen before the auto-scroll arrived; tying it to
+  // visibility means it is actually seen on arrival, and keeps going down a tall atlas.
+  figs.forEach((f, i) => f.style.setProperty("--i", String(Math.min(i, 12))));
+  revealPlates(figs);
+  // Keep the smooth scroll, but respect reduced motion (a JS scroll is not reached
+  // by the CSS reduced-motion collapse in /motion.css).
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  atlasDiv.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+}
+
+// Add .settling to each plate as it enters the viewport, so the settle animation
+// (index.css) plays where the reader can see it. Reduced motion or no
+// IntersectionObserver: reveal everything at once, so no plate is ever left hidden
+// and nothing moves.
+function revealPlates(figs) {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce || typeof IntersectionObserver !== "function") {
+    figs.forEach((f) => f.classList.add("settling"));
+    return;
+  }
+  plateObserver = new IntersectionObserver((entries, obs) => {
+    // Re-index by reveal batch (not global position) so a plate reached later settles
+    // promptly instead of waiting out a large global animation-delay.
+    let k = 0;
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      e.target.style.setProperty("--i", String(k++));
+      e.target.classList.add("settling");
+      obs.unobserve(e.target);
+    }
+  }, { threshold: 0.2 });
+  figs.forEach((f) => plateObserver.observe(f));
 }

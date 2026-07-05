@@ -17,8 +17,8 @@
   --paper: 260ms;         /* standard settle */
   --paper-settle: 340ms;  /* larger arrivals */
   --unfurl: 650ms;        /* the long rolled map opening */
-  --ink-draw: 900ms;      /* a stroke drawing itself */
-  --ink-dry: 1200ms;      /* ink darkening as it dries */
+  --ink-draw: 1200ms;     /* a stroke drawing itself (the coastline) */
+  --ink-dry: 1200ms;      /* a wash or ink drying in */
 
   /* Easings: paper settles (ease-out, no bounce); the unfurl starts stiff and
      flexes just past flat, per the ratified one ruled exception. */
@@ -35,10 +35,28 @@
    tune the exact stops when it wires one up.
    -------------------------------------------------------------------------- */
 
-/* Paper settles onto the desk: a short drop into place. (Sub 2: new charts.) */
+/* Paper settles onto the desk: rises into place with a faint rotate and a small
+   overshoot past flat, then rests. (#127: the Explorer chart arrival and the
+   staggered atlas plates. Tuned from Sub 1's placeholder by its first consumer.) */
 @keyframes paperSettle {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(16px) rotate(0.9deg); }
+  70%  { opacity: 1; transform: translateY(-2px) rotate(-0.15deg); }
+  to   { opacity: 1; transform: translateY(0) rotate(0); }
+}
+
+/* Ink draws itself along a stroke. The consumer sets --draw-len (the path's total
+   length) and a matching stroke-dasharray inline, then removes both on animationend
+   to restore the pristine stroke. (#127: the coastline. Later: the voyage track.) */
+@keyframes inkDraw {
+  from { stroke-dashoffset: var(--draw-len, 0); }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* A wash dries in behind the drawn ink: fill-opacity rises from bare paper to full.
+   (#127: the land wash settling in behind the coastline.) */
+@keyframes washDry {
+  from { fill-opacity: 0; }
+  to   { fill-opacity: 1; }
 }
 
 /* Ink stamped down: it appears and presses to size. (Subs 3-4: dots, marks.) */
@@ -155,7 +173,9 @@ button:not(.place-hit):active,
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
   .plate { transform: none !important; }

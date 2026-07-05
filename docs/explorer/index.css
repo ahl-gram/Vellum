@@ -50,6 +50,23 @@ button.primary:hover { background: #5d4831; }
 #map svg { width: 100%; height: auto; display: block;
   border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
 
+/* #127 The Drafting Moment: a freshly drawn chart settles onto the desk while the
+   coastline draws itself in ink and the land wash + waterline halos dry in behind
+   it. Gated behind .arriving (added by app.js after injection) so the sea-level
+   drag can suppress the ceremony; app.js sets --draw-len + stroke-dasharray on the
+   coast path and clears them on animationend, restoring the pristine stroke. This
+   is DOM-only styling of the injected SVG, so Download (the pristine lastSvg
+   string) stays byte-identical. All of it collapses under the shared
+   prefers-reduced-motion rule in /motion.css (chart instant, coast pre-drawn). */
+#map svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
+#map svg.arriving #layer-land path {
+  animation: inkDraw var(--ink-draw) var(--ease-paper) both,
+             washDry var(--ink-dry) var(--ease-paper) 400ms both;
+}
+#map svg.arriving #layer-waterlines {
+  animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
+}
+
 /* Living Chart overlay (#53): invisible focusable hit-targets sit over the baked
    glyphs and feed one reused parchment card. The container ignores pointer
    events so the rest of the page stays live; only the hits and card take them.
@@ -133,7 +150,18 @@ footer a { color: inherit; }
 #atlas:empty { margin: 0; }
 #atlas h2 { letter-spacing: 0.06em; border-bottom: 1px solid #b9a77f;
   padding-bottom: 0.3rem; margin-top: 2.6rem; }
-#atlas figure { margin: 1.5rem 0; }
+/* #127: bound atlas plates settle in sequence as they scroll into view, like proof
+   sheets laid out. atlas-view.js adds .settling (via an IntersectionObserver) as each
+   plate enters the viewport; --i is the per-batch stagger index. Plates are hidden
+   until revealed so the settle is seen on arrival; under reduced motion they are all
+   revealed at once and the collapse in /motion.css makes it instant. */
+#atlas figure { margin: 1.5rem 0; opacity: 0; }
+#atlas figure.settling { opacity: 1;
+  animation: paperSettle var(--paper-settle) var(--ease-paper) both;
+  animation-delay: calc(var(--i, 0) * 60ms); }
+/* Print reveals every plate: a below-fold plate whose reveal-on-scroll never fired
+   would otherwise print blank (it is hidden until .settling on screen). */
+@media print { #atlas figure { opacity: 1; } }
 #atlas figure img { width: 100%; height: auto; display: block;
   border: 1px solid #b9a77f; box-shadow: 0 10px 30px rgb(61 47 31 / 0.18); }
 #atlas figcaption { text-align: center; font-style: italic; color: #6b5a40;
