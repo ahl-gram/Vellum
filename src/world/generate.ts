@@ -4,6 +4,7 @@ import { classifyBiomes, BIOMES } from "../climate/biomes.ts";
 import { computeClimate, type ClimateBand } from "../climate/climate.ts";
 import { computeFlow } from "../hydrology/flow.ts";
 import { extractRivers, isMajorRiver } from "../hydrology/rivers.ts";
+import { mountainCrests } from "../hydrology/crests.ts";
 import { findLakes } from "../hydrology/lakes.ts";
 import { buildHeightfield, type MapType } from "../terrain/heightfield.ts";
 import { pickSeaLevel } from "../terrain/sealevel.ts";
@@ -128,20 +129,24 @@ export function generateWorld(recipe: WorldRecipe): World {
   );
 
   const roads = buildRoads(elev, seaLevel, riverCells, settlements);
-  // #140 major rivers are hard realm frontiers: a distinct mask from riverCells
-  // (all rivers, soft cost) -- only isMajorRiver streams wall the flood.
-  const majorRiverMask = new Uint8Array(gridW * gridH);
+  // #140/#141 natural frontiers the realm flood may claim but never cross: major
+  // rivers (a distinct mask from riverCells, which is all rivers at soft cost) united
+  // with large mountain crests (elevation-gated watershed divides). Only these wall
+  // the flood, so a border falls onto the river or ridge where two realms meet across
+  // it. This supersedes #80's border snap entirely.
+  const frontierMask = new Uint8Array(gridW * gridH);
   for (const r of rivers) {
     if (!isMajorRiver(r)) continue;
     for (const p of r.points) {
       const i = p.x + p.y * gridW;
-      if ((elev.data[i] as number) > seaLevel) majorRiverMask[i] = 1;
+      if ((elev.data[i] as number) > seaLevel) frontierMask[i] = 1;
     }
   }
+  const crests = mountainCrests(elev, flow, seaLevel);
+  for (let i = 0; i < frontierMask.length; i++) if (crests[i] === 1) frontierMask[i] = 1;
   const realms = partitionRealms(elev, seaLevel, riverCells, settlements, {
     ...(citystate ? { maxRealms: 1 } : {}),
-    barrier: majorRiverMask,
-    snap: { rivers, flow },
+    barrier: frontierMask,
   });
 
   const culture = rng.fork("culture").pick(CULTURES);

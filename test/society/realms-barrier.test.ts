@@ -7,8 +7,8 @@ import type { Settlement } from "../../src/society/sites.ts";
 // #140: a major river passed as opts.barrier is a HARD frontier -- the realm flood
 // may claim a barrier cell but never propagate across it, so where two realms grow
 // toward each other across the river they meet ON it. These drive the opt-in barrier
-// path with hand-drawn masks (no River/flow construction), mirroring border-snap's
-// synthetic-grid style. Seats must sit > MIN_SEAT_SPACING (24) apart to be picked.
+// path with hand-drawn masks (no River/flow construction) on a synthetic grid. Seats
+// must sit > MIN_SEAT_SPACING (24) apart to be picked.
 
 const SEA = 0.5;
 const allLand = (w: number, h: number) => createField(w, h, () => 1);
