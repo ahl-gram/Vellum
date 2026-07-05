@@ -23,7 +23,8 @@ import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
  * #140 (major rivers as hard flood frontiers) re-pinned the label checksum ONLY,
  * same shape: the three realms and every name are unchanged. Major rivers are now
  * a barrier the realm flood cannot cross, so a border falls ON the river where two
- * realms meet across it (superseding #80's soft river snap; divides still snap).
+ * realms meet across it. (#80's snap is untouched -- rivers stay membranes there, so
+ * the barrier is never undone; the now-redundant river snap is cleaned up in #141.)
  * This reshapes the partition, 2474185067 -> 1087747788, and nothing else.
  */
 
