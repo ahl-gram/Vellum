@@ -28,6 +28,12 @@ h3 { font-size: 0.95rem; letter-spacing: 0.08em; color: #857257;
 .term { font-weight: 600; color: #4a3826; margin: 1.6rem 0 0.3rem;
   font-size: 1.08rem; }
 .term:first-of-type, h3 + .term { margin-top: 0.8rem; }
+/* #126 Paper & Ink: a term tips like a loose slip under the hand (reduced-motion
+   collapse lives in /motion.css). inline-block so it pivots around its own text. */
+.term { display: inline-block; transform-origin: left center;
+  transition: transform var(--paper-quick) var(--ease-paper); }
+.term:hover  { transform: rotate(-1.2deg) translateX(2px); }
+.term:active { transform: none; }
 .def { margin: 0; }
 a { color: #6b5a40; }
 code { background: #e6d9b8; padding: 0.1em 0.4em; border-radius: 3px;

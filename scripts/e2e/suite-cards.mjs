@@ -36,6 +36,16 @@ export async function run(ctx) {
   check("P2 idle: card hidden + hits transparent/borderless (no global-button leak)", p2.cardHidden && p2.bg === "rgba(0, 0, 0, 0)" && p2.bw === "0px", JSON.stringify(p2));
   check("P3 pointer-events: overlay none, hits auto (rest of page stays live)", p2.ovPe === "none" && p2.hitPe === "auto", `ov=${p2.ovPe} hit=${p2.hitPe}`);
 
+  // #126 Paper & Ink: the universal press/lift (motion.css) reaches real buttons
+  // but MUST NOT reach the load-bearing .place-hit overlay reset. Read at idle: a
+  // control button carries the shared transition (~180ms); .place-hit carries none
+  // (the `button:not(.place-hit)` exclusion). P2 above is idle-only, so a dropped
+  // exclusion would let .place-hit:hover inherit the lift+shadow while P2 stayed
+  // green; this pair is the guard that actually bites that mutation.
+  const p2m = await evaluate(`(()=>{const b=getComputedStyle(document.getElementById("draw")).transitionDuration;const h=getComputedStyle(document.querySelector(".place-hit")).transitionDuration;return{btn:b,hit:h};})()`);
+  check("P2b press/lift reaches buttons (motion.css loaded + applied)", p2m.btn.includes("0.18s"), `#draw transition-duration=${p2m.btn}`);
+  check("P2c press/lift does NOT reach .place-hit (exclusion holds)", p2m.hit === "0s", `.place-hit transition-duration=${p2m.hit}`);
+
   // Keyboard focus a living capital: card shows name + rank + founding, no tale.
   const p4 = await evaluate(`(()=>{const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.focus();const c=document.getElementById("place-card");return{hidden:c.hidden,aria:hit.getAttribute("aria-label"),name:(c.querySelector(".pc-name")||{}).textContent,rank:(c.querySelector(".pc-rank")||{}).textContent,founded:(c.querySelector(".pc-founded")||{}).textContent,tale:!!c.querySelector(".pc-tale")};})()`);
   check("P4 focus a capital: card shows name + Capital + founding year, no tale", p4.hidden === false && p4.name === pm.capName && p4.rank === "Capital" && p4.founded === "Founded in the year " + pm.capFounded + "." && p4.tale === false, JSON.stringify(p4));

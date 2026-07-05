@@ -1,0 +1,162 @@
+/* ==========================================================================
+   Paper & Ink: the shared motion desk (#126, epic #125)
+   --------------------------------------------------------------------------
+   One physical motion language for every hand-authored sheet: paper moves
+   (tips, lifts, presses, unfurls, settles) and ink appears (draws, dries,
+   stamps). Linked root-absolute (/motion.css) from the five hand-authored
+   pages; the generated atlas/gallery arrive in Sub 5.
+
+   Byte-safe by construction: this styles the LIVE DOM only. The determinism
+   contract protects the SVG string and committed files, never the rendered
+   page (see epic #125). No src/, no chart bytes, no golden.
+   ========================================================================== */
+
+:root {
+  /* Durations: paper is quick (160-340ms), ink ceremonies are slow (500ms+). */
+  --paper-quick: 180ms;   /* press, lift, nav underline, term tip */
+  --paper: 260ms;         /* standard settle */
+  --paper-settle: 340ms;  /* larger arrivals */
+  --unfurl: 650ms;        /* the long rolled map opening */
+  --ink-draw: 900ms;      /* a stroke drawing itself */
+  --ink-dry: 1200ms;      /* ink darkening as it dries */
+
+  /* Easings: paper settles (ease-out, no bounce); the unfurl starts stiff and
+     flexes just past flat, per the ratified one ruled exception. */
+  --ease-paper: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-unfurl: cubic-bezier(0.66, 0, 0.2, 1.03);
+
+  --iron-red: #7a1f12;    /* the site's ink red (hunt star, status) */
+}
+
+/* --------------------------------------------------------------------------
+   Keyframe vocabulary. Authored here as the shared foundation (epic #125);
+   Subs 2-6 attach these to their elements (charts, cards, chronicle dots,
+   soundings). They render nothing on their own in Sub 1; a consuming sub may
+   tune the exact stops when it wires one up.
+   -------------------------------------------------------------------------- */
+
+/* Paper settles onto the desk: a short drop into place. (Sub 2: new charts.) */
+@keyframes paperSettle {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Ink stamped down: it appears and presses to size. (Subs 3-4: dots, marks.) */
+@keyframes inkStamp {
+  from { opacity: 0; transform: scale(1.35); }
+  60%  { opacity: 1; }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* The long roll opens: stiff start, a flex just past flat, then settle.
+   Pair with --ease-unfurl and --unfurl. (Sub 3: place cards and panels.) */
+@keyframes paperUnfurl {
+  from { transform: scaleY(0); transform-origin: top; }
+  72%  { transform: scaleY(1.03); transform-origin: top; }
+  to   { transform: scaleY(1); transform-origin: top; }
+}
+
+/* Ink drying: the stroke appears, then deepens to full. (Sub 2: the coast.) */
+@keyframes dryingInk {
+  from { opacity: 0; }
+  45%  { opacity: 0.85; }
+  to   { opacity: 1; }
+}
+
+/* A sounding ripple spreads and fades. (Sub 4: the daily sounding.) */
+@keyframes inkRipple {
+  from { opacity: 0.55; transform: scale(0.2); }
+  to   { opacity: 0; transform: scale(1); }
+}
+
+/* --------------------------------------------------------------------------
+   Universal press and lift. Every button and action-styled link rises under
+   the hand and presses on the tap (the touch twin ships in the same rule).
+
+   CAREFUL: the Explorer's .place-hit overlay reset is load-bearing and asserted
+   by e2e (idle transparent background + zero border, suite-cards P2/P3). It is
+   a <button>, so it MUST be excluded here or its :hover would inherit the lift
+   and shadow. The `:not(.place-hit)` exclusion is guarded by suite-cards P2c.
+   -------------------------------------------------------------------------- */
+button:not(.place-hit),
+.card,
+.actions a {
+  transition: transform var(--paper-quick) var(--ease-paper),
+              box-shadow var(--paper-quick) var(--ease-paper);
+}
+button:not(.place-hit):hover,
+.actions a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgb(61 47 31 / 0.2);
+}
+button:not(.place-hit):active,
+.actions a:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgb(61 47 31 / 0.14);
+}
+/* Cards lift a touch further and keep their own deeper resting shadow line. */
+.card:hover  { transform: translateY(-3px); box-shadow: 0 14px 30px rgb(61 47 31 / 0.2); }
+.card:active { transform: translateY(1px);  box-shadow: 0 4px 12px rgb(61 47 31 / 0.12); }
+
+/* --------------------------------------------------------------------------
+   The nav menu. Links lift under the hand, a hairline iron-red underline draws
+   in from the left, and a tap presses (the touch twin). Present on all five
+   pages via .topnav.
+   -------------------------------------------------------------------------- */
+.topnav a {
+  display: inline-block;
+  position: relative;
+  text-decoration: none;
+  transition: transform var(--paper-quick) var(--ease-paper);
+}
+.topnav a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 1px;
+  background: var(--iron-red);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--paper-quick) var(--ease-paper);
+}
+.topnav a:hover              { transform: translateY(-2px); }
+.topnav a:active             { transform: translateY(0); }
+.topnav a:hover::after,
+.topnav a:focus-visible::after,
+.topnav a:active::after      { transform: scaleX(1); }
+
+/* --------------------------------------------------------------------------
+   Homepage chart plates. Each rests at a faint tilt, as though set down on the
+   desk, and straightens + lifts under the hand. The per-plate angle is passed
+   as --tilt on the element (see docs/index.html). This is the one deliberate
+   at-rest change in this sub (epic #125 relaxes idle-parity for it).
+   -------------------------------------------------------------------------- */
+.plate {
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform var(--paper) var(--ease-paper),
+              box-shadow var(--paper) var(--ease-paper);
+}
+.plate:hover {
+  transform: rotate(0deg) translateY(-5px);
+  box-shadow: 0 20px 44px rgb(61 47 31 / 0.28);
+}
+.plate:active { transform: rotate(0deg) translateY(-1px); }
+
+/* --------------------------------------------------------------------------
+   Every gesture has a still twin. This ONE block collapses all motion to
+   instant end states: the gestures above, the page-CSS gestures (glossary
+   term tip), AND the two pre-existing animations retrofitted into the doctrine
+   (the seed-of-the-day hunt star, the Explorer chronicle-strip fade). The
+   universal duration collapse reaches any animation/transition site-wide; the
+   .plate rule additionally flattens the one static resting transform, which a
+   duration collapse alone would leave tilted.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .plate { transform: none !important; }
+}
