@@ -18,6 +18,8 @@ docs/gallery/
 .claude/worktrees/
 SESSION-NOTES.md
 RESUME-HERE.md
+# Personal working-style instructions for Claude Code (local only, not published).
+CLAUDE.md
 
 # Local planning docs, no longer tracked. Backlog lives in GitHub issues.
 roadmap/
