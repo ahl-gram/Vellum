@@ -21,16 +21,101 @@ figure { margin: 0; }
 #map svg { width: 100%; height: auto; display: block;
   border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
 #map:not(.solved) svg { cursor: crosshair; }
+/* The win star rests still; on a LIVE solve app.js adds .stamp and it stamps in.
+   On a solved-day reload the star is placed WITHOUT .stamp, so it sits perfectly
+   still (#129; the old code replayed this animation on every reload). The centering
+   offset (--pos, #126) is defined once and the entry keyframe layers scale + rotate
+   onto it; collapses under the shared prefers-reduced-motion rule in /motion.css. */
 .hunt-star { position: absolute; --pos: translate(-50%, -50%); transform: var(--pos);
   color: #7a1f12; font-size: 1.7rem; line-height: 1; pointer-events: none;
-  text-shadow: 0 0 4px #fff7e4, 0 1px 2px rgb(61 47 31 / 0.5);
-  animation: huntStarIn 0.5s ease-out both; }
-/* #126 Paper & Ink retrofit: the centering offset (--pos) is defined once, and
-   the entry keyframe layers scale + rotate onto it. This animation now collapses
-   under the shared prefers-reduced-motion rule in /motion.css. */
+  text-shadow: 0 0 4px #fff7e4, 0 1px 2px rgb(61 47 31 / 0.5); }
+.hunt-star.stamp { animation: huntStarIn var(--paper-settle) var(--ease-paper) both; }
 @keyframes huntStarIn {
   from { opacity: 0; transform: var(--pos) scale(0.2) rotate(-40deg); }
   to { opacity: 1; transform: var(--pos) scale(1) rotate(0); }
+}
+
+/* ==========================================================================
+   #129 Today's ceremonies (epic #125, Paper & Ink). Consumes the /motion.css
+   vocabulary. This page renders on the main thread, so each ceremony starts
+   after the single paint. Styles the LIVE DOM only: this page has no Download
+   and no golden, so there are no chart bytes to protect.
+   ========================================================================== */
+
+/* The arrival, extended from #127: the chart settles onto the desk while the
+   coastline draws itself in ink and the land wash + waterlines dry in behind.
+   app.js sets --draw-len + stroke-dasharray on the coast and clears them on
+   animationend, restoring the pristine stroke. Plays on every load (the daily
+   reveal), including a solved-day reload. */
+#map svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
+#map svg.arriving #layer-land path {
+  animation: inkDraw var(--ink-draw) var(--ease-paper) both,
+             washDry var(--ink-dry) var(--ease-paper) 400ms both;
+}
+#map svg.arriving #layer-waterlines {
+  animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
+}
+
+/* The caption, survey line, and blurb dry in after the chart, lightly staggered
+   (--dry-delay set per element in app.js). */
+.drying { animation: dryingInk var(--ink-dry) var(--ease-paper) var(--dry-delay, 0ms) both; }
+
+/* The clue slips stagger in, 60ms apart (--i per item set in app.js). */
+.clues li { animation: dryingInk var(--paper) var(--ease-paper) both;
+  animation-delay: calc(var(--i, 0) * 60ms); }
+
+/* A miss leaves a sounding over the map: a spreading ink ring (the shared
+   inkRipple) and a surveyor's graphite dot that lingers, then fades. Both are
+   pointer-transparent so a lingering dot never eats the next click, and both
+   self-remove on animationend. Centered by margin (not transform) so the ripple's
+   own scale keeps the transform to itself. The SVG is never touched. */
+.sounding-ring, .sounding-dot { position: absolute; pointer-events: none; }
+.sounding-ring { width: 44px; height: 44px; margin: -22px 0 0 -22px;
+  border-radius: 50%; border: 2px solid var(--iron-red);
+  animation: inkRipple 700ms var(--ease-paper) both; }
+.sounding-dot { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%; background: #6b5a40;
+  box-shadow: 0 0 0 1px rgb(247 247 228 / 0.55);
+  animation: soundingFade 2600ms var(--ease-paper) both; }
+@keyframes soundingFade {
+  0% { opacity: 0; } 8% { opacity: 0.9; } 68% { opacity: 0.9; } 100% { opacity: 0; }
+}
+
+/* The warmer/colder line keeps its instant aria-live swap; only its rendered ink
+   dries in with a brief blur, so a sighted player sees the update land. */
+.hunt-status.wet { animation: inkWet var(--paper) var(--ease-paper) both; }
+@keyframes inkWet {
+  from { filter: blur(2.5px); opacity: 0.45; }
+  to   { filter: blur(0); opacity: 1; }
+}
+
+/* The reveal unrolls open on a live solve; on a solved-day reload it is simply
+   shown, still (app.js adds .unfurl only from a live solve). It carries no
+   positioning transform, so the unfurl (self-perspective in the keyframe) rides
+   it directly, like the Explorer's scrubber panel (#128). */
+.reveal.unfurl { transform-origin: top center;
+  animation: paperUnfurl var(--unfurl) var(--ease-unfurl) both; }
+
+/* The Share button rises in on a live solve. No fill, so it reverts to normal
+   afterward and the shared button :hover lift stays free (the #146 forwards-fill
+   gotcha). */
+#share.rise { animation: shareRise var(--paper-settle) var(--ease-paper); }
+@keyframes shareRise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* The streak stamps in when it increments on a live solve. */
+.streak.stamp { animation: inkStamp var(--paper) var(--ease-paper) both; }
+
+/* The mobile sticky bar slides up the first time it appears (app.js adds .rise on
+   the hidden -> shown transition only, never on subsequent misses). aria-hidden
+   stays true: this bar mirrors #hunt-status, which is already an aria-live region,
+   so re-announcing it would duplicate screen-reader content. */
+.hunt-sticky.rise { animation: stickyRise var(--paper-settle) var(--ease-paper); }
+@keyframes stickyRise {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
 }
 figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
   margin-top: 1rem; }
