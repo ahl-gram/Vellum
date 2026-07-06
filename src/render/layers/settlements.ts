@@ -233,12 +233,19 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
     const px = proj.px(s.x);
     const py = proj.py(s.y);
 
+    // #93: each settlement's marks (halo, glyph, label) go into one addressable
+    // <g class="settlement" data-idx="i"> so the Explorer's chronicle can reveal
+    // the real glyph as its founding year passes. `i` is the WORLD index (matches
+    // the manifest place idx); the wrapper is inert (no style rule targets it), so
+    // idle output is byte-identical bar the tag itself, which regenerates the golden.
+    const group: SvgNode[] = [];
+
     if (showHalo && (tier === "capital" || tier === "seat") && !s.ruined) {
       const realmId = seatRealm.get(i) as number;
       const color = style.realmTints[ctx.realmTint[realmId] as number] as string;
-      nodes.push(seatHalo(px, py, tier, color, ctx));
+      group.push(seatHalo(px, py, tier, color, ctx));
     }
-    nodes.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(tier, px, py, ctx));
+    group.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(tier, px, py, ctx));
 
     const fs = FONT_SIZE[tier] * k;
     const gap = (tier === "capital" ? 11 : tier === "seat" ? 8 : 7) * k;
@@ -252,15 +259,17 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
       if (box.x < proj.margin + 4 || box.x + box.w > proj.widthPx - proj.margin - 4) continue;
       if (box.y < proj.margin + 4 || box.y + box.h > proj.heightPx - proj.margin - 4) continue;
       if (!labels.tryClaim(box)) continue;
-      nodes.push(labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx));
+      group.push(labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx));
       placed = true;
       break;
     }
     if (!placed && tier !== "village") {
       // important places keep their label even in a crowd
       const t = tries[0]!;
-      nodes.push(labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx));
+      group.push(labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx));
     }
+
+    nodes.push(el("g", { class: "settlement", "data-idx": String(i) }, group));
   }
 
   return el("g", { id: "layer-settlements" }, nodes);

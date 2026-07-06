@@ -219,7 +219,7 @@ function draw(opts) {
         runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => {
           if (myGen !== drawGen) return; // superseded while turning; the latest draw owns #map
           buildPlaceOverlay(res.manifest);
-          if (chronicleChk.checked) applyScrub(style);
+          if (chronicleChk.checked) applyScrub();
           else clearScrub();
         });
       } else {
@@ -231,7 +231,7 @@ function draw(opts) {
         // #54: if the chronicle toggle is on, re-apply the scrubber to THIS new world
         // (fresh manifest, range, layers); applyScrub hides the just-rendered layers
         // synchronously, so there is no flash of the present-day chart.
-        if (chronicleChk.checked) applyScrub(style);
+        if (chronicleChk.checked) applyScrub();
         else clearScrub();
       }
     })
@@ -322,7 +322,7 @@ landSlider.addEventListener("change", () => {
 // (no re-roll); Play/Pause runs the event-proportional sweep; a manual drag pauses
 // Play and rebases it so the next Play restarts from the beginning.
 chronicleChk.addEventListener("change", () => {
-  if (chronicleChk.checked) applyScrub(lastStyle);
+  if (chronicleChk.checked) applyScrub();
   else exitScrub();
 });
 scrubPlayBtn.addEventListener("click", togglePlay);

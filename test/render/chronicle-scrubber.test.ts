@@ -8,6 +8,7 @@ import {
   scrubRange,
   buildScrubMarks,
   placeStateAt,
+  glyphVisibleAt,
   eventIsPast,
   buildSweepPlan,
   sweepYearAt,
@@ -105,6 +106,26 @@ test("placeStateAt: a ruin is LIVING between founding and abandonment, RUIN afte
   assert.equal(placeStateAt(m, 649), "living", "still thriving the year before it falls");
   assert.equal(placeStateAt(m, 650), "ruin", "crumbles in its abandonment year");
   assert.equal(placeStateAt(m, 800), "ruin");
+});
+
+// #93: glyphVisibleAt drives the real baked glyphs on/off by year (replacing the
+// #54 abstract dots). It differs from placeStateAt because the static chart bakes
+// each settlement in its PRESENT-DAY state only, so a glyph can only be shown in
+// the state it was drawn in ("state-begins").
+test("glyphVisibleAt: a living town's glyph shows at and after founding, hidden before (#93)", () => {
+  const mark = { idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null };
+  assert.equal(glyphVisibleAt(mark, 299), false, "hidden before founding");
+  assert.equal(glyphVisibleAt(mark, 300), true, "shows in its founding year");
+  assert.equal(glyphVisibleAt(mark, 900), true, "still shown at the present");
+});
+
+test("glyphVisibleAt: a ruined town follows state-begins - hidden through its living centuries, ruin glyph at the fall year (#93)", () => {
+  const mark = { idx: 1, nx: 0.5, ny: 0.5, founded: 400, ruinYear: 650 };
+  assert.equal(glyphVisibleAt(mark, 399), false, "not yet founded");
+  assert.equal(glyphVisibleAt(mark, 400), false, "founded, but no living glyph is baked (state-begins), so hidden");
+  assert.equal(glyphVisibleAt(mark, 649), false, "still hidden the year before it falls");
+  assert.equal(glyphVisibleAt(mark, 650), true, "the baked ruin glyph inks in at the fall year");
+  assert.equal(glyphVisibleAt(mark, 800), true, "and stays a ruin");
 });
 
 test("eventIsPast is inclusive of the current year", () => {
