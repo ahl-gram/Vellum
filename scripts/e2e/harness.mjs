@@ -165,6 +165,52 @@ async function shoot(file) {
   console.log(`  shot -> ${join(OUT_DIR, file)} (${h}px tall)`);
 }
 
+// Spawn the headless browser and wait for its DevTools page target, retrying a few
+// times with a fresh profile. A cold Chrome on a CI runner intermittently comes up
+// but never binds the remote-debugging port (a transient dbus/crashpad hiccup; the
+// process stays alive, so getPageTarget just times out). One attempt reds the whole
+// run for a flake, so retry. A genuine break (bad binary, missing lib, the browser
+// exits) still fails after the last attempt, with the captured browser output.
+async function launchBrowser(browser, DPORT) {
+  const MAX_ATTEMPTS = 3;
+  let lastErr;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    browserExit = null;
+    browserOut = "";
+    userDataDir = await mkdtemp(join(tmpdir(), "vellum-e2e-"));
+    brave = spawn(
+      browser,
+      [
+        "--headless=new",
+        `--remote-debugging-port=${DPORT}`,
+        `--user-data-dir=${userDataDir}`,
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--hide-scrollbars",
+        "--force-device-scale-factor=1",
+        "--window-size=1280,2400",
+        "about:blank",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    );
+    brave.stdout.on("data", (d) => (browserOut += d));
+    brave.stderr.on("data", (d) => (browserOut += d));
+    brave.on("exit", (code, signal) => (browserExit = { code, signal }));
+    try {
+      return await getPageTarget(DPORT);
+    } catch (err) {
+      lastErr = err;
+      try { brave.kill("SIGKILL"); } catch {}
+      try { await rm(userDataDir, { recursive: true, force: true }); } catch {}
+      if (attempt < MAX_ATTEMPTS) {
+        console.log(`  e2e: browser launch attempt ${attempt}/${MAX_ATTEMPTS} exposed no devtools target; retrying with a fresh profile...`);
+      }
+    }
+  }
+  throw lastErr;
+}
+
 // Bring the page up: server, browser, CDP socket, domains enabled, navigated. The
 // passed-in results/consoleErrors/http4xx arrays are pushed to BY REFERENCE (the
 // ws handler + check close over them) so the runner's trailing tally sees them.
@@ -172,28 +218,7 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
   OUT_DIR = OUT;
   await mkdir(OUT, { recursive: true });
   server = await startServer(SITE, PORT);
-  userDataDir = await mkdtemp(join(tmpdir(), "vellum-e2e-"));
-  brave = spawn(
-    browser,
-    [
-      "--headless=new",
-      `--remote-debugging-port=${DPORT}`,
-      `--user-data-dir=${userDataDir}`,
-      "--no-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-      "--hide-scrollbars",
-      "--force-device-scale-factor=1",
-      "--window-size=1280,2400",
-      "about:blank",
-    ],
-    { stdio: ["ignore", "pipe", "pipe"] },
-  );
-  brave.stdout.on("data", (d) => (browserOut += d));
-  brave.stderr.on("data", (d) => (browserOut += d));
-  brave.on("exit", (code, signal) => (browserExit = { code, signal }));
-
-  const target = await getPageTarget(DPORT);
+  const target = await launchBrowser(browser, DPORT);
   ws = new WebSocket(target.webSocketDebuggerUrl);
   await new Promise((res, rej) => {
     ws.addEventListener("open", res, { once: true });
