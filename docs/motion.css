@@ -20,11 +20,15 @@
   --unfurl-quick: 400ms;  /* the same curve at ~60%, for hover previews */
   --ink-draw: 1200ms;     /* a stroke drawing itself (the coastline) */
   --ink-dry: 1200ms;      /* a wash or ink drying in */
+  --turn: 900ms;          /* the weighty sheet turn: same world, new dress (#131; the
+                             Verso #116 reuses it). Read by sheet-turn.js's WAAPI. */
 
   /* Easings: paper settles (ease-out, no bounce); the unfurl starts stiff and
      flexes just past flat, per the ratified one ruled exception. */
   --ease-paper: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-unfurl: cubic-bezier(0.66, 0, 0.2, 1.03);
+  --ease-turn: cubic-bezier(0.62, 0, 0.34, 1);  /* the page heaves over: a weighty
+                             ease-in-out, slow at both edges of the turn. */
 
   --iron-red: #7a1f12;    /* the site's ink red (hunt star, status) */
 }

@@ -7,6 +7,7 @@
 // deferred, so the DOM is parsed first).
 import { runJob, runInline, usesWorker, initWorker } from "./worker-client.js";
 import { clearAtlas, renderAtlas } from "./atlas-view.js";
+import { shouldTurn, runTurn, cancelTurn } from "./sheet-turn.js";
 import { sliderToLand, landToSlider, updateLandReadout, syncAutoSlider } from "./sea-level.js";
 import {
   buildPlaceOverlay,
@@ -32,6 +33,8 @@ const armsChk = $("arms");
 const landSlider = $("land");
 const status = $("status");
 const mapDiv = $("map");
+const sheetEl = $("sheet");
+const innerEl = $("sheet-inner");
 const caption = $("caption");
 const bindBtn = $("bind");
 const chronicleChk = $("chronicle");
@@ -64,6 +67,20 @@ let drawing = false;
 
 function randomSeed() {
   return Math.floor(Math.random() * 0xffffffff);
+}
+
+function prefersReduce() {
+  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+}
+
+// #131: the sheet turn's duration + easing come from /motion.css (the single timing
+// source). Read lazily so the stylesheet is applied, with the ratified fallback if a
+// custom property is unreadable (e.g. the stylesheet has not loaded yet).
+function turnTiming() {
+  const cs = getComputedStyle(document.documentElement);
+  const ms = parseFloat(cs.getPropertyValue("--turn")) || 900;
+  const ease = cs.getPropertyValue("--ease-turn").trim() || "cubic-bezier(0.62, 0, 0.34, 1)";
+  return { ms, ease };
 }
 
 function readHash() {
@@ -139,8 +156,16 @@ function startArrival(svg) {
 // while the slider moves. The release (change) redraw runs the full ceremony.
 function draw(opts) {
   const quiet = !!(opts && opts.quiet);
+  const isTurn = !!(opts && opts.turn); // a style change turns the sheet (#131)
   const seed = Number(seedInput.value) >>> 0;
   const myGen = ++drawGen;
+  // #131: tear down any in-flight turn NOW, synchronously, not only when this draw's
+  // worker resolves. A turn's natural landing commits its chart gated on `settled`,
+  // not drawGen, so a turn superseded late (a settle arriving in the last worker-
+  // duration of the 900ms turn) would otherwise self-commit its stale chart and wipe
+  // the overlay before this draw resolves. Aborting leaves #map's pre-turn chart and
+  // overlay intact (a turn never wipes #map until it commits); runTurn cancels again.
+  cancelTurn();
   drawing = true;
   cancelScrubRaf(); // a redraw is about to wipe the overlay; stop any running sweep
   bindBtn.disabled = true;
@@ -158,6 +183,9 @@ function draw(opts) {
   const theme = themeSel.value;
   const legend = legendChk.checked;
   const arms = armsChk.checked;
+  // Whether this draw TURNS is decided at the swap, while the outgoing chart is still
+  // on screen; capture the presence here so the closure is stable across the round-trip.
+  const hadChart = !!mapDiv.querySelector("svg");
   const t0 = performance.now();
   runJob({
     kind: "draw",
@@ -169,28 +197,49 @@ function draw(opts) {
       if (myGen !== drawGen) return; // a newer draw superseded this one
       drawing = false;
       bindBtn.disabled = false;
+      // Any prior turn was already torn down synchronously at draw() start; a turn for
+      // THIS draw (if any) is created below and cancels again on its own.
       lastSvg = res.svg;
       lastTitle = res.title;
       lastSeed = seed;
       lastOverrides = overrides;
       lastStyle = style;
       lastTheme = theme;
-      mapDiv.innerHTML = res.svg;
-      buildPlaceOverlay(res.manifest); // #53: marks + card, appended after innerHTML wipes #map
-      if (!quiet) startArrival(mapDiv.querySelector("svg")); // #127: the arrival ceremony
-      // #54: if the chronicle toggle is on, re-apply the scrubber to THIS new world
-      // (fresh manifest, range, layers); applyScrub hides the just-rendered layers
-      // synchronously, so there is no flash of the present-day chart.
-      if (chronicleChk.checked) applyScrub(style);
-      else clearScrub();
+      // Clear "Drafting…" and caption now, so a 900ms turn never holds the status
+      // line; Download already has the new bytes (lastSvg, above).
       const ms = (performance.now() - t0).toFixed(0);
       status.textContent = "";
       caption.textContent = `${res.title} · ${res.mapType} · ${res.band} · drawn in ${ms}ms`;
+      if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, chronicle: chronicleChk.checked })) {
+        // #131 The style turn: the same world in a new dress. The sheet turns over,
+        // and the overlay/scrub rebuild against the new chart only after it LANDS (so
+        // the marks never rebuild over the outgoing chart). The turn suppresses the
+        // #127 settle ceremony: a draw is either a turn or a settle, never both.
+        const t = turnTiming();
+        runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => {
+          if (myGen !== drawGen) return; // superseded while turning; the latest draw owns #map
+          buildPlaceOverlay(res.manifest);
+          if (chronicleChk.checked) applyScrub(style);
+          else clearScrub();
+        });
+      } else {
+        // Settle (#127): inject the chart and run the arrival ceremony (unless this is
+        // a quiet mid-drag redraw). Order preserved from the pre-#131 path.
+        mapDiv.innerHTML = res.svg;
+        buildPlaceOverlay(res.manifest); // #53: marks + card, appended after innerHTML wipes #map
+        if (!quiet) startArrival(mapDiv.querySelector("svg")); // #127: the arrival ceremony
+        // #54: if the chronicle toggle is on, re-apply the scrubber to THIS new world
+        // (fresh manifest, range, layers); applyScrub hides the just-rendered layers
+        // synchronously, so there is no flash of the present-day chart.
+        if (chronicleChk.checked) applyScrub(style);
+        else clearScrub();
+      }
     })
     .catch((err) => {
       if (myGen !== drawGen) return;
       drawing = false;
       bindBtn.disabled = false;
+      cancelTurn(); // #131: tear down any in-flight turn on a failed redraw
       // A redraw that fails leaves the OLD overlay in place; if a sweep was running,
       // its rAF was already cancelled at draw() start, so restore the button to a
       // consistent paused state rather than a frozen "Pause" with nothing animating.
@@ -241,9 +290,12 @@ seedInput.addEventListener("keydown", (e) => {
     draw();
   }
 });
-for (const sel of [styleSel, bandSel, themeSel, legendChk, armsChk]) {
+for (const sel of [bandSel, themeSel, legendChk, armsChk]) {
   sel.addEventListener("change", draw);
 }
+// #131: a style change re-dresses the SAME world, so it turns the sheet over rather
+// than settling. Every other control draws a new/changed world and settles (#127).
+styleSel.addEventListener("change", () => draw({ turn: true }));
 // Changing the map type reshapes the terrain, so a manual tide no longer applies:
 // reset to auto so the slider re-derives from the new world.
 typeSel.addEventListener("change", () => {
