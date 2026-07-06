@@ -102,7 +102,14 @@
 </div>
 
 <p class="status" id="status" role="status" aria-live="polite"></p>
+<!-- #131: the sheet wrapper. #map is the recto (the live chart); a style change
+     turns this leaf over (sheet-turn.js) to land the same world re-dressed. The 3D
+     context is inert until .turning is set, so idle behaviour is unchanged. The
+     Verso (#116) reuses this perspective wrapper. Never restructure INSIDE #map:
+     draw() wipes it with innerHTML and re-appends the overlay right after. -->
+<div class="sheet" id="sheet"><div class="sheet-inner" id="sheet-inner">
 <div id="map"></div>
+</div></div>
 <p class="caption" id="caption"></p>
 <div id="scrubber" class="scrubber" hidden>
   <div class="scrub-controls">

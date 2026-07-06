@@ -53,6 +53,27 @@ button.primary:hover { background: #5d4831; }
 #map svg { width: 100%; height: auto; display: block;
   border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
 
+/* #131 The style turn. Changing the style turns this leaf over: the outgoing chart
+   turns away and the same world lands re-dressed in the new style (sheet-turn.js).
+   The 3D context is INERT at rest and lit only while .turning is set, so the chart,
+   the place overlay, and the pinned card behave byte-for-byte as before between turns
+   (verified by the #131 CDP spike). #sheet-inner stays position:relative so the
+   transient back face (added only during a turn) anchors over the recto. This
+   perspective wrapper is the shared flip infrastructure the Verso (#116) reuses.
+   The turn is a WAAPI animation (JS, not CSS), so its reduced-motion twin is the
+   shouldTurn() gate (reduced motion -> instant swap), the same JS matchMedia move
+   atlas-view.js makes; there is nothing here for the /motion.css collapse to reach. */
+.sheet-inner { position: relative; }
+.sheet.turning { perspective: 2200px; }
+.sheet-inner.turning { transform-style: preserve-3d; }
+.sheet-inner.turning #map { backface-visibility: hidden; }
+.sheet-back {
+  position: absolute; inset: 0 0 auto 0;
+  backface-visibility: hidden; transform: rotateY(180deg);
+}
+.sheet-back img { width: 100%; height: auto; display: block;
+  border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+
 /* #127 The Drafting Moment: a freshly drawn chart settles onto the desk while the
    coastline draws itself in ink and the land wash + waterline halos dry in behind
    it. Gated behind .arriving (added by app.js after injection) so the sea-level
