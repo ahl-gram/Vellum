@@ -167,13 +167,36 @@ button:not(.place-hit):active,
 .plate:active { transform: rotate(0deg) translateY(-1px); }
 
 /* --------------------------------------------------------------------------
+   The folio (#130, epic #125). Navigating Vellum reads as turning through one
+   bound folio: cross-document View Transitions give every same-origin page swap
+   a quiet sheet crossfade with a small 6px slide, the leaf that is leaving
+   lifting away as the one arriving settles down. Pure CSS, zero JS, no router
+   (ratified call D): Chromium and Safari get the folio feel; Firefox and any
+   engine without cross-document support keep today's instant loads, which is
+   the fallback. Both the old and new document must opt in -- all five hand-
+   authored pages link this file, and Sub 5 adds the same link to the generated
+   gallery/atlas templates so the shelves join the folio too (ratified call C,
+   knowingly relaxing the convention that site-wide changes skip generated pages).
+   These view-transition pseudo-elements live on their own tree, so the universal
+   `*` reduced-motion collapse below does NOT reach them; the folio is turned off
+   explicitly there instead (navigation: none).
+   -------------------------------------------------------------------------- */
+@view-transition { navigation: auto; }
+
+::view-transition-old(root) { animation: folioLeave var(--paper) var(--ease-paper) both; }
+::view-transition-new(root) { animation: folioArrive var(--paper) var(--ease-paper) both; }
+@keyframes folioLeave  { to   { opacity: 0; transform: translateY(-6px); } }
+@keyframes folioArrive { from { opacity: 0; transform: translateY(6px); } }
+
+/* --------------------------------------------------------------------------
    Every gesture has a still twin. This ONE block collapses all motion to
    instant end states: the gestures above, the page-CSS gestures (glossary
    term tip), AND the two pre-existing animations retrofitted into the doctrine
    (the seed-of-the-day hunt star, the Explorer chronicle-strip fade). The
    universal duration collapse reaches any animation/transition site-wide; the
    .plate rule additionally flattens the one static resting transform, which a
-   duration collapse alone would leave tilted.
+   duration collapse alone would leave tilted; and the nested @view-transition
+   turns the folio off (the pseudo-element tree the `*` rule cannot reach).
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -185,4 +208,5 @@ button:not(.place-hit):active,
     scroll-behavior: auto !important;
   }
   .plate { transform: none !important; }
+  @view-transition { navigation: none; }
 }

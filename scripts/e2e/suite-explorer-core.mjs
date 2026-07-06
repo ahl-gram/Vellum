@@ -191,4 +191,30 @@ export async function run(ctx) {
   check("D5b atlas plate rests flat (no resting tilt; tidy grid)", d5.img && (d5.tform === "none" || d5.tform === "matrix(1, 0, 0, 1, 0, 0)"), JSON.stringify(d5));
   check("D5c a :hover rule lifts the plate image (the gesture, not just the plumbing)", d5.hoverLift === true, JSON.stringify(d5));
 
+  // F: the folio (#130). Cross-document View Transitions turn page-to-page nav into
+  // leaves of one bound folio. The crossfade + the reduced-motion disable can't be
+  // SEEN by e2e, but their DECLARATION is structural and IS in the CSSOM. Walk the
+  // parsed motion.css (same-origin, so cssRules reads, per the D5c precedent) so the
+  // check bites the rule, not just its text: F2 asserts CONTAINMENT (the disable is
+  // nested inside the @media block), not mere token order -- relocating the disable
+  // out of the block, which would ship the folio to reduced-motion users, must fail.
+  const folio = await evaluate(`(()=>{
+    const hasVT = (r, nav) => /@view-transition/.test(r.cssText || "") && new RegExp("navigation:\\\\s*" + nav).test(r.cssText || "");
+    let topAuto = false, reducedNone = false;
+    for (const ss of document.styleSheets) {
+      if (!/motion\\.css/.test(ss.href || "")) continue;
+      let rules; try { rules = ss.cssRules; } catch (e) { continue; }
+      if (!rules) continue;
+      for (const r of rules) {
+        if (hasVT(r, "auto")) topAuto = true;
+        if (r.constructor.name === "CSSMediaRule" && /prefers-reduced-motion/.test(r.conditionText || (r.media && r.media.mediaText) || "")) {
+          for (const n of r.cssRules) if (hasVT(n, "none")) reducedNone = true;
+        }
+      }
+    }
+    return { topAuto, reducedNone };
+  })()`);
+  check("F1 the folio opt-in is parsed top-level (@view-transition navigation:auto)", folio.topAuto === true, JSON.stringify(folio));
+  check("F2 reduced-motion turns the folio off, nested in the @media block (navigation:none)", folio.reducedNone === true, JSON.stringify(folio));
+
 }

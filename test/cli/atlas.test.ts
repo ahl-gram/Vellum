@@ -80,3 +80,28 @@ test("the atlas carries a Chronicle of the world's dated events", async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("the atlas joins the motion folio: links /motion.css and its figures lift under the hand (#130)", async () => {
+  const seed = 42;
+  const dir = "out/test-atlas-motion";
+  await rm(dir, { recursive: true, force: true });
+  try {
+    await buildAtlas(seed, { out: dir });
+    const html = await readFile(join(dir, "index.html"), "utf8");
+    // root-absolute so it resolves at /atlas/ depth, exactly as the five
+    // hand-authored pages link it (the folio needs both pages opted in)
+    assert.match(
+      html,
+      /<link rel="stylesheet" href="\/motion\.css">/,
+      "atlas should link the shared motion desk so it joins the folio",
+    );
+    // the plates lift gently under the hand, mirroring the Explorer atlas view (#146)
+    assert.match(
+      html,
+      /figure img:hover\s*\{[^}]*transform:[^}]*translateY/,
+      "atlas figures should lift under the hand",
+    );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
