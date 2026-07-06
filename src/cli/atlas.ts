@@ -20,6 +20,7 @@ function indexHtml(
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeXml(t.title)}: a Vellum atlas</title>
+<link rel="stylesheet" href="/motion.css">
 <style>
   :root { color-scheme: light; }
   body {
@@ -34,8 +35,17 @@ function indexHtml(
   .subtitle { font-style: italic; color: #6b5a40; max-width: 46rem; margin-inline: auto; }
   .chartno { letter-spacing: 0.3em; font-size: 0.8rem; color: #857257; margin-top: 0.6rem; }
   figure { margin: 1.5rem 0; }
+  /* The plates lift gently under the hand, mirroring the Explorer's atlas view
+     (#146): rest flat, then rise on hover. Timing/easing come from /motion.css;
+     the reduced-motion collapse there snaps this to its end state. Scoped to
+     figure img, so the small banner SVGs (figure.banner svg) stay put. */
   figure img { width: 100%; height: auto; display: block;
-    border: 1px solid #b9a77f; box-shadow: 0 10px 30px rgb(61 47 31 / 0.18); }
+    border: 1px solid #b9a77f; box-shadow: 0 10px 30px rgb(61 47 31 / 0.18);
+    transition: transform var(--paper) var(--ease-paper),
+                box-shadow var(--paper) var(--ease-paper); }
+  figure img:hover { transform: translateY(-5px) rotate(-0.6deg);
+    box-shadow: 0 20px 44px rgb(61 47 31 / 0.28); }
+  figure img:active { transform: translateY(-1px) rotate(0deg); }
   figcaption { text-align: center; font-style: italic; color: #6b5a40; padding-top: 0.55rem; }
   .styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
   .themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.25rem; }

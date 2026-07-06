@@ -37,6 +37,7 @@ export async function buildGallery(
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vellum gallery: ${count} worlds from seed ${startSeed}</title>
+<link rel="stylesheet" href="/motion.css">
 <style>
   body { margin: 0; padding: 2rem 1.5rem 4rem; background: #efe6cf; color: #3d2f1f;
     font-family: 'Iowan Old Style', 'Palatino', Georgia, serif; }
@@ -45,8 +46,18 @@ export async function buildGallery(
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
     gap: 1.5rem; max-width: 1500px; margin-inline: auto; }
   figure { margin: 0; }
+  /* The contact-sheet tiles tip like loose plates in a drawer: picked up from a
+     corner (transform-origin) with a real tilt, distinct from the atlas's gentle
+     centred lift. Timing/easing come from /motion.css; the reduced-motion collapse
+     there snaps this to its end state (no animated tip). */
   figure img { width: 100%; height: auto; display: block; border: 1px solid #b9a77f;
-    box-shadow: 0 6px 18px rgb(61 47 31 / 0.15); }
+    box-shadow: 0 6px 18px rgb(61 47 31 / 0.15); transform-origin: bottom left;
+    transition: transform var(--paper) var(--ease-paper),
+                box-shadow var(--paper) var(--ease-paper); }
+  figure img:hover { transform: translateY(-4px) rotate(-1.4deg);
+    box-shadow: 0 16px 34px rgb(61 47 31 / 0.26); }
+  figure img:active { transform: translateY(-1px) rotate(0deg);
+    box-shadow: 0 5px 14px rgb(61 47 31 / 0.16); }
   figcaption { text-align: center; padding-top: 0.5rem; line-height: 1.45; }
   figcaption span { font-size: 0.8rem; color: #857257; letter-spacing: 0.08em; }
   a { color: inherit; text-decoration: none; }

@@ -150,30 +150,52 @@ button:not(.place-hit):active,
 .topnav a:active::after      { transform: scaleX(1); }
 
 /* --------------------------------------------------------------------------
-   Homepage chart plates. Each rests at a faint tilt, as though set down on the
-   desk, and straightens + lifts under the hand. The per-plate angle is passed
-   as --tilt on the element (see docs/index.html). This is the one deliberate
-   at-rest change in this sub (epic #125 relaxes idle-parity for it).
+   Homepage chart plates. They rest FLAT and tip + lift under the hand, the same
+   gesture as the Explorer's bound atlas plates (#146) and the generated
+   atlas/gallery shelves (#130): straight at rest, a small tip on hover, so every
+   chart surface on the site reacts to the hand the same way (Alex, 2026-07-06).
    -------------------------------------------------------------------------- */
 .plate {
-  transform: rotate(var(--tilt, 0deg));
   transition: transform var(--paper) var(--ease-paper),
               box-shadow var(--paper) var(--ease-paper);
 }
 .plate:hover {
-  transform: rotate(0deg) translateY(-5px);
+  transform: translateY(-5px) rotate(-0.6deg);
   box-shadow: 0 20px 44px rgb(61 47 31 / 0.28);
 }
-.plate:active { transform: rotate(0deg) translateY(-1px); }
+.plate:active { transform: translateY(-1px) rotate(0deg); }
+
+/* --------------------------------------------------------------------------
+   The folio (#130, epic #125). Navigating Vellum reads as turning through one
+   bound folio: cross-document View Transitions give every same-origin page swap
+   a quiet sheet crossfade with a small 6px slide, the leaf that is leaving
+   lifting away as the one arriving settles down. Pure CSS, zero JS, no router
+   (ratified call D): Chromium and Safari get the folio feel; Firefox and any
+   engine without cross-document support keep today's instant loads, which is
+   the fallback. Both the old and new document must opt in -- all five hand-
+   authored pages link this file, and Sub 5 adds the same link to the generated
+   gallery/atlas templates so the shelves join the folio too (ratified call C,
+   knowingly relaxing the convention that site-wide changes skip generated pages).
+   These view-transition pseudo-elements live on their own tree, so the universal
+   `*` reduced-motion collapse below does NOT reach them; the folio is turned off
+   explicitly there instead (navigation: none).
+   -------------------------------------------------------------------------- */
+@view-transition { navigation: auto; }
+
+::view-transition-old(root) { animation: folioLeave var(--paper) var(--ease-paper) both; }
+::view-transition-new(root) { animation: folioArrive var(--paper) var(--ease-paper) both; }
+@keyframes folioLeave  { to   { opacity: 0; transform: translateY(-6px); } }
+@keyframes folioArrive { from { opacity: 0; transform: translateY(6px); } }
 
 /* --------------------------------------------------------------------------
    Every gesture has a still twin. This ONE block collapses all motion to
    instant end states: the gestures above, the page-CSS gestures (glossary
    term tip), AND the two pre-existing animations retrofitted into the doctrine
    (the seed-of-the-day hunt star, the Explorer chronicle-strip fade). The
-   universal duration collapse reaches any animation/transition site-wide; the
-   .plate rule additionally flattens the one static resting transform, which a
-   duration collapse alone would leave tilted.
+   universal duration collapse reaches any animation/transition site-wide (every
+   chart surface now rests flat, so there is no static resting transform left to
+   flatten); and the nested @view-transition turns the folio off (the pseudo-
+   element tree the `*` rule cannot reach).
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -184,5 +206,5 @@ button:not(.place-hit):active,
     transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
-  .plate { transform: none !important; }
+  @view-transition { navigation: none; }
 }
