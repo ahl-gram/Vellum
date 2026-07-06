@@ -83,6 +83,21 @@ export function placeStateAt(mark: ScrubMark, year: number): PlaceState {
   return "living";
 }
 
+/**
+ * Whether a settlement's BAKED glyph should be shown at a given year (#93). The
+ * static chart draws each settlement in its present-day state only: a living town
+ * has a living glyph, a town that is a ruin today has a ruin glyph and no living
+ * glyph anywhere. So a glyph is shown exactly when the year's state matches the
+ * baked state ("state-begins", the decided rule): a living town appears at its
+ * founding; an eventually-ruined town stays hidden through its living centuries
+ * (no living glyph to show) and its ruin glyph inks in at the fall year. The
+ * chronicle strip still narrates the founding it cannot draw.
+ */
+export function glyphVisibleAt(mark: ScrubMark, year: number): boolean {
+  const bakedState: PlaceState = mark.ruinYear !== null ? "ruin" : "living";
+  return placeStateAt(mark, year) === bakedState;
+}
+
 /** Whether an event has happened by the current year (inclusive of its own year). */
 export function eventIsPast(eventYear: number, year: number): boolean {
   return eventYear <= year;

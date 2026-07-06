@@ -1,8 +1,13 @@
-// Chronicle year-scrubber checks (S1-S10, #54).
-// Split from e2e-explorer.mjs; behavior + check order unchanged.
+// Chronicle year-scrubber checks (S1-S14, #54 + #93).
+// Split from e2e-explorer.mjs; behavior + check order preserved where they map.
+// #93 rewrote the reveal mechanism: the sweep now shows/hides the REAL baked
+// settlement glyphs (<g class="settlement" data-idx>) by year instead of abstract
+// dots, and the roads layer reveals only when parked at the present. So the checks
+// that read a dot's data-state now read a glyph group's display; the roads and the
+// taller strip (Part 2) get their own checks.
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitAtlas, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
-  // --- S: Chronicle year-scrubber (#54): the client-only DOM overlay that
+  // --- S: Chronicle year-scrubber (#54, #93): the client-only DOM overlay that
   // animates the world growing. Placed before the console-health check so it also
   // covers the toggle / scrub / Play / redraw paths. A clean seed-42 antique base
   // (arms off, no theme, chronicle off) so the marks map to a known manifest.
@@ -17,29 +22,41 @@ export async function run(ctx) {
   })()`);
   await waitSettled("scrub-base-draw");
 
-  // Scrub facts from the page's OWN engine: range, the present year, an early and
-  // a late founding, and the ruin's abandonment year (or present, if its event
-  // was sliced off the 14-event chronicle).
+  // Scrub facts from the page's OWN engine: range, the present year, the earliest
+  // and a later LIVING (non-ruined) founding so their glyph groups reveal cleanly,
+  // and the ruin's founding + abandonment year (or present, if its event was sliced
+  // off the 14-event chronicle).
   const sm = await evaluate(`(()=>{
     const r=window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});
     const places=r.manifest.places,events=r.manifest.events,present=r.manifest.presentYear;
     const minFounded=Math.min(...places.map((p)=>p.founded));
-    const earlyIdx=places.findIndex((p)=>p.founded===minFounded);
-    let lateIdx=-1,lateFounded=-1;
-    places.forEach((p,i)=>{if(p.founded>minFounded&&p.founded>lateFounded){lateFounded=p.founded;lateIdx=i;}});
-    const ruinIdx=places.findIndex((p)=>p.ruined);
-    const ruinEv=ruinIdx>=0?events.find((e)=>e.settlement===ruinIdx&&e.kind==="ruin"):null;
-    const ruinYear=ruinIdx>=0?(ruinEv?ruinEv.year:present):null;
-    const ruinFounded=ruinIdx>=0?places[ruinIdx].founded:null;
-    return{count:places.length,present,minFounded,earlyIdx,lateIdx,ruinIdx,ruinYear,ruinFounded};
+    const living=places.filter((p)=>!p.ruined).slice().sort((a,b)=>a.founded-b.founded);
+    const early=living[0];
+    const later=living.find((p)=>p.founded>early.founded);
+    const ruin=places.find((p)=>p.ruined);
+    const ruinEv=ruin?events.find((e)=>e.settlement===ruin.idx&&e.kind==="ruin"):null;
+    const ruinYear=ruin?(ruinEv?ruinEv.year:present):null;
+    return{count:places.length,present,minFounded,
+      earlyIdx:early.idx,earlyFounded:early.founded,
+      lateIdx:later?later.idx:-1,lateFounded:later?later.founded:-1,
+      ruinIdx:ruin?ruin.idx:-1,ruinYear,ruinFounded:ruin?ruin.founded:null};
   })()`);
 
   const setYear = (y) =>
     evaluate(`(()=>{const s=document.getElementById("scrub-range");s.value="${y}";s.dispatchEvent(new Event("input",{bubbles:true}));return Number(s.value);})()`);
-  const stateOf = (idx) =>
-    evaluate(`(document.querySelector('.place-hit[data-idx="${idx}"]')||{}).dataset?document.querySelector('.place-hit[data-idx="${idx}"]').dataset.state:null`);
+  // Each baked settlement glyph is an addressable group; the sweep toggles its display.
+  const groupVis = (idx) =>
+    evaluate(`(()=>{const g=document.querySelector('#map #layer-settlements g.settlement[data-idx="${idx}"]');return g?(getComputedStyle(g).display==="none"?"hidden":"shown"):"(no-el)";})()`);
+  const layerDisp = () =>
+    evaluate(`(()=>{const s=document.querySelector('#map #layer-settlements');return s?getComputedStyle(s).display:"(no-el)";})()`);
+  const roadsDisp = () =>
+    evaluate(`(()=>{const r=document.querySelector('#map #layer-roads');return r?getComputedStyle(r).display:"(no-el)";})()`);
+  const visibleGroups = () =>
+    evaluate(`[...document.querySelectorAll('#map #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length`);
 
-  // S1: toggle chronicle ON via the change handler (the real gesture).
+  // S1: toggle chronicle ON via the change handler (the real gesture). Parked at the
+  // present, the baked settlement layer stays visible (its glyphs are the marks now)
+  // and the roads show; the slider spans founding..present.
   const s1 = await evaluate(`(()=>{
     const chk=document.getElementById("chronicle");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
     const panel=document.getElementById("scrubber");
@@ -47,25 +64,33 @@ export async function run(ctx) {
     const set=document.querySelector("#map #layer-settlements");
     const roads=document.querySelector("#map #layer-roads");
     const slider=document.getElementById("scrub-range");
-    const dots=document.querySelectorAll('.place-overlay.scrub .place-hit[data-state="living"], .place-overlay.scrub .place-hit[data-state="ruin"]').length;
-    return{panelShown:!panel.hidden,scrubClass:ov?ov.classList.contains("scrub"):false,setHidden:set?getComputedStyle(set).display:"(no-el)",roadsHidden:roads?getComputedStyle(roads).display:"(no-el)",min:Number(slider.min),max:Number(slider.max),val:Number(slider.value),dots};
+    return{panelShown:!panel.hidden,scrubClass:ov?ov.classList.contains("scrub"):false,setDisp:set?getComputedStyle(set).display:"(no-el)",roadsDisp:roads?getComputedStyle(roads).display:"(no-el)",min:Number(slider.min),max:Number(slider.max),val:Number(slider.value)};
   })()`);
-  check("S1 chronicle on: panel shown, baked layers hidden, slider spans founding..present", s1.panelShown && s1.scrubClass && s1.setHidden === "none" && s1.roadsHidden === "none" && s1.min === sm.minFounded && s1.max === sm.present && s1.val === sm.present, JSON.stringify(s1));
-  check("S2 parked at the present year: every place shows a dot", s1.dots === sm.count, `${s1.dots} dots vs ${sm.count} places`);
+  check("S1 chronicle on: panel shown, real glyph layer + roads visible at present, slider spans founding..present", s1.panelShown && s1.scrubClass && s1.setDisp !== "none" && s1.roadsDisp !== "none" && s1.min === sm.minFounded && s1.max === sm.present && s1.val === sm.present, JSON.stringify(s1));
 
-  // S3: scrub to the earliest founding — the first town is up, a later one is not.
-  await setYear(sm.minFounded);
-  const s3early = await stateOf(sm.earlyIdx);
-  const s3late = sm.lateIdx >= 0 ? await stateOf(sm.lateIdx) : "hidden";
-  check("S3 scrub to earliest founding: first town living, a later town still hidden", s3early === "living" && s3late === "hidden", `early=${s3early} late=${s3late}`);
+  const s2visible = await visibleGroups();
+  check("S2 parked at the present year: every settlement glyph is shown", s2visible === sm.count, `${s2visible} visible groups vs ${sm.count} places`);
 
-  // S4: the ruin reads living between founding and abandonment, ruin once past it.
+  // S3: scrub to the earliest LIVING founding — that town's glyph is up, a later one
+  // is not; and with the year in the past, the roads hide (no roads to unfounded towns).
+  await setYear(sm.earlyFounded);
+  const s3early = await groupVis(sm.earlyIdx);
+  const s3late = sm.lateIdx >= 0 ? await groupVis(sm.lateIdx) : "hidden";
+  const s3roads = await roadsDisp();
+  check("S3 scrub to earliest founding: that glyph shows, a later town's is hidden, roads hidden in the past", s3early === "shown" && s3late === "hidden" && s3roads === "none", `early=${s3early} late=${s3late} roads=${s3roads}`);
+  // S3b: the headline acceptance, asserted directly -- the world GROWS over time, so
+  // fewer real glyphs are up at an early year than the full set shown at the present.
+  const s3grown = await visibleGroups();
+  check("S3b the world reveals over time: fewer glyphs up early than at the present", s3grown > 0 && s3grown < sm.count, `${s3grown} visible at year ${sm.earlyFounded} vs ${sm.count} at present`);
+
+  // S4: state-begins for a ruin — its baked glyph is a ruin, so it is HIDDEN through
+  // its living centuries (no living glyph baked) and inks in at the fall year.
   if (sm.ruinIdx >= 0) {
     await setYear(Math.floor((sm.ruinFounded + sm.ruinYear) / 2));
-    const before = await stateOf(sm.ruinIdx);
+    const before = await groupVis(sm.ruinIdx);
     await setYear(sm.ruinYear);
-    const after = await stateOf(sm.ruinIdx);
-    check("S4 the ruin is living before its abandonment year, a ruin in it", before === "living" && after === "ruin", `before=${before} after=${after} ruinYear=${sm.ruinYear}`);
+    const after = await groupVis(sm.ruinIdx);
+    check("S4 a ruin is hidden through its living phase (state-begins), its ruin glyph appears at the fall year", before === "hidden" && after === "shown", `before=${before} after=${after} ruinYear=${sm.ruinYear}`);
   } else {
     check("S4 seed 42 has a ruin to scrub through", false, "no ruin in manifest");
   }
@@ -90,6 +115,8 @@ export async function run(ctx) {
     await sleep(110);
   }
   check("S5 Play sweeps through interior years monotonically and auto-pauses at present", startLabel === "Pause" && mono && sawInterior && ended && lastYear === sm.present, `start=${startLabel} mono=${mono} interior=${sawInterior} ended=${ended} last=${lastYear} present=${sm.present}`);
+  const s5roads = await roadsDisp();
+  check("S5b roads return at the end-of-Play present park", s5roads !== "none", `roads=${s5roads}`);
 
   // S6: a manual drag during Play pauses it and jumps to the dragged year.
   await setYear(sm.minFounded);
@@ -105,7 +132,8 @@ export async function run(ctx) {
   const s6after = await evaluate(`Number(document.getElementById("scrub-range").value)`);
   check("S6 a manual drag during Play pauses it and the sweep stops advancing", s6.before === "Pause" && s6.after === "Play" && s6.year === s6.mid && s6after === s6.mid, JSON.stringify(s6) + ` settled=${s6after}`);
 
-  // S7: chronicle OFF restores the baked layers and idle parity (hits clickable).
+  // S7: chronicle OFF restores the full present-day chart (every glyph group + roads
+  // shown again, even those the sweep had hidden) and idle parity (hits clickable).
   const s7 = await evaluate(`(()=>{
     const chk=document.getElementById("chronicle");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));
     const panel=document.getElementById("scrubber");
@@ -113,12 +141,14 @@ export async function run(ctx) {
     const set=document.querySelector("#map #layer-settlements");
     const roads=document.querySelector("#map #layer-roads");
     const hit=document.querySelector(".place-hit");
-    return{panelHidden:panel.hidden,noScrub:ov?!ov.classList.contains("scrub"):true,setVis:set?getComputedStyle(set).display:"(no-el)",roadsVis:roads?getComputedStyle(roads).display:"(no-el)",hitPe:hit?getComputedStyle(hit).pointerEvents:"(no-el)"};
+    const groups=[...document.querySelectorAll('#map #layer-settlements g.settlement')];
+    const visible=groups.filter((g)=>getComputedStyle(g).display!=="none").length;
+    return{panelHidden:panel.hidden,noScrub:ov?!ov.classList.contains("scrub"):true,setDisp:set?getComputedStyle(set).display:"(no-el)",roadsDisp:roads?getComputedStyle(roads).display:"(no-el)",visible,total:groups.length,hitPe:hit?getComputedStyle(hit).pointerEvents:"(no-el)"};
   })()`);
-  check("S7 chronicle off: panel hidden, baked layers restored, hits interactive again", s7.panelHidden && s7.noScrub && s7.setVis !== "none" && s7.roadsVis !== "none" && s7.hitPe === "auto", JSON.stringify(s7));
+  check("S7 chronicle off: panel hidden, every glyph + roads restored, hits interactive again", s7.panelHidden && s7.noScrub && s7.setDisp !== "none" && s7.roadsDisp !== "none" && s7.visible === s7.total && s7.total === sm.count && s7.hitPe === "auto", JSON.stringify(s7));
 
-  // S8: a redraw with chronicle ON re-applies the scrubber to the NEW world
-  // (fresh manifest, range, and hidden layers) — the cross-rebuild hazard.
+  // S8: a redraw with chronicle ON re-applies the scrubber to the NEW world (fresh
+  // manifest, range, and glyph groups) — the cross-rebuild hazard.
   await evaluate(`(()=>{const chk=document.getElementById("chronicle");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await evaluate(`(()=>{document.getElementById("seed").value="100";document.getElementById("draw").click();})()`);
   await waitSettled("scrub-redraw");
@@ -127,11 +157,12 @@ export async function run(ctx) {
     const panel=document.getElementById("scrubber");
     const ov=document.querySelector("#map .place-overlay");
     const set=document.querySelector("#map #layer-settlements");
+    const roads=document.querySelector("#map #layer-roads");
     const slider=document.getElementById("scrub-range");
-    const dots=document.querySelectorAll('.place-overlay.scrub .place-hit[data-state="living"], .place-overlay.scrub .place-hit[data-state="ruin"]').length;
-    return{panelShown:!panel.hidden,scrubClass:ov?ov.classList.contains("scrub"):false,setHidden:set?getComputedStyle(set).display:"(no-el)",max:Number(slider.max),dots};
+    const visible=[...document.querySelectorAll('#map #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length;
+    return{panelShown:!panel.hidden,scrubClass:ov?ov.classList.contains("scrub"):false,setDisp:set?getComputedStyle(set).display:"(no-el)",roadsDisp:roads?getComputedStyle(roads).display:"(no-el)",max:Number(slider.max),visible};
   })()`);
-  check("S8 redraw with chronicle on re-applies the scrubber to the new world", s8.panelShown && s8.scrubClass && s8.setHidden === "none" && s8.max === sm2.present && s8.dots === sm2.count, JSON.stringify(s8));
+  check("S8 redraw with chronicle on re-applies the scrubber to the new world", s8.panelShown && s8.scrubClass && s8.setDisp !== "none" && s8.roadsDisp !== "none" && s8.max === sm2.present && s8.visible === sm2.count, JSON.stringify(s8));
 
   // S9: drag to a mid year, then Play — the sweep RESTARTS from the earliest
   // founding (a manual drag zeroes scrub.elapsed), it does NOT resume from the
@@ -164,21 +195,23 @@ export async function run(ctx) {
   const resumed = await evaluate(`Number(document.getElementById("scrub-range").value)`);
   check("S10 Pause button freezes mid-sweep; Play resumes from the frozen year (not min/present)", frozen.lbl === "Play" && frozen.year > sm2.minFounded && frozen.year < sm2.present && stillFrozen === frozen.year && resumed > frozen.year && resumed <= sm2.present, `frozen=${frozen.year} still=${stillFrozen} resumed=${resumed} min=${sm2.minFounded} present=${sm2.present}`);
 
-  // S11-S13 #128 Paper physics on the scrubber. Park at the present year FIRST: S10
+  // S11-S14 #128 paper physics + #93 mechanism. Park at the present year FIRST: S10
   // leaves the sweep PLAYING mid-timeline, so setYear pauses it (onManualScrub) AND
-  // drives every dot to its final state, so a ruin dot exists for S12's fade half to
-  // actually bite (at a mid-timeline year no place has fallen yet). e2e reads the WIRED
-  // motion; the live animations + reduced-motion collapse are CDP-probe verified.
+  // drives every glyph to its present-day state. e2e reads the WIRED motion; the live
+  // animations + reduced-motion collapse are CDP-probe verified.
   await setYear(sm2.present);
   const s11 = await evaluate(`(()=>{const p=document.getElementById("scrubber");const cs=getComputedStyle(p);return{hidden:p.hidden,name:cs.animationName,dur:cs.animationDuration};})()`);
   check("S11 scrubber panel unfurls on show (paperUnfurl at the full grade)", s11.hidden === false && s11.name === "paperUnfurl" && s11.dur.includes("0.65"), JSON.stringify(s11));
 
+  // S12: the reveal is the real baked glyphs, not dots — a visible settlement group
+  // carries a real glyph node, and no data-state dot remains on any hit.
   const s12 = await evaluate(`(()=>{
-    const live=document.querySelector('.place-overlay.scrub .place-hit[data-state="living"]');
-    const ruin=document.querySelector('.place-overlay.scrub .place-hit[data-state="ruin"]');
-    return{liveName:live?getComputedStyle(live,"::before").animationName:"(none)",ruinName:ruin?getComputedStyle(ruin,"::before").animationName:"(no ruin)",hasRuin:!!ruin};
+    const g=[...document.querySelectorAll('#map #layer-settlements g.settlement')].find((el)=>getComputedStyle(el).display!=="none");
+    const hasGlyph=!!(g&&g.querySelector("path, circle, text"));
+    const dataStateHits=document.querySelectorAll(".place-hit[data-state]").length;
+    return{hasGlyph,dataStateHits};
   })()`);
-  check("S12 dots stamp on founding (inkStamp), fade to a ruin mark (dryingInk)", s12.liveName === "inkStamp" && s12.hasRuin && s12.ruinName === "dryingInk", JSON.stringify(s12));
+  check("S12 the sweep shows real glyphs, not dots (no data-state dots remain)", s12.hasGlyph && s12.dataStateHits === 0, JSON.stringify(s12));
 
   const s13 = await evaluate(`(()=>{
     const li=document.querySelector(".chronicle-strip li");
@@ -188,6 +221,10 @@ export async function run(ctx) {
     return{li:true,prop,pastTf};
   })()`);
   check("S13 chronicle strip past-rows slide (transform in the transition + a 2px indent)", s13.li && s13.prop.includes("transform") && s13.pastTf !== "none", JSON.stringify(s13));
+
+  // S14 (#93 Part 2): the strip is tall enough to show every entry at once (no scroll).
+  const s14 = await evaluate(`(()=>{const s=document.getElementById("chronicle-strip");return{rows:s.querySelectorAll("li").length,scrollH:s.scrollHeight,clientH:s.clientHeight};})()`);
+  check("S14 the chronicle strip shows every entry without scrolling (#93 Part 2)", s14.rows > 0 && s14.scrollH <= s14.clientH + 1, JSON.stringify(s14));
 
   // Restore to a clean, chronicle-off state for the rest of the suite.
   await evaluate(`(()=>{const chk=document.getElementById("chronicle");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}})()`);

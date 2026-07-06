@@ -17,7 +17,7 @@ import { composePlaceCard, placeAriaLabel, cardSide } from "./engine/render/plac
 import {
   scrubRange,
   buildScrubMarks,
-  placeStateAt,
+  glyphVisibleAt,
   eventIsPast,
   buildSweepPlan,
   sweepYearAt,
@@ -39,9 +39,11 @@ const chronicleStrip = document.getElementById("chronicle-strip");
 // switch when pinning B after A was pinned.
 let placeOverlay = null; // { card, places, events, presentYear, currentIdx, pinned, pinnedIdx } | null
 
-// #54 scrubber session (null when the toggle is off).
-let scrub = null; // { marks, range, hits, strip, plan, playing, rafId, elapsed, year } | null
-const STYLE_MARK = { antique: "#7a2d12", topographic: "#1f5135", ink: "#1a1a1a", nautical: "#1d3a63" };
+// #54 scrubber session (null when the toggle is off). Since #93 the sweep drives
+// the REAL baked settlement glyphs (per-idx <g class="settlement">), not abstract
+// dots: `groups` maps each world index to its glyph group, `roadsEl` is the baked
+// road network shown only when parked at the present.
+let scrub = null; // { marks, range, groups, roadsEl, strip, plan, playing, rafId, elapsed, year } | null
 
 // --- #53 story cards --------------------------------------------------------
 
@@ -161,17 +163,19 @@ export function onDocClick(e) {
 }
 
 // --- #54 chronicle scrubber -------------------------------------------------
-// Toggles display on the baked #layer-settlements/#layer-roads groups and reads
-// the #52 manifest; never re-renders. Download SVG saves lastSvg (the string),
-// never the DOM, so the export is unaffected no matter the scrubbed frame.
+// Reveals the world over time using the #52 manifest; never re-renders. Since #93
+// it toggles each baked settlement's own <g class="settlement" data-idx> by year
+// (real castles/towns/labels, not dots), plus the baked #layer-roads as a whole.
+// Download SVG saves lastSvg (the string), never the DOM, so the export is
+// unaffected no matter the scrubbed frame.
 
-function toggleBakedLayers(visible) {
-  // Restore by CLEARING the inline style, never setting "block": the <g> carried
-  // no inline display originally, and an SVG <g> does not take display:block.
-  for (const id of ["layer-settlements", "layer-roads"]) {
-    const g = mapDiv.querySelector("#" + id);
-    if (g) g.style.display = visible ? "" : "none";
-  }
+// The road network carries no per-settlement founding year, so it cannot time-
+// reveal; show it only when parked at the present (toggle-on, a manual scrub to
+// the present, end-of-Play) and hide it whenever the shown year is in the past,
+// so roads to not-yet-founded towns never appear. Restore by CLEARING the inline
+// style, never setting "block": an SVG <g> does not take display:block.
+function setRoadsVisible(visible) {
+  if (scrub && scrub.roadsEl) scrub.roadsEl.style.display = visible ? "" : "none";
 }
 
 export function cancelScrubRaf() {
@@ -205,9 +209,10 @@ function buildStrip(events) {
   return rows;
 }
 
-// Paint one frame: the year readout, the slider thumb, each place's dot state,
-// and which chronicle rows have come to pass. Setting .value here does NOT fire
-// the slider's input event, so Play never trips the manual-scrub handler.
+// Paint one frame: the year readout, the slider thumb, each settlement glyph's
+// visibility, the roads, and which chronicle rows have come to pass. Setting
+// .value here does NOT fire the slider's input event, so Play never trips the
+// manual-scrub handler.
 function paintScrub(year) {
   if (!scrub) return;
   scrub.year = year;
@@ -217,32 +222,39 @@ function paintScrub(year) {
   // scrub announces "year N" once per arrow press. The #scrub-year span is visual.
   scrubRangeEl.setAttribute("aria-valuetext", `year ${year}`);
   scrubYearEl.textContent = `year ${year}`;
-  scrub.marks.forEach((m, i) => {
-    const el = scrub.hits[i];
-    if (el) el.dataset.state = placeStateAt(m, year);
-  });
+  for (const m of scrub.marks) {
+    const g = scrub.groups.get(m.idx);
+    if (g) g.style.display = glyphVisibleAt(m, year) ? "" : "none";
+  }
+  setRoadsVisible(year >= scrub.range.max); // roads only at the present-day park
   for (const row of scrub.strip) {
     row.li.classList.toggle("past", eventIsPast(row.year, year));
   }
 }
 
-// Enter (or re-apply, after a redraw) scrub mode for the current overlay. `style`
-// picks the dot colour; app.js passes the active map style.
-export function applyScrub(style) {
+// Enter (or re-apply, after a redraw) scrub mode for the current overlay. Since
+// #93 it drives the baked settlement glyphs directly, so no style/colour is needed.
+export function applyScrub() {
   if (!placeOverlay || !placeOverlay.places || !placeOverlay.places.length) return;
   cancelScrubRaf();
   hidePlaceCard();
   const { places, events, presentYear } = placeOverlay;
   const overlayEl = mapDiv.querySelector(".place-overlay");
   const hits = overlayEl ? [...overlayEl.querySelectorAll(".place-hit")] : [];
-  if (overlayEl) {
-    overlayEl.classList.add("scrub");
-    overlayEl.style.setProperty("--scrub-mark", STYLE_MARK[style] ?? STYLE_MARK.antique);
-  }
-  // The dots are a visual time-layer, not a tab-stop; the dated chronicle strip
-  // below lists the world's headline events (a capped subset) as readable text.
+  // The overlay hits stay as invisible focus targets but go inert while scrubbing
+  // (the CSS scopes pointer-events off behind .scrub); the dated chronicle strip
+  // below narrates the headline events (a capped subset) as readable text.
+  if (overlayEl) overlayEl.classList.add("scrub");
   for (const h of hits) h.tabIndex = -1;
-  toggleBakedLayers(false);
+  // Address every baked settlement glyph by its world index (== manifest idx) so a
+  // year can show/hide each one; the roads layer reveals only at the present park.
+  const groups = new Map();
+  const settleLayer = mapDiv.querySelector("#layer-settlements");
+  if (settleLayer) {
+    for (const g of settleLayer.querySelectorAll("g.settlement")) {
+      groups.set(Number(g.dataset.idx), g);
+    }
+  }
   const range = scrubRange(places, presentYear);
   scrubRangeEl.min = String(range.min);
   scrubRangeEl.max = String(range.max);
@@ -250,7 +262,8 @@ export function applyScrub(style) {
   scrub = {
     marks: buildScrubMarks(places, events, presentYear),
     range,
-    hits,
+    groups,
+    roadsEl: mapDiv.querySelector("#layer-roads"),
     strip: buildStrip(events),
     plan: null,
     playing: false,
@@ -260,7 +273,7 @@ export function applyScrub(style) {
   };
   scrubPanel.hidden = false;
   setPlayLabel(false);
-  paintScrub(range.max); // park at the present: the world as just drawn, in dot form
+  paintScrub(range.max); // park at the present: the world exactly as just drawn
 }
 
 export function exitScrub() {
@@ -271,7 +284,13 @@ export function exitScrub() {
     overlayEl.classList.remove("scrub");
     for (const h of overlayEl.querySelectorAll(".place-hit")) h.removeAttribute("tabindex");
   }
-  toggleBakedLayers(true);
+  // #93: the sweep may have hidden individual glyph groups; restore the full
+  // present-day chart by clearing every inline display it set (never "block": an
+  // SVG <g> does not take it), plus the roads.
+  const settleLayer = mapDiv.querySelector("#layer-settlements");
+  if (settleLayer) for (const g of settleLayer.querySelectorAll("g.settlement")) g.style.display = "";
+  const roads = mapDiv.querySelector("#layer-roads");
+  if (roads) roads.style.display = "";
   scrub = null;
 }
 

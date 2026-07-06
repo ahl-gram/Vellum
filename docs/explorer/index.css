@@ -153,32 +153,15 @@ button.primary:hover { background: #5d4831; }
 .pc-founded { display: block; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
 .pc-tale { margin: 0.4rem 0 0; font-style: italic; color: #54452f; }
 
-/* Chronicle year-scrubber (#54). In scrub mode the baked settlement + road
-   layers are display:none and the overlay's hit-targets become time-controlled
-   dots. All dot styling is scoped behind .place-overlay.scrub so normal mode
-   stays byte-identical (idle parity): the global button{} rule must never paint
-   these. The dots are a visual time-layer (not a tab-stop, JS sets tabindex -1);
-   the chronicle strip lists the headline events as text. --scrub-mark per style. */
+/* Chronicle year-scrubber (#54, #93). In scrub mode the sweep shows and hides the
+   REAL baked settlement glyphs by year (living-chart.js toggles each
+   <g class="settlement" data-idx>), so the map keeps its castles, towns, and
+   labels instead of abstract dots; the roads reveal only at the present park. The
+   overlay hit-targets stay put but go inert (pointer-events off, JS sets tabindex
+   -1) so cards are suppressed while scrubbing; the chronicle strip below narrates
+   the headline events as text. Scoped behind .place-overlay.scrub so idle mode is
+   byte-identical (the global button{} rule must never reach these). */
 .place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
-/* #128: centre the dot with inset+margin (not a translate) so the stamp keyframe's
-   scale has the transform to itself and the dot never decentres mid-stamp. */
-.place-overlay.scrub .place-hit::before {
-  content: ""; position: absolute; inset: 0; margin: auto;
-  width: 9px; height: 9px; border-radius: 50%; box-sizing: border-box;
-  display: none; box-shadow: 0 0 0 1.5px #f8f1e0;
-}
-/* A town stamps onto the map at its founding year; a ruin's mark inks in as it falls.
-   Keyed on data-state, so the stamp plays exactly when a dot enters that state (as the
-   Play sweep or a manual scrub crosses the year). Collapse via the shared reduced block. */
-.place-overlay.scrub .place-hit[data-state="living"]::before {
-  display: block; background: var(--scrub-mark, #4a3826); border: 0;
-  animation: inkStamp var(--paper) var(--ease-paper) both;
-}
-.place-overlay.scrub .place-hit[data-state="ruin"]::before {
-  display: block; background: transparent;
-  border: 2px solid var(--scrub-mark, #4a3826);
-  animation: dryingInk var(--paper) var(--ease-paper) both;
-}
 .scrubber[hidden] { display: none; }
 .scrubber { max-width: 1100px; margin: 0.8rem auto 0;
   background: #f3ead2; border: 1px solid #b9a77f; border-radius: 6px;
@@ -192,8 +175,10 @@ button.primary:hover { background: #5d4831; }
 .scrub-controls input[type="range"] { flex: 1; accent-color: #7a5c2e; }
 .scrub-year { font-style: italic; color: #6b5a40;
   font-variant-numeric: tabular-nums; min-width: 5rem; text-align: right; }
+/* #93 Part 2: tall enough to show every entry at once (the chronicle is capped at
+   14 events, so this cannot grow unbounded); overflow-y stays as a safety valve. */
 .chronicle-strip { list-style: none; margin: 0.7rem 0 0; padding: 0;
-  max-height: 9rem; overflow-y: auto; }
+  max-height: 32rem; overflow-y: auto; }
 /* #128: a row that has come to pass brightens AND slides a hair to the right, like
    an entry inked into the ledger as its year arrives. */
 .chronicle-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
