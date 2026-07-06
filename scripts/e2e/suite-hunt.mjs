@@ -69,6 +69,17 @@ export async function run(ctx) {
     JSON.stringify(miss),
   );
 
+  // #129: a miss leaves a sounding over the map. It must be an OVERLAY on #map (never
+  // inside the SVG, so no chart bytes move) and pointer-transparent (a lingering dot
+  // must not eat the next click). Read right after the first miss, before the dot's
+  // ~2.6s fade removes it.
+  const snd = await evaluate(`(()=>{const d=document.querySelector("#map .sounding-dot");return{dots:document.querySelectorAll("#map .sounding-dot").length,inSvg:!!document.querySelector("#map svg .sounding-dot"),pe:d?getComputedStyle(d).pointerEvents:null};})()`);
+  check(
+    "H3c a miss drops a pointer-transparent sounding over the map, never inside the SVG",
+    snd.dots >= 1 && !snd.inSvg && snd.pe === "none",
+    JSON.stringify(snd),
+  );
+
   // #94: heat is continuous -- a click halfway from the far capital to the quarry
   // must not read COLDER than the capital click (it is nearer the quarry).
   // The probe sits at 0.4 of the way, NOT halfway: the exact midpoint ties
@@ -90,6 +101,16 @@ export async function run(ctx) {
   check("H5 reveal names the found place and its founding year", post.reveal && post.revealText.includes(tgt.name) && /founded in the year/i.test(post.revealText), post.revealText.slice(0, 80));
   check("H6 a win marker overlays the map and the Share button appears", post.star && post.share);
   check("H7 streak + localStorage persist, keyed on the day's seed", /Streak: 1 day/.test(post.streak) && new RegExp(`"solved":${tgt.seed},"streak":1`).test(post.ls || ""), `${post.streak} | ${post.ls}`);
+
+  // #129: a LIVE solve plays the win ceremony. Read the WIRED animation (name + trigger
+  // class) on the star and the reveal; the class persists after the run, so this is
+  // stable regardless of whether the animation is still in flight.
+  const wire = await evaluate(`(()=>{const s=document.querySelector("#map .hunt-star");const rev=document.getElementById("reveal");return{starStamp:!!(s&&s.classList.contains("stamp")),starAnim:s?getComputedStyle(s).animationName:null,revUnfurl:!!(rev&&rev.classList.contains("unfurl")),revAnim:rev?getComputedStyle(rev).animationName:null};})()`);
+  check(
+    "H6b a live solve wires the win ceremony (star stamps in, reveal unfurls)",
+    wire.starStamp && wire.starAnim === "huntStarIn" && wire.revUnfurl && wire.revAnim === "paperUnfurl",
+    JSON.stringify(wire),
+  );
   await shoot("hunt-seed-of-the-day.png");
 
   await send("Page.navigate", { url: HUNT_PAGE });
@@ -101,6 +122,18 @@ export async function run(ctx) {
     await sleep(75);
   }
   check("H8 reload restores the solved state without inflating the streak", huntRestored);
+
+  // #129: the WIN ceremony must not replay on a solved-day reload (the old star
+  // animation did). Scoped to the win gate ONLY: the star is placed still (no .stamp)
+  // and the reveal is shown but not unrolled (no .unfurl). We deliberately do NOT
+  // assert the arrival ceremony is absent -- it replays on every load (the daily
+  // reveal), so the coast may still be mid-draw when this reads.
+  const still = await evaluate(`(()=>{const s=document.querySelector("#map .hunt-star");const rev=document.getElementById("reveal");return{star:!!s,stamp:!!(s&&s.classList.contains("stamp")),starAnim:s?getComputedStyle(s).animationName:null,revShown:!!(rev&&!rev.hidden),unfurl:!!(rev&&rev.classList.contains("unfurl")),revAnim:rev?getComputedStyle(rev).animationName:null};})()`);
+  check(
+    "H8b a solved-day reload is still: star + reveal restored without replaying the win ceremony",
+    still.star && !still.stamp && still.starAnim === "none" && still.revShown && !still.unfurl && still.revAnim === "none",
+    JSON.stringify(still),
+  );
   check("H9 the hunt run logged no JS exceptions or console errors", consoleErrors.length === huntErrBase, consoleErrors.slice(huntErrBase).join(" | ") || "clean");
 
   // #88: the quarry must not be picked beneath the legend card. legFrac is the
