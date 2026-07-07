@@ -16,6 +16,16 @@ export type MapStyle = {
   readonly contourStroke: string | null;
   readonly river: string;
   readonly road: string;
+  /**
+   * #158 political boundary treatment, kept distinct from the road so a border
+   * never reads as a track. antique/ink/nautical use a dark-ink dash-DOT line;
+   * topographic keeps its already-distinct dashed ink. `borderWidth` and the
+   * `borderDash` values are k-multipliers (k = widthPx/1500), matching the road.
+   */
+  readonly borderStroke: string;
+  readonly borderWidth: number;
+  readonly borderDash: ReadonlyArray<number>;
+  readonly borderOpacity: number;
   readonly labelColor: string;
   readonly labelHalo: string;
   readonly fontFamily: string;
@@ -50,6 +60,10 @@ const ANTIQUE: MapStyle = {
   contourStroke: null,
   river: "#637f9b",
   road: "#8a6a4a",
+  borderStroke: "#4a3826",
+  borderWidth: 1.5,
+  borderDash: [6, 3, 0.6, 3],
+  borderOpacity: 0.85,
   labelColor: "#3d2f1f",
   labelHalo: "#f2e8cf",
   fontFamily: "'Iowan Old Style', 'Palatino', 'Georgia', serif",
@@ -91,6 +105,12 @@ const TOPOGRAPHIC: MapStyle = {
   contourStroke: "#8d7d62",
   river: "#3f88c5",
   road: "#c0392b",
+  // Preserved from the pre-#158 border (dashed dark ink): topographic already
+  // reads distinctly from its cased red roads, so its treatment does not move.
+  borderStroke: "#3a3a3a",
+  borderWidth: 1.1,
+  borderDash: [1.2, 3.2],
+  borderOpacity: 0.65,
   labelColor: "#2a2a2a",
   labelHalo: "#f7f4ee",
   fontFamily: "'Avenir Next', 'Helvetica Neue', 'Arial', sans-serif",
@@ -123,6 +143,10 @@ const INK: MapStyle = {
   contourStroke: "#8a8275",
   river: "#241c10",
   road: "#241c10",
+  borderStroke: "#241c10",
+  borderWidth: 1.5,
+  borderDash: [6, 3, 0.6, 3],
+  borderOpacity: 0.85,
   labelColor: "#241c10",
   labelHalo: "#faf7ef",
   fontFamily: "'Iowan Old Style', 'Palatino', 'Georgia', serif",
@@ -153,6 +177,10 @@ const NAUTICAL: MapStyle = {
   contourStroke: "#a8a695",
   river: "#4a7ba6",
   road: "#8a6a4a",
+  borderStroke: "#27415e",
+  borderWidth: 1.5,
+  borderDash: [6, 3, 0.6, 3],
+  borderOpacity: 0.85,
   labelColor: "#27415e",
   labelHalo: "#f6f2e6",
   fontFamily: "'Iowan Old Style', 'Palatino', 'Georgia', serif",

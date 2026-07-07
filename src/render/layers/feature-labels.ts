@@ -111,11 +111,15 @@ export function featureLabelsLayer(ctx: RenderCtx): {
           x: c.x, y: placedY, "text-anchor": "middle",
           "font-family": style.fontFamilyTitle,
           "font-size": fs.toFixed(1),
+          // #158: bold + near-opaque + a fatter halo so a realm name reads over
+          // mountains and forests. Size is held (see fs above): it is the only one
+          // of these that feeds tryClaim, so changing it could unplace a label.
+          "font-weight": 700,
           "letter-spacing": ls.toFixed(1),
           fill: style.labelColor,
-          "fill-opacity": 0.55,
+          "fill-opacity": 0.9,
           stroke: style.labelHalo,
-          "stroke-width": 2.6 * k,
+          "stroke-width": 3.8 * k,
           "paint-order": "stroke",
         },
         [name.toUpperCase()],

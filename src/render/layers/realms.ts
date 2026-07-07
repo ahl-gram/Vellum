@@ -110,7 +110,7 @@ function chainBorderSegments(segs: ReadonlyArray<Seg>): Point[][] {
   return chains;
 }
 
-/** Dashed political borders along realm boundaries. */
+/** Political borders along realm boundaries, in the style's own boundary treatment. */
 export function realmBordersLayer(ctx: RenderCtx): SvgNode | null {
   const { world, proj, style } = ctx;
   const { labels, seats } = world.realms;
@@ -152,11 +152,11 @@ export function realmBordersLayer(ctx: RenderCtx): SvgNode | null {
       el("path", {
         d: pathFrom(chain, false),
         fill: "none",
-        stroke: style.name === "topographic" ? style.ink : style.road,
-        "stroke-width": 1.1 * k,
-        "stroke-dasharray": `${1.2 * k} ${3.2 * k}`,
+        stroke: style.borderStroke,
+        "stroke-width": style.borderWidth * k,
+        "stroke-dasharray": style.borderDash.map((d) => d * k).join(" "),
         "stroke-linecap": "round",
-        "stroke-opacity": 0.65,
+        "stroke-opacity": style.borderOpacity,
       }),
     ),
   );
