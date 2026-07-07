@@ -97,6 +97,7 @@
       <button id="draw" class="primary">Draw</button>
       <button id="download">Download SVG</button>
       <button id="bind">Bind as atlas</button>
+      <button id="verso-turn">Turn the sheet</button>
     </div>
   </div>
 </div>
@@ -104,11 +105,15 @@
 <p class="status" id="status" role="status" aria-live="polite"></p>
 <!-- #131: the sheet wrapper. #map is the recto (the live chart); a style change
      turns this leaf over (sheet-turn.js) to land the same world re-dressed. The 3D
-     context is inert until .turning is set, so idle behaviour is unchanged. The
-     Verso (#116) reuses this perspective wrapper. Never restructure INSIDE #map:
-     draw() wipes it with innerHTML and re-appends the overlay right after. -->
+     context is inert until .turning is set, so idle behaviour is unchanged. Never
+     restructure INSIDE #map: draw() wipes it with innerHTML and re-appends the
+     overlay right after.
+     #116: #verso is the recto's back face, a permanent sibling of #map filled by
+     verso.js. It rests hidden (visibility gated on .flip3d) so idle byte-parity
+     holds; the Turn button flips the whole leaf 180deg to read it. -->
 <div class="sheet" id="sheet"><div class="sheet-inner" id="sheet-inner">
 <div id="map"></div>
+<div id="verso" aria-hidden="true"></div>
 </div></div>
 <p class="caption" id="caption"></p>
 <div id="scrubber" class="scrubber" hidden>

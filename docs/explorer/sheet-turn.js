@@ -25,11 +25,14 @@
  * Whether this draw should turn the sheet rather than settle. A style change over a
  * live chart turns; everything else (a new world, reduced motion, the worker
  * fallback, the first draw, or scrub mode) takes today's instant/settle path.
- * @param {{isTurn:boolean, reduceMotion:boolean, usesWorker:boolean, hasChart:boolean, chronicle:boolean}} s
+ * A style change while the sheet is flipped to its verso (#116) rebuilds the verso
+ * in place instead of turning: the turn and the flip both drive #sheet-inner's
+ * rotateY, so they must never both own it.
+ * @param {{isTurn:boolean, reduceMotion:boolean, usesWorker:boolean, hasChart:boolean, chronicle:boolean, flipped?:boolean}} s
  * @returns {boolean}
  */
 export function shouldTurn(s) {
-  return !!(s.isTurn && !s.reduceMotion && s.usesWorker && s.hasChart && !s.chronicle);
+  return !!(s.isTurn && !s.reduceMotion && s.usesWorker && s.hasChart && !s.chronicle && !s.flipped);
 }
 
 // The single in-flight turn, or null. One turn at a time: runTurn cancels any prior

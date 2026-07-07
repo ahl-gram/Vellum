@@ -15,6 +15,8 @@ export interface TurnDecision {
   hasChart: boolean;
   /** Chronicle/scrub mode is active (re-applies per its own redraw rules). */
   chronicle: boolean;
+  /** #116: the sheet is flipped to its verso (the flip owns the sheet, not the turn). */
+  flipped?: boolean;
 }
 
 /** Whether this draw should turn the sheet rather than settle (#127) or swap instantly. */

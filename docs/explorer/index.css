@@ -74,6 +74,54 @@ button.primary:hover { background: #5d4831; }
 .sheet-back img { width: 100%; height: auto; display: block;
   border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
 
+/* #116 The Verso. The flip REUSES #131's .sheet / #sheet-inner perspective wrapper,
+   but where #131's turn is transient (it lands back on the recto re-dressed), the
+   Verso RESTS on the back face: a held rotateY(-180deg). Two classes carry that:
+     .flip3d  -- lights perspective + preserve-3d and reveals #verso. Added the instant
+                 a flip starts (either direction) and removed only once the leaf lands
+                 flat on the recto again (transitionend), so idle byte-parity on the
+                 recto is restored exactly like #131's at-rest invariant.
+     .versoed -- the rotation TARGET: present => the leaf holds rotateY(-180deg).
+   The transition is scoped OFF while a #131 style-turn owns the leaf (.turning), so
+   the WAAPI turn and this CSS transition never drive #sheet-inner at once. Reduced
+   motion collapses the transition via /motion.css, so the face swaps instantly. */
+.sheet:not(.turning) .sheet-inner {
+  transition: transform var(--verso-turn, 1200ms) var(--ease-turn, ease-in-out);
+}
+.sheet.flip3d { perspective: 2200px; }
+.sheet.flip3d .sheet-inner { transform-style: preserve-3d; }
+.sheet.flip3d #map { backface-visibility: hidden; }
+.sheet.versoed .sheet-inner { transform: rotateY(-180deg); }
+
+/* The back face: a permanent sibling of #map, sized by its ghost image so the sheet
+   turns over at the chart's exact height. Hidden at rest (visibility, not a 3D trick)
+   so the 3D context can stay off between flips. */
+#verso {
+  position: absolute; inset: 0 0 auto 0;
+  visibility: hidden;
+  backface-visibility: hidden; transform: rotateY(180deg);
+  background: #e6dabd; color: #3d2f1f;
+  border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2);
+  overflow: hidden;
+}
+.sheet.flip3d #verso { visibility: visible; }
+/* The bleed-through ghost: the current chart struck through the vellum, mirrored and
+   faint, the way iron-gall ink shows on the reverse. Also sizes #verso (block flow). */
+.verso-ghost { display: block; width: 100%; height: auto;
+  transform: scaleX(-1); opacity: 0.1; filter: blur(1.2px); }
+/* The docket line stamped along the fold, the surveyor's attribution, and the office
+   stamp all sit over the ghost. Percentages track the ghost's height at any world. */
+.verso-docket, .verso-survey { position: absolute; left: 8%; right: 8%;
+  text-align: center; }
+.verso-docket { top: 9%; text-transform: uppercase; letter-spacing: 0.18em;
+  font-size: clamp(0.6rem, 1.4vw, 0.92rem); color: #6b5a40;
+  font-variant-numeric: tabular-nums; }
+.verso-survey { top: 17%; font-style: italic; line-height: 1.5;
+  font-size: clamp(0.62rem, 1.5vw, 1rem); color: #7a6746; }
+.verso-stamp { position: absolute; right: 11%; bottom: 12%;
+  width: clamp(90px, 17%, 190px); height: auto; opacity: 0.5;
+  transform: rotate(-8deg); }
+
 /* #127 The Drafting Moment: a freshly drawn chart settles onto the desk while the
    coastline draws itself in ink and the land wash + waterline halos dry in behind
    it. Gated behind .arriving (added by app.js after injection) so the sea-level
