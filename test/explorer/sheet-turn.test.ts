@@ -38,3 +38,10 @@ test("the very first draw has no chart to turn from (no turn)", () => {
 test("scrub mode re-applies per its existing redraw rules, it does not turn", () => {
   assert.equal(shouldTurn({ ...base, chronicle: true }), false);
 });
+
+// #116 The Verso. When the sheet is already flipped to its back, a style change
+// rebuilds the verso in place; it must NOT fire the #131 turn, because the turn and
+// the flip both drive #sheet-inner's rotateY and would fight over one transform.
+test("a style change while flipped to the verso does not turn (the flip owns the sheet)", () => {
+  assert.equal(shouldTurn({ ...base, flipped: true }), false);
+});

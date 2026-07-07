@@ -8,6 +8,7 @@
 import { runJob, runInline, usesWorker, initWorker } from "./worker-client.js";
 import { clearAtlas, renderAtlas } from "./atlas-view.js";
 import { shouldTurn, runTurn, cancelTurn } from "./sheet-turn.js";
+import { buildDocket, renderVerso, toggleFlip, isFlipped } from "./verso.js";
 import { sliderToLand, landToSlider, updateLandReadout, syncAutoSlider } from "./sea-level.js";
 import {
   buildPlaceOverlay,
@@ -37,12 +38,15 @@ const sheetEl = $("sheet");
 const innerEl = $("sheet-inner");
 const caption = $("caption");
 const bindBtn = $("bind");
+const versoEl = $("verso");
+const versoBtn = $("verso-turn");
 const chronicleChk = $("chronicle");
 const scrubPlayBtn = $("scrub-play");
 const scrubRangeEl = $("scrub-range");
 
 let lastSvg = "";
 let lastTitle = "";
+let lastSubtitle = "";
 let lastSeed = 0;
 let lastOverrides = {};
 let lastStyle = "antique";
@@ -151,6 +155,23 @@ function startArrival(svg) {
   svg.classList.add("arriving");
 }
 
+// #116: refresh the verso back face for the chart that just drew. Rebuilt on every
+// draw (whether flipped or not, per the acceptance criterion) so a flip always shows
+// the current world; renderVerso revokes the prior ghost URL, so redraws do not leak.
+function rebuildVerso(res, seed) {
+  const capital = res.manifest.places.find((p) => p.kind === "capital");
+  renderVerso(versoEl, {
+    svg: res.svg,
+    docket: buildDocket({
+      seed,
+      title: res.title,
+      presentYear: res.manifest.presentYear,
+      capital: capital ? capital.name : "",
+    }),
+    surveyor: res.subtitle,
+  });
+}
+
 // opts.quiet suppresses the arrival ceremony, used only by the sea-level drag's
 // throttled mid-drag redraws, so the coastline does not perpetually redraw itself
 // while the slider moves. The release (change) redraw runs the full ceremony.
@@ -169,6 +190,7 @@ function draw(opts) {
   drawing = true;
   cancelScrubRaf(); // a redraw is about to wipe the overlay; stop any running sweep
   bindBtn.disabled = true;
+  versoBtn.disabled = true; // #116: no flip mid-draw; re-enabled when the draw resolves
   status.textContent = "Drafting…";
   caption.textContent = "";
   clearAtlas();
@@ -197,10 +219,12 @@ function draw(opts) {
       if (myGen !== drawGen) return; // a newer draw superseded this one
       drawing = false;
       bindBtn.disabled = false;
+      versoBtn.disabled = false;
       // Any prior turn was already torn down synchronously at draw() start; a turn for
       // THIS draw (if any) is created below and cancels again on its own.
       lastSvg = res.svg;
       lastTitle = res.title;
+      lastSubtitle = res.subtitle;
       lastSeed = seed;
       lastOverrides = overrides;
       lastStyle = style;
@@ -210,7 +234,10 @@ function draw(opts) {
       const ms = (performance.now() - t0).toFixed(0);
       status.textContent = "";
       caption.textContent = `${res.title} · ${res.mapType} · ${res.band} · drawn in ${ms}ms`;
-      if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, chronicle: chronicleChk.checked })) {
+      // #116: a style change while flipped to the verso rebuilds it in place (see
+      // below) instead of turning; the flip and the #131 turn must never both drive
+      // #sheet-inner's rotateY. flipped is read at the swap, when the state is settled.
+      if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, chronicle: chronicleChk.checked, flipped: isFlipped(sheetEl) })) {
         // #131 The style turn: the same world in a new dress. The sheet turns over,
         // and the overlay/scrub rebuild against the new chart only after it LANDS (so
         // the marks never rebuild over the outgoing chart). The turn suppresses the
@@ -224,7 +251,9 @@ function draw(opts) {
         });
       } else {
         // Settle (#127): inject the chart and run the arrival ceremony (unless this is
-        // a quiet mid-drag redraw). Order preserved from the pre-#131 path.
+        // a quiet mid-drag redraw). Order preserved from the pre-#131 path. When
+        // flipped, this updates the hidden recto beneath the verso (the ceremony runs
+        // out of sight); the visible verso is refreshed by rebuildVerso below.
         mapDiv.innerHTML = res.svg;
         buildPlaceOverlay(res.manifest); // #53: marks + card, appended after innerHTML wipes #map
         if (!quiet) startArrival(mapDiv.querySelector("svg")); // #127: the arrival ceremony
@@ -234,11 +263,16 @@ function draw(opts) {
         if (chronicleChk.checked) applyScrub();
         else clearScrub();
       }
+      // #116: refresh the back face for the chart just drawn. Skipped on quiet mid-
+      // drag redraws (like the arrival ceremony) so a sea-level drag does not churn an
+      // invisible verso Blob every frame; the release's non-quiet draw rebuilds it.
+      if (!quiet) rebuildVerso(res, seed);
     })
     .catch((err) => {
       if (myGen !== drawGen) return;
       drawing = false;
       bindBtn.disabled = false;
+      versoBtn.disabled = false;
       cancelTurn(); // #131: tear down any in-flight turn on a failed redraw
       // A redraw that fails leaves the OLD overlay in place; if a sweep was running,
       // its rAF was already cancelled at draw() start, so restore the button to a
@@ -283,6 +317,14 @@ bindBtn.addEventListener("click", () => {
       if (myGen !== drawGen || mySeq !== bindSeq) return;
       status.textContent = "The bindery faltered: " + err.message;
     });
+});
+// #116: turn the sheet over to read its back, or turn it back. Guarded so the flip
+// never starts mid-draw (the verso is being rebuilt) or mid-#131-turn (the turn owns
+// #sheet-inner's rotateY); the button is also disabled for the whole draw round-trip.
+versoBtn.addEventListener("click", () => {
+  if (!lastSvg || drawing || sheetEl.classList.contains("turning")) return;
+  const flipped = toggleFlip(sheetEl);
+  versoBtn.textContent = flipped ? "Turn back" : "Turn the sheet";
 });
 seedInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {

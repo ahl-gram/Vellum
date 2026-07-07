@@ -20,6 +20,7 @@ self.onmessage = (e) => {
         svg: renderMap(world, msg.render),
         manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
         title: world.title.title,
+        subtitle: world.title.subtitle,
         mapType: recipe.mapType,
         band: recipe.band,
       });

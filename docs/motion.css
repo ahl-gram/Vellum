@@ -20,8 +20,11 @@
   --unfurl-quick: 400ms;  /* the same curve at ~60%, for hover previews */
   --ink-draw: 1200ms;     /* a stroke drawing itself (the coastline) */
   --ink-dry: 1200ms;      /* a wash or ink drying in */
-  --turn: 900ms;          /* the weighty sheet turn: same world, new dress (#131; the
-                             Verso #116 reuses it). Read by sheet-turn.js's WAAPI. */
+  --turn: 900ms;          /* the weighty sheet turn: same world, new dress (#131).
+                             Read by sheet-turn.js's WAAPI. */
+  --verso-turn: 1200ms;   /* the heavier, ceremonial flip to read the chart's back
+                             (#116). Slower than a style re-dress on purpose: turning
+                             the whole sheet over is the bigger gesture. CSS transition. */
 
   /* Easings: paper settles (ease-out, no bounce); the unfurl starts stiff and
      flexes just past flat, per the ratified one ruled exception. */
