@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { renderSvg } from "../../src/render/svg.ts";
+import { el, renderSvg } from "../../src/render/svg.ts";
 import { STYLES } from "../../src/render/style.ts";
 import {
   armsNode,
@@ -8,7 +8,7 @@ import {
   armsSvgDocument,
   paletteForStyle,
 } from "../../src/render/layers/heraldry.ts";
-import { CULTURE_CHARGES, type Arms } from "../../src/society/heraldry.ts";
+import { CULTURE_CHARGES, type Arms, type Tincture } from "../../src/society/heraldry.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 
@@ -202,6 +202,109 @@ test("a side-placed shield clears its realm label's all-caps text (no covered le
       `realm ${realm} shield ${JSON.stringify(shieldBox)} overlaps its caps label ${JSON.stringify(labelBox)}`,
     );
   }
+});
+
+// ---- #25: ink-style Petra Sancta tincture hatching (field + divisions only) ----
+
+const ALL_TINCTURES: Tincture[] = ["or", "argent", "gules", "azure", "sable", "vert", "purpure"];
+
+/** Inner content of the <pattern id="hatch-<t>-<suffix>">…</pattern> block, or null. */
+function patternBlock(svg: string, t: Tincture): string | null {
+  const m = new RegExp(`<pattern id="hatch-${t}-[^"]*"[^>]*>(.*?)</pattern>`).exec(svg);
+  return m ? (m[1] as string) : null;
+}
+
+/** Every d="…" path string inside a block. */
+function pathDs(block: string): string[] {
+  return [...block.matchAll(/ d="([^"]*)"/g)].map((m) => m[1] as string);
+}
+
+/** Direction {dx,dy} of the first "M x y L x2 y2" line in a block. */
+function firstLineDir(block: string): { dx: number; dy: number } | null {
+  const m = /M(-?[\d.]+) (-?[\d.]+)L(-?[\d.]+) (-?[\d.]+)/.exec(block);
+  if (!m) return null;
+  return { dx: Number(m[3]) - Number(m[1]), dy: Number(m[4]) - Number(m[2]) };
+}
+
+function inkFieldDoc(t: Tincture, suffix: string): string {
+  const pal = paletteForStyle(STYLES.ink);
+  return armsSvgDocument({ division: "plain", field: [t], charge: null }, SIZE, pal, suffix);
+}
+
+test("#25 ink hatches each tincture field with its own <pattern>, referenced by the field", () => {
+  for (const t of ALL_TINCTURES) {
+    const doc = inkFieldDoc(t, `h-${t}`);
+    assert.ok(doc.includes(`url(#hatch-${t}-h-${t})`), `${t} field should reference its hatch pattern`);
+    assert.ok(patternBlock(doc, t) !== null, `${t} should define a <pattern>`);
+  }
+});
+
+test("#25 ink hatch marks follow the Petra Sancta engraving convention per tincture", () => {
+  const az = pathDs(patternBlock(inkFieldDoc("azure", "x"), "azure")!).join(" ");
+  assert.match(az, /H/, "azure = horizontal lines");
+  assert.doesNotMatch(az, /V/, "azure has no verticals");
+
+  const gu = pathDs(patternBlock(inkFieldDoc("gules", "x"), "gules")!).join(" ");
+  assert.match(gu, /V/, "gules = vertical lines");
+  assert.doesNotMatch(gu, /H/, "gules has no horizontals");
+
+  const sa = pathDs(patternBlock(inkFieldDoc("sable", "x"), "sable")!).join(" ");
+  assert.match(sa, /H/, "sable crosshatch has horizontals");
+  assert.match(sa, /V/, "sable crosshatch has verticals");
+
+  const or = patternBlock(inkFieldDoc("or", "x"), "or")!;
+  assert.match(or, /<circle/, "or = seme of dots");
+
+  const ar = patternBlock(inkFieldDoc("argent", "x"), "argent")!;
+  assert.equal(pathDs(ar).length, 0, "argent = plain paper, no line marks");
+  assert.doesNotMatch(ar, /<circle/, "argent has no dots");
+
+  const ve = firstLineDir(patternBlock(inkFieldDoc("vert", "x"), "vert")!);
+  assert.ok(ve && ve.dx !== 0 && Math.sign(ve.dx) === Math.sign(ve.dy), "vert = \\ diagonal (dexter chief)");
+
+  const pu = firstLineDir(patternBlock(inkFieldDoc("purpure", "x"), "purpure")!);
+  assert.ok(pu && pu.dx !== 0 && Math.sign(pu.dx) === -Math.sign(pu.dy), "purpure = / diagonal (sinister chief)");
+});
+
+test("#25 every ink hatch tile has an opaque paper base (no bleed-through)", () => {
+  // Divided fields paint one region over the other; without an opaque tile base
+  // the lower field's hatch shows through the overlay's gaps. Same guard protects
+  // on-map arms from terrain bleeding through the gaps.
+  const doc = armsSvgDocument(
+    { division: "perBend", field: ["vert", "or"], charge: null },
+    SIZE, paletteForStyle(STYLES.ink), "d",
+  );
+  assert.ok(doc.includes("url(#hatch-vert-d)") && doc.includes("url(#hatch-or-d)"), "both regions hatched");
+  for (const t of ["vert", "or"] as Tincture[]) {
+    assert.match(patternBlock(doc, t)!, /^<rect[^>]*fill="#faf7ef"/, `${t} tile opens with an opaque paper rect`);
+  }
+});
+
+test("#25 colour styles keep solid field fills, never patterns", () => {
+  for (const name of ["antique", "topographic", "nautical"] as const) {
+    const pal = paletteForStyle(STYLES[name]);
+    const doc = armsSvgDocument({ division: "plain", field: ["azure"], charge: null }, SIZE, pal, name);
+    assert.ok(!doc.includes("<pattern"), `${name} field is a solid fill, no hatch`);
+    assert.ok(doc.includes(pal.tincture("azure")), `${name} paints the solid tincture`);
+  }
+});
+
+test("#25 multiple ink arms in one document get collision-free, suffix-scoped pattern ids", () => {
+  // Two realms sharing a tincture must not share a <pattern> id — the on-map
+  // multi-realm `--style ink --arms` path is the only place ink patterns collide
+  // (atlas banners are colour). idSuffix must scope every pattern id.
+  const arms: Arms = { division: "plain", field: ["azure"], charge: null };
+  const pal = paletteForStyle(STYLES.ink);
+  const doc = renderSvg(
+    el("svg", { xmlns: "http://www.w3.org/2000/svg" }, [
+      armsNode(arms, 60, 70, SIZE, pal, "m0"),
+      armsNode(arms, 180, 70, SIZE, pal, "m1"),
+    ]),
+  );
+  assert.ok(doc.includes('id="hatch-azure-m0"'), "realm 0 gets its own pattern id");
+  assert.ok(doc.includes('id="hatch-azure-m1"'), "realm 1 gets its own pattern id");
+  const ids = [...doc.matchAll(/ id="([^"]+)"/g)].map((m) => m[1]);
+  assert.equal(ids.length, new Set(ids).size, `all ids must be unique, got: ${ids.join(", ")}`);
 });
 
 test("armsNode returns a group node, and the document is byte-deterministic", () => {

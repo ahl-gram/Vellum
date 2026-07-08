@@ -95,11 +95,13 @@ ${rows}
 </section>`;
 }
 
-/** A plate of every realm's coat of arms. Iterates world.arms (one per seat),
- *  so a single-realm world still shows its banner, labelled by its seat. */
-function bannersHtml(world: World): string {
+/** A plate of every realm's coat of arms. Iterates world.arms (one per seat), so a
+ *  single-realm world still shows its banner, labelled by its seat. Drawn in the
+ *  given style so the Explorer can show the ink style's Petra Sancta hatching at
+ *  banner size; every colour style shares one palette, so only `ink` differs. */
+function bannersHtml(world: World, style: StyleName): string {
   if (world.arms.length === 0) return "";
-  const pal = paletteForStyle(STYLES.antique);
+  const pal = paletteForStyle(STYLES[style]);
   const label = (realmId: number): string => {
     const named = world.names.realms[realmId];
     if (named) return named;
@@ -197,9 +199,12 @@ const THEMATIC: ReadonlyArray<{ theme: ThemeName; title: string; style: StyleNam
  */
 export function composeAtlas(
   world: World,
-  opts: { width?: number } = {},
+  opts: { width?: number; bannerStyle?: StyleName } = {},
 ): AtlasComposition {
   const width = opts.width ?? 1500;
+  // The bound atlas and CLI showcase keep colour banners (default); the Explorer
+  // passes the on-screen style so viewing in `ink` shows hatched banners.
+  const bannerStyle = opts.bannerStyle ?? "antique";
   const hero: AtlasPlate = {
     key: "antique",
     title: "The world chart, drawn in the antique manner",
@@ -233,7 +238,7 @@ export function composeAtlas(
     draughtings,
     themes,
     regions: regionPlates(world, width),
-    bannersHtml: bannersHtml(world),
+    bannersHtml: bannersHtml(world, bannerStyle),
     chronicleHtml: chronicleHtml(world),
     gazetteerHtml: gazetteerHtml(world),
   };

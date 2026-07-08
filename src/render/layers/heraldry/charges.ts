@@ -85,14 +85,26 @@ function chargeGlyph(
       kids.push(el("path", { d: M(X + R * 0.1, Y - R * 0.9) + Q(X + R, Y - R * 0.45, X + R * 0.45, Y - R * 0.05) + "Z", ...solid }));
       break;
     case "raven":
-      // a bird with wings swept up to a small head, over a short body
+      // a perched corvid in profile facing dexter: stout beak, wedge tail, two legs
       kids.push(el("path", {
-        d: M(X - R, Y) + Q(X - R * 0.5, Y - R * 0.6, X - R * 0.12, Y - R * 0.05) +
-          M(X + R, Y) + Q(X + R * 0.5, Y - R * 0.6, X + R * 0.12, Y - R * 0.05),
-        ...line, "stroke-width": n(R * 0.2),
+        d: M(X - R * 0.66, Y - R * 0.16) + // upper beak base / brow
+          Q(X - R * 0.34, Y - R * 0.52, X + R * 0.06, Y - R * 0.44) + // crown to nape
+          Q(X + R * 0.6, Y - R * 0.32, X + R * 0.98, Y + R * 0.06) + // back down to tail root
+          L(X + R * 0.78, Y + R * 0.16) + // tail upper notch
+          L(X + R, Y + R * 0.46) + // wedge tail tip
+          L(X + R * 0.6, Y + R * 0.34) + // tail lower notch
+          Q(X + R * 0.2, Y + R * 0.5, X - R * 0.16, Y + R * 0.34) + // belly
+          Q(X - R * 0.5, Y + R * 0.2, X - R * 0.5, Y - R * 0.08) + // breast to throat
+          L(X - R, Y - R * 0.02) + // beak underside
+          L(X - R * 0.66, Y - R * 0.16) + "Z", // beak top back to brow
+        ...solid,
       }));
-      kids.push(el("circle", { cx: n(X), cy: n(Y - R * 0.2), r: n(R * 0.16), fill }));
-      kids.push(el("path", { d: M(X, Y - R * 0.05) + L(X, Y + R * 0.55), ...line, "stroke-width": n(R * 0.2) }));
+      kids.push(el("circle", { cx: n(X - R * 0.42), cy: n(Y - R * 0.2), r: n(R * 0.07), fill: outline }));
+      kids.push(el("path", {
+        d: M(X - R * 0.02, Y + R * 0.4) + L(X - R * 0.02, Y + R * 0.72) +
+          M(X + R * 0.22, Y + R * 0.42) + L(X + R * 0.22, Y + R * 0.72),
+        fill: "none", stroke: fill, "stroke-width": n(R * 0.07), "stroke-linecap": "round",
+      }));
       break;
     case "mountain":
       kids.push(el("path", { d: M(X - R, Y + R * 0.6) + L(X - R * 0.2, Y - R * 0.5) + L(X + R * 0.35, Y + R * 0.6) + "Z", ...solid }));
@@ -121,14 +133,19 @@ function chargeGlyph(
       }));
       break;
     case "scimitar":
-      // a curved sabre rising from a straight grip, distinct from the crescent
+      // a curved sabre: grip + pommel + crossguard below a broad blade that curves
+      // up and widens to a pointed tip — unmistakably curved, unlike the straight sword
+      kids.push(el("path", { d: M(X - R * 0.32, Y + R * 0.95) + L(X - R * 0.12, Y + R * 0.5), ...line, "stroke-width": n(R * 0.12) }));
+      kids.push(el("circle", { cx: n(X - R * 0.34), cy: n(Y + R * 0.98), r: n(R * 0.1), fill }));
+      kids.push(el("path", { d: M(X - R * 0.42, Y + R * 0.52) + Q(X - R * 0.1, Y + R * 0.34, X + R * 0.3, Y + R * 0.5), ...line, "stroke-width": n(R * 0.1) }));
       kids.push(el("path", {
-        d: M(X - R * 0.45, Y + R * 0.9) + L(X - R * 0.2, Y + R * 0.45) +
-          Q(X + R * 0.25, Y - R * 0.2, X + R * 0.6, Y - R * 0.9),
-        ...line, "stroke-width": n(R * 0.22),
+        d: M(X - R * 0.16, Y + R * 0.46) +
+          Q(X - R * 0.3, Y - R * 0.15, X - R * 0.05, Y - R * 0.62) + // spine up
+          Q(X + R * 0.2, Y - R * 1.02, X + R * 0.62, Y - R * 0.82) + // to curling tip
+          Q(X + R * 0.34, Y - R * 0.66, X + R * 0.16, Y - R * 0.44) + // yelman underside
+          Q(X - R * 0.02, Y - R * 0.12, X + R * 0.06, Y + R * 0.46) + "Z", // cutting edge to hilt
+        ...solid,
       }));
-      kids.push(el("path", { d: M(X - R * 0.5, Y + R * 0.32) + L(X + R * 0.05, Y + R * 0.55), ...line }));
-      kids.push(el("circle", { cx: n(X - R * 0.47), cy: n(Y + R * 0.92), r: n(R * 0.12), fill }));
       break;
     case "oak":
       kids.push(el("rect", { x: n(X - R * 0.12), y: n(Y + R * 0.05), width: n(R * 0.24), height: n(R * 0.85), fill, stroke: outline, "stroke-width": n(R * 0.05) }));
@@ -184,8 +201,27 @@ function chargeGlyph(
       kids.push(el("path", { d: M(X, Y + R * 0.5) + L(X, Y + R * 0.9), ...line }));
       break;
     case "flame":
-      kids.push(el("path", { d: M(X, Y + R * 0.9) + Q(X - R * 0.75, Y + R * 0.1, X, Y - R) + Q(X + R * 0.75, Y + R * 0.1, X, Y + R * 0.9) + "Z", ...solid }));
-      kids.push(el("path", { d: M(X, Y + R * 0.8) + Q(X - R * 0.35, Y + R * 0.2, X, Y - R * 0.35) + Q(X + R * 0.35, Y + R * 0.2, X, Y + R * 0.8) + "Z", fill: outline, "fill-opacity": 0.25 }));
+      // an asymmetric fire: a rounded base rising to a tall central tongue with a
+      // shorter tongue to each side — distinct from the symmetric `leaf` almond
+      kids.push(el("path", {
+        d: M(X, Y + R * 0.92) +
+          Q(X - R * 0.6, Y + R * 0.55, X - R * 0.46, Y) + // left base bulge
+          Q(X - R * 0.38, Y - R * 0.42, X - R * 0.12, Y - R * 0.5) + // up to left tongue root
+          Q(X - R * 0.34, Y - R * 0.82, X - R * 0.14, Y - R * 0.66) + // left tongue
+          Q(X - R * 0.12, Y - R * 0.8, X + R * 0.02, Y - R) + // notch then central tongue (tall)
+          Q(X + R * 0.12, Y - R * 0.72, X + R * 0.2, Y - R * 0.5) + // notch to right tongue root
+          Q(X + R * 0.44, Y - R * 0.66, X + R * 0.34, Y - R * 0.32) + // right tongue
+          Q(X + R * 0.56, Y, X + R * 0.46, Y + R * 0.4) + // right base bulge
+          Q(X + R * 0.34, Y + R * 0.78, X, Y + R * 0.92) + "Z",
+        ...solid,
+      }));
+      kids.push(el("path", {
+        d: M(X, Y + R * 0.66) + Q(X - R * 0.3, Y + R * 0.3, X - R * 0.12, Y - R * 0.12) +
+          Q(X - R * 0.06, Y - R * 0.4, X + R * 0.06, Y - R * 0.55) +
+          Q(X + R * 0.04, Y - R * 0.2, X + R * 0.18, Y + R * 0.02) +
+          Q(X + R * 0.3, Y + R * 0.42, X, Y + R * 0.66) + "Z",
+        fill: outline, "fill-opacity": 0.22,
+      }));
       break;
   }
   return el("g", {}, kids);

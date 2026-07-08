@@ -66,6 +66,19 @@ test("the banners fragment carries one banner per realm seat", () => {
   assert.equal(banners, world.arms.length);
 });
 
+test("#25 banners default to colour, and hatch only when bannerStyle is ink", () => {
+  const world = generateWorld(defaultRecipe(42));
+  // default (bound atlas + CLI showcase): solid colour banners, no hatch patterns
+  assert.ok(!composeAtlas(world).bannersHtml.includes("<pattern"), "default banners are colour");
+  assert.ok(!composeAtlas(world, { bannerStyle: "nautical" }).bannersHtml.includes("<pattern"), "colour styles stay solid");
+  // ink: the Explorer shows Petra Sancta hatching at banner size
+  const ink = composeAtlas(world, { bannerStyle: "ink" }).bannersHtml;
+  assert.ok(ink.includes("<pattern"), "ink banners hatch the field");
+  // per-realm idSuffix keeps pattern ids collision-free across banners
+  const ids = [...ink.matchAll(/<pattern id="([^"]+)"/g)].map((m) => m[1]);
+  assert.equal(ids.length, new Set(ids).size, `banner pattern ids must be unique, got ${ids.join(", ")}`);
+});
+
 test("composeAtlas is deterministic for a seed", () => {
   const a = composeAtlas(generateWorld(defaultRecipe(7)));
   const b = composeAtlas(generateWorld(defaultRecipe(7)));

@@ -1,6 +1,5 @@
 import { el, type SvgNode } from "../../svg.ts";
-import type { Arms } from "../../../society/heraldry.ts";
-import type { ArmsPalette } from "./palette.ts";
+import type { Arms, Tincture } from "../../../society/heraldry.ts";
 
 /**
  * Shield geometry: the heater silhouette and the field divisions clipped to it.
@@ -50,15 +49,17 @@ export function shieldPath(g: Geom): string {
   );
 }
 
-/** Base field plus, for a divided shield, the second tincture's region. All
- *  are clipped to the silhouette, so simple bbox shapes give exact divisions. */
-export function fieldNodes(arms: Arms, g: Geom, pal: ArmsPalette): SvgNode[] {
+/** Base field plus, for a divided shield, the second tincture's region. All are
+ *  clipped to the silhouette, so simple bbox shapes give exact divisions. `fieldFill`
+ *  resolves a tincture to its region fill: a solid on colour styles, a hatch
+ *  `url(#…)` on the ink style. */
+export function fieldNodes(arms: Arms, g: Geom, fieldFill: (t: Tincture) => string): SvgNode[] {
   const base = el("rect", {
     x: n(g.x0), y: n(g.top), width: n(g.w), height: n(g.h),
-    fill: pal.tincture(arms.field[0]!),
+    fill: fieldFill(arms.field[0]!),
   });
   if (arms.division === "plain") return [base];
-  const t1 = pal.tincture(arms.field[1]!);
+  const t1 = fieldFill(arms.field[1]!);
   const polygon = (pts: string): SvgNode => el("path", { d: pts + "Z", fill: t1 });
   const P = (x: number, y: number, lead = "L"): string => `${lead}${n(x)} ${n(y)}`;
   switch (arms.division) {

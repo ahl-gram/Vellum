@@ -39,7 +39,7 @@ export function runInline(msg) {
     };
   }
   const world = generateWorld(defaultRecipe(msg.seed, msg.overrides));
-  return { ok: true, atlas: serializableAtlas(composeAtlas(world, { width: msg.width })) };
+  return { ok: true, atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })) };
 }
 
 export function runJob(msg) {
