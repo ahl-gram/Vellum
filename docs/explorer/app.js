@@ -306,7 +306,7 @@ bindBtn.addEventListener("click", () => {
   const theme = lastTheme;
   clearAtlas();
   status.textContent = "Binding the atlas…";
-  runJob({ kind: "atlas", seed: lastSeed, overrides: lastOverrides, width: 1500 })
+  runJob({ kind: "atlas", seed: lastSeed, overrides: lastOverrides, width: 1500, bannerStyle: style })
     .then((res) => {
       // discard if a redraw or a newer bind has superseded this one
       if (myGen !== drawGen || mySeq !== bindSeq) return;

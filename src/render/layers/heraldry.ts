@@ -2,7 +2,7 @@ import { el, renderSvg, type SvgNode } from "../svg.ts";
 import type { RenderCtx } from "../context.ts";
 import type { Box } from "../geometry.ts";
 import type { RealmAnchor } from "./feature-labels.ts";
-import type { Arms } from "../../society/heraldry.ts";
+import type { Arms, Tincture } from "../../society/heraldry.ts";
 import { type ArmsPalette, paletteForStyle } from "./heraldry/palette.ts";
 import { n, geom, shieldPath, fieldNodes } from "./heraldry/geom.ts";
 import { chargeNodes } from "./heraldry/charges.ts";
@@ -33,17 +33,30 @@ export function armsNode(
   const g = geom(cx, cy, size);
   const d = shieldPath(g);
   const clipId = `vellum-arms-${idSuffix}`;
-  return el("g", { class: "vellum-arms" }, [
+  // On the ink style the field regions hatch (Petra Sancta); charges keep the
+  // palette's solid tinctures. Colour styles fill the field solid (hatch === null),
+  // so their output is byte-identical to before this feature.
+  const fieldTinctures = arms.division === "plain"
+    ? [arms.field[0]!]
+    : [arms.field[0]!, arms.field[1]!];
+  const fieldFill = pal.hatch
+    ? (t: Tincture) => pal.hatch!.fill(t, idSuffix)
+    : (t: Tincture) => pal.tincture(t);
+  const defs = pal.hatch ? pal.hatch.defs(fieldTinctures, g.w, idSuffix) : [];
+  const body: SvgNode[] = [];
+  if (defs.length > 0) body.push(el("defs", {}, defs));
+  body.push(
     el("clipPath", { id: clipId }, [el("path", { d })]),
     el("g", { "clip-path": `url(#${clipId})` }, [
-      ...fieldNodes(arms, g, pal),
+      ...fieldNodes(arms, g, fieldFill),
       ...chargeNodes(arms, g, pal),
     ]),
     el("path", {
       d, fill: "none", stroke: pal.outline,
       "stroke-width": n(g.w * 0.045), "stroke-linejoin": "round",
     }),
-  ]);
+  );
+  return el("g", { class: "vellum-arms" }, body);
 }
 
 /** A standalone <svg> document for one coat of arms (atlas banners, previews). */

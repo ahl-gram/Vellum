@@ -29,7 +29,7 @@ self.onmessage = (e) => {
       self.postMessage({
         id: msg.id,
         ok: true,
-        atlas: serializableAtlas(composeAtlas(world, { width: msg.width })),
+        atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })),
       });
     }
   } catch (err) {
