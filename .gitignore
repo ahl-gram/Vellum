@@ -17,6 +17,7 @@ docs/gallery/
 # Transient review worktrees spawned by Claude Code workflows.
 .claude/worktrees/
 SESSION-NOTES.md
+SESSION-NOTES-ARCHIVE-*.md
 RESUME-HERE.md
 # Personal working-style instructions for Claude Code (local only, not published).
 CLAUDE.md
