@@ -28,6 +28,7 @@ import { start, cleanup } from "./e2e/harness.mjs";
 import { run as runExplorerCore } from "./e2e/suite-explorer-core.mjs";
 import { run as runCards } from "./e2e/suite-cards.mjs";
 import { run as runScrubber } from "./e2e/suite-scrubber.mjs";
+import { run as runVoyage } from "./e2e/suite-voyage.mjs";
 import { run as runHealth } from "./e2e/suite-health.mjs";
 import { run as runFallback } from "./e2e/suite-fallback.mjs";
 import { run as runHunt } from "./e2e/suite-hunt.mjs";
@@ -72,6 +73,7 @@ async function main() {
   await runExplorerCore(ctx);
   await runCards(ctx);
   await runScrubber(ctx);
+  await runVoyage(ctx);
   await runHealth(ctx);
   await runFallback(ctx);
   await runHunt(ctx);

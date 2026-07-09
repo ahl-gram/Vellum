@@ -111,3 +111,32 @@ export function buildVoyagePlan(
 
   return { ports, legs };
 }
+
+/**
+ * A frame of the sweep: which leg the marker is on, how far along it (0..1), and how
+ * many ports it has reached so far (the origin counts, so `arrived` runs 1..legCount+1).
+ */
+export type VoyageFrame = {
+  readonly legIndex: number;
+  readonly legT: number;
+  readonly arrived: number;
+};
+
+/**
+ * The animation timeline as a pure function of progress `t` (0..1), with time split
+ * EQUALLY across legs so the survey arrives at a steady cadence (one log line per
+ * port). Geometry (the port pixel positions, the marker) stays in the overlay; this
+ * is only the deterministic progress math, so it is unit-tested like the plan.
+ *
+ * Assumes a non-empty plan (ports = legCount + 1). `legCount <= 0` is the one-port
+ * survey: the marker rests at the origin, which counts as arrived.
+ */
+export function frameAt(legCount: number, t: number): VoyageFrame {
+  if (legCount <= 0) return { legIndex: -1, legT: 0, arrived: 1 };
+  const clamped = t < 0 ? 0 : t > 1 ? 1 : t;
+  const scaled = clamped * legCount;
+  const legIndex = Math.min(Math.floor(scaled), legCount - 1);
+  const legT = scaled - legIndex;
+  const arrived = Math.min(Math.floor(scaled) + 1, legCount + 1);
+  return { legIndex, legT, arrived };
+}

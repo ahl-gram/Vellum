@@ -236,6 +236,21 @@ button.primary:hover { background: #5d4831; }
 .chronicle-strip .cr-year { flex: 0 0 3rem; text-align: right;
   font-variant-numeric: tabular-nums; font-weight: 600; color: #857257; }
 .chronicle-strip .cr-text { color: #54452f; }
+/* The Wayfarer's Passage overlay (#119). A client-only SVG layer over the baked
+   chart: a dotted survey track threads port to port behind a little ship, and each
+   port's dated log line lands in #status. pointer-events:none so the #53 place-hit
+   cards keep working underneath; the track is a SIBLING <svg>, never inside the
+   chart, so Download SVG (the pristine lastSvg string) stays byte-identical. The rAF
+   sweep is JS, so its reduced-motion twin is the prefersReduce() gate in voyage.js
+   (full track shown at once); there is nothing here for /motion.css to collapse. */
+.voyage-overlay { position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 3; overflow: visible; }
+.voyage-track { fill: none; stroke: #5a4326; stroke-width: 3;
+  stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke; opacity: 0.95; }
+.voyage-ship path { fill: #f3ead2; stroke: #4a3826; stroke-width: 1.5;
+  stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.voyage-ship .voyage-mast { fill: #4a3826; }
 .caption { text-align: center; font-style: italic; color: #6b5a40;
   padding-top: 0.6rem; }
 footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;

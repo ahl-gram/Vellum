@@ -22,6 +22,15 @@ import {
   onDocKeydown,
   onDocClick,
 } from "./living-chart.js";
+import {
+  applyVoyage,
+  rearmVoyage,
+  exitVoyage,
+  clearVoyage,
+  cancelVoyageRaf,
+  voyageStepTo,
+  voyagePlan,
+} from "./voyage.js";
 
 const $ = (id) => document.getElementById(id);
 const seedInput = $("seed");
@@ -41,6 +50,7 @@ const bindBtn = $("bind");
 const versoEl = $("verso");
 const versoBtn = $("verso-turn");
 const chronicleChk = $("chronicle");
+const voyageChk = $("voyage");
 const scrubPlayBtn = $("scrub-play");
 const scrubRangeEl = $("scrub-range");
 
@@ -51,6 +61,7 @@ let lastSeed = 0;
 let lastOverrides = {};
 let lastStyle = "antique";
 let lastTheme = "";
+let lastManifest = null; // the place manifest of the chart on screen; feeds a voyage toggled on without a redraw
 
 // Sea-level slider (#55) gate. landTouched gates the manual override and the land=
 // hash param; until the user moves the slider, it auto-tracks each world's natural
@@ -189,6 +200,7 @@ function draw(opts) {
   cancelTurn();
   drawing = true;
   cancelScrubRaf(); // a redraw is about to wipe the overlay; stop any running sweep
+  cancelVoyageRaf(); // #119: likewise stop a running voyage sweep before the wipe
   bindBtn.disabled = true;
   versoBtn.disabled = true; // #116: no flip mid-draw; re-enabled when the draw resolves
   status.textContent = "Drafting…";
@@ -229,6 +241,7 @@ function draw(opts) {
       lastOverrides = overrides;
       lastStyle = style;
       lastTheme = theme;
+      lastManifest = res.manifest; // #119: the current world's manifest, for a voyage toggled on later
       // Clear "Drafting…" and caption now, so a 900ms turn never holds the status
       // line; Download already has the new bytes (lastSvg, above).
       const ms = (performance.now() - t0).toFixed(0);
@@ -248,6 +261,10 @@ function draw(opts) {
           buildPlaceOverlay(res.manifest);
           if (chronicleChk.checked) applyScrub();
           else clearScrub();
+          // #119: re-arm the voyage to the new chart, resting on the full track (only
+          // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
+          if (voyageChk.checked) rearmVoyage(res.manifest);
+          else clearVoyage();
         });
       } else {
         // Settle (#127): inject the chart and run the arrival ceremony (unless this is
@@ -262,6 +279,10 @@ function draw(opts) {
         // synchronously, so there is no flash of the present-day chart.
         if (chronicleChk.checked) applyScrub();
         else clearScrub();
+        // #119: re-arm the voyage to the new chart, resting on the full track (only
+        // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
+        if (voyageChk.checked) rearmVoyage(res.manifest);
+        else clearVoyage();
       }
       // #116: refresh the back face for the chart just drawn. Skipped on quiet mid-
       // drag redraws (like the arrival ceremony) so a sea-level drag does not churn an
@@ -364,11 +385,24 @@ landSlider.addEventListener("change", () => {
 // (no re-roll); Play/Pause runs the event-proportional sweep; a manual drag pauses
 // Play and rebases it so the next Play restarts from the beginning.
 chronicleChk.addEventListener("change", () => {
-  if (chronicleChk.checked) applyScrub();
-  else exitScrub();
+  if (chronicleChk.checked) {
+    // #119: chronicle and voyage are mutually exclusive; entering one leaves the other.
+    if (voyageChk.checked) { voyageChk.checked = false; exitVoyage(); }
+    applyScrub();
+  } else exitScrub();
 });
 scrubPlayBtn.addEventListener("click", togglePlay);
 scrubRangeEl.addEventListener("input", onManualScrub);
+
+// #119 The Wayfarer's Passage: the toggle enters/leaves voyage mode without a redraw
+// (no re-roll), animating the survey track over the current world; it is mutually
+// exclusive with the chronicle scrubber (both own the same overlay substrate).
+voyageChk.addEventListener("change", () => {
+  if (voyageChk.checked) {
+    if (chronicleChk.checked) { chronicleChk.checked = false; exitScrub(); }
+    applyVoyage(lastManifest);
+  } else exitVoyage();
+});
 
 // Living Chart overlay (#53): dismiss a pinned card with Escape or a click/tap off
 // any mark. Added once; both read living-chart's current overlay so they stay
@@ -381,6 +415,9 @@ window.__vellumUsesWorker = usesWorker;
 // Verification hooks for the headless byte-identity check (harmless in prod).
 window.__vellumRunJob = runJob;
 window.__vellumRunInline = runInline;
+// #119: deterministic voyage hooks for the e2e (drive the sweep by port, read the plan).
+window.__vellumVoyageStepTo = voyageStepTo;
+window.__vellumVoyagePlan = voyagePlan;
 
 seedInput.value = String(randomSeed());
 readHash();
