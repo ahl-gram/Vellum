@@ -6,6 +6,7 @@ import { centroidOf, principalAngle, spacedTextBox, textBox } from "../geometry.
 import { largestBlob } from "../blobs.ts";
 import type { RenderCtx } from "../context.ts";
 import { reachPlacements, type RiverLabelPlacement } from "./river-label-placement.ts";
+import { placeRealmLabel } from "./realm-label-placement.ts";
 
 const FOREST_BIOMES: ReadonlySet<number> = new Set<number>([
   BIOMES.temperateForest,
@@ -85,7 +86,9 @@ export function featureLabelsLayer(ctx: RenderCtx): {
   // --- realm names over their heartlands ---
   world.names.realms.forEach((name, realm) => {
     const blob = largestBlob(w, h, (i) => world.realms.labels[i] === realm);
-    if (blob.length < 60) return;
+    // A realm with no cells cannot be labelled anywhere; every other realm gets a
+    // name, however small or however crowded its heartland (#145).
+    if (blob.length === 0) return;
     const pts = blob.map((i) => ({
       x: proj.px(i % w),
       y: proj.py((i / w) | 0),
@@ -93,22 +96,29 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     const c = centroidOf(pts);
     const fs = 16.5 * k;
     const ls = 4 * k;
-    const placedY = offsetCandidates(c.y, k).find((cy) =>
-      labels.tryClaim(spacedTextBox(c.x, cy, name, fs, ls), 4),
-    );
-    if (placedY === undefined) return;
+    const { x: placedX, y: placedY } = placeRealmLabel({
+      blob,
+      gridW: w,
+      proj,
+      centroid: c,
+      yCandidates: offsetCandidates(c.y, k),
+      name,
+      fs,
+      ls,
+      arena: labels,
+    });
     // The label renders all-caps (name.toUpperCase() below), which runs wider
     // than spacedTextBox's 0.56 mixed-case factor. Size the shield anchor with a
     // caps-aware width so a side-placed coat of arms clears the final letters
     // instead of tucking over them. (Anchor-only: heraldry consumes this, so it
     // does not move the no-arms committed charts.)
     const labelW = name.length * (fs * 0.72 + ls);
-    realmAnchors.push({ realm, cx: c.x, cy: placedY - 0.4 * fs, halfW: labelW / 2, halfH: 0.6 * fs });
+    realmAnchors.push({ realm, cx: placedX, cy: placedY - 0.4 * fs, halfW: labelW / 2, halfH: 0.6 * fs });
     nodes.push(
       el(
         "text",
         {
-          x: c.x, y: placedY, "text-anchor": "middle",
+          x: placedX, y: placedY, "text-anchor": "middle",
           "font-family": style.fontFamilyTitle,
           "font-size": fs.toFixed(1),
           // #158: bold + near-opaque + a fatter halo so a realm name reads over
