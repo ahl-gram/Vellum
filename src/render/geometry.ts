@@ -87,6 +87,19 @@ export function textBox(
   return { x: left, y: y - fontSize, w, h };
 }
 
+/**
+ * Average glyph width as a fraction of the font size (#175). Capitals run wider
+ * than mixed case, so a label that renders `.toUpperCase()` must be measured with
+ * `caps` or it reserves about 20% less space than it draws, and two labels can
+ * both claim successfully while their glyphs collide. Defined once, here.
+ */
+export const WIDTH_FACTOR = {
+  /** Sea and forest names: drawn as written, italic. */
+  mixed: 0.56,
+  /** Realm and mountain-range names: drawn `.toUpperCase()`. */
+  caps: 0.72,
+} as const;
+
 /** Text box widened for letter-spacing, centered on (x, y). */
 export function spacedTextBox(
   x: number,
@@ -94,7 +107,47 @@ export function spacedTextBox(
   text: string,
   fontSize: number,
   letterSpacing: number,
+  widthFactor: number = WIDTH_FACTOR.mixed,
 ): Box {
-  const w = text.length * (fontSize * 0.56 + letterSpacing);
+  const w = text.length * (fontSize * widthFactor + letterSpacing);
   return { x: x - w / 2, y: y - fontSize, w, h: fontSize * 1.2 };
+}
+
+/**
+ * A rotated label's footprint, as a chain of axis-aligned boxes hugging the ink
+ * (#175). The arena stores axis-aligned boxes, so a spun label cannot reserve its
+ * true oriented rectangle. One bounding box of the whole rotation over-reserves
+ * badly (a 296x17 run at 32 degrees bounds to 260x171, ten times too tall) and
+ * would push the label off the chart entirely; slicing along the baseline first
+ * keeps each slice's bounding box close to the ink it covers.
+ */
+export function rotatedSpanBoxes(
+  box: Box,
+  degrees: number,
+  originX: number,
+  originY: number,
+  segments = 6,
+): Box[] {
+  const a = (degrees * Math.PI) / 180;
+  const cos = Math.cos(a);
+  const sin = Math.sin(a);
+  const spin = (px: number, py: number) => {
+    const dx = px - originX;
+    const dy = py - originY;
+    return { x: originX + dx * cos - dy * sin, y: originY + dx * sin + dy * cos };
+  };
+
+  const out: Box[] = [];
+  const step = box.w / segments;
+  for (let i = 0; i < segments; i++) {
+    const x0 = box.x + i * step;
+    const x1 = x0 + step;
+    const corners = [spin(x0, box.y), spin(x1, box.y), spin(x1, box.y + box.h), spin(x0, box.y + box.h)];
+    const xs = corners.map((p) => p.x);
+    const ys = corners.map((p) => p.y);
+    const minX = Math.min(...xs);
+    const minY = Math.min(...ys);
+    out.push({ x: minX, y: minY, w: Math.max(...xs) - minX, h: Math.max(...ys) - minY });
+  }
+  return out;
 }

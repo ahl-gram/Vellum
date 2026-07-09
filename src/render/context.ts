@@ -28,6 +28,8 @@ export type RenderCtx = {
 /** Greedy first-come label collision arena, local to one render pass. */
 export type LabelArena = {
   tryClaim(box: Box, pad?: number): boolean;
+  /** All-or-nothing: one label whose footprint is several boxes (a rotated run). */
+  tryClaimAll(boxes: ReadonlyArray<Box>, pad?: number): boolean;
   claim(box: Box): void;
 };
 
@@ -39,6 +41,18 @@ export function createLabelArena(): LabelArena {
         if (boxesOverlap(b, box, pad)) return false;
       }
       placed.push(box);
+      return true;
+    },
+    // Every box is tested against the arena BEFORE any is claimed, so a rejected
+    // label never leaves part of itself reserved (#175). The boxes are slices of
+    // one label, so they are not tested against each other.
+    tryClaimAll(boxes: ReadonlyArray<Box>, pad = 2): boolean {
+      for (const box of boxes) {
+        for (const b of placed) {
+          if (boxesOverlap(b, box, pad)) return false;
+        }
+      }
+      placed.push(...boxes);
       return true;
     },
     claim(box: Box): void {
