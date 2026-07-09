@@ -2,7 +2,8 @@ import { BIOMES } from "../../climate/biomes.ts";
 import { clamp } from "../../core/math.ts";
 import { chaikinSmooth } from "../../terrain/contours.ts";
 import { el, type SvgNode } from "../svg.ts";
-import { centroidOf, principalAngle, spacedTextBox, textBox } from "../geometry.ts";
+import { centroidOf, principalAngle, rotatedSpanBoxes, spacedTextBox, textBox, WIDTH_FACTOR, type Box, type Pt } from "../geometry.ts";
+import { interiorProbes } from "./label-probes.ts";
 import { largestBlob } from "../blobs.ts";
 import type { RenderCtx } from "../context.ts";
 import { reachPlacements, type RiverLabelPlacement } from "./river-label-placement.ts";
@@ -83,6 +84,103 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     }
   }
 
+  // --- mountain range label over the LARGEST connected range ---
+  //
+  // CLAIM ORDER IS LOAD-BEARING (#175). The range name claims BEFORE the realm
+  // names, because it is pinned: it can only sit on its own ridge, at its own
+  // angle. A realm name can roam its whole heartland and, since #145, is force-
+  // placed if it must be. So first refusal goes to the label that cannot move.
+  // Claiming realms first (the pre-#175 order) starved the range name, and once
+  // its box told the truth it vanished from about one chart in eight.
+  //
+  // Painting in this order also puts the realm names ON TOP of the range's opaque
+  // paper casing, instead of the casing washing over them.
+  if (world.names.range) {
+    const blob = largestBlob(w, h, (i) => {
+      const b = world.biomes[i] as number;
+      return b === BIOMES.alpine || b === BIOMES.snow;
+    });
+    if (blob.length >= 10) {
+      const peaks = blob.map((i) => ({
+        x: proj.px(i % w),
+        y: proj.py((i / w) | 0),
+      }));
+      const c = centroidOf(peaks);
+      const angle = clamp((principalAngle(peaks) * 180) / Math.PI, -32, 32);
+      const padX = 7 * k;
+      const padY = 4 * k;
+      // #175: the range name renders .toUpperCase() and is drawn ROTATED along the
+      // ridge, behind an opaque paper casing that is painted OVER the realm names.
+      // It must therefore reserve what it paints: caps width, padded out to the
+      // casing, and spun into a chain of boxes that hug the ink rather than one
+      // bounding box ten times taller than the text.
+      const claimAt = (cx: number, cy: number, fs: number): Box[] => {
+        const text = spacedTextBox(cx, cy, world.names.range!, fs, 3 * k, WIDTH_FACTOR.caps);
+        const casing = {
+          x: text.x - padX,
+          y: text.y - padY,
+          w: text.w + 2 * padX,
+          h: text.h + 2 * padY,
+        };
+        return rotatedSpanBoxes(casing, angle, cx, cy);
+      };
+      // The honest claim needs more room than the old dishonest one, so the label
+      // must be able to give ground rather than vanish. It escalates the way the
+      // realm name does (#145: the historical ladder first, then along the ridge
+      // itself), and then, like the sea name above, SHRINKS to fit rather than
+      // dropping off the chart.
+      let placed: (Pt & { fs: number }) | undefined;
+      for (const fsBase of [14.5, 13, 11.5, 10]) {
+        const fs = fsBase * k;
+        const candidates: Pt[] = [
+          ...offsetCandidates(c.y, k).map((cy) => ({ x: c.x, y: cy })),
+          ...interiorProbes(blob, w, proj, c),
+        ];
+        const hit = candidates.find((p) => labels.tryClaimAll(claimAt(p.x, p.y, fs), 4));
+        if (hit) {
+          placed = { ...hit, fs };
+          break;
+        }
+      }
+      if (placed !== undefined) {
+        const { x: placedX, y: placedY, fs } = placed;
+        // a soft paper casing clears a clean lane through the dense mountain
+        // glyphs so the spaced capitals read; the opaque fill + halo do the
+        // rest. Rotated with the label and drawn first, so text sits on top.
+        const box = spacedTextBox(placedX, placedY, world.names.range, fs, 3 * k, WIDTH_FACTOR.caps);
+        const spin = `rotate(${angle.toFixed(1)} ${placedX.toFixed(1)} ${placedY.toFixed(1)})`;
+        nodes.push(
+          el("rect", {
+            class: "range-casing",
+            x: (box.x - padX).toFixed(1),
+            y: (box.y - padY).toFixed(1),
+            width: (box.w + 2 * padX).toFixed(1),
+            height: (box.h + 2 * padY).toFixed(1),
+            rx: (5 * k).toFixed(1),
+            transform: spin,
+            fill: style.paper,
+            "fill-opacity": 0.72,
+          }),
+          el(
+            "text",
+            {
+              x: placedX, y: placedY, "text-anchor": "middle",
+              transform: spin,
+              "font-family": style.fontFamily,
+              "font-size": fs.toFixed(1),
+              "letter-spacing": (3 * k).toFixed(1),
+              fill: style.labelColor,
+              stroke: style.labelHalo,
+              "stroke-width": 3 * k,
+              "paint-order": "stroke",
+            },
+            [world.names.range.toUpperCase()],
+          ),
+        );
+      }
+    }
+  }
+
   // --- realm names over their heartlands ---
   world.names.realms.forEach((name, realm) => {
     const blob = largestBlob(w, h, (i) => world.realms.labels[i] === realm);
@@ -107,12 +205,10 @@ export function featureLabelsLayer(ctx: RenderCtx): {
       ls,
       arena: labels,
     });
-    // The label renders all-caps (name.toUpperCase() below), which runs wider
-    // than spacedTextBox's 0.56 mixed-case factor. Size the shield anchor with a
-    // caps-aware width so a side-placed coat of arms clears the final letters
-    // instead of tucking over them. (Anchor-only: heraldry consumes this, so it
-    // does not move the no-arms committed charts.)
-    const labelW = name.length * (fs * 0.72 + ls);
+    // Size the shield anchor with the same caps-aware width the label now claims,
+    // so a side-placed coat of arms clears the final letters instead of tucking
+    // over them.
+    const labelW = name.length * (fs * WIDTH_FACTOR.caps + ls);
     realmAnchors.push({ realm, cx: placedX, cy: placedY - 0.4 * fs, halfW: labelW / 2, halfH: 0.6 * fs });
     nodes.push(
       el(
@@ -204,63 +300,6 @@ export function featureLabelsLayer(ctx: RenderCtx): {
         [lake.name],
       ),
     );
-  }
-
-  // --- mountain range label over the LARGEST connected range ---
-  if (world.names.range) {
-    const blob = largestBlob(w, h, (i) => {
-      const b = world.biomes[i] as number;
-      return b === BIOMES.alpine || b === BIOMES.snow;
-    });
-    if (blob.length >= 10) {
-      const peaks = blob.map((i) => ({
-        x: proj.px(i % w),
-        y: proj.py((i / w) | 0),
-      }));
-      const c = centroidOf(peaks);
-      const angle = clamp((principalAngle(peaks) * 180) / Math.PI, -32, 32);
-      const fs = 14.5 * k;
-      const placedY = offsetCandidates(c.y, k).find((cy) =>
-        labels.tryClaim(spacedTextBox(c.x, cy, world.names.range!, fs, 3 * k), 4),
-      );
-      if (placedY !== undefined) {
-        // a soft paper casing clears a clean lane through the dense mountain
-        // glyphs so the spaced capitals read; the opaque fill + halo do the
-        // rest. Rotated with the label and drawn first, so text sits on top.
-        const box = spacedTextBox(c.x, placedY, world.names.range, fs, 3 * k);
-        const padX = 7 * k;
-        const padY = 4 * k;
-        const spin = `rotate(${angle.toFixed(1)} ${c.x.toFixed(1)} ${placedY.toFixed(1)})`;
-        nodes.push(
-          el("rect", {
-            class: "range-casing",
-            x: (box.x - padX).toFixed(1),
-            y: (box.y - padY).toFixed(1),
-            width: (box.w + 2 * padX).toFixed(1),
-            height: (box.h + 2 * padY).toFixed(1),
-            rx: (5 * k).toFixed(1),
-            transform: spin,
-            fill: style.paper,
-            "fill-opacity": 0.72,
-          }),
-          el(
-            "text",
-            {
-              x: c.x, y: placedY, "text-anchor": "middle",
-              transform: spin,
-              "font-family": style.fontFamily,
-              "font-size": fs.toFixed(1),
-              "letter-spacing": (3 * k).toFixed(1),
-              fill: style.labelColor,
-              stroke: style.labelHalo,
-              "stroke-width": 3 * k,
-              "paint-order": "stroke",
-            },
-            [world.names.range.toUpperCase()],
-          ),
-        );
-      }
-    }
   }
 
   // --- forest label at the largest forest blob ---
