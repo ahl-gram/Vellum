@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { PlaceMark } from "../../src/render/place-manifest.ts";
-import { buildVoyagePlan } from "../../src/render/voyage.ts";
+import { buildVoyagePlan, frameAt } from "../../src/render/voyage.ts";
 
 // Unit tests for #118 (Sub 1 of the Wayfarer's Passage epic #117): the pure core
 // that turns a place manifest into a deterministic survey itinerary. No DOM, no
@@ -150,6 +150,53 @@ test("does not mutate the caller's places array (immutability rule)", () => {
   const plan = buildVoyagePlan(input, 1059);
   assert.equal(plan.ports.length, 4);
   assert.deepEqual(input, snapshot);
+});
+
+// --- frameAt: the pure animation timeline (#119) ------------------------------
+
+test("frameAt: a one-port survey rests at the origin", () => {
+  assert.deepEqual(frameAt(0, 0), { legIndex: -1, legT: 0, arrived: 1 });
+  assert.deepEqual(frameAt(0, 0.7), { legIndex: -1, legT: 0, arrived: 1 });
+  assert.deepEqual(frameAt(0, 1), { legIndex: -1, legT: 0, arrived: 1 });
+});
+
+test("frameAt: t=0 sits at the origin, about to start the first leg", () => {
+  assert.deepEqual(frameAt(3, 0), { legIndex: 0, legT: 0, arrived: 1 });
+});
+
+test("frameAt: t=1 completes the last leg with every port arrived", () => {
+  assert.deepEqual(frameAt(3, 1), { legIndex: 2, legT: 1, arrived: 4 });
+});
+
+test("frameAt: mid-leg splits equally across legs", () => {
+  // 3 legs, t=0.5 -> scaled 1.5 -> leg 1 at half, ports 0 and 1 arrived.
+  assert.deepEqual(frameAt(3, 0.5), { legIndex: 1, legT: 0.5, arrived: 2 });
+});
+
+test("frameAt: an exact port arrival lands at the start of the next leg", () => {
+  // 4 legs, t=2/4 -> just reached port 2, about to start leg 2.
+  assert.deepEqual(frameAt(4, 0.5), { legIndex: 2, legT: 0, arrived: 3 });
+});
+
+test("frameAt: t is clamped to [0,1]", () => {
+  assert.deepEqual(frameAt(3, -0.5), { legIndex: 0, legT: 0, arrived: 1 });
+  assert.deepEqual(frameAt(3, 1.5), { legIndex: 2, legT: 1, arrived: 4 });
+});
+
+test("frameAt: stepping to port N arrives exactly N+1 ports (the e2e hook contract)", () => {
+  const legCount = 5;
+  for (let n = 0; n <= legCount; n++) {
+    assert.equal(frameAt(legCount, n / legCount).arrived, n + 1, `port ${n}`);
+  }
+});
+
+test("frameAt: arrived never decreases as t advances", () => {
+  let prev = 0;
+  for (let i = 0; i <= 20; i++) {
+    const { arrived } = frameAt(4, i / 20);
+    assert.ok(arrived >= prev, `arrived went backwards at t=${i / 20}`);
+    prev = arrived;
+  }
 });
 
 test("origin, arrival, and village/town use distinct log templates", () => {
