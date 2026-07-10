@@ -1,4 +1,5 @@
 import type { PlaceMark } from "./place-manifest.ts";
+import { orderTour } from "./voyage-tour.ts";
 
 /**
  * The pure core of the Wayfarer's Passage (#117, Sub 1 = #118). It turns a place
@@ -36,30 +37,6 @@ export type VoyagePlan = {
 
 const EMPTY_PLAN: VoyagePlan = { ports: [], legs: [] };
 
-/** Squared Euclidean distance on the 0..1 projected fractions; sqrt is needless for ordering. */
-function distSq(a: PlaceMark, b: PlaceMark): number {
-  const dx = a.nx - b.nx;
-  const dy = a.ny - b.ny;
-  return dx * dx + dy * dy;
-}
-
-/**
- * The nearest unvisited port to `from`, ties broken by the lower `idx` so the
- * choice never depends on array order. Returns null when none remain.
- */
-function nearest(from: PlaceMark, remaining: ReadonlyArray<PlaceMark>): PlaceMark | null {
-  let best: PlaceMark | null = null;
-  let bestDist = Infinity;
-  for (const cand of remaining) {
-    const d = distSq(from, cand);
-    if (d < bestDist || (d === bestDist && best !== null && cand.idx < best.idx)) {
-      best = cand;
-      bestDist = d;
-    }
-  }
-  return best;
-}
-
 function logLineFor(place: PlaceMark, presentYear: number, isOrigin: boolean): string {
   if (isOrigin) {
     return `Year ${presentYear}: set out from ${place.name}, seat of this survey, raised in the year ${place.founded}.`;
@@ -72,9 +49,10 @@ function logLineFor(place: PlaceMark, presentYear: number, isOrigin: boolean): s
  * Build a deterministic voyage itinerary from a place manifest.
  *
  * The survey departs the single capital (its home port, included even if the
- * chronicle later ruined it) and greedily visits every living town and village
- * once by nearest-neighbour, as an open path with no return leg. A world with no
- * capital has no survey and yields an empty plan.
+ * chronicle later ruined it) and visits every living town and village once, ordered
+ * as an open path that sweeps AROUND the world rather than backtracking (the tour
+ * algorithm lives in voyage-tour.ts). A world with no capital has no survey and
+ * yields an empty plan.
  */
 export function buildVoyagePlan(
   places: ReadonlyArray<PlaceMark>,
@@ -83,20 +61,14 @@ export function buildVoyagePlan(
   const origin = places.find((p) => p.kind === "capital");
   if (!origin) return EMPTY_PLAN;
 
-  // Destinations: every living town/village. The origin is excluded by idx (so a
-  // ruined capital still departs) and ruins are excluded (a survey visits the
-  // living world).
-  const remaining = places.filter((p) => p.idx !== origin.idx && !p.ruined);
-
-  const visited: PlaceMark[] = [origin];
-  let current = origin;
-  while (remaining.length > 0) {
-    const next = nearest(current, remaining);
-    if (!next) break;
-    visited.push(next);
-    remaining.splice(remaining.indexOf(next), 1);
-    current = next;
-  }
+  // The survey visits the capital plus every living town/village. The origin is kept
+  // even if the chronicle later ruined it (a ruined capital still departs); other
+  // ruins are excluded. Ordering keys on nx/ny (chart fractions), the same layout the
+  // marker draws over, so the drawn route matches the plotted one.
+  const survey = places.filter((p) => p.idx === origin.idx || !p.ruined);
+  const order = orderTour(survey.map((p) => ({ idx: p.idx, x: p.nx, y: p.ny })), origin.idx);
+  const byIdx = new Map(places.map((p) => [p.idx, p]));
+  const visited: PlaceMark[] = order.map((idx) => byIdx.get(idx)!);
 
   const ports: VoyagePort[] = visited.map((p, i) => ({
     idx: p.idx,
