@@ -15,6 +15,42 @@ import type { Pt } from "../core/rdp.ts";
  *     rider back and forth every few frames (headingAt, resolveFacing).
  */
 
+/**
+ * Pacing (#120 follow-up). v1 split a fixed 12s EQUALLY across legs, so the mark's
+ * speed scaled with a leg's length and a long crossing blurred past. These give each
+ * leg a duration by its length instead, anchored to the near-town speed the short legs
+ * already had, with a mild speed-up for long legs (never a linear one). The whole sweep
+ * therefore grows with the world, capped, rather than being pinned to 12s.
+ *
+ * PACE_EXP is the knob: 1 is constant speed (a long leg takes proportionally longer),
+ * 0 is v1's equal-time (speed scales with length). 0.55 gives a ~1000px crossing about
+ * 2.6x the near-town speed while still running ~1.6s. PACE_MS_PER_UNIT sets the baseline
+ * (a ~120px near leg runs ~0.5s). Picked by eye; retune here.
+ */
+export const PACE_EXP = 0.55;
+export const PACE_MS_PER_UNIT = 34;
+export const MIN_LEG_MS = 300;
+export const MAX_SWEEP_MS = 26000;
+
+/**
+ * Per-leg animation durations (ms) from per-leg pixel lengths. Sublinear in length so
+ * long legs move faster per pixel than short ones but still take longer overall; floored
+ * so a tiny hop still reads; the total is capped by scaling every leg down together, which
+ * preserves the relative pacing. Pure, so play()'s real-time loop stays a thin consumer.
+ */
+export function legDurations(lengths: ReadonlyArray<number>): number[] {
+  if (lengths.length === 0) return [];
+  const raw = lengths.map((len) =>
+    Math.max(MIN_LEG_MS, PACE_MS_PER_UNIT * Math.pow(Math.max(len, 0), PACE_EXP)),
+  );
+  const total = raw.reduce((a, b) => a + b, 0);
+  if (total > MAX_SWEEP_MS) {
+    const k = MAX_SWEEP_MS / total;
+    return raw.map((d) => d * k);
+  }
+  return raw;
+}
+
 /** Degrees. The tilt is a damped function of climb, never the literal bearing. */
 export const MAX_TILT = 24;
 

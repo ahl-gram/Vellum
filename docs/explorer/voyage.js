@@ -28,6 +28,7 @@ import {
   tiltFor,
   resolveFacing,
   netFacing,
+  legDurations,
 } from "./engine/render/voyage-geometry.js";
 import { paintVersoTrack, clearVersoTrack } from "./verso.js";
 
@@ -36,9 +37,10 @@ const versoEl = document.getElementById("verso");
 const statusEl = document.getElementById("status");
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-// The full sweep runs about 12 seconds, split equally across legs so the survey
-// arrives at a steady cadence (one log line per port), whatever each leg's length.
-const SWEEP_MS = 12000;
+// The sweep no longer runs a fixed duration split equally: v1 did that, so a long
+// crossing blurred past while a near-town hop crawled. Each leg is now timed by its
+// length (legDurations), anchored to the near-town speed, so the whole sweep grows with
+// the world (capped inside legDurations). The pacing knobs live in voyage-geometry.js.
 
 // Both marks are drawn in PROFILE, pointing +x (bow / muzzle east), with the origin on
 // their ground contact line: the ship's waterline, the horse's hooves. So the mark stands
@@ -53,16 +55,19 @@ const SHIP_PARTS = [
   { d: "M -8 -19 L 7 -19 Q 12 -13 7 -7 L -8 -7 Q -4 -13 -8 -19 Z" },
   { d: "M -1 -23 L 6 -24 L -1 -25.5 Z", cls: "ink" },
 ];
-// A horse walking east under a cloaked, hatted rider. Tail, barrel, arched neck and head,
-// four legs mid-stride, the rider, then the fine work (hat brim, rein, ears).
+// A horse walking east under a cloaked, hatted rider, in profile with the hooves on
+// the baseline: a flowing tail, the barrel, the arched neck rising to a small eared
+// head, four legs mid-stride, then the rider (torso, hatted head, hat brim, rein).
 const RIDER_PARTS = [
-  { d: "M -9 -13 Q -14 -12 -14.5 -5", cls: "tail" },
-  { d: "M -9 -14 Q -2 -16.5 6 -13.5 Q 8.5 -12 8 -9 Q 0 -6.5 -8 -8 Q -11 -10 -9 -14 Z" },
-  { d: "M 4 -13 Q 9 -14.5 11 -19 Q 12 -22 15 -21.5 Q 17.5 -21 17 -19 Q 16.5 -17.5 14 -17 Q 11.5 -15 10 -11 Z" },
-  { d: "M 5 -9 L 5.5 -4 L 7.5 0 M 2.5 -9 L 2 -4 L 3 0 M -7.5 -10 Q -9 -6 -7 -4 L -6.5 0 M -4.5 -10 Q -6 -6 -4.2 -4 L -3.8 0", cls: "leg" },
-  { d: "M -1.5 -13.5 L -3 -18.5 Q -1 -20 1.5 -19.8 L 2.5 -13.5 Z" },
-  { circle: [0.4, -21.6, 2.1], cls: "ink" },
-  { d: "M -2.4 -22.8 L 3.4 -22.8 M 1.5 -17.5 Q 6 -17 10 -16.5 M 13.8 -21.6 L 14.3 -23.6 M 15.6 -21.4 L 16.6 -23.2", cls: "detail" },
+  { d: "M -13 -11 Q -18 -10 -21 -4", cls: "tail" },
+  { d: "M -13 -11 Q -14 -14 -10 -14 L 4 -14 Q 8 -14 9 -11 L 9 -8 Q 8 -6 3 -6 L -8 -6 Q -12 -6 -13 -11 Z" },
+  { d: "M 5 -13 Q 9 -15 12 -21 Q 13 -24 16 -24 L 19 -22 Q 17 -20 15 -20 Q 14 -18 13 -15 Q 11 -12 6 -12 Z" },
+  { d: "M 15 -24 L 16 -27 M 17 -23 L 19 -26", cls: "detail" },
+  { d: "M -9 -6 L -10 0 M -5 -6 L -6 0 M 3 -7 L 4 0 M 7 -8 L 8 0", cls: "leg" },
+  { d: "M -3 -13 L -4 -19 Q -1 -21 2 -20 L 3 -13 Z" },
+  { circle: [-0.5, -22, 2.3], cls: "ink" },
+  { d: "M -3.4 -23.4 L 2.6 -23.4", cls: "detail" },
+  { d: "M 2 -17 Q 7 -18 11 -18", cls: "detail" },
 ];
 
 // The current voyage session, or null when the toggle is off. Rebuilt every draw
@@ -124,6 +129,14 @@ function buildVoyage(manifest, survey) {
     geom: buildLegGeometry(leg.points.map((p) => ({ x: proj.px(p.x), y: proj.py(p.y) }))),
   }));
 
+  // Per-leg animation time by length (#120 follow-up), plus the cumulative start times
+  // play() reads to map real elapsed ms to which leg the mark is on. cumMs has legs+1
+  // entries: cumMs[i] is when leg i begins, cumMs[legs] is the whole sweep.
+  const durations = legDurations(legs.map((l) => l.geom.total));
+  const cumMs = [0];
+  for (const d of durations) cumMs.push(cumMs[cumMs.length - 1] + d);
+  const totalMs = cumMs[cumMs.length - 1];
+
   const byIdx = new Map(manifest.places.map((p) => [p.idx, p]));
   const origin = byIdx.get(plan.ports[0].idx);
   const originPt = { x: proj.px(origin.gx), y: proj.py(origin.gy) };
@@ -146,6 +159,8 @@ function buildVoyage(manifest, survey) {
   voyage = {
     plan,
     legs,
+    cumMs,
+    totalMs,
     originPt,
     svg,
     trackEl,
@@ -258,16 +273,31 @@ export function syncVersoTrack() {
 }
 
 function play(session) {
+  const legCount = session.legs.length;
+  // A one-port survey (no legs) has nothing to sweep: rest at the origin at once.
+  if (legCount <= 0 || session.totalMs <= 0) {
+    paintFrame(session, 1);
+    syncVersoTrack();
+    return;
+  }
   const begin = performance.now();
   const tick = (now) => {
     if (!voyage || voyage !== session || !session.rafId) return; // superseded or cancelled
-    const t = Math.min((now - begin) / SWEEP_MS, 1);
-    paintFrame(session, t);
-    if (t >= 1) {
+    const elapsed = now - begin;
+    if (elapsed >= session.totalMs) {
+      paintFrame(session, 1);
       session.rafId = 0; // the full track now rests on the chart
       syncVersoTrack(); // #174: at rest, so the ink may bleed through to the back
       return;
     }
+    // Which leg is the mark on, and how far along it? Convert to the equal-split global
+    // t that frameAt expects (t = (legIndex + legT)/legCount), so paintFrame and the
+    // deterministic step hooks keep sharing one timeline; only the pacing differs.
+    let i = 0;
+    while (i < legCount - 1 && session.cumMs[i + 1] <= elapsed) i++;
+    const dur = session.cumMs[i + 1] - session.cumMs[i];
+    const legT = dur > 0 ? Math.min((elapsed - session.cumMs[i]) / dur, 1) : 0;
+    paintFrame(session, (i + legT) / legCount);
     session.rafId = requestAnimationFrame(tick);
   };
   session.rafId = requestAnimationFrame(tick);

@@ -8,9 +8,12 @@ import {
   tiltFor,
   resolveFacing,
   netFacing,
+  legDurations,
   MAX_TILT,
   LOOKAHEAD,
   FACING_DEADBAND,
+  MIN_LEG_MS,
+  MAX_SWEEP_MS,
   type Facing,
 } from "../../src/render/voyage-geometry.ts";
 
@@ -223,4 +226,44 @@ test("geometry helpers do not mutate their inputs (immutability rule)", () => {
   pointAtDistance(g, 5);
   headingAt(g, 5);
   assert.deepEqual(pts, copy);
+});
+
+// --- pacing (#120 follow-up): time by length, not equal per leg -------------
+
+test("legDurations is monotonic: a longer leg never gets less time", () => {
+  const d = legDurations([100, 200, 400, 800]);
+  for (let i = 1; i < d.length; i++) assert.ok(d[i]! >= d[i - 1]!, `leg ${i} shorter time than ${i - 1}`);
+});
+
+test("legDurations is SUBLINEAR: doubling length less than doubles time (long legs move faster)", () => {
+  const [a, b] = legDurations([200, 400]);
+  assert.ok(b! < 2 * a!, `400px got ${b}ms, >= 2x the 200px ${a}ms (that is equal-or-worse than constant speed)`);
+  assert.ok(b! > a!, "but a longer leg still takes longer");
+});
+
+test("legDurations floors a tiny hop so it still reads", () => {
+  const [d] = legDurations([1]);
+  assert.equal(d, MIN_LEG_MS);
+});
+
+test("legDurations caps the whole sweep, scaling every leg down together", () => {
+  // Many long legs would blow past MAX_SWEEP_MS; the total is clamped and the relative
+  // pacing preserved (each leg keeps its share).
+  const many = new Array(40).fill(1500);
+  const d = legDurations(many);
+  const total = d.reduce((s, x) => s + x, 0);
+  assert.ok(total <= MAX_SWEEP_MS + 1e-6, `total ${total} exceeds the cap`);
+  // all equal-length legs keep equal durations after scaling
+  assert.ok(d.every((x) => Math.abs(x - d[0]!) < 1e-6));
+});
+
+test("legDurations is deterministic and handles the empty case", () => {
+  assert.deepEqual(legDurations([]), []);
+  assert.deepEqual(legDurations([120, 480]), legDurations([120, 480]));
+});
+
+test("legDurations anchors the near-town baseline near half a second", () => {
+  // A ~120px near-town leg should run in the ballpark the short legs already felt good at.
+  const [near] = legDurations([120]);
+  assert.ok(near! > 350 && near! < 750, `near-town leg ran ${near}ms, outside the ~0.5s baseline`);
 });
