@@ -47,8 +47,12 @@ export async function run(ctx) {
   const lastPort = plan.legs; // the last port's 0-based index == leg count
   const midPort = Math.max(1, Math.floor(plan.legs / 2));
 
+  // #120: the mark is a ship on sea legs and a rider on road/straight legs, so select
+  // whichever is currently displayed. Reading .voyage-ship unconditionally throws on the
+  // ~94% of legs that ride.
+  const markFn = `const mark=()=>{const s=document.querySelector("#map .voyage-ship");const r=document.querySelector("#map .voyage-rider");return (s&&s.getAttribute("display")!=="none")?s:r;};`;
   const stepTo = (n) =>
-    evaluate(`(()=>{window.__vellumVoyageStepTo(${n});const t=document.querySelector(".voyage-ship").getAttribute("transform");const pts=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ").length;return{status:document.getElementById("status").textContent,tf:t,pts};})()`);
+    evaluate(`(()=>{${markFn}window.__vellumVoyageStepTo(${n});const m=mark();const t=m?m.getAttribute("transform"):"";const glyph=m?m.getAttribute("class"):"";const pts=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ").length;return{status:document.getElementById("status").textContent,tf:t,glyph,pts};})()`);
 
   // W2: step to the origin -> the departure log line shows.
   const s0 = await stepTo(0);
@@ -60,7 +64,9 @@ export async function run(ctx) {
 
   // W4: step to the last port -> its line shows and the full track (every port) rests.
   const sLast = await stepTo(lastPort);
-  check("W4 step to the last port: its line shows and the full track rests (every port drawn)", sLast.status === plan.ports[lastPort].logLine && sLast.pts === plan.ports.length, JSON.stringify({ last: lastPort, sLast, ports: plan.ports.length }));
+  // #120: legs are routed polylines now, so the resting track has strictly MORE vertices
+  // than it has ports. Under v1 this was an equality.
+  check("W4 step to the last port: its line shows and the full routed track rests", sLast.status === plan.ports[lastPort].logLine && sLast.pts > plan.ports.length, JSON.stringify({ last: lastPort, sLast, ports: plan.ports.length }));
 
   // Artifact: a mid-sweep frame (track + ship) for the user to eyeball.
   await stepTo(midPort);
@@ -109,7 +115,7 @@ export async function run(ctx) {
     const pts=ov?ov.querySelector(".voyage-track").getAttribute("points").trim().split(" ").length:0;
     return{hasOverlay:!!ov,firstIdx:plan&&plan.ports[0]?plan.ports[0].idx:-1,ports:plan?plan.ports.length:0,pts};
   })()`);
-  check("W8 redraw with voyage on re-arms to the new world's full resting track", v8.hasOverlay && v8.firstIdx === vm2.capitalIdx && v8.ports > 1 && v8.pts === v8.ports, JSON.stringify(v8) + ` capital=${vm2.capitalIdx}`);
+  check("W8 redraw with voyage on re-arms to the new world's full resting track", v8.hasOverlay && v8.firstIdx === vm2.capitalIdx && v8.ports > 1 && v8.pts > v8.ports, JSON.stringify(v8) + ` capital=${vm2.capitalIdx}`);
 
   // ---------------------------------------------------------------------------
   // #174 The surveyor's ink bleeds through. The verso ghost is a Blob of the worker's
@@ -158,8 +164,8 @@ export async function run(ctx) {
     };
   })()`);
   check("W9 a flip mid-sweep snaps the voyage to rest and turns; a running sweep never disables the button",
-    w9.disabledMidSweep === false && w9.ports > 2 && w9.midPts === 2 && w9.midStatus === w9.firstLine &&
-    w9.restPts === w9.ports && w9.status === w9.finalLine && w9.versoed && w9.label === "Turn back",
+    w9.disabledMidSweep === false && w9.ports > 2 && w9.midPts === 1 && w9.midStatus === w9.firstLine &&
+    w9.restPts > w9.ports && w9.status === w9.finalLine && w9.versoed && w9.label === "Turn back",
     JSON.stringify(w9));
   check("W9b the snap posts ONLY the final port's line: exactly one write to #status, not a burst",
     w9.statusWrites === 1 && w9.status === w9.finalLine, JSON.stringify({ writes: w9.statusWrites, status: w9.status }));
@@ -179,14 +185,14 @@ export async function run(ctx) {
     return{
       present:!!vTrack,
       samePoints: vTrack&&rTrack ? vTrack.getAttribute("points")===rTrack.getAttribute("points") : false,
-      shipOnVerso:!!verso.querySelector(".voyage-ship"),
-      shipOnRecto:!!document.querySelector("#map .voyage-ship"),
+      shipOnVerso:!!verso.querySelector(".voyage-ship,.voyage-rider"),
+      shipOnRecto:!!document.querySelector("#map .voyage-ship,#map .voyage-rider"),
       mirrored: layer?getComputedStyle(layer).transform:"",
       registered: near(ghost?box(ghost):null, layer?box(layer):null),
       opacity: layer?Number(getComputedStyle(layer).opacity):1,
     };
   })()`);
-  check("W10 the resting track bleeds through the verso, mirrored and registered on the ghost; the ship does not",
+  check("W10 the resting track bleeds through the verso, mirrored and registered on the ghost; the mark (ship or rider) does not",
     w10.present && w10.samePoints && !w10.shipOnVerso && w10.shipOnRecto &&
     w10.mirrored.startsWith("matrix(-1") && w10.registered && w10.opacity > 0 && w10.opacity < 1,
     JSON.stringify(w10));
@@ -214,7 +220,7 @@ export async function run(ctx) {
     };
   })()`);
   check("W11 ticking voyage while flipped rests on the full track on both faces and runs no sweep",
-    w11.flipped && w11.ports > 2 && w11.rectoPts === w11.ports && w11.versoPts === w11.ports &&
+    w11.flipped && w11.ports > 2 && w11.rectoPts === w11.versoPts && w11.rectoPts > w11.ports &&
     w11.status === w11.finalLine, JSON.stringify(w11));
 
   // W12: a redraw while flipped and voyaging re-arms BOTH faces, silently. renderVerso's
@@ -239,7 +245,7 @@ export async function run(ctx) {
     };
   })()`);
   check("W12 a redraw while flipped and voyaging re-arms both faces silently (the verso track survives replaceChildren)",
-    w12.versoed && w12.ports > 2 && w12.rectoPts === w12.ports && w12.versoPts === w12.ports &&
+    w12.versoed && w12.ports > 2 && w12.rectoPts === w12.versoPts && w12.rectoPts > w12.ports &&
     w12.samePoints && w12.status === "" && w12.docket.startsWith("CHART № 42 · "),
     JSON.stringify({ ...w12, docket: w12.docket.slice(0, 24) }));
 
@@ -355,14 +361,126 @@ export async function run(ctx) {
     };
   })()`);
   check("W16 a style turn with voyage on lands re-dressed with both faces agreeing on the re-armed track",
-    w16.ports > 2 && w16.rectoPts === w16.ports && w16.versoPts === w16.ports && w16.samePoints &&
+    w16.ports > 2 && w16.rectoPts === w16.versoPts && w16.rectoPts > w16.ports && w16.samePoints &&
     !w16.versoed && w16.status === "" && w16.rectoStyle === "ink", JSON.stringify(w16));
+
+  // ---------------------------------------------------------------------------
+  // #120 Real routes plus the mode-aware marker. The pure rules (mode assignment, the
+  // road/sea geometry, the tilt cap, the anti-flicker facing) are proven exhaustively in
+  // node:test over synthetic grids; these checks prove those proven rules are WIRED into
+  // the live overlay. Driven by the deterministic hooks, never by rAF timing.
+  // ---------------------------------------------------------------------------
+
+  // Land on a world with both a sea leg and road legs. Seed 526413615 ("The Isle of
+  // Selivelai") sails out to Liatalin and back: 21 road legs, 2 sea legs.
+  await evaluate(`(()=>{
+    const voy=document.getElementById("voyage");
+    if(voy.checked){voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));}
+    document.getElementById("seed").value="526413615";
+    document.getElementById("style").value="antique";
+    document.getElementById("draw").click();
+  })()`);
+  await waitSettled("voyage-120-draw");
+  await evaluate(`(()=>{const c=document.getElementById("voyage");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+
+  const w17 = await evaluate(`(()=>{
+    const plan=window.__vellumVoyagePlan();
+    const modes={};
+    for(const l of plan.legs) modes[l.mode]=(modes[l.mode]||0)+1;
+    const bad=plan.legs.filter((l)=>!["road","sea","straight"].includes(l.mode)).length;
+    return{legs:plan.legs.length,modes,bad};
+  })()`);
+  check("W17 every leg reaches the overlay carrying the router's mode, and a sea leg exists",
+    w17.bad === 0 && w17.legs > 10 && (w17.modes.sea || 0) >= 1 && (w17.modes.road || 0) >= 10,
+    JSON.stringify(w17));
+
+  // W18: the routed track is a real polyline. Under v1 it had exactly one point per port.
+  const w18 = await evaluate(`(()=>{
+    window.__vellumVoyageStepTo(999);
+    const plan=window.__vellumVoyagePlan();
+    const pts=document.querySelector("#map .voyage-track").getAttribute("points").trim().split(" ").length;
+    return{pts,ports:plan.ports.length};
+  })()`);
+  check("W18 the resting track is a multi-point routed path, not a port-to-port lerp",
+    w18.pts > w18.ports, JSON.stringify(w18));
+
+  // W19: the mark swaps ship <-> rider at the port, driven by the leg's mode.
+  const w19 = await evaluate(`(()=>{
+    const plan=window.__vellumVoyagePlan();
+    const legs=plan.legs;
+    const seaLeg=legs.findIndex((l)=>l.mode==="sea");
+    const roadLeg=legs.findIndex((l)=>l.mode==="road");
+    const glyphAtLeg=(i)=>{
+      // sample the MIDDLE of leg i, so the mark is unambiguously on that leg
+      window.__vellumVoyagePaintAt((i+0.5)/legs.length);
+      const ship=document.querySelector("#map .voyage-ship");
+      const rider=document.querySelector("#map .voyage-rider");
+      const shown=(el)=>!!el&&el.getAttribute("display")!=="none";
+      return shown(ship)?"ship":(shown(rider)?"rider":"none");
+    };
+    return{seaLeg,roadLeg,onSea:glyphAtLeg(seaLeg),onRoad:glyphAtLeg(roadLeg)};
+  })()`);
+  check("W19 the mark is a ship on a sea leg and a rider on a road leg, swapping at the port",
+    w19.seaLeg >= 0 && w19.roadLeg >= 0 && w19.onSea === "ship" && w19.onRoad === "rider",
+    JSON.stringify(w19));
+
+  // W20: the mark never tips past MAX_TILT (24deg) on any bearing the sweep visits, and
+  // its facing does not flicker along a leg. voyageStepTo lands only ON ports (legT=0), so
+  // the mid-leg samples come from __vellumVoyagePaintAt.
+  const w20 = await evaluate(`(()=>{
+    const plan=window.__vellumVoyagePlan();
+    const mark=()=>{const s=document.querySelector("#map .voyage-ship");const r=document.querySelector("#map .voyage-rider");return (s&&s.getAttribute("display")!=="none")?s:r;};
+    const read=(t)=>{
+      window.__vellumVoyagePaintAt(t);
+      const tf=mark().getAttribute("transform");
+      const rot=/rotate\\(([-0-9.]+)\\)/.exec(tf);
+      const sc=/scale\\((-?[0-9.]+) 1\\)/.exec(tf);
+      return{tilt:rot?Math.abs(parseFloat(rot[1])):0,facing:sc?parseFloat(sc[1]):1};
+    };
+    let maxTilt=0;
+    // sweep the whole voyage densely for the tilt cap
+    for(let k=0;k<=200;k++) maxTilt=Math.max(maxTilt,read(k/200).tilt);
+    // walk ONE leg finely and count facing changes: a switchbacking road must not flicker
+    const n=plan.legs.length;
+    const legIdx=plan.legs.findIndex((l)=>l.mode==="road");
+    let flips=0,prev=null;
+    for(let k=0;k<=60;k++){
+      const t=(legIdx+k/60)/n;
+      const f=read(t).facing;
+      if(prev!==null&&f!==prev) flips++;
+      prev=f;
+    }
+    return{maxTilt:Math.round(maxTilt*100)/100,flips,legIdx};
+  })()`);
+  check("W20 the mark never tips past MAX_TILT on any bearing of the sweep",
+    w20.maxTilt <= 24.0001, `max |tilt| = ${w20.maxTilt}deg`);
+  check("W20b the facing does not flicker along a routed road leg (at most one genuine reversal)",
+    w20.flips <= 1, JSON.stringify(w20));
+
+  // W21: Download stays clean. The routed track AND both new glyphs live in the sibling
+  // overlay <svg>, never inside the baked chart that Download blobs.
+  const w21 = await evaluate(`(()=>{
+    const chart=document.querySelector("#map svg:not(.voyage-overlay)");
+    return{
+      inChart:!!chart.querySelector(".voyage-track,.voyage-ship,.voyage-rider"),
+      inOverlay:!!document.querySelector("#map .voyage-overlay .voyage-track"),
+      shipInOverlay:!!document.querySelector("#map .voyage-overlay .voyage-ship"),
+      riderInOverlay:!!document.querySelector("#map .voyage-overlay .voyage-rider"),
+    };
+  })()`);
+  check("W21 the routed track and BOTH glyphs stay in the sibling overlay, never the baked chart",
+    !w21.inChart && w21.inOverlay && w21.shipInOverlay && w21.riderInOverlay, JSON.stringify(w21));
+
+  await evaluate(`window.__vellumVoyageStepTo(999)`);
+  await shoot("explorer-voyage-routed.png");
 
   // Restore a clean, voyage-off, un-flipped, antique state for the suites that follow.
   await evaluate(`(()=>{const voy=document.getElementById("voyage");if(voy.checked){voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
   await evaluate(`(()=>{const s=document.getElementById("sheet");if(s.classList.contains("versoed"))document.getElementById("verso-turn").click();})()`);
   await sleep(120); // let any turn-back settle before the health checkpoint reads the page
-  await evaluate(`(()=>{const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  // #120's checks draw seed 526413615 (the one world with a sea leg), so put seed 42 back:
+  // the suites that follow read a page they expect to be showing the golden world.
+  await evaluate(`(()=>{document.getElementById("seed").value="42";const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await waitSettled("voyage-restore");
   await sleep(1100); // the restore turns the sheet too; let it land before the next suite
 }

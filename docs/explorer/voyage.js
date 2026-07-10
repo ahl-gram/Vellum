@@ -44,19 +44,25 @@ const SWEEP_MS = 12000;
 // their ground contact line: the ship's waterline, the horse's hooves. So the mark stands
 // ON its track point the way a mountain stands on its own, and the tilt pivots about that
 // contact point. Sized in viewBox pixels against the 1500px chart.
+// A cog under sail: hull, stern castle, standing rigging, a square sail bellying east,
+// and a pennant. About 40 units wide against a chart whose peaks run 18 to 20.
 const SHIP_PARTS = [
-  ["path", "M -19 -6 Q -21 -5 -20 -1 Q -18 1 -13 1 Q -3 4 7 3 Q 13 3 17 -1 Q 20 -2 18 -5 Z", ""],
-  ["path", "M -1 -5 L -1 -23", "rig"],
-  ["path", "M -1 -21 Q 11 -18 10 -14 Q 11 -10 -1 -8 Z", ""],
-  ["path", "M 3 -19 Q 5 -14.5 3 -10 M 6 -18 Q 7.5 -14.5 6 -11", "detail"],
-  ["path", "M -1 -23 L 6 -24 L -1 -25 Z", "ink"],
+  { d: "M -17 -5 Q -19 -1 -13 4 L 11 4 Q 17 1 17 -5 Z" },
+  { d: "M -17 -5 L -17 -10 L -11 -10 L -11 -5 Z" },
+  { d: "M -1 -5 L -1 -23 M -9 -19 L 8 -19 M 17 -3 L 21 -6", cls: "rig" },
+  { d: "M -8 -19 L 7 -19 Q 12 -13 7 -7 L -8 -7 Q -4 -13 -8 -19 Z" },
+  { d: "M -1 -23 L 6 -24 L -1 -25.5 Z", cls: "ink" },
 ];
+// A horse walking east under a cloaked, hatted rider. Tail, barrel, arched neck and head,
+// four legs mid-stride, the rider, then the fine work (hat brim, rein, ears).
 const RIDER_PARTS = [
-  ["path", "M -11 -12 Q -16 -10 -15 -4", "tail"],
-  ["path", "M 15 -14 Q 17 -17 14 -18 Q 12 -21 10 -18 Q 7 -16 5 -14 L -8 -14 Q -11 -14 -11 -11 L -10 -1 L -7 -1 L -7 -9 L 2 -9 L 2 -1 L 5 -1 L 5 -12 Q 6 -14 8 -14 Q 12 -14 13 -13 Z", ""],
-  ["path", "M -4 -14 L -2 -20 L 2 -20 L 3 -14 Z", ""],
-  ["circle", null, "ink"],
-  ["path", "M 3 -17 Q 9 -17 14 -15", "detail"],
+  { d: "M -9 -13 Q -14 -12 -14.5 -5", cls: "tail" },
+  { d: "M -9 -14 Q -2 -16.5 6 -13.5 Q 8.5 -12 8 -9 Q 0 -6.5 -8 -8 Q -11 -10 -9 -14 Z" },
+  { d: "M 4 -13 Q 9 -14.5 11 -19 Q 12 -22 15 -21.5 Q 17.5 -21 17 -19 Q 16.5 -17.5 14 -17 Q 11.5 -15 10 -11 Z" },
+  { d: "M 5 -9 L 5.5 -4 L 7.5 0 M 2.5 -9 L 2 -4 L 3 0 M -7.5 -10 Q -9 -6 -7 -4 L -6.5 0 M -4.5 -10 Q -6 -6 -4.2 -4 L -3.8 0", cls: "leg" },
+  { d: "M -1.5 -13.5 L -3 -18.5 Q -1 -20 1.5 -19.8 L 2.5 -13.5 Z" },
+  { circle: [0.4, -21.6, 2.1], cls: "ink" },
+  { d: "M -2.4 -22.8 L 3.4 -22.8 M 1.5 -17.5 Q 6 -17 10 -16.5 M 13.8 -21.6 L 14.3 -23.6 M 15.6 -21.4 L 16.6 -23.2", cls: "detail" },
 ];
 
 // The current voyage session, or null when the toggle is off. Rebuilt every draw
@@ -83,16 +89,17 @@ export function clearVoyage() {
 function makeMark(className, parts) {
   const g = document.createElementNS(SVG_NS, "g");
   g.setAttribute("class", className);
-  for (const [tag, d, cls] of parts) {
-    const node = document.createElementNS(SVG_NS, tag);
-    if (tag === "circle") {
-      node.setAttribute("cx", "0");
-      node.setAttribute("cy", "-22");
-      node.setAttribute("r", "2.2");
+  for (const part of parts) {
+    const node = document.createElementNS(SVG_NS, part.circle ? "circle" : "path");
+    if (part.circle) {
+      const [cx, cy, r] = part.circle;
+      node.setAttribute("cx", String(cx));
+      node.setAttribute("cy", String(cy));
+      node.setAttribute("r", String(r));
     } else {
-      node.setAttribute("d", d);
+      node.setAttribute("d", part.d);
     }
-    if (cls) node.setAttribute("class", cls);
+    if (part.cls) node.setAttribute("class", part.cls);
     g.appendChild(node);
   }
   return g;
