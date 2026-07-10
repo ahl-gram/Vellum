@@ -1,6 +1,6 @@
 // Wayfarer's Passage voyage-overlay checks (W1-W8, #119, epic #117) and the voyage x
 // verso bleed-through (W9-W16, #174). The W prefix owns both: the verso checks (V*) live
-// in suite-explorer-core.mjs, which runs BEFORE this suite and ends un-flipped with no
+// in suite-verso.mjs, which runs BEFORE this suite and ends un-flipped with no
 // voyage standing, while everything below needs a live voyage session.
 // The voyage sweep is rAF-animated, so like the scrubber suite this drives it
 // through a DETERMINISTIC hook (window.__vellumVoyageStepTo, the analogue of the

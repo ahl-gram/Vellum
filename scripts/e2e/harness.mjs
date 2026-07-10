@@ -153,6 +153,22 @@ async function waitReady() {
   }
   return false;
 }
+// waitTurned / armTurnWatch: shared by the sheet-turn (suite-turn) and the verso flip
+// (suite-verso), which test each other's turn-vs-flip races. A turn clears "Drafting…"
+// immediately (no 900ms status hang), so waitSettled resolves mid-turn; waitTurned waits
+// for the leaf to actually LAND (status clear, .sheet not turning, a chart present).
+// armTurnWatch arms a MutationObserver recording whether .sheet ever carried .turning, so
+// a check can tell a real 3D turn from an instant swap.
+async function waitTurned(label = "") {
+  for (let i = 0; i < 240; i++) {
+    if (await evaluate(`(()=>{const s=document.getElementById("status").textContent;const t=document.querySelector(".sheet.turning");return s==="" && !t && !!document.querySelector("#map svg");})()`)) return;
+    await sleep(50);
+  }
+  throw new Error("waitTurned timeout " + label);
+}
+function armTurnWatch() {
+  return evaluate(`(()=>{window.__turned=false;if(window.__turnMo)window.__turnMo.disconnect();window.__turnMo=new MutationObserver(()=>{if(document.querySelector(".sheet.turning"))window.__turned=true;});window.__turnMo.observe(document.getElementById("sheet"),{subtree:true,attributes:true,attributeFilter:["class"]});return true;})()`);
+}
 
 async function shoot(file) {
   const h = await evaluate(`Math.min(16000, Math.ceil(document.body.scrollHeight))`);
@@ -264,7 +280,7 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
 
   return {
     evaluate, send, check, shoot, sleep,
-    waitSettled, waitAtlas, waitReady, axDescription,
+    waitSettled, waitAtlas, waitReady, waitTurned, armTurnWatch, axDescription,
     serverState, cleanup, consoleErrors, http4xx, PORT,
   };
 }

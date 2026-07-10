@@ -25,7 +25,10 @@ import { fileURLToPath } from "node:url";
 import { join, resolve } from "node:path";
 import { findBrowser } from "../src/cli/raster.ts";
 import { start, cleanup } from "./e2e/harness.mjs";
-import { run as runExplorerCore } from "./e2e/suite-explorer-core.mjs";
+import { run as runRender } from "./e2e/suite-render.mjs";
+import { run as runMotion } from "./e2e/suite-motion.mjs";
+import { run as runTurn } from "./e2e/suite-turn.mjs";
+import { run as runVerso } from "./e2e/suite-verso.mjs";
 import { run as runCards } from "./e2e/suite-cards.mjs";
 import { run as runScrubber } from "./e2e/suite-scrubber.mjs";
 import { run as runVoyage } from "./e2e/suite-voyage.mjs";
@@ -67,10 +70,14 @@ const http4xx = [];
 
 async function main() {
   const ctx = await start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx });
-  // Order is load-bearing: the health checkpoint (A9a/A9b) asserts accumulated
+  // Order is load-bearing: the health checkpoint (N1/N2) asserts accumulated
   // console/network state from everything before it, then the fallback reload and
-  // the hunt run on top.
-  await runExplorerCore(ctx);
+  // the hunt run on top. Render -> motion -> turn -> verso is the old explorer-core
+  // split, kept in that order (each redraws its own clean base).
+  await runRender(ctx);
+  await runMotion(ctx);
+  await runTurn(ctx);
+  await runVerso(ctx);
   await runCards(ctx);
   await runScrubber(ctx);
   await runVoyage(ctx);
