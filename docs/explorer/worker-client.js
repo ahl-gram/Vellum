@@ -7,6 +7,7 @@
 import { defaultRecipe, generateWorld } from "./engine/world/generate.js";
 import { renderMap } from "./engine/render/map-renderer.js";
 import { buildPlaceManifest } from "./engine/render/place-manifest.js";
+import { buildSurvey } from "./engine/render/survey.js";
 import { composeAtlas } from "./engine/atlas/compose.js";
 import { serializableAtlas } from "./serializable-atlas.js";
 
@@ -32,6 +33,7 @@ export function runInline(msg) {
       ok: true,
       svg: renderMap(world, msg.render),
       manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
+      survey: buildSurvey(world.elev, world.seaLevel, world.roads), // #120, mirrors worker.js
       title: world.title.title,
       subtitle: world.title.subtitle,
       mapType: recipe.mapType,

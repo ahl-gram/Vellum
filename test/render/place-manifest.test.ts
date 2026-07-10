@@ -75,3 +75,27 @@ test("nx/ny are width-independent fractions: a wider render scales pixels, not f
     assert.ok(Math.abs(pa.ny - pb.ny) < EPS, `place ${i} ny invariant to width`);
   });
 });
+
+// #120: the voyage router walks the world GRID (road cells, sea cells), so it needs
+// each settlement's grid cell. nx/ny cannot serve: they are fractions of the RENDERED
+// chart, margin-inset, so inverting them client-side would round-trip an integer the
+// worker already holds exactly. Ship the integers instead.
+test("every place carries its raw grid cell as gx/gy", () => {
+  const m = buildPlaceManifest(world, WIDTH);
+  m.places.forEach((p, i) => {
+    const s = world.settlements[i]!;
+    assert.equal(p.gx, s.x, `place ${i} gx`);
+    assert.equal(p.gy, s.y, `place ${i} gy`);
+    assert.ok(Number.isInteger(p.gx) && Number.isInteger(p.gy), `place ${i} grid cell is integral`);
+  });
+});
+
+test("gx/gy are grid coords, distinct from the chart-space nx/ny", () => {
+  const m = buildPlaceManifest(world, WIDTH);
+  const p = m.places[0]!;
+  assert.ok(p.gx >= 0 && p.gx < world.elev.w, "gx lies inside the grid");
+  assert.ok(p.gy >= 0 && p.gy < world.elev.h, "gy lies inside the grid");
+  // The projection is affine with a margin, so nx*widthPx recovers the pixel, not the cell.
+  assert.equal(Math.round(expectedPx(p.gx)), Math.round(p.nx * WIDTH));
+  assert.equal(Math.round(expectedPy(p.gy)), Math.round(p.ny * expectedHeightPx));
+});

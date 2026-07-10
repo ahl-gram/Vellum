@@ -23,11 +23,16 @@ const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   ruined: false,
   nx: 0.5,
   ny: 0.5,
+  // #120 added the grid cell to PlaceMark. buildVoyagePlan orders ports by the chart
+  // fractions nx/ny and never reads gx/gy, so these are filler here, not fixtures.
+  gx: 0,
+  gy: 0,
   ...over,
 });
 
-// A small hand-laid world whose greedy order is unambiguous. The capital sits at
-// the origin; A/C/B march out along the x-axis at 0.1 / 0.2 / 0.3.
+// A small hand-laid world whose sweep order is unambiguous. The capital sits at the
+// origin; A/C/B march out collinearly along the x-axis at 0.1 / 0.2 / 0.3, so the tour
+// is just the line in order, no ring and no detour.
 const capital = mark({ idx: 0, name: "Aelmoor", kind: "capital", founded: 812, nx: 0, ny: 0 });
 const townA = mark({ idx: 1, name: "Nailo", kind: "town", founded: 947, nx: 0.1, ny: 0 });
 const townB = mark({ idx: 2, name: "Bexley", kind: "town", founded: 1003, nx: 0.3, ny: 0 });
@@ -41,14 +46,40 @@ test("plan starts at the capital", () => {
   assert.equal(plan.ports[0].name, "Aelmoor");
 });
 
-test("greedy nearest-neighbour order from the capital", () => {
-  // From (0,0): A(0.1) is nearest -> from A: C(0.2, dist 0.1) beats B(0.3, dist 0.2)
-  // -> from C: B (dist 0.1). Expected visiting order by idx: 0, 1, 3, 2.
+test("collinear ports sweep along the line in order, no backtrack", () => {
+  // On the x-axis the tour is just the sorted line: 0 (x=0) -> 1 (0.1) -> 3 (0.2) ->
+  // 2 (0.3). The order carries idx 3 before 2 because C sits between A and B.
   const plan = buildVoyagePlan(lineWorld, 1059);
   assert.deepEqual(
     plan.ports.map((p) => p.idx),
     [0, 1, 3, 2],
   );
+});
+
+test("the tour does not cross itself on a ring layout nearest-neighbour would tangle", () => {
+  // Capital at the top, a ring of towns, and one inland town near the centre: greedy
+  // NN dives inland then jumps back, crossing its own track. The swept tour must not.
+  const ringWorld = [
+    mark({ idx: 0, name: "Cap", kind: "capital", nx: 0.5, ny: 0.9 }),
+    mark({ idx: 1, name: "W", kind: "town", nx: 0.1, ny: 0.5 }),
+    mark({ idx: 2, name: "E", kind: "town", nx: 0.9, ny: 0.5 }),
+    mark({ idx: 3, name: "S", kind: "town", nx: 0.5, ny: 0.1 }),
+    mark({ idx: 4, name: "Mid", kind: "village", nx: 0.5, ny: 0.45 }),
+  ];
+  const plan = buildVoyagePlan(ringWorld, 1059);
+  const at = new Map(ringWorld.map((p) => [p.idx, p]));
+  const o = (a: PlaceMark, b: PlaceMark, c: PlaceMark) =>
+    Math.sign((b.nx - a.nx) * (c.ny - a.ny) - (b.ny - a.ny) * (c.nx - a.nx));
+  const crosses = (a: PlaceMark, b: PlaceMark, c: PlaceMark, d: PlaceMark) =>
+    o(a, b, c) !== o(a, b, d) && o(c, d, a) !== o(c, d, b) &&
+    o(a, b, c) !== 0 && o(a, b, d) !== 0 && o(c, d, a) !== 0 && o(c, d, b) !== 0;
+  const legs = plan.legs.map((l) => [at.get(l.fromIdx)!, at.get(l.toIdx)!] as const);
+  for (let i = 0; i < legs.length; i++) {
+    for (let j = i + 2; j < legs.length; j++) {
+      assert.ok(!crosses(legs[i]![0], legs[i]![1], legs[j]![0], legs[j]![1]),
+        `legs ${i} and ${j} cross`);
+    }
+  }
 });
 
 test("legs are an open path of consecutive ports (no return leg)", () => {

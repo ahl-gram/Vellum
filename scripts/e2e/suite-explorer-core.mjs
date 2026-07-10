@@ -8,11 +8,32 @@ export async function run(ctx) {
   // A2: worker draw === inline draw, byte-for-byte, in the browser. Includes the
   // #52 place manifest: a new structured-cloneable field that must be identical
   // worker-vs-inline (same V8 runs both paths, so nx/ny are byte-identical).
+  //
+  // #120 added the `survey` field (grid dims, a 76,800-byte land mask, road polylines).
+  // The mask is compared byte-wise, NOT via JSON.stringify: a Uint8Array stringifies to a
+  // {"0":1,"1":0,...} object literal with one key per cell, built twice, inside this
+  // evaluate(). The compare stays exact, and being integers it is immune to the
+  // transcendental drift that forces A4 to compare with a tolerance.
   const a2 = await evaluate(
-    `(async()=>{const m={kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}};const j=await window.__vellumRunJob(m);const i=window.__vellumRunInline(m);return{svg:j.svg===i.svg,title:j.title===i.title,sub:j.subtitle===i.subtitle&&!!j.subtitle,mt:j.mapType===i.mapType,band:j.band===i.band,man:JSON.stringify(j.manifest)===JSON.stringify(i.manifest),places:j.manifest.places.length,len:j.svg.length};})()`,
+    `(async()=>{const m={kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}};` +
+      `const j=await window.__vellumRunJob(m);const i=window.__vellumRunInline(m);` +
+      `const eqBytes=(a,b)=>{if(!a||!b||a.length!==b.length)return false;for(let k=0;k<a.length;k++)if(a[k]!==b[k])return false;return true;};` +
+      `const js=j.survey,is=i.survey;` +
+      `const srv=!!js&&!!is&&js.gridW===is.gridW&&js.gridH===is.gridH&&eqBytes(js.land,is.land)&&JSON.stringify(js.roads)===JSON.stringify(is.roads);` +
+      `let land=0;for(const v of js.land)land+=v;` +
+      `return{svg:j.svg===i.svg,title:j.title===i.title,sub:j.subtitle===i.subtitle&&!!j.subtitle,mt:j.mapType===i.mapType,band:j.band===i.band,` +
+      `man:JSON.stringify(j.manifest)===JSON.stringify(i.manifest),srv,places:j.manifest.places.length,len:j.svg.length,` +
+      `cells:js.land.length,land,roads:js.roads.length,gx:j.manifest.places[0].gx};})()`,
     true,
   );
-  check("A2 draw: worker bytes === inline bytes (svg + manifest + subtitle)", a2.svg && a2.title && a2.sub && a2.mt && a2.band && a2.man, `${a2.len} code units, ${a2.places} places, manifest eq=${a2.man}, subtitle eq=${a2.sub}`);
+  check(
+    "A2 draw: worker bytes === inline bytes (svg + manifest + subtitle + survey)",
+    a2.svg && a2.title && a2.sub && a2.mt && a2.band && a2.man && a2.srv,
+    `${a2.len} code units, ${a2.places} places, manifest eq=${a2.man}, subtitle eq=${a2.sub}, survey eq=${a2.srv} (${a2.cells} cells, ${a2.land} land, ${a2.roads} roads)`,
+  );
+  // #120: the router walks grid cells, so PlaceMark must carry them. A missing gx would
+  // otherwise surface far away, as a track that misses every road by the chart's margin.
+  check("A2b manifest places carry their grid cell (gx/gy) for the router", Number.isInteger(a2.gx), `places[0].gx=${a2.gx}`);
 
   // A3 — worker atlas === inline atlas, in the browser (gazetteer locale matches)
   const a3 = await evaluate(

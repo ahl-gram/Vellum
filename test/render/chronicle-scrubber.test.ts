@@ -36,6 +36,9 @@ const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   ruined: false,
   nx: 0.5,
   ny: 0.5,
+  // #120 added the grid cell to PlaceMark; nothing here reads it.
+  gx: 0,
+  gy: 0,
   ...over,
 });
 

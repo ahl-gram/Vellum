@@ -5,6 +5,7 @@
 import { defaultRecipe, generateWorld } from "./engine/world/generate.js";
 import { renderMap } from "./engine/render/map-renderer.js";
 import { buildPlaceManifest } from "./engine/render/place-manifest.js";
+import { buildSurvey } from "./engine/render/survey.js";
 import { composeAtlas } from "./engine/atlas/compose.js";
 import { serializableAtlas } from "./serializable-atlas.js";
 
@@ -19,6 +20,11 @@ self.onmessage = (e) => {
         ok: true,
         svg: renderMap(world, msg.render),
         manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
+        // #120: the world facts the client's voyage router walks (land mask + roads,
+        // grid space). Shipped on EVERY draw, because the voyage toggle enters voyage
+        // mode with no redraw, so the client must already hold them when the box is
+        // ticked. Mirrored in worker-client.js runInline; e2e A2 proves the two agree.
+        survey: buildSurvey(world.elev, world.seaLevel, world.roads),
         title: world.title.title,
         subtitle: world.title.subtitle,
         mapType: recipe.mapType,
