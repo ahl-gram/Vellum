@@ -145,6 +145,10 @@ export function realmBordersLayer(ctx: RenderCtx): SvgNode | null {
     ),
   );
 
+  // KEEP THIS ATTRIBUTE ORDER (#158). Attributes serialize in insertion order, and
+  // topographic's committed border is byte-identical to its pre-#158 form only while
+  // the order stays d, fill, stroke, stroke-width, stroke-dasharray, stroke-linecap,
+  // stroke-opacity. Reordering them regenerates the committed charts for no reason.
   return el(
     "g",
     { id: "layer-realm-borders" },
