@@ -18,6 +18,14 @@ export type PlaceMark = {
   readonly nx: number;
   /** Projected y as a fraction of the rendered height (0..1). */
   readonly ny: number;
+  /**
+   * The settlement's cell on the world grid. The voyage router (#120) walks road
+   * and sea cells, so it needs this; nx/ny cannot serve, being fractions of the
+   * rendered chart with a margin baked in. Shipping the integer the worker already
+   * holds beats inverting the projection on the client.
+   */
+  readonly gx: number;
+  readonly gy: number;
 };
 
 /**
@@ -53,6 +61,8 @@ export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest
     ruined: s.ruined,
     nx: proj.px(s.x) / proj.widthPx,
     ny: proj.py(s.y) / proj.heightPx,
+    gx: s.x,
+    gy: s.y,
   }));
   return {
     places,

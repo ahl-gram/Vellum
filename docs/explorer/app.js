@@ -29,6 +29,7 @@ import {
   clearVoyage,
   cancelVoyageRaf,
   voyageStepTo,
+  voyagePaintAt,
   voyagePlan,
   voyageSnapToRest,
   syncVersoTrack,
@@ -64,6 +65,10 @@ let lastOverrides = {};
 let lastStyle = "antique";
 let lastTheme = "";
 let lastManifest = null; // the place manifest of the chart on screen; feeds a voyage toggled on without a redraw
+// #120: the same chart's world facts (land mask + roads), which the voyage router walks.
+// Assigned beside lastManifest, from the SAME draw: a manifest paired with another draw's
+// survey would route this world's ports over that world's roads.
+let lastSurvey = null;
 
 // Sea-level slider (#55) gate. landTouched gates the manual override and the land=
 // hash param; until the user moves the slider, it auto-tracks each world's natural
@@ -244,6 +249,7 @@ function draw(opts) {
       lastStyle = style;
       lastTheme = theme;
       lastManifest = res.manifest; // #119: the current world's manifest, for a voyage toggled on later
+      lastSurvey = res.survey; // #120: paired with it, so a later voyage routes THIS world
       // Clear "Drafting…" and caption now, so a 900ms turn never holds the status
       // line; Download already has the new bytes (lastSvg, above).
       const ms = (performance.now() - t0).toFixed(0);
@@ -265,7 +271,7 @@ function draw(opts) {
           else clearScrub();
           // #119: re-arm the voyage to the new chart, resting on the full track (only
           // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
-          if (voyageChk.checked) rearmVoyage(res.manifest, { quiet });
+          if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, { quiet });
           else clearVoyage();
         });
       } else {
@@ -285,7 +291,9 @@ function draw(opts) {
         // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
         // #174: `quiet` rides along so a mid-drag re-arm leaves the back face alone; the
         // verso's ghost and its track must always come from the same draw.
-        if (voyageChk.checked) rearmVoyage(res.manifest, { quiet });
+        // #120: re-arm from THIS draw's survey, never lastSurvey. A sea-level drag moves the
+        // waterline, so the roads and open water the router walks moved with it.
+        if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, { quiet });
         else clearVoyage();
       }
       // #116: refresh the back face for the chart just drawn. Skipped on quiet mid-
@@ -427,7 +435,7 @@ voyageChk.addEventListener("change", () => {
     // precedent above where a style change while flipped rebuilds in place rather than
     // turning. The checkbox is never disabled while flipped, for the same reason the Turn
     // button is never disabled by a sweep.
-    applyVoyage(lastManifest, { skipSweep: isFlipped(sheetEl) });
+    applyVoyage(lastManifest, lastSurvey, { skipSweep: isFlipped(sheetEl) });
   } else exitVoyage();
 });
 
@@ -444,6 +452,10 @@ window.__vellumRunJob = runJob;
 window.__vellumRunInline = runInline;
 // #119: deterministic voyage hooks for the e2e (drive the sweep by port, read the plan).
 window.__vellumVoyageStepTo = voyageStepTo;
+// #120: voyageStepTo can only land ON a port (legT = 0), so it can never sample a MID-leg
+// frame, which is exactly where the tilt varies and where a switchbacking road would
+// flicker the rider's facing.
+window.__vellumVoyagePaintAt = voyagePaintAt;
 window.__vellumVoyagePlan = voyagePlan;
 
 seedInput.value = String(randomSeed());

@@ -23,6 +23,10 @@ const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   ruined: false,
   nx: 0.5,
   ny: 0.5,
+  // #120 added the grid cell to PlaceMark. buildVoyagePlan orders ports by the chart
+  // fractions nx/ny and never reads gx/gy, so these are filler here, not fixtures.
+  gx: 0,
+  gy: 0,
   ...over,
 });
 

@@ -264,9 +264,19 @@ button.primary:hover { background: #5d4831; }
 .voyage-track { fill: none; stroke: #5a4326; stroke-width: 3;
   stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
   vector-effect: non-scaling-stroke; opacity: 0.95; }
-.voyage-ship path { fill: #f3ead2; stroke: #4a3826; stroke-width: 1.5;
-  stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-.voyage-ship .voyage-mast { fill: #4a3826; }
+/* #120: the mark is a ship at sea and a rider on the road, both drawn in PROFILE, in the
+   chart's own ink idiom (render/layers/glyph-symbols.ts: a paper-filled body, an ink
+   outline, a thinner stroke for interior detail, standing on a baseline at y=0). Only one
+   is displayed at a time; voyage.js toggles the SVG `display` attribute at each port. */
+.voyage-ship path, .voyage-rider path { fill: #f3ead2; stroke: #4a3826; stroke-width: 1.5;
+  stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.voyage-ship .rig { fill: none; stroke: #4a3826; stroke-width: 1.1;
+  vector-effect: non-scaling-stroke; }
+.voyage-ship .detail, .voyage-rider .detail, .voyage-rider .tail { fill: none;
+  stroke: #4a3826; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.voyage-ship .detail, .voyage-rider .detail { stroke-width: 0.8; }
+.voyage-rider .tail { stroke-width: 1.4; }
+.voyage-ship .ink, .voyage-rider .ink { fill: #4a3826; stroke: none; }
 .caption { text-align: center; font-style: italic; color: #6b5a40;
   padding-top: 0.6rem; }
 footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;
