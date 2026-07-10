@@ -1,5 +1,5 @@
 // Wayfarer's Passage voyage-overlay checks (W1-W8, #119, epic #117) and the voyage x
-// verso bleed-through (W9-W14, #174). The W prefix owns both: the verso checks (V*) live
+// verso bleed-through (W9-W16, #174). The W prefix owns both: the verso checks (V*) live
 // in suite-explorer-core.mjs, which runs BEFORE this suite and ends un-flipped with no
 // voyage standing, while everything below needs a live voyage session.
 // The voyage sweep is rAF-animated, so like the scrubber suite this drives it
@@ -133,17 +133,26 @@ export async function run(ctx) {
     voy.checked=true;voy.dispatchEvent(new Event("change",{bubbles:true}));
     const plan=window.__vellumVoyagePlan();
     const btn=document.getElementById("verso-turn");
+    const statusEl=document.getElementById("status");
     const midPts=cnt(document.querySelector("#map .voyage-track"));
-    const midStatus=document.getElementById("status").textContent;
+    const midStatus=statusEl.textContent;
     const disabledMidSweep=btn.disabled;
+    // COUNT the writes to #status across the snap, do not just read its end state:
+    // textContent retains only the last value, so a burst posting every port the snap
+    // skipped, ending on the final line, would be indistinguishable from the single post
+    // decision 2 requires. Each textContent assignment is exactly one childList record.
+    const obs=new MutationObserver(()=>{});
+    obs.observe(statusEl,{childList:true,characterData:true,subtree:true});
     btn.click();
+    const statusWrites=obs.takeRecords().length;
+    obs.disconnect();
     return{
       ports:plan?plan.ports.length:0,
       firstLine:plan&&plan.ports[0]?plan.ports[0].logLine:"",
       finalLine:plan&&plan.ports.length?plan.ports[plan.ports.length-1].logLine:"",
-      midPts,midStatus,disabledMidSweep,
+      midPts,midStatus,disabledMidSweep,statusWrites,
       restPts:cnt(document.querySelector("#map .voyage-track")),
-      status:document.getElementById("status").textContent,
+      status:statusEl.textContent,
       versoed:document.getElementById("sheet").classList.contains("versoed"),
       label:btn.textContent,
     };
@@ -152,6 +161,8 @@ export async function run(ctx) {
     w9.disabledMidSweep === false && w9.ports > 2 && w9.midPts === 2 && w9.midStatus === w9.firstLine &&
     w9.restPts === w9.ports && w9.status === w9.finalLine && w9.versoed && w9.label === "Turn back",
     JSON.stringify(w9));
+  check("W9b the snap posts ONLY the final port's line: exactly one write to #status, not a burst",
+    w9.statusWrites === 1 && w9.status === w9.finalLine, JSON.stringify({ writes: w9.statusWrites, status: w9.status }));
 
   await sleep(1400); // let the 1200ms flip land, so W10 and its screenshot read the end state
 
@@ -270,7 +281,49 @@ export async function run(ctx) {
   check("W14 the verso track adds no Blob URL churn: one ghost URL created and one revoked per redraw",
     w14.created === 1 && w14.revoked === 1 && w14.versoTrack, JSON.stringify(w14));
 
-  // W15: the OTHER draw path. A style change turns the sheet (#131), so the voyage re-arms
+  // W15: the verso's ghost and its track always come from the SAME draw. A sea-level drag
+  // fires QUIET redraws that deliberately do not rebuild the ghost (re-blobbing the chart
+  // every frame is the ~1 MB per redraw leak #116 exists to avoid), so a mid-drag re-arm
+  // must leave the back face frozen: a fresh survey struck over a stale coastline registers
+  // with nothing. The drag's release is not quiet and refreshes both together. Runs flipped,
+  // with the voyage left on by W14.
+  const read15 = `(()=>{
+    const verso=document.getElementById("verso");
+    const vt=verso.querySelector(".verso-track");
+    const rt=document.querySelector("#map .voyage-track");
+    return{ghost:(verso.querySelector(".verso-ghost")||{src:""}).src,
+      verso:vt?vt.getAttribute("points"):null,
+      recto:rt?rt.getAttribute("points"):null};
+  })()`;
+  const before15 = await evaluate(read15);
+  // Drag: nudge the tide and let the 100ms debounce fire a QUIET redraw. Poll for the recto
+  // to re-arm rather than waitSettled, which would return instantly (the draw has not begun).
+  await evaluate(`(()=>{const l=document.getElementById("land");
+    l.value=String(Math.max(0,Number(l.value)-90));l.dispatchEvent(new Event("input",{bubbles:true}));})()`);
+  for (let i = 0; i < 80; i++) {
+    const r = await evaluate(`(()=>{const rt=document.querySelector("#map .voyage-track");return rt?rt.getAttribute("points"):null;})()`);
+    if (r !== before15.recto) break;
+    await sleep(50);
+  }
+  await waitSettled("voyage-verso-quiet-drag");
+  const mid15 = await evaluate(read15);
+  // Release: the authoritative, non-quiet redraw. Both faces refresh together.
+  await evaluate(`(()=>{const l=document.getElementById("land");l.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await waitSettled("voyage-verso-drag-release");
+  const after15 = await evaluate(read15);
+  check("W15 the verso ghost and its track come from the same draw: a quiet mid-drag redraw freezes both",
+    mid15.recto !== before15.recto && // the drag really did re-arm the recto to a new world
+    mid15.ghost === before15.ghost && mid15.verso === before15.verso && // the back face froze
+    after15.ghost !== before15.ghost && after15.verso === after15.recto, // the release refreshed both
+    JSON.stringify({ rectoMoved: mid15.recto !== before15.recto, ghostFroze: mid15.ghost === before15.ghost,
+      versoFroze: mid15.verso === before15.verso, ghostRefreshed: after15.ghost !== before15.ghost,
+      facesAgree: after15.verso === after15.recto }));
+  // Restore the auto waterline (a #type change resets landTouched), clearing the land= hash
+  // param before the fallback suite reloads the page.
+  await evaluate(`(()=>{document.getElementById("type").dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await waitSettled("voyage-verso-land-restore");
+
+  // W16: the OTHER draw path. A style change turns the sheet (#131), so the voyage re-arms
   // in runTurn's .then(), ~900ms AFTER rebuildVerso already wiped the verso track. app.js
   // repaints on the far side of that wipe with the pre-turn session still standing, which
   // is safe for a reason worth pinning: a turn only ever re-dresses the SAME world (only
@@ -286,7 +339,7 @@ export async function run(ctx) {
     await sleep(50);
   }
   await sleep(80); // runTurn removes .turning just before it resolves; let its .then() commit
-  const w15 = await evaluate(`(()=>{
+  const w16 = await evaluate(`(()=>{
     ${cntFn}
     const verso=document.getElementById("verso");
     const plan=window.__vellumVoyagePlan();
@@ -301,9 +354,9 @@ export async function run(ctx) {
       rectoStyle:(document.querySelector("#map svg:not(.voyage-overlay)")||{getAttribute:()=>null}).getAttribute("data-vellum-style"),
     };
   })()`);
-  check("W15 a style turn with voyage on lands re-dressed with both faces agreeing on the re-armed track",
-    w15.ports > 2 && w15.rectoPts === w15.ports && w15.versoPts === w15.ports && w15.samePoints &&
-    !w15.versoed && w15.status === "" && w15.rectoStyle === "ink", JSON.stringify(w15));
+  check("W16 a style turn with voyage on lands re-dressed with both faces agreeing on the re-armed track",
+    w16.ports > 2 && w16.rectoPts === w16.ports && w16.versoPts === w16.ports && w16.samePoints &&
+    !w16.versoed && w16.status === "" && w16.rectoStyle === "ink", JSON.stringify(w16));
 
   // Restore a clean, voyage-off, un-flipped, antique state for the suites that follow.
   await evaluate(`(()=>{const voy=document.getElementById("voyage");if(voy.checked){voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));}})()`);

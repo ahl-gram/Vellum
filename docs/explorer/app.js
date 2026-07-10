@@ -265,7 +265,7 @@ function draw(opts) {
           else clearScrub();
           // #119: re-arm the voyage to the new chart, resting on the full track (only
           // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
-          if (voyageChk.checked) rearmVoyage(res.manifest);
+          if (voyageChk.checked) rearmVoyage(res.manifest, { quiet });
           else clearVoyage();
         });
       } else {
@@ -283,7 +283,9 @@ function draw(opts) {
         else clearScrub();
         // #119: re-arm the voyage to the new chart, resting on the full track (only
         // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
-        if (voyageChk.checked) rearmVoyage(res.manifest);
+        // #174: `quiet` rides along so a mid-drag re-arm leaves the back face alone; the
+        // verso's ghost and its track must always come from the same draw.
+        if (voyageChk.checked) rearmVoyage(res.manifest, { quiet });
         else clearVoyage();
       }
       // #116: refresh the back face for the chart just drawn. Skipped on quiet mid-
@@ -296,7 +298,7 @@ function draw(opts) {
       // world. In the TURN path the re-arm is still ~900ms out, so this paints the outgoing
       // session: harmless, because only styleSel turns and a style turn re-dresses the SAME
       // world, making those points identical to the ones the landing re-arm will paint.
-      // Both invariants (turn => same world, turn => never flipped) are pinned by e2e W15.
+      // Both invariants (turn => same world, turn => never flipped) are pinned by e2e W16.
       if (!quiet) {
         rebuildVerso(res, seed);
         syncVersoTrack();

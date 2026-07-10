@@ -187,7 +187,7 @@ export function applyVoyage(manifest, opts = {}) {
 // Re-arm after a redraw while the toggle stayed on: rebuild against the new world
 // and rest on the full track. Only an explicit toggle-ON animates the sweep, so a
 // style turn or a sea-level nudge never replays the whole voyage.
-export function rearmVoyage(manifest) {
+export function rearmVoyage(manifest, opts = {}) {
   cancelVoyageRaf();
   voyage = null;
   if (!buildVoyage(manifest)) return;
@@ -196,7 +196,14 @@ export function rearmVoyage(manifest) {
   // on every draw, exactly as mapDiv.innerHTML wipes the recto overlay, so BOTH faces have
   // to be rebuilt. In app.js's settle path rebuildVerso runs AFTER this and wipes it again,
   // which is why app.js calls syncVersoTrack once more on the far side of that wipe.
-  syncVersoTrack();
+  //
+  // INVARIANT: the verso's ghost and its track always come from the SAME draw. A quiet
+  // mid-drag redraw (the sea-level slider) deliberately does NOT rebuild the ghost, because
+  // re-blobbing the chart every frame is the ~1 MB per redraw leak #116 exists to avoid. So
+  // the track must not be repainted for the new world either: a fresh survey struck over a
+  // stale coastline registers with nothing. Leave the whole back face frozen on the last
+  // non-quiet draw; the drag's release redraw is not quiet and refreshes both together.
+  if (!opts.quiet) syncVersoTrack();
 }
 
 // Toggle voyage OFF: cancel the sweep, remove the overlay, and clear the log line so
