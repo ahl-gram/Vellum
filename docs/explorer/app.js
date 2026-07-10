@@ -31,6 +31,7 @@ import {
   voyageStepTo,
   voyagePaintAt,
   voyagePlan,
+  voyageLegGeometry,
   voyageSnapToRest,
   syncVersoTrack,
 } from "./voyage.js";
@@ -457,6 +458,7 @@ window.__vellumVoyageStepTo = voyageStepTo;
 // flicker the rider's facing.
 window.__vellumVoyagePaintAt = voyagePaintAt;
 window.__vellumVoyagePlan = voyagePlan;
+window.__vellumVoyageLegGeometry = voyageLegGeometry; // #120: projected leg points, for W20b
 
 seedInput.value = String(randomSeed());
 readHash();

@@ -375,3 +375,11 @@ export function voyagePlan() {
     legs: voyage.plan.legs.map((leg, i) => ({ ...leg, mode: voyage.legs[i].mode })),
   };
 }
+
+// e2e read hook: each leg's mode plus its PROJECTED (chart-pixel) vertices, so a suite can
+// find a genuinely switchbacking road leg to prove the anti-flicker wiring, rather than
+// assuming the first road leg bends.
+export function voyageLegGeometry() {
+  if (!voyage) return null;
+  return voyage.legs.map((l) => ({ mode: l.mode, points: l.geom.points.map((p) => ({ x: p.x, y: p.y })) }));
+}
