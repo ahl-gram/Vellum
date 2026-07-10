@@ -80,7 +80,10 @@ export function routeVoyage(
   return legs.map((leg) => {
     const a = byIdx.get(leg.fromIdx);
     const b = byIdx.get(leg.toIdx);
-    if (!a || !b) return { ...leg, mode: "straight" as const, points: [] };
+    // Legs and sites are both derived from the same place manifest, so a missing site is a
+    // caller bug. Say so here rather than return an empty polyline: that would surface far
+    // away, as the overlay formatting an undefined vertex into the track's `points`.
+    if (!a || !b) throw new Error(`voyage leg ${leg.fromIdx} -> ${leg.toIdx} has no site in the manifest`);
     const from = cellOf(a);
     const to = cellOf(b);
 

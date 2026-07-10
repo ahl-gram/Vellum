@@ -333,3 +333,12 @@ test("on real worlds, EVERY cross-landmass leg sails; none degrades to a straigh
     }
   }
 });
+
+test("a leg naming a site the manifest does not carry fails loudly, not with an empty polyline", () => {
+  const s = survey(["===="]);
+  assert.throws(
+    () => routeVoyage([leg(0, 9)], [site(0, 0, 0)], s),
+    /no site in the manifest/,
+    "an empty points array would surface far away, in the overlay's track formatting",
+  );
+});
