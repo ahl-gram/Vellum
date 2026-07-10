@@ -30,6 +30,8 @@ import {
   cancelVoyageRaf,
   voyageStepTo,
   voyagePlan,
+  voyageSnapToRest,
+  syncVersoTrack,
 } from "./voyage.js";
 
 const $ = (id) => document.getElementById(id);
@@ -263,7 +265,7 @@ function draw(opts) {
           else clearScrub();
           // #119: re-arm the voyage to the new chart, resting on the full track (only
           // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
-          if (voyageChk.checked) rearmVoyage(res.manifest);
+          if (voyageChk.checked) rearmVoyage(res.manifest, { quiet });
           else clearVoyage();
         });
       } else {
@@ -281,13 +283,26 @@ function draw(opts) {
         else clearScrub();
         // #119: re-arm the voyage to the new chart, resting on the full track (only
         // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
-        if (voyageChk.checked) rearmVoyage(res.manifest);
+        // #174: `quiet` rides along so a mid-drag re-arm leaves the back face alone; the
+        // verso's ghost and its track must always come from the same draw.
+        if (voyageChk.checked) rearmVoyage(res.manifest, { quiet });
         else clearVoyage();
       }
       // #116: refresh the back face for the chart just drawn. Skipped on quiet mid-
       // drag redraws (like the arrival ceremony) so a sea-level drag does not churn an
       // invisible verso Blob every frame; the release's non-quiet draw rebuilds it.
-      if (!quiet) rebuildVerso(res, seed);
+      // #174: renderVerso's replaceChildren WIPES the verso's voyage track, exactly as
+      // mapDiv.innerHTML wipes the recto overlay above, so repaint it on the far side of
+      // the wipe. syncVersoTrack is silent (safe inside this settle) and a no-op with no
+      // voyage. In the settle path the voyage was re-armed just above, so it paints the new
+      // world. In the TURN path the re-arm is still ~900ms out, so this paints the outgoing
+      // session: harmless, because only styleSel turns and a style turn re-dresses the SAME
+      // world, making those points identical to the ones the landing re-arm will paint.
+      // Both invariants (turn => same world, turn => never flipped) are pinned by e2e W16.
+      if (!quiet) {
+        rebuildVerso(res, seed);
+        syncVersoTrack();
+      }
     })
     .catch((err) => {
       if (myGen !== drawGen) return;
@@ -344,6 +359,13 @@ bindBtn.addEventListener("click", () => {
 // #sheet-inner's rotateY); the button is also disabled for the whole draw round-trip.
 versoBtn.addEventListener("click", () => {
   if (!lastSvg || drawing || sheetEl.classList.contains("turning")) return;
+  // #174: interaction interrupts the animation. A running 12s sweep is snapped to its
+  // resting track (on both faces) before the sheet turns, so the back never shows a
+  // half-drawn survey and no rAF loop narrates into #status behind a hidden face. The
+  // button is deliberately NOT disabled for the sweep's duration: the existing
+  // disable-during-draw covers a sub-second round trip, and a control that goes dead for
+  // 12 seconds with no stated reason reads as a bug. No-op when not voyaging.
+  voyageSnapToRest();
   const flipped = toggleFlip(sheetEl);
   versoBtn.textContent = flipped ? "Turn back" : "Turn the sheet";
 });
@@ -400,7 +422,12 @@ scrubRangeEl.addEventListener("input", onManualScrub);
 voyageChk.addEventListener("change", () => {
   if (voyageChk.checked) {
     if (chronicleChk.checked) { chronicleChk.checked = false; exitScrub(); }
-    applyVoyage(lastManifest);
+    // #174: the sweep is a recto ceremony. Ticking voyage while the sheet rests on its
+    // verso paints the resting track on both faces and skips the animation, following the
+    // precedent above where a style change while flipped rebuilds in place rather than
+    // turning. The checkbox is never disabled while flipped, for the same reason the Turn
+    // button is never disabled by a sweep.
+    applyVoyage(lastManifest, { skipSweep: isFlipped(sheetEl) });
   } else exitVoyage();
 });
 

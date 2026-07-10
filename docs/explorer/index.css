@@ -109,6 +109,22 @@ button.primary:hover { background: #5d4831; }
    faint, the way iron-gall ink shows on the reverse. Also sizes #verso (block flow). */
 .verso-ghost { display: block; width: 100%; height: auto;
   transform: scaleX(-1); opacity: 0.1; filter: blur(1.2px); }
+/* #174 The surveyor's ink bleeds through too. The voyage track is a client overlay on the
+   recto, never baked into the chart string the ghost is made of, so it is drawn again here
+   as a mirrored polyline. It MUST share the ghost's box and its scaleX(-1) about the same
+   centre, or the track will not register with the coastline it is bleeding through: the
+   ghost is width:100%/height:auto in block flow, and this layer is inset:0 over the same
+   padding box, so the two boxes coincide. Struck a little stronger than the ghost's 0.1:
+   that opacity is tuned for a whole chart's worth of ink, and a 3px dotted stroke at 0.1
+   simply disappears. Set on the layer, not the polyline, so it reads as one bleed.
+   The stroke is the TRACK's ink (#5a4326, matching .voyage-track), never the ship's
+   (#4a3826): what soaks through the sheet is the line the surveyor drew on it. */
+.verso-track-layer { position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; transform: scaleX(-1);
+  opacity: 0.26; filter: blur(1.1px); overflow: visible; }
+.verso-track { fill: none; stroke: #5a4326; stroke-width: 3;
+  stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke; }
 /* The docket line stamped along the fold, the surveyor's attribution, and the office
    stamp all sit over the ghost. Percentages track the ghost's height at any world. */
 .verso-docket, .verso-survey { position: absolute; left: 8%; right: 8%;

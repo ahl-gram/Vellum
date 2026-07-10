@@ -85,6 +85,50 @@ export function renderVerso(versoEl, { svg, docket, surveyor }) {
   versoEl.replaceChildren(ghost, docketEl, surveyEl, buildStamp());
 }
 
+// #174 The surveyor's ink bleeds through. The ghost is a snapshot of the chart as the
+// WORKER drew it, so a client overlay (the voyage track) has no path onto the back face.
+// It gets one here: a mirrored <polyline> sharing the ghost's box, fed the very same
+// `points` string the recto track carries.
+//
+// INVARIANT: never rebuild the ghost Blob to refresh the track. #116 leaks about 1 MB per
+// redraw (a chart Blob URL that is never released), and renderVerso is the only place
+// allowed to churn one. Writing `points` is free; re-blobbing is not.
+//
+// The layer is inserted directly AFTER the ghost, so it paints over the bleed-through but
+// under the docket, the attribution, and the stamp (all positioned, so DOM order decides).
+// It carries no ship: the track is ink the surveyor laid on the recto, while the ship is
+// the survey itself, a thing moving over the world rather than painted on the sheet. That
+// also keeps this function glyph-agnostic, indifferent to what the marker looks like.
+
+/**
+ * Paint (or refresh) the verso's bleed-through track. Creates the layer on first use.
+ * @param {HTMLElement} versoEl the #verso back face
+ * @param {string} points the recto track's `points` attribute, verbatim
+ * @param {string} viewBox the recto overlay's viewBox, so the two faces share a space
+ */
+export function paintVersoTrack(versoEl, points, viewBox) {
+  if (!points) { clearVersoTrack(versoEl); return; }
+  let layer = versoEl.querySelector(".verso-track-layer");
+  if (!layer) {
+    layer = svgEl("svg", {
+      class: "verso-track-layer", viewBox, preserveAspectRatio: "none",
+      "aria-hidden": "true", focusable: "false",
+    });
+    layer.append(svgEl("polyline", { class: "verso-track" }));
+    const ghost = versoEl.querySelector(".verso-ghost");
+    if (ghost) ghost.after(layer);
+    else versoEl.append(layer);
+  }
+  layer.setAttribute("viewBox", viewBox);
+  layer.firstChild.setAttribute("points", points);
+}
+
+/** Remove the bleed-through track from the verso. Safe when there is none. */
+export function clearVersoTrack(versoEl) {
+  const layer = versoEl.querySelector(".verso-track-layer");
+  if (layer) layer.remove();
+}
+
 /** Whether the sheet is currently resting on (or turning toward) its verso. */
 export function isFlipped(sheetEl) {
   return sheetEl.classList.contains("versoed");

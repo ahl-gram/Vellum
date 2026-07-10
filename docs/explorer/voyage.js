@@ -11,8 +11,10 @@
 // DOM, and animation. Download SVG blobs the pristine chart string, never this
 // overlay, so the exported plate never learns it was animated.
 import { buildVoyagePlan, frameAt } from "./engine/render/voyage.js";
+import { paintVersoTrack, clearVersoTrack } from "./verso.js";
 
 const mapDiv = document.getElementById("map");
+const versoEl = document.getElementById("verso");
 const statusEl = document.getElementById("status");
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -128,6 +130,23 @@ function paintFrame(session, t, postLog = true) {
   }
 }
 
+// #174: mirror the recto track onto the verso's back face, reading the very same `points`
+// string paintFrame just wrote, so the two faces can never disagree.
+//
+// INVARIANT: the verso track is STATIC, never live. It is painted only where the survey
+// comes to REST (a sweep ending, a flip snapping it to rest, a silent re-arm after a
+// redraw) and removed on exit, never from the rAF tick. Decision 2 (a flip snaps the
+// voyage to rest first) is what makes that safe: no flip can land mid-sweep, so the back
+// face is never revealed showing a half-drawn track. Painting per frame would also churn
+// layout on a hidden face 60 times a second for nothing.
+//
+// It posts nothing to #status, so it is safe inside a settle (the draw's settle signal and
+// the e2e waitSettled both key on #status === "").
+export function syncVersoTrack() {
+  if (!voyage) { clearVersoTrack(versoEl); return; }
+  paintVersoTrack(versoEl, voyage.trackEl.getAttribute("points"), voyage.svg.getAttribute("viewBox"));
+}
+
 function play(session) {
   const begin = performance.now();
   const tick = (now) => {
@@ -136,6 +155,7 @@ function play(session) {
     paintFrame(session, t);
     if (t >= 1) {
       session.rafId = 0; // the full track now rests on the chart
+      syncVersoTrack(); // #174: at rest, so the ink may bleed through to the back
       return;
     }
     session.rafId = requestAnimationFrame(tick);
@@ -145,11 +165,19 @@ function play(session) {
 
 // Toggle voyage ON: build the survey and animate the sweep from the capital. Under
 // reduced motion the full track and the final port's line appear at once, no sweep.
-export function applyVoyage(manifest) {
+// #174: opts.skipSweep takes the same at-rest path when the sheet is resting on its verso.
+// The sweep is a recto ceremony: a 12 second animation nobody can see, narrating into
+// #status the whole way, is not a feature. The caller (app.js) owns the flipped state.
+//
+// During a sweep the verso carries NO track: exitVoyage cleared it above, and it is
+// repainted when the survey comes to rest. A flip mid-sweep snaps to rest first, so the
+// back face never turns into view empty.
+export function applyVoyage(manifest, opts = {}) {
   exitVoyage();
   if (!buildVoyage(manifest)) return;
-  if (prefersReduce()) {
+  if (opts.skipSweep || prefersReduce()) {
     paintFrame(voyage, 1);
+    syncVersoTrack();
     return;
   }
   paintFrame(voyage, 0);
@@ -159,11 +187,23 @@ export function applyVoyage(manifest) {
 // Re-arm after a redraw while the toggle stayed on: rebuild against the new world
 // and rest on the full track. Only an explicit toggle-ON animates the sweep, so a
 // style turn or a sea-level nudge never replays the whole voyage.
-export function rearmVoyage(manifest) {
+export function rearmVoyage(manifest, opts = {}) {
   cancelVoyageRaf();
   voyage = null;
   if (!buildVoyage(manifest)) return;
   paintFrame(voyage, 1, false); // silent: the draw's settle needs #status to stay ""
+  // #174: repaint the back face too. renderVerso's replaceChildren wipes the verso track
+  // on every draw, exactly as mapDiv.innerHTML wipes the recto overlay, so BOTH faces have
+  // to be rebuilt. In app.js's settle path rebuildVerso runs AFTER this and wipes it again,
+  // which is why app.js calls syncVersoTrack once more on the far side of that wipe.
+  //
+  // INVARIANT: the verso's ghost and its track always come from the SAME draw. A quiet
+  // mid-drag redraw (the sea-level slider) deliberately does NOT rebuild the ghost, because
+  // re-blobbing the chart every frame is the ~1 MB per redraw leak #116 exists to avoid. So
+  // the track must not be repainted for the new world either: a fresh survey struck over a
+  // stale coastline registers with nothing. Leave the whole back face frozen on the last
+  // non-quiet draw; the drag's release redraw is not quiet and refreshes both together.
+  if (!opts.quiet) syncVersoTrack();
 }
 
 // Toggle voyage OFF: cancel the sweep, remove the overlay, and clear the log line so
@@ -174,6 +214,22 @@ export function exitVoyage() {
   if (existing) existing.remove();
   if (voyage) statusEl.textContent = "";
   voyage = null;
+  clearVersoTrack(versoEl); // #174: the ink leaves the back of the sheet with the front
+}
+
+// #174: snap a running sweep to its resting track, both faces, and stay there. Called by
+// the flip: a 12 second sweep must never hold the sheet hostage, and a Turn button that
+// goes dead for that long reads as a bug rather than as a rule, so interaction interrupts
+// the animation instead (the same idiom as the scrubber's drag pausing Play).
+//
+// paintFrame's shownArrived diff fires exactly ONCE here, so #status posts only the final
+// port's line, never a burst of every port the snap skipped. No-op when not voyaging, and
+// a no-op on an already-resting voyage (no diff, so nothing is posted).
+export function voyageSnapToRest() {
+  if (!voyage) return;
+  cancelVoyageRaf();
+  paintFrame(voyage, 1);
+  syncVersoTrack();
 }
 
 // Deterministic e2e hook: jump the sweep to the ship's arrival at port N (the origin
@@ -186,6 +242,7 @@ export function voyageStepTo(portIndex) {
   const clampedPort = Math.max(0, Math.min(portIndex, legCount));
   const t = legCount > 0 ? clampedPort / legCount : 0;
   paintFrame(voyage, t);
+  syncVersoTrack(); // #174: a step lands the survey at rest, so the two faces agree
 }
 
 // e2e read hook: the current plan (or null), so a suite can assert the itinerary.
