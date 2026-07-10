@@ -32,6 +32,8 @@ import { run as runVerso } from "./e2e/suite-verso.mjs";
 import { run as runCards } from "./e2e/suite-cards.mjs";
 import { run as runScrubber } from "./e2e/suite-scrubber.mjs";
 import { run as runVoyage } from "./e2e/suite-voyage.mjs";
+import { run as runVoyageVerso } from "./e2e/suite-voyage-verso.mjs";
+import { run as runVoyageRoute } from "./e2e/suite-voyage-route.mjs";
 import { run as runHealth } from "./e2e/suite-health.mjs";
 import { run as runFallback } from "./e2e/suite-fallback.mjs";
 import { run as runHunt } from "./e2e/suite-hunt.mjs";
@@ -80,7 +82,11 @@ async function main() {
   await runVerso(ctx);
   await runCards(ctx);
   await runScrubber(ctx);
+  // Voyage split into core -> verso bleed-through -> real routes, run in that order:
+  // core establishes the voyage session/base the other two inherit; route restores clean.
   await runVoyage(ctx);
+  await runVoyageVerso(ctx);
+  await runVoyageRoute(ctx);
   await runHealth(ctx);
   await runFallback(ctx);
   await runHunt(ctx);
