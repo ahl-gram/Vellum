@@ -1,4 +1,5 @@
 import { bfsPath } from "../core/bfs-path.ts";
+import { bfsDistance } from "../core/bfs-distance.ts";
 import { NEIGHBORS_8 } from "../core/grid.ts";
 import { labelComponents } from "../core/mask-components.ts";
 import { simplifyPath, type Pt } from "../core/rdp.ts";
@@ -17,7 +18,9 @@ import type { VoyageLeg } from "./voyage.ts";
  * neighbour order; the only float math is the RDP simplification, which is
  * presentation-only and never reaches a baked SVG.
  *
- * Measured over seeds 1..40 (905 legs): 89.1% road, 6.0% sea, 5.0% straight.
+ * Measured over seeds 1..40 (905 legs): ~71% road, ~24% sea, ~5% straight. Of the sea legs,
+ * 6% are true cross-landmass crossings and the rest are coastal shortcuts the survey sails
+ * rather than ride a long inland road around (SAIL_WHEN_ROAD_EXCEEDS).
  */
 
 export type LegMode = "road" | "sea" | "straight";
@@ -38,6 +41,55 @@ export type RoutedLeg = VoyageLeg & {
 
 /** Grid cells, so a 0.75 chord tolerance is about three quarters of one cell. */
 export const RDP_EPSILON = 0.75;
+
+/**
+ * Two coastal ports the road connects only by a long inland loop should be sailed, not
+ * ridden all the way around (Alex, 2026-07-10). The survey rides by default and takes ship
+ * only when the road is at least this many times the coastal sea route. 1.3 catches the
+ * egregious backtracks (a 2.2x inland loop on seed 3084684951, Gogkalei -> Dreigbra) while
+ * leaving ordinary coastal roads as rides. Measured over seeds 1..40 it sails ~24% of legs:
+ * fewer than a naive "always take the shorter" (~50% on an island world) because the embark
+ * gate below rejects ports whose shared ocean sits behind a nearer pond. A one-line knob:
+ * raise it for more riding, lower it for more sailing.
+ */
+export const SAIL_WHEN_ROAD_EXCEEDS = 1.3;
+
+/** A port must be within this many cells of the sea to take a coastal sail shortcut, so a
+ *  ship never embarks by marching far overland (that is #181's territory). This is a cheap
+ *  prefilter on the nearest sea; the embark into the SHARED body is checked separately,
+ *  because a port near an inland pond is close to water but far from the ocean. */
+export const COAST_MAX_HOPS = 2;
+
+/** Max straight embark from a port to the shared water body for a coastal shortcut. Keeps
+ *  the overland stub of a same-landmass sail to a cell or two, so no ship marches inland. */
+export const COAST_EMBARK_MAX = 3;
+
+/**
+ * True when a sea path's two overland stubs are both short. seaCrossing returns
+ * [fromPort, ...open water..., toPort], jumping straight from each land port to its launch
+ * cell, so the stub is the port-to-first-water gap. A coastal shortcut must embark right by
+ * the shore; a far embark means the shared ocean is inland of the port (a pond fooled the
+ * cheap prefilter), and the survey should ride instead.
+ */
+function embarksNearShore(water: ReadonlyArray<number>, w: number): boolean {
+  if (water.length < 3) return true;
+  const d = (a: number, b: number) => Math.hypot((a % w) - (b % w), ((a / w) | 0) - ((b / w) | 0));
+  return (
+    d(water[0] as number, water[1] as number) <= COAST_EMBARK_MAX &&
+    d(water[water.length - 1] as number, water[water.length - 2] as number) <= COAST_EMBARK_MAX
+  );
+}
+
+/** Total polyline length of a cell chain, in grid cells. */
+function chainLength(cells: ReadonlyArray<number>, w: number): number {
+  let d = 0;
+  for (let i = 1; i < cells.length; i++) {
+    const a = cells[i - 1] as number;
+    const b = cells[i] as number;
+    d += Math.hypot((a % w) - (b % w), ((a / w) | 0) - ((b / w) | 0));
+  }
+  return d;
+}
 
 export function routeVoyage(
   legs: ReadonlyArray<VoyageLeg>,
@@ -70,6 +122,9 @@ export function routeVoyage(
   const isRoad = (c: number) => road[c] === 1;
   const isSea = (c: number) => land[c] === 0;
   const isLand = (c: number) => land[c] === 1;
+  // Hop distance from the nearest sea, to gate which ports may sail a coastal shortcut.
+  const oceanHops = bfsDistance(w, h, (x, y) => land[x + y * w] === 0);
+  const coastal = (c: number) => (oceanHops[c] as number) <= COAST_MAX_HOPS;
 
   const finish = (mode: LegMode, cells: ReadonlyArray<number>, leg: VoyageLeg): RoutedLeg => ({
     ...leg,
@@ -87,26 +142,41 @@ export function routeVoyage(
     const from = cellOf(a);
     const to = cellOf(b);
 
-    // 1. Both ports stand on the road network, so the survey rides. The network is one
-    //    connected component (a road always runs to an existing network cell), so this
-    //    walk cannot fail; the null guard is defensive, not expected.
-    if (isRoad(from) && isRoad(to)) {
-      const walk = bfsPath(w, h, from, (c) => c === to, isRoad);
-      if (walk) return finish("road", walk, leg);
-    }
-
-    // 2. Different landmasses, so the survey sails. Measured across seeds 1..40: all 54
-    //    cross-landmass legs have both endpoints within 2 cells of water, so no
+    // 1. Different landmasses: the survey must sail. Measured across seeds 1..40: every
+    //    cross-landmass leg has both endpoints within 2 cells of water, so no
     //    road-to-coast-to-road composite leg is needed.
     if (comp[from] !== comp[to]) {
       const water = seaCrossing(w, h, from, to, isSea, seaComp);
       if (water) return finish("sea", water, leg);
+      return finish("straight", straightFallback(w, h, from, to, isRoad, isLand), leg);
     }
 
-    // 3. The documented fallback: one port is off the road network (an over-budget
-    //    village), so ride the road as far as it goes and hop straight to the port.
-    //    Never claims mode "road", which is what keeps "a road leg never crosses open
-    //    water" true by construction.
+    // 2. Same landmass and both on the road network: ride, UNLESS the road loops far
+    //    around a coastal shortcut the survey could sail. The road network is one
+    //    connected component, so the walk cannot fail; the null guard is defensive.
+    if (isRoad(from) && isRoad(to)) {
+      const walk = bfsPath(w, h, from, (c) => c === to, isRoad);
+      if (walk) {
+        // Only coastal ports may sail, and only when the road is meaningfully longer than
+        // the sea route (SAIL_WHEN_ROAD_EXCEEDS). This is what stops a survey riding all
+        // the way around a bay when a boat could cut across it.
+        if (coastal(from) && coastal(to)) {
+          const water = seaCrossing(w, h, from, to, isSea, seaComp);
+          if (
+            water &&
+            embarksNearShore(water, w) &&
+            chainLength(walk, w) >= SAIL_WHEN_ROAD_EXCEEDS * chainLength(water, w)
+          ) {
+            return finish("sea", water, leg);
+          }
+        }
+        return finish("road", walk, leg);
+      }
+    }
+
+    // 3. The documented fallback: a port is off the road network (an over-budget village),
+    //    so ride the road as far as it goes and hop straight to the port. Never claims
+    //    mode "road", which keeps "a road leg never crosses open water" true by construction.
     return finish("straight", straightFallback(w, h, from, to, isRoad, isLand), leg);
   });
 }
