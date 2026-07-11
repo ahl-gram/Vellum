@@ -1,7 +1,8 @@
 // The Wayfarer's Passage overlay (epic #117; Sub 2 = #119, Sub 3 = #120): a per-draw
 // DOM layer over the baked chart that animates the survey that drew it. A dotted track
-// sets out from the capital and threads port to port behind the survey party, and each
-// port's dated log line lands in #status as it arrives. When the sweep ends the full
+// sets out from the capital and threads port to port behind the survey party, and the
+// surveyor's dated log accumulates in the margin (#121): a chronicle-strip-style panel
+// whose entries brighten as the survey reaches each port. When the sweep ends the full
 // track rests on the chart until the toggle goes off.
 //
 // #120 replaced v1's straight lerp between ports with honest geometry: road-connected
@@ -31,10 +32,14 @@ import {
   legDurations,
 } from "./engine/render/voyage-geometry.js";
 import { paintVersoTrack, clearVersoTrack } from "./verso.js";
+import { buildVoyageLog } from "./engine/world/voyage-log.js";
 
 const mapDiv = document.getElementById("map");
 const versoEl = document.getElementById("verso");
 const statusEl = document.getElementById("status");
+const logPanel = document.getElementById("voyage-log");
+const logSig = document.getElementById("voyage-log-sig");
+const logStrip = document.getElementById("voyage-log-strip");
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 // The sweep no longer runs a fixed duration split equally: v1 did that, so a long
@@ -85,10 +90,49 @@ export function cancelVoyageRaf() {
   }
 }
 
-// Drop the session without touching the DOM: used after a redraw with the toggle
-// off, where mapDiv.innerHTML already removed the overlay with the old chart.
+// Drop the session after a redraw with the toggle off. mapDiv.innerHTML already removed
+// the overlay with the old chart, but the #121 margin log is a SIBLING of #map, so it
+// survives that wipe and must be hidden explicitly.
 export function clearVoyage() {
+  hideLog();
   voyage = null;
+}
+
+// Build the margin-log panel: every port a row up front (dimmed), the signature above.
+// Mirrors living-chart buildStrip so a snap or a reduced-motion jump can brighten them all
+// at once. The dated year rides its own tabular column like the chronicle strip; the row
+// text drops the redundant "Year N." lead the entry already carries. Returns the rows so
+// the session can brighten them per arrival.
+function buildLogPanel(log) {
+  logSig.textContent = log.attribution;
+  const rows = log.entries.map((e) => {
+    const li = document.createElement("li");
+    const year = document.createElement("span");
+    year.className = "cr-year";
+    year.textContent = String(e.year);
+    const text = document.createElement("span");
+    text.className = "cr-text";
+    text.textContent = e.text.replace(/^Year \d+\. /, "");
+    li.append(year, text);
+    return li;
+  });
+  logStrip.replaceChildren(...rows);
+  logPanel.hidden = false;
+  return rows;
+}
+
+// Brighten the rows the survey has reached (rows [0, arrived)), dim the rest. Idempotent
+// and order-independent, so stepping backward via the e2e hook un-brightens correctly.
+function revealLog(session, arrived) {
+  const rows = session.logRows;
+  for (let i = 0; i < rows.length; i++) rows[i].classList.toggle("logged", i < arrived);
+}
+
+// Hide and empty the panel. The panel lives outside #map, so nothing else clears it.
+function hideLog() {
+  logPanel.hidden = true;
+  logStrip.replaceChildren();
+  logSig.textContent = "";
 }
 
 function makeMark(className, parts) {
@@ -112,7 +156,7 @@ function makeMark(className, parts) {
 
 // Build the plan + routed geometry + overlay for a manifest and append it into #map.
 // Returns false when there is nothing to survey (no capital), so the caller can bail.
-function buildVoyage(manifest, survey) {
+function buildVoyage(manifest, survey, seed, subtitle) {
   if (!manifest || !manifest.places || !survey) return false;
   const plan = buildVoyagePlan(manifest.places, manifest.presentYear);
   if (!plan.ports.length) return false;
@@ -141,11 +185,25 @@ function buildVoyage(manifest, survey) {
   const origin = byIdx.get(plan.ports[0].idx);
   const originPt = { x: proj.px(origin.gx), y: proj.py(origin.gy) };
 
+  // #121 The margin log. Each port carries the mode of the leg that ARRIVED at it (the
+  // origin has none, so it departs), so the surveyor's voice reads a ride, a sail, or a
+  // setting-out. The richer, seed-forked prose lives in the engine (world/voyage-log.js);
+  // the plan's own port.logLine is the pure Sub-1 line and is no longer displayed.
+  const logPorts = plan.ports.map((port, i) => {
+    const pm = byIdx.get(port.idx);
+    return {
+      idx: pm.idx, name: pm.name, kind: pm.kind, founded: pm.founded,
+      arrivalMode: i === 0 ? null : routed[i - 1].mode,
+    };
+  });
+  const log = buildVoyageLog(logPorts, manifest.presentYear, (seed >>> 0), subtitle || "");
+  const logRows = buildLogPanel(log);
+
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("class", "voyage-overlay");
   svg.setAttribute("viewBox", `0 0 ${wPx} ${manifest.heightPx}`);
   svg.setAttribute("preserveAspectRatio", "none");
-  svg.setAttribute("aria-hidden", "true"); // the dated log lines in #status carry the a11y payload
+  svg.setAttribute("aria-hidden", "true"); // #121: the margin-log panel + one #status summary carry the a11y payload
   const trackEl = document.createElementNS(SVG_NS, "polyline");
   trackEl.setAttribute("class", "voyage-track");
   const shipG = makeMark("voyage-ship", SHIP_PARTS);
@@ -159,6 +217,8 @@ function buildVoyage(manifest, survey) {
   voyage = {
     plan,
     legs,
+    log,
+    logRows,
     cumMs,
     totalMs,
     originPt,
@@ -211,10 +271,10 @@ function showMark(session, mode) {
 }
 
 // Paint one frame at progress t (0..1): grow the track through every arrived port plus
-// the partial current leg, move the mark to its position/facing/tilt, and (when postLog
-// is set) post the newly arrived port's log line to #status. A resting re-arm after a
-// redraw paints silently (postLog false), so it never stomps the "" that the draw's own
-// settle signal depends on.
+// the partial current leg, move the mark to its position/facing/tilt, and brighten the
+// margin-log rows reached so far. On the LIVE completion (postLog) it posts the one
+// #status summary. A resting re-arm after a redraw paints silently (postLog false): it
+// still brightens the log, but never stomps the "" the draw's own settle signal depends on.
 function paintFrame(session, t, postLog = true) {
   const legCount = session.legs.length;
   const f = frameAt(legCount, t);
@@ -245,10 +305,18 @@ function paintFrame(session, t, postLog = true) {
     `translate(${pos.x} ${pos.y}) scale(${session.facing} 1) rotate(${tiltDeg})`,
   );
 
-  if (postLog && f.arrived !== session.shownArrived) {
+  if (f.arrived !== session.shownArrived) {
     session.shownArrived = f.arrived;
-    const port = session.plan.ports[f.arrived - 1];
-    if (port) statusEl.textContent = port.logLine;
+    // The margin log brightens per arrival ALWAYS, even on a silent re-arm (it is visual,
+    // not the live region). #121: the single polite #status summary is the whole survey's
+    // announcement, posted only on the LIVE completion (postLog) so a silent re-arm keeps
+    // #status "" for the draw's settle signal and the e2e waitSettled. On any earlier OR
+    // backward-stepped resting frame (the deterministic step hooks can move `arrived` DOWN)
+    // #status returns to "", so a stale summary never lingers at a mid-survey rest.
+    revealLog(session, f.arrived);
+    if (postLog) {
+      statusEl.textContent = f.arrived >= session.plan.ports.length ? session.log.summary : "";
+    }
   }
 }
 
@@ -312,9 +380,9 @@ function play(session) {
 // During a sweep the verso carries NO track: exitVoyage cleared it above, and it is
 // repainted when the survey comes to rest. A flip mid-sweep snaps to rest first, so the
 // back face never turns into view empty.
-export function applyVoyage(manifest, survey, opts = {}) {
+export function applyVoyage(manifest, survey, seed, subtitle, opts = {}) {
   exitVoyage();
-  if (!buildVoyage(manifest, survey)) return;
+  if (!buildVoyage(manifest, survey, seed, subtitle)) return;
   if (opts.skipSweep || prefersReduce()) {
     paintFrame(voyage, 1);
     syncVersoTrack();
@@ -327,10 +395,10 @@ export function applyVoyage(manifest, survey, opts = {}) {
 // Re-arm after a redraw while the toggle stayed on: rebuild against the new world
 // and rest on the full track. Only an explicit toggle-ON animates the sweep, so a
 // style turn or a sea-level nudge never replays the whole voyage.
-export function rearmVoyage(manifest, survey, opts = {}) {
+export function rearmVoyage(manifest, survey, seed, subtitle, opts = {}) {
   cancelVoyageRaf();
   voyage = null;
-  if (!buildVoyage(manifest, survey)) return;
+  if (!buildVoyage(manifest, survey, seed, subtitle)) { hideLog(); return; }
   paintFrame(voyage, 1, false); // silent: the draw's settle needs #status to stay ""
   // #174: repaint the back face too. renderVerso's replaceChildren wipes the verso track
   // on every draw, exactly as mapDiv.innerHTML wipes the recto overlay, so BOTH faces have
@@ -353,6 +421,7 @@ export function exitVoyage() {
   const existing = mapDiv.querySelector(".voyage-overlay");
   if (existing) existing.remove();
   if (voyage) statusEl.textContent = "";
+  hideLog(); // #121: the margin log is a sibling of #map, so remove it explicitly
   voyage = null;
   clearVersoTrack(versoEl); // #174: the ink leaves the back of the sheet with the front
 }
@@ -403,6 +472,21 @@ export function voyagePlan() {
   return {
     ports: voyage.plan.ports,
     legs: voyage.plan.legs.map((leg, i) => ({ ...leg, mode: voyage.legs[i].mode })),
+  };
+}
+
+// #121 e2e read hook: the margin log (attribution, summary, entries) plus how many rows
+// are currently revealed and whether the panel is shown, so a suite can assert the mode-
+// aware prose and the reveal-per-arrival without racing the rAF loop.
+export function voyageLog() {
+  if (!voyage) return null;
+  return {
+    attribution: voyage.log.attribution,
+    summary: voyage.log.summary,
+    entries: voyage.log.entries.map((e) => ({ idx: e.idx, year: e.year, text: e.text })),
+    logged: voyage.logRows.filter((r) => r.classList.contains("logged")).length,
+    rows: voyage.logRows.length,
+    visible: !logPanel.hidden,
   };
 }
 

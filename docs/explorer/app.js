@@ -31,6 +31,7 @@ import {
   voyageStepTo,
   voyagePaintAt,
   voyagePlan,
+  voyageLog,
   voyageLegGeometry,
   voyageSnapToRest,
   syncVersoTrack,
@@ -272,7 +273,7 @@ function draw(opts) {
           else clearScrub();
           // #119: re-arm the voyage to the new chart, resting on the full track (only
           // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
-          if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, { quiet });
+          if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
           else clearVoyage();
         });
       } else {
@@ -294,7 +295,7 @@ function draw(opts) {
         // verso's ghost and its track must always come from the same draw.
         // #120: re-arm from THIS draw's survey, never lastSurvey. A sea-level drag moves the
         // waterline, so the roads and open water the router walks moved with it.
-        if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, { quiet });
+        if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
         else clearVoyage();
       }
       // #116: refresh the back face for the chart just drawn. Skipped on quiet mid-
@@ -436,7 +437,7 @@ voyageChk.addEventListener("change", () => {
     // precedent above where a style change while flipped rebuilds in place rather than
     // turning. The checkbox is never disabled while flipped, for the same reason the Turn
     // button is never disabled by a sweep.
-    applyVoyage(lastManifest, lastSurvey, { skipSweep: isFlipped(sheetEl) });
+    applyVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle, { skipSweep: isFlipped(sheetEl) });
   } else exitVoyage();
 });
 
@@ -458,6 +459,7 @@ window.__vellumVoyageStepTo = voyageStepTo;
 // flicker the rider's facing.
 window.__vellumVoyagePaintAt = voyagePaintAt;
 window.__vellumVoyagePlan = voyagePlan;
+window.__vellumVoyageLog = voyageLog; // #121: the margin log (entries, summary, reveal state)
 window.__vellumVoyageLegGeometry = voyageLegGeometry; // #120: projected leg points, for W20b
 
 seedInput.value = String(randomSeed());

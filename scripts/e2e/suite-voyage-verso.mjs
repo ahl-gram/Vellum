@@ -16,9 +16,9 @@ export async function run(ctx) {
   const cntFn = `const cnt=(el)=>el&&el.getAttribute("points")?el.getAttribute("points").trim().split(" ").length:0;`;
 
   // W9: a flip mid-sweep SNAPS the voyage to its resting track, then turns. The button is
-  // never disabled by a running sweep (a 12s dead control reads as a bug), and the snap
-  // fires paintFrame's shownArrived diff exactly once, so #status posts ONLY the final
-  // port's line, not a burst of every port the snap skipped over.
+  // never disabled by a running sweep (a 12s dead control reads as a bug). #121: the margin
+  // log accumulates (row 0 brightened as the sweep set out) while #status stays "" until
+  // the snap posts the survey's single polite summary.
   const w9 = await evaluate(`(()=>{
     ${cntFn}
     const voy=document.getElementById("voyage");
@@ -29,34 +29,37 @@ export async function run(ctx) {
     const btn=document.getElementById("verso-turn");
     const statusEl=document.getElementById("status");
     const midPts=cnt(document.querySelector("#map .voyage-track"));
+    const midLog=window.__vellumVoyageLog();
     const midStatus=statusEl.textContent;
     const disabledMidSweep=btn.disabled;
     // COUNT the writes to #status across the snap, do not just read its end state:
     // textContent retains only the last value, so a burst posting every port the snap
-    // skipped, ending on the final line, would be indistinguishable from the single post
-    // decision 2 requires. Each textContent assignment is exactly one childList record.
+    // skipped would be indistinguishable from the single summary post #121 requires. Each
+    // textContent assignment is exactly one childList record.
     const obs=new MutationObserver(()=>{});
     obs.observe(statusEl,{childList:true,characterData:true,subtree:true});
     btn.click();
     const statusWrites=obs.takeRecords().length;
     obs.disconnect();
+    const restLog=window.__vellumVoyageLog();
     return{
       ports:plan?plan.ports.length:0,
-      firstLine:plan&&plan.ports[0]?plan.ports[0].logLine:"",
-      finalLine:plan&&plan.ports.length?plan.ports[plan.ports.length-1].logLine:"",
-      midPts,midStatus,disabledMidSweep,statusWrites,
+      summary:restLog?restLog.summary:"",
+      midPts,midStatus,midLogged:midLog?midLog.logged:-1,disabledMidSweep,statusWrites,
       restPts:cnt(document.querySelector("#map .voyage-track")),
+      restLogged:restLog?restLog.logged:-1,
       status:statusEl.textContent,
       versoed:document.getElementById("sheet").classList.contains("versoed"),
       label:btn.textContent,
     };
   })()`);
   check("W9 a flip mid-sweep snaps the voyage to rest and turns; a running sweep never disables the button",
-    w9.disabledMidSweep === false && w9.ports > 2 && w9.midPts === 1 && w9.midStatus === w9.firstLine &&
-    w9.restPts > w9.ports && w9.status === w9.finalLine && w9.versoed && w9.label === "Turn back",
+    w9.disabledMidSweep === false && w9.ports > 2 && w9.midPts === 1 && w9.midLogged >= 1 && w9.midStatus === "" &&
+    w9.restPts > w9.ports && w9.restLogged === w9.ports && w9.status === w9.summary && w9.versoed && w9.label === "Turn back",
     JSON.stringify(w9));
-  check("W9b the snap posts ONLY the final port's line: exactly one write to #status, not a burst",
-    w9.statusWrites === 1 && w9.status === w9.finalLine, JSON.stringify({ writes: w9.statusWrites, status: w9.status }));
+  check("W9b the snap posts the survey's ONE polite summary, not a burst: exactly one write to #status",
+    w9.statusWrites === 1 && w9.status === w9.summary && w9.summary !== "",
+    JSON.stringify({ writes: w9.statusWrites, status: w9.status, summary: w9.summary }));
 
   await sleep(1400); // let the 1200ms flip land, so W10 and its screenshot read the end state
 
@@ -98,18 +101,20 @@ export async function run(ctx) {
     voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));
     voy.checked=true;voy.dispatchEvent(new Event("change",{bubbles:true}));
     const plan=window.__vellumVoyagePlan();
+    const log=window.__vellumVoyageLog();
     return{
       flipped:document.getElementById("sheet").classList.contains("versoed"),
       ports:plan?plan.ports.length:0,
-      finalLine:plan&&plan.ports.length?plan.ports[plan.ports.length-1].logLine:"",
+      summary:log?log.summary:"",
+      logged:log?log.logged:-1,
       rectoPts:cnt(document.querySelector("#map .voyage-track")),
       versoPts:cnt(verso.querySelector(".verso-track")),
       status:document.getElementById("status").textContent,
     };
   })()`);
-  check("W11 ticking voyage while flipped rests on the full track on both faces and runs no sweep",
+  check("W11 ticking voyage while flipped rests on the full track on both faces, logs every entry, no sweep",
     w11.flipped && w11.ports > 2 && w11.rectoPts === w11.versoPts && w11.rectoPts > w11.ports &&
-    w11.status === w11.finalLine, JSON.stringify(w11));
+    w11.logged === w11.ports && w11.status === w11.summary, JSON.stringify(w11));
 
   // W12: a redraw while flipped and voyaging re-arms BOTH faces, silently. renderVerso's
   // replaceChildren wipes the verso track on every draw (the same lifecycle trap as #map's
