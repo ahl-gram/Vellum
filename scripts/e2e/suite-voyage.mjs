@@ -47,25 +47,41 @@ export async function run(ctx) {
   // whichever is currently displayed. Reading .voyage-ship unconditionally throws on the
   // ~94% of legs that ride.
   const markFn = `const mark=()=>{const s=document.querySelector("#map .voyage-ship");const r=document.querySelector("#map .voyage-rider");return (s&&s.getAttribute("display")!=="none")?s:r;};`;
+  // #121: the per-port log no longer streams into #status; it accumulates in the margin
+  // log panel. stepTo reads how many rows have brightened (logged) and the newest one's
+  // text via the read hook, alongside the track/mark state.
   const stepTo = (n) =>
-    evaluate(`(()=>{${markFn}window.__vellumVoyageStepTo(${n});const m=mark();const t=m?m.getAttribute("transform"):"";const glyph=m?m.getAttribute("class"):"";const pts=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ").length;return{status:document.getElementById("status").textContent,tf:t,glyph,pts};})()`);
+    evaluate(`(()=>{${markFn}window.__vellumVoyageStepTo(${n});const m=mark();const t=m?m.getAttribute("transform"):"";const glyph=m?m.getAttribute("class"):"";const pts=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ").length;const log=window.__vellumVoyageLog();return{status:document.getElementById("status").textContent,tf:t,glyph,pts,logged:log?log.logged:-1,rows:log?log.rows:-1,visible:!!(log&&log.visible),lastText:log&&log.logged>0?log.entries[log.logged-1].text:""};})()`);
 
-  // W2: step to the origin -> the departure log line shows.
+  // W2: step to the origin -> the panel shows one row per port, the first brightened, and
+  // it reads as a departure (the surveyor sets out, does not arrive).
   const s0 = await stepTo(0);
-  check("W2 step to the capital: the departure log line shows in #status", s0.status === plan.ports[0].logLine, `"${s0.status}" vs "${plan.ports[0].logLine}"`);
+  check("W2 step to the capital: the margin log opens with the departure entry",
+    s0.visible && s0.rows === plan.ports.length && s0.logged === 1 && s0.lastText.includes("set out"),
+    JSON.stringify({ s0, ports: plan.ports.length }));
 
-  // W3: step to a mid port -> its log line shows, the track has grown, the ship moved.
+  // W3: step to a mid port -> that many entries have brightened, the track grew, the mark moved.
   const sMid = await stepTo(midPort);
-  check("W3 step to a mid port: its log line shows, the track grew, the ship moved", sMid.status === plan.ports[midPort].logLine && sMid.pts > s0.pts && sMid.tf !== s0.tf, JSON.stringify({ mid: midPort, sMid, s0pts: s0.pts }));
+  check("W3 step to a mid port: the log accumulated to that port, the track grew, the mark moved",
+    sMid.logged === midPort + 1 && sMid.pts > s0.pts && sMid.tf !== s0.tf,
+    JSON.stringify({ mid: midPort, sMid, s0pts: s0.pts }));
 
-  // W4: step to the last port -> its line shows and the full track (every port) rests.
+  // W4: step to the last port -> every entry has brightened and the full routed track rests.
   const sLast = await stepTo(lastPort);
   // #120: legs are routed polylines now, so the resting track has strictly MORE vertices
   // than it has ports. Under v1 this was an equality.
-  check("W4 step to the last port: its line shows and the full routed track rests", sLast.status === plan.ports[lastPort].logLine && sLast.pts > plan.ports.length, JSON.stringify({ last: lastPort, sLast, ports: plan.ports.length }));
+  check("W4 step to the last port: every entry is logged and the full routed track rests",
+    sLast.logged === plan.ports.length && sLast.pts > plan.ports.length,
+    JSON.stringify({ last: lastPort, sLast, ports: plan.ports.length }));
 
+  // W4b: stepping BACK from the finished survey clears the completion summary. The
+  // deterministic hooks can move the survey backward to a mid rest, and #status must return
+  // to "" there (never a stale "The survey is charted..."), so the settle invariant that
+  // waitSettled and the draw settle both key on holds at every resting frame, not just t=1.
+  const sBack = await stepTo(midPort);
+  check("W4b stepping back from the last port clears the completion summary from #status",
+    sBack.status === "" && sBack.logged === midPort + 1, JSON.stringify(sBack));
   // Artifact: a mid-sweep frame (track + ship) for the user to eyeball.
-  await stepTo(midPort);
   await shoot("explorer-voyage.png");
 
   // W5: the track lives in a SIBLING overlay <svg>, never inside the baked chart, so
@@ -89,15 +105,17 @@ export async function run(ctx) {
   check("W6 chronicle and voyage are mutually exclusive (chronicle on removes the voyage)", v6.voyageUnchecked && v6.overlayGone && v6.panelShown, JSON.stringify(v6));
   await evaluate(`(()=>{const chr=document.getElementById("chronicle");chr.checked=false;chr.dispatchEvent(new Event("change",{bubbles:true}));})()`);
 
-  // W7: voyage OFF removes the overlay, clears the log line, and drops the session.
+  // W7: voyage OFF removes the overlay, clears #status, hides the margin log, and drops
+  // the session. The panel is a sibling of #map, so it must be hidden explicitly.
   const v7 = await evaluate(`(()=>{
     const voy=document.getElementById("voyage");voy.checked=true;voy.dispatchEvent(new Event("change",{bubbles:true}));
     window.__vellumVoyageStepTo(0);
     voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));
     const ov=document.querySelector("#map .voyage-overlay");
-    return{overlayGone:!ov,status:document.getElementById("status").textContent,plan:window.__vellumVoyagePlan()};
+    return{overlayGone:!ov,status:document.getElementById("status").textContent,plan:window.__vellumVoyagePlan(),logHidden:document.getElementById("voyage-log").hidden,log:window.__vellumVoyageLog()};
   })()`);
-  check("W7 voyage off: overlay removed, log line cleared, session dropped", v7.overlayGone && v7.status === "" && v7.plan === null, JSON.stringify(v7));
+  check("W7 voyage off: overlay removed, #status cleared, margin log hidden, session dropped",
+    v7.overlayGone && v7.status === "" && v7.plan === null && v7.logHidden && v7.log === null, JSON.stringify(v7));
 
   // W8: a redraw with voyage ON re-arms against the NEW world, resting on the full
   // track (only an explicit toggle-on animates), starting at the new capital.
@@ -108,8 +126,16 @@ export async function run(ctx) {
   const v8 = await evaluate(`(()=>{
     const ov=document.querySelector("#map .voyage-overlay");
     const plan=window.__vellumVoyagePlan();
+    const log=window.__vellumVoyageLog();
     const pts=ov?ov.querySelector(".voyage-track").getAttribute("points").trim().split(" ").length:0;
-    return{hasOverlay:!!ov,firstIdx:plan&&plan.ports[0]?plan.ports[0].idx:-1,ports:plan?plan.ports.length:0,pts};
+    return{hasOverlay:!!ov,firstIdx:plan&&plan.ports[0]?plan.ports[0].idx:-1,ports:plan?plan.ports.length:0,pts,
+      logVisible:!!(log&&log.visible),logEntries:log?log.entries.length:0,logged:log?log.logged:-1,logAttr:log?log.attribution:""};
   })()`);
-  check("W8 redraw with voyage on re-arms to the new world's full resting track", v8.hasOverlay && v8.firstIdx === vm2.capitalIdx && v8.ports > 1 && v8.pts > v8.ports, JSON.stringify(v8) + ` capital=${vm2.capitalIdx}`);
+  // #121: the settle-path re-arm must thread the seed + subtitle, so the margin log rebuilds
+  // for the NEW world with its real attribution (a bug here builds it with seed 0 and an
+  // empty signature, invisible to a track-only check).
+  check("W8 redraw with voyage on re-arms the full resting track AND the new world's margin log",
+    v8.hasOverlay && v8.firstIdx === vm2.capitalIdx && v8.ports > 1 && v8.pts > v8.ports &&
+    v8.logVisible && v8.logEntries === v8.ports && v8.logged === v8.ports && v8.logAttr.startsWith("Being a true"),
+    JSON.stringify({ ...v8, logAttr: v8.logAttr.slice(0, 20) }) + ` capital=${vm2.capitalIdx}`);
 }

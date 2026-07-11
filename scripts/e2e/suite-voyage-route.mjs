@@ -1,7 +1,8 @@
-// Wayfarer's Passage: real routes + the mode-aware marker (W17-W21, #120). The pure rules (mode
-// assignment, road/sea geometry, the tilt cap, anti-flicker facing) are proven exhaustively in
-// node:test; these prove they are WIRED into the live overlay. Self-bases on seed 526413615 (the
-// one world with a sea leg) and restores the clean seed-42 base for the suites that follow.
+// Wayfarer's Passage: real routes + the mode-aware marker (W17-W21, #120) and the margin log
+// (W22-W24, #121). The pure rules (mode assignment, road/sea geometry, the tilt cap, anti-flicker
+// facing, and the deterministic mode-aware prose) are proven exhaustively in node:test; these
+// prove they are WIRED into the live overlay + panel. Self-bases on seed 526413615 (a world that
+// both sails and rides) and restores the clean seed-42 base for the suites that follow.
 // Split from suite-voyage.mjs; W prefix kept.
 export async function run(ctx) {
   const { evaluate, check, shoot, waitSettled, sleep } = ctx;
@@ -133,6 +134,66 @@ export async function run(ctx) {
   })()`);
   check("W21 the routed track and BOTH glyphs stay in the sibling overlay, never the baked chart",
     !w21.inChart && w21.inOverlay && w21.shipInOverlay && w21.riderInOverlay, JSON.stringify(w21));
+
+  // ---------------------------------------------------------------------------
+  // #121 The margin log. The prose is proven deterministic + mode-aware in node:test
+  // (voyage-log.test.ts); these prove it is WIRED into the live panel on a real routed
+  // world (seed 526413615 both sails and rides), consuming #120's leg mode.
+  // ---------------------------------------------------------------------------
+
+  // W22: the full sweep accumulates one dated entry per port; the panel opens with the
+  // surveyor's attribution and a departure, and every entry persists brightened at rest.
+  const w22 = await evaluate(`(()=>{
+    window.__vellumVoyageStepTo(999); // land the whole survey at rest
+    const plan=window.__vellumVoyagePlan();
+    const log=window.__vellumVoyageLog();
+    const sig=document.getElementById("voyage-log-sig").textContent;
+    const rows=document.getElementById("voyage-log-strip").querySelectorAll("li").length;
+    return{
+      visible:!!(log&&log.visible), entries:log?log.entries.length:0, logged:log?log.logged:-1,
+      rows, ports:plan?plan.ports.length:0, sig, attribution:log?log.attribution:"",
+      opensDeparture:!!(log&&log.entries[0]&&log.entries[0].text.includes("set out")),
+    };
+  })()`);
+  check("W22 the full sweep logs one dated entry per port, opens with the attribution + a departure, all persisting",
+    w22.visible && w22.entries === w22.ports && w22.rows === w22.ports && w22.logged === w22.ports &&
+    w22.opensDeparture && w22.sig === w22.attribution && w22.attribution.startsWith("Being a true"),
+    JSON.stringify({ ...w22, attribution: w22.attribution.slice(0, 24) }));
+
+  // W23: the voice consumes #120's leg mode. A port reached by a sea leg reads as a voyage
+  // ("made sail"); one reached by a road leg reads as a ride ("rode on"). Port p is reached
+  // by leg p-1, so its entry is entries[p].
+  const w23 = await evaluate(`(()=>{
+    const plan=window.__vellumVoyagePlan();
+    const log=window.__vellumVoyageLog();
+    const seaLeg=plan.legs.findIndex((l)=>l.mode==="sea");
+    const roadLeg=plan.legs.findIndex((l)=>l.mode==="road");
+    return{seaLeg,roadLeg,
+      seaEntry:seaLeg>=0?log.entries[seaLeg+1].text:"",
+      roadEntry:roadLeg>=0?log.entries[roadLeg+1].text:""};
+  })()`);
+  check("W23 the margin log consumes the leg mode: a sea arrival sailed, a road arrival rode",
+    w23.seaLeg >= 0 && w23.roadLeg >= 0 && w23.seaEntry.includes("made sail") && w23.roadEntry.includes("rode on"),
+    JSON.stringify(w23));
+
+  // W24: the panel rows mirror the engine entries (the reveal drops only the redundant
+  // "Year N." lead the entry carries), the panel lives OUTSIDE #map so Download can never
+  // blob it, and #status holds the survey's one summary, not a per-port line.
+  const w24 = await evaluate(`(()=>{
+    const log=window.__vellumVoyageLog();
+    const first=document.getElementById("voyage-log-strip").querySelector("li");
+    const domText=first?first.querySelector(".cr-text").textContent:"";
+    const domYear=first?first.querySelector(".cr-year").textContent:"";
+    const engineFirst=log?log.entries[0].text:"";
+    return{
+      panelOutsideMap: !document.querySelector("#map #voyage-log") && !document.querySelector("#map .voyage-log"),
+      matches: !!domText && engineFirst.includes(domText) && engineFirst.startsWith("Year "+domYear+"."),
+      status: document.getElementById("status").textContent, summary: log?log.summary:"",
+    };
+  })()`);
+  check("W24 the panel rows mirror the engine entries, live outside #map, and #status holds the one summary",
+    w24.matches && w24.panelOutsideMap && w24.status === w24.summary && w24.summary !== "",
+    JSON.stringify(w24));
 
   await evaluate(`window.__vellumVoyageStepTo(999)`);
   await shoot("explorer-voyage-routed.png");

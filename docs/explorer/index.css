@@ -252,6 +252,28 @@ button.primary:hover { background: #5d4831; }
 .chronicle-strip .cr-year { flex: 0 0 3rem; text-align: right;
   font-variant-numeric: tabular-nums; font-weight: 600; color: #857257; }
 .chronicle-strip .cr-text { color: #54452f; }
+/* #121 The margin log: the surveyor's journal, styled like the chronicle strip (#93)
+   but its own voyage-only panel (voyage and chronicle are mutually exclusive). Rows rest
+   dimmed and brighten as the survey reaches each port, the same "inked into the ledger"
+   reveal as chronicle-strip li.past. The panel appears at rest, fully visible: the life is
+   in the per-row brightening, not a container flourish. It deliberately does NOT reuse the
+   scrubber's paperUnfurl entrance: that 3D-transform-plus-opacity animation can leave the
+   panel stuck near opacity 0 in some compositors, and an invisible log reads as broken. */
+.voyage-log[hidden] { display: none; }
+.voyage-log { max-width: 1100px; margin: 0.8rem auto 0;
+  background: #f3ead2; border: 1px solid #b9a77f; border-radius: 6px;
+  padding: 0.8rem 1rem; }
+.voyage-log-sig { margin: 0 0 0.5rem; font-style: italic; color: #6b5a40;
+  border-bottom: 1px solid #cdbd97; padding-bottom: 0.5rem; }
+.voyage-log-strip { list-style: none; margin: 0; padding: 0;
+  max-height: 32rem; overflow-y: auto; }
+.voyage-log-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
+  border-bottom: 1px solid #cdbd97; opacity: 0.4;
+  transition: opacity 0.18s, transform 0.18s; }
+.voyage-log-strip li.logged { opacity: 1; transform: translateX(2px); }
+.voyage-log-strip .cr-year { flex: 0 0 3rem; text-align: right;
+  font-variant-numeric: tabular-nums; font-weight: 600; color: #857257; }
+.voyage-log-strip .cr-text { color: #54452f; }
 /* The Wayfarer's Passage overlay (#119). A client-only SVG layer over the baked
    chart: a dotted survey track threads port to port behind a little ship, and each
    port's dated log line lands in #status. pointer-events:none so the #53 place-hit

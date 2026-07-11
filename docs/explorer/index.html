@@ -125,6 +125,14 @@
   </div>
   <ol id="chronicle-strip" class="chronicle-strip"></ol>
 </div>
+<!-- #121 The margin log: the surveyor's dated journal, one entry per port, revealed as
+     the survey reaches each. A voyage-only panel styled like the chronicle strip but its
+     own element (voyage and chronicle are mutually exclusive). The overlay <svg> is
+     aria-hidden; this readable list plus the one polite #status summary carry the a11y. -->
+<div id="voyage-log" class="voyage-log" hidden role="region" aria-label="The surveyor's log">
+  <p id="voyage-log-sig" class="voyage-log-sig"></p>
+  <ol id="voyage-log-strip" class="voyage-log-strip"></ol>
+</div>
 <div id="atlas"></div>
 
 <footer>
