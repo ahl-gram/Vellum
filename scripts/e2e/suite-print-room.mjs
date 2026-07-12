@@ -128,6 +128,88 @@ export async function run(ctx) {
   }
   check("PRB bare Print Room visit lands on today's seed-of-the-day", !!bare && bare.seed === bare.expected, JSON.stringify(bare));
 
+  // --- #134 poster plates -------------------------------------------------------------
+  // Downloads are gated to "deny" so the plate's a.click() exercises the full blob path
+  // (create, click, revoke, observe) without a headless disk write or prompt. blob: URLs
+  // are not HTTP, so a denied download adds no 4xx and no console error: PR6/PR7 (checked
+  // after this block) stay clean.
+  try { await send("Browser.setDownloadBehavior", { behavior: "deny" }); }
+  catch { try { await send("Page.setDownloadBehavior", { behavior: "deny" }); } catch {} }
+
+  // Order from a KNOWN proof: seed 42 antique (the golden hero). Pull it, then the plate
+  // buttons enable off the snapshotted basis (they start disabled with no proof).
+  await evaluate(`(()=>{const s=document.getElementById("pr-seed");s.value="42";document.getElementById("pr-style").value="antique";document.getElementById("pr-draw").click();})()`);
+  let plateReady = null;
+  for (let i = 0; i < 160; i++) {
+    let s = null;
+    try { s = await evaluate(`(()=>{const st=window.__vellumPrintRoomState();const g=document.querySelector('[data-poster="grand"]');return{seed:st.seed,status:document.getElementById("pr-status").textContent,disabled:g?g.disabled:true};})()`); } catch {}
+    if (s && s.seed === 42 && s.status === "" && s.disabled === false) { plateReady = s; break; }
+    await sleep(50);
+  }
+  check("PR10 plate buttons enable once a proof is on the desk", !!plateReady, JSON.stringify(plateReady));
+
+  // The clamp guard, exercised in-browser: a hand-edited width can never reach the worker
+  // wider than Grand (4200) or under Desk (2400). Unit-tested too (poster-presets.test.ts).
+  const clamp = await evaluate(`(()=>{const f=window.__vellumClampPosterWidth;return{hi:f(999999),lo:f(1),grand:f(4200)};})()`);
+  check("PR11 clampPosterWidth bounds any width to the [2400, 4200] envelope", clamp.hi === 4200 && clamp.lo === 2400 && clamp.grand === 4200, JSON.stringify(clamp));
+
+  // Order the Grand plate. orderPoster runs synchronously up to runJob, so the plates
+  // disable and the press status appears in the SAME turn as the click: assert both.
+  const accepted = await evaluate(`(()=>{window.__vellumLastPoster=undefined;const g=document.querySelector('[data-poster="grand"]');g.click();return{disabled:g.disabled,status:document.getElementById("pr-poster-status").textContent};})()`);
+  check("PR12 ordering a plate disables the counter and rolls the press", accepted.disabled === true && /press is rolling/i.test(accepted.status), JSON.stringify(accepted));
+
+  // The press runs a few seconds off-thread. Wait for the poster hook, and assert it is a
+  // well-formed 4200px plate of the proof, the counter re-opened, and the status names the
+  // pulled sheet.
+  let poster = null;
+  for (let i = 0; i < 220; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(()=>{const p=window.__vellumLastPoster;const g=document.querySelector('[data-poster="grand"]');const svgs=[...document.querySelectorAll("svg")].map(el=>Number(el.getAttribute("width"))||0);return{has:!!p,filename:p&&p.filename,width:p&&p.width,seed:p&&p.seed,hasWidthAttr:!!(p&&p.svg.includes('width="4200"')),hasRecipeAttr:!!(p&&p.svg.includes('data-vellum-seed="42"')),reenabled:g?!g.disabled:false,status:document.getElementById("pr-poster-status").textContent,maxDom:svgs.length?Math.max(...svgs):0,preview:!!document.querySelector("#pr-preview svg")};})()`);
+    } catch {}
+    if (s && s.has) { poster = s; break; }
+    await sleep(50);
+  }
+  check(
+    "PR13 the Grand plate pulls a well-formed 4200px poster of the proof (counter re-opens, sheet named)",
+    !!poster && poster.width === 4200 && poster.seed === 42 &&
+      poster.filename === "vellum-poster-42-antique-4200.svg" &&
+      poster.hasWidthAttr && poster.hasRecipeAttr &&
+      poster.reenabled === true && /vellum-poster-42-antique-4200\.svg/.test(poster.status),
+    JSON.stringify(poster && { ...poster }),
+  );
+
+  // The epic's one hard warning: the wide poster string is download-only and NEVER enters
+  // the live DOM (a multi-MB innerHTML swap). The only svg on the page is the modest
+  // PREVIEW_WIDTH proof, so no svg element carries a width attribute above the preview.
+  check(
+    "PR14 download-only: the wide poster never enters the DOM (no svg wider than the preview)",
+    !!poster && poster.preview === true && poster.maxDom > 0 && poster.maxDom <= 1000,
+    poster ? `maxDomSvgWidth=${poster.maxDom}` : "no poster",
+  );
+
+  // recipeFromSvg round-trips the poster (acceptance-1): the recipe rides inside the SVG,
+  // so the artifact is self-describing. Parse the poster string with the engine's reader.
+  const rt = await evaluate(`(async()=>{const {recipeFromSvg}=await import("/explorer/engine/render/recipe-meta.js");const p=window.__vellumLastPoster;const r=p?recipeFromSvg(p.svg):null;return r?{seed:r.recipe.seed,style:r.style}:null;})()`, true);
+  check("PR15 recipeFromSvg round-trips the poster (seed 42, antique)", !!rt && rt.seed === 42 && rt.style === "antique", JSON.stringify(rt));
+
+  // Acceptance-1 is "EACH preset downloads": Desk/Wall/Grand ride the same handler, so a
+  // second preset end-to-end (Desk 2400) proves the per-preset width flows through, not
+  // just Grand. The counter re-opened after PR13, so the button is clickable.
+  await evaluate(`(()=>{window.__vellumLastPoster=undefined;document.querySelector('[data-poster="desk"]').click();})()`);
+  let desk = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try { s = await evaluate(`(()=>{const p=window.__vellumLastPoster;return p?{filename:p.filename,width:p.width,hasWidthAttr:p.svg.includes('width="2400"')}:null;})()`); } catch {}
+    if (s) { desk = s; break; }
+    await sleep(50);
+  }
+  check(
+    "PR16 the Desk plate downloads a well-formed 2400px poster (each preset, not just Grand)",
+    !!desk && desk.width === 2400 && desk.filename === "vellum-poster-42-antique-2400.svg" && desk.hasWidthAttr,
+    JSON.stringify(desk),
+  );
+
   await shoot("print-room.png");
 
   // Scoped health: no new console errors and no new (non-favicon) 4xx from this page,
