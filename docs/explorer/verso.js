@@ -85,6 +85,30 @@ export function renderVerso(versoEl, { svg, docket, surveyor }) {
   versoEl.replaceChildren(ghost, docketEl, surveyEl, buildStamp());
 }
 
+/**
+ * #116: refresh the verso back face for the chart that just drew. Composes the docket
+ * from the draw result and hands it to renderVerso. Rebuilt on every draw (whether
+ * flipped or not, per the acceptance criterion) so a flip always shows the current
+ * world; renderVerso revokes the prior ghost URL, so redraws do not leak. Extracted
+ * from app.js (#183) to sit beside the renderVerso / buildDocket it calls.
+ * @param {HTMLElement} versoEl the #verso back face
+ * @param {{svg:string, title:string, subtitle:string, manifest:{presentYear:number, places:Array<{kind:string,name:string}>}}} res
+ * @param {number} seed
+ */
+export function rebuildVerso(versoEl, res, seed) {
+  const capital = res.manifest.places.find((p) => p.kind === "capital");
+  renderVerso(versoEl, {
+    svg: res.svg,
+    docket: buildDocket({
+      seed,
+      title: res.title,
+      presentYear: res.manifest.presentYear,
+      capital: capital ? capital.name : "",
+    }),
+    surveyor: res.subtitle,
+  });
+}
+
 // #174 The surveyor's ink bleeds through. The ghost is a snapshot of the chart as the
 // WORKER drew it, so a client overlay (the voyage track) has no path onto the back face.
 // It gets one here: a mirrored <polyline> sharing the ghost's box, fed the very same

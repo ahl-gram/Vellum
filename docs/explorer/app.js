@@ -8,8 +8,10 @@
 import { runJob, runInline, usesWorker, initWorker } from "./worker-client.js";
 import { clearAtlas, renderAtlas } from "./atlas-view.js";
 import { shouldTurn, runTurn, cancelTurn } from "./sheet-turn.js";
-import { buildDocket, renderVerso, toggleFlip, isFlipped } from "./verso.js";
-import { sliderToLand, landToSlider, updateLandReadout, syncAutoSlider } from "./sea-level.js";
+import { toggleFlip, isFlipped, rebuildVerso } from "./verso.js";
+import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.js";
+import { startArrival } from "./draw-ceremony.js";
+import { readHash, writeHash } from "./hash-sync.js";
 import {
   buildPlaceOverlay,
   applyScrub,
@@ -60,6 +62,9 @@ const voyageChk = $("voyage");
 const scrubPlayBtn = $("scrub-play");
 const scrubRangeEl = $("scrub-range");
 
+// #183: the controls readHash/writeHash (hash-sync.js) mirror to and from location.hash.
+const hashControls = { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider };
+
 let lastSvg = "";
 let lastTitle = "";
 let lastSubtitle = "";
@@ -108,91 +113,6 @@ function turnTiming() {
   return { ms, ease };
 }
 
-function readHash() {
-  const params = new URLSearchParams(location.hash.slice(1));
-  const seed = Number(params.get("seed"));
-  if (Number.isInteger(seed) && seed >= 0) seedInput.value = String(seed);
-  const style = params.get("style");
-  if (style && [...styleSel.options].some((o) => o.value === style)) {
-    styleSel.value = style;
-  }
-  const type = params.get("type") ?? "";
-  if ([...typeSel.options].some((o) => o.value === type)) typeSel.value = type;
-  const band = params.get("band") ?? "";
-  if ([...bandSel.options].some((o) => o.value === band)) bandSel.value = band;
-  const theme = params.get("theme") ?? "";
-  if ([...themeSel.options].some((o) => o.value === theme)) themeSel.value = theme;
-  const legend = params.get("legend");
-  if (legend !== null) legendChk.checked = legend === "1";
-  const arms = params.get("arms");
-  if (arms !== null) armsChk.checked = arms === "1";
-  const land = params.get("land");
-  if (land !== null) {
-    const f = Number(land) / 1000;
-    if (Number.isFinite(f)) {
-      landTouched = true;
-      landSlider.value = String(landToSlider(f));
-      updateLandReadout();
-    }
-  }
-}
-
-function writeHash() {
-  const params = new URLSearchParams();
-  params.set("seed", seedInput.value);
-  params.set("style", styleSel.value);
-  if (typeSel.value) params.set("type", typeSel.value);
-  if (bandSel.value) params.set("band", bandSel.value);
-  if (themeSel.value) params.set("theme", themeSel.value);
-  params.set("legend", legendChk.checked ? "1" : "0");
-  params.set("arms", armsChk.checked ? "1" : "0");
-  if (landTouched) params.set("land", String(Math.round(sliderToLand(landSlider.value) * 1000)));
-  history.replaceState(null, "", "#" + params.toString());
-}
-
-// #127 The Drafting Moment. After a fresh chart is injected, trigger its arrival
-// ceremony: the coastline draws itself in ink (stroke-dashoffset animated from the
-// path's own length) while the whole chart settles and the wash dries in behind
-// (CSS on .arriving). Purely DOM styling of the live SVG; the pristine lastSvg
-// string that Download blobs is never touched. On animationend the inline dash is
-// removed so the resting stroke is byte-for-byte the original (round joins intact).
-function startArrival(svg) {
-  if (!svg) return;
-  const coast = svg.querySelector("#layer-land path");
-  if (coast && typeof coast.getTotalLength === "function") {
-    const len = coast.getTotalLength();
-    if (Number.isFinite(len) && len > 0) {
-      coast.style.setProperty("--draw-len", String(len));
-      coast.style.strokeDasharray = String(len);
-      coast.addEventListener("animationend", function onDrawn(e) {
-        if (e.animationName !== "inkDraw") return; // ignore the wash (washDry)
-        coast.style.strokeDasharray = "";
-        coast.style.strokeDashoffset = "";
-        coast.style.removeProperty("--draw-len");
-        coast.removeEventListener("animationend", onDrawn);
-      });
-    }
-  }
-  svg.classList.add("arriving");
-}
-
-// #116: refresh the verso back face for the chart that just drew. Rebuilt on every
-// draw (whether flipped or not, per the acceptance criterion) so a flip always shows
-// the current world; renderVerso revokes the prior ghost URL, so redraws do not leak.
-function rebuildVerso(res, seed) {
-  const capital = res.manifest.places.find((p) => p.kind === "capital");
-  renderVerso(versoEl, {
-    svg: res.svg,
-    docket: buildDocket({
-      seed,
-      title: res.title,
-      presentYear: res.manifest.presentYear,
-      capital: capital ? capital.name : "",
-    }),
-    surveyor: res.subtitle,
-  });
-}
-
 // opts.quiet suppresses the arrival ceremony, used only by the sea-level drag's
 // throttled mid-drag redraws, so the coastline does not perpetually redraw itself
 // while the slider moves. The release (change) redraw runs the full ceremony.
@@ -216,7 +136,7 @@ function draw(opts) {
   status.textContent = "Drafting…";
   caption.textContent = "";
   clearAtlas();
-  writeHash();
+  writeHash(hashControls, landTouched);
   const overrides = {};
   if (typeSel.value) overrides.mapType = typeSel.value;
   if (bandSel.value) overrides.band = bandSel.value;
@@ -311,7 +231,7 @@ function draw(opts) {
       // world, making those points identical to the ones the landing re-arm will paint.
       // Both invariants (turn => same world, turn => never flipped) are pinned by e2e W16.
       if (!quiet) {
-        rebuildVerso(res, seed);
+        rebuildVerso(versoEl, res, seed);
         syncVersoTrack();
       }
     })
@@ -471,5 +391,5 @@ window.__vellumVoyageLog = voyageLog; // #121: the margin log (entries, summary,
 window.__vellumVoyageLegGeometry = voyageLegGeometry; // #120: projected leg points, for W20b
 
 seedInput.value = String(randomSeed());
-readHash();
+if (readHash(hashControls)) landTouched = true;
 draw();
