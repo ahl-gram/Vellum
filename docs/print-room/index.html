@@ -63,13 +63,28 @@ a moment.</p>
 
 <section class="plates" aria-labelledby="pr-plates-head">
   <h2 class="plates-head" id="pr-plates-head">Order a plate</h2>
-  <p class="plates-intro">Take this proof to a poster-size sheet. Choose a plate and the
-  press pulls the same world wide, then hands you the vector to send to the printer.</p>
-  <div class="plate-row" role="group" aria-label="Poster plate size">
-    <button class="plate" data-poster="desk" disabled>Desk<span class="plate-dim">2400 px</span></button>
-    <button class="plate" data-poster="wall" disabled>Wall<span class="plate-dim">3300 px</span></button>
-    <button class="plate" data-poster="grand" disabled>Grand<span class="plate-dim">4200 px</span></button>
+  <p class="plates-intro">Take this proof to a poster-size sheet in two steps: choose how it is
+  pressed, then the plate size. The press pulls the same world wide and hands it to you to send
+  to the printer.</p>
+  <div class="plate-step">
+    <label class="step-label" for="pr-format">Step one: choose how it's pressed</label>
+    <select id="pr-format">
+      <option value="svg" selected>Vector (SVG)</option>
+      <option value="png1">Image (PNG &times;1)</option>
+      <option value="png2">Image (PNG &times;2)</option>
+    </select>
   </div>
+  <div class="plate-step">
+    <p class="step-label" id="pr-size-label">Step two: choose the plate size</p>
+    <div class="plate-row" role="group" aria-labelledby="pr-size-label">
+      <button class="plate" data-poster="desk" disabled>Desk<span class="plate-dim">2400 px</span></button>
+      <button class="plate" data-poster="wall" disabled>Wall<span class="plate-dim">3300 px</span></button>
+      <button class="plate" data-poster="grand" disabled>Grand<span class="plate-dim">4200 px</span></button>
+    </div>
+  </div>
+  <p class="plates-caveat">A PNG is pressed with your own device's fonts, so a chart may
+  set a touch differently from machine to machine. Keep the vector SVG for an exact
+  archival copy; a large image is fitted down to what your browser can hold.</p>
   <p class="status" id="pr-poster-status" role="status" aria-live="polite"></p>
 </section>
 

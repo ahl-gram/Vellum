@@ -1,4 +1,6 @@
-// The Print Room checks (PRL, PR0-PR9) on the /print-room/ page (#133, epic #132).
+// The Print Room checks (PRL, PR0-PR16, PRC, PRB) on the /print-room/ page (#133/#134/#135,
+// epic #132): PR0-PR9 the shell + inline fallback (#133), PR10-PR16 the SVG poster plates
+// (#134), PR17-PR19 the client-side PNG rasterizer (#135).
 // A sixth hand-authored page that reuses the Explorer's render worker from a DIFFERENT
 // directory, so the checks below are the tripwire for the cross-directory worker-spawn
 // trap: `new Worker("./worker.js")` would resolve against /print-room/ and 404 into a
@@ -208,6 +210,56 @@ export async function run(ctx) {
     "PR16 the Desk plate downloads a well-formed 2400px poster (each preset, not just Grand)",
     !!desk && desk.width === 2400 && desk.filename === "vellum-poster-42-antique-2400.svg" && desk.hasWidthAttr,
     JSON.stringify(desk),
+  );
+
+  // --- #135 poster PNG (the client-side rasterizer) -----------------------------------
+  // The "Step one" format dropdown switches the same plate buttons from a vector SVG
+  // download to a canvas PNG at x1 or x2. Downloads stay denied, so we observe
+  // window.__vellumLastPng: MIME type, blob size, output dimensions, and the budget-clamp
+  // flag. No timing assertions (acceptance). Helper: set the format select, order a plate,
+  // await the hook.
+  async function orderPng(format, plate) {
+    await evaluate(`(()=>{window.__vellumLastPng=undefined;document.getElementById("pr-format").value="${format}";document.querySelector('[data-poster="${plate}"]').click();})()`);
+    let png = null;
+    for (let i = 0; i < 300; i++) {
+      let s = null;
+      try { s = await evaluate(`(()=>{const p=window.__vellumLastPng;return p?{type:p.type,size:p.size,width:p.width,height:p.height,scale:p.scale,clamped:p.clamped,filename:p.filename,status:document.getElementById("pr-poster-status").textContent}:null;})()`); } catch {}
+      if (s) { png = s; break; }
+      await sleep(50);
+    }
+    return png;
+  }
+
+  // PR17 Desk PNG x1: a 2400px plate rasterizes to a 2400px PNG, well under the pixel
+  // budget, so x1 carries through unclamped as image/png with nonzero bytes.
+  const png1 = await orderPng("png1", "desk");
+  check(
+    "PR17 Desk PNG x1 is a well-formed 2400px image/png (nonzero, not clamped)",
+    !!png1 && png1.type === "image/png" && png1.size > 0 && png1.width === 2400 &&
+      png1.clamped === false && png1.filename === "vellum-poster-42-antique-2400.png",
+    JSON.stringify(png1),
+  );
+
+  // PR18 Desk PNG x2: the same 2400px plate at x2 is a 4800px PNG (~17.8 Mpx, still under
+  // the 24 Mpx budget), proving the scale flows through and stays unclamped.
+  const png2 = await orderPng("png2", "desk");
+  check(
+    "PR18 Desk PNG x2 is a 4800px image/png, unclamped (scale carries through)",
+    !!png2 && png2.type === "image/png" && png2.size > 0 && png2.width === 4800 &&
+      png2.clamped === false && png2.filename === "vellum-poster-42-antique-4800.png",
+    JSON.stringify(png2),
+  );
+
+  // PR19 Grand PNG x2: 4200px at x2 (~54 Mpx) busts the 24 Mpx budget, so the rasterizer
+  // fits it DOWN (scale < 2, width < the unclamped 8400) and the status carries a visible
+  // reduced-resolution notice, never a silent null or a tab-killing allocation. This is
+  // acceptance "4200px x2 gets budget-clamped with a visible notice".
+  const png3 = await orderPng("png2", "grand");
+  check(
+    "PR19 Grand PNG x2 is budget-clamped with a visible notice (not a silent crash)",
+    !!png3 && png3.type === "image/png" && png3.size > 0 && png3.clamped === true &&
+      png3.scale < 2 && png3.width < 8400 && /reduced/i.test(png3.status) && /\.png$/.test(png3.filename),
+    JSON.stringify(png3),
   );
 
   await shoot("print-room.png");

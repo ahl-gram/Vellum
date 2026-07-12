@@ -20,3 +20,6 @@ export function clampPosterWidth(w: unknown): number;
 
 /** The self-describing artifact name: vellum-poster-{seed}-{style}-{width}.svg. */
 export function posterFilename(seed: number, style: string, width: number): string;
+
+/** The PNG twin, named by OUTPUT pixel width: vellum-poster-{seed}-{style}-{outWidth}.png. */
+export function posterPngFilename(seed: number, style: string, outWidth: number): string;

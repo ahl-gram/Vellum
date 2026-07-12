@@ -32,3 +32,11 @@ export function clampPosterWidth(w) {
 export function posterFilename(seed, style, width) {
   return `vellum-poster-${seed}-${style}-${width}.svg`;
 }
+
+// The PNG twin of posterFilename, named by the OUTPUT pixel width (post scale + budget
+// fit), so Desk x1 (2400) and Desk x2 (4800) never collide, and a budget-clamped plate
+// carries its real reduced width. The recipe still rides inside the source SVG, not the
+// PNG, so the SVG stays the reproducible artifact (see rasterize.js).
+export function posterPngFilename(seed, style, outWidth) {
+  return `vellum-poster-${seed}-${style}-${outWidth}.png`;
+}
