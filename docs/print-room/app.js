@@ -15,6 +15,9 @@
 import { runJob, usesWorker, initWorker } from "/explorer/worker-client.js";
 import { startArrival } from "/explorer/draw-ceremony.js";
 import { seedForDate } from "/explorer/engine/world/seed-of-the-day.js";
+// #134 poster plates. Same-dir module (resolves against this module's URL, /print-room/),
+// unlike the root-absolute worker spawn above. Pure clamp + presets; unit-tested in Node.
+import { POSTER_PRESETS, clampPosterWidth, posterFilename } from "./poster-presets.js";
 
 const PREVIEW_WIDTH = 900; // a modest proof; the real outputs are downloads (Subs 2-4).
 
@@ -32,6 +35,9 @@ const status = $("pr-status");
 const preview = $("pr-preview");
 const caption = $("pr-caption");
 const warning = $("pr-warning");
+const posterStatus = $("pr-poster-status");
+const plateButtons = [...document.querySelectorAll("[data-poster]")];
+const presetByKey = new Map(POSTER_PRESETS.map((p) => [p.key, p]));
 
 // Recipe params with no visible control in Sub 1: they ride along from a deep-link's
 // hash (type/band/theme/legend/arms/land) so an Explorer world reproduces faithfully,
@@ -45,8 +51,21 @@ let drawGen = 0;
 let lastSeed = 0;
 let lastTitle = "";
 
+// #134 poster state. posterBasis is the world of the CURRENT proof, snapshotted on every
+// successful draw so an order reproduces exactly the sheet on screen, not whatever the
+// live controls read at click time. Null until the first proof lands, which is why the
+// plate buttons start disabled in the HTML.
+let posterBasis = null;
+let ordering = false; // an order is at the press; the plates are disabled meanwhile
+let posterGen = 0; // drawGen-style stale guard (belt-and-suspenders: the button-disable
+// is the operative guard, since only one order can run at a time)
+
 function randomSeed() {
   return Math.floor(Math.random() * 0xffffffff);
+}
+
+function setPlatesEnabled(on) {
+  for (const b of plateButtons) b.disabled = !on;
 }
 
 // Read the same hash keys the Explorer writes (docs/explorer/hash-sync.js), applying
@@ -123,6 +142,11 @@ function draw() {
       caption.textContent = `${res.title} · seed ${seed}`;
       lastSeed = seed;
       lastTitle = res.title;
+      // Snapshot the world just proofed (its seed, style, and render options) so a poster
+      // order reproduces THIS sheet. overrides is built fresh per draw and never mutated,
+      // so holding the reference is safe.
+      posterBasis = { seed, style, overrides, legend: carried.legend, arms: carried.arms, theme: carried.theme || undefined };
+      if (!ordering) setPlatesEnabled(true);
     })
     .catch((err) => {
       if (myGen !== drawGen) return;
@@ -135,9 +159,63 @@ seedInput.addEventListener("keydown", (e) => { if (e.key === "Enter") draw(); })
 styleSel.addEventListener("change", draw);
 $("pr-random").addEventListener("click", () => { seedInput.value = String(randomSeed()); draw(); });
 
+// #134 Order a poster plate. The press pulls the CURRENT proof's world at a preset width
+// through the SHARED worker, and the wide SVG goes STRAIGHT to a Blob download: it is
+// NEVER injected into the live DOM (a multi-MB innerHTML swap is the epic's one hard
+// warning), so the on-page preview stays at PREVIEW_WIDTH.
+function downloadSvg(svg, filename) {
+  const blob = new Blob([svg], { type: "image/svg+xml" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function orderPoster(key) {
+  const preset = presetByKey.get(key);
+  if (!preset || ordering || !posterBasis) return;
+  // Snapshot the basis synchronously: the preview controls stay live during a render, so
+  // a style change could redraw and mutate posterBasis mid-flight. Bind the world NOW,
+  // exactly as the Explorer's bind handler snapshots lastStyle/lastTheme before runJob.
+  const basis = posterBasis;
+  const width = clampPosterWidth(preset.width);
+  const myGen = ++posterGen;
+  ordering = true;
+  setPlatesEnabled(false);
+  posterStatus.textContent = `The press is rolling at ${width}px…`;
+  runJob({
+    kind: "draw",
+    seed: basis.seed,
+    overrides: basis.overrides,
+    render: { style: basis.style, widthPx: width, legend: basis.legend, arms: basis.arms, theme: basis.theme },
+  })
+    .then((res) => {
+      if (myGen !== posterGen) return; // superseded by a newer order
+      const filename = posterFilename(basis.seed, basis.style, width);
+      downloadSvg(res.svg, filename);
+      // e2e observation point: the poster the press pulled, which never touches the DOM.
+      window.__vellumLastPoster = { svg: res.svg, filename, width, seed: basis.seed, style: basis.style };
+      posterStatus.textContent = `${preset.label} plate pulled: ${filename}`;
+    })
+    .catch((err) => {
+      if (myGen !== posterGen) return;
+      posterStatus.textContent = "The press jammed: " + err.message;
+    })
+    .finally(() => {
+      // Only one order runs at a time (the plates are disabled meanwhile), so this always
+      // clears the in-flight order and re-opens the counter.
+      ordering = false;
+      setPlatesEnabled(true);
+    });
+}
+
+for (const b of plateButtons) b.addEventListener("click", () => orderPoster(b.dataset.poster));
+
 await initWorker("/explorer/worker.js");
 window.__vellumPrintRoomUsesWorker = usesWorker;
 window.__vellumPrintRoomState = () => ({ seed: lastSeed, title: lastTitle });
+window.__vellumClampPosterWidth = clampPosterWidth; // e2e: the tab-killing-width guard
 if (!usesWorker()) warning.hidden = false; // inline fallback: large plates will pause the tab
 
 applyHash();

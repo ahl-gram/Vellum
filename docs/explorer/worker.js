@@ -18,6 +18,11 @@ self.onmessage = (e) => {
       self.postMessage({
         id: msg.id,
         ok: true,
+        // msg.render.widthPx is passed to renderMap UNCLAMPED by design: the CLI bounded
+        // it 400-6000 (src/cli/main.ts), and callers here own that guard instead. The
+        // Explorer draws at fixed widths; the Print Room's poster plates (#134) clamp
+        // page-side to the [2400, 4200] envelope in docs/print-room/poster-presets.js
+        // before ordering, so a hand-edited width can never ask for a tab-killing render.
         svg: renderMap(world, msg.render),
         manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
         // #120: the world facts the client's voyage router walks (land mask + roads,
