@@ -37,6 +37,7 @@ import { run as runVoyageRoute } from "./e2e/suite-voyage-route.mjs";
 import { run as runHealth } from "./e2e/suite-health.mjs";
 import { run as runFallback } from "./e2e/suite-fallback.mjs";
 import { run as runHunt } from "./e2e/suite-hunt.mjs";
+import { run as runPrintRoom } from "./e2e/suite-print-room.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url)); // scripts/
 const REPO = resolve(HERE, "..");
@@ -90,6 +91,10 @@ async function main() {
   await runHealth(ctx);
   await runFallback(ctx);
   await runHunt(ctx);
+  // The Print Room (#133) is a separate page that reuses the Explorer's worker from
+  // another directory; like the hunt it runs after the health checkpoint and carries
+  // its own scoped no-4xx + console-error delta (see suite-print-room.mjs).
+  await runPrintRoom(ctx);
 }
 
 main()

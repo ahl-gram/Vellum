@@ -59,6 +59,7 @@ const versoEl = $("verso");
 const versoBtn = $("verso-turn");
 const chronicleChk = $("chronicle");
 const voyageChk = $("voyage");
+const orderLink = $("order-plates"); // #133: "Take to the Print Room", href kept current in draw()
 const scrubPlayBtn = $("scrub-play");
 const scrubRangeEl = $("scrub-range");
 
@@ -137,6 +138,10 @@ function draw(opts) {
   caption.textContent = "";
   clearAtlas();
   writeHash(hashControls, landTouched);
+  // #133: writeHash just set location.hash to this world; carry it to the Print Room
+  // link so "Take to the Print Room" (and a copied link / middle-click) always opens
+  // the CURRENT world, never the one from page load.
+  if (orderLink) orderLink.href = "../print-room/" + (location.hash || "");
   const overrides = {};
   if (typeSel.value) overrides.mapType = typeSel.value;
   if (bandSel.value) overrides.band = bandSel.value;

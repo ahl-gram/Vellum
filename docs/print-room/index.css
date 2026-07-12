@@ -1,0 +1,72 @@
+:root { color-scheme: light; }
+body {
+  margin: 0; padding: 2rem 1.5rem 4rem;
+  background: #efe6cf; color: #3d2f1f;
+  font-family: 'Iowan Old Style', 'Palatino', Georgia, serif;
+  line-height: 1.6;
+}
+main { max-width: 1000px; margin-inline: auto; }
+header { text-align: center; margin-bottom: 1.2rem; }
+h1 { font-size: 2rem; letter-spacing: 0.1em; margin: 0; }
+h1 a { color: inherit; text-decoration: none; }
+.tagline { font-style: italic; color: #6b5a40; margin: 0.3rem 0 0; }
+.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: #857257; margin: 0.9rem 0 0; }
+.topnav a { color: inherit; }
+[aria-current="page"] { font-weight: 700; }
+.intro { max-width: 640px; margin: 1.4rem auto; text-align: center; }
+
+/* The counter: a single quiet row of controls, like the survey office's order desk. */
+.counter { display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 0.55rem 0.85rem; margin: 1.4rem auto; }
+.counter label { font-size: 0.85rem; letter-spacing: 0.05em; color: #6b5a40; }
+input[type="number"], select, button {
+  font-family: inherit; font-size: 0.95rem; color: #3d2f1f;
+  background: #f8f1e0; border: 1.5px solid #4a3826; border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+}
+input[type="number"] { width: 8.5rem; }
+button { cursor: pointer; }
+button:hover { background: #fff7e4; }
+button.primary { background: #4a3826; color: #f2e8cf; letter-spacing: 0.08em; }
+button.primary:hover { background: #5d4831; }
+
+/* The inline-fallback notice: a pinned-slip aside, not an alarm. */
+.warning { max-width: 640px; margin: 0 auto 0.4rem; text-align: center;
+  font-size: 0.85rem; font-style: italic; color: #7a5c2e;
+  background: #f4ecd8; border: 1px solid #cdbd97; border-radius: 4px;
+  padding: 0.6rem 0.9rem; }
+.warning[hidden] { display: none; }
+
+.status { text-align: center; font-style: italic; color: #857257;
+  min-height: 1.4em; margin-bottom: 0.8rem; }
+
+/* The proof: the pulled chart, centered under the counter. Mirrors the Explorer's
+   #map svg frame (border + drop shadow) so a proof reads as the same sheet. */
+.preview { max-width: 1000px; margin-inline: auto; position: relative; }
+.preview svg { width: 100%; height: auto; display: block;
+  border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+/* #127 The Drafting Moment, reused: a freshly pulled proof settles onto the desk
+   while its coastline draws itself in ink (app.js sets --draw-len + the dasharray on
+   the coast path via startArrival, and clears them on animationend). DOM-only styling
+   of the injected SVG; the pristine string a future Download blobs is never touched.
+   Collapses to instant under the shared reduced-motion rule in /motion.css. */
+.preview svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
+.preview svg.arriving #layer-land path {
+  animation: inkDraw var(--ink-draw) var(--ease-paper) both,
+             washDry var(--ink-dry) var(--ease-paper) 400ms both;
+}
+.preview svg.arriving #layer-waterlines {
+  animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
+}
+
+.caption { text-align: center; font-style: italic; color: #6b5a40; padding-top: 0.6rem; }
+.counter-note { max-width: 560px; margin: 2.4rem auto 0; text-align: center;
+  font-style: italic; font-size: 0.9rem; color: #857257; }
+footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;
+  font-size: 0.72rem; color: #857257; }
+footer a { color: inherit; }
+
+@media (max-width: 560px) {
+  .counter { gap: 0.5rem; }
+  input[type="number"] { width: 7rem; }
+}
