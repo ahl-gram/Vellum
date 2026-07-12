@@ -213,12 +213,13 @@ export async function run(ctx) {
   );
 
   // --- #135 poster PNG (the client-side rasterizer) -----------------------------------
-  // The "Pressed as" radio switches the same plate buttons from a vector SVG download to a
-  // canvas PNG at x1 or x2. Downloads stay denied, so we observe window.__vellumLastPng:
-  // MIME type, blob size, output dimensions, and the budget-clamp flag. No timing
-  // assertions (acceptance). Helper: set the format radio, order a plate, await the hook.
+  // The "Step one" format dropdown switches the same plate buttons from a vector SVG
+  // download to a canvas PNG at x1 or x2. Downloads stay denied, so we observe
+  // window.__vellumLastPng: MIME type, blob size, output dimensions, and the budget-clamp
+  // flag. No timing assertions (acceptance). Helper: set the format select, order a plate,
+  // await the hook.
   async function orderPng(format, plate) {
-    await evaluate(`(()=>{window.__vellumLastPng=undefined;const r=document.querySelector('input[name="pr-format"][value="${format}"]');r.checked=true;document.querySelector('[data-poster="${plate}"]').click();})()`);
+    await evaluate(`(()=>{window.__vellumLastPng=undefined;document.getElementById("pr-format").value="${format}";document.querySelector('[data-poster="${plate}"]').click();})()`);
     let png = null;
     for (let i = 0; i < 300; i++) {
       let s = null;

@@ -180,11 +180,11 @@ function downloadSvg(svg, filename) {
   downloadBlob(new Blob([svg], { type: "image/svg+xml" }), filename);
 }
 
-// The "Pressed as" choice: the reproducible vector SVG, or a PNG image at x1 or x2. Read
-// at click time (like the basis snapshot), and defaults to SVG so the Sub 2 SVG path and
-// its e2e (PR13-PR16) are unchanged. png1/png2 map to the rasterizer's x1/x2 scale.
+// Step one, "how it's pressed": the reproducible vector SVG, or a PNG image at x1 or x2.
+// Read at click time (like the basis snapshot), and defaults to SVG so the Sub 2 SVG path
+// and its e2e (PR13-PR16) are unchanged. png1/png2 map to the rasterizer's x1/x2 scale.
 function selectedFormat() {
-  const el = document.querySelector('input[name="pr-format"]:checked');
+  const el = document.getElementById("pr-format");
   return el ? el.value : "svg";
 }
 
