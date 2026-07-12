@@ -1,5 +1,5 @@
 import { el, type SvgNode } from "../svg.ts";
-import { textBox } from "../geometry.ts";
+import { textBox, WIDTH_FACTOR } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { NamedSettlement } from "../../world/types.ts";
 
@@ -252,10 +252,16 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
     const upper = tier === "capital" || tier === "seat";
     const text = s.name;
     const display = upper ? text.toUpperCase() : text;
+    // #195: capitals and seats render .toUpperCase() (and letter-spaced), so their
+    // claim must use caps width + that spacing or the box is ~20% narrower than the
+    // drawn name, letting a neighbour (e.g. a river reach, #178) bury the final
+    // letters. Towns and villages draw as set, so they keep the mixed default.
+    const wf = upper ? WIDTH_FACTOR.caps : WIDTH_FACTOR.mixed;
+    const ls = tier === "capital" ? 0.8 : tier === "seat" ? 0.5 : 0;
     const tries = labelCandidates(px, py, fs, gap);
     let placed = false;
     for (const t of tries) {
-      const box = textBox(t.x, t.y, text, fs, t.anchor);
+      const box = textBox(t.x, t.y, text, fs, t.anchor, wf, ls);
       if (box.x < proj.margin + 4 || box.x + box.w > proj.widthPx - proj.margin - 4) continue;
       if (box.y < proj.margin + 4 || box.y + box.h > proj.heightPx - proj.margin - 4) continue;
       if (!labels.tryClaim(box)) continue;

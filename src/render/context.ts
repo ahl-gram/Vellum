@@ -2,9 +2,9 @@ import type { Rng } from "../core/rng.ts";
 import type { World } from "../world/types.ts";
 import type { MapStyle } from "./style.ts";
 import type { Projection } from "./transform.ts";
-import type { Box } from "./geometry.ts";
+import type { Box, Pt } from "./geometry.ts";
 import type { ThemeName } from "./layers/field.ts";
-import { boxesOverlap } from "./geometry.ts";
+import { boxesOverlap, polyBoxOverlapFraction } from "./geometry.ts";
 
 export type PxRing = ReadonlyArray<readonly [number, number]>;
 
@@ -30,6 +30,11 @@ export type LabelArena = {
   tryClaim(box: Box, pad?: number): boolean;
   /** All-or-nothing: one label whose footprint is several boxes (a rotated run). */
   tryClaimAll(boxes: ReadonlyArray<Box>, pad?: number): boolean;
+  /** Soft claim (#178): admit `poly` (a label's true oriented ink) as long as it
+   *  overlaps every placed box by LESS than `maxFrac` of the smaller area, then
+   *  reserve `footprint`. Lets a river name graze a label a few percent instead of
+   *  vanishing, while still refusing a real burial. */
+  tryClaimPoly(poly: ReadonlyArray<Pt>, footprint: ReadonlyArray<Box>, maxFrac: number): boolean;
   claim(box: Box): void;
 };
 
@@ -53,6 +58,16 @@ export function createLabelArena(): LabelArena {
         }
       }
       placed.push(...boxes);
+      return true;
+    },
+    // The true ink is tested against every placed box by AREA fraction, not a binary
+    // touch, so a sub-threshold graze is admitted; the fatter `footprint` slices are
+    // what gets reserved, so later labels still route clear of the whole run.
+    tryClaimPoly(poly: ReadonlyArray<Pt>, footprint: ReadonlyArray<Box>, maxFrac: number): boolean {
+      for (const b of placed) {
+        if (polyBoxOverlapFraction(poly, b) >= maxFrac) return false;
+      }
+      placed.push(...footprint);
       return true;
     },
     claim(box: Box): void {
