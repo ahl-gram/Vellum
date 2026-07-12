@@ -5,6 +5,15 @@
 export async function run(ctx) {
   const { evaluate, check, shoot, sleep, waitSettled, waitAtlas, waitReady } = ctx;
   check("R0 page loaded + initial auto-draw rendered", await waitReady());
+  // R0b: a bare visit (no seed in the hash) lands on today's seed-of-the-day (UTC), so
+  // the Explorer, Print Room, and Today page all default to the same world. The suite's
+  // PAGE is bare /explorer/, so this initial load is the bare case; compute the expected
+  // seed in-browser from the same engine helper (immune to any node-side date drift).
+  const r0b = await evaluate(
+    `(async()=>{const {seedForDate}=await import("./engine/world/seed-of-the-day.js");return{seed:document.getElementById("seed").value,expected:String(seedForDate(new Date()))};})()`,
+    true,
+  );
+  check("R0b bare Explorer visit lands on today's seed-of-the-day", r0b.seed === r0b.expected, JSON.stringify(r0b));
   check("R1 worker active (no silent fallback)", await evaluate(`window.__vellumUsesWorker()===true`));
 
   // R2: worker draw === inline draw, byte-for-byte, in the browser. Includes the

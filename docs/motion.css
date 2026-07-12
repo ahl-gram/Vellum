@@ -3,7 +3,7 @@
    --------------------------------------------------------------------------
    One physical motion language for every hand-authored sheet: paper moves
    (tips, lifts, presses, unfurls, settles) and ink appears (draws, dries,
-   stamps). Linked root-absolute (/motion.css) from the five hand-authored
+   stamps). Linked root-absolute (/motion.css) from the six hand-authored
    pages; the generated atlas/gallery arrive in Sub 5.
 
    Byte-safe by construction: this styles the LIVE DOM only. The determinism
@@ -131,7 +131,7 @@ button:not(.place-hit):active,
 
 /* --------------------------------------------------------------------------
    The nav menu. Links lift under the hand, a hairline iron-red underline draws
-   in from the left, and a tap presses (the touch twin). Present on all five
+   in from the left, and a tap presses (the touch twin). Present on all six
    pages via .topnav.
    -------------------------------------------------------------------------- */
 .topnav a {
@@ -179,7 +179,7 @@ button:not(.place-hit):active,
    lifting away as the one arriving settles down. Pure CSS, zero JS, no router
    (ratified call D): Chromium and Safari get the folio feel; Firefox and any
    engine without cross-document support keep today's instant loads, which is
-   the fallback. Both the old and new document must opt in -- all five hand-
+   the fallback. Both the old and new document must opt in -- all six hand-
    authored pages link this file, and Sub 5 adds the same link to the generated
    gallery/atlas templates so the shelves join the folio too (ratified call C,
    knowingly relaxing the convention that site-wide changes skip generated pages).

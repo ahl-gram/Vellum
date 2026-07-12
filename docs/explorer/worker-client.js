@@ -70,11 +70,19 @@ export function usesWorker() {
 // Construct the worker and wait for its ready handshake; resolves null (and falls
 // back to inline) on any failure. A crash after handshake nulls `worker` so later
 // jobs degrade to inline too.
-function connect() {
+//
+// workerUrl is the spawn target. `new Worker(str)` resolves str against the DOCUMENT
+// base URL, not this module's URL, so the Explorer's default "./worker.js" (document
+// base /explorer/) lands on /explorer/worker.js exactly as before. A page in another
+// directory that reuses this client (the Print Room, #133) must pass the root-absolute
+// "/explorer/worker.js" instead, or a bare "./worker.js" would resolve against ITS base
+// (/print-room/) and 404 into a silent inline fallback. The worker's own ./engine/...
+// imports always resolve against the worker script URL, so only the spawn string bites.
+function connect(workerUrl) {
   return new Promise((resolve) => {
     let w;
     try {
-      w = new Worker("./worker.js", { type: "module" });
+      w = new Worker(workerUrl, { type: "module" });
     } catch {
       resolve(null);
       return;
@@ -104,7 +112,11 @@ function connect() {
   });
 }
 
-/** Connect the worker (best-effort) and record it as the active transport. */
-export async function initWorker() {
-  worker = await connect();
+/**
+ * Connect the worker (best-effort) and record it as the active transport.
+ * @param {string} [workerUrl] spawn target (default "./worker.js", the Explorer's own).
+ *   A cross-directory reuser (the Print Room) passes root-absolute "/explorer/worker.js".
+ */
+export async function initWorker(workerUrl = "./worker.js") {
+  worker = await connect(workerUrl);
 }

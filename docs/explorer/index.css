@@ -28,6 +28,11 @@ h1 a { color: inherit; text-decoration: none; }
 .controls label.sealevel { display: inline-flex; align-items: center; gap: 0.4rem; }
 .controls input[type="range"]#land { accent-color: #4a3826; width: 9rem; }
 .land-end { font-size: 0.72rem; font-style: italic; color: #857257; }
+/* #133: the "Take to the Print Room" link sits in the Actions row but reads as a
+   navigation, not a press: a quiet underlined link, distinct from the action buttons. */
+.action-link { align-self: center; font-size: 0.85rem; letter-spacing: 0.05em;
+  color: #6b5a40; text-decoration: none; border-bottom: 1px solid #b9a77f; }
+.action-link:hover { color: #4a3826; border-bottom-color: #4a3826; }
 .land-readout { font-style: italic; color: #6b5a40;
   font-variant-numeric: tabular-nums; min-width: 4.2rem; }
 @media (max-width: 560px) {

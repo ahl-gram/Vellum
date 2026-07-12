@@ -27,8 +27,12 @@ import { landToSlider, sliderToLand, updateLandReadout } from "./sea-level.js";
 export function readHash(controls) {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider } = controls;
   const params = new URLSearchParams(location.hash.slice(1));
-  const seed = Number(params.get("seed"));
-  if (Number.isInteger(seed) && seed >= 0) seedInput.value = String(seed);
+  // Gate on PRESENCE, not just validity: Number(null) === 0 would pass the integer
+  // guard and clobber a bare visit's bootstrap default (today's seed-of-the-day) down
+  // to seed 0. A missing seed leaves seedInput at whatever default the conductor set.
+  const seedRaw = params.get("seed");
+  const seed = Number(seedRaw);
+  if (seedRaw !== null && Number.isInteger(seed) && seed >= 0) seedInput.value = String(seed);
   const style = params.get("style");
   if (style && [...styleSel.options].some((o) => o.value === style)) {
     styleSel.value = style;

@@ -30,7 +30,7 @@
   <p class="tagline">every seed is a world, draw one</p>
   <nav class="topnav">
     <a href="../">Home</a> · <a href="../seed-of-the-day/">Today</a> ·
-    <span aria-current="page">Explorer</span> · <a href="../faq/">FAQ</a> ·
+    <span aria-current="page">Explorer</span> · <a href="../print-room/">Print Room</a> · <a href="../faq/">FAQ</a> ·
     <a href="../glossary/">Glossary</a>
   </nav>
 </header>
@@ -99,6 +99,9 @@
       <button id="download">Download SVG</button>
       <button id="bind">Bind as atlas</button>
       <button id="verso-turn">Turn the sheet</button>
+      <!-- #133: carry the world on screen to the Print Room. Its href is refreshed on
+           every draw (app.js) so it always carries the CURRENT hash, not the load-time one. -->
+      <a id="order-plates" class="action-link" href="../print-room/">Take to the Print Room</a>
     </div>
   </div>
 </div>
