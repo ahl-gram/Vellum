@@ -4,6 +4,7 @@ import {
   POSTER_PRESETS,
   clampPosterWidth,
   posterFilename,
+  posterPngFilename,
 } from "../../docs/print-room/poster-presets.js";
 
 // #134 (epic #132) Sub 2: the Print Room's poster plates. The pure logic lives in a
@@ -61,4 +62,13 @@ test("clampPosterWidth falls back to Grand for a non-number", () => {
 test("posterFilename is a self-describing artifact name", () => {
   assert.equal(posterFilename(42, "antique", 4200), "vellum-poster-42-antique-4200.svg");
   assert.equal(posterFilename(100, "nautical", 2400), "vellum-poster-100-nautical-2400.svg");
+});
+
+// The PNG twin (#135). It takes the OUTPUT pixel width (post scale + budget fit), not the
+// plate width, so Desk x1 (2400) and Desk x2 (4800) never collide on one name, and a
+// budget-clamped Grand carries its real reduced width.
+test("posterPngFilename names a PNG by its output pixel width", () => {
+  assert.equal(posterPngFilename(42, "antique", 2400), "vellum-poster-42-antique-2400.png");
+  assert.equal(posterPngFilename(42, "antique", 4800), "vellum-poster-42-antique-4800.png");
+  assert.equal(posterPngFilename(100, "nautical", 5657), "vellum-poster-100-nautical-5657.png");
 });

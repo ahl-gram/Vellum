@@ -17,7 +17,12 @@ import { startArrival } from "/explorer/draw-ceremony.js";
 import { seedForDate } from "/explorer/engine/world/seed-of-the-day.js";
 // #134 poster plates. Same-dir module (resolves against this module's URL, /print-room/),
 // unlike the root-absolute worker spawn above. Pure clamp + presets; unit-tested in Node.
-import { POSTER_PRESETS, clampPosterWidth, posterFilename } from "./poster-presets.js";
+import { POSTER_PRESETS, clampPosterWidth, posterFilename, posterPngFilename } from "./poster-presets.js";
+// #135 the rasterizer: the site's first shared cross-page client library (docs/lib/,
+// served at /lib/). Root-absolute like the worker so the path is stable from /print-room/.
+// SVG string in, PNG blob out, fitted under a canvas pixel budget; the pure decision core
+// is unit-tested in Node and its failure paths surface in-voice messages, never silent nulls.
+import { rasterizeSvg } from "/lib/rasterize.js";
 
 const PREVIEW_WIDTH = 900; // a modest proof; the real outputs are downloads (Subs 2-4).
 
@@ -163,13 +168,24 @@ $("pr-random").addEventListener("click", () => { seedInput.value = String(random
 // through the SHARED worker, and the wide SVG goes STRAIGHT to a Blob download: it is
 // NEVER injected into the live DOM (a multi-MB innerHTML swap is the epic's one hard
 // warning), so the on-page preview stays at PREVIEW_WIDTH.
-function downloadSvg(svg, filename) {
-  const blob = new Blob([svg], { type: "image/svg+xml" });
+function downloadBlob(blob, filename) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = filename;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+function downloadSvg(svg, filename) {
+  downloadBlob(new Blob([svg], { type: "image/svg+xml" }), filename);
+}
+
+// The "Pressed as" choice: the reproducible vector SVG, or a PNG image at x1 or x2. Read
+// at click time (like the basis snapshot), and defaults to SVG so the Sub 2 SVG path and
+// its e2e (PR13-PR16) are unchanged. png1/png2 map to the rasterizer's x1/x2 scale.
+function selectedFormat() {
+  const el = document.querySelector('input[name="pr-format"]:checked');
+  return el ? el.value : "svg";
 }
 
 function orderPoster(key) {
@@ -179,6 +195,7 @@ function orderPoster(key) {
   // a style change could redraw and mutate posterBasis mid-flight. Bind the world NOW,
   // exactly as the Explorer's bind handler snapshots lastStyle/lastTheme before runJob.
   const basis = posterBasis;
+  const format = selectedFormat(); // snapshot alongside the basis; a later click can change it
   const width = clampPosterWidth(preset.width);
   const myGen = ++posterGen;
   ordering = true;
@@ -190,13 +207,43 @@ function orderPoster(key) {
     overrides: basis.overrides,
     render: { style: basis.style, widthPx: width, legend: basis.legend, arms: basis.arms, theme: basis.theme },
   })
-    .then((res) => {
+    .then(async (res) => {
       if (myGen !== posterGen) return; // superseded by a newer order
-      const filename = posterFilename(basis.seed, basis.style, width);
-      downloadSvg(res.svg, filename);
-      // e2e observation point: the poster the press pulled, which never touches the DOM.
-      window.__vellumLastPoster = { svg: res.svg, filename, width, seed: basis.seed, style: basis.style };
-      posterStatus.textContent = `${preset.label} plate pulled: ${filename}`;
+      if (format === "svg") {
+        const filename = posterFilename(basis.seed, basis.style, width);
+        downloadSvg(res.svg, filename);
+        // e2e observation point: the poster the press pulled, which never touches the DOM.
+        window.__vellumLastPoster = { svg: res.svg, filename, width, seed: basis.seed, style: basis.style };
+        posterStatus.textContent = `${preset.label} plate pulled: ${filename}`;
+        return;
+      }
+      // PNG: rasterize the wide SVG client-side. It still never enters the DOM
+      // (rasterizeSvg draws it off a blob-URL Image, not innerHTML). A too-large plate is
+      // fitted DOWN to the browser's pixel budget; a decode/toBlob/canvas failure rejects
+      // with an in-voice line, shown directly (it is already a full sentence, so no
+      // "press jammed" prefix).
+      const scale = format === "png2" ? 2 : 1;
+      let png;
+      try {
+        png = await rasterizeSvg(res.svg, { scale });
+      } catch (err) {
+        if (myGen !== posterGen) return;
+        posterStatus.textContent = err.message;
+        return;
+      }
+      if (myGen !== posterGen) return; // a newer order landed while rasterizing
+      const filename = posterPngFilename(basis.seed, basis.style, png.width);
+      downloadBlob(png.blob, filename);
+      // e2e observation point: dimensions + blob size, never the bytes. The wide SVG and
+      // the PNG both stay out of the DOM.
+      window.__vellumLastPng = {
+        filename, type: png.blob.type, size: png.blob.size,
+        width: png.width, height: png.height, scale: png.scale, clamped: png.clamped,
+        seed: basis.seed, style: basis.style,
+      };
+      posterStatus.textContent = png.clamped
+        ? `${preset.label} plate pressed at reduced resolution to fit this browser: ${filename}`
+        : `${preset.label} plate pressed: ${filename}`;
     })
     .catch((err) => {
       if (myGen !== posterGen) return;
