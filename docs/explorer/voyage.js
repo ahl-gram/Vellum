@@ -32,14 +32,11 @@ import {
   legDurations,
 } from "./engine/render/voyage-geometry.js";
 import { paintVersoTrack, clearVersoTrack } from "./verso.js";
-import { buildVoyageLog } from "./engine/world/voyage-log.js";
+import { buildLogPanel, revealLog, hideLog, logSnapshot } from "./voyage-log-panel.js";
 
 const mapDiv = document.getElementById("map");
 const versoEl = document.getElementById("verso");
 const statusEl = document.getElementById("status");
-const logPanel = document.getElementById("voyage-log");
-const logSig = document.getElementById("voyage-log-sig");
-const logStrip = document.getElementById("voyage-log-strip");
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 // The sweep no longer runs a fixed duration split equally: v1 did that, so a long
@@ -96,43 +93,6 @@ export function cancelVoyageRaf() {
 export function clearVoyage() {
   hideLog();
   voyage = null;
-}
-
-// Build the margin-log panel: every port a row up front (dimmed), the signature above.
-// Mirrors living-chart buildStrip so a snap or a reduced-motion jump can brighten them all
-// at once. The dated year rides its own tabular column like the chronicle strip; the row
-// text drops the redundant "Year N." lead the entry already carries. Returns the rows so
-// the session can brighten them per arrival.
-function buildLogPanel(log) {
-  logSig.textContent = log.attribution;
-  const rows = log.entries.map((e) => {
-    const li = document.createElement("li");
-    const year = document.createElement("span");
-    year.className = "cr-year";
-    year.textContent = String(e.year);
-    const text = document.createElement("span");
-    text.className = "cr-text";
-    text.textContent = e.text.replace(/^Year \d+\. /, "");
-    li.append(year, text);
-    return li;
-  });
-  logStrip.replaceChildren(...rows);
-  logPanel.hidden = false;
-  return rows;
-}
-
-// Brighten the rows the survey has reached (rows [0, arrived)), dim the rest. Idempotent
-// and order-independent, so stepping backward via the e2e hook un-brightens correctly.
-function revealLog(session, arrived) {
-  const rows = session.logRows;
-  for (let i = 0; i < rows.length; i++) rows[i].classList.toggle("logged", i < arrived);
-}
-
-// Hide and empty the panel. The panel lives outside #map, so nothing else clears it.
-function hideLog() {
-  logPanel.hidden = true;
-  logStrip.replaceChildren();
-  logSig.textContent = "";
 }
 
 function makeMark(className, parts) {
@@ -196,8 +156,7 @@ function buildVoyage(manifest, survey, seed, subtitle) {
       arrivalMode: i === 0 ? null : routed[i - 1].mode,
     };
   });
-  const log = buildVoyageLog(logPorts, manifest.presentYear, (seed >>> 0), subtitle || "");
-  const logRows = buildLogPanel(log);
+  const { log, rows: logRows } = buildLogPanel(logPorts, manifest.presentYear, seed, subtitle);
 
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("class", "voyage-overlay");
@@ -313,7 +272,7 @@ function paintFrame(session, t, postLog = true) {
     // #status "" for the draw's settle signal and the e2e waitSettled. On any earlier OR
     // backward-stepped resting frame (the deterministic step hooks can move `arrived` DOWN)
     // #status returns to "", so a stale summary never lingers at a mid-survey rest.
-    revealLog(session, f.arrived);
+    revealLog(session.logRows, f.arrived);
     if (postLog) {
       statusEl.textContent = f.arrived >= session.plan.ports.length ? session.log.summary : "";
     }
@@ -477,17 +436,12 @@ export function voyagePlan() {
 
 // #121 e2e read hook: the margin log (attribution, summary, entries) plus how many rows
 // are currently revealed and whether the panel is shown, so a suite can assert the mode-
-// aware prose and the reveal-per-arrival without racing the rAF loop.
+// aware prose and the reveal-per-arrival without racing the rAF loop. The payload (and the
+// panel's visibility) is assembled by voyage-log-panel.js; this stays exported here because
+// app.js wires it to window.__vellumVoyageLog from "./voyage.js".
 export function voyageLog() {
   if (!voyage) return null;
-  return {
-    attribution: voyage.log.attribution,
-    summary: voyage.log.summary,
-    entries: voyage.log.entries.map((e) => ({ idx: e.idx, year: e.year, text: e.text })),
-    logged: voyage.logRows.filter((r) => r.classList.contains("logged")).length,
-    rows: voyage.logRows.length,
-    visible: !logPanel.hidden,
-  };
+  return logSnapshot(voyage.log, voyage.logRows);
 }
 
 // e2e read hook: each leg's mode plus its PROJECTED (chart-pixel) vertices, so a suite can
