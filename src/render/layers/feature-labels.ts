@@ -2,7 +2,7 @@ import { BIOMES } from "../../climate/biomes.ts";
 import { clamp } from "../../core/math.ts";
 import { chaikinSmooth } from "../../terrain/contours.ts";
 import { el, type SvgNode } from "../svg.ts";
-import { centroidOf, principalAngle, rotatedSpanBoxes, spacedTextBox, textBox, WIDTH_FACTOR, type Box, type Pt } from "../geometry.ts";
+import { centroidOf, principalAngle, rotatedRect, rotatedSpanBoxes, spacedTextBox, textBox, WIDTH_FACTOR, type Box, type Pt } from "../geometry.ts";
 import { interiorProbes } from "./label-probes.ts";
 import { largestBlob } from "../blobs.ts";
 import type { RenderCtx } from "../context.ts";
@@ -16,6 +16,14 @@ const FOREST_BIOMES: ReadonlySet<number> = new Set<number>([
   BIOMES.jungle,
   BIOMES.taiga,
 ]);
+
+// #178: a river name may claim a reach as long as its true ink overlaps every label
+// by LESS than this fraction of the smaller box. Matches the issue's own >= 15%
+// "substantial collision" bar (and the label-overlap test), so a river grazing a
+// settlement name by a few percent keeps its label instead of vanishing, while a
+// real burial still yields. Terrain glyphs never reserve arena space, so this only
+// ever yields to other TEXT.
+const RIVER_MAX_OVERLAP = 0.15;
 
 /** Offsets tried (in order) when a feature label's first spot is taken. */
 function offsetCandidates(y: number, k: number): number[] {
@@ -249,7 +257,18 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     // tryClaim only reserves on success, so failed candidates cost nothing.
     let place: RiverLabelPlacement | null = null;
     for (const cand of reachPlacements(pts, name.length * fs * 0.52)) {
-      if (labels.tryClaim(textBox(cand.x, cand.y - 4 * k, name, fs, "middle"), 2)) {
+      // #178: the label is drawn ROTATED up to +/-50 degrees along the reach (see the
+      // emit below), so its collision test measures the TRUE oriented ink, not an axis-
+      // aligned box its swung ends escape. The width factor is honest already (rivers
+      // draw as written, mixed case, 0.56); rotate the box about (cand.x, cand.y) -- the
+      // emit's rotate() center -- after dropping the baseline by the tspan dy, so the
+      // quad is exactly what the glyphs cover. A reach is taken if that ink grazes every
+      // label by < RIVER_MAX_OVERLAP; the fatter slices are then reserved so later labels
+      // clear the whole run.
+      const box = textBox(cand.x, cand.y - 4 * k, name, fs, "middle");
+      const ink = rotatedRect(box, cand.angleDeg, cand.x, cand.y);
+      const footprint = rotatedSpanBoxes(box, cand.angleDeg, cand.x, cand.y);
+      if (labels.tryClaimPoly(ink, footprint, RIVER_MAX_OVERLAP)) {
         place = cand;
         break;
       }

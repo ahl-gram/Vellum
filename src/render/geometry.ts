@@ -73,15 +73,20 @@ export function boxesOverlap(a: Box, b: Box, pad = 0): boolean {
   );
 }
 
-/** Approximate rendered text box for collision tests. */
+/** Approximate rendered text box for collision tests. `widthFactor` and
+ *  `letterSpacing` default to the mixed-case, un-spaced case, so existing callers
+ *  are byte-identical; a label drawn `.toUpperCase()` (and spaced) must pass caps
+ *  width and its letter-spacing or it reserves ~20% less than it draws (#195). */
 export function textBox(
   x: number,
   y: number,
   text: string,
   fontSize: number,
   anchor: "start" | "middle" | "end",
+  widthFactor = 0.56,
+  letterSpacing = 0,
 ): Box {
-  const w = text.length * fontSize * 0.56;
+  const w = text.length * (fontSize * widthFactor + letterSpacing);
   const h = fontSize * 1.15;
   const left = anchor === "start" ? x : anchor === "end" ? x - w : x - w / 2;
   return { x: left, y: y - fontSize, w, h };
@@ -150,4 +155,63 @@ export function rotatedSpanBoxes(
     out.push({ x: minX, y: minY, w: Math.max(...xs) - minX, h: Math.max(...ys) - minY });
   }
   return out;
+}
+
+/** The four corners of `box` rotated `degrees` about (originX, originY): the TRUE
+ *  oriented footprint of a spun label, for an area-based overlap test that the
+ *  axis-aligned slices only approximate. */
+export function rotatedRect(box: Box, degrees: number, originX: number, originY: number): Pt[] {
+  const a = (degrees * Math.PI) / 180;
+  const cos = Math.cos(a);
+  const sin = Math.sin(a);
+  const spin = (px: number, py: number): Pt => ({
+    x: originX + (px - originX) * cos - (py - originY) * sin,
+    y: originY + (px - originX) * sin + (py - originY) * cos,
+  });
+  return [spin(box.x, box.y), spin(box.x + box.w, box.y), spin(box.x + box.w, box.y + box.h), spin(box.x, box.y + box.h)];
+}
+
+function shoelaceArea(pts: ReadonlyArray<Pt>): number {
+  let s = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i]!;
+    const b = pts[(i + 1) % pts.length]!;
+    s += a.x * b.y - b.x * a.y;
+  }
+  return Math.abs(s) / 2;
+}
+
+/**
+ * Area shared by a convex polygon and an axis-aligned box, as a fraction of the
+ * SMALLER of the two areas (0..1). Sutherland-Hodgman clip of `poly` against the
+ * box's four edges (both convex, so the clip is their exact intersection). Used to
+ * ask "does this rotated river name bury that label" by real ink area, not by the
+ * fat bounding slices, so a few-percent graze reads as the near-miss it is (#178).
+ */
+export function polyBoxOverlapFraction(poly: ReadonlyArray<Pt>, box: Box): number {
+  const x0 = box.x, x1 = box.x + box.w, y0 = box.y, y1 = box.y + box.h;
+  const lerp = (a: Pt, b: Pt, t: number): Pt => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
+  const edges: Array<{ inside: (p: Pt) => boolean; cut: (a: Pt, b: Pt) => Pt }> = [
+    { inside: (p) => p.x >= x0, cut: (a, b) => lerp(a, b, (x0 - a.x) / (b.x - a.x)) },
+    { inside: (p) => p.x <= x1, cut: (a, b) => lerp(a, b, (x1 - a.x) / (b.x - a.x)) },
+    { inside: (p) => p.y >= y0, cut: (a, b) => lerp(a, b, (y0 - a.y) / (b.y - a.y)) },
+    { inside: (p) => p.y <= y1, cut: (a, b) => lerp(a, b, (y1 - a.y) / (b.y - a.y)) },
+  ];
+  let pts: Pt[] = poly.map((p) => ({ x: p.x, y: p.y }));
+  for (const e of edges) {
+    if (pts.length === 0) break;
+    const next: Pt[] = [];
+    for (let i = 0; i < pts.length; i++) {
+      const A = pts[i]!;
+      const B = pts[(i + 1) % pts.length]!;
+      const aIn = e.inside(A);
+      const bIn = e.inside(B);
+      if (aIn) next.push(A);
+      if (aIn !== bIn) next.push(e.cut(A, B));
+    }
+    pts = next;
+  }
+  if (pts.length < 3) return 0;
+  const inter = shoelaceArea(pts);
+  return inter / Math.max(1e-9, Math.min(shoelaceArea(poly), box.w * box.h));
 }
