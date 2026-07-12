@@ -226,7 +226,116 @@ export async function run(ctx) {
   const s14 = await evaluate(`(()=>{const s=document.getElementById("chronicle-strip");return{rows:s.querySelectorAll("li").length,scrollH:s.scrollHeight,clientH:s.clientHeight};})()`);
   check("S14 the chronicle strip shows every entry without scrolling (#93 Part 2)", s14.rows > 0 && s14.scrollH <= s14.clientH + 1, JSON.stringify(s14));
 
-  // Restore to a clean, chronicle-off state for the rest of the suite.
+  // --- S15-S19 (#180): flipping the sheet SNAPS the chronicle to the present, so the
+  // pristine verso ghost (a Blob of the chart as the WORKER drew it) can never disagree
+  // with a scrubbed recto. The scrubber mutates the baked chart (per-glyph display) and the
+  // <img> ghost cannot mirror that, so the fix parks the recto at the present on flip, which
+  // clears every mutation and makes both faces agree BY CONSTRUCTION with zero ghost work.
+  // Chronicle is ON here (seed 100, sm2), parked at the present, not playing. The scrubber
+  // panel + strip live OUTSIDE .sheet, so they stay visible while flipped and must read the
+  // present after the snap. suite-scrubber runs after suite-verso, so it drives its own flip.
+  const ensureRecto = () =>
+    evaluate(`(()=>{const s=document.getElementById("sheet");if(s.classList.contains("versoed")){document.getElementById("verso-turn").click();return "unflipped";}return "recto";})()`);
+  await ensureRecto();
+  await sleep(60);
+
+  // S15: scrub to a PAST year, then turn the sheet -> the panel snaps to the present. The
+  // beforeVisible < count guard proves the recto really was in the past (non-vacuous).
+  const s15past = Math.floor((sm2.minFounded + sm2.present) / 2);
+  await setYear(s15past);
+  const visSel = `[...document.querySelectorAll('#map #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length`;
+  const s15 = await evaluate(`(()=>{
+    const beforeVal=Number(document.getElementById("scrub-range").value);
+    const beforeVisible=${visSel};
+    document.getElementById("verso-turn").click();
+    const rows=[...document.querySelectorAll("#chronicle-strip li")];
+    return{beforeVal,beforeVisible,afterVal:Number(document.getElementById("scrub-range").value),
+      afterVisible:${visSel},
+      year:document.getElementById("scrub-year").textContent,
+      rows:rows.length,pastRows:rows.filter((li)=>li.classList.contains("past")).length,
+      flipped:document.getElementById("sheet").classList.contains("versoed")};
+  })()`);
+  // afterVisible === count is the headline criterion, asserted directly on the RECTO glyphs:
+  // the snap clears every inline display the sweep set, so no settlement hidden on the front
+  // (and therefore absent from the pristine ghost) survives onto the back. The panel readouts
+  // are the visible proof; the glyph restore is the substance.
+  check("S15 flipping mid-scrub snaps the scrubber to the present (all glyphs back, slider, year, every strip row .past)", s15.beforeVal === s15past && s15.beforeVisible < sm2.count && s15.afterVisible === sm2.count && s15.afterVal === sm2.present && s15.year === `year ${sm2.present}` && s15.rows > 0 && s15.pastRows === s15.rows && s15.flipped, JSON.stringify(s15));
+
+  // S16: turning mid-Play PAUSES Play and parks at the present; the Turn button is never
+  // disabled by a running Play, and no rAF leaks on behind the hidden face.
+  await ensureRecto();
+  await sleep(60);
+  await setYear(sm2.minFounded);
+  await evaluate(`document.getElementById("scrub-play").click()`); // Play from the earliest founding
+  await sleep(300); // advance well into the interior (the full sweep runs several seconds; see S5)
+  const s16 = await evaluate(`(()=>{
+    const playBefore=document.getElementById("scrub-play").textContent;
+    const btnDisabled=document.getElementById("verso-turn").disabled;
+    document.getElementById("verso-turn").click();
+    return{playBefore,btnDisabled,playAfter:document.getElementById("scrub-play").textContent,
+      val:Number(document.getElementById("scrub-range").value),
+      flipped:document.getElementById("sheet").classList.contains("versoed"),
+      btnText:document.getElementById("verso-turn").textContent};
+  })()`);
+  await sleep(200); // a leaked rAF would advance the year past the present in this window
+  const s16after = await evaluate(`Number(document.getElementById("scrub-range").value)`);
+  check("S16 flipping mid-Play pauses Play, parks at present, and never disables the Turn button", s16.playBefore === "Pause" && s16.btnDisabled === false && s16.playAfter === "Play" && s16.val === sm2.present && s16.flipped && s16.btnText === "Turn back" && s16after === sm2.present, JSON.stringify(s16) + ` settled=${s16after}`);
+
+  // S17: turning back leaves the recto at the present (the scrubbed year is discarded by
+  // design), and the next Play replays from the earliest founding (post-snap year===max, so
+  // playScrub zeroes elapsed). S16 left us flipped, paused, parked.
+  const s17back = await evaluate(`(()=>{
+    document.getElementById("verso-turn").click();
+    return{flipped:document.getElementById("sheet").classList.contains("versoed"),
+      val:Number(document.getElementById("scrub-range").value),
+      btnText:document.getElementById("verso-turn").textContent};
+  })()`);
+  await evaluate(`document.getElementById("scrub-play").click()`); // the next Play
+  let s17min = Infinity;
+  for (let i = 0; i < 6; i++) {
+    const y = await evaluate(`Number(document.getElementById("scrub-range").value)`);
+    if (y < s17min) s17min = y;
+    await sleep(70);
+  }
+  await evaluate(`(()=>{const b=document.getElementById("scrub-play");if(b.textContent==="Pause")b.click();})()`);
+  check("S17 turning back leaves the recto at the present; the next Play replays from the earliest founding", s17back.flipped === false && s17back.val === sm2.present && s17back.btnText === "Turn the sheet" && s17min < sm2.present, JSON.stringify(s17back) + ` playMin=${s17min} present=${sm2.present}`);
+
+  // S18: a flip must NOT churn a Blob URL. renderVerso is the only place allowed to create
+  // one (#116's ~1 MB-per-redraw leak); the snap writes display styles, never a new ghost.
+  await ensureRecto();
+  await sleep(60);
+  await setYear(Math.floor((sm2.minFounded + sm2.present) / 2));
+  const s18 = await evaluate(`(()=>{
+    const ghost=document.querySelector(".verso-ghost");
+    const before=ghost?ghost.getAttribute("src"):"(no-ghost)";
+    const orig=URL.createObjectURL;let n=0;URL.createObjectURL=function(...a){n++;return orig.apply(this,a);};
+    document.getElementById("verso-turn").click();
+    URL.createObjectURL=orig;
+    const g2=document.querySelector(".verso-ghost");
+    return{before,after:g2?g2.getAttribute("src"):"(no-ghost)",created:n};
+  })()`);
+  check("S18 a flip snaps without churning a Blob URL (ghost src unchanged, createObjectURL uncalled)", s18.before !== "(no-ghost)" && s18.after === s18.before && s18.created === 0, JSON.stringify(s18));
+
+  // S19: ticking chronicle ON while FLIPPED needs no special case -- applyScrub parks at the
+  // present (its last line), so the recto agrees with the pristine ghost the instant it goes
+  // on. Flip with chronicle OFF, then toggle it on.
+  await ensureRecto();
+  await sleep(60);
+  await evaluate(`(()=>{const chk=document.getElementById("chronicle");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
+  await evaluate(`document.getElementById("verso-turn").click()`); // flip with chronicle off
+  const s19 = await evaluate(`(()=>{
+    const chk=document.getElementById("chronicle");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    const rows=[...document.querySelectorAll("#chronicle-strip li")];
+    return{flipped:document.getElementById("sheet").classList.contains("versoed"),
+      panelShown:!document.getElementById("scrubber").hidden,
+      val:Number(document.getElementById("scrub-range").value),max:Number(document.getElementById("scrub-range").max),
+      rows:rows.length,pastRows:rows.filter((li)=>li.classList.contains("past")).length};
+  })()`);
+  check("S19 ticking chronicle while flipped lands at the present with no special case (applyScrub parks)", s19.flipped && s19.panelShown && s19.val === s19.max && s19.rows > 0 && s19.pastRows === s19.rows, JSON.stringify(s19));
+
+  // Restore to a clean, recto + chronicle-off state for the rest of the suite.
+  await ensureRecto();
+  await sleep(60);
   await evaluate(`(()=>{const chk=document.getElementById("chronicle");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
 
 }
