@@ -18,6 +18,11 @@ import {
   revealLore,
 } from "../explorer/engine/world/daily-hunt.js";
 import { createProjection } from "../explorer/engine/render/transform.js";
+// The #127/#129 arrival ceremony, shared with the Explorer (extracted in #183). This
+// page has no Download or golden, so styling the live SVG is free; the ceremony only
+// adds the .arriving class and animates the coastline dash, and each page's CSS decides
+// what .arriving does (here it also runs paperSettle).
+import { startArrival } from "../explorer/draw-ceremony.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -51,31 +56,6 @@ function dryIn(el, delay) {
   if (!el) return;
   el.style.setProperty("--dry-delay", delay);
   el.classList.add("drying");
-}
-
-// After the day's chart is injected, play its arrival: the chart settles onto the
-// desk (paperSettle) while the coastline draws itself in ink (stroke-dashoffset from
-// the path's own length) and the wash dries in behind (CSS on .arriving). Mirrors the
-// Explorer's #127 Drafting Moment; this page has no Download or golden, so styling the
-// live SVG is free. On animationend the inline dash is removed to restore the stroke.
-function startArrival(svg) {
-  if (!svg) return;
-  const coast = svg.querySelector("#layer-land path");
-  if (coast && typeof coast.getTotalLength === "function") {
-    const len = coast.getTotalLength();
-    if (Number.isFinite(len) && len > 0) {
-      coast.style.setProperty("--draw-len", String(len));
-      coast.style.strokeDasharray = String(len);
-      coast.addEventListener("animationend", function onDrawn(e) {
-        if (e.animationName !== "inkDraw") return; // ignore the wash (washDry)
-        coast.style.strokeDasharray = "";
-        coast.style.strokeDashoffset = "";
-        coast.style.removeProperty("--draw-len");
-        coast.removeEventListener("animationend", onDrawn);
-      });
-    }
-  }
-  svg.classList.add("arriving");
 }
 
 // Defer one macrotask so the "Drafting…" status paints before the main thread
