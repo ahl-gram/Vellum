@@ -19,6 +19,7 @@ import {
   pauseScrub,
   togglePlay,
   onManualScrub,
+  scrubSnapToPresent,
   onDocKeydown,
   onDocClick,
 } from "./living-chart.js";
@@ -375,7 +376,14 @@ versoBtn.addEventListener("click", () => {
   // button is deliberately NOT disabled for the sweep's duration: the existing
   // disable-during-draw covers a sub-second round trip, and a control that goes dead for
   // 12 seconds with no stated reason reads as a bug. No-op when not voyaging.
+  // #180: the chronicle scrubber is the same class as the voyage track. It mutates the
+  // baked recto (per-glyph display) that the <img> ghost cannot mirror, so instead of
+  // painting the back face we snap the scrubber to the present before turning: the parked
+  // recto then IS the chart the pristine ghost holds, so the two faces agree by construction.
+  // Both snaps no-op when their feature is off, and chronicle and voyage are mutually
+  // exclusive, so at most one fires.
   voyageSnapToRest();
+  scrubSnapToPresent();
   const flipped = toggleFlip(sheetEl);
   versoBtn.textContent = flipped ? "Turn back" : "Turn the sheet";
 });

@@ -337,6 +337,20 @@ export function togglePlay() {
   else playScrub();
 }
 
+// #180: flipping the sheet snaps the scrubber to the PRESENT. The verso ghost is a Blob of
+// the chart as the WORKER drew it; the scrubber mutates the baked recto (per-glyph display),
+// which the <img> ghost cannot mirror. Parking at the present clears every mutation
+// (glyphVisibleAt is true for all marks, setRoadsVisible(year >= max) is true), so the recto
+// then IS the chart the ghost already holds: both faces agree by construction, with zero
+// ghost work. It also pauses a running Play, matching voyage.js voyageSnapToRest() and the
+// drag-pauses-Play idiom. paintScrub is module-private, so this is the seam that exposes the
+// park. No-op when the chronicle is off.
+export function scrubSnapToPresent() {
+  if (!scrub) return;
+  pauseScrub();
+  paintScrub(scrub.range.max);
+}
+
 // A manual drag/keyboard scrub on the slider: pause Play and rebase it so the next
 // Play restarts from the earliest founding, then paint the dragged year.
 export function onManualScrub() {
