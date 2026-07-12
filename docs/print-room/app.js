@@ -14,6 +14,7 @@
 // (e2e R2/R3), and the fallback path (B1-B3) are all unchanged.
 import { runJob, usesWorker, initWorker } from "/explorer/worker-client.js";
 import { startArrival } from "/explorer/draw-ceremony.js";
+import { seedForDate } from "/explorer/engine/world/seed-of-the-day.js";
 
 const PREVIEW_WIDTH = 900; // a modest proof; the real outputs are downloads (Subs 2-4).
 
@@ -56,8 +57,8 @@ function applyHash() {
   const seedRaw = p.get("seed");
   const seed = Number(seedRaw);
   // Gate on PRESENCE, not just validity: Number(null) === 0 would pass the integer
-  // guard and silently pin every bare visit to seed 0, defeating the random-world
-  // fallback at bootstrap. A missing OR invalid seed both fall through to random.
+  // guard and silently pin every bare visit to seed 0. A missing OR invalid seed both
+  // fall through to today's seed-of-the-day at bootstrap.
   if (seedRaw !== null && Number.isInteger(seed) && seed >= 0) seedInput.value = String(seed);
   const style = p.get("style");
   if (STYLES.includes(style)) styleSel.value = style;
@@ -140,5 +141,7 @@ window.__vellumPrintRoomState = () => ({ seed: lastSeed, title: lastTitle });
 if (!usesWorker()) warning.hidden = false; // inline fallback: large plates will pause the tab
 
 applyHash();
-if (!seedInput.value) seedInput.value = String(randomSeed());
+// A bare visit (no valid seed in the hash) lands on today's seed-of-the-day (UTC), the
+// same default world the Explorer and the Today page use.
+if (!seedInput.value) seedInput.value = String(seedForDate(new Date()));
 draw();

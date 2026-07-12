@@ -112,6 +112,22 @@ export async function run(ctx) {
     /legend=0/.test(carried.hash) && /land=350/.test(carried.hash) && /seed=42/.test(carried.hash);
   check("PRC carried params (type/band/theme/legend/arms/land) round-trip at non-defaults", carriedOk, carried ? carried.hash : "no preview");
 
+  // PRB: a bare visit (no seed in the hash) lands on today's seed-of-the-day (UTC),
+  // matching the Explorer (R0b) and the Today page. about:blank first so the hash truly
+  // clears (a same-document hash removal would not re-bootstrap the page).
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/` });
+  let bare = null;
+  for (let i = 0; i < 160; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(async()=>{const {seedForDate}=await import("/explorer/engine/world/seed-of-the-day.js");return{svg:!!document.querySelector("#pr-preview svg"),status:(document.getElementById("pr-status")||{}).textContent,seed:document.getElementById("pr-seed").value,expected:String(seedForDate(new Date()))};})()`, true);
+    } catch {}
+    if (s && s.svg && s.status === "") { bare = s; break; }
+    await sleep(50);
+  }
+  check("PRB bare Print Room visit lands on today's seed-of-the-day", !!bare && bare.seed === bare.expected, JSON.stringify(bare));
+
   await shoot("print-room.png");
 
   // Scoped health: no new console errors and no new (non-favicon) 4xx from this page,
