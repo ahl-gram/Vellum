@@ -282,27 +282,32 @@ export async function run(ctx) {
   for (let i = 0; i < 300; i++) {
     let s = null;
     try {
-      s = await evaluate(`(()=>{const b=window.__vellumBoundAtlas;if(!b)return null;const imgs=[...document.querySelectorAll("#pr-atlas img")];return{seed:b.seed,title:b.title,figs:b.figures,plates:document.querySelectorAll("#pr-atlas figure:not(.banner)").length,print:!document.getElementById("pr-print").disabled,dl:!document.getElementById("pr-download").disabled,hasAtlas:document.body.classList.contains("has-atlas"),imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0)};})()`);
+      s = await evaluate(`(()=>{const b=window.__vellumBoundAtlas;if(!b)return null;const imgs=[...document.querySelectorAll("#pr-atlas img")];const hero=document.querySelector("#pr-atlas .hero-plate");return{seed:b.seed,title:b.title,figs:b.figures,plates:document.querySelectorAll("#pr-atlas figure:not(.banner)").length,print:!document.getElementById("pr-print").disabled,dl:!document.getElementById("pr-download").disabled,hide:!document.getElementById("pr-hide").disabled,hasAtlas:document.body.classList.contains("has-atlas"),imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),heroHiddenOnScreen:hero?getComputedStyle(hero).display==="none":false};})()`);
     } catch {}
     if (s && s.loaded) { bound = s; break; }
     await sleep(50);
   }
   check(
-    "PR20 Bind composes the full atlas inline: all plates load, delivery enabled",
+    "PR20 Bind composes the full atlas inline: all plates load, delivery enabled, hero hidden on screen",
     !!bound && bound.seed === 42 && bound.title === "The Isle of Rahai" && bound.plates >= 8 &&
-      bound.print === true && bound.dl === true && bound.hasAtlas === true && bound.loaded === true,
+      bound.print === true && bound.dl === true && bound.hide === true && bound.hasAtlas === true &&
+      bound.loaded === true && bound.heroHiddenOnScreen === true,
     JSON.stringify(bound),
   );
+
+  // Capture the redesigned layout with the atlas bound below the proof (order desk on top).
+  await shoot("print-room-bound.png");
 
   // PR21 the print stylesheet: under print media the page chrome collapses and only the
   // bound atlas remains, one plate per page. Emulate print and read computed styles, a
   // direct witness that the site's first real @media print block does its job.
   await send("Emulation.setEmulatedMedia", { media: "print" });
-  const printView = await evaluate(`(()=>{const disp=(sel)=>{const el=document.querySelector(sel);return el?getComputedStyle(el).display:"absent";};const f=document.querySelector("#pr-atlas figure:not(.banner)");return{counter:disp(".counter"),preview:disp("#pr-preview"),plates:disp(".plates"),controls:disp(".bound-controls"),atlas:disp("#pr-atlas"),breakAfter:f?getComputedStyle(f).breakAfter:"absent"};})()`);
+  const printView = await evaluate(`(()=>{const disp=(sel)=>{const el=document.querySelector(sel);return el?getComputedStyle(el).display:"absent";};const f=document.querySelector("#pr-atlas figure:not(.banner)");return{counter:disp(".counter"),preview:disp("#pr-preview"),desk:disp(".order-desk"),caption:disp("#pr-caption"),atlas:disp("#pr-atlas"),hero:disp("#pr-atlas .hero-plate"),breakAfter:f?getComputedStyle(f).breakAfter:"absent"};})()`);
   check(
-    "PR21 print stylesheet hides chrome, keeps the atlas, breaks one plate per page",
-    printView.counter === "none" && printView.preview === "none" && printView.plates === "none" &&
-      printView.controls === "none" && printView.atlas !== "none" && printView.breakAfter === "page",
+    "PR21 print stylesheet hides chrome, keeps the atlas + hero, breaks one plate per page",
+    printView.counter === "none" && printView.preview === "none" && printView.desk === "none" &&
+      printView.caption === "none" && printView.atlas !== "none" && printView.hero !== "none" &&
+      printView.breakAfter === "page",
     JSON.stringify(printView),
   );
 
@@ -355,6 +360,24 @@ export async function run(ctx) {
     midDraw.bind === true && midDraw.print === true && midDraw.atlasEmpty === true &&
       midDraw.hasAtlas === false && !!reenabled,
     JSON.stringify({ midDraw, reenabled }),
+  );
+
+  // PR25 the Hide action (#136 redesign). After binding, Hide dismisses the atlas but leaves
+  // Bind enabled (the proof is unchanged), and drops Print/Download/Hide + the has-atlas class.
+  await evaluate(`document.getElementById("pr-bind").click()`);
+  let reboundForHide = false;
+  for (let i = 0; i < 260; i++) {
+    let ok = null;
+    try { ok = await evaluate(`(()=>{const imgs=[...document.querySelectorAll("#pr-atlas img")];return !!window.__vellumBoundAtlas && imgs.length>0 && imgs.every(im=>im.complete) && !document.getElementById("pr-hide").disabled;})()`); } catch {}
+    if (ok) { reboundForHide = true; break; }
+    await sleep(50);
+  }
+  const hidden = await evaluate(`(()=>{document.getElementById("pr-hide").click();return{atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas"),bindEnabled:!document.getElementById("pr-bind").disabled,printDisabled:document.getElementById("pr-print").disabled,hideDisabled:document.getElementById("pr-hide").disabled};})()`);
+  check(
+    "PR25 Hide dismisses the bound atlas and re-enables Bind (proof unchanged)",
+    reboundForHide && hidden.atlasEmpty === true && hidden.hasAtlas === false &&
+      hidden.bindEnabled === true && hidden.printDisabled === true && hidden.hideDisabled === true,
+    JSON.stringify({ reboundForHide, hidden }),
   );
 
   await shoot("print-room.png");

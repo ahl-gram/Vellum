@@ -27,6 +27,7 @@ const $ = (id) => document.getElementById(id);
 const bindBtn = $("pr-bind");
 const printBtn = $("pr-print");
 const downloadBtn = $("pr-download");
+const hideBtn = $("pr-hide");
 const atlasDiv = $("pr-atlas");
 const status = $("pr-bound-status");
 
@@ -38,30 +39,44 @@ let lastAtlas = null; // the last successfully composed atlas (serializable), fo
 let bindGen = 0;
 let binding = false;
 
+// The delivery actions (Print, Download, Hide) come alive together once an atlas is bound.
 function setDeliveryEnabled(on) {
   printBtn.disabled = !on;
   downloadBtn.disabled = !on;
+  hideBtn.disabled = !on;
 }
 
-// Release the current preview's blob URLs and empty the sheet. Also invalidates any
-// in-flight bind and disables BOTH the delivery buttons AND Bind itself, since there is
-// nothing bound to take home and the world is about to change. Called at the START of every
-// draw (app.js), so Bind stays disabled through the redraw's in-flight window: without this,
-// posterBasis still points at the PREVIOUS world during that window, and a bind clicked then
-// would compose the old world's atlas and survive the bindGen guard (the new proof lands
-// without bumping bindGen), leaving the bound sheet disagreeing with the on-screen proof.
-// enableBind re-enables it when the new proof settles (mirrors the Explorer's Bind, which is
-// likewise disabled for the whole draw round-trip).
-export function clearBoundAtlas() {
+// Tear down the current bound atlas: release its preview blob URLs, empty the sheet, drop the
+// delivery buttons, and invalidate any in-flight bind (bindGen++). Shared by the two callers
+// below, which differ only in what they do to the Bind button.
+function resetBoundAtlas() {
   bindGen++;
   for (const url of atlasUrls) URL.revokeObjectURL(url);
   atlasUrls = [];
   lastAtlas = null;
   atlasDiv.innerHTML = "";
-  bindBtn.disabled = true;
   setDeliveryEnabled(false);
   document.body.classList.remove("has-atlas");
   status.textContent = "";
+}
+
+// Called at the START of every draw (app.js): a redraw is coming, so ALSO disable Bind until
+// the new proof settles. Without this, posterBasis still points at the PREVIOUS world during
+// the redraw's in-flight window, and a bind clicked then would compose the old world's atlas
+// and survive the bindGen guard (the new proof lands without bumping bindGen), leaving the
+// bound sheet disagreeing with the on-screen proof. enableBind re-enables it when the new
+// proof settles (mirrors the Explorer's Bind, disabled for the whole draw round-trip).
+export function clearBoundAtlas() {
+  resetBoundAtlas();
+  bindBtn.disabled = true;
+}
+
+// The Hide button: dismiss the bound atlas after a look, but keep Bind enabled since the proof
+// on the desk is unchanged and can be bound again. (#136 redesign: the atlas is nice to see
+// but should be dismissable so it does not dominate the page.)
+function hideAtlas() {
+  resetBoundAtlas();
+  bindBtn.disabled = false;
 }
 
 // A proof landed: a world is available to bind. Enable the counter's Bind button.
@@ -69,14 +84,15 @@ export function enableBind() {
   bindBtn.disabled = false;
 }
 
-function plateFigure(svg, caption) {
+function plateFigure(svg, caption, cls = "") {
   const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
   atlasUrls.push(url);
   const c = escapeXml(caption);
+  const classAttr = cls ? ` class="${cls}"` : "";
   // Eager, NOT loading="lazy" (unlike the Explorer's scroll view): the bound atlas is a
   // print target, and a below-fold lazy plate can print blank if the engine renders to PDF
   // before it loads. Loading all plates up front is exactly what "bind the whole atlas" wants.
-  return `<figure><img src="${url}" alt="${c}"><figcaption>${c}</figcaption></figure>`;
+  return `<figure${classAttr}><img src="${url}" alt="${c}"><figcaption>${c}</figcaption></figure>`;
 }
 
 // Render the whole atlas inline: a title header, then every plate and fragment in atlas
@@ -91,11 +107,15 @@ function plateFigure(svg, caption) {
 // derived from the deterministic name generator, and are escapeXml'd besides; the plate
 // SVGs and the composer's banner/chronicle/gazetteer fragments are trusted engine output.
 function renderBoundAtlas(atlas) {
-  const hero = plateFigure(atlas.hero.svg, atlas.hero.title);
+  // The title header and the hero plate carry .print-only: on screen they duplicate the proof
+  // shown right above, so index.css hides them; print reveals them for a complete standalone
+  // atlas. They stay in the DOM so Print (which prints #pr-atlas) still includes them; Download
+  // is independent (it rebuilds from the full atlas), so it carries them regardless.
+  const hero = plateFigure(atlas.hero.svg, atlas.hero.title, "hero-plate print-only");
   const draughtings = atlas.draughtings.map((p) => plateFigure(p.svg, p.title)).join("\n");
   const themes = atlas.themes.map((p) => plateFigure(p.svg, p.title)).join("\n");
   const regions = atlas.regions.map((p) => plateFigure(p.svg, p.title)).join("\n");
-  atlasDiv.innerHTML = `<header class="atlas-head">
+  atlasDiv.innerHTML = `<header class="atlas-head print-only">
   <h1>${escapeXml(atlas.title)}</h1>
   <p class="subtitle">${escapeXml(atlas.subtitle)}</p>
   <p class="chartno">VELLUM · CHART № ${atlas.seed}</p>
@@ -136,7 +156,11 @@ function bindAtlas() {
       renderBoundAtlas(res.atlas);
       setDeliveryEnabled(true);
       document.body.classList.add("has-atlas");
-      status.textContent = `The atlas of ${res.atlas.title} is bound: print it, or take the single file home.`;
+      // The atlas populates below the proof, off-screen from the order desk up top, so bring
+      // it into view (a JS scroll bypasses the CSS reduced-motion collapse, so honor it here).
+      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      atlasDiv.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      status.textContent = `The atlas of ${res.atlas.title} is bound: print it, take the single file, or hide it.`;
       // e2e observation point: the bound atlas, without holding the plate bytes.
       window.__vellumBoundAtlas = { seed: res.atlas.seed, title: res.atlas.title, figures: atlasDiv.querySelectorAll("figure").length };
     })
@@ -191,6 +215,7 @@ export function initBoundAtlas(getBasisFn) {
   bindBtn.addEventListener("click", bindAtlas);
   printBtn.addEventListener("click", printAtlas);
   downloadBtn.addEventListener("click", downloadAtlas);
+  hideBtn.addEventListener("click", hideAtlas);
   // e2e hooks for the delivery actions that never touch the DOM.
   window.__vellumPrintAtlas = printAtlas;
 }

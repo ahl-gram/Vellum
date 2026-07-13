@@ -131,6 +131,7 @@ function draw() {
   // A fresh proof supersedes any bound atlas: the old one no longer matches the world
   // about to be drawn, so clear it (and disable Print/Download) before the redraw.
   clearBoundAtlas();
+  posterStatus.textContent = ""; // a new proof clears any stale poster-order status in the desk
   const overrides = {};
   if (carried.type) overrides.mapType = carried.type;
   if (carried.band) overrides.band = carried.band;

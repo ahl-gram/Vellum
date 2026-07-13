@@ -61,57 +61,59 @@ button.primary:hover { background: #5d4831; }
 
 .caption { text-align: center; font-style: italic; color: #6b5a40; padding-top: 0.6rem; }
 
-/* The order desk: pick a plate size and the press pulls a poster-wide sheet as a
-   download (#134). Three plate cards, quiet like a printer's sample rail. */
-.plates { max-width: 640px; margin: 2.6rem auto 0; text-align: center; }
-.plates-head { font-size: 0.82rem; letter-spacing: 0.18em; text-transform: uppercase;
-  color: #6b5a40; margin: 0 0 0.4rem; font-weight: 700; }
-.plates-intro { max-width: 520px; margin: 0 auto 1rem; font-size: 0.92rem; color: #6b5a40; }
+/* The order desk (#136 redesign): two side-by-side offerings above the proof, one for a
+   single poster plate, one for the whole bound atlas. Everything below the desk is output
+   (the proof, then the atlas once bound). The offerings stack on a narrow screen. */
+.order-desk { max-width: 860px; margin: 2rem auto 0; }
+.desk-head { text-align: center; font-size: 0.82rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: #6b5a40; margin: 0 0 1.2rem; font-weight: 700; }
+.offerings { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; align-items: stretch; }
+.offering { border: 1px solid #cdbd97; border-radius: 6px; background: #f4ecd8;
+  padding: 1.2rem 1.1rem; display: flex; flex-direction: column; text-align: center; }
+.offering-head { font-size: 1rem; letter-spacing: 0.06em; margin: 0 0 0.4rem; color: #4a3826; }
+/* min-height aligns where the two cards' controls begin even when the intros wrap differently. */
+.offering-intro { font-size: 0.85rem; color: #6b5a40; margin: 0 0 1rem; min-height: 3.4em; }
+.offering-controls { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; }
+.offering-field { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #857257; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+.offering-field select { min-width: 11rem; }
+.atlas-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+/* Push the caveat + status to the card bottom so the two equal-height cards align. */
+.offering-caveat { font-size: 0.76rem; font-style: italic; color: #857257; margin: auto 0 0;
+  padding-top: 0.9rem; }
+.offering .status { margin: 0.5rem 0 0; min-height: 1.2em; }
 
-/* Two labeled steps at the order desk: first choose how it is pressed (a dropdown), then
-   the plate size (the buttons below). Each step is centered under its own instruction. */
-.plate-step { margin: 0 auto 1.2rem; text-align: center; }
-.step-label { display: block; margin: 0 0 0.45rem; font-size: 0.72rem; letter-spacing: 0.14em;
-  text-transform: uppercase; color: #857257; }
-.plate-step select { min-width: 12rem; }
-
-.plate-row { display: flex; flex-wrap: wrap; align-items: stretch; justify-content: center; gap: 0.7rem; }
+.plate-row { display: flex; flex-wrap: wrap; align-items: stretch; justify-content: center; gap: 0.5rem; }
 .plate { display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
-  min-width: 6rem; padding: 0.7rem 1rem; letter-spacing: 0.06em; line-height: 1.2; }
+  min-width: 5rem; padding: 0.55rem 0.85rem; letter-spacing: 0.06em; line-height: 1.2; }
 .plate-dim { font-size: 0.72rem; font-style: italic; letter-spacing: 0.04em; color: #857257; }
 .plate:hover:not(:disabled) { background: #fff7e4; }
 .plate:disabled { cursor: default; opacity: 0.45; }
 .plate:disabled .plate-dim { color: #a1926f; }
 
-.plates-caveat { max-width: 520px; margin: 1rem auto 0; font-size: 0.82rem; font-style: italic;
-  color: #857257; }
-
-/* The bound atlas (#136): bind the whole atlas, then print it to PDF or take the single
-   file. The controls read like the poster counter; the bound sheet below is wider. */
-.bound-atlas { margin: 2.8rem auto 0; text-align: center; }
-.bound-head { font-size: 0.82rem; letter-spacing: 0.18em; text-transform: uppercase;
-  color: #6b5a40; margin: 0 0 0.4rem; font-weight: 700; }
-.bound-intro { max-width: 560px; margin: 0 auto 1.1rem; font-size: 0.92rem; color: #6b5a40; }
-.bound-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-  gap: 0.6rem; margin: 0 auto 1rem; }
-.bound-caveat { max-width: 560px; margin: 0.4rem auto 0; font-size: 0.82rem; font-style: italic;
-  color: #857257; }
-
-/* The bound sheet: wider than the controls, framed like the Explorer's #atlas. Empty until
-   a bind; the shared .atlas-sheet rules (injected by bound-atlas.js) style its plates,
-   tables, banners, and chronicle. Only the title header is styled here (page chrome). */
-#pr-atlas { max-width: 1100px; margin: 2rem auto 0; text-align: left; }
+/* The bound sheet populates below the proof, wider than the desk, framed like the Explorer's
+   #atlas. Empty until a bind; the shared .atlas-sheet rules (injected by bound-atlas.js) style
+   its plates, tables, banners, and chronicle. On SCREEN it omits the duplicated header + hero
+   (.print-only), which the proof already shows above; print + download restore them. */
+#pr-atlas { max-width: 1100px; margin: 2.5rem auto 0; }
 #pr-atlas:empty { margin: 0; }
 #pr-atlas .atlas-head { text-align: center; margin: 0 0 1.5rem; }
 #pr-atlas .atlas-head h1 { font-size: 2.2rem; letter-spacing: 0.04em; margin: 0 0 0.4rem; }
 #pr-atlas .atlas-head .subtitle { font-style: italic; color: #6b5a40; margin: 0; }
 #pr-atlas .atlas-head .chartno { letter-spacing: 0.3em; font-size: 0.8rem; color: #857257;
   margin: 0.5rem 0 0; }
+/* Drop-hero: hide the header + hero on screen; print reveals them (below) for a complete
+   standalone atlas, and the download always carries them (it builds from the full atlas). */
+@media screen { #pr-atlas .print-only { display: none; } }
 
 footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;
   font-size: 0.72rem; color: #857257; }
 footer a { color: inherit; }
 
+@media (max-width: 640px) {
+  .offerings { grid-template-columns: 1fr; }
+  .offering-intro { min-height: 0; }
+}
 @media (max-width: 560px) {
   .counter { gap: 0.5rem; }
   input[type="number"] { width: 7rem; }
@@ -129,14 +131,15 @@ footer a { color: inherit; }
   body.has-atlas .counter,
   body.has-atlas .warning,
   body.has-atlas #pr-status,
+  body.has-atlas .order-desk,
   body.has-atlas #pr-preview,
   body.has-atlas #pr-caption,
-  body.has-atlas .plates,
-  body.has-atlas .bound-atlas > *:not(#pr-atlas),
   body.has-atlas > main > footer { display: none !important; }
   body.has-atlas { padding: 0; }
   body.has-atlas main { max-width: none; }
   body.has-atlas #pr-atlas { max-width: none; margin: 0; }
+  /* Reveal the header + hero that are hidden on screen, so the printed atlas is complete. */
+  body.has-atlas #pr-atlas .print-only { display: block; }
   /* Block layout so each plate figure can own a page (grid + fragmentation is unreliable). */
   body.has-atlas #pr-atlas .styles,
   body.has-atlas #pr-atlas .themes { display: block; }
