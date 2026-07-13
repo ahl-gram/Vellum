@@ -23,6 +23,10 @@ import { POSTER_PRESETS, clampPosterWidth, posterFilename, posterPngFilename } f
 // SVG string in, PNG blob out, fitted under a canvas pixel budget; the pure decision core
 // is unit-tested in Node and its failure paths surface in-voice messages, never silent nulls.
 import { rasterizeSvg } from "/lib/rasterize.js";
+// #136 the bound atlas: bind the full atlas off-thread, print it to PDF, or download a
+// self-contained single file. Same-dir module (resolves against /print-room/); it reuses
+// the shared worker + the engine's atlasDocument.
+import { initBoundAtlas, clearBoundAtlas, enableBind } from "./bound-atlas.js";
 
 const PREVIEW_WIDTH = 900; // a modest proof; the real outputs are downloads (Subs 2-4).
 
@@ -124,6 +128,9 @@ function draw() {
   const myGen = ++drawGen;
   status.textContent = "Pulling a proof…";
   caption.textContent = "";
+  // A fresh proof supersedes any bound atlas: the old one no longer matches the world
+  // about to be drawn, so clear it (and disable Print/Download) before the redraw.
+  clearBoundAtlas();
   const overrides = {};
   if (carried.type) overrides.mapType = carried.type;
   if (carried.band) overrides.band = carried.band;
@@ -152,10 +159,16 @@ function draw() {
       // so holding the reference is safe.
       posterBasis = { seed, style, overrides, legend: carried.legend, arms: carried.arms, theme: carried.theme || undefined };
       if (!ordering) setPlatesEnabled(true);
+      enableBind(); // a world is on the desk: the atlas can be bound from this proof
     })
     .catch((err) => {
       if (myGen !== drawGen) return;
       status.textContent = "The press jammed: " + err.message;
+      // The draw failed, but the previous proof (if any) is still on the desk and bindable,
+      // so re-enable Bind (clearBoundAtlas disabled it at the start of this draw). Without
+      // this, a worker crash during a redraw would leave Bind stuck disabled until the next
+      // successful draw. Mirrors the Explorer, which re-enables its Bind on draw failure too.
+      enableBind();
     });
 }
 
@@ -260,6 +273,9 @@ function orderPoster(key) {
 for (const b of plateButtons) b.addEventListener("click", () => orderPoster(b.dataset.poster));
 
 await initWorker("/explorer/worker.js");
+// #136: wire the bound atlas. getBasis reads the LIVE posterBasis at click time, so a
+// bind reproduces exactly the world on the desk (the same snapshot the poster order uses).
+initBoundAtlas(() => posterBasis);
 window.__vellumPrintRoomUsesWorker = usesWorker;
 window.__vellumPrintRoomState = () => ({ seed: lastSeed, title: lastTitle });
 window.__vellumClampPosterWidth = clampPosterWidth; // e2e: the tab-killing-width guard

@@ -262,6 +262,101 @@ export async function run(ctx) {
     JSON.stringify(png3),
   );
 
+  // --- #136 the bound atlas (bind + print stylesheet + single-file download) ------------
+  // Bind the atlas of the seed-42 proof. The plate buttons re-enabled after PR13, and the
+  // Bind button enables off the same proof; click it and wait for the composed atlas to lay
+  // itself out inline (the same off-thread `atlas` job the Explorer's Bind uses). Downloads
+  // are still denied, so the single-file a.click() below exercises the full blob path.
+  await evaluate(`(()=>{const s=document.getElementById("pr-seed");s.value="42";document.getElementById("pr-style").value="antique";document.getElementById("pr-draw").click();})()`);
+  let bindReady = false;
+  for (let i = 0; i < 160; i++) {
+    let ok = null;
+    try { ok = await evaluate(`(()=>{const st=window.__vellumPrintRoomState();const b=document.getElementById("pr-bind");return st.seed===42&&document.getElementById("pr-status").textContent===""&&b&&!b.disabled;})()`); } catch {}
+    if (ok) { bindReady = true; break; }
+    await sleep(50);
+  }
+  check("PR20a the Bind button enables once a proof is on the desk", bindReady);
+
+  await evaluate(`document.getElementById("pr-bind").click()`);
+  let bound = null;
+  for (let i = 0; i < 300; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(()=>{const b=window.__vellumBoundAtlas;if(!b)return null;const imgs=[...document.querySelectorAll("#pr-atlas img")];return{seed:b.seed,title:b.title,figs:b.figures,plates:document.querySelectorAll("#pr-atlas figure:not(.banner)").length,print:!document.getElementById("pr-print").disabled,dl:!document.getElementById("pr-download").disabled,hasAtlas:document.body.classList.contains("has-atlas"),imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0)};})()`);
+    } catch {}
+    if (s && s.loaded) { bound = s; break; }
+    await sleep(50);
+  }
+  check(
+    "PR20 Bind composes the full atlas inline: all plates load, delivery enabled",
+    !!bound && bound.seed === 42 && bound.title === "The Isle of Rahai" && bound.plates >= 8 &&
+      bound.print === true && bound.dl === true && bound.hasAtlas === true && bound.loaded === true,
+    JSON.stringify(bound),
+  );
+
+  // PR21 the print stylesheet: under print media the page chrome collapses and only the
+  // bound atlas remains, one plate per page. Emulate print and read computed styles, a
+  // direct witness that the site's first real @media print block does its job.
+  await send("Emulation.setEmulatedMedia", { media: "print" });
+  const printView = await evaluate(`(()=>{const disp=(sel)=>{const el=document.querySelector(sel);return el?getComputedStyle(el).display:"absent";};const f=document.querySelector("#pr-atlas figure:not(.banner)");return{counter:disp(".counter"),preview:disp("#pr-preview"),plates:disp(".plates"),controls:disp(".bound-controls"),atlas:disp("#pr-atlas"),breakAfter:f?getComputedStyle(f).breakAfter:"absent"};})()`);
+  check(
+    "PR21 print stylesheet hides chrome, keeps the atlas, breaks one plate per page",
+    printView.counter === "none" && printView.preview === "none" && printView.plates === "none" &&
+      printView.controls === "none" && printView.atlas !== "none" && printView.breakAfter === "page",
+    JSON.stringify(printView),
+  );
+
+  // PR22 the browser's own Save-as-PDF (this replaces the deleted CLI --pdf): print the page
+  // to a PDF and assert it is well-formed and non-trivial (a blank atlas or a print-blank
+  // plate bug would yield a tiny file). Full paper-fidelity is a manual Chrome/Safari pass.
+  let pdf = null;
+  try { pdf = await send("Page.printToPDF", { printBackground: true }); } catch (e) { pdf = null; }
+  check(
+    "PR22 browser Save-as-PDF yields a well-formed, non-empty bound atlas",
+    !!pdf && typeof pdf.data === "string" && pdf.data.length > 20000,
+    pdf ? `${pdf.data.length} base64 chars` : "printToPDF failed",
+  );
+  await send("Emulation.setEmulatedMedia", { media: "" }); // back to screen for the rest
+
+  // PR23 the single-file download: a self-contained document with every plate inlined as a
+  // base64 data URI, no blob: URLs (session-scoped, would break offline), and no external
+  // stylesheet. Downloads are denied, so we read the metadata hook, never the ~20MB string.
+  await evaluate(`(()=>{window.__vellumLastAtlasDownload=undefined;document.getElementById("pr-download").click();})()`);
+  let dl = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try { s = await evaluate(`window.__vellumLastAtlasDownload || null`); } catch {}
+    if (s) { dl = s; break; }
+    await sleep(50);
+  }
+  check(
+    "PR23 single-file download is self-contained (data-URI plates, no blob/external refs)",
+    !!dl && dl.dataUris >= 8 && dl.hasBlobUrl === false && dl.hasExternalCss === false &&
+      dl.size > 1000000 && dl.title === "The Isle of Rahai" && /^vellum-atlas-42\.html$/.test(dl.filename),
+    JSON.stringify(dl),
+  );
+
+  // PR24 the bind-during-redraw guard. A fresh draw must disable Bind SYNCHRONOUSLY
+  // (clearBoundAtlas runs before the async render), so a bind can never start against the
+  // PREVIOUS world while a new proof is in flight: that would compose the old world's atlas
+  // and survive the bindGen guard (the new proof lands without bumping bindGen), leaving the
+  // bound sheet disagreeing with the on-screen proof. The click below reads the button state
+  // in the SAME turn as the draw click, then we confirm the new proof re-enables Bind.
+  const midDraw = await evaluate(`(()=>{const s=document.getElementById("pr-seed");s.value="2024";document.getElementById("pr-draw").click();return{bind:document.getElementById("pr-bind").disabled,print:document.getElementById("pr-print").disabled,atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas")};})()`);
+  let reenabled = null;
+  for (let i = 0; i < 160; i++) {
+    let s = null;
+    try { s = await evaluate(`(()=>{const st=window.__vellumPrintRoomState();return{seed:st.seed,status:document.getElementById("pr-status").textContent,bind:document.getElementById("pr-bind").disabled};})()`); } catch {}
+    if (s && s.seed === 2024 && s.status === "" && s.bind === false) { reenabled = s; break; }
+    await sleep(50);
+  }
+  check(
+    "PR24 a redraw disables Bind mid-flight (no stale-world bind), re-enabled on the new proof",
+    midDraw.bind === true && midDraw.print === true && midDraw.atlasEmpty === true &&
+      midDraw.hasAtlas === false && !!reenabled,
+    JSON.stringify({ midDraw, reenabled }),
+  );
+
   await shoot("print-room.png");
 
   // Scoped health: no new console errors and no new (non-favicon) 4xx from this page,

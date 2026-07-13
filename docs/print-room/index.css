@@ -86,8 +86,28 @@ button.primary:hover { background: #5d4831; }
 .plates-caveat { max-width: 520px; margin: 1rem auto 0; font-size: 0.82rem; font-style: italic;
   color: #857257; }
 
-.counter-note { max-width: 560px; margin: 2.4rem auto 0; text-align: center;
-  font-style: italic; font-size: 0.9rem; color: #857257; }
+/* The bound atlas (#136): bind the whole atlas, then print it to PDF or take the single
+   file. The controls read like the poster counter; the bound sheet below is wider. */
+.bound-atlas { margin: 2.8rem auto 0; text-align: center; }
+.bound-head { font-size: 0.82rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: #6b5a40; margin: 0 0 0.4rem; font-weight: 700; }
+.bound-intro { max-width: 560px; margin: 0 auto 1.1rem; font-size: 0.92rem; color: #6b5a40; }
+.bound-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 0.6rem; margin: 0 auto 1rem; }
+.bound-caveat { max-width: 560px; margin: 0.4rem auto 0; font-size: 0.82rem; font-style: italic;
+  color: #857257; }
+
+/* The bound sheet: wider than the controls, framed like the Explorer's #atlas. Empty until
+   a bind; the shared .atlas-sheet rules (injected by bound-atlas.js) style its plates,
+   tables, banners, and chronicle. Only the title header is styled here (page chrome). */
+#pr-atlas { max-width: 1100px; margin: 2rem auto 0; text-align: left; }
+#pr-atlas:empty { margin: 0; }
+#pr-atlas .atlas-head { text-align: center; margin: 0 0 1.5rem; }
+#pr-atlas .atlas-head h1 { font-size: 2.2rem; letter-spacing: 0.04em; margin: 0 0 0.4rem; }
+#pr-atlas .atlas-head .subtitle { font-style: italic; color: #6b5a40; margin: 0; }
+#pr-atlas .atlas-head .chartno { letter-spacing: 0.3em; font-size: 0.8rem; color: #857257;
+  margin: 0.5rem 0 0; }
+
 footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;
   font-size: 0.72rem; color: #857257; }
 footer a { color: inherit; }
@@ -95,4 +115,35 @@ footer a { color: inherit; }
 @media (max-width: 560px) {
   .counter { gap: 0.5rem; }
   input[type="number"] { width: 7rem; }
+}
+
+/* The bound atlas printed to PDF: the browser's own Save as PDF replaces the deleted CLI
+   `--pdf` (#136). Scoped to body.has-atlas (set by bound-atlas.js on a successful bind), so
+   a plain Ctrl+P before binding still prints the normal page, not a blank sheet. All page
+   chrome is hidden; only #pr-atlas remains, one plate per page, with the banner grid,
+   chronicle, and gazetteer flowing after. This is the site's first real print stylesheet
+   (the only other @media print is #127's one-line motion override on the Explorer). */
+@media print {
+  body.has-atlas > main > header,
+  body.has-atlas .intro,
+  body.has-atlas .counter,
+  body.has-atlas .warning,
+  body.has-atlas #pr-status,
+  body.has-atlas #pr-preview,
+  body.has-atlas #pr-caption,
+  body.has-atlas .plates,
+  body.has-atlas .bound-atlas > *:not(#pr-atlas),
+  body.has-atlas > main > footer { display: none !important; }
+  body.has-atlas { padding: 0; }
+  body.has-atlas main { max-width: none; }
+  body.has-atlas #pr-atlas { max-width: none; margin: 0; }
+  /* Block layout so each plate figure can own a page (grid + fragmentation is unreliable). */
+  body.has-atlas #pr-atlas .styles,
+  body.has-atlas #pr-atlas .themes { display: block; }
+  /* Every PLATE figure on its own page; banner figures (.banner) keep flowing in their grid.
+     opacity:1 is belt-and-suspenders (the Print Room plates never hide, unlike the Explorer's
+     reveal), so no below-fold plate can ever print blank. */
+  body.has-atlas #pr-atlas figure:not(.banner) { break-inside: avoid; break-after: page; opacity: 1; }
+  body.has-atlas #pr-atlas figure:not(.banner) img { box-shadow: none; }
+  @page { margin: 1.5cm; }
 }

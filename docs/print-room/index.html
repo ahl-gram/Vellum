@@ -88,8 +88,23 @@ a moment.</p>
   <p class="status" id="pr-poster-status" role="status" aria-live="polite"></p>
 </section>
 
-<p class="counter-note">A printable bound atlas and a single-file download are being
-fitted at this counter.</p>
+<section class="bound-atlas" aria-labelledby="pr-bound-head">
+  <h2 class="bound-head" id="pr-bound-head">The bound atlas</h2>
+  <p class="bound-intro">Bind the whole atlas of this world, the way the survey office would:
+  the world chart and its other draughtings, the thematic surveys, the regional plates, the
+  banners of the realms, the chronicle, and the gazetteer, all on one sheet. Then print it to
+  PDF, or take the single self-contained file home.</p>
+  <div class="bound-controls" role="group" aria-labelledby="pr-bound-head">
+    <button id="pr-bind" class="primary" disabled>Bind the atlas</button>
+    <button id="pr-print" disabled>Print the atlas</button>
+    <button id="pr-download" disabled>Download single file</button>
+  </div>
+  <p class="bound-caveat">Printing opens your browser's own Save as PDF, so choose your paper
+  size there; one plate falls on each page. The single file is one self-contained page of about
+  20 MB that opens offline in any browser, with every plate carried inside it.</p>
+  <p class="status" id="pr-bound-status" role="status" aria-live="polite"></p>
+  <div id="pr-atlas" class="atlas-sheet"></div>
+</section>
 
 <footer>
   VELLUM · AN ATELIER OF IMAGINARY CARTOGRAPHY

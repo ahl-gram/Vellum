@@ -49,6 +49,10 @@ export async function run(ctx) {
   // (the tidy-grid invariant); (c) a :hover rule with a transform actually exists in
   // the stylesheet (so the committed check bites the lift itself, not just the
   // plumbing). The lift's exact end state is CDP-probe verified (e2e can't hover).
+  // #136: the lift rule moved to the shared ATLAS_SHEET_CSS (src/atlas/document.ts),
+  // injected by atlas-view.js and scoped .atlas-sheet; #atlas carries that class, so the
+  // rule still lifts these plates. The check now bites the new selector, not the old
+  // #atlas-scoped one (whose byte-identical twin in the CLI atlas was the drift trap).
   const d5 = await evaluate(`(()=>{
     const img=document.querySelector("#atlas figure img");
     if(!img)return{img:false};
@@ -57,7 +61,7 @@ export async function run(ctx) {
     for(const ss of document.styleSheets){let rules;try{rules=ss.cssRules;}catch(e){continue;}
       if(!rules)continue;
       for(const r of rules){
-        if(r.selectorText&&r.selectorText.includes("#atlas figure img:hover")&&r.style&&r.style.transform&&r.style.transform!=="none"){hoverLift=true;}
+        if(r.selectorText&&r.selectorText.includes(".atlas-sheet figure img:hover")&&r.style&&r.style.transform&&r.style.transform!=="none"&&img.matches(".atlas-sheet figure img")){hoverLift=true;}
       }
     }
     return{img:true,dur:cs.transitionDuration,prop:cs.transitionProperty,tform:cs.transform,hoverLift};

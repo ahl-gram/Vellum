@@ -311,60 +311,25 @@ button.primary:hover { background: #5d4831; }
 footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;
   font-size: 0.72rem; color: #857257; }
 footer a { color: inherit; }
-/* The bound atlas, drawn inline beneath the chart. Mirrors the standalone
-   atlas (src/cli/atlas.ts), scoped to #atlas so the CLI bytes stay untouched. */
+/* The bound atlas, drawn inline beneath the chart. #136: the plate/table/banner/
+   chronicle styling now lives in ONE shared source (src/atlas/document.ts's
+   ATLAS_SHEET_CSS, scoped .atlas-sheet), injected by atlas-view.js; #atlas carries that
+   class in the markup. Only the Explorer-specific bits stay here: the container box, and
+   the #127 settle reveal. This block sets NOTHING the shared source sets, so #atlas's
+   higher id-specificity can never silently override a shared rule and re-open the drift
+   trap (the #146 plate hover/lift now rides the shared .atlas-sheet figure img). */
 #atlas { max-width: 1100px; margin: 2.5rem auto 0; }
 #atlas:empty { margin: 0; }
-#atlas h2 { letter-spacing: 0.06em; border-bottom: 1px solid #b9a77f;
-  padding-bottom: 0.3rem; margin-top: 2.6rem; }
+#atlas h2 { margin-top: 2.6rem; }
 /* #127: bound atlas plates settle in sequence as they scroll into view, like proof
    sheets laid out. atlas-view.js adds .settling (via an IntersectionObserver) as each
    plate enters the viewport; --i is the per-batch stagger index. Plates are hidden
    until revealed so the settle is seen on arrival; under reduced motion they are all
    revealed at once and the collapse in /motion.css makes it instant. */
-#atlas figure { margin: 1.5rem 0; opacity: 0; }
+#atlas figure { opacity: 0; }
 #atlas figure.settling { opacity: 1;
   animation: paperSettle var(--paper-settle) var(--ease-paper) both;
   animation-delay: calc(var(--i, 0) * 60ms); }
 /* Print reveals every plate: a below-fold plate whose reveal-on-scroll never fired
    would otherwise print blank (it is hidden until .settling on screen). */
 @media print { #atlas figure { opacity: 1; } }
-/* #146: the bound plates react to the hand like the homepage chart plates, but
-   rest FLAT (no resting tilt) so the atlas grid stays crisp; on hover each lifts
-   with a slight tilt and a deeper shadow, and presses on tap. The gesture rides
-   the <img>, not the <figure>: the figure carries the settle animation, whose
-   forwards-fill keeps applying its own transform after it ends and would silently
-   override a hover transform placed on the same element. Reuses the #126 .plate
-   vocabulary (the --paper timing, the --ease-paper curve, and the one shared
-   reduced-motion collapse in /motion.css), so no new keyframes and no twin block. */
-#atlas figure img { width: 100%; height: auto; display: block;
-  border: 1px solid #b9a77f; box-shadow: 0 10px 30px rgb(61 47 31 / 0.18);
-  transition: transform var(--paper) var(--ease-paper),
-              box-shadow var(--paper) var(--ease-paper); }
-#atlas figure img:hover {
-  transform: translateY(-5px) rotate(-0.6deg);
-  box-shadow: 0 20px 44px rgb(61 47 31 / 0.28); }
-#atlas figure img:active {
-  transform: translateY(-1px) rotate(0deg); }
-#atlas figcaption { text-align: center; font-style: italic; color: #6b5a40;
-  padding-top: 0.55rem; }
-#atlas .styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
-#atlas .themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.25rem; }
-#atlas table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-#atlas th { text-align: left; border-bottom: 2px solid #4a3826; padding: 0.45rem 0.6rem; }
-#atlas td { border-bottom: 1px solid #cdbd97; padding: 0.45rem 0.6rem; vertical-align: top; }
-#atlas td.name { font-weight: 600; white-space: nowrap; }
-#atlas td.name.capital { text-transform: uppercase; letter-spacing: 0.06em; }
-#atlas td.note { font-style: italic; color: #54452f; }
-#atlas .realms { font-style: italic; color: #6b5a40; }
-#atlas .banners { display: flex; flex-wrap: wrap; gap: 1.1rem; justify-content: center; }
-#atlas .banner { width: 120px; text-align: center; }
-#atlas .banner svg { width: 100%; height: auto; }
-#atlas .banner figcaption { font-style: italic; color: #6b5a40; font-size: 0.85rem;
-  padding-top: 0.35rem; }
-#atlas .chronicle-intro { font-style: italic; color: #6b5a40; }
-#atlas ol.chronicle { list-style: none; padding: 0; margin: 1rem 0 0; max-width: 48rem; }
-#atlas ol.chronicle li { padding: 0.4rem 0; border-bottom: 1px solid #cdbd97;
-  display: flex; gap: 0.9rem; }
-#atlas ol.chronicle .year { flex: 0 0 3.2rem; text-align: right;
-  font-variant-numeric: tabular-nums; font-weight: 600; color: #857257; }
