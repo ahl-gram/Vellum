@@ -3,6 +3,21 @@
 // every chart carries internal ids (map-clip, glyph/texture/label defs) referenced
 // by url(#...), so injecting several inline into one document would collide them.
 import { escapeXml } from "./engine/render/svg.js";
+import { ATLAS_SHEET_CSS } from "./engine/atlas/document.js";
+
+// #136: the bound-atlas plate/table/banner/chronicle styling lives in ONE shared source
+// now (src/atlas/document.ts), so the Explorer's inline bind and the standalone atlas
+// document can never drift. Inject it once, at module load, before any bind; #atlas is
+// empty until the first bind, so there is nothing to restyle mid-flight. The Explorer's
+// own #atlas rules (container box + the #127 settle reveal) stay in index.css and set
+// only properties this shared block does not, so #atlas's higher specificity never
+// silently overrides a shared rule.
+if (!document.getElementById("atlas-sheet-css")) {
+  const style = document.createElement("style");
+  style.id = "atlas-sheet-css";
+  style.textContent = ATLAS_SHEET_CSS;
+  document.head.appendChild(style);
+}
 
 const atlasDiv = document.getElementById("atlas");
 let atlasUrls = [];
