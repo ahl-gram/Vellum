@@ -59,6 +59,32 @@ test("coast warp still honors the deep-water border guarantee", () => {
   }
 });
 
+test("coast warp honors the deep-water border across the full slider range (#137)", () => {
+  // the Explorer coast slider reaches coastWarp 1.0, bolder than the 0.55 default; the
+  // hard edge sink (heightfield.ts) is warp-independent, so every edge cell stays ocean
+  // at any warp the slider can dial in.
+  for (const coastWarp of [0.55, 0.8, 1.0]) {
+    const f = buildHeightfield({ ...RECIPE, coastWarp });
+    for (let x = 0; x < f.w; x++) {
+      assert.ok(f.at(x, 0) < 0 && f.at(x, f.h - 1) < 0, `warp ${coastWarp}: top/bottom edge land at x=${x}`);
+    }
+    for (let y = 0; y < f.h; y++) {
+      assert.ok(f.at(0, y) < 0 && f.at(f.w - 1, y) < 0, `warp ${coastWarp}: left/right edge land at y=${y}`);
+    }
+  }
+});
+
+test("a coastWarp override is additive: it shifts no other recipe roll (#137)", () => {
+  for (const seed of [42, 7, 1234]) {
+    const base = defaultRecipe(seed, {});
+    const forced = defaultRecipe(seed, { coastWarp: 0.8 });
+    assert.equal(forced.coastWarp, 0.8, "the override takes effect");
+    assert.equal(forced.mapType, base.mapType, "mapType unchanged by forcing coast warp");
+    assert.equal(forced.band, base.band, "band unchanged by forcing coast warp");
+    assert.equal(forced.landFraction, base.landFraction, "landFraction unchanged by forcing coast warp");
+  }
+});
+
 test("map types produce different terrain", () => {
   const island = buildHeightfield(RECIPE);
   const arch = buildHeightfield({ ...RECIPE, mapType: "archipelago" });
@@ -132,6 +158,22 @@ test("generateWorld survives the full slider landFraction band on every map type
         assert.ok(
           world.settlements.length > 0,
           `seed ${seed} ${mapType} land ${landFraction}: no settlements`,
+        );
+      }
+    }
+  }
+});
+
+test("generateWorld survives the full coast-warp slider band on every map type (#137)", () => {
+  // the Explorer coast slider spans 0 (calm radial) to 1 (deeply lobed); a full world
+  // must still generate settlements at either extreme, on every map type and seed.
+  for (const seed of [42, 7, 1234]) {
+    for (const mapType of MAP_TYPES) {
+      for (const coastWarp of [0, 1]) {
+        const world = generateWorld(defaultRecipe(seed, { mapType, coastWarp }));
+        assert.ok(
+          world.settlements.length > 0,
+          `seed ${seed} ${mapType} warp ${coastWarp}: no settlements`,
         );
       }
     }

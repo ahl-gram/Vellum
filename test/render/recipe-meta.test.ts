@@ -29,6 +29,32 @@ test("recipeFromSvg returns null for an SVG with no recipe", () => {
   assert.equal(recipeFromSvg("<svg><title>not vellum</title></svg>"), null);
 });
 
+// #137: coastWarp is an OPTIONAL identity field, stamped only when the recipe
+// carries an explicit warp (the Explorer coast slider or --coast-warp). A default
+// world omits it, so its bytes (the committed charts + the golden) are unchanged;
+// a warped world stamps it and round-trips back to the same warp.
+test("a warped chart stamps and round-trips its coastWarp (#137)", () => {
+  const world = generateWorld(defaultRecipe(7, { coastWarp: 0.8 }));
+  const svg = renderMap(world, { style: "antique" });
+  assert.match(svg, /data-vellum-coast-warp="0\.8"/, "the warp is stamped on the root");
+  const parsed = recipeFromSvg(svg);
+  assert.ok(parsed);
+  assert.equal(parsed.recipe.coastWarp, 0.8, "coastWarp is recovered");
+  assert.deepEqual(parsed.recipe, world.recipe, "the recipe round-trips exactly");
+  const redrawn = renderMap(generateWorld(parsed.recipe), { style: parsed.style });
+  assert.equal(redrawn, svg, "the recovered recipe redraws byte-for-byte");
+});
+
+test("a default chart omits the coastWarp stamp, so its bytes are unchanged (#137)", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const svg = renderMap(world, { style: "antique" });
+  assert.doesNotMatch(svg, /data-vellum-coast-warp/, "a default world is not stamped");
+  const parsed = recipeFromSvg(svg);
+  assert.ok(parsed);
+  assert.equal(parsed.recipe.coastWarp, undefined, "no coastWarp key on a default recipe");
+  assert.deepEqual(parsed.recipe, world.recipe, "the default recipe still round-trips");
+});
+
 test("regional inset charts omit the recipe but stay labelled", () => {
   const world = generateWorld(defaultRecipe(42));
   const capital = world.settlements.find((s) => s.kind === "capital");

@@ -32,15 +32,25 @@ export function recipeAttrs(
     "data-vellum-grid-w": r.gridW,
     "data-vellum-grid-h": r.gridH,
     "data-vellum-style": styleName,
+    // #137: coastWarp is optional. Stamped ONLY when the recipe carries an explicit
+    // warp, spread so an undefined value never becomes a key. A default world omits
+    // it, keeping its chart bytes (the committed charts + the golden) byte-identical;
+    // a warped world stamps it so recipeFromSvg round-trips the warp.
+    ...(r.coastWarp !== undefined
+      ? { "data-vellum-coast-warp": r.coastWarp }
+      : {}),
   };
 }
 
 export function recipeMetadataNode(world: World, styleName: StyleName): SvgNode {
   const r = world.recipe;
+  // #137: append the warp only when present, so a default world's <metadata> (part of
+  // the committed bytes) is unchanged; existing tokens keep their positions.
+  const coast = r.coastWarp !== undefined ? ` coast=${r.coastWarp}` : "";
   const summary =
     `Vellum chart. Recipe: seed=${r.seed} type=${r.mapType} band=${r.band} ` +
     `land=${r.landFraction} grid=${r.gridW}x${r.gridH} style=${styleName} ` +
-    `engine=${ENGINE_VERSION}`;
+    `engine=${ENGINE_VERSION}${coast}`;
   return el("metadata", {}, [summary]);
 }
 
@@ -82,6 +92,10 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
   ) {
     return null;
   }
+  // #137: coastWarp is optional (absent on every pre-#137 chart and every default
+  // world). Read it separately and spread only when present, so a default recipe has
+  // no coastWarp key and stays deepEqual to the world's own recipe.
+  const coastWarp = readAttr(svg, "data-vellum-coast-warp");
   return {
     recipe: {
       seed: Number(seed),
@@ -90,6 +104,7 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
       mapType: mapType as MapType,
       landFraction: Number(landFraction),
       band: band as ClimateBand,
+      ...(coastWarp !== null ? { coastWarp: Number(coastWarp) } : {}),
     },
     style: style as StyleName,
     version,

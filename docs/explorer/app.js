@@ -10,6 +10,7 @@ import { clearAtlas, renderAtlas } from "./atlas-view.js";
 import { shouldTurn, runTurn, cancelTurn } from "./sheet-turn.js";
 import { toggleFlip, isFlipped, rebuildVerso } from "./verso.js";
 import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.js";
+import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.js";
 import { startArrival } from "./draw-ceremony.js";
 import { readHash, writeHash } from "./hash-sync.js";
 import { seedForDate } from "./engine/world/seed-of-the-day.js";
@@ -50,6 +51,7 @@ const themeSel = $("theme");
 const legendChk = $("legend");
 const armsChk = $("arms");
 const landSlider = $("land");
+const coastSlider = $("coast");
 const status = $("status");
 const mapDiv = $("map");
 const sheetEl = $("sheet");
@@ -65,7 +67,7 @@ const scrubPlayBtn = $("scrub-play");
 const scrubRangeEl = $("scrub-range");
 
 // #183: the controls readHash/writeHash (hash-sync.js) mirror to and from location.hash.
-const hashControls = { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider };
+const hashControls = { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider };
 
 let lastSvg = "";
 let lastTitle = "";
@@ -85,6 +87,13 @@ let lastSurvey = null;
 // waterline. landDebounce throttles the redraw during a drag.
 let landTouched = false;
 let landDebounce = 0;
+
+// #137: the coast slider's gate, sibling of landTouched. False until the visitor
+// moves the slider; until then draw() sends no coastWarp override and re-parks the
+// slider at the natural 0.55, so an untouched draw is byte-identical to today. There
+// is deliberately NO coast debounce (unlike landDebounce): every coastWarp is a
+// different ~0.6s world, so the slider redraws on release only, not mid-drag.
+let coastTouched = false;
 
 // Monotonic guards. drawGen is bumped by every draw; both a draw's own result and
 // any pending bind check it, so a fresh draw cancels a stale draw and a stale bind
@@ -138,7 +147,7 @@ function draw(opts) {
   status.textContent = "Drafting…";
   caption.textContent = "";
   clearAtlas();
-  writeHash(hashControls, landTouched);
+  writeHash(hashControls, landTouched, coastTouched);
   // #133: writeHash just set location.hash to this world; carry it to the Print Room
   // link so "Take to the Print Room" (and a copied link / middle-click) always opens
   // the CURRENT world, never the one from page load.
@@ -149,6 +158,12 @@ function draw(opts) {
   if (landTouched) overrides.landFraction = sliderToLand(landSlider.value);
   else syncAutoSlider(seed, overrides);
   updateLandReadout();
+  // #137: coast warp is additive and independent of the waterline. Touched sends the
+  // override; untouched re-parks the slider at the natural 0.55 (mirroring
+  // syncAutoSlider), so the slider position always matches the world on screen.
+  if (coastTouched) overrides.coastWarp = sliderToCoast(coastSlider.value);
+  else parkCoastDefault();
+  updateCoastReadout();
   const style = styleSel.value;
   const theme = themeSel.value;
   const legend = legendChk.checked;
@@ -259,6 +274,7 @@ $("draw").addEventListener("click", draw);
 $("random").addEventListener("click", () => {
   seedInput.value = String(randomSeed());
   landTouched = false;
+  coastTouched = false; // #137: a fresh world starts from its natural coastline
   draw();
 });
 $("download").addEventListener("click", () => {
@@ -316,6 +332,7 @@ versoBtn.addEventListener("click", () => {
 seedInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     landTouched = false;
+    coastTouched = false; // #137: a new seed starts from its natural coastline
     draw();
   }
 });
@@ -325,10 +342,11 @@ for (const sel of [bandSel, themeSel, legendChk, armsChk]) {
 // #131: a style change re-dresses the SAME world, so it turns the sheet over rather
 // than settling. Every other control draws a new/changed world and settles (#127).
 styleSel.addEventListener("change", () => draw({ turn: true }));
-// Changing the map type reshapes the terrain, so a manual tide no longer applies:
-// reset to auto so the slider re-derives from the new world.
+// Changing the map type reshapes the terrain, so a manual tide (and warp) no longer
+// applies: reset both to auto so the sliders re-derive from the new world.
 typeSel.addEventListener("change", () => {
   landTouched = false;
+  coastTouched = false; // #137: a reshaped world starts from its natural coastline
   draw();
 });
 // Drag: live readout + debounced redraw on input, an authoritative redraw on
@@ -344,6 +362,18 @@ landSlider.addEventListener("input", () => {
 landSlider.addEventListener("change", () => {
   landTouched = true;
   clearTimeout(landDebounce);
+  draw();
+});
+// #137: the coast slider. Unlike sea-level (which debounces a QUIET mid-drag redraw
+// because re-leveling reuses the SAME terrain), every coastWarp value is a different
+// ~0.6s world, so this updates the readout live on input but redraws only on release
+// (change). Both set coastTouched so the override + the coast= hash param take effect.
+coastSlider.addEventListener("input", () => {
+  coastTouched = true;
+  updateCoastReadout();
+});
+coastSlider.addEventListener("change", () => {
+  coastTouched = true;
   draw();
 });
 
@@ -401,5 +431,7 @@ window.__vellumVoyageLegGeometry = voyageLegGeometry; // #120: projected leg poi
 // the link actually carries a seed (it presence-gates the key, so it no longer clobbers
 // this default down to seed 0).
 seedInput.value = String(seedForDate(new Date()));
-if (readHash(hashControls)) landTouched = true;
+const hashed = readHash(hashControls);
+if (hashed.land) landTouched = true;
+if (hashed.coast) coastTouched = true; // #137: a shared coast= link opens warped
 draw();

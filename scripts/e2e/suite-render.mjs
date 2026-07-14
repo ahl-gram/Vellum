@@ -161,4 +161,65 @@ export async function run(ctx) {
     const a12on = await evaluate(`({heraldry:document.querySelector("#map svg").outerHTML.includes("layer-heraldry"),hash:location.hash.includes("arms=1")})`);
     check("R12b arms on: heraldry layer drawn, arms=1 in hash", a12on.heraldry && a12on.hash, `heraldry=${a12on.heraldry} hash=${a12on.hash}`);
   }
+
+  // --- R13: the coast warp (#137), a slider that reshapes the coastline of the ---
+  // current seed. Redraws on release only (every warp is a different ~0.6s world).
+  // Verifies the control, the untouched byte-identity gate, the coast= hash param and
+  // the data-vellum-coast-warp stamp, that distinct warps give distinct worlds, and
+  // worker/inline parity under the override. The type-change reset at the end also
+  // keeps the shared page un-warped for the suites that run after this one.
+  const coastPresent = await evaluate(`!!document.getElementById("coast")`);
+  if (!coastPresent) {
+    check("R13 coast slider present", false, "#coast control missing");
+  } else {
+    // baseline: an untouched coast slider sends no override, so the default world is
+    // unstamped and carries no coast= in the hash (byte-identity with today).
+    await evaluate(`(()=>{
+      document.getElementById("seed").value="42";
+      document.getElementById("style").value="antique";
+      document.getElementById("theme").value="";
+      document.getElementById("type").value="";
+      document.getElementById("draw").click();
+    })()`);
+    await waitSettled("coast-baseline");
+    const a13base = await evaluate(`({stamp:document.querySelector("#map svg").hasAttribute("data-vellum-coast-warp"),hash:location.hash.includes("coast=")})`);
+    check("R13a untouched coast: no stamp, no coast= in hash (default byte-identity)", !a13base.stamp && !a13base.hash, `stamp=${a13base.stamp} hash=${a13base.hash}`);
+
+    // warp: dial a bold coast, fire input then change (the real drag gesture)
+    await evaluate(`(()=>{
+      const c=document.getElementById("coast");
+      c.value="90";
+      c.dispatchEvent(new Event("input",{bubbles:true}));
+      c.dispatchEvent(new Event("change",{bubbles:true}));
+    })()`);
+    await waitSettled("coast-warp");
+    const a13warp = await evaluate(`({stamp:document.querySelector("#map svg").getAttribute("data-vellum-coast-warp"),hash:location.hash.includes("coast=90"),map:!!document.querySelector("#map svg")})`);
+    check("R13b warp reshapes in place: fresh chart + coast= in hash + stamped value", a13warp.stamp === "0.9" && a13warp.hash && a13warp.map, `stamp=${a13warp.stamp} hash=${a13warp.hash}`);
+
+    // distinct warps are distinct worlds: a calm coast differs from the lobed one
+    await evaluate(`(()=>{ window.__coastLobed = document.querySelector("#map svg").outerHTML; })()`);
+    await evaluate(`(()=>{const c=document.getElementById("coast");c.value="10";c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    await waitSettled("coast-calm");
+    const a13calm = await evaluate(`({stamp:document.querySelector("#map svg").getAttribute("data-vellum-coast-warp"),differs:document.querySelector("#map svg").outerHTML!==window.__coastLobed})`);
+    check("R13c a different warp is a different world (render changes)", a13calm.stamp === "0.1" && a13calm.differs, `calm stamp=${a13calm.stamp} differs=${a13calm.differs}`);
+
+    // worker/inline parity holds under the coastWarp override (R2-style, with the stamp)
+    const a13par = await evaluate(
+      `(async()=>{const m={kind:"draw",seed:42,overrides:{coastWarp:0.9},render:{style:"antique",widthPx:1500,legend:true}};` +
+        `const j=await window.__vellumRunJob(m);const i=window.__vellumRunInline(m);` +
+        `return{eq:j.svg===i.svg,stamped:j.svg.includes('data-vellum-coast-warp="0.9"')};})()`,
+      true,
+    );
+    check("R13d worker bytes === inline bytes under a coastWarp override (stamped)", a13par.eq && a13par.stamped, `eq=${a13par.eq} stamped=${a13par.stamped}`);
+
+    // auto-reset: changing map type drops the manual warp from the hash, so no warped
+    // state leaks into the suites that run after this one on the shared page.
+    await evaluate(`(()=>{const t=document.getElementById("type");t.value="continent";t.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    await waitSettled("coast-typereset");
+    const a13reset = await evaluate(`({reset:!location.hash.includes("coast="),stamp:document.querySelector("#map svg").hasAttribute("data-vellum-coast-warp")})`);
+    check("R13e changing type resets the coast slider to auto (coast= dropped, unstamped)", a13reset.reset && !a13reset.stamp, `reset=${a13reset.reset} stamp=${a13reset.stamp}`);
+    // leave the type back at seed's choice so later suites start from a clean control set
+    await evaluate(`(()=>{const t=document.getElementById("type");t.value="";t.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    await waitSettled("coast-cleanup");
+  }
 }
