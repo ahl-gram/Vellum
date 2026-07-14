@@ -17,7 +17,9 @@ export type WorldRecipe = {
   readonly mapType: MapType;
   readonly landFraction: number;
   readonly band: ClimateBand;
-  /** Coastline irregularity; 0 (default) is the pure radial island. */
+  /** Coastline irregularity in [0, 1]: 0 is the pure radial island, 1 deeply lobed
+   * with offshore islets. Omitted uses the map type's natural SHAPES value (0.55);
+   * the Explorer coast slider (#137) and --coast-warp set it. */
   readonly coastWarp?: number;
 };
 

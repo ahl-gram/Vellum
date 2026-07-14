@@ -49,10 +49,11 @@ const plateButtons = [...document.querySelectorAll("[data-poster]")];
 const presetByKey = new Map(POSTER_PRESETS.map((p) => [p.key, p]));
 
 // Recipe params with no visible control in Sub 1: they ride along from a deep-link's
-// hash (type/band/theme/legend/arms/land) so an Explorer world reproduces faithfully,
-// and are re-serialized on every draw so the Print Room's own URL stays a valid,
-// shareable Explorer link too.
-const carried = { type: "", band: "", theme: "", legend: true, arms: false, land: null };
+// hash (type/band/theme/legend/arms/land/coast) so an Explorer world reproduces
+// faithfully, and are re-serialized on every draw so the Print Room's own URL stays a
+// valid, shareable Explorer link too. (#137 added coast: a warped world Taken to the
+// Print Room must print warped, not drop back to the default coastline.)
+const carried = { type: "", band: "", theme: "", legend: true, arms: false, land: null, coast: null };
 
 // Monotonic guard: a fresh draw cancels a stale in-flight one, so a slow proof can
 // never overwrite a newer chart the visitor asked for.
@@ -105,6 +106,13 @@ function applyHash() {
     const f = Number(land) / 1000;
     if (Number.isFinite(f)) carried.land = Math.min(0.7, Math.max(0.1, f));
   }
+  // #137: coast= carries coastWarp x 100, the Explorer's encoding. Clamp to [0, 1] so
+  // a crafted hash can never push the engine out of range.
+  const coast = p.get("coast");
+  if (coast !== null) {
+    const w = Number(coast) / 100;
+    if (Number.isFinite(w)) carried.coast = Math.min(1, Math.max(0, w));
+  }
 }
 
 // Mirror the current recipe into location.hash in the Explorer's exact format, so a
@@ -119,6 +127,7 @@ function writeHash(seed, style) {
   p.set("legend", carried.legend ? "1" : "0");
   p.set("arms", carried.arms ? "1" : "0");
   if (carried.land != null) p.set("land", String(Math.round(carried.land * 1000)));
+  if (carried.coast != null) p.set("coast", String(Math.round(carried.coast * 100)));
   history.replaceState(null, "", "#" + p.toString());
 }
 
@@ -136,6 +145,7 @@ function draw() {
   if (carried.type) overrides.mapType = carried.type;
   if (carried.band) overrides.band = carried.band;
   if (carried.land != null) overrides.landFraction = carried.land;
+  if (carried.coast != null) overrides.coastWarp = carried.coast; // #137
   runJob({
     kind: "draw",
     seed,

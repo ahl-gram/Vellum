@@ -418,4 +418,41 @@ export async function run(ctx) {
     serverState.blockWorker = false;
     try { await send("Network.setCacheDisabled", { cacheDisabled: false }); } catch {}
   }
+
+  // --- #137 the coast warp travels the full loop: a warped Explorer world, its real
+  // "Take to the Print Room" href, and a warped proof on the desk that re-serializes
+  // coast=. Uses the genuine cross-path handoff (like PRL), so the Print Room truly
+  // re-bootstraps (no same-document hash-change trap). Runs last: it navigates away.
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique&legend=1&coast=90` });
+  let exWarp = false;
+  for (let i = 0; i < 200; i++) {
+    let ok = null;
+    try { ok = await evaluate(`typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`); } catch {}
+    if (ok) { exWarp = true; break; }
+    await sleep(75);
+  }
+  const warpHref = exWarp ? await evaluate(`(()=>{const a=document.getElementById("order-plates");return a?a.getAttribute("href"):null;})()`) : null;
+  check(
+    "PRW Explorer 'Take to the Print Room' href carries the coast warp (coast=90)",
+    !!warpHref && /coast=90/.test(warpHref) && /seed=42/.test(warpHref),
+    String(warpHref),
+  );
+  // Follow the real handoff into the Print Room (cross-path -> full bootstrap), then
+  // prove the proof is genuinely warped (the stamp) and the warp re-serialized.
+  const warpHash = warpHref && warpHref.includes("#") ? warpHref.slice(warpHref.indexOf("#")) : "#seed=42&style=antique&legend=1&coast=90";
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/${warpHash}` });
+  let warpProof = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(()=>{if(typeof window.__vellumPrintRoomState!=="function")return null;const st=window.__vellumPrintRoomState();const svg=document.querySelector("#pr-preview svg");return{seed:st.seed,svg:!!svg,status:(document.getElementById("pr-status")||{}).textContent,hash:location.hash,stamp:svg?svg.getAttribute("data-vellum-coast-warp"):null};})()`);
+    } catch {}
+    if (s && s.svg && s.status === "" && s.seed === 42) { warpProof = s; break; }
+    await sleep(50);
+  }
+  check(
+    "PRW2 the warped world Taken to the Print Room prints warped (stamp + coast= round-trip)",
+    !!warpProof && warpProof.stamp === "0.9" && /coast=90/.test(warpProof.hash),
+    warpProof ? `stamp=${warpProof.stamp} hash=${warpProof.hash}` : "no proof",
+  );
 }

@@ -22,8 +22,9 @@ export type TerrainParams = {
   /**
    * Breaks the radial falloff's circular symmetry: low-frequency noise wobbles
    * the falloff radius by direction, so the coast forms lobes and peninsulas
-   * instead of an oval — most visible when the sea is drained and the outer
-   * coast sits in the falloff zone. 0 (default) reproduces the pure radial dome.
+   * instead of an oval, most visible when the sea is drained and the outer coast
+   * sits in the falloff zone. Range [0, 1]; 0 reproduces the pure radial dome.
+   * When omitted, the map type's SHAPES value (0.55) is used.
    */
   readonly coastWarp?: number;
   /** World-space crop for regional charts; defaults to the full world. */
