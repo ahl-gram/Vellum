@@ -103,11 +103,13 @@
     <div class="row-fields">
       <button id="draw" class="primary">Draw</button>
       <button id="download">Download SVG</button>
-      <button id="bind">Bind as atlas</button>
       <button id="verso-turn">Turn the sheet</button>
       <!-- #133: carry the world on screen to the Print Room. Its href is refreshed on
-           every draw (app.js) so it always carries the CURRENT hash, not the load-time one. -->
-      <a id="order-plates" class="action-link" href="../print-room/">Take to the Print Room</a>
+           every draw (app.js) so it always carries the CURRENT hash, not the load-time one.
+           #199: now the Explorer's only path to the bound atlas, so it is the featured
+           "take your world home" action (see .action-link in index.css). The glyph is
+           decorative, so aria-hidden keeps the link's accessible name clean. -->
+      <a id="order-plates" class="action-link" href="../print-room/"><svg class="order-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><!-- #199: a freshly pulled proof (the Print Room "pulls a proof"): a dog-eared printed sheet under the press platen, whose turn-handle offsets to one side. Paper is the hero and the whole thing is asymmetric on purpose, so it reads as paper rather than a symmetric mark. Decorative (aria-hidden); the link text carries the meaning. --><path d="M4 6.5h13.5"/><circle cx="4" cy="6.5" r="1.4"/><path d="M7 9h6l3.5 3.5V20.5H7z"/><path d="M13 9v3.5h3.5"/><path d="M9.5 15h4.5M9.5 17.5h3"/></svg>Take to the Print Room</a>
     </div>
   </div>
 </div>
@@ -142,7 +144,6 @@
   <p id="voyage-log-sig" class="voyage-log-sig"></p>
   <ol id="voyage-log-strip" class="voyage-log-strip"></ol>
 </div>
-<div id="atlas" class="atlas-sheet"></div>
 
 <footer>
   VELLUM · AN ATELIER OF IMAGINARY CARTOGRAPHY

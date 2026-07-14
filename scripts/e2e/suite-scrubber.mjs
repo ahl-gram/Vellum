@@ -6,7 +6,7 @@
 // that read a dot's data-state now read a glyph group's display; the roads and the
 // taller strip (Part 2) get their own checks.
 export async function run(ctx) {
-  const { evaluate, send, check, shoot, sleep, waitSettled, waitAtlas, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
   // --- S: Chronicle year-scrubber (#54, #93): the client-only DOM overlay that
   // animates the world growing. Placed before the console-health check so it also
   // covers the toggle / scrub / Play / redraw paths. A clean seed-42 antique base

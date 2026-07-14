@@ -1,7 +1,7 @@
 // Inline-fallback checks (B): worker.js served 404, page degrades to inline.
 // Split from e2e-explorer.mjs; flips ctx.serverState.blockWorker (same object the server reads).
 export async function run(ctx) {
-  const { evaluate, send, check, shoot, sleep, waitSettled, waitAtlas, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
   // --- B: inline FALLBACK path when the worker script is unavailable ---
   // Flip the server to 404 worker.js (faithfully simulating file://, a 404, or a
   // CSP block) and reload. No working-tree mutation — the file is untouched on
@@ -27,9 +27,16 @@ export async function run(ctx) {
     check("B2 fallback: __vellumUsesWorker()===false (inline path taken)", await evaluate(`window.__vellumUsesWorker()===false`));
     await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("theme").value="";document.getElementById("draw").click();})()`);
     await waitSettled("fallback-draw");
-    await evaluate(`document.getElementById("bind").click()`);
-    const fbFigs = await waitAtlas("fallback-bind");
-    check("B3 fallback: inline draw + bind produce an atlas", fbFigs > 0, `${fbFigs} figures`);
+    // #199: the Explorer's inline Bind button is retired, so drive the atlas job through the
+    // runJob hook instead. On this page the worker is 404'd (B2), so runJob routes to the
+    // inline engine -- exactly the path this suite exists to prove -- and must still compose a
+    // full atlas (hero + draughtings + themes + gazetteer), the same job the old Bind clicked.
+    const fb = await evaluate(
+      `(async()=>{const a=(await window.__vellumRunJob({kind:"atlas",seed:42,overrides:{},width:1500})).atlas;` +
+        `return{hero:!!(a.hero&&a.hero.svg),draughtings:a.draughtings.length,themes:a.themes.length,gaz:a.gazetteerHtml.length};})()`,
+      true,
+    );
+    check("B3 fallback: inline atlas job composes a full atlas (hero + plates + gazetteer)", fb.hero && fb.draughtings > 0 && fb.themes > 0 && fb.gaz > 0, JSON.stringify(fb));
   } finally {
     serverState.blockWorker = false;
     try { await send("Network.setCacheDisabled", { cacheDisabled: false }); } catch {}

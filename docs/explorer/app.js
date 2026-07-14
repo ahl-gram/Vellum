@@ -1,12 +1,12 @@
 // Explorer UI conductor. Wires the controls to the render worker (via
-// worker-client.js), runs draw()/bind, and keeps the URL hash in sync. The heavy
+// worker-client.js), runs draw(), and keeps the URL hash in sync. The heavy
 // world-gen + SVG render runs off the main thread; the feature logic lives in
-// sibling modules (worker-client, atlas-view, living-chart, sea-level) and this
-// file is the glue: DOM refs, the draw/bind race guards, the listener wiring, and
-// the bootstrap. Listeners attach here at module-eval time (module scripts are
-// deferred, so the DOM is parsed first).
+// sibling modules (worker-client, living-chart, sea-level) and this file is the
+// glue: DOM refs, the draw race guard, the listener wiring, and the bootstrap.
+// Listeners attach here at module-eval time (module scripts are deferred, so the
+// DOM is parsed first). The bound atlas moved to the Print Room (#199); the
+// Explorer's own "Bind as atlas" was retired now that page owns it.
 import { runJob, runInline, usesWorker, initWorker } from "./worker-client.js";
-import { clearAtlas, renderAtlas } from "./atlas-view.js";
 import { shouldTurn, runTurn, cancelTurn } from "./sheet-turn.js";
 import { toggleFlip, isFlipped, rebuildVerso } from "./verso.js";
 import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.js";
@@ -57,7 +57,6 @@ const mapDiv = $("map");
 const sheetEl = $("sheet");
 const innerEl = $("sheet-inner");
 const caption = $("caption");
-const bindBtn = $("bind");
 const versoEl = $("verso");
 const versoBtn = $("verso-turn");
 const chronicleChk = $("chronicle");
@@ -73,9 +72,6 @@ let lastSvg = "";
 let lastTitle = "";
 let lastSubtitle = "";
 let lastSeed = 0;
-let lastOverrides = {};
-let lastStyle = "antique";
-let lastTheme = "";
 let lastManifest = null; // the place manifest of the chart on screen; feeds a voyage toggled on without a redraw
 // #120: the same chart's world facts (land mask + roads), which the voyage router walks.
 // Assigned beside lastManifest, from the SAME draw: a manifest paired with another draw's
@@ -95,15 +91,13 @@ let landDebounce = 0;
 // different ~0.6s world, so the slider redraws on release only, not mid-drag.
 let coastTouched = false;
 
-// Monotonic guards. drawGen is bumped by every draw; both a draw's own result and
-// any pending bind check it, so a fresh draw cancels a stale draw and a stale bind
-// (the bound atlas must always match the chart on screen). bindSeq guards rapid
-// re-binds of the same chart against one another.
+// Monotonic guard. drawGen is bumped by every draw; a draw's own result checks it,
+// so a fresh draw cancels a stale one (the chart that lands must always be the
+// latest requested).
 let drawGen = 0;
-let bindSeq = 0;
-// True while a draw's result is still in flight. Binding is suppressed during this
-// window so the bound atlas can never be composed from a seed the chart is about to
-// replace (the draw-then-bind race).
+// True while a draw's result is still in flight. Its one remaining reader is the
+// verso flip guard below: belt-and-suspenders, since the Turn button is already
+// `.disabled` for the whole draw round-trip, so this only makes that guard explicit.
 let drawing = false;
 
 function randomSeed() {
@@ -142,11 +136,9 @@ function draw(opts) {
   drawing = true;
   cancelScrubRaf(); // a redraw is about to wipe the overlay; stop any running sweep
   cancelVoyageRaf(); // #119: likewise stop a running voyage sweep before the wipe
-  bindBtn.disabled = true;
   versoBtn.disabled = true; // #116: no flip mid-draw; re-enabled when the draw resolves
   status.textContent = "Drafting…";
   caption.textContent = "";
-  clearAtlas();
   writeHash(hashControls, landTouched, coastTouched);
   // #133: writeHash just set location.hash to this world; carry it to the Print Room
   // link so "Take to the Print Room" (and a copied link / middle-click) always opens
@@ -181,7 +173,6 @@ function draw(opts) {
     .then((res) => {
       if (myGen !== drawGen) return; // a newer draw superseded this one
       drawing = false;
-      bindBtn.disabled = false;
       versoBtn.disabled = false;
       // Any prior turn was already torn down synchronously at draw() start; a turn for
       // THIS draw (if any) is created below and cancels again on its own.
@@ -189,9 +180,6 @@ function draw(opts) {
       lastTitle = res.title;
       lastSubtitle = res.subtitle;
       lastSeed = seed;
-      lastOverrides = overrides;
-      lastStyle = style;
-      lastTheme = theme;
       lastManifest = res.manifest; // #119: the current world's manifest, for a voyage toggled on later
       lastSurvey = res.survey; // #120: paired with it, so a later voyage routes THIS world
       // Clear "Drafting…" and caption now, so a 900ms turn never holds the status
@@ -259,7 +247,6 @@ function draw(opts) {
     .catch((err) => {
       if (myGen !== drawGen) return;
       drawing = false;
-      bindBtn.disabled = false;
       versoBtn.disabled = false;
       cancelTurn(); // #131: tear down any in-flight turn on a failed redraw
       // A redraw that fails leaves the OLD overlay in place; if a sweep was running,
@@ -286,26 +273,6 @@ $("download").addEventListener("click", () => {
   a.download = `vellum-${seedInput.value}-${styleSel.value}-${slug}.svg`;
   a.click();
   URL.revokeObjectURL(a.href);
-});
-bindBtn.addEventListener("click", () => {
-  if (!lastSvg || drawing) return;
-  const myGen = drawGen;
-  const mySeq = ++bindSeq;
-  const style = lastStyle;
-  const theme = lastTheme;
-  clearAtlas();
-  status.textContent = "Binding the atlas…";
-  runJob({ kind: "atlas", seed: lastSeed, overrides: lastOverrides, width: 1500, bannerStyle: style })
-    .then((res) => {
-      // discard if a redraw or a newer bind has superseded this one
-      if (myGen !== drawGen || mySeq !== bindSeq) return;
-      renderAtlas(res.atlas, style, theme);
-      status.textContent = "";
-    })
-    .catch((err) => {
-      if (myGen !== drawGen || mySeq !== bindSeq) return;
-      status.textContent = "The bindery faltered: " + err.message;
-    });
 });
 // #116: turn the sheet over to read its back, or turn it back. Guarded so the flip
 // never starts mid-draw (the verso is being rebuilt) or mid-#131-turn (the turn owns

@@ -91,9 +91,9 @@ button.primary:hover { background: #5d4831; }
 .plate:disabled { cursor: default; opacity: 0.45; }
 .plate:disabled .plate-dim { color: #a1926f; }
 
-/* The bound sheet populates below the proof, wider than the desk, framed like the Explorer's
-   #atlas. Empty until a bind; the shared .atlas-sheet rules (injected by bound-atlas.js) style
-   its plates, tables, banners, and chronicle. On SCREEN it omits the duplicated header + hero
+/* The bound sheet populates below the proof, wider than the desk. Empty until a bind; the
+   shared .atlas-sheet rules (injected by bound-atlas.js) style its plates, tables, banners,
+   and chronicle. On SCREEN it omits the duplicated header + hero
    (.print-only), which the proof already shows above; print + download restore them. */
 #pr-atlas { max-width: 1100px; margin: 2.5rem auto 0; }
 #pr-atlas:empty { margin: 0; }

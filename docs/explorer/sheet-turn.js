@@ -6,8 +6,8 @@
 // trigger in v1.
 //
 // Two faces on one bound leaf: the front is the live #map (the outgoing chart), the
-// back is the incoming chart as a blob-url <img> (the atlas-view.js pattern) so
-// #map itself never holds a second <svg> and the "exactly one #map svg" invariant
+// back is the incoming chart as a blob-url <img> (the same pattern the verso ghost
+// uses) so #map itself never holds a second <svg> and the "exactly one #map svg" invariant
 // holds structurally through the turn. The leaf (#sheet-inner) rotates 0 -> -180deg
 // under a perspective lit only while .turning is set (idle parity between turns);
 // at -180 the back face faces the reader un-mirrored, then #map is re-dressed in one

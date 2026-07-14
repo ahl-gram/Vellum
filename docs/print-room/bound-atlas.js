@@ -14,8 +14,8 @@ import { runJob } from "/explorer/worker-client.js";
 import { escapeXml } from "/explorer/engine/render/svg.js";
 import { ATLAS_SHEET_CSS, atlasDocument, svgToDataUri } from "/explorer/engine/atlas/document.js";
 
-// Inject the shared plate/table/banner CSS once (same single source the Explorer bind and
-// the standalone atlas draw from). #pr-atlas carries the .atlas-sheet class in the markup.
+// Inject the shared plate/table/banner CSS once (the same single source the standalone
+// atlas draws from). #pr-atlas carries the .atlas-sheet class in the markup.
 if (!document.getElementById("atlas-sheet-css")) {
   const style = document.createElement("style");
   style.id = "atlas-sheet-css";
@@ -100,8 +100,8 @@ function plateFigure(svg, caption, cls = "") {
 // atlas view; the download rebuilds the identical atlas with base64 data URIs so it opens
 // offline.
 //
-// innerHTML safety: this mirrors the Explorer's atlas-view.js and the Print Room proof
-// (app.js). The only inputs to a bound atlas are the uint32 seed and recipe params, each
+// innerHTML safety: the same trusted-input contract as the Print Room proof (app.js). The
+// only inputs to a bound atlas are the uint32 seed and recipe params, each
 // validated against fixed allowlists in app.js's applyHash before any worker job runs, so
 // no user-controlled string reaches here. Captions, the title, and the subtitle are
 // derived from the deterministic name generator, and are escapeXml'd besides; the plate

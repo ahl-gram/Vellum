@@ -130,21 +130,17 @@ async function axDescription(selector) {
 
 async function waitSettled(label = "") {
   for (let i = 0; i < 200; i++) {
+    // #199: the settle probe reads #verso-turn, not the retired #bind. The Turn button
+    // is disabled for the whole draw round-trip and re-enabled the instant the draw
+    // resolves (app.js), exactly the lifecycle #bind had, so the settle semantics are
+    // unchanged; it is just no longer keyed on a button that no longer exists.
     const s = await evaluate(
-      `({status:document.getElementById("status").textContent,dis:document.getElementById("bind").disabled,map:!!document.querySelector("#map svg")})`,
+      `({status:document.getElementById("status").textContent,dis:document.getElementById("verso-turn").disabled,map:!!document.querySelector("#map svg")})`,
     );
     if (s.status === "" && s.dis === false && s.map) return;
     await sleep(50);
   }
   throw new Error("waitSettled timeout " + label);
-}
-async function waitAtlas(label = "") {
-  for (let i = 0; i < 200; i++) {
-    const n = await evaluate(`document.querySelectorAll("#atlas figure").length`);
-    if (n > 0) return n;
-    await sleep(50);
-  }
-  throw new Error("waitAtlas timeout " + label);
 }
 async function waitReady() {
   for (let i = 0; i < 200; i++) {
@@ -280,7 +276,7 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
 
   return {
     evaluate, send, check, shoot, sleep,
-    waitSettled, waitAtlas, waitReady, waitTurned, armTurnWatch, axDescription,
+    waitSettled, waitReady, waitTurned, armTurnWatch, axDescription,
     serverState, cleanup, consoleErrors, http4xx, PORT,
   };
 }

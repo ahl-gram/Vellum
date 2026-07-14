@@ -298,6 +298,34 @@ export async function run(ctx) {
   // Capture the redesigned layout with the atlas bound below the proof (order desk on top).
   await shoot("print-room-bound.png");
 
+  // PR20b the shared plate hover-lift (moved from the Explorer's retired D5, #199). The bound
+  // plates react to the hand like the homepage chart plates (#146) but rest FLAT so the grid
+  // stays crisp. The lift lives in the shared ATLAS_SHEET_CSS (src/atlas/document.ts, scoped
+  // .atlas-sheet), injected here by bound-atlas.js; #pr-atlas carries .atlas-sheet, so the rule
+  // governs these plates. e2e cannot emulate :hover, so this asserts the gesture is WIRED: a
+  // paper-timed transform transition on the image, the image resting with no transform, and a
+  // :hover rule with a transform actually in the stylesheet (so the check bites the lift, not
+  // just the plumbing). Read on screen media, before PR21 emulates print.
+  const hover = await evaluate(`(()=>{
+    const img=document.querySelector("#pr-atlas figure img");
+    if(!img)return{img:false};
+    const cs=getComputedStyle(img);
+    let hoverLift=false;
+    for(const ss of document.styleSheets){let rules;try{rules=ss.cssRules;}catch(e){continue;}
+      if(!rules)continue;
+      for(const r of rules){
+        if(r.selectorText&&r.selectorText.includes(".atlas-sheet figure img:hover")&&r.style&&r.style.transform&&r.style.transform!=="none"&&img.matches(".atlas-sheet figure img")){hoverLift=true;}
+      }
+    }
+    return{img:true,dur:cs.transitionDuration,prop:cs.transitionProperty,tform:cs.transform,hoverLift};
+  })()`);
+  check(
+    "PR20b bound plates carry the shared hover-lift (paper-timed transition, rest flat, :hover transform rule exists)",
+    hover.img && hover.dur.includes("0.26s") && hover.prop.includes("transform") &&
+      (hover.tform === "none" || hover.tform === "matrix(1, 0, 0, 1, 0, 0)") && hover.hoverLift === true,
+    JSON.stringify(hover),
+  );
+
   // PR21 the print stylesheet: under print media the page chrome collapses and only the
   // bound atlas remains, one plate per page. Emulate print and read computed styles, a
   // direct witness that the site's first real @media print block does its job.
@@ -360,6 +388,32 @@ export async function run(ctx) {
     midDraw.bind === true && midDraw.print === true && midDraw.atlasEmpty === true &&
       midDraw.hasAtlas === false && !!reenabled,
     JSON.stringify({ midDraw, reenabled }),
+  );
+
+  // PR24b the bind-THEN-draw race. New coverage of the Print Room's existing bindGen guard for
+  // the bind-then-draw direction (the same race-class the Explorer's now-retired R7 guarded
+  // there, #199; PR24 already covers draw-then-bind). Where PR24 supersedes a SETTLED atlas
+  // with a redraw, this starts a bind and supersedes it while it is IN FLIGHT: click Bind (an atlas compose is
+  // posted to the worker), then in the SAME turn draw a fresh seed. draw()'s synchronous
+  // clearBoundAtlas bumps bindGen before the compose resolves, and because the Print Room
+  // shares ONE FIFO worker the atlas job settles FIRST (order-before-draw), so its .then sees
+  // the bumped bindGen and drops -- the stale world's atlas must never inject over the new
+  // proof. Deterministic on this substrate, the same property #212's PR26/PR27 rely on.
+  const btd = await evaluate(`(()=>{document.getElementById("pr-bind").click();const s=document.getElementById("pr-seed");s.value="909";document.getElementById("pr-draw").click();return{bindDisabled:document.getElementById("pr-bind").disabled,atlasEmpty:document.getElementById("pr-atlas").children.length===0};})()`);
+  let btdSettled = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try { s = await evaluate(`(()=>{const st=window.__vellumPrintRoomState();return{seed:st.seed,status:document.getElementById("pr-status").textContent,bind:document.getElementById("pr-bind").disabled};})()`); } catch {}
+    if (s && s.seed === 909 && s.status === "" && s.bind === false) { btdSettled = s; break; }
+    await sleep(50);
+  }
+  await sleep(250); // let any (wrongly) surviving stale bind inject before asserting emptiness
+  const btdAtlas = await evaluate(`(()=>({figs:document.querySelectorAll("#pr-atlas figure").length,hasAtlas:document.body.classList.contains("has-atlas")}))()`);
+  check(
+    "PR24b an in-flight bind is dropped when a redraw supersedes it (no stale-world atlas)",
+    btd.bindDisabled === true && btd.atlasEmpty === true && !!btdSettled &&
+      btdAtlas.figs === 0 && btdAtlas.hasAtlas === false,
+    JSON.stringify({ btd, btdSettled, btdAtlas }),
   );
 
   // PR25 the Hide action (#136 redesign). After binding, Hide dismisses the atlas but leaves
