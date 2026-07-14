@@ -382,6 +382,73 @@ export async function run(ctx) {
 
   await shoot("print-room.png");
 
+  // PR26 the order-during-redraw guard (#212, the poster-plate sibling of PR24's Bind race).
+  // A fresh draw must disable the plate buttons AND the #pr-format select SYNCHRONOUSLY
+  // (before the async render), because posterBasis only advances on a successful draw: an
+  // enabled plate clicked while a new proof is in flight would snapshot the PREVIOUS world
+  // and press a poster the visitor is no longer looking at. First confirm a proof is on the
+  // desk with the counter open, THEN read the control state in the SAME turn as a redraw
+  // click, then confirm the new proof re-opens the counter.
+  let orderReady = false;
+  for (let i = 0; i < 160; i++) {
+    let ok = null;
+    try { ok = await evaluate(`(()=>{const g=document.querySelector('[data-poster="grand"]');const f=document.getElementById("pr-format");return !!document.querySelector("#pr-preview svg")&&document.getElementById("pr-status").textContent===""&&!!g&&!g.disabled&&!!f&&!f.disabled;})()`); } catch {}
+    if (ok) { orderReady = true; break; }
+    await sleep(50);
+  }
+  const midPoster = await evaluate(`(()=>{const s=document.getElementById("pr-seed");s.value="777";document.getElementById("pr-draw").click();const plates=[...document.querySelectorAll("[data-poster]")];const f=document.getElementById("pr-format");return{platesDisabled:plates.length>0&&plates.every((b)=>b.disabled),format:f?f.disabled:null,status:document.getElementById("pr-status").textContent};})()`);
+  let orderReenabled = null;
+  for (let i = 0; i < 160; i++) {
+    let s = null;
+    try { s = await evaluate(`(()=>{const st=window.__vellumPrintRoomState();const g=document.querySelector('[data-poster="grand"]');const f=document.getElementById("pr-format");return{seed:st.seed,status:document.getElementById("pr-status").textContent,plate:g?g.disabled:true,format:f?f.disabled:true};})()`); } catch {}
+    if (s && s.seed === 777 && s.status === "" && s.plate === false && s.format === false) { orderReenabled = s; break; }
+    await sleep(50);
+  }
+  check(
+    "PR26 a redraw disables the plate controls mid-flight (no stale-world poster), re-enabled on the new proof",
+    orderReady && midPoster.platesDisabled === true && midPoster.format === true && !!orderReenabled,
+    JSON.stringify({ orderReady, midPoster, orderReenabled }),
+  );
+
+  // PR27 the REVERSE guard (#212): an order that finishes DURING a redraw must NOT re-open the
+  // counter. orderPoster's .finally re-enables the plates only through refreshOrderControls,
+  // whose `!drawing` term is the SOLE guard for this direction. The Print Room shares ONE FIFO
+  // render worker (worker-client.js: one persistent worker, no job cancellation, synchronous
+  // onmessage), so a plate ordered and THEN a redraw posted behind it settle order-first while
+  // the draw is still in flight: the order's .finally runs with drawing===true every run. We
+  // assert the SUSTAINED invariant -- no plate ever re-enables while #pr-status still reads
+  // "Pulling a proof..." -- and witness that the order genuinely completed inside the draw
+  // window (else the interleaving never happened). An unconditional re-enable trips `violated`.
+  let pr27Ready = false;
+  for (let i = 0; i < 160; i++) {
+    let ok = null;
+    try { ok = await evaluate(`(()=>{const g=document.querySelector('[data-poster="grand"]');const f=document.getElementById("pr-format");return !!document.querySelector("#pr-preview svg")&&document.getElementById("pr-status").textContent===""&&!!g&&!g.disabled&&!!f&&!f.disabled;})()`); } catch {}
+    if (ok) { pr27Ready = true; break; }
+    await sleep(50);
+  }
+  // Order a Desk plate (SVG, so it reports via __vellumLastPoster), then IMMEDIATELY post a
+  // redraw behind it in the same worker queue, all synchronously in one turn.
+  const pr27Start = await evaluate(`(()=>{document.getElementById("pr-format").value="svg";window.__vellumLastPoster=undefined;document.querySelector('[data-poster="desk"]').click();const s=document.getElementById("pr-seed");s.value="888";document.getElementById("pr-draw").click();const plates=[...document.querySelectorAll("[data-poster]")];return{platesDisabled:plates.every((b)=>b.disabled),status:document.getElementById("pr-status").textContent};})()`);
+  let pr27Violated = false;
+  let pr27OrderInDraw = false;
+  let pr27Settled = null;
+  for (let i = 0; i < 400; i++) {
+    let s = null;
+    try { s = await evaluate(`(()=>{const st=window.__vellumPrintRoomState();const plates=[...document.querySelectorAll("[data-poster]")];return{seed:st.seed,status:document.getElementById("pr-status").textContent,anyEnabled:plates.some((b)=>!b.disabled),orderDone:!!window.__vellumLastPoster};})()`); } catch {}
+    if (s) {
+      const drawing = s.status === "Pulling a proof…";
+      if (drawing && s.orderDone) pr27OrderInDraw = true; // the order's .finally ran while the draw was still in flight
+      if (drawing && s.anyEnabled) pr27Violated = true;   // a plate re-opened onto the pre-redraw world (the reverse race)
+      if (s.seed === 888 && s.status === "" && s.anyEnabled) { pr27Settled = s; break; } // draw settled, counter re-opened
+    }
+    await sleep(30);
+  }
+  check(
+    "PR27 an order finishing during a redraw keeps the counter closed until the new proof settles (reverse guard)",
+    pr27Ready && pr27Start.platesDisabled === true && pr27OrderInDraw === true && pr27Violated === false && !!pr27Settled,
+    JSON.stringify({ pr27Ready, pr27Start, pr27OrderInDraw, pr27Violated, pr27Settled }),
+  );
+
   // Scoped health: no new console errors and no new (non-favicon) 4xx from this page,
   // its worker, its engine, or its root-absolute assets. Checked BEFORE the inline-
   // fallback test below, which deliberately 404s the worker.
