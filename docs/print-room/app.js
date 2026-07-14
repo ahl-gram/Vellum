@@ -46,6 +46,7 @@ const caption = $("pr-caption");
 const warning = $("pr-warning");
 const posterStatus = $("pr-poster-status");
 const plateButtons = [...document.querySelectorAll("[data-poster]")];
+const formatSel = $("pr-format"); // the "Pressed as" select (#135); greyed out during a draw (#212)
 const presetByKey = new Map(POSTER_PRESETS.map((p) => [p.key, p]));
 
 // Recipe params with no visible control in Sub 1: they ride along from a deep-link's
@@ -58,6 +59,10 @@ const carried = { type: "", band: "", theme: "", legend: true, arms: false, land
 // Monotonic guard: a fresh draw cancels a stale in-flight one, so a slow proof can
 // never overwrite a newer chart the visitor asked for.
 let drawGen = 0;
+// True from a draw's synchronous start until its own settle (#212): pairs with `ordering`
+// so the order surface is held closed for the whole draw round-trip, never re-opened onto a
+// stale posterBasis that is about to change.
+let drawing = false;
 let lastSeed = 0;
 let lastTitle = "";
 
@@ -74,8 +79,18 @@ function randomSeed() {
   return Math.floor(Math.random() * 0xffffffff);
 }
 
-function setPlatesEnabled(on) {
-  for (const b of plateButtons) b.disabled = !on;
+// The single gate for the order surface (#212). The plate buttons are safe to enable only
+// when the world on the desk (posterBasis) matches the proof on screen AND nothing is in
+// flight: posterBasis advances only on a successful draw, so it matches the preview exactly
+// when no draw is running, and only one order may press at a time. Consulting BOTH `drawing`
+// and `ordering` closes the race in both directions: a redraw finishing during an order, and
+// an order finishing during a redraw, each leave the counter closed until the world settles.
+// The #pr-format select greys out for the draw round-trip only; its value is snapshotted at
+// order time (orderPoster), so an in-flight order need not hold it.
+function refreshOrderControls() {
+  const platesReady = posterBasis != null && !drawing && !ordering;
+  for (const b of plateButtons) b.disabled = !platesReady;
+  if (formatSel) formatSel.disabled = drawing;
 }
 
 // Read the same hash keys the Explorer writes (docs/explorer/hash-sync.js), applying
@@ -135,11 +150,16 @@ function draw() {
   const seed = Number(seedInput.value) >>> 0;
   const style = STYLES.includes(styleSel.value) ? styleSel.value : "antique";
   const myGen = ++drawGen;
+  drawing = true;
   status.textContent = "Pulling a proof…";
   caption.textContent = "";
-  // A fresh proof supersedes any bound atlas: the old one no longer matches the world
-  // about to be drawn, so clear it (and disable Print/Download) before the redraw.
+  // A fresh proof supersedes any bound atlas AND any pending poster order: the old world no
+  // longer matches the one about to be drawn, so close the whole order surface (Bind, the
+  // plates, the format select) SYNCHRONOUSLY before the async render. Without this a plate
+  // clicked mid-redraw would press the previous world's poster (#212), the sibling of the
+  // stale-world Bind (#136) that clearBoundAtlas guards.
   clearBoundAtlas();
+  refreshOrderControls();
   posterStatus.textContent = ""; // a new proof clears any stale poster-order status in the desk
   const overrides = {};
   if (carried.type) overrides.mapType = carried.type;
@@ -169,16 +189,21 @@ function draw() {
       // order reproduces THIS sheet. overrides is built fresh per draw and never mutated,
       // so holding the reference is safe.
       posterBasis = { seed, style, overrides, legend: carried.legend, arms: carried.arms, theme: carried.theme || undefined };
-      if (!ordering) setPlatesEnabled(true);
+      drawing = false;
+      refreshOrderControls(); // the new world is on the desk: re-open the counter (unless an order still holds it)
       enableBind(); // a world is on the desk: the atlas can be bound from this proof
     })
     .catch((err) => {
       if (myGen !== drawGen) return;
+      drawing = false;
       status.textContent = "The press jammed: " + err.message;
-      // The draw failed, but the previous proof (if any) is still on the desk and bindable,
-      // so re-enable Bind (clearBoundAtlas disabled it at the start of this draw). Without
-      // this, a worker crash during a redraw would leave Bind stuck disabled until the next
-      // successful draw. Mirrors the Explorer, which re-enables its Bind on draw failure too.
+      // The draw failed, but the previous proof (if any) is still on the desk, bindable AND
+      // orderable: posterBasis was never reassigned, so it still matches the on-screen proof.
+      // Re-open the order surface (clearBoundAtlas + refreshOrderControls closed it at the
+      // start of this draw); without this a worker crash during a redraw would leave the
+      // plates and Bind stuck disabled until the next successful draw. Mirrors the Explorer,
+      // which re-enables its Bind on draw failure too.
+      refreshOrderControls();
       enableBind();
     });
 }
@@ -214,7 +239,10 @@ function selectedFormat() {
 
 function orderPoster(key) {
   const preset = presetByKey.get(key);
-  if (!preset || ordering || !posterBasis) return;
+  // `drawing` guards defensively (#212): the plates are disabled during a draw, so a real
+  // click cannot land here mid-redraw, but a programmatic call must not press the stale,
+  // about-to-change posterBasis either.
+  if (!preset || ordering || drawing || !posterBasis) return;
   // Snapshot the basis synchronously: the preview controls stay live during a render, so
   // a style change could redraw and mutate posterBasis mid-flight. Bind the world NOW,
   // exactly as the Explorer's bind handler snapshots lastStyle/lastTheme before runJob.
@@ -223,7 +251,7 @@ function orderPoster(key) {
   const width = clampPosterWidth(preset.width);
   const myGen = ++posterGen;
   ordering = true;
-  setPlatesEnabled(false);
+  refreshOrderControls();
   posterStatus.textContent = `The press is rolling at ${width}px…`;
   runJob({
     kind: "draw",
@@ -274,10 +302,12 @@ function orderPoster(key) {
       posterStatus.textContent = "The press jammed: " + err.message;
     })
     .finally(() => {
-      // Only one order runs at a time (the plates are disabled meanwhile), so this always
-      // clears the in-flight order and re-opens the counter.
+      // The order is off the press; clear the in-flight flag and refresh. refreshOrderControls
+      // re-opens the counter ONLY if no draw is now in flight: a redraw started while this
+      // order was rolling must keep the plates closed until its own proof settles (#212),
+      // otherwise the counter would re-open onto the pre-redraw world this order just left.
       ordering = false;
-      setPlatesEnabled(true);
+      refreshOrderControls();
     });
 }
 
