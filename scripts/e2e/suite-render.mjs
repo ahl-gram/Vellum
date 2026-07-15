@@ -1,9 +1,10 @@
 // Explorer render core (R): worker active (no silent fallback), worker/inline byte-parity
-// (draw + atlas incl. gazetteer), the committed-chart ULP check, the draw/bind races, the
-// thematic layer, the Tide Wheel (#55) and the arms toggle (#44). Split from the old
-// suite-explorer-core.mjs; check bodies verbatim, only the A-prefix became R.
+// (draw + atlas incl. gazetteer), the committed-chart ULP check, the thematic layer, the
+// coast warp (#137), the Tide Wheel (#55) and the arms toggle (#44). Split from the old
+// suite-explorer-core.mjs; check bodies verbatim, the A-prefix became R. #199 retired
+// R5/R6/R7 (the inline Bind + its two races) when the bound atlas moved to the Print Room.
 export async function run(ctx) {
-  const { evaluate, check, shoot, sleep, waitSettled, waitAtlas, waitReady } = ctx;
+  const { evaluate, check, shoot, waitSettled, waitReady } = ctx;
   check("R0 page loaded + initial auto-draw rendered", await waitReady());
   // R0b: a bare visit (no seed in the hash) lands on today's seed-of-the-day (UTC), so
   // the Explorer, Print Room, and Today page all default to the same world. The suite's
@@ -63,33 +64,13 @@ export async function run(ctx) {
   );
   check("R4 worker draw === committed Node chart (normalized, ULP-tolerant)", a4.normEq, `${a4.diffTok}/${a4.tokens} numeric tokens differ by ULP; raw-equal=${a4.rawEq}`);
 
-  // --- normal bind (no race): atlas populates; artifact for the user ---
-  await evaluate(`(()=>{const s=document.getElementById("seed");s.value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("draw").click();})()`);
-  await waitSettled("draw-42");
-  await evaluate(`document.getElementById("bind").click()`);
-  const figs = await waitAtlas("normal-bind");
-  check("R5 normal bind injects the atlas", figs > 0, `${figs} plate figures`);
-  // #127: plates are hidden until the reveal-on-scroll fires; wait so the artifact
-  // captures a settled atlas rather than a blank one.
-  for (let i = 0; i < 60 && !(await evaluate(`!!document.querySelector("#atlas figure.settling")`)); i++) await sleep(50);
-  await shoot("explorer-worker-atlas.png");
-
-  // --- R6 RACE: draw-then-bind (the bug the advisor flagged) ---
-  const a6click = await evaluate(`(()=>{const s=document.getElementById("seed");s.value="100";document.getElementById("draw").click();const dis=document.getElementById("bind").disabled;document.getElementById("bind").click();return{dis};})()`);
-  check("R6a bind disabled the instant a draw starts", a6click.dis === true);
-  await waitSettled("draw-100");
-  const a6 = await evaluate(`({figs:document.querySelectorAll("#atlas figure").length,map:!!document.querySelector("#map svg"),cap:document.getElementById("caption").textContent})`);
-  check("R6b race draw->bind: atlas suppressed, chart advanced", a6.figs === 0 && a6.map && a6.cap.length > 0, `figs=${a6.figs}`);
-  await evaluate(`document.getElementById("bind").click()`);
-  const figs2 = await waitAtlas("post-race-bind");
-  check("R6c post-settle bind works again", figs2 > 0, `${figs2} figures`);
-
-  // --- R7 RACE: bind-then-draw (gen guard must drop the stale bind) ---
-  await evaluate(`(()=>{document.getElementById("bind").click();const s=document.getElementById("seed");s.value="7";document.getElementById("draw").click();})()`);
-  await waitSettled("draw-7");
-  await sleep(400); // let any (wrongly) surviving bind inject before asserting emptiness
-  const a7 = await evaluate(`document.querySelectorAll("#atlas figure").length`);
-  check("R7 race bind->draw: stale bind discarded, atlas cleared", a7 === 0, `figs=${a7}`);
+  // R5/R6/R7 are intentionally retired (#199): the Explorer's inline "Bind as atlas" -- its
+  // #atlas view and its OWN gen guard against the draw/bind races -- was deleted when the
+  // bound atlas moved to the Print Room, so there is no Explorer code left to guard here. The
+  // Print Room owns the bound atlas now, behind its own separate bindGen guard, exercised by
+  // suite-print-room's PR20 (bind renders the atlas inline), PR24 (draw-then-bind) and PR24b
+  // (bind-then-draw). R3 above still proves the shared atlas job is byte-identical worker-vs-
+  // inline. Numbers are left as a gap so R8+ keep history 1:1, matching the R9/R10 tombstone.
 
   // --- themed draw: worker theme path + artifact ---
   await evaluate(`(()=>{const s=document.getElementById("seed");s.value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="vegetation";document.getElementById("draw").click();})()`);

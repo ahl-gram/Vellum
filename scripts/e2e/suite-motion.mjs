@@ -1,8 +1,9 @@
-// Motion / choreography (D + F): the #127 Drafting-moment arrival ceremony and atlas-plate
-// reveal/hover (#146), and the #130 Folio cross-document view-transition declarations.
-// Split from the old suite-explorer-core.mjs; prefixes D (Drafting) and F (Folio) unchanged.
+// Motion / choreography (D + F): the #127 Drafting-moment arrival ceremony and the #130
+// Folio cross-document view-transition declarations. Split from the old suite-explorer-
+// core.mjs; prefixes D (Drafting) and F (Folio) unchanged. #199 retired D4/D5 (the atlas-
+// plate reveal/hover) when the bound atlas moved to the Print Room (see PR20b there).
 export async function run(ctx) {
-  const { evaluate, check, sleep, waitSettled, waitAtlas } = ctx;
+  const { evaluate, check, sleep, waitSettled } = ctx;
   // --- D: #127 The Drafting Moment: the arrival ceremony (end-states, not timing).
   // A fresh draw settles the chart in (paperSettle on #map svg) while the coast
   // ink-draws (stroke-dashoffset on #layer-land path); the wash + waterlines dry in
@@ -31,44 +32,13 @@ export async function run(ctx) {
   await waitSettled("draft-drag-release");
   const d3rel = await evaluate(`document.querySelector("#map svg").classList.contains("arriving")`);
   check("D3 drag input is quiet (no ceremony), release restores it", d3drag === false && d3rel === true, `dragArriving=${d3drag} releaseArriving=${d3rel}`);
-  // D4: bound atlas plates carry a stagger index (--i) AND reveal on scroll. Each
-  // gets .settling from the IntersectionObserver as it enters the viewport (so the
-  // cascade is seen on arrival, not played off-screen at the top before the scroll).
-  await evaluate(`document.getElementById("bind").click()`);
-  await waitAtlas("draft-atlas");
-  let anySettling = false;
-  for (let i = 0; i < 60 && !anySettling; i++) { anySettling = await evaluate(`!!document.querySelector("#atlas figure.settling")`); if (!anySettling) await sleep(50); }
-  const d4 = await evaluate(`(()=>{const figs=[...document.querySelectorAll("#atlas figure")];return{n:figs.length,withI:figs.filter(f=>f.style.getPropertyValue("--i")!=="").length,settling:figs.filter(f=>f.classList.contains("settling")).length};})()`);
-  check("D4 bound atlas plates carry --i and reveal on scroll (.settling)", d4.n > 0 && d4.withI === d4.n && d4.settling > 0, JSON.stringify(d4));
-
-  // D5: the bound plates react to the hand like the homepage chart plates (#146),
-  // but rest FLAT (no resting tilt) so the atlas grid stays crisp. e2e cannot
-  // emulate :hover, so this asserts the gesture is WIRED three ways: (a) the plate
-  // image carries a paper-timed transition (motion.css --paper resolves = the rule
-  // applied, the P2b-style plumbing check); (b) the image rests with no transform
-  // (the tidy-grid invariant); (c) a :hover rule with a transform actually exists in
-  // the stylesheet (so the committed check bites the lift itself, not just the
-  // plumbing). The lift's exact end state is CDP-probe verified (e2e can't hover).
-  // #136: the lift rule moved to the shared ATLAS_SHEET_CSS (src/atlas/document.ts),
-  // injected by atlas-view.js and scoped .atlas-sheet; #atlas carries that class, so the
-  // rule still lifts these plates. The check now bites the new selector, not the old
-  // #atlas-scoped one (whose byte-identical twin in the CLI atlas was the drift trap).
-  const d5 = await evaluate(`(()=>{
-    const img=document.querySelector("#atlas figure img");
-    if(!img)return{img:false};
-    const cs=getComputedStyle(img);
-    let hoverLift=false;
-    for(const ss of document.styleSheets){let rules;try{rules=ss.cssRules;}catch(e){continue;}
-      if(!rules)continue;
-      for(const r of rules){
-        if(r.selectorText&&r.selectorText.includes(".atlas-sheet figure img:hover")&&r.style&&r.style.transform&&r.style.transform!=="none"&&img.matches(".atlas-sheet figure img")){hoverLift=true;}
-      }
-    }
-    return{img:true,dur:cs.transitionDuration,prop:cs.transitionProperty,tform:cs.transform,hoverLift};
-  })()`);
-  check("D5a atlas plate hover is wired (paper-timed transform transition on the image)", d5.img && d5.dur.includes("0.26s") && d5.prop.includes("transform"), JSON.stringify(d5));
-  check("D5b atlas plate rests flat (no resting tilt; tidy grid)", d5.img && (d5.tform === "none" || d5.tform === "matrix(1, 0, 0, 1, 0, 0)"), JSON.stringify(d5));
-  check("D5c a :hover rule lifts the plate image (the gesture, not just the plumbing)", d5.hoverLift === true, JSON.stringify(d5));
+  // D4 and D5 are intentionally retired (#199): both drove the Explorer's inline "Bind as
+  // atlas" (#atlas), which was consolidated into the Print Room. D4's reveal-on-scroll
+  // stagger was an Explorer-only flourish (the Print Room's bound plates load eagerly, no
+  // observer), so it retires outright. D5's shared-CSS plate hover-lift
+  // (.atlas-sheet figure img:hover) is STILL live -- the Print Room injects the same
+  // ATLAS_SHEET_CSS -- so its guard moved to suite-print-room's PR20b, which bites the same
+  // rule on #pr-atlas. Numbers left as a gap so F1/F2 keep their history 1:1.
 
   // F: the folio (#130). Cross-document View Transitions turn page-to-page nav into
   // leaves of one bound folio. The crossfade + the reduced-motion disable can't be

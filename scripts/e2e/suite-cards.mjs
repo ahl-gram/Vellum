@@ -1,7 +1,7 @@
 // Living Chart story-card overlay checks (P1-P13, #53).
 // Split from e2e-explorer.mjs; behavior + check order unchanged.
 export async function run(ctx) {
-  const { evaluate, send, check, shoot, sleep, waitSettled, waitAtlas, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
   // --- P: Living Chart story cards (#53): the DOM overlay over the baked chart.
   // Clean seed-42 antique draw (arms off, no theme) so the marks map to a known
   // manifest and the card screenshot is the standard chart. Placed before the

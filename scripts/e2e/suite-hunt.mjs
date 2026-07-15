@@ -2,7 +2,7 @@
 // the #88 legend-clearance guard (H10), and the labeled-clue guard (H11).
 // Split from e2e-explorer.mjs; behavior + check order unchanged.
 export async function run(ctx) {
-  const { evaluate, send, check, shoot, sleep, waitSettled, waitAtlas, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
   // --- H: The Daily Hunt (#56) on the seed-of-the-day page ---
   // The page seed is new Date() in UTC, so the click targets are derived from
   // the browser's OWN world via dynamic import (immune to any node-side date

@@ -245,7 +245,7 @@ function orderPoster(key) {
   if (!preset || ordering || drawing || !posterBasis) return;
   // Snapshot the basis synchronously: the preview controls stay live during a render, so
   // a style change could redraw and mutate posterBasis mid-flight. Bind the world NOW,
-  // exactly as the Explorer's bind handler snapshots lastStyle/lastTheme before runJob.
+  // the same synchronous snapshot the bound-atlas bind makes before its own runJob.
   const basis = posterBasis;
   const format = selectedFormat(); // snapshot alongside the basis; a later click can change it
   const width = clampPosterWidth(preset.width);

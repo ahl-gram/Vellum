@@ -1,7 +1,7 @@
 // The atlas document: the standalone-page wrapper (head, header, section layout,
 // footer) plus the shared inner CSS, extracted out of src/cli/atlas.ts so the CLI
-// deploy path, the Explorer's inline bind, and the Print Room's bound atlas all draw
-// from ONE source. Browser-safe by construction: no node: imports, only pure string
+// deploy path and the Print Room's bound atlas both draw from ONE source. Browser-safe
+// by construction: no node: imports, only pure string
 // building and the btoa/TextEncoder globals both Node and the browser provide. buildAtlas
 // keeps all of the filesystem work; this module never touches the disk or the DOM.
 import { escapeXml } from "../render/svg.ts";
@@ -32,16 +32,17 @@ export type AtlasDocumentData = {
 /**
  * The shared inner atlas CSS: the single source of truth for how the composed plates,
  * tables, banners, and chronicle are drawn. Scoped under `.atlas-sheet` so it can be
- * injected into the Explorer and the Print Room (both host pages with their own
- * figure/table/h2) without bleeding. This CLOSES the drift trap: before, these exact
- * rules were hand-mirrored in both src/cli/atlas.ts's <style> and the Explorer's
- * `#atlas`-scoped block in docs/explorer/index.css.
+ * injected into any host page with its own figure/table/h2 without bleeding: the Print
+ * Room (bound-atlas.js injects it) and the generated atlas document (buildAtlas embeds
+ * it). This CLOSES the drift trap: before, these exact rules were hand-mirrored in both
+ * src/cli/atlas.ts's <style> and the Explorer's inline bind view. (The Explorer's own
+ * "Bind as atlas" was retired in #199 and its bound atlas consolidated into the Print Room.)
  *
  * Deliberately does NOT carry page chrome (body background, header, footer) or the
- * divergent bits (h2 margin-top differs 2.6rem/3rem by context, the Explorer's settle
- * reveal): those stay context-local so the Explorer bind and the /atlas/ page are both
- * unchanged. The transition timing falls back to literal values (var(--paper, 260ms))
- * so the self-contained download, which links no /motion.css, still eases correctly.
+ * divergent bits (page-chrome spacing like the standalone's h2 margin-top): those stay
+ * context-local so each host is unchanged. The transition timing falls back to literal values
+ * (var(--paper, 260ms)) so the self-contained download, which links no /motion.css, still
+ * eases correctly.
  */
 export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
 .atlas-sheet h2 { letter-spacing: 0.06em; border-bottom: 1px solid #b9a77f; padding-bottom: 0.3rem; }
@@ -73,9 +74,9 @@ export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
   font-weight: 600; color: #857257; }`;
 
 // The page chrome for the STANDALONE document only (the CLI /atlas/ page and the
-// single-file download). Never injected into the Explorer, which supplies its own body
+// single-file download). Never injected into a host page, which supplies its own body
 // and header. h2 margin-top lives here at the standalone's 3rem, kept off the shared
-// block on purpose (the Explorer bind uses 2.6rem); both stay unchanged.
+// block on purpose so each host keeps its own spacing.
 const PAGE_CHROME_CSS = `:root { color-scheme: light; }
 body {
   margin: 0; padding: 2.5rem 1.5rem 5rem;

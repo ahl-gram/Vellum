@@ -111,17 +111,20 @@
    -------------------------------------------------------------------------- */
 button:not(.place-hit),
 .card,
-.actions a {
+.actions a,
+.action-link {
   transition: transform var(--paper-quick) var(--ease-paper),
               box-shadow var(--paper-quick) var(--ease-paper);
 }
 button:not(.place-hit):hover,
-.actions a:hover {
+.actions a:hover,
+.action-link:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgb(61 47 31 / 0.2);
 }
 button:not(.place-hit):active,
-.actions a:active {
+.actions a:active,
+.action-link:active {
   transform: translateY(1px);
   box-shadow: 0 1px 3px rgb(61 47 31 / 0.14);
 }

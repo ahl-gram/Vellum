@@ -29,11 +29,22 @@ h1 a { color: inherit; text-decoration: none; }
 .controls input[type="range"]#land,
 .controls input[type="range"]#coast { accent-color: #4a3826; width: 9rem; }
 .land-end { font-size: 0.72rem; font-style: italic; color: #857257; }
-/* #133: the "Take to the Print Room" link sits in the Actions row but reads as a
-   navigation, not a press: a quiet underlined link, distinct from the action buttons. */
-.action-link { align-self: center; font-size: 0.85rem; letter-spacing: 0.05em;
-  color: #6b5a40; text-decoration: none; border-bottom: 1px solid #b9a77f; }
-.action-link:hover { color: #4a3826; border-bottom-color: #4a3826; }
+/* #133 / #199: "Take to the Print Room" is the Explorer's ONLY path to the bound atlas now
+   that the inline Bind is retired, so it is the featured "take your world home" step. It is
+   button-shaped like the action buttons, but warmer (a parchment-gold fill) and a touch
+   weightier than the plain cream outline peers, with a leading press glyph -- so it stands
+   out without becoming a second dark primary (Draw stays the sole primary). Still an <a>
+   (navigation, not a press), styled to match the buttons' chrome. */
+.action-link { display: inline-flex; align-items: center; gap: 0.45rem; align-self: center;
+  font-family: inherit; font-size: 0.95rem; letter-spacing: 0.04em; color: #3d2f1f;
+  background: #f0e3bd; border: 1.5px solid #4a3826; border-radius: 4px;
+  padding: 0.4rem 0.75rem; text-decoration: none; }
+.action-link:hover { background: #f7edcd; color: #4a3826; }
+/* The hand-press glyph is stroked in the link's own ink (currentColor), so it tracks the
+   text on hover and reads as drawn, not printed. */
+.order-glyph { width: 1.2em; height: 1.2em; flex: none; fill: none; stroke: currentColor;
+  stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.order-glyph circle { fill: currentColor; stroke: none; } /* the handle knob */
 .land-readout { font-style: italic; color: #6b5a40;
   font-variant-numeric: tabular-nums; min-width: 4.2rem; }
 @media (max-width: 560px) {
@@ -67,8 +78,8 @@ button.primary:hover { background: #5d4831; }
    transient back face (added only during a turn) anchors over the recto. This
    perspective wrapper is the shared flip infrastructure the Verso (#116) reuses.
    The turn is a WAAPI animation (JS, not CSS), so its reduced-motion twin is the
-   shouldTurn() gate (reduced motion -> instant swap), the same JS matchMedia move
-   atlas-view.js makes; there is nothing here for the /motion.css collapse to reach. */
+   shouldTurn() gate (reduced motion -> instant swap), a JS matchMedia move rather than
+   a CSS collapse; there is nothing here for the /motion.css collapse to reach. */
 .sheet-inner { position: relative; }
 .sheet.turning { perspective: 2200px; }
 .sheet-inner.turning { transform-style: preserve-3d; }
@@ -312,25 +323,3 @@ button.primary:hover { background: #5d4831; }
 footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;
   font-size: 0.72rem; color: #857257; }
 footer a { color: inherit; }
-/* The bound atlas, drawn inline beneath the chart. #136: the plate/table/banner/
-   chronicle styling now lives in ONE shared source (src/atlas/document.ts's
-   ATLAS_SHEET_CSS, scoped .atlas-sheet), injected by atlas-view.js; #atlas carries that
-   class in the markup. Only the Explorer-specific bits stay here: the container box, and
-   the #127 settle reveal. This block sets NOTHING the shared source sets, so #atlas's
-   higher id-specificity can never silently override a shared rule and re-open the drift
-   trap (the #146 plate hover/lift now rides the shared .atlas-sheet figure img). */
-#atlas { max-width: 1100px; margin: 2.5rem auto 0; }
-#atlas:empty { margin: 0; }
-#atlas h2 { margin-top: 2.6rem; }
-/* #127: bound atlas plates settle in sequence as they scroll into view, like proof
-   sheets laid out. atlas-view.js adds .settling (via an IntersectionObserver) as each
-   plate enters the viewport; --i is the per-batch stagger index. Plates are hidden
-   until revealed so the settle is seen on arrival; under reduced motion they are all
-   revealed at once and the collapse in /motion.css makes it instant. */
-#atlas figure { opacity: 0; }
-#atlas figure.settling { opacity: 1;
-  animation: paperSettle var(--paper-settle) var(--ease-paper) both;
-  animation-delay: calc(var(--i, 0) * 60ms); }
-/* Print reveals every plate: a below-fold plate whose reveal-on-scroll never fired
-   would otherwise print blank (it is hidden until .settling on screen). */
-@media print { #atlas figure { opacity: 1; } }
