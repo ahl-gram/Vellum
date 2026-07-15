@@ -251,23 +251,6 @@ attribution required.
 
 ## For contributors
 
-### Project shape
-
-```
-src/
-  core/       seeded RNG (labeled forks), Float64 fields, BFS, min-heap
-  noise/      hash-lattice gradient noise, fBm, ridged, domain warp
-  terrain/    heightfield, sea level, marching squares, slope
-  hydrology/  priority-flood, D8 flow, river tracing
-  climate/    temperature, moisture, biomes
-  society/    names, settlements, roads, realms, lore
-  render/     styles, layers/ (19 of them), svg builder, projection
-  world/      generate.ts (pipeline), region.ts (zoom windows)
-  cli/        main.ts (the chart verb), atlas.ts + gallery.ts (deploy builders), raster.ts (SVG to PNG)
-test/         188 tests, node:test, mirrors src/
-docs/explorer the same engine, tsc-emitted as browser ES modules
-```
-
 Zero runtime dependencies. Node 23.6+ runs the TypeScript directly
 (`erasableSyntaxOnly`). Dev dependencies are `typescript` and
 `@types/node` for `tsc --noEmit`.
