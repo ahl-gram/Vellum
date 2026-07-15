@@ -40,35 +40,31 @@ plain SVG you can open in a browser, drop into a document, or rasterize with
 
 ## Commands
 
-Every command is run the same way. Under `npm run`, put `--` before the flags
-so they reach Vellum instead of npm:
+Vellum's CLI draws one thing: a single chart. Run it under `npm run` with `--`
+before the flags so they reach Vellum instead of npm:
 
 ```bash
-npm run chart   -- --seed 42 --style antique   # one chart → out/
-npm run chart   -- --seed 42 --legend          # add a key explaining the symbols
-npm run chart   -- --seed 42 --arms            # blazon each realm's coat of arms
-npm run chart   -- --seed 42 --theme moisture  # a thematic data plate (rainfall)
-npm run chart   -- --style nautical            # no --seed → random (and printed)
-npm run poster  -- --seed 42                   # wall art: same world, 4200px + PNG
-npm run atlas   -- --seed 42                   # HTML book: 3 styles, regions, gazetteer
-npm run atlas   -- --seed 42 --pdf             # ...also bound into a single PDF
-npm run gallery -- --seed 100 --count 12       # contact sheet of 12 worlds
-npm run demo    -- --seed 42                   # one world in all four styles
-npm test                                       # full test suite
-npm run check                                  # typecheck
-npm run site                                   # rebuild the docs/ showcase
-npm run og                                     # rebuild the committed social card (docs/og.png)
+npm run chart -- --seed 42 --style antique   # one chart → out/
+npm run chart -- --seed 42 --legend          # add a key explaining the symbols
+npm run chart -- --seed 42 --arms            # blazon each realm's coat of arms
+npm run chart -- --seed 42 --theme moisture  # a thematic data plate (rainfall)
+npm run chart -- --seed 42 --coast-warp 0.8  # a raggeder, more fractal coastline
+npm run chart -- --style nautical            # no --seed → random (and printed)
+npm run chart -- --seed 42 --png             # also rasterize a PNG (needs a browser)
+npm test                                     # full test suite
+npm run check                                # typecheck
+npm run site                                 # rebuild the docs/ showcase
+npm run og                                   # rebuild the committed social card (docs/og.png)
 ```
 
 Run `node src/cli/main.ts help` for the built-in usage screen.
 
-| Command | Draws | Honors |
-|---|---|---|
-| `chart` | one SVG (add `--png` for a raster too) | `--seed --style --type --band --land --grid --width --legend --arms --theme` |
-| `poster` | one large SVG and PNG at 4200px (~14″ at 300 dpi) | `--seed --style --scale --legend --arms --theme` |
-| `atlas` | a multi-page HTML atlas: world in four styles, four thematic plates, two regional close-ups, a gazetteer, and a coat-of-arms plate; add `--pdf` to bind it into one PDF | `--seed --type --band --land --pdf` |
-| `gallery` | an HTML contact sheet of *N* worlds, walking outward from the seed | `--seed` (starting point), `--count`, `--style` |
-| `demo` | one world drawn in all four styles | `--seed --grid --width --legend --arms --theme` |
+**Posters, atlases, and printing live on the site now**, in the
+[Print Room](https://vellum.route12b.net/print-room/): order a poster-size SVG or
+PNG of any seed, print a bound atlas to PDF straight from your browser, or download
+a self-contained atlas HTML file. No Node.js required.
+
+`chart` honors every recipe and view flag below.
 
 ### Flags
 
@@ -79,15 +75,14 @@ Run `node src/cli/main.ts help` for the built-in usage screen.
 | `--type <t>` | `island` · `archipelago` · `continent` · `citystate` *(default: chosen by the seed)* |
 | `--band <b>` | Climate band: `temperate` · `tropical` · `polar` *(default: chosen by the seed)* |
 | `--land <f>` | Land fraction, `0.1`–`0.7` *(default: set by map type)* |
+| `--coast-warp <f>` | Coastline raggedness, `0`–`1`: how fractal the shoreline is *(default: set by the seed)* |
 | `--grid <WxH>` | Simulation resolution *(default `320x240`)* |
-| `--width <px>` | Output width in pixels, `400`–`6000` *(default `1500`; poster `4200`)* |
-| `--legend` | Draw a compact, style-aware key explaining the chart's symbols and labels *(default: off; the atlas always includes one)* |
-| `--arms` | Blazon each realm's coat of arms beside its label *(default: off; the atlas always shows them as a banner plate)* |
-| `--theme <t>` | Render a thematic data plate instead of the usual symbology: `vegetation` · `climate` · `moisture` · `population` *(default: off; the atlas includes all four)* |
+| `--width <px>` | Output width in pixels, `400`–`6000` *(default `1500`)* |
+| `--legend` | Draw a compact, style-aware key explaining the chart's symbols and labels *(default: off)* |
+| `--arms` | Blazon each realm's coat of arms beside its label *(default: off)* |
+| `--theme <t>` | Render a thematic data plate instead of the usual symbology: `vegetation` · `climate` · `moisture` · `population` *(default: off)* |
 | `--png` | Also rasterize to PNG using an installed browser; set `VELLUM_BROWSER` to choose which |
-| `--pdf` | Atlas only. Bind the atlas into a single PDF via an installed browser. Degrades gracefully if no browser is found. |
-| `--scale <n>` | PNG pixel scale, `0.5`–`4` *(default `2`; poster `1`)* |
-| `--count <n>` | Gallery only: how many worlds, `1`–`48` *(default `12`)* |
+| `--scale <n>` | PNG pixel scale, `0.5`–`4` *(default `2`)* |
 | `--out <path>` | Override where the file is written |
 
 ### Reproducing a chart
@@ -99,7 +94,7 @@ reads them back, and re-rendering `generateWorld(recipe)` at the default width
 reproduces the map byte-for-byte.
 
 Display and output options (`--width`, `--legend`, `--arms`, `--theme`, `--png`,
-`--pdf`, `--scale`) change how a world is drawn or exported, not the world itself,
+`--scale`) change how a world is drawn or exported, not the world itself,
 so they are not stamped in the SVG and must be re-supplied to reproduce a
 particular view. (Arms are still fully deterministic from the seed; only the choice
 to draw them is a view option.)
@@ -256,50 +251,9 @@ attribution required.
 
 ## For contributors
 
-### Project shape
-
-```
-src/
-  core/       seeded RNG (labeled forks), Float64 fields, BFS, min-heap
-  noise/      hash-lattice gradient noise, fBm, ridged, domain warp
-  terrain/    heightfield, sea level, marching squares, slope
-  hydrology/  priority-flood, D8 flow, river tracing
-  climate/    temperature, moisture, biomes
-  society/    names, settlements, roads, realms, lore
-  render/     styles, layers/ (19 of them), svg builder, projection
-  world/      generate.ts (pipeline), region.ts (zoom windows)
-  cli/        main.ts, atlas.ts, gallery.ts, raster.ts (PNG/PDF/poster)
-test/         188 tests, node:test, mirrors src/
-docs/explorer the same engine, tsc-emitted as browser ES modules
-```
-
-Zero runtime dependencies. Node 23.6+ runs the TypeScript directly
-(`erasableSyntaxOnly`). Dev dependencies are `typescript` and
+Vellum currently has no runtime dependencies. Node 23.6+ runs the TypeScript
+directly (`erasableSyntaxOnly`). Dev dependencies are `typescript` and
 `@types/node` for `tsc --noEmit`.
-
-### The Explorer's render path
-
-The web [Explorer](https://vellum.route12b.net/explorer/) runs the whole
-engine in your browser, off the main thread, so the page stays responsive while
-a world is drawn. `docs/explorer/index.html` loads `app.js`, which spawns a Web
-Worker with `new Worker("./worker.js", { type: "module" })`.
-
-The worker is a stateless request/response service. The page posts a job,
-`{ kind: "draw" | "atlas", seed, overrides, ... }`, and the worker regenerates
-the world from scratch and replies with the chart SVG (`draw`) or the fully
-bound atlas as strings (`atlas`). Nothing is kept between jobs, so the result is
-byte-identical to running the engine on the main thread. The worker imports the
-same browser engine the page uses: `docs/explorer/engine/`, emitted from the
-TypeScript source by `tsconfig.browser.json` as ES modules.
-
-If the worker can't be constructed (a `file://` page, a strict CSP, an older
-browser), `app.js` runs the identical engine inline on the main thread, so the
-Explorer always works. `window.__vellumUsesWorker()` reports which path is live.
-
-`worker.js`, `app.js`, and the Explorer's `index.html` are hand-authored: they
-are not part of the tsc-emitted engine and are never used by the CLI. See
-[`docs/explorer/worker.js`](docs/explorer/worker.js) and
-[`docs/explorer/app.js`](docs/explorer/app.js) for the full detail.
 
 ### Social preview and favicon
 

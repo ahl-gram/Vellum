@@ -1,49 +1,37 @@
 import { parseArgs } from "node:util";
 import { mkdir, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
-import { generateWorld } from "../world/generate.ts";
-import { recipeForCommand } from "./recipe.ts";
+import { dirname, resolve } from "node:path";
+import { defaultRecipe, generateWorld } from "../world/generate.ts";
 import { renderMap } from "../render/map-renderer.ts";
 import type { StyleName } from "../render/style.ts";
 import type { ThemeName } from "../render/layers/field.ts";
 import type { MapType } from "../terrain/heightfield.ts";
 import type { ClimateBand } from "../climate/climate.ts";
-import { buildAtlas } from "./atlas.ts";
-import { buildGallery } from "./gallery.ts";
-import {
-  findBrowser,
-  rasterizeSvg,
-  printToPdf,
-  NO_BROWSER_HINT,
-  NO_BROWSER_HINT_PDF,
-} from "./raster.ts";
+import { findBrowser, rasterizeSvg, NO_BROWSER_HINT } from "./raster.ts";
 
 const HELP = `vellum: an atelier of imaginary cartography
 
 Usage:
   node src/cli/main.ts chart [options]   Draft a single chart (SVG)
-  node src/cli/main.ts poster [options]    Wall-art chart: same world, 4200px, PNG
-  node src/cli/main.ts atlas [options]     Bind a full atlas (HTML + charts)
-  node src/cli/main.ts gallery [options]   Contact sheet of many worlds
-  node src/cli/main.ts demo  [options]     Draft one chart in each style
 
 Options:
-  --seed <n>      World seed (default: random; always printed)
-  --style <s>     antique | topographic | ink | nautical  (default: antique)
-  --type <t>      island | archipelago | continent | citystate  (default: by seed)
-  --band <b>      temperate | tropical | polar      (default: by seed)
-  --grid <WxH>    Simulation grid (default: 320x240)
-  --width <px>    Output width in pixels (default: 1500)
-  --land <f>      Land fraction 0.1–0.7 (default: by map type)
-  --count <n>     Gallery: number of worlds (default 12, max 48)
-  --png           Also rasterize to PNG (uses an installed browser)
-  --pdf           Atlas: also bind the atlas into one PDF (uses a browser)
-  --scale <n>     PNG pixel scale (default 2; poster default 1)
-  --legend        Draw a compact key explaining the symbols (default: off)
-  --arms          Draw each realm's coat of arms beside its label (default: off)
-  --theme <t>     Thematic data plate: vegetation | climate | moisture |
-                  population  (chart/poster/demo)
-  --out <path>    Output file (default: out/chart-<seed>-<style>.svg)
+  --seed <n>        World seed (default: random; always printed)
+  --style <s>       antique | topographic | ink | nautical  (default: antique)
+  --type <t>        island | archipelago | continent | citystate  (default: by seed)
+  --band <b>        temperate | tropical | polar      (default: by seed)
+  --grid <WxH>      Simulation grid (default: 320x240)
+  --width <px>      Output width in pixels, 400 to 6000 (default: 1500)
+  --land <f>        Land fraction 0.1 to 0.7 (default: by map type)
+  --coast-warp <f>  Coastline raggedness 0 to 1 (default: by seed)
+  --png             Also rasterize to PNG (uses an installed browser)
+  --scale <n>       PNG pixel scale 0.5 to 4 (default: 2)
+  --legend          Draw a compact key explaining the symbols (default: off)
+  --arms            Draw each realm's coat of arms beside its label (default: off)
+  --theme <t>       Thematic data plate: vegetation | climate | moisture | population
+  --out <path>      Output file (default: out/chart-<seed>-<style>.svg)
+
+Posters, atlases, and printing moved to the Print Room on the site:
+https://vellum.route12b.net/print-room/
 `;
 
 type ParsedGrid = { gridW: number; gridH: number };
@@ -114,9 +102,7 @@ export async function main(argv: string[]): Promise<void> {
       width: { type: "string" },
       land: { type: "string" },
       "coast-warp": { type: "string" },
-      count: { type: "string" },
       png: { type: "boolean", default: false },
-      pdf: { type: "boolean", default: false },
       scale: { type: "string" },
       legend: { type: "boolean", default: false },
       arms: { type: "boolean", default: false },
@@ -129,6 +115,11 @@ export async function main(argv: string[]): Promise<void> {
   if (!command || values.help || command === "help") {
     console.log(HELP);
     return;
+  }
+  // chart is the only verb: posters, atlases, galleries, and PDF moved to the
+  // Print Room on the site (#132/#138). Anything else is an error, not a draw.
+  if (command !== "chart") {
+    throw new Error(`unknown command "${command}"\n${HELP}`);
   }
 
   const seed =
@@ -156,7 +147,7 @@ export async function main(argv: string[]): Promise<void> {
     throw new Error("--coast-warp must be between 0 and 1");
   }
 
-  const recipe = recipeForCommand(command, seed, {
+  const recipe = defaultRecipe(seed, {
     ...(grid ?? {}),
     ...(mapType ? { mapType } : {}),
     ...(band ? { band } : {}),
@@ -164,108 +155,36 @@ export async function main(argv: string[]): Promise<void> {
     ...(coastWarp !== undefined ? { coastWarp } : {}),
   });
 
-  if (command === "chart" || command === "poster") {
-    const style = validateStyle(values.style as string);
-    const poster = command === "poster";
-    // a poster is the same world as the chart, only larger and rasterized
-    const posterWidth = poster && !values.width ? 4200 : widthPx;
+  const style = validateStyle(values.style as string);
+  const t0 = performance.now();
+  const world = generateWorld(recipe);
+  const t1 = performance.now();
+  const svg = renderMap(world, { widthPx, style, legend: values.legend, arms: values.arms, theme });
+  const t2 = performance.now();
+  const out = resolve(values.out ?? `out/chart-${seed}-${style}.svg`);
+  await writeOut(out, svg);
+  console.log(`seed ${seed} · ${recipe.mapType} · ${world.title.title}`);
+  console.log(
+    `world ${(t1 - t0).toFixed(0)}ms · render ${(t2 - t1).toFixed(0)}ms · ${out}`,
+  );
 
-    const t0 = performance.now();
-    const world = generateWorld(recipe);
-    const t1 = performance.now();
-    const svg = renderMap(world, { widthPx: posterWidth, style, legend: values.legend, arms: values.arms, theme });
-    const t2 = performance.now();
-    const out = resolve(
-      values.out ?? `out/${command}-${seed}-${style}.svg`,
-    );
-    await writeOut(out, svg);
-    console.log(`seed ${seed} · ${recipe.mapType} · ${world.title.title}`);
+  if (values.png) {
+    const browser = findBrowser();
+    if (!browser) {
+      console.error(NO_BROWSER_HINT);
+      return;
+    }
+    const scale = values.scale ? Number(values.scale) : 2;
+    if (!Number.isFinite(scale) || scale < 0.5 || scale > 4) {
+      throw new Error("--scale must be between 0.5 and 4");
+    }
+    const pngOut = out.replace(/\.svg$/, ".png");
+    const t3 = performance.now();
+    await rasterizeSvg(browser, out, pngOut, scale);
     console.log(
-      `world ${(t1 - t0).toFixed(0)}ms · render ${(t2 - t1).toFixed(0)}ms · ${out}`,
+      `png ${(performance.now() - t3).toFixed(0)}ms · scale ${scale} · ${pngOut}`,
     );
-
-    const wantPng = values.png || poster;
-    if (wantPng) {
-      const browser = findBrowser();
-      if (!browser) {
-        console.error(NO_BROWSER_HINT);
-        return;
-      }
-      const scale = values.scale ? Number(values.scale) : poster ? 1 : 2;
-      if (!Number.isFinite(scale) || scale < 0.5 || scale > 4) {
-        throw new Error("--scale must be between 0.5 and 4");
-      }
-      const pngOut = out.replace(/\.svg$/, ".png");
-      const t3 = performance.now();
-      await rasterizeSvg(browser, out, pngOut, scale);
-      console.log(
-        `png ${(performance.now() - t3).toFixed(0)}ms · scale ${scale} · ${pngOut}`,
-      );
-    }
-    return;
   }
-
-  if (command === "atlas") {
-    const t0 = performance.now();
-    const dir = await buildAtlas(seed, {
-      width: widthPx,
-      ...(values.out ? { out: values.out } : {}),
-      recipe: {
-        ...(grid ?? {}),
-        ...(mapType ? { mapType } : {}),
-        ...(band ? { band } : {}),
-        ...(landFraction !== undefined ? { landFraction } : {}),
-      },
-    });
-    console.log(`seed ${seed} · atlas bound in ${(performance.now() - t0).toFixed(0)}ms`);
-    console.log(`  ${dir}/index.html`);
-
-    if (values.pdf) {
-      const browser = findBrowser();
-      if (!browser) {
-        console.error(NO_BROWSER_HINT_PDF);
-        return;
-      }
-      const pdfPath = join(dir, `atlas-${seed}.pdf`);
-      const t1 = performance.now();
-      await printToPdf(browser, join(dir, "index.html"), pdfPath);
-      console.log(`pdf ${(performance.now() - t1).toFixed(0)}ms · ${pdfPath}`);
-    }
-    return;
-  }
-
-  if (command === "gallery") {
-    const style = validateStyle(values.style as string);
-    const count = values.count ? Number(values.count) : 12;
-    if (!Number.isInteger(count) || count < 1 || count > 48) {
-      throw new Error("--count must be an integer between 1 and 48");
-    }
-    const t0 = performance.now();
-    const dir = await buildGallery(seed, {
-      count,
-      style,
-      ...(values.out ? { out: values.out } : {}),
-    });
-    console.log(
-      `gallery of ${count} worlds in ${((performance.now() - t0) / 1000).toFixed(1)}s`,
-    );
-    console.log(`  ${dir}/index.html`);
-    return;
-  }
-
-  if (command === "demo") {
-    const world = generateWorld(recipe);
-    console.log(`seed ${seed} · ${recipe.mapType} · ${world.title.title}`);
-    for (const style of ["antique", "topographic", "ink", "nautical"] as const) {
-      const svg = renderMap(world, { widthPx, style, legend: values.legend, arms: values.arms, theme });
-      const out = resolve(`out/chart-${seed}-${style}.svg`);
-      await writeOut(out, svg);
-      console.log(`  ${out}`);
-    }
-    return;
-  }
-
-  throw new Error(`unknown command "${command}"\n${HELP}`);
 }
 
 const isDirectRun = process.argv[1]?.endsWith("main.ts") ?? false;

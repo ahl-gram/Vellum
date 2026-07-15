@@ -61,34 +61,6 @@ export async function rasterizeSvg(
   }
 }
 
-/**
- * Bind an HTML page (the atlas index.html) into a single PDF, headless. The
- * plates are separate <img src> SVGs loaded over file://; --virtual-time-budget
- * lets them settle before the print fires (virtual time fast-forwards, so this
- * is a ceiling, not a real-time wait) so the PDF never captures blank charts.
- */
-export async function printToPdf(
-  browser: string,
-  htmlPath: string,
-  pdfPath: string,
-): Promise<void> {
-  await execFileAsync(browser, [
-    "--headless",
-    "--disable-gpu",
-    "--no-pdf-header-footer",
-    "--virtual-time-budget=15000",
-    `--print-to-pdf=${pdfPath}`,
-    pathToFileURL(htmlPath).href,
-  ]);
-  if (!existsSync(pdfPath)) {
-    throw new Error(`browser exited but produced no PDF at ${pdfPath}`);
-  }
-}
-
 export const NO_BROWSER_HINT =
   "no Chromium-family browser found for PNG export: install Brave/Chrome, " +
   "or point VELLUM_BROWSER at a browser binary; the SVG was still written";
-
-export const NO_BROWSER_HINT_PDF =
-  "no Chromium-family browser found for PDF export: install Brave/Chrome, " +
-  "or point VELLUM_BROWSER at a browser binary; the atlas HTML was still written";

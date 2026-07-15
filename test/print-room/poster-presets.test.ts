@@ -23,12 +23,11 @@ test("the three plate presets are Desk 2400, Wall 3300, Grand 4200", () => {
   );
 });
 
-// The Grand width is the OLD `npm run poster` default (src/cli/main.ts:171). Both the
-// CLI poster and the Print Room poster share defaultRecipe + renderMap, so the render
-// OPTIONS (width, legend/arms/theme) are the only divergence surface; pinning Grand to
-// 4200 pins the width side of the acceptance-4 covenant (the SVG side is in
-// test/cli/poster-parity.test.ts).
-test("the Grand preset matches the old CLI poster width (4200)", () => {
+// Grand's 4200 is the largest poster width. The Print Room poster and every other entry
+// point share defaultRecipe + renderMap, so the render OPTIONS (width, legend/arms/theme)
+// are the only divergence surface; pinning Grand to 4200 pins the width side of the
+// acceptance-4 covenant (the SVG side is in test/cli/poster-parity.test.ts).
+test("the Grand preset is the 4200 poster width", () => {
   const grand = POSTER_PRESETS.find((p) => p.key === "grand");
   assert.ok(grand);
   assert.equal(grand.width, 4200);
