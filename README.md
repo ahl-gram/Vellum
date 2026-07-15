@@ -251,8 +251,8 @@ attribution required.
 
 ## For contributors
 
-Zero runtime dependencies. Node 23.6+ runs the TypeScript directly
-(`erasableSyntaxOnly`). Dev dependencies are `typescript` and
+Vellum currently has no runtime dependencies. Node 23.6+ runs the TypeScript
+directly (`erasableSyntaxOnly`). Dev dependencies are `typescript` and
 `@types/node` for `tsc --noEmit`.
 
 ### Social preview and favicon
