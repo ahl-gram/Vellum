@@ -255,30 +255,6 @@ Zero runtime dependencies. Node 23.6+ runs the TypeScript directly
 (`erasableSyntaxOnly`). Dev dependencies are `typescript` and
 `@types/node` for `tsc --noEmit`.
 
-### The Explorer's render path
-
-The web [Explorer](https://vellum.route12b.net/explorer/) runs the whole
-engine in your browser, off the main thread, so the page stays responsive while
-a world is drawn. `docs/explorer/index.html` loads `app.js`, which spawns a Web
-Worker with `new Worker("./worker.js", { type: "module" })`.
-
-The worker is a stateless request/response service. The page posts a job,
-`{ kind: "draw" | "atlas", seed, overrides, ... }`, and the worker regenerates
-the world from scratch and replies with the chart SVG (`draw`) or the fully
-bound atlas as strings (`atlas`). Nothing is kept between jobs, so the result is
-byte-identical to running the engine on the main thread. The worker imports the
-same browser engine the page uses: `docs/explorer/engine/`, emitted from the
-TypeScript source by `tsconfig.browser.json` as ES modules.
-
-If the worker can't be constructed (a `file://` page, a strict CSP, an older
-browser), `app.js` runs the identical engine inline on the main thread, so the
-Explorer always works. `window.__vellumUsesWorker()` reports which path is live.
-
-`worker.js`, `app.js`, and the Explorer's `index.html` are hand-authored: they
-are not part of the tsc-emitted engine and are never used by the CLI. See
-[`docs/explorer/worker.js`](docs/explorer/worker.js) and
-[`docs/explorer/app.js`](docs/explorer/app.js) for the full detail.
-
 ### Social preview and favicon
 
 The hand-authored pages carry Open Graph / Twitter Card tags and a favicon.
