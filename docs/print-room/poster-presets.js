@@ -1,11 +1,11 @@
 // Poster plate presets for the Print Room (#134, epic #132). A poster is the same
-// world as the on-screen proof, only rendered wider: the old `npm run poster` 4200px
-// plate becomes a thing a visitor clicks. Pure + DOM-free so it is unit-testable in
-// Node the way sheet-turn.js's shouldTurn is; app.js does the worker + download wiring.
+// world as the on-screen proof, only rendered wider, delivered as a download the
+// visitor clicks. Pure + DOM-free so it is unit-testable in Node the way sheet-turn.js's
+// shouldTurn is; app.js does the worker + download wiring.
 
-// Desk / Wall / Grand. Grand's 4200 is the old CLI poster default (src/cli/main.ts:171),
-// so a Grand plate reproduces the CLI poster's world at the CLI poster's width. The three
-// widths ARE the clamp envelope below.
+// Desk / Wall / Grand. Grand's 4200 is the largest poster width; a Grand plate renders
+// the covenant world (defaultRecipe(seed)) at that width (parity pinned in
+// test/cli/poster-parity.test.ts). The three widths ARE the clamp envelope below.
 export const POSTER_PRESETS = [
   { key: "desk", label: "Desk", width: 2400 },
   { key: "wall", label: "Wall", width: 3300 },

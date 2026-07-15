@@ -1,32 +1,32 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { generateWorld } from "../../src/world/generate.ts";
-import { recipeForCommand } from "../../src/cli/recipe.ts";
+import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
 import { POSTER_PRESETS } from "../../docs/print-room/poster-presets.js";
 
-// Acceptance-4 (#134): a Grand poster of seed 42 antique reproduces the old
-// `npm run poster --seed 42 --style antique` output. The covenant is RECIPE-level, not
-// byte-level: the Print Room proof defaults its legend ON (docs/print-room/app.js), the
-// CLI poster defaults it OFF (src/cli/main.ts), and a legend is a structural SVG group,
-// so the two are deliberately NOT full-SVG identical. What must match is the WORLD and
+// Acceptance-4 (#134): a Grand poster of seed 42 antique renders the covenant world
+// (defaultRecipe(42)) at the Grand width. The CLI `poster` verb this once mirrored was
+// retired in #138 (git history is its archive); the parity that still matters is that the
+// Print Room's poster order and every other entry point draw the SAME world for a seed.
+// The covenant is RECIPE-level, not byte-level: the Print Room proof defaults its legend
+// ON (docs/print-room/app.js) and a legend is a structural SVG group, so a poster is
+// deliberately NOT full-SVG identical to a plain chart. What must match is the WORLD and
 // the WIDTH the plate renders at. The option-carry (that a poster inherits the on-screen
 // proof's legend/arms/theme) is proven in the print-room e2e, not here.
 //
-// This is a characterization guard (green from the start), not a red->green: it pins the
-// covenant so a future divergence between the CLI poster path and the Print Room's world
-// choice reds here. Both paths funnel through defaultRecipe + renderMap, so the recipe +
-// width are the only surface a regression could move.
+// A characterization guard (green from the start), not a red->green: it pins the covenant
+// so a future divergence between the Print Room's world choice and defaultRecipe reds here.
+// Both funnel through defaultRecipe + renderMap, so recipe + width are the only surface a
+// regression could move.
 
 const GRAND = POSTER_PRESETS.find((p) => p.key === "grand")!.width;
 
-test("a Grand poster renders the CLI poster's world at the CLI poster's width", () => {
+test("a Grand poster renders the covenant world at the Grand width", () => {
   // The Print Room's poster order is a `draw` job: defaultRecipe(seed, overrides) then
-  // renderMap at the clamped poster width. recipeForCommand("poster", ...) IS
-  // defaultRecipe (src/cli/recipe.ts), so this generates the exact world the CLI poster
-  // drafts for the same seed.
-  const world = generateWorld(recipeForCommand("poster", 42, {}));
+  // renderMap at the clamped poster width, so this generates the exact world a Grand
+  // poster of the seed draws.
+  const world = generateWorld(defaultRecipe(42, {}));
   const svg = renderMap(world, { widthPx: GRAND, style: "antique" });
 
   const parsed = recipeFromSvg(svg);
@@ -37,6 +37,6 @@ test("a Grand poster renders the CLI poster's world at the CLI poster's width", 
   assert.match(svg, /<svg\b[^>]*\bwidth="4200"/);
 });
 
-test("the Grand width equals the CLI poster default (4200)", () => {
+test("the Grand poster width is 4200", () => {
   assert.equal(GRAND, 4200);
 });

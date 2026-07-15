@@ -48,6 +48,11 @@ function weightedPick<T>(
   return (pairs[pairs.length - 1] as readonly [T, number])[0];
 }
 
+// A world's identity (terrain, realms, names, rivers) derives from the seed and
+// grid alone, never from which entry point draws it: the `chart` CLI verb, the
+// deploy's atlas/gallery builders, and the Print Room all resolve the SAME world
+// for a seed (the #26 invariant; it used to live in a per-command recipe wrapper,
+// src/cli/recipe.ts, retired with the CLI diet in #138).
 export function defaultRecipe(
   seed: number,
   overrides: Partial<WorldRecipe> = {},

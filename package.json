@@ -9,10 +9,6 @@
   },
   "scripts": {
     "chart": "node src/cli/main.ts chart",
-    "poster": "node src/cli/main.ts poster",
-    "atlas": "node src/cli/main.ts atlas",
-    "gallery": "node src/cli/main.ts gallery",
-    "demo": "node src/cli/main.ts demo",
     "site": "node scripts/build-site.ts && tsc -p tsconfig.browser.json",
     "serve": "node scripts/serve.ts",
     "dev": "npm run site && node scripts/serve.ts",
