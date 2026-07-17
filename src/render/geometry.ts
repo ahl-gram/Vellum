@@ -190,6 +190,8 @@ function shoelaceArea(pts: ReadonlyArray<Pt>): number {
  */
 export function polyBoxOverlapFraction(poly: ReadonlyArray<Pt>, box: Box): number {
   const x0 = box.x, x1 = box.x + box.w, y0 = box.y, y1 = box.y + box.h;
+  // a Pt lerp; core/math.ts's lerp is scalar. Same `a + (b - a) * t` form, so
+  // delegating to it per axis would be byte-safe, just not clearer.
   const lerp = (a: Pt, b: Pt, t: number): Pt => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
   const edges: Array<{ inside: (p: Pt) => boolean; cut: (a: Pt, b: Pt) => Pt }> = [
     { inside: (p) => p.x >= x0, cut: (a, b) => lerp(a, b, (x0 - a.x) / (b.x - a.x)) },

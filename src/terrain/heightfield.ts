@@ -1,5 +1,5 @@
 import { createField, type Field } from "../core/grid.ts";
-import { smoothstep } from "../core/math.ts";
+import { lerp, smoothstep } from "../core/math.ts";
 import { fbm2, ridged2, warped2 } from "../noise/fbm.ts";
 
 export type MapType = "island" | "archipelago" | "continent" | "citystate";
@@ -154,9 +154,9 @@ export function buildHeightfield(params: TerrainParams): Field {
       );
       d = Math.hypot(dx + coastWarp * wx, dy + coastWarp * wy);
     }
+    // keep baseKeep of the elevation at the rim, all of it at the center
     const falloff = 1 - smoothstep(shape.falloffStart, shape.falloffEnd, d);
-    e = e * (shape.baseKeep + (1 - shape.baseKeep) * falloff) -
-      (1 - falloff) * shape.sinkDepth;
+    e = e * lerp(shape.baseKeep, 1, falloff) - (1 - falloff) * shape.sinkDepth;
 
     // hard guarantee: outermost fringe is always deep water
     const edge = Math.min(u, 1 - u, v, 1 - v);

@@ -4,6 +4,8 @@
  * (ix, iy, seed), so the field is fully determined by the seed.
  */
 
+import { lerp } from "../core/math.ts";
+
 const TAU = Math.PI * 2;
 
 function hash2(ix: number, iy: number, seed: number): number {
@@ -45,7 +47,6 @@ export function gradientNoise2(x: number, y: number, seed: number): number {
 
   const u = fade(fx);
   const v = fade(fy);
-  const nx0 = d00 + (d10 - d00) * u;
-  const nx1 = d01 + (d11 - d01) * u;
-  return (nx0 + (nx1 - nx0) * v) * Math.SQRT2;
+  // bilinear: lerp along the top and bottom edges, then between the two
+  return lerp(lerp(d00, d10, u), lerp(d01, d11, u), v) * Math.SQRT2;
 }
