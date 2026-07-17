@@ -218,7 +218,11 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
   const seats = world.realms.seats;
   const seatRealm = new Map<number, number>();
   seats.forEach((idx, realmId) => seatRealm.set(idx, realmId));
-  const showHalo = style.politicalTints && seats.length > 1;
+  // On a regional survey (world.region set) seats are projected but realm tints,
+  // borders, and labels stay world-sheet-only (#161/#162), so the tint-halo would
+  // paint plausible-but-wrong colours: gate it off. The seat glyph itself stays.
+  const showHalo =
+    style.politicalTints && seats.length > 1 && world.region === undefined;
 
   const RANK: Record<SettlementTier, number> = { capital: 0, seat: 1, town: 2, village: 3 };
   const tierOf = (s: NamedSettlement, i: number): SettlementTier =>
@@ -275,7 +279,22 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
       group.push(labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx));
     }
 
-    nodes.push(el("g", { class: "settlement", "data-idx": String(i) }, group));
+    // #162: a regional survey stamps data-tier/data-name so Sub 9's redraft can
+    // dry the names in. Conditional-spread on world.region so a world sheet stays
+    // byte-identical (golden-safe): the spread is {} there, leaving the tag as-is.
+    nodes.push(
+      el(
+        "g",
+        {
+          class: "settlement",
+          "data-idx": String(i),
+          ...(world.region !== undefined
+            ? { "data-tier": tier, "data-name": s.name }
+            : {}),
+        },
+        group,
+      ),
+    );
   }
 
   return el("g", { id: "layer-settlements" }, nodes);

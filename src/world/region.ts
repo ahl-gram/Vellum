@@ -4,9 +4,9 @@ import { NEIGHBORS_8 } from "../core/grid.ts";
 import { computeClimate } from "../climate/climate.ts";
 import { classifyBiomes } from "../climate/biomes.ts";
 import { computeFlow } from "../hydrology/flow.ts";
-import { extractRivers } from "../hydrology/rivers.ts";
 import { buildHeightfield, type UvWindow } from "../terrain/heightfield.ts";
 import { buildRoads } from "../society/roads.ts";
+import { anchorRegionRivers } from "./region-rivers.ts";
 import type { NamedSettlement, World } from "./types.ts";
 
 export type RegionSpec = {
@@ -38,21 +38,33 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   });
   const seaLevel = world.seaLevel; // absolute — same waterline as the world chart
 
+  // #162: normalize climate/biomes against the PARENT world's elevation span, not
+  // the window's own local max, so temperature and the snow/alpine bands are
+  // continuous with the world chart across the window boundary (no banding seam).
+  let worldMax = -Infinity;
+  for (const v of world.elev.data) worldMax = Math.max(worldMax, v as number);
+  const elevSpan = worldMax - seaLevel;
+
   const preClimate = computeClimate(elev, seaLevel, recipe.seed, {
     band: recipe.band,
     windDir: world.winds.dir, // the same wind blows over a region of the same world
     window,
     worldAspect,
+    elevSpan,
   });
   const rain = new Float64Array(gridW * gridH);
   for (let i = 0; i < rain.length; i++) {
     rain[i] = 0.3 + 1.4 * (preClimate.moisture.data[i] as number);
   }
   const flow = computeFlow(elev, seaLevel, rain);
-  const rivers = extractRivers(elev, flow, seaLevel);
+  // #162: anchor the re-derived rivers to the parent world so a stream does not
+  // gain or lose river status between zoom levels and named world rivers never
+  // vanish at the window boundary. (region-rivers.ts documents the two fixes.)
+  const rivers = anchorRegionRivers(world, window, gridW, gridH, elev, flow, seaLevel);
   const riverCells = new Uint8Array(gridW * gridH);
   for (const r of rivers) {
-    for (const p of r.points) riverCells[p.x + p.y * gridW] = 1;
+    // projected world rivers carry fractional cell coords; snap for the raster.
+    for (const p of r.points) riverCells[Math.round(p.x) + Math.round(p.y) * gridW] = 1;
   }
   const climate = computeClimate(elev, seaLevel, recipe.seed, {
     band: recipe.band,
@@ -60,22 +72,27 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     windDir: world.winds.dir,
     window,
     worldAspect,
+    elevSpan,
   });
-  const biomes = classifyBiomes(elev, seaLevel, climate);
+  const biomes = classifyBiomes(elev, seaLevel, climate, elevSpan);
 
   // project world settlements that fall inside the window
   const du = window.u1 - window.u0;
   const dv = window.v1 - window.v0;
   const inset = 0.02;
   const settlements: NamedSettlement[] = [];
-  for (const s of world.settlements) {
+  // #162: map each surviving world settlement index to its new region index, so
+  // realm seats project into the region instead of being dropped (region.ts used
+  // to return seats: [], silently downgrading every seat's castle to a town dot).
+  const regionIdxOf = new Map<number, number>();
+  world.settlements.forEach((s, worldIdx) => {
     const u = s.x / (recipe.gridW - 1);
     const v = s.y / (recipe.gridH - 1);
     if (
       u < window.u0 + du * inset || u > window.u1 - du * inset ||
       v < window.v0 + dv * inset || v > window.v1 - dv * inset
     ) {
-      continue;
+      return;
     }
     let gx = Math.round(((u - window.u0) / du) * (gridW - 1));
     let gy = Math.round(((v - window.v0) / dv) * (gridH - 1));
@@ -92,10 +109,16 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
           break;
         }
       }
-      if (!snapped) continue;
+      if (!snapped) return;
     }
+    regionIdxOf.set(worldIdx, settlements.length);
     settlements.push({ ...s, x: gx, y: gy });
-  }
+  });
+
+  // Realm-indexed seats (array index = realm id), with a -1 sentinel for any seat
+  // that fell outside the window. settlements.ts maps -1 to nothing, so it is
+  // harmless there; the render gates the realm-tint halo off on region sheets.
+  const seats = world.realms.seats.map((wi) => regionIdxOf.get(wi) ?? -1);
 
   const roads = buildRoads(elev, seaLevel, riverCells, settlements);
 
@@ -115,7 +138,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     biomes,
     settlements,
     roads,
-    realms: { labels: new Int16Array(gridW * gridH).fill(-1), seats: [] },
+    realms: { labels: new Int16Array(gridW * gridH).fill(-1), seats },
     arms: [],
     culture: world.culture,
     title: {

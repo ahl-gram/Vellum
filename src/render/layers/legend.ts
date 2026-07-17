@@ -74,7 +74,15 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
 
   const tiers = new Set(world.settlements.map((s) => s.kind));
   if (tiers.has("capital")) rows.push({ icon: { kind: "settlement", tier: "capital" }, label: "Capital" });
-  if (world.realms.seats.length > 1) rows.push({ icon: { kind: "settlement", tier: "seat" }, label: "Realm seat" });
+  // A "Realm seat" row iff a seat glyph is actually drawn: some realm's seat is a
+  // non-capital settlement present on this sheet. On a world chart every seat index
+  // is valid, so this equals the old seats.length > 1 (golden-safe); on a regional
+  // survey (#162) seats carry -1 sentinels for off-window seats, so the atlas'
+  // capital plate no longer claims a seat key it never draws.
+  const seatDrawn = world.realms.seats.some(
+    (i) => i >= 0 && world.settlements[i]?.kind !== "capital",
+  );
+  if (seatDrawn) rows.push({ icon: { kind: "settlement", tier: "seat" }, label: "Realm seat" });
   if (tiers.has("town")) rows.push({ icon: { kind: "settlement", tier: "town" }, label: "Town" });
   if (tiers.has("village")) rows.push({ icon: { kind: "settlement", tier: "village" }, label: "Village" });
   if (world.settlements.some((s) => s.ruined)) rows.push({ icon: { kind: "ruin" }, label: "Ruins" });
@@ -103,7 +111,14 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
   const roadRanks = new Set(world.roads.map((r) => r.rank));
   if (roadRanks.has("trunk")) rows.push({ icon: { kind: "road", rank: "trunk" }, label: "Road" });
   if (roadRanks.has("lane")) rows.push({ icon: { kind: "road", rank: "lane" }, label: "Track" });
-  if (!theme && style.politicalTints && world.realms.seats.length > 1) {
+  // Realm tints and borders are world-sheet-only (#161/#162): a regional survey
+  // draws none (its labels are all -1), so it must not key one either.
+  if (
+    !theme &&
+    style.politicalTints &&
+    world.region === undefined &&
+    world.realms.seats.length > 1
+  ) {
     rows.push({ icon: { kind: "realm" }, label: "Realm & border" });
   }
 
