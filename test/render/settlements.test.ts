@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { FONT_SIZE } from "../../src/render/layers/settlements.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
@@ -122,6 +123,31 @@ test("every settlement is wrapped in an addressable g.settlement carrying its WO
   // The sequence must be the TIER-SORTED world indices, not 0..n-1 positions: this
   // proves data-idx is the pre-sort world index (a bijection alone would not).
   assert.deepEqual(seq, expectedGroupOrder(multi), "data-idx follows the world-index space, in tier-sorted document order");
+});
+
+// #162: a regional survey stamps data-tier and data-name on each settlement
+// wrapper so Sub 9 can dry the names in during the redraft. The stamps are
+// region-only: a world sheet stays byte-identical (golden-safe), so they are
+// spread in solely when world.region is set.
+test("region sheets stamp data-tier/data-name; world sheets stay golden-clean (#162)", () => {
+  const worldSvg = renderMap(multi, { style: "antique" });
+  assert.equal(count(worldSvg, "data-tier="), 0, "no data-tier on a world sheet");
+  assert.equal(count(worldSvg, "data-name="), 0, "no data-name on a world sheet");
+
+  const cap = multi.settlements.find((s) => s.kind === "capital")!;
+  const region = generateRegionWorld(multi, {
+    window: windowAround(multi, cap, 0.45),
+    gridW: 160,
+    gridH: 160,
+    title: "The Environs",
+  });
+  const regionSvg = renderMap(region, { style: "antique" });
+  assert.ok(count(regionSvg, "data-tier=") > 0, "region sheets stamp data-tier for Sub 9");
+  assert.ok(count(regionSvg, "data-name=") > 0, "region sheets stamp data-name for Sub 9");
+  assert.ok(
+    regionSvg.includes(`data-name="${cap.name}"`),
+    "the projected capital's name is stamped on its wrapper",
+  );
 });
 
 test("g.settlement data-idx aligns with the manifest place idx space, in every style (#93)", () => {

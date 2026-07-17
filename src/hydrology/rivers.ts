@@ -19,7 +19,30 @@ export type RiverOptions = {
   quantileQ?: number;
   minAcc?: number;
   minLength?: number;
+  /**
+   * A pre-computed accumulation threshold. When present it is used verbatim and
+   * the window-local quantile is skipped entirely (#162): a regional survey
+   * anchors its threshold to the parent world so a stream does not gain or lose
+   * river status between zoom levels. See region.ts for how the world value is
+   * computed and scaled to the region grid.
+   */
+  absoluteThreshold?: number;
 };
+
+/**
+ * The accumulation threshold above which a land cell counts as a river: the
+ * given quantile of the land-cell accumulation distribution, floored at minAcc.
+ * Exported so a regional survey (#162) can compute the parent world's value and
+ * scale it for the finer grid, instead of re-deriving a window-local quantile.
+ * Callers guarantee a non-empty landAcc.
+ */
+export function riverThreshold(
+  landAcc: readonly number[],
+  quantileQ = 0.985,
+  minAcc = 8,
+): number {
+  return Math.max(quantile(landAcc, quantileQ), minAcc);
+}
 
 /**
  * A "major" river: reaches the sea, runs long, and carries real flow at its
@@ -38,7 +61,7 @@ export function extractRivers(
   seaLevel: number,
   opts: RiverOptions = {},
 ): River[] {
-  const { quantileQ = 0.985, minAcc = 8, minLength = 3 } = opts;
+  const { quantileQ = 0.985, minAcc = 8, minLength = 3, absoluteThreshold } = opts;
   const { w, data } = elev;
   const { dir, acc } = flow;
   const n = data.length;
@@ -48,7 +71,9 @@ export function extractRivers(
     if ((data[i] as number) > seaLevel) landAcc.push(acc[i] as number);
   }
   if (landAcc.length === 0) return [];
-  const threshold = Math.max(quantile(landAcc, quantileQ), minAcc);
+  // A regional survey passes a threshold anchored to the parent world (#162);
+  // absent that, fall back to the window-local quantile.
+  const threshold = absoluteThreshold ?? riverThreshold(landAcc, quantileQ, minAcc);
 
   const isRiver = new Uint8Array(n);
   for (let i = 0; i < n; i++) {

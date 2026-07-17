@@ -14,6 +14,29 @@ function flatIsland(w: number, h: number, elevation = 0.15) {
   });
 }
 
+// #162: a regional survey normalizes its lapse-rate against the PARENT world's
+// elevation span, not the window's own max, so a locally-tall-but-globally-modest
+// summit does not read colder in the region than on the world chart (a snow seam
+// at the window boundary). An explicit elevSpan overrides the field's local max.
+test("computeClimate honors an explicit elevSpan (region temperature continuity, #162)", () => {
+  const w = 20, h = 20, sea = 0.2;
+  // local max is 0.6 (span 0.4); the parent world's span is larger.
+  const elev = createField(w, h, (x) => 0.2 + 0.4 * (x / (w - 1)));
+  const local = computeClimate(elev, sea, 1, { windDir: 0 });
+  const world = computeClimate(elev, sea, 1, { windDir: 0, elevSpan: 1.2 });
+  const hi = (w - 1) + 0 * w; // the tallest column
+  const lo = 0 + 0 * w; // at the waterline, above == 0, so the span cannot matter
+  assert.ok(
+    (world.temperature.data[hi] as number) > (local.temperature.data[hi] as number),
+    "a larger elevSpan lifts high-elevation temperature toward the world value",
+  );
+  assert.equal(
+    world.temperature.data[lo] as number,
+    local.temperature.data[lo] as number,
+    "at the shoreline the lapse term is zero, so elevSpan changes nothing",
+  );
+});
+
 test("south is warmer than north at equal elevation", () => {
   const f = flatIsland(30, 40);
   const { temperature } = computeClimate(f, 0, 99, { windDir: 0 });

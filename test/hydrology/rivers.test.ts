@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createField } from "../../src/core/grid.ts";
 import { computeFlow } from "../../src/hydrology/flow.ts";
-import { extractRivers } from "../../src/hydrology/rivers.ts";
+import { extractRivers, riverThreshold } from "../../src/hydrology/rivers.ts";
 import { buildHeightfield } from "../../src/terrain/heightfield.ts";
 import { pickSeaLevel } from "../../src/terrain/sealevel.ts";
 
@@ -82,6 +82,33 @@ test("river cells are claimed exactly once (no overlap except junctions)", () =>
       seen.add(k);
     }
   }
+});
+
+// #162 (the Surveyor's Glass gate): a regional survey must anchor its river
+// threshold to the parent world instead of re-deriving a window-local quantile,
+// so a stream does not gain or lose river status between zoom levels. The pure
+// threshold function is exported so region.ts can compute the world's value and
+// scale it; absoluteThreshold feeds a pre-computed value back in.
+test("riverThreshold is the land-accumulation quantile, floored at minAcc (#162)", () => {
+  const acc = [1, 2, 3, 4, 5, 6, 7, 8, 9, 100];
+  // quantile(0.985) of 10 sorted values -> index floor(0.985 * 9) = 8 -> value 9
+  assert.equal(riverThreshold(acc, 0.985, 4), 9);
+  // the minAcc floor wins when the quantile falls below it
+  assert.equal(riverThreshold([1, 1, 1, 1], 0.5, 8), 8);
+});
+
+test("absoluteThreshold overrides the window-local quantile (#162)", () => {
+  const { f, sea } = valley();
+  const flow = computeFlow(f, sea);
+  const maxAcc = Math.max(...Array.from(flow.acc));
+  // A threshold above every land cell's flow draws nothing, whatever the local
+  // distribution the quantile would otherwise pick.
+  const none = extractRivers(f, flow, sea, { absoluteThreshold: maxAcc + 1 });
+  assert.equal(none.length, 0, "an absolute threshold above all flow draws no rivers");
+  // A low absolute threshold draws the trunk even with a near-max quantileQ,
+  // proving the quantile path is skipped entirely.
+  const many = extractRivers(f, flow, sea, { absoluteThreshold: 3, quantileQ: 0.999 });
+  assert.ok(many.length >= 1, "a low absolute threshold ignores quantileQ");
 });
 
 test("real island yields rivers deterministically", () => {

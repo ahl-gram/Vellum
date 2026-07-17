@@ -63,13 +63,20 @@ export function classifyBiomes(
   elev: Field,
   seaLevel: number,
   climate: Climate,
+  elevSpan?: number,
 ): Uint8Array {
   const { data } = elev;
   const out = new Uint8Array(data.length);
 
-  let maxElev = -Infinity;
-  for (const v of data) maxElev = Math.max(maxElev, v);
-  const span = Math.max(1e-9, maxElev - seaLevel);
+  // A regional survey passes the PARENT world's span (#162) so the snow/alpine
+  // bands do not shift at the window boundary; otherwise use the field's own max.
+  let rawSpan = elevSpan;
+  if (rawSpan === undefined) {
+    let maxElev = -Infinity;
+    for (const v of data) maxElev = Math.max(maxElev, v);
+    rawSpan = maxElev - seaLevel;
+  }
+  const span = Math.max(1e-9, rawSpan);
 
   for (let i = 0; i < data.length; i++) {
     const e = data[i] as number;

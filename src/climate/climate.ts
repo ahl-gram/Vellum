@@ -19,6 +19,13 @@ export type ClimateOptions = {
   /** World-space crop for regional charts (keeps latitude consistent). */
   window?: { u0: number; v0: number; u1: number; v1: number };
   worldAspect?: number;
+  /**
+   * Elevation span (maxElev - seaLevel) to normalize the lapse-rate against. A
+   * regional survey (#162) passes the PARENT world's span so temperature and the
+   * snow/alpine bands match the world chart at the window boundary; omitted, the
+   * field's own local max is used (the world-chart default).
+   */
+  elevSpan?: number;
 };
 
 const BANDS: Record<ClimateBand, { base: number; latSpan: number }> = {
@@ -44,9 +51,16 @@ export function computeClimate(
   const toU = (x: number): number => win.u0 + (x / (w - 1)) * (win.u1 - win.u0);
   const toV = (y: number): number => win.v0 + (y / (h - 1)) * (win.v1 - win.v0);
 
-  let maxElev = -Infinity;
-  for (const v of data) maxElev = Math.max(maxElev, v);
-  const elevSpan = Math.max(1e-9, maxElev - seaLevel);
+  // A regional survey normalizes its lapse-rate against the PARENT world's span
+  // (#162) so temperature/snow bands match the world chart; otherwise the field's
+  // own local max is the span (the world-chart default).
+  let span = opts.elevSpan;
+  if (span === undefined) {
+    let maxElev = -Infinity;
+    for (const v of data) maxElev = Math.max(maxElev, v);
+    span = maxElev - seaLevel;
+  }
+  const elevSpan = Math.max(1e-9, span);
 
   const temperature = createField(w, h, (x, y) => {
     const lat = toV(y); // south (high v) is warm

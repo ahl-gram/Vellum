@@ -25,6 +25,27 @@ function classifyOne(elevRel: number, temp: number, moist: number): number {
   return biomes[1 + 1 * 3] as number;
 }
 
+// #162: biome bands (snow/alpine caps especially) normalize against the parent
+// world's elevation span in a regional survey, so a window that excludes the
+// world's true peaks does not sprout false snow on its own tallest hill.
+test("classifyBiomes honors an explicit elevSpan (region snow-band continuity, #162)", () => {
+  const w = 4, h = 4, sea = 0.2;
+  const elev = createField(w, h, (x) => (x === 3 ? 1.0 : 0.3)); // one tall column
+  const climate = {
+    temperature: createField(w, h, () => 0.5), // cool enough to admit snow/alpine
+    moisture: createField(w, h, () => 0.5),
+  };
+  const tall = 3 + 0 * w;
+  // local span = 1.0 - 0.2 = 0.8 -> rel of the peak = 1.0 -> snow
+  assert.equal(classifyBiomes(elev, sea, climate)[tall] as number, BIOMES.snow);
+  // the parent world's span (4.0) shrinks rel to 0.2 -> a temperate band, no snow
+  assert.notEqual(
+    classifyBiomes(elev, sea, climate, 4.0)[tall] as number,
+    BIOMES.snow,
+    "under the world span the region's tallest hill is not falsely snowbound",
+  );
+});
+
 test("ocean cells classify as ocean", () => {
   const f = createField(3, 3, () => -1);
   const climate = {
