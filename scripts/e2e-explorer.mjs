@@ -30,6 +30,7 @@ import { run as runMotion } from "./e2e/suite-motion.mjs";
 import { run as runTurn } from "./e2e/suite-turn.mjs";
 import { run as runVerso } from "./e2e/suite-verso.mjs";
 import { run as runZoom } from "./e2e/suite-zoom.mjs";
+import { run as runZoomGestures } from "./e2e/suite-zoom-gestures.mjs";
 import { run as runCards } from "./e2e/suite-cards.mjs";
 import { run as runScrubber } from "./e2e/suite-scrubber.mjs";
 import { run as runVoyage } from "./e2e/suite-voyage.mjs";
@@ -85,6 +86,10 @@ async function main() {
   // #164 The Surveyor's Glass: geometric zoom on the antique chart. Runs on the clean
   // antique base verso leaves, and snaps the camera home before handing off to cards.
   await runZoom(ctx);
+  // #166 Sub 5: the same zoom/pan proven again through REAL synthesized browser input
+  // (wheel, pinch, drag, mobile viewport). Reloads under touch/device emulation and
+  // restores the clean antique desktop home suite-zoom left, before cards.
+  await runZoomGestures(ctx);
   await runCards(ctx);
   await runScrubber(ctx);
   // Voyage split into core -> verso bleed-through -> real routes, run in that order:
