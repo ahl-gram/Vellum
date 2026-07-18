@@ -102,14 +102,18 @@ export function createZoomController({
   const isHome = (t) => t.k === 1 && t.x === 0 && t.y === 0;
 
   function apply(transform) {
-    // Home leaves the idle DOM byte-identical (no inline transform, no clip): the
-    // arrival ceremony's translate/rotate and the chart's drop shadow overflow the
-    // frame exactly as today. Clip only once actually zoomed.
+    // Home leaves the idle DOM byte-identical (no inline transform, no --zoom-k, no
+    // clip): the arrival ceremony's translate/rotate and the chart's drop shadow
+    // overflow the frame exactly as today. Clip only once actually zoomed.
     if (isHome(transform)) {
       targetEl.style.transform = "";
+      targetEl.style.removeProperty("--zoom-k");
       viewportEl.classList.remove("zoomed");
     } else {
       targetEl.style.transform = zoomTransformToCss(transform);
+      // Publish k to descendants so overlays that must NOT magnify with the chart (the
+      // place card) can counter-scale by 1/k while their anchor rides the transform.
+      targetEl.style.setProperty("--zoom-k", String(transform.k));
       viewportEl.classList.add("zoomed");
     }
   }

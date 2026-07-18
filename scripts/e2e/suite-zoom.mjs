@@ -77,6 +77,40 @@ export async function run(ctx) {
   await shoot("explorer-zoom-card.png"); // manual: card anchored to its mark at 2x (edge unfurls clip)
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`); // dismiss the pin
 
+  // Z8 (AC2, Alex's call): a pinned card reads at a CONSTANT screen size at any zoom -- it
+  // must not magnify with the chart (an 8x card fills and clips the frame). The card rides
+  // #map's transform for its anchor but is counter-scaled by 1/k (--zoom-k, published on
+  // #map by the controller). Pin a central place at home, measure the card's screen width,
+  // zoom to k=8, and confirm the width is unchanged while --zoom-k tracks k.
+  const z8 = await evaluate(`(()=>{
+    const vp=document.getElementById("map-viewport");
+    window.__vellumZoomTo({k:1,x:0,y:0});
+    const vr=vp.getBoundingClientRect();const cx=vr.left+vr.width/2,cy=vr.top+vr.height/2;
+    const hits=[...document.querySelectorAll("#map .place-hit")];
+    let best=null,bd=Infinity;for(const h of hits){const r=h.getBoundingClientRect();if(r.width===0)continue;const d=Math.hypot(r.left+r.width/2-cx,r.top+r.height/2-cy);if(d<bd){bd=d;best=h;}}
+    if(!best)return{ok:false};
+    const br=best.getBoundingClientRect();
+    const px=br.left+br.width/2-vr.left, py=br.top+br.height/2-vr.top; // the place's local coords at k=1
+    best.click();
+    const card=document.getElementById("place-card");
+    const m=document.getElementById("map");
+    const w1=card.getBoundingClientRect().width;
+    const k1=getComputedStyle(m).getPropertyValue("--zoom-k").trim();
+    const W=vp.clientWidth,H=vp.clientHeight;
+    window.__vellumZoomTo({k:8,x:W/2-8*px,y:H/2-8*py}); // centre the pinned place so its card is in view
+    const w8=card.getBoundingClientRect().width;
+    const k8=getComputedStyle(m).getPropertyValue("--zoom-k").trim();
+    return{ok:true,w1,w8,k1,k8};
+  })()`);
+  check(
+    "Z8 a pinned card stays a constant screen size while zoomed (counter-scaled, not magnified)",
+    z8.ok && Math.abs(z8.w8 - z8.w1) <= 2 && z8.k8 === "8" && (z8.k1 === "" || z8.k1 === "1"),
+    JSON.stringify(z8),
+  );
+  await sleep(700); // let the pinned unfurl (--unfurl 650ms) settle before the shot
+  await shoot("explorer-zoom-card-k8.png"); // the constant-size card at max zoom (cf. the ballooned before)
+  await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`); // dismiss the pin
+
   // Z5 (manual sanity, screenshotted): flip the verso WHILE ZOOMED. The transform is on
   // #map, never #sheet-inner, so the flip (which rotates #sheet-inner) and the zoom never
   // fight: the verso reveals its own unzoomed ghost while the hidden recto keeps its
