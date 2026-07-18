@@ -160,6 +160,21 @@ export async function run(ctx) {
     JSON.stringify(z10),
   );
 
+  // Z10b (regression, Alex's report): a rapid double-click on a zoom button makes the browser
+  // fire a `dblclick` on it, and because the cluster sits INSIDE the d3-zoom-bound #map-viewport
+  // that dblclick used to bubble into d3's own double-click-to-zoom (a 2x magnify about the
+  // pointer -- the button corner), lurching/panning the map. The cluster now stops gesture
+  // events, so a dblclick on a button leaves the camera untouched. Sleep past any (buggy) 250ms
+  // dblclick animation before reading, so the check is deterministic, not a race.
+  await evaluate(`(()=>{window.__vellumZoomTo({k:1,x:0,y:0});document.getElementById("zoom-in").dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,view:window}));})()`);
+  await sleep(350); // let any leaked d3 dblclick-zoom animation finish
+  const z10b = await evaluate(`window.__vellumZoomState()`);
+  check(
+    "Z10b a double-click on a zoom button does not leak into d3's dblclick-zoom (no lurch/pan)",
+    z10b.k === 1 && z10b.x === 0 && z10b.y === 0,
+    JSON.stringify(z10b),
+  );
+
   // Z11 (AC1): all four styles pan/zoom identically. Antique is proven above; topographic,
   // ink, nautical each magnify to the same matrix, keep touch-action:none, and keep the
   // %-positioned #place-hit overlay (the manifest is style-independent, so the marks carry

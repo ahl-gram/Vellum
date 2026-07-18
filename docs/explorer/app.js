@@ -506,6 +506,17 @@ mapViewport.addEventListener("keydown", (e) => {
 $("zoom-in").addEventListener("click", () => zoomController.scaleBy(ZOOM_STEP));
 $("zoom-out").addEventListener("click", () => zoomController.scaleBy(1 / ZOOM_STEP));
 $("zoom-reset").addEventListener("click", () => { zoomController.reset(); syncHash(); });
+// The cluster sits INSIDE #map-viewport, the element d3-zoom binds its gesture listeners to.
+// So a gesture over a button bubbles into d3: most visibly, a rapid double-click on a button
+// fires a `dblclick` that d3 turns into its own double-click-to-zoom (a 2x magnify about the
+// pointer, i.e. the button corner), lurching the map on its own. Stop d3's gesture events at
+// the cluster so ONLY the buttons' click handlers act. The chart's own double-click-to-zoom
+// (a dblclick on the viewport, not a button) is unaffected, and click never propagates here
+// so the handlers above still fire.
+const zoomControlsEl = $("zoom-controls");
+for (const type of ["mousedown", "dblclick", "wheel", "touchstart"]) {
+  zoomControlsEl.addEventListener(type, (e) => e.stopPropagation());
+}
 
 // Living Chart overlay (#53): dismiss a pinned card with Escape or a click/tap off
 // any mark. Added once; both read living-chart's current overlay so they stay
