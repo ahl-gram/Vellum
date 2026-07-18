@@ -134,6 +134,130 @@ export async function run(ctx) {
     still.star && !still.stamp && still.starAnim === "none" && still.revShown && !still.unfurl && still.revAnim === "none",
     JSON.stringify(still),
   );
+
+  // --- HG: The Surveyor's Glass, Sub 6 (#167) -- the Daily Hunt takes the glass ---
+  // The Hunt adopts the shared zoom controller (docs/shared/zoom-controller.js),
+  // geometric-only. suite-zoom / suite-zoom-gestures prove the controller's pan/zoom
+  // and REAL pinch/drag/wheel on the Explorer; the Hunt wires the IDENTICAL instance, so
+  // the risk unique to this page is the guess interaction: does zoom break the guess-click
+  // math, and does a drag-pan leak in as a guess? These use REAL CDP mouse input (not
+  // synthetic DOM events) so d3-zoom's own click-distance handling runs exactly as a
+  // finger would: a clean tap (press+release, no move) fires the click the guess listens
+  // for; a moved drag makes d3 suppress the trailing click, so it never counts as a guess.
+  //
+  // Starts from a FRESH unsolved state (H8 left today solved): clear the store, reload.
+  // Characterization, so green from the first wired run; the RED that justified the
+  // controller (a drag's release-click registering as a guess) was demonstrated in dev by
+  // detaching the controller, not committed. Runs before H9 so its console output is gated.
+  try { await evaluate(`localStorage.removeItem("vellum.hunt.v1")`); } catch {}
+  await send("Page.navigate", { url: HUNT_PAGE });
+  let hgReady = false;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try { s = await evaluate(`(()=>{const h=document.getElementById("hunt");return{hunt:h&&!h.hidden,map:!!document.querySelector("#map svg"),hook:typeof window.__vellumZoomTo==="function"};})()`); } catch {}
+    if (s && s.hunt && s.map && s.hook) { hgReady = true; break; }
+    await sleep(75);
+  }
+  check("HG0 the Hunt boots with the shared zoom controller wired (__vellumZoomTo present)", hgReady);
+
+  // Real CDP mouse primitives. A tap is press+release at ONE point (no move) -> d3 leaves
+  // the trailing click alone -> the guess fires. A drag moves between press and release ->
+  // d3 records a moved gesture and suppresses the click -> no guess.
+  const mouseTap = async (x, y) => {
+    await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", buttons: 0, clickCount: 1 });
+  };
+  const mouseDrag = async (x0, y0, x1, y1) => {
+    await send("Input.dispatchMouseEvent", { type: "mousePressed", x: x0, y: y0, button: "left", buttons: 1, clickCount: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: Math.round((x0 + x1) / 2), y: Math.round((y0 + y1) / 2), buttons: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: x1, y: y1, buttons: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: x1, y: y1, button: "left", buttons: 0, clickCount: 1 });
+  };
+
+  // HG1 (AC1): at home the idle DOM is byte-identical (no inline transform, no clip) yet the
+  // controller is attached -- .zoomable / touch-action:none is what enables pinch on touch
+  // (the shared module's real-pinch is proven in suite-zoom-gestures; here we prove the
+  // Hunt turns it on). Then zoomTo lands a resolved matrix on #map with the top-left origin,
+  // toggles .zoomed, and getState reads it back: the same geometric mode as the Explorer.
+  const hg1 = await evaluate(`(()=>{
+    const vp=document.getElementById("map-viewport"),m=document.getElementById("map");
+    const idle={inline:m.style.transform,matrix:getComputedStyle(m).transform,zoomed:vp.classList.contains("zoomed"),zoomable:vp.classList.contains("zoomable"),touch:getComputedStyle(vp).touchAction};
+    window.__vellumZoomTo({k:3,x:-20,y:-15});
+    const s=window.__vellumZoomState();const cs=getComputedStyle(m);
+    return{idle,s,matrix:cs.transform,origin:cs.transformOrigin,zoomed:vp.classList.contains("zoomed")};
+  })()`);
+  check(
+    "HG1 geometric zoom like the Explorer: idle byte-identical at home, .zoomable/touch-action on, zoomTo lands the matrix",
+    hg1.idle.inline === "" && hg1.idle.matrix === "none" && hg1.idle.zoomed === false &&
+      hg1.idle.zoomable === true && hg1.idle.touch === "none" &&
+      hg1.matrix === "matrix(3, 0, 0, 3, -20, -15)" && hg1.origin === "0px 0px" && hg1.zoomed === true &&
+      hg1.s.k === 3 && hg1.s.x === -20 && hg1.s.y === -15,
+    JSON.stringify(hg1),
+  );
+
+  // Frame the quarry at k=2 (centered, clamped) and hand back its on-screen point plus the
+  // viewport corner farthest from it (a guaranteed miss). getBoundingClientRect reflects the
+  // live transform, so the quarry's screen point is fx/fy of the transformed svg box.
+  const frameQuarry = (k) => evaluate(`(()=>{
+    const vp=document.getElementById("map-viewport"),W=vp.clientWidth,H=vp.clientHeight,k=${k};
+    window.__vellumZoomTo({k,x:W*(0.5-k*${tgt.hit.fx}),y:H*(0.5-k*${tgt.hit.fy})});
+    const svg=document.querySelector("#map svg"),sr=svg.getBoundingClientRect(),vr=vp.getBoundingClientRect();
+    const qx=Math.round(sr.left+${tgt.hit.fx}*sr.width), qy=Math.round(sr.top+${tgt.hit.fy}*sr.height);
+    let mx=0,my=0,bd=-1;
+    for(const fx of [0.12,0.88]) for(const fy of [0.12,0.88]){
+      const cx=vr.left+fx*vr.width, cy=vr.top+fy*vr.height, d=Math.hypot(cx-qx,cy-qy);
+      if(d>bd){bd=d;mx=Math.round(cx);my=Math.round(cy);}
+    }
+    return{qx,qy,mx,my,cx:Math.round(vr.left+vr.width/2),cy:Math.round(vr.top+vr.height/2),state:window.__vellumZoomState()};
+  })()`);
+
+  await evaluate(`document.getElementById("map-viewport").scrollIntoView({block:"center"})`);
+  await sleep(60);
+  const fr = await frameQuarry(2);
+
+  // HG2 (AC2): a MISS tap while zoomed drops a sounding at the tapped spot. The sounding is a
+  // %-positioned overlay on #map, so it rides the transform and lands under the finger; it
+  // must be over #map (never inside the SVG, so no chart bytes move) and must not solve.
+  await mouseTap(fr.mx, fr.my);
+  await sleep(80);
+  const hg2 = await evaluate(`(()=>{const d=document.querySelector("#map .sounding-dot");return{dots:document.querySelectorAll("#map .sounding-dot").length,inSvg:!!document.querySelector("#map svg .sounding-dot"),solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent};})()`);
+  check(
+    "HG2 a miss tap while zoomed drops a sounding at the tapped spot over #map, and does not solve (AC2)",
+    hg2.dots >= 1 && !hg2.inSvg && !hg2.solved && hg2.status.length > 0,
+    JSON.stringify(hg2),
+  );
+
+  // HG3 (AC2): a drag-pan never counts as a guess. Snapshot the hunt, drag across the sheet
+  // (a moved gesture -> d3 suppresses the trailing click), and confirm nothing changed: still
+  // unsolved, the warmth line is untouched, and no NEW sounding dropped (a leaked click would
+  // have registered a miss and done all three). This is the tap-vs-pan disambiguation.
+  const before = await evaluate(`(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,dots:document.querySelectorAll("#map .sounding-dot").length}))()`);
+  await mouseDrag(fr.cx, fr.cy, fr.cx + 150, fr.cy + 95);
+  await sleep(100);
+  const after = await evaluate(`(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,dots:document.querySelectorAll("#map .sounding-dot").length}))()`);
+  check(
+    "HG3 a drag-pan while zoomed never registers as a guess (AC2: not solved, warmth + soundings unchanged)",
+    after.solved === false && after.status === before.status && after.dots === before.dots,
+    JSON.stringify({ before, after }),
+  );
+
+  // HG4 (AC2): a clean tap on the quarry resolves the guess at zoom. Re-frame (the drag panned
+  // the quarry off-centre), then tap its on-screen point: the guess-click math is ratio-based
+  // against getBoundingClientRect (which reflects the transform), so it snaps to the quarry and
+  // solves exactly as it would at k=1 -- proving the synthesized tap at the transformed screen
+  // position lands true. This is the counterpart to HG3: a real tap DOES count.
+  const fr2 = await frameQuarry(2);
+  await mouseTap(fr2.qx, fr2.qy);
+  await sleep(120);
+  const hg4 = await evaluate(`(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,star:!!document.querySelector("#map .hunt-star")}))()`);
+  check(
+    "HG4 a guess tap resolves to the correct settlement while zoomed (AC2: solves at k=2 via a real tap)",
+    hg4.solved === true && /found it/i.test(hg4.status) && hg4.star === true,
+    JSON.stringify({ hg4, state: fr2.state }),
+  );
+  await shoot("hunt-seed-of-the-day-zoomed.png"); // manual: the win star pinned true on the magnified sheet
+  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`); // leave the map home for the checks that follow
+
   check("H9 the hunt run logged no JS exceptions or console errors", consoleErrors.length === huntErrBase, consoleErrors.slice(huntErrBase).join(" | ") || "clean");
 
   // #88: the quarry must not be picked beneath the legend card. legFrac is the
