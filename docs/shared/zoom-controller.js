@@ -77,20 +77,44 @@ export function createZoomController({
   settleMs = 250,
   onSettle,
   onApply,
-  reducedMotion = false,
+  reducedMotion,
 }) {
   const viewportExtent = () => [[0, 0], [viewportEl.clientWidth, viewportEl.clientHeight]];
+
+  // #165: reduced motion is read LIVE, not frozen at construction. It accepts a boolean
+  // or a getter (() => boolean); with neither, it reads the OS setting live via
+  // matchMedia. Live is both more correct (an OS toggle takes effect without a reload)
+  // and what lets the e2e emulate reduced-motion and prove AC5's collapse (a value
+  // baked in at construction could never be flipped mid-page).
+  const mq =
+    typeof globalThis.matchMedia === "function"
+      ? globalThis.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
+  const prefersReduced = () => {
+    if (typeof reducedMotion === "function") return !!reducedMotion();
+    if (typeof reducedMotion === "boolean") return reducedMotion;
+    return !!(mq && mq.matches);
+  };
+  const DBLCLICK_MS = 250;
 
   const behavior = zoom()
     .scaleExtent(scaleExtent)
     .extent(viewportExtent)
-    // The one animated d3 path here is the double-click zoom (default 250ms); reduced
-    // motion collapses it to an instant jump. Nothing else animates in this sub.
-    .duration(reducedMotion ? 0 : 250)
+    // The one animated d3 path here is the double-click zoom; reduced motion collapses it
+    // to an instant jump. syncDblDuration (below) keeps this live per click; the keyboard
+    // and on-screen buttons drive scaleBy/panBy instantly (their voiced glide is Sub 9),
+    // so the double-click is the sole programmatic animation this sub must collapse.
+    .duration(prefersReduced() ? 0 : DBLCLICK_MS)
     .constrain((transform, ext) => {
       const c = constrainZoom({ x: transform.x, y: transform.y, k: transform.k }, ext, scaleExtent);
       return zoomIdentity.translate(c.x, c.y).scale(c.k);
     });
+
+  // Keep the double-click honoring reduced motion LIVE. d3-zoom reads behavior.duration()
+  // inside its own (bubble-phase) dblclick handler, so a capture-phase listener that runs
+  // FIRST can refresh the duration from the current setting just before d3 uses it. This
+  // is bulletproof where relying on a matchMedia "change" event would not be.
+  const syncDblDuration = () => behavior.duration(prefersReduced() ? 0 : DBLCLICK_MS);
 
   let settleTimer = 0;
   const clearSettle = () => {
@@ -145,17 +169,25 @@ export function createZoomController({
   return {
     /** Bind the gesture listeners to viewportEl. Idempotent (re-binds in place). */
     attach() {
+      // Refresh the double-click duration from the live reduced-motion setting. Registered
+      // BEFORE d3 binds its own dblclick so ours wins the ordering: during capturing (a real
+      // click on a child of the viewport) capture beats bubble, and AT_TARGET (a click/dispatch
+      // on the viewport itself) listeners fire in registration order, so ours-first requires
+      // registering first. d3's on() re-appends on every re-bind, keeping ours ahead. Adding
+      // the same listener twice (attach is idempotent) is a no-op, so no guard is needed.
+      viewportEl.addEventListener("dblclick", syncDblDuration, true);
       sel().call(behavior);
       // touch-action:none is REQUIRED for touch drag/pinch: d3-zoom does not set it,
       // and without it the browser's native pan/pinch-zoom preempts the gesture. Gated
-      // to when the controller is attached (antique in this sub) so non-zoomable styles
-      // keep normal page scrolling over the chart. It must be present even at k=1 so the
-      // very first pinch (from home) reaches the controller rather than scrolling.
+      // to when the controller is attached (all four styles zoom as of #165) so a detached
+      // surface keeps normal page scrolling over the chart. It must be present even at k=1
+      // so the very first pinch (from home) reaches the controller rather than scrolling.
       viewportEl.classList.add("zoomable");
     },
     /** Remove the gesture listeners. Leaves the current transform in place. */
     detach() {
       sel().on(".zoom", null);
+      viewportEl.removeEventListener("dblclick", syncDblDuration, true);
       viewportEl.classList.remove("zoomable"); // restore normal touch scrolling
       clearSettle();
     },
@@ -179,6 +211,25 @@ export function createZoomController({
     zoomTo(next) {
       const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), scaleExtent);
       sel().call(behavior.transform, zoomIdentity.translate(c.x, c.y).scale(c.k));
+    },
+    /**
+     * Magnify by `factor` about the viewport centre (#165: the keyboard +/- and the
+     * on-screen buttons). It drives d3-zoom's own scaleBy, so it enters the SAME "zoom"
+     * event pipeline as a gesture (one clamp, one settle, one hash write) rather than a
+     * parallel code path. Instant on purpose; the voiced glide is Sub 9.
+     */
+    scaleBy(factor) {
+      sel().call(behavior.scaleBy, factor);
+    },
+    /**
+     * Pan the view by (dxScreen, dyScreen) screen px (#165: the keyboard arrows). d3's
+     * translateBy works in the pre-scale frame (it adds k*arg to the screen translate), so
+     * dividing by k turns a screen-px delta into that frame; the constrain then keeps the
+     * sheet covering the viewport. Same "zoom" pipeline as scaleBy.
+     */
+    panBy(dxScreen, dyScreen) {
+      const k = getState().k;
+      sel().call(behavior.translateBy, dxScreen / k, dyScreen / k);
     },
     getState,
   };

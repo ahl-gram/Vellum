@@ -22,8 +22,10 @@ import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.j
  * Apply a bookmarked/shared hash to the controls. Only keys present and valid are
  * applied, so a partial link leaves the rest at their defaults.
  * @param {Controls} controls
- * @returns {{ land: boolean, coast: boolean }} which slider gates the link touched, so
- *   the conductor can set landTouched/coastTouched (matching the old in-place mutation).
+ * @returns {{ land: boolean, coast: boolean, camera: {cx:number,cy:number,k:number}|null }}
+ *   which slider gates the link touched (so the conductor can set landTouched/coastTouched)
+ *   and the #165 camera (world-uv centre + zoom) if the link carried one, else null. The
+ *   conductor restores the camera after the first chart lands; absent params mean home.
  */
 export function readHash(controls) {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider } = controls;
@@ -71,7 +73,21 @@ export function readHash(controls) {
       coastTouched = true;
     }
   }
-  return { land: landTouched, coast: coastTouched };
+  // #165: the camera. cx/cy are the world-uv centre (0..1) and k the continuous zoom.
+  // All three must be present and finite, and k in [1, 8], for a valid frame; a partial
+  // or nonsensical set is ignored (the chart opens home), so a hand-edited link never
+  // throws. Applying the frame is the conductor's job once the chart is on screen.
+  const cxRaw = params.get("cx");
+  const cyRaw = params.get("cy");
+  const kRaw = params.get("k");
+  let camera = null;
+  if (cxRaw !== null && cyRaw !== null && kRaw !== null) {
+    const cx = Number(cxRaw);
+    const cy = Number(cyRaw);
+    const k = Number(kRaw);
+    if ([cx, cy, k].every(Number.isFinite) && k >= 1 && k <= 8) camera = { cx, cy, k };
+  }
+  return { land: landTouched, coast: coastTouched, camera };
 }
 
 /**
@@ -80,8 +96,12 @@ export function readHash(controls) {
  * @param {Controls} controls
  * @param {boolean} landTouched whether the manual sea-level override is in effect
  * @param {boolean} coastTouched whether the manual coast-warp override is in effect
+ * @param {{cx:number,cy:number,k:number}} [camera] the #165 camera. cx/cy/k are written
+ *   only when the camera is NOT home (k !== 1), so a home view links clean and every
+ *   existing (never-zoomed) shared link is byte-identical. Quantized to 4dp: enough to
+ *   restore the framing indistinguishably, short enough to keep the hash readable.
  */
-export function writeHash(controls, landTouched, coastTouched) {
+export function writeHash(controls, landTouched, coastTouched, camera) {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider } = controls;
   const params = new URLSearchParams();
   params.set("seed", seedInput.value);
@@ -94,5 +114,13 @@ export function writeHash(controls, landTouched, coastTouched) {
   if (landTouched) params.set("land", String(Math.round(sliderToLand(landSlider.value) * 1000)));
   // #137: coast= is written only once the coast gate is touched, mirroring land=.
   if (coastTouched) params.set("coast", String(Math.round(sliderToCoast(coastSlider.value) * 100)));
+  // #165: the camera is written ONLY when zoomed. k===1 is home (the controller snaps k
+  // to exactly 1 at the min extent and on reset/rebase), so the gate is exact. A world-
+  // sheet-changing action snaps home first, so any draw drops cx/cy/k for free.
+  if (camera && camera.k !== 1) {
+    params.set("cx", camera.cx.toFixed(4));
+    params.set("cy", camera.cy.toFixed(4));
+    params.set("k", camera.k.toFixed(4));
+  }
   history.replaceState(null, "", "#" + params.toString());
 }

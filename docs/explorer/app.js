@@ -14,6 +14,7 @@ import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-war
 import { startArrival } from "./draw-ceremony.js";
 import { createZoomController } from "../shared/zoom-controller.js";
 import { readHash, writeHash } from "./hash-sync.js";
+import { cameraFromTransform, transformFromCamera } from "./camera.js";
 import { seedForDate } from "./engine/world/seed-of-the-day.js";
 import {
   buildPlaceOverlay,
@@ -93,6 +94,13 @@ let landDebounce = 0;
 // different ~0.6s world, so the slider redraws on release only, not mid-drag.
 let coastTouched = false;
 
+// #165: a deep link's camera (cx/cy/k), stashed at bootstrap and applied ONCE, on the
+// first chart to land (the viewport must exist to convert uv -> transform). Strictly
+// one-shot: draw() rebases home at its top and every draw re-runs syncZoom, so a camera
+// left live here would re-frame the user on every subsequent Draw. Nulled the moment it
+// is applied.
+let pendingCamera = null;
+
 // Monotonic guard. drawGen is bumped by every draw; a draw's own result checks it,
 // so a fresh draw cancels a stale one (the chart that lands must always be the
 // latest requested).
@@ -139,23 +147,42 @@ function setCardZoom(k) {
   if (k === 1) card.style.removeProperty("--zoom-k");
   else card.style.setProperty("--zoom-k", String(k));
 }
+// #165: the camera is bookmarkable. On settle (a gesture, a keyboard step, or an on-screen
+// button coming to rest) the current frame is mirrored into the hash as cx/cy/k; at home
+// (k=1) those params are dropped, so a home view links clean. reducedMotion is left unset so
+// the controller reads the OS setting LIVE (see zoom-controller.js), which is both more
+// correct and what lets the e2e prove AC5's collapse.
 const zoomController = createZoomController({
   viewportEl: mapViewport,
   targetEl: mapDiv,
   scaleExtent: [1, 8],
-  reducedMotion: prefersReduce(),
   onApply: (state) => setCardZoom(state.k),
+  onSettle: () => syncHash(),
 });
+// #165: the camera the controller is framing, as {cx,cy,k} world-uv centre + zoom. Read
+// from the STABLE #map-viewport (its client box is the sheet size at k=1). Guard against a
+// zero-size box (before first layout) so the division is finite.
+function cameraFromState() {
+  const W = mapViewport.clientWidth || 1;
+  const H = mapViewport.clientHeight || 1;
+  return cameraFromTransform(zoomController.getState(), W, H);
+}
+// #165: the ONE hash writer. Every trigger (draw, zoom settle, a reset from verso/chronicle)
+// funnels through here so the hash always carries the complete current state, camera
+// included. writeHash drops cx/cy/k when the camera is home, so a world-changing action
+// (which snaps home first) clears them for free.
+function syncHash() {
+  writeHash(hashControls, landTouched, coastTouched, cameraFromState());
+}
+// #165: geometric pan/zoom now belongs to ALL FOUR styles (the epic's ratified decision;
+// semantic LOD stays antique-only, but that is Sub 8, not here). So the controller attaches
+// unconditionally; the reset-home-on-world-change policy lives in draw()/the verso + chronicle
+// handlers, not here, so there is no longer a style branch that could strand a magnified sheet.
 function syncZoom() {
-  if (styleSel.value === "antique") {
-    zoomController.attach();
-    // The overlay (and #place-card) was just rebuilt by this draw; re-publish the current
-    // zoom onto the fresh card so a card shown before the next gesture is counter-scaled.
-    setCardZoom(zoomController.getState().k);
-  } else {
-    zoomController.detach();
-    zoomController.reset();
-  }
+  zoomController.attach();
+  // The overlay (and #place-card) was just rebuilt by this draw; re-publish the current
+  // zoom onto the fresh card so a card shown before the next gesture is counter-scaled.
+  setCardZoom(zoomController.getState().k);
 }
 
 // opts.quiet suppresses the arrival ceremony, used only by the sea-level drag's
@@ -173,13 +200,19 @@ function draw(opts) {
   // the overlay before this draw resolves. Aborting leaves #map's pre-turn chart and
   // overlay intact (a turn never wipes #map until it commits); runTurn cancels again.
   cancelTurn();
+  // #165 reset policy: any world-sheet-changing action snaps the camera home FIRST, before
+  // its own ceremony. rebase() (not reset()) because the chart under the camera is being
+  // replaced: it drops the transform to home with no spurious settle, so this draw's own
+  // syncHash below is the authoritative hash write (home => cx/cy/k dropped). Sea-level and
+  // coast drags run through draw(), so they are covered here for free.
+  zoomController.rebase();
   drawing = true;
   cancelScrubRaf(); // a redraw is about to wipe the overlay; stop any running sweep
   cancelVoyageRaf(); // #119: likewise stop a running voyage sweep before the wipe
   versoBtn.disabled = true; // #116: no flip mid-draw; re-enabled when the draw resolves
   status.textContent = "Drafting…";
   caption.textContent = "";
-  writeHash(hashControls, landTouched, coastTouched);
+  syncHash();
   // #133: writeHash just set location.hash to this world; carry it to the Print Room
   // link so "Take to the Print Room" (and a copied link / middle-click) always opens
   // the CURRENT world, never the one from page load.
@@ -245,7 +278,7 @@ function draw(opts) {
           // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
           if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
           else clearVoyage();
-          syncZoom(); // #164: attach/reset the zoom to the just-landed chart's style
+          syncZoom(); // #164/#165: attach the zoom to the just-landed chart (every style now)
         });
       } else {
         // Settle (#127): inject the chart and run the arrival ceremony (unless this is
@@ -268,7 +301,15 @@ function draw(opts) {
         // waterline, so the roads and open water the router walks moved with it.
         if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
         else clearVoyage();
-        syncZoom(); // #164: attach/reset the zoom to the just-drawn chart's style
+        syncZoom(); // #164/#165: attach the zoom to the just-drawn chart (every style now)
+        // #165: restore a deep link's camera once the first chart (and so the viewport) is
+        // up. One-shot: consumed and nulled so no later Draw re-frames. zoomTo clamps, so a
+        // centre that would pull an edge past the viewport at that zoom is pinned in bounds.
+        if (pendingCamera) {
+          const cam = pendingCamera;
+          pendingCamera = null;
+          zoomController.zoomTo(transformFromCamera(cam, mapViewport.clientWidth, mapViewport.clientHeight));
+        }
       }
       // #116: refresh the back face for the chart just drawn. Skipped on quiet mid-
       // drag redraws (like the arrival ceremony) so a sea-level drag does not churn an
@@ -321,6 +362,14 @@ $("download").addEventListener("click", () => {
 // #sheet-inner's rotateY); the button is also disabled for the whole draw round-trip.
 versoBtn.addEventListener("click", () => {
   if (!lastSvg || drawing || sheetEl.classList.contains("turning")) return;
+  // #165 reset policy: the flip snaps the camera home FIRST, so the sheet turns over at
+  // k=1 rather than mid-magnification (the flip and the zoom share no transform, but a
+  // zoomed sheet flipping reads wrong). Unlike draw()'s rebase(), reset() is right here:
+  // the SAME chart stays, we only re-home it. syncHash writes the now-home hash EXPLICITLY
+  // rather than trusting reset()'s debounced settle, so a link copied right after the flip
+  // never carries a stale cx/cy/k. reset() is a no-op when already home (turning back).
+  zoomController.reset();
+  syncHash();
   // #174: interaction interrupts the animation. A running 12s sweep is snapped to its
   // resting track (on both faces) before the sheet turns, so the back never shows a
   // half-drawn survey and no rAF loop narrates into #status behind a hidden face. The
@@ -391,6 +440,12 @@ coastSlider.addEventListener("change", () => {
 // Play and rebases it so the next Play restarts from the beginning.
 chronicleChk.addEventListener("change", () => {
   if (chronicleChk.checked) {
+    // #165 reset policy: entering the chronicle snaps the camera home first (zoom and the
+    // scrubber are mutually exclusive per the epic; the scrub reveals baked layers on the
+    // home sheet). Explicit syncHash for the same reason as the verso flip: drop cx/cy/k
+    // now, not on a debounced settle. Leaving the chronicle needs no reset (already home).
+    zoomController.reset();
+    syncHash();
     // #119: chronicle and voyage are mutually exclusive; entering one leaves the other.
     if (voyageChk.checked) { voyageChk.checked = false; exitVoyage(); }
     applyScrub();
@@ -413,6 +468,55 @@ voyageChk.addEventListener("change", () => {
     applyVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle, { skipSweep: isFlipped(sheetEl) });
   } else exitVoyage();
 });
+
+// #165 The Surveyor's Glass, keyboard + on-screen driving. The keys and the buttons both
+// route through the controller's scaleBy/panBy, which drive d3-zoom's own scaleBy/translateBy
+// -- so a keystroke enters the EXACT same "zoom" event pipeline as a gesture (one clamp, one
+// settle, one hash write), satisfying the a11y hard requirement that keyboard-only reaches
+// full zoom. A step magnifies by 1.4x about the viewport centre; an arrow pans by ~15% of the
+// viewport. Instant on purpose (the voiced glide is Sub 9's ceremony).
+const ZOOM_STEP = 1.4;
+const PAN_FRACTION = 0.15;
+// The map viewport is focusable (tabindex in the HTML), so a keyboard user tabs onto the
+// sheet and pans/zooms it. Scoped to the viewport (not document) so the arrows do not hijack
+// the page scroll from elsewhere; preventDefault only for keys we consume, so Escape et al
+// still bubble to the document (card dismiss). "0" homes the camera.
+mapViewport.addEventListener("keydown", (e) => {
+  if (e.altKey || e.ctrlKey || e.metaKey) return; // leave browser/OS chords alone
+  const W = mapViewport.clientWidth;
+  const H = mapViewport.clientHeight;
+  switch (e.key) {
+    case "+": case "=": zoomController.scaleBy(ZOOM_STEP); break;
+    case "-": case "_": zoomController.scaleBy(1 / ZOOM_STEP); break;
+    // Arrow moves the camera the way it points: ArrowRight reveals what lies to the right,
+    // so the content slides left, i.e. the screen translate decreases. panBy takes a screen
+    // delta, so the sign is applied here and the controller stays direction-agnostic.
+    case "ArrowLeft": zoomController.panBy(W * PAN_FRACTION, 0); break;
+    case "ArrowRight": zoomController.panBy(-W * PAN_FRACTION, 0); break;
+    case "ArrowUp": zoomController.panBy(0, H * PAN_FRACTION); break;
+    case "ArrowDown": zoomController.panBy(0, -H * PAN_FRACTION); break;
+    case "0": zoomController.reset(); syncHash(); break; // home
+    default: return; // not ours: let it through (browse mode, card Escape, tabbing)
+  }
+  e.preventDefault();
+});
+// The on-screen minus / reset / plus cluster (#165, functional now, voiced in Sub 9). Same
+// controller entry points as the keys. Reset writes the hash explicitly (drop cx/cy/k now);
+// scaleBy rides its settle to write the new camera.
+$("zoom-in").addEventListener("click", () => zoomController.scaleBy(ZOOM_STEP));
+$("zoom-out").addEventListener("click", () => zoomController.scaleBy(1 / ZOOM_STEP));
+$("zoom-reset").addEventListener("click", () => { zoomController.reset(); syncHash(); });
+// The cluster sits INSIDE #map-viewport, the element d3-zoom binds its gesture listeners to.
+// So a gesture over a button bubbles into d3: most visibly, a rapid double-click on a button
+// fires a `dblclick` that d3 turns into its own double-click-to-zoom (a 2x magnify about the
+// pointer, i.e. the button corner), lurching the map on its own. Stop d3's gesture events at
+// the cluster so ONLY the buttons' click handlers act. The chart's own double-click-to-zoom
+// (a dblclick on the viewport, not a button) is unaffected, and click never propagates here
+// so the handlers above still fire.
+const zoomControlsEl = $("zoom-controls");
+for (const type of ["mousedown", "dblclick", "wheel", "touchstart"]) {
+  zoomControlsEl.addEventListener(type, (e) => e.stopPropagation());
+}
 
 // Living Chart overlay (#53): dismiss a pinned card with Escape or a click/tap off
 // any mark. Added once; both read living-chart's current overlay so they stay
@@ -447,4 +551,7 @@ seedInput.value = String(seedForDate(new Date()));
 const hashed = readHash(hashControls);
 if (hashed.land) landTouched = true;
 if (hashed.coast) coastTouched = true; // #137: a shared coast= link opens warped
+// #165: stash a deep link's camera BEFORE draw() (draw's own syncHash rewrites the hash to
+// home, so it must be read first). It is applied once the first chart lands (settle branch).
+pendingCamera = hashed.camera;
 draw();
