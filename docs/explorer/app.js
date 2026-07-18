@@ -12,6 +12,7 @@ import { toggleFlip, isFlipped, rebuildVerso } from "./verso.js";
 import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.js";
 import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.js";
 import { startArrival } from "./draw-ceremony.js";
+import { createZoomController } from "../shared/zoom-controller.js";
 import { readHash, writeHash } from "./hash-sync.js";
 import { seedForDate } from "./engine/world/seed-of-the-day.js";
 import {
@@ -54,6 +55,7 @@ const landSlider = $("land");
 const coastSlider = $("coast");
 const status = $("status");
 const mapDiv = $("map");
+const mapViewport = $("map-viewport"); // #164: the zoom clipping/gesture box wrapping #map
 const sheetEl = $("sheet");
 const innerEl = $("sheet-inner");
 const caption = $("caption");
@@ -116,6 +118,44 @@ function turnTiming() {
   const ms = parseFloat(cs.getPropertyValue("--turn")) || 900;
   const ease = cs.getPropertyValue("--ease-turn").trim() || "cubic-bezier(0.62, 0, 0.34, 1)";
   return { ms, ease };
+}
+
+// #164 The Surveyor's Glass: geometric pan/zoom on the antique chart. The controller
+// binds to the STABLE #map-viewport (never wiped by a redraw) and lands its live CSS
+// transform on #map, so the chart SVG and its %-positioned overlays (place hits, cards,
+// voyage track) ride one composited frame with no redraw. Antique-only in this sub:
+// syncZoom() (called on every draw resolve, both the settle and the turn landing)
+// attaches the gestures on antique and snaps home + detaches on any other style, so a
+// non-antique chart is never left magnified. There is deliberately NO snap-home on a
+// same-style redraw yet -- a redraw while zoomed stays zoomed; the camera-home policy
+// for world-changing actions is Sub 4's (#165).
+// #164: publish the current zoom k onto the place card (a LEAF, sibling of the chart
+// svg) so the card counter-scales to a constant, readable size. It is written to the
+// CARD, never to #map: a per-frame non-transform style write on #map re-rasterizes the
+// baked SVG labels and makes them jiggle (only #map's `transform` may change per frame).
+function setCardZoom(k) {
+  const card = document.getElementById("place-card");
+  if (!card) return;
+  if (k === 1) card.style.removeProperty("--zoom-k");
+  else card.style.setProperty("--zoom-k", String(k));
+}
+const zoomController = createZoomController({
+  viewportEl: mapViewport,
+  targetEl: mapDiv,
+  scaleExtent: [1, 8],
+  reducedMotion: prefersReduce(),
+  onApply: (state) => setCardZoom(state.k),
+});
+function syncZoom() {
+  if (styleSel.value === "antique") {
+    zoomController.attach();
+    // The overlay (and #place-card) was just rebuilt by this draw; re-publish the current
+    // zoom onto the fresh card so a card shown before the next gesture is counter-scaled.
+    setCardZoom(zoomController.getState().k);
+  } else {
+    zoomController.detach();
+    zoomController.reset();
+  }
 }
 
 // opts.quiet suppresses the arrival ceremony, used only by the sea-level drag's
@@ -205,6 +245,7 @@ function draw(opts) {
           // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
           if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
           else clearVoyage();
+          syncZoom(); // #164: attach/reset the zoom to the just-landed chart's style
         });
       } else {
         // Settle (#127): inject the chart and run the arrival ceremony (unless this is
@@ -227,6 +268,7 @@ function draw(opts) {
         // waterline, so the roads and open water the router walks moved with it.
         if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
         else clearVoyage();
+        syncZoom(); // #164: attach/reset the zoom to the just-drawn chart's style
       }
       // #116: refresh the back face for the chart just drawn. Skipped on quiet mid-
       // drag redraws (like the arrival ceremony) so a sea-level drag does not churn an
@@ -392,6 +434,10 @@ window.__vellumVoyagePaintAt = voyagePaintAt;
 window.__vellumVoyagePlan = voyagePlan;
 window.__vellumVoyageLog = voyageLog; // #121: the margin log (entries, summary, reveal state)
 window.__vellumVoyageLegGeometry = voyageLegGeometry; // #120: projected leg points, for W20b
+// #164: deterministic zoom hooks for the e2e (Z1-Z4). zoomTo drives the camera through
+// the same clamp a live gesture uses; zoomState reads back the settled {x,y,k}.
+window.__vellumZoomTo = (t) => zoomController.zoomTo(t);
+window.__vellumZoomState = () => zoomController.getState();
 
 // A bare visit (no seed in the hash) lands on today's seed-of-the-day (UTC), the same
 // default world the Print Room and the Today page use. readHash overrides it only when

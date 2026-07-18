@@ -66,7 +66,23 @@ button.primary { background: #4a3826; color: #f2e8cf; letter-spacing: 0.08em; }
 button.primary:hover { background: #5d4831; }
 .status { text-align: center; font-style: italic; color: #857257;
   min-height: 1.4em; margin-bottom: 0.8rem; }
-#map { max-width: 1100px; margin-inline: auto; position: relative; }
+/* #164 The Surveyor's Glass. #map-viewport is the layout + clipping box (it owns the
+   centering #map used to); #map is the transform target the zoom-controller drives.
+   transform-origin 0 0 makes the CSS scale pivot at the top-left, matching d3-zoom's
+   screen-space math (point*k + translate) so gestures land true and the overlays stay
+   pixel-aligned with their marks. overflow:hidden clips ONLY while zoomed (.zoomed,
+   toggled by the controller): at k=1 (home) the arrival ceremony's translate/rotate
+   and the chart's drop shadow must overflow the frame exactly as today, so the idle
+   page is byte-identical. */
+#map-viewport { max-width: 1100px; margin-inline: auto; position: relative; }
+#map-viewport.zoomed { overflow: hidden; }
+/* #164: touch drag/pinch need touch-action:none, which d3-zoom does NOT set; without
+   it the browser's native pan/pinch preempts the gesture. The controller adds .zoomable
+   only while attached (antique in this sub), so non-zoomable styles keep normal touch
+   scrolling over the chart. Tradeoff: on antique, a touch/wheel over the sheet no longer
+   scrolls the page past it (standard slippy-map behavior). */
+#map-viewport.zoomable { touch-action: none; }
+#map { position: relative; transform-origin: 0 0; }
 #map svg { width: 100%; height: auto; display: block;
   border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
 
@@ -83,7 +99,11 @@ button.primary:hover { background: #5d4831; }
 .sheet-inner { position: relative; }
 .sheet.turning { perspective: 2200px; }
 .sheet-inner.turning { transform-style: preserve-3d; }
-.sheet-inner.turning #map { backface-visibility: hidden; }
+/* #164: the backface hides on #map-viewport (the direct child of the preserve-3d
+   #sheet-inner), not #map: the viewport is a flat plane -- transform-style flat is the
+   default, and the .zoomed overflow:hidden would force it regardless -- so #map renders
+   flattened into it, and it is the viewport's facing that must flip out of view. */
+.sheet-inner.turning #map-viewport { backface-visibility: hidden; }
 .sheet-back {
   position: absolute; inset: 0 0 auto 0;
   backface-visibility: hidden; transform: rotateY(180deg);
@@ -107,7 +127,7 @@ button.primary:hover { background: #5d4831; }
 }
 .sheet.flip3d { perspective: 2200px; }
 .sheet.flip3d .sheet-inner { transform-style: preserve-3d; }
-.sheet.flip3d #map { backface-visibility: hidden; }
+.sheet.flip3d #map-viewport { backface-visibility: hidden; } /* #164: retargeted from #map, see the turn rule above */
 .sheet.versoed .sheet-inner { transform: rotateY(-180deg); }
 
 /* The back face: a permanent sibling of #map, sized by its ghost image so the sheet
@@ -204,15 +224,25 @@ button.primary:hover { background: #5d4831; }
 /* #place-card is the positioning shell only: its transform places the card by its
    anchor corner (the flip variants below). The paper sheet + its #128 unfurl live on
    the inner wrapper, so the unfurl's own transform never fights this positioning one. */
+/* #164: the card is a tooltip, so it must NOT magnify with the chart while zoomed (a
+   4-8x card fills and clips the frame). It lives inside #map, so its anchor rides the
+   zoom transform for free; the leading scale(1/k) counter-scales it back to a constant,
+   readable size. --zoom-k is published on THIS card element (never on #map, which would
+   re-rasterize the baked SVG labels every frame and make them jiggle) by app.js. Scaling
+   about the box origin (transform-origin 0 0, i.e. the mark point) keeps the anchor corner
+   a constant screen distance from the mark for EVERY flip variant, because the flip offset
+   rides inside the same scale. The (…,1) fallback makes scale(1) at home, so the transform
+   reduces to the original translate and the idle card is byte-identical. */
 #place-card {
   position: absolute; z-index: 5; max-width: 16rem; pointer-events: none;
-  transform: translate(10px, 10px);
+  transform-origin: 0 0;
+  transform: scale(calc(1 / var(--zoom-k, 1))) translate(10px, 10px);
 }
 /* id+attr specificity beats the id-only rule above, so [hidden] really hides. */
 #place-card[hidden] { display: none; }
-#place-card.flip-h { transform: translate(calc(-100% - 10px), 10px); }
-#place-card.flip-v { transform: translate(10px, calc(-100% - 10px)); }
-#place-card.flip-h.flip-v { transform: translate(calc(-100% - 10px), calc(-100% - 10px)); }
+#place-card.flip-h { transform: scale(calc(1 / var(--zoom-k, 1))) translate(calc(-100% - 10px), 10px); }
+#place-card.flip-v { transform: scale(calc(1 / var(--zoom-k, 1))) translate(10px, calc(-100% - 10px)); }
+#place-card.flip-h.flip-v { transform: scale(calc(1 / var(--zoom-k, 1))) translate(calc(-100% - 10px), calc(-100% - 10px)); }
 /* #128 The slow unfurl. The sheet unrolls from the edge nearest its place: top when
    the card hangs below the anchor, bottom when it sits above (the flip-v cases). A
    pinned/tapped card plays the full --unfurl ceremony; a hover/focus preview runs the
