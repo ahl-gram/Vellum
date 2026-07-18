@@ -27,6 +27,7 @@ const MIME: Record<string, string> = {
   ".json": "application/json; charset=utf-8",
   ".png": "image/png",
   ".ico": "image/x-icon",
+  ".woff2": "font/woff2",
 };
 
 const SITE = resolve("docs");

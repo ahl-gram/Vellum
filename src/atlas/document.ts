@@ -45,7 +45,8 @@ export type AtlasDocumentData = {
  * eases correctly.
  */
 export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
-.atlas-sheet h2 { letter-spacing: 0.06em; border-bottom: 1px solid #b9a77f; padding-bottom: 0.3rem; }
+.atlas-sheet h2 { letter-spacing: 0.06em; border-bottom: 1px solid #b9a77f; padding-bottom: 0.3rem;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); }
 .atlas-sheet figure img { width: 100%; height: auto; display: block;
   border: 1px solid #b9a77f; box-shadow: 0 10px 30px rgb(61 47 31 / 0.18);
   transition: transform var(--paper, 260ms) var(--ease-paper, cubic-bezier(0.22, 0.61, 0.36, 1)),
@@ -53,7 +54,8 @@ export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
 .atlas-sheet figure img:hover { transform: translateY(-5px) rotate(-0.6deg);
   box-shadow: 0 20px 44px rgb(61 47 31 / 0.28); }
 .atlas-sheet figure img:active { transform: translateY(-1px) rotate(0deg); }
-.atlas-sheet figcaption { text-align: center; font-style: italic; color: #6b5a40; padding-top: 0.55rem; }
+.atlas-sheet figcaption { text-align: center; font-style: italic; color: #6b5a40; padding-top: 0.55rem;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); }
 .atlas-sheet .styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
 .atlas-sheet .themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.25rem; }
 .atlas-sheet table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
@@ -81,8 +83,17 @@ const PAGE_CHROME_CSS = `:root { color-scheme: light; }
 body {
   margin: 0; padding: 2.5rem 1.5rem 5rem;
   background: #efe6cf; color: #3d2f1f;
-  font-family: 'Iowan Old Style', 'Palatino', Georgia, serif;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
   max-width: 1080px; margin-inline: auto;
+}
+/* The Punchcutter's Case (#228): the deployed page links /fonts.css (below, gated on
+   motion) so these vars resolve to the Fell/Garamond faces; the offline single-file
+   download links nothing, so each var falls back to the serif stack inline. */
+h1, h2, .chartno, footer {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+}
+.subtitle {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
 header { text-align: center; margin-bottom: 2rem; }
 h1 { font-size: 2.4rem; letter-spacing: 0.04em; margin: 0 0 0.4rem; }
@@ -138,8 +149,9 @@ function plateFigure(
  * Assemble a complete standalone atlas HTML document from composed plates. `plateSrc`
  * decides how each plate is embedded: the CLI returns a filename (and sets anchor:true
  * so the sheet links its full-size SVG); the single-file download returns a base64 data
- * URI (anchor:false). `motion` links the shared /motion.css desk (the CLI page and the
- * folio); the offline download omits it and relies on the CSS fallbacks above.
+ * URI (anchor:false). `motion` links the shared /fonts.css (the Punchcutter faces, #228)
+ * and /motion.css desk (the CLI page and the folio); the offline download omits both and
+ * relies on the CSS fallbacks above (serif type, literal-valued transitions).
  */
 export function atlasDocument(
   data: AtlasDocumentData,
@@ -160,7 +172,7 @@ export function atlasDocument(
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeXml(data.title)}: a Vellum atlas</title>
-${motion ? '<link rel="stylesheet" href="/motion.css">\n' : ""}<style>
+${motion ? '<link rel="stylesheet" href="/fonts.css">\n<link rel="stylesheet" href="/motion.css">\n' : ""}<style>
 ${PAGE_CHROME_CSS}
 ${ATLAS_SHEET_CSS}
 </style>
