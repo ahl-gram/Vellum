@@ -37,12 +37,16 @@ export async function buildGallery(
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vellum gallery: ${count} worlds from seed ${startSeed}</title>
+<link rel="stylesheet" href="/fonts.css">
 <link rel="stylesheet" href="/motion.css">
 <style>
   body { margin: 0; padding: 2rem 1.5rem 4rem; background: #efe6cf; color: #3d2f1f;
-    font-family: 'Iowan Old Style', 'Palatino', Georgia, serif; }
-  h1 { text-align: center; letter-spacing: 0.05em; }
-  p.sub { text-align: center; font-style: italic; color: #6b5a40; margin-bottom: 2.5rem; }
+    font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); }
+  /* The Punchcutter's Case (#228): display title, italic flourish subtitle. */
+  h1 { text-align: center; letter-spacing: 0.05em;
+    font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); }
+  p.sub { text-align: center; font-style: italic; color: #6b5a40; margin-bottom: 2.5rem;
+    font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
     gap: 1.5rem; max-width: 1500px; margin-inline: auto; }
   figure { margin: 0; }

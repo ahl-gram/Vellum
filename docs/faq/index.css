@@ -2,8 +2,15 @@
 body {
   margin: 0; padding: 2.5rem 1.5rem 5rem;
   background: #efe6cf; color: #3d2f1f;
-  font-family: 'Iowan Old Style', 'Palatino', Georgia, serif;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
   line-height: 1.6;
+}
+/* The Punchcutter's Case (#228): display/flourish/body roles via /fonts.css vars. */
+h1, h2, nav, footer {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+}
+.tagline {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
 main { max-width: 760px; margin-inline: auto; }
 header { text-align: center; margin-bottom: 1rem; }

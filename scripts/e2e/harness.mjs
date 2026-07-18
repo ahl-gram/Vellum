@@ -20,6 +20,7 @@ const MIME = {
   ".json": "application/json; charset=utf-8",
   ".png": "image/png",
   ".ico": "image/x-icon",
+  ".woff2": "font/woff2",
 };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
