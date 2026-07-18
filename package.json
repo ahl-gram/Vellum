@@ -9,17 +9,21 @@
   },
   "scripts": {
     "chart": "node src/cli/main.ts chart",
-    "site": "node scripts/build-site.ts && tsc -p tsconfig.browser.json",
+    "site": "node scripts/build-site.ts && tsc -p tsconfig.browser.json && node scripts/build-explorer-bundle.ts docs",
     "serve": "node scripts/serve.ts",
     "dev": "npm run site && node scripts/serve.ts",
     "og": "node scripts/build-og.ts",
-    "build": "node scripts/build-dist.ts && tsc -p tsconfig.browser.json --outDir dist/explorer/engine",
+    "build": "node scripts/build-dist.ts && tsc -p tsconfig.browser.json --outDir dist/explorer/engine && node scripts/build-explorer-bundle.ts dist",
     "test": "node --test",
     "test:e2e": "node scripts/e2e-explorer.mjs",
     "check": "tsc --noEmit"
   },
+  "dependencies": {
+    "d3-zoom": "^3.0.0"
+  },
   "devDependencies": {
     "typescript": "^5.8.0",
-    "@types/node": "^24.0.0"
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.28.1"
   }
 }

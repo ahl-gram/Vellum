@@ -24,11 +24,17 @@ const DIST = resolve("dist");
 const HERO_SEED = 42;
 const GALLERY_SEED = 100;
 
-// docs/ subpaths that are generated output, never copied into dist/ as source.
+// docs/ subpaths that are generated output, never copied into dist/ as source:
+// they are regenerated fresh into dist/ instead. Includes the esbuild .bundle.js
+// twins (#163), which are rebuilt into dist/ by build-explorer-bundle.ts after the
+// tsc engine emit, so a stale local `npm run site` twin cannot leak into dist/.
 const GENERATED = new Set([
   join(DOCS, "explorer", "engine"),
   join(DOCS, "atlas"),
   join(DOCS, "gallery"),
+  join(DOCS, "explorer", "app.bundle.js"),
+  join(DOCS, "explorer", "worker.bundle.js"),
+  join(DOCS, "seed-of-the-day", "app.bundle.js"),
 ]);
 
 async function main(): Promise<void> {
