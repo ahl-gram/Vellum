@@ -29,6 +29,7 @@ import { run as runRender } from "./e2e/suite-render.mjs";
 import { run as runMotion } from "./e2e/suite-motion.mjs";
 import { run as runTurn } from "./e2e/suite-turn.mjs";
 import { run as runVerso } from "./e2e/suite-verso.mjs";
+import { run as runZoom } from "./e2e/suite-zoom.mjs";
 import { run as runCards } from "./e2e/suite-cards.mjs";
 import { run as runScrubber } from "./e2e/suite-scrubber.mjs";
 import { run as runVoyage } from "./e2e/suite-voyage.mjs";
@@ -81,6 +82,9 @@ async function main() {
   await runMotion(ctx);
   await runTurn(ctx);
   await runVerso(ctx);
+  // #164 The Surveyor's Glass: geometric zoom on the antique chart. Runs on the clean
+  // antique base verso leaves, and snaps the camera home before handing off to cards.
+  await runZoom(ctx);
   await runCards(ctx);
   await runScrubber(ctx);
   // Voyage split into core -> verso bleed-through -> real routes, run in that order:
