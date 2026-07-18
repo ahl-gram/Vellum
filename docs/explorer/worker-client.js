@@ -72,12 +72,14 @@ export function usesWorker() {
 // jobs degrade to inline too.
 //
 // workerUrl is the spawn target. `new Worker(str)` resolves str against the DOCUMENT
-// base URL, not this module's URL, so the Explorer's default "./worker.js" (document
-// base /explorer/) lands on /explorer/worker.js exactly as before. A page in another
-// directory that reuses this client (the Print Room, #133) must pass the root-absolute
-// "/explorer/worker.js" instead, or a bare "./worker.js" would resolve against ITS base
-// (/print-room/) and 404 into a silent inline fallback. The worker's own ./engine/...
-// imports always resolve against the worker script URL, so only the spawn string bites.
+// base URL, not this module's URL, so the Explorer's default "./worker.bundle.js"
+// (document base /explorer/) lands on /explorer/worker.bundle.js, the esbuild twin
+// (#163). A page in another directory that reuses this client (the Print Room, #133)
+// must pass a root-absolute URL instead, or a bare "./worker.bundle.js" would resolve
+// against ITS base (/print-room/) and 404 into a silent inline fallback. The Print Room
+// is not put through the press, so it passes "/explorer/worker.js", the native-ESM
+// worker. Either worker's own ./engine/... imports resolve against the worker script
+// URL (and the twin inlines them), so only the spawn string bites.
 function connect(workerUrl) {
   return new Promise((resolve) => {
     let w;
@@ -114,9 +116,10 @@ function connect(workerUrl) {
 
 /**
  * Connect the worker (best-effort) and record it as the active transport.
- * @param {string} [workerUrl] spawn target (default "./worker.js", the Explorer's own).
- *   A cross-directory reuser (the Print Room) passes root-absolute "/explorer/worker.js".
+ * @param {string} [workerUrl] spawn target (default "./worker.bundle.js", the Explorer's
+ *   own esbuild twin). A cross-directory reuser (the Print Room) passes the root-absolute
+ *   "/explorer/worker.js" (the unbundled worker; the Print Room is not bundled).
  */
-export async function initWorker(workerUrl = "./worker.js") {
+export async function initWorker(workerUrl = "./worker.bundle.js") {
   worker = await connect(workerUrl);
 }

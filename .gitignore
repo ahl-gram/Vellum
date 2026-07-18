@@ -13,6 +13,12 @@ docs/explorer/engine/
 docs/atlas/
 docs/gallery/
 
+# esbuild bundle twins (#163): gitignored siblings of the committed hand-authored
+# sources, rebuilt by build-explorer-bundle.ts after the tsc engine emit.
+docs/explorer/app.bundle.js
+docs/explorer/worker.bundle.js
+docs/seed-of-the-day/app.bundle.js
+
 .claude/settings.local.json
 # Transient review worktrees spawned by Claude Code workflows.
 .claude/worktrees/

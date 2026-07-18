@@ -34,16 +34,20 @@ const httpGet = (url) =>
       .on("error", reject);
   });
 
-// Mutable static file server. blockWorker flips worker.js to a 404 so the inline
-// fallback can be exercised without ever mutating the working tree on disk. The
-// fallback suite flips this same object via ctx.serverState.
+// Mutable static file server. blockWorker flips the worker scripts to a 404 so the
+// inline fallback can be exercised without ever mutating the working tree on disk.
+// The fallback suite flips this same object via ctx.serverState. Both worker names
+// are blocked (#163): the Explorer spawns the esbuild twin worker.bundle.js, the
+// Print Room still spawns the unbundled worker.js, and each page's fallback suite
+// needs its own spawn target 404'd.
 const serverState = { blockWorker: false };
+const BLOCKED_WORKERS = new Set(["/explorer/worker.js", "/explorer/worker.bundle.js"]);
 function startServer(SITE, PORT) {
   const server = createServer(async (req, res) => {
     try {
       const url = new URL(req.url, "http://127.0.0.1");
       let pathname = decodeURIComponent(url.pathname);
-      if (serverState.blockWorker && pathname === "/explorer/worker.js") {
+      if (serverState.blockWorker && BLOCKED_WORKERS.has(pathname)) {
         res.writeHead(404).end("worker blocked for fallback test");
         return;
       }
