@@ -170,6 +170,67 @@ function armTurnWatch() {
   return evaluate(`(()=>{window.__turned=false;if(window.__turnMo)window.__turnMo.disconnect();window.__turnMo=new MutationObserver(()=>{if(document.querySelector(".sheet.turning"))window.__turned=true;});window.__turnMo.observe(document.getElementById("sheet"),{subtree:true,attributes:true,attributeFilter:["class"]});return true;})()`);
 }
 
+// ---- real input primitives (Sub 5, #166) --------------------------------------
+// Thin wrappers over the same send() idiom the rest of the harness uses, dispatching
+// REAL browser input (not synthetic DOM events) so d3-zoom's own wheel/touch handlers
+// run exactly as they do for a user. Touch is gated on the page having booted as a
+// touch device: d3-zoom binds its touch listeners only when navigator.maxTouchPoints
+// is truthy at bind time (defaultTouchable), so setTouch()/mobileViewport() must be in
+// effect BEFORE the (re)navigate that boots the Explorer. suite-zoom-gestures proves
+// the wheel/pinch/pan behaviour the Sub 3/4 hooks proved programmatically.
+
+// A real mouse wheel at (x, y) page px. Negative deltaY zooms IN (d3's wheelDelta is
+// -deltaY * 0.002 at deltaMode 0), so the sign matches a user scrolling up to zoom.
+function wheel(x, y, deltaY, deltaX = 0) {
+  return send("Input.dispatchMouseEvent", { type: "mouseWheel", x, y, deltaX, deltaY });
+}
+
+// One raw touch event. `points` is [{x, y, id}]; per CDP, touchStart/touchMove carry
+// the currently-down points and touchEnd/touchCancel MUST pass [] (CDP diffs against
+// the prior event to end every active point). The composed gestures below never leave
+// a gesture half-open, so a later suite's first touch starts from a clean slate.
+function touch(type, points) {
+  return send("Input.dispatchTouchEvent", { type, touchPoints: points });
+}
+
+// A one-finger drag from (x0, y0) to (x1, y1): start, one move, end. d3 pans by the
+// screen delta; at k=1 the constrain snaps it home, so the caller must be zoomed first.
+async function touchPan(x0, y0, x1, y1) {
+  await touch("touchStart", [{ x: x0, y: y0, id: 0 }]);
+  await touch("touchMove", [{ x: x1, y: y1, id: 0 }]);
+  await touch("touchEnd", []);
+}
+
+// A two-finger pinch centred on (cx, cy): the pair starts `from` px apart and ends `to`
+// px apart, horizontally. d3 sets k to k_old * (to / from) about the centroid; one move
+// suffices because d3 scales against the touchstart spread, not incrementally.
+async function pinch(cx, cy, from, to) {
+  const s = from / 2, e = to / 2;
+  await touch("touchStart", [{ x: cx - s, y: cy, id: 0 }, { x: cx + s, y: cy, id: 1 }]);
+  await touch("touchMove", [{ x: cx - e, y: cy, id: 0 }, { x: cx + e, y: cy, id: 1 }]);
+  await touch("touchEnd", []);
+}
+
+// Emulate a touch device. maxTouchPoints > 0 makes d3's defaultTouchable() true, so the
+// NEXT navigate boots the Explorer with touch listeners bound. Call before (re)loading.
+function setTouch(enabled, maxTouchPoints = 5) {
+  return send("Emulation.setTouchEmulationEnabled", { enabled, maxTouchPoints });
+}
+
+// Emulate a mobile viewport (small screen + touch). Reload after so the page boots as a
+// phone (the mobile touch-action wiring is what AC2 proves). Clear with clearMobile().
+async function setMobileViewport(width, height) {
+  await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: true });
+  await setTouch(true);
+}
+
+// Undo setMobileViewport/setTouch: back to the desktop window metrics, touch off. A
+// reload after this returns the page to a pristine desktop state for the next suite.
+async function clearMobile() {
+  await send("Emulation.clearDeviceMetricsOverride");
+  await setTouch(false);
+}
+
 async function shoot(file) {
   const h = await evaluate(`Math.min(16000, Math.ceil(document.body.scrollHeight))`);
   const r = await send("Page.captureScreenshot", {
@@ -281,6 +342,7 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
   return {
     evaluate, send, check, shoot, sleep,
     waitSettled, waitReady, waitTurned, armTurnWatch, axDescription,
+    wheel, touch, touchPan, pinch, setTouch, setMobileViewport, clearMobile,
     serverState, cleanup, consoleErrors, http4xx, PORT,
   };
 }
