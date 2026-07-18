@@ -227,9 +227,10 @@ button.primary:hover { background: #5d4831; }
 /* #164: the card is a tooltip, so it must NOT magnify with the chart while zoomed (a
    4-8x card fills and clips the frame). It lives inside #map, so its anchor rides the
    zoom transform for free; the leading scale(1/k) counter-scales it back to a constant,
-   readable size. --zoom-k is published on #map by the zoom controller. Scaling about the
-   box origin (transform-origin 0 0, i.e. the mark point) keeps the anchor corner a
-   constant screen distance from the mark for EVERY flip variant, because the flip offset
+   readable size. --zoom-k is published on THIS card element (never on #map, which would
+   re-rasterize the baked SVG labels every frame and make them jiggle) by app.js. Scaling
+   about the box origin (transform-origin 0 0, i.e. the mark point) keeps the anchor corner
+   a constant screen distance from the mark for EVERY flip variant, because the flip offset
    rides inside the same scale. The (…,1) fallback makes scale(1) at home, so the transform
    reduces to the original translate and the idle card is byte-identical. */
 #place-card {

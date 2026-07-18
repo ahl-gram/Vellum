@@ -76,6 +76,7 @@ export function createZoomController({
   scaleExtent = [1, 8],
   settleMs = 250,
   onSettle,
+  onApply,
   reducedMotion = false,
 }) {
   const viewportExtent = () => [[0, 0], [viewportEl.clientWidth, viewportEl.clientHeight]];
@@ -102,20 +103,23 @@ export function createZoomController({
   const isHome = (t) => t.k === 1 && t.x === 0 && t.y === 0;
 
   function apply(transform) {
-    // Home leaves the idle DOM byte-identical (no inline transform, no --zoom-k, no
-    // clip): the arrival ceremony's translate/rotate and the chart's drop shadow
-    // overflow the frame exactly as today. Clip only once actually zoomed.
+    // Home leaves the idle DOM byte-identical (no inline transform, no clip): the arrival
+    // ceremony's translate/rotate and the chart's drop shadow overflow the frame exactly
+    // as today. Clip only once actually zoomed.
     if (isHome(transform)) {
       targetEl.style.transform = "";
-      targetEl.style.removeProperty("--zoom-k");
       viewportEl.classList.remove("zoomed");
     } else {
       targetEl.style.transform = zoomTransformToCss(transform);
-      // Publish k to descendants so overlays that must NOT magnify with the chart (the
-      // place card) can counter-scale by 1/k while their anchor rides the transform.
-      targetEl.style.setProperty("--zoom-k", String(transform.k));
       viewportEl.classList.add("zoomed");
     }
+    // Per-frame hook for overlays that must counter-scale to a constant size (the place
+    // card). It MUST write to a LEAF element, never here on #map: the only per-frame
+    // mutation on #map stays the composited `transform`, so #map keeps its rasterize-once
+    // / GPU-scale layer. A non-transform style write on #map (an ancestor of the chart
+    // <svg>) invalidates the whole subtree every frame, re-rasterizing the baked SVG
+    // labels at the live fractional scale, and they visibly jiggle. Learned the hard way.
+    if (onApply) onApply({ x: transform.x, y: transform.y, k: transform.k });
   }
 
   behavior.on("zoom", (event) => {

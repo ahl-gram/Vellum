@@ -129,15 +129,30 @@ function turnTiming() {
 // non-antique chart is never left magnified. There is deliberately NO snap-home on a
 // same-style redraw yet -- a redraw while zoomed stays zoomed; the camera-home policy
 // for world-changing actions is Sub 4's (#165).
+// #164: publish the current zoom k onto the place card (a LEAF, sibling of the chart
+// svg) so the card counter-scales to a constant, readable size. It is written to the
+// CARD, never to #map: a per-frame non-transform style write on #map re-rasterizes the
+// baked SVG labels and makes them jiggle (only #map's `transform` may change per frame).
+function setCardZoom(k) {
+  const card = document.getElementById("place-card");
+  if (!card) return;
+  if (k === 1) card.style.removeProperty("--zoom-k");
+  else card.style.setProperty("--zoom-k", String(k));
+}
 const zoomController = createZoomController({
   viewportEl: mapViewport,
   targetEl: mapDiv,
   scaleExtent: [1, 8],
   reducedMotion: prefersReduce(),
+  onApply: (state) => setCardZoom(state.k),
 });
 function syncZoom() {
-  if (styleSel.value === "antique") zoomController.attach();
-  else {
+  if (styleSel.value === "antique") {
+    zoomController.attach();
+    // The overlay (and #place-card) was just rebuilt by this draw; re-publish the current
+    // zoom onto the fresh card so a card shown before the next gesture is counter-scaled.
+    setCardZoom(zoomController.getState().k);
+  } else {
     zoomController.detach();
     zoomController.reset();
   }

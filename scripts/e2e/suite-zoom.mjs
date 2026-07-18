@@ -95,16 +95,17 @@ export async function run(ctx) {
     const card=document.getElementById("place-card");
     const m=document.getElementById("map");
     const w1=card.getBoundingClientRect().width;
-    const k1=getComputedStyle(m).getPropertyValue("--zoom-k").trim();
+    const cardK1=card.style.getPropertyValue("--zoom-k"); // the card's own inline var at home
     const W=vp.clientWidth,H=vp.clientHeight;
     window.__vellumZoomTo({k:8,x:W/2-8*px,y:H/2-8*py}); // centre the pinned place so its card is in view
     const w8=card.getBoundingClientRect().width;
-    const k8=getComputedStyle(m).getPropertyValue("--zoom-k").trim();
-    return{ok:true,w1,w8,k1,k8};
+    const cardK8=card.style.getPropertyValue("--zoom-k"); // published on the CARD, so it counter-scales
+    const mapK8=getComputedStyle(m).getPropertyValue("--zoom-k").trim(); // MUST stay empty on #map (else labels jiggle)
+    return{ok:true,w1,w8,cardK1,cardK8,mapK8};
   })()`);
   check(
-    "Z8 a pinned card stays a constant screen size while zoomed (counter-scaled, not magnified)",
-    z8.ok && Math.abs(z8.w8 - z8.w1) <= 2 && z8.k8 === "8" && (z8.k1 === "" || z8.k1 === "1"),
+    "Z8 a pinned card stays a constant screen size while zoomed, and --zoom-k rides the card not #map (no label jiggle)",
+    z8.ok && Math.abs(z8.w8 - z8.w1) <= 2 && z8.cardK8 === "8" && z8.cardK1 === "" && z8.mapK8 === "",
     JSON.stringify(z8),
   );
   await sleep(700); // let the pinned unfurl (--unfurl 650ms) settle before the shot
