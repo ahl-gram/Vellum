@@ -1,17 +1,21 @@
-// The Surveyor's Glass, Sub 3 (Z, #164): geometric CSS pan/zoom on the antique chart,
-// driven by the shared d3-zoom controller (docs/shared/zoom-controller.js). The live
-// transform lands on #map inside the new #map-viewport clip box; nothing re-renders
-// (the semantic redraft is Sub 8). Real wheel/drag/pinch dispatch is Sub 5's job, so
-// here the deterministic window.__vellumZoomTo / __vellumZoomState hooks stand in:
-// they prove the transform lands as valid CSS, clamps at BOTH extents (scale and pan),
-// and round-trips. The camera-home invariants (ceremony/turn/verso unaffected at k=1)
-// are covered by the other suites running before/after this one at home.
+// The Surveyor's Glass (Z): geometric CSS pan/zoom on the Explorer chart, driven by the
+// shared d3-zoom controller (docs/shared/zoom-controller.js). The live transform lands on
+// #map inside the #map-viewport clip box; nothing re-renders (the semantic redraft is Sub 8).
+//
+// Sub 3 (#164) built the glass on antique via the deterministic window.__vellumZoomTo /
+// __vellumZoomState hooks (Z1-Z8). Sub 4 (#165) makes it a full citizen: ALL four styles
+// (Z11), keyboard driving that enters the same pipeline as gestures (Z9), on-screen buttons
+// (Z10), a bookmarkable cx/cy/k camera (Z12 write, Z13 on-load restore), the home-reset rule
+// for every world-sheet-changing action (Z5 verso, Z14 draw/turn/chronicle), and reduced
+// motion collapsing the one programmatic animation (Zrm). Z5 and Z7 are UPDATED for Sub 4:
+// the flip now homes the camera (Sub 3's "recto keeps its scale" is superseded), and
+// touch-action:none holds on every style (it no longer reverts off antique).
 //
 // getComputedStyle(#map).transform is asserted as a resolved matrix on purpose: it is
-// "none" if the browser rejected the value, so it doubles as proof the px-suffixed
-// string the controller builds is actually valid CSS (d3's own toString() is not).
+// "none" if the browser rejected the value, so it doubles as proof the px-suffixed string
+// the controller builds is actually valid CSS (d3's own toString() is not).
 export async function run(ctx) {
-  const { evaluate, check, shoot, sleep, waitSettled, waitTurned } = ctx;
+  const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, waitTurned, PORT } = ctx;
 
   // Clean antique seed-42 base, chronicle/voyage off, resting on the recto.
   await evaluate(`(()=>{for(const id of ["chronicle","voyage"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
@@ -80,8 +84,8 @@ export async function run(ctx) {
   // Z8 (AC2, Alex's call): a pinned card reads at a CONSTANT screen size at any zoom -- it
   // must not magnify with the chart (an 8x card fills and clips the frame). The card rides
   // #map's transform for its anchor but is counter-scaled by 1/k (--zoom-k, published on
-  // #map by the controller). Pin a central place at home, measure the card's screen width,
-  // zoom to k=8, and confirm the width is unchanged while --zoom-k tracks k.
+  // #place-card by the controller). Pin a central place at home, measure the card's screen
+  // width, zoom to k=8, and confirm the width is unchanged while --zoom-k tracks k.
   const z8 = await evaluate(`(()=>{
     const vp=document.getElementById("map-viewport");
     window.__vellumZoomTo({k:1,x:0,y:0});
@@ -112,44 +116,174 @@ export async function run(ctx) {
   await shoot("explorer-zoom-card-k8.png"); // the constant-size card at max zoom (cf. the ballooned before)
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`); // dismiss the pin
 
-  // Z5 (manual sanity, screenshotted): flip the verso WHILE ZOOMED. The transform is on
-  // #map, never #sheet-inner, so the flip (which rotates #sheet-inner) and the zoom never
-  // fight: the verso reveals its own unzoomed ghost while the hidden recto keeps its
-  // scale. suite-verso's end-state assertions cannot see a backface regression, so the
-  // screenshot here (and explorer-verso.png at home) is the real visual check.
+  // ---- Sub 4 (#165) ------------------------------------------------------------------
+
+  // Z9 (AC2, a11y hard requirement): keyboard-only reaches full zoom. The keys dispatch as
+  // real KeyboardEvents on the focusable viewport and drive the controller's scaleBy/panBy,
+  // i.e. d3's own scaleBy/translateBy -- the SAME "zoom" pipeline as a gesture. '+' twice is
+  // 1.4^2=1.96; '-' back to 1.4; ArrowRight pans x more negative; '0' homes.
+  const z9 = await evaluate(`(()=>{
+    const vp=document.getElementById("map-viewport");
+    window.__vellumZoomTo({k:1,x:0,y:0});
+    vp.focus();
+    const key=(k)=>vp.dispatchEvent(new KeyboardEvent("keydown",{key:k,bubbles:true}));
+    const st=()=>window.__vellumZoomState();
+    key("+"); key("+"); const afterIn=st().k;
+    key("-"); const afterOut=st().k;
+    const beforePanX=st().x;
+    key("ArrowRight"); const afterPanX=st().x;
+    key("0"); const home=st();
+    return {afterIn,afterOut,beforePanX,afterPanX,home};
+  })()`);
+  check(
+    "Z9 keyboard-only reaches full zoom: +/- magnify, arrows pan, 0 homes (AC2 a11y)",
+    Math.abs(z9.afterIn - 1.96) < 1e-6 && Math.abs(z9.afterOut - 1.4) < 1e-6 &&
+      z9.afterPanX < z9.beforePanX && z9.home.k === 1 && z9.home.x === 0 && z9.home.y === 0,
+    JSON.stringify(z9),
+  );
+
+  // Z10: the on-screen minus / reset / plus buttons drive the same controller entry points
+  // (functional now, voiced in Sub 9). In 1.4, in again 1.96, out 1.4, reset home.
+  const z10 = await evaluate(`(()=>{
+    const st=()=>window.__vellumZoomState();
+    window.__vellumZoomTo({k:1,x:0,y:0});
+    document.getElementById("zoom-in").click(); const inK=st().k;
+    document.getElementById("zoom-in").click(); const in2=st().k;
+    document.getElementById("zoom-out").click(); const outK=st().k;
+    document.getElementById("zoom-reset").click(); const home=st();
+    return {inK,in2,outK,home};
+  })()`);
+  check(
+    "Z10 the on-screen +/reset/- buttons drive the zoom (functional now, voiced in Sub 9)",
+    Math.abs(z10.inK - 1.4) < 1e-6 && Math.abs(z10.in2 - 1.96) < 1e-6 &&
+      Math.abs(z10.outK - 1.4) < 1e-6 && z10.home.k === 1,
+    JSON.stringify(z10),
+  );
+
+  // Z11 (AC1): all four styles pan/zoom identically. Antique is proven above; topographic,
+  // ink, nautical each magnify to the same matrix, keep touch-action:none, and keep the
+  // %-positioned #place-hit overlay (the manifest is style-independent, so the marks carry
+  // over). One non-antique zoom is screenshotted for the visual record.
+  for (const style of ["topographic", "ink", "nautical"]) {
+    await evaluate(`(()=>{window.__vellumZoomTo({k:1,x:0,y:0});const s=document.getElementById("style");s.value=${JSON.stringify(style)};s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    await waitTurned("zoom-style-" + style);
+    const zs = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:3,x:-W,y:-H});const m=document.getElementById("map");return{matrix:getComputedStyle(m).transform,zoomed:vp.classList.contains("zoomed"),touch:getComputedStyle(vp).touchAction,hits:document.querySelectorAll("#map .place-hit").length};})()`);
+    check(
+      "Z11 " + style + " pans/zooms identically (AC1: matrix lands, .zoomed, touch-action:none, marks present)",
+      zs.matrix.startsWith("matrix(3, 0, 0, 3,") && zs.zoomed === true && zs.touch === "none" && zs.hits > 0,
+      style + " " + JSON.stringify(zs),
+    );
+    if (style === "topographic") await shoot("explorer-zoom-topographic-k3.png");
+  }
+  // Back to a clean antique home for the hash + reset checks below.
+  await evaluate(`(()=>{window.__vellumZoomTo({k:1,x:0,y:0});const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await waitTurned("zoom-styles-restore-antique");
+
+  // Z12 (AC3 write): a settled zoom mirrors the camera into the hash as cx/cy/k (world-uv
+  // centre + zoom, 4dp), written only after the settle debounce. The centre is chosen so
+  // cx/cy are exact regardless of viewport size: cx=(0.5+0.2)/2=0.35, cy=(0.5+0.3)/2=0.4.
+  await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:2,x:-0.2*W,y:-0.3*H});})()`);
+  await sleep(400); // > the 250ms settle debounce, so onSettle has written the hash
+  const z12 = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k")};})()`);
+  check(
+    "Z12 a settled zoom writes cx/cy/k to the hash (AC3 write: uv centre + zoom, 4dp)",
+    z12.cx === "0.3500" && z12.cy === "0.4000" && z12.k === "2.0000",
+    JSON.stringify(z12),
+  );
+
+  // Z5 (AC4, UPDATED for Sub 4): the verso flip snaps the camera HOME first (Sub 3's "the
+  // hidden recto keeps its scale while flipped" is superseded by the reset policy). Zoom,
+  // flip, and confirm k=1 AND that cx/cy/k were dropped from the hash EXPLICITLY (not left
+  // to a debounced settle), while the flip still lands (versoed + a ghost).
   await evaluate(`window.__vellumZoomTo({k:3,x:-40,y:-30})`);
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(1300); // let the 1.2s flip land
-  const z5 = await evaluate(`(()=>{const sh=document.getElementById("sheet");const m=document.getElementById("map");return{versoed:sh.classList.contains("versoed"),ghost:!!document.querySelector("#verso .verso-ghost"),vis:getComputedStyle(document.getElementById("verso")).visibility,rectoScaled:getComputedStyle(m).transform==="matrix(3, 0, 0, 3, -40, -30)"};})()`);
+  const z5 = await evaluate(`(()=>{const sh=document.getElementById("sheet");const st=window.__vellumZoomState();const p=new URLSearchParams(location.hash.slice(1));return{versoed:sh.classList.contains("versoed"),ghost:!!document.querySelector("#verso .verso-ghost"),vis:getComputedStyle(document.getElementById("verso")).visibility,k:st.k,x:st.x,y:st.y,cx:p.get("cx")};})()`);
   check(
-    "Z5 flipping the verso while zoomed reveals the verso and never fights the zoom (hidden recto keeps its scale)",
-    z5.versoed && z5.ghost && z5.vis === "visible" && z5.rectoScaled,
+    "Z5 the verso flip snaps the camera home first, then flips (AC4 reset-on-verso; cx/cy/k cleared)",
+    z5.versoed && z5.ghost && z5.vis === "visible" && z5.k === 1 && z5.x === 0 && z5.y === 0 && z5.cx === null,
     JSON.stringify(z5),
   );
-  await shoot("explorer-zoom-verso.png"); // manual: the verso reads clean over a zoomed recto
-
+  await shoot("explorer-zoom-verso.png"); // manual: the verso reads clean over a now-home recto
   // Flip back to the recto.
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(1300);
 
-  // Z7 (AC1 touch): the gesture element declares touch-action:none while the zoom is
-  // attached (antique), so the browser's native pan/pinch cannot preempt a drag/pinch --
-  // the one thing no headless gesture test can reach. A non-antique style detaches the
-  // zoom and reverts to normal scrolling. Snap home first so the ink turn is not zoomed.
+  // Z14 (AC4): every OTHER world-sheet-changing action homes the camera first too. Each
+  // starts zoomed and asserts k=1 immediately after the trigger (draw() rebases the camera
+  // synchronously at its top, before the worker round-trip). #a draw, #b style turn, #c the
+  // chronicle (which also clears cx/cy/k from the hash).
+  await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
+  const r14a = await evaluate(`(()=>{document.getElementById("draw").click();return window.__vellumZoomState().k;})()`);
+  await waitSettled("reset-on-draw");
+  check("Z14a reset-on-draw: Draw snaps the camera home first (AC4)", r14a === 1, String(r14a));
+
+  await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
+  const r14b = await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));return window.__vellumZoomState().k;})()`);
+  await waitTurned("reset-on-turn");
+  check("Z14b reset-on-style-turn: a style change homes the camera before the turn (AC4)", r14b === 1, String(r14b));
+  await evaluate(`(()=>{const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await waitTurned("reset-on-turn-back-antique");
+
+  await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
+  const r14c = await evaluate(`(()=>{const c=document.getElementById("chronicle");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));const st=window.__vellumZoomState();const p=new URLSearchParams(location.hash.slice(1));return{k:st.k,cx:p.get("cx"),cy:p.get("cy"),kp:p.get("k")};})()`);
+  check(
+    "Z14c reset-on-chronicle: entering the chronicle homes the camera AND drops cx/cy/k from the hash (AC4)",
+    r14c.k === 1 && r14c.cx === null && r14c.cy === null && r14c.kp === null,
+    JSON.stringify(r14c),
+  );
+  await evaluate(`(()=>{const c=document.getElementById("chronicle");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the chronicle
+
+  // Zrm (AC5): prefers-reduced-motion collapses the one programmatic zoom animation (d3's
+  // double-click smooth-zoom) to an instant jump. The keyboard/buttons are instant already;
+  // the controller reads reduced motion LIVE, so emulating it here flips the double-click to
+  // its synchronous branch and getState reads k=2 in the same turn (an animated one would
+  // still be at k~1). Snap home, emulate, real double-click at the centre, assert, un-emulate.
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  const rmOn = await evaluate(`matchMedia("(prefers-reduced-motion: reduce)").matches`); // precondition
+  const zr = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const r=vp.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;vp.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,view:window,clientX:cx,clientY:cy}));return window.__vellumZoomState().k;})()`);
+  check(
+    "Zrm reduced motion collapses the double-click zoom to instant (AC5: lands at k=2 in one turn)",
+    rmOn === true && zr === 2,
+    JSON.stringify({ rmOn, zr }),
+  );
+  await send("Emulation.setEmulatedMedia", { features: [] }); // clear the emulation
+  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+
+  // Z7 (AC1 touch, UPDATED for Sub 4): every style now zooms, so touch-action:none holds on
+  // ALL four (Sub 3 asserted it reverted off antique; superseded). It is the one thing no
+  // headless gesture test can reach: without it the browser's native pan/pinch preempts a
+  // drag/pinch. Antique and a non-antique both report none.
   const z7a = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
-  await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  await waitTurned("zoom-ink-turn");
+  await evaluate(`(()=>{const s=document.getElementById("style");s.value="nautical";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await waitTurned("zoom-touch-nautical");
   const z7b = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
   check(
-    "Z7 touch-action:none while attached on antique (touch gestures reach the controller), reverts off antique",
-    z7a === "none" && z7b !== "none",
+    "Z7 touch-action:none holds on every style now that all four zoom (AC1 touch; Sub 3 revert superseded)",
+    z7a === "none" && z7b === "none",
     JSON.stringify({ z7a, z7b }),
   );
 
-  // Restore a clean antique seed-42 HOME base for the suites that follow. A redraw does
-  // not snap the camera home on antique in this sub (that is Sub 4), so snap home first.
+  // Z13 (AC3 load): a deep link with cx/cy/k restores the same framing ON LOAD. Navigate
+  // fresh to a camera link (about:blank first forces a full reload, the print-room suite's
+  // precedent) and confirm the settled chart opens at that zoom and centre. cx=cy=0.5,k=4
+  // frames the sheet centre at 4x, so x = W/2 - 0.5*4*W = -1.5*W.
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique&cx=0.5&cy=0.5&k=4` });
+  await waitReady();
+  await waitSettled("zoom-deeplink-load");
+  await sleep(80);
+  const z13 = await evaluate(`(()=>{const s=window.__vellumZoomState();const vp=document.getElementById("map-viewport");return{k:s.k,x:s.x,W:vp.clientWidth};})()`);
+  check(
+    "Z13 a deep link #cx&cy&k restores the framing on load (AC3 load: k=4 and centre)",
+    z13.k === 4 && Math.abs(z13.x - (-1.5 * z13.W)) < 1.5,
+    JSON.stringify(z13),
+  );
+  await shoot("explorer-zoom-deeplink-k4.png"); // manual: opened straight into a 4x framing from the link
+
+  // Restore a clean antique seed-42 HOME base (chronicle off) for the suites that follow.
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
-  await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("draw").click();})()`);
+  await evaluate(`(()=>{const c=document.getElementById("chronicle");if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
   await waitSettled("post-zoom-restore");
 }

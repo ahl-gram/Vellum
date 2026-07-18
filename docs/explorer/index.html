@@ -131,7 +131,19 @@
      so #sheet-inner's rotateY (the #131 turn / #116 verso) gains no third claimant;
      the backface-visibility rules that used to name #map now name #map-viewport (its
      direct child in the preserve-3d context). #verso stays a SIBLING outside it. -->
-<div id="map-viewport"><div id="map"></div></div>
+<div id="map-viewport" tabindex="0" role="application" aria-label="Interactive map. Arrow keys pan, plus and minus keys zoom, 0 resets."><div id="map"></div>
+<!-- #165 The Surveyor's Glass: the on-screen zoom cluster. A SIBLING of #map (never inside
+     it), so it does NOT ride #map's live zoom transform; it sits in the viewport corner and
+     is clipped in-bounds by .zoomed's overflow. Functional now, VOICED in Sub 9 (#170): the
+     antique styling, iconography, and ceremony copy come later. The buttons carry their own
+     accessible names; they plus the focusable viewport (arrow-pan) meet the keyboard-only
+     hard requirement. -->
+<div id="zoom-controls" class="zoom-controls" role="group" aria-label="Zoom">
+  <button id="zoom-in" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+  <button id="zoom-reset" type="button" aria-label="Reset zoom" title="Reset zoom">&#9750;</button>
+  <button id="zoom-out" type="button" aria-label="Zoom out" title="Zoom out">&#8722;</button>
+</div>
+</div>
 <div id="verso" aria-hidden="true"></div>
 </div></div>
 <p class="caption" id="caption"></p>

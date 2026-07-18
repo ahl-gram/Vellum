@@ -82,6 +82,23 @@ button.primary:hover { background: #5d4831; }
    scrolling over the chart. Tradeoff: on antique, a touch/wheel over the sheet no longer
    scrolls the page past it (standard slippy-map behavior). */
 #map-viewport.zoomable { touch-action: none; }
+/* #165: the map viewport is focusable (tabindex) so keyboard users pan/zoom it with the
+   arrows and +/-. Show the focus ring only for keyboard focus (:focus-visible), so a mouse
+   click on the sheet does not leave it outlined. */
+#map-viewport:focus-visible { outline: 2px solid #4a3826; outline-offset: 2px; }
+/* #165 The Surveyor's Glass: the on-screen zoom cluster, a corner overlay. position:absolute
+   anchors it to the viewport box (NOT #map's live transform); z-index lifts it over the chart.
+   Compact and plain here; Sub 9 (#170) gives it the antique voice. */
+.zoom-controls {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.zoom-controls button {
+  width: 2rem; height: 2rem; padding: 0; line-height: 1; font-size: 1.15rem;
+  display: flex; align-items: center; justify-content: center;
+  background: rgb(247 237 207 / 0.92); border: 1px solid #b9a77f; color: #4a3826;
+}
+.zoom-controls button:hover { background: #fff7e4; }
 #map { position: relative; transform-origin: 0 0; }
 #map svg { width: 100%; height: auto; display: block;
   border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
