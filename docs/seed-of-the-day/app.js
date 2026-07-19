@@ -118,6 +118,35 @@ setTimeout(() => {
 const STORE_KEY = "vellum.hunt.v1";
 const MARGIN = Math.round(1500 * 0.045); // matches renderMap's default margin
 
+// --- The Surveyor's Dispatch (#123): SVG helpers -----------------------------
+// The dispatch clones the live chart and appends a survey overlay + a caption band.
+// Everything it adds is inline-styled and font-independent, because a downloaded SVG
+// travels with NO page CSS (index.css never reaches the file) and no guaranteed fonts.
+const SVG_NS = "http://www.w3.org/2000/svg";
+const DISPATCH_BAND = 104; // extra sheet drawn below the plate to seat the caption
+
+const svgEl = (name, attrs) => {
+  const e = document.createElementNS(SVG_NS, name);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, String(v));
+  return e;
+};
+
+// A five-pointed vector star at (cx,cy): a polygon, so it renders identically in any SVG
+// viewer without depending on a "★" glyph being present in the reader's installed fonts.
+const starNode = (cx, cy, fill) => {
+  const rOuter = 26, rInner = 11, pts = [];
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 === 0 ? rOuter : rInner;
+    const a = -Math.PI / 2 + (i * Math.PI) / 5; // first point straight up
+    pts.push(`${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`);
+  }
+  return svgEl("polygon", {
+    "data-dispatch-star": "",
+    points: pts.join(" "),
+    style: `fill:${fill};stroke:#fff7e4;stroke-width:1.5`,
+  });
+};
+
 const BAND_PROSE = {
   hot: "Hot. You are all but upon it.",
   warm: "Warmer. The place lies near.",
@@ -217,6 +246,7 @@ function setupHunt(world) {
   hunt.hidden = false;
 
   let guesses = 0;
+  const missRoute = []; // #123: each miss as {gx,gy} in GRID space, re-projected at draft time
 
   // #129: on a LIVE solve the star stamps in (.stamp); on a solved-day reload it is
   // placed still (no .stamp), so the win no longer replays its animation on reload.
@@ -262,6 +292,9 @@ function setupHunt(world) {
     const share = $("share");
     share.hidden = false;
     if (fromClick) restart(share, "rise"); // #129: the share button rises on a live solve
+    // #123: only a LIVE win has a route in memory to plot, so the dispatch is offered here and
+    // nowhere else. The restored-solve path (win(false)) leaves the Draft dispatch button hidden.
+    if (fromClick) $("dispatch").hidden = false;
     setHuntStatus(
       fromClick
         ? `Found it in ${guesses} ${guesses === 1 ? "guess" : "guesses"}.`
@@ -271,10 +304,88 @@ function setupHunt(world) {
     if (fromClick) restart($("streak"), "stamp"); // #129: the streak stamps on increment
   };
 
+  // #123 The Surveyor's Dispatch: file the hunt as a survey plate. Clone today's actual chart
+  // (keeping its data-vellum-* recipe, so the artifact stays reproducible like every Vellum
+  // export) and append one survey overlay -- the guess route as a dotted line, a numbered
+  // station at each miss, a star at the find -- plus a caption band beneath the plate. The
+  // route is stored in GRID space and re-projected HERE, at draft time, so it is identical no
+  // matter the window size when each guess was clicked.
+  const dispatchCaption = () => {
+    const n = guesses;
+    const streak = readStore().streak || 0;
+    const soundings = `${n} ${n === 1 ? "sounding" : "soundings"}`;
+    const tail = streak > 0 ? ` · streak ${streak} ${streak === 1 ? "day" : "days"}` : "";
+    return `Quarry taken in ${soundings} · CHART № ${seed}${tail}`;
+  };
+
+  const buildDispatchSvg = () => {
+    const clone = svg.cloneNode(true);
+    clone.removeAttribute("class"); // drop any transient arrival class; the chart draws CSS-free
+    // The background paper is a DIRECT child rect; the defs/pattern rects are nested, so
+    // :scope > rect selects the plate colour (not a texture tile) to back the caption band.
+    const paper = clone.querySelector(":scope > rect")?.getAttribute("fill") || "#f4ecd8";
+    const bandTop = proj.heightPx;
+    const vbH = proj.heightPx + DISPATCH_BAND;
+    clone.setAttribute("viewBox", `0 0 ${proj.widthPx} ${vbH}`);
+    clone.setAttribute("height", String(Math.round(vbH)));
+    clone.appendChild(svgEl("rect", { x: 0, y: bandTop, width: proj.widthPx, height: DISPATCH_BAND, fill: paper }));
+
+    const INK = "#4a3826", STAR = "#7a1f12";
+    const g = svgEl("g", { "data-vellum-dispatch": "" });
+
+    const misses = missRoute.map((m) => [proj.px(m.gx), proj.py(m.gy)]);
+    const qx = proj.px(quarry.settlement.x), qy = proj.py(quarry.settlement.y);
+
+    // dotted survey line: miss 1 -> ... -> miss N -> the find
+    if (misses.length > 0) {
+      g.appendChild(svgEl("polyline", {
+        points: [...misses, [qx, qy]].map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" "),
+        style: `fill:none;stroke:${INK};stroke-width:3;stroke-dasharray:1 13;stroke-linecap:round;opacity:0.8`,
+      }));
+    }
+    // a numbered station at each wrong sounding
+    misses.forEach(([x, y], i) => {
+      g.appendChild(svgEl("circle", {
+        "data-dispatch-station": "",
+        cx: x.toFixed(2), cy: y.toFixed(2), r: 17,
+        style: `fill:${paper};stroke:${INK};stroke-width:2.5`,
+      }));
+      const label = svgEl("text", {
+        x: x.toFixed(2), y: y.toFixed(2),
+        style: `fill:${INK};font:600 22px Georgia,'Times New Roman',serif;text-anchor:middle;dominant-baseline:central`,
+      });
+      label.textContent = String(i + 1);
+      g.appendChild(label);
+    });
+    g.appendChild(starNode(qx, qy, STAR)); // a star at the find
+
+    const cap = svgEl("text", {
+      x: (proj.widthPx / 2).toFixed(2),
+      y: (bandTop + DISPATCH_BAND / 2).toFixed(2),
+      style: `fill:${INK};font:italic 30px Georgia,'Times New Roman',serif;text-anchor:middle;dominant-baseline:central;letter-spacing:0.03em`,
+    });
+    cap.textContent = dispatchCaption();
+    g.appendChild(cap);
+
+    clone.appendChild(g);
+    return new XMLSerializer().serializeToString(clone);
+  };
+  window.__vellumDispatchSvg = buildDispatchSvg; // #123 e2e hook (inspect without a real download)
+
+  $("dispatch").addEventListener("click", () => {
+    const blob = new Blob([buildDispatchSvg()], { type: "image/svg+xml" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    const slug = quarry.settlement.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    a.download = `vellum-dispatch-${seed}-${slug}.svg`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
   $("share").addEventListener("click", () => {
     const name = quarry.settlement.name;
-    const tally = guesses > 0 ? ` in ${guesses} ${guesses === 1 ? "guess" : "guesses"}` : "";
-    const text = `Vellum Daily Hunt: I found ${name}${tally}. Seed ${seed}. ${location.href}`;
+    const soundings = `${guesses} ${guesses === 1 ? "sounding" : "soundings"}`;
+    const text = `Vellum Daily Hunt: I took ${name} in ${soundings}. Seed ${seed}. Can you beat it? ${location.href}`;
     if (navigator.share) {
       navigator.share({ title: "Vellum Daily Hunt", text }).catch(() => {});
     } else if (navigator.clipboard) {
@@ -328,6 +439,7 @@ function setupHunt(world) {
       recordSolve();
       win(true);
     } else {
+      missRoute.push({ gx, gy }); // #123: record the route in GRID space (resize-proof)
       spawnSounding(ev.clientX, ev.clientY); // #129: a sounding at the miss point
       // Continuous heat (from the click's own distance to the quarry) plus the
       // name of the mark the click selected, so a cluster of identical village
