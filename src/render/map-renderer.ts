@@ -6,7 +6,7 @@ import type { MapType } from "../terrain/heightfield.ts";
 import { createLabelArena, type RenderCtx } from "./context.ts";
 import { createProjection } from "./transform.ts";
 import { STYLES, type StyleName } from "./style.ts";
-import { el, renderSvg, type SvgNode } from "./svg.ts";
+import { el, pathFrom, renderSvg, type SvgNode } from "./svg.ts";
 import { recipeAttrs, recipeMetadataNode } from "./recipe-meta.ts";
 import { oceanLayer, waterlinesLayer } from "./layers/water.ts";
 import { contoursLayer, hypsometricLayer, landLayer } from "./layers/land.ts";
@@ -159,6 +159,18 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   // water, rivers, roads, settlements, and labels stay as reference.
   const themed = opts.theme !== undefined;
 
+  // #223 The Surveyor's Glass: on a REGIONAL survey the drawn coast is a Chaikin-smoothed
+  // contour, while terrain glyphs and rivers are placed on the raw elev>seaLevel cell mask.
+  // Smoothing plus the window-edge corner closing pull the drawn coast inland of some land
+  // cells, so glyphs and river mouths near the window edges render seaward of the shore,
+  // over open sea. Clip both layers to the SAME coast polygon the land fill draws
+  // (coastRings), so nothing paints over the painted sea. Region-only (world.region): world
+  // charts are untouched and stay byte-identical, so no golden regen is owed. The clipPath
+  // itself is added to defs below, and mirrors the field/iso/winds clip idiom.
+  const isRegion = world.region !== undefined;
+  const clipToLand = (node: SvgNode | null): SvgNode | null =>
+    isRegion && node ? el("g", { "clip-path": "url(#region-land-clip)" }, [node]) : node;
+
   const mapLayers: Array<SvgNode | null> = [
     oceanLayer(ctx),
     compassPlan ? rhumbLayer(ctx, compassPlan) : null,
@@ -170,8 +182,8 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     themed ? null : hypsometricLayer(ctx),
     themed ? null : contoursLayer(ctx),
     themed ? null : realmTintsLayer(ctx),
-    riversLayer(ctx),
-    themed ? null : glyphsLayer(ctx),
+    clipToLand(riversLayer(ctx)),
+    themed ? null : clipToLand(glyphsLayer(ctx)),
     roadsLayer(ctx),
     realmBordersLayer(ctx),
     soundingsLayer(ctx, cartouchePlan, compassPlan),
@@ -199,6 +211,18 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
         height: proj.heightPx - 2 * margin,
       }),
     ]),
+    // #223: the region land mask, the same coast polygon the land fill draws. Only
+    // regional surveys clip to it (see clipToLand above); world charts stay byte-identical.
+    ...(isRegion
+      ? [
+          el("clipPath", { id: "region-land-clip" }, [
+            el("path", {
+              d: coastRings.map((r) => pathFrom(r, true)).join(""),
+              "clip-rule": "evenodd",
+            }),
+          ]),
+        ]
+      : []),
     ...(style.glyphs ? glyphSymbolDefs(style) : []),
     ...featureLabels.defs,
     ...textureDefs(ctx),
