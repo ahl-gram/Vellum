@@ -297,6 +297,56 @@ export async function run(ctx) {
   );
   await shoot("explorer-zoom-deeplink-k4.png"); // manual: opened straight into a 4x framing from the link
 
+  // Z15/Z16 (#168, Glass Sub 7): the finer-survey ENGINE behind the settle. These drive
+  // the additive "region" worker job directly via __vellumRunJob (Sub 8 wires it to the
+  // camera settle), so they touch no page zoom state. A fixed literal window keeps them
+  // deterministic. The A2/A3-style worker/inline byte-parity for the kind is R14 (render).
+
+  // Z15: a region job returns a valid, stamped, genuinely-regional CROP of the world
+  // (AC1). "region-land-clip" is the coast-clip def only a region sheet emits, proving a
+  // real regional render. The crop is proven env-stably by projected-settlement COUNT:
+  // the window holds a strict, non-empty SUBSET of the world's places (0 < region < world)
+  // -- integer counts are immune to the cross-engine float drift that bars an SVG byte
+  // compare here. (The FINER terrain itself is a numeric claim, so it is guarded by the
+  // same-process unit tests test/terrain/window.test.ts + test/world/region.test.ts and
+  // shown in out/sub7-*; an e2e must not byte-compare terrain across environments.)
+  const z15 = await evaluate(
+    `(async()=>{const win={u0:0.375,v0:0.375,u1:0.625,v1:0.625};` +
+      `const r=await window.__vellumRunJob({kind:"region",seed:42,overrides:{},window:win,band:2,gridW:320,gridH:240,title:"Survey",render:{style:"antique",widthPx:1500,legend:true}});` +
+      `const w=await window.__vellumRunJob({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});` +
+      `const {recipeFromSvg}=await import("./engine/render/recipe-meta.js");const p=recipeFromSvg(r.svg);` +
+      `const places=Array.isArray(r.manifest.places)?r.manifest.places:[];const wPlaces=Array.isArray(w.manifest.places)?w.manifest.places.length:-1;` +
+      `return{ok:r.ok,hasSvg:typeof r.svg==="string"&&r.svg.length>2000,stamped:r.svg.includes('data-vellum-region-u0='),` +
+      `regionSheet:r.svg.includes('region-land-clip'),windowEcho:JSON.stringify(r.window)===JSON.stringify(win),bandEcho:r.band===2,` +
+      `parsed:!!p&&!!p.region&&Math.abs(p.region.window.u0-win.u0)<1e-9,` +
+      `manifestOk:places.length>0&&places.every(pl=>Number.isFinite(pl.nx)&&Number.isFinite(pl.ny)),` +
+      `isCrop:places.length>0&&places.length<wPlaces,places:places.length,worldPlaces:wPlaces};})()`,
+    true,
+  );
+  check(
+    "Z15 a region job returns a stamped regional CROP of the world (AC1: subset of places, finer terrain unit-tested + in out/)",
+    z15.ok && z15.hasSvg && z15.stamped && z15.regionSheet && z15.windowEcho && z15.bandEcho && z15.parsed && z15.manifestOk && z15.isCrop,
+    JSON.stringify(z15),
+  );
+
+  // Z16: two identical region jobs skip generateWorld the second time (AC2). Asserted via
+  // the worldFor `cached` flag (deterministic), not timing; the ta/tb ms are logged only, as
+  // corroboration. A primer draw at another seed first evicts the single-entry cache, so the
+  // first region job is a guaranteed MISS and the second a guaranteed HIT.
+  const z16 = await evaluate(
+    `(async()=>{await window.__vellumRunJob({kind:"draw",seed:117,overrides:{},render:{style:"antique",widthPx:1500}});` +
+      `const win={u0:0.375,v0:0.375,u1:0.625,v1:0.625};` +
+      `const mk=()=>({kind:"region",seed:918273,overrides:{},window:win,band:2,gridW:320,gridH:240,title:"Survey",render:{style:"antique",widthPx:1500}});` +
+      `const t0=performance.now();const a=await window.__vellumRunJob(mk());const t1=performance.now();const b=await window.__vellumRunJob(mk());const t2=performance.now();` +
+      `return{aOk:a.ok,bOk:b.ok,aCached:a.cached,bCached:b.cached,sameSvg:a.svg===b.svg,ta:Math.round(t1-t0),tb:Math.round(t2-t1)};})()`,
+    true,
+  );
+  check(
+    "Z16 a repeat region job at the same seed skips generateWorld (AC2: cache hit via the cached flag)",
+    z16.aOk && z16.bOk && z16.aCached === false && z16.bCached === true && z16.sameSvg,
+    `miss=${z16.aCached} hit=${z16.bCached} sameSvg=${z16.sameSvg} (ta=${z16.ta}ms tb=${z16.tb}ms, timing is corroboration only)`,
+  );
+
   // Restore a clean antique seed-42 HOME base (chronicle off) for the suites that follow.
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await evaluate(`(()=>{const c=document.getElementById("chronicle");if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);

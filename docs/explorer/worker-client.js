@@ -4,12 +4,13 @@
 // running the same engine inline on the main thread, so the page always works.
 // runInline mirrors worker.js exactly (same engine calls, same serializableAtlas)
 // so the worker/inline byte-identity check (e2e A2/A3) stays a clean compare.
-import { defaultRecipe, generateWorld } from "./engine/world/generate.js";
 import { renderMap } from "./engine/render/map-renderer.js";
 import { buildPlaceManifest } from "./engine/render/place-manifest.js";
 import { buildSurvey } from "./engine/render/survey.js";
+import { generateRegionWorld } from "./engine/world/region.js";
 import { composeAtlas } from "./engine/atlas/compose.js";
 import { serializableAtlas } from "./serializable-atlas.js";
+import { worldFor } from "./world-cache.js";
 
 let worker = null;
 let reqId = 0;
@@ -27,8 +28,7 @@ function onJobMessage(e) {
 
 export function runInline(msg) {
   if (msg.kind === "draw") {
-    const recipe = defaultRecipe(msg.seed, msg.overrides);
-    const world = generateWorld(recipe);
+    const { world } = worldFor(msg.seed, msg.overrides);
     return {
       ok: true,
       svg: renderMap(world, msg.render),
@@ -36,11 +36,31 @@ export function runInline(msg) {
       survey: buildSurvey(world.elev, world.seaLevel, world.roads), // #120, mirrors worker.js
       title: world.title.title,
       subtitle: world.title.subtitle,
-      mapType: recipe.mapType,
-      band: recipe.band,
+      mapType: world.recipe.mapType,
+      band: world.recipe.band,
     };
   }
-  const world = generateWorld(defaultRecipe(msg.seed, msg.overrides));
+  if (msg.kind === "region") {
+    // #168: an EXPLICIT region branch. Without it a region job would fall through to
+    // the atlas path below and silently run the wrong engine in the inline fallback.
+    const { world, cached } = worldFor(msg.seed, msg.overrides);
+    const region = generateRegionWorld(world, {
+      window: msg.window,
+      gridW: msg.gridW,
+      gridH: msg.gridH,
+      title: msg.title,
+    });
+    const regionRecipe = { window: msg.window, worldGridW: world.recipe.gridW };
+    return {
+      ok: true,
+      svg: renderMap(region, { ...msg.render, regionRecipe }),
+      manifest: buildPlaceManifest(region, msg.render.widthPx ?? 1500),
+      window: msg.window,
+      band: msg.band, // the LOD band index, mirrors worker.js
+      cached,
+    };
+  }
+  const { world } = worldFor(msg.seed, msg.overrides);
   return { ok: true, atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })) };
 }
 

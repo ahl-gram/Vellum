@@ -8,7 +8,7 @@ import { createLabelArena, type RenderCtx } from "./context.ts";
 import { createProjection } from "./transform.ts";
 import { STYLES, type StyleName } from "./style.ts";
 import { el, pathFrom, renderSvg, type SvgNode } from "./svg.ts";
-import { recipeAttrs, recipeMetadataNode } from "./recipe-meta.ts";
+import { recipeAttrs, recipeMetadataNode, regionRecipeAttrs, type RegionRecipe } from "./recipe-meta.ts";
 import { oceanLayer, waterlinesLayer } from "./layers/water.ts";
 import { contoursLayer, hypsometricLayer, landLayer } from "./layers/land.ts";
 import { fieldLayer, type ThemeName } from "./layers/field.ts";
@@ -42,6 +42,13 @@ export type RenderOptions = {
   arms?: boolean;
   /** Render a thematic data plate instead of the normal land symbology. */
   theme?: ThemeName;
+  /**
+   * #168: opt a regional survey into being self-describing. When present, the
+   * sheet is stamped with the flat recipe AND the region window (data-vellum-region-*),
+   * so a downloaded region redraws from seed + window. The atlas region plates leave
+   * this undefined, so their bytes stay un-stamped (byte-identical to before).
+   */
+  regionRecipe?: RegionRecipe;
 };
 
 const TYPE_NOUNS: Record<MapType, string> = {
@@ -225,9 +232,12 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     ...textureDefs(ctx),
   ]);
 
-  // a regional inset also needs its zoom window to redraw, so it is not
-  // reproducible from a flat recipe; only standalone charts embed one
-  const reproducible = world.region === undefined;
+  // A regional inset needs its zoom window to redraw, so a FLAT recipe alone would
+  // mislead. A world chart is reproducible from its flat recipe; a region becomes
+  // reproducible only when the caller opts in with a regionRecipe, which also stamps
+  // the window (#168). The atlas region plates pass no regionRecipe, so they stay
+  // un-stamped and byte-identical to before.
+  const reproducible = world.region === undefined || opts.regionRecipe !== undefined;
 
   const root = el(
     "svg",
@@ -241,11 +251,15 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
       role: "img",
       "aria-label": description,
       ...(reproducible ? recipeAttrs(world, style.name) : {}),
+      // #168: conditional-spread on the region window too, so a world chart or an
+      // un-opted region emits ZERO region attrs (never an undefined key) and keeps
+      // its committed bytes; mirrors the coastWarp discipline (#137).
+      ...(opts.regionRecipe ? regionRecipeAttrs(opts.regionRecipe) : {}),
     },
     [
       el("title", {}, [world.title.title]),
       el("desc", {}, [description]),
-      ...(reproducible ? [recipeMetadataNode(world, style.name)] : []),
+      ...(reproducible ? [recipeMetadataNode(world, style.name, opts.regionRecipe)] : []),
       defs,
       el("rect", {
         x: 0, y: 0,
