@@ -55,7 +55,7 @@ export async function run(ctx) {
     const q=chooseQuarry(world,{exclude});
     const cap=world.settlements.find((s)=>s.kind==="capital")??world.settlements[0];
     const frac=(s)=>({fx:proj.px(s.x)/proj.widthPx,fy:proj.py(s.y)/proj.heightPx});
-    return{seed,name:q.settlement.name,hit:frac(q.settlement),miss:frac(cap),legFrac};
+    return{seed,name:q.settlement.name,hit:frac(q.settlement),miss:frac(cap),legFrac,wpx:proj.widthPx,hpx:proj.heightPx};
   })()`, true);
   const clickHunt = (f) => evaluate(`(()=>{const svg=document.querySelector("#map svg");const r=svg.getBoundingClientRect();svg.dispatchEvent(new MouseEvent("click",{clientX:r.left+${f.fx}*r.width,clientY:r.top+${f.fy}*r.height,bubbles:true}));return{status:document.getElementById("hunt-status").textContent,solved:document.getElementById("map").classList.contains("solved")};})()`);
 
@@ -111,6 +111,67 @@ export async function run(ctx) {
     wire.starStamp && wire.starAnim === "huntStarIn" && wire.revUnfurl && wire.revAnim === "paperUnfurl",
     JSON.stringify(wire),
   );
+
+  // --- HD: The Surveyor's Dispatch (#123) -- file the hunt as a drafted survey plate ---
+  // A LIVE win offers a "Draft dispatch" button that clones today's actual chart and plots
+  // the guess route over it: a dotted survey line, a numbered station at each wrong sounding,
+  // a star at the find, and one hand-set caption. The button is gated to the live-win path
+  // (HD3 below proves the restored path never offers it). We read the dispatch through a window
+  // hook rather than clicking it, so no real file download happens under CDP.
+  const disp = await evaluate(`(()=>{
+    const btn=document.getElementById("dispatch");
+    const fn=window.__vellumDispatchSvg;
+    const svg=(typeof fn==="function")?fn():"";
+    return{exists:!!btn,hidden:btn?btn.hidden:true,hasFn:typeof fn==="function",svg};
+  })()`);
+  check(
+    "HD1 a live win offers the Draft dispatch button (#123)",
+    disp.exists && disp.hidden === false,
+    JSON.stringify({ exists: disp.exists, hidden: disp.hidden }),
+  );
+
+  // HD2 (AC1-AC5): the dispatch is a self-contained artifact. It must (a) preserve the chart's
+  // data-vellum-* recipe so it stays reproducible like every Vellum export; (b) plot one numbered
+  // station per miss (2 here: the capital + the 0.4 probe); (c) caption the soundings tally in
+  // period voice; (d) be inline-styled with NO page-CSS class leaking into the added group; and
+  // (e) -- the AC that justifies storing GRID coordinates -- station #1 (the capital miss) must
+  // land at proj.px(cap.x)/py(cap.y), which only holds if the route was re-projected at draft
+  // time. If it had stored pixel or client-rect coords, re-projection would displace the station
+  // by ~100-500px and this fails hard. The residual we DO allow (~2-3px) is the synthesized
+  // click's clientX/Y being quantized to an integer by the browser, then amplified by the
+  // sheet-to-screen scale (viewBox 1500 / displayed width ~= 1.9-2.5x); the grid round-trip
+  // itself is exact. 5px comfortably covers that quantization yet stays 20x below any coord-space
+  // mismatch, so the guard still bites the moment the route stops being stored in grid space.
+  const d = disp.svg || "";
+  const g = d.slice(d.indexOf("data-vellum-dispatch")); // scope the style/leak checks to the added <g>
+  const stations = (d.match(/data-dispatch-station/g) || []).length;
+  const st1 = g.match(/data-dispatch-station[^>]*?cx="([-\d.]+)"[^>]*?cy="([-\d.]+)"/);
+  const cx = st1 ? parseFloat(st1[1]) : NaN;
+  const cy = st1 ? parseFloat(st1[2]) : NaN;
+  const gridOk = Math.abs(cx - tgt.miss.fx * tgt.wpx) < 5 && Math.abs(cy - tgt.miss.fy * tgt.hpx) < 5;
+  check(
+    "HD2 the dispatch clones the chart, plots the grid-projected route + star, captions the tally, inline-styled (#123)",
+    disp.hasFn &&
+      d.includes(`data-vellum-seed="${tgt.seed}"`) &&
+      stations === 2 &&
+      /<polyline[^>]*stroke:/.test(g) &&
+      /data-dispatch-star/.test(g) &&
+      g.includes("Quarry taken in 3 soundings") &&
+      g.includes(`CHART № ${tgt.seed}`) &&
+      gridOk &&
+      g.includes("style=") && !g.includes("class="),
+    JSON.stringify({
+      hasFn: disp.hasFn,
+      seedKept: d.includes(`data-vellum-seed="${tgt.seed}"`),
+      stations,
+      poly: /<polyline[^>]*stroke:/.test(g),
+      star: /data-dispatch-star/.test(g),
+      caption: g.includes("Quarry taken in 3 soundings"),
+      chartNo: g.includes(`CHART № ${tgt.seed}`),
+      gridOk, cx, cy, expX: tgt.miss.fx * tgt.wpx, expY: tgt.miss.fy * tgt.hpx,
+      inline: g.includes("style=") && !g.includes("class="),
+    }),
+  );
   await shoot("hunt-seed-of-the-day.png");
 
   await send("Page.navigate", { url: HUNT_PAGE });
@@ -133,6 +194,16 @@ export async function run(ctx) {
     "H8b a solved-day reload is still: star + reveal restored without replaying the win ceremony",
     still.star && !still.stamp && still.starAnim === "none" && still.revShown && !still.unfurl && still.revAnim === "none",
     JSON.stringify(still),
+  );
+
+  // HD3 (#123, AC3): the restored-solve path (win(false)) has no in-memory route to plot, so it
+  // must NOT offer the dispatch. Assert the button EXISTS but is hidden -- an absent button would
+  // let a naive "is it hidden?" check pass vacuously and hide a real regression.
+  const dispRestored = await evaluate(`(()=>{const b=document.getElementById("dispatch");return{exists:!!b,hidden:b?b.hidden:false};})()`);
+  check(
+    "HD3 a restored solve never offers the dispatch: button present but hidden (#123)",
+    dispRestored.exists && dispRestored.hidden === true,
+    JSON.stringify(dispRestored),
   );
 
   // --- HG: The Surveyor's Glass, Sub 6 (#167) -- the Daily Hunt takes the glass ---

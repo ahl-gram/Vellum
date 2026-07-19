@@ -186,10 +186,10 @@ figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
 .reveal p { margin: 0; font-style: italic; color: #4a3826; }
 .hunt-actions { text-align: center; margin-top: 1.2rem; display: flex;
   gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap; }
-#share { border: 1.5px solid #4a3826; border-radius: 4px; padding: 0.5rem 1rem;
+#share, #dispatch { border: 1.5px solid #4a3826; border-radius: 4px; padding: 0.5rem 1rem;
   background: #f4ecd8; color: inherit; letter-spacing: 0.04em; cursor: pointer;
   font: inherit; }
-#share:hover { background: #fff7e4; }
+#share:hover, #dispatch:hover { background: #fff7e4; }
 .streak { font-size: 0.9rem; color: #6b5a40; }
 .note { text-align: center; color: #857257; font-size: 0.85rem; margin-top: 1rem; }
 footer { margin-top: 4rem; text-align: center; letter-spacing: 0.22em;
