@@ -26,7 +26,20 @@ h1 a { color: inherit; text-decoration: none; }
   text-transform: uppercase; color: #857257; margin: 0.4rem 0 1.4rem; }
 .status { text-align: center; font-style: italic; color: #6b5a40; min-height: 1.4rem; }
 figure { margin: 0; }
-#map { position: relative; }
+/* #167 The Surveyor's Glass, Sub 6: geometric pan/zoom on today's chart. #map-viewport
+   is the clip/gesture box the shared controller binds to; #map is the transform target.
+   overflow:hidden clips ONLY while zoomed (.zoomed, toggled by the controller): at home
+   (k=1) the arrival ceremony's translate/rotate and the chart's drop shadow must overflow
+   the frame exactly as today, so the idle page stays byte-identical. touch-action:none
+   (added via .zoomable by the controller) is REQUIRED for touch drag/pinch; d3-zoom does
+   not set it, and without it the browser's native pan/pinch preempts the gesture. */
+#map-viewport { position: relative; }
+#map-viewport.zoomed { overflow: hidden; }
+#map-viewport.zoomable { touch-action: none; }
+/* transform-origin 0 0 pivots the CSS scale at the top-left, matching d3-zoom's
+   screen-space math (point*k + translate) so gestures land true and the star + soundings
+   stay pixel-aligned with their marks. */
+#map { position: relative; transform-origin: 0 0; }
 #map svg { width: 100%; height: auto; display: block;
   border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
 #map:not(.solved) svg { cursor: crosshair; }

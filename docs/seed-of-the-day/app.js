@@ -23,6 +23,8 @@ import { createProjection } from "../explorer/engine/render/transform.js";
 // adds the .arriving class and animates the coastline dash, and each page's CSS decides
 // what .arriving does (here it also runs paperSettle).
 import { startArrival } from "../explorer/draw-ceremony.js";
+// #167 The Surveyor's Glass, Sub 6: the SAME shared zoom controller the Explorer uses.
+import { createZoomController } from "../shared/zoom-controller.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -39,6 +41,32 @@ const dateLabel = new Intl.DateTimeFormat("en-GB", {
 
 $("dateline").textContent = `${dateLabel} · seed ${seed}`;
 $("explore").href = `../explorer/#seed=${seed}&style=antique&legend=1`;
+
+// --- The Surveyor's Glass, Sub 6 (#167): geometric pan/zoom on today's chart --
+// The Hunt adopts the SAME shared controller the Explorer built in Sub 3, geometric-only.
+// It binds to the STABLE #map-viewport (never wiped when the deferred render replaces
+// #map's innerHTML) and lands its live CSS transform on #map, so the chart SVG and the
+// %-positioned hunt star + soundings ride one composited frame with no redraw. Attached
+// once at load: the world is fixed and always antique, so the glass is always live.
+//
+// Deliberately NO onSettle: the Hunt is a FIXED world (epic #161). A semantic redraft
+// would reveal new places and change the clue difficulty, so it never imports the LOD or
+// region-worker paths -- the magnify stays purely geometric. The guess-click math needs
+// zero changes: it is ratio-based against getBoundingClientRect(), which reflects the live
+// transform by definition, and d3-zoom's own click-distance handling makes a drag-pan never
+// register as a guess (a moved gesture suppresses the trailing click). reducedMotion is left
+// unset so the controller reads the OS setting live (the double-click zoom is the one
+// animation it collapses).
+const zoomController = createZoomController({
+  viewportEl: $("map-viewport"),
+  targetEl: $("map"),
+  scaleExtent: [1, 8],
+});
+zoomController.attach();
+// Deterministic zoom hooks for the e2e (mirror the Explorer's): zoomTo drives the camera
+// through the same clamp a live gesture uses; zoomState reads back the settled {x,y,k}.
+window.__vellumZoomTo = (t) => zoomController.zoomTo(t);
+window.__vellumZoomState = () => zoomController.getState();
 
 // --- The daily reveal (#129 arrival ceremony) --------------------------------
 

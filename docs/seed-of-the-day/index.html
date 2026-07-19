@@ -41,7 +41,13 @@
 
 <div class="stage">
   <figure>
-    <div id="map"></div>
+    <!-- #167 The Surveyor's Glass, Sub 6: #map-viewport is the stable clip/gesture box
+         the shared zoom-controller (docs/shared/zoom-controller.js) binds to; the live
+         CSS transform lands on #map inside it, so the chart SVG and its %-positioned
+         overlays (the hunt star, the miss soundings) ride one composited frame. The
+         figcaption (the world's name) stays OUTSIDE the frame, and the clue list is a
+         sibling of the whole figure, so neither magnifies with the sheet. -->
+    <div id="map-viewport"><div id="map"></div></div>
     <figcaption id="caption"></figcaption>
   </figure>
 
