@@ -17,8 +17,12 @@ export const AROMATIC_GOODS: Record<string, readonly string[]> = {
   norden: ["whale oil", "pine tar", "smoked herring", "tallow", "juniper smoke"],
   veshari: ["saffron", "rose attar", "cardamom", "sandalwood", "ripe dates"],
   sylvan: ["heather honey", "cider", "beeswax", "woodsmoke", "pressed apples"],
+  tsuren: ["green tea", "cedar incense", "pickled plum", "toasted rice", "camphor"],
   oromi: ["palm wine", "coconut oil", "smoked fish", "frangipani", "copra"],
   draket: ["bitter ale", "pine pitch", "hot tar", "smoked mutton", "peat smoke"],
+  zoryan: ["rye bread", "birch tar", "linden honey", "pine resin", "spiced kvass"],
+  tezcal: ["cacao", "vanilla", "copal smoke", "roasted chili", "toasted maize"],
+  ordai: ["fermented mare's milk", "steppe thyme", "roast mutton", "felt smoke", "wild garlic"],
 };
 
 export const CARGO_GOODS: Record<string, readonly string[]> = {
@@ -26,8 +30,12 @@ export const CARGO_GOODS: Record<string, readonly string[]> = {
   norden: ["whale oil", "iron blooms", "pine tar", "sealskin", "smoked herring"],
   veshari: ["saffron", "indigo", "dates", "rose attar", "glazed tiles"],
   sylvan: ["heather honey", "cider", "willow-bark", "wool", "carved oak"],
+  tsuren: ["lacquerware", "raw silk", "sea salt", "folded steel", "glazed porcelain"],
   oromi: ["dried fish", "black pearls", "feather cloaks", "obsidian", "palm wine"],
   draket: ["iron ingots", "black granite", "wolf pelts", "siege timber", "bitter ale"],
+  zoryan: ["amber", "sable furs", "flax", "iron blooms", "beeswax"],
+  tezcal: ["obsidian", "jade", "cacao", "quetzal feathers", "cochineal dye"],
+  ordai: ["horsehide", "felt", "lacquered bows", "rock salt", "silver ingots"],
 };
 
 export const HARBOR_NOTES = [

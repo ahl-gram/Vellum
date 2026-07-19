@@ -58,9 +58,15 @@ export type Culture = {
   readonly realmTemplates: readonly string[];
 };
 
+// The order of this array is normative. generate.ts:157 picks a world's culture
+// with `rng.fork("culture").pick(CULTURES)`, and pick() = floor(u * length). Seed
+// 42's culture-fork draw is u = 0.69486..., so floor(u * 10) = 6: oromi MUST stay
+// at index 6 or the golden re-rolls its culture and every seed-42 name changes.
+// This is the covenant of seed 42 (issue #235); the guard test in
+// test/world/covenant-seed42.test.ts fails if oromi ever leaves index 6.
 export const CULTURES: readonly Culture[] = [
   {
-    id: "thalassic",
+    id: "thalassic", // a Mediterranean maritime culture (Greek thalassa: the sea)
     onsets: ["th", "v", "s", "m", "n", "l", "r", "c", "mar", "vel", "sel", "tal", "or"],
     nuclei: ["a", "e", "o", "i", "ia", "ea", "ai", "io"],
     codas: ["", "n", "r", "s", "l", "th", "ra", "mor", "lis", "dor"],
@@ -74,7 +80,7 @@ export const CULTURES: readonly Culture[] = [
     realmTemplates: ["The Realm of %", "The % Dominion", "%ia"],
   },
   {
-    id: "norden",
+    id: "norden", // a Norse culture - fjords, fells, jarldoms
     onsets: ["k", "g", "h", "br", "dr", "sk", "thr", "gr", "v", "hj", "kal", "sten"],
     nuclei: ["a", "o", "u", "e", "ei", "au"],
     codas: ["", "k", "g", "rk", "nd", "rg", "ld", "rn", "st"],
@@ -88,7 +94,7 @@ export const CULTURES: readonly Culture[] = [
     realmTemplates: ["The Jarldom of %", "The % March", "Greater %"],
   },
   {
-    id: "veshari",
+    id: "veshari", // an Arabic and Persian desert culture - wadis, oases, sultanates
     onsets: ["z", "sh", "kh", "q", "s", "n", "m", "az", "ish", "far", "sah"],
     nuclei: ["a", "i", "u", "aa", "ai", "ara"],
     codas: ["", "r", "n", "sh", "m", "l", "din", "zar"],
@@ -102,7 +108,7 @@ export const CULTURES: readonly Culture[] = [
     realmTemplates: ["The Sultanate of %", "The % Expanse", "Greater %"],
   },
   {
-    id: "sylvan",
+    id: "sylvan", // a Celtic pastoral culture with an elvish lilt - vales, meres, hollows
     onsets: ["w", "l", "f", "el", "ael", "br", "th", "gw", "lor", "fen"],
     nuclei: ["e", "i", "a", "ae", "ie", "ei"],
     codas: ["", "l", "n", "th", "wen", "ril", "las", "mir"],
@@ -116,7 +122,36 @@ export const CULTURES: readonly Culture[] = [
     realmTemplates: ["The Vale of %", "The % Compact", "Fair %"],
   },
   {
-    id: "oromi",
+    id: "tsuren", // NEW: a Japanese culture - open syllables, -kawa and -shima, the Mandate
+    onsets: ["k", "s", "t", "n", "h", "m", "r", "y", "w", "sh", "ch", "ts", "g", "z", "d", "b"],
+    nuclei: ["a", "i", "u", "e", "o", "ai", "ou", "ei"],
+    codas: ["", "", "", "n"],
+    patterns: ["ONON", "ON", "ONONON", "ONC"],
+    townSuffixes: ["shima", "kawa", "yama", "moto", "saki"],
+    riverTemplates: ["The %gawa", "River %", "The % Waters"],
+    peakTemplates: ["Mount %", "The % Heights", "The Peak of %"],
+    seaTemplates: ["The Sea of %", "The % Straits", "The % Sound"],
+    lakeTemplates: ["Lake %", "The % Waters", "The Mirror of %"],
+    forestTemplates: ["The %mori", "The % Forest", "Deep %"],
+    realmTemplates: ["The Shogunate of %", "The Mandate of %", "Greater %"],
+  },
+  {
+    id: "draket", // a harsh Germanic-imperial culture in the dark-fantasy grain
+    onsets: ["dr", "kr", "gr", "th", "mal", "bar", "z", "d", "g", "vor", "skar"],
+    nuclei: ["a", "e", "o", "u", "ya"],
+    codas: ["", "k", "th", "rg", "d", "mar", "gat"],
+    patterns: ["ONC", "ONCONC", "ONCON", "ON"],
+    townSuffixes: ["hold", "spire", "gate", "keep", "burg"],
+    riverTemplates: ["The % Cut", "River %", "The Black %"],
+    peakTemplates: ["The % Fangs", "The Throne of %", "% Spire"],
+    seaTemplates: ["The % Maw", "The Sea of %", "The Iron %"],
+    lakeTemplates: ["The % Depths", "Lake %", "The Drowned %"],
+    forestTemplates: ["The % Thorns", "The Dark of %", "% Forest"],
+    realmTemplates: ["The Empire of %", "The % Dominion", "Iron %"],
+  },
+  {
+    id: "oromi", // a Polynesian culture - atolls, fire peaks, chiefdoms
+    // ^ index 6: the covenant of seed 42 - DO NOT MOVE (see guard test)
     onsets: ["k", "t", "m", "n", "h", "r", "l", "p", "w", "kai", "tau", "moa"],
     nuclei: ["a", "o", "u", "e", "ai", "au", "oa"],
     codas: ["", "", "n", "ng", "ki", "lo"],
@@ -130,18 +165,52 @@ export const CULTURES: readonly Culture[] = [
     realmTemplates: ["The % Atolls", "The Chiefdom of %", "Greater %"],
   },
   {
-    id: "draket",
-    onsets: ["dr", "kr", "gr", "th", "mal", "bar", "z", "d", "g", "vor", "skar"],
-    nuclei: ["a", "e", "o", "u", "ya"],
-    codas: ["", "k", "th", "rg", "d", "mar", "gat"],
+    id: "zoryan", // NEW: a Slavic culture - -grad and -ov, limans, birch taigas
+    onsets: ["v", "z", "r", "d", "b", "g", "k", "s", "m", "n", "l", "p", "vl", "gr", "dr", "sk", "st", "br", "tr", "kr", "sv", "zv"],
+    nuclei: ["a", "o", "e", "i", "u", "y"],
+    // no bare "v"/"ov" coda (the "Striovvya" collision of early drafts). Codas are
+    // single consonants only: cluster codas ("sk"/"st") met the cluster onsets and
+    // stacked into unpronounceable piles ("Kraskstov"). The -sk ending survives as
+    // a town suffix, "sk" survives as an onset; just not as a coda.
+    codas: ["", "r", "n", "d", "l", "k"],
     patterns: ["ONC", "ONCONC", "ONCON", "ON"],
-    townSuffixes: ["hold", "spire", "gate", "keep", "burg"],
-    riverTemplates: ["The % Cut", "River %", "The Black %"],
-    peakTemplates: ["The % Fangs", "The Throne of %", "% Spire"],
-    seaTemplates: ["The % Maw", "The Sea of %", "The Iron %"],
-    lakeTemplates: ["The % Depths", "Lake %", "The Drowned %"],
-    forestTemplates: ["The % Thorns", "The Dark of %", "% Forest"],
-    realmTemplates: ["The Empire of %", "The % Dominion", "Iron %"],
+    townSuffixes: ["grad", "ov", "sk", "in", "itsa"],
+    riverTemplates: ["The % Reka", "River %", "The %va"],
+    peakTemplates: ["The % Planina", "Mount %", "The Peaks of %"],
+    seaTemplates: ["The Sea of %", "The % Gulf", "The Cold Sea of %"],
+    lakeTemplates: ["The % Liman", "Lake %", "The % Ozero"],
+    forestTemplates: ["The % Taiga", "The Birch of %", "The %les"],
+    realmTemplates: ["The Tsardom of %", "The % Voivodeship", "The % Balka"],
+  },
+  {
+    id: "tezcal", // NEW: a Nahuatl and Maya culture - -tlan and -pec, cenotes, the Fifth Sun
+    onsets: ["", "t", "tl", "tz", "x", "ch", "c", "m", "n", "l", "p", "hu", "cu", "y"],
+    nuclei: ["a", "e", "i", "o", "ia", "ua"],
+    // "tl" stays an onset and the -tlan suffix, but not a coda: as a coda it
+    // stacked with tl-onsets and -tlan into "Tletltlan"-style pile-ups.
+    codas: ["", "", "n", "c", "l", "x"],
+    patterns: ["ONC", "ONON", "ONONC", "ON"],
+    townSuffixes: ["tlan", "pec", "pan", "co", "can"],
+    riverTemplates: ["The %apan", "The Waters of %", "River %"],
+    peakTemplates: ["The Smoking Altar of %", "Mount %", "The % Tepetl"],
+    seaTemplates: ["The Sea of %", "The % Gulf", "The Gulf of %"],
+    lakeTemplates: ["The Cenote of %", "Lake %", "The % Cenote"],
+    forestTemplates: ["The % Jungle", "The Jungle of %", "Deep %"],
+    realmTemplates: ["The Fifth Sun of %", "The % Dominion", "The Empire of %"],
+  },
+  {
+    id: "ordai", // NEW: a Mongolic and Turkic steppe culture - khots, kurgans, the horde
+    onsets: ["", "k", "kh", "g", "t", "d", "b", "s", "sh", "ch", "m", "n", "l", "r", "y", "gh"],
+    nuclei: ["a", "e", "i", "o", "u", "uu", "oo", "ai", "ei"],
+    codas: ["", "n", "r", "l", "g", "t", "sh", "ng"],
+    patterns: ["ONC", "ONCON", "ONCONC", "ON"],
+    townSuffixes: ["khot", "bulak", "balik", "tai", "gan"],
+    riverTemplates: ["The % Gol", "River %", "The Waters of %"],
+    peakTemplates: ["The % Uul", "Mount %", "The % Dag"],
+    seaTemplates: ["The Grass Sea of %", "The Sea of %", "The % Dalai"],
+    lakeTemplates: ["The % Nor", "Lake %", "The % Kol"],
+    forestTemplates: ["The Larch of %", "The % Woods", "Deep %"],
+    realmTemplates: ["The % Horde", "The Khanate of %", "The % Orda"],
   },
 ];
 

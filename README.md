@@ -135,10 +135,10 @@ choice comes from a labeled fork of the master seed (`fork("names")`,
    fertile land; roads grown by Dijkstra with a reuse discount so trunk
    corridors emerge; realms partitioned by terrain-cost Voronoi, with
    borders that prefer ridges and rivers.
-5. **Names & lore**: syllable-grammar generators for six invented
-   cultures (thalassic, norden, veshari, sylvan, oromi, draket) name
-   every town, river, sea, and realm; a template-grammar lore writer
-   drafts the gazetteer notes.
+5. **Names & lore**: syllable-grammar generators for ten invented
+   cultures (thalassic, norden, veshari, sylvan, tsuren, draket, oromi,
+   zoryan, tezcal, ordai) name every town, river, sea, and realm; a
+   template-grammar lore writer drafts the gazetteer notes.
 6. **Rendering**: marching-squares coastlines and contours (with
    saddle resolution and boundary closing), Chaikin smoothing, a tiny
    immutable SVG builder, and ~15 layer renderers up through the
@@ -152,7 +152,7 @@ line up with the world chart.
 
 ## Inventing a name language
 
-Each of the six cultures is a plain data object (the `Culture` type) in
+Each of the ten cultures is a plain data object (the `Culture` type) in
 `src/society/names.ts`, collected in the `CULTURES` array. That object is all it
 takes to define how a world's names sound, so you can retune an existing culture
 or add your own to lean the names toward a real language.
@@ -202,6 +202,17 @@ Two things to know:
   the draw sequence and renames every world: a seed you saved comes back with a
   different identity. After a naming change, rebuild the showcase
   (`npm run site`) and update the hero captions.
+
+  The **Second Edition** (issue #235) is the second change of this kind: it grew
+  the roster from six cultures to ten (adding tsuren, zoryan, tezcal, ordai), so
+  every seed re-rolled its culture and names, with one exception. Seed 42, the
+  golden, is the **covenant seed**. A world draws its culture with one pick,
+  `roster[floor(u * roster.length)]`; seed 42's draw `u = 0.69486...` lands oromi
+  at index 6 of the ten-culture array, exactly where it sat at index 4 of the six,
+  so seed 42's every name and cell stayed bit-identical and the golden passed with
+  no re-pin. A future edition repeats that one placement: put oromi at
+  `floor(u * newLength)` and the covenant holds. A guard test
+  (`test/world/covenant-seed42.test.ts`) fails loudly if oromi ever leaves index 6.
 
 ## Seed of the day
 

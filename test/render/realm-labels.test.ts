@@ -17,10 +17,21 @@ import { renderMap } from "../../src/render/map-renderer.ts";
  * The two seeds below are the ones Alex filed, recovered from the charts' own
  * `CHART No` (the chart number IS the seed). Each has exactly one silently
  * dropped realm.
+ *
+ * #235 (Names: Second Edition) re-rolled culture and names for every non-42 seed.
+ * Culture is picked AFTER the realm partition, so each seed's blobs and seat order
+ * are byte-identical; only the name strings changed, so realm index i is the same
+ * realm. Both fixtures re-pinned to the new title and the new name of that SAME
+ * geometrically-dropped realm:
+ *   seed 1619895893: "The Whispering Reaches of Rau" -> "...Ciapa";
+ *     dropped realm[0] "Greater Woropau" -> "The Empire of Non".
+ *   seed 3767410253: "The Verdant Isle of Gyath" -> "...Noca";
+ *     dropped realm[1] "The Gyamarde Dominion" -> "The Niayax Dominion".
+ * The behavior guarded (every realm is labelled) is unchanged; only strings moved.
  */
 const CASES = [
-  { seed: 1619895893, chart: "The Whispering Reaches of Rau", dropped: "Greater Woropau" },
-  { seed: 3767410253, chart: "The Verdant Isle of Gyath", dropped: "The Gyamarde Dominion" },
+  { seed: 1619895893, chart: "The Whispering Reaches of Ciapa", dropped: "The Empire of Non" },
+  { seed: 3767410253, chart: "The Verdant Isle of Noca", dropped: "The Niayax Dominion" },
 ] as const;
 
 /** Realm labels render as all-caps text nodes. */
