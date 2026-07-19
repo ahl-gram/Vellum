@@ -100,36 +100,70 @@ export function lodWindowFor(cx: number, cy: number, size: number): UvWindow {
   return { u0, v0, u1: u0 + size, v1: v0 + size };
 }
 
-// ---- Sub 8 settle math (#169) ---------------------------------------------------
+// ---- Sub 8 settle + inset math (#169) --------------------------------------------
 // The redraft state machine's PURE core, kept here (not in the docs/ controller) so it
-// unit-tests from source with no build artifact. The DOM orchestration (crossfade,
-// rebase, worker dispatch, overlay) lives in docs/explorer/lod-controller.js and is
-// proven by e2e; this file owns only the "given a camera + the sheet it is framing,
-// what should the next sheet be" decision.
+// unit-tests from source with no build artifact. The DOM orchestration (inset mount,
+// crossfade, worker dispatch, overlay) lives in docs/explorer/lod-controller.js and is
+// proven by e2e; this file owns the "given the world camera, what should the next sheet
+// be" decision and the geometry that mounts a region sheet INSIDE the world sheet.
+//
+// Redesigned in PR #245 review: the camera stays world-relative for good (no rebase),
+// so the sole coordinate conversion left is sheet fraction <-> plot-uv (the frame
+// margin), plus the inset placement rects.
 
-/** A world-uv (or region-relative) camera: centre fraction + continuous zoom. */
+/** A camera: centre fraction + continuous zoom. Sheet-fraction or plot-uv per context. */
 export type UvCamera = { readonly cx: number; readonly cy: number; readonly k: number };
 
-/** The whole-world window (band 0): the full sheet, size 1, so composition is identity. */
+/** The whole-world window (band 0): the full sheet. */
 export const FULL_WINDOW: UvWindow = { u0: 0, v0: 0, u1: 1, v1: 1 };
 
+/** Margin fractions of a rendered sheet: marginPx/widthPx and marginPx/heightPx. */
+export type SheetMargins = { readonly mx: number; readonly my: number };
+
+/** A rect in sheet fractions (of the full chart box, margins included). */
+export type SheetRect = { readonly x: number; readonly y: number; readonly w: number; readonly h: number };
+
 /**
- * Compose a region-relative camera (read via cameraFromTransform against whatever sheet
- * is mounted in #map) UP into world-uv, given the world-uv `window` that sheet covers.
- *
- * This is the composition #169 turns on. After a redraft rebases the controller, the live
- * transform is relative to the REGION sheet, not the world; so the world centre is
- * `window.u0 + cam.cx * size` and the world zoom is `cam.k / size` (a size-`s` window drawn
- * to fill the viewport is a `1/s` magnification of the world). At band 0 the window is
- * FULL_WINDOW (size 1) and this is the identity, so one code path serves every band.
+ * Convert the camera read against the SHEET (fractions of the full chart box, the
+ * space cameraFromTransform works in) into plot-uv (fractions of the world grid, the
+ * space region windows live in). The chart draws its grid inset by a frame margin on
+ * every side, so the two differ by that margin; clamped because a camera centred over
+ * the margin/frame area is still best served by the nearest edge of the plot.
  */
-export function worldCameraFrom(cam: UvCamera, window: UvWindow): UvCamera {
-  const size = window.u1 - window.u0; // LOD windows are square, so one size serves both axes
+export function plotUvFromSheet(cam: UvCamera, m: SheetMargins): UvCamera {
   return {
-    cx: window.u0 + cam.cx * size,
-    cy: window.v0 + cam.cy * size,
-    k: cam.k / size,
+    cx: clamp((cam.cx - m.mx) / (1 - 2 * m.mx), 0, 1),
+    cy: clamp((cam.cy - m.my) / (1 - 2 * m.my), 0, 1),
+    k: cam.k,
   };
+}
+
+/** The sheet-fraction rect a plot-uv window occupies on the world sheet (used to aim
+ *  the drafting indicator, and as the alignment target for insetSheetRect). */
+export function windowSheetRect(window: UvWindow, m: SheetMargins): SheetRect {
+  const sx = 1 - 2 * m.mx;
+  const sy = 1 - 2 * m.my;
+  return {
+    x: m.mx + window.u0 * sx,
+    y: m.my + window.v0 * sy,
+    w: (window.u1 - window.u0) * sx,
+    h: (window.v1 - window.v0) * sy,
+  };
+}
+
+/**
+ * Where a region sheet mounts inside the world sheet's box (both as fractions of that
+ * box) so the region's PLOT AREA lands exactly on the window it re-surveys. The region
+ * sheet is rendered with the SAME margin fractions at the same aspect, scaled to `s`
+ * (the window size), so its own margins overhang the window rect by m*s on each side:
+ * the mounted sheet reads as a detail survey pasted over the master chart, its frame
+ * just outside the terrain it refines. For a centred window the overhang cancels and
+ * the mount is exactly (u0, v0, s, s).
+ */
+export function insetSheetRect(window: UvWindow, m: SheetMargins): SheetRect {
+  const s = window.u1 - window.u0; // LOD windows are square, so one size serves both axes
+  const r = windowSheetRect(window, m);
+  return { x: r.x - m.mx * s, y: r.y - m.my * s, w: s, h: s };
 }
 
 function windowsEqual(a: UvWindow, b: UvWindow): boolean {
@@ -147,12 +181,14 @@ export type SettleDecision =
   | { readonly action: "region"; readonly band: number; readonly window: UvWindow };
 
 /**
- * Decide what a settle should do, given the region-relative `camera`, the world-uv
- * `currentWindow` the mounted sheet covers, and the `currentBand` held. Composes to world,
- * resolves the band with hysteresis, and quantizes the window:
- *  - band 0 from a region -> revert to the retained world sheet ("world"); from the world
- *    itself -> "noop".
- *  - band >= 1 with the SAME band and window already held -> "noop" (skip the redraft).
+ * Decide what a settle should do, given the WORLD `camera` (plot-uv centre + viewport
+ * zoom -- the camera is world-relative at every band, since a committed region only
+ * mounts an inset and never rebases), the plot-uv `currentWindow` of the committed
+ * inset (FULL_WINDOW at band 0), and the `currentBand` held. Resolves the band with
+ * hysteresis and quantizes the window:
+ *  - band 0 with an inset committed -> drop it and return to the bare world sheet
+ *    ("world"); on the bare world sheet itself -> "noop".
+ *  - band >= 1 with the SAME band and window already committed -> "noop".
  *  - otherwise -> "region" with the quantized band + window to draw.
  */
 export function decideSettle(state: {
@@ -160,31 +196,15 @@ export function decideSettle(state: {
   readonly currentWindow: UvWindow;
   readonly currentBand: number;
 }): SettleDecision {
-  const world = worldCameraFrom(state.camera, state.currentWindow);
-  const band = bandFor(world.k, state.currentBand);
+  const band = bandFor(state.camera.k, state.currentBand);
   if (band === 0) {
-    // From a region, a settle at band 0 reverts to the retained world sheet; the world
-    // sheet itself has nothing to redraft. (bandFor only returns 0 below the down-cross,
-    // so a revert always lands near home and cannot re-enter a region on the next settle.)
     return state.currentBand === 0 ? { action: "noop" } : { action: "world" };
   }
   const size = (LOD_BANDS[band] as LodBand).sizeUV;
-  const { cx, cy } = quantizeCenter(world.cx, world.cy, size);
+  const { cx, cy } = quantizeCenter(state.camera.cx, state.camera.cy, size);
   const window = lodWindowFor(cx, cy, size);
   if (band === state.currentBand && windowsEqual(window, state.currentWindow)) {
     return { action: "noop" }; // same survey already on screen: skip the redraft
   }
   return { action: "region", band, window };
-}
-
-/**
- * The controller scaleExtent to install when band `band` is committed. Band 0 is the world
- * sheet, [1, 8]. A region band is rebased so the camera is region-relative; ck maps to world
- * zoom wk = ck * k_b, so installing [1/k_b, 8/k_b] keeps wk spanning the global [1, 8] at every
- * band -- it caps zoom-in at the finest survey and lets a zoom-out reach the band-0 down-cross.
- */
-export function scaleExtentFor(band: number): readonly [number, number] {
-  if (band <= 0) return [1, 8];
-  const k = (LOD_BANDS[band] as LodBand).k;
-  return [1 / k, 8 / k];
 }

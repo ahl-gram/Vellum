@@ -1,49 +1,63 @@
 // The Surveyor's Glass, Sub 8 (#169): the redraft. Wires a camera SETTLE on the antique
-// chart to a finer REGIONAL survey of the window, and a zoom-out back to the retained world
-// sheet. The convergence point of the epic: Sub 4 gave the camera, Sub 7 gave the region
-// engine + LOD schedule, the sheet-turn (#131) gave the commit discipline; only the rebase
-// math is new, and it lives (pure, unit-tested) in src/world/lod.ts. This module is the DOM
-// conductor around that math -- crossfade, rebase, worker dispatch, overlay -- proven by e2e.
+// chart to a finer REGIONAL survey of the window. Redesigned in PR #245 review: the camera
+// stays WORLD-relative for good. A committed survey never replaces the world sheet and never
+// rebases the controller; it mounts as an INSET -- a smaller region sheet laid over the exact
+// window it re-surveys, inside #map, riding the same live transform as the chart and its
+// overlays. That one decision is what makes the interactions continuous:
+//   - pan/zoom always run against the world sheet's own extent (the proven Sub 3/4 geometry),
+//     so panning works at every band and no per-band scaleExtent exists;
+//   - a commit moves NOTHING (the transform is untouched): the window's content sharpens in
+//     place and the region sheet's own frame appears around it, a detail survey pasted on the
+//     master chart;
+//   - a zoom-out shows the world chart around the inset immediately (it was there all along),
+//     and the region -> world hop just fades the inset away, no worker round-trip.
+// The pure settle/inset math lives (unit-tested) in src/world/lod.js; this module is the DOM
+// conductor -- inset mount, crossfade, worker dispatch, overlay, the drafting indicator.
 //
 // Kept out of app.js so the conductor stays glue: app.js owns the controls + the draw race,
-// and hands this module the pieces it needs (the zoom controller, runJob, buildPlaceOverlay,
-// the camera reader) plus a per-draw world context (setWorld). Antique-only redraft: app.js
-// gates onSettle on the style, so a non-antique settle only writes the hash (geometric zoom).
+// and hands this module the pieces it needs plus a per-draw world context (setWorld).
+// Antique-only redraft: app.js gates onSettle on the style, so a non-antique settle only
+// writes the hash (geometric zoom).
 import {
   LOD_BANDS,
   decideSettle,
-  scaleExtentFor,
+  plotUvFromSheet,
+  windowSheetRect,
+  insetSheetRect,
   FULL_WINDOW,
 } from "./engine/world/lod.js";
 
+const pct = (f) => `${(f * 100).toFixed(4)}%`;
+
 /**
  * @param {{
- *   mapDiv: HTMLElement,            // #map, holds the current sheet (world or region)
- *   mapViewport: HTMLElement,       // #map-viewport, the stable clip/gesture box (crossfade host)
- *   zoomController: any,            // createZoomController(): rebase/reset/setScaleExtent/getState
+ *   mapDiv: HTMLElement,            // #map, the world sheet's box; insets mount inside it
  *   runJob: (msg:any)=>Promise<any>,// worker-client dispatch
  *   buildPlaceOverlay: (manifest:any, opts?:any)=>void,
  *   setCaption: (text:string)=>void,
- *   syncHash: ()=>void,
+ *   getZoomK: ()=>number,           // current world zoom, to counter-scale the pencil border
  *   prefersReduce: ()=>boolean,
  * }} deps
  */
 export function createLodController(deps) {
-  const { mapDiv, mapViewport, zoomController, runJob, buildPlaceOverlay, setCaption, syncHash, prefersReduce } = deps;
+  const { mapDiv, runJob, buildPlaceOverlay, setCaption, getZoomK, prefersReduce } = deps;
 
-  // The world-uv window the mounted sheet covers, and the LOD band held. Band 0 is the world
-  // sheet (window = the whole sheet); 1..3 are regional surveys. currentWindow is what the
-  // settle math composes the region-relative camera against, so it MUST track the mounted sheet.
+  // The plot-uv window the committed inset covers, and the LOD band held. Band 0 is the
+  // bare world sheet (FULL_WINDOW, no inset); 1..3 are regional surveys.
   let currentBand = 0;
   let currentWindow = FULL_WINDOW;
 
-  // The retained world context, from the last world draw: enough to (a) fire a region job over
-  // the SAME base world (cache hit) and (b) restore the world sheet on a zoom-out with no worker.
-  let world = null; // { seed, overrides, render, svg, manifest } | null
+  // The retained world context, from the last world draw: enough to fire a region job over
+  // the SAME base world (cache hit) and to rebuild the world overlay when the inset drops.
+  let world = null; // { seed, overrides, render, manifest } | null
 
-  // The region sheet currently committed (for the Download-saves-what-you-see policy), or null
-  // at the world sheet.
-  let committed = null; // { svg, band, title } | null
+  // The committed inset (for the Download-saves-what-you-see policy and the DOM teardown),
+  // or null at the bare world sheet.
+  let inset = null; // { el, svg, band, window, title } | null
+
+  // The drafting indicator: a dashed outline over the window being surveyed, up between
+  // dispatch and commit. One element, repositioned per dispatch.
+  let pencil = null;
 
   // Monotonic guard, the drawGen idiom: every dispatch bumps it; a resolved job that is no
   // longer the latest is silently dropped, so only the LAST settle in a flurry commits.
@@ -52,18 +66,99 @@ export function createLodController(deps) {
   // settle and last-wins without timing.
   let redrafts = 0;
 
-  const crossfade = makeCrossfade(mapViewport);
+  // marginPx/widthPx differ from marginPx/heightPx (same px inset, different axis lengths),
+  // so the conversion carries both. The world manifest is the authority: the camera is read
+  // against the world sheet at every band.
+  function margins() {
+    const m = world.manifest;
+    return { mx: m.marginPx / m.widthPx, my: m.marginPx / m.heightPx };
+  }
 
-  function setBandExtent(band) {
-    if (zoomController.setScaleExtent) zoomController.setScaleExtent(scaleExtentFor(band));
+  function showPencil(window) {
+    const r = windowSheetRect(window, margins());
+    if (!pencil) {
+      pencil = document.createElement("div");
+      pencil.className = "survey-pencil";
+      pencil.setAttribute("aria-hidden", "true");
+    }
+    pencil.style.left = pct(r.x);
+    pencil.style.top = pct(r.y);
+    pencil.style.width = pct(r.w);
+    pencil.style.height = pct(r.h);
+    // The pencil rides #map's transform, so a fixed border would fatten k-fold on screen.
+    pencil.style.borderWidth = `${Math.max(0.4, 2 / Math.max(1, getZoomK()))}px`;
+    if (!pencil.parentNode) mapDiv.appendChild(pencil);
+  }
+
+  function hidePencil() {
+    if (pencil && pencil.parentNode) pencil.remove();
+  }
+
+  // Remove every mounted inset except `keep`. Fades in flight are per-element and guarded
+  // by isConnected, so sweeping stragglers out from under them is safe.
+  function removeInsetsExcept(keep) {
+    for (const el of mapDiv.querySelectorAll(".region-inset")) {
+      if (el !== keep) el.remove();
+    }
+  }
+
+  // Commit a resolved survey: mount the new inset aligned over its window and fade it in
+  // OVER whatever it replaces (the world content, or a previous inset). State, overlay and
+  // caption update synchronously at the mount -- the fade is pure paint, and the outgoing
+  // inset is only torn down once the incoming one is fully opaque, so the reader never sees
+  // a gap frame (the sheet-turn discipline, #131). Reduced motion swaps instantly.
+  function commitInset(band, window, res, ms) {
+    const rect = insetSheetRect(window, margins());
+    const el = document.createElement("div");
+    el.className = "region-inset";
+    el.style.left = pct(rect.x);
+    el.style.top = pct(rect.y);
+    el.style.width = pct(rect.w);
+    el.style.height = pct(rect.h);
+    el.innerHTML = res.svg;
+    const old = inset ? inset.el : null;
+    mapDiv.appendChild(el);
+    inset = { el, svg: res.svg, band, window, title: res.title };
+    currentBand = band;
+    currentWindow = window;
+    hidePencil();
+    // The overlay rebuilds against the region manifest, positioned to the inset's box so the
+    // region's own nx/ny fractions land on its drawn glyphs. Pin continuity keys by NAME
+    // (region worlds renumber indices).
+    buildPlaceOverlay(res.manifest, { preservePinByName: true, box: rect });
+    redrafts++;
+    setCaption(`${res.title} · regional survey · band ${band} · drawn in ${ms}ms`);
+    if (prefersReduce()) {
+      el.classList.add("in");
+      if (old) old.remove();
+      return;
+    }
+    void el.offsetWidth; // force layout so the class add transitions from opacity 0
+    el.classList.add("in");
+    if (old) {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        el.removeEventListener("transitionend", onEnd);
+        if (old.isConnected) old.remove();
+      };
+      const onEnd = (e) => {
+        if (e.target === el) finish();
+      };
+      el.addEventListener("transitionend", onEnd);
+      // Fallback: if transitionend never fires (a dropped transition), tear down anyway.
+      const timer = setTimeout(finish, 700);
+    }
   }
 
   // Dispatch a region job for (band, window) over the retained base world, guarded so a
-  // superseding settle drops this one. On commit the finer sheet crossfades in and the camera
-  // rebases to it, so the SAME framing shows at a finer grid with no visible jump.
+  // superseding settle drops this one.
   function dispatchRegion(band, window) {
     if (!world) return;
     const myGen = ++regionGen;
+    showPencil(window);
     setCaption("Drafting the finer survey…");
     const t0 = performance.now();
     runJob({
@@ -81,105 +176,101 @@ export function createLodController(deps) {
       .then((res) => {
         if (myGen !== regionGen) return; // superseded by a newer settle
         const ms = (performance.now() - t0).toFixed(0);
-        crossfade.run(res.svg, prefersReduce(), () => {
-          // One synchronous tick (the sheet-turn discipline): band/window state, then the new
-          // SVG, then rebase, then the overlay, so the reader never sees a gap frame.
-          currentBand = band;
-          currentWindow = window;
-          committed = { svg: res.svg, band, title: res.title };
-          mapDiv.innerHTML = res.svg;
-          zoomController.rebase(); // the region sheet is the new home: identity fills the viewport
-          setBandExtent(band); // region-relative ck now maps to world zoom [1,8]
-          buildPlaceOverlay(res.manifest, { preservePinByName: true });
-          redrafts++;
-          setCaption(`${res.title} · regional survey · band ${band} · drawn in ${ms}ms`);
-          syncHash(); // the composed world framing (post-rebase) links correctly
-        });
+        commitInset(band, window, res, ms);
       })
       .catch((err) => {
         if (myGen !== regionGen) return;
+        hidePencil();
         setCaption("The cartographer spilled the ink: " + (err && err.message ? err.message : String(err)));
       });
   }
 
-  // Zoom-out past the world threshold: crossfade back to the RETAINED world sheet, no worker
-  // round-trip (the scope's "no worker round-trip" is why a region never steps down band by
-  // band; the only coarser sheet kept is the world). bandFor only returns 0 below the down-
-  // cross, so the camera lands near home and rebasing to home reads as a clean zoom-out.
+  // Zoom-out past the world threshold: the world chart is already on screen around the
+  // inset, so the return is just the inset fading away. No worker round-trip.
   function revertToWorld() {
     if (!world) return;
-    const myGen = ++regionGen; // cancel any in-flight region so it cannot commit after the revert
-    crossfade.run(world.svg, prefersReduce(), () => {
-      if (myGen !== regionGen) return;
-      currentBand = 0;
-      currentWindow = FULL_WINDOW;
-      committed = null;
-      mapDiv.innerHTML = world.svg;
-      zoomController.rebase(); // home: the world sheet fills the viewport
-      setBandExtent(0);
-      buildPlaceOverlay(world.manifest, { preservePinByName: true });
-      setCaption("");
-      syncHash();
-    });
+    regionGen++; // cancel any in-flight region so it cannot commit after the revert
+    hidePencil();
+    const going = inset ? inset.el : null;
+    inset = null;
+    currentBand = 0;
+    currentWindow = FULL_WINDOW;
+    buildPlaceOverlay(world.manifest, { preservePinByName: true });
+    setCaption("");
+    if (going) {
+      removeInsetsExcept(going);
+      if (prefersReduce()) {
+        going.remove();
+      } else {
+        going.classList.remove("in");
+        const drop = () => {
+          if (going.isConnected) going.remove();
+        };
+        going.addEventListener("transitionend", drop, { once: true });
+        setTimeout(drop, 700); // fallback, as in commitInset
+      }
+    }
   }
 
   return {
-    /** A camera settle on the antique chart. `cam` is the REGION-RELATIVE {cx,cy,k}. */
+    /** A camera settle on the antique chart. `cam` is the SHEET-fraction {cx,cy,k}. */
     onSettle(cam) {
       if (!world) return;
-      const decision = decideSettle({ camera: cam, currentWindow, currentBand });
+      const decision = decideSettle({
+        camera: plotUvFromSheet(cam, margins()),
+        currentWindow,
+        currentBand,
+      });
       if (decision.action === "noop") return;
       if (decision.action === "world") return revertToWorld();
       dispatchRegion(decision.band, decision.window);
     },
 
-    /** Record the world sheet just drawn, and reset to band 0. Called on every world draw. */
-    setWorld({ seed, overrides, render, svg, manifest }) {
-      world = { seed, overrides, render, svg, manifest };
+    /** Record the world sheet just drawn, and reset to band 0. Called on every world draw.
+     *  The draw wiped #map (settle) or will at landing (turn), so the DOM cleanup here is
+     *  belt-and-suspenders for elements that survived outside those paths. */
+    setWorld({ seed, overrides, render, manifest }) {
+      world = { seed, overrides, render, manifest };
       currentBand = 0;
       currentWindow = FULL_WINDOW;
-      committed = null;
+      inset = null;
       regionGen++; // any region in flight from the previous world is now stale
-      crossfade.cancel();
-      setBandExtent(0);
+      hidePencil();
+      removeInsetsExcept(null);
     },
 
-    /** Drop any in-flight redraft and reset the band state (a new draw is starting). */
+    /** Drop any in-flight redraft, unmount everything, reset the band state (a new draw
+     *  is starting). */
     cancel() {
       regionGen++;
-      crossfade.cancel();
       currentBand = 0;
       currentWindow = FULL_WINDOW;
-      committed = null;
-      setBandExtent(0);
+      inset = null;
+      hidePencil();
+      removeInsetsExcept(null);
     },
 
-    // Restore the WORLD sheet instantly (no crossfade) if a region is committed, so a world-
-    // sheet-changing action (verso flip, chronicle, home/reset) operates on the world chart,
-    // not a region (whose baked layers have no chronicle/realm data). A no-op at band 0. The
-    // caller still snaps the camera home (zoomController.reset) and writes the hash.
+    // Drop the inset INSTANTLY (no fade) if one is committed, so a world-sheet action
+    // (verso flip, chronicle, home/reset) operates on the bare world chart -- a region
+    // carries no chronicle/realm layers, and those ceremonies own the sheet. A no-op at
+    // band 0. The caller still snaps the camera home (zoomController.reset) and writes
+    // the hash.
     homeToWorld() {
       regionGen++;
-      crossfade.cancel();
+      hidePencil();
+      removeInsetsExcept(null);
       if (currentBand > 0 && world) {
-        mapDiv.innerHTML = world.svg;
         buildPlaceOverlay(world.manifest);
         setCaption("");
       }
       currentBand = 0;
       currentWindow = FULL_WINDOW;
-      committed = null;
-      setBandExtent(0);
-    },
-
-    /** The world-uv window the mounted sheet covers, for the composed hash camera. */
-    worldWindow() {
-      return currentWindow;
+      inset = null;
     },
 
     /** The committed region sheet for the Download policy, or null at the world sheet. */
     committedRegion() {
-      return committed;
+      return inset ? { svg: inset.svg, band: inset.band, title: inset.title } : null;
     },
 
     /** Observable state for the e2e (band, window, title, redraft count). */
@@ -187,78 +278,10 @@ export function createLodController(deps) {
       return {
         band: currentBand,
         window: currentWindow,
-        committed: committed !== null,
-        title: committed ? committed.title : null,
+        committed: inset !== null,
+        title: inset ? inset.title : null,
         redrafts,
       };
-    },
-  };
-}
-
-// A crossfade that follows the sheet-turn commit discipline: fade the incoming sheet in as a
-// blob <img> laid over the viewport, and only when it is fully opaque write the new SVG into
-// #map and tear the layer down in ONE synchronous tick, so the reader never sees a gap frame
-// between the old chart and the re-dressed one. Reduced motion collapses it to an instant swap.
-// The layer lives on #map-viewport (NOT #map): #map carries the live zoom transform, so an
-// overlay inside it would inherit that transform; the incoming sheet must show at identity (the
-// framing #map rebases to), which is the viewport's own box.
-function makeCrossfade(mapViewport) {
-  let active = null;
-  return {
-    run(newSvg, reduced, commit) {
-      if (active) active.abort();
-      if (reduced) {
-        commit();
-        return;
-      }
-      let blobUrl = "";
-      let layer = null;
-      try {
-        blobUrl = URL.createObjectURL(new Blob([newSvg], { type: "image/svg+xml" }));
-        layer = document.createElement("div");
-        layer.className = "region-fade";
-        layer.setAttribute("aria-hidden", "true");
-        const img = document.createElement("img");
-        img.alt = "";
-        img.src = blobUrl;
-        layer.appendChild(img);
-        mapViewport.appendChild(layer);
-        void layer.offsetWidth; // force layout so the class add transitions from opacity 0
-        layer.classList.add("in");
-
-        let settled = false;
-        const finish = (doCommit) => {
-          if (settled) return;
-          settled = true;
-          clearTimeout(timer);
-          layer.removeEventListener("transitionend", onEnd);
-          if (doCommit) commit(); // new SVG in + rebase, before the layer is removed: no gap frame
-          if (layer.parentNode) layer.remove();
-          if (blobUrl) URL.revokeObjectURL(blobUrl);
-          active = null;
-        };
-        const onEnd = (e) => {
-          if (e.target === layer) finish(true);
-        };
-        layer.addEventListener("transitionend", onEnd);
-        // Fallback: if transitionend never fires (e.g. a zero-duration or dropped transition),
-        // commit anyway so the redraft is never stranded behind the fade.
-        const timer = setTimeout(() => finish(true), 700);
-        active = { abort: () => finish(false) };
-      } catch {
-        // Setup failed (no Blob/URL): undo any partial scaffold and swap instantly.
-        if (layer && layer.parentNode) layer.remove();
-        if (blobUrl) {
-          try {
-            URL.revokeObjectURL(blobUrl);
-          } catch {}
-        }
-        active = null;
-        commit();
-      }
-    },
-    cancel() {
-      if (active) active.abort();
     },
   };
 }

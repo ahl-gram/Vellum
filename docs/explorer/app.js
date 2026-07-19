@@ -14,7 +14,6 @@ import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-war
 import { startArrival } from "./draw-ceremony.js";
 import { createZoomController } from "../shared/zoom-controller.js";
 import { createLodController } from "./lod-controller.js";
-import { worldCameraFrom } from "./engine/world/lod.js";
 import { readHash, writeHash } from "./hash-sync.js";
 import { cameraFromTransform, transformFromCamera } from "./camera.js";
 import { seedForDate } from "./engine/world/seed-of-the-day.js";
@@ -162,34 +161,33 @@ const zoomController = createZoomController({
   onSettle: () => onCameraSettle(), // #169: hash + (on antique) the region redraft
 });
 // #169 The redraft: a camera settle on the antique chart draws a finer regional survey of the
-// window; a zoom-out returns to the retained world sheet. The controller owns the band/window
-// state, the worker dispatch, and the crossfade; app.js hands it the pieces and gates it (see
-// regionEligible) so a geometric zoom on any other style still only writes the hash.
+// window, committed as an INSET laid over the world sheet (the camera never rebases; a zoom-out
+// just fades the inset away over the world chart that was around it all along). The controller
+// owns the band/window state, the worker dispatch, and the inset mount/crossfade; app.js hands
+// it the pieces and gates it (see regionEligible) so a geometric zoom on any other style still
+// only writes the hash.
 const lodController = createLodController({
   mapDiv,
-  mapViewport,
-  zoomController,
   runJob,
   buildPlaceOverlay,
   setCaption: (t) => { caption.textContent = t; },
-  syncHash: () => syncHash(),
+  getZoomK: () => zoomController.getState().k,
   prefersReduce,
 });
-// #165/#169: the region-relative camera the controller is framing, read from the STABLE
-// #map-viewport (its client box is the mounted sheet's size at k=1). Guard a zero-size box
-// (before first layout) so the division is finite.
-function regionCameraNow() {
+// #165/#169: the camera the controller is framing -- sheet fractions of the WORLD sheet at
+// every band (the inset design never rebases) -- read from the STABLE #map-viewport (its
+// client box is the sheet's size at k=1). Guard a zero-size box (before first layout) so the
+// division is finite.
+function cameraNow() {
   const W = mapViewport.clientWidth || 1;
   const H = mapViewport.clientHeight || 1;
   return cameraFromTransform(zoomController.getState(), W, H);
 }
 // #165/#169: the ONE hash writer. Every trigger funnels through here so the hash carries the
-// complete current state, camera included. After a redraft the live transform is relative to
-// the REGION sheet, so the camera is composed up to world-uv via the controller's current
-// window (identity at band 0, so a never-zoomed link stays byte-identical). writeHash drops
-// cx/cy/k when the composed camera is home.
+// complete current state, camera included. The camera is world-relative at every band, so it
+// writes straight into the hash; writeHash drops cx/cy/k when the camera is home.
 function syncHash() {
-  writeHash(hashControls, landTouched, coastTouched, worldCameraFrom(regionCameraNow(), lodController.worldWindow()));
+  writeHash(hashControls, landTouched, coastTouched, cameraNow());
 }
 // #169: a test seam, ON by default (production). It lets the geometric-zoom e2e (Z1-Z16,
 // Sub 3-4) isolate the geometric layer from the semantic redraft this sub adds on top of it;
@@ -198,13 +196,16 @@ function syncHash() {
 let redraftEnabled = true;
 // #169: whether a settle should redraft. Semantic LOD is antique-only (the epic's ratified
 // decision); geometric zoom on the other three styles just writes the hash. Off while the
-// chronicle or verso owns the sheet, and until a chart exists.
+// chronicle, the voyage, or the verso owns the sheet, and until a chart exists. Voyage is
+// excluded for the same reason as the chronicle: its track is a WORLD-survey overlay (world
+// coordinates, world roads), so a finer regional survey under it would carry a track that no
+// longer follows the roads it describes.
 function regionEligible() {
-  return redraftEnabled && styleSel.value === "antique" && !chronicleChk.checked && !isFlipped(sheetEl) && !!lastSvg;
+  return redraftEnabled && styleSel.value === "antique" && !chronicleChk.checked && !voyageChk.checked && !isFlipped(sheetEl) && !!lastSvg;
 }
 function onCameraSettle() {
   syncHash();
-  if (regionEligible()) lodController.onSettle(regionCameraNow());
+  if (regionEligible()) lodController.onSettle(cameraNow());
 }
 window.__vellumSetRedraftEnabled = (v) => { redraftEnabled = !!v; };
 // #165: geometric pan/zoom now belongs to ALL FOUR styles (the epic's ratified decision;
@@ -314,7 +315,7 @@ function draw(opts) {
           else clearVoyage();
           syncZoom(); // #164/#165: attach the zoom to the just-landed chart (every style now)
           // #169: record the (re-dressed) world sheet so a settle can redraft over it.
-          lodController.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, svg: res.svg, manifest: res.manifest });
+          lodController.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
         });
       } else {
         // Settle (#127): inject the chart and run the arrival ceremony (unless this is
@@ -339,9 +340,8 @@ function draw(opts) {
         else clearVoyage();
         syncZoom(); // #164/#165: attach the zoom to the just-drawn chart (every style now)
         // #169: record this world sheet BEFORE a deep-link camera is applied, so the settle
-        // that camera triggers can redraft a region over the SAME base world (cache hit), and a
-        // later zoom-out can restore the sheet with no worker round-trip.
-        lodController.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, svg: res.svg, manifest: res.manifest });
+        // that camera triggers can redraft a region over the SAME base world (cache hit).
+        lodController.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
         // #165: restore a deep link's camera once the first chart (and so the viewport) is
         // up. One-shot: consumed and nulled so no later Draw re-frames. zoomTo clamps, so a
         // centre that would pull an edge past the viewport at that zoom is pinned in bounds.
@@ -414,7 +414,7 @@ versoBtn.addEventListener("click", () => {
   // the SAME chart stays, we only re-home it. syncHash writes the now-home hash EXPLICITLY
   // rather than trusting reset()'s debounced settle, so a link copied right after the flip
   // never carries a stale cx/cy/k. reset() is a no-op when already home (turning back).
-  lodController.homeToWorld(); // #169: if in a region, restore the world sheet before the flip
+  lodController.homeToWorld(); // #169: drop a committed region inset before the flip
   zoomController.reset();
   syncHash();
   // #174: interaction interrupts the animation. A running 12s sweep is snapped to its
@@ -492,7 +492,7 @@ chronicleChk.addEventListener("change", () => {
     // home sheet). Explicit syncHash for the same reason as the verso flip: drop cx/cy/k
     // now, not on a debounced settle. Leaving the chronicle needs no reset (already home).
     // #169: the scrubber drives the WORLD chart's baked layers (a region carries no chronicle),
-    // so restore the world sheet first if a region is committed.
+    // so drop a committed region inset first.
     lodController.homeToWorld();
     zoomController.reset();
     syncHash();
@@ -510,6 +510,11 @@ scrubRangeEl.addEventListener("input", onManualScrub);
 voyageChk.addEventListener("change", () => {
   if (voyageChk.checked) {
     if (chronicleChk.checked) { chronicleChk.checked = false; exitScrub(); }
+    // #169: the voyage narrates the WORLD survey (lastManifest/lastSurvey), so a committed
+    // region inset must drop first or the world-scale track would paint over the finer sheet.
+    // Unlike the chronicle, the camera is NOT reset: voyage + geometric zoom were always
+    // compatible, and regionEligible above keeps the sheet geometric while the voyage is on.
+    lodController.homeToWorld();
     // #174: the sweep is a recto ceremony. Ticking voyage while the sheet rests on its
     // verso paints the resting track on both faces and skips the animation, following the
     // precedent above where a style change while flipped rebuilds in place rather than

@@ -105,14 +105,31 @@ function hidePlaceCard() {
 // in the new manifest. A region redraft renumbers settlements (region worlds re-index), so a
 // pin kept by array index would jump to a different town or dangle; keying by name keeps the
 // card on the place the reader pinned. Default draws (a new world) pass nothing: no continuity.
+// #169: opts.box positions the overlay over a region INSET's rect (sheet fractions of #map)
+// instead of the whole sheet, so a region manifest's own nx/ny fractions land on the inset's
+// drawn glyphs. The card moved inside the overlay for the same reason: its % anchor must
+// resolve against the same box the fractions describe (the full sheet when box is absent,
+// so world overlays are unchanged).
 export function buildPlaceOverlay(manifest, opts) {
   if (!manifest || !manifest.places) return;
   const preserveName =
     opts && opts.preservePinByName && placeOverlay && placeOverlay.pinned && placeOverlay.pinnedIdx >= 0
       ? (placeOverlay.places[placeOverlay.pinnedIdx] || {}).name
       : null;
+  // An inset commit rebuilds the overlay with no #map wipe before it (unlike a draw), so
+  // this builder owns removing the previous overlay + card. A no-op after a wipe.
+  for (const stale of mapDiv.querySelectorAll(":scope > .place-overlay, :scope > #place-card")) stale.remove();
   const overlay = document.createElement("div");
   overlay.className = "place-overlay";
+  if (opts && opts.box) {
+    const b = opts.box;
+    overlay.style.left = `${b.x * 100}%`;
+    overlay.style.top = `${b.y * 100}%`;
+    overlay.style.width = `${b.w * 100}%`;
+    overlay.style.height = `${b.h * 100}%`;
+    overlay.style.right = "auto"; // the stylesheet's inset:0 would otherwise fight width/height
+    overlay.style.bottom = "auto";
+  }
   const card = document.createElement("div");
   card.id = "place-card";
   // role=tooltip + aria-describedby (set per hit below) is the robust path: it
@@ -152,8 +169,8 @@ export function buildPlaceOverlay(manifest, opts) {
     });
     overlay.appendChild(hit);
   });
+  overlay.appendChild(card); // inside the overlay so its % anchor shares the overlay's box
   mapDiv.appendChild(overlay);
-  mapDiv.appendChild(card);
   // #169: restore a pinned card onto the same-named settlement if it survived into the new
   // sheet; if the place is off the new window, leave the card dismissed.
   if (preserveName != null) {

@@ -35,6 +35,12 @@ test("one PlaceMark per settlement, with matching name/kind/founded/ruined", () 
   });
 });
 
+test("marginPx ships the sheet's frame margin, so the client can convert sheet fractions to plot-uv (#169)", () => {
+  const m = buildPlaceManifest(world, WIDTH);
+  assert.equal(m.marginPx, margin, "marginPx is the renderMap margin (round(widthPx*0.045))");
+  assert.equal(m.marginPx, 68, "concrete value at the Explorer's 1500px width");
+});
+
 test("nx/ny reproduce renderMap's projected pixel coords for seed 42", () => {
   const m = buildPlaceManifest(world, WIDTH);
   assert.equal(m.widthPx, WIDTH, "widthPx echoed");

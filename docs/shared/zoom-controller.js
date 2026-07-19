@@ -213,18 +213,6 @@ export function createZoomController({
       sel().call(behavior.transform, zoomIdentity.translate(c.x, c.y).scale(c.k));
     },
     /**
-     * Install a new [min, max] scale extent (#169). The Surveyor's Glass rebases the camera
-     * onto each committed sheet, so the SAME controller drives the world sheet ([1, 8]) and a
-     * region sheet (a per-band extent, so region-relative zoom maps onto the global world zoom).
-     * Updates BOTH d3-zoom's own clamp (live wheel/pinch) and the closed-over `scaleExtent` the
-     * constrain callback + zoomTo read, so every path clamps to the new extent. Only the
-     * Surveyor's Glass calls this; a page that never does keeps its construction-time extent.
-     */
-    setScaleExtent(extent) {
-      scaleExtent = extent;
-      behavior.scaleExtent(extent);
-    },
-    /**
      * Magnify by `factor` about the viewport centre (#165: the keyboard +/- and the
      * on-screen buttons). It drives d3-zoom's own scaleBy, so it enters the SAME "zoom"
      * event pipeline as a gesture (one clamp, one settle, one hash write) rather than a
