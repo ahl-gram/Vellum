@@ -1,12 +1,13 @@
 import { createRng } from "../core/rng.ts";
 import { minMax } from "../core/grid.ts";
-import { chaikinSmooth, closedIsoRings, coastSmoothingIterations } from "../terrain/contours.ts";
+import { coastSmoothingIterations } from "../terrain/contours.ts";
+import { coastRingsGrid } from "./coast.ts";
 import type { World } from "../world/types.ts";
 import type { MapType } from "../terrain/heightfield.ts";
 import { createLabelArena, type RenderCtx } from "./context.ts";
 import { createProjection } from "./transform.ts";
 import { STYLES, type StyleName } from "./style.ts";
-import { el, renderSvg, type SvgNode } from "./svg.ts";
+import { el, pathFrom, renderSvg, type SvgNode } from "./svg.ts";
 import { recipeAttrs, recipeMetadataNode } from "./recipe-meta.ts";
 import { oceanLayer, waterlinesLayer } from "./layers/water.ts";
 import { contoursLayer, hypsometricLayer, landLayer } from "./layers/land.ts";
@@ -94,10 +95,8 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   // plate at 4200px instead of showing grid-scale facets. Render-time only; the
   // realm borders, names, and rivers are computed elsewhere and do not move.
   const coastIters = coastSmoothingIterations(widthPx);
-  let coastRings = closedIsoRings(world.elev, world.seaLevel).map((c) =>
-    chaikinSmooth(c.points, true, coastIters).map(
-      ([x, y]) => [proj.px(x), proj.py(y)] as const,
-    ),
+  let coastRings = coastRingsGrid(world, coastIters).map((ring) =>
+    ring.map(([x, y]) => [proj.px(x), proj.py(y)] as const),
   );
   if (coastRings.length === 0) {
     const mid = world.elev.at(world.elev.w >> 1, world.elev.h >> 1);
@@ -159,6 +158,18 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   // water, rivers, roads, settlements, and labels stay as reference.
   const themed = opts.theme !== undefined;
 
+  // On a regional survey a river still runs one ocean cell past its mouth by
+  // design (hydrology terminates a stream just offshore), so it would draw a
+  // short stub into open water seaward of the drawn coast. Clip the rivers to
+  // the coast on region sheets so every stream ends exactly at the shore (#223).
+  // Terrain glyphs need no clip: the frame-pinned coast now faithfully contains
+  // the land they sit on. World charts have no region window and are untouched,
+  // keeping the committed goldens byte-identical.
+  const clipRegionLand = (node: SvgNode): SvgNode =>
+    world.region
+      ? el("g", { "clip-path": "url(#region-land-clip)" }, [node])
+      : node;
+
   const mapLayers: Array<SvgNode | null> = [
     oceanLayer(ctx),
     compassPlan ? rhumbLayer(ctx, compassPlan) : null,
@@ -170,7 +181,7 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     themed ? null : hypsometricLayer(ctx),
     themed ? null : contoursLayer(ctx),
     themed ? null : realmTintsLayer(ctx),
-    riversLayer(ctx),
+    clipRegionLand(riversLayer(ctx)),
     themed ? null : glyphsLayer(ctx),
     roadsLayer(ctx),
     realmBordersLayer(ctx),
@@ -199,6 +210,16 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
         height: proj.heightPx - 2 * margin,
       }),
     ]),
+    ...(world.region
+      ? [
+          el("clipPath", { id: "region-land-clip" }, [
+            el("path", {
+              d: coastRings.map((r) => pathFrom(r, true)).join(""),
+              "clip-rule": "evenodd",
+            }),
+          ]),
+        ]
+      : []),
     ...(style.glyphs ? glyphSymbolDefs(style) : []),
     ...featureLabels.defs,
     ...textureDefs(ctx),
