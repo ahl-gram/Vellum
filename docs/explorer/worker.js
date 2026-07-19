@@ -1,20 +1,23 @@
 // Render worker: runs the CPU-heavy world generation + SVG rendering off the
-// main thread so the Explorer stays responsive. Stateless — every job carries
-// its own seed + overrides and regenerates the world deterministically, so the
-// output is byte-identical to running the same engine on the main thread.
-import { defaultRecipe, generateWorld } from "./engine/world/generate.js";
+// main thread so the Explorer stays responsive. Memoized but deterministic — the
+// base world for a (seed, overrides) is resolved through worldFor (world-cache.js),
+// a single-entry cache, so a pan/zoom that re-surveys the SAME world (the Surveyor's
+// Glass, #168) skips regenerating it. Every job still carries its own seed +
+// overrides and the output is byte-identical to running the same engine on the main
+// thread (the cache changes nothing but the time to produce identical bytes).
 import { renderMap } from "./engine/render/map-renderer.js";
 import { buildPlaceManifest } from "./engine/render/place-manifest.js";
 import { buildSurvey } from "./engine/render/survey.js";
+import { generateRegionWorld } from "./engine/world/region.js";
 import { composeAtlas } from "./engine/atlas/compose.js";
 import { serializableAtlas } from "./serializable-atlas.js";
+import { worldFor } from "./world-cache.js";
 
 self.onmessage = (e) => {
   const msg = e.data;
   try {
     if (msg.kind === "draw") {
-      const recipe = defaultRecipe(msg.seed, msg.overrides);
-      const world = generateWorld(recipe);
+      const { world } = worldFor(msg.seed, msg.overrides);
       self.postMessage({
         id: msg.id,
         ok: true,
@@ -32,11 +35,37 @@ self.onmessage = (e) => {
         survey: buildSurvey(world.elev, world.seaLevel, world.roads),
         title: world.title.title,
         subtitle: world.title.subtitle,
-        mapType: recipe.mapType,
-        band: recipe.band,
+        mapType: world.recipe.mapType,
+        band: world.recipe.band,
+      });
+    } else if (msg.kind === "region") {
+      // #168 The finer survey: the client supplies a quantized window + band; the
+      // worker stays a dumb executor that crops the cached base world at a finer grid.
+      const { world, cached } = worldFor(msg.seed, msg.overrides);
+      const region = generateRegionWorld(world, {
+        window: msg.window,
+        gridW: msg.gridW,
+        gridH: msg.gridH,
+        title: msg.title,
+      });
+      // Stamp the window so a downloaded region redraws from seed + window (#168);
+      // worldGridW is the PARENT grid, taken explicitly (not the 320 coincidence).
+      const regionRecipe = { window: msg.window, worldGridW: world.recipe.gridW };
+      self.postMessage({
+        id: msg.id,
+        ok: true,
+        svg: renderMap(region, { ...msg.render, regionRecipe }),
+        manifest: buildPlaceManifest(region, msg.render.widthPx ?? 1500),
+        window: msg.window,
+        // NB: `band` here is the LOD band INDEX (0..3), echoed for the client's next
+        // hysteresis step -- NOT the climate band a draw returns. Same key, different
+        // meaning across kinds.
+        band: msg.band,
+        // whether worldFor skipped generateWorld this call (the cache-timing AC's flag)
+        cached,
       });
     } else if (msg.kind === "atlas") {
-      const world = generateWorld(defaultRecipe(msg.seed, msg.overrides));
+      const { world } = worldFor(msg.seed, msg.overrides);
       self.postMessage({
         id: msg.id,
         ok: true,

@@ -203,4 +203,27 @@ export async function run(ctx) {
     await evaluate(`(()=>{const t=document.getElementById("type");t.value="";t.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     await waitSettled("coast-cleanup");
   }
+
+  // --- R14: the "region" worker job (#168, Glass Sub 7) — the finer-survey engine ---
+  // The A2/A3-style byte-parity check for the new kind: worker bytes === inline bytes,
+  // the manifest agrees, the response echoes the window + LOD band, the sheet is stamped
+  // with data-vellum-region-*, and recipeFromSvg round-trips the window + parent grid.
+  // A fixed literal window (not a settlement lookup) keeps the check deterministic.
+  const a14 = await evaluate(
+    `(async()=>{const win={u0:0.375,v0:0.375,u1:0.625,v1:0.625};` +
+      `const m={kind:"region",seed:42,overrides:{},window:win,band:2,gridW:320,gridH:240,title:"The Environs",render:{style:"antique",widthPx:1500,legend:true}};` +
+      `const j=await window.__vellumRunJob(m);const i=window.__vellumRunInline(m);` +
+      `const {recipeFromSvg}=await import("./engine/render/recipe-meta.js");const p=recipeFromSvg(j.svg);` +
+      `return{svg:j.svg===i.svg,man:JSON.stringify(j.manifest)===JSON.stringify(i.manifest),` +
+      `windowEcho:JSON.stringify(j.window)===JSON.stringify(win)&&JSON.stringify(i.window)===JSON.stringify(win),` +
+      `bandEcho:j.band===2&&i.band===2,stamped:j.svg.includes('data-vellum-region-u0='),` +
+      `roundtrip:!!p&&!!p.region&&Math.abs(p.region.window.u1-win.u1)<1e-9&&p.region.worldGridW===320,` +
+      `places:Array.isArray(j.manifest.places)?j.manifest.places.length:-1,len:j.svg.length};})()`,
+    true,
+  );
+  check(
+    "R14 region job: worker bytes === inline bytes + window/band echo + stamp round-trips (Sub 7 AC2/AC3)",
+    a14.svg && a14.man && a14.windowEcho && a14.bandEcho && a14.stamped && a14.roundtrip,
+    `${a14.len} units, ${a14.places} places, svg=${a14.svg} man=${a14.man} echo=${a14.windowEcho}/${a14.bandEcho} stamp=${a14.stamped} rt=${a14.roundtrip}`,
+  );
 }
