@@ -169,7 +169,14 @@ const zoomController = createZoomController({
 const lodController = createLodController({
   mapDiv,
   runJob,
-  buildPlaceOverlay,
+  // Every controller path (commit, revert, homeToWorld) rebuilds the overlay, which creates
+  // a FRESH #place-card -- and none of those paths touches the camera, so nothing else would
+  // re-publish the zoom onto it. Re-publish here (the draw paths get the same via syncZoom)
+  // or a card shown after a redraft renders k-times too large.
+  buildPlaceOverlay: (manifest, opts) => {
+    buildPlaceOverlay(manifest, opts);
+    setCardZoom(zoomController.getState().k);
+  },
   setCaption: (t) => { caption.textContent = t; },
   getZoomK: () => zoomController.getState().k,
   prefersReduce,

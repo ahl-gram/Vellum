@@ -599,11 +599,18 @@ export async function run(ctx) {
   await enterAt(3.6, 0.5, 0.5); // past the 1/2 up-cross: the next finer band, same centre
   await waitRedraft(e20e1.redrafts);
   await sleep(80);
-  const kept = await evaluate(`(()=>{const card=document.getElementById("place-card");const nm=card.querySelector(".pc-name");return{hidden:card.hidden,name:nm?nm.textContent:null};})()`);
+  // The rebuilt card must also carry the LIVE zoom's counter-scale (--zoom-k): the overlay
+  // rebuild creates a fresh #place-card, and a commit no longer touches the camera, so the
+  // controller must re-publish k onto it or the card renders k-times too large (review quirk:
+  // gigantic cards on a region sheet).
+  const kept = await evaluate(
+    `(()=>{const card=document.getElementById("place-card");const nm=card.querySelector(".pc-name");` +
+      `return{hidden:card.hidden,name:nm?nm.textContent:null,zoomK:card.style.getPropertyValue("--zoom-k")};})()`,
+  );
   check(
-    "Z20e a pinned card survives a redraft keyed by settlement NAME (region worlds renumber indices)",
-    !!pinnedName && kept.hidden === false && kept.name === pinnedName,
-    `pinned=${JSON.stringify(pinnedName)} afterRedraft=${JSON.stringify(kept)}`,
+    "Z20e a pinned card survives a redraft keyed by NAME and keeps its counter-scale (fresh card carries --zoom-k)",
+    !!pinnedName && kept.hidden === false && kept.name === pinnedName && kept.zoomK === "3.6",
+    `pinned=${JSON.stringify(pinnedName)} afterRedraft=${JSON.stringify(kept)} (zoomK expected "3.6")`,
   );
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`); // dismiss the pin
 
