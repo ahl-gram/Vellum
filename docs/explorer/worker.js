@@ -8,7 +8,7 @@
 import { renderMap } from "./engine/render/map-renderer.js";
 import { buildPlaceManifest } from "./engine/render/place-manifest.js";
 import { buildSurvey } from "./engine/render/survey.js";
-import { generateRegionWorld } from "./engine/world/region.js";
+import { generateRegionWorld, regionTitle } from "./engine/world/region.js";
 import { composeAtlas } from "./engine/atlas/compose.js";
 import { serializableAtlas } from "./serializable-atlas.js";
 import { worldFor } from "./world-cache.js";
@@ -42,11 +42,15 @@ self.onmessage = (e) => {
       // #168 The finer survey: the client supplies a quantized window + band; the
       // worker stays a dumb executor that crops the cached base world at a finer grid.
       const { world, cached } = worldFor(msg.seed, msg.overrides);
+      // #169: the title is derived from (world, window) so the live redraft and a downloaded
+      // sheet's redraw agree byte-for-byte (the stamp carries no title). msg.title, if given,
+      // is honored for back-compat (Z15/Z16 pass one); the Explorer's client sends none.
+      const title = msg.title ?? regionTitle(world, msg.window);
       const region = generateRegionWorld(world, {
         window: msg.window,
         gridW: msg.gridW,
         gridH: msg.gridH,
-        title: msg.title,
+        title,
       });
       // Stamp the window so a downloaded region redraws from seed + window (#168);
       // worldGridW is the PARENT grid, taken explicitly (not the 320 coincidence).
@@ -61,6 +65,8 @@ self.onmessage = (e) => {
         // hysteresis step -- NOT the climate band a draw returns. Same key, different
         // meaning across kinds.
         band: msg.band,
+        // #169: the derived title, so the client can caption the survey without re-deriving it.
+        title,
         // whether worldFor skipped generateWorld this call (the cache-timing AC's flag)
         cached,
       });

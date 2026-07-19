@@ -1,7 +1,7 @@
 import type { World } from "../world/types.ts";
 import type { SettlementKind } from "../society/sites.ts";
 import type { HistoricalEvent } from "../society/history.ts";
-import { createProjection } from "./transform.ts";
+import { createProjection, marginFor } from "./transform.ts";
 
 /**
  * A settlement projected for the client: identity + chronicle fields plus its
@@ -41,6 +41,9 @@ export type PlaceManifest = {
   readonly presentYear: number;
   readonly widthPx: number;
   readonly heightPx: number;
+  /** The frame margin in px (same on all sides), so the client can convert sheet
+   *  fractions to plot-uv and mount region insets aligned to the drawn grid (#169). */
+  readonly marginPx: number;
 };
 
 /**
@@ -51,7 +54,7 @@ export type PlaceManifest = {
  * the drawn settlements.
  */
 export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest {
-  const margin = Math.round(widthPx * 0.045);
+  const margin = marginFor(widthPx);
   const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
   const places: PlaceMark[] = world.settlements.map((s, idx) => ({
     idx,
@@ -70,5 +73,6 @@ export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest
     presentYear: world.title.year,
     widthPx,
     heightPx: proj.heightPx,
+    marginPx: margin,
   };
 }

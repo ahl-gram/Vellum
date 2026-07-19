@@ -110,6 +110,44 @@ button.primary:hover { background: #5d4831; }
 #map svg { width: 100%; height: auto; display: block;
   border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
 
+/* #169 The redraft inset. A committed regional survey mounts INSIDE #map, positioned over the
+   exact window it re-surveys, so it rides the live zoom transform with the chart and reads as
+   a detail sheet pasted on the master chart. It fades in over the coarser content and the
+   camera never moves at the commit; the outgoing inset (if any) is torn down only once the
+   incoming one is opaque, so the swap never shows a gap frame. pointer-events:none keeps
+   gestures and place-hits flowing through it. Reduced motion swaps instantly (the JS also
+   skips the transition path). --fade is the single timing source. */
+.region-inset {
+  position: absolute; pointer-events: none;
+  opacity: 0; transition: opacity var(--fade, 200ms) ease;
+}
+.region-inset.in { opacity: 1; }
+/* #map svg (the id-strength rule above) would border+shadow this svg too; the inset instead
+   keeps its own drawn neatline and casts a small paste-up shadow. width/height 100% (not
+   auto) pin it to the computed box so no rounding gap opens at the window edge. */
+#map .region-inset svg {
+  width: 100%; height: 100%;
+  border: 0; box-shadow: 0 2px 9px rgb(61 47 31 / 0.35);
+}
+@media (prefers-reduced-motion: reduce) { .region-inset { transition-duration: 0ms; } }
+
+/* #169 The drafting pencil: while a finer survey is being drawn in the worker, its target
+   window is pencilled on the chart -- a dashed outline that breathes -- so the wait reads as
+   "the surveyor is drafting here", not as a stall. Mounted inside #map (it marks WORLD
+   terrain, so it must ride the transform); the JS counter-scales the border width by 1/k.
+   Reduced motion holds it steady. */
+.survey-pencil {
+  position: absolute; pointer-events: none;
+  border: 2px dashed rgb(74 56 38 / 0.55);
+  background: rgb(74 56 38 / 0.04);
+  animation: survey-pencil-breathe 1.2s ease-in-out infinite;
+}
+@keyframes survey-pencil-breathe {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) { .survey-pencil { animation: none; } }
+
 /* #131 The style turn. Changing the style turns this leaf over: the outgoing chart
    turns away and the same world lands re-dressed in the new style (sheet-turn.js).
    The 3D context is INERT at rest and lit only while .turning is set, so the chart,

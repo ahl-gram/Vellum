@@ -5,7 +5,7 @@ import { coastRingsGrid } from "./coast.ts";
 import type { World } from "../world/types.ts";
 import type { MapType } from "../terrain/heightfield.ts";
 import { createLabelArena, type RenderCtx } from "./context.ts";
-import { createProjection } from "./transform.ts";
+import { createProjection, marginFor } from "./transform.ts";
 import { STYLES, type StyleName } from "./style.ts";
 import { el, pathFrom, renderSvg, type SvgNode } from "./svg.ts";
 import { recipeAttrs, recipeMetadataNode, regionRecipeAttrs, type RegionRecipe } from "./recipe-meta.ts";
@@ -94,7 +94,7 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   const style = STYLES[opts.style ?? "antique"];
   const description = describeChart(world, style.name, opts.theme);
   const widthPx = opts.widthPx ?? 1500;
-  const margin = Math.round(widthPx * 0.045);
+  const margin = marginFor(widthPx);
   const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
 
   // The coastline gets width-scaled corner-cutting: 2 iterations at chart width

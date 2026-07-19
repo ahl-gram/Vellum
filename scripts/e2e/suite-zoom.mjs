@@ -20,6 +20,11 @@ export async function run(ctx) {
   // Clean antique seed-42 base, chronicle/voyage off, resting on the recto.
   await evaluate(`(()=>{for(const id of ["chronicle","voyage"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
   await waitSettled("zoom-base");
+  // #169: Z1-Z16 characterize the GEOMETRIC glass (Sub 3-4). Sub 8 makes an antique settle also
+  // redraft a region, which would rebase the camera + swap the sheet mid-assertion; turn the
+  // semantic redraft OFF for the geometric block and back ON for Z17-Z20 below. Runtime flag,
+  // re-set after every reload (Z13, and the gesture suite) since a fresh page defaults it ON.
+  await evaluate(`window.__vellumSetRedraftEnabled(false)`);
   await shoot("explorer-zoom-k1.png"); // home: the arrival ceremony + drop shadow overflow the frame, exactly as today
 
   // Z1: zoomTo lands an in-bounds transform on #map. Assert the resolved matrix (proves
@@ -287,6 +292,7 @@ export async function run(ctx) {
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique&cx=0.5&cy=0.5&k=4` });
   await waitReady();
+  await evaluate(`window.__vellumSetRedraftEnabled(false)`); // #169: a fresh page defaults ON; keep the geometric block clean before the deep-link settle fires
   await waitSettled("zoom-deeplink-load");
   await sleep(80);
   const z13 = await evaluate(`(()=>{const s=window.__vellumZoomState();const vp=document.getElementById("map-viewport");return{k:s.k,x:s.x,W:vp.clientWidth};})()`);
@@ -346,6 +352,318 @@ export async function run(ctx) {
     z16.aOk && z16.bOk && z16.aCached === false && z16.bCached === true && z16.sameSvg,
     `miss=${z16.aCached} hit=${z16.bCached} sameSvg=${z16.sameSvg} (ta=${z16.ta}ms tb=${z16.tb}ms, timing is corroboration only)`,
   );
+
+  // #169: turn the semantic redraft back ON for the Sub 8 tests (off for the geometric block above).
+  await evaluate(`window.__vellumSetRedraftEnabled(true)`);
+
+  // ---- Z17-Z20 (#169, Glass Sub 8): the settle -> region REDRAFT, wired to the camera.
+  // Redesigned in PR #245 review: the camera stays WORLD-relative at every band and a commit
+  // mounts the survey as an INSET (#map .region-inset) laid over its window on the world sheet.
+  // The load-bearing new invariant asserted throughout: a commit NEVER moves the camera
+  // (__vellumZoomState is byte-stable across a redraft), which is what makes pan work at every
+  // band and kills the zoom-out snap. Unlike Z15/Z16 (which drove the worker job directly),
+  // these drive a real camera settle via __vellumZoomTo and observe the committed survey via
+  // window.__vellumRegion() -> {band, window, title, committed, redrafts}. Reduced motion is
+  // OFF here (Zrm cleared it); poll the monotonic redraft counter rather than sleeping a fixed
+  // time. Between cases the on-screen home button drops the inset + homes the camera.
+  const rgn = () => evaluate(`window.__vellumRegion()`);
+  const goHome = async () => { await evaluate(`document.getElementById("zoom-reset").click()`); await sleep(40); };
+  // Frame world-uv (cu,cv) at zoom k on the world sheet: the exact inverse of
+  // cameraFromTransform, so a settle at k=2 centred on 0.5 lands the band-1 window at 0.5.
+  const enterAt = (k, cu, cv) =>
+    evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
+  const waitRedraft = async (prev) => {
+    for (let i = 0; i < 100; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
+    return await rgn();
+  };
+  const captionMs = () => evaluate(`(()=>{const m=(document.getElementById("caption").textContent||"").match(/drawn in (\\d+)ms/);return m?+m[1]:-1;})()`);
+  // The inset-architecture DOM invariants, read together: the world sheet stays mounted as
+  // #map's own <svg> (never region-stamped), and the committed survey is a stamped svg inside
+  // .region-inset. zoomState rides along so callers can pin camera stability.
+  const insetView = () =>
+    evaluate(
+      `(()=>{const world=document.querySelector("#map > svg");const inset=document.querySelector("#map .region-inset");` +
+        `const isvg=inset?inset.querySelector("svg"):null;const z=window.__vellumZoomState();` +
+        `return{worldMounted:!!world&&!world.hasAttribute("data-vellum-region-u0"),insets:document.querySelectorAll("#map .region-inset").length,` +
+        `stamped:!!isvg&&isvg.hasAttribute("data-vellum-region-u0"),insetLeft:inset?parseFloat(inset.style.left):-1,insetW:inset?parseFloat(inset.style.width):-1,` +
+        `hits:document.querySelectorAll("#map .place-hit").length,zx:z.x,zy:z.y,zk:z.k,caption:document.getElementById("caption").textContent||""};})()`,
+    );
+
+  // Z17: one camera settle on antique redrafts ONE finer regional survey (AC1), committed as an
+  // inset. Frame the world centre at k=2 (band 1); assert the committed band, a title "The
+  // Environs of X" derived from the window, the overlay rebuilt against the region manifest
+  // (place-hits present), the stamped inset svg OVER the still-mounted world sheet, the caption's
+  // drawn-in-ms (AC3), exactly ONE redraft -- and the camera EXACTLY where the settle left it
+  // (k=2, centred: x = -W/2), the no-jump invariant the redesign exists for. A centred band-1
+  // window mounts at left 25% / width 50% (the pure-math invariant, seen live).
+  // Warm up first, so Z17's logged desktop ms is the STEADY-STATE redraft a real pan hits, not a
+  // one-off: Z15/Z16 left another seed in the worker's single-entry world cache (a cold
+  // generateWorld), and the first region gen also pays one-time JIT of the region code path. A
+  // throwaway redraft over seed 42 warms both; the real number is what the reviewer should read.
+  const warm0 = (await rgn()).redrafts;
+  await enterAt(2, 0.4, 0.4);
+  await waitRedraft(warm0);
+  await goHome();
+  const before17 = (await rgn()).redrafts;
+  await enterAt(2, 0.5, 0.5);
+  const s17 = await waitRedraft(before17);
+  const drawMs17 = await captionMs();
+  const view17 = await insetView();
+  const W17 = await evaluate(`document.getElementById("map-viewport").clientWidth`);
+  check(
+    "Z17 a settle redrafts one finer survey as an inset; the camera does not move at the commit (AC1)",
+    s17.band === 1 && s17.committed === true && /^The Environs of .+/.test(s17.title || "") &&
+      s17.redrafts === before17 + 1 && view17.worldMounted && view17.insets === 1 && view17.stamped &&
+      Math.abs(view17.insetLeft - 25) < 0.01 && Math.abs(view17.insetW - 50) < 0.01 &&
+      view17.hits > 0 && /drawn in \d+ms/.test(view17.caption) &&
+      view17.zk === 2 && Math.abs(view17.zx - -W17 / 2) < 0.5,
+    `${JSON.stringify(s17)} inset=${view17.insets}@${view17.insetLeft}%/${view17.insetW}% stamped=${view17.stamped} world=${view17.worldMounted} ` +
+      `hits=${view17.hits} camera k=${view17.zk} x=${view17.zx} (expected ${-W17 / 2}) settle->sheet=${drawMs17}ms (AC3 target ~400ms desktop)`,
+  );
+  await sleep(400); // let the crossfade land so the artifact shows the committed (opaque) inset
+  await shoot("explorer-sub8-region-band1.png"); // manual: a finer survey pasted over its window
+  // A second artifact for the reviewer: geometric zoom OUT within the band (a noop settle --
+  // same window, hysteresis holds band 1) so the committed inset sits small on the master
+  // chart with the world visible around it: the pasted-detail-survey look the redesign buys.
+  await enterAt(1.35, 0.5, 0.5);
+  await sleep(600);
+  await shoot("explorer-sub8-inset-context.png"); // manual: the survey as a detail sheet on the world chart
+
+  // Z18: within a committed window a settle does NOT redraft; PANNING into a new quantized
+  // window does (AC2). This is the review quirk-1 regression test: with a survey committed, the
+  // camera pans exactly as it would on the bare world sheet (the world extent is the constraint,
+  // there is no region extent), and the pan re-surveys after the fact. No goHome between the
+  // steps -- the pan starts FROM the committed region, where the old rebase design was frozen.
+  await goHome();
+  const before18 = (await rgn()).redrafts;
+  await enterAt(2, 0.5, 0.5);
+  const enter18 = await waitRedraft(before18); // window A, band 1, centred 0.5
+  // A settle that zooms to k=2.2 at the same centre stays band 1 (hysteresis) in the same
+  // lattice cell: no redraft.
+  await enterAt(2.2, 0.5, 0.5);
+  await sleep(500); // well past the 250ms settle debounce; assert NO new commit
+  const same18 = await rgn();
+  // A PAN at band 1 (same k, centre moved past half a lattice cell): the camera must actually
+  // move (the old design clamped it dead), and the settle lands a NEW window -> one redraft.
+  await enterAt(2, 0.42, 0.42);
+  const new18 = await waitRedraft(same18.redrafts);
+  const pan18 = await evaluate(`window.__vellumZoomState()`);
+  const W18 = await evaluate(`document.getElementById("map-viewport").clientWidth`);
+  const pannedTo = -0.34 * W18; // x = W/2 - 0.42*2*W
+  check(
+    "Z18 pan works at a committed band and re-drafts only on a new quantized window (AC2 + review quirk 1)",
+    same18.redrafts === enter18.redrafts && new18.redrafts === same18.redrafts + 1 &&
+      JSON.stringify(new18.window) !== JSON.stringify(enter18.window) &&
+      new18.band === 1 && Math.abs(pan18.x - pannedTo) < 0.5,
+    `A=${JSON.stringify(enter18.window)} inWindow=${same18.redrafts}(==${enter18.redrafts}) B=${JSON.stringify(new18.window)} ` +
+      `pan x=${pan18.x} (expected ${pannedTo}, a dead pan would sit at ${-0.5 * W18})`,
+  );
+
+  // Z19: rapid successive settles commit only the LAST (AC2: the settle debounce coalesces and
+  // the monotonic guard drops superseded jobs). Three different band-1 framings fired back to
+  // back land exactly ONE redraft.
+  await goHome();
+  const before19 = (await rgn()).redrafts;
+  await evaluate(
+    `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;` +
+      `const z=(cu,cv)=>window.__vellumZoomTo({k:2,x:W/2-cu*2*W,y:H/2-cv*2*H});z(0.35,0.35);z(0.5,0.5);z(0.62,0.62);})()`,
+  );
+  const s19 = await waitRedraft(before19);
+  await sleep(500); // any superseded straggler would land here; assert it did not
+  const after19 = await rgn();
+  check(
+    "Z19 rapid settles commit only the last (AC2: one redraft despite three framings)",
+    s19.redrafts === before19 + 1 && after19.redrafts === before19 + 1 && after19.band === 1,
+    `redrafts ${before19}->${after19.redrafts} (expected +1), band=${after19.band}`,
+  );
+
+  // Z19b (review): the supersession guard itself (regionGen), which Z19 does NOT reach (its
+  // three framings coalesce in the 250ms settle debounce, so only one job ever dispatches).
+  // Here a job is genuinely IN FLIGHT when home is hit: the settle fires at ~250ms, the warm
+  // redraft takes ~500ms, and home lands between the two. The resolved job must be discarded:
+  // no commit, no inset, the redraft counter unmoved.
+  await goHome();
+  const before19b = (await rgn()).redrafts;
+  await enterAt(2, 0.5, 0.5);
+  await sleep(350); // past the debounce: the region job is now in flight in the worker
+  await goHome(); // bumps regionGen mid-flight; the job's commit must be dropped
+  await sleep(1200); // the worker resolved long since; assert the result went nowhere
+  const after19b = await rgn();
+  const insets19b = await evaluate(`document.querySelectorAll("#map .region-inset").length`);
+  check(
+    "Z19b a home while a redraft is in flight drops the resolved job (the regionGen supersession guard)",
+    after19b.redrafts === before19b && after19b.band === 0 && after19b.committed === false && insets19b === 0,
+    `redrafts ${before19b}->${after19b.redrafts} (expected unchanged) band=${after19b.band} insets=${insets19b}`,
+  );
+
+  // Z20: a zoom-out past the band-0 threshold drops the inset over the world chart that was
+  // under it -- no worker round-trip -- and Download follows "saves what you see" in both
+  // states (AC4). While a region is committed the download keys on that sheet + its band; after
+  // the revert no inset remains, the world sheet is (still) mounted, and the overlay is the
+  // world's. The camera lands where the zoom-out put it, un-snapped.
+  await goHome();
+  const before20 = (await rgn()).redrafts;
+  await enterAt(2, 0.5, 0.5);
+  const reg20 = await waitRedraft(before20);
+  const dlRegion = reg20.committed === true && reg20.band === 1 && /^The Environs of .+/.test(reg20.title || "");
+  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`); // under the 0/1 down-cross
+  let world20 = reg20;
+  for (let i = 0; i < 100; i++) { world20 = await rgn(); if (world20.band === 0) break; await sleep(40); }
+  let gone20 = -1; // the inset teardown trails the revert by the fade; poll it to zero
+  for (let i = 0; i < 50; i++) { gone20 = await evaluate(`document.querySelectorAll("#map .region-inset").length`); if (gone20 === 0) break; await sleep(40); }
+  const worldView = await insetView();
+  check(
+    "Z20 a zoom-out drops the inset over the always-present world sheet; Download saves-what-you-see in both states (AC4)",
+    dlRegion && world20.band === 0 && world20.committed === false && gone20 === 0 &&
+      worldView.worldMounted && worldView.hits > 0 && worldView.zk === 1,
+    `committedRegion=${dlRegion} -> band=${world20.band} committed=${world20.committed} insets=${gone20} world=${worldView.worldMounted} hits=${worldView.hits} k=${worldView.zk}`,
+  );
+
+  // Z20b: reduced motion redrafts INSTANTLY (AC4) -- the commit lands with the inset already
+  // opaque (no transition ran) and exactly one inset mounted.
+  await goHome();
+  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  const beforeRm = (await rgn()).redrafts;
+  await enterAt(2, 0.5, 0.5);
+  const rm = await waitRedraft(beforeRm);
+  const rmView = await evaluate(
+    `(()=>{const ins=[...document.querySelectorAll("#map .region-inset")];` +
+      `return{count:ins.length,opaque:ins.length===1&&ins[0].classList.contains("in")};})()`,
+  );
+  check(
+    "Z20b reduced motion redrafts instantly (AC4: one inset, committed opaque, no transition path)",
+    rm.band === 1 && rm.redrafts === beforeRm + 1 && rmView.count === 1 && rmView.opaque,
+    `band=${rm.band} redrafts ${beforeRm}->${rm.redrafts} insets=${JSON.stringify(rmView)}`,
+  );
+  await send("Emulation.setEmulatedMedia", { features: [] });
+
+  // Z20c: settle-to-sheet under a 4x main-thread CPU throttle, MEASURED (AC3). NB the redraft
+  // (generateRegionWorld + renderMap) runs in the Web WORKER, which CDP's setCPUThrottlingRate
+  // does NOT slow -- so this mainly proves the redraft never blocks the main thread (the number
+  // stays ~the warm desktop ms, not 4x it), and the worker compute (~0.5s here) sits well under
+  // the ~1.5s mid-mobile budget with headroom. Loose flake-guard ceiling; ms is corroboration.
+  await goHome();
+  await send("Emulation.setCPUThrottlingRate", { rate: 4 });
+  const beforePerf = (await rgn()).redrafts;
+  await enterAt(2, 0.5, 0.5);
+  const perf = await waitRedraft(beforePerf);
+  const perfMs = await captionMs();
+  await send("Emulation.setCPUThrottlingRate", { rate: 1 });
+  check(
+    "Z20c settle-to-sheet is measured under a 4x CPU throttle (AC3: ~1.5s mid-mobile target)",
+    perf.redrafts === beforePerf + 1 && perfMs >= 0 && perfMs < 4000,
+    `drawn in ${perfMs}ms under 4x throttle (target ~1.5s; 4000ms ceiling is a flake guard, not the target)`,
+  );
+
+  // Z20d (scope: chronicle mutual exclusion): entering the chronicle reverts a committed region to
+  // the WORLD sheet (its baked settlement/road layers are what the scrubber drives; a region carries
+  // no chronicle), so no region job can be in flight while scrubbing. Enter a region, toggle the
+  // chronicle, assert the sheet is the world chart (no region stamp) and the scrubber is showing.
+  await goHome();
+  const before20d = (await rgn()).redrafts;
+  await enterAt(2, 0.5, 0.5);
+  await waitRedraft(before20d);
+  await evaluate(`(()=>{const c=document.getElementById("chronicle");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await sleep(80);
+  const chron = await evaluate(
+    `(()=>{const s=window.__vellumRegion();const svg=document.querySelector("#map > svg");` +
+      `return{band:s.band,committed:s.committed,noStamp:!!svg&&!svg.hasAttribute("data-vellum-region-u0"),` +
+      `insets:document.querySelectorAll("#map .region-inset").length,scrubShown:!document.getElementById("scrubber").hidden};})()`,
+  );
+  check(
+    "Z20d entering the chronicle drops the inset back to the bare world sheet (mutual exclusion, no region while scrubbing)",
+    chron.band === 0 && chron.committed === false && chron.noStamp && chron.insets === 0 && chron.scrubShown,
+    JSON.stringify(chron),
+  );
+  await evaluate(`(()=>{const c=document.getElementById("chronicle");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the chronicle
+
+  // Z20e (scope: overlay rebuild, card continuity keyed by NAME): a card pinned in one survey stays
+  // pinned to the SAME-named settlement across a redraft, even though region worlds renumber indices.
+  // Pin the settlement nearest the centre (the survey's namesake), zoom into the next finer band still
+  // centred on it, and assert the card is still open on that same name.
+  await goHome();
+  const before20e = (await rgn()).redrafts;
+  await enterAt(2, 0.5, 0.5);
+  const e20e1 = await waitRedraft(before20e);
+  const pinnedName = await evaluate(`(()=>{
+    const hits=[...document.querySelectorAll("#map .place-hit")];
+    if(!hits.length) return null;
+    const vp=document.getElementById("map-viewport").getBoundingClientRect();
+    const cx=vp.left+vp.width/2, cy=vp.top+vp.height/2;
+    let best=null,bd=1e9;
+    for(const h of hits){const r=h.getBoundingClientRect();const d=Math.hypot(r.left+r.width/2-cx,r.top+r.height/2-cy);if(d<bd){bd=d;best=h;}}
+    best.click();
+    const nm=document.querySelector("#place-card .pc-name");
+    return nm?nm.textContent:null;
+  })()`);
+  await enterAt(3.6, 0.5, 0.5); // past the 1/2 up-cross: the next finer band, same centre
+  await waitRedraft(e20e1.redrafts);
+  await sleep(80);
+  // The rebuilt card must also carry the LIVE zoom's counter-scale (--zoom-k): the overlay
+  // rebuild creates a fresh #place-card, and a commit no longer touches the camera, so the
+  // controller must re-publish k onto it or the card renders k-times too large (review quirk:
+  // gigantic cards on a region sheet).
+  const kept = await evaluate(
+    `(()=>{const card=document.getElementById("place-card");const nm=card.querySelector(".pc-name");` +
+      `return{hidden:card.hidden,name:nm?nm.textContent:null,zoomK:card.style.getPropertyValue("--zoom-k")};})()`,
+  );
+  check(
+    "Z20e a pinned card survives a redraft keyed by NAME and keeps its counter-scale (fresh card carries --zoom-k)",
+    !!pinnedName && kept.hidden === false && kept.name === pinnedName && kept.zoomK === "3.6",
+    `pinned=${JSON.stringify(pinnedName)} afterRedraft=${JSON.stringify(kept)} (zoomK expected "3.6")`,
+  );
+  await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`); // dismiss the pin
+
+  // Z20f (review quirk 3): a PARTIAL zoom-out steps down one band by swapping the inset in
+  // place -- the world chart shows around it throughout and the camera stays exactly where the
+  // zoom-out put it (no snap, no full-viewport shrink into void). From band 3 (k=8), settle at
+  // k=4: bandFor(4, 3) = 2, so the band-2 survey commits while the camera holds k=4.
+  await goHome();
+  const before20f = (await rgn()).redrafts;
+  await enterAt(8, 0.5, 0.5);
+  const deep20f = await waitRedraft(before20f);
+  await enterAt(4, 0.5, 0.5);
+  const step20f = await waitRedraft(deep20f.redrafts);
+  // The commit mounts the band-2 inset immediately; the band-3 one is torn down only once the
+  // crossfade lands (both up during the fade IS the no-gap-frame discipline), so poll to 1.
+  let view20f = await insetView();
+  for (let i = 0; i < 50 && view20f.insets !== 1; i++) { await sleep(40); view20f = await insetView(); }
+  check(
+    "Z20f a partial zoom-out steps down ONE band in place: inset swaps, world sheet visible, camera un-snapped (review quirk 3)",
+    deep20f.band === 3 && step20f.band === 2 && step20f.committed === true &&
+      view20f.insets === 1 && view20f.stamped && view20f.worldMounted && view20f.zk === 4,
+    `band ${deep20f.band}->${step20f.band} insets=${view20f.insets} world=${view20f.worldMounted} k=${view20f.zk} (expected 4)`,
+  );
+
+  // Z20g (review): the VOYAGE mutually excludes the redraft, mirroring the chronicle (Z20d).
+  // Its track narrates the WORLD survey at world coordinates, so (a) toggling it on drops a
+  // committed inset and paints the world track over the world sheet -- with the camera left
+  // where it was (unlike the chronicle, voyage never resets the zoom) -- and (b) while it is
+  // on, a settle stays geometric: no redraft.
+  await goHome();
+  const before20g = (await rgn()).redrafts;
+  await enterAt(2, 0.5, 0.5);
+  const reg20g = await waitRedraft(before20g);
+  await evaluate(`(()=>{const v=document.getElementById("voyage");v.checked=true;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await sleep(120);
+  const von = await evaluate(
+    `(()=>{const s=window.__vellumRegion();return{band:s.band,committed:s.committed,` +
+      `insets:document.querySelectorAll("#map .region-inset").length,track:!!document.querySelector("#map .voyage-overlay"),` +
+      `k:window.__vellumZoomState().k};})()`,
+  );
+  await enterAt(2, 0.35, 0.35); // a settle while voyaging: must NOT redraft
+  await sleep(600); // past the debounce + any would-be dispatch
+  const vsettle = await rgn();
+  await evaluate(`(()=>{const v=document.getElementById("voyage");v.checked=false;v.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the voyage
+  check(
+    "Z20g the voyage drops the inset and blocks the redraft while on (world-track coherence; camera untouched)",
+    von.band === 0 && von.committed === false && von.insets === 0 && von.track && von.k === 2 &&
+      vsettle.redrafts === reg20g.redrafts && vsettle.band === 0,
+    `on-toggle ${JSON.stringify(von)} settleWhileVoyaging redrafts=${vsettle.redrafts}(==${reg20g.redrafts}) band=${vsettle.band}`,
+  );
+
+  await goHome(); // leave the world sheet for the restore tail below
+  await evaluate(`window.__vellumSetRedraftEnabled(false)`); // #169: geometric-only again for the suites that follow
 
   // Restore a clean antique seed-42 HOME base (chronicle off) for the suites that follow.
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);

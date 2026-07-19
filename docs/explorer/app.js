@@ -13,6 +13,7 @@ import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.js"
 import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.js";
 import { startArrival } from "./draw-ceremony.js";
 import { createZoomController } from "../shared/zoom-controller.js";
+import { createLodController } from "./lod-controller.js";
 import { readHash, writeHash } from "./hash-sync.js";
 import { cameraFromTransform, transformFromCamera } from "./camera.js";
 import { seedForDate } from "./engine/world/seed-of-the-day.js";
@@ -157,23 +158,63 @@ const zoomController = createZoomController({
   targetEl: mapDiv,
   scaleExtent: [1, 8],
   onApply: (state) => setCardZoom(state.k),
-  onSettle: () => syncHash(),
+  onSettle: () => onCameraSettle(), // #169: hash + (on antique) the region redraft
 });
-// #165: the camera the controller is framing, as {cx,cy,k} world-uv centre + zoom. Read
-// from the STABLE #map-viewport (its client box is the sheet size at k=1). Guard against a
-// zero-size box (before first layout) so the division is finite.
-function cameraFromState() {
+// #169 The redraft: a camera settle on the antique chart draws a finer regional survey of the
+// window, committed as an INSET laid over the world sheet (the camera never rebases; a zoom-out
+// just fades the inset away over the world chart that was around it all along). The controller
+// owns the band/window state, the worker dispatch, and the inset mount/crossfade; app.js hands
+// it the pieces and gates it (see regionEligible) so a geometric zoom on any other style still
+// only writes the hash.
+const lodController = createLodController({
+  mapDiv,
+  runJob,
+  // Every controller path (commit, revert, homeToWorld) rebuilds the overlay, which creates
+  // a FRESH #place-card -- and none of those paths touches the camera, so nothing else would
+  // re-publish the zoom onto it. Re-publish here (the draw paths get the same via syncZoom)
+  // or a card shown after a redraft renders k-times too large.
+  buildPlaceOverlay: (manifest, opts) => {
+    buildPlaceOverlay(manifest, opts);
+    setCardZoom(zoomController.getState().k);
+  },
+  setCaption: (t) => { caption.textContent = t; },
+  getZoomK: () => zoomController.getState().k,
+  prefersReduce,
+});
+// #165/#169: the camera the controller is framing -- sheet fractions of the WORLD sheet at
+// every band (the inset design never rebases) -- read from the STABLE #map-viewport (its
+// client box is the sheet's size at k=1). Guard a zero-size box (before first layout) so the
+// division is finite.
+function cameraNow() {
   const W = mapViewport.clientWidth || 1;
   const H = mapViewport.clientHeight || 1;
   return cameraFromTransform(zoomController.getState(), W, H);
 }
-// #165: the ONE hash writer. Every trigger (draw, zoom settle, a reset from verso/chronicle)
-// funnels through here so the hash always carries the complete current state, camera
-// included. writeHash drops cx/cy/k when the camera is home, so a world-changing action
-// (which snaps home first) clears them for free.
+// #165/#169: the ONE hash writer. Every trigger funnels through here so the hash carries the
+// complete current state, camera included. The camera is world-relative at every band, so it
+// writes straight into the hash; writeHash drops cx/cy/k when the camera is home.
 function syncHash() {
-  writeHash(hashControls, landTouched, coastTouched, cameraFromState());
+  writeHash(hashControls, landTouched, coastTouched, cameraNow());
 }
+// #169: a test seam, ON by default (production). It lets the geometric-zoom e2e (Z1-Z16,
+// Sub 3-4) isolate the geometric layer from the semantic redraft this sub adds on top of it;
+// those suites toggle it off, and the Sub 8 suite (Z17-Z20) toggles it back on. Runtime only:
+// the Explorer never persists or reads it, so production is unaffected.
+let redraftEnabled = true;
+// #169: whether a settle should redraft. Semantic LOD is antique-only (the epic's ratified
+// decision); geometric zoom on the other three styles just writes the hash. Off while the
+// chronicle, the voyage, or the verso owns the sheet, and until a chart exists. Voyage is
+// excluded for the same reason as the chronicle: its track is a WORLD-survey overlay (world
+// coordinates, world roads), so a finer regional survey under it would carry a track that no
+// longer follows the roads it describes.
+function regionEligible() {
+  return redraftEnabled && styleSel.value === "antique" && !chronicleChk.checked && !voyageChk.checked && !isFlipped(sheetEl) && !!lastSvg;
+}
+function onCameraSettle() {
+  syncHash();
+  if (regionEligible()) lodController.onSettle(cameraNow());
+}
+window.__vellumSetRedraftEnabled = (v) => { redraftEnabled = !!v; };
 // #165: geometric pan/zoom now belongs to ALL FOUR styles (the epic's ratified decision;
 // semantic LOD stays antique-only, but that is Sub 8, not here). So the controller attaches
 // unconditionally; the reset-home-on-world-change policy lives in draw()/the verso + chronicle
@@ -206,6 +247,7 @@ function draw(opts) {
   // syncHash below is the authoritative hash write (home => cx/cy/k dropped). Sea-level and
   // coast drags run through draw(), so they are covered here for free.
   zoomController.rebase();
+  lodController.cancel(); // #169: drop any in-flight redraft; a fresh world is being drawn
   drawing = true;
   cancelScrubRaf(); // a redraw is about to wipe the overlay; stop any running sweep
   cancelVoyageRaf(); // #119: likewise stop a running voyage sweep before the wipe
@@ -279,6 +321,8 @@ function draw(opts) {
           if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
           else clearVoyage();
           syncZoom(); // #164/#165: attach the zoom to the just-landed chart (every style now)
+          // #169: record the (re-dressed) world sheet so a settle can redraft over it.
+          lodController.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
         });
       } else {
         // Settle (#127): inject the chart and run the arrival ceremony (unless this is
@@ -302,6 +346,9 @@ function draw(opts) {
         if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
         else clearVoyage();
         syncZoom(); // #164/#165: attach the zoom to the just-drawn chart (every style now)
+        // #169: record this world sheet BEFORE a deep-link camera is applied, so the settle
+        // that camera triggers can redraft a region over the SAME base world (cache hit).
+        lodController.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
         // #165: restore a deep link's camera once the first chart (and so the viewport) is
         // up. One-shot: consumed and nulled so no later Draw re-frames. zoomTo clamps, so a
         // centre that would pull an edge past the viewport at that zoom is pinned in bounds.
@@ -348,12 +395,18 @@ $("random").addEventListener("click", () => {
   draw();
 });
 $("download").addEventListener("click", () => {
-  if (!lastSvg) return;
-  const blob = new Blob([lastSvg], { type: "image/svg+xml" });
+  // #169 "Download saves what you see": while a region sheet is committed, save THAT stamped
+  // sheet (its filename gains the band); at the world sheet, save the world chart as before.
+  const region = lodController.committedRegion();
+  const svg = region ? region.svg : lastSvg;
+  if (!svg) return;
+  const blob = new Blob([svg], { type: "image/svg+xml" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  const slug = lastTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-  a.download = `vellum-${seedInput.value}-${styleSel.value}-${slug}.svg`;
+  const slug = (region ? region.title : lastTitle).toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  a.download = region
+    ? `vellum-${seedInput.value}-${styleSel.value}-band${region.band}-${slug}.svg`
+    : `vellum-${seedInput.value}-${styleSel.value}-${slug}.svg`;
   a.click();
   URL.revokeObjectURL(a.href);
 });
@@ -368,6 +421,7 @@ versoBtn.addEventListener("click", () => {
   // the SAME chart stays, we only re-home it. syncHash writes the now-home hash EXPLICITLY
   // rather than trusting reset()'s debounced settle, so a link copied right after the flip
   // never carries a stale cx/cy/k. reset() is a no-op when already home (turning back).
+  lodController.homeToWorld(); // #169: drop a committed region inset before the flip
   zoomController.reset();
   syncHash();
   // #174: interaction interrupts the animation. A running 12s sweep is snapped to its
@@ -444,6 +498,9 @@ chronicleChk.addEventListener("change", () => {
     // scrubber are mutually exclusive per the epic; the scrub reveals baked layers on the
     // home sheet). Explicit syncHash for the same reason as the verso flip: drop cx/cy/k
     // now, not on a debounced settle. Leaving the chronicle needs no reset (already home).
+    // #169: the scrubber drives the WORLD chart's baked layers (a region carries no chronicle),
+    // so drop a committed region inset first.
+    lodController.homeToWorld();
     zoomController.reset();
     syncHash();
     // #119: chronicle and voyage are mutually exclusive; entering one leaves the other.
@@ -460,6 +517,11 @@ scrubRangeEl.addEventListener("input", onManualScrub);
 voyageChk.addEventListener("change", () => {
   if (voyageChk.checked) {
     if (chronicleChk.checked) { chronicleChk.checked = false; exitScrub(); }
+    // #169: the voyage narrates the WORLD survey (lastManifest/lastSurvey), so a committed
+    // region inset must drop first or the world-scale track would paint over the finer sheet.
+    // Unlike the chronicle, the camera is NOT reset: voyage + geometric zoom were always
+    // compatible, and regionEligible above keeps the sheet geometric while the voyage is on.
+    lodController.homeToWorld();
     // #174: the sweep is a recto ceremony. Ticking voyage while the sheet rests on its
     // verso paints the resting track on both faces and skips the animation, following the
     // precedent above where a style change while flipped rebuilds in place rather than
@@ -495,7 +557,7 @@ mapViewport.addEventListener("keydown", (e) => {
     case "ArrowRight": zoomController.panBy(-W * PAN_FRACTION, 0); break;
     case "ArrowUp": zoomController.panBy(0, H * PAN_FRACTION); break;
     case "ArrowDown": zoomController.panBy(0, -H * PAN_FRACTION); break;
-    case "0": zoomController.reset(); syncHash(); break; // home
+    case "0": lodController.homeToWorld(); zoomController.reset(); syncHash(); break; // home
     default: return; // not ours: let it through (browse mode, card Escape, tabbing)
   }
   e.preventDefault();
@@ -505,7 +567,7 @@ mapViewport.addEventListener("keydown", (e) => {
 // scaleBy rides its settle to write the new camera.
 $("zoom-in").addEventListener("click", () => zoomController.scaleBy(ZOOM_STEP));
 $("zoom-out").addEventListener("click", () => zoomController.scaleBy(1 / ZOOM_STEP));
-$("zoom-reset").addEventListener("click", () => { zoomController.reset(); syncHash(); });
+$("zoom-reset").addEventListener("click", () => { lodController.homeToWorld(); zoomController.reset(); syncHash(); });
 // The cluster sits INSIDE #map-viewport, the element d3-zoom binds its gesture listeners to.
 // So a gesture over a button bubbles into d3: most visibly, a rapid double-click on a button
 // fires a `dblclick` that d3 turns into its own double-click-to-zoom (a 2x magnify about the
@@ -542,6 +604,9 @@ window.__vellumVoyageLegGeometry = voyageLegGeometry; // #120: projected leg poi
 // the same clamp a live gesture uses; zoomState reads back the settled {x,y,k}.
 window.__vellumZoomTo = (t) => zoomController.zoomTo(t);
 window.__vellumZoomState = () => zoomController.getState();
+// #169: the committed region state for the e2e (Z17-Z20): band, world-uv window, derived
+// title, and a monotonic redraft counter (proves one-job-per-settle + last-wins, no timing).
+window.__vellumRegion = () => lodController.state();
 
 // A bare visit (no seed in the hash) lands on today's seed-of-the-day (UTC), the same
 // default world the Print Room and the Today page use. readHash overrides it only when

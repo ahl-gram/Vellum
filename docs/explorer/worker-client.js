@@ -7,7 +7,7 @@
 import { renderMap } from "./engine/render/map-renderer.js";
 import { buildPlaceManifest } from "./engine/render/place-manifest.js";
 import { buildSurvey } from "./engine/render/survey.js";
-import { generateRegionWorld } from "./engine/world/region.js";
+import { generateRegionWorld, regionTitle } from "./engine/world/region.js";
 import { composeAtlas } from "./engine/atlas/compose.js";
 import { serializableAtlas } from "./serializable-atlas.js";
 import { worldFor } from "./world-cache.js";
@@ -44,11 +44,14 @@ export function runInline(msg) {
     // #168: an EXPLICIT region branch. Without it a region job would fall through to
     // the atlas path below and silently run the wrong engine in the inline fallback.
     const { world, cached } = worldFor(msg.seed, msg.overrides);
+    // #169: derive the title from (world, window), mirroring worker.js exactly so the inline
+    // fallback stays byte-identical; msg.title (if given) is honored for back-compat.
+    const title = msg.title ?? regionTitle(world, msg.window);
     const region = generateRegionWorld(world, {
       window: msg.window,
       gridW: msg.gridW,
       gridH: msg.gridH,
-      title: msg.title,
+      title,
     });
     const regionRecipe = { window: msg.window, worldGridW: world.recipe.gridW };
     return {
@@ -57,6 +60,7 @@ export function runInline(msg) {
       manifest: buildPlaceManifest(region, msg.render.widthPx ?? 1500),
       window: msg.window,
       band: msg.band, // the LOD band index, mirrors worker.js
+      title,
       cached,
     };
   }

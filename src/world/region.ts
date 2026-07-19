@@ -175,3 +175,23 @@ export function windowAround(
   const v0 = clamp(v - half, 0.01, 0.99 - size);
   return { u0, v0, u1: u0 + size, v1: v0 + size };
 }
+
+/**
+ * The deterministic title of a regional survey of `window`: "The Environs of X", where X is
+ * the settlement nearest the window CENTRE in grid space (the same space windowAround maps
+ * from). A pure function of (world, window) with NO free-form input, which is what lets the
+ * Explorer's live redraft and the download-redraw path agree byte-for-byte (#169): a region
+ * SVG stamps only its geometry (window + parent grid), never its title, so a downloaded sheet
+ * redraws its cartouche by recomputing this from the recovered window over the regenerated
+ * base world. (The atlas titles its two canonical plates by a settlement->window flow; for an
+ * interior window centred on a settlement this rule resolves to that same settlement.)
+ */
+export function regionTitle(world: World, window: UvWindow): string {
+  if (world.settlements.length === 0) return world.title.title;
+  const cx = ((window.u0 + window.u1) / 2) * (world.recipe.gridW - 1);
+  const cy = ((window.v0 + window.v1) / 2) * (world.recipe.gridH - 1);
+  const nearest = world.settlements.reduce((a, b) =>
+    Math.hypot(b.x - cx, b.y - cy) < Math.hypot(a.x - cx, a.y - cy) ? b : a,
+  );
+  return `The Environs of ${nearest.name}`;
+}

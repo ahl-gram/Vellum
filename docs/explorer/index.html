@@ -141,7 +141,9 @@
      hard requirement. -->
 <div id="zoom-controls" class="zoom-controls" role="group" aria-label="Zoom">
   <button id="zoom-in" type="button" aria-label="Zoom in" title="Zoom in">+</button>
-  <button id="zoom-reset" type="button" aria-label="Reset zoom" title="Reset zoom">&#9750;</button>
+  <!-- A drawn line-art house (the old &#9750; was the white shogi piece, which reads as a
+       tombstone in this serif). stroke=currentColor so it keeps the cluster's ink. -->
+  <button id="zoom-reset" type="button" aria-label="Reset zoom" title="Reset zoom"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 8.3 8 3.4l5.4 4.9"/><path d="M4.4 7.6v5.9h7.2V7.6"/><path d="M6.9 13.5v-3.2h2.2v3.2"/></svg></button>
   <button id="zoom-out" type="button" aria-label="Zoom out" title="Zoom out">&#8722;</button>
 </div>
 </div>

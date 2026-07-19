@@ -1,5 +1,17 @@
 /** Uniform grid→pixel projection with a frame margin. */
 
+/**
+ * The frame margin as a fraction of the rendered width (the same px inset on all four
+ * sides). Shared by renderMap and buildPlaceManifest, and shipped to the Explorer as
+ * the manifest's marginPx (#169): the client's sheet-fraction <-> plot-uv conversion
+ * must agree with the drawn chart exactly, so the constant lives in one place.
+ */
+export const MARGIN_FRACTION = 0.045;
+
+export function marginFor(widthPx: number): number {
+  return Math.round(widthPx * MARGIN_FRACTION);
+}
+
 export type Projection = {
   readonly widthPx: number;
   readonly heightPx: number;

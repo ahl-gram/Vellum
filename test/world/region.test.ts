@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
-import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
+import { generateRegionWorld, windowAround, regionTitle } from "../../src/world/region.ts";
 import { createRng } from "../../src/core/rng.ts";
 import { createLoreWriter } from "../../src/society/lore.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
@@ -296,4 +296,41 @@ test("a writer avoids back-to-back template repeats", () => {
   for (let i = 1; i < notes.length; i++) {
     assert.notEqual(notes[i], notes[i - 1], "adjacent notes identical");
   }
+});
+
+// #169: the region title must be a deterministic function of (world, window) so the
+// Explorer's live redraft and a downloaded sheet's redraw (which recover only the window,
+// never the title) agree byte-for-byte.
+test("regionTitle names the settlement nearest the window centre (#169)", () => {
+  const w = bigWorld;
+  const capital = w.settlements.find((s) => s.kind === "capital");
+  assert.ok(capital);
+  const win = windowAround(w, capital, 0.3);
+  // independently: the nearest settlement to the window centre in grid space
+  const cx = ((win.u0 + win.u1) / 2) * (w.recipe.gridW - 1);
+  const cy = ((win.v0 + win.v1) / 2) * (w.recipe.gridH - 1);
+  const nearest = w.settlements.reduce((a, b) =>
+    Math.hypot(b.x - cx, b.y - cy) < Math.hypot(a.x - cx, a.y - cy) ? b : a,
+  );
+  assert.equal(regionTitle(w, win), `The Environs of ${nearest.name}`);
+
+  // it tracks the window, it is not a constant: the farthest town's environs differ
+  const far = w.settlements
+    .filter((s) => s.kind === "town")
+    .reduce((a, b) =>
+      Math.hypot(b.x - capital.x, b.y - capital.y) > Math.hypot(a.x - capital.x, a.y - capital.y) ? b : a,
+    );
+  assert.notEqual(
+    regionTitle(w, windowAround(w, far, 0.3)),
+    regionTitle(w, win),
+    "a window elsewhere yields a different title",
+  );
+});
+
+test("regionTitle is stable across a regeneration of the same world (#169)", () => {
+  // The download-redraw path regenerates the base world from the recovered flat recipe;
+  // regionTitle must return the identical string over that fresh world for byte-identity.
+  const win = windowAround(bigWorld, bigWorld.settlements[0], 0.5);
+  const regen = generateWorld(defaultRecipe(42, { gridW: 320, gridH: 240 }));
+  assert.equal(regionTitle(bigWorld, win), regionTitle(regen, win));
 });
