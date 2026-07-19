@@ -67,20 +67,23 @@ test("reachPlacements returns [] for a degenerate river and one reach for a shor
   assert.equal(shortRiver.length, 1, "a course shorter than the label gets one whole-reach candidate");
 });
 
-// #95 follow-up: the west river on seed 20260701 ("The Hjarggre Torrent") sits
-// in a crowded reach; its straightest spot collided, so it went unlabeled and
-// the Daily Hunt cited a name printed nowhere. With spread alternatives it now
-// labels. This is the render-side guarantee behind the pruned clue.
+// #95 follow-up: a river on crowded seed 20260701 once went unlabeled because its
+// straightest spot collided, so the Daily Hunt cited a name printed nowhere. With
+// spread alternatives (reachPlacements) the crowded seed now labels its rivers.
+// #235 (Second Edition) re-rolled this seed's names; the guarded river is re-pinned
+// to "The Silver Lathfi", one of the 9 (of 12) rivers this seed still labels. The
+// recovery MECHANISM is unit-tested via reachPlacements above; this integration pin
+// only asserts a crowded seed keeps a visible river label.
 test("a crowded named river recovers a label via an alternative reach", () => {
   const world = generateWorld(defaultRecipe(20260701, {}));
   assert.ok(world.names.rivers.size > 0, "fixture names rivers");
   assert.ok(
-    [...world.names.rivers.values()].includes("The Hjarggre Torrent"),
-    "fixture still names The Hjarggre Torrent",
+    [...world.names.rivers.values()].includes("The Silver Lathfi"),
+    "fixture still names The Silver Lathfi",
   );
   const svg = renderMap(world, { style: "antique", legend: true });
   assert.ok(
-    svg.includes(">The Hjarggre Torrent<"),
+    svg.includes(">The Silver Lathfi<"),
     "the crowded river now carries a visible label",
   );
 });

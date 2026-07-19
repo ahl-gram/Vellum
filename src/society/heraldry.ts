@@ -63,8 +63,12 @@ export const CULTURE_CHARGES: Record<string, readonly MobileCharge[]> = {
   norden: ["axe", "raven", "mountain"],
   veshari: ["sun", "crescent", "scimitar"],
   sylvan: ["oak", "leaf", "star"],
+  tsuren: ["sun", "wave", "mountain"],
   oromi: ["wave", "fish", "turtle"],
   draket: ["tower", "sword", "flame"],
+  zoryan: ["tower", "raven", "star"],
+  tezcal: ["sun", "flame", "sword"],
+  ordai: ["axe", "sword", "sun"],
 };
 
 const FALLBACK_CHARGES: readonly MobileCharge[] = ["star", "sun", "crescent"];
