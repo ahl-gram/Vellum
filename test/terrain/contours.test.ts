@@ -4,9 +4,14 @@ import { createField } from "../../src/core/grid.ts";
 import {
   marchingSquares,
   chaikinSmooth,
+  chaikinSmoothPinned,
   coastSmoothingIterations,
   ringArea,
 } from "../../src/terrain/contours.ts";
+
+type Pt = readonly [number, number];
+const has = (pts: ReadonlyArray<Pt>, p: Pt): boolean =>
+  pts.some(([x, y]) => x === p[0] && y === p[1]);
 
 test("uniform fields produce no contours", () => {
   const low = createField(5, 5, () => 0);
@@ -112,6 +117,40 @@ test("ringArea computes the shoelace area", () => {
   assert.equal(Math.abs(ringArea(square)), 4);
   const reversed = [...square].reverse();
   assert.equal(ringArea(square), -ringArea(reversed));
+});
+
+test("pinned chaikin holds pinned corners sharp while free corners round (#223)", () => {
+  const square: Pt[] = [[0, 0], [4, 0], [4, 4], [0, 4]];
+  // Pin the top edge's two corners; leave the bottom two free.
+  const pinned = (p: Pt): boolean => p[1] === 0;
+  const out = chaikinSmoothPinned(square, 3, pinned);
+  // Pinned corners survive exactly at their original coordinates...
+  assert.ok(has(out, [0, 0]), "pinned corner (0,0) must be preserved exactly");
+  assert.ok(has(out, [4, 0]), "pinned corner (4,0) must be preserved exactly");
+  // ...while the free corners are cut away (rounded, no longer present).
+  assert.ok(!has(out, [4, 4]), "free corner (4,4) must be rounded off");
+  assert.ok(!has(out, [0, 4]), "free corner (0,4) must be rounded off");
+  // Every output point stays within the square's bounds.
+  for (const [x, y] of out) {
+    assert.ok(x >= 0 && x <= 4 && y >= 0 && y <= 4, `point escaped bounds: ${x},${y}`);
+  }
+});
+
+test("pinned chaikin with everything pinned is the ring itself (#223)", () => {
+  const square: Pt[] = [[0, 0], [4, 0], [4, 4], [0, 4]];
+  const out = chaikinSmoothPinned(square, 3, () => true);
+  for (const c of square) assert.ok(has(out, c), `pinned vertex ${c} must survive`);
+  // No interpolated points are introduced when nothing is free to cut.
+  assert.ok(out.length <= square.length + 1, "all-pinned ring gains no cut points");
+});
+
+test("pinned chaikin with nothing pinned equals plain chaikin (#223)", () => {
+  // The free-point arithmetic must be the exact 0.75/0.25 form plain uses, so a
+  // ring with no pins renders byte-identically. Guards the ULP invariant.
+  const ring: Pt[] = [[1, 0], [5, 1], [4, 6], [0, 5]];
+  const plain = chaikinSmooth(ring, true, 2);
+  const pinned = chaikinSmoothPinned(ring, 2, () => false);
+  assert.deepEqual(pinned, plain);
 });
 
 test("coastSmoothingIterations is a no-op at or below chart width (#27)", () => {

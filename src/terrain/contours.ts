@@ -265,4 +265,9 @@ export function closedIsoRings(field: Field, iso: number): Contour[] {
 
 // Polyline utilities moved to ./polyline.ts; re-exported here so importers of
 // this module keep their existing path.
-export { chaikinSmooth, coastSmoothingIterations, ringArea } from "./polyline.ts";
+export {
+  chaikinSmooth,
+  chaikinSmoothPinned,
+  coastSmoothingIterations,
+  ringArea,
+} from "./polyline.ts";
