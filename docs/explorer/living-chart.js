@@ -101,8 +101,16 @@ function hidePlaceCard() {
 
 // After each draw: lay invisible focusable hit-targets over the baked glyphs (the
 // chart exposes no per-feature ids) and feed one reused parchment card.
-export function buildPlaceOverlay(manifest) {
+// #169: opts.preservePinByName re-pins a currently-pinned card to the SAME-NAMED settlement
+// in the new manifest. A region redraft renumbers settlements (region worlds re-index), so a
+// pin kept by array index would jump to a different town or dangle; keying by name keeps the
+// card on the place the reader pinned. Default draws (a new world) pass nothing: no continuity.
+export function buildPlaceOverlay(manifest, opts) {
   if (!manifest || !manifest.places) return;
+  const preserveName =
+    opts && opts.preservePinByName && placeOverlay && placeOverlay.pinned && placeOverlay.pinnedIdx >= 0
+      ? (placeOverlay.places[placeOverlay.pinnedIdx] || {}).name
+      : null;
   const overlay = document.createElement("div");
   overlay.className = "place-overlay";
   const card = document.createElement("div");
@@ -146,6 +154,16 @@ export function buildPlaceOverlay(manifest) {
   });
   mapDiv.appendChild(overlay);
   mapDiv.appendChild(card);
+  // #169: restore a pinned card onto the same-named settlement if it survived into the new
+  // sheet; if the place is off the new window, leave the card dismissed.
+  if (preserveName != null) {
+    const idx = manifest.places.findIndex((p) => p.name === preserveName);
+    if (idx >= 0) {
+      placeOverlay.pinned = true;
+      placeOverlay.pinnedIdx = idx;
+      showPlaceCard(idx);
+    }
+  }
 }
 
 // Document-level dismiss, wired once in app.js: Escape or a click/tap off any mark

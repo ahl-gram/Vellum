@@ -99,3 +99,92 @@ export function lodWindowFor(cx: number, cy: number, size: number): UvWindow {
   const v0 = clamp(cy - half, 0.01, 0.99 - size);
   return { u0, v0, u1: u0 + size, v1: v0 + size };
 }
+
+// ---- Sub 8 settle math (#169) ---------------------------------------------------
+// The redraft state machine's PURE core, kept here (not in the docs/ controller) so it
+// unit-tests from source with no build artifact. The DOM orchestration (crossfade,
+// rebase, worker dispatch, overlay) lives in docs/explorer/lod-controller.js and is
+// proven by e2e; this file owns only the "given a camera + the sheet it is framing,
+// what should the next sheet be" decision.
+
+/** A world-uv (or region-relative) camera: centre fraction + continuous zoom. */
+export type UvCamera = { readonly cx: number; readonly cy: number; readonly k: number };
+
+/** The whole-world window (band 0): the full sheet, size 1, so composition is identity. */
+export const FULL_WINDOW: UvWindow = { u0: 0, v0: 0, u1: 1, v1: 1 };
+
+/**
+ * Compose a region-relative camera (read via cameraFromTransform against whatever sheet
+ * is mounted in #map) UP into world-uv, given the world-uv `window` that sheet covers.
+ *
+ * This is the composition #169 turns on. After a redraft rebases the controller, the live
+ * transform is relative to the REGION sheet, not the world; so the world centre is
+ * `window.u0 + cam.cx * size` and the world zoom is `cam.k / size` (a size-`s` window drawn
+ * to fill the viewport is a `1/s` magnification of the world). At band 0 the window is
+ * FULL_WINDOW (size 1) and this is the identity, so one code path serves every band.
+ */
+export function worldCameraFrom(cam: UvCamera, window: UvWindow): UvCamera {
+  const size = window.u1 - window.u0; // LOD windows are square, so one size serves both axes
+  return {
+    cx: window.u0 + cam.cx * size,
+    cy: window.v0 + cam.cy * size,
+    k: cam.k / size,
+  };
+}
+
+function windowsEqual(a: UvWindow, b: UvWindow): boolean {
+  return (
+    Math.abs(a.u0 - b.u0) < 1e-9 &&
+    Math.abs(a.v0 - b.v0) < 1e-9 &&
+    Math.abs(a.u1 - b.u1) < 1e-9 &&
+    Math.abs(a.v1 - b.v1) < 1e-9
+  );
+}
+
+export type SettleDecision =
+  | { readonly action: "noop" }
+  | { readonly action: "world" }
+  | { readonly action: "region"; readonly band: number; readonly window: UvWindow };
+
+/**
+ * Decide what a settle should do, given the region-relative `camera`, the world-uv
+ * `currentWindow` the mounted sheet covers, and the `currentBand` held. Composes to world,
+ * resolves the band with hysteresis, and quantizes the window:
+ *  - band 0 from a region -> revert to the retained world sheet ("world"); from the world
+ *    itself -> "noop".
+ *  - band >= 1 with the SAME band and window already held -> "noop" (skip the redraft).
+ *  - otherwise -> "region" with the quantized band + window to draw.
+ */
+export function decideSettle(state: {
+  readonly camera: UvCamera;
+  readonly currentWindow: UvWindow;
+  readonly currentBand: number;
+}): SettleDecision {
+  const world = worldCameraFrom(state.camera, state.currentWindow);
+  const band = bandFor(world.k, state.currentBand);
+  if (band === 0) {
+    // From a region, a settle at band 0 reverts to the retained world sheet; the world
+    // sheet itself has nothing to redraft. (bandFor only returns 0 below the down-cross,
+    // so a revert always lands near home and cannot re-enter a region on the next settle.)
+    return state.currentBand === 0 ? { action: "noop" } : { action: "world" };
+  }
+  const size = (LOD_BANDS[band] as LodBand).sizeUV;
+  const { cx, cy } = quantizeCenter(world.cx, world.cy, size);
+  const window = lodWindowFor(cx, cy, size);
+  if (band === state.currentBand && windowsEqual(window, state.currentWindow)) {
+    return { action: "noop" }; // same survey already on screen: skip the redraft
+  }
+  return { action: "region", band, window };
+}
+
+/**
+ * The controller scaleExtent to install when band `band` is committed. Band 0 is the world
+ * sheet, [1, 8]. A region band is rebased so the camera is region-relative; ck maps to world
+ * zoom wk = ck * k_b, so installing [1/k_b, 8/k_b] keeps wk spanning the global [1, 8] at every
+ * band -- it caps zoom-in at the finest survey and lets a zoom-out reach the band-0 down-cross.
+ */
+export function scaleExtentFor(band: number): readonly [number, number] {
+  if (band <= 0) return [1, 8];
+  const k = (LOD_BANDS[band] as LodBand).k;
+  return [1 / k, 8 / k];
+}

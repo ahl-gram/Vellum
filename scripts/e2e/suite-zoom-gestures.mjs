@@ -39,6 +39,10 @@ export async function run(ctx) {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique` });
     await waitReady();
+    // #169: this suite characterizes the GEOMETRIC gesture behaviour (Sub 5); a fresh page defaults
+    // the Sub 8 semantic redraft ON, so turn it OFF so a real wheel/pinch/drag settle does not swap
+    // the sheet mid-assertion. (suite-zoom left it off, but each reload here resets it.)
+    await evaluate(`window.__vellumSetRedraftEnabled(false)`);
     await waitSettled(label);
   }
   // The map-viewport's viewport-relative rect + its live size, for placing input at CSS

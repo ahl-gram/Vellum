@@ -6,6 +6,10 @@ import {
   bandFor,
   quantizeCenter,
   lodWindowFor,
+  worldCameraFrom,
+  decideSettle,
+  scaleExtentFor,
+  FULL_WINDOW,
 } from "../../src/world/lod.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { windowAround } from "../../src/world/region.ts";
@@ -125,4 +129,120 @@ test("lodWindowFor clamps a centre near the world edge inside the sheet", () => 
   const hi = lodWindowFor(1, 1, size);
   assert.ok(Math.abs(hi.u0 - (0.99 - size)) < 1e-12, "right edge clamps to 0.99-size");
   assert.ok(Math.abs(hi.v0 - (0.99 - size)) < 1e-12, "bottom edge clamps to 0.99-size");
+});
+
+// ---- Sub 8 settle math (#169) ---------------------------------------------------
+
+test("worldCameraFrom is the identity at band 0 (the world sheet)", () => {
+  assert.deepEqual(
+    worldCameraFrom({ cx: 0.5, cy: 0.5, k: 3 }, FULL_WINDOW),
+    { cx: 0.5, cy: 0.5, k: 3 },
+    "a full-window sheet needs no composition",
+  );
+});
+
+test("worldCameraFrom composes a region-relative camera up into world-uv (#169)", () => {
+  // A size-0.5 window at (0.25..0.75). The region sheet's own centre (cx=cy=0.5, ck=1)
+  // is the world centre 0.5, at world zoom 1/0.5 = 2 (the window fills the viewport).
+  const win = { u0: 0.25, v0: 0.25, u1: 0.75, v1: 0.75 };
+  assert.deepEqual(worldCameraFrom({ cx: 0.5, cy: 0.5, k: 1 }, win), { cx: 0.5, cy: 0.5, k: 2 });
+  // The region's top-left corner (cx=cy=0) is world (0.25, 0.25); ck=1 -> wk=2.
+  assert.deepEqual(worldCameraFrom({ cx: 0, cy: 0, k: 1 }, win), { cx: 0.25, cy: 0.25, k: 2 });
+  // Zoom the region 1.6x -> world zoom 3.2 (crosses into band 2).
+  assert.deepEqual(worldCameraFrom({ cx: 0.5, cy: 0.5, k: 1.6 }, win).k, 3.2);
+});
+
+test("scaleExtentFor maps every band's region-ck onto the global world zoom [1,8]", () => {
+  assert.deepEqual(scaleExtentFor(0), [1, 8], "band 0 is the world sheet");
+  // Region band b: ck in [1/k_b, 8/k_b], so wk = ck*k_b spans [1,8] at every band.
+  assert.deepEqual(scaleExtentFor(1), [1 / 2, 8 / 2]);
+  assert.deepEqual(scaleExtentFor(2), [1 / 4, 8 / 4]);
+  assert.deepEqual(scaleExtentFor(3), [1 / 8, 8 / 8]);
+});
+
+test("decideSettle: zoom-in from the world enters a region at the quantized window", () => {
+  const d = decideSettle({
+    camera: { cx: 0.5, cy: 0.5, k: 2 }, // world-relative at band 0
+    currentWindow: FULL_WINDOW,
+    currentBand: 0,
+  });
+  assert.equal(d.action, "region");
+  if (d.action !== "region") return;
+  assert.equal(d.band, 1, "k=2 is band 1");
+  assert.deepEqual(d.window, lodWindowFor(0.5, 0.5, 0.5), "quantized window centred on the camera");
+});
+
+test("decideSettle: a settle onto the SAME band and window is a no-op (skip the redraft)", () => {
+  const win = lodWindowFor(0.5, 0.5, 0.5); // band-1 window centred at 0.5
+  const d = decideSettle({
+    camera: { cx: 0.5, cy: 0.5, k: 1 }, // region home: world centre 0.5, wk=2 -> still band 1
+    currentWindow: win,
+    currentBand: 1,
+  });
+  assert.equal(d.action, "noop", "unchanged window does not redraft");
+});
+
+test("decideSettle: zooming in inside a region redrafts the next finer band", () => {
+  const win = lodWindowFor(0.5, 0.5, 0.5); // band 1
+  const d = decideSettle({
+    camera: { cx: 0.5, cy: 0.5, k: 1.6 }, // wk = 1.6/0.5 = 3.2 -> band 2
+    currentWindow: win,
+    currentBand: 1,
+  });
+  assert.equal(d.action, "region");
+  if (d.action !== "region") return;
+  assert.equal(d.band, 2);
+  assert.deepEqual(d.window, lodWindowFor(0.5, 0.5, 0.25));
+});
+
+test("decideSettle: panning to a new quantized window inside the band redrafts", () => {
+  const win = lodWindowFor(0.5, 0.5, 0.5); // band 1 centred at 0.5
+  // A region-relative cx of 0.6 pans the WORLD centre to 0.25 + 0.6*0.5 = 0.55, past half a
+  // lattice cell (step 0.0625), so it quantizes to a different window than the held one.
+  const q = quantizeCenter(0.55, 0.5, 0.5);
+  const d = decideSettle({
+    camera: { cx: 0.6, cy: 0.5, k: 1 },
+    currentWindow: win,
+    currentBand: 1,
+  });
+  assert.equal(d.action, "region", "a new window in the same band still redrafts");
+  if (d.action !== "region") return;
+  assert.equal(d.band, 1);
+  assert.notDeepEqual(d.window, win, "the window moved");
+  assert.deepEqual(d.window, lodWindowFor(q.cx, q.cy, 0.5), "the quantized panned window");
+});
+
+test("decideSettle: zooming back out of a region reverts to the retained world sheet", () => {
+  const win = lodWindowFor(0.5, 0.5, 0.5); // band 1
+  const d = decideSettle({
+    camera: { cx: 0.5, cy: 0.5, k: 0.6 }, // wk = 0.6/0.5 = 1.2 < the 0/1 down-cross -> world
+    currentWindow: win,
+    currentBand: 1,
+  });
+  assert.equal(d.action, "world", "a zoom-out past band 0 returns to the world sheet");
+});
+
+test("decideSettle: a partial zoom-out steps down ONE region band (band-by-band, not straight to world)", () => {
+  // Zoom-out is tier-ordered too: only the region -> world hop is the retained-sheet, no-worker
+  // revert; an intermediate down-cross redrafts the next COARSER region. From band 3, ck=0.5 is
+  // wk = 0.5/0.125 = 4.0, and bandFor(4.0, 3) drops one step to band 2 (4.0 < DOWN[2], not DOWN[1]).
+  const win3 = lodWindowFor(0.5, 0.5, 0.125); // band 3
+  const d = decideSettle({
+    camera: { cx: 0.5, cy: 0.5, k: 0.5 },
+    currentWindow: win3,
+    currentBand: 3,
+  });
+  assert.equal(d.action, "region", "an intermediate zoom-out redrafts, it does not revert to world");
+  if (d.action !== "region") return;
+  assert.equal(d.band, 2, "band 3 steps to band 2, not straight to band 0");
+  assert.deepEqual(d.window, lodWindowFor(0.5, 0.5, 0.25));
+});
+
+test("decideSettle: staying on the world sheet is a no-op", () => {
+  const d = decideSettle({
+    camera: { cx: 0.5, cy: 0.5, k: 1.1 }, // still band 0
+    currentWindow: FULL_WINDOW,
+    currentBand: 0,
+  });
+  assert.equal(d.action, "noop", "the world sheet does not redraft itself");
 });

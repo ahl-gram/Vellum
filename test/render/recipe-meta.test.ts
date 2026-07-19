@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { ENGINE_VERSION, recipeFromSvg } from "../../src/render/recipe-meta.ts";
-import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
+import { generateRegionWorld, windowAround, regionTitle } from "../../src/world/region.ts";
 
 test("a chart embeds its full recipe", () => {
   const world = generateWorld(defaultRecipe(42));
@@ -98,16 +98,22 @@ test("a region with a regionRecipe stamps and round-trips its window (#168)", ()
   assert.equal(parsed.recipe.seed, 42, "the flat recipe rides along for the parent world");
 });
 
-test("a stamped region redraws byte-for-byte from the recovered recipe + its title (#168)", () => {
-  // Sub 7 stamps the GEOMETRY (window + parent grid); the human title is a display
-  // label deferred to Sub 8. Given the same title, the recovered recipe reproduces
-  // the sheet exactly, which is what proves the window stamp is sufficient.
+test("a stamped region redraws byte-for-byte with a title RE-DERIVED from the window (#169)", () => {
+  // Sub 7 stamps only the GEOMETRY (window + parent grid), never the title. Sub 8 makes the
+  // title a deterministic function of (world, window) via regionTitle, so the download-redraw
+  // path recomputes the SAME cartouche off the recovered window with NO title stamp to lean on.
+  // This is the real title-completeness proof (the #168 test reused a title constant on both
+  // sides, which could not have caught a title that varied with the derivation).
   const world = generateWorld(defaultRecipe(7, { mapType: "continent" }));
   const capital = world.settlements.find((s) => s.kind === "capital");
   assert.ok(capital);
   const window = windowAround(world, capital, 0.5);
-  const title = "The Environs of the Capital";
-  const region = generateRegionWorld(world, { window, gridW: 320, gridH: 240, title });
+  const region = generateRegionWorld(world, {
+    window,
+    gridW: 320,
+    gridH: 240,
+    title: regionTitle(world, window), // as the Explorer's live redraft draws it
+  });
   const rr = { window, worldGridW: world.recipe.gridW };
   const svg = renderMap(region, { style: "antique", regionRecipe: rr });
 
@@ -118,10 +124,10 @@ test("a stamped region redraws byte-for-byte from the recovered recipe + its tit
     window: parsed.region.window,
     gridW: parsed.recipe.gridW,
     gridH: parsed.recipe.gridH,
-    title,
+    title: regionTitle(reworld, parsed.region.window), // recomputed, NOT recovered
   });
   const redrawn = renderMap(reregion, { style: parsed.style, regionRecipe: parsed.region });
-  assert.equal(redrawn, svg, "the recovered region recipe redraws byte-for-byte");
+  assert.equal(redrawn, svg, "the recovered window + re-derived title redraw byte-for-byte");
 });
 
 test("a world chart carries NO region stamp, so recipeFromSvg has no region key (#168)", () => {
