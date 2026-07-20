@@ -15,12 +15,20 @@ export const FONT_SIZE: Record<SettlementTier, number> = {
   hamlet: 8.5,
 };
 
-/** Settlement type grows by this factor on REGIONAL surveys only. A committed
- *  inset is viewed at roughly viewport width, so base type reads tiny on a
- *  laptop and worse on a phone; the finer sheet has the label room to spare
+/** Settlement type on REGIONAL surveys only, tier-graded: the smallest tiers
+ *  gain the most, since they carry the readability problem. A committed inset
+ *  is viewed at roughly viewport width (a 1500px render shown at ~1000px on a
+ *  laptop, and at band 3 no deeper band's in-band zoom can ever grow it), so
+ *  base type reads tiny on screen; the finer sheet has the label room to spare
  *  ("labels are the reveal", #170). World sheets keep FONT_SIZE exactly: their
  *  bytes are golden-locked, and a change there owes a regen. */
-export const REGION_TYPE_SCALE = 1.3;
+export const REGION_FONT_SIZE: Record<SettlementTier, number> = {
+  capital: 24,
+  seat: 20,
+  town: 17.5,
+  village: 15,
+  hamlet: 13,
+};
 
 /** Grand capital and provincial-seat marks scale the same base glyph. */
 const CAPITAL_GLYPH_SCALE = 1.25;
@@ -269,10 +277,11 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
 
     // region-gated so world sheets stay byte-identical; the gap grows with the
     // type so the larger setting does not crowd its own mark
-    const type = world.region !== undefined ? REGION_TYPE_SCALE : 1;
-    const fs = FONT_SIZE[tier] * type * k;
+    const sized = world.region !== undefined ? REGION_FONT_SIZE : FONT_SIZE;
+    const fs = sized[tier] * k;
     const gap =
-      (tier === "capital" ? 11 : tier === "seat" ? 8 : tier === "hamlet" ? 5 : 7) * type * k;
+      (tier === "capital" ? 11 : tier === "seat" ? 8 : tier === "hamlet" ? 5 : 7) *
+      (sized[tier] / FONT_SIZE[tier]) * k;
     const upper = tier === "capital" || tier === "seat";
     const text = s.name;
     const display = upper ? text.toUpperCase() : text;

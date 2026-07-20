@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
-import { FONT_SIZE, REGION_TYPE_SCALE } from "../../src/render/layers/settlements.ts";
+import { FONT_SIZE, REGION_FONT_SIZE } from "../../src/render/layers/settlements.ts";
 import { BIOMES } from "../../src/climate/biomes.ts";
 import { createRng } from "../../src/core/rng.ts";
 import { EDGE_MARGIN } from "../../src/society/sites.ts";
@@ -303,10 +303,26 @@ test("region sheets set settlement labels larger; world sheets keep their type (
     "the survey labels at least one hamlet",
   );
   for (const l of labeled) {
-    const expected = Number((FONT_SIZE[l.tier] * REGION_TYPE_SCALE).toFixed(1));
+    const expected = Number(REGION_FONT_SIZE[l.tier].toFixed(1));
     assert.equal(l.fs, expected, `a region ${l.tier} label is set at ${expected}, not ${l.fs}`);
   }
-  assert.ok(REGION_TYPE_SCALE > 1, "region type actually grows");
+  // every tier grows, the smallest tiers grow the most (they carry the
+  // readability problem), and the visual hierarchy stays strict
+  for (const tier of Object.keys(FONT_SIZE) as Array<keyof typeof FONT_SIZE>) {
+    assert.ok(REGION_FONT_SIZE[tier] > FONT_SIZE[tier], `region ${tier} type grows`);
+  }
+  assert.ok(
+    REGION_FONT_SIZE.hamlet / FONT_SIZE.hamlet > REGION_FONT_SIZE.capital / FONT_SIZE.capital,
+    "the smallest tier gains the most",
+  );
+  assert.ok(
+    REGION_FONT_SIZE.capital > REGION_FONT_SIZE.seat &&
+      REGION_FONT_SIZE.seat > REGION_FONT_SIZE.town &&
+      REGION_FONT_SIZE.town > REGION_FONT_SIZE.village &&
+      REGION_FONT_SIZE.village > REGION_FONT_SIZE.hamlet,
+    "the tier hierarchy holds at region sizes",
+  );
+  assert.ok(REGION_FONT_SIZE.hamlet >= 12.5, "hamlet type is laptop-legible at display scale");
 
   // the world sheet is untouched: its village labels stay at base FONT_SIZE
   // (data-tier is region-only, so read the world label size off any village text)
