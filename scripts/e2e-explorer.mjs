@@ -31,6 +31,7 @@ import { run as runTurn } from "./e2e/suite-turn.mjs";
 import { run as runVerso } from "./e2e/suite-verso.mjs";
 import { run as runZoom } from "./e2e/suite-zoom.mjs";
 import { run as runZoomGestures } from "./e2e/suite-zoom-gestures.mjs";
+import { run as runGlassCeremony } from "./e2e/suite-glass-ceremony.mjs";
 import { run as runCards } from "./e2e/suite-cards.mjs";
 import { run as runScrubber } from "./e2e/suite-scrubber.mjs";
 import { run as runVoyage } from "./e2e/suite-voyage.mjs";
@@ -90,6 +91,10 @@ async function main() {
   // (wheel, pinch, drag, mobile viewport). Reloads under touch/device emulation and
   // restores the clean antique desktop home suite-zoom left, before cards.
   await runZoomGestures(ctx);
+  // #170 Glass Sub 9: the ceremony (antique voice, voiced glide, redraft ink-in).
+  // Runs on the clean antique home the gesture suite restores, and restores the
+  // same base (redraft off, camera home) before cards.
+  await runGlassCeremony(ctx);
   await runCards(ctx);
   await runScrubber(ctx);
   // Voyage split into core -> verso bleed-through -> real routes, run in that order:

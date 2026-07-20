@@ -26,6 +26,20 @@
                              (#116). Slower than a style re-dress on purpose: turning
                              the whole sheet over is the bigger gesture. CSS transition. */
 
+  /* #170 The redraft grade: the Sub 8 inset inking itself in. Deliberately SHORTER
+     than the once-per-draw world arrival (--ink-draw/--ink-dry 1200ms): a redraft
+     fires on every settle, so its ceremony must read as a quick fine-pen pass, not
+     the full drafting moment. The dry waits stagger the newly labeled names by tier
+     (towns first, villages after), both past the inset's 200ms crossfade so a name
+     never dries onto a sheet that is still translucent. */
+  --redraft-draw: 600ms;           /* the region coastline inking in */
+  --redraft-dry: 450ms;            /* the wash + a newly labeled name drying */
+  --redraft-dry-wait: 260ms;       /* towns (and any rarer higher tier) start here */
+  --redraft-dry-wait-village: 500ms; /* villages follow the towns */
+  --glide: 300ms;         /* #170 the voiced zoom glide (buttons, +/- keys, 0 home).
+                             Read lazily by app.js and handed to the zoom controller;
+                             reduced motion bypasses it entirely (instant baseline). */
+
   /* Easings: paper settles (ease-out, no bounce); the unfurl starts stiff and
      flexes just past flat, per the ratified one ruled exception. */
   --ease-paper: cubic-bezier(0.22, 0.61, 0.36, 1);
