@@ -17,6 +17,10 @@
 // proven by e2e suite-zoom (Z1-Z4). See test/site/zoom-controller.test.ts.
 import { zoom, zoomIdentity } from "d3-zoom";
 import { select } from "d3-selection";
+// #170: selection.transition() for the voiced glide. A side-effect import (it patches
+// d3-selection's prototype); the module was ALREADY in the bundle transitively (d3-zoom's
+// double-click smooth zoom uses it), so declaring it adds no bundle weight.
+import "d3-transition";
 
 // ---- pure helpers (unit-tested) -------------------------------------------------
 
@@ -58,6 +62,20 @@ export function constrainZoom(t, extent, scaleExtent) {
   return { x: t.x + k * dx, y: t.y + k * dy, k };
 }
 
+/**
+ * The absolute k a voiced glide should fly to (#170). Compounds against the PENDING
+ * glide target when one is in flight (baseK = that target), so hammering "+" lands
+ * factor^presses rather than re-deriving from a mid-flight k; clamped to scaleExtent
+ * so a run of presses saturates at the extent exactly like the live gesture.
+ * @param {number} baseK  the current k, or the in-flight glide's target k
+ * @param {number} factor
+ * @param {ReadonlyArray<number>} scaleExtent  [min,max]
+ * @returns {number}
+ */
+export function nextGlideTarget(baseK, factor, scaleExtent) {
+  return Math.max(scaleExtent[0], Math.min(scaleExtent[1], baseK * factor));
+}
+
 // ---- the controller -------------------------------------------------------------
 
 /**
@@ -68,6 +86,7 @@ export function constrainZoom(t, extent, scaleExtent) {
  *   settleMs?: number,
  *   onSettle?: (state: {x:number,y:number,k:number}) => void,
  *   reducedMotion?: boolean,
+ *   glideMs?: number | (() => number),
  * }} opts
  */
 export function createZoomController({
@@ -78,6 +97,7 @@ export function createZoomController({
   onSettle,
   onApply,
   reducedMotion,
+  glideMs = 250,
 }) {
   const viewportExtent = () => [[0, 0], [viewportEl.clientWidth, viewportEl.clientHeight]];
 
@@ -96,14 +116,29 @@ export function createZoomController({
     return !!(mq && mq.matches);
   };
   const DBLCLICK_MS = 250;
+  // #170: the glide duration, like reducedMotion read live (a getter lets the page hand
+  // in a lazy /motion.css token read; the stylesheet may not be applied at construction).
+  const glideMsNow = () => {
+    const v = typeof glideMs === "function" ? glideMs() : glideMs;
+    return Number.isFinite(v) && v >= 0 ? v : 250;
+  };
+  // #170: the in-flight glide's absolute target k, so stacked presses compound against
+  // the INTENT (factor^presses) rather than a mid-flight k. Cleared when the LATEST
+  // glide ends or anything interrupts it (a gesture, zoomTo, reset: all of d3-zoom's
+  // plain-selection entry points call selection.interrupt() first). glideSeq is the
+  // drawGen idiom: a superseding glide interrupts its predecessor one frame AFTER
+  // setting the new target (d3 starts transitions on the next timer tick), so the
+  // predecessor's own end/interrupt must not clear the newer press's pending target.
+  let glideTargetK = null;
+  let glideSeq = 0;
 
   const behavior = zoom()
     .scaleExtent(scaleExtent)
     .extent(viewportExtent)
-    // The one animated d3 path here is the double-click zoom; reduced motion collapses it
-    // to an instant jump. syncDblDuration (below) keeps this live per click; the keyboard
-    // and on-screen buttons drive scaleBy/panBy instantly (their voiced glide is Sub 9),
-    // so the double-click is the sole programmatic animation this sub must collapse.
+    // The double-click zoom's animated path; reduced motion collapses it to an instant
+    // jump. syncDblDuration (below) keeps this live per click. Since #170 the keyboard
+    // and on-screen buttons glide too (glideBy/glideHome below), each carrying its own
+    // live reduced-motion gate; panBy stays instant (the accessible pan baseline).
     .duration(prefersReduced() ? 0 : DBLCLICK_MS)
     .constrain((transform, ext) => {
       const c = constrainZoom({ x: transform.x, y: transform.y, k: transform.k }, ext, scaleExtent);
@@ -204,6 +239,12 @@ export function createZoomController({
      */
     rebase() {
       clearSettle();
+      // #170: a rebase writes __zoom directly (no d3 entry point, so no implicit
+      // interrupt); stop any camera transition in flight (a glide, the double-click
+      // zoom) or its remaining frames would stomp the fresh home and leave a replaced
+      // chart magnified. Pre-existed the glide (the 250ms double-click had the same
+      // window) but the glide widened it enough to close.
+      sel().interrupt();
       viewportEl.__zoom = zoomIdentity;
       apply(zoomIdentity);
     },
@@ -213,13 +254,58 @@ export function createZoomController({
       sel().call(behavior.transform, zoomIdentity.translate(c.x, c.y).scale(c.k));
     },
     /**
-     * Magnify by `factor` about the viewport centre (#165: the keyboard +/- and the
-     * on-screen buttons). It drives d3-zoom's own scaleBy, so it enters the SAME "zoom"
-     * event pipeline as a gesture (one clamp, one settle, one hash write) rather than a
-     * parallel code path. Instant on purpose; the voiced glide is Sub 9.
+     * #170 the voiced glide: magnify by `factor` about the viewport centre as a short
+     * d3 transition (interpolateZoom) through the same "zoom" pipeline, so the settle
+     * debounce fires once the glide comes to rest exactly as after a gesture, and it
+     * still clamps like one (d3-zoom's scaleBy/scaleTo, the Sub 4 entry points).
+     * Reduced motion collapses to the instant scaleBy (the Sub 4 baseline, zero
+     * functional loss). Flies to an ABSOLUTE k from nextGlideTarget so rapid presses
+     * compound against the pending target, never a mid-flight k.
      */
-    scaleBy(factor) {
-      sel().call(behavior.scaleBy, factor);
+    glideBy(factor) {
+      if (prefersReduced()) {
+        sel().call(behavior.scaleBy, factor);
+        return;
+      }
+      const base = glideTargetK != null ? glideTargetK : getState().k;
+      glideTargetK = nextGlideTarget(base, factor, scaleExtent);
+      // Only the LATEST glide's end/interrupt may clear the pending target: a
+      // superseding press interrupts THIS transition one frame after setting its own
+      // newer target, and an unguarded clear here would null that target mid-flight,
+      // making the 3rd-and-later press in a burst compound from a mid-flight k.
+      const myGlide = ++glideSeq;
+      sel()
+        .transition()
+        .duration(glideMsNow())
+        .call(behavior.scaleTo, glideTargetK)
+        .on("end interrupt", () => {
+          if (myGlide === glideSeq) glideTargetK = null;
+        });
+    },
+    /**
+     * #170 the voiced home: glide the camera to k=1 (the full sheet) and call `onDone`
+     * when the leaf lands, so the caller can write the hash at the landing rather than
+     * mid-flight (a link copied during the glide must never carry a stale camera).
+     * Reduced motion lands home and calls onDone in the same turn. If something
+     * interrupts the glide (a gesture, a draw), onDone is skipped on purpose: the
+     * interrupting action owns the camera and the hash from that point.
+     */
+    glideHome(onDone) {
+      clearSettle();
+      glideTargetK = null;
+      if (prefersReduced()) {
+        sel().call(behavior.transform, zoomIdentity);
+        apply(zoomIdentity);
+        if (onDone) onDone();
+        return;
+      }
+      sel()
+        .transition()
+        .duration(glideMsNow())
+        .call(behavior.transform, zoomIdentity)
+        .on("end", () => {
+          if (onDone) onDone();
+        });
     },
     /**
      * Pan the view by (dxScreen, dyScreen) screen px (#165: the keyboard arrows). d3's

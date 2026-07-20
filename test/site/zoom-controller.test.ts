@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { zoomTransformToCss, constrainZoom } from "../../docs/shared/zoom-controller.js";
+import { zoomTransformToCss, constrainZoom, nextGlideTarget } from "../../docs/shared/zoom-controller.js";
 
 // Sub 3 of the Surveyor's Glass epic (#164): the glass itself. The controller
 // leans on d3-zoom for the gesture handling (wheel/drag/pinch/double-click), but
@@ -44,4 +44,23 @@ test("constrainZoom keeps the zoomed sheet covering the viewport at every edge (
   assert.equal(constrainZoom({ x: -300, y: 0, k: 2 }, EXTENT, SCALE).x, -100);
   assert.equal(constrainZoom({ x: 0, y: 400, k: 2 }, EXTENT, SCALE).y, 0);
   assert.equal(constrainZoom({ x: 0, y: -260, k: 2 }, EXTENT, SCALE).y, -100);
+});
+
+// Sub 9 (#170): the voiced glide's target arithmetic. The glide flies to an ABSOLUTE k
+// (d3 scaleTo) computed here, compounding against the pending target when presses stack,
+// so the DOM path stays a thin d3-transition wrapper around this pure decision.
+
+test("nextGlideTarget compounds a step from the base k (#170)", () => {
+  assert.ok(Math.abs(nextGlideTarget(1, 1.4, SCALE) - 1.4) < 1e-9);
+  // A second press mid-flight compounds against the pending TARGET (1.4), not the
+  // mid-flight k, so two rapid presses land 1.96 exactly like two settled ones.
+  assert.ok(Math.abs(nextGlideTarget(1.4, 1.4, SCALE) - 1.96) < 1e-9);
+  assert.ok(Math.abs(nextGlideTarget(1.96, 1 / 1.4, SCALE) - 1.4) < 1e-9);
+});
+
+test("nextGlideTarget clamps at both ends of the scaleExtent (#170)", () => {
+  assert.equal(nextGlideTarget(7, 1.4, SCALE), 8);
+  assert.equal(nextGlideTarget(8, 1.4, SCALE), 8);
+  assert.equal(nextGlideTarget(1.2, 1 / 1.4, SCALE), 1);
+  assert.equal(nextGlideTarget(1, 1 / 1.4, SCALE), 1);
 });

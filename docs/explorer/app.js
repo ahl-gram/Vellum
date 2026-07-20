@@ -129,6 +129,14 @@ function turnTiming() {
   return { ms, ease };
 }
 
+// #170: the voiced glide's duration, same single-timing-source discipline (lazy, with
+// the token's own value as fallback). The controller reads it per glide, so a stylesheet
+// tweak takes effect without a reload; reduced motion never reaches it.
+function glideMs() {
+  const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide"));
+  return Number.isFinite(v) ? v : 300;
+}
+
 // #164 The Surveyor's Glass: geometric pan/zoom on the antique chart. The controller
 // binds to the STABLE #map-viewport (never wiped by a redraw) and lands its live CSS
 // transform on #map, so the chart SVG and its %-positioned overlays (place hits, cards,
@@ -159,6 +167,7 @@ const zoomController = createZoomController({
   scaleExtent: [1, 8],
   onApply: (state) => setCardZoom(state.k),
   onSettle: () => onCameraSettle(), // #169: hash + (on antique) the region redraft
+  glideMs, // #170: the voiced glide's /motion.css grade, read live
 });
 // #169 The redraft: a camera settle on the antique chart draws a finer regional survey of the
 // window, committed as an INSET laid over the world sheet (the camera never rebases; a zoom-out
@@ -532,13 +541,27 @@ voyageChk.addEventListener("change", () => {
 });
 
 // #165 The Surveyor's Glass, keyboard + on-screen driving. The keys and the buttons both
-// route through the controller's scaleBy/panBy, which drive d3-zoom's own scaleBy/translateBy
-// -- so a keystroke enters the EXACT same "zoom" event pipeline as a gesture (one clamp, one
-// settle, one hash write), satisfying the a11y hard requirement that keyboard-only reaches
-// full zoom. A step magnifies by 1.4x about the viewport centre; an arrow pans by ~15% of the
-// viewport. Instant on purpose (the voiced glide is Sub 9's ceremony).
+// route through the controller, which drives d3-zoom's own entry points -- so a keystroke
+// enters the EXACT same "zoom" event pipeline as a gesture (one clamp, one settle, one hash
+// write), satisfying the a11y hard requirement that keyboard-only reaches full zoom. A step
+// magnifies by 1.4x about the viewport centre; an arrow pans by ~15% of the viewport.
+// #170: the zoom steps and the home now GLIDE (glideBy/glideHome, the voiced ceremony);
+// reduced motion collapses both to the Sub 4 instant baseline inside the controller. The
+// pan arrows stay instant on purpose (the accessible pan baseline; the issue scopes the
+// glide to +/- and the home).
 const ZOOM_STEP = 1.4;
 const PAN_FRACTION = 0.15;
+
+// #170: the voiced home, shared by the full-sheet button and the 0 key. A committed inset
+// FADES off over the world chart (easeHome) while the camera glides home; the hash writes
+// at the landing (glideHome's onDone), never mid-flight, so a link copied right after the
+// leaf settles is clean. The programmatic homes (verso, chronicle, voyage, draw) keep
+// their INSTANT homeToWorld() + reset() + explicit syncHash: those ceremonies own the
+// sheet and need the bare world chart synchronously.
+function goHomeVoiced() {
+  lodController.easeHome();
+  zoomController.glideHome(syncHash);
+}
 // The map viewport is focusable (tabindex in the HTML), so a keyboard user tabs onto the
 // sheet and pans/zooms it. Scoped to the viewport (not document) so the arrows do not hijack
 // the page scroll from elsewhere; preventDefault only for keys we consume, so Escape et al
@@ -548,8 +571,8 @@ mapViewport.addEventListener("keydown", (e) => {
   const W = mapViewport.clientWidth;
   const H = mapViewport.clientHeight;
   switch (e.key) {
-    case "+": case "=": zoomController.scaleBy(ZOOM_STEP); break;
-    case "-": case "_": zoomController.scaleBy(1 / ZOOM_STEP); break;
+    case "+": case "=": zoomController.glideBy(ZOOM_STEP); break;
+    case "-": case "_": zoomController.glideBy(1 / ZOOM_STEP); break;
     // Arrow moves the camera the way it points: ArrowRight reveals what lies to the right,
     // so the content slides left, i.e. the screen translate decreases. panBy takes a screen
     // delta, so the sign is applied here and the controller stays direction-agnostic.
@@ -557,17 +580,17 @@ mapViewport.addEventListener("keydown", (e) => {
     case "ArrowRight": zoomController.panBy(-W * PAN_FRACTION, 0); break;
     case "ArrowUp": zoomController.panBy(0, H * PAN_FRACTION); break;
     case "ArrowDown": zoomController.panBy(0, -H * PAN_FRACTION); break;
-    case "0": lodController.homeToWorld(); zoomController.reset(); syncHash(); break; // home
+    case "0": goHomeVoiced(); break; // #170: the full sheet, voiced
     default: return; // not ours: let it through (browse mode, card Escape, tabbing)
   }
   e.preventDefault();
 });
-// The on-screen minus / reset / plus cluster (#165, functional now, voiced in Sub 9). Same
-// controller entry points as the keys. Reset writes the hash explicitly (drop cx/cy/k now);
-// scaleBy rides its settle to write the new camera.
-$("zoom-in").addEventListener("click", () => zoomController.scaleBy(ZOOM_STEP));
-$("zoom-out").addEventListener("click", () => zoomController.scaleBy(1 / ZOOM_STEP));
-$("zoom-reset").addEventListener("click", () => { lodController.homeToWorld(); zoomController.reset(); syncHash(); });
+// The on-screen stand-back / full-sheet / lean-closer cluster (#165, voiced in #170). Same
+// controller entry points as the keys: the steps glide, the home glides and writes the
+// hash at the landing.
+$("zoom-in").addEventListener("click", () => zoomController.glideBy(ZOOM_STEP));
+$("zoom-out").addEventListener("click", () => zoomController.glideBy(1 / ZOOM_STEP));
+$("zoom-reset").addEventListener("click", goHomeVoiced);
 // The cluster sits INSIDE #map-viewport, the element d3-zoom binds its gesture listeners to.
 // So a gesture over a button bubbles into d3: most visibly, a rapid double-click on a button
 // fires a `dblclick` that d3 turns into its own double-click-to-zoom (a 2x magnify about the

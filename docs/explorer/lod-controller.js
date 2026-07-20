@@ -26,6 +26,8 @@ import {
   insetSheetRect,
   FULL_WINDOW,
 } from "./engine/world/lod.js";
+import { startRedraft } from "./draw-ceremony.js";
+import { dryInNames } from "./redraft-plan.js";
 
 const pct = (f) => `${(f * 100).toFixed(4)}%`;
 
@@ -102,6 +104,37 @@ export function createLodController(deps) {
     }
   }
 
+  // #170: the names with a PLACED label on the outgoing composition, the "persisting"
+  // set the dry-in ceremony must never re-animate. The world sheet is always part of
+  // that composition (it is mounted under and around every inset), and its settlement
+  // groups carry only data-idx (data-tier/data-name are region-only, #162), so its
+  // names resolve through the world manifest; a prior inset carries data-name directly.
+  function prevLabeledNames() {
+    const names = new Set();
+    const worldSvg = mapDiv.querySelector(":scope > svg");
+    if (worldSvg && world) {
+      for (const g of worldSvg.querySelectorAll("g.settlement[data-idx]")) {
+        if (!g.querySelector("text")) continue;
+        const place = world.manifest.places[Number(g.dataset.idx)];
+        if (place) names.add(place.name);
+      }
+    }
+    const oldSvg = inset ? inset.el.querySelector("svg") : null;
+    if (oldSvg) for (const n of labeledNames(oldSvg)) names.add(n);
+    return names;
+  }
+
+  // #170: a region sheet's labeled settlement names (label placement is the reveal: a
+  // village can carry a glyph on every sheet but only win a label at the finer scale,
+  // and THAT is the moment its name dries in).
+  function labeledNames(svg) {
+    const out = [];
+    for (const g of svg.querySelectorAll("g.settlement[data-name]")) {
+      if (g.querySelector("text")) out.push(g.dataset.name);
+    }
+    return out;
+  }
+
   // Commit a resolved survey: mount the new inset aligned over its window and fade it in
   // OVER whatever it replaces (the world content, or a previous inset). State, overlay and
   // caption update synchronously at the mount -- the fade is pure paint, and the outgoing
@@ -109,6 +142,10 @@ export function createLodController(deps) {
   // a gap frame (the sheet-turn discipline, #131). Reduced motion swaps instantly.
   function commitInset(band, window, res, ms) {
     const rect = insetSheetRect(window, margins());
+    // #170: capture the outgoing composition's labeled names BEFORE the sheets change
+    // hands; the ceremony below dries in only the names this survey newly labels.
+    const reduce = prefersReduce();
+    const prevLabeled = reduce ? null : prevLabeledNames();
     const el = document.createElement("div");
     el.className = "region-inset";
     el.style.left = pct(rect.x);
@@ -128,13 +165,18 @@ export function createLodController(deps) {
     buildPlaceOverlay(res.manifest, { preservePinByName: true, box: rect });
     redrafts++;
     setCaption(`${res.title} · regional survey · band ${band} · drawn in ${ms}ms`);
-    if (prefersReduce()) {
+    if (reduce) {
       el.classList.add("in");
       if (old) old.remove();
       return;
     }
     void el.offsetWidth; // force layout so the class add transitions from opacity 0
     el.classList.add("in");
+    // #170 The ceremony: the incoming survey inks itself in (coast at the redraft
+    // grade, wash behind) and the newly labeled names dry in tier-staggered; every
+    // name already labeled on the outgoing sheets gets no class and stays put (AC1).
+    const insetSvg = el.querySelector("svg");
+    if (insetSvg) startRedraft(insetSvg, dryInNames(prevLabeled, labeledNames(insetSvg)));
     if (old) {
       let done = false;
       const finish = () => {
@@ -248,6 +290,22 @@ export function createLodController(deps) {
       inset = null;
       hidePencil();
       removeInsetsExcept(null);
+    },
+
+    /** #170: the voiced home, for the full-sheet button and the 0 key. A committed
+     *  inset FADES off over the world chart (the revertToWorld ceremony) while the
+     *  caller glides the camera home in parallel; reduced motion swaps instantly via
+     *  revertToWorld's own gate. With nothing committed it still cancels an in-flight
+     *  redraft so a superseded job cannot commit after the home. The programmatic
+     *  homes (verso, chronicle, voyage, draw) keep homeToWorld below: those ceremonies
+     *  own the sheet and need the bare world chart synchronously. */
+    easeHome() {
+      if (!inset) {
+        regionGen++;
+        hidePencil();
+        return;
+      }
+      revertToWorld();
     },
 
     // Drop the inset INSTANTLY (no fade) if one is committed, so a world-sheet action

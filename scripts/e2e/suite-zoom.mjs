@@ -124,42 +124,52 @@ export async function run(ctx) {
   // ---- Sub 4 (#165) ------------------------------------------------------------------
 
   // Z9 (AC2, a11y hard requirement): keyboard-only reaches full zoom. The keys dispatch as
-  // real KeyboardEvents on the focusable viewport and drive the controller's scaleBy/panBy,
-  // i.e. d3's own scaleBy/translateBy -- the SAME "zoom" pipeline as a gesture. '+' twice is
-  // 1.4^2=1.96; '-' back to 1.4; ArrowRight pans x more negative; '0' homes.
-  const z9 = await evaluate(`(()=>{
+  // real KeyboardEvents on the focusable viewport and drive the controller's glide/pan,
+  // i.e. d3's own scaleTo/translateBy -- the SAME "zoom" pipeline as a gesture. '+' twice is
+  // 1.4^2=1.96; '-' back to 1.4; ArrowRight pans x more negative; '0' homes. #170: the zoom
+  // steps and home now GLIDE (pan stays instant), so each step is awaited to its settled k
+  // (the issue's own note: an added transition must be waited out); rapid presses compound
+  // against the pending target, so the two immediate '+' still land exactly 1.96.
+  const z9 = await evaluate(`(async()=>{
     const vp=document.getElementById("map-viewport");
     window.__vellumZoomTo({k:1,x:0,y:0});
     vp.focus();
     const key=(k)=>vp.dispatchEvent(new KeyboardEvent("keydown",{key:k,bubbles:true}));
     const st=()=>window.__vellumZoomState();
-    key("+"); key("+"); const afterIn=st().k;
-    key("-"); const afterOut=st().k;
+    const settleK=async(t)=>{for(let i=0;i<100;i++){if(Math.abs(st().k-t)<1e-6)return st().k;await new Promise(r=>setTimeout(r,40));}return st().k;};
+    key("+"); key("+"); const afterIn=await settleK(1.96);
+    key("-"); const afterOut=await settleK(1.4);
     const beforePanX=st().x;
     key("ArrowRight"); const afterPanX=st().x;
-    key("0"); const home=st();
+    key("0");
+    for(let i=0;i<100;i++){const s=st();if(s.k===1&&s.x===0&&s.y===0)break;await new Promise(r=>setTimeout(r,40));}
+    const home=st();
     return {afterIn,afterOut,beforePanX,afterPanX,home};
-  })()`);
+  })()`, true);
   check(
-    "Z9 keyboard-only reaches full zoom: +/- magnify, arrows pan, 0 homes (AC2 a11y)",
+    "Z9 keyboard-only reaches full zoom: +/- magnify (glide waited out, #170), arrows pan instantly, 0 homes (AC2 a11y)",
     Math.abs(z9.afterIn - 1.96) < 1e-6 && Math.abs(z9.afterOut - 1.4) < 1e-6 &&
       z9.afterPanX < z9.beforePanX && z9.home.k === 1 && z9.home.x === 0 && z9.home.y === 0,
     JSON.stringify(z9),
   );
 
   // Z10: the on-screen minus / reset / plus buttons drive the same controller entry points
-  // (functional now, voiced in Sub 9). In 1.4, in again 1.96, out 1.4, reset home.
-  const z10 = await evaluate(`(()=>{
+  // (voiced + gliding since Sub 9, #170: each step awaited to its settled k, and the two
+  // rapid ins compound to 1.96 via the pending glide target).
+  const z10 = await evaluate(`(async()=>{
     const st=()=>window.__vellumZoomState();
+    const settleK=async(t)=>{for(let i=0;i<100;i++){if(Math.abs(st().k-t)<1e-6)return st().k;await new Promise(r=>setTimeout(r,40));}return st().k;};
     window.__vellumZoomTo({k:1,x:0,y:0});
-    document.getElementById("zoom-in").click(); const inK=st().k;
-    document.getElementById("zoom-in").click(); const in2=st().k;
-    document.getElementById("zoom-out").click(); const outK=st().k;
-    document.getElementById("zoom-reset").click(); const home=st();
+    document.getElementById("zoom-in").click(); const inK=await settleK(1.4);
+    document.getElementById("zoom-in").click(); const in2=await settleK(1.96);
+    document.getElementById("zoom-out").click(); const outK=await settleK(1.4);
+    document.getElementById("zoom-reset").click();
+    for(let i=0;i<100;i++){const s=st();if(s.k===1&&s.x===0&&s.y===0)break;await new Promise(r=>setTimeout(r,40));}
+    const home=st();
     return {inK,in2,outK,home};
-  })()`);
+  })()`, true);
   check(
-    "Z10 the on-screen +/reset/- buttons drive the zoom (functional now, voiced in Sub 9)",
+    "Z10 the on-screen +/reset/- buttons drive the zoom (voiced + gliding, settled values asserted, #170)",
     Math.abs(z10.inK - 1.4) < 1e-6 && Math.abs(z10.in2 - 1.96) < 1e-6 &&
       Math.abs(z10.outK - 1.4) < 1e-6 && z10.home.k === 1,
     JSON.stringify(z10),

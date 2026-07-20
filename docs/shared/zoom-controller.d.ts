@@ -19,3 +19,10 @@ export function constrainZoom(
   extent: ReadonlyArray<ReadonlyArray<number>>,
   scaleExtent: ReadonlyArray<number>,
 ): ZoomState;
+
+/** The absolute k a voiced glide flies to: baseK * factor, clamped to scaleExtent (#170). */
+export function nextGlideTarget(
+  baseK: number,
+  factor: number,
+  scaleExtent: ReadonlyArray<number>,
+): number;
