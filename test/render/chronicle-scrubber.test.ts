@@ -34,6 +34,7 @@ const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   kind: "town",
   founded: 300,
   ruined: false,
+  seat: false,
   nx: 0.5,
   ny: 0.5,
   // #120 added the grid cell to PlaceMark; nothing here reads it.

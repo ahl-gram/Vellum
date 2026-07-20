@@ -23,9 +23,23 @@ const RANK_LABEL: Record<"capital" | "town" | "village", string> = {
   village: "Village",
 };
 
-/** A settlement's rank for display; a ruin overrides its kind. */
+/** The legend calls this row "Realm seat"; the card title-cases it like every
+ *  other rank. Both name the same tier: a realm's seat that is not the capital. */
+const SEAT_LABEL = "Realm Seat";
+
+/**
+ * A settlement's rank for display. Precedence, highest first:
+ *  - a ruin overrides its kind (history.ts never ruins a seat, so this cannot
+ *    silently swallow one, but the ordering is the safe one either way);
+ *  - the grand capital outranks its own seat status, since realms.ts seats it as
+ *    realm 0; this mirrors the chart's tiering at settlements.ts:229, so the card
+ *    and the drawn glyph always agree;
+ *  - any other realm seat reads as a seat, not as the town or village it is.
+ */
 export function placeRank(mark: PlaceMark): string {
-  return mark.ruined ? "Ruin" : RANK_LABEL[mark.kind];
+  if (mark.ruined) return "Ruin";
+  if (mark.kind === "capital") return RANK_LABEL.capital;
+  return mark.seat ? SEAT_LABEL : RANK_LABEL[mark.kind];
 }
 
 /** The hit-target's accessible name: place name plus rank, matching the card. */
