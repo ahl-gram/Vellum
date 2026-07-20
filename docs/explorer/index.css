@@ -123,7 +123,11 @@ button.primary:hover { background: #5d4831; }
   letter-spacing: 0.04em; color: #6b5a40; text-align: right; white-space: nowrap;
 }
 .zoom-keys kbd { font-family: inherit; font-style: normal; font-weight: 600; color: #4a3826; }
-@media (hover: none), (max-width: 560px) { .zoom-keys { display: none; } }
+/* Touch-primary means hover:none AND pointer:coarse. A bare (hover: none) over-matches
+   environments with NO pointer at all (linux headless CI reports hover:none with
+   pointer:none), which would hide the legend exactly where a keyboard user could use
+   it; caught by CI, pinned by e2e G1's rule-scoping check. */
+@media (hover: none) and (pointer: coarse), (max-width: 560px) { .zoom-keys { display: none; } }
 #map { position: relative; transform-origin: 0 0; }
 #map svg { width: 100%; height: auto; display: block;
   border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }

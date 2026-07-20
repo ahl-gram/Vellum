@@ -55,19 +55,48 @@ export async function run(ctx) {
     const btn=(id)=>{const b=document.getElementById(id);return{title:b.getAttribute("title"),aria:b.getAttribute("aria-label"),svg:!!b.querySelector("svg"),text:(b.textContent||"").trim()};};
     const legend=grp?grp.querySelector(".zoom-keys"):null;
     const legendVisible=!!legend&&legend.offsetWidth>0&&legend.offsetHeight>0;
+    // The hide rules, declaration-level (the F2 containment pattern): every media rule
+    // that hides .zoom-keys and mentions hover must ALSO require pointer: coarse. A bare
+    // (hover: none) over-matches pointerless environments (linux headless CI reports
+    // hover: none with pointer: NONE), hiding the legend exactly where a keyboard user
+    // could use it.
+    let hideRules=0, hoverHideRules=0, coarseScopedHideRules=0;
+    for(const ss of document.styleSheets){
+      let rules;try{rules=ss.cssRules;}catch(e){continue;}
+      if(!rules)continue;
+      for(const r of rules){
+        if(r.constructor.name!=="CSSMediaRule")continue;
+        const cond=r.conditionText||(r.media&&r.media.mediaText)||"";
+        for(const n of r.cssRules){
+          if(!n.selectorText||!n.selectorText.includes(".zoom-keys"))continue;
+          if((n.style&&n.style.display)!=="none")continue;
+          hideRules++;
+          if(/hover:\\s*none/.test(cond)){
+            hoverHideRules++;
+            if(/pointer:\\s*coarse/.test(cond))coarseScopedHideRules++;
+          }
+        }
+      }
+    }
     return{grpAria:grp?grp.getAttribute("aria-label"):null,
       zin:btn("zoom-in"),zout:btn("zoom-out"),zreset:btn("zoom-reset"),
       legend:!!legend,legendVisible,legendAriaHidden:legend?legend.getAttribute("aria-hidden"):null,
-      legendText:legend?(legend.textContent||"").replace(/\\s+/g," ").trim():""};
+      legendText:legend?(legend.textContent||"").replace(/\\s+/g," ").trim():"",
+      hideRules,hoverHideRules,coarseScopedHideRules,
+      hoverNone:matchMedia("(hover: none)").matches,pointerCoarse:matchMedia("(pointer: coarse)").matches};
   })()`);
+  // legendVisible is asserted only where the environment says a legend SHOULD show
+  // (not a touch-primary device); the declaration check pins the scoping everywhere.
+  const touchPrimary = g1.hoverNone && g1.pointerCoarse;
   check(
     "G1 the cluster speaks in the antique voice and the keys legend is visible by it (#170 voice + Sub 4 handoff)",
     g1.grpAria === "The Surveyor's Glass" &&
       g1.zin.title === "Lean closer" && /zoom in/i.test(g1.zin.aria || "") && g1.zin.svg && g1.zin.text === "" &&
       g1.zout.title === "Stand back" && /zoom out/i.test(g1.zout.aria || "") && g1.zout.svg && g1.zout.text === "" &&
       g1.zreset.title === "The full sheet" && /reset/i.test(g1.zreset.aria || "") && g1.zreset.svg &&
-      g1.legend && g1.legendVisible && g1.legendAriaHidden === "true" &&
-      /0/.test(g1.legendText) && /pan/i.test(g1.legendText),
+      g1.legend && (touchPrimary || g1.legendVisible) && g1.legendAriaHidden === "true" &&
+      /0/.test(g1.legendText) && /pan/i.test(g1.legendText) &&
+      g1.hideRules > 0 && g1.hoverHideRules === g1.coarseScopedHideRules,
     JSON.stringify(g1),
   );
 
