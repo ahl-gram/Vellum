@@ -24,7 +24,8 @@ export async function run(ctx) {
     const cap=places.findIndex((p)=>p.kind==="capital");
     const ruinIdx=places.findIndex((p)=>p.ruined);
     const tale=ruinIdx>=0?r.manifest.events.find((e)=>e.settlement===ruinIdx&&e.kind==="ruin"):null;
-    return{count:places.length,cap,capName:places[cap].name,capFounded:places[cap].founded,ruinIdx,ruinName:ruinIdx>=0?places[ruinIdx].name:null,tale:tale?tale.text:null};
+    const seatIdx=places.findIndex((p)=>p.seat&&p.kind!=="capital");
+    return{count:places.length,cap,capName:places[cap].name,capFounded:places[cap].founded,ruinIdx,ruinName:ruinIdx>=0?places[ruinIdx].name:null,tale:tale?tale.text:null,seatIdx,seatName:seatIdx>=0?places[seatIdx].name:null,capSeat:places[cap].seat};
   })()`);
 
   const p1 = await evaluate(`(()=>{const ov=document.querySelector("#map .place-overlay");const hits=document.querySelectorAll("#map .place-hit").length;const card=!!document.getElementById("place-card");return{ov:!!ov,hits,card};})()`);
@@ -50,6 +51,27 @@ export async function run(ctx) {
   const p4 = await evaluate(`(()=>{const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.focus();const c=document.getElementById("place-card");return{hidden:c.hidden,aria:hit.getAttribute("aria-label"),name:(c.querySelector(".pc-name")||{}).textContent,rank:(c.querySelector(".pc-rank")||{}).textContent,founded:(c.querySelector(".pc-founded")||{}).textContent,tale:!!c.querySelector(".pc-tale")};})()`);
   check("P4 focus a capital: card shows name + Capital + founding year, no tale", p4.hidden === false && p4.name === pm.capName && p4.rank === "Capital" && p4.founded === "Founded in the year " + pm.capFounded + "." && p4.tale === false, JSON.stringify(p4));
   check("P5 hit aria-label is name + rank (matches the card)", p4.aria === pm.capName + ", Capital", `aria=${p4.aria}`);
+
+  // A non-capital realm seat cards as "Realm Seat", not the plain "Town"/"Village"
+  // it used to read as while the chart drew it with the seat castle + halo. This is
+  // the whole chain in one check: realms.seats -> manifest seat flag -> worker
+  // structured clone -> placeRank -> the .pc-rank DOM node.
+  if (pm.seatIdx >= 0) {
+    const p5b = await evaluate(`(()=>{const hit=document.querySelector('.place-hit[data-idx="'+${pm.seatIdx}+'"]');hit.focus();const c=document.getElementById("place-card");return{hidden:c.hidden,name:(c.querySelector(".pc-name")||{}).textContent,rank:(c.querySelector(".pc-rank")||{}).textContent,aria:hit.getAttribute("aria-label"),tale:!!c.querySelector(".pc-tale")};})()`);
+    check("P5b focus a realm seat: rank 'Realm Seat', aria matches, no tale", p5b.hidden === false && p5b.rank === "Realm Seat" && p5b.name === pm.seatName && p5b.aria === pm.seatName + ", Realm Seat" && p5b.tale === false, JSON.stringify(p5b));
+    // Artifact: PIN the seat card, then WAIT OUT the paperUnfurl animation. The
+    // card mounts at the animation's first keyframe (fill mode `both`), so a shot
+    // fired immediately catches it at zero scale and looks like no card at all.
+    await evaluate(`(()=>{document.querySelector('.place-hit[data-idx="'+${pm.seatIdx}+'"]').click();})()`);
+    await sleep(500);
+    await shoot("explorer-place-card-seat.png");
+    await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
+  } else {
+    check("P5b seed 42 has a non-capital realm seat to show", false, "no seat in manifest");
+  }
+  // The capital IS realm 0's seat (realms.ts), so it carries seat===true; the card
+  // must still say Capital. Guards the precedence in placeRank against a flip.
+  check("P5c the grand capital carries seat===true yet still ranks Capital", pm.capSeat === true && p4.rank === "Capital", `capSeat=${pm.capSeat} rank=${p4.rank}`);
 
   // A ruin additionally shows its abandonment tale (the kind-filtered lookup).
   if (pm.ruinIdx >= 0) {
@@ -154,8 +176,12 @@ export async function run(ctx) {
 
   // Artifact: a card open over the chart, for the user to eyeball. Blur first so
   // the focus() always changes the active element and fires (the target may
-  // already be focused, in which case a re-focus is a no-op event-wise).
+  // already be focused, in which case a re-focus is a no-op event-wise). Then wait
+  // out paperUnfurl: the card mounts at the animation's first keyframe (fill mode
+  // `both`), so a shot fired immediately catches it at zero scale, which is why
+  // this artifact showed a bare focus ring and no card at all before.
   await evaluate(`(()=>{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();document.querySelector('.place-hit[data-idx="'+${pm.ruinIdx >= 0 ? pm.ruinIdx : pm.cap}+'"]').focus();})()`);
+  await sleep(500);
   await shoot("explorer-place-card.png");
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
 

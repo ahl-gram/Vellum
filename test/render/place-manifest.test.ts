@@ -35,6 +35,19 @@ test("one PlaceMark per settlement, with matching name/kind/founded/ruined", () 
   });
 });
 
+test("seat flags exactly the settlements in world.realms.seats", () => {
+  const m = buildPlaceManifest(world, WIDTH);
+  const expected = new Set(world.realms.seats);
+  assert.ok(expected.size > 1, "seed 42 at 160x120 is multi-realm");
+  m.places.forEach((p, i) => {
+    assert.equal(p.seat, expected.has(i), `place ${i} (${p.name}) seat flag`);
+  });
+  // realms.ts:116 seats the grand capital as realm 0, so the capital is a seat too;
+  // the capital-over-seat precedence lives in placeRank, not here.
+  const capital = m.places.find((p) => p.kind === "capital")!;
+  assert.equal(capital.seat, true, "the grand capital is realm 0's seat");
+});
+
 test("marginPx ships the sheet's frame margin, so the client can convert sheet fractions to plot-uv (#169)", () => {
   const m = buildPlaceManifest(world, WIDTH);
   assert.equal(m.marginPx, margin, "marginPx is the renderMap margin (round(widthPx*0.045))");

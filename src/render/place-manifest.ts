@@ -14,6 +14,13 @@ export type PlaceMark = {
   readonly kind: SettlementKind;
   readonly founded: number;
   readonly ruined: boolean;
+  /**
+   * This settlement is some realm's seat (`world.realms.seats`). Raw, so realm 0's
+   * seat (the grand capital, realms.ts:116) carries `seat: true` as well; the
+   * capital-over-seat display precedence lives in placeRank, matching the chart's
+   * own tiering at settlements.ts:229.
+   */
+  readonly seat: boolean;
   /** Projected x as a fraction of the rendered width (0..1). */
   readonly nx: number;
   /** Projected y as a fraction of the rendered height (0..1). */
@@ -56,12 +63,16 @@ export type PlaceManifest = {
 export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest {
   const margin = marginFor(widthPx);
   const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
+  // On a regional survey (#162) an off-window seat is a -1 sentinel (region.ts:121);
+  // it matches no settlement index, so those places simply stay unflagged.
+  const seats = new Set(world.realms.seats);
   const places: PlaceMark[] = world.settlements.map((s, idx) => ({
     idx,
     name: s.name,
     kind: s.kind,
     founded: s.founded,
     ruined: s.ruined,
+    seat: seats.has(idx),
     nx: proj.px(s.x) / proj.widthPx,
     ny: proj.py(s.y) / proj.heightPx,
     gx: s.x,
