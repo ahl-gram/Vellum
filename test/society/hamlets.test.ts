@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
+import { FONT_SIZE, REGION_TYPE_SCALE } from "../../src/render/layers/settlements.ts";
 import { BIOMES } from "../../src/climate/biomes.ts";
 import { createRng } from "../../src/core/rng.ts";
 import { EDGE_MARGIN } from "../../src/society/sites.ts";
@@ -266,6 +267,53 @@ test("label pressure drops hamlet labels first and never force-places them (#171
     if (g.tier === "village" || g.tier === "hamlet") continue;
     assert.ok(g.labeled, `a ${g.tier} keeps its label even in a crowd`);
   }
+});
+
+test("region sheets set settlement labels larger; world sheets keep their type (readability)", () => {
+  // On a regional survey the labels are the reveal, and the committed inset is
+  // viewed at roughly viewport width, so base type reads tiny on a laptop and
+  // worse on a phone. Region sheets scale settlement type up by
+  // REGION_TYPE_SCALE; world sheets keep FONT_SIZE exactly (golden-locked).
+  const win = richWindow();
+  const region = generateRegionWorld(world, {
+    window: win, gridW: 320, gridH: 240, title: "Legible Environs",
+  });
+  const regionSvg = renderMap(region, { style: "antique" });
+  const worldSvg = renderMap(world, { style: "antique" });
+
+  // every labeled settlement on the survey is set at its tier's SCALED size,
+  // whatever tiers this window happens to hold (bounded to the settlements
+  // layer so the cartouche and feature labels cannot leak into the last slice)
+  const layerStart = regionSvg.indexOf('<g id="layer-settlements">');
+  assert.ok(layerStart >= 0);
+  const nextLayer = regionSvg.indexOf('<g id="layer-', layerStart + 10);
+  const layer = regionSvg.slice(layerStart, nextLayer > 0 ? nextLayer : undefined);
+  const marks = [...layer.matchAll(/<g class="settlement" data-idx="\d+" data-tier="([a-z]+)"[^>]*>/g)];
+  const labeled: Array<{ tier: keyof typeof FONT_SIZE; fs: number }> = [];
+  marks.forEach((m, i) => {
+    const body = layer.slice(
+      (m.index as number) + m[0].length,
+      i + 1 < marks.length ? marks[i + 1]!.index : undefined,
+    );
+    const fs = body.match(/<text[^>]*font-size="([\d.]+)"/);
+    if (fs) labeled.push({ tier: m[1] as keyof typeof FONT_SIZE, fs: Number(fs[1]) });
+  });
+  assert.ok(
+    labeled.some((l) => l.tier === "hamlet"),
+    "the survey labels at least one hamlet",
+  );
+  for (const l of labeled) {
+    const expected = Number((FONT_SIZE[l.tier] * REGION_TYPE_SCALE).toFixed(1));
+    assert.equal(l.fs, expected, `a region ${l.tier} label is set at ${expected}, not ${l.fs}`);
+  }
+  assert.ok(REGION_TYPE_SCALE > 1, "region type actually grows");
+
+  // the world sheet is untouched: its village labels stay at base FONT_SIZE
+  // (data-tier is region-only, so read the world label size off any village text)
+  const worldVillage = worldSvg.match(
+    new RegExp(`<text[^>]*font-size="${FONT_SIZE.village}"`),
+  );
+  assert.ok(worldVillage, "world villages keep their base type (golden-locked)");
 });
 
 test("the legend keys a Hamlet row only on sheets that contain hamlets", () => {
