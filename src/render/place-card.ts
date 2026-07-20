@@ -17,10 +17,11 @@ export type PlaceCard = {
   readonly tale?: string;
 };
 
-const RANK_LABEL: Record<"capital" | "town" | "village", string> = {
+const RANK_LABEL: Record<"capital" | "town" | "village" | "hamlet", string> = {
   capital: "Capital",
   town: "Town",
   village: "Village",
+  hamlet: "Hamlet",
 };
 
 /** The legend calls this row "Realm seat"; the card title-cases it like every

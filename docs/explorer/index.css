@@ -195,6 +195,10 @@ button.primary:hover { background: #5d4831; }
 #map .region-inset svg.redrafting g.settlement.dry-in[data-tier="village"] text {
   animation-delay: var(--redraft-dry-wait-village, 500ms);
 }
+/* Hamlets follow the villages (#171): the smallest places dry in last. */
+#map .region-inset svg.redrafting g.settlement.dry-in[data-tier="hamlet"] text {
+  animation-delay: var(--redraft-dry-wait-hamlet, 740ms);
+}
 
 /* #131 The style turn. Changing the style turns this leaf over: the outgoing chart
    turns away and the same world lands re-dressed in the new style (sheet-turn.js).

@@ -268,6 +268,73 @@ test("region rivers are not inked twice: no extracted river shadows a projected 
   assert.ok(extractedRivers > 0, "the window also carries genuinely new extracted detail");
 });
 
+// --- #171 Hamlets: the deepest band's payoff, gated on window size ---
+
+test("only the deepest band grows hamlets; they never seat a realm or take a road (#171)", () => {
+  // anchor on the settlement whose deepest window carries the most hamlets
+  let best: { win: ReturnType<typeof windowAround>; n: number } | null = null;
+  for (const s of bigWorld.settlements) {
+    const win = windowAround(bigWorld, s, 0.125);
+    const region = generateRegionWorld(bigWorld, {
+      window: win, gridW: 320, gridH: 240, title: "Deep Environs",
+    });
+    const n = region.settlements.filter((x) => x.kind === "hamlet").length;
+    if (!best || n > best.n) best = { win, n };
+  }
+  assert.ok(best && best.n >= 3, `a deepest window grows hamlets (best had ${best?.n})`);
+
+  const deep = generateRegionWorld(bigWorld, {
+    window: best.win, gridW: 320, gridH: 240, title: "Deep Environs",
+  });
+  const hamlets = deep.settlements.filter((s) => s.kind === "hamlet");
+
+  // never a seat: every projected seat still points at a projected world settlement
+  for (const si of deep.realms.seats) {
+    if (si === -1) continue;
+    assert.notEqual(deep.settlements[si]!.kind, "hamlet", "a hamlet never seats a realm");
+  }
+  // never a road terminus: roads are built over the projected world settlements only
+  const hamletCells = new Set(hamlets.map((h) => `${h.x},${h.y}`));
+  for (const road of deep.roads) {
+    const a = road.points[0]!;
+    const b = road.points[road.points.length - 1]!;
+    assert.ok(!hamletCells.has(`${a.x},${a.y}`), "no road departs a hamlet");
+    assert.ok(!hamletCells.has(`${b.x},${b.y}`), "no road arrives at a hamlet");
+  }
+  // appended after the projected settlements, so world indices stay stable
+  const firstHamlet = deep.settlements.findIndex((s) => s.kind === "hamlet");
+  assert.ok(
+    deep.settlements.slice(firstHamlet).every((s) => s.kind === "hamlet"),
+    "hamlets are appended after every projected settlement",
+  );
+
+  // one band shallower, same centre: no hamlets at all
+  const cu = (best.win.u0 + best.win.u1) / 2;
+  const cv = (best.win.v0 + best.win.v1) / 2;
+  const shallow = generateRegionWorld(bigWorld, {
+    window: windowAround(
+      bigWorld,
+      { x: cu * (bigWorld.recipe.gridW - 1), y: cv * (bigWorld.recipe.gridH - 1) },
+      0.25,
+    ),
+    gridW: 320, gridH: 240, title: "Shallow Environs",
+  });
+  assert.equal(
+    shallow.settlements.filter((s) => s.kind === "hamlet").length,
+    0,
+    "band 2 grows no hamlets",
+  );
+});
+
+test("a world sheet never carries a hamlet, in kind or in ink (#171)", () => {
+  assert.ok(
+    bigWorld.settlements.every((s) => s.kind !== "hamlet"),
+    "generateWorld never places a hamlet",
+  );
+  const svg = renderMap(bigWorld, { style: "antique", legend: true });
+  assert.equal(count(svg, "hamlet"), 0, "no hamlet mark, tier, or legend row on a world sheet");
+});
+
 test("windowAround clamps to the world", () => {
   const win = windowAround(world, { x: 2, y: 2 }, 0.4);
   assert.ok(win.u0 >= 0 && win.v0 >= 0);

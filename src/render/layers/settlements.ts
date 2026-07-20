@@ -12,6 +12,7 @@ export const FONT_SIZE: Record<SettlementTier, number> = {
   seat: 14,
   town: 13,
   village: 10.5,
+  hamlet: 8.5,
 };
 
 /** Grand capital and provincial-seat marks scale the same base glyph. */
@@ -69,6 +70,14 @@ export function settlementGlyph(
     return el("circle", {
       cx: px, cy: py, r: 3.4 * k,
       fill: style.ink, stroke: style.labelHalo, "stroke-width": 1.2 * k,
+    });
+  }
+  if (tier === "hamlet") {
+    // the smallest mark on any sheet (#171): a solid ink fleck under the
+    // village dot, haloed a hair so it survives the darker washes
+    return el("circle", {
+      cx: px, cy: py, r: 1.5 * k,
+      fill: style.ink, stroke: style.labelHalo, "stroke-width": 0.8 * k,
     });
   }
   return el("circle", {
@@ -224,7 +233,7 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
   const showHalo =
     style.politicalTints && seats.length > 1 && world.region === undefined;
 
-  const RANK: Record<SettlementTier, number> = { capital: 0, seat: 1, town: 2, village: 3 };
+  const RANK: Record<SettlementTier, number> = { capital: 0, seat: 1, town: 2, village: 3, hamlet: 4 };
   const tierOf = (s: NamedSettlement, i: number): SettlementTier =>
     s.kind === "capital" ? "capital" : seatRealm.has(i) ? "seat" : s.kind;
 
@@ -252,7 +261,8 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
     group.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(tier, px, py, ctx));
 
     const fs = FONT_SIZE[tier] * k;
-    const gap = (tier === "capital" ? 11 : tier === "seat" ? 8 : 7) * k;
+    const gap =
+      (tier === "capital" ? 11 : tier === "seat" ? 8 : tier === "hamlet" ? 5 : 7) * k;
     const upper = tier === "capital" || tier === "seat";
     const text = s.name;
     const display = upper ? text.toUpperCase() : text;
@@ -273,8 +283,9 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
       placed = true;
       break;
     }
-    if (!placed && tier !== "village") {
-      // important places keep their label even in a crowd
+    if (!placed && tier !== "village" && tier !== "hamlet") {
+      // important places keep their label even in a crowd; villages and
+      // hamlets lose theirs, preserving tier order under label pressure
       const t = tries[0]!;
       group.push(labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx));
     }

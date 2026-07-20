@@ -58,6 +58,16 @@ test("placeRank calls a non-capital realm seat a Realm Seat, not a Town", () => 
   assert.equal(placeRank(mark({ kind: "village", seat: true })), "Realm Seat");
 });
 
+test("placeRank calls a hamlet a Hamlet (#171)", () => {
+  // hamlets exist only on deepest-band region sheets; their manifest kind
+  // carries straight through to the card and the aria name.
+  assert.equal(placeRank(mark({ kind: "hamlet" })), "Hamlet");
+  assert.equal(
+    placeAriaLabel(mark({ name: "Weki", kind: "hamlet" })),
+    "Weki, Hamlet",
+  );
+});
+
 test("placeRank ranks capital above seat: realm 0's seat IS the grand capital", () => {
   // realms.ts:116 pushes the capital as realm 0's seat, so the capital carries
   // seat===true. It must still read "Capital", matching settlements.ts:229.

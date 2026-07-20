@@ -672,6 +672,79 @@ export async function run(ctx) {
     `on-toggle ${JSON.stringify(von)} settleWhileVoyaging redrafts=${vsettle.redrafts}(==${reg20g.redrafts}) band=${vsettle.band}`,
   );
 
+  // Z21 (#171, Glass Sub 10): HAMLETS are the deepest band's payoff, a region-only
+  // smallest tier grown from a fixed world-space lattice. The target window is derived
+  // in-page from the engine itself (the same lattice the worker draws from), and the
+  // committed inset is then checked for COUNT and NAME parity against the engine run
+  // over the window the sheet actually STAMPED, so the settle quantization can never
+  // desync the expectation. Tier order (capital/seat/town/village/hamlet) must hold in
+  // document order: that is the label-pressure order, higher tiers claim space first.
+  await goHome();
+  const target21 = await evaluate(
+    `(async()=>{const {defaultRecipe,generateWorld}=await import("/explorer/engine/world/generate.js");` +
+      `const {hamletCandidates}=await import("/explorer/engine/society/hamlets.js");` +
+      `const {quantizeCenter,lodWindowFor,LOD_BANDS}=await import("/explorer/engine/world/lod.js");` +
+      `const {marginFor}=await import("/explorer/engine/render/transform.js");` +
+      `const world=generateWorld(defaultRecipe(42,{gridW:320,gridH:240}));` +
+      `const size=LOD_BANDS[LOD_BANDS.length-1].sizeUV;let best=null;` +
+      `for(const s of world.settlements){` +
+      `const q=quantizeCenter(s.x/(world.recipe.gridW-1),s.y/(world.recipe.gridH-1),size);` +
+      `const n=hamletCandidates(world,lodWindowFor(q.cx,q.cy,size)).length;` +
+      `if(!best||n>best.n)best={q,n};}` +
+      `const svg=document.querySelector("#map > svg");const vb=svg.getAttribute("viewBox").split(" ").map(Number);` +
+      `const m=marginFor(vb[2]);const mx=m/vb[2],my=m/vb[3];` +
+      `return {cx:mx+best.q.cx*(1-2*mx),cy:my+best.q.cy*(1-2*my),n:best.n};})()`,
+    true,
+  );
+  const before21 = (await rgn()).redrafts;
+  await enterAt(8, target21.cx, target21.cy);
+  const deep21 = await waitRedraft(before21);
+  let view21 = await insetView();
+  for (let i = 0; i < 50 && view21.insets !== 1; i++) { await sleep(40); view21 = await insetView(); }
+  await shoot("explorer-hamlets-band3.png");
+  const dom21 = await evaluate(
+    `(async()=>{const isvg=document.querySelector("#map .region-inset svg");if(!isvg)return{err:"no inset"};` +
+      `const win={u0:+isvg.getAttribute("data-vellum-region-u0"),v0:+isvg.getAttribute("data-vellum-region-v0"),` +
+      `u1:+isvg.getAttribute("data-vellum-region-u1"),v1:+isvg.getAttribute("data-vellum-region-v1")};` +
+      `const tiers=[...isvg.querySelectorAll("g.settlement")].map(g=>g.dataset.tier);` +
+      `const RANK={capital:0,seat:1,town:2,village:3,hamlet:4};` +
+      `const ordered=tiers.every((t,i)=>i===0||RANK[t]>=RANK[tiers[i-1]]);` +
+      `const domNames=[...isvg.querySelectorAll('g.settlement[data-tier="hamlet"]')].map(g=>g.dataset.name);` +
+      `const outside=document.querySelectorAll('#map > svg g.settlement[data-tier="hamlet"]').length;` +
+      `const {defaultRecipe,generateWorld}=await import("/explorer/engine/world/generate.js");` +
+      `const {generateRegionWorld}=await import("/explorer/engine/world/region.js");` +
+      `const world=generateWorld(defaultRecipe(42,{gridW:320,gridH:240}));` +
+      `const region=generateRegionWorld(world,{window:win,gridW:320,gridH:240,title:"parity"});` +
+      `const engine=region.settlements.filter(s=>s.kind==="hamlet").map(s=>s.name);` +
+      `const names=new Set(engine);` +
+      `return {hamlets:domNames.length,expected:engine.length,ordered,outside,` +
+      `namesMatch:domNames.every(n=>names.has(n))};})()`,
+    true,
+  );
+  check(
+    "Z21 hamlets: the deepest band grows the smallest tier, engine count/name parity over the stamped window, tier order held",
+    deep21.band === 3 && dom21.hamlets >= 3 && dom21.hamlets === dom21.expected &&
+      dom21.namesMatch && dom21.ordered && dom21.outside === 0,
+    `band=${deep21.band} dom=${dom21.hamlets} engine=${dom21.expected} ordered=${dom21.ordered} ` +
+      `namesMatch=${dom21.namesMatch} worldSheetHamlets=${dom21.outside} (scouted n=${target21.n})`,
+  );
+
+  // Z21b: absent at every shallower band. One band up over the SAME centre: zero
+  // hamlet marks (and the legend keys no Hamlet row a band-2 sheet never draws).
+  await enterAt(4, target21.cx, target21.cy);
+  const step21 = await waitRedraft(deep21.redrafts);
+  let view21b = await insetView();
+  for (let i = 0; i < 50 && view21b.insets !== 1; i++) { await sleep(40); view21b = await insetView(); }
+  const shallow21 = await evaluate(
+    `(()=>{const isvg=document.querySelector("#map .region-inset svg");` +
+      `return isvg?isvg.querySelectorAll('g.settlement[data-tier="hamlet"]').length:-1;})()`,
+  );
+  check(
+    "Z21b hamlets vanish one band up: the band-2 survey of the same centre draws none",
+    step21.band === 2 && shallow21 === 0,
+    `band=${step21.band} band2Hamlets=${shallow21}`,
+  );
+
   await goHome(); // leave the world sheet for the restore tail below
   await evaluate(`window.__vellumSetRedraftEnabled(false)`); // #169: geometric-only again for the suites that follow
 

@@ -6,7 +6,9 @@ import { classifyBiomes } from "../climate/biomes.ts";
 import { computeFlow } from "../hydrology/flow.ts";
 import { buildHeightfield, type UvWindow } from "../terrain/heightfield.ts";
 import { buildRoads } from "../society/roads.ts";
+import { placeHamlets } from "../society/hamlets.ts";
 import { anchorRegionRivers } from "./region-rivers.ts";
+import { LOD_BANDS } from "./lod.ts";
 import type { NamedSettlement, World } from "./types.ts";
 
 export type RegionSpec = {
@@ -120,7 +122,19 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   // harmless there; the render gates the realm-tint halo off on region sheets.
   const seats = world.realms.seats.map((wi) => regionIdxOf.get(wi) ?? -1);
 
+  // Roads are laid over the projected WORLD settlements only, before hamlets
+  // append (#171). buildRoads filters town/village literals anyway, but keeping
+  // hamlets out of its input makes "no hamlet gets a road" true by construction.
   const roads = buildRoads(elev, seaLevel, riverCells, settlements);
+
+  // #171: the deepest band's payoff. Gated on the WINDOW SIZE, not a caller flag,
+  // so every producer of a deepest-band sheet (live redraft, download redraw,
+  // tests) agrees byte-for-byte with no parameter to forget. Appended AFTER the
+  // projected settlements so the realm-seat indices above stay valid.
+  const deepestSizeUV = (LOD_BANDS[LOD_BANDS.length - 1] as (typeof LOD_BANDS)[number]).sizeUV;
+  const hamlets =
+    du <= deepestSizeUV + 1e-9 ? placeHamlets(world, window, elev, seaLevel) : [];
+  const peopled = hamlets.length > 0 ? [...settlements, ...hamlets] : settlements;
 
   const oceanDist = bfsDistance(gridW, gridH, (x, y) =>
     (elev.data[x + y * gridW] as number) > seaLevel,
@@ -136,7 +150,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     riverCells,
     climate,
     biomes,
-    settlements,
+    settlements: peopled,
     roads,
     realms: { labels: new Int16Array(gridW * gridH).fill(-1), seats },
     arms: [],
