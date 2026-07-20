@@ -85,6 +85,9 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
   if (seatDrawn) rows.push({ icon: { kind: "settlement", tier: "seat" }, label: "Realm seat" });
   if (tiers.has("town")) rows.push({ icon: { kind: "settlement", tier: "town" }, label: "Town" });
   if (tiers.has("village")) rows.push({ icon: { kind: "settlement", tier: "village" }, label: "Village" });
+  // hamlets exist only on deepest-band region sheets (#171), so this row can
+  // never appear on a world chart (golden-safe by the same kind-presence gate)
+  if (tiers.has("hamlet")) rows.push({ icon: { kind: "settlement", tier: "hamlet" }, label: "Hamlet" });
   if (world.settlements.some((s) => s.ruined)) rows.push({ icon: { kind: "ruin" }, label: "Ruins" });
 
   if (theme) {

@@ -50,11 +50,14 @@ const KIND_LABEL: Record<string, string> = {
   capital: "Capital",
   town: "Town",
   village: "Village",
+  hamlet: "Hamlet",
 };
 
 function gazetteerHtml(world: World): string {
   const lore = createLoreWriter(world, createRng(world.recipe.seed).fork("lore"));
-  const order = { capital: 0, town: 1, village: 2 };
+  // hamlet is unreachable here (the gazetteer reads the BASE world, which never
+  // carries one, #171), listed only to keep the kind index total.
+  const order = { capital: 0, town: 1, village: 2, hamlet: 3 };
   const sorted = [...world.settlements].sort(
     (a, b) => order[a.kind] - order[b.kind] || a.name.localeCompare(b.name),
   );

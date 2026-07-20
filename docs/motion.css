@@ -36,6 +36,7 @@
   --redraft-dry: 450ms;            /* the wash + a newly labeled name drying */
   --redraft-dry-wait: 260ms;       /* towns (and any rarer higher tier) start here */
   --redraft-dry-wait-village: 500ms; /* villages follow the towns */
+  --redraft-dry-wait-hamlet: 740ms;  /* #171 hamlets, the smallest places, dry in last */
   --glide: 300ms;         /* #170 the voiced zoom glide (buttons, +/- keys, 0 home).
                              Read lazily by app.js and handed to the zoom controller;
                              reduced motion bypasses it entirely (instant baseline). */

@@ -1,10 +1,10 @@
 import { el, type SvgNode } from "../svg.ts";
 import type { RenderCtx } from "../context.ts";
-import { settlementGlyph, ruinGlyph } from "./settlements.ts";
+import { settlementGlyph, ruinGlyph, type SettlementTier } from "./settlements.ts";
 import { isoStroke } from "./iso.ts";
 
 export type Icon =
-  | { kind: "settlement"; tier: "capital" | "seat" | "town" | "village" }
+  | { kind: "settlement"; tier: SettlementTier }
   | { kind: "ruin" }
   | { kind: "glyph"; sym: string }
   | { kind: "river" }
