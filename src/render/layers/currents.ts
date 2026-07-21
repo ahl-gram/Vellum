@@ -49,10 +49,14 @@ export function traceStreamline(
 ): Array<[number, number]> {
   const { w, h } = world.elev;
   const od = world.oceanDist;
+  const gate = world.region?.seaGate; // #251: parent's genuine-sea partition, if a region
   const inWater = (x: number, y: number): boolean => {
     const ix = Math.round(x);
     const iy = Math.round(y);
     if (ix < 1 || iy < 1 || ix > w - 2 || iy > h - 2) return false;
+    // A streamline stays in genuine sea: oceanDist cannot tell an inland lake from
+    // the open sea, and on a region the crop can reconnect a lake to the border.
+    if (gate && gate[ix + iy * w] === 0) return false;
     return (od[ix + iy * w] as number) >= MIN_OCEAN_DIST;
   };
   if (!inWater(x0, y0)) return [];
@@ -127,6 +131,8 @@ export function currentsLayer(
   for (let gy = 5; gy < h - 5; gy += 4) {
     for (let gx = 5; gx < w - 5; gx += 4) {
       if ((world.oceanDist[gx + gy * w] as number) < START_OCEAN_DIST) continue;
+      // #251: seed streamlines only in the parent's genuine sea, never an inland lake.
+      if (world.region?.seaGate && world.region.seaGate[gx + gy * w] === 0) continue;
       const px = proj.px(gx);
       const py = proj.py(gy);
       const edge = Math.min(
