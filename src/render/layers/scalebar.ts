@@ -4,6 +4,10 @@ import type { RenderCtx } from "../context.ts";
 
 const CELLS_PER_LEAGUE = 2.2;
 const NICE_TOTALS = [20, 30, 40, 50, 60, 80, 100, 120, 150, 200];
+// #249: a regional survey zooms in (up to 8x), so px-per-league grows until even
+// the smallest world total (20) overruns the frame. Extend the ladder downward
+// with smaller round totals, all even so the mid tick (total / 2) stays whole.
+const REGION_NICE_TOTALS = [2, 4, 10, ...NICE_TOTALS];
 
 export type ScalebarPlan = { readonly box: Box };
 
@@ -34,13 +38,25 @@ export function scalebarLayer(ctx: RenderCtx, plan: ScalebarPlan): SvgNode {
   const pxPerLeague = (proj.scale / worldCellsPerCell) * CELLS_PER_LEAGUE;
   const target = 200 * k;
 
-  let total = NICE_TOTALS[NICE_TOTALS.length - 1] as number;
-  let bestDiff = Infinity;
-  for (const t of NICE_TOTALS) {
-    const diff = Math.abs(t * pxPerLeague - target);
-    if (diff < bestDiff) {
-      bestDiff = diff;
-      total = t;
+  let total: number;
+  if (world.region) {
+    // #249: at a region's zoom the bar must FIT the plot, not merely sit closest
+    // to the target width, or a deep survey's bar overruns the frame. Take the
+    // largest round total whose bar is within target, falling back to the smallest
+    // (the extended ladder's floor always fits, so this never overflows).
+    total = REGION_NICE_TOTALS[0] as number;
+    for (const t of REGION_NICE_TOTALS) {
+      if (t * pxPerLeague <= target) total = t;
+    }
+  } else {
+    total = NICE_TOTALS[NICE_TOTALS.length - 1] as number;
+    let bestDiff = Infinity;
+    for (const t of NICE_TOTALS) {
+      const diff = Math.abs(t * pxPerLeague - target);
+      if (diff < bestDiff) {
+        bestDiff = diff;
+        total = t;
+      }
     }
   }
 
