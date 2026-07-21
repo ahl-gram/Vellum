@@ -54,9 +54,15 @@ export function featureLabelsLayer(ctx: RenderCtx): {
   const realmAnchors: RealmAnchor[] = [];
 
   // --- sea label in open water, shrinking until it fits ---
+  // #234: on a region, gate the candidates on the parent world's sea/lake partition
+  // so the caption never lands on an inland lake the crop reconnected to the window
+  // edge. World sheets have region === undefined, so this is inert there and the
+  // committed goldens stay byte-identical.
+  const seaGate = world.region?.seaGate;
   const deep: Array<{ px: number; py: number; d: number }> = [];
   for (let gy = 3; gy < h - 3; gy += 2) {
     for (let gx = 3; gx < w - 3; gx += 2) {
+      if (seaGate && seaGate[gx + gy * w] === 0) continue;
       const d = world.oceanDist[gx + gy * w] as number;
       if (d >= 5) deep.push({ px: proj.px(gx), py: proj.py(gy), d });
     }

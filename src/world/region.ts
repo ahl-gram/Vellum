@@ -8,8 +8,9 @@ import { buildHeightfield, type UvWindow } from "../terrain/heightfield.ts";
 import { buildRoads } from "../society/roads.ts";
 import { placeHamlets } from "../society/hamlets.ts";
 import { anchorRegionRivers } from "./region-rivers.ts";
+import { seaMask } from "../hydrology/sea-mask.ts";
 import { LOD_BANDS } from "./lod.ts";
-import type { NamedSettlement, World } from "./types.ts";
+import type { NamedLake, NamedSettlement, World } from "./types.ts";
 
 export type RegionSpec = {
   readonly window: UvWindow;
@@ -140,6 +141,39 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     (elev.data[x + y * gridW] as number) > seaLevel,
   );
 
+  // #234: the parent world's authoritative sea/lake partition, projected onto the
+  // region grid. The region's OWN seaMask cannot classify this: cropping reconnects
+  // an inland lake to the window edge, so the region floods it as border-sea. So the
+  // sea caption would sit on a lake. We instead sample the parent's seaMask at each
+  // region cell's world point. Coarse (world resolution) but only ever read at deep
+  // water far from any shore, where the coarse boundary does not matter.
+  const worldSea = seaMask(world.elev, world.seaLevel);
+  const seaGate = new Uint8Array(gridW * gridH);
+  for (let gy = 0; gy < gridH; gy++) {
+    for (let gx = 0; gx < gridW; gx++) {
+      const u = window.u0 + (gx / (gridW - 1)) * du;
+      const v = window.v0 + (gy / (gridH - 1)) * dv;
+      const wx = Math.round(u * (recipe.gridW - 1));
+      const wy = Math.round(v * (recipe.gridH - 1));
+      seaGate[gx + gy * gridW] = worldSea[wx + wy * recipe.gridW] as number;
+    }
+  }
+
+  // #234: carry the parent's named lakes that fall inside the window, remapped to
+  // region grid coords, so a lake captions as a lake instead of inheriting the sea
+  // name (region.names used to strip lakes to []). Skip any whose projected centroid
+  // is not region water: the finer field can reshape a lake's exact outline, and a
+  // lake label on dry land would read as a bug.
+  const regionLakes: NamedLake[] = world.names.lakes.flatMap((lake) => {
+    const u = lake.x / (recipe.gridW - 1);
+    const v = lake.y / (recipe.gridH - 1);
+    if (u < window.u0 || u > window.u1 || v < window.v0 || v > window.v1) return [];
+    const gx = ((u - window.u0) / du) * (gridW - 1);
+    const gy = ((v - window.v0) / dv) * (gridH - 1);
+    if ((elev.data[Math.round(gx) + Math.round(gy) * gridW] as number) > seaLevel) return [];
+    return [{ x: gx, y: gy, name: lake.name }];
+  });
+
   return {
     recipe: { ...recipe, gridW, gridH },
     elev,
@@ -165,14 +199,14 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
       sea: world.names.sea,
       range: null,
       forest: null,
-      lakes: [],
+      lakes: regionLakes,
       realms: [],
     },
     // regional plates show no chronicle; founded/ruined ride along on the
     // settlements (spread above), so ruins still render at the finer scale.
     history: { events: [] },
     oceanDist,
-    region: { window, worldGridW: recipe.gridW },
+    region: { window, worldGridW: recipe.gridW, seaGate },
   };
 }
 
