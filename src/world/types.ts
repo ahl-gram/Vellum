@@ -82,5 +82,13 @@ export type World = {
   readonly region?: {
     readonly window: UvWindow;
     readonly worldGridW: number;
+    /**
+     * #234: the parent world's sea/lake partition projected onto the region grid
+     * (1 = genuine border-connected sea, 0 = land or an inland lake). The region's
+     * own `seaMask` cannot be trusted for this: cropping reconnects an inland lake
+     * to the window edge, so it floods as sea. Furniture that must sit on the open
+     * sea (the sea caption) reads THIS, not `oceanDist`.
+     */
+    readonly seaGate?: Uint8Array;
   };
 };
