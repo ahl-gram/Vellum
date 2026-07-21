@@ -33,6 +33,10 @@ export function windsLayer(
     for (let gx = 4; gx < w - 4; gx += 3) {
       const d = world.oceanDist[gx + gy * w] as number;
       if (d < 6) continue;
+      // #251: gate to the parent's genuine sea so a region's wind arrows never land
+      // in an inland lake (oceanDist alone cannot tell a lake from the sea). Inert on
+      // world sheets, so the committed goldens stay byte-identical.
+      if (world.region?.seaGate && world.region.seaGate[gx + gy * w] === 0) continue;
       const px = proj.px(gx);
       const py = proj.py(gy);
       const edge = Math.min(

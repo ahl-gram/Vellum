@@ -1,7 +1,9 @@
 import { el, type SvgNode } from "../svg.ts";
 import { boxesOverlap, type Box } from "../geometry.ts";
 import { seaMask } from "../../hydrology/sea-mask.ts";
+import { bfsDistance } from "../../core/bfs-distance.ts";
 import type { RenderCtx } from "../context.ts";
+import type { World } from "../../world/types.ts";
 import type { CartouchePlan } from "./cartouche.ts";
 
 export type CompassPlan = {
@@ -11,6 +13,13 @@ export type CompassPlan = {
   readonly box: Box;
 };
 
+// The land-rose fallback (#251) needs a clearing at least this many hops (Chebyshev
+// cells, from any water, town, or high ground) so the shrunk rose settles into open
+// country. The landR=32px rose reaches ~7.5 cells on its cardinal petals (grid scale
+// ~4.28 px/cell, width-independent), so 8 left the tip ~2px shy of a source cell and
+// could graze a town dot; 10 clears the rose plus a settlement glyph's radius.
+const LAND_MIN_OPEN = 10;
+
 export function planCompass(
   ctx: RenderCtx,
   cartouche: CartouchePlan,
@@ -19,56 +28,109 @@ export function planCompass(
 ): CompassPlan | null {
   const { world, proj } = ctx;
   const k = proj.widthPx / 1500;
-  const r = 47 * k;
+  const fullR = 47 * k;
+  const landR = 32 * k; // a region rose over land is a shade smaller, to sit in a clearing
   const { w, h } = world.elev;
 
-  // Only the open, border-connected sea is fair game. oceanDist runs just as
-  // deep inside an inland lake, so without this gate the rose can be dropped in
-  // a lake (it was, on some regional surveys).
+  // Only the open, border-connected sea is fair game. oceanDist runs just as deep
+  // inside an inland lake, and on a region the crop reconnects a lake to the window
+  // edge so the region's own seaMask floods it as sea (#234). Gate on the parent's
+  // authoritative partition too. World sheets carry no seaGate, so this is inert
+  // there and the sea search stays byte-identical to before.
   const sea = seaMask(world.elev, world.seaLevel);
+  const gate = world.region?.seaGate;
 
-  // bounding box of the rose plus the "N" label above it
-  const boxAt = (px: number, py: number): Box => ({
-    x: px - r,
-    y: py - r - 18 * k,
-    w: 2 * r,
-    h: 2 * r + 18 * k,
+  // bounding box of a rose of radius rr, plus the "N" label above it
+  const boxAt = (px: number, py: number, rr: number): Box => ({
+    x: px - rr,
+    y: py - rr - 18 * k,
+    w: 2 * rr,
+    h: 2 * rr + 18 * k,
   });
 
-  // Take the most open water: the largest hop-distance from any shore that still
-  // clears the frame and the furniture. Openness alone keeps the rose out in the
-  // sea rather than in whatever corner is merely farthest from the title.
+  // clears the frame edge and every fixed furniture box, for a rose of radius rr
+  const clears = (px: number, py: number, rr: number): boolean => {
+    const margin = proj.margin;
+    const edge = Math.min(
+      px - margin, py - margin,
+      proj.widthPx - margin - px, proj.heightPx - margin - py,
+    );
+    if (edge < rr + 14 * k) return false;
+    const box = boxAt(px, py, rr);
+    if (boxesOverlap(box, scalebarBox, 8 * k)) return false;
+    if (boxesOverlap(box, cartouche.rect, 6 * k)) return false;
+    if (legendBox && boxesOverlap(box, legendBox, 6 * k)) return false;
+    return true;
+  };
+
+  // Pass 1: the most open water. The largest hop-distance from any shore that still
+  // clears the frame and the furniture. Openness alone keeps the rose out in the sea
+  // rather than in whatever corner is merely farthest from the title.
   let best: { px: number; py: number; open: number } | null = null;
   for (let gy = 4; gy < h - 4; gy += 2) {
     for (let gx = 4; gx < w - 4; gx += 2) {
       const i = gx + gy * w;
       if (sea[i] === 0) continue;
+      if (gate && gate[i] === 0) continue;
       const open = world.oceanDist[i] as number;
       if (open < 7) continue;
       const px = proj.px(gx);
       const py = proj.py(gy);
-      const margin = proj.margin;
-      const edge = Math.min(
-        px - margin, py - margin,
-        proj.widthPx - margin - px, proj.heightPx - margin - py,
-      );
-      if (edge < r + 14 * k) continue;
-      // keep clear of the fixed furniture so the rose never sits on them
-      const box = boxAt(px, py);
-      if (boxesOverlap(box, scalebarBox, 8 * k)) continue;
-      if (boxesOverlap(box, cartouche.rect, 6 * k)) continue;
-      if (legendBox && boxesOverlap(box, legendBox, 6 * k)) continue;
+      if (!clears(px, py, fullR)) continue;
       if (!best || open > best.open) best = { px, py, open };
     }
   }
-  if (!best) return null;
+  if (best) {
+    return { cx: best.px, cy: best.py, r: fullR, box: boxAt(best.px, best.py, fullR) };
+  }
 
-  return {
-    cx: best.px,
-    cy: best.py,
-    r,
-    box: boxAt(best.px, best.py),
-  };
+  // Pass 2 (region only): the window holds no open sea to anchor a rose. Rather than
+  // vanish, drop a smaller rose on the most open LAND clearing, as a plain orientation
+  // aid (ratified for #251). World sheets never reach here, so their goldens are
+  // untouched; a fully closed window (no sea, no open land) still yields no rose.
+  if (!world.region) return null;
+  const landOpen = landOpenness(world);
+  let bestLand: { px: number; py: number; open: number } | null = null;
+  for (let gy = 4; gy < h - 4; gy += 2) {
+    for (let gx = 4; gx < w - 4; gx += 2) {
+      const openv = landOpen[gx + gy * w] as number;
+      if (openv < LAND_MIN_OPEN) continue;
+      const px = proj.px(gx);
+      const py = proj.py(gy);
+      if (!clears(px, py, landR)) continue;
+      if (!bestLand || openv > bestLand.open) bestLand = { px, py, open: openv };
+    }
+  }
+  if (bestLand) {
+    return { cx: bestLand.px, cy: bestLand.py, r: landR, box: boxAt(bestLand.px, bestLand.py, landR) };
+  }
+  return null;
+}
+
+/**
+ * #251: hop distance from the nearest "busy" cell — any water, any settlement, or
+ * high ground — so the deepest interior of an open lowland scores highest. Drives
+ * the region land-rose fallback, and is only ever computed when a window has no open
+ * sea. High ground (partway up the land's own relief) is a proxy for the glyph-dense
+ * mountains a rose should not sit on.
+ */
+function landOpenness(world: World): Float64Array {
+  const { w, h, data } = world.elev;
+  const sea = world.seaLevel;
+  let maxEl = -Infinity;
+  for (const v of data) maxEl = Math.max(maxEl, v as number);
+  const highGround = sea + (maxEl - sea) * 0.55;
+  const settlement = new Uint8Array(w * h);
+  for (const s of world.settlements) {
+    const sx = Math.round(s.x);
+    const sy = Math.round(s.y);
+    if (sx >= 0 && sy >= 0 && sx < w && sy < h) settlement[sx + sy * w] = 1;
+  }
+  return bfsDistance(w, h, (x, y) => {
+    const i = x + y * w;
+    const e = data[i] as number;
+    return e <= sea || e >= highGround || settlement[i] === 1;
+  });
 }
 
 export function compassLayer(ctx: RenderCtx, plan: CompassPlan): SvgNode {

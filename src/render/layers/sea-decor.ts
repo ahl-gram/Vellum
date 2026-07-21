@@ -39,6 +39,10 @@ export function seaDecorLayer(
     for (let gx = 4; gx < w - 4; gx += 2) {
       const d = world.oceanDist[gx + gy * w] as number;
       if (d < 5) continue;
+      // #251: oceanDist runs just as deep inside an inland lake, so on a region gate
+      // to the parent's genuine sea or a wave/serpent/ship lands in a lake. Inert on
+      // world sheets (no seaGate), keeping the committed goldens byte-identical.
+      if (world.region?.seaGate && world.region.seaGate[gx + gy * w] === 0) continue;
       const px = proj.px(gx);
       const py = proj.py(gy);
       if (!clearOf(px, py, 30 * k)) continue;
