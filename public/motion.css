@@ -1,0 +1,235 @@
+/* ==========================================================================
+   Paper & Ink: the shared motion desk (#126, epic #125)
+   --------------------------------------------------------------------------
+   One physical motion language for every hand-authored sheet: paper moves
+   (tips, lifts, presses, unfurls, settles) and ink appears (draws, dries,
+   stamps). Linked root-absolute (/motion.css) from the six hand-authored
+   pages; the generated atlas/gallery arrive in Sub 5.
+
+   Byte-safe by construction: this styles the LIVE DOM only. The determinism
+   contract protects the SVG string and committed files, never the rendered
+   page (see epic #125). No src/, no chart bytes, no golden.
+   ========================================================================== */
+
+:root {
+  /* Durations: paper is quick (160-340ms), ink ceremonies are slow (500ms+). */
+  --paper-quick: 180ms;   /* press, lift, nav underline, term tip */
+  --paper: 260ms;         /* standard settle */
+  --paper-settle: 340ms;  /* larger arrivals */
+  --unfurl: 650ms;        /* the long rolled map opening (pinned cards, panels) */
+  --unfurl-quick: 400ms;  /* the same curve at ~60%, for hover previews */
+  --ink-draw: 1200ms;     /* a stroke drawing itself (the coastline) */
+  --ink-dry: 1200ms;      /* a wash or ink drying in */
+  --turn: 900ms;          /* the weighty sheet turn: same world, new dress (#131).
+                             Read by sheet-turn.js's WAAPI. */
+  --verso-turn: 1200ms;   /* the heavier, ceremonial flip to read the chart's back
+                             (#116). Slower than a style re-dress on purpose: turning
+                             the whole sheet over is the bigger gesture. CSS transition. */
+
+  /* #170 The redraft grade: the Sub 8 inset inking itself in. Deliberately SHORTER
+     than the once-per-draw world arrival (--ink-draw/--ink-dry 1200ms): a redraft
+     fires on every settle, so its ceremony must read as a quick fine-pen pass, not
+     the full drafting moment. The dry waits stagger the newly labeled names by tier
+     (towns first, villages after), both past the inset's 200ms crossfade so a name
+     never dries onto a sheet that is still translucent. */
+  --redraft-draw: 600ms;           /* the region coastline inking in */
+  --redraft-dry: 450ms;            /* the wash + a newly labeled name drying */
+  --redraft-dry-wait: 260ms;       /* towns (and any rarer higher tier) start here */
+  --redraft-dry-wait-village: 500ms; /* villages follow the towns */
+  --redraft-dry-wait-hamlet: 740ms;  /* #171 hamlets, the smallest places, dry in last */
+  --glide: 300ms;         /* #170 the voiced zoom glide (buttons, +/- keys, 0 home).
+                             Read lazily by app.js and handed to the zoom controller;
+                             reduced motion bypasses it entirely (instant baseline). */
+
+  /* Easings: paper settles (ease-out, no bounce); the unfurl starts stiff and
+     flexes just past flat, per the ratified one ruled exception. */
+  --ease-paper: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-unfurl: cubic-bezier(0.66, 0, 0.2, 1.03);
+  --ease-turn: cubic-bezier(0.62, 0, 0.34, 1);  /* the page heaves over: a weighty
+                             ease-in-out, slow at both edges of the turn. */
+
+  --iron-red: #7a1f12;    /* the site's ink red (hunt star, status) */
+}
+
+/* --------------------------------------------------------------------------
+   Keyframe vocabulary. Authored here as the shared foundation (epic #125);
+   Subs 2-6 attach these to their elements (charts, cards, chronicle dots,
+   soundings). They render nothing on their own in Sub 1; a consuming sub may
+   tune the exact stops when it wires one up.
+   -------------------------------------------------------------------------- */
+
+/* Paper settles onto the desk: rises into place with a faint rotate and a small
+   overshoot past flat, then rests. (#127: the Explorer chart arrival and the
+   staggered atlas plates. Tuned from Sub 1's placeholder by its first consumer.) */
+@keyframes paperSettle {
+  from { opacity: 0; transform: translateY(16px) rotate(0.9deg); }
+  70%  { opacity: 1; transform: translateY(-2px) rotate(-0.15deg); }
+  to   { opacity: 1; transform: translateY(0) rotate(0); }
+}
+
+/* Ink draws itself along a stroke. The consumer sets --draw-len (the path's total
+   length) and a matching stroke-dasharray inline, then removes both on animationend
+   to restore the pristine stroke. (#127: the coastline. Later: the voyage track.) */
+@keyframes inkDraw {
+  from { stroke-dashoffset: var(--draw-len, 0); }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* A wash dries in behind the drawn ink: fill-opacity rises from bare paper to full.
+   (#127: the land wash settling in behind the coastline.) */
+@keyframes washDry {
+  from { fill-opacity: 0; }
+  to   { fill-opacity: 1; }
+}
+
+/* Ink stamped down: it appears and presses to size. (Subs 3-4: dots, marks.) */
+@keyframes inkStamp {
+  from { opacity: 0; transform: scale(1.35); }
+  60%  { opacity: 1; }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* The long roll opens: a rolled sheet tips down stiff from its anchored edge,
+   swings just past flat, flexes back, then settles (Alex's ruled dramatic unfurl,
+   2026-07-04). Self-perspective lives in the transform so a consumer needs no
+   perspective on an ancestor; the consumer sets transform-origin to the anchored
+   edge (top when the sheet hangs below its anchor, bottom when it sits above).
+   Pair with --ease-unfurl and --unfurl (or --unfurl-quick on hover). (#128: the
+   place card's inner sheet and the scrubber panel.) */
+@keyframes paperUnfurl {
+  from { opacity: 0; transform: perspective(900px) rotateX(-62deg); }
+  72%  { opacity: 1; transform: perspective(900px) rotateX(7deg); }
+  to   { opacity: 1; transform: perspective(900px) rotateX(0); }
+}
+
+/* Ink drying: the stroke appears, then deepens to full. (Sub 2: the coast.) */
+@keyframes dryingInk {
+  from { opacity: 0; }
+  45%  { opacity: 0.85; }
+  to   { opacity: 1; }
+}
+
+/* A sounding ripple spreads and fades. (Sub 4: the daily sounding.) */
+@keyframes inkRipple {
+  from { opacity: 0.55; transform: scale(0.2); }
+  to   { opacity: 0; transform: scale(1); }
+}
+
+/* --------------------------------------------------------------------------
+   Universal press and lift. Every button and action-styled link rises under
+   the hand and presses on the tap (the touch twin ships in the same rule).
+
+   CAREFUL: the Explorer's .place-hit overlay reset is load-bearing and asserted
+   by e2e (idle transparent background + zero border, suite-cards P2/P3). It is
+   a <button>, so it MUST be excluded here or its :hover would inherit the lift
+   and shadow. The `:not(.place-hit)` exclusion is guarded by suite-cards P2c.
+   -------------------------------------------------------------------------- */
+button:not(.place-hit),
+.card,
+.actions a,
+.action-link {
+  transition: transform var(--paper-quick) var(--ease-paper),
+              box-shadow var(--paper-quick) var(--ease-paper);
+}
+button:not(.place-hit):hover,
+.actions a:hover,
+.action-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgb(61 47 31 / 0.2);
+}
+button:not(.place-hit):active,
+.actions a:active,
+.action-link:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgb(61 47 31 / 0.14);
+}
+/* Cards lift a touch further and keep their own deeper resting shadow line. */
+.card:hover  { transform: translateY(-3px); box-shadow: 0 14px 30px rgb(61 47 31 / 0.2); }
+.card:active { transform: translateY(1px);  box-shadow: 0 4px 12px rgb(61 47 31 / 0.12); }
+
+/* --------------------------------------------------------------------------
+   The nav menu. Links lift under the hand, a hairline iron-red underline draws
+   in from the left, and a tap presses (the touch twin). Present on all six
+   pages via .topnav.
+   -------------------------------------------------------------------------- */
+.topnav a {
+  display: inline-block;
+  position: relative;
+  text-decoration: none;
+  transition: transform var(--paper-quick) var(--ease-paper);
+}
+.topnav a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 1px;
+  background: var(--iron-red);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--paper-quick) var(--ease-paper);
+}
+.topnav a:hover              { transform: translateY(-2px); }
+.topnav a:active             { transform: translateY(0); }
+.topnav a:hover::after,
+.topnav a:focus-visible::after,
+.topnav a:active::after      { transform: scaleX(1); }
+
+/* --------------------------------------------------------------------------
+   Homepage chart plates. They rest FLAT and tip + lift under the hand, the same
+   gesture as the Explorer's bound atlas plates (#146) and the generated
+   atlas/gallery shelves (#130): straight at rest, a small tip on hover, so every
+   chart surface on the site reacts to the hand the same way (Alex, 2026-07-06).
+   -------------------------------------------------------------------------- */
+.plate {
+  transition: transform var(--paper) var(--ease-paper),
+              box-shadow var(--paper) var(--ease-paper);
+}
+.plate:hover {
+  transform: translateY(-5px) rotate(-0.6deg);
+  box-shadow: 0 20px 44px rgb(61 47 31 / 0.28);
+}
+.plate:active { transform: translateY(-1px) rotate(0deg); }
+
+/* --------------------------------------------------------------------------
+   The folio (#130, epic #125). Navigating Vellum reads as turning through one
+   bound folio: cross-document View Transitions give every same-origin page swap
+   a quiet sheet crossfade with a small 6px slide, the leaf that is leaving
+   lifting away as the one arriving settles down. Pure CSS, zero JS, no router
+   (ratified call D): Chromium and Safari get the folio feel; Firefox and any
+   engine without cross-document support keep today's instant loads, which is
+   the fallback. Both the old and new document must opt in -- all six hand-
+   authored pages link this file, and Sub 5 adds the same link to the generated
+   gallery/atlas templates so the shelves join the folio too (ratified call C,
+   knowingly relaxing the convention that site-wide changes skip generated pages).
+   These view-transition pseudo-elements live on their own tree, so the universal
+   `*` reduced-motion collapse below does NOT reach them; the folio is turned off
+   explicitly there instead (navigation: none).
+   -------------------------------------------------------------------------- */
+@view-transition { navigation: auto; }
+
+::view-transition-old(root) { animation: folioLeave var(--paper) var(--ease-paper) both; }
+::view-transition-new(root) { animation: folioArrive var(--paper) var(--ease-paper) both; }
+@keyframes folioLeave  { to   { opacity: 0; transform: translateY(-6px); } }
+@keyframes folioArrive { from { opacity: 0; transform: translateY(6px); } }
+
+/* --------------------------------------------------------------------------
+   Every gesture has a still twin. This ONE block collapses all motion to
+   instant end states: the gestures above, the page-CSS gestures (glossary
+   term tip), AND the two pre-existing animations retrofitted into the doctrine
+   (the seed-of-the-day hunt star, the Explorer chronicle-strip fade). The
+   universal duration collapse reaches any animation/transition site-wide (every
+   chart surface now rests flat, so there is no static resting transform left to
+   flatten); and the nested @view-transition turns the folio off (the pseudo-
+   element tree the `*` rule cannot reach).
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+  @view-transition { navigation: none; }
+}
