@@ -16,12 +16,15 @@ import { fileURLToPath } from "node:url";
  *   node scripts/clean-public-generated.ts <root>   # cleans another root (tests)
  */
 
-// Relative to the cleaned root. Mirrors the gitignored set under docs/.
+// Relative to the cleaned root. Mirrors the gitignored set under docs/, plus
+// the showcases Sub 4 (#205) moved into public/ generation.
 export const GENERATED_SUBTREES: ReadonlyArray<string> = [
   "explorer/engine",
   "explorer/app.bundle.js",
   "explorer/worker.bundle.js",
   "seed-of-the-day/app.bundle.js",
+  "atlas",
+  "gallery",
 ];
 
 export async function cleanPublicGenerated(root: string): Promise<void> {

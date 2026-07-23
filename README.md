@@ -53,7 +53,7 @@ npm run chart -- --style nautical            # no --seed → random (and printed
 npm run chart -- --seed 42 --png             # also rasterize a PNG (needs a browser)
 npm test                                     # full test suite
 npm run check                                # typecheck
-npm run site                                 # rebuild the docs/ showcase
+npm run charts:regen                         # rewrite the committed hero charts (re-rolls only)
 npm run og                                   # rebuild the committed social card (docs/og.png)
 ```
 
@@ -200,8 +200,8 @@ Two things to know:
 - **Editing the cultures re-rolls existing seeds.** Names come from a labeled
   fork of the seed, so adding, removing, reordering, or editing a culture shifts
   the draw sequence and renames every world: a seed you saved comes back with a
-  different identity. After a naming change, rebuild the showcase
-  (`npm run site`) and update the hero captions.
+  different identity. After a naming change, regenerate the committed hero
+  charts (`npm run charts:regen`) and update the hero captions.
 
   The **Second Edition** (issue #235) is the second change of this kind: it grew
   the roster from six cultures to ten (adding tsuren, zoryan, tezcal, ordai), so

@@ -29,6 +29,8 @@ public/explorer/engine/
 public/explorer/app.bundle.js
 public/explorer/worker.bundle.js
 public/seed-of-the-day/app.bundle.js
+public/atlas/
+public/gallery/
 
 .claude/settings.local.json
 # Transient review worktrees spawned by Claude Code workflows.

@@ -12,10 +12,10 @@ import { buildGallery } from "../src/cli/gallery.ts";
  *             `tsc -p tsconfig.browser.json --outDir dist/explorer/engine`)
  *
  * docs/ is the committed SOURCE: the hand-authored HTML pages, app.js/worker.js,
- * and the pinned hero charts/. It is never the deploy target here, so a stale
- * local `npm run site` (which still writes generated files into docs/) cannot
- * leak into dist/: the copy filter below skips the generated subdirs, and the
- * atlas/gallery/engine are always regenerated fresh.
+ * and the pinned hero charts/. It is never the deploy target here, so any stale
+ * generated files still sitting in docs/ (from the pre-Sub-4 `npm run site` era)
+ * cannot leak into dist/: the copy filter below skips the generated subdirs, and
+ * the atlas/gallery/engine are always regenerated fresh.
  */
 
 const DOCS = resolve("docs");
@@ -26,8 +26,8 @@ const GALLERY_SEED = 100;
 
 // docs/ subpaths that are generated output, never copied into dist/ as source:
 // they are regenerated fresh into dist/ instead. Includes the esbuild .bundle.js
-// twins (#163), which are rebuilt into dist/ by build-explorer-bundle.ts after the
-// tsc engine emit, so a stale local `npm run site` twin cannot leak into dist/.
+// twins (#163), which are rebuilt into dist/ by build-explorer-bundle.ts after
+// the tsc engine emit, so a stale local twin in docs/ cannot leak into dist/.
 const GENERATED = new Set([
   join(DOCS, "explorer", "engine"),
   join(DOCS, "atlas"),

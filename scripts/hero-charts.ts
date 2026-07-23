@@ -7,11 +7,12 @@ import { STYLES } from "../src/render/style.ts";
  * Single source of truth for the committed `docs/charts/*.svg` showcase: the
  * hero seed's four style charts plus its realm-arms strip for the landing page.
  *
- * Both `scripts/build-site.ts` (which WRITES these files on a re-roll / hero
- * refresh) and the drift guard `test/site/hero-charts.test.ts` (which byte-
- * compares the committed files against a fresh render) call this one function,
- * so the two can never disagree on how a hero chart is drawn. A render change
- * that alters seed 42 now fails the guard until `npm run site` regenerates.
+ * Both `scripts/regen-hero-charts.ts` (which WRITES these files on a re-roll /
+ * hero refresh, via `npm run charts:regen`) and the drift guard
+ * `test/site/hero-charts.test.ts` (which byte-compares the committed files
+ * against a fresh render) call this one function, so the two can never disagree
+ * on how a hero chart is drawn. A render change that alters seed 42 now fails
+ * the guard until `npm run charts:regen` regenerates.
  */
 
 export const HERO_SEED = 42;
