@@ -3,14 +3,14 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
-import { POSTER_PRESETS } from "../../docs/print-room/poster-presets.js";
+import { POSTER_PRESETS } from "../../public/print-room/poster-presets.js";
 
 // Acceptance-4 (#134): a Grand poster of seed 42 antique renders the covenant world
 // (defaultRecipe(42)) at the Grand width. The CLI `poster` verb this once mirrored was
 // retired in #138 (git history is its archive); the parity that still matters is that the
 // Print Room's poster order and every other entry point draw the SAME world for a seed.
 // The covenant is RECIPE-level, not byte-level: the Print Room proof defaults its legend
-// ON (docs/print-room/app.js) and a legend is a structural SVG group, so a poster is
+// ON (public/print-room/app.js) and a legend is a structural SVG group, so a poster is
 // deliberately NOT full-SVG identical to a plain chart. What must match is the WORLD and
 // the WIDTH the plate renders at. The option-carry (that a poster inherits the on-screen
 // proof's legend/arms/theme) is proven in the print-room e2e, not here.

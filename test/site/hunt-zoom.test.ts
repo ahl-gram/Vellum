@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 /**
  * The Surveyor's Glass, Sub 6 (#167): the Daily Hunt takes the glass. The
  * seed-of-the-day page adopts the SAME shared zoom controller the Explorer uses
- * (docs/shared/zoom-controller.js), geometric-only: #map is wrapped in a stable
+ * (public/shared/zoom-controller.js), geometric-only: #map is wrapped in a stable
  * #map-viewport clip/gesture box, the live CSS transform lands on #map so the
  * hunt star and sounding overlays (children of #map) ride one frame, and the
  * guess-click math is untouched (it is ratio-based against getBoundingClientRect,
@@ -26,7 +26,7 @@ const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
 test("HZ1 the Hunt wraps #map in a stable #map-viewport clip/gesture box (#167)", () => {
-  const html = read("docs/seed-of-the-day/index.html");
+  const html = read("public/seed-of-the-day/index.html");
   // #map-viewport is the box d3-zoom binds to; #map (the transform target) nests
   // directly inside it, exactly like the Explorer's #164 wrapper.
   assert.match(
@@ -39,7 +39,7 @@ test("HZ1 the Hunt wraps #map in a stable #map-viewport clip/gesture box (#167)"
 });
 
 test("HZ2 app.js adopts the shared zoom controller, bound to #map-viewport / #map (#167)", () => {
-  const js = read("docs/seed-of-the-day/app.js");
+  const js = read("public/seed-of-the-day/app.js");
   assert.match(
     js,
     /import\s*\{\s*createZoomController\s*\}\s*from\s*"\.\.\/shared\/zoom-controller\.js"/,
@@ -51,13 +51,13 @@ test("HZ2 app.js adopts the shared zoom controller, bound to #map-viewport / #ma
 });
 
 test("HZ3 app.js exposes the deterministic zoom hooks the e2e drives (#167)", () => {
-  const js = read("docs/seed-of-the-day/app.js");
+  const js = read("public/seed-of-the-day/app.js");
   assert.match(js, /window\.__vellumZoomTo\s*=/, "app.js should expose __vellumZoomTo");
   assert.match(js, /window\.__vellumZoomState\s*=/, "app.js should expose __vellumZoomState");
 });
 
 test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)", () => {
-  const js = read("docs/seed-of-the-day/app.js");
+  const js = read("public/seed-of-the-day/app.js");
   // Inspect the ACTUAL import specifiers, not prose: the Hunt magnifies geometrically
   // only, and importing the LOD schedule or the region redraft would let zoom reveal new
   // places and change the clue difficulty. (Comments are free to name these paths.)
@@ -73,7 +73,7 @@ test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)
 });
 
 test("HZ5 index.css gives #map-viewport the clip + touch-action wiring and #map a top-left pivot (#167)", () => {
-  const css = read("docs/seed-of-the-day/index.css");
+  const css = read("public/seed-of-the-day/index.css");
   // Clip ONLY while zoomed, so the idle DOM (arrival ceremony overflow, drop shadow)
   // is byte-identical to today at home (k=1).
   assert.match(css, /#map-viewport\.zoomed\s*\{[^}]*overflow:\s*hidden/s, "#map-viewport.zoomed should clip");

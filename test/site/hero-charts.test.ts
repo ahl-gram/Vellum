@@ -6,7 +6,7 @@ import { heroChartSvgs } from "../../scripts/hero-charts.ts";
 import { diffSvg, DRIFT_TOL } from "../../scripts/svg-drift.ts";
 
 /**
- * Drift guard (#40 part 2): the committed `docs/charts/*.svg` heroes are content
+ * Drift guard (#40 part 2): the committed `public/charts/*.svg` heroes are content
  * the homepage embeds by relative path, but nothing re-rendered them from src/.
  * A `src/render` change that alters how seed 42 draws could leave the homepage
  * showing stale charts silently. This re-renders them via heroChartSvgs() (the
@@ -17,9 +17,9 @@ import { diffSvg, DRIFT_TOL } from "../../scripts/svg-drift.ts";
  * `npm run site`.
  */
 
-const chartsDir = fileURLToPath(new URL("../../docs/charts/", import.meta.url));
+const chartsDir = fileURLToPath(new URL("../../public/charts/", import.meta.url));
 
-test("committed docs/charts heroes match a fresh src/ render (structure exact, numbers ULP-tolerant)", async () => {
+test("committed public/charts heroes match a fresh src/ render (structure exact, numbers ULP-tolerant)", async () => {
   let worstAbs = 0;
   for (const [name, svg] of heroChartSvgs()) {
     const committed = await readFile(chartsDir + name, "utf8");
@@ -27,7 +27,7 @@ test("committed docs/charts heroes match a fresh src/ render (structure exact, n
     if (d === null) continue; // byte-identical (same platform)
     if (d.kind === "structure") {
       assert.fail(
-        `docs/charts/${name} drifted from src/ — a structural change at offset ${d.at}. ` +
+        `public/charts/${name} drifted from src/ — a structural change at offset ${d.at}. ` +
           `Run \`npm run site\` to regenerate.\n  committed: …${d.committed}…\n  fresh:     …${d.fresh}…`,
       );
     }
@@ -35,7 +35,7 @@ test("committed docs/charts heroes match a fresh src/ render (structure exact, n
     assert.equal(
       d.overTol,
       0,
-      `docs/charts/${name}: ${d.overTol}/${d.total} numbers drifted beyond ${DRIFT_TOL}px ` +
+      `public/charts/${name}: ${d.overTol}/${d.total} numbers drifted beyond ${DRIFT_TOL}px ` +
         `(max Δ ${d.maxAbs.toExponential(2)}) — run \`npm run site\` to regenerate. e.g. ${d.examples.join("; ")}`,
     );
   }
@@ -45,7 +45,7 @@ test("committed docs/charts heroes match a fresh src/ render (structure exact, n
   }
 });
 
-test("committed docs/charts has no orphaned or missing SVGs", async () => {
+test("committed public/charts has no orphaned or missing SVGs", async () => {
   const produced = new Set(heroChartSvgs().keys());
   const committed = new Set((await readdir(chartsDir)).filter((f) => f.endsWith(".svg")));
   const orphans = [...committed].filter((f) => !produced.has(f));
@@ -53,6 +53,6 @@ test("committed docs/charts has no orphaned or missing SVGs", async () => {
   assert.deepEqual(
     { orphans, missing },
     { orphans: [], missing: [] },
-    "docs/charts file set disagrees with heroChartSvgs() — run `npm run site` to regenerate",
+    "public/charts file set disagrees with heroChartSvgs() — run `npm run site` to regenerate",
   );
 });

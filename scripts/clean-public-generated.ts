@@ -16,8 +16,8 @@ import { fileURLToPath } from "node:url";
  *   node scripts/clean-public-generated.ts <root>   # cleans another root (tests)
  */
 
-// Relative to the cleaned root. Mirrors the gitignored set under docs/, plus
-// the showcases Sub 4 (#205) moved into public/ generation.
+// Relative to the cleaned root: the gitignored generated set under public/
+// (runtime trees from Sub 3 #204, showcases from Sub 4 #205).
 export const GENERATED_SUBTREES: ReadonlyArray<string> = [
   "explorer/engine",
   "explorer/app.bundle.js",

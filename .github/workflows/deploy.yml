@@ -1,17 +1,14 @@
 name: Deploy site to GitHub Pages
 
 # Builds the site into dist/ and publishes it via the GitHub Pages Actions
-# pipeline. Replaces the legacy "serve main:/docs verbatim" deploy.
+# pipeline. Since Sub 5 (#206) `npm run build` is the Astro build: astro:generate
+# writes the runtime trees (engine, bundles, atlas/gallery) into public/, then
+# `astro build` assembles dist/, which upload-pages-artifact publishes.
 #
-# CUTOVER (do NOT skip the order — see PAGES-DEPLOY-SPIKE.md):
-#   1. Land this workflow + the build wiring with the generated files STILL
-#      committed, and confirm a manual run's build job is green.
-#   2. Switch the repo's Pages source to "GitHub Actions" (build_type: workflow).
-#      Until this is done, the deploy job below errors by design.
-#   3. Confirm the Actions deploy serves the live site.
-#   4. THEN land the eviction (.gitignore + git rm of engine/atlas/gallery).
-# Reversing 2 and 4 takes the live Explorer down (legacy Pages serves the
-# committed docs/, which would no longer contain the engine).
+# Contractual shape (ratified Sub 1 decision doc, #202): hand-rolled npm ci
+# pipeline (no withastro/action: the repo has a lockfile and a frozen npm ci
+# flow), `path: dist` matches Astro's default outDir, and the custom domain
+# (vellum.route12b.net) lives in the repo's Pages settings, not in a CNAME file.
 
 on:
   push:

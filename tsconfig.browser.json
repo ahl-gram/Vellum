@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
-    "outDir": "docs/explorer/engine",
+    "outDir": "public/explorer/engine",
     "rootDir": "src",
     "module": "esnext",
     "moduleResolution": "bundler",

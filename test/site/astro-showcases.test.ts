@@ -46,8 +46,8 @@ test("build-site.ts is retired; charts:regen and the showcase step replace it", 
   assert.equal(pkg.scripts["dev"], "npm run astro:dev", "local preview repoints to the Astro dev server");
   assert.equal(
     pkg.scripts["build"],
-    "node scripts/build-dist.ts && tsc -p tsconfig.browser.json --outDir dist/explorer/engine && node scripts/build-explorer-bundle.ts dist",
-    "the legacy deploy build survives byte-unchanged until Sub 5 cuts over",
+    "npm run astro:generate && astro build",
+    "the deploy build is the Astro build since the Sub 5 cutover (#206)",
   );
 });
 
@@ -93,18 +93,8 @@ test("the no-arg CLI generates into ./public relative to CWD (the exact astro:ge
   rmSync(scratch, { recursive: true, force: true });
 });
 
-test("the dual-write contract and the reverse charts/fonts guard hold", () => {
-  // charts:regen must write BOTH committed charts dirs while the dual-copy
-  // window lasts (drop docs/charts at Sub 5).
-  assert.deepEqual([...HERO_CHART_DIRS], ["docs/charts", "public/charts"]);
-  // Reverse guard: Sub 2's boundary guard proves docs -> public byte-identity
-  // for the support set, but an EXTRA file in public/charts or public/fonts
-  // would ship unreviewed. Nothing generated lands in either dir.
-  for (const dir of ["charts", "fonts"]) {
-    for (const file of readdirSync(root(`public/${dir}`)).filter((f) => f !== ".DS_Store")) {
-      assert.ok(existsSync(root(`docs/${dir}/${file}`)), `public/${dir}/${file} has no docs/ counterpart`);
-    }
-  }
+test("charts:regen writes the single committed charts dir (docs/ retired at Sub 5)", () => {
+  assert.deepEqual([...HERO_CHART_DIRS], ["public/charts"]);
 });
 
 test("regenHeroCharts writes the committed golden set, identically, into every charts dir", { timeout: 120_000 }, async () => {
@@ -113,7 +103,7 @@ test("regenHeroCharts writes the committed golden set, identically, into every c
   for (const t of [tmpA, tmpB]) rmSync(t, { recursive: true, force: true });
   await regenHeroCharts([tmpA, tmpB]);
 
-  const committed = readdirSync(root("docs/charts")).filter((f) => f.endsWith(".svg")).sort();
+  const committed = readdirSync(root("public/charts")).filter((f) => f.endsWith(".svg")).sort();
   for (const dir of [tmpA, tmpB]) {
     const written = readdirSync(dir).filter((f) => f.endsWith(".svg")).sort();
     assert.deepEqual(written, committed, "the successor must write exactly the committed golden filenames");

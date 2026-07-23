@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { cleanPublicGenerated, GENERATED_SUBTREES } from "../../scripts/clean-public-generated.ts";
@@ -12,57 +12,15 @@ process.env.ASTRO_TELEMETRY_DISABLED = "1";
  * Scriptorium Sub 3 (#204): the app surfaces served verbatim from public/. The
  * spec is the ratified Sub 1 decision doc (the 2026-07-21 comment on #202),
  * sections 1 and 3 plus constraints 2, 3, 4, and 10: the committed sources under
- * docs/{explorer,print-room,seed-of-the-day,lib,shared} are duplicated
- * byte-identical into public/ (widening Sub 2's dual-copy window until Sub 5
- * retires docs/), and the gitignored runtime trees (the tsc engine emit + the
- * three esbuild bundle twins) are regenerated into public/ by
- * `npm run astro:generate` before every astro dev/build, with decision D's
- * clean-before-regen so a renamed engine module cannot leave an importable
- * orphan that masks a 404 locally.
+ * public/{explorer,print-room,seed-of-the-day,lib,shared} ship verbatim (since
+ * Sub 5 retired docs/, public/ is their single committed home), and the
+ * gitignored runtime trees (the tsc engine emit + the three esbuild bundle
+ * twins) are regenerated into public/ by `npm run astro:generate` before every
+ * astro dev/build, with decision D's clean-before-regen so a renamed engine
+ * module cannot leave an importable orphan that masks a 404 locally.
  */
 
 const root = (p = "") => fileURLToPath(new URL(`../../${p}`, import.meta.url));
-
-// The five committed directories of the widened dual-copy window.
-const MIRRORED_DIRS = ["explorer", "print-room", "seed-of-the-day", "lib", "shared"] as const;
-
-const isGenerated = (rel: string) =>
-  GENERATED_SUBTREES.some((g) => rel === g || rel.startsWith(`${g}/`));
-
-/** Committed-shaped files under base/dir: everything except generated output and OS cruft. */
-const mirroredFiles = (base: string, dir: string): string[] => {
-  if (!existsSync(root(join(base, dir)))) return [];
-  return readdirSync(root(join(base, dir)), { recursive: true, withFileTypes: true })
-    .filter((e) => e.isFile() && e.name !== ".DS_Store")
-    .map((e) => join(e.parentPath.slice(root(base).length + 1), e.name))
-    .filter((rel) => !isGenerated(rel))
-    .sort();
-};
-
-test("every committed app-surface file has a byte-identical public/ twin", () => {
-  for (const dir of MIRRORED_DIRS) {
-    const files = mirroredFiles("docs", dir);
-    assert.ok(files.length > 0, `docs/${dir} should hold committed source`);
-    for (const rel of files) {
-      assert.ok(existsSync(root(`public/${rel}`)), `public/${rel} should exist (Sub 3 verbatim set)`);
-      assert.ok(
-        readFileSync(root(`docs/${rel}`)).equals(readFileSync(root(`public/${rel}`))),
-        `public/${rel} must stay byte-identical to docs/${rel} until Sub 5 retires docs/`,
-      );
-    }
-  }
-});
-
-test("public/ carries no app-surface file docs/ does not have (nothing ships unreviewed)", () => {
-  for (const dir of MIRRORED_DIRS) {
-    for (const rel of mirroredFiles("public", dir)) {
-      assert.ok(
-        existsSync(root(`docs/${rel}`)),
-        `public/${rel} has no docs/ counterpart: only the committed verbatim set may ship`,
-      );
-    }
-  }
-});
 
 // The literal Sub 3 floor. Deliberately NOT derived from GENERATED_SUBTREES:
 // the review of this sub caught that a constant serving as both subject and
@@ -97,7 +55,7 @@ test("astro:generate regenerates the runtime trees into public/, and dev/build r
     "astro:generate must clean, emit the engine, bundle, then generate the showcases, all into public/",
   );
   assert.equal(pkg.scripts["astro:dev"], "npm run astro:generate && astro dev", "dev parity needs the runtime trees");
-  assert.equal(pkg.scripts["astro:build"], "npm run astro:generate && astro build", "the build serves what dev serves");
+  assert.equal(pkg.scripts["build"], "npm run astro:generate && astro build", "the build serves what dev serves");
   assert.equal(pkg.scripts["astro:preview"], "astro preview", "preview reuses the last build untouched");
 });
 

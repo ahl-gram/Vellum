@@ -38,7 +38,7 @@ export default defineConfig({
   site: "https://vellum.route12b.net",
   // Every internal link and og:url is trailing-slash directory form (constraint 8).
   trailingSlash: "always",
-  // The migrated pages must stay near-verbatim against their docs/ originals:
+  // The migrated pages' markup must stay near-verbatim (no minification drift):
   // no whitespace minification, and no fingerprinted stylesheet emitted for the
   // layout's small shell <style> (nothing on this site may be fingerprinted).
   compressHTML: false,

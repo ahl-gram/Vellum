@@ -13,17 +13,17 @@ import { fileURLToPath } from "node:url";
  * source it replaces (no minify, no syntax downlevel, one self-contained bundle
  * per entry, no shared chunks).
  *
- * Runs AFTER the tsc engine emit (the site/build npm scripts), because esbuild
- * inlines the ./engine/*.js the entries import, so those files must be on disk.
+ * Runs AFTER the tsc engine emit (`npm run astro:generate` sequences it so),
+ * because esbuild inlines the ./engine/*.js the entries import, so those files
+ * must be on disk.
  *
  *   node scripts/build-explorer-bundle.ts public   # alongside `npm run astro:generate`
- *   node scripts/build-explorer-bundle.ts dist     # alongside `npm run build`
  */
 
-// entry -> twin, relative to the site root (public/ for `npm run astro:generate`,
-// dist/ for `npm run build`). The worker is its own entry: it is spawned by a
-// string URL, invisible to import tracing, so it can never be a shared chunk of
-// app.js.
+// entry -> twin, relative to the site root (public/, the single committed home
+// of the app surfaces since Sub 5 #206). The worker is its own entry: it is
+// spawned by a string URL, invisible to import tracing, so it can never be a
+// shared chunk of app.js.
 export const BUNDLE_ENTRIES: ReadonlyArray<{ entry: string; twin: string }> = [
   { entry: "explorer/app.js", twin: "explorer/app.bundle.js" },
   { entry: "explorer/worker.js", twin: "explorer/worker.bundle.js" },
@@ -62,7 +62,7 @@ export async function bundleToString(absEntry: string): Promise<string> {
 
 // Run as a script (not when imported by a test): `node build-explorer-bundle.ts [root]`.
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const root = resolve(process.argv[2] ?? "docs");
+  const root = resolve(process.argv[2] ?? "public");
   bundleExplorer(root).catch((err: unknown) => {
     console.error(err instanceof Error ? err.message : err);
     process.exitCode = 1;
