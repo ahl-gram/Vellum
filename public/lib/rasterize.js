@@ -1,6 +1,6 @@
 // The atelier's rasterizer (#135, epic #132 Sub 3). SVG string in, PNG Blob out, with
 // zero dependencies: a blob-URL Image, a canvas, and toBlob. It is deliberately the
-// site's first cross-page client library (docs/lib/), page-agnostic and importing
+// site's first cross-page client library (public/lib/), page-agnostic and importing
 // nothing, so the Print Room's poster PNGs, the Surveyor's Dispatch (#123 v3), and any
 // future card compositor share one code path.
 //

@@ -8,7 +8,7 @@ import type { HistoricalEvent } from "../society/history.ts";
  * deterministic timeline that DWELLS on years carrying chronicle events.
  *
  * No DOM, no RNG. The slider, layer hide/restore, and the requestAnimationFrame
- * loop live in docs/explorer/app.js and are covered by the Explorer e2e.
+ * loop live in public/explorer/app.js and are covered by the Explorer e2e.
  *
  * Play is EVENT-PROPORTIONAL: a deliberate override (the user's call) of the
  * issue's "fixed linear sweep" decision. The sweep skims empty centuries and

@@ -18,7 +18,7 @@ import { seedForDate } from "/explorer/engine/world/seed-of-the-day.js";
 // #134 poster plates. Same-dir module (resolves against this module's URL, /print-room/),
 // unlike the root-absolute worker spawn above. Pure clamp + presets; unit-tested in Node.
 import { POSTER_PRESETS, clampPosterWidth, posterFilename, posterPngFilename } from "./poster-presets.js";
-// #135 the rasterizer: the site's first shared cross-page client library (docs/lib/,
+// #135 the rasterizer: the site's first shared cross-page client library (public/lib/,
 // served at /lib/). Root-absolute like the worker so the path is stable from /print-room/.
 // SVG string in, PNG blob out, fitted under a canvas pixel budget; the pure decision core
 // is unit-tested in Node and its failure paths surface in-voice messages, never silent nulls.
@@ -93,7 +93,7 @@ function refreshOrderControls() {
   if (formatSel) formatSel.disabled = drawing;
 }
 
-// Read the same hash keys the Explorer writes (docs/explorer/hash-sync.js), applying
+// Read the same hash keys the Explorer writes (public/explorer/hash-sync.js), applying
 // only present + valid values: the visible controls (seed, style) and the carried
 // params; everything else stays at its default.
 function applyHash() {

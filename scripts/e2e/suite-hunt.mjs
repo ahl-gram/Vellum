@@ -207,7 +207,7 @@ export async function run(ctx) {
   );
 
   // --- HG: The Surveyor's Glass, Sub 6 (#167) -- the Daily Hunt takes the glass ---
-  // The Hunt adopts the shared zoom controller (docs/shared/zoom-controller.js),
+  // The Hunt adopts the shared zoom controller (public/shared/zoom-controller.js),
   // geometric-only. suite-zoom / suite-zoom-gestures prove the controller's pan/zoom
   // and REAL pinch/drag/wheel on the Explorer; the Hunt wires the IDENTICAL instance, so
   // the risk unique to this page is the guess interaction: does zoom break the guess-click

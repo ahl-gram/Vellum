@@ -1,4 +1,4 @@
-// Types for docs/explorer/camera.js, the pure camera <-> transform bridge (#165).
+// Types for public/explorer/camera.js, the pure camera <-> transform bridge (#165).
 // Declared DOM-free so the project tsconfig (no "dom" lib) can type-check the test
 // that imports it, mirroring verso.d.ts / sheet-turn.d.ts.
 

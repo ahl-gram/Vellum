@@ -1,5 +1,5 @@
 // The Surveyor's Glass (Z): geometric CSS pan/zoom on the Explorer chart, driven by the
-// shared d3-zoom controller (docs/shared/zoom-controller.js). The live transform lands on
+// shared d3-zoom controller (public/shared/zoom-controller.js). The live transform lands on
 // #map inside the #map-viewport clip box; nothing re-renders (the semantic redraft is Sub 8).
 //
 // Sub 3 (#164) built the glass on antique via the deterministic window.__vellumZoomTo /
