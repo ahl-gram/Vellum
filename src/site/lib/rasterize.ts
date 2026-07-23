@@ -1,6 +1,6 @@
 // The atelier's rasterizer (#135, epic #132 Sub 3). SVG string in, PNG Blob out, with
 // zero dependencies: a blob-URL Image, a canvas, and toBlob. It is deliberately the
-// site's first cross-page client library (public/lib/), page-agnostic and importing
+// site's first cross-page client library (src/site/lib/), page-agnostic and importing
 // nothing, so the Print Room's poster PNGs, the Surveyor's Dispatch (#123 v3), and any
 // future card compositor share one code path.
 //
@@ -20,12 +20,17 @@
 // ~13.2 Mpx) and forces the fallback exactly where it should: Grand and Wall at x2. Note
 // older iOS Safari caps its canvas well below this, which is why the failure paths below
 // surface a message instead of a silent null.
-export const MAX_PIXELS = 24_000_000;
+export const MAX_PIXELS: number = 24_000_000;
+
+export interface SvgSize {
+  width: number;
+  height: number;
+}
 
 // Read the ROOT <svg>'s pixel width/height. Scoped to the opening tag and anchored on a
 // leading space (`\swidth=`), so the data-vellum-grid-w / grid-h attributes a naive
 // `width=` regex would grab (320x240) are never mistaken for the render size (4200x3150).
-export function readSvgSize(svg) {
+export function readSvgSize(svg: string): SvgSize {
   const root = /<svg\b[^>]*>/i.exec(String(svg));
   if (!root) throw new Error("no <svg> root found in the markup to rasterize");
   const tag = root[0];
@@ -35,12 +40,24 @@ export function readSvgSize(svg) {
   return { width: Number(w[1]), height: Number(h[1]) };
 }
 
+export interface ScaleFit {
+  /** The scale to render at: the request if it fits, else the largest that does. */
+  scale: number;
+  /** True when the request was reduced to sit under the pixel budget. */
+  clamped: boolean;
+}
+
 // Fit a requested scale under the pixel budget. Returns the requested scale untouched
 // when width*height*scale^2 fits; otherwise the largest scale that sits the render
 // EXACTLY on the budget (area * scale^2 == maxPixels), flagged clamped so the caller can
 // tell the visitor the resolution was reduced. Pure; the continuous fit maximizes
 // resolution within budget and generalizes past the x1/x2 poster presets for #123.
-export function fitScaleToBudget(width, height, requestedScale, maxPixels) {
+export function fitScaleToBudget(
+  width: number,
+  height: number,
+  requestedScale: number,
+  maxPixels: number,
+): ScaleFit {
   const area = width * height;
   if (!Number.isFinite(area) || area <= 0 || !Number.isFinite(maxPixels) || maxPixels <= 0) {
     return { scale: requestedScale, clamped: false };
@@ -52,22 +69,42 @@ export function fitScaleToBudget(width, height, requestedScale, maxPixels) {
 
 // In-voice failure copy, one line per path, so a rasterize failure is a legible notice at
 // the counter, never a silent null. Survey-office register, em-dash-free (published copy).
-const RASTERIZE_MESSAGES = {
+const RASTERIZE_MESSAGES: Record<string, string> = {
   decode: "The proof would not resolve into an image, so the plate could not be pulled as a PNG.",
   toBlob: "The press pulled a blank plate: the browser returned no image data.",
   context: "This browser would not lend a drawing canvas, so no PNG could be pressed.",
 };
 const RASTERIZE_FALLBACK = "The plate could not be pulled as a PNG.";
 
-export function rasterizeErrorMessage(kind) {
+export function rasterizeErrorMessage(kind: string): string {
   return RASTERIZE_MESSAGES[kind] || RASTERIZE_FALLBACK;
+}
+
+export interface RasterizeOptions {
+  /** Requested output scale (x1, x2); fitted down if it busts the budget. */
+  scale?: number;
+  /** Pixel budget override; defaults to MAX_PIXELS. */
+  maxPixels?: number;
+}
+
+export interface RasterizeResult {
+  blob: Blob;
+  /** Actual output pixel dimensions after any budget fit. */
+  width: number;
+  height: number;
+  /** The scale actually rendered at, and whether it was clamped down. */
+  scale: number;
+  clamped: boolean;
 }
 
 // Rasterize an SVG string to a PNG Blob. Returns the blob plus the actual output size and
 // the fitted scale (and whether it was clamped) so the caller can name the file and post
 // a resolution notice. Resolves the return object, not a bare Blob, precisely because the
 // clamp flag has to reach the UI. Every failure path rejects with an in-voice message.
-export async function rasterizeSvg(svgString, opts = {}) {
+export async function rasterizeSvg(
+  svgString: string,
+  opts: RasterizeOptions = {},
+): Promise<RasterizeResult> {
   const requestedScale = Number(opts.scale) > 0 ? Number(opts.scale) : 1;
   const maxPixels = Number(opts.maxPixels) > 0 ? Number(opts.maxPixels) : MAX_PIXELS;
   const { width, height } = readSvgSize(svgString);
@@ -78,7 +115,7 @@ export async function rasterizeSvg(svgString, opts = {}) {
   const url = URL.createObjectURL(new Blob([svgString], { type: "image/svg+xml" }));
   try {
     const img = new Image();
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       img.onload = () => resolve();
       img.onerror = () => reject(new Error(rasterizeErrorMessage("decode")));
       img.src = url;
@@ -89,7 +126,7 @@ export async function rasterizeSvg(svgString, opts = {}) {
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error(rasterizeErrorMessage("context"));
     ctx.drawImage(img, 0, 0, outW, outH);
-    const blob = await new Promise((resolve, reject) => {
+    const blob = await new Promise<Blob>((resolve, reject) => {
       // A tainted canvas (an SVG with external resources) makes toBlob throw a
       // SecurityError synchronously; our charts are self-contained, but map it anyway so a
       // future external-asset SVG surfaces a notice rather than an uncaught throw.

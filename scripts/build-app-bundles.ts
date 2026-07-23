@@ -5,33 +5,35 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /**
- * Sub 7 of the Scriptorium epic (#208): the bindery keeps one press. Replaces
- * the Glass's esbuild step (build-explorer-bundle.ts): a single multi-entry
- * Vite build bundles the three app surfaces into their gitignored .bundle.js
- * twins, beside their committed sources under public/. The worker is emitted
- * ONCE (worker-client.js's static import-URL spawn, which Vite detects and
- * rewrites) at the fixed path explorer/worker.bundle.js; both the Explorer and
- * the Print Room spawn that one chunk. Modules shared between entries land in
- * explorer/chunks/ (gitignored, fixed names, no hashing: the app pages
- * reference fixed entry names, and the e2e harness pins the worker path).
+ * Sub 7 of the Scriptorium epic (#208): the bindery keeps one press. A single
+ * multi-entry Vite build bundles the three app surfaces into their gitignored
+ * .bundle.js twins under public/. Since Sub 9 (#260) the entries are the
+ * TypeScript sources in src/site, which import the engine's src/ directly, so
+ * Vite compiles the whole graph itself (the tsc browser emit retired). The
+ * worker is emitted ONCE (worker-client.ts's static import-URL spawn, which
+ * Vite detects and rewrites) at the fixed path explorer/worker.bundle.js; both
+ * the Explorer and the Print Room spawn that one chunk. Modules shared between
+ * entries land in explorer/chunks/ (gitignored, fixed names, no hashing: the
+ * app pages reference fixed entry names, and the e2e harness pins the worker
+ * path).
  *
  * Every knob is chosen to keep the emitted code running identically to the
  * source it replaces (no minify, no downlevel, no preload polyfill), the same
  * behavior-preserving discipline the esbuild press had.
  *
- * Runs AFTER the tsc engine emit (`npm run astro:generate` sequences it so),
- * because the entries import ./engine/*.js, which must be on disk.
- *
  *   node scripts/build-app-bundles.ts          # bundles into public/
- *   node scripts/build-app-bundles.ts <root>   # another root (tests)
+ *   node scripts/build-app-bundles.ts <root>   # another served root (tests)
  */
 
-// entry -> twin, relative to the bundled root (public/). Input keys are the
-// twin names minus .bundle.js, so Rollup's [name] emits each twin in place.
+const REPO = fileURLToPath(new URL("..", import.meta.url));
+
+// entry (repo-relative TS source) -> twin (relative to the served root,
+// public/). Input keys are the twin names minus .bundle.js, so Rollup's [name]
+// emits each twin in place.
 export const BUNDLE_ENTRIES: ReadonlyArray<{ entry: string; twin: string }> = [
-  { entry: "explorer/app.js", twin: "explorer/app.bundle.js" },
-  { entry: "print-room/app.js", twin: "print-room/app.bundle.js" },
-  { entry: "seed-of-the-day/app.js", twin: "seed-of-the-day/app.bundle.js" },
+  { entry: "src/site/explorer/app.ts", twin: "explorer/app.bundle.js" },
+  { entry: "src/site/print-room/app.ts", twin: "print-room/app.bundle.js" },
+  { entry: "src/site/seed-of-the-day/app.ts", twin: "seed-of-the-day/app.bundle.js" },
 ];
 
 // Behavior-preserving output shape shared by the page build and the worker build.
@@ -42,15 +44,16 @@ const OUTPUT = {
   assetFileNames: "explorer/chunks/[name][extname]",
 } as const;
 
-const pressConfig = (root: string, outDir: string): InlineConfig => ({
+const pressConfig = (outDir: string): InlineConfig => ({
   configFile: false,
   logLevel: "warn",
-  // root must be the served tree: the Print Room imports "/explorer/..." and
-  // "/lib/..." root-absolute, and Vite resolves those against this root.
-  root,
-  // CRITICAL: Vite's publicDir default is <root>/public and is copied into the
-  // outDir verbatim; our root IS public/, so any truthy value here would
-  // recursively copy the site into itself.
+  // The repo is the Vite root: the entries live in src/site, import the engine
+  // src relatively, and pull d3 from node_modules (root-absolute imports
+  // retired with the JS source at Sub 9).
+  root: REPO,
+  // CRITICAL: Vite's publicDir default is <root>/public, copied into the
+  // outDir verbatim; ours holds the whole served site, so any truthy value
+  // here would copy it into the staging tree and then back over itself.
   publicDir: false,
   build: {
     // A staging dir, not root itself: writing into root would trip Vite's
@@ -65,14 +68,14 @@ const pressConfig = (root: string, outDir: string): InlineConfig => ({
     modulePreload: false, // no polyfill injection; the shells load plain modules
     rollupOptions: {
       input: Object.fromEntries(
-        BUNDLE_ENTRIES.map(({ entry }) => [entry.replace(/\.js$/, ""), join(root, entry)]),
+        BUNDLE_ENTRIES.map(({ entry, twin }) => [twin.replace(/\.bundle\.js$/, ""), join(REPO, entry)]),
       ),
       output: OUTPUT,
     },
   },
   worker: {
-    // The worker chunk must be an ES module: worker.js imports ./engine/*.js and
-    // is spawned { type: "module" } (Vite's default worker format is iife).
+    // The worker chunk must be an ES module: worker.ts imports the engine src
+    // and is spawned { type: "module" } (Vite's default worker format is iife).
     format: "es",
     rollupOptions: {
       output: { ...OUTPUT, entryFileNames: "explorer/worker.bundle.js" },
@@ -80,12 +83,12 @@ const pressConfig = (root: string, outDir: string): InlineConfig => ({
   },
 });
 
-/** Bundle the three app surfaces (and the one shared worker) under `root`. */
+/** Bundle the three app surfaces (and the one shared worker) into `root`, the served tree. */
 export async function bundleAppSurfaces(root: string): Promise<void> {
   const staging = await mkdtemp(join(tmpdir(), "vellum-press-"));
   try {
-    await build(pressConfig(root, staging));
-    // The staging tree mirrors root-relative paths (explorer/app.bundle.js,
+    await build(pressConfig(staging));
+    // The staging tree mirrors served-root-relative paths (explorer/app.bundle.js,
     // explorer/chunks/*, ...), so a recursive copy lands every twin in place.
     await cp(staging, root, { recursive: true });
   } finally {

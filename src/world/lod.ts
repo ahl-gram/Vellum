@@ -101,9 +101,9 @@ export function lodWindowFor(cx: number, cy: number, size: number): UvWindow {
 }
 
 // ---- Sub 8 settle + inset math (#169) --------------------------------------------
-// The redraft state machine's PURE core, kept here (not in the public/ controller) so it
+// The redraft state machine's PURE core, kept here (not in the site controller) so it
 // unit-tests from source with no build artifact. The DOM orchestration (inset mount,
-// crossfade, worker dispatch, overlay) lives in public/explorer/lod-controller.js and is
+// crossfade, worker dispatch, overlay) lives in src/site/explorer/lod-controller.ts and is
 // proven by e2e; this file owns the "given the world camera, what should the next sheet
 // be" decision and the geometry that mounts a region sheet INSIDE the world sheet.
 //

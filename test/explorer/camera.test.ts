@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { cameraFromTransform, transformFromCamera } from "../../public/explorer/camera.js";
+import { cameraFromTransform, transformFromCamera } from "../../src/site/explorer/camera.ts";
 
 // The Surveyor's Glass, Sub 4 (#165): the camera <-> transform bridge that a shared
 // link stores as cx/cy/k (world-uv centre + continuous zoom). These validate the NEW

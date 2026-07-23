@@ -11,11 +11,15 @@
 // and none of these panel element refs reach the overlay. The overlay reads exactly one
 // field back, `log.summary` (for its #status announcement); the log is shared data, so that
 // is expected, not leakage.
-import { buildVoyageLog } from "./engine/world/voyage-log.js";
+import {
+  buildVoyageLog,
+  type VoyageLog,
+  type VoyageLogPort,
+} from "../../world/voyage-log.ts";
 
-const logPanel = document.getElementById("voyage-log");
-const logSig = document.getElementById("voyage-log-sig");
-const logStrip = document.getElementById("voyage-log-strip");
+const logPanel = document.getElementById("voyage-log") as HTMLElement;
+const logSig = document.getElementById("voyage-log-sig") as HTMLElement;
+const logStrip = document.getElementById("voyage-log-strip") as HTMLElement;
 
 /**
  * Build the log from the arrival ports and render the margin panel: every port a row up
@@ -33,7 +37,12 @@ const logStrip = document.getElementById("voyage-log-strip");
  * @returns {{log:object, rows:HTMLLIElement[]}} the built log and its rows (the session
  *   brightens the rows per arrival)
  */
-export function buildLogPanel(logPorts, presentYear, seed, subtitle) {
+export function buildLogPanel(
+  logPorts: ReadonlyArray<VoyageLogPort>,
+  presentYear: number,
+  seed: number,
+  subtitle: string,
+): { log: VoyageLog; rows: HTMLLIElement[] } {
   const log = buildVoyageLog(logPorts, presentYear, (seed >>> 0), subtitle || "");
   logSig.textContent = log.attribution;
   const rows = log.entries.map((e) => {
@@ -58,12 +67,12 @@ export function buildLogPanel(logPorts, presentYear, seed, subtitle) {
  * @param {HTMLLIElement[]} rows
  * @param {number} arrived how many ports the mark has reached
  */
-export function revealLog(rows, arrived) {
+export function revealLog(rows: HTMLLIElement[], arrived: number): void {
   for (let i = 0; i < rows.length; i++) rows[i].classList.toggle("logged", i < arrived);
 }
 
 /** Hide and empty the panel. The panel lives outside #map, so nothing else clears it. */
-export function hideLog() {
+export function hideLog(): void {
   logPanel.hidden = true;
   logStrip.replaceChildren();
   logSig.textContent = "";
@@ -76,7 +85,7 @@ export function hideLog() {
  * @param {object} log the built log
  * @param {HTMLLIElement[]} rows
  */
-export function logSnapshot(log, rows) {
+export function logSnapshot(log: VoyageLog, rows: HTMLLIElement[]) {
   return {
     attribution: log.attribution,
     summary: log.summary,

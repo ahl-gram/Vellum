@@ -11,21 +11,46 @@
 // fold (#208) this page is bundled like the Explorer: worker-client is inlined
 // into this bundle, and its static import-URL spawn resolves to the ONE emitted
 // worker chunk, so initWorker takes no URL here anymore.
-import { runJob, usesWorker, initWorker } from "/explorer/worker-client.js";
-import { startArrival } from "/explorer/draw-ceremony.js";
-import { seedForDate } from "/explorer/engine/world/seed-of-the-day.js";
+import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
+import { startArrival } from "../explorer/draw-ceremony.ts";
+import { seedForDate } from "../../world/seed-of-the-day.ts";
 // #134 poster plates. Same-dir module (resolves against this module's URL, /print-room/),
 // unlike the root-absolute worker spawn above. Pure clamp + presets; unit-tested in Node.
-import { POSTER_PRESETS, clampPosterWidth, posterFilename, posterPngFilename } from "./poster-presets.js";
-// #135 the rasterizer: the site's first shared cross-page client library (public/lib/,
-// served at /lib/). Root-absolute like the worker so the path is stable from /print-room/.
+import { POSTER_PRESETS, clampPosterWidth, posterFilename, posterPngFilename, type PosterPreset } from "./poster-presets.ts";
+// #135 the rasterizer: the site's first shared cross-page client library
+// (src/site/lib/, bundled into each consumer since #260).
 // SVG string in, PNG blob out, fitted under a canvas pixel budget; the pure decision core
 // is unit-tested in Node and its failure paths surface in-voice messages, never silent nulls.
-import { rasterizeSvg } from "/lib/rasterize.js";
+import { rasterizeSvg } from "../lib/rasterize.ts";
 // #136 the bound atlas: bind the full atlas off-thread, print it to PDF, or download a
 // self-contained single file. Same-dir module (resolves against /print-room/); it reuses
 // the shared worker + the engine's atlasDocument.
-import { initBoundAtlas, clearBoundAtlas, enableBind } from "./bound-atlas.js";
+import { initBoundAtlas, clearBoundAtlas, enableBind, type PosterBasis } from "./bound-atlas.ts";
+import type { MapType } from "../../terrain/heightfield.ts";
+import type { ClimateBand } from "../../climate/climate.ts";
+import type { StyleName } from "../../render/style.ts";
+import type { ThemeName } from "../../render/layers/field.ts";
+
+// The window.__vellum* verification hooks assigned in this file, typed once here.
+declare global {
+  interface Window {
+    __vellumPrintRoomUsesWorker?: typeof usesWorker;
+    __vellumPrintRoomState?: () => { seed: number; title: string };
+    __vellumClampPosterWidth?: typeof clampPosterWidth;
+    __vellumLastPoster?: { svg: string; filename: string; width: number; seed: number; style: StyleName };
+    __vellumLastPng?: {
+      filename: string;
+      type: string;
+      size: number;
+      width: number;
+      height: number;
+      scale: number;
+      clamped: boolean;
+      seed: number;
+      style: StyleName;
+    };
+  }
+}
 
 const PREVIEW_WIDTH = 900; // a modest proof; the real outputs are downloads (Subs 2-4).
 
@@ -36,24 +61,32 @@ const TYPES = ["island", "archipelago", "continent", "citystate"];
 const BANDS = ["temperate", "tropical", "polar"];
 const THEMES = ["vegetation", "climate", "moisture", "population"];
 
-const $ = (id) => document.getElementById(id);
-const seedInput = $("pr-seed");
-const styleSel = $("pr-style");
+const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
+const seedInput = $<HTMLInputElement>("pr-seed");
+const styleSel = $<HTMLSelectElement>("pr-style");
 const status = $("pr-status");
 const preview = $("pr-preview");
 const caption = $("pr-caption");
 const warning = $("pr-warning");
 const posterStatus = $("pr-poster-status");
-const plateButtons = [...document.querySelectorAll("[data-poster]")];
-const formatSel = $("pr-format"); // the "Pressed as" select (#135); greyed out during a draw (#212)
-const presetByKey = new Map(POSTER_PRESETS.map((p) => [p.key, p]));
+const plateButtons = [...document.querySelectorAll<HTMLButtonElement>("[data-poster]")];
+const formatSel = $<HTMLSelectElement>("pr-format"); // the "Pressed as" select (#135); greyed out during a draw (#212)
+const presetByKey = new Map(POSTER_PRESETS.map((p): [string, PosterPreset] => [p.key, p]));
 
 // Recipe params with no visible control in Sub 1: they ride along from a deep-link's
 // hash (type/band/theme/legend/arms/land/coast) so an Explorer world reproduces
 // faithfully, and are re-serialized on every draw so the Print Room's own URL stays a
 // valid, shareable Explorer link too. (#137 added coast: a warped world Taken to the
 // Print Room must print warped, not drop back to the default coastline.)
-const carried = { type: "", band: "", theme: "", legend: true, arms: false, land: null, coast: null };
+const carried: {
+  type: MapType | "";
+  band: ClimateBand | "";
+  theme: ThemeName | "";
+  legend: boolean;
+  arms: boolean;
+  land: number | null;
+  coast: number | null;
+} = { type: "", band: "", theme: "", legend: true, arms: false, land: null, coast: null };
 
 // Monotonic guard: a fresh draw cancels a stale in-flight one, so a slow proof can
 // never overwrite a newer chart the visitor asked for.
@@ -69,12 +102,12 @@ let lastTitle = "";
 // successful draw so an order reproduces exactly the sheet on screen, not whatever the
 // live controls read at click time. Null until the first proof lands, which is why the
 // plate buttons start disabled in the HTML.
-let posterBasis = null;
+let posterBasis: PosterBasis | null = null;
 let ordering = false; // an order is at the press; the plates are disabled meanwhile
 let posterGen = 0; // drawGen-style stale guard (belt-and-suspenders: the button-disable
 // is the operative guard, since only one order can run at a time)
 
-function randomSeed() {
+function randomSeed(): number {
   return Math.floor(Math.random() * 0xffffffff);
 }
 
@@ -86,16 +119,16 @@ function randomSeed() {
 // an order finishing during a redraw, each leave the counter closed until the world settles.
 // The #pr-format select greys out for the draw round-trip only; its value is snapshotted at
 // order time (orderPoster), so an in-flight order need not hold it.
-function refreshOrderControls() {
+function refreshOrderControls(): void {
   const platesReady = posterBasis != null && !drawing && !ordering;
   for (const b of plateButtons) b.disabled = !platesReady;
   if (formatSel) formatSel.disabled = drawing;
 }
 
-// Read the same hash keys the Explorer writes (public/explorer/hash-sync.js), applying
+// Read the same hash keys the Explorer writes (src/site/explorer/hash-sync.ts), applying
 // only present + valid values: the visible controls (seed, style) and the carried
 // params; everything else stays at its default.
-function applyHash() {
+function applyHash(): void {
   const p = new URLSearchParams(location.hash.slice(1));
   const seedRaw = p.get("seed");
   const seed = Number(seedRaw);
@@ -104,13 +137,13 @@ function applyHash() {
   // fall through to today's seed-of-the-day at bootstrap.
   if (seedRaw !== null && Number.isInteger(seed) && seed >= 0) seedInput.value = String(seed);
   const style = p.get("style");
-  if (STYLES.includes(style)) styleSel.value = style;
+  if (style !== null && STYLES.includes(style)) styleSel.value = style;
   const type = p.get("type");
-  if (TYPES.includes(type)) carried.type = type;
+  if (type !== null && TYPES.includes(type)) carried.type = type as MapType;
   const band = p.get("band");
-  if (BANDS.includes(band)) carried.band = band;
+  if (band !== null && BANDS.includes(band)) carried.band = band as ClimateBand;
   const theme = p.get("theme");
-  if (THEMES.includes(theme)) carried.theme = theme;
+  if (theme !== null && THEMES.includes(theme)) carried.theme = theme as ThemeName;
   const legend = p.get("legend");
   if (legend !== null) carried.legend = legend === "1";
   const arms = p.get("arms");
@@ -131,7 +164,7 @@ function applyHash() {
 
 // Mirror the current recipe into location.hash in the Explorer's exact format, so a
 // Print Room link opens the same world in either page.
-function writeHash(seed, style) {
+function writeHash(seed: number, style: string): void {
   const p = new URLSearchParams();
   p.set("seed", String(seed));
   p.set("style", style);
@@ -145,9 +178,9 @@ function writeHash(seed, style) {
   history.replaceState(null, "", "#" + p.toString());
 }
 
-function draw() {
+function draw(): void {
   const seed = Number(seedInput.value) >>> 0;
-  const style = STYLES.includes(styleSel.value) ? styleSel.value : "antique";
+  const style = STYLES.includes(styleSel.value) ? (styleSel.value as StyleName) : "antique";
   const myGen = ++drawGen;
   drawing = true;
   status.textContent = "Pulling a proof…";
@@ -160,7 +193,7 @@ function draw() {
   clearBoundAtlas();
   refreshOrderControls();
   posterStatus.textContent = ""; // a new proof clears any stale poster-order status in the desk
-  const overrides = {};
+  const overrides: { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number } = {};
   if (carried.type) overrides.mapType = carried.type;
   if (carried.band) overrides.band = carried.band;
   if (carried.land != null) overrides.landFraction = carried.land;
@@ -216,7 +249,7 @@ $("pr-random").addEventListener("click", () => { seedInput.value = String(random
 // through the SHARED worker, and the wide SVG goes STRAIGHT to a Blob download: it is
 // NEVER injected into the live DOM (a multi-MB innerHTML swap is the epic's one hard
 // warning), so the on-page preview stays at PREVIEW_WIDTH.
-function downloadBlob(blob, filename) {
+function downloadBlob(blob: Blob, filename: string): void {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = filename;
@@ -224,19 +257,19 @@ function downloadBlob(blob, filename) {
   URL.revokeObjectURL(a.href);
 }
 
-function downloadSvg(svg, filename) {
+function downloadSvg(svg: string, filename: string): void {
   downloadBlob(new Blob([svg], { type: "image/svg+xml" }), filename);
 }
 
 // Step one, "how it's pressed": the reproducible vector SVG, or a PNG image at x1 or x2.
 // Read at click time (like the basis snapshot), and defaults to SVG so the Sub 2 SVG path
 // and its e2e (PR13-PR16) are unchanged. png1/png2 map to the rasterizer's x1/x2 scale.
-function selectedFormat() {
-  const el = document.getElementById("pr-format");
+function selectedFormat(): string {
+  const el = document.getElementById("pr-format") as HTMLSelectElement | null;
   return el ? el.value : "svg";
 }
 
-function orderPoster(key) {
+function orderPoster(key: string): void {
   const preset = presetByKey.get(key);
   // `drawing` guards defensively (#212): the plates are disabled during a draw, so a real
   // click cannot land here mid-redraw, but a programmatic call must not press the stale,
@@ -279,7 +312,7 @@ function orderPoster(key) {
         png = await rasterizeSvg(res.svg, { scale });
       } catch (err) {
         if (myGen !== posterGen) return;
-        posterStatus.textContent = err.message;
+        posterStatus.textContent = (err as Error).message;
         return;
       }
       if (myGen !== posterGen) return; // a newer order landed while rasterizing
@@ -310,7 +343,7 @@ function orderPoster(key) {
     });
 }
 
-for (const b of plateButtons) b.addEventListener("click", () => orderPoster(b.dataset.poster));
+for (const b of plateButtons) b.addEventListener("click", () => orderPoster(b.dataset.poster as string));
 
 await initWorker();
 // #136: wire the bound atlas. getBasis reads the LIVE posterBasis at click time, so a

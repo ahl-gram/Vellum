@@ -5,26 +5,36 @@
 // Glass, #168) skips regenerating it. Every job still carries its own seed +
 // overrides and the output is byte-identical to running the same engine on the main
 // thread (the cache changes nothing but the time to produce identical bytes).
-import { renderMap } from "./engine/render/map-renderer.js";
-import { buildPlaceManifest } from "./engine/render/place-manifest.js";
-import { buildSurvey } from "./engine/render/survey.js";
-import { generateRegionWorld, regionTitle } from "./engine/world/region.js";
-import { composeAtlas } from "./engine/atlas/compose.js";
-import { serializableAtlas } from "./serializable-atlas.js";
-import { worldFor } from "./world-cache.js";
+import { renderMap } from "../../render/map-renderer.ts";
+import { buildPlaceManifest } from "../../render/place-manifest.ts";
+import { buildSurvey } from "../../render/survey.ts";
+import { generateRegionWorld, regionTitle } from "../../world/region.ts";
+import { composeAtlas } from "../../atlas/compose.ts";
+import { serializableAtlas } from "./serializable-atlas.ts";
+import { worldFor } from "./world-cache.ts";
+import type { WorkerRequest, WorkerResponse } from "./worker-client.ts";
 
-self.onmessage = (e) => {
+// This module runs inside a Worker, but the project tsconfig lib is DOM (no
+// WebWorker lib), so `self` types as Window here. Cast once to the minimal
+// worker-global surface this module uses; the message shapes are the shared
+// wire contract in worker-client.ts (imported type-only, so no runtime cycle).
+const ctx = self as unknown as {
+  onmessage: ((e: MessageEvent<WorkerRequest>) => void) | null;
+  postMessage(msg: WorkerResponse): void;
+};
+
+ctx.onmessage = (e) => {
   const msg = e.data;
   try {
     if (msg.kind === "draw") {
       const { world } = worldFor(msg.seed, msg.overrides);
-      self.postMessage({
+      ctx.postMessage({
         id: msg.id,
         ok: true,
         // msg.render.widthPx is passed to renderMap UNCLAMPED by design: the CLI bounded
         // it 400-6000 (src/cli/main.ts), and callers here own that guard instead. The
         // Explorer draws at fixed widths; the Print Room's poster plates (#134) clamp
-        // page-side to the [2400, 4200] envelope in public/print-room/poster-presets.js
+        // page-side to the [2400, 4200] envelope in src/site/print-room/poster-presets.ts
         // before ordering, so a hand-edited width can never ask for a tab-killing render.
         svg: renderMap(world, msg.render),
         manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
@@ -55,7 +65,7 @@ self.onmessage = (e) => {
       // Stamp the window so a downloaded region redraws from seed + window (#168);
       // worldGridW is the PARENT grid, taken explicitly (not the 320 coincidence).
       const regionRecipe = { window: msg.window, worldGridW: world.recipe.gridW };
-      self.postMessage({
+      ctx.postMessage({
         id: msg.id,
         ok: true,
         svg: renderMap(region, { ...msg.render, regionRecipe }),
@@ -72,17 +82,17 @@ self.onmessage = (e) => {
       });
     } else if (msg.kind === "atlas") {
       const { world } = worldFor(msg.seed, msg.overrides);
-      self.postMessage({
+      ctx.postMessage({
         id: msg.id,
         ok: true,
         atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })),
       });
     }
   } catch (err) {
-    self.postMessage({ id: msg.id, ok: false, error: (err && err.message) || String(err) });
+    ctx.postMessage({ id: msg.id, ok: false, error: ((err as { message?: string } | null) && (err as { message?: string }).message) || String(err) });
   }
 };
 
 // Handshake: the static imports above have resolved by the time the module body
 // runs, so this tells the main thread the engine loaded and the worker is ready.
-self.postMessage({ ready: true });
+ctx.postMessage({ ready: true });

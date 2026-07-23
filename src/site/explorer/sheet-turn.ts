@@ -21,6 +21,21 @@
 // unit-testable under Node; runTurn/cancelTurn touch the DOM only inside their
 // bodies and are proven by the e2e end-states + a CDP probe.
 
+export interface TurnDecision {
+  /** This draw was triggered by a style change (the only turn trigger in v1). */
+  isTurn: boolean;
+  /** prefers-reduced-motion is on (fall back to an instant swap). */
+  reduceMotion: boolean;
+  /** The off-thread render worker is live (the fallback path swaps instantly). */
+  usesWorker: boolean;
+  /** A chart is already on screen to turn away from. */
+  hasChart: boolean;
+  /** Chronicle/scrub mode is active (re-applies per its own redraw rules). */
+  chronicle: boolean;
+  /** #116: the sheet is flipped to its verso (the flip owns the sheet, not the turn). */
+  flipped?: boolean;
+}
+
 /**
  * Whether this draw should turn the sheet rather than settle. A style change over a
  * live chart turns; everything else (a new world, reduced motion, the worker
@@ -31,20 +46,20 @@
  * @param {{isTurn:boolean, reduceMotion:boolean, usesWorker:boolean, hasChart:boolean, chronicle:boolean, flipped?:boolean}} s
  * @returns {boolean}
  */
-export function shouldTurn(s) {
+export function shouldTurn(s: TurnDecision): boolean {
   return !!(s.isTurn && !s.reduceMotion && s.usesWorker && s.hasChart && !s.chronicle && !s.flipped);
 }
 
 // The single in-flight turn, or null. One turn at a time: runTurn cancels any prior
 // turn before starting, and every draw resolution cancels a leftover turn before it
 // touches #map, so a superseded turn can never orphan a sheet.
-let active = null;
+let active: { abort: () => void } | null = null;
 
 /**
  * Tear down any in-flight turn WITHOUT committing its content (the superseding draw
  * owns the final #map). Idempotent and safe to call when nothing is turning.
  */
-export function cancelTurn() {
+export function cancelTurn(): void {
   if (active) active.abort();
   active = null;
 }
@@ -58,15 +73,18 @@ export function cancelTurn() {
  * @param {{sheetEl:HTMLElement, innerEl:HTMLElement, mapEl:HTMLElement, newSvg:string, durationMs:number, easing:string}} o
  * @returns {Promise<void>}
  */
-export function runTurn({ sheetEl, innerEl, mapEl, newSvg, durationMs, easing }) {
+export function runTurn(
+  { sheetEl, innerEl, mapEl, newSvg, durationMs, easing }:
+  { sheetEl: HTMLElement; innerEl: HTMLElement; mapEl: HTMLElement; newSvg: string; durationMs: number; easing: string },
+): Promise<void> {
   cancelTurn(); // never stack turns
   // Contract: this NEVER rejects. It resolves when the turn lands (so the caller
   // rebuilds the overlay); a superseding cancelTurn() aborts it and it stays pending;
   // and if the 3D scaffold cannot be built (e.g. WAAPI is unavailable) it degrades to
   // an instant swap and resolves. So the caller needs no .catch.
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     let blobUrl = "";
-    let back = null;
+    let back: HTMLDivElement | null = null;
     try {
       // Back face: the incoming chart as a blob <img>, pre-rotated so it reads
       // un-mirrored at -180deg. Kept out of the a11y tree (the recto is the chart).
@@ -93,7 +111,7 @@ export function runTurn({ sheetEl, innerEl, mapEl, newSvg, durationMs, easing })
       // landing) the new chart is written into #map FIRST, in the same synchronous
       // tick, so the reader never sees a frame between the back face and the re-dressed
       // recto (both show the identical new chart).
-      const finish = (commit) => {
+      const finish = (commit: boolean): void => {
         if (settled) return;
         settled = true;
         if (commit) mapEl.innerHTML = newSvg;
@@ -101,7 +119,7 @@ export function runTurn({ sheetEl, innerEl, mapEl, newSvg, durationMs, easing })
         sheetEl.classList.remove("turning");
         innerEl.classList.remove("turning");
         innerEl.style.transform = "";
-        if (back.parentNode) back.remove();
+        if (back && back.parentNode) back.remove();
         URL.revokeObjectURL(blobUrl);
         active = null;
         if (commit) resolve();

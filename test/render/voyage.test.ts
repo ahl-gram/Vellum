@@ -5,7 +5,7 @@ import { buildVoyagePlan, frameAt } from "../../src/render/voyage.ts";
 
 // Unit tests for #118 (Sub 1 of the Wayfarer's Passage epic #117): the pure core
 // that turns a place manifest into a deterministic survey itinerary. No DOM, no
-// RNG. The animated overlay (public/explorer/voyage.js) is Sub 2 and is covered by
+// RNG. The animated overlay (src/site/explorer/voyage.ts) is Sub 2 and is covered by
 // the Explorer e2e; only the deterministic plan math is tested here.
 //
 // Two load-bearing behaviours:

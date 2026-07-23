@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildDocket } from "../../public/explorer/verso.js";
+import { buildDocket } from "../../src/site/explorer/verso.ts";
 
 /**
  * #116 The Verso. The pure heart of the sub is the docket line stamped along the

@@ -17,7 +17,7 @@ import { routeVoyage } from "../../src/render/voyage-route.ts";
 // margin log. A pure post-world module on the daily-hunt pattern: it forks its own
 // RNG off the recipe seed, so it adds no World field, is never imported by
 // generate.ts, and cannot move a chart byte (golden checksum untouched). The scrollable
-// panel + the reveal-per-arrival wiring live in public/explorer/voyage.js and are covered
+// panel + the reveal-per-arrival wiring live in src/site/explorer/voyage.ts and are covered
 // by the Explorer e2e; only the deterministic prose lives here.
 //
 // The prose consumes the leg mode from #120: a sea arrival reads as a voyage, a road (or

@@ -8,7 +8,9 @@ import { createServer } from "node:http";
 import http from "node:http";
 import { readFile, mkdir, mkdtemp, rm } from "node:fs/promises";
 import { existsSync, writeFileSync } from "node:fs";
-import { join, resolve, sep, extname } from "node:path";
+import { stripTypeScriptTypes } from "node:module";
+import { dirname, join, resolve, sep, extname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { tmpdir } from "node:os";
 
 const MIME = {
@@ -44,6 +46,35 @@ const httpGet = (url) =>
 // also held /explorer/worker.js, the unbundled worker the Print Room spawned.)
 const serverState = { blockWorker: false };
 const BLOCKED_WORKERS = new Set(["/explorer/worker.bundle.js"]);
+
+// The suites' in-page test oracle: several checks dynamically import engine
+// modules IN THE BROWSER to compute expected values beside what the page drew
+// (same JS engine, so no cross-engine float drift). Since Sub 9 (#260) retired
+// the served tsc emit, the harness answers /explorer/engine/<p>.js itself by
+// type-stripping the engine SOURCE src/<p>.ts on demand (the exact files the
+// shipped bundles compile from) and rewriting the relative .ts specifiers the
+// browser cannot resolve. e2e-only serving: the deploy artifact carries no
+// engine tree.
+const SRC_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "src");
+const ENGINE_MODULE = /^\/explorer\/engine\/(.+)\.js$/;
+function serveEngineModule(pathname, res) {
+  const m = pathname.match(ENGINE_MODULE);
+  if (!m) return false;
+  const tsPath = resolve(SRC_DIR, `${m[1]}.ts`);
+  if (!tsPath.startsWith(SRC_DIR + sep) || !existsSync(tsPath)) {
+    res.writeHead(404).end("no such engine module");
+    return true;
+  }
+  return readFile(tsPath, "utf8").then((source) => {
+    const js = stripTypeScriptTypes(source, { mode: "strip" }).replace(
+      /(["'])(\.\.?\/[^"']+)\.ts\1/g,
+      "$1$2.js$1",
+    );
+    res.writeHead(200, { "content-type": MIME[".js"] }).end(js);
+    return true;
+  });
+}
+
 function startServer(SITE, PORT) {
   const server = createServer(async (req, res) => {
     try {
@@ -53,6 +84,7 @@ function startServer(SITE, PORT) {
         res.writeHead(404).end("worker blocked for fallback test");
         return;
       }
+      if (await serveEngineModule(pathname, res)) return;
       if (pathname.endsWith("/")) pathname += "index.html";
       const filePath = resolve(SITE, "." + pathname);
       if (filePath !== SITE && !filePath.startsWith(SITE + sep)) {

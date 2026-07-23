@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { existsSync, mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { tmpdir } from "node:os";
@@ -43,22 +44,54 @@ test("the hand-coded public/ shells retired with the re-shell (#254): routes and
   }
 });
 
-test("the worker spawn is the static import-URL form Vite owns (#208)", () => {
-  const js = read("public/explorer/worker-client.js");
-  // Vite only rewrites a STATICALLY ANALYZABLE `new Worker(new URL("./worker.js",
+test("the worker spawn is the static import-URL form Vite owns (#208, TS source since #260)", () => {
+  const ts = read("src/site/explorer/worker-client.ts");
+  // Vite only rewrites a STATICALLY ANALYZABLE `new Worker(new URL("./worker.ts",
   // import.meta.url), ...)`; a variable spawn target would emit no worker chunk
   // and 404 at runtime. The literal form below is therefore contractual.
   assert.match(
-    js,
-    /new Worker\(new URL\("\.\/worker\.js", import\.meta\.url\), \{ type: "module" \}\)/,
+    ts,
+    /new Worker\(new URL\("\.\/worker\.ts", import\.meta\.url\), \{ type: "module" \}\)/,
     "worker-client must spawn via the static import-URL form",
   );
-  assert.doesNotMatch(js, /workerUrl/, "the parameterized spawn target retired with the twin arrangement");
+  assert.doesNotMatch(ts, /workerUrl/, "the parameterized spawn target retired with the twin arrangement");
   // Both spawning pages call the bare form; the emitted worker URL is Vite's.
-  assert.match(read("public/explorer/app.js"), /await initWorker\(\);/);
-  const printRoom = read("public/print-room/app.js");
+  assert.match(read("src/site/explorer/app.ts"), /await initWorker\(\);/);
+  const printRoom = read("src/site/print-room/app.ts");
   assert.match(printRoom, /await initWorker\(\);/);
   assert.doesNotMatch(printRoom, /initWorker\("/, "the Print Room no longer passes a spawn URL");
+});
+
+test("the press bundles from the src/site TypeScript entries (#260)", async () => {
+  const { BUNDLE_ENTRIES } = await import("../../scripts/build-app-bundles.ts");
+  assert.deepEqual(
+    BUNDLE_ENTRIES.map(({ entry, twin }) => ({ entry, twin })),
+    [
+      { entry: "src/site/explorer/app.ts", twin: "explorer/app.bundle.js" },
+      { entry: "src/site/print-room/app.ts", twin: "print-room/app.bundle.js" },
+      { entry: "src/site/seed-of-the-day/app.ts", twin: "seed-of-the-day/app.bundle.js" },
+    ],
+    "entries are the TS sources; twins keep their served names untouched",
+  );
+});
+
+test("public/ holds no committed source: the raw app JS and the .d.ts twins retired (#260)", () => {
+  // git ls-files is the oracle: the generated twins/chunks are .js files too,
+  // but gitignored; the acceptance is about COMMITTED content.
+  const tracked = execFileSync("git", ["ls-files", "public"], { cwd: REPO, encoding: "utf8" })
+    .split("\n")
+    .filter((f) => f.endsWith(".js") || f.endsWith(".d.ts"));
+  assert.deepEqual(tracked, [], "no committed .js or .d.ts may remain under public/");
+});
+
+test("the tsc engine emit retired: no browser tsconfig, astro:generate is clean-bundle-showcases (#260)", () => {
+  assert.ok(!existsSync(resolve(REPO, "tsconfig.browser.json")), "tsconfig.browser.json retires with the emit");
+  const pkg = JSON.parse(read("package.json"));
+  assert.equal(
+    pkg.scripts["astro:generate"],
+    "node scripts/clean-public-generated.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts",
+    "no tsc step: Vite compiles the engine graph from src/ directly",
+  );
 });
 
 test("one bundler: vite is the devDep, esbuild is gone (#208)", () => {

@@ -1,10 +1,11 @@
 import { test, before } from "node:test";
 import assert from "node:assert/strict";
-import { readFile, rm } from "node:fs/promises";
+import { readFile, readdir, rm } from "node:fs/promises";
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { NAV_ITEMS } from "../../src/layouts/nav.ts";
+import { cleanPublicGenerated } from "../../scripts/clean-public-generated.ts";
 
 /**
  * Scriptorium Sub 2 (#203): the Astro scaffold and the shared layout. The spec is
@@ -133,6 +134,10 @@ const rendered = new Map<string, string>();
 before(
   async () => {
     await rm(outDir, { recursive: true, force: true });
+    // Clean the generated trees first so the built output mirrors a deploy
+    // (fresh checkout): the dist-audit test below must not pass or fail on
+    // stale local generated files. The next build/dev regenerates them.
+    await cleanPublicGenerated(root("public"));
     const { build } = await import("astro");
     await build({ root: root(""), outDir, logLevel: "error" });
     for (const page of PAGES) {
@@ -425,6 +430,28 @@ test("the support set the pages depend on is committed in public/", () => {
   for (const file of ["motion.css", "fonts.css", "favicon.svg", "og.png", "index.css"]) {
     assert.ok(existsSync(root(`public/${file}`)), `public/${file} should exist`);
   }
+});
+
+test("the deploy artifact serves no raw app source, no .d.ts, and no engine emit (#260)", async () => {
+  // Walk the built output: since Sub 9 every .js the site serves is a pressed
+  // twin or a shared chunk; the app source lives in src/site as TypeScript and
+  // the tsc engine emit is retired. The before() clean means the gitignored
+  // generated trees are absent here, so this audits exactly what the COMMITTED
+  // public/ content contributes to the artifact.
+  const files: string[] = [];
+  const walk = async (dir: string): Promise<void> => {
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      const p = join(dir, entry.name);
+      if (entry.isDirectory()) await walk(p);
+      else files.push(relative(outDir, p));
+    }
+  };
+  await walk(outDir);
+  assert.ok(!existsSync(join(outDir, "explorer", "engine")), "no /explorer/engine/ tree may ship");
+  const offenders = files.filter(
+    (f) => (f.endsWith(".js") && !f.endsWith(".bundle.js") && !f.startsWith(join("explorer", "chunks") + "/")) || f.endsWith(".d.ts"),
+  );
+  assert.deepEqual(offenders, [], "no raw .js source or .d.ts may reach the artifact");
 });
 
 test("the hero charts and arms the home page embeds all resolve in public/charts", () => {
