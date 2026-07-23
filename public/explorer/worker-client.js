@@ -95,20 +95,19 @@ export function usesWorker() {
 // back to inline) on any failure. A crash after handshake nulls `worker` so later
 // jobs degrade to inline too.
 //
-// workerUrl is the spawn target. `new Worker(str)` resolves str against the DOCUMENT
-// base URL, not this module's URL, so the Explorer's default "./worker.bundle.js"
-// (document base /explorer/) lands on /explorer/worker.bundle.js, the esbuild twin
-// (#163). A page in another directory that reuses this client (the Print Room, #133)
-// must pass a root-absolute URL instead, or a bare "./worker.bundle.js" would resolve
-// against ITS base (/print-room/) and 404 into a silent inline fallback. The Print Room
-// is not put through the press, so it passes "/explorer/worker.js", the native-ESM
-// worker. Either worker's own ./engine/... imports resolve against the worker script
-// URL (and the twin inlines them), so only the spawn string bites.
-function connect(workerUrl) {
+// The spawn is the STATIC import-URL form, verbatim (#208): Vite only detects a
+// literal `new Worker(new URL("./worker.js", import.meta.url), ...)` at build
+// time, bundles ./worker.js (engine imports inlined) into the ONE emitted worker
+// chunk (explorer/worker.bundle.js), and rewrites the URL to it. Hoisting the expression into a
+// variable or parameter breaks the static analysis: no worker chunk is emitted,
+// the URL survives unrewritten, and every page 404s into a silent inline
+// fallback. Both spawning pages (the Explorer and the Print Room, whose bundles
+// each inline this module) resolve to the SAME emitted worker.
+function connect() {
   return new Promise((resolve) => {
     let w;
     try {
-      w = new Worker(workerUrl, { type: "module" });
+      w = new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
     } catch {
       resolve(null);
       return;
@@ -139,11 +138,9 @@ function connect(workerUrl) {
 }
 
 /**
- * Connect the worker (best-effort) and record it as the active transport.
- * @param {string} [workerUrl] spawn target (default "./worker.bundle.js", the Explorer's
- *   own esbuild twin). A cross-directory reuser (the Print Room) passes the root-absolute
- *   "/explorer/worker.js" (the unbundled worker; the Print Room is not bundled).
+ * Connect the worker (best-effort) and record it as the active transport. The
+ * spawn target is Vite's: every caller gets the one emitted worker chunk (#208).
  */
-export async function initWorker(workerUrl = "./worker.bundle.js") {
-  worker = await connect(workerUrl);
+export async function initWorker() {
+  worker = await connect();
 }

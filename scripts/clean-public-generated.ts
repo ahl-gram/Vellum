@@ -22,6 +22,8 @@ export const GENERATED_SUBTREES: ReadonlyArray<string> = [
   "explorer/engine",
   "explorer/app.bundle.js",
   "explorer/worker.bundle.js",
+  "explorer/chunks",
+  "print-room/app.bundle.js",
   "seed-of-the-day/app.bundle.js",
   "atlas",
   "gallery",

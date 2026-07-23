@@ -6,12 +6,11 @@
 // is the shell plus this preview.
 //
 // Worker reuse: the render worker and its inline fallback already live in the
-// Explorer's worker-client.js. We import it root-absolute so its own ./engine/...
-// imports resolve against /explorer/, and we hand initWorker the root-absolute worker
-// URL because `new Worker("./worker.js")` resolves against THIS document's base
-// (/print-room/), not the module's, and would 404 into a silent inline fallback. The
-// Explorer keeps the "./worker.js" default, so its bytes, the worker/inline parity
-// (e2e R2/R3), and the fallback path (B1-B3) are all unchanged.
+// Explorer's worker-client.js, imported root-absolute (Vite resolves "/..." against
+// the public/ build root, and the served URL is stable from any page). Since the
+// fold (#208) this page is bundled like the Explorer: worker-client is inlined
+// into this bundle, and its static import-URL spawn resolves to the ONE emitted
+// worker chunk, so initWorker takes no URL here anymore.
 import { runJob, usesWorker, initWorker } from "/explorer/worker-client.js";
 import { startArrival } from "/explorer/draw-ceremony.js";
 import { seedForDate } from "/explorer/engine/world/seed-of-the-day.js";
@@ -313,7 +312,7 @@ function orderPoster(key) {
 
 for (const b of plateButtons) b.addEventListener("click", () => orderPoster(b.dataset.poster));
 
-await initWorker("/explorer/worker.js");
+await initWorker();
 // #136: wire the bound atlas. getBasis reads the LIVE posterBasis at click time, so a
 // bind reproduces exactly the world on the desk (the same snapshot the poster order uses).
 initBoundAtlas(() => posterBasis);

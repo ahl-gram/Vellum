@@ -37,12 +37,13 @@ const httpGet = (url) =>
 
 // Mutable static file server. blockWorker flips the worker scripts to a 404 so the
 // inline fallback can be exercised without ever mutating the working tree on disk.
-// The fallback suite flips this same object via ctx.serverState. Both worker names
-// are blocked (#163): the Explorer spawns the esbuild twin worker.bundle.js, the
-// Print Room still spawns the unbundled worker.js, and each page's fallback suite
-// needs its own spawn target 404'd.
+// The fallback suite flips this same object via ctx.serverState. Since the Vite
+// fold (#208) there is ONE spawn target: both the Explorer and the Print Room
+// spawn the shared Vite-emitted worker chunk, so blocking this single path
+// 404s the worker for every page's fallback suite. (Before the fold the set
+// also held /explorer/worker.js, the unbundled worker the Print Room spawned.)
 const serverState = { blockWorker: false };
-const BLOCKED_WORKERS = new Set(["/explorer/worker.js", "/explorer/worker.bundle.js"]);
+const BLOCKED_WORKERS = new Set(["/explorer/worker.bundle.js"]);
 function startServer(SITE, PORT) {
   const server = createServer(async (req, res) => {
     try {

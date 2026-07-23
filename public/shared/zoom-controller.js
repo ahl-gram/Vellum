@@ -3,7 +3,8 @@
 // in public/shared/ -- the first hand-authored module shared across page directories
 // -- and is the ONLY file that imports d3-zoom (and, to attach it, d3-selection;
 // d3-zoom cannot bind gestures without a selection). Both resolve at bundle time via
-// the #163 esbuild press, so the pages still load a single native-ESM twin.
+// the Vite press (#163's esbuild originally, folded by #208), so the pages still
+// load a single native-ESM twin.
 //
 // The live gesture is CSS-ONLY: each transform lands on targetEl's `style.transform`,
 // so the SVG and the %-positioned overlays already inside it (place hits, cards, the
