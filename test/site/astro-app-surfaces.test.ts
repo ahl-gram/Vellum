@@ -93,8 +93,8 @@ test("astro:generate regenerates the runtime trees into public/, and dev/build r
   const pkg = JSON.parse(readFileSync(root("package.json"), "utf8"));
   assert.equal(
     pkg.scripts["astro:generate"],
-    "node scripts/clean-public-generated.ts && tsc -p tsconfig.browser.json --outDir public/explorer/engine && node scripts/build-explorer-bundle.ts public",
-    "astro:generate must clean, emit the engine, then bundle, all into public/",
+    "node scripts/clean-public-generated.ts && tsc -p tsconfig.browser.json --outDir public/explorer/engine && node scripts/build-explorer-bundle.ts public && node scripts/generate-showcases.ts",
+    "astro:generate must clean, emit the engine, bundle, then generate the showcases, all into public/",
   );
   assert.equal(pkg.scripts["astro:dev"], "npm run astro:generate && astro dev", "dev parity needs the runtime trees");
   assert.equal(pkg.scripts["astro:build"], "npm run astro:generate && astro build", "the build serves what dev serves");

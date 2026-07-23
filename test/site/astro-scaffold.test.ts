@@ -392,17 +392,15 @@ test("the hero charts and arms the home page embeds all resolve in public/charts
   }
 });
 
-test("the legacy build stays wired in parallel until Sub 5 cuts over", async () => {
+test("the legacy deploy build stays wired in parallel until Sub 5 cuts over", async () => {
   const pkg = JSON.parse(await readFile(root("package.json"), "utf8"));
-  assert.equal(
-    pkg.scripts.site,
-    "node scripts/build-site.ts && tsc -p tsconfig.browser.json && node scripts/build-explorer-bundle.ts docs",
-    "npm run site must keep building docs/ untouched",
-  );
+  // npm run site retired in Sub 4 (#205, decision D): charts:regen + the
+  // astro:generate showcase step own its jobs now. The DEPLOY build survives.
+  assert.equal(pkg.scripts.site, undefined, "npm run site stays retired");
   assert.equal(
     pkg.scripts.build,
     "node scripts/build-dist.ts && tsc -p tsconfig.browser.json --outDir dist/explorer/engine && node scripts/build-explorer-bundle.ts dist",
-    "npm run build must keep assembling the legacy dist/ the e2e serves",
+    "npm run build must keep assembling the legacy dist/ the deploy publishes",
   );
   assert.equal(
     pkg.scripts["astro:build"],

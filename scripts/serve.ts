@@ -10,8 +10,12 @@
  *   npm run serve -- 4000    # pick a port
  *   PORT=4000 npm run serve  # or via env
  *
- * This only serves; it never rebuilds. Run `npm run site` first (or use
- * `npm run dev`) when engine or seeded-chart changes need to be regenerated.
+ * This only serves; it never rebuilds. Since Sub 4 (#205) nothing regenerates
+ * into docs/ anymore (astro:generate targets public/, the deploy build targets
+ * dist/), so this serves the FROZEN committed docs/ tree: its Explorer needs
+ * gitignored engine/bundle files a fresh checkout does not have. For a working
+ * local preview use `npm run dev` (the Astro dev server). Retires with docs/
+ * at Sub 5.
  */
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
@@ -34,7 +38,7 @@ const SITE = resolve("docs");
 const PORT = Number(process.argv[2] ?? process.env.PORT ?? 8000);
 
 if (!existsSync(SITE)) {
-  console.error(`No docs/ directory at ${SITE}. Run \`npm run site\` first.`);
+  console.error(`No docs/ directory at ${SITE}. For a local preview use \`npm run dev\`.`);
   process.exit(1);
 }
 
