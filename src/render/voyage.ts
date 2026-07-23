@@ -8,9 +8,9 @@ import { orderTour } from "./voyage-tour.ts";
  * port in the surveyor's period voice.
  *
  * No DOM, no RNG. The animated overlay (a dotted track with a moving marker, the
- * log lines streamed into #status) lives in docs/explorer/voyage.js (Sub 2) and
+ * log lines streamed into #status) lives in public/explorer/voyage.js (Sub 2) and
  * is covered by the Explorer e2e. Only this deterministic math lives here, so the
- * existing browser tsc pass compiles it into docs/explorer/engine/ with no worker
+ * existing browser tsc pass compiles it into public/explorer/engine/ with no worker
  * or draw-payload changes.
  *
  * Determinism is same-input-same-output plus idx tiebreaks: every selection keys

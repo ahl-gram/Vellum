@@ -39,7 +39,7 @@ test("the cleaned set keeps its Sub 3 floor (later subs may only grow it)", () =
   }
 });
 
-test("the generated runtime trees are gitignored in public/, like their docs/ twins", () => {
+test("the generated runtime trees are gitignored in public/", () => {
   const lines = readFileSync(root(".gitignore"), "utf8").split("\n");
   for (const sub of SUB3_GENERATED) {
     const line = sub.endsWith(".bundle.js") ? `public/${sub}` : `public/${sub}/`;

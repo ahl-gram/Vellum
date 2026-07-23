@@ -16,7 +16,7 @@ import {
 
 // Unit tests for #54 (Chronicle year-scrubber): the pure core that the Explorer's
 // year-slider + Play sweep consume. The DOM wiring (slider, layer hide/restore,
-// rAF loop, redraw re-apply) lives in docs/explorer/app.js and is covered by the
+// rAF loop, redraw re-apply) lives in public/explorer/app.js and is covered by the
 // Explorer e2e. Only the deterministic math is tested here.
 //
 // Two load-bearing behaviours:

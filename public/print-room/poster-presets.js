@@ -16,7 +16,7 @@ const MIN_WIDTH = POSTER_PRESETS[0].width; // 2400
 const MAX_WIDTH = POSTER_PRESETS[POSTER_PRESETS.length - 1].width; // 4200
 
 // The render worker passes widthPx straight into renderMap with no clamp of its own
-// (docs/explorer/worker.js), so bounding the width is the page's job. Any requested
+// (public/explorer/worker.js), so bounding the width is the page's job. Any requested
 // width (a preset button, or a value that somehow reached us out of band) is clamped to
 // the [Desk, Grand] envelope; a non-number falls back to Grand. This is the guard the
 // CLI's 400-6000 check used to be (src/cli/main.ts:145-147): a hand-edited value can

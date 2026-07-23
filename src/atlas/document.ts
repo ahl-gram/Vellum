@@ -12,7 +12,7 @@ import type { AtlasPlate } from "./compose.ts";
 export type PlateSection = "hero" | "draughting" | "theme" | "region";
 
 // The header fields + the composed plates and fragments an atlas document needs. This
-// is exactly the shape serializableAtlas produces (docs/explorer/serializable-atlas.js),
+// is exactly the shape serializableAtlas produces (public/explorer/serializable-atlas.js),
 // so the Print Room can hand a worker's atlas result straight in; the CLI builds the same
 // shape from the World it holds. No `world` here on purpose: the worker strips it (its
 // Field methods are not structured-cloneable), so the document must never need it.

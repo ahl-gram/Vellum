@@ -4,105 +4,39 @@
 
 [![CI](https://github.com/ahl-gram/Vellum/actions/workflows/ci.yml/badge.svg)](https://github.com/ahl-gram/Vellum/actions/workflows/ci.yml)
 
-**Live gallery: <https://vellum.route12b.net/>** · draw your own
-in the **[Explorer](https://vellum.route12b.net/explorer/)** (the
-whole engine runs client-side) · or read the
-**[FAQ](https://vellum.route12b.net/faq/)**.
+![The seed-42 hero chart, drawn in the antique style, beside the Vellum wordmark](public/og.png)
+
+**Vellum lives at <https://vellum.route12b.net/>.** No install, no account:
+the whole engine runs client-side in your browser.
 
 Vellum surveys worlds that don't exist and drafts them as atlas charts.
 Give it a seed and it invents a landmass, simulates the rain that carves its
 rivers, grows its forests, founds its harbor towns, names everything in
-one of six invented languages, and partitions the land into quarrelsome
+one of ten invented languages, and partitions the land into quarrelsome
 realms. Then Vellum sits down at the drafting table and draws the maps,
 complete with parchment texture, hatched mountain ranges, a compass
 rose, a sea serpent, and a title cartouche.
 
-Same seed, same world, identical SVG. Every chart is reproducible
-from the number printed in its corner.
-
-## Quick start
-
-```bash
-git clone https://github.com/ahl-gram/Vellum
-cd Vellum
-npm install                       # dev-only: typescript + @types/node
-npm run chart -- --seed 42        # → out/chart-42-antique.svg
-open out/chart-42-antique.svg     # macOS; otherwise open the file in any browser
-```
-
-Vellum needs **Node 23.6+** and runs its TypeScript directly, with no
-build step. Everything it draws lands in `out/` (gitignored); each chart is a
-plain SVG you can open in a browser, drop into a document, or rasterize with
-`--png`.
-
-> **No Node.js?** The **[Explorer](https://vellum.route12b.net/explorer/)**
-> runs the whole engine in your browser: type a seed and draw.
-
-## Commands
-
-Vellum's CLI draws one thing: a single chart. Run it under `npm run` with `--`
-before the flags so they reach Vellum instead of npm:
-
-```bash
-npm run chart -- --seed 42 --style antique   # one chart → out/
-npm run chart -- --seed 42 --legend          # add a key explaining the symbols
-npm run chart -- --seed 42 --arms            # blazon each realm's coat of arms
-npm run chart -- --seed 42 --theme moisture  # a thematic data plate (rainfall)
-npm run chart -- --seed 42 --coast-warp 0.8  # a raggeder, more fractal coastline
-npm run chart -- --style nautical            # no --seed → random (and printed)
-npm run chart -- --seed 42 --png             # also rasterize a PNG (needs a browser)
-npm test                                     # full test suite
-npm run check                                # typecheck
-npm run charts:regen                         # rewrite the committed hero charts (re-rolls only)
-npm run og                                   # rebuild the committed social card (docs/og.png)
-```
-
-Run `node src/cli/main.ts help` for the built-in usage screen.
-
-**Posters, atlases, and printing live on the site now**, in the
-[Print Room](https://vellum.route12b.net/print-room/): order a poster-size SVG or
-PNG of any seed, print a bound atlas to PDF straight from your browser, or download
-a self-contained atlas HTML file. No Node.js required.
-
-`chart` honors every recipe and view flag below.
-
-### Flags
-
-| Flag | Description |
+| Room | What happens there |
 |---|---|
-| `--seed <n>` | The world's identity. Omit for a random seed (it's printed so you can reuse it). |
-| `--style <s>` | `antique` (default) · `topographic` · `ink` · `nautical` |
-| `--type <t>` | `island` · `archipelago` · `continent` · `citystate` *(default: chosen by the seed)* |
-| `--band <b>` | Climate band: `temperate` · `tropical` · `polar` *(default: chosen by the seed)* |
-| `--land <f>` | Land fraction, `0.1`–`0.7` *(default: set by map type)* |
-| `--coast-warp <f>` | Coastline raggedness, `0`–`1`: how fractal the shoreline is *(default: set by the seed)* |
-| `--grid <WxH>` | Simulation resolution *(default `320x240`)* |
-| `--width <px>` | Output width in pixels, `400`–`6000` *(default `1500`)* |
-| `--legend` | Draw a compact, style-aware key explaining the chart's symbols and labels *(default: off)* |
-| `--arms` | Blazon each realm's coat of arms beside its label *(default: off)* |
-| `--theme <t>` | Render a thematic data plate instead of the usual symbology: `vegetation` · `climate` · `moisture` · `population` *(default: off)* |
-| `--png` | Also rasterize to PNG using an installed browser; set `VELLUM_BROWSER` to choose which |
-| `--scale <n>` | PNG pixel scale, `0.5`–`4` *(default `2`)* |
-| `--out <path>` | Override where the file is written |
+| **[Explorer](https://vellum.route12b.net/explorer/)** | Type a seed, draw its world, zoom into its regions |
+| **[Print Room](https://vellum.route12b.net/print-room/)** | Poster-size SVG or PNG of any seed, print the bound atlas to PDF, download a self-contained atlas |
+| **[Seed of the Day](https://vellum.route12b.net/seed-of-the-day/)** | Today's world, the same for everyone, plus the Daily Hunt |
+| **[Atlas](https://vellum.route12b.net/atlas/)** | The hero world (seed 42) as a bound volume |
+| **[Gallery](https://vellum.route12b.net/gallery/)** | A twelve-world contact sheet |
+| **[FAQ](https://vellum.route12b.net/faq/)** · **[Glossary](https://vellum.route12b.net/glossary/)** | How it all works; the vocabulary printed on the charts |
 
-### Reproducing a chart
+The daily seed is the current UTC date read as an integer `YYYYMMDD`, so
+everyone sees the same world on the same calendar day, and the page never
+needs a rebuild: it draws itself in your browser when you load it.
 
-Every chart embeds its full recipe: the root `<svg>` carries `data-vellum-*`
-attributes (seed, type, band, land, grid, style, and engine version) alongside
-a readable `<metadata>` summary. `recipeFromSvg()` in `src/render/recipe-meta.ts`
-reads them back, and re-rendering `generateWorld(recipe)` at the default width
-reproduces the map byte-for-byte.
+## Same seed, same world
 
-Display and output options (`--width`, `--legend`, `--arms`, `--theme`, `--png`,
-`--scale`) change how a world is drawn or exported, not the world itself,
-so they are not stamped in the SVG and must be re-supplied to reproduce a
-particular view. (Arms are still fully deterministic from the seed; only the choice
-to draw them is a view option.)
-
-If all you have is a saved chart, the seed and style are printed in the margin. Pass
-any forced `--type`, `--band`, or `--land` again alongside the seed to redraw the
-same map. Regional inset charts (the atlas's "Environs of ..." surveys) carry no
-recipe, since redrawing one also needs its zoom window.
+Every chart is reproducible from the number printed in its corner. The root
+`<svg>` embeds its full recipe as `data-vellum-*` attributes, and re-rendering
+that recipe reproduces the map byte for byte. The
+[FAQ](https://vellum.route12b.net/faq/) covers seeds, determinism, and how to
+reproduce a saved chart in detail.
 
 ## The styles
 
@@ -136,9 +70,8 @@ choice comes from a labeled fork of the master seed (`fork("names")`,
    corridors emerge; realms partitioned by terrain-cost Voronoi, with
    borders that prefer ridges and rivers.
 5. **Names & lore**: syllable-grammar generators for ten invented
-   cultures (thalassic, norden, veshari, sylvan, tsuren, draket, oromi,
-   zoryan, tezcal, ordai) name every town, river, sea, and realm; a
-   template-grammar lore writer drafts the gazetteer notes.
+   cultures name every town, river, sea, and realm; a template-grammar
+   lore writer drafts the gazetteer notes.
 6. **Rendering**: marching-squares coastlines and contours (with
    saddle resolution and boundary closing), Chaikin smoothing, a tiny
    immutable SVG builder, and ~15 layer renderers up through the
@@ -152,83 +85,48 @@ line up with the world chart.
 
 ## Inventing a name language
 
-Each of the ten cultures is a plain data object (the `Culture` type) in
-`src/society/names.ts`, collected in the `CULTURES` array. That object is all it
-takes to define how a world's names sound, so you can retune an existing culture
-or add your own to lean the names toward a real language.
+Each of the ten name cultures is a plain data object (the `Culture` type in
+`src/society/names.ts`): three sound inventories (onsets, nuclei, codas), the
+syllable patterns that combine them, and the templates that dress a bare stem
+into "The Sea of %" or "Mount %". Retune one, or add your own to lean a
+world's names toward any sound you like. It is phonotactic mimicry, not
+linguistics: a culture captures the shape and sound of a language, never its
+grammar or meaning.
 
-A culture has three sound inventories plus the rules that combine them:
+One warning: names come from a labeled fork of the seed, so editing the
+cultures renames every world. A naming change re-rolls existing seeds, owes a
+hero-chart regen (`npm run charts:regen` + `npm run og`), and must respect the
+**covenant seed**: seed 42's culture pick must keep landing on oromi across
+roster changes, so the golden world's every name stays bit-identical.
+`test/world/covenant-seed42.test.ts` fails loudly if it ever moves.
 
-- `onsets` (**O**), `nuclei` (**N**), `codas` (**C**): the syllable pieces,
-  given as chunks rather than single letters. Onsets like `"th"`, `"vel"`,
-  `"sten"`; nuclei including diphthongs like `"ai"`; codas like `"nd"`, `"mor"`,
-  or `""` (none).
-- `patterns`: strings over `O`/`N`/`C` such as `"ONC"` or `"ONCONC"`. Vellum
-  walks a pattern and picks one piece per slot, so `"ONON"` might yield
-  `mar`+`a`+`vel`+`i` = `"maraveli"`. Coda-light, nucleus-heavy patterns read
-  open and flowing; cluster-heavy ones read blocky.
-- `townSuffixes` and the feature templates (`riverTemplates`, `peakTemplates`,
-  `seaTemplates`, `lakeTemplates`, `forestTemplates`, `realmTemplates`): these
-  dress a bare stem into a finished name, with `%` standing in for the stem, as
-  in `"The Sea of %"` or `"Mount %"`.
+## Run it locally
 
-A Japanese-leaning culture, for example:
-
-```ts
-{
-  id: "yamato",
-  onsets: ["k","s","t","n","h","m","y","r","w","g","z","d","b","ch","sh"],
-  nuclei: ["a","i","u","e","o"],           // five pure vowels, no diphthongs
-  codas:  ["","","","n"],                  // mostly open syllables, rare -n
-  patterns: ["ONON","ONONON","ONONONON"],  // strict CV, no clusters
-  townSuffixes: ["mura","machi","jima","yama","saki"],
-  riverTemplates: ["% -gawa","The % River","The Waters of %"],
-  peakTemplates: ["Mount %","% -san","The % Heights"],
-  // ...sea/lake/forest/realm templates to taste
-}
+```bash
+git clone https://github.com/ahl-gram/Vellum
+cd Vellum
+npm install
+npm run dev        # the full site, Explorer included, on a local Astro dev server
 ```
 
-That yields stems like *Sakira* or *Kanashima* and names such as *Mount Hatsu*
-or *Kana-gawa*.
+Vellum needs **Node 24+**.
 
-Two things to know:
+### The CLI
 
-- **It is phonotactic mimicry, not linguistics.** A culture captures the shape
-  and sound of a language, not its grammar, morphology, or meaning. There is no
-  vowel harmony, tone, or real orthography; put any special characters straight
-  in the inventories.
-- **Editing the cultures re-rolls existing seeds.** Names come from a labeled
-  fork of the seed, so adding, removing, reordering, or editing a culture shifts
-  the draw sequence and renames every world: a seed you saved comes back with a
-  different identity. After a naming change, regenerate the committed hero
-  charts (`npm run charts:regen`) and update the hero captions.
+The engine is also a command-line tool that draws one chart at a time, straight
+from the TypeScript source with no build step:
 
-  The **Second Edition** (issue #235) is the second change of this kind: it grew
-  the roster from six cultures to ten (adding tsuren, zoryan, tezcal, ordai), so
-  every seed re-rolled its culture and names, with one exception. Seed 42, the
-  golden, is the **covenant seed**. A world draws its culture with one pick,
-  `roster[floor(u * roster.length)]`; seed 42's draw `u = 0.69486...` lands oromi
-  at index 6 of the ten-culture array, exactly where it sat at index 4 of the six,
-  so seed 42's every name and cell stayed bit-identical and the golden passed with
-  no re-pin. A future edition repeats that one placement: put oromi at
-  `floor(u * newLength)` and the covenant holds. A guard test
-  (`test/world/covenant-seed42.test.ts`) fails loudly if oromi ever leaves index 6.
+```bash
+npm run chart -- --seed 42                     # → out/chart-42-antique.svg
+npm run chart -- --seed 42 --style nautical    # a different drafting table
+npm run chart -- --seed 42 --theme moisture    # a thematic data plate (rainfall)
+node src/cli/main.ts help                      # the full flag reference
+```
 
-## Seed of the day
-
-[`docs/seed-of-the-day/`](https://vellum.route12b.net/seed-of-the-day/) is a
-hand-authored page that draws a fresh world each day. The seed is the current
-date in UTC read as an integer `YYYYMMDD` (2026-06-19 -> seed `20260619`), mapped
-by `seedForDate()` in `src/world/seed-of-the-day.ts`. UTC, so everyone sees the
-same world on the same calendar day.
-
-It renders client-side: `app.js` imports the same browser engine the Explorer
-uses (`../explorer/engine/`) and draws today's chart on load, with a gazetteer
-note from its capital. Because the date is read in the browser, the page stays
-current with no rebuild, so it is **not** regenerated by `npm run site`; only the
-shared engine under `docs/explorer/engine/` is (re)built by the deploy. The
-social-preview image for a shared link is the static site card, not today's
-world.
+Charts land in `out/` (gitignored) as plain SVGs: open them in a browser, drop
+them into a document, or add `--png` to rasterize. The help screen documents
+every flag (styles, map types, climate bands, coastline raggedness, legends,
+coats of arms, PNG export).
 
 ## Development notes
 
@@ -262,20 +160,35 @@ attribution required.
 
 ## For contributors
 
-Vellum currently has no runtime dependencies. Node 23.6+ runs the TypeScript
-directly (`erasableSyntaxOnly`). Dev dependencies are `typescript` and
-`@types/node` for `tsc --noEmit`.
+The repository is two things: a dependency-light world engine, and the Astro
+site that serves it.
 
-### Social preview and favicon
+- **The engine** (`src/`) has zero runtime dependencies. Node 24+ runs its
+  TypeScript directly (`erasableSyntaxOnly`), no build step, and the CLI and
+  tests run the same way.
+- **The site** takes dependencies where they earn their keep. The three
+  content pages (home, FAQ, glossary) are Astro pages rendered through one
+  shared layout (`src/pages/` + `src/layouts/`); the app surfaces (Explorer,
+  Print Room, Seed of the Day) are hand-authored HTML/JS served verbatim from
+  `public/`. The Explorer and Seed of the Day pages bundle their zoom behavior
+  with esbuild, which is where the runtime deps (`d3-selection`,
+  `d3-transition`, `d3-zoom`) ship. Dev deps: `astro`, `esbuild`,
+  `typescript`, `@types/node`.
+- **The build** (`npm run build`): `astro:generate` first writes the generated
+  trees into `public/` (the tsc browser emit of the engine, the esbuild
+  bundles, the atlas and gallery showcases), then `astro build` assembles
+  `dist/`, which GitHub Actions publishes to Pages on every push to main.
 
-The hand-authored pages carry Open Graph / Twitter Card tags and a favicon.
-Two assets are committed under `docs/` (not generated at deploy time, since the
-Pages build runs in CI with no browser to rasterize):
+Day to day: `npm test` (unit), `npm run check` (typecheck), `npm run test:e2e`
+(headless-browser suite against a built `dist/`; needs a Chromium-family
+browser), `npm run dev` (local site).
 
-- `docs/og.png`, the 1200x630 preview card: the hero chart (seed 42) letterboxed
-  beside the Vellum wordmark. Rebuild with `npm run og` (needs an installed
-  browser) whenever the hero map changes; the card SVG lands in `out/`.
-- `docs/favicon.svg`, a hand-drawn compass-rose mark, linked from every page.
+### Committed goldens
 
-The Pages deploy build (`npm run build`) copies `docs/` into `dist/`, so both
-assets ship as-is.
+The homepage's seven hero charts (`public/charts/*.svg`) and the social
+card (`public/og.png`, 1200x630, rebuilt by `npm run og` with an installed
+browser) are committed rather than generated at deploy time, because CI has no
+browser and the homepage pins its heroes. `npm run charts:regen` is their only
+writer; land a regen alone, with the label moves named in the PR.
+`public/favicon.svg` is the hand-drawn compass-rose mark, linked from every
+page.

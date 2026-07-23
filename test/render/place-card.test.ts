@@ -13,7 +13,7 @@ import {
 
 // Unit tests for #53: client-side composition of a place's story card from the
 // #52 manifest. Pure logic only; the DOM overlay (hover/focus/tap, edge flip,
-// pin/dismiss) lives in docs/explorer/app.js and is covered by the Explorer e2e.
+// pin/dismiss) lives in public/explorer/app.js and is covered by the Explorer e2e.
 //
 // The load-bearing assertion: a settlement's FOUNDING event and its RUIN event
 // both carry the same `settlement` idx (history.ts), so the abandonment tale

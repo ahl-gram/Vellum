@@ -1,6 +1,6 @@
 // The Surveyor's Glass, Sub 3 (#164): the glass itself. A shared, page-agnostic
 // controller that gives an element geometric pan/zoom driven by d3-zoom. It lives
-// in docs/shared/ -- the first hand-authored module shared across page directories
+// in public/shared/ -- the first hand-authored module shared across page directories
 // -- and is the ONLY file that imports d3-zoom (and, to attach it, d3-selection;
 // d3-zoom cannot bind gestures without a selection). Both resolve at bundle time via
 // the #163 esbuild press, so the pages still load a single native-ESM twin.
