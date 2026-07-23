@@ -334,10 +334,9 @@ test("the body skeleton pins the load-bearing <main> wrapper at both ends", () =
 });
 
 test("every internal link and embed on the rendered pages resolves", () => {
-  // The app and generated surfaces stay in docs/ until Subs 3-4 move them; the
-  // committed shells resolve against docs/, the per-deploy generated pair only
-  // against the allowlist (they may not exist on a fresh checkout).
-  const appSurfaces = ["/explorer/", "/print-room/", "/seed-of-the-day/"];
+  // Since Sub 3 the app surfaces ship from public/ (their shells resolve there);
+  // the per-deploy generated pair resolves only against the allowlist (atlas/ and
+  // gallery/ are generated into the output by Sub 4, absent on a fresh checkout).
   const generated = ["/atlas/", "/gallery/"];
   const routes = new Set<string>(PAGES.map((p) => p.dir));
   for (const p of PAGES) {
@@ -351,11 +350,8 @@ test("every internal link and embed on the rendered pages resolves", () => {
       const path = new URL(url, `https://v.test${p.dir}`).pathname;
       if (routes.has(path)) continue;
       if (generated.includes(path)) continue;
-      if (appSurfaces.includes(path)) {
-        assert.ok(existsSync(root(`docs${path}index.html`)), `${p.route} links ${url}: docs${path} should exist`);
-        continue;
-      }
-      assert.ok(existsSync(root(`public${path}`)), `${p.route} links ${url}: public${path} should exist`);
+      const target = path.endsWith("/") ? `${path}index.html` : path;
+      assert.ok(existsSync(root(`public${target}`)), `${p.route} links ${url}: public${target} should exist`);
     }
   }
 });
@@ -408,5 +404,9 @@ test("the legacy build stays wired in parallel until Sub 5 cuts over", async () 
     "node scripts/build-dist.ts && tsc -p tsconfig.browser.json --outDir dist/explorer/engine && node scripts/build-explorer-bundle.ts dist",
     "npm run build must keep assembling the legacy dist/ the e2e serves",
   );
-  assert.equal(pkg.scripts["astro:build"], "astro build", "the Astro build gets its own script for now");
+  assert.equal(
+    pkg.scripts["astro:build"],
+    "npm run astro:generate && astro build",
+    "the Astro build regenerates the public/ runtime trees first (Sub 3)",
+  );
 });

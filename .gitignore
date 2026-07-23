@@ -22,6 +22,14 @@ docs/explorer/app.bundle.js
 docs/explorer/worker.bundle.js
 docs/seed-of-the-day/app.bundle.js
 
+# The same generated runtime trees under public/ (#204): regenerated there by
+# `npm run astro:generate` before every astro dev/build. Committed app-surface
+# SOURCE in public/ is tracked (the Sub 3 dual-copy window until Sub 5).
+public/explorer/engine/
+public/explorer/app.bundle.js
+public/explorer/worker.bundle.js
+public/seed-of-the-day/app.bundle.js
+
 .claude/settings.local.json
 # Transient review worktrees spawned by Claude Code workflows.
 .claude/worktrees/

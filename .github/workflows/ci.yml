@@ -37,3 +37,25 @@ jobs:
           # Require a browser so a missing one fails the build loud rather than
           # skipping silently (local runs with no browser still skip).
           VELLUM_REQUIRE_BROWSER: '1'
+
+  # Sub 3 (#204) parallel track: the same e2e suite, zero check changes, against
+  # the Astro-served build (astro:build regenerates the public/ runtime trees and
+  # emits to dist/, which the e2e serves by default). Guards the Astro path
+  # through the dual-copy window; Sub 5 retires the legacy job above at cutover.
+  astro-e2e:
+    name: astro build & e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci
+      - name: Build the Astro site into dist/
+        run: npm run astro:build
+      - name: Explorer e2e (headless browser, against the Astro-served dist/)
+        run: npm run test:e2e
+        env:
+          VELLUM_BROWSER: /usr/bin/google-chrome
+          VELLUM_REQUIRE_BROWSER: '1'

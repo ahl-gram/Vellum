@@ -1,0 +1,469 @@
+:root { color-scheme: light; }
+body {
+  margin: 0; padding: 2rem 1.5rem 4rem;
+  background: #efe6cf; color: #3d2f1f;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+}
+/* The Punchcutter's Case (#228): display/flourish/body roles via /fonts.css vars. */
+h1, .topnav, footer {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+}
+.tagline, .caption {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+}
+main { max-width: 1100px; margin-inline: auto; }
+header { text-align: center; margin-bottom: 1.4rem; }
+h1 { font-size: 2rem; letter-spacing: 0.1em; margin: 0; }
+h1 a { color: inherit; text-decoration: none; }
+.tagline { font-style: italic; color: #6b5a40; margin: 0.3rem 0 0; }
+.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: #857257; margin: 0.9rem 0 0; }
+.topnav a { color: inherit; }
+[aria-current="page"] { font-weight: 700; }
+/* #87: the controls read as three labeled bands (Map / Display / Actions)
+   instead of one wrapping blob. Each row is a quiet right-aligned label plus a
+   wrapping field group; rows stack into clean sections on a phone. */
+.controls { display: flex; flex-direction: column; gap: 0.8rem;
+  margin: 1.2rem auto; max-width: 960px; }
+.control-row { display: flex; align-items: baseline; gap: 0.9rem; }
+.row-label { flex: 0 0 4.5rem; text-align: right; text-transform: uppercase;
+  letter-spacing: 0.14em; font-size: 0.68rem; color: #9a8868; }
+.row-fields { display: flex; flex-wrap: wrap; align-items: center;
+  gap: 0.55rem 0.85rem; flex: 1; }
+.controls label { font-size: 0.85rem; letter-spacing: 0.05em; color: #6b5a40; }
+.controls label.check { display: inline-flex; align-items: center; gap: 0.35rem; }
+.controls input[type="checkbox"] { accent-color: #4a3826; width: 1rem; height: 1rem; }
+.controls label.sealevel { display: inline-flex; align-items: center; gap: 0.4rem; }
+.controls input[type="range"]#land,
+.controls input[type="range"]#coast { accent-color: #4a3826; width: 9rem; }
+.land-end { font-size: 0.72rem; font-style: italic; color: #857257; }
+/* #133 / #199: "Take to the Print Room" is the Explorer's ONLY path to the bound atlas now
+   that the inline Bind is retired, so it is the featured "take your world home" step. It is
+   button-shaped like the action buttons, but warmer (a parchment-gold fill) and a touch
+   weightier than the plain cream outline peers, with a leading press glyph -- so it stands
+   out without becoming a second dark primary (Draw stays the sole primary). Still an <a>
+   (navigation, not a press), styled to match the buttons' chrome. */
+.action-link { display: inline-flex; align-items: center; gap: 0.45rem; align-self: center;
+  font-family: inherit; font-size: 0.95rem; letter-spacing: 0.04em; color: #3d2f1f;
+  background: #f0e3bd; border: 1.5px solid #4a3826; border-radius: 4px;
+  padding: 0.4rem 0.75rem; text-decoration: none; }
+.action-link:hover { background: #f7edcd; color: #4a3826; }
+/* The hand-press glyph is stroked in the link's own ink (currentColor), so it tracks the
+   text on hover and reads as drawn, not printed. */
+.order-glyph { width: 1.2em; height: 1.2em; flex: none; fill: none; stroke: currentColor;
+  stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.order-glyph circle { fill: currentColor; stroke: none; } /* the handle knob */
+.land-readout { font-style: italic; color: #6b5a40;
+  font-variant-numeric: tabular-nums; min-width: 4.2rem; }
+@media (max-width: 560px) {
+  .control-row { flex-direction: column; align-items: stretch; gap: 0.35rem; }
+  .row-label { flex: none; text-align: left; }
+}
+input[type="number"], select, button {
+  font-family: inherit; font-size: 0.95rem; color: #3d2f1f;
+  background: #f8f1e0; border: 1.5px solid #4a3826; border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+}
+input[type="number"] { width: 8.5rem; }
+button { cursor: pointer; }
+/* Exclude the invisible .place-hit overlay (its hover ring is an ::after, #128), the
+   same way motion.css excludes it from the universal lift; otherwise this cream would
+   paint an opaque box over each map glyph on hover. */
+button:not(.place-hit):hover { background: #fff7e4; }
+button.primary { background: #4a3826; color: #f2e8cf; letter-spacing: 0.08em; }
+button.primary:hover { background: #5d4831; }
+.status { text-align: center; font-style: italic; color: #857257;
+  min-height: 1.4em; margin-bottom: 0.8rem; }
+/* #164 The Surveyor's Glass. #map-viewport is the layout + clipping box (it owns the
+   centering #map used to); #map is the transform target the zoom-controller drives.
+   transform-origin 0 0 makes the CSS scale pivot at the top-left, matching d3-zoom's
+   screen-space math (point*k + translate) so gestures land true and the overlays stay
+   pixel-aligned with their marks. overflow:hidden clips ONLY while zoomed (.zoomed,
+   toggled by the controller): at k=1 (home) the arrival ceremony's translate/rotate
+   and the chart's drop shadow must overflow the frame exactly as today, so the idle
+   page is byte-identical. */
+#map-viewport { max-width: 1100px; margin-inline: auto; position: relative; }
+#map-viewport.zoomed { overflow: hidden; }
+/* #164: touch drag/pinch need touch-action:none, which d3-zoom does NOT set; without
+   it the browser's native pan/pinch preempts the gesture. The controller adds .zoomable
+   only while attached (antique in this sub), so non-zoomable styles keep normal touch
+   scrolling over the chart. Tradeoff: on antique, a touch/wheel over the sheet no longer
+   scrolls the page past it (standard slippy-map behavior). */
+#map-viewport.zoomable { touch-action: none; }
+/* #165: the map viewport is focusable (tabindex) so keyboard users pan/zoom it with the
+   arrows and +/-. Show the focus ring only for keyboard focus (:focus-visible), so a mouse
+   click on the sheet does not leave it outlined. */
+#map-viewport:focus-visible { outline: 2px solid #4a3826; outline-offset: 2px; }
+/* #165 The Surveyor's Glass: the on-screen zoom cluster, a corner overlay. position:absolute
+   anchors it to the viewport box (NOT #map's live transform); z-index lifts it over the chart.
+   Compact and plain here; Sub 9 (#170) gives it the antique voice. */
+.zoom-controls {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  display: flex; flex-direction: column; gap: 4px;
+  /* #170: the keys legend below is wider than the 2rem buttons; keep the buttons
+     hugging the frame corner instead of stretching to the legend's width. */
+  align-items: flex-end;
+}
+.zoom-controls button {
+  width: 2rem; height: 2rem; padding: 0; line-height: 1; font-size: 1.15rem;
+  display: flex; align-items: center; justify-content: center;
+  background: rgb(247 237 207 / 0.92); border: 1px solid #b9a77f; color: #4a3826;
+}
+.zoom-controls button:hover { background: #fff7e4; }
+/* #170: the keys legend, Sub 4's handoff resolved (Alex's call: a small visible slip by
+   the cluster, the only form a sighted mouse user can DISCOVER without hover). It is
+   aria-hidden: the same keys are already announced by the #map-viewport aria-label, so
+   voicing it twice would double up for AT users. Hidden where keys make no sense (touch
+   devices) and where the stacked controls already crowd a small screen. */
+.zoom-keys {
+  margin-top: 2px; padding: 0.28rem 0.45rem;
+  background: rgb(247 237 207 / 0.92); border: 1px solid #b9a77f; border-radius: 3px;
+  display: flex; flex-direction: column; gap: 0.1rem;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.58rem; font-style: italic; line-height: 1.45;
+  letter-spacing: 0.04em; color: #6b5a40; text-align: right; white-space: nowrap;
+}
+.zoom-keys kbd { font-family: inherit; font-style: normal; font-weight: 600; color: #4a3826; }
+/* Touch-primary means hover:none AND pointer:coarse. A bare (hover: none) over-matches
+   environments with NO pointer at all (linux headless CI reports hover:none with
+   pointer:none), which would hide the legend exactly where a keyboard user could use
+   it; caught by CI, pinned by e2e G1's rule-scoping check. */
+@media (hover: none) and (pointer: coarse), (max-width: 560px) { .zoom-keys { display: none; } }
+#map { position: relative; transform-origin: 0 0; }
+#map svg { width: 100%; height: auto; display: block;
+  border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+
+/* #169 The redraft inset. A committed regional survey mounts INSIDE #map, positioned over the
+   exact window it re-surveys, so it rides the live zoom transform with the chart and reads as
+   a detail sheet pasted on the master chart. It fades in over the coarser content and the
+   camera never moves at the commit; the outgoing inset (if any) is torn down only once the
+   incoming one is opaque, so the swap never shows a gap frame. pointer-events:none keeps
+   gestures and place-hits flowing through it. Reduced motion swaps instantly (the JS also
+   skips the transition path). --fade is the single timing source. */
+.region-inset {
+  position: absolute; pointer-events: none;
+  opacity: 0; transition: opacity var(--fade, 200ms) ease;
+}
+.region-inset.in { opacity: 1; }
+/* #map svg (the id-strength rule above) would border+shadow this svg too; the inset instead
+   keeps its own drawn neatline and casts a small paste-up shadow. width/height 100% (not
+   auto) pin it to the computed box so no rounding gap opens at the window edge. */
+#map .region-inset svg {
+  width: 100%; height: 100%;
+  border: 0; box-shadow: 0 2px 9px rgb(61 47 31 / 0.35);
+}
+@media (prefers-reduced-motion: reduce) { .region-inset { transition-duration: 0ms; } }
+
+/* #169 The drafting pencil: while a finer survey is being drawn in the worker, its target
+   window is pencilled on the chart -- a dashed outline that breathes -- so the wait reads as
+   "the surveyor is drafting here", not as a stall. Mounted inside #map (it marks WORLD
+   terrain, so it must ride the transform); the JS counter-scales the border width by 1/k.
+   Reduced motion holds it steady. */
+.survey-pencil {
+  position: absolute; pointer-events: none;
+  border: 2px dashed rgb(74 56 38 / 0.55);
+  background: rgb(74 56 38 / 0.04);
+  animation: survey-pencil-breathe 1.2s ease-in-out infinite;
+}
+@keyframes survey-pencil-breathe {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) { .survey-pencil { animation: none; } }
+
+/* #170 The redraft inks itself in. The incoming inset svg gets .redrafting at the commit
+   (lod-controller startRedraft): the region coastline draws in ink at the redraft grade
+   (a shorter pass than the once-per-draw #127 arrival, because this fires on every
+   settle) while the land wash and waterline halos dry in behind it, and the names the
+   finer sheet newly labels dry in tier-staggered (.dry-in on the settlement GROUP, the
+   animation on its label text only: the glyph was already visible at world scale, so
+   only the NAME is news). Persisting names carry no class and never re-animate (AC1).
+   All of it is DOM styling of the live inset only; Download blobs the pristine res.svg
+   string, so saved sheets are untouched. Reduced motion never adds these classes (the
+   JS gate), and the /motion.css universal collapse flattens a mid-flight OS flip. */
+#map .region-inset svg.redrafting #layer-land path {
+  animation: inkDraw var(--redraft-draw, 600ms) var(--ease-paper) both,
+             washDry var(--redraft-dry, 450ms) var(--ease-paper) 200ms both;
+}
+#map .region-inset svg.redrafting #layer-waterlines {
+  animation: dryingInk var(--redraft-dry, 450ms) var(--ease-paper) 150ms both;
+}
+#map .region-inset svg.redrafting g.settlement.dry-in text {
+  animation: dryingInk var(--redraft-dry, 450ms) var(--ease-paper) var(--redraft-dry-wait, 260ms) both;
+}
+/* Villages wait for the towns: the tier stagger (#170). Both waits sit past the inset's
+   200ms crossfade so a name never dries onto a still-translucent sheet. */
+#map .region-inset svg.redrafting g.settlement.dry-in[data-tier="village"] text {
+  animation-delay: var(--redraft-dry-wait-village, 500ms);
+}
+/* Hamlets follow the villages (#171): the smallest places dry in last. */
+#map .region-inset svg.redrafting g.settlement.dry-in[data-tier="hamlet"] text {
+  animation-delay: var(--redraft-dry-wait-hamlet, 740ms);
+}
+
+/* #131 The style turn. Changing the style turns this leaf over: the outgoing chart
+   turns away and the same world lands re-dressed in the new style (sheet-turn.js).
+   The 3D context is INERT at rest and lit only while .turning is set, so the chart,
+   the place overlay, and the pinned card behave byte-for-byte as before between turns
+   (verified by the #131 CDP spike). #sheet-inner stays position:relative so the
+   transient back face (added only during a turn) anchors over the recto. This
+   perspective wrapper is the shared flip infrastructure the Verso (#116) reuses.
+   The turn is a WAAPI animation (JS, not CSS), so its reduced-motion twin is the
+   shouldTurn() gate (reduced motion -> instant swap), a JS matchMedia move rather than
+   a CSS collapse; there is nothing here for the /motion.css collapse to reach. */
+.sheet-inner { position: relative; }
+.sheet.turning { perspective: 2200px; }
+.sheet-inner.turning { transform-style: preserve-3d; }
+/* #164: the backface hides on #map-viewport (the direct child of the preserve-3d
+   #sheet-inner), not #map: the viewport is a flat plane -- transform-style flat is the
+   default, and the .zoomed overflow:hidden would force it regardless -- so #map renders
+   flattened into it, and it is the viewport's facing that must flip out of view. */
+.sheet-inner.turning #map-viewport { backface-visibility: hidden; }
+.sheet-back {
+  position: absolute; inset: 0 0 auto 0;
+  backface-visibility: hidden; transform: rotateY(180deg);
+}
+.sheet-back img { width: 100%; height: auto; display: block;
+  border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+
+/* #116 The Verso. The flip REUSES #131's .sheet / #sheet-inner perspective wrapper,
+   but where #131's turn is transient (it lands back on the recto re-dressed), the
+   Verso RESTS on the back face: a held rotateY(-180deg). Two classes carry that:
+     .flip3d  -- lights perspective + preserve-3d and reveals #verso. Added the instant
+                 a flip starts (either direction) and removed only once the leaf lands
+                 flat on the recto again (transitionend), so idle byte-parity on the
+                 recto is restored exactly like #131's at-rest invariant.
+     .versoed -- the rotation TARGET: present => the leaf holds rotateY(-180deg).
+   The transition is scoped OFF while a #131 style-turn owns the leaf (.turning), so
+   the WAAPI turn and this CSS transition never drive #sheet-inner at once. Reduced
+   motion collapses the transition via /motion.css, so the face swaps instantly. */
+.sheet:not(.turning) .sheet-inner {
+  transition: transform var(--verso-turn, 1200ms) var(--ease-turn, ease-in-out);
+}
+.sheet.flip3d { perspective: 2200px; }
+.sheet.flip3d .sheet-inner { transform-style: preserve-3d; }
+.sheet.flip3d #map-viewport { backface-visibility: hidden; } /* #164: retargeted from #map, see the turn rule above */
+.sheet.versoed .sheet-inner { transform: rotateY(-180deg); }
+
+/* The back face: a permanent sibling of #map, sized by its ghost image so the sheet
+   turns over at the chart's exact height. Hidden at rest (visibility, not a 3D trick)
+   so the 3D context can stay off between flips. */
+#verso {
+  position: absolute; inset: 0 0 auto 0;
+  visibility: hidden;
+  backface-visibility: hidden; transform: rotateY(180deg);
+  background: #e6dabd; color: #3d2f1f;
+  border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2);
+  overflow: hidden;
+}
+.sheet.flip3d #verso { visibility: visible; }
+/* The bleed-through ghost: the current chart struck through the vellum, mirrored and
+   faint, the way iron-gall ink shows on the reverse. Also sizes #verso (block flow). */
+.verso-ghost { display: block; width: 100%; height: auto;
+  transform: scaleX(-1); opacity: 0.1; filter: blur(1.2px); }
+/* #174 The surveyor's ink bleeds through too. The voyage track is a client overlay on the
+   recto, never baked into the chart string the ghost is made of, so it is drawn again here
+   as a mirrored polyline. It MUST share the ghost's box and its scaleX(-1) about the same
+   centre, or the track will not register with the coastline it is bleeding through: the
+   ghost is width:100%/height:auto in block flow, and this layer is inset:0 over the same
+   padding box, so the two boxes coincide. Struck a little stronger than the ghost's 0.1:
+   that opacity is tuned for a whole chart's worth of ink, and a 3px dotted stroke at 0.1
+   simply disappears. Set on the layer, not the polyline, so it reads as one bleed.
+   The stroke is the TRACK's ink (#5a4326, matching .voyage-track), never the ship's
+   (#4a3826): what soaks through the sheet is the line the surveyor drew on it. */
+.verso-track-layer { position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; transform: scaleX(-1);
+  opacity: 0.26; filter: blur(1.1px); overflow: visible; }
+.verso-track { fill: none; stroke: #5a4326; stroke-width: 3;
+  stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke; }
+/* The docket line stamped along the fold, the surveyor's attribution, and the office
+   stamp all sit over the ghost. Percentages track the ghost's height at any world. */
+.verso-docket, .verso-survey { position: absolute; left: 8%; right: 8%;
+  text-align: center; }
+.verso-docket { top: 9%; text-transform: uppercase; letter-spacing: 0.18em;
+  font-size: clamp(0.6rem, 1.4vw, 0.92rem); color: #6b5a40;
+  font-variant-numeric: tabular-nums; }
+.verso-survey { top: 17%; font-style: italic; line-height: 1.5;
+  font-size: clamp(0.62rem, 1.5vw, 1rem); color: #7a6746; }
+.verso-stamp { position: absolute; right: 11%; bottom: 12%;
+  width: clamp(90px, 17%, 190px); height: auto; opacity: 0.5;
+  transform: rotate(-8deg); }
+
+/* #127 The Drafting Moment: a freshly drawn chart settles onto the desk while the
+   coastline draws itself in ink and the land wash + waterline halos dry in behind
+   it. Gated behind .arriving (added by app.js after injection) so the sea-level
+   drag can suppress the ceremony; app.js sets --draw-len + stroke-dasharray on the
+   coast path and clears them on animationend, restoring the pristine stroke. This
+   is DOM-only styling of the injected SVG, so Download (the pristine lastSvg
+   string) stays byte-identical. All of it collapses under the shared
+   prefers-reduced-motion rule in /motion.css (chart instant, coast pre-drawn). */
+#map svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
+#map svg.arriving #layer-land path {
+  animation: inkDraw var(--ink-draw) var(--ease-paper) both,
+             washDry var(--ink-dry) var(--ease-paper) 400ms both;
+}
+#map svg.arriving #layer-waterlines {
+  animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
+}
+
+/* Living Chart overlay (#53): invisible focusable hit-targets sit over the baked
+   glyphs and feed one reused parchment card. The container ignores pointer
+   events so the rest of the page stays live; only the hits and card take them.
+   The .place-hit reset is load-bearing: the global button{} rule above would
+   otherwise paint 26 parchment boxes over the map, breaking idle parity. */
+.place-overlay { position: absolute; inset: 0; pointer-events: none; }
+.place-hit {
+  position: absolute; transform: translate(-50%, -50%);
+  width: 26px; height: 26px; box-sizing: border-box;
+  background: transparent; border: 0; border-radius: 0; padding: 0;
+  pointer-events: auto; cursor: pointer;
+}
+/* #128: the hover/focus ring grows in softly from 0.85 with a fade. It rides an
+   ::after (the scrub dot is ::before) so the .place-hit ELEMENT keeps the zero-
+   transition reset suite-cards P2c guards and stays transparent/borderless at idle
+   for P2; the pseudo is invisible (opacity 0) at rest, so idle parity holds. In scrub
+   mode the hit is pointer-events:none and not focusable, so the ring never shows.
+   Collapses to instant via the shared reduced-motion block in /motion.css. */
+.place-hit::after {
+  content: ""; position: absolute; inset: 0; margin: auto;
+  width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box;
+  border: 2px solid #4a3826; pointer-events: none;
+  opacity: 0; transform: scale(0.85);
+  transition: opacity var(--paper-quick) var(--ease-paper),
+              transform var(--paper-quick) var(--ease-paper);
+}
+.place-hit:hover::after, .place-hit:focus-visible::after {
+  opacity: 1; transform: scale(1);
+}
+/* #place-card is the positioning shell only: its transform places the card by its
+   anchor corner (the flip variants below). The paper sheet + its #128 unfurl live on
+   the inner wrapper, so the unfurl's own transform never fights this positioning one. */
+/* #164: the card is a tooltip, so it must NOT magnify with the chart while zoomed (a
+   4-8x card fills and clips the frame). It lives inside #map, so its anchor rides the
+   zoom transform for free; the leading scale(1/k) counter-scales it back to a constant,
+   readable size. --zoom-k is published on THIS card element (never on #map, which would
+   re-rasterize the baked SVG labels every frame and make them jiggle) by app.js. Scaling
+   about the box origin (transform-origin 0 0, i.e. the mark point) keeps the anchor corner
+   a constant screen distance from the mark for EVERY flip variant, because the flip offset
+   rides inside the same scale. The (…,1) fallback makes scale(1) at home, so the transform
+   reduces to the original translate and the idle card is byte-identical. */
+#place-card {
+  position: absolute; z-index: 5; max-width: 16rem; pointer-events: none;
+  transform-origin: 0 0;
+  transform: scale(calc(1 / var(--zoom-k, 1))) translate(10px, 10px);
+}
+/* id+attr specificity beats the id-only rule above, so [hidden] really hides. */
+#place-card[hidden] { display: none; }
+#place-card.flip-h { transform: scale(calc(1 / var(--zoom-k, 1))) translate(calc(-100% - 10px), 10px); }
+#place-card.flip-v { transform: scale(calc(1 / var(--zoom-k, 1))) translate(10px, calc(-100% - 10px)); }
+#place-card.flip-h.flip-v { transform: scale(calc(1 / var(--zoom-k, 1))) translate(calc(-100% - 10px), calc(-100% - 10px)); }
+/* #128 The slow unfurl. The sheet unrolls from the edge nearest its place: top when
+   the card hangs below the anchor, bottom when it sits above (the flip-v cases). A
+   pinned/tapped card plays the full --unfurl ceremony; a hover/focus preview runs the
+   same curve at --unfurl-quick so sweeping a crowded coast stays nimble. Collapses via
+   the shared reduced-motion block in /motion.css (the `both` fill rests at rotateX 0). */
+.pc-inner {
+  background: #f8f1e0; color: #4a3826;
+  border: 1px solid #4a3826; border-radius: 4px;
+  box-shadow: 0 8px 22px rgb(61 47 31 / 0.28);
+  padding: 0.6rem 0.75rem; font-size: 0.9rem; line-height: 1.35;
+  transform-origin: top center;
+  animation: paperUnfurl var(--unfurl-quick) var(--ease-unfurl) both;
+}
+#place-card.flip-v .pc-inner { transform-origin: bottom center; }
+#place-card.pinned .pc-inner { animation-duration: var(--unfurl); }
+.pc-name { display: block; font-size: 1rem; letter-spacing: 0.02em; }
+.pc-rank { display: block; font-style: italic; color: #6b5a40; font-size: 0.82rem;
+  letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.1rem; }
+.pc-founded { display: block; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
+.pc-tale { margin: 0.4rem 0 0; font-style: italic; color: #54452f; }
+
+/* Chronicle year-scrubber (#54, #93). In scrub mode the sweep shows and hides the
+   REAL baked settlement glyphs by year (living-chart.js toggles each
+   <g class="settlement" data-idx>), so the map keeps its castles, towns, and
+   labels instead of abstract dots; the roads reveal only at the present park. The
+   overlay hit-targets stay put but go inert (pointer-events off, JS sets tabindex
+   -1) so cards are suppressed while scrubbing; the chronicle strip below narrates
+   the headline events as text. Scoped behind .place-overlay.scrub so idle mode is
+   byte-identical (the global button{} rule must never reach these). */
+.place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
+.scrubber[hidden] { display: none; }
+.scrubber { max-width: 1100px; margin: 0.8rem auto 0;
+  background: #f3ead2; border: 1px solid #b9a77f; border-radius: 6px;
+  padding: 0.8rem 1rem; transform-origin: top center; }
+/* #128: the panel unrolls open from its top edge when chronicle mode turns on. It has
+   no positioning transform of its own, so the unfurl (self-perspective in the keyframe)
+   rides the panel directly; no wrapper. Collapses via the shared reduced-motion block. */
+.scrubber:not([hidden]) { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) both; }
+.scrub-controls { display: flex; align-items: center; gap: 0.8rem; }
+.scrub-controls #scrub-play { min-width: 5.2rem; }
+.scrub-controls input[type="range"] { flex: 1; accent-color: #7a5c2e; }
+.scrub-year { font-style: italic; color: #6b5a40;
+  font-variant-numeric: tabular-nums; min-width: 5rem; text-align: right; }
+/* #93 Part 2: tall enough to show every entry at once (the chronicle is capped at
+   14 events, so this cannot grow unbounded); overflow-y stays as a safety valve. */
+.chronicle-strip { list-style: none; margin: 0.7rem 0 0; padding: 0;
+  max-height: 32rem; overflow-y: auto; }
+/* #128: a row that has come to pass brightens AND slides a hair to the right, like
+   an entry inked into the ledger as its year arrives. */
+.chronicle-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
+  border-bottom: 1px solid #cdbd97; opacity: 0.4;
+  transition: opacity 0.18s, transform 0.18s; }
+.chronicle-strip li.past { opacity: 1; transform: translateX(2px); }
+.chronicle-strip .cr-year { flex: 0 0 3rem; text-align: right;
+  font-variant-numeric: tabular-nums; font-weight: 600; color: #857257; }
+.chronicle-strip .cr-text { color: #54452f; }
+/* #121 The margin log: the surveyor's journal, styled like the chronicle strip (#93)
+   but its own voyage-only panel (voyage and chronicle are mutually exclusive). Rows rest
+   dimmed and brighten as the survey reaches each port, the same "inked into the ledger"
+   reveal as chronicle-strip li.past. The panel appears at rest, fully visible: the life is
+   in the per-row brightening, not a container flourish. It deliberately does NOT reuse the
+   scrubber's paperUnfurl entrance: that 3D-transform-plus-opacity animation can leave the
+   panel stuck near opacity 0 in some compositors, and an invisible log reads as broken. */
+.voyage-log[hidden] { display: none; }
+.voyage-log { max-width: 1100px; margin: 0.8rem auto 0;
+  background: #f3ead2; border: 1px solid #b9a77f; border-radius: 6px;
+  padding: 0.8rem 1rem; }
+.voyage-log-sig { margin: 0 0 0.5rem; font-style: italic; color: #6b5a40;
+  border-bottom: 1px solid #cdbd97; padding-bottom: 0.5rem; }
+.voyage-log-strip { list-style: none; margin: 0; padding: 0;
+  max-height: 32rem; overflow-y: auto; }
+.voyage-log-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
+  border-bottom: 1px solid #cdbd97; opacity: 0.4;
+  transition: opacity 0.18s, transform 0.18s; }
+.voyage-log-strip li.logged { opacity: 1; transform: translateX(2px); }
+.voyage-log-strip .cr-year { flex: 0 0 3rem; text-align: right;
+  font-variant-numeric: tabular-nums; font-weight: 600; color: #857257; }
+.voyage-log-strip .cr-text { color: #54452f; }
+/* The Wayfarer's Passage overlay (#119). A client-only SVG layer over the baked
+   chart: a dotted survey track threads port to port behind a little ship, and each
+   port's dated log line lands in #status. pointer-events:none so the #53 place-hit
+   cards keep working underneath; the track is a SIBLING <svg>, never inside the
+   chart, so Download SVG (the pristine lastSvg string) stays byte-identical. The rAF
+   sweep is JS, so its reduced-motion twin is the prefersReduce() gate in voyage.js
+   (full track shown at once); there is nothing here for /motion.css to collapse. */
+.voyage-overlay { position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 3; overflow: visible; }
+.voyage-track { fill: none; stroke: #5a4326; stroke-width: 3;
+  stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke; opacity: 0.95; }
+/* #120: the mark is a ship at sea and a rider on the road, both drawn in PROFILE, in the
+   chart's own ink idiom (render/layers/glyph-symbols.ts: a paper-filled body, an ink
+   outline, a thinner stroke for interior detail, standing on a baseline at y=0). Only one
+   is displayed at a time; voyage.js toggles the SVG `display` attribute at each port. */
+.voyage-ship path, .voyage-rider path { fill: #f3ead2; stroke: #4a3826; stroke-width: 1.5;
+  stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.voyage-ship .rig { fill: none; stroke: #4a3826; stroke-width: 1.1;
+  vector-effect: non-scaling-stroke; }
+.voyage-ship .detail, .voyage-rider .detail, .voyage-rider .tail { fill: none;
+  stroke: #4a3826; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.voyage-ship .detail, .voyage-rider .detail { stroke-width: 0.8; }
+.voyage-rider .tail { stroke-width: 1.4; }
+.voyage-rider .leg { fill: none; stroke: #4a3826; stroke-width: 1.2;
+  stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.voyage-ship .ink, .voyage-rider .ink { fill: #4a3826; stroke: none; }
+.caption { text-align: center; font-style: italic; color: #6b5a40;
+  padding-top: 0.6rem; }
+footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;
+  font-size: 0.72rem; color: #857257; }
+footer a { color: inherit; }
