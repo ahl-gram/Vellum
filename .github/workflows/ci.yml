@@ -6,9 +6,13 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Two independent jobs run in parallel: check-and-test never builds, so it
+# returns fast; build-and-e2e carries the slow half (build + headless e2e).
+# PR wall-clock is the longer half, not the sum. Both jobs run on every trigger,
+# so push-to-main and PRs cover exactly what the old single serial job covered.
 jobs:
-  test:
-    name: typecheck & test
+  check-and-test:
+    name: check & test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,6 +25,17 @@ jobs:
         run: npm run check
       - name: Test
         run: npm test
+
+  build-and-e2e:
+    name: build & e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+          cache: npm
+      - run: npm ci
       # Build the deploy artifact and run the e2e against it, so CI validates the
       # exact dist/ that gets published. Since Sub 5 (#206) `npm run build` IS the
       # Astro build: astro:generate refreshes the public/ runtime trees (engine,
