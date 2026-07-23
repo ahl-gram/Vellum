@@ -9,16 +9,17 @@ import { cleanPublicGenerated, GENERATED_SUBTREES } from "../../scripts/clean-pu
 process.env.ASTRO_TELEMETRY_DISABLED = "1";
 
 /**
- * Scriptorium Sub 3 (#204): the app surfaces served verbatim from public/. The
- * spec is the ratified Sub 1 decision doc (the 2026-07-21 comment on #202),
- * sections 1 and 3 plus constraints 2, 3, 4, and 10: the committed sources under
- * public/{explorer,print-room,seed-of-the-day,lib,shared} ship verbatim (since
- * Sub 5 retired docs/, public/ is their single committed home), and the
- * gitignored runtime trees (the tsc engine emit + the Vite bundle twins and
- * their shared chunks, #208) are regenerated into public/ by
- * `npm run astro:generate` before every astro dev/build, with decision D's
- * clean-before-regen so a renamed engine module cannot leave an importable
- * orphan that masks a 404 locally.
+ * Scriptorium Sub 3 (#204): the app surfaces' source served verbatim from
+ * public/. The spec is the ratified Sub 1 decision doc (the 2026-07-21 comment
+ * on #202), sections 1 and 3 plus constraints 2, 3, 4, and 10: the committed
+ * app sources under public/{explorer,print-room,seed-of-the-day,lib,shared}
+ * ship verbatim (since Sub 8 (#254) the page SHELLS render through BaseLayout
+ * instead; only the JS/CSS source keeps its public/ home), and the gitignored
+ * runtime trees (the tsc engine emit + the Vite bundle twins and their shared
+ * chunks, #208) are regenerated into public/ by `npm run astro:generate`
+ * before every astro dev/build, with decision D's clean-before-regen so a
+ * renamed engine module cannot leave an importable orphan that masks a 404
+ * locally.
  */
 
 const root = (p = "") => fileURLToPath(new URL(`../../${p}`, import.meta.url));
@@ -90,13 +91,13 @@ test("the no-arg CLI cleans ./public relative to CWD (the exact astro:generate i
   mkdirSync(join(scratch, "public", "explorer", "engine", "world"), { recursive: true });
   writeFileSync(join(scratch, "public", "explorer", "engine", "world", "orphan.js"), "// stale");
   writeFileSync(join(scratch, "public", "explorer", "app.bundle.js"), "// stale twin");
-  writeFileSync(join(scratch, "public", "explorer", "index.html"), "<!-- committed, must survive -->");
+  writeFileSync(join(scratch, "public", "explorer", "app.js"), "// committed source, must survive");
 
   execFileSync(process.execPath, [root("scripts/clean-public-generated.ts")], { cwd: scratch });
 
   assert.ok(!existsSync(join(scratch, "public", "explorer", "engine")), "the CLI should clean <cwd>/public");
   assert.ok(!existsSync(join(scratch, "public", "explorer", "app.bundle.js")), "twins go too");
-  assert.ok(existsSync(join(scratch, "public", "explorer", "index.html")), "committed files survive");
+  assert.ok(existsSync(join(scratch, "public", "explorer", "app.js")), "committed files survive");
   rmSync(scratch, { recursive: true, force: true });
 });
 
@@ -111,8 +112,8 @@ test("astro dev serves the app surfaces at their canonical directory URLs (dev p
       ["/seed-of-the-day/", "app.bundle.js"],
     ] as const) {
       const res = await fetch(at(path));
-      assert.equal(res.status, 200, `${path} should serve the public/ shell in dev, not Astro's 404`);
-      assert.ok((await res.text()).includes(marker), `${path} should be the app shell (loads ${marker})`);
+      assert.equal(res.status, 200, `${path} should serve the app page in dev, not Astro's 404`);
+      assert.ok((await res.text()).includes(marker), `${path} should be the app page (loads ${marker})`);
     }
     const route = await fetch(at("/faq/"));
     assert.equal(route.status, 200, "Astro routes keep winning their own URLs");

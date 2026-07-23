@@ -11,7 +11,9 @@ import { NAV_ITEMS } from "../../src/layouts/nav.ts";
  * the ratified Sub 1 decision doc (the 2026-07-21 comment on #202): home, FAQ, and
  * glossary render through one BaseLayout (head fan-out, canonical nav, constant
  * footer). Since Sub 5 (#206) retired docs/ and its dual-copy byte guards, the
- * committed sources are src/pages + public/ alone.
+ * committed sources are src/pages + public/ alone. Sub 8 (#254) ends the
+ * app-shell exception: the Explorer, Print Room, and seed-of-the-day pages
+ * render through the same BaseLayout, so ALL six pages are asserted here.
  *
  * The suite builds the Astro site once (into out/test-astro-build, left in place
  * for inspection; out/ is gitignored) and asserts against the rendered output plus
@@ -34,9 +36,26 @@ const decode = (s: string) =>
 
 // Per-page expectations. `title` is the head <title>; `ogTitle` feeds og:title AND
 // twitter:title (FAQ's differ in punctuation: the og twins take the normalized
-// form, never the &-form title). `description` feeds name=description,
-// og:description, AND twitter:description.
-const PAGES = [
+// form, never the &-form title). `description` feeds name=description;
+// `ogDescription` (defaulting to it) feeds og:description AND twitter:description
+// (seed-of-the-day's card copy is shorter than its search snippet). `h1` is the
+// rendered header wordmark: the home link wraps VELLUM alone, the app surfaces'
+// wordmark suffix stays outside it (Sub 8 #254 preserves the old shells' form).
+type PageSpec = {
+  route: string;
+  dir: string;
+  current: string;
+  title: string;
+  ogTitle: string;
+  description: string;
+  ogDescription?: string;
+  h1: string;
+  tagline: string;
+  /** App surfaces only: the is:inline bundle-twin script the page must keep. */
+  scriptSrc?: string;
+};
+
+const PAGES: readonly PageSpec[] = [
   {
     route: "index.html",
     dir: "/",
@@ -45,6 +64,8 @@ const PAGES = [
     ogTitle: "Vellum: an atelier of imaginary cartography",
     description:
       "Procedurally generated fantasy atlases: deterministic worlds drawn as antique, topographic, ink, and nautical SVG charts.",
+    h1: "<h1>VELLUM</h1>",
+    tagline: "an atelier of imaginary cartography",
   },
   {
     route: "faq/index.html",
@@ -54,6 +75,8 @@ const PAGES = [
     ogTitle: "Vellum: Questions and Answers",
     description:
       "How Vellum works: seeds, determinism, terrain and rivers, climate and styles, and how to make and reproduce your own maps.",
+    h1: '<h1><a href="/">VELLUM</a></h1>',
+    tagline: "questions &amp; answers",
   },
   {
     route: "glossary/index.html",
@@ -63,8 +86,47 @@ const PAGES = [
     ogTitle: "Vellum: Glossary",
     description:
       "A glossary of the cartography, heraldry, and geography vocabulary printed on Vellum's charts, in its gazetteer, and across its realm names.",
+    h1: '<h1><a href="/">VELLUM</a></h1>',
+    tagline: "glossary",
   },
-] as const;
+  {
+    route: "explorer/index.html",
+    dir: "/explorer/",
+    current: "Explorer",
+    title: "Vellum Explorer: draw your own imaginary world",
+    ogTitle: "Vellum Explorer: draw your own imaginary world",
+    description: "Generate procedural fantasy maps in your browser. Every seed is a world.",
+    h1: '<h1><a href="/">VELLUM</a> EXPLORER</h1>',
+    tagline: "every seed is a world, draw one",
+    scriptSrc: "./app.bundle.js",
+  },
+  {
+    route: "print-room/index.html",
+    dir: "/print-room/",
+    current: "Print Room",
+    title: "Vellum: Print Room",
+    ogTitle: "Vellum: Print Room",
+    description:
+      "The atelier's print room: bring a world in from the Explorer or call up a seed by number, pull a proof, and take the chart home.",
+    h1: '<h1><a href="/">VELLUM</a> PRINT ROOM</h1>',
+    tagline: "take a world home",
+    scriptSrc: "./app.bundle.js",
+  },
+  {
+    route: "seed-of-the-day/index.html",
+    dir: "/seed-of-the-day/",
+    current: "Today",
+    title: "Vellum: the seed of the day",
+    ogTitle: "Vellum: the seed of the day",
+    description:
+      "A new procedural world every day: today's date is the seed, drawn as an antique chart with a line from its gazetteer. Same day, same world, everywhere.",
+    ogDescription:
+      "A new procedural world every day: today's date is the seed, drawn as an antique chart with a line from its gazetteer.",
+    h1: '<h1><a href="/">VELLUM</a></h1>',
+    tagline: "the seed of the day",
+    scriptSrc: "app.bundle.js",
+  },
+];
 
 const rendered = new Map<string, string>();
 
@@ -98,7 +160,7 @@ const metaContent = (head: string, attr: "name" | "property", key: string) => {
   return m ? decode(m[1]) : undefined;
 };
 
-test("astro build emits the three content pages in directory form", () => {
+test("astro build emits all six pages in directory form", () => {
   for (const p of PAGES) {
     assert.ok(rendered.has(p.route), `astro build should emit ${p.route}`);
   }
@@ -124,7 +186,9 @@ test("the shell is authored exactly once: pages carry no header/nav/footer/meta 
 
   for (const p of PAGES) {
     const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
-    for (const marker of ["<footer", "topnav", "og:", "twitter:", "<title", "<header", "<html", "<head"]) {
+    // The og/twitter markers are the meta-attribute forms: the app pages' verbatim
+    // content carries prose comments where a bare "og:" false-positives ("log:").
+    for (const marker of ["<footer", "topnav", 'property="og:', 'name="twitter:', "<title", "<header", "<html", "<head"]) {
       assert.ok(!source.includes(marker), `${p.route} source should not duplicate the shell (found ${marker})`);
     }
   }
@@ -139,8 +203,8 @@ test("each rendered head carries the canonical meta with the ratified prop fan-o
 
     for (const [attr, key, want] of [
       ["name", "description", p.description],
-      ["property", "og:description", p.description],
-      ["name", "twitter:description", p.description],
+      ["property", "og:description", p.ogDescription ?? p.description],
+      ["name", "twitter:description", p.ogDescription ?? p.description],
       ["property", "og:title", p.ogTitle],
       ["name", "twitter:title", p.ogTitle],
       ["property", "og:url", `https://vellum.route12b.net${p.dir}`],
@@ -260,9 +324,16 @@ test("the layout ships the two ratified shell rules: 0.82rem unification + aria-
 });
 
 test("the header keeps each page's identity: wordmark link, tagline, home's extras in order", () => {
-  const home = page("index.html");
-  assert.match(home, /<h1>VELLUM<\/h1>/, "home's h1 stays unlinked");
-  const homeHeader = home.match(/<header>([\s\S]*?)<\/header>/);
+  for (const p of PAGES) {
+    const html = page(p.route);
+    assert.ok(
+      html.includes(p.h1),
+      `${p.route} h1 should be exactly ${p.h1} (home unlinked; VELLUM alone carries the home link; a wordmark suffix stays outside it)`,
+    );
+    assert.ok(html.includes(`<p class="tagline">${p.tagline}</p>`), `${p.route} keeps its tagline`);
+  }
+
+  const homeHeader = page("index.html").match(/<header>([\s\S]*?)<\/header>/);
   assert.ok(homeHeader, "home should have a header");
   const order = ["<h1>", 'class="tagline"', 'class="lede"', 'class="seedline"', '<nav class="topnav">'];
   let at = -1;
@@ -270,16 +341,6 @@ test("the header keeps each page's identity: wordmark link, tagline, home's extr
     const next = homeHeader[1].indexOf(marker);
     assert.ok(next > at, `home header keeps its order at ${marker}`);
     at = next;
-  }
-  assert.ok(homeHeader[1].includes("an atelier of imaginary cartography"), "home tagline");
-
-  for (const [route, tagline] of [
-    ["faq/index.html", "questions &amp; answers"],
-    ["glossary/index.html", "glossary"],
-  ] as const) {
-    const html = page(route);
-    assert.match(html, /<h1><a href="\/">VELLUM<\/a><\/h1>/, `${route} wordmark links home root-absolute`);
-    assert.ok(html.includes(`<p class="tagline">${tagline}</p>`), `${route} keeps its tagline`);
   }
 });
 
@@ -307,11 +368,38 @@ test("the body skeleton pins the load-bearing <main> wrapper at both ends", () =
   }
 });
 
+test("each app page keeps its bundle-twin module script, rendered verbatim inside <main>", () => {
+  // Sub 8 (#254): the shells render through the layout, but the app entry stays
+  // the Vite-pressed twin (#208), loaded by an is:inline script Astro must leave
+  // alone. A module script is deferred by spec, so living at the end of the page
+  // content (inside <main>, before the footer) is behavior-identical to the old
+  // shells' after-</main> position, and the end-anchored skeleton pin above
+  // keeps holding for every page.
+  for (const p of PAGES) {
+    const tag = `<script type="module" src="${p.scriptSrc}"></script>`;
+    if (p.scriptSrc === undefined) {
+      assert.ok(!page(p.route).includes("<script"), `${p.route} is a content page and ships no script`);
+      continue;
+    }
+    const html = page(p.route);
+    assert.ok(html.includes(tag), `${p.route} should load its bundle twin via ${tag}`);
+    assert.ok(html.indexOf(tag) < html.indexOf("<footer>"), `${p.route} script renders inside <main>, before the footer`);
+    assert.doesNotMatch(html, /src="(\.\/)?app\.js"/, `${p.route} must not load the raw ESM entry`);
+  }
+});
+
 test("every internal link and embed on the rendered pages resolves", () => {
-  // Since Sub 3 the app surfaces ship from public/ (their shells resolve there);
-  // the per-deploy generated pair resolves only against the allowlist (atlas/ and
-  // gallery/ are generated into the output by Sub 4, absent on a fresh checkout).
-  const generated = ["/atlas/", "/gallery/"];
+  // The per-deploy generated set resolves only against the allowlist: atlas/ and
+  // gallery/ are generated into the output by Sub 4, and the app pages' bundle
+  // twins are pressed into public/ by astro:generate (#208); all are gitignored
+  // and absent on a fresh checkout (CI runs npm test before npm run build).
+  const generated = [
+    "/atlas/",
+    "/gallery/",
+    "/explorer/app.bundle.js",
+    "/print-room/app.bundle.js",
+    "/seed-of-the-day/app.bundle.js",
+  ];
   const routes = new Set<string>(PAGES.map((p) => p.dir));
   for (const p of PAGES) {
     const html = page(p.route);

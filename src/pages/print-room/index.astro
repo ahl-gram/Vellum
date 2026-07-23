@@ -1,40 +1,15 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vellum: Print Room</title>
-<meta name="description" content="The atelier's print room: bring a world in from the Explorer or call up a seed by number, pull a proof, and take the chart home.">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Vellum">
-<meta property="og:url" content="https://vellum.route12b.net/print-room/">
-<meta property="og:title" content="Vellum: Print Room">
-<meta property="og:description" content="The atelier's print room: bring a world in from the Explorer or call up a seed by number, pull a proof, and take the chart home.">
-<meta property="og:image" content="https://vellum.route12b.net/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="A Vellum antique chart beside the Vellum wordmark.">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Vellum: Print Room">
-<meta name="twitter:description" content="The atelier's print room: bring a world in from the Explorer or call up a seed by number, pull a proof, and take the chart home.">
-<meta name="twitter:image" content="https://vellum.route12b.net/og.png">
-<meta name="twitter:image:alt" content="A Vellum antique chart beside the Vellum wordmark.">
-<link rel="stylesheet" href="/fonts.css">
-<link rel="stylesheet" href="/motion.css">
-<link rel="stylesheet" href="index.css">
-</head>
-<body>
-<main>
-<header>
-  <h1><a href="../">VELLUM</a> PRINT ROOM</h1>
-  <p class="tagline">take a world home</p>
-  <nav class="topnav">
-    <a href="../">Home</a> · <a href="../seed-of-the-day/">Today</a> ·
-    <a href="../explorer/">Explorer</a> · <span aria-current="page">Print Room</span> ·
-    <a href="../faq/">FAQ</a> · <a href="../glossary/">Glossary</a>
-  </nav>
-</header>
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Vellum: Print Room"
+  description="The atelier's print room: bring a world in from the Explorer or call up a seed by number, pull a proof, and take the chart home."
+  ogTitle="Vellum: Print Room"
+  path="/print-room/"
+  tagline="take a world home"
+  wordmarkSuffix="PRINT ROOM"
+>
 
 <p class="intro">This is the atelier's print room, where a world leaves the screen
 for the page. Bring a chart in from the Explorer, or call up a seed by number, and
@@ -113,11 +88,5 @@ a moment.</p>
      (already shown as the proof above); print + download restore the full atlas. -->
 <div id="pr-atlas" class="atlas-sheet"></div>
 
-<footer>
-  VELLUM · AN ATELIER OF IMAGINARY CARTOGRAPHY
-</footer>
-</main>
-
-<script type="module" src="./app.bundle.js"></script>
-</body>
-</html>
+<script type="module" src="./app.bundle.js" is:inline></script>
+</BaseLayout>

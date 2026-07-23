@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
  * ONCE (worker-client.js's static import-URL spawn, which Vite detects and
  * rewrites) at the fixed path explorer/worker.bundle.js; both the Explorer and
  * the Print Room spawn that one chunk. Modules shared between entries land in
- * explorer/chunks/ (gitignored, fixed names, no hashing: the committed shells
+ * explorer/chunks/ (gitignored, fixed names, no hashing: the app pages
  * reference fixed entry names, and the e2e harness pins the worker path).
  *
  * Every knob is chosen to keep the emitted code running identically to the
