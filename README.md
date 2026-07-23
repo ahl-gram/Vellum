@@ -170,12 +170,12 @@ site that serves it.
   content pages (home, FAQ, glossary) are Astro pages rendered through one
   shared layout (`src/pages/` + `src/layouts/`); the app surfaces (Explorer,
   Print Room, Seed of the Day) are hand-authored HTML/JS served verbatim from
-  `public/`. The Explorer and Seed of the Day pages bundle their zoom behavior
-  with esbuild, which is where the runtime deps (`d3-selection`,
-  `d3-transition`, `d3-zoom`) ship. Dev deps: `astro`, `esbuild`,
-  `typescript`, `@types/node`.
+  `public/`. One bundler, Vite, bundles all three app entries and the shared
+  render worker, which is where the runtime deps (`d3-selection`,
+  `d3-transition`, `d3-zoom`) ship. Dev deps: `astro`, `typescript`,
+  `@types/node`, `vite`.
 - **The build** (`npm run build`): `astro:generate` first writes the generated
-  trees into `public/` (the tsc browser emit of the engine, the esbuild
+  trees into `public/` (the tsc browser emit of the engine, the Vite app
   bundles, the atlas and gallery showcases), then `astro build` assembles
   `dist/`, which GitHub Actions publishes to Pages on every push to main.
 

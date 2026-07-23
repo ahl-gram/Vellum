@@ -14,10 +14,11 @@ process.env.ASTRO_TELEMETRY_DISABLED = "1";
  * sections 1 and 3 plus constraints 2, 3, 4, and 10: the committed sources under
  * public/{explorer,print-room,seed-of-the-day,lib,shared} ship verbatim (since
  * Sub 5 retired docs/, public/ is their single committed home), and the
- * gitignored runtime trees (the tsc engine emit + the three esbuild bundle
- * twins) are regenerated into public/ by `npm run astro:generate` before every
- * astro dev/build, with decision D's clean-before-regen so a renamed engine
- * module cannot leave an importable orphan that masks a 404 locally.
+ * gitignored runtime trees (the tsc engine emit + the Vite bundle twins and
+ * their shared chunks, #208) are regenerated into public/ by
+ * `npm run astro:generate` before every astro dev/build, with decision D's
+ * clean-before-regen so a renamed engine module cannot leave an importable
+ * orphan that masks a 404 locally.
  */
 
 const root = (p = "") => fileURLToPath(new URL(`../../${p}`, import.meta.url));
@@ -51,8 +52,8 @@ test("astro:generate regenerates the runtime trees into public/, and dev/build r
   const pkg = JSON.parse(readFileSync(root("package.json"), "utf8"));
   assert.equal(
     pkg.scripts["astro:generate"],
-    "node scripts/clean-public-generated.ts && tsc -p tsconfig.browser.json --outDir public/explorer/engine && node scripts/build-explorer-bundle.ts public && node scripts/generate-showcases.ts",
-    "astro:generate must clean, emit the engine, bundle, then generate the showcases, all into public/",
+    "node scripts/clean-public-generated.ts && tsc -p tsconfig.browser.json --outDir public/explorer/engine && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts",
+    "astro:generate must clean, emit the engine, bundle (Vite since Sub 7), then generate the showcases",
   );
   assert.equal(pkg.scripts["astro:dev"], "npm run astro:generate && astro dev", "dev parity needs the runtime trees");
   assert.equal(pkg.scripts["build"], "npm run astro:generate && astro build", "the build serves what dev serves");
@@ -106,7 +107,7 @@ test("astro dev serves the app surfaces at their canonical directory URLs (dev p
     const at = (path: string) => `http://localhost:${server.address.port}${path}`;
     for (const [path, marker] of [
       ["/explorer/", "app.bundle.js"],
-      ["/print-room/", "./app.js"],
+      ["/print-room/", "app.bundle.js"],
       ["/seed-of-the-day/", "app.bundle.js"],
     ] as const) {
       const res = await fetch(at(path));
