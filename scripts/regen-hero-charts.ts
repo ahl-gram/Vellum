@@ -11,14 +11,13 @@ import { heroChartSvgs } from "./hero-charts.ts";
  * diffing the committed charts old-vs-new, since the #40 drift guard is
  * circular right after a regen).
  *
- * During the Sub 3-5 dual-copy window the committed charts live in BOTH
- * docs/charts and public/charts (byte-guarded twins), so both are written; when
- * Sub 5 retires docs/, drop the docs/ entry here.
+ * Since Sub 5 (#206) retired docs/, public/charts is the ONLY committed charts
+ * dir; the dual-copy window is over.
  *
  *   npm run charts:regen
  */
 
-export const HERO_CHART_DIRS: ReadonlyArray<string> = ["docs/charts", "public/charts"];
+export const HERO_CHART_DIRS: ReadonlyArray<string> = ["public/charts"];
 
 export async function regenHeroCharts(dirs: ReadonlyArray<string>): Promise<void> {
   const svgs = heroChartSvgs();

@@ -5,19 +5,17 @@
   "type": "module",
   "private": true,
   "engines": {
-    "node": ">=23.6"
+    "node": ">=24"
   },
   "scripts": {
     "chart": "node src/cli/main.ts chart",
-    "serve": "node scripts/serve.ts",
     "dev": "npm run astro:dev",
     "og": "node scripts/build-og.ts",
     "charts:regen": "node scripts/regen-hero-charts.ts",
     "astro:generate": "node scripts/clean-public-generated.ts && tsc -p tsconfig.browser.json --outDir public/explorer/engine && node scripts/build-explorer-bundle.ts public && node scripts/generate-showcases.ts",
     "astro:dev": "npm run astro:generate && astro dev",
-    "astro:build": "npm run astro:generate && astro build",
     "astro:preview": "astro preview",
-    "build": "node scripts/build-dist.ts && tsc -p tsconfig.browser.json --outDir dist/explorer/engine && node scripts/build-explorer-bundle.ts dist",
+    "build": "npm run astro:generate && astro build",
     "test": "node --test",
     "test:e2e": "node scripts/e2e-explorer.mjs",
     "check": "tsc --noEmit"

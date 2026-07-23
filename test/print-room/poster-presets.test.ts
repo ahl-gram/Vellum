@@ -5,7 +5,7 @@ import {
   clampPosterWidth,
   posterFilename,
   posterPngFilename,
-} from "../../docs/print-room/poster-presets.js";
+} from "../../public/print-room/poster-presets.js";
 
 // #134 (epic #132) Sub 2: the Print Room's poster plates. The pure logic lives in a
 // DOM-free browser module (mirrors sheet-turn.js), so the width clamp -- the guard

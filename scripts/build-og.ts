@@ -6,15 +6,15 @@ import { buildOgCard } from "../src/render/og-card.ts";
 import { findBrowser, rasterizeSvg, NO_BROWSER_HINT } from "../src/cli/raster.ts";
 
 /**
- * Regenerates the committed social-preview image docs/og.png from the hero
+ * Regenerates the committed social-preview image public/og.png from the hero
  * world (seed 42). Run manually (`npm run og`) when the hero map changes; the
- * PNG is committed (like docs/charts/) because the Pages deploy build runs in
- * CI with no browser and cannot rasterize. The intermediate card SVG lands in
- * out/ (gitignored).
+ * PNG is committed (like public/charts/) because the Pages deploy build runs
+ * in CI with no browser and cannot rasterize. The intermediate card SVG lands
+ * in out/ (gitignored).
  *
  * Needs a Chromium-family browser (Brave/Chrome) for the screenshot, same as
- * the chart/atlas PNG/PDF exports. The favicon (docs/favicon.svg) is authored
- * by hand and not produced here.
+ * the chart/atlas PNG/PDF exports. The favicon (public/favicon.svg) is
+ * authored by hand and not produced here.
  */
 
 const HERO_SEED = 42;
@@ -38,8 +38,8 @@ async function main(): Promise<void> {
     return;
   }
   // scale 1 keeps the served file at exactly the declared 1200x630 OG size.
-  await rasterizeSvg(browser, cardPath, resolve("docs/og.png"), 1);
-  console.log("docs/og.png (1200x630)");
+  await rasterizeSvg(browser, cardPath, resolve("public/og.png"), 1);
+  console.log("public/og.png (1200x630)");
 }
 
 main().catch((err: unknown) => {

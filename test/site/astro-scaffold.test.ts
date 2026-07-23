@@ -1,7 +1,7 @@
 import { test, before } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, rm } from "node:fs/promises";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { NAV_ITEMS } from "../../src/layouts/nav.ts";
@@ -10,13 +10,12 @@ import { NAV_ITEMS } from "../../src/layouts/nav.ts";
  * Scriptorium Sub 2 (#203): the Astro scaffold and the shared layout. The spec is
  * the ratified Sub 1 decision doc (the 2026-07-21 comment on #202): home, FAQ, and
  * glossary render through one BaseLayout (head fan-out, canonical nav, constant
- * footer) while their body content stays near-verbatim against docs/, and the
- * legacy docs/ build keeps working untouched until Sub 5 cuts over.
+ * footer). Since Sub 5 (#206) retired docs/ and its dual-copy byte guards, the
+ * committed sources are src/pages + public/ alone.
  *
  * The suite builds the Astro site once (into out/test-astro-build, left in place
  * for inspection; out/ is gitignored) and asserts against the rendered output plus
- * the committed sources. The public/-vs-docs/ byte guards are green from the start
- * by design (boundary guards, not red-green).
+ * the committed sources.
  */
 
 process.env.ASTRO_TELEMETRY_DISABLED = "1";
@@ -40,7 +39,6 @@ const decode = (s: string) =>
 const PAGES = [
   {
     route: "index.html",
-    docs: "docs/index.html",
     dir: "/",
     current: "Home",
     title: "Vellum: an atelier of imaginary cartography",
@@ -50,7 +48,6 @@ const PAGES = [
   },
   {
     route: "faq/index.html",
-    docs: "docs/faq/index.html",
     dir: "/faq/",
     current: "FAQ",
     title: "Vellum: Questions & Answers",
@@ -60,7 +57,6 @@ const PAGES = [
   },
   {
     route: "glossary/index.html",
-    docs: "docs/glossary/index.html",
     dir: "/glossary/",
     current: "Glossary",
     title: "Vellum: Glossary",
@@ -113,7 +109,7 @@ test("astro.config keeps the contractual shape (site, trailing slash, no fingerp
   const config = (await import("../../astro.config.ts")).default;
   assert.equal(config.site, "https://vellum.route12b.net", "site drives og:url and must stay the custom domain");
   assert.equal(config.trailingSlash, "always", "every internal URL is trailing-slash directory form");
-  assert.equal(config.compressHTML, false, "output must stay near-verbatim against docs/ (no minification)");
+  assert.equal(config.compressHTML, false, "the migrated pages' markup must stay unminified (near-verbatim discipline)");
   assert.equal(config.build?.inlineStylesheets, "always", "the shell style must inline, never a fingerprinted file");
   assert.ok(!("base" in config), "base must stay the default '/' (root-absolute assets break otherwise)");
   assert.ok(!("outDir" in config), "outDir must stay the default ./dist (deploy.yml uploads path: dist)");
@@ -295,30 +291,8 @@ test("the footer is constant and appears exactly once per page", () => {
   }
 });
 
-test("content parity: everything between the shell renders verbatim against docs/", async () => {
-  for (const p of PAGES) {
-    const slice = (html: string) => {
-      const start = html.indexOf("</header>");
-      const end = html.indexOf("<footer");
-      assert.ok(start >= 0 && end > start, `${p.route} should have a header-to-footer content region`);
-      return normalize(html.slice(start + "</header>".length, end));
-    };
-    const docsHtml = await readFile(root(p.docs), "utf8");
-    assert.equal(slice(page(p.route)), slice(docsHtml), `${p.route} content should match ${p.docs}`);
-  }
-  // Home's lede + seedline live inside the header (above the nav), so the slice
-  // above excludes them; hold them to the same verbatim standard here.
-  const docsHome = await readFile(root("docs/index.html"), "utf8");
-  const home = page("index.html");
-  for (const cls of ["lede", "seedline"]) {
-    const m = docsHome.match(new RegExp(`<p class="${cls}">[\\s\\S]*?</p>`));
-    assert.ok(m, `docs home should carry the ${cls} paragraph`);
-    assert.ok(normalize(home).includes(normalize(m[0])), `home keeps the ${cls} paragraph verbatim`);
-  }
-});
-
-// Green from the start by design (a guard, not red-green): the parity slice above
-// runs header-to-footer, so this pins the skeleton OUTSIDE it. <main> is
+// Green from the start by design (a guard, not red-green): the shell tests above
+// cover header-to-footer, so this pins the skeleton OUTSIDE it. <main> is
 // load-bearing (the page CSS centers via `main { max-width ... }`), and the
 // end-anchored close means nothing can be injected after the footer unseen.
 test("the body skeleton pins the load-bearing <main> wrapper at both ends", () => {
@@ -356,32 +330,13 @@ test("every internal link and embed on the rendered pages resolves", () => {
   }
 });
 
-test("boundary guard: the public/ support set is byte-identical to docs/ (home css excepted by one line)", () => {
-  const identical = [
-    "faq/index.css",
-    "glossary/index.css",
-    "motion.css",
-    "fonts.css",
-    "favicon.svg",
-    "og.png",
-    ...readdirSync(root("docs/fonts")).map((f) => `fonts/${f}`),
-    ...readdirSync(root("docs/charts")).map((f) => `charts/${f}`),
-  ];
-  for (const file of identical) {
+test("the support set the pages depend on is committed in public/", () => {
+  // The docs/-vs-public/ byte guards retired with docs/ at Sub 5; existence of
+  // the root-absolute support files is still worth pinning (og:image and the
+  // fonts.css url()s are meta/CSS references the link-resolver test cannot see).
+  for (const file of ["motion.css", "fonts.css", "favicon.svg", "og.png", "index.css"]) {
     assert.ok(existsSync(root(`public/${file}`)), `public/${file} should exist`);
-    assert.ok(
-      readFileSync(root(`docs/${file}`)).equals(readFileSync(root(`public/${file}`))),
-      `public/${file} must stay byte-identical to docs/${file} until Sub 5 retires docs/`,
-    );
   }
-  // Home's css differs ONLY by the margin-bottom keeping the old p.topnav's UA
-  // paragraph margin through the semantic p -> nav change (plus its comment).
-  const publicCss = readFileSync(root("public/index.css"), "utf8");
-  const docsCss = readFileSync(root("docs/index.css"), "utf8");
-  const undone = publicCss
-    .replace(/\/\* margin-bottom keeps[\s\S]*?\*\/\n/, "")
-    .replace(" margin-bottom: 1em;", "");
-  assert.equal(undone, docsCss, "public/index.css must differ from docs/index.css only by the nav margin line");
 });
 
 test("the hero charts and arms the home page embeds all resolve in public/charts", () => {
@@ -392,19 +347,17 @@ test("the hero charts and arms the home page embeds all resolve in public/charts
   }
 });
 
-test("the legacy deploy build stays wired in parallel until Sub 5 cuts over", async () => {
+test("the deploy build IS the Astro build (Sub 5 cutover, #206)", async () => {
   const pkg = JSON.parse(await readFile(root("package.json"), "utf8"));
   // npm run site retired in Sub 4 (#205, decision D): charts:regen + the
-  // astro:generate showcase step own its jobs now. The DEPLOY build survives.
+  // astro:generate showcase step own its jobs now.
   assert.equal(pkg.scripts.site, undefined, "npm run site stays retired");
   assert.equal(
     pkg.scripts.build,
-    "node scripts/build-dist.ts && tsc -p tsconfig.browser.json --outDir dist/explorer/engine && node scripts/build-explorer-bundle.ts dist",
-    "npm run build must keep assembling the legacy dist/ the deploy publishes",
-  );
-  assert.equal(
-    pkg.scripts["astro:build"],
     "npm run astro:generate && astro build",
-    "the Astro build regenerates the public/ runtime trees first (Sub 3)",
+    "npm run build must assemble dist/ via Astro (deploy.yml runs it unchanged)",
   );
+  assert.equal(pkg.scripts["astro:build"], undefined, "astro:build folds into build at the cutover");
+  assert.equal(pkg.scripts.serve, undefined, "npm run serve retires with docs/ (use npm run dev)");
+  assert.equal(pkg.engines?.node, ">=24", "Astro does not support odd Node majors; 23 is odd");
 });

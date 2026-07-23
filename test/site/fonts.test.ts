@@ -35,29 +35,29 @@ const WOFF2 = [
   "eb-garamond-latin-700-normal.woff2",
 ] as const;
 
-// Every hand-authored page in the folio (the atlas + gallery are generated; guarded
-// through their generators below).
+// Every hand-authored page shell in the folio (the atlas + gallery are generated,
+// guarded through their generators below; the three Astro content pages link
+// fonts.css through BaseLayout, checked alongside). Since Sub 5 (#206) the
+// committed home of the app surfaces is public/.
 const AUTHORED_PAGES = [
-  "docs/index.html",
-  "docs/explorer/index.html",
-  "docs/faq/index.html",
-  "docs/glossary/index.html",
-  "docs/print-room/index.html",
-  "docs/seed-of-the-day/index.html",
+  "public/explorer/index.html",
+  "public/print-room/index.html",
+  "public/seed-of-the-day/index.html",
+  "src/layouts/BaseLayout.astro",
 ] as const;
 
 const AUTHORED_CSS = [
-  "docs/index.css",
-  "docs/explorer/index.css",
-  "docs/faq/index.css",
-  "docs/glossary/index.css",
-  "docs/print-room/index.css",
-  "docs/seed-of-the-day/index.css",
+  "public/index.css",
+  "public/explorer/index.css",
+  "public/faq/index.css",
+  "public/glossary/index.css",
+  "public/print-room/index.css",
+  "public/seed-of-the-day/index.css",
 ] as const;
 
 test("fonts.css self-hosts the three Fell/Garamond faces with font-display: swap", async () => {
-  const css = await readText("docs/fonts.css");
-  assert.ok(css.length > 0, "docs/fonts.css should exist");
+  const css = await readText("public/fonts.css");
+  assert.ok(css.length > 0, "public/fonts.css should exist");
 
   // The three families, each declared @font-face.
   for (const family of ["IM Fell English SC", "IM Fell English", "EB Garamond"]) {
@@ -82,20 +82,20 @@ test("fonts.css self-hosts the three Fell/Garamond faces with font-display: swap
   assert.match(css, /Iowan Old Style/, "the role vars should fall back to the existing serif stack");
 });
 
-test("the self-hosted woff2 files and their OFL license ship under docs/fonts/", () => {
+test("the self-hosted woff2 files and their OFL license ship under public/fonts/", () => {
   for (const file of WOFF2) {
-    const path = root(`docs/fonts/${file}`);
-    assert.ok(existsSync(path), `docs/fonts/${file} should exist`);
+    const path = root(`public/fonts/${file}`);
+    assert.ok(existsSync(path), `public/fonts/${file} should exist`);
     // wOF2 magic: prove it is a real WOFF2, not an HTML error page saved as .woff2.
     const sig = readFileSync(path).subarray(0, 4).toString("latin1");
     assert.equal(sig, "wOF2", `${file} should be a real WOFF2 (wOF2 signature)`);
   }
   // OFL 1.1 requires the copyright + license accompany the redistributed fonts.
-  const ofl = readFileSync(root("docs/fonts/OFL.txt"), "utf8");
-  assert.match(ofl, /Open Font License/, "docs/fonts/OFL.txt should carry the OFL text");
+  const ofl = readFileSync(root("public/fonts/OFL.txt"), "utf8");
+  assert.match(ofl, /Open Font License/, "public/fonts/OFL.txt should carry the OFL text");
 });
 
-test("every page in the folio links /fonts.css (root-absolute, like /motion.css)", async () => {
+test("every page shell in the folio links /fonts.css (root-absolute, like /motion.css)", async () => {
   for (const page of AUTHORED_PAGES) {
     const html = await readText(page);
     assert.ok(html.length > 0, `${page} should exist`);
@@ -115,7 +115,7 @@ test("the static page CSS binds body to the body role, via the font var", async 
 });
 
 test("index.css maps display + flourish roles onto headings and flourishes", async () => {
-  const css = await readText("docs/index.css");
+  const css = await readText("public/index.css");
   assert.match(css, /var\(--font-display/, "titles/heads should use var(--font-display ...)");
   assert.match(css, /var\(--font-flourish/, "taglines/captions should use var(--font-flourish ...)");
 });
@@ -159,11 +159,9 @@ test("the generated gallery joins the Case: links /fonts.css and binds the roles
   }
 });
 
-test("serve.ts and the e2e harness serve .woff2 with a real font MIME (no false-positive fallback)", async () => {
-  for (const p of ["scripts/serve.ts", "scripts/e2e/harness.mjs"]) {
-    const text = await readText(p);
-    assert.match(text, /["']\.woff2["']\s*:\s*["']font\/woff2/, `${p} MIME map should serve .woff2 as font/woff2`);
-  }
+test("the e2e harness serves .woff2 with a real font MIME (no false-positive fallback)", async () => {
+  const text = await readText("scripts/e2e/harness.mjs");
+  assert.match(text, /["']\.woff2["']\s*:\s*["']font\/woff2/, "the harness MIME map should serve .woff2 as font/woff2");
 });
 
 // ---------------------------------------------------------------------------

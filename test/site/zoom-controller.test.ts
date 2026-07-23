@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { zoomTransformToCss, constrainZoom, nextGlideTarget } from "../../docs/shared/zoom-controller.js";
+import { zoomTransformToCss, constrainZoom, nextGlideTarget } from "../../public/shared/zoom-controller.js";
 
 // Sub 3 of the Surveyor's Glass epic (#164): the glass itself. The controller
 // leans on d3-zoom for the gesture handling (wheel/drag/pinch/double-click), but

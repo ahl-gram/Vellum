@@ -16,14 +16,14 @@ const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
 test("the Explorer page loads the bundled app twin, not the raw source (#163)", () => {
-  const html = read("docs/explorer/index.html");
+  const html = read("public/explorer/index.html");
   assert.match(html, /<script type="module" src="\.\/app\.bundle\.js"><\/script>/);
   // the raw ESM entry must no longer be the loaded module
   assert.doesNotMatch(html, /src="\.\/app\.js"/);
 });
 
 test("the seed-of-the-day page loads the bundled app twin (#163)", () => {
-  const html = read("docs/seed-of-the-day/index.html");
+  const html = read("public/seed-of-the-day/index.html");
   assert.match(html, /<script type="module" src="app\.bundle\.js"><\/script>/);
   assert.doesNotMatch(html, /src="app\.js"/);
 });
@@ -32,12 +32,12 @@ test("the Explorer's default worker spawn targets the bundled worker twin (#163)
   // Only the Explorer's own default flips. A cross-directory reuser (the Print
   // Room) still passes an explicit root-absolute URL, so it keeps the unbundled
   // worker; the default is what the bundled Explorer uses.
-  const js = read("docs/explorer/worker-client.js");
+  const js = read("public/explorer/worker-client.js");
   assert.match(js, /initWorker\(workerUrl = "\.\/worker\.bundle\.js"\)/);
 });
 
 // The behavior-preserving guarantees of the press itself, on a hermetic fixture
-// (the real docs/ entries import ./engine/*.js, which only exists after the tsc
+// (the real public/ entries import ./engine/*.js, which only exists after the tsc
 // emit; `npm test` runs before it, so the fixture keeps this test self-contained).
 // The full e2e suite against dist/ is what proves the real entries stay invisible.
 

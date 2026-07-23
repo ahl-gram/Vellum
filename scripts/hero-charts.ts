@@ -4,7 +4,7 @@ import { armsSvgDocument, paletteForStyle } from "../src/render/layers/heraldry.
 import { STYLES } from "../src/render/style.ts";
 
 /**
- * Single source of truth for the committed `docs/charts/*.svg` showcase: the
+ * Single source of truth for the committed `public/charts/*.svg` showcase: the
  * hero seed's four style charts plus its realm-arms strip for the landing page.
  *
  * Both `scripts/regen-hero-charts.ts` (which WRITES these files on a re-roll /
@@ -19,7 +19,7 @@ export const HERO_SEED = 42;
 const HERO_STYLES = ["antique", "topographic", "ink", "nautical"] as const;
 const ARMS_SIZE = 150;
 
-/** Every committed hero SVG, keyed by its `docs/charts/` filename -> SVG text. */
+/** Every committed hero SVG, keyed by its `public/charts/` filename -> SVG text. */
 export function heroChartSvgs(): Map<string, string> {
   const out = new Map<string, string>();
   const hero = generateWorld(defaultRecipe(HERO_SEED));

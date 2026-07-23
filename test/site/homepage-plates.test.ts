@@ -12,11 +12,13 @@ import { fileURLToPath } from "node:url";
  * surface out (it straightened on hover while every other chart tips).
  */
 
-const indexHtml = fileURLToPath(new URL("../../docs/index.html", import.meta.url));
-const motionCss = fileURLToPath(new URL("../../docs/motion.css", import.meta.url));
+// Since Sub 5 (#206) the committed homepage source is the Astro page; the plate
+// markup lives verbatim in its content region.
+const indexAstro = fileURLToPath(new URL("../../src/pages/index.astro", import.meta.url));
+const motionCss = fileURLToPath(new URL("../../public/motion.css", import.meta.url));
 
 test("homepage chart plates rest flat and tip on hover (consistent with the atlas)", async () => {
-  const html = await readFile(indexHtml, "utf8");
+  const html = await readFile(indexAstro, "utf8");
   const css = await readFile(motionCss, "utf8");
 
   // the markup carries no resting-tilt scatter, but the plates are still there
