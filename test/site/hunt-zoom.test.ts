@@ -26,13 +26,15 @@ const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
 test("HZ1 the Hunt wraps #map in a stable #map-viewport clip/gesture box (#167)", () => {
-  const html = read("public/seed-of-the-day/index.html");
+  // The page renders through BaseLayout since Sub 8 (#254); the hunt markup
+  // moved verbatim into the Astro page's content region.
+  const html = read("src/pages/seed-of-the-day/index.astro");
   // #map-viewport is the box d3-zoom binds to; #map (the transform target) nests
   // directly inside it, exactly like the Explorer's #164 wrapper.
   assert.match(
     html,
     /<div id="map-viewport">\s*<div id="map">\s*<\/div>\s*<\/div>/,
-    "index.html should wrap #map inside #map-viewport",
+    "the page should wrap #map inside #map-viewport",
   );
   // figcaption (the world's name) stays OUTSIDE the frame, a sibling of the viewport.
   assert.match(html, /<\/div>\s*<figcaption id="caption">/, "figcaption stays outside the zoom frame");

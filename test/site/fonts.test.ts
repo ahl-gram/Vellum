@@ -36,15 +36,9 @@ const WOFF2 = [
 ] as const;
 
 // Every hand-authored page shell in the folio (the atlas + gallery are generated,
-// guarded through their generators below; the three Astro content pages link
-// fonts.css through BaseLayout, checked alongside). Since Sub 5 (#206) the
-// committed home of the app surfaces is public/.
-const AUTHORED_PAGES = [
-  "public/explorer/index.html",
-  "public/print-room/index.html",
-  "public/seed-of-the-day/index.html",
-  "src/layouts/BaseLayout.astro",
-] as const;
+// guarded through their generators below). Since Sub 8 (#254) all six pages
+// render through BaseLayout, so the one layout IS the folio's shell.
+const AUTHORED_PAGES = ["src/layouts/BaseLayout.astro"] as const;
 
 const AUTHORED_CSS = [
   "public/index.css",

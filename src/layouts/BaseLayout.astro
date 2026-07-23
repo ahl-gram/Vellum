@@ -3,27 +3,36 @@ import { NAV_ITEMS } from "./nav.ts";
 
 // The one shared shell (#203, per the ratified Sub 1 decision doc on #202):
 // head meta with the prop fan-out, the canonical nav, the constant footer.
-// Only the three content pages render through it during the migration; the
-// app surfaces keep their hand-coded shells until Sub 8 re-shells them.
+// Every page renders through it since Sub 8 (#254) re-shelled the app surfaces.
 interface Props {
   /** The head <title>, verbatim (FAQ keeps its &-form punctuation here). */
   title: string;
-  /** Fans out to name=description, og:description, AND twitter:description. */
+  /** The name=description search snippet; also the og twins' default. */
   description: string;
   /**
    * Fans out to og:title AND twitter:title. Always the punctuation-normalized
    * form, never the &-form title (they differ on the FAQ page).
    */
   ogTitle: string;
+  /**
+   * Fans out to og:description AND twitter:description. Only for a page whose
+   * card copy is shorter than its search snippet (seed-of-the-day); defaults
+   * to description, exactly parallel to the title/ogTitle split.
+   */
+  ogDescription?: string;
   /** Root-absolute trailing-slash route ("/", "/faq/"): og:url + aria-current. */
   path: string;
   /** The flourish line under the wordmark. */
   tagline: string;
-  /** Sub 8's app shells render "VELLUM EXPLORER" etc.; content pages omit it. */
+  /**
+   * The app surfaces render "VELLUM EXPLORER" etc. (#254); content pages omit
+   * it. The suffix stays OUTSIDE the home link, as the old hand-coded shells
+   * had it: only VELLUM is the link.
+   */
   wordmarkSuffix?: string;
 }
 
-const { title, description, ogTitle, path, tagline, wordmarkSuffix } = Astro.props;
+const { title, description, ogTitle, ogDescription, path, tagline, wordmarkSuffix } = Astro.props;
 
 if (!/^\/([a-z0-9-]+\/)*$/.test(path)) {
   throw new Error(`BaseLayout path must be root-absolute directory form ("/faq/"), got "${path}"`);
@@ -32,7 +41,7 @@ if (!/^\/([a-z0-9-]+\/)*$/.test(path)) {
 const ogUrl = new URL(path, Astro.site).href;
 const ogImage = new URL("/og.png", Astro.site).href;
 const ogImageAlt = "A Vellum antique chart beside the Vellum wordmark.";
-const wordmark = wordmarkSuffix ? `VELLUM ${wordmarkSuffix}` : "VELLUM";
+const cardDescription = ogDescription ?? description;
 const isHome = path === "/";
 ---
 
@@ -48,14 +57,14 @@ const isHome = path === "/";
 <meta property="og:site_name" content="Vellum">
 <meta property="og:url" content={ogUrl}>
 <meta property="og:title" content={ogTitle}>
-<meta property="og:description" content={description}>
+<meta property="og:description" content={cardDescription}>
 <meta property="og:image" content={ogImage}>
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content={ogImageAlt}>
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content={ogTitle}>
-<meta name="twitter:description" content={description}>
+<meta name="twitter:description" content={cardDescription}>
 <meta name="twitter:image" content={ogImage}>
 <meta name="twitter:image:alt" content={ogImageAlt}>
 <link rel="stylesheet" href="/fonts.css">
@@ -75,7 +84,7 @@ const isHome = path === "/";
 <body>
 <main>
 <header>
-  <h1>{isHome ? wordmark : <a href="/">{wordmark}</a>}</h1>
+  <h1>{isHome ? "VELLUM" : <a href="/">VELLUM</a>}{wordmarkSuffix ? ` ${wordmarkSuffix}` : ""}</h1>
   <p class="tagline">{tagline}</p>
   <slot name="header-extra" />
   <nav class="topnav">

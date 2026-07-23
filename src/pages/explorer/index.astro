@@ -1,40 +1,15 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vellum Explorer: draw your own imaginary world</title>
-<meta name="description" content="Generate procedural fantasy maps in your browser. Every seed is a world.">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Vellum">
-<meta property="og:url" content="https://vellum.route12b.net/explorer/">
-<meta property="og:title" content="Vellum Explorer: draw your own imaginary world">
-<meta property="og:description" content="Generate procedural fantasy maps in your browser. Every seed is a world.">
-<meta property="og:image" content="https://vellum.route12b.net/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="A Vellum antique chart beside the Vellum wordmark.">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Vellum Explorer: draw your own imaginary world">
-<meta name="twitter:description" content="Generate procedural fantasy maps in your browser. Every seed is a world.">
-<meta name="twitter:image" content="https://vellum.route12b.net/og.png">
-<meta name="twitter:image:alt" content="A Vellum antique chart beside the Vellum wordmark.">
-<link rel="stylesheet" href="/fonts.css">
-<link rel="stylesheet" href="/motion.css">
-<link rel="stylesheet" href="index.css">
-</head>
-<body>
-<main>
-<header>
-  <h1><a href="../">VELLUM</a> EXPLORER</h1>
-  <p class="tagline">every seed is a world, draw one</p>
-  <nav class="topnav">
-    <a href="../">Home</a> · <a href="../seed-of-the-day/">Today</a> ·
-    <span aria-current="page">Explorer</span> · <a href="../print-room/">Print Room</a> · <a href="../faq/">FAQ</a> ·
-    <a href="../glossary/">Glossary</a>
-  </nav>
-</header>
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Vellum Explorer: draw your own imaginary world"
+  description="Generate procedural fantasy maps in your browser. Every seed is a world."
+  ogTitle="Vellum Explorer: draw your own imaginary world"
+  path="/explorer/"
+  tagline="every seed is a world, draw one"
+  wordmarkSuffix="EXPLORER"
+>
 
 <div class="controls">
   <div class="control-row" role="group" aria-labelledby="grp-map">
@@ -177,11 +152,5 @@
   <ol id="voyage-log-strip" class="voyage-log-strip"></ol>
 </div>
 
-<footer>
-  VELLUM · AN ATELIER OF IMAGINARY CARTOGRAPHY
-</footer>
-</main>
-
-<script type="module" src="./app.bundle.js"></script>
-</body>
-</html>
+<script type="module" src="./app.bundle.js" is:inline></script>
+</BaseLayout>

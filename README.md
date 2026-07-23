@@ -166,14 +166,13 @@ site that serves it.
 - **The engine** (`src/`) has zero runtime dependencies. Node 24+ runs its
   TypeScript directly (`erasableSyntaxOnly`), no build step, and the CLI and
   tests run the same way.
-- **The site** takes dependencies where they earn their keep. The three
-  content pages (home, FAQ, glossary) are Astro pages rendered through one
-  shared layout (`src/pages/` + `src/layouts/`); the app surfaces (Explorer,
-  Print Room, Seed of the Day) are hand-authored HTML/JS served verbatim from
-  `public/`. One bundler, Vite, bundles all three app entries and the shared
-  render worker, which is where the runtime deps (`d3-selection`,
-  `d3-transition`, `d3-zoom`) ship. Dev deps: `astro`, `typescript`,
-  `@types/node`, `vite`.
+- **The site** takes dependencies where they earn their keep. All six pages
+  (home, FAQ, glossary, Explorer, Print Room, Seed of the Day) are Astro pages
+  rendered through one shared layout (`src/pages/` + `src/layouts/`); the app
+  surfaces' hand-authored JS/CSS is served verbatim from `public/`. One
+  bundler, Vite, bundles all three app entries and the shared render worker,
+  which is where the runtime deps (`d3-selection`, `d3-transition`, `d3-zoom`)
+  ship. Dev deps: `astro`, `typescript`, `@types/node`, `vite`.
 - **The build** (`npm run build`): `astro:generate` first writes the generated
   trees into `public/` (the tsc browser emit of the engine, the Vite app
   bundles, the atlas and gallery showcases), then `astro build` assembles

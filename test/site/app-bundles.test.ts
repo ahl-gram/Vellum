@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -15,15 +15,31 @@ import { tmpdir } from "node:os";
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
-test("all three app shells load their bundled app twin, none load raw source (#208)", () => {
-  for (const [shell, src] of [
-    ["public/explorer/index.html", /<script type="module" src="\.\/app\.bundle\.js"><\/script>/],
-    ["public/print-room/index.html", /<script type="module" src="\.\/app\.bundle\.js"><\/script>/],
-    ["public/seed-of-the-day/index.html", /<script type="module" src="app\.bundle\.js"><\/script>/],
+test("all three app pages load their bundled app twin via is:inline, none load raw source (#208, #254)", () => {
+  // is:inline is load-bearing: without it Astro routes the script through its
+  // own Vite pass, which #204's ratified analysis rejects for these surfaces
+  // (the twins are already pressed by scripts/build-app-bundles.ts).
+  for (const [pageSource, src] of [
+    ["src/pages/explorer/index.astro", /<script type="module" src="\.\/app\.bundle\.js" is:inline><\/script>/],
+    ["src/pages/print-room/index.astro", /<script type="module" src="\.\/app\.bundle\.js" is:inline><\/script>/],
+    ["src/pages/seed-of-the-day/index.astro", /<script type="module" src="app\.bundle\.js" is:inline><\/script>/],
   ] as const) {
-    const html = read(shell);
-    assert.match(html, src, `${shell} should load its bundle twin`);
-    assert.doesNotMatch(html, /src="(\.\/)?app\.js"/, `${shell} must not load the raw ESM entry`);
+    const html = read(pageSource);
+    assert.match(html, src, `${pageSource} should load its bundle twin, opted out of Astro's script processing`);
+    assert.doesNotMatch(html, /src="(\.\/)?app\.js"/, `${pageSource} must not load the raw ESM entry`);
+  }
+});
+
+test("the hand-coded public/ shells retired with the re-shell (#254): routes and public/ stay disjoint", () => {
+  // Sub 1 constraint 9: Astro documents no collision precedence between a
+  // public/ file and a same-path route, so the src/pages/ routes above must be
+  // the only claimants of these URLs.
+  for (const shell of [
+    "public/explorer/index.html",
+    "public/print-room/index.html",
+    "public/seed-of-the-day/index.html",
+  ]) {
+    assert.ok(!existsSync(resolve(REPO, shell)), `${shell} must not exist: its route renders through BaseLayout`);
   }
 });
 
