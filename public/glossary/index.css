@@ -1,0 +1,50 @@
+:root { color-scheme: light; }
+body {
+  margin: 0; padding: 2.5rem 1.5rem 5rem;
+  background: #efe6cf; color: #3d2f1f;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  line-height: 1.6;
+}
+/* The Punchcutter's Case (#228): display/flourish/body roles via /fonts.css vars. */
+h1, h2, h3, nav, footer {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+}
+.tagline {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+}
+main { max-width: 760px; margin-inline: auto; }
+header { text-align: center; margin-bottom: 1rem; }
+h1 { font-size: 2rem; letter-spacing: 0.12em; margin: 0; }
+h1 a { color: inherit; text-decoration: none; }
+.tagline { font-style: italic; color: #6b5a40; margin: 0.3rem 0 0; }
+nav { text-align: center; font-size: 0.8rem; letter-spacing: 0.12em;
+  color: #857257; margin: 0.9rem 0 0; }
+nav a { color: inherit; }
+[aria-current="page"] { font-weight: 700; }
+h2 { letter-spacing: 0.06em; border-bottom: 1px solid #b9a77f;
+  padding-bottom: 0.3rem; margin-top: 2.8rem; }
+h3 { font-size: 0.95rem; letter-spacing: 0.08em; color: #857257;
+  text-transform: uppercase; margin: 2rem 0 0; }
+.intro { margin: 1.2rem 0; }
+.toc { background: #f4ecd8; border: 1.5px solid #b9a77f; border-radius: 4px;
+  padding: 1rem 1.4rem; margin: 2rem 0 1rem; }
+.toc strong { letter-spacing: 0.08em; font-size: 0.8rem; color: #857257;
+  display: block; margin-bottom: 0.4rem; text-transform: uppercase; }
+.toc ul { margin: 0; padding-left: 1.1rem; }
+.toc a { color: #4a3826; }
+.term { font-weight: 600; color: #4a3826; margin: 1.6rem 0 0.3rem;
+  font-size: 1.08rem; }
+.term:first-of-type, h3 + .term { margin-top: 0.8rem; }
+/* #126 Paper & Ink: a term tips like a loose slip under the hand (reduced-motion
+   collapse lives in /motion.css). inline-block so it pivots around its own text. */
+.term { display: inline-block; transform-origin: left center;
+  transition: transform var(--paper-quick) var(--ease-paper); }
+.term:hover  { transform: rotate(-1.2deg) translateX(2px); }
+.term:active { transform: none; }
+.def { margin: 0; }
+a { color: #6b5a40; }
+code { background: #e6d9b8; padding: 0.1em 0.4em; border-radius: 3px;
+  font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
+footer { margin-top: 4rem; text-align: center; letter-spacing: 0.22em;
+  font-size: 0.72rem; color: #857257; }
+footer a { color: inherit; }

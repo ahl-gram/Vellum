@@ -13,6 +13,9 @@
     "serve": "node scripts/serve.ts",
     "dev": "npm run site && node scripts/serve.ts",
     "og": "node scripts/build-og.ts",
+    "astro:dev": "astro dev",
+    "astro:build": "astro build",
+    "astro:preview": "astro preview",
     "build": "node scripts/build-dist.ts && tsc -p tsconfig.browser.json --outDir dist/explorer/engine && node scripts/build-explorer-bundle.ts dist",
     "test": "node --test",
     "test:e2e": "node scripts/e2e-explorer.mjs",
@@ -24,8 +27,9 @@
     "d3-zoom": "^3.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.8.0",
     "@types/node": "^24.0.0",
-    "esbuild": "^0.28.1"
+    "astro": "^7.1.3",
+    "esbuild": "^0.28.1",
+    "typescript": "^5.8.0"
   }
 }

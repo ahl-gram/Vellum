@@ -6,6 +6,9 @@ out/
 # Built deploy artifact (assembled by `npm run build`, published by deploy.yml).
 dist/
 
+# Astro's generated types/cache dir (#203).
+.astro/
+
 # Generated showcase output, rebuilt into dist/ at deploy time (see #37). No
 # longer committed now that Pages builds via Actions. (docs/charts/ stays
 # committed: the hand-authored homepage embeds it.)

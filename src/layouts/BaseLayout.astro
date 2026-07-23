@@ -1,0 +1,99 @@
+---
+import { NAV_ITEMS } from "./nav.ts";
+
+// The one shared shell (#203, per the ratified Sub 1 decision doc on #202):
+// head meta with the prop fan-out, the canonical nav, the constant footer.
+// Only the three content pages render through it during the migration; the
+// app surfaces keep their hand-coded shells until Sub 8 re-shells them.
+interface Props {
+  /** The head <title>, verbatim (FAQ keeps its &-form punctuation here). */
+  title: string;
+  /** Fans out to name=description, og:description, AND twitter:description. */
+  description: string;
+  /**
+   * Fans out to og:title AND twitter:title. Always the punctuation-normalized
+   * form, never the &-form title (they differ on the FAQ page).
+   */
+  ogTitle: string;
+  /** Root-absolute trailing-slash route ("/", "/faq/"): og:url + aria-current. */
+  path: string;
+  /** The flourish line under the wordmark. */
+  tagline: string;
+  /** Sub 8's app shells render "VELLUM EXPLORER" etc.; content pages omit it. */
+  wordmarkSuffix?: string;
+}
+
+const { title, description, ogTitle, path, tagline, wordmarkSuffix } = Astro.props;
+
+if (!/^\/([a-z0-9-]+\/)*$/.test(path)) {
+  throw new Error(`BaseLayout path must be root-absolute directory form ("/faq/"), got "${path}"`);
+}
+
+const ogUrl = new URL(path, Astro.site).href;
+const ogImage = new URL("/og.png", Astro.site).href;
+const ogImageAlt = "A Vellum antique chart beside the Vellum wordmark.";
+const wordmark = wordmarkSuffix ? `VELLUM ${wordmarkSuffix}` : "VELLUM";
+const isHome = path === "/";
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title}</title>
+<meta name="description" content={description}>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Vellum">
+<meta property="og:url" content={ogUrl}>
+<meta property="og:title" content={ogTitle}>
+<meta property="og:description" content={description}>
+<meta property="og:image" content={ogImage}>
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content={ogImageAlt}>
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content={ogTitle}>
+<meta name="twitter:description" content={description}>
+<meta name="twitter:image" content={ogImage}>
+<meta name="twitter:image:alt" content={ogImageAlt}>
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/motion.css">
+<link rel="stylesheet" href="index.css">
+<style is:global>
+/* The canonical nav form's two cross-page rules (Sub 1 decision B, ratified
+   2026-07-21). They live in the layout, not in motion.css or the page CSS:
+   motion.css is a byte-frozen golden, and .topnav outranks the faq/glossary
+   page-CSS `nav` element rule, which still carries the pre-unification 0.8rem. */
+.topnav { font-size: 0.82rem; }
+/* motion.css makes nav LINKS inline-block so a multi-word label never wraps
+   mid-label; the current page renders as a span, so it takes the same rule. */
+.topnav [aria-current="page"] { display: inline-block; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>{isHome ? wordmark : <a href="/">{wordmark}</a>}</h1>
+  <p class="tagline">{tagline}</p>
+  <slot name="header-extra" />
+  <nav class="topnav">
+    {NAV_ITEMS.map((item, i) => (
+      <Fragment>{i > 0 ? " · " : ""}{item.href === path ? (
+        <span aria-current="page">{item.label}</span>
+      ) : (
+        <a href={item.href}>{item.label}</a>
+      )}</Fragment>
+    ))}
+  </nav>
+</header>
+
+<slot />
+
+<footer>
+  VELLUM · AN ATELIER OF IMAGINARY CARTOGRAPHY
+</footer>
+</main>
+</body>
+</html>

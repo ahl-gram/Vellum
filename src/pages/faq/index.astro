@@ -1,0 +1,211 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Vellum: Questions & Answers"
+  description="How Vellum works: seeds, determinism, terrain and rivers, climate and styles, and how to make and reproduce your own maps."
+  ogTitle="Vellum: Questions and Answers"
+  path="/faq/"
+  tagline="questions & answers"
+>
+<div class="toc">
+  <strong>On this page</strong>
+  <ul>
+    <li><a href="#about">About Vellum</a></li>
+    <li><a href="#how">How a world is built</a></li>
+    <li><a href="#names">Names &amp; invented languages</a></li>
+    <li><a href="#climate">Climate, styles &amp; map types</a></li>
+    <li><a href="#making">Making &amp; reproducing maps</a></li>
+  </ul>
+</div>
+
+<h2 id="about">About Vellum</h2>
+
+<p class="q">What is Vellum?</p>
+<p class="a">Vellum is a procedural cartography engine. Give it a number, a
+"seed," and it invents an entire world (terrain, rivers, forests, towns, and
+their names) and draws it as an old-fashioned atlas chart.</p>
+
+<p class="q">Is this AI image generation?</p>
+<p class="a">No. There is no machine learning or image model involved. Vellum
+follows a fixed set of rules (layered noise, a water-flow simulation, and name
+grammars), so it draws crisp, infinitely scalable SVG maps, and the same seed
+always produces exactly the same one.</p>
+
+<p class="q">What is a "seed"?</p>
+<p class="a">A seed is a number that serves as a world's identity. Seed 42 always
+draws the same island; change the number for a different world. It is printed
+in every chart's margin, so you can always find your way back to a map you
+liked.</p>
+
+<p class="q">Do I need to install anything to try it?</p>
+<p class="a">No. The <a href="../explorer/">Explorer</a> runs the whole engine
+in your browser. Type a seed and draw; nothing is uploaded. To generate files
+on your own machine, clone the repo (see the
+<a href="https://github.com/ahl-gram/Vellum#readme">README</a>).</p>
+
+<p class="q">Can I use the maps I make?</p>
+<p class="a">Yes, freely. Maps you generate with Vellum are yours to use for
+anything, including commercial work, with no restrictions and no attribution
+required (they are dedicated to the public domain). The Vellum source code
+itself is released under the MIT license, so you are welcome to build on the
+engine too.</p>
+
+<p class="q">Why "Vellum"?</p>
+<p class="a">Vellum is the prepared animal skin that real medieval maps and
+manuscripts were drawn on, a fitting surface for charts of places that were
+never real.</p>
+
+<h2 id="how">How a world is built</h2>
+
+<p class="q">How is the land shaped?</p>
+<p class="a">Layered "noise" produces a field of elevations. A sea level is then
+chosen so that the intended fraction of the map is land, and everything above
+the waterline becomes the coastline, hills, and mountains.</p>
+
+<p class="q">How do the rivers and lakes form?</p>
+<p class="a">Vellum simulates water. Rainfall runs downhill along the steepest
+path, and the algorithm guarantees every drop can reach the sea, so rivers
+always connect and flow the right way, widening toward their mouths. Where
+water collects below sea level inland, you get a lake.</p>
+
+<p class="q">Where do the towns, roads, and borders come from?</p>
+<p class="a">Towns are scored by good harbors, river mouths, and flat, fertile
+land. Roads are the cheapest paths between them, and they reuse one another, so
+shared trunk roads emerge naturally. Realms are formed by giving each capital
+the land nearest to it, with borders that prefer to follow rivers and
+ridgelines.</p>
+
+<p class="q">Do the settlements have a history?</p>
+<p class="a">Yes. After the world is built, Vellum simulates a rough history:
+towns receive founding dates, and some villages fall into ruin before the survey
+is drawn. Ruins appear on the map as a broken-tower glyph with a dimmed label.
+The atlas adds a Chronicle section, a dated record of founding events and
+collapses, and the gazetteer notes cite dates where relevant
+(<em>"founded in the year 312; fell to ruin by 581"</em>).</p>
+
+<p class="q">Is every map really repeatable?</p>
+<p class="a">Yes. Every random choice descends from the seed, so the same seed
+with the same options always draws an identical map.</p>
+
+<h2 id="names">Names &amp; invented languages</h2>
+
+<p class="q">Where do the names come from?</p>
+<p class="a">Every world picks one of six invented cultures, each with its own
+sound, and uses it for everything: towns, rivers, peaks, seas, and realms.
+Because a single map keeps to one culture, its names share a family resemblance,
+the way place names within one country do. Nothing is taken from a real word
+list; every name is built from scratch.</p>
+
+<p class="q">How does the name "grammar" work?</p>
+<p class="a">In two steps. First Vellum builds a bare stem by stringing together a
+culture's sound pieces: beginnings like "mar" or "dr," vowels like "a" or "ai,"
+and endings like "nd" or "mor," following that culture's syllable patterns. Then
+it wraps the stem in a template to fit the feature, for example "The Sea of
+___," "Mount ___," or a town ending such as "haven." A few tidy-up rules keep
+each name short and pronounceable, and no two names on one map repeat.</p>
+
+<p class="q">What are the six cultures?</p>
+<p class="a">Each is a different sound-world, loosely echoing a real one: a soft
+seafaring tongue, a hard northern one, a desert tongue rich in "sh" and "kh," an
+airy woodland one, an open island one heavy with vowels, and a harsh mountain
+one full of clusters. The chart's title page even credits an invented surveyor
+whose name comes from the same culture.</p>
+
+<p class="q">Do these names fill the gazetteer too?</p>
+<p class="a">Yes. The gazetteer, the atlas's directory of every town, lists them
+by these same invented names, grouped by realm, with a line or two of travelers'
+notes written in the same spirit. The labels on the map and the entries in the
+gazetteer come from one and the same source.</p>
+
+<h2 id="climate">Climate, styles &amp; map types</h2>
+
+<p class="q">How does climate change the look?</p>
+<p class="a">Climate sets temperature, which sets the biomes, and biomes change
+the map's <em>symbols</em>, not its base color. A polar world shows pine woods
+and open tundra, with the snow line low on the hills. A tropical world shows
+palms, deserts marked with dunes, and snow only on the highest peaks. Temperate
+sits between, with broadleaf woods. The coastline of a given seed is identical
+in every climate.</p>
+
+<p class="q">So is a polar map white?</p>
+<p class="a">No, and that surprises people. The land is the same parchment (or
+elevation tint) in every climate; "cold" shows through the tree types, the
+beaches, the snow line, and the gazetteer's notes, not a change of palette.</p>
+
+<p class="q">What are the four styles?</p>
+<p class="a"><em>Antique</em>: parchment, hatched mountains, sea monsters.
+<em>Topographic</em>: elevation tints and contour lines.
+<em>Ink</em>: pen-and-ink monochrome.
+<em>Nautical</em>: a sea chart with depth soundings, prevailing-wind arrows, and
+ocean-current streamlines.
+(The nautical style draws no land symbols, so climate is most muted there.)</p>
+
+<p class="q">How do I read the symbols and labels?</p>
+<p class="a">Most charts carry a small key in one corner that names the symbols
+actually on that map: the settlement marks, the terrain glyphs, rivers, and on
+sea charts the depth soundings and wind arrows. The lettering is a code too. Bold
+capitals mark a capital city, plain type a town or village, faded spaced capitals
+name a realm, and italics name water (seas, rivers, and lakes) and forests. Every atlas page carries a key, and you can turn one on for any chart you
+draw in the Explorer or generate locally.</p>
+
+<p class="q">What do the colors on an antique chart mean?</p>
+<p class="a">Less than you might expect, because an antique chart shows most
+things by drawing rather than by color. The land is a single even parchment, the
+same cream at every elevation and in every climate; mountains are drawn as brown
+hatched ranges and forests as little tree marks, not painted on. The sea is a
+pale sage green, ringed by slightly darker "waterlines" that echo each coast in
+the old engraved manner. A dark brown line is the shoreline, thin blue lines are
+rivers, and faint brown lines are roads. The one place color really carries
+meaning is the soft washes of red, green, gold, blue, and mauve: each marks a
+realm, one tint apiece, so you can tell neighboring territories apart. Those are
+political regions, not terrain, so a single-realm island shows almost none while
+a continent of several realms shows them clearly. (Topographic charts are the
+exception: there the land color itself maps to elevation.)</p>
+
+<p class="q">What are the map types?</p>
+<p class="a"><em>Island</em> (one landmass), <em>archipelago</em> (scattered
+isles), <em>continent</em> (a large landmass), and <em>city-state</em> (one
+dominant free city and its hinterland). Leave it unset and the seed chooses.</p>
+
+<h2 id="making">Making &amp; reproducing maps</h2>
+
+<p class="q">How do I make a map on my own machine?</p>
+<p class="a">Download the source from
+<a href="https://github.com/ahl-gram/Vellum">GitHub</a> and follow the
+setup instructions in the
+<a href="https://github.com/ahl-gram/Vellum#readme">README</a>. Charts are
+generated as SVG files you can open in any browser.</p>
+
+<p class="q">I found a map I love. How do I get it back?</p>
+<p class="a">Note its seed (printed in the margin) and enter it again. One catch:
+if you chose a specific type, climate, or land amount, those aren't saved on the
+chart itself, so you'll need to set them the same way again alongside the seed.</p>
+
+<p class="q">Can I make a high-resolution print?</p>
+<p class="a">Yes. The <a href="../print-room/">Print Room</a> renders any seed at
+poster size (up to about 14 inches at 300 dpi) and downloads it as an SVG or PNG,
+ready to print as wall art. No install needed: it all runs in your browser.</p>
+
+<p class="q">What is the Seed of the Day?</p>
+<p class="a">The <a href="../seed-of-the-day/">Seed of the Day</a> page draws a
+new world each day automatically. The seed is today's date in UTC read as a
+number (for example, June 22 2026 becomes seed 20260622), so everyone in the
+world sees the same chart on the same day. No reload needed: the page renders
+fresh in your browser each time you visit.</p>
+
+<p class="q">What is the atlas?</p>
+<p class="a">The atlas binds one world into a small book: the chart in several
+styles, four thematic data plates (vegetation, temperature, rainfall, and
+population), two regional close-ups that zoom in on busy areas, a coat-of-arms
+plate for every realm, a Chronicle of the world's founding events and ruins, and
+a gazetteer of every town with travelers' notes. Explore a seed in the
+<a href="../explorer/">Explorer</a>, then take it to the
+<a href="../print-room/">Print Room</a> to bind the atlas, print it to PDF, or
+download it as a single file.</p>
+
+<p class="q">What is the gallery?</p>
+<p class="a">The <a href="../gallery/">gallery</a> is a contact sheet of many
+worlds at once, useful for browsing seeds until one catches your eye.</p>
+</BaseLayout>
