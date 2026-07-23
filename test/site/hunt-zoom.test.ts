@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 /**
  * The Surveyor's Glass, Sub 6 (#167): the Daily Hunt takes the glass. The
  * seed-of-the-day page adopts the SAME shared zoom controller the Explorer uses
- * (public/shared/zoom-controller.js), geometric-only: #map is wrapped in a stable
+ * (src/site/shared/zoom-controller.ts), geometric-only: #map is wrapped in a stable
  * #map-viewport clip/gesture box, the live CSS transform lands on #map so the
  * hunt star and sounding overlays (children of #map) ride one frame, and the
  * guess-click math is untouched (it is ratio-based against getBoundingClientRect,
@@ -41,10 +41,10 @@ test("HZ1 the Hunt wraps #map in a stable #map-viewport clip/gesture box (#167)"
 });
 
 test("HZ2 app.js adopts the shared zoom controller, bound to #map-viewport / #map (#167)", () => {
-  const js = read("public/seed-of-the-day/app.js");
+  const js = read("src/site/seed-of-the-day/app.ts");
   assert.match(
     js,
-    /import\s*\{\s*createZoomController\s*\}\s*from\s*"\.\.\/shared\/zoom-controller\.js"/,
+    /import\s*\{\s*createZoomController\s*\}\s*from\s*"\.\.\/shared\/zoom-controller\.ts"/,
     "app.js should import the shared createZoomController",
   );
   assert.match(js, /createZoomController\(/, "app.js should construct the controller");
@@ -53,13 +53,13 @@ test("HZ2 app.js adopts the shared zoom controller, bound to #map-viewport / #ma
 });
 
 test("HZ3 app.js exposes the deterministic zoom hooks the e2e drives (#167)", () => {
-  const js = read("public/seed-of-the-day/app.js");
+  const js = read("src/site/seed-of-the-day/app.ts");
   assert.match(js, /window\.__vellumZoomTo\s*=/, "app.js should expose __vellumZoomTo");
   assert.match(js, /window\.__vellumZoomState\s*=/, "app.js should expose __vellumZoomState");
 });
 
 test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)", () => {
-  const js = read("public/seed-of-the-day/app.js");
+  const js = read("src/site/seed-of-the-day/app.ts");
   // Inspect the ACTUAL import specifiers, not prose: the Hunt magnifies geometrically
   // only, and importing the LOD schedule or the region redraft would let zoom reveal new
   // places and change the clue difficulty. (Comments are free to name these paths.)

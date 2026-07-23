@@ -53,8 +53,8 @@ test("astro:generate regenerates the runtime trees into public/, and dev/build r
   const pkg = JSON.parse(readFileSync(root("package.json"), "utf8"));
   assert.equal(
     pkg.scripts["astro:generate"],
-    "node scripts/clean-public-generated.ts && tsc -p tsconfig.browser.json --outDir public/explorer/engine && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts",
-    "astro:generate must clean, emit the engine, bundle (Vite since Sub 7), then generate the showcases",
+    "node scripts/clean-public-generated.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts",
+    "astro:generate must clean, bundle (Vite compiles the TS graph since Sub 9, #260), then generate the showcases",
   );
   assert.equal(pkg.scripts["astro:dev"], "npm run astro:generate && astro dev", "dev parity needs the runtime trees");
   assert.equal(pkg.scripts["build"], "npm run astro:generate && astro build", "the build serves what dev serves");
@@ -117,7 +117,7 @@ test("astro dev serves the app surfaces at their canonical directory URLs (dev p
     }
     const route = await fetch(at("/faq/"));
     assert.equal(route.status, 200, "Astro routes keep winning their own URLs");
-    const sub = await fetch(at("/explorer/app.js"));
+    const sub = await fetch(at("/explorer/index.css"));
     assert.equal(sub.status, 200, "exact-path subresources stay served from public/");
     const missing = await fetch(at("/no-such-surface/"));
     assert.equal(missing.status, 404, "directories with no public/ shell still 404");

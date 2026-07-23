@@ -7,16 +7,21 @@
 // app.js: readHash reports whether the link carried a land value (so the conductor can
 // set the gate) rather than reaching back into the conductor's state, and writeHash
 // takes the gate's current value as an argument.
-import { landToSlider, sliderToLand, updateLandReadout } from "./sea-level.js";
-import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.js";
+import { landToSlider, sliderToLand, updateLandReadout } from "./sea-level.ts";
+import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.ts";
+import type { Camera } from "./camera.ts";
 
-/**
- * @typedef {{
- *   seedInput: HTMLInputElement, styleSel: HTMLSelectElement, typeSel: HTMLSelectElement,
- *   bandSel: HTMLSelectElement, themeSel: HTMLSelectElement, legendChk: HTMLInputElement,
- *   armsChk: HTMLInputElement, landSlider: HTMLInputElement, coastSlider: HTMLInputElement
- * }} Controls
- */
+export interface Controls {
+  seedInput: HTMLInputElement;
+  styleSel: HTMLSelectElement;
+  typeSel: HTMLSelectElement;
+  bandSel: HTMLSelectElement;
+  themeSel: HTMLSelectElement;
+  legendChk: HTMLInputElement;
+  armsChk: HTMLInputElement;
+  landSlider: HTMLInputElement;
+  coastSlider: HTMLInputElement;
+}
 
 /**
  * Apply a bookmarked/shared hash to the controls. Only keys present and valid are
@@ -27,7 +32,11 @@ import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.j
  *   and the #165 camera (world-uv centre + zoom) if the link carried one, else null. The
  *   conductor restores the camera after the first chart lands; absent params mean home.
  */
-export function readHash(controls) {
+export function readHash(controls: Controls): {
+  land: boolean;
+  coast: boolean;
+  camera: Camera | null;
+} {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider } = controls;
   const params = new URLSearchParams(location.hash.slice(1));
   // Gate on PRESENCE, not just validity: Number(null) === 0 would pass the integer
@@ -80,7 +89,7 @@ export function readHash(controls) {
   const cxRaw = params.get("cx");
   const cyRaw = params.get("cy");
   const kRaw = params.get("k");
-  let camera = null;
+  let camera: Camera | null = null;
   if (cxRaw !== null && cyRaw !== null && kRaw !== null) {
     const cx = Number(cxRaw);
     const cy = Number(cyRaw);
@@ -101,7 +110,12 @@ export function readHash(controls) {
  *   existing (never-zoomed) shared link is byte-identical. Quantized to 4dp: enough to
  *   restore the framing indistinguishably, short enough to keep the hash readable.
  */
-export function writeHash(controls, landTouched, coastTouched, camera) {
+export function writeHash(
+  controls: Controls,
+  landTouched: boolean,
+  coastTouched: boolean,
+  camera?: Camera,
+): void {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider } = controls;
   const params = new URLSearchParams();
   params.set("seed", seedInput.value);

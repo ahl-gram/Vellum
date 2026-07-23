@@ -1,6 +1,6 @@
 // The Surveyor's Glass, Sub 3 (#164): the glass itself. A shared, page-agnostic
 // controller that gives an element geometric pan/zoom driven by d3-zoom. It lives
-// in public/shared/ -- the first hand-authored module shared across page directories
+// in src/site/shared/ -- the first hand-authored module shared across page directories
 // -- and is the ONLY file that imports d3-zoom (and, to attach it, d3-selection;
 // d3-zoom cannot bind gestures without a selection). Both resolve at bundle time via
 // the Vite press (#163's esbuild originally, folded by #208), so the pages still
@@ -16,12 +16,18 @@
 // Kept free of top-level DOM access (the factory takes its elements as arguments) so
 // the two pure helpers below are unit-testable under Node; createZoomController is
 // proven by e2e suite-zoom (Z1-Z4). See test/site/zoom-controller.test.ts.
-import { zoom, zoomIdentity } from "d3-zoom";
+import { zoom, zoomIdentity, type D3ZoomEvent, type ZoomBehavior, type ZoomTransform } from "d3-zoom";
 import { select } from "d3-selection";
 // #170: selection.transition() for the voiced glide. A side-effect import (it patches
 // d3-selection's prototype); the module was ALREADY in the bundle transitively (d3-zoom's
 // double-click smooth zoom uses it), so declaring it adds no bundle weight.
 import "d3-transition";
+
+export interface ZoomState {
+  x: number;
+  y: number;
+  k: number;
+}
 
 // ---- pure helpers (unit-tested) -------------------------------------------------
 
@@ -32,7 +38,7 @@ import "d3-transition";
  * @param {{x:number, y:number, k:number}} t
  * @returns {string}
  */
-export function zoomTransformToCss(t) {
+export function zoomTransformToCss(t: ZoomState): string {
   return `translate(${t.x}px, ${t.y}px) scale(${t.k})`;
 }
 
@@ -47,7 +53,11 @@ export function zoomTransformToCss(t) {
  * @param {ReadonlyArray<number>} scaleExtent  [min,max]
  * @returns {{x:number, y:number, k:number}}
  */
-export function constrainZoom(t, extent, scaleExtent) {
+export function constrainZoom(
+  t: ZoomState,
+  extent: ReadonlyArray<ReadonlyArray<number>>,
+  scaleExtent: ReadonlyArray<number>,
+): ZoomState {
   const k = Math.max(scaleExtent[0], Math.min(scaleExtent[1], t.k));
   const [[x0, y0], [x1, y1]] = extent;
   // d3-zoom defaultConstrain with translateExtent == the viewport extent, so the
@@ -73,11 +83,42 @@ export function constrainZoom(t, extent, scaleExtent) {
  * @param {ReadonlyArray<number>} scaleExtent  [min,max]
  * @returns {number}
  */
-export function nextGlideTarget(baseK, factor, scaleExtent) {
+export function nextGlideTarget(
+  baseK: number,
+  factor: number,
+  scaleExtent: ReadonlyArray<number>,
+): number {
   return Math.max(scaleExtent[0], Math.min(scaleExtent[1], baseK * factor));
 }
 
 // ---- the controller -------------------------------------------------------------
+
+export interface ZoomControllerOptions {
+  viewportEl: HTMLElement;
+  targetEl: HTMLElement;
+  scaleExtent?: [number, number];
+  settleMs?: number;
+  onSettle?: (state: ZoomState) => void;
+  onApply?: (state: ZoomState) => void;
+  reducedMotion?: boolean | (() => boolean);
+  glideMs?: number | (() => number);
+}
+
+export interface ZoomController {
+  attach(): void;
+  detach(): void;
+  reset(): void;
+  rebase(): void;
+  zoomTo(next: ZoomState): void;
+  glideBy(factor: number): void;
+  glideHome(onDone?: () => void): void;
+  panBy(dxScreen: number, dyScreen: number): void;
+  getState(): ZoomState;
+}
+
+// d3-zoom stashes the live transform on the element itself as `__zoom`; typed here so
+// getState/rebase can read and write it through a single cast at each lookup.
+type ZoomStoredElement = HTMLElement & { __zoom?: ZoomTransform };
 
 /**
  * @param {{
@@ -99,8 +140,9 @@ export function createZoomController({
   onApply,
   reducedMotion,
   glideMs = 250,
-}) {
-  const viewportExtent = () => [[0, 0], [viewportEl.clientWidth, viewportEl.clientHeight]];
+}: ZoomControllerOptions): ZoomController {
+  const viewportExtent = (): [[number, number], [number, number]] =>
+    [[0, 0], [viewportEl.clientWidth, viewportEl.clientHeight]];
 
   // #165: reduced motion is read LIVE, not frozen at construction. It accepts a boolean
   // or a getter (() => boolean); with neither, it reads the OS setting live via
@@ -130,10 +172,10 @@ export function createZoomController({
   // drawGen idiom: a superseding glide interrupts its predecessor one frame AFTER
   // setting the new target (d3 starts transitions on the next timer tick), so the
   // predecessor's own end/interrupt must not clear the newer press's pending target.
-  let glideTargetK = null;
+  let glideTargetK: number | null = null;
   let glideSeq = 0;
 
-  const behavior = zoom()
+  const behavior: ZoomBehavior<HTMLElement, unknown> = zoom<HTMLElement, unknown>()
     .scaleExtent(scaleExtent)
     .extent(viewportExtent)
     // The double-click zoom's animated path; reduced motion collapses it to an instant
@@ -152,7 +194,7 @@ export function createZoomController({
   // is bulletproof where relying on a matchMedia "change" event would not be.
   const syncDblDuration = () => behavior.duration(prefersReduced() ? 0 : DBLCLICK_MS);
 
-  let settleTimer = 0;
+  let settleTimer: ReturnType<typeof setTimeout> | 0 = 0;
   const clearSettle = () => {
     if (settleTimer) {
       clearTimeout(settleTimer);
@@ -160,9 +202,9 @@ export function createZoomController({
     }
   };
 
-  const isHome = (t) => t.k === 1 && t.x === 0 && t.y === 0;
+  const isHome = (t: ZoomTransform) => t.k === 1 && t.x === 0 && t.y === 0;
 
-  function apply(transform) {
+  function apply(transform: ZoomTransform) {
     // Home leaves the idle DOM byte-identical (no inline transform, no clip): the arrival
     // ceremony's translate/rotate and the chart's drop shadow overflow the frame exactly
     // as today. Clip only once actually zoomed.
@@ -182,7 +224,7 @@ export function createZoomController({
     if (onApply) onApply({ x: transform.x, y: transform.y, k: transform.k });
   }
 
-  behavior.on("zoom", (event) => {
+  behavior.on("zoom", (event: D3ZoomEvent<HTMLElement, unknown>) => {
     apply(event.transform);
     // A settle debounce independent of d3's internal wheel coalescing: fire onSettle
     // only once the gesture goes quiet. Dormant until a later sub passes onSettle.
@@ -197,8 +239,8 @@ export function createZoomController({
 
   const sel = () => select(viewportEl);
 
-  function getState() {
-    const t = viewportEl.__zoom || zoomIdentity;
+  function getState(): ZoomState {
+    const t = (viewportEl as ZoomStoredElement).__zoom || zoomIdentity;
     return { x: t.x, y: t.y, k: t.k };
   }
 
@@ -246,11 +288,11 @@ export function createZoomController({
       // chart magnified. Pre-existed the glide (the 250ms double-click had the same
       // window) but the glide widened it enough to close.
       sel().interrupt();
-      viewportEl.__zoom = zoomIdentity;
+      (viewportEl as ZoomStoredElement).__zoom = zoomIdentity;
       apply(zoomIdentity);
     },
     /** Programmatically zoom to a proposed transform, clamped like a live gesture. */
-    zoomTo(next) {
+    zoomTo(next: ZoomState) {
       const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), scaleExtent);
       sel().call(behavior.transform, zoomIdentity.translate(c.x, c.y).scale(c.k));
     },
@@ -263,7 +305,7 @@ export function createZoomController({
      * functional loss). Flies to an ABSOLUTE k from nextGlideTarget so rapid presses
      * compound against the pending target, never a mid-flight k.
      */
-    glideBy(factor) {
+    glideBy(factor: number) {
       if (prefersReduced()) {
         sel().call(behavior.scaleBy, factor);
         return;
@@ -291,7 +333,7 @@ export function createZoomController({
      * interrupts the glide (a gesture, a draw), onDone is skipped on purpose: the
      * interrupting action owns the camera and the hash from that point.
      */
-    glideHome(onDone) {
+    glideHome(onDone?: () => void) {
       clearSettle();
       glideTargetK = null;
       if (prefersReduced()) {
@@ -314,7 +356,7 @@ export function createZoomController({
      * dividing by k turns a screen-px delta into that frame; the constrain then keeps the
      * sheet covering the viewport. Same "zoom" pipeline as scaleBy.
      */
-    panBy(dxScreen, dyScreen) {
+    panBy(dxScreen: number, dyScreen: number) {
       const k = getState().k;
       sel().call(behavior.translateBy, dxScreen / k, dyScreen / k);
     },

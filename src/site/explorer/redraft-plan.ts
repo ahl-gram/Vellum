@@ -16,6 +16,9 @@
  * @param {ReadonlyArray<string>} labeledNames  the incoming sheet's labeled settlement names
  * @returns {Array<string>}
  */
-export function dryInNames(prevLabeledNames, labeledNames) {
+export function dryInNames(
+  prevLabeledNames: ReadonlySet<string>,
+  labeledNames: readonly string[],
+): string[] {
   return labeledNames.filter((name) => !prevLabeledNames.has(name));
 }

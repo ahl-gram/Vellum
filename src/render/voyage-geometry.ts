@@ -2,7 +2,7 @@ import type { Pt } from "../core/rdp.ts";
 
 /**
  * The moving mark's geometry (#120). Pure, DOM-free, so the overlay in
- * public/explorer/voyage.js stays glue and every rule below is proven in node:test
+ * src/site/explorer/voyage.ts stays glue and every rule below is proven in node:test
  * rather than parsed out of a transform string in the browser.
  *
  * Three problems, all created by giving legs real geometry:

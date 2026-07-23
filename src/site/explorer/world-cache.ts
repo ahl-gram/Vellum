@@ -10,13 +10,16 @@
 // fully deterministic: worldFor(seed, overrides) returns exactly the world
 // generateWorld(defaultRecipe(seed, overrides)) would, cache hit or miss, so
 // worker/inline byte-parity is unaffected.
-import { defaultRecipe, generateWorld } from "./engine/world/generate.js";
+import { defaultRecipe, generateWorld } from "../../world/generate.ts";
+import type { World, WorldRecipe } from "../../world/types.ts";
 
-let entry = null; // { key, world }
+type Overrides = Partial<WorldRecipe>;
+
+let entry: { key: string; world: World } | null = null; // { key, world }
 
 // overrides is a small FLAT object, so a sorted-key JSON is a canonical fingerprint
 // (key order can't change the hash). seed is prefixed so two seeds never collide.
-function keyOf(seed, overrides) {
+function keyOf(seed: number, overrides: Overrides | undefined): string {
   const o = overrides || {};
   return seed + "|" + JSON.stringify(o, Object.keys(o).sort());
 }
@@ -28,7 +31,10 @@ function keyOf(seed, overrides) {
  * e2e asserts, so the "skips generateWorld the second time" AC needs no flaky
  * timing measurement.
  */
-export function worldFor(seed, overrides) {
+export function worldFor(
+  seed: number,
+  overrides?: Overrides,
+): { world: World; cached: boolean } {
   const key = keyOf(seed, overrides);
   if (entry && entry.key === key) {
     return { world: entry.world, cached: true };

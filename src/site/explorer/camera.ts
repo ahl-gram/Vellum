@@ -14,6 +14,18 @@
 // screen = p*k + t. The viewport centre is (W/2, H/2), so the sheet point under it is
 // ((W/2 - x)/k, (H/2 - y)/k), and its uv is that over (W, H).
 
+export interface CameraTransform {
+  x: number;
+  y: number;
+  k: number;
+}
+
+export interface Camera {
+  cx: number;
+  cy: number;
+  k: number;
+}
+
 /**
  * The camera (world-uv centre + zoom) that a d3 transform is framing.
  * @param {{x:number, y:number, k:number}} t  the live d3 transform
@@ -21,7 +33,11 @@
  * @param {number} H  viewport height in px
  * @returns {{cx:number, cy:number, k:number}}
  */
-export function cameraFromTransform(t, W, H) {
+export function cameraFromTransform(
+  t: CameraTransform,
+  W: number,
+  H: number,
+): Camera {
   return { cx: (W / 2 - t.x) / (t.k * W), cy: (H / 2 - t.y) / (t.k * H), k: t.k };
 }
 
@@ -35,6 +51,10 @@ export function cameraFromTransform(t, W, H) {
  * @param {number} H
  * @returns {{x:number, y:number, k:number}}
  */
-export function transformFromCamera(c, W, H) {
+export function transformFromCamera(
+  c: Camera,
+  W: number,
+  H: number,
+): CameraTransform {
   return { x: W / 2 - c.cx * c.k * W, y: H / 2 - c.cy * c.k * H, k: c.k };
 }

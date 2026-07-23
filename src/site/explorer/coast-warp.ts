@@ -12,18 +12,21 @@
 // to today (the covenant charts and the golden are untouched). If a future edit gives
 // the map types different warp defaults, the additive guard in heightfield.test.ts and
 // this constant are the two places to revisit.
-const coastSlider = document.getElementById("coast");
-const coastReadout = document.getElementById("coast-readout");
+const coastSlider = document.getElementById("coast") as HTMLInputElement;
+const coastReadout = document.getElementById("coast-readout") as HTMLElement;
 
 const COAST_MIN = 0;
 const COAST_MAX = 1;
 export const DEFAULT_COAST_WARP = 0.55;
 
-export const clampCoast = (w) => Math.min(COAST_MAX, Math.max(COAST_MIN, w));
-export const sliderToCoast = (v) => clampCoast(Number(v) / 100);
-export const coastToSlider = (w) => Math.round(clampCoast(w) * 100);
+export const clampCoast = (w: number): number =>
+  Math.min(COAST_MAX, Math.max(COAST_MIN, w));
+export const sliderToCoast = (v: string | number): number =>
+  clampCoast(Number(v) / 100);
+export const coastToSlider = (w: number): number =>
+  Math.round(clampCoast(w) * 100);
 
-export function updateCoastReadout() {
+export function updateCoastReadout(): void {
   const w = sliderToCoast(coastSlider.value);
   coastReadout.textContent = `warp ${w.toFixed(2)}`;
   coastSlider.setAttribute("aria-valuetext", `coastline warp ${w.toFixed(2)}`);
@@ -32,6 +35,6 @@ export function updateCoastReadout() {
 // Park the slider at the world's natural coastline (0.55) without touching the
 // overrides: an untouched coast slider sends no coastWarp override, exactly as the
 // sea-level slider parks at the natural waterline without forcing landFraction.
-export function parkCoastDefault() {
+export function parkCoastDefault(): void {
   coastSlider.value = String(coastToSlider(DEFAULT_COAST_WARP));
 }

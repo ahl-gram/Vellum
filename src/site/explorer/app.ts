@@ -6,17 +6,17 @@
 // Listeners attach here at module-eval time (module scripts are deferred, so the
 // DOM is parsed first). The bound atlas moved to the Print Room (#199); the
 // Explorer's own "Bind as atlas" was retired now that page owns it.
-import { runJob, runInline, usesWorker, initWorker } from "./worker-client.js";
-import { shouldTurn, runTurn, cancelTurn } from "./sheet-turn.js";
-import { toggleFlip, isFlipped, rebuildVerso } from "./verso.js";
-import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.js";
-import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.js";
-import { startArrival } from "./draw-ceremony.js";
-import { createZoomController } from "../shared/zoom-controller.js";
-import { createLodController } from "./lod-controller.js";
-import { readHash, writeHash } from "./hash-sync.js";
-import { cameraFromTransform, transformFromCamera } from "./camera.js";
-import { seedForDate } from "./engine/world/seed-of-the-day.js";
+import { runJob, runInline, usesWorker, initWorker } from "./worker-client.ts";
+import { shouldTurn, runTurn, cancelTurn } from "./sheet-turn.ts";
+import { toggleFlip, isFlipped, rebuildVerso } from "./verso.ts";
+import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts";
+import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
+import { startArrival } from "./draw-ceremony.ts";
+import { createZoomController, type ZoomState } from "../shared/zoom-controller.ts";
+import { createLodController } from "./lod-controller.ts";
+import { readHash, writeHash } from "./hash-sync.ts";
+import { cameraFromTransform, transformFromCamera, type Camera } from "./camera.ts";
+import { seedForDate } from "../../world/seed-of-the-day.ts";
 import {
   buildPlaceOverlay,
   applyScrub,
@@ -29,7 +29,7 @@ import {
   scrubSnapToPresent,
   onDocKeydown,
   onDocClick,
-} from "./living-chart.js";
+} from "./living-chart.ts";
 import {
   applyVoyage,
   rearmVoyage,
@@ -43,18 +43,43 @@ import {
   voyageLegGeometry,
   voyageSnapToRest,
   syncVersoTrack,
-} from "./voyage.js";
+} from "./voyage.ts";
+import type { PlaceManifest } from "../../render/place-manifest.ts";
+import type { Survey } from "../../render/survey.ts";
+import type { MapType } from "../../terrain/heightfield.ts";
+import type { ClimateBand } from "../../climate/climate.ts";
+import type { StyleName } from "../../render/style.ts";
+import type { ThemeName } from "../../render/layers/field.ts";
 
-const $ = (id) => document.getElementById(id);
-const seedInput = $("seed");
-const styleSel = $("style");
-const typeSel = $("type");
-const bandSel = $("band");
-const themeSel = $("theme");
-const legendChk = $("legend");
-const armsChk = $("arms");
-const landSlider = $("land");
-const coastSlider = $("coast");
+// The window.__vellum* verification hooks assigned at the bottom of this file,
+// typed from what is assigned there.
+declare global {
+  interface Window {
+    __vellumSetRedraftEnabled?: (v: boolean) => void;
+    __vellumUsesWorker?: typeof usesWorker;
+    __vellumRunJob?: typeof runJob;
+    __vellumRunInline?: typeof runInline;
+    __vellumVoyageStepTo?: typeof voyageStepTo;
+    __vellumVoyagePaintAt?: typeof voyagePaintAt;
+    __vellumVoyagePlan?: typeof voyagePlan;
+    __vellumVoyageLog?: typeof voyageLog;
+    __vellumVoyageLegGeometry?: typeof voyageLegGeometry;
+    __vellumZoomTo: (t: ZoomState) => void;
+    __vellumZoomState: () => ZoomState;
+    __vellumRegion?: () => ReturnType<ReturnType<typeof createLodController>["state"]>;
+  }
+}
+
+const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
+const seedInput = $<HTMLInputElement>("seed");
+const styleSel = $<HTMLSelectElement>("style");
+const typeSel = $<HTMLSelectElement>("type");
+const bandSel = $<HTMLSelectElement>("band");
+const themeSel = $<HTMLSelectElement>("theme");
+const legendChk = $<HTMLInputElement>("legend");
+const armsChk = $<HTMLInputElement>("arms");
+const landSlider = $<HTMLInputElement>("land");
+const coastSlider = $<HTMLInputElement>("coast");
 const status = $("status");
 const mapDiv = $("map");
 const mapViewport = $("map-viewport"); // #164: the zoom clipping/gesture box wrapping #map
@@ -62,10 +87,10 @@ const sheetEl = $("sheet");
 const innerEl = $("sheet-inner");
 const caption = $("caption");
 const versoEl = $("verso");
-const versoBtn = $("verso-turn");
-const chronicleChk = $("chronicle");
-const voyageChk = $("voyage");
-const orderLink = $("order-plates"); // #133: "Take to the Print Room", href kept current in draw()
+const versoBtn = $<HTMLButtonElement>("verso-turn");
+const chronicleChk = $<HTMLInputElement>("chronicle");
+const voyageChk = $<HTMLInputElement>("voyage");
+const orderLink = $<HTMLAnchorElement>("order-plates"); // #133: "Take to the Print Room", href kept current in draw()
 const scrubPlayBtn = $("scrub-play");
 const scrubRangeEl = $("scrub-range");
 
@@ -76,17 +101,17 @@ let lastSvg = "";
 let lastTitle = "";
 let lastSubtitle = "";
 let lastSeed = 0;
-let lastManifest = null; // the place manifest of the chart on screen; feeds a voyage toggled on without a redraw
+let lastManifest: PlaceManifest | null = null; // the place manifest of the chart on screen; feeds a voyage toggled on without a redraw
 // #120: the same chart's world facts (land mask + roads), which the voyage router walks.
 // Assigned beside lastManifest, from the SAME draw: a manifest paired with another draw's
 // survey would route this world's ports over that world's roads.
-let lastSurvey = null;
+let lastSurvey: Survey | null = null;
 
 // Sea-level slider (#55) gate. landTouched gates the manual override and the land=
 // hash param; until the user moves the slider, it auto-tracks each world's natural
 // waterline. landDebounce throttles the redraw during a drag.
 let landTouched = false;
-let landDebounce = 0;
+let landDebounce: ReturnType<typeof setTimeout> | 0 = 0;
 
 // #137: the coast slider's gate, sibling of landTouched. False until the visitor
 // moves the slider; until then draw() sends no coastWarp override and re-parks the
@@ -100,7 +125,7 @@ let coastTouched = false;
 // one-shot: draw() rebases home at its top and every draw re-runs syncZoom, so a camera
 // left live here would re-frame the user on every subsequent Draw. Nulled the moment it
 // is applied.
-let pendingCamera = null;
+let pendingCamera: Camera | null = null;
 
 // Monotonic guard. drawGen is bumped by every draw; a draw's own result checks it,
 // so a fresh draw cancels a stale one (the chart that lands must always be the
@@ -111,18 +136,18 @@ let drawGen = 0;
 // `.disabled` for the whole draw round-trip, so this only makes that guard explicit.
 let drawing = false;
 
-function randomSeed() {
+function randomSeed(): number {
   return Math.floor(Math.random() * 0xffffffff);
 }
 
-function prefersReduce() {
+function prefersReduce(): boolean {
   return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 }
 
 // #131: the sheet turn's duration + easing come from /motion.css (the single timing
 // source). Read lazily so the stylesheet is applied, with the ratified fallback if a
 // custom property is unreadable (e.g. the stylesheet has not loaded yet).
-function turnTiming() {
+function turnTiming(): { ms: number; ease: string } {
   const cs = getComputedStyle(document.documentElement);
   const ms = parseFloat(cs.getPropertyValue("--turn")) || 900;
   const ease = cs.getPropertyValue("--ease-turn").trim() || "cubic-bezier(0.62, 0, 0.34, 1)";
@@ -132,7 +157,7 @@ function turnTiming() {
 // #170: the voiced glide's duration, same single-timing-source discipline (lazy, with
 // the token's own value as fallback). The controller reads it per glide, so a stylesheet
 // tweak takes effect without a reload; reduced motion never reaches it.
-function glideMs() {
+function glideMs(): number {
   const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide"));
   return Number.isFinite(v) ? v : 300;
 }
@@ -150,7 +175,7 @@ function glideMs() {
 // svg) so the card counter-scales to a constant, readable size. It is written to the
 // CARD, never to #map: a per-frame non-transform style write on #map re-rasterizes the
 // baked SVG labels and makes them jiggle (only #map's `transform` may change per frame).
-function setCardZoom(k) {
+function setCardZoom(k: number): void {
   const card = document.getElementById("place-card");
   if (!card) return;
   if (k === 1) card.style.removeProperty("--zoom-k");
@@ -194,7 +219,7 @@ const lodController = createLodController({
 // every band (the inset design never rebases) -- read from the STABLE #map-viewport (its
 // client box is the sheet's size at k=1). Guard a zero-size box (before first layout) so the
 // division is finite.
-function cameraNow() {
+function cameraNow(): Camera {
   const W = mapViewport.clientWidth || 1;
   const H = mapViewport.clientHeight || 1;
   return cameraFromTransform(zoomController.getState(), W, H);
@@ -202,7 +227,7 @@ function cameraNow() {
 // #165/#169: the ONE hash writer. Every trigger funnels through here so the hash carries the
 // complete current state, camera included. The camera is world-relative at every band, so it
 // writes straight into the hash; writeHash drops cx/cy/k when the camera is home.
-function syncHash() {
+function syncHash(): void {
   writeHash(hashControls, landTouched, coastTouched, cameraNow());
 }
 // #169: a test seam, ON by default (production). It lets the geometric-zoom e2e (Z1-Z16,
@@ -216,10 +241,10 @@ let redraftEnabled = true;
 // excluded for the same reason as the chronicle: its track is a WORLD-survey overlay (world
 // coordinates, world roads), so a finer regional survey under it would carry a track that no
 // longer follows the roads it describes.
-function regionEligible() {
+function regionEligible(): boolean {
   return redraftEnabled && styleSel.value === "antique" && !chronicleChk.checked && !voyageChk.checked && !isFlipped(sheetEl) && !!lastSvg;
 }
-function onCameraSettle() {
+function onCameraSettle(): void {
   syncHash();
   if (regionEligible()) lodController.onSettle(cameraNow());
 }
@@ -228,7 +253,7 @@ window.__vellumSetRedraftEnabled = (v) => { redraftEnabled = !!v; };
 // semantic LOD stays antique-only, but that is Sub 8, not here). So the controller attaches
 // unconditionally; the reset-home-on-world-change policy lives in draw()/the verso + chronicle
 // handlers, not here, so there is no longer a style branch that could strand a magnified sheet.
-function syncZoom() {
+function syncZoom(): void {
   zoomController.attach();
   // The overlay (and #place-card) was just rebuilt by this draw; re-publish the current
   // zoom onto the fresh card so a card shown before the next gesture is counter-scaled.
@@ -238,7 +263,7 @@ function syncZoom() {
 // opts.quiet suppresses the arrival ceremony, used only by the sea-level drag's
 // throttled mid-drag redraws, so the coastline does not perpetually redraw itself
 // while the slider moves. The release (change) redraw runs the full ceremony.
-function draw(opts) {
+function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
   const quiet = !!(opts && opts.quiet);
   const isTurn = !!(opts && opts.turn); // a style change turns the sheet (#131)
   const seed = Number(seedInput.value) >>> 0;
@@ -268,9 +293,9 @@ function draw(opts) {
   // link so "Take to the Print Room" (and a copied link / middle-click) always opens
   // the CURRENT world, never the one from page load.
   if (orderLink) orderLink.href = "../print-room/" + (location.hash || "");
-  const overrides = {};
-  if (typeSel.value) overrides.mapType = typeSel.value;
-  if (bandSel.value) overrides.band = bandSel.value;
+  const overrides: { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number } = {};
+  if (typeSel.value) overrides.mapType = typeSel.value as MapType;
+  if (bandSel.value) overrides.band = bandSel.value as ClimateBand;
   if (landTouched) overrides.landFraction = sliderToLand(landSlider.value);
   else syncAutoSlider(seed, overrides);
   updateLandReadout();
@@ -280,8 +305,8 @@ function draw(opts) {
   if (coastTouched) overrides.coastWarp = sliderToCoast(coastSlider.value);
   else parkCoastDefault();
   updateCoastReadout();
-  const style = styleSel.value;
-  const theme = themeSel.value;
+  const style = styleSel.value as StyleName;
+  const theme = themeSel.value as ThemeName | "";
   const legend = legendChk.checked;
   const arms = armsChk.checked;
   // Whether this draw TURNS is decided at the swap, while the outgoing chart is still
@@ -396,7 +421,7 @@ function draw(opts) {
     });
 }
 
-$("draw").addEventListener("click", draw);
+$("draw").addEventListener("click", draw as unknown as EventListener);
 $("random").addEventListener("click", () => {
   seedInput.value = String(randomSeed());
   landTouched = false;
@@ -458,7 +483,7 @@ seedInput.addEventListener("keydown", (e) => {
   }
 });
 for (const sel of [bandSel, themeSel, legendChk, armsChk]) {
-  sel.addEventListener("change", draw);
+  sel.addEventListener("change", draw as unknown as EventListener);
 }
 // #131: a style change re-dresses the SAME world, so it turns the sheet over rather
 // than settling. Every other control draws a new/changed world and settles (#127).
@@ -558,7 +583,7 @@ const PAN_FRACTION = 0.15;
 // leaf settles is clean. The programmatic homes (verso, chronicle, voyage, draw) keep
 // their INSTANT homeToWorld() + reset() + explicit syncHash: those ceremonies own the
 // sheet and need the bare world chart synchronously.
-function goHomeVoiced() {
+function goHomeVoiced(): void {
   lodController.easeHome();
   zoomController.glideHome(syncHash);
 }

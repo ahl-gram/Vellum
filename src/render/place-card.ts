@@ -6,7 +6,7 @@ import type { HistoricalEvent } from "../society/history.ts";
  * no DOM, no RNG. Deliberately NOT createLoreWriter, whose prose depends on call
  * order and its own rng and would silently disagree with the bound-atlas
  * gazetteer for the same town (#53). The DOM overlay that renders these cards
- * lives in public/explorer/app.js.
+ * lives in src/site/explorer/app.ts.
  */
 
 export type PlaceCard = {

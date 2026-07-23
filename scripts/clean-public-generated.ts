@@ -17,7 +17,9 @@ import { fileURLToPath } from "node:url";
  */
 
 // Relative to the cleaned root: the gitignored generated set under public/
-// (runtime trees from Sub 3 #204, showcases from Sub 4 #205).
+// (runtime trees from Sub 3 #204, showcases from Sub 4 #205). explorer/engine
+// is a TOMBSTONE since Sub 9 (#260) retired the tsc emit: nothing regenerates
+// it, but cleaning it keeps a stale pre-#260 local tree out of the artifact.
 export const GENERATED_SUBTREES: ReadonlyArray<string> = [
   "explorer/engine",
   "explorer/app.bundle.js",

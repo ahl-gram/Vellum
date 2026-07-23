@@ -15,6 +15,19 @@
 // is unit-testable under Node; renderVerso / the flip helpers touch the DOM only
 // inside their bodies and are proven by the e2e end-states + a CDP probe.
 
+import type { PlaceManifest } from "../../render/place-manifest.ts";
+
+export interface DocketFields {
+  /** The world's seed (the chart number). */
+  seed: number;
+  /** The chart's title. */
+  title: string;
+  /** The world's present year. */
+  presentYear: number;
+  /** The capital's name, when the world has one (omitted otherwise). */
+  capital?: string;
+}
+
 /**
  * The docket line stamped along the fold: chart number, title, present year, and the
  * capital's name when the world has one. Pure so it is unit-testable; the rest of the
@@ -22,7 +35,7 @@
  * @param {{seed:number, title:string, presentYear:number, capital?:string}} o
  * @returns {string}
  */
-export function buildDocket({ seed, title, presentYear, capital }) {
+export function buildDocket({ seed, title, presentYear, capital }: DocketFields): string {
   const parts = [`CHART № ${seed}`, title, `Year ${presentYear}`];
   if (capital) parts.push(capital);
   return parts.join(" · ");
@@ -34,14 +47,14 @@ export function buildDocket({ seed, title, presentYear, capital }) {
 // tree. Built with DOM nodes, not markup, so the module has no HTML-injection sink.
 const SVGNS = "http://www.w3.org/2000/svg";
 
-function svgEl(tag, attrs, text) {
+function svgEl(tag: string, attrs: Record<string, string | number>, text?: string): SVGElement {
   const el = document.createElementNS(SVGNS, tag);
   for (const k in attrs) el.setAttribute(k, String(attrs[k]));
   if (text != null) el.textContent = text;
   return el;
 }
 
-function buildStamp() {
+function buildStamp(): SVGElement {
   const svg = svgEl("svg", {
     class: "verso-stamp", viewBox: "0 0 200 120", "aria-hidden": "true", focusable: "false",
   });
@@ -69,7 +82,10 @@ let ghostUrl = "";
  * @param {HTMLElement} versoEl the #verso back face
  * @param {{svg:string, docket:string, surveyor:string}} o
  */
-export function renderVerso(versoEl, { svg, docket, surveyor }) {
+export function renderVerso(
+  versoEl: HTMLElement,
+  { svg, docket, surveyor }: { svg: string; docket: string; surveyor: string },
+): void {
   if (ghostUrl) { try { URL.revokeObjectURL(ghostUrl); } catch {} ghostUrl = ""; }
   ghostUrl = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
   const ghost = document.createElement("img");
@@ -95,7 +111,11 @@ export function renderVerso(versoEl, { svg, docket, surveyor }) {
  * @param {{svg:string, title:string, subtitle:string, manifest:{presentYear:number, places:Array<{kind:string,name:string}>}}} res
  * @param {number} seed
  */
-export function rebuildVerso(versoEl, res, seed) {
+export function rebuildVerso(
+  versoEl: HTMLElement,
+  res: { svg: string; title: string; subtitle: string; manifest: PlaceManifest },
+  seed: number,
+): void {
   const capital = res.manifest.places.find((p) => p.kind === "capital");
   renderVerso(versoEl, {
     svg: res.svg,
@@ -130,7 +150,7 @@ export function rebuildVerso(versoEl, res, seed) {
  * @param {string} points the recto track's `points` attribute, verbatim
  * @param {string} viewBox the recto overlay's viewBox, so the two faces share a space
  */
-export function paintVersoTrack(versoEl, points, viewBox) {
+export function paintVersoTrack(versoEl: HTMLElement, points: string, viewBox: string): void {
   if (!points) { clearVersoTrack(versoEl); return; }
   let layer = versoEl.querySelector(".verso-track-layer");
   if (!layer) {
@@ -144,17 +164,17 @@ export function paintVersoTrack(versoEl, points, viewBox) {
     else versoEl.append(layer);
   }
   layer.setAttribute("viewBox", viewBox);
-  layer.firstChild.setAttribute("points", points);
+  (layer.firstChild as SVGElement).setAttribute("points", points);
 }
 
 /** Remove the bleed-through track from the verso. Safe when there is none. */
-export function clearVersoTrack(versoEl) {
+export function clearVersoTrack(versoEl: HTMLElement): void {
   const layer = versoEl.querySelector(".verso-track-layer");
   if (layer) layer.remove();
 }
 
 /** Whether the sheet is currently resting on (or turning toward) its verso. */
-export function isFlipped(sheetEl) {
+export function isFlipped(sheetEl: HTMLElement): boolean {
   return sheetEl.classList.contains("versoed");
 }
 
@@ -171,13 +191,13 @@ export function isFlipped(sheetEl) {
  * @param {HTMLElement} sheetEl the #sheet wrapper
  * @returns {boolean} true if now showing the verso
  */
-export function toggleFlip(sheetEl) {
+export function toggleFlip(sheetEl: HTMLElement): boolean {
   if (isFlipped(sheetEl)) { flipToRecto(sheetEl); return false; }
   flipToVerso(sheetEl);
   return true;
 }
 
-function flipToVerso(sheetEl) {
+function flipToVerso(sheetEl: HTMLElement): void {
   sheetEl.classList.add("flip3d");
   // Force a reflow so .flip3d's flat (rotateY0) state commits BEFORE the rotation
   // target, guaranteeing the transition runs (a same-tick class pair can otherwise be
@@ -187,10 +207,10 @@ function flipToVerso(sheetEl) {
   sheetEl.classList.add("versoed");
 }
 
-function flipToRecto(sheetEl) {
-  const inner = sheetEl.querySelector(".sheet-inner");
+function flipToRecto(sheetEl: HTMLElement): void {
+  const inner = sheetEl.querySelector(".sheet-inner") as HTMLElement;
   let settled = false;
-  const settle = () => {
+  const settle = (): void => {
     if (settled) return;
     settled = true;
     inner.removeEventListener("transitionend", onEnd);
@@ -198,7 +218,7 @@ function flipToRecto(sheetEl) {
     // re-flip may have put us back on the verso while this turn-back was in flight.
     if (!sheetEl.classList.contains("versoed")) sheetEl.classList.remove("flip3d");
   };
-  const onEnd = (e) => {
+  const onEnd = (e: TransitionEvent): void => {
     if (e.target === inner && e.propertyName === "transform") settle();
   };
   inner.addEventListener("transitionend", onEnd);

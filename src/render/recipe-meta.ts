@@ -26,9 +26,9 @@ export type RegionRecipe = {
  * given recipe stays byte-identical.
  */
 
-// Kept local rather than in a shared src/version.ts: tsconfig.browser.json's
-// include is per-subdirectory with no top-level src/*.ts glob, and src/render
-// is already in the browser engine set.
+// Kept local rather than in a shared src/version.ts: src/render is part of the
+// browser-bundled engine graph (Vite compiles it into the app bundles since
+// #260), and a top-level version module would widen that graph for one string.
 export const ENGINE_VERSION = "0.1.0";
 
 export function recipeAttrs(

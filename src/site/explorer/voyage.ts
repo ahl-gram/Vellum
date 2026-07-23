@@ -19,9 +19,14 @@
 // arc length, tilt, facing) lives in the engine under src/render/, so this file is only
 // projection, DOM, and animation. Download SVG blobs the pristine chart string, never
 // this overlay, so the exported plate never learns it was animated.
-import { buildVoyagePlan, frameAt } from "./engine/render/voyage.js";
-import { routeVoyage } from "./engine/render/voyage-route.js";
-import { createProjection } from "./engine/render/transform.js";
+import {
+  buildVoyagePlan,
+  frameAt,
+  type VoyageFrame,
+  type VoyagePlan,
+} from "../../render/voyage.ts";
+import { routeVoyage, type LegMode } from "../../render/voyage-route.ts";
+import { createProjection } from "../../render/transform.ts";
 import {
   buildLegGeometry,
   pointAtDistance,
@@ -30,13 +35,19 @@ import {
   resolveFacing,
   netFacing,
   legDurations,
-} from "./engine/render/voyage-geometry.js";
-import { paintVersoTrack, clearVersoTrack } from "./verso.js";
-import { buildLogPanel, revealLog, hideLog, logSnapshot } from "./voyage-log-panel.js";
+  type Facing,
+  type LegGeometry,
+} from "../../render/voyage-geometry.ts";
+import { paintVersoTrack, clearVersoTrack } from "./verso.ts";
+import { buildLogPanel, revealLog, hideLog, logSnapshot } from "./voyage-log-panel.ts";
+import type { PlaceManifest } from "../../render/place-manifest.ts";
+import type { Survey } from "../../render/survey.ts";
+import type { VoyageLog } from "../../world/voyage-log.ts";
+import type { Pt } from "../../core/rdp.ts";
 
-const mapDiv = document.getElementById("map");
-const versoEl = document.getElementById("verso");
-const statusEl = document.getElementById("status");
+const mapDiv = document.getElementById("map") as HTMLElement;
+const versoEl = document.getElementById("verso") as HTMLElement;
+const statusEl = document.getElementById("status") as HTMLElement;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 // The sweep no longer runs a fixed duration split equally: v1 did that, so a long
@@ -44,13 +55,18 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 // length (legDurations), anchored to the near-town speed, so the whole sweep grows with
 // the world (capped inside legDurations). The pacing knobs live in voyage-geometry.js.
 
+// One drawn piece of a mark: a path (d) or a circle (cx, cy, r), optionally classed.
+type MarkPart =
+  | { readonly d: string; readonly circle?: undefined; readonly cls?: string }
+  | { readonly circle: readonly [number, number, number]; readonly d?: undefined; readonly cls?: string };
+
 // Both marks are drawn in PROFILE, pointing +x (bow / muzzle east), with the origin on
 // their ground contact line: the ship's waterline, the horse's hooves. So the mark stands
 // ON its track point the way a mountain stands on its own, and the tilt pivots about that
 // contact point. Sized in viewBox pixels against the 1500px chart.
 // A cog under sail: hull, stern castle, standing rigging, a square sail bellying east,
 // and a pennant. About 40 units wide against a chart whose peaks run 18 to 20.
-const SHIP_PARTS = [
+const SHIP_PARTS: ReadonlyArray<MarkPart> = [
   { d: "M -17 -5 Q -19 -1 -13 4 L 11 4 Q 17 1 17 -5 Z" },
   { d: "M -17 -5 L -17 -10 L -11 -10 L -11 -5 Z" },
   { d: "M -1 -5 L -1 -23 M -9 -19 L 8 -19 M 17 -3 L 21 -6", cls: "rig" },
@@ -60,7 +76,7 @@ const SHIP_PARTS = [
 // A horse walking east under a cloaked, hatted rider, in profile with the hooves on
 // the baseline: a flowing tail, the barrel, the arched neck rising to a small eared
 // head, four legs mid-stride, then the rider (torso, hatted head, hat brim, rein).
-const RIDER_PARTS = [
+const RIDER_PARTS: ReadonlyArray<MarkPart> = [
   { d: "M -13 -11 Q -18 -10 -21 -4", cls: "tail" },
   { d: "M -13 -11 Q -14 -14 -10 -14 L 4 -14 Q 8 -14 9 -11 L 9 -8 Q 8 -6 3 -6 L -8 -6 Q -12 -6 -13 -11 Z" },
   { d: "M 5 -13 Q 9 -15 12 -21 Q 13 -24 16 -24 L 19 -22 Q 17 -20 15 -20 Q 14 -18 13 -15 Q 11 -12 6 -12 Z" },
@@ -72,15 +88,41 @@ const RIDER_PARTS = [
   { d: "M 2 -17 Q 7 -18 11 -18", cls: "detail" },
 ];
 
+// A routed leg as the overlay holds it: the router's mode plus the projected
+// (chart-pixel) polyline with its precomputed arc lengths.
+interface SessionLeg {
+  mode: LegMode;
+  geom: LegGeometry;
+}
+
+interface Session {
+  plan: VoyagePlan;
+  legs: SessionLeg[];
+  log: VoyageLog;
+  logRows: HTMLLIElement[];
+  cumMs: number[];
+  totalMs: number;
+  originPt: Pt;
+  svg: SVGSVGElement;
+  trackEl: SVGPolylineElement;
+  shipG: SVGGElement;
+  riderG: SVGGElement;
+  activeMark: SVGGElement | null;
+  shownMode: LegMode | "";
+  facing: Facing;
+  rafId: number;
+  shownArrived: number;
+}
+
 // The current voyage session, or null when the toggle is off. Rebuilt every draw
 // because mapDiv.innerHTML wipes #map's children (the overlay among them).
-let voyage = null;
+let voyage: Session | null = null;
 
-function prefersReduce() {
+function prefersReduce(): boolean {
   return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 }
 
-export function cancelVoyageRaf() {
+export function cancelVoyageRaf(): void {
   if (voyage && voyage.rafId) {
     cancelAnimationFrame(voyage.rafId);
     voyage.rafId = 0;
@@ -90,12 +132,12 @@ export function cancelVoyageRaf() {
 // Drop the session after a redraw with the toggle off. mapDiv.innerHTML already removed
 // the overlay with the old chart, but the #121 margin log is a SIBLING of #map, so it
 // survives that wipe and must be hidden explicitly.
-export function clearVoyage() {
+export function clearVoyage(): void {
   hideLog();
   voyage = null;
 }
 
-function makeMark(className, parts) {
+function makeMark(className: string, parts: ReadonlyArray<MarkPart>): SVGGElement {
   const g = document.createElementNS(SVG_NS, "g");
   g.setAttribute("class", className);
   for (const part of parts) {
@@ -116,7 +158,12 @@ function makeMark(className, parts) {
 
 // Build the plan + routed geometry + overlay for a manifest and append it into #map.
 // Returns false when there is nothing to survey (no capital), so the caller can bail.
-function buildVoyage(manifest, survey, seed, subtitle) {
+function buildVoyage(
+  manifest: PlaceManifest | null,
+  survey: Survey | null,
+  seed: number,
+  subtitle: string,
+): boolean {
   if (!manifest || !manifest.places || !survey) return false;
   const plan = buildVoyagePlan(manifest.places, manifest.presentYear);
   if (!plan.ports.length) return false;
@@ -128,7 +175,7 @@ function buildVoyage(manifest, survey, seed, subtitle) {
   // map-renderer.ts exactly; drift here would slide the track off the drawn roads.
   const wPx = manifest.widthPx;
   const proj = createProjection(survey.gridW, survey.gridH, wPx, Math.round(wPx * 0.045));
-  const legs = routed.map((leg) => ({
+  const legs: SessionLeg[] = routed.map((leg) => ({
     mode: leg.mode,
     geom: buildLegGeometry(leg.points.map((p) => ({ x: proj.px(p.x), y: proj.py(p.y) }))),
   }));
@@ -142,7 +189,7 @@ function buildVoyage(manifest, survey, seed, subtitle) {
   const totalMs = cumMs[cumMs.length - 1];
 
   const byIdx = new Map(manifest.places.map((p) => [p.idx, p]));
-  const origin = byIdx.get(plan.ports[0].idx);
+  const origin = byIdx.get(plan.ports[0].idx)!;
   const originPt = { x: proj.px(origin.gx), y: proj.py(origin.gy) };
 
   // #121 The margin log. Each port carries the mode of the leg that ARRIVED at it (the
@@ -150,7 +197,7 @@ function buildVoyage(manifest, survey, seed, subtitle) {
   // setting-out. The richer, seed-forked prose lives in the engine (world/voyage-log.js);
   // the plan's own port.logLine is the pure Sub-1 line and is no longer displayed.
   const logPorts = plan.ports.map((port, i) => {
-    const pm = byIdx.get(port.idx);
+    const pm = byIdx.get(port.idx)!;
     return {
       idx: pm.idx, name: pm.name, kind: pm.kind, founded: pm.founded,
       arrivalMode: i === 0 ? null : routed[i - 1].mode,
@@ -197,13 +244,13 @@ function buildVoyage(manifest, survey, seed, subtitle) {
   return true;
 }
 
-const fmt = (p) => `${p.x},${p.y}`;
+const fmt = (p: Pt) => `${p.x},${p.y}`;
 
 /** The track drawn so far: every vertex of every completed leg, plus the partial one. */
-function trackString(session, f) {
+function trackString(session: Session, f: VoyageFrame): string {
   if (session.legs.length === 0) return fmt(session.originPt);
-  const out = [];
-  const push = (p) => {
+  const out: string[] = [];
+  const push = (p: Pt) => {
     const s = fmt(p);
     if (out[out.length - 1] !== s) out.push(s); // a leg starts where the last one ended
   };
@@ -218,7 +265,7 @@ function trackString(session, f) {
 }
 
 /** Show the glyph this leg's mode calls for. Toggled only on change, never per frame. */
-function showMark(session, mode) {
+function showMark(session: Session, mode: LegMode): void {
   if (mode === session.shownMode) return;
   const useShip = mode === "sea";
   // The SVG `display` presentation attribute, not [hidden]: SVG elements do not honour
@@ -234,11 +281,11 @@ function showMark(session, mode) {
 // margin-log rows reached so far. On the LIVE completion (postLog) it posts the one
 // #status summary. A resting re-arm after a redraw paints silently (postLog false): it
 // still brightens the log, but never stomps the "" the draw's own settle signal depends on.
-function paintFrame(session, t, postLog = true) {
+function paintFrame(session: Session, t: number, postLog = true): void {
   const legCount = session.legs.length;
   const f = frameAt(legCount, t);
 
-  let pos;
+  let pos: Pt;
   let tiltDeg = 0;
   if (legCount <= 0) {
     pos = session.originPt;
@@ -259,7 +306,7 @@ function paintFrame(session, t, postLog = true) {
   session.trackEl.setAttribute("points", trackString(session, f));
   // scale() before rotate(): the mirror negates x and preserves y, so one unsigned tilt
   // lifts the bow whether the mark faces east or west. See voyage-geometry.js tiltFor.
-  session.activeMark.setAttribute(
+  session.activeMark!.setAttribute(
     "transform",
     `translate(${pos.x} ${pos.y}) scale(${session.facing} 1) rotate(${tiltDeg})`,
   );
@@ -294,12 +341,16 @@ function paintFrame(session, t, postLog = true) {
 //
 // It posts nothing to #status, so it is safe inside a settle (the draw's settle signal and
 // the e2e waitSettled both key on #status === "").
-export function syncVersoTrack() {
+export function syncVersoTrack(): void {
   if (!voyage) { clearVersoTrack(versoEl); return; }
-  paintVersoTrack(versoEl, voyage.trackEl.getAttribute("points"), voyage.svg.getAttribute("viewBox"));
+  paintVersoTrack(
+    versoEl,
+    voyage.trackEl.getAttribute("points") as string,
+    voyage.svg.getAttribute("viewBox") as string,
+  );
 }
 
-function play(session) {
+function play(session: Session): void {
   const legCount = session.legs.length;
   // A one-port survey (no legs) has nothing to sweep: rest at the origin at once.
   if (legCount <= 0 || session.totalMs <= 0) {
@@ -308,7 +359,7 @@ function play(session) {
     return;
   }
   const begin = performance.now();
-  const tick = (now) => {
+  const tick = (now: number) => {
     if (!voyage || voyage !== session || !session.rafId) return; // superseded or cancelled
     const elapsed = now - begin;
     if (elapsed >= session.totalMs) {
@@ -339,26 +390,38 @@ function play(session) {
 // During a sweep the verso carries NO track: exitVoyage cleared it above, and it is
 // repainted when the survey comes to rest. A flip mid-sweep snaps to rest first, so the
 // back face never turns into view empty.
-export function applyVoyage(manifest, survey, seed, subtitle, opts = {}) {
+export function applyVoyage(
+  manifest: PlaceManifest | null,
+  survey: Survey | null,
+  seed: number,
+  subtitle: string,
+  opts: { skipSweep?: boolean } = {},
+): void {
   exitVoyage();
   if (!buildVoyage(manifest, survey, seed, subtitle)) return;
   if (opts.skipSweep || prefersReduce()) {
-    paintFrame(voyage, 1);
+    paintFrame(voyage!, 1);
     syncVersoTrack();
     return;
   }
-  paintFrame(voyage, 0);
-  play(voyage);
+  paintFrame(voyage!, 0);
+  play(voyage!);
 }
 
 // Re-arm after a redraw while the toggle stayed on: rebuild against the new world
 // and rest on the full track. Only an explicit toggle-ON animates the sweep, so a
 // style turn or a sea-level nudge never replays the whole voyage.
-export function rearmVoyage(manifest, survey, seed, subtitle, opts = {}) {
+export function rearmVoyage(
+  manifest: PlaceManifest | null,
+  survey: Survey | null,
+  seed: number,
+  subtitle: string,
+  opts: { quiet?: boolean } = {},
+): void {
   cancelVoyageRaf();
   voyage = null;
   if (!buildVoyage(manifest, survey, seed, subtitle)) { hideLog(); return; }
-  paintFrame(voyage, 1, false); // silent: the draw's settle needs #status to stay ""
+  paintFrame(voyage!, 1, false); // silent: the draw's settle needs #status to stay ""
   // #174: repaint the back face too. renderVerso's replaceChildren wipes the verso track
   // on every draw, exactly as mapDiv.innerHTML wipes the recto overlay, so BOTH faces have
   // to be rebuilt. In app.js's settle path rebuildVerso runs AFTER this and wipes it again,
@@ -375,7 +438,7 @@ export function rearmVoyage(manifest, survey, seed, subtitle, opts = {}) {
 
 // Toggle voyage OFF: cancel the sweep, remove the overlay, and clear the log line so
 // #map is byte-identical to today (only the place overlay remains).
-export function exitVoyage() {
+export function exitVoyage(): void {
   cancelVoyageRaf();
   const existing = mapDiv.querySelector(".voyage-overlay");
   if (existing) existing.remove();
@@ -393,7 +456,7 @@ export function exitVoyage() {
 // paintFrame's shownArrived diff fires exactly ONCE here, so #status posts only the final
 // port's line, never a burst of every port the snap skipped. No-op when not voyaging, and
 // a no-op on an already-resting voyage (no diff, so nothing is posted).
-export function voyageSnapToRest() {
+export function voyageSnapToRest(): void {
   if (!voyage) return;
   cancelVoyageRaf();
   paintFrame(voyage, 1);
@@ -403,7 +466,7 @@ export function voyageSnapToRest() {
 // Deterministic e2e hook: jump the sweep to the mark's arrival at port N (the origin
 // is port 0), mirroring how the scrubber is driven through its slider rather than its
 // Play timer. No-op when not voyaging.
-export function voyageStepTo(portIndex) {
+export function voyageStepTo(portIndex: number): void {
   if (!voyage) return;
   cancelVoyageRaf();
   const legCount = voyage.legs.length;
@@ -417,7 +480,7 @@ export function voyageStepTo(portIndex) {
 // port (legT = 0), so it can never sample a MID-leg frame, which is exactly where the
 // tilt varies and where a switchbacking road would flicker the rider's facing. Like
 // voyageStepTo this lands the survey at a resting frame, never inside the rAF loop.
-export function voyagePaintAt(t) {
+export function voyagePaintAt(t: number): void {
   if (!voyage) return;
   cancelVoyageRaf();
   paintFrame(voyage, t);
@@ -430,7 +493,7 @@ export function voyagePlan() {
   if (!voyage) return null;
   return {
     ports: voyage.plan.ports,
-    legs: voyage.plan.legs.map((leg, i) => ({ ...leg, mode: voyage.legs[i].mode })),
+    legs: voyage.plan.legs.map((leg, i) => ({ ...leg, mode: voyage!.legs[i].mode })),
   };
 }
 

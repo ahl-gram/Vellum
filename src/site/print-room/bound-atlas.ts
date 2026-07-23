@@ -10,9 +10,40 @@
 // module's own ./engine/... imports resolve against /explorer/, not /print-room/ (a bare
 // relative path would 404). The shared render worker is the SAME singleton app.js
 // connects via initWorker; importing runJob here reuses it.
-import { runJob } from "/explorer/worker-client.js";
-import { escapeXml } from "/explorer/engine/render/svg.js";
-import { ATLAS_SHEET_CSS, atlasDocument, svgToDataUri } from "/explorer/engine/atlas/document.js";
+import { runJob } from "../explorer/worker-client.ts";
+import { escapeXml } from "../../render/svg.ts";
+import { ATLAS_SHEET_CSS, atlasDocument, svgToDataUri } from "../../atlas/document.ts";
+import type { AtlasDocumentData } from "../../atlas/document.ts";
+import type { StyleName } from "../../render/style.ts";
+import type { ThemeName } from "../../render/layers/field.ts";
+import type { WorldRecipe } from "../../world/types.ts";
+
+// The world snapshot a bind reproduces: app.ts's posterBasis shape (seed, style, and the
+// render options of the proof on screen), handed in lazily via initBoundAtlas.
+export type PosterBasis = {
+  seed: number;
+  style: StyleName;
+  overrides: Partial<WorldRecipe>;
+  legend: boolean;
+  arms: boolean;
+  theme: ThemeName | undefined;
+};
+
+// The e2e observation hooks this module hangs on window, typed once here.
+declare global {
+  interface Window {
+    __vellumBoundAtlas?: { seed: number; title: string; figures: number };
+    __vellumLastAtlasDownload?: {
+      filename: string;
+      size: number;
+      dataUris: number;
+      hasBlobUrl: boolean;
+      hasExternalCss: boolean;
+      title: string;
+    };
+    __vellumPrintAtlas?: () => void;
+  }
+}
 
 // Inject the shared plate/table/banner CSS once (the same single source the standalone
 // atlas draws from). #pr-atlas carries the .atlas-sheet class in the markup.
@@ -23,24 +54,24 @@ if (!document.getElementById("atlas-sheet-css")) {
   document.head.appendChild(style);
 }
 
-const $ = (id) => document.getElementById(id);
-const bindBtn = $("pr-bind");
-const printBtn = $("pr-print");
-const downloadBtn = $("pr-download");
-const hideBtn = $("pr-hide");
-const atlasDiv = $("pr-atlas");
-const status = $("pr-bound-status");
+const $ = (id: string) => document.getElementById(id);
+const bindBtn = $("pr-bind") as HTMLButtonElement;
+const printBtn = $("pr-print") as HTMLButtonElement;
+const downloadBtn = $("pr-download") as HTMLButtonElement;
+const hideBtn = $("pr-hide") as HTMLButtonElement;
+const atlasDiv = $("pr-atlas") as HTMLElement;
+const status = $("pr-bound-status") as HTMLElement;
 
-let getBasis = () => null; // set by initBoundAtlas; reads the current proof's world
-let atlasUrls = []; // blob URLs for the inline preview plates, revoked on recompose
-let lastAtlas = null; // the last successfully composed atlas (serializable), for the download
+let getBasis: () => PosterBasis | null = () => null; // set by initBoundAtlas; reads the current proof's world
+let atlasUrls: string[] = []; // blob URLs for the inline preview plates, revoked on recompose
+let lastAtlas: AtlasDocumentData | null = null; // the last successfully composed atlas (serializable), for the download
 // Monotonic guard: a redraw (clearBoundAtlas) or a newer bind invalidates an in-flight
 // bind, so a slow compose can never inject an atlas that disagrees with the proof.
 let bindGen = 0;
 let binding = false;
 
 // The delivery actions (Print, Download, Hide) come alive together once an atlas is bound.
-function setDeliveryEnabled(on) {
+function setDeliveryEnabled(on: boolean): void {
   printBtn.disabled = !on;
   downloadBtn.disabled = !on;
   hideBtn.disabled = !on;
@@ -49,7 +80,7 @@ function setDeliveryEnabled(on) {
 // Tear down the current bound atlas: release its preview blob URLs, empty the sheet, drop the
 // delivery buttons, and invalidate any in-flight bind (bindGen++). Shared by the two callers
 // below, which differ only in what they do to the Bind button.
-function resetBoundAtlas() {
+function resetBoundAtlas(): void {
   bindGen++;
   for (const url of atlasUrls) URL.revokeObjectURL(url);
   atlasUrls = [];
@@ -66,7 +97,7 @@ function resetBoundAtlas() {
 // and survive the bindGen guard (the new proof lands without bumping bindGen), leaving the
 // bound sheet disagreeing with the on-screen proof. enableBind re-enables it when the new
 // proof settles (mirrors the Explorer's Bind, disabled for the whole draw round-trip).
-export function clearBoundAtlas() {
+export function clearBoundAtlas(): void {
   resetBoundAtlas();
   bindBtn.disabled = true;
 }
@@ -74,17 +105,17 @@ export function clearBoundAtlas() {
 // The Hide button: dismiss the bound atlas after a look, but keep Bind enabled since the proof
 // on the desk is unchanged and can be bound again. (#136 redesign: the atlas is nice to see
 // but should be dismissable so it does not dominate the page.)
-function hideAtlas() {
+function hideAtlas(): void {
   resetBoundAtlas();
   bindBtn.disabled = false;
 }
 
 // A proof landed: a world is available to bind. Enable the counter's Bind button.
-export function enableBind() {
+export function enableBind(): void {
   bindBtn.disabled = false;
 }
 
-function plateFigure(svg, caption, cls = "") {
+function plateFigure(svg: string, caption: string, cls = ""): string {
   const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
   atlasUrls.push(url);
   const c = escapeXml(caption);
@@ -106,7 +137,7 @@ function plateFigure(svg, caption, cls = "") {
 // no user-controlled string reaches here. Captions, the title, and the subtitle are
 // derived from the deterministic name generator, and are escapeXml'd besides; the plate
 // SVGs and the composer's banner/chronicle/gazetteer fragments are trusted engine output.
-function renderBoundAtlas(atlas) {
+function renderBoundAtlas(atlas: AtlasDocumentData): void {
   // The title header and the hero plate carry .print-only: on screen they duplicate the proof
   // shown right above, so index.css hides them; print reveals them for a complete standalone
   // atlas. They stay in the DOM so Print (which prints #pr-atlas) still includes them; Download
@@ -132,7 +163,7 @@ ${atlas.gazetteerHtml}`;
 // Compose the atlas of the current proof off-thread and lay it out. Snapshots the basis
 // synchronously (a style change could redraw mid-compose), guards against supersession,
 // and revokes the previous preview's blobs before drawing the new one.
-function bindAtlas() {
+function bindAtlas(): void {
   const basis = getBasis();
   if (!basis || binding) return;
   const myGen = ++bindGen;
@@ -178,7 +209,7 @@ function bindAtlas() {
 
 // Print the bound atlas to PDF via the browser. The @media print stylesheet (index.css,
 // scoped body.has-atlas) hides all page chrome and breaks one plate per page.
-function printAtlas() {
+function printAtlas(): void {
   if (!lastAtlas) return;
   window.print();
 }
@@ -186,7 +217,7 @@ function printAtlas() {
 // Build the self-contained document and hand it over as a download. Every plate is inlined
 // as a base64 data URI (svgToDataUri), so the file carries no external references and opens
 // offline. Expect ~20MB; the UI copy says so. The download string never enters the DOM.
-function downloadAtlas() {
+function downloadAtlas(): void {
   if (!lastAtlas) return;
   const html = atlasDocument(lastAtlas, (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
   const blob = new Blob([html], { type: "text/html" });
@@ -210,7 +241,7 @@ function downloadAtlas() {
 
 // Wire the counter. getBasisFn returns the current proof's world snapshot (app.js's
 // posterBasis) at click time, so a bind reproduces exactly the sheet on screen.
-export function initBoundAtlas(getBasisFn) {
+export function initBoundAtlas(getBasisFn: () => PosterBasis | null): void {
   getBasis = getBasisFn;
   bindBtn.addEventListener("click", bindAtlas);
   printBtn.addEventListener("click", printAtlas);

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { dryInNames } from "../../public/explorer/redraft-plan.js";
+import { dryInNames } from "../../src/site/explorer/redraft-plan.ts";
 
 // Sub 9 (#170) Ceremony: the redraft dries in ONLY the names the finer sheet labels
 // that the outgoing composition (world sheet + any prior inset) did not. Persisting

@@ -163,20 +163,22 @@ attribution required.
 The repository is two things: a dependency-light world engine, and the Astro
 site that serves it.
 
-- **The engine** (`src/`) has zero runtime dependencies. Node 24+ runs its
-  TypeScript directly (`erasableSyntaxOnly`), no build step, and the CLI and
-  tests run the same way.
+- **The engine** (the `src/` world/render/atlas tree) has zero runtime
+  dependencies. Node 24+ runs its TypeScript directly (`erasableSyntaxOnly`),
+  no build step, and the CLI and tests run the same way.
 - **The site** takes dependencies where they earn their keep. All six pages
   (home, FAQ, glossary, Explorer, Print Room, Seed of the Day) are Astro pages
   rendered through one shared layout (`src/pages/` + `src/layouts/`); the app
-  surfaces' hand-authored JS/CSS is served verbatim from `public/`. One
-  bundler, Vite, bundles all three app entries and the shared render worker,
-  which is where the runtime deps (`d3-selection`, `d3-transition`, `d3-zoom`)
-  ship. Dev deps: `astro`, `typescript`, `@types/node`, `vite`.
+  surfaces' code is TypeScript in `src/site/`, one language with the engine it
+  imports. One bundler, Vite, compiles the app and engine graph together into
+  the three app entries and the shared render worker, which is where the
+  runtime deps (`d3-selection`, `d3-transition`, `d3-zoom`) ship. `public/`
+  holds only static assets (goldens, fonts, per-page CSS, favicon). Dev deps:
+  `astro`, `typescript`, `@types/node`, `@types/d3-*`, `vite`.
 - **The build** (`npm run build`): `astro:generate` first writes the generated
-  trees into `public/` (the tsc browser emit of the engine, the Vite app
-  bundles, the atlas and gallery showcases), then `astro build` assembles
-  `dist/`, which GitHub Actions publishes to Pages on every push to main.
+  trees into `public/` (the Vite app bundles, the atlas and gallery
+  showcases), then `astro build` assembles `dist/`, which GitHub Actions
+  publishes to Pages on every push to main.
 
 Day to day: `npm test` (unit), `npm run check` (typecheck), `npm run test:e2e`
 (headless-browser suite against a built `dist/`; needs a Chromium-family

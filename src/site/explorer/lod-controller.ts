@@ -25,23 +25,57 @@ import {
   windowSheetRect,
   insetSheetRect,
   FULL_WINDOW,
-} from "./engine/world/lod.js";
-import { startRedraft } from "./draw-ceremony.js";
-import { dryInNames } from "./redraft-plan.js";
+} from "../../world/lod.ts";
+import type { UvCamera, SheetMargins, SheetRect } from "../../world/lod.ts";
+import type { UvWindow } from "../../terrain/heightfield.ts";
+import type { WorldRecipe } from "../../world/types.ts";
+import type { RenderOptions } from "../../render/map-renderer.ts";
+import type { PlaceManifest } from "../../render/place-manifest.ts";
+import { startRedraft } from "./draw-ceremony.ts";
+import { dryInNames } from "./redraft-plan.ts";
 
-const pct = (f) => `${(f * 100).toFixed(4)}%`;
+const pct = (f: number) => `${(f * 100).toFixed(4)}%`;
 
-/**
- * @param {{
- *   mapDiv: HTMLElement,            // #map, the world sheet's box; insets mount inside it
- *   runJob: (msg:any)=>Promise<any>,// worker-client dispatch
- *   buildPlaceOverlay: (manifest:any, opts?:any)=>void,
- *   setCaption: (text:string)=>void,
- *   getZoomK: ()=>number,           // current world zoom, to counter-scale the pencil border
- *   prefersReduce: ()=>boolean,
- * }} deps
- */
-export function createLodController(deps) {
+/** The region job dispatched on a settle: worker-client runJob's region message. */
+type RegionJobMessage = {
+  kind: "region";
+  seed: number;
+  overrides: Partial<WorldRecipe> | undefined;
+  window: UvWindow;
+  gridW: number;
+  gridH: number;
+  band: number;
+  render: RenderOptions;
+};
+
+/** The fields of a resolved region survey this controller consumes (worker-client's region result). */
+type RegionJobResult = {
+  svg: string;
+  manifest: PlaceManifest;
+  title: string;
+};
+
+/** The per-draw world context app.js hands to setWorld on every world draw. */
+type WorldContext = {
+  seed: number;
+  overrides: Partial<WorldRecipe> | undefined;
+  render: RenderOptions;
+  manifest: PlaceManifest;
+};
+
+interface Deps {
+  /** #map, the world sheet's box; insets mount inside it */
+  mapDiv: HTMLElement;
+  /** worker-client dispatch */
+  runJob: (msg: RegionJobMessage) => Promise<RegionJobResult>;
+  buildPlaceOverlay: (manifest: PlaceManifest, opts?: { preservePinByName?: boolean; box?: SheetRect }) => void;
+  setCaption: (text: string) => void;
+  /** current world zoom, to counter-scale the pencil border */
+  getZoomK: () => number;
+  prefersReduce: () => boolean;
+}
+
+export function createLodController(deps: Deps) {
   const { mapDiv, runJob, buildPlaceOverlay, setCaption, getZoomK, prefersReduce } = deps;
 
   // The plot-uv window the committed inset covers, and the LOD band held. Band 0 is the
@@ -51,15 +85,15 @@ export function createLodController(deps) {
 
   // The retained world context, from the last world draw: enough to fire a region job over
   // the SAME base world (cache hit) and to rebuild the world overlay when the inset drops.
-  let world = null; // { seed, overrides, render, manifest } | null
+  let world: WorldContext | null = null; // { seed, overrides, render, manifest } | null
 
   // The committed inset (for the Download-saves-what-you-see policy and the DOM teardown),
   // or null at the bare world sheet.
-  let inset = null; // { el, svg, band, window, title } | null
+  let inset: { el: HTMLDivElement; svg: string; band: number; window: UvWindow; title: string } | null = null; // { el, svg, band, window, title } | null
 
   // The drafting indicator: a dashed outline over the window being surveyed, up between
   // dispatch and commit. One element, repositioned per dispatch.
-  let pencil = null;
+  let pencil: HTMLDivElement | null = null;
 
   // Monotonic guard, the drawGen idiom: every dispatch bumps it; a resolved job that is no
   // longer the latest is silently dropped, so only the LAST settle in a flurry commits.
@@ -71,12 +105,13 @@ export function createLodController(deps) {
   // marginPx/widthPx differ from marginPx/heightPx (same px inset, different axis lengths),
   // so the conversion carries both. The world manifest is the authority: the camera is read
   // against the world sheet at every band.
-  function margins() {
-    const m = world.manifest;
+  function margins(): SheetMargins {
+    // world! is safe: every caller runs behind a non-null world gate (dispatch and commit).
+    const m = world!.manifest;
     return { mx: m.marginPx / m.widthPx, my: m.marginPx / m.heightPx };
   }
 
-  function showPencil(window) {
+  function showPencil(window: UvWindow): void {
     const r = windowSheetRect(window, margins());
     if (!pencil) {
       pencil = document.createElement("div");
@@ -92,13 +127,13 @@ export function createLodController(deps) {
     if (!pencil.parentNode) mapDiv.appendChild(pencil);
   }
 
-  function hidePencil() {
+  function hidePencil(): void {
     if (pencil && pencil.parentNode) pencil.remove();
   }
 
   // Remove every mounted inset except `keep`. Fades in flight are per-element and guarded
   // by isConnected, so sweeping stragglers out from under them is safe.
-  function removeInsetsExcept(keep) {
+  function removeInsetsExcept(keep: Element | null): void {
     for (const el of mapDiv.querySelectorAll(".region-inset")) {
       if (el !== keep) el.remove();
     }
@@ -109,11 +144,11 @@ export function createLodController(deps) {
   // that composition (it is mounted under and around every inset), and its settlement
   // groups carry only data-idx (data-tier/data-name are region-only, #162), so its
   // names resolve through the world manifest; a prior inset carries data-name directly.
-  function prevLabeledNames() {
-    const names = new Set();
+  function prevLabeledNames(): Set<string> {
+    const names = new Set<string>();
     const worldSvg = mapDiv.querySelector(":scope > svg");
     if (worldSvg && world) {
-      for (const g of worldSvg.querySelectorAll("g.settlement[data-idx]")) {
+      for (const g of worldSvg.querySelectorAll<SVGElement>("g.settlement[data-idx]")) {
         if (!g.querySelector("text")) continue;
         const place = world.manifest.places[Number(g.dataset.idx)];
         if (place) names.add(place.name);
@@ -127,10 +162,10 @@ export function createLodController(deps) {
   // #170: a region sheet's labeled settlement names (label placement is the reveal: a
   // village can carry a glyph on every sheet but only win a label at the finer scale,
   // and THAT is the moment its name dries in).
-  function labeledNames(svg) {
-    const out = [];
-    for (const g of svg.querySelectorAll("g.settlement[data-name]")) {
-      if (g.querySelector("text")) out.push(g.dataset.name);
+  function labeledNames(svg: SVGSVGElement): string[] {
+    const out: string[] = [];
+    for (const g of svg.querySelectorAll<SVGElement>("g.settlement[data-name]")) {
+      if (g.querySelector("text")) out.push(g.dataset.name as string);
     }
     return out;
   }
@@ -140,7 +175,7 @@ export function createLodController(deps) {
   // caption update synchronously at the mount -- the fade is pure paint, and the outgoing
   // inset is only torn down once the incoming one is fully opaque, so the reader never sees
   // a gap frame (the sheet-turn discipline, #131). Reduced motion swaps instantly.
-  function commitInset(band, window, res, ms) {
+  function commitInset(band: number, window: UvWindow, res: RegionJobResult, ms: string): void {
     const rect = insetSheetRect(window, margins());
     // #170: capture the outgoing composition's labeled names BEFORE the sheets change
     // hands; the ceremony below dries in only the names this survey newly labels.
@@ -176,17 +211,18 @@ export function createLodController(deps) {
     // grade, wash behind) and the newly labeled names dry in tier-staggered; every
     // name already labeled on the outgoing sheets gets no class and stays put (AC1).
     const insetSvg = el.querySelector("svg");
-    if (insetSvg) startRedraft(insetSvg, dryInNames(prevLabeled, labeledNames(insetSvg)));
+    // prevLabeled! is non-null here: the reduce path returned above.
+    if (insetSvg) startRedraft(insetSvg, dryInNames(prevLabeled!, labeledNames(insetSvg)));
     if (old) {
       let done = false;
-      const finish = () => {
+      const finish = (): void => {
         if (done) return;
         done = true;
         clearTimeout(timer);
         el.removeEventListener("transitionend", onEnd);
         if (old.isConnected) old.remove();
       };
-      const onEnd = (e) => {
+      const onEnd = (e: TransitionEvent): void => {
         if (e.target === el) finish();
       };
       el.addEventListener("transitionend", onEnd);
@@ -197,7 +233,7 @@ export function createLodController(deps) {
 
   // Dispatch a region job for (band, window) over the retained base world, guarded so a
   // superseding settle drops this one.
-  function dispatchRegion(band, window) {
+  function dispatchRegion(band: number, window: UvWindow): void {
     if (!world) return;
     const myGen = ++regionGen;
     showPencil(window);
@@ -229,7 +265,7 @@ export function createLodController(deps) {
 
   // Zoom-out past the world threshold: the world chart is already on screen around the
   // inset, so the return is just the inset fading away. No worker round-trip.
-  function revertToWorld() {
+  function revertToWorld(): void {
     if (!world) return;
     regionGen++; // cancel any in-flight region so it cannot commit after the revert
     hidePencil();
@@ -245,7 +281,7 @@ export function createLodController(deps) {
         going.remove();
       } else {
         going.classList.remove("in");
-        const drop = () => {
+        const drop = (): void => {
           if (going.isConnected) going.remove();
         };
         going.addEventListener("transitionend", drop, { once: true });
@@ -256,7 +292,7 @@ export function createLodController(deps) {
 
   return {
     /** A camera settle on the antique chart. `cam` is the SHEET-fraction {cx,cy,k}. */
-    onSettle(cam) {
+    onSettle(cam: UvCamera) {
       if (!world) return;
       const decision = decideSettle({
         camera: plotUvFromSheet(cam, margins()),
@@ -271,7 +307,7 @@ export function createLodController(deps) {
     /** Record the world sheet just drawn, and reset to band 0. Called on every world draw.
      *  The draw wiped #map (settle) or will at landing (turn), so the DOM cleanup here is
      *  belt-and-suspenders for elements that survived outside those paths. */
-    setWorld({ seed, overrides, render, manifest }) {
+    setWorld({ seed, overrides, render, manifest }: WorldContext) {
       world = { seed, overrides, render, manifest };
       currentBand = 0;
       currentWindow = FULL_WINDOW;

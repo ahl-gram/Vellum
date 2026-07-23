@@ -13,7 +13,7 @@
 // app.js (the conductor) owns the listener wiring and calls the exports below;
 // state (placeOverlay, scrub) is module-private here, so the suppress check is a
 // plain within-module read and there is no cross-module cycle.
-import { composePlaceCard, placeAriaLabel, cardSide } from "./engine/render/place-card.js";
+import { composePlaceCard, placeAriaLabel, cardSide } from "../../render/place-card.ts";
 import {
   scrubRange,
   buildScrubMarks,
@@ -21,14 +21,19 @@ import {
   eventIsPast,
   buildSweepPlan,
   sweepYearAt,
-} from "./engine/render/chronicle-scrubber.js";
+  type ScrubMark,
+  type YearRange,
+  type SweepPlan,
+} from "../../render/chronicle-scrubber.ts";
+import type { PlaceManifest, PlaceMark } from "../../render/place-manifest.ts";
+import type { HistoricalEvent } from "../../society/history.ts";
 
-const mapDiv = document.getElementById("map");
-const scrubPanel = document.getElementById("scrubber");
-const scrubPlayBtn = document.getElementById("scrub-play");
-const scrubRangeEl = document.getElementById("scrub-range");
-const scrubYearEl = document.getElementById("scrub-year");
-const chronicleStrip = document.getElementById("chronicle-strip");
+const mapDiv = document.getElementById("map") as HTMLElement;
+const scrubPanel = document.getElementById("scrubber") as HTMLElement;
+const scrubPlayBtn = document.getElementById("scrub-play") as HTMLButtonElement;
+const scrubRangeEl = document.getElementById("scrub-range") as HTMLInputElement;
+const scrubYearEl = document.getElementById("scrub-year") as HTMLElement;
+const chronicleStrip = document.getElementById("chronicle-strip") as HTMLElement;
 
 // #53 overlay state. Rebuilt every draw because mapDiv.innerHTML wipes #map's
 // children. `pinned` keeps a tapped or Enter/Space card open (touch has no
@@ -37,23 +42,51 @@ const chronicleStrip = document.getElementById("chronicle-strip");
 // pinnedIdx MUST be distinct: a genuine click is always preceded by a preview of
 // the same place, so keying the pin toggle off currentIdx would dismiss instead of
 // switch when pinning B after A was pinned.
-let placeOverlay = null; // { card, places, events, presentYear, currentIdx, pinned, pinnedIdx } | null
+interface PlaceOverlayState {
+  card: HTMLDivElement;
+  places: ReadonlyArray<PlaceMark>;
+  events: ReadonlyArray<HistoricalEvent>;
+  presentYear: number;
+  currentIdx: number;
+  pinned: boolean;
+  pinnedIdx: number;
+}
+
+let placeOverlay: PlaceOverlayState | null = null; // { card, places, events, presentYear, currentIdx, pinned, pinnedIdx } | null
 
 // #54 scrubber session (null when the toggle is off). Since #93 the sweep drives
 // the REAL baked settlement glyphs (per-idx <g class="settlement">), not abstract
 // dots: `groups` maps each world index to its glyph group, `roadsEl` is the baked
 // road network shown only when parked at the present.
-let scrub = null; // { marks, range, groups, roadsEl, strip, plan, playing, rafId, elapsed, year } | null
+interface StripRow {
+  li: HTMLLIElement;
+  year: number;
+}
+
+interface ScrubState {
+  marks: ScrubMark[];
+  range: YearRange;
+  groups: Map<number, SVGGElement>;
+  roadsEl: SVGGElement | null;
+  strip: StripRow[];
+  plan: SweepPlan | null;
+  playing: boolean;
+  rafId: number;
+  elapsed: number;
+  year: number;
+}
+
+let scrub: ScrubState | null = null; // { marks, range, groups, roadsEl, strip, plan, playing, rafId, elapsed, year } | null
 
 // --- #53 story cards --------------------------------------------------------
 
-function showPlaceCard(idx) {
+function showPlaceCard(idx: number): void {
   if (!placeOverlay || scrub) return; // the hover card is suppressed while scrubbing
   const place = placeOverlay.places[idx];
   if (!place) return;
   const card = composePlaceCard(place, placeOverlay.events);
   const el = placeOverlay.card;
-  const inner = el.querySelector(".pc-inner");
+  const inner = el.querySelector(".pc-inner") as HTMLElement;
   // Rebuilt from textContent only (no innerHTML): the fields are plain strings.
   inner.replaceChildren();
   const name = document.createElement("strong");
@@ -92,11 +125,23 @@ function showPlaceCard(idx) {
   placeOverlay.currentIdx = idx;
 }
 
-function hidePlaceCard() {
+function hidePlaceCard(): void {
   if (!placeOverlay) return;
   placeOverlay.pinned = false;
   placeOverlay.pinnedIdx = -1;
   placeOverlay.card.hidden = true;
+}
+
+interface OverlayBox {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+interface BuildPlaceOverlayOpts {
+  preservePinByName?: boolean;
+  box?: OverlayBox;
 }
 
 // After each draw: lay invisible focusable hit-targets over the baked glyphs (the
@@ -110,11 +155,11 @@ function hidePlaceCard() {
 // drawn glyphs. The card moved inside the overlay for the same reason: its % anchor must
 // resolve against the same box the fractions describe (the full sheet when box is absent,
 // so world overlays are unchanged).
-export function buildPlaceOverlay(manifest, opts) {
+export function buildPlaceOverlay(manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts): void {
   if (!manifest || !manifest.places) return;
   const preserveName =
     opts && opts.preservePinByName && placeOverlay && placeOverlay.pinned && placeOverlay.pinnedIdx >= 0
-      ? (placeOverlay.places[placeOverlay.pinnedIdx] || {}).name
+      ? ((placeOverlay.places[placeOverlay.pinnedIdx] || {}) as Partial<PlaceMark>).name
       : null;
   // An inset commit rebuilds the overlay with no #map wipe before it (unlike a draw), so
   // this builder owns removing the previous overlay + card. A no-op after a wipe.
@@ -157,14 +202,14 @@ export function buildPlaceOverlay(manifest, opts) {
     // card between places, and the pin only governs whether leaving dismisses it.
     hit.addEventListener("mouseenter", () => showPlaceCard(idx));
     hit.addEventListener("focus", () => showPlaceCard(idx));
-    hit.addEventListener("mouseleave", () => { if (!placeOverlay.pinned) placeOverlay.card.hidden = true; });
-    hit.addEventListener("blur", () => { if (!placeOverlay.pinned) placeOverlay.card.hidden = true; });
+    hit.addEventListener("mouseleave", () => { if (!placeOverlay!.pinned) placeOverlay!.card.hidden = true; });
+    hit.addEventListener("blur", () => { if (!placeOverlay!.pinned) placeOverlay!.card.hidden = true; });
     // Tap / Enter / Space all fire a button click: pin the card open, or switch
     // the pin to this place. Activating the already-pinned place toggles it off.
     hit.addEventListener("click", () => {
-      if (placeOverlay.pinned && placeOverlay.pinnedIdx === idx) { hidePlaceCard(); return; }
-      placeOverlay.pinned = true;
-      placeOverlay.pinnedIdx = idx;
+      if (placeOverlay!.pinned && placeOverlay!.pinnedIdx === idx) { hidePlaceCard(); return; }
+      placeOverlay!.pinned = true;
+      placeOverlay!.pinnedIdx = idx;
       showPlaceCard(idx);
     });
     overlay.appendChild(hit);
@@ -186,13 +231,13 @@ export function buildPlaceOverlay(manifest, opts) {
 // Document-level dismiss, wired once in app.js: Escape or a click/tap off any mark
 // closes a pinned card. A click on a hit or the card itself is ignored here (the
 // hit's own handler owns pinning).
-export function onDocKeydown(e) {
+export function onDocKeydown(e: KeyboardEvent): void {
   if (e.key === "Escape" && placeOverlay && !placeOverlay.card.hidden) hidePlaceCard();
 }
 
-export function onDocClick(e) {
+export function onDocClick(e: MouseEvent): void {
   if (!placeOverlay || placeOverlay.card.hidden) return;
-  const t = e.target;
+  const t = e.target as Element | null;
   if (t && t.closest && (t.closest(".place-hit") || t.closest("#place-card"))) return;
   hidePlaceCard();
 }
@@ -209,26 +254,26 @@ export function onDocClick(e) {
 // the present, end-of-Play) and hide it whenever the shown year is in the past,
 // so roads to not-yet-founded towns never appear. Restore by CLEARING the inline
 // style, never setting "block": an SVG <g> does not take display:block.
-function setRoadsVisible(visible) {
+function setRoadsVisible(visible: boolean): void {
   if (scrub && scrub.roadsEl) scrub.roadsEl.style.display = visible ? "" : "none";
 }
 
-export function cancelScrubRaf() {
+export function cancelScrubRaf(): void {
   if (scrub && scrub.rafId) {
     cancelAnimationFrame(scrub.rafId);
     scrub.rafId = 0;
   }
 }
 
-function setPlayLabel(playing) {
+function setPlayLabel(playing: boolean): void {
   // The label swap (Play/Pause) IS the state for AT; no aria-pressed, which on a
   // label-swapping control announces a contradictory "Pause, pressed" while playing.
   scrubPlayBtn.textContent = playing ? "Pause" : "Play";
 }
 
-function buildStrip(events) {
+function buildStrip(events: ReadonlyArray<HistoricalEvent>): StripRow[] {
   chronicleStrip.replaceChildren();
-  const rows = [];
+  const rows: StripRow[] = [];
   for (const e of events) {
     const li = document.createElement("li");
     const year = document.createElement("span");
@@ -248,7 +293,7 @@ function buildStrip(events) {
 // visibility, the roads, and which chronicle rows have come to pass. Setting
 // .value here does NOT fire the slider's input event, so Play never trips the
 // manual-scrub handler.
-function paintScrub(year) {
+function paintScrub(year: number): void {
   if (!scrub) return;
   scrub.year = year;
   scrubRangeEl.value = String(year);
@@ -269,13 +314,13 @@ function paintScrub(year) {
 
 // Enter (or re-apply, after a redraw) scrub mode for the current overlay. Since
 // #93 it drives the baked settlement glyphs directly, so no style/colour is needed.
-export function applyScrub() {
+export function applyScrub(): void {
   if (!placeOverlay || !placeOverlay.places || !placeOverlay.places.length) return;
   cancelScrubRaf();
   hidePlaceCard();
   const { places, events, presentYear } = placeOverlay;
   const overlayEl = mapDiv.querySelector(".place-overlay");
-  const hits = overlayEl ? [...overlayEl.querySelectorAll(".place-hit")] : [];
+  const hits = overlayEl ? [...overlayEl.querySelectorAll<HTMLElement>(".place-hit")] : [];
   // The overlay hits stay as invisible focus targets but go inert while scrubbing
   // (the CSS scopes pointer-events off behind .scrub); the dated chronicle strip
   // below narrates the headline events (a capped subset) as readable text.
@@ -283,10 +328,10 @@ export function applyScrub() {
   for (const h of hits) h.tabIndex = -1;
   // Address every baked settlement glyph by its world index (== manifest idx) so a
   // year can show/hide each one; the roads layer reveals only at the present park.
-  const groups = new Map();
+  const groups = new Map<number, SVGGElement>();
   const settleLayer = mapDiv.querySelector("#layer-settlements");
   if (settleLayer) {
-    for (const g of settleLayer.querySelectorAll("g.settlement")) {
+    for (const g of settleLayer.querySelectorAll<SVGGElement>("g.settlement")) {
       groups.set(Number(g.dataset.idx), g);
     }
   }
@@ -298,7 +343,7 @@ export function applyScrub() {
     marks: buildScrubMarks(places, events, presentYear),
     range,
     groups,
-    roadsEl: mapDiv.querySelector("#layer-roads"),
+    roadsEl: mapDiv.querySelector<SVGGElement>("#layer-roads"),
     strip: buildStrip(events),
     plan: null,
     playing: false,
@@ -311,7 +356,7 @@ export function applyScrub() {
   paintScrub(range.max); // park at the present: the world exactly as just drawn
 }
 
-export function exitScrub() {
+export function exitScrub(): void {
   cancelScrubRaf();
   scrubPanel.hidden = true;
   const overlayEl = mapDiv.querySelector(".place-overlay");
@@ -323,50 +368,50 @@ export function exitScrub() {
   // present-day chart by clearing every inline display it set (never "block": an
   // SVG <g> does not take it), plus the roads.
   const settleLayer = mapDiv.querySelector("#layer-settlements");
-  if (settleLayer) for (const g of settleLayer.querySelectorAll("g.settlement")) g.style.display = "";
-  const roads = mapDiv.querySelector("#layer-roads");
+  if (settleLayer) for (const g of settleLayer.querySelectorAll<SVGGElement>("g.settlement")) g.style.display = "";
+  const roads = mapDiv.querySelector<SVGGElement>("#layer-roads");
   if (roads) roads.style.display = "";
   scrub = null;
 }
 
 // Drop the scrub session without restoring layers: used after a redraw with the
 // toggle off, where mapDiv.innerHTML already replaced the baked layers fresh.
-export function clearScrub() {
+export function clearScrub(): void {
   scrub = null;
 }
 
-export function pauseScrub() {
+export function pauseScrub(): void {
   if (!scrub) return;
   cancelScrubRaf();
   scrub.playing = false;
   setPlayLabel(false);
 }
 
-function playScrub() {
+function playScrub(): void {
   if (!scrub) return;
-  scrub.plan = buildSweepPlan(scrub.range, placeOverlay.events.map((e) => e.year));
+  scrub.plan = buildSweepPlan(scrub.range, placeOverlay!.events.map((e) => e.year));
   if (scrub.year >= scrub.range.max) scrub.elapsed = 0; // at the end: replay from the start
   const begin = performance.now() - scrub.elapsed;
   scrub.playing = true;
   setPlayLabel(true);
-  const tick = (now) => {
+  const tick = (now: number) => {
     if (!scrub || !scrub.playing) return;
     const elapsed = now - begin;
     scrub.elapsed = elapsed;
-    if (elapsed >= scrub.plan.totalMs) {
-      scrub.elapsed = scrub.plan.totalMs;
+    if (elapsed >= scrub.plan!.totalMs) {
+      scrub.elapsed = scrub.plan!.totalMs;
       paintScrub(scrub.range.max);
       pauseScrub(); // auto-pause at the present year, button back to "Play"
       return;
     }
-    paintScrub(sweepYearAt(scrub.plan, elapsed));
+    paintScrub(sweepYearAt(scrub.plan!, elapsed));
     scrub.rafId = requestAnimationFrame(tick);
   };
   scrub.rafId = requestAnimationFrame(tick);
 }
 
 // The Play/Pause button: toggle the sweep. No-op when not scrubbing.
-export function togglePlay() {
+export function togglePlay(): void {
   if (!scrub) return;
   if (scrub.playing) pauseScrub();
   else playScrub();
@@ -380,7 +425,7 @@ export function togglePlay() {
 // ghost work. It also pauses a running Play, matching voyage.js voyageSnapToRest() and the
 // drag-pauses-Play idiom. paintScrub is module-private, so this is the seam that exposes the
 // park. No-op when the chronicle is off.
-export function scrubSnapToPresent() {
+export function scrubSnapToPresent(): void {
   if (!scrub) return;
   pauseScrub();
   paintScrub(scrub.range.max);
@@ -388,7 +433,7 @@ export function scrubSnapToPresent() {
 
 // A manual drag/keyboard scrub on the slider: pause Play and rebase it so the next
 // Play restarts from the earliest founding, then paint the dragged year.
-export function onManualScrub() {
+export function onManualScrub(): void {
   if (!scrub) return;
   if (scrub.playing) pauseScrub();
   scrub.elapsed = 0;

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { shouldTurn } from "../../public/explorer/sheet-turn.js";
+import { shouldTurn } from "../../src/site/explorer/sheet-turn.ts";
 
 /**
  * #131 The style turn. The semantic heart of the sub is a pure decision: only a

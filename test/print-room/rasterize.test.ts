@@ -6,7 +6,7 @@ import {
   fitScaleToBudget,
   rasterizeErrorMessage,
   rasterizeSvg,
-} from "../../public/lib/rasterize.js";
+} from "../../src/site/lib/rasterize.ts";
 
 // #135 (epic #132) Sub 3: the client-side SVG->PNG rasterizer. The platform half
 // (blob-URL Image + canvas + toBlob) is browser-only and proven by the print-room e2e;

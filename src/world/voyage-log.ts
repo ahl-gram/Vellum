@@ -17,7 +17,7 @@ import type { LegMode } from "../render/voyage-route.ts";
  * degraded "straight") arrival as a ride, and the origin as a departure. The plan's leg
  * geometry is untouched (that is #118/#120 territory); only the prose lives here.
  *
- * The scrollable panel + the reveal-per-arrival wiring live in public/explorer/voyage.js
+ * The scrollable panel + the reveal-per-arrival wiring live in src/site/explorer/voyage.ts
  * and are covered by the Explorer e2e. Only this deterministic prose is unit-tested.
  */
 

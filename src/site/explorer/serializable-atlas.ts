@@ -10,7 +10,10 @@
 // download builds atlasDocument() straight from this, with no access to `world`. The
 // shape matches AtlasDocumentData (src/atlas/document.ts). Both transport paths run
 // through this one function, so adding these keeps the R2/R3 byte-parity by construction.
-export function serializableAtlas(a) {
+import type { AtlasComposition } from "../../atlas/compose.ts";
+import type { AtlasDocumentData } from "../../atlas/document.ts";
+
+export function serializableAtlas(a: AtlasComposition): AtlasDocumentData {
   return {
     title: a.world.title.title,
     subtitle: a.world.title.subtitle,
