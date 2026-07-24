@@ -65,7 +65,25 @@ export type RoutedLeg = VoyageLeg & {
   readonly inlandHandoff: boolean;
 };
 
-/** Grid cells, so a 0.75 chord tolerance is about three quarters of one cell. */
+/**
+ * Grid cells, so a 0.75 chord tolerance is about three quarters of one cell.
+ *
+ * Reviewed under #185 (2026-07-25) and kept. Alone among the four constants here, epsilon
+ * is itinerary-INDEPENDENT: legLength measures the raw cell walk, so this only ever
+ * reaches the drawn polyline and can be swept in one pass. Over seeds 1..40, against the
+ * lossless walk's 9353 vertices, as (vertices, worst stray of a walked cell from the drawn
+ * line): 0.5 -> (7332, 0.50 cells), 0.75 -> (5869, 1.00), 1.0 -> (4781, 1.00),
+ * 1.5 -> (3974, 1.49), 2.5 -> (3205, 2.50).
+ *
+ * Two things there are worth knowing before touching it. The worst stray at 0.75 is a
+ * full CELL rather than 0.75, because RDP bounds each dropped vertex against the INFINITE
+ * line through its anchors while a hairpin can leave the nearest drawn SEGMENT further
+ * off. And 1.0 ties 0.75 on that worst case while shedding a fifth of the vertices, which
+ * looks free but is not: the tie is this corpus's luck, RDP's bound scales with epsilon,
+ * the vertices saved are ~27 per world in a `points` attribute nobody measures, and the
+ * BOUND in voyage-route.test.ts is RDP_EPSILON + 0.5, so raising this quietly loosens a
+ * real check rather than passing it.
+ */
 export const RDP_EPSILON = 0.75;
 
 /**
@@ -78,17 +96,43 @@ export const RDP_EPSILON = 0.75;
  * fewer than a naive "always take the shorter" (~50% on an island world) because the embark
  * gate below rejects ports whose shared ocean sits behind a nearer pond. A one-line knob:
  * raise it for more riding, lower it for more sailing.
+ *
+ * Reviewed under #185 (2026-07-25) and kept. Sea legs of 945 over seeds 1..40 by value:
+ * 1.0 -> 329, 1.15 -> 272, 1.3 -> 237, 1.5 -> 199, 2.0 -> 152, 3.0 -> 110. The naive
+ * figure above re-measures at exactly 50.0% on the isle fixture, so that claim survived
+ * both itinerary reorders. What settles the value is not taste, though. From 1.5 up, the
+ * LEANEST genuine inland handoff falls from 8.94 cells to 4.24, which drags the measured
+ * upper end of the gap INLAND_STUB_CELLS = 4 sits in (voyage-water.ts) down onto its
+ * structural lower end of 3, and #181's ride-sail-ride prose starts firing on stubs too
+ * short to be worth narrating. 1.3 is the most permissive value keeping that better
+ * than 2x apart, so treat it as bounded above, not free.
  */
 export const SAIL_WHEN_ROAD_EXCEEDS = 1.3;
 
 /** A port must be within this many cells of the sea to take a coastal sail shortcut, so a
  *  ship never embarks by marching far overland (that is #181's territory). This is a cheap
  *  prefilter on the nearest sea; the embark into the SHARED body is checked separately,
- *  because a port near an inland pond is close to water but far from the ocean. */
+ *  because a port near an inland pond is close to water but far from the ocean.
+ *
+ *  NOT A TUNING KNOB. Swept 1, 2, 3, 5 and 8 over seeds 1..40 it moves not one leg of 945
+ *  (#185, 2026-07-25), because embarksNearShore already rejects every pair it would, and
+ *  timing the whole route pass with the gate against without it shows a 0.5% difference,
+ *  which is noise. So it is neither a routing rule nor, measurably, a cost guard: it reads
+ *  as intent. Anyone reaching for it should be considering deleting it, not retuning it. */
 export const COAST_MAX_HOPS = 2;
 
 /** Max straight embark from a port to the shared water body for a coastal shortcut. Keeps
- *  the overland stub of a same-landmass sail to a cell or two, so no ship marches inland. */
+ *  the overland stub of a same-landmass sail to a cell or two, so no ship marches inland.
+ *
+ *  INVARIANT: THIS MUST STAY BELOW INLAND_STUB_CELLS (voyage-water.ts, 4). A sea leg's raw
+ *  chain is [port, launch, ...open water...], so the stub waterSpanOf measures to decide
+ *  `inlandHandoff` is EXACTLY the chord embarksNearShore bounds here. While 3 < 4, a
+ *  coastal shortcut cannot be narrated as a genuine inland handoff. That is one cell of
+ *  margin and it is exact, not comfortable: swept to 4 (#185, 2026-07-25) the leanest
+ *  "genuine" handoff over seeds 1..40 lands at precisely 4.00 cells, and at 6 the handoff
+ *  count goes 8 -> 11, every new one a coastal shortcut wearing #181's ride-sail-ride
+ *  prose. Lowering is safe (2 routes all but identically, 236 sea legs of 945 against 237,
+ *  and tightens the worst coastal stub from 3.00 to 1.41); raising is not. */
 export const COAST_EMBARK_MAX = 3;
 
 /**
@@ -175,9 +219,13 @@ export function prepareVoyageRouter(sites: ReadonlyArray<Site>, survey: Survey):
   // The mode decision and its raw cell walk, shared by `route` (which simplifies it
   // into drawn geometry) and `legLength` (which only measures it).
   const walkLeg = (from: number, to: number): { mode: LegMode; cells: ReadonlyArray<number> } => {
-    // 1. Different landmasses: the survey must sail. Measured across seeds 1..40: every
-    //    cross-landmass leg has both endpoints within 2 cells of water, so no
-    //    road-to-coast-to-road composite leg is needed.
+    // 1. Different landmasses: the survey must sail. The note here used to claim every
+    //    cross-landmass leg has both endpoints within 2 cells of water. Re-measured under
+    //    #275's round trip (#185, 2026-07-25) that premise no longer holds: 1 of the 56
+    //    crossings over seeds 1..40 embarks 28 cells inland (seed 35, leg 16 -> 20). Its
+    //    conclusion does hold, and for a better reason than the old one. No composite
+    //    road-to-coast-to-road leg is needed, because #181 measures that overland stub as
+    //    an inland handoff and the mark RIDES it, so no ship sails over dry land.
     if (comp[from] !== comp[to]) {
       const water = seaCrossing(w, h, from, to, isSea, launchesFor);
       if (water) return { mode: "sea", cells: water };
