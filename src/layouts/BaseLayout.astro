@@ -128,13 +128,16 @@ h1, .room-name, .topnav, footer {
    of an old ledger; then the nav band, centered. */
 .running-head { display: flex; justify-content: space-between; align-items: baseline;
   gap: 0.5rem 2rem; text-align: left; }
-h1 { font-size: 1.75rem; letter-spacing: 0.3em; margin: 0; }
+/* The head members pin line-height 1.6 (here and on .topnav below): page css
+   sets body line-height per page, and the head must not inherit that variance
+   or its geometry differs page to page. */
+h1 { font-size: 1.75rem; letter-spacing: 0.3em; margin: 0; line-height: 1.6; }
 h1 a { color: inherit; text-decoration: none; }
 .room { text-align: right; }
-.room-name { font-size: 1rem; letter-spacing: 0.07em; margin: 0; }
+.room-name { font-size: 1rem; letter-spacing: 0.07em; margin: 0; line-height: 1.6; }
 .tagline {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  font-style: italic; color: var(--ink-brown); margin: 0.15rem 0 0;
+  font-style: italic; color: var(--ink-brown); margin: 0.15rem 0 0; line-height: 1.6;
 }
 .head-rule { height: 3px; border-top: 1px solid var(--ink-dark);
   border-bottom: 1px solid var(--ink-dark); margin: 0.7rem 0 0; }
@@ -146,7 +149,7 @@ h1 a { color: inherit; text-decoration: none; }
   h1 { margin-right: -0.3em; }
   .room { text-align: center; }
 }
-.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: var(--ink-faded); margin: 0.9rem 0 0; }
+.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: var(--ink-faded); margin: 0.9rem 0 0; line-height: 1.6; }
 /* motion.css makes nav LINKS inline-block so a multi-word label never wraps
    mid-label; the current page renders as a span, so it takes the same rule.
    Ink-dark + manicule + underline: the you-are-here marker never relies on

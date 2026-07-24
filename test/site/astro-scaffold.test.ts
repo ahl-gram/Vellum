@@ -388,6 +388,22 @@ test("the layout ships the two ratified shell rules: 0.82rem unification + aria-
     );
     // Tracking stays restrained everywhere except the wordmark.
     assert.match(css, /h1\s*\{[^}]*letter-spacing:\s*0?\.3em/, "the wordmark alone is tracked out");
+    // The head pins its own line-heights: page css sets body line-height per
+    // page (1.6 on the prose pages, unset elsewhere), and the head must not
+    // inherit that variance or its geometry differs page to page. 1.6 is the
+    // ratified height (the taller of the two the pages produced).
+    for (const [label, sel] of [
+      ["h1", "h1"],
+      [".room-name", "\\.room-name"],
+      [".tagline", "\\.tagline"],
+      [".topnav", "\\.topnav"],
+    ] as const) {
+      assert.match(
+        css,
+        new RegExp(`${sel}\\s*\\{[^}]*line-height:\\s*1\\.6`),
+        `${label} pins line-height 1.6 so the head is identical on every page`,
+      );
+    }
   }
 });
 
