@@ -14,7 +14,8 @@ import { cleanPublicGenerated } from "../../scripts/clean-public-generated.ts";
  * footer). Since Sub 5 (#206) retired docs/ and its dual-copy byte guards, the
  * committed sources are src/pages + public/ alone. Sub 8 (#254) ends the
  * app-shell exception: the Explorer, Print Room, and seed-of-the-day pages
- * render through the same BaseLayout, so ALL six pages are asserted here.
+ * render through the same BaseLayout. The Running Head (#268) re-shells the
+ * generated gallery as a real route, so ALL seven pages are asserted here.
  *
  * The suite builds the Astro site once (into out/test-astro-build, left in place
  * for inspection; out/ is gitignored) and asserts against the rendered output plus
@@ -35,22 +36,26 @@ const decode = (s: string) =>
     .replace(/&gt;/g, ">")
     .replace(/&amp;/g, "&");
 
-// Per-page expectations. `title` is the head <title>; `ogTitle` feeds og:title AND
-// twitter:title (FAQ's differ in punctuation: the og twins take the normalized
-// form, never the &-form title). `description` feeds name=description;
-// `ogDescription` (defaulting to it) feeds og:description AND twitter:description
-// (seed-of-the-day's card copy is shorter than its search snippet). `h1` is the
-// rendered header wordmark: the home link wraps VELLUM alone, the app surfaces'
-// wordmark suffix stays outside it (Sub 8 #254 preserves the old shells' form).
+// Per-page expectations. The Running Head (#268): `room` is the layout prop the
+// page passes; `title` is the head <title> the layout COMPUTES from it
+// ("The Print Room · Vellum"; home alone, roomless, keeps the atelier line).
+// `ogTitle` feeds og:title AND twitter:title (Q & A's differs in punctuation:
+// the og twins take the normalized form via ogRoom, never the &-form room).
+// `description` feeds name=description; `ogDescription` (defaulting to it)
+// feeds og:description AND twitter:description (seed-of-the-day's card copy is
+// shorter than its search snippet). `current` is the nav label marked
+// aria-current (absent on home: the wordmark carries the home link and there
+// is no Home nav item). The h1 wordmark is uniform, asserted in the header
+// test, not per page here.
 type PageSpec = {
   route: string;
   dir: string;
-  current: string;
+  current?: string;
+  room?: string;
   title: string;
   ogTitle: string;
   description: string;
   ogDescription?: string;
-  h1: string;
   tagline: string;
   /** App surfaces only: the is:inline bundle-twin script the page must keep. */
   scriptSrc?: string;
@@ -60,44 +65,42 @@ const PAGES: readonly PageSpec[] = [
   {
     route: "index.html",
     dir: "/",
-    current: "Home",
-    title: "Vellum: an atelier of imaginary cartography",
-    ogTitle: "Vellum: an atelier of imaginary cartography",
+    title: "Vellum · an atelier of imaginary cartography",
+    ogTitle: "Vellum · an atelier of imaginary cartography",
     description:
       "Procedurally generated fantasy atlases: deterministic worlds drawn as antique, topographic, ink, and nautical SVG charts.",
-    h1: "<h1>VELLUM</h1>",
     tagline: "an atelier of imaginary cartography",
   },
   {
     route: "faq/index.html",
     dir: "/faq/",
-    current: "FAQ",
-    title: "Vellum: Questions & Answers",
-    ogTitle: "Vellum: Questions and Answers",
+    current: "Q & A",
+    room: "Questions & Answers",
+    title: "Questions & Answers · Vellum",
+    ogTitle: "Questions and Answers · Vellum",
     description:
       "How Vellum works: seeds, determinism, terrain and rivers, climate and styles, and how to make and reproduce your own maps.",
-    h1: '<h1><a href="/">VELLUM</a></h1>',
-    tagline: "questions &amp; answers",
+    tagline: "how the worlds are made",
   },
   {
     route: "glossary/index.html",
     dir: "/glossary/",
     current: "Glossary",
-    title: "Vellum: Glossary",
-    ogTitle: "Vellum: Glossary",
+    room: "The Glossary",
+    title: "The Glossary · Vellum",
+    ogTitle: "The Glossary · Vellum",
     description:
       "A glossary of the cartography, heraldry, and geography vocabulary printed on Vellum's charts, in its gazetteer, and across its realm names.",
-    h1: '<h1><a href="/">VELLUM</a></h1>',
-    tagline: "glossary",
+    tagline: "the words on the charts",
   },
   {
     route: "explorer/index.html",
     dir: "/explorer/",
     current: "Explorer",
-    title: "Vellum Explorer: draw your own imaginary world",
-    ogTitle: "Vellum Explorer: draw your own imaginary world",
+    room: "The Explorer",
+    title: "The Explorer · Vellum",
+    ogTitle: "The Explorer · Vellum",
     description: "Generate procedural fantasy maps in your browser. Every seed is a world.",
-    h1: '<h1><a href="/">VELLUM</a> EXPLORER</h1>',
     tagline: "every seed is a world, draw one",
     scriptSrc: "./app.bundle.js",
   },
@@ -105,11 +108,11 @@ const PAGES: readonly PageSpec[] = [
     route: "print-room/index.html",
     dir: "/print-room/",
     current: "Print Room",
-    title: "Vellum: Print Room",
-    ogTitle: "Vellum: Print Room",
+    room: "The Print Room",
+    title: "The Print Room · Vellum",
+    ogTitle: "The Print Room · Vellum",
     description:
       "The atelier's print room: bring a world in from the Explorer or call up a seed by number, pull a proof, and take the chart home.",
-    h1: '<h1><a href="/">VELLUM</a> PRINT ROOM</h1>',
     tagline: "take a world home",
     scriptSrc: "./app.bundle.js",
   },
@@ -117,15 +120,26 @@ const PAGES: readonly PageSpec[] = [
     route: "seed-of-the-day/index.html",
     dir: "/seed-of-the-day/",
     current: "Today",
-    title: "Vellum: the seed of the day",
-    ogTitle: "Vellum: the seed of the day",
+    room: "The Seed of the Day",
+    title: "The Seed of the Day · Vellum",
+    ogTitle: "The Seed of the Day · Vellum",
     description:
       "A new procedural world every day: today's date is the seed, drawn as an antique chart with a line from its gazetteer. Same day, same world, everywhere.",
     ogDescription:
       "A new procedural world every day: today's date is the seed, drawn as an antique chart with a line from its gazetteer.",
-    h1: '<h1><a href="/">VELLUM</a></h1>',
-    tagline: "the seed of the day",
+    tagline: "today's date is the seed",
     scriptSrc: "app.bundle.js",
+  },
+  {
+    route: "gallery/index.html",
+    dir: "/gallery/",
+    current: "Gallery",
+    room: "The Gallery",
+    title: "The Gallery · Vellum",
+    ogTitle: "The Gallery · Vellum",
+    description:
+      "A contact sheet of twelve imaginary worlds, drawn by Vellum as antique charts and hung for viewing.",
+    tagline: "a dozen worlds, hung for viewing",
   },
 ];
 
@@ -165,7 +179,7 @@ const metaContent = (head: string, attr: "name" | "property", key: string) => {
   return m ? decode(m[1]) : undefined;
 };
 
-test("astro build emits all six pages in directory form", () => {
+test("astro build emits all seven pages in directory form", () => {
   for (const p of PAGES) {
     assert.ok(rendered.has(p.route), `astro build should emit ${p.route}`);
   }
@@ -271,14 +285,21 @@ test("no head member arrives beyond the canonical set (nothing injected, nothing
   }
 });
 
-test("the canonical nav renders the typed items flat, root-absolute, one aria-current", () => {
+test("the canonical nav renders the typed items flat, root-absolute, one manicule-marked aria-current", () => {
   assert.deepEqual(
     NAV_ITEMS.map((i) => i.label),
-    ["Home", "Today", "Explorer", "Print Room", "FAQ", "Glossary"],
-    "the flat six (Reading Room arrives later as the 7th)",
+    ["Today", "Explorer", "Print Room", "Gallery", "Q & A", "Glossary"],
+    "the Running Head six (#268): Home's slot goes to the Gallery, FAQ reads Q & A",
   );
   for (const item of NAV_ITEMS) {
     assert.match(item.href, /^\/([a-z0-9-]+\/)*$/, `${item.label} href must be root-absolute directory form`);
+  }
+  assert.ok(!NAV_ITEMS.some((i) => i.href === "/"), "there is no Home item: the wordmark carries the home link");
+  // Nav labels stay mixed-case strings: the Fell SC cut sets the small caps.
+  // (No run of capitals, so "Print Room" never arrives as "PRINT ROOM"; the
+  // Q & A initialism's single capitals are fine.)
+  for (const item of NAV_ITEMS) {
+    assert.doesNotMatch(item.label, /[A-Z]{2,}/, `${item.label} must not be hand-uppercased`);
   }
   for (const p of PAGES) {
     const html = page(p.route);
@@ -286,24 +307,34 @@ test("the canonical nav renders the typed items flat, root-absolute, one aria-cu
     assert.equal(navs.length, 1, `${p.route} should have exactly one topnav (semantic <nav>)`);
     const nav = navs[0][1];
 
-    const parts = [...nav.matchAll(/<a href="([^"]+)">([^<]+)<\/a>|<span aria-current="page">([^<]+)<\/span>/g)];
+    // The current page renders unlinked with the decorative manicule inside the
+    // span (aria-hidden, so the accessible name stays the bare label).
+    const parts = [
+      ...nav.matchAll(
+        /<a href="([^"]+)">([^<]+)<\/a>|<span aria-current="page"><span class="manicule" aria-hidden="true">[^<]+<\/span>([^<]+)<\/span>/g,
+      ),
+    ];
     assert.deepEqual(
-      parts.map((m) => m[2] ?? m[3]),
+      parts.map((m) => decode(m[2] ?? m[3])),
       NAV_ITEMS.map((i) => i.label),
       `${p.route} nav renders every item in NAV_ITEMS order`,
     );
     for (const m of parts) {
       if (m[2] !== undefined) {
-        const item = NAV_ITEMS.find((i) => i.label === m[2]);
+        const item = NAV_ITEMS.find((i) => i.label === decode(m[2]));
         assert.equal(m[1], item?.href, `${p.route} nav link ${m[2]} uses the root-absolute href`);
       }
     }
     const currents = parts.filter((m) => m[3] !== undefined);
     assert.deepEqual(
-      currents.map((m) => m[3]),
-      [p.current],
-      `${p.route} marks exactly its own page aria-current, as an unlinked span`,
+      currents.map((m) => decode(m[3])),
+      p.current ? [p.current] : [],
+      p.current
+        ? `${p.route} marks exactly its own page aria-current, as an unlinked manicule span`
+        : `${p.route} is home: no nav item, so no aria-current`,
     );
+    const manicules = nav.split('class="manicule"').length - 1;
+    assert.equal(manicules, p.current ? 1 : 0, `${p.route} carries exactly one manicule, on the current page alone`);
     assert.equal(nav.split(" · ").length, NAV_ITEMS.length, `${p.route} items are separated by the middle dot`);
   }
 });
@@ -325,27 +356,125 @@ test("the layout ships the two ratified shell rules: 0.82rem unification + aria-
       /\.topnav\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*display:\s*inline-block/,
       "the current label joins motion.css's inline-block rule so a multi-word label cannot wrap mid-label",
     );
+    // The Running Head's you-are-here marker (#268): ink-dark AND underlined,
+    // so with the manicule the marker never relies on color alone.
+    assert.match(
+      css,
+      /\.topnav\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*color:\s*var\(--ink-dark\)/,
+      "the current label darkens to the shell's ink",
+    );
+    assert.match(
+      css,
+      /\.topnav\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*text-decoration(?:-line)?:\s*underline/,
+      "the current label is underlined",
+    );
+    // The double hairline rule, the old ledger detail: 1px top and bottom.
+    assert.match(
+      css,
+      /\.head-rule\s*\{[^}]*border-top:\s*1px solid var\(--ink-dark\)/,
+      "the head rule draws its top hairline",
+    );
+    assert.match(
+      css,
+      /\.head-rule\s*\{[^}]*border-bottom:\s*1px solid var\(--ink-dark\)/,
+      "the head rule draws its bottom hairline",
+    );
+    // The manicule's glyph coverage is inconsistent across the Fell fallback
+    // stack, so it pins the plain serif stack rather than the display role.
+    assert.match(
+      css,
+      /\.manicule\s*\{[^}]*font-family:\s*['"]?Iowan Old Style/,
+      "the manicule never trusts the Fell font for its glyph",
+    );
+    // Tracking stays restrained everywhere except the wordmark.
+    assert.match(css, /h1\s*\{[^}]*letter-spacing:\s*0?\.3em/, "the wordmark alone is tracked out");
+    // The head pins its own line-heights: page css sets body line-height per
+    // page (1.6 on the prose pages, unset elsewhere), and the head must not
+    // inherit that variance or its geometry differs page to page. 1.6 is the
+    // ratified height (the taller of the two the pages produced).
+    for (const [label, sel] of [
+      ["h1", "h1"],
+      [".room-name", "\\.room-name"],
+      [".tagline", "\\.tagline"],
+      [".topnav", "\\.topnav"],
+    ] as const) {
+      assert.match(
+        css,
+        new RegExp(`${sel}\\s*\\{[^}]*line-height:\\s*1\\.6`),
+        `${label} pins line-height 1.6 so the head is identical on every page`,
+      );
+    }
   }
 });
 
-test("the header keeps each page's identity: wordmark link, tagline, home's extras in order", () => {
+test("the running head: uniform wordmark link, room name + tagline, double rule, then the nav band (#268)", () => {
+  // Astro escapes text expressions: the &-form room and the apostrophes in
+  // the taglines arrive entity-encoded.
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#39;");
   for (const p of PAGES) {
     const html = page(p.route);
     assert.ok(
-      html.includes(p.h1),
-      `${p.route} h1 should be exactly ${p.h1} (home unlinked; VELLUM alone carries the home link; a wordmark suffix stays outside it)`,
+      html.includes('<h1><a href="/">VELLUM</a></h1>'),
+      `${p.route} wordmark must be the home link on every page, home included`,
     );
-    assert.ok(html.includes(`<p class="tagline">${p.tagline}</p>`), `${p.route} keeps its tagline`);
+    if (p.room) {
+      assert.ok(html.includes(`<p class="room-name">${esc(p.room)}</p>`), `${p.route} names its room on the running head`);
+    } else {
+      // The markup form, not the bare class name: the shell css mentions
+      // .room-name on every page.
+      assert.ok(
+        !html.includes('<p class="room-name">'),
+        `${p.route} is home: the atelier is not a room, the tagline stands alone`,
+      );
+    }
+    assert.ok(html.includes(`<p class="tagline">${esc(p.tagline)}</p>`), `${p.route} keeps its tagline`);
+
+    // The folio order: running head, the double hairline rule, the nav band.
+    const [head, rule, nav] = ['class="running-head"', 'class="head-rule"', 'class="topnav"'].map((m) =>
+      html.indexOf(m),
+    );
+    assert.ok(head > -1 && head < rule && rule < nav, `${p.route} keeps the order: running head, double rule, nav band`);
   }
 
   const homeHeader = page("index.html").match(/<header>([\s\S]*?)<\/header>/);
   assert.ok(homeHeader, "home should have a header");
-  const order = ["<h1>", 'class="tagline"', 'class="lede"', 'class="seedline"', '<nav class="topnav">'];
+  // The header-extra slot renders AFTER the nav band since #268: the rule and
+  // the band sit directly under the head on every page, identically.
+  const order = ["<h1>", 'class="tagline"', '<nav class="topnav">', 'class="lede"', 'class="seedline"'];
   let at = -1;
   for (const marker of order) {
     const next = homeHeader[1].indexOf(marker);
     assert.ok(next > at, `home header keeps its order at ${marker}`);
     at = next;
+  }
+});
+
+test("titles are computed in the layout from the room, never hand-set (#268)", () => {
+  const layout = readFileSync(root("src/layouts/BaseLayout.astro"), "utf8");
+  assert.ok(!layout.includes("wordmarkSuffix"), "wordmarkSuffix is retired (#268 reverses the #254 parameterization)");
+  assert.ok(layout.includes(" · Vellum"), "the layout owns the title scheme");
+
+  for (const p of PAGES) {
+    if (p.room) {
+      assert.equal(p.title, `${p.room} · Vellum`, `${p.route} title follows the room scheme`);
+    }
+    const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
+    const open = source.match(/<BaseLayout([\s\S]*?)>/);
+    assert.ok(open, `${p.route} renders through BaseLayout`);
+    for (const gone of ["title=", "ogTitle=", "wordmarkSuffix="]) {
+      assert.ok(!open[1].includes(gone), `${p.route} must not hand-set ${gone.slice(0, -1)} (the layout computes it)`);
+    }
+    if (p.room) {
+      assert.ok(open[1].includes(`room="${p.room}"`), `${p.route} passes its room to the layout`);
+    } else {
+      assert.ok(!open[1].includes("room="), `${p.route} is home and passes no room`);
+    }
+    if (p.ogTitle !== p.title) {
+      const normalized = p.ogTitle.replace(" · Vellum", "");
+      assert.ok(open[1].includes(`ogRoom="${normalized}"`), `${p.route} normalizes its og twin via ogRoom`);
+    } else {
+      assert.ok(!open[1].includes("ogRoom="), `${p.route} needs no ogRoom (its room is already normalized)`);
+    }
   }
 });
 
@@ -394,13 +523,15 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
 });
 
 test("every internal link and embed on the rendered pages resolves", () => {
-  // The per-deploy generated set resolves only against the allowlist: atlas/ and
-  // gallery/ are generated into the output by Sub 4, and the app pages' bundle
-  // twins are pressed into public/ by astro:generate (#208); all are gitignored
-  // and absent on a fresh checkout (CI runs npm test before npm run build).
+  // The per-deploy generated set resolves only against the allowlist: atlas/ is
+  // generated into the output by Sub 4, the gallery's chart SVGs and page css
+  // are generated by the same step (#268 re-shelled /gallery/ itself into an
+  // Astro route), and the app pages' bundle twins are pressed into public/ by
+  // astro:generate (#208); all are gitignored and absent on a fresh checkout
+  // (CI runs npm test before npm run build).
   const generated = [
     "/atlas/",
-    "/gallery/",
+    "/gallery/index.css",
     "/explorer/app.bundle.js",
     "/print-room/app.bundle.js",
     "/seed-of-the-day/app.bundle.js",
@@ -417,6 +548,7 @@ test("every internal link and embed on the rendered pages resolves", () => {
       const path = new URL(url, `https://v.test${p.dir}`).pathname;
       if (routes.has(path)) continue;
       if (generated.includes(path)) continue;
+      if (/^\/gallery\/chart-\d+\.svg$/.test(path)) continue;
       const target = path.endsWith("/") ? `${path}index.html` : path;
       assert.ok(existsSync(root(`public${target}`)), `${p.route} links ${url}: public${target} should exist`);
     }

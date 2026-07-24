@@ -135,16 +135,18 @@ test("atlasDocument: the deployed page joins the Case; the offline download fall
   assert.match(offline, /var\(--font-body,[^)]*serif/, "the download must fall back to the serif stack");
 });
 
-test("the generated gallery joins the Case: links /fonts.css and binds the roles", async () => {
+test("the gallery page css keeps the flourish role; the standalone shell is retired (#268)", async () => {
   const dir = "out/test-fonts-gallery";
   await rm(dir, { recursive: true, force: true });
   try {
     await buildGallery(100, { count: 1, out: dir });
-    const html = await readFile(join(dir, "index.html"), "utf8");
-    assert.match(html, /<link rel="stylesheet" href="\/fonts\.css">/, "gallery should link /fonts.css");
-    assert.match(html, /var\(--font-body/, "gallery body should use the body role var");
-    assert.match(html, /var\(--font-display/, "gallery h1 should use the display role var");
-    assert.match(html, /var\(--font-flourish/, "gallery subtitle should use the flourish role var");
+    const css = await readFile(join(dir, "index.css"), "utf8").catch(() => "");
+    assert.match(css, /var\(--font-flourish/, "the gallery sub line keeps the flourish role");
+    // Display and body roles now arrive through BaseLayout: /gallery/ is a
+    // shelled route since #268 (covered by the layout binding test above and
+    // the scaffold suite), so the standalone document with its own fonts
+    // links retires.
+    assert.ok(!existsSync(join(dir, "index.html")), "buildGallery must not write the standalone shell anymore");
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

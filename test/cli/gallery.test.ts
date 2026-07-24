@@ -28,24 +28,24 @@ test("a gallery card is the same world as the canonical chart for that seed", as
   }
 });
 
-test("the gallery joins the motion folio: links /motion.css and its tiles tip under the hand (#130)", async () => {
+test("the gallery stays in the motion folio: its tiles tip under the hand on the desk's timing (#130)", async () => {
   const dir = "out/test-gallery-motion";
   await rm(dir, { recursive: true, force: true });
   try {
     await buildGallery(100, { count: 1, out: dir });
-    const html = await readFile(join(dir, "index.html"), "utf8");
-    // root-absolute so it resolves at /gallery/ depth, exactly as the five
-    // hand-authored pages link it (the folio needs both pages opted in)
-    assert.match(
-      html,
-      /<link rel="stylesheet" href="\/motion\.css">/,
-      "gallery should link the shared motion desk so it joins the folio",
-    );
+    // Since #268 the composer writes the page css (the shelled /gallery/ route
+    // links /motion.css through BaseLayout, so the link left with the shell).
+    const css = await readFile(join(dir, "index.css"), "utf8").catch(() => "");
     // the contact-sheet tiles tip like loose plates: a hover transform that rotates
     assert.match(
-      html,
+      css,
       /figure img:hover\s*\{[^}]*transform:[^}]*rotate/,
       "gallery tiles should tip (a rotate) under the hand",
+    );
+    assert.match(
+      css,
+      /var\(--paper\)/,
+      "the tip rides the motion desk's shared timing token",
     );
   } finally {
     await rm(dir, { recursive: true, force: true });

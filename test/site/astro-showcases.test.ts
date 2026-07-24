@@ -56,30 +56,34 @@ test("generateShowcases writes the atlas and gallery a deploy expects", { timeou
   rmSync(tmp, { recursive: true, force: true });
   await generateShowcases(tmp);
 
-  for (const [dir, svgCount] of [
-    ["atlas", 10],
-    ["gallery", 12],
-  ] as const) {
-    const index = join(tmp, dir, "index.html");
-    assert.ok(existsSync(index), `${dir}/index.html should exist`);
-    const html = readFileSync(index, "utf8");
-    assert.ok(html.includes('href="/fonts.css"'), `${dir} links the root-absolute fonts.css it hard-depends on`);
-    assert.ok(html.includes('href="/motion.css"'), `${dir} links the root-absolute motion.css it hard-depends on`);
-    const svgs = readdirSync(join(tmp, dir)).filter((f) => f.endsWith(".svg"));
-    assert.equal(svgs.length, svgCount, `${dir} should hold ${svgCount} SVGs`);
-  }
-  // Identity pins (green from the start by design, like Sub 2's boundary
+  // The atlas stays a self-shelled generated document (out of #268's scope).
+  const atlasIndex = join(tmp, "atlas", "index.html");
+  assert.ok(existsSync(atlasIndex), "atlas/index.html should exist");
+  const atlasHtml = readFileSync(atlasIndex, "utf8");
+  assert.ok(atlasHtml.includes('href="/fonts.css"'), "atlas links the root-absolute fonts.css it hard-depends on");
+  assert.ok(atlasHtml.includes('href="/motion.css"'), "atlas links the root-absolute motion.css it hard-depends on");
+  const atlasSvgs = readdirSync(join(tmp, "atlas")).filter((f) => f.endsWith(".svg"));
+  assert.equal(atlasSvgs.length, 10, "atlas should hold 10 SVGs");
+  // Identity pin (green from the start by design, like Sub 2's boundary
   // guards): counts alone would pass a wrong-seed showcase. The atlas title
   // carries the seed-42 hero world's deterministic name, so a wrong seed or a
-  // silent re-roll changes it; the gallery title pins its seed and count.
+  // silent re-roll changes it.
   assert.ok(
-    readFileSync(join(tmp, "atlas", "index.html"), "utf8").includes("The Isle of Rahai: a Vellum atlas"),
+    atlasHtml.includes("The Isle of Rahai: a Vellum atlas"),
     "the atlas must be the seed-42 hero world's bound volume",
   );
-  assert.ok(
-    readFileSync(join(tmp, "gallery", "index.html"), "utf8").includes("12 worlds from seed 100"),
-    "the gallery must be the ratified seed-100, count-12 contact sheet",
-  );
+
+  // The gallery is a shelled Astro route since #268, so its generated tree is
+  // assets alone: the chart SVGs and the page css, never an index.html that
+  // would collide with the route in dist/.
+  const galleryFiles = readdirSync(join(tmp, "gallery"));
+  assert.equal(galleryFiles.filter((f) => f.endsWith(".svg")).length, 12, "gallery should hold 12 SVGs");
+  assert.ok(galleryFiles.includes("index.css"), "gallery should hold the generated page css");
+  assert.ok(!galleryFiles.includes("index.html"), "the standalone gallery shell retired with the #268 re-shell");
+  // Identity pins: the ratified seed-100, count-12 contact sheet on its prime
+  // stride (7919), pinned by the first and last card filenames.
+  assert.ok(galleryFiles.includes("chart-100.svg"), "the first card must be seed 100");
+  assert.ok(galleryFiles.includes(`chart-${100 + 11 * 7919}.svg`), "the last card must sit 11 prime strides along");
   rmSync(tmp, { recursive: true, force: true });
 });
 
@@ -89,7 +93,7 @@ test("the no-arg CLI generates into ./public relative to CWD (the exact astro:ge
   mkdirSync(scratch, { recursive: true });
   execFileSync(process.execPath, [root("scripts/generate-showcases.ts")], { cwd: scratch });
   assert.ok(existsSync(join(scratch, "public", "atlas", "index.html")), "the CLI should write <cwd>/public/atlas");
-  assert.ok(existsSync(join(scratch, "public", "gallery", "index.html")), "the CLI should write <cwd>/public/gallery");
+  assert.ok(existsSync(join(scratch, "public", "gallery", "index.css")), "the CLI should write <cwd>/public/gallery");
   rmSync(scratch, { recursive: true, force: true });
 });
 

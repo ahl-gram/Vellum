@@ -14,11 +14,15 @@ export interface NavItem {
   readonly kind: "room" | "reference" | "daily";
 }
 
+// The Running Head set (#268): Home drops out (the wordmark carries the home
+// link) and its slot goes to the re-shelled Gallery; FAQ reads "Q & A" in the
+// nav, "Questions & Answers" in its title. Labels stay mixed-case: the Fell SC
+// cut sets the small caps.
 export const NAV_ITEMS: readonly NavItem[] = [
-  { label: "Home", href: "/", kind: "reference" },
   { label: "Today", href: "/seed-of-the-day/", kind: "daily" },
   { label: "Explorer", href: "/explorer/", kind: "room" },
   { label: "Print Room", href: "/print-room/", kind: "room" },
-  { label: "FAQ", href: "/faq/", kind: "reference" },
+  { label: "Gallery", href: "/gallery/", kind: "room" },
+  { label: "Q & A", href: "/faq/", kind: "reference" },
   { label: "Glossary", href: "/glossary/", kind: "reference" },
 ];

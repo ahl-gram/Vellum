@@ -24,7 +24,7 @@ rose, a sea serpent, and a title cartouche.
 | **[Seed of the Day](https://vellum.route12b.net/seed-of-the-day/)** | Today's world, the same for everyone, plus the Daily Hunt |
 | **[Atlas](https://vellum.route12b.net/atlas/)** | The hero world (seed 42) as a bound volume |
 | **[Gallery](https://vellum.route12b.net/gallery/)** | A twelve-world contact sheet |
-| **[FAQ](https://vellum.route12b.net/faq/)** · **[Glossary](https://vellum.route12b.net/glossary/)** | How it all works; the vocabulary printed on the charts |
+| **[Q & A](https://vellum.route12b.net/faq/)** · **[Glossary](https://vellum.route12b.net/glossary/)** | How it all works; the vocabulary printed on the charts |
 
 The daily seed is the current UTC date read as an integer `YYYYMMDD`, so
 everyone sees the same world on the same calendar day, and the page never
@@ -35,7 +35,7 @@ needs a rebuild: it draws itself in your browser when you load it.
 Every chart is reproducible from the number printed in its corner. The root
 `<svg>` embeds its full recipe as `data-vellum-*` attributes, and re-rendering
 that recipe reproduces the map byte for byte. The
-[FAQ](https://vellum.route12b.net/faq/) covers seeds, determinism, and how to
+[Q & A](https://vellum.route12b.net/faq/) covers seeds, determinism, and how to
 reproduce a saved chart in detail.
 
 ## The styles
@@ -166,9 +166,9 @@ site that serves it.
 - **The engine** (the `src/` world/render/atlas tree) has zero runtime
   dependencies. Node 24+ runs its TypeScript directly (`erasableSyntaxOnly`),
   no build step, and the CLI and tests run the same way.
-- **The site** takes dependencies where they earn their keep. All six pages
-  (home, FAQ, glossary, Explorer, Print Room, Seed of the Day) are Astro pages
-  rendered through one shared layout (`src/pages/` + `src/layouts/`); the app
+- **The site** takes dependencies where they earn their keep. All seven pages
+  (home, Q & A, Glossary, Explorer, Print Room, Seed of the Day, Gallery) are
+  Astro pages rendered through one shared layout (`src/pages/` + `src/layouts/`); the app
   surfaces' code is TypeScript in `src/site/`, one language with the engine it
   imports. One bundler, Vite, compiles the app and engine graph together into
   the three app entries and the shared render worker, which is where the
