@@ -1,7 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildSurvey } from "../../src/render/survey.ts";
-import { prepareVoyageRouter, routeVoyage } from "../../src/render/voyage-route.ts";
+import { prepareVoyageRouter, routeVoyage, type RoutedLeg } from "../../src/render/voyage-route.ts";
+import { INLAND_STUB_CELLS } from "../../src/render/voyage-water.ts";
+import { buildLegGeometry, pointAtDistance } from "../../src/render/voyage-geometry.ts";
 import { buildVoyagePlan, reorderPlanByTravel } from "../../src/render/voyage.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
@@ -68,6 +70,59 @@ test("legLength: deterministic across two prepared routers", () => {
   for (const leg of isle.plan.legs) {
     assert.equal(a.legLength(leg.fromIdx, leg.toIdx), b.legLength(leg.fromIdx, leg.toIdx));
   }
+});
+
+test("water span (#181): sea legs carry the span, coastal stubs stay short, and the pond-decoy port is the isle's one genuine inland handoff", () => {
+  const router = prepareVoyageRouter(isle.sites, isle.s);
+  const plan = reorderPlanByTravel(isle.plan, router.legLength);
+  const routed = plan.legs.map((l) => router.route(l));
+  const { gridW: w, gridH: h, land } = isle.s;
+
+  // Within RDP tolerance of some sea cell: the span's edges must hug the water.
+  const nearSea = (p: Pt): boolean => {
+    const cx = Math.round(p.x);
+    const cy = Math.round(p.y);
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -2; dx <= 2; dx++) {
+        const x = cx + dx;
+        const y = cy + dy;
+        if (x < 0 || x >= w || y < 0 || y >= h) continue;
+        if (land[x + y * w] === 0 && Math.hypot(p.x - x, p.y - y) <= 1.3) return true;
+      }
+    }
+    return false;
+  };
+  const at = (l: RoutedLeg, frac: number): Pt => {
+    const g = buildLegGeometry(l.points);
+    return pointAtDistance(g, frac * g.total);
+  };
+
+  const handoffs: RoutedLeg[] = [];
+  for (const l of routed) {
+    if (l.mode !== "sea") {
+      assert.equal(l.water, null, "only sea legs carry a water span");
+      assert.equal(l.inlandHandoff, false, "only sea legs can hand off");
+      continue;
+    }
+    assert.ok(l.water, `sea leg ${l.fromIdx}->${l.toIdx} must carry its water span`);
+    const { from, to } = l.water!;
+    assert.ok(from > 0 && from < to && to < 1, `span must sit strictly inside the leg: ${from}..${to}`);
+    assert.ok(nearSea(at(l, from)) && nearSea(at(l, to)), "the span's edges sit at the water");
+    const len = polylineLength(l.points);
+    if (l.inlandHandoff) {
+      handoffs.push(l);
+    } else {
+      assert.ok(from * len < INLAND_STUB_CELLS, `coastal embark stub rides ${from * len} cells`);
+      assert.ok((1 - to) * len < INLAND_STUB_CELLS, `coastal landfall stub rides ${(1 - to) * len} cells`);
+    }
+  }
+
+  assert.equal(handoffs.length, 1, "the isle has exactly one genuine inland handoff");
+  const handoff = handoffs[0]!;
+  const name = new Map(plan.ports.map((p) => [p.idx, p.name]));
+  assert.equal(name.get(handoff.toIdx), "Thilthoport", "it is the pond-decoy port from #120's notes");
+  const len = polylineLength(handoff.points);
+  assert.ok((1 - handoff.water!.to) * len > 10, "its landfall stub rides more than 10 cells overland");
 });
 
 test("seed 12: the travel-ordered itinerary rides far fewer miles than the straight-line one", () => {

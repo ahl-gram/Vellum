@@ -9,6 +9,7 @@ import {
   resolveFacing,
   netFacing,
   legDurations,
+  markGlyphAt,
   MAX_TILT,
   LOOKAHEAD,
   FACING_DEADBAND,
@@ -266,4 +267,23 @@ test("legDurations anchors the near-town baseline near half a second", () => {
   // A ~120px near-town leg should run in the ballpark the short legs already felt good at.
   const [near] = legDurations([120]);
   assert.ok(near! > 350 && near! < 750, `near-town leg ran ${near}ms, outside the ~0.5s baseline`);
+});
+
+// --- the mark's glyph by water span (#181) ----------------------------------
+
+test("markGlyphAt: the ship sails only the water span; both overland stubs ride", () => {
+  const span = { from: 0.3, to: 0.9 };
+  assert.equal(markGlyphAt("sea", span, 0.1), "rider", "the embark stub rides");
+  assert.equal(markGlyphAt("sea", span, 0.3), "ship", "the mark embarks AT the water's edge");
+  assert.equal(markGlyphAt("sea", span, 0.6), "ship", "open water sails");
+  assert.equal(markGlyphAt("sea", span, 0.9), "ship", "the mark lands AT the water's edge");
+  assert.equal(markGlyphAt("sea", span, 0.95), "rider", "the landfall stub rides");
+});
+
+test("markGlyphAt: a spanless sea leg keeps the whole-leg ship; land modes always ride", () => {
+  assert.equal(markGlyphAt("sea", null, 0.5), "ship", "no span degrades to #120's whole-leg ship");
+  for (const t of [0, 0.5, 1]) {
+    assert.equal(markGlyphAt("road", { from: 0.3, to: 0.9 }, t), "rider", "a road leg never sails");
+    assert.equal(markGlyphAt("straight", null, t), "rider", "a straight leg never sails");
+  }
 });

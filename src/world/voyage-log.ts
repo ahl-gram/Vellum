@@ -14,7 +14,9 @@ import type { LegMode } from "../render/voyage-route.ts";
  * the golden checksum untouched (golden-seed42.test.ts holds the line).
  *
  * It consumes the leg `mode` from #120: a sea arrival reads as a voyage, a road (or the
- * degraded "straight") arrival as a ride, and the origin as a departure. The plan's leg
+ * degraded "straight") arrival as a ride, and the origin as a departure. Since #181 a
+ * sea arrival whose leg rode a genuine overland stub (`inlandHandoff`) narrates the
+ * full ride-sail-ride instead, in the ratified three-part shape. The plan's leg
  * geometry is untouched (that is #118/#120 territory); only the prose lives here.
  *
  * The scrollable panel + the reveal-per-arrival wiring live in src/site/explorer/voyage.ts
@@ -22,13 +24,17 @@ import type { LegMode } from "../render/voyage-route.ts";
  */
 
 /** A port in visit order, carrying the mode of the leg that ARRIVED at it. The origin
- *  has no arriving leg, so its arrivalMode is null (it departs, it does not arrive). */
+ *  has no arriving leg, so its arrivalMode is null (it departs, it does not arrive).
+ *  `inlandHandoff` (#181) is true when that arriving leg rode a genuine overland stub
+ *  to or from the water (RoutedLeg.inlandHandoff), which earns the ride-sail-ride
+ *  narrative below in place of the plain sea arrival. */
 export type VoyageLogPort = {
   readonly idx: number;
   readonly name: string;
   readonly kind: SettlementKind;
   readonly founded: number;
   readonly arrivalMode: LegMode | null;
+  readonly inlandHandoff: boolean;
 };
 
 export type VoyageLogEntry = {
@@ -81,6 +87,18 @@ export const DEPARTURES: readonly string[] = [
   "A gentle wind rose with the sun, and we set the survey in hand.",
   "The morning broke clear over the roads, and we made ready to go.",
   "We watered the horses, blessed the work, and turned our faces outward.",
+];
+
+// #181 (ratified 2026-07-24): a crossing whose port sits genuinely inland reads as the
+// full ride-sail-ride it draws: "We rode from X to the coast, took ship, and made
+// landfall below Y, a town standing since N, <closing>." Each closing completes that
+// sentence, so every entry is a participle or trailing clause, never a fresh sentence.
+export const HANDOFF_CLOSINGS: readonly string[] = [
+  "riding the last miles to its gates before dark",
+  "and led the horses up from the strand",
+  "the shore party glad to feel dry ground again",
+  "and came up from the water as the light failed",
+  "with the masts small behind us by the time its walls rose",
 ];
 
 // Cycle a pool without repeating until it is exhausted, then wrap. The same idiom as
@@ -141,9 +159,16 @@ export function buildVoyageLog(
   const entries = ports.map((port, i) => {
     const isOrigin = i === 0;
     const mode = isOrigin ? null : port.arrivalMode;
+    // #181: a sea arrival whose leg rode a genuine overland stub narrates all three
+    // parts of what the mark draws: the ride from the previous port to the coast, the
+    // crossing, and the landfall short of the walls. Only a sea leg can hand off, and
+    // the origin never arrives, so both stay on the plain clause below.
     const text =
-      `Year ${presentYear}. ${arrivalVerb(mode)} ${port.name}, ` +
-      `${descriptor(port, isOrigin)}. ${pick(poolFor(mode))}`;
+      !isOrigin && mode === "sea" && port.inlandHandoff
+        ? `Year ${presentYear}. We rode from ${ports[i - 1]!.name} to the coast, took ship, ` +
+          `and made landfall below ${port.name}, ${descriptor(port, false)}, ${pick(HANDOFF_CLOSINGS)}.`
+        : `Year ${presentYear}. ${arrivalVerb(mode)} ${port.name}, ` +
+          `${descriptor(port, isOrigin)}. ${pick(poolFor(mode))}`;
     return { idx: port.idx, year: presentYear, text };
   });
   const n = ports.length;

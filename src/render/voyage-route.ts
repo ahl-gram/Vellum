@@ -3,6 +3,7 @@ import { bfsDistance } from "../core/bfs-distance.ts";
 import { NEIGHBORS_8 } from "../core/grid.ts";
 import { labelComponents } from "../core/mask-components.ts";
 import { simplifyPath, type Pt } from "../core/rdp.ts";
+import { waterSpanOf, type WaterSpan } from "./voyage-water.ts";
 import type { Survey } from "./survey.ts";
 import type { VoyageLeg } from "./voyage.ts";
 
@@ -21,6 +22,11 @@ import type { VoyageLeg } from "./voyage.ts";
  * Since #184 the router is prepared ONCE per survey (prepareVoyageRouter) and also
  * measures pairs (legLength), so the itinerary can be ordered on an all-pairs
  * ACTUAL-travel matrix by the same walk that draws the legs.
+ *
+ * Since #181 a sea leg also carries its water span (voyage-water.ts): the ports are
+ * land, so the mark rides an overland stub at each end of a crossing, and the span
+ * is what lets the overlay swap rider <-> ship at the water's edge instead of
+ * shipping the whole leg.
  *
  * Measured over seeds 1..40 with the travel-ordered itinerary (905 legs): ~70% road,
  * ~24% sea, ~5% straight. Of the sea legs, ~23% are true cross-landmass crossings
@@ -43,6 +49,14 @@ export type Site = { readonly idx: number; readonly x: number; readonly y: numbe
 export type RoutedLeg = VoyageLeg & {
   readonly mode: LegMode;
   readonly points: ReadonlyArray<Pt>;
+  /**
+   * #181: where the water is, as arc-length fractions of `points` (null off sea
+   * legs). The overlay swaps rider <-> ship at these edges instead of keying the
+   * whole leg on `mode`, so an inland port's crossing rides its overland stubs.
+   */
+  readonly water: WaterSpan | null;
+  /** #181: true when either overland stub is long enough to narrate (voyage-water.ts). */
+  readonly inlandHandoff: boolean;
 };
 
 /** Grid cells, so a 0.75 chord tolerance is about three quarters of one cell. */
@@ -200,7 +214,11 @@ export function prepareVoyageRouter(sites: ReadonlyArray<Site>, survey: Survey):
     // away, as the overlay formatting an undefined vertex into the track's `points`.
     if (!a || !b) throw new Error(`voyage leg ${leg.fromIdx} -> ${leg.toIdx} has no site in the manifest`);
     const { mode, cells } = walkLeg(cellOf(a), cellOf(b));
-    return { ...leg, mode, points: simplifyPath(dedupe(cells).map(toPt), RDP_EPSILON) };
+    const chain = dedupe(cells);
+    const points = simplifyPath(chain.map(toPt), RDP_EPSILON);
+    const span =
+      mode === "sea" ? waterSpanOf(chain, points, isSea, w) : { water: null, inlandHandoff: false };
+    return { ...leg, mode, points, water: span.water, inlandHandoff: span.inlandHandoff };
   };
 
   const lengthMemo = new Map<string, number>();

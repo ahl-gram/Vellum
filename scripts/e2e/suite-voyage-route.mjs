@@ -1,9 +1,10 @@
-// Wayfarer's Passage: real routes + the mode-aware marker (W17-W21, #120) and the margin log
-// (W22-W24, #121). The pure rules (mode assignment, road/sea geometry, the tilt cap, anti-flicker
-// facing, and the deterministic mode-aware prose) are proven exhaustively in node:test; these
-// prove they are WIRED into the live overlay + panel. Self-bases on seed 526413615 (a world that
-// both sails and rides) and restores the clean seed-42 base for the suites that follow.
-// Split from suite-voyage.mjs; W prefix kept.
+// Wayfarer's Passage: real routes + the mode-aware marker (W17-W21, #120), the margin log
+// (W22-W24, #121), and the water-span glyph handoff (W25-W27, #181). The pure rules (mode
+// assignment, road/sea geometry, the tilt cap, anti-flicker facing, the span math, and the
+// deterministic mode-aware prose) are proven exhaustively in node:test; these prove they are
+// WIRED into the live overlay + panel. Self-bases on seed 526413615 (a world that both sails
+// and rides), visits seed 39 (the worst inland handoffs), and restores the clean seed-42 base
+// for the suites that follow. Split from suite-voyage.mjs; W prefix kept.
 export async function run(ctx) {
   const { evaluate, check, shoot, waitSettled, sleep } = ctx;
   // ---------------------------------------------------------------------------
@@ -195,14 +196,114 @@ export async function run(ctx) {
     w24.matches && w24.panelOutsideMap && w24.status === w24.summary && w24.summary !== "",
     JSON.stringify(w24));
 
+  // ---------------------------------------------------------------------------
+  // #181 The water span: the mark swaps rider <-> ship at the WATER'S EDGE, not at
+  // the port. The span math is proven in node:test (voyage-water.test.ts); these
+  // prove the span reaches the overlay, the glyph follows it, and the margin log
+  // narrates the genuine inland handoffs (ratified three-part shape).
+  // ---------------------------------------------------------------------------
+
+  // W25: every sea leg carries a span, non-handoff crossings keep their swap at the
+  // port (tiny stub fractions), and this world's one genuine handoff is wired through.
+  const w25 = await evaluate(`(()=>{
+    const legs=window.__vellumVoyageLegGeometry();
+    const sea=legs.filter((l)=>l.mode==="sea");
+    const missing=sea.filter((l)=>!l.water).length;
+    const badOrder=sea.filter((l)=>l.water&&!(l.water.from>0&&l.water.from<l.water.to&&l.water.to<1)).length;
+    const landSpans=legs.filter((l)=>l.mode!=="sea"&&(l.water||l.inlandHandoff)).length;
+    const coastal=sea.filter((l)=>!l.inlandHandoff);
+    const fatStub=coastal.filter((l)=>l.water.from>0.08||l.water.to<0.92).length;
+    const handoffs=sea.filter((l)=>l.inlandHandoff).length;
+    return{seaLegs:sea.length,missing,badOrder,landSpans,fatStub,handoffs};
+  })()`);
+  check("W25 every sea leg ships a sane water span, coastal swaps hug the port, one genuine handoff",
+    w25.seaLegs >= 2 && w25.missing === 0 && w25.badOrder === 0 && w25.landSpans === 0 &&
+    w25.fatStub === 0 && w25.handoffs === 1,
+    JSON.stringify(w25));
+
+  // W26: on the handoff leg (Thilthoport, the pond-decoy port: a ~13 cell landfall
+  // stub), the mark sails mid-span and RIDES the stub, and the port's margin-log entry
+  // narrates the ride-sail-ride instead of a plain sail.
+  const w26 = await evaluate(`(()=>{
+    const legs=window.__vellumVoyageLegGeometry();
+    const n=legs.length;
+    const hi=legs.findIndex((l)=>l.inlandHandoff);
+    const w=legs[hi].water;
+    const glyph=(t)=>{
+      window.__vellumVoyagePaintAt(t);
+      const ship=document.querySelector("#map .voyage-ship");
+      const shown=(el)=>!!el&&el.getAttribute("display")!=="none";
+      return shown(ship)?"ship":"rider";
+    };
+    const onWater=glyph((hi+(w.from+w.to)/2)/n);
+    const onStub=glyph((hi+(w.to+1)/2)/n);
+    const entry=window.__vellumVoyageLog().entries[hi+1].text;
+    return{hi,onWater,onStub,entry};
+  })()`);
+  check("W26 the mark sails the span, rides the landfall stub, and the log narrates the handoff",
+    w26.hi >= 0 && w26.onWater === "ship" && w26.onStub === "rider" &&
+    /rode from .+ to the coast, took ship, and made landfall below/.test(w26.entry) &&
+    !w26.entry.includes("made sail"),
+    JSON.stringify(w26));
+
   await evaluate(`window.__vellumVoyageStepTo(999)`);
   await shoot("explorer-voyage-routed.png");
+
+  // W27: seed 39 carries the worst measured handoffs (2026-07-24: a 26-cell embark
+  // stub into Feniefena and a 48-cell landfall stub into Loriemirmere, back to back),
+  // so it proves the swap in BOTH directions: ride to the shore, sail, ride again.
+  await evaluate(`(()=>{
+    const voy=document.getElementById("voyage");
+    if(voy.checked){voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));}
+    document.getElementById("seed").value="39";
+    document.getElementById("draw").click();
+  })()`);
+  await waitSettled("voyage-181-draw39");
+  await evaluate(`(()=>{const c=document.getElementById("voyage");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+
+  const w27 = await evaluate(`(()=>{
+    const legs=window.__vellumVoyageLegGeometry();
+    const n=legs.length;
+    const hs=legs.map((l,i)=>({l,i})).filter((x)=>x.l.inlandHandoff);
+    if(!hs.length) return{handoffs:0};
+    const emb=hs.reduce((a,b)=>(b.l.water.from>a.l.water.from?b:a));
+    const land=hs.reduce((a,b)=>((1-b.l.water.to)>(1-a.l.water.to)?b:a));
+    const glyph=(t)=>{
+      window.__vellumVoyagePaintAt(t);
+      const ship=document.querySelector("#map .voyage-ship");
+      const shown=(el)=>!!el&&el.getAttribute("display")!=="none";
+      return shown(ship)?"ship":"rider";
+    };
+    const ridesToShore=glyph((emb.i+emb.l.water.from/2)/n);
+    const sails=glyph((emb.i+(emb.l.water.from+emb.l.water.to)/2)/n);
+    const ridesFromLandfall=glyph((land.i+(land.l.water.to+1)/2)/n);
+    const log=window.__vellumVoyageLog();
+    const narrated=[emb.i,land.i].every((i)=>
+      /rode from .+ to the coast, took ship, and made landfall below/.test(log.entries[i+1].text));
+    return{handoffs:hs.length,embFrom:emb.l.water.from,landTo:land.l.water.to,
+      ridesToShore,sails,ridesFromLandfall,narrated};
+  })()`);
+  check("W27 seed 39: the mark rides to the shore, sails the crossing, and rides again on landfall, narrated",
+    w27.handoffs === 2 && w27.embFrom > 0.3 && w27.landTo < 0.7 &&
+    w27.ridesToShore === "rider" && w27.sails === "ship" && w27.ridesFromLandfall === "rider" &&
+    w27.narrated,
+    JSON.stringify(w27));
+
+  // Land the mark mid-stub ashore on the worst handoff for the visual record.
+  await evaluate(`(()=>{
+    const legs=window.__vellumVoyageLegGeometry();
+    const n=legs.length;
+    const hs=legs.map((l,i)=>({l,i})).filter((x)=>x.l.inlandHandoff);
+    const land=hs.reduce((a,b)=>((1-b.l.water.to)>(1-a.l.water.to)?b:a));
+    window.__vellumVoyagePaintAt((land.i+(land.l.water.to+1)/2)/n);
+  })()`);
+  await shoot("explorer-voyage-handoff.png");
 
   // Restore a clean, voyage-off, un-flipped, antique state for the suites that follow.
   await evaluate(`(()=>{const voy=document.getElementById("voyage");if(voy.checked){voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
   await evaluate(`(()=>{const s=document.getElementById("sheet");if(s.classList.contains("versoed"))document.getElementById("verso-turn").click();})()`);
   await sleep(120); // let any turn-back settle before the health checkpoint reads the page
-  // #120's checks draw seed 526413615 (the one world with a sea leg), so put seed 42 back:
+  // This suite draws seeds 526413615 and 39 (worlds that sail), so put seed 42 back:
   // the suites that follow read a page they expect to be showing the golden world.
   await evaluate(`(()=>{document.getElementById("seed").value="42";const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await waitSettled("voyage-restore");

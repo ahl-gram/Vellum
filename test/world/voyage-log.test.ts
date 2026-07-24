@@ -5,6 +5,7 @@ import {
   SEA_ARRIVALS,
   LAND_ARRIVALS,
   DEPARTURES,
+  HANDOFF_CLOSINGS,
   type VoyageLogPort,
 } from "../../src/world/voyage-log.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
@@ -34,6 +35,7 @@ const port = (over: Partial<VoyageLogPort> = {}): VoyageLogPort => ({
   kind: "town",
   founded: 300,
   arrivalMode: "road",
+  inlandHandoff: false,
   ...over,
 });
 
@@ -148,9 +150,50 @@ test("no flavor repeats within one voyage until the pool is exhausted", () => {
 
 test("pools are non-trivial and em-dash free (authored copy sanity)", () => {
   assert.ok(SEA_ARRIVALS.length >= 6 && LAND_ARRIVALS.length >= 6 && DEPARTURES.length >= 3);
-  for (const phrase of [...SEA_ARRIVALS, ...LAND_ARRIVALS, ...DEPARTURES]) {
+  assert.ok(HANDOFF_CLOSINGS.length >= 3, "the handoff narrative has closings to cycle");
+  for (const phrase of [...SEA_ARRIVALS, ...LAND_ARRIVALS, ...DEPARTURES, ...HANDOFF_CLOSINGS]) {
     assert.ok(!phrase.includes("—"), `no em-dash in pool phrase: "${phrase}"`);
   }
+});
+
+// --- the inland handoff narrative (#181, ratified 2026-07-24) -------------------
+
+test("an inland handoff reads as the full ride-sail-ride narrative", () => {
+  const handoff = port({ idx: 2, name: "Meamere", kind: "village", founded: 420, arrivalMode: "sea", inlandHandoff: true });
+  const log = buildVoyageLog([origin, roadTown, handoff], 1059, 42, SUBTITLE);
+  const text = log.entries[2]!.text;
+  assert.match(
+    text,
+    /^Year 1059\. We rode from Haireno to the coast, took ship, and made landfall below Meamere, a village standing since 420, /,
+    `the ratified three-part shape: "${text}"`,
+  );
+  assert.ok(!text.includes("made sail"), `a handoff never reads as a plain sail: "${text}"`);
+  assert.ok(HANDOFF_CLOSINGS.some((c) => text.includes(c)), `the closing comes from the pool: "${text}"`);
+});
+
+test("the narrative names the PREVIOUS port: the ride to the coast departs where the survey last stood", () => {
+  const other = port({ idx: 5, name: "Farhold", kind: "town", founded: 700, arrivalMode: "road" });
+  const handoff = port({ idx: 2, name: "Meamere", kind: "village", founded: 420, arrivalMode: "sea", inlandHandoff: true });
+  const log = buildVoyageLog([origin, other, handoff], 1059, 42, SUBTITLE);
+  const text = log.entries[2]!.text;
+  assert.ok(text.includes("rode from Farhold"), `the ride departs the previous port: "${text}"`);
+});
+
+test("only a sea arrival can hand off: the flag on a road leg still reads as a ride", () => {
+  const rode = port({ idx: 1, name: "Haireno", kind: "village", founded: 860, arrivalMode: "road", inlandHandoff: true });
+  const log = buildVoyageLog([origin, rode], 1059, 42, SUBTITLE);
+  const text = log.entries[1]!.text;
+  assert.ok(text.includes("rode on"), `a road arrival rides: "${text}"`);
+  assert.ok(!text.includes("took ship"), `a road arrival never ships: "${text}"`);
+});
+
+test("handoff closings cycle without repeating until the pool is exhausted", () => {
+  const n = HANDOFF_CLOSINGS.length;
+  const handoffs = Array.from({ length: n }, (_, i) =>
+    port({ idx: i + 1, name: "Same", kind: "town", founded: 500, arrivalMode: "sea", inlandHandoff: true }));
+  const texts = buildVoyageLog([origin, ...handoffs], 1059, 42, SUBTITLE).entries.slice(1).map((e) => e.text);
+  for (const text of texts) assert.ok(text.includes("took ship"), `every handoff narrates: "${text}"`);
+  assert.equal(new Set(texts).size, n, "each handoff draws a fresh closing until the pool empties");
 });
 
 test("empty survey yields an attributed but empty log", () => {
@@ -177,6 +220,7 @@ test("on a real routed world the mode-aware voice reaches the right ports (seed 
       kind: pm.kind,
       founded: pm.founded,
       arrivalMode: i === 0 ? null : routed[i - 1]!.mode,
+      inlandHandoff: i === 0 ? false : routed[i - 1]!.inlandHandoff,
     };
   });
   const log = buildVoyageLog(logPorts, manifest.presentYear, world.recipe.seed, world.title.subtitle);

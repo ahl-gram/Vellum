@@ -1,4 +1,6 @@
 import type { Pt } from "../core/rdp.ts";
+import type { LegMode } from "./voyage-route.ts";
+import type { WaterSpan } from "./voyage-water.ts";
 
 /**
  * The moving mark's geometry (#120). Pure, DOM-free, so the overlay in
@@ -168,4 +170,18 @@ export function netFacing(points: ReadonlyArray<Pt>): Facing {
   if (points.length < 2) return 1;
   const dx = (points[points.length - 1] as Pt).x - (points[0] as Pt).x;
   return dx < 0 ? -1 : 1;
+}
+
+export type MarkGlyph = "ship" | "rider";
+
+/**
+ * Which glyph the mark shows at `legT` (the 0..1 arc fraction along the leg): a
+ * ship only while inside the leg's water span, a rider everywhere else (#181).
+ * A sea leg without a span keeps #120's whole-leg ship, so a degenerate span
+ * degrades to the old behavior rather than to a swimming horse.
+ */
+export function markGlyphAt(mode: LegMode, water: WaterSpan | null, legT: number): MarkGlyph {
+  if (mode !== "sea") return "rider";
+  if (!water) return "ship";
+  return legT >= water.from && legT <= water.to ? "ship" : "rider";
 }
