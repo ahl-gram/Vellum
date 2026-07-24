@@ -22,14 +22,14 @@ input[type="number"], select, button {
 }
 input[type="number"] { width: 8.5rem; }
 button { cursor: pointer; }
-button:hover { background: #fff7e4; }
+button:hover { background: var(--parchment-bright); }
 button.primary { background: var(--ink-dark); color: #f2e8cf; letter-spacing: 0.08em; }
 button.primary:hover { background: #5d4831; }
 
 /* The inline-fallback notice: a pinned-slip aside, not an alarm. */
 .warning { max-width: 640px; margin: 0 auto 0.4rem; text-align: center;
   font-size: 0.85rem; font-style: italic; color: #7a5c2e;
-  background: #f4ecd8; border: 1px solid #cdbd97; border-radius: 4px;
+  background: var(--parchment-panel); border: 1px solid var(--line-faint); border-radius: 4px;
   padding: 0.6rem 0.9rem; }
 .warning[hidden] { display: none; }
 
@@ -64,7 +64,7 @@ button.primary:hover { background: #5d4831; }
 .desk-head { text-align: center; font-size: 0.82rem; letter-spacing: 0.18em;
   text-transform: uppercase; color: var(--ink-brown); margin: 0 0 1.2rem; font-weight: 700; }
 .offerings { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; align-items: stretch; }
-.offering { border: 1px solid #cdbd97; border-radius: 6px; background: #f4ecd8;
+.offering { border: 1px solid var(--line-faint); border-radius: 6px; background: var(--parchment-panel);
   padding: 1.2rem 1.1rem; display: flex; flex-direction: column; text-align: center; }
 .offering-head { font-size: 1rem; letter-spacing: 0.06em; margin: 0 0 0.4rem; color: var(--ink-dark); }
 /* min-height aligns where the two cards' controls begin even when the intros wrap differently. */
@@ -83,7 +83,7 @@ button.primary:hover { background: #5d4831; }
 .plate { display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
   min-width: 5rem; padding: 0.55rem 0.85rem; letter-spacing: 0.06em; line-height: 1.2; }
 .plate-dim { font-size: 0.72rem; font-style: italic; letter-spacing: 0.04em; color: var(--ink-faded); }
-.plate:hover:not(:disabled) { background: #fff7e4; }
+.plate:hover:not(:disabled) { background: var(--parchment-bright); }
 .plate:disabled { cursor: default; opacity: 0.45; }
 .plate:disabled .plate-dim { color: #a1926f; }
 

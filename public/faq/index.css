@@ -11,7 +11,7 @@ main { max-width: 760px; }
 header { margin-bottom: 1rem; }
 h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   padding-bottom: 0.3rem; margin-top: 2.8rem; }
-.toc { background: #f4ecd8; border: 1.5px solid var(--line-tan); border-radius: 4px;
+.toc { background: var(--parchment-panel); border: 1.5px solid var(--line-tan); border-radius: 4px;
   padding: 1rem 1.4rem; margin: 2rem 0 1rem; }
 .toc strong { letter-spacing: 0.08em; font-size: 0.8rem; color: var(--ink-faded);
   display: block; margin-bottom: 0.4rem; text-transform: uppercase; }
@@ -21,6 +21,6 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   font-size: 1.08rem; }
 .a { margin: 0; }
 a { color: var(--ink-brown); }
-code { background: #e6d9b8; padding: 0.1em 0.4em; border-radius: 3px;
+code { background: var(--parchment-deep); padding: 0.1em 0.4em; border-radius: 3px;
   font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
 footer { margin-top: 4rem; }

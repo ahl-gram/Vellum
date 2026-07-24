@@ -41,8 +41,8 @@ figure { margin: 0; }
    offset (--pos, #126) is defined once and the entry keyframe layers scale + rotate
    onto it; collapses under the shared prefers-reduced-motion rule in /motion.css. */
 .hunt-star { position: absolute; --pos: translate(-50%, -50%); transform: var(--pos);
-  color: #7a1f12; font-size: 1.7rem; line-height: 1; pointer-events: none;
-  text-shadow: 0 0 4px #fff7e4, 0 1px 2px rgb(61 47 31 / 0.5); }
+  color: var(--iron-red); font-size: 1.7rem; line-height: 1; pointer-events: none;
+  text-shadow: 0 0 4px var(--parchment-bright), 0 1px 2px rgb(61 47 31 / 0.5); }
 .hunt-star.stamp { animation: huntStarIn var(--paper-settle) var(--ease-paper) both; }
 @keyframes huntStarIn {
   from { opacity: 0; transform: var(--pos) scale(0.2) rotate(-40deg); }
@@ -137,9 +137,9 @@ figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
 .blurb { max-width: 44rem; margin: 1.2rem auto 0; }
 .actions { text-align: center; margin-top: 1.6rem; }
 .actions a { display: inline-block; border: 1.5px solid var(--ink-dark); border-radius: 4px;
-  padding: 0.5rem 1rem; background: #f4ecd8; text-decoration: none; color: inherit;
+  padding: 0.5rem 1rem; background: var(--parchment-panel); text-decoration: none; color: inherit;
   letter-spacing: 0.04em; }
-.actions a:hover { background: #fff7e4; }
+.actions a:hover { background: var(--parchment-bright); }
 /* #88: keep the map and the hunt visible together. On wide screens they sit
    side by side, so the warmer/colder line lives in the right column, always in
    view; the panel is sticky so it trails a taller map as you scroll. On narrow
@@ -156,13 +156,13 @@ figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
 @media (max-width: 759px) {
   .hunt-sticky.active {
     display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
-    background: var(--ink-dark); color: #f4ecd8; text-align: center;
+    background: var(--ink-dark); color: var(--parchment-panel); text-align: center;
     padding: 0.7rem 1rem; font-weight: 700; letter-spacing: 0.03em;
     box-shadow: 0 -4px 16px rgb(61 47 31 / 0.32);
   }
 }
 .hunt { max-width: 44rem; margin: 2rem auto 0; padding: 1.4rem 1.6rem;
-  border: 1px solid var(--line-tan); border-radius: 6px; background: #f4ecd8; }
+  border: 1px solid var(--line-tan); border-radius: 6px; background: var(--parchment-panel); }
 .hunt h2 { text-align: center; font-size: 1.2rem; letter-spacing: 0.06em;
   margin: 0 0 0.4rem; }
 .hunt-intro { text-align: center; font-size: 0.92rem; color: var(--ink-brown);
@@ -171,17 +171,17 @@ figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
   font-style: italic; color: var(--ink-dark); }
 .clues li { margin: 0.3rem 0; }
 .hunt-status { text-align: center; min-height: 1.4rem; font-weight: 700;
-  letter-spacing: 0.03em; color: #7a1f12; margin: 1rem 0 0; }
+  letter-spacing: 0.03em; color: var(--iron-red); margin: 1rem 0 0; }
 .reveal { margin-top: 1rem; padding: 1rem 1.2rem; border-radius: 4px;
-  background: #fff7e4; border: 1px solid #d8c79c; }
+  background: var(--parchment-bright); border: 1px solid #d8c79c; }
 .reveal strong { display: block; font-size: 1.1rem; margin-bottom: 0.4rem; }
 .reveal p { margin: 0; font-style: italic; color: var(--ink-dark); }
 .hunt-actions { text-align: center; margin-top: 1.2rem; display: flex;
   gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap; }
 #share, #dispatch { border: 1.5px solid var(--ink-dark); border-radius: 4px; padding: 0.5rem 1rem;
-  background: #f4ecd8; color: inherit; letter-spacing: 0.04em; cursor: pointer;
+  background: var(--parchment-panel); color: inherit; letter-spacing: 0.04em; cursor: pointer;
   font: inherit; }
-#share:hover, #dispatch:hover { background: #fff7e4; }
+#share:hover, #dispatch:hover { background: var(--parchment-bright); }
 .streak { font-size: 0.9rem; color: var(--ink-brown); }
 .note { text-align: center; color: var(--ink-faded); font-size: 0.85rem; margin-top: 1rem; }
 footer { margin-top: 4rem; }

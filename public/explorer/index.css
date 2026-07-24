@@ -57,7 +57,7 @@ button { cursor: pointer; }
 /* Exclude the invisible .place-hit overlay (its hover ring is an ::after, #128), the
    same way motion.css excludes it from the universal lift; otherwise this cream would
    paint an opaque box over each map glyph on hover. */
-button:not(.place-hit):hover { background: #fff7e4; }
+button:not(.place-hit):hover { background: var(--parchment-bright); }
 button.primary { background: var(--ink-dark); color: #f2e8cf; letter-spacing: 0.08em; }
 button.primary:hover { background: #5d4831; }
 .status { text-align: center; font-style: italic; color: var(--ink-faded);
@@ -97,7 +97,7 @@ button.primary:hover { background: #5d4831; }
   display: flex; align-items: center; justify-content: center;
   background: rgb(247 237 207 / 0.92); border: 1px solid var(--line-tan); color: var(--ink-dark);
 }
-.zoom-controls button:hover { background: #fff7e4; }
+.zoom-controls button:hover { background: var(--parchment-bright); }
 /* #170: the keys legend, Sub 4's handoff resolved (Alex's call: a small visible slip by
    the cluster, the only form a sighted mouse user can DISCOVER without hover). It is
    aria-hidden: the same keys are already announced by the #map-viewport aria-label, so
@@ -397,7 +397,7 @@ button.primary:hover { background: #5d4831; }
 /* #128: a row that has come to pass brightens AND slides a hair to the right, like
    an entry inked into the ledger as its year arrives. */
 .chronicle-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
-  border-bottom: 1px solid #cdbd97; opacity: 0.4;
+  border-bottom: 1px solid var(--line-faint); opacity: 0.4;
   transition: opacity 0.18s, transform 0.18s; }
 .chronicle-strip li.past { opacity: 1; transform: translateX(2px); }
 .chronicle-strip .cr-year { flex: 0 0 3rem; text-align: right;
@@ -415,11 +415,11 @@ button.primary:hover { background: #5d4831; }
   background: #f3ead2; border: 1px solid var(--line-tan); border-radius: 6px;
   padding: 0.8rem 1rem; }
 .voyage-log-sig { margin: 0 0 0.5rem; font-style: italic; color: var(--ink-brown);
-  border-bottom: 1px solid #cdbd97; padding-bottom: 0.5rem; }
+  border-bottom: 1px solid var(--line-faint); padding-bottom: 0.5rem; }
 .voyage-log-strip { list-style: none; margin: 0; padding: 0;
   max-height: 32rem; overflow-y: auto; }
 .voyage-log-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
-  border-bottom: 1px solid #cdbd97; opacity: 0.4;
+  border-bottom: 1px solid var(--line-faint); opacity: 0.4;
   transition: opacity 0.18s, transform 0.18s; }
 .voyage-log-strip li.logged { opacity: 1; transform: translateX(2px); }
 .voyage-log-strip .cr-year { flex: 0 0 3rem; text-align: right;

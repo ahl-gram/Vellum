@@ -79,10 +79,15 @@ const isHome = path === "/";
    are deliberately no longer the same hex. Guarded by
    test/site/shell-css.test.ts. */
 :root {
-  --ink-dark: #4a3826;   /* dark walnut ink: borders, buttons, emphasis */
-  --ink-brown: #6b5a40;  /* flourish brown: taglines, captions, asides */
-  --ink-faded: #857257;  /* faded ink: nav, footer, small labels */
-  --line-tan: #b9a77f;   /* pale tan hairline: rules and frame borders */
+  --ink-dark: #4a3826;         /* dark walnut ink: borders, buttons, prose, emphasis */
+  --ink-brown: #6b5a40;        /* flourish brown: taglines, captions, asides */
+  --ink-faded: #857257;        /* faded ink: nav, footer, small labels */
+  --line-tan: #b9a77f;         /* pale tan hairline: rules and frame borders */
+  --parchment: #efe6cf;        /* the page ground every sheet rests on */
+  --parchment-panel: #f4ecd8;  /* raised panels, cards, and pinned slips */
+  --parchment-bright: #fff7e4; /* the lit cream: hovers and the reveal */
+  --parchment-deep: #e6d9b8;   /* the pressed tan: code chips */
+  --line-faint: #cdbd97;       /* the softer hairline, a shade lighter than --line-tan */
 }
 /* The shell dresses once (#263), part A: the rules every page shell shares,
    extracted move-and-delete from the six page css files. Per-page values stay
@@ -96,7 +101,7 @@ const isHome = path === "/";
 :root { color-scheme: light; }
 body {
   margin: 0;
-  background: #efe6cf; color: var(--ink-dark);
+  background: var(--parchment); color: var(--ink-dark);
   font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
 main { margin-inline: auto; }

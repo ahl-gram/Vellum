@@ -33,6 +33,11 @@ const TOKENS: Record<string, string> = {
   "--ink-brown": "#6b5a40",
   "--ink-faded": "#857257",
   "--line-tan": "#b9a77f",
+  "--parchment": "#efe6cf",
+  "--parchment-panel": "#f4ecd8",
+  "--parchment-bright": "#fff7e4",
+  "--parchment-deep": "#e6d9b8",
+  "--line-faint": "#cdbd97",
 };
 
 // Retired inks (PR #269 review, item 4): the old body-text and voyage-track

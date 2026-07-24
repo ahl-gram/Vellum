@@ -37,7 +37,7 @@ figcaption { text-align: center; font-style: italic; color: var(--ink-brown); pa
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.4rem; margin-top: 1.5rem; }
 @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
 .card { display: block; border: 1.5px solid var(--ink-dark); border-radius: 4px;
-  padding: 1.4rem 1.6rem; background: #f4ecd8; text-decoration: none; color: inherit;
+  padding: 1.4rem 1.6rem; background: var(--parchment-panel); text-decoration: none; color: inherit;
   box-shadow: 0 6px 18px rgb(61 47 31 / 0.12); }
 .card:hover { background: #f8f1e0; }
 .card h3 { margin: 0 0 0.4rem; letter-spacing: 0.05em; }
@@ -46,7 +46,7 @@ figcaption { text-align: center; font-style: italic; color: var(--ink-brown); pa
 .underhood { font-style: italic; color: var(--ink-brown); font-size: 0.92rem;
   line-height: 1.6; max-width: 46rem; margin-top: 0.5rem; }
 .underhood a { color: #7a5c2e; }
-code { background: #e6d9b8; padding: 0.1em 0.4em; border-radius: 3px;
+code { background: var(--parchment-deep); padding: 0.1em 0.4em; border-radius: 3px;
   font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
 /* Landing-page footer deviations (#263): grander size and spacing, pinned
    above the shell rule for the same cascade reason as the masthead pins. */
