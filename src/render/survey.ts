@@ -26,6 +26,32 @@ export type Survey = {
   readonly roads: ReadonlyArray<SurveyRoad>;
 };
 
+/**
+ * A cheap stable fingerprint of the survey's walkable facts: dimensions, the land
+ * mask, and every road vertex (FNV-1a, 32-bit). #184: the Explorer keys its cached
+ * travel order on it, so a cached itinerary is reused only when the world the router
+ * would walk is byte-identical, and the order at rest stays a pure function of the
+ * world rather than of the interaction path that led there.
+ */
+export function surveyFingerprint(s: Survey): number {
+  let h = 0x811c9dc5;
+  const mix = (v: number) => {
+    h = Math.imul(h ^ (v & 0xff), 0x01000193) >>> 0;
+    h = Math.imul(h ^ ((v >>> 8) & 0xff), 0x01000193) >>> 0;
+  };
+  mix(s.gridW);
+  mix(s.gridH);
+  for (let i = 0; i < s.land.length; i++) h = Math.imul(h ^ (s.land[i] as number), 0x01000193) >>> 0;
+  for (const polyline of s.roads) {
+    mix(polyline.length);
+    for (const [x, y] of polyline) {
+      mix(x);
+      mix(y);
+    }
+  }
+  return h >>> 0;
+}
+
 export function buildSurvey(elev: Field, seaLevel: number, roads: ReadonlyArray<Road>): Survey {
   const { w, h, data } = elev;
   const land = new Uint8Array(w * h);

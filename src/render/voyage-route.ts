@@ -18,9 +18,15 @@ import type { VoyageLeg } from "./voyage.ts";
  * neighbour order; the only float math is the RDP simplification, which is
  * presentation-only and never reaches a baked SVG.
  *
- * Measured over seeds 1..40 (905 legs): ~71% road, ~24% sea, ~5% straight. Of the sea legs,
- * 6% are true cross-landmass crossings and the rest are coastal shortcuts the survey sails
- * rather than ride a long inland road around (SAIL_WHEN_ROAD_EXCEEDS).
+ * Since #184 the router is prepared ONCE per survey (prepareVoyageRouter) and also
+ * measures pairs (legLength), so the itinerary can be ordered on an all-pairs
+ * ACTUAL-travel matrix by the same walk that draws the legs.
+ *
+ * Measured over seeds 1..40 with the travel-ordered itinerary (905 legs): ~70% road,
+ * ~24% sea, ~5% straight. Of the sea legs, ~23% are true cross-landmass crossings
+ * (the ordering makes island visits adjacent, so a crossing is spent once, not
+ * scattered) and the rest are coastal shortcuts the survey sails rather than ride a
+ * long inland road around (SAIL_WHEN_ROAD_EXCEEDS).
  */
 
 export type LegMode = "road" | "sea" | "straight";
@@ -91,13 +97,19 @@ function chainLength(cells: ReadonlyArray<number>, w: number): number {
   return d;
 }
 
-export function routeVoyage(
-  legs: ReadonlyArray<VoyageLeg>,
-  sites: ReadonlyArray<Site>,
-  survey: Survey,
-): ReadonlyArray<RoutedLeg> {
-  if (legs.length === 0) return [];
+/**
+ * A router prepared once over a survey (#184). `route` draws a leg exactly as
+ * routeVoyage always has; `legLength` measures a pair's actual routed travel in grid
+ * cells, on the RAW cell walk (no simplification), always walked lower-idx-first so
+ * the matrix is symmetric by construction. Both share one walk, so the itinerary is
+ * ordered by exactly the miles the drawn legs ride.
+ */
+export type VoyageRouter = {
+  readonly route: (leg: VoyageLeg) => RoutedLeg;
+  readonly legLength: (fromIdx: number, toIdx: number) => number;
+};
 
+export function prepareVoyageRouter(sites: ReadonlyArray<Site>, survey: Survey): VoyageRouter {
   const { gridW: w, gridH: h, land } = survey;
   const byIdx = new Map(sites.map((s) => [s.idx, s]));
   const cellOf = (s: Site) => s.x + s.y * w;
@@ -126,29 +138,29 @@ export function routeVoyage(
   const oceanHops = bfsDistance(w, h, (x, y) => land[x + y * w] === 0);
   const coastal = (c: number) => (oceanHops[c] as number) <= COAST_MAX_HOPS;
 
-  const finish = (mode: LegMode, cells: ReadonlyArray<number>, leg: VoyageLeg): RoutedLeg => ({
-    ...leg,
-    mode,
-    points: simplifyPath(dedupe(cells).map(toPt), RDP_EPSILON),
-  });
+  // #184: a port's launch map is the router's expensive flood (one full-grid BFS per
+  // port), and the all-pairs travel matrix asks about every pair, so each port's map
+  // is computed once and shared across every walk that needs it.
+  const launchesMemo = new Map<number, Map<number, Launch>>();
+  const launchesFor = (cell: number): Map<number, Launch> => {
+    let m = launchesMemo.get(cell);
+    if (!m) {
+      m = launchesByWaterBody(w, h, cell, isSea, seaComp);
+      launchesMemo.set(cell, m);
+    }
+    return m;
+  };
 
-  return legs.map((leg) => {
-    const a = byIdx.get(leg.fromIdx);
-    const b = byIdx.get(leg.toIdx);
-    // Legs and sites are both derived from the same place manifest, so a missing site is a
-    // caller bug. Say so here rather than return an empty polyline: that would surface far
-    // away, as the overlay formatting an undefined vertex into the track's `points`.
-    if (!a || !b) throw new Error(`voyage leg ${leg.fromIdx} -> ${leg.toIdx} has no site in the manifest`);
-    const from = cellOf(a);
-    const to = cellOf(b);
-
+  // The mode decision and its raw cell walk, shared by `route` (which simplifies it
+  // into drawn geometry) and `legLength` (which only measures it).
+  const walkLeg = (from: number, to: number): { mode: LegMode; cells: ReadonlyArray<number> } => {
     // 1. Different landmasses: the survey must sail. Measured across seeds 1..40: every
     //    cross-landmass leg has both endpoints within 2 cells of water, so no
     //    road-to-coast-to-road composite leg is needed.
     if (comp[from] !== comp[to]) {
-      const water = seaCrossing(w, h, from, to, isSea, seaComp);
-      if (water) return finish("sea", water, leg);
-      return finish("straight", straightFallback(w, h, from, to, isRoad, isLand), leg);
+      const water = seaCrossing(w, h, from, to, isSea, launchesFor);
+      if (water) return { mode: "sea", cells: water };
+      return { mode: "straight", cells: straightFallback(w, h, from, to, isRoad, isLand) };
     }
 
     // 2. Same landmass and both on the road network: ride, UNLESS the road loops far
@@ -161,24 +173,61 @@ export function routeVoyage(
         // the sea route (SAIL_WHEN_ROAD_EXCEEDS). This is what stops a survey riding all
         // the way around a bay when a boat could cut across it.
         if (coastal(from) && coastal(to)) {
-          const water = seaCrossing(w, h, from, to, isSea, seaComp);
+          const water = seaCrossing(w, h, from, to, isSea, launchesFor);
           if (
             water &&
             embarksNearShore(water, w) &&
             chainLength(walk, w) >= SAIL_WHEN_ROAD_EXCEEDS * chainLength(water, w)
           ) {
-            return finish("sea", water, leg);
+            return { mode: "sea", cells: water };
           }
         }
-        return finish("road", walk, leg);
+        return { mode: "road", cells: walk };
       }
     }
 
     // 3. The documented fallback: a port is off the road network (an over-budget village),
     //    so ride the road as far as it goes and hop straight to the port. Never claims
     //    mode "road", which keeps "a road leg never crosses open water" true by construction.
-    return finish("straight", straightFallback(w, h, from, to, isRoad, isLand), leg);
-  });
+    return { mode: "straight", cells: straightFallback(w, h, from, to, isRoad, isLand) };
+  };
+
+  const route = (leg: VoyageLeg): RoutedLeg => {
+    const a = byIdx.get(leg.fromIdx);
+    const b = byIdx.get(leg.toIdx);
+    // Legs and sites are both derived from the same place manifest, so a missing site is a
+    // caller bug. Say so here rather than return an empty polyline: that would surface far
+    // away, as the overlay formatting an undefined vertex into the track's `points`.
+    if (!a || !b) throw new Error(`voyage leg ${leg.fromIdx} -> ${leg.toIdx} has no site in the manifest`);
+    const { mode, cells } = walkLeg(cellOf(a), cellOf(b));
+    return { ...leg, mode, points: simplifyPath(dedupe(cells).map(toPt), RDP_EPSILON) };
+  };
+
+  const lengthMemo = new Map<string, number>();
+  const legLength = (fromIdx: number, toIdx: number): number => {
+    const a = byIdx.get(fromIdx);
+    const b = byIdx.get(toIdx);
+    if (!a || !b) throw new Error(`voyage leg ${fromIdx} -> ${toIdx} has no site in the manifest`);
+    const [lo, hi] = a.idx <= b.idx ? [a, b] : [b, a];
+    const key = `${lo.idx}:${hi.idx}`;
+    const hit = lengthMemo.get(key);
+    if (hit !== undefined) return hit;
+    const len = chainLength(walkLeg(cellOf(lo), cellOf(hi)).cells, w);
+    lengthMemo.set(key, len);
+    return len;
+  };
+
+  return { route, legLength };
+}
+
+export function routeVoyage(
+  legs: ReadonlyArray<VoyageLeg>,
+  sites: ReadonlyArray<Site>,
+  survey: Survey,
+): ReadonlyArray<RoutedLeg> {
+  if (legs.length === 0) return [];
+  const router = prepareVoyageRouter(sites, survey);
+  return legs.map(router.route);
 }
 
 /**
@@ -191,10 +240,10 @@ export function routeVoyage(
  * puddle, it finds no route, and the leg silently degrades to a straight line with a
  * RIDER drawn across the strait, which is the exact defect this sub exists to remove.
  *
- * So: find, for each port, the nearest cell of EVERY water body, then sail across the
- * body they share, choosing the one with the shortest combined launch. Ties break on the
- * lower component id and then the lower cell id, so the choice never depends on grid
- * iteration order.
+ * So: find, for each port, the nearest cell of EVERY water body (launchesFor, memoized
+ * per port since #184), then sail across the body they share, choosing the one with the
+ * shortest combined launch. Ties break on the lower component id and then the lower cell
+ * id, so the choice never depends on grid iteration order.
  *
  * The sea walk is 8-connected while landmasses are labelled 4-connected. That mismatch is
  * deliberate: a corner pinch splits two landmasses (so the leg is classified a crossing),
@@ -206,10 +255,10 @@ function seaCrossing(
   from: number,
   to: number,
   isSea: (c: number) => boolean,
-  seaComp: Int32Array,
+  launchesFor: (cell: number) => Map<number, Launch>,
 ): number[] | null {
-  const fromLaunches = launchesByWaterBody(w, h, from, isSea, seaComp);
-  const toLaunches = launchesByWaterBody(w, h, to, isSea, seaComp);
+  const fromLaunches = launchesFor(from);
+  const toLaunches = launchesFor(to);
 
   let bestBody = -1;
   let bestCost = Infinity;

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fieldFrom } from "../../src/core/grid.ts";
 import type { Road } from "../../src/society/roads.ts";
-import { buildSurvey } from "../../src/render/survey.ts";
+import { buildSurvey, surveyFingerprint } from "../../src/render/survey.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
 // #120: the world facts the worker ships so the client can route a voyage.
@@ -75,4 +75,25 @@ test("does not mutate the elevation field (immutability rule)", () => {
   const before = Array.from(elev.data);
   buildSurvey(elev, 0.5, []);
   assert.deepEqual(Array.from(elev.data), before);
+});
+
+// --- #184: surveyFingerprint, the cache key for the Explorer's travel order -----
+
+const road = (pts: Array<[number, number]>): Road => ({ rank: "lane", points: pts.map(([x, y]) => ({ x, y })) });
+
+test("surveyFingerprint: equal for two independently built identical surveys", () => {
+  const elev = field(3, 2, [0.2, 0.6, 0.9, 0.2, 0.9, 0.2]);
+  const a = surveyFingerprint(buildSurvey(elev, 0.5, [road([[1, 0], [2, 0]])]));
+  const b = surveyFingerprint(buildSurvey(elev, 0.5, [road([[1, 0], [2, 0]])]));
+  assert.equal(a, b);
+});
+
+test("surveyFingerprint: a flipped land cell or a moved road cell changes it", () => {
+  const elev = field(3, 2, [0.2, 0.6, 0.9, 0.2, 0.9, 0.2]);
+  const roads = [road([[1, 0], [2, 0]])];
+  const base = surveyFingerprint(buildSurvey(elev, 0.5, roads));
+  // Raising the waterline past 0.6 drowns cell (1,0): the land mask differs.
+  assert.notEqual(surveyFingerprint(buildSurvey(elev, 0.7, roads)), base);
+  // Same land, one road vertex moved: the road facts differ.
+  assert.notEqual(surveyFingerprint(buildSurvey(elev, 0.5, [road([[1, 0], [1, 1]])])), base);
 });

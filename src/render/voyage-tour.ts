@@ -108,6 +108,83 @@ function breakAtStart(cycle: TourPoint[], startIdx: number): TourPoint[] {
   return reversed[1]!.idx < forward[1]!.idx ? reversed : forward;
 }
 
+/** A travel-distance oracle between two ports, keyed by their idx (#184). */
+export type TourDistance = (a: number, b: number) => number;
+
+/**
+ * Refine a tour on ACTUAL travel distances (#184). `path` is the straight-line
+ * order from orderTour; `d` measures the real routed miles between two ports.
+ * Position 0 (the capital) stays pinned; the result visits the same set and
+ * never costs more travel than the given order.
+ *
+ * Two 2-opt candidates: one seeded from the given order (so the result can only
+ * improve on it) and one from a greedy nearest-first sweep (which escapes local
+ * optima the given order's basin holds). The fresh start must win STRICTLY, so a
+ * tie always keeps the refinement of the given order.
+ */
+export function refineTour(path: ReadonlyArray<number>, d: TourDistance): number[] {
+  if (path.length <= 2) return [...path];
+  const cost = (t: ReadonlyArray<number>): number => {
+    let c = 0;
+    for (let i = 1; i < t.length; i++) c += d(t[i - 1]!, t[i]!);
+    return c;
+  };
+  const fromGiven = twoOptOnDistances([...path], d);
+  const fromNearest = twoOptOnDistances(nearestFirst(path, d), d);
+  return cost(fromNearest) < cost(fromGiven) - EPS ? fromNearest : fromGiven;
+}
+
+/** Greedy nearest-unvisited seed order from the pinned start, idx tiebreaks. */
+function nearestFirst(path: ReadonlyArray<number>, d: TourDistance): number[] {
+  const left = new Set(path.slice(1));
+  const seq = [path[0]!];
+  while (left.size > 0) {
+    let best = -1;
+    let bestD = Infinity;
+    for (const i of left) {
+      const dd = d(seq[seq.length - 1]!, i);
+      if (dd < bestD - EPS || (Math.abs(dd - bestD) <= EPS && (best === -1 || i < best))) {
+        bestD = dd;
+        best = i;
+      }
+    }
+    seq.push(best);
+    left.delete(best);
+  }
+  return seq;
+}
+
+/**
+ * The twoOpt pass below, on a distance oracle instead of Euclidean points: the same
+ * pinned position 0, the same edge-swap reversal, applied on any strict improvement.
+ * Mutates and returns its own scratch copy; callers pass one in.
+ */
+function twoOptOnDistances(t: number[], d: TourDistance): number[] {
+  let improved = true;
+  while (improved) {
+    improved = false;
+    for (let i = 1; i < t.length - 1; i++) {
+      for (let j = i + 1; j < t.length; j++) {
+        const a = t[i - 1]!;
+        const b = t[i]!;
+        const c = t[j]!;
+        const e = j + 1 < t.length ? t[j + 1]! : undefined;
+        const before = d(a, b) + (e !== undefined ? d(c, e) : 0);
+        const after = d(a, c) + (e !== undefined ? d(b, e) : 0);
+        if (after < before - EPS) {
+          for (let lo = i, hi = j; lo < hi; lo++, hi--) {
+            const tmp = t[lo]!;
+            t[lo] = t[hi]!;
+            t[hi] = tmp;
+          }
+          improved = true;
+        }
+      }
+    }
+  }
+  return t;
+}
+
 /**
  * 2-opt on the open path, with position 0 (the capital) pinned. Reversing the segment
  * [i..j] swaps edges (i-1,i) and (j,j+1); a reversal past the last port drops the
