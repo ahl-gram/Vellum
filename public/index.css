@@ -11,9 +11,13 @@ figcaption, .card p, .underhood {
 }
 main { max-width: 1080px; }
 header { margin-bottom: 2.5rem; }
-/* The Running Head (#268) retired the landing page's grander masthead
-   deviations: the head is identical on every page now. Home's one remaining
-   deviation is the grander footer below. */
+/* Deliberate landing-page deviation (#268 follow-up): the wordmark alone is
+   grander on home, whose head has no room name to fill the right side; the
+   taller line box also restores the vertical presence the room pages get.
+   Pinned above the shell's specificity because the layout's inline style
+   renders after this file, so an equal-specificity rule here would lose.
+   Home's other deviation is the grander footer below. */
+header h1 { font-size: 2.25rem; }
 h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   padding-bottom: 0.3rem; margin-top: 3.5rem; }
 .lede { max-width: 44rem; margin-inline: auto; line-height: 1.6; }
