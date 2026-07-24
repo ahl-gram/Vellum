@@ -72,9 +72,11 @@ const isHome = path === "/";
 <link rel="stylesheet" href="index.css">
 <style is:global>
 /* The shell dresses once (#263), part B: the recurring parchment/ink palette,
-   named here and consumed as var() by the six page css files. Exact-match
-   hexes only; near-miss inks (the #3d2f1f body text, the #5a4326 voyage
-   track) stay raw values on purpose, never merged. Guarded by
+   named here and consumed as var() by the six page css files. The old
+   body-text and voyage-track near-miss inks merged into --ink-dark at the
+   PR #269 review (item 4) and are retired. The charts' own label ink stays
+   the renderer's (byte-identity domain), so site prose and chart lettering
+   are deliberately no longer the same hex. Guarded by
    test/site/shell-css.test.ts. */
 :root {
   --ink-dark: #4a3826;   /* dark walnut ink: borders, buttons, emphasis */
@@ -94,7 +96,7 @@ const isHome = path === "/";
 :root { color-scheme: light; }
 body {
   margin: 0;
-  background: #efe6cf; color: #3d2f1f;
+  background: #efe6cf; color: var(--ink-dark);
   font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
 main { margin-inline: auto; }

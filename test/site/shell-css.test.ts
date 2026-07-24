@@ -26,15 +26,20 @@ const PAGE_CSS = [
   "public/seed-of-the-day/index.css",
 ] as const;
 
-// The ratified token set (#263): exact-match recurring hexes ONLY. Near-miss
-// inks (the #3d2f1f body text vs --ink-dark, the #5a4326 voyage track) stay
-// raw values on purpose: flagged in the PR, never silently merged.
+// The token set: the four ratified by #263, extended by the PR #269 review
+// call (item 4: the near-miss inks merged into --ink-dark and retired).
 const TOKENS: Record<string, string> = {
   "--ink-dark": "#4a3826",
   "--ink-brown": "#6b5a40",
   "--ink-faded": "#857257",
   "--line-tan": "#b9a77f",
 };
+
+// Retired inks (PR #269 review, item 4): the old body-text and voyage-track
+// near-misses merged into --ink-dark. They must never reappear in authored
+// css. (Their rgb() shadow forms carry alpha and are a different thing; the
+// chart renderer's label ink is the byte-identity domain and keeps its own.)
+const RETIRED_INKS = ["#3d2f1f", "#5a4326"] as const;
 
 const layoutStyle = () => {
   const m = read("src/layouts/BaseLayout.astro").match(/<style is:global>([\s\S]*?)<\/style>/);
@@ -67,6 +72,15 @@ test("no tokenized hex survives raw: pages consume the vars, the layout declares
   for (const [name, hex] of Object.entries(TOKENS)) {
     const count = layout.split(hex).length - 1;
     assert.equal(count, 1, `the layout should carry ${hex} exactly once (the ${name} declaration)`);
+  }
+});
+
+test("the retired near-miss inks never reappear (#269 review, item 4)", () => {
+  for (const source of [...PAGE_CSS, "src/layouts/BaseLayout.astro"]) {
+    const text = read(source).toLowerCase();
+    for (const hex of RETIRED_INKS) {
+      assert.ok(!text.includes(hex), `${source} carries retired ink ${hex}; use var(--ink-dark)`);
+    }
   }
 });
 

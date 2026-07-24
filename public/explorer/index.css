@@ -32,7 +32,7 @@ header { margin-bottom: 1.4rem; }
    out without becoming a second dark primary (Draw stays the sole primary). Still an <a>
    (navigation, not a press), styled to match the buttons' chrome. */
 .action-link { display: inline-flex; align-items: center; gap: 0.45rem; align-self: center;
-  font-family: inherit; font-size: 0.95rem; letter-spacing: 0.04em; color: #3d2f1f;
+  font-family: inherit; font-size: 0.95rem; letter-spacing: 0.04em; color: var(--ink-dark);
   background: #f0e3bd; border: 1.5px solid var(--ink-dark); border-radius: 4px;
   padding: 0.4rem 0.75rem; text-decoration: none; }
 .action-link:hover { background: #f7edcd; color: var(--ink-dark); }
@@ -48,7 +48,7 @@ header { margin-bottom: 1.4rem; }
   .row-label { flex: none; text-align: left; }
 }
 input[type="number"], select, button {
-  font-family: inherit; font-size: 0.95rem; color: #3d2f1f;
+  font-family: inherit; font-size: 0.95rem; color: var(--ink-dark);
   background: #f8f1e0; border: 1.5px solid var(--ink-dark); border-radius: 4px;
   padding: 0.4rem 0.6rem;
 }
@@ -240,7 +240,7 @@ button.primary:hover { background: #5d4831; }
   position: absolute; inset: 0 0 auto 0;
   visibility: hidden;
   backface-visibility: hidden; transform: rotateY(180deg);
-  background: #e6dabd; color: #3d2f1f;
+  background: #e6dabd; color: var(--ink-dark);
   border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2);
   overflow: hidden;
 }
@@ -257,12 +257,13 @@ button.primary:hover { background: #5d4831; }
    padding box, so the two boxes coincide. Struck a little stronger than the ghost's 0.1:
    that opacity is tuned for a whole chart's worth of ink, and a 3px dotted stroke at 0.1
    simply disappears. Set on the layer, not the polyline, so it reads as one bleed.
-   The stroke is the TRACK's ink (#5a4326, matching .voyage-track), never the ship's
-   (var(--ink-dark)): what soaks through the sheet is the line the surveyor drew on it. */
+   The stroke is the TRACK's ink (matching .voyage-track; both merged into --ink-dark
+   at the #269 review): what soaks through the sheet is the line the surveyor drew on
+   it, never the ship, which is the survey moving OVER the world. */
 .verso-track-layer { position: absolute; inset: 0; width: 100%; height: 100%;
   pointer-events: none; transform: scaleX(-1);
   opacity: 0.26; filter: blur(1.1px); overflow: visible; }
-.verso-track { fill: none; stroke: #5a4326; stroke-width: 3;
+.verso-track { fill: none; stroke: var(--ink-dark); stroke-width: 3;
   stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
   vector-effect: non-scaling-stroke; }
 /* The docket line stamped along the fold, the surveyor's attribution, and the office
@@ -433,7 +434,7 @@ button.primary:hover { background: #5d4831; }
    (full track shown at once); there is nothing here for /motion.css to collapse. */
 .voyage-overlay { position: absolute; inset: 0; width: 100%; height: 100%;
   pointer-events: none; z-index: 3; overflow: visible; }
-.voyage-track { fill: none; stroke: #5a4326; stroke-width: 3;
+.voyage-track { fill: none; stroke: var(--ink-dark); stroke-width: 3;
   stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
   vector-effect: non-scaling-stroke; opacity: 0.95; }
 /* #120: the mark is a ship at sea and a rider on the road, both drawn in PROFILE, in the
