@@ -406,7 +406,8 @@ button.primary:hover { background: #5d4831; }
 /* #121 The margin log: the surveyor's journal, styled like the chronicle strip (#93)
    but its own voyage-only panel (voyage and chronicle are mutually exclusive). Rows rest
    dimmed and brighten as the survey reaches each port, the same "inked into the ledger"
-   reveal as chronicle-strip li.past. The panel appears at rest, fully visible: the life is
+   reveal as chronicle-strip li.past; since #275 the LAST row inks in when the survey
+   makes its home port again, not on reaching a new port. The styling is count-agnostic. The panel appears at rest, fully visible: the life is
    in the per-row brightening, not a container flourish. It deliberately does NOT reuse the
    scrubber's paperUnfurl entrance: that 3D-transform-plus-opacity animation can leave the
    panel stuck near opacity 0 in some compositors, and an invisible log reads as broken. */

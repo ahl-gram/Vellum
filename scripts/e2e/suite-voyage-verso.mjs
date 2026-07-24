@@ -55,7 +55,7 @@ export async function run(ctx) {
   })()`);
   check("W9 a flip mid-sweep snaps the voyage to rest and turns; a running sweep never disables the button",
     w9.disabledMidSweep === false && w9.ports > 2 && w9.midPts === 1 && w9.midLogged >= 1 && w9.midStatus === "" &&
-    w9.restPts > w9.ports && w9.restLogged === w9.ports && w9.status === w9.summary && w9.versoed && w9.label === "Turn back",
+    w9.restPts > w9.ports && w9.restLogged === w9.ports + 1 && w9.status === w9.summary && w9.versoed && w9.label === "Turn back",
     JSON.stringify(w9));
   check("W9b the snap posts the survey's ONE polite summary, not a burst: exactly one write to #status",
     w9.statusWrites === 1 && w9.status === w9.summary && w9.summary !== "",
@@ -112,9 +112,10 @@ export async function run(ctx) {
       status:document.getElementById("status").textContent,
     };
   })()`);
+  // #275: every entry means every port PLUS the homecoming, so logged === ports + 1.
   check("W11 ticking voyage while flipped rests on the full track on both faces, logs every entry, no sweep",
     w11.flipped && w11.ports > 2 && w11.rectoPts === w11.versoPts && w11.rectoPts > w11.ports &&
-    w11.logged === w11.ports && w11.status === w11.summary, JSON.stringify(w11));
+    w11.logged === w11.ports + 1 && w11.status === w11.summary, JSON.stringify(w11));
 
   // W12: a redraw while flipped and voyaging re-arms BOTH faces, silently. renderVerso's
   // replaceChildren wipes the verso track on every draw (the same lifecycle trap as #map's
@@ -244,16 +245,22 @@ export async function run(ctx) {
     const plan=window.__vellumVoyagePlan();
     const vTrack=verso.querySelector(".verso-track");
     const rTrack=document.querySelector("#map .voyage-track");
+    const ends=(el)=>{if(!el)return null;const p=el.getAttribute("points").trim().split(" ");return p[0]===p[p.length-1];};
     return{
       ports:plan?plan.ports.length:0,
       rectoPts:cnt(rTrack), versoPts:cnt(vTrack),
       samePoints: vTrack&&rTrack ? vTrack.getAttribute("points")===rTrack.getAttribute("points") : false,
+      rectoClosed:ends(rTrack), versoClosed:ends(vTrack),
       versoed:document.getElementById("sheet").classList.contains("versoed"),
       status:document.getElementById("status").textContent,
       rectoStyle:(document.querySelector("#map svg:not(.voyage-overlay)")||{getAttribute:()=>null}).getAttribute("data-vellum-style"),
     };
   })()`);
-  check("W16 a style turn with voyage on lands re-dressed with both faces agreeing on the re-armed track",
+  // #275: the resting round trip is a CLOSED CIRCUIT, and the acceptance asks for it on
+  // BOTH faces. The verso reads the recto's points verbatim, so this proves the circuit
+  // crosses the sheet rather than just agreeing by construction.
+  check("W16 a style turn with voyage on lands re-dressed with both faces agreeing on the re-armed closed circuit",
     w16.ports > 2 && w16.rectoPts === w16.versoPts && w16.rectoPts > w16.ports && w16.samePoints &&
+    w16.rectoClosed && w16.versoClosed &&
     !w16.versoed && w16.status === "" && w16.rectoStyle === "ink", JSON.stringify(w16));
 }

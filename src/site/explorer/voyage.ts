@@ -2,8 +2,10 @@
 // DOM layer over the baked chart that animates the survey that drew it. A dotted track
 // sets out from the capital and threads port to port behind the survey party, and the
 // surveyor's dated log accumulates in the margin (#121): a chronicle-strip-style panel
-// whose entries brighten as the survey reaches each port. When the sweep ends the full
-// track rests on the chart until the toggle goes off.
+// whose entries brighten as the survey reaches each port. #275 closed the itinerary into
+// a round trip: a final leg carries the survey home, so the resting track is a closed
+// circuit and the log closes with a homecoming line. When the sweep ends the full track
+// rests on the chart until the toggle goes off.
 //
 // #120 replaced v1's straight lerp between ports with honest geometry: road-connected
 // ports are joined by a walk along the drawn roads, ports on different landmasses by a
@@ -25,6 +27,7 @@ import {
   applyTourOrder,
   buildVoyagePlan,
   frameAt,
+  logEntryCount,
   reorderPlanByTravel,
   type VoyageFrame,
   type VoyagePlan,
@@ -246,7 +249,17 @@ function buildVoyage(
       inlandHandoff: i === 0 ? false : routed[i - 1].inlandHandoff,
     };
   });
-  const { log, rows: logRows } = buildLogPanel(logPorts, manifest.presentYear, seed, subtitle);
+  // #275: the closing leg is the last routed leg (it carries the survey home to
+  // plan.ports[0]), and it earns the log's final row. A one-port survey has no closing
+  // leg, so it logs its departure and stops.
+  const closing = plan.ports.length >= 2 ? routed[routed.length - 1]! : null;
+  const { log, rows: logRows } = buildLogPanel(
+    logPorts,
+    manifest.presentYear,
+    seed,
+    subtitle,
+    closing ? { arrivalMode: closing.mode, inlandHandoff: closing.inlandHandoff } : null,
+  );
 
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("class", "voyage-overlay");
@@ -366,7 +379,10 @@ function paintFrame(session: Session, t: number, postLog = true): void {
     // #status returns to "", so a stale summary never lingers at a mid-survey rest.
     revealLog(session.logRows, f.arrived);
     if (postLog) {
-      statusEl.textContent = f.arrived >= session.plan.ports.length ? session.log.summary : "";
+      // #275: against logEntryCount, NEVER ports.length. Once the tour closes, the last
+      // port is no longer the end of the survey: comparing against ports.length would
+      // post the one summary a leg early, at the last port, and again at the homecoming.
+      statusEl.textContent = f.arrived >= logEntryCount(session.plan) ? session.log.summary : "";
     }
   }
 }

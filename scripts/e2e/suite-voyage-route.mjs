@@ -15,7 +15,10 @@ export async function run(ctx) {
   // ---------------------------------------------------------------------------
 
   // Land on a world with both a sea leg and road legs. Seed 526413615 ("The Isle of
-  // Selivelai") sails out to Liatalin and back: 21 road legs, 2 sea legs.
+  // Selivelai"): 24 ports, and since #275 a closed round trip of 24 legs, 15 road and
+  // 9 sea, one of which is the genuine inland handoff W25/W26 need. (Measured 2026-07-24;
+  // the old "21 road, 2 sea" here had been stale since #184 re-ordered the itinerary on
+  // actual travel, which groups the island visits and spends its crossings differently.)
   await evaluate(`(()=>{
     const voy=document.getElementById("voyage");
     if(voy.checked){voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));}
@@ -92,25 +95,32 @@ export async function run(ctx) {
     // compute what the NAIVE per-segment rule would do, as the baseline to beat.
     const geom=window.__vellumVoyageLegGeometry();
     const cum=(pts)=>{const c=[0];for(let i=1;i<pts.length;i++)c.push(c[i-1]+Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y));return c;};
-    const rawReversals=(pts)=>{let rev=0,ps=0;for(let i=1;i<pts.length;i++){const s=Math.sign(pts[i].x-pts[i-1].x);if(s!==0&&ps!==0&&s!==ps)rev++;if(s!==0)ps=s;}return rev;};
-    // The leg whose raw x-direction reverses the most: the hardest case for anti-flicker.
-    // The first road leg is usually monotone, where naive and smoothed agree at zero.
-    let legIdx=-1,worstRev=-1;
-    geom.forEach((l,i)=>{if(l.mode==="road"){const r=rawReversals(l.points);if(r>worstRev){worstRev=r;legIdx=i;}}});
-    // The NAIVE facing (sign of the raw segment under the mark) sampled at the SAME points
-    // the live sweep uses, so a regression to the naive rule would tie this count exactly.
+    // The NAIVE facing (sign of the raw segment under the mark), sampled the way the live
+    // sweep is sampled, so a regression to the naive rule would tie the two counts exactly.
+    const naiveAt=(pts,c,d)=>{let k=0;while(k<c.length-2&&c[k+1]<d)k++;return Math.sign(pts[k+1].x-pts[k].x)||1;};
+    const naiveFlipsOf=(pts)=>{const c=cum(pts);const total=c[c.length-1];let f=0,p=null;
+      for(let k=0;k<=60;k++){const v=naiveAt(pts,c,(k/60)*total);if(p!==null&&v!==p)f++;p=v;}return f;};
+    // Pick the road leg that flips the NAIVE facing the most: the hardest case for the
+    // anti-flicker rule, and the metric this check actually asserts on. It used to select
+    // by counting raw x-reversals instead, which is a DIFFERENT quantity (a vertical
+    // segment, dx === 0, reads as +1 here but is skipped there), so a leg could reverse
+    // zero times and still flip the naive facing five times. Selecting on one metric and
+    // asserting on the other left the check passing on a tie: #275's reordered itinerary
+    // shifted which leg won that tie and the fixture went toothless (naiveFlips 3 -> 1),
+    // with a 5-flip leg sitting right there unselected. Measured on seed 526413615.
+    let legIdx=-1,worstNaive=-1;
+    geom.forEach((l,i)=>{if(l.mode==="road"){const f=naiveFlipsOf(l.points);if(f>worstNaive){worstNaive=f;legIdx=i;}}});
     const pts=geom[legIdx].points, c=cum(pts), total=c[c.length-1];
-    const naiveFacingAt=(d)=>{let k=0;while(k<c.length-2&&c[k+1]<d)k++;const s=Math.sign(pts[k+1].x-pts[k].x);return s||1;};
     let flips=0,naiveFlips=0,prev=null,prevN=null;
     for(let k=0;k<=60;k++){
       const local=(k/60)*total;
       const f=read((legIdx+k/60)/n).facing; // the LIVE, shipped facing
-      const nf=naiveFacingAt(local);         // what the naive rule would paint
+      const nf=naiveAt(pts,c,local);        // what the naive rule would paint
       if(prev!==null&&f!==prev) flips++;
       if(prevN!==null&&nf!==prevN) naiveFlips++;
       prev=f; prevN=nf;
     }
-    return{maxTilt:Math.round(maxTilt*100)/100,flips,naiveFlips,legIdx,worstRev};
+    return{maxTilt:Math.round(maxTilt*100)/100,flips,naiveFlips,legIdx,worstNaive};
   })()`);
   check("W20 the mark never tips past MAX_TILT on any bearing of the sweep",
     w20.maxTilt <= 24.0001, `max |tilt| = ${w20.maxTilt}deg`);
@@ -142,33 +152,44 @@ export async function run(ctx) {
   // world (seed 526413615 both sails and rides), consuming #120's leg mode.
   // ---------------------------------------------------------------------------
 
-  // W22: the full sweep accumulates one dated entry per port; the panel opens with the
-  // surveyor's attribution and a departure, and every entry persists brightened at rest.
+  // W22: the full sweep accumulates one dated entry per LEG plus the departure, so a round
+  // trip (#275) logs ports + 1: every port, then the homecoming. The panel opens with the
+  // surveyor's attribution and a departure, closes on the return, and all of it persists
+  // brightened at rest.
   const w22 = await evaluate(`(()=>{
     window.__vellumVoyageStepTo(999); // land the whole survey at rest
     const plan=window.__vellumVoyagePlan();
     const log=window.__vellumVoyageLog();
     const sig=document.getElementById("voyage-log-sig").textContent;
     const rows=document.getElementById("voyage-log-strip").querySelectorAll("li").length;
+    const last=log&&log.entries.length?log.entries[log.entries.length-1]:null;
     return{
       visible:!!(log&&log.visible), entries:log?log.entries.length:0, logged:log?log.logged:-1,
-      rows, ports:plan?plan.ports.length:0, sig, attribution:log?log.attribution:"",
+      rows, ports:plan?plan.ports.length:0, legs:plan?plan.legs.length:0, sig,
+      attribution:log?log.attribution:"",
       opensDeparture:!!(log&&log.entries[0]&&log.entries[0].text.includes("set out")),
+      closesHome:!!(last&&last.text.includes("whence we set out")),
+      homeIdx:last?last.idx:-1, capitalIdx:plan&&plan.ports[0]?plan.ports[0].idx:-2,
     };
   })()`);
-  check("W22 the full sweep logs one dated entry per port, opens with the attribution + a departure, all persisting",
-    w22.visible && w22.entries === w22.ports && w22.rows === w22.ports && w22.logged === w22.ports &&
-    w22.opensDeparture && w22.sig === w22.attribution && w22.attribution.startsWith("Being a true"),
+  check("W22 the full sweep logs every port plus the homecoming, opens with the attribution + a departure, all persisting",
+    w22.visible && w22.entries === w22.ports + 1 && w22.rows === w22.entries &&
+    w22.logged === w22.entries && w22.legs === w22.ports &&
+    w22.opensDeparture && w22.closesHome && w22.homeIdx === w22.capitalIdx &&
+    w22.sig === w22.attribution && w22.attribution.startsWith("Being a true"),
     JSON.stringify({ ...w22, attribution: w22.attribution.slice(0, 24) }));
 
   // W23: the voice consumes #120's leg mode. A port reached by a sea leg reads as a voyage
   // ("made sail"); one reached by a road leg reads as a ride ("rode on"). Port p is reached
-  // by leg p-1, so its entry is entries[p].
+  // by leg p-1, so its entry is entries[p], and that mapping survives #275 unchanged: the
+  // closing leg's entry is simply the last one, the homecoming. The search skips that
+  // closing leg so this check always lands on a plain arrival, never on the homecoming.
   const w23 = await evaluate(`(()=>{
     const plan=window.__vellumVoyagePlan();
     const log=window.__vellumVoyageLog();
-    const seaLeg=plan.legs.findIndex((l)=>l.mode==="sea");
-    const roadLeg=plan.legs.findIndex((l)=>l.mode==="road");
+    const inbound=plan.legs.slice(0,-1);
+    const seaLeg=inbound.findIndex((l)=>l.mode==="sea");
+    const roadLeg=inbound.findIndex((l)=>l.mode==="road");
     return{seaLeg,roadLeg,
       seaEntry:seaLeg>=0?log.entries[seaLeg+1].text:"",
       roadEntry:roadLeg>=0?log.entries[roadLeg+1].text:""};

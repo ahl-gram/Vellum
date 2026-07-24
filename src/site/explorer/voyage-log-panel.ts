@@ -13,6 +13,7 @@
 // is expected, not leakage.
 import {
   buildVoyageLog,
+  type VoyageHomecoming,
   type VoyageLog,
   type VoyageLogPort,
 } from "../../world/voyage-log.ts";
@@ -28,6 +29,11 @@ const logStrip = document.getElementById("voyage-log-strip") as HTMLElement;
  * own tabular column like the chronicle strip; the row text drops the redundant "Year N."
  * lead the entry already carries.
  *
+ * #275: `homecoming` is the CLOSING leg (last port back to the capital), which earns the
+ * log's final row, so rows = ports + 1 on a round trip. Pass null for a survey with no
+ * closing leg. The extra row is why revealLog is positional: its entry shares the
+ * capital's idx with row 0.
+ *
  * The richer, seed-forked prose lives in the engine (world/voyage-log.js); the plan's own
  * `port.logLine` is the pure Sub-1 line and is not displayed.
  * @param {Array<{idx:number,name:string,kind:string,founded:number,arrivalMode:string|null}>} logPorts
@@ -42,8 +48,9 @@ export function buildLogPanel(
   presentYear: number,
   seed: number,
   subtitle: string,
+  homecoming: VoyageHomecoming | null = null,
 ): { log: VoyageLog; rows: HTMLLIElement[] } {
-  const log = buildVoyageLog(logPorts, presentYear, (seed >>> 0), subtitle || "");
+  const log = buildVoyageLog(logPorts, presentYear, (seed >>> 0), subtitle || "", homecoming);
   logSig.textContent = log.attribution;
   const rows = log.entries.map((e) => {
     const li = document.createElement("li");
@@ -65,7 +72,8 @@ export function buildLogPanel(
  * Brighten the rows the survey has reached (rows [0, arrived)), dim the rest. Idempotent
  * and order-independent, so stepping backward via the e2e hook un-brightens correctly.
  * @param {HTMLLIElement[]} rows
- * @param {number} arrived how many ports the mark has reached
+ * @param {number} arrived how many log entries the mark has earned (frameAt's count:
+ *   the departure, one per arrival, and on a round trip the homecoming last)
  */
 export function revealLog(rows: HTMLLIElement[], arrived: number): void {
   for (let i = 0; i < rows.length; i++) rows[i].classList.toggle("logged", i < arrived);
