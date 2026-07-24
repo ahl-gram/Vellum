@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { paletteRootCss } from "../atlas/palette.ts";
 import { renderMap } from "../render/map-renderer.ts";
 import { escapeXml } from "../render/svg.ts";
 import type { StyleName } from "../render/style.ts";
@@ -40,12 +41,13 @@ export async function buildGallery(
 <link rel="stylesheet" href="/fonts.css">
 <link rel="stylesheet" href="/motion.css">
 <style>
-  body { margin: 0; padding: 2rem 1.5rem 4rem; background: #efe6cf; color: #3d2f1f;
+${paletteRootCss()}
+  body { margin: 0; padding: 2rem 1.5rem 4rem; background: var(--parchment); color: var(--ink-dark);
     font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); }
   /* The Punchcutter's Case (#228): display title, italic flourish subtitle. */
   h1 { text-align: center; letter-spacing: 0.05em;
     font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); }
-  p.sub { text-align: center; font-style: italic; color: #6b5a40; margin-bottom: 2.5rem;
+  p.sub { text-align: center; font-style: italic; color: var(--ink-brown); margin-bottom: 2.5rem;
     font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
     gap: 1.5rem; max-width: 1500px; margin-inline: auto; }
@@ -54,7 +56,7 @@ export async function buildGallery(
      corner (transform-origin) with a real tilt, distinct from the atlas's gentle
      centred lift. Timing/easing come from /motion.css; the reduced-motion collapse
      there snaps this to its end state (no animated tip). */
-  figure img { width: 100%; height: auto; display: block; border: 1px solid #b9a77f;
+  figure img { width: 100%; height: auto; display: block; border: 1px solid var(--line-tan);
     box-shadow: 0 6px 18px rgb(61 47 31 / 0.15); transform-origin: bottom left;
     transition: transform var(--paper) var(--ease-paper),
                 box-shadow var(--paper) var(--ease-paper); }
@@ -63,7 +65,7 @@ export async function buildGallery(
   figure img:active { transform: translateY(-1px) rotate(0deg);
     box-shadow: 0 5px 14px rgb(61 47 31 / 0.16); }
   figcaption { text-align: center; padding-top: 0.5rem; line-height: 1.45; }
-  figcaption span { font-size: 0.8rem; color: #857257; letter-spacing: 0.08em; }
+  figcaption span { font-size: 0.8rem; color: var(--ink-faded); letter-spacing: 0.08em; }
   a { color: inherit; text-decoration: none; }
 </style>
 </head>

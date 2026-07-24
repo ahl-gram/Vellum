@@ -1,30 +1,22 @@
-:root { color-scheme: light; }
 body {
-  margin: 0; padding: 2.5rem 1.5rem 5rem;
-  background: #efe6cf; color: #3d2f1f;
-  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  padding: 2.5rem 1.5rem 5rem;
   line-height: 1.6;
 }
-/* The Punchcutter's Case (#228): display/flourish/body roles via /fonts.css vars.
+/* The Punchcutter's Case (#228), page members: the shell's h1/.topnav/footer
+   display and .tagline flourish bindings live in BaseLayout (#263).
    figcaption here is the world's NAME shown large (not an italic caption), so it
    takes the display face like a title. */
-h1, .hunt h2, figcaption, .topnav, footer {
+.hunt h2, figcaption {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
-.tagline, .survey, .status {
+.survey, .status {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
-main { max-width: 1080px; margin-inline: auto; }
-header { text-align: center; margin-bottom: 1.4rem; }
-h1 { font-size: 2rem; letter-spacing: 0.1em; margin: 0; }
-h1 a { color: inherit; text-decoration: none; }
-.tagline { font-style: italic; color: #6b5a40; margin: 0.3rem 0 0; }
-.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: #857257; margin: 0.9rem 0 0; }
-.topnav a { color: inherit; }
-[aria-current="page"] { font-weight: 700; }
+main { max-width: 1080px; }
+header { margin-bottom: 1.4rem; }
 .dateline { text-align: center; letter-spacing: 0.18em; font-size: 0.82rem;
-  text-transform: uppercase; color: #857257; margin: 0.4rem 0 1.4rem; }
-.status { text-align: center; font-style: italic; color: #6b5a40; min-height: 1.4rem; }
+  text-transform: uppercase; color: var(--ink-faded); margin: 0.4rem 0 1.4rem; }
+.status { text-align: center; font-style: italic; color: var(--ink-brown); min-height: 1.4rem; }
 figure { margin: 0; }
 /* #167 The Surveyor's Glass, Sub 6: geometric pan/zoom on today's chart. #map-viewport
    is the clip/gesture box the shared controller binds to; #map is the transform target.
@@ -41,7 +33,7 @@ figure { margin: 0; }
    stay pixel-aligned with their marks. */
 #map { position: relative; transform-origin: 0 0; }
 #map svg { width: 100%; height: auto; display: block;
-  border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
 #map:not(.solved) svg { cursor: crosshair; }
 /* The win star rests still; on a LIVE solve app.js adds .stamp and it stamps in.
    On a solved-day reload the star is placed WITHOUT .stamp, so it sits perfectly
@@ -49,8 +41,8 @@ figure { margin: 0; }
    offset (--pos, #126) is defined once and the entry keyframe layers scale + rotate
    onto it; collapses under the shared prefers-reduced-motion rule in /motion.css. */
 .hunt-star { position: absolute; --pos: translate(-50%, -50%); transform: var(--pos);
-  color: #7a1f12; font-size: 1.7rem; line-height: 1; pointer-events: none;
-  text-shadow: 0 0 4px #fff7e4, 0 1px 2px rgb(61 47 31 / 0.5); }
+  color: var(--iron-red); font-size: 1.7rem; line-height: 1; pointer-events: none;
+  text-shadow: 0 0 4px var(--parchment-bright), 0 1px 2px rgb(61 47 31 / 0.5); }
 .hunt-star.stamp { animation: huntStarIn var(--paper-settle) var(--ease-paper) both; }
 @keyframes huntStarIn {
   from { opacity: 0; transform: var(--pos) scale(0.2) rotate(-40deg); }
@@ -96,7 +88,7 @@ figure { margin: 0; }
   border-radius: 50%; border: 2px solid var(--iron-red);
   animation: inkRipple 700ms var(--ease-paper) both; }
 .sounding-dot { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
-  border-radius: 50%; background: #6b5a40;
+  border-radius: 50%; background: var(--ink-brown);
   box-shadow: 0 0 0 1px rgb(247 247 228 / 0.55);
   animation: soundingFade 2600ms var(--ease-paper) both; }
 @keyframes soundingFade {
@@ -141,13 +133,13 @@ figure { margin: 0; }
 }
 figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
   margin-top: 1rem; }
-.survey { text-align: center; font-style: italic; color: #6b5a40; margin: 0.3rem 0 0; }
+.survey { text-align: center; font-style: italic; color: var(--ink-brown); margin: 0.3rem 0 0; }
 .blurb { max-width: 44rem; margin: 1.2rem auto 0; }
 .actions { text-align: center; margin-top: 1.6rem; }
-.actions a { display: inline-block; border: 1.5px solid #4a3826; border-radius: 4px;
-  padding: 0.5rem 1rem; background: #f4ecd8; text-decoration: none; color: inherit;
+.actions a { display: inline-block; border: 1.5px solid var(--ink-dark); border-radius: 4px;
+  padding: 0.5rem 1rem; background: var(--parchment-panel); text-decoration: none; color: inherit;
   letter-spacing: 0.04em; }
-.actions a:hover { background: #fff7e4; }
+.actions a:hover { background: var(--parchment-bright); }
 /* #88: keep the map and the hunt visible together. On wide screens they sit
    side by side, so the warmer/colder line lives in the right column, always in
    view; the panel is sticky so it trails a taller map as you scroll. On narrow
@@ -164,34 +156,32 @@ figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
 @media (max-width: 759px) {
   .hunt-sticky.active {
     display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
-    background: #4a3826; color: #f4ecd8; text-align: center;
+    background: var(--ink-dark); color: var(--parchment-panel); text-align: center;
     padding: 0.7rem 1rem; font-weight: 700; letter-spacing: 0.03em;
     box-shadow: 0 -4px 16px rgb(61 47 31 / 0.32);
   }
 }
 .hunt { max-width: 44rem; margin: 2rem auto 0; padding: 1.4rem 1.6rem;
-  border: 1px solid #b9a77f; border-radius: 6px; background: #f4ecd8; }
+  border: 1px solid var(--line-tan); border-radius: 6px; background: var(--parchment-panel); }
 .hunt h2 { text-align: center; font-size: 1.2rem; letter-spacing: 0.06em;
   margin: 0 0 0.4rem; }
-.hunt-intro { text-align: center; font-size: 0.92rem; color: #6b5a40;
+.hunt-intro { text-align: center; font-size: 0.92rem; color: var(--ink-brown);
   margin: 0 0 1rem; }
 .clues { margin: 0 auto; padding-left: 1.4rem; max-width: 36rem;
-  font-style: italic; color: #4a3826; }
+  font-style: italic; color: var(--ink-dark); }
 .clues li { margin: 0.3rem 0; }
 .hunt-status { text-align: center; min-height: 1.4rem; font-weight: 700;
-  letter-spacing: 0.03em; color: #7a1f12; margin: 1rem 0 0; }
+  letter-spacing: 0.03em; color: var(--iron-red); margin: 1rem 0 0; }
 .reveal { margin-top: 1rem; padding: 1rem 1.2rem; border-radius: 4px;
-  background: #fff7e4; border: 1px solid #d8c79c; }
+  background: var(--parchment-bright); border: 1px solid #d8c79c; }
 .reveal strong { display: block; font-size: 1.1rem; margin-bottom: 0.4rem; }
-.reveal p { margin: 0; font-style: italic; color: #4a3826; }
+.reveal p { margin: 0; font-style: italic; color: var(--ink-dark); }
 .hunt-actions { text-align: center; margin-top: 1.2rem; display: flex;
   gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap; }
-#share, #dispatch { border: 1.5px solid #4a3826; border-radius: 4px; padding: 0.5rem 1rem;
-  background: #f4ecd8; color: inherit; letter-spacing: 0.04em; cursor: pointer;
+#share, #dispatch { border: 1.5px solid var(--ink-dark); border-radius: 4px; padding: 0.5rem 1rem;
+  background: var(--parchment-panel); color: inherit; letter-spacing: 0.04em; cursor: pointer;
   font: inherit; }
-#share:hover, #dispatch:hover { background: #fff7e4; }
-.streak { font-size: 0.9rem; color: #6b5a40; }
-.note { text-align: center; color: #857257; font-size: 0.85rem; margin-top: 1rem; }
-footer { margin-top: 4rem; text-align: center; letter-spacing: 0.22em;
-  font-size: 0.72rem; color: #857257; }
-footer a { color: inherit; }
+#share:hover, #dispatch:hover { background: var(--parchment-bright); }
+.streak { font-size: 0.9rem; color: var(--ink-brown); }
+.note { text-align: center; color: var(--ink-faded); font-size: 0.85rem; margin-top: 1rem; }
+footer { margin-top: 4rem; }

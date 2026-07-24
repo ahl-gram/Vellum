@@ -1,24 +1,13 @@
-:root { color-scheme: light; }
 body {
-  margin: 0; padding: 2rem 1.5rem 4rem;
-  background: #efe6cf; color: #3d2f1f;
-  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  padding: 2rem 1.5rem 4rem;
 }
-/* The Punchcutter's Case (#228): display/flourish/body roles via /fonts.css vars. */
-h1, .topnav, footer {
-  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
-}
-.tagline, .caption {
+/* The Punchcutter's Case (#228), page members: the shell's h1/.topnav/footer
+   display and .tagline flourish bindings live in BaseLayout (#263). */
+.caption {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
-main { max-width: 1100px; margin-inline: auto; }
-header { text-align: center; margin-bottom: 1.4rem; }
-h1 { font-size: 2rem; letter-spacing: 0.1em; margin: 0; }
-h1 a { color: inherit; text-decoration: none; }
-.tagline { font-style: italic; color: #6b5a40; margin: 0.3rem 0 0; }
-.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: #857257; margin: 0.9rem 0 0; }
-.topnav a { color: inherit; }
-[aria-current="page"] { font-weight: 700; }
+main { max-width: 1100px; }
+header { margin-bottom: 1.4rem; }
 /* #87: the controls read as three labeled bands (Map / Display / Actions)
    instead of one wrapping blob. Each row is a quiet right-aligned label plus a
    wrapping field group; rows stack into clean sections on a phone. */
@@ -29,13 +18,13 @@ h1 a { color: inherit; text-decoration: none; }
   letter-spacing: 0.14em; font-size: 0.68rem; color: #9a8868; }
 .row-fields { display: flex; flex-wrap: wrap; align-items: center;
   gap: 0.55rem 0.85rem; flex: 1; }
-.controls label { font-size: 0.85rem; letter-spacing: 0.05em; color: #6b5a40; }
+.controls label { font-size: 0.85rem; letter-spacing: 0.05em; color: var(--ink-brown); }
 .controls label.check { display: inline-flex; align-items: center; gap: 0.35rem; }
-.controls input[type="checkbox"] { accent-color: #4a3826; width: 1rem; height: 1rem; }
+.controls input[type="checkbox"] { accent-color: var(--ink-dark); width: 1rem; height: 1rem; }
 .controls label.sealevel { display: inline-flex; align-items: center; gap: 0.4rem; }
 .controls input[type="range"]#land,
-.controls input[type="range"]#coast { accent-color: #4a3826; width: 9rem; }
-.land-end { font-size: 0.72rem; font-style: italic; color: #857257; }
+.controls input[type="range"]#coast { accent-color: var(--ink-dark); width: 9rem; }
+.land-end { font-size: 0.72rem; font-style: italic; color: var(--ink-faded); }
 /* #133 / #199: "Take to the Print Room" is the Explorer's ONLY path to the bound atlas now
    that the inline Bind is retired, so it is the featured "take your world home" step. It is
    button-shaped like the action buttons, but warmer (a parchment-gold fill) and a touch
@@ -43,24 +32,24 @@ h1 a { color: inherit; text-decoration: none; }
    out without becoming a second dark primary (Draw stays the sole primary). Still an <a>
    (navigation, not a press), styled to match the buttons' chrome. */
 .action-link { display: inline-flex; align-items: center; gap: 0.45rem; align-self: center;
-  font-family: inherit; font-size: 0.95rem; letter-spacing: 0.04em; color: #3d2f1f;
-  background: #f0e3bd; border: 1.5px solid #4a3826; border-radius: 4px;
+  font-family: inherit; font-size: 0.95rem; letter-spacing: 0.04em; color: var(--ink-dark);
+  background: #f0e3bd; border: 1.5px solid var(--ink-dark); border-radius: 4px;
   padding: 0.4rem 0.75rem; text-decoration: none; }
-.action-link:hover { background: #f7edcd; color: #4a3826; }
+.action-link:hover { background: #f7edcd; color: var(--ink-dark); }
 /* The hand-press glyph is stroked in the link's own ink (currentColor), so it tracks the
    text on hover and reads as drawn, not printed. */
 .order-glyph { width: 1.2em; height: 1.2em; flex: none; fill: none; stroke: currentColor;
   stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .order-glyph circle { fill: currentColor; stroke: none; } /* the handle knob */
-.land-readout { font-style: italic; color: #6b5a40;
+.land-readout { font-style: italic; color: var(--ink-brown);
   font-variant-numeric: tabular-nums; min-width: 4.2rem; }
 @media (max-width: 560px) {
   .control-row { flex-direction: column; align-items: stretch; gap: 0.35rem; }
   .row-label { flex: none; text-align: left; }
 }
 input[type="number"], select, button {
-  font-family: inherit; font-size: 0.95rem; color: #3d2f1f;
-  background: #f8f1e0; border: 1.5px solid #4a3826; border-radius: 4px;
+  font-family: inherit; font-size: 0.95rem; color: var(--ink-dark);
+  background: #f8f1e0; border: 1.5px solid var(--ink-dark); border-radius: 4px;
   padding: 0.4rem 0.6rem;
 }
 input[type="number"] { width: 8.5rem; }
@@ -68,10 +57,10 @@ button { cursor: pointer; }
 /* Exclude the invisible .place-hit overlay (its hover ring is an ::after, #128), the
    same way motion.css excludes it from the universal lift; otherwise this cream would
    paint an opaque box over each map glyph on hover. */
-button:not(.place-hit):hover { background: #fff7e4; }
-button.primary { background: #4a3826; color: #f2e8cf; letter-spacing: 0.08em; }
+button:not(.place-hit):hover { background: var(--parchment-bright); }
+button.primary { background: var(--ink-dark); color: #f2e8cf; letter-spacing: 0.08em; }
 button.primary:hover { background: #5d4831; }
-.status { text-align: center; font-style: italic; color: #857257;
+.status { text-align: center; font-style: italic; color: var(--ink-faded);
   min-height: 1.4em; margin-bottom: 0.8rem; }
 /* #164 The Surveyor's Glass. #map-viewport is the layout + clipping box (it owns the
    centering #map used to); #map is the transform target the zoom-controller drives.
@@ -92,7 +81,7 @@ button.primary:hover { background: #5d4831; }
 /* #165: the map viewport is focusable (tabindex) so keyboard users pan/zoom it with the
    arrows and +/-. Show the focus ring only for keyboard focus (:focus-visible), so a mouse
    click on the sheet does not leave it outlined. */
-#map-viewport:focus-visible { outline: 2px solid #4a3826; outline-offset: 2px; }
+#map-viewport:focus-visible { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
 /* #165 The Surveyor's Glass: the on-screen zoom cluster, a corner overlay. position:absolute
    anchors it to the viewport box (NOT #map's live transform); z-index lifts it over the chart.
    Compact and plain here; Sub 9 (#170) gives it the antique voice. */
@@ -106,9 +95,9 @@ button.primary:hover { background: #5d4831; }
 .zoom-controls button {
   width: 2rem; height: 2rem; padding: 0; line-height: 1; font-size: 1.15rem;
   display: flex; align-items: center; justify-content: center;
-  background: rgb(247 237 207 / 0.92); border: 1px solid #b9a77f; color: #4a3826;
+  background: rgb(247 237 207 / 0.92); border: 1px solid var(--line-tan); color: var(--ink-dark);
 }
-.zoom-controls button:hover { background: #fff7e4; }
+.zoom-controls button:hover { background: var(--parchment-bright); }
 /* #170: the keys legend, Sub 4's handoff resolved (Alex's call: a small visible slip by
    the cluster, the only form a sighted mouse user can DISCOVER without hover). It is
    aria-hidden: the same keys are already announced by the #map-viewport aria-label, so
@@ -116,13 +105,13 @@ button.primary:hover { background: #5d4831; }
    devices) and where the stacked controls already crowd a small screen. */
 .zoom-keys {
   margin-top: 2px; padding: 0.28rem 0.45rem;
-  background: rgb(247 237 207 / 0.92); border: 1px solid #b9a77f; border-radius: 3px;
+  background: rgb(247 237 207 / 0.92); border: 1px solid var(--line-tan); border-radius: 3px;
   display: flex; flex-direction: column; gap: 0.1rem;
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-size: 0.58rem; font-style: italic; line-height: 1.45;
-  letter-spacing: 0.04em; color: #6b5a40; text-align: right; white-space: nowrap;
+  letter-spacing: 0.04em; color: var(--ink-brown); text-align: right; white-space: nowrap;
 }
-.zoom-keys kbd { font-family: inherit; font-style: normal; font-weight: 600; color: #4a3826; }
+.zoom-keys kbd { font-family: inherit; font-style: normal; font-weight: 600; color: var(--ink-dark); }
 /* Touch-primary means hover:none AND pointer:coarse. A bare (hover: none) over-matches
    environments with NO pointer at all (linux headless CI reports hover:none with
    pointer:none), which would hide the legend exactly where a keyboard user could use
@@ -130,7 +119,7 @@ button.primary:hover { background: #5d4831; }
 @media (hover: none) and (pointer: coarse), (max-width: 560px) { .zoom-keys { display: none; } }
 #map { position: relative; transform-origin: 0 0; }
 #map svg { width: 100%; height: auto; display: block;
-  border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
 
 /* #169 The redraft inset. A committed regional survey mounts INSIDE #map, positioned over the
    exact window it re-surveys, so it rides the live zoom transform with the chart and reads as
@@ -223,7 +212,7 @@ button.primary:hover { background: #5d4831; }
   backface-visibility: hidden; transform: rotateY(180deg);
 }
 .sheet-back img { width: 100%; height: auto; display: block;
-  border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
 
 /* #116 The Verso. The flip REUSES #131's .sheet / #sheet-inner perspective wrapper,
    but where #131's turn is transient (it lands back on the recto re-dressed), the
@@ -251,8 +240,8 @@ button.primary:hover { background: #5d4831; }
   position: absolute; inset: 0 0 auto 0;
   visibility: hidden;
   backface-visibility: hidden; transform: rotateY(180deg);
-  background: #e6dabd; color: #3d2f1f;
-  border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2);
+  background: #e6dabd; color: var(--ink-dark);
+  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2);
   overflow: hidden;
 }
 .sheet.flip3d #verso { visibility: visible; }
@@ -268,12 +257,13 @@ button.primary:hover { background: #5d4831; }
    padding box, so the two boxes coincide. Struck a little stronger than the ghost's 0.1:
    that opacity is tuned for a whole chart's worth of ink, and a 3px dotted stroke at 0.1
    simply disappears. Set on the layer, not the polyline, so it reads as one bleed.
-   The stroke is the TRACK's ink (#5a4326, matching .voyage-track), never the ship's
-   (#4a3826): what soaks through the sheet is the line the surveyor drew on it. */
+   The stroke is the TRACK's ink (matching .voyage-track; both merged into --ink-dark
+   at the #269 review): what soaks through the sheet is the line the surveyor drew on
+   it, never the ship, which is the survey moving OVER the world. */
 .verso-track-layer { position: absolute; inset: 0; width: 100%; height: 100%;
   pointer-events: none; transform: scaleX(-1);
   opacity: 0.26; filter: blur(1.1px); overflow: visible; }
-.verso-track { fill: none; stroke: #5a4326; stroke-width: 3;
+.verso-track { fill: none; stroke: var(--ink-dark); stroke-width: 3;
   stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
   vector-effect: non-scaling-stroke; }
 /* The docket line stamped along the fold, the surveyor's attribution, and the office
@@ -281,7 +271,7 @@ button.primary:hover { background: #5d4831; }
 .verso-docket, .verso-survey { position: absolute; left: 8%; right: 8%;
   text-align: center; }
 .verso-docket { top: 9%; text-transform: uppercase; letter-spacing: 0.18em;
-  font-size: clamp(0.6rem, 1.4vw, 0.92rem); color: #6b5a40;
+  font-size: clamp(0.6rem, 1.4vw, 0.92rem); color: var(--ink-brown);
   font-variant-numeric: tabular-nums; }
 .verso-survey { top: 17%; font-style: italic; line-height: 1.5;
   font-size: clamp(0.62rem, 1.5vw, 1rem); color: #7a6746; }
@@ -327,7 +317,7 @@ button.primary:hover { background: #5d4831; }
 .place-hit::after {
   content: ""; position: absolute; inset: 0; margin: auto;
   width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box;
-  border: 2px solid #4a3826; pointer-events: none;
+  border: 2px solid var(--ink-dark); pointer-events: none;
   opacity: 0; transform: scale(0.85);
   transition: opacity var(--paper-quick) var(--ease-paper),
               transform var(--paper-quick) var(--ease-paper);
@@ -363,8 +353,8 @@ button.primary:hover { background: #5d4831; }
    same curve at --unfurl-quick so sweeping a crowded coast stays nimble. Collapses via
    the shared reduced-motion block in /motion.css (the `both` fill rests at rotateX 0). */
 .pc-inner {
-  background: #f8f1e0; color: #4a3826;
-  border: 1px solid #4a3826; border-radius: 4px;
+  background: #f8f1e0; color: var(--ink-dark);
+  border: 1px solid var(--ink-dark); border-radius: 4px;
   box-shadow: 0 8px 22px rgb(61 47 31 / 0.28);
   padding: 0.6rem 0.75rem; font-size: 0.9rem; line-height: 1.35;
   transform-origin: top center;
@@ -373,7 +363,7 @@ button.primary:hover { background: #5d4831; }
 #place-card.flip-v .pc-inner { transform-origin: bottom center; }
 #place-card.pinned .pc-inner { animation-duration: var(--unfurl); }
 .pc-name { display: block; font-size: 1rem; letter-spacing: 0.02em; }
-.pc-rank { display: block; font-style: italic; color: #6b5a40; font-size: 0.82rem;
+.pc-rank { display: block; font-style: italic; color: var(--ink-brown); font-size: 0.82rem;
   letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.1rem; }
 .pc-founded { display: block; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
 .pc-tale { margin: 0.4rem 0 0; font-style: italic; color: #54452f; }
@@ -389,7 +379,7 @@ button.primary:hover { background: #5d4831; }
 .place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
 .scrubber[hidden] { display: none; }
 .scrubber { max-width: 1100px; margin: 0.8rem auto 0;
-  background: #f3ead2; border: 1px solid #b9a77f; border-radius: 6px;
+  background: #f3ead2; border: 1px solid var(--line-tan); border-radius: 6px;
   padding: 0.8rem 1rem; transform-origin: top center; }
 /* #128: the panel unrolls open from its top edge when chronicle mode turns on. It has
    no positioning transform of its own, so the unfurl (self-perspective in the keyframe)
@@ -398,7 +388,7 @@ button.primary:hover { background: #5d4831; }
 .scrub-controls { display: flex; align-items: center; gap: 0.8rem; }
 .scrub-controls #scrub-play { min-width: 5.2rem; }
 .scrub-controls input[type="range"] { flex: 1; accent-color: #7a5c2e; }
-.scrub-year { font-style: italic; color: #6b5a40;
+.scrub-year { font-style: italic; color: var(--ink-brown);
   font-variant-numeric: tabular-nums; min-width: 5rem; text-align: right; }
 /* #93 Part 2: tall enough to show every entry at once (the chronicle is capped at
    14 events, so this cannot grow unbounded); overflow-y stays as a safety valve. */
@@ -407,11 +397,11 @@ button.primary:hover { background: #5d4831; }
 /* #128: a row that has come to pass brightens AND slides a hair to the right, like
    an entry inked into the ledger as its year arrives. */
 .chronicle-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
-  border-bottom: 1px solid #cdbd97; opacity: 0.4;
+  border-bottom: 1px solid var(--line-faint); opacity: 0.4;
   transition: opacity 0.18s, transform 0.18s; }
 .chronicle-strip li.past { opacity: 1; transform: translateX(2px); }
 .chronicle-strip .cr-year { flex: 0 0 3rem; text-align: right;
-  font-variant-numeric: tabular-nums; font-weight: 600; color: #857257; }
+  font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
 .chronicle-strip .cr-text { color: #54452f; }
 /* #121 The margin log: the surveyor's journal, styled like the chronicle strip (#93)
    but its own voyage-only panel (voyage and chronicle are mutually exclusive). Rows rest
@@ -422,18 +412,18 @@ button.primary:hover { background: #5d4831; }
    panel stuck near opacity 0 in some compositors, and an invisible log reads as broken. */
 .voyage-log[hidden] { display: none; }
 .voyage-log { max-width: 1100px; margin: 0.8rem auto 0;
-  background: #f3ead2; border: 1px solid #b9a77f; border-radius: 6px;
+  background: #f3ead2; border: 1px solid var(--line-tan); border-radius: 6px;
   padding: 0.8rem 1rem; }
-.voyage-log-sig { margin: 0 0 0.5rem; font-style: italic; color: #6b5a40;
-  border-bottom: 1px solid #cdbd97; padding-bottom: 0.5rem; }
+.voyage-log-sig { margin: 0 0 0.5rem; font-style: italic; color: var(--ink-brown);
+  border-bottom: 1px solid var(--line-faint); padding-bottom: 0.5rem; }
 .voyage-log-strip { list-style: none; margin: 0; padding: 0;
   max-height: 32rem; overflow-y: auto; }
 .voyage-log-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
-  border-bottom: 1px solid #cdbd97; opacity: 0.4;
+  border-bottom: 1px solid var(--line-faint); opacity: 0.4;
   transition: opacity 0.18s, transform 0.18s; }
 .voyage-log-strip li.logged { opacity: 1; transform: translateX(2px); }
 .voyage-log-strip .cr-year { flex: 0 0 3rem; text-align: right;
-  font-variant-numeric: tabular-nums; font-weight: 600; color: #857257; }
+  font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
 .voyage-log-strip .cr-text { color: #54452f; }
 /* The Wayfarer's Passage overlay (#119). A client-only SVG layer over the baked
    chart: a dotted survey track threads port to port behind a little ship, and each
@@ -444,26 +434,24 @@ button.primary:hover { background: #5d4831; }
    (full track shown at once); there is nothing here for /motion.css to collapse. */
 .voyage-overlay { position: absolute; inset: 0; width: 100%; height: 100%;
   pointer-events: none; z-index: 3; overflow: visible; }
-.voyage-track { fill: none; stroke: #5a4326; stroke-width: 3;
+.voyage-track { fill: none; stroke: var(--ink-dark); stroke-width: 3;
   stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
   vector-effect: non-scaling-stroke; opacity: 0.95; }
 /* #120: the mark is a ship at sea and a rider on the road, both drawn in PROFILE, in the
    chart's own ink idiom (render/layers/glyph-symbols.ts: a paper-filled body, an ink
    outline, a thinner stroke for interior detail, standing on a baseline at y=0). Only one
    is displayed at a time; voyage.js toggles the SVG `display` attribute at each port. */
-.voyage-ship path, .voyage-rider path { fill: #f3ead2; stroke: #4a3826; stroke-width: 1.5;
+.voyage-ship path, .voyage-rider path { fill: #f3ead2; stroke: var(--ink-dark); stroke-width: 1.5;
   stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-.voyage-ship .rig { fill: none; stroke: #4a3826; stroke-width: 1.1;
+.voyage-ship .rig { fill: none; stroke: var(--ink-dark); stroke-width: 1.1;
   vector-effect: non-scaling-stroke; }
 .voyage-ship .detail, .voyage-rider .detail, .voyage-rider .tail { fill: none;
-  stroke: #4a3826; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  stroke: var(--ink-dark); stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .voyage-ship .detail, .voyage-rider .detail { stroke-width: 0.8; }
 .voyage-rider .tail { stroke-width: 1.4; }
-.voyage-rider .leg { fill: none; stroke: #4a3826; stroke-width: 1.2;
+.voyage-rider .leg { fill: none; stroke: var(--ink-dark); stroke-width: 1.2;
   stroke-linecap: round; vector-effect: non-scaling-stroke; }
-.voyage-ship .ink, .voyage-rider .ink { fill: #4a3826; stroke: none; }
-.caption { text-align: center; font-style: italic; color: #6b5a40;
+.voyage-ship .ink, .voyage-rider .ink { fill: var(--ink-dark); stroke: none; }
+.caption { text-align: center; font-style: italic; color: var(--ink-brown);
   padding-top: 0.6rem; }
-footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;
-  font-size: 0.72rem; color: #857257; }
-footer a { color: inherit; }
+footer { margin-top: 3rem; }

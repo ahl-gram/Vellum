@@ -71,14 +71,65 @@ const isHome = path === "/";
 <link rel="stylesheet" href="/motion.css">
 <link rel="stylesheet" href="index.css">
 <style is:global>
+/* The shell dresses once (#263), part B: the recurring parchment/ink palette,
+   named here and consumed as var() by the six page css files. The old
+   body-text and voyage-track near-miss inks merged into --ink-dark at the
+   PR #269 review (item 4) and are retired. The charts' own label ink stays
+   the renderer's (byte-identity domain), so site prose and chart lettering
+   are deliberately no longer the same hex. Guarded by
+   test/site/shell-css.test.ts. */
+:root {
+  --ink-dark: #4a3826;         /* dark walnut ink: borders, buttons, prose, emphasis */
+  --ink-brown: #6b5a40;        /* flourish brown: taglines, captions, asides */
+  --ink-faded: #857257;        /* faded ink: nav, footer, small labels */
+  --line-tan: #b9a77f;         /* pale tan hairline: rules and frame borders */
+  --parchment: #efe6cf;        /* the page ground every sheet rests on */
+  --parchment-panel: #f4ecd8;  /* raised panels, cards, and pinned slips */
+  --parchment-bright: #fff7e4; /* the lit cream: hovers and the reveal */
+  --parchment-deep: #e6d9b8;   /* the pressed tan: code chips */
+  --line-faint: #cdbd97;       /* the softer hairline, a shade lighter than --line-tan */
+}
+/* The shell dresses once (#263), part A: the rules every page shell shares,
+   extracted move-and-delete from the six page css files. Per-page values stay
+   in the page files: body padding and line-height, main max-width, header
+   margin-bottom, footer margin-top. The h1 and footer letter-spacing unified
+   here on the non-home values (PR #269 review call): home alone keeps the
+   grander masthead and footer, pinned in public/index.css ABOVE this block's
+   specificity on purpose, because the page css link renders before this
+   inline style, so an equal-specificity page rule would silently lose the
+   cascade. */
+:root { color-scheme: light; }
+body {
+  margin: 0;
+  background: var(--parchment); color: var(--ink-dark);
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+}
+main { margin-inline: auto; }
+header { text-align: center; }
+/* The Punchcutter's Case (#228), shell members only: display for the masthead
+   line, flourish for the tagline. Page files keep their page-specific members
+   (home's h2 and cards, seed's figcaption-as-title, the captions). */
+h1, .topnav, footer {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+}
+.tagline {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; color: var(--ink-brown); margin: 0.3rem 0 0;
+}
+h1 { font-size: 2rem; letter-spacing: 0.1em; margin: 0; }
+h1 a { color: inherit; text-decoration: none; }
 /* The canonical nav form's two cross-page rules (Sub 1 decision B, ratified
-   2026-07-21). They live in the layout, not in motion.css or the page CSS:
-   motion.css is a byte-frozen golden, and .topnav outranks the faq/glossary
-   page-CSS `nav` element rule, which still carries the pre-unification 0.8rem. */
-.topnav { font-size: 0.82rem; }
+   2026-07-21) fold into the shell rule here: motion.css is a byte-frozen
+   golden, and .topnav outranks the faq/glossary page-CSS `nav` element rule,
+   which still carried the pre-unification 0.8rem until #263 deleted it. */
+.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: var(--ink-faded); margin: 0.9rem 0 0; }
 /* motion.css makes nav LINKS inline-block so a multi-word label never wraps
    mid-label; the current page renders as a span, so it takes the same rule. */
 .topnav [aria-current="page"] { display: inline-block; }
+.topnav a { color: inherit; }
+[aria-current="page"] { font-weight: 700; }
+footer { text-align: center; font-size: 0.72rem; letter-spacing: 0.22em; color: var(--ink-faded); }
+footer a { color: inherit; }
 </style>
 </head>
 <body>
