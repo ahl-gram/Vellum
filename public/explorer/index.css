@@ -8,7 +8,6 @@ body {
 }
 main { max-width: 1100px; }
 header { margin-bottom: 1.4rem; }
-h1 { letter-spacing: 0.1em; }
 /* #87: the controls read as three labeled bands (Map / Display / Actions)
    instead of one wrapping blob. Each row is a quiet right-aligned label plus a
    wrapping field group; rows stack into clean sections on a phone. */
@@ -454,4 +453,4 @@ button.primary:hover { background: #5d4831; }
 .voyage-ship .ink, .voyage-rider .ink { fill: var(--ink-dark); stroke: none; }
 .caption { text-align: center; font-style: italic; color: var(--ink-brown);
   padding-top: 0.6rem; }
-footer { margin-top: 3rem; letter-spacing: 0.25em; }
+footer { margin-top: 3rem; }

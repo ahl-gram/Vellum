@@ -83,14 +83,14 @@ const isHome = path === "/";
   --line-tan: #b9a77f;   /* pale tan hairline: rules and frame borders */
 }
 /* The shell dresses once (#263), part A: the rules every page shell shares,
-   extracted move-and-delete from the six page css files. Only exact-match
-   properties live here. Per-page values stay in the page files: body padding
-   and line-height, main max-width, header margin-bottom, the h1/footer
-   letter-spacing drift pairs (0.12em/0.1em, 0.25em/0.22em, flagged in the
-   #263 PR, never merged), and footer margin-top. Home's deliberate masthead
-   deviations are pinned in public/index.css ABOVE this block's specificity
-   on purpose: the page css link renders before this inline style, so an
-   equal-specificity page rule would silently lose the cascade. */
+   extracted move-and-delete from the six page css files. Per-page values stay
+   in the page files: body padding and line-height, main max-width, header
+   margin-bottom, footer margin-top. The h1 and footer letter-spacing unified
+   here on the non-home values (PR #269 review call): home alone keeps the
+   grander masthead and footer, pinned in public/index.css ABOVE this block's
+   specificity on purpose, because the page css link renders before this
+   inline style, so an equal-specificity page rule would silently lose the
+   cascade. */
 :root { color-scheme: light; }
 body {
   margin: 0;
@@ -109,7 +109,7 @@ h1, .topnav, footer {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-style: italic; color: var(--ink-brown); margin: 0.3rem 0 0;
 }
-h1 { font-size: 2rem; margin: 0; }
+h1 { font-size: 2rem; letter-spacing: 0.1em; margin: 0; }
 h1 a { color: inherit; text-decoration: none; }
 /* The canonical nav form's two cross-page rules (Sub 1 decision B, ratified
    2026-07-21) fold into the shell rule here: motion.css is a byte-frozen
@@ -121,7 +121,7 @@ h1 a { color: inherit; text-decoration: none; }
 .topnav [aria-current="page"] { display: inline-block; }
 .topnav a { color: inherit; }
 [aria-current="page"] { font-weight: 700; }
-footer { text-align: center; font-size: 0.72rem; color: var(--ink-faded); }
+footer { text-align: center; font-size: 0.72rem; letter-spacing: 0.22em; color: var(--ink-faded); }
 footer a { color: inherit; }
 </style>
 </head>

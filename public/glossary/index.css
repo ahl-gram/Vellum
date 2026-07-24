@@ -9,7 +9,6 @@ h2, h3 {
 }
 main { max-width: 760px; }
 header { margin-bottom: 1rem; }
-h1 { letter-spacing: 0.12em; }
 h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   padding-bottom: 0.3rem; margin-top: 2.8rem; }
 h3 { font-size: 0.95rem; letter-spacing: 0.08em; color: var(--ink-faded);
@@ -34,4 +33,4 @@ h3 { font-size: 0.95rem; letter-spacing: 0.08em; color: var(--ink-faded);
 a { color: var(--ink-brown); }
 code { background: #e6d9b8; padding: 0.1em 0.4em; border-radius: 3px;
   font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
-footer { margin-top: 4rem; letter-spacing: 0.22em; }
+footer { margin-top: 4rem; }

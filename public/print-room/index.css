@@ -9,7 +9,6 @@ body {
 }
 main { max-width: 1000px; }
 header { margin-bottom: 1.2rem; }
-h1 { letter-spacing: 0.1em; }
 .intro { max-width: 640px; margin: 1.4rem auto; text-align: center; }
 
 /* The counter: a single quiet row of controls, like the survey office's order desk. */
@@ -103,7 +102,7 @@ button.primary:hover { background: #5d4831; }
    standalone atlas, and the download always carries them (it builds from the full atlas). */
 @media screen { #pr-atlas .print-only { display: none; } }
 
-footer { margin-top: 3rem; letter-spacing: 0.25em; }
+footer { margin-top: 3rem; }
 
 @media (max-width: 640px) {
   .offerings { grid-template-columns: 1fr; }

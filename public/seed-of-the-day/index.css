@@ -14,7 +14,6 @@ body {
 }
 main { max-width: 1080px; }
 header { margin-bottom: 1.4rem; }
-h1 { letter-spacing: 0.1em; }
 .dateline { text-align: center; letter-spacing: 0.18em; font-size: 0.82rem;
   text-transform: uppercase; color: var(--ink-faded); margin: 0.4rem 0 1.4rem; }
 .status { text-align: center; font-style: italic; color: var(--ink-brown); min-height: 1.4rem; }
@@ -185,4 +184,4 @@ figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
 #share:hover, #dispatch:hover { background: #fff7e4; }
 .streak { font-size: 0.9rem; color: var(--ink-brown); }
 .note { text-align: center; color: var(--ink-faded); font-size: 0.85rem; margin-top: 1rem; }
-footer { margin-top: 4rem; letter-spacing: 0.22em; }
+footer { margin-top: 4rem; }
