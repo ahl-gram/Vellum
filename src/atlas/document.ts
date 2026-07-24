@@ -5,6 +5,7 @@
 // building and the btoa/TextEncoder globals both Node and the browser provide. buildAtlas
 // keeps all of the filesystem work; this module never touches the disk or the DOM.
 import { escapeXml } from "../render/svg.ts";
+import { paletteRootCss } from "./palette.ts";
 import type { AtlasPlate } from "./compose.ts";
 
 // Which band of the atlas a plate sits in. Drives the filename scheme (the style
@@ -45,44 +46,45 @@ export type AtlasDocumentData = {
  * eases correctly.
  */
 export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
-.atlas-sheet h2 { letter-spacing: 0.06em; border-bottom: 1px solid #b9a77f; padding-bottom: 0.3rem;
+.atlas-sheet h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan); padding-bottom: 0.3rem;
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); }
 .atlas-sheet figure img { width: 100%; height: auto; display: block;
-  border: 1px solid #b9a77f; box-shadow: 0 10px 30px rgb(61 47 31 / 0.18);
+  border: 1px solid var(--line-tan); box-shadow: 0 10px 30px rgb(61 47 31 / 0.18);
   transition: transform var(--paper, 260ms) var(--ease-paper, cubic-bezier(0.22, 0.61, 0.36, 1)),
               box-shadow var(--paper, 260ms) var(--ease-paper, cubic-bezier(0.22, 0.61, 0.36, 1)); }
 .atlas-sheet figure img:hover { transform: translateY(-5px) rotate(-0.6deg);
   box-shadow: 0 20px 44px rgb(61 47 31 / 0.28); }
 .atlas-sheet figure img:active { transform: translateY(-1px) rotate(0deg); }
-.atlas-sheet figcaption { text-align: center; font-style: italic; color: #6b5a40; padding-top: 0.55rem;
+.atlas-sheet figcaption { text-align: center; font-style: italic; color: var(--ink-brown); padding-top: 0.55rem;
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); }
 .atlas-sheet .styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
 .atlas-sheet .themes { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.25rem; }
 .atlas-sheet table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-.atlas-sheet th { text-align: left; border-bottom: 2px solid #4a3826; padding: 0.45rem 0.6rem; }
-.atlas-sheet td { border-bottom: 1px solid #cdbd97; padding: 0.45rem 0.6rem; vertical-align: top; }
+.atlas-sheet th { text-align: left; border-bottom: 2px solid var(--ink-dark); padding: 0.45rem 0.6rem; }
+.atlas-sheet td { border-bottom: 1px solid var(--line-faint); padding: 0.45rem 0.6rem; vertical-align: top; }
 .atlas-sheet td.name { font-weight: 600; white-space: nowrap; }
 .atlas-sheet td.name.capital { text-transform: uppercase; letter-spacing: 0.06em; }
 .atlas-sheet td.note { font-style: italic; color: #54452f; }
-.atlas-sheet .realms { font-style: italic; color: #6b5a40; }
+.atlas-sheet .realms { font-style: italic; color: var(--ink-brown); }
 .atlas-sheet .banners { display: flex; flex-wrap: wrap; gap: 1.1rem; justify-content: center; }
 .atlas-sheet .banner { width: 120px; text-align: center; }
 .atlas-sheet .banner svg { width: 100%; height: auto; }
-.atlas-sheet .banner figcaption { font-style: italic; color: #6b5a40; font-size: 0.85rem; padding-top: 0.35rem; }
-.atlas-sheet .chronicle-intro { font-style: italic; color: #6b5a40; }
+.atlas-sheet .banner figcaption { font-style: italic; color: var(--ink-brown); font-size: 0.85rem; padding-top: 0.35rem; }
+.atlas-sheet .chronicle-intro { font-style: italic; color: var(--ink-brown); }
 .atlas-sheet ol.chronicle { list-style: none; padding: 0; margin: 1rem 0 0; max-width: 48rem; }
-.atlas-sheet ol.chronicle li { padding: 0.4rem 0; border-bottom: 1px solid #cdbd97; display: flex; gap: 0.9rem; }
+.atlas-sheet ol.chronicle li { padding: 0.4rem 0; border-bottom: 1px solid var(--line-faint); display: flex; gap: 0.9rem; }
 .atlas-sheet ol.chronicle .year { flex: 0 0 3.2rem; text-align: right; font-variant-numeric: tabular-nums;
-  font-weight: 600; color: #857257; }`;
+  font-weight: 600; color: var(--ink-faded); }`;
 
 // The page chrome for the STANDALONE document only (the CLI /atlas/ page and the
 // single-file download). Never injected into a host page, which supplies its own body
 // and header. h2 margin-top lives here at the standalone's 3rem, kept off the shared
 // block on purpose so each host keeps its own spacing.
 const PAGE_CHROME_CSS = `:root { color-scheme: light; }
+${paletteRootCss()}
 body {
   margin: 0; padding: 2.5rem 1.5rem 5rem;
-  background: #efe6cf; color: #3d2f1f;
+  background: var(--parchment); color: var(--ink-dark);
   font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
   max-width: 1080px; margin-inline: auto;
 }
@@ -98,10 +100,10 @@ h1, h2, .chartno, footer {
 header { text-align: center; margin-bottom: 2rem; }
 h1 { font-size: 2.4rem; letter-spacing: 0.04em; margin: 0 0 0.4rem; }
 h2 { margin-top: 3rem; }
-.subtitle { font-style: italic; color: #6b5a40; max-width: 46rem; margin-inline: auto; }
-.chartno { letter-spacing: 0.3em; font-size: 0.8rem; color: #857257; margin-top: 0.6rem; }
+.subtitle { font-style: italic; color: var(--ink-brown); max-width: 46rem; margin-inline: auto; }
+.chartno { letter-spacing: 0.3em; font-size: 0.8rem; color: var(--ink-faded); margin-top: 0.6rem; }
 footer { margin-top: 4rem; text-align: center; letter-spacing: 0.25em;
-  font-size: 0.75rem; color: #857257; }
+  font-size: 0.75rem; color: var(--ink-faded); }
 a { color: inherit; }`;
 
 // The plate's SVG filename in its atlas section. The style plates (the antique hero and

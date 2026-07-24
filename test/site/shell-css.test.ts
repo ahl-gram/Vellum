@@ -89,13 +89,61 @@ test("the retired near-miss inks never reappear (#269 review, item 4)", () => {
   }
 });
 
-test("drift guard: every var() consumed without a fallback is declared (#263)", () => {
+test("the composers dress from the same palette (#269 review follow-up)", async () => {
+  // The generated atlas and gallery cannot render through BaseLayout (the
+  // single-file atlas download links nothing external), so each document
+  // declares the same tokens in its own :root and consumes them as var().
+  for (const source of ["src/atlas/document.ts", "src/cli/gallery.ts"]) {
+    const text = read(source).toLowerCase();
+    for (const [name, hex] of Object.entries(TOKENS)) {
+      assert.ok(!text.includes(hex), `${source} carries raw ${hex}; consume var(${name})`);
+    }
+    for (const hex of RETIRED_INKS) {
+      assert.ok(!text.includes(hex), `${source} carries retired ink ${hex}; use var(--ink-dark)`);
+    }
+  }
+
+  const { SITE_PALETTE } = await import("../../src/atlas/palette.ts");
+  assert.deepEqual(
+    { ...SITE_PALETTE },
+    TOKENS,
+    "src/atlas/palette.ts must carry exactly the layout's token set (names and values)",
+  );
+
+  const { atlasDocument, atlasPlateFilename } = await import("../../src/atlas/document.ts");
+  const plate = { key: "antique", title: "hero", svg: "<svg></svg>" };
+  const fixture = {
+    title: "T", subtitle: "s", seed: 7,
+    hero: plate, draughtings: [], themes: [], regions: [],
+    bannersHtml: "", chronicleHtml: "", gazetteerHtml: "",
+  };
+  for (const [label, opts] of [
+    ["deployed", { anchor: true, motion: true }],
+    ["offline download", { anchor: false, motion: false }],
+  ] as const) {
+    const html = atlasDocument(fixture, (p, s) => atlasPlateFilename(p, s), opts).toLowerCase();
+    for (const [name, hex] of Object.entries(TOKENS)) {
+      const count = html.split(hex).length - 1;
+      assert.equal(count, 1, `the ${label} atlas should carry ${hex} exactly once (the ${name} :root declaration)`);
+    }
+  }
+});
+
+test("drift guard: every var() consumed without a fallback is declared (#263)", async () => {
   // Declarations may live in the page css itself, the shared fonts.css and
-  // motion.css the layout links on every page, or the layout's own style block.
-  // Consumptions WITH a fallback are excluded: they define their own behavior
-  // when undeclared (the atlas-download font degradation relies on exactly that).
+  // motion.css the layout links on every page, the layout's own style block,
+  // or the composers' inlined palette :root. Consumptions WITH a fallback are
+  // excluded: they define their own behavior when undeclared (the
+  // atlas-download font degradation relies on exactly that).
+  const { paletteRootCss } = await import("../../src/atlas/palette.ts");
   const declared = new Set<string>();
-  const declarationSources = [...PAGE_CSS.map(read), read("public/fonts.css"), read("public/motion.css"), layoutStyle()];
+  const declarationSources = [
+    ...PAGE_CSS.map(read),
+    read("public/fonts.css"),
+    read("public/motion.css"),
+    layoutStyle(),
+    paletteRootCss(),
+  ];
   for (const text of declarationSources) {
     for (const m of text.matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)) declared.add(m[1]);
   }
@@ -103,6 +151,8 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
   const consumers: Array<[string, string]> = [
     ...PAGE_CSS.map((p): [string, string] => [p, read(p)]),
     ["BaseLayout <style is:global>", layoutStyle()],
+    ["src/atlas/document.ts", read("src/atlas/document.ts")],
+    ["src/cli/gallery.ts", read("src/cli/gallery.ts")],
   ];
   for (const [name, text] of consumers) {
     for (const m of text.matchAll(/var\(\s*(--[a-zA-Z0-9-]+)\s*\)/g)) {
