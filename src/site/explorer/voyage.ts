@@ -20,12 +20,14 @@
 // projection, DOM, and animation. Download SVG blobs the pristine chart string, never
 // this overlay, so the exported plate never learns it was animated.
 import {
+  applyTourOrder,
   buildVoyagePlan,
   frameAt,
+  reorderPlanByTravel,
   type VoyageFrame,
   type VoyagePlan,
 } from "../../render/voyage.ts";
-import { routeVoyage, type LegMode } from "../../render/voyage-route.ts";
+import { prepareVoyageRouter, type LegMode, type VoyageRouter } from "../../render/voyage-route.ts";
 import { createProjection } from "../../render/transform.ts";
 import {
   buildLegGeometry,
@@ -41,7 +43,7 @@ import {
 import { paintVersoTrack, clearVersoTrack } from "./verso.ts";
 import { buildLogPanel, revealLog, hideLog, logSnapshot } from "./voyage-log-panel.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
-import type { Survey } from "../../render/survey.ts";
+import { surveyFingerprint, type Survey } from "../../render/survey.ts";
 import type { VoyageLog } from "../../world/voyage-log.ts";
 import type { Pt } from "../../core/rdp.ts";
 
@@ -156,6 +158,33 @@ function makeMark(className: string, parts: ReadonlyArray<MarkPart>): SVGGElemen
   return g;
 }
 
+// #184: the itinerary is ordered on ACTUAL travel, an all-pairs matrix over the
+// prepared router, so the drawn sweep never backtracks by road and sea the way the
+// straight-line tour could. The matrix costs a beat (~0.9s on a laptop for a 24-port
+// world), so it runs only when the walkable world actually changed: the cache keys on
+// seed + port set + surveyFingerprint, which a style turn or a re-toggle leaves
+// untouched. A QUIET rebuild (a mid-drag sea-level frame) NEVER computes: it reuses a
+// matching cached order or falls back to the straight-line one for that transient
+// frame; the drag's release redraw is non-quiet and recomputes against the settled
+// world. At rest the order is therefore a pure function of the world, never of the
+// interaction path that led there.
+let travelOrder: { key: string; order: ReadonlyArray<number> } | null = null;
+
+function orderItinerary(
+  plan: VoyagePlan,
+  router: VoyageRouter,
+  survey: Survey,
+  seed: number,
+  quiet: boolean,
+): VoyagePlan {
+  const key = `${seed}:${surveyFingerprint(survey)}:${plan.ports.map((p) => p.idx).join(",")}`;
+  if (travelOrder && travelOrder.key === key) return applyTourOrder(plan, travelOrder.order);
+  if (quiet) return plan;
+  const ordered = reorderPlanByTravel(plan, router.legLength);
+  travelOrder = { key, order: ordered.ports.map((p) => p.idx) };
+  return ordered;
+}
+
 // Build the plan + routed geometry + overlay for a manifest and append it into #map.
 // Returns false when there is nothing to survey (no capital), so the caller can bail.
 function buildVoyage(
@@ -163,13 +192,16 @@ function buildVoyage(
   survey: Survey | null,
   seed: number,
   subtitle: string,
+  quiet = false,
 ): boolean {
   if (!manifest || !manifest.places || !survey) return false;
-  const plan = buildVoyagePlan(manifest.places, manifest.presentYear);
-  if (!plan.ports.length) return false;
+  const straight = buildVoyagePlan(manifest.places, manifest.presentYear);
+  if (!straight.ports.length) return false;
 
   const sites = manifest.places.map((p) => ({ idx: p.idx, x: p.gx, y: p.gy }));
-  const routed = routeVoyage(plan.legs, sites, survey);
+  const router = prepareVoyageRouter(sites, survey);
+  const plan = orderItinerary(straight, router, survey, seed, quiet);
+  const routed = plan.legs.map(router.route);
 
   // Grid space -> chart pixels. This margin rule mirrors place-manifest.ts and
   // map-renderer.ts exactly; drift here would slide the track off the drawn roads.
@@ -420,7 +452,7 @@ export function rearmVoyage(
 ): void {
   cancelVoyageRaf();
   voyage = null;
-  if (!buildVoyage(manifest, survey, seed, subtitle)) { hideLog(); return; }
+  if (!buildVoyage(manifest, survey, seed, subtitle, opts.quiet)) { hideLog(); return; }
   paintFrame(voyage!, 1, false); // silent: the draw's settle needs #status to stay ""
   // #174: repaint the back face too. renderVerso's replaceChildren wipes the verso track
   // on every draw, exactly as mapDiv.innerHTML wipes the recto overlay, so BOTH faces have

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { PlaceMark } from "../../src/render/place-manifest.ts";
-import { buildVoyagePlan, frameAt } from "../../src/render/voyage.ts";
+import { applyTourOrder, buildVoyagePlan, frameAt, reorderPlanByTravel } from "../../src/render/voyage.ts";
 
 // Unit tests for #118 (Sub 1 of the Wayfarer's Passage epic #117): the pure core
 // that turns a place manifest into a deterministic survey itinerary. No DOM, no
@@ -182,6 +182,70 @@ test("does not mutate the caller's places array (immutability rule)", () => {
   const plan = buildVoyagePlan(input, 1059);
   assert.equal(plan.ports.length, 4);
   assert.deepEqual(input, snapshot);
+});
+
+// --- #184: reordering the itinerary on actual travel distances -----------------
+
+/** A symmetric distance oracle from a sparse pair map; throws on an unknown pair. */
+const matrixD = (m: Record<string, number>) => (a: number, b: number): number => {
+  const v = m[a < b ? `${a}:${b}` : `${b}:${a}`];
+  if (v === undefined) throw new Error(`no distance for ${a}:${b}`);
+  return v;
+};
+
+// The straight-line plan for lineWorld visits 0,1,3,2 (the collinear sweep). The
+// travel oracle puts a strait between A(1) and C(3): far by sea, so the true miles
+// prefer 0,1,2,3 even though C sits between A and B as the crow flies.
+const straitD = matrixD({ "0:1": 1, "1:3": 10, "2:3": 1, "1:2": 2, "0:3": 4, "0:2": 3 });
+
+test("reorderPlanByTravel adopts the cheaper itinerary the travel distances reveal", () => {
+  const plan = buildVoyagePlan(lineWorld, 1059);
+  assert.deepEqual(plan.ports.map((p) => p.idx), [0, 1, 3, 2], "fixture premise: straight-line order");
+  const re = reorderPlanByTravel(plan, straitD);
+  assert.deepEqual(re.ports.map((p) => p.idx), [0, 1, 2, 3]);
+  assert.deepEqual(re.legs, [
+    { fromIdx: 0, toIdx: 1 },
+    { fromIdx: 1, toIdx: 2 },
+    { fromIdx: 2, toIdx: 3 },
+  ]);
+});
+
+test("applyTourOrder: rebuilds legs to the new order and keeps each port's own log line", () => {
+  const plan = buildVoyagePlan(lineWorld, 1059);
+  const re = applyTourOrder(plan, [0, 2, 3, 1]);
+  assert.deepEqual(re.ports.map((p) => p.idx), [0, 2, 3, 1]);
+  assert.deepEqual(re.legs, [
+    { fromIdx: 0, toIdx: 2 },
+    { fromIdx: 2, toIdx: 3 },
+    { fromIdx: 3, toIdx: 1 },
+  ]);
+  const lineOf = new Map(plan.ports.map((p) => [p.idx, p.logLine]));
+  for (const port of re.ports) assert.equal(port.logLine, lineOf.get(port.idx), `port ${port.idx} lost its line`);
+});
+
+test("applyTourOrder: rejects an order that is not a same-set permutation keeping the origin", () => {
+  const plan = buildVoyagePlan(lineWorld, 1059);
+  assert.throws(() => applyTourOrder(plan, [1, 0, 3, 2]), /origin/);
+  assert.throws(() => applyTourOrder(plan, [0, 1, 3]), /permutation/);
+  assert.throws(() => applyTourOrder(plan, [0, 1, 3, 3]), /permutation/);
+  assert.throws(() => applyTourOrder(plan, [0, 1, 3, 5]), /permutation/);
+});
+
+test("reorderPlanByTravel: deterministic and does not mutate the given plan", () => {
+  const plan = buildVoyagePlan(lineWorld, 1059);
+  Object.freeze(plan.ports);
+  Object.freeze(plan.legs);
+  const a = reorderPlanByTravel(plan, straitD);
+  const b = reorderPlanByTravel(plan, straitD);
+  assert.deepEqual(a, b);
+  assert.deepEqual(plan.ports.map((p) => p.idx), [0, 1, 3, 2], "the given plan changed");
+});
+
+test("reorderPlanByTravel: empty and one-port plans come back unchanged", () => {
+  const empty = buildVoyagePlan([], 1059);
+  assert.deepEqual(reorderPlanByTravel(empty, straitD), empty);
+  const solo = buildVoyagePlan([capital], 1059);
+  assert.deepEqual(reorderPlanByTravel(solo, straitD), solo);
 });
 
 // --- frameAt: the pure animation timeline (#119) ------------------------------

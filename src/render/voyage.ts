@@ -1,5 +1,5 @@
 import type { PlaceMark } from "./place-manifest.ts";
-import { orderTour } from "./voyage-tour.ts";
+import { orderTour, refineTour } from "./voyage-tour.ts";
 
 /**
  * The pure core of the Wayfarer's Passage (#117, Sub 1 = #118). It turns a place
@@ -16,6 +16,8 @@ import { orderTour } from "./voyage-tour.ts";
  * on the settlement's `idx`, never its array position, so a shuffled manifest
  * yields a byte-identical plan. Sub 3 (#120) swaps only the leg geometry and Sub 4
  * (#121) swaps only the log prose; both keep this plan shape and these callers.
+ * #184 adds reorderPlanByTravel below: the overlay refines this plan's straight-line
+ * order on actual routed travel before drawing it.
  */
 
 export type VoyageLeg = {
@@ -81,6 +83,48 @@ export function buildVoyagePlan(
   }
 
   return { ports, legs };
+}
+
+/**
+ * Rebuild a plan's ports and legs in the given visiting order (#184). `order` must
+ * be a permutation of the plan's port idxs that keeps the origin first; each port
+ * keeps its own log line (only the origin's line is position-bound, and the origin
+ * does not move). Validated here because the order arrives from a caller-supplied
+ * refinement, and a bad one would surface far away as a mid-sweep missing port.
+ */
+export function applyTourOrder(plan: VoyagePlan, order: ReadonlyArray<number>): VoyagePlan {
+  const current = plan.ports.map((p) => p.idx);
+  const sameSet =
+    order.length === current.length &&
+    [...order].sort((a, b) => a - b).join(",") === [...current].sort((a, b) => a - b).join(",");
+  if (!sameSet) {
+    throw new Error(`tour order [${order.join(",")}] is not a permutation of the plan's ports`);
+  }
+  if (order[0] !== current[0]) {
+    throw new Error(`tour order must keep the origin port ${current[0]} first, got ${order[0]}`);
+  }
+  if (order.every((idx, i) => idx === current[i])) return plan;
+
+  const byIdx = new Map(plan.ports.map((p) => [p.idx, p]));
+  const ports = order.map((idx) => byIdx.get(idx)!);
+  const legs: VoyageLeg[] = [];
+  for (let i = 1; i < ports.length; i++) {
+    legs.push({ fromIdx: ports[i - 1]!.idx, toIdx: ports[i]!.idx });
+  }
+  return { ports, legs };
+}
+
+/**
+ * Reorder a plan's itinerary on ACTUAL travel distances (#184). `d` measures the
+ * routed miles between two ports by idx (prepareVoyageRouter's legLength), so the
+ * order is chosen on exactly the miles the drawn legs will ride, where the
+ * straight-line tour above can still place two ports adjacent whose real road/sea
+ * path backtracks. The straight-line plan seeds the refinement; the result never
+ * rides more miles than it.
+ */
+export function reorderPlanByTravel(plan: VoyagePlan, d: (a: number, b: number) => number): VoyagePlan {
+  if (plan.ports.length <= 2) return plan;
+  return applyTourOrder(plan, refineTour(plan.ports.map((p) => p.idx), d));
 }
 
 /**

@@ -186,7 +186,7 @@ const realWorld = (seed: number) => {
   const plan = buildVoyagePlan(manifest.places, manifest.presentYear);
   const s = buildSurvey(world.elev, world.seaLevel, world.roads);
   const sites = manifest.places.map((p) => site(p.idx, p.gx, p.gy));
-  return { world, s, routed: routeVoyage(plan.legs, sites, s) };
+  return { world, s, plan, sites, routed: routeVoyage(plan.legs, sites, s) };
 };
 
 test("seed 526413615 sails: it has at least one sea leg and many road legs", () => {
