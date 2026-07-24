@@ -9,7 +9,9 @@
 // ports are joined by a walk along the drawn roads, ports on different landmasses by a
 // path across open water. The mark knows which: a rider on the road, a ship at sea, both
 // drawn in PROFILE like every other glyph on the chart (mountains, hills, trees all stand
-// on a baseline at y=0). Profile glyphs have an "up", so the mark flips east/west and
+// on a baseline at y=0). #181 sharpened the swap: it happens at the WATER'S EDGE (the
+// leg's water span), not at the port, so a crossing whose port sits inland rides to the
+// shore, sails, and rides again on landfall. Profile glyphs have an "up", so the mark flips east/west and
 // tilts north/south rather than rotating; a full rotate would lay the ship on its
 // beam-ends on a due-north leg.
 //
@@ -28,6 +30,7 @@ import {
   type VoyagePlan,
 } from "../../render/voyage.ts";
 import { prepareVoyageRouter, type LegMode, type VoyageRouter } from "../../render/voyage-route.ts";
+import type { WaterSpan } from "../../render/voyage-water.ts";
 import { createProjection } from "../../render/transform.ts";
 import {
   buildLegGeometry,
@@ -37,8 +40,10 @@ import {
   resolveFacing,
   netFacing,
   legDurations,
+  markGlyphAt,
   type Facing,
   type LegGeometry,
+  type MarkGlyph,
 } from "../../render/voyage-geometry.ts";
 import { paintVersoTrack, clearVersoTrack } from "./verso.ts";
 import { buildLogPanel, revealLog, hideLog, logSnapshot } from "./voyage-log-panel.ts";
@@ -90,10 +95,13 @@ const RIDER_PARTS: ReadonlyArray<MarkPart> = [
   { d: "M 2 -17 Q 7 -18 11 -18", cls: "detail" },
 ];
 
-// A routed leg as the overlay holds it: the router's mode plus the projected
-// (chart-pixel) polyline with its precomputed arc lengths.
+// A routed leg as the overlay holds it: the router's mode and water span (#181) plus
+// the projected (chart-pixel) polyline with its precomputed arc lengths. The span's
+// fractions carry over from grid space unchanged because the projection is uniform.
 interface SessionLeg {
   mode: LegMode;
+  water: WaterSpan | null;
+  inlandHandoff: boolean;
   geom: LegGeometry;
 }
 
@@ -110,7 +118,7 @@ interface Session {
   shipG: SVGGElement;
   riderG: SVGGElement;
   activeMark: SVGGElement | null;
-  shownMode: LegMode | "";
+  shownGlyph: MarkGlyph | "";
   facing: Facing;
   rafId: number;
   shownArrived: number;
@@ -209,6 +217,8 @@ function buildVoyage(
   const proj = createProjection(survey.gridW, survey.gridH, wPx, Math.round(wPx * 0.045));
   const legs: SessionLeg[] = routed.map((leg) => ({
     mode: leg.mode,
+    water: leg.water,
+    inlandHandoff: leg.inlandHandoff,
     geom: buildLegGeometry(leg.points.map((p) => ({ x: proj.px(p.x), y: proj.py(p.y) }))),
   }));
 
@@ -233,6 +243,7 @@ function buildVoyage(
     return {
       idx: pm.idx, name: pm.name, kind: pm.kind, founded: pm.founded,
       arrivalMode: i === 0 ? null : routed[i - 1].mode,
+      inlandHandoff: i === 0 ? false : routed[i - 1].inlandHandoff,
     };
   });
   const { log, rows: logRows } = buildLogPanel(logPorts, manifest.presentYear, seed, subtitle);
@@ -265,7 +276,7 @@ function buildVoyage(
     shipG,
     riderG,
     activeMark: null,
-    shownMode: "",
+    shownGlyph: "",
     // The mark's facing carries across frames and legs so a switchbacking road cannot
     // flip it (voyage-geometry.js resolveFacing). Seeded from the first leg's overall
     // sense, and rebuilt with the session, so no facing leaks between worlds.
@@ -296,16 +307,18 @@ function trackString(session: Session, f: VoyageFrame): string {
   return out.join(" ");
 }
 
-/** Show the glyph this leg's mode calls for. Toggled only on change, never per frame. */
-function showMark(session: Session, mode: LegMode): void {
-  if (mode === session.shownMode) return;
-  const useShip = mode === "sea";
+/** Show the glyph this frame calls for (#181: markGlyphAt decides by the leg's water
+ *  span, so the swap lands at the water's edge, not at the port). The DOM is still
+ *  toggled only on change, never per frame. */
+function showMark(session: Session, glyph: MarkGlyph): void {
+  if (glyph === session.shownGlyph) return;
+  const useShip = glyph === "ship";
   // The SVG `display` presentation attribute, not [hidden]: SVG elements do not honour
   // the HTML hidden attribute through the UA stylesheet.
   session.shipG.setAttribute("display", useShip ? "inline" : "none");
   session.riderG.setAttribute("display", useShip ? "none" : "inline");
   session.activeMark = useShip ? session.shipG : session.riderG;
-  session.shownMode = mode;
+  session.shownGlyph = glyph;
 }
 
 // Paint one frame at progress t (0..1): grow the track through every arrived port plus
@@ -321,9 +334,9 @@ function paintFrame(session: Session, t: number, postLog = true): void {
   let tiltDeg = 0;
   if (legCount <= 0) {
     pos = session.originPt;
-    showMark(session, "straight");
+    showMark(session, "rider");
   } else {
-    const { geom, mode } = session.legs[f.legIndex];
+    const { geom, mode, water } = session.legs[f.legIndex];
     const s = f.legT * geom.total;
     pos = pointAtDistance(geom, s);
     // The heading is a chord across a lookahead window, not the raw segment under the
@@ -332,7 +345,7 @@ function paintFrame(session: Session, t: number, postLog = true): void {
     const hd = headingAt(geom, s);
     tiltDeg = tiltFor(hd.x, hd.y);
     session.facing = resolveFacing(hd.x, Math.hypot(hd.x, hd.y), session.facing);
-    showMark(session, mode);
+    showMark(session, markGlyphAt(mode, water, f.legT));
   }
 
   session.trackEl.setAttribute("points", trackString(session, f));
@@ -539,10 +552,16 @@ export function voyageLog() {
   return logSnapshot(voyage.log, voyage.logRows);
 }
 
-// e2e read hook: each leg's mode plus its PROJECTED (chart-pixel) vertices, so a suite can
-// find a genuinely switchbacking road leg to prove the anti-flicker wiring, rather than
-// assuming the first road leg bends.
+// e2e read hook: each leg's mode, water span + handoff flag (#181), and its PROJECTED
+// (chart-pixel) vertices, so a suite can find a genuinely switchbacking road leg to prove
+// the anti-flicker wiring, or an inland-handoff leg to sample the glyph along, rather
+// than assuming which leg exhibits what.
 export function voyageLegGeometry() {
   if (!voyage) return null;
-  return voyage.legs.map((l) => ({ mode: l.mode, points: l.geom.points.map((p) => ({ x: p.x, y: p.y })) }));
+  return voyage.legs.map((l) => ({
+    mode: l.mode,
+    water: l.water,
+    inlandHandoff: l.inlandHandoff,
+    points: l.geom.points.map((p) => ({ x: p.x, y: p.y })),
+  }));
 }
