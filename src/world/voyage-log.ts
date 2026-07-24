@@ -37,6 +37,14 @@ export type VoyageLogPort = {
   readonly inlandHandoff: boolean;
 };
 
+/** The closing leg's character, for the homecoming entry (#275). The capital is already
+ *  `ports[0]`, so only the leg crosses this boundary, never a repeated port: the
+ *  homecoming is an ARRIVAL at a port already logged, not a new port. */
+export type VoyageHomecoming = {
+  readonly arrivalMode: LegMode;
+  readonly inlandHandoff: boolean;
+};
+
 export type VoyageLogEntry = {
   readonly idx: number;
   readonly year: number;
@@ -101,6 +109,32 @@ export const HANDOFF_CLOSINGS: readonly string[] = [
   "with the masts small behind us by the time its walls rose",
 ];
 
+// #275 (prose shape ratified by Alex 2026-07-24): the survey sails home, and the closing
+// leg earns one entry in the same annalist register. Mode-split like SEA_ARRIVALS /
+// LAND_ARRIVALS, because the prose forces it ("we handed the last of the sail" cannot
+// follow "We rode on to"). Each entry completes the sentence
+// "<verb> <capital> again, whence we set out, <closing>." so every one is a trailing
+// clause and none carries its own final stop, exactly as HANDOFF_CLOSINGS does.
+// Deliberately NO fixed "the survey is closed" sentence: the log simply stops, the way
+// it does today at the final port.
+export const SEA_HOMECOMINGS: readonly string[] = [
+  "and came to our own moorings on the evening tide",
+  "and handed the last of our sail in water we knew by heart",
+  "the watch on the wall knowing our colours before ever we were hailed",
+  "and let go the anchor in the roads we had left in the spring",
+  "the pilot idle at last, every shoal of it long since in our own book",
+  "and the quay stood crowded before we had the warps ashore",
+];
+
+export const LAND_HOMECOMINGS: readonly string[] = [
+  "and the horses found their own stalls without asking",
+  "and came up the last mile at a walk, in no haste at all",
+  "the gate standing open, as it had the morning we rode out",
+  "and gave the reeve back his road, none the worse for our using of it",
+  "the bells being rung, though we had sent no word ahead",
+  "and slept that night under a roof we had some claim on",
+];
+
 // Cycle a pool without repeating until it is exhausted, then wrap. The same idiom as
 // lore.ts freshPick and history.ts makeCycler, both closure-private (and freshPick's
 // pools are the gazetteer register, not this journal one), so it is re-implemented here.
@@ -143,20 +177,63 @@ function poolFor(mode: LegMode | null): readonly string[] {
   return LAND_ARRIVALS; // road and the degraded straight both ride overland
 }
 
+/** #275: the homecoming's pool, split on the same rule as poolFor. */
+function homecomingPoolFor(mode: LegMode): readonly string[] {
+  return mode === "sea" ? SEA_HOMECOMINGS : LAND_HOMECOMINGS;
+}
+
+/**
+ * The closing leg's entry (#275). The capital is `ports[0]` and is already logged as the
+ * departure, so this is an ARRIVAL at a port the log has met: "whence we set out" stands
+ * in for a descriptor, because repeating "seat of this survey, its walls raised in the
+ * year N" would read as a second founding.
+ *
+ * A closing leg that hands off inland keeps #181's ratified three-part shape, with the
+ * ride departing the LAST port and the landfall below the capital. HANDOFF_CLOSINGS is
+ * reused there rather than grown a fourth pool: those clauses are mode-neutral.
+ *
+ * Returns null when there is nothing to sail home from (fewer than two ports), so a
+ * one-port survey logs its departure and stops.
+ */
+function homecomingEntry(
+  ports: ReadonlyArray<VoyageLogPort>,
+  presentYear: number,
+  homecoming: VoyageHomecoming,
+  pick: (list: readonly string[]) => string,
+): VoyageLogEntry | null {
+  if (ports.length < 2) return null;
+  const home = ports[0]!;
+  const last = ports[ports.length - 1]!;
+  const { arrivalMode: mode, inlandHandoff } = homecoming;
+  const text =
+    mode === "sea" && inlandHandoff
+      ? `Year ${presentYear}. We rode from ${last.name} to the coast, took ship, ` +
+        `and made landfall below ${home.name}, whence we set out, ${pick(HANDOFF_CLOSINGS)}.`
+      : `Year ${presentYear}. ${arrivalVerb(mode)} ${home.name} again, whence we set out, ` +
+        `${pick(homecomingPoolFor(mode))}.`;
+  return { idx: home.idx, year: presentYear, text };
+}
+
 /**
  * Compose the survey's margin log from its ports in visit order. Every port is dated with
  * the single survey year (there is no per-port timeline in the world data, so an invented
  * per-port date would be fiction, not world-derived). The flavor clause is the only
  * randomness, drawn no-repeat off `createRng(seed).fork("voyage-log")`.
+ *
+ * INVARIANT (#275): `entries = legs + 1`, one departure plus one entry per leg. Pass the
+ * closing leg as `homecoming` and the round trip logs its return; pass null and this is
+ * the open-path log it always was, byte for byte. `ports` NEVER repeats the capital, so
+ * the homecoming entry shares entry 0's idx: rows are revealed by POSITION, not by idx.
  */
 export function buildVoyageLog(
   ports: ReadonlyArray<VoyageLogPort>,
   presentYear: number,
   seed: number,
   subtitle: string,
+  homecoming: VoyageHomecoming | null = null,
 ): VoyageLog {
   const pick = makeCycler(createRng(seed).fork("voyage-log"));
-  const entries = ports.map((port, i) => {
+  const portEntries = ports.map((port, i) => {
     const isOrigin = i === 0;
     const mode = isOrigin ? null : port.arrivalMode;
     // #181: a sea arrival whose leg rode a genuine overland stub narrates all three
@@ -171,6 +248,13 @@ export function buildVoyageLog(
           `${descriptor(port, isOrigin)}. ${pick(poolFor(mode))}`;
     return { idx: port.idx, year: presentYear, text };
   });
+  // #275: the homecoming draws LAST, off the same forked stream, so adding it cannot
+  // reshuffle a single port's flavor: an open-path log and the first n entries of a
+  // round-trip log over the same ports are identical.
+  const home = homecoming ? homecomingEntry(ports, presentYear, homecoming, pick) : null;
+  const entries = home ? [...portEntries, home] : portEntries;
+  // The summary counts PORTS, not entries. The homecoming is an arrival at a port
+  // already counted, so a round trip charts the same number of ports as an open path.
   const n = ports.length;
   const summary = `The survey is charted: ${n} ${n === 1 ? "port" : "ports"} set down in the surveyor's hand.`;
   return { attribution: subtitle, summary, entries };

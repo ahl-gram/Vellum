@@ -1,7 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { PlaceMark } from "../../src/render/place-manifest.ts";
-import { applyTourOrder, buildVoyagePlan, frameAt, reorderPlanByTravel } from "../../src/render/voyage.ts";
+import {
+  applyTourOrder,
+  buildVoyagePlan,
+  frameAt,
+  logEntryCount,
+  reorderPlanByTravel,
+} from "../../src/render/voyage.ts";
 
 // Unit tests for #118 (Sub 1 of the Wayfarer's Passage epic #117): the pure core
 // that turns a place manifest into a deterministic survey itinerary. No DOM, no
@@ -9,8 +15,9 @@ import { applyTourOrder, buildVoyagePlan, frameAt, reorderPlanByTravel } from ".
 // the Explorer e2e; only the deterministic plan math is tested here.
 //
 // Two load-bearing behaviours:
-//  1. The plan starts at the single capital and an OPEN path visits every living
-//     town and village exactly once (legs.length === ports.length - 1).
+//  1. The plan starts at the single capital and a CLOSED round trip visits every
+//     living town and village exactly once before sailing home (#275: legs.length
+//     === ports.length, the last leg returning to the capital).
 //  2. Every selection keys on the settlement's `idx`, never its array position,
 //     so a shuffled input yields a byte-identical plan. That is the determinism
 //     promise the epic makes ("same seed, same voyage").
@@ -77,21 +84,47 @@ test("the tour does not cross itself on a ring layout nearest-neighbour would ta
   const legs = plan.legs.map((l) => [at.get(l.fromIdx)!, at.get(l.toIdx)!] as const);
   for (let i = 0; i < legs.length; i++) {
     for (let j = i + 2; j < legs.length; j++) {
+      // #275: the closing leg is a real leg and is checked too. It shares a port with
+      // leg 0, so that one adjacent pair is the only exclusion.
+      if (i === 0 && j === legs.length - 1) continue;
       assert.ok(!crosses(legs[i]![0], legs[i]![1], legs[j]![0], legs[j]![1]),
         `legs ${i} and ${j} cross`);
     }
   }
 });
 
-test("legs are an open path of consecutive ports (no return leg)", () => {
+test("legs close the tour into a round trip: the last leg sails home to the capital", () => {
+  // #275 reverses #120's "the survey does not sail home". legs = ports now, not ports - 1.
   const plan = buildVoyagePlan(lineWorld, 1059);
-  assert.equal(plan.legs.length, plan.ports.length - 1);
+  assert.equal(plan.legs.length, plan.ports.length, "one leg per port once the tour closes");
   for (let i = 1; i < plan.ports.length; i++) {
     assert.deepEqual(plan.legs[i - 1], {
       fromIdx: plan.ports[i - 1].idx,
       toIdx: plan.ports[i].idx,
     });
   }
+  assert.deepEqual(
+    plan.legs[plan.legs.length - 1],
+    { fromIdx: plan.ports[plan.ports.length - 1].idx, toIdx: plan.ports[0].idx },
+    "the closing leg carries the survey home",
+  );
+});
+
+test("a two-port survey sails out and back, not out alone", () => {
+  const plan = buildVoyagePlan([capital, townA], 1059);
+  assert.deepEqual(plan.ports.map((p) => p.idx), [0, 1]);
+  assert.deepEqual(plan.legs, [
+    { fromIdx: 0, toIdx: 1 },
+    { fromIdx: 1, toIdx: 0 },
+  ]);
+});
+
+test("no port is visited twice even though the survey comes home (the capital is one port)", () => {
+  // The homecoming is an ARRIVAL at a port already in the itinerary, never a second
+  // port. A plan that appended the capital again would double it here.
+  const plan = buildVoyagePlan(lineWorld, 1059);
+  const idxs = plan.ports.map((p) => p.idx);
+  assert.equal(new Set(idxs).size, idxs.length, "the capital must not appear twice as a port");
 });
 
 test("visits every living town and village exactly once", () => {
@@ -207,6 +240,7 @@ test("reorderPlanByTravel adopts the cheaper itinerary the travel distances reve
     { fromIdx: 0, toIdx: 1 },
     { fromIdx: 1, toIdx: 2 },
     { fromIdx: 2, toIdx: 3 },
+    { fromIdx: 3, toIdx: 0 },
   ]);
 });
 
@@ -218,6 +252,7 @@ test("applyTourOrder: rebuilds legs to the new order and keeps each port's own l
     { fromIdx: 0, toIdx: 2 },
     { fromIdx: 2, toIdx: 3 },
     { fromIdx: 3, toIdx: 1 },
+    { fromIdx: 1, toIdx: 0 },
   ]);
   const lineOf = new Map(plan.ports.map((p) => [p.idx, p.logLine]));
   for (const port of re.ports) assert.equal(port.logLine, lineOf.get(port.idx), `port ${port.idx} lost its line`);
@@ -246,6 +281,31 @@ test("reorderPlanByTravel: empty and one-port plans come back unchanged", () => 
   assert.deepEqual(reorderPlanByTravel(empty, straitD), empty);
   const solo = buildVoyagePlan([capital], 1059);
   assert.deepEqual(reorderPlanByTravel(solo, straitD), solo);
+});
+
+// --- logEntryCount: the completion threshold (#275) ---------------------------
+
+test("logEntryCount: one departure plus one entry per leg, so a round trip logs a homecoming", () => {
+  const plan = buildVoyagePlan(lineWorld, 1059);
+  assert.equal(plan.ports.length, 4, "fixture premise");
+  assert.equal(logEntryCount(plan), 5, "4 ports, 4 legs, 5 entries: the homecoming earns its own");
+});
+
+test("logEntryCount: the sweep reaches it exactly at t=1, and NOT at the last port", () => {
+  // The bug this guards: comparing `arrived` against ports.length posts the survey's one
+  // #status summary a leg early (at the last port, before it sails home) and again at the
+  // homecoming. Against logEntryCount it fires once, at completion.
+  const plan = buildVoyagePlan(lineWorld, 1059);
+  const legCount = plan.legs.length;
+  const entries = logEntryCount(plan);
+  assert.equal(frameAt(legCount, 1).arrived, entries, "t=1 completes the log");
+  const atLastPort = frameAt(legCount, (legCount - 1) / legCount).arrived;
+  assert.ok(atLastPort < entries, `reaching the last port (${atLastPort}) must not complete ${entries}`);
+});
+
+test("logEntryCount: a one-port survey logs only its departure; an empty plan logs nothing", () => {
+  assert.equal(logEntryCount(buildVoyagePlan([capital], 1059)), 1);
+  assert.equal(logEntryCount(buildVoyagePlan([], 1059)), 0);
 });
 
 // --- frameAt: the pure animation timeline (#119) ------------------------------

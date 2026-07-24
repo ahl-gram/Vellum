@@ -6,6 +6,8 @@ import {
   LAND_ARRIVALS,
   DEPARTURES,
   HANDOFF_CLOSINGS,
+  SEA_HOMECOMINGS,
+  LAND_HOMECOMINGS,
   type VoyageLogPort,
 } from "../../src/world/voyage-log.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
@@ -196,6 +198,125 @@ test("handoff closings cycle without repeating until the pool is exhausted", () 
   assert.equal(new Set(texts).size, n, "each handoff draws a fresh closing until the pool empties");
 });
 
+// --- the homecoming (#275, prose shape ratified by Alex 2026-07-24) -------------
+//
+// The survey now sails home, so the log gains ONE entry for the closing leg. It is an
+// arrival at a port already logged, not a new port: the capital is `ports[0]` and stays
+// there, and only the closing leg's character crosses the boundary. The invariant is
+// `entries = legs + 1` (one departure plus one per leg), which for a round trip reads
+// as ports + 1. Prose: a mode-aware pool exactly like SEA_ARRIVALS / LAND_ARRIVALS,
+// with NO fixed closing sentence, and "whence we set out" in place of a descriptor.
+
+const homeBySea = { arrivalMode: "sea", inlandHandoff: false } as const;
+const homeByRoad = { arrivalMode: "road", inlandHandoff: false } as const;
+
+test("the homecoming closes the log: one entry per leg plus the departure", () => {
+  const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, homeBySea);
+  assert.equal(log.entries.length, smallSurvey.length + 1, "3 ports, 3 legs, 4 entries");
+  const home = log.entries[log.entries.length - 1]!;
+  assert.equal(home.idx, origin.idx, "the survey comes home to the capital it departed");
+  assert.equal(home.year, 1059);
+  assert.ok(home.text.includes(origin.name), `the homecoming names the capital: "${home.text}"`);
+});
+
+test("no homecoming given: the log is exactly the open-path log it always was", () => {
+  const closed = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, null);
+  const open = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE);
+  assert.deepEqual(closed, open);
+  assert.equal(open.entries.length, smallSurvey.length);
+});
+
+test("the homecoming reads as a return, not a second founding", () => {
+  const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, homeBySea);
+  const text = log.entries[log.entries.length - 1]!.text;
+  assert.ok(text.includes("whence we set out"), `the capital is where the survey began: "${text}"`);
+  assert.ok(!text.includes("seat of this survey"), `it must not re-found the capital: "${text}"`);
+  assert.ok(!text.includes("standing since"), `it must not read as a fresh arrival: "${text}"`);
+  assert.ok(!text.includes("set out from"), `it arrives, it does not depart again: "${text}"`);
+});
+
+test("a sea homecoming sails and a road homecoming rides, in their own registers", () => {
+  const bySea = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, homeBySea);
+  const byRoad = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, homeByRoad);
+  const seaText = bySea.entries[bySea.entries.length - 1]!.text;
+  const roadText = byRoad.entries[byRoad.entries.length - 1]!.text;
+  assert.ok(seaText.includes("made sail"), `a sea homecoming sails: "${seaText}"`);
+  assert.ok(roadText.includes("rode on"), `a road homecoming rides: "${roadText}"`);
+  assert.ok(
+    SEA_HOMECOMINGS.some((c) => seaText.includes(c)),
+    `the sea closing comes from the sea pool: "${seaText}"`,
+  );
+  assert.ok(
+    LAND_HOMECOMINGS.some((c) => roadText.includes(c)),
+    `the road closing comes from the land pool: "${roadText}"`,
+  );
+});
+
+test("a degraded straight closing leg comes home overland, never under sail", () => {
+  const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, {
+    arrivalMode: "straight",
+    inlandHandoff: false,
+  });
+  const text = log.entries[log.entries.length - 1]!.text;
+  assert.ok(text.includes("overland"), `a straight homecoming presses overland: "${text}"`);
+  assert.ok(!text.includes("made sail"), `it must never sail: "${text}"`);
+  assert.ok(LAND_HOMECOMINGS.some((c) => text.includes(c)), `land register: "${text}"`);
+});
+
+test("a homecoming that hands off inland keeps #181's three-part ride-sail-ride shape", () => {
+  const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, {
+    arrivalMode: "sea",
+    inlandHandoff: true,
+  });
+  const text = log.entries[log.entries.length - 1]!.text;
+  assert.match(
+    text,
+    /^Year 1059\. We rode from Meamere to the coast, took ship, and made landfall below Laukuwelua, whence we set out, /,
+    `the ride departs the LAST port and lands below the capital: "${text}"`,
+  );
+  assert.ok(!text.includes("made sail"), `a handoff never reads as a plain sail: "${text}"`);
+  assert.ok(HANDOFF_CLOSINGS.some((c) => text.includes(c)), `the closing comes from the pool: "${text}"`);
+});
+
+test("the homecoming draws off the same forked stream: deterministic per seed, varying across seeds", () => {
+  const a = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, homeBySea);
+  const b = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, homeBySea);
+  assert.deepEqual(a, b, "same seed, same homecoming");
+  const seeds = new Set(
+    [42, 99, 7, 1234, 5, 88].map(
+      (s) => buildVoyageLog(smallSurvey, 1059, s, SUBTITLE, homeBySea).entries.slice(-1)[0]!.text,
+    ),
+  );
+  assert.ok(seeds.size > 1, "different seeds must be able to draw different homecomings");
+});
+
+test("the summary still counts PORTS, not entries: the homecoming is not a new port", () => {
+  const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, homeBySea);
+  assert.ok(log.summary.includes(String(smallSurvey.length)), `summary counts ports: "${log.summary}"`);
+  assert.ok(!log.summary.includes(String(smallSurvey.length + 1)), "the homecoming must not inflate the count");
+});
+
+test("homecoming pools are non-trivial and em-dash free (authored copy sanity)", () => {
+  assert.ok(SEA_HOMECOMINGS.length >= 4, "the sea homecoming has closings to cycle");
+  assert.ok(LAND_HOMECOMINGS.length >= 4, "the land homecoming has closings to cycle");
+  for (const phrase of [...SEA_HOMECOMINGS, ...LAND_HOMECOMINGS]) {
+    assert.ok(!phrase.includes("—"), `no em-dash in pool phrase: "${phrase}"`);
+  }
+});
+
+test("no em-dashes in a log that comes home (house rule)", () => {
+  const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, homeBySea);
+  for (const entry of log.entries) assert.ok(!entry.text.includes("—"), `no em-dash: "${entry.text}"`);
+});
+
+test("a one-port survey has no closing leg, so no homecoming is logged", () => {
+  // The capital alone: buildVoyagePlan yields no legs, so the caller passes no homecoming
+  // and the log is the single departure. Nothing to sail home from.
+  const log = buildVoyageLog([origin], 1059, 42, SUBTITLE, null);
+  assert.equal(log.entries.length, 1);
+  assert.ok(log.entries[0]!.text.includes("set out"));
+});
+
 test("empty survey yields an attributed but empty log", () => {
   const log = buildVoyageLog([], 1059, 42, SUBTITLE);
   assert.deepEqual(log.entries, []);
@@ -223,10 +344,20 @@ test("on a real routed world the mode-aware voice reaches the right ports (seed 
       inlandHandoff: i === 0 ? false : routed[i - 1]!.inlandHandoff,
     };
   });
-  const log = buildVoyageLog(logPorts, manifest.presentYear, world.recipe.seed, world.title.subtitle);
+  const closing = routed[routed.length - 1]!;
+  const log = buildVoyageLog(logPorts, manifest.presentYear, world.recipe.seed, world.title.subtitle, {
+    arrivalMode: closing.mode,
+    inlandHandoff: closing.inlandHandoff,
+  });
 
-  assert.equal(log.entries.length, plan.ports.length, "one entry per port");
+  assert.equal(plan.legs.length, plan.ports.length, "#275: the real world's tour closes too");
+  assert.equal(closing.toIdx, plan.ports[0]!.idx, "the closing leg routes home to the capital");
+  assert.equal(log.entries.length, plan.ports.length + 1, "one entry per port plus the homecoming");
   assert.ok(log.entries[0]!.text.includes("set out"), "the survey departs the capital");
+  assert.ok(
+    log.entries[log.entries.length - 1]!.text.includes("whence we set out"),
+    "and comes home to it",
+  );
 
   const firstSea = logPorts.findIndex((p) => p.arrivalMode === "sea");
   const firstRoad = logPorts.findIndex((p) => p.arrivalMode === "road");

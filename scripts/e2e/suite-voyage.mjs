@@ -28,8 +28,9 @@ export async function run(ctx) {
   })()`);
 
   // W1: toggle voyage ON via the change handler (the real gesture). The overlay is
-  // drawn in #map and the in-page plan starts at the capital (the open-path leg count
-  // is an engine invariant proven by the frameAt/buildVoyagePlan unit tests).
+  // drawn in #map and the in-page plan starts at the capital (#275: the closed round
+  // trip's leg count is an engine invariant proven by the frameAt/buildVoyagePlan
+  // unit tests, so it is not re-derived here).
   const v1 = await evaluate(`(()=>{
     const chk=document.getElementById("voyage");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
     const ov=document.querySelector("#map .voyage-overlay");
@@ -40,8 +41,13 @@ export async function run(ctx) {
 
   // The plan's ports (idx + the v1 log line), read once for the step assertions.
   const plan = await evaluate(`(()=>{const p=window.__vellumVoyagePlan();return{ports:p.ports.map((x)=>({idx:x.idx,logLine:x.logLine})),legs:p.legs.length};})()`);
-  const lastPort = plan.legs; // the last port's 0-based index == leg count
+  // #275: legs === ports now, and the LAST leg is the one home. So the step index that
+  // lands on the final distinct port is legs - 1, and stepping to legs itself is the
+  // HOMECOMING (t = 1). Under the open path those were the same step.
+  const lastPort = plan.legs - 1;
+  const homeStep = plan.legs;
   const midPort = Math.max(1, Math.floor(plan.legs / 2));
+  const entries = plan.ports.length + 1; // one per port, plus the homecoming
 
   // #120: the mark is a ship on sea legs and a rider on road/straight legs, so select
   // whichever is currently displayed. Reading .voyage-ship unconditionally throws on the
@@ -50,15 +56,18 @@ export async function run(ctx) {
   // #121: the per-port log no longer streams into #status; it accumulates in the margin
   // log panel. stepTo reads how many rows have brightened (logged) and the newest one's
   // text via the read hook, alongside the track/mark state.
+  // #275: `first`/`last` are the track polyline's end vertices, so a resting round trip
+  // can be checked for being a CLOSED CIRCUIT (they must be string-identical: the closing
+  // leg ends on the very projection of the capital that leg 0 started from).
   const stepTo = (n) =>
-    evaluate(`(()=>{${markFn}window.__vellumVoyageStepTo(${n});const m=mark();const t=m?m.getAttribute("transform"):"";const glyph=m?m.getAttribute("class"):"";const pts=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ").length;const log=window.__vellumVoyageLog();return{status:document.getElementById("status").textContent,tf:t,glyph,pts,logged:log?log.logged:-1,rows:log?log.rows:-1,visible:!!(log&&log.visible),lastText:log&&log.logged>0?log.entries[log.logged-1].text:""};})()`);
+    evaluate(`(()=>{${markFn}window.__vellumVoyageStepTo(${n});const m=mark();const t=m?m.getAttribute("transform"):"";const glyph=m?m.getAttribute("class"):"";const raw=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ");const log=window.__vellumVoyageLog();return{status:document.getElementById("status").textContent,tf:t,glyph,pts:raw.length,first:raw[0],last:raw[raw.length-1],logged:log?log.logged:-1,rows:log?log.rows:-1,visible:!!(log&&log.visible),lastText:log&&log.logged>0?log.entries[log.logged-1].text:""};})()`);
 
   // W2: step to the origin -> the panel shows one row per port, the first brightened, and
   // it reads as a departure (the surveyor sets out, does not arrive).
   const s0 = await stepTo(0);
   check("W2 step to the capital: the margin log opens with the departure entry",
-    s0.visible && s0.rows === plan.ports.length && s0.logged === 1 && s0.lastText.includes("set out"),
-    JSON.stringify({ s0, ports: plan.ports.length }));
+    s0.visible && s0.rows === entries && s0.logged === 1 && s0.lastText.includes("set out"),
+    JSON.stringify({ s0, ports: plan.ports.length, entries }));
 
   // W3: step to a mid port -> that many entries have brightened, the track grew, the mark moved.
   const sMid = await stepTo(midPort);
@@ -66,13 +75,28 @@ export async function run(ctx) {
     sMid.logged === midPort + 1 && sMid.pts > s0.pts && sMid.tf !== s0.tf,
     JSON.stringify({ mid: midPort, sMid, s0pts: s0.pts }));
 
-  // W4: step to the last port -> every entry has brightened and the full routed track rests.
+  // W4: step to the last PORT -> every port's entry has brightened, but the survey is not
+  // finished: it still has to sail home, so the homecoming row is still dim and the one
+  // #status summary has NOT been posted. This is the direct guard on #275's completion
+  // check: comparing `arrived` against ports.length instead of the log's entry count posts
+  // the summary here, a whole leg early, and then again at the homecoming.
   const sLast = await stepTo(lastPort);
   // #120: legs are routed polylines now, so the resting track has strictly MORE vertices
   // than it has ports. Under v1 this was an equality.
-  check("W4 step to the last port: every entry is logged and the full routed track rests",
-    sLast.logged === plan.ports.length && sLast.pts > plan.ports.length,
-    JSON.stringify({ last: lastPort, sLast, ports: plan.ports.length }));
+  check("W4 step to the last port: every port is logged, but the survey has not come home yet",
+    sLast.logged === plan.ports.length && sLast.logged < entries && sLast.status === "" &&
+    sLast.pts > plan.ports.length,
+    JSON.stringify({ last: lastPort, sLast, ports: plan.ports.length, entries }));
+
+  // W4c (#275): step home -> the homecoming row brightens last, it reads as a return to
+  // the capital, the single completion summary posts, and the resting track is a CLOSED
+  // CIRCUIT: its last vertex is the very same projected point its first vertex is.
+  const sHome = await stepTo(homeStep);
+  check("W4c the survey sails home: the homecoming closes the log and the track is a closed circuit",
+    sHome.logged === entries && sHome.lastText.includes("whence we set out") &&
+    sHome.status.startsWith("The survey is charted") && sHome.first === sHome.last &&
+    sHome.pts > sLast.pts,
+    JSON.stringify({ home: homeStep, sHome, entries }));
 
   // W4b: stepping BACK from the finished survey clears the completion summary. The
   // deterministic hooks can move the survey backward to a mid rest, and #status must return
@@ -134,8 +158,10 @@ export async function run(ctx) {
   // #121: the settle-path re-arm must thread the seed + subtitle, so the margin log rebuilds
   // for the NEW world with its real attribution (a bug here builds it with seed 0 and an
   // empty signature, invisible to a track-only check).
+  // #275: the re-armed log carries the homecoming too, so entries = ports + 1.
   check("W8 redraw with voyage on re-arms the full resting track AND the new world's margin log",
     v8.hasOverlay && v8.firstIdx === vm2.capitalIdx && v8.ports > 1 && v8.pts > v8.ports &&
-    v8.logVisible && v8.logEntries === v8.ports && v8.logged === v8.ports && v8.logAttr.startsWith("Being a true"),
+    v8.logVisible && v8.logEntries === v8.ports + 1 && v8.logged === v8.ports + 1 &&
+    v8.logAttr.startsWith("Being a true"),
     JSON.stringify({ ...v8, logAttr: v8.logAttr.slice(0, 20) }) + ` capital=${vm2.capitalIdx}`);
 }

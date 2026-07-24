@@ -38,6 +38,27 @@ export type VoyagePlan = {
 
 const EMPTY_PLAN: VoyagePlan = { ports: [], legs: [] };
 
+/**
+ * The legs of a CLOSED itinerary (#275): each consecutive pair, then the closing leg
+ * home to the origin. So `legs.length === ports.length` from two ports up, where it was
+ * `ports.length - 1` while the survey rested where it ended.
+ *
+ * INVARIANT: a one-port survey has NO legs. A closing leg from the capital to itself
+ * would route a zero-length track, draw a mark standing on its own start, and log a
+ * homecoming from nowhere. The port list itself never repeats the capital either: the
+ * homecoming is an arrival at a port already visited, not a second port.
+ */
+function closedLegs(ports: ReadonlyArray<{ readonly idx: number }>): VoyageLeg[] {
+  const legs: VoyageLeg[] = [];
+  for (let i = 1; i < ports.length; i++) {
+    legs.push({ fromIdx: ports[i - 1]!.idx, toIdx: ports[i]!.idx });
+  }
+  if (ports.length >= 2) {
+    legs.push({ fromIdx: ports[ports.length - 1]!.idx, toIdx: ports[0]!.idx });
+  }
+  return legs;
+}
+
 function logLineFor(place: PlaceMark, presentYear: number, isOrigin: boolean): string {
   if (isOrigin) {
     return `Year ${presentYear}: set out from ${place.name}, seat of this survey, raised in the year ${place.founded}.`;
@@ -50,9 +71,10 @@ function logLineFor(place: PlaceMark, presentYear: number, isOrigin: boolean): s
  * Build a deterministic voyage itinerary from a place manifest.
  *
  * The survey departs the single capital (its home port, included even if the
- * chronicle later ruined it) and visits every living town and village once, ordered
- * as an open path that sweeps AROUND the world rather than backtracking (the tour
- * algorithm lives in voyage-tour.ts). A world with no capital has no survey and
+ * chronicle later ruined it), visits every living town and village once, and sails
+ * home: a closed round trip that sweeps AROUND the world rather than backtracking
+ * (the tour algorithm lives in voyage-tour.ts). #275 closed it; before that it was an
+ * open path that rested wherever it ended. A world with no capital has no survey and
  * yields an empty plan.
  */
 export function buildVoyagePlan(
@@ -77,12 +99,7 @@ export function buildVoyagePlan(
     logLine: logLineFor(p, presentYear, i === 0),
   }));
 
-  const legs: VoyageLeg[] = [];
-  for (let i = 1; i < visited.length; i++) {
-    legs.push({ fromIdx: visited[i - 1].idx, toIdx: visited[i].idx });
-  }
-
-  return { ports, legs };
+  return { ports, legs: closedLegs(ports) };
 }
 
 /**
@@ -107,11 +124,7 @@ export function applyTourOrder(plan: VoyagePlan, order: ReadonlyArray<number>): 
 
   const byIdx = new Map(plan.ports.map((p) => [p.idx, p]));
   const ports = order.map((idx) => byIdx.get(idx)!);
-  const legs: VoyageLeg[] = [];
-  for (let i = 1; i < ports.length; i++) {
-    legs.push({ fromIdx: ports[i - 1]!.idx, toIdx: ports[i]!.idx });
-  }
-  return { ports, legs };
+  return { ports, legs: closedLegs(ports) };
 }
 
 /**
@@ -128,8 +141,24 @@ export function reorderPlanByTravel(plan: VoyagePlan, d: (a: number, b: number) 
 }
 
 /**
+ * How many margin-log entries a plan yields (#275): one departure plus one per leg.
+ * NOT `ports.length`. Under the round trip the closing leg earns its own homecoming
+ * entry, so a plan with n ports has n legs and n + 1 entries. An empty plan has none.
+ *
+ * INVARIANT: this is the completion threshold the overlay compares `frame.arrived`
+ * against. `arrived` runs 1..legCount + 1, so it reaches this value exactly at t = 1.
+ * Comparing against `ports.length` instead would post the survey's one #status summary
+ * a leg EARLY (when the mark reaches the last port, before it sails home) and then
+ * again at the homecoming, which is the "posts exactly once" criterion broken twice.
+ */
+export function logEntryCount(plan: VoyagePlan): number {
+  return plan.ports.length === 0 ? 0 : plan.legs.length + 1;
+}
+
+/**
  * A frame of the sweep: which leg the marker is on, how far along it (0..1), and how
- * many ports it has reached so far (the origin counts, so `arrived` runs 1..legCount+1).
+ * many log entries it has earned so far (the departure counts, so `arrived` runs
+ * 1..legCount+1; on a round trip the last of those is the homecoming, not a new port).
  */
 export type VoyageFrame = {
   readonly legIndex: number;
@@ -143,8 +172,13 @@ export type VoyageFrame = {
  * port). Geometry (the port pixel positions, the marker) stays in the overlay; this
  * is only the deterministic progress math, so it is unit-tested like the plan.
  *
- * Assumes a non-empty plan (ports = legCount + 1). `legCount <= 0` is the one-port
- * survey: the marker rests at the origin, which counts as arrived.
+ * Assumes a non-empty plan. `legCount <= 0` is the one-port survey: the marker rests at
+ * the origin, which counts as arrived.
+ *
+ * #275 left this function untouched on purpose. `arrived` has always run 1..legCount + 1,
+ * which under the closed tour is exactly the margin log's entry count (a departure plus
+ * one per leg), so the reveal still lands one row per arrival with the homecoming last.
+ * What did change is who it is compared against: logEntryCount above, never ports.length.
  */
 export function frameAt(legCount: number, t: number): VoyageFrame {
   if (legCount <= 0) return { legIndex: -1, legT: 0, arrived: 1 };

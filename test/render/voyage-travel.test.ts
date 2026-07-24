@@ -126,17 +126,22 @@ test("water span (#181): sea legs carry the span, coastal stubs stay short, and 
 });
 
 test("seed 12: the travel-ordered itinerary rides far fewer miles than the straight-line one", () => {
-  // The measurement behind #184's build decision (2026-07-24 comment): seed 12's
-  // straight-line order rides 1873 cells where a travel-ordered tour rides ~1035.
-  // 0.75 leaves slack; the point is a LARGE, visible saving, not a precise ratio.
+  // The measurement behind #184's build decision, RE-TAKEN for #275's round trip
+  // (2026-07-24): seed 12's straight-line CLOSED tour rides 1871 cells where a
+  // travel-ordered closed tour rides 1242, a ratio of 0.66. 0.75 leaves slack; the point
+  // is a LARGE, visible saving, not a precise ratio. (The pre-#275 open-path figures were
+  // 1873 vs ~1035; they are void, because refineTour now optimizes a different objective.)
   const { plan, s, sites } = realWorld(12);
   const router = prepareVoyageRouter(sites, s);
   const re = reorderPlanByTravel(plan, router.legLength);
 
+  // #275: the CLOSED miles, the leg home included. Summing only the consecutive pairs
+  // would score the open path, which is no longer what either itinerary rides nor what
+  // the refinement minimizes.
   const miles = (ports: ReadonlyArray<{ idx: number }>): number => {
     let total = 0;
     for (let i = 1; i < ports.length; i++) total += router.legLength(ports[i - 1]!.idx, ports[i]!.idx);
-    return total;
+    return total + router.legLength(ports[ports.length - 1]!.idx, ports[0]!.idx);
   };
   assert.ok(
     miles(re.ports) < 0.75 * miles(plan.ports),

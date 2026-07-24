@@ -28,11 +28,17 @@ import type { VoyageLeg } from "./voyage.ts";
  * is what lets the overlay swap rider <-> ship at the water's edge instead of
  * shipping the whole leg.
  *
- * Measured over seeds 1..40 with the travel-ordered itinerary (905 legs): ~70% road,
- * ~24% sea, ~5% straight. Of the sea legs, ~23% are true cross-landmass crossings
- * (the ordering makes island visits adjacent, so a crossing is spent once, not
- * scattered) and the rest are coastal shortcuts the survey sails rather than ride a
- * long inland road around (SAIL_WHEN_ROAD_EXCEEDS).
+ * Measured over seeds 1..40 with the travel-ordered ROUND-TRIP itinerary (#275, re-taken
+ * 2026-07-24; 945 legs): 660 road (~70%), 237 sea (~25%), 48 straight (~5%). Of the sea
+ * legs, 56 (~24%) are true cross-landmass crossings (the ordering makes island visits
+ * adjacent, so a crossing is spent once, not scattered) and the rest are coastal
+ * shortcuts the survey sails rather than ride a long inland road around
+ * (SAIL_WHEN_ROAD_EXCEEDS). The tally includes one closing leg per world: 35 of the 40
+ * ride home, 5 sail, and none of them hands off inland.
+ *
+ * Any per-leg number taken before #275 is VOID: the round trip both adds a leg per world
+ * and reorders the tour on a closed objective, so which port pairs are adjacent changes
+ * wholesale (seed 526413615's straight-line split moved from 2 sea / 21 road to 6 / 18).
  */
 
 export type LegMode = "road" | "sea" | "straight";
@@ -67,7 +73,8 @@ export const RDP_EPSILON = 0.75;
  * ridden all the way around (Alex, 2026-07-10). The survey rides by default and takes ship
  * only when the road is at least this many times the coastal sea route. 1.3 catches the
  * egregious backtracks (a 2.2x inland loop on seed 3084684951, Gogkalei -> Dreigbra) while
- * leaving ordinary coastal roads as rides. Measured over seeds 1..40 it sails ~24% of legs:
+ * leaving ordinary coastal roads as rides. Measured over seeds 1..40 it sails ~25% of legs
+ * (237 of 945 under #275's round trip; ~24% under the open path it replaced):
  * fewer than a naive "always take the shorter" (~50% on an island world) because the embark
  * gate below rejects ports whose shared ocean sits behind a nearer pond. A one-line knob:
  * raise it for more riding, lower it for more sailing.

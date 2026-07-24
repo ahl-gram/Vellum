@@ -4,9 +4,10 @@ import type { Pt } from "../core/rdp.ts";
  * The water span of a sea leg (#181). A sea leg's raw chain is
  * [fromPort, ...open water..., toPort]: the ports are LAND, so the mark rides an
  * overland stub before it embarks and after it lands. #120 drew the whole leg as a
- * ship; on the rare crossing whose port sits genuinely inland (measured 2026-07-24
- * under the #184 travel order: 5 of 51 crossings, stubs of 10 to 48 cells, every
- * coastal stub under 4) that ship marches far over dry land.
+ * ship; on the rare sea leg whose port sits genuinely inland (re-measured 2026-07-24
+ * under #275's travel-ordered round trip: 8 of 237 sea legs over seeds 1..40, on seeds
+ * 2, 12, 15, 21, 33, 35 and 39, with stubs of 8.9 to 48 cells against a coastal maximum
+ * of 3) that ship marches far over dry land.
  *
  * This module finds WHERE the water is, as arc-length FRACTIONS of the drawn
  * (RDP-simplified) polyline, so the overlay can swap rider <-> ship at the water's
@@ -20,9 +21,13 @@ export type WaterSpan = { readonly from: number; readonly to: number };
 /**
  * A stub of at least this many grid cells marks the leg as a genuine inland handoff,
  * which is what earns the margin log's ride-sail-ride narrative (#181, ratified
- * 2026-07-24). Measured over seeds 1..40 under the #184 travel order: every
- * coastal-shortcut stub is <= 3.5 cells (COAST_EMBARK_MAX gates them to 3 straight)
- * and the genuine inland stubs start at 10, so 4 sits in the clear gap between.
+ * 2026-07-24). Re-measured over seeds 1..40 under #275's travel-ordered round trip:
+ * every coastal-shortcut stub is <= 3 cells (COAST_EMBARK_MAX gates them to 3 straight)
+ * and the genuine inland stubs start at 8.94, so 4 sits in the clear gap between.
+ *
+ * INVARIANT: 4 is only correct while that gap stays open. The reorder narrowed it from
+ * 3.5..10 to 3..8.94, which is still wide, but a future change to the itinerary or to
+ * COAST_EMBARK_MAX owes a re-measure of BOTH ends before trusting this constant.
  */
 export const INLAND_STUB_CELLS = 4;
 
