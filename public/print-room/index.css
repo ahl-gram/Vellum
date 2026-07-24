@@ -16,8 +16,8 @@ main { max-width: 1000px; margin-inline: auto; }
 header { text-align: center; margin-bottom: 1.2rem; }
 h1 { font-size: 2rem; letter-spacing: 0.1em; margin: 0; }
 h1 a { color: inherit; text-decoration: none; }
-.tagline { font-style: italic; color: #6b5a40; margin: 0.3rem 0 0; }
-.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: #857257; margin: 0.9rem 0 0; }
+.tagline { font-style: italic; color: var(--ink-brown); margin: 0.3rem 0 0; }
+.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: var(--ink-faded); margin: 0.9rem 0 0; }
 .topnav a { color: inherit; }
 [aria-current="page"] { font-weight: 700; }
 .intro { max-width: 640px; margin: 1.4rem auto; text-align: center; }
@@ -25,16 +25,16 @@ h1 a { color: inherit; text-decoration: none; }
 /* The counter: a single quiet row of controls, like the survey office's order desk. */
 .counter { display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
   gap: 0.55rem 0.85rem; margin: 1.4rem auto; }
-.counter label { font-size: 0.85rem; letter-spacing: 0.05em; color: #6b5a40; }
+.counter label { font-size: 0.85rem; letter-spacing: 0.05em; color: var(--ink-brown); }
 input[type="number"], select, button {
   font-family: inherit; font-size: 0.95rem; color: #3d2f1f;
-  background: #f8f1e0; border: 1.5px solid #4a3826; border-radius: 4px;
+  background: #f8f1e0; border: 1.5px solid var(--ink-dark); border-radius: 4px;
   padding: 0.4rem 0.6rem;
 }
 input[type="number"] { width: 8.5rem; }
 button { cursor: pointer; }
 button:hover { background: #fff7e4; }
-button.primary { background: #4a3826; color: #f2e8cf; letter-spacing: 0.08em; }
+button.primary { background: var(--ink-dark); color: #f2e8cf; letter-spacing: 0.08em; }
 button.primary:hover { background: #5d4831; }
 
 /* The inline-fallback notice: a pinned-slip aside, not an alarm. */
@@ -44,14 +44,14 @@ button.primary:hover { background: #5d4831; }
   padding: 0.6rem 0.9rem; }
 .warning[hidden] { display: none; }
 
-.status { text-align: center; font-style: italic; color: #857257;
+.status { text-align: center; font-style: italic; color: var(--ink-faded);
   min-height: 1.4em; margin-bottom: 0.8rem; }
 
 /* The proof: the pulled chart, centered under the counter. Mirrors the Explorer's
    #map svg frame (border + drop shadow) so a proof reads as the same sheet. */
 .preview { max-width: 1000px; margin-inline: auto; position: relative; }
 .preview svg { width: 100%; height: auto; display: block;
-  border: 1px solid #b9a77f; box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
 /* #127 The Drafting Moment, reused: a freshly pulled proof settles onto the desk
    while its coastline draws itself in ink (app.js sets --draw-len + the dasharray on
    the coast path via startArrival, and clears them on animationend). DOM-only styling
@@ -66,34 +66,34 @@ button.primary:hover { background: #5d4831; }
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
-.caption { text-align: center; font-style: italic; color: #6b5a40; padding-top: 0.6rem; }
+.caption { text-align: center; font-style: italic; color: var(--ink-brown); padding-top: 0.6rem; }
 
 /* The order desk (#136 redesign): two side-by-side offerings above the proof, one for a
    single poster plate, one for the whole bound atlas. Everything below the desk is output
    (the proof, then the atlas once bound). The offerings stack on a narrow screen. */
 .order-desk { max-width: 860px; margin: 2rem auto 0; }
 .desk-head { text-align: center; font-size: 0.82rem; letter-spacing: 0.18em;
-  text-transform: uppercase; color: #6b5a40; margin: 0 0 1.2rem; font-weight: 700; }
+  text-transform: uppercase; color: var(--ink-brown); margin: 0 0 1.2rem; font-weight: 700; }
 .offerings { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; align-items: stretch; }
 .offering { border: 1px solid #cdbd97; border-radius: 6px; background: #f4ecd8;
   padding: 1.2rem 1.1rem; display: flex; flex-direction: column; text-align: center; }
-.offering-head { font-size: 1rem; letter-spacing: 0.06em; margin: 0 0 0.4rem; color: #4a3826; }
+.offering-head { font-size: 1rem; letter-spacing: 0.06em; margin: 0 0 0.4rem; color: var(--ink-dark); }
 /* min-height aligns where the two cards' controls begin even when the intros wrap differently. */
-.offering-intro { font-size: 0.85rem; color: #6b5a40; margin: 0 0 1rem; min-height: 3.4em; }
+.offering-intro { font-size: 0.85rem; color: var(--ink-brown); margin: 0 0 1rem; min-height: 3.4em; }
 .offering-controls { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; }
 .offering-field { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
-  color: #857257; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+  color: var(--ink-faded); display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
 .offering-field select { min-width: 11rem; }
 .atlas-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
 /* Push the caveat + status to the card bottom so the two equal-height cards align. */
-.offering-caveat { font-size: 0.76rem; font-style: italic; color: #857257; margin: auto 0 0;
+.offering-caveat { font-size: 0.76rem; font-style: italic; color: var(--ink-faded); margin: auto 0 0;
   padding-top: 0.9rem; }
 .offering .status { margin: 0.5rem 0 0; min-height: 1.2em; }
 
 .plate-row { display: flex; flex-wrap: wrap; align-items: stretch; justify-content: center; gap: 0.5rem; }
 .plate { display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
   min-width: 5rem; padding: 0.55rem 0.85rem; letter-spacing: 0.06em; line-height: 1.2; }
-.plate-dim { font-size: 0.72rem; font-style: italic; letter-spacing: 0.04em; color: #857257; }
+.plate-dim { font-size: 0.72rem; font-style: italic; letter-spacing: 0.04em; color: var(--ink-faded); }
 .plate:hover:not(:disabled) { background: #fff7e4; }
 .plate:disabled { cursor: default; opacity: 0.45; }
 .plate:disabled .plate-dim { color: #a1926f; }
@@ -106,15 +106,15 @@ button.primary:hover { background: #5d4831; }
 #pr-atlas:empty { margin: 0; }
 #pr-atlas .atlas-head { text-align: center; margin: 0 0 1.5rem; }
 #pr-atlas .atlas-head h1 { font-size: 2.2rem; letter-spacing: 0.04em; margin: 0 0 0.4rem; }
-#pr-atlas .atlas-head .subtitle { font-style: italic; color: #6b5a40; margin: 0; }
-#pr-atlas .atlas-head .chartno { letter-spacing: 0.3em; font-size: 0.8rem; color: #857257;
+#pr-atlas .atlas-head .subtitle { font-style: italic; color: var(--ink-brown); margin: 0; }
+#pr-atlas .atlas-head .chartno { letter-spacing: 0.3em; font-size: 0.8rem; color: var(--ink-faded);
   margin: 0.5rem 0 0; }
 /* Drop-hero: hide the header + hero on screen; print reveals them (below) for a complete
    standalone atlas, and the download always carries them (it builds from the full atlas). */
 @media screen { #pr-atlas .print-only { display: none; } }
 
 footer { margin-top: 3rem; text-align: center; letter-spacing: 0.25em;
-  font-size: 0.72rem; color: #857257; }
+  font-size: 0.72rem; color: var(--ink-faded); }
 footer a { color: inherit; }
 
 @media (max-width: 640px) {

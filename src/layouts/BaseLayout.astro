@@ -71,6 +71,17 @@ const isHome = path === "/";
 <link rel="stylesheet" href="/motion.css">
 <link rel="stylesheet" href="index.css">
 <style is:global>
+/* The shell dresses once (#263), part B: the recurring parchment/ink palette,
+   named here and consumed as var() by the six page css files. Exact-match
+   hexes only; near-miss inks (the #3d2f1f body text, the #5a4326 voyage
+   track) stay raw values on purpose, never merged. Guarded by
+   test/site/shell-css.test.ts. */
+:root {
+  --ink-dark: #4a3826;   /* dark walnut ink: borders, buttons, emphasis */
+  --ink-brown: #6b5a40;  /* flourish brown: taglines, captions, asides */
+  --ink-faded: #857257;  /* faded ink: nav, footer, small labels */
+  --line-tan: #b9a77f;   /* pale tan hairline: rules and frame borders */
+}
 /* The canonical nav form's two cross-page rules (Sub 1 decision B, ratified
    2026-07-21). They live in the layout, not in motion.css or the page CSS:
    motion.css is a byte-frozen golden, and .topnav outranks the faq/glossary
