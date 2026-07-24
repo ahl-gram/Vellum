@@ -11,14 +11,9 @@ figcaption, .card p, .underhood {
 }
 main { max-width: 1080px; }
 header { margin-bottom: 2.5rem; }
-/* Deliberate landing-page masthead deviations from the shared shell (#263):
-   pinned above the shell's specificity because the layout's inline style
-   renders after this file, so an equal-specificity rule here would lose. */
-header h1 { font-size: 3rem; letter-spacing: 0.12em; }
-header .tagline { font-size: 1.15rem; margin: 0.6rem 0 1rem; }
-/* margin-bottom keeps the UA paragraph margin the old p.topnav carried, so the
-   semantic p -> nav change (#203) does not shift the header's bottom edge. */
-header .topnav { margin-top: 1.1rem; margin-bottom: 1em; }
+/* The Running Head (#268) retired the landing page's grander masthead
+   deviations: the head is identical on every page now. Home's one remaining
+   deviation is the grander footer below. */
 h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   padding-bottom: 0.3rem; margin-top: 3.5rem; }
 .lede { max-width: 44rem; margin-inline: auto; line-height: 1.6; }

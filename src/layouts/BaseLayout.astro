@@ -3,46 +3,59 @@ import { NAV_ITEMS } from "./nav.ts";
 
 // The one shared shell (#203, per the ratified Sub 1 decision doc on #202):
 // head meta with the prop fan-out, the canonical nav, the constant footer.
-// Every page renders through it since Sub 8 (#254) re-shelled the app surfaces.
+// Every page renders through it since Sub 8 (#254). The Running Head (#268)
+// replaced the centered masthead with the folio page-header form and moved
+// the <title> into the layout, computed from `room`, so title drift across
+// pages is structurally impossible.
 interface Props {
-  /** The head <title>, verbatim (FAQ keeps its &-form punctuation here). */
-  title: string;
+  /**
+   * The page's name on the running head's right side, and the computed
+   * <title> ("The Print Room · Vellum"). Absent on home ALONE, whose title
+   * stays the atelier's own line. The atlas keeps its in-fiction title
+   * exception outside this layout entirely.
+   */
+  room?: string;
+  /**
+   * The og twins' punctuation-normalized room, only when it differs from
+   * `room` (the Q & A page's &-form split): og:title AND twitter:title take
+   * `${ogRoom} · Vellum` instead of the computed title.
+   */
+  ogRoom?: string;
   /** The name=description search snippet; also the og twins' default. */
   description: string;
   /**
-   * Fans out to og:title AND twitter:title. Always the punctuation-normalized
-   * form, never the &-form title (they differ on the FAQ page).
-   */
-  ogTitle: string;
-  /**
    * Fans out to og:description AND twitter:description. Only for a page whose
    * card copy is shorter than its search snippet (seed-of-the-day); defaults
-   * to description, exactly parallel to the title/ogTitle split.
+   * to description, exactly parallel to the room/ogRoom split.
    */
   ogDescription?: string;
   /** Root-absolute trailing-slash route ("/", "/faq/"): og:url + aria-current. */
   path: string;
-  /** The flourish line under the wordmark. */
+  /** The flourish line under the room name (under the wordmark alone on home). */
   tagline: string;
-  /**
-   * The app surfaces render "VELLUM EXPLORER" etc. (#254); content pages omit
-   * it. The suffix stays OUTSIDE the home link, as the old hand-coded shells
-   * had it: only VELLUM is the link.
-   */
-  wordmarkSuffix?: string;
 }
 
-const { title, description, ogTitle, ogDescription, path, tagline, wordmarkSuffix } = Astro.props;
+const { room, ogRoom, description, ogDescription, path, tagline } = Astro.props;
 
 if (!/^\/([a-z0-9-]+\/)*$/.test(path)) {
   throw new Error(`BaseLayout path must be root-absolute directory form ("/faq/"), got "${path}"`);
 }
+const isHome = path === "/";
+if (isHome === (room !== undefined)) {
+  throw new Error(
+    isHome
+      ? 'home is the atelier, not a room: pass no room for path "/"'
+      : `every room page must name its room (got none for "${path}")`,
+  );
+}
 
+const HOME_TITLE = "Vellum · an atelier of imaginary cartography";
+const title = room ? `${room} · Vellum` : HOME_TITLE;
+const ogTitle = ogRoom ? `${ogRoom} · Vellum` : title;
 const ogUrl = new URL(path, Astro.site).href;
 const ogImage = new URL("/og.png", Astro.site).href;
 const ogImageAlt = "A Vellum antique chart beside the Vellum wordmark.";
 const cardDescription = ogDescription ?? description;
-const isHome = path === "/";
 ---
 
 <!doctype html>
@@ -72,12 +85,11 @@ const isHome = path === "/";
 <link rel="stylesheet" href="index.css">
 <style is:global>
 /* The shell dresses once (#263), part B: the recurring parchment/ink palette,
-   named here and consumed as var() by the six page css files. The old
-   body-text and voyage-track near-miss inks merged into --ink-dark at the
-   PR #269 review (item 4) and are retired. The charts' own label ink stays
-   the renderer's (byte-identity domain), so site prose and chart lettering
-   are deliberately no longer the same hex. Guarded by
-   test/site/shell-css.test.ts. */
+   named here and consumed as var() by the page css files. The old body-text
+   and voyage-track near-miss inks merged into --ink-dark at the PR #269
+   review (item 4) and are retired. The charts' own label ink stays the
+   renderer's (byte-identity domain), so site prose and chart lettering are
+   deliberately no longer the same hex. Guarded by test/site/shell-css.test.ts. */
 :root {
   --ink-dark: #4a3826;         /* dark walnut ink: borders, buttons, prose, emphasis */
   --ink-brown: #6b5a40;        /* flourish brown: taglines, captions, asides */
@@ -89,15 +101,12 @@ const isHome = path === "/";
   --parchment-deep: #e6d9b8;   /* the pressed tan: code chips */
   --line-faint: #cdbd97;       /* the softer hairline, a shade lighter than --line-tan */
 }
-/* The shell dresses once (#263), part A: the rules every page shell shares,
-   extracted move-and-delete from the six page css files. Per-page values stay
-   in the page files: body padding and line-height, main max-width, header
-   margin-bottom, footer margin-top. The h1 and footer letter-spacing unified
-   here on the non-home values (PR #269 review call): home alone keeps the
-   grander masthead and footer, pinned in public/index.css ABOVE this block's
-   specificity on purpose, because the page css link renders before this
-   inline style, so an equal-specificity page rule would silently lose the
-   cascade. */
+/* The shell dresses once (#263), part A: the rules every page shell shares.
+   Per-page values stay in the page files: body padding and line-height, main
+   max-width, header margin-bottom, footer margin-top. Since #268 the header
+   is the Running Head, identical on every page (home keeps only its grander
+   footer, pinned in public/index.css ABOVE this block's specificity because
+   the page css link renders before this inline style). */
 :root { color-scheme: light; }
 body {
   margin: 0;
@@ -106,28 +115,49 @@ body {
 }
 main { margin-inline: auto; }
 header { text-align: center; }
-/* The Punchcutter's Case (#228), shell members only: display for the masthead
-   line, flourish for the tagline. Page files keep their page-specific members
-   (home's h2 and cards, seed's figcaption-as-title, the captions). */
-h1, .topnav, footer {
+/* The Punchcutter's Case (#228) roles on the shell members: display for the
+   wordmark, room name, nav band, and footer; flourish for the tagline. Page
+   files keep their page-specific members. */
+h1, .room-name, .topnav, footer {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
+/* The Running Head (#268): the page header of an old folio. Left, the wordmark,
+   the one place tracking opens up (Fell falls apart tracked out at text sizes);
+   right, the room name with its tagline beneath, baseline-aligned so Fell's
+   irregular x-height cannot float it; beneath both, the double hairline rule
+   of an old ledger; then the nav band, centered. */
+.running-head { display: flex; justify-content: space-between; align-items: baseline;
+  gap: 0.5rem 2rem; text-align: left; }
+h1 { font-size: 1.75rem; letter-spacing: 0.3em; margin: 0; }
+h1 a { color: inherit; text-decoration: none; }
+.room { text-align: right; }
+.room-name { font-size: 1rem; letter-spacing: 0.07em; margin: 0; }
 .tagline {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  font-style: italic; color: var(--ink-brown); margin: 0.3rem 0 0;
+  font-style: italic; color: var(--ink-brown); margin: 0.15rem 0 0;
 }
-h1 { font-size: 2rem; letter-spacing: 0.1em; margin: 0; }
-h1 a { color: inherit; text-decoration: none; }
-/* The canonical nav form's two cross-page rules (Sub 1 decision B, ratified
-   2026-07-21) fold into the shell rule here: motion.css is a byte-frozen
-   golden, and .topnav outranks the faq/glossary page-CSS `nav` element rule,
-   which still carried the pre-unification 0.8rem until #263 deleted it. */
+.head-rule { height: 3px; border-top: 1px solid var(--ink-dark);
+  border-bottom: 1px solid var(--ink-dark); margin: 0.7rem 0 0; }
+@media (max-width: 480px) {
+  /* The longer room names collide with the wordmark on a narrow sheet: stack
+     the head centered. The negative margin recenters the wordmark over its
+     trailing letter-space. */
+  .running-head { flex-direction: column; align-items: center; gap: 0.2rem; text-align: center; }
+  h1 { margin-right: -0.3em; }
+  .room { text-align: center; }
+}
 .topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: var(--ink-faded); margin: 0.9rem 0 0; }
 /* motion.css makes nav LINKS inline-block so a multi-word label never wraps
-   mid-label; the current page renders as a span, so it takes the same rule. */
-.topnav [aria-current="page"] { display: inline-block; }
+   mid-label; the current page renders as a span, so it takes the same rule.
+   Ink-dark + manicule + underline: the you-are-here marker never relies on
+   color alone (#268). */
+.topnav [aria-current="page"] { display: inline-block; color: var(--ink-dark);
+  text-decoration: underline; text-underline-offset: 0.45em; text-decoration-thickness: 1px; }
 .topnav a { color: inherit; }
-[aria-current="page"] { font-weight: 700; }
+/* The manicule's glyph coverage is inconsistent across the Fell fallback
+   stack: pin the plain serif stack and let the system substitute, never the
+   display role. */
+.manicule { font-family: 'Iowan Old Style', 'Palatino', Georgia, serif; }
 footer { text-align: center; font-size: 0.72rem; letter-spacing: 0.22em; color: var(--ink-faded); }
 footer a { color: inherit; }
 </style>
@@ -135,18 +165,24 @@ footer a { color: inherit; }
 <body>
 <main>
 <header>
-  <h1>{isHome ? "VELLUM" : <a href="/">VELLUM</a>}{wordmarkSuffix ? ` ${wordmarkSuffix}` : ""}</h1>
-  <p class="tagline">{tagline}</p>
-  <slot name="header-extra" />
+  <div class="running-head">
+    <h1><a href="/">VELLUM</a></h1>
+    <div class="room">
+      {room && <p class="room-name">{room}</p>}
+      <p class="tagline">{tagline}</p>
+    </div>
+  </div>
+  <div class="head-rule"></div>
   <nav class="topnav">
     {NAV_ITEMS.map((item, i) => (
       <Fragment>{i > 0 ? " · " : ""}{item.href === path ? (
-        <span aria-current="page">{item.label}</span>
+        <span aria-current="page"><span class="manicule" aria-hidden="true">☞&nbsp;</span>{item.label}</span>
       ) : (
         <a href={item.href}>{item.label}</a>
       )}</Fragment>
     ))}
   </nav>
+  <slot name="header-extra" />
 </header>
 
 <slot />
