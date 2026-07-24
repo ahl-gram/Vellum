@@ -1,29 +1,28 @@
-:root { color-scheme: light; }
 body {
-  margin: 0; padding: 3rem 1.5rem 5rem;
-  background: #efe6cf; color: #3d2f1f;
-  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  padding: 3rem 1.5rem 5rem;
 }
-/* The Punchcutter's Case (#228): display/flourish/body roles via /fonts.css vars. */
-h1, h2, .card h3, .topnav, footer {
+/* The Punchcutter's Case (#228), page members: the shell's h1/.topnav/footer
+   display and .tagline flourish bindings live in BaseLayout (#263). */
+h2, .card h3 {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
-.tagline, figcaption, .card p, .underhood {
+figcaption, .card p, .underhood {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
-main { max-width: 1080px; margin-inline: auto; }
-header { text-align: center; margin-bottom: 2.5rem; }
-h1 { font-size: 3rem; letter-spacing: 0.12em; margin: 0; }
-h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
-  padding-bottom: 0.3rem; margin-top: 3.5rem; }
-.tagline { font-style: italic; color: var(--ink-brown); font-size: 1.15rem; margin: 0.6rem 0 1rem; }
-.lede { max-width: 44rem; margin-inline: auto; line-height: 1.6; }
-.seedline { letter-spacing: 0.25em; font-size: 0.78rem; color: var(--ink-faded); margin-top: 1rem; }
+main { max-width: 1080px; }
+header { margin-bottom: 2.5rem; }
+/* Deliberate landing-page masthead deviations from the shared shell (#263):
+   pinned above the shell's specificity because the layout's inline style
+   renders after this file, so an equal-specificity rule here would lose. */
+header h1 { font-size: 3rem; letter-spacing: 0.12em; }
+header .tagline { font-size: 1.15rem; margin: 0.6rem 0 1rem; }
 /* margin-bottom keeps the UA paragraph margin the old p.topnav carried, so the
    semantic p -> nav change (#203) does not shift the header's bottom edge. */
-.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: var(--ink-faded); margin-top: 1.1rem; margin-bottom: 1em; }
-.topnav a { color: inherit; }
-[aria-current="page"] { font-weight: 700; }
+header .topnav { margin-top: 1.1rem; margin-bottom: 1em; }
+h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
+  padding-bottom: 0.3rem; margin-top: 3.5rem; }
+.lede { max-width: 44rem; margin-inline: auto; line-height: 1.6; }
+.seedline { letter-spacing: 0.25em; font-size: 0.78rem; color: var(--ink-faded); margin-top: 1rem; }
 figure { margin: 1.5rem 0; }
 figure img { width: 100%; height: auto; display: block;
   border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
@@ -49,6 +48,6 @@ figcaption { text-align: center; font-style: italic; color: var(--ink-brown); pa
 .underhood a { color: #7a5c2e; }
 code { background: #e6d9b8; padding: 0.1em 0.4em; border-radius: 3px;
   font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
-footer { margin-top: 4.5rem; text-align: center; letter-spacing: 0.25em;
-  font-size: 0.75rem; color: var(--ink-faded); }
-footer a { color: inherit; }
+/* Landing-page footer deviations (#263): grander size and spacing, pinned
+   above the shell rule for the same cascade reason as the masthead pins. */
+main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }

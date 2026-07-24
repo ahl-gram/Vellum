@@ -40,14 +40,9 @@ const WOFF2 = [
 // render through BaseLayout, so the one layout IS the folio's shell.
 const AUTHORED_PAGES = ["src/layouts/BaseLayout.astro"] as const;
 
-const AUTHORED_CSS = [
-  "public/index.css",
-  "public/explorer/index.css",
-  "public/faq/index.css",
-  "public/glossary/index.css",
-  "public/print-room/index.css",
-  "public/seed-of-the-day/index.css",
-] as const;
+// The shell's role bindings (body prose, the h1/nav/footer display line, the
+// tagline flourish) moved into BaseLayout's global style at #263; the page
+// files keep only their page-specific member bindings.
 
 test("fonts.css self-hosts the three Fell/Garamond faces with font-display: swap", async () => {
   const css = await readText("public/fonts.css");
@@ -101,10 +96,12 @@ test("every page shell in the folio links /fonts.css (root-absolute, like /motio
   }
 });
 
-test("the static page CSS binds body to the body role, via the font var", async () => {
-  for (const css of AUTHORED_CSS) {
-    const text = await readText(css);
-    assert.match(text, /var\(--font-body/, `${css} body should use var(--font-body ...)`);
+test("the shell binds all three roles once, in the layout's global style (#263)", async () => {
+  const layout = await readText("src/layouts/BaseLayout.astro");
+  const style = layout.match(/<style is:global>([\s\S]*?)<\/style>/);
+  assert.ok(style, "BaseLayout should carry the global shell <style>");
+  for (const v of ROLE_VARS) {
+    assert.match(style[1], new RegExp(`var\\(${v}[,)]`), `the shell style should bind ${v}`);
   }
 });
 

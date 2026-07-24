@@ -82,14 +82,47 @@ const isHome = path === "/";
   --ink-faded: #857257;  /* faded ink: nav, footer, small labels */
   --line-tan: #b9a77f;   /* pale tan hairline: rules and frame borders */
 }
+/* The shell dresses once (#263), part A: the rules every page shell shares,
+   extracted move-and-delete from the six page css files. Only exact-match
+   properties live here. Per-page values stay in the page files: body padding
+   and line-height, main max-width, header margin-bottom, the h1/footer
+   letter-spacing drift pairs (0.12em/0.1em, 0.25em/0.22em, flagged in the
+   #263 PR, never merged), and footer margin-top. Home's deliberate masthead
+   deviations are pinned in public/index.css ABOVE this block's specificity
+   on purpose: the page css link renders before this inline style, so an
+   equal-specificity page rule would silently lose the cascade. */
+:root { color-scheme: light; }
+body {
+  margin: 0;
+  background: #efe6cf; color: #3d2f1f;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+}
+main { margin-inline: auto; }
+header { text-align: center; }
+/* The Punchcutter's Case (#228), shell members only: display for the masthead
+   line, flourish for the tagline. Page files keep their page-specific members
+   (home's h2 and cards, seed's figcaption-as-title, the captions). */
+h1, .topnav, footer {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+}
+.tagline {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; color: var(--ink-brown); margin: 0.3rem 0 0;
+}
+h1 { font-size: 2rem; margin: 0; }
+h1 a { color: inherit; text-decoration: none; }
 /* The canonical nav form's two cross-page rules (Sub 1 decision B, ratified
-   2026-07-21). They live in the layout, not in motion.css or the page CSS:
-   motion.css is a byte-frozen golden, and .topnav outranks the faq/glossary
-   page-CSS `nav` element rule, which still carries the pre-unification 0.8rem. */
-.topnav { font-size: 0.82rem; }
+   2026-07-21) fold into the shell rule here: motion.css is a byte-frozen
+   golden, and .topnav outranks the faq/glossary page-CSS `nav` element rule,
+   which still carried the pre-unification 0.8rem until #263 deleted it. */
+.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: var(--ink-faded); margin: 0.9rem 0 0; }
 /* motion.css makes nav LINKS inline-block so a multi-word label never wraps
    mid-label; the current page renders as a span, so it takes the same rule. */
 .topnav [aria-current="page"] { display: inline-block; }
+.topnav a { color: inherit; }
+[aria-current="page"] { font-weight: 700; }
+footer { text-align: center; font-size: 0.72rem; color: var(--ink-faded); }
+footer a { color: inherit; }
 </style>
 </head>
 <body>
