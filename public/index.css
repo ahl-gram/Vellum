@@ -1,7 +1,7 @@
 body {
   padding: 3rem 1.5rem 5rem;
 }
-/* The Punchcutter's Case (#228), page members: the shell's h1/.topnav/footer
+/* The Punchcutter's Case (#228), page members: the shell's .wordmark/.topnav/footer
    display and .tagline flourish bindings live in BaseLayout (#263). */
 h2, .card h3 {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
@@ -16,8 +16,11 @@ header { margin-bottom: 2.5rem; }
    taller line box also restores the vertical presence the room pages get.
    Pinned above the shell's specificity because the layout's inline style
    renders after this file, so an equal-specificity rule here would lose.
-   Home's other deviation is the grander footer below. */
-header h1 { font-size: 2.7rem; }
+   Home's other deviation is the grander footer below.
+   Keyed on .wordmark, not h1, since #288: the shell now sizes the wordmark
+   through a class, and a bare `header h1` (0,0,2) LOSES to `.wordmark` (0,1,0),
+   which would silently drop home back to the room-page 1.75rem. */
+header .wordmark { font-size: 2.7rem; }
 h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   padding-bottom: 0.3rem; margin-top: 3.5rem; }
 /* The title cartouche (#289): the charts' own cartouche form, mirrored by hand

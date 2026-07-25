@@ -43,14 +43,17 @@ test("homepage chart plates rest flat and tip on hover (consistent with the atla
 // the plates on room pages, and only there; home's wordmark IS home.
 test("the wordmark tips under the hand on room pages, and stays still on home", async () => {
   const css = await readFile(motionCss, "utf8");
-  const hover = css.match(/body:has\(\.room-name\) h1 a:hover\s*\{([^}]*)\}/);
+  // Keyed on .wordmark, not h1, since #288: on a room page the wordmark is a
+  // <p> and the h1 is the room name, which has no link to tip. Keying this on
+  // h1 would silently select nothing and the gesture would just vanish.
+  const hover = css.match(/body:has\(\.room-name\) \.wordmark a:hover\s*\{([^}]*)\}/);
   assert.ok(hover, "the room-scoped wordmark hover rule should exist in motion.css");
   assert.ok(
     /rotate\(/.test(hover[1]) && /translateY\(/.test(hover[1]),
     "the wordmark should tip (rotate) and lift (translateY) under the hand",
   );
   assert.ok(
-    !/(?<!\(\.room-name\) )h1 a:hover/.test(css.replace(/body:has\(\.room-name\) h1 a:hover/g, "")),
-    "no unscoped h1 a:hover may leak the tip onto home",
+    !/(?<!\(\.room-name\) )\.wordmark a:hover/.test(css.replace(/body:has\(\.room-name\) \.wordmark a:hover/g, "")),
+    "no unscoped .wordmark a:hover may leak the tip onto home",
   );
 });

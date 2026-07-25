@@ -1,7 +1,7 @@
 body {
   padding: 2rem 1.5rem 4rem;
 }
-/* The Punchcutter's Case (#228), page members: the shell's h1/.topnav/footer
+/* The Punchcutter's Case (#228), page members: the shell's .wordmark/.topnav/footer
    display and .tagline flourish bindings live in BaseLayout (#263). */
 .caption {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
