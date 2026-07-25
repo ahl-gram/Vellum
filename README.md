@@ -6,7 +6,7 @@
 
 ![The seed-42 hero chart, drawn in the antique style, beside the Vellum wordmark](public/og.png)
 
-**Vellum lives at <https://vellum.route12b.net/>.** No install, no account:
+**Vellum lives at <https://www.vellumworlds.com/>.** No install, no account:
 the whole engine runs client-side in your browser.
 
 Vellum surveys worlds that don't exist and drafts them as atlas charts.
@@ -19,12 +19,12 @@ rose, a sea serpent, and a title cartouche.
 
 | Room | What happens there |
 |---|---|
-| **[Explorer](https://vellum.route12b.net/explorer/)** | Type a seed, draw its world, zoom into its regions |
-| **[Print Room](https://vellum.route12b.net/print-room/)** | Poster-size SVG or PNG of any seed, print the bound atlas to PDF, download a self-contained atlas |
-| **[Seed of the Day](https://vellum.route12b.net/seed-of-the-day/)** | Today's world, the same for everyone, plus the Daily Hunt |
-| **[Atlas](https://vellum.route12b.net/atlas/)** | The hero world (seed 42) as a bound volume |
-| **[Gallery](https://vellum.route12b.net/gallery/)** | A twelve-world contact sheet |
-| **[Q & A](https://vellum.route12b.net/faq/)** · **[Glossary](https://vellum.route12b.net/glossary/)** | How it all works; the vocabulary printed on the charts |
+| **[Explorer](https://www.vellumworlds.com/explorer/)** | Type a seed, draw its world, zoom into its regions |
+| **[Print Room](https://www.vellumworlds.com/print-room/)** | Poster-size SVG or PNG of any seed, print the bound atlas to PDF, download a self-contained atlas |
+| **[Seed of the Day](https://www.vellumworlds.com/seed-of-the-day/)** | Today's world, the same for everyone, plus the Daily Hunt |
+| **[Atlas](https://www.vellumworlds.com/atlas/)** | The hero world (seed 42) as a bound volume |
+| **[Gallery](https://www.vellumworlds.com/gallery/)** | A twelve-world contact sheet |
+| **[Q & A](https://www.vellumworlds.com/faq/)** · **[Glossary](https://www.vellumworlds.com/glossary/)** | How it all works; the vocabulary printed on the charts |
 
 The daily seed is the current UTC date read as an integer `YYYYMMDD`, so
 everyone sees the same world on the same calendar day, and the page never
@@ -35,7 +35,7 @@ needs a rebuild: it draws itself in your browser when you load it.
 Every chart is reproducible from the number printed in its corner. The root
 `<svg>` embeds its full recipe as `data-vellum-*` attributes, and re-rendering
 that recipe reproduces the map byte for byte. The
-[Q & A](https://vellum.route12b.net/faq/) covers seeds, determinism, and how to
+[Q & A](https://www.vellumworlds.com/faq/) covers seeds, determinism, and how to
 reproduce a saved chart in detail.
 
 ## The styles

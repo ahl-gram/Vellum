@@ -35,7 +35,7 @@ const publicDirIndexes = () => ({
 // three are Astro defaults, so they are not restated here; changing any of them
 // breaks the site or the deploy.
 export default defineConfig({
-  site: "https://vellum.route12b.net",
+  site: "https://www.vellumworlds.com",
   // Every internal link and og:url is trailing-slash directory form (constraint 8).
   trailingSlash: "always",
   // The migrated pages' markup must stay near-verbatim (no minification drift):
