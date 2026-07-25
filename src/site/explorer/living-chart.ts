@@ -365,8 +365,27 @@ export function applyScrub(): void {
   scrubRangeEl.min = String(range.min);
   scrubRangeEl.max = String(range.max);
   scrubRangeEl.step = "1";
+  const marks = buildScrubMarks(places, events, presentYear);
+  // #155: anchor each mark's ink-in press on its OWN town point. The chart mixes
+  // projections, so no box centre serves: a profile castle stands ON its point while a
+  // town circle is centred on it and a seat halo sits above it, three different points
+  // for one settlement. nx/ny are fractions of the rendered chart and the viewBox
+  // starts at 0 0, so as percentages against the view box they ARE the point, for every
+  // glyph and every style. It is per-element data, so it goes inline on the elements
+  // that animate (a stylesheet has nothing true to say about it, and a var() with no
+  // honest default would resolve to the middle of the whole sheet). Written over the
+  // same marks-crossed-with-groups domain paintScrub grades, so a mark can never be
+  // graded without its origin; exitScrub clears both together.
+  for (const m of marks) {
+    const g = groups.get(m.idx);
+    if (!g) continue;
+    for (const mark of g.querySelectorAll<SVGGraphicsElement>(":scope > :not(text)")) {
+      mark.style.transformBox = "view-box"; // not the initial value everywhere, so say it
+      mark.style.transformOrigin = `${m.nx * 100}% ${m.ny * 100}%`;
+    }
+  }
   scrub = {
-    marks: buildScrubMarks(places, events, presentYear),
+    marks,
     range,
     groups,
     roadsEl: mapDiv.querySelector<SVGGElement>("#layer-roads"),
@@ -394,13 +413,19 @@ export function exitScrub(): void {
   }
   // #93: the sweep may have hidden individual glyph groups; restore the full
   // present-day chart by clearing every inline display it set (never "block": an
-  // SVG <g> does not take it), plus the roads. #155: and drop every ink grade, so
-  // the chart the reader is handed back carries no scrub-only attribute at all.
+  // SVG <g> does not take it), plus the roads. #155: and drop every ink grade with the
+  // press origin it was armed with, so the chart the reader is handed back carries no
+  // scrub-only attribute or style at all. Grade and origin go together, always.
   const settleLayer = mapDiv.querySelector("#layer-settlements");
   if (settleLayer) {
     for (const g of settleLayer.querySelectorAll<SVGGElement>("g.settlement")) {
       g.style.display = "";
       g.removeAttribute("data-ink");
+      for (const mark of g.querySelectorAll<SVGGraphicsElement>(":scope > :not(text)")) {
+        mark.style.removeProperty("transform-box");
+        mark.style.removeProperty("transform-origin");
+        if (!mark.getAttribute("style")) mark.removeAttribute("style");
+      }
     }
   }
   const roads = mapDiv.querySelector<SVGGElement>("#layer-roads");

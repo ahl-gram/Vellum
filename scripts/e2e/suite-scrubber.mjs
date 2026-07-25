@@ -39,6 +39,7 @@ export async function run(ctx) {
     return{count:places.length,present,minFounded,
       earlyIdx:early.idx,earlyFounded:early.founded,
       lateIdx:later?later.idx:-1,lateFounded:later?later.founded:-1,
+      lateNx:later?later.nx:-1,lateNy:later?later.ny:-1,
       ruinIdx:ruin?ruin.idx:-1,ruinYear,ruinFounded:ruin?ruin.founded:null};
   })()`);
 
@@ -361,7 +362,9 @@ export async function run(ctx) {
 
   // S21: crossing a founding stamps THAT town. The grade lands on the group, and the
   // mark node under it (never the group, whose box spans the label too) carries
-  // inkStamp at --paper about its own fill-box centre.
+  // inkStamp at --paper about the town point the group publishes, resolved against the
+  // view box. S26 measures that the point is really held fixed through the press; this
+  // pins the wiring that carries it there, so a regression to a box centre reds here too.
   if (sm.lateIdx >= 0) {
     await setYear(sm.lateFounded - 1);
     const s21 = await evaluate(`(()=>{
@@ -371,11 +374,15 @@ export async function run(ctx) {
       const mark=g.querySelector(":scope > :not(text)");
       if(!mark)return{found:true,hasMark:false};
       const cs=getComputedStyle(mark);
+      const vb=document.querySelector("#map svg").viewBox.baseVal;
+      const o=cs.transformOrigin.split(" ").map(parseFloat);
       return{found:true,hasMark:true,ink:g.getAttribute("data-ink"),disp:getComputedStyle(g).display,
         name:cs.animationName,dur:cs.animationDuration,box:cs.transformBox,origin:cs.transformOrigin,
+        wantX:${sm.lateNx}*vb.width,wantY:${sm.lateNy}*vb.height,gotX:o[0],gotY:o[1],
         others:document.querySelectorAll('#map #layer-settlements g.settlement[data-ink]').length};
     })()`);
-    check("S21 crossing a founding stamps that town: data-ink=founding, inkStamp at --paper about its own fill-box", s21.found && s21.hasMark && s21.ink === "founding" && s21.disp !== "none" && s21.name === "inkStamp" && s21.dur.includes("0.26") && s21.box === "fill-box" && s21.others >= 1, JSON.stringify(s21));
+    const onPoint = s21.found && s21.hasMark && Math.abs(s21.gotX - s21.wantX) < 0.05 && Math.abs(s21.gotY - s21.wantY) < 0.05;
+    check("S21 crossing a founding stamps that town: data-ink=founding, inkStamp at --paper about the town point", s21.found && s21.hasMark && s21.ink === "founding" && s21.disp !== "none" && s21.name === "inkStamp" && s21.dur.includes("0.26") && s21.box === "view-box" && onPoint && s21.others >= 1, JSON.stringify(s21));
   } else {
     check("S21 seed 42 has a later living founding to cross", false, "no second living founding in manifest");
   }
@@ -431,20 +438,85 @@ export async function run(ctx) {
   })()`);
   check("S24 the verso snap parks in silence: every glyph restored, no grade left pending (#155)", s24.beforeInked > 0 && s24.afterInked === 0 && s24.shown === s24.total && s24.total === sm.count, JSON.stringify(s24));
 
-  // S25: chronicle OFF hands back a chart with no scrub-only attribute on it at all,
-  // the same idle-parity contract S7 holds for the inline display styles.
+  // S25: chronicle OFF hands back a chart with no scrub-only attribute or property on
+  // it at all, the same idle-parity contract S7 holds for the inline display styles.
+  // The press point goes with the grade: leaving --mark-x behind would leave an inline
+  // style on a baked node after the reader turned the feature off.
   await ensureRecto();
   await sleep(60);
   await setYear(sm.minFounded); // leave grades on the recto so the restore is non-vacuous
   const s25 = await evaluate(`(()=>{
     const s=document.getElementById("scrub-range");s.value="${sm.present}";s.dispatchEvent(new Event("input",{bubbles:true}));
     const beforeInked=document.querySelectorAll('#map #layer-settlements g.settlement[data-ink]').length;
+    const origins=()=>[...document.querySelectorAll('#map #layer-settlements g.settlement > :not(text)')].filter((el)=>el.style&&el.style.transformOrigin).length;
+    const beforePts=origins();
     const chk=document.getElementById("chronicle");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));
     const groups=[...document.querySelectorAll('#map #layer-settlements g.settlement')];
-    return{beforeInked,afterInked:groups.filter((g)=>g.hasAttribute("data-ink")).length,
+    return{beforeInked,beforePts,afterInked:groups.filter((g)=>g.hasAttribute("data-ink")).length,
+      afterPts:origins(),
+      styleAttrs:[...document.querySelectorAll('#map #layer-settlements g.settlement, #map #layer-settlements g.settlement *')].filter((el)=>el.getAttribute("style")).length,
       shown:groups.filter((g)=>getComputedStyle(g).display!=="none").length,total:groups.length};
   })()`);
-  check("S25 chronicle off leaves no ink grade behind and every glyph up (idle parity, #155)", s25.beforeInked > 0 && s25.afterInked === 0 && s25.shown === s25.total && s25.total === sm.count, JSON.stringify(s25));
+  check("S25 chronicle off leaves no ink grade or press origin behind and every glyph up (idle parity, #155)", s25.beforeInked > 0 && s25.beforePts >= sm.count && s25.afterInked === 0 && s25.afterPts === 0 && s25.styleAttrs === 0 && s25.shown === s25.total && s25.total === sm.count, JSON.stringify(s25));
+
+  // S26 (#155): the stamp presses ONTO the town, it does not slide onto it. The town
+  // point must be a FIXED POINT of the press, so at any instant the mark's box is the
+  // resting box scaled about that point. This measures the OUTCOME, not the mechanism:
+  // an origin at each node's own box centre passes a transform-box check and still
+  // fails here, because the chart mixes projections (glyph-symbols.ts) and a PROFILE
+  // glyph like the castle STANDS ON its point rather than being centred on it, while
+  // the seat halo is centred on a third point again. The error is in chart user units,
+  // so the Surveyor's Glass magnifies it up to 8x.
+  await ensureRecto();
+  await sleep(60);
+  await evaluate(`(()=>{const chk=document.getElementById("chronicle");if(!chk.checked){chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
+  await setYear(sm.minFounded);
+  const s26 = await evaluate(`(()=>{
+    const s=document.getElementById("scrub-range");s.value="${sm.present}";s.dispatchEvent(new Event("input",{bubbles:true}));
+    // Ground truth comes from the MANIFEST, independent of anything the ink-in
+    // publishes, mapped into client space by the chart's own screen CTM. Deliberately
+    // NOT the .place-hit box: the overlay is sized to #map while the chart svg renders
+    // a few px wider, so a hit centre sits ~1.2px off the true point, which the press
+    // would then scale into a phantom 0.35px error. Hits are 26px targets, so that
+    // offset is immaterial to #53 and is not this issue's business, but it is far too
+    // coarse to anchor a sub-pixel geometric assertion on.
+    const man=window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest;
+    const pt=new Map(man.places.map((p)=>[String(p.idx),p]));
+    const svg=document.querySelector("#map svg");
+    const vb=svg.viewBox.baseVal, ctm=svg.getScreenCTM();
+    const groups=[...document.querySelectorAll('#map #layer-settlements g.settlement[data-ink="founding"]')];
+    let worst=0,worstAt="",measured=0,castles=0;
+    for(const g of groups){
+      const place=pt.get(g.dataset.idx);
+      if(!place)continue;
+      const p=new DOMPoint(place.nx*vb.width,place.ny*vb.height).matrixTransform(ctm);
+      const px=p.x, py=p.y;
+      for(const mark of g.querySelectorAll(":scope > :not(text)")){
+        const anims=mark.getAnimations();
+        if(!anims.length)continue;
+        if(mark.querySelector(".settlement-capital,.settlement-seat")||mark.classList.contains("settlement-capital")||mark.classList.contains("settlement-seat"))castles++;
+        for(const a of anims)a.pause();
+        for(const a of anims)a.currentTime=0;
+        const b0=mark.getBoundingClientRect();
+        const k=new DOMMatrix(getComputedStyle(mark).transform).a; // the from-scale
+        for(const a of anims)a.currentTime=a.effect.getTiming().duration;
+        const b1=mark.getBoundingClientRect();
+        for(const a of anims){a.currentTime=0;a.play();}
+        if(b1.width===0||b1.height===0)continue;
+        measured++;
+        // predicted: the resting box scaled by k about the town point
+        for(const [got,rest,p] of [[b0.left,b1.left,px],[b0.right,b1.right,px],[b0.top,b1.top,py],[b0.bottom,b1.bottom,py]]){
+          const d=Math.abs(got-(p+k*(rest-p)));
+          if(d>worst){worst=d;worstAt=g.dataset.idx+" k="+k.toFixed(3);}
+        }
+      }
+    }
+    return{groups:groups.length,measured,castles,worst:Number(worst.toFixed(3)),worstAt};
+  })()`);
+  // Tolerance is sub-pixel on purpose. The defect this guards is 1.03px at k=1 (a
+  // castle's own box centre sits 5 chart units above its town point), and the Glass
+  // magnifies it up to 8x, so anything looser would let it back in at rest scale.
+  check("S26 the stamp presses ONTO the town: the town point is a fixed point of the press (#155)", s26.measured > 0 && s26.castles > 0 && s26.worst < 0.05, JSON.stringify(s26));
 
   // Restore to a clean, recto + chronicle-off state for the rest of the suite.
   await ensureRecto();
