@@ -100,12 +100,11 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   padding: calc(var(--k) * 6.5px) calc(var(--k) * 12px); cursor: pointer;
 }
 .cartouche .seedrow :focus-visible { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
-/* The resurrected seedline (D3) in the slot the chart prints CHART № {seed},
-   at the № line's own 9k size and 1.8k tracking; italic is Alex's call,
-   borrowing the chart subtitle's voice (the № line itself is upright in the
-   renderer). Wraps freely on narrow sheets. */
+/* The resurrected seedline (D3), wearing the chart SUBTITLE's exact voice
+   (cartouche.ts: 10.5k italic inkSoft, no tracking, sentence case), not the
+   CHART № line's: Alex's call at the shipped-hero review, 2026-07-25. */
 .cartouche-seedline {
-  font-size: calc(var(--k) * 9px); letter-spacing: calc(var(--k) * 1.8px);
+  font-size: calc(var(--k) * 10.5px);
   font-style: italic; color: var(--ink-faded);
   margin: calc(var(--k) * 13px) 0 0; line-height: 1.6;
 }

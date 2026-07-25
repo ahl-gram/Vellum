@@ -559,7 +559,7 @@ test("the cartouche hero: frame, hook, seed form, chart plate, fused caption, in
     'id="seed-form"',
     'value="42"',
     "Draw it",
-    "EVERY CHART IS REPRODUCIBLE FROM THE NUMBER IN ITS MARGIN",
+    "Every chart is reproducible from the number in its margin",
     "chart-42-antique.svg",
     "drawn in the antique manner",
     "stroke for stroke",
