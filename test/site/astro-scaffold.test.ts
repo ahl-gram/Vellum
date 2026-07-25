@@ -59,6 +59,12 @@ type PageSpec = {
   tagline: string;
   /** App surfaces only: the is:inline bundle-twin script the page must keep. */
   scriptSrc?: string;
+  /**
+   * Content pages ship no script, with one stated exception (#289): home's
+   * seed-form intercept, a marker string the page's single inline script must
+   * carry. The pipeline rule (#260) records the reason at the script's head.
+   */
+  inlineScript?: string;
 };
 
 const PAGES: readonly PageSpec[] = [
@@ -70,6 +76,10 @@ const PAGES: readonly PageSpec[] = [
     description:
       "Procedurally generated fantasy atlases: deterministic worlds drawn as antique, topographic, ink, and nautical SVG charts.",
     tagline: "an atelier of imaginary cartography",
+    // getElementById form: occurs ONLY inside the script (the form tag's own
+    // id="seed-form" would match anywhere), so the assertion proves the
+    // intercept exists, not merely the form.
+    inlineScript: 'getElementById("seed-form")',
   },
   {
     route: "faq/index.html",
@@ -438,14 +448,18 @@ test("the running head: uniform wordmark link, room name + tagline, double rule,
 
   const homeHeader = page("index.html").match(/<header>([\s\S]*?)<\/header>/);
   assert.ok(homeHeader, "home should have a header");
-  // The header-extra slot renders AFTER the nav band since #268: the rule and
-  // the band sit directly under the head on every page, identically.
-  const order = ["<h1>", 'class="tagline"', '<nav class="topnav">', 'class="lede"', 'class="seedline"'];
+  // #289: the lede wall and the standalone seedline banner left the header for
+  // the cartouche hero in the body; home's header keeps only the shell members,
+  // identical to every room page.
+  const order = ["<h1>", 'class="tagline"', '<nav class="topnav">'];
   let at = -1;
   for (const marker of order) {
     const next = homeHeader[1].indexOf(marker);
     assert.ok(next > at, `home header keeps its order at ${marker}`);
     at = next;
+  }
+  for (const gone of ['class="lede"', 'class="seedline"']) {
+    assert.ok(!page("index.html").includes(gone), `home retired its ${gone} banner (#289 cartouche hero)`);
   }
 });
 
@@ -511,15 +525,74 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
   // keeps holding for every page.
   for (const p of PAGES) {
     const tag = `<script type="module" src="${p.scriptSrc}"></script>`;
-    if (p.scriptSrc === undefined) {
+    if (p.scriptSrc === undefined && p.inlineScript === undefined) {
       assert.ok(!page(p.route).includes("<script"), `${p.route} is a content page and ships no script`);
       continue;
     }
     const html = page(p.route);
+    if (p.inlineScript !== undefined) {
+      // #289: home's seed-form intercept is the one stated inline-script
+      // exception on a content page (reason recorded at the script's head).
+      const scripts = [...html.matchAll(/<script\b/g)];
+      assert.equal(scripts.length, 1, `${p.route} carries exactly one script, the seed-form intercept`);
+      assert.ok(!html.includes('type="module"'), `${p.route} ships no module bundle, only the inline intercept`);
+      assert.ok(html.includes(p.inlineScript), `${p.route} script targets ${p.inlineScript}`);
+      assert.ok(html.indexOf("<script") < html.indexOf("<footer>"), `${p.route} script renders inside <main>, before the footer`);
+      continue;
+    }
     assert.ok(html.includes(tag), `${p.route} should load its bundle twin via ${tag}`);
     assert.ok(html.indexOf(tag) < html.indexOf("<footer>"), `${p.route} script renders inside <main>, before the footer`);
     assert.doesNotMatch(html, /src="(\.\/)?app\.js"/, `${p.route} must not load the raw ESM entry`);
   }
+});
+
+test("the cartouche hero: frame, hook, seed form, chart plate, fused caption, in order (#289)", () => {
+  // normalize: prose markers must not break on source-line reflow.
+  const html = normalize(decode(page("index.html")));
+  // The reading order the redesign ratified: cartouche (hook, divider, seed
+  // form, resurrected seedline), then the hero plate, then the fused caption.
+  const order = [
+    'class="cartouche"',
+    "Give Vellum a number.",
+    "It gives you back a world.",
+    'class="divider"',
+    'id="seed-form"',
+    'value="42"',
+    "Draw it",
+    "EVERY CHART IS REPRODUCIBLE FROM THE NUMBER IN ITS MARGIN",
+    "chart-42-antique.svg",
+    "drawn in the antique manner",
+    "stroke for stroke",
+  ];
+  let at = -1;
+  for (const marker of order) {
+    const next = html.indexOf(marker);
+    assert.ok(next > at, `home hero keeps its order at ${marker}`);
+    at = next;
+  }
+  // The frame carries all four corner flourishes (D6: at every width).
+  const flourishes = [...html.matchAll(/class="flourish/g)];
+  assert.equal(flourishes.length, 4, "the cartouche keeps its four corner flourishes");
+});
+
+test("How It Works opens with the Notice to Mariners and the merged lede; the count is ten (#289)", () => {
+  // normalize: prose markers must not break on source-line reflow.
+  const html = normalize(decode(page("index.html")));
+  const order = [
+    "NOTICE TO MARINERS",
+    "No feature on this chart exists.",
+    "Vellum surveys worlds that don't exist",
+    "ten invented languages, one per culture",
+    "Under the hood",
+  ];
+  let at = -1;
+  for (const marker of order) {
+    const next = html.indexOf(marker);
+    assert.ok(next > at, `How It Works keeps its order at ${marker}`);
+    at = next;
+  }
+  assert.ok(html.includes("quarrelsome realms"), "the lede's realms survive the merge into the borders sentence");
+  assert.ok(!html.includes("six invented"), "the six-language miscount is gone from home (#289)");
 });
 
 test("every internal link and embed on the rendered pages resolves", () => {

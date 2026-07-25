@@ -41,6 +41,7 @@ import { run as runHealth } from "./e2e/suite-health.mjs";
 import { run as runFallback } from "./e2e/suite-fallback.mjs";
 import { run as runHunt } from "./e2e/suite-hunt.mjs";
 import { run as runPrintRoom } from "./e2e/suite-print-room.mjs";
+import { run as runHome } from "./e2e/suite-home.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url)); // scripts/
 const REPO = resolve(HERE, "..");
@@ -109,6 +110,9 @@ async function main() {
   // another directory; like the hunt it runs after the health checkpoint and carries
   // its own scoped no-4xx + console-error delta (see suite-print-room.mjs).
   await runPrintRoom(ctx);
+  // The cartouche hero (#289): the homepage's seed form and its real navigation
+  // into the Explorer; self-scoped like the hunt and the Print Room.
+  await runHome(ctx);
 }
 
 main()
