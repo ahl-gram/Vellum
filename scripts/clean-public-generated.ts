@@ -20,6 +20,8 @@ import { fileURLToPath } from "node:url";
 // (runtime trees from Sub 3 #204, showcases from Sub 4 #205). explorer/engine
 // is a TOMBSTONE since Sub 9 (#260) retired the tsc emit: nothing regenerates
 // it, but cleaning it keeps a stale pre-#260 local tree out of the artifact.
+// The discovery files (#286) are plain files rather than trees; rm handles both,
+// and cleaning them means a retired route cannot linger in a local sitemap.
 export const GENERATED_SUBTREES: ReadonlyArray<string> = [
   "explorer/engine",
   "explorer/app.bundle.js",
@@ -29,6 +31,9 @@ export const GENERATED_SUBTREES: ReadonlyArray<string> = [
   "seed-of-the-day/app.bundle.js",
   "atlas",
   "gallery",
+  "sitemap.xml",
+  "robots.txt",
+  "llms.txt",
 ];
 
 export async function cleanPublicGenerated(root: string): Promise<void> {

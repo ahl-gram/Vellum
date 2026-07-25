@@ -12,7 +12,7 @@
     "dev": "npm run astro:dev",
     "og": "node scripts/build-og.ts",
     "charts:regen": "node scripts/regen-hero-charts.ts",
-    "astro:generate": "node scripts/clean-public-generated.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts",
+    "astro:generate": "node scripts/clean-public-generated.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts",
     "astro:dev": "npm run astro:generate && astro dev",
     "astro:preview": "astro preview",
     "build": "npm run astro:generate && astro build",

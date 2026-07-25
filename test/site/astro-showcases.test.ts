@@ -39,8 +39,8 @@ test("build-site.ts is retired; charts:regen and the showcase step replace it", 
   assert.equal(pkg.scripts["site"], undefined, "npm run site is retired");
   assert.equal(
     pkg.scripts["astro:generate"],
-    "node scripts/clean-public-generated.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts",
-    "astro:generate must end by generating the showcases into public/ (tsc emit retired at Sub 9, #260)",
+    "node scripts/clean-public-generated.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts",
+    "astro:generate must generate the showcases into public/ (tsc emit retired at Sub 9, #260), then the discovery files (#286)",
   );
   assert.equal(pkg.scripts["charts:regen"], "node scripts/regen-hero-charts.ts", "the thin golden-writer successor");
   assert.equal(pkg.scripts["dev"], "npm run astro:dev", "local preview repoints to the Astro dev server");

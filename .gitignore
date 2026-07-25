@@ -22,6 +22,12 @@ public/seed-of-the-day/app.bundle.js
 public/atlas/
 public/gallery/
 
+# The discovery files (#286), generated from NAV_ITEMS by the same step so they
+# cannot drift from the nav.
+public/sitemap.xml
+public/robots.txt
+public/llms.txt
+
 .claude/settings.local.json
 # Transient review worktrees spawned by Claude Code workflows.
 .claude/worktrees/
