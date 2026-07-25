@@ -7,7 +7,28 @@ body {
 h2, h3 {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
-main { max-width: 760px; }
+/* The survey sheet (#289 review): twin of the FAQ's sheet rule, see
+   faq/index.css for the doctrine; guarded by test/site/sheet-frame.test.ts. */
+main {
+  max-width: 760px;
+  background: var(--parchment-panel);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgb(255 252 240 / 0.55), transparent 70%),
+    radial-gradient(ellipse at 90% 100%, rgb(110 85 45 / 0.14), transparent 60%);
+  border: 1px solid var(--line-tan);
+  outline: 3px double var(--line-tan);
+  outline-offset: 6px;
+  padding: 2.5rem clamp(1.25rem, 5vw, 3.5rem) 3rem;
+  box-shadow: 0 18px 50px rgb(61 47 31 / 0.28);
+  position: relative;
+}
+main::before, main::after {
+  content: ""; position: absolute; width: 26px; height: 26px;
+  border: 1px solid var(--line-tan); pointer-events: none;
+}
+main::before { top: 14px; left: 14px; border-right: none; border-bottom: none; }
+main::after { bottom: 14px; right: 14px; border-left: none; border-top: none; }
+@media (max-width: 600px) { main { outline-offset: 4px; } }
 header { margin-bottom: 1rem; }
 h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   padding-bottom: 0.3rem; margin-top: 2.8rem; }
