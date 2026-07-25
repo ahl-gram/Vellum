@@ -9,6 +9,8 @@ import {
   buildScrubMarks,
   placeStateAt,
   glyphVisibleAt,
+  glyphRevealedBetween,
+  inkGradeFor,
   eventIsPast,
   buildSweepPlan,
   sweepYearAt,
@@ -130,6 +132,49 @@ test("glyphVisibleAt: a ruined town follows state-begins - hidden through its li
   assert.equal(glyphVisibleAt(mark, 649), false, "still hidden the year before it falls");
   assert.equal(glyphVisibleAt(mark, 650), true, "the baked ruin glyph inks in at the fall year");
   assert.equal(glyphVisibleAt(mark, 800), true, "and stays a ruin");
+});
+
+// #155: the ink-in. A glyph no longer pops into being: the frame that reveals it
+// plays a brief ceremony, so the scrubber needs to know WHICH marks crossed into
+// view between the last painted year and this one, and WHICH grade each plays.
+// Both are pure; the class/attribute plumbing and the CSS live in the Explorer.
+
+test("glyphRevealedBetween: true only on the frame that crosses a founding (#155)", () => {
+  const m = { idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null };
+  assert.equal(glyphRevealedBetween(m, 299, 300), true, "the crossing frame is the ink-in beat");
+  assert.equal(glyphRevealedBetween(m, 250, 400), true, "a fast sweep may cross the founding in one frame");
+  assert.equal(glyphRevealedBetween(m, 300, 301), false, "already up: no second stamp");
+  assert.equal(glyphRevealedBetween(m, 100, 299), false, "still hidden: nothing to ink");
+});
+
+test("glyphRevealedBetween: a park (fromYear === toYear) reveals nothing (#155)", () => {
+  // applyScrub and the #180 verso snap PARK the scrubber. A park must be silent:
+  // every glyph is already where it belongs, so nothing may re-stamp.
+  const m = { idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null };
+  assert.equal(glyphRevealedBetween(m, 900, 900), false, "parking at the present is not a reveal");
+  assert.equal(glyphRevealedBetween(m, 300, 300), false, "nor is parking on the founding year itself");
+});
+
+test("glyphRevealedBetween: scrubbing BACKWARDS is not a reveal (#155)", () => {
+  // A backward drag hides glyphs. Hiding stays a hard cut: only the appearance
+  // carries a ceremony.
+  const m = { idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null };
+  assert.equal(glyphRevealedBetween(m, 400, 299), false, "shown -> hidden is not a reveal");
+});
+
+test("glyphRevealedBetween: a ruin's beat is its FALL year, not its founding (#155)", () => {
+  // state-begins (#93): an eventually-ruined town has no living glyph baked, so it
+  // is hidden through its living centuries and its ruin glyph is what appears.
+  const m = { idx: 1, nx: 0.5, ny: 0.5, founded: 400, ruinYear: 650 };
+  assert.equal(glyphRevealedBetween(m, 399, 400), false, "its founding draws nothing, so it is no beat");
+  assert.equal(glyphRevealedBetween(m, 649, 650), true, "the fall year is where the ruin inks in");
+});
+
+test("inkGradeFor: a living town is stamped, a ruin dries in (#155)", () => {
+  // The two grades the CSS keys on: a founding presses a mark onto the sheet
+  // (inkStamp), a fall darkens into the record with no press (dryingInk).
+  assert.equal(inkGradeFor({ idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null }), "founding");
+  assert.equal(inkGradeFor({ idx: 1, nx: 0.5, ny: 0.5, founded: 400, ruinYear: 650 }), "ruin");
 });
 
 test("eventIsPast is inclusive of the current year", () => {
@@ -256,4 +301,26 @@ test("integration: seed 42 marks, range, and sweep are internally consistent", (
   const plan = buildSweepPlan(range, m.events.map((e) => e.year));
   assert.equal(sweepYearAt(plan, 0), range.min);
   assert.equal(sweepYearAt(plan, plan.totalMs), range.max);
+});
+
+test("integration: over seed 42's whole timeline every mark inks in exactly once (#155)", () => {
+  // Visibility is monotonic in year, so a year-by-year walk must find each mark's
+  // one crossing frame. A double count would mean a glyph re-stamping mid-sweep;
+  // a zero count would mean a place that never gets its beat.
+  const world = generateWorld(defaultRecipe(42));
+  const m = buildPlaceManifest(world, 1500);
+  const marks = buildScrubMarks(m.places, m.events, m.presentYear);
+  const range = scrubRange(m.places, m.presentYear);
+
+  for (const mk of marks) {
+    let reveals = 0;
+    for (let y = range.min; y <= range.max; y++) {
+      if (glyphRevealedBetween(mk, y - 1, y)) reveals++;
+    }
+    assert.equal(reveals, 1, `mark ${mk.idx} should ink in exactly once, saw ${reveals}`);
+  }
+
+  // and both grades are exercised by this world: seed 42 has living towns and a ruin
+  const grades = new Set(marks.map(inkGradeFor));
+  assert.deepEqual([...grades].sort(), ["founding", "ruin"]);
 });

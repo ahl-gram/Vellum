@@ -333,6 +333,119 @@ export async function run(ctx) {
   })()`);
   check("S19 ticking chronicle while flipped lands at the present with no special case (applyScrub parks)", s19.flipped && s19.panelShown && s19.val === s19.max && s19.rows > 0 && s19.pastRows === s19.rows, JSON.stringify(s19));
 
+  // --- S20-S25 (#155): the ink-in. #93 revealed each glyph with a hard display toggle;
+  // now the frame that reveals it plays a brief ceremony. living-chart.ts tags the
+  // CROSSING group data-ink with its grade and the CSS keys the animation on it, so the
+  // attribute is both the trigger and the scrub-only scope (nothing else writes it, and
+  // Download saves the pristine lastSvg string, so the golden cannot see it). e2e reads
+  // the WIRED motion, as S11 does; the live animation is CDP-probe verified.
+  //
+  // Back to the seed-42 world so the `sm` facts (the earliest and a later LIVING
+  // founding, the ruin's fall year) address real glyph groups again.
+  await ensureRecto();
+  await sleep(60);
+  await evaluate(`(()=>{
+    const chk=document.getElementById("chronicle");
+    if(!chk.checked){chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));}
+    document.getElementById("seed").value="42";document.getElementById("draw").click();
+  })()`);
+  await waitSettled("scrub-ink-redraw");
+
+  const inkedCount = () => evaluate(`document.querySelectorAll('#map #layer-settlements g.settlement[data-ink]').length`);
+
+  // S20: a PARK is silent. applyScrub parks at the present on toggle-on and after every
+  // redraw; if that painted a grade, turning the chronicle on would stamp the entire
+  // world in at once. Non-vacuous: S2 already proved every glyph is shown at this park.
+  const s20 = await inkedCount();
+  check("S20 the chronicle park is silent: every glyph is up and none carries an ink grade (#155)", s20 === 0, `${s20} groups inked at the park`);
+
+  // S21: crossing a founding stamps THAT town. The grade lands on the group, and the
+  // mark node under it (never the group, whose box spans the label too) carries
+  // inkStamp at --paper about its own fill-box centre.
+  if (sm.lateIdx >= 0) {
+    await setYear(sm.lateFounded - 1);
+    const s21 = await evaluate(`(()=>{
+      const s=document.getElementById("scrub-range");s.value="${sm.lateFounded}";s.dispatchEvent(new Event("input",{bubbles:true}));
+      const g=document.querySelector('#map #layer-settlements g.settlement[data-idx="${sm.lateIdx}"]');
+      if(!g)return{found:false};
+      const mark=g.querySelector(":scope > :not(text)");
+      if(!mark)return{found:true,hasMark:false};
+      const cs=getComputedStyle(mark);
+      return{found:true,hasMark:true,ink:g.getAttribute("data-ink"),disp:getComputedStyle(g).display,
+        name:cs.animationName,dur:cs.animationDuration,box:cs.transformBox,origin:cs.transformOrigin,
+        others:document.querySelectorAll('#map #layer-settlements g.settlement[data-ink]').length};
+    })()`);
+    check("S21 crossing a founding stamps that town: data-ink=founding, inkStamp at --paper about its own fill-box", s21.found && s21.hasMark && s21.ink === "founding" && s21.disp !== "none" && s21.name === "inkStamp" && s21.dur.includes("0.26") && s21.box === "fill-box" && s21.others >= 1, JSON.stringify(s21));
+  } else {
+    check("S21 seed 42 has a later living founding to cross", false, "no second living founding in manifest");
+  }
+
+  // S22: the name dries in one beat BEHIND the mark (#170's staggered-name idiom). Jump
+  // from the earliest year to the present so many towns reveal at once, guaranteeing an
+  // inked group that actually kept its label (villages can lose theirs under pressure).
+  await setYear(sm.minFounded);
+  const s22 = await evaluate(`(()=>{
+    const s=document.getElementById("scrub-range");s.value="${sm.present}";s.dispatchEvent(new Event("input",{bubbles:true}));
+    const inked=[...document.querySelectorAll('#map #layer-settlements g.settlement[data-ink]')];
+    const withLabel=inked.find((g)=>g.querySelector(":scope > text"));
+    if(!withLabel)return{inked:inked.length,labelled:false};
+    const t=withLabel.querySelector(":scope > text");
+    const cs=getComputedStyle(t);
+    return{inked:inked.length,labelled:true,name:cs.animationName,dur:cs.animationDuration,delay:cs.animationDelay};
+  })()`);
+  check("S22 a revealed town's NAME dries in one quick beat behind its mark (#155)", s22.inked > 0 && s22.labelled && s22.name === "dryingInk" && s22.dur.includes("0.18") && s22.delay.includes("0.18"), JSON.stringify(s22));
+
+  // Artifact: the sweep caught mid-ceremony, several towns inking in at once.
+  await shoot("explorer-chronicle-ink-in.png");
+
+  // S23: a ruin has no press to it. Its beat is the FALL year (state-begins, #93) and
+  // it dries into the record rather than stamping down.
+  if (sm.ruinIdx >= 0) {
+    await setYear(sm.ruinYear - 1);
+    const s23 = await evaluate(`(()=>{
+      const s=document.getElementById("scrub-range");s.value="${sm.ruinYear}";s.dispatchEvent(new Event("input",{bubbles:true}));
+      const g=document.querySelector('#map #layer-settlements g.settlement[data-idx="${sm.ruinIdx}"]');
+      if(!g)return{found:false};
+      const mark=g.querySelector(":scope > :not(text)");
+      if(!mark)return{found:true,hasMark:false};
+      const cs=getComputedStyle(mark);
+      return{found:true,hasMark:true,ink:g.getAttribute("data-ink"),disp:getComputedStyle(g).display,
+        name:cs.animationName,dur:cs.animationDuration};
+    })()`);
+    check("S23 a ruin inks in at its FALL year with dryingInk, never the stamp (#155)", s23.found && s23.hasMark && s23.ink === "ruin" && s23.disp !== "none" && s23.name === "dryingInk" && s23.dur.includes("0.26"), JSON.stringify(s23));
+  } else {
+    check("S23 seed 42 has a ruin to ink in", false, "no ruin in manifest");
+  }
+
+  // S24: the #180 verso snap is a PARK too, so it restores the pristine chart in silence
+  // instead of re-inking a century of foundings as the sheet swings away. beforeInked > 0
+  // makes it non-vacuous: the recto really did carry grades going in.
+  await setYear(sm.minFounded);
+  const s24 = await evaluate(`(()=>{
+    const s=document.getElementById("scrub-range");s.value="${Math.floor((sm.minFounded + sm.present) / 2)}";s.dispatchEvent(new Event("input",{bubbles:true}));
+    const beforeInked=document.querySelectorAll('#map #layer-settlements g.settlement[data-ink]').length;
+    document.getElementById("verso-turn").click();
+    const groups=[...document.querySelectorAll('#map #layer-settlements g.settlement')];
+    return{beforeInked,afterInked:groups.filter((g)=>g.hasAttribute("data-ink")).length,
+      shown:groups.filter((g)=>getComputedStyle(g).display!=="none").length,total:groups.length};
+  })()`);
+  check("S24 the verso snap parks in silence: every glyph restored, no grade left pending (#155)", s24.beforeInked > 0 && s24.afterInked === 0 && s24.shown === s24.total && s24.total === sm.count, JSON.stringify(s24));
+
+  // S25: chronicle OFF hands back a chart with no scrub-only attribute on it at all,
+  // the same idle-parity contract S7 holds for the inline display styles.
+  await ensureRecto();
+  await sleep(60);
+  await setYear(sm.minFounded); // leave grades on the recto so the restore is non-vacuous
+  const s25 = await evaluate(`(()=>{
+    const s=document.getElementById("scrub-range");s.value="${sm.present}";s.dispatchEvent(new Event("input",{bubbles:true}));
+    const beforeInked=document.querySelectorAll('#map #layer-settlements g.settlement[data-ink]').length;
+    const chk=document.getElementById("chronicle");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    const groups=[...document.querySelectorAll('#map #layer-settlements g.settlement')];
+    return{beforeInked,afterInked:groups.filter((g)=>g.hasAttribute("data-ink")).length,
+      shown:groups.filter((g)=>getComputedStyle(g).display!=="none").length,total:groups.length};
+  })()`);
+  check("S25 chronicle off leaves no ink grade behind and every glyph up (idle parity, #155)", s25.beforeInked > 0 && s25.afterInked === 0 && s25.shown === s25.total && s25.total === sm.count, JSON.stringify(s25));
+
   // Restore to a clean, recto + chronicle-off state for the rest of the suite.
   await ensureRecto();
   await sleep(60);
