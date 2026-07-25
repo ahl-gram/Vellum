@@ -17,7 +17,7 @@ header { margin-bottom: 2.5rem; }
    Pinned above the shell's specificity because the layout's inline style
    renders after this file, so an equal-specificity rule here would lose.
    Home's other deviation is the grander footer below. */
-header h1 { font-size: 2.25rem; }
+header h1 { font-size: 2.7rem; }
 h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   padding-bottom: 0.3rem; margin-top: 3.5rem; }
 /* The title cartouche (#289): the charts' own cartouche form, mirrored by hand
@@ -59,7 +59,7 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
 .cartouche .hook {
   /* the vw cap fits the hook's longer ratified line on one line down to
      ~360px, the way the renderer's titleFs shrinks the chart title to fit */
-  font-size: min(calc(var(--k) * 27px), 5vw);
+  font-size: min(calc(var(--k) * 24px), 5vw);
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
   letter-spacing: calc(var(--k) * 1.4px);
   line-height: 1.35; margin: 0;
