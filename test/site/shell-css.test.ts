@@ -160,3 +160,19 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
     }
   }
 });
+
+test("the daylight wash: every sheet is lit from the top and dims as it runs on (#289)", () => {
+  // Alex's call at the #289 review, adapted from his claude.ai ideas sheet:
+  // the shell body carries two soft radial washes over --parchment, a warm
+  // light anchored near the top of the document and an umber one at the
+  // bottom, so a long page gradually darkens as it scrolls. Order matters:
+  // the light ellipse paints above the dark one.
+  const css = layoutStyle();
+  const body = css.match(/body\s*\{([\s\S]*?)\}/);
+  assert.ok(body, "the layout style should carry the body rule");
+  const light = body[1].search(/radial-gradient\(ellipse at \d+% 1?\d%,\s*rgb\(255 250 235/);
+  const dark = body[1].search(/radial-gradient\(ellipse at \d+% 9\d%,\s*rgb\(120 95 50/);
+  assert.ok(light > -1, "the body wash lights the top of the sheet");
+  assert.ok(dark > -1, "the body wash dims the foot of the sheet");
+  assert.ok(light < dark, "the light wash paints above the dark one");
+});

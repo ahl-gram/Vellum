@@ -7,28 +7,31 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   path="/"
   tagline="an atelier of imaginary cartography"
 >
-  <Fragment slot="header-extra">
-  <p class="lede">Vellum surveys worlds that don't exist and drafts them as atlas charts.
-Give it a seed and it invents a landmass, simulates the rain that carves its
-rivers, grows its forests, founds its harbor towns, names everything in
-one of six invented languages, and partitions the land into quarrelsome
-realms. Then Vellum sits down at the drafting table and draws the maps,
-complete with parchment texture, hatched mountain ranges, a compass
-rose, a sea serpent, and a title cartouche. Same seed, same world, identical SVG.</p>
-  <p class="seedline">EVERY CHART IS REPRODUCIBLE FROM THE NUMBER IN ITS MARGIN</p>
-  </Fragment>
+<section class="cartouche" aria-label="Draw a world by its seed">
+  <div class="rule">
+    <svg class="flourish tl" viewBox="0 0 15 15" aria-hidden="true"><path d="M14.9 0.9Q0.9 0.9 0.9 14.9" fill="none"/></svg>
+    <svg class="flourish tr" viewBox="0 0 15 15" aria-hidden="true"><path d="M14.9 0.9Q0.9 0.9 0.9 14.9" fill="none"/></svg>
+    <svg class="flourish bl" viewBox="0 0 15 15" aria-hidden="true"><path d="M14.9 0.9Q0.9 0.9 0.9 14.9" fill="none"/></svg>
+    <svg class="flourish br" viewBox="0 0 15 15" aria-hidden="true"><path d="M14.9 0.9Q0.9 0.9 0.9 14.9" fill="none"/></svg>
+    <p class="hook">Give Vellum a number.<br>It gives you back a world.</p>
+    <div class="divider" aria-hidden="true"><svg viewBox="0 0 7.2 7.2"><path d="M3.6 0L7.2 3.6L3.6 7.2L0 3.6Z"/></svg></div>
+    <form id="seed-form" class="seedrow" action="explorer/" method="get">
+      <input id="seed-input" name="seed" inputmode="numeric" pattern="[0-9]*" title="digits only" value="42" aria-label="Seed">
+      <button type="submit">Draw it</button>
+    </form>
+    <p class="cartouche-seedline">Every chart is reproducible from the number in its margin</p>
+  </div>
+</section>
 
 <figure>
   <a href="charts/chart-42-antique.svg"><img src="charts/chart-42-antique.svg"
     alt="The Isle of Rahai, antique chart" loading="eager" class="plate"></a>
-  <figcaption>The Isle of Rahai, drawn in the antique manner · seed 42</figcaption>
+  <figcaption>The Isle of Rahai, drawn in the antique manner · seed 42.<br>
+  The same number always draws the same island, stroke for stroke.</figcaption>
 </figure>
 
 <section>
 <h2>Arms of the Realms</h2>
-<p class="how">Every realm is given its own coat of arms, generated from the
-same seed and obeying the heraldic rule of tincture: no colour on colour, no metal
-on metal. Here are the three realms of the Isle of Rahai.</p>
 <div class="banners">
   <figure class="banner"><img loading="lazy" src="charts/arms-42-0.svg"
     alt="Arms of The Chiefdom of Rekekoa"><figcaption>The Chiefdom of Rekekoa</figcaption></figure>
@@ -78,10 +81,17 @@ on metal. Here are the three realms of the Isle of Rahai.</p>
 
 <section>
 <h2>How It Works</h2>
-<p class="how">Give Vellum a number, called a <em>seed</em>, and it builds an
-entire world from scratch. First it raises land out of noise: noise layered at
-several scales, then pushed and pulled out of shape so the features wander and
-swirl instead of repeating in a regular pattern. That distortion is what gives
+<aside class="notice">
+<p class="notice-head">NOTICE TO MARINERS</p>
+<p class="notice-body">No feature on this chart exists. Soundings are imaginary.
+Navigation of these waters is undertaken entirely in the imagination.</p>
+</aside>
+<p class="how">Vellum surveys worlds that don't exist and drafts them as atlas
+charts. Give it a number, called a <em>seed</em>, and it builds an entire world
+from scratch.</p>
+<p class="how">First it raises land out of noise: noise layered at several
+scales, then pushed and pulled out of shape so the features wander and swirl
+instead of repeating in a regular pattern. That distortion is what gives
 coastlines their ragged, believable look instead of round, featureless blobs.
 Next it runs water downhill until every river finds its way to the sea.
 A simple climate of temperature and rainfall decides where forests, deserts, and
@@ -89,9 +99,12 @@ tundra grow.</p>
 <p class="how">Towns settle where any founder would, near sheltered harbors,
 river mouths, and good soil, and roads thread between them by the easiest route,
 sharing corridors. Borders follow the lay of the land, tracing ridgelines and
-rivers. Place names are drawn from six invented languages, one per culture.
-All of it is reproducible: the same seed always draws exactly the same world,
-right down to the last coastline.</p>
+rivers, and carve it into quarrelsome realms. Place names are drawn from ten
+invented languages, one per culture.</p>
+<p class="how">Then Vellum sits down at the drafting table and draws the maps:
+parchment texture, hatched mountain ranges, a compass rose, a sea serpent, a
+title cartouche. All of it is reproducible: the same seed always draws exactly
+the same world, identical SVG, right down to the last coastline.</p>
 <p class="underhood">Under the hood: a zero-dependency TypeScript engine, using
 domain-warped <a href="https://en.wikipedia.org/wiki/Perlin_noise">gradient
 noise</a> for terrain, <a href="https://arxiv.org/abs/1511.04463">priority-flood</a>
@@ -103,4 +116,17 @@ full <a href="https://en.wikipedia.org/wiki/Random_seed">reproducibility</a>.</p
 <p class="how">Draw your own: read the
 <a href="https://github.com/ahl-gram/Vellum#readme">README</a>.</p>
 </section>
+
+<script is:inline>
+// Inline by stated exception (#289, pipeline rule #260): one form intercept
+// does not earn a bundle twin. The Explorer reads its recipe from the HASH
+// (explorer/#seed=N, keys gate on presence so its defaults hold); the plain
+// GET the form falls back to without JS lands on ?seed=N, which the Explorer
+// ignores, degrading to today's world.
+document.getElementById("seed-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const raw = document.getElementById("seed-input").value.trim();
+  location.href = /^\d+$/.test(raw) ? "explorer/#seed=" + (Number(raw) >>> 0) : "explorer/";
+});
+</script>
 </BaseLayout>

@@ -17,11 +17,98 @@ header { margin-bottom: 2.5rem; }
    Pinned above the shell's specificity because the layout's inline style
    renders after this file, so an equal-specificity rule here would lose.
    Home's other deviation is the grander footer below. */
-header h1 { font-size: 2.25rem; }
+header h1 { font-size: 2.7rem; }
 h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   padding-bottom: 0.3rem; margin-top: 3.5rem; }
-.lede { max-width: 44rem; margin-inline: auto; line-height: 1.6; }
-.seedline { letter-spacing: 0.25em; font-size: 0.78rem; color: var(--ink-faded); margin-top: 1rem; }
+/* The title cartouche (#289): the charts' own cartouche form, mirrored by hand
+   from src/render/layers/cartouche.ts at a held k (the renderer's
+   k = widthPx / 1500) and rebuilt the hybrid way: CSS borders for the two
+   rects, fixed-size corner SVGs for the flourish quads, an SVG diamond over a
+   CSS divider line, so the frame reflows at any width with zero distortion.
+   If the renderer's cartouche ever changes shape, this is the copy to redraw.
+   The paper is the chart-exact #f2e8cf at the chart's own 0.94, a deliberate
+   D4 exception to the shell palette; the ink hexes already ARE the shell's
+   tokens, consumed as vars below. Full main width, like the hero plate under
+   it (Alex's call, 2026-07-25). The cartouche body keeps the chart's serif
+   stack; the hook alone takes the site's display face, a second deliberate
+   divergence from the chart title, called at the same review. */
+.cartouche {
+  --k: 1.5;
+  margin: 2.5rem auto 0;
+  border: calc(var(--k) * 2.2px) solid var(--ink-dark);
+  border-radius: calc(var(--k) * 3px);
+  background: rgb(242 232 207 / 0.94);
+  font-family: 'Iowan Old Style', 'Palatino', 'Georgia', serif;
+  text-align: center;
+}
+.cartouche .rule {
+  border: calc(var(--k) * 0.8px) solid var(--ink-dark);
+  margin: calc(var(--k) * 5px);
+  padding: calc(var(--k) * 16px) calc(var(--k) * 20px) calc(var(--k) * 14px);
+  position: relative;
+}
+.cartouche .flourish {
+  position: absolute; overflow: visible;
+  width: calc(var(--k) * 15px); height: calc(var(--k) * 15px);
+}
+.cartouche .flourish path { stroke: var(--ink-dark); stroke-width: 1.8; }
+.cartouche .flourish.tl { top: 0; left: 0; }
+.cartouche .flourish.tr { top: 0; right: 0; transform: scaleX(-1); }
+.cartouche .flourish.bl { bottom: 0; left: 0; transform: scaleY(-1); }
+.cartouche .flourish.br { bottom: 0; right: 0; transform: scale(-1, -1); }
+.cartouche .hook {
+  /* the vw cap fits the hook's longer ratified line on one line down to
+     ~360px, the way the renderer's titleFs shrinks the chart title to fit */
+  font-size: min(calc(var(--k) * 24px), 5vw);
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  letter-spacing: calc(var(--k) * 1.4px);
+  line-height: 1.35; margin: 0;
+}
+.cartouche .divider {
+  position: relative; height: calc(var(--k) * 7.2px);
+  margin: calc(var(--k) * 11px) auto calc(var(--k) * 13px);
+  /* the renderer spans 60% of the OUTER rect; this box lives in .rule's
+     content box, inset 28k per side (2.2 outer border + 5 margin + 0.8 rule
+     + 20 padding), so add back 0.6 x 56k to keep the chart's proportion */
+  width: calc(60% + var(--k) * 33.6px);
+}
+.cartouche .divider::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 50%;
+  border-top: calc(var(--k) * 0.9px) solid var(--ink-dark); transform: translateY(-50%);
+}
+.cartouche .divider svg {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: calc(var(--k) * 7.2px); height: calc(var(--k) * 7.2px);
+}
+.cartouche .divider path { fill: var(--ink-dark); }
+.cartouche .seedrow {
+  display: flex; gap: calc(var(--k) * 8px);
+  justify-content: center; align-items: center; margin: 0;
+}
+.cartouche .seedrow input {
+  font-family: inherit; color: var(--ink-dark);
+  /* 16px floor: a smaller input font makes iOS Safari zoom the page on focus */
+  font-size: 16px;
+  width: calc(var(--k) * 90px); text-align: center;
+  background: var(--parchment-bright); border: 1px solid var(--ink-faded);
+  border-radius: 2px; padding: calc(var(--k) * 4px) calc(var(--k) * 6px);
+}
+.cartouche .seedrow button {
+  font-family: inherit; font-size: calc(var(--k) * 11px); letter-spacing: 0.12em;
+  color: var(--parchment-bright); background: var(--ink-dark);
+  border: none; border-radius: 2px;
+  padding: calc(var(--k) * 6.5px) calc(var(--k) * 12px); cursor: pointer;
+}
+.cartouche .seedrow :focus-visible { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
+/* The resurrected seedline (D3), wearing the chart SUBTITLE's exact voice
+   (cartouche.ts: 10.5k italic inkSoft, no tracking, sentence case), not the
+   CHART № line's: Alex's call at the shipped-hero review, 2026-07-25. */
+.cartouche-seedline {
+  font-size: calc(var(--k) * 10.5px);
+  font-style: italic; color: var(--ink-faded);
+  margin: calc(var(--k) * 13px) 0 0; line-height: 1.6;
+}
+@media (max-width: 520px) { .cartouche { --k: 1.1; } }
 figure { margin: 1.5rem 0; }
 figure img { width: 100%; height: auto; display: block;
   border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
@@ -41,9 +128,18 @@ figcaption { text-align: center; font-style: italic; color: var(--ink-brown); pa
 .card:hover { background: #f8f1e0; }
 .card h3 { margin: 0 0 0.4rem; letter-spacing: 0.05em; }
 .card p { margin: 0; font-style: italic; color: var(--ink-brown); line-height: 1.5; }
-.how { line-height: 1.65; max-width: 46rem; }
+/* Notice to Mariners (#289): the parody block heading How It Works, in the
+   voice of a real chart's disclaimer. Small-caps tracked head, italic body. */
+.notice {
+  max-width: 46rem; margin: 1.2rem 0 1.6rem;
+  border: 1px solid var(--line-tan); background: var(--parchment-panel);
+  padding: 0.9rem 1.2rem;
+}
+.notice-head { margin: 0; letter-spacing: 0.22em; font-size: 0.78rem; color: var(--ink-faded); }
+.notice-body { margin: 0.35rem 0 0; font-style: italic; color: var(--ink-brown); line-height: 1.55; }
+.how { line-height: 1.65; }
 .underhood { font-style: italic; color: var(--ink-brown); font-size: 0.92rem;
-  line-height: 1.6; max-width: 46rem; margin-top: 0.5rem; }
+  line-height: 1.6; margin-top: 0.5rem; }
 .underhood a { color: #7a5c2e; }
 code { background: var(--parchment-deep); padding: 0.1em 0.4em; border-radius: 3px;
   font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
