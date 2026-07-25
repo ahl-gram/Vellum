@@ -31,7 +31,7 @@ Options:
   --out <path>      Output file (default: out/chart-<seed>-<style>.svg)
 
 Posters, atlases, and printing moved to the Print Room on the site:
-https://vellum.route12b.net/print-room/
+https://www.vellumworlds.com/print-room/
 `;
 
 type ParsedGrid = { gridW: number; gridH: number };

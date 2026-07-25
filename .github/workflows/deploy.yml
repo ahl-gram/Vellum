@@ -8,7 +8,7 @@ name: Deploy site to GitHub Pages
 # Contractual shape (ratified Sub 1 decision doc, #202): hand-rolled npm ci
 # pipeline (no withastro/action: the repo has a lockfile and a frozen npm ci
 # flow), `path: dist` matches Astro's default outDir, and the custom domain
-# (vellum.route12b.net) lives in the repo's Pages settings, not in a CNAME file.
+# (www.vellumworlds.com) lives in the repo's Pages settings, not in a CNAME file.
 
 on:
   push:

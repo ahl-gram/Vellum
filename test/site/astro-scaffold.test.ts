@@ -188,7 +188,7 @@ test("astro build emits all seven pages in directory form", () => {
 
 test("astro.config keeps the contractual shape (site, trailing slash, no fingerprinting knobs)", async () => {
   const config = (await import("../../astro.config.ts")).default;
-  assert.equal(config.site, "https://vellum.route12b.net", "site drives og:url and must stay the custom domain");
+  assert.equal(config.site, "https://www.vellumworlds.com", "site drives og:url and must stay the custom domain");
   assert.equal(config.trailingSlash, "always", "every internal URL is trailing-slash directory form");
   assert.equal(config.compressHTML, false, "the migrated pages' markup must stay unminified (near-verbatim discipline)");
   assert.equal(config.build?.inlineStylesheets, "always", "the shell style must inline, never a fingerprinted file");
@@ -226,15 +226,15 @@ test("each rendered head carries the canonical meta with the ratified prop fan-o
       ["name", "twitter:description", p.ogDescription ?? p.description],
       ["property", "og:title", p.ogTitle],
       ["name", "twitter:title", p.ogTitle],
-      ["property", "og:url", `https://vellum.route12b.net${p.dir}`],
+      ["property", "og:url", `https://www.vellumworlds.com${p.dir}`],
       ["property", "og:type", "website"],
       ["property", "og:site_name", "Vellum"],
-      ["property", "og:image", "https://vellum.route12b.net/og.png"],
+      ["property", "og:image", "https://www.vellumworlds.com/og.png"],
       ["property", "og:image:width", "1200"],
       ["property", "og:image:height", "630"],
       ["property", "og:image:alt", "A Vellum antique chart beside the Vellum wordmark."],
       ["name", "twitter:card", "summary_large_image"],
-      ["name", "twitter:image", "https://vellum.route12b.net/og.png"],
+      ["name", "twitter:image", "https://www.vellumworlds.com/og.png"],
       ["name", "twitter:image:alt", "A Vellum antique chart beside the Vellum wordmark."],
     ] as const) {
       assert.equal(metaContent(head, attr, key), want, `${p.route} ${attr}=${key}`);
