@@ -18,6 +18,8 @@ import {
   scrubRange,
   buildScrubMarks,
   glyphVisibleAt,
+  glyphRevealedBetween,
+  inkGradeFor,
   eventIsPast,
   buildSweepPlan,
   sweepYearAt,
@@ -293,8 +295,21 @@ function buildStrip(events: ReadonlyArray<HistoricalEvent>): StripRow[] {
 // visibility, the roads, and which chronicle rows have come to pass. Setting
 // .value here does NOT fire the slider's input event, so Play never trips the
 // manual-scrub handler.
-function paintScrub(year: number): void {
+//
+// #155 the ink-in: a glyph that CROSSES into view on this frame is tagged
+// data-ink with its grade (founding stamps, a fall dries in) and the Explorer CSS
+// keys a brief ceremony on it. Three things make that attribute the whole scope:
+// nothing else on the site ever writes it, it lives on the injected DOM only, and
+// Download SVG saves lastSvg (the string), so the baked chart, the committed
+// charts, and the golden can never see it. Idle is byte-identical by construction.
+//
+// `silent` PARKS instead: it clears every pending grade and reveals nothing, so
+// toggling the chronicle on (applyScrub) and the #180 verso snap set the resting
+// state with no ceremony rather than mass-stamping a whole world at once.
+function paintScrub(year: number, opts: { silent?: boolean } = {}): void {
   if (!scrub) return;
+  const fromYear = scrub.year;
+  const silent = opts.silent === true;
   scrub.year = year;
   scrubRangeEl.value = String(year);
   // Year on the slider's aria-valuetext (like the sea-level slider), NOT a live
@@ -304,7 +319,18 @@ function paintScrub(year: number): void {
   scrubYearEl.textContent = `year ${year}`;
   for (const m of scrub.marks) {
     const g = scrub.groups.get(m.idx);
-    if (g) g.style.display = glyphVisibleAt(m, year) ? "" : "none";
+    if (!g) continue;
+    const shown = glyphVisibleAt(m, year);
+    g.style.display = shown ? "" : "none";
+    // Every paint drives display straight off the year, so DOM visibility always
+    // equals glyphVisibleAt(m, scrub.year) and the year-based crossing test IS the
+    // DOM hidden->shown test. That also restarts the animation for free: per spec
+    // display:none terminates a running animation and restoring display starts it
+    // afresh, so #128's none/reflow/restore dance is not owed here (and offsetWidth
+    // does not exist on an SVGGElement anyway). A glyph that is up and steady keeps
+    // its grade untouched, or the next frame would cut its ceremony off mid-press.
+    if (silent || !shown) g.removeAttribute("data-ink");
+    else if (glyphRevealedBetween(m, fromYear, year)) g.dataset.ink = inkGradeFor(m);
   }
   setRoadsVisible(year >= scrub.range.max); // roads only at the present-day park
   for (const row of scrub.strip) {
@@ -339,8 +365,27 @@ export function applyScrub(): void {
   scrubRangeEl.min = String(range.min);
   scrubRangeEl.max = String(range.max);
   scrubRangeEl.step = "1";
+  const marks = buildScrubMarks(places, events, presentYear);
+  // #155: anchor each mark's ink-in press on its OWN town point. The chart mixes
+  // projections, so no box centre serves: a profile castle stands ON its point while a
+  // town circle is centred on it and a seat halo sits above it, three different points
+  // for one settlement. nx/ny are fractions of the rendered chart and the viewBox
+  // starts at 0 0, so as percentages against the view box they ARE the point, for every
+  // glyph and every style. It is per-element data, so it goes inline on the elements
+  // that animate (a stylesheet has nothing true to say about it, and a var() with no
+  // honest default would resolve to the middle of the whole sheet). Written over the
+  // same marks-crossed-with-groups domain paintScrub grades, so a mark can never be
+  // graded without its origin; exitScrub clears both together.
+  for (const m of marks) {
+    const g = groups.get(m.idx);
+    if (!g) continue;
+    for (const mark of g.querySelectorAll<SVGGraphicsElement>(":scope > :not(text)")) {
+      mark.style.transformBox = "view-box"; // not the initial value everywhere, so say it
+      mark.style.transformOrigin = `${m.nx * 100}% ${m.ny * 100}%`;
+    }
+  }
   scrub = {
-    marks: buildScrubMarks(places, events, presentYear),
+    marks,
     range,
     groups,
     roadsEl: mapDiv.querySelector<SVGGElement>("#layer-roads"),
@@ -353,7 +398,9 @@ export function applyScrub(): void {
   };
   scrubPanel.hidden = false;
   setPlayLabel(false);
-  paintScrub(range.max); // park at the present: the world exactly as just drawn
+  // Park at the present: the world exactly as just drawn, and silent (#155), so
+  // turning the chronicle on never stamps every settlement in at once.
+  paintScrub(range.max, { silent: true });
 }
 
 export function exitScrub(): void {
@@ -366,9 +413,21 @@ export function exitScrub(): void {
   }
   // #93: the sweep may have hidden individual glyph groups; restore the full
   // present-day chart by clearing every inline display it set (never "block": an
-  // SVG <g> does not take it), plus the roads.
+  // SVG <g> does not take it), plus the roads. #155: and drop every ink grade with the
+  // press origin it was armed with, so the chart the reader is handed back carries no
+  // scrub-only attribute or style at all. Grade and origin go together, always.
   const settleLayer = mapDiv.querySelector("#layer-settlements");
-  if (settleLayer) for (const g of settleLayer.querySelectorAll<SVGGElement>("g.settlement")) g.style.display = "";
+  if (settleLayer) {
+    for (const g of settleLayer.querySelectorAll<SVGGElement>("g.settlement")) {
+      g.style.display = "";
+      g.removeAttribute("data-ink");
+      for (const mark of g.querySelectorAll<SVGGraphicsElement>(":scope > :not(text)")) {
+        mark.style.removeProperty("transform-box");
+        mark.style.removeProperty("transform-origin");
+        if (!mark.getAttribute("style")) mark.removeAttribute("style");
+      }
+    }
+  }
   const roads = mapDiv.querySelector<SVGGElement>("#layer-roads");
   if (roads) roads.style.display = "";
   scrub = null;
@@ -428,7 +487,10 @@ export function togglePlay(): void {
 export function scrubSnapToPresent(): void {
   if (!scrub) return;
   pauseScrub();
-  paintScrub(scrub.range.max);
+  // Silent (#155): a snap is a park, not the passage of time. The reader turned the
+  // sheet, so the recto must simply BE the pristine chart the ghost already holds,
+  // not re-ink a century of foundings as it swings away.
+  paintScrub(scrub.range.max, { silent: true });
 }
 
 // A manual drag/keyboard scrub on the slider: pause Play and rebase it so the next

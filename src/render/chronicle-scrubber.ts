@@ -98,6 +98,32 @@ export function glyphVisibleAt(mark: ScrubMark, year: number): boolean {
   return placeStateAt(mark, year) === bakedState;
 }
 
+/**
+ * The ceremony a glyph plays as it appears (#155). A living town is STAMPED onto
+ * the sheet at its founding; a ruin has no press to it, it darkens into the record
+ * at its fall year. The Explorer maps these to inkStamp / dryingInk.
+ */
+export type InkGrade = "founding" | "ruin";
+
+/**
+ * Whether a mark's glyph crosses hidden -> shown between two painted years (#155):
+ * the one frame that earns the ink-in. Derived from glyphVisibleAt, so it inherits
+ * state-begins: a ruin's beat is its FALL year, since its living centuries draw
+ * nothing. Three cases fall out and all three are wanted:
+ *  - a park (fromYear === toYear) reveals nothing, so toggling the chronicle on and
+ *    the #180 verso snap stay silent;
+ *  - a backward scrub is never a reveal, so hiding stays a hard cut;
+ *  - a fast sweep frame that skips whole centuries still catches every crossing.
+ */
+export function glyphRevealedBetween(mark: ScrubMark, fromYear: number, toYear: number): boolean {
+  return !glyphVisibleAt(mark, fromYear) && glyphVisibleAt(mark, toYear);
+}
+
+/** Which grade a mark's glyph inks in at (#155). Its BAKED state, as in glyphVisibleAt. */
+export function inkGradeFor(mark: ScrubMark): InkGrade {
+  return mark.ruinYear !== null ? "ruin" : "founding";
+}
+
 /** Whether an event has happened by the current year (inclusive of its own year). */
 export function eventIsPast(eventYear: number, year: number): boolean {
   return eventYear <= year;

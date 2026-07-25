@@ -377,6 +377,45 @@ button.primary:hover { background: #5d4831; }
    the headline events as text. Scoped behind .place-overlay.scrub so idle mode is
    byte-identical (the global button{} rule must never reach these). */
 .place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
+/* #155 The ink-in. #93 revealed each glyph with a hard display toggle; now the frame
+   that reveals it plays a brief ceremony, so towns settle onto the sheet in the Paper
+   & Ink vocabulary (#125) instead of popping. living-chart.ts tags the crossing group
+   data-ink with its grade, and THAT ATTRIBUTE IS THE WHOLE SCOPE: only the scrubber
+   ever writes it, it lives on the injected DOM, and Download saves the pristine
+   lastSvg string, so the baked chart, the committed charts, and the golden never see
+   it. Idle output is byte-identical by construction.
+
+   Two grades, mirroring the pre-#93 dots this replaces: a founding is STAMPED onto
+   the sheet, a fall has no press to it and simply darkens into the record. The
+   animations ride the CHILDREN, never the group: the group's box spans halo, glyph
+   AND label, so scaling the group would drag the name in with the mark.
+
+   THE PRESS IS ANCHORED ON THE TOWN POINT, and no box centre will do it, which is why
+   the origin is NOT declared here: it is per-element data, so living-chart.ts writes it
+   inline on each mark it is about to grade. The chart deliberately mixes projections,
+   so a PROFILE glyph (the antique/ink castle) STANDS ON its point while a PLAN glyph
+   (the town circle, the star-in-circle) is centred on it, and a seat halo sits on a
+   third point again: for seed 42's capital those are y=474.21, 469.21 and 469.83. An
+   own-box origin therefore starts a castle's foot BELOW its town and slides it up over
+   the press, an error in CHART UNITS that the Surveyor's Glass magnifies up to 8x.
+   Anchored on the manifest point instead, halo and glyph share one origin and stay
+   concentric. Guarded by e2e S26, which MEASURES the town point staying fixed through
+   the press rather than trusting any declaration.
+
+   Held at --paper, the timing the dots used, because an event-proportional Play can
+   cross several foundings inside one dwell and a longer grade would smear them
+   together. The name dries in one quick beat behind the mark (the surveyor presses
+   the mark, then writes it up), the same staggered idiom as #170's redrafted names.
+   Both collapse to the end state via the shared reduced-motion block in /motion.css. */
+#map g.settlement[data-ink="founding"] > :not(text) {
+  animation: inkStamp var(--paper) var(--ease-paper) both;
+}
+#map g.settlement[data-ink="ruin"] > :not(text) {
+  animation: dryingInk var(--paper) var(--ease-paper) both;
+}
+#map g.settlement[data-ink] > text {
+  animation: dryingInk var(--paper-quick) var(--ease-paper) var(--paper-quick) both;
+}
 .scrubber[hidden] { display: none; }
 .scrubber { max-width: 1100px; margin: 0.8rem auto 0;
   background: #f3ead2; border: 1px solid var(--line-tan); border-radius: 6px;
