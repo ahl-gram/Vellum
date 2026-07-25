@@ -25,9 +25,19 @@ export type WaterSpan = { readonly from: number; readonly to: number };
  * every coastal-shortcut stub is <= 3 cells (COAST_EMBARK_MAX gates them to 3 straight)
  * and the genuine inland stubs start at 8.94, so 4 sits in the clear gap between.
  *
- * INVARIANT: 4 is only correct while that gap stays open. The reorder narrowed it from
- * 3.5..10 to 3..8.94, which is still wide, but a future change to the itinerary or to
- * COAST_EMBARK_MAX owes a re-measure of BOTH ends before trusting this constant.
+ * INVARIANT: 4 is only correct while that gap stays open, and the two ends of the gap are
+ * guarded very differently (#185, 2026-07-25).
+ *
+ * The LOWER end is STRUCTURAL. A sea leg's raw chain is [port, launch, ...open water...],
+ * so `stubFrom` below is exactly the chord `embarksNearShore` bounds by COAST_EMBARK_MAX.
+ * While COAST_EMBARK_MAX stays under INLAND_STUB_CELLS a coastal shortcut CANNOT reach
+ * this threshold. That is one cell of margin, and it is exact rather than comfortable:
+ * swept to 4, the leanest handoff over seeds 1..40 lands at precisely 4.00 cells, which
+ * is a coastal shortcut wearing the ride-sail-ride prose.
+ *
+ * The UPPER end is MEASURED ONLY. 8.94 is where genuine inland stubs happen to start on
+ * these seeds; nothing enforces it. Any itinerary change owes a re-measure of THAT end
+ * (the #184 and #275 reorders moved it from 10 to 8.94).
  */
 export const INLAND_STUB_CELLS = 4;
 

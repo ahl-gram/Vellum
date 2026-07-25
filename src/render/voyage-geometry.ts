@@ -22,12 +22,23 @@ import type { WaterSpan } from "./voyage-water.ts";
  * speed scaled with a leg's length and a long crossing blurred past. These give each
  * leg a duration by its length instead, anchored to the near-town speed the short legs
  * already had, with a mild speed-up for long legs (never a linear one). The whole sweep
- * therefore grows with the world, capped, rather than being pinned to 12s.
+ * therefore grows with the world rather than being pinned to 12s.
  *
  * PACE_EXP is the knob: 1 is constant speed (a long leg takes proportionally longer),
  * 0 is v1's equal-time (speed scales with length). 0.55 gives a ~1000px crossing about
  * 2.6x the near-town speed while still running ~1.6s. PACE_MS_PER_UNIT sets the baseline
- * (a ~120px near leg runs ~0.5s). Picked by eye; retune here.
+ * (a ~120px near leg runs ~0.5s). Both re-verified against #275's round trip.
+ *
+ * MAX_SWEEP_MS IS A SAFETY VALVE, NOT A GOVERNOR. Measured over 150 seeds (#185,
+ * 2026-07-25): every world runs 19 to 24 legs and a whole sweep takes 10.2s to 16.1s,
+ * mean 13.4s, so the cap has never once bitten and the worst world sits 1.61x under it.
+ * Reaching 26s over a full 24 legs needs every one of them near 540px, a p95 leg where
+ * the corpus median is 141px; 16 legs at the corpus maximum (1175px, 1.66s) would do it
+ * too. Neither is a world this generator makes, but both are nearer than "never", so the
+ * valve is worth keeping. What it is NOT is the place to tune the sweep's LENGTH:
+ * PACE_MS_PER_UNIT is the linear knob that reaches the screen, and the day the cap
+ * starts biting is the day to lower that rather than raise this. MIN_LEG_MS lifts 125
+ * of 945 legs (every leg under ~52px) off the curve and onto the floor.
  */
 export const PACE_EXP = 0.55;
 export const PACE_MS_PER_UNIT = 34;
@@ -53,13 +64,40 @@ export function legDurations(lengths: ReadonlyArray<number>): number[] {
   return raw;
 }
 
-/** Degrees. The tilt is a damped function of climb, never the literal bearing. */
+/**
+ * Degrees. The tilt is a damped function of climb, never the literal bearing.
+ *
+ * This ceiling is not an outlier clamp: measured over 945 legs at LOOKAHEAD 24 (#185,
+ * 2026-07-25) the MEDIAN leg peaks at 23.6 degrees and 630 of them press past 20, so
+ * MAX_TILT is close to what the mark simply looks like on a climbing leg. Changing it
+ * is therefore a visible change to the whole sweep, not a tail adjustment, and it also
+ * re-pins the e2e W20 ceiling in scripts/e2e/suite-voyage-route.mjs.
+ */
 export const MAX_TILT = 24;
 
-/** Chart px. The window the heading is averaged over, about half a ship-length. */
+/**
+ * Chart px. The window the heading is averaged over, about half a ship-length. It sets
+ * BOTH the facing hysteresis and how eagerly the tilt tracks a bend, so it cannot be
+ * tuned on flip counts alone. Measured over 945 legs at FACING_DEADBAND 0.35, walking
+ * each sweep at 60fps with the facing CARRIED between legs as the overlay carries it
+ * (#185, 2026-07-25): 24px costs 558 facing flips, 4 backwards arrivals and 0.90
+ * deg/frame of tilt movement, which beats an 18px window on all three (574 / 5 / a
+ * busier 1.07). Widening to 32px is the only real alternative and it is a trade, not a
+ * win: 496 flips and a calmer 0.72 deg/frame, bought with nearly 3x the backwards
+ * arrivals (11).
+ */
 export const LOOKAHEAD = 24;
 
-/** Normalized east-ness (-1..1) the heading must exceed to turn the mark around. */
+/**
+ * Normalized east-ness (-1..1) the heading must exceed to turn the mark around.
+ *
+ * 0.35 is the last value before suppressing the flicker starts causing the opposite
+ * defect. Measured over 945 legs at LOOKAHEAD 24 (#185, 2026-07-25): widening
+ * to 0.50 cuts flips 558 -> 497 but TRIPLES the legs that reach port facing away from
+ * the way they are travelling (4 -> 13), and 0.65 takes that to 35. Judge any change
+ * here on arrivals, never on the flip count alone, which improves monotonically all the
+ * way to a mark that never turns at all.
+ */
 export const FACING_DEADBAND = 0.35;
 
 export type Facing = 1 | -1;
