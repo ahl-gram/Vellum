@@ -192,13 +192,16 @@ button:not(.place-hit):active,
 
 /* The wordmark tips under the hand on room pages (#289 review): in Vellum,
    what goes somewhere tips, the same gesture as the plates, scaled to text.
-   Home's wordmark IS home and stays still (the :has(.room-name) scope). */
-h1 a {
+   Home's wordmark IS home and stays still (the :has(.room-name) scope).
+   Keyed on .wordmark, not h1, since #288: on a room page the wordmark is a <p>
+   and the h1 is the room name, which holds no link, so an h1-keyed rule would
+   select nothing and the gesture would vanish without a word. */
+.wordmark a {
   display: inline-block;
   transition: transform var(--paper) var(--ease-paper);
 }
-body:has(.room-name) h1 a:hover { transform: translateY(-2px) rotate(-0.6deg); }
-body:has(.room-name) h1 a:active { transform: translateY(0); }
+body:has(.room-name) .wordmark a:hover { transform: translateY(-2px) rotate(-0.6deg); }
+body:has(.room-name) .wordmark a:active { transform: translateY(0); }
 
 /* --------------------------------------------------------------------------
    The folio (#130, epic #125). Navigating Vellum reads as turning through one

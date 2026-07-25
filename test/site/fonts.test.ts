@@ -40,7 +40,7 @@ const WOFF2 = [
 // render through BaseLayout, so the one layout IS the folio's shell.
 const AUTHORED_PAGES = ["src/layouts/BaseLayout.astro"] as const;
 
-// The shell's role bindings (body prose, the h1/nav/footer display line, the
+// The shell's role bindings (body prose, the wordmark/nav/footer display line, the
 // tagline flourish) moved into BaseLayout's global style at #263; the page
 // files keep only their page-specific member bindings.
 

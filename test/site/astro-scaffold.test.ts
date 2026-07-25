@@ -45,8 +45,8 @@ const decode = (s: string) =>
 // feeds og:description AND twitter:description (seed-of-the-day's card copy is
 // shorter than its search snippet). `current` is the nav label marked
 // aria-current (absent on home: the wordmark carries the home link and there
-// is no Home nav item). The h1 wordmark is uniform, asserted in the header
-// test, not per page here.
+// is no Home nav item). The wordmark is uniform and the h1 is the room name
+// (#288); both are asserted in the header tests, not per page here.
 type PageSpec = {
   route: string;
   dir: string;
@@ -397,13 +397,20 @@ test("the layout ships the two ratified shell rules: 0.82rem unification + aria-
       "the manicule never trusts the Fell font for its glyph",
     );
     // Tracking stays restrained everywhere except the wordmark.
-    assert.match(css, /h1\s*\{[^}]*letter-spacing:\s*0?\.3em/, "the wordmark alone is tracked out");
+    assert.match(css, /\.wordmark\s*\{[^}]*letter-spacing:\s*0?\.3em/, "the wordmark alone is tracked out");
+    // #288 moved the h1 off the wordmark and onto the room name, so both head
+    // members now sit on a tag whose UA-default weight is the opposite of what
+    // it renders today (h1 is bold, p is normal). Both weights are pinned in
+    // the shell so the swap stays pixel-identical; assert both, since a
+    // dropped pin is invisible in source review and loud on the page.
+    assert.match(css, /\.wordmark\s*\{[^}]*font-weight:\s*700/, "the wordmark keeps the weight its h1 gave it");
+    assert.match(css, /\.room-name\s*\{[^}]*font-weight:\s*400/, "the room name keeps the weight its p gave it");
     // The head pins its own line-heights: page css sets body line-height per
     // page (1.6 on the prose pages, unset elsewhere), and the head must not
     // inherit that variance or its geometry differs page to page. 1.6 is the
     // ratified height (the taller of the two the pages produced).
     for (const [label, sel] of [
-      ["h1", "h1"],
+      [".wordmark", "\\.wordmark"],
       [".room-name", "\\.room-name"],
       [".tagline", "\\.tagline"],
       [".topnav", "\\.topnav"],
@@ -424,16 +431,19 @@ test("the running head: uniform wordmark link, room name + tagline, double rule,
   for (const p of PAGES) {
     const html = page(p.route);
     assert.ok(
-      html.includes('<h1><a href="/">VELLUM</a></h1>'),
+      html.includes('<a href="/">VELLUM</a>'),
       `${p.route} wordmark must be the home link on every page, home included`,
     );
     if (p.room) {
-      assert.ok(html.includes(`<p class="room-name">${esc(p.room)}</p>`), `${p.route} names its room on the running head`);
+      assert.ok(
+        html.includes(`<h1 class="room-name">${esc(p.room)}</h1>`),
+        `${p.route} names its room on the running head, as the page's h1 (#288)`,
+      );
     } else {
       // The markup form, not the bare class name: the shell css mentions
       // .room-name on every page.
       assert.ok(
-        !html.includes('<p class="room-name">'),
+        !html.includes('<h1 class="room-name">'),
         `${p.route} is home: the atelier is not a room, the tagline stands alone`,
       );
     }
@@ -451,7 +461,7 @@ test("the running head: uniform wordmark link, room name + tagline, double rule,
   // #289: the lede wall and the standalone seedline banner left the header for
   // the cartouche hero in the body; home's header keeps only the shell members,
   // identical to every room page.
-  const order = ["<h1>", 'class="tagline"', '<nav class="topnav">'];
+  const order = ['class="wordmark"', 'class="tagline"', '<nav class="topnav">'];
   let at = -1;
   for (const marker of order) {
     const next = homeHeader[1].indexOf(marker);
@@ -460,6 +470,48 @@ test("the running head: uniform wordmark link, room name + tagline, double rule,
   }
   for (const gone of ['class="lede"', 'class="seedline"']) {
     assert.ok(!page("index.html").includes(gone), `home retired its ${gone} banner (#289 cartouche hero)`);
+  }
+});
+
+// #288: before this, all seven pages shared the identical `<h1>VELLUM</h1>` and
+// the page's own subject lived in a `<p class="room-name">`, which carries no
+// structural weight at all. The heading outline a screen reader walks therefore
+// said nothing about where the reader had landed. The fix is purely which tag
+// carries which text: the wordmark drops to a `<p class="wordmark">` and the
+// room name rises to the `<h1>`. Home is the correct exception -- it is roomless
+// (the atelier is not a room), so the wordmark stays its h1.
+test("every page's h1 names the page: the room on room pages, the wordmark on home (#288)", () => {
+  const decodeAll = (s: string) => decode(s.replace(/<[^>]*>/g, ""));
+  for (const p of PAGES) {
+    const html = page(p.route);
+    const h1s = [...html.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/g)];
+    assert.equal(h1s.length, 1, `${p.route} has exactly one h1`);
+    assert.equal(
+      normalize(decodeAll(h1s[0][1])),
+      p.room ?? "VELLUM",
+      `${p.route} h1 must name the page itself, not the masthead`,
+    );
+
+    // The h1 is still the first heading, and it is still in the running head:
+    // #288 swaps tags in place, it does not relocate the heading into the body.
+    const firstHeading = html.search(/<h[1-6]\b/);
+    assert.equal(firstHeading, html.search(/<h1\b/), `${p.route} h1 is the first heading on the page`);
+    const [headOpen, headClose] = [html.indexOf("<header>"), html.indexOf("</header>")];
+    assert.ok(
+      headOpen > -1 && firstHeading > headOpen && firstHeading < headClose,
+      `${p.route} keeps its h1 inside the running head`,
+    );
+  }
+
+  // The masthead survives on every page, it just stops being the heading. On a
+  // room page it is a p; on home it IS the h1, so accept either tag around it.
+  for (const p of PAGES) {
+    const html = page(p.route);
+    const tag = p.room ? "p" : "h1";
+    assert.ok(
+      html.includes(`<${tag} class="wordmark"><a href="/">VELLUM</a></${tag}>`),
+      `${p.route} carries the wordmark as a <${tag} class="wordmark">`,
+    );
   }
 });
 
