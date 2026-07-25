@@ -111,6 +111,15 @@ const cardDescription = ogDescription ?? description;
 body {
   margin: 0;
   background: var(--parchment); color: var(--ink-dark);
+  /* The daylight wash (Alex's call at the #289 review, from his ideas
+     sheet): a warm light anchored near the top of the DOCUMENT and an umber
+     shade at its foot, sized to the whole page, so every sheet reads lit
+     from above and gradually dims as it scrolls. Alpha washes over
+     --parchment, deliberately not palette tokens (guarded in
+     shell-css.test.ts, the daylight-wash test). */
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgb(255 250 235 / 0.5), transparent 60%),
+    radial-gradient(ellipse at 85% 90%, rgb(120 95 50 / 0.18), transparent 55%);
   font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
 main { margin-inline: auto; }
