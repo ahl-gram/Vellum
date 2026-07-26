@@ -33,17 +33,16 @@ export type AtlasDocumentData = {
 /**
  * The shared inner atlas CSS: the single source of truth for how the composed plates,
  * tables, banners, and chronicle are drawn. Scoped under `.atlas-sheet` so it can be
- * injected into any host page with its own figure/table/h2 without bleeding: the Print
- * Room (bound-atlas.js injects it) and the generated atlas document (buildAtlas embeds
- * it). This CLOSES the drift trap: before, these exact rules were hand-mirrored in both
- * src/cli/atlas.ts's <style> and the Explorer's inline bind view. (The Explorer's own
- * "Bind as atlas" was retired in #199 and its bound atlas consolidated into the Print Room.)
- *
- * Deliberately does NOT carry page chrome (body background, header, footer) or the
- * divergent bits (page-chrome spacing like the standalone's h2 margin-top): those stay
- * context-local so each host is unchanged. The transition timing falls back to literal values
- * (var(--paper, 260ms)) so the self-contained download, which links no /motion.css, still
- * eases correctly.
+ * injected into any host page with its own figure/table/h2 without bleeding: the Print Room
+ * (src/site/print-room/bound-atlas.ts injects it) and the generated atlas document
+ * (buildAtlas embeds it). This CLOSES the drift trap: before, these exact rules were
+ * hand-mirrored in both src/cli/atlas.ts's <style> and the Explorer's inline bind view.
+ * (The Explorer's own "Bind as atlas" was retired in #199 and its bound atlas consolidated
+ * into the Print Room.) Deliberately does NOT carry page chrome (body background, header,
+ * footer) or the divergent bits (page-chrome spacing like the standalone's h2 margin-top):
+ * those stay context-local so each host is unchanged. The transition timing falls back to
+ * literal values (var(--paper, 260ms)) so the self-contained download, which links no
+ * /motion.css, still eases correctly.
  */
 export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
 .atlas-sheet h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan); padding-bottom: 0.3rem;

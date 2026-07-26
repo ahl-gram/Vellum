@@ -85,7 +85,7 @@ export async function run(ctx) {
 
   // V5 (the shared-transform race): while a #131 style-turn is LIVE, clicking Turn
   // must be IGNORED. The turn owns #sheet-inner's rotateY; a flip starting mid-turn
-  // would fight it. Guarded in app.js by the .turning check. The turn still lands
+  // would fight it. Guarded in src/site/explorer/app.ts by the .turning check. The turn still lands
   // re-dressed and the sheet is never left flipped. (A regression that dropped the
   // .turning guard would flip mid-turn and fail this.)
   await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("draw").click();})()`);

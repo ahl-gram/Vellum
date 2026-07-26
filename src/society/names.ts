@@ -58,8 +58,9 @@ export type Culture = {
   readonly realmTemplates: readonly string[];
 };
 
-// The order of this array is normative. generate.ts:157 picks a world's culture
-// with `rng.fork("culture").pick(CULTURES)`, and pick() = floor(u * length). Seed
+// The order of this array is normative. `generateWorld` in `src/world/generate.ts`
+// picks a world's culture with `rng.fork("culture").pick(CULTURES)`, and
+// pick() = floor(u * length). Seed
 // 42's culture-fork draw is u = 0.69486..., so floor(u * 10) = 6: oromi MUST stay
 // at index 6 or the golden re-rolls its culture and every seed-42 name changes.
 // This is the covenant of seed 42 (issue #235); the guard test in

@@ -8,8 +8,8 @@
 //
 // Imports are ROOT-ABSOLUTE (/explorer/...) like the rest of the Print Room, so the
 // module's own ./engine/... imports resolve against /explorer/, not /print-room/ (a bare
-// relative path would 404). The shared render worker is the SAME singleton app.js
-// connects via initWorker; importing runJob here reuses it.
+// relative path would 404). The shared render worker is the SAME singleton
+// src/site/print-room/app.ts connects via initWorker; importing runJob here reuses it.
 import { runJob } from "../explorer/worker-client.ts";
 import { escapeXml } from "../../render/svg.ts";
 import { ATLAS_SHEET_CSS, atlasDocument, svgToDataUri } from "../../atlas/document.ts";
@@ -91,12 +91,13 @@ function resetBoundAtlas(): void {
   status.textContent = "";
 }
 
-// Called at the START of every draw (app.js): a redraw is coming, so ALSO disable Bind until
-// the new proof settles. Without this, posterBasis still points at the PREVIOUS world during
-// the redraw's in-flight window, and a bind clicked then would compose the old world's atlas
-// and survive the bindGen guard (the new proof lands without bumping bindGen), leaving the
-// bound sheet disagreeing with the on-screen proof. enableBind re-enables it when the new
-// proof settles (mirrors the Explorer's Bind, disabled for the whole draw round-trip).
+// Called at the START of every draw (src/site/print-room/app.ts): a redraw is coming, so
+// ALSO disable Bind until the new proof settles. Without this, posterBasis still points at
+// the PREVIOUS world during the redraw's in-flight window, and a bind clicked then would
+// compose the old world's atlas and survive the bindGen guard (the new proof lands without
+// bumping bindGen), leaving the bound sheet disagreeing with the on-screen proof.
+// enableBind re-enables it when the new proof settles (mirrors the Explorer's Bind,
+// disabled for the whole draw round-trip).
 export function clearBoundAtlas(): void {
   resetBoundAtlas();
   bindBtn.disabled = true;
@@ -129,14 +130,13 @@ function plateFigure(svg: string, caption: string, cls = ""): string {
 // Render the whole atlas inline: a title header, then every plate and fragment in atlas
 // order. Plates ride blob-URL <img>s (cheap, session-scoped) exactly like the Explorer's
 // atlas view; the download rebuilds the identical atlas with base64 data URIs so it opens
-// offline.
-//
-// innerHTML safety: the same trusted-input contract as the Print Room proof (app.js). The
-// only inputs to a bound atlas are the uint32 seed and recipe params, each
-// validated against fixed allowlists in app.js's applyHash before any worker job runs, so
-// no user-controlled string reaches here. Captions, the title, and the subtitle are
-// derived from the deterministic name generator, and are escapeXml'd besides; the plate
-// SVGs and the composer's banner/chronicle/gazetteer fragments are trusted engine output.
+// offline. innerHTML safety: the same trusted-input contract as the Print Room proof
+// (src/site/print-room/app.ts). The only inputs to a bound atlas are the uint32 seed and
+// recipe params, each validated against fixed allowlists in src/site/print-room/app.ts's
+// applyHash before any worker job runs, so no user-controlled string reaches here.
+// Captions, the title, and the subtitle are derived from the deterministic name generator,
+// and are escapeXml'd besides; the plate SVGs and the composer's banner/chronicle/gazetteer
+// fragments are trusted engine output.
 function renderBoundAtlas(atlas: AtlasDocumentData): void {
   // The title header and the hero plate carry .print-only: on screen they duplicate the proof
   // shown right above, so index.css hides them; print reveals them for a complete standalone
@@ -239,8 +239,9 @@ function downloadAtlas(): void {
   };
 }
 
-// Wire the counter. getBasisFn returns the current proof's world snapshot (app.js's
-// posterBasis) at click time, so a bind reproduces exactly the sheet on screen.
+// Wire the counter. getBasisFn returns the current proof's world snapshot
+// (src/site/print-room/app.ts's posterBasis) at click time, so a bind reproduces exactly
+// the sheet on screen.
 export function initBoundAtlas(getBasisFn: () => PosterBasis | null): void {
   getBasis = getBasisFn;
   bindBtn.addEventListener("click", bindAtlas);

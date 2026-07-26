@@ -16,9 +16,9 @@ export async function run(ctx) {
   const cntFn = `const cnt=(el)=>el&&el.getAttribute("points")?el.getAttribute("points").trim().split(" ").length:0;`;
 
   // W9: a flip mid-sweep SNAPS the voyage to its resting track, then turns. The button is
-  // never disabled by a running sweep (a control dead for many seconds reads as a bug). #121: the margin
-  // log accumulates (row 0 brightened as the sweep set out) while #status stays "" until
-  // the snap posts the survey's single polite summary.
+  // never disabled by a running sweep (a control dead for many seconds reads as a bug).
+  // #121: the margin log accumulates (row 0 brightened as the sweep set out) while #status
+  // stays "" until the snap posts the survey's single polite summary.
   const w9 = await evaluate(`(()=>{
     ${cntFn}
     const voy=document.getElementById("voyage");
@@ -92,8 +92,8 @@ export async function run(ctx) {
   await shoot("explorer-verso-voyage.png");
 
   // W11: ticking voyage while FLIPPED paints the resting track on both faces and runs no
-  // sweep (the sweep is a recto ceremony). Following app.js's precedent that a style change
-  // while flipped rebuilds in place rather than turning.
+  // sweep (the sweep is a recto ceremony). Following src/site/explorer/app.ts's precedent
+  // that a style change while flipped rebuilds in place rather than turning.
   const w11 = await evaluate(`(()=>{
     ${cntFn}
     const verso=document.getElementById("verso");
@@ -224,12 +224,12 @@ export async function run(ctx) {
   await waitSettled("voyage-verso-land-restore");
 
   // W16: the OTHER draw path. A style change turns the sheet (#131), so the voyage re-arms
-  // in runTurn's .then(), ~900ms AFTER rebuildVerso already wiped the verso track. app.js
-  // repaints on the far side of that wipe with the pre-turn session still standing, which
-  // is safe for a reason worth pinning: a turn only ever re-dresses the SAME world (only
-  // styleSel turns; every other control settles), so the points it paints are identical to
-  // the ones the landing re-arm paints. A turn also never runs while flipped. Both faces
-  // must agree once the sheet lands.
+  // in runTurn's .then(), ~900ms AFTER rebuildVerso already wiped the verso track.
+  // src/site/explorer/app.ts repaints on the far side of that wipe with the pre-turn
+  // session still standing, which is safe for a reason worth pinning: a turn only ever
+  // re-dresses the SAME world (only styleSel turns; every other control settles), so the
+  // points it paints are identical to the ones the landing re-arm paints. A turn also never
+  // runs while flipped. Both faces must agree once the sheet lands.
   await evaluate(`(()=>{document.getElementById("verso-turn").click();})()`); // back to the recto
   await sleep(1400);
   await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);

@@ -11,12 +11,13 @@
 //     master chart;
 //   - a zoom-out shows the world chart around the inset immediately (it was there all along),
 //     and the region -> world hop just fades the inset away, no worker round-trip.
-// The pure settle/inset math lives (unit-tested) in src/world/lod.js; this module is the DOM
+// The pure settle/inset math lives (unit-tested) in src/world/lod.ts; this module is the DOM
 // conductor -- inset mount, crossfade, worker dispatch, overlay, the drafting indicator.
 //
-// Kept out of app.js so the conductor stays glue: app.js owns the controls + the draw race,
-// and hands this module the pieces it needs plus a per-draw world context (setWorld).
-// Antique-only redraft: app.js gates onSettle on the style, so a non-antique settle only
+// Kept out of src/site/explorer/app.ts so the conductor stays glue:
+// src/site/explorer/app.ts owns the controls + the draw race, and hands this module the
+// pieces it needs plus a per-draw world context (setWorld). Antique-only redraft:
+// src/site/explorer/app.ts gates onSettle on the style, so a non-antique settle only
 // writes the hash (geometric zoom).
 import {
   LOD_BANDS,
@@ -48,14 +49,17 @@ type RegionJobMessage = {
   render: RenderOptions;
 };
 
-/** The fields of a resolved region survey this controller consumes (worker-client's region result). */
+/**
+ * The fields of a resolved region survey this controller consumes (worker-client's region
+ * result).
+ */
 type RegionJobResult = {
   svg: string;
   manifest: PlaceManifest;
   title: string;
 };
 
-/** The per-draw world context app.js hands to setWorld on every world draw. */
+/** The per-draw world context src/site/explorer/app.ts hands to setWorld on every world draw. */
 type WorldContext = {
   seed: number;
   overrides: Partial<WorldRecipe> | undefined;

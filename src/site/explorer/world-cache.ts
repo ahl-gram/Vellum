@@ -1,5 +1,5 @@
-// Single-entry base-world cache, shared by the render worker (worker.js) and its
-// inline fallback (worker-client.js). generateWorld is the CPU floor of any draw,
+// Single-entry base-world cache, shared by the render worker (src/site/explorer/worker.ts) and its
+// inline fallback (src/site/explorer/worker-client.ts). generateWorld is the CPU floor of any draw,
 // atlas, or regional survey; the Surveyor's Glass (#161/#168) fires a fresh region
 // job on every settle over the SAME base world, so memoizing the last resolved
 // (seed, overrides) world lets a pan/zoom re-survey without regenerating it.

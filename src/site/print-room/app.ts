@@ -1,16 +1,14 @@
-// The Print Room controller (#133, epic #132). A sixth hand-authored page: the
-// atelier's print shop. It takes a world by URL hash (deep-linked from the Explorer's
-// "Take to the Print Room" link) or by manual seed entry, and pulls a modest proof
-// through the SHARED render worker so the heavy work stays off the main thread. The
-// ordering surface (poster plates, the bound atlas) is filled in by Subs 2-4; Sub 1
-// is the shell plus this preview.
-//
-// Worker reuse: the render worker and its inline fallback already live in the
-// Explorer's worker-client.js, imported root-absolute (Vite resolves "/..." against
-// the public/ build root, and the served URL is stable from any page). Since the
-// fold (#208) this page is bundled like the Explorer: worker-client is inlined
-// into this bundle, and its static import-URL spawn resolves to the ONE emitted
-// worker chunk, so initWorker takes no URL here anymore.
+// The Print Room controller (#133, epic #132). A sixth hand-authored page: the atelier's
+// print shop. It takes a world by URL hash (deep-linked from the Explorer's "Take to the
+// Print Room" link) or by manual seed entry, and pulls a modest proof through the SHARED
+// render worker so the heavy work stays off the main thread. The ordering surface (poster
+// plates, the bound atlas) is filled in by Subs 2-4; Sub 1 is the shell plus this preview.
+// Worker reuse: the render worker and its inline fallback already live in the Explorer's
+// src/site/explorer/worker-client.ts, imported root-absolute (Vite resolves "/..." against
+// the public/ build root, and the served URL is stable from any page). Since the fold
+// (#208) this page is bundled like the Explorer: worker-client is inlined into this bundle,
+// and its static import-URL spawn resolves to the ONE emitted worker chunk, so initWorker
+// takes no URL here anymore.
 import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";

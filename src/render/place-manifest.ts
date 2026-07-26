@@ -16,9 +16,10 @@ export type PlaceMark = {
   readonly ruined: boolean;
   /**
    * This settlement is some realm's seat (`world.realms.seats`). Raw, so realm 0's
-   * seat (the grand capital, realms.ts:116) carries `seat: true` as well; the
-   * capital-over-seat display precedence lives in placeRank, matching the chart's
-   * own tiering at settlements.ts:229.
+   * seat (the grand capital, `selectSeats` in `src/society/realms.ts`) carries
+   * `seat: true` as well; the capital-over-seat display precedence lives in
+   * placeRank, matching the chart's own tiering (`tierOf` in
+   * `src/render/layers/settlements.ts`).
    */
   readonly seat: boolean;
   /** Projected x as a fraction of the rendered width (0..1). */
@@ -57,14 +58,15 @@ export type PlaceManifest = {
  * Project the world into a {@link PlaceManifest}. Pure: no RNG, no World
  * mutation, no `rng.fork` (the data was already produced by the LAST fork in the
  * pipeline, `rng.fork("history")`, so there is nothing to fork). The projection
- * MUST match renderMap exactly (map-renderer.ts:87-88) so client overlays land on
- * the drawn settlements.
+ * MUST match renderMap exactly (`createProjection` in
+ * `src/render/map-renderer.ts`) so client overlays land on the drawn settlements.
  */
 export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest {
   const margin = marginFor(widthPx);
   const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
-  // On a regional survey (#162) an off-window seat is a -1 sentinel (region.ts:121);
-  // it matches no settlement index, so those places simply stay unflagged.
+  // On a regional survey (#162) an off-window seat is a -1 sentinel, set by
+  // `generateRegionWorld` in `src/world/region.ts`; it matches no settlement
+  // index, so those places simply stay unflagged.
   const seats = new Set(world.realms.seats);
   const places: PlaceMark[] = world.settlements.map((s, idx) => ({
     idx,

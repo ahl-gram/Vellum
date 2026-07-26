@@ -69,8 +69,9 @@ test("placeRank calls a hamlet a Hamlet (#171)", () => {
 });
 
 test("placeRank ranks capital above seat: realm 0's seat IS the grand capital", () => {
-  // realms.ts:116 pushes the capital as realm 0's seat, so the capital carries
-  // seat===true. It must still read "Capital", matching settlements.ts:229.
+  // `selectSeats` in `src/society/realms.ts` pushes the capital as realm 0's seat,
+  // so the capital carries seat===true. It must still read "Capital", matching
+  // `tierOf` in `src/render/layers/settlements.ts`.
   assert.equal(placeRank(mark({ kind: "capital", seat: true })), "Capital");
 });
 

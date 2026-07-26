@@ -1,8 +1,8 @@
-// Render worker plumbing. The heavy world-gen + SVG render runs in ./worker.js
+// Render worker plumbing. The heavy world-gen + SVG render runs in ./worker.ts
 // off the main thread so the UI stays responsive. The worker is best-effort: if
 // it cannot be constructed (file://, strict CSP, an older browser) we fall back to
 // running the same engine inline on the main thread, so the page always works.
-// runInline mirrors worker.js exactly (same engine calls, same serializableAtlas)
+// runInline mirrors src/site/explorer/worker.ts exactly (same engine calls, same serializableAtlas)
 // so the worker/inline byte-identity check (e2e A2/A3) stays a clean compare.
 import { renderMap, type RenderOptions } from "../../render/map-renderer.ts";
 import { buildPlaceManifest, type PlaceManifest } from "../../render/place-manifest.ts";
@@ -18,7 +18,7 @@ import type { MapType, UvWindow } from "../../terrain/heightfield.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 
 // The message contract between this client and ./worker.ts, shared so the two
-// sides cannot drift: worker.ts imports these shapes with "import type" (type
+// sides cannot drift: src/site/explorer/worker.ts imports these shapes with "import type" (type
 // only, so no runtime cycle). The same job/result shapes serve the inline
 // fallback, which is what keeps the worker/inline mirror honest at the type level.
 export interface DrawJob {
@@ -135,8 +135,9 @@ export function runInline(msg: RenderJob): JobResult {
     // #168: an EXPLICIT region branch. Without it a region job would fall through to
     // the atlas path below and silently run the wrong engine in the inline fallback.
     const { world, cached } = worldFor(msg.seed, msg.overrides);
-    // #169: derive the title from (world, window), mirroring worker.js exactly so the inline
-    // fallback stays byte-identical; msg.title (if given) is honored for back-compat.
+    // #169: derive the title from (world, window), mirroring src/site/explorer/worker.ts
+    // exactly so the inline fallback stays byte-identical; msg.title (if given) is honored
+    // for back-compat.
     const title = msg.title ?? regionTitle(world, msg.window);
     const region = generateRegionWorld(world, {
       window: msg.window,

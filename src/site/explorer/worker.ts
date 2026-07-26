@@ -1,10 +1,10 @@
-// Render worker: runs the CPU-heavy world generation + SVG rendering off the
-// main thread so the Explorer stays responsive. Memoized but deterministic — the
-// base world for a (seed, overrides) is resolved through worldFor (world-cache.js),
-// a single-entry cache, so a pan/zoom that re-surveys the SAME world (the Surveyor's
-// Glass, #168) skips regenerating it. Every job still carries its own seed +
-// overrides and the output is byte-identical to running the same engine on the main
-// thread (the cache changes nothing but the time to produce identical bytes).
+// Render worker: runs the CPU-heavy world generation + SVG rendering off the main thread so
+// the Explorer stays responsive. Memoized but deterministic — the base world for a (seed,
+// overrides) is resolved through worldFor (src/site/explorer/world-cache.ts), a
+// single-entry cache, so a pan/zoom that re-surveys the SAME world (the Surveyor's Glass,
+// #168) skips regenerating it. Every job still carries its own seed + overrides and the
+// output is byte-identical to running the same engine on the main thread (the cache changes
+// nothing but the time to produce identical bytes).
 import { renderMap } from "../../render/map-renderer.ts";
 import { buildPlaceManifest } from "../../render/place-manifest.ts";
 import { buildSurvey } from "../../render/survey.ts";
@@ -17,7 +17,7 @@ import type { WorkerRequest, WorkerResponse } from "./worker-client.ts";
 // This module runs inside a Worker, but the project tsconfig lib is DOM (no
 // WebWorker lib), so `self` types as Window here. Cast once to the minimal
 // worker-global surface this module uses; the message shapes are the shared
-// wire contract in worker-client.ts (imported type-only, so no runtime cycle).
+// wire contract in src/site/explorer/worker-client.ts (imported type-only, so no runtime cycle).
 const ctx = self as unknown as {
   onmessage: ((e: MessageEvent<WorkerRequest>) => void) | null;
   postMessage(msg: WorkerResponse): void;
@@ -38,10 +38,10 @@ ctx.onmessage = (e) => {
         // before ordering, so a hand-edited width can never ask for a tab-killing render.
         svg: renderMap(world, msg.render),
         manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
-        // #120: the world facts the client's voyage router walks (land mask + roads,
-        // grid space). Shipped on EVERY draw, because the voyage toggle enters voyage
-        // mode with no redraw, so the client must already hold them when the box is
-        // ticked. Mirrored in worker-client.js runInline; e2e A2 proves the two agree.
+        // #120: the world facts the client's voyage router walks (land mask + roads, grid
+        // space). Shipped on EVERY draw, because the voyage toggle enters voyage mode with
+        // no redraw, so the client must already hold them when the box is ticked. Mirrored
+        // in src/site/explorer/worker-client.ts runInline; e2e A2 proves the two agree.
         survey: buildSurvey(world.elev, world.seaLevel, world.roads),
         title: world.title.title,
         subtitle: world.title.subtitle,

@@ -1,18 +1,15 @@
 // The Surveyor's Glass, Sub 4 (#165): the camera <-> transform bridge. A shared,
-// bookmarkable link stores the camera as cx/cy/k, where cx/cy is the world-uv centre
-// of the viewport (fraction of the sheet, 0..1) and k is the continuous zoom. Storing
-// the CENTRE in uv (not the raw d3 translate in px) is what lets a deep link restore
-// the same FRAMING on any device: the translate depends on the viewport pixel size,
-// the uv centre does not.
-//
+// bookmarkable link stores the camera as cx/cy/k, where cx/cy is the world-uv centre of the
+// viewport (fraction of the sheet, 0..1) and k is the continuous zoom. Storing the CENTRE
+// in uv (not the raw d3 translate in px) is what lets a deep link restore the same FRAMING
+// on any device: the translate depends on the viewport pixel size, the uv centre does not.
 // These two functions are pure and DOM-free so they are unit-tested in isolation
-// (test/explorer/camera.test.ts); the live plumbing (reading location.hash, driving
-// the controller) lives in app.js / hash-sync.js and is proven by e2e suite-zoom.
-//
-// The sheet fills the viewport exactly at k=1, so the sheet's px extent IS the
-// viewport extent [0,W]x[0,H]; the d3 transform maps a sheet point p to screen as
-// screen = p*k + t. The viewport centre is (W/2, H/2), so the sheet point under it is
-// ((W/2 - x)/k, (H/2 - y)/k), and its uv is that over (W, H).
+// (test/explorer/camera.test.ts); the live plumbing (reading location.hash, driving the
+// controller) lives in src/site/explorer/app.ts / src/site/explorer/hash-sync.ts and is
+// proven by e2e suite-zoom. The sheet fills the viewport exactly at k=1, so the sheet's px
+// extent IS the viewport extent [0,W]x[0,H]; the d3 transform maps a sheet point p to
+// screen as screen = p*k + t. The viewport centre is (W/2, H/2), so the sheet point under
+// it is ((W/2 - x)/k, (H/2 - y)/k), and its uv is that over (W, H).
 
 export interface CameraTransform {
   x: number;

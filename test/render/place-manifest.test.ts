@@ -5,7 +5,8 @@ import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 
 // Unit tests for #52: the projected place manifest, the data layer the Living
 // Chart epic (#51) consumes. The projection MUST match renderMap exactly
-// (map-renderer.ts:87-88), so the expected pixel coords here are reconstructed by
+// (`createProjection` in `src/render/map-renderer.ts`), so the expected pixel
+// coords here are reconstructed by
 // hand from world.elev.w/h and Math.round(widthPx*0.045), independent of
 // createProjection, so a regression in either the manifest OR the projection
 // helper is caught (not the tautological nx*widthPx === proj.px(s.x)).
@@ -42,7 +43,8 @@ test("seat flags exactly the settlements in world.realms.seats", () => {
   m.places.forEach((p, i) => {
     assert.equal(p.seat, expected.has(i), `place ${i} (${p.name}) seat flag`);
   });
-  // realms.ts:116 seats the grand capital as realm 0, so the capital is a seat too;
+  // `selectSeats` in `src/society/realms.ts` seats the grand capital as realm 0,
+  // so the capital is a seat too;
   // the capital-over-seat precedence lives in placeRank, not here.
   const capital = m.places.find((p) => p.kind === "capital")!;
   assert.equal(capital.seat, true, "the grand capital is realm 0's seat");
