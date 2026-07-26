@@ -9,14 +9,14 @@ export async function run(ctx) {
   // #174 The surveyor's ink bleeds through. The verso ghost is a Blob of the worker's
   // chart STRING, so a client overlay (the track) has no path onto the back face. These
   // checks own the voyage x verso interaction: the track bleeds, the ship does not, and
-  // the flip never leaves a 12 second sweep running behind a hidden face.
+  // the flip never leaves a sweep (10-16s measured, #185) running behind a hidden face.
   //
   // Every read below is null-safe on purpose: a missing .verso-track must report a clean
   // FAIL, not throw inside evaluate() and surface as a HARNESS ERROR.
   const cntFn = `const cnt=(el)=>el&&el.getAttribute("points")?el.getAttribute("points").trim().split(" ").length:0;`;
 
   // W9: a flip mid-sweep SNAPS the voyage to its resting track, then turns. The button is
-  // never disabled by a running sweep (a 12s dead control reads as a bug). #121: the margin
+  // never disabled by a running sweep (a control dead for many seconds reads as a bug). #121: the margin
   // log accumulates (row 0 brightened as the sweep set out) while #status stays "" until
   // the snap posts the survey's single polite summary.
   const w9 = await evaluate(`(()=>{

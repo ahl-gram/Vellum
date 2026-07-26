@@ -18,8 +18,8 @@ import {
 
 // Unit tests for #54 (Chronicle year-scrubber): the pure core that the Explorer's
 // year-slider + Play sweep consume. The DOM wiring (slider, layer hide/restore,
-// rAF loop, redraw re-apply) lives in src/site/explorer/app.ts and is covered by the
-// Explorer e2e. Only the deterministic math is tested here.
+// rAF loop, redraw re-apply) lives in src/site/living-chart/chronicle.ts and is covered
+// by the Explorer e2e. Only the deterministic math is tested here.
 //
 // Two load-bearing behaviours:
 //  1. A ruined place is LIVING between its founding and its abandonment year, and

@@ -50,6 +50,17 @@ export function shouldTurn(s: TurnDecision): boolean {
   return !!(s.isTurn && !s.reduceMotion && s.usesWorker && s.hasChart && !s.chronicle && !s.flipped);
 }
 
+// #131: the turn's duration + easing come from /motion.css (the single timing source).
+// Read lazily so the stylesheet is applied, with the ratified fallback if a custom
+// property is unreadable (e.g. the stylesheet has not loaded yet). Lives beside the
+// turn it times (moved from app.ts at #191).
+export function turnTiming(): { ms: number; ease: string } {
+  const cs = getComputedStyle(document.documentElement);
+  const ms = parseFloat(cs.getPropertyValue("--turn")) || 900;
+  const ease = cs.getPropertyValue("--ease-turn").trim() || "cubic-bezier(0.62, 0, 0.34, 1)";
+  return { ms, ease };
+}
+
 // The single in-flight turn, or null. One turn at a time: runTurn cancels any prior
 // turn before starting, and every draw resolution cancels a leftover turn before it
 // touches #map, so a superseded turn can never orphan a sheet.
