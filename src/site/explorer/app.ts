@@ -1,74 +1,30 @@
-// Explorer UI conductor. Wires the controls to the render worker (via
-// worker-client.js), runs draw(), and keeps the URL hash in sync. The heavy
-// world-gen + SVG render runs off the main thread; the feature logic lives in
-// sibling modules (worker-client, living-chart, sea-level) and this file is the
-// glue: DOM refs, the draw race guard, the listener wiring, and the bootstrap.
-// Listeners attach here at module-eval time (module scripts are deferred, so the
-// DOM is parsed first). The bound atlas moved to the Print Room (#199); the
-// Explorer's own "Bind as atlas" was retired now that page owns it.
+// Explorer UI conductor. Wires the controls to the render worker (via worker-client),
+// runs draw(), and keeps the URL hash in sync. The heavy world-gen + SVG render runs
+// off the main thread; the animated machinery lives in the living-chart ENGINE
+// (src/site/living-chart/, host-agnostic since #191) and the Glass cluster (glass.ts),
+// and this file is the glue: DOM refs, the draw race guard, the ceremony arbitration
+// (turn vs settle vs flip, chronicle vs voyage), and the bootstrap. The plain control
+// plumbing is wired by controls.ts; the window.__vellum* seams by hooks.ts. Listeners
+// attach at module-eval time (module scripts are deferred, so the DOM is parsed first).
 import { runJob, runInline, usesWorker, initWorker } from "./worker-client.ts";
-import { shouldTurn, runTurn, cancelTurn } from "./sheet-turn.ts";
-import { toggleFlip, isFlipped, rebuildVerso } from "./verso.ts";
+import { shouldTurn, runTurn, cancelTurn, turnTiming } from "./sheet-turn.ts";
+import { toggleFlip, isFlipped, rebuildVerso, paintVersoTrack, clearVersoTrack } from "./verso.ts";
 import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts";
 import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
 import { startArrival } from "./draw-ceremony.ts";
-import { createZoomController, type ZoomState } from "../shared/zoom-controller.ts";
-import { createLodController } from "./lod-controller.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
-import { cameraFromTransform, transformFromCamera, type Camera } from "./camera.ts";
+import { createGlass } from "./glass.ts";
+import { wireControls } from "./controls.ts";
+import { installExplorerHooks } from "./hooks.ts";
+import { createLivingChart } from "../living-chart/index.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
-import {
-  buildPlaceOverlay,
-  applyScrub,
-  exitScrub,
-  clearScrub,
-  cancelScrubRaf,
-  pauseScrub,
-  togglePlay,
-  onManualScrub,
-  scrubSnapToPresent,
-  onDocKeydown,
-  onDocClick,
-} from "./living-chart.ts";
-import {
-  applyVoyage,
-  rearmVoyage,
-  exitVoyage,
-  clearVoyage,
-  cancelVoyageRaf,
-  voyageStepTo,
-  voyagePaintAt,
-  voyagePlan,
-  voyageLog,
-  voyageLegGeometry,
-  voyageSnapToRest,
-  syncVersoTrack,
-} from "./voyage.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
-
-// The window.__vellum* verification hooks assigned at the bottom of this file,
-// typed from what is assigned there.
-declare global {
-  interface Window {
-    __vellumSetRedraftEnabled?: (v: boolean) => void;
-    __vellumUsesWorker?: typeof usesWorker;
-    __vellumRunJob?: typeof runJob;
-    __vellumRunInline?: typeof runInline;
-    __vellumVoyageStepTo?: typeof voyageStepTo;
-    __vellumVoyagePaintAt?: typeof voyagePaintAt;
-    __vellumVoyagePlan?: typeof voyagePlan;
-    __vellumVoyageLog?: typeof voyageLog;
-    __vellumVoyageLegGeometry?: typeof voyageLegGeometry;
-    __vellumZoomTo: (t: ZoomState) => void;
-    __vellumZoomState: () => ZoomState;
-    __vellumRegion?: () => ReturnType<ReturnType<typeof createLodController>["state"]>;
-  }
-}
+import type { Camera } from "./camera.ts";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 const seedInput = $<HTMLInputElement>("seed");
@@ -91,10 +47,8 @@ const versoBtn = $<HTMLButtonElement>("verso-turn");
 const chronicleChk = $<HTMLInputElement>("chronicle");
 const voyageChk = $<HTMLInputElement>("voyage");
 const orderLink = $<HTMLAnchorElement>("order-plates"); // #133: "Take to the Print Room", href kept current in draw()
-const scrubPlayBtn = $("scrub-play");
-const scrubRangeEl = $("scrub-range");
 
-// #183: the controls readHash/writeHash (hash-sync.js) mirror to and from location.hash.
+// #183: the controls readHash/writeHash (hash-sync.ts) mirror to and from location.hash.
 const hashControls = { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider };
 
 let lastSvg = "";
@@ -107,18 +61,9 @@ let lastManifest: PlaceManifest | null = null; // the place manifest of the char
 // survey would route this world's ports over that world's roads.
 let lastSurvey: Survey | null = null;
 
-// Sea-level slider (#55) gate. landTouched gates the manual override and the land=
-// hash param; until the user moves the slider, it auto-tracks each world's natural
-// waterline. landDebounce throttles the redraw during a drag.
-let landTouched = false;
-let landDebounce: ReturnType<typeof setTimeout> | 0 = 0;
-
-// #137: the coast slider's gate, sibling of landTouched. False until the visitor
-// moves the slider; until then draw() sends no coastWarp override and re-parks the
-// slider at the natural 0.55, so an untouched draw is byte-identical to today. There
-// is deliberately NO coast debounce (unlike landDebounce): every coastWarp is a
-// different ~0.6s world, so the slider redraws on release only, not mid-drag.
-let coastTouched = false;
+// #55/#137: the slider gates, shared BY REFERENCE with controls.ts (its handlers set
+// them, draw()/syncHash read them). Until touched, a draw is the natural world.
+const touched = { land: false, coast: false };
 
 // #165: a deep link's camera (cx/cy/k), stashed at bootstrap and applied ONCE, on the
 // first chart to land (the viewport must exist to convert uv -> transform). Strictly
@@ -136,104 +81,31 @@ let drawGen = 0;
 // `.disabled` for the whole draw round-trip, so this only makes that guard explicit.
 let drawing = false;
 
-function randomSeed(): number {
-  return Math.floor(Math.random() * 0xffffffff);
-}
-
 function prefersReduce(): boolean {
   return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 }
 
-// #131: the sheet turn's duration + easing come from /motion.css (the single timing
-// source). Read lazily so the stylesheet is applied, with the ratified fallback if a
-// custom property is unreadable (e.g. the stylesheet has not loaded yet).
-function turnTiming(): { ms: number; ease: string } {
-  const cs = getComputedStyle(document.documentElement);
-  const ms = parseFloat(cs.getPropertyValue("--turn")) || 900;
-  const ease = cs.getPropertyValue("--ease-turn").trim() || "cubic-bezier(0.62, 0, 0.34, 1)";
-  return { ms, ease };
-}
-
-// #170: the voiced glide's duration, same single-timing-source discipline (lazy, with
-// the token's own value as fallback). The controller reads it per glide, so a stylesheet
-// tweak takes effect without a reload; reduced motion never reaches it.
-function glideMs(): number {
-  const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide"));
-  return Number.isFinite(v) ? v : 300;
-}
-
-// #164 The Surveyor's Glass: geometric pan/zoom on the antique chart. The controller
-// binds to the STABLE #map-viewport (never wiped by a redraw) and lands its live CSS
-// transform on #map, so the chart SVG and its %-positioned overlays (place hits, cards,
-// voyage track) ride one composited frame with no redraw. Antique-only in this sub:
-// syncZoom() (called on every draw resolve, both the settle and the turn landing)
-// attaches the gestures on antique and snaps home + detaches on any other style, so a
-// non-antique chart is never left magnified. There is deliberately NO snap-home on a
-// same-style redraw yet -- a redraw while zoomed stays zoomed; the camera-home policy
-// for world-changing actions is Sub 4's (#165).
-// #164: publish the current zoom k onto the place card (a LEAF, sibling of the chart
-// svg) so the card counter-scales to a constant, readable size. It is written to the
-// CARD, never to #map: a per-frame non-transform style write on #map re-rasterizes the
-// baked SVG labels and makes them jiggle (only #map's `transform` may change per frame).
-function setCardZoom(k: number): void {
-  const card = document.getElementById("place-card");
-  if (!card) return;
-  if (k === 1) card.style.removeProperty("--zoom-k");
-  else card.style.setProperty("--zoom-k", String(k));
-}
-// #165: the camera is bookmarkable. On settle (a gesture, a keyboard step, or an on-screen
-// button coming to rest) the current frame is mirrored into the hash as cx/cy/k; at home
-// (k=1) those params are dropped, so a home view links clean. reducedMotion is left unset so
-// the controller reads the OS setting LIVE (see zoom-controller.js), which is both more
-// correct and what lets the e2e prove AC5's collapse.
-const zoomController = createZoomController({
-  viewportEl: mapViewport,
-  targetEl: mapDiv,
-  scaleExtent: [1, 8],
-  onApply: (state) => setCardZoom(state.k),
-  onSettle: () => onCameraSettle(), // #169: hash + (on antique) the region redraft
-  glideMs, // #170: the voiced glide's /motion.css grade, read live
-});
-// #169 The redraft: a camera settle on the antique chart draws a finer regional survey of the
-// window, committed as an INSET laid over the world sheet (the camera never rebases; a zoom-out
-// just fades the inset away over the world chart that was around it all along). The controller
-// owns the band/window state, the worker dispatch, and the inset mount/crossfade; app.js hands
-// it the pieces and gates it (see regionEligible) so a geometric zoom on any other style still
-// only writes the hash.
-const lodController = createLodController({
-  mapDiv,
-  runJob,
-  // Every controller path (commit, revert, homeToWorld) rebuilds the overlay, which creates
-  // a FRESH #place-card -- and none of those paths touches the camera, so nothing else would
-  // re-publish the zoom onto it. Re-publish here (the draw paths get the same via syncZoom)
-  // or a card shown after a redraft renders k-times too large.
-  buildPlaceOverlay: (manifest, opts) => {
-    buildPlaceOverlay(manifest, opts);
-    setCardZoom(zoomController.getState().k);
+// The living-chart engine (#191): cards + chronicle + voyage behind one host-agnostic
+// boundary. This conductor is the Explorer host: it hands its elements in, and mirrors
+// the resting voyage track onto the verso back face (#174) through the sink.
+const lc = createLivingChart({
+  mapEl: mapDiv,
+  statusEl: status,
+  scrubber: {
+    panel: $("scrubber"),
+    playBtn: $<HTMLButtonElement>("scrub-play"),
+    range: $<HTMLInputElement>("scrub-range"),
+    year: $("scrub-year"),
+    strip: $("chronicle-strip"),
   },
-  setCaption: (t) => { caption.textContent = t; },
-  getZoomK: () => zoomController.getState().k,
-  prefersReduce,
+  voyageLog: { panel: $("voyage-log"), sig: $("voyage-log-sig"), strip: $("voyage-log-strip") },
+  restingTrackSink: {
+    paint: (points, viewBox) => paintVersoTrack(versoEl, points, viewBox),
+    clear: () => clearVersoTrack(versoEl),
+  },
 });
-// #165/#169: the camera the controller is framing -- sheet fractions of the WORLD sheet at
-// every band (the inset design never rebases) -- read from the STABLE #map-viewport (its
-// client box is the sheet's size at k=1). Guard a zero-size box (before first layout) so the
-// division is finite.
-function cameraNow(): Camera {
-  const W = mapViewport.clientWidth || 1;
-  const H = mapViewport.clientHeight || 1;
-  return cameraFromTransform(zoomController.getState(), W, H);
-}
-// #165/#169: the ONE hash writer. Every trigger funnels through here so the hash carries the
-// complete current state, camera included. The camera is world-relative at every band, so it
-// writes straight into the hash; writeHash drops cx/cy/k when the camera is home.
-function syncHash(): void {
-  writeHash(hashControls, landTouched, coastTouched, cameraNow());
-}
-// #169: a test seam, ON by default (production). It lets the geometric-zoom e2e (Z1-Z16,
-// Sub 3-4) isolate the geometric layer from the semantic redraft this sub adds on top of it;
-// those suites toggle it off, and the Sub 8 suite (Z17-Z20) toggles it back on. Runtime only:
-// the Explorer never persists or reads it, so production is unaffected.
+
+// #169: the redraft test seam, ON by default (production); hooks.ts exposes the setter.
 let redraftEnabled = true;
 // #169: whether a settle should redraft. Semantic LOD is antique-only (the epic's ratified
 // decision); geometric zoom on the other three styles just writes the hash. Off while the
@@ -244,21 +116,24 @@ let redraftEnabled = true;
 function regionEligible(): boolean {
   return redraftEnabled && styleSel.value === "antique" && !chronicleChk.checked && !voyageChk.checked && !isFlipped(sheetEl) && !!lastSvg;
 }
-function onCameraSettle(): void {
-  syncHash();
-  if (regionEligible()) lodController.onSettle(cameraNow());
+// #165/#169: the ONE hash writer. Every trigger funnels through here so the hash carries
+// the complete current state, camera included. The camera is world-relative at every band,
+// so it writes straight into the hash; writeHash drops cx/cy/k when the camera is home.
+function syncHash(): void {
+  writeHash(hashControls, touched.land, touched.coast, glass.cameraNow());
 }
-window.__vellumSetRedraftEnabled = (v) => { redraftEnabled = !!v; };
-// #165: geometric pan/zoom now belongs to ALL FOUR styles (the epic's ratified decision;
-// semantic LOD stays antique-only, but that is Sub 8, not here). So the controller attaches
-// unconditionally; the reset-home-on-world-change policy lives in draw()/the verso + chronicle
-// handlers, not here, so there is no longer a style branch that could strand a magnified sheet.
-function syncZoom(): void {
-  zoomController.attach();
-  // The overlay (and #place-card) was just rebuilt by this draw; re-publish the current
-  // zoom onto the fresh card so a card shown before the next gesture is counter-scaled.
-  setCardZoom(zoomController.getState().k);
-}
+
+const glass = createGlass({
+  mapViewport,
+  mapDiv,
+  runJob,
+  buildPlaceOverlay: lc.buildPlaceOverlay,
+  setCaption: (t) => { caption.textContent = t; },
+  prefersReduce,
+  regionEligible,
+  syncHash,
+  buttons: { zoomIn: $("zoom-in"), zoomOut: $("zoom-out"), reset: $("zoom-reset"), cluster: $("zoom-controls") },
+});
 
 // opts.quiet suppresses the arrival ceremony, used only by the sea-level drag's
 // throttled mid-drag redraws, so the coastline does not perpetually redraw itself
@@ -280,11 +155,11 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
   // replaced: it drops the transform to home with no spurious settle, so this draw's own
   // syncHash below is the authoritative hash write (home => cx/cy/k dropped). Sea-level and
   // coast drags run through draw(), so they are covered here for free.
-  zoomController.rebase();
-  lodController.cancel(); // #169: drop any in-flight redraft; a fresh world is being drawn
+  glass.rebase();
+  glass.cancelRedraft(); // #169: drop any in-flight redraft; a fresh world is being drawn
   drawing = true;
-  cancelScrubRaf(); // a redraw is about to wipe the overlay; stop any running sweep
-  cancelVoyageRaf(); // #119: likewise stop a running voyage sweep before the wipe
+  lc.cancelScrubRaf(); // a redraw is about to wipe the overlay; stop any running sweep
+  lc.cancelVoyageRaf(); // #119: likewise stop a running voyage sweep before the wipe
   versoBtn.disabled = true; // #116: no flip mid-draw; re-enabled when the draw resolves
   status.textContent = "Drafting…";
   caption.textContent = "";
@@ -296,13 +171,13 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
   const overrides: { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number } = {};
   if (typeSel.value) overrides.mapType = typeSel.value as MapType;
   if (bandSel.value) overrides.band = bandSel.value as ClimateBand;
-  if (landTouched) overrides.landFraction = sliderToLand(landSlider.value);
+  if (touched.land) overrides.landFraction = sliderToLand(landSlider.value);
   else syncAutoSlider(seed, overrides);
   updateLandReadout();
   // #137: coast warp is additive and independent of the waterline. Touched sends the
   // override; untouched re-parks the slider at the natural 0.55 (mirroring
   // syncAutoSlider), so the slider position always matches the world on screen.
-  if (coastTouched) overrides.coastWarp = sliderToCoast(coastSlider.value);
+  if (touched.coast) overrides.coastWarp = sliderToCoast(coastSlider.value);
   else parkCoastDefault();
   updateCoastReadout();
   const style = styleSel.value as StyleName;
@@ -347,16 +222,16 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         const t = turnTiming();
         runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => {
           if (myGen !== drawGen) return; // superseded while turning; the latest draw owns #map
-          buildPlaceOverlay(res.manifest);
-          if (chronicleChk.checked) applyScrub();
-          else clearScrub();
+          lc.buildPlaceOverlay(res.manifest);
+          if (chronicleChk.checked) lc.applyScrub();
+          else lc.clearScrub();
           // #119: re-arm the voyage to the new chart, resting on the full track (only
           // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
-          if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
-          else clearVoyage();
-          syncZoom(); // #164/#165: attach the zoom to the just-landed chart (every style now)
+          if (voyageChk.checked) lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
+          else lc.clearVoyage();
+          glass.syncZoom(); // #164/#165: attach the zoom to the just-landed chart (every style)
           // #169: record the (re-dressed) world sheet so a settle can redraft over it.
-          lodController.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
+          glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
         });
       } else {
         // Settle (#127): inject the chart and run the arrival ceremony (unless this is
@@ -364,32 +239,32 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         // flipped, this updates the hidden recto beneath the verso (the ceremony runs
         // out of sight); the visible verso is refreshed by rebuildVerso below.
         mapDiv.innerHTML = res.svg;
-        buildPlaceOverlay(res.manifest); // #53: marks + card, appended after innerHTML wipes #map
+        lc.buildPlaceOverlay(res.manifest); // #53: marks + card, appended after innerHTML wipes #map
         if (!quiet) startArrival(mapDiv.querySelector("svg")); // #127: the arrival ceremony
         // #54: if the chronicle toggle is on, re-apply the scrubber to THIS new world
         // (fresh manifest, range, layers); applyScrub hides the just-rendered layers
         // synchronously, so there is no flash of the present-day chart.
-        if (chronicleChk.checked) applyScrub();
-        else clearScrub();
+        if (chronicleChk.checked) lc.applyScrub();
+        else lc.clearScrub();
         // #119: re-arm the voyage to the new chart, resting on the full track (only
         // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
         // #174: `quiet` rides along so a mid-drag re-arm leaves the back face alone; the
         // verso's ghost and its track must always come from the same draw.
         // #120: re-arm from THIS draw's survey, never lastSurvey. A sea-level drag moves the
         // waterline, so the roads and open water the router walks moved with it.
-        if (voyageChk.checked) rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
-        else clearVoyage();
-        syncZoom(); // #164/#165: attach the zoom to the just-drawn chart (every style now)
+        if (voyageChk.checked) lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
+        else lc.clearVoyage();
+        glass.syncZoom(); // #164/#165: attach the zoom to the just-drawn chart (every style)
         // #169: record this world sheet BEFORE a deep-link camera is applied, so the settle
         // that camera triggers can redraft a region over the SAME base world (cache hit).
-        lodController.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
+        glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
         // #165: restore a deep link's camera once the first chart (and so the viewport) is
-        // up. One-shot: consumed and nulled so no later Draw re-frames. zoomTo clamps, so a
-        // centre that would pull an edge past the viewport at that zoom is pinned in bounds.
+        // up. One-shot: consumed and nulled so no later Draw re-frames. applyCamera clamps,
+        // so a centre that would pull an edge past the viewport at that zoom stays in bounds.
         if (pendingCamera) {
           const cam = pendingCamera;
           pendingCamera = null;
-          zoomController.zoomTo(transformFromCamera(cam, mapViewport.clientWidth, mapViewport.clientHeight));
+          glass.applyCamera(cam);
         }
       }
       // #116: refresh the back face for the chart just drawn. Skipped on quiet mid-
@@ -397,7 +272,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       // invisible verso Blob every frame; the release's non-quiet draw rebuilds it.
       // #174: renderVerso's replaceChildren WIPES the verso's voyage track, exactly as
       // mapDiv.innerHTML wipes the recto overlay above, so repaint it on the far side of
-      // the wipe. syncVersoTrack is silent (safe inside this settle) and a no-op with no
+      // the wipe. syncRestingTrack is silent (safe inside this settle) and a no-op with no
       // voyage. In the settle path the voyage was re-armed just above, so it paints the new
       // world. In the TURN path the re-arm is still ~900ms out, so this paints the outgoing
       // session: harmless, because only styleSel turns and a style turn re-dresses the SAME
@@ -405,7 +280,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       // Both invariants (turn => same world, turn => never flipped) are pinned by e2e W16.
       if (!quiet) {
         rebuildVerso(versoEl, res, seed);
-        syncVersoTrack();
+        lc.syncRestingTrack();
       }
     })
     .catch((err) => {
@@ -416,34 +291,25 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       // A redraw that fails leaves the OLD overlay in place; if a sweep was running,
       // its rAF was already cancelled at draw() start, so restore the button to a
       // consistent paused state rather than a frozen "Pause" with nothing animating.
-      pauseScrub();
+      lc.pauseScrub();
       status.textContent = "The cartographer spilled the ink: " + err.message;
     });
 }
 
-$("draw").addEventListener("click", draw as unknown as EventListener);
-$("random").addEventListener("click", () => {
-  seedInput.value = String(randomSeed());
-  landTouched = false;
-  coastTouched = false; // #137: a fresh world starts from its natural coastline
-  draw();
+// The plain control plumbing (Draw/random/Download, seed Enter, selects, sliders, the
+// scrubber's Play + range, the doc-level card dismiss) lives in controls.ts; this
+// conductor keeps the handlers that arbitrate ceremonies below.
+wireControls({
+  seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider,
+  drawBtn: $("draw"), randomBtn: $("random"), downloadBtn: $("download"),
+  scrubPlayBtn: $("scrub-play"), scrubRangeEl: $("scrub-range"),
+  touched, draw,
+  committedRegion: () => glass.committedRegion(),
+  lastChart: () => ({ svg: lastSvg, title: lastTitle }),
+  togglePlay: lc.togglePlay, onManualScrub: lc.onManualScrub,
+  onDocKeydown: lc.onDocKeydown, onDocClick: lc.onDocClick,
 });
-$("download").addEventListener("click", () => {
-  // #169 "Download saves what you see": while a region sheet is committed, save THAT stamped
-  // sheet (its filename gains the band); at the world sheet, save the world chart as before.
-  const region = lodController.committedRegion();
-  const svg = region ? region.svg : lastSvg;
-  if (!svg) return;
-  const blob = new Blob([svg], { type: "image/svg+xml" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  const slug = (region ? region.title : lastTitle).toLowerCase().replace(/[^a-z0-9]+/g, "-");
-  a.download = region
-    ? `vellum-${seedInput.value}-${styleSel.value}-band${region.band}-${slug}.svg`
-    : `vellum-${seedInput.value}-${styleSel.value}-${slug}.svg`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-});
+
 // #116: turn the sheet over to read its back, or turn it back. Guarded so the flip
 // never starts mid-draw (the verso is being rebuilt) or mid-#131-turn (the turn owns
 // #sheet-inner's rotateY); the button is also disabled for the whole draw round-trip.
@@ -455,206 +321,70 @@ versoBtn.addEventListener("click", () => {
   // the SAME chart stays, we only re-home it. syncHash writes the now-home hash EXPLICITLY
   // rather than trusting reset()'s debounced settle, so a link copied right after the flip
   // never carries a stale cx/cy/k. reset() is a no-op when already home (turning back).
-  lodController.homeToWorld(); // #169: drop a committed region inset before the flip
-  zoomController.reset();
+  glass.homeToWorld(); // #169: drop a committed region inset before the flip
+  glass.reset();
   syncHash();
-  // #174: interaction interrupts the animation. A running 12s sweep is snapped to its
-  // resting track (on both faces) before the sheet turns, so the back never shows a
-  // half-drawn survey and no rAF loop narrates into #status behind a hidden face. The
-  // button is deliberately NOT disabled for the sweep's duration: the existing
-  // disable-during-draw covers a sub-second round trip, and a control that goes dead for
-  // 12 seconds with no stated reason reads as a bug. No-op when not voyaging.
+  // #174: interaction interrupts the animation. A running sweep (10-16s measured, #185)
+  // is snapped to its resting track (on both faces) before the sheet turns, so the back
+  // never shows a half-drawn survey and no rAF loop narrates into #status behind a
+  // hidden face. The button is deliberately NOT disabled for the sweep: a control that
+  // goes dead for many seconds with no stated reason reads as a bug.
   // #180: the chronicle scrubber is the same class as the voyage track. It mutates the
   // baked recto (per-glyph display) that the <img> ghost cannot mirror, so instead of
   // painting the back face we snap the scrubber to the present before turning: the parked
   // recto then IS the chart the pristine ghost holds, so the two faces agree by construction.
   // Both snaps no-op when their feature is off, and chronicle and voyage are mutually
   // exclusive, so at most one fires.
-  voyageSnapToRest();
-  scrubSnapToPresent();
+  lc.voyageSnapToRest();
+  lc.scrubSnapToPresent();
   const flipped = toggleFlip(sheetEl);
   versoBtn.textContent = flipped ? "Turn back" : "Turn the sheet";
 });
-seedInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    landTouched = false;
-    coastTouched = false; // #137: a new seed starts from its natural coastline
-    draw();
-  }
-});
-for (const sel of [bandSel, themeSel, legendChk, armsChk]) {
-  sel.addEventListener("change", draw as unknown as EventListener);
-}
-// #131: a style change re-dresses the SAME world, so it turns the sheet over rather
-// than settling. Every other control draws a new/changed world and settles (#127).
-styleSel.addEventListener("change", () => draw({ turn: true }));
-// Changing the map type reshapes the terrain, so a manual tide (and warp) no longer
-// applies: reset both to auto so the sliders re-derive from the new world.
-typeSel.addEventListener("change", () => {
-  landTouched = false;
-  coastTouched = false; // #137: a reshaped world starts from its natural coastline
-  draw();
-});
-// Drag: live readout + debounced redraw on input, an authoritative redraw on
-// release. Both bump drawGen, so a stale in-flight frame is discarded.
-landSlider.addEventListener("input", () => {
-  landTouched = true;
-  updateLandReadout();
-  clearTimeout(landDebounce);
-  // #127: the mid-drag redraws are quiet (no arrival ceremony); the release (change)
-  // handler below runs the full ceremony once the tide settles.
-  landDebounce = setTimeout(() => draw({ quiet: true }), 100);
-});
-landSlider.addEventListener("change", () => {
-  landTouched = true;
-  clearTimeout(landDebounce);
-  draw();
-});
-// #137: the coast slider. Unlike sea-level (which debounces a QUIET mid-drag redraw
-// because re-leveling reuses the SAME terrain), every coastWarp value is a different
-// ~0.6s world, so this updates the readout live on input but redraws only on release
-// (change). Both set coastTouched so the override + the coast= hash param take effect.
-coastSlider.addEventListener("input", () => {
-  coastTouched = true;
-  updateCoastReadout();
-});
-coastSlider.addEventListener("change", () => {
-  coastTouched = true;
-  draw();
-});
 
 // Chronicle scrubber (#54): the toggle enters/leaves scrub mode without a redraw
-// (no re-roll); Play/Pause runs the event-proportional sweep; a manual drag pauses
-// Play and rebases it so the next Play restarts from the beginning.
+// (no re-roll). A manual drag pauses Play; both live in controls.ts wiring.
 chronicleChk.addEventListener("change", () => {
   if (chronicleChk.checked) {
     // #165 reset policy: entering the chronicle snaps the camera home first (zoom and the
     // scrubber are mutually exclusive per the epic; the scrub reveals baked layers on the
     // home sheet). Explicit syncHash for the same reason as the verso flip: drop cx/cy/k
     // now, not on a debounced settle. Leaving the chronicle needs no reset (already home).
-    // #169: the scrubber drives the WORLD chart's baked layers (a region carries no chronicle),
-    // so drop a committed region inset first.
-    lodController.homeToWorld();
-    zoomController.reset();
+    // #169: the scrubber drives the WORLD chart's baked layers (a region carries no
+    // chronicle), so drop a committed region inset first.
+    glass.homeToWorld();
+    glass.reset();
     syncHash();
     // #119: chronicle and voyage are mutually exclusive; entering one leaves the other.
-    if (voyageChk.checked) { voyageChk.checked = false; exitVoyage(); }
-    applyScrub();
-  } else exitScrub();
+    if (voyageChk.checked) { voyageChk.checked = false; lc.exitVoyage(); }
+    lc.applyScrub();
+  } else lc.exitScrub();
 });
-scrubPlayBtn.addEventListener("click", togglePlay);
-scrubRangeEl.addEventListener("input", onManualScrub);
 
 // #119 The Wayfarer's Passage: the toggle enters/leaves voyage mode without a redraw
 // (no re-roll), animating the survey track over the current world; it is mutually
 // exclusive with the chronicle scrubber (both own the same overlay substrate).
 voyageChk.addEventListener("change", () => {
   if (voyageChk.checked) {
-    if (chronicleChk.checked) { chronicleChk.checked = false; exitScrub(); }
+    if (chronicleChk.checked) { chronicleChk.checked = false; lc.exitScrub(); }
     // #169: the voyage narrates the WORLD survey (lastManifest/lastSurvey), so a committed
     // region inset must drop first or the world-scale track would paint over the finer sheet.
     // Unlike the chronicle, the camera is NOT reset: voyage + geometric zoom were always
     // compatible, and regionEligible above keeps the sheet geometric while the voyage is on.
-    lodController.homeToWorld();
+    glass.homeToWorld();
     // #174: the sweep is a recto ceremony. Ticking voyage while the sheet rests on its
     // verso paints the resting track on both faces and skips the animation, following the
     // precedent above where a style change while flipped rebuilds in place rather than
     // turning. The checkbox is never disabled while flipped, for the same reason the Turn
     // button is never disabled by a sweep.
-    applyVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle, { skipSweep: isFlipped(sheetEl) });
-  } else exitVoyage();
+    lc.applyVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle, { skipSweep: isFlipped(sheetEl) });
+  } else lc.exitVoyage();
 });
-
-// #165 The Surveyor's Glass, keyboard + on-screen driving. The keys and the buttons both
-// route through the controller, which drives d3-zoom's own entry points -- so a keystroke
-// enters the EXACT same "zoom" event pipeline as a gesture (one clamp, one settle, one hash
-// write), satisfying the a11y hard requirement that keyboard-only reaches full zoom. A step
-// magnifies by 1.4x about the viewport centre; an arrow pans by ~15% of the viewport.
-// #170: the zoom steps and the home now GLIDE (glideBy/glideHome, the voiced ceremony);
-// reduced motion collapses both to the Sub 4 instant baseline inside the controller. The
-// pan arrows stay instant on purpose (the accessible pan baseline; the issue scopes the
-// glide to +/- and the home).
-const ZOOM_STEP = 1.4;
-const PAN_FRACTION = 0.15;
-
-// #170: the voiced home, shared by the full-sheet button and the 0 key. A committed inset
-// FADES off over the world chart (easeHome) while the camera glides home; the hash writes
-// at the landing (glideHome's onDone), never mid-flight, so a link copied right after the
-// leaf settles is clean. The programmatic homes (verso, chronicle, voyage, draw) keep
-// their INSTANT homeToWorld() + reset() + explicit syncHash: those ceremonies own the
-// sheet and need the bare world chart synchronously.
-function goHomeVoiced(): void {
-  lodController.easeHome();
-  zoomController.glideHome(syncHash);
-}
-// The map viewport is focusable (tabindex in the HTML), so a keyboard user tabs onto the
-// sheet and pans/zooms it. Scoped to the viewport (not document) so the arrows do not hijack
-// the page scroll from elsewhere; preventDefault only for keys we consume, so Escape et al
-// still bubble to the document (card dismiss). "0" homes the camera.
-mapViewport.addEventListener("keydown", (e) => {
-  if (e.altKey || e.ctrlKey || e.metaKey) return; // leave browser/OS chords alone
-  const W = mapViewport.clientWidth;
-  const H = mapViewport.clientHeight;
-  switch (e.key) {
-    case "+": case "=": zoomController.glideBy(ZOOM_STEP); break;
-    case "-": case "_": zoomController.glideBy(1 / ZOOM_STEP); break;
-    // Arrow moves the camera the way it points: ArrowRight reveals what lies to the right,
-    // so the content slides left, i.e. the screen translate decreases. panBy takes a screen
-    // delta, so the sign is applied here and the controller stays direction-agnostic.
-    case "ArrowLeft": zoomController.panBy(W * PAN_FRACTION, 0); break;
-    case "ArrowRight": zoomController.panBy(-W * PAN_FRACTION, 0); break;
-    case "ArrowUp": zoomController.panBy(0, H * PAN_FRACTION); break;
-    case "ArrowDown": zoomController.panBy(0, -H * PAN_FRACTION); break;
-    case "0": goHomeVoiced(); break; // #170: the full sheet, voiced
-    default: return; // not ours: let it through (browse mode, card Escape, tabbing)
-  }
-  e.preventDefault();
-});
-// The on-screen stand-back / full-sheet / lean-closer cluster (#165, voiced in #170). Same
-// controller entry points as the keys: the steps glide, the home glides and writes the
-// hash at the landing.
-$("zoom-in").addEventListener("click", () => zoomController.glideBy(ZOOM_STEP));
-$("zoom-out").addEventListener("click", () => zoomController.glideBy(1 / ZOOM_STEP));
-$("zoom-reset").addEventListener("click", goHomeVoiced);
-// The cluster sits INSIDE #map-viewport, the element d3-zoom binds its gesture listeners to.
-// So a gesture over a button bubbles into d3: most visibly, a rapid double-click on a button
-// fires a `dblclick` that d3 turns into its own double-click-to-zoom (a 2x magnify about the
-// pointer, i.e. the button corner), lurching the map on its own. Stop d3's gesture events at
-// the cluster so ONLY the buttons' click handlers act. The chart's own double-click-to-zoom
-// (a dblclick on the viewport, not a button) is unaffected, and click never propagates here
-// so the handlers above still fire.
-const zoomControlsEl = $("zoom-controls");
-for (const type of ["mousedown", "dblclick", "wheel", "touchstart"]) {
-  zoomControlsEl.addEventListener(type, (e) => e.stopPropagation());
-}
-
-// Living Chart overlay (#53): dismiss a pinned card with Escape or a click/tap off
-// any mark. Added once; both read living-chart's current overlay so they stay
-// correct across redraws.
-document.addEventListener("keydown", onDocKeydown);
-document.addEventListener("click", onDocClick);
 
 await initWorker();
-window.__vellumUsesWorker = usesWorker;
-// Verification hooks for the headless byte-identity check (harmless in prod).
-window.__vellumRunJob = runJob;
-window.__vellumRunInline = runInline;
-// #119: deterministic voyage hooks for the e2e (drive the sweep by port, read the plan).
-window.__vellumVoyageStepTo = voyageStepTo;
-// #120: voyageStepTo can only land ON a port (legT = 0), so it can never sample a MID-leg
-// frame, which is exactly where the tilt varies and where a switchbacking road would
-// flicker the rider's facing.
-window.__vellumVoyagePaintAt = voyagePaintAt;
-window.__vellumVoyagePlan = voyagePlan;
-window.__vellumVoyageLog = voyageLog; // #121: the margin log (entries, summary, reveal state)
-window.__vellumVoyageLegGeometry = voyageLegGeometry; // #120: projected leg points, for W20b
-// #164: deterministic zoom hooks for the e2e (Z1-Z4). zoomTo drives the camera through
-// the same clamp a live gesture uses; zoomState reads back the settled {x,y,k}.
-window.__vellumZoomTo = (t) => zoomController.zoomTo(t);
-window.__vellumZoomState = () => zoomController.getState();
-// #169: the committed region state for the e2e (Z17-Z20): band, world-uv window, derived
-// title, and a monotonic redraft counter (proves one-job-per-settle + last-wins, no timing).
-window.__vellumRegion = () => lodController.state();
+installExplorerHooks({
+  livingChart: lc, glass, usesWorker, runJob, runInline,
+  setRedraftEnabled: (v) => { redraftEnabled = !!v; },
+});
 
 // A bare visit (no seed in the hash) lands on today's seed-of-the-day (UTC), the same
 // default world the Print Room and the Today page use. readHash overrides it only when
@@ -662,8 +392,8 @@ window.__vellumRegion = () => lodController.state();
 // this default down to seed 0).
 seedInput.value = String(seedForDate(new Date()));
 const hashed = readHash(hashControls);
-if (hashed.land) landTouched = true;
-if (hashed.coast) coastTouched = true; // #137: a shared coast= link opens warped
+if (hashed.land) touched.land = true;
+if (hashed.coast) touched.coast = true; // #137: a shared coast= link opens warped
 // #165: stash a deep link's camera BEFORE draw() (draw's own syncHash rewrites the hash to
 // home, so it must be read first). It is applied once the first chart lands (settle branch).
 pendingCamera = hashed.camera;

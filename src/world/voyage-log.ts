@@ -19,7 +19,7 @@ import type { LegMode } from "../render/voyage-route.ts";
  * full ride-sail-ride instead, in the ratified three-part shape. The plan's leg
  * geometry is untouched (that is #118/#120 territory); only the prose lives here.
  *
- * The scrollable panel + the reveal-per-arrival wiring live in src/site/explorer/voyage.ts
+ * The scrollable panel + the reveal-per-arrival wiring live in src/site/living-chart/voyage.ts
  * and are covered by the Explorer e2e. Only this deterministic prose is unit-tested.
  */
 
