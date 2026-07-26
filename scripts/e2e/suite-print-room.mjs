@@ -3,7 +3,7 @@
 // (#134), PR17-PR19 the client-side PNG rasterizer (#135).
 // A sixth hand-authored page that reuses the Explorer's render worker from a DIFFERENT
 // directory, so the checks below are the tripwire for the cross-directory worker-spawn
-// trap: `new Worker("./worker.js")` would resolve against /print-room/ and 404 into a
+// trap: a bare `new Worker("./worker.ts")` would resolve against /print-room/ and 404 into a
 // silent inline fallback. PR1 (worker active) and PR7 (no new 4xx) catch exactly that.
 //
 // Self-contained like the Daily Hunt suite: it navigates to its own page after the
@@ -40,7 +40,7 @@ export async function run(ctx) {
   // Scope the health deltas to the Print Room page only: capture AFTER the navigation
   // above so the Explorer/seed-of-the-day loads before it are not charged to PR6/PR7.
   // The worker + engine + asset requests for THIS load fire after navigate() resolves,
-  // so they are still inside the window (a /print-room/worker.js 404 still trips PR7).
+  // so they are still inside the window (a /print-room/worker.bundle.js 404 still trips PR7).
   const prErrBase = consoleErrors.length;
   const prHttpBase = http4xx.length;
 
@@ -298,14 +298,15 @@ export async function run(ctx) {
   // Capture the redesigned layout with the atlas bound below the proof (order desk on top).
   await shoot("print-room-bound.png");
 
-  // PR20b the shared plate hover-lift (moved from the Explorer's retired D5, #199). The bound
-  // plates react to the hand like the homepage chart plates (#146) but rest FLAT so the grid
-  // stays crisp. The lift lives in the shared ATLAS_SHEET_CSS (src/atlas/document.ts, scoped
-  // .atlas-sheet), injected here by bound-atlas.js; #pr-atlas carries .atlas-sheet, so the rule
-  // governs these plates. e2e cannot emulate :hover, so this asserts the gesture is WIRED: a
-  // paper-timed transform transition on the image, the image resting with no transform, and a
-  // :hover rule with a transform actually in the stylesheet (so the check bites the lift, not
-  // just the plumbing). Read on screen media, before PR21 emulates print.
+  // PR20b the shared plate hover-lift (moved from the Explorer's retired D5, #199). The
+  // bound plates react to the hand like the homepage chart plates (#146) but rest FLAT so
+  // the grid stays crisp. The lift lives in the shared ATLAS_SHEET_CSS
+  // (src/atlas/document.ts, scoped .atlas-sheet), injected here by
+  // src/site/print-room/bound-atlas.ts; #pr-atlas carries .atlas-sheet, so the rule governs
+  // these plates. e2e cannot emulate :hover, so this asserts the gesture is WIRED: a
+  // paper-timed transform transition on the image, the image resting with no transform, and
+  // a :hover rule with a transform actually in the stylesheet (so the check bites the lift,
+  // not just the plumbing). Read on screen media, before PR21 emulates print.
   const hover = await evaluate(`(()=>{
     const img=document.querySelector("#pr-atlas figure img");
     if(!img)return{img:false};
@@ -390,15 +391,16 @@ export async function run(ctx) {
     JSON.stringify({ midDraw, reenabled }),
   );
 
-  // PR24b the bind-THEN-draw race. New coverage of the Print Room's existing bindGen guard for
-  // the bind-then-draw direction (the same race-class the Explorer's now-retired R7 guarded
-  // there, #199; PR24 already covers draw-then-bind). Where PR24 supersedes a SETTLED atlas
-  // with a redraw, this starts a bind and supersedes it while it is IN FLIGHT: click Bind (an atlas compose is
-  // posted to the worker), then in the SAME turn draw a fresh seed. draw()'s synchronous
-  // clearBoundAtlas bumps bindGen before the compose resolves, and because the Print Room
-  // shares ONE FIFO worker the atlas job settles FIRST (order-before-draw), so its .then sees
-  // the bumped bindGen and drops -- the stale world's atlas must never inject over the new
-  // proof. Deterministic on this substrate, the same property #212's PR26/PR27 rely on.
+  // PR24b the bind-THEN-draw race. New coverage of the Print Room's existing bindGen guard
+  // for the bind-then-draw direction (the same race-class the Explorer's now-retired R7
+  // guarded there, #199; PR24 already covers draw-then-bind). Where PR24 supersedes a
+  // SETTLED atlas with a redraw, this starts a bind and supersedes it while it is IN
+  // FLIGHT: click Bind (an atlas compose is posted to the worker), then in the SAME turn
+  // draw a fresh seed. draw()'s synchronous clearBoundAtlas bumps bindGen before the
+  // compose resolves, and because the Print Room shares ONE FIFO worker the atlas job
+  // settles FIRST (order-before-draw), so its .then sees the bumped bindGen and drops --
+  // the stale world's atlas must never inject over the new proof. Deterministic on this
+  // substrate, the same property #212's PR26/PR27 rely on.
   const btd = await evaluate(`(()=>{document.getElementById("pr-bind").click();const s=document.getElementById("pr-seed");s.value="909";document.getElementById("pr-draw").click();return{bindDisabled:document.getElementById("pr-bind").disabled,atlasEmpty:document.getElementById("pr-atlas").children.length===0};})()`);
   let btdSettled = null;
   for (let i = 0; i < 200; i++) {
@@ -464,15 +466,16 @@ export async function run(ctx) {
     JSON.stringify({ orderReady, midPoster, orderReenabled }),
   );
 
-  // PR27 the REVERSE guard (#212): an order that finishes DURING a redraw must NOT re-open the
-  // counter. orderPoster's .finally re-enables the plates only through refreshOrderControls,
-  // whose `!drawing` term is the SOLE guard for this direction. The Print Room shares ONE FIFO
-  // render worker (worker-client.js: one persistent worker, no job cancellation, synchronous
-  // onmessage), so a plate ordered and THEN a redraw posted behind it settle order-first while
-  // the draw is still in flight: the order's .finally runs with drawing===true every run. We
-  // assert the SUSTAINED invariant -- no plate ever re-enables while #pr-status still reads
-  // "Pulling a proof..." -- and witness that the order genuinely completed inside the draw
-  // window (else the interleaving never happened). An unconditional re-enable trips `violated`.
+  // PR27 the REVERSE guard (#212): an order that finishes DURING a redraw must NOT re-open
+  // the counter. orderPoster's .finally re-enables the plates only through
+  // refreshOrderControls, whose `!drawing` term is the SOLE guard for this direction. The
+  // Print Room shares ONE FIFO render worker (src/site/explorer/worker-client.ts: one
+  // persistent worker, no job cancellation, synchronous onmessage), so a plate ordered and
+  // THEN a redraw posted behind it settle order-first while the draw is still in flight:
+  // the order's .finally runs with drawing===true every run. We assert the SUSTAINED
+  // invariant -- no plate ever re-enables while #pr-status still reads "Pulling a proof..."
+  // -- and witness that the order genuinely completed inside the draw window (else the
+  // interleaving never happened). An unconditional re-enable trips `violated`.
   let pr27Ready = false;
   for (let i = 0; i < 160; i++) {
     let ok = null;
@@ -512,7 +515,7 @@ export async function run(ctx) {
   check("PR7 no new missing resources (no worker/engine/asset 4xx from /print-room/)", new4xx.length === 0, new4xx.join(", ") || "none");
 
   // PR8/PR9: the inline-fallback path (a named #133 acceptance bullet). 404 the worker
-  // (blockWorker 404s exactly the /explorer/worker.js the Print Room spawns) and reload:
+  // (blockWorker 404s exactly the /explorer/worker.bundle.js the Print Room spawns) and reload:
   // the page must degrade to the inline engine, SHOW the #pr-warning, and still render.
   // Mirrors the Explorer's B1-B3 for this page's separate markup. Restored in finally.
   try {

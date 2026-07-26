@@ -1,8 +1,8 @@
-// Sea-level slider (#55). The slider value is landFraction x 1000 (an integer in
-// [100, 700]); these are trivial inverses so the gesture cannot ship backwards.
-// clampLand keeps every value strictly inside (0, 1) so pickSeaLevel never throws
-// on a crafted hash. The slider's `landTouched` gate + the redraw wiring stay in
-// app.js (the conductor); this module is the pure conversions + the two DOM writes.
+// Sea-level slider (#55). The slider value is landFraction x 1000 (an integer in [100,
+// 700]); these are trivial inverses so the gesture cannot ship backwards. clampLand keeps
+// every value strictly inside (0, 1) so pickSeaLevel never throws on a crafted hash. The
+// slider's `landTouched` gate + the redraw wiring stay in src/site/explorer/app.ts (the
+// conductor); this module is the pure conversions + the two DOM writes.
 import { defaultRecipe } from "../../world/generate.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 

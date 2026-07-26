@@ -1,5 +1,5 @@
 // The Surveyor's Glass (Z): geometric CSS pan/zoom on the Explorer chart, driven by the
-// shared d3-zoom controller (public/shared/zoom-controller.js). The live transform lands on
+// shared d3-zoom controller (src/site/shared/zoom-controller.ts). The live transform lands on
 // #map inside the #map-viewport clip box; nothing re-renders (the semantic redraft is Sub 8).
 //
 // Sub 3 (#164) built the glass on antique via the deterministic window.__vellumZoomTo /
@@ -363,7 +363,8 @@ export async function run(ctx) {
     `miss=${z16.aCached} hit=${z16.bCached} sameSvg=${z16.sameSvg} (ta=${z16.ta}ms tb=${z16.tb}ms, timing is corroboration only)`,
   );
 
-  // #169: turn the semantic redraft back ON for the Sub 8 tests (off for the geometric block above).
+  // #169: turn the semantic redraft back ON for the Sub 8 tests (off for the geometric
+  // block above).
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
 
   // ---- Z17-Z20 (#169, Glass Sub 8): the settle -> region REDRAFT, wired to the camera.
@@ -565,10 +566,11 @@ export async function run(ctx) {
     `drawn in ${perfMs}ms under 4x throttle (target ~1.5s; 4000ms ceiling is a flake guard, not the target)`,
   );
 
-  // Z20d (scope: chronicle mutual exclusion): entering the chronicle reverts a committed region to
-  // the WORLD sheet (its baked settlement/road layers are what the scrubber drives; a region carries
-  // no chronicle), so no region job can be in flight while scrubbing. Enter a region, toggle the
-  // chronicle, assert the sheet is the world chart (no region stamp) and the scrubber is showing.
+  // Z20d (scope: chronicle mutual exclusion): entering the chronicle reverts a committed
+  // region to the WORLD sheet (its baked settlement/road layers are what the scrubber
+  // drives; a region carries no chronicle), so no region job can be in flight while
+  // scrubbing. Enter a region, toggle the chronicle, assert the sheet is the world chart
+  // (no region stamp) and the scrubber is showing.
   await goHome();
   const before20d = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
@@ -587,10 +589,11 @@ export async function run(ctx) {
   );
   await evaluate(`(()=>{const c=document.getElementById("chronicle");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the chronicle
 
-  // Z20e (scope: overlay rebuild, card continuity keyed by NAME): a card pinned in one survey stays
-  // pinned to the SAME-named settlement across a redraft, even though region worlds renumber indices.
-  // Pin the settlement nearest the centre (the survey's namesake), zoom into the next finer band still
-  // centred on it, and assert the card is still open on that same name.
+  // Z20e (scope: overlay rebuild, card continuity keyed by NAME): a card pinned in one
+  // survey stays pinned to the SAME-named settlement across a redraft, even though region
+  // worlds renumber indices. Pin the settlement nearest the centre (the survey's namesake),
+  // zoom into the next finer band still centred on it, and assert the card is still open on
+  // that same name.
   await goHome();
   const before20e = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);

@@ -1,19 +1,17 @@
-// #116 The Verso (epic: the Paper & Ink material-object lens). Turn the sheet over
-// and find the chart's back: a mirrored bleed-through ghost of the current chart, a
-// docket line along the fold, the surveyor's attribution, and a survey-office ink
-// stamp. Every page of the site insists a Vellum chart is a document; giving the
-// sheet a readable back asserts object-hood in one gesture no screenshot conveys.
-//
-// The flip REUSES #131's shared .sheet / #sheet-inner perspective wrapper but owns a
-// SEPARATE, persistent state (a held rotateY(-180) rest on the back face), kept out
-// of sheet-turn.js's transient style-turn state machine so the two never entangle.
-// The one hard invariant: the turn (#131) and the flip (#116) must never both own
-// #sheet-inner's rotateY at once. app.js enforces it (a style change while flipped is
-// suppressed from turning; the Turn button is disabled during a draw or a turn).
-//
-// Kept free of top-level DOM/globals so buildDocket (the pure docket-string builder)
-// is unit-testable under Node; renderVerso / the flip helpers touch the DOM only
-// inside their bodies and are proven by the e2e end-states + a CDP probe.
+// #116 The Verso (epic: the Paper & Ink material-object lens). Turn the sheet over and find
+// the chart's back: a mirrored bleed-through ghost of the current chart, a docket line
+// along the fold, the surveyor's attribution, and a survey-office ink stamp. Every page of
+// the site insists a Vellum chart is a document; giving the sheet a readable back asserts
+// object-hood in one gesture no screenshot conveys. The flip REUSES #131's shared .sheet /
+// #sheet-inner perspective wrapper but owns a SEPARATE, persistent state (a held
+// rotateY(-180) rest on the back face), kept out of src/site/explorer/sheet-turn.ts's
+// transient style-turn state machine so the two never entangle. The one hard invariant: the
+// turn (#131) and the flip (#116) must never both own #sheet-inner's rotateY at once.
+// src/site/explorer/app.ts enforces it (a style change while flipped is suppressed from
+// turning; the Turn button is disabled during a draw or a turn). Kept free of top-level
+// DOM/globals so buildDocket (the pure docket-string builder) is unit-testable under Node;
+// renderVerso / the flip helpers touch the DOM only inside their bodies and are proven by
+// the e2e end-states + a CDP probe.
 
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 
@@ -106,7 +104,7 @@ export function renderVerso(
  * from the draw result and hands it to renderVerso. Rebuilt on every draw (whether
  * flipped or not, per the acceptance criterion) so a flip always shows the current
  * world; renderVerso revokes the prior ghost URL, so redraws do not leak. Extracted
- * from app.js (#183) to sit beside the renderVerso / buildDocket it calls.
+ * from src/site/explorer/app.ts (#183) to sit beside the renderVerso / buildDocket it calls.
  * @param {HTMLElement} versoEl the #verso back face
  * @param {{svg:string, title:string, subtitle:string, manifest:{presentYear:number, places:Array<{kind:string,name:string}>}}} res
  * @param {number} seed

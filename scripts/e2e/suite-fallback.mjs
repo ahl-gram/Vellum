@@ -1,9 +1,9 @@
-// Inline-fallback checks (B): worker.js served 404, page degrades to inline.
+// Inline-fallback checks (B): the worker bundle served 404, page degrades to inline.
 // Split from e2e-explorer.mjs; flips ctx.serverState.blockWorker (same object the server reads).
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
   // --- B: inline FALLBACK path when the worker script is unavailable ---
-  // Flip the server to 404 worker.js (faithfully simulating file://, a 404, or a
+  // Flip the server to 404 /explorer/worker.bundle.js (faithfully simulating file://, a 404, or a
   // CSP block) and reload. No working-tree mutation — the file is untouched on
   // disk; only the served response changes. Restored in finally.
   try {

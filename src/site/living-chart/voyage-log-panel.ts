@@ -1,17 +1,15 @@
 // #121 The margin log: the surveyor's dated journal beside the chart. A scrollable,
 // chronicle-strip-style HTML panel (a SIBLING of the chart mount, not part of the SVG
 // overlay) whose entries brighten as the voyage sweep reaches each port. Extracted from
-// voyage.js (#189), made host-agnostic in #191: the host hands its three panel elements
-// in, nothing is looked up by id. The panel is HTML DOM, the voyage engine is the
-// animated SVG survey, and they share only DATA:
-//   buildLogPanel(logPorts, ...) -> { log, rows }   (build the log, render the strip)
-//   revealLog(rows, arrived)                          (brighten the reached rows)
-//   hideLog()                                         (empty + hide the panel)
-//   logSnapshot(log, rows) -> {...}                   (the e2e read hook's payload)
-// No overlay internals (plan / routing / geometry / marks / rAF) reach this file, and
-// none of these panel element refs reach the overlay. The overlay reads exactly one
-// field back, `log.summary` (for its status announcement); the log is shared data, so
-// that is expected, not leakage.
+// src/site/living-chart/voyage.ts (#189), made host-agnostic in #191: the host hands its
+// three panel elements in, nothing is looked up by id. The panel is HTML DOM, the voyage
+// engine is the animated SVG survey, and they share only DATA: buildLogPanel(logPorts, ...)
+// -> { log, rows } (build the log, render the strip) revealLog(rows, arrived) (brighten the
+// reached rows) hideLog() (empty + hide the panel) logSnapshot(log, rows) -> {...} (the e2e
+// read hook's payload) No overlay internals (plan / routing / geometry / marks / rAF) reach
+// this file, and none of these panel element refs reach the overlay. The overlay reads
+// exactly one field back, `log.summary` (for its status announcement); the log is shared
+// data, so that is expected, not leakage.
 import {
   buildVoyageLog,
   type VoyageHomecoming,

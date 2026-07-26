@@ -32,9 +32,10 @@ const SEAT_LABEL = "Realm Seat";
  * A settlement's rank for display. Precedence, highest first:
  *  - a ruin overrides its kind (history.ts never ruins a seat, so this cannot
  *    silently swallow one, but the ordering is the safe one either way);
- *  - the grand capital outranks its own seat status, since realms.ts seats it as
- *    realm 0; this mirrors the chart's tiering at settlements.ts:229, so the card
- *    and the drawn glyph always agree;
+ *  - the grand capital outranks its own seat status, since `selectSeats` in
+ *    `src/society/realms.ts` seats it as realm 0; this mirrors the chart's own
+ *    tiering (`tierOf` in `src/render/layers/settlements.ts`), so the card and
+ *    the drawn glyph always agree;
  *  - any other realm seat reads as a seat, not as the town or village it is.
  */
 export function placeRank(mark: PlaceMark): string {

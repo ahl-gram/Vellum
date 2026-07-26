@@ -1,7 +1,7 @@
-// Poster plate presets for the Print Room (#134, epic #132). A poster is the same
-// world as the on-screen proof, only rendered wider, delivered as a download the
-// visitor clicks. Pure + DOM-free so it is unit-testable in Node the way sheet-turn.js's
-// shouldTurn is; app.js does the worker + download wiring.
+// Poster plate presets for the Print Room (#134, epic #132). A poster is the same world as
+// the on-screen proof, only rendered wider, delivered as a download the visitor clicks.
+// Pure + DOM-free so it is unit-testable in Node the way src/site/explorer/sheet-turn.ts's
+// shouldTurn is; src/site/print-room/app.ts does the worker + download wiring.
 
 export interface PosterPreset {
   /** Stable key carried on the button's data-poster attribute. */
@@ -28,7 +28,7 @@ const MAX_WIDTH = POSTER_PRESETS[POSTER_PRESETS.length - 1].width; // 4200
 // (src/site/explorer/worker.ts), so bounding the width is the page's job. Any requested
 // width (a preset button, or a value that somehow reached us out of band) is clamped to
 // the [Desk, Grand] envelope; a non-number falls back to Grand. This is the guard the
-// CLI's 400-6000 check used to be (src/cli/main.ts:145-147): a hand-edited value can
+// CLI's 400-6000 check used to be (`main` in `src/cli/main.ts`): a hand-edited value can
 // never ask the worker for a tab-killing width.
 export function clampPosterWidth(w: unknown): number {
   const n = Number(w);
@@ -45,7 +45,7 @@ export function posterFilename(seed: number, style: string, width: number): stri
 // The PNG twin of posterFilename, named by the OUTPUT pixel width (post scale + budget
 // fit), so Desk x1 (2400) and Desk x2 (4800) never collide, and a budget-clamped plate
 // carries its real reduced width. The recipe still rides inside the source SVG, not the
-// PNG, so the SVG stays the reproducible artifact (see rasterize.js).
+// PNG, so the SVG stays the reproducible artifact (see src/site/lib/rasterize.ts).
 export function posterPngFilename(seed: number, style: string, outWidth: number): string {
   return `vellum-poster-${seed}-${style}-${outWidth}.png`;
 }

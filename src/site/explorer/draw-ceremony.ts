@@ -5,7 +5,7 @@
 // Download blobs is never touched. On animationend the inline dash is removed so the
 // resting stroke is byte-for-byte the original (round joins intact).
 //
-// Extracted from app.js (#183): a self-contained, voyage-independent ceremony the
+// Extracted from src/site/explorer/app.ts (#183): a self-contained, voyage-independent ceremony the
 // conductor triggers after a settle, with no coupling to the draw/bind race guards.
 export function startArrival(svg: SVGSVGElement | null): void {
   if (!svg) return;
@@ -17,7 +17,7 @@ export function startArrival(svg: SVGSVGElement | null): void {
 // as the arrival, but on the incoming region inset's coastline at the redraft grade
 // (this fires on every settle, so the pass is quick), plus the tier-staggered name
 // dry-in: each name in `dryIn` (already filtered to the NEWLY labeled names by
-// redraft-plan.js) tags its settlement group `.dry-in`, and index.css dries the
+// src/site/explorer/redraft-plan.ts) tags its settlement group `.dry-in`, and index.css dries the
 // group's label text in, towns before villages (the stagger keys on the group's own
 // data-tier attribute). Persisting names get no class and never re-animate. Like the
 // arrival, this styles the LIVE inset DOM only; the pristine res.svg string that

@@ -1,12 +1,11 @@
-// The URL hash <-> controls bridge, extracted from app.js (#183). readHash seeds the
-// controls from a shared/bookmarked link on load; writeHash mirrors the current control
-// values back into location.hash on every draw, so the link is always shareable.
-//
-// Kept out of the conductor because it is a self-contained mapping with no stake in the
-// draw/bind race guards. landTouched (the #55 manual-override gate) stays OWNED by
-// app.js: readHash reports whether the link carried a land value (so the conductor can
-// set the gate) rather than reaching back into the conductor's state, and writeHash
-// takes the gate's current value as an argument.
+// The URL hash <-> controls bridge, extracted from src/site/explorer/app.ts (#183).
+// readHash seeds the controls from a shared/bookmarked link on load; writeHash mirrors the
+// current control values back into location.hash on every draw, so the link is always
+// shareable. Kept out of the conductor because it is a self-contained mapping with no stake
+// in the draw/bind race guards. landTouched (the #55 manual-override gate) stays OWNED by
+// src/site/explorer/app.ts: readHash reports whether the link carried a land value (so the
+// conductor can set the gate) rather than reaching back into the conductor's state, and
+// writeHash takes the gate's current value as an argument.
 import { landToSlider, sliderToLand, updateLandReadout } from "./sea-level.ts";
 import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.ts";
 import type { Camera } from "./camera.ts";

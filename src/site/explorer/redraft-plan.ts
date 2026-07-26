@@ -5,7 +5,7 @@
 // plus a prior inset) stays put. Name-keyed, like the pin continuity (#169): region
 // worlds renumber indices, names are the stable identity.
 // Pure and DOM-free so it is unit-testable under Node (test/explorer/redraft-plan.test.ts);
-// lod-controller.js owns reading the DOM sheets into the inputs.
+// src/site/explorer/lod-controller.ts owns reading the DOM sheets into the inputs.
 
 /**
  * The labeled names of the incoming sheet that were NOT labeled on the outgoing

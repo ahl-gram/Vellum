@@ -8,9 +8,9 @@ import {
 } from "../../src/site/print-room/poster-presets.ts";
 
 // #134 (epic #132) Sub 2: the Print Room's poster plates. The pure logic lives in a
-// DOM-free browser module (mirrors sheet-turn.js), so the width clamp -- the guard
-// against a hand-edited width killing the tab -- is unit-testable here. The worker
-// wiring and download are proven by the print-room e2e suite (PR10-PR14).
+// DOM-free browser module (mirrors src/site/explorer/sheet-turn.ts), so the width clamp --
+// the guard against a hand-edited width killing the tab -- is unit-testable here. The
+// worker wiring and download are proven by the print-room e2e suite (PR10-PR14).
 
 test("the three plate presets are Desk 2400, Wall 3300, Grand 4200", () => {
   assert.deepEqual(

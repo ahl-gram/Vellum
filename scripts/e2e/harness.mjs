@@ -43,7 +43,7 @@ const httpGet = (url) =>
 // fold (#208) there is ONE spawn target: both the Explorer and the Print Room
 // spawn the shared Vite-emitted worker chunk, so blocking this single path
 // 404s the worker for every page's fallback suite. (Before the fold the set
-// also held /explorer/worker.js, the unbundled worker the Print Room spawned.)
+// also held a second entry: the unbundled per-page worker the Print Room spawned.)
 const serverState = { blockWorker: false };
 const BLOCKED_WORKERS = new Set(["/explorer/worker.bundle.js"]);
 
@@ -168,10 +168,10 @@ async function axDescription(selector) {
 
 async function waitSettled(label = "") {
   for (let i = 0; i < 200; i++) {
-    // #199: the settle probe reads #verso-turn, not the retired #bind. The Turn button
-    // is disabled for the whole draw round-trip and re-enabled the instant the draw
-    // resolves (app.js), exactly the lifecycle #bind had, so the settle semantics are
-    // unchanged; it is just no longer keyed on a button that no longer exists.
+    // #199: the settle probe reads #verso-turn, not the retired #bind. The Turn button is
+    // disabled for the whole draw round-trip and re-enabled the instant the draw resolves
+    // (src/site/explorer/app.ts), exactly the lifecycle #bind had, so the settle semantics
+    // are unchanged; it is just no longer keyed on a button that no longer exists.
     const s = await evaluate(
       `({status:document.getElementById("status").textContent,dis:document.getElementById("verso-turn").disabled,map:!!document.querySelector("#map svg")})`,
     );

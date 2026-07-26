@@ -8,12 +8,12 @@ import {
   rasterizeSvg,
 } from "../../src/site/lib/rasterize.ts";
 
-// #135 (epic #132) Sub 3: the client-side SVG->PNG rasterizer. The platform half
-// (blob-URL Image + canvas + toBlob) is browser-only and proven by the print-room e2e;
-// the DECISION math is pure and DOM-free, so it lives here as the honest unit RED:
-// reading the plate's native size, fitting a scale under the pixel budget, and the
-// in-voice failure copy. rasterize.js keeps every DOM reference inside a function body,
-// so this Node import touches only the pure exports.
+// #135 (epic #132) Sub 3: the client-side SVG->PNG rasterizer. The platform half (blob-URL
+// Image + canvas + toBlob) is browser-only and proven by the print-room e2e; the DECISION
+// math is pure and DOM-free, so it lives here as the honest unit RED: reading the plate's
+// native size, fitting a scale under the pixel budget, and the in-voice failure copy.
+// src/site/lib/rasterize.ts keeps every DOM reference inside a function body, so this Node
+// import touches only the pure exports.
 
 // A poster-shaped SVG root: width BEFORE height (the engine's order, verified against the
 // committed hero chart), and the decoy data-vellum-grid-w/h that a naive `width=` regex
