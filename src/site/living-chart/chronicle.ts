@@ -58,10 +58,16 @@ export interface ChronicleDeps {
   strip: HTMLElement;
   /** The place overlay: manifest data in, card dismiss out (the two coupling points). */
   overlay: { data(): OverlayData | null; hideCard(): void };
+  /** #192: called when PLAY parks (the Pause click and the sweep's auto-pause), the one
+   *  rest the host cannot see through events: paintScrub writes the slider
+   *  programmatically, so no input/change fires and the host's address writer would
+   *  otherwise keep the pre-Play year. Deliberately NOT called from pauseScrub itself:
+   *  a manual drag pauses per input frame, and the address writes on release only. */
+  onPark?: () => void;
 }
 
 export function createChronicle(deps: ChronicleDeps) {
-  const { mapEl, panel, playBtn, range: rangeEl, year: yearEl, strip: stripEl, overlay } = deps;
+  const { mapEl, panel, playBtn, range: rangeEl, year: yearEl, strip: stripEl, overlay, onPark } = deps;
 
   let scrub: ScrubState | null = null;
 
@@ -281,6 +287,7 @@ export function createChronicle(deps: ChronicleDeps) {
         scrub.elapsed = scrub.plan!.totalMs;
         paintScrub(scrub.range.max);
         pauseScrub(); // auto-pause at the present year, button back to "Play"
+        onPark?.(); // #192: the parked present must reach the address
         return;
       }
       paintScrub(sweepYearAt(scrub.plan!, elapsed));
@@ -292,8 +299,10 @@ export function createChronicle(deps: ChronicleDeps) {
   // The Play/Pause button: toggle the sweep. No-op when not scrubbing.
   function togglePlay(): void {
     if (!scrub) return;
-    if (scrub.playing) pauseScrub();
-    else playScrub();
+    if (scrub.playing) {
+      pauseScrub();
+      onPark?.(); // #192: the mid-sweep park must reach the address
+    } else playScrub();
   }
 
   // #180: flipping the sheet snaps the scrubber to the PRESENT. The Explorer's verso

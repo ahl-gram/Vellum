@@ -49,6 +49,10 @@ export interface LivingChartHost {
     range: HTMLInputElement;
     year: HTMLElement;
     strip: HTMLElement;
+    /** #192: invoked when Play parks (Pause click or the sweep's auto-pause), so the
+     *  host's address writer can record the rest no event announces. Optional: a host
+     *  with no address simply omits it. */
+    onPark?: () => void;
   };
   /** The surveyor's margin-log panel. */
   voyageLog: VoyageLogHost;
@@ -74,6 +78,7 @@ export function createLivingChart(host: LivingChartHost) {
     range: host.scrubber.range,
     year: host.scrubber.year,
     strip: host.scrubber.strip,
+    onPark: host.scrubber.onPark,
     overlay: { data: () => overlay.data(), hideCard: () => overlay.hideCard() },
   });
   const logPanel = createVoyageLogPanel(host.voyageLog);

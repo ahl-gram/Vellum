@@ -30,6 +30,8 @@ interface ControlsDeps {
   scrubRangeEl: HTMLElement;
   touched: TouchedGates;
   draw: (opts?: { quiet?: boolean; turn?: boolean }) => void;
+  /** #192: the conductor's one hash writer; the scrubber's release syncs the year key. */
+  syncHash: () => void;
   /** #169: Download saves what you see; a committed region sheet wins over the world chart. */
   committedRegion: () => { svg: string; title: string; band: number } | null;
   lastChart: () => { svg: string; title: string };
@@ -126,8 +128,12 @@ export function wireControls(deps: ControlsDeps): void {
 
   // Chronicle scrubber controls (#54): Play/Pause runs the event-proportional sweep; a
   // manual drag pauses Play and rebases it so the next Play restarts from the beginning.
+  // #192: the hash records the year on RELEASE (change), never per input frame, so a
+  // drag is one replaceState, not hundreds; Play's parks reach the hash through the
+  // engine's onPark seam (paintScrub moves the slider programmatically, no events).
   deps.scrubPlayBtn.addEventListener("click", deps.togglePlay);
   deps.scrubRangeEl.addEventListener("input", deps.onManualScrub);
+  deps.scrubRangeEl.addEventListener("change", deps.syncHash);
 
   // Living Chart overlay (#53): the doc-level dismiss pair, added once; both read the
   // engine's current overlay so they stay correct across redraws.

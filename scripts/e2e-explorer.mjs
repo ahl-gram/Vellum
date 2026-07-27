@@ -42,6 +42,7 @@ import { run as runFallback } from "./e2e/suite-fallback.mjs";
 import { run as runHunt } from "./e2e/suite-hunt.mjs";
 import { run as runPrintRoom } from "./e2e/suite-print-room.mjs";
 import { run as runHome } from "./e2e/suite-home.mjs";
+import { run as runAddress } from "./e2e/suite-address.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url)); // scripts/
 const REPO = resolve(HERE, "..");
@@ -113,6 +114,9 @@ async function main() {
   // The cartouche hero (#289): the homepage's seed form and its real navigation
   // into the Explorer; self-scoped like the hunt and the Print Room.
   await runHome(ctx);
+  // The Address (#192): survey/year deep links restore the armed instruments;
+  // self-scoped, and last because every check is its own fresh navigation.
+  await runAddress(ctx);
 }
 
 main()
