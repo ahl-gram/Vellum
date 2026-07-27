@@ -1,0 +1,394 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync, readdirSync } from "node:fs";
+import { resolve } from "node:path";
+import type { VoyageLogPort } from "../../src/world/voyage-log.ts";
+
+/**
+ * The Reading Room, Sub 3 (#219): the frame. The reading presentation is one chart
+ * over one dated log and nothing else, and it is host-agnostic: it is the first HOST
+ * of the #191 engine's public API, which is what proves that API capability-complete
+ * for a surface that is not the Explorer.
+ *
+ * Both of the issue's open decisions were ratified by Alex on 2026-07-27
+ * (https://github.com/ahl-gram/Vellum/issues/219#issuecomment-5097366231):
+ *   1. NO Explorer watch view in this sub, so Sub 5 (#221) is the frame's first real
+ *      host and this suite IS the "minimal harness" the acceptance offers instead.
+ *   2. The log FLOWS at every width: it is bounded by construction (14 chronicle
+ *      events, and the 19-24 voyage legs #185 measured across 150 seeds), so it needs
+ *      no scrollbar. The Explorer's own 32rem panels are untouched by this sub.
+ *
+ * Node has no `document`, and the frame BUILDS DOM (unlike the engine, which only
+ * stores refs its host passes in). So this file installs a small element shim for the
+ * handful of DOM operations the frame and the engine's own log builder use. The shim
+ * stands in for the ENVIRONMENT, never for the module under test: every assertion below
+ * reads structure the real code produced.
+ */
+
+const REPO = resolve(import.meta.dirname, "..", "..");
+const FRAME_DIR = resolve(REPO, "src/site/reading-frame");
+const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
+
+// The element shim: create / append / classify / attribute, and nothing else.
+
+class El {
+  tagName: string;
+  children: El[] = [];
+  parentNode: El | null = null;
+  attrs = new Map<string, string>();
+  classes = new Set<string>();
+  hidden = false;
+  value = "";
+  min = "";
+  max = "";
+  step = "";
+  type = "";
+  #text = "";
+
+  constructor(tag: string) {
+    this.tagName = tag.toUpperCase();
+  }
+
+  // `id` and `className` are ATTRIBUTE accessors, not plain fields, exactly as the DOM
+  // reflects them: the no-ids guard below reads attrs, so a stray `el.id = "map"` has
+  // to land somewhere the guard can see it.
+  get id(): string {
+    return this.attrs.get("id") ?? "";
+  }
+  set id(v: string) {
+    this.attrs.set("id", String(v));
+  }
+  get className(): string {
+    return [...this.classes].join(" ");
+  }
+  set className(v: string) {
+    this.classes = new Set(v.split(/\s+/).filter(Boolean));
+  }
+  get classList() {
+    const set = this.classes;
+    const toggle = (c: string, on?: boolean): boolean => {
+      const want = on ?? !set.has(c);
+      if (want) set.add(c);
+      else set.delete(c);
+      return want;
+    };
+    return {
+      add: (...c: string[]) => c.forEach((x) => set.add(x)),
+      remove: (...c: string[]) => c.forEach((x) => set.delete(x)),
+      contains: (c: string) => set.has(c),
+      toggle,
+    };
+  }
+  get textContent(): string {
+    return this.children.length ? this.children.map((c) => c.textContent).join("") : this.#text;
+  }
+  set textContent(v: string) {
+    this.children = [];
+    this.#text = String(v);
+  }
+  #adopt(kids: El[]): void {
+    for (const k of kids) k.parentNode = this;
+  }
+  append(...kids: El[]): void {
+    this.#adopt(kids);
+    this.children.push(...kids);
+  }
+  appendChild(kid: El): El {
+    this.#adopt([kid]);
+    this.children.push(kid);
+    return kid;
+  }
+  replaceChildren(...kids: El[]): void {
+    for (const c of this.children) c.parentNode = null;
+    this.#adopt(kids);
+    this.children = [...kids];
+  }
+  setAttribute(name: string, v: string): void {
+    this.attrs.set(name, String(v));
+  }
+  getAttribute(name: string): string | null {
+    return this.attrs.get(name) ?? null;
+  }
+  removeAttribute(name: string): void {
+    this.attrs.delete(name);
+  }
+  remove(): void {
+    const p = this.parentNode;
+    if (!p) return;
+    p.children = p.children.filter((c) => c !== this);
+    this.parentNode = null;
+  }
+}
+
+const installShim = (): void => {
+  (globalThis as { document?: unknown }).document = {
+    createElement: (tag: string) => new El(tag),
+  };
+};
+installShim();
+
+/** Depth-first walk of a shim tree. */
+function walk(el: El, seen: El[] = []): El[] {
+  seen.push(el);
+  for (const c of el.children) walk(c, seen);
+  return seen;
+}
+
+/** The structure an assertion can compare across two producers of the same idiom. */
+function shape(li: El): unknown {
+  return {
+    tag: li.tagName,
+    parts: li.children.map((s) => ({ tag: s.tagName, cls: s.className, text: s.textContent })),
+  };
+}
+
+const el = () => new El("div") as unknown as HTMLElement;
+
+// The frame as a host of the engine
+
+test("the frame mounts and hands the engine a complete host (#219, the first non-Explorer host)", async () => {
+  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const mount = new El("div");
+  const frame = createReadingFrame(mount as unknown as HTMLElement);
+
+  assert.equal(mount.children.length, 1, "the frame mounts its root into the element it was given");
+  assert.equal(mount.children[0], frame.root as unknown as El, "the mounted root is the frame's root");
+
+  const host = frame.host;
+  for (const [name, node] of [
+    ["mapEl", host.mapEl],
+    ["statusEl", host.statusEl],
+    ["scrubber.panel", host.scrubber.panel],
+    ["scrubber.playBtn", host.scrubber.playBtn],
+    ["scrubber.range", host.scrubber.range],
+    ["scrubber.year", host.scrubber.year],
+    ["scrubber.strip", host.scrubber.strip],
+    ["voyageLog.panel", host.voyageLog.panel],
+    ["voyageLog.sig", host.voyageLog.sig],
+    ["voyageLog.strip", host.voyageLog.strip],
+  ] as const) {
+    assert.ok(node instanceof El, `the host supplies a real element for ${name}`);
+    assert.ok(
+      walk(frame.root as unknown as El).includes(node as unknown as El),
+      `${name} is part of the frame's own tree, not a detached stub`,
+    );
+  }
+
+  // The capability proof: the engine constructs against this host exactly as it does
+  // against the Explorer's, so nothing in its public API is Explorer-shaped.
+  const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
+  const lc = createLivingChart(host);
+  for (const method of ["applyScrub", "scrubTo", "applyVoyage", "voyagePaintAt", "scrubState", "destroy"]) {
+    assert.equal(typeof (lc as Record<string, unknown>)[method], "function", `the engine drives the frame: ${method}()`);
+  }
+});
+
+test("both panels start hidden and the engine's hidden toggle governs each (#219)", async () => {
+  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
+  // Mirrors the Explorer markup: <div id="scrubber" hidden> and <div id="voyage-log" hidden>.
+  // applyScrub / buildLogPanel reveal them; exitScrub / hideLog hide them again.
+  assert.equal((frame.host.scrubber.panel as unknown as El).hidden, true, "the chronicle apparatus starts hidden");
+  assert.equal((frame.host.voyageLog.panel as unknown as El).hidden, true, "the surveyor's log starts hidden");
+  // The chronicle's dated rows must ride INSIDE the panel the engine hides, or exiting
+  // the chronicle would leave a stale strip on screen (the Explorer nests them, too).
+  const panel = frame.host.scrubber.panel as unknown as El;
+  assert.ok(
+    walk(panel).includes(frame.host.scrubber.strip as unknown as El),
+    "the chronicle strip lives inside the panel exitScrub() hides",
+  );
+});
+
+test("the frame owns no element ids: identity stays the host's namespace (#191, #219)", async () => {
+  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
+  for (const node of walk(frame.root as unknown as El)) {
+    assert.ok(
+      !node.attrs.has("id"),
+      `the frame set an id on <${node.tagName.toLowerCase()}>; a second frame on one page would collide`,
+    );
+  }
+  for (const f of readdirSync(FRAME_DIR).filter((n) => n.endsWith(".ts"))) {
+    const src = read(`src/site/reading-frame/${f}`);
+    assert.doesNotMatch(src, /getElementById/, `${f} must not look elements up by id: it BUILDS them`);
+  }
+});
+
+test("the frame imports nothing from the Explorer (#219 acceptance)", () => {
+  for (const f of readdirSync(FRAME_DIR).filter((n) => n.endsWith(".ts"))) {
+    const src = read(`src/site/reading-frame/${f}`);
+    for (const m of src.matchAll(/from\s+"([^"]+)"/g)) {
+      assert.doesNotMatch(
+        m[1],
+        /explorer\//,
+        `${f} imports ${m[1]}; the frame must be mountable by a page that is not the Explorer`,
+      );
+    }
+  }
+});
+
+test("destroy() unmounts the frame (a page host that leaves takes its DOM with it)", async () => {
+  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const mount = new El("div");
+  const frame = createReadingFrame(mount as unknown as HTMLElement);
+  frame.destroy();
+  assert.equal(mount.children.length, 0, "destroy() removes the frame's root from its mount");
+});
+
+// The one dated-log component
+
+test("the log component renders the chronicle's row shape in the shared idiom (#219)", async () => {
+  const { createDatedLog } = await import("../../src/site/reading-frame/dated-log.ts");
+  const log = createDatedLog({ label: "The chronicle" });
+  // HistoricalEvent's displayed fields (src/society/history.ts): year + text.
+  log.render([
+    { year: 214, text: "Aldmarch is founded on the strait." },
+    { year: 655, text: "The Kelder war ends at the shallows." },
+  ]);
+  const strip = log.strip as unknown as El;
+  assert.equal(strip.children.length, 2, "one row per event");
+  assert.deepEqual(shape(strip.children[0]), {
+    tag: "LI",
+    parts: [
+      { tag: "SPAN", cls: "cr-year", text: "214" },
+      { tag: "SPAN", cls: "cr-text", text: "Aldmarch is founded on the strait." },
+    ],
+  });
+});
+
+test("the log component renders the voyage's row shape identically to the engine's own builder (#219)", async () => {
+  const { createDatedLog } = await import("../../src/site/reading-frame/dated-log.ts");
+  const { createVoyageLogPanel } = await import("../../src/site/living-chart/voyage-log-panel.ts");
+
+  const ports: VoyageLogPort[] = [
+    { idx: 0, name: "Aldmarch", kind: "capital", founded: 214, arrivalMode: null, inlandHandoff: false },
+    { idx: 4, name: "Kelder", kind: "town", founded: 402, arrivalMode: "sea", inlandHandoff: false },
+    { idx: 9, name: "Brenmoor", kind: "village", founded: 655, arrivalMode: "road", inlandHandoff: true },
+  ];
+
+  // The engine's builder, against shim elements: the reference rendering.
+  const enginePanel = { panel: el(), sig: el(), strip: el() };
+  const engine = createVoyageLogPanel(enginePanel);
+  const { log: builtLog } = engine.buildLogPanel(ports, 1200, 42, "surveyed for the Admiralty", null);
+
+  // The frame's component, given the SAME entries the engine just built.
+  const log = createDatedLog({ label: "The surveyor's log" });
+  log.render(
+    builtLog.entries.map((e) => ({ year: e.year, text: e.text.replace(/^Year \d+\. /, "") })),
+    builtLog.attribution,
+  );
+
+  const mine = (log.strip as unknown as El).children.map(shape);
+  const theirs = (enginePanel.strip as unknown as El).children.map(shape);
+  assert.ok(theirs.length > 0, "the engine produced reference rows to compare against");
+  assert.deepEqual(mine, theirs, "the component renders the engine's own rows byte-for-byte in structure");
+  assert.equal(
+    (log.sig as unknown as El).textContent,
+    (enginePanel.sig as unknown as El).textContent,
+    "the attribution line carries the surveyor's signature, like the engine's",
+  );
+});
+
+test("reveal() brightens an arrived prefix, idempotently and in both directions (#219)", async () => {
+  const { createDatedLog } = await import("../../src/site/reading-frame/dated-log.ts");
+  const log = createDatedLog({ label: "The chronicle" });
+  log.render([
+    { year: 100, text: "one" },
+    { year: 200, text: "two" },
+    { year: 300, text: "three" },
+  ]);
+  const inked = () => (log.strip as unknown as El).children.map((li) => li.classes.has("inked"));
+
+  assert.deepEqual(inked(), [false, false, false], "rows rest dim until their year arrives");
+  log.reveal(2);
+  assert.deepEqual(inked(), [true, true, false], "the arrived prefix brightens");
+  log.reveal(2);
+  assert.deepEqual(inked(), [true, true, false], "reveal is idempotent: a repeated frame changes nothing");
+  log.reveal(1);
+  assert.deepEqual(inked(), [true, false, false], "stepping BACKWARD un-brightens, so a scrub can run either way");
+  log.reveal(0);
+  assert.deepEqual(inked(), [false, false, false], "back to the start");
+  log.reveal(99);
+  assert.deepEqual(inked(), [true, true, true], "an over-count clamps at the last row");
+
+  assert.deepEqual(log.snapshot(), { rows: 3, inked: 3, attribution: "" }, "the read hook reports the live state");
+
+  log.clear();
+  assert.equal((log.strip as unknown as El).children.length, 0, "clear() empties the strip");
+  assert.equal((log.sig as unknown as El).textContent, "", "clear() empties the attribution too");
+});
+
+test("the log is a labeled region and its rows are plain text (accessibility carries over, not down)", async () => {
+  const { createDatedLog } = await import("../../src/site/reading-frame/dated-log.ts");
+  const log = createDatedLog({ label: "The surveyor's log" });
+  const panel = log.panel as unknown as El;
+  assert.equal(panel.getAttribute("role"), "region", "the log panel is a landmark a screen reader can jump to");
+  assert.equal(panel.getAttribute("aria-label"), "The surveyor's log", "and it is named");
+});
+
+// The presentation: one vertical story, one canonical row idiom
+
+test("the frame's log never nests a scroller, at any width (#219 acceptance, decision 2)", () => {
+  const css = read("public/reading-frame.css");
+  assert.doesNotMatch(
+    css,
+    /overflow-y\s*:\s*(auto|scroll)/,
+    "the frame's log is a single vertical story: the PAGE scroll owns it, at every width",
+  );
+  assert.doesNotMatch(
+    css,
+    /max-height/,
+    "no max-height cap: the log is bounded by construction (14 events + ~24 legs), not by a scrollbar",
+  );
+  assert.doesNotMatch(css, /@media[^{]*max-width/, "no narrow-viewport special case: one layout, ratified 2026-07-27");
+
+  // ...and this sub rewires nothing: the Explorer keeps the panels it has today.
+  const explorer = read("public/explorer/index.css");
+  assert.equal(
+    explorer.match(/max-height:\s*32rem;\s*overflow-y:\s*auto/g)?.length,
+    2,
+    "the Explorer's own .chronicle-strip and .voyage-log-strip caps are untouched by this sub",
+  );
+});
+
+test("one canonical row rule covers every producer of the idiom (#219: ONE log component)", () => {
+  const css = read("public/reading-frame.css");
+  // Three names write the same "this row has arrived" state today: the chronicle's
+  // .past, the voyage's .logged, and the component's own .inked. The frame's whole job
+  // is that they read as one log, so one rule must brighten all three; #220's fused
+  // journal then collapses them to .inked alone.
+  const brighten = css.match(/^[^{]*\.inked[^{]*\{[^}]*\}/m);
+  assert.ok(brighten, "the frame css carries a rule keyed on the component's own .inked state");
+  for (const cls of ["inked", "past", "logged"]) {
+    assert.match(
+      brighten[0],
+      new RegExp(`\\.${cls}\\b`),
+      `the brighten rule must also cover .${cls}, or that producer's rows never light up`,
+    );
+  }
+  assert.match(
+    css,
+    /\.cr-year/,
+    "the frame dresses the shared .cr-year column the engine's builders already emit",
+  );
+  assert.match(css, /\.cr-text/, "and the shared .cr-text column");
+});
+
+test("the brighten is a transition, so motion.css's universal collapse reaches it (#128)", () => {
+  const css = read("public/reading-frame.css");
+  assert.match(
+    css,
+    /transition:\s*opacity/,
+    "rows brighten via a transition, the form the reduced-motion block collapses",
+  );
+  assert.doesNotMatch(
+    css,
+    /prefers-reduced-motion/,
+    "the frame needs no reduced-motion block of its own: motion.css's universal `*` collapse already reaches it, and a local block would be a second source of truth",
+  );
+  assert.match(
+    read("public/motion.css"),
+    /@media \(prefers-reduced-motion: reduce\)[\s\S]*transition-duration: 0\.01ms !important/,
+    "the universal collapse this frame relies on is still there",
+  );
+});
