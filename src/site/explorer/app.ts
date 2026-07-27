@@ -2,10 +2,10 @@
 // runs draw(), and keeps the URL hash in sync. The heavy world-gen + SVG render runs
 // off the main thread; the animated machinery lives in the living-chart ENGINE
 // (src/site/living-chart/, host-agnostic since #191) and the Glass cluster (glass.ts),
-// and this file is the glue: DOM refs, the draw race guard, the ceremony arbitration
-// (turn vs settle vs flip, chronicle vs voyage), and the bootstrap. The plain control
-// plumbing is wired by controls.ts; the window.__vellum* seams by hooks.ts. Listeners
-// attach at module-eval time (module scripts are deferred, so the DOM is parsed first).
+// and this file is the glue: the draw race guard, the ceremony arbitration (turn vs
+// settle vs flip, chronicle vs voyage), and the bootstrap. The DOM refs live in
+// elements.ts; the plain control plumbing is wired by controls.ts; the window.__vellum*
+// seams by hooks.ts. Listeners attach at module-eval time (modules are deferred).
 import { runJob, runInline, usesWorker, initWorker } from "./worker-client.ts";
 import { shouldTurn, runTurn, cancelTurn, turnTiming } from "./sheet-turn.ts";
 import { toggleFlip, isFlipped, rebuildVerso, paintVersoTrack, clearVersoTrack } from "./verso.ts";
@@ -25,31 +25,11 @@ import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import type { Camera } from "./camera.ts";
-
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
-const seedInput = $<HTMLInputElement>("seed");
-const styleSel = $<HTMLSelectElement>("style");
-const typeSel = $<HTMLSelectElement>("type");
-const bandSel = $<HTMLSelectElement>("band");
-const themeSel = $<HTMLSelectElement>("theme");
-const legendChk = $<HTMLInputElement>("legend");
-const armsChk = $<HTMLInputElement>("arms");
-const landSlider = $<HTMLInputElement>("land");
-const coastSlider = $<HTMLInputElement>("coast");
-const status = $("status");
-const mapDiv = $("map");
-const mapViewport = $("map-viewport"); // #164: the zoom clipping/gesture box wrapping #map
-const sheetEl = $("sheet");
-const innerEl = $("sheet-inner");
-const caption = $("caption");
-const versoEl = $("verso");
-const versoBtn = $<HTMLButtonElement>("verso-turn");
-const chronicleChk = $<HTMLInputElement>("chronicle");
-const voyageChk = $<HTMLInputElement>("voyage");
-const orderLink = $<HTMLAnchorElement>("order-plates"); // #133: "Take to the Print Room", href kept current in draw()
-
-// #183: the controls readHash/writeHash (hash-sync.ts) mirror to and from location.hash.
-const hashControls = { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider };
+import {
+  $, seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider,
+  coastSlider, status, mapDiv, mapViewport, sheetEl, innerEl, caption, versoEl, versoBtn,
+  chronicleChk, voyageChk, orderLink, hashControls,
+} from "./elements.ts";
 
 let lastSvg = "";
 let lastTitle = "";
