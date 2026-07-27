@@ -8,6 +8,7 @@
 // writeHash takes the gate's current value as an argument.
 import { landToSlider, sliderToLand, updateLandReadout } from "./sea-level.ts";
 import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.ts";
+import { parseLive, emitLive, finalizeHash, type Live } from "./address.ts";
 import type { Camera } from "./camera.ts";
 
 export interface Controls {
@@ -26,15 +27,18 @@ export interface Controls {
  * Apply a bookmarked/shared hash to the controls. Only keys present and valid are
  * applied, so a partial link leaves the rest at their defaults.
  * @param {Controls} controls
- * @returns {{ land: boolean, coast: boolean, camera: {cx:number,cy:number,k:number}|null }}
- *   which slider gates the link touched (so the conductor can set landTouched/coastTouched)
- *   and the #165 camera (world-uv centre + zoom) if the link carried one, else null. The
- *   conductor restores the camera after the first chart lands; absent params mean home.
+ * @returns {{ land: boolean, coast: boolean, camera: {cx:number,cy:number,k:number}|null,
+ *   live: import("./address.ts").Live | null }}
+ *   which slider gates the link touched (so the conductor can set landTouched/coastTouched),
+ *   the #165 camera (world-uv centre + zoom) if the link carried one, and the #192 live
+ *   address (bare `survey` or `year=N`) if it carried one. The conductor restores the
+ *   camera after the first chart lands; absent params mean home, still, disarmed.
  */
 export function readHash(controls: Controls): {
   land: boolean;
   coast: boolean;
   camera: Camera | null;
+  live: Live | null;
 } {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider } = controls;
   const params = new URLSearchParams(location.hash.slice(1));
@@ -95,7 +99,8 @@ export function readHash(controls: Controls): {
     const k = Number(kRaw);
     if ([cx, cy, k].every(Number.isFinite) && k >= 1 && k <= 8) camera = { cx, cy, k };
   }
-  return { land: landTouched, coast: coastTouched, camera };
+  // #192: the live address (bare `survey` / `year=N`), validated by the pure grammar.
+  return { land: landTouched, coast: coastTouched, camera, live: parseLive(params) };
 }
 
 /**
@@ -108,12 +113,15 @@ export function readHash(controls: Controls): {
  *   only when the camera is NOT home (k !== 1), so a home view links clean and every
  *   existing (never-zoomed) shared link is byte-identical. Quantized to 4dp: enough to
  *   restore the framing indistinguishably, short enough to keep the hash readable.
+ * @param {import("./address.ts").Live | null} [live] the #192 live address. Emitted only
+ *   when an instrument is armed, so a disarmed chart links byte-identical to today's.
  */
 export function writeHash(
   controls: Controls,
   landTouched: boolean,
   coastTouched: boolean,
   camera?: Camera,
+  live?: Live | null,
 ): void {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider } = controls;
   const params = new URLSearchParams();
@@ -127,6 +135,10 @@ export function writeHash(
   if (landTouched) params.set("land", String(Math.round(sliderToLand(landSlider.value) * 1000)));
   // #137: coast= is written only once the coast gate is touched, mirroring land=.
   if (coastTouched) params.set("coast", String(Math.round(sliderToCoast(coastSlider.value) * 100)));
+  // #192: the one live key, exactly one or neither (the writer's half of the ratified
+  // mutual exclusion; the grammar lives in address.ts). Before the camera, so the
+  // address reads instrument-then-framing, as in the ratified examples.
+  emitLive(params, live);
   // #165: the camera is written ONLY when zoomed. k===1 is home (the controller snaps k
   // to exactly 1 at the min extent and on reset/rebase), so the gate is exact. A world-
   // sheet-changing action snaps home first, so any draw drops cx/cy/k for free.
@@ -135,5 +147,6 @@ export function writeHash(
     params.set("cy", camera.cy.toFixed(4));
     params.set("k", camera.k.toFixed(4));
   }
-  history.replaceState(null, "", "#" + params.toString());
+  // finalizeHash, not params.toString(): it respells `survey=` to the ratified bare flag.
+  history.replaceState(null, "", "#" + finalizeHash(params));
 }

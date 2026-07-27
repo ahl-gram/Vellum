@@ -13,6 +13,7 @@ import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts"
 import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
+import { liveNow } from "./address.ts";
 import { createGlass } from "./glass.ts";
 import { wireControls } from "./controls.ts";
 import { installExplorerHooks } from "./hooks.ts";
@@ -51,6 +52,10 @@ const touched = { land: false, coast: false };
 // left live here would re-frame the user on every subsequent Draw. Nulled the moment it
 // is applied.
 let pendingCamera: Camera | null = null;
+// #192: the address's year, the chronicle half of a deep link. Same one-shot discipline:
+// applyScrub parks every draw at the present, so this is consumed by the first settle
+// only; liveNow reads it so the address survives draw()'s early syncHash.
+let pendingYear: number | null = null;
 
 // Monotonic guard. drawGen is bumped by every draw; a draw's own result checks it,
 // so a fresh draw cancels a stale one (the chart that lands must always be the
@@ -96,11 +101,12 @@ let redraftEnabled = true;
 function regionEligible(): boolean {
   return redraftEnabled && styleSel.value === "antique" && !chronicleChk.checked && !voyageChk.checked && !isFlipped(sheetEl) && !!lastSvg;
 }
-// #165/#169: the ONE hash writer. Every trigger funnels through here so the hash carries
-// the complete current state, camera included. The camera is world-relative at every band,
-// so it writes straight into the hash; writeHash drops cx/cy/k when the camera is home.
+// #165/#169/#192: the ONE hash writer. Every trigger funnels through here so the hash
+// carries the complete current state, camera and live address included. writeHash drops
+// cx/cy/k when the camera is home and the live key when both instruments are off.
 function syncHash(): void {
-  writeHash(hashControls, touched.land, touched.coast, glass.cameraNow());
+  writeHash(hashControls, touched.land, touched.coast, glass.cameraNow(),
+    liveNow({ survey: voyageChk.checked, chronicle: chronicleChk.checked, year: lc.scrubState()?.year ?? pendingYear }));
 }
 
 const glass = createGlass({
@@ -212,6 +218,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
           glass.syncZoom(); // #164/#165: attach the zoom to the just-landed chart (every style)
           // #169: record the (re-dressed) world sheet so a settle can redraft over it.
           glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
+          syncHash(); // #192: converge the address after the landing re-arms
         });
       } else {
         // Settle (#127): inject the chart and run the arrival ceremony (unless this is
@@ -226,6 +233,9 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         // synchronously, so there is no flash of the present-day chart.
         if (chronicleChk.checked) lc.applyScrub();
         else lc.clearScrub();
+        // #192: the addressed year, one-shot, after applyScrub's park at the present.
+        // scrubTo clamps a hand-edited year and no-ops when the chronicle is off.
+        if (pendingYear !== null) { const y = pendingYear; pendingYear = null; lc.scrubTo(y); }
         // #119: re-arm the voyage to the new chart, resting on the full track (only
         // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
         // #174: `quiet` rides along so a mid-drag re-arm leaves the back face alone; the
@@ -238,6 +248,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         // #169: record this world sheet BEFORE a deep-link camera is applied, so the settle
         // that camera triggers can redraft a region over the SAME base world (cache hit).
         glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
+        syncHash(); // #192: re-sync after the arms, so the address converges every settle
         // #165: restore a deep link's camera once the first chart (and so the viewport) is
         // up. One-shot: consumed and nulled so no later Draw re-frames. applyCamera clamps,
         // so a centre that would pull an edge past the viewport at that zoom stays in bounds.
@@ -283,7 +294,7 @@ wireControls({
   seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider,
   drawBtn: $("draw"), randomBtn: $("random"), downloadBtn: $("download"),
   scrubPlayBtn: $("scrub-play"), scrubRangeEl: $("scrub-range"),
-  touched, draw,
+  touched, draw, syncHash,
   committedRegion: () => glass.committedRegion(),
   lastChart: () => ({ svg: lastSvg, title: lastTitle }),
   togglePlay: lc.togglePlay, onManualScrub: lc.onManualScrub,
@@ -298,12 +309,9 @@ versoBtn.addEventListener("click", () => {
   // #165 reset policy: the flip snaps the camera home FIRST, so the sheet turns over at
   // k=1 rather than mid-magnification (the flip and the zoom share no transform, but a
   // zoomed sheet flipping reads wrong). Unlike draw()'s rebase(), reset() is right here:
-  // the SAME chart stays, we only re-home it. syncHash writes the now-home hash EXPLICITLY
-  // rather than trusting reset()'s debounced settle, so a link copied right after the flip
-  // never carries a stale cx/cy/k. reset() is a no-op when already home (turning back).
+  // the SAME chart stays, we only re-home it. reset() is a no-op when already home.
   glass.homeToWorld(); // #169: drop a committed region inset before the flip
   glass.reset();
-  syncHash();
   // #174: interaction interrupts the animation. A running sweep (10-16s measured, #185)
   // is snapped to its resting track (on both faces) before the sheet turns, so the back
   // never shows a half-drawn survey and no rAF loop narrates into #status behind a
@@ -317,6 +325,10 @@ versoBtn.addEventListener("click", () => {
   // exclusive, so at most one fires.
   lc.voyageSnapToRest();
   lc.scrubSnapToPresent();
+  // #165/#192: sync AFTER the snaps, explicit and synchronous rather than on a debounced
+  // settle, so a link copied right after the flip carries neither a stale cx/cy/k nor a
+  // mid-scrub year (the hash records the parked present).
+  syncHash();
   const flipped = toggleFlip(sheetEl);
   versoBtn.textContent = flipped ? "Turn back" : "Turn the sheet";
 });
@@ -327,17 +339,18 @@ chronicleChk.addEventListener("change", () => {
   if (chronicleChk.checked) {
     // #165 reset policy: entering the chronicle snaps the camera home first (zoom and the
     // scrubber are mutually exclusive per the epic; the scrub reveals baked layers on the
-    // home sheet). Explicit syncHash for the same reason as the verso flip: drop cx/cy/k
-    // now, not on a debounced settle. Leaving the chronicle needs no reset (already home).
+    // home sheet). Leaving the chronicle needs no reset (already home).
     // #169: the scrubber drives the WORLD chart's baked layers (a region carries no
     // chronicle), so drop a committed region inset first.
     glass.homeToWorld();
     glass.reset();
-    syncHash();
     // #119: chronicle and voyage are mutually exclusive; entering one leaves the other.
     if (voyageChk.checked) { voyageChk.checked = false; lc.exitVoyage(); }
     lc.applyScrub();
   } else lc.exitScrub();
+  // #192: sync AFTER the arm (scrubState now knows the parked year) and in both
+  // directions; still synchronous in the handler, so a copied link drops cx/cy/k now.
+  syncHash();
 });
 
 // #119 The Wayfarer's Passage: the toggle enters/leaves voyage mode without a redraw
@@ -358,6 +371,7 @@ voyageChk.addEventListener("change", () => {
     // button is never disabled by a sweep.
     lc.applyVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle, { skipSweep: isFlipped(sheetEl) });
   } else lc.exitVoyage();
+  syncHash(); // #192: the survey key follows the toggle, in both directions
 });
 
 await initWorker();
@@ -377,4 +391,9 @@ if (hashed.coast) touched.coast = true; // #137: a shared coast= link opens warp
 // #165: stash a deep link's camera BEFORE draw() (draw's own syncHash rewrites the hash to
 // home, so it must be read first). It is applied once the first chart lands (settle branch).
 pendingCamera = hashed.camera;
+// #192: the address's instrument. Tick the box only (no change event, so no interactive
+// arming ceremony fires): the first settle arms it silently through the existing re-arm
+// branch, applies pendingYear, then the camera. A restored link is not an arming gesture.
+if (hashed.live?.kind === "survey") voyageChk.checked = true;
+if (hashed.live?.kind === "year") { chronicleChk.checked = true; pendingYear = hashed.live.year; }
 draw();
