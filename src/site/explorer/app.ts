@@ -82,6 +82,7 @@ const lc = createLivingChart({
     range: $<HTMLInputElement>("scrub-range"),
     year: $("scrub-year"),
     strip: $("chronicle-strip"),
+    onPark: () => syncHash(), // #192: Play's parks are the one un-evented rest
   },
   voyageLog: { panel: $("voyage-log"), sig: $("voyage-log-sig"), strip: $("voyage-log-strip") },
   restingTrackSink: {

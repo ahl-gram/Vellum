@@ -14,7 +14,9 @@ export type Live = { kind: "survey" } | { kind: "year"; year: number };
 // hand-edited value must never throw. Out-of-range years are NOT clamped here;
 // `scrubTo` in `src/site/living-chart/chronicle.ts` parks them at the range boundary.
 // Both keys at once is a nonsensical set and is ignored WHOLE, the camera's
-// discipline in `readHash` in `src/site/explorer/hash-sync.ts`.
+// discipline in `readHash` in `src/site/explorer/hash-sync.ts`. The survey gate is
+// presence-only, so `survey=<anything>` reads as the bare flag today (the writer
+// self-heals the spelling); a future mid-sweep reader would tighten this.
 export function parseLive(params: URLSearchParams): Live | null {
   const hasSurvey = params.has("survey");
   const yearRaw = params.get("year");

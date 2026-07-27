@@ -129,8 +129,8 @@ export function wireControls(deps: ControlsDeps): void {
   // Chronicle scrubber controls (#54): Play/Pause runs the event-proportional sweep; a
   // manual drag pauses Play and rebases it so the next Play restarts from the beginning.
   // #192: the hash records the year on RELEASE (change), never per input frame, so a
-  // drag is one replaceState, not hundreds; Play's parked year converges on the next
-  // sync trigger (a draw, a flip, a toggle, a camera settle).
+  // drag is one replaceState, not hundreds; Play's parks reach the hash through the
+  // engine's onPark seam (paintScrub moves the slider programmatically, no events).
   deps.scrubPlayBtn.addEventListener("click", deps.togglePlay);
   deps.scrubRangeEl.addEventListener("input", deps.onManualScrub);
   deps.scrubRangeEl.addEventListener("change", deps.syncHash);

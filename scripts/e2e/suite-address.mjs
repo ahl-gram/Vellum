@@ -43,7 +43,7 @@ export async function run(ctx) {
       roads:roads?getComputedStyle(roads).display:"(no-el)",vis,status:document.getElementById("status").textContent};
   })()`);
   check(
-    `A1 a year=${midYear} deep link restores the chronicle at rest on that year`,
+    "A1 a year=N deep link restores the chronicle at rest on that year",
     a1.checked && a1.panelShown && a1.val === midYear && a1.readout === `year ${midYear}` &&
       a1.roads === "none" && a1.vis > 0 && a1.vis < sm.count && a1.status === "",
     JSON.stringify({ a1, midYear, count: sm.count }),
@@ -166,6 +166,35 @@ export async function run(ctx) {
       new URLSearchParams(a7drag).get("year") === String(midYear) &&
       !/(^|&)year=/.test(a7off),
     JSON.stringify({ a7on, a7drag, a7off }),
+  );
+
+  // A7b: Play's parks are the one path where the year moves with no input/change event
+  // (paintScrub writes the slider programmatically), so the engine's onPark seam must
+  // write the address when the sweep self-pauses at the present. Without it, a reader
+  // who watches Play run and copies the link shares the pre-Play year: the chart rests
+  // at the present while the hash still says the old year.
+  const a7bset = await evaluate(`(()=>{
+    const chk=document.getElementById("chronicle");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    const s=document.getElementById("scrub-range");s.value="${midYear}";
+    s.dispatchEvent(new Event("input",{bubbles:true}));
+    s.dispatchEvent(new Event("change",{bubbles:true}));
+    document.getElementById("scrub-play").click();
+    return location.hash.slice(1);
+  })()`);
+  let a7bParked = null;
+  for (let i = 0; i < 120; i++) {
+    a7bParked = await evaluate(`(()=>({val:Number(document.getElementById("scrub-range").value),
+      play:document.getElementById("scrub-play").textContent,
+      year:new URLSearchParams(location.hash.slice(1)).get("year")}))()`);
+    if (a7bParked.play === "Play" && a7bParked.val === sm.present) break;
+    await sleep(100);
+  }
+  await evaluate(`(()=>{const chk=document.getElementById("chronicle");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  check(
+    "A7b Play's auto-park at the present re-writes the address (no stale pre-Play year)",
+    new URLSearchParams(a7bset).get("year") === String(midYear) &&
+      !!a7bParked && a7bParked.val === sm.present && a7bParked.year === String(sm.present),
+    JSON.stringify({ a7bset, a7bParked, present: sm.present }),
   );
 
   // A9: prefers-reduced-motion lands the deep link on the target frame with no sweep:
