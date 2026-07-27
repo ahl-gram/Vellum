@@ -49,21 +49,12 @@ class El {
     this.tagName = tag.toUpperCase();
   }
 
-  // `id` and `className` are ATTRIBUTE accessors, not plain fields, exactly as the DOM
-  // reflects them: the no-ids guard below reads attrs, so a stray `el.id = "map"` has
-  // to land somewhere the guard can see it.
-  get id(): string {
-    return this.attrs.get("id") ?? "";
-  }
-  set id(v: string) {
-    this.attrs.set("id", String(v));
-  }
-  get className(): string {
-    return [...this.classes].join(" ");
-  }
-  set className(v: string) {
-    this.classes = new Set(v.split(/\s+/).filter(Boolean));
-  }
+  // `id` reflects to the ATTRIBUTE, not a plain field: the no-ids guard reads attrs,
+  // so a stray `el.id = "map"` has to land where the guard can see it.
+  get id(): string { return this.attrs.get("id") ?? ""; }
+  set id(v: string) { this.attrs.set("id", String(v)); }
+  get className(): string { return [...this.classes].join(" "); }
+  set className(v: string) { this.classes = new Set(v.split(/\s+/).filter(Boolean)); }
   get classList() {
     const set = this.classes;
     const toggle = (c: string, on?: boolean): boolean => {
@@ -103,15 +94,9 @@ class El {
     this.#adopt(kids);
     this.children = [...kids];
   }
-  setAttribute(name: string, v: string): void {
-    this.attrs.set(name, String(v));
-  }
-  getAttribute(name: string): string | null {
-    return this.attrs.get(name) ?? null;
-  }
-  removeAttribute(name: string): void {
-    this.attrs.delete(name);
-  }
+  setAttribute(name: string, v: string): void { this.attrs.set(name, String(v)); }
+  getAttribute(name: string): string | null { return this.attrs.get(name) ?? null; }
+  removeAttribute(name: string): void { this.attrs.delete(name); }
   remove(): void {
     const p = this.parentNode;
     if (!p) return;
@@ -341,6 +326,16 @@ test("the frame's log never nests a scroller, at any width (#219 acceptance, dec
     "no max-height cap: the log is bounded by construction (14 events + ~24 legs), not by a scrollbar",
   );
   assert.doesNotMatch(css, /@media[^{]*max-width/, "no narrow-viewport special case: one layout, ratified 2026-07-27");
+
+  // Nor does it push the page sideways, which is the same scroll-trap by another door.
+  // Measured at a REAL 320px viewport over CDP (Brave's --window-size does not shrink
+  // the layout viewport: it reports clientWidth 500 for --window-size 390). Before
+  // these two declarations the instrument row overflowed to scrollWidth 355 on a 320px
+  // screen, with span.rf-year pushed past the edge: a flex item defaults to
+  // min-width:auto and refuses to shrink below min-content, and a range input's
+  // intrinsic width is about 129px. Both halves are load-bearing.
+  assert.match(css, /\.rf-instrument\s*\{[^}]*flex-wrap:\s*wrap/, "the instrument wraps instead of overflowing");
+  assert.match(css, /\.rf-range\s*\{[^}]*min-width:\s*0/, "the slider may shrink below its intrinsic width");
 
   // ...and this sub rewires nothing: the Explorer keeps the panels it has today.
   const explorer = read("public/explorer/index.css");

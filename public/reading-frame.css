@@ -36,11 +36,18 @@
 /* The instrument slot: whatever the active subsystem exposes, and no maker chrome.
    The chronicle puts Play, the year slider and the readout here; the voyage has no
    instrument, so its log stands alone and the slot simply is not there. */
-.rf-instrument { display: flex; align-items: center; gap: 0.8rem;
+   The row WRAPS, and the slider is allowed to shrink. Both halves are load-bearing and
+   were found by measuring a real 320px viewport (an iPhone SE, a folded Galaxy cover
+   screen): a flex item defaults to `min-width: auto` and so refuses to go below its
+   min-content width, and a range input's intrinsic width is around 129px. Play plus
+   slider plus the year readout could not fit, so the row pushed the whole PAGE sideways
+   to a 355px scrollWidth. A reading room that scrolls horizontally on a phone is worse
+   than the nested scroller the ratified decision removed. */
+.rf-instrument { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
   padding: 0.7rem 1rem; background: var(--parchment-panel);
   border: 1px solid var(--line-tan); border-radius: 6px 6px 0 0; }
 .rf-play { min-width: 5.2rem; }
-.rf-range { flex: 1; accent-color: var(--ink-brown); }
+.rf-range { flex: 1 1 8rem; min-width: 0; accent-color: var(--ink-brown); }
 .rf-year { font-style: italic; color: var(--ink-brown);
   font-variant-numeric: tabular-nums; min-width: 5rem; text-align: right; }
 
