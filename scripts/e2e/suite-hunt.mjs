@@ -266,30 +266,38 @@ export async function run(ctx) {
     JSON.stringify(hg1),
   );
 
-  // Frame the quarry at k=2 (centered, clamped) and hand back its on-screen point plus the
-  // viewport corner farthest from it (a guaranteed miss). getBoundingClientRect reflects the
-  // live transform, so the quarry's screen point is fx/fy of the transformed svg box.
-  const frameQuarry = (k) => evaluate(`(()=>{
+  // Frame a chart point (its sheet fractions) at k=2 and hand back its on-screen point plus
+  // the viewport centre. getBoundingClientRect reflects the live transform, so the point is
+  // read from the transformed svg box and the tap lands true whatever the controller did to
+  // the requested translate.
+  //
+  // The MISS tap frames and taps the CAPITAL, not a viewport corner. classifyClick snaps
+  // every tap to the NEAREST settlement with no distance cap, so the only point that can
+  // never snap to the quarry is another settlement's own position (the same guarantee H3
+  // leans on at k=1: chooseQuarry draws villages first, then the non-capital fallback, so
+  // the capital is never the quarry). The original derivation tapped "the corner farthest
+  // from the quarry on screen", which is a per-day lottery: on world 20260728 the far
+  // corner's nearest mark WAS the quarry (Zonva, alone in a sparse top-left), and with the
+  // quarry centred all four corners tie on screen distance, so the winner fell to sub-pixel
+  // layout noise: linux CI picked the solving corner, a Mac picked a safe one. One guess,
+  // "solved", HG2+HG3 red on main and unreproducible locally (#304). Do not bring the
+  // corner scan back.
+  const framePoint = (k, fx, fy) => evaluate(`(()=>{
     const vp=document.getElementById("map-viewport"),W=vp.clientWidth,H=vp.clientHeight,k=${k};
-    window.__vellumZoomTo({k,x:W*(0.5-k*${tgt.hit.fx}),y:H*(0.5-k*${tgt.hit.fy})});
+    window.__vellumZoomTo({k,x:W*(0.5-k*${fx}),y:H*(0.5-k*${fy})});
     const svg=document.querySelector("#map svg"),sr=svg.getBoundingClientRect(),vr=vp.getBoundingClientRect();
-    const qx=Math.round(sr.left+${tgt.hit.fx}*sr.width), qy=Math.round(sr.top+${tgt.hit.fy}*sr.height);
-    let mx=0,my=0,bd=-1;
-    for(const fx of [0.12,0.88]) for(const fy of [0.12,0.88]){
-      const cx=vr.left+fx*vr.width, cy=vr.top+fy*vr.height, d=Math.hypot(cx-qx,cy-qy);
-      if(d>bd){bd=d;mx=Math.round(cx);my=Math.round(cy);}
-    }
-    return{qx,qy,mx,my,cx:Math.round(vr.left+vr.width/2),cy:Math.round(vr.top+vr.height/2),state:window.__vellumZoomState()};
+    return{px:Math.round(sr.left+${fx}*sr.width),py:Math.round(sr.top+${fy}*sr.height),
+      cx:Math.round(vr.left+vr.width/2),cy:Math.round(vr.top+vr.height/2),state:window.__vellumZoomState()};
   })()`);
 
   await evaluate(`document.getElementById("map-viewport").scrollIntoView({block:"center"})`);
   await sleep(60);
-  const fr = await frameQuarry(2);
+  const fr = await framePoint(2, tgt.miss.fx, tgt.miss.fy);
 
   // HG2 (AC2): a MISS tap while zoomed drops a sounding at the tapped spot. The sounding is a
   // %-positioned overlay on #map, so it rides the transform and lands under the finger; it
   // must be over #map (never inside the SVG, so no chart bytes move) and must not solve.
-  await mouseTap(fr.mx, fr.my);
+  await mouseTap(fr.px, fr.py);
   await sleep(80);
   const hg2 = await evaluate(`(()=>{const d=document.querySelector("#map .sounding-dot");return{dots:document.querySelectorAll("#map .sounding-dot").length,inSvg:!!document.querySelector("#map svg .sounding-dot"),solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent};})()`);
   check(
@@ -312,13 +320,14 @@ export async function run(ctx) {
     JSON.stringify({ before, after }),
   );
 
-  // HG4 (AC2): a clean tap on the quarry resolves the guess at zoom. Re-frame (the drag panned
-  // the quarry off-centre), then tap its on-screen point: the guess-click math is ratio-based
-  // against getBoundingClientRect (which reflects the transform), so it snaps to the quarry and
-  // solves exactly as it would at k=1 -- proving the synthesized tap at the transformed screen
-  // position lands true. This is the counterpart to HG3: a real tap DOES count.
-  const fr2 = await frameQuarry(2);
-  await mouseTap(fr2.qx, fr2.qy);
+  // HG4 (AC2): a clean tap on the quarry resolves the guess at zoom. Frame the quarry (HG2/HG3
+  // framed the capital, and the drag panned that framing further), then tap its on-screen
+  // point: the guess-click math is ratio-based against getBoundingClientRect (which reflects
+  // the transform), so it snaps to the quarry and solves exactly as it would at k=1 -- proving
+  // the synthesized tap at the transformed screen position lands true. This is the counterpart
+  // to HG3: a real tap DOES count.
+  const fr2 = await framePoint(2, tgt.hit.fx, tgt.hit.fy);
+  await mouseTap(fr2.px, fr2.py);
   await sleep(120);
   const hg4 = await evaluate(`(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,star:!!document.querySelector("#map .hunt-star")}))()`);
   check(
