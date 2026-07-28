@@ -331,7 +331,11 @@ export function createAges(deps: AgesDeps) {
     setPlayLabel(true);
     const tick = (now: number) => {
       if (!ages || !ages.playing) return;
-      const elapsed = now - begin;
+      // Clamped below the resume point: a rAF timestamp is vsync-aligned and can
+      // PRECEDE the performance.now() that anchored `begin`, so an unclamped first
+      // frame can land a hair before elapsed0 and step the year BACKWARD across a
+      // rounding boundary (a one-frame flicker; CI's slower VM caught it in e2e S9).
+      const elapsed = Math.max(now - begin, elapsed0);
       if (elapsed >= totalMs) {
         paintPos({ chamber: "ages", year: range.max }, { postLog: true });
         pause(); // auto-park at the present, button back to "Play"
