@@ -1,10 +1,11 @@
 // Wayfarer's Passage: real routes + the mode-aware marker (W17-W21, #120), the margin log
-// (W22-W24, #121), and the water-span glyph handoff (W25-W27, #181). The pure rules (mode
-// assignment, road/sea geometry, the tilt cap, anti-flicker facing, the span math, and the
-// deterministic mode-aware prose) are proven exhaustively in node:test; these prove they are
-// WIRED into the live overlay + panel. Self-bases on seed 526413615 (a world that both sails
-// and rides), visits seed 39 (the worst inland handoffs), and restores the clean seed-42 base
-// for the suites that follow. Split from suite-voyage.mjs; W prefix kept.
+// (W22-W24, #121), the water-span glyph handoff (W25-W27, #181), and the straight fallback's
+// land walk (W28, #298). The pure rules (mode assignment, road/sea geometry, the tilt cap,
+// anti-flicker facing, the span math, and the deterministic mode-aware prose) are proven
+// exhaustively in node:test; these prove they are WIRED into the live overlay + panel.
+// Self-bases on seed 526413615 (a world that both sails and rides), visits seed 39 (the
+// worst inland handoffs) and seed 430445745 (the roadless-island fixture), and restores the
+// clean seed-42 base for the suites that follow. Split from suite-voyage.mjs; W prefix kept.
 export async function run(ctx) {
   const { evaluate, check, shoot, waitSettled, sleep } = ctx;
   // ---------------------------------------------------------------------------
@@ -320,11 +321,74 @@ export async function run(ctx) {
   })()`);
   await shoot("explorer-voyage-handoff.png");
 
+  // W28 (#298): a straight fallback leg walks the land, never across open water.
+  // Seed 430445745: ports on THREE landmasses with roads only on the capital's, so most
+  // legs degrade to the roadless-landmass fallback; before #298 the worst drawn chord ran
+  // 33 continuous cells over open sea with the rider glyph on it. Legs are selected by
+  // the metric asserted (mode + terrain under the drawn track), never by leg index: the
+  // #298 fix itself reordered this world's tour, and #309 (roads on settled secondary
+  // landmasses) will shrink its straight census again. The floor on straightCount is what
+  // keeps this check from going vacuous when that happens. The wet-run bound is 1.5 cells:
+  // the finest sampling measures 1.16 post-fix (the drawn line clipping just offshore of a
+  // jagged coast within the RDP budget, as road legs always have), against 33.4 pre-fix;
+  // every wet sample sits within the tested RDP_EPSILON + 0.5 of land. The glyph clause is
+  // a smoke check that the overlay painted this fixture world, not a #298 assertion: a
+  // straight leg's mark is the rider by mode alone, before and after the fix.
+  await evaluate(`(()=>{
+    const voy=document.getElementById("voyage");
+    if(voy.checked){voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));}
+    document.getElementById("seed").value="430445745";
+    document.getElementById("draw").click();
+  })()`);
+  await waitSettled("voyage-298-draw");
+  await evaluate(`(()=>{const c=document.getElementById("voyage");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+
+  const w28 = await evaluate(`(async()=>{
+    const res=await window.__vellumRunJob({kind:"draw",seed:430445745,overrides:{},render:{style:"antique",widthPx:1500,legend:true,arms:false}});
+    const {gridW,gridH,land}=res.survey;
+    const legs=window.__vellumVoyageLegGeometry();
+    const margin=Math.round(1500*0.045);
+    const scale=(1500-2*margin)/(gridW-1);
+    const inv=(v)=>(v-margin)/scale;
+    const straight=legs.map((l,i)=>({l,i})).filter((x)=>x.l.mode==="straight");
+    let maxRun=0;
+    let longest={i:-1,len:0};
+    for(const {l,i} of straight){
+      const pts=l.points;
+      let run=0;
+      let legLen=0;
+      for(let j=1;j<pts.length;j++){
+        const a=pts[j-1],b=pts[j];
+        const len=Math.hypot(b.x-a.x,b.y-a.y)/scale;
+        legLen+=len;
+        const steps=Math.max(2,Math.ceil(len*4));
+        for(let k=0;k<=steps;k++){
+          const t=k/steps;
+          const gx=Math.round(inv(a.x+(b.x-a.x)*t));
+          const gy=Math.round(inv(a.y+(b.y-a.y)*t));
+          const sea=gx>=0&&gy>=0&&gx<gridW&&gy<gridH?land[gx+gy*gridW]===0:true;
+          if(sea){run+=len/steps;maxRun=Math.max(maxRun,run);}else{run=0;}
+        }
+      }
+      if(legLen>longest.len)longest={i,len:legLen};
+    }
+    // the mark mid-way along the longest straight leg is the rider, over land
+    window.__vellumVoyagePaintAt((longest.i+0.5)/legs.length);
+    const ship=document.querySelector("#map .voyage-ship");
+    const shown=(el)=>!!el&&el.getAttribute("display")!=="none";
+    return{straightCount:straight.length,maxRunCells:Number(maxRun.toFixed(2)),glyphMid:shown(ship)?"ship":"rider"};
+  })()`, true);
+  check("W28 seed 430445745: every straight fallback leg's track stays on land (#298)",
+    w28.straightCount >= 10 && w28.maxRunCells <= 1.5 && w28.glyphMid === "rider",
+    JSON.stringify(w28));
+  await shoot("explorer-voyage-straight-land.png");
+
   // Restore a clean, voyage-off, un-flipped, antique state for the suites that follow.
   await evaluate(`(()=>{const voy=document.getElementById("voyage");if(voy.checked){voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
   await evaluate(`(()=>{const s=document.getElementById("sheet");if(s.classList.contains("versoed"))document.getElementById("verso-turn").click();})()`);
   await sleep(120); // let any turn-back settle before the health checkpoint reads the page
-  // This suite draws seeds 526413615 and 39 (worlds that sail), so put seed 42 back:
+  // This suite draws seeds 526413615, 39 and 430445745 (worlds that sail), so put seed
+  // 42 back:
   // the suites that follow read a page they expect to be showing the golden world.
   await evaluate(`(()=>{document.getElementById("seed").value="42";const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await waitSettled("voyage-restore");

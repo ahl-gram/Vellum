@@ -120,6 +120,51 @@ test("a port off the road network takes road-to-nearest, then a straight hop", (
   assert.ok(l.points.some((p) => roadSet.has(`${p.x},${p.y}`)), "never touched the road");
 });
 
+test("an off-network port joins the road along the shore, never chording across the bay (#298)", () => {
+  // The splice half of #298: `snap` finds the road by walking LAND, and the leg now
+  // keeps that walk instead of only its endpoint. No generated world currently
+  // exercises this branch (every real straight leg is the roadless-landmass case),
+  // so this picture is its only guard: the lone road cell sits across a wide bay
+  // from port B, and the old endpoint-only chord ran straight down open water.
+  const s = survey([
+    "=####",
+    "....#",
+    "....#",
+    "....#",
+    "#####",
+  ]);
+  const routed = routeVoyage([leg(0, 1)], [site(0, 0, 0), site(1, 0, 4)], s);
+  const l = routed[0]!;
+  assert.equal(l.mode, "straight");
+  assert.deepEqual(l.points[0], { x: 0, y: 0 });
+  assert.deepEqual(l.points[l.points.length - 1], { x: 0, y: 4 });
+  assert.ok(l.points.length > 2, "the leg bends around the bay rather than chording it");
+  const BOUND = RDP_EPSILON + 0.5;
+  const nearestLand = (x: number, y: number) => {
+    let best = Infinity;
+    for (let dy = -3; dy <= 3; dy++) {
+      for (let dx = -3; dx <= 3; dx++) {
+        const gx = Math.round(x) + dx;
+        const gy = Math.round(y) + dy;
+        if (gx < 0 || gx >= s.gridW || gy < 0 || gy >= s.gridH) continue;
+        if (s.land[gx + gy * s.gridW] === 1) best = Math.min(best, Math.hypot(x - gx, y - gy));
+      }
+    }
+    return best;
+  };
+  for (let i = 1; i < l.points.length; i++) {
+    const a = l.points[i - 1]!;
+    const b = l.points[i]!;
+    const steps = Math.max(2, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) * 4));
+    for (let k = 0; k <= steps; k++) {
+      const t = k / steps;
+      const x = a.x + (b.x - a.x) * t;
+      const y = a.y + (b.y - a.y) * t;
+      assert.ok(nearestLand(x, y) <= BOUND, `bookend strays into open water at ${x.toFixed(1)},${y.toFixed(1)}`);
+    }
+  }
+});
+
 test("an island port unreachable by road takes a sea leg, not a straight one", () => {
   const s = survey([
     "==..#",
@@ -253,7 +298,6 @@ test("a simplified leg never strays past the tolerance from terrain of its own k
   const isWaterVertex = (p: { x: number; y: number }) => s.land[p.x + p.y * s.gridW] === 0;
 
   for (const l of routed) {
-    if (l.mode === "straight") continue;
     // A sea leg's two ends are the LAND ports it sails between, joined to the water by a
     // short overland stub. The invariant concerns the OPEN WATER body between them, so
     // scan from the first water vertex to the last.
@@ -264,6 +308,9 @@ test("a simplified leg never strays past the tolerance from terrain of its own k
       hi = l.points.length - 1 - [...l.points].reverse().findIndex(isWaterVertex);
       if (lo < 1 || hi <= lo) continue;
     }
+    // A straight leg's endpoints are the land ports themselves, so every chord counts,
+    // including the first (a two-vertex chord would otherwise scan nothing).
+    if (l.mode === "straight") lo = 0;
     for (let i = lo + 1; i <= hi; i++) {
       const a = l.points[i - 1]!;
       const b = l.points[i]!;
@@ -274,8 +321,13 @@ test("a simplified leg never strays past the tolerance from terrain of its own k
         const y = a.y + (b.y - a.y) * t;
         if (l.mode === "road") {
           assert.ok(nearest(x, y, (c) => road[c] === 1) <= BOUND, `road leg strays at ${x},${y}`);
-        } else {
+        } else if (l.mode === "sea") {
           assert.ok(nearest(x, y, (c) => s.land[c] === 0) <= BOUND, `sea leg strays at ${x},${y}`);
+        } else {
+          // #298: a straight leg is an overland fallback, so its terrain of kind is LAND.
+          // This seed has no straight legs; the degraded fixture with teeth is the
+          // seed 430445745 test below.
+          assert.ok(nearest(x, y, (c) => s.land[c] === 1) <= BOUND, `straight leg strays at ${x},${y}`);
         }
       }
     }
@@ -351,6 +403,56 @@ test("on real worlds, EVERY cross-landmass leg sails, never degrading to a strai
       const b = byIdx.get(l.toIdx)!;
       const crosses = comp[a.gx + a.gy * s.gridW] !== comp[b.gx + b.gy * s.gridW];
       if (crosses) assert.equal(l.mode, "sea", `seed ${seed}: ${a.name} -> ${b.name} crosses water as "${l.mode}"`);
+    }
+  }
+});
+
+test("a straight fallback leg walks the land, never across open water (#298)", () => {
+  // Seed 430445745: ports sit on THREE landmasses while roads exist only on the
+  // capital's (`buildRoads` in `src/society/roads.ts` grows one network from the
+  // capital and skips unreachable islands), so 17 of this world's 24 straight-line
+  // legs degrade to the roadless-landmass fallback. Before #298 the worst degraded
+  // chord ran 33 continuous cells over open water with a rider drawn across it.
+  // NOTE #309 (roads on settled secondary landmasses) will shrink this fixture's
+  // straight population when it lands; the floor below is what keeps this test from
+  // going vacuous rather than a claim about the exact census.
+  const BOUND = RDP_EPSILON + 0.5;
+  const { s, routed } = realWorld(430445745);
+  const straight = routed.filter((l) => l.mode === "straight");
+  assert.ok(
+    straight.length >= 10,
+    `the degraded fixture should have straight legs to assert on, got ${straight.length}`,
+  );
+
+  const nearestLand = (x: number, y: number) => {
+    let best = Infinity;
+    const cx = Math.round(x);
+    const cy = Math.round(y);
+    for (let dy = -3; dy <= 3; dy++) {
+      for (let dx = -3; dx <= 3; dx++) {
+        const gx = cx + dx;
+        const gy = cy + dy;
+        if (gx < 0 || gx >= s.gridW || gy < 0 || gy >= s.gridH) continue;
+        if (s.land[gx + gy * s.gridW] === 1) best = Math.min(best, Math.hypot(x - gx, y - gy));
+      }
+    }
+    return best;
+  };
+
+  for (const l of straight) {
+    for (let i = 1; i < l.points.length; i++) {
+      const a = l.points[i - 1]!;
+      const b = l.points[i]!;
+      const steps = Math.max(2, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) * 4));
+      for (let k = 0; k <= steps; k++) {
+        const t = k / steps;
+        const x = a.x + (b.x - a.x) * t;
+        const y = a.y + (b.y - a.y) * t;
+        assert.ok(
+          nearestLand(x, y) <= BOUND,
+          `straight leg ${l.fromIdx} -> ${l.toIdx} strays into open water at ${x.toFixed(1)},${y.toFixed(1)}`,
+        );
+      }
     }
   }
 });

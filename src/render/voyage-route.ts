@@ -28,13 +28,20 @@ import type { VoyageLeg } from "./voyage.ts";
  * is what lets the overlay swap rider <-> ship at the water's edge instead of
  * shipping the whole leg.
  *
- * Measured over seeds 1..40 with the travel-ordered ROUND-TRIP itinerary (#275, re-taken
- * 2026-07-24; 945 legs): 660 road (~70%), 237 sea (~25%), 48 straight (~5%). Of the sea
- * legs, 56 (~24%) are true cross-landmass crossings (the ordering makes island visits
- * adjacent, so a crossing is spent once, not scattered) and the rest are coastal
- * shortcuts the survey sails rather than ride a long inland road around
- * (SAIL_WHEN_ROAD_EXCEEDS). The tally includes one closing leg per world: 35 of the 40
- * ride home, 5 sail, and none of them hands off inland.
+ * Measured over seeds 1..40 with the travel-ordered ROUND-TRIP itinerary (re-taken
+ * 2026-07-28 under #298; 945 legs): 657 road (~70%), 242 sea (~26%), 46 straight (~5%).
+ * Of the sea legs, 59 (~24%) are true cross-landmass crossings (the ordering makes
+ * island visits adjacent, so a crossing is spent once, not scattered) and the rest are
+ * coastal shortcuts the survey sails rather than ride a long inland road around
+ * (SAIL_WHEN_ROAD_EXCEEDS). The tally includes one closing leg per world: 34 of the 40
+ * ride home, 6 sail, and none of them hands off inland.
+ *
+ * Since #298 a straight leg WALKS THE LAND (straightFallback below), so its raw chain
+ * never enters sea; the drawn line can still clip just offshore of a jagged coast
+ * within the RDP budget, exactly as road legs always have (worst measured sample sits
+ * 0.94 cells from land, seed 25, against the tested RDP_EPSILON + 0.5 bound). #298 also
+ * moved legLength on degraded pairs, which reordered the tour on affected worlds and
+ * shifted the census from #275's 660 / 237 / 48 (closing 35 / 5).
  *
  * Any per-leg number taken before #275 is VOID: the round trip both adds a leg per world
  * and reorders the tour on a closed objective, so which port pairs are adjacent changes
@@ -91,13 +98,16 @@ export const RDP_EPSILON = 0.75;
  * ridden all the way around (Alex, 2026-07-10). The survey rides by default and takes ship
  * only when the road is at least this many times the coastal sea route. 1.3 catches the
  * egregious backtracks (a 2.2x inland loop on seed 3084684951, Gogkalei -> Dreigbra) while
- * leaving ordinary coastal roads as rides. Measured over seeds 1..40 it sails ~25% of legs
- * (237 of 945 under #275's round trip; ~24% under the open path it replaced):
- * fewer than a naive "always take the shorter" (~50% on an island world) because the embark
- * gate below rejects ports whose shared ocean sits behind a nearer pond. A one-line knob:
- * raise it for more riding, lower it for more sailing.
+ * leaving ordinary coastal roads as rides. Measured over seeds 1..40 it sails ~26% of legs
+ * (242 of 945 under the shipped router, re-measured 2026-07-28 after #298's reorder;
+ * 237 under #275's itinerary, ~24% under the open path that replaced): fewer than a naive
+ * "always take the shorter" (~50% on an island world) because the embark gate below rejects
+ * ports whose shared ocean sits behind a nearer pond. A one-line knob: raise it for more
+ * riding, lower it for more sailing.
  *
- * Reviewed under #185 (2026-07-25) and kept. Sea legs of 945 over seeds 1..40 by value:
+ * Reviewed under #185 (2026-07-25) and kept. Sea legs of 945 over seeds 1..40 by value,
+ * swept on #275's PRE-#298 itinerary (#298's reorder moved the shipped row to 242; the
+ * alternative rows keep their #185 date and the shape argument below is unchanged):
  * 1.0 -> 329, 1.15 -> 272, 1.3 -> 237, 1.5 -> 199, 2.0 -> 152, 3.0 -> 110. The naive
  * figure above re-measures at exactly 50.0% on the isle fixture, so that claim survived
  * both itinerary reorders. What settles the value is not taste, though. From 1.5 up, the
@@ -131,8 +141,10 @@ export const COAST_MAX_HOPS = 2;
  *  margin and it is exact, not comfortable: swept to 4 (#185, 2026-07-25) the leanest
  *  "genuine" handoff over seeds 1..40 lands at precisely 4.00 cells, and at 6 the handoff
  *  count goes 8 -> 11, every new one a coastal shortcut wearing #181's ride-sail-ride
- *  prose. Lowering is safe (2 routes all but identically, 236 sea legs of 945 against 237,
- *  and tightens the worst coastal stub from 3.00 to 1.41); raising is not. */
+ *  prose. Lowering is safe (2 routes all but identically, 236 sea legs of 945 against the
+ *  237 of that same pre-#298 sweep, and tightens the worst coastal stub from 3.00 to 1.41);
+ *  raising is not. (Sweep numbers are #185's, taken on #275's itinerary; #298's reorder
+ *  moved the shipped baseline to 242 sea legs without moving any handoff number.) */
 export const COAST_EMBARK_MAX = 3;
 
 /**
@@ -221,8 +233,9 @@ export function prepareVoyageRouter(sites: ReadonlyArray<Site>, survey: Survey):
   const walkLeg = (from: number, to: number): { mode: LegMode; cells: ReadonlyArray<number> } => {
     // 1. Different landmasses: the survey must sail. The note here used to claim every
     //    cross-landmass leg has both endpoints within 2 cells of water. Re-measured under
-    //    #275's round trip (#185, 2026-07-25) that premise no longer holds: 1 of the 56
-    //    crossings over seeds 1..40 embarks 28 cells inland (seed 35, leg 16 -> 20). Its
+    //    #275's round trip (#185, 2026-07-25) that premise no longer holds: 1 of the
+    //    crossings over seeds 1..40 (56 then, 59 after #298's reorder, re-measured
+    //    2026-07-28) embarks 28 cells inland (seed 35, leg 16 -> 20). Its
     //    conclusion does hold, and for a better reason than the old one. No composite
     //    road-to-coast-to-road leg is needed, because #181 measures that overland stub as
     //    an inland handoff and the mark RIDES it, so no ship sails over dry land.
@@ -401,11 +414,18 @@ function launchesByWaterBody(
 }
 
 /**
- * Ride the road as far as it reaches, then hop straight to the stranded port: snap each
+ * Ride the road as far as it reaches, then walk overland to the stranded port: snap each
  * off-network endpoint to its nearest road cell OVER LAND (never across a strait, which
  * an unrestricted search would happily do), walk the road between the snapped cells, and
- * bookend with the true ports. A landmass with no roads at all degrades to a plain
- * straight line, which is what a world with no capital gets for every leg.
+ * join the ports to the road along the same land walk the snap already found.
+ *
+ * #298: a landmass with no road at all walks the LAND port to port instead of degrading
+ * to a bare chord. Roads only ever grow from the capital (`buildRoads` in
+ * `src/society/roads.ts` skips islands it cannot reach, see #309), so every port pair on
+ * a roadless secondary island lands here, and the old [from, to] chord ignored terrain
+ * and drew a RIDER gliding over open sea. The chord survives only as the true last
+ * resort: a cross-landmass call, where no land walk can exist (`walkLeg` reaches here
+ * only when seaCrossing finds no shared water, which no generated world has produced).
  */
 function straightFallback(
   w: number,
@@ -415,17 +435,31 @@ function straightFallback(
   isRoad: (c: number) => boolean,
   isLand: (c: number) => boolean,
 ): number[] {
-  const snap = (cell: number): number | null => {
-    if (isRoad(cell)) return cell;
-    const reach = bfsPath(w, h, cell, isRoad, isLand);
-    return reach ? (reach[reach.length - 1] as number) : null;
+  // The whole reach chain [cell, ...land walk..., roadCell], not just its endpoint, so
+  // the port-to-road bookends follow land instead of chording across a bay.
+  const snap = (cell: number): ReadonlyArray<number> | null => {
+    if (isRoad(cell)) return [cell];
+    return bfsPath(w, h, cell, isRoad, isLand);
   };
-  const snapFrom = snap(from);
-  const snapTo = snap(to);
-  if (snapFrom === null || snapTo === null) return [from, to];
-  const walk = bfsPath(w, h, snapFrom, (c) => c === snapTo, isRoad);
-  if (!walk) return [from, to];
-  return [from, ...walk, to];
+  const reachFrom = snap(from);
+  if (reachFrom) {
+    const reachTo = snap(to);
+    if (reachTo) {
+      const snapFrom = reachFrom[reachFrom.length - 1] as number;
+      const snapTo = reachTo[reachTo.length - 1] as number;
+      const walk = bfsPath(w, h, snapFrom, (c) => c === snapTo, isRoad);
+      // The junction cells repeat across the three chains; route() dedupes them, and
+      // chainLength counts a repeated cell as zero distance, so legLength is unhurt.
+      if (walk) return [...reachFrom, ...walk, ...[...reachTo].reverse()];
+    }
+  }
+  // No road reachable from one port (a roadless landmass), or the snapped cells sit in
+  // different road components: walk the land itself. On one landmass this cannot fail
+  // (land is labelled 4-connected while bfsPath walks 8-connected, and an 8-connected
+  // walk within a 4-connected component always exists), so only the cross-landmass
+  // caller above ever falls through to the chord.
+  const landWalk = bfsPath(w, h, from, (c) => c === to, isLand);
+  return landWalk ? [...landWalk] : [from, to];
 }
 
 /** Drop repeated cells so a port that already sits on its launch cell is not doubled. */
