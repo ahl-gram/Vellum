@@ -29,8 +29,10 @@ import type { Camera } from "./camera.ts";
 import {
   $, seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider,
   coastSlider, status, mapDiv, mapViewport, sheetEl, innerEl, caption, versoEl, versoBtn,
-  chronicleChk, voyageChk, orderLink, hashControls,
+  agesChk, orderLink, hashControls,
 } from "./elements.ts";
+import type { AgesPos } from "../living-chart/index.ts";
+import type { Live } from "./address.ts";
 
 let lastSvg = "";
 let lastTitle = "";
@@ -52,10 +54,11 @@ const touched = { land: false, coast: false };
 // left live here would re-frame the user on every subsequent Draw. Nulled the moment it
 // is applied.
 let pendingCamera: Camera | null = null;
-// #192: the address's year, the chronicle half of a deep link. Same one-shot discipline:
-// applyScrub parks every draw at the present, so this is consumed by the first settle
-// only; liveNow reads it so the address survives draw()'s early syncHash.
-let pendingYear: number | null = null;
+// #192/#220: the address's live key (bare `survey` or `year=N`), the instrument half of
+// a deep link. Same one-shot discipline: rearmAges parks every draw at the present, so
+// this is consumed by the first settle only (it becomes the arm's rest position);
+// liveNow reads it so the address survives draw()'s early syncHash.
+let pendingLive: Live | null = null;
 
 // Monotonic guard. drawGen is bumped by every draw; a draw's own result checks it,
 // so a fresh draw cancels a stale one (the chart that lands must always be the
@@ -81,10 +84,10 @@ const lc = createLivingChart({
     playBtn: $<HTMLButtonElement>("scrub-play"),
     range: $<HTMLInputElement>("scrub-range"),
     year: $("scrub-year"),
+    sig: $("scrub-sig"),
     strip: $("chronicle-strip"),
     onPark: () => syncHash(), // #192: Play's parks are the one un-evented rest
   },
-  voyageLog: { panel: $("voyage-log"), sig: $("voyage-log-sig"), strip: $("voyage-log-strip") },
   restingTrackSink: {
     paint: (points, viewBox) => paintVersoTrack(versoEl, points, viewBox),
     clear: () => clearVersoTrack(versoEl),
@@ -95,19 +98,20 @@ const lc = createLivingChart({
 let redraftEnabled = true;
 // #169: whether a settle should redraft. Semantic LOD is antique-only (the epic's ratified
 // decision); geometric zoom on the other three styles just writes the hash. Off while the
-// chronicle, the voyage, or the verso owns the sheet, and until a chart exists. Voyage is
-// excluded for the same reason as the chronicle: its track is a WORLD-survey overlay (world
-// coordinates, world roads), so a finer regional survey under it would carry a track that no
-// longer follows the roads it describes.
+// ages instrument or the verso owns the sheet, and until a chart exists. The instrument is
+// excluded because both of its chambers drive the WORLD chart: the chronicle half reveals
+// baked world layers a region does not carry, and the survey half's track is a WORLD
+// overlay (world coordinates, world roads) a finer regional sheet would orphan.
 function regionEligible(): boolean {
-  return redraftEnabled && styleSel.value === "antique" && !chronicleChk.checked && !voyageChk.checked && !isFlipped(sheetEl) && !!lastSvg;
+  return redraftEnabled && styleSel.value === "antique" && !agesChk.checked && !isFlipped(sheetEl) && !!lastSvg;
 }
 // #165/#169/#192: the ONE hash writer. Every trigger funnels through here so the hash
 // carries the complete current state, camera and live address included. writeHash drops
-// cx/cy/k when the camera is home and the live key when both instruments are off.
+// cx/cy/k when the camera is home and the live key when the instrument is off.
 function syncHash(): void {
+  const a = lc.agesState();
   writeHash(hashControls, touched.land, touched.coast, glass.cameraNow(),
-    liveNow({ survey: voyageChk.checked, chronicle: chronicleChk.checked, year: lc.scrubState()?.year ?? pendingYear }));
+    liveNow({ ages: agesChk.checked, chamber: a?.chamber ?? null, year: a?.year, pending: pendingLive }));
 }
 
 const glass = createGlass({
@@ -201,7 +205,10 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       // #116: a style change while flipped to the verso rebuilds it in place (see
       // below) instead of turning; the flip and the #131 turn must never both drive
       // #sheet-inner's rotateY. flipped is read at the swap, when the state is settled.
-      if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, chronicle: chronicleChk.checked, flipped: isFlipped(sheetEl) })) {
+      // #220: the turn stays suppressed while the CHRONICLE half holds the sheet (its
+      // per-glyph mutations cannot ride a turn); a survey-chamber rest keeps the turn,
+      // preserving the voyage's pre-fusion behaviour (pinned by e2e W16).
+      if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, chronicle: lc.agesState()?.chamber === "ages", flipped: isFlipped(sheetEl) })) {
         // #131 The style turn: the same world in a new dress. The sheet turns over,
         // and the overlay/scrub rebuild against the new chart only after it LANDS (so
         // the marks never rebuild over the outgoing chart). The turn suppresses the
@@ -210,12 +217,10 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => {
           if (myGen !== drawGen) return; // superseded while turning; the latest draw owns #map
           lc.buildPlaceOverlay(res.manifest);
-          if (chronicleChk.checked) lc.applyScrub();
-          else lc.clearScrub();
-          // #119: re-arm the voyage to the new chart, resting on the full track (only
-          // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
-          if (voyageChk.checked) lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
-          else lc.clearVoyage();
+          // #220: re-arm the instrument to the just-landed chart, parked at the present
+          // (only Play animates a story; a landing never replays one).
+          if (agesChk.checked) lc.rearmAges(res.manifest, res.survey, seed, res.subtitle, { quiet });
+          else lc.clearAges();
           glass.syncZoom(); // #164/#165: attach the zoom to the just-landed chart (every style)
           // #169: record the (re-dressed) world sheet so a settle can redraft over it.
           glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
@@ -229,22 +234,20 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         mapDiv.innerHTML = res.svg;
         lc.buildPlaceOverlay(res.manifest); // #53: marks + card, appended after innerHTML wipes #map
         if (!quiet) startArrival(mapDiv.querySelector("svg")); // #127: the arrival ceremony
-        // #54: if the chronicle toggle is on, re-apply the scrubber to THIS new world
-        // (fresh manifest, range, layers); applyScrub hides the just-rendered layers
-        // synchronously, so there is no flash of the present-day chart.
-        if (chronicleChk.checked) lc.applyScrub();
-        else lc.clearScrub();
-        // #192: the addressed year, one-shot, after applyScrub's park at the present.
-        // scrubTo clamps a hand-edited year and no-ops when the chronicle is off.
-        if (pendingYear !== null) { const y = pendingYear; pendingYear = null; lc.scrubTo(y); }
-        // #119: re-arm the voyage to the new chart, resting on the full track (only
-        // an explicit toggle-on animates the sweep). Mutually exclusive with chronicle.
+        // #220: re-arm the instrument to THIS new world. The default rest is the present
+        // park; a deep link's live key becomes the arm's rest, one-shot (#192). scrubTo's
+        // clamping lives in the engine, so a hand-edited year parks at the boundary.
         // #174: `quiet` rides along so a mid-drag re-arm leaves the back face alone; the
         // verso's ghost and its track must always come from the same draw.
         // #120: re-arm from THIS draw's survey, never lastSurvey. A sea-level drag moves the
         // waterline, so the roads and open water the router walks moved with it.
-        if (voyageChk.checked) lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
-        else lc.clearVoyage();
+        if (agesChk.checked) {
+          const rest: AgesPos | undefined =
+            pendingLive?.kind === "year" ? { chamber: "ages", year: pendingLive.year }
+            : pendingLive?.kind === "survey" ? { chamber: "survey", t: 1 } : undefined;
+          pendingLive = null;
+          lc.rearmAges(res.manifest, res.survey, seed, res.subtitle, { quiet, rest });
+        } else lc.clearAges();
         glass.syncZoom(); // #164/#165: attach the zoom to the just-drawn chart (every style)
         // #169: record this world sheet BEFORE a deep-link camera is applied, so the settle
         // that camera triggers can redraft a region over the SAME base world (cache hit).
@@ -299,6 +302,7 @@ wireControls({
   committedRegion: () => glass.committedRegion(),
   lastChart: () => ({ svg: lastSvg, title: lastTitle }),
   togglePlay: lc.togglePlay, onManualScrub: lc.onManualScrub,
+  agesDragStart: lc.agesDragStart, agesDragEnd: lc.agesDragEnd,
   onDocKeydown: lc.onDocKeydown, onDocClick: lc.onDocClick,
 });
 
@@ -313,19 +317,14 @@ versoBtn.addEventListener("click", () => {
   // the SAME chart stays, we only re-home it. reset() is a no-op when already home.
   glass.homeToWorld(); // #169: drop a committed region inset before the flip
   glass.reset();
-  // #174: interaction interrupts the animation. A running sweep (10-16s measured, #185)
-  // is snapped to its resting track (on both faces) before the sheet turns, so the back
-  // never shows a half-drawn survey and no rAF loop narrates into #status behind a
-  // hidden face. The button is deliberately NOT disabled for the sweep: a control that
-  // goes dead for many seconds with no stated reason reads as a bug.
-  // #180: the chronicle scrubber is the same class as the voyage track. It mutates the
-  // baked recto (per-glyph display) that the <img> ghost cannot mirror, so instead of
-  // painting the back face we snap the scrubber to the present before turning: the parked
-  // recto then IS the chart the pristine ghost holds, so the two faces agree by construction.
-  // Both snaps no-op when their feature is off, and chronicle and voyage are mutually
-  // exclusive, so at most one fires.
-  lc.voyageSnapToRest();
-  lc.scrubSnapToPresent();
+  // #174/#180/#220: interaction interrupts the animation. The flip snaps the instrument
+  // to its CURRENT chamber's rest: a survey-chamber flip rests on the full track (both
+  // faces agree through the sink), an ages-chamber flip parks at the present (the parked
+  // recto then IS the chart the pristine ghost holds). No rAF loop narrates into #status
+  // behind a hidden face. The button is deliberately NOT disabled for a running story: a
+  // control that goes dead for many seconds with no stated reason reads as a bug. No-op
+  // when the instrument is off.
+  lc.agesSnapToRest();
   // #165/#192: sync AFTER the snaps, explicit and synchronous rather than on a debounced
   // settle, so a link copied right after the flip carries neither a stale cx/cy/k nor a
   // mid-scrub year (the hash records the parked present).
@@ -334,45 +333,24 @@ versoBtn.addEventListener("click", () => {
   versoBtn.textContent = flipped ? "Turn back" : "Turn the sheet";
 });
 
-// Chronicle scrubber (#54): the toggle enters/leaves scrub mode without a redraw
-// (no re-roll). A manual drag pauses Play; both live in controls.ts wiring.
-chronicleChk.addEventListener("change", () => {
-  if (chronicleChk.checked) {
-    // #165 reset policy: entering the chronicle snaps the camera home first (zoom and the
-    // scrubber are mutually exclusive per the epic; the scrub reveals baked layers on the
-    // home sheet). Leaving the chronicle needs no reset (already home).
-    // #169: the scrubber drives the WORLD chart's baked layers (a region carries no
-    // chronicle), so drop a committed region inset first.
+// #220 the ages instrument: the one toggle enters/leaves the fused scrubber without a
+// redraw (no re-roll). Arming PARKS at the present, the world exactly as drawn and the
+// journal fully told; Play is the story's one entry. A manual drag pauses Play; the
+// bar, Play, and the detent's pointer wiring live in controls.ts.
+agesChk.addEventListener("change", () => {
+  if (agesChk.checked) {
+    // Ratified 2026-07-26: arming snaps the camera home, the #165 world-sheet reset
+    // extended across the WHOLE instrument (it supersedes the standalone voyage's
+    // no-snap entry); the seam never moves the camera, and a hash restore skips this
+    // handler entirely (the boot ticks the box with no change event). #169: both
+    // chambers drive the WORLD chart, so a committed region inset drops first.
     glass.homeToWorld();
     glass.reset();
-    // #119: chronicle and voyage are mutually exclusive; entering one leaves the other.
-    if (voyageChk.checked) { voyageChk.checked = false; lc.exitVoyage(); }
-    lc.applyScrub();
-  } else lc.exitScrub();
-  // #192: sync AFTER the arm (scrubState now knows the parked year) and in both
+    lc.applyAges(lastManifest, lastSurvey, lastSeed, lastSubtitle);
+  } else lc.exitAges();
+  // #192: sync AFTER the arm (agesState now knows the parked rest) and in both
   // directions; still synchronous in the handler, so a copied link drops cx/cy/k now.
   syncHash();
-});
-
-// #119 The Wayfarer's Passage: the toggle enters/leaves voyage mode without a redraw
-// (no re-roll), animating the survey track over the current world; it is mutually
-// exclusive with the chronicle scrubber (both own the same overlay substrate).
-voyageChk.addEventListener("change", () => {
-  if (voyageChk.checked) {
-    if (chronicleChk.checked) { chronicleChk.checked = false; lc.exitScrub(); }
-    // #169: the voyage narrates the WORLD survey (lastManifest/lastSurvey), so a committed
-    // region inset must drop first or the world-scale track would paint over the finer sheet.
-    // Unlike the chronicle, the camera is NOT reset: voyage + geometric zoom were always
-    // compatible, and regionEligible above keeps the sheet geometric while the voyage is on.
-    glass.homeToWorld();
-    // #174: the sweep is a recto ceremony. Ticking voyage while the sheet rests on its
-    // verso paints the resting track on both faces and skips the animation, following the
-    // precedent above where a style change while flipped rebuilds in place rather than
-    // turning. The checkbox is never disabled while flipped, for the same reason the Turn
-    // button is never disabled by a sweep.
-    lc.applyVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle, { skipSweep: isFlipped(sheetEl) });
-  } else lc.exitVoyage();
-  syncHash(); // #192: the survey key follows the toggle, in both directions
 });
 
 await initWorker();
@@ -392,9 +370,9 @@ if (hashed.coast) touched.coast = true; // #137: a shared coast= link opens warp
 // #165: stash a deep link's camera BEFORE draw() (draw's own syncHash rewrites the hash to
 // home, so it must be read first). It is applied once the first chart lands (settle branch).
 pendingCamera = hashed.camera;
-// #192: the address's instrument. Tick the box only (no change event, so no interactive
-// arming ceremony fires): the first settle arms it silently through the existing re-arm
-// branch, applies pendingYear, then the camera. A restored link is not an arming gesture.
-if (hashed.live?.kind === "survey") voyageChk.checked = true;
-if (hashed.live?.kind === "year") { chronicleChk.checked = true; pendingYear = hashed.live.year; }
+// #192/#220: the address's instrument. Tick the box only (no change event, so no
+// interactive arming ceremony fires): the first settle arms it silently through the
+// re-arm branch at the addressed rest, then applies the camera. A restored link is a
+// photograph, never an arming gesture.
+if (hashed.live) { agesChk.checked = true; pendingLive = hashed.live; }
 draw();

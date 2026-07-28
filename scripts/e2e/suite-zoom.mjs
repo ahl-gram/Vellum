@@ -18,7 +18,7 @@ export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, waitTurned, PORT } = ctx;
 
   // Clean antique seed-42 base, chronicle/voyage off, resting on the recto.
-  await evaluate(`(()=>{for(const id of ["chronicle","voyage"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+  await evaluate(`(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
   await waitSettled("zoom-base");
   // #169: Z1-Z16 characterize the GEOMETRIC glass (Sub 3-4). Sub 8 makes an antique settle also
   // redraft a region, which would rebase the camera + swap the sheet mid-assertion; turn the
@@ -256,13 +256,13 @@ export async function run(ctx) {
   await waitTurned("reset-on-turn-back-antique");
 
   await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
-  const r14c = await evaluate(`(()=>{const c=document.getElementById("chronicle");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));const st=window.__vellumZoomState();const p=new URLSearchParams(location.hash.slice(1));return{k:st.k,cx:p.get("cx"),cy:p.get("cy"),kp:p.get("k")};})()`);
+  const r14c = await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));const st=window.__vellumZoomState();const p=new URLSearchParams(location.hash.slice(1));return{k:st.k,cx:p.get("cx"),cy:p.get("cy"),kp:p.get("k")};})()`);
   check(
-    "Z14c reset-on-chronicle: entering the chronicle homes the camera AND drops cx/cy/k from the hash (AC4)",
+    "Z14c reset-on-arming: entering the ages instrument homes the camera AND drops cx/cy/k from the hash (AC4)",
     r14c.k === 1 && r14c.cx === null && r14c.cy === null && r14c.kp === null,
     JSON.stringify(r14c),
   );
-  await evaluate(`(()=>{const c=document.getElementById("chronicle");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the chronicle
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the chronicle
 
   // Zrm (AC5): prefers-reduced-motion collapses the one programmatic zoom animation (d3's
   // double-click smooth-zoom) to an instant jump. The keyboard/buttons are instant already;
@@ -575,7 +575,7 @@ export async function run(ctx) {
   const before20d = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   await waitRedraft(before20d);
-  await evaluate(`(()=>{const c=document.getElementById("chronicle");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await sleep(80);
   const chron = await evaluate(
     `(()=>{const s=window.__vellumRegion();const svg=document.querySelector("#map > svg");` +
@@ -583,11 +583,11 @@ export async function run(ctx) {
       `insets:document.querySelectorAll("#map .region-inset").length,scrubShown:!document.getElementById("scrubber").hidden};})()`,
   );
   check(
-    "Z20d entering the chronicle drops the inset back to the bare world sheet (mutual exclusion, no region while scrubbing)",
+    "Z20d entering the ages instrument drops the inset back to the bare world sheet (mutual exclusion, no region while scrubbing)",
     chron.band === 0 && chron.committed === false && chron.noStamp && chron.insets === 0 && chron.scrubShown,
     JSON.stringify(chron),
   );
-  await evaluate(`(()=>{const c=document.getElementById("chronicle");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the chronicle
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the chronicle
 
   // Z20e (scope: overlay rebuild, card continuity keyed by NAME): a card pinned in one
   // survey stays pinned to the SAME-named settlement across a redraft, even though region
@@ -648,31 +648,34 @@ export async function run(ctx) {
     `band ${deep20f.band}->${step20f.band} insets=${view20f.insets} world=${view20f.worldMounted} k=${view20f.zk} (expected 4)`,
   );
 
-  // Z20g (review): the VOYAGE mutually excludes the redraft, mirroring the chronicle (Z20d).
-  // Its track narrates the WORLD survey at world coordinates, so (a) toggling it on drops a
-  // committed inset and paints the world track over the world sheet -- with the camera left
-  // where it was (unlike the chronicle, voyage never resets the zoom) -- and (b) while it is
-  // on, a settle stays geometric: no redraft.
+  // Z20g: the SURVEY chamber mutually excludes the redraft, mirroring Z20d. Its track
+  // narrates the WORLD survey at world coordinates, so (a) arming drops a committed
+  // inset and builds the world track over the world sheet -- and since the 2026-07-26
+  // ratification the arming ceremony snaps the camera HOME across the WHOLE instrument
+  // (superseding the standalone voyage's old no-snap entry) -- and (b) while it is on,
+  // a settle stays geometric: no redraft. The bar steps to the seam so the track is the
+  // visible surface under the settle.
   await goHome();
   const before20g = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const reg20g = await waitRedraft(before20g);
-  await evaluate(`(()=>{const v=document.getElementById("voyage");v.checked=true;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=true;v.dispatchEvent(new Event("change",{bubbles:true}));
+    const s=document.getElementById("scrub-range");s.value=String(Number(s.max)/2);s.dispatchEvent(new Event("input",{bubbles:true}));})()`);
   await sleep(120);
   const von = await evaluate(
     `(()=>{const s=window.__vellumRegion();return{band:s.band,committed:s.committed,` +
       `insets:document.querySelectorAll("#map .region-inset").length,track:!!document.querySelector("#map .voyage-overlay"),` +
       `k:window.__vellumZoomState().k};})()`,
   );
-  await enterAt(2, 0.35, 0.35); // a settle while voyaging: must NOT redraft
+  await enterAt(2, 0.35, 0.35); // a settle while the survey rests: must NOT redraft
   await sleep(600); // past the debounce + any would-be dispatch
   const vsettle = await rgn();
-  await evaluate(`(()=>{const v=document.getElementById("voyage");v.checked=false;v.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the voyage
+  await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=false;v.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the instrument
   check(
-    "Z20g the voyage drops the inset and blocks the redraft while on (world-track coherence; camera untouched)",
-    von.band === 0 && von.committed === false && von.insets === 0 && von.track && von.k === 2 &&
+    "Z20g the survey chamber drops the inset, homes the camera on arming (ratified 2026-07-26), and blocks the redraft",
+    von.band === 0 && von.committed === false && von.insets === 0 && von.track && von.k === 1 &&
       vsettle.redrafts === reg20g.redrafts && vsettle.band === 0,
-    `on-toggle ${JSON.stringify(von)} settleWhileVoyaging redrafts=${vsettle.redrafts}(==${reg20g.redrafts}) band=${vsettle.band}`,
+    `on-toggle ${JSON.stringify(von)} settleWhileSurveying redrafts=${vsettle.redrafts}(==${reg20g.redrafts}) band=${vsettle.band}`,
   );
 
   // Z21 (#171, Glass Sub 10): HAMLETS are the deepest band's payoff, a region-only
@@ -753,6 +756,6 @@ export async function run(ctx) {
 
   // Restore a clean antique seed-42 HOME base (chronicle off) for the suites that follow.
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
-  await evaluate(`(()=>{const c=document.getElementById("chronicle");if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
   await waitSettled("post-zoom-restore");
 }

@@ -15,7 +15,7 @@ export async function run(ctx) {
   // A clean antique seed-42 base, chronicle off, so the turn path (not the scrub
   // carve-out) is exercised and the manifest is known.
   await evaluate(`(()=>{
-    const chk=document.getElementById("chronicle");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}
+    const chk=document.getElementById("ages");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}
     document.getElementById("seed").value="42";document.getElementById("style").value="antique";
     document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("arms").checked=false;
     document.getElementById("draw").click();

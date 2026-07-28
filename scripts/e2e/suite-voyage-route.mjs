@@ -21,14 +21,14 @@ export async function run(ctx) {
   // the old "21 road, 2 sea" here had been stale since #184 re-ordered the itinerary on
   // actual travel, which groups the island visits and spends its crossings differently.)
   await evaluate(`(()=>{
-    const voy=document.getElementById("voyage");
+    const voy=document.getElementById("ages");
     if(voy.checked){voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));}
     document.getElementById("seed").value="526413615";
     document.getElementById("style").value="antique";
     document.getElementById("draw").click();
   })()`);
   await waitSettled("voyage-120-draw");
-  await evaluate(`(()=>{const c=document.getElementById("voyage");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
 
   const w17 = await evaluate(`(()=>{
     const plan=window.__vellumVoyagePlan();
@@ -161,8 +161,9 @@ export async function run(ctx) {
     window.__vellumVoyageStepTo(999); // land the whole survey at rest
     const plan=window.__vellumVoyagePlan();
     const log=window.__vellumVoyageLog();
-    const sig=document.getElementById("voyage-log-sig").textContent;
-    const rows=document.getElementById("voyage-log-strip").querySelectorAll("li").length;
+    const sig=document.getElementById("scrub-sig").textContent;
+    // #220: the journal is one strip; the prologue rows are the margin log's.
+    const rows=document.getElementById("chronicle-strip").querySelectorAll("li.prologue").length;
     const last=log&&log.entries.length?log.entries[log.entries.length-1]:null;
     return{
       visible:!!(log&&log.visible), entries:log?log.entries.length:0, logged:log?log.logged:-1,
@@ -204,12 +205,14 @@ export async function run(ctx) {
   // blob it, and #status holds the survey's one summary, not a per-port line.
   const w24 = await evaluate(`(()=>{
     const log=window.__vellumVoyageLog();
-    const first=document.getElementById("voyage-log-strip").querySelector("li");
+    // #220: the journal is one strip; the prologue rows lead it, so the first row is
+    // still the departure entry.
+    const first=document.getElementById("chronicle-strip").querySelector("li.prologue");
     const domText=first?first.querySelector(".cr-text").textContent:"";
     const domYear=first?first.querySelector(".cr-year").textContent:"";
     const engineFirst=log?log.entries[0].text:"";
     return{
-      panelOutsideMap: !document.querySelector("#map #voyage-log") && !document.querySelector("#map .voyage-log"),
+      panelOutsideMap: !document.querySelector("#map #scrubber") && !document.querySelector("#map #chronicle-strip"),
       matches: !!domText && engineFirst.includes(domText) && engineFirst.startsWith("Year "+domYear+"."),
       status: document.getElementById("status").textContent, summary: log?log.summary:"",
     };
@@ -275,13 +278,13 @@ export async function run(ctx) {
   // stub into Feniefena and a 48-cell landfall stub into Loriemirmere, back to back),
   // so it proves the swap in BOTH directions: ride to the shore, sail, ride again.
   await evaluate(`(()=>{
-    const voy=document.getElementById("voyage");
+    const voy=document.getElementById("ages");
     if(voy.checked){voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));}
     document.getElementById("seed").value="39";
     document.getElementById("draw").click();
   })()`);
   await waitSettled("voyage-181-draw39");
-  await evaluate(`(()=>{const c=document.getElementById("voyage");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
 
   const w27 = await evaluate(`(()=>{
     const legs=window.__vellumVoyageLegGeometry();
@@ -335,13 +338,13 @@ export async function run(ctx) {
   // a smoke check that the overlay painted this fixture world, not a #298 assertion: a
   // straight leg's mark is the rider by mode alone, before and after the fix.
   await evaluate(`(()=>{
-    const voy=document.getElementById("voyage");
+    const voy=document.getElementById("ages");
     if(voy.checked){voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));}
     document.getElementById("seed").value="430445745";
     document.getElementById("draw").click();
   })()`);
   await waitSettled("voyage-298-draw");
-  await evaluate(`(()=>{const c=document.getElementById("voyage");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
 
   const w28 = await evaluate(`(async()=>{
     const res=await window.__vellumRunJob({kind:"draw",seed:430445745,overrides:{},render:{style:"antique",widthPx:1500,legend:true,arms:false}});
@@ -384,7 +387,7 @@ export async function run(ctx) {
   await shoot("explorer-voyage-straight-land.png");
 
   // Restore a clean, voyage-off, un-flipped, antique state for the suites that follow.
-  await evaluate(`(()=>{const voy=document.getElementById("voyage");if(voy.checked){voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
+  await evaluate(`(()=>{const voy=document.getElementById("ages");if(voy.checked){voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
   await evaluate(`(()=>{const s=document.getElementById("sheet");if(s.classList.contains("versoed"))document.getElementById("verso-turn").click();})()`);
   await sleep(120); // let any turn-back settle before the health checkpoint reads the page
   // This suite draws seeds 526413615, 39 and 430445745 (worlds that sail), so put seed

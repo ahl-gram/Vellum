@@ -147,10 +147,8 @@ test("the frame mounts and hands the engine a complete host (#219, the first non
     ["scrubber.playBtn", host.scrubber.playBtn],
     ["scrubber.range", host.scrubber.range],
     ["scrubber.year", host.scrubber.year],
+    ["scrubber.sig", host.scrubber.sig],
     ["scrubber.strip", host.scrubber.strip],
-    ["voyageLog.panel", host.voyageLog.panel],
-    ["voyageLog.sig", host.voyageLog.sig],
-    ["voyageLog.strip", host.voyageLog.strip],
   ] as const) {
     assert.ok(node instanceof El, `the host supplies a real element for ${name}`);
     assert.ok(
@@ -163,24 +161,28 @@ test("the frame mounts and hands the engine a complete host (#219, the first non
   // against the Explorer's, so nothing in its public API is Explorer-shaped.
   const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
   const lc = createLivingChart(host);
-  for (const method of ["applyScrub", "scrubTo", "applyVoyage", "voyagePaintAt", "scrubState", "destroy"]) {
+  for (const method of ["applyAges", "agesState", "applyScrub", "scrubTo", "applyVoyage", "voyagePaintAt", "scrubState", "destroy"]) {
     assert.equal(typeof (lc as Record<string, unknown>)[method], "function", `the engine drives the frame: ${method}()`);
   }
 });
 
-test("both panels start hidden and the engine's hidden toggle governs each (#219)", async () => {
+test("the instrument panel starts hidden and the ONE journal nests inside it (#219, fused at #220)", async () => {
   const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
-  // Mirrors the Explorer markup: <div id="scrubber" hidden> and <div id="voyage-log" hidden>.
-  // applyScrub / buildLogPanel reveal them; exitScrub / hideLog hide them again.
-  assert.equal((frame.host.scrubber.panel as unknown as El).hidden, true, "the chronicle apparatus starts hidden");
-  assert.equal((frame.host.voyageLog.panel as unknown as El).hidden, true, "the surveyor's log starts hidden");
-  // The chronicle's dated rows must ride INSIDE the panel the engine hides, or exiting
-  // the chronicle would leave a stale strip on screen (the Explorer nests them, too).
+  // Mirrors the Explorer markup: <div id="scrubber" hidden>. The engine's arm reveals
+  // it; its exit hides it again.
+  assert.equal((frame.host.scrubber.panel as unknown as El).hidden, true, "the instrument starts hidden");
+  // The journal's rows and signature must ride INSIDE the panel the engine hides, or
+  // turning the instrument off would leave a stale strip on screen (the Explorer nests
+  // them, too).
   const panel = frame.host.scrubber.panel as unknown as El;
   assert.ok(
     walk(panel).includes(frame.host.scrubber.strip as unknown as El),
-    "the chronicle strip lives inside the panel exitScrub() hides",
+    "the journal strip lives inside the panel the engine hides",
+  );
+  assert.ok(
+    walk(panel).includes(frame.host.scrubber.sig as unknown as El),
+    "the signature line lives inside the same panel",
   );
 });
 
@@ -337,30 +339,35 @@ test("the frame's log never nests a scroller, at any width (#219 acceptance, dec
   assert.match(css, /\.rf-instrument\s*\{[^}]*flex-wrap:\s*wrap/, "the instrument wraps instead of overflowing");
   assert.match(css, /\.rf-range\s*\{[^}]*min-width:\s*0/, "the slider may shrink below its intrinsic width");
 
-  // ...and this sub rewires nothing: the Explorer keeps the panels it has today.
+  // ...and the Explorer's ONE journal adopted the same flow at #220: the fused
+  // prologue-plus-annals outgrew the old 32rem cap, so the cap is gone, not raised.
   const explorer = read("public/explorer/index.css");
   assert.equal(
-    explorer.match(/max-height:\s*32rem;\s*overflow-y:\s*auto/g)?.length,
-    2,
-    "the Explorer's own .chronicle-strip and .voyage-log-strip caps are untouched by this sub",
+    explorer.match(/max-height:\s*32rem;\s*overflow-y:\s*auto/g)?.length ?? 0,
+    0,
+    "the Explorer's journal flows like the frame's; a revived scroll cap would truncate the fused journal",
   );
 });
 
-test("one canonical row rule covers every producer of the idiom (#219: ONE log component)", () => {
+test("one canonical row rule covers the one arrived-state (#219; collapsed at #220)", () => {
   const css = read("public/reading-frame.css");
-  // Three names write the same "this row has arrived" state today: the chronicle's
-  // .past, the voyage's .logged, and the component's own .inked. The frame's whole job
-  // is that they read as one log, so one rule must brighten all three; #220's fused
-  // journal then collapses them to .inked alone.
+  // #220 collapsed the old three-name state (.inked / .past / .logged) onto .inked
+  // alone: one journal, one rule. The stale names must be GONE, or a leftover selector
+  // would quietly resurrect a producer the fusion retired.
   const brighten = css.match(/^[^{]*\.inked[^{]*\{[^}]*\}/m);
-  assert.ok(brighten, "the frame css carries a rule keyed on the component's own .inked state");
-  for (const cls of ["inked", "past", "logged"]) {
-    assert.match(
-      brighten[0],
-      new RegExp(`\\.${cls}\\b`),
-      `the brighten rule must also cover .${cls}, or that producer's rows never light up`,
+  assert.ok(brighten, "the frame css carries the rule keyed on the one .inked state");
+  for (const stale of ["past", "logged"]) {
+    assert.doesNotMatch(
+      css,
+      new RegExp(`\\.${stale}\\b`),
+      `the retired .${stale} selector must not linger after the #220 collapse`,
     );
   }
+  assert.match(
+    css,
+    /\.prologue\b/,
+    "the surveyor's prologue voice (#220's Overture) is dressed in the frame css",
+  );
   assert.match(
     css,
     /\.cr-year/,

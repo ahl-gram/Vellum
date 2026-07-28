@@ -81,16 +81,36 @@ test("the grammar round-trips: parse(finalize(emit(live))) === live", () => {
   }
 });
 
-test("liveNow: the survey checkbox addresses the survey", () => {
-  assert.deepEqual(liveNow({ survey: true, chronicle: false, year: null }), { kind: "survey" });
+test("liveNow: a survey-chamber rest addresses the bare survey (#220)", () => {
+  assert.deepEqual(
+    liveNow({ ages: true, chamber: "survey", year: null, pending: null }),
+    { kind: "survey" },
+  );
 });
 
-test("liveNow: the chronicle checkbox with a known year addresses that year", () => {
-  assert.deepEqual(liveNow({ survey: false, chronicle: true, year: 812 }), { kind: "year", year: 812 });
+test("liveNow: an ages-chamber rest with a known year addresses that year (#220)", () => {
+  assert.deepEqual(
+    liveNow({ ages: true, chamber: "ages", year: 812, pending: null }),
+    { kind: "year", year: 812 },
+  );
 });
 
-test("liveNow: an unknowable year or a disarmed instrument emits nothing", () => {
-  assert.equal(liveNow({ survey: false, chronicle: true, year: null }), null);
-  assert.equal(liveNow({ survey: false, chronicle: true, year: undefined }), null);
-  assert.equal(liveNow({ survey: false, chronicle: false, year: 812 }), null);
+test("liveNow: while the arm lags the gesture, the restored key survives as the fallback (#220)", () => {
+  const pending = { kind: "year", year: 640 } as const;
+  assert.deepEqual(liveNow({ ages: true, chamber: null, year: null, pending }), pending);
+  assert.deepEqual(
+    liveNow({ ages: true, chamber: null, year: null, pending: { kind: "survey" } }),
+    { kind: "survey" },
+  );
+});
+
+test("liveNow: an unknowable state or a disarmed instrument emits nothing", () => {
+  assert.equal(liveNow({ ages: true, chamber: null, year: null, pending: null }), null);
+  assert.equal(liveNow({ ages: true, chamber: "ages", year: null, pending: null }), null);
+  assert.equal(liveNow({ ages: false, chamber: "ages", year: 812, pending: null }), null);
+  assert.equal(
+    liveNow({ ages: false, chamber: null, year: null, pending: { kind: "survey" } }),
+    null,
+    "a disarmed instrument emits nothing even with a stale pending key",
+  );
 });

@@ -156,6 +156,6 @@ export async function run(ctx) {
   await clearMobile();
   await reloadHome("gesture-restore");
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
-  await evaluate(`(()=>{const c=document.getElementById("chronicle");if(c&&c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");if(c&&c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
   await waitSettled("post-gesture-restore");
 }

@@ -38,13 +38,14 @@ export async function run(ctx) {
     const slider=document.getElementById("scrub-range");
     const roads=document.querySelector('#map #layer-roads');
     const vis=[...document.querySelectorAll('#map #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length;
-    return{checked:document.getElementById("chronicle").checked,panelShown:!document.getElementById("scrubber").hidden,
-      val:Number(slider.value),readout:document.getElementById("scrub-year").textContent,
+    const a=window.__vellumAgesState();
+    return{checked:document.getElementById("ages").checked,panelShown:!document.getElementById("scrubber").hidden,
+      val:a?a.year:-1,chamber:a?a.chamber:"",readout:document.getElementById("scrub-year").textContent,
       roads:roads?getComputedStyle(roads).display:"(no-el)",vis,status:document.getElementById("status").textContent};
   })()`);
   check(
-    "A1 a year=N deep link restores the chronicle at rest on that year",
-    a1.checked && a1.panelShown && a1.val === midYear && a1.readout === `year ${midYear}` &&
+    "A1 a year=N deep link restores the ages chamber at rest on that year",
+    a1.checked && a1.panelShown && a1.chamber === "ages" && a1.val === midYear && a1.readout === `year ${midYear}` &&
       a1.roads === "none" && a1.vis > 0 && a1.vis < sm.count && a1.status === "",
     JSON.stringify({ a1, midYear, count: sm.count }),
   );
@@ -58,7 +59,7 @@ export async function run(ctx) {
   await sleep(400); // the camera's debounced settle re-syncs the hash
   const a2 = await evaluate(`(()=>{
     const p=new URLSearchParams(location.hash.slice(1));
-    return{checked:document.getElementById("chronicle").checked,val:Number(document.getElementById("scrub-range").value),
+    return{checked:document.getElementById("ages").checked,val:window.__vellumAgesState().year,
       k:window.__vellumZoomState().k,year:p.get("year"),cx:p.get("cx"),kp:p.get("k")};
   })()`);
   check(
@@ -76,14 +77,15 @@ export async function run(ctx) {
     const raw=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ");
     const log=window.__vellumVoyageLog();
     const plan=window.__vellumVoyagePlan();
-    return{checked:document.getElementById("voyage").checked,ports:plan?plan.ports.length:0,
+    const a=window.__vellumAgesState();
+    return{checked:document.getElementById("ages").checked,chamber:a?a.chamber:"",t:a?a.t:-1,ports:plan?plan.ports.length:0,
       first:raw[0],last:raw[raw.length-1],pts:raw.length,logged:log?log.logged:-1,rows:log?log.rows:-1,
       visible:!!(log&&log.visible),status:document.getElementById("status").textContent,
       hash:location.hash.slice(1)};
   })()`);
   check(
-    "A3 a bare survey deep link restores the voyage at rest on the closed track, silently",
-    a3.checked && a3.ports > 1 && a3.first === a3.last && a3.pts > a3.ports && a3.visible &&
+    "A3 a bare survey deep link restores the survey chamber at rest on the closed track, silently",
+    a3.checked && a3.chamber === "survey" && a3.t === 1 && a3.ports > 1 && a3.first === a3.last && a3.pts > a3.ports && a3.visible &&
       a3.logged === a3.rows && a3.rows > 1 && a3.status === "" &&
       /(^|&)survey(&|$)/.test(a3.hash) && !a3.hash.includes("survey="),
     JSON.stringify(a3),
@@ -96,7 +98,7 @@ export async function run(ctx) {
   await sleep(400);
   const a4 = await evaluate(`(()=>{
     const p=new URLSearchParams(location.hash.slice(1));
-    return{checked:document.getElementById("voyage").checked,k:window.__vellumZoomState().k,
+    return{checked:document.getElementById("ages").checked,k:window.__vellumZoomState().k,
       survey:/(^|&)survey(&|$)/.test(location.hash.slice(1)),kp:p.get("k")};
   })()`);
   check(
@@ -108,13 +110,13 @@ export async function run(ctx) {
   // A5: both live keys at once is a nonsensical set, ignored WHOLE (the camera's
   // discipline): neither instrument arms, the chart is the plain still.
   await gotoAddress(`#seed=42&style=antique&survey&year=${midYear}`, "address-both-keys");
-  const a5 = await evaluate(`(()=>({chronicle:document.getElementById("chronicle").checked,
-    voyage:document.getElementById("voyage").checked,
+  const a5 = await evaluate(`(()=>({ages:document.getElementById("ages").checked,
+    state:window.__vellumAgesState(),
     overlay:!!document.querySelector("#map .voyage-overlay"),
     panelShown:!document.getElementById("scrubber").hidden}))()`);
   check(
-    "A5 a link carrying both survey and year=N arms neither (nonsensical set ignored)",
-    !a5.chronicle && !a5.voyage && !a5.overlay && !a5.panelShown,
+    "A5 a link carrying both survey and year=N arms nothing (nonsensical set ignored)",
+    !a5.ages && a5.state === null && !a5.overlay && !a5.panelShown,
     JSON.stringify(a5),
   );
 
@@ -128,40 +130,51 @@ export async function run(ctx) {
     a8,
   );
 
-  // A6: the writer follows the voyage toggle, both directions, in the ratified BARE
-  // spelling (never survey=).
+  // A6 (#220): a survey-chamber rest writes the bare survey key in the ratified BARE
+  // spelling (never survey=); arming alone parks in the ages chamber (year=present),
+  // and unticking removes every live key.
   const a6on = await evaluate(`(()=>{
-    const chk=document.getElementById("voyage");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    const chk=document.getElementById("ages");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    return location.hash.slice(1);
+  })()`);
+  const a6seam = await evaluate(`(()=>{
+    const s=document.getElementById("scrub-range");
+    s.value=String(Number(s.max)/2);
+    s.dispatchEvent(new Event("input",{bubbles:true}));
+    s.dispatchEvent(new Event("change",{bubbles:true}));
     return location.hash.slice(1);
   })()`);
   const a6off = await evaluate(`(()=>{
-    const chk=document.getElementById("voyage");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    const chk=document.getElementById("ages");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));
     return location.hash.slice(1);
   })()`);
   check(
-    "A6 ticking the voyage writes the bare survey key; unticking removes it",
-    /(^|&)survey(&|$)/.test(a6on) && !a6on.includes("survey=") && !/(^|&)survey(=|&|$)/.test(a6off),
-    JSON.stringify({ a6on, a6off }),
+    "A6 arming writes year=present; a survey-chamber rest writes the bare survey key; unticking removes it",
+    /(^|&)year=/.test(a6on) && !/(^|&)survey(=|&|$)/.test(a6on) &&
+      /(^|&)survey(&|$)/.test(a6seam) && !a6seam.includes("survey=") && !/(^|&)year=/.test(a6seam) &&
+      !/(^|&)survey(=|&|$)/.test(a6off) && !/(^|&)year=/.test(a6off),
+    JSON.stringify({ a6on, a6seam, a6off }),
   );
 
   // A7: the writer follows the chronicle toggle (parked at the present) and the
   // slider's RELEASE (change), and unticking removes the key.
   const a7on = await evaluate(`(()=>{
-    const chk=document.getElementById("chronicle");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
-    return{hash:location.hash.slice(1),max:Number(document.getElementById("scrub-range").max)};
+    const chk=document.getElementById("ages");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    return{hash:location.hash.slice(1),max:window.__vellumAgesState().max};
   })()`);
   const a7drag = await evaluate(`(()=>{
-    const s=document.getElementById("scrub-range");s.value="${midYear}";
+    const s=document.getElementById("scrub-range");const a=window.__vellumAgesState();
+    s.value=String(Number(s.max)/2+(${midYear}-a.min));
     s.dispatchEvent(new Event("input",{bubbles:true}));
     s.dispatchEvent(new Event("change",{bubbles:true}));
     return location.hash.slice(1);
   })()`);
   const a7off = await evaluate(`(()=>{
-    const chk=document.getElementById("chronicle");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    const chk=document.getElementById("ages");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));
     return location.hash.slice(1);
   })()`);
   check(
-    "A7 ticking the chronicle writes year=present, a slider release re-writes it, unticking removes it",
+    "A7 ticking ages writes year=present, a bar release re-writes it, unticking removes it",
     new URLSearchParams(a7on.hash).get("year") === String(a7on.max) &&
       new URLSearchParams(a7drag).get("year") === String(midYear) &&
       !/(^|&)year=/.test(a7off),
@@ -174,8 +187,9 @@ export async function run(ctx) {
   // who watches Play run and copies the link shares the pre-Play year: the chart rests
   // at the present while the hash still says the old year.
   const a7bset = await evaluate(`(()=>{
-    const chk=document.getElementById("chronicle");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
-    const s=document.getElementById("scrub-range");s.value="${midYear}";
+    const chk=document.getElementById("ages");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    const s=document.getElementById("scrub-range");const a=window.__vellumAgesState();
+    s.value=String(Number(s.max)/2+(${midYear}-a.min));
     s.dispatchEvent(new Event("input",{bubbles:true}));
     s.dispatchEvent(new Event("change",{bubbles:true}));
     document.getElementById("scrub-play").click();
@@ -183,13 +197,13 @@ export async function run(ctx) {
   })()`);
   let a7bParked = null;
   for (let i = 0; i < 120; i++) {
-    a7bParked = await evaluate(`(()=>({val:Number(document.getElementById("scrub-range").value),
+    a7bParked = await evaluate(`(()=>({val:window.__vellumAgesState().year,
       play:document.getElementById("scrub-play").textContent,
       year:new URLSearchParams(location.hash.slice(1)).get("year")}))()`);
     if (a7bParked.play === "Play" && a7bParked.val === sm.present) break;
     await sleep(100);
   }
-  await evaluate(`(()=>{const chk=document.getElementById("chronicle");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(`(()=>{const chk=document.getElementById("ages");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   check(
     "A7b Play's auto-park at the present re-writes the address (no stale pre-Play year)",
     new URLSearchParams(a7bset).get("year") === String(midYear) &&
@@ -201,8 +215,8 @@ export async function run(ctx) {
   // the restore is a single still paint either way, so the armed state is identical.
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await gotoAddress(`#seed=42&style=antique&year=${midYear}`, "address-reduced");
-  const a9 = await evaluate(`(()=>({checked:document.getElementById("chronicle").checked,
-    val:Number(document.getElementById("scrub-range").value),
+  const a9 = await evaluate(`(()=>({checked:document.getElementById("ages").checked,
+    val:window.__vellumAgesState().year,
     play:document.getElementById("scrub-play").textContent,
     status:document.getElementById("status").textContent}))()`);
   await send("Emulation.setEmulatedMedia", { features: [] });

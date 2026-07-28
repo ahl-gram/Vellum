@@ -35,9 +35,13 @@ interface ControlsDeps {
   /** #169: Download saves what you see; a committed region sheet wins over the world chart. */
   committedRegion: () => { svg: string; title: string; band: number } | null;
   lastChart: () => { svg: string; title: string };
-  /** The engine's scrubber controls (#54): Play/Pause and the manual year drag. */
+  /** The engine's instrument controls (#54, fused at #220): Play/Pause and the bar. */
   togglePlay: () => void;
   onManualScrub: () => void;
+  /** #220: the seam detent governs POINTER drags only, so the engine needs to know when
+   *  one is live; a keyboard step (input with no pointer down) crosses freely. */
+  agesDragStart: () => void;
+  agesDragEnd: () => void;
   /** #53 doc-level dismiss pair: Escape or a click/tap off any mark closes a pinned card. */
   onDocKeydown: (e: KeyboardEvent) => void;
   onDocClick: (e: MouseEvent) => void;
@@ -126,14 +130,19 @@ export function wireControls(deps: ControlsDeps): void {
     draw();
   });
 
-  // Chronicle scrubber controls (#54): Play/Pause runs the event-proportional sweep; a
-  // manual drag pauses Play and rebases it so the next Play restarts from the beginning.
-  // #192: the hash records the year on RELEASE (change), never per input frame, so a
+  // The ages instrument's controls (#54, fused at #220): Play/Pause runs the story; a
+  // manual input pauses Play. The pointer pair brackets a drag so the engine's seam
+  // detent knows a continuous gesture from a discrete keyboard step (pointercancel
+  // counts as a release, or an interrupted touch drag would leave the detent armed).
+  // #192: the hash records the rest on RELEASE (change), never per input frame, so a
   // drag is one replaceState, not hundreds; Play's parks reach the hash through the
-  // engine's onPark seam (paintScrub moves the slider programmatically, no events).
+  // engine's onPark seam (the engine moves the bar programmatically, no events).
   deps.scrubPlayBtn.addEventListener("click", deps.togglePlay);
   deps.scrubRangeEl.addEventListener("input", deps.onManualScrub);
   deps.scrubRangeEl.addEventListener("change", deps.syncHash);
+  deps.scrubRangeEl.addEventListener("pointerdown", deps.agesDragStart);
+  deps.scrubRangeEl.addEventListener("pointerup", deps.agesDragEnd);
+  deps.scrubRangeEl.addEventListener("pointercancel", deps.agesDragEnd);
 
   // Living Chart overlay (#53): the doc-level dismiss pair, added once; both read the
   // engine's current overlay so they stay correct across redraws.

@@ -303,62 +303,54 @@ button.primary:hover { background: #5d4831; }
    panels below, the Glass, the verso, the arrival ceremony. The #map mount carries
    class="living-chart" (the #302 host contract) so the shared ink-in rules key on it. */
 
-/* Chronicle year-scrubber panel (#54, #93). In scrub mode the sweep shows and hides
-   the REAL baked settlement glyphs by year (src/site/living-chart/chronicle.ts
-   toggles each <g class="settlement" data-idx>), so the map keeps its castles,
-   towns, and labels instead of abstract dots; the chronicle strip below narrates
-   the headline events as text. The overlay's inert-hits state and the #155 ink-in
-   ceremony are the engine's dressing, in /living-chart.css. */
+/* The ages instrument panel (#54, #93; fused at #220). One bar (the survey half then
+   the ages half, dressed by the engine's .ages-range rules in /living-chart.css) over
+   ONE journal: the surveyor's dated prologue (li.prologue, the voice distinction) then
+   the chronicler's annals. In the ages chamber the sweep shows and hides the REAL
+   baked settlement glyphs by year (src/site/living-chart/chronicle.ts), so the map
+   keeps its castles, towns, and labels; the journal below narrates the story as text.
+   The overlay's inert-hits state and the #155 ink-in ceremony are the engine's
+   dressing, in /living-chart.css. */
 .scrubber[hidden] { display: none; }
 .scrubber { max-width: 1100px; margin: 0.8rem auto 0;
   background: #f3ead2; border: 1px solid var(--line-tan); border-radius: 6px;
   padding: 0.8rem 1rem; transform-origin: top center; }
-/* #128: the panel unrolls open from its top edge when chronicle mode turns on. It has
+/* #128: the panel unrolls open from its top edge when the instrument turns on. It has
    no positioning transform of its own, so the unfurl (self-perspective in the keyframe)
    rides the panel directly; no wrapper. Collapses via the shared reduced-motion block. */
 .scrubber:not([hidden]) { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) both; }
-.scrub-controls { display: flex; align-items: center; gap: 0.8rem; }
+/* The row WRAPS (#219's 320px lesson, measured again for #220): a range input's
+   intrinsic width is ~129px and a flex item refuses to shrink below min-content, so on
+   a phone the un-wrapped row overflowed the page sideways. Wrapping instead drops the
+   readout to its own line and lets the bar grow to ~230px, which also keeps the seam
+   detent's escape band a real gesture there. */
+.scrub-controls { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
 .scrub-controls #scrub-play { min-width: 5.2rem; }
-.scrub-controls input[type="range"] { flex: 1; accent-color: #7a5c2e; }
+.scrub-controls input[type="range"] { flex: 1; }
 .scrub-year { font-style: italic; color: var(--ink-brown);
-  font-variant-numeric: tabular-nums; min-width: 5rem; text-align: right; }
-/* #93 Part 2: tall enough to show every entry at once (the chronicle is capped at
-   14 events, so this cannot grow unbounded); overflow-y stays as a safety valve. */
-.chronicle-strip { list-style: none; margin: 0.7rem 0 0; padding: 0;
-  max-height: 32rem; overflow-y: auto; }
-/* #128: a row that has come to pass brightens AND slides a hair to the right, like
-   an entry inked into the ledger as its year arrives. */
+  font-variant-numeric: tabular-nums; min-width: 5.6rem; text-align: right; }
+/* The surveyor's signature line above the journal (#121's sig, now the one journal's). */
+.voyage-log-sig { margin: 0.7rem 0 0.5rem; font-style: italic; color: var(--ink-brown);
+  border-bottom: 1px solid var(--line-faint); padding-bottom: 0.5rem; }
+.voyage-log-sig:empty { display: none; }
+/* #93 Part 2's intent, kept under #220: every entry shows at once. The fused journal
+   (14 chronicle events plus the 19-24 prologue rows #185 measured) outgrew the old
+   32rem cap, so it FLOWS like the reading frame's ratified log (2026-07-27): bounded
+   by construction, the page scroll owns it, never a nested scroller. */
+.chronicle-strip { list-style: none; margin: 0 0 0; padding: 0; }
+/* #128: a row that has come to pass brightens AND slides a hair to the right, like an
+   entry inked into the ledger as its moment arrives. #220 collapsed the two producers'
+   old class pair (the chronicle's `past`, the margin log's `logged`) onto `inked`. */
 .chronicle-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
   border-bottom: 1px solid var(--line-faint); opacity: 0.4;
   transition: opacity 0.18s, transform 0.18s; }
-.chronicle-strip li.past { opacity: 1; transform: translateX(2px); }
+.chronicle-strip li.inked { opacity: 1; transform: translateX(2px); }
+/* The voice handoff (#220's Overture): the prologue reads in the surveyor's italic
+   hand, the annals in the chronicler's upright one. */
+.chronicle-strip li.prologue .cr-text { font-style: italic; }
 .chronicle-strip .cr-year { flex: 0 0 3rem; text-align: right;
   font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
 .chronicle-strip .cr-text { color: #54452f; }
-/* #121 The margin log: the surveyor's journal, styled like the chronicle strip (#93) but
-   its own voyage-only panel (voyage and chronicle are mutually exclusive). Rows rest dimmed
-   and brighten as the survey reaches each port, the same "inked into the ledger" reveal as
-   chronicle-strip li.past; since #275 the LAST row inks in when the survey makes its home
-   port again, not on reaching a new port. The styling is count-agnostic. The panel appears
-   at rest, fully visible: the life is in the per-row brightening, not a container flourish.
-   It deliberately does NOT reuse the scrubber's paperUnfurl entrance: that
-   3D-transform-plus-opacity animation can leave the panel stuck near opacity 0 in some
-   compositors, and an invisible log reads as broken. */
-.voyage-log[hidden] { display: none; }
-.voyage-log { max-width: 1100px; margin: 0.8rem auto 0;
-  background: #f3ead2; border: 1px solid var(--line-tan); border-radius: 6px;
-  padding: 0.8rem 1rem; }
-.voyage-log-sig { margin: 0 0 0.5rem; font-style: italic; color: var(--ink-brown);
-  border-bottom: 1px solid var(--line-faint); padding-bottom: 0.5rem; }
-.voyage-log-strip { list-style: none; margin: 0; padding: 0;
-  max-height: 32rem; overflow-y: auto; }
-.voyage-log-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
-  border-bottom: 1px solid var(--line-faint); opacity: 0.4;
-  transition: opacity 0.18s, transform 0.18s; }
-.voyage-log-strip li.logged { opacity: 1; transform: translateX(2px); }
-.voyage-log-strip .cr-year { flex: 0 0 3rem; text-align: right;
-  font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
-.voyage-log-strip .cr-text { color: #54452f; }
 .caption { text-align: center; font-style: italic; color: var(--ink-brown);
   padding-top: 0.6rem; }
 footer { margin-top: 3rem; }

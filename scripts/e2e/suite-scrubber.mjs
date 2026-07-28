@@ -17,7 +17,7 @@ export async function run(ctx) {
     document.getElementById("theme").value="";
     document.getElementById("type").value="";
     document.getElementById("arms").checked=false;
-    document.getElementById("chronicle").checked=false;
+    document.getElementById("ages").checked=false;
     document.getElementById("draw").click();
   })()`);
   await waitSettled("scrub-base-draw");
@@ -43,8 +43,15 @@ export async function run(ctx) {
       ruinIdx:ruin?ruin.idx:-1,ruinYear,ruinFounded:ruin?ruin.founded:null};
   })()`);
 
+  // #220: the bar's value domain is [0, 2*span] with the seam at the midpoint, so a
+  // year lands at barMax/2 + (year - min). The earliest year is the ONE bar position
+  // the seam already owns (the ratified survey rest), so the bar's first ages step is
+  // min+1: the helper clamps there. Exact-min addressing stays the deep link's and
+  // scrubTo's job, which these checks do not need. The painted year reads back off
+  // the hook.
   const setYear = (y) =>
-    evaluate(`(()=>{const s=document.getElementById("scrub-range");s.value="${y}";s.dispatchEvent(new Event("input",{bubbles:true}));return Number(s.value);})()`);
+    evaluate(`(()=>{const s=document.getElementById("scrub-range");const a=window.__vellumAgesState();const yy=Math.max(${y},a.min+1);s.value=String(Number(s.max)/2+(yy-a.min));s.dispatchEvent(new Event("input",{bubbles:true}));return window.__vellumAgesState().year;})()`);
+  const yearNow = () => evaluate(`window.__vellumAgesState().year`);
   // Each baked settlement glyph is an addressable group; the sweep toggles its display.
   const groupVis = (idx) =>
     evaluate(`(()=>{const g=document.querySelector('#map #layer-settlements g.settlement[data-idx="${idx}"]');return g?(getComputedStyle(g).display==="none"?"hidden":"shown"):"(no-el)";})()`);
@@ -59,15 +66,18 @@ export async function run(ctx) {
   // present, the baked settlement layer stays visible (its glyphs are the marks now)
   // and the roads show; the slider spans founding..present.
   const s1 = await evaluate(`(()=>{
-    const chk=document.getElementById("chronicle");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    const chk=document.getElementById("ages");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
     const panel=document.getElementById("scrubber");
     const ov=document.querySelector("#map .place-overlay");
     const set=document.querySelector("#map #layer-settlements");
     const roads=document.querySelector("#map #layer-roads");
     const slider=document.getElementById("scrub-range");
-    return{panelShown:!panel.hidden,scrubClass:ov?ov.classList.contains("scrub"):false,setDisp:set?getComputedStyle(set).display:"(no-el)",roadsDisp:roads?getComputedStyle(roads).display:"(no-el)",min:Number(slider.min),max:Number(slider.max),val:Number(slider.value)};
+    const a=window.__vellumAgesState();
+    return{panelShown:!panel.hidden,scrubClass:ov?ov.classList.contains("scrub"):false,setDisp:set?getComputedStyle(set).display:"(no-el)",roadsDisp:roads?getComputedStyle(roads).display:"(no-el)",min:Number(slider.min),max:Number(slider.max),val:Number(slider.value),year:a?a.year:-1,chamber:a?a.chamber:""};
   })()`);
-  check("S1 chronicle on: panel shown, real glyph layer + roads visible at present, slider spans founding..present", s1.panelShown && s1.scrubClass && s1.setDisp !== "none" && s1.roadsDisp !== "none" && s1.min === sm.minFounded && s1.max === sm.present && s1.val === sm.present, JSON.stringify(s1));
+  // #220: the bar spans both chambers ([0, 2*span], the seam at the midpoint); the arm
+  // parks in the ages chamber at the present, the thumb at the far right.
+  check("S1 ages on: panel shown, real glyph layer + roads visible at present, the bar parks at the far right", s1.panelShown && s1.scrubClass && s1.setDisp !== "none" && s1.roadsDisp !== "none" && s1.min === 0 && s1.max === 2 * Math.max(1, sm.present - sm.minFounded) && s1.val === s1.max && s1.chamber === "ages" && s1.year === sm.present, JSON.stringify(s1));
 
   const s2visible = await visibleGroups();
   check("S2 parked at the present year: every settlement glyph is shown", s2visible === sm.count, `${s2visible} visible groups vs ${sm.count} places`);
@@ -107,7 +117,7 @@ export async function run(ctx) {
   const startLabel = await evaluate(`(()=>{document.getElementById("scrub-play").click();return document.getElementById("scrub-play").textContent;})()`);
   let prev = -Infinity, mono = true, ended = false, lastYear = null, sawInterior = false;
   for (let i = 0; i < 130; i++) {
-    const st = await evaluate(`({y:Number(document.getElementById("scrub-range").value),lbl:document.getElementById("scrub-play").textContent})`);
+    const st = await evaluate(`({y:window.__vellumAgesState().year,lbl:document.getElementById("scrub-play").textContent})`);
     if (st.y < prev) mono = false;
     // an interior sample proves the world actually grew, not a single-frame jump to present
     if (st.y > sm.minFounded && st.y < sm.present) sawInterior = true;
@@ -126,17 +136,18 @@ export async function run(ctx) {
   const s6 = await evaluate(`(()=>{
     const before=document.getElementById("scrub-play").textContent;
     const s=document.getElementById("scrub-range");const mid=${Math.floor((sm.minFounded + sm.present) / 2)};
-    s.value=String(mid);s.dispatchEvent(new Event("input",{bubbles:true}));
-    return{before,after:document.getElementById("scrub-play").textContent,year:Number(s.value),mid};
+    const a=window.__vellumAgesState();
+    s.value=String(Number(s.max)/2+(mid-a.min));s.dispatchEvent(new Event("input",{bubbles:true}));
+    return{before,after:document.getElementById("scrub-play").textContent,year:window.__vellumAgesState().year,mid};
   })()`);
   await sleep(150); // a leaked rAF would advance the year past mid in this window
-  const s6after = await evaluate(`Number(document.getElementById("scrub-range").value)`);
+  const s6after = await yearNow();
   check("S6 a manual drag during Play pauses it and the sweep stops advancing", s6.before === "Pause" && s6.after === "Play" && s6.year === s6.mid && s6after === s6.mid, JSON.stringify(s6) + ` settled=${s6after}`);
 
   // S7: chronicle OFF restores the full present-day chart (every glyph group + roads
   // shown again, even those the sweep had hidden) and idle parity (hits clickable).
   const s7 = await evaluate(`(()=>{
-    const chk=document.getElementById("chronicle");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    const chk=document.getElementById("ages");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));
     const panel=document.getElementById("scrubber");
     const ov=document.querySelector("#map .place-overlay");
     const set=document.querySelector("#map #layer-settlements");
@@ -150,7 +161,7 @@ export async function run(ctx) {
 
   // S8: a redraw with chronicle ON re-applies the scrubber to the NEW world (fresh
   // manifest, range, and glyph groups) — the cross-rebuild hazard.
-  await evaluate(`(()=>{const chk=document.getElementById("chronicle");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(`(()=>{const chk=document.getElementById("ages");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await evaluate(`(()=>{document.getElementById("seed").value="100";document.getElementById("draw").click();})()`);
   await waitSettled("scrub-redraw");
   const sm2 = await evaluate(`(()=>{const r=window.__vellumRunInline({kind:"draw",seed:100,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});const places=r.manifest.places;return{present:r.manifest.presentYear,count:places.length,minFounded:Math.min(...places.map((p)=>p.founded))};})()`);
@@ -161,24 +172,25 @@ export async function run(ctx) {
     const roads=document.querySelector("#map #layer-roads");
     const slider=document.getElementById("scrub-range");
     const visible=[...document.querySelectorAll('#map #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length;
-    return{panelShown:!panel.hidden,scrubClass:ov?ov.classList.contains("scrub"):false,setDisp:set?getComputedStyle(set).display:"(no-el)",roadsDisp:roads?getComputedStyle(roads).display:"(no-el)",max:Number(slider.max),visible};
+    return{panelShown:!panel.hidden,scrubClass:ov?ov.classList.contains("scrub"):false,setDisp:set?getComputedStyle(set).display:"(no-el)",roadsDisp:roads?getComputedStyle(roads).display:"(no-el)",max:Number(slider.max),visible,year:window.__vellumAgesState().year};
   })()`);
-  check("S8 redraw with chronicle on re-applies the scrubber to the new world", s8.panelShown && s8.scrubClass && s8.setDisp !== "none" && s8.roadsDisp !== "none" && s8.max === sm2.present && s8.visible === sm2.count, JSON.stringify(s8));
+  check("S8 redraw with ages on re-applies the scrubber to the new world", s8.panelShown && s8.scrubClass && s8.setDisp !== "none" && s8.roadsDisp !== "none" && s8.max === 2 * Math.max(1, sm2.present - sm2.minFounded) && s8.year === sm2.present && s8.visible === sm2.count, JSON.stringify(s8));
 
-  // S9: drag to a mid year, then Play — the sweep RESTARTS from the earliest
-  // founding (a manual drag zeroes scrub.elapsed), it does NOT resume from the
-  // dragged year. Guards the deliberate restart-from-min behavior; a regression
-  // to resume-from-position would leave every observed year >= the dragged value.
+  // S9 (#220 ratified): "play from any year runs forward from there". A drag to a mid
+  // year followed by Play CONTINUES from that year; only a chamber's END rewinds (S17
+  // still proves the replay-from-the-start pole). The old restart-from-min behavior
+  // died with the fusion, by the issue's own acceptance.
   const s9mid = Math.floor((sm2.minFounded + sm2.present) / 2);
   await setYear(s9mid);
   await evaluate(`document.getElementById("scrub-play").click()`);
-  let s9min = Infinity;
+  let s9min = Infinity, s9max = -Infinity;
   for (let i = 0; i < 6; i++) {
-    const y = await evaluate(`Number(document.getElementById("scrub-range").value)`);
+    const y = await yearNow();
     if (y < s9min) s9min = y;
+    if (y > s9max) s9max = y;
     await sleep(70);
   }
-  check("S9 drag-then-Play restarts from the earliest founding, not the dragged year", s9min < s9mid, `earliest observed=${s9min} dragged=${s9mid} min=${sm2.minFounded}`);
+  check("S9 drag-then-Play runs FORWARD from the dragged year (#220: play from any year)", s9min >= s9mid && s9max > s9mid, `observed min=${s9min} max=${s9max} dragged=${s9mid}`);
 
   // S10: the Pause BUTTON freezes the sweep mid-flight, and Play RESUMES from the
   // frozen year (begin = now - scrub.elapsed), not from min or present. This is the
@@ -188,12 +200,15 @@ export async function run(ctx) {
   await setYear(sm2.minFounded);
   await evaluate(`document.getElementById("scrub-play").click()`); // Play from min
   await sleep(700); // advance into the interior
-  const frozen = await evaluate(`(()=>{document.getElementById("scrub-play").click();return{year:Number(document.getElementById("scrub-range").value),lbl:document.getElementById("scrub-play").textContent};})()`); // Pause button
+  const frozen = await evaluate(`(()=>{document.getElementById("scrub-play").click();return{year:window.__vellumAgesState().year,lbl:document.getElementById("scrub-play").textContent};})()`); // Pause button
   await sleep(260);
-  const stillFrozen = await evaluate(`Number(document.getElementById("scrub-range").value)`);
+  const stillFrozen = await yearNow();
   await evaluate(`document.getElementById("scrub-play").click()`); // Play resumes
-  await sleep(300);
-  const resumed = await evaluate(`Number(document.getElementById("scrub-range").value)`);
+  // #220: a resume re-enters at the parked year's earliest showing, which for a dwell
+  // year is the START of its dwell (<= 650ms); wait past the longest dwell so the
+  // resumed year has provably moved on.
+  await sleep(800);
+  const resumed = await yearNow();
   check("S10 Pause button freezes mid-sweep; Play resumes from the frozen year (not min/present)", frozen.lbl === "Play" && frozen.year > sm2.minFounded && frozen.year < sm2.present && stillFrozen === frozen.year && resumed > frozen.year && resumed <= sm2.present, `frozen=${frozen.year} still=${stillFrozen} resumed=${resumed} min=${sm2.minFounded} present=${sm2.present}`);
 
   // S11-S14 #128 paper physics + #93 mechanism. Park at the present year FIRST: S10
@@ -218,10 +233,10 @@ export async function run(ctx) {
     const li=document.querySelector(".chronicle-strip li");
     if(!li)return{li:false};
     const prop=getComputedStyle(li).transitionProperty;
-    li.classList.add("past");const pastTf=getComputedStyle(li).transform;li.classList.remove("past");
+    li.classList.add("inked");const pastTf=getComputedStyle(li).transform;li.classList.remove("inked");
     return{li:true,prop,pastTf};
   })()`);
-  check("S13 chronicle strip past-rows slide (transform in the transition + a 2px indent)", s13.li && s13.prop.includes("transform") && s13.pastTf !== "none", JSON.stringify(s13));
+  check("S13 journal inked-rows slide (transform in the transition + a 2px indent)", s13.li && s13.prop.includes("transform") && s13.pastTf !== "none", JSON.stringify(s13));
 
   // S14 (#93 Part 2): the strip is tall enough to show every entry at once (no scroll).
   const s14 = await evaluate(`(()=>{const s=document.getElementById("chronicle-strip");return{rows:s.querySelectorAll("li").length,scrollH:s.scrollHeight,clientH:s.clientHeight};})()`);
@@ -246,21 +261,21 @@ export async function run(ctx) {
   await setYear(s15past);
   const visSel = `[...document.querySelectorAll('#map #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length`;
   const s15 = await evaluate(`(()=>{
-    const beforeVal=Number(document.getElementById("scrub-range").value);
+    const beforeVal=window.__vellumAgesState().year;
     const beforeVisible=${visSel};
     document.getElementById("verso-turn").click();
     const rows=[...document.querySelectorAll("#chronicle-strip li")];
-    return{beforeVal,beforeVisible,afterVal:Number(document.getElementById("scrub-range").value),
+    return{beforeVal,beforeVisible,afterVal:window.__vellumAgesState().year,
       afterVisible:${visSel},
       year:document.getElementById("scrub-year").textContent,
-      rows:rows.length,pastRows:rows.filter((li)=>li.classList.contains("past")).length,
+      rows:rows.length,pastRows:rows.filter((li)=>li.classList.contains("inked")).length,
       flipped:document.getElementById("sheet").classList.contains("versoed")};
   })()`);
   // afterVisible === count is the headline criterion, asserted directly on the RECTO glyphs:
   // the snap clears every inline display the sweep set, so no settlement hidden on the front
   // (and therefore absent from the pristine ghost) survives onto the back. The panel readouts
   // are the visible proof; the glyph restore is the substance.
-  check("S15 flipping mid-scrub snaps the scrubber to the present (all glyphs back, slider, year, every strip row .past)", s15.beforeVal === s15past && s15.beforeVisible < sm2.count && s15.afterVisible === sm2.count && s15.afterVal === sm2.present && s15.year === `year ${sm2.present}` && s15.rows > 0 && s15.pastRows === s15.rows && s15.flipped, JSON.stringify(s15));
+  check("S15 flipping mid-scrub snaps the scrubber to the present (all glyphs back, year readout, every journal row inked)", s15.beforeVal === s15past && s15.beforeVisible < sm2.count && s15.afterVisible === sm2.count && s15.afterVal === sm2.present && s15.year === `year ${sm2.present}` && s15.rows > 0 && s15.pastRows === s15.rows && s15.flipped, JSON.stringify(s15));
 
   // S16: turning mid-Play PAUSES Play and parks at the present; the Turn button is never
   // disabled by a running Play, and no rAF leaks on behind the hidden face.
@@ -274,12 +289,12 @@ export async function run(ctx) {
     const btnDisabled=document.getElementById("verso-turn").disabled;
     document.getElementById("verso-turn").click();
     return{playBefore,btnDisabled,playAfter:document.getElementById("scrub-play").textContent,
-      val:Number(document.getElementById("scrub-range").value),
+      val:window.__vellumAgesState().year,
       flipped:document.getElementById("sheet").classList.contains("versoed"),
       btnText:document.getElementById("verso-turn").textContent};
   })()`);
   await sleep(200); // a leaked rAF would advance the year past the present in this window
-  const s16after = await evaluate(`Number(document.getElementById("scrub-range").value)`);
+  const s16after = await yearNow();
   check("S16 flipping mid-Play pauses Play, parks at present, and never disables the Turn button", s16.playBefore === "Pause" && s16.btnDisabled === false && s16.playAfter === "Play" && s16.val === sm2.present && s16.flipped && s16.btnText === "Turn back" && s16after === sm2.present, JSON.stringify(s16) + ` settled=${s16after}`);
 
   // S17: turning back leaves the recto at the present (the scrubbed year is discarded by
@@ -288,13 +303,13 @@ export async function run(ctx) {
   const s17back = await evaluate(`(()=>{
     document.getElementById("verso-turn").click();
     return{flipped:document.getElementById("sheet").classList.contains("versoed"),
-      val:Number(document.getElementById("scrub-range").value),
+      val:window.__vellumAgesState().year,
       btnText:document.getElementById("verso-turn").textContent};
   })()`);
   await evaluate(`document.getElementById("scrub-play").click()`); // the next Play
   let s17min = Infinity;
   for (let i = 0; i < 6; i++) {
-    const y = await evaluate(`Number(document.getElementById("scrub-range").value)`);
+    const y = await yearNow();
     if (y < s17min) s17min = y;
     await sleep(70);
   }
@@ -322,17 +337,17 @@ export async function run(ctx) {
   // on. Flip with chronicle OFF, then toggle it on.
   await ensureRecto();
   await sleep(60);
-  await evaluate(`(()=>{const chk=document.getElementById("chronicle");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
+  await evaluate(`(()=>{const chk=document.getElementById("ages");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
   await evaluate(`document.getElementById("verso-turn").click()`); // flip with chronicle off
   const s19 = await evaluate(`(()=>{
-    const chk=document.getElementById("chronicle");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    const chk=document.getElementById("ages");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
     const rows=[...document.querySelectorAll("#chronicle-strip li")];
     return{flipped:document.getElementById("sheet").classList.contains("versoed"),
       panelShown:!document.getElementById("scrubber").hidden,
       val:Number(document.getElementById("scrub-range").value),max:Number(document.getElementById("scrub-range").max),
-      rows:rows.length,pastRows:rows.filter((li)=>li.classList.contains("past")).length};
+      rows:rows.length,pastRows:rows.filter((li)=>li.classList.contains("inked")).length};
   })()`);
-  check("S19 ticking chronicle while flipped lands at the present with no special case (applyScrub parks)", s19.flipped && s19.panelShown && s19.val === s19.max && s19.rows > 0 && s19.pastRows === s19.rows, JSON.stringify(s19));
+  check("S19 ticking ages while flipped lands at the present with no special case (the arm parks)", s19.flipped && s19.panelShown && s19.val === s19.max && s19.rows > 0 && s19.pastRows === s19.rows, JSON.stringify(s19));
 
   // --- S20-S25 (#155): the ink-in. #93 revealed each glyph with a hard display toggle;
   // now the frame that reveals it plays a brief ceremony. living-chart.ts tags the
@@ -346,7 +361,7 @@ export async function run(ctx) {
   await ensureRecto();
   await sleep(60);
   await evaluate(`(()=>{
-    const chk=document.getElementById("chronicle");
+    const chk=document.getElementById("ages");
     if(!chk.checked){chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));}
     document.getElementById("seed").value="42";document.getElementById("draw").click();
   })()`);
@@ -368,7 +383,7 @@ export async function run(ctx) {
   if (sm.lateIdx >= 0) {
     await setYear(sm.lateFounded - 1);
     const s21 = await evaluate(`(()=>{
-      const s=document.getElementById("scrub-range");s.value="${sm.lateFounded}";s.dispatchEvent(new Event("input",{bubbles:true}));
+      const s=document.getElementById("scrub-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.lateFounded}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
       const g=document.querySelector('#map #layer-settlements g.settlement[data-idx="${sm.lateIdx}"]');
       if(!g)return{found:false};
       const mark=g.querySelector(":scope > :not(text)");
@@ -392,7 +407,7 @@ export async function run(ctx) {
   // inked group that actually kept its label (villages can lose theirs under pressure).
   await setYear(sm.minFounded);
   const s22 = await evaluate(`(()=>{
-    const s=document.getElementById("scrub-range");s.value="${sm.present}";s.dispatchEvent(new Event("input",{bubbles:true}));
+    const s=document.getElementById("scrub-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.present}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
     const inked=[...document.querySelectorAll('#map #layer-settlements g.settlement[data-ink]')];
     const withLabel=inked.find((g)=>g.querySelector(":scope > text"));
     if(!withLabel)return{inked:inked.length,labelled:false};
@@ -410,7 +425,7 @@ export async function run(ctx) {
   if (sm.ruinIdx >= 0) {
     await setYear(sm.ruinYear - 1);
     const s23 = await evaluate(`(()=>{
-      const s=document.getElementById("scrub-range");s.value="${sm.ruinYear}";s.dispatchEvent(new Event("input",{bubbles:true}));
+      const s=document.getElementById("scrub-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.ruinYear}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
       const g=document.querySelector('#map #layer-settlements g.settlement[data-idx="${sm.ruinIdx}"]');
       if(!g)return{found:false};
       const mark=g.querySelector(":scope > :not(text)");
@@ -429,7 +444,7 @@ export async function run(ctx) {
   // makes it non-vacuous: the recto really did carry grades going in.
   await setYear(sm.minFounded);
   const s24 = await evaluate(`(()=>{
-    const s=document.getElementById("scrub-range");s.value="${Math.floor((sm.minFounded + sm.present) / 2)}";s.dispatchEvent(new Event("input",{bubbles:true}));
+    const s=document.getElementById("scrub-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${Math.floor((sm.minFounded + sm.present) / 2)}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
     const beforeInked=document.querySelectorAll('#map #layer-settlements g.settlement[data-ink]').length;
     document.getElementById("verso-turn").click();
     const groups=[...document.querySelectorAll('#map #layer-settlements g.settlement')];
@@ -446,11 +461,11 @@ export async function run(ctx) {
   await sleep(60);
   await setYear(sm.minFounded); // leave grades on the recto so the restore is non-vacuous
   const s25 = await evaluate(`(()=>{
-    const s=document.getElementById("scrub-range");s.value="${sm.present}";s.dispatchEvent(new Event("input",{bubbles:true}));
+    const s=document.getElementById("scrub-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.present}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
     const beforeInked=document.querySelectorAll('#map #layer-settlements g.settlement[data-ink]').length;
     const origins=()=>[...document.querySelectorAll('#map #layer-settlements g.settlement > :not(text)')].filter((el)=>el.style&&el.style.transformOrigin).length;
     const beforePts=origins();
-    const chk=document.getElementById("chronicle");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    const chk=document.getElementById("ages");chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));
     const groups=[...document.querySelectorAll('#map #layer-settlements g.settlement')];
     return{beforeInked,beforePts,afterInked:groups.filter((g)=>g.hasAttribute("data-ink")).length,
       afterPts:origins(),
@@ -469,10 +484,10 @@ export async function run(ctx) {
   // so the Surveyor's Glass magnifies it up to 8x.
   await ensureRecto();
   await sleep(60);
-  await evaluate(`(()=>{const chk=document.getElementById("chronicle");if(!chk.checked){chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
+  await evaluate(`(()=>{const chk=document.getElementById("ages");if(!chk.checked){chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
   await setYear(sm.minFounded);
   const s26 = await evaluate(`(()=>{
-    const s=document.getElementById("scrub-range");s.value="${sm.present}";s.dispatchEvent(new Event("input",{bubbles:true}));
+    const s=document.getElementById("scrub-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.present}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
     // Ground truth comes from the MANIFEST, independent of anything the ink-in
     // publishes, mapped into client space by the chart's own screen CTM. Deliberately
     // NOT the .place-hit box: the overlay is sized to #map while the chart svg renders
@@ -521,6 +536,6 @@ export async function run(ctx) {
   // Restore to a clean, recto + chronicle-off state for the rest of the suite.
   await ensureRecto();
   await sleep(60);
-  await evaluate(`(()=>{const chk=document.getElementById("chronicle");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
+  await evaluate(`(()=>{const chk=document.getElementById("ages");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}})()`);
 
 }

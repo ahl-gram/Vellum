@@ -57,6 +57,7 @@ const ENGINE_RULES = [
   ".voyage-track",
   ".voyage-ship",
   ".voyage-rider",
+  ".ages-range",
 ];
 
 test("the shared sheet dresses every engine-emitted hook (#302)", () => {
@@ -95,6 +96,7 @@ test("the dressing has one home: the Explorer sheet keeps no copy (#302)", () =>
     ".voyage-track",
     ".voyage-ship",
     ".voyage-rider",
+    ".ages-range {",
   ];
   for (const s of banned) {
     assert.ok(!css.includes(s), `public/explorer/index.css still carries ${s}; the rule lives in ${SHEET} now`);

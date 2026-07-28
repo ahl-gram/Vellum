@@ -1,4 +1,4 @@
-// The window.__vellum* verification hooks (12), extracted from app.ts at #191.
+// The window.__vellum* verification hooks (13), extracted from app.ts at #191.
 // Deterministic e2e seams, harmless in prod; the suites drive the sweep/camera through
 // these rather than racing rAF loops. The declare block is typed from what is assigned.
 import type { runJob, runInline, usesWorker } from "./worker-client.ts";
@@ -17,6 +17,7 @@ declare global {
     __vellumVoyagePlan?: LivingChart["voyagePlan"];
     __vellumVoyageLog?: LivingChart["voyageLog"];
     __vellumVoyageLegGeometry?: LivingChart["voyageLegGeometry"];
+    __vellumAgesState?: LivingChart["agesState"];
     __vellumZoomTo: (t: ZoomState) => void;
     __vellumZoomState: () => ZoomState;
     __vellumRegion?: () => ReturnType<Glass["lodState"]>;
@@ -52,6 +53,9 @@ export function installExplorerHooks({ livingChart: lc, glass, ...d }: HookDeps)
   window.__vellumVoyagePlan = lc.voyagePlan;
   window.__vellumVoyageLog = lc.voyageLog; // #121: the margin log (entries, summary, reveal state)
   window.__vellumVoyageLegGeometry = lc.voyageLegGeometry; // #120: projected leg points, for W20b
+  // #220: the fused instrument's read hook (chamber, u, held, playing), so a suite can
+  // assert a seam crossing or the detent's hold without racing the clock.
+  window.__vellumAgesState = lc.agesState;
   // #164: deterministic zoom hooks (Z1-Z4). zoomTo drives the camera through the same
   // clamp a live gesture uses; zoomState reads back the settled {x,y,k}.
   window.__vellumZoomTo = (t) => glass.zoomTo(t);

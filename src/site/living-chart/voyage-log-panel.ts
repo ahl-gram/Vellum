@@ -53,6 +53,10 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
     host.sig.textContent = log.attribution;
     const rows = log.entries.map((e) => {
       const li = document.createElement("li");
+      // #220: these rows are the fused journal's PROLOGUE block, the surveyor's hand
+      // drawing the finished chart at the present, above the chronicler's dated annals.
+      // The class carries the voice distinction the Overture framing owes the reader.
+      li.className = "prologue";
       const year = document.createElement("span");
       year.className = "cr-year";
       year.textContent = String(e.year);
@@ -74,7 +78,9 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
    * arrival, and on a round trip the homecoming last.
    */
   function revealLog(rows: HTMLLIElement[], arrived: number): void {
-    for (let i = 0; i < rows.length; i++) rows[i].classList.toggle("logged", i < arrived);
+    // #220 collapsed the three arrived-classes (the chronicle's `past`, this panel's
+    // old `logged`, the dated-log component's `inked`) onto `inked` alone.
+    for (let i = 0; i < rows.length; i++) rows[i].classList.toggle("inked", i < arrived);
   }
 
   /** Hide and empty the panel. It lives outside the chart mount, so nothing else clears it. */
@@ -94,7 +100,7 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
       attribution: log.attribution,
       summary: log.summary,
       entries: log.entries.map((e) => ({ idx: e.idx, year: e.year, text: e.text })),
-      logged: rows.filter((r) => r.classList.contains("logged")).length,
+      logged: rows.filter((r) => r.classList.contains("inked")).length,
       rows: rows.length,
       visible: !host.panel.hidden,
     };

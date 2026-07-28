@@ -14,7 +14,7 @@ export async function run(ctx) {
 
   // Clean antique seed-42 base, chronicle/voyage off, camera home, redraft OFF for
   // the voice + glide block (geometric only; the ceremony block turns it on below).
-  await evaluate(`(()=>{for(const id of ["chronicle","voyage"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+  await evaluate(`(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
   await waitSettled("glass-ceremony-base");
   await evaluate(`window.__vellumSetRedraftEnabled(false)`);
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);

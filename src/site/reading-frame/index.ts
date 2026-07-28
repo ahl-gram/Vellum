@@ -12,23 +12,23 @@
 //
 // ## Why the tree is shaped like this
 //   root .rf
-//     .rf-chart                <- mapEl: the baked chart svg plus the engine's overlays
-//     .rf-status               <- statusEl: the one polite line, "" at rest
-//     .rf-reading              <- the reading column, instrument over log
-//       .rf-chronicle [hidden] <- scrubber.panel
-//         .rf-instrument       <- the instrument slot: Play, the year slider, the readout
-//         (the chronicle's dated log)
-//       (the voyage's dated log) [hidden]
+//     .rf-chart            <- mapEl: the baked chart svg plus the engine's overlays
+//     .rf-status           <- statusEl: the one polite line, "" at rest
+//     .rf-reading          <- the reading column, instrument over journal
+//       .rf-ages [hidden]  <- scrubber.panel, the whole fused instrument (#220)
+//         .rf-instrument   <- Play, the one bar, the readout
+//         (the ONE dated log: the surveyor's prologue, then the chronicler's annals)
 //
-// The chronicle's log rides INSIDE the panel the engine hides. That nesting is
-// load-bearing: exitScrub() only sets `panel.hidden`, it never empties the strip, so a
-// log mounted as the panel's sibling would keep a dead world's rows on screen after the
-// chronicle turned off. The Explorer nests them for the same reason.
+// The journal rides INSIDE the panel the engine hides. That nesting is load-bearing:
+// the engine's teardown hides the panel without emptying the strip, so a log mounted
+// as the panel's sibling would keep a dead world's rows on screen after the
+// instrument turned off. The Explorer nests them for the same reason.
 //
-// The two logs are two instances of ONE component, sitting adjacent in one slot and
-// dressed by one rule. They are mutually exclusive (the engine's own invariant), so at
-// most one is ever visible and the frame reads as a single log. #220's fusion collapses
-// them into one instance without moving the furniture.
+// #220 collapsed the frame's two dated-log instances into this ONE, exactly as #219
+// anticipated: one document, one arrived-class (`inked`), one dressing rule. The
+// engine writes the prologue and annal rows into the component's elements directly
+// (the engine-driven path in dated-log.ts); render/reveal/snapshot stay the
+// host-driven path for a page filling a strip itself.
 import { createDatedLog } from "./dated-log.ts";
 import type { LivingChartHost } from "../living-chart/index.ts";
 
@@ -58,10 +58,10 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   const reading = document.createElement("div");
   reading.className = "rf-reading";
 
-  // The chronicle's apparatus: its instrument and its log, hidden together.
-  const chroniclePanel = document.createElement("div");
-  chroniclePanel.className = "rf-chronicle";
-  chroniclePanel.hidden = true;
+  // The instrument's apparatus (#220): the bar and the one journal, hidden together.
+  const agesPanel = document.createElement("div");
+  agesPanel.className = "rf-ages";
+  agesPanel.hidden = true;
 
   const instrument = document.createElement("div");
   instrument.className = "rf-instrument";
@@ -74,23 +74,22 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   playBtn.textContent = "Play";
 
   const range = document.createElement("input");
-  range.className = "rf-range";
+  range.className = "rf-range ages-range";
   range.type = "range";
-  range.setAttribute("aria-label", "Chronicle year");
+  range.setAttribute("aria-label", "The ages");
 
-  // The visual year readout. aria-hidden because the slider's aria-valuetext already
-  // announces the same year, and once is enough.
+  // The visual readout (a word in the survey half, the year in the ages half).
+  // aria-hidden because the bar's aria-valuetext already announces the same text,
+  // and once is enough.
   const year = document.createElement("span");
   year.className = "rf-year";
   year.setAttribute("aria-hidden", "true");
 
-  const chronicleLog = createDatedLog({ label: "The chronicle" });
-  const voyageLog = createDatedLog({ label: "The surveyor's log" });
-  voyageLog.panel.hidden = true;
+  const log = createDatedLog({ label: "The ages" });
 
   instrument.append(playBtn, range, year);
-  chroniclePanel.append(instrument, chronicleLog.panel);
-  reading.append(chroniclePanel, voyageLog.panel);
+  agesPanel.append(instrument, log.panel);
+  reading.append(agesPanel);
   root.append(chart, status, reading);
   mount.appendChild(root);
 
@@ -98,25 +97,24 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
     mapEl: chart,
     statusEl: status,
     scrubber: {
-      panel: chroniclePanel,
+      panel: agesPanel,
       playBtn,
       range,
       year,
-      strip: chronicleLog.strip,
+      sig: log.sig,
+      strip: log.strip,
       onPark: opts.onPark,
     },
-    voyageLog: { panel: voyageLog.panel, sig: voyageLog.sig, strip: voyageLog.strip },
   };
 
   /** Unmount: a page host that leaves takes its DOM with it. The engine's own
    *  destroy() is the host's to call; this frame owns only the furniture. */
   function destroy(): void {
-    chronicleLog.clear();
-    voyageLog.clear();
+    log.clear();
     root.remove();
   }
 
-  return { root, host, chronicleLog, voyageLog, destroy };
+  return { root, host, log, destroy };
 }
 
 export type ReadingFrame = ReturnType<typeof createReadingFrame>;

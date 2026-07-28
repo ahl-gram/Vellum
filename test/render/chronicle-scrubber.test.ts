@@ -14,6 +14,7 @@ import {
   eventIsPast,
   buildSweepPlan,
   sweepYearAt,
+  sweepElapsedAt,
 } from "../../src/render/chronicle-scrubber.ts";
 
 // Unit tests for #54 (Chronicle year-scrubber): the pure core that the Explorer's
@@ -323,4 +324,47 @@ test("integration: over seed 42's whole timeline every mark inks in exactly once
   // and both grades are exercised by this world: seed 42 has living towns and a ruin
   const grades = new Set(marks.map(inkGradeFor));
   assert.deepEqual([...grades].sort(), ["founding", "ruin"]);
+});
+
+// --- sweepElapsedAt: the inverse #220's fused Play resumes from ---------------
+
+test("sweepElapsedAt round-trips every event year through sweepYearAt", () => {
+  const range = { min: 300, max: 1100 };
+  const events = [340, 520, 520, 700, 1050];
+  const plan = buildSweepPlan(range, events);
+  for (const y of new Set(events)) {
+    assert.equal(sweepYearAt(plan, sweepElapsedAt(plan, y)), y, `event year ${y}`);
+  }
+});
+
+test("sweepElapsedAt round-trips interior travel years too", () => {
+  const range = { min: 300, max: 1100 };
+  const plan = buildSweepPlan(range, [340, 700]);
+  for (const y of [301, 450, 699, 800, 1099]) {
+    assert.equal(sweepYearAt(plan, sweepElapsedAt(plan, y)), y, `travel year ${y}`);
+  }
+});
+
+test("sweepElapsedAt lands a dwell year at the dwell's START, its earliest showing", () => {
+  const range = { min: 300, max: 1100 };
+  const plan = buildSweepPlan(range, [700]);
+  const e = sweepElapsedAt(plan, 700);
+  assert.equal(sweepYearAt(plan, e), 700);
+  assert.ok(e > 0, "an interior dwell cannot start at zero elapsed");
+  // one ms earlier the sweep has not yet reached the dwell year
+  assert.ok(sweepYearAt(plan, e - 1) < 700, "the dwell should begin exactly at e");
+});
+
+test("sweepElapsedAt is monotone in year and clamps at the plan's ends", () => {
+  const range = { min: 300, max: 1100 };
+  const plan = buildSweepPlan(range, [340, 520, 700, 1050]);
+  let prev = -1;
+  for (let y = range.min; y <= range.max; y += 25) {
+    const e = sweepElapsedAt(plan, y);
+    assert.ok(e >= prev, `elapsed went backward at year ${y}`);
+    prev = e;
+  }
+  assert.equal(sweepElapsedAt(plan, range.min - 100), 0);
+  assert.equal(sweepElapsedAt(plan, range.max + 100), plan.totalMs);
+  assert.equal(sweepElapsedAt(plan, range.max), plan.totalMs);
 });

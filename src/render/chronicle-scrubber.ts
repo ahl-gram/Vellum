@@ -176,6 +176,28 @@ export function buildSweepPlan(
 const segStart = (s: SweepSegment): number => (s.type === "travel" ? s.fromYear : s.year);
 const segEnd = (s: SweepSegment): number => (s.type === "travel" ? s.toYear : s.year);
 
+/**
+ * The earliest elapsed time at which the sweep shows `year`: sweepYearAt's inverse,
+ * up to its rounding. #220's fused Play starts an ages-chamber resume here, since a
+ * parked year is the only coordinate a park leaves behind.
+ */
+export function sweepElapsedAt(plan: SweepPlan, year: number): number {
+  const segs = plan.segments;
+  if (segs.length === 0) return 0;
+  if (year <= segStart(segs[0]!)) return 0;
+  if (year >= segEnd(segs[segs.length - 1]!)) return plan.totalMs;
+  let acc = 0;
+  for (const s of segs) {
+    if (s.type === "dwell") {
+      if (s.year >= year) return acc;
+    } else if (s.toYear >= year) {
+      return acc + ((year - s.fromYear) / (s.toYear - s.fromYear)) * s.ms;
+    }
+    acc += s.ms;
+  }
+  return plan.totalMs;
+}
+
 /** The year shown at a given elapsed time, interpolating across travels. */
 export function sweepYearAt(plan: SweepPlan, elapsedMs: number): number {
   const segs = plan.segments;

@@ -30,7 +30,9 @@ export interface TurnDecision {
   usesWorker: boolean;
   /** A chart is already on screen to turn away from. */
   hasChart: boolean;
-  /** Chronicle/scrub mode is active (re-applies per its own redraw rules). */
+  /** The chronicle CHAMBER holds the sheet (#220: the fused instrument rests in its
+   *  ages half, whose per-glyph mutations cannot ride a turn; a survey-chamber rest
+   *  keeps the turn, the voyage's pre-fusion behaviour). */
   chronicle: boolean;
   /** #116: the sheet is flipped to its verso (the flip owns the sheet, not the turn). */
   flipped?: boolean;
