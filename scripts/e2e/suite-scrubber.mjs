@@ -233,7 +233,12 @@ export async function run(ctx) {
     const li=document.querySelector(".chronicle-strip li");
     if(!li)return{li:false};
     const prop=getComputedStyle(li).transitionProperty;
-    li.classList.add("inked");const pastTf=getComputedStyle(li).transform;li.classList.remove("inked");
+    // Restore the row's own state after probing: the fused journal re-lights a
+    // prologue row only on an arrival DIFF, so a stripped class would stay stripped
+    // and red S15's every-row-inked count two checks later.
+    const had=li.classList.contains("inked");
+    li.classList.add("inked");const pastTf=getComputedStyle(li).transform;
+    if(!had)li.classList.remove("inked");
     return{li:true,prop,pastTf};
   })()`);
   check("S13 journal inked-rows slide (transform in the transition + a 2px indent)", s13.li && s13.prop.includes("transform") && s13.pastTf !== "none", JSON.stringify(s13));
