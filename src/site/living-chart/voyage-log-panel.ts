@@ -1,6 +1,8 @@
-// #121 The margin log: the surveyor's dated journal beside the chart. A scrollable,
-// chronicle-strip-style HTML panel (a SIBLING of the chart mount, not part of the SVG
-// overlay) whose entries brighten as the voyage sweep reaches each port. Extracted from
+// #121 The margin log: the surveyor's dated journal beside the chart, and since #220
+// the PROLOGUE block of the fused journal (its host elements are the instrument
+// panel's sig and strip; the ages driver appends the annal rows after these). An HTML
+// panel (a SIBLING of the chart mount, not part of the SVG overlay) whose entries
+// brighten as the voyage sweep reaches each port. Extracted from
 // src/site/living-chart/voyage.ts (#189), made host-agnostic in #191: the host hands its
 // three panel elements in, nothing is looked up by id. The panel is HTML DOM, the voyage
 // engine is the animated SVG survey, and they share only DATA: buildLogPanel(logPorts, ...)

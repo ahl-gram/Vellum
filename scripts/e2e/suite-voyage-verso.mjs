@@ -128,7 +128,30 @@ export async function run(ctx) {
   check("W11 ticking ages while flipped parks trackless at the present, then the seam rests the survey on both faces, no sweep",
     w11.parked.chamber === "ages" && !w11.parked.playing && w11.parked.overlayHidden && !w11.parked.versoTrack &&
     w11.flipped && w11.ports > 2 && w11.rectoPts === w11.versoPts && w11.rectoPts > w11.ports &&
-    w11.samePoints && w11.logged === w11.ports + 1, JSON.stringify(w11));
+    w11.samePoints && w11.logged === w11.ports + 1 &&
+    w11.status === "", // the whole flow rode the silent paths; a posted line would hang the next settle
+    JSON.stringify(w11));
+
+  // W11b (#220/#174): a non-quiet redraw during an AGES-chamber rest must NOT bleed a
+  // survey track onto the visible verso. rebuildVerso wipes the verso layer and the
+  // conductor re-syncs the sink afterward; that re-sync has to know the resting
+  // chamber shows no track. Non-vacuous: the recto session exists and holds a full
+  // points string throughout.
+  await evaluate(`(()=>{const s=document.getElementById("scrub-range");s.value=s.max;s.dispatchEvent(new Event("input",{bubbles:true}));})()`);
+  await evaluate(`(()=>{document.getElementById("draw").click();})()`);
+  await waitSettled("voyage-verso-ages-rest-redraw");
+  const w11b = await evaluate(`(()=>{
+    const a=window.__vellumAgesState();
+    const plan=window.__vellumVoyagePlan();
+    return{flipped:document.getElementById("sheet").classList.contains("versoed"),
+      chamber:a?a.chamber:"",ports:plan?plan.ports.length:0,
+      versoTrack:!!document.getElementById("verso").querySelector(".verso-track"),
+      status:document.getElementById("status").textContent};
+  })()`);
+  check("W11b a redraw at an ages-chamber rest keeps the visible verso trackless (#174)",
+    w11b.flipped && w11b.chamber === "ages" && w11b.ports > 2 && !w11b.versoTrack && w11b.status === "",
+    JSON.stringify(w11b));
+  await evaluate(`(()=>{const s=document.getElementById("scrub-range");s.value=String(Number(s.max)/2);s.dispatchEvent(new Event("input",{bubbles:true}));})()`);
 
   // W12: a redraw while flipped and voyaging re-arms BOTH faces, silently. renderVerso's
   // replaceChildren wipes the verso track on every draw (the same lifecycle trap as #map's

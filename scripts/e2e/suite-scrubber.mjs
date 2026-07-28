@@ -113,14 +113,16 @@ export async function run(ctx) {
   // S5: Play sweeps monotonically (event-proportional plateaus included) and
   // auto-pauses at the present year with the button back to "Play". Timing is not
   // asserted — only that the year never goes backwards and the run terminates.
-  await setYear(sm.minFounded);
+  const s5start = await setYear(sm.minFounded); // clamps to min+1 (the seam owns min)
   const startLabel = await evaluate(`(()=>{document.getElementById("scrub-play").click();return document.getElementById("scrub-play").textContent;})()`);
   let prev = -Infinity, mono = true, ended = false, lastYear = null, sawInterior = false;
   for (let i = 0; i < 130; i++) {
     const st = await evaluate(`({y:window.__vellumAgesState().year,lbl:document.getElementById("scrub-play").textContent})`);
     if (st.y < prev) mono = false;
-    // an interior sample proves the world actually grew, not a single-frame jump to present
-    if (st.y > sm.minFounded && st.y < sm.present) sawInterior = true;
+    // an interior sample STRICTLY past the starting year proves the world actually
+    // grew, not a single-frame jump to present (the start itself is already interior
+    // since the setYear helper clamps to min+1, so equality would be vacuous)
+    if (st.y > s5start && st.y < sm.present) sawInterior = true;
     prev = st.y; lastYear = st.y;
     if (st.lbl === "Play") { ended = true; break; }
     await sleep(110);
@@ -204,12 +206,16 @@ export async function run(ctx) {
   await sleep(260);
   const stillFrozen = await yearNow();
   await evaluate(`document.getElementById("scrub-play").click()`); // Play resumes
+  // An EARLY sample first: a regression that restarted the whole sweep from min would
+  // be visibly below the frozen year in its first beats, before it could climb back.
+  await sleep(120);
+  const resumedEarly = await yearNow();
   // #220: a resume re-enters at the parked year's earliest showing, which for a dwell
   // year is the START of its dwell (<= 650ms); wait past the longest dwell so the
   // resumed year has provably moved on.
-  await sleep(800);
+  await sleep(700);
   const resumed = await yearNow();
-  check("S10 Pause button freezes mid-sweep; Play resumes from the frozen year (not min/present)", frozen.lbl === "Play" && frozen.year > sm2.minFounded && frozen.year < sm2.present && stillFrozen === frozen.year && resumed > frozen.year && resumed <= sm2.present, `frozen=${frozen.year} still=${stillFrozen} resumed=${resumed} min=${sm2.minFounded} present=${sm2.present}`);
+  check("S10 Pause button freezes mid-sweep; Play resumes from the frozen year (not min/present)", frozen.lbl === "Play" && frozen.year > sm2.minFounded && frozen.year < sm2.present && stillFrozen === frozen.year && resumedEarly >= frozen.year && resumed > frozen.year && resumed <= sm2.present, `frozen=${frozen.year} early=${resumedEarly} resumed=${resumed} min=${sm2.minFounded} present=${sm2.present}`);
 
   // S11-S14 #128 paper physics + #93 mechanism. Park at the present year FIRST: S10
   // leaves the sweep PLAYING mid-timeline, so setYear pauses it (onManualScrub) AND

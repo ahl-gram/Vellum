@@ -236,9 +236,17 @@ export function createAges(deps: AgesDeps) {
     };
     panel.hidden = false;
     setPlayLabel(false);
-    const rest: AgesPos =
+    // The adopted rest CLAMPS against this world's range: parseLive only gates on
+    // "integer > 0", so a hand-edited year=999999 reaches here and, unclamped, would
+    // paint a blank chart and write itself back into the hash forever (the internal
+    // paintYear seam is deliberately unclamped; this is its boundary).
+    const rawRest: AgesPos =
       opts.rest ??
       (priorChamber === "survey" ? { chamber: "survey", t: 1 } : { chamber: "ages", year: range.max });
+    const rest: AgesPos =
+      rawRest.chamber === "ages"
+        ? { chamber: "ages", year: Math.max(range.min, Math.min(range.max, Math.round(rawRest.year))) }
+        : { chamber: "survey", t: Math.max(0, Math.min(1, rawRest.t)) };
     paintPos(rest, { silent: true, postLog: false });
     if (!opts.quiet) syncSinkAtRest();
   }
@@ -396,6 +404,7 @@ export function createAges(deps: AgesDeps) {
   return {
     isActive,
     isPlaying,
+    syncSinkAtRest,
     armAges,
     exitAges,
     clearAges,

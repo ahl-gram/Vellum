@@ -51,6 +51,19 @@ export async function run(ctx) {
   );
   await shoot("explorer-address-year.png");
 
+  // A1b (#220 review): an out-of-range hand-edited year CLAMPS at the boundary (the
+  // old chronicle scrubTo clamp, now enforced where the arm adopts its rest) and the
+  // first sync self-heals the hash rather than re-emitting the nonsense forever.
+  await gotoAddress("#seed=42&style=antique&year=999999", "address-year-clamped");
+  const a1b = await evaluate(`(()=>{const a=window.__vellumAgesState();
+    return{year:a?a.year:-1,readout:document.getElementById("scrub-year").textContent,
+      hashYear:new URLSearchParams(location.hash.slice(1)).get("year")};})()`);
+  check(
+    "A1b an out-of-range year clamps to the boundary and the hash self-heals",
+    a1b.year === sm.present && a1b.readout === `year ${sm.present}` && a1b.hashYear === String(sm.present),
+    JSON.stringify({ a1b, present: sm.present }),
+  );
+
   // A2: faithful restore, the ratified decision B: year=N COMPOSES with cx/cy/k. The
   // boot ticks the box (no interactive ceremony, so no snap-home), the settle arms the
   // chronicle, and the pending camera applies after. The converged hash then carries

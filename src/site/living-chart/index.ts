@@ -177,7 +177,13 @@ export function createLivingChart(host: LivingChartHost) {
     voyagePlan: voyage.voyagePlan,
     voyageLog: voyage.voyageLog,
     voyageLegGeometry: voyage.voyageLegGeometry,
-    syncRestingTrack: voyage.syncRestingTrack,
+    // #220: chamber-aware while the instrument is armed. The Explorer calls this after
+    // every non-quiet draw (rebuildVerso wipes the verso track), and the raw voyage
+    // sync repaints unconditionally whenever a session exists, which under the fused
+    // instrument is ALWAYS while armed: an ages-chamber rest (recto shows no track)
+    // would get a survey track bled onto the visible verso (#174). The ages driver
+    // knows which chamber rests; disarmed, the raw sync's clear path still runs.
+    syncRestingTrack: () => (ages.isActive() ? ages.syncSinkAtRest() : voyage.syncRestingTrack()),
     destroy,
   };
 }
