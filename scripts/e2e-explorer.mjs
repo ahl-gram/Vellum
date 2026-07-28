@@ -43,6 +43,7 @@ import { run as runHunt } from "./e2e/suite-hunt.mjs";
 import { run as runPrintRoom } from "./e2e/suite-print-room.mjs";
 import { run as runHome } from "./e2e/suite-home.mjs";
 import { run as runAddress } from "./e2e/suite-address.mjs";
+import { run as runRunningHead } from "./e2e/suite-runninghead.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url)); // scripts/
 const REPO = resolve(HERE, "..");
@@ -117,6 +118,11 @@ async function main() {
   // The Address (#192): survey/year deep links restore the armed instruments;
   // self-scoped, and last because every check is its own fresh navigation.
   await runAddress(ctx);
+  // The Running Head (#295): the shell masthead asserted by RESOLVED computed
+  // styles, the cascade failure a source-text CSS test cannot see. Sweeps all
+  // seven shelled pages, so it goes last for the same reason the address suite
+  // does: every check is its own fresh navigation.
+  await runRunningHead(ctx);
 }
 
 main()
