@@ -4,8 +4,8 @@ import type { Pt } from "../core/rdp.ts";
  * The water span of a sea leg (#181). A sea leg's raw chain is
  * [fromPort, ...open water..., toPort]: the ports are LAND, so the mark rides an
  * overland stub before it embarks and after it lands. #120 drew the whole leg as a
- * ship; on the rare sea leg whose port sits genuinely inland (re-measured 2026-07-24
- * under #275's travel-ordered round trip: 8 of 237 sea legs over seeds 1..40, on seeds
+ * ship; on the rare sea leg whose port sits genuinely inland (re-measured 2026-07-28
+ * under #298's travel-ordered round trip: 8 of 242 sea legs over seeds 1..40, on seeds
  * 2, 12, 15, 21, 33, 35 and 39, with stubs of 8.9 to 48 cells against a coastal maximum
  * of 3) that ship marches far over dry land.
  *
@@ -37,7 +37,8 @@ export type WaterSpan = { readonly from: number; readonly to: number };
  *
  * The UPPER end is MEASURED ONLY. 8.94 is where genuine inland stubs happen to start on
  * these seeds; nothing enforces it. Any itinerary change owes a re-measure of THAT end
- * (the #184 and #275 reorders moved it from 10 to 8.94).
+ * (the #184 and #275 reorders moved it from 10 to 8.94; #298's reorder, re-measured
+ * 2026-07-28, left every handoff number unmoved: same 8 legs, same seeds, same 8.94).
  */
 export const INLAND_STUB_CELLS = 4;
 
