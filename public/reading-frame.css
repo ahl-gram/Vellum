@@ -1,0 +1,94 @@
+/* ==========================================================================
+   The reading frame (#219, Sub 3 of the Reading Room epic #190)
+   --------------------------------------------------------------------------
+   The reading presentation: one chart over one dated log and nothing else. Host-
+   agnostic like the module it dresses, so it is linked by whatever page mounts the
+   frame (#221's /reading-room/ is its first host) rather than owned by one room. The
+   Explorer is untouched by this sub and keeps its own panels.
+
+   Palette tokens are BaseLayout's shell block (#263); the gestures are motion.css's
+   (#125), including the one universal block that collapses every transition below to
+   an instant end state for a reader who asks for stillness.
+   ========================================================================== */
+
+.rf { max-width: 1100px; margin-inline: auto; }
+
+/* The chart mount. The baked chart svg lands here and the engine's overlays are
+   appended as its children, so it is the positioning context for all of them. The
+   hairline and the drop shadow are the site's one sheet-on-the-desk dressing, the same
+   pair the Explorer's chart and the home page's plates carry, so a chart reads as the
+   same object in every room. */
+.rf-chart { position: relative; }
+.rf-chart svg { display: block; width: 100%; height: auto;
+  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+
+/* The one polite line. It reserves its height so the column never jumps when the
+   voyage posts its completion summary and clears it again. */
+.rf-status { min-height: 1.4em; margin: 0.6rem 0 0; text-align: center;
+  font-style: italic; color: var(--ink-brown); }
+
+/* --------------------------------------------------------------------------
+   The reading column: the instrument, then the log, one continuous story.
+   -------------------------------------------------------------------------- */
+.rf-reading { margin-top: 0.8rem; }
+.rf-chronicle[hidden], .rf-log[hidden] { display: none; }
+
+/* The instrument slot: whatever the active subsystem exposes, and no maker chrome.
+   The chronicle puts Play, the year slider and the readout here; the voyage has no
+   instrument, so its log stands alone and the slot simply is not there. */
+   The row WRAPS, and the slider is allowed to shrink. Both halves are load-bearing and
+   were found by measuring a real 320px viewport (an iPhone SE, a folded Galaxy cover
+   screen): a flex item defaults to `min-width: auto` and so refuses to go below its
+   min-content width, and a range input's intrinsic width is around 129px. Play plus
+   slider plus the year readout could not fit, so the row pushed the whole PAGE sideways
+   to a 355px scrollWidth. A reading room that scrolls horizontally on a phone is worse
+   than the nested scroller the ratified decision removed. */
+.rf-instrument { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
+  padding: 0.7rem 1rem; background: var(--parchment-panel);
+  border: 1px solid var(--line-tan); border-radius: 6px 6px 0 0; }
+.rf-play { min-width: 5.2rem; }
+.rf-range { flex: 1 1 8rem; min-width: 0; accent-color: var(--ink-brown); }
+.rf-year { font-style: italic; color: var(--ink-brown);
+  font-variant-numeric: tabular-nums; min-width: 5rem; text-align: right; }
+
+/* --------------------------------------------------------------------------
+   The log. One component, one slot, one dressing.
+   -------------------------------------------------------------------------- */
+.rf-log { background: var(--parchment-panel); border: 1px solid var(--line-tan);
+  border-radius: 6px; padding: 0.8rem 1rem; }
+/* Under the instrument the two panels are one instrument: the seam between them
+   closes so the chronicle reads as a single ruled sheet. */
+.rf-chronicle .rf-log { border-top: 0; border-radius: 0 0 6px 6px; }
+
+/* The surveyor's signature above the strip. The chronicle has no attribution, so its
+   line collapses rather than leaving a rule floating over nothing. */
+.rf-log-sig { margin: 0 0 0.5rem; font-style: italic; color: var(--ink-brown);
+  border-bottom: 1px solid var(--line-faint); padding-bottom: 0.5rem; }
+.rf-log-sig:empty { display: none; }
+
+/* The strip FLOWS, at every width (Alex's call, 2026-07-27, on #219's open decision
+   2). It is bounded by construction rather than by a scrollbar: the chronicle is
+   capped at 14 events (src/society/history.ts) and #185 measured 19 to 24 voyage legs
+   across 150 seeds, so even the fused journal (#220) tops out around 35 rows. The PAGE
+   scroll owns the log at every size, which is what keeps the room from being the
+   nested scroll-trap the epic's acceptance forbids. There is deliberately no
+   breakpoint here: the reading experience must not differ by viewport width. */
+.rf-log-strip { list-style: none; margin: 0; padding: 0; }
+.rf-log-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
+  border-bottom: 1px solid var(--line-faint); opacity: 0.4;
+  transition: opacity 0.18s, transform 0.18s; }
+
+/* The brighten-on-arrival, canonicalized: a row that has come to pass brightens AND
+   slides a hair right, like an entry inked into the ledger as its year arrives.
+   THREE names write that one state today, so one rule answers to all three: the
+   component's own `inked`, the chronicle's `past`, and the voyage's `logged`. The
+   fusion (#220) collapses them to `inked` alone; until then, dropping any one of
+   these selectors silently stops that producer's rows from ever lighting up. */
+.rf-log-strip li.inked,
+.rf-log-strip li.past,
+.rf-log-strip li.logged { opacity: 1; transform: translateX(2px); }
+
+/* The shared two-column row idiom every producer emits. */
+.rf-log-strip .cr-year { flex: 0 0 3rem; text-align: right;
+  font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
+.rf-log-strip .cr-text { color: var(--ink-dark); }

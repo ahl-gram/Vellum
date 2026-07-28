@@ -26,6 +26,14 @@ const PAGE_CSS = [
   "public/seed-of-the-day/index.css",
 ] as const;
 
+// Not a page's stylesheet: the reading frame (#219) is host-agnostic, so its dressing
+// is linked by whatever page mounts the frame (#221's room first) rather than owned by
+// one room. It answers to the same palette discipline, so it joins every guard below.
+const SHARED_CSS = ["public/reading-frame.css"] as const;
+
+/** Every hand-authored stylesheet the palette rules apply to. */
+const AUTHORED_CSS = [...PAGE_CSS, ...SHARED_CSS] as const;
+
 // The token set: the four ratified by #263, extended by the PR #269 review
 // call (item 4: the near-miss inks merged into --ink-dark and retired).
 const TOKENS: Record<string, string> = {
@@ -64,7 +72,7 @@ test("BaseLayout declares the four palette tokens at their ratified values (#263
 });
 
 test("no tokenized hex survives raw: pages consume the vars, the layout declares each once", () => {
-  for (const page of PAGE_CSS) {
+  for (const page of AUTHORED_CSS) {
     const css = read(page).toLowerCase();
     for (const [name, hex] of Object.entries(TOKENS)) {
       assert.ok(
@@ -81,7 +89,7 @@ test("no tokenized hex survives raw: pages consume the vars, the layout declares
 });
 
 test("the retired near-miss inks never reappear (#269 review, item 4)", () => {
-  for (const source of [...PAGE_CSS, "src/layouts/BaseLayout.astro"]) {
+  for (const source of [...AUTHORED_CSS, "src/layouts/BaseLayout.astro"]) {
     const text = read(source).toLowerCase();
     for (const hex of RETIRED_INKS) {
       assert.ok(!text.includes(hex), `${source} carries retired ink ${hex}; use var(--ink-dark)`);
@@ -138,7 +146,7 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
   const { paletteRootCss } = await import("../../src/atlas/palette.ts");
   const declared = new Set<string>();
   const declarationSources = [
-    ...PAGE_CSS.map(read),
+    ...AUTHORED_CSS.map(read),
     read("public/fonts.css"),
     read("public/motion.css"),
     layoutStyle(),
@@ -149,7 +157,7 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
   }
 
   const consumers: Array<[string, string]> = [
-    ...PAGE_CSS.map((p): [string, string] => [p, read(p)]),
+    ...AUTHORED_CSS.map((p): [string, string] => [p, read(p)]),
     ["BaseLayout <style is:global>", layoutStyle()],
     ["src/atlas/document.ts", read("src/atlas/document.ts")],
     ["src/cli/gallery.ts", read("src/cli/gallery.ts")],
