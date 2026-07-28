@@ -44,7 +44,9 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   root.className = "rf";
 
   const chart = document.createElement("div");
-  chart.className = "rf-chart";
+  // living-chart is the #302 host contract: the shared /living-chart.css keys the
+  // engine's ink-in dressing on this mount class, never on a host element id.
+  chart.className = "rf-chart living-chart";
 
   // The polite status line: the engine posts the voyage's one completion summary here
   // and otherwise keeps it "", which is the settle signal a host's draw depends on.

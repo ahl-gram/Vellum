@@ -122,8 +122,9 @@ export function createChronicle(deps: ChronicleDeps) {
   // manual-scrub handler.
   //
   // #155 the ink-in: a glyph that CROSSES into view on this frame is tagged
-  // data-ink with its grade (founding stamps, a fall dries in) and the Explorer CSS
-  // keys a brief ceremony on it. Three things make that attribute the whole scope:
+  // data-ink with its grade (founding stamps, a fall dries in) and the shared
+  // /living-chart.css (#302) keys a brief ceremony on it, scoped to the
+  // .living-chart class the host puts on the chart mount. Three things make that attribute the whole scope:
   // nothing else on the site ever writes it, it lives on the injected DOM only, and
   // Download saves the chart string, so the baked chart, the committed charts, and
   // the golden can never see it. Idle is byte-identical by construction.

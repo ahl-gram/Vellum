@@ -28,8 +28,10 @@ const PAGE_CSS = [
 
 // Not a page's stylesheet: the reading frame (#219) is host-agnostic, so its dressing
 // is linked by whatever page mounts the frame (#221's room first) rather than owned by
-// one room. It answers to the same palette discipline, so it joins every guard below.
-const SHARED_CSS = ["public/reading-frame.css"] as const;
+// one room. The living-chart sheet (#302) is the same shape one layer down: the
+// ENGINE's overlay dressing, linked by every page that mounts the engine. Both answer
+// to the same palette discipline, so they join every guard below.
+const SHARED_CSS = ["public/reading-frame.css", "public/living-chart.css"] as const;
 
 /** Every hand-authored stylesheet the palette rules apply to. */
 const AUTHORED_CSS = [...PAGE_CSS, ...SHARED_CSS] as const;

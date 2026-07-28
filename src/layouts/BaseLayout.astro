@@ -33,9 +33,22 @@ interface Props {
   path: string;
   /** The flourish line under the room name (under the wordmark alone on home). */
   tagline: string;
+  /**
+   * Extra root-absolute stylesheet hrefs for SHARED sheets a page opts into
+   * (/living-chart.css for pages that mount the engine, /reading-frame.css for
+   * pages that mount the frame). Linked after the global sheets and before the
+   * page's own relative index.css, so page rules keep the last word.
+   */
+  extraCss?: readonly string[];
 }
 
-const { room, ogRoom, description, ogDescription, path, tagline } = Astro.props;
+const { room, ogRoom, description, ogDescription, path, tagline, extraCss = [] } = Astro.props;
+
+for (const href of extraCss) {
+  if (!href.startsWith("/")) {
+    throw new Error(`BaseLayout extraCss hrefs must be root-absolute ("/living-chart.css"), got "${href}"`);
+  }
+}
 
 if (!/^\/([a-z0-9-]+\/)*$/.test(path)) {
   throw new Error(`BaseLayout path must be root-absolute directory form ("/faq/"), got "${path}"`);
@@ -82,6 +95,7 @@ const cardDescription = ogDescription ?? description;
 <meta name="twitter:image:alt" content={ogImageAlt}>
 <link rel="stylesheet" href="/fonts.css">
 <link rel="stylesheet" href="/motion.css">
+{extraCss.map((href) => <link rel="stylesheet" href={href} />)}
 <link rel="stylesheet" href="index.css">
 <style is:global>
 /* The shell dresses once (#263), part B: the recurring parchment/ink palette,
