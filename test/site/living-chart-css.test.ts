@@ -1,0 +1,122 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+/**
+ * #302: the living-chart engine's overlay dressing is a SHARED sheet,
+ * public/living-chart.css, linked by every page that mounts the engine (the
+ * Explorer today, the Reading Room's page next). This is the CSS twin of the
+ * #191 module boundary: #191 lifted the BEHAVIOR out of the Explorer, this
+ * sheet lifts the DRESSING, so a non-Explorer host is no longer functionally
+ * live but visually undressed.
+ *
+ * Three contracts, each with its own failure mode:
+ *   1. the sheet dresses every hook the engine emits (a missing rule leaves
+ *      UA-default buttons over the chart, or an unpositioned overlay);
+ *   2. the sheet is host-agnostic: it never names a host's own element, so
+ *      the #155 ink-in keys on the .living-chart mount class a host supplies,
+ *      never on the Explorer's #map;
+ *   3. the dressing has ONE home. The Explorer sheet must not keep copies,
+ *      because two copies drift apart silently (the exact failure option 2 of
+ *      #302 was rejected for).
+ */
+
+const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
+const read = (p: string) => {
+  try {
+    return readFileSync(root(p), "utf8");
+  } catch {
+    return "";
+  }
+};
+
+const SHEET = "public/living-chart.css";
+
+// Every rule opener the engine's dressing needs: the nodes place-overlay.ts,
+// voyage-session.ts, and chronicle.ts create or tag. Matched as literal
+// substrings of the sheet, so a rename on either side fails here first.
+const ENGINE_RULES = [
+  ".place-overlay {",
+  ".place-hit {",
+  ".place-hit::after",
+  "#place-card {",
+  "#place-card[hidden]",
+  "#place-card.flip-h",
+  "#place-card.flip-v",
+  ".pc-inner",
+  ".pc-name",
+  ".pc-rank",
+  ".pc-founded",
+  ".pc-tale",
+  ".place-overlay.scrub .place-hit",
+  '.living-chart g.settlement[data-ink="founding"]',
+  '.living-chart g.settlement[data-ink="ruin"]',
+  ".living-chart g.settlement[data-ink] > text",
+  ".voyage-overlay",
+  ".voyage-track",
+  ".voyage-ship",
+  ".voyage-rider",
+];
+
+test("the shared sheet dresses every engine-emitted hook (#302)", () => {
+  const css = read(SHEET);
+  assert.ok(css.length > 0, `${SHEET} exists and is non-empty`);
+  for (const rule of ENGINE_RULES) {
+    assert.ok(css.includes(rule), `${SHEET} dresses ${rule}`);
+  }
+});
+
+test("the shared sheet is host-agnostic: no host element id, ever (#302)", () => {
+  const raw = read(SHEET);
+  assert.ok(raw.length > 0, `${SHEET} exists and is non-empty`);
+  // Comments may cite a host by name to document the contract; SELECTORS must
+  // not. #place-card is ENGINE-created (place-overlay.ts assigns the id), so it
+  // may appear; #map is the Explorer host's own mount and must not.
+  const css = raw.replace(/\/\*[\s\S]*?\*\//g, "");
+  assert.ok(!css.includes("#map"), `${SHEET} must never key a rule on a host's #map`);
+});
+
+test("the dressing has one home: the Explorer sheet keeps no copy (#302)", () => {
+  // Strip comments first: prose may legitimately mention a class name (the
+  // button reset comment explains WHY .place-hit is excluded), and the
+  // :not(.place-hit) exclusion in the Explorer's button rule stays by design.
+  const css = read("public/explorer/index.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  const banned = [
+    ".place-overlay",
+    ".place-hit {",
+    ".place-hit::after",
+    ".place-hit:hover",
+    ".place-hit:focus",
+    "#place-card",
+    ".pc-",
+    "data-ink",
+    ".voyage-overlay",
+    ".voyage-track",
+    ".voyage-ship",
+    ".voyage-rider",
+  ];
+  for (const s of banned) {
+    assert.ok(!css.includes(s), `public/explorer/index.css still carries ${s}; the rule lives in ${SHEET} now`);
+  }
+});
+
+test("the Explorer host wires the contract: mount class + sheet link (#302)", () => {
+  const page = read("src/pages/explorer/index.astro");
+  assert.ok(
+    /id="map"[^>]*class="[^"]*\bliving-chart\b/.test(page) ||
+      /class="[^"]*\bliving-chart\b[^"]*"[^>]*id="map"/.test(page),
+    "the Explorer's #map carries the living-chart mount class",
+  );
+  assert.ok(page.includes("/living-chart.css"), "the Explorer page links /living-chart.css");
+  const layout = read("src/layouts/BaseLayout.astro");
+  assert.ok(layout.includes("extraCss"), "BaseLayout emits a page's extra stylesheet links");
+});
+
+test("the reading frame's chart mount carries the class for any future host (#302)", () => {
+  const frame = read("src/site/reading-frame/index.ts");
+  assert.ok(
+    frame.includes('"rf-chart living-chart"'),
+    "buildReadingFrame's chart mount carries living-chart alongside rf-chart",
+  );
+});

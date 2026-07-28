@@ -16,6 +16,13 @@
 // Construction only STORES the refs, so a host may build the engine before its DOM is
 // fully assembled, as long as the elements exist by the first method call.
 //
+// The contract has a CSS half (#302, the boundary's twin): the engine's overlay
+// dressing lives in the SHARED /living-chart.css, so a host page must (1) link that
+// sheet (BaseLayout's extraCss prop) and (2) put class="living-chart" on the chart
+// mount it hands in, which is what the #155 ink-in rules key on. Without both, the
+// engine runs live but renders undressed (UA-default buttons, an unpositioned
+// voyage overlay). Guarded by test/site/living-chart-css.test.ts.
+//
 // ## Capability map for the Reading Room (#190), so Subs 2-5 need not re-open internals
 //   arm:      buildPlaceOverlay (per draw), applyScrub / applyVoyage / rearmVoyage
 //   step:     voyageStepTo (port-resolution), scrubTo (year-resolution)
