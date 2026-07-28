@@ -119,9 +119,9 @@ async function main() {
   // self-scoped, and last because every check is its own fresh navigation.
   await runAddress(ctx);
   // The Running Head (#295): the shell masthead asserted by RESOLVED computed
-  // styles, the cascade failure a source-text CSS test cannot see. Sweeps all
-  // seven shelled pages, so it goes last for the same reason the address suite
-  // does: every check is its own fresh navigation.
+  // styles, the cascade failure a source-text CSS test cannot see. It sweeps all
+  // seven shelled pages and mutates the Print Room's #pr-atlas, so it restores the
+  // settled Explorer base before returning, like the zoom and ceremony suites.
   await runRunningHead(ctx);
 }
 
