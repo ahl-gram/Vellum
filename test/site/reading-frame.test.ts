@@ -108,6 +108,14 @@ class El {
 const installShim = (): void => {
   (globalThis as { document?: unknown }).document = {
     createElement: (tag: string) => new El(tag),
+    // #312: the engine's log builder wraps the drop-cap initial beside a plain text
+    // node. A text node is an El with no children, so textContent aggregation and
+    // shape() need nothing new.
+    createTextNode: (t: string) => {
+      const n = new El("#text");
+      n.textContent = String(t);
+      return n;
+    },
   };
 };
 installShim();
@@ -243,36 +251,59 @@ test("the log component renders the chronicle's row shape in the shared idiom (#
   });
 });
 
-test("the log component renders the voyage's row shape identically to the engine's own builder (#219)", async () => {
-  const { createDatedLog } = await import("../../src/site/reading-frame/dated-log.ts");
+test("the engine's prologue rows carry the #312 manuscript shape: day gutters, an initial on the first line", async () => {
+  // #219 asserted the component and the engine render IDENTICAL rows. #312 narrowed
+  // that parity by design: both still emit the li > .cr-year + .cr-text idiom the
+  // frame dresses, but the engine's gutter now counts the days of the voyage (the
+  // year lives in the attribution alone) and its first line opens with an initial.
   const { createVoyageLogPanel } = await import("../../src/site/living-chart/voyage-log-panel.ts");
 
   const ports: VoyageLogPort[] = [
-    { idx: 0, name: "Aldmarch", kind: "capital", founded: 214, arrivalMode: null, inlandHandoff: false },
-    { idx: 4, name: "Kelder", kind: "town", founded: 402, arrivalMode: "sea", inlandHandoff: false },
-    { idx: 9, name: "Brenmoor", kind: "village", founded: 655, arrivalMode: "road", inlandHandoff: true },
+    { idx: 0, name: "Aldmarch", kind: "capital", founded: 214, arrivalMode: null, inlandHandoff: false, legLength: 0 },
+    // 28 grid units = two days' travel (GRID_UNITS_PER_DAY is 14): day 1 + 2 = 3.
+    { idx: 4, name: "Kelder", kind: "town", founded: 402, arrivalMode: "sea", inlandHandoff: false, legLength: 28 },
+    // A one-unit hop rounds to the same raw day; the strictly-increasing ruling bumps it.
+    { idx: 9, name: "Brenmoor", kind: "village", founded: 655, arrivalMode: "road", inlandHandoff: true, legLength: 1 },
   ];
 
-  // The engine's builder, against shim elements: the reference rendering.
   const enginePanel = { panel: el(), sig: el(), strip: el() };
   const engine = createVoyageLogPanel(enginePanel);
   const { log: builtLog } = engine.buildLogPanel(ports, 1200, 42, "surveyed for the Admiralty", null);
+  const rows = (enginePanel.strip as unknown as El).children;
+  assert.equal(rows.length, 3, "one row per port");
 
-  // The frame's component, given the SAME entries the engine just built.
-  const log = createDatedLog({ label: "The surveyor's log" });
-  log.render(
-    builtLog.entries.map((e) => ({ year: e.year, text: e.text.replace(/^Year \d+\. /, "") })),
-    builtLog.attribution,
+  assert.deepEqual(
+    rows.map((li) => ({ cls: li.children[0]!.className, text: li.children[0]!.textContent })),
+    [
+      { cls: "cr-year", text: "day 1" },
+      { cls: "cr-year", text: "day 3" },
+      { cls: "cr-year", text: "day 4" },
+    ],
+    "the gutter counts strictly increasing days, never the year",
   );
 
-  const mine = (log.strip as unknown as El).children.map(shape);
-  const theirs = (enginePanel.strip as unknown as El).children.map(shape);
-  assert.ok(theirs.length > 0, "the engine produced reference rows to compare against");
-  assert.deepEqual(mine, theirs, "the component renders the engine's own rows byte-for-byte in structure");
+  // Row 0's initial is dressing, not content: the .cr-dc span leads, and the row's
+  // readable text is still the whole entry.
+  const body0 = builtLog.entries[0]!.text.replace(/^Year \d+\. /, "");
+  const text0 = rows[0]!.children[1]!;
+  assert.equal(text0.className, "cr-text");
+  assert.equal(text0.children[0]!.className, "cr-dc");
+  assert.equal(text0.children[0]!.textContent, body0[0], "the initial is the first letter");
+  assert.equal(text0.textContent, body0, "the drop cap costs no readable text");
+
+  // Later rows keep the plain two-column idiom the frame's component also emits.
+  assert.deepEqual(shape(rows[1]!), {
+    tag: "LI",
+    parts: [
+      { tag: "SPAN", cls: "cr-year", text: "day 3" },
+      { tag: "SPAN", cls: "cr-text", text: builtLog.entries[1]!.text.replace(/^Year \d+\. /, "") },
+    ],
+  });
+
   assert.equal(
-    (log.sig as unknown as El).textContent,
     (enginePanel.sig as unknown as El).textContent,
-    "the attribution line carries the surveyor's signature, like the engine's",
+    "surveyed for the Admiralty",
+    "the attribution line alone carries the survey's dating",
   );
 });
 

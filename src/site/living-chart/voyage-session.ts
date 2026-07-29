@@ -147,6 +147,9 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
         idx: pm.idx, name: pm.name, kind: pm.kind, founded: pm.founded,
         arrivalMode: i === 0 ? null : routed[i - 1].mode,
         inlandHandoff: i === 0 ? false : routed[i - 1].inlandHandoff,
+        // #312: GRID-space leg length (routed points are pre-projection), so the
+        // day counts are world-derived and never move with the render width.
+        legLength: i === 0 ? 0 : buildLegGeometry(routed[i - 1].points).total,
       };
     });
     // #275: the closing leg is the last routed leg (it carries the survey home to
@@ -158,7 +161,9 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
       manifest.presentYear,
       seed,
       subtitle,
-      closing ? { arrivalMode: closing.mode, inlandHandoff: closing.inlandHandoff } : null,
+      closing
+        ? { arrivalMode: closing.mode, inlandHandoff: closing.inlandHandoff, legLength: buildLegGeometry(closing.points).total }
+        : null,
     );
 
     const svg = document.createElementNS(SVG_NS, "svg") as SVGSVGElement;

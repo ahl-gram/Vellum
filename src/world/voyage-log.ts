@@ -35,6 +35,8 @@ export type VoyageLogPort = {
   readonly founded: number;
   readonly arrivalMode: LegMode | null;
   readonly inlandHandoff: boolean;
+  /** Grid-space length of the ARRIVING leg (#312); the origin departs, so it is 0. */
+  readonly legLength: number;
 };
 
 /** The closing leg's character, for the homecoming entry (#275). The capital is already
@@ -43,13 +45,28 @@ export type VoyageLogPort = {
 export type VoyageHomecoming = {
   readonly arrivalMode: LegMode;
   readonly inlandHandoff: boolean;
+  /** Grid-space length of the closing leg (#312), for the homecoming's day. */
+  readonly legLength: number;
 };
 
 export type VoyageLogEntry = {
   readonly idx: number;
   readonly year: number;
+  /** The day of the voyage this entry is written on (#312): the prologue gutter
+   *  counts days, strictly increasing, while `year` stays the survey's one date. */
+  readonly day: number;
   readonly text: string;
 };
+
+/**
+ * Grid units the survey travels in a day (#312). Measured 2026-07-28 over seeds
+ * 42/7/100/953/2024 (320x240 grid, 24-leg round trips): totals ran 994-1212 units,
+ * legs 7-200, median 30-50. At 14 a whole voyage runs 70-90 days (out in spring,
+ * home by late summer), a median leg is 2-3 days, and the longest sails jump about
+ * 14, so the gutter reads with real variety. Days are STRICTLY increasing by the
+ * #312 ruling: each entry is max(previousDay + 1, 1 + round(cum / this)).
+ */
+export const GRID_UNITS_PER_DAY = 14;
 
 export type VoyageLog = {
   /** The surveyor's signature, straight from the #116 subtitle protocol field. */
@@ -198,6 +215,7 @@ function homecomingPoolFor(mode: LegMode): readonly string[] {
 function homecomingEntry(
   ports: ReadonlyArray<VoyageLogPort>,
   presentYear: number,
+  day: number,
   homecoming: VoyageHomecoming,
   pick: (list: readonly string[]) => string,
 ): VoyageLogEntry | null {
@@ -211,7 +229,7 @@ function homecomingEntry(
         `and made landfall below ${home.name}, whence we set out, ${pick(HANDOFF_CLOSINGS)}.`
       : `Year ${presentYear}. ${arrivalVerb(mode)} ${home.name} again, whence we set out, ` +
         `${pick(homecomingPoolFor(mode))}.`;
-  return { idx: home.idx, year: presentYear, text };
+  return { idx: home.idx, year: presentYear, day, text };
 }
 
 /**
@@ -233,6 +251,17 @@ export function buildVoyageLog(
   homecoming: VoyageHomecoming | null = null,
 ): VoyageLog {
   const pick = makeCycler(createRng(seed).fork("voyage-log"));
+  // #312: the days of the voyage, a pure function of the legs (no RNG). Cumulative
+  // grid length at GRID_UNITS_PER_DAY, strictly increasing by ruling: a long sail
+  // jumps many days, a short hop advances at least one, no two rows share a day.
+  let cumLength = 0;
+  let prevDay = 0;
+  const nextDay = (legLength: number): number => {
+    cumLength += legLength;
+    const computed = 1 + Math.round(cumLength / GRID_UNITS_PER_DAY);
+    prevDay = Math.max(prevDay + 1, computed);
+    return prevDay;
+  };
   const portEntries = ports.map((port, i) => {
     const isOrigin = i === 0;
     const mode = isOrigin ? null : port.arrivalMode;
@@ -246,12 +275,13 @@ export function buildVoyageLog(
           `and made landfall below ${port.name}, ${descriptor(port, false)}, ${pick(HANDOFF_CLOSINGS)}.`
         : `Year ${presentYear}. ${arrivalVerb(mode)} ${port.name}, ` +
           `${descriptor(port, isOrigin)}. ${pick(poolFor(mode))}`;
-    return { idx: port.idx, year: presentYear, text };
+    // The origin's legLength is ignored like its arrivalMode: it departs on day 1.
+    return { idx: port.idx, year: presentYear, day: nextDay(isOrigin ? 0 : port.legLength), text };
   });
   // #275: the homecoming draws LAST, off the same forked stream, so adding it cannot
   // reshuffle a single port's flavor: an open-path log and the first n entries of a
   // round-trip log over the same ports are identical.
-  const home = homecoming ? homecomingEntry(ports, presentYear, homecoming, pick) : null;
+  const home = homecoming ? homecomingEntry(ports, presentYear, nextDay(homecoming.legLength), homecoming, pick) : null;
   const entries = home ? [...portEntries, home] : portEntries;
   // The summary counts PORTS, not entries. The homecoming is an arrival at a port
   // already counted, so a round trip charts the same number of ports as an open path.

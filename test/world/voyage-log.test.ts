@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   buildVoyageLog,
+  GRID_UNITS_PER_DAY,
   SEA_ARRIVALS,
   LAND_ARRIVALS,
   DEPARTURES,
@@ -38,12 +39,13 @@ const port = (over: Partial<VoyageLogPort> = {}): VoyageLogPort => ({
   founded: 300,
   arrivalMode: "road",
   inlandHandoff: false,
+  legLength: 30,
   ...over,
 });
 
 // A small ordered survey: the capital origin (departs), a road-arrival village, a
 // sea-arrival village. Ordered as visited, exactly as buildVoyagePlan hands them over.
-const origin = port({ idx: 0, name: "Laukuwelua", kind: "capital", founded: 451, arrivalMode: null });
+const origin = port({ idx: 0, name: "Laukuwelua", kind: "capital", founded: 451, arrivalMode: null, legLength: 0 });
 const roadTown = port({ idx: 1, name: "Haireno", kind: "village", founded: 860, arrivalMode: "road" });
 const seaVillage = port({ idx: 2, name: "Meamere", kind: "village", founded: 420, arrivalMode: "sea" });
 const smallSurvey = [origin, roadTown, seaVillage];
@@ -207,8 +209,8 @@ test("handoff closings cycle without repeating until the pool is exhausted", () 
 // as ports + 1. Prose: a mode-aware pool exactly like SEA_ARRIVALS / LAND_ARRIVALS,
 // with NO fixed closing sentence, and "whence we set out" in place of a descriptor.
 
-const homeBySea = { arrivalMode: "sea", inlandHandoff: false } as const;
-const homeByRoad = { arrivalMode: "road", inlandHandoff: false } as const;
+const homeBySea = { arrivalMode: "sea", inlandHandoff: false, legLength: 40 } as const;
+const homeByRoad = { arrivalMode: "road", inlandHandoff: false, legLength: 40 } as const;
 
 test("the homecoming closes the log: one entry per leg plus the departure", () => {
   const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, homeBySea);
@@ -256,6 +258,7 @@ test("a degraded straight closing leg comes home overland, never under sail", ()
   const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, {
     arrivalMode: "straight",
     inlandHandoff: false,
+    legLength: 40,
   });
   const text = log.entries[log.entries.length - 1]!.text;
   assert.ok(text.includes("overland"), `a straight homecoming presses overland: "${text}"`);
@@ -267,6 +270,7 @@ test("a homecoming that hands off inland keeps #181's three-part ride-sail-ride 
   const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, {
     arrivalMode: "sea",
     inlandHandoff: true,
+    legLength: 40,
   });
   const text = log.entries[log.entries.length - 1]!.text;
   assert.match(
@@ -323,6 +327,70 @@ test("empty survey yields an attributed but empty log", () => {
   assert.equal(log.attribution, SUBTITLE);
 });
 
+// --- the days of the voyage (#312, ratified 2026-07-28) -------------------------
+//
+// The prologue gutter counts days instead of repeating the survey year (the year
+// lives in the attribution line alone). Days derive from cumulative grid-space leg
+// length at GRID_UNITS_PER_DAY, STRICTLY INCREASING by ruling: each entry's day is
+// max(previousDay + 1, 1 + round(cumLength / GRID_UNITS_PER_DAY)), so a long sail
+// jumps many days, a short hop advances at least one, and no two rows share a day.
+
+test("the origin departs on day 1", () => {
+  const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE);
+  assert.equal(log.entries[0]!.day, 1);
+});
+
+test("a long leg advances many days: distance drives the count", () => {
+  // One leg of exactly ten days' travel: day = 1 + round(140/14) = 11.
+  const far = [origin, port({ idx: 1, name: "Farshore", legLength: 10 * GRID_UNITS_PER_DAY })];
+  const log = buildVoyageLog(far, 1059, 42, SUBTITLE);
+  assert.equal(log.entries[1]!.day, 11);
+});
+
+test("days are STRICTLY increasing: back-to-back short hops never share a day", () => {
+  // Three one-unit hops all round to the same raw day; the ruling bumps each by one.
+  const hops = [
+    origin,
+    port({ idx: 1, name: "A", legLength: 1 }),
+    port({ idx: 2, name: "B", legLength: 1 }),
+    port({ idx: 3, name: "C", legLength: 1 }),
+  ];
+  const log = buildVoyageLog(hops, 1059, 42, SUBTITLE);
+  assert.deepEqual(log.entries.map((e) => e.day), [1, 2, 3, 4]);
+});
+
+test("the bump never outruns a real distance: a later long leg still lands on its computed day", () => {
+  // A short hop (bumped to day 2) followed by a long leg: the long leg's computed day
+  // wins over previous+1, so the count returns to the distance-derived timeline.
+  const mixed = [
+    origin,
+    port({ idx: 1, name: "Near", legLength: 1 }),
+    port({ idx: 2, name: "Far", legLength: 20 * GRID_UNITS_PER_DAY }),
+  ];
+  const log = buildVoyageLog(mixed, 1059, 42, SUBTITLE);
+  assert.equal(log.entries[1]!.day, 2, "the hop is bumped past day 1");
+  assert.equal(log.entries[2]!.day, 1 + Math.round((1 + 20 * GRID_UNITS_PER_DAY) / GRID_UNITS_PER_DAY));
+});
+
+test("the homecoming is dated after the last port, by its own leg", () => {
+  const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, homeBySea);
+  const days = log.entries.map((e) => e.day);
+  for (let i = 1; i < days.length; i++) {
+    assert.ok(days[i]! > days[i - 1]!, `day ${days[i]} at row ${i} must follow ${days[i - 1]}`);
+  }
+});
+
+test("days are a pure function of the legs: seeds move the flavor, never the calendar", () => {
+  const a = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, homeBySea);
+  const b = buildVoyageLog(smallSurvey, 1059, 99, SUBTITLE, homeBySea);
+  assert.deepEqual(a.entries.map((e) => e.day), b.entries.map((e) => e.day));
+});
+
+test("every entry still carries the survey year in its data: only the display moved to days", () => {
+  const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE);
+  for (const e of log.entries) assert.equal(e.year, 1059);
+});
+
 // --- real-world integration: the mode wiring on seed 42 ------------------------
 
 test("on a real routed world the mode-aware voice reaches the right ports (seed 42)", () => {
@@ -333,6 +401,11 @@ test("on a real routed world the mode-aware voice reaches the right ports (seed 
   const sites = manifest.places.map((p) => ({ idx: p.idx, x: p.gx, y: p.gy }));
   const routed = routeVoyage(plan.legs, sites, survey);
   const byIdx = new Map(manifest.places.map((p) => [p.idx, p]));
+  const gridLen = (pts: ReadonlyArray<{ x: number; y: number }>): number => {
+    let s = 0;
+    for (let i = 1; i < pts.length; i++) s += Math.hypot(pts[i]!.x - pts[i - 1]!.x, pts[i]!.y - pts[i - 1]!.y);
+    return s;
+  };
   const logPorts: VoyageLogPort[] = plan.ports.map((pt, i) => {
     const pm = byIdx.get(pt.idx)!;
     return {
@@ -342,12 +415,14 @@ test("on a real routed world the mode-aware voice reaches the right ports (seed 
       founded: pm.founded,
       arrivalMode: i === 0 ? null : routed[i - 1]!.mode,
       inlandHandoff: i === 0 ? false : routed[i - 1]!.inlandHandoff,
+      legLength: i === 0 ? 0 : gridLen(routed[i - 1]!.points),
     };
   });
   const closing = routed[routed.length - 1]!;
   const log = buildVoyageLog(logPorts, manifest.presentYear, world.recipe.seed, world.title.subtitle, {
     arrivalMode: closing.mode,
     inlandHandoff: closing.inlandHandoff,
+    legLength: gridLen(closing.points),
   });
 
   assert.equal(plan.legs.length, plan.ports.length, "#275: the real world's tour closes too");

@@ -53,7 +53,7 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
   ): { log: VoyageLog; rows: HTMLLIElement[] } {
     const log = buildVoyageLog(logPorts, presentYear, (seed >>> 0), subtitle || "", homecoming);
     host.sig.textContent = log.attribution;
-    const rows = log.entries.map((e) => {
+    const rows = log.entries.map((e, i) => {
       const li = document.createElement("li");
       // #220: these rows are the fused journal's PROLOGUE block, the surveyor's hand
       // drawing the finished chart at the present, above the chronicler's dated annals.
@@ -61,10 +61,21 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
       li.className = "prologue";
       const year = document.createElement("span");
       year.className = "cr-year";
-      year.textContent = String(e.year);
+      // #312: the gutter counts the days of the voyage; the survey's one year lives
+      // in the attribution line alone (the Overture framing, amended 2026-07-28).
+      year.textContent = `day ${e.day}`;
       const text = document.createElement("span");
       text.className = "cr-text";
-      text.textContent = e.text.replace(/^Year \d+\. /, "");
+      const body = e.text.replace(/^Year \d+\. /, "");
+      if (i === 0 && body.length > 0) {
+        // #312: the surveyor's hand opens with an initial (the manuscript dressing).
+        const dc = document.createElement("span");
+        dc.className = "cr-dc";
+        dc.textContent = body[0]!;
+        text.append(dc, document.createTextNode(body.slice(1)));
+      } else {
+        text.textContent = body;
+      }
       li.append(year, text);
       return li;
     });
@@ -101,7 +112,7 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
     return {
       attribution: log.attribution,
       summary: log.summary,
-      entries: log.entries.map((e) => ({ idx: e.idx, year: e.year, text: e.text })),
+      entries: log.entries.map((e) => ({ idx: e.idx, year: e.year, day: e.day, text: e.text })),
       logged: rows.filter((r) => r.classList.contains("inked")).length,
       rows: rows.length,
       visible: !host.panel.hidden,
