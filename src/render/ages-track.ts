@@ -76,6 +76,19 @@ export function readoutFor(pos: AgesPos): string {
   return pos.chamber === "survey" ? "the survey" : `year ${pos.year}`;
 }
 
+/**
+ * Where Play opens from a given position. At EITHER chamber's end rest (the present
+ * park or the bare-survey rest) Play opens the whole story from the survey's first
+ * leg: Alex's ruling on PR #311 (2026-07-28), superseding that PR's builder decision
+ * to rewind per chamber, because arming parks at the present and Play there must
+ * tell the whole ~20s story, not just replay the annals. Any interior position runs
+ * forward from where it stands (ratified on #220).
+ */
+export function playStart(pos: AgesPos, range: YearRange): AgesPos {
+  const atEnd = pos.chamber === "ages" ? pos.year >= range.max : pos.t >= 1;
+  return atEnd ? { chamber: "survey", t: 0 } : pos;
+}
+
 export type DetentDrag = { readonly side: Chamber; readonly held: boolean };
 
 /** A drag begins on whichever side of the seam the thumb rests (the seam is survey). */

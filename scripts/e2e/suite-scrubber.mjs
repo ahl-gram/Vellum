@@ -179,9 +179,9 @@ export async function run(ctx) {
   check("S8 redraw with ages on re-applies the scrubber to the new world", s8.panelShown && s8.scrubClass && s8.setDisp !== "none" && s8.roadsDisp !== "none" && s8.max === 2 * Math.max(1, sm2.present - sm2.minFounded) && s8.year === sm2.present && s8.visible === sm2.count, JSON.stringify(s8));
 
   // S9 (#220 ratified): "play from any year runs forward from there". A drag to a mid
-  // year followed by Play CONTINUES from that year; only a chamber's END rewinds (S17
-  // still proves the replay-from-the-start pole). The old restart-from-min behavior
-  // died with the fusion, by the issue's own acceptance.
+  // year followed by Play CONTINUES from that year; only a chamber-end rest opens the
+  // whole story from the survey's first leg (S17 proves that pole; Alex's PR #311
+  // ruling). The old restart-from-min behavior died with the fusion.
   const s9mid = Math.floor((sm2.minFounded + sm2.present) / 2);
   await setYear(s9mid);
   await evaluate(`document.getElementById("scrub-play").click()`);
@@ -309,8 +309,9 @@ export async function run(ctx) {
   check("S16 flipping mid-Play pauses Play, parks at present, and never disables the Turn button", s16.playBefore === "Pause" && s16.btnDisabled === false && s16.playAfter === "Play" && s16.val === sm2.present && s16.flipped && s16.btnText === "Turn back" && s16after === sm2.present, JSON.stringify(s16) + ` settled=${s16after}`);
 
   // S17: turning back leaves the recto at the present (the scrubbed year is discarded by
-  // design), and the next Play replays from the earliest founding (post-snap year===max, so
-  // playScrub zeroes elapsed). S16 left us flipped, paused, parked.
+  // design), and the next Play opens the WHOLE story from the survey's first leg: the
+  // present park is a chamber-end rest (Alex's PR #311 ruling, superseding the per-chamber
+  // rewind this suite briefly pinned). S16 left us flipped, paused, parked.
   const s17back = await evaluate(`(()=>{
     document.getElementById("verso-turn").click();
     return{flipped:document.getElementById("sheet").classList.contains("versoed"),
@@ -318,14 +319,16 @@ export async function run(ctx) {
       btnText:document.getElementById("verso-turn").textContent};
   })()`);
   await evaluate(`document.getElementById("scrub-play").click()`); // the next Play
-  let s17min = Infinity;
-  for (let i = 0; i < 6; i++) {
-    const y = await yearNow();
-    if (y < s17min) s17min = y;
-    await sleep(70);
+  // The survey leg runs many seconds, so an early sample lands well inside its first
+  // half; a regression that replayed only the annals never shows the survey chamber.
+  let s17open = null;
+  for (let i = 0; i < 40; i++) {
+    const st = await evaluate(`(()=>{const a=window.__vellumAgesState();return{chamber:a.chamber,t:a.t,playing:a.playing,readout:document.getElementById("scrub-year").textContent};})()`);
+    if (st.chamber === "survey") { s17open = st; break; }
+    await sleep(50);
   }
   await evaluate(`(()=>{const b=document.getElementById("scrub-play");if(b.textContent==="Pause")b.click();})()`);
-  check("S17 turning back leaves the recto at the present; the next Play replays from the earliest founding", s17back.flipped === false && s17back.val === sm2.present && s17back.btnText === "Turn the sheet" && s17min < sm2.present, JSON.stringify(s17back) + ` playMin=${s17min} present=${sm2.present}`);
+  check("S17 turning back leaves the recto at the present; the next Play opens the whole story from the survey's first leg", s17back.flipped === false && s17back.val === sm2.present && s17back.btnText === "Turn the sheet" && !!s17open && s17open.playing === true && s17open.t < 0.5 && s17open.readout === "the survey", JSON.stringify(s17back) + ` open=${JSON.stringify(s17open)}`);
 
   // S18: a flip must NOT churn a Blob URL. renderVerso is the only place allowed to create
   // one (#116's ~1 MB-per-redraw leak); the snap writes display styles, never a new ghost.

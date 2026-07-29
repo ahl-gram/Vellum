@@ -12,10 +12,10 @@
 // blocks: the prologue positionally as the survey reaches each port, the annals by
 // year. The voice handoff is the prologue dressing plus the readout flip.
 //
-// Play at a chamber's END rewinds to that chamber's start, then runs forward to the
-// timeline's end: arming at the present and pressing Play replays the annals exactly
-// as the chronicle always did, the bare-survey rest replays the survey (the preserved
-// short story), and the far left plays the whole story. A running Play crosses the
+// Play at EITHER chamber-end rest opens the whole story from the survey's first leg
+// (Alex's PR #311 ruling, 2026-07-28: arming parks at the present, and Play there
+// must tell the whole ~20s story, not just replay the annals). Play from any
+// interior position runs forward from where it stands. A running Play crosses the
 // seam without pausing (the detent governs drags only).
 import {
   SEAM_U,
@@ -25,6 +25,7 @@ import {
   detentStart,
   detentStep,
   detentEscapeU,
+  playStart,
   type AgesPos,
   type Chamber,
   type DetentDrag,
@@ -315,10 +316,8 @@ export function createAges(deps: AgesDeps) {
       onPark?.();
       return;
     }
-    // At a chamber's end, rewind to that chamber's start (see the module header).
-    let pos = ages.pos;
-    if (pos.chamber === "ages" && pos.year >= range.max) pos = { chamber: "ages", year: range.min };
-    else if (pos.chamber === "survey" && pos.t >= 1) pos = { chamber: "survey", t: 0 };
+    // At a chamber-end rest, open the whole story (see the module header).
+    const pos = playStart(ages.pos, range);
     const sched = voyage.internals.schedule();
     const cumMs = sched ? sched.cumMs : [0];
     const surveyMs = sched ? sched.totalMs : 0;

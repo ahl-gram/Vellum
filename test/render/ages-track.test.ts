@@ -10,6 +10,7 @@ import {
   readoutFor,
   detentStart,
   detentStep,
+  playStart,
   type AgesPos,
   type DetentDrag,
 } from "../../src/render/ages-track.ts";
@@ -122,6 +123,26 @@ test("the survey half reads as a word, never a year (ratified 2026-07-28)", () =
 
 test("the ages half reads the year in the chronicle's lowercase idiom", () => {
   assert.equal(readoutFor({ chamber: "ages", year: 847 }), "year 847");
+});
+
+// --- where Play opens ----------------------------------------------------------
+
+test("Play at the present park opens the whole story from the survey's first leg (Alex's PR #311 ruling)", () => {
+  assert.deepEqual(playStart({ chamber: "ages", year: RANGE.max }, RANGE), { chamber: "survey", t: 0 });
+});
+
+test("Play at the bare-survey rest opens the same whole story", () => {
+  assert.deepEqual(playStart({ chamber: "survey", t: 1 }, RANGE), { chamber: "survey", t: 0 });
+});
+
+test("Play from any interior position runs forward from where it stands", () => {
+  assert.deepEqual(playStart({ chamber: "survey", t: 0.4 }, RANGE), { chamber: "survey", t: 0.4 });
+  assert.deepEqual(playStart({ chamber: "ages", year: 700 }, RANGE), { chamber: "ages", year: 700 });
+});
+
+test("a degenerate range's one year IS the park: Play opens the whole story", () => {
+  const flat: YearRange = { min: 900, max: 900 };
+  assert.deepEqual(playStart({ chamber: "ages", year: 900 }, flat), { chamber: "survey", t: 0 });
 });
 
 // --- the hard detent ----------------------------------------------------------
