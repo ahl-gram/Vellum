@@ -31,7 +31,7 @@ import {
   type DetentDrag,
 } from "../../render/ages-track.ts";
 import {
-  buildSweepPlan,
+  SWEEP_MS,
   sweepYearAt,
   sweepElapsedAt,
   eventIsPast,
@@ -321,10 +321,9 @@ export function createAges(deps: AgesDeps) {
     const sched = voyage.internals.schedule();
     const cumMs = sched ? sched.cumMs : [0];
     const surveyMs = sched ? sched.totalMs : 0;
-    const plan = buildSweepPlan(range, (overlay.data()?.events ?? []).map((e) => e.year));
     const elapsed0 =
-      pos.chamber === "survey" ? elapsedAtT(cumMs, pos.t) : surveyMs + sweepElapsedAt(plan, pos.year);
-    const totalMs = surveyMs + plan.totalMs;
+      pos.chamber === "survey" ? elapsedAtT(cumMs, pos.t) : surveyMs + sweepElapsedAt(range, pos.year);
+    const totalMs = surveyMs + SWEEP_MS;
     const begin = performance.now() - elapsed0;
     ages.playing = true;
     setPlayLabel(true);
@@ -345,7 +344,7 @@ export function createAges(deps: AgesDeps) {
       if (elapsed < surveyMs) {
         paintPos({ chamber: "survey", t: tAtElapsed(cumMs, elapsed) }, { postLog: true });
       } else {
-        paintPos({ chamber: "ages", year: sweepYearAt(plan, elapsed - surveyMs) }, { postLog: true });
+        paintPos({ chamber: "ages", year: sweepYearAt(range, elapsed - surveyMs) }, { postLog: true });
       }
       ages.rafId = requestAnimationFrame(tick);
     };

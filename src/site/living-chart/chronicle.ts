@@ -9,8 +9,8 @@
 // dated strip) belongs to the fused ages driver (ages.ts), which owns the one bar and
 // the one journal and drives this module through paintYear on its own clock. Writing
 // the host's range input from here again would put two hands on the fused bar; the
-// sweep-plan math this module used to consume (buildSweepPlan, sweepYearAt) is now
-// imported by ages.ts alone.
+// sweep math this module used to consume (sweepYearAt and its inverse, uniform since
+// Alex's PR #311 pacing ruling) is now imported by ages.ts alone.
 import {
   scrubRange,
   buildScrubMarks,

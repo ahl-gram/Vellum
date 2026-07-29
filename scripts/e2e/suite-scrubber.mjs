@@ -110,7 +110,7 @@ export async function run(ctx) {
   await setYear(Math.floor((sm.minFounded + sm.present) / 2));
   await shoot("explorer-chronicle-scrubber.png");
 
-  // S5: Play sweeps monotonically (event-proportional plateaus included) and
+  // S5: Play sweeps monotonically (uniform pacing since Alex's PR #311 ruling) and
   // auto-pauses at the present year with the button back to "Play". Timing is not
   // asserted — only that the year never goes backwards and the run terminates.
   const s5start = await setYear(sm.minFounded); // clamps to min+1 (the seam owns min)
@@ -210,9 +210,8 @@ export async function run(ctx) {
   // be visibly below the frozen year in its first beats, before it could climb back.
   await sleep(120);
   const resumedEarly = await yearNow();
-  // #220: a resume re-enters at the parked year's earliest showing, which for a dwell
-  // year is the START of its dwell (<= 650ms); wait past the longest dwell so the
-  // resumed year has provably moved on.
+  // The uniform sweep re-enters exactly at the frozen year (sweepElapsedAt is its
+  // exact inverse); 700ms is a tenth of the annals, so the year has provably moved on.
   await sleep(700);
   const resumed = await yearNow();
   check("S10 Pause button freezes mid-sweep; Play resumes from the frozen year (not min/present)", frozen.lbl === "Play" && frozen.year > sm2.minFounded && frozen.year < sm2.present && stillFrozen === frozen.year && resumedEarly >= frozen.year && resumed > frozen.year && resumed <= sm2.present, `frozen=${frozen.year} early=${resumedEarly} resumed=${resumed} min=${sm2.minFounded} present=${sm2.present}`);
