@@ -40,14 +40,22 @@ export function finalizeHash(params: URLSearchParams): string {
   return params.toString().replace(/(^|&)survey=(?=&|$)/, "$1survey");
 }
 
-// What the writer should say right now. Reads checkbox STATE, not engine-session
-// existence: the checkboxes are truthful at every syncHash call site, while the scrub
+// What the writer should say right now. Reads the CHECKBOX first, not engine-session
+// existence: the box is truthful at every syncHash call site, while the instrument's
 // session lags the gesture that arms it (and draw()'s early sync runs before the
-// re-arm). The caller passes the boot's pending year as the fallback so a restored
-// address survives the first draw's sync; an unknowable year emits nothing rather
-// than a guess.
-export function liveNow(state: { survey: boolean; chronicle: boolean; year: number | null | undefined }): Live | null {
-  if (state.survey) return { kind: "survey" };
-  if (state.chronicle && state.year != null) return { kind: "year", year: state.year };
-  return null;
+// re-arm). #220: one instrument, one box; the chamber picks the key. A survey-chamber
+// rest anywhere on the half emits the bare flag (mid-sweep `survey=<t>` addresses stay
+// reserved and unbuilt), an ages-chamber rest emits its year. While the session lags,
+// the caller passes the boot's restored key through as the fallback so a deep link
+// survives the first draw's sync; an unknowable state emits nothing rather than a guess.
+export function liveNow(state: {
+  ages: boolean;
+  chamber: "survey" | "ages" | null;
+  year: number | null | undefined;
+  pending: Live | null;
+}): Live | null {
+  if (!state.ages) return null;
+  if (state.chamber === "survey") return { kind: "survey" };
+  if (state.chamber === "ages" && state.year != null) return { kind: "year", year: state.year };
+  return state.pending;
 }

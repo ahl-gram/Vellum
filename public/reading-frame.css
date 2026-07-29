@@ -31,18 +31,19 @@
    The reading column: the instrument, then the log, one continuous story.
    -------------------------------------------------------------------------- */
 .rf-reading { margin-top: 0.8rem; }
-.rf-chronicle[hidden], .rf-log[hidden] { display: none; }
+.rf-ages[hidden], .rf-log[hidden] { display: none; }
 
-/* The instrument slot: whatever the active subsystem exposes, and no maker chrome.
-   The chronicle puts Play, the year slider and the readout here; the voyage has no
-   instrument, so its log stands alone and the slot simply is not there. */
+/* The instrument slot (#220: the fused ages bar, Play, and the readout; the bar's
+   two-chamber dressing is the engine's .ages-range in /living-chart.css).
    The row WRAPS, and the slider is allowed to shrink. Both halves are load-bearing and
    were found by measuring a real 320px viewport (an iPhone SE, a folded Galaxy cover
    screen): a flex item defaults to `min-width: auto` and so refuses to go below its
    min-content width, and a range input's intrinsic width is around 129px. Play plus
    slider plus the year readout could not fit, so the row pushed the whole PAGE sideways
    to a 355px scrollWidth. A reading room that scrolls horizontally on a phone is worse
-   than the nested scroller the ratified decision removed. */
+   than the nested scroller the ratified decision removed.
+   (#220 also mended this block: the explanation above had leaked OUTSIDE its comment,
+   and CSS error recovery silently dropped the entire .rf-instrument rule with it.) */
 .rf-instrument { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
   padding: 0.7rem 1rem; background: var(--parchment-panel);
   border: 1px solid var(--line-tan); border-radius: 6px 6px 0 0; }
@@ -57,8 +58,8 @@
 .rf-log { background: var(--parchment-panel); border: 1px solid var(--line-tan);
   border-radius: 6px; padding: 0.8rem 1rem; }
 /* Under the instrument the two panels are one instrument: the seam between them
-   closes so the chronicle reads as a single ruled sheet. */
-.rf-chronicle .rf-log { border-top: 0; border-radius: 0 0 6px 6px; }
+   closes so the reading column reads as a single ruled sheet. */
+.rf-ages .rf-log { border-top: 0; border-radius: 0 0 6px 6px; }
 
 /* The surveyor's signature above the strip. The chronicle has no attribution, so its
    line collapses rather than leaving a rule floating over nothing. */
@@ -79,14 +80,14 @@
   transition: opacity 0.18s, transform 0.18s; }
 
 /* The brighten-on-arrival, canonicalized: a row that has come to pass brightens AND
-   slides a hair right, like an entry inked into the ledger as its year arrives.
-   THREE names write that one state today, so one rule answers to all three: the
-   component's own `inked`, the chronicle's `past`, and the voyage's `logged`. The
-   fusion (#220) collapses them to `inked` alone; until then, dropping any one of
-   these selectors silently stops that producer's rows from ever lighting up. */
-.rf-log-strip li.inked,
-.rf-log-strip li.past,
-.rf-log-strip li.logged { opacity: 1; transform: translateX(2px); }
+   slides a hair right, like an entry inked into the ledger as its moment arrives.
+   #220 collapsed the old three-name state (the component's `inked`, the chronicle's
+   `past`, the voyage's `logged`) onto `inked` alone: one journal, one producer pair,
+   one rule. */
+.rf-log-strip li.inked { opacity: 1; transform: translateX(2px); }
+/* The voice handoff (#220's Overture): the surveyor's prologue rows read in an italic
+   hand above the chronicler's upright annals. */
+.rf-log-strip li.prologue .cr-text { font-style: italic; }
 
 /* The shared two-column row idiom every producer emits. */
 .rf-log-strip .cr-year { flex: 0 0 3rem; text-align: right;

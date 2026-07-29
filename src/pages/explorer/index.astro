@@ -57,8 +57,11 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       </label>
       <label class="check">legend <input id="legend" type="checkbox" checked></label>
       <label class="check">arms <input id="arms" type="checkbox"></label>
-      <label class="check">chronicle <input id="chronicle" type="checkbox"></label>
-      <label class="check">voyage <input id="voyage" type="checkbox"></label>
+      <!-- #220: the `chronicle` and `voyage` checkboxes fused into this one entry, the
+           ratified `ages` label (dated comment on #220, 2026-07-28). The name follows
+           the instrument's right-hand chamber; the scrubber's own affordances announce
+           the survey half, since this label no longer can. -->
+      <label class="check">ages <input id="ages" type="checkbox"></label>
       <label class="sealevel">sea level
         <span class="land-end">more sea</span>
         <input id="land" type="range" min="100" max="700" step="2" aria-label="Sea level">
@@ -134,25 +137,19 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 <div id="verso" aria-hidden="true"></div>
 </div></div>
 <p class="caption" id="caption"></p>
-<div id="scrubber" class="scrubber" hidden>
+<!-- #220 the ages instrument: one bar (survey half then ages half, the seam at the
+     midpoint) over ONE journal, the surveyor's dated prologue then the chronicler's
+     annals (#121's margin log and #54's chronicle strip, fused). The engine sets the
+     bar's domain at arm time. The overlay <svg> is aria-hidden; this readable journal
+     plus the one polite #status summary carry the a11y. -->
+<div id="scrubber" class="scrubber" hidden role="region" aria-label="The ages">
   <div class="scrub-controls">
     <button id="scrub-play" type="button">Play</button>
-    <input id="scrub-range" type="range" aria-label="Chronicle year">
+    <input id="scrub-range" class="ages-range" type="range" aria-label="The ages">
     <span id="scrub-year" class="scrub-year" aria-hidden="true"></span>
   </div>
+  <p id="scrub-sig" class="voyage-log-sig"></p>
   <ol id="chronicle-strip" class="chronicle-strip"></ol>
-</div>
-<!-- #121 The margin log: the surveyor's dated journal, one entry per port, revealed as
-     the survey reaches each, and since #275 closing with the homecoming when it sails
-     back to the capital (so the list runs one longer than the port count, which is why
-     the #status summary still says "N ports": the homecoming is a return to a port
-     already charted, not a new one). A voyage-only panel styled like the chronicle strip
-     but its own element (voyage and chronicle are mutually exclusive). The overlay <svg>
-     is aria-hidden; this readable list plus the one polite #status summary carry the
-     a11y. -->
-<div id="voyage-log" class="voyage-log" hidden role="region" aria-label="The surveyor's log">
-  <p id="voyage-log-sig" class="voyage-log-sig"></p>
-  <ol id="voyage-log-strip" class="voyage-log-strip"></ol>
 </div>
 
 <script type="module" src="./app.bundle.js" is:inline></script>

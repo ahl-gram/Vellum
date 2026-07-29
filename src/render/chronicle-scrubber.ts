@@ -4,15 +4,17 @@ import type { HistoricalEvent } from "../society/history.ts";
 /**
  * The pure core of the Chronicle year-scrubber (#54, the closing sub of the
  * Living Chart epic #51). It turns the #52 manifest into the data a year-slider
- * and a Play sweep need: each place's founding and abandonment years, and a
- * deterministic timeline that DWELLS on years carrying chronicle events.
+ * and a Play sweep need: each place's founding and abandonment years, and the
+ * uniform Play timeline.
  *
  * No DOM, no RNG. The slider, layer hide/restore, and the requestAnimationFrame
- * loop live in src/site/explorer/app.ts and are covered by the Explorer e2e.
+ * loop live in src/site/living-chart/ages.ts and are covered by the Explorer e2e.
  *
- * Play is EVENT-PROPORTIONAL: a deliberate override (the user's call) of the
- * issue's "fixed linear sweep" decision. The sweep skims empty centuries and
- * pauses on each event so the chronicle's beats land.
+ * Play is UNIFORM: linear in years over the fixed SWEEP_MS, the bar moving at one
+ * speed through the annals. #54 shipped it event-proportional, dwelling on each
+ * beat-year (itself a deliberate override of that issue's fixed linear sweep);
+ * Alex reversed that on PR #311 (2026-07-28), restoring the linear sweep and
+ * retiring the dwell plan.
  */
 
 export type PlaceState = "hidden" | "living" | "ruin";
@@ -28,23 +30,6 @@ export type ScrubMark = {
 };
 
 export type YearRange = { readonly min: number; readonly max: number };
-
-export type SweepSegment =
-  | { readonly type: "travel"; readonly fromYear: number; readonly toYear: number; readonly ms: number }
-  | { readonly type: "dwell"; readonly year: number; readonly ms: number };
-
-export type SweepPlan = {
-  readonly segments: ReadonlyArray<SweepSegment>;
-  readonly totalMs: number;
-};
-
-export type SweepOptions = {
-  readonly travelMs?: number;
-  readonly dwellMs?: number;
-  readonly maxTotalMs?: number;
-};
-
-const DEFAULTS = { travelMs: 350, dwellMs: 650, maxTotalMs: 7000 } as const;
 
 /** The slider span: earliest founding to the present survey year. */
 export function scrubRange(places: ReadonlyArray<PlaceMark>, presentYear: number): YearRange {
@@ -129,68 +114,26 @@ export function eventIsPast(eventYear: number, year: number): boolean {
   return eventYear <= year;
 }
 
+/** The annals sweep runs this long for every world: uniform bar speed, no beats. */
+export const SWEEP_MS = 7000;
+
 /**
- * The Play timeline: travel quickly between event years, dwell on each. Distinct
- * event years are clamped into [min, max] and sorted; each becomes a dwell, with
- * a short travel filling the gaps. The raw run is scaled DOWN to `maxTotalMs` for
- * event-dense worlds so the animation never drags, while keeping each beat's
- * relative emphasis.
+ * The year shown at a given elapsed time: linear from min to max over SWEEP_MS,
+ * clamped at both ends (Alex's PR #311 pacing ruling, 2026-07-28).
  */
-export function buildSweepPlan(
-  range: YearRange,
-  eventYears: ReadonlyArray<number>,
-  opts: SweepOptions = {},
-): SweepPlan {
-  const travelMs = opts.travelMs ?? DEFAULTS.travelMs;
-  const dwellMs = opts.dwellMs ?? DEFAULTS.dwellMs;
-  const maxTotalMs = opts.maxTotalMs ?? DEFAULTS.maxTotalMs;
-
-  const beats = Array.from(
-    new Set(
-      eventYears
-        .map((y) => Math.max(range.min, Math.min(range.max, y)))
-        .filter((y) => Number.isFinite(y)),
-    ),
-  ).sort((a, b) => a - b);
-
-  const raw: SweepSegment[] = [];
-  let prev = range.min;
-  for (const b of beats) {
-    if (b > prev) {
-      raw.push({ type: "travel", fromYear: prev, toYear: b, ms: travelMs });
-      prev = b;
-    }
-    raw.push({ type: "dwell", year: b, ms: dwellMs });
-  }
-  if (prev < range.max) raw.push({ type: "travel", fromYear: prev, toYear: range.max, ms: travelMs });
-  if (raw.length === 0) raw.push({ type: "travel", fromYear: range.min, toYear: range.max, ms: travelMs });
-
-  const rawTotal = raw.reduce((sum, s) => sum + s.ms, 0);
-  if (rawTotal <= maxTotalMs) return { segments: raw, totalMs: rawTotal };
-
-  const scale = maxTotalMs / rawTotal;
-  const segments = raw.map((s) => ({ ...s, ms: s.ms * scale }));
-  return { segments, totalMs: maxTotalMs };
+export function sweepYearAt(range: YearRange, elapsedMs: number): number {
+  const f = Math.max(0, Math.min(1, elapsedMs / SWEEP_MS));
+  return Math.round(range.min + f * (range.max - range.min));
 }
 
-const segStart = (s: SweepSegment): number => (s.type === "travel" ? s.fromYear : s.year);
-const segEnd = (s: SweepSegment): number => (s.type === "travel" ? s.toYear : s.year);
-
-/** The year shown at a given elapsed time, interpolating across travels. */
-export function sweepYearAt(plan: SweepPlan, elapsedMs: number): number {
-  const segs = plan.segments;
-  if (segs.length === 0) return 0;
-  if (elapsedMs <= 0) return segStart(segs[0]!);
-  if (elapsedMs >= plan.totalMs) return segEnd(segs[segs.length - 1]!);
-
-  let acc = 0;
-  for (const s of segs) {
-    if (elapsedMs < acc + s.ms) {
-      if (s.type === "dwell") return s.year;
-      const t = (elapsedMs - acc) / s.ms;
-      return Math.round(s.fromYear + (s.toYear - s.fromYear) * t);
-    }
-    acc += s.ms;
-  }
-  return segEnd(segs[segs.length - 1]!);
+/**
+ * The elapsed time at which the sweep shows `year`: sweepYearAt's exact inverse
+ * on whole years. #220's fused Play starts an ages-chamber resume here, since a
+ * parked year is the only coordinate a park leaves behind.
+ */
+export function sweepElapsedAt(range: YearRange, year: number): number {
+  const span = range.max - range.min;
+  if (span <= 0) return year >= range.max ? SWEEP_MS : 0;
+  const f = Math.max(0, Math.min(1, (year - range.min) / span));
+  return f * SWEEP_MS;
 }

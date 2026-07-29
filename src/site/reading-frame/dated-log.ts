@@ -15,13 +15,14 @@
 // ## Two paths fill a strip, and render/reveal/snapshot are only one of them
 // This tripped two independent reviewers, so it is written down at the line that
 // breaks. A strip can be filled EITHER by this component (render/reveal/snapshot,
-// which is the path #220's fused journal will use and the path the harness exercises)
-// OR by the engine writing into the element the frame handed it, which is what happens
-// today for both of the frame's instances. On the engine-driven path this component's
+// the host-driven path the harness exercises) OR by the engine writing into the
+// element the frame handed it, which is what happens for the frame's one instance:
+// #220's fused journal landed ENGINE-driven (the ages driver and the log panel write
+// the prologue and annal rows directly). On the engine-driven path this component's
 // `rows` stays empty by design, so reveal() is inert and snapshot() reports zero. That
 // is not a gap to close: the engine already owns the read hooks for its own path
-// (`lc.voyageLog()` and `lc.scrubState()`, per the capability map in
-// living-chart/index.ts), and its rows carry `past` / `logged` rather than `inked`.
+// (`lc.voyageLog()` and `lc.agesState()`, per the capability map in
+// living-chart/index.ts), and since #220 its rows carry the same `inked` class.
 // Wiring this component over engine-written rows would put two hands on one switch and
 // would detach the very nodes voyage.ts still holds in `logRows`. Do not "fix" it.
 //

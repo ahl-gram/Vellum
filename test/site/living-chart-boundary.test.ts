@@ -36,9 +36,9 @@ test("createLivingChart constructs against a plain-object host and exposes the f
       playBtn: el() as HTMLButtonElement,
       range: el() as HTMLInputElement,
       year: el(),
+      sig: el(),
       strip: el(),
     },
-    voyageLog: { panel: el(), sig: el(), strip: el() },
   });
   // The arm / step / paint / reset / teardown surface plus the e2e read hooks,
   // capability-complete for the Explorer today and the Reading Room's later subs
@@ -46,7 +46,10 @@ test("createLivingChart constructs against a plain-object host and exposes the f
   const api = [
     // #53 story cards
     "buildPlaceOverlay", "onDocKeydown", "onDocClick",
-    // #54 chronicle scrubber
+    // #220 the fused ages instrument
+    "applyAges", "rearmAges", "exitAges", "clearAges",
+    "agesSnapToRest", "agesState", "agesDragStart", "agesDragEnd",
+    // #54 chronicle scrubber (chart side; the instrument names delegate to ages)
     "applyScrub", "exitScrub", "clearScrub", "cancelScrubRaf",
     "pauseScrub", "togglePlay", "onManualScrub", "scrubTo",
     "scrubSnapToPresent", "scrubState",

@@ -20,8 +20,7 @@ export const innerEl = $("sheet-inner");
 export const caption = $("caption");
 export const versoEl = $("verso");
 export const versoBtn = $<HTMLButtonElement>("verso-turn");
-export const chronicleChk = $<HTMLInputElement>("chronicle");
-export const voyageChk = $<HTMLInputElement>("voyage");
+export const agesChk = $<HTMLInputElement>("ages"); // #220: the one fused-instrument toggle
 export const orderLink = $<HTMLAnchorElement>("order-plates"); // #133: "Take to the Print Room", href kept current in draw()
 
 // #183: the controls readHash/writeHash (hash-sync.ts) mirror to and from location.hash.

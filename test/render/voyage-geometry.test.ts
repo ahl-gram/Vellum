@@ -10,6 +10,8 @@ import {
   netFacing,
   legDurations,
   markGlyphAt,
+  tAtElapsed,
+  elapsedAtT,
   MAX_TILT,
   LOOKAHEAD,
   FACING_DEADBAND,
@@ -286,4 +288,36 @@ test("markGlyphAt: a spanless sea leg keeps the whole-leg ship; land modes alway
     assert.equal(markGlyphAt("road", { from: 0.3, to: 0.9 }, t), "rider", "a road leg never sails");
     assert.equal(markGlyphAt("straight", null, t), "rider", "a straight leg never sails");
   }
+});
+
+// --- tAtElapsed / elapsedAtT: the schedule walk, lifted for #220's fused clock ---
+
+test("tAtElapsed maps the schedule onto equal-split t exactly as the tick's walk", () => {
+  const cum = [0, 400, 1000, 1600]; // three legs: 400ms, 600ms, 600ms
+  near(tAtElapsed(cum, 0), 0);
+  near(tAtElapsed(cum, 200), (0 + 200 / 400) / 3);
+  near(tAtElapsed(cum, 400), 1 / 3, 1e-12); // a boundary lands the NEXT leg at legT 0
+  near(tAtElapsed(cum, 1300), (2 + 300 / 600) / 3);
+  near(tAtElapsed(cum, 1600), 1);
+});
+
+test("tAtElapsed clamps outside the schedule and rests an empty one at t=1", () => {
+  const cum = [0, 400, 1000, 1600];
+  near(tAtElapsed(cum, -50), 0);
+  near(tAtElapsed(cum, 99999), 1);
+  near(tAtElapsed([0], 0), 1, 1e-12); // a portless survey rests, matching frameAt's empty case
+});
+
+test("tAtElapsed skips a zero-duration leg forward, as the tick always did", () => {
+  const cum = [0, 500, 500, 900]; // leg 1 takes no time
+  near(tAtElapsed(cum, 500), 2 / 3, 1e-12);
+});
+
+test("elapsedAtT inverts tAtElapsed across the schedule", () => {
+  const cum = [0, 400, 1000, 1600];
+  for (const t of [0, 0.25, 1 / 3, 0.5, 0.9, 1]) {
+    near(tAtElapsed(cum, elapsedAtT(cum, t)), t, 1e-12);
+  }
+  near(elapsedAtT(cum, 1), 1600, 1e-12);
+  near(elapsedAtT([0], 0.5), 0, 1e-12);
 });

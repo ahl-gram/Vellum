@@ -65,6 +65,34 @@ export function legDurations(lengths: ReadonlyArray<number>): number[] {
 }
 
 /**
+ * Equal-split t from elapsed real time over a session's cumulative leg schedule.
+ * `cumMs` has legs+1 entries, cumMs[i] = when leg i begins (voyage-session.ts); this
+ * reproduces the walk play()'s rAF tick has always run, lifted here so #220's fused
+ * clock and the animator share one conversion. A zero-duration leg is skipped
+ * forward, exactly as the tick's while-loop always did.
+ */
+export function tAtElapsed(cumMs: ReadonlyArray<number>, elapsedMs: number): number {
+  const legCount = cumMs.length - 1;
+  if (legCount <= 0) return 1;
+  if (elapsedMs <= 0) return 0;
+  if (elapsedMs >= cumMs[legCount]!) return 1;
+  let i = 0;
+  while (i < legCount - 1 && cumMs[i + 1]! <= elapsedMs) i++;
+  const dur = cumMs[i + 1]! - cumMs[i]!;
+  const legT = dur > 0 ? Math.min((elapsedMs - cumMs[i]!) / dur, 1) : 0;
+  return (i + legT) / legCount;
+}
+
+/** The elapsed real time at equal-split t: tAtElapsed's inverse on the same schedule. */
+export function elapsedAtT(cumMs: ReadonlyArray<number>, t: number): number {
+  const legCount = cumMs.length - 1;
+  if (legCount <= 0) return 0;
+  const scaled = Math.max(0, Math.min(1, t)) * legCount;
+  const i = Math.min(Math.floor(scaled), legCount - 1);
+  return cumMs[i]! + (scaled - i) * (cumMs[i + 1]! - cumMs[i]!);
+}
+
+/**
  * Degrees. The tilt is a damped function of climb, never the literal bearing.
  *
  * This ceiling is not an outlier clamp: measured over 945 legs at LOOKAHEAD 24 (#185,

@@ -21,10 +21,11 @@ export async function run(ctx) {
   // stays "" until the snap posts the survey's single polite summary.
   const w9 = await evaluate(`(()=>{
     ${cntFn}
-    const voy=document.getElementById("voyage");
-    // Re-toggle so a sweep is genuinely running from t=0 (an explicit toggle-on animates).
-    voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));
-    voy.checked=true;voy.dispatchEvent(new Event("change",{bubbles:true}));
+    // #220: arming parks; PLAY is what sweeps. Wind the bar to the survey's start and
+    // press Play so a survey sweep is genuinely running from t=0.
+    const s=document.getElementById("scrub-range");
+    s.value="0";s.dispatchEvent(new Event("input",{bubbles:true}));
+    document.getElementById("scrub-play").click();
     const plan=window.__vellumVoyagePlan();
     const btn=document.getElementById("verso-turn");
     const statusEl=document.getElementById("status");
@@ -91,31 +92,66 @@ export async function run(ctx) {
   // Artifact: the back of the sheet with the survey bled through, for the user to eyeball.
   await shoot("explorer-verso-voyage.png");
 
-  // W11: ticking voyage while FLIPPED paints the resting track on both faces and runs no
-  // sweep (the sweep is a recto ceremony). Following src/site/explorer/app.ts's precedent
-  // that a style change while flipped rebuilds in place rather than turning.
+  // W11 (#220): ticking the instrument while FLIPPED parks at the present with no sweep
+  // (the sweep is a recto ceremony and only Play runs one): the surveyor's ink is off
+  // both faces at an ages-chamber rest. Stepping the bar to the seam while still
+  // flipped then rests the survey on BOTH faces (the keyboard rest syncs the sink).
   const w11 = await evaluate(`(()=>{
     ${cntFn}
     const verso=document.getElementById("verso");
-    const voy=document.getElementById("voyage");
-    voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));
-    voy.checked=true;voy.dispatchEvent(new Event("change",{bubbles:true}));
+    const chk=document.getElementById("ages");
+    chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
+    const a=window.__vellumAgesState();
+    const ovParked=document.querySelector("#map .voyage-overlay");
+    const parked={chamber:a?a.chamber:"",playing:a?a.playing:true,
+      overlayHidden:!!ovParked&&ovParked.style.display==="none",
+      versoTrack:!!verso.querySelector(".verso-track")};
+    const s=document.getElementById("scrub-range");
+    s.value=String(Number(s.max)/2);
+    s.dispatchEvent(new Event("input",{bubbles:true}));
     const plan=window.__vellumVoyagePlan();
     const log=window.__vellumVoyageLog();
-    return{
+    const vt=verso.querySelector(".verso-track");
+    const rt=document.querySelector("#map .voyage-track");
+    return{parked,
       flipped:document.getElementById("sheet").classList.contains("versoed"),
       ports:plan?plan.ports.length:0,
       summary:log?log.summary:"",
       logged:log?log.logged:-1,
-      rectoPts:cnt(document.querySelector("#map .voyage-track")),
-      versoPts:cnt(verso.querySelector(".verso-track")),
+      rectoPts:cnt(rt),versoPts:cnt(vt),
+      samePoints:vt&&rt?vt.getAttribute("points")===rt.getAttribute("points"):false,
       status:document.getElementById("status").textContent,
     };
   })()`);
   // #275: every entry means every port PLUS the homecoming, so logged === ports + 1.
-  check("W11 ticking voyage while flipped rests on the full track on both faces, logs every entry, no sweep",
+  check("W11 ticking ages while flipped parks trackless at the present, then the seam rests the survey on both faces, no sweep",
+    w11.parked.chamber === "ages" && !w11.parked.playing && w11.parked.overlayHidden && !w11.parked.versoTrack &&
     w11.flipped && w11.ports > 2 && w11.rectoPts === w11.versoPts && w11.rectoPts > w11.ports &&
-    w11.logged === w11.ports + 1 && w11.status === w11.summary, JSON.stringify(w11));
+    w11.samePoints && w11.logged === w11.ports + 1 &&
+    w11.status === "", // the whole flow rode the silent paths; a posted line would hang the next settle
+    JSON.stringify(w11));
+
+  // W11b (#220/#174): a non-quiet redraw during an AGES-chamber rest must NOT bleed a
+  // survey track onto the visible verso. rebuildVerso wipes the verso layer and the
+  // conductor re-syncs the sink afterward; that re-sync has to know the resting
+  // chamber shows no track. Non-vacuous: the recto session exists and holds a full
+  // points string throughout.
+  await evaluate(`(()=>{const s=document.getElementById("scrub-range");s.value=s.max;s.dispatchEvent(new Event("input",{bubbles:true}));})()`);
+  await evaluate(`(()=>{document.getElementById("draw").click();})()`);
+  await waitSettled("voyage-verso-ages-rest-redraw");
+  const w11b = await evaluate(`(()=>{
+    const a=window.__vellumAgesState();
+    const plan=window.__vellumVoyagePlan();
+    return{flipped:document.getElementById("sheet").classList.contains("versoed"),
+      chamber:a?a.chamber:"",ports:plan?plan.ports.length:0,
+      versoTrack:!!document.getElementById("verso").querySelector(".verso-track"),
+      status:document.getElementById("status").textContent};
+  })()`);
+  check("W11b a redraw at an ages-chamber rest keeps the visible verso trackless (#174)",
+    w11b.flipped && w11b.chamber === "ages" && w11b.ports > 2 && !w11b.versoTrack && w11b.status === "",
+    JSON.stringify(w11b));
+  await evaluate(`(()=>{const s=document.getElementById("scrub-range");s.value=String(Number(s.max)/2);s.dispatchEvent(new Event("input",{bubbles:true}));})()`);
 
   // W12: a redraw while flipped and voyaging re-arms BOTH faces, silently. renderVerso's
   // replaceChildren wipes the verso track on every draw (the same lifecycle trap as #map's
@@ -143,12 +179,12 @@ export async function run(ctx) {
     w12.samePoints && w12.status === "" && w12.docket.startsWith("CHART № 42 · "),
     JSON.stringify({ ...w12, docket: w12.docket.slice(0, 24) }));
 
-  // W13: voyage OFF removes the track from BOTH faces (asserting it was on both first, so
+  // W13: ages OFF removes the track from BOTH faces (asserting it was on both first, so
   // the check cannot pass vacuously against a verso that never had a track).
   const w13 = await evaluate(`(()=>{
     const verso=document.getElementById("verso");
     const before={recto:!!document.querySelector("#map .voyage-overlay"),verso:!!verso.querySelector(".verso-track")};
-    const voy=document.getElementById("voyage");voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));
+    const voy=document.getElementById("ages");voy.checked=false;voy.dispatchEvent(new Event("change",{bubbles:true}));
     return{before,
       recto:!!document.querySelector("#map .voyage-overlay"),
       verso:!!verso.querySelector(".verso-track"),
@@ -156,7 +192,7 @@ export async function run(ctx) {
       status:document.getElementById("status").textContent,
       plan:window.__vellumVoyagePlan()};
   })()`);
-  check("W13 voyage off removes the track from both faces",
+  check("W13 ages off removes the track from both faces",
     w13.before.recto && w13.before.verso && !w13.recto && !w13.verso && !w13.layer &&
     w13.status === "" && w13.plan === null, JSON.stringify(w13));
 
@@ -168,7 +204,10 @@ export async function run(ctx) {
     window.__ocRef=URL.createObjectURL;window.__orRef=URL.revokeObjectURL;
     URL.createObjectURL=function(b){window.__ocN++;return window.__ocRef.call(URL,b);};
     URL.revokeObjectURL=function(u){window.__orN++;return window.__orRef.call(URL,u);};
-    const voy=document.getElementById("voyage");voy.checked=true;voy.dispatchEvent(new Event("change",{bubbles:true}));
+    const voy=document.getElementById("ages");voy.checked=true;voy.dispatchEvent(new Event("change",{bubbles:true}));
+    // #220: into the survey chamber, so the redraw's re-arm keeps a track on the sink.
+    const s=document.getElementById("scrub-range");
+    s.value=String(Number(s.max)/2);s.dispatchEvent(new Event("input",{bubbles:true}));
     document.getElementById("seed").value="100";document.getElementById("draw").click();
   })()`);
   await waitSettled("voyage-verso-blob");

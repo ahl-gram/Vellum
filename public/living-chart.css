@@ -170,3 +170,29 @@
 .voyage-rider .leg { fill: none; stroke: var(--ink-dark); stroke-width: 1.2;
   stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .voyage-ship .ink, .voyage-rider .ink { fill: var(--ink-dark); stroke: none; }
+
+/* The ages bar (#220): the fused instrument's one range input, dressed as the ratified
+   two-chamber track. Chosen by look from the rendered candidates (out/220-bar-candidates,
+   2026-07-28): the survey half wears a diagonal hatch (the sheet still being drawn), the
+   ages half a plain deep parchment, and the seam carries a serifed threshold post that
+   stands PROUD of the track, so the hard detent's landmark stays visible even with the
+   thumb parked on it. All paint is background layers on the input itself (top layers
+   first: the post, its two caps, then the halves), sized against a 24px-tall box whose
+   middle 10px band is the track; appearance:none so both hosts render the same
+   instrument. The class ships in host markup (the Explorer's #scrub-range, the reading
+   frame's .rf-range); this sheet stays host-agnostic. */
+.ages-range { appearance: none; -webkit-appearance: none; height: 24px;
+  margin: 0; background:
+    linear-gradient(var(--ink-dark), var(--ink-dark)) 50% 0 / 6px 2px no-repeat,
+    linear-gradient(var(--ink-dark), var(--ink-dark)) 50% 100% / 6px 2px no-repeat,
+    linear-gradient(var(--ink-dark), var(--ink-dark)) 50% 50% / 2px 24px no-repeat,
+    repeating-linear-gradient(45deg, var(--parchment-deep) 0 4px,
+      rgb(185 167 127 / 0.45) 4px 6px) 0 50% / 50% 10px no-repeat,
+    linear-gradient(var(--parchment-deep), var(--parchment-deep)) 100% 50% / 50% 10px no-repeat; }
+.ages-range:focus-visible { outline: 2px solid var(--ink-brown); outline-offset: 2px; }
+.ages-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px; border-radius: 50%; background: var(--ink-dark);
+  border: 2px solid var(--parchment-bright); box-shadow: 0 0 0 1px var(--ink-dark); }
+.ages-range::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%;
+  background: var(--ink-dark); border: 2px solid var(--parchment-bright);
+  box-shadow: 0 0 0 1px var(--ink-dark); }

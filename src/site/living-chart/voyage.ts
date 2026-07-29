@@ -25,6 +25,7 @@ import {
   tiltFor,
   resolveFacing,
   markGlyphAt,
+  tAtElapsed,
   type MarkGlyph,
 } from "../../render/voyage-geometry.ts";
 import { createSessionBuilder, type Session } from "./voyage-session.ts";
@@ -223,14 +224,11 @@ export function createVoyage(deps: VoyageDeps) {
         syncRestingTrack(); // #174: at rest, so the ink may bleed through to the back
         return;
       }
-      // Which leg is the mark on, and how far along it? Convert to the equal-split global
-      // t that frameAt expects (t = (legIndex + legT)/legCount), so paintFrame and the
-      // deterministic step hooks keep sharing one timeline; only the pacing differs.
-      let i = 0;
-      while (i < legCount - 1 && session.cumMs[i + 1] <= elapsed) i++;
-      const dur = session.cumMs[i + 1] - session.cumMs[i];
-      const legT = dur > 0 ? Math.min((elapsed - session.cumMs[i]) / dur, 1) : 0;
-      paintFrame(session, (i + legT) / legCount);
+      // Which leg is the mark on, and how far along it? tAtElapsed converts to the
+      // equal-split global t that frameAt expects (t = (legIndex + legT)/legCount), so
+      // paintFrame, the deterministic step hooks, and #220's fused clock keep sharing
+      // one timeline; only the pacing differs.
+      paintFrame(session, tAtElapsed(session.cumMs, elapsed));
       session.rafId = requestAnimationFrame(tick);
     };
     session.rafId = requestAnimationFrame(tick);
@@ -381,6 +379,25 @@ export function createVoyage(deps: VoyageDeps) {
     }));
   }
 
+  // #220 internal seams for the fused ages driver, consumed by index.ts and never on
+  // the public engine API: a live per-frame paint that writes NO sink (#174 keeps the
+  // sink rest-only, and the fused clock paints sixty times a second), the overlay's
+  // chamber visibility (the track leaves the sheet while the chronicler holds it), the
+  // pacing schedule for the fused clock, and the rest-side sink clear for an
+  // ages-chamber rest, where the recto shows no track for the verso to bleed through.
+  const internals = {
+    hasSession: (): boolean => voyage !== null,
+    paintLive: (t: number, postLog: boolean): void => {
+      if (voyage) paintFrame(voyage, t, postLog);
+    },
+    schedule: (): { cumMs: ReadonlyArray<number>; totalMs: number } | null =>
+      voyage ? { cumMs: voyage.cumMs, totalMs: voyage.totalMs } : null,
+    setOverlayVisible: (visible: boolean): void => {
+      if (voyage) voyage.svg.style.display = visible ? "" : "none";
+    },
+    clearRestingTrack: (): void => restingTrackSink?.clear(),
+  };
+
   return {
     applyVoyage,
     rearmVoyage,
@@ -394,6 +411,7 @@ export function createVoyage(deps: VoyageDeps) {
     voyageLog,
     voyageLegGeometry,
     syncRestingTrack,
+    internals,
   };
 }
 

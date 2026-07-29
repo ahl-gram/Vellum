@@ -1,6 +1,8 @@
-// #121 The margin log: the surveyor's dated journal beside the chart. A scrollable,
-// chronicle-strip-style HTML panel (a SIBLING of the chart mount, not part of the SVG
-// overlay) whose entries brighten as the voyage sweep reaches each port. Extracted from
+// #121 The margin log: the surveyor's dated journal beside the chart, and since #220
+// the PROLOGUE block of the fused journal (its host elements are the instrument
+// panel's sig and strip; the ages driver appends the annal rows after these). An HTML
+// panel (a SIBLING of the chart mount, not part of the SVG overlay) whose entries
+// brighten as the voyage sweep reaches each port. Extracted from
 // src/site/living-chart/voyage.ts (#189), made host-agnostic in #191: the host hands its
 // three panel elements in, nothing is looked up by id. The panel is HTML DOM, the voyage
 // engine is the animated SVG survey, and they share only DATA: buildLogPanel(logPorts, ...)
@@ -53,6 +55,10 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
     host.sig.textContent = log.attribution;
     const rows = log.entries.map((e) => {
       const li = document.createElement("li");
+      // #220: these rows are the fused journal's PROLOGUE block, the surveyor's hand
+      // drawing the finished chart at the present, above the chronicler's dated annals.
+      // The class carries the voice distinction the Overture framing owes the reader.
+      li.className = "prologue";
       const year = document.createElement("span");
       year.className = "cr-year";
       year.textContent = String(e.year);
@@ -74,7 +80,9 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
    * arrival, and on a round trip the homecoming last.
    */
   function revealLog(rows: HTMLLIElement[], arrived: number): void {
-    for (let i = 0; i < rows.length; i++) rows[i].classList.toggle("logged", i < arrived);
+    // #220 collapsed the three arrived-classes (the chronicle's `past`, this panel's
+    // old `logged`, the dated-log component's `inked`) onto `inked` alone.
+    for (let i = 0; i < rows.length; i++) rows[i].classList.toggle("inked", i < arrived);
   }
 
   /** Hide and empty the panel. It lives outside the chart mount, so nothing else clears it. */
@@ -94,7 +102,7 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
       attribution: log.attribution,
       summary: log.summary,
       entries: log.entries.map((e) => ({ idx: e.idx, year: e.year, text: e.text })),
-      logged: rows.filter((r) => r.classList.contains("logged")).length,
+      logged: rows.filter((r) => r.classList.contains("inked")).length,
       rows: rows.length,
       visible: !host.panel.hidden,
     };

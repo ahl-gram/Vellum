@@ -12,8 +12,9 @@ import {
   glyphRevealedBetween,
   inkGradeFor,
   eventIsPast,
-  buildSweepPlan,
+  SWEEP_MS,
   sweepYearAt,
+  sweepElapsedAt,
 } from "../../src/render/chronicle-scrubber.ts";
 
 // Unit tests for #54 (Chronicle year-scrubber): the pure core that the Explorer's
@@ -183,95 +184,56 @@ test("eventIsPast is inclusive of the current year", () => {
   assert.equal(eventIsPast(500, 501), true);
 });
 
-// --- the event-proportional Play sweep ------------------------------------
+// --- the uniform Play sweep -------------------------------------------------
 
-// Tally, at 1ms resolution, how long each integer year is on screen across the
-// whole sweep. Event-proportional pacing means a beat-year's tally dwarfs an
-// empty year's; a linear sweep would give every year a near-equal share.
-function yearDwellMs(plan: ReturnType<typeof buildSweepPlan>, year: number): number {
-  let ms = 0;
-  for (let t = 0; t <= plan.totalMs; t++) {
-    if (sweepYearAt(plan, t) === year) ms++;
-  }
-  return ms;
-}
+// #54 shipped an event-proportional plan that dwelled on each beat-year (itself a
+// deliberate override of that issue's fixed linear sweep). Alex reversed it on
+// PR #311 (2026-07-28): the bar moves uniformly through the annals in every world,
+// so the sweep is linear in years over the fixed SWEEP_MS and events no longer
+// shape the pacing at all (the API takes no event years to consult).
 
-test("buildSweepPlan: the plan carries a dwell segment at each event beat-year", () => {
-  const plan = buildSweepPlan({ min: 0, max: 100 }, [30, 70], { travelMs: 100, dwellMs: 300 });
-  // a linear single-travel plan has no dwell segments at all
-  assert.ok(
-    plan.segments.some((s) => s.type === "dwell" && s.year === 30),
-    "expected a dwell at beat-year 30",
-  );
-  assert.ok(
-    plan.segments.some((s) => s.type === "dwell" && s.year === 70),
-    "expected a dwell at beat-year 70",
-  );
+test("sweepYearAt is linear: elapsed fractions map straight onto year fractions", () => {
+  const range = { min: 0, max: 100 };
+  assert.equal(sweepYearAt(range, 0), 0, "starts at the earliest founding");
+  assert.equal(sweepYearAt(range, SWEEP_MS / 4), 25);
+  assert.equal(sweepYearAt(range, SWEEP_MS / 2), 50);
+  assert.equal(sweepYearAt(range, SWEEP_MS), 100, "ends at the present year");
+  assert.equal(sweepYearAt(range, SWEEP_MS + 5000), 100, "stays at present past the end");
+  assert.equal(sweepYearAt(range, -50), 0, "clamps below the start");
 });
 
-test("sweepYearAt: starts at min, ends at max, never goes backwards", () => {
-  const plan = buildSweepPlan({ min: 0, max: 100 }, [30], { travelMs: 100, dwellMs: 300 });
-  assert.equal(sweepYearAt(plan, 0), 0, "starts at the earliest founding");
-  assert.equal(sweepYearAt(plan, plan.totalMs), 100, "ends at the present year");
-  assert.equal(sweepYearAt(plan, plan.totalMs + 5000), 100, "stays at present past the end");
+test("the sweep never goes backwards and covers the whole range", () => {
+  const range = { min: 10, max: 90 };
   let prev = -Infinity;
-  for (let t = 0; t <= plan.totalMs; t += 7) {
-    const y = sweepYearAt(plan, t);
+  for (let t = 0; t <= SWEEP_MS; t += 7) {
+    const y = sweepYearAt(range, t);
     assert.ok(y >= prev, `year went backwards at ${t}ms: ${y} < ${prev}`);
     prev = y;
   }
+  assert.equal(sweepYearAt(range, 0), 10);
+  assert.equal(sweepYearAt(range, SWEEP_MS), 90);
 });
 
-test("sweepYearAt: the sweep DWELLS at a beat-year (a plateau a linear sweep lacks)", () => {
-  // beat at 30 (deliberately off the [0,100] midpoint, so a linear sweep cannot
-  // accidentally sit at 30 for both sampled instants).
-  const plan = buildSweepPlan({ min: 0, max: 100 }, [30], { travelMs: 100, dwellMs: 400 });
-  assert.equal(sweepYearAt(plan, 200), 30);
-  assert.equal(sweepYearAt(plan, 400), 30, "still at 30 two hundred ms later: it is dwelling");
-});
-
-test("sweepYearAt: a beat-year gets far more screen time than an empty year", () => {
-  const plan = buildSweepPlan({ min: 0, max: 100 }, [50], { travelMs: 100, dwellMs: 300 });
-  const beat = yearDwellMs(plan, 50);
-  const empty = yearDwellMs(plan, 20);
-  assert.ok(beat > empty * 10, `beat-year 50 (${beat}ms) should dwarf empty year 20 (${empty}ms)`);
-});
-
-test("buildSweepPlan: with no events it still sweeps min to max monotonically", () => {
-  const plan = buildSweepPlan({ min: 10, max: 90 }, [], { travelMs: 200, dwellMs: 300 });
-  assert.equal(sweepYearAt(plan, 0), 10);
-  assert.equal(sweepYearAt(plan, plan.totalMs), 90);
-  assert.ok(!plan.segments.some((s) => s.type === "dwell"), "no events, no dwells");
-});
-
-test("buildSweepPlan: a stray beat outside the range is clamped, not crashed", () => {
-  // rise events can predate the earliest founding; a clamped beat must not break
-  // monotonicity or the endpoints.
-  const plan = buildSweepPlan({ min: 100, max: 200 }, [40, 150, 900], { travelMs: 80, dwellMs: 120 });
-  assert.equal(sweepYearAt(plan, 0), 100);
-  assert.equal(sweepYearAt(plan, plan.totalMs), 200);
-  let prev = -Infinity;
-  for (let t = 0; t <= plan.totalMs; t += 5) {
-    const y = sweepYearAt(plan, t);
-    assert.ok(y >= prev && y >= 100 && y <= 200, `out-of-range year ${y} at ${t}ms`);
-    prev = y;
+test("every interior year gets the same screen time: no beat-year plateaus", () => {
+  // The 1ms tally that once proved the dwells now proves their absence: with the
+  // uniform sweep no interior year's share may meaningfully exceed another's.
+  const range = { min: 0, max: 100 };
+  const tally = new Map<number, number>();
+  for (let t = 0; t <= SWEEP_MS; t++) {
+    const y = sweepYearAt(range, t);
+    tally.set(y, (tally.get(y) ?? 0) + 1);
   }
+  const interior = [...tally.entries()].filter(([y]) => y > range.min && y < range.max).map(([, ms]) => ms);
+  assert.equal(interior.length, range.max - range.min - 1, "every interior year appears");
+  const spread = Math.max(...interior) - Math.min(...interior);
+  assert.ok(spread <= 2, `interior years should share the sweep evenly, spread was ${spread}ms`);
 });
 
-test("buildSweepPlan: a degenerate one-year range (min===max) still yields a usable plan", () => {
-  // A zero-place world, or one whose only place was founded in the present survey
-  // year, gives scrubRange min===max and no in-range beats. The plan must still
-  // produce a single segment that holds at that year, not an empty-segments plan.
-  const plan = buildSweepPlan({ min: 500, max: 500 }, [], { travelMs: 200, dwellMs: 300 });
-  assert.ok(plan.segments.length >= 1, "a one-year range still has a segment");
-  assert.equal(sweepYearAt(plan, 0), 500);
-  assert.equal(sweepYearAt(plan, plan.totalMs), 500);
-});
-
-test("buildSweepPlan: total run time is capped for event-dense worlds", () => {
-  const many = Array.from({ length: 40 }, (_, i) => i * 5); // 40 beats in [0,200]
-  const plan = buildSweepPlan({ min: 0, max: 200 }, many, { travelMs: 300, dwellMs: 600, maxTotalMs: 7000 });
-  assert.ok(plan.totalMs <= 7000, `dense world should cap at 7000ms, got ${plan.totalMs}`);
+test("a degenerate one-year range (min===max) holds its one year throughout", () => {
+  const flat = { min: 500, max: 500 };
+  assert.equal(sweepYearAt(flat, 0), 500);
+  assert.equal(sweepYearAt(flat, SWEEP_MS / 2), 500);
+  assert.equal(sweepYearAt(flat, SWEEP_MS), 500);
 });
 
 // --- real-seed integration ------------------------------------------------
@@ -298,9 +260,8 @@ test("integration: seed 42 marks, range, and sweep are internally consistent", (
   assert.equal(placeStateAt(ruin!, ruin!.founded), "living");
   assert.equal(placeStateAt(ruin!, ruin!.ruinYear!), "ruin");
 
-  const plan = buildSweepPlan(range, m.events.map((e) => e.year));
-  assert.equal(sweepYearAt(plan, 0), range.min);
-  assert.equal(sweepYearAt(plan, plan.totalMs), range.max);
+  assert.equal(sweepYearAt(range, 0), range.min);
+  assert.equal(sweepYearAt(range, SWEEP_MS), range.max);
 });
 
 test("integration: over seed 42's whole timeline every mark inks in exactly once (#155)", () => {
@@ -323,4 +284,33 @@ test("integration: over seed 42's whole timeline every mark inks in exactly once
   // and both grades are exercised by this world: seed 42 has living towns and a ruin
   const grades = new Set(marks.map(inkGradeFor));
   assert.deepEqual([...grades].sort(), ["founding", "ruin"]);
+});
+
+// --- sweepElapsedAt: the inverse #220's fused Play resumes from ---------------
+
+test("sweepElapsedAt round-trips every year through sweepYearAt exactly", () => {
+  const range = { min: 300, max: 1100 };
+  for (let y = range.min; y <= range.max; y += 41) {
+    assert.equal(sweepYearAt(range, sweepElapsedAt(range, y)), y, `year ${y}`);
+  }
+});
+
+test("sweepElapsedAt is monotone in year and clamps at the sweep's ends", () => {
+  const range = { min: 300, max: 1100 };
+  let prev = -1;
+  for (let y = range.min; y <= range.max; y += 25) {
+    const e = sweepElapsedAt(range, y);
+    assert.ok(e >= prev, `elapsed went backward at year ${y}`);
+    prev = e;
+  }
+  assert.equal(sweepElapsedAt(range, range.min), 0);
+  assert.equal(sweepElapsedAt(range, range.min - 100), 0);
+  assert.equal(sweepElapsedAt(range, range.max), SWEEP_MS);
+  assert.equal(sweepElapsedAt(range, range.max + 100), SWEEP_MS);
+});
+
+test("a degenerate range pins its ends: at-or-past the one year is the sweep's end", () => {
+  const flat = { min: 500, max: 500 };
+  assert.equal(sweepElapsedAt(flat, 500), SWEEP_MS);
+  assert.equal(sweepElapsedAt(flat, 499), 0);
 });

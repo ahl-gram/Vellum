@@ -24,23 +24,31 @@
 // voyage overlay). Guarded by test/site/living-chart-css.test.ts.
 //
 // ## Capability map for the Reading Room (#190), so Subs 2-5 need not re-open internals
-//   arm:      buildPlaceOverlay (per draw), applyScrub / applyVoyage / rearmVoyage
+//   arm:      buildPlaceOverlay (per draw), applyAges / rearmAges (the fused #220
+//             instrument; applyScrub / applyVoyage / rearmVoyage remain the chamber
+//             painters' own entries)
 //   step:     voyageStepTo (port-resolution), scrubTo (year-resolution)
 //   paint:    voyagePaintAt (continuous t in [0,1]), scrubTo (clamped year)
-//   reset:    exitScrub / exitVoyage / voyageSnapToRest / scrubSnapToPresent
-//   teardown: clearScrub / clearVoyage (post-wipe), destroy (unmounting host)
-//   read:     voyagePlan / voyageLog / voyageLegGeometry / scrubState
-// #220's fused instrument owns its own clock and drives voyagePaintAt then scrubTo on
-// one continuous timeline; #192's address serializer reads scrubState() for the year;
-// #221's page passes its own elements as the host and needs no verso sink. The Explorer
-// keeps wiring its own listeners (conductor owns wiring; the engine owns behavior).
+//   reset:    exitAges / agesSnapToRest; exitScrub / exitVoyage / voyageSnapToRest /
+//             scrubSnapToPresent stay per-chamber
+//   teardown: clearAges (post-wipe), destroy (unmounting host)
+//   read:     agesState / voyagePlan / voyageLog / voyageLegGeometry / scrubState
+// #220 landed the fused instrument as ages.ts: it owns the one clock, the one bar and
+// the one journal, and drives the two chamber painters through internal seams. #192's
+// address serializer reads agesState() for the chamber and year; #221's page passes
+// its own elements as the host and needs no verso sink. The Explorer keeps wiring its
+// own listeners (conductor owns wiring; the engine owns behavior).
 import { createPlaceOverlay, type BuildPlaceOverlayOpts } from "./place-overlay.ts";
 import { createChronicle } from "./chronicle.ts";
 import { createVoyage, type RestingTrackSink } from "./voyage.ts";
-import { createVoyageLogPanel, type VoyageLogHost } from "./voyage-log-panel.ts";
+import { createVoyageLogPanel } from "./voyage-log-panel.ts";
+import { createAges } from "./ages.ts";
+import type { AgesPos } from "../../render/ages-track.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
+import type { Survey } from "../../render/survey.ts";
 
 export type { BuildPlaceOverlayOpts, RestingTrackSink };
+export type { AgesPos };
 
 export interface LivingChartHost {
   /** The chart mount (the Explorer's #map): overlays are appended as its children and
@@ -49,20 +57,22 @@ export interface LivingChartHost {
   /** The polite status line. The engine posts the voyage's one live-completion summary
    *  here and otherwise keeps it "", the settle signal the host's draw depends on. */
   statusEl: HTMLElement;
-  /** The chronicle scrubber panel and its controls. */
+  /** The fused instrument panel (#220): the bar, Play, the readout, and the ONE
+   *  journal (the surveyor's signature line and the strip both blocks render into).
+   *  The journal nests INSIDE this panel: hiding the panel is the engine's whole
+   *  teardown of the reading column. */
   scrubber: {
     panel: HTMLElement;
     playBtn: HTMLButtonElement;
     range: HTMLInputElement;
     year: HTMLElement;
+    sig: HTMLElement;
     strip: HTMLElement;
     /** #192: invoked when Play parks (Pause click or the sweep's auto-pause), so the
      *  host's address writer can record the rest no event announces. Optional: a host
      *  with no address simply omits it. */
     onPark?: () => void;
   };
-  /** The surveyor's margin-log panel. */
-  voyageLog: VoyageLogHost;
   /** Optional second surface the RESTING voyage track mirrors to (the Explorer's verso
    *  bleed-through, #174). Painted only at rest, never from the rAF tick; a page host
    *  with no back face simply omits it. */
@@ -80,28 +90,39 @@ export function createLivingChart(host: LivingChartHost) {
   });
   const chronicle = createChronicle({
     mapEl: host.mapEl,
-    panel: host.scrubber.panel,
-    playBtn: host.scrubber.playBtn,
-    range: host.scrubber.range,
-    year: host.scrubber.year,
-    strip: host.scrubber.strip,
-    onPark: host.scrubber.onPark,
     overlay: { data: () => overlay.data(), hideCard: () => overlay.hideCard() },
   });
-  const logPanel = createVoyageLogPanel(host.voyageLog);
+  // #220: the journal is ONE document in ONE panel. The prologue rows the log panel
+  // builds and the annal rows the ages driver appends share the scrubber's strip, and
+  // the log panel's hide/show drives the same panel the instrument lives in.
+  const logPanel = createVoyageLogPanel({
+    panel: host.scrubber.panel,
+    sig: host.scrubber.sig,
+    strip: host.scrubber.strip,
+  });
   const voyage = createVoyage({
     mapEl: host.mapEl,
     statusEl: host.statusEl,
     logPanel,
     restingTrackSink: host.restingTrackSink,
   });
+  const ages = createAges({
+    panel: host.scrubber.panel,
+    playBtn: host.scrubber.playBtn,
+    range: host.scrubber.range,
+    readout: host.scrubber.year,
+    strip: host.scrubber.strip,
+    onPark: host.scrubber.onPark,
+    overlay: { data: () => overlay.data() },
+    chronicle,
+    voyage,
+  });
 
   // Full teardown for an UNMOUNTING host (a page leaving; the Explorer's redraw
-  // lifecycle never calls this). Cancels both rAF loops, restores the baked layers,
+  // lifecycle never calls this). Cancels the clock, restores the baked layers,
   // removes every engine-owned node on both faces, and drops the sessions.
   function destroy(): void {
-    voyage.exitVoyage();
-    chronicle.exitScrub();
+    ages.exitAges(); // tears down both chamber painters with it
     overlay.teardown();
   }
 
@@ -112,17 +133,38 @@ export function createLivingChart(host: LivingChartHost) {
       overlay.buildPlaceOverlay(manifest, opts),
     onDocKeydown: overlay.onDocKeydown,
     onDocClick: overlay.onDocClick,
-    // #54 chronicle scrubber
+    // #220 the fused ages instrument: the one arm/exit/clear the Explorer wires.
+    applyAges: (manifest: PlaceManifest | null, survey: Survey | null, seed: number, subtitle: string) =>
+      ages.armAges(manifest, survey, seed, subtitle),
+    rearmAges: (
+      manifest: PlaceManifest | null,
+      survey: Survey | null,
+      seed: number,
+      subtitle: string,
+      opts?: { quiet?: boolean; rest?: AgesPos },
+    ) => ages.armAges(manifest, survey, seed, subtitle, opts),
+    exitAges: ages.exitAges,
+    clearAges: ages.clearAges,
+    agesSnapToRest: ages.snapToRest,
+    agesState: ages.agesState,
+    agesDragStart: ages.dragStart,
+    agesDragEnd: ages.dragEnd,
+    // #54 chronicle scrubber. The chart-side entries keep their chamber meaning; the
+    // instrument-side names (#220) now answer to the fused driver, which owns the one
+    // Play clock and the one bar the old chronicle instrument used to hold.
     applyScrub: chronicle.applyScrub,
     exitScrub: chronicle.exitScrub,
     clearScrub: chronicle.clearScrub,
-    cancelScrubRaf: chronicle.cancelScrubRaf,
-    pauseScrub: chronicle.pauseScrub,
-    togglePlay: chronicle.togglePlay,
-    onManualScrub: chronicle.onManualScrub,
-    scrubTo: chronicle.scrubTo,
+    cancelScrubRaf: ages.cancelRaf,
+    pauseScrub: ages.pause,
+    togglePlay: ages.togglePlay,
+    onManualScrub: ages.onBarInput,
+    scrubTo: (year: number) => (ages.isActive() ? ages.scrubToYear(year) : chronicle.scrubTo(year)),
     scrubSnapToPresent: chronicle.scrubSnapToPresent,
-    scrubState: chronicle.scrubState,
+    scrubState: () => {
+      const s = chronicle.scrubState();
+      return s ? { ...s, playing: ages.isPlaying() } : null;
+    },
     // the Wayfarer's voyage
     applyVoyage: voyage.applyVoyage,
     rearmVoyage: voyage.rearmVoyage,
@@ -135,7 +177,13 @@ export function createLivingChart(host: LivingChartHost) {
     voyagePlan: voyage.voyagePlan,
     voyageLog: voyage.voyageLog,
     voyageLegGeometry: voyage.voyageLegGeometry,
-    syncRestingTrack: voyage.syncRestingTrack,
+    // #220: chamber-aware while the instrument is armed. The Explorer calls this after
+    // every non-quiet draw (rebuildVerso wipes the verso track), and the raw voyage
+    // sync repaints unconditionally whenever a session exists, which under the fused
+    // instrument is ALWAYS while armed: an ages-chamber rest (recto shows no track)
+    // would get a survey track bled onto the visible verso (#174). The ages driver
+    // knows which chamber rests; disarmed, the raw sync's clear path still runs.
+    syncRestingTrack: () => (ages.isActive() ? ages.syncSinkAtRest() : voyage.syncRestingTrack()),
     destroy,
   };
 }
