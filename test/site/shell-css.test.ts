@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
  * named ONCE in BaseLayout's global style block and consumed as var() everywhere
  * it matched exactly. Three guards:
  *   1. the four ratified tokens stay declared, at their ratified values;
- *   2. no tokenized hex ever creeps back into the six page css files raw;
+ *   2. no tokenized hex ever creeps back into the page css files raw;
  *   3. the drift guard: every custom property consumed WITHOUT a fallback is
  *      declared somewhere the page actually loads (a typo'd var() fails to
  *      inherit silently in the browser, so it must fail loudly here instead).
@@ -23,6 +23,7 @@ const PAGE_CSS = [
   "public/faq/index.css",
   "public/glossary/index.css",
   "public/print-room/index.css",
+  "public/reading-room/index.css",
   "public/seed-of-the-day/index.css",
 ] as const;
 

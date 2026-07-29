@@ -18,7 +18,7 @@
 //     one member relative to a sibling page cannot see it either, because the
 //     regression lands on both pages. Every value here is pinned against a
 //     measured constant, never against another page.
-//   - ACROSS PAGES. Each of the seven pages loads its own stylesheet, and any of
+//   - ACROSS PAGES. Each shelled page loads its own stylesheet, and any of
 //     them can outrank a shell rule the way `public/index.css` deliberately does
 //     twice. Sampling two pages would leave the other five able to carry the same
 //     defect silently, so RH2 sweeps the whole head on every page.
@@ -41,19 +41,19 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 
-// The seven shelled pages, LITERAL on purpose. Deriving this from `NAV_ITEMS` in
+// The eight shelled pages, LITERAL on purpose. Deriving this from `NAV_ITEMS` in
 // `src/layouts/nav.ts` would be wrong twice over: home is deliberately not a nav
 // item, and a page dropping out of the nav must not silently drop out of this
 // guard. `/atlas/` stays out, it is generated and carries no shell.
-const SHELLED = ["/", "/explorer/", "/print-room/", "/gallery/", "/faq/", "/glossary/", "/seed-of-the-day/"];
+const SHELLED = ["/", "/explorer/", "/print-room/", "/reading-room/", "/gallery/", "/faq/", "/glossary/", "/seed-of-the-day/"];
 
 // The two sample pages for the checks that need a contrast rather than a pin.
 // They are NOT interchangeable with their siblings: body line-height is set per
 // page css, and MEASUREMENT (not the prose/app split it is tempting to assume)
 // says the pages divide as
-//   line-height 1.6:     /faq/  /glossary/  /print-room/  /seed-of-the-day/
+//   line-height 1.6:     /faq/  /glossary/  /print-room/  /reading-room/  /seed-of-the-day/
 //   line-height normal:  /  /explorer/  /gallery/
-// so /print-room/ and /seed-of-the-day/ are app surfaces that DO set 1.6.
+// so /print-room/, /reading-room/ and /seed-of-the-day/ are app surfaces that DO set 1.6.
 // RH6 needs its two pages to differ in body leading or it proves nothing, which
 // is why APP is /explorer/ specifically. Swapping in another app surface would
 // silently gut that check.
@@ -160,7 +160,7 @@ export async function run(ctx) {
     return false;
   };
 
-  // One sweep of all seven pages; every check below reads from this map rather
+  // One sweep of all the shelled pages; every check below reads from this map rather
   // than navigating again.
   const heads = {};
   const unreachable = [];
@@ -185,16 +185,16 @@ export async function run(ctx) {
     unreachable.length === 0 && manyH1.length === 0,
     unreachable.length
       ? `unreachable: ${unreachable.join(", ")}`
-      : manyH1.map((r) => `${r}: ${JSON.stringify(heads[r]?.h1s)}`).join(" | ") || "7/7 pages, one h1 each",
+      : manyH1.map((r) => `${r}: ${JSON.stringify(heads[r]?.h1s)}`).join(" | ") || `${SHELLED.length}/${SHELLED.length} pages, one h1 each`,
   );
 
   // RH1: the #288 tag swap, on every page rather than a sample. Home is roomless
   // so its h1 is the wordmark; every room page's h1 is the room name.
   const wrongH1 = bad((h, r) => h.h1s.length === 1 && h.h1s[0].classes.includes(r === "/" ? "wordmark" : "room-name"));
   check(
-    "RH1 the h1 names the page: the wordmark on home, the room name on the six rooms",
+    "RH1 the h1 names the page: the wordmark on home, the room name on every room page",
     wrongH1.length === 0,
-    wrongH1.map((r) => `${r}: ${JSON.stringify(heads[r]?.h1s)}`).join(" | ") || "home=wordmark, 6 rooms=room-name",
+    wrongH1.map((r) => `${r}: ${JSON.stringify(heads[r]?.h1s)}`).join(" | ") || `home=wordmark, ${SHELLED.length - 1} rooms=room-name`,
   );
 
   // RH2: the whole head, every member, every page, against the measured table.
@@ -215,9 +215,9 @@ export async function run(ctx) {
     }
   }
   check(
-    "RH2 every head member resolves its measured tag, weight, size, tracking and face, on all seven pages",
+    "RH2 every head member resolves its measured tag, weight, size, tracking and face, on every shelled page",
     offenders.length === 0,
-    offenders.join(" | ") || `${SHELLED.length * MEMBERS.length - 1} members pinned across 7 pages`,
+    offenders.join(" | ") || `${SHELLED.length * MEMBERS.length - 1} members pinned across ${SHELLED.length} pages`,
   );
 
   // RH3: THE specificity guard, the regression this issue exists for, stated as
@@ -259,9 +259,9 @@ export async function run(ctx) {
       .filter((m) => (r === "/" && m === "roomName" ? false : !leaded(heads[r]?.[m])))
       .map((m) => `${r} ${m}`));
   check(
-    "RH5 every head member resolves line-height 1.6 on all seven pages",
+    "RH5 every head member resolves line-height 1.6 on every shelled page",
     unleaded.length === 0,
-    unleaded.join(", ") || "27/27 members at 1.6",
+    unleaded.join(", ") || `${SHELLED.length * HEAD_MEMBERS.length - 1}/${SHELLED.length * HEAD_MEMBERS.length - 1} members at 1.6`,
   );
 
   // RH6: the premise RH2 and RH5 rest on. Their uniformity is only interesting
@@ -315,7 +315,7 @@ export async function run(ctx) {
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
   const restored = await waitReady();
 
-  // RH8: nine page loads (the seven-page sweep, the Print Room again for RH7, and
+  // RH8: ten page loads (the eight-page sweep, the Print Room again for RH7, and
   // the Explorer restore) added no console errors and no new 4xx. This suite is
   // also the only visitor to /gallery/, /glossary/ and /faq/, so it is their sole
   // health check. One stock Chromium message is excused for the same reason `run`

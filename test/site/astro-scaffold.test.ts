@@ -15,7 +15,7 @@ import { cleanPublicGenerated } from "../../scripts/clean-public-generated.ts";
  * committed sources are src/pages + public/ alone. Sub 8 (#254) ends the
  * app-shell exception: the Explorer, Print Room, and seed-of-the-day pages
  * render through the same BaseLayout. The Running Head (#268) re-shells the
- * generated gallery as a real route, so ALL seven pages are asserted here.
+ * generated gallery as a real route, so EVERY page is asserted here.
  *
  * The suite builds the Astro site once (into out/test-astro-build, left in place
  * for inspection; out/ is gitignored) and asserts against the rendered output plus
@@ -127,6 +127,18 @@ const PAGES: readonly PageSpec[] = [
     scriptSrc: "./app.bundle.js",
   },
   {
+    route: "reading-room/index.html",
+    dir: "/reading-room/",
+    current: "Reading Room",
+    room: "The Reading Room",
+    title: "The Reading Room · Vellum",
+    ogTitle: "The Reading Room · Vellum",
+    description:
+      "The atelier's reading room: sit with any seed's world and watch its founding voyage flow into its recorded ages on one continuous timeline.",
+    tagline: "watch a world live",
+    scriptSrc: "./app.bundle.js",
+  },
+  {
     route: "seed-of-the-day/index.html",
     dir: "/seed-of-the-day/",
     current: "Today",
@@ -189,7 +201,7 @@ const metaContent = (head: string, attr: "name" | "property", key: string) => {
   return m ? decode(m[1]) : undefined;
 };
 
-test("astro build emits all seven pages in directory form", () => {
+test("astro build emits every page in directory form", () => {
   for (const p of PAGES) {
     assert.ok(rendered.has(p.route), `astro build should emit ${p.route}`);
   }
@@ -298,8 +310,8 @@ test("no head member arrives beyond the canonical set (nothing injected, nothing
 test("the canonical nav renders the typed items flat, root-absolute, one manicule-marked aria-current", () => {
   assert.deepEqual(
     NAV_ITEMS.map((i) => i.label),
-    ["Today", "Explorer", "Print Room", "Gallery", "Q & A", "Glossary"],
-    "the Running Head six (#268): Home's slot goes to the Gallery, FAQ reads Q & A",
+    ["Today", "Explorer", "Reading Room", "Print Room", "Gallery", "Q & A", "Glossary"],
+    "the Running Head six (#268) plus the Reading Room (#221), seated beside the Explorer it watches",
   );
   for (const item of NAV_ITEMS) {
     assert.match(item.href, /^\/([a-z0-9-]+\/)*$/, `${item.label} href must be root-absolute directory form`);
@@ -660,6 +672,7 @@ test("every internal link and embed on the rendered pages resolves", () => {
     "/explorer/app.bundle.js",
     "/print-room/app.bundle.js",
     "/seed-of-the-day/app.bundle.js",
+    "/reading-room/app.bundle.js",
   ];
   const routes = new Set<string>(PAGES.map((p) => p.dir));
   for (const p of PAGES) {

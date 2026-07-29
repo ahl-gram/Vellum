@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 /**
  * Sub 7 of the Scriptorium epic (#208): the bindery keeps one press. A single
- * multi-entry Vite build bundles the three app surfaces into their gitignored
+ * multi-entry Vite build bundles the app surfaces into their gitignored
  * .bundle.js twins under public/. Since Sub 9 (#260) the entries are the
  * TypeScript sources in src/site, which import the engine's src/ directly, so
  * Vite compiles the whole graph itself (the tsc browser emit retired). The
@@ -34,6 +34,7 @@ export const BUNDLE_ENTRIES: ReadonlyArray<{ entry: string; twin: string }> = [
   { entry: "src/site/explorer/app.ts", twin: "explorer/app.bundle.js" },
   { entry: "src/site/print-room/app.ts", twin: "print-room/app.bundle.js" },
   { entry: "src/site/seed-of-the-day/app.ts", twin: "seed-of-the-day/app.bundle.js" },
+  { entry: "src/site/reading-room/app.ts", twin: "reading-room/app.bundle.js" },
 ];
 
 // Behavior-preserving output shape shared by the page build and the worker build.
@@ -83,7 +84,7 @@ const pressConfig = (outDir: string): InlineConfig => ({
   },
 });
 
-/** Bundle the three app surfaces (and the one shared worker) into `root`, the served tree. */
+/** Bundle the app surfaces (and the one shared worker) into `root`, the served tree. */
 export async function bundleAppSurfaces(root: string): Promise<void> {
   const staging = await mkdtemp(join(tmpdir(), "vellum-press-"));
   try {

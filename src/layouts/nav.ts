@@ -21,6 +21,7 @@ export interface NavItem {
 export const NAV_ITEMS: readonly NavItem[] = [
   { label: "Today", href: "/seed-of-the-day/", kind: "daily" },
   { label: "Explorer", href: "/explorer/", kind: "room" },
+  { label: "Reading Room", href: "/reading-room/", kind: "room" },
   { label: "Print Room", href: "/print-room/", kind: "room" },
   { label: "Gallery", href: "/gallery/", kind: "room" },
   { label: "Q & A", href: "/faq/", kind: "reference" },

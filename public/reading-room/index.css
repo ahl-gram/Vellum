@@ -1,0 +1,47 @@
+/* The Reading Room (#221): page-specific dressing only. The frame's own layout is
+   the SHARED /reading-frame.css (linked via BaseLayout extraCss, #219), and the
+   engine's overlay dressing is /living-chart.css (#302); this file owes them nothing
+   but the page around them. Palette tokens are BaseLayout's shell block (#263). */
+body {
+  padding: 2.5rem 1.5rem 5rem;
+  line-height: 1.6;
+}
+main { max-width: 1100px; }
+header { margin-bottom: 2rem; }
+footer { margin-top: 3.5rem; }
+
+.intro {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; color: var(--ink-brown);
+  max-width: 46rem; margin: 0 auto 1.6rem; text-align: center;
+}
+
+.warning {
+  font-style: italic; color: var(--ink-brown); text-align: center;
+  border: 1px solid var(--line-tan); background: var(--parchment-panel);
+  border-radius: 6px; padding: 0.5rem 1rem; max-width: 46rem; margin: 0 auto 1.2rem;
+}
+
+/* The instrument's one control wears the atelier dress (the Print Room's counter
+   idiom); .place-hit stays out, it is the engine's invisible hit target. */
+button:not(.place-hit) {
+  font-family: inherit; font-size: 0.95rem; color: var(--ink-dark);
+  background: #f8f1e0; border: 1.5px solid var(--ink-dark); border-radius: 4px;
+  padding: 0.4rem 0.6rem; cursor: pointer;
+}
+button:not(.place-hit):hover { background: var(--parchment-bright); }
+
+/* #127 The Drafting Moment, reused: the chart settles onto the desk while its
+   coastline draws itself in ink. startArrival (src/site/explorer/draw-ceremony.ts)
+   sets --draw-len + the dasharray on the coast path and clears them on
+   animationend, so WITHOUT these mount-scoped rules the ceremony never plays AND
+   the inline stroke-dasharray is never cleaned off the live coastline. Collapses
+   to instant under the shared reduced-motion rule in /motion.css. */
+.rf-chart svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
+.rf-chart svg.arriving #layer-land path {
+  animation: inkDraw var(--ink-draw) var(--ease-paper) both,
+             washDry var(--ink-dry) var(--ease-paper) 400ms both;
+}
+.rf-chart svg.arriving #layer-waterlines {
+  animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
+}
