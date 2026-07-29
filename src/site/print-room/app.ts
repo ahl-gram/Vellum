@@ -244,6 +244,13 @@ $("pr-draw").addEventListener("click", draw);
 seedInput.addEventListener("keydown", (e) => { if (e.key === "Enter") draw(); });
 styleSel.addEventListener("change", draw);
 $("pr-random").addEventListener("click", () => { seedInput.value = String(randomSeed()); draw(); });
+// #217: a pulled plate's status line names the format it was pressed as, so a fresh
+// Pressed-as choice makes it stale; dismiss it. An in-flight order keeps its line: the
+// press message belongs to the format snapshotted at click, and its completion rewrites
+// the line either way.
+formatSel.addEventListener("change", () => {
+  if (!ordering) posterStatus.textContent = "";
+});
 
 // #134 Order a poster plate. The press pulls the CURRENT proof's world at a preset width
 // through the SHARED worker, and the wide SVG goes STRAIGHT to a Blob download: it is

@@ -239,6 +239,20 @@ export async function run(ctx) {
     JSON.stringify(chartPull),
   );
 
+  // PR29: changing the Pressed-as format dismisses the stale status line (a "plate
+  // pressed" line describing the OLD format under a fresh choice reads as a lie). The
+  // select still shows png1 from PR28 and the chart status is on screen, so this is the
+  // exact reported setup; a REAL change event must clear it (orderPng's programmatic
+  // value writes never fire change, so the PNG section below is untouched by this).
+  const dismissed = await evaluate(
+    `(()=>{const f=document.getElementById("pr-format");const before=document.getElementById("pr-poster-status").textContent;f.value="svg";f.dispatchEvent(new Event("change"));return{before,after:document.getElementById("pr-poster-status").textContent,plateOpen:!document.querySelector('[data-poster="chart"]').disabled};})()`,
+  );
+  check(
+    "PR29 changing the Pressed-as format dismisses the stale poster status line",
+    !!dismissed && dismissed.before.length > 0 && dismissed.after === "" && dismissed.plateOpen === true,
+    JSON.stringify(dismissed),
+  );
+
   // --- #135 poster PNG (the client-side rasterizer) -----------------------------------
   // The "Step one" format dropdown switches the same plate buttons from a vector SVG
   // download to a canvas PNG at x1 or x2. Downloads stay denied, so we observe
