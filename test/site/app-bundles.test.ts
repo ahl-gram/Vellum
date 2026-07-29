@@ -16,7 +16,7 @@ import { tmpdir } from "node:os";
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
-test("all three app pages load their bundled app twin via is:inline, none load raw source (#208, #254)", () => {
+test("all four app pages load their bundled app twin via is:inline, none load raw source (#208, #254)", () => {
   // is:inline is load-bearing: without it Astro routes the script through its
   // own Vite pass, which #204's ratified analysis rejects for these surfaces
   // (the twins are already pressed by scripts/build-app-bundles.ts).
@@ -24,6 +24,7 @@ test("all three app pages load their bundled app twin via is:inline, none load r
     ["src/pages/explorer/index.astro", /<script type="module" src="\.\/app\.bundle\.js" is:inline><\/script>/],
     ["src/pages/print-room/index.astro", /<script type="module" src="\.\/app\.bundle\.js" is:inline><\/script>/],
     ["src/pages/seed-of-the-day/index.astro", /<script type="module" src="app\.bundle\.js" is:inline><\/script>/],
+    ["src/pages/reading-room/index.astro", /<script type="module" src="\.\/app\.bundle\.js" is:inline><\/script>/],
   ] as const) {
     const html = read(pageSource);
     assert.match(html, src, `${pageSource} should load its bundle twin, opted out of Astro's script processing`);
@@ -70,6 +71,7 @@ test("the press bundles from the src/site TypeScript entries (#260)", async () =
       { entry: "src/site/explorer/app.ts", twin: "explorer/app.bundle.js" },
       { entry: "src/site/print-room/app.ts", twin: "print-room/app.bundle.js" },
       { entry: "src/site/seed-of-the-day/app.ts", twin: "seed-of-the-day/app.bundle.js" },
+      { entry: "src/site/reading-room/app.ts", twin: "reading-room/app.bundle.js" },
     ],
     "entries are the TS sources; twins keep their served names untouched",
   );

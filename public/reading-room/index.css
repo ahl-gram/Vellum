@@ -1,0 +1,23 @@
+/* The Reading Room (#221): page-specific dressing only. The frame's own layout is
+   the SHARED /reading-frame.css (linked via BaseLayout extraCss, #219), and the
+   engine's overlay dressing is /living-chart.css (#302); this file owes them nothing
+   but the page around them. Palette tokens are BaseLayout's shell block (#263). */
+body {
+  padding: 2.5rem 1.5rem 5rem;
+  line-height: 1.6;
+}
+main { max-width: 1100px; }
+header { margin-bottom: 2rem; }
+footer { margin-top: 3.5rem; }
+
+.intro {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; color: var(--ink-brown);
+  max-width: 46rem; margin: 0 auto 1.6rem; text-align: center;
+}
+
+.warning {
+  font-style: italic; color: var(--ink-brown); text-align: center;
+  border: 1px solid var(--line-tan); background: var(--parchment-panel);
+  border-radius: 6px; padding: 0.5rem 1rem; max-width: 46rem; margin: 0 auto 1.2rem;
+}

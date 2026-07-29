@@ -52,6 +52,10 @@ const dateLabel = new Intl.DateTimeFormat("en-GB", {
 
 $("dateline").textContent = `${dateLabel} · seed ${seed}`;
 $<HTMLAnchorElement>("explore").href = `../explorer/#seed=${seed}&style=antique&legend=1`;
+// #221: the Reading Room cross-link carries the seed explicitly, so the link keeps
+// opening THIS page's world even if the visitor clicks after UTC midnight rolls the
+// bare-visit default over to a new day.
+$<HTMLAnchorElement>("watch").href = `../reading-room/#seed=${seed}`;
 
 // --- The Surveyor's Glass, Sub 6 (#167): geometric pan/zoom on today's chart --
 // The Hunt adopts the SAME shared controller the Explorer built in Sub 3, geometric-only.

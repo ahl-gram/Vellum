@@ -62,6 +62,10 @@ export const ROUTE_ENTRIES: Readonly<Record<string, RouteEntry | undefined>> = {
     title: "The Explorer",
     blurb: "Draw a world from any seed in the browser, pan and zoom the chart, and read the gazetteer it comes with.",
   },
+  "/reading-room/": {
+    title: "The Reading Room",
+    blurb: "Watch any seed's world live: the founding voyage sails its survey, then the recorded ages turn, on one continuous timeline.",
+  },
   "/print-room/": {
     title: "The Print Room",
     blurb: "Pull a proof of any seed at print sizes and take the chart home as an SVG or a PNG.",
