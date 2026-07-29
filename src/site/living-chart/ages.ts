@@ -130,16 +130,31 @@ export function createAges(deps: AgesDeps) {
 
   // The annal rows: the chronicler's block of the one journal, appended AFTER the
   // prologue rows voyage-log-panel just built into the same strip. Same row idiom.
+  // #312 (the manuscript dressing): the block opens with the chronicler's heading,
+  // the mirror of the surveyor's signature, and its first line takes an initial.
   function buildAnnals(events: ReadonlyArray<HistoricalEvent>): AnnalRow[] {
     const rows: AnnalRow[] = [];
-    for (const e of events) {
+    if (events.length > 0) {
+      const head = document.createElement("li");
+      head.className = "annals-head";
+      head.textContent = "Here follow the annals of these waters";
+      stripEl.appendChild(head);
+    }
+    for (const [i, e] of events.entries()) {
       const li = document.createElement("li");
       const year = document.createElement("span");
       year.className = "cr-year";
       year.textContent = String(e.year);
       const text = document.createElement("span");
       text.className = "cr-text";
-      text.textContent = e.text; // textContent: event prose is plain text
+      if (i === 0 && e.text.length > 0) {
+        const dc = document.createElement("span");
+        dc.className = "cr-dc";
+        dc.textContent = e.text[0]!;
+        text.append(dc, document.createTextNode(e.text.slice(1)));
+      } else {
+        text.textContent = e.text; // textContent: event prose is plain text
+      }
       li.append(year, text);
       stripEl.appendChild(li);
       rows.push({ li, year: e.year });

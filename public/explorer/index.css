@@ -345,12 +345,25 @@ button.primary:hover { background: #5d4831; }
   border-bottom: 1px solid var(--line-faint); opacity: 0.4;
   transition: opacity 0.18s, transform 0.18s; }
 .chronicle-strip li.inked { opacity: 1; transform: translateX(2px); }
-/* The voice handoff (#220's Overture): the prologue reads in the surveyor's italic
-   hand, the annals in the chronicler's upright one. */
-.chronicle-strip li.prologue .cr-text { font-style: italic; }
-.chronicle-strip .cr-year { flex: 0 0 3rem; text-align: right;
+/* The voice handoff (#220's Overture), dressed as a manuscript (#312, candidate D of
+   the 2026-07-28 contact sheet): the surveyor writes italic in warm walnut ink behind
+   a logbook margin rule, the days of the voyage in his unbolded gutter; the chronicler
+   writes upright in darker iron-gall under his own heading, years bold in the gutter;
+   each hand's first line opens with an initial. */
+.chronicle-strip li.prologue { border-left: 3px solid var(--line-tan); padding-left: 0.7rem; }
+.chronicle-strip li.prologue .cr-text { font-style: italic; color: #7a5f38; }
+.chronicle-strip li.prologue .cr-year { font-weight: 400; font-style: italic; color: #99855f; }
+/* The chronicler's heading li never dims: it is furniture, not an entry to reveal. */
+.chronicle-strip li.annals-head { display: block; opacity: 1;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  letter-spacing: 0.05em; color: var(--ink-brown); padding: 0.55rem 0 0.35rem; }
+.chronicle-strip .cr-dc { float: left; font-style: normal; color: var(--ink-dark);
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 2.1em; line-height: 0.8; margin: 0.08em 0.12em 0 0; }
+/* "day 105" runs wider than a bare year, so the shared column grew from 3rem (#312). */
+.chronicle-strip .cr-year { flex: 0 0 3.6rem; text-align: right;
   font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
-.chronicle-strip .cr-text { color: #54452f; }
+.chronicle-strip .cr-text { color: #3f3122; }
 .caption { text-align: center; font-style: italic; color: var(--ink-brown);
   padding-top: 0.6rem; }
 footer { margin-top: 3rem; }

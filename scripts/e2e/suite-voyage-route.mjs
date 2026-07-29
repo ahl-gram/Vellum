@@ -209,11 +209,14 @@ export async function run(ctx) {
     // still the departure entry.
     const first=document.getElementById("chronicle-strip").querySelector("li.prologue");
     const domText=first?first.querySelector(".cr-text").textContent:"";
-    const domYear=first?first.querySelector(".cr-year").textContent:"";
+    const domGutter=first?first.querySelector(".cr-year").textContent:"";
     const engineFirst=log?log.entries[0].text:"";
+    // #312: the gutter counts the days of the voyage (the entry keeps its Year lead in
+    // DATA; the reveal still drops it from the display).
     return{
       panelOutsideMap: !document.querySelector("#map #scrubber") && !document.querySelector("#map #chronicle-strip"),
-      matches: !!domText && engineFirst.includes(domText) && engineFirst.startsWith("Year "+domYear+"."),
+      matches: !!domText && engineFirst.includes(domText) && engineFirst.startsWith("Year ") &&
+        log && domGutter === ("day " + log.entries[0].day),
       status: document.getElementById("status").textContent, summary: log?log.summary:"",
     };
   })()`);

@@ -274,7 +274,9 @@ export async function run(ctx) {
     const beforeVal=window.__vellumAgesState().year;
     const beforeVisible=${visSel};
     document.getElementById("verso-turn").click();
-    const rows=[...document.querySelectorAll("#chronicle-strip li")];
+    // #312: the chronicler's heading li is furniture, never inked, so it sits outside
+    // the every-row-inked criterion.
+    const rows=[...document.querySelectorAll("#chronicle-strip li:not(.annals-head)")];
     return{beforeVal,beforeVisible,afterVal:window.__vellumAgesState().year,
       afterVisible:${visSel},
       year:document.getElementById("scrub-year").textContent,
@@ -354,7 +356,7 @@ export async function run(ctx) {
   await evaluate(`document.getElementById("verso-turn").click()`); // flip with chronicle off
   const s19 = await evaluate(`(()=>{
     const chk=document.getElementById("ages");chk.checked=true;chk.dispatchEvent(new Event("change",{bubbles:true}));
-    const rows=[...document.querySelectorAll("#chronicle-strip li")];
+    const rows=[...document.querySelectorAll("#chronicle-strip li:not(.annals-head)")];
     return{flipped:document.getElementById("sheet").classList.contains("versoed"),
       panelShown:!document.getElementById("scrubber").hidden,
       val:Number(document.getElementById("scrub-range").value),max:Number(document.getElementById("scrub-range").max),

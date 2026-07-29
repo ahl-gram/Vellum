@@ -38,7 +38,7 @@ export async function run(ctx) {
     const ov=document.querySelector("#map .voyage-overlay");
     const plan=window.__vellumVoyagePlan();
     const a=window.__vellumAgesState();
-    const annals=[...document.querySelectorAll("#chronicle-strip li:not(.prologue)")];
+    const annals=[...document.querySelectorAll("#chronicle-strip li:not(.prologue):not(.annals-head)")];
     return{hasOverlay:!!ov,ports:plan?plan.ports.length:0,firstIdx:plan&&plan.ports[0]?plan.ports[0].idx:-1,
       chamber:a?a.chamber:"",year:a?a.year:-1,max:a?a.max:-2,
       annals:annals.length,annalsInked:annals.filter((li)=>li.classList.contains("inked")).length};
@@ -47,6 +47,26 @@ export async function run(ctx) {
     v1.hasOverlay && v1.ports > 1 && v1.firstIdx === vm.capitalIdx &&
     v1.chamber === "ages" && v1.year === v1.max && v1.annals > 0 && v1.annalsInked === v1.annals,
     JSON.stringify(v1) + ` capital=${vm.capitalIdx}`);
+
+  // W1c (#312): the manuscript dressing. The chronicler's heading stands once between
+  // the hands, the prologue gutter counts STRICTLY increasing days from day 1 (the
+  // year lives in the attribution alone), and each hand's first line opens with an
+  // initial. Read-only against W1's armed present park.
+  const v1c = await evaluate(`(()=>{
+    const lis=[...document.querySelectorAll("#chronicle-strip li")];
+    const heads=lis.filter((li)=>li.classList.contains("annals-head"));
+    const headIdx=lis.indexOf(heads[0]);
+    const lastPro=lis.map((li)=>li.classList.contains("prologue")).lastIndexOf(true);
+    const days=lis.filter((li)=>li.classList.contains("prologue")).map((li)=>li.querySelector(".cr-year").textContent);
+    const nums=days.map((d)=>/^day \\d+$/.test(d)?Number(d.slice(4)):NaN);
+    const strict=nums.length>0&&nums.every((n,i)=>i===0?n===1:n>nums[i-1]);
+    return{heads:heads.length,headAfterPrologue:headIdx===lastPro+1,strict,firstDays:days.slice(0,3),
+      proDc:!!document.querySelector("#chronicle-strip li.prologue .cr-text .cr-dc"),
+      annDc:!!document.querySelector("#chronicle-strip li:not(.prologue):not(.annals-head) .cr-text .cr-dc")};
+  })()`);
+  check("W1c #312 manuscript dressing: one chronicler's heading after the prologue, strictly increasing day gutters, initials on both hands",
+    v1c.heads === 1 && v1c.headAfterPrologue && v1c.strict && v1c.proDc && v1c.annDc,
+    JSON.stringify(v1c));
 
   // W1b (#220): crossing the seam LEFTWARD. Driving the bar to its midpoint enters the
   // survey chamber at its rest (t=1, the ratified bare-survey pose): the track shows,
@@ -57,7 +77,7 @@ export async function run(ctx) {
     s.dispatchEvent(new Event("input",{bubbles:true}));
     const a=window.__vellumAgesState();
     const ov=document.querySelector("#map .voyage-overlay");
-    const annals=[...document.querySelectorAll("#chronicle-strip li:not(.prologue)")];
+    const annals=[...document.querySelectorAll("#chronicle-strip li:not(.prologue):not(.annals-head)")];
     return{chamber:a?a.chamber:"",t:a?a.t:-1,readout:document.getElementById("scrub-year").textContent,
       overlayVisible:!!ov&&ov.style.display!=="none",
       annalsInked:annals.filter((li)=>li.classList.contains("inked")).length};
