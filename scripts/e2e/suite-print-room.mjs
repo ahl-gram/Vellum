@@ -212,6 +212,33 @@ export async function run(ctx) {
     JSON.stringify(desk),
   );
 
+  // --- #217 Part 1: the chart plate (the covenant artifact at the chart's own width) ---
+  // The chart is pulled ONLY as the engraving: the format select is deliberately set to
+  // png1 FIRST and the pull must ignore it (no PNG hook fires; the status line teaches
+  // the split). Width 1500 skips the poster clamp (PR11 keeps pinning [2400, 4200] for
+  // the posters), and the filename is the Explorer's exact artifact name (title slug),
+  // which is the Part 2 retirement contract. Byte-parity with the Explorer's Download SVG
+  // is by construction (same worker, same draw kind, same widthPx 1500), so this check
+  // pins the observable residue: width, recipe stamp, name, format-ignore.
+  await evaluate(`(()=>{window.__vellumLastPoster=undefined;window.__vellumLastPng=undefined;document.getElementById("pr-format").value="png1";document.querySelector('[data-poster="chart"]').click();})()`);
+  let chartPull = null;
+  for (let i = 0; i < 220; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(()=>{const p=window.__vellumLastPoster;return p?{width:p.width,seed:p.seed,filename:p.filename,hasWidthAttr:p.svg.includes('width="1500"'),hasRecipeAttr:p.svg.includes('data-vellum-seed="42"'),pngFired:window.__vellumLastPng!==undefined,status:document.getElementById("pr-poster-status").textContent}:null;})()`);
+    } catch {}
+    if (s) { chartPull = s; break; }
+    await sleep(50);
+  }
+  check(
+    "PR28 the Chart plate pulls the 1500px engraving, Explorer-named, ignoring the PNG format",
+    !!chartPull && chartPull.width === 1500 && chartPull.seed === 42 &&
+      chartPull.filename === "vellum-42-antique-the-isle-of-rahai.svg" &&
+      chartPull.hasWidthAttr && chartPull.hasRecipeAttr && chartPull.pngFired === false &&
+      /pulled as the engraving: vellum-42-antique-the-isle-of-rahai\.svg/.test(chartPull.status),
+    JSON.stringify(chartPull),
+  );
+
   // --- #135 poster PNG (the client-side rasterizer) -----------------------------------
   // The "Step one" format dropdown switches the same plate buttons from a vector SVG
   // download to a canvas PNG at x1 or x2. Downloads stay denied, so we observe

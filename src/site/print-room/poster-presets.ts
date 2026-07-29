@@ -21,6 +21,21 @@ export const POSTER_PRESETS: PosterPreset[] = [
   { key: "grand", label: "Grand", width: 4200 },
 ];
 
+// #217 Part 1: the chart plate, the covenant artifact at the chart's own width. It is
+// deliberately NOT in POSTER_PRESETS: the clamp envelope below must stay [Desk, Grand]
+// (clampPosterWidth would raise 1500 to 2400, so the order path takes this width
+// directly), and the chart is pulled only as the engraving (SVG), never rasterized.
+export const CHART_PRESET: PosterPreset = { key: "chart", label: "Chart", width: 1500 };
+
+// The chart's artifact name mirrors the Explorer's Download SVG byte-for-byte (the
+// downloadBtn handler in src/site/explorer/controls.ts), so when #217 Part 2 retires
+// that button the take-home survives name-for-name as well as byte-for-byte. Keep the
+// slug regex identical to the Explorer's until Part 2 deletes it.
+export function chartFilename(seed: number, style: string, title: string): string {
+  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  return `vellum-${seed}-${style}-${slug}.svg`;
+}
+
 const MIN_WIDTH = POSTER_PRESETS[0].width; // 2400
 const MAX_WIDTH = POSTER_PRESETS[POSTER_PRESETS.length - 1].width; // 4200
 

@@ -39,23 +39,25 @@ a moment.</p>
   <div class="offerings">
     <div class="offering" aria-labelledby="pr-plate-head">
       <h3 class="offering-head" id="pr-plate-head">A poster plate</h3>
-      <p class="offering-intro">One chart, pulled poster-wide and handed to you to send to a printer.</p>
+      <p class="offering-intro">One chart, pulled at its own width or poster-wide, and handed to you to send to a printer.</p>
       <div class="offering-controls">
         <label class="offering-field" for="pr-format">Pressed as
           <select id="pr-format">
-            <option value="svg" selected>Vector (SVG)</option>
-            <option value="png1">Image (PNG &times;1)</option>
-            <option value="png2">Image (PNG &times;2)</option>
+            <option value="svg" selected>The engraving itself (SVG)</option>
+            <option value="png1">An impression (PNG)</option>
+            <option value="png2">A finer impression (PNG &times;2)</option>
           </select>
         </label>
         <div class="plate-row" role="group" aria-label="Plate size">
+          <button class="plate" data-poster="chart" disabled>Chart<span class="plate-dim">1500 px</span></button>
           <button class="plate" data-poster="desk" disabled>Desk<span class="plate-dim">2400 px</span></button>
           <button class="plate" data-poster="wall" disabled>Wall<span class="plate-dim">3300 px</span></button>
           <button class="plate" data-poster="grand" disabled>Grand<span class="plate-dim">4200 px</span></button>
         </div>
       </div>
-      <p class="offering-caveat">A PNG uses your device's fonts; keep the vector SVG for an exact
-      copy. A large image is fitted to what your browser can hold.</p>
+      <p class="offering-caveat">The engraving is exact at any size; an impression is pressed with your
+      device's fonts, and a large one is fitted to what your browser can hold.
+      The chart is pulled only as the engraving.</p>
       <p class="status" id="pr-poster-status" role="status" aria-live="polite"></p>
     </div>
 
