@@ -199,7 +199,7 @@ export function usesWorker(): boolean {
 // chunk (explorer/worker.bundle.js), and rewrites the URL to it. Hoisting the expression into a
 // variable or parameter breaks the static analysis: no worker chunk is emitted,
 // the URL survives unrewritten, and every page 404s into a silent inline
-// fallback. Both spawning pages (the Explorer and the Print Room, whose bundles
+// fallback. Every spawning page (Explorer, Print Room, Reading Room, whose bundles
 // each inline this module) resolve to the SAME emitted worker.
 function connect(): Promise<Worker | null> {
   return new Promise((resolve) => {

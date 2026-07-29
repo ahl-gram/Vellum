@@ -1,4 +1,4 @@
-// The Reading Room checks (RR0-RR13) on the /reading-room/ page (#221, the last sub
+// The Reading Room checks (RR0-RR15) on the /reading-room/ page (#221, the last sub
 // of epic #190). The destination page: the reading frame (#219) driving the fused
 // ages instrument (#220), a world taken from the hash, drawn once through the SHARED
 // worker. There is deliberately NO Explorer entry point to follow (decision 3,
@@ -11,6 +11,8 @@
 // page and carries its own scoped no-4xx + console-error delta. Arrival is AT REST
 // on every path (the #221 ratification): these checks assert the instrument lands
 // parked, never mid-play.
+import { seedForDate } from "../../src/world/seed-of-the-day.ts";
+
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, serverState, consoleErrors, http4xx, PORT } = ctx;
 
@@ -45,6 +47,19 @@ export async function run(ctx) {
   check("RR0 reading-room page booted (worker hook present)", await boot());
   check("RR1 render worker active (no silent cross-directory fallback)", await evaluate(`window.__vellumReadingRoomUsesWorker() === true`));
   check("RR2 the deep-linked chart renders into the frame and settles", await settled());
+  // RR2b: the #127 arrival ceremony really RAN and cleaned up after itself.
+  // startArrival sets an inline stroke-dasharray + --draw-len on the coast path and
+  // clears them on animationend; if the page loads no mount-scoped svg.arriving
+  // rules, no animation ever fires and the residue persists forever (the defect the
+  // adversarial review caught). Polling for the cleanup asserts both halves at once.
+  let inked = false;
+  for (let i = 0; i < 120; i++) {
+    let ok = null;
+    try { ok = await evaluate(`[...document.querySelectorAll(".rf-chart #layer-land path")].every((p)=>!p.style.strokeDasharray) && !!document.querySelector(".rf-chart #layer-land path")`); } catch {}
+    if (ok) { inked = true; break; }
+    await sleep(50);
+  }
+  check("RR2b the arrival ceremony plays and clears its inline coast dasharray (no residue)", inked);
   const st = await evaluate(`(()=>{const s=window.__vellumReadingRoomState();return{seed:s.seed,title:s.title};})()`);
   check("RR3 the world is the deep-linked one (seed 42 == 'The Isle of Rahai')", st.seed === 42 && st.title === "The Isle of Rahai", JSON.stringify(st));
   // At-rest arrival, the ratified default: the instrument is armed (panel shown),
@@ -104,7 +119,11 @@ export async function run(ctx) {
   await shoot("reading-room.png");
 
   // RR9: a bare visit lands on today's seed-of-the-day (UTC), like the Explorer and
-  // the Print Room. The oracle is the engine's own seedForDate, imported in-browser.
+  // the Print Room. The oracle is the engine's own seedForDate, sampled BEFORE the
+  // navigation and again after settle: the page freezes its seed at load, so a
+  // single fresh-per-poll oracle flakes when the run crosses 00:00Z between load
+  // and poll (#304's date-flake class). Either sample matching is a pass.
+  const todayBefore = seedForDate(new Date());
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/` });
   let bare = null;
@@ -112,13 +131,18 @@ export async function run(ctx) {
     for (let i = 0; i < 160; i++) {
       let s = null;
       try {
-        s = await evaluate(`(async()=>{const {seedForDate}=await import("/explorer/engine/world/seed-of-the-day.js");const st=window.__vellumReadingRoomState();return{svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent,seed:st.seed,expected:seedForDate(new Date())};})()`, true);
+        s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent,seed:st.seed};})()`);
       } catch {}
       if (s && s.svg && s.status === "") { bare = s; break; }
       await sleep(50);
     }
   }
-  check("RR9 a bare visit opens today's seed-of-the-day", !!bare && bare.seed === bare.expected, JSON.stringify(bare));
+  const todayAfter = seedForDate(new Date());
+  check(
+    "RR9 a bare visit opens today's seed-of-the-day",
+    !!bare && (bare.seed === todayBefore || bare.seed === todayAfter),
+    JSON.stringify({ ...bare, todayBefore, todayAfter }),
+  );
 
   // RR10: the ways in. The home card (Watch one) and the Today cross-link, which
   // carries the seed explicitly so it survives a UTC midnight rollover.
@@ -130,6 +154,7 @@ export async function run(ctx) {
     await sleep(50);
   }
   check("RR10a the home Go Deeper card invites Watch one into the room", !!card && card.verb === "Watch one", JSON.stringify(card));
+  const linkBefore = seedForDate(new Date());
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/seed-of-the-day/` });
   let watch = null;
   for (let i = 0; i < 160; i++) {
@@ -137,7 +162,15 @@ export async function run(ctx) {
     if (watch) break;
     await sleep(50);
   }
-  check("RR10b the Today page cross-links the room with today's seed pinned", !!watch && /^\.\.\/reading-room\/#seed=\d+$/.test(watch.href), JSON.stringify(watch));
+  // The href must carry TODAY's seed, not just any digits (a stale or zero seed
+  // would pass a shape-only regex); the before/after pair rides out 00:00Z.
+  const linkAfter = seedForDate(new Date());
+  const watchSeed = watch ? Number((watch.href.match(/#seed=(\d+)$/) || [])[1]) : null;
+  check(
+    "RR10b the Today page cross-links the room with today's seed pinned",
+    !!watch && /^\.\.\/reading-room\/#seed=\d+$/.test(watch.href) && (watchSeed === linkBefore || watchSeed === linkAfter),
+    JSON.stringify({ watch, linkBefore, linkAfter }),
+  );
 
   // RR11: mobile is the clean vertical chart-over-log story, no sideways scroll-trap.
   // Device metrics go on BEFORE the navigation (the CDP-touch rule; no touch is
@@ -178,7 +211,9 @@ export async function run(ctx) {
       try {
         s = await evaluate(`(()=>{const uw=typeof window.__vellumReadingRoomUsesWorker==="function"?window.__vellumReadingRoomUsesWorker():null;const w=document.getElementById("rr-warning");return{uw,warn:!!(w&&!w.hidden),svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent};})()`);
       } catch {}
-      if (s && s.uw === false && s.svg && s.status === "") { fb = s; break; }
+      // The gate deliberately omits s.svg: RR15 asserts it, and a gate that already
+      // required it would make RR15 true by construction whenever fb is non-null.
+      if (s && s.uw === false && s.status === "") { fb = s; break; }
       await sleep(75);
     }
     check("RR14 inline fallback: worker blocked -> inline path taken and #rr-warning shown", !!fb && fb.uw === false && fb.warn === true, JSON.stringify(fb));

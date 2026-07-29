@@ -15,7 +15,7 @@ import { cleanPublicGenerated } from "../../scripts/clean-public-generated.ts";
  * committed sources are src/pages + public/ alone. Sub 8 (#254) ends the
  * app-shell exception: the Explorer, Print Room, and seed-of-the-day pages
  * render through the same BaseLayout. The Running Head (#268) re-shells the
- * generated gallery as a real route, so ALL seven pages are asserted here.
+ * generated gallery as a real route, so EVERY page is asserted here.
  *
  * The suite builds the Astro site once (into out/test-astro-build, left in place
  * for inspection; out/ is gitignored) and asserts against the rendered output plus
@@ -201,7 +201,7 @@ const metaContent = (head: string, attr: "name" | "property", key: string) => {
   return m ? decode(m[1]) : undefined;
 };
 
-test("astro build emits all seven pages in directory form", () => {
+test("astro build emits every page in directory form", () => {
   for (const p of PAGES) {
     assert.ok(rendered.has(p.route), `astro build should emit ${p.route}`);
   }

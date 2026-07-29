@@ -18,7 +18,7 @@
 //     one member relative to a sibling page cannot see it either, because the
 //     regression lands on both pages. Every value here is pinned against a
 //     measured constant, never against another page.
-//   - ACROSS PAGES. Each of the seven pages loads its own stylesheet, and any of
+//   - ACROSS PAGES. Each shelled page loads its own stylesheet, and any of
 //     them can outrank a shell rule the way `public/index.css` deliberately does
 //     twice. Sampling two pages would leave the other five able to carry the same
 //     defect silently, so RH2 sweeps the whole head on every page.
@@ -160,7 +160,7 @@ export async function run(ctx) {
     return false;
   };
 
-  // One sweep of all seven pages; every check below reads from this map rather
+  // One sweep of all the shelled pages; every check below reads from this map rather
   // than navigating again.
   const heads = {};
   const unreachable = [];

@@ -39,6 +39,7 @@ test("the hand-coded public/ shells retired with the re-shell (#254): routes and
   for (const shell of [
     "public/explorer/index.html",
     "public/print-room/index.html",
+    "public/reading-room/index.html",
     "public/seed-of-the-day/index.html",
   ]) {
     assert.ok(!existsSync(resolve(REPO, shell)), `${shell} must not exist: its route renders through BaseLayout`);
@@ -56,7 +57,7 @@ test("the worker spawn is the static import-URL form Vite owns (#208, TS source 
     "worker-client must spawn via the static import-URL form",
   );
   assert.doesNotMatch(ts, /workerUrl/, "the parameterized spawn target retired with the twin arrangement");
-  // Both spawning pages call the bare form; the emitted worker URL is Vite's.
+  // Every spawning page calls the bare form; the emitted worker URL is Vite's.
   assert.match(read("src/site/explorer/app.ts"), /await initWorker\(\);/);
   const printRoom = read("src/site/print-room/app.ts");
   assert.match(printRoom, /await initWorker\(\);/);
@@ -103,13 +104,13 @@ test("one bundler: vite is the devDep, esbuild is gone (#208)", () => {
   assert.equal(pkg.dependencies.esbuild, undefined, "esbuild must not hide in dependencies either");
 });
 
-test("the cleaned set and gitignore cover the Print Room twin and the chunk dir (#208)", async () => {
+test("the cleaned set and gitignore cover the Print Room and Reading Room twins and the chunk dir (#208, #221)", async () => {
   const { GENERATED_SUBTREES } = await import("../../scripts/clean-public-generated.ts");
-  for (const sub of ["print-room/app.bundle.js", "explorer/chunks"]) {
+  for (const sub of ["print-room/app.bundle.js", "reading-room/app.bundle.js", "explorer/chunks"]) {
     assert.ok(GENERATED_SUBTREES.includes(sub), `GENERATED_SUBTREES must include ${sub}`);
   }
   const lines = read(".gitignore").split("\n");
-  for (const line of ["public/print-room/app.bundle.js", "public/explorer/chunks/"]) {
+  for (const line of ["public/print-room/app.bundle.js", "public/reading-room/app.bundle.js", "public/explorer/chunks/"]) {
     assert.ok(lines.includes(line), `.gitignore should carry the exact line ${line}`);
   }
 });
