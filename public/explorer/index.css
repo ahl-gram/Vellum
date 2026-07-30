@@ -14,8 +14,8 @@ header { margin-bottom: 1.4rem; }
 .controls { display: flex; flex-direction: column; gap: 0.8rem;
   margin: 1.2rem auto; max-width: 960px; }
 .control-row { display: flex; align-items: baseline; gap: 0.9rem; }
-.row-label { flex: 0 0 4.5rem; text-align: right; text-transform: uppercase;
-  letter-spacing: 0.14em; font-size: 0.68rem; color: #9a8868; }
+/* Voice from /house.css (.archivist-label, #324); only the row geometry here. */
+.row-label { flex: 0 0 4.5rem; text-align: right; }
 .row-fields { display: flex; flex-wrap: wrap; align-items: center;
   gap: 0.55rem 0.85rem; flex: 1; }
 .controls label { font-size: 0.85rem; letter-spacing: 0.05em; color: var(--ink-brown); }
@@ -33,9 +33,9 @@ header { margin-bottom: 1.4rem; }
    (navigation, not a press), styled to match the buttons' chrome. */
 .action-link { display: inline-flex; align-items: center; gap: 0.45rem; align-self: center;
   font-family: inherit; font-size: 0.95rem; letter-spacing: 0.04em; color: var(--ink-dark);
-  background: #f0e3bd; border: 1.5px solid var(--ink-dark); border-radius: 4px;
+  background: var(--control-gold); border: 1.5px solid var(--ink-dark); border-radius: 4px;
   padding: 0.4rem 0.75rem; text-decoration: none; }
-.action-link:hover { background: #f7edcd; color: var(--ink-dark); }
+.action-link:hover { background: var(--control-gold-lit); color: var(--ink-dark); }
 /* The hand-press glyph is stroked in the link's own ink (currentColor), so it tracks the
    text on hover and reads as drawn, not printed. */
 .order-glyph { width: 1.2em; height: 1.2em; flex: none; fill: none; stroke: currentColor;
@@ -47,21 +47,10 @@ header { margin-bottom: 1.4rem; }
   .control-row { flex-direction: column; align-items: stretch; gap: 0.35rem; }
   .row-label { flex: none; text-align: left; }
 }
-input[type="number"], select, button {
-  font-family: inherit; font-size: 0.95rem; color: var(--ink-dark);
-  background: #f8f1e0; border: 1.5px solid var(--ink-dark); border-radius: 4px;
-  padding: 0.4rem 0.6rem;
-}
+/* Control skin and .status voice from /house.css (#324; its hover keeps the
+   .place-hit exclusion the engine depends on). */
 input[type="number"] { width: 8.5rem; }
-button { cursor: pointer; }
-/* Exclude the invisible .place-hit overlay (its hover ring is an ::after, #128), the
-   same way motion.css excludes it from the universal lift; otherwise this cream would
-   paint an opaque box over each map glyph on hover. */
-button:not(.place-hit):hover { background: var(--parchment-bright); }
-button.primary { background: var(--ink-dark); color: #f2e8cf; letter-spacing: 0.08em; }
-button.primary:hover { background: #5d4831; }
-.status { text-align: center; font-style: italic; color: var(--ink-faded);
-  min-height: 1.4em; margin-bottom: 0.8rem; }
+.status { margin-bottom: 0.8rem; }
 /* #164 The Surveyor's Glass. #map-viewport is the layout + clipping box (it owns the
    centering #map used to); #map is the transform target the zoom-controller drives.
    transform-origin 0 0 makes the CSS scale pivot at the top-left, matching d3-zoom's
@@ -119,7 +108,7 @@ button.primary:hover { background: #5d4831; }
 @media (hover: none) and (pointer: coarse), (max-width: 560px) { .zoom-keys { display: none; } }
 #map { position: relative; transform-origin: 0 0; }
 #map svg { width: 100%; height: auto; display: block;
-  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.2); }
 
 /* #169 The redraft inset. A committed regional survey mounts INSIDE #map, positioned over the
    exact window it re-surveys, so it rides the live zoom transform with the chart and reads as
@@ -138,7 +127,7 @@ button.primary:hover { background: #5d4831; }
    auto) pin it to the computed box so no rounding gap opens at the window edge. */
 #map .region-inset svg {
   width: 100%; height: 100%;
-  border: 0; box-shadow: 0 2px 9px rgb(61 47 31 / 0.35);
+  border: 0; box-shadow: 0 2px 9px rgb(from var(--chart-ink) r g b / 0.35);
 }
 @media (prefers-reduced-motion: reduce) { .region-inset { transition-duration: 0ms; } }
 
@@ -149,8 +138,8 @@ button.primary:hover { background: #5d4831; }
    Reduced motion holds it steady. */
 .survey-pencil {
   position: absolute; pointer-events: none;
-  border: 2px dashed rgb(74 56 38 / 0.55);
-  background: rgb(74 56 38 / 0.04);
+  border: 2px dashed rgb(from var(--ink-dark) r g b / 0.55);
+  background: rgb(from var(--ink-dark) r g b / 0.04);
   animation: survey-pencil-breathe 1.2s ease-in-out infinite;
 }
 @keyframes survey-pencil-breathe {
@@ -212,7 +201,7 @@ button.primary:hover { background: #5d4831; }
   backface-visibility: hidden; transform: rotateY(180deg);
 }
 .sheet-back img { width: 100%; height: auto; display: block;
-  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.2); }
 
 /* #116 The Verso. The flip REUSES #131's .sheet / #sheet-inner perspective wrapper,
    but where #131's turn is transient (it lands back on the recto re-dressed), the
@@ -240,8 +229,8 @@ button.primary:hover { background: #5d4831; }
   position: absolute; inset: 0 0 auto 0;
   visibility: hidden;
   backface-visibility: hidden; transform: rotateY(180deg);
-  background: #e6dabd; color: var(--ink-dark);
-  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2);
+  background: var(--parchment-deep); color: var(--ink-dark);
+  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.2);
   overflow: hidden;
 }
 .sheet.flip3d #verso { visibility: visible; }
@@ -274,7 +263,7 @@ button.primary:hover { background: #5d4831; }
   font-size: clamp(0.6rem, 1.4vw, 0.92rem); color: var(--ink-brown);
   font-variant-numeric: tabular-nums; }
 .verso-survey { top: 17%; font-style: italic; line-height: 1.5;
-  font-size: clamp(0.62rem, 1.5vw, 1rem); color: #7a6746; }
+  font-size: clamp(0.62rem, 1.5vw, 1rem); color: var(--ink-brown); }
 .verso-stamp { position: absolute; right: 11%; bottom: 12%;
   width: clamp(90px, 17%, 190px); height: auto; opacity: 0.5;
   transform: rotate(-8deg); }
@@ -313,7 +302,7 @@ button.primary:hover { background: #5d4831; }
    dressing, in /living-chart.css. */
 .scrubber[hidden] { display: none; }
 .scrubber { max-width: 1100px; margin: 0.8rem auto 0;
-  background: #f3ead2; border: 1px solid var(--line-tan); border-radius: 6px;
+  background: var(--parchment-panel); border: 1px solid var(--line-tan); border-radius: 6px;
   padding: 0.8rem 1rem; transform-origin: top center; }
 /* #128: the panel unrolls open from its top edge when the instrument turns on. It has
    no positioning transform of its own, so the unfurl (self-perspective in the keyframe)
@@ -351,8 +340,8 @@ button.primary:hover { background: #5d4831; }
    writes upright in darker iron-gall under his own heading, years bold in the gutter;
    each hand's first line opens with an initial. */
 .chronicle-strip li.prologue { border-left: 3px solid var(--line-tan); padding-left: 0.7rem; }
-.chronicle-strip li.prologue .cr-text { font-style: italic; color: #7a5f38; }
-.chronicle-strip li.prologue .cr-year { font-weight: 400; font-style: italic; color: #99855f; }
+.chronicle-strip li.prologue .cr-text { font-style: italic; color: var(--ink-surveyor); }
+.chronicle-strip li.prologue .cr-year { font-weight: 400; font-style: italic; color: var(--ink-surveyor-faded); }
 /* The chronicler's heading li never dims: it is furniture, not an entry to reveal. */
 .chronicle-strip li.annals-head { display: block; opacity: 1;
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
@@ -363,7 +352,7 @@ button.primary:hover { background: #5d4831; }
 /* "day 105" runs wider than a bare year, so the shared column grew from 3rem (#312). */
 .chronicle-strip .cr-year { flex: 0 0 3.6rem; text-align: right;
   font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
-.chronicle-strip .cr-text { color: #3f3122; }
+.chronicle-strip .cr-text { color: var(--ink-annals); }
 .caption { text-align: center; font-style: italic; color: var(--ink-brown);
   padding-top: 0.6rem; }
 footer { margin-top: 3rem; }

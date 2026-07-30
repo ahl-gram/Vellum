@@ -135,13 +135,16 @@ test("atlasDocument: the deployed page joins the Case; the offline download fall
   assert.match(offline, /var\(--font-body,[^)]*serif/, "the download must fall back to the serif stack");
 });
 
-test("the gallery page css keeps the flourish role; the standalone shell is retired (#268)", async () => {
+test("the gallery page css defers the sub's voice to the house intro role (#324)", async () => {
   const dir = "out/test-fonts-gallery";
   await rm(dir, { recursive: true, force: true });
   try {
     await buildGallery(100, { count: 1, out: dir });
     const css = await readFile(join(dir, "index.css"), "utf8").catch(() => "");
-    assert.match(css, /var\(--font-flourish/, "the gallery sub line keeps the flourish role");
+    // The sub line is an intro since #324 (markup class="sub intro", pinned in
+    // house-style.test.ts), so its flourish voice arrives through /house.css;
+    // the generated css re-binding it would shadow a future re-ratification.
+    assert.ok(!/p\.sub[^{]*\{[^}]*font-family/.test(css), "the sub's voice belongs to /house.css, not the generated css");
     // Display and body roles now arrive through BaseLayout: /gallery/ is a
     // shelled route since #268 (covered by the layout binding test above and
     // the scaffold suite), so the standalone document with its own fonts

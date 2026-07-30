@@ -95,6 +95,7 @@ const cardDescription = ogDescription ?? description;
 <meta name="twitter:image:alt" content={ogImageAlt}>
 <link rel="stylesheet" href="/fonts.css">
 <link rel="stylesheet" href="/motion.css">
+<link rel="stylesheet" href="/house.css">
 {extraCss.map((href) => <link rel="stylesheet" href={href} />)}
 <link rel="stylesheet" href="index.css">
 <style is:global>
@@ -114,6 +115,25 @@ const cardDescription = ogDescription ?? description;
   --parchment-bright: #fff7e4; /* the lit cream: hovers and the reveal */
   --parchment-deep: #e6d9b8;   /* the pressed tan: code chips */
   --line-faint: #cdbd97;       /* the softer hairline, a shade lighter than --line-tan */
+  /* The Specimen Book (#324, ratified 2026-07-30); the roster mirrors
+     src/atlas/palette.ts exactly (the shell-css deepEqual). */
+  --ink-annals: #3f3122;       /* the chronicler's iron-gall (journal entries, #312) */
+  --ink-surveyor: #7a5f38;     /* the surveyor's walnut italic (journal prologue, #312) */
+  --ink-surveyor-faded: #99855f; /* the surveyor's unbolded gutter days (#312) */
+  --control-cream: #f8f1e0;    /* the control idiom's cream fill */
+  --ink-press: #5d4831;        /* the dark primary pressed (hover) */
+  --control-gold: #f0e3bd;     /* the featured action-link's parchment gold (#133/#199) */
+  --control-gold-lit: #f7edcd; /* the gold, lit on hover */
+  --ink-tale: #54452f;         /* the tale/note ink: place-card tales, atlas notes */
+  --iron-red: #7a1f12;         /* the site's ink red (hunt star, statuses); was motion.css's */
+  /* The --chart-* quotations: values borrowed from render/style.ts, named so
+     the exception declares itself. house-style.test.ts pins each to the
+     render constant it quotes. --chart-ink is the retired lettering ink's
+     ONE sanctioned home on the site side (shell-css pins it to exactly this
+     declaration): shadows are cast in chart ink, consumed as
+     rgb(from var(--chart-ink) r g b / a). */
+  --chart-paper: #f2e8cf;      /* the antique chart's paper: primary lettering, cartouche ground */
+  --chart-ink: #3d2f1f;        /* the chart's lettering ink: every site shadow */
 }
 /* The shell dresses once (#263), part A: the rules every page shell shares.
    Per-page values stay in the page files: body padding and line-height, main

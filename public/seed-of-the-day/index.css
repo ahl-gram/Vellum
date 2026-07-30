@@ -9,14 +9,14 @@ body {
 .hunt h2, figcaption {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
-.survey, .status {
+.survey {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
 main { max-width: 1080px; }
 header { margin-bottom: 1.4rem; }
-.dateline { text-align: center; letter-spacing: 0.18em; font-size: 0.82rem;
-  text-transform: uppercase; color: var(--ink-faded); margin: 0.4rem 0 1.4rem; }
-.status { text-align: center; font-style: italic; color: var(--ink-brown); min-height: 1.4rem; }
+/* Dateline voice from /house.css (.archivist-head) and .status voice from its
+   status role (#324); placement stays here. */
+.dateline { text-align: center; margin: 0.4rem 0 1.4rem; }
 figure { margin: 0; }
 /* #167 The Surveyor's Glass, Sub 6: geometric pan/zoom on today's chart. #map-viewport
    is the clip/gesture box the shared controller binds to; #map is the transform target.
@@ -33,7 +33,8 @@ figure { margin: 0; }
    stay pixel-aligned with their marks. */
 #map { position: relative; transform-origin: 0 0; }
 #map svg { width: 100%; height: auto; display: block;
-  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+  border: 1px solid var(--line-tan);
+  box-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.2); }
 #map:not(.solved) svg { cursor: crosshair; }
 /* The win star rests still; on a LIVE solve src/site/seed-of-the-day/app.ts adds .stamp and
    it stamps in. On a solved-day reload the star is placed WITHOUT .stamp, so it sits
@@ -42,7 +43,7 @@ figure { margin: 0; }
    rotate onto it; collapses under the shared prefers-reduced-motion rule in /motion.css. */
 .hunt-star { position: absolute; --pos: translate(-50%, -50%); transform: var(--pos);
   color: var(--iron-red); font-size: 1.7rem; line-height: 1; pointer-events: none;
-  text-shadow: 0 0 4px var(--parchment-bright), 0 1px 2px rgb(61 47 31 / 0.5); }
+  text-shadow: 0 0 4px var(--parchment-bright), 0 1px 2px rgb(from var(--chart-ink) r g b / 0.5); }
 .hunt-star.stamp { animation: huntStarIn var(--paper-settle) var(--ease-paper) both; }
 @keyframes huntStarIn {
   from { opacity: 0; transform: var(--pos) scale(0.2) rotate(-40deg); }
@@ -136,10 +137,8 @@ figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
 .survey { text-align: center; font-style: italic; color: var(--ink-brown); margin: 0.3rem 0 0; }
 .blurb { max-width: 44rem; margin: 1.2rem auto 0; }
 .actions { text-align: center; margin-top: 1.6rem; }
-.actions a { display: inline-block; border: 1.5px solid var(--ink-dark); border-radius: 4px;
-  padding: 0.5rem 1rem; background: var(--parchment-panel); text-decoration: none; color: inherit;
-  letter-spacing: 0.04em; }
-.actions a:hover { background: var(--parchment-bright); }
+/* The actions wear a.control from /house.css (#324); the old parchment-panel
+   near-miss of the idiom is retired. */
 /* #88: keep the map and the hunt visible together. On wide screens they sit
    side by side, so the warmer/colder line lives in the right column, always in
    view; the panel is sticky so it trails a taller map as you scroll. On narrow
@@ -158,30 +157,27 @@ figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
     display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
     background: var(--ink-dark); color: var(--parchment-panel); text-align: center;
     padding: 0.7rem 1rem; font-weight: 700; letter-spacing: 0.03em;
-    box-shadow: 0 -4px 16px rgb(61 47 31 / 0.32);
+    box-shadow: 0 -4px 16px rgb(from var(--chart-ink) r g b / 0.32);
   }
 }
 .hunt { max-width: 44rem; margin: 2rem auto 0; padding: 1.4rem 1.6rem;
   border: 1px solid var(--line-tan); border-radius: 6px; background: var(--parchment-panel); }
 .hunt h2 { text-align: center; font-size: 1.2rem; letter-spacing: 0.06em;
   margin: 0 0 0.4rem; }
-.hunt-intro { text-align: center; font-size: 0.92rem; color: var(--ink-brown);
-  margin: 0 0 1rem; }
+/* An intro (voice from /house.css); its panel size stays local. */
+.hunt-intro { font-size: 0.92rem; margin: 0 0 1rem; }
 .clues { margin: 0 auto; padding-left: 1.4rem; max-width: 36rem;
   font-style: italic; color: var(--ink-dark); }
 .clues li { margin: 0.3rem 0; }
 .hunt-status { text-align: center; min-height: 1.4rem; font-weight: 700;
   letter-spacing: 0.03em; color: var(--iron-red); margin: 1rem 0 0; }
 .reveal { margin-top: 1rem; padding: 1rem 1.2rem; border-radius: 4px;
-  background: var(--parchment-bright); border: 1px solid #d8c79c; }
+  background: var(--parchment-bright); border: 1px solid var(--line-faint); }
 .reveal strong { display: block; font-size: 1.1rem; margin-bottom: 0.4rem; }
 .reveal p { margin: 0; font-style: italic; color: var(--ink-dark); }
 .hunt-actions { text-align: center; margin-top: 1.2rem; display: flex;
   gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap; }
-#share, #dispatch { border: 1.5px solid var(--ink-dark); border-radius: 4px; padding: 0.5rem 1rem;
-  background: var(--parchment-panel); color: inherit; letter-spacing: 0.04em; cursor: pointer;
-  font: inherit; }
-#share:hover, #dispatch:hover { background: var(--parchment-bright); }
+/* #share and #dispatch are plain buttons: the house idiom dresses them. */
 .streak { font-size: 0.9rem; color: var(--ink-brown); }
 .note { text-align: center; color: var(--ink-faded); font-size: 0.85rem; margin-top: 1rem; }
 footer { margin-top: 4rem; }

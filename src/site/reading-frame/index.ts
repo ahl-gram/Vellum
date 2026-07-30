@@ -51,7 +51,7 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   // The polite status line: the engine posts the voyage's one completion summary here
   // and otherwise keeps it "", which is the settle signal a host's draw depends on.
   const status = document.createElement("p");
-  status.className = "rf-status";
+  status.className = "rf-status status";
   status.setAttribute("role", "status");
   status.setAttribute("aria-live", "polite");
 

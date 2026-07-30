@@ -10,26 +10,11 @@ main { max-width: 1100px; }
 header { margin-bottom: 2rem; }
 footer { margin-top: 3.5rem; }
 
-.intro {
-  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  font-style: italic; color: var(--ink-brown);
-  max-width: 46rem; margin: 0 auto 1.6rem; text-align: center;
-}
+/* Voice from /house.css (.intro, .warning, the control idiom); this file owes
+   the room only its widths and margins (#324). */
+.intro { max-width: 46rem; margin: 0 auto 1.6rem; }
 
-.warning {
-  font-style: italic; color: var(--ink-brown); text-align: center;
-  border: 1px solid var(--line-tan); background: var(--parchment-panel);
-  border-radius: 6px; padding: 0.5rem 1rem; max-width: 46rem; margin: 0 auto 1.2rem;
-}
-
-/* The instrument's one control wears the atelier dress (the Print Room's counter
-   idiom); .place-hit stays out, it is the engine's invisible hit target. */
-button:not(.place-hit) {
-  font-family: inherit; font-size: 0.95rem; color: var(--ink-dark);
-  background: #f8f1e0; border: 1.5px solid var(--ink-dark); border-radius: 4px;
-  padding: 0.4rem 0.6rem; cursor: pointer;
-}
-button:not(.place-hit):hover { background: var(--parchment-bright); }
+.warning { max-width: 46rem; margin: 0 auto 1.2rem; }
 
 /* #127 The Drafting Moment, reused: the chart settles onto the desk while its
    coastline draws itself in ink. startArrival (src/site/explorer/draw-ceremony.ts)

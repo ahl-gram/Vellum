@@ -20,12 +20,13 @@
    same object in every room. */
 .rf-chart { position: relative; }
 .rf-chart svg { display: block; width: 100%; height: auto;
-  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+  border: 1px solid var(--line-tan);
+  box-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.2); }
 
-/* The one polite line. It reserves its height so the column never jumps when the
-   voyage posts its completion summary and clears it again. */
-.rf-status { min-height: 1.4em; margin: 0.6rem 0 0; text-align: center;
-  font-style: italic; color: var(--ink-brown); }
+/* The one polite line: voice from /house.css's .status role (#324; the frame's
+   host JS marks the element class="rf-status status"). It reserves its height
+   so the column never jumps when the voyage posts its summary and clears it. */
+.rf-status { margin: 0.6rem 0 0; }
 
 /* --------------------------------------------------------------------------
    The reading column: the instrument, then the log, one continuous story.
@@ -90,8 +91,8 @@
    italic surveyor behind a margin rule, iron-gall chronicler under his own heading,
    an initial on each hand's first line. */
 .rf-log-strip li.prologue { border-left: 3px solid var(--line-tan); padding-left: 0.7rem; }
-.rf-log-strip li.prologue .cr-text { font-style: italic; color: #7a5f38; }
-.rf-log-strip li.prologue .cr-year { font-weight: 400; font-style: italic; color: #99855f; }
+.rf-log-strip li.prologue .cr-text { font-style: italic; color: var(--ink-surveyor); }
+.rf-log-strip li.prologue .cr-year { font-weight: 400; font-style: italic; color: var(--ink-surveyor-faded); }
 /* The chronicler's heading li never dims: it is furniture, not an entry to reveal. */
 .rf-log-strip li.annals-head { display: block; opacity: 1;
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
@@ -104,4 +105,4 @@
    bare year, so the column grew from 3rem at #312). */
 .rf-log-strip .cr-year { flex: 0 0 3.6rem; text-align: right;
   font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
-.rf-log-strip .cr-text { color: #3f3122; }
+.rf-log-strip .cr-text { color: var(--ink-annals); }

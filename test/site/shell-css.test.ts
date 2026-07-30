@@ -34,11 +34,18 @@ const PAGE_CSS = [
 // to the same palette discipline, so they join every guard below.
 const SHARED_CSS = ["public/reading-frame.css", "public/living-chart.css"] as const;
 
+// The root house sheet (#324): linked by BaseLayout on EVERY page beside
+// fonts.css and motion.css, so it answers to the palette discipline like a
+// page sheet. Its role specs are pinned in test/site/house-style.test.ts.
+const ROOT_CSS = ["public/house.css"] as const;
+
 /** Every hand-authored stylesheet the palette rules apply to. */
-const AUTHORED_CSS = [...PAGE_CSS, ...SHARED_CSS] as const;
+const AUTHORED_CSS = [...PAGE_CSS, ...SHARED_CSS, ...ROOT_CSS] as const;
 
 // The token set: the four ratified by #263, extended by the PR #269 review
-// call (item 4: the near-miss inks merged into --ink-dark and retired).
+// call (item 4: the near-miss inks merged into --ink-dark and retired), and
+// by the Specimen Book (#324, ratified 2026-07-30: the journal hands, the
+// control idiom, the moved iron-red, and the --chart-* quotations).
 const TOKENS: Record<string, string> = {
   "--ink-dark": "#4a3826",
   "--ink-brown": "#6b5a40",
@@ -49,12 +56,24 @@ const TOKENS: Record<string, string> = {
   "--parchment-bright": "#fff7e4",
   "--parchment-deep": "#e6d9b8",
   "--line-faint": "#cdbd97",
+  "--ink-annals": "#3f3122",
+  "--ink-surveyor": "#7a5f38",
+  "--ink-surveyor-faded": "#99855f",
+  "--control-cream": "#f8f1e0",
+  "--ink-press": "#5d4831",
+  "--control-gold": "#f0e3bd",
+  "--control-gold-lit": "#f7edcd",
+  "--ink-tale": "#54452f",
+  "--iron-red": "#7a1f12",
+  "--chart-paper": "#f2e8cf",
+  "--chart-ink": "#3d2f1f",
 };
 
 // Retired inks (PR #269 review, item 4): the old body-text and voyage-track
-// near-misses merged into --ink-dark. They must never reappear in authored
-// css. (Their rgb() shadow forms carry alpha and are a different thing; the
-// chart renderer's label ink is the byte-identity domain and keeps its own.)
+// near-misses merged into --ink-dark. They must never appear RAW in authored
+// css. #3d2f1f gained ONE sanctioned home at #324: the layout's --chart-ink
+// declaration (the shadow ink is the chart's lettering ink, quoted by name);
+// everywhere else it stays banned, and #5a4326 is banned outright.
 const RETIRED_INKS = ["#3d2f1f", "#5a4326"] as const;
 
 const layoutStyle = () => {
@@ -92,12 +111,21 @@ test("no tokenized hex survives raw: pages consume the vars, the layout declares
 });
 
 test("the retired near-miss inks never reappear (#269 review, item 4)", () => {
-  for (const source of [...AUTHORED_CSS, "src/layouts/BaseLayout.astro"]) {
+  for (const source of AUTHORED_CSS) {
     const text = read(source).toLowerCase();
     for (const hex of RETIRED_INKS) {
       assert.ok(!text.includes(hex), `${source} carries retired ink ${hex}; use var(--ink-dark)`);
     }
   }
+  // The layout: #5a4326 stays banned outright; #3d2f1f may appear EXACTLY once,
+  // as the --chart-ink token declaration (#324), never as a bare value.
+  const layout = read("src/layouts/BaseLayout.astro").toLowerCase();
+  assert.ok(!layout.includes("#5a4326"), "the layout carries retired ink #5a4326");
+  assert.equal(
+    layout.split("#3d2f1f").length - 1, 1,
+    "the layout should carry #3d2f1f exactly once, as the --chart-ink declaration",
+  );
+  assert.match(layout, /--chart-ink:\s*#3d2f1f/, "#3d2f1f's one home is the --chart-ink token");
 });
 
 test("the composers dress from the same palette (#269 review follow-up)", async () => {

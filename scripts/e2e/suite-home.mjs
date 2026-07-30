@@ -40,9 +40,21 @@ export async function run(ctx) {
   })()`) : null;
   const flourishesShown = (fl, min) =>
     !!fl && fl.length === 4 && fl.every(([w, h]) => w > min && Math.abs(w - fl[0][0]) < 0.01 && Math.abs(h - w) < 0.01);
+  // The paper compares NUMERICALLY: since #324 the fill is written
+  // rgb(from var(--chart-paper) r g b / 0.94), which Chromium serializes as
+  // color(srgb ...) rather than rgba(...); the channels, not the spelling,
+  // are the chart-exactness under test.
+  const chartPaper = (bg) => {
+    if (!bg) return false;
+    let m = bg.match(/^rgba\((\d+), (\d+), (\d+), ([0-9.]+)\)$/);
+    if (m) return +m[1] === 242 && +m[2] === 232 && +m[3] === 207 && Math.abs(+m[4] - 0.94) < 0.005;
+    m = bg.match(/^color\(srgb ([0-9.]+) ([0-9.]+) ([0-9.]+) \/ ([0-9.]+)\)$/);
+    return !!m && Math.round(m[1] * 255) === 242 && Math.round(m[2] * 255) === 232
+      && Math.round(m[3] * 255) === 207 && Math.abs(+m[4] - 0.94) < 0.005;
+  };
   check(
     "H1 the cartouche frame holds the chart's geometry (border 2.2k, chart paper, four visible equal flourishes)",
-    !!frame && Math.abs(parseFloat(frame.border) - 3.3) < 0.35 && frame.bg === "rgba(242, 232, 207, 0.94)" && flourishesShown(frame.flourishes, 15),
+    !!frame && Math.abs(parseFloat(frame.border) - 3.3) < 0.35 && chartPaper(frame.bg) && flourishesShown(frame.flourishes, 15),
     JSON.stringify(frame),
   );
 

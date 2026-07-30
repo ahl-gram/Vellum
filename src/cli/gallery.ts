@@ -64,8 +64,8 @@ export function cardFigureHtml(card: GalleryCard): string {
 export const GALLERY_PAGE_CSS = `body { padding: 2rem 1.5rem 4rem; }
 main { max-width: 1500px; }
 header { margin-bottom: 2rem; }
-p.sub { text-align: center; font-style: italic; color: var(--ink-brown); margin-bottom: 2.5rem;
-  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); }
+/* The sub is an intro: voice from /house.css (#324); only spacing here. */
+p.sub { margin-bottom: 2.5rem; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 1.5rem; }
 figure { margin: 0; }
 /* The contact-sheet tiles tip like loose plates in a drawer: picked up from a
@@ -73,13 +73,13 @@ figure { margin: 0; }
    centred lift. Timing/easing come from /motion.css; the reduced-motion collapse
    there snaps this to its end state (no animated tip). */
 figure img { width: 100%; height: auto; display: block; border: 1px solid var(--line-tan);
-  box-shadow: 0 6px 18px rgb(61 47 31 / 0.15); transform-origin: bottom left;
+  box-shadow: 0 6px 18px rgb(from var(--chart-ink) r g b / 0.15); transform-origin: bottom left;
   transition: transform var(--paper) var(--ease-paper),
               box-shadow var(--paper) var(--ease-paper); }
 figure img:hover { transform: translateY(-4px) rotate(-1.4deg);
-  box-shadow: 0 16px 34px rgb(61 47 31 / 0.26); }
+  box-shadow: 0 16px 34px rgb(from var(--chart-ink) r g b / 0.26); }
 figure img:active { transform: translateY(-1px) rotate(0deg);
-  box-shadow: 0 5px 14px rgb(61 47 31 / 0.16); }
+  box-shadow: 0 5px 14px rgb(from var(--chart-ink) r g b / 0.16); }
 figcaption { text-align: center; padding-top: 0.5rem; line-height: 1.45; }
 figcaption span { font-size: 0.8rem; color: var(--ink-faded); letter-spacing: 0.08em; }
 .grid a { color: inherit; text-decoration: none; }
