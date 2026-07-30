@@ -14,7 +14,7 @@ import { startArrival } from "../explorer/draw-ceremony.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 // #134 poster plates. Same-dir module (resolves against this module's URL, /print-room/),
 // unlike the root-absolute worker spawn above. Pure clamp + presets; unit-tested in Node.
-import { POSTER_PRESETS, clampPosterWidth, posterFilename, posterPngFilename, type PosterPreset } from "./poster-presets.ts";
+import { POSTER_PRESETS, CHART_PRESET, clampPosterWidth, posterFilename, posterPngFilename, chartFilename, type PosterPreset } from "./poster-presets.ts";
 // #135 the rasterizer: the site's first shared cross-page client library
 // (src/site/lib/, bundled into each consumer since #260).
 // SVG string in, PNG blob out, fitted under a canvas pixel budget; the pure decision core
@@ -69,7 +69,9 @@ const warning = $("pr-warning");
 const posterStatus = $("pr-poster-status");
 const plateButtons = [...document.querySelectorAll<HTMLButtonElement>("[data-poster]")];
 const formatSel = $<HTMLSelectElement>("pr-format"); // the "Pressed as" select (#135); greyed out during a draw (#212)
-const presetByKey = new Map(POSTER_PRESETS.map((p): [string, PosterPreset] => [p.key, p]));
+// The chart plate (#217) rides the same order path as the posters; its divergences
+// (SVG-only, unclamped width, Explorer-parity filename) branch inside orderPoster.
+const presetByKey = new Map([...POSTER_PRESETS, CHART_PRESET].map((p): [string, PosterPreset] => [p.key, p]));
 
 // Recipe params with no visible control in Sub 1: they ride along from a deep-link's
 // hash (type/band/theme/legend/arms/land/coast) so an Explorer world reproduces
@@ -242,6 +244,13 @@ $("pr-draw").addEventListener("click", draw);
 seedInput.addEventListener("keydown", (e) => { if (e.key === "Enter") draw(); });
 styleSel.addEventListener("change", draw);
 $("pr-random").addEventListener("click", () => { seedInput.value = String(randomSeed()); draw(); });
+// #217: a pulled plate's status line names the format it was pressed as, so a fresh
+// Pressed-as choice makes it stale; dismiss it. An in-flight order keeps its line: the
+// press message belongs to the format snapshotted at click, and its completion rewrites
+// the line either way.
+formatSel.addEventListener("change", () => {
+  if (!ordering) posterStatus.textContent = "";
+});
 
 // #134 Order a poster plate. The press pulls the CURRENT proof's world at a preset width
 // through the SHARED worker, and the wide SVG goes STRAIGHT to a Blob download: it is
@@ -277,8 +286,13 @@ function orderPoster(key: string): void {
   // a style change could redraw and mutate posterBasis mid-flight. Bind the world NOW,
   // the same synchronous snapshot the bound-atlas bind makes before its own runJob.
   const basis = posterBasis;
-  const format = selectedFormat(); // snapshot alongside the basis; a later click can change it
-  const width = clampPosterWidth(preset.width);
+  // #217: the chart is pulled only as the engraving. The plates are instant-order
+  // buttons, so "SVG-only" means the chart IGNORES the format select rather than pinning
+  // it; the status line teaches the split on every pull. Its width skips clampPosterWidth
+  // (the poster floor is 2400 and would silently raise 1500).
+  const isChart = preset.key === CHART_PRESET.key;
+  const format = isChart ? "svg" : selectedFormat(); // snapshot alongside the basis; a later click can change it
+  const width = isChart ? CHART_PRESET.width : clampPosterWidth(preset.width);
   const myGen = ++posterGen;
   ordering = true;
   refreshOrderControls();
@@ -292,11 +306,18 @@ function orderPoster(key: string): void {
     .then(async (res) => {
       if (myGen !== posterGen) return; // superseded by a newer order
       if (format === "svg") {
-        const filename = posterFilename(basis.seed, basis.style, width);
+        // The chart reuses the Explorer's exact artifact name (byte-parity is by
+        // construction: same worker, same draw kind, same widthPx 1500), the posters
+        // keep their width-stamped names.
+        const filename = isChart
+          ? chartFilename(basis.seed, basis.style, res.title)
+          : posterFilename(basis.seed, basis.style, width);
         downloadSvg(res.svg, filename);
         // e2e observation point: the poster the press pulled, which never touches the DOM.
         window.__vellumLastPoster = { svg: res.svg, filename, width, seed: basis.seed, style: basis.style };
-        posterStatus.textContent = `${preset.label} plate pulled: ${filename}`;
+        posterStatus.textContent = isChart
+          ? `The chart is pulled as the engraving: ${filename}`
+          : `${preset.label} plate pulled: ${filename}`;
         return;
       }
       // PNG: rasterize the wide SVG client-side. It still never enters the DOM
