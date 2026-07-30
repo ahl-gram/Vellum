@@ -27,10 +27,10 @@ export const POSTER_PRESETS: PosterPreset[] = [
 // directly), and the chart is pulled only as the engraving (SVG), never rasterized.
 export const CHART_PRESET: PosterPreset = { key: "chart", label: "Chart", width: 1500 };
 
-// The chart's artifact name mirrors the Explorer's Download SVG byte-for-byte (the
-// downloadBtn handler in src/site/explorer/controls.ts), so when #217 Part 2 retires
-// that button the take-home survives name-for-name as well as byte-for-byte. Keep the
-// slug regex identical to the Explorer's until Part 2 deletes it.
+// The chart's artifact name is the one the Explorer's Download SVG used until #217
+// Part 2 retired that button (PR #322 shipped this plate first), so the take-home
+// survived name-for-name as well as byte-for-byte. The slug regex is the retired
+// handler's, verbatim; the pinned filenames in the unit test are the contract now.
 export function chartFilename(seed: number, style: string, title: string): string {
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   return `vellum-${seed}-${style}-${slug}.svg`;

@@ -1,7 +1,7 @@
 // The Explorer's control-row wiring, extracted from app.ts at #191: every listener
-// that just funnels a control into draw() (or Download). The conductor keeps the
-// handlers that arbitrate CEREMONIES (the chronicle/voyage mode toggles, the verso
-// flip); this module keeps the plumbing. The `touched` gates are shared BY REFERENCE
+// that just funnels a control into draw(). The conductor keeps the handlers that
+// arbitrate CEREMONIES (the chronicle/voyage mode toggles, the verso flip); this
+// module keeps the plumbing. The `touched` gates are shared BY REFERENCE
 // with the conductor: handlers here set them, draw()/syncHash read them.
 import { updateLandReadout } from "./sea-level.ts";
 import { updateCoastReadout } from "./coast-warp.ts";
@@ -25,16 +25,12 @@ interface ControlsDeps {
   coastSlider: HTMLInputElement;
   drawBtn: HTMLElement;
   randomBtn: HTMLElement;
-  downloadBtn: HTMLElement;
   scrubPlayBtn: HTMLElement;
   scrubRangeEl: HTMLElement;
   touched: TouchedGates;
   draw: (opts?: { quiet?: boolean; turn?: boolean }) => void;
   /** #192: the conductor's one hash writer; the scrubber's release syncs the year key. */
   syncHash: () => void;
-  /** #169: Download saves what you see; a committed region sheet wins over the world chart. */
-  committedRegion: () => { svg: string; title: string; band: number } | null;
-  lastChart: () => { svg: string; title: string };
   /** The engine's instrument controls (#54, fused at #220): Play/Pause and the bar. */
   togglePlay: () => void;
   onManualScrub: () => void;
@@ -63,24 +59,6 @@ export function wireControls(deps: ControlsDeps): void {
     touched.land = false;
     touched.coast = false; // #137: a fresh world starts from its natural coastline
     draw();
-  });
-  deps.downloadBtn.addEventListener("click", () => {
-    // #169 "Download saves what you see": while a region sheet is committed, save THAT
-    // stamped sheet (its filename gains the band); at the world sheet, save the world
-    // chart as before.
-    const region = deps.committedRegion();
-    const last = deps.lastChart();
-    const svg = region ? region.svg : last.svg;
-    if (!svg) return;
-    const blob = new Blob([svg], { type: "image/svg+xml" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    const slug = (region ? region.title : last.title).toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    a.download = region
-      ? `vellum-${seedInput.value}-${styleSel.value}-band${region.band}-${slug}.svg`
-      : `vellum-${seedInput.value}-${styleSel.value}-${slug}.svg`;
-    a.click();
-    URL.revokeObjectURL(a.href);
   });
   seedInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {

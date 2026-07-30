@@ -72,10 +72,10 @@ test("the chart plate is its own preset at the covenant width, outside the poste
   assert.equal(clampPosterWidth(CHART_PRESET.width), 2400);
 });
 
-// #217: the chart pull reuses the Explorer's exact artifact name (the downloadBtn handler
-// in src/site/explorer/controls.ts: title lowercased, non-alphanumeric runs collapsed to
-// dashes), so when Part 2 retires that button the artifact survives name-for-name. The
-// warts are part of the parity: an apostrophe becomes a dash run like any punctuation.
+// #217: the chart pull took over the retired Explorer Download SVG's exact artifact
+// name (title lowercased, non-alphanumeric runs collapsed to dashes), so the take-home
+// survived Part 2 name-for-name. These pins ARE the naming contract now; the warts are
+// part of it (an apostrophe becomes a dash run like any punctuation).
 test("chartFilename mirrors the Explorer's download name, title slug included", () => {
   assert.equal(chartFilename(42, "antique", "The Isle of Rahai"), "vellum-42-antique-the-isle-of-rahai.svg");
   assert.equal(chartFilename(100, "nautical", "The Great Woaku"), "vellum-100-nautical-the-great-woaku.svg");

@@ -91,8 +91,9 @@ export function createLodController(deps: Deps) {
   // the SAME base world (cache hit) and to rebuild the world overlay when the inset drops.
   let world: WorldContext | null = null; // { seed, overrides, render, manifest } | null
 
-  // The committed inset (for the Download-saves-what-you-see policy and the DOM teardown),
-  // or null at the bare world sheet.
+  // The committed inset (for the DOM teardown and the e2e's lodState), or null at the
+  // bare world sheet. (It also fed the Explorer's Download SVG until #217 Part 2
+  // retired that button; the Print Room's Chart plate is the take-home now.)
   let inset: { el: HTMLDivElement; svg: string; band: number; window: UvWindow; title: string } | null = null; // { el, svg, band, window, title } | null
 
   // The drafting indicator: a dashed outline over the window being surveyed, up between
@@ -364,11 +365,6 @@ export function createLodController(deps: Deps) {
       currentBand = 0;
       currentWindow = FULL_WINDOW;
       inset = null;
-    },
-
-    /** The committed region sheet for the Download policy, or null at the world sheet. */
-    committedRegion() {
-      return inset ? { svg: inset.svg, band: inset.band, title: inset.title } : null;
     },
 
     /** Observable state for the e2e (band, window, title, redraft count). */

@@ -508,15 +508,17 @@ export async function run(ctx) {
   );
 
   // Z20: a zoom-out past the band-0 threshold drops the inset over the world chart that was
-  // under it -- no worker round-trip -- and Download follows "saves what you see" in both
-  // states (AC4). While a region is committed the download keys on that sheet + its band; after
-  // the revert no inset remains, the world sheet is (still) mounted, and the overlay is the
-  // world's. The camera lands where the zoom-out put it, un-snapped.
+  // under it -- no worker round-trip. While a region is committed the LOD state carries that
+  // sheet + its band + its derived title; after the revert no inset remains, the world sheet
+  // is (still) mounted, and the overlay is the world's. The camera lands where the zoom-out
+  // put it, un-snapped. (This was #169 AC4's "Download saves what you see" until #217 Part 2
+  // retired the Explorer's Download button; the committed-sheet state it keyed on IS the LOD
+  // contract, so the assertions stand unchanged under the new framing.)
   await goHome();
   const before20 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const reg20 = await waitRedraft(before20);
-  const dlRegion = reg20.committed === true && reg20.band === 1 && /^The Environs of .+/.test(reg20.title || "");
+  const regionCommitted = reg20.committed === true && reg20.band === 1 && /^The Environs of .+/.test(reg20.title || "");
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`); // under the 0/1 down-cross
   let world20 = reg20;
   for (let i = 0; i < 100; i++) { world20 = await rgn(); if (world20.band === 0) break; await sleep(40); }
@@ -524,10 +526,10 @@ export async function run(ctx) {
   for (let i = 0; i < 50; i++) { gone20 = await evaluate(`document.querySelectorAll("#map .region-inset").length`); if (gone20 === 0) break; await sleep(40); }
   const worldView = await insetView();
   check(
-    "Z20 a zoom-out drops the inset over the always-present world sheet; Download saves-what-you-see in both states (AC4)",
-    dlRegion && world20.band === 0 && world20.committed === false && gone20 === 0 &&
+    "Z20 a zoom-out drops the inset over the always-present world sheet (committed state reverts, camera un-snapped)",
+    regionCommitted && world20.band === 0 && world20.committed === false && gone20 === 0 &&
       worldView.worldMounted && worldView.hits > 0 && worldView.zk === 1,
-    `committedRegion=${dlRegion} -> band=${world20.band} committed=${world20.committed} insets=${gone20} world=${worldView.worldMounted} hits=${worldView.hits} k=${worldView.zk}`,
+    `committedRegion=${regionCommitted} -> band=${world20.band} committed=${world20.committed} insets=${gone20} world=${worldView.worldMounted} hits=${worldView.hits} k=${worldView.zk}`,
   );
 
   // Z20b: reduced motion redrafts INSTANTLY (AC4) -- the commit lands with the inset already

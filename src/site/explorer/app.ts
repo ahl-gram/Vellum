@@ -291,16 +291,15 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
     });
 }
 
-// The plain control plumbing (Draw/random/Download, seed Enter, selects, sliders, the
+// The plain control plumbing (Draw/random, seed Enter, selects, sliders, the
 // scrubber's Play + range, the doc-level card dismiss) lives in controls.ts; this
-// conductor keeps the handlers that arbitrate ceremonies below.
+// conductor keeps the handlers that arbitrate ceremonies below. (The Download SVG
+// button retired at #217 Part 2; the Print Room's Chart plate is the take-home.)
 wireControls({
   seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider,
-  drawBtn: $("draw"), randomBtn: $("random"), downloadBtn: $("download"),
+  drawBtn: $("draw"), randomBtn: $("random"),
   scrubPlayBtn: $("scrub-play"), scrubRangeEl: $("scrub-range"),
   touched, draw, syncHash,
-  committedRegion: () => glass.committedRegion(),
-  lastChart: () => ({ svg: lastSvg, title: lastTitle }),
   togglePlay: lc.togglePlay, onManualScrub: lc.onManualScrub,
   agesDragStart: lc.agesDragStart, agesDragEnd: lc.agesDragEnd,
   onDocKeydown: lc.onDocKeydown, onDocClick: lc.onDocClick,

@@ -198,7 +198,6 @@ export function createGlass(deps: GlassDeps) {
     cancelRedraft: () => lodController.cancel(),
     setWorld: (ctx: Parameters<typeof lodController.setWorld>[0]) => lodController.setWorld(ctx),
     homeToWorld: () => lodController.homeToWorld(),
-    committedRegion: () => lodController.committedRegion(),
     lodState: () => lodController.state(),
   };
 }
