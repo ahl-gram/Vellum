@@ -16,8 +16,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     <p class="hook">Give Vellum a number.<br>It gives you back a world.</p>
     <div class="divider" aria-hidden="true"><svg viewBox="0 0 7.2 7.2"><path d="M3.6 0L7.2 3.6L3.6 7.2L0 3.6Z"/></svg></div>
     <form id="seed-form" class="seedrow" action="explorer/" method="get">
-      <input id="seed-input" name="seed" inputmode="numeric" pattern="[0-9]*" title="digits only" value="42" aria-label="Seed">
-      <button type="submit">Draw it</button>
+      <input id="seed-input" class="control" name="seed" inputmode="numeric" pattern="[0-9]*" title="digits only" value="42" aria-label="Seed">
+      <button type="submit" class="primary">Draw it</button>
     </form>
     <p class="cartouche-seedline">Every chart is reproducible from the number in its margin</p>
   </div>

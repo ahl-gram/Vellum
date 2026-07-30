@@ -11,36 +11,24 @@ main { max-width: 1000px; }
 header { margin-bottom: 1.2rem; }
 .intro { max-width: 640px; margin: 1.4rem auto; text-align: center; }
 
-/* The counter: a single quiet row of controls, like the survey office's order desk. */
+/* The counter: a single quiet row of controls, like the survey office's order
+   desk. Control skin, .warning, and .status voice from /house.css (#324). */
 .counter { display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
   gap: 0.55rem 0.85rem; margin: 1.4rem auto; }
 .counter label { font-size: 0.85rem; letter-spacing: 0.05em; color: var(--ink-brown); }
-input[type="number"], select, button {
-  font-family: inherit; font-size: 0.95rem; color: var(--ink-dark);
-  background: #f8f1e0; border: 1.5px solid var(--ink-dark); border-radius: 4px;
-  padding: 0.4rem 0.6rem;
-}
 input[type="number"] { width: 8.5rem; }
-button { cursor: pointer; }
-button:hover { background: var(--parchment-bright); }
-button.primary { background: var(--ink-dark); color: #f2e8cf; letter-spacing: 0.08em; }
-button.primary:hover { background: #5d4831; }
 
-/* The inline-fallback notice: a pinned-slip aside, not an alarm. */
-.warning { max-width: 640px; margin: 0 auto 0.4rem; text-align: center;
-  font-size: 0.85rem; font-style: italic; color: #7a5c2e;
-  background: var(--parchment-panel); border: 1px solid var(--line-faint); border-radius: 4px;
-  padding: 0.6rem 0.9rem; }
+.warning { max-width: 640px; margin: 0 auto 0.4rem; }
 .warning[hidden] { display: none; }
 
-.status { text-align: center; font-style: italic; color: var(--ink-faded);
-  min-height: 1.4em; margin-bottom: 0.8rem; }
+.status { margin-bottom: 0.8rem; }
 
 /* The proof: the pulled chart, centered under the counter. Mirrors the Explorer's
    #map svg frame (border + drop shadow) so a proof reads as the same sheet. */
 .preview { max-width: 1000px; margin-inline: auto; position: relative; }
 .preview svg { width: 100%; height: auto; display: block;
-  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+  border: 1px solid var(--line-tan);
+  box-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.2); }
 /* #127 The Drafting Moment, reused: a freshly pulled proof settles onto the desk while its
    coastline draws itself in ink (src/site/print-room/app.ts sets --draw-len + the dasharray
    on the coast path via startArrival, and clears them on animationend). DOM-only styling of
@@ -61,17 +49,18 @@ button.primary:hover { background: #5d4831; }
    single poster plate, one for the whole bound atlas. Everything below the desk is output
    (the proof, then the atlas once bound). The offerings stack on a narrow screen. */
 .order-desk { max-width: 860px; margin: 2rem auto 0; }
-.desk-head { text-align: center; font-size: 0.82rem; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--ink-brown); margin: 0 0 1.2rem; font-weight: 700; }
+/* The desk head and offering fields wear the archivist tiers from /house.css
+   (#324); this file keeps their placement. Outer hairlines are line-tan
+   (ratified: line-faint is for interior rules only). */
+.desk-head { text-align: center; margin: 0 0 1.2rem; }
 .offerings { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; align-items: stretch; }
-.offering { border: 1px solid var(--line-faint); border-radius: 6px; background: var(--parchment-panel);
+.offering { border: 1px solid var(--line-tan); border-radius: 6px; background: var(--parchment-panel);
   padding: 1.2rem 1.1rem; display: flex; flex-direction: column; text-align: center; }
 .offering-head { font-size: 1rem; letter-spacing: 0.06em; margin: 0 0 0.4rem; color: var(--ink-dark); }
 /* min-height aligns where the two cards' controls begin even when the intros wrap differently. */
 .offering-intro { font-size: 0.85rem; color: var(--ink-brown); margin: 0 0 1rem; min-height: 3.4em; }
 .offering-controls { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; }
-.offering-field { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink-faded); display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+.offering-field { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
 .offering-field select { min-width: 11rem; }
 .atlas-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
 /* Push the caveat + status to the card bottom so the two equal-height cards align. */
@@ -85,7 +74,7 @@ button.primary:hover { background: #5d4831; }
 .plate-dim { font-size: 0.72rem; font-style: italic; letter-spacing: 0.04em; color: var(--ink-faded); }
 .plate:hover:not(:disabled) { background: var(--parchment-bright); }
 .plate:disabled { cursor: default; opacity: 0.45; }
-.plate:disabled .plate-dim { color: #a1926f; }
+.plate:disabled .plate-dim { color: var(--ink-faded); }
 
 /* The bound sheet populates below the proof, wider than the desk. Empty until a bind; the
    shared .atlas-sheet rules (injected by src/site/print-room/bound-atlas.ts) style its

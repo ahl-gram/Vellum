@@ -12,7 +12,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
 <div class="controls">
   <div class="control-row" role="group" aria-labelledby="grp-map">
-    <span class="row-label" id="grp-map">Map</span>
+    <span class="row-label archivist-label" id="grp-map">Map</span>
     <div class="row-fields">
       <label>seed <input id="seed" type="number" min="0" max="4294967295" step="1"></label>
       <button id="random" title="random seed" aria-label="Random seed">🎲</button>
@@ -44,7 +44,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     </div>
   </div>
   <div class="control-row" role="group" aria-labelledby="grp-display">
-    <span class="row-label" id="grp-display">Display</span>
+    <span class="row-label archivist-label" id="grp-display">Display</span>
     <div class="row-fields">
       <label>theme
         <select id="theme">
@@ -77,7 +77,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     </div>
   </div>
   <div class="control-row" role="group" aria-labelledby="grp-actions">
-    <span class="row-label" id="grp-actions">Actions</span>
+    <span class="row-label archivist-label" id="grp-actions">Actions</span>
     <div class="row-fields">
       <button id="draw" class="primary">Draw</button>
       <button id="verso-turn">Turn the sheet</button>

@@ -15,6 +15,6 @@ const figures = galleryCards(GALLERY_SEED, GALLERY_COUNT).map(cardFigureHtml).jo
   path="/gallery/"
   tagline="a dozen worlds, hung for viewing"
 >
-<p class="sub">{GALLERY_COUNT} charts drawn by Vellum, beginning at seed {GALLERY_SEED}</p>
+<p class="sub intro">{GALLERY_COUNT} charts drawn by Vellum, beginning at seed {GALLERY_SEED}</p>
 <div class="grid" set:html={figures}></div>
 </BaseLayout>

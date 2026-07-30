@@ -26,7 +26,7 @@ main { max-width: 760px; }
   outline-offset: 6px;
   margin-top: 1.6rem;
   padding: 2.2rem clamp(1.25rem, 5vw, 3.5rem) 3rem;
-  box-shadow: 0 18px 50px rgb(61 47 31 / 0.28);
+  box-shadow: 0 18px 50px rgb(from var(--chart-ink) r g b / 0.28);
   position: relative;
 }
 .sheet::before, .sheet::after {
@@ -41,8 +41,8 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   padding-bottom: 0.3rem; margin-top: 2.8rem; }
 .toc { background: var(--parchment-panel); border: 1.5px solid var(--line-tan); border-radius: 4px;
   padding: 1rem 1.4rem; margin: 2rem 0 1rem; }
-.toc strong { letter-spacing: 0.08em; font-size: 0.8rem; color: var(--ink-faded);
-  display: block; margin-bottom: 0.4rem; text-transform: uppercase; }
+/* Voice from /house.css (.archivist-label, #324). */
+.toc strong { display: block; margin-bottom: 0.4rem; }
 .toc ul { margin: 0; padding-left: 1.1rem; }
 .toc a { color: var(--ink-dark); }
 .q { font-weight: 600; color: var(--ink-dark); margin: 1.6rem 0 0.3rem;

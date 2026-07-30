@@ -48,11 +48,11 @@ export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
 .atlas-sheet h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan); padding-bottom: 0.3rem;
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); }
 .atlas-sheet figure img { width: 100%; height: auto; display: block;
-  border: 1px solid var(--line-tan); box-shadow: 0 10px 30px rgb(61 47 31 / 0.18);
+  border: 1px solid var(--line-tan); box-shadow: 0 10px 30px rgb(from var(--chart-ink) r g b / 0.18);
   transition: transform var(--paper, 260ms) var(--ease-paper, cubic-bezier(0.22, 0.61, 0.36, 1)),
               box-shadow var(--paper, 260ms) var(--ease-paper, cubic-bezier(0.22, 0.61, 0.36, 1)); }
 .atlas-sheet figure img:hover { transform: translateY(-5px) rotate(-0.6deg);
-  box-shadow: 0 20px 44px rgb(61 47 31 / 0.28); }
+  box-shadow: 0 20px 44px rgb(from var(--chart-ink) r g b / 0.28); }
 .atlas-sheet figure img:active { transform: translateY(-1px) rotate(0deg); }
 .atlas-sheet figcaption { text-align: center; font-style: italic; color: var(--ink-brown); padding-top: 0.55rem;
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); }
@@ -63,7 +63,7 @@ export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
 .atlas-sheet td { border-bottom: 1px solid var(--line-faint); padding: 0.45rem 0.6rem; vertical-align: top; }
 .atlas-sheet td.name { font-weight: 600; white-space: nowrap; }
 .atlas-sheet td.name.capital { text-transform: uppercase; letter-spacing: 0.06em; }
-.atlas-sheet td.note { font-style: italic; color: #54452f; }
+.atlas-sheet td.note { font-style: italic; color: var(--ink-tale); }
 .atlas-sheet .realms { font-style: italic; color: var(--ink-brown); }
 .atlas-sheet .banners { display: flex; flex-wrap: wrap; gap: 1.1rem; justify-content: center; }
 .atlas-sheet .banner { width: 120px; text-align: center; }

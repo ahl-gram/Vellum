@@ -78,9 +78,9 @@
    same curve at --unfurl-quick so sweeping a crowded coast stays nimble. Collapses via
    the shared reduced-motion block in /motion.css (the `both` fill rests at rotateX 0). */
 .pc-inner {
-  background: #f8f1e0; color: var(--ink-dark);
+  background: var(--control-cream); color: var(--ink-dark);
   border: 1px solid var(--ink-dark); border-radius: 4px;
-  box-shadow: 0 8px 22px rgb(61 47 31 / 0.28);
+  box-shadow: 0 8px 22px rgb(from var(--chart-ink) r g b / 0.28);
   padding: 0.6rem 0.75rem; font-size: 0.9rem; line-height: 1.35;
   transform-origin: top center;
   animation: paperUnfurl var(--unfurl-quick) var(--ease-unfurl) both;
@@ -91,7 +91,7 @@
 .pc-rank { display: block; font-style: italic; color: var(--ink-brown); font-size: 0.82rem;
   letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.1rem; }
 .pc-founded { display: block; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
-.pc-tale { margin: 0.4rem 0 0; font-style: italic; color: #54452f; }
+.pc-tale { margin: 0.4rem 0 0; font-style: italic; color: var(--ink-tale); }
 
 /* Chronicle scrub mode (#54, #93): the overlay hit-targets stay put but go inert
    (pointer-events off; the engine sets tabindex -1) so cards are suppressed while
@@ -159,7 +159,7 @@
    outline, a thinner stroke for interior detail, standing on a baseline at y=0). Only one
    is displayed at a time; src/site/living-chart/voyage.ts toggles the SVG `display`
    attribute at each port. */
-.voyage-ship path, .voyage-rider path { fill: #f3ead2; stroke: var(--ink-dark); stroke-width: 1.5;
+.voyage-ship path, .voyage-rider path { fill: var(--parchment-panel); stroke: var(--ink-dark); stroke-width: 1.5;
   stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .voyage-ship .rig { fill: none; stroke: var(--ink-dark); stroke-width: 1.1;
   vector-effect: non-scaling-stroke; }
@@ -187,9 +187,9 @@
     linear-gradient(var(--ink-dark), var(--ink-dark)) 50% 100% / 6px 2px no-repeat,
     linear-gradient(var(--ink-dark), var(--ink-dark)) 50% 50% / 2px 24px no-repeat,
     repeating-linear-gradient(45deg, var(--parchment-deep) 0 4px,
-      rgb(185 167 127 / 0.45) 4px 6px) 0 50% / 50% 10px no-repeat,
+      rgb(from var(--line-tan) r g b / 0.45) 4px 6px) 0 50% / 50% 10px no-repeat,
     linear-gradient(var(--parchment-deep), var(--parchment-deep)) 100% 50% / 50% 10px no-repeat; }
-.ages-range:focus-visible { outline: 2px solid var(--ink-brown); outline-offset: 2px; }
+.ages-range:focus-visible { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
 .ages-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none;
   width: 16px; height: 16px; border-radius: 50%; background: var(--ink-dark);
   border: 2px solid var(--parchment-bright); box-shadow: 0 0 0 1px var(--ink-dark); }

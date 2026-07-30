@@ -1,0 +1,110 @@
+/* The house style (#324, The Specimen Book): the ratified type roles, the
+   control idiom, and the shared slips, linked by BaseLayout on EVERY page
+   beside /fonts.css and /motion.css (the root-sheet precedent; ratified
+   2026-07-30 over the extraCss opt-in because all eight pages consume at
+   least one role). Palette tokens are BaseLayout's shell block; this sheet
+   only consumes. The ratified specs are the 2026-07-30 ledger comment on
+   #324, and test/site/house-style.test.ts pins them: a change here is a
+   re-ratification, not a refactor.
+
+   Load order is load-bearing: this sheet renders BEFORE extraCss and the
+   page's own index.css, so a page (or the living-chart reset) keeps the
+   last word on layout while this sheet owns the voice. */
+
+/* --------------------------------------------------------------------------
+   The type roles. A page marks the role (class="intro", class="status",
+   class="archivist-label"...) and this sheet dresses it; pages keep their
+   own sizes, margins, and widths.
+   -------------------------------------------------------------------------- */
+
+/* The room's opening line (decision 1): the flourish hand, ink-brown, centered. */
+.intro {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  color: var(--ink-brown);
+  text-align: center;
+}
+
+/* The one polite line (decision 3): the body hand, italic, faded. */
+.status {
+  font-style: italic;
+  color: var(--ink-faded);
+  text-align: center;
+  min-height: 1.4em;
+}
+
+/* The pinned warning slip (decision 4): a quiet panel, never an alarm. */
+.warning {
+  font-style: italic;
+  color: var(--ink-brown);
+  background: var(--parchment-panel);
+  border: 1px solid var(--line-tan);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+}
+
+/* The archivist's label (decision 5, candidate B): two tiers, both faded
+   uppercase body face. The inline tier whispers beside its controls; the
+   standing tier presides over a section. CHART No's 0.3em stays the one
+   ratified wide exception (print-room css). */
+.archivist-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+}
+.archivist-head {
+  font-size: 0.82rem;
+  letter-spacing: 0.18em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+}
+
+/* --------------------------------------------------------------------------
+   The control idiom: cream fill, 1.5px walnut border, the slip radius. One
+   dark primary per page. The .place-hit exclusions keep the living-chart
+   engine's invisible hit targets out of the idiom (their reset in
+   /living-chart.css also loads after this sheet and wins ties).
+   -------------------------------------------------------------------------- */
+/* input.control is the opt-in for inputs the attribute selector cannot see
+   (home's seed input is type=text with inputmode=numeric for the iOS keypad). */
+input[type="number"], select, button, input.control {
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--ink-dark);
+  background: var(--control-cream);
+  border: 1.5px solid var(--ink-dark);
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+}
+button { cursor: pointer; }
+button:not(.place-hit):hover { background: var(--parchment-bright); }
+button.primary {
+  background: var(--ink-dark);
+  color: var(--chart-paper);
+  letter-spacing: 0.08em;
+}
+button.primary:hover { background: var(--ink-press); }
+
+/* A link dressed as the idiom (navigation that sits in a control row). */
+a.control {
+  display: inline-block;
+  font-size: 0.95rem;
+  color: var(--ink-dark);
+  background: var(--control-cream);
+  border: 1.5px solid var(--ink-dark);
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+}
+a.control:hover { background: var(--parchment-bright); }
+
+/* The focus ring (decision 6): one ring, everywhere a key can land. */
+:is(a, input, select, [tabindex], button:not(.place-hit)):focus-visible {
+  outline: 2px solid var(--ink-dark);
+  outline-offset: 2px;
+}

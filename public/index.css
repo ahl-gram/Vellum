@@ -29,9 +29,10 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
    rects, fixed-size corner SVGs for the flourish quads, an SVG diamond over a
    CSS divider line, so the frame reflows at any width with zero distortion.
    If the renderer's cartouche ever changes shape, this is the copy to redraw.
-   The paper is the chart-exact #f2e8cf at the chart's own 0.94, a deliberate
-   D4 exception to the shell palette; the ink hexes already ARE the shell's
-   tokens, consumed as vars below. Full main width, like the hero plate under
+   The paper is the chart's own at the chart's own 0.94, quoted through
+   --chart-paper (#324; house-style.test.ts pins the token to the render
+   constant), a deliberate D4 exception to the shell palette; the ink hexes
+   already ARE the shell's tokens, consumed as vars below. Full main width, like the hero plate under
    it (Alex's call, 2026-07-25). The cartouche body keeps the chart's serif
    stack; the hook alone takes the site's display face, a second deliberate
    divergence from the chart title, called at the same review. */
@@ -40,7 +41,7 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   margin: 2.5rem auto 0;
   border: calc(var(--k) * 2.2px) solid var(--ink-dark);
   border-radius: calc(var(--k) * 3px);
-  background: rgb(242 232 207 / 0.94);
+  background: rgb(from var(--chart-paper) r g b / 0.94);
   font-family: 'Iowan Old Style', 'Palatino', 'Georgia', serif;
   text-align: center;
 }
@@ -88,21 +89,20 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   display: flex; gap: calc(var(--k) * 8px);
   justify-content: center; align-items: center; margin: 0;
 }
+/* The seed form joined the house control idiom at #324 (Alex's call,
+   2026-07-30: no cartouche exception): skin from /house.css, the button as
+   the page's one dark primary. Only the k-scaled geometry and the input's
+   iOS floor stay local. */
 .cartouche .seedrow input {
-  font-family: inherit; color: var(--ink-dark);
   /* 16px floor: a smaller input font makes iOS Safari zoom the page on focus */
   font-size: 16px;
   width: calc(var(--k) * 90px); text-align: center;
-  background: var(--parchment-bright); border: 1px solid var(--ink-faded);
-  border-radius: 2px; padding: calc(var(--k) * 4px) calc(var(--k) * 6px);
+  padding: calc(var(--k) * 4px) calc(var(--k) * 6px);
 }
-.cartouche .seedrow button {
-  font-family: inherit; font-size: calc(var(--k) * 11px); letter-spacing: 0.12em;
-  color: var(--parchment-bright); background: var(--ink-dark);
-  border: none; border-radius: 2px;
-  padding: calc(var(--k) * 6.5px) calc(var(--k) * 12px); cursor: pointer;
+.cartouche .seedrow button.primary {
+  font-size: calc(var(--k) * 11px);
+  padding: calc(var(--k) * 6.5px) calc(var(--k) * 12px);
 }
-.cartouche .seedrow :focus-visible { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
 /* The resurrected seedline (D3), wearing the chart SUBTITLE's exact voice
    (cartouche.ts: 10.5k italic inkSoft, no tracking, sentence case), not the
    CHART № line's: Alex's call at the shipped-hero review, 2026-07-25. */
@@ -114,12 +114,12 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
 @media (max-width: 520px) { .cartouche { --k: 1.1; } }
 figure { margin: 1.5rem 0; }
 figure img { width: 100%; height: auto; display: block;
-  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(61 47 31 / 0.2); }
+  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.2); }
 figcaption { text-align: center; font-style: italic; color: var(--ink-brown); padding-top: 0.55rem; }
 .banners { display: flex; flex-wrap: wrap; gap: 2.2rem; justify-content: center; margin-top: 1.8rem; }
 .banner { width: 150px; text-align: center; }
 .banner img { width: 100%; height: auto; border: 0; box-shadow: none;
-  filter: drop-shadow(0 6px 14px rgb(61 47 31 / 0.22)); }
+  filter: drop-shadow(0 6px 14px rgb(from var(--chart-ink) r g b / 0.22)); }
 .banner figcaption { font-style: italic; color: var(--ink-brown); padding-top: 0.55rem; letter-spacing: 0.03em; }
 .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.4rem; }
 @media (max-width: 720px) { .grid3 { grid-template-columns: 1fr; } }
@@ -129,8 +129,8 @@ figcaption { text-align: center; font-style: italic; color: var(--ink-brown); pa
 @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
 .card { display: block; border: 1.5px solid var(--ink-dark); border-radius: 4px;
   padding: 1.4rem 1.6rem; background: var(--parchment-panel); text-decoration: none; color: inherit;
-  box-shadow: 0 6px 18px rgb(61 47 31 / 0.12); }
-.card:hover { background: #f8f1e0; }
+  box-shadow: 0 6px 18px rgb(from var(--chart-ink) r g b / 0.12); }
+.card:hover { background: var(--control-cream); }
 .card h3 { margin: 0 0 0.4rem; letter-spacing: 0.05em; }
 .card p { margin: 0; font-style: italic; color: var(--ink-brown); line-height: 1.5; }
 /* Notice to Mariners (#289): the parody block heading How It Works, in the
@@ -145,7 +145,7 @@ figcaption { text-align: center; font-style: italic; color: var(--ink-brown); pa
 .how { line-height: 1.65; }
 .underhood { font-style: italic; color: var(--ink-brown); font-size: 0.92rem;
   line-height: 1.6; margin-top: 0.5rem; }
-.underhood a { color: #7a5c2e; }
+.underhood a { color: var(--ink-brown); }
 code { background: var(--parchment-deep); padding: 0.1em 0.4em; border-radius: 3px;
   font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
 /* Landing-page footer deviations (#263): grander size and spacing, pinned
