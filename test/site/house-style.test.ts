@@ -120,6 +120,8 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
   wears("src/pages/index.astro", /<button[^>]*class="[^"]*primary/, "Draw it joins the primary idiom");
   wears("src/pages/index.astro", /<input id="seed-input" class="control"/,
     "the seed input opts into the idiom (type=text for the iOS numeric keypad, so the attribute selector cannot see it)");
+  wears("src/pages/index.astro", /class="notice-head archivist-head"/,
+    "the Notice to Mariners head is a standing head (the audit's missed block; candidate C, 2026-07-30)");
   wears("src/pages/gallery/index.astro", /class="sub intro"/, "the gallery sub is an intro");
   wears("src/pages/seed-of-the-day/index.astro", /class="[^"]*hunt-intro intro/, "the hunt intro is an intro");
   wears("src/pages/seed-of-the-day/index.astro", /class="[^"]*dateline archivist-head/, "the dateline is a standing head");
@@ -129,6 +131,24 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
   wears("src/pages/explorer/index.astro", /class="row-label archivist-label"/, "the row labels are inline labels");
   wears("src/pages/faq/index.astro", /<strong class="archivist-label">/, "the TOC heading is an inline label");
   wears("src/pages/glossary/index.astro", /<strong class="archivist-label">/, "the TOC heading is an inline label");
+});
+
+test("the Notice to Mariners folds into the families (#324 follow-up, candidate C)", () => {
+  // The audit missed this block; Alex chose the full fold from the rendered
+  // candidates (2026-07-30): the 6px panel family, the archivist standing
+  // head (markup class, pinned above), and the flourish body like home's
+  // other asides.
+  const css = read("public/index.css");
+  assert.match(css, /\.notice[^{]*\{[^}]*border-radius:\s*6px/, ".notice wears the panel radius");
+  assert.ok(
+    !/\.notice-head[^{]*\{[^}]*(font-size|letter-spacing|color)/.test(css),
+    ".notice-head's voice belongs to .archivist-head now",
+  );
+  assert.match(
+    css,
+    /figcaption, \.card p, \.underhood, \.notice-body \{/,
+    ".notice-body joins home's flourish asides",
+  );
 });
 
 test("the old page-local skins are gone (#324)", () => {

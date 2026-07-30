@@ -6,7 +6,7 @@ body {
 h2, .card h3 {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
-figcaption, .card p, .underhood {
+figcaption, .card p, .underhood, .notice-body {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
 main { max-width: 1080px; }
@@ -134,13 +134,17 @@ figcaption { text-align: center; font-style: italic; color: var(--ink-brown); pa
 .card h3 { margin: 0 0 0.4rem; letter-spacing: 0.05em; }
 .card p { margin: 0; font-style: italic; color: var(--ink-brown); line-height: 1.5; }
 /* Notice to Mariners (#289): the parody block heading How It Works, in the
-   voice of a real chart's disclaimer. Small-caps tracked head, italic body. */
+   voice of a real chart's disclaimer. The audit missed it; folded into the
+   families at the #324 follow-up (Alex's call from the rendered candidates,
+   2026-07-30, C): the 6px panel radius, the archivist standing head (markup
+   class), and the flourish body like home's other asides. */
 .notice {
   max-width: 46rem; margin: 1.2rem 0 1.6rem;
   border: 1px solid var(--line-tan); background: var(--parchment-panel);
+  border-radius: 6px;
   padding: 0.9rem 1.2rem;
 }
-.notice-head { margin: 0; letter-spacing: 0.22em; font-size: 0.78rem; color: var(--ink-faded); }
+.notice-head { margin: 0; }
 .notice-body { margin: 0.35rem 0 0; font-style: italic; color: var(--ink-brown); line-height: 1.55; }
 .how { line-height: 1.65; }
 .underhood { font-style: italic; color: var(--ink-brown); font-size: 0.92rem;
