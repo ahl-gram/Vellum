@@ -157,6 +157,48 @@ test("buildClues falls to exactly the three-line floor on a featureless quarry",
   assert.deepEqual(clues.map((c) => c.kind), ["framing", "ew", "ns"]);
 });
 
+test("a quarry near (not exactly at) the chart's center reads central, not west/south", () => {
+  // Live-play 2026-07-31 (seed 20260731, Breibrook): the quarry sat a few cells
+  // off dead-center yet the clues claimed "western reach" and "southern part",
+  // because "central" fired only on exact midpoint equality. Near-center must
+  // land in a central BAND (within 1/8 of the dimension from the midpoint).
+  const world = {
+    elev: { w: 320, h: 240 },
+    rivers: [],
+    realms: { labels: new Int16Array(320 * 240), seats: [] },
+    names: { rivers: new Map(), lakes: [], realms: [] },
+  } as unknown as World;
+  const at = (x: number, y: number): Quarry => ({
+    idx: 0,
+    settlement: {
+      x,
+      y,
+      kind: "village",
+      harbor: false,
+      onRiver: false,
+      score: 0,
+      name: "Midmark",
+      founded: 500,
+      ruined: false,
+    },
+  });
+  const subjects = (x: number, y: number) => {
+    const clues = buildClues(world, at(x, y));
+    return {
+      ew: clues.find((c) => c.kind === "ew")!.subject,
+      ns: clues.find((c) => c.kind === "ns")!.subject,
+    };
+  };
+
+  // Slightly west and south of the midpoint (159.5, 119.5): inside the band.
+  assert.deepEqual(subjects(150, 125), { ew: "central", ns: "central" });
+  // At the band edges (|dx| <= 319/8, |dy| <= 239/8): still central.
+  assert.deepEqual(subjects(120, 90), { ew: "central", ns: "central" });
+  // Just beyond the band: the directional wording is earned again.
+  assert.deepEqual(subjects(118, 88), { ew: "west", ns: "north" });
+  assert.deepEqual(subjects(201, 152), { ew: "east", ns: "south" });
+});
+
 test("classifyDistanceBand is monotonic and a direct hit is never cold", () => {
   const diag = 300;
   assert.notEqual(classifyDistanceBand(0, diag), "cold", "distance 0 is not cold");
