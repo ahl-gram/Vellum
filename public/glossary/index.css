@@ -43,15 +43,17 @@ h3 { font-size: 0.95rem; letter-spacing: 0.08em; color: var(--ink-faded);
 .toc strong { display: block; margin-bottom: 0.4rem; }
 .toc ul { margin: 0; padding-left: 1.1rem; }
 .toc a { color: var(--ink-dark); }
+/* The TOC's slips go somewhere, so they tip: the wordmark's text-scale gesture
+   (#289; #324 feel review). Reduced-motion collapse lives in /motion.css. */
+.toc a { display: inline-block; transition: transform var(--paper-quick) var(--ease-paper); }
+.toc a:hover { transform: translateY(-2px) rotate(-0.6deg); }
+.toc a:active { transform: translateY(0); }
 .term { font-weight: 600; color: var(--ink-dark); margin: 1.6rem 0 0.3rem;
   font-size: 1.08rem; }
 .term:first-of-type, h3 + .term { margin-top: 0.8rem; }
-/* #126 Paper & Ink: a term tips like a loose slip under the hand (reduced-motion
-   collapse lives in /motion.css). inline-block so it pivots around its own text. */
-.term { display: inline-block; transform-origin: left center;
-  transition: transform var(--paper-quick) var(--ease-paper); }
-.term:hover  { transform: rotate(-1.2deg) translateX(2px); }
-.term:active { transform: none; }
+/* Terms do not tip: the tip gesture promises "goes somewhere" (#289) and a term
+   navigates nowhere. The #126 slip tip came out at the #324 post-use feel review;
+   tip-affordance.test.ts guards the promise. */
 .def { margin: 0; }
 a { color: var(--ink-brown); }
 code { background: var(--parchment-deep); padding: 0.1em 0.4em; border-radius: 3px;

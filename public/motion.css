@@ -226,8 +226,8 @@ body:has(.room-name) .wordmark a:active { transform: translateY(0); }
 
 /* --------------------------------------------------------------------------
    Every gesture has a still twin. This ONE block collapses all motion to
-   instant end states: the gestures above, the page-CSS gestures (glossary
-   term tip), AND the two pre-existing animations retrofitted into the doctrine
+   instant end states: the gestures above, the page-CSS gestures (the generated
+   gallery's tile tip), AND the two pre-existing animations retrofitted into the doctrine
    (the seed-of-the-day hunt star, the Explorer chronicle-strip fade). The
    universal duration collapse reaches any animation/transition site-wide (every
    chart surface now rests flat, so there is no static resting transform left to
