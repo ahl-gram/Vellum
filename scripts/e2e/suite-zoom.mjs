@@ -121,6 +121,50 @@ export async function run(ctx) {
   await shoot("explorer-zoom-card-k8.png"); // the constant-size card at max zoom (cf. the ballooned before)
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`); // dismiss the pin
 
+  // Z8b (#331, revisited after live use): the WHOLE hit divides by the published k,
+  // so target and ring hold their designed size at depth (scaled boxes kept their
+  // k=1 overlaps while the marks looked far apart, so a hover near one town ringed
+  // its neighbor). Frame a central place at k=4, hover it with a REAL mouse move
+  // (CDP hit-testing, so :hover is the browser's own), and assert the outcome: the
+  // hit's on-screen box holds ~26px, the ring pseudo resolves to scale(1) (its
+  // element carries the one division; a second would shrink the ring k-fold), and
+  // --zoom-k rides the .place-overlay container, never #map (the #164 jiggle rule;
+  // Z8 pins the card half of the same contract).
+  const z8b = await evaluate(`(()=>{
+    const vp=document.getElementById("map-viewport");
+    window.__vellumZoomTo({k:1,x:0,y:0});
+    const vr=vp.getBoundingClientRect();const cx=vr.left+vr.width/2,cy=vr.top+vr.height/2;
+    const hits=[...document.querySelectorAll("#map .place-hit")];
+    let best=null,bd=Infinity;for(const h of hits){const r=h.getBoundingClientRect();if(r.width===0)continue;const d=Math.hypot(r.left+r.width/2-cx,r.top+r.height/2-cy);if(d<bd){bd=d;best=h;}}
+    if(!best)return{ok:false};
+    const br=best.getBoundingClientRect();
+    const px=br.left+br.width/2-vr.left, py=br.top+br.height/2-vr.top;
+    const W=vp.clientWidth,H=vp.clientHeight;
+    window.__vellumZoomTo({k:4,x:W/2-4*px,y:H/2-4*py});
+    const r4=best.getBoundingClientRect();
+    const overlay=document.querySelector("#map .place-overlay");
+    return{ok:true,x:Math.round(r4.left+r4.width/2),y:Math.round(r4.top+r4.height/2),hitW:r4.width,
+      overlayK:overlay?overlay.style.getPropertyValue("--zoom-k"):null,
+      mapK:getComputedStyle(document.getElementById("map")).getPropertyValue("--zoom-k").trim()};
+  })()`);
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: z8b.x ?? 0, y: z8b.y ?? 0 });
+  await sleep(400); // the ring's --paper-quick grow-in settles
+  const z8bRing = await evaluate(`(()=>{
+    const h=document.querySelector("#map .place-hit:hover");
+    if(!h)return{hover:false};
+    const s=getComputedStyle(h,"::after");
+    return{hover:true,t:s.transform,o:s.opacity};
+  })()`);
+  const z8bScale = parseFloat(((z8bRing.t || "").match(/matrix\(([-\d.]+)/) || [])[1] ?? "NaN");
+  check(
+    "Z8b a hovered hit holds its designed ~26px box at zoom, ring pseudo at scale(1), var on the overlay never #map (#331)",
+    z8b.ok && z8bRing.hover && Math.abs(z8bScale - 1) <= 0.02 && parseFloat(z8bRing.o) === 1 &&
+      z8b.overlayK === "4" && z8b.mapK === "" && Math.abs(z8b.hitW - 26) <= 1,
+    JSON.stringify({ z8b, z8bRing, z8bScale }),
+  );
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 }); // park the pointer off the map
+  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+
   // ---- Sub 4 (#165) ------------------------------------------------------------------
 
   // Z9 (AC2, a11y hard requirement): keyboard-only reaches full zoom. The keys dispatch as

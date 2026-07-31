@@ -25,7 +25,16 @@
    glyph, breaking idle parity. */
 .place-overlay { position: absolute; inset: 0; pointer-events: none; }
 .place-hit {
-  position: absolute; transform: translate(-50%, -50%);
+  position: absolute;
+  /* #331 (revisited after live use): the WHOLE hit divides by the published zoom k,
+     so the target holds its designed 26px on screen at every depth. Scaled boxes kept
+     their k=1 overlaps while the marks LOOKED far apart, so a hover near one town
+     ringed its neighbor. The host publishes --zoom-k on the .place-overlay container
+     (a sibling of the chart svg, never the mount: the #164 jiggle rule); the (…,1)
+     fallback keeps a non-zooming host (the Reading Room) untouched. The scale's fixed
+     point is the element centre, which the translate pins to the mark, so the anchor
+     never moves; the ring + scrub pseudos inherit the division for free. */
+  transform: translate(-50%, -50%) scale(calc(1 / var(--zoom-k, 1)));
   width: 26px; height: 26px; box-sizing: border-box;
   background: transparent; border: 0; border-radius: 0; padding: 0;
   pointer-events: auto; cursor: pointer;
@@ -44,6 +53,8 @@
   transition: opacity var(--paper-quick) var(--ease-paper),
               transform var(--paper-quick) var(--ease-paper);
 }
+/* The ring needs NO zoom division of its own: its element carries it (#331 above),
+   and a second division here would shrink the ring k-fold below its 20px design. */
 .place-hit:hover::after, .place-hit:focus-visible::after {
   opacity: 1; transform: scale(1);
 }

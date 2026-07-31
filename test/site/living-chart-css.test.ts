@@ -68,6 +68,23 @@ test("the shared sheet dresses every engine-emitted hook (#302)", () => {
   }
 });
 
+test("the hit divides by --zoom-k once, on the element; the ring pseudos stay plain (#331)", () => {
+  const css = read(SHEET);
+  const hit = css.match(/\.place-hit\s*\{[^}]*transform:\s*([^;}]+)/);
+  assert.ok(hit, "the hit declares its positioning transform");
+  assert.match(
+    hit[1],
+    /translate\(-50%,\s*-50%\)\s*scale\(calc\(1\s*\/\s*var\(--zoom-k,\s*1\)\)\)/,
+    "the whole hit counter-scales, so target AND ring hold their designed size at depth",
+  );
+  // Exactly ONE division: a second one on the pseudos would shrink the ring k-fold.
+  const pseudos = css.match(/\.place-hit[:a-z-]*:after[^{]*\{[^}]*\}|\.place-hit[:a-z-]*::after[^{]*\{[^}]*\}/g) ?? [];
+  assert.ok(pseudos.length >= 2, "the ring's rest and shown rules exist");
+  for (const rule of pseudos) {
+    assert.doesNotMatch(rule, /--zoom-k/, "a ring pseudo must not divide again; its element already does");
+  }
+});
+
 test("the shared sheet is host-agnostic: no host element id, ever (#302)", () => {
   const raw = read(SHEET);
   assert.ok(raw.length > 0, `${SHEET} exists and is non-empty`);

@@ -47,15 +47,19 @@ export function createGlass(deps: GlassDeps) {
   }
 
   // #164: publish the current zoom k onto the place card (a LEAF, sibling of the chart
-  // svg) so the card counter-scales to a constant, readable size. It is written to the
-  // CARD, never to the mount: a per-frame non-transform style write on the mount
-  // re-rasterizes the baked SVG labels and makes them jiggle (only the mount's
-  // `transform` may change per frame).
+  // svg) so the card counter-scales to a constant, readable size. #331 adds the
+  // .place-overlay container as a second target so the hit ring divides by the same k.
+  // Both are siblings of the chart svg, never the mount: a per-frame non-transform
+  // style write on the mount (or any svg ancestor) re-rasterizes the baked SVG labels
+  // and makes them jiggle (only the mount's `transform` may change per frame).
   function setCardZoom(k: number): void {
     const card = document.getElementById("place-card");
-    if (!card) return;
-    if (k === 1) card.style.removeProperty("--zoom-k");
-    else card.style.setProperty("--zoom-k", String(k));
+    const overlay = mapDiv.querySelector<HTMLElement>(".place-overlay");
+    for (const el of [card, overlay]) {
+      if (!el) continue;
+      if (k === 1) el.style.removeProperty("--zoom-k");
+      else el.style.setProperty("--zoom-k", String(k));
+    }
   }
 
   // #165: the camera is bookmarkable. On settle (a gesture, a keyboard step, or an
