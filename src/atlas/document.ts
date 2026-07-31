@@ -45,6 +45,13 @@ export type AtlasDocumentData = {
  * /motion.css, still eases correctly.
  */
 export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
+.atlas-sheet figure a { display: block; position: relative; }
+/* The waiting frame (#329): the img reserves its box via width/height attributes and
+   this label sits BEHIND it (negative z-index), so the opaque plate paints over it as
+   it lands. Anchor-wrapped plates only (the data-URI download decodes inline). */
+.atlas-sheet figure a::before { content: "Drafting…"; position: absolute; inset: 0; z-index: -1;
+  display: grid; place-items: center; font-style: italic;
+  background: var(--parchment-panel); color: var(--ink-faded); }
 .atlas-sheet h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan); padding-bottom: 0.3rem;
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); }
 .atlas-sheet figure img { width: 100%; height: auto; display: block;
@@ -141,7 +148,12 @@ function plateFigure(
 ): string {
   const src = plateSrc(plate, section);
   const alt = escapeXml(plate.title);
-  const img = `<img src="${src}" alt="${alt}">`;
+  // #329: reserve the frame the plate's own svg root declares (map-renderer emits
+  // rounded width/height first among the root attrs), so the document lays out
+  // before a byte of chart arrives. Graceful when a plate carries no dims.
+  const dims = plate.svg.match(/width="(\d+)" height="(\d+)"/);
+  const frame = dims ? ` width="${dims[1]}" height="${dims[2]}"` : "";
+  const img = `<img src="${src}"${frame} loading="lazy" decoding="async" alt="${alt}">`;
   const linked = anchor ? `<a href="${src}">${img}</a>` : img;
   return `<figure>${linked}<figcaption>${alt}</figcaption></figure>`;
 }

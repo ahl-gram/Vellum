@@ -38,6 +38,22 @@ test("homepage chart plates rest flat and tip on hover (consistent with the atla
   );
 });
 
+test("home's below-fold plates yield bandwidth to a clicked navigation (#329)", async () => {
+  const html = await readFile(indexAstro, "utf8");
+  const lazyPlates = html.match(/<img loading="lazy"[^>]*class="plate"[^>]*>|<img [^>]*class="plate"[^>]*loading="lazy"[^>]*>/g) ?? [];
+  assert.ok(lazyPlates.length >= 3, `the three lazy style plates are present (got ${lazyPlates.length})`);
+  for (const img of lazyPlates) {
+    assert.ok(
+      img.includes('fetchpriority="low"'),
+      `a lazy megabyte plate must not outrank a clicked room's HTML: ${img}`,
+    );
+  }
+  assert.ok(
+    !/loading="eager"[^>]*fetchpriority="low"|fetchpriority="low"[^>]*loading="eager"/.test(html),
+    "the eager hero keeps its natural priority",
+  );
+});
+
 // Green from the start by design (a guard, not red-green): pins the #289
 // review call that the wordmark makes the same tips-under-the-hand gesture as
 // the plates on room pages, and only there; home's wordmark IS home.

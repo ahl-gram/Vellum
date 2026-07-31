@@ -44,14 +44,16 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <section>
 <h2>One World, Many Charts</h2>
+{/* fetchpriority=low (#329): these megabyte plates must not outrank a clicked
+    room's HTML while they stream on a cold load. The eager hero keeps its rank. */}
 <div class="grid3">
-  <figure><a href="charts/chart-42-topographic.svg"><img loading="lazy"
+  <figure><a href="charts/chart-42-topographic.svg"><img loading="lazy" fetchpriority="low"
     src="charts/chart-42-topographic.svg" alt="Topographic style" class="plate"></a>
     <figcaption>Topographic survey</figcaption></figure>
-  <figure><a href="charts/chart-42-ink.svg"><img loading="lazy"
+  <figure><a href="charts/chart-42-ink.svg"><img loading="lazy" fetchpriority="low"
     src="charts/chart-42-ink.svg" alt="Pen and ink style" class="plate"></a>
     <figcaption>Pen &amp; ink</figcaption></figure>
-  <figure><a href="charts/chart-42-nautical.svg"><img loading="lazy"
+  <figure><a href="charts/chart-42-nautical.svg"><img loading="lazy" fetchpriority="low"
     src="charts/chart-42-nautical.svg" alt="Nautical style" class="plate"></a>
     <figcaption>Nautical chart, with fathom soundings</figcaption></figure>
 </div>
