@@ -68,6 +68,24 @@ test("the shared sheet dresses every engine-emitted hook (#302)", () => {
   }
 });
 
+test("the hit ring counter-scales like its card: both transforms divide by --zoom-k (#331)", () => {
+  const css = read(SHEET);
+  const rest = css.match(/\.place-hit::after\s*\{[^}]*transform:\s*([^;}]+)/);
+  const hover = css.match(/\.place-hit:hover::after[^{]*\{[^}]*transform:\s*([^;}]+)/);
+  assert.ok(rest, "the ring's rest rule declares a transform");
+  assert.ok(hover, "the ring's hover/focus rule declares a transform");
+  assert.match(
+    rest[1],
+    /scale\(calc\(0\.85\s*\/\s*var\(--zoom-k,\s*1\)\)\)/,
+    "at rest the ring's 0.85 grow-in start divides by the published zoom k",
+  );
+  assert.match(
+    hover[1],
+    /scale\(calc\(1\s*\/\s*var\(--zoom-k,\s*1\)\)\)/,
+    "shown, the ring holds its designed 20px by dividing by the published zoom k",
+  );
+});
+
 test("the shared sheet is host-agnostic: no host element id, ever (#302)", () => {
   const raw = read(SHEET);
   assert.ok(raw.length > 0, `${SHEET} exists and is non-empty`);
