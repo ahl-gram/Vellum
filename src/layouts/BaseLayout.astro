@@ -98,6 +98,13 @@ const cardDescription = ogDescription ?? description;
 <link rel="stylesheet" href="/house.css">
 {extraCss.map((href) => <link rel="stylesheet" href={href} />)}
 <link rel="stylesheet" href="index.css">
+{/* #329: prefetch the sibling shells (a few KB each) so a first click commits
+    instantly even while this page's plates are still streaming; without it the
+    clicked room's HTML queues behind megabytes of in-flight SVG. Derived from
+    NAV_ITEMS plus home so the list can never rot; self is skipped. */}
+{["/", ...NAV_ITEMS.map((item) => item.href)]
+  .filter((href) => href !== Astro.url.pathname)
+  .map((href) => <link rel="prefetch" href={href} />)}
 <style is:global>
 /* The shell dresses once (#263), part B: the recurring parchment/ink palette,
    named here and consumed as var() by the page css files. The old body-text

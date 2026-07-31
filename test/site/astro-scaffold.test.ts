@@ -218,6 +218,16 @@ test("astro.config keeps the contractual shape (site, trailing slash, no fingerp
   assert.ok(!("outDir" in config), "outDir must stay the default ./dist (deploy.yml uploads path: dist)");
 });
 
+test("BaseLayout prefetches the room shells so a first click commits instantly (#329)", () => {
+  const layout = readFileSync(root("src/layouts/BaseLayout.astro"), "utf8");
+  assert.ok(layout.includes('rel="prefetch"'), "the shell prefetches sibling rooms");
+  assert.match(
+    layout,
+    /NAV_ITEMS[\s\S]{0,200}rel="prefetch"|rel="prefetch"[\s\S]{0,200}NAV_ITEMS/,
+    "the prefetch list derives from NAV_ITEMS, never a hand-copied route list",
+  );
+});
+
 test("the shell is authored exactly once: pages carry no header/nav/footer/meta boilerplate", () => {
   const layout = readFileSync(root("src/layouts/BaseLayout.astro"), "utf8");
   for (const marker of ["<footer>", 'class="topnav"', 'property="og:title"', 'name="twitter:card"', "<title>"]) {
@@ -302,7 +312,8 @@ test("no head member arrives beyond the canonical set (nothing injected, nothing
     });
     assert.deepEqual(new Set(seen), expectedMeta, `${p.route} meta set should be exactly the canonical one`);
     assert.equal(seen.length, expectedMeta.size, `${p.route} should carry no duplicate meta`);
-    assert.ok(!/<link(?![^>]*(?:rel="icon"|rel="stylesheet"))/.test(head), `${p.route} has only icon/stylesheet links`);
+    // rel="prefetch" joined the canonical set at #329 (the sibling-shell prefetch).
+    assert.ok(!/<link(?![^>]*(?:rel="icon"|rel="stylesheet"|rel="prefetch"))/.test(head), `${p.route} has only icon/stylesheet/prefetch links`);
     assert.ok(!head.includes("canonical"), "no canonical tags exist today and the layout must not invent them");
   }
 });

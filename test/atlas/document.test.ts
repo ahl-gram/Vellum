@@ -89,6 +89,19 @@ test("atlasDocument (file-ref mode): a standalone doc that references plate SVG 
   assert.doesNotMatch(html, /data:image\/svg\+xml/);
 });
 
+test("plates reserve their frames: img dims from the plate's own svg root, lazy and async (#329)", () => {
+  const html = atlasDocument(fixture(), (p, section) => atlasPlateFilename(p, section), { anchor: true, motion: true });
+  assert.match(
+    html,
+    /<img src="world-antique\.svg" width="1500" height="1125" loading="lazy" decoding="async"/,
+    "the plate img reserves the frame its own svg root declares",
+  );
+  // The waiting frame speaks the drafting voice; the loaded plate paints over it.
+  assert.match(ATLAS_SHEET_CSS, /figure\s+a\s*\{[^}]*position:\s*relative/);
+  assert.match(ATLAS_SHEET_CSS, /figure\s+a::before\s*\{[^}]*content:\s*"Drafting…"/);
+  assert.match(ATLAS_SHEET_CSS, /figure\s+a::before\s*\{[^}]*z-index:\s*-1/);
+});
+
 test("atlasDocument (data-URI mode): a self-contained doc with no anchors and no external refs", () => {
   const data = fixture();
   const html = atlasDocument(data, (p) => svgToDataUri(p.svg), { anchor: false, motion: false });

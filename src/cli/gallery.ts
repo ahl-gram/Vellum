@@ -3,11 +3,14 @@ import { join, resolve } from "node:path";
 import { renderMap } from "../render/map-renderer.ts";
 import { escapeXml } from "../render/svg.ts";
 import type { StyleName } from "../render/style.ts";
+import { createProjection, marginFor } from "../render/transform.ts";
 import { defaultRecipe, generateWorld } from "../world/generate.ts";
 
 /** The ratified contact sheet the deploy generates for /gallery/ (#205 decision D). */
 export const GALLERY_SEED = 100;
 export const GALLERY_COUNT = 12;
+/** Cards render at this width everywhere a gallery plate is drawn or measured. */
+export const GALLERY_PLATE_WIDTH = 900;
 
 const SEED_STRIDE = 7919; // a prime walk through seed space
 
@@ -17,6 +20,11 @@ export interface GalleryCard {
   readonly title: string;
   readonly mapType: string;
   readonly band: string;
+  /** The plate's frame (#329), reserved on the <img> so the grid lays out before
+   *  a byte of chart arrives. MUST equal the svg root's rounded width/height
+   *  (map-renderer.ts emits Math.round of the same projection). */
+  readonly width: number;
+  readonly height: number;
 }
 
 export function gallerySeeds(startSeed: number, count: number): readonly number[] {
@@ -33,12 +41,20 @@ export function galleryCards(startSeed: number, count: number): readonly Gallery
   if (memo) return memo;
   const cards = gallerySeeds(startSeed, count).map((seed) => {
     const world = generateWorld(defaultRecipe(seed));
+    const proj = createProjection(
+      world.elev.w,
+      world.elev.h,
+      GALLERY_PLATE_WIDTH,
+      marginFor(GALLERY_PLATE_WIDTH),
+    );
     return {
       seed,
       file: `chart-${seed}.svg`,
       title: world.title.title,
       mapType: world.recipe.mapType,
       band: world.recipe.band,
+      width: Math.round(proj.widthPx),
+      height: Math.round(proj.heightPx),
     };
   });
   cardsMemo.set(key, cards);
@@ -52,7 +68,7 @@ export function galleryCards(startSeed: number, count: number): readonly Gallery
  */
 export function cardFigureHtml(card: GalleryCard): string {
   return `<figure>
-  <a href="${card.file}"><img src="${card.file}" loading="lazy" alt="${escapeXml(card.title)}"></a>
+  <a href="${card.file}"><img src="${card.file}" width="${card.width}" height="${card.height}" loading="lazy" decoding="async" alt="${escapeXml(card.title)}"></a>
   <figcaption><strong>${escapeXml(card.title)}</strong><br>
   <span>seed ${card.seed} · ${card.mapType} · ${card.band}</span></figcaption>
 </figure>`;
@@ -82,7 +98,14 @@ figure img:active { transform: translateY(-1px) rotate(0deg);
   box-shadow: 0 5px 14px rgb(from var(--chart-ink) r g b / 0.16); }
 figcaption { text-align: center; padding-top: 0.5rem; line-height: 1.45; }
 figcaption span { font-size: 0.8rem; color: var(--ink-faded); letter-spacing: 0.08em; }
-.grid a { color: inherit; text-decoration: none; }
+.grid a { color: inherit; text-decoration: none; display: block; position: relative; }
+/* The waiting frame (#329): the img reserves its box via width/height attributes,
+   and this label sits BEHIND it (negative z-index, so the opaque plate paints over
+   it the moment it lands). Until then the empty frame reads as a sheet still on
+   the press, in the drafting voice the Explorer's status already speaks. */
+.grid a::before { content: "Drafting…"; position: absolute; inset: 0; z-index: -1;
+  display: grid; place-items: center; background: var(--parchment-panel);
+  font-style: italic; color: var(--ink-faded); }
 footer { margin-top: 3rem; }
 `;
 
@@ -98,7 +121,7 @@ export async function buildGallery(
   for (const seed of gallerySeeds(startSeed, count)) {
     // use the default grid so a gallery seed matches its `chart` / Explorer render
     const world = generateWorld(defaultRecipe(seed));
-    const svg = renderMap(world, { style, widthPx: 900 });
+    const svg = renderMap(world, { style, widthPx: GALLERY_PLATE_WIDTH });
     await writeFile(join(dir, `chart-${seed}.svg`), svg, "utf8");
   }
   await writeFile(join(dir, "index.css"), GALLERY_PAGE_CSS, "utf8");
