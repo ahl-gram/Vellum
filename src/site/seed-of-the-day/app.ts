@@ -265,6 +265,10 @@ function setupHunt(world: World): void {
 
   let guesses = 0;
   const missRoute: { gx: number; gy: number }[] = []; // #123: each miss as {gx,gy} in GRID space, re-projected at draft time
+  // #327: the session's warmest sounding (smallest click-to-quarry distance), named
+  // so a colder miss can point back at it. Ties keep the earlier one; forgotten on
+  // reload, the same lifetime as the plotted route above.
+  let warmest: { readonly dist: number; readonly name: string } | null = null;
 
   // #129: on a LIVE solve the star stamps in (.stamp); on a solved-day reload it is
   // placed still (no .stamp), so the win no longer replays its animation on reload.
@@ -461,9 +465,20 @@ function setupHunt(world: World): void {
       spawnSounding(ev.clientX, ev.clientY); // #129: a sounding at the miss point
       // Continuous heat (from the click's own distance to the quarry) plus the
       // name of the mark the click selected, so a cluster of identical village
-      // glyphs no longer reads as an indistinguishable dead-end.
-      const tail = feedback.pickedName ? ` The nearest mark is ${feedback.pickedName}.` : "";
-      setHuntStatus(`${BAND_PROSE[feedback.band]}${tail}`);
+      // glyphs no longer reads as an indistinguishable dead-end. "You mark X"
+      // anchors the name to the CLICK (#327: "nearest mark" read as nearest to
+      // the quarry, contradicting a colder band); a miss that fails to beat the
+      // session's warmest sounding points back at it instead of repeating itself.
+      const marked = feedback.pickedName ? ` You mark ${feedback.pickedName}.` : "";
+      const beaten = warmest !== null && feedback.dist < warmest.dist;
+      const trail =
+        warmest !== null && !beaten && warmest.name !== feedback.pickedName
+          ? ` Your warmest sounding yet fell at ${warmest.name}.`
+          : "";
+      if (feedback.pickedName && (warmest === null || beaten)) {
+        warmest = { dist: feedback.dist, name: feedback.pickedName };
+      }
+      setHuntStatus(`${BAND_PROSE[feedback.band]}${marked}${trail}`);
     }
   });
 }

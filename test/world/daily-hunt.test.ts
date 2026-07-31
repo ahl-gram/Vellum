@@ -358,6 +358,14 @@ test("classifyClick heat reflects the click's distance, not the nearest town's",
   }
 });
 
+test("classifyClick reports the click's own distance to the quarry on a miss (#327)", () => {
+  const fb = classifyClick(clickWorld, clickQuarry, { x: 12, y: 12 });
+  assert.equal(fb.kind, "miss");
+  if (fb.kind === "miss") {
+    assert.equal(fb.dist, Math.hypot(12 - 50, 12 - 50), "dist is the click-to-quarry grid distance");
+  }
+});
+
 test("classifyClick heat never cools as the click steps straight toward the quarry", () => {
   for (const world of DAILY.slice(0, 5)) {
     const q = mustQuarry(world);

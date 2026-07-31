@@ -55,7 +55,7 @@ export async function run(ctx) {
     const q=chooseQuarry(world,{exclude});
     const cap=world.settlements.find((s)=>s.kind==="capital")??world.settlements[0];
     const frac=(s)=>({fx:proj.px(s.x)/proj.widthPx,fy:proj.py(s.y)/proj.heightPx});
-    return{seed,name:q.settlement.name,hit:frac(q.settlement),miss:frac(cap),legFrac,wpx:proj.widthPx,hpx:proj.heightPx};
+    return{seed,name:q.settlement.name,hit:frac(q.settlement),miss:frac(cap),missName:cap.name,legFrac,wpx:proj.widthPx,hpx:proj.heightPx};
   })()`, true);
   const clickHunt = (f) => evaluate(`(()=>{const svg=document.querySelector("#map svg");const r=svg.getBoundingClientRect();svg.dispatchEvent(new MouseEvent("click",{clientX:r.left+${f.fx}*r.width,clientY:r.top+${f.fy}*r.height,bubbles:true}));return{status:document.getElementById("hunt-status").textContent,solved:document.getElementById("map").classList.contains("solved")};})()`);
 
@@ -64,8 +64,9 @@ export async function run(ctx) {
 
   const miss = await clickHunt(tgt.miss);
   check(
-    "H3 a miss names the town the click selected, reports warmer/colder prose, and does not solve",
-    miss.status.length > 0 && !miss.solved && /nearest mark is /i.test(miss.status),
+    "H3 a miss anchors the selected town to the click, reports warmer/colder prose, and does not solve (#327)",
+    miss.status.length > 0 && !miss.solved && /You mark /.test(miss.status) &&
+      !/warmest sounding/.test(miss.status),
     JSON.stringify(miss),
   );
 
@@ -89,9 +90,29 @@ export async function run(ctx) {
   const near = { fx: tgt.miss.fx + 0.4 * (tgt.hit.fx - tgt.miss.fx), fy: tgt.miss.fy + 0.4 * (tgt.hit.fy - tgt.miss.fy) };
   const nearMiss = await clickHunt(near);
   check(
-    "H3b a click nearer the quarry never reads colder than a far click (continuous heat)",
-    !nearMiss.solved && bandRank(nearMiss.status) >= bandRank(miss.status) && bandRank(nearMiss.status) >= 0,
+    "H3b a click nearer the quarry never reads colder than a far click, and a new warmest stays silent (#327)",
+    !nearMiss.solved && bandRank(nearMiss.status) >= bandRank(miss.status) && bandRank(nearMiss.status) >= 0 &&
+      !/warmest sounding/.test(nearMiss.status),
     JSON.stringify({ far: miss.status, near: nearMiss.status }),
+  );
+
+  // #327: a miss that fails to beat the session's warmest sounding points back at it
+  // by name. Re-tapping the capital ties the first miss (same point) and loses to the
+  // 0.4 probe, so the warmest is the probe's sounding, named in the probe's own status
+  // line. The pointer is suppressed when both taps selected the same town ("warmest
+  // fell at X" right after "You mark X" says nothing), which happens on days when the
+  // probe point still snapped to the capital.
+  const warmName = (nearMiss.status.match(/You mark ([^.]+)\./) || [])[1] || "";
+  const again = await clickHunt(tgt.miss);
+  const wantTrail = warmName !== "" && warmName !== tgt.missName;
+  check(
+    "H3d a colder miss cites the warmest sounding by name, silent on a same-town repeat (#327)",
+    !again.solved &&
+      again.status.includes(`You mark ${tgt.missName}.`) &&
+      (wantTrail
+        ? again.status.includes(`Your warmest sounding yet fell at ${warmName}.`)
+        : !/warmest sounding/.test(again.status)),
+    JSON.stringify({ again: again.status, warmName, missName: tgt.missName }),
   );
 
   const won = await clickHunt(tgt.hit);
@@ -132,7 +153,8 @@ export async function run(ctx) {
 
   // HD2 (AC1-AC5): the dispatch is a self-contained artifact. It must (a) preserve the chart's
   // data-vellum-* recipe so it stays reproducible like every Vellum export; (b) plot one numbered
-  // station per miss (2 here: the capital + the 0.4 probe); (c) caption the soundings tally in
+  // station per miss (3 here: the capital twice, H3 + H3d, and the 0.4 probe); (c) caption the
+  // soundings tally in
   // period voice; (d) be inline-styled with NO page-CSS class leaking into the added group; and
   // (e) -- the AC that justifies storing GRID coordinates -- station #1 (the capital miss) must
   // land at proj.px(cap.x)/py(cap.y), which only holds if the route was re-projected at draft
@@ -153,10 +175,10 @@ export async function run(ctx) {
     "HD2 the dispatch clones the chart, plots the grid-projected route + star, captions the tally, inline-styled (#123)",
     disp.hasFn &&
       d.includes(`data-vellum-seed="${tgt.seed}"`) &&
-      stations === 2 &&
+      stations === 3 &&
       /<polyline[^>]*stroke:/.test(g) &&
       /data-dispatch-star/.test(g) &&
-      g.includes("Quarry taken in 3 soundings") &&
+      g.includes("Quarry taken in 4 soundings") &&
       g.includes(`CHART № ${tgt.seed}`) &&
       gridOk &&
       g.includes("style=") && !g.includes("class="),
@@ -166,7 +188,7 @@ export async function run(ctx) {
       stations,
       poly: /<polyline[^>]*stroke:/.test(g),
       star: /data-dispatch-star/.test(g),
-      caption: g.includes("Quarry taken in 3 soundings"),
+      caption: g.includes("Quarry taken in 4 soundings"),
       chartNo: g.includes(`CHART № ${tgt.seed}`),
       gridOk, cx, cy, expX: tgt.miss.fx * tgt.wpx, expY: tgt.miss.fy * tgt.hpx,
       inline: g.includes("style=") && !g.includes("class="),

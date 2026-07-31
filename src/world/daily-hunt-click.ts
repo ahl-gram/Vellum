@@ -21,6 +21,9 @@ export type ClickFeedback =
   | {
       readonly kind: "miss";
       readonly band: DistanceBand;
+      /** The click's own distance to the quarry, in grid units (#327): lets the
+       *  app rank soundings for "warmest yet" without re-deriving quarry geometry. */
+      readonly dist: number;
       readonly pickedIdx: number;
       readonly pickedName: string;
     };
@@ -47,6 +50,7 @@ export function classifyClick(
   return {
     kind: "miss",
     band: classifyDistanceBand(dist, diagonal),
+    dist,
     pickedIdx: nearest,
     pickedName: picked ? picked.name : "",
   };
