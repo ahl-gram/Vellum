@@ -11,9 +11,20 @@ type Glyph = {
 };
 
 // Relief thresholds on (elevation - seaLevel) / elevSpan. Shared with the
-// legend so its key can only list terrain the chart actually carries.
+// legend so its key can only list terrain the chart actually carries, and with
+// the daily hunt's terrain clues (#335) so a clue and the drawing cannot drift.
 export const GLYPH_MTN_REL = 0.5;
 export const GLYPH_HILL_REL = 0.34;
+
+/** Biomes that draw tree glyphs (at or below mountain relief). Shared with the
+ *  daily hunt's forest clue (#335) for the same no-drift reason. */
+export const TREE_BIOMES: ReadonlySet<number> = new Set<number>([
+  BIOMES.temperateForest,
+  BIOMES.rainforest,
+  BIOMES.taiga,
+  BIOMES.tropicalForest,
+  BIOMES.jungle,
+]);
 
 export type TerrainGlyphs = {
   readonly hill: boolean;
@@ -94,14 +105,7 @@ export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
       else if (rel > GLYPH_HILL_REL) hill.push(c);
       else if (b === BIOMES.marsh) marsh.push(c);
       else if (b === BIOMES.desert) dune.push(c);
-      if (
-        rel <= GLYPH_MTN_REL &&
-        (b === BIOMES.temperateForest ||
-          b === BIOMES.rainforest ||
-          b === BIOMES.taiga ||
-          b === BIOMES.tropicalForest ||
-          b === BIOMES.jungle)
-      ) {
+      if (rel <= GLYPH_MTN_REL && TREE_BIOMES.has(b)) {
         tree.push(c);
       }
     }

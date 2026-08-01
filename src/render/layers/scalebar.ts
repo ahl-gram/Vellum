@@ -2,7 +2,9 @@ import { el, type SvgNode } from "../svg.ts";
 import type { Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 
-const CELLS_PER_LEAGUE = 2.2;
+/** Grid cells per league; exported for the daily hunt's leagues clue (#335)
+ *  so the clue and the printed scale bar can never disagree. */
+export const CELLS_PER_LEAGUE = 2.2;
 const NICE_TOTALS = [20, 30, 40, 50, 60, 80, 100, 120, 150, 200];
 // #249: a regional survey zooms in (up to 8x), so px-per-league grows until even
 // the smallest world total (20) overruns the frame. Extend the ladder downward

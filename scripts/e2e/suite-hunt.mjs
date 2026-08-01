@@ -1,5 +1,6 @@
-// The Daily Hunt checks (H1-H11) on the seed-of-the-day page: #56 (H1-H9),
-// the #88 legend-clearance guard (H10), and the labeled-clue guard (H11).
+// The Daily Hunt checks (H1-H12) on the seed-of-the-day page: #56 (H1-H9),
+// the #88 legend-clearance guard (H10), the labeled-clue guard (H11, since
+// #335 covering near clues too), and the #335 drawn-terrain guard (H12).
 // Split from e2e-explorer.mjs; behavior + check order unchanged.
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
@@ -55,7 +56,7 @@ export async function run(ctx) {
     const q=chooseQuarry(world,{exclude});
     const cap=world.settlements.find((s)=>s.kind==="capital")??world.settlements[0];
     const frac=(s)=>({fx:proj.px(s.x)/proj.widthPx,fy:proj.py(s.y)/proj.heightPx});
-    return{seed,name:q.settlement.name,hit:frac(q.settlement),miss:frac(cap),missName:cap.name,legFrac,wpx:proj.widthPx,hpx:proj.heightPx};
+    return{seed,name:q.settlement.name,hit:frac(q.settlement),miss:frac(cap),missName:cap.name,legFrac,wpx:proj.widthPx,hpx:proj.heightPx,scale:proj.scale};
   })()`, true);
   const clickHunt = (f) => evaluate(`(()=>{const svg=document.querySelector("#map svg");const r=svg.getBoundingClientRect();svg.dispatchEvent(new MouseEvent("click",{clientX:r.left+${f.fx}*r.width,clientY:r.top+${f.fy}*r.height,bubbles:true}));return{status:document.getElementById("hunt-status").textContent,solved:document.getElementById("map").classList.contains("solved")};})()`);
 
@@ -371,13 +372,15 @@ export async function run(ctx) {
     tgt.hit.fy >= tgt.legFrac.y0 && tgt.hit.fy <= tgt.legFrac.y1;
   check("H10 the day's quarry sits clear of the rendered legend", !!tgt.legFrac && !hitInLegend, JSON.stringify({ leg: tgt.legFrac, hit: tgt.hit }));
 
-  // A displayed river/lake clue must name a feature the chart actually LABELED.
+  // A displayed clue must point at something the chart actually DREW.
   // Pre-fix, buildClues cited the nearest NAMED river even when the renderer
   // skipped its label (short course / collision loser, feature-labels.ts), so
-  // the clue sent the player after a name printed nowhere on the map. Extract
-  // each feature name from the two stable clue phrasings and assert it appears
-  // as a ">Name<" label node in the rendered SVG. Vacuous on days with no such
-  // clue; bites the moment the prune (pruneUnlabeledFeatureClues) regresses.
+  // the clue sent the player after a name printed nowhere on the map. Since
+  // #335 findability gates run BEFORE selection (ClueFindability in
+  // daily-hunt-clue-facts.ts), covering three name phrasings (river, lake,
+  // near) and the terrain bands. Capital/seat labels render .toUpperCase()
+  // (settlementsLayer), so the name check accepts either spelling. Vacuous on
+  // days with no such clue; bites the moment a gate regresses.
   const labelCheck = await evaluate(`(()=>{
     const svg=document.querySelector("#map svg");
     const html=svg?svg.outerHTML:"";
@@ -387,10 +390,41 @@ export async function run(ctx) {
       let m=t.match(/within sight of the river (.+)\\.$/);
       if(m){names.push(m[1]);continue;}
       m=t.match(/takes in the waters of (.+)\\.$/);
+      if(m){names.push(m[1]);continue;}
+      m=t.match(/within \\d+ leagues of (.+)\\.$/);
       if(m){names.push(m[1]);}
     }
-    const missing=names.filter((n)=>!html.includes(">"+n+"<"));
+    const missing=names.filter((n)=>!html.includes(">"+n+"<")&&!html.includes(">"+n.toUpperCase()+"<"));
     return{count:names.length,missing};
   })()`);
-  check("H11 every displayed river/lake clue names a feature the chart labeled", labelCheck.missing.length === 0, JSON.stringify(labelCheck));
+  check("H11 every displayed river/lake/near clue names something the chart labeled", labelCheck.missing.length === 0, JSON.stringify(labelCheck));
+
+  // #335: a terrain clue promises DRAWN glyphs near the quarry, not merely
+  // eligible cells (the glyph field shuffles + caps its candidates). Map each
+  // terrain phrasing to its glyph symbol prefix and assert one such <use>
+  // sits within the terrain radius (TERRAIN_RADIUS = 4 cells) of the quarry,
+  // in render-pixel space; the quarry and cell scale come from tgt above.
+  const terrainCheck = await evaluate(`(()=>{
+    const TEXTS={
+      "It sits in the shadow of the mountains.":"gl-mtn",
+      "Hill country rises all about it.":"gl-hill",
+      "Deep woods stand close about it.":"gl-tree",
+      "Marshland lies hard by its bounds.":"gl-marsh",
+      "Desert sands lie hard by its bounds.":"gl-dune"};
+    const svg=document.querySelector("#map svg");
+    if(!svg)return{count:0,missing:["no svg"]};
+    const lis=Array.from(document.getElementById("clues").children).map((li)=>li.textContent);
+    const bands=lis.filter((t)=>TEXTS[t]).map((t)=>TEXTS[t]);
+    if(bands.length===0)return{count:0,missing:[]};
+    const qx=${tgt.hit.fx}*${tgt.wpx};
+    const qy=${tgt.hit.fy}*${tgt.hpx};
+    const radius=4*${tgt.scale};
+    const uses=Array.from(svg.querySelectorAll("#layer-glyphs use")).map((u)=>{
+      const m=/translate\\((-?[\\d.]+) (-?[\\d.]+)\\)/.exec(u.getAttribute("transform")||"");
+      return m?{href:u.getAttribute("href")||"",x:+m[1],y:+m[2]}:null;
+    }).filter(Boolean);
+    const missing=bands.filter((p)=>!uses.some((u)=>u.href.startsWith("#"+p)&&Math.hypot(u.x-qx,u.y-qy)<=radius));
+    return{count:bands.length,missing};
+  })()`);
+  check("H12 every displayed terrain clue has its glyphs drawn near the quarry", terrainCheck.missing.length === 0, JSON.stringify(terrainCheck));
 }

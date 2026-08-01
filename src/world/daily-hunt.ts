@@ -1,6 +1,7 @@
 import { createRng } from "../core/rng.ts";
 import { createLoreWriter } from "../society/lore.ts";
 import { createProjection } from "../render/transform.ts";
+import { quarryPool } from "./daily-hunt-clue-facts.ts";
 import type { NamedSettlement, World } from "./types.ts";
 
 /**
@@ -23,10 +24,14 @@ import type { NamedSettlement, World } from "./types.ts";
 
 export {
   buildClues,
-  pruneUnlabeledFeatureClues,
   type Clue,
   type ClueKind,
 } from "./daily-hunt-clues.ts";
+export {
+  TERRAIN_RADIUS,
+  type ClueFindability,
+  type TerrainBand,
+} from "./daily-hunt-clue-facts.ts";
 export {
   classifyClick,
   classifyDistanceBand,
@@ -76,12 +81,9 @@ export function chooseQuarry(
   opts: { exclude?: ReadonlySet<number> } = {},
 ): Quarry | null {
   const { exclude } = opts;
-  const seats = new Set(world.realms.seats);
-  const indexed = world.settlements.map((s, idx) => ({ s, idx }));
-
-  const villages = indexed.filter(({ s, idx }) => s.kind === "village" && !seats.has(idx));
-  const nonCapital = indexed.filter(({ s, idx }) => s.kind !== "capital" && !seats.has(idx));
-  const base = villages.length > 0 ? villages : nonCapital.length > 0 ? nonCapital : indexed;
+  // The pool lives in daily-hunt-clue-facts.ts so the clue walk's narrowing
+  // counts run over EXACTLY the pool the quarry is drawn from (#335).
+  const base = quarryPool(world);
   if (base.length === 0) return null;
 
   const open = exclude && exclude.size > 0 ? base.filter(({ idx }) => !exclude.has(idx)) : base;

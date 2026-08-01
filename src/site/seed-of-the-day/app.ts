@@ -14,8 +14,9 @@ import {
   chooseQuarry,
   classifyClick,
   legendExcluded,
-  pruneUnlabeledFeatureClues,
   revealLore,
+  TERRAIN_RADIUS,
+  type TerrainBand,
 } from "../../world/daily-hunt.ts";
 import { createProjection, type Projection } from "../../render/transform.ts";
 // The #127/#129 arrival ceremony, shared with the Explorer (extracted in #183). This
@@ -247,15 +248,42 @@ function setupHunt(world: World): void {
   const quarry = chooseQuarry(world, { exclude: legendExclusions(world, svg, proj) });
   if (!quarry) return;
 
-  // clues: a plain antique ordered list. Prune any river/lake clue whose name
-  // the chart never labeled (short/collision-skipped courses), so the hunt never
-  // cites a feature the player cannot find. The rendered SVG is the source of
-  // truth for what was drawn: a label emits as ">Name<" in the markup.
-  const isLabeled = (name: string) => svg.outerHTML.includes(`>${name}<`);
+  // clues: a plain antique ordered list. The rendered SVG is the source of
+  // truth for what was drawn, so the findability gates read it and run BEFORE
+  // selection (#335): a clue never cites a name or terrain the player cannot
+  // find, and the narrowing/floor guarantees hold on this exact list.
+  // A label emits as ">Name<" in the markup, except capital and seat labels,
+  // which `settlementsLayer` in `src/render/layers/settlements.ts` renders
+  // `.toUpperCase()`, so both spellings must be checked.
+  const markup = svg.outerHTML;
+  const isLabeled = (name: string) =>
+    markup.includes(`>${name}<`) || markup.includes(`>${name.toUpperCase()}<`);
+  // Terrain: eligible cells are not enough, only DRAWN glyphs count (the glyph
+  // field shuffles and caps its candidates). Parse the glyph layer's <use>
+  // translates back to render-pixel space and test them against the quarry.
+  const glyphs = Array.from(svg.querySelectorAll("#layer-glyphs use")).flatMap((u) => {
+    const m = /translate\((-?[\d.]+) (-?[\d.]+)\)/.exec(u.getAttribute("transform") ?? "");
+    return m ? [{ href: u.getAttribute("href") ?? "", x: Number(m[1]), y: Number(m[2]) }] : [];
+  });
+  const GLYPH_PREFIX: Record<TerrainBand, string> = {
+    mountains: "#gl-mtn",
+    hills: "#gl-hill",
+    forest: "#gl-tree",
+    marsh: "#gl-marsh",
+    dunes: "#gl-dune",
+  };
+  const qpx = proj.px(quarry.settlement.x);
+  const qpy = proj.py(quarry.settlement.y);
+  const hasGlyphNear = (band: TerrainBand) =>
+    glyphs.some(
+      (g) =>
+        g.href.startsWith(GLYPH_PREFIX[band]) &&
+        Math.hypot(g.x - qpx, g.y - qpy) <= TERRAIN_RADIUS * proj.scale,
+    );
   const list = $("clues");
   list.replaceChildren();
   // #129: each slip staggers in (--i drives the per-item delay in index.css).
-  pruneUnlabeledFeatureClues(buildClues(world, quarry), isLabeled).forEach((c, i) => {
+  buildClues(world, quarry, { isLabeled, hasGlyphNear }).forEach((c, i) => {
     const li = document.createElement("li");
     li.textContent = c.text;
     li.style.setProperty("--i", String(i));

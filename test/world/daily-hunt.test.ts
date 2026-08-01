@@ -7,25 +7,55 @@ import {
   classifyClick,
   classifyDistanceBand,
   legendExcluded,
-  pruneUnlabeledFeatureClues,
   revealLore,
   type Clue,
   type LegendBox,
   type Quarry,
 } from "../../src/world/daily-hunt.ts";
 import { createProjection } from "../../src/render/transform.ts";
+import { renderMap } from "../../src/render/map-renderer.ts";
+import { GLYPH_HILL_REL, GLYPH_MTN_REL, TREE_BIOMES } from "../../src/render/layers/glyphs.ts";
+import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
+import * as facts from "../../src/world/daily-hunt-clue-facts.ts";
+import { buildClueFacts } from "../../src/world/daily-hunt-clue-facts.ts";
 import type { World } from "../../src/world/types.ts";
 import {
   ALLOWED_KINDS,
+  clueHoldsAt,
+  expectedClueText,
   expectedEW,
   expectedNS,
+  glyphGate,
+  labelGate,
+  LEAGUE_LADDER,
+  MIRROR_CELLS_PER_LEAGUE,
+  MIRROR_HILL_REL,
+  MIRROR_MTN_REL,
   mustQuarry,
   NEAR,
+  nearestAnchor,
   nearestNamedLake,
   nearestNamedRiver,
+  quarryPoolMirror,
   realmNameAt,
+  ROAD_NEAR,
+  roadState,
+  TERRAIN_MIN,
+  TERRAIN_RADIUS,
+  terrainCounts,
+  TREE_IDS,
+  truthfulCandidates,
   villagePoolSize,
+  type TerrainBand,
 } from "../../test-support/daily-hunt-geometry.ts";
+
+// Mirrors MAX_LINES in src/world/daily-hunt-clues.ts: the cap on a day's total
+// clue lines, past which the narrowing walk stops even if the field is wide.
+const MAX_LINES = 8;
+// Ratified narrowing target (#335): villages consistent with all clues.
+const NARROW_TARGET = 3;
+// Mirrors MARGIN in src/site/seed-of-the-day/app.ts (renderMap's default).
+const MARGIN = Math.round(1500 * 0.045);
 
 // This suite is world-generation heavy by design: acceptance #5 asks for the
 // truthfulness sweep to run across ALL 30 June-2026 daily seeds. Worlds are
@@ -36,6 +66,32 @@ const DAILY: ReadonlyArray<World> = DAILY_SEEDS.map((s) => generateWorld(default
 // "a few off-grid seeds": arbitrary, non-date seeds, default recipe.
 const OFFGRID: ReadonlyArray<World> = [1, 7, 12345].map((s) => generateWorld(defaultRecipe(s)));
 const SWEEP: ReadonlyArray<World> = [...DAILY, ...OFFGRID];
+
+// The delivered clue list depends on what the sheet DREW (#335), so the sweep
+// renders each world's antique chart once and derives the page's findability
+// gates from the markup, exactly as setupHunt in src/site/seed-of-the-day/app.ts
+// does from the live SVG.
+const SWEEP_SVGS: ReadonlyArray<string> = SWEEP.map((w) =>
+  renderMap(w, { style: "antique", legend: true }),
+);
+
+type Gates = {
+  readonly isLabeled: (name: string) => boolean;
+  readonly hasGlyphNear: (band: TerrainBand) => boolean;
+};
+
+function gatesFor(world: World, q: Quarry, markup: string): Gates {
+  const proj = createProjection(world.elev.w, world.elev.h, 1500, MARGIN);
+  return {
+    isLabeled: labelGate(markup),
+    hasGlyphNear: glyphGate(
+      markup,
+      proj.px(q.settlement.x),
+      proj.py(q.settlement.y),
+      TERRAIN_RADIUS * proj.scale,
+    ),
+  };
+}
 
 // --- tests -------------------------------------------------------------------
 
@@ -60,23 +116,37 @@ test("the quarry is a real, non-seat village (the broad uniform-glyph pool)", ()
 });
 
 test("every emitted clue re-verifies true against independent raw geometry", () => {
-  for (const world of SWEEP) {
+  SWEEP.forEach((world, wi) => {
     const q = mustQuarry(world);
     const { x, y } = q.settlement;
-    const clues = buildClues(world, q);
+    const gates = gatesFor(world, q, SWEEP_SVGS[wi]!);
+    const clues = buildClues(world, q, gates);
 
     assert.ok(clues.length >= 3, "at least the three-line floor");
+    assert.ok(clues.length <= MAX_LINES, "never past the line cap");
     const kinds = clues.map((c) => c.kind);
     assert.ok(
-      kinds.includes("framing") && kinds.includes("ew") && kinds.includes("ns"),
-      "the floor is framing + east/west + north/south",
+      kinds.includes("framing") && (kinds.includes("ew") || kinds.includes("ns")),
+      "the floor is framing + at least one compass band (#335)",
     );
 
     for (const clue of clues) {
-      assert.ok(clue.text.length > 0, "clue has text");
+      assert.equal(clue.text, expectedClueText(clue), "the prose matches the clue's subject");
       assert.ok(ALLOWED_KINDS.has(clue.kind), `kind ${clue.kind} is allowed`);
       assert.doesNotMatch(clue.text, /ruin|abandon/i, `clue avoids ruin/abandon: ${clue.text}`);
       assert.doesNotMatch(clue.text, /inland/i, `clue makes no affirmative inland claim: ${clue.text}`);
+
+      // Findability (#335): a cited name must be printed on the sheet, and a
+      // terrain claim must have DRAWN glyphs nearby, per the page's own gates.
+      if (clue.kind === "river" || clue.kind === "lake" || clue.kind === "near") {
+        assert.ok(gates.isLabeled(clue.subject!), `"${clue.subject}" is printed on the sheet`);
+      }
+      if (clue.kind === "terrain") {
+        assert.ok(
+          gates.hasGlyphNear(clue.subject as TerrainBand),
+          `${clue.subject} glyphs are truly drawn near the quarry`,
+        );
+      }
 
       switch (clue.kind) {
         case "framing":
@@ -111,6 +181,37 @@ test("every emitted clue re-verifies true against independent raw geometry", () 
           assert.ok(world.names.realms.length >= 2, "realm clue only when multi-realm");
           assert.equal(clue.subject, realmNameAt(world, x, y), "cites the cell's realm");
           break;
+        case "terrain": {
+          const counts = terrainCounts(world, x, y);
+          const band = clue.subject as TerrainBand;
+          assert.ok(band in counts, `terrain subject ${clue.subject} is a known band`);
+          assert.ok(
+            counts[band] >= TERRAIN_MIN,
+            `enough ${band} glyph cells near the quarry (${counts[band]})`,
+          );
+          break;
+        }
+        case "road":
+          assert.equal(
+            clue.subject,
+            roadState(world, x, y),
+            "road clue matches the network's true state at the quarry",
+          );
+          break;
+        case "near": {
+          const anchor = nearestAnchor(world, q.idx);
+          assert.ok(anchor, "near clue requires an anchor settlement to exist");
+          assert.equal(clue.subject, anchor.name, "cites the nearest anchor-tier settlement");
+          assert.ok(
+            clue.leagues !== undefined && LEAGUE_LADDER.includes(clue.leagues),
+            `quotes a round leagues bound (${clue.leagues})`,
+          );
+          assert.ok(
+            anchor.dist <= clue.leagues! * MIRROR_CELLS_PER_LEAGUE + 1e-9,
+            `the quoted bound truly contains the quarry (${anchor.dist})`,
+          );
+          break;
+        }
       }
 
       // Never references a range or forest (named, but coordinate-less).
@@ -119,42 +220,158 @@ test("every emitted clue re-verifies true against independent raw geometry", () 
         assert.notEqual(clue.subject, world.names.forest, "no forest reference");
       }
     }
-  }
+  });
 });
 
 test("buildClues falls to exactly the three-line floor on a featureless quarry", () => {
   // Real village placement clusters near water, so a bare-floor quarry is
   // vanishingly rare from a live seed. Acceptance #2's guarantee (">=3 even
   // with no named river, lake, harbor, or realm") is proven directly with a
-  // constructed featureless world: a single-realm grid, no named features, a
-  // landlocked dry village. buildClues reads only these fields.
+  // constructed featureless world: a single-realm flat grid, no named
+  // features, no roads, a lone landlocked dry village. buildClues reads only
+  // these fields.
+  const w = 320;
+  const h = 240;
+  const quarrySettlement = {
+    x: 100,
+    y: 50,
+    kind: "village",
+    harbor: false,
+    onRiver: false,
+    score: 0,
+    name: "Nowhere",
+    founded: 100,
+    ruined: false,
+  };
   const featureless = {
-    elev: { w: 320, h: 240 },
+    recipe: { seed: 99 },
+    elev: { w, h, data: new Float64Array(w * h) },
+    seaLevel: -1,
+    biomes: new Uint8Array(w * h),
     rivers: [],
-    realms: { labels: new Int16Array(320 * 240), seats: [] },
+    roads: [],
+    settlements: [quarrySettlement],
+    realms: { labels: new Int16Array(w * h), seats: [] },
     names: { rivers: new Map(), lakes: [], realms: [] },
   } as unknown as World;
-  const quarry: Quarry = {
-    idx: 0,
-    settlement: {
-      x: 100,
-      y: 50,
-      kind: "village",
-      harbor: false,
-      onRiver: false,
-      score: 0,
-      name: "Nowhere",
-      founded: 100,
-      ruined: false,
-    },
-  };
+  const quarry: Quarry = { idx: 0, settlement: quarrySettlement as Quarry["settlement"] };
   const clues = buildClues(featureless, quarry);
-  assert.equal(
-    clues.length,
-    3,
-    `expected the bare floor; got ${clues.map((c) => c.kind).join(",")}`,
+  assert.ok(
+    clues.length >= 3,
+    `expected at least the three-line floor; got ${clues.map((c) => c.kind).join(",")}`,
   );
-  assert.deepEqual(clues.map((c) => c.kind), ["framing", "ew", "ns"]);
+  assert.equal(clues[0]!.kind, "framing", "the framing line opens the list");
+  const kinds = clues.map((c) => c.kind);
+  assert.ok(kinds.includes("ew") || kinds.includes("ns"), "a compass anchor survives the floor");
+});
+
+// --- #335: seeded, discriminative clue selection ------------------------------
+
+test("clue selection is deterministic across fresh constructions of a seed (#335)", () => {
+  for (const seed of [20260601, 12345]) {
+    const a = generateWorld(defaultRecipe(seed));
+    const b = generateWorld(defaultRecipe(seed));
+    assert.deepEqual(
+      buildClues(a, chooseQuarry(a)!),
+      buildClues(b, chooseQuarry(b)!),
+      `seed ${seed}: same seed, same clues`,
+    );
+  }
+});
+
+test("at least one compass line survives every day (#335 ratified)", () => {
+  SWEEP.forEach((world, wi) => {
+    const q = mustQuarry(world);
+    const kinds = buildClues(world, q, gatesFor(world, q, SWEEP_SVGS[wi]!)).map((c) => c.kind);
+    assert.ok(kinds.includes("ew") || kinds.includes("ns"), "a compass anchor is guaranteed");
+    assert.equal(kinds[0], "framing", "the framing line still opens the list");
+  });
+});
+
+test("the month's clue voice varies: terrain, road, and near clues all appear (#335)", () => {
+  const kinds = new Set<string>();
+  DAILY.forEach((world, wi) => {
+    const q = mustQuarry(world);
+    for (const c of buildClues(world, q, gatesFor(world, q, SWEEP_SVGS[wi]!))) kinds.add(c.kind);
+  });
+  for (const k of ["terrain", "road", "near"]) {
+    assert.ok(kinds.has(k), `kind ${k} appears at least once across the June-2026 month`);
+  }
+});
+
+test("each day's DELIVERED clues narrow the field to <= 3 villages, or nothing unused and findable would help (#335)", () => {
+  SWEEP.forEach((world, wi) => {
+    const q = mustQuarry(world);
+    const gates = gatesFor(world, q, SWEEP_SVGS[wi]!);
+    const clues = buildClues(world, q, gates);
+    const pool = quarryPoolMirror(world);
+    const remaining = pool.filter(({ s, idx }) =>
+      clues.every((c) => clueHoldsAt(world, c, s, idx)),
+    );
+    assert.ok(
+      remaining.some(({ idx }) => idx === q.idx),
+      `the quarry itself stays consistent with every clue (seed ${world.recipe.seed})`,
+    );
+    if (remaining.length <= NARROW_TARGET) return;
+    if (clues.length >= MAX_LINES) return;
+    const emitted = new Set(clues.map((c) => `${c.kind}:${c.subject ?? ""}`));
+    const findable = truthfulCandidates(world, q).filter((cand) =>
+      cand.kind === "river" || cand.kind === "lake" || cand.kind === "near"
+        ? gates.isLabeled(cand.subject!)
+        : cand.kind === "terrain"
+          ? gates.hasGlyphNear(cand.subject as TerrainBand)
+          : true,
+    );
+    for (const cand of findable) {
+      if (emitted.has(`${cand.kind}:${cand.subject ?? ""}`)) continue;
+      const clueLike = {
+        kind: cand.kind,
+        text: "",
+        subject: cand.subject,
+        leagues: cand.leagues,
+      } as Clue;
+      const filtered = remaining.filter(({ s, idx }) => clueHoldsAt(world, clueLike, s, idx));
+      assert.equal(
+        filtered.length,
+        remaining.length,
+        `an unused truthful ${cand.kind} clue would have narrowed ${remaining.length} -> ` +
+          `${filtered.length} (seed ${world.recipe.seed})`,
+      );
+    }
+  });
+});
+
+test("findability gates run before selection, so the walk plans around them (#335)", () => {
+  const world = DAILY[0]!;
+  const q = mustQuarry(world);
+  const closed = buildClues(world, q, { isLabeled: () => false, hasGlyphNear: () => false });
+  const kinds = closed.map((c) => c.kind);
+  for (const k of ["river", "lake", "near", "terrain"]) {
+    assert.ok(!kinds.includes(k as Clue["kind"]), `${k} cannot appear when its gate is closed`);
+  }
+  assert.ok(closed.length >= 3, "the three-line floor survives fully closed gates");
+  assert.equal(closed[0]!.kind, "framing", "the framing line still opens the list");
+});
+
+test("every mirrored constant matches its source (the drift alarm, #335)", () => {
+  assert.equal(MIRROR_MTN_REL, GLYPH_MTN_REL, "mountain relief threshold");
+  assert.equal(MIRROR_HILL_REL, GLYPH_HILL_REL, "hill relief threshold");
+  assert.equal(MIRROR_CELLS_PER_LEAGUE, CELLS_PER_LEAGUE, "cells per league");
+  assert.deepEqual([...TREE_IDS].sort(), [...TREE_BIOMES].sort(), "tree-glyph biome set");
+  assert.deepEqual(LEAGUE_LADDER, facts.LEAGUE_LADDER, "leagues ladder");
+  assert.equal(NEAR, facts.NEAR, "named-feature nearness radius");
+  assert.equal(TERRAIN_RADIUS, facts.TERRAIN_RADIUS, "terrain neighborhood radius");
+  assert.equal(TERRAIN_MIN, facts.TERRAIN_MIN, "terrain cell floor");
+  assert.equal(ROAD_NEAR, facts.ROAD_NEAR, "road reach");
+});
+
+test("chooseQuarry picks are pinned: the #335 pool refactor changed nothing", () => {
+  // Measured before the pool moved to daily-hunt-clue-facts.ts (120-seed
+  // equivalence run, 0 mismatches); these two pins keep the class guarded.
+  assert.equal(chooseQuarry(DAILY[0]!)!.idx, 11);
+  assert.equal(DAILY[0]!.settlements[11]!.name, "Sharakhara");
+  assert.equal(chooseQuarry(DAILY[14]!)!.idx, 19);
+  assert.equal(DAILY[14]!.settlements[19]!.name, "Lurgry");
 });
 
 test("a quarry near (not exactly at) the chart's center reads central, not west/south", () => {
@@ -162,10 +379,19 @@ test("a quarry near (not exactly at) the chart's center reads central, not west/
   // off dead-center yet the clues claimed "western reach" and "southern part",
   // because "central" fired only on exact midpoint equality. Near-center must
   // land in a central BAND (within 1/8 of the dimension from the midpoint).
+  // Probed through buildClueFacts' compass candidates: selection (#335)
+  // guarantees only ONE compass line in the emitted list, but both candidates
+  // always exist and carry the band the sweep re-verifies emitted clues by.
+  const w = 320;
+  const h = 240;
   const world = {
-    elev: { w: 320, h: 240 },
+    elev: { w, h, data: new Float64Array(w * h) },
+    seaLevel: -1,
+    biomes: new Uint8Array(w * h),
     rivers: [],
-    realms: { labels: new Int16Array(320 * 240), seats: [] },
+    roads: [],
+    settlements: [],
+    realms: { labels: new Int16Array(w * h), seats: [] },
     names: { rivers: new Map(), lakes: [], realms: [] },
   } as unknown as World;
   const at = (x: number, y: number): Quarry => ({
@@ -183,10 +409,10 @@ test("a quarry near (not exactly at) the chart's center reads central, not west/
     },
   });
   const subjects = (x: number, y: number) => {
-    const clues = buildClues(world, at(x, y));
+    const compass = buildClueFacts(world, at(x, y)).compass;
     return {
-      ew: clues.find((c) => c.kind === "ew")!.subject,
-      ns: clues.find((c) => c.kind === "ns")!.subject,
+      ew: compass.find((c) => c.clue.kind === "ew")!.clue.subject,
+      ns: compass.find((c) => c.clue.kind === "ns")!.clue.subject,
     };
   };
 
@@ -312,51 +538,9 @@ test("legendExcluded flags settlements under the box and spares those outside it
   assert.equal(legendExcluded(world, null, widthPx).size, 0, "no legend box excludes nothing");
 });
 
-// --- pruneUnlabeledFeatureClues: keep only clues a player can actually find ---
-// Uses a synthetic clue list (not a pinned seed) so the contract is tested
-// directly, independent of world-gen determinism.
-const SAMPLE_CLUES: readonly Clue[] = [
-  { kind: "framing", text: "Today's survey hides one small place." },
-  { kind: "ew", subject: "west", text: "It lies toward the western reach of the chart." },
-  { kind: "ns", subject: "north", text: "It lies in the northern part of the chart." },
-  {
-    kind: "river",
-    subject: "The Hjarggre Torrent",
-    text: "It stands within sight of the river The Hjarggre Torrent.",
-  },
-  { kind: "lake", subject: "The Still Mere", text: "Its prospect takes in the waters of The Still Mere." },
-  { kind: "onriver", text: "A river runs through its bounds." },
-  { kind: "realm", subject: "The Jarldom of Skaugre", text: "It answers to The Jarldom of Skaugre." },
-];
-
-test("pruneUnlabeledFeatureClues drops river/lake clues whose label was never drawn", () => {
-  const kept = pruneUnlabeledFeatureClues(SAMPLE_CLUES, () => false);
-  const kinds = kept.map((c) => c.kind);
-  assert.ok(!kinds.includes("river"), "an unlabeled river clue is removed");
-  assert.ok(!kinds.includes("lake"), "an unlabeled lake clue is removed");
-  // Non-feature clues (and the realm clue, which is out of scope) always survive.
-  assert.deepEqual(kinds, ["framing", "ew", "ns", "onriver", "realm"]);
-});
-
-test("pruneUnlabeledFeatureClues keeps every clue when all labels are drawn", () => {
-  const kept = pruneUnlabeledFeatureClues(SAMPLE_CLUES, () => true);
-  assert.deepEqual(kept, SAMPLE_CLUES);
-});
-
-test("pruneUnlabeledFeatureClues keeps a labeled feature and drops an unlabeled one", () => {
-  const kept = pruneUnlabeledFeatureClues(SAMPLE_CLUES, (name) => name === "The Hjarggre Torrent");
-  const river = kept.find((c) => c.kind === "river");
-  const lake = kept.find((c) => c.kind === "lake");
-  assert.ok(river, "the labeled river clue is kept");
-  assert.equal(lake, undefined, "the unlabeled lake clue is dropped");
-});
-
-test("pruneUnlabeledFeatureClues never mutates its input", () => {
-  const before = SAMPLE_CLUES.length;
-  const kept = pruneUnlabeledFeatureClues(SAMPLE_CLUES, () => false);
-  assert.equal(SAMPLE_CLUES.length, before, "input array length is unchanged");
-  assert.notStrictEqual(kept, SAMPLE_CLUES, "a new array is returned");
-});
+// pruneUnlabeledFeatureClues and its tests are gone (#335): findability now
+// gates candidates BEFORE selection (ClueFindability), covered by the gated
+// sweep and the closed-gates test above.
 
 // --- classifyClick: continuous warmer/colder + name the town you clicked -----
 // A synthetic world gives exact control over the geometry the click reads
