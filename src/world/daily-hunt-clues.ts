@@ -1,5 +1,11 @@
-import type { World } from "./types.ts";
+import { createRng } from "../core/rng.ts";
+import {
+  buildClueFacts,
+  type ClueCandidate,
+  type ClueFindability,
+} from "./daily-hunt-clue-facts.ts";
 import type { Quarry } from "./daily-hunt.ts";
+import type { World } from "./types.ts";
 
 export type ClueKind =
   | "framing"
@@ -9,166 +15,104 @@ export type ClueKind =
   | "lake"
   | "coast"
   | "onriver"
-  | "realm";
+  | "realm"
+  | "terrain"
+  | "road"
+  | "near";
 
 /**
  * One antique survey line. `subject` carries the geometric fact a feature clue
- * asserts (a feature name, or a band token for the positional clues) so callers
- * and tests can verify truthfulness without parsing prose.
+ * asserts (a feature name, or a band token for the positional/terrain/road
+ * clues) so callers and tests can verify truthfulness without parsing prose.
+ * A `near` clue also carries `leagues`, the round scale-bar bound its text
+ * quotes, for the same reason.
  */
 export type Clue = {
   readonly kind: ClueKind;
   readonly text: string;
   readonly subject?: string;
+  readonly leagues?: number;
 };
 
-/** Grid-cell radius within which a named river or lake is "near" the quarry. */
-const NEAR = 4;
+/** Ratified narrowing target (#335): the walk stops once at most this many
+ *  candidate villages stay consistent with every emitted clue. */
+const NARROW_TARGET = 3;
+
+/** Cap on a day's total lines (framing included), so a wide field cannot run
+ *  the survey voice long. Mirrored by the narrowing test. */
+const MAX_LINES = 8;
+
+/** Seeded target lengths (framing included) the color pass fills toward. The
+ *  reduction walk alone often stops at three lines, which reads thin next to
+ *  the survey voice the hunt shipped with; extra truthful lines only ever make
+ *  the puzzle fairer, never false. */
+const TARGET_LINES = [5, 6];
+
+const FRAMING: Clue = {
+  kind: "framing",
+  text:
+    "Today's survey hides one small place, set down on the chart but left " +
+    "unnamed in these notes. Read the lines, then find it.",
+};
 
 /**
- * Fraction of a chart dimension, either side of the midpoint, that counts as
- * "central": the middle quarter of the chart. Without a band, a quarry two
- * cells off dead-center reads "western reach", which live play proved
- * misleading (seed 20260731).
- */
-const CENTRAL_BAND = 1 / 8;
-
-/**
- * Emit only geometrically truthful antique clues, always at least three: a
- * constant framing line plus an always-true east/west band and an always-true
- * north/south band (near-center quarries get a central wording so neither is
- * ever empty). Feature clues are appended only when each holds, so the floor
- * of three is guaranteed for any world, including featureless off-grid seeds.
- */
-export function buildClues(world: World, quarry: Quarry): Clue[] {
-  const s = quarry.settlement;
-  const { x, y } = s;
-  const clues: Clue[] = [];
-
-  clues.push({
-    kind: "framing",
-    text:
-      "Today's survey hides one small place, set down on the chart but left " +
-      "unnamed in these notes. Read the lines, then find it.",
-  });
-
-  const cx = (world.elev.w - 1) / 2;
-  const ewBand = (world.elev.w - 1) * CENTRAL_BAND;
-  const ew = Math.abs(x - cx) <= ewBand ? "central" : x < cx ? "west" : "east";
-  clues.push({
-    kind: "ew",
-    subject: ew,
-    text:
-      ew === "east"
-        ? "It lies toward the eastern reach of the chart."
-        : ew === "west"
-          ? "It lies toward the western reach of the chart."
-          : "It sits near the chart's central meridian, neither east nor west.",
-  });
-
-  const cy = (world.elev.h - 1) / 2;
-  const nsBand = (world.elev.h - 1) * CENTRAL_BAND;
-  const ns = Math.abs(y - cy) <= nsBand ? "central" : y < cy ? "north" : "south";
-  clues.push({
-    kind: "ns",
-    subject: ns,
-    text:
-      ns === "north"
-        ? "It lies in the northern part of the chart."
-        : ns === "south"
-          ? "It lies in the southern part of the chart."
-          : "It sits near the chart's middle latitude, neither north nor south.",
-  });
-
-  const river = nearestNamedRiver(world, x, y);
-  if (river && river.dist <= NEAR) {
-    clues.push({
-      kind: "river",
-      subject: river.name,
-      text: `It stands within sight of the river ${river.name}.`,
-    });
-  }
-
-  const lake = nearestNamedLake(world, x, y);
-  if (lake && lake.dist <= NEAR) {
-    clues.push({
-      kind: "lake",
-      subject: lake.name,
-      text: `Its prospect takes in the waters of ${lake.name}.`,
-    });
-  }
-
-  if (s.harbor) {
-    clues.push({ kind: "coast", text: "It is a harbor settlement, open to the sea." });
-  }
-
-  if (s.onRiver) {
-    clues.push({ kind: "onriver", text: "A river runs through its bounds." });
-  }
-
-  const realm = realmNameAt(world, x, y);
-  if (realm) {
-    clues.push({ kind: "realm", subject: realm, text: `It answers to ${realm}.` });
-  }
-
-  return clues;
-}
-
-/**
- * Drop feature clues that name a map feature the chart never labeled, so the
- * hunt never sends a player looking for a name that is not printed anywhere.
+ * Emit only geometrically truthful antique clues, chosen by a seeded,
+ * discriminative walk (#335) rather than a fixed template:
  *
- * `buildClues` is a pure function of the World and (correctly) cites the nearest
- * NAMED river/lake, but the renderer only draws a subset of those labels (short
- * courses and collision losers are skipped, see `feature-labels.ts`). This prune
- * runs AFTER `buildClues`, keying off each clue's `subject`, and keeps a
- * `river`/`lake` clue only when `isLabeled(subject)` reports the label was drawn.
- * The caller (the page, which owns the rendered SVG) supplies `isLabeled`; all
- * other clue kinds pass through untouched. Returns a new array (never mutates).
+ * 1. Candidates come from `buildClueFacts` in
+ *    `src/world/daily-hunt-clue-facts.ts`, each true of the quarry, FINDABLE
+ *    on the rendered sheet (the page's `findable` gates run before selection,
+ *    so every guarantee below holds on the list the player sees), and
+ *    carrying a predicate any candidate village can be tested against.
+ * 2. A fresh top-level fork ("daily-hunt-clues") picks ONE compass band to
+ *    guarantee (ratified: at least one always survives) and shuffles the
+ *    rest; the other compass axis goes to the END of the pool, so variety of
+ *    kind is preferred over a second compass line.
+ * 3. Reduction walk: each pool clue is kept only if it strictly shrinks the
+ *    set of candidate villages consistent with everything kept so far. The
+ *    walk stops at NARROW_TARGET remaining (or MAX_LINES, or an exhausted
+ *    pool), so the ratified narrowing guarantee holds.
+ * 4. Color pass: the list then fills toward a seeded TARGET_LINES length with
+ *    further truthful clues that no longer need to reduce (features before
+ *    the spare compass axis). Extra truth only makes the hunt fairer.
+ * 5. Floor: never fewer than three lines, so featureless off-grid seeds and
+ *    the page's readiness check keep their guarantee.
+ *
+ * Clue count floats by design.
  */
-export function pruneUnlabeledFeatureClues(
-  clues: readonly Clue[],
-  isLabeled: (name: string) => boolean,
+export function buildClues(
+  world: World,
+  quarry: Quarry,
+  findable: ClueFindability = {},
 ): Clue[] {
-  return clues.filter((c) => {
-    if (c.kind !== "river" && c.kind !== "lake") return true;
-    return c.subject !== undefined && isLabeled(c.subject);
-  });
-}
+  const facts = buildClueFacts(world, quarry, findable);
+  const rng = createRng(world.recipe.seed).fork("daily-hunt-clues");
 
-// --- internal geometry -------------------------------------------------------
+  const first = rng.pick(facts.compass);
+  const other = facts.compass.find((c) => c !== first);
+  const pool = [...rng.shuffled(facts.features), ...(other ? [other] : [])];
+  const target = rng.pick(TARGET_LINES);
 
-function nearestNamedRiver(
-  world: World,
-  x: number,
-  y: number,
-): { name: string; dist: number } | null {
-  let best: { name: string; dist: number } | null = null;
-  for (const [i, name] of world.names.rivers) {
-    const river = world.rivers[i];
-    if (!river) continue;
-    let d = Infinity;
-    for (const p of river.points) d = Math.min(d, Math.hypot(p.x - x, p.y - y));
-    if (best === null || d < best.dist) best = { name, dist: d };
+  const chosen: ClueCandidate[] = [first];
+  let remaining = facts.pool.filter((e) => first.holds(e));
+  for (const cand of pool) {
+    if (remaining.length <= NARROW_TARGET || chosen.length >= MAX_LINES - 1) break;
+    const next = remaining.filter((e) => cand.holds(e));
+    if (next.length < remaining.length) {
+      chosen.push(cand);
+      remaining = next;
+    }
   }
-  return best;
-}
 
-function nearestNamedLake(
-  world: World,
-  x: number,
-  y: number,
-): { name: string; dist: number } | null {
-  let best: { name: string; dist: number } | null = null;
-  for (const lk of world.names.lakes) {
-    const d = Math.hypot(lk.x - x, lk.y - y);
-    if (best === null || d < best.dist) best = { name: lk.name, dist: d };
+  for (const cand of pool) {
+    if (chosen.length >= target - 1) break;
+    if (!chosen.includes(cand)) chosen.push(cand);
   }
-  return best;
+
+  return [FRAMING, ...chosen.map((c) => c.clue)];
 }
 
-function realmNameAt(world: World, x: number, y: number): string | null {
-  if (world.names.realms.length < 2) return null;
-  const id = world.realms.labels[x + y * world.elev.w];
-  return id >= 0 ? (world.names.realms[id] ?? null) : null;
-}
+// pruneUnlabeledFeatureClues is gone (#335): a post-hoc prune could delete a
+// clue the reduction walk had counted on, silently breaking the narrowing and
+// floor guarantees on the delivered list. Findability now gates candidates
+// BEFORE selection via ClueFindability in src/world/daily-hunt-clue-facts.ts.
