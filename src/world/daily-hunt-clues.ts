@@ -26,11 +26,19 @@ export type Clue = {
 const NEAR = 4;
 
 /**
+ * Fraction of a chart dimension, either side of the midpoint, that counts as
+ * "central": the middle quarter of the chart. Without a band, a quarry two
+ * cells off dead-center reads "western reach", which live play proved
+ * misleading (seed 20260731).
+ */
+const CENTRAL_BAND = 1 / 8;
+
+/**
  * Emit only geometrically truthful antique clues, always at least three: a
  * constant framing line plus an always-true east/west band and an always-true
- * north/south band (each with a central-tie wording so neither is ever empty).
- * Feature clues are appended only when each holds, so the floor of three is
- * guaranteed for any world, including featureless off-grid seeds.
+ * north/south band (near-center quarries get a central wording so neither is
+ * ever empty). Feature clues are appended only when each holds, so the floor
+ * of three is guaranteed for any world, including featureless off-grid seeds.
  */
 export function buildClues(world: World, quarry: Quarry): Clue[] {
   const s = quarry.settlement;
@@ -45,7 +53,8 @@ export function buildClues(world: World, quarry: Quarry): Clue[] {
   });
 
   const cx = (world.elev.w - 1) / 2;
-  const ew = x < cx ? "west" : x > cx ? "east" : "central";
+  const ewBand = (world.elev.w - 1) * CENTRAL_BAND;
+  const ew = Math.abs(x - cx) <= ewBand ? "central" : x < cx ? "west" : "east";
   clues.push({
     kind: "ew",
     subject: ew,
@@ -58,7 +67,8 @@ export function buildClues(world: World, quarry: Quarry): Clue[] {
   });
 
   const cy = (world.elev.h - 1) / 2;
-  const ns = y < cy ? "north" : y > cy ? "south" : "central";
+  const nsBand = (world.elev.h - 1) * CENTRAL_BAND;
+  const ns = Math.abs(y - cy) <= nsBand ? "central" : y < cy ? "north" : "south";
   clues.push({
     kind: "ns",
     subject: ns,

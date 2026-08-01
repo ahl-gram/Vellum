@@ -61,14 +61,21 @@ export function realmNameAt(world: World, x: number, y: number): string | null {
   return id >= 0 ? (world.names.realms[id] ?? null) : null;
 }
 
+// Central-band fraction (1/8 of the dimension either side of the midpoint,
+// i.e. the middle quarter of the chart); mirrored from buildClues so the
+// sweep re-derives the band from raw geometry.
+const CENTRAL_BAND = 1 / 8;
+
 export function expectedEW(world: World, x: number): "east" | "west" | "central" {
   const c = (world.elev.w - 1) / 2;
-  return x < c ? "west" : x > c ? "east" : "central";
+  if (Math.abs(x - c) <= (world.elev.w - 1) * CENTRAL_BAND) return "central";
+  return x < c ? "west" : "east";
 }
 
 export function expectedNS(world: World, y: number): "north" | "south" | "central" {
   const c = (world.elev.h - 1) / 2;
-  return y < c ? "north" : y > c ? "south" : "central";
+  if (Math.abs(y - c) <= (world.elev.h - 1) * CENTRAL_BAND) return "central";
+  return y < c ? "north" : "south";
 }
 
 export function mustQuarry(world: World): Quarry {
