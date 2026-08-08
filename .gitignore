@@ -35,8 +35,9 @@ public/llms.txt
 SESSION-NOTES.md
 SESSION-NOTES-ARCHIVE-*.md
 RESUME-HERE.md
-# Personal working-style instructions for Claude Code (local only, not published).
-CLAUDE.md
+# CLAUDE.md was local-only until 2026-08-08 and is now TRACKED (it is project
+# instructions, not personal notes). RESUME-HERE and the session notes stay
+# ignored: they are per-session state, not instructions.
 
 # Local planning docs, no longer tracked. Backlog lives in GitHub issues.
 roadmap/
