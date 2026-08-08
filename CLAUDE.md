@@ -136,10 +136,22 @@ caught by a prediction failing to match data, never by a test.
 - **Before writing a number down, sanity-check it against a prediction.** If every seed yields an
   identical count, if a ship sails over dry land, if two labels "overlap" without touching: the
   measurement is broken, not the world.
-- **Before writing any world-analysis scratch script, read the "Scratch-script traps" gotcha in
-  auto-memory** (it is in the core file, `project_vellum.md`). Argument order, chart-space vs
-  grid-space fractions, and `Field` vs flat `Float64Array` have each silently produced confident
-  garbage.
+- **Before writing any world-analysis scratch script, read these three traps.** Each has already
+  produced a confident wrong analysis, and the reason they are worth stating here rather than
+  leaving to review is that **none of them throws**: you get a plausible number instead of an
+  error, so nothing downstream tells you the measurement was broken.
+  - **Argument order: the seed comes FIRST.** Build a world with `defaultRecipe(seed, overrides)`
+    from `src/world/generate.ts`. The old `recipeForCommand(command, seed, ...)` took the COMMAND
+    first and was deleted at #138, so a script copied from that era calling `recipeForCommand(42)`
+    silently generates the DEFAULT world. The tell is that every "seed" yields identical counts.
+  - **Chart space is not grid space.** `PlaceMark.nx/ny` (`buildPlaceManifest` in
+    `src/render/place-manifest.ts`) are 0..1 fractions of the RENDERED chart, with the frame margin
+    baked in (`MARGIN_FRACTION` in `src/render/transform.ts`, 0.045). They cannot be used to sample
+    terrain. For that use `world.settlements[i].x/y`, which is grid space; the projection is affine.
+  - **A `Field` is not a `Float64Array`.** `world.elev` is a `Field` (`Field` in `src/core/grid.ts`)
+    and is read with `.at(x, y)`. `world.oceanDist` is a bare `Float64Array`, indexed `y * W + x`.
+    Calling `.at(x, y)` on the latter silently resolves to `TypedArray.at(x)`, which ignores the
+    second argument and returns an unrelated cell.
 - **The chart number IS the seed** (`cartouche.ts:146`), so any screenshot identifies its world
   exactly. Reproduce before theorising.
 
