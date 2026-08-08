@@ -28,6 +28,7 @@ import { fileURLToPath } from "node:url";
 import { join, resolve } from "node:path";
 import { findBrowser } from "../src/cli/raster.ts";
 import { browserlessAction } from "../src/cli/browser-policy.ts";
+import { resolveE2ePorts } from "../src/cli/e2e-ports.ts";
 import { start, cleanup } from "./e2e/harness.mjs";
 import { run as runRender } from "./e2e/suite-render.mjs";
 import { run as runMotion } from "./e2e/suite-motion.mjs";
@@ -56,9 +57,22 @@ const REPO = resolve(HERE, "..");
 // published. Override with VELLUM_SITE_DIR. Run `npm run build` first to populate it.
 const SITE = process.env["VELLUM_SITE_DIR"] ? resolve(process.env["VELLUM_SITE_DIR"]) : join(REPO, "dist");
 const OUT = join(REPO, "out", "e2e");
-const PORT = 8765;
-const DPORT = 9222;
+// #339: both ports are overridable (VELLUM_E2E_PORT / VELLUM_E2E_DPORT, defaulting
+// to 8765 / 9222) so two checkouts can run this at the same time. A bad value fails
+// here rather than falling back, since a silent fallback puts both lanes back on the
+// same port. The debug port carries a second hazard the harness preflights: see
+// debugPortConflictMessage in src/cli/e2e-ports.ts.
+const { PORT, DPORT } = readPorts();
 const PAGE = `http://127.0.0.1:${PORT}/explorer/`;
+
+function readPorts() {
+  try {
+    return resolveE2ePorts(process.env);
+  } catch (err) {
+    console.error(`FAIL: ${err.message}`);
+    process.exit(1);
+  }
+}
 
 const browser = findBrowser();
 if (!browser) {
