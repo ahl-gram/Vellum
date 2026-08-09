@@ -6,12 +6,14 @@
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
 import http from "node:http";
+import net from "node:net";
 import { readFile, mkdir, mkdtemp, rm } from "node:fs/promises";
 import { existsSync, writeFileSync } from "node:fs";
 import { stripTypeScriptTypes } from "node:module";
 import { dirname, join, resolve, sep, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { tmpdir } from "node:os";
+import { E2E_PORT_VAR, debugPortConflictMessage } from "../../src/cli/e2e-ports.ts";
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -102,7 +104,66 @@ function startServer(SITE, PORT) {
       res.writeHead(500).end(String(err));
     }
   });
-  return new Promise((res) => server.listen(PORT, "127.0.0.1", () => res(server)));
+  return new Promise((res, rej) => {
+    // Bare EADDRINUSE reads as a crash rather than as "that port is taken", which
+    // is the first thing a second concurrent lane hits (#339).
+    server.on("error", (err) =>
+      rej(
+        err.code === "EADDRINUSE"
+          ? new Error(
+              `port ${PORT} is already in use, so this run cannot serve the site. ` +
+                `Another e2e run or dev server likely holds it; set ${E2E_PORT_VAR}=<free port> to run beside it.`,
+            )
+          : err,
+      ),
+    );
+    server.listen(PORT, "127.0.0.1", () => res(server));
+  });
+}
+
+// #339 preflight. Nothing here binds DPORT (the browser does, later), and
+// getPageTarget attaches to whatever answers /json, so an orphaned browser left
+// holding the port is adopted in SILENCE and the whole run reports on its build.
+// A plain TCP connect is the occupancy signal: it settles immediately on
+// 127.0.0.1 and catches a non-browser squatter too, which would otherwise cost
+// the launch its three retries and then fail with "no devtools page target".
+function probeDebugPort(DPORT, timeoutMs = 300) {
+  return new Promise((res) => {
+    const socket = net.connect({ host: "127.0.0.1", port: DPORT });
+    const settle = (listening) => {
+      socket.destroy();
+      res(listening);
+    };
+    socket.setTimeout(timeoutMs, () => settle(false));
+    socket.on("connect", () => settle(true));
+    socket.on("error", () => settle(false));
+  });
+}
+
+// Best effort, only to name the squatter in the failure: a stray headless browser
+// answers /json/version with a Browser string like "Chrome/141.0.0.0".
+async function debugPortIdentity(DPORT, timeoutMs = 1000) {
+  try {
+    const body = await new Promise((res, rej) => {
+      const req = http.get(`http://127.0.0.1:${DPORT}/json/version`, { timeout: timeoutMs }, (r) => {
+        let d = "";
+        r.on("data", (c) => (d += c));
+        r.on("end", () => res(d));
+      });
+      req.on("timeout", () => req.destroy(new Error("timeout")));
+      req.on("error", rej);
+    });
+    return JSON.parse(body).Browser || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function assertDebugPortFree(DPORT) {
+  const listening = await probeDebugPort(DPORT);
+  const identity = listening ? await debugPortIdentity(DPORT) : undefined;
+  const conflict = debugPortConflictMessage(DPORT, { listening, identity });
+  if (conflict) throw new Error(conflict);
 }
 
 let server, brave, ws, userDataDir;
@@ -283,6 +344,10 @@ async function shoot(file) {
 // run for a flake, so retry. A genuine break (bad binary, missing lib, the browser
 // exits) still fails after the last attempt, with the captured browser output.
 async function launchBrowser(browser, DPORT) {
+  // Once, ABOVE the retry loop: a SIGKILLed attempt does not release the port
+  // synchronously, so preflighting per attempt would report our own dying
+  // browser as the stray one.
+  await assertDebugPortFree(DPORT);
   const MAX_ATTEMPTS = 3;
   let lastErr;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
