@@ -1,5 +1,4 @@
 import { bfsPath } from "../core/bfs-path.ts";
-import { bfsDistance } from "../core/bfs-distance.ts";
 import { NEIGHBORS_8 } from "../core/grid.ts";
 import { labelComponents } from "../core/mask-components.ts";
 import { simplifyPath, type Pt } from "../core/rdp.ts";
@@ -119,18 +118,6 @@ export const RDP_EPSILON = 0.75;
  */
 export const SAIL_WHEN_ROAD_EXCEEDS = 1.3;
 
-/** A port must be within this many cells of the sea to take a coastal sail shortcut, so a
- *  ship never embarks by marching far overland (that is #181's territory). This is a cheap
- *  prefilter on the nearest sea; the embark into the SHARED body is checked separately,
- *  because a port near an inland pond is close to water but far from the ocean.
- *
- *  NOT A TUNING KNOB. Swept 1, 2, 3, 5 and 8 over seeds 1..40 it moves not one leg of 945
- *  (#185, 2026-07-25), because embarksNearShore already rejects every pair it would, and
- *  timing the whole route pass with the gate against without it shows a 0.5% difference,
- *  which is noise. So it is neither a routing rule nor, measurably, a cost guard: it reads
- *  as intent. Anyone reaching for it should be considering deleting it, not retuning it. */
-export const COAST_MAX_HOPS = 2;
-
 /** Max straight embark from a port to the shared water body for a coastal shortcut. Keeps
  *  the overland stub of a same-landmass sail to a cell or two, so no ship marches inland.
  *
@@ -151,8 +138,16 @@ export const COAST_EMBARK_MAX = 3;
  * True when a sea path's two overland stubs are both short. seaCrossing returns
  * [fromPort, ...open water..., toPort], jumping straight from each land port to its launch
  * cell, so the stub is the port-to-first-water gap. A coastal shortcut must embark right by
- * the shore; a far embark means the shared ocean is inland of the port (a pond fooled the
- * cheap prefilter), and the survey should ride instead.
+ * the shore; a far embark means the shared ocean is inland of the port (its nearest water
+ * was a pond), and the survey should ride instead.
+ *
+ * Since #284 this is the ONLY gate on which ports may sail a coastal shortcut. A cheap
+ * hop-distance prefilter, COAST_MAX_HOPS, used to run ahead of it in walkLeg step 2;
+ * measured over seeds 1..40 it rejected no pair this one does not, at every value from 1
+ * up to deletion itself, so it was removed rather than retuned (#284, and #185 before it).
+ * That makes the bound here load-bearing in a way it was not while a second gate stood in
+ * front of it: relax it and a ship starts embarking by marching inland, which is the whole
+ * thing these two were guarding against.
  */
 function embarksNearShore(water: ReadonlyArray<number>, w: number): boolean {
   if (water.length < 3) return true;
@@ -211,9 +206,6 @@ export function prepareVoyageRouter(sites: ReadonlyArray<Site>, survey: Survey):
   const isRoad = (c: number) => road[c] === 1;
   const isSea = (c: number) => land[c] === 0;
   const isLand = (c: number) => land[c] === 1;
-  // Hop distance from the nearest sea, to gate which ports may sail a coastal shortcut.
-  const oceanHops = bfsDistance(w, h, (x, y) => land[x + y * w] === 0);
-  const coastal = (c: number) => (oceanHops[c] as number) <= COAST_MAX_HOPS;
 
   // #184: a port's launch map is the router's expensive flood (one full-grid BFS per
   // port), and the all-pairs travel matrix asks about every pair, so each port's map
@@ -251,18 +243,17 @@ export function prepareVoyageRouter(sites: ReadonlyArray<Site>, survey: Survey):
     if (isRoad(from) && isRoad(to)) {
       const walk = bfsPath(w, h, from, (c) => c === to, isRoad);
       if (walk) {
-        // Only coastal ports may sail, and only when the road is meaningfully longer than
-        // the sea route (SAIL_WHEN_ROAD_EXCEEDS). This is what stops a survey riding all
-        // the way around a bay when a boat could cut across it.
-        if (coastal(from) && coastal(to)) {
-          const water = seaCrossing(w, h, from, to, isSea, launchesFor);
-          if (
-            water &&
-            embarksNearShore(water, w) &&
-            chainLength(walk, w) >= SAIL_WHEN_ROAD_EXCEEDS * chainLength(water, w)
-          ) {
-            return { mode: "sea", cells: water };
-          }
+        // A pair sails only when it embarks right by the shore (embarksNearShore) and the
+        // road is meaningfully longer than the sea route (SAIL_WHEN_ROAD_EXCEEDS). Together
+        // those stop a survey riding all the way around a bay a boat could cut across,
+        // without letting a ship set out by marching inland.
+        const water = seaCrossing(w, h, from, to, isSea, launchesFor);
+        if (
+          water &&
+          embarksNearShore(water, w) &&
+          chainLength(walk, w) >= SAIL_WHEN_ROAD_EXCEEDS * chainLength(water, w)
+        ) {
+          return { mode: "sea", cells: water };
         }
         return { mode: "road", cells: walk };
       }
