@@ -27,7 +27,7 @@ const BASE = 232; // ground line
 const SHORE = BASE + 6; // waterline on coast/river plates
 const WATER_BOT = 276; // bottom of the vignette region
 
-type Kind = "capital" | "town" | "village";
+type Kind = "capital" | "seat" | "town" | "village" | "hamlet";
 type Biome =
   | "fields" | "forest" | "pines" | "marsh" | "coast"
   | "river" | "mountain" | "hills" | "dunes";
@@ -45,35 +45,38 @@ type Prospect = {
   readonly shield?: readonly [number, number];
 };
 
-// Style row (1-4) shares one seed so the composition is identical in all four
-// dresses; geometry consumes RNG only in style-independent code to keep that true.
+// V2 after the 2026-08-09 review: antique + ink only (the go dropped the other
+// two dresses), all five settlement tiers, harder ruins, grounded mountain
+// seats, anchored bridges. Plates 1-2 share one seed so the pair is
+// composition-identical; geometry consumes RNG only in style-independent code.
 const CASES: ReadonlyArray<Prospect> = [
   { n: 1, name: "Hakoawelu", epithet: "a harbour town upon the Great Woaku · founded An. 1123", style: "antique", kind: "town", biome: "coast", special: "harbor", seed: 71 },
-  { n: 2, name: "Hakoawelu", epithet: "the same prospect in the surveyor's dress", style: "topographic", kind: "town", biome: "coast", special: "harbor", seed: 71 },
-  { n: 3, name: "Hakoawelu", epithet: "the same prospect in the engraver's dress", style: "ink", kind: "town", biome: "coast", special: "harbor", seed: 71 },
-  { n: 4, name: "Hakoawelu", epithet: "the same prospect in the pilot's dress", style: "nautical", kind: "town", biome: "coast", special: "harbor", seed: 71 },
+  { n: 2, name: "Hakoawelu", epithet: "the same prospect in the engraver's dress", style: "ink", kind: "town", biome: "coast", special: "harbor", seed: 71 },
 
-  { n: 5, name: "Laukuwelua", epithet: "chief city of the realm of Rekekoa · founded An. 1059", style: "antique", kind: "capital", biome: "fields", special: null, seed: 11, shield: [0, 3] },
-  { n: 6, name: "Karag Druum", epithet: "a mountain seat of the draket kings · founded An. 918", style: "ink", kind: "capital", biome: "mountain", special: null, seed: 23, shield: [1, 4] },
-  { n: 7, name: "Tessavar", epithet: "chief port of the veshari shore, her mole and customs house · An. 1204", style: "nautical", kind: "capital", biome: "coast", special: "harbor", seed: 37, shield: [3, 1] },
-  { n: 8, name: "Zoryhav", epithet: "a river capital of five arches · founded An. 987", style: "topographic", kind: "capital", biome: "river", special: "bridge", seed: 41, shield: [1, 3] },
+  { n: 3, name: "Laukuwelua", epithet: "chief city of the realm of Rekekoa · founded An. 1059", style: "antique", kind: "capital", biome: "fields", special: null, seed: 11, shield: [0, 3] },
+  { n: 4, name: "Hauwai", epithet: "seat of the realm of Hauwaiwa · founded An. 1102", style: "antique", kind: "seat", biome: "fields", special: null, seed: 113, shield: [1, 2] },
+  { n: 5, name: "Rekutona", epithet: "a market town of the open fields · founded An. 1214", style: "antique", kind: "town", biome: "fields", special: null, seed: 127 },
+  { n: 6, name: "Furrowdene", epithet: "a village of the open fields · founded An. 1310", style: "antique", kind: "village", biome: "fields", special: null, seed: 73 },
+  { n: 7, name: "Thistlemoor", epithet: "a hamlet of the open fields · founded An. 1387", style: "antique", kind: "hamlet", biome: "fields", special: null, seed: 131 },
 
-  { n: 9, name: "Aelthorn", epithet: "a market town under the greenwood · founded An. 1266", style: "antique", kind: "town", biome: "forest", special: null, seed: 53 },
-  { n: 10, name: "Miremouth", epithet: "a grey town of the fens · founded An. 1189", style: "ink", kind: "town", biome: "marsh", special: null, seed: 59 },
-  { n: 11, name: "Skelbru", epithet: "a bridge town of the norden reach · founded An. 1042", style: "antique", kind: "town", biome: "river", special: "bridge", seed: 61 },
-  { n: 12, name: "Tsulan", epithet: "a terraced town among the hills · founded An. 1131", style: "topographic", kind: "town", biome: "hills", special: null, seed: 67 },
+  { n: 8, name: "Aelthorn", epithet: "a market town under the greenwood · founded An. 1266", style: "antique", kind: "town", biome: "forest", special: null, seed: 53 },
+  { n: 9, name: "Miremouth", epithet: "a grey town of the fens · founded An. 1189", style: "ink", kind: "town", biome: "marsh", special: null, seed: 59 },
+  { n: 10, name: "Tsulan", epithet: "a terraced town among the hills · founded An. 1131", style: "antique", kind: "town", biome: "hills", special: null, seed: 67 },
+  { n: 11, name: "Karag Druum", epithet: "a mountain seat of the draket kings · founded An. 918", style: "ink", kind: "capital", biome: "mountain", special: null, seed: 23, shield: [1, 4] },
+  { n: 12, name: "Tessavar", epithet: "chief port of the veshari shore, her mole and customs house · An. 1204", style: "antique", kind: "capital", biome: "coast", special: "harbor", seed: 37, shield: [3, 1] },
 
-  { n: 13, name: "Furrowdene", epithet: "a village of the open fields · founded An. 1310", style: "antique", kind: "village", biome: "fields", special: null, seed: 73 },
-  { n: 14, name: "Nadelwik", epithet: "a village under the pinewood · founded An. 1287", style: "topographic", kind: "village", biome: "pines", special: null, seed: 79 },
-  { n: 15, name: "Moku-iti", epithet: "a fisher village of the strand · founded An. 1352", style: "nautical", kind: "village", biome: "coast", special: "harbor", seed: 83 },
-  { n: 16, name: "Reedholt", epithet: "a fenland hamlet upon stilts · founded An. 1224", style: "ink", kind: "village", biome: "marsh", special: null, seed: 89 },
+  { n: 13, name: "Nadelwik", epithet: "a village under the pinewood · founded An. 1287", style: "ink", kind: "village", biome: "pines", special: null, seed: 79 },
+  { n: 14, name: "Moku-iti", epithet: "a fisher village of the strand · founded An. 1352", style: "antique", kind: "village", biome: "coast", special: "harbor", seed: 83 },
+  { n: 15, name: "Reedholt", epithet: "a fenland hamlet upon stilts · founded An. 1224", style: "ink", kind: "village", biome: "marsh", special: null, seed: 89 },
+  { n: 16, name: "Oromi-Kai", epithet: "a far isle village under the palms · founded An. 1373", style: "antique", kind: "village", biome: "dunes", special: null, seed: 107 },
+  { n: 17, name: "Eelwater", epithet: "a village at the weir · founded An. 1298", style: "antique", kind: "village", biome: "river", special: "weir", seed: 109 },
 
-  { n: 17, name: "Old Weluarapa", epithet: "founded An. 1120 · burned in the realm wars An. 1361", style: "antique", kind: "town", biome: "fields", special: "ruin", seed: 97 },
-  { n: 18, name: "Karag Voss", epithet: "a fallen mountain hold · thrown down An. 1266", style: "ink", kind: "capital", biome: "mountain", special: "ruin", seed: 101 },
-  { n: 19, name: "Saltmere", epithet: "a drowned village of the marshes · lost to the sea An. 1402", style: "nautical", kind: "village", biome: "marsh", special: "ruin", seed: 103 },
+  { n: 18, name: "Zoryhav", epithet: "a river capital of five arches · founded An. 987", style: "ink", kind: "capital", biome: "river", special: "bridge", seed: 41, shield: [1, 3] },
+  { n: 19, name: "Skelbru", epithet: "a bridge town of the norden reach · founded An. 1042", style: "antique", kind: "town", biome: "river", special: "bridge", seed: 61 },
 
-  { n: 20, name: "Oromi-Kai", epithet: "a far isle village under the palms · founded An. 1373", style: "antique", kind: "village", biome: "dunes", special: null, seed: 107 },
-  { n: 21, name: "Eelwater", epithet: "a village at the weir · founded An. 1298", style: "nautical", kind: "village", biome: "river", special: "weir", seed: 109 },
+  { n: 20, name: "Old Weluarapa", epithet: "founded An. 1120 · burned in the realm wars An. 1361", style: "antique", kind: "town", biome: "fields", special: "ruin", seed: 97 },
+  { n: 21, name: "Karag Voss", epithet: "a fallen mountain hold · thrown down An. 1266", style: "ink", kind: "capital", biome: "mountain", special: "ruin", seed: 101 },
+  { n: 22, name: "Saltmere", epithet: "a drowned village of the marshes · lost to the sea An. 1402", style: "ink", kind: "village", biome: "marsh", special: "ruin", seed: 103 },
 ];
 
 // ------------------------------------------------------------------- helpers
@@ -186,7 +189,7 @@ function groundFor(p: Prospect): GroundFn {
   };
 }
 
-const KIND_SPREAD = { capital: 150, town: 120, village: 78 } as const;
+const KIND_SPREAD = { capital: 150, seat: 135, town: 120, village: 78, hamlet: 46 } as const;
 
 /** Far ridge: scaled-up gl-mtn silhouettes, paper-filled, hatched right flank.
  *  Centered under the town only on mountain/hills seats; otherwise the peaks
@@ -246,6 +249,17 @@ function groundLine(c: Ctx, g: GroundFn, x0: number, x1: number): SvgNode {
   return el("path", { d: pts.join(""), fill: "none", ...stroke(c, 1.3) });
 }
 
+/** The seat hill as a filled MASS occluding the far peaks, so a hill town
+ *  stands on ground rather than floating on the ridge behind it. */
+function mound(c: Ctx, g: GroundFn, base: number): SvgNode {
+  const x0 = VX0 + 6;
+  const x1 = VX1 - 6;
+  const pts: string[] = [`M${r1(x0)} ${r1(base + 3)}`, `L${r1(x0)} ${r1(g(x0))}`];
+  for (let x = x0 + 8; x <= x1; x += 8) pts.push(`L${r1(x)} ${r1(g(x))}`);
+  pts.push(`L${r1(x1)} ${r1(base + 3)}`, "Z");
+  return el("path", { d: pts.join(""), fill: c.paper, ...stroke(c, 1.3) });
+}
+
 function grassFlicks(c: Ctx, r: () => number, g: GroundFn, x0: number, x1: number, count: number): SvgNode {
   const parts: string[] = [];
   for (let i = 0; i < count; i++) {
@@ -297,6 +311,8 @@ function building(c: Ctx, b: Bld, base: number, weight: number): SvgNode[] {
       out.push(el("path", { d, fill: c.paper, ...stroke(c, weight) }));
       hatch.push(`M${r1(x + w * 0.62)} ${r1(top + h * 0.55)}l${r1(w * 0.2)} ${r1(h * 0.28)}`);
       hatch.push(`M${r1(x + w * 0.5)} ${r1(top + h * 0.72)}l${r1(w * 0.22)} ${r1(h * 0.2)}`);
+      hatch.push(`M${r1(x + w * 0.16)} ${r1(top + h * 0.5)}l${r1(w * 0.14)} ${r1(h * 0.24)}`);
+      hatch.push(`M${r1(x + w * 0.3)} ${r1(top + h * 0.66)}l${r1(w * 0.16)} ${r1(h * 0.2)}`);
     } else if (b.form === "gable") {
       const d = `M${r1(x)} ${base}L${r1(x)} ${r1(top)}L${r1(x + w / 2)} ${r1(top - gh)}L${r1(x + w)} ${r1(top)}L${r1(x + w)} ${base}Z`;
       out.push(el("path", { d, fill: c.paper, ...stroke(c, weight) }));
@@ -329,6 +345,7 @@ function building(c: Ctx, b: Bld, base: number, weight: number): SvgNode[] {
       const d = `M${r1(x)} ${base}L${r1(x)} ${r1(top + h * 0.2)}L${r1(x + w * 0.35)} ${r1(top + h * 0.38)}L${r1(x + w * 0.65)} ${r1(top + h * 0.12)}L${r1(x + w)} ${r1(top + h * 0.3)}L${r1(x + w)} ${base}Z`;
       out.push(el("path", { d, fill: c.paper, ...stroke(c, weight) }));
       hatch.push(`M${r1(x + w * 0.55)} ${r1(top + h * 0.35)}l${r1(w * 0.28)} ${r1(h * 0.22)}`);
+      hatch.push(`M${r1(x + w * 0.2)} ${r1(top + h * 0.5)}l${r1(w * 0.3)} ${r1(h * 0.24)}`);
     } else {
       out.push(el("path", { d: `M${r1(x)} ${base}L${r1(x)} ${r1(top)}L${r1(x + w)} ${r1(top)}L${r1(x + w)} ${base}Z`, fill: c.paper, ...stroke(c, weight) }));
       if (b.form === "tower") {
@@ -410,10 +427,13 @@ function curtainWall(c: Ctx, g: GroundFn, x0: number, x1: number, h: number, gat
 /** Packed medieval skyline: back row first (thinner stroke), then the front row. */
 function townscape(c: Ctx, r: () => number, p: Prospect, g: GroundFn): SvgNode[] {
   const ruined = p.special === "ruin";
+  // the five-tier ladder: capital > seat > town > village > hamlet
   const params = {
-    capital: { n: 11, hMin: 16, hMax: 30, spires: 3, keep: true, wall: true },
-    town: { n: 9, hMin: 13, hMax: 23, spires: 2, keep: false, wall: p.biome !== "marsh" },
-    village: { n: 5, hMin: 10, hMax: 16, spires: 1, keep: false, wall: false },
+    capital: { n: 11, hMin: 16, hMax: 30, spires: 3, keep: 34, wall: true },
+    seat: { n: 9, hMin: 14, hMax: 25, spires: 2, keep: 26, wall: true },
+    town: { n: 9, hMin: 13, hMax: 23, spires: 2, keep: 0, wall: p.biome !== "marsh" },
+    village: { n: 5, hMin: 10, hMax: 16, spires: 1, keep: 0, wall: false },
+    hamlet: { n: 3, hMin: 9, hMax: 13, spires: 0, keep: 0, wall: false },
   }[p.kind];
   const cx = (VX0 + VX1) / 2;
 
@@ -426,7 +446,7 @@ function townscape(c: Ctx, r: () => number, p: Prospect, g: GroundFn): SvgNode[]
       const w = 15 + r() * 13;
       const h = (params.hMin + r() * (params.hMax - params.hMin)) * hScale;
       const form: Bld["form"] = r() < 0.55 ? "gable" : "ridge";
-      blds.push({ x, w, h, form, broken: ruined && r() < 0.6 });
+      blds.push({ x, w, h, form, broken: ruined && r() < 0.85 });
       x += w * (0.62 + r() * 0.28);
     }
     const last = blds[blds.length - 1]!;
@@ -444,23 +464,45 @@ function townscape(c: Ctx, r: () => number, p: Prospect, g: GroundFn): SvgNode[]
   for (let i = 0; i < params.spires; i++) {
     const bi = front[Math.floor(r() * front.length)]!;
     const form: Bld["form"] = i === 0 ? "spire" : r() < 0.5 ? "tower" : "spire";
-    verticals.push({ x: bi.x + bi.w * 0.2, w: 9 + r() * 4, h: params.hMax + 8 + r() * 10, form, broken: ruined && r() < 0.5 });
+    verticals.push({ x: bi.x + bi.w * 0.2, w: 9 + r() * 4, h: params.hMax + 8 + r() * 10, form, broken: ruined && r() < 0.8 });
   }
-  const keep: Bld | null = params.keep
-    ? { x: cx - 17, w: 34, h: params.hMax + 16, form: "keep", broken: ruined && r() < 0.5 }
+  const keep: Bld | null = params.keep > 0
+    ? { x: cx - params.keep / 2, w: params.keep, h: params.hMax + (params.keep > 30 ? 16 : 10), form: "keep", broken: ruined && r() < 0.6 }
     : null;
 
   const out: SvgNode[] = [];
   for (const b of back) out.push(...building(c, { ...b, x: b.x + 6 }, g(b.x + b.w / 2) - 8, 0.9));
   if (params.wall && !ruined) out.push(...curtainWall(c, g, runX0, runX1, p.kind === "capital" ? 13 : 10, true));
   if (params.wall && ruined) {
-    // broken wall: two stubs hugging the run
+    // broken wall: two stubs hugging the run, the right one heeling over
     out.push(...curtainWall(c, g, runX0, runX0 + 44, 9, false));
-    out.push(...curtainWall(c, g, runX1 - 38, runX1, 9, false));
+    out.push(el("g", { transform: `rotate(-5 ${r1(runX1 - 19)} ${r1(g(runX1 - 19))})` }, curtainWall(c, g, runX1 - 38, runX1, 8, false)));
   }
   if (keep) out.push(...building(c, keep, g(cx) - (params.wall ? 4 : 0), 1.3));
   for (const b of front) out.push(...building(c, b, g(b.x + b.w / 2), 1.2));
   for (const b of verticals) out.push(...building(c, b, g(b.x + b.w / 2), 1.2));
+  if (ruined) {
+    // a ruin is a FIELD of collapse, not just broken rooflines: strewn rubble,
+    // fallen roof beams leaning on the stumps, and greenery reclaiming the floor
+    const stones: string[] = [];
+    for (let i = 0; i < 10; i++) {
+      const sx = runX0 + 4 + r() * (runX1 - runX0 - 8);
+      const sy = g(sx) - 0.5 - r() * 2;
+      const sw = 2 + r() * 3;
+      stones.push(`M${r1(sx)} ${r1(sy)}l${r1(sw * 0.5)} ${r1(-sw * 0.55)}l${r1(sw * 0.55)} ${r1(sw * 0.55)}Z`);
+    }
+    out.push(el("path", { d: stones.join(""), fill: c.paper, ...stroke(c, 0.7) }));
+    const beams: string[] = [];
+    for (let i = 0; i < 3; i++) {
+      const b = front[Math.floor(r() * front.length)]!;
+      const bx = b.x + b.w * (0.2 + r() * 0.5);
+      beams.push(`M${r1(bx)} ${r1(g(bx))}l${r1(7 + r() * 5)} ${r1(-9 - r() * 5)}`);
+    }
+    out.push(el("path", { d: beams.join(""), fill: "none", ...stroke(c, 0.8) }));
+    out.push(treeRound(c, cx - 20 - r() * 30, g(cx) + 3, 1.0 + r() * 0.3));
+    out.push(marshTuft(c, cx + 14 + r() * 30, g(cx) + 2, 0.9));
+    out.push(marshTuft(c, cx - 60 + r() * 20, g(cx - 50) + 3, 0.8));
+  }
   // stilts under two hamlet houses, for the fen case
   if (p.biome === "marsh" && p.kind === "village" && !ruined) {
     const st: string[] = [];
@@ -585,6 +627,10 @@ function bridge(c: Ctx, x0: number, x1: number, deckY: number, waterY: number, a
   const topo = c.style.name === "topographic";
   const out: SvgNode[] = [];
   const span = (x1 - x0) / arches;
+  // abutments: the bridge must visibly land on both banks
+  for (const ax of [x0, x1]) {
+    out.push(el("path", { d: `M${r1(ax - 3)} ${r1(deckY + 1)}L${r1(ax - 3)} ${r1(waterY + 3)}L${r1(ax + 3)} ${r1(waterY + 3)}L${r1(ax + 3)} ${r1(deckY + 1)}Z`, fill: c.paper, ...stroke(c, 1.0) }));
+  }
   // deck with a slight camber
   const midY = deckY - 5;
   out.push(el("path", { d: `M${r1(x0 - 14)} ${r1(deckY + 2)}L${r1(x0)} ${r1(deckY)}Q${r1((x0 + x1) / 2)} ${r1(midY - 3)} ${r1(x1)} ${r1(deckY)}L${r1(x1 + 14)} ${r1(deckY + 2)}`, fill: "none", ...stroke(c, 1.3) }));
@@ -605,6 +651,8 @@ function bridge(c: Ctx, x0: number, x1: number, deckY: number, waterY: number, a
       out.push(rippleDash(c, (ax0 + ax1) / 2 - 12, waterY + 5 + (i % 2) * 4, 0.7));
     }
   }
+  // the bridge gate: a crenellated tower where the deck meets the town bank
+  out.push(...building(c, { x: x0 - 6, w: 12, h: 22, form: "tower", broken: false }, deckY + 1, 1.1));
   return out;
 }
 
@@ -773,14 +821,17 @@ function foreground(c: Ctx, r: () => number, p: Prospect, g: GroundFn): SvgNode[
 function specialLayer(c: Ctx, r: () => number, p: Prospect): SvgNode[] {
   const out: SvgNode[] = [];
   const cx = (VX0 + VX1) / 2;
+  // harbour furniture draws from its own fork so the two-dress pair stays
+  // composition-identical even though wave counts differ per style
+  const rM = mulberry32(p.seed * 31 + 7);
   if (p.biome === "coast" || p.biome === "dunes") {
     out.push(...waterBand(c, r, p, SHORE, WATER_BOT));
     if (p.special === "harbor" && p.kind !== "village") {
       const q0 = cx - 130;
       const q1 = cx + 40;
       out.push(...quay(c, q0, q1, SHORE));
-      out.push(...mastRow(c, r, q1 + 14, VX1 - 60, SHORE + 8, p.kind === "capital" ? 5 : 4));
-      out.push(ship(c, VX0 + 70 + r() * 30, WATER_BOT - 16, 1.15));
+      out.push(...mastRow(c, rM, q1 + 14, VX1 - 60, SHORE + 8, p.kind === "capital" ? 5 : 4));
+      out.push(ship(c, VX0 + 70 + rM() * 30, WATER_BOT - 16, 1.15));
       if (p.kind === "capital") {
         // the mole, curving out with a light at its head
         const mx = VX1 - 52;
@@ -869,7 +920,7 @@ function prospect(p: Prospect): string {
     sky.push(el("path", { d: lines.join(""), fill: "none", stroke: c.soft, "stroke-width": 0.45, "stroke-opacity": 0.3 }));
   }
   if (p.special === "ruin" || p.biome === "coast") {
-    sky.push(...birds(c, rDecor, p.special === "ruin" ? 4 : 2, 88));
+    sky.push(...birds(c, rDecor, p.special === "ruin" ? 6 : 2, 88));
   }
   const lateDecor: SvgNode[] = [];
   if (p.n === 20) {
@@ -896,7 +947,11 @@ function prospect(p: Prospect): string {
     el("rect", { x: 0, y: 0, width: W, height: H, fill: st.paper }),
     ...sky,
     ...farRidge(c, rGeo, p),
-    ...(drowned ? [] : [groundLine(c, g, VX0 + 6, VX1 - 6)]),
+    ...(drowned
+      ? []
+      : p.biome === "mountain" || p.biome === "hills"
+        ? [mound(c, g, baseFor(p))]
+        : [groundLine(c, g, VX0 + 6, VX1 - 6)]),
     ...townscape(c, rGeo, p, g),
     ...foreground(c, rDecor, p, g),
     ...specialLayer(c, rDecor, p),
@@ -926,12 +981,12 @@ function prospect(p: Prospect): string {
 // ---------------------------------------------------------------------- page
 type Section = { readonly title: string; readonly blurb: string; readonly nums: ReadonlyArray<number> };
 const SECTIONS: ReadonlyArray<Section> = [
-  { title: "I. One town, four dresses", blurb: "The same harbour town, identical composition, once in each style. Judge whether one grammar survives four inks.", nums: [1, 2, 3, 4] },
-  { title: "II. Capitals", blurb: "Walled skylines with keeps, gates and arms. Kind should read without the caption.", nums: [5, 6, 7, 8] },
-  { title: "III. Towns", blurb: "Middling skylines: a spire or two, sometimes a wall.", nums: [9, 10, 11, 12] },
-  { title: "IV. Villages", blurb: "A handful of gables. The special cases: a fisher strand, a fen hamlet on stilts.", nums: [13, 14, 15, 16] },
-  { title: "V. Ruins", blurb: "Broken silhouettes and birds. The year parameter's other endpoint.", nums: [17, 18, 19] },
-  { title: "VI. Far shores", blurb: "Palms, dunes, a weir and its mill: the grammar at its edges.", nums: [20, 21] },
+  { title: "I. One town, two dresses", blurb: "The same harbour town, identical composition, in the two chosen inks: antique and the engraver's.", nums: [1, 2] },
+  { title: "II. The five tiers", blurb: "One ground (the open fields), one dress, the whole ladder: capital, seat, town, village, hamlet. Rank should read without captions.", nums: [3, 4, 5, 6, 7] },
+  { title: "III. Grounds & seats", blurb: "Forest, fen, terraced hills, the mountain seat (now standing on its own hill), and the great port with mole and customs quay.", nums: [8, 9, 10, 11, 12] },
+  { title: "IV. Villages & shores", blurb: "Pines, the fisher strand, stilts in the fen, palms on the far isle, and the weir village. (Open question: the mill is data-less dress, invented; keep or cut.)", nums: [13, 14, 15, 16, 17] },
+  { title: "V. Rivers & bridges", blurb: "The bridge shows its arcade side-on, per the period convention; abutments and a bridge-gate tower now anchor it to the town bank.", nums: [18, 19] },
+  { title: "VI. Ruins", blurb: "A field of collapse: strewn rubble, fallen beams, greenery in the floors, the heeling wall. The year parameter's other endpoint.", nums: [20, 21, 22] },
 ];
 
 function page(): string {
@@ -982,15 +1037,15 @@ footer { margin-top: 3rem; text-align: center; color: var(--ink-faded); font-siz
 <body>
 <main>
 <header>
-<h1>The Prospects · Sub 0 spike</h1>
-<p class="sub">issue #237 · a throwaway gallery to prove the silhouette-and-hatching grammar before it is built · every vignette hand-faked, no world sampled</p>
+<h1>The Prospects · Sub 0 spike, second state</h1>
+<p class="sub">issue #237 · a throwaway gallery to prove the silhouette-and-hatching grammar before it is built · every vignette hand-faked, no world sampled · second state after the 2026-08-09 review (go): antique + ink only, all five tiers, harder ruins, grounded seats, anchored bridges</p>
 <div class="note">
 <strong>The review question:</strong> do these read as engraved prospect plates from the same atelier as the charts?
 The bar is <em>good enough to build</em> (Sub 3 owns per-style polish), not good enough to ship.
 <ul>
-<li>Does the silhouette read at arm's length: capital &gt; town &gt; village, without captions?</li>
+<li>Does the tier ladder read at arm's length: capital &gt; seat &gt; town &gt; village &gt; hamlet, without captions?</li>
 <li>Do biomes and specials read: harbor, bridge, ruin, marsh, fields?</li>
-<li>Does each of the four dresses feel native, or does one fight the grammar?</li>
+<li>Do the two dresses feel native, and do ruins now read ruinous?</li>
 </ul>
 </div>
 </header>
