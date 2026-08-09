@@ -470,8 +470,16 @@ function townscape(c: Ctx, r: () => number, p: Prospect, g: GroundFn): SvgNode[]
     ? { x: cx - params.keep / 2, w: params.keep, h: params.hMax + (params.keep > 30 ? 16 : 10), form: "keep", broken: ruined && r() < 0.6 }
     : null;
 
+  // GROUNDING INVARIANT (the spike's twice-seen failure class): a back-row
+  // mass is drawn with its base raised for depth, so it may exist ONLY where
+  // the front row's packed span fully covers it; anywhere else its raised
+  // base reads as a floating building. Packing guarantees the front span is
+  // one contiguous interval, so containment is the whole check.
+  const backKept = back.filter(
+    (b) => b.x + 6 >= first.x - 1 && b.x + 6 + b.w <= lastB.x + lastB.w + 1,
+  );
   const out: SvgNode[] = [];
-  for (const b of back) out.push(...building(c, { ...b, x: b.x + 6 }, g(b.x + b.w / 2) - 8, 0.9));
+  for (const b of backKept) out.push(...building(c, { ...b, x: b.x + 6 }, g(b.x + b.w / 2) - 8, 0.9));
   if (params.wall && !ruined) out.push(...curtainWall(c, g, runX0, runX1, p.kind === "capital" ? 13 : 10, true));
   if (params.wall && ruined) {
     // broken wall: two stubs hugging the run, the right one heeling over
