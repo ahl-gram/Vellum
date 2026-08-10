@@ -79,6 +79,53 @@ function emptyMount(): { el: HTMLElement; asked: string[] } {
   return { el: mount as unknown as HTMLElement, asked };
 }
 
+/**
+ * A recording stand-in for one of the ages driver's two chamber painters. Every property
+ * answers as a function that logs its own name, so a test can assert the EXACT set of
+ * delegations a member makes, including the empty set. These are the driver's injected
+ * collaborators, never the module under test.
+ */
+function recordingChamber(): { calls: string[]; as<T>(): T } {
+  const calls: string[] = [];
+  const proxy = new Proxy(
+    {},
+    { get: (_t, prop: string) => () => calls.push(prop) },
+  );
+  return { calls, as: <T,>() => proxy as T };
+}
+
+/**
+ * A scrubber whose elements record what was written to them. Enough to tell the REAL
+ * instrument and journal apart from the stand-ins without a DOM: createAges clears the
+ * bar's aria-valuetext on exit and the real log panel empties the strip and the signature,
+ * and no-bar.ts does neither.
+ */
+function recordingBar(): { bar: Record<string, unknown>; writes: string[] } {
+  const writes: string[] = [];
+  const node = (name: string) => ({
+    hidden: undefined as boolean | undefined,
+    textContent: undefined as string | undefined,
+    min: "",
+    max: "",
+    step: "",
+    replaceChildren: () => writes.push(`${name}.replaceChildren`),
+    removeAttribute: (attr: string) => writes.push(`${name}.removeAttribute:${attr}`),
+    setAttribute: (attr: string) => writes.push(`${name}.setAttribute:${attr}`),
+    appendChild: () => writes.push(`${name}.appendChild`),
+  });
+  return {
+    writes,
+    bar: {
+      panel: node("panel"),
+      playBtn: node("playBtn"),
+      range: node("range"),
+      year: node("year"),
+      sig: node("sig"),
+      strip: node("strip"),
+    },
+  };
+}
+
 /** The host's optional verso surface (#174), recording so a clear is provable. */
 function recordingSink(): { sink: { paint(p: string, v: string): void; clear(): void }; calls: string[] } {
   const calls: string[] = [];
@@ -198,6 +245,79 @@ test("destroy() on a bar-less host still tears down the chart side (#319)", asyn
     "the place overlay nodes are removed from the mount (overlay.teardown ran)",
   );
   assert.deepEqual(calls, ["clear"], "the verso sink's ink leaves with the front of the sheet");
+});
+
+test("the bar-less ages driver delegates EXACTLY the two chart-side teardowns (#319)", async () => {
+  const { barlessAges } = await import("../../src/site/living-chart/no-bar.ts");
+
+  // The whole substance of the bar-less driver is WHICH members stay silent and which
+  // still reach the chamber painters. Through the engine's public surface that split is
+  // invisible on an undrawn mount (both delegations are no-ops with no session), so it is
+  // pinned here, on the module, against its own injected collaborators. A blanket-no-op
+  // clearAges passes every other test in this file; it fails this one.
+  const ledger = (drive: (a: ReturnType<typeof barlessAges>) => void): string[] => {
+    const chronicle = recordingChamber();
+    const voyage = recordingChamber();
+    drive(barlessAges({ chronicle: chronicle.as(), voyage: voyage.as() }));
+    return [...chronicle.calls, ...voyage.calls];
+  };
+
+  // The Explorer calls clearAges after EVERY draw whose instrument is off, so this is the
+  // hot path: swallowing it leaks a stale chronicle session and the voyage overlay once
+  // per redraw on a host that never had a bar.
+  assert.deepEqual(ledger((a) => a.clearAges()), ["clearScrub", "clearVoyage"], "clearAges clears both chambers");
+  // destroy() reaches the chamber painters through here.
+  assert.deepEqual(ledger((a) => a.exitAges()), ["exitScrub", "exitVoyage"], "exitAges exits both chambers");
+
+  // Everything else is the INSTRUMENT, and touches neither painter. syncSinkAtRest is in
+  // this list on purpose: index.ts gates it behind isActive(), so on a bar-less engine it
+  // is unreachable, and it must not acquire a delegation that would then be dead code
+  // pretending to be behaviour.
+  for (const [name, drive] of [
+    ["armAges", (a: ReturnType<typeof barlessAges>) => a.armAges(null, null, 42, "")],
+    ["syncSinkAtRest", (a: ReturnType<typeof barlessAges>) => a.syncSinkAtRest()],
+    ["snapToRest", (a: ReturnType<typeof barlessAges>) => a.snapToRest()],
+    ["scrubToYear", (a: ReturnType<typeof barlessAges>) => a.scrubToYear(1200)],
+    ["togglePlay", (a: ReturnType<typeof barlessAges>) => a.togglePlay()],
+    ["onBarInput", (a: ReturnType<typeof barlessAges>) => a.onBarInput()],
+    ["pause", (a: ReturnType<typeof barlessAges>) => a.pause()],
+    ["cancelRaf", (a: ReturnType<typeof barlessAges>) => a.cancelRaf()],
+    ["dragStart", (a: ReturnType<typeof barlessAges>) => a.dragStart()],
+    ["dragEnd", (a: ReturnType<typeof barlessAges>) => a.dragEnd()],
+  ] as const) {
+    assert.deepEqual(ledger(drive), [], `${name} touches neither chamber painter`);
+  }
+});
+
+test("a host WITH a scrubber still gets the REAL instrument and journal, not the stand-ins (#319)", async () => {
+  const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
+  const mount = emptyMount();
+  const { bar, writes } = recordingBar();
+  const lc = createLivingChart({
+    mapEl: mount.el,
+    statusEl: {} as unknown as HTMLElement,
+    scrubber: bar as unknown as Parameters<typeof createLivingChart>[0]["scrubber"],
+  });
+
+  // #319's branch decides which modules a host gets, and picking the stand-in for a FULL
+  // host would silently strip the Explorer's and the room's instrument and journal. Until
+  // now only the e2e suites could see that: these two writes are the cheapest DOM-free
+  // fingerprints of the real modules, taken on the one teardown reachable with no session.
+  lc.exitAges();
+  assert.ok(
+    writes.includes("range.removeAttribute:aria-valuetext"),
+    "the real createAges is wired: only it clears the bar's aria-valuetext on exit",
+  );
+  assert.ok(
+    writes.includes("strip.replaceChildren"),
+    "the real createVoyageLogPanel is wired: only it empties the journal strip on hide",
+  );
+  assert.equal(
+    (bar.sig as { textContent?: string }).textContent,
+    "",
+    "and clears the surveyor's signature line",
+  );
+  assert.equal((bar.panel as { hidden?: boolean }).hidden, true, "and the instrument panel is hidden");
 });
 
 test("the bar-less journal keeps the survey's prose and reports no rendered rows (#319)", async () => {
