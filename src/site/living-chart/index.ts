@@ -43,12 +43,29 @@ import { createChronicle } from "./chronicle.ts";
 import { createVoyage, type RestingTrackSink } from "./voyage.ts";
 import { createVoyageLogPanel } from "./voyage-log-panel.ts";
 import { createAges } from "./ages.ts";
+import { barlessAges, barlessLogPanel } from "./no-bar.ts";
 import type { AgesPos } from "../../render/ages-track.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
 
 export type { BuildPlaceOverlayOpts, RestingTrackSink };
 export type { AgesPos };
+
+/** The fused instrument's elements. Named (#319) so a host that always supplies one can
+ *  say so in its own type: see createReadingFrame, whose returned host is the full
+ *  shape, which keeps the room's listeners free of narrowing. */
+export interface ScrubberRefs {
+  panel: HTMLElement;
+  playBtn: HTMLButtonElement;
+  range: HTMLInputElement;
+  year: HTMLElement;
+  sig: HTMLElement;
+  strip: HTMLElement;
+  /** #192: invoked when Play parks (Pause click or the sweep's auto-pause), so the
+   *  host's address writer can record the rest no event announces. Optional: a host
+   *  with no address simply omits it. */
+  onPark?: () => void;
+}
 
 export interface LivingChartHost {
   /** The chart mount (the Explorer's #map): overlays are appended as its children and
@@ -60,19 +77,15 @@ export interface LivingChartHost {
   /** The fused instrument panel (#220): the bar, Play, the readout, and the ONE
    *  journal (the surveyor's signature line and the strip both blocks render into).
    *  The journal nests INSIDE this panel: hiding the panel is the engine's whole
-   *  teardown of the reading column. */
-  scrubber: {
-    panel: HTMLElement;
-    playBtn: HTMLButtonElement;
-    range: HTMLInputElement;
-    year: HTMLElement;
-    sig: HTMLElement;
-    strip: HTMLElement;
-    /** #192: invoked when Play parks (Pause click or the sweep's auto-pause), so the
-     *  host's address writer can record the rest no event announces. Optional: a host
-     *  with no address simply omits it. */
-    onPark?: () => void;
-  };
+   *  teardown of the reading column.
+   *
+   *  OPTIONAL since #319: a host may mount the engine for its overlays and the static
+   *  resting track and hand in no instrument at all, rather than shipping hidden dead
+   *  controls to assistive tech to satisfy this type. With no scrubber the engine wires
+   *  the two stand-ins in no-bar.ts: the instrument surface goes silently inert and the
+   *  chart side (place overlay, the chronicle's static reveal, the voyage's track
+   *  painter) stays fully live. The instrument-less arm-at-rest entry is rearmVoyage. */
+  scrubber?: ScrubberRefs;
   /** Optional second surface the RESTING voyage track mirrors to (the Explorer's verso
    *  bleed-through, #174). Painted only at rest, never from the rAF tick; a page host
    *  with no back face simply omits it. */
@@ -92,35 +105,44 @@ export function createLivingChart(host: LivingChartHost) {
     mapEl: host.mapEl,
     overlay: { data: () => overlay.data(), hideCard: () => overlay.hideCard() },
   });
+  // #319: the ONE place the optional instrument branches. `bar` is read once so both
+  // consumers of the scrubber narrow off the same check; everything downstream is
+  // shape-identical for the two host kinds, which is what keeps the return surface
+  // single (one boundary, one host type, ratified 2026-08-09).
+  const bar = host.scrubber;
   // #220: the journal is ONE document in ONE panel. The prologue rows the log panel
   // builds and the annal rows the ages driver appends share the scrubber's strip, and
   // the log panel's hide/show drives the same panel the instrument lives in.
-  const logPanel = createVoyageLogPanel({
-    panel: host.scrubber.panel,
-    sig: host.scrubber.sig,
-    strip: host.scrubber.strip,
-  });
+  const logPanel = bar
+    ? createVoyageLogPanel({ panel: bar.panel, sig: bar.sig, strip: bar.strip })
+    : barlessLogPanel();
   const voyage = createVoyage({
     mapEl: host.mapEl,
     statusEl: host.statusEl,
     logPanel,
     restingTrackSink: host.restingTrackSink,
   });
-  const ages = createAges({
-    panel: host.scrubber.panel,
-    playBtn: host.scrubber.playBtn,
-    range: host.scrubber.range,
-    readout: host.scrubber.year,
-    strip: host.scrubber.strip,
-    onPark: host.scrubber.onPark,
-    overlay: { data: () => overlay.data() },
-    chronicle,
-    voyage,
-  });
+  const ages = bar
+    ? createAges({
+        panel: bar.panel,
+        playBtn: bar.playBtn,
+        range: bar.range,
+        readout: bar.year,
+        strip: bar.strip,
+        onPark: bar.onPark,
+        overlay: { data: () => overlay.data() },
+        chronicle,
+        voyage,
+      })
+    : barlessAges({ chronicle, voyage });
 
   // Full teardown for an UNMOUNTING host (a page leaving; the Explorer's redraw
   // lifecycle never calls this). Cancels the clock, restores the baked layers,
   // removes every engine-owned node on both faces, and drops the sessions.
+  // #319: correct for BOTH host kinds without a branch, because the bar-less exitAges is
+  // not a blanket no-op: it keeps the two chamber-painter teardowns and drops only the
+  // instrument half. A pure no-op here would strand an unmounting bar-less host's voyage
+  // overlay in the mount and its ink on the verso.
   function destroy(): void {
     ages.exitAges(); // tears down both chamber painters with it
     overlay.teardown();
@@ -159,6 +181,12 @@ export function createLivingChart(host: LivingChartHost) {
     pauseScrub: ages.pause,
     togglePlay: ages.togglePlay,
     onManualScrub: ages.onBarInput,
+    // #319: this line is UNCHANGED by the optional instrument, and deliberately so. The
+    // ratified no-op is the INSTRUMENT's year paint (ages.scrubToYear); the chart-side
+    // fallback below is the chronicle's static reveal the same sub keeps fully live. A
+    // bar-less engine reports isActive() false, so a scrubTo here already resolves to
+    // the chronicle rather than to nothing. Making the whole entry inert would delete a
+    // chart-side capability from exactly the hosts this sub exists to serve.
     scrubTo: (year: number) => (ages.isActive() ? ages.scrubToYear(year) : chronicle.scrubTo(year)),
     scrubSnapToPresent: chronicle.scrubSnapToPresent,
     scrubState: () => {
@@ -183,6 +211,9 @@ export function createLivingChart(host: LivingChartHost) {
     // instrument is ALWAYS while armed: an ages-chamber rest (recto shows no track)
     // would get a survey track bled onto the visible verso (#174). The ages driver
     // knows which chamber rests; disarmed, the raw sync's clear path still runs.
+    // #319: also unchanged, and no bar-less special casing is owed (ratified). With no
+    // ages driver isActive() is always false, so a bar-less host always takes the raw
+    // voyage sync, which is correct for a host where every reachable state IS a rest.
     syncRestingTrack: () => (ages.isActive() ? ages.syncSinkAtRest() : voyage.syncRestingTrack()),
     destroy,
   };
