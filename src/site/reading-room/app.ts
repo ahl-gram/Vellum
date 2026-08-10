@@ -55,6 +55,10 @@ const colophon = createColophon();
 frame.reading.appendChild(colophon.root);
 
 let seed = 0;
+// The seed of the world actually ON SCREEN, advanced only by a successful settle:
+// the rollback target when a counter draw fails, so the hash writer, the state
+// hook, and the counter never name a world that never arrived.
+let shownSeed = 0;
 let style: StyleName = "antique";
 let lastTitle = "";
 // #192/#220: a deep link's live key, one-shot. It becomes the arm's rest position on
@@ -136,9 +140,12 @@ let drawGen = 0;
 
 function draw(): void {
   const myGen = ++drawGen;
-  // The Explorer's synchronous teardown order: a redraw is about to wipe the overlay,
-  // so stop any running sweep first (its rafs would tick over dead DOM).
-  lc.cancelScrubRaf();
+  // The Explorer's synchronous teardown order, with a park: a redraw is about to
+  // wipe the overlay, so stop any running sweep first (its rafs would tick over
+  // dead DOM). pauseScrub rather than a bare raf cancel, so a sweep interrupted by
+  // a read is PARKED (playing flag, Play label) even if the draw then fails; it
+  // never fires onPark, so nothing writes the address mid-draft.
+  lc.pauseScrub();
   lc.cancelVoyageRaf();
   // The chart number IS the seed, so the counter always shows the world on screen;
   // a visitor reads the next number over whatever the last draw left behind.
@@ -164,6 +171,7 @@ function draw(): void {
       lc.buildPlaceOverlay(res.manifest);
       startArrival(frame.host.mapEl.querySelector("svg"));
       lastTitle = res.title;
+      shownSeed = seed;
       // At-rest arrival, every path (#221 ratification): the deep link's key becomes
       // the arm's rest, one-shot; with no key the arm's default parks at the present.
       // rearmAges, never applyAges: a restored link is a photograph, not an arming
@@ -189,24 +197,28 @@ function draw(): void {
     })
     .catch((err) => {
       if (myGen !== drawGen) return;
+      // The previous world is still on screen with its instrument armed: converge
+      // the module state back onto it, or the next park would serialize the failed
+      // seed against the old world's rest into a shareable wrong address.
+      seed = shownSeed;
+      colophon.seedInput.value = String(shownSeed);
       frame.host.statusEl.textContent = "The cartographer spilled the ink: " + err.message;
     });
 }
 
-// #318 the colophon's wiring (the conductor owns wiring, the furniture module owns
+// #318 the colophon's read (the conductor owns wiring, the furniture module owns
 // none). Number(...) >>> 0 is the Print Room's exact boundary shape: a uint32 or 0.
 // The carried recipe params ride along untouched: a counter draw changes the seed,
 // not the dress.
 function readSeed(): void {
+  // A counter gesture retires any unconsumed deep-link key. Without this, a read
+  // that supersedes the boot draft adopts the link's rest for the NEW world (the
+  // superseded settle bails at the gen guard before consuming the one-shot).
+  // Boot-only means boot-only; e2e RR23 pins the race.
+  pendingLive = null;
   seed = Number(colophon.seedInput.value) >>> 0;
   draw();
 }
-colophon.readBtn.addEventListener("click", readSeed);
-colophon.seedInput.addEventListener("keydown", (e) => { if (e.key === "Enter") readSeed(); });
-colophon.diceBtn.addEventListener("click", () => {
-  colophon.seedInput.value = String(Math.floor(Math.random() * 0xffffffff));
-  readSeed();
-});
 
 // The conductor owns wiring, the engine owns behavior (the Explorer's controls.ts
 // idiom, mirrored): Play, the bar, the detent's pointer pair, and the release sync.
@@ -230,4 +242,14 @@ window.__vellumReadingRoomAges = () => {
 if (!usesWorker()) warning.hidden = false;
 
 applyHash();
+shownSeed = seed; // a boot failure rolls back to the boot world itself
 draw();
+// The colophon arms only once the boot draft is underway: wired after the first
+// draw() so a click can never reach a worker still shaking hands (it would render
+// inline on the main thread only to be discarded by the boot draft's supersession).
+colophon.readBtn.addEventListener("click", readSeed);
+colophon.seedInput.addEventListener("keydown", (e) => { if (e.key === "Enter") readSeed(); });
+colophon.diceBtn.addEventListener("click", () => {
+  colophon.seedInput.value = String(Math.floor(Math.random() * 0xffffffff));
+  readSeed();
+});

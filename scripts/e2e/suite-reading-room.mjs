@@ -1,5 +1,5 @@
-// The Reading Room checks (RR0-RR15) on the /reading-room/ page (#221, the last sub
-// of epic #190). The destination page: the reading frame (#219) driving the fused
+// The Reading Room checks (RR0-RR23) on the /reading-room/ page (#221, the last sub
+// of epic #190; RR16-RR23 are #318's colophon dice). The destination page: the reading frame (#219) driving the fused
 // ages instrument (#220), a world taken from the hash, drawn once through the SHARED
 // worker. There is deliberately NO Explorer entry point to follow (decision 3,
 // ratified 2026-07-29 on #221: the room is the only watch surface), so unlike the
@@ -144,7 +144,7 @@ export async function run(ctx) {
     JSON.stringify({ ...bare, todayBefore, todayAfter }),
   );
 
-  // RR16-RR21: the colophon dice (#318, Survey and Story Sub 1). The room's own way
+  // RR16-RR23: the colophon dice (#318, Survey and Story Sub 1). The room's own way
   // to another world: a seed input, the dice, and Read at the journal's foot. They
   // run HERE, on the bare page RR9 just opened, because that is the acceptance
   // verbatim: open the room bare, finish today's story, read another world without
@@ -207,10 +207,13 @@ export async function run(ctx) {
     JSON.stringify({ entries: after.entries, inked: after.inked }),
   );
 
-  // RR20: drawGen supersession. Two reads in one breath; the FIRST must never land
-  // over the second. The worker resolves the stale seed-7 job too (usually first, it
-  // was posted first), so after settling on 42 the page must HOLD 42: a stale settle
-  // slipping through would swap the world after the fact.
+  // RR20: two reads in one breath settle on the latest and HOLD. Honest scope: the
+  // worker is FIFO (jobs run sequentially, replies in order), so the stale seed-7
+  // settle always resolves BEFORE the newer one and the final state converges with
+  // or without the drawGen guard; this check witnesses the acceptance's observable
+  // (latest wins and holds), while the guard itself is belt-and-braces against the
+  // stale settle's side effects and any future non-FIFO transport (the Print Room
+  // shape). The supersession race with real teeth is RR23's.
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");const i=c.querySelector("input");const r=c.querySelector(".rr-read");i.value="7";r.click();i.value="42";r.click();})()`);
   let raced = null;
   for (let i = 0; i < 200; i++) {
@@ -274,6 +277,35 @@ export async function run(ctx) {
     JSON.stringify({ midPlay, interrupted }),
   );
   await shoot("reading-room-colophon.png");
+
+  // RR23: a counter read that SUPERSEDES a deep link's boot draw must not inherit
+  // the link's rest (the adversarial-review catch: pendingLive is one-shot and
+  // boot-only, so a superseded boot settle must not leave it for the counter draw
+  // to adopt; unfixed, seed 42 parked at the link's year=850 and the hash shipped
+  // that never-requested rest). The boot hook lands in the same synchronous block
+  // that starts the boot draft, and the draft's worker round-trip is hundreds of
+  // ms, so clicking right after boot() deterministically supersedes it; preStatus
+  // pins that the race really ran. 1059 is seed 42's present (the golden's year).
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=7&year=850` });
+  check("RR23a the deep-linked boot draft is underway", await boot());
+  const pre = await evaluate(`(()=>{const st=(document.querySelector(".rf-status")||{}).textContent;const c=document.querySelector(".rr-colophon");c.querySelector("input").value="42";c.querySelector(".rr-read").click();return{preStatus:st};})()`);
+  let usurped = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumReadingRoomAges();return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,ages:a,hash:location.hash};})()`);
+    } catch {}
+    if (s && s.status === "" && s.seed === 42 && s.title === "The Isle of Rahai") { usurped = s; break; }
+    await sleep(50);
+  }
+  check(
+    "RR23 a read that supersedes a deep link's boot draft parks the NEW world at ITS present, not the link's rest",
+    pre.preStatus === "Drafting…" && !!usurped && !!usurped.ages &&
+      usurped.ages.chamber === "ages" && usurped.ages.year === 1059 &&
+      /year=1059(&|$)/.test(usurped.hash) && !/year=850/.test(usurped.hash),
+    JSON.stringify({ pre, usurped }),
+  );
 
   // RR10: the ways in. The home card (Watch one) and the Today cross-link, which
   // carries the seed explicitly so it survives a UTC midnight rollover.
