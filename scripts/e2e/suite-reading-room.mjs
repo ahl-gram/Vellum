@@ -207,29 +207,33 @@ export async function run(ctx) {
     JSON.stringify({ entries: after.entries, inked: after.inked }),
   );
 
-  // RR20: two reads in one breath settle on the latest and HOLD. Honest scope: the
-  // worker is FIFO (jobs run sequentially, replies in order), so the stale seed-7
-  // settle always resolves BEFORE the newer one and the final state converges with
-  // or without the drawGen guard; this check witnesses the acceptance's observable
-  // (latest wins and holds), while the guard itself is belt-and-braces against the
-  // stale settle's side effects and any future non-FIFO transport (the Print Room
-  // shape). The supersession race with real teeth is RR23's.
+  // RR20: drawGen supersession, witnessed deterministically. Two reads in one
+  // breath; the worker is FIFO (jobs run sequentially, replies in order), so the
+  // STALE seed-7 settle always resolves FIRST and only the gen guard drops it. The
+  // final state converges either way, which is why the original hold-only form was
+  // blind (guard-prover: guard deleted, 304/304 stayed green). The closer is
+  // sawForeign: the page shows Rahai when this starts (RR17), and with the guard
+  // the title never leaves it, while without the guard seed 7's world lands and
+  // holds the title for its whole successor's job, hundreds of ms against a 50 ms
+  // poll.
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");const i=c.querySelector("input");const r=c.querySelector(".rr-read");i.value="7";r.click();i.value="42";r.click();})()`);
   let raced = null;
+  let sawForeign = false;
   for (let i = 0; i < 200; i++) {
     let s = null;
     try {
       s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent};})()`);
     } catch {}
+    if (s && s.title && s.title !== "The Isle of Rahai") sawForeign = true;
     if (s && s.status === "" && s.seed === 42 && s.title === "The Isle of Rahai") { raced = s; break; }
     await sleep(50);
   }
   await sleep(2000);
   const held = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,hash:location.hash};})()`);
   check(
-    "RR20 a superseded draw can never land over a newer one: the rapid double-read settles on the latest and holds",
-    !!raced && held.seed === 42 && held.title === "The Isle of Rahai" && /(^|#|&)seed=42(&|$)/.test(held.hash),
-    JSON.stringify({ raced: !!raced, held }),
+    "RR20 a superseded draw can never land over a newer one: the stale settle is dropped, the latest holds",
+    !!raced && !sawForeign && held.seed === 42 && held.title === "The Isle of Rahai" && /(^|#|&)seed=42(&|$)/.test(held.hash),
+    JSON.stringify({ raced: !!raced, sawForeign, held }),
   );
 
   // RR21: the dice reads a fresh world. The roll is random, so the assertion is

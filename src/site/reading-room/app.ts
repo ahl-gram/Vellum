@@ -140,11 +140,13 @@ let drawGen = 0;
 
 function draw(): void {
   const myGen = ++drawGen;
-  // The Explorer's synchronous teardown order, with a park: a redraw is about to
-  // wipe the overlay, so stop any running sweep first (its rafs would tick over
-  // dead DOM). pauseScrub rather than a bare raf cancel, so a sweep interrupted by
-  // a read is PARKED (playing flag, Play label) even if the draw then fails; it
-  // never fires onPark, so nothing writes the address mid-draft.
+  // Park the outgoing world's sweep for the draft round-trip. The stake is the
+  // VISIBLE second or so of "Drafting…": the settle's own teardown (clearAges, and
+  // the voyage rearm's raf cancel) runs synchronously with the innerHTML swap, so
+  // no raf can tick over dead DOM with or without this (guard-prover verified).
+  // pauseScrub rather than a bare raf cancel, so a sweep interrupted by a read is
+  // PARKED (playing flag, Play label) even if the draw then fails; it never fires
+  // onPark, so nothing writes the address mid-draft.
   lc.pauseScrub();
   lc.cancelVoyageRaf();
   // The chart number IS the seed, so the counter always shows the world on screen;
