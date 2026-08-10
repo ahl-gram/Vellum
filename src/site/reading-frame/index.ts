@@ -18,6 +18,9 @@
 //       .rf-ages [hidden]  <- scrubber.panel, the whole fused instrument (#220)
 //         .rf-instrument   <- Play, the one bar, the readout
 //         (the ONE dated log: the surveyor's prologue, then the chronicler's annals)
+//       (host furniture may follow, as the panel's SIBLING: the room's #318 colophon
+//        mounts here via the exposed `reading`, below the panel and outside every
+//        panel.hidden teardown the engine drives)
 //
 // The journal rides INSIDE the panel the engine hides. That nesting is load-bearing:
 // the engine's teardown hides the panel without emptying the strip, so a log mounted
@@ -114,7 +117,10 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
     root.remove();
   }
 
-  return { root, host, log, destroy };
+  // `reading` is the host's furniture mount (#318): a page may append its own
+  // elements below the instrument panel. Only ever append SIBLINGS of the panel
+  // here; anything nested inside the panel inherits the engine's hidden teardowns.
+  return { root, host, log, reading, destroy };
 }
 
 export type ReadingFrame = ReturnType<typeof createReadingFrame>;
