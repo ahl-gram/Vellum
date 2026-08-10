@@ -31,7 +31,7 @@ import {
   coastSlider, status, mapDiv, mapViewport, sheetEl, innerEl, caption, versoEl, versoBtn,
   agesChk, orderLink, hashControls,
 } from "./elements.ts";
-import type { AgesPos } from "../living-chart/index.ts";
+import type { AgesPos, LivingChartHost, ScrubberRefs } from "../living-chart/index.ts";
 import type { Live } from "./address.ts";
 
 let lastSvg = "";
@@ -92,7 +92,11 @@ const lc = createLivingChart({
     paint: (points, viewBox) => paintVersoTrack(versoEl, points, viewBox),
     clear: () => clearVersoTrack(versoEl),
   },
-});
+  // #319 made host.scrubber optional, which removed the only STATIC proof that this host
+  // hands one in: without the constraint below, an edit that dropped the scrubber block
+  // would typecheck clean and silently take the bar-less stand-ins, with only e2e to notice.
+  // `satisfies` keeps the inference and adds the floor. (#321 deletes this block outright.)
+} satisfies LivingChartHost & { scrubber: ScrubberRefs });
 
 // #169: the redraft test seam, ON by default (production); hooks.ts exposes the setter.
 let redraftEnabled = true;

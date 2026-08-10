@@ -33,7 +33,7 @@
 // (the engine-driven path in dated-log.ts); render/reveal/snapshot stay the
 // host-driven path for a page filling a strip itself.
 import { createDatedLog } from "./dated-log.ts";
-import type { LivingChartHost } from "../living-chart/index.ts";
+import type { LivingChartHost, ScrubberRefs } from "../living-chart/index.ts";
 
 export interface ReadingFrameOpts {
   /** #192: forwarded to the chronicle's park seam, so a host with an address writer
@@ -96,7 +96,11 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   root.append(chart, status, reading);
   mount.appendChild(root);
 
-  const host: LivingChartHost = {
+  // #319 made LivingChartHost.scrubber optional for a bar-less host. This frame ALWAYS
+  // builds one, so it says so in its own type: the room reads frame.host.scrubber.range
+  // to wire its listeners, and without this intersection every one of those reads would
+  // need a narrowing the frame can prove statically once, here.
+  const host: LivingChartHost & { scrubber: ScrubberRefs } = {
     mapEl: chart,
     statusEl: status,
     scrubber: {
