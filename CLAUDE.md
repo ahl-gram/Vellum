@@ -221,6 +221,12 @@ audit built from scratch.
   mutates one behavior at a time in its own throwaway worktree and reports which single test went
   red. A green suite is not evidence: #73's fork mutant escaped all 340 tests, #141's gate mutation
   escaped all 409, and #140 shipped three guards that were deletable. Zero red is a hole, not a pass.
+- **Run the `pr-skeptic` subagent on every PR after it is pushed, before asking Alex to review.**
+  Dispatch it COLD: the prompt is the PR number or branch name and NOTHING else, no summary of the
+  work and no claims about it. It is agnostic (a fresh context that reconstructs the spec from the
+  issue and the diff, never from the implementing session) and adversarial (it returns ranked
+  findings or a documented failed attack, never approval). It is read-only and never posts to
+  GitHub; relay its report in your reply and let Alex decide what lands on the PR.
 - **No em-dashes** in issue bodies, PR bodies, published copy, or new code comments.
 - A **local invariant belongs in a code comment at the line that breaks**, not only in the working
   notes. If a future edit would silently break byte-identity or an ordering contract, say so there.
