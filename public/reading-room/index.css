@@ -30,3 +30,17 @@ footer { margin-top: 3.5rem; }
 .rf-chart svg.arriving #layer-waterlines {
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
+
+/* #318 the colophon dice: the invitation to the next story, at the journal's foot.
+   It is a SIBLING of .rf-ages (the ratified placement: the engine hides the panel
+   through every teardown, so furniture inside it would vanish on each counter
+   draw). The row wraps and the input may shrink, the #220 lesson: a flex item
+   defaults to min-width auto and refuses to go below min-content on a 320px
+   viewport. Voice from the Print Room's counter (label + dice) and /house.css's
+   control idiom. */
+.rr-colophon { display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem;
+  margin-top: 1.2rem; padding: 0.75rem 0.2rem 0;
+  border-top: 1px solid var(--line-tan); }
+.rr-colophon-invite { font-style: italic; color: var(--ink-brown); }
+.rr-colophon label { font-size: 0.85rem; letter-spacing: 0.05em; color: var(--ink-brown); }
+.rr-colophon input { width: 8.5rem; min-width: 0; font-variant-numeric: tabular-nums; }

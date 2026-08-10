@@ -144,6 +144,137 @@ export async function run(ctx) {
     JSON.stringify({ ...bare, todayBefore, todayAfter }),
   );
 
+  // RR16-RR21: the colophon dice (#318, Survey and Story Sub 1). The room's own way
+  // to another world: a seed input, the dice, and Read at the journal's foot. They
+  // run HERE, on the bare page RR9 just opened, because that is the acceptance
+  // verbatim: open the room bare, finish today's story, read another world without
+  // touching the URL. (Labels continue from RR15; file order is page-state order.)
+  //
+  // RR16: presence and the ratified placement (the 2026-08-08 comment on #318): the
+  // colophon is a SIBLING of .rf-ages inside .rf-reading, never inside the panel
+  // (armAges/clearAges drive panel.hidden through every teardown, so furniture
+  // nested there would vanish on each counter draw), and it is visible on arrival,
+  // before any gesture (open decision 2: always visible).
+  const colo = await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");if(!c)return null;const panel=document.querySelector(".rf-ages");const reading=document.querySelector(".rf-reading");return{input:!!c.querySelector("input[type=number]"),dice:!!c.querySelector(".rr-dice"),read:!!c.querySelector(".rr-read"),inPanel:panel?panel.contains(c):null,sibling:!!(panel&&c.parentElement===panel.parentElement),inReading:!!(reading&&reading.contains(c)),shown:!c.hidden&&getComputedStyle(c).display!=="none"};})()`);
+  check(
+    "RR16 the colophon dice sits at the journal's foot: input, dice, Read, the panel's sibling, visible",
+    !!colo && colo.input && colo.dice && colo.read && colo.inPanel === false && colo.sibling && colo.inReading && colo.shown,
+    JSON.stringify(colo),
+  );
+
+  // RR17: read seed 42 by the counter alone. The click starts the draw SYNCHRONOUSLY
+  // (status goes "Drafting…" inside the handler), so polling for "" afterward cannot
+  // race a not-yet-started draw. Identity via the state hook: the golden seed 42
+  // title is the witness that the typed number reached the engine.
+  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="42";c.querySelector(".rr-read").click();})()`);
+  let counter = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,svg:!!document.querySelector(".rf-chart svg")};})()`);
+    } catch {}
+    if (s && s.svg && s.status === "" && s.seed === 42 && s.title === "The Isle of Rahai") { counter = s; break; }
+    await sleep(50);
+  }
+  check("RR17 Read draws the typed world (seed 42 == 'The Isle of Rahai') without touching the URL", !!counter, JSON.stringify(counter));
+  // RR17b: the arrival ceremony replays on the NEW chart and cleans up after itself
+  // (RR2b's assertion re-run on the redraw path: the second startArrival must scope
+  // to the just-landed svg, the #318 pickup note).
+  let reInked = false;
+  for (let i = 0; i < 120; i++) {
+    let ok = null;
+    try { ok = await evaluate(`[...document.querySelectorAll(".rf-chart #layer-land path")].every((p)=>!p.style.strokeDasharray) && !!document.querySelector(".rf-chart #layer-land path")`); } catch {}
+    if (ok) { reInked = true; break; }
+    await sleep(50);
+  }
+  check("RR17b the counter draw replays the arrival ceremony and clears its coast dasharray (no residue)", reInked);
+
+  // RR18/RR19: the counter draw lands at the ratified rest. The address
+  // re-serializes to the new world (seed=42 plus the present park's year, the #221
+  // arrival ratification: pendingLive stays boot-only, so a counter draw parks at
+  // the present), the instrument is armed and parked, and the new story arrives
+  // fully told, ready for the NEXT read at its foot.
+  const after = await evaluate(`(()=>{const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const panel=document.querySelector(".rf-ages");const rows=[...document.querySelectorAll(".rf-log-strip li")];const entries=rows.filter(r=>!r.classList.contains("annals-head"));return{ages:a,play:p?p.textContent:null,panelHidden:panel?panel.hidden:null,hash:location.hash,entries:entries.length,inked:entries.filter(r=>r.classList.contains("inked")).length};})()`);
+  check(
+    "RR18 the counter draw re-serializes the address to the new world's present park (seed=42, year=N)",
+    !!after.ages && after.ages.chamber === "ages" && after.play === "Play" && after.panelHidden === false &&
+      /(^|#|&)seed=42(&|$)/.test(after.hash) && /year=\d+/.test(after.hash),
+    JSON.stringify(after),
+  );
+  check(
+    "RR19 the counter draw arrives at rest with the new story fully told (all entries inked)",
+    after.entries > 0 && after.inked === after.entries,
+    JSON.stringify({ entries: after.entries, inked: after.inked }),
+  );
+
+  // RR20: drawGen supersession. Two reads in one breath; the FIRST must never land
+  // over the second. The worker resolves the stale seed-7 job too (usually first, it
+  // was posted first), so after settling on 42 the page must HOLD 42: a stale settle
+  // slipping through would swap the world after the fact.
+  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");const i=c.querySelector("input");const r=c.querySelector(".rr-read");i.value="7";r.click();i.value="42";r.click();})()`);
+  let raced = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent};})()`);
+    } catch {}
+    if (s && s.status === "" && s.seed === 42 && s.title === "The Isle of Rahai") { raced = s; break; }
+    await sleep(50);
+  }
+  await sleep(2000);
+  const held = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,hash:location.hash};})()`);
+  check(
+    "RR20 a superseded draw can never land over a newer one: the rapid double-read settles on the latest and holds",
+    !!raced && held.seed === 42 && held.title === "The Isle of Rahai" && /(^|#|&)seed=42(&|$)/.test(held.hash),
+    JSON.stringify({ raced: !!raced, held }),
+  );
+
+  // RR21: the dice reads a fresh world. The roll is random, so the assertion is
+  // CONSISTENCY, not identity: the input, the drawn world, and the address all agree
+  // on the same number at the settle (readSeed sets the module seed synchronously,
+  // so the gate keys on status returning "" plus the seed leaving 42).
+  await evaluate(`document.querySelector(".rr-dice").click()`);
+  let rolled = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();const v=document.querySelector(".rr-colophon input").value;return{seed:st.seed,input:v,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,hash:location.hash};})()`);
+    } catch {}
+    if (s && s.status === "" && s.seed !== 42 && String(s.seed) === s.input) { rolled = s; break; }
+    await sleep(50);
+  }
+  check(
+    "RR21 the dice rolls a fresh world and the input, the drawn world, and the address agree",
+    !!rolled && !!rolled.title && new RegExp(`(^|#|&)seed=${rolled.seed}(&|$)`).test(rolled.hash),
+    JSON.stringify(rolled),
+  );
+  // RR22: a read MID-PLAY. The one path where the counter interrupts a running
+  // sweep: draw() cancels the rafs synchronously (the Explorer's teardown order)
+  // and the settle re-arms over the still-armed instrument. The new world must land
+  // exactly like any other counter draw: parked at the present, fully told, Play's
+  // label back at rest. (RR12's suite-scoped console-error delta would catch a raf
+  // ticking over the dead world's DOM.)
+  await evaluate(`(()=>{document.querySelector(".rf-play").click();})()`);
+  await sleep(350);
+  const midPlay = await evaluate(`(()=>{const p=document.querySelector(".rf-play");return{label:p.textContent};})()`);
+  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="42";c.querySelector(".rr-read").click();})()`);
+  let interrupted = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const rows=[...document.querySelectorAll(".rf-log-strip li")].filter(r=>!r.classList.contains("annals-head"));return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,chamber:a&&a.chamber,play:p.textContent,entries:rows.length,inked:rows.filter(r=>r.classList.contains("inked")).length};})()`);
+    } catch {}
+    if (s && s.status === "" && s.seed === 42 && s.title === "The Isle of Rahai" && s.play === "Play") { interrupted = s; break; }
+    await sleep(50);
+  }
+  check(
+    "RR22 a read mid-play interrupts the sweep and still lands parked at the present, fully told",
+    midPlay.label === "Pause" && !!interrupted && interrupted.chamber === "ages" &&
+      interrupted.entries > 0 && interrupted.inked === interrupted.entries,
+    JSON.stringify({ midPlay, interrupted }),
+  );
+  await shoot("reading-room-colophon.png");
+
   // RR10: the ways in. The home card (Watch one) and the Today cross-link, which
   // carries the seed explicitly so it survives a UTC midnight rollover.
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });

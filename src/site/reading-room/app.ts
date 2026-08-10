@@ -6,15 +6,18 @@
 // every path (ratified 2026-07-29 on #221): a bare visit parks at the present, a deep
 // link parks at its addressed rest, and Play is the visitor's gesture.
 //
-// Like the Print Room, the page renders ONCE at load and has no hashchange listener;
-// unlike it, there are no draw controls at all, so there is no redraw path and no
-// drawGen race to guard. The engine's overlays never write the status line mid-draw
-// (the settle signal is it becoming ""), and this conductor is its only other writer.
+// Like the Print Room, the page has no hashchange listener: the hash is read once at
+// boot. The colophon dice (#318) is the one draw control, a seed counter at the
+// journal's foot, so draws carry the Print Room's drawGen monotonic guard and a
+// counter draw parks at the present (pendingLive stays boot-only). The engine's
+// overlays never write the status line mid-draw (the settle signal is it becoming
+// ""), and this conductor is its only other writer.
 import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { parseLive, emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
 import { createReadingFrame } from "../reading-frame/index.ts";
+import { createColophon } from "./colophon.ts";
 import { createLivingChart, type AgesPos } from "../living-chart/index.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
@@ -45,6 +48,11 @@ const warning = document.getElementById("rr-warning") as HTMLElement;
 // onPark is #192's seam: Play's parks are the one rest no input event announces.
 const frame = createReadingFrame(mount, { onPark: () => syncHash() });
 const lc = createLivingChart(frame.host);
+// #318 the colophon dice, mounted as the instrument panel's SIBLING in the reading
+// column, never inside it (the ratified placement: the engine hides the panel
+// through every teardown, and the colophon must stand through all of them).
+const colophon = createColophon();
+frame.reading.appendChild(colophon.root);
 
 let seed = 0;
 let style: StyleName = "antique";
@@ -122,7 +130,19 @@ function syncHash(): void {
   history.replaceState(null, "", "#" + finalizeHash(p));
 }
 
+// #318: the Print Room's monotonic guard, needed the day the colophon gave the room
+// a second draw. A superseded draw can never land over a newer one.
+let drawGen = 0;
+
 function draw(): void {
+  const myGen = ++drawGen;
+  // The Explorer's synchronous teardown order: a redraw is about to wipe the overlay,
+  // so stop any running sweep first (its rafs would tick over dead DOM).
+  lc.cancelScrubRaf();
+  lc.cancelVoyageRaf();
+  // The chart number IS the seed, so the counter always shows the world on screen;
+  // a visitor reads the next number over whatever the last draw left behind.
+  colophon.seedInput.value = String(seed);
   frame.host.statusEl.textContent = "Drafting…";
   const overrides: { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number } = {};
   if (carried.type) overrides.mapType = carried.type;
@@ -136,6 +156,7 @@ function draw(): void {
     render: { style, widthPx: 1500, legend: carried.legend, arms: carried.arms, theme: carried.theme || undefined },
   })
     .then((res) => {
+      if (myGen !== drawGen) return; // a newer draw superseded this one
       // res.svg is engine-rendered markup, not user content: the only inputs are the
       // uint32 seed and recipe params validated against fixed allowlists in applyHash,
       // the same trusted-string injection the Explorer and Print Room already do.
@@ -153,6 +174,13 @@ function draw(): void {
         pendingLive?.kind === "year" ? { chamber: "ages", year: pendingLive.year }
         : pendingLive?.kind === "survey" ? { chamber: "survey", t: 1 } : undefined;
       pendingLive = null;
+      // #318: every draw here is a fresh ARRIVAL, never the Explorer's redraw of the
+      // world on screen, so drop any prior session before arming. Without this a
+      // re-arm adopts the interrupted CHAMBER's rest (the #220 Explorer rule), so a
+      // read mid-play landed at the survey rest instead of the present park the #221
+      // ratification owes every path (caught by e2e RR22). clearAges is the
+      // post-wipe teardown: the old chart DOM already left with the innerHTML swap.
+      lc.clearAges();
       lc.rearmAges(res.manifest, res.survey, seed, res.subtitle, { rest });
       frame.host.statusEl.textContent = "";
       // Converge the address after the arm, so a bare visit's URL immediately carries
@@ -160,9 +188,25 @@ function draw(): void {
       syncHash();
     })
     .catch((err) => {
+      if (myGen !== drawGen) return;
       frame.host.statusEl.textContent = "The cartographer spilled the ink: " + err.message;
     });
 }
+
+// #318 the colophon's wiring (the conductor owns wiring, the furniture module owns
+// none). Number(...) >>> 0 is the Print Room's exact boundary shape: a uint32 or 0.
+// The carried recipe params ride along untouched: a counter draw changes the seed,
+// not the dress.
+function readSeed(): void {
+  seed = Number(colophon.seedInput.value) >>> 0;
+  draw();
+}
+colophon.readBtn.addEventListener("click", readSeed);
+colophon.seedInput.addEventListener("keydown", (e) => { if (e.key === "Enter") readSeed(); });
+colophon.diceBtn.addEventListener("click", () => {
+  colophon.seedInput.value = String(Math.floor(Math.random() * 0xffffffff));
+  readSeed();
+});
 
 // The conductor owns wiring, the engine owns behavior (the Explorer's controls.ts
 // idiom, mirrored): Play, the bar, the detent's pointer pair, and the release sync.

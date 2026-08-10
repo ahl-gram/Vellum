@@ -19,113 +19,19 @@ import type { VoyageLogPort } from "../../src/world/voyage-log.ts";
  *      no scrollbar. The Explorer's own 32rem panels are untouched by this sub.
  *
  * Node has no `document`, and the frame BUILDS DOM (unlike the engine, which only
- * stores refs its host passes in). So this file installs a small element shim for the
- * handful of DOM operations the frame and the engine's own log builder use. The shim
- * stands in for the ENVIRONMENT, never for the module under test: every assertion below
- * reads structure the real code produced.
+ * stores refs its host passes in). So this file installs the small element shim from
+ * test-support/element-shim.ts (extracted when #318's colophon test became its second
+ * consumer) for the handful of DOM operations the frame and the engine's own log
+ * builder use. The shim stands in for the ENVIRONMENT, never for the module under
+ * test: every assertion below reads structure the real code produced.
  */
+import { El, installShim, walk } from "../../test-support/element-shim.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const FRAME_DIR = resolve(REPO, "src/site/reading-frame");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
-// The element shim: create / append / classify / attribute, and nothing else.
-
-class El {
-  tagName: string;
-  children: El[] = [];
-  parentNode: El | null = null;
-  attrs = new Map<string, string>();
-  classes = new Set<string>();
-  hidden = false;
-  value = "";
-  min = "";
-  max = "";
-  step = "";
-  type = "";
-  #text = "";
-
-  constructor(tag: string) {
-    this.tagName = tag.toUpperCase();
-  }
-
-  // `id` reflects to the ATTRIBUTE, not a plain field: the no-ids guard reads attrs,
-  // so a stray `el.id = "map"` has to land where the guard can see it.
-  get id(): string { return this.attrs.get("id") ?? ""; }
-  set id(v: string) { this.attrs.set("id", String(v)); }
-  get className(): string { return [...this.classes].join(" "); }
-  set className(v: string) { this.classes = new Set(v.split(/\s+/).filter(Boolean)); }
-  get classList() {
-    const set = this.classes;
-    const toggle = (c: string, on?: boolean): boolean => {
-      const want = on ?? !set.has(c);
-      if (want) set.add(c);
-      else set.delete(c);
-      return want;
-    };
-    return {
-      add: (...c: string[]) => c.forEach((x) => set.add(x)),
-      remove: (...c: string[]) => c.forEach((x) => set.delete(x)),
-      contains: (c: string) => set.has(c),
-      toggle,
-    };
-  }
-  get textContent(): string {
-    return this.children.length ? this.children.map((c) => c.textContent).join("") : this.#text;
-  }
-  set textContent(v: string) {
-    this.children = [];
-    this.#text = String(v);
-  }
-  #adopt(kids: El[]): void {
-    for (const k of kids) k.parentNode = this;
-  }
-  append(...kids: El[]): void {
-    this.#adopt(kids);
-    this.children.push(...kids);
-  }
-  appendChild(kid: El): El {
-    this.#adopt([kid]);
-    this.children.push(kid);
-    return kid;
-  }
-  replaceChildren(...kids: El[]): void {
-    for (const c of this.children) c.parentNode = null;
-    this.#adopt(kids);
-    this.children = [...kids];
-  }
-  setAttribute(name: string, v: string): void { this.attrs.set(name, String(v)); }
-  getAttribute(name: string): string | null { return this.attrs.get(name) ?? null; }
-  removeAttribute(name: string): void { this.attrs.delete(name); }
-  remove(): void {
-    const p = this.parentNode;
-    if (!p) return;
-    p.children = p.children.filter((c) => c !== this);
-    this.parentNode = null;
-  }
-}
-
-const installShim = (): void => {
-  (globalThis as { document?: unknown }).document = {
-    createElement: (tag: string) => new El(tag),
-    // #312: the engine's log builder wraps the drop-cap initial beside a plain text
-    // node. A text node is an El with no children, so textContent aggregation and
-    // shape() need nothing new.
-    createTextNode: (t: string) => {
-      const n = new El("#text");
-      n.textContent = String(t);
-      return n;
-    },
-  };
-};
 installShim();
-
-/** Depth-first walk of a shim tree. */
-function walk(el: El, seen: El[] = []): El[] {
-  seen.push(el);
-  for (const c of el.children) walk(c, seen);
-  return seen;
-}
 
 /** The structure an assertion can compare across two producers of the same idiom. */
 function shape(li: El): unknown {
