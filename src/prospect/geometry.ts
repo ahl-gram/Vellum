@@ -180,6 +180,11 @@ function covered(cover: ReadonlyArray<Interval>, x0: number, x1: number): boolea
  * declared raise, and any raise above zero is legal only where the merged
  * span of on-ground masses and walls fully covers it. Returns one message
  * per violation; empty means grounded.
+ *
+ * Class boundary: only g.masses is checked. A Mass embedded in a foreground
+ * element (the bridge's gate tower, the mill house) deliberately stands on
+ * its element's own anchor, the deck end or the near bank, not the ground
+ * function; those anchors are pinned by the composer tests instead.
  */
 export function groundingViolations(g: ProspectGeometry): string[] {
   const out: string[] = [];

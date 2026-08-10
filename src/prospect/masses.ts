@@ -38,8 +38,11 @@ const TIERS: Record<ProspectKind, Tier> = {
 };
 
 /** Typical raw scores per tier (sites run ~0.3-8, hamlets sit on a slimmer
- * scale capped near 2; see input.ts). Score modulates WITHIN a kind. */
-const TYPICAL_SCORE: Record<ProspectKind, number> = {
+ * scale capped near 2; see input.ts). Score modulates WITHIN a kind.
+ * Exported so test fixtures normalize with the SAME table the composer
+ * uses; a retuned grammar must move both together or the tier tests start
+ * hitting the 0.75/1.25 clamps differently while staying green. */
+export const TYPICAL_SCORE: Record<ProspectKind, number> = {
   capital: 6,
   seat: 4.5,
   town: 3.5,

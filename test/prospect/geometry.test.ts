@@ -334,6 +334,22 @@ test("before founding the ground is empty", () => {
   );
 });
 
+test("before founding the land wears only its natural dressing", () => {
+  // Guards the era branch's built:false arm (skeptic finding 3): flipping
+  // it to true would re-plow the fields and re-stilt the fen.
+  const fields = composeProspect(makeInput({}), { era: "before-founding" });
+  assert.equal(fields.masses.length, 0);
+  assert.equal(els(fields, "fieldRows").length, 0, "no furrows before the plow");
+  assert.ok(els(fields, "trees").length >= 1, "the trees were always there");
+
+  const fen = composeProspect(
+    makeInput({ kind: "village", foreground: band("marsh") }),
+    { era: "before-founding" },
+  );
+  assert.equal(els(fen, "stilts").length, 0, "no stilts before the houses");
+  assert.ok(one(fen, "marshTufts").items.length >= 6, "the fen keeps its tufts");
+});
+
 test("every composition is grounded and in frame", () => {
   const cases: ProspectInput[] = [
     makeInput({ kind: "capital", harbor: true }),

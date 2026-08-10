@@ -3,26 +3,22 @@
  * worlds cannot reach every composition arm: hamlets are region-only
  * (src/society/hamlets.ts, out of scope for buildProspectInput), and a
  * 609-settlement sweep over seeds 1-24 (2026-08-10, re-run for this file)
- * measured ZERO marsh-dominant foreground bands and ZERO river towns
- * without the harbor flag, so the fen, stilt, drowned, bridge, and weir
- * arms are reachable only synthetically today.
+ * measured ZERO marsh-dominant foreground bands and ZERO non-harbor river
+ * sites above village rank, so the fen, stilt, drowned, bridge, and hamlet
+ * arms are reachable only synthetically today. The weir arm is NOT in that
+ * list: the same sweep found all 19 inland sites are river villages, and
+ * every one composes the weir on a real world sheet.
  */
 
-import type { ProspectInput, ProspectKind } from "../src/prospect/input.ts";
+import type { ProspectInput } from "../src/prospect/input.ts";
 import { BACKDROP_SAMPLES, FOREGROUND_SAMPLES } from "../src/prospect/transect.ts";
 import type { BiomeName } from "../src/climate/biomes.ts";
+import { TYPICAL_SCORE } from "../src/prospect/masses.ts";
 
-/** Typical raw site scores per tier, matching the ranges input.ts documents
- * (sites run ~0.3-8; hamlets sit on a slimmer scale capped near 2). The
- * default score tracks the KIND so tier comparisons stay legible: a fixed
- * score would hit the composer's clamp differently per tier. */
-export const TYPICAL_SCORE: Record<ProspectKind, number> = {
-  capital: 6,
-  seat: 4.5,
-  town: 3.5,
-  village: 1.8,
-  hamlet: 1.2,
-};
+/** The composer's own per-tier normalization table, re-exported so fixture
+ * default scores can never drift from the grammar (the default tracks the
+ * KIND: a fixed score would hit the composer's clamp differently per tier). */
+export { TYPICAL_SCORE };
 
 /** A gentle inland ridge profile: flat shoulders, one central rise, enough
  * above the default siteRel to exercise the ridge path on every fixture. */

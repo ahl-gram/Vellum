@@ -54,8 +54,8 @@ export function buildGround(input: ProspectInput): Ground {
  * relative to the site's own ground plane, spread across the view. A
  * backdrop that never rises past RIDGE_MIN_RISE above the site reads as a
  * flat horizon and draws nothing (fen prospects get this for free from the
- * data). The x step 450/128 is a power-of-two fraction, so positions are
- * IEEE-exact.
+ * data). The x step is 462/128 = 231/64, a dyadic fraction, so positions
+ * are IEEE-exact.
  */
 export function buildRidge(input: ProspectInput, ground: Ground): ReadonlyArray<Pt> | null {
   const rises = input.backdrop.map((v) => Math.max(0, v - input.siteRel));
