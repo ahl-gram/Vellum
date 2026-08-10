@@ -206,7 +206,7 @@ both of those are the `api` form. Never conclude an issue is empty from `gh issu
 
 **Remind Alex of any open decision in an issue and get his call before implementing it.**
 
-**Run the `spec-recon` subagent at the start of any sub or epic.** It fetches body AND comments,
+**Run the `vellum-spec-recon` subagent at the start of any sub or epic.** It fetches body AND comments,
 verifies every cited path, symbol, test name and count with a command, and returns a
 CURRENT / STALE / UNVERIFIABLE ledger plus the open decisions awaiting Alex. It exists because
 #132 (6 of 7 subs stale) and #190 (73 stale claims, 20 blocking) each cost a 12 to 13-agent
@@ -217,11 +217,11 @@ audit built from scratch.
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him.
 - **Write the failing test first.** It must fail on the assertion you care about, not on a missing
   module.
-- **Run the `guard-prover` subagent on new or strengthened guards before opening the PR.** It
+- **Run the `vellum-guard-prover` subagent on new or strengthened guards before opening the PR.** It
   mutates one behavior at a time in its own throwaway worktree and reports which single test went
   red. A green suite is not evidence: #73's fork mutant escaped all 340 tests, #141's gate mutation
   escaped all 409, and #140 shipped three guards that were deletable. Zero red is a hole, not a pass.
-- **Run the `pr-skeptic` subagent on every PR after it is pushed, before asking Alex to review.**
+- **Run the `vellum-pr-skeptic` subagent on every PR after it is pushed, before asking Alex to review.**
   Dispatch it COLD: the prompt is the PR number or branch name and NOTHING else, no summary of the
   work and no claims about it. It is agnostic (a fresh context that reconstructs the spec from the
   issue and the diff, never from the implementing session) and adversarial (it returns ranked
@@ -238,9 +238,9 @@ filesystem goes in the **`out/`** directory (the CLI's default output location; 
 is where Alex looks. Name the files in your reply so they are easy to open. Do not scatter samples
 in `/tmp`, scratchpad, or other dirs he will not find.
 
-**For a presentation sub, run the `plate-reader` subagent before the PR.** Structural tests cannot
+**For a presentation sub, run the `vellum-plate-reader` subagent before the PR.** Structural tests cannot
 see layout: #219's 320px sideways scroll survived 902 unit tests, 254 e2e checks and a 22-agent
-review that found nothing. plate-reader renders through CDP and returns MEASUREMENTS (scrollWidth
+review that found nothing. vellum-plate-reader renders through CDP and returns MEASUREMENTS (scrollWidth
 vs clientWidth, resolved computed styles, bounding boxes) plus named files in `out/`, at both full
 scale and 1:1 crop, since glance properties only exist at full scale (#75). It also carries the
 traps: headless Brave `--window-size` does not set the layout viewport, so narrow-width checks

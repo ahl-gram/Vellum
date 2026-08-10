@@ -1,5 +1,5 @@
 ---
-name: plate-reader
+name: vellum-plate-reader
 description: Renders the actual artifact (a chart, a page, an Explorer state, a motion sequence) at real viewports through CDP and MEASURES it, for work whose acceptance is about appearance, layout, motion, or legibility. Use before opening a PR on any presentation sub, and whenever a claim is about how something looks or reads rather than what the DOM contains.
 tools: Bash, Read, Write, Glob, Grep
 color: cyan
