@@ -3,6 +3,11 @@ import assert from "node:assert/strict";
 import type { ProspectInput, ProspectKind } from "../../src/prospect/input.ts";
 import type { BiomeName } from "../../src/climate/biomes.ts";
 import { BACKDROP_SAMPLES, FOREGROUND_SAMPLES } from "../../src/prospect/transect.ts";
+import {
+  TYPICAL_SCORE,
+  bandOf,
+  makeInput,
+} from "../../test-support/prospect-fixtures.ts";
 import { composeProspect } from "../../src/prospect/compose.ts";
 import {
   BASE_GROUND,
@@ -17,51 +22,6 @@ import {
   type Mass,
   type ProspectGeometry,
 } from "../../src/prospect/geometry.ts";
-
-/** Typical raw site scores per tier, matching the ranges input.ts documents
- * (0.3-8 for sites, hamlets capped near 2). */
-const TYPICAL_SCORE: Record<ProspectKind, number> = {
-  capital: 6,
-  seat: 4.5,
-  town: 3.5,
-  village: 1.8,
-  hamlet: 1.2,
-};
-
-function makeInput(overrides: Partial<{
-  seed: number;
-  index: number;
-  kind: ProspectKind;
-  score: number;
-  harbor: boolean;
-  onRiver: boolean;
-  ruined: boolean;
-  ruinedYear: number | null;
-  siteRel: number;
-  backdrop: ReadonlyArray<number>;
-  foreground: ReadonlyArray<BiomeName>;
-}> = {}): ProspectInput {
-  const kind = overrides.kind ?? "town";
-  return {
-    seed: overrides.seed ?? 4242,
-    index: overrides.index ?? 0,
-    name: "Testholm",
-    kind,
-    score: overrides.score ?? TYPICAL_SCORE[kind],
-    harbor: overrides.harbor ?? false,
-    onRiver: overrides.onRiver ?? false,
-    founded: 1100,
-    ruined: overrides.ruined ?? false,
-    ruinedYear: overrides.ruinedYear ?? null,
-    realm: 0,
-    realmName: "Testrealm",
-    arms: null,
-    view: { dx: 0, dy: -1 },
-    siteRel: overrides.siteRel ?? 0.12,
-    backdrop: overrides.backdrop ?? Array(BACKDROP_SAMPLES).fill(0.15),
-    foreground: overrides.foreground ?? Array(FOREGROUND_SAMPLES).fill("grassland"),
-  };
-}
 
 function els<K extends ForegroundElement["kind"]>(
   g: ProspectGeometry,
@@ -246,7 +206,7 @@ test("harbor outranks river when a site is both", () => {
 
 // ----------------------------------------------------------- biome dressing
 
-const band = (b: BiomeName): BiomeName[] => Array(FOREGROUND_SAMPLES).fill(b);
+const band = (b: BiomeName): ReadonlyArray<BiomeName> => bandOf([b, FOREGROUND_SAMPLES]);
 
 test("each biome dresses its named foreground", () => {
   const fields = composeProspect(makeInput({ foreground: band("grassland") }));
@@ -277,10 +237,7 @@ test("each biome dresses its named foreground", () => {
 });
 
 test("the majority biome wins the dressing", () => {
-  const mixed: BiomeName[] = [
-    ...Array(20).fill("temperateForest"),
-    ...Array(13).fill("grassland"),
-  ];
+  const mixed = bandOf(["temperateForest", 20], ["grassland", 13]);
   const g = composeProspect(makeInput({ foreground: mixed }));
   assert.equal(one(g, "trees").species, "round");
   assert.equal(els(g, "fieldRows").length, 0);
