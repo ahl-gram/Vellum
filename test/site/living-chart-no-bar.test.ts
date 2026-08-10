@@ -73,16 +73,22 @@ test("destroy() on a bar-less host still tears down the chart side (#319)", asyn
   // destroy() routes through exitAges, so a bar-less exitAges that no-oped ENTIRELY would
   // leave an unmounting host's voyage overlay in the mount and its ink on the verso forever.
   // The instrument half of exitAges is what goes silent; the two chamber painters it tears
-  // down are chart-side and must still run. Asserted positively, by what the teardown ASKED
-  // the mount and what it did to the sink, so deleting either delegation goes red here
-  // rather than passing as "did not throw".
+  // down are chart-side and must still run. Asserted positively, so deleting either
+  // delegation goes red here rather than passing as "did not throw".
+  //
+  // SCOPE, precisely: these two assert that the teardown REACHED the mount and asked it for
+  // the nodes it removes, not that a node came off. This harness answers every query with
+  // "the mount is empty" by design (see element-shim.ts), so the `.remove()` calls at
+  // voyage.ts:301 and place-overlay.ts:220 are not reachable in any unit test and are
+  // covered by e2e. What is proven here is that the delegation ran at all, which is the one
+  // thing #319 could get wrong; the exact delegation set is pinned by the module ledger below.
   assert.ok(
     mount.asked.some((s) => s.includes(".voyage-overlay")),
-    "the voyage overlay is removed from the mount (voyage.exitVoyage ran)",
+    "the teardown asked the mount for the voyage overlay (voyage.exitVoyage ran)",
   );
   assert.ok(
     mount.asked.some((s) => s.includes(".place-overlay")),
-    "the place overlay nodes are removed from the mount (overlay.teardown ran)",
+    "and for the place overlay nodes (overlay.teardown ran)",
   );
   assert.deepEqual(calls, ["clear"], "the verso sink's ink leaves with the front of the sheet");
 });
@@ -220,11 +226,21 @@ test("a bar-less host PAINTS and clears the resting voyage track (#319)", async 
   for (const v of verts) assert.match(v, /^-?[\d.]+,-?[\d.]+$/, "every vertex is an x,y pair");
   assert.equal(viewBox, `0 0 1500 ${manifest.heightPx}`, "the sink is told the chart's own viewBox");
 
-  // ...and the same host clears it, with no instrument anywhere in the path.
+  // ...and the same host CLEARS the resting track, with no instrument anywhere in the path.
+  // "Clears" here is the resting track proper: the sink mirror and the session. Taking the
+  // svg node itself off the sheet needs a mount that can answer a query, which this harness
+  // deliberately cannot (see the destroy test), so that half is e2e's; the node is expected
+  // to still be a child below, and saying so keeps the gap visible rather than implied.
   calls.length = 0;
   lc.exitVoyage();
-  assert.deepEqual(calls, ["clear"], "the ink leaves the back of the sheet with the front");
+  assert.deepEqual(calls, ["clear"], "the ink leaves the back of the sheet");
   assert.equal(lc.voyagePlan(), null, "and the session is dropped");
+  assert.ok(
+    mount.children.includes(svg),
+    "the svg is still parented HERE, because this mount cannot resolve exitVoyage's query: " +
+      "node removal is e2e's to prove, and this assertion exists so nobody reads the test " +
+      "title as covering it",
+  );
 });
 
 test("the bar-less scrubTo still reaches the chronicle's static reveal (#319)", async () => {
