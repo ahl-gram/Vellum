@@ -36,6 +36,9 @@ export type ProspectInput = {
   readonly index: number;
   readonly name: string;
   readonly kind: ProspectKind;
+  /** Raw site score from placeSettlements (roughly 0.3 to 8, unnormalized;
+   * harbor and river bonuses included). Hamlet scores come from a slimmer
+   * formula capped near 2 and are NOT on the same scale. */
   readonly score: number;
   readonly harbor: boolean;
   readonly onRiver: boolean;
@@ -70,6 +73,13 @@ function biomeAt(world: World, x: number, y: number): BiomeName {
 /**
  * Sample one settlement's prospect out of its world. Pure: same world and
  * index yield a byte-identical, JSON-serializable ProspectInput.
+ *
+ * World sheets only, for now. A region world (world.region set) carries no
+ * realm labels, no arms, and an empty chronicle (world/region.ts), so a
+ * region-sourced input would report realm -1, arms null, and ruinedYear null
+ * even for a seat or a dated ruin. Region prospect insets are the epic's
+ * "Later" bullet; whichever sub takes that on resolves realm identity and
+ * chronicle facts through the parent world rather than loosening this one.
  */
 export function buildProspectInput(world: World, index: number): ProspectInput {
   const s = world.settlements[index];

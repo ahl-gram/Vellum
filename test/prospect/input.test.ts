@@ -3,12 +3,13 @@ import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import type { World } from "../../src/world/types.ts";
 import { minMax } from "../../src/core/grid.ts";
-import { BIOMES } from "../../src/climate/biomes.ts";
-import { buildProspectInput } from "../../src/prospect/input.ts";
+import { BIOMES, biomeName } from "../../src/climate/biomes.ts";
+import { buildProspectInput, type ProspectInput } from "../../src/prospect/input.ts";
 import {
   BACKDROP_SAMPLES,
   BACKDROP_OFFSET,
   FOREGROUND_SAMPLES,
+  FOREGROUND_OFFSET,
   GRADIENT_RADIUS,
 } from "../../src/prospect/transect.ts";
 
@@ -56,25 +57,50 @@ function relOf(w: World, e: number): number {
 }
 
 test("a prospect input is deterministic and serializable byte for byte", () => {
-  const a = generateWorld(defaultRecipe(42));
-  const b = generateWorld(defaultRecipe(42));
-  const indices = [0, Math.floor(a.settlements.length / 2), a.settlements.length - 1];
-  for (const i of indices) {
-    const pa = buildProspectInput(a, i);
-    const pb = buildProspectInput(b, i);
-    assert.deepEqual(pa, pb, `seed 42 index ${i} deep-equal`);
-    assert.equal(
-      JSON.stringify(pa),
-      JSON.stringify(pb),
-      `seed 42 index ${i} byte-identical`,
-    );
-    assert.deepEqual(
-      JSON.parse(JSON.stringify(pa)),
-      pa,
-      `seed 42 index ${i} survives a JSON round trip`,
-    );
+  // Two independent generations per seed, compared within this process:
+  // byte-identity of raw floats is a same-environment claim (the pinned
+  // checksums below handle the cross-platform story with quantization).
+  for (const seed of [42, 7]) {
+    const a = generateWorld(defaultRecipe(seed));
+    const b = generateWorld(defaultRecipe(seed));
+    const indices = [0, Math.floor(a.settlements.length / 2), a.settlements.length - 1];
+    for (const i of indices) {
+      const pa = buildProspectInput(a, i);
+      const pb = buildProspectInput(b, i);
+      assert.deepEqual(pa, pb, `seed ${seed} index ${i} deep-equal`);
+      assert.equal(
+        JSON.stringify(pa),
+        JSON.stringify(pb),
+        `seed ${seed} index ${i} byte-identical`,
+      );
+      // node:assert/strict deepEqual distinguishes -0 from 0, so this catches
+      // any -0 component that JSON would silently flatten.
+      assert.deepEqual(
+        JSON.parse(JSON.stringify(pa)),
+        pa,
+        `seed ${seed} index ${i} survives a JSON round trip`,
+      );
+    }
   }
 });
+
+/** Floats are quantized to 3 decimals before hashing: world.elev descends
+ * from Math.hypot (terrain/heightfield.ts), which is not correctly rounded,
+ * so raw float bytes can drift ~1e-13 between macOS and linux CI (the
+ * CLAUDE.md never-byte-compare rule; golden-seed42 likewise hashes no raw
+ * float). 1e-3 is far above any libm drift and far below any real geometry
+ * change, which moves samples by whole cells. */
+const q = (v: number): number => Math.round(v * 1000) / 1000;
+
+function pinProjection(p: ProspectInput): unknown {
+  return {
+    ...p,
+    score: q(p.score),
+    siteRel: q(p.siteRel),
+    view: { dx: q(p.view.dx), dy: q(p.view.dy) },
+    backdrop: p.backdrop.map(q),
+  };
+}
 
 // Pinned 2026-08-09 from a measured run (the golden-seed42 convention): any
 // change to sampling geometry, normalization, or the ProspectInput shape
@@ -82,18 +108,18 @@ test("a prospect input is deterministic and serializable byte for byte", () => {
 // cases span the shape space: a capital, harbor towns, a realm seat, and an
 // inland ruined village (slope vantage, dated ruin).
 const PINNED: ReadonlyArray<{ seed: number; index: number; sum: number }> = [
-  { seed: 42, index: 0, sum: 747713579 }, // Laukuwelua, capital, harbor
-  { seed: 42, index: 5, sum: 1809010720 }, // Loatunui, town, harbor
-  { seed: 1, index: 1, sum: 1386409046 }, // Mectlan, seat
-  { seed: 3, index: 19, sum: 508277193 }, // Saharabad, village, inland + ruined
-  { seed: 7, index: 3, sum: 1783812061 }, // Wutoanu, town, harbor
+  { seed: 42, index: 0, sum: 861063081 }, // Laukuwelua, capital, harbor
+  { seed: 42, index: 5, sum: 2958303229 }, // Loatunui, town, harbor
+  { seed: 1, index: 1, sum: 3387866517 }, // Mectlan, seat
+  { seed: 3, index: 19, sum: 69144944 }, // Saharabad, village, inland + ruined
+  { seed: 7, index: 3, sum: 2611738395 }, // Wutoanu, town, harbor
 ];
 
 test("pinned prospect checksums over several seeds and indices", () => {
   for (const { seed, index, sum } of PINNED) {
     const p = buildProspectInput(worldFor(seed), index);
     assert.equal(
-      fnv1a(JSON.stringify(p)),
+      fnv1a(JSON.stringify(pinProjection(p))),
       sum,
       `checksum for seed ${seed} index ${index}`,
     );
@@ -185,6 +211,22 @@ test("the backdrop is the chart's own terrain behind the site", () => {
       Math.abs(p.backdrop[mid]! - relOf(w, bilinear(w, bx, by))) < 1e-12,
       `seed 42 index ${i} backdrop center matches the heightfield`,
     );
+    // Same oracle for the foreground center, indexed independently into the
+    // bare biome array, so the sign of "in front" cannot silently flip.
+    const fmid = (FOREGROUND_SAMPLES - 1) / 2;
+    const fx = Math.min(
+      Math.max(Math.round(s.x - FOREGROUND_OFFSET * p.view.dx), 0),
+      w.elev.w - 1,
+    );
+    const fy = Math.min(
+      Math.max(Math.round(s.y - FOREGROUND_OFFSET * p.view.dy), 0),
+      w.elev.h - 1,
+    );
+    assert.equal(
+      p.foreground[fmid],
+      biomeName(w.biomes[fx + fy * w.elev.w] as number),
+      `seed 42 index ${i} foreground center is the biome in front of the site`,
+    );
     const len = p.view.dx * p.view.dx + p.view.dy * p.view.dy;
     assert.ok(Math.abs(len - 1) < 1e-9, "view direction is unit length");
   });
@@ -223,8 +265,10 @@ test("the adaptive vantage points the right way", () => {
   }
   assert.ok(harbors >= 100, `sweep saw ${harbors} harbors`);
   assert.ok(inland >= 1, `sweep saw ${inland} inland sites`);
+  // Pinned near the measured constant (293/305 = 0.961), not a loose lean:
+  // a regression flipping even a tenth of the vantages must go red.
   assert.ok(
-    harborsFacingSea / harbors > 0.85,
+    harborsFacingSea / harbors > 0.95,
     `harbors face the sea: ${harborsFacingSea}/${harbors}`,
   );
 });

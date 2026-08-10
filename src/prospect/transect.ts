@@ -20,7 +20,12 @@ export type ProspectView = {
 
 /** Transect width: 64 cells, about 29 leagues at 2.2 cells per league. */
 export const TRANSECT_HALF_WIDTH = 32;
-/** Odd counts include an exact center sample at the transect midpoint. */
+/** Odd counts include an exact center sample at the transect midpoint, and
+ * the two counts must keep (BACKDROP_SAMPLES - 1) divisible by
+ * (FOREGROUND_SAMPLES - 1): both bands share the transect width and center,
+ * so foreground[i] sits at the same lateral position as backdrop[4 * i],
+ * which is how a composer aligns quay, river, or field with the ridge
+ * behind it. Change one count and the other must follow. */
 export const BACKDROP_SAMPLES = 129;
 export const FOREGROUND_SAMPLES = 33;
 /** The backdrop ridge line sits this many cells behind the site. */
