@@ -342,6 +342,11 @@ test("every composition is grounded and in frame", () => {
     makeInput({ kind: "village", foreground: band("marsh") }),
     makeInput({ kind: "town", ruined: true }),
     makeInput({ kind: "hamlet" }),
+    // Unwalled hamlets are where the back-row containment filter actually
+    // fires (no wall widens the cover); guard-prover measured these seeds
+    // as live witnesses (2026-08-10).
+    makeInput({ kind: "hamlet", seed: 3 }),
+    makeInput({ kind: "hamlet", ruined: true, seed: 1 }),
   ];
   for (const input of cases) {
     const g = composeProspect(input);
@@ -355,6 +360,27 @@ test("every composition is grounded and in frame", () => {
       assert.ok(m.base - m.h > 0 && m.base < PLATE_H, "mass inside the plate");
     }
   }
+  // Bite-proof for the containment filter: at seed 3 the hamlet packs TWO
+  // back-row masses and the filter must drop exactly one (measured, see
+  // above). A deleted filter reds here on the count; a mass that escapes
+  // the cover reds above in groundingViolations.
+  const filtered = composeProspect(makeInput({ kind: "hamlet", seed: 3 }));
+  assert.equal(
+    filtered.masses.filter((m) => m.raise > 0).length,
+    1,
+    "the seed 3 hamlet keeps exactly one covered back mass",
+  );
+});
+
+test("a ruined skyline shows ruin even when every draw comes up intact", () => {
+  // Measured witness (guard-prover, 2026-08-10): at seed 7321 every
+  // per-mass broken draw comes up intact for a ruined hamlet (~1 in 13,500
+  // compositions), so only composeTownscape's insurance breaks the tallest
+  // front mass. Deleting that insurance goes red exactly here.
+  const g = composeProspect(
+    makeInput({ kind: "hamlet", ruined: true, ruinedYear: 1361, seed: 7321 }),
+  );
+  assert.ok(g.masses.some((m) => m.broken), "the insurance breaks a mass");
 });
 
 test("the grounding check bites on a floated or uncovered mass", () => {
