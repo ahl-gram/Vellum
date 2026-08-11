@@ -133,6 +133,13 @@ test("forwardTarget: a valid year=N link forwards to the Reading Room, hash verb
     forwardTarget("#seed=7&style=ink&year=1&cx=0.5100&cy=0.4900&k=3.0000"),
     "/reading-room/#seed=7&style=ink&year=1&cx=0.5100&cy=0.4900&k=3.0000",
   );
+  // Non-canonical riders are where "verbatim" earns its name: a bare flag
+  // re-serializes as `flag=` and %20 as `+`, so any re-serialization fails here
+  // (the guard-prover's mutant survived every canonical fixture above).
+  assert.equal(
+    forwardTarget("#seed=42&year=814&flag&note=a%20b"),
+    "/reading-room/#seed=42&year=814&flag&note=a%20b",
+  );
 });
 
 test("forwardTarget: a survey link is the Explorer's own address and stays", () => {
