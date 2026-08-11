@@ -12,24 +12,32 @@
 // counter draw parks at the present (pendingLive stays boot-only). The engine's
 // overlays never write the status line mid-draw (the settle signal is it becoming
 // ""), and this conductor is its only other writer.
-import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
+import { runJob, runInline, usesWorker, initWorker } from "../explorer/worker-client.ts";
+import { installHostHooks } from "../shared/host-hooks.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { parseLive, emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
 import { createReadingFrame } from "../reading-frame/index.ts";
 import { createColophon } from "./colophon.ts";
-import { createLivingChart, type AgesPos } from "../living-chart/index.ts";
+import { createLivingChart, type AgesPos, type LivingChart } from "../living-chart/index.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 
 // The window.__vellum* verification hooks assigned in this file, typed once here.
+//
+// #320: the ages hook publishes the engine's WHOLE instrument state rather than the
+// {chamber, year} the room needed for its own address checks. The live-animation
+// coverage re-hosted here reads the sweep through t / u / held / min / max / playing,
+// all of which the Explorer's __vellumAgesState has always carried. Typing it as the
+// engine's own ReturnType (the #319 no-bar.ts idiom) means tsc breaks this file if
+// agesState ever grows or loses a member, so the hook cannot silently narrow again.
 declare global {
   interface Window {
     __vellumReadingRoomUsesWorker?: typeof usesWorker;
     __vellumReadingRoomState?: () => { seed: number; title: string };
-    __vellumReadingRoomAges?: () => { chamber: "survey" | "ages"; year: number | null } | null;
+    __vellumReadingRoomAges?: LivingChart["agesState"];
   }
 }
 
@@ -237,10 +245,15 @@ document.addEventListener("click", lc.onDocClick);
 await initWorker();
 window.__vellumReadingRoomUsesWorker = usesWorker;
 window.__vellumReadingRoomState = () => ({ seed, title: lastTitle });
-window.__vellumReadingRoomAges = () => {
-  const a = lc.agesState();
-  return a ? { chamber: a.chamber, year: a.year } : null;
-};
+// #320: published whole, not narrowed. The room is the host that now carries the
+// live-animation coverage, so its hook owes the same read the Explorer's does. Kept
+// under its own name ALONGSIDE the shared surface below because RR4/RR6/RR7/RR8/RR18/
+// RR22/RR23 already read it: this sub adds coverage and weakens none. Both names are
+// the same function object, so they cannot disagree.
+window.__vellumReadingRoomAges = lc.agesState;
+// The seams every LivingChart host publishes, so the live-animation checks re-hosted
+// here read the same hook names they read on the Explorer (#320 decision B).
+installHostHooks({ livingChart: lc, runInline });
 if (!usesWorker()) warning.hidden = false;
 
 applyHash();

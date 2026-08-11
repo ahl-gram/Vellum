@@ -49,6 +49,11 @@ import { run as runPrintRoom } from "./e2e/suite-print-room.mjs";
 import { run as runHome } from "./e2e/suite-home.mjs";
 import { run as runAddress } from "./e2e/suite-address.mjs";
 import { run as runReadingRoom } from "./e2e/suite-reading-room.mjs";
+import { run as runRoomInstrument } from "./e2e/suite-room-instrument.mjs";
+import { run as runRoomInk } from "./e2e/suite-room-ink.mjs";
+import { run as runRoomVoyage } from "./e2e/suite-room-voyage.mjs";
+import { run as runRoomAddress } from "./e2e/suite-room-address.mjs";
+import { run as runRoomVoyageRoute } from "./e2e/suite-room-voyage-route.mjs";
 import { run as runRunningHead } from "./e2e/suite-runninghead.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url)); // scripts/
@@ -145,6 +150,15 @@ async function main() {
   // navigations with constructed hashes (decision 3: no Explorer entry point to
   // follow), so it slots after the address suite whose vocabulary it consumes.
   await runReadingRoom(ctx);
+  // #320 Survey and Story Sub 3: the live-animation coverage re-hosted on the room,
+  // running beside the Explorer-hosted originals rather than replacing them (Sub 4
+  // retires those). Slots after the room's own suite, whose boot/settle idiom it
+  // shares and whose armed-rest checks it builds on.
+  await runRoomInstrument(ctx);
+  await runRoomInk(ctx);
+  await runRoomVoyage(ctx);
+  await runRoomVoyageRoute(ctx);
+  await runRoomAddress(ctx);
   // The Running Head (#295): the shell masthead asserted by RESOLVED computed
   // styles, the cascade failure a source-text CSS test cannot see. It sweeps all
   // seven shelled pages and mutates the Print Room's #pr-atlas, so it restores the
