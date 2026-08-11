@@ -50,6 +50,7 @@ import { run as runHome } from "./e2e/suite-home.mjs";
 import { run as runAddress } from "./e2e/suite-address.mjs";
 import { run as runReadingRoom } from "./e2e/suite-reading-room.mjs";
 import { run as runRoomInstrument } from "./e2e/suite-room-instrument.mjs";
+import { run as runRoomInk } from "./e2e/suite-room-ink.mjs";
 import { run as runRoomVoyage } from "./e2e/suite-room-voyage.mjs";
 import { run as runRoomAddress } from "./e2e/suite-room-address.mjs";
 import { run as runRoomVoyageRoute } from "./e2e/suite-room-voyage-route.mjs";
@@ -154,6 +155,7 @@ async function main() {
   // retires those). Slots after the room's own suite, whose boot/settle idiom it
   // shares and whose armed-rest checks it builds on.
   await runRoomInstrument(ctx);
+  await runRoomInk(ctx);
   await runRoomVoyage(ctx);
   await runRoomVoyageRoute(ctx);
   await runRoomAddress(ctx);

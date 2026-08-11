@@ -16,11 +16,12 @@
 //   W8  "a redraw re-arms in the SAME chamber". This is deliberately Explorer-only: the
 //       room's ratified counter draw parks at the PRESENT (#221), which RR22 pins. The
 //       contract does not port, it is superseded. Sub 4 retires it rather than moving it.
-import { makeRoom } from "./room-support.mjs";
+import { makeRoom, scopedHealth } from "./room-support.mjs";
 
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep } = ctx;
   const room = makeRoom(ctx);
+  const gate = scopedHealth(ctx);
 
   // The room arrives armed and parked at the present, which is exactly W1's post-toggle
   // state, so the suite opens where the Explorer's opened after ticking the checkbox.
@@ -273,4 +274,6 @@ export async function run(ctx) {
     sawSurveyPlaying && !!crossed && crossed.playing === true && crossed.lbl === "Pause",
     JSON.stringify({ sawSurveyPlaying, crossed }),
   );
+
+  gate.check("RW14 the room voyage run is clean (no console errors, no new 4xx)");
 }

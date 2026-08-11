@@ -7,11 +7,13 @@
 // assertions against .rf-* selectors and the room's own hooks. What did NOT port is
 // named in the inventory: the #ages checkbox arming, the verso flip, and the Explorer's
 // keep-the-chamber redraw (the room's ratified counter draw parks at the present, #221).
-import { makeRoom } from "./room-support.mjs";
+import { makeRoom, makeBar, scrubFacts, scopedHealth } from "./room-support.mjs";
 
 export async function run(ctx) {
   const { evaluate, check, sleep } = ctx;
   const room = makeRoom(ctx);
+  const { setYear, yearNow, groupVis, roadsDisp, visibleGroups, clickPlay } = makeBar(ctx);
+  const gate = scopedHealth(ctx);
 
   // RS0: the widened instrument state. The room published {chamber, year} only; every
   // check below reads the sweep through t / u / held / min / max / playing, which the
@@ -54,41 +56,7 @@ export async function run(ctx) {
     JSON.stringify(surface),
   );
 
-  // Scrub facts from the room's OWN engine, the S-suite's oracle read through the
-  // shared hook: the range, the present year, the earliest and a later LIVING founding
-  // (so their glyph groups reveal cleanly), and the ruin's founding + fall year.
-  const sm = await evaluate(`(()=>{
-    const r=window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});
-    const places=r.manifest.places,events=r.manifest.events,present=r.manifest.presentYear;
-    const minFounded=Math.min(...places.map((p)=>p.founded));
-    const living=places.filter((p)=>!p.ruined).slice().sort((a,b)=>a.founded-b.founded);
-    const early=living[0];
-    const later=living.find((p)=>p.founded>early.founded);
-    const ruin=places.find((p)=>p.ruined);
-    const ruinEv=ruin?events.find((e)=>e.settlement===ruin.idx&&e.kind==="ruin"):null;
-    return{count:places.length,present,minFounded,
-      earlyIdx:early.idx,earlyFounded:early.founded,
-      lateIdx:later?later.idx:-1,lateFounded:later?later.founded:-1,
-      lateNx:later?later.nx:-1,lateNy:later?later.ny:-1,
-      ruinIdx:ruin?ruin.idx:-1,ruinYear:ruin?(ruinEv?ruinEv.year:present):null,
-      ruinFounded:ruin?ruin.founded:null};
-  })()`);
-
-  // The room's bar helpers. Same #220 domain as the Explorer's ([0, 2*span], the seam at
-  // the midpoint, so a year lands at barMax/2 + (year - min)), against .rf-* selectors.
-  // The earliest year is the ONE bar position the seam already owns, so the helper
-  // clamps to min+1 exactly as the S-suite's does.
-  const setYear = (y) =>
-    evaluate(`(()=>{const s=document.querySelector(".rf-range");const a=window.__vellumAgesState();const yy=Math.max(${y},a.min+1);s.value=String(Number(s.max)/2+(yy-a.min));s.dispatchEvent(new Event("input",{bubbles:true}));return window.__vellumAgesState().year;})()`);
-  const yearNow = () => evaluate(`window.__vellumAgesState().year`);
-  const groupVis = (idx) =>
-    evaluate(`(()=>{const g=document.querySelector('.rf-chart #layer-settlements g.settlement[data-idx="${idx}"]');return g?(getComputedStyle(g).display==="none"?"hidden":"shown"):"(no-el)";})()`);
-  const roadsDisp = () =>
-    evaluate(`(()=>{const r=document.querySelector('.rf-chart #layer-roads');return r?getComputedStyle(r).display:"(no-el)";})()`);
-  const visibleGroups = () =>
-    evaluate(`[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length`);
-  const playLabel = () => evaluate(`document.querySelector(".rf-play").textContent`);
-  const clickPlay = () => evaluate(`document.querySelector(".rf-play").click()`);
+  const sm = await scrubFacts(evaluate, 42);
 
   // RS3 (S1's portable half): the room arrives ARMED and parked at the present with the
   // bar at the far right. The Explorer reached this by ticking #ages; the room has no
@@ -300,135 +268,39 @@ export async function run(ctx) {
     JSON.stringify(rs17open),
   );
 
-  // --- RS18-RS22 (#155): the ink-in, re-hosted. living-chart.ts tags the CROSSING group
-  // data-ink with its grade and the CSS keys the animation on it. Back to a clean present
-  // park first so the `sm` facts address real glyph groups again.
-  await setYear(sm.present);
-  const inkedCount = () => evaluate(`document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink]').length`);
-
-  // RS18 (S20): a PARK is silent. If a park painted a grade, arriving in the room would
-  // stamp the entire world in at once. Non-vacuous: RS4 already proved every glyph is up.
-  const rs18 = await inkedCount();
-  check("RS18 the park is silent: every glyph is up and none carries an ink grade (#155)", rs18 === 0, `${rs18} groups inked at the park`);
-
-  // RS19 (S21): crossing a founding stamps THAT town. The grade lands on the group and
-  // the mark node under it carries inkStamp at --paper about the town point, resolved
-  // against the view box (never a box centre: the chart mixes projections, so a castle
-  // STANDS ON its point while a plan mark is CENTRED on it).
-  if (sm.lateIdx >= 0) {
-    await setYear(sm.lateFounded - 1);
-    const rs19 = await evaluate(`(()=>{
-      const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.lateFounded}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
-      const g=document.querySelector('.rf-chart #layer-settlements g.settlement[data-idx="${sm.lateIdx}"]');
-      if(!g)return{found:false};
-      const mark=g.querySelector(":scope > :not(text)");
-      if(!mark)return{found:true,hasMark:false};
-      const cs=getComputedStyle(mark);
-      const vb=document.querySelector(".rf-chart svg").viewBox.baseVal;
-      const o=cs.transformOrigin.split(" ").map(parseFloat);
-      return{found:true,hasMark:true,ink:g.getAttribute("data-ink"),disp:getComputedStyle(g).display,
-        name:cs.animationName,dur:cs.animationDuration,box:cs.transformBox,
-        wantX:${sm.lateNx}*vb.width,wantY:${sm.lateNy}*vb.height,gotX:o[0],gotY:o[1],
-        others:document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink]').length};
-    })()`);
-    const onPoint = rs19.found && rs19.hasMark && Math.abs(rs19.gotX - rs19.wantX) < 0.05 && Math.abs(rs19.gotY - rs19.wantY) < 0.05;
-    check(
-      "RS19 crossing a founding stamps that town: data-ink=founding, inkStamp at --paper about the town point",
-      rs19.found && rs19.hasMark && rs19.ink === "founding" && rs19.disp !== "none" &&
-        rs19.name === "inkStamp" && rs19.dur.includes("0.26") && rs19.box === "view-box" && onPoint && rs19.others >= 1,
-      JSON.stringify(rs19),
-    );
-  } else {
-    check("RS19 seed 42 has a later living founding to cross", false, "no second living founding in manifest");
+  // RS23 (S8): the cross-rebuild hazard. A draw of a DIFFERENT world must re-derive the
+  // instrument against THAT world: a fresh manifest, a fresh bar domain, and the new
+  // world's full glyph set. The Explorer reached this by typing a seed and clicking
+  // #draw; the room's redraw is the #318 colophon counter, and the room parks at the new
+  // world's own present rather than keeping the chamber (#221, so W8's contract does not
+  // port, only S8's does).
+  //
+  // The oracle is INDEPENDENT on purpose: seed 100's facts come from __vellumRunInline,
+  // not from agesState. A self-referential form (year === max, both read off the same
+  // hook) cannot see a bar domain re-derived from the wrong world, which is exactly the
+  // regression S8 exists to catch, and it is why RR18/RR19/RR22 do not cover this.
+  const sm2 = await scrubFacts(evaluate, 100);
+  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="100";c.querySelector(".rr-read").click();})()`);
+  let rs23 = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumAgesState();const bar=document.querySelector(".rf-range");return{seed:st.seed,status:(document.querySelector(".rf-status")||{}).textContent,
+        panelShown:!document.querySelector(".rf-ages").hidden,
+        chamber:a&&a.chamber,year:a&&a.year,max:Number(bar.max),
+        visible:[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length};})()`);
+    } catch {}
+    if (s && s.status === "" && s.seed === 100) { rs23 = s; break; }
+    await sleep(50);
   }
-
-  // RS20 (S22): the NAME dries one quick beat behind its mark (#170's staggered-name
-  // idiom). Jumping from the earliest year to the present reveals many towns at once,
-  // guaranteeing an inked group that kept its label.
-  await setYear(sm.minFounded);
-  const rs20 = await evaluate(`(()=>{
-    const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.present}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
-    const inked=[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink]')];
-    const withLabel=inked.find((g)=>g.querySelector(":scope > text"));
-    if(!withLabel)return{inked:inked.length,labelled:false};
-    const cs=getComputedStyle(withLabel.querySelector(":scope > text"));
-    return{inked:inked.length,labelled:true,name:cs.animationName,dur:cs.animationDuration,delay:cs.animationDelay};
-  })()`);
   check(
-    "RS20 a revealed town's NAME dries in one quick beat behind its mark (#155)",
-    rs20.inked > 0 && rs20.labelled && rs20.name === "dryingInk" && rs20.dur.includes("0.18") && rs20.delay.includes("0.18"),
-    JSON.stringify(rs20),
+    "RS23 a draw of a different world re-derives the instrument against THAT world (bar domain and full glyph set)",
+    !!rs23 && rs23.panelShown && rs23.chamber === "ages" &&
+      rs23.max === 2 * Math.max(1, sm2.present - sm2.minFounded) &&
+      rs23.year === sm2.present && rs23.visible === sm2.count,
+    JSON.stringify({ rs23, expectedMax: 2 * Math.max(1, sm2.present - sm2.minFounded), expectedCount: sm2.count, present: sm2.present }),
   );
 
-  // RS21 (S23): a ruin has no press to it. Its beat is the FALL year and it dries into
-  // the record rather than stamping down.
-  if (sm.ruinIdx >= 0) {
-    await setYear(sm.ruinYear - 1);
-    const rs21 = await evaluate(`(()=>{
-      const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.ruinYear}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
-      const g=document.querySelector('.rf-chart #layer-settlements g.settlement[data-idx="${sm.ruinIdx}"]');
-      if(!g)return{found:false};
-      const mark=g.querySelector(":scope > :not(text)");
-      if(!mark)return{found:true,hasMark:false};
-      const cs=getComputedStyle(mark);
-      return{found:true,hasMark:true,ink:g.getAttribute("data-ink"),disp:getComputedStyle(g).display,
-        name:cs.animationName,dur:cs.animationDuration};
-    })()`);
-    check(
-      "RS21 a ruin inks in at its FALL year with dryingInk, never the stamp (#155)",
-      rs21.found && rs21.hasMark && rs21.ink === "ruin" && rs21.disp !== "none" &&
-        rs21.name === "dryingInk" && rs21.dur.includes("0.26"),
-      JSON.stringify(rs21),
-    );
-  } else {
-    check("RS21 seed 42 has a ruin to ink in", false, "no ruin in manifest");
-  }
-
-  // RS22 (S26): the crown jewel. The stamp presses ONTO the town, it does not slide onto
-  // it, so the town point must be a FIXED POINT of the press: at any instant the mark's
-  // box is the resting box scaled about that point. Ground truth comes from the MANIFEST
-  // through the chart's own getScreenCTM, never from a .place-hit box (the overlay is
-  // sized to the mount while the chart svg renders a few px wider, and the press would
-  // scale that ~1.2px offset into a phantom error). Tolerance is sub-pixel on purpose:
-  // the defect this guards is 1.03px at k=1.
-  await setYear(sm.minFounded);
-  const rs22 = await evaluate(`(()=>{
-    const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.present}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
-    const man=window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest;
-    const pt=new Map(man.places.map((p)=>[String(p.idx),p]));
-    const svg=document.querySelector(".rf-chart svg");
-    const vb=svg.viewBox.baseVal, ctm=svg.getScreenCTM();
-    const groups=[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink="founding"]')];
-    let worst=0,worstAt="",measured=0,castles=0;
-    for(const g of groups){
-      const place=pt.get(g.dataset.idx);
-      if(!place)continue;
-      const p=new DOMPoint(place.nx*vb.width,place.ny*vb.height).matrixTransform(ctm);
-      const px=p.x, py=p.y;
-      for(const mark of g.querySelectorAll(":scope > :not(text)")){
-        const anims=mark.getAnimations();
-        if(!anims.length)continue;
-        if(mark.querySelector(".settlement-capital,.settlement-seat")||mark.classList.contains("settlement-capital")||mark.classList.contains("settlement-seat"))castles++;
-        for(const a of anims)a.pause();
-        for(const a of anims)a.currentTime=0;
-        const b0=mark.getBoundingClientRect();
-        const k=new DOMMatrix(getComputedStyle(mark).transform).a;
-        for(const a of anims)a.currentTime=a.effect.getTiming().duration;
-        const b1=mark.getBoundingClientRect();
-        for(const a of anims){a.currentTime=0;a.play();}
-        if(b1.width===0||b1.height===0)continue;
-        measured++;
-        for(const [got,rest,q] of [[b0.left,b1.left,px],[b0.right,b1.right,px],[b0.top,b1.top,py],[b0.bottom,b1.bottom,py]]){
-          const d=Math.abs(got-(q+k*(rest-q)));
-          if(d>worst){worst=d;worstAt=g.dataset.idx+" k="+k.toFixed(3);}
-        }
-      }
-    }
-    return{groups:groups.length,measured,castles,worst:Number(worst.toFixed(3)),worstAt};
-  })()`);
-  check(
-    "RS22 the stamp presses ONTO the town: the town point is a fixed point of the press (#155)",
-    rs22.measured > 0 && rs22.castles > 0 && rs22.worst < 0.05,
-    JSON.stringify(rs22),
-  );
+  gate.check("RS24 the room instrument run is clean (no console errors, no new 4xx)");
 }
+

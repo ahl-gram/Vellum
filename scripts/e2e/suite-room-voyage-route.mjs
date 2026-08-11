@@ -19,11 +19,12 @@
 // The room reaches a world by NAVIGATION rather than by a #seed field and a #draw click
 // (it has no draw controls), and the bare `survey` key lands it in the survey chamber at
 // the completed track, which is the resting base every check here wants.
-import { makeRoom } from "./room-support.mjs";
+import { makeRoom, scopedHealth } from "./room-support.mjs";
 
 export async function run(ctx) {
   const { evaluate, check, shoot } = ctx;
   const room = makeRoom(ctx);
+  const gate = scopedHealth(ctx);
 
   // Seed 526413615 ("The Isle of Selivelai"): 24 ports and, since #275, a closed round
   // trip of 24 legs, 15 road and 9 sea, one of which is the genuine inland handoff.
@@ -322,4 +323,6 @@ export async function run(ctx) {
     JSON.stringify(rv12),
   );
   await shoot("reading-room-voyage-straight-land.png");
+
+  gate.check("RV13 the room route run is clean (no console errors, no new 4xx)");
 }
