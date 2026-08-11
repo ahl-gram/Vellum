@@ -7,8 +7,11 @@ import { bandOf, makeInput } from "../../test-support/prospect-fixtures.ts";
 import {
   groundAt,
   type ForegroundElement,
+  type Mass,
   type ProspectGeometry,
 } from "../../src/prospect/geometry.ts";
+import { renderSvg } from "../../src/render/svg.ts";
+import { massNodes } from "../../src/prospect/dress/buildings.ts";
 import {
   PROSPECT_DRESSES,
   foregroundNodes,
@@ -173,17 +176,34 @@ test("the sea band wears the style's water tokens", () => {
 
 // ------------------------------------------------------------ ruin reads ruin
 
-test("a broken mass renders a different silhouette than an intact one", () => {
-  const g = FIXTURES.fieldsHamlet!;
-  const broken: ProspectGeometry = {
-    ...g,
-    masses: g.masses.map((m, i) => (i === 0 ? { ...m, broken: true } : m)),
-  };
-  assert.notEqual(
-    prospectSvg(g, STYLES.ink),
-    prospectSvg(broken, STYLES.ink),
-    "breaking a mass changes the plate",
-  );
+// Silhouette-specific on purpose: a whole-plate notEqual was satisfied by
+// the foot rubble alone, so a broken tower rendering intact (merlons and
+// all) escaped every test until vellum-guard-prover proved it. Guard each
+// form family's silhouette through massNodes, the class, not the instance.
+test("a broken mass loses its intact silhouette, form by form", () => {
+  const c = dressContext(STYLES.ink);
+  const render = (m: Mass): string => massNodes(c, m, 1.2).map(renderSvg).join("");
+
+  const gable: Mass = { form: "gable", x: 100, w: 20, h: 18, base: 232, raise: 0, broken: false };
+  const apex = `L${f(110)} ${f(232 - 18 - Math.min(9, 18 * 0.45))}`;
+  assert.ok(render(gable).includes(apex), "intact gable raises its apex");
+  const gb = render({ ...gable, broken: true });
+  assert.ok(!gb.includes(apex), "a broken gable loses the apex");
+  assert.ok(gb.includes(`L${f(100)} ${f(232 - 18 + 18 * 0.25)}`), "a broken gable jags");
+
+  const tower: Mass = { form: "tower", x: 200, w: 10, h: 30, base: 232, raise: 0, broken: false };
+  const merlons = `M${f(199.5)} ${f(202)}`;
+  assert.ok(render(tower).includes(merlons), "an intact tower is crenellated");
+  const tb = render({ ...tower, broken: true });
+  assert.ok(!tb.includes(merlons), "a broken tower loses its merlons");
+  assert.ok(tb.includes(`L${f(203.5)} ${f(202 + 30 * 0.38)}`), "a broken tower jags");
+
+  const keep: Mass = { form: "keep", x: 240, w: 34, h: 40, base: 232, raise: 0, broken: false };
+  const pennant = "l4 1.4l-4 1.4";
+  assert.ok(render(keep).includes(pennant), "an intact keep flies pennants");
+  const kb = render({ ...keep, broken: true });
+  assert.ok(!kb.includes(pennant), "a thrown-down keep flies no pennant");
+  assert.ok(kb.includes(`L${f(240 + 34 * 0.2)} ${f(192 + 40 * 0.4)}`), "a broken keep jags");
 });
 
 // ------------------------------------------- every foreground element has ink

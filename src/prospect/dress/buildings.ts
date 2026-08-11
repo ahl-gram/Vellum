@@ -129,7 +129,27 @@ function verticalNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
   return out;
 }
 
+/** A thrown-down keep: the jagged shell, no crenellation, no turrets, and
+ * above all no pennant (GO condition 3: a ruin must read ruinous; the
+ * intact crown on a fallen hold was the hole vellum-guard-prover found). */
+function brokenKeepNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
+  const { x, w, h, base } = m;
+  const top = base - h;
+  const d = `M${r1(x)} ${r1(base)}L${r1(x)} ${r1(top + h * 0.15)}L${r1(x + w * 0.2)} ${r1(top + h * 0.4)}L${r1(x + w * 0.42)} ${r1(top + h * 0.1)}L${r1(x + w * 0.66)} ${r1(top + h * 0.45)}L${r1(x + w)} ${r1(top + h * 0.22)}L${r1(x + w)} ${r1(base)}Z`;
+  const hatch = [
+    `M${r1(x + w * 0.5)} ${r1(top + h * 0.4)}l${r1(w * 0.18)} ${r1(h * 0.24)}`,
+    `M${r1(x + w * 0.28)} ${r1(top + h * 0.55)}l${r1(w * 0.2)} ${r1(h * 0.2)}`,
+    `M${r1(x + w * 0.7)} ${r1(top + h * 0.55)}l${r1(w * 0.16)} ${r1(h * 0.22)}`,
+  ].join("");
+  return [
+    el("path", { d, fill: c.paper, ...stroke(c, weight) }),
+    el("path", { d: hatch, fill: "none", ...stroke(c, 0.7) }),
+    archedDoor(c, x + w / 2, base, 2.2, 4.2),
+  ];
+}
+
 function keepNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
+  if (m.broken) return brokenKeepNodes(c, m, weight);
   const { x, w, h, base } = m;
   const top = base - h;
   const t = w / 7;
