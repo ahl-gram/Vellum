@@ -206,6 +206,10 @@ both of those are the `api` form. Never conclude an issue is empty from `gh issu
 
 **Remind Alex of any open decision in an issue and get his call before implementing it.**
 
+**When asking Alex to make an open decision** (on a feature, a bug, a test, anything else),
+explain the context and what you need from him in simple terms, so he can have a good
+understanding of what he is deciding: no jargon, no overly technical language, no acronyms.
+
 **Run the `vellum-spec-recon` subagent at the start of any sub or epic.** It fetches body AND comments,
 verifies every cited path, symbol, test name and count with a command, and returns a
 CURRENT / STALE / UNVERIFIABLE ledger plus the open decisions awaiting Alex. It exists because
