@@ -374,6 +374,38 @@ export async function run(ctx) {
     JSON.stringify({ rs27clear, rs27 }),
   );
 
+  // RS28 (pr-skeptic finding 4a): a counter read INSIDE the ceremony window. The read
+  // hides the panel mid-unfurl, which CANCELS the animations (display:none terminates
+  // them; end never fires), so a removal keyed on animationend alone leaves the class
+  // in place and the next unhide replays the whole unfurl. The fix retires the class
+  // on end OR cancel, whichever empties the column of running unfurls: by the time the
+  // read's draw settles, the class must be gone and nothing unfurling.
+  const arrivedAgain = await room.goto("#seed=42&style=antique&legend=1");
+  let rs28armed = false;
+  for (let i = 0; i < 40; i++) {
+    if (await evaluate(`document.querySelector(".rf").classList.contains("rf-arrival")`)) { rs28armed = true; break; }
+    await sleep(25);
+  }
+  // Strike while the ceremony is in flight: the read tears the panel down mid-unfurl.
+  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="9";c.querySelector(".rr-read").click();})()`);
+  let rs28 = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,
+        status:(document.querySelector(".rf-status")||{}).textContent,
+        cls:document.querySelector(".rf").classList.contains("rf-arrival"),
+        anim:getComputedStyle(document.querySelector(".rf-instrument")).animationName};})()`);
+    } catch {}
+    if (s && s.status === "" && s.seed === 9) { rs28 = s; break; }
+    await sleep(50);
+  }
+  check(
+    "RS28 a counter read mid-ceremony cancels it cleanly: the class retires on cancel, no replay on the re-arm",
+    arrivedAgain && rs28armed && !!rs28 && rs28.cls === false && rs28.anim === "none",
+    JSON.stringify({ arrivedAgain, rs28armed, rs28 }),
+  );
+
   gate.check("RS24 the room instrument run is clean (no console errors, no new 4xx)");
 }
 

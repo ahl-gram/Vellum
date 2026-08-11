@@ -151,15 +151,30 @@ let drawGen = 0;
 // successful settle. One-shot by CLASS REMOVAL, not by this flag alone: the engine
 // drives the panel's hidden flag on every counter read, display:none terminates a
 // CSS animation, and restoring display starts it AFRESH, so a class left in place
-// would replay the unfurl as a flash on every dice roll. The journal is the later
-// stage (one --paper-quick beat behind), so its animationend is when the whole
-// ceremony has landed and the class can retire.
+// would replay the unfurl as a flash on every dice roll.
+//
+// The class retires the moment NOTHING is unfurling any more, whichever way it got
+// there (the pr-skeptic found the last two paths on the first cut, e2e RS28):
+// the journal's natural end (the ceremony's last stage, one beat behind), a column
+// whose journal never animates at all (a declined session hides the log before
+// arrival, so the instrument's end is the last event there is), or a counter read
+// INSIDE the ceremony window, which draw() retires explicitly at its top: Chrome
+// has never implemented animationcancel (a Blink gap), so the mid-ceremony hidden
+// toggle fires no event there at all, and only a deterministic removal in the
+// conductor covers it. The cancel listener stays for the engines that do fire it.
 let arrived = false;
-frame.log.panel.addEventListener("animationend", function onUnfurled(e: AnimationEvent) {
+const retireArrival = (e: AnimationEvent): void => {
   if (e.animationName !== "paperUnfurl") return;
+  const unfurling = frame.root
+    .getAnimations({ subtree: true })
+    .some((a) => a.playState === "running" && (a as CSSAnimation).animationName === "paperUnfurl");
+  if (unfurling) return;
   frame.root.classList.remove("rf-arrival");
-  frame.log.panel.removeEventListener("animationend", onUnfurled);
-});
+  frame.root.removeEventListener("animationend", retireArrival);
+  frame.root.removeEventListener("animationcancel", retireArrival);
+};
+frame.root.addEventListener("animationend", retireArrival);
+frame.root.addEventListener("animationcancel", retireArrival);
 
 function draw(): void {
   const myGen = ++drawGen;
@@ -172,6 +187,12 @@ function draw(): void {
   // onPark, so nothing writes the address mid-draft.
   lc.pauseScrub();
   lc.cancelVoyageRaf();
+  // #321: a read supersedes the arrival ceremony (interaction interrupts, the #174
+  // idiom), and it must be retired HERE, deterministically: see the retireArrival
+  // comment above for why no event covers this path in Chrome. A no-op on the boot
+  // draw (the class is only added after this draw's own re-arm) and after a
+  // completed ceremony (the class is already gone).
+  frame.root.classList.remove("rf-arrival");
   // The chart number IS the seed, so the counter always shows the world on screen;
   // a visitor reads the next number over whatever the last draw left behind.
   colophon.seedInput.value = String(seed);
