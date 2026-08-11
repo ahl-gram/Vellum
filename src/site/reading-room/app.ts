@@ -18,18 +18,25 @@ import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { parseLive, emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
 import { createReadingFrame } from "../reading-frame/index.ts";
 import { createColophon } from "./colophon.ts";
-import { createLivingChart, type AgesPos } from "../living-chart/index.ts";
+import { createLivingChart, type AgesPos, type LivingChart } from "../living-chart/index.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 
 // The window.__vellum* verification hooks assigned in this file, typed once here.
+//
+// #320: the ages hook publishes the engine's WHOLE instrument state rather than the
+// {chamber, year} the room needed for its own address checks. The live-animation
+// coverage re-hosted here reads the sweep through t / u / held / min / max / playing,
+// all of which the Explorer's __vellumAgesState has always carried. Typing it as the
+// engine's own ReturnType (the #319 no-bar.ts idiom) means tsc breaks this file if
+// agesState ever grows or loses a member, so the hook cannot silently narrow again.
 declare global {
   interface Window {
     __vellumReadingRoomUsesWorker?: typeof usesWorker;
     __vellumReadingRoomState?: () => { seed: number; title: string };
-    __vellumReadingRoomAges?: () => { chamber: "survey" | "ages"; year: number | null } | null;
+    __vellumReadingRoomAges?: LivingChart["agesState"];
   }
 }
 
@@ -237,10 +244,9 @@ document.addEventListener("click", lc.onDocClick);
 await initWorker();
 window.__vellumReadingRoomUsesWorker = usesWorker;
 window.__vellumReadingRoomState = () => ({ seed, title: lastTitle });
-window.__vellumReadingRoomAges = () => {
-  const a = lc.agesState();
-  return a ? { chamber: a.chamber, year: a.year } : null;
-};
+// #320: published whole, not narrowed. The room is the host that now carries the
+// live-animation coverage, so its hook owes the same read the Explorer's does.
+window.__vellumReadingRoomAges = lc.agesState;
 if (!usesWorker()) warning.hidden = false;
 
 applyHash();
