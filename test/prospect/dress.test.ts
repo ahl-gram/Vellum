@@ -65,17 +65,16 @@ test("the ratified dresses are antique and ink, and only those render", () => {
 
 // ------------------------------------------------- every ink is a style token
 
-/** Every color literal a style owns, lowercased. */
+/** The tokens the dress is allowed to draw from. Deliberately NOT the
+ * whole style object: realmTints are excluded so a hard-coded grey that
+ * happens to equal a tint (ink's realmTints hold "#888") still fails. */
 function tokenColors(dress: ProspectDress): Set<string> {
-  const style = STYLES[dress];
-  const colors = new Set<string>();
-  const walk = (v: unknown): void => {
-    if (typeof v === "string" && v.startsWith("#")) colors.add(v.toLowerCase());
-    else if (Array.isArray(v)) v.forEach(walk);
-    else if (v !== null && typeof v === "object") Object.values(v).forEach(walk);
-  };
-  walk(style);
-  return colors;
+  const s = STYLES[dress];
+  return new Set(
+    [s.paper, s.ink, s.inkSoft, s.ocean, s.waterline, s.coastStroke, s.land].map((c) =>
+      c.toLowerCase(),
+    ),
+  );
 }
 
 test("every ink in every plate is sourced from render/style.ts tokens", () => {
@@ -341,22 +340,26 @@ test("the same (geometry, dress) yields byte-identical, pinned SVG", () => {
   }
 });
 
-// The byte pins above are only sound while the dress stays libm-free: one
-// Math.sin and the rounded bytes can differ Mac-vs-CI (the golden rule's
-// ~1e-13 drift). Guard the CLASS at the source, same contract geometry.ts
-// states for the composer layer. Math.sqrt is exempt: IEEE requires it
-// correctly rounded, so it cannot drift.
-test("the dress layer stays libm-free and clock-free", async () => {
+// The byte pins above are only sound while the WHOLE prospect chain stays
+// libm-free: the fixtures run through compose/masses/ground/foreground/
+// ruin, so one Math.sin in the composer would also make the pinned bytes
+// drift Mac-vs-CI (the golden rule's ~1e-13). Guard the class at its true
+// boundary, all of src/prospect/, the contract geometry.ts and transect.ts
+// state in prose (their prose mentions are why comments are stripped
+// before matching). Math.sqrt is exempt: IEEE requires it correctly
+// rounded, so it cannot drift.
+test("the prospect layer stays libm-free and clock-free", async () => {
   const { readdir, readFile } = await import("node:fs/promises");
   const { fileURLToPath } = await import("node:url");
-  const dir = fileURLToPath(new URL("../../src/prospect/dress/", import.meta.url));
-  const files = (await readdir(dir)).filter((f) => f.endsWith(".ts"));
-  assert.ok(files.length >= 2, "the dress layer exists");
+  const dir = fileURLToPath(new URL("../../src/prospect/", import.meta.url));
+  const files = (await readdir(dir, { recursive: true })).filter((f) => f.endsWith(".ts"));
+  assert.ok(files.length >= 10, `scans the whole prospect layer (${files.length} files)`);
   const banned =
     /Math\.(sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|hypot|cbrt|log|log2|log10|log1p|exp|expm1|pow|random)\b|Date\.now|new Date/;
   for (const file of files) {
     const src = await readFile(dir + file, "utf8");
-    const hit = src.match(banned);
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    const hit = code.match(banned);
     assert.equal(hit, null, `${file} calls ${hit?.[0]}, breaking cross-platform byte identity`);
   }
 });

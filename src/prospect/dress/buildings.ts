@@ -77,53 +77,62 @@ function gableNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
   return out;
 }
 
+/** The broken tower or spire: the jagged shell, no merlons, no finial. */
+function brokenVerticalNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
+  const { x, w, h, base } = m;
+  const top = base - h;
+  const d = `M${r1(x)} ${r1(base)}L${r1(x)} ${r1(top + h * 0.2)}L${r1(x + w * 0.35)} ${r1(top + h * 0.38)}L${r1(x + w * 0.65)} ${r1(top + h * 0.12)}L${r1(x + w)} ${r1(top + h * 0.3)}L${r1(x + w)} ${r1(base)}Z`;
+  const hatch = [
+    `M${r1(x + w * 0.55)} ${r1(top + h * 0.35)}l${r1(w * 0.28)} ${r1(h * 0.22)}`,
+    `M${r1(x + w * 0.2)} ${r1(top + h * 0.5)}l${r1(w * 0.3)} ${r1(h * 0.24)}`,
+  ].join("");
+  return [
+    el("path", { d, fill: c.paper, ...stroke(c, weight) }),
+    el("path", { d: hatch, fill: "none", ...stroke(c, 0.7) }),
+  ];
+}
+
 function verticalNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
+  if (m.broken) return brokenVerticalNodes(c, m, weight);
   const { x, w, h, base } = m;
   const top = base - h;
   const out: SvgNode[] = [];
   const hatch: string[] = [];
-  if (m.broken) {
-    const d = `M${r1(x)} ${r1(base)}L${r1(x)} ${r1(top + h * 0.2)}L${r1(x + w * 0.35)} ${r1(top + h * 0.38)}L${r1(x + w * 0.65)} ${r1(top + h * 0.12)}L${r1(x + w)} ${r1(top + h * 0.3)}L${r1(x + w)} ${r1(base)}Z`;
-    out.push(el("path", { d, fill: c.paper, ...stroke(c, weight) }));
-    hatch.push(`M${r1(x + w * 0.55)} ${r1(top + h * 0.35)}l${r1(w * 0.28)} ${r1(h * 0.22)}`);
-    hatch.push(`M${r1(x + w * 0.2)} ${r1(top + h * 0.5)}l${r1(w * 0.3)} ${r1(h * 0.24)}`);
+  out.push(
+    el("path", {
+      d: `M${r1(x)} ${r1(base)}L${r1(x)} ${r1(top)}L${r1(x + w)} ${r1(top)}L${r1(x + w)} ${r1(base)}Z`,
+      fill: c.paper,
+      ...stroke(c, weight),
+    }),
+  );
+  if (m.form === "tower") {
+    // merlons, quoting the chart's castle glyph
+    const t = w / 5;
+    const d = `M${r1(x - 0.5)} ${r1(top)}L${r1(x - 0.5)} ${r1(top - 2.6)}L${r1(x + t)} ${r1(top - 2.6)}L${r1(x + t)} ${r1(top)}M${r1(x + 2 * t)} ${r1(top)}L${r1(x + 2 * t)} ${r1(top - 2.6)}L${r1(x + 3 * t)} ${r1(top - 2.6)}L${r1(x + 3 * t)} ${r1(top)}M${r1(x + 4 * t)} ${r1(top)}L${r1(x + 4 * t)} ${r1(top - 2.6)}L${r1(x + w + 0.5)} ${r1(top - 2.6)}L${r1(x + w + 0.5)} ${r1(top)}`;
+    out.push(el("path", { d, fill: "none", ...stroke(c, weight * 0.85) }));
   } else {
+    const sp = Math.max(12, h * 0.55);
+    const cx = x + w / 2;
     out.push(
       el("path", {
-        d: `M${r1(x)} ${r1(base)}L${r1(x)} ${r1(top)}L${r1(x + w)} ${r1(top)}L${r1(x + w)} ${r1(base)}Z`,
+        d: `M${r1(x - 0.6)} ${r1(top)}L${r1(cx)} ${r1(top - sp)}L${r1(x + w + 0.6)} ${r1(top)}Z`,
         fill: c.paper,
         ...stroke(c, weight),
       }),
     );
-    if (m.form === "tower") {
-      // merlons, quoting the chart's castle glyph
-      const t = w / 5;
-      const d = `M${r1(x - 0.5)} ${r1(top)}L${r1(x - 0.5)} ${r1(top - 2.6)}L${r1(x + t)} ${r1(top - 2.6)}L${r1(x + t)} ${r1(top)}M${r1(x + 2 * t)} ${r1(top)}L${r1(x + 2 * t)} ${r1(top - 2.6)}L${r1(x + 3 * t)} ${r1(top - 2.6)}L${r1(x + 3 * t)} ${r1(top)}M${r1(x + 4 * t)} ${r1(top)}L${r1(x + 4 * t)} ${r1(top - 2.6)}L${r1(x + w + 0.5)} ${r1(top - 2.6)}L${r1(x + w + 0.5)} ${r1(top)}`;
-      out.push(el("path", { d, fill: "none", ...stroke(c, weight * 0.85) }));
-    } else {
-      const sp = Math.max(12, h * 0.55);
-      const cx = x + w / 2;
-      out.push(
-        el("path", {
-          d: `M${r1(x - 0.6)} ${r1(top)}L${r1(cx)} ${r1(top - sp)}L${r1(x + w + 0.6)} ${r1(top)}Z`,
-          fill: c.paper,
-          ...stroke(c, weight),
-        }),
-      );
-      out.push(
-        el("path", {
-          d: `M${r1(cx)} ${r1(top - sp - 1)}L${r1(cx)} ${r1(top - sp - 4.4)}M${r1(cx - 1.8)} ${r1(top - sp - 3.2)}L${r1(cx + 1.8)} ${r1(top - sp - 3.2)}`,
-          fill: "none",
-          ...stroke(c, 0.8),
-        }),
-      );
-      roofHatch(hatch, cx + 0.8, top - sp * 0.55, w * 0.2, sp * 0.3, 2, 1.8);
-    }
-    const wx = x + w / 2;
-    out.push(el("rect", { x: r1(wx - 0.6), y: r1(top + h * 0.28), width: 1.2, height: 3, fill: c.ink }));
-    if (h > 30) {
-      out.push(el("rect", { x: r1(wx - 0.6), y: r1(top + h * 0.55), width: 1.2, height: 3, fill: c.ink }));
-    }
+    out.push(
+      el("path", {
+        d: `M${r1(cx)} ${r1(top - sp - 1)}L${r1(cx)} ${r1(top - sp - 4.4)}M${r1(cx - 1.8)} ${r1(top - sp - 3.2)}L${r1(cx + 1.8)} ${r1(top - sp - 3.2)}`,
+        fill: "none",
+        ...stroke(c, 0.8),
+      }),
+    );
+    roofHatch(hatch, cx + 0.8, top - sp * 0.55, w * 0.2, sp * 0.3, 2, 1.8);
+  }
+  const wx = x + w / 2;
+  out.push(el("rect", { x: r1(wx - 0.6), y: r1(top + h * 0.28), width: 1.2, height: 3, fill: c.ink }));
+  if (h > 30) {
+    out.push(el("rect", { x: r1(wx - 0.6), y: r1(top + h * 0.55), width: 1.2, height: 3, fill: c.ink }));
   }
   if (hatch.length > 0) out.push(el("path", { d: hatch.join(""), fill: "none", ...stroke(c, 0.7) }));
   return out;

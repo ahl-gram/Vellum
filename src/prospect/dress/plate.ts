@@ -122,6 +122,9 @@ function unreachable(e: never): never {
 
 /** #rrggbb -> "r g b" channels in 0..1, 2dp, for the grain's color matrix. */
 function inkChannels(ink: string): [string, string, string] {
+  if (!/^#[0-9a-fA-F]{6}$/.test(ink)) {
+    throw new RangeError(`ink token ${ink} is not #rrggbb; the grain matrix needs 6-digit hex`);
+  }
   const ch = (i: number): string => (parseInt(ink.slice(i, i + 2), 16) / 255).toFixed(2);
   return [ch(1), ch(3), ch(5)];
 }

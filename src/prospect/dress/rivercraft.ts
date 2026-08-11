@@ -16,9 +16,8 @@ type Bridge = Extract<ForegroundElement, { kind: "bridge" }>;
 type Mill = Extract<ForegroundElement, { kind: "mill" }>;
 
 export function bridgeNodes(c: DressContext, b: Bridge): SvgNode[] {
-  const { x0, x1, deckY, waterY, arches } = b;
+  const { x0, x1, deckY, waterY } = b;
   const out: SvgNode[] = [];
-  const span = (x1 - x0) / arches;
   // abutments: the bridge must visibly land on both banks (the GO's anchor)
   for (const ax of [x0, x1]) {
     out.push(
@@ -44,6 +43,16 @@ export function bridgeNodes(c: DressContext, b: Bridge): SvgNode[] {
       ...stroke(c, 0.8),
     }),
   );
+  out.push(...archSpanNodes(c, b));
+  out.push(...massNodes(c, b.gateTower, 1.1));
+  return out;
+}
+
+/** The piers, arch rings, and the water stirring under each span. */
+function archSpanNodes(c: DressContext, b: Bridge): SvgNode[] {
+  const { x0, deckY, waterY, arches } = b;
+  const span = (b.x1 - x0) / arches;
+  const out: SvgNode[] = [];
   for (let i = 0; i <= arches; i++) {
     const px = x0 + i * span;
     if (i > 0 && i < arches) {
@@ -68,7 +77,6 @@ export function bridgeNodes(c: DressContext, b: Bridge): SvgNode[] {
       out.push(rippleDash(c, (ax0 + ax1) / 2 - 12, waterY + 5 + (i % 2) * 4, 0.7));
     }
   }
-  out.push(...massNodes(c, b.gateTower, 1.1));
   return out;
 }
 
