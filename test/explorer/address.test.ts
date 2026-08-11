@@ -1,13 +1,14 @@
 // #192 The Address: the live-state keys of the Explorer hash. The grammar is pure and
 // DOM-free (src/site/explorer/address.ts) so it is unit-tested here in isolation; the
 // live plumbing (readHash/writeHash in hash-sync.ts, the conductor's one-shot restore)
-// is proven by the e2e suite-address. Ratified vocabulary (the 2026-07-26 comment on
+// is proven by the e2e suite-survey and the room-hosted RA suite (#321). Ratified
+// vocabulary (the 2026-07-26 comment on
 // #192): two mutually exclusive keys, a bare `survey` flag (the voyage at rest on its
 // completed track) and `year=N` (the chronicle wound to in-world year N). The writer
 // emits exactly one of them, or neither.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseLive, emitLive, finalizeHash, liveNow } from "../../src/site/explorer/address.ts";
+import { parseLive, emitLive, finalizeHash, liveNow, forwardTarget } from "../../src/site/explorer/address.ts";
 
 const P = (s: string) => new URLSearchParams(s);
 
@@ -113,4 +114,42 @@ test("liveNow: an unknowable state or a disarmed instrument emits nothing", () =
     null,
     "a disarmed instrument emits nothing even with a stale pending key",
   );
+});
+
+// #321 (Survey & Story Sub 4): the time forward. An Explorer link carrying a valid
+// `year=N` forwards to the Reading Room BEFORE any draw, hash verbatim (decision 2,
+// 2026-08-11: the room reads the same recipe keys and ignores what it cannot use, so
+// the forward strips nothing). Everything else stays in the Explorer exactly as today:
+// the bare survey flag is the Explorer's own address, a malformed year is ignored, and
+// the both-keys set is nonsensical and ignored whole (parseLive's discipline, reused).
+test("forwardTarget: a valid year=N link forwards to the Reading Room, hash verbatim", () => {
+  assert.equal(
+    forwardTarget("#seed=42&style=antique&legend=1&arms=0&year=814"),
+    "/reading-room/#seed=42&style=antique&legend=1&arms=0&year=814",
+  );
+  // The camera and every other rider forwards untouched; the room ignores what it
+  // cannot use (its applyHash allowlists), so nothing is stripped here.
+  assert.equal(
+    forwardTarget("#seed=7&style=ink&year=1&cx=0.5100&cy=0.4900&k=3.0000"),
+    "/reading-room/#seed=7&style=ink&year=1&cx=0.5100&cy=0.4900&k=3.0000",
+  );
+});
+
+test("forwardTarget: a survey link is the Explorer's own address and stays", () => {
+  assert.equal(forwardTarget("#seed=42&survey"), null);
+  assert.equal(forwardTarget("#seed=42&survey="), null);
+});
+
+test("forwardTarget: a malformed year stays in the Explorer, ignored as today", () => {
+  assert.equal(forwardTarget("#seed=42&year=0"), null);
+  assert.equal(forwardTarget("#seed=42&year=-3"), null);
+  assert.equal(forwardTarget("#seed=42&year=8.5"), null);
+  assert.equal(forwardTarget("#seed=42&year=abc"), null);
+  assert.equal(forwardTarget("#seed=42&year="), null);
+  assert.equal(forwardTarget(""), null);
+  assert.equal(forwardTarget("#seed=42&style=antique"), null);
+});
+
+test("forwardTarget: the both-keys set is ignored whole, so it stays", () => {
+  assert.equal(forwardTarget("#seed=42&survey&year=814"), null);
 });

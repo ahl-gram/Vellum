@@ -146,6 +146,21 @@ function syncHash(): void {
 // a second draw. A superseded draw can never land over a newer one.
 let drawGen = 0;
 
+// #321 the arrival ceremony (ratified by Alex 2026-08-11, candidate C of the
+// out/321-unfurl variants): the reading column unfurls ONCE per visit, on the first
+// successful settle. One-shot by CLASS REMOVAL, not by this flag alone: the engine
+// drives the panel's hidden flag on every counter read, display:none terminates a
+// CSS animation, and restoring display starts it AFRESH, so a class left in place
+// would replay the unfurl as a flash on every dice roll. The journal is the later
+// stage (one --paper-quick beat behind), so its animationend is when the whole
+// ceremony has landed and the class can retire.
+let arrived = false;
+frame.log.panel.addEventListener("animationend", function onUnfurled(e: AnimationEvent) {
+  if (e.animationName !== "paperUnfurl") return;
+  frame.root.classList.remove("rf-arrival");
+  frame.log.panel.removeEventListener("animationend", onUnfurled);
+});
+
 function draw(): void {
   const myGen = ++drawGen;
   // Park the outgoing world's sweep for the draft round-trip. The stake is the
@@ -200,6 +215,12 @@ function draw(): void {
       // post-wipe teardown: the old chart DOM already left with the innerHTML swap.
       lc.clearAges();
       lc.rearmAges(res.manifest, res.survey, seed, res.subtitle, { rest });
+      // #321: the arrival unfurl, first settle only, added AFTER the arm so the panel
+      // is visible when the animation starts (see the flag's comment above).
+      if (!arrived) {
+        arrived = true;
+        frame.root.classList.add("rf-arrival");
+      }
       frame.host.statusEl.textContent = "";
       // Converge the address after the arm, so a bare visit's URL immediately carries
       // the world it landed on (agesState knows the parked rest by now).

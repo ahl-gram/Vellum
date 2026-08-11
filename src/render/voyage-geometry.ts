@@ -99,7 +99,8 @@ export function elapsedAtT(cumMs: ReadonlyArray<number>, t: number): number {
  * 2026-07-25) the MEDIAN leg peaks at 23.6 degrees and 630 of them press past 20, so
  * MAX_TILT is close to what the mark simply looks like on a climbing leg. Changing it
  * is therefore a visible change to the whole sweep, not a tail adjustment, and it also
- * re-pins the e2e W20 ceiling in scripts/e2e/suite-voyage-route.mjs.
+ * re-pins the e2e RV4 ceiling in scripts/e2e/suite-room-voyage-route.mjs (the sole
+ * numeric guard since #321 retired its Explorer twin W20 with the Explorer's seams).
  */
 export const MAX_TILT = 24;
 

@@ -57,11 +57,12 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       </label>
       <label class="check">legend <input id="legend" type="checkbox" checked></label>
       <label class="check">arms <input id="arms" type="checkbox"></label>
-      <!-- #220: the `chronicle` and `voyage` checkboxes fused into this one entry, the
-           ratified `ages` label (dated comment on #220, 2026-07-28). The name follows
-           the instrument's right-hand chamber; the scrubber's own affordances announce
-           the survey half, since this label no longer can. -->
-      <label class="check">ages <input id="ages" type="checkbox"></label>
+      <!-- #321: the survey ink, static chart furniture beside arms (the ratified
+           `survey` label, #317 decision 1, 2026-07-29). Ticked inks the completed
+           survey track onto the sheet at rest; time itself lives in the Reading Room.
+           The element id stays `ages` (smallest diff, per the issue); the box is 1:1
+           with the bare `survey` hash flag in both directions. -->
+      <label class="check">survey <input id="ages" type="checkbox"></label>
       <label class="sealevel">sea level
         <span class="land-end">more sea</span>
         <input id="land" type="range" min="100" max="700" step="2" aria-label="Sea level">
@@ -136,20 +137,13 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 <div id="verso" aria-hidden="true"></div>
 </div></div>
 <p class="caption" id="caption"></p>
-<!-- #220 the ages instrument: one bar (survey half then ages half, the seam at the
-     midpoint) over ONE journal, the surveyor's dated prologue then the chronicler's
-     annals (#121's margin log and #54's chronicle strip, fused). The engine sets the
-     bar's domain at arm time. The overlay <svg> is aria-hidden; this readable journal
-     plus the one polite #status summary carry the a11y. -->
-<div id="scrubber" class="scrubber" hidden role="region" aria-label="The ages">
-  <div class="scrub-controls">
-    <button id="scrub-play" type="button">Play</button>
-    <input id="scrub-range" class="ages-range" type="range" aria-label="The ages">
-    <span id="scrub-year" class="scrub-year" aria-hidden="true"></span>
-  </div>
-  <p id="scrub-sig" class="voyage-log-sig"></p>
-  <ol id="chronicle-strip" class="chronicle-strip"></ol>
-</div>
+<!-- #321 decision 3 (ratified by Alex 2026-08-11): the inked track's quiet pointer to
+     its story. The journal left this page with the scrubber (time lives in the Reading
+     Room), so the caption line under the sheet, the one place a visitor who just inked
+     the track will look next, links the room. Hidden unless the survey box is ticked;
+     href kept current by app.ts (the #order-plates idiom) so it always opens THIS
+     world's journal at the survey rest. -->
+<p class="caption journal-line" id="journal-line" hidden><a id="journal-link" href="/reading-room/">read this survey&rsquo;s journal in the Reading Room</a></p>
 
 <script type="module" src="./app.bundle.js" is:inline></script>
 </BaseLayout>

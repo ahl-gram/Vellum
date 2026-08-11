@@ -1,17 +1,19 @@
-// The window.__vellum* verification hooks the EXPLORER adds on top of the shared host
-// surface, extracted from app.ts at #191 and split again at #320.
+// The window.__vellum* verification hooks the EXPLORER publishes, extracted from
+// app.ts at #191 and split again at #320.
 //
-// The six seams every LivingChart host publishes (the ages read, the five voyage seams)
-// plus the runInline oracle now live in ../shared/host-hooks.ts, so the Reading Room
-// registers the identical surface and a ported e2e check means the same thing on either
-// page. What remains here is Explorer-only by nature: the camera, the region state, the
-// redraft flag, and the worker plumbing. The declare block is typed from what is
-// assigned in this file.
+// #321: the Explorer no longer calls the shared installHostHooks. That is ratified
+// #320 decision A (2026-08-10): the deterministic voyage/ages seams retire from the
+// static Explorer WITH the wiring, because test-only seams that paint non-rest
+// positions would leave this page holding time machinery against the epic's "every
+// reachable state is a rest". The shared installer in ../shared/host-hooks.ts is the
+// Reading Room's surface now (the room's RS2 check derives from HOST_HOOK_NAMES
+// there); the two hosts differ ON PURPOSE from this sub on, so do not "re-unify"
+// them. What stays here is Explorer-only by nature (the camera, the region state,
+// the redraft flag, the worker plumbing) plus __vellumRunInline, the in-page
+// ground-truth oracle the surviving Explorer suites (render/cards/turn/verso) read.
 import type { runJob, runInline, usesWorker } from "./worker-client.ts";
 import type { ZoomState } from "../shared/zoom-controller.ts";
-import type { LivingChart } from "../living-chart/index.ts";
 import type { Glass } from "./glass.ts";
-import { installHostHooks } from "../shared/host-hooks.ts";
 
 declare global {
   interface Window {
@@ -25,7 +27,6 @@ declare global {
 }
 
 interface HookDeps {
-  livingChart: LivingChart;
   glass: Glass;
   usesWorker: typeof usesWorker;
   runJob: typeof runJob;
@@ -34,16 +35,18 @@ interface HookDeps {
   setRedraftEnabled: (v: boolean) => void;
 }
 
-export function installExplorerHooks({ livingChart: lc, glass, ...d }: HookDeps): void {
-  // The shared surface first: ages + the voyage seams + the runInline oracle.
-  installHostHooks({ livingChart: lc, runInline: d.runInline });
+export function installExplorerHooks({ glass, ...d }: HookDeps): void {
+  // The ground-truth oracle (manifest/survey the page's own engine would draw),
+  // declared on Window in ../shared/host-hooks.ts and published here directly since
+  // #321 (the rest of that installer's seams are the room's).
+  window.__vellumRunInline = d.runInline;
   // #169: a test seam, ON by default (production). It lets the geometric-zoom e2e
   // (Z1-Z16) isolate the geometric layer from the semantic redraft; those suites toggle
   // it off, and the Sub 8 suite (Z17-Z20) toggles it back on. Runtime only: the Explorer
   // never persists or reads it, so production is unaffected.
   window.__vellumSetRedraftEnabled = d.setRedraftEnabled;
   window.__vellumUsesWorker = d.usesWorker;
-  // Verification hook for the headless byte-identity check (its runInline half is shared).
+  // Verification hook for the headless byte-identity check (paired with runInline above).
   window.__vellumRunJob = d.runJob;
   // #164: deterministic zoom hooks (Z1-Z4). zoomTo drives the camera through the same
   // clamp a live gesture uses; zoomState reads back the settled {x,y,k}.

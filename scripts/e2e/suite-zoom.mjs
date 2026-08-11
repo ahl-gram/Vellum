@@ -612,11 +612,12 @@ export async function run(ctx) {
     `drawn in ${perfMs}ms under 4x throttle (target ~1.5s; 4000ms ceiling is a flake guard, not the target)`,
   );
 
-  // Z20d (scope: chronicle mutual exclusion): entering the chronicle reverts a committed
-  // region to the WORLD sheet (its baked settlement/road layers are what the scrubber
-  // drives; a region carries no chronicle), so no region job can be in flight while
-  // scrubbing. Enter a region, toggle the chronicle, assert the sheet is the world chart
-  // (no region stamp) and the scrubber is showing.
+  // Z20d (scope: survey mutual exclusion; retitled at #321, same contract): inking the
+  // survey track reverts a committed region to the WORLD sheet (the track is a WORLD
+  // overlay: world coordinates, world roads; a finer regional sheet would orphan it),
+  // so no region job can be in flight while the track is inked. Enter a region, tick
+  // the survey box, assert the sheet is the world chart (no region stamp) and the
+  // resting track is on it.
   await goHome();
   const before20d = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
@@ -626,14 +627,14 @@ export async function run(ctx) {
   const chron = await evaluate(
     `(()=>{const s=window.__vellumRegion();const svg=document.querySelector("#map > svg");` +
       `return{band:s.band,committed:s.committed,noStamp:!!svg&&!svg.hasAttribute("data-vellum-region-u0"),` +
-      `insets:document.querySelectorAll("#map .region-inset").length,scrubShown:!document.getElementById("scrubber").hidden};})()`,
+      `insets:document.querySelectorAll("#map .region-inset").length,trackShown:!!document.querySelector("#map .voyage-overlay .voyage-track")};})()`,
   );
   check(
-    "Z20d entering the ages instrument drops the inset back to the bare world sheet (mutual exclusion, no region while scrubbing)",
-    chron.band === 0 && chron.committed === false && chron.noStamp && chron.insets === 0 && chron.scrubShown,
+    "Z20d inking the survey drops the inset back to the bare world sheet (mutual exclusion, no region while the track is inked)",
+    chron.band === 0 && chron.committed === false && chron.noStamp && chron.insets === 0 && chron.trackShown,
     JSON.stringify(chron),
   );
-  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the chronicle
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`); // clear the survey ink
 
   // Z20e (scope: overlay rebuild, card continuity keyed by NAME): a card pinned in one
   // survey stays pinned to the SAME-named settlement across a redraft, even though region
@@ -694,34 +695,32 @@ export async function run(ctx) {
     `band ${deep20f.band}->${step20f.band} insets=${view20f.insets} world=${view20f.worldMounted} k=${view20f.zk} (expected 4)`,
   );
 
-  // Z20g: the SURVEY chamber mutually excludes the redraft, mirroring Z20d. Its track
-  // narrates the WORLD survey at world coordinates, so (a) arming drops a committed
-  // inset and builds the world track over the world sheet -- and since the 2026-07-26
-  // ratification the arming ceremony snaps the camera HOME across the WHOLE instrument
-  // (superseding the standalone voyage's old no-snap entry) -- and (b) while it is on,
-  // a settle stays geometric: no redraft. The bar steps to the seam so the track is the
-  // visible surface under the settle.
+  // Z20g: the survey ink mutually excludes the redraft, mirroring Z20d (#321: no bar
+  // to step any more, the box alone is the survey). Its track narrates the WORLD
+  // survey at world coordinates, so (a) ticking drops a committed inset and builds
+  // the world track over the world sheet -- and since the 2026-07-26 ratification the
+  // arming ceremony snaps the camera HOME (kept by the cut) -- and (b) while the
+  // track is inked, a settle stays geometric: no redraft.
   await goHome();
   const before20g = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const reg20g = await waitRedraft(before20g);
-  await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=true;v.dispatchEvent(new Event("change",{bubbles:true}));
-    const s=document.getElementById("scrub-range");s.value=String(Number(s.max)/2);s.dispatchEvent(new Event("input",{bubbles:true}));})()`);
+  await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=true;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await sleep(120);
   const von = await evaluate(
     `(()=>{const s=window.__vellumRegion();return{band:s.band,committed:s.committed,` +
       `insets:document.querySelectorAll("#map .region-inset").length,track:!!document.querySelector("#map .voyage-overlay"),` +
       `k:window.__vellumZoomState().k};})()`,
   );
-  await enterAt(2, 0.35, 0.35); // a settle while the survey rests: must NOT redraft
+  await enterAt(2, 0.35, 0.35); // a settle while the track is inked: must NOT redraft
   await sleep(600); // past the debounce + any would-be dispatch
   const vsettle = await rgn();
-  await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=false;v.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the instrument
+  await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=false;v.dispatchEvent(new Event("change",{bubbles:true}));})()`); // clear the survey ink
   check(
-    "Z20g the survey chamber drops the inset, homes the camera on arming (ratified 2026-07-26), and blocks the redraft",
+    "Z20g the survey ink drops the inset, homes the camera on arming (ratified 2026-07-26), and blocks the redraft",
     von.band === 0 && von.committed === false && von.insets === 0 && von.track && von.k === 1 &&
       vsettle.redrafts === reg20g.redrafts && vsettle.band === 0,
-    `on-toggle ${JSON.stringify(von)} settleWhileSurveying redrafts=${vsettle.redrafts}(==${reg20g.redrafts}) band=${vsettle.band}`,
+    `on-toggle ${JSON.stringify(von)} settleWhileInked redrafts=${vsettle.redrafts}(==${reg20g.redrafts}) band=${vsettle.band}`,
   );
 
   // Z21 (#171, Glass Sub 10): HAMLETS are the deepest band's payoff, a region-only
