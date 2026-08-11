@@ -215,6 +215,9 @@ audit built from scratch.
 ## Process
 
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him.
+- **When asking Alex to make an open decision** (on a feature, a bug, a test, anything else),
+  explain the context and what you need from him in simple terms, so he can have a good
+  understanding of what he is deciding: no jargon, no overly technical language, no acronyms.
 - **Write the failing test first.** It must fail on the assertion you care about, not on a missing
   module.
 - **Run the `vellum-guard-prover` subagent on new or strengthened guards before opening the PR.** It
