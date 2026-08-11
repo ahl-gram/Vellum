@@ -12,7 +12,8 @@
 // counter draw parks at the present (pendingLive stays boot-only). The engine's
 // overlays never write the status line mid-draw (the settle signal is it becoming
 // ""), and this conductor is its only other writer.
-import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
+import { runJob, runInline, usesWorker, initWorker } from "../explorer/worker-client.ts";
+import { installHostHooks } from "../shared/host-hooks.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { parseLive, emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
@@ -245,8 +246,14 @@ await initWorker();
 window.__vellumReadingRoomUsesWorker = usesWorker;
 window.__vellumReadingRoomState = () => ({ seed, title: lastTitle });
 // #320: published whole, not narrowed. The room is the host that now carries the
-// live-animation coverage, so its hook owes the same read the Explorer's does.
+// live-animation coverage, so its hook owes the same read the Explorer's does. Kept
+// under its own name ALONGSIDE the shared surface below because RR4/RR6/RR7/RR8/RR18/
+// RR22/RR23 already read it: this sub adds coverage and weakens none. Both names are
+// the same function object, so they cannot disagree.
 window.__vellumReadingRoomAges = lc.agesState;
+// The seams every LivingChart host publishes, so the live-animation checks re-hosted
+// here read the same hook names they read on the Explorer (#320 decision B).
+installHostHooks({ livingChart: lc, runInline });
 if (!usesWorker()) warning.hidden = false;
 
 applyHash();
