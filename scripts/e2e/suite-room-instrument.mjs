@@ -8,6 +8,7 @@
 // named in the inventory: the #ages checkbox arming, the verso flip, and the Explorer's
 // keep-the-chamber redraw (the room's ratified counter draw parks at the present, #221).
 import { makeRoom, makeBar, scrubFacts, scopedHealth } from "./room-support.mjs";
+import { HOST_HOOK_NAMES } from "../../src/site/shared/host-hooks.ts";
 
 export async function run(ctx) {
   const { evaluate, check, sleep } = ctx;
@@ -46,13 +47,21 @@ export async function run(ctx) {
   // the two hosts cannot drift apart in what they expose (ratified 2026-08-10, decision
   // B on #320). __vellumRunInline rides along because it is the ground-truth oracle
   // every ported check needs: the manifest the page's own engine would draw.
+  // The expected names come from the INSTALLER, not from a list restated here. A
+  // hand-copied list is one-sided: it catches a seam removed from the room, and cannot
+  // catch a seam added to installHostHooks that never reaches the room, since both sides
+  // would have to be edited together to disagree. Importing HOST_HOOK_NAMES makes adding
+  // a seam automatically extend this assertion. (The guard-prover flagged the hand-copied
+  // shape on the first cut: it proved RS2 bit on removal and could not bite on addition.)
   const surface = await evaluate(`(()=>{
-    const names=["__vellumAgesState","__vellumVoyageStepTo","__vellumVoyagePaintAt","__vellumVoyagePlan","__vellumVoyageLog","__vellumVoyageLegGeometry","__vellumRunInline"];
+    const names=${JSON.stringify(HOST_HOOK_NAMES)};
     return Object.fromEntries(names.map((n)=>[n,typeof window[n]]));
   })()`);
   check(
-    "RS2 the room publishes the shared host hook surface (ages, the five voyage seams, runInline)",
-    !!surface && Object.values(surface).every((t) => t === "function"),
+    `RS2 the room publishes every seam installHostHooks installs (${HOST_HOOK_NAMES.length} of them, derived from the installer)`,
+    !!surface &&
+      Object.keys(surface).length === HOST_HOOK_NAMES.length &&
+      Object.values(surface).every((t) => t === "function"),
     JSON.stringify(surface),
   );
 
@@ -275,12 +284,21 @@ export async function run(ctx) {
   // world's own present rather than keeping the chamber (#221, so W8's contract does not
   // port, only S8's does).
   //
-  // The oracle is INDEPENDENT on purpose: seed 100's facts come from __vellumRunInline,
-  // not from agesState. A self-referential form (year === max, both read off the same
-  // hook) cannot see a bar domain re-derived from the wrong world, which is exactly the
-  // regression S8 exists to catch, and it is why RR18/RR19/RR22 do not cover this.
-  const sm2 = await scrubFacts(evaluate, 100);
-  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="100";c.querySelector(".rr-read").click();})()`);
+  // The oracle is INDEPENDENT on purpose: the second world's facts come from
+  // __vellumRunInline, not from agesState. A self-referential form (year === max, both
+  // read off the same hook) cannot see a bar domain re-derived from the wrong world,
+  // which is exactly the regression S8 exists to catch, and it is why RR18/RR19/RR22 do
+  // not cover this.
+  //
+  // SEED 3, and the choice is load-bearing: it is the one nearby seed whose place COUNT
+  // differs from seed 42's (21 against 26). 13 of the 14 seeds sampled all carry 26, so
+  // the obvious pick (seed 100) leaves the `visible === count` clause inert, satisfied by
+  // coincidence rather than by the instrument having re-derived anything. Measured on the
+  // mutation run that proved this guard: freezing the overlay manifest reddened it on max
+  // and year while `visible` matched anyway. Seed 3 makes all three clauses discriminate.
+  // Do not "tidy" this back to a rounder number.
+  const sm2 = await scrubFacts(evaluate, 3);
+  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="3";c.querySelector(".rr-read").click();})()`);
   let rs23 = null;
   for (let i = 0; i < 200; i++) {
     let s = null;
@@ -290,7 +308,7 @@ export async function run(ctx) {
         chamber:a&&a.chamber,year:a&&a.year,max:Number(bar.max),
         visible:[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length};})()`);
     } catch {}
-    if (s && s.status === "" && s.seed === 100) { rs23 = s; break; }
+    if (s && s.status === "" && s.seed === 3) { rs23 = s; break; }
     await sleep(50);
   }
   check(

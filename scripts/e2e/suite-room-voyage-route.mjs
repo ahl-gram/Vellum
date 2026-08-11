@@ -10,9 +10,12 @@
 // the only host that will still be able to run them.
 //
 // Two of these are the sub's real stakes, per spec-recon:
-//   RV4  is the ONLY numeric guard on MAX_TILT anywhere. The unit tests pin the clamp
-//        symbolically (near(tiltFor(0,-1), -MAX_TILT)), so they cannot catch a value
-//        change; the literal 24.0001 appears exactly once in the repo.
+//   RV4  is the room's half of the only NUMERIC guard on MAX_TILT. The unit tests pin the
+//        clamp symbolically (near(tiltFor(0,-1), -MAX_TILT)), so they cannot catch a value
+//        change: proven, a 24 -> 30 mutation leaves all 1058 unit tests green and reds
+//        only RV4 and its Explorer twin W20. The literal 24.0001 asserts in exactly two
+//        places while this sub double-covers, here and suite-voyage-route.mjs:127, and
+//        RV4 becomes the sole one when Sub 4 retires W20 with the Explorer seams.
 //   RV3 / RV9 / RV10 guard showMark in src/site/living-chart/voyage.ts, the #181 swap
 //        WIRING, which has no unit coverage at all.
 //
