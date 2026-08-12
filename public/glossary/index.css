@@ -45,7 +45,14 @@ h3 { font-size: 0.95rem; letter-spacing: 0.08em; color: var(--ink-faded);
 .toc a { color: var(--ink-dark); }
 /* The TOC's slips go somewhere, so they tip: the wordmark's text-scale gesture
    (#289; #324 feel review). Reduced-motion collapse lives in /motion.css. */
-.toc a { display: inline-block; transition: transform var(--paper-quick) var(--ease-paper); }
+/* vertical-align keeps the list marker on an entry's FIRST line. An
+   inline-block takes its baseline from its LAST line box, so once #353 grew
+   this TOC to fourteen entries the long ones wrapped at 320px and their bullets
+   dropped to line two. Only visible in the font-fallback first paint, which
+   font-display: swap makes every cold load. Do not drop back to display:inline
+   to fix it: the tip transform above needs a block box, and tip-affordance.test.ts
+   guards that gesture. */
+.toc a { display: inline-block; vertical-align: top; transition: transform var(--paper-quick) var(--ease-paper); }
 .toc a:hover { transform: translateY(-2px) rotate(-0.6deg); }
 .toc a:active { transform: translateY(0); }
 .term { font-weight: 600; color: var(--ink-dark); margin: 1.6rem 0 0.3rem;
