@@ -88,6 +88,47 @@ test("the footnote marks go to the glossary, so they tip, at the wordmark's numb
   );
 });
 
+/** One selector list split on its TOP-LEVEL commas. A plain split(",") breaks
+ *  `:is(.toc, .gazetteer) a` into two fragments, and the second, `.gazetteer) a`,
+ *  is a selector no rule has: it would be looked up, found nowhere, and quietly
+ *  dropped. `:is()` and `:not()` are house style here (house.css:107), so the
+ *  reader has to survive them. */
+const selectorsIn = (selectorList: string): string[] => {
+  const out: string[] = [];
+  let depth = 0;
+  let current = "";
+  for (const ch of selectorList) {
+    if (ch === "(") depth += 1;
+    if (ch === ")") depth -= 1;
+    if (ch === "," && depth === 0) {
+      out.push(current);
+      current = "";
+      continue;
+    }
+    current += ch;
+  }
+  out.push(current);
+  return out.map((s) => s.trim().replace(/\s+/g, " ")).filter(Boolean);
+};
+
+/** The element a selector finally styles: its last compound. Combinators inside
+ *  a functional pseudo-class do not divide it, so `:is(.toc > .index) a` has the
+ *  subject `a`, the element that actually takes the declarations. */
+const subjectOf = (selector: string): string => {
+  let depth = 0;
+  let subject = "";
+  for (const ch of selector) {
+    if (ch === "(") depth += 1;
+    if (ch === ")") depth -= 1;
+    if (depth === 0 && /[\s>+~]/.test(ch)) {
+      subject = "";
+      continue;
+    }
+    subject += ch;
+  }
+  return subject;
+};
+
 /** Every declaration a selector finally wins, merged in source order. Reading
  *  only the FIRST matching rule would miss a later override, and would go red on
  *  the behavior-preserving split of one declaration into its own rule. Flat, like
@@ -97,8 +138,7 @@ const settled = (css: string, selector: string): Readonly<Record<string, string>
   const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const out: Record<string, string> = {};
   for (const m of bare.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    const selectors = m[1].split(",").map((s) => s.trim().replace(/\s+/g, " "));
-    if (!selectors.includes(selector)) continue;
+    if (!selectorsIn(m[1]).includes(selector)) continue;
     for (const declaration of m[2].split(";")) {
       const [prop, ...value] = declaration.split(":");
       if (value.length) out[prop.trim()] = value.join(":").trim();
@@ -145,20 +185,19 @@ const LINKS_OUTSIDE_MARKER_LISTS = new Set([
   "explorer/broadside.css :: a.fn",
 ]);
 
-/** The element a selector finally styles: its last compound. */
-const subjectOf = (selector: string): string =>
-  selector.split(/[\s>+~]+/).filter(Boolean).pop() ?? "";
-
-/** Every selector in one sheet whose settled box is an inline-block LINK. State
- *  and pseudo-element rules are skipped (any selector carrying a `:`): the wrap
- *  defect is a property of the element's own box, and skipping them also keeps
- *  `.broadside .seal::before`, an inline-block that is not a link, out of it. */
+/** Every selector in one sheet whose settled box is an inline-block LINK. The
+ *  test is on the SUBJECT, not the whole selector: a pseudo-class on an ancestor
+ *  says nothing about the box the declarations land on, so `.toc li:first-child a`
+ *  is swept, while `a:hover` (a state) and `.broadside .seal::before` (an
+ *  inline-block that is not a link) are not. Reading the whole selector for a `:`
+ *  instead would drop every marker-list link an ancestor happens to qualify. */
 const inlineBlockLinksIn = (css: string): string[] => {
   const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const found = new Set<string>();
   for (const m of bare.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    for (const selector of m[1].split(",").map((s) => s.trim().replace(/\s+/g, " "))) {
-      if (selector.includes(":") || !/^a([.#[]|$)/.test(subjectOf(selector))) continue;
+    for (const selector of selectorsIn(m[1])) {
+      const subject = subjectOf(selector);
+      if (subject.includes(":") || !/^a([.#[]|$)/.test(subject)) continue;
       if (settled(css, selector)["display"] === "inline-block") found.add(selector);
     }
   }
@@ -189,6 +228,19 @@ test("an inline-block link in a marker-bearing list keeps its bullet on line one
       );
     }
   }
+});
+
+test("the sweep's selector reader survives the house's :is() and :not() forms (#358)", () => {
+  // Found by mutation: the first cut split selector lists on every comma and
+  // rejected any selector carrying a `:`, so `.toc li:first-child a` and
+  // `:is(.toc) a` both escaped the sweep while looking exactly like the defect.
+  assert.deepEqual(selectorsIn(":is(.toc, .gazetteer) a, .faq a"), [
+    ":is(.toc, .gazetteer) a",
+    ".faq a",
+  ]);
+  assert.equal(subjectOf(":is(.toc, .gazetteer) a"), "a", "a functional pseudo-class is not a combinator");
+  assert.equal(subjectOf(".toc li:first-child a"), "a", "the subject is the element the rule lands on");
+  assert.equal(subjectOf(".broadside .seal::before"), ".seal::before", "a pseudo-element IS the subject");
 });
 
 test("both TOC slips still enter the bullet sweep (#358, the guard's premise)", () => {
