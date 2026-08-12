@@ -54,8 +54,9 @@ export async function run(ctx) {
   const tick = (on, into) => evaluate(`(()=>{
     const c=document.getElementById("ages");window.${into}=null;const t0=performance.now();
     c.checked=${on};c.dispatchEvent(new Event("change",{bubbles:true}));
+    const handlerMs=performance.now()-t0;
     requestAnimationFrame(()=>setTimeout(()=>{window.${into}=performance.now()-t0;},0));
-    return{checked:c.checked,inked:!!document.querySelector("#map .voyage-overlay"),
+    return{checked:c.checked,handlerMs,inked:!!document.querySelector("#map .voyage-overlay"),
       overlays:document.querySelectorAll("#map .voyage-overlay").length,
       hash:location.hash,status:document.getElementById("status").textContent,
       href:document.getElementById("journal-link").getAttribute("href")};
@@ -91,10 +92,12 @@ export async function run(ctx) {
   // inside the change handler, which meant the browser could not paint the checked box
   // until it returned. So the readback in the dispatch's own turn now asserts the
   // acknowledgment WITHOUT the track: box checked, bare survey flag written, journal href
-  // followed, status silent, and no overlay yet. That last clause is the guard on the
-  // yield itself -- restore the synchronous build and it reds. The completed track (a
-  // sweep would start near zero length) is then waited for, and the address must not have
-  // moved across the beat: the writer reads the box, never the track.
+  // followed, status silent, no overlay yet, and the handler itself returning in a few ms
+  // rather than the ~1.1s it used to hold the thread for. Those last two are the guard on
+  // the yield: the overlay clause reds if this exact build comes back into the handler,
+  // and the duration clause reds for any heavy work put there in some other shape. The
+  // completed track (a sweep would start near zero length) is then waited for, and the
+  // address must not have moved across the beat: the writer reads the box, never the track.
   const sv2 = await tick(true, "__armMs");
   const sv2Vertices = await waitInked("survey-first-arm");
   const sv2After = await evaluate(`({status:document.getElementById("status").textContent,
@@ -102,7 +105,8 @@ export async function run(ctx) {
     href:document.getElementById("journal-link").getAttribute("href"),ms:window.__armMs})`);
   check(
     "SV2 ticking survey acknowledges on the click's own frame and inks the completed track a beat later (#300)",
-    sv2.checked && !sv2.inked && /(^|&)survey(&|$)/.test(sv2.hash.slice(1)) && !/year=/.test(sv2.hash) &&
+    sv2.checked && !sv2.inked && sv2.handlerMs < 50 &&
+      /(^|&)survey(&|$)/.test(sv2.hash.slice(1)) && !/year=/.test(sv2.hash) &&
       sv2.status === "" && sv2.href === "/reading-room/" + sv2.hash &&
       sv2Vertices > 10 && sv2After.overlays === 1 && sv2After.status === "" &&
       sv2After.hash === sv2.hash && sv2After.href === sv2.href,
