@@ -7,88 +7,130 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
   description="Generate procedural fantasy maps in your browser. Every seed is a world."
   path="/explorer/"
   tagline="every seed is a world, draw one"
-  extraCss={["/living-chart.css"]}
+  extraCss={["/living-chart.css", "/explorer/broadside.css"]}
 >
 
-<div class="controls">
-  <div class="control-row" role="group" aria-labelledby="grp-map">
-    <span class="row-label archivist-label" id="grp-map">Map</span>
-    <div class="row-fields">
-      <label>seed <input id="seed" type="number" min="0" max="4294967295" step="1"></label>
-      <button id="random" title="random seed" aria-label="Random seed">🎲</button>
-      <label>style
-        <select id="style">
-          <option value="antique" selected>antique</option>
-          <option value="topographic">topographic</option>
-          <option value="ink">ink</option>
-          <option value="nautical">nautical</option>
-        </select>
-      </label>
-      <label>type
-        <select id="type">
-          <option value="" selected>seed's choice</option>
-          <option value="island">island</option>
-          <option value="archipelago">archipelago</option>
-          <option value="continent">continent</option>
-          <option value="citystate">city-state</option>
-        </select>
-      </label>
-      <label>climate
-        <select id="band">
-          <option value="" selected>seed's choice</option>
-          <option value="temperate">temperate</option>
-          <option value="tropical">tropical</option>
-          <option value="polar">polar</option>
-        </select>
-      </label>
+<!-- #270 The Broadside: the controls composed as one sheet, grouped by what they do
+     to the WORLD rather than by widget kind. The Land reshapes the geography (seed,
+     type, climate, the two sliders); The Hand dresses the same world (style turns the
+     sheet, theme/legend/arms redraw the same land, survey inks the resting track);
+     The Press acts on the sheet. Every input keeps its id, events, and redraw
+     semantics exactly as app.ts/controls.ts wire them: this issue moved and dressed
+     the controls, it did not rewire them. Rulings 2026-08-11 on #270: the ledger
+     alignment (a label column per panel, equal-width controls), the countersigned
+     seals, the four footnote marks, and the two gold links on the Press's second
+     line. Each control now has a sibling <label for>, so the old aria-labels on the
+     sliders retired (one accessible name, not two). -->
+<div class="controls broadside">
+  <div class="panel" role="group" aria-labelledby="grp-land">
+    <p class="panel-head archivist-head" id="grp-land">The Land</p>
+    <p class="panel-gloss">these shape the world itself</p>
+    <div class="ledger">
+      <span class="l-label"><label for="seed">seed</label></span>
+      <span class="l-ctl"><input id="seed" type="number" min="0" max="4294967295" step="1"><button id="random" title="random seed" aria-label="Random seed">🎲</button></span>
+      <span class="l-label"><label for="type">type</label><a class="fn" href="/glossary/#seeds-choice" data-note="note-seeds-choice" aria-describedby="note-seeds-choice" aria-label="note on the seed's choice">&dagger;</a></span>
+      <span class="l-ctl"><select id="type">
+        <option value="" selected>seed's choice</option>
+        <option value="island">island</option>
+        <option value="archipelago">archipelago</option>
+        <option value="continent">continent</option>
+        <option value="citystate">city-state</option>
+      </select></span>
+      <span class="l-label"><label for="band">climate</label></span>
+      <span class="l-ctl"><select id="band">
+        <option value="" selected>seed's choice</option>
+        <option value="temperate">temperate</option>
+        <option value="tropical">tropical</option>
+        <option value="polar">polar</option>
+      </select></span>
+      <span class="l-label"><label for="land">sea level</label></span>
+      <span class="l-ctl"><span class="land-end">more sea</span><input id="land" type="range" min="100" max="700" step="2"><span class="land-end">more land</span><span id="land-readout" class="land-readout"></span></span>
+      <span class="l-label"><label for="coast">coast</label><a class="fn" href="/glossary/#coast-warp" data-note="note-coast-warp" aria-describedby="note-coast-warp" aria-label="note on the coast warp">&Dagger;</a></span>
+      <span class="l-ctl"><span class="land-end">calm</span><input id="coast" type="range" min="0" max="100" step="5"><span class="land-end">lobed</span><span id="coast-readout" class="land-readout"></span></span>
     </div>
   </div>
-  <div class="control-row" role="group" aria-labelledby="grp-display">
-    <span class="row-label archivist-label" id="grp-display">Display</span>
-    <div class="row-fields">
-      <label>theme
-        <select id="theme">
-          <option value="" selected>none</option>
-          <option value="vegetation">vegetation</option>
-          <option value="climate">temperature</option>
-          <option value="moisture">rainfall</option>
-          <option value="population">population</option>
-        </select>
-      </label>
-      <label class="check">legend <input id="legend" type="checkbox" checked></label>
-      <label class="check">arms <input id="arms" type="checkbox"></label>
-      <!-- #321: the survey ink, static chart furniture beside arms (the ratified
-           `survey` label, #317 decision 1, 2026-07-29). Ticked inks the completed
-           survey track onto the sheet at rest; time itself lives in the Reading Room.
-           The element id stays `ages` (smallest diff, per the issue); the box is 1:1
-           with the bare `survey` hash flag in both directions. -->
-      <label class="check">survey <input id="ages" type="checkbox"></label>
-      <label class="sealevel">sea level
-        <span class="land-end">more sea</span>
-        <input id="land" type="range" min="100" max="700" step="2" aria-label="Sea level">
-        <span class="land-end">more land</span>
-        <span id="land-readout" class="land-readout"></span>
-      </label>
-      <label class="sealevel">coast
-        <span class="land-end">calm</span>
-        <input id="coast" type="range" min="0" max="100" step="5" aria-label="Coastline warp">
-        <span class="land-end">lobed</span>
-        <span id="coast-readout" class="land-readout"></span>
-      </label>
+  <div class="panel" role="group" aria-labelledby="grp-hand">
+    <p class="panel-head archivist-head" id="grp-hand">The Hand</p>
+    <p class="panel-gloss">these dress the same world</p>
+    <div class="ledger">
+      <span class="l-label"><label for="style">style</label></span>
+      <span class="l-ctl"><select id="style">
+        <option value="antique" selected>antique</option>
+        <option value="topographic">topographic</option>
+        <option value="ink">ink</option>
+        <option value="nautical">nautical</option>
+      </select></span>
+      <span class="l-label"><label for="theme">theme</label></span>
+      <span class="l-ctl"><select id="theme">
+        <option value="" selected>none</option>
+        <option value="vegetation">vegetation</option>
+        <option value="climate">temperature</option>
+        <option value="moisture">rainfall</option>
+        <option value="population">population</option>
+      </select></span>
+      <span class="l-label"></span>
+      <span class="l-ctl seals">
+        <!-- The seals (#270 ruling 4, countersigned): real checkboxes dressed as
+             chips that fill ink-dark AND gain a check mark when pressed, so state
+             never reads by color alone. Ids, events, and focus order untouched. -->
+        <label class="check seal">legend <input id="legend" type="checkbox" checked></label>
+        <label class="check seal">arms <input id="arms" type="checkbox"></label>
+        <!-- #321: the survey ink, static chart furniture beside arms (the ratified
+             `survey` label, #317 decision 1, 2026-07-29). Ticked inks the completed
+             survey track onto the sheet at rest; time itself lives in the Reading Room.
+             The element id stays `ages` (smallest diff, per the issue); the box is 1:1
+             with the bare `survey` hash flag in both directions. -->
+        <label class="check seal">survey <input id="ages" type="checkbox"></label><a class="fn" href="/glossary/#survey" data-note="note-survey" aria-describedby="note-survey" aria-label="note on the survey">*</a>
+      </span>
     </div>
   </div>
-  <div class="control-row" role="group" aria-labelledby="grp-actions">
-    <span class="row-label archivist-label" id="grp-actions">Actions</span>
-    <div class="row-fields">
+  <div class="press" role="group" aria-labelledby="grp-press">
+    <p class="panel-head archivist-head" id="grp-press">The Press</p>
+    <div class="press-line">
       <button id="draw" class="primary">Draw</button>
-      <button id="verso-turn">Turn the sheet</button>
+      <button id="verso-turn">Turn the sheet</button><a class="fn" href="/glossary/#verso" data-note="note-verso" aria-describedby="note-verso" aria-label="note on the verso">&sect;</a>
+    </div>
+    <div class="press-line press-roads">
       <!-- #133: carry the world on screen to the Print Room. Its href is refreshed on
            every draw (app.js) so it always carries the CURRENT hash, not the load-time one.
            #199: now the Explorer's only path to the bound atlas, so it is the featured
-           "take your world home" action (see .action-link in index.css). The glyph is
+           "take your world home" action (see .action-link in broadside.css). The glyph is
            decorative, so aria-hidden keeps the link's accessible name clean. -->
       <a id="order-plates" class="action-link" href="../print-room/"><svg class="order-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><!-- #199: a freshly pulled proof (the Print Room "pulls a proof"): a dog-eared printed sheet under the press platen, whose turn-handle offsets to one side. Paper is the hero and the whole thing is asymmetric on purpose, so it reads as paper rather than a symmetric mark. Decorative (aria-hidden); the link text carries the meaning. --><path d="M4 6.5h13.5"/><circle cx="4" cy="6.5" r="1.4"/><path d="M7 9h6l3.5 3.5V20.5H7z"/><path d="M13 9v3.5h3.5"/><path d="M9.5 15h4.5M9.5 17.5h3"/></svg>Take to the Print Room</a>
+      <!-- #270 ruling 2: the journal pointer, promoted from #321's caption line to the
+           Print Room link's gold peer, ALWAYS visible (a conscious update of #321
+           decision 3's hidden-unless-ticked rule: as navigation it serves any world's
+           story, and the row never changes shape). Its href is kept current beside
+           every hash write (app.ts syncHash), the #133 idiom. The glyph is an open
+           journal drawn in the proof sheet's stroke; decorative, aria-hidden. -->
+      <a id="journal-link" class="action-link" href="/reading-room/"><svg class="order-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 6.5c-1.2-1.3-3-2-5.5-2H4v13h3c2.3 0 4 .6 5 1.7 1-1.1 2.7-1.7 5-1.7h3v-13h-2.5c-2.5 0-4.3.7-5.5 2z"/><path d="M12 6.5V19"/><path d="M6.5 8.5h3M6.5 11h3M14.5 8.5h3M14.5 11h3"/></svg>Read the Journal in the Reading Room</a>
     </div>
+  </div>
+  <!-- #270 ruling 5: the footnote apparatus. Period marks (the Fell set) on the four
+       opaque controls open these marginalia notes: real text in the DOM, never title
+       attributes, each doubled as the term's back-matter link into /glossary/. Shown
+       through the native popover API (Esc and light dismiss come free); hover/focus
+       on fine pointers, tap-toggle on touch (footnotes.ts). role="tooltip" +
+       aria-describedby per the issue's accessibility contract. -->
+  <div class="fn-note" id="note-seeds-choice" role="tooltip" popover="auto">
+    <strong class="fn-head">of the seed's choice</strong>
+    <span>Left alone, each world decides its own shape and weather from its seed. Pick a value to overrule it.</span>
+    <a href="/glossary/#seeds-choice">read more in the glossary</a>
+  </div>
+  <div class="fn-note" id="note-coast-warp" role="tooltip" popover="auto">
+    <strong class="fn-head">of the coast warp</strong>
+    <span>How much the coastline wanders: calm keeps the shore plain, lobed lets bays and headlands cut deeper. Each step of warp is a different world, redrawn when you let go.</span>
+    <a href="/glossary/#coast-warp">read more in the glossary</a>
+  </div>
+  <div class="fn-note" id="note-survey" role="tooltip" popover="auto">
+    <strong class="fn-head">of the survey</strong>
+    <span>Inks the expedition's completed track onto the sheet, with the ship's daily stations. Its day-by-day journal is kept in the Reading Room.</span>
+    <a href="/glossary/#survey">read more in the glossary</a>
+  </div>
+  <div class="fn-note" id="note-verso" role="tooltip" popover="auto">
+    <strong class="fn-head">of the verso</strong>
+    <span>Every chart has two faces: the recto carries the map, the verso its docket, the surveyor's attribution, and the office stamp. Turn the sheet to read the back.</span>
+    <a href="/glossary/#verso">read more in the glossary</a>
   </div>
 </div>
 
@@ -137,13 +179,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 <div id="verso" aria-hidden="true"></div>
 </div></div>
 <p class="caption" id="caption"></p>
-<!-- #321 decision 3 (ratified by Alex 2026-08-11): the inked track's quiet pointer to
-     its story. The journal left this page with the scrubber (time lives in the Reading
-     Room), so the caption line under the sheet, the one place a visitor who just inked
-     the track will look next, links the room. Hidden unless the survey box is ticked;
-     href kept current by app.ts (the #order-plates idiom) so it always opens THIS
-     world's journal at the survey rest. -->
-<p class="caption journal-line" id="journal-line" hidden><a id="journal-link" href="/reading-room/">read this survey&rsquo;s journal in the Reading Room</a></p>
+<!-- (#270 ruling 2: the #321 journal-line caption that lived here moved into The
+     Press as the always-visible gold #journal-link button, above.) -->
 
 <script type="module" src="./app.bundle.js" is:inline></script>
 </BaseLayout>

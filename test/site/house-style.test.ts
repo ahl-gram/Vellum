@@ -128,7 +128,10 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
   wears("src/pages/seed-of-the-day/index.astro", /<a[^>]*class="[^"]*control/, "the actions link wears the idiom");
   wears("src/pages/print-room/index.astro", /class="[^"]*desk-head archivist-head/, "the desk head is a standing head");
   wears("src/pages/print-room/index.astro", /class="[^"]*offering-field archivist-label/, "the offering field is an inline label");
-  wears("src/pages/explorer/index.astro", /class="row-label archivist-label"/, "the row labels are inline labels");
+  // #270: the Broadside promoted the Explorer's group heads from the inline tier
+  // (the old Map/Display/Actions row labels) to the standing tier: The Land / The
+  // Hand / The Press each preside over a panel, the print-room desk-head precedent.
+  wears("src/pages/explorer/index.astro", /class="panel-head archivist-head"/, "the Broadside group heads are standing heads");
   wears("src/pages/faq/index.astro", /<strong class="archivist-label">/, "the TOC heading is an inline label");
   wears("src/pages/glossary/index.astro", /<strong class="archivist-label">/, "the TOC heading is an inline label");
 });

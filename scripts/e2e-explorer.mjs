@@ -44,6 +44,7 @@ import { run as runHunt } from "./e2e/suite-hunt.mjs";
 import { run as runPrintRoom } from "./e2e/suite-print-room.mjs";
 import { run as runHome } from "./e2e/suite-home.mjs";
 import { run as runSurvey } from "./e2e/suite-survey.mjs";
+import { run as runBroadside } from "./e2e/suite-broadside.mjs";
 import { run as runReadingRoom } from "./e2e/suite-reading-room.mjs";
 import { run as runRoomInstrument } from "./e2e/suite-room-instrument.mjs";
 import { run as runRoomInk } from "./e2e/suite-room-ink.mjs";
@@ -141,6 +142,10 @@ async function main() {
   // the year=N forward, the verso mirror, the journal pointer). Self-scoped fresh
   // navigations, so it slots with the other self-contained suites.
   await runSurvey(ctx);
+  // The Broadside (#270): the regrouped control sheet, the seals, the journal
+  // button, and the footnote apparatus. Self-scoped like the survey suite whose
+  // page state it re-navigates.
+  await runBroadside(ctx);
   // The Reading Room (#221): the epic's destination page. Self-scoped fresh
   // navigations with constructed hashes (decision 3: no Explorer entry point to
   // follow), so it slots after the survey suite whose vocabulary it consumes.

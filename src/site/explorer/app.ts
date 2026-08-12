@@ -19,6 +19,7 @@ import { readHash, writeHash } from "./hash-sync.ts";
 import { forwardTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
 import { wireControls } from "./controls.ts";
+import { wireFootnotes } from "./footnotes.ts";
 import { installExplorerHooks } from "./hooks.ts";
 import { createLivingChart } from "../living-chart/index.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
@@ -32,7 +33,7 @@ import type { Camera } from "./camera.ts";
 import {
   $, seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider,
   coastSlider, status, mapDiv, mapViewport, sheetEl, innerEl, caption, versoEl, versoBtn,
-  agesChk, orderLink, journalLine, journalLink, hashControls,
+  agesChk, orderLink, journalLink, hashControls,
 } from "./elements.ts";
 
 let lastSvg = "";
@@ -102,12 +103,13 @@ function regionEligible(): boolean {
 // carries the complete current state, camera and live address included. writeHash drops
 // cx/cy/k when the camera is home and the live key when the box is unticked.
 // #321: the box IS the flag, both directions; the Explorer never authors `year=`.
-// The journal pointer (decision 3) rides beside the write, the #133 orderLink idiom:
-// its href always opens THIS world's journal at the survey rest.
+// The journal button rides beside the write, the #133 orderLink idiom: its href
+// always opens THIS world's journal (at the survey rest when the box is ticked).
+// #270 ruling 2: the button is ALWAYS visible, so there is no hidden gate here;
+// only the href tracks the address.
 function syncHash(): void {
   writeHash(hashControls, touched.land, touched.coast, glass.cameraNow(),
     agesChk.checked ? { kind: "survey" } : null);
-  journalLine.hidden = !agesChk.checked;
   journalLink.href = "/reading-room/" + (location.hash || "");
 }
 
@@ -291,6 +293,9 @@ wireControls({
   touched, draw,
   onDocKeydown: lc.onDocKeydown, onDocClick: lc.onDocClick,
 });
+// #270: the footnote marks' note apparatus (hover/focus/tap-toggle), page
+// furniture with no draw path, wired beside the plain control plumbing.
+wireFootnotes();
 
 // #116: turn the sheet over to read its back, or turn it back. Guarded so the flip
 // never starts mid-draw (the verso is being rebuilt) or mid-#131-turn (the turn owns
