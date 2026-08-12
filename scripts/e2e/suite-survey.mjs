@@ -265,25 +265,41 @@ export async function run(ctx) {
   // mount that already holds an overlay. The first arm is waited for before the second
   // is dispatched, on purpose: two schedules inside one beat supersede (survey-arm.ts
   // bumps its generation), which is a different mechanism and is SV2d's.
-  // The load-bearing number is `overlays`: with the builder appending unconditionally
-  // this leaves two tracks stacked on the sheet, and every other clause here passes.
+  //
+  // TWO refinements the first cut of this check needed, both from the #364 review:
+  //   - a decoy overlay is PLANTED beside the armed one, so the mount holds two before the
+  //     second arm rather than one. A count of one afterwards then also pins that the wipe
+  //     is plural: take-the-first would leave the decoy and the new build stacked. (The
+  //     mount-side proof of that lives in test/site/voyage-session-mount.test.ts, which
+  //     can hold as many as it likes; this is the browser-real half.)
+  //   - every overlay in the mount is TAGGED before the arm, and none may carry the tag
+  //     afterwards. Without it every clause here is equally true of the state BEFORE the
+  //     second change is dispatched, so a future change that made a redundant change event
+  //     a no-op would leave this check green and empty rather than red.
   await goto("#seed=42&style=antique", "survey-double-arm-base");
   await tick(true, "__armMs3");
   const firstArm = await waitInked("survey-double-arm-first");
-  const before = await evaluate(`document.querySelectorAll("#map .voyage-overlay").length`);
+  const before = await evaluate(`(()=>{const m=document.getElementById("map");
+    const d=document.createElementNS("http://www.w3.org/2000/svg","svg");
+    d.setAttribute("class","voyage-overlay");d.setAttribute("aria-hidden","true");
+    m.appendChild(d);
+    const all=m.querySelectorAll(".voyage-overlay");
+    all.forEach((o)=>o.setAttribute("data-before-arm","1"));
+    return all.length;})()`);
   await evaluate(`(()=>{const c=document.getElementById("ages");window.__beat=false;
     c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
     requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
   await waitBeat("survey-double-arm-beat");
   const sv2g = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
     tracks:document.querySelectorAll("#map .voyage-overlay .voyage-track").length,
+    stale:document.querySelectorAll("#map .voyage-overlay[data-before-arm]").length,
     checked:document.getElementById("ages").checked,hash:location.hash,
     status:document.getElementById("status").textContent,
     vertices:(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
       return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})()})`);
   check(
-    "SV2g two consecutive arms into one mount leave exactly ONE track: the builder drops the overlay it finds (#364)",
-    before === 1 && sv2g.overlays === 1 && sv2g.tracks === 1 && sv2g.checked &&
+    "SV2g a second arm into a mount holding two overlays leaves exactly ONE, and it is the new build's (#364)",
+    before === 2 && sv2g.overlays === 1 && sv2g.tracks === 1 && sv2g.stale === 0 && sv2g.checked &&
       sv2g.vertices === firstArm && /(^|&)survey(&|$)/.test(sv2g.hash.slice(1)) && sv2g.status === "",
     JSON.stringify({ before, firstArm, ...sv2g }),
   );
@@ -311,6 +327,54 @@ export async function run(ctx) {
     "SV2h unticking a sheet that holds two overlays clears EVERY one, not just the first (#364)",
     planted === 2 && sv2h.overlays === 0 && !/survey/.test(sv2h.hash) && sv2h.status === "",
     JSON.stringify({ planted, ...sv2h }),
+  );
+
+  // SV2i: the settle OWNS the arm, asserted by identity rather than by counting overlays.
+  //
+  // This is SV2e's scenario (a tick during a draw already in flight, the one ordering the
+  // arm's own worldGen snapshot cannot see) with the assertion moved to where #364 left it.
+  // Before #364 a stale arm surviving the landing stacked a second overlay, so SV2e's count
+  // caught it. The builder now drops the overlay it finds, so the count is one either way
+  // and the count can no longer tell "the settle's arm is on the sheet" from "a second build
+  // replaced it". Measured, not assumed: with #364 in place and the settle's
+  // `surveyArm.cancel()` deleted, the whole suite stayed green.
+  //
+  // So this counts BUILDS, not overlays. A MutationObserver on the mount stamps every
+  // `.voyage-overlay` appended after it starts with a sequence number, which is the one
+  // seam that can distinguish them: the nodes are otherwise identical, since the deferred
+  // arm reads the host's live refs at fire time and so rebuilds the very world the settle
+  // just armed. Exactly one build after the landing, and the survivor is stamped 0.
+  //
+  // #366 makes this load-bearing rather than tidy: it defers the settle's own arm, so a
+  // stale arm and the landing's arm stop being the same world's track.
+  await goto("#seed=42&style=antique", "survey-settle-owns-arm-base");
+  await evaluate(`(()=>{
+    window.__armSeq=0;
+    window.__armObs=new MutationObserver((recs)=>{for(const r of recs)for(const n of r.addedNodes){
+      if(n.nodeType===1&&n.getAttribute&&(n.getAttribute("class")||"").split(/\\s+/).indexOf("voyage-overlay")>=0)
+        n.setAttribute("data-arm-seq",String(window.__armSeq++));}});
+    window.__armObs.observe(document.getElementById("map"),{childList:true});
+    document.getElementById("draw").click();
+    const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
+    const end=performance.now()+1500;while(performance.now()<end);
+  })()`);
+  await waitSettled("survey-settle-owns-arm-settle");
+  await waitInked("survey-settle-owns-arm-ink");
+  await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
+  await waitBeat("survey-settle-owns-arm-beat");
+  const sv2i = await evaluate(`(()=>{const ov=document.querySelector("#map .voyage-overlay");
+    const r={builds:window.__armSeq,seq:ov?ov.getAttribute("data-arm-seq"):null,
+      overlays:document.querySelectorAll("#map .voyage-overlay").length,
+      checked:document.getElementById("ages").checked,hash:location.hash,
+      status:document.getElementById("status").textContent,
+      vertices:(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
+        return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})()};
+    window.__armObs.disconnect();return r;})()`);
+  check(
+    "SV2i a tick during an in-flight draw builds ONCE: the track on the sheet is the settle's own arm (#300)",
+    sv2i.builds === 1 && sv2i.seq === "0" && sv2i.overlays === 1 && sv2i.checked && sv2i.vertices > 10 &&
+      /(^|&)survey(&|$)/.test(sv2i.hash.slice(1)) && sv2i.status === "",
+    JSON.stringify(sv2i),
   );
 
   await goto("#seed=42&style=antique&survey", "survey-restore-for-sv3");
