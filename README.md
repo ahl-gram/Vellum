@@ -20,6 +20,7 @@ rose, a sea serpent, and a title cartouche.
 | Room | What happens there |
 |---|---|
 | **[Explorer](https://www.vellumworlds.com/explorer/)** | Type a seed, draw its world, zoom into its regions |
+| **[Reading Room](https://www.vellumworlds.com/reading-room/)** | Watch any seed's world unfold: the founding voyage, then its recorded ages, on one continuous timeline |
 | **[Print Room](https://www.vellumworlds.com/print-room/)** | Poster-size SVG or PNG of any seed, print the bound atlas to PDF, download a self-contained atlas |
 | **[Seed of the Day](https://www.vellumworlds.com/seed-of-the-day/)** | Today's world, the same for everyone, plus the Daily Hunt |
 | **[Atlas](https://www.vellumworlds.com/atlas/)** | The hero world (seed 42) as a bound volume |
@@ -166,12 +167,12 @@ site that serves it.
 - **The engine** (the `src/` world/render/atlas tree) has zero runtime
   dependencies. Node 24+ runs its TypeScript directly (`erasableSyntaxOnly`),
   no build step, and the CLI and tests run the same way.
-- **The site** takes dependencies where they earn their keep. All seven pages
-  (home, Q & A, Glossary, Explorer, Print Room, Seed of the Day, Gallery) are
+- **The site** takes dependencies where they earn their keep. All eight pages
+  (home, Q & A, Glossary, Explorer, Reading Room, Print Room, Seed of the Day, Gallery) are
   Astro pages rendered through one shared layout (`src/pages/` + `src/layouts/`); the app
   surfaces' code is TypeScript in `src/site/`, one language with the engine it
   imports. One bundler, Vite, compiles the app and engine graph together into
-  the three app entries and the shared render worker, which is where the
+  the four app entries and the shared render worker, which is where the
   runtime deps (`d3-selection`, `d3-transition`, `d3-zoom`) ship. `public/`
   holds only static assets (goldens, fonts, per-page CSS, favicon). Dev deps:
   `astro`, `typescript`, `@types/node`, `@types/d3-*`, `vite`.
