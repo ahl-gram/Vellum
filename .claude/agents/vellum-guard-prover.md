@@ -40,6 +40,8 @@ If the code under test is uncommitted in the parent checkout, the worktree will 
 
 You have Edit access, which review agents in this project normally must not have (a verify agent once left `// MUTATION:` edits in Vellum source). The worktree is the entire reason that is safe here. **Never edit a file under the parent checkout.** Before you report, run `git status --porcelain` in the parent and confirm it matches the baseline you recorded.
 
+**Never `git add` from your worktree, and never commit from it.** It is a scratch tree for mutating and running, nothing else. The `node_modules` symlink above is the specific hazard: git sees a symlink as a FILE, so it slipped past the old `node_modules/` ignore pattern (trailing slash matches directories only) and a `git add -A` committed a link whose contents were one machine's absolute path. The ignore is fixed, but the rule stands on its own: your output is a ledger, not a commit.
+
 ## Scope and budget
 
 **Match the effort to the change.** A three-file diff does not earn half an hour of a laptop's fans. Thoroughness here is measured in the SHAPES of defect you covered, not in minutes burned or mutations counted.
