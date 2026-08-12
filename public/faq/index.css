@@ -54,8 +54,10 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
    band it is the steady state and not a first-paint flash; from 335 to 360 only
    the fallback paint wraps. Do not drop back to display:inline to fix it: the
    tip transform below needs a block box, and tip-affordance.test.ts guards that
-   gesture. glossary/index.css carries the identical inline-block pair and takes
-   this same one-line fix on #353 (PR #354), which has not landed yet. */
+   gesture. glossary/index.css carries the identical inline-block pair and took
+   the same one-line fix on #353 (PR #354). Since #358 both are held by one sweep
+   in tip-affordance.test.ts: every inline-block link either pins its bullet or is
+   recorded there as living outside a marker-bearing list. */
 .toc a { display: inline-block; vertical-align: top; transition: transform var(--paper-quick) var(--ease-paper); }
 .toc a:hover { transform: translateY(-2px) rotate(-0.6deg); }
 .toc a:active { transform: translateY(0); }
