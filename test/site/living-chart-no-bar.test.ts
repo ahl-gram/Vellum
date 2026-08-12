@@ -79,9 +79,13 @@ test("destroy() on a bar-less host still tears down the chart side (#319)", asyn
   // SCOPE, precisely: these two assert that the teardown REACHED the mount and asked it for
   // the nodes it removes, not that a node came off. This harness answers every query with
   // "the mount is empty" by design (see element-shim.ts), so the `.remove()` calls at
-  // voyage.ts:301 and place-overlay.ts:220 are not reachable in any unit test and are
-  // covered by e2e. What is proven here is that the delegation ran at all, which is the one
-  // thing #319 could get wrong; the exact delegation set is pinned by the module ledger below.
+  // voyage.ts:305 (a querySelectorAll forEach since #364, no longer a single node) and
+  // place-overlay.ts:220 are not reachable THROUGH THIS HARNESS and are covered by e2e.
+  // What is proven here is that the delegation ran at all, which is the one thing #319
+  // could get wrong; the exact delegation set is pinned by the module ledger below.
+  // (#364 added test/site/voyage-session-mount.test.ts, which proves the BUILDER's removal
+  // against a mount double that answers with the nodes it holds. Nothing stops the same
+  // idiom being pointed at exitVoyage later; it is unwritten, not impossible.)
   assert.ok(
     mount.asked.some((s) => s.includes(".voyage-overlay")),
     "the teardown asked the mount for the voyage overlay (voyage.exitVoyage ran)",

@@ -179,9 +179,11 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     // feeds the sink trackEl's `points` verbatim, so a mark nested in the track would
     // bleed through to the back of the sheet, which #174 ruled it must never do.
     svg.append(trackEl, shipG, riderG);
-    // INVARIANT: a mount this builder RETURNS FROM holds exactly one overlay, this one
-    // (#364). The append is unconditional, so the builder drops whatever overlay is
-    // already there rather than trusting the caller to have wiped it. Every arm shipping
+    // INVARIANT: on every path that APPENDS, the mount is left holding exactly one
+    // overlay, this one (#364). The append is unconditional, so the builder drops whatever
+    // overlay is already there rather than trusting the caller to have wiped it. (The
+    // bails above return without appending and leave the mount untouched, which is a
+    // deliberate limit, spelled out below.) Every arm shipping
     // today is preceded by something that empties the mount (the Explorer's settle
     // innerHTML swap and its turn commit, applyVoyage's own exitVoyage, the Reading
     // Room's draw), which is exactly why nothing enforced this and why a future caller
@@ -199,7 +201,7 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     // against a survey-less world therefore leaves a stale track with no log under it.
     // That state predates #364 and is unreachable from every caller today (all four wipe
     // the mount first); the fix would be a wipe on the bail path that no test could
-    // reach, so it is left for its own issue rather than added here unguarded.
+    // reach, so it is left to its own issue, #371, rather than added here unguarded.
     mapEl.querySelectorAll(".voyage-overlay").forEach((stale) => stale.remove());
     mapEl.appendChild(svg);
 

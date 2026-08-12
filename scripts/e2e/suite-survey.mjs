@@ -62,6 +62,12 @@ export async function run(ctx) {
     throw new Error("waitBeat timeout " + label);
   };
 
+  // Move the box the way a user would, with no clock. The #364 checks below want the arm
+  // itself, not its duration, and a `tick()` whose timing global nothing reads would be a
+  // measurement taken for no reader.
+  const setBox = (on) => evaluate(`(()=>{const c=document.getElementById("ages");
+    c.checked=${on};c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+
   // Tick or untick the box the way a user would, and clock the whole arm from inside the
   // page. The clock's own rAF-then-task is registered AFTER the handler's, so it queues
   // behind the build and measures the entire beat, not just the handler's return.
@@ -277,7 +283,7 @@ export async function run(ctx) {
   //     second change is dispatched, so a future change that made a redundant change event
   //     a no-op would leave this check green and empty rather than red.
   await goto("#seed=42&style=antique", "survey-double-arm-base");
-  await tick(true, "__armMs3");
+  await setBox(true);
   const firstArm = await waitInked("survey-double-arm-first");
   const before = await evaluate(`(()=>{const m=document.getElementById("map");
     const d=document.createElementNS("http://www.w3.org/2000/svg","svg");
@@ -313,7 +319,7 @@ export async function run(ctx) {
   // builds into, beside the one a real arm just inked. The base is re-established rather
   // than inherited from SV2g, so a builder regression reds THAT check and not this one.
   await goto("#seed=42&style=antique", "survey-plural-exit-base");
-  await tick(true, "__armMs4");
+  await setBox(true);
   await waitInked("survey-plural-exit-arm");
   await evaluate(`(()=>{const m=document.getElementById("map");
     const d=document.createElementNS("http://www.w3.org/2000/svg","svg");
@@ -375,6 +381,70 @@ export async function run(ctx) {
     sv2i.builds === 1 && sv2i.seq === "0" && sv2i.overlays === 1 && sv2i.checked && sv2i.vertices > 10 &&
       /(^|&)survey(&|$)/.test(sv2i.hash.slice(1)) && sv2i.status === "",
     JSON.stringify(sv2i),
+  );
+
+  // SV2j: the SAME class at the other instance. `surveyArm.cancel()` appears twice in the
+  // conductor, once in the settle (app.ts:248, above) and once at the #131 turn landing
+  // (app.ts:222), and a guard here comes out shaped like the class rather than like the
+  // one instance that happened to be reported. Coverage of the turn instance was ZERO
+  // before this branch: `scripts/e2e/suite-turn.mjs` unticks the survey box in its base
+  // setup, so no check anywhere has ever ticked it during a turn's flight.
+  //
+  // Deterministic, not raced, and the mechanism is worth reading carefully. The tick is
+  // dispatched from a MutationObserver watching the mount for the turn's own chart swap.
+  // sheet-turn.ts's finish(true) writes `mapEl.innerHTML = newSvg` and THEN resolves, so
+  // the observer's microtask is queued before the landing's promise reaction: the tick
+  // lands in the gap, and the arm it schedules is still pending when the landing runs.
+  // That gap is the only moment at which the turn's cancel() is load-bearing, and a
+  // wall-clock sleep cannot hit it reliably.
+  //
+  // The assertion is SV2i's: count BUILDS, not overlays. Since #364 the builder drops the
+  // overlay it finds, so a stale arm landing after the turn leaves one overlay either way
+  // and only the stamp can tell whose it is.
+  await goto("#seed=42&style=antique", "survey-turn-owns-arm-base");
+  await setBox(true);
+  await waitInked("survey-turn-owns-arm-first");
+  await evaluate(`(()=>{
+    window.__armSeq=0;window.__tickedAtLanding=false;
+    const m=document.getElementById("map");
+    window.__armObs=new MutationObserver((recs)=>{for(const r of recs)for(const n of r.addedNodes){
+      if(n.nodeType===1&&n.getAttribute&&(n.getAttribute("class")||"").split(/\\s+/).indexOf("voyage-overlay")>=0)
+        n.setAttribute("data-arm-seq",String(window.__armSeq++));}});
+    window.__armObs.observe(m,{childList:true});
+    window.__landObs=new MutationObserver((recs)=>{
+      if(window.__tickedAtLanding)return;
+      let swapped=false;
+      for(const r of recs)for(const n of r.addedNodes){
+        if(n.nodeType===1&&n.tagName&&n.tagName.toLowerCase()==="svg"&&
+           (n.getAttribute("class")||"").indexOf("voyage-overlay")<0) swapped=true;}
+      if(!swapped)return;
+      window.__tickedAtLanding=true;
+      const c=document.getElementById("ages");
+      c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));});
+    window.__landObs.observe(m,{childList:true});
+  })()`);
+  await armTurnWatch();
+  await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await waitTurned("survey-turn-owns-arm-turn");
+  await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
+  await waitBeat("survey-turn-owns-arm-beat");
+  const sv2j = await evaluate(`(()=>{const ov=document.querySelector("#map .voyage-overlay");
+    const chart=document.querySelector("#map svg:not(.voyage-overlay)");
+    const r={builds:window.__armSeq,seq:ov?ov.getAttribute("data-arm-seq"):null,
+      ticked:window.__tickedAtLanding,turned:window.__turned,
+      overlays:document.querySelectorAll("#map .voyage-overlay").length,
+      style:chart?chart.getAttribute("data-vellum-style"):null,
+      checked:document.getElementById("ages").checked,hash:location.hash,
+      status:document.getElementById("status").textContent,
+      vertices:(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
+        return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})()};
+    window.__armObs.disconnect();window.__landObs.disconnect();return r;})()`);
+  check(
+    "SV2j a tick inside the TURN's landing builds ONCE: the landing's own arm is the track that stays (#300)",
+    sv2j.turned === true && sv2j.ticked === true && sv2j.builds === 1 && sv2j.seq === "0" &&
+      sv2j.overlays === 1 && sv2j.style === "ink" && sv2j.checked && sv2j.vertices > 10 &&
+      /(^|&)survey(&|$)/.test(sv2j.hash.slice(1)) && sv2j.status === "",
+    JSON.stringify(sv2j),
   );
 
   await goto("#seed=42&style=antique&survey", "survey-restore-for-sv3");
