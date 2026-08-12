@@ -1,4 +1,9 @@
-node_modules/
+# No trailing slash, deliberately. `node_modules/` matches only a DIRECTORY, and the
+# throwaway-worktree recipe in .claude/agents/vellum-guard-prover.md creates node_modules
+# as a SYMLINK to the parent checkout's. Git sees a symlink as a file, so the slashed form
+# let it straight through, and a `git add -A` from such a worktree committed a link whose
+# contents are an absolute path on one machine. Caught on PR #369, 2026-08-12.
+node_modules
 out/
 *.log
 .DS_Store
