@@ -22,12 +22,13 @@ import { fileURLToPath } from "node:url";
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
 
-/** Every stylesheet under public/ that a generator writes, so it is gitignored,
- *  absent from a fresh clone and present after a build. Its source is guarded
- *  where it is authored (GALLERY_PAGE_CSS in src/cli/gallery.ts), not here. The
- *  bundle and showcase trees are listed as prefixes because Vite may start
- *  emitting css chunks into them, and that must not red the roster guard. */
-const GENERATED_CSS = ["public/gallery/", "public/atlas/", "public/explorer/chunks/"] as const;
+/** Trees under public/ a generator writes, so they are gitignored: absent from a
+ *  fresh clone and present after a build. They are NOT swept, and nothing else
+ *  sweeps them either: test/cli/gallery.test.ts pins GALLERY_PAGE_CSS's frame and
+ *  label, not this rule. Recorded as a known gap rather than described as covered.
+ *  Only trees that really hold css today are listed, so a future generated sheet
+ *  reds the roster and someone decides about it on purpose. */
+const GENERATED_CSS = ["public/gallery/"] as const;
 
 /** Every committed hand-authored stylesheet (generated css has its own source). */
 const AUTHORED_CSS = [
@@ -132,8 +133,10 @@ const subjectOf = (selector: string): string => {
 /** Every declaration a selector finally wins, merged in source order. Reading
  *  only the FIRST matching rule would miss a later override, and would go red on
  *  the behavior-preserving split of one declaration into its own rule. Flat, like
- *  hoverTipsIn above: a rule nested in @media counts as unconditional, which errs
- *  toward reporting an override rather than missing one. */
+ *  hoverTipsIn above: a rule nested in @media counts as unconditional. That errs
+ *  toward reporting an override, and for the bullet sweep it also errs the other
+ *  way, since a pin written ONLY inside a media query would satisfy a sweep that
+ *  wants an unconditional one. Both pins are unconditional today. */
 const settled = (css: string, selector: string): Readonly<Record<string, string>> => {
   const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const out: Record<string, string> = {};
@@ -174,35 +177,59 @@ const settled = (css: string, selector: string): Readonly<Record<string, string>
  * so the sweep asks css what it can answer (is this an inline-block link) and
  * keeps the html half as a measured allowlist, the same shape as TIPPING_LINKS.
  */
-const LINKS_OUTSIDE_MARKER_LISTS = new Set([
-  // <div class="actions"> on the seed page (src/pages/seed-of-the-day/index.astro).
+/** Each entry is a MEASUREMENT of the markup, taken 2026-08-12, not a rule. It
+ *  says this selector's boxes are not list items today, on the pages that use it
+ *  today. Two of the four live in sheets every page links, so a later use of the
+ *  same class inside a marker-bearing li would inherit the defect behind its
+ *  exemption. Re-take the measurement when you touch one:
+ *  `grep -rn 'class="[^"]*control' src/` and its siblings. */
+const INLINE_BLOCKS_OUTSIDE_MARKER_LISTS = new Set([
+  // <div class="actions"> on the seed page (src/pages/seed-of-the-day/index.astro:51).
   "house.css :: a.control",
   // Direct children of <nav class="topnav">, separated by a middot, no list at all.
   "motion.css :: .topnav a",
-  // Inside <p class="wordmark"> or <h1 class="wordmark"> (BaseLayout.astro).
+  // Inside <p class="wordmark"> or <h1 class="wordmark"> (BaseLayout.astro:235).
   "motion.css :: .wordmark a",
   // A period mark inline in a control's label (#270), not a list item.
   "explorer/broadside.css :: a.fn",
 ]);
 
-/** Every selector in one sheet whose settled box is an inline-block LINK. The
- *  test is on the SUBJECT, not the whole selector: a pseudo-class on an ancestor
- *  says nothing about the box the declarations land on, so `.toc li:first-child a`
- *  is swept, while `a:hover` (a state) and `.broadside .seal::before` (an
- *  inline-block that is not a link) are not. Reading the whole selector for a `:`
- *  instead would drop every marker-list link an ancestor happens to qualify. */
-const inlineBlockLinksIn = (css: string): string[] => {
+/** Every selector in one sheet whose settled box is an inline-block.
+ *
+ *  Not "every inline-block LINK": a link is not identifiable from css. The first
+ *  cut required the subject to be an `a` type selector, which reads as the class
+ *  but is narrower than it, since `.toc .slip { display: inline-block }` on an
+ *  <a class="slip"> is the same defect wearing a class. Sweeping every box costs
+ *  nothing today (all six live inline-blocks in authored css are already links)
+ *  and closes that hole; the cost lands on whoever adds an inline-block that is
+ *  genuinely not a list item, as one allowlist line.
+ *
+ *  The test is on the SUBJECT, not the whole selector: a pseudo-class on an
+ *  ancestor says nothing about the box the declarations land on, so
+ *  `.toc li:first-child a` is swept. A subject carrying its own `:` is not: that
+ *  is a state (`a:hover`) or generated content (`.seal::before`), neither of
+ *  which is the element's own steady-state box. Attribute values are stripped
+ *  before that test, since `a[href^="https://x"]` carries a colon that is not a
+ *  pseudo-class. */
+const inlineBlocksIn = (css: string): string[] => {
   const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const found = new Set<string>();
   for (const m of bare.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
     for (const selector of selectorsIn(m[1])) {
-      const subject = subjectOf(selector);
-      if (subject.includes(":") || !/^a([.#[]|$)/.test(subject)) continue;
+      if (subjectOf(selector).replace(/\[[^\]]*\]/g, "").includes(":")) continue;
       if (settled(css, selector)["display"] === "inline-block") found.add(selector);
     }
   }
   return [...found];
 };
+
+/** Every inline-block the sweep finds, keyed as the allowlist keys it. */
+const sweptBoxes = (): Set<string> =>
+  new Set(
+    AUTHORED_CSS.flatMap((file) =>
+      inlineBlocksIn(read(file)).map((selector) => `${file.replace("public/", "")} :: ${selector}`),
+    ),
+  );
 
 /** The links the sweep must still reach. Candidacy is derived from `display:
  *  inline-block`, so dropping that declaration would drop the entry out of the
@@ -213,20 +240,35 @@ const PINNED_MARKER_LIST_LINKS = [
   ["public/glossary/index.css", ".toc a"],
 ] as const;
 
-test("an inline-block link in a marker-bearing list keeps its bullet on line one (#358)", () => {
+test("an inline-block in a marker-bearing list keeps its bullet on line one (#358)", () => {
   for (const file of AUTHORED_CSS) {
     const css = read(file);
-    for (const selector of inlineBlockLinksIn(css)) {
+    for (const selector of inlineBlocksIn(css)) {
       const key = `${file.replace("public/", "")} :: ${selector}`;
-      if (LINKS_OUTSIDE_MARKER_LISTS.has(key)) continue;
+      if (INLINE_BLOCKS_OUTSIDE_MARKER_LISTS.has(key)) continue;
       assert.equal(
         settled(css, selector)["vertical-align"],
         "top",
-        `${key} is an inline-block link, so in a marker-bearing list a wrapped entry ` +
+        `${key} is an inline-block, so as a marker-bearing list item a wrapped entry ` +
           `drops its bullet to line two (#356, #353). Either set vertical-align: top, ` +
-          `or record it in LINKS_OUTSIDE_MARKER_LISTS with the container that exempts it`,
+          `or record it in INLINE_BLOCKS_OUTSIDE_MARKER_LISTS with the markup that ` +
+          `exempts it`,
       );
     }
+  }
+});
+
+test("every marker-list exemption still names a live inline-block (#358)", () => {
+  // The pinned side has a premise test; without this the exempted side has none,
+  // and an exemption whose rule is gone or renamed sits forever, silently
+  // covering nothing while reading as a considered decision.
+  const swept = sweptBoxes();
+  for (const key of INLINE_BLOCKS_OUTSIDE_MARKER_LISTS) {
+    assert.ok(
+      swept.has(key),
+      `${key} is exempted from the bullet sweep but is no longer an inline-block the ` +
+        `sweep finds; delete the exemption rather than leaving it to look like cover`,
+    );
   }
 });
 
@@ -246,8 +288,8 @@ test("the sweep's selector reader survives the house's :is() and :not() forms (#
 test("both TOC slips still enter the bullet sweep (#358, the guard's premise)", () => {
   for (const [file, selector] of PINNED_MARKER_LIST_LINKS) {
     assert.ok(
-      inlineBlockLinksIn(read(file)).includes(selector),
-      `${file}: ${selector} is no longer an inline-block link, so the bullet sweep no ` +
+      inlineBlocksIn(read(file)).includes(selector),
+      `${file}: ${selector} is no longer an inline-block, so the bullet sweep no ` +
         `longer covers it; re-check the premise before deleting this line`,
     );
   }
