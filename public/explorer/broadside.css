@@ -5,22 +5,26 @@
    geometry and its own dressings live here. Rulings 2026-08-11 on #270: the ledger
    alignment, the countersigned seals, the marginalia notes, the gold links' row. */
 
+/* Vertical spacing runs tight throughout (the plate-reader measured the ledger
+   form ~190px taller than the old three-band strip at 1280; the form is the
+   ratified trade, but the chart still fights the controls for the viewport, so
+   no rem here is spent idly). */
 .controls.broadside { display: grid; grid-template-columns: 1.12fr 1fr; gap: 0 2rem;
-  margin: 1.2rem auto; max-width: 960px; }
-.broadside .panel { padding: 0.2rem 0 0.9rem; min-width: 0; }
+  margin: 0.9rem auto; max-width: 960px; }
+.broadside .panel { padding: 0.15rem 0 0.55rem; min-width: 0; }
 .broadside .panel + .panel { border-left: 1px solid var(--line-tan); padding-left: 2rem; }
 .broadside .panel-head { margin: 0; }
 .broadside .panel-gloss {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-style: italic; font-size: 0.85rem; color: var(--ink-brown);
-  margin: 0.1rem 0 0.8rem;
+  margin: 0.1rem 0 0.55rem;
 }
 
 /* The ledger (ruling 3): one right-aligned label column per panel, and a control
    column whose members share the same left and right edges. Misaligned controls
    are an antipattern (Alex's directive on the round-1 mockup). */
 .broadside .ledger { display: grid; grid-template-columns: auto 1fr;
-  gap: 0.55rem 0.6rem; align-items: center; }
+  gap: 0.5rem 0.6rem; align-items: center; }
 .broadside .l-label { text-align: right; white-space: nowrap; }
 .broadside .l-label label { font-size: 0.85rem; letter-spacing: 0.05em; color: var(--ink-brown); }
 .broadside .l-ctl { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
@@ -41,6 +45,7 @@
 .broadside .seals { flex-wrap: wrap; }
 .broadside label.check.seal { display: inline-flex; align-items: center; gap: 0.35rem;
   cursor: pointer; user-select: none;
+  font-size: 0.85rem; letter-spacing: 0.05em; /* the label voice the old .controls label rule carried */
   border: 1.5px solid var(--ink-brown); border-radius: 4px; padding: 0.28rem 0.6rem;
   background: var(--control-cream); color: var(--ink-brown); }
 .broadside label.check.seal:hover { background: var(--parchment-bright); }
@@ -48,14 +53,20 @@
 .broadside .seal::before { content: ""; width: 0.72em; display: inline-block; }
 .broadside .seal:has(input:checked) { background: var(--ink-dark);
   border-color: var(--ink-dark); color: var(--chart-paper); }
+/* A pressed seal under the cursor stays pressed: without this, the unchecked
+   hover's bright cream would beat the dark fill (specificity) and wash the
+   chart-paper label out light-on-light, exactly in the state right after the
+   click. The primary button's hover idiom (lit dark) instead. */
+.broadside label.check.seal:has(input:checked):hover { background: var(--ink-press);
+  border-color: var(--ink-press); }
 .broadside .seal:has(input:checked)::before { content: "\2713"; }
 .broadside .seal:has(input:focus-visible) { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
 
 /* The Press: a full-width bar beneath a horizontal rule, its head presiding over
    two lines that share a left edge: the sheet actions, then the two gold links. */
 .broadside .press { grid-column: 1 / -1; border-top: 1px solid var(--line-tan);
-  margin-top: 0.4rem; padding-top: 0.9rem;
-  display: grid; grid-template-columns: auto 1fr; gap: 0.7rem 0.85rem; align-items: center; }
+  margin-top: 0.25rem; padding-top: 0.65rem;
+  display: grid; grid-template-columns: auto 1fr; gap: 0.55rem 0.85rem; align-items: center; }
 .broadside .press .panel-head { grid-column: 1; }
 .broadside .press-line { grid-column: 2; display: flex; align-items: center;
   gap: 0.85rem; flex-wrap: wrap; }
@@ -95,7 +106,7 @@ a.fn:hover, a.fn:focus-visible { color: var(--ink-dark); }
 .fn-note .fn-head { display: block; font-variant: small-caps; letter-spacing: 0.08em;
   color: var(--ink-faded); font-size: 0.82rem; font-weight: 400; margin-bottom: 0.2rem; }
 .fn-note > a { display: block; margin-top: 0.3rem; font-style: italic;
-  font-size: 0.74rem; color: var(--ink-brown); }
+  font-size: 0.78rem; color: var(--ink-brown); } /* >= 12px rendered: the back-matter link must stay legible */
 
 /* Below ~700px the two panels stack (Land, Hand, Press): the ruled-ledger form is
    the broadside's narrow layout, from the same grid. The existing 560px tier keeps

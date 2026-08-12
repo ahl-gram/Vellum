@@ -23,19 +23,27 @@ function pairs(): NotePair[] {
 
 // Anchor the note under its mark at show time: the note lives in the top layer as
 // a fixed-position box, and static CSS cannot place a top-layer box relative to
-// an in-flow anchor. Clamped to the viewport so a mark near an edge never pushes
-// its note off-screen.
+// an in-flow anchor. It clears the whole control ROW, not just the mark's line:
+// the mark sits beside a label whose neighboring control (a select, the seal row)
+// is taller, and the note must annotate, never cover. Clamped to the viewport so
+// a mark near an edge never pushes its note off-screen.
 function place(mark: HTMLElement, note: HTMLElement): void {
   const r = mark.getBoundingClientRect();
+  const cell = mark.closest(".l-label");
+  const rowEl = (cell && cell.nextElementSibling) || mark.parentElement;
+  const rowBottom = rowEl ? rowEl.getBoundingClientRect().bottom : r.bottom;
   const half = note.offsetWidth / 2;
   const x = Math.min(Math.max(r.left + r.width / 2, half + 8), window.innerWidth - half - 8);
   note.style.left = `${Math.round(x - half)}px`;
-  note.style.top = `${Math.round(r.bottom + 8)}px`;
+  note.style.top = `${Math.round(Math.max(r.bottom, rowBottom) + 8)}px`;
 }
 
 export function wireFootnotes(): void {
   // A pre-popover engine keeps working marks: they stay plain glossary links.
   if (!("showPopover" in HTMLElement.prototype)) return;
+  // Queried at event time, not captured at wire time, so a device-mode flip (or
+  // the e2e's emulation) is honored without a reload.
+  const hoverFine = (): boolean => !window.matchMedia("(hover: none)").matches;
   for (const { mark, note } of pairs()) {
     const show = (): void => {
       if (note.matches(":popover-open")) return;
@@ -45,17 +53,28 @@ export function wireFootnotes(): void {
     const hide = (): void => {
       if (note.matches(":popover-open")) note.hidePopover();
     };
-    mark.addEventListener("mouseenter", show);
-    mark.addEventListener("mouseleave", hide);
-    mark.addEventListener("focus", show);
-    mark.addEventListener("blur", hide);
+    // A tap fires the compat mouseenter and focus BEFORE its click, so on a
+    // touch device these must stand down or the click's toggle inverts (the
+    // plate-reader's off-by-one, pinned by e2e BR6's real taps). Hover and
+    // keyboard focus keep the note on fine-pointer devices.
+    mark.addEventListener("mouseenter", () => { if (hoverFine()) show(); });
+    mark.addEventListener("mouseleave", () => { if (hoverFine()) hide(); });
+    mark.addEventListener("focus", () => { if (hoverFine()) show(); });
+    mark.addEventListener("blur", () => { if (hoverFine()) hide(); });
+    // The closing half of a tap never reaches the click handler as "open": the
+    // tap's own pointer-down light-dismisses an auto popover first. Record that
+    // close SYNCHRONOUSLY (beforetoggle; the toggle event is queued async and
+    // lands after the click), so a click on its heels reads as the close it was,
+    // instead of re-showing.
+    let closedAt = 0;
+    note.addEventListener("beforetoggle", (ev) => {
+      if ((ev as ToggleEvent).newState === "closed") closedAt = performance.now();
+    });
     mark.addEventListener("click", (e) => {
-      // Queried at click time, not captured at wire time, so a device-mode flip
-      // (or the e2e's emulation) is honored without a reload.
-      if (!window.matchMedia("(hover: none)").matches) return; // fine pointer: the click follows the link
+      if (hoverFine()) return; // fine pointer: the click follows the link
       e.preventDefault();
       if (note.matches(":popover-open")) hide();
-      else show();
+      else if (performance.now() - closedAt > 400) show();
     });
   }
 }

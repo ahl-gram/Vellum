@@ -8,7 +8,7 @@
 // behavior no source test can see. Self-contained like the survey suite
 // (navigates itself, scoped no-4xx + console-error delta).
 export async function run(ctx) {
-  const { evaluate, send, check, sleep, waitSettled, waitReady, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
+  const { evaluate, send, check, sleep, waitSettled, waitReady, touch, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
 
   const EXP = `http://127.0.0.1:${PORT}/explorer/`;
   const errBase = consoleErrors.length;
@@ -132,28 +132,35 @@ export async function run(ctx) {
   const awayClosed = await evaluate(`!document.getElementById("note-coast-warp").matches(":popover-open")`);
   check("BR5 the note shows under a real hover and hides when the pointer leaves", overOpen && awayClosed, JSON.stringify({ overOpen, awayClosed }));
 
-  // BR6: the touch side, the ratified tap-toggle: with hover:none in force (device
-  // emulation, the suite-zoom-gestures idiom: metrics override + touch is what
-  // actually flips the hover/pointer media in this browser; setEmulatedMedia's
-  // feature overrides are a no-op here), a tap on the mark toggles the note
-  // INSTEAD of navigating, and the note carries its own glossary link.
+  // BR6: the touch side, the ratified tap-toggle, through REAL taps (CDP touch,
+  // which fires the full compat sequence: mouseenter, focus, click, and the
+  // popover's own pointerdown light dismiss; a synthetic .click() skips those and
+  // once hid a real off-by-one here). Device emulation is the suite-zoom-gestures
+  // idiom: metrics override + touch is what actually flips the hover/pointer
+  // media in this browser; setEmulatedMedia's feature overrides are a no-op.
+  // First tap opens the note (no navigation), second tap closes it.
   await setMobileViewport(390, 700);
-  const br6 = await evaluate(`(()=>{
-    if(!window.matchMedia("(hover: none)").matches)return{emulated:false};
-    const mark=document.querySelector('a.fn[data-note="note-survey"]');
-    const note=document.getElementById("note-survey");
-    mark.click();
-    const open=note.matches(":popover-open");
-    const stayed=location.pathname==="/explorer/";
-    const link=note.querySelector('a[href="/glossary/#survey"]');
-    mark.click();
-    return{emulated:true,open,stayed,hasLink:!!link,toggledOff:!note.matches(":popover-open")};
-  })()`);
+  const emulated = await evaluate(`window.matchMedia("(hover: none)").matches`);
+  const tapAt = async () => {
+    const p = await evaluate(`(()=>{const m=document.querySelector('a.fn[data-note="note-survey"]');
+      m.scrollIntoView({block:"center"});const r=m.getBoundingClientRect();
+      return{x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`);
+    await touch("touchStart", [{ x: p.x, y: p.y, id: 0 }]);
+    await touch("touchEnd", []);
+    await sleep(500); // past the tap-dismiss window, so the next tap is a fresh gesture
+  };
+  await tapAt();
+  const afterTap1 = await evaluate(`({open:document.getElementById("note-survey").matches(":popover-open"),
+    stayed:location.pathname==="/explorer/",
+    hasLink:!!document.querySelector('#note-survey a[href="/glossary/#survey"]')})`);
+  await tapAt();
+  const afterTap2 = await evaluate(`({open:document.getElementById("note-survey").matches(":popover-open"),
+    stayed:location.pathname==="/explorer/"})`);
   await clearMobile();
   check(
-    "BR6 under hover:none a tap toggles the note instead of navigating, and the note carries the glossary link",
-    br6.emulated && br6.open && br6.stayed && br6.hasLink && br6.toggledOff,
-    JSON.stringify(br6),
+    "BR6 under hover:none a real tap opens the note without navigating and a second tap closes it",
+    emulated && afterTap1.open && afterTap1.stayed && afterTap1.hasLink && !afterTap2.open && afterTap2.stayed,
+    JSON.stringify({ emulated, afterTap1, afterTap2 }),
   );
 
   // BR7: the back matter is real: every anchor the marks point at exists on the
