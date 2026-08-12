@@ -141,26 +141,35 @@ export async function run(ctx) {
   // First tap opens the note (no navigation), second tap closes it.
   await setMobileViewport(390, 700);
   const emulated = await evaluate(`window.matchMedia("(hover: none)").matches`);
+  // Every probe guards against the mark's document being GONE: the regression this
+  // check forbids is precisely "the tap navigated away", and the post-tap sleep is
+  // what lets a pending anchor navigation commit before the fresh evaluate reads
+  // the path (a same-evaluate read cannot see it; the guard-prover proved a
+  // dropped preventDefault survived that shape).
   const tapAt = async () => {
     const p = await evaluate(`(()=>{const m=document.querySelector('a.fn[data-note="note-survey"]');
+      if(!m)return null;
       m.scrollIntoView({block:"center"});const r=m.getBoundingClientRect();
       return{x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`);
+    if (!p) return false;
     await touch("touchStart", [{ x: p.x, y: p.y, id: 0 }]);
     await touch("touchEnd", []);
-    await sleep(500); // past the tap-dismiss window, so the next tap is a fresh gesture
+    await sleep(500); // past the tap-dismiss window, and past any pending navigation's commit
+    return true;
   };
-  await tapAt();
-  const afterTap1 = await evaluate(`({open:document.getElementById("note-survey").matches(":popover-open"),
-    stayed:location.pathname==="/explorer/",
-    hasLink:!!document.querySelector('#note-survey a[href="/glossary/#survey"]')})`);
-  await tapAt();
-  const afterTap2 = await evaluate(`({open:document.getElementById("note-survey").matches(":popover-open"),
-    stayed:location.pathname==="/explorer/"})`);
+  const probe = () => evaluate(`(()=>{const n=document.getElementById("note-survey");
+    return{stayed:location.pathname==="/explorer/",open:!!n&&n.matches(":popover-open"),
+      hasLink:!!document.querySelector('#note-survey a[href="/glossary/#survey"]')};})()`);
+  const tapped1 = await tapAt();
+  const afterTap1 = await probe();
+  const tapped2 = await tapAt();
+  const afterTap2 = await probe();
   await clearMobile();
   check(
     "BR6 under hover:none a real tap opens the note without navigating and a second tap closes it",
-    emulated && afterTap1.open && afterTap1.stayed && afterTap1.hasLink && !afterTap2.open && afterTap2.stayed,
-    JSON.stringify({ emulated, afterTap1, afterTap2 }),
+    emulated && tapped1 && tapped2 && afterTap1.open && afterTap1.stayed && afterTap1.hasLink &&
+      !afterTap2.open && afterTap2.stayed,
+    JSON.stringify({ emulated, tapped1, tapped2, afterTap1, afterTap2 }),
   );
 
   // BR7: the back matter is real: every anchor the marks point at exists on the

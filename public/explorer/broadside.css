@@ -76,6 +76,11 @@
    never a second dark primary (Draw stays the sole primary). Still an <a>
    (navigation, not a press). #270 ruling 2 gives it a gold peer, the journal
    button, so the pair form the Press's second line. */
+/* CAUTION: this display declaration also makes the `hidden` ATTRIBUTE inert on
+   these links (an author display beats the UA's [hidden] { display: none }), so
+   el.hidden = true silently does nothing here. Hide via style.display if ever
+   needed. Found by the #270 guard-prover: a hidden-gate regression written that
+   way would no-op invisibly. */
 .action-link { display: inline-flex; align-items: center; gap: 0.45rem;
   font-family: inherit; font-size: 0.95rem; letter-spacing: 0.04em; color: var(--ink-dark);
   background: var(--control-gold); border: 1.5px solid var(--ink-dark); border-radius: 4px;
