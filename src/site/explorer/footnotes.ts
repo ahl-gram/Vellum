@@ -29,13 +29,22 @@ function pairs(): NotePair[] {
 // a mark near an edge never pushes its note off-screen.
 function place(mark: HTMLElement, note: HTMLElement): void {
   const r = mark.getBoundingClientRect();
+  // A ledger row is the label cell plus every sibling up to the next label cell
+  // (the slider rows sit as loose cells on the grid); elsewhere the mark's own
+  // container is the row.
   const cell = mark.closest(".l-label");
-  const rowEl = (cell && cell.nextElementSibling) || mark.parentElement;
-  const rowBottom = rowEl ? rowEl.getBoundingClientRect().bottom : r.bottom;
+  let rowBottom = r.bottom;
+  if (cell) {
+    for (let el = cell.nextElementSibling; el && !el.classList.contains("l-label"); el = el.nextElementSibling) {
+      rowBottom = Math.max(rowBottom, el.getBoundingClientRect().bottom);
+    }
+  } else if (mark.parentElement) {
+    rowBottom = Math.max(rowBottom, mark.parentElement.getBoundingClientRect().bottom);
+  }
   const half = note.offsetWidth / 2;
   const x = Math.min(Math.max(r.left + r.width / 2, half + 8), window.innerWidth - half - 8);
   note.style.left = `${Math.round(x - half)}px`;
-  note.style.top = `${Math.round(Math.max(r.bottom, rowBottom) + 8)}px`;
+  note.style.top = `${Math.round(rowBottom + 8)}px`;
 }
 
 export function wireFootnotes(): void {

@@ -51,6 +51,21 @@ export async function run(ctx) {
     JSON.stringify(br1),
   );
 
+  // BR1b: the two slider tracks are twins (Alex's ledger directive, round 3): the
+  // endpoint words differ in width, so without real columns the flexed tracks
+  // drift apart on both ends. Same left edge, same right edge, within 1px.
+  const br1b = await evaluate(`(()=>{
+    const l=document.getElementById("land").getBoundingClientRect();
+    const c=document.getElementById("coast").getBoundingClientRect();
+    return{lLeft:Math.round(l.left*10)/10,cLeft:Math.round(c.left*10)/10,
+      lRight:Math.round(l.right*10)/10,cRight:Math.round(c.right*10)/10};
+  })()`);
+  check(
+    "BR1b the sea-level and coast tracks share both edges (equal length, one column)",
+    Math.abs(br1b.lLeft - br1b.cLeft) <= 1 && Math.abs(br1b.lRight - br1b.cRight) <= 1,
+    JSON.stringify(br1b),
+  );
+
   // BR2: the Press's second line never changes shape (#270 ruling 2): the two gold
   // links share the action-link dressing and the journal button stays standing and
   // in place through a survey tick and untick.

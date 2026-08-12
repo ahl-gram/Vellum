@@ -22,15 +22,25 @@
 
 /* The ledger (ruling 3): one right-aligned label column per panel, and a control
    column whose members share the same left and right edges. Misaligned controls
-   are an antipattern (Alex's directive on the round-1 mockup). */
-.broadside .ledger { display: grid; grid-template-columns: auto 1fr;
+   are an antipattern (Alex's directive on the round-1 mockup). Five columns:
+   label | endpoint word | track | endpoint word | readout. Ordinary controls
+   span the last four as one cell (.l-ctl); the slider rows sit directly on the
+   grid so BOTH tracks share the one track column and land twin-length whatever
+   their endpoint words weigh (the round-3 directive, pinned by e2e BR1b). */
+.broadside .ledger { display: grid; grid-template-columns: auto auto 1fr auto auto;
   gap: 0.5rem 0.6rem; align-items: center; }
-.broadside .l-label { text-align: right; white-space: nowrap; }
+.broadside .l-label { grid-column: 1; text-align: right; white-space: nowrap; }
 .broadside .l-label label { font-size: 0.85rem; letter-spacing: 0.05em; color: var(--ink-brown); }
-.broadside .l-ctl { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.broadside .l-ctl { grid-column: 2 / -1; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
 .broadside .l-ctl > select,
 .broadside .l-ctl > input[type="number"] { flex: 1; min-width: 0; }
-.broadside .l-ctl > input[type="range"] { flex: 1; min-width: 4rem; accent-color: var(--ink-dark); margin: 0; }
+/* The slider rows' own cells, columns pinned explicitly: auto-placement would
+   re-deal the row when the words drop out at the 560px tier below. */
+.broadside .ledger > .land-end-min { grid-column: 2; justify-self: end; }
+.broadside .ledger > input[type="range"] { grid-column: 3; width: 100%; min-width: 4rem;
+  accent-color: var(--ink-dark); margin: 0; }
+.broadside .ledger > .land-end-max { grid-column: 4; }
+.broadside .ledger > .land-readout { grid-column: 5; }
 .land-end { font-size: 0.72rem; font-style: italic; color: var(--ink-faded); white-space: nowrap; }
 /* The reserved readout slot (acceptance: "34% land" / "warp 0.55" never push their
    neighbors as values change length). */
@@ -127,7 +137,13 @@ a.fn:hover { transform: translateY(-2px) rotate(-0.6deg); }
     padding-left: 0; padding-top: 0.9rem; margin-top: 0.5rem; }
 }
 @media (max-width: 560px) {
-  .broadside .ledger .land-end { display: none; } /* the tracks stay long; the readout carries the value */
+  /* The tracks stay long; the readout carries the value. The ledger re-deals to
+     three columns so the track's left edge stays flush with the selects' (empty
+     word columns would each still cost a grid gap). */
+  .broadside .ledger .land-end { display: none; }
+  .broadside .ledger { grid-template-columns: auto 1fr auto; }
+  .broadside .ledger > input[type="range"] { grid-column: 2; }
+  .broadside .ledger > .land-readout { grid-column: 3; }
   .broadside .press { grid-template-columns: 1fr; }
   .broadside .press .panel-head, .broadside .press-line { grid-column: 1; }
   .broadside .press-line .action-link { flex: 1 1 100%; justify-content: center; }

@@ -43,10 +43,20 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
         <option value="tropical">tropical</option>
         <option value="polar">polar</option>
       </select></span>
+      <!-- The slider rows sit DIRECTLY on the ledger grid (no .l-ctl wrapper):
+           the endpoint words get real columns of their own, so both tracks share
+           one track column and land twin-length whatever the words weigh
+           (Alex's round-3 directive; e2e BR1b pins the twin edges). -->
       <span class="l-label"><label for="land">sea level</label></span>
-      <span class="l-ctl"><span class="land-end">more sea</span><input id="land" type="range" min="100" max="700" step="2"><span class="land-end">more land</span><span id="land-readout" class="land-readout"></span></span>
+      <span class="land-end land-end-min">more sea</span>
+      <input id="land" type="range" min="100" max="700" step="2">
+      <span class="land-end land-end-max">more land</span>
+      <span id="land-readout" class="land-readout"></span>
       <span class="l-label"><label for="coast">coast</label><a class="fn" href="/glossary/#coast-warp" data-note="note-coast-warp" aria-describedby="note-coast-warp" aria-label="note on the coast warp">&Dagger;</a></span>
-      <span class="l-ctl"><span class="land-end">calm</span><input id="coast" type="range" min="0" max="100" step="5"><span class="land-end">lobed</span><span id="coast-readout" class="land-readout"></span></span>
+      <span class="land-end land-end-min">calm</span>
+      <input id="coast" type="range" min="0" max="100" step="5">
+      <span class="land-end land-end-max">lobed</span>
+      <span id="coast-readout" class="land-readout"></span>
     </div>
   </div>
   <div class="panel" role="group" aria-labelledby="grp-hand">
