@@ -196,6 +196,46 @@ test("the grown TOC reads in two columns, and stacks on mobile (#353)", () => {
   );
 });
 
+/** Every declaration `.toc a` finally wins, merged in source order. Reading only
+ *  the first matching rule would miss a later override and would red on the
+ *  behavior-preserving split of one declaration into its own rule. A twin of this
+ *  helper guards the FAQ in tip-affordance.test.ts; #358 folds the pair into one
+ *  sweep once both fixes are on main. */
+const settledTocLink = (css: string): Readonly<Record<string, string>> => {
+  const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const out: Record<string, string> = {};
+  for (const m of bare.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    if (!m[1].split(",").map((s) => s.trim().replace(/\s+/g, " ")).includes(".toc a")) continue;
+    for (const declaration of m[2].split(";")) {
+      const [prop, ...value] = declaration.split(":");
+      if (value.length) out[prop.trim()] = value.join(":").trim();
+    }
+  }
+  return out;
+};
+
+test("a wrapped TOC slip keeps its list marker on the first line (#353)", () => {
+  // The tip gesture needs a block box, so a slip is an inline-block, and an
+  // inline-block takes its baseline from its LAST line box: a wrapped entry
+  // drops its bullet beside line two. Measured at 320px in the font-fallback
+  // paint, which font-display: swap makes the first paint of every cold load:
+  // 5 of 15 entries wrap there, and all 5 bullets moved. No structural test can
+  // see it, since nothing overflows and a ::marker is unreachable from the DOM.
+  const decls = settledTocLink(
+    readFileSync(fileURLToPath(new URL("../../public/glossary/index.css", import.meta.url)), "utf8"),
+  );
+  assert.equal(
+    decls["display"],
+    "inline-block",
+    "the glossary's .toc a is no longer an inline-block; re-check this guard's premise",
+  );
+  assert.equal(
+    decls["vertical-align"],
+    "top",
+    "a wrapped TOC entry drops its bullet to line two without vertical-align: top",
+  );
+});
+
 test("every term carries a definition (#353)", () => {
   // Terms and defs alternate, so a dropped def silently orphans the headword
   // above it. Counting per section catches the drift where it happens.

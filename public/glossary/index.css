@@ -61,8 +61,8 @@ h3 { font-size: 0.95rem; letter-spacing: 0.08em; color: var(--ink-faded);
    this TOC past a handful of entries the long ones wrapped at 320px and their
    bullets dropped to line two. Only visible in the font-fallback first paint, which
    font-display: swap makes every cold load. Do not drop back to display:inline
-   to fix it: the tip transform above needs a block box, and tip-affordance.test.ts
-   guards that gesture. */
+   to fix it: the tip transform below needs a block box, and tip-affordance.test.ts
+   guards that gesture. glossary-sections.test.ts guards this line itself. */
 .toc a { display: inline-block; vertical-align: top; transition: transform var(--paper-quick) var(--ease-paper); }
 .toc a:hover { transform: translateY(-2px) rotate(-0.6deg); }
 .toc a:active { transform: translateY(0); }
