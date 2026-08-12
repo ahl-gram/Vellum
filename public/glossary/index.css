@@ -41,7 +41,16 @@ h3 { font-size: 0.95rem; letter-spacing: 0.08em; color: var(--ink-faded);
   padding: 1rem 1.4rem; margin: 2rem 0 1rem; }
 /* Voice from /house.css (.archivist-label, #324). */
 .toc strong { display: block; margin-bottom: 0.4rem; }
-.toc ul { margin: 0; padding-left: 1.1rem; }
+/* Fourteen sections (#353) make a tall single column, so the slips read in two
+   where the sheet is wide enough: down-then-across, as a printed contents does.
+   `columns` rather than a grid because it balances at any entry count, where an
+   explicit row track would silently spill to a third column at fifteen sections.
+   The gap has to clear a bullet: column two's markers hang OUTSIDE its content
+   box, into the gap, since padding-left only makes room at the left of the ul.
+   720px is the collapse boundary public/index.css already uses. */
+.toc ul { margin: 0; padding-left: 1.1rem; columns: 2; column-gap: 2.4rem; }
+.toc li { break-inside: avoid; }
+@media (max-width: 720px) { .toc ul { columns: 1; } }
 .toc a { color: var(--ink-dark); }
 /* The TOC's slips go somewhere, so they tip: the wordmark's text-scale gesture
    (#289; #324 feel review). Reduced-motion collapse lives in /motion.css. */

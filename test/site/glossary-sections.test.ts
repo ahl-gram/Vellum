@@ -167,6 +167,32 @@ test("terms stay alphabetical inside their section (#353)", () => {
   }
 });
 
+test("the grown TOC reads in two columns, and stacks on mobile (#353)", () => {
+  // Fourteen entries in a single column push the first term below the fold.
+  // Two columns halve the block where there is room to hold them, and collapse
+  // at the 720px boundary the homepage grids already use (public/index.css).
+  // break-inside keeps a wrapped entry from splitting across the column break.
+  const css = readFileSync(
+    fileURLToPath(new URL("../../public/glossary/index.css", import.meta.url)),
+    "utf8",
+  );
+  assert.match(
+    css,
+    /\.toc ul\s*\{[^}]*columns:\s*2/,
+    "the glossary TOC should read in two columns once the sheet is wide enough",
+  );
+  assert.match(
+    css,
+    /@media\s*\(max-width:\s*720px\)\s*\{[^}]*\.toc ul\s*\{[^}]*columns:\s*1/,
+    "the TOC should stack to one column on mobile, at the 720px boundary public/index.css uses",
+  );
+  assert.match(
+    css,
+    /\.toc li\s*\{[^}]*break-inside:\s*avoid/,
+    "a wrapped TOC entry should not split across the column break",
+  );
+});
+
 test("every term carries a definition (#353)", () => {
   // Terms and defs alternate, so a dropped def silently orphans the headword
   // above it. Counting per section catches the drift where it happens.
