@@ -49,11 +49,13 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
    (#289; #324 feel review). Reduced-motion collapse lives in /motion.css. */
 /* vertical-align keeps the list marker on an entry's FIRST line (#356). An
    inline-block takes its baseline from its LAST line box, so a wrapped entry
-   drops its bullet beside line two: at 320px three of these five entries wrap
-   on the fully loaded webfont, so it is the steady state here, not a
-   first-paint flash. Do not drop back to display:inline to fix it: the tip
-   transform below needs a block box, and tip-affordance.test.ts guards that
-   gesture. Twin of the same rule in glossary/index.css. */
+   drops its bullet beside line two, measured at 26.00px down. At 320 to 330px
+   three of these five entries wrap even on the fully loaded webfont, so in that
+   band it is the steady state and not a first-paint flash; from 335 to 360 only
+   the fallback paint wraps. Do not drop back to display:inline to fix it: the
+   tip transform below needs a block box, and tip-affordance.test.ts guards that
+   gesture. glossary/index.css carries the identical inline-block pair and takes
+   this same one-line fix on #353 (PR #354), which has not landed yet. */
 .toc a { display: inline-block; vertical-align: top; transition: transform var(--paper-quick) var(--ease-paper); }
 .toc a:hover { transform: translateY(-2px) rotate(-0.6deg); }
 .toc a:active { transform: translateY(0); }
