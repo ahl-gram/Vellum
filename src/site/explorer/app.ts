@@ -219,6 +219,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
           lc.buildPlaceOverlay(res.manifest);
           // #321: re-arm the static survey track to the just-landed chart, at rest
           // (rearmVoyage, the bar-less arm entry #319 named for this conductor).
+          surveyArm.cancel(); // #300: this landing owns the arm; see the settle path below
           if (agesChk.checked) lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
           else lc.clearAges();
           glass.syncZoom(); // #164/#165: attach the zoom to the just-landed chart (every style)
@@ -241,6 +242,10 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         // verso's ghost and its track must always come from the same draw.
         // #120: re-arm from THIS draw's survey, never lastSurvey. A sea-level drag moves the
         // waterline, so the roads and open water the router walks moved with it.
+        // #300: this settle OWNS the arm, so drop any tick still waiting on its frame.
+        // drawGen cannot see a draw that was ALREADY IN FLIGHT when the box was ticked (it
+        // bumped before the tick), and that arm would land a second overlay. See survey-arm.ts.
+        surveyArm.cancel();
         if (agesChk.checked) lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
         else lc.clearAges();
         glass.syncZoom(); // #164/#165: attach the zoom to the just-drawn chart (every style)

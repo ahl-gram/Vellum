@@ -18,6 +18,14 @@
 // The host bumps `worldGen` for the last of those; `isArmed` is the live box read, kept as
 // the standing truth even where a generation already covers it.
 //
+// `worldGen` covers a draw that STARTS after the tick. It cannot cover one that was already
+// IN FLIGHT, because the host bumps its counter when a draw begins, so a tick made during
+// the drafting takes a snapshot that already matches and always will. That case is closed
+// from the other end: the settle and the turn landing each call cancel() before arming,
+// which is the host saying "this landing owns the arm now". Without it the settle's arm and
+// this one both land, and the mount ends up with TWO overlays stacked, since the session
+// builder appends and never wipes and exitVoyage removes only the first.
+//
 // Deliberately DOM-free: the yield arrives as `afterPaint` so it is testable
 // (test/site/survey-arm.test.ts holds the frame open and acts inside it). The production
 // yield is afterNextPaint below.
@@ -61,6 +69,13 @@ export function createSurveyArm(deps: SurveyArmDeps) {
  * The production yield: one rAF to reach the frame the click produced, then a task, which
  * runs AFTER that frame is painted. rAF alone is not enough, since its callbacks run
  * BEFORE the render step and would block the very paint being waited for.
+ *
+ * INVARIANT: this hop is rAF-FIRST on purpose, and that ties the arm to the tab being
+ * visible. A backgrounded tab suspends rAF, so a tick made just before the tab is hidden
+ * leaves the box checked and `survey` in the address over a bare sheet until the reader
+ * comes back, at which point it arms. Deliberate: the work is a ~1.1s block whose only
+ * output is ink nobody is looking at. Swapping the order to run the task first would break
+ * the acknowledgment this whole module exists for.
  */
 export function afterNextPaint(run: () => void): void {
   requestAnimationFrame(() => { setTimeout(run, 0); });

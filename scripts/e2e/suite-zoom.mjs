@@ -17,6 +17,19 @@
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, waitTurned, PORT } = ctx;
 
+  // #300: the survey tick's build now waits for a painted frame, so the track appears a
+  // beat after the change event. Z20d and Z20g each used a fixed sleep (80ms, 120ms) that
+  // happened to outlast it on this laptop only because a CDP evaluate sent mid-build queues
+  // behind the blocked main thread. Wait for the ink itself instead: on a slower runner the
+  // sleep could return before the rAF had even fired, and the check would red for timing.
+  const waitInked = async (label) => {
+    for (let i = 0; i < 120; i++) {
+      if (await evaluate(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
+      await sleep(50);
+    }
+    throw new Error("waitInked timeout " + label);
+  };
+
   // Clean antique seed-42 base, chronicle/voyage off, resting on the recto.
   await evaluate(`(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
   await waitSettled("zoom-base");
@@ -623,7 +636,7 @@ export async function run(ctx) {
   await enterAt(2, 0.5, 0.5);
   await waitRedraft(before20d);
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  await sleep(80);
+  await waitInked("z20d-survey-ink"); // #300: the ink lands a beat after the tick, so wait for it rather than sleeping
   const chron = await evaluate(
     `(()=>{const s=window.__vellumRegion();const svg=document.querySelector("#map > svg");` +
       `return{band:s.band,committed:s.committed,noStamp:!!svg&&!svg.hasAttribute("data-vellum-region-u0"),` +
@@ -706,7 +719,7 @@ export async function run(ctx) {
   await enterAt(2, 0.5, 0.5);
   const reg20g = await waitRedraft(before20g);
   await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=true;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  await sleep(120);
+  await waitInked("z20g-survey-ink"); // #300: as Z20d, the ink is a beat behind the tick
   const von = await evaluate(
     `(()=>{const s=window.__vellumRegion();return{band:s.band,committed:s.committed,` +
       `insets:document.querySelectorAll("#map .region-inset").length,track:!!document.querySelector("#map .voyage-overlay"),` +

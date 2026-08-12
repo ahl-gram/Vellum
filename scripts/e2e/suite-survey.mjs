@@ -1,7 +1,7 @@
 // The Survey Ink checks (SV1-SV11, #321, Survey and Story Sub 4): the static
 // Explorer. The scrubber panel, Play, the bar, and the journal strip are GONE from
 // the DOM (not hidden); the one `survey` checkbox is 1:1 with the bare `survey` hash
-// flag and inks the completed track instantly, at rest; an inbound `year=N` link
+// flag and inks the completed track at rest a beat after the tick (#300); an inbound `year=N` link
 // forwards to the Reading Room with the hash intact; the verso mirrors the resting
 // track with no snap; and the journal pointer's href tracks every hash write. (#270
 // ruling 2 reshaped the pointer checks here: the old hidden-unless-ticked caption
@@ -46,6 +46,18 @@ export async function run(ctx) {
       await sleep(50);
     }
     throw new Error("waitInked timeout " + label);
+  };
+
+  // Wait for the beat itself rather than for a wall-clock guess. A marker registered on the
+  // SAME rAF-then-task hop the arm uses is queued BEHIND it, so once the marker fires the
+  // arm has already run or been dropped. That is what lets the negative cases ("nothing was
+  // inked") assert absence without a sleep that a slower CI runner could outlast.
+  const waitBeat = async (label) => {
+    for (let i = 0; i < 200; i++) {
+      if (await evaluate(`window.__beat === true`)) return;
+      await sleep(25);
+    }
+    throw new Error("waitBeat timeout " + label);
   };
 
   // Tick or untick the box the way a user would, and clock the whole arm from inside the
@@ -161,10 +173,11 @@ export async function run(ctx) {
   // the mount and never wipes, so a stale arm surviving alongside a live one would leave
   // two tracks stacked on the sheet, and "a track is present" could not see it.
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  await evaluate(`(()=>{const c=document.getElementById("ages");
+  await evaluate(`(()=>{const c=document.getElementById("ages");window.__beat=false;
     c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
-    c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  await sleep(500); // past a cached arm's whole beat, so "nothing inked" means nothing ever inks
+    c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));
+    requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
+  await waitBeat("survey-cancelled-beat");
   const sv2dOff = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
     checked:document.getElementById("ages").checked,hash:location.hash,
     status:document.getElementById("status").textContent})`);
@@ -185,6 +198,55 @@ export async function run(ctx) {
     JSON.stringify({ off: sv2dOff, on: sv2dOn }),
   );
 
+  // SV2e: the box ticked while a draw is ALREADY IN FLIGHT. This is the one ordering the
+  // arm's own worldGen snapshot cannot see, because the host bumps that counter when a draw
+  // BEGINS, which here is before the tick, so the snapshot matches and always will. If the
+  // settle then arms the chart that lands and the pending arm lands too, the mount ends up
+  // with TWO stacked overlays, and a later untick strands one of them on an unticked sheet
+  // (the session builder appends and never wipes; exitVoyage removes a single overlay). The
+  // settle's cancel() is what closes it.
+  //
+  // Deterministic, not raced. After the tick the page HOLDS the main thread past the
+  // worker's reply, so when it frees, the settle's message task and the arm's deferred task
+  // are both queued, settle first. Left to run naturally the arm fires about a frame in,
+  // long before any reply, and the settle's innerHTML wipe would hide the defect entirely:
+  // this check would then pass on the broken code, which is the whole thing worth avoiding.
+  // The seed is left alone so the worker's world cache serves the redraw and the reply
+  // comfortably beats the hold.
+  await goto("#seed=42&style=antique", "survey-inflight-base");
+  await evaluate(`(()=>{
+    document.getElementById("draw").click();
+    const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
+    const end=performance.now()+1500;while(performance.now()<end);
+  })()`);
+  await waitSettled("survey-inflight-settle");
+  await waitInked("survey-inflight-ink");
+  await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
+  await waitBeat("survey-inflight-beat");
+  const sv2e = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    checked:document.getElementById("ages").checked,hash:location.hash,
+    status:document.getElementById("status").textContent,
+    vertices:(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
+      return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})()})`);
+  check(
+    "SV2e a tick during an in-flight draw leaves exactly ONE track: the settle owns the arm (#300)",
+    sv2e.overlays === 1 && sv2e.checked && sv2e.vertices > 10 &&
+      /(^|&)survey(&|$)/.test(sv2e.hash.slice(1)) && sv2e.status === "",
+    JSON.stringify(sv2e),
+  );
+  // And the untick really does clear it: with two stacked overlays this leaves one behind,
+  // on a sheet whose box is unticked and whose address carries no survey flag.
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  const sv2f = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    hash:location.hash,status:document.getElementById("status").textContent})`);
+  check(
+    "SV2f unticking after that leaves the sheet truly bare, no stranded track (#300)",
+    sv2f.overlays === 0 && !/survey/.test(sv2f.hash) && sv2f.status === "",
+    JSON.stringify(sv2f),
+  );
+
+  await goto("#seed=42&style=antique&survey", "survey-restore-for-sv3");
+  await waitInked("survey-sv3-ink");
   // SV3: the box and the flag are 1:1 in the other direction too. Unticking clears
   // the overlay from the mount and drops the flag from the hash; the journal button
   // stays standing (#270) and its href follows the write, losing the flag with it.

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createSurveyArm } from "../../src/site/explorer/survey-arm.ts";
+import { createSurveyArm, afterNextPaint } from "../../src/site/explorer/survey-arm.ts";
 
 // #300: ticking the survey box ran the whole session build inside the change handler
 // (prepareVoyageRouter plus the #184 all-pairs travel matrix, measured 895-1207ms across
@@ -49,12 +49,15 @@ test("#300 the arm is deferred past the paint: the click's turn builds nothing",
   assert.equal(h.state.builds, 1, "the build runs once the frame has painted");
 });
 
-test("#300 an untick inside the deferred window cancels the arm entirely", () => {
+test("#300 cancel() alone drops the pending arm, with the box left ticked", () => {
   const h = harness();
   h.state.armed = true;
   h.arm.schedule();
-  h.state.armed = false;
   h.arm.cancel(); // the untick branch of the same change handler
+  // The box is deliberately NOT unticked here. A real untick moves both, and asserting
+  // both at once made this test pass with cancel() gutted: isArmed alone was carrying it
+  // (the #140 shape, found by the guard-prover). One mechanism per test; the box read has
+  // its own below.
   h.paint();
   assert.equal(h.state.builds, 0, "a cancelled arm never builds");
 });
@@ -91,6 +94,18 @@ test("#300 the box is the truth at fire time, not at schedule time", () => {
   assert.equal(h.state.builds, 0, "an unticked box builds nothing even with the generations agreeing");
 });
 
+test("#300 back-to-back schedules supersede: one build, not two", () => {
+  const h = harness();
+  h.state.armed = true;
+  h.arm.schedule();
+  h.arm.schedule();
+  h.paint();
+  // Not reachable from today's single call site, which is why it is worth pinning: it is
+  // the claim schedule()'s own bump rests on, and a second caller would otherwise inherit
+  // a double build silently.
+  assert.equal(h.state.builds, 1, "schedule() supersedes the arm pending before it");
+});
+
 test("#300 cancel() with no arm pending is a no-op, and does not poison the next one", () => {
   const h = harness();
   h.arm.cancel();
@@ -98,4 +113,34 @@ test("#300 cancel() with no arm pending is a no-op, and does not poison the next
   h.arm.schedule();
   h.paint();
   assert.equal(h.state.builds, 1, "a later arm still runs after a bare cancel");
+});
+
+// The production yield's SHAPE. Whether a browser paints between the two hops is a browser
+// fact this cannot assert, but the hop itself is the whole reason the function exists, and
+// without this it had no coverage anywhere: collapsing it to a bare setTimeout, or to the
+// bare requestAnimationFrame whose callbacks run BEFORE the render step, was green on all
+// 1108 tests. Stubs both globals so the two steps can be driven one at a time.
+test("#300 afterNextPaint hops a frame AND a task: a bare rAF would block the paint it waits for", () => {
+  const hadRaf = "requestAnimationFrame" in globalThis;
+  const realRaf = (globalThis as Record<string, unknown>).requestAnimationFrame;
+  const realTimeout = globalThis.setTimeout;
+  let frame: (() => void) | null = null;
+  let task: (() => void) | null = null;
+  (globalThis as Record<string, unknown>).requestAnimationFrame = (fn: () => void) => { frame = fn; return 1; };
+  (globalThis as Record<string, unknown>).setTimeout = (fn: () => void) => { task = fn; return 0; };
+  try {
+    let ran = 0;
+    afterNextPaint(() => { ran++; });
+    assert.equal(ran, 0, "nothing runs in the caller's own turn");
+    assert.ok(frame, "a frame is requested");
+    (frame as unknown as () => void)();
+    assert.equal(ran, 0, "the frame callback must NOT run the work: it fires before the render step");
+    assert.ok(task, "the frame callback queues a task instead");
+    (task as unknown as () => void)();
+    assert.equal(ran, 1, "the work runs in the task, on the far side of the paint");
+  } finally {
+    globalThis.setTimeout = realTimeout;
+    if (hadRaf) (globalThis as Record<string, unknown>).requestAnimationFrame = realRaf;
+    else delete (globalThis as Record<string, unknown>).requestAnimationFrame;
+  }
 });
