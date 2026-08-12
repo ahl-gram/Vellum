@@ -50,7 +50,10 @@ const sections = (html: string): readonly Section[] => {
     const level = Number(parts[i]);
     const heading = parts[i + 1].replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").trim();
     const body = parts[i + 2] ?? "";
-    const terms = [...body.matchAll(/<p class="term">([\s\S]*?)<\/p>/g)].map((m) =>
+    // Tolerate attributes on the term: #270's footnote marks link per-term ids
+    // (`<p class="term" id="verso">`), and an exact-tag match made every one of
+    // those entries invisible to all the guards below rather than failing loudly.
+    const terms = [...body.matchAll(/<p class="term"[^>]*>([\s\S]*?)<\/p>/g)].map((m) =>
       m[1].replace(/<[^>]*>/g, "").trim(),
     );
     out.push({ heading, level, terms });
@@ -168,7 +171,7 @@ test("terms stay alphabetical inside their section (#353)", () => {
 });
 
 test("the grown TOC reads in two columns, and stacks on mobile (#353)", () => {
-  // Fourteen entries in a single column push the first term below the fold.
+  // Fifteen entries in a single column push the first term below the fold.
   // Two columns halve the block where there is room to hold them, and collapse
   // at the 720px boundary the homepage grids already use (public/index.css).
   // break-inside keeps a wrapped entry from splitting across the column break.
@@ -196,11 +199,17 @@ test("the grown TOC reads in two columns, and stacks on mobile (#353)", () => {
 test("every term carries a definition (#353)", () => {
   // Terms and defs alternate, so a dropped def silently orphans the headword
   // above it. Counting per section catches the drift where it happens.
-  const bodies = source.split(/<h[23][^>]*>/).slice(1);
-  for (const body of bodies) {
-    const terms = [...body.matchAll(/<p class="term">/g)].length;
+  const bodies = source.split(/<h([23])[^>]*>([\s\S]*?)<\/h\1>/);
+  for (let i = 1; i + 2 < bodies.length + 1; i += 3) {
+    const heading = (bodies[i + 1] ?? "").replace(/<[^>]*>/g, "").trim();
+    const body = bodies[i + 2] ?? "";
+    const terms = [...body.matchAll(/<p class="term"[^>]*>/g)].length;
     const defs = [...body.matchAll(/<p class="def">/g)].length;
-    if (terms === 0) continue;
-    assert.equal(defs, terms, `a section carries ${terms} terms but ${defs} definitions`);
+    // Skipping every term-less section would hide a body that carries defs and
+    // no headwords at all, which is exactly what an unmatched term tag looks
+    // like. Only a section with neither is legitimately empty (an h2 whose
+    // terms all live under its h3 subsections).
+    if (terms === 0 && defs === 0) continue;
+    assert.equal(defs, terms, `"${heading}" carries ${terms} terms but ${defs} definitions`);
   }
 });

@@ -3,7 +3,10 @@
 // the DOM (not hidden); the one `survey` checkbox is 1:1 with the bare `survey` hash
 // flag and inks the completed track instantly, at rest; an inbound `year=N` link
 // forwards to the Reading Room with the hash intact; the verso mirrors the resting
-// track with no snap; and the caption carries the quiet journal pointer (decision 3).
+// track with no snap; and the journal pointer's href tracks every hash write. (#270
+// ruling 2 reshaped the pointer checks here: the old hidden-unless-ticked caption
+// became the ALWAYS-visible gold #journal-link button in The Press, so the hidden
+// gate probes retired and the href sync is asserted in both directions instead.)
 // Successors for the retired Explorer-hosted live checks are the room-hosted RS/RW/
 // RV/RA suites (#320); this suite guards only what the static Explorer still owes.
 // Self-contained like the hunt / Print Room / home suites (navigates itself, carries
@@ -30,41 +33,46 @@ export async function run(ctx) {
 
   // SV1: the cut itself. A bare visit carries NO scrubber panel, Play, bar, readout,
   // or journal strip anywhere in the document (gone from the DOM, not hidden), the
-  // box boots unticked, the sheet is bare, and the journal pointer is hidden.
+  // box boots unticked, the sheet is bare, and the journal button stands ready with
+  // this world's address (#270: the old #journal-line caption is gone WITH its gate;
+  // the button is always visible and only its href tracks the state).
   await goto("#seed=42&style=antique", "survey-base");
   const sv1 = await evaluate(`(()=>{
-    const ids=["scrubber","scrub-play","scrub-range","scrub-year","scrub-sig","chronicle-strip"];
+    const ids=["scrubber","scrub-play","scrub-range","scrub-year","scrub-sig","chronicle-strip","journal-line"];
+    const j=document.getElementById("journal-link");
     return{gone:ids.every((id)=>!document.getElementById(id)),
       checked:document.getElementById("ages").checked,
       track:!!document.querySelector("#map .voyage-overlay"),
-      journalHidden:document.getElementById("journal-line").hidden,
+      journalShown:!!j&&j.getClientRects().length>0,
+      journalHref:j?j.getAttribute("href"):"",hash:location.hash,
       label:(document.getElementById("ages").closest("label")||{}).textContent||"",
       status:document.getElementById("status").textContent};
   })()`);
   check(
-    "SV1 the scrubber panel and journal strip are gone from the DOM, the box boots unticked, the sheet bare",
-    sv1.gone && !sv1.checked && !sv1.track && sv1.journalHidden && sv1.label.trim().startsWith("survey") && sv1.status === "",
+    "SV1 the scrubber panel and journal strip are gone from the DOM, the box boots unticked, the sheet bare, the journal button standing",
+    sv1.gone && !sv1.checked && !sv1.track && sv1.journalShown && sv1.journalHref === "/reading-room/" + sv1.hash &&
+      sv1.label.trim().startsWith("survey") && sv1.status === "",
     JSON.stringify(sv1),
   );
 
   // SV2: ticking the box inks the COMPLETED track instantly, at rest. The handler is
   // synchronous, so by the time this evaluate returns the full track must be on the
   // sheet (a sweep would start near zero length), the status line silent, the hash
-  // carrying the bare survey flag, and the journal pointer visible with this world's
-  // address. The readback happens in the same call as the dispatch on purpose.
+  // carrying the bare survey flag, and the journal button's href carrying this
+  // world's survey address. The readback happens in the same call as the dispatch on
+  // purpose.
   const sv2 = await evaluate(`(()=>{
     const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
     const t=document.querySelector("#map .voyage-overlay .voyage-track");
     const pts=t?(t.getAttribute("points")||""):"";
-    const line=document.getElementById("journal-line");
     return{vertices:pts?pts.trim().split(/\\s+/).length:0,
       hash:location.hash,status:document.getElementById("status").textContent,
-      journalHidden:line.hidden,href:document.getElementById("journal-link").getAttribute("href")};
+      href:document.getElementById("journal-link").getAttribute("href")};
   })()`);
   check(
     "SV2 ticking survey inks the completed track instantly, at rest, and writes the bare flag",
     sv2.vertices > 10 && /(^|&)survey(&|$)/.test(sv2.hash.slice(1)) && !/year=/.test(sv2.hash) &&
-      sv2.status === "" && !sv2.journalHidden && sv2.href === "/reading-room/" + sv2.hash,
+      sv2.status === "" && sv2.href === "/reading-room/" + sv2.hash,
     JSON.stringify({ ...sv2, hash: sv2.hash }),
   );
   await shoot("explorer-survey-inked.png");
@@ -86,16 +94,18 @@ export async function run(ctx) {
   );
 
   // SV3: the box and the flag are 1:1 in the other direction too. Unticking clears
-  // the overlay from the mount, drops the flag from the hash, and hides the pointer.
+  // the overlay from the mount and drops the flag from the hash; the journal button
+  // stays standing (#270) and its href follows the write, losing the flag with it.
   const sv3 = await evaluate(`(()=>{
     const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));
     return{track:!!document.querySelector("#map .voyage-overlay"),hash:location.hash,
-      journalHidden:document.getElementById("journal-line").hidden,
+      href:document.getElementById("journal-link").getAttribute("href"),
       status:document.getElementById("status").textContent};
   })()`);
   check(
-    "SV3 unticking clears the track, drops the flag, and hides the journal pointer",
-    !sv3.track && !/survey/.test(sv3.hash) && !/year=/.test(sv3.hash) && sv3.journalHidden && sv3.status === "",
+    "SV3 unticking clears the track and drops the flag; the journal href follows the write",
+    !sv3.track && !/survey/.test(sv3.hash) && !/year=/.test(sv3.hash) &&
+      sv3.href === "/reading-room/" + sv3.hash && sv3.status === "",
     JSON.stringify(sv3),
   );
 
@@ -108,11 +118,12 @@ export async function run(ctx) {
     return{checked:document.getElementById("ages").checked,
       vertices:t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0,
       hash:location.hash,status:document.getElementById("status").textContent,
-      journalHidden:document.getElementById("journal-line").hidden};
+      href:document.getElementById("journal-link").getAttribute("href")};
   })()`);
   check(
     "SV4 a survey deep link restores ticked, resting on the completed track, silently",
-    sv4.checked && sv4.vertices > 10 && /(^|&)survey(&|$)/.test(sv4.hash.slice(1)) && sv4.status === "" && !sv4.journalHidden,
+    sv4.checked && sv4.vertices > 10 && /(^|&)survey(&|$)/.test(sv4.hash.slice(1)) && sv4.status === "" &&
+      sv4.href === "/reading-room/" + sv4.hash,
     JSON.stringify(sv4),
   );
 
@@ -201,8 +212,9 @@ export async function run(ctx) {
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(1500);
 
-  // SV7: the journal pointer is a real pointer: following the caption link lands in
-  // the Reading Room on THIS world's journal at the survey rest.
+  // SV7: the journal pointer is a real pointer: following the Press's journal
+  // button (#270 ruling 2; the caption line it replaced carried this same check)
+  // lands in the Reading Room on THIS world's journal at the survey rest.
   const sv7href = await evaluate(`document.getElementById("journal-link").getAttribute("href")`);
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${sv7href}` });
   const sv7up = (await room.boot()) && (await room.settled());
@@ -211,7 +223,7 @@ export async function run(ctx) {
         return{seed:window.__vellumReadingRoomState().seed,chamber:a?a.chamber:"",t:a?a.t:-1};})()`)
     : { seed: -1, chamber: "", t: -1 };
   check(
-    "SV7 the caption's journal link opens this world's journal in the room, at the survey rest",
+    "SV7 the journal button opens this world's journal in the room, at the survey rest",
     sv7up && sv7.seed === 42 && sv7.chamber === "survey" && sv7.t === 1,
     JSON.stringify({ sv7href, sv7up, sv7 }),
   );

@@ -22,8 +22,7 @@ export const versoEl = $("verso");
 export const versoBtn = $<HTMLButtonElement>("verso-turn");
 export const agesChk = $<HTMLInputElement>("ages"); // #321: the survey ink toggle (label `survey`; the id stays for the smallest diff)
 export const orderLink = $<HTMLAnchorElement>("order-plates"); // #133: "Take to the Print Room", href kept current in draw()
-export const journalLine = $("journal-line"); // #321 decision 3: the caption's quiet pointer to the journal
-export const journalLink = $<HTMLAnchorElement>("journal-link"); // its href, kept current beside the hash write
+export const journalLink = $<HTMLAnchorElement>("journal-link"); // #270 ruling 2: the always-visible journal button; href kept current beside the hash write
 
 // #183: the controls readHash/writeHash (hash-sync.ts) mirror to and from location.hash.
 export const hashControls = { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider };
