@@ -10,6 +10,10 @@ import { fileURLToPath } from "node:url";
  * This sweep finds every :hover rule that rotates and requires its selector to
  * be on the measured allowlist of surfaces that really go somewhere. Adding a
  * new tip means either making it navigate or consciously extending the list.
+ *
+ * The file also guards what the tip COSTS. It needs a block box, so a tipping
+ * link is an inline-block, and that changes where a wrapped entry's list marker
+ * sits (#356). Same gesture, second contract.
  */
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
@@ -74,30 +78,54 @@ test("the footnote marks go to the glossary, so they tip, at the wordmark's numb
   );
 });
 
+/** Every declaration a selector finally wins, merged in source order. Reading
+ *  only the FIRST matching rule would miss a later override, and would go red on
+ *  the behavior-preserving split of one declaration into its own rule. Flat, like
+ *  hoverTipsIn above: a rule nested in @media counts as unconditional, which errs
+ *  toward reporting an override rather than missing one. */
+const settled = (css: string, selector: string): Readonly<Record<string, string>> => {
+  const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const out: Record<string, string> = {};
+  for (const m of bare.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const selectors = m[1].split(",").map((s) => s.trim().replace(/\s+/g, " "));
+    if (!selectors.includes(selector)) continue;
+    for (const declaration of m[2].split(";")) {
+      const [prop, ...value] = declaration.split(":");
+      if (value.length) out[prop.trim()] = value.join(":").trim();
+    }
+  }
+  return out;
+};
+
 /**
  * The tip has a cost, and this is it (#356). A slip is an inline-block so it can
  * carry the transform, and an inline-block takes its baseline from its LAST line
- * box: let one wrap and its list marker drops beside the second line. At 320px
- * three of the FAQ's five entries wrap on the FULLY LOADED webfont, so this is
- * the steady state a narrow-phone reader sees on every visit, not a first-paint
- * flash. vertical-align: top pins the marker back to the first line.
+ * box: let one wrap and its list marker drops beside the second line, measured at
+ * 26.00px down. At 320 to 330px three of the FAQ's five entries wrap even on the
+ * fully loaded webfont, so in that band it is the steady state rather than a
+ * first-paint flash; from 335 to 360 only the fallback paint wraps.
+ * vertical-align: top pins the marker back to the first line.
  *
  * No structural test can see this: nothing overflows (scrollWidth equals
  * clientWidth), and a ::marker is not reachable from the DOM, so the bullet's
- * position only exists in paint. That is why the rule is guarded as text here.
+ * position only exists in paint. That is why the rule is guarded as text here,
+ * and why the fix shipped with a rendered measurement rather than a green suite.
  *
  * Scoped to the FAQ because that is the file #356 fixes. public/glossary/index.css
- * carries the identical pair and is fixed on #353's branch; once both are on main
- * this should become a sweep over AUTHORED_CSS for `.toc a` rules that set
- * display: inline-block without vertical-align.
+ * carries the identical pair and takes the same fix on #353 (PR #354). #358 tracks
+ * folding both into one sweep over AUTHORED_CSS once they are on main together;
+ * until then this guard is shaped like the instance, not the class.
  */
 test("a wrapped TOC slip keeps its list marker on the first line (#356)", () => {
-  const css = read("public/faq/index.css");
-  const rule = /\.toc a\s*\{[^}]*display:\s*inline-block[^}]*\}/.exec(css);
-  assert.ok(rule, "the FAQ's .toc a is no longer an inline-block; re-check this guard's premise");
-  assert.match(
-    rule[0],
-    /vertical-align:\s*top/,
+  const decls = settled(read("public/faq/index.css"), ".toc a");
+  assert.equal(
+    decls["display"],
+    "inline-block",
+    "the FAQ's .toc a is no longer an inline-block; re-check this guard's premise",
+  );
+  assert.equal(
+    decls["vertical-align"],
+    "top",
     "an inline-block slip takes its baseline from its last line box, so a wrapped " +
       "entry drops its bullet to line two; vertical-align: top pins it to the first",
   );
