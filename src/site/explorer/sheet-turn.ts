@@ -30,26 +30,27 @@ export interface TurnDecision {
   usesWorker: boolean;
   /** A chart is already on screen to turn away from. */
   hasChart: boolean;
-  /** The chronicle CHAMBER holds the sheet (#220: the fused instrument rests in its
-   *  ages half, whose per-glyph mutations cannot ride a turn; a survey-chamber rest
-   *  keeps the turn, the voyage's pre-fusion behaviour). */
-  chronicle: boolean;
   /** #116: the sheet is flipped to its verso (the flip owns the sheet, not the turn). */
   flipped?: boolean;
 }
+// #321 deleted the `chronicle` member: the Explorer's only armed state is the static
+// survey track, a DOM overlay with no per-glyph mutations, so the style turn works
+// armed (resolving #153). Do not re-add a suppression term without a state that
+// genuinely cannot ride a turn; the sheet-turn unit test pins that a stale
+// `chronicle: true` no longer suppresses.
 
 /**
  * Whether this draw should turn the sheet rather than settle. A style change over a
  * live chart turns; everything else (a new world, reduced motion, the worker
- * fallback, the first draw, or scrub mode) takes today's instant/settle path.
+ * fallback, or the first draw) takes today's instant/settle path.
  * A style change while the sheet is flipped to its verso (#116) rebuilds the verso
  * in place instead of turning: the turn and the flip both drive #sheet-inner's
  * rotateY, so they must never both own it.
- * @param {{isTurn:boolean, reduceMotion:boolean, usesWorker:boolean, hasChart:boolean, chronicle:boolean, flipped?:boolean}} s
+ * @param {{isTurn:boolean, reduceMotion:boolean, usesWorker:boolean, hasChart:boolean, flipped?:boolean}} s
  * @returns {boolean}
  */
 export function shouldTurn(s: TurnDecision): boolean {
-  return !!(s.isTurn && !s.reduceMotion && s.usesWorker && s.hasChart && !s.chronicle && !s.flipped);
+  return !!(s.isTurn && !s.reduceMotion && s.usesWorker && s.hasChart && !s.flipped);
 }
 
 // #131: the turn's duration + easing come from /motion.css (the single timing source).

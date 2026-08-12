@@ -1,7 +1,8 @@
 // The #192 address grammar: the live-state keys of the Explorer hash, kept pure and
 // DOM-free so they are unit-tested in isolation (the `camera.ts` pattern); the live
 // plumbing lives in `readHash`/`writeHash` in `src/site/explorer/hash-sync.ts` and the
-// conductor, proven by the e2e suite-address. Ratified vocabulary (the 2026-07-26
+// conductor, proven by the e2e suite-survey (Explorer side, since #321) and the
+// room-hosted RA suite. Ratified vocabulary (the 2026-07-26
 // comment on #192): two MUTUALLY EXCLUSIVE keys, a bare `survey` flag (the voyage at
 // rest on its completed track) and `year=N` (the chronicle wound to in-world year N).
 // The writer emits exactly one of them, or neither; there is no sentinel year. Under
@@ -38,6 +39,21 @@ export function emitLive(params: URLSearchParams, live: Live | null | undefined)
 
 export function finalizeHash(params: URLSearchParams): string {
   return params.toString().replace(/(^|&)survey=(?=&|$)/, "$1survey");
+}
+
+// #321: the time forward. An Explorer link carrying a valid `year=N` belongs to the
+// Reading Room now (the room keeps TIME, the epic's ratified division), so the boot
+// forwards it there BEFORE any draw, hash verbatim (decision 2, 2026-08-11: the room
+// reads the same recipe keys and its boundary validation ignores what it cannot use,
+// so nothing is stripped). Validated exactly as parseLive does: a malformed year, the
+// bare survey flag, or the nonsensical both-keys set all stay in the Explorer, which
+// is today's behavior. Pure, so the redirect decision is unit-testable.
+export function forwardTarget(hash: string): string | null {
+  const raw = hash.startsWith("#") ? hash.slice(1) : hash;
+  const live = parseLive(new URLSearchParams(raw));
+  // The original string rides through untouched (never re-serialized), so the room
+  // receives byte-for-byte what the link carried.
+  return live?.kind === "year" ? "/reading-room/#" + raw : null;
 }
 
 // What the writer should say right now. Reads the CHECKBOX first, not engine-session

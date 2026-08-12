@@ -25,19 +25,8 @@ interface ControlsDeps {
   coastSlider: HTMLInputElement;
   drawBtn: HTMLElement;
   randomBtn: HTMLElement;
-  scrubPlayBtn: HTMLElement;
-  scrubRangeEl: HTMLElement;
   touched: TouchedGates;
   draw: (opts?: { quiet?: boolean; turn?: boolean }) => void;
-  /** #192: the conductor's one hash writer; the scrubber's release syncs the year key. */
-  syncHash: () => void;
-  /** The engine's instrument controls (#54, fused at #220): Play/Pause and the bar. */
-  togglePlay: () => void;
-  onManualScrub: () => void;
-  /** #220: the seam detent governs POINTER drags only, so the engine needs to know when
-   *  one is live; a keyboard step (input with no pointer down) crosses freely. */
-  agesDragStart: () => void;
-  agesDragEnd: () => void;
   /** #53 doc-level dismiss pair: Escape or a click/tap off any mark closes a pinned card. */
   onDocKeydown: (e: KeyboardEvent) => void;
   onDocClick: (e: MouseEvent) => void;
@@ -108,19 +97,10 @@ export function wireControls(deps: ControlsDeps): void {
     draw();
   });
 
-  // The ages instrument's controls (#54, fused at #220): Play/Pause runs the story; a
-  // manual input pauses Play. The pointer pair brackets a drag so the engine's seam
-  // detent knows a continuous gesture from a discrete keyboard step (pointercancel
-  // counts as a release, or an interrupted touch drag would leave the detent armed).
-  // #192: the hash records the rest on RELEASE (change), never per input frame, so a
-  // drag is one replaceState, not hundreds; Play's parks reach the hash through the
-  // engine's onPark seam (the engine moves the bar programmatically, no events).
-  deps.scrubPlayBtn.addEventListener("click", deps.togglePlay);
-  deps.scrubRangeEl.addEventListener("input", deps.onManualScrub);
-  deps.scrubRangeEl.addEventListener("change", deps.syncHash);
-  deps.scrubRangeEl.addEventListener("pointerdown", deps.agesDragStart);
-  deps.scrubRangeEl.addEventListener("pointerup", deps.agesDragEnd);
-  deps.scrubRangeEl.addEventListener("pointercancel", deps.agesDragEnd);
+  // #321: the Play/bar/detent wiring left with the scrubber panel. The Explorer is
+  // static (time lives in the Reading Room), so the one instrument control that
+  // remains is the survey checkbox, wired by the conductor (it arbitrates the
+  // camera reset ceremony, so it is not plumbing).
 
   // Living Chart overlay (#53): the doc-level dismiss pair, added once; both read the
   // engine's current overlay so they stay correct across redraws.

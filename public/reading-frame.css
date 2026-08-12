@@ -34,6 +34,21 @@
 .rf-reading { margin-top: 0.8rem; }
 .rf-ages[hidden], .rf-log[hidden] { display: none; }
 
+/* #321 the arrival ceremony (ratified by Alex 2026-08-11, candidate C of the
+   out/321-unfurl variants): the reading column unrolls ONCE per visit, staged, the
+   instrument at the full unfurl grade and the journal one --paper-quick beat behind
+   (the #170 staggered idiom). Keyed on a HOST-applied class, never on [hidden]: the
+   engine drives the panel's hidden flag on every counter read and dice roll (the same
+   mechanism that forced #318's colophon to mount as the panel's sibling), display:none
+   terminates a CSS animation, and restoring display starts it AFRESH, so a
+   [hidden]-gated rule would replay the reveal as a flash on every read. The room's
+   conductor adds .rf-arrival on the FIRST successful settle only and removes it when
+   the journal lands, which is what makes later hidden toggles style-inert. Collapses
+   via motion.css's universal reduced-motion block. */
+.rf-arrival .rf-instrument, .rf-arrival .rf-log { transform-origin: top center; }
+.rf-arrival .rf-instrument { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) both; }
+.rf-arrival .rf-log { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) var(--paper-quick) both; }
+
 /* The instrument slot (#220: the fused ages bar, Play, and the readout; the bar's
    two-chamber dressing is the engine's .ages-range in /living-chart.css).
    The row WRAPS, and the slider is allowed to shrink. Both halves are load-bearing and

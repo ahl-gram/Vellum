@@ -38,16 +38,12 @@ import { run as runZoom } from "./e2e/suite-zoom.mjs";
 import { run as runZoomGestures } from "./e2e/suite-zoom-gestures.mjs";
 import { run as runGlassCeremony } from "./e2e/suite-glass-ceremony.mjs";
 import { run as runCards } from "./e2e/suite-cards.mjs";
-import { run as runScrubber } from "./e2e/suite-scrubber.mjs";
-import { run as runVoyage } from "./e2e/suite-voyage.mjs";
-import { run as runVoyageVerso } from "./e2e/suite-voyage-verso.mjs";
-import { run as runVoyageRoute } from "./e2e/suite-voyage-route.mjs";
 import { run as runHealth } from "./e2e/suite-health.mjs";
 import { run as runFallback } from "./e2e/suite-fallback.mjs";
 import { run as runHunt } from "./e2e/suite-hunt.mjs";
 import { run as runPrintRoom } from "./e2e/suite-print-room.mjs";
 import { run as runHome } from "./e2e/suite-home.mjs";
-import { run as runAddress } from "./e2e/suite-address.mjs";
+import { run as runSurvey } from "./e2e/suite-survey.mjs";
 import { run as runReadingRoom } from "./e2e/suite-reading-room.mjs";
 import { run as runRoomInstrument } from "./e2e/suite-room-instrument.mjs";
 import { run as runRoomInk } from "./e2e/suite-room-ink.mjs";
@@ -127,12 +123,10 @@ async function main() {
   // same base (redraft off, camera home) before cards.
   await runGlassCeremony(ctx);
   await runCards(ctx);
-  await runScrubber(ctx);
-  // Voyage split into core -> verso bleed-through -> real routes, run in that order:
-  // core establishes the voyage session/base the other two inherit; route restores clean.
-  await runVoyage(ctx);
-  await runVoyageVerso(ctx);
-  await runVoyageRoute(ctx);
+  // #321: the Explorer-hosted live-animation suites (scrubber, voyage, voyage-verso,
+  // voyage-route, address) retired here with the wiring they exercised; their (a)-class
+  // checks live on room-hosted in the RS/RW/RV/RA suites (#320's inventory, enumerated
+  // in the #321 PR body), and the static Explorer's own contract is suite-survey below.
   await runHealth(ctx);
   await runFallback(ctx);
   await runHunt(ctx);
@@ -143,12 +137,13 @@ async function main() {
   // The cartouche hero (#289): the homepage's seed form and its real navigation
   // into the Explorer; self-scoped like the hunt and the Print Room.
   await runHome(ctx);
-  // The Address (#192): survey/year deep links restore the armed instruments;
-  // self-scoped, and last because every check is its own fresh navigation.
-  await runAddress(ctx);
+  // The Survey Ink (#321): the static Explorer's contract (the cut, the 1:1 flag,
+  // the year=N forward, the verso mirror, the journal pointer). Self-scoped fresh
+  // navigations, so it slots with the other self-contained suites.
+  await runSurvey(ctx);
   // The Reading Room (#221): the epic's destination page. Self-scoped fresh
   // navigations with constructed hashes (decision 3: no Explorer entry point to
-  // follow), so it slots after the address suite whose vocabulary it consumes.
+  // follow), so it slots after the survey suite whose vocabulary it consumes.
   await runReadingRoom(ctx);
   // #320 Survey and Story Sub 3: the live-animation coverage re-hosted on the room,
   // running beside the Explorer-hosted originals rather than replacing them (Sub 4

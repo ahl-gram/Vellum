@@ -319,6 +319,93 @@ export async function run(ctx) {
     JSON.stringify({ rs23, expectedMax: 2 * Math.max(1, sm2.present - sm2.minFounded), expectedCount: sm2.count, present: sm2.present }),
   );
 
+  // RS26 (S11's successor; #321, ratified by Alex 2026-08-11, candidate C of the
+  // out/321-unfurl variants): the room's reading column plays the arrival unfurl ONCE
+  // per visit, staged: the instrument at the full grade, the journal one --paper-quick
+  // beat (180ms) behind. The ceremony is transient BY DESIGN (the conductor removes
+  // the class once the journal lands, so the engine's hidden toggles cannot replay it
+  // as a flash), so this probes from settle for the class while it is live and reads
+  // the computed animations at that moment, never after the fact.
+  const arrivedRoom = await room.goto("#seed=42&style=antique&legend=1");
+  let rs26 = null;
+  for (let i = 0; i < 40; i++) {
+    const s = await evaluate(`(()=>{const root=document.querySelector(".rf");
+      const inst=document.querySelector(".rf-instrument");const log=document.querySelector(".rf-log");
+      return{cls:root.classList.contains("rf-arrival"),
+        instAnim:getComputedStyle(inst).animationName,instDelay:getComputedStyle(inst).animationDelay,
+        logAnim:getComputedStyle(log).animationName,logDelay:getComputedStyle(log).animationDelay};})()`);
+    if (s.cls) { rs26 = s; break; }
+    await sleep(30);
+  }
+  check(
+    "RS26 the arrival unfurl plays, staged: instrument and journal wear paperUnfurl, the journal one beat behind (S11's room successor)",
+    arrivedRoom && !!rs26 && rs26.instAnim === "paperUnfurl" && rs26.instDelay === "0s" &&
+      rs26.logAnim === "paperUnfurl" && rs26.logDelay === "0.18s",
+    JSON.stringify({ arrivedRoom, rs26 }),
+  );
+
+  // RS27: the ceremony is FIRST arrival only, and the removal (not the [hidden] flag)
+  // is what holds that: display:none terminates a CSS animation and restoring display
+  // starts it AFRESH, and the engine drives the panel's hidden flag on every counter
+  // read, so a class left in place would replay the unfurl on every dice roll. Wait
+  // for the ceremony to retire, run a counter read, assert no unfurl re-applies.
+  let rs27clear = false;
+  for (let i = 0; i < 60; i++) {
+    const c = await evaluate(`document.querySelector(".rf").classList.contains("rf-arrival")`);
+    if (!c) { rs27clear = true; break; }
+    await sleep(50);
+  }
+  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="7";c.querySelector(".rr-read").click();})()`);
+  let rs27 = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,
+        status:(document.querySelector(".rf-status")||{}).textContent,
+        cls:document.querySelector(".rf").classList.contains("rf-arrival"),
+        anim:getComputedStyle(document.querySelector(".rf-instrument")).animationName};})()`);
+    } catch {}
+    if (s && s.status === "" && s.seed === 7) { rs27 = s; break; }
+    await sleep(50);
+  }
+  check(
+    "RS27 the ceremony never replays: a counter read re-arms the panel with no unfurl (the hidden-toggle flash trap, held off)",
+    rs27clear && !!rs27 && rs27.cls === false && rs27.anim === "none",
+    JSON.stringify({ rs27clear, rs27 }),
+  );
+
+  // RS28 (pr-skeptic finding 4a): a counter read INSIDE the ceremony window. The read
+  // hides the panel mid-unfurl, which CANCELS the animations (display:none terminates
+  // them; end never fires), so a removal keyed on animationend alone leaves the class
+  // in place and the next unhide replays the whole unfurl. The fix retires the class
+  // on end OR cancel, whichever empties the column of running unfurls: by the time the
+  // read's draw settles, the class must be gone and nothing unfurling.
+  const arrivedAgain = await room.goto("#seed=42&style=antique&legend=1");
+  let rs28armed = false;
+  for (let i = 0; i < 40; i++) {
+    if (await evaluate(`document.querySelector(".rf").classList.contains("rf-arrival")`)) { rs28armed = true; break; }
+    await sleep(25);
+  }
+  // Strike while the ceremony is in flight: the read tears the panel down mid-unfurl.
+  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="9";c.querySelector(".rr-read").click();})()`);
+  let rs28 = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try {
+      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,
+        status:(document.querySelector(".rf-status")||{}).textContent,
+        cls:document.querySelector(".rf").classList.contains("rf-arrival"),
+        anim:getComputedStyle(document.querySelector(".rf-instrument")).animationName};})()`);
+    } catch {}
+    if (s && s.status === "" && s.seed === 9) { rs28 = s; break; }
+    await sleep(50);
+  }
+  check(
+    "RS28 a counter read mid-ceremony cancels it cleanly: the class retires on cancel, no replay on the re-arm",
+    arrivedAgain && rs28armed && !!rs28 && rs28.cls === false && rs28.anim === "none",
+    JSON.stringify({ arrivedAgain, rs28armed, rs28 }),
+  );
+
   gate.check("RS24 the room instrument run is clean (no console errors, no new 4xx)");
 }
 

@@ -289,70 +289,18 @@ input[type="number"] { width: 8.5rem; }
    .pc-*, the scrub inert state, the #155 ink-in, .voyage-overlay/.voyage-track and
    the ship/rider marks) moved to the SHARED /living-chart.css at #302, linked by
    every page that mounts the engine. This page keeps only its own furniture: the
-   panels below, the Glass, the verso, the arrival ceremony. The #map mount carries
+   Glass, the verso, the arrival ceremony, the caption lines. The #map mount carries
    class="living-chart" (the #302 host contract) so the shared ink-in rules key on it. */
 
-/* The ages instrument panel (#54, #93; fused at #220). One bar (the survey half then
-   the ages half, dressed by the engine's .ages-range rules in /living-chart.css) over
-   ONE journal: the surveyor's dated prologue (li.prologue, the voice distinction) then
-   the chronicler's annals. In the ages chamber the sweep shows and hides the REAL
-   baked settlement glyphs by year (src/site/living-chart/chronicle.ts), so the map
-   keeps its castles, towns, and labels; the journal below narrates the story as text.
-   The overlay's inert-hits state and the #155 ink-in ceremony are the engine's
-   dressing, in /living-chart.css. */
-.scrubber[hidden] { display: none; }
-.scrubber { max-width: 1100px; margin: 0.8rem auto 0;
-  background: var(--parchment-panel); border: 1px solid var(--line-tan); border-radius: 6px;
-  padding: 0.8rem 1rem; transform-origin: top center; }
-/* #128: the panel unrolls open from its top edge when the instrument turns on. It has
-   no positioning transform of its own, so the unfurl (self-perspective in the keyframe)
-   rides the panel directly; no wrapper. Collapses via the shared reduced-motion block. */
-.scrubber:not([hidden]) { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) both; }
-/* The row WRAPS (#219's 320px lesson, measured again for #220): a range input's
-   intrinsic width is ~129px and a flex item refuses to shrink below min-content, so on
-   a phone the un-wrapped row overflowed the page sideways. Wrapping instead drops the
-   readout to its own line and lets the bar grow to ~230px, which also keeps the seam
-   detent's escape band a real gesture there. */
-.scrub-controls { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
-.scrub-controls #scrub-play { min-width: 5.2rem; }
-.scrub-controls input[type="range"] { flex: 1; }
-.scrub-year { font-style: italic; color: var(--ink-brown);
-  font-variant-numeric: tabular-nums; min-width: 5.6rem; text-align: right; }
-/* The surveyor's signature line above the journal (#121's sig, now the one journal's). */
-.voyage-log-sig { margin: 0.7rem 0 0.5rem; font-style: italic; color: var(--ink-brown);
-  border-bottom: 1px solid var(--line-faint); padding-bottom: 0.5rem; }
-.voyage-log-sig:empty { display: none; }
-/* #93 Part 2's intent, kept under #220: every entry shows at once. The fused journal
-   (14 chronicle events plus the 19-24 prologue rows #185 measured) outgrew the old
-   32rem cap, so it FLOWS like the reading frame's ratified log (2026-07-27): bounded
-   by construction, the page scroll owns it, never a nested scroller. */
-.chronicle-strip { list-style: none; margin: 0 0 0; padding: 0; }
-/* #128: a row that has come to pass brightens AND slides a hair to the right, like an
-   entry inked into the ledger as its moment arrives. #220 collapsed the two producers'
-   old class pair (the chronicle's `past`, the margin log's `logged`) onto `inked`. */
-.chronicle-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
-  border-bottom: 1px solid var(--line-faint); opacity: 0.4;
-  transition: opacity 0.18s, transform 0.18s; }
-.chronicle-strip li.inked { opacity: 1; transform: translateX(2px); }
-/* The voice handoff (#220's Overture), dressed as a manuscript (#312, candidate D of
-   the 2026-07-28 contact sheet): the surveyor writes italic in warm walnut ink behind
-   a logbook margin rule, the days of the voyage in his unbolded gutter; the chronicler
-   writes upright in darker iron-gall under his own heading, years bold in the gutter;
-   each hand's first line opens with an initial. */
-.chronicle-strip li.prologue { border-left: 3px solid var(--line-tan); padding-left: 0.7rem; }
-.chronicle-strip li.prologue .cr-text { font-style: italic; color: var(--ink-surveyor); }
-.chronicle-strip li.prologue .cr-year { font-weight: 400; font-style: italic; color: var(--ink-surveyor-faded); }
-/* The chronicler's heading li never dims: it is furniture, not an entry to reveal. */
-.chronicle-strip li.annals-head { display: block; opacity: 1;
-  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  letter-spacing: 0.05em; color: var(--ink-brown); padding: 0.55rem 0 0.35rem; }
-.chronicle-strip .cr-dc { float: left; font-style: normal; color: var(--ink-dark);
-  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  font-size: 2.1em; line-height: 0.8; margin: 0.08em 0.12em 0 0; }
-/* "day 105" runs wider than a bare year, so the shared column grew from 3rem (#312). */
-.chronicle-strip .cr-year { flex: 0 0 3.6rem; text-align: right;
-  font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
-.chronicle-strip .cr-text { color: var(--ink-annals); }
+/* #321: the ages instrument panel and its journal left this page entirely (the
+   Explorer keeps SPACE, the Reading Room keeps TIME; the panel dressing lives on in
+   /reading-frame.css, worn by whatever page mounts the frame). What remains of the
+   instrument here is the survey checkbox, plain chart furniture beside `arms`, and
+   the caption's quiet journal pointer below. */
+/* #321 decision 3: the journal-line pointer under the caption. It wears the caption's
+   own dressing (the .caption rule below); only the link needs its ink stated, since
+   the shell's default link blue would shout on the parchment. */
+.journal-line a { color: var(--ink-brown); text-underline-offset: 2px; }
 .caption { text-align: center; font-style: italic; color: var(--ink-brown);
   padding-top: 0.6rem; }
 footer { margin-top: 3rem; }
