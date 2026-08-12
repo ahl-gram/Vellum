@@ -41,9 +41,14 @@ function place(mark: HTMLElement, note: HTMLElement): void {
 export function wireFootnotes(): void {
   // A pre-popover engine keeps working marks: they stay plain glossary links.
   if (!("showPopover" in HTMLElement.prototype)) return;
+  // Touch-primary means hover:none AND pointer:coarse. A bare (hover: none)
+  // over-matches environments with NO pointer at all (linux headless CI reports
+  // hover:none with pointer:none), which would mute the focus path exactly
+  // where a keyboard user needs it; the zoom-keys rule in /explorer/index.css
+  // hit the same trap (pinned by e2e G1), and CI caught this one as BR4/BR5.
   // Queried at event time, not captured at wire time, so a device-mode flip (or
   // the e2e's emulation) is honored without a reload.
-  const hoverFine = (): boolean => !window.matchMedia("(hover: none)").matches;
+  const touchPrimary = (): boolean => window.matchMedia("(hover: none) and (pointer: coarse)").matches;
   for (const { mark, note } of pairs()) {
     const show = (): void => {
       if (note.matches(":popover-open")) return;
@@ -54,13 +59,13 @@ export function wireFootnotes(): void {
       if (note.matches(":popover-open")) note.hidePopover();
     };
     // A tap fires the compat mouseenter and focus BEFORE its click, so on a
-    // touch device these must stand down or the click's toggle inverts (the
-    // plate-reader's off-by-one, pinned by e2e BR6's real taps). Hover and
-    // keyboard focus keep the note on fine-pointer devices.
-    mark.addEventListener("mouseenter", () => { if (hoverFine()) show(); });
-    mark.addEventListener("mouseleave", () => { if (hoverFine()) hide(); });
-    mark.addEventListener("focus", () => { if (hoverFine()) show(); });
-    mark.addEventListener("blur", () => { if (hoverFine()) hide(); });
+    // touch-primary device these must stand down or the click's toggle inverts
+    // (the plate-reader's off-by-one, pinned by e2e BR6's real taps). Hover and
+    // keyboard focus keep the note everywhere else.
+    mark.addEventListener("mouseenter", () => { if (!touchPrimary()) show(); });
+    mark.addEventListener("mouseleave", () => { if (!touchPrimary()) hide(); });
+    mark.addEventListener("focus", () => { if (!touchPrimary()) show(); });
+    mark.addEventListener("blur", () => { if (!touchPrimary()) hide(); });
     // The closing half of a tap never reaches the click handler as "open": the
     // tap's own pointer-down light-dismisses an auto popover first. Record that
     // close SYNCHRONOUSLY (beforetoggle; the toggle event is queued async and
@@ -71,7 +76,7 @@ export function wireFootnotes(): void {
       if ((ev as ToggleEvent).newState === "closed") closedAt = performance.now();
     });
     mark.addEventListener("click", (e) => {
-      if (hoverFine()) return; // fine pointer: the click follows the link
+      if (!touchPrimary()) return; // not touch-primary: the click follows the link
       e.preventDefault();
       if (note.matches(":popover-open")) hide();
       else if (performance.now() - closedAt > 400) show();
