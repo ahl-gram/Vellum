@@ -64,9 +64,10 @@ test("#364 the wipe runs BEFORE the append, and asks the MOUNT for the nodes", a
   // The `ask:` entry is the other half: it proves the query was addressed to the mount, on
   // a page with two chart frames a `document`-scoped query would strip the OTHER frame's
   // overlay. That mutation reds HERE and only here, though it reds as a throw rather than
-  // as this assertion: the shim's `document` stand-in answers no queries at all
-  // (element-shim.ts installs three factory methods and nothing else), so a build that asks
-  // it fails at the call. Teaching that stand-in to answer would buy a tidier message and
+  // as this assertion: the DOCUMENT stand-in that element-shim.ts's installShim() puts on
+  // globalThis carries three factory methods and nothing else, so a build that asks IT
+  // fails at the call. (The shim's element class does answer queries, with null and empty;
+  // it is only the document object that answers none.) Teaching that stand-in to answer would buy a tidier message and
   // nothing else, so it stays as it is and this comment says which red to expect.
   assert.deepEqual(
     mount.ledger,
