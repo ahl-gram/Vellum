@@ -216,3 +216,152 @@ test("the daylight wash: every sheet is lit from the top and dims as it runs on 
   assert.ok(dark > -1, "the body wash dims the foot of the sheet");
   assert.ok(light < dark, "the light wash paints above the dark one");
 });
+
+/**
+ * #367 The sheet's lift. `0 12px 34px rgb(from var(--chart-ink) r g b / ...)` was written
+ * out SEVEN times across five sheets with no token behind it, so the depth every chart
+ * rests at could only be changed in seven places at once. It is one named value now, and
+ * these guards keep it that way.
+ *
+ * The value was ratified at 0.4 (Alex, 2026-08-12), deeper than the old 0.2 on purpose. An
+ * armed Explorer had been showing a DOUBLE of the old shadow, because the id-strength
+ * `#map svg` rule dressed the survey overlay as well as the chart beneath it, and the
+ * doubling is what he liked. Measured before the change: two coincident 0.2 shadows read as
+ * a single 0.385 (rms residual 1.08 luminance units over the 25px falloff band), and 0.4 is
+ * that number rounded to something a stylesheet can own.
+ */
+const SHEET_SHADOW_GEOMETRY = "0 12px 34px";
+
+test("BaseLayout declares --sheet-shadow, the one depth every sheet rests at (#367)", () => {
+  assert.match(
+    layoutStyle(),
+    /--sheet-shadow:\s*0 12px 34px rgb\(from var\(--chart-ink\) r g b \/ 0\.4\)/,
+    "the layout style should declare --sheet-shadow at the ratified 0.4",
+  );
+});
+
+test("the sheet shadow is declared once and consumed as a var: no raw geometry survives (#367)", () => {
+  for (const page of AUTHORED_CSS) {
+    assert.ok(
+      !read(page).includes(SHEET_SHADOW_GEOMETRY),
+      `${page} still writes the sheet shadow out longhand; it should consume var(--sheet-shadow)`,
+    );
+  }
+  assert.equal(
+    layoutStyle().split(SHEET_SHADOW_GEOMETRY).length - 1,
+    1,
+    "the layout should carry the sheet-shadow geometry exactly once (the token declaration)",
+  );
+});
+
+/**
+ * Every host dresses the svgs in its own chart mount with one blanket rule, which is right
+ * for the chart and wrong for anything laid OVER it: the engine appends its overlays as
+ * children of that same mount, so an overlay that does not opt out paints a second copy of
+ * the sheet's shadow in exact register, and the chart silently sits deeper whenever that
+ * overlay is present. That is the #367 defect. It was reported on the Explorer's survey
+ * track and found here to affect the Reading Room's mount identically.
+ *
+ * The opt-out has to WIN, and that is the part worth guarding rather than its presence. The
+ * first attempt at this fix put `box-shadow: none` on `.voyage-overlay` in the engine's own
+ * sheet, where it is (0,1,0) against a (1,0,1) and a (0,1,1) spill: present, readable, and
+ * completely powerless. So each row below is checked for specificity, not for text.
+ */
+/** Rules as (selector, body) pairs, comments stripped FIRST. Stripping matters: a regex that
+ *  scoops up whatever precedes the selector will happily swallow a comment and count the
+ *  words in it, which inflates the specificity below and lets the very mutation this guard
+ *  exists to catch walk straight through. It did, on the first cut of this test. */
+const rulesIn = (css: string): ReadonlyArray<{ selector: string; body: string }> =>
+  [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+    .map((m) => ({ selector: m[1].trim(), body: m[2] }));
+
+/** a,b,c counted as one number; a selector LIST takes its strongest arm. */
+const specificity = (sel: string): number =>
+  Math.max(...sel.split(",").map((one) => {
+    const ids = (one.match(/#[\w-]+/g) || []).length;
+    const classes = (one.match(/[.:[][\w-]+/g) || []).length;
+    const elements = (one.replace(/[#.:[][\w-]+/g, "").match(/\b[a-z]+\b/g) || []).length;
+    return ids * 10000 + classes * 100 + elements;
+  }));
+
+const findRule = (css: string, selector: string) =>
+  rulesIn(css).find((r) => r.selector === selector);
+
+/** Every rule whose selector's LAST compound targets this overlay class. */
+const optOutsFor = (css: string, cls: string) =>
+  rulesIn(css).filter((r) => r.selector.split(",").some((s) => s.trim().endsWith(cls)));
+
+/** The attribute the renderer stamps on a chart, and nothing else carries. It is what tells
+ *  a mount's dressing apart from the overlays the engine lays on top of it. */
+const CHART_MARKER = "[data-vellum-style]";
+
+/** Every chart mount that dresses a sheet. A dated measurement of the markup, not a rule:
+ *  a NEW host that mounts the engine joins this, or it reintroduces the doubling. */
+const CHART_MOUNTS = [
+  { host: "Explorer", file: "public/explorer/index.css", mount: "#map", rule: `#map svg${CHART_MARKER}` },
+  { host: "Reading Room", file: "public/reading-frame.css", mount: ".rf-chart", rule: `.rf-chart svg${CHART_MARKER}` },
+] as const;
+
+test("each mount dresses its sheet at the house depth, via the token (#367)", () => {
+  for (const { host, file, rule } of CHART_MOUNTS) {
+    const found = findRule(read(file), rule);
+    assert.ok(found, `${host}: ${file} should carry the mount rule ${rule}`);
+    assert.match(
+      found.body,
+      /box-shadow:\s*var\(--sheet-shadow\)/,
+      `${host}: ${rule} should rest at the house depth, via the token`,
+    );
+  }
+});
+
+test("no mount dresses a BARE svg: the engine's overlays are not sheets (#367)", () => {
+  // The defect. An unqualified descendant rule catches every svg in the mount, and the
+  // engine appends its overlays as children of that same mount, so each one wore the
+  // hairline and the shadow a second time in exact register and the chart sat deeper.
+  // Qualifying the rule fixes it at the source and needs no opt-out, which matters because
+  // #302 forbids this sheet from naming the engine's classes at all.
+  // Scoped to rules INSIDE a mount. Other things legitimately rest at the sheet depth
+  // (the verso's ghost image, the Explorer's slips); they hold no engine overlays, so the
+  // qualifier would be meaningless on them. What must never happen is a mount-scoped rule
+  // reaching an svg it did not mean to dress.
+  for (const { host, file, mount } of CHART_MOUNTS) {
+    for (const { selector, body } of rulesIn(read(file))) {
+      if (!/box-shadow:\s*var\(--sheet-shadow\)/.test(body)) continue;
+      for (const arm of selector.split(",").map((s) => s.trim())) {
+        if (!arm.startsWith(mount) || !/\bsvg\b/.test(arm)) continue;
+        assert.ok(
+          arm.includes(CHART_MARKER),
+          `${host}: "${arm}" casts the sheet shadow on an svg in the mount without ` +
+            `qualifying on ${CHART_MARKER}, so it dresses the engine's overlays too ` +
+            `and the shadow doubles`,
+        );
+      }
+    }
+  }
+});
+
+test("the chart marker is real: the renderer stamps it on every committed chart (#367)", () => {
+  // Without this the guard above is satisfiable by a typo. A qualifier that matches nothing
+  // does not double the shadow, it removes it from every sheet on the site, and no
+  // structural test would notice a page that had simply gone flat.
+  for (const chart of ["chart-42-antique.svg", "chart-42-ink.svg", "chart-42-nautical.svg", "chart-42-topographic.svg"]) {
+    assert.match(
+      read(`public/charts/${chart}`).slice(0, 4000),
+      /data-vellum-style="/,
+      `${chart} should carry the data-vellum-style marker the mount rules select on`,
+    );
+  }
+});
+
+test("the engine's own sheet states no shadow it could not win (#367)", () => {
+  // The engine is host-agnostic (#302), so it has no host selector to lean on: a bare
+  // `.voyage-overlay` is (0,1,0) against the mounts' (1,0,1) and (0,1,1). A box-shadow
+  // written here would read as a fix and lose every cascade it entered, which is how the
+  // first attempt at #367 was written and why it is worth pinning.
+  const rule = findRule(read("public/living-chart.css"), ".voyage-overlay");
+  assert.ok(rule, "living-chart.css should still carry the .voyage-overlay layout rule");
+  assert.ok(
+    !/box-shadow/.test(rule.body),
+    "the engine sheet must not state a box-shadow it cannot win; the mounts own the fix",
+  );
+});

@@ -34,7 +34,7 @@ figure { margin: 0; }
 #map { position: relative; transform-origin: 0 0; }
 #map svg { width: 100%; height: auto; display: block;
   border: 1px solid var(--line-tan);
-  box-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.2); }
+  box-shadow: var(--sheet-shadow); }
 #map:not(.solved) svg { cursor: crosshair; }
 /* The win star rests still; on a LIVE solve src/site/seed-of-the-day/app.ts adds .stamp and
    it stamps in. On a solved-day reload the star is placed WITHOUT .stamp, so it sits

@@ -160,6 +160,13 @@
    (the pristine lastSvg string) stays byte-identical. The rAF sweep is JS, so its
    reduced-motion twin is the prefersReduce() gate in src/site/living-chart/voyage.ts (full
    track shown at once); there is nothing here for /motion.css to collapse. */
+/* #367: the track casts no shadow, and deliberately says nothing about one. Both hosts used
+   to dress every svg in their mount, which caught this overlay and doubled the sheet's
+   shadow; the fix is in their mount rules (now qualified to the renderer's
+   [data-vellum-style]), not an opt-out here. An opt-out here could not have worked anyway:
+   this sheet is host-agnostic (#302), so it has no host selector to lean on, and a bare
+   `.voyage-overlay` is (0,1,0) against a (1,0,1) and a (0,1,1). It would have read as a fix
+   and lost every cascade it entered. */
 .voyage-overlay { position: absolute; inset: 0; width: 100%; height: 100%;
   pointer-events: none; z-index: 3; overflow: visible; }
 .voyage-track { fill: none; stroke: var(--ink-dark); stroke-width: 3;

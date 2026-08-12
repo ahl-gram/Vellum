@@ -28,7 +28,7 @@ input[type="number"] { width: 8.5rem; }
 .preview { max-width: 1000px; margin-inline: auto; position: relative; }
 .preview svg { width: 100%; height: auto; display: block;
   border: 1px solid var(--line-tan);
-  box-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.2); }
+  box-shadow: var(--sheet-shadow); }
 /* #127 The Drafting Moment, reused: a freshly pulled proof settles onto the desk while its
    coastline draws itself in ink (src/site/print-room/app.ts sets --draw-len + the dasharray
    on the coast path via startArrival, and clears them on animationend). DOM-only styling of

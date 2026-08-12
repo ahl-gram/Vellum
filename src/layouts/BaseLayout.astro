@@ -122,6 +122,14 @@ const cardDescription = ogDescription ?? description;
   --parchment-bright: #fff7e4; /* the lit cream: hovers and the reveal */
   --parchment-deep: #e6d9b8;   /* the pressed tan: code chips */
   --line-faint: #cdbd97;       /* the softer hairline, a shade lighter than --line-tan */
+  /* #367 The sheet's lift: the one depth a chart rests at, on every page that lays one
+     down. Named here because it was seven longhand copies across five sheets before, so
+     the depth could only be changed in seven places at once. Deeper than the 0.2 those
+     copies carried: an armed Explorer had been casting a DOUBLE of the old shadow (the
+     id-strength `#map svg` rule dressed the survey overlay too), that doubling read as
+     0.385 when measured, and it was ratified as the house depth at 0.4. Anything laid
+     OVER a chart inside the mount must opt out of it; see public/living-chart.css. */
+  --sheet-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.4);
   /* The Specimen Book (#324, ratified 2026-07-30); the roster mirrors
      src/atlas/palette.ts exactly (the shell-css deepEqual). */
   --ink-annals: #3f3122;       /* the chronicler's iron-gall (journal entries, #312) */
