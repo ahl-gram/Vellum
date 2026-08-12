@@ -127,22 +127,55 @@ const authoredSheets = (): ReadonlyArray<readonly [string, string]> => [
 const withoutComments = (source: string): string =>
   source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 
-/** One css rule's fingerprint: a brace block holding an UNQUOTED HYPHENATED property
- *  whose `;`-terminated value does not begin with a quote.
+/** A brace block holding an UNQUOTED HYPHENATED property with a `;`-terminated value.
  *
- *  Every discriminator is load-bearing, and each was picked against this tree rather
- *  than in the abstract. The HYPHEN does most of the work: an unquoted hyphenated key
- *  is not legal JS or TS, so `{ t: 0.14, color: "#c3d5a1" }` in render/style.ts cannot
- *  match it, while `font-family:`, `box-shadow:` and `--ink-dark:` all do. The `;`
- *  rejects object literals, which separate with commas. The unquoted value rejects
- *  src/atlas/palette.ts's `"--ink-dark": "#4a3826"`, whose key is quoted BECAUSE the
- *  hyphen forces it. Measured 2026-08-12: across all 174 .ts/.astro files under src/
- *  this selects exactly the three real css sources and nothing else, which is why
- *  there is no hand-kept not-css exemption list here to rot.
+ *  The HYPHEN is what does the work: an unquoted hyphenated key is not legal JS or TS,
+ *  so `{ t: 0.14, color: "#c3d5a1" }` in render/style.ts cannot match, while
+ *  `font-family:`, `box-shadow:` and `--ink-dark:` all do. The key boundary
+ *  `(?:^|[\s;{])` is the second real discriminator: it rejects src/atlas/palette.ts's
+ *  `"--ink-dark": "#4a3826"`, whose key is quoted BECAUSE the hyphen forces it.
  *
- *  It only has to be right about the FILE, not about every rule in it: one matching
- *  rule puts the file on the roster, and extraction there is exact. */
-const CSS_RULE = /\{[^{}]*(?:^|[\s;{])(?:-{0,2}[a-z][a-z0-9]*(?:-[a-z0-9]+)+)\s*:\s*[^"'{};][^{};]*;/m;
+ *  The `;` terminator really does discriminate (it is what would reject a
+ *  comma-separated `{ a: 1, foo-bar: 2 }`), but be honest about its value HERE:
+ *  measured on today's tree, relaxing it to accept a comma still selects the same
+ *  three files, because the other two have already excluded every object literal in
+ *  src/. It is insurance against a future one, not a load-bearing part of the current
+ *  result. An earlier draft of this comment claimed all three discriminators were
+ *  doing work and the self-test below claimed to pin them; neither was true, and the
+ *  guard-prover weakened two of them and escaped all 1105 tests. Both now hold. */
+const HYPHENATED_DECLARATION =
+  /\{[^{}]*(?:^|[\s;{])(?:-{0,2}[a-z][a-z0-9]*(?:-[a-z0-9]+)+)\s*:\s*[^{};]*;/m;
+
+/** What makes a file authored css. A file matching ANY of these joins the roster.
+ *
+ *  The union exists because a single fingerprint was measurably blind, and blind in
+ *  the worst possible place. The first cut of this scan required a hyphenated property,
+ *  and `display` and `transform` carry no hyphen: those are the exact two properties
+ *  BOTH contracts in this file exist to police. A scoped <style> in a page whose only
+ *  declarations were `display: inline-block` and a `transform: rotate()` tip therefore
+ *  never joined the roster, and went green through all 1105 tests carrying both defects
+ *  at once. Worse, the bias ran the wrong way: the FIX (`vertical-align: top`) is
+ *  hyphenated and would have been seen, the DEFECT is not. Found by the guard-prover
+ *  on #360 before this shipped, on src/pages/faq/index.astro, which is precisely the
+ *  "any future page" case the issue was filed to prevent.
+ *
+ *  So the last two fingerprints name the two defects literally. They are narrow and
+ *  that is fine: they are a floor under the general ones, not a replacement for them.
+ *
+ *  Measured 2026-08-12 across all 174 .ts/.astro files under src/: the union selects
+ *  exactly the three real css sources and nothing else, which is why no hand-kept
+ *  not-css exemption list is needed here to rot. Each was measured alone too, and
+ *  `<style` WITHOUT its closing tag is not one of them: it also matches src/cli/main.ts,
+ *  whose --help text spells the flag `--style <style>`.
+ *
+ *  A fingerprint only has to be right about the FILE, not about every rule in it: one
+ *  hit puts the file on the roster, and extraction there is exact. */
+const CSS_FINGERPRINTS: ReadonlyArray<readonly [string, (source: string) => boolean]> = [
+  ["a <style> element", (s) => /<style[^>]*>[\s\S]*?<\/style>/.test(s)],
+  ["a hyphenated declaration", (s) => HYPHENATED_DECLARATION.test(s)],
+  ["an inline-block", (s) => /display\s*:\s*inline-block/.test(s)],
+  ["a rotate-on-hover tip", (s) => /:hover/.test(s) && /rotate\(/.test(s)],
+];
 
 /** Every file under src/ carrying authored css, found mechanically rather than listed.
  *  public/ and src/ are the whole authored-css surface: CLAUDE.md forbids .js outside
@@ -150,8 +183,15 @@ const CSS_RULE = /\{[^{}]*(?:^|[\s;{])(?:-{0,2}[a-z][a-z0-9]*(?:-[a-z0-9]+)+)\s*
 const cssBearingSources = (): string[] =>
   readdirSync(root("src"), { recursive: true, encoding: "utf8" })
     .map((entry) => `src/${entry.split(sep).join("/")}`)
-    .filter((p) => p.endsWith(".ts") || p.endsWith(".astro"))
-    .filter((p) => CSS_RULE.test(withoutComments(read(p))));
+    // .css is here for a file that does not exist yet: there are zero stylesheets
+    // under src/ today (they all live in public/). Cheaper to scan the extension now
+    // than to discover later that the one obvious way to add authored css was the
+    // one the scan did not look at.
+    .filter((p) => p.endsWith(".ts") || p.endsWith(".astro") || p.endsWith(".css"))
+    .filter((p) => {
+      const source = withoutComments(read(p));
+      return CSS_FINGERPRINTS.some(([, matches]) => matches(source));
+    });
 
 /** The surfaces that tip AND navigate (each is a link or wraps one). */
 const TIPPING_LINKS = new Set([
@@ -483,28 +523,80 @@ test("the authored roster is exactly the css-bearing sources under src/ (#360)",
   );
 });
 
-test("the css-source scan reads css, not JS wearing its shape (#360)", () => {
+/** The scan's verdict on one source, as the names of the fingerprints that hit. */
+const fingerprintsOf = (source: string): string[] =>
+  CSS_FINGERPRINTS.filter(([, matches]) => matches(withoutComments(source))).map(([name]) => name);
+
+test("the css-source scan sees css, and sees the defects it polices (#360)", () => {
   // The scan is a hand-rolled reader, and #358 shipped three escapes from one of
-  // those. These pin the discriminators, so loosening one goes red here rather than
-  // silently emptying the roster the test above compares against.
-  assert.ok(CSS_RULE.test(".toc a { font-family: serif; }"), "a hyphenated property is css");
-  assert.ok(CSS_RULE.test(":root {\n  --ink-dark: #4a3826;\n}"), "a custom property is css");
-  assert.ok(
-    !CSS_RULE.test('const STOPS = [{ t: 0.14, color: "#c3d5a1" }];'),
-    "an object literal separates with commas and quotes its values",
+  // those. Each case below is named for the fingerprint it pins, so deleting or
+  // loosening that one goes red HERE rather than silently emptying the roster the
+  // test above compares against. The first cut of this test did not do that: two of
+  // its negatives passed on the hyphen rule no matter what the other discriminators
+  // did, so the guard-prover could weaken those and escape all 1105 tests.
+  assert.deepEqual(
+    fingerprintsOf(".toc a { font-family: serif; }"),
+    ["a hyphenated declaration"],
+    "a hyphenated property is css",
   );
-  assert.ok(
-    !CSS_RULE.test('const P = { "--ink-dark": "#4a3826" };'),
-    "a hyphenated JS key must be quoted, and a quoted key is not a css property",
+  assert.deepEqual(
+    fingerprintsOf(":root {\n  --ink-dark: #4a3826;\n}"),
+    ["a hyphenated declaration"],
+    "a custom property is css",
   );
-  assert.ok(
-    !CSS_RULE.test("function f() { const a: string = b; }"),
+  assert.deepEqual(
+    fingerprintsOf('<style is:global>\n.x { color: red; }\n</style>'),
+    ["a <style> element"],
+    "a style element is css whatever its declarations say",
+  );
+
+  // The row-1 escape, pinned. Neither declaration carries a hyphen, so the general
+  // rule cannot see either, and both ARE the defects the sweeps look for.
+  assert.deepEqual(
+    fingerprintsOf(".slip { display: inline-block; }"),
+    ["an inline-block"],
+    "the bullet defect must be visible to the scan without a hyphen anywhere",
+  );
+  assert.deepEqual(
+    fingerprintsOf(".slip:hover { transform: rotate(-0.6deg); }"),
+    ["a rotate-on-hover tip"],
+    "the tip defect must be visible to the scan without a hyphen anywhere",
+  );
+
+  // Not css, by each general fingerprint's own discriminator.
+  assert.deepEqual(
+    fingerprintsOf('const P = {\n  "--ink-dark": "#4a3826",\n  "--ink-brown": "#6b5a40",\n};'),
+    [],
+    "src/atlas/palette.ts's shape: a hyphenated JS key MUST be quoted, and the key " +
+      "boundary is what rejects it, since the hyphen alone would happily match",
+  );
+  assert.deepEqual(
+    fingerprintsOf("const S = { a: 1, foo-bar: 2, b: 3 };"),
+    [],
+    "and the `;` terminator is what rejects a comma-separated one; this is the case " +
+      "that makes it more than decoration, so do not relax it to accept a comma",
+  );
+  assert.deepEqual(
+    fingerprintsOf("function f() { const a: string = b; }"),
+    [],
     "a type annotation carries no hyphen",
   );
-  assert.equal(
-    withoutComments("x\n// touch-primary: the click falls through\ny"),
-    "x\n\ny",
-    "prose in a comment wears the css shape and must not put its file on the roster",
+  assert.deepEqual(
+    fingerprintsOf("cli --style <style> writes a chart"),
+    [],
+    "help text naming a --style flag is not a <style> element; it has no closing tag",
+  );
+
+  // Comment stripping, which every fingerprint runs behind: prose wears the css shape.
+  assert.deepEqual(
+    fingerprintsOf("const x = 1;\n// touch-primary: the click falls through\n"),
+    [],
+    "a line comment must not put its file on the roster",
+  );
+  assert.deepEqual(
+    fingerprintsOf("const x = 1;\n/* a { display: inline-block; } in prose */\n"),
+    [],
+    "a block comment must not either, including one quoting css at it",
   );
   assert.match(
     withoutComments("a { background: url(https://x/y.png); }"),
