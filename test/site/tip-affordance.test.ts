@@ -74,6 +74,35 @@ test("the footnote marks go to the glossary, so they tip, at the wordmark's numb
   );
 });
 
+/**
+ * The tip has a cost, and this is it (#356). A slip is an inline-block so it can
+ * carry the transform, and an inline-block takes its baseline from its LAST line
+ * box: let one wrap and its list marker drops beside the second line. At 320px
+ * three of the FAQ's five entries wrap on the FULLY LOADED webfont, so this is
+ * the steady state a narrow-phone reader sees on every visit, not a first-paint
+ * flash. vertical-align: top pins the marker back to the first line.
+ *
+ * No structural test can see this: nothing overflows (scrollWidth equals
+ * clientWidth), and a ::marker is not reachable from the DOM, so the bullet's
+ * position only exists in paint. That is why the rule is guarded as text here.
+ *
+ * Scoped to the FAQ because that is the file #356 fixes. public/glossary/index.css
+ * carries the identical pair and is fixed on #353's branch; once both are on main
+ * this should become a sweep over AUTHORED_CSS for `.toc a` rules that set
+ * display: inline-block without vertical-align.
+ */
+test("a wrapped TOC slip keeps its list marker on the first line (#356)", () => {
+  const css = read("public/faq/index.css");
+  const rule = /\.toc a\s*\{[^}]*display:\s*inline-block[^}]*\}/.exec(css);
+  assert.ok(rule, "the FAQ's .toc a is no longer an inline-block; re-check this guard's premise");
+  assert.match(
+    rule[0],
+    /vertical-align:\s*top/,
+    "an inline-block slip takes its baseline from its last line box, so a wrapped " +
+      "entry drops its bullet to line two; vertical-align: top pins it to the first",
+  );
+});
+
 test("every hover tip belongs to a surface that goes somewhere (#289; #324 feel review)", () => {
   for (const file of AUTHORED_CSS) {
     for (const selector of hoverTipsIn(read(file))) {
