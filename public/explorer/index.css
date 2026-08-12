@@ -74,8 +74,14 @@ header { margin-bottom: 1.4rem; }
    it; caught by CI, pinned by e2e G1's rule-scoping check. */
 @media (hover: none) and (pointer: coarse), (max-width: 560px) { .zoom-keys { display: none; } }
 #map { position: relative; transform-origin: 0 0; }
-#map svg { width: 100%; height: auto; display: block;
-  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.2); }
+/* #367: qualified to `[data-vellum-style]`, which the RENDERER stamps on a chart and
+   nothing else carries. Unqualified, this dressed every svg in the mount, and the engine
+   appends its survey track as one of them, so an armed sheet wore the hairline and the
+   shadow TWICE in exact register and sat measurably deeper than a bare one (22.5 luminance
+   units at the sheet edge). Fixed here rather than by an opt-out on the overlay, because
+   the engine's dressing has one home by #302 and this sheet may not name its classes. */
+#map svg[data-vellum-style] { width: 100%; height: auto; display: block;
+  border: 1px solid var(--line-tan); box-shadow: var(--sheet-shadow); }
 
 /* #169 The redraft inset. A committed regional survey mounts INSIDE #map, positioned over the
    exact window it re-surveys, so it rides the live zoom transform with the chart and reads as
@@ -168,7 +174,7 @@ header { margin-bottom: 1.4rem; }
   backface-visibility: hidden; transform: rotateY(180deg);
 }
 .sheet-back img { width: 100%; height: auto; display: block;
-  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.2); }
+  border: 1px solid var(--line-tan); box-shadow: var(--sheet-shadow); }
 
 /* #116 The Verso. The flip REUSES #131's .sheet / #sheet-inner perspective wrapper,
    but where #131's turn is transient (it lands back on the recto re-dressed), the
@@ -197,7 +203,7 @@ header { margin-bottom: 1.4rem; }
   visibility: hidden;
   backface-visibility: hidden; transform: rotateY(180deg);
   background: var(--parchment-deep); color: var(--ink-dark);
-  border: 1px solid var(--line-tan); box-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.2);
+  border: 1px solid var(--line-tan); box-shadow: var(--sheet-shadow);
   overflow: hidden;
 }
 .sheet.flip3d #verso { visibility: visible; }

@@ -19,9 +19,13 @@
    pair the Explorer's chart and the home page's plates carry, so a chart reads as the
    same object in every room. */
 .rf-chart { position: relative; }
-.rf-chart svg { display: block; width: 100%; height: auto;
+/* #367: qualified to `[data-vellum-style]`, the attribute the RENDERER stamps on a chart.
+   Unqualified this dressed every svg in the mount, and the engine appends its survey track
+   as one of them, so a room showing the track wore the hairline and the shadow twice in
+   exact register. The Explorer's mount had the identical spill. */
+.rf-chart svg[data-vellum-style] { display: block; width: 100%; height: auto;
   border: 1px solid var(--line-tan);
-  box-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.2); }
+  box-shadow: var(--sheet-shadow); }
 
 /* The one polite line: voice from /house.css's .status role (#324; the frame's
    host JS marks the element class="rf-status status"). It reserves its height
