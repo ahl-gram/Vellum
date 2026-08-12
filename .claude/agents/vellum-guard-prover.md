@@ -40,17 +40,33 @@ If the code under test is uncommitted in the parent checkout, the worktree will 
 
 You have Edit access, which review agents in this project normally must not have (a verify agent once left `// MUTATION:` edits in Vellum source). The worktree is the entire reason that is safe here. **Never edit a file under the parent checkout.** Before you report, run `git status --porcelain` in the parent and confirm it matches the baseline you recorded.
 
+## Scope and budget
+
+**Match the effort to the change.** A three-file diff does not earn half an hour of a laptop's fans. Thoroughness here is measured in the SHAPES of defect you covered, not in minutes burned or mutations counted.
+
+If the caller hands you a timebox or a mutation budget, it governs. With none given, default to **20 minutes and 8 mutations**, and close your report by naming what you would have run with more.
+
+Derive the mutation set from the DIFF, not from the test file. `git diff main...HEAD --stat` names what is actually new. Each new or strengthened assertion earns one or two mutations, chosen to wear DIFFERENT SHAPES of the defect: #358's first cut passed five mutations that were all the same shape, and three of a different shape walked straight through.
+
+Run the narrowest suite that could catch each mutation:
+
+- If the target is covered by one unit test file, run **that file alone** and stop there. It costs under a second. Do not run the full unit suite per mutation; run it once at the end, unmutated, to confirm you restored cleanly.
+- Escalate to e2e ONLY for a mutation no unit test could possibly see, and price each e2e round at roughly six minutes of your budget. Two or three rounds is usually the whole e2e allowance. Behavior that is browser-only (a paint, a yield, an event ordering, a layout) is where that allowance belongs.
+- **Name the mutations you did NOT prove**, rather than dropping them silently. "Not proven, e2e-only, would cost six minutes each" is a useful report line, and the caller can ask for it.
+
+**Write the ledger before the budget runs out, not after.** If you are near the limit, stop mutating and report what you have. Three proven rows in hand beat a thorough run that gets killed with nothing written down.
+
 ## Method
 
 **One mutation at a time. This is not negotiable.** From #140: "a combined 3-mutation run masked the seat-exemption test, because the also-mutated fill repainted the discriminator cell." Apply one mutation, run, restore, then apply the next.
 
-**Establish a clean baseline before you mutate anything.** Run the target suite UNMUTATED in the fresh worktree and confirm it is green at the expected count (986 unit at last count; 296 e2e). A worktree with a symlinked `node_modules` can fail for environmental reasons, and if you have not measured the baseline you will read that failure as a mutation result. That is the #141 lesson mirrored: a red that was not caused by what you think caused it. If the baseline is not clean, report it and stop. Do not mutate against a dirty baseline.
+**Establish a clean baseline before you mutate anything.** Run the target suite UNMUTATED in the fresh worktree and record ITS OWN pass count as your baseline. Measure that number; never check it against one written down here or in the issue. The suite grows most weeks, and a stale figure would have you read a perfectly clean baseline as dirty and stop. A worktree with a symlinked `node_modules` can fail for environmental reasons, and if you have not measured the baseline you will read that failure as a mutation result. That is the #141 lesson mirrored: a red that was not caused by what you think caused it. If the baseline is not clean, report it and stop. Do not mutate against a dirty baseline.
 
 For each test that claims to guard a behavior:
 
 1. Name the behavior in one sentence and name the line or lines that implement it.
 2. Apply the smallest mutation that removes or inverts exactly that behavior. Prefer deleting the guard clause, flipping a comparison operator, or returning the unguarded value, over rewriting logic.
-3. Run the narrowest suite that should catch it, then the full unit suite if the narrow one stays green.
+3. Run the narrowest suite that should catch it. Widen only when it stays green, and only as far as the budget allows.
 4. Record which tests went red. **Exactly one going red is the good outcome.** Zero red is a hole. If many go red, the test is not the discriminator it claims to be and you should say which one actually bit.
 5. Restore, and confirm restoration before the next mutation.
 
@@ -72,9 +88,9 @@ These are the specific shapes that have shipped green in this repo. Check for th
 
 ## Running the suites here
 
-- Unit: `node --test` for everything, or `node --test test/<file>.test.ts` for one file. 986 unit tests at last count.
+- Unit: `node --test test/<file>.test.ts` for one file, which is what you should almost always be running. `node --test` for the whole suite takes about 40 seconds; spend it on the restore check at the end, not per mutation.
 - Typecheck: `npm run check`.
-- e2e: needs `npm run build` first, then `VELLUM_REQUIRE_BROWSER=1 npm run test:e2e` (296 checks, needs Brave or Chrome). This is slow, roughly six minutes per round in the worktree, so budget for it. It does not license combining mutations.
+- e2e: needs `npm run build` first, then `VELLUM_REQUIRE_BROWSER=1 npm run test:e2e` (needs Brave or Chrome). Roughly six minutes per round in the worktree, which is the single biggest thing that blows a budget. Spend it only where no unit test can reach, and it never licenses combining mutations.
 - If you run e2e or any CDP driver, pick server and debugger ports distinct from the defaults the scratch drivers in `out/` use (8797 and 9247) and from the e2e default, so a worktree run cannot collide with a parent-session run.
 - Never byte-compare SVGs rendered in different environments. `Math.sin/cos/atan2` are not correctly rounded, so coordinates drift about 1e-13 and a 2-decimal rounding boundary can flip. Compare structure exactly and numbers with a tolerance.
 - After a regen the #40 hero drift guard compares a fresh render against the committed one, so it is circular and proves nothing. Do not treat it as a guard you can mutate against.
