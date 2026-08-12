@@ -20,6 +20,7 @@ const read = (p: string) => readFileSync(root(p), "utf8");
 const PAGE_CSS = [
   "public/index.css",
   "public/explorer/index.css",
+  "public/explorer/broadside.css",
   "public/faq/index.css",
   "public/glossary/index.css",
   "public/print-room/index.css",

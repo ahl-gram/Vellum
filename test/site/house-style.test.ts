@@ -41,7 +41,8 @@ test("the intro role: flourish italic, ink-brown, centered (#324 decision 1)", (
 
 test("no page sheet re-binds the intro voice (#324)", () => {
   for (const page of [
-    "public/index.css", "public/explorer/index.css", "public/faq/index.css",
+    "public/index.css", "public/explorer/index.css", "public/explorer/broadside.css",
+    "public/faq/index.css",
     "public/glossary/index.css", "public/print-room/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
   ]) {
@@ -128,7 +129,10 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
   wears("src/pages/seed-of-the-day/index.astro", /<a[^>]*class="[^"]*control/, "the actions link wears the idiom");
   wears("src/pages/print-room/index.astro", /class="[^"]*desk-head archivist-head/, "the desk head is a standing head");
   wears("src/pages/print-room/index.astro", /class="[^"]*offering-field archivist-label/, "the offering field is an inline label");
-  wears("src/pages/explorer/index.astro", /class="row-label archivist-label"/, "the row labels are inline labels");
+  // #270: the Broadside promoted the Explorer's group heads from the inline tier
+  // (the old Map/Display/Actions row labels) to the standing tier: The Land / The
+  // Hand / The Press each preside over a panel, the print-room desk-head precedent.
+  wears("src/pages/explorer/index.astro", /class="panel-head archivist-head"/, "the Broadside group heads are standing heads");
   wears("src/pages/faq/index.astro", /<strong class="archivist-label">/, "the TOC heading is an inline label");
   wears("src/pages/glossary/index.astro", /<strong class="archivist-label">/, "the TOC heading is an inline label");
 });
@@ -157,7 +161,8 @@ test("the old page-local skins are gone (#324)", () => {
     "the seedrow's 2px corners joined the idiom",
   );
   for (const page of [
-    "public/explorer/index.css", "public/print-room/index.css",
+    "public/explorer/index.css", "public/explorer/broadside.css",
+    "public/print-room/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
   ]) {
     assert.ok(
@@ -173,7 +178,8 @@ test("no token value smuggled past the guards in rgb() form (#324)", async () =>
   // the quotation stays attached to its name.
   const { SITE_PALETTE } = await import("../../src/atlas/palette.ts");
   const sources = [
-    "public/index.css", "public/explorer/index.css", "public/faq/index.css",
+    "public/index.css", "public/explorer/index.css", "public/explorer/broadside.css",
+    "public/faq/index.css",
     "public/glossary/index.css", "public/print-room/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
     "public/reading-frame.css", "public/living-chart.css", "public/motion.css",
