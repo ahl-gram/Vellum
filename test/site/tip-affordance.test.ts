@@ -20,14 +20,23 @@ import { atlasDocument } from "../../src/atlas/document.ts";
  * every inline-block link mechanically, and require each one to either pin its
  * bullet or be recorded as living outside a marker-bearing list.
  *
- * Both contracts sweep the AUTHORED CSS OF THE WHOLE SITE, which since #360 means
- * public/ and src/ alike. Before it, every sweep here read a list of files under
- * public/ and three sources in src/ sat outside all of them: a tip added there
- * promised something nobody checked, and an inline-block link added there went
- * green through all 1102 tests. That mutation is what filed the issue. The roster
- * that closes it, and the scan that keeps the roster complete, are at the foot of
- * this file, because a sweep is only worth its coverage.
- */
+ * Since #360 both contracts read every authored sheet the site has, public/ and src/
+ * alike. Before it, every sweep here read a list of files under public/ and three
+ * sources in src/ sat outside all of them: a tip added there promised something
+ * nobody checked, and an inline-block link added there went green through all 1102
+ * tests. That mutation is what filed the issue. The roster that closes it, and the
+ * scan that keeps the roster complete, are at the foot of this file, because a sweep
+ * is only worth its coverage.
+ *
+ * That is coverage of FILES. Be careful not to read it as coverage of the contract:
+ * what each sweep then looks FOR is unchanged from #289 and #358, and the tip half is
+ * still shaped like `rotate(`. A hover lift written as translate alone is not a tip by
+ * this file's definition and is not swept, which is a live shape, not a hypothetical:
+ * motion.css's `.card:hover` and `.topnav a:hover` both lift with translateY and no
+ * rotate. Neither is a false affordance today (both are anchors), so nothing is broken,
+ * and widening the definition is a #289 question rather than a #360 one. Recorded here
+ * because #360 widened WHERE this file looks, and it would be easy to come away
+ * thinking it had widened what counts. */
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
@@ -35,12 +44,17 @@ const read = (p: string) => readFileSync(root(p), "utf8");
 /** Trees under public/ a generator writes, so they are gitignored: absent from a
  *  fresh clone and present after a build. The public/ walk below still skips them,
  *  because on a fresh clone there is nothing there to walk. They are no longer a gap:
- *  since #360 each one is swept at its SOURCE instead, in SRC_CSS below
- *  (public/gallery/index.css is written verbatim from GALLERY_PAGE_CSS), which is the
- *  same css and is present in every clone. Only trees that really hold css today are
- *  listed, so a future generated sheet reds the roster and someone decides about it
- *  on purpose -- and now the decision has an answer: name the source that writes it. */
-const GENERATED_CSS = ["public/gallery/"] as const;
+ *  since #360 each is swept at its SOURCE instead, and each therefore has to NAME that
+ *  source, which must be on SRC_CSS. public/gallery/index.css is written verbatim from
+ *  GALLERY_PAGE_CSS in src/cli/gallery.ts, so sweeping the source sweeps the sheet, and
+ *  the source is in every clone rather than only after a build.
+ *
+ *  The mapping is enforced below, not merely described here. Left as prose it would be
+ *  an invariant with nothing behind it: the next session could silence a red by adding
+ *  a tree prefix to this list and re-open the exact gap #360 was filed to close, since
+ *  a listed tree is skipped by the public/ walk. Adding a tree now costs naming the
+ *  src/ module that writes it, which is the decision, made on purpose. */
+const GENERATED_CSS = [["public/gallery/", "src/cli/gallery.ts"]] as const;
 
 /** Every committed hand-authored stylesheet (generated css has its own source). */
 const AUTHORED_CSS = [
@@ -69,12 +83,21 @@ const styleBlocksIn = (source: string): string =>
 /** The atlas document's css, resolved by BUILDING one (#360).
  *
  *  src/atlas/document.ts is the awkward source the issue flagged: its <style> is
- *  `${PAGE_CHROME_CSS}\n${ATLAS_SHEET_CSS}`, and PAGE_CHROME_CSS is itself a template
- *  literal interpolating `${paletteRootCss()}`. Read as TEXT it yields `${...}` markers
- *  rather than css, and PAGE_CHROME_CSS is not exported to be read as a value.
- *  Running the real function resolves every interpolation exactly, needs no export
- *  added to production code for a test's convenience, and cannot drift from what the
- *  document actually ships. The data never reaches the css, so the fixture is empty. */
+ *  `${PAGE_CHROME_CSS}\n${ATLAS_SHEET_CSS}`. Be precise about which half is awkward,
+ *  because an earlier draft of this comment was not: ATLAS_SHEET_CSS IS exported and
+ *  could simply be imported. PAGE_CHROME_CSS is the problem. It is not exported, and
+ *  it interpolates `${paletteRootCss()}`, so read as text it yields a `${...}` marker
+ *  rather than css.
+ *
+ *  Running the real function is still the better answer for BOTH halves, and not just
+ *  because it avoids adding an export for a test's convenience. Importing the two
+ *  constants would test the two constants. This tests the DOCUMENT: if a refactor
+ *  stopped including one of them in the <style>, importing it would keep sweeping css
+ *  no page ships, reporting coverage that had quietly become fictional, while this
+ *  follows the document and stops. That is the same reason the roster exists at all.
+ *
+ *  The data never reaches the css (verified: a fully populated fixture yields a
+ *  byte-identical style block), so the fixture is empty. */
 const atlasCss = (): string => {
   const plate = { key: "x", title: "x", svg: "<svg></svg>" };
   return styleBlocksIn(
@@ -508,7 +531,6 @@ test("every hover tip belongs to a surface that goes somewhere (#289; #324 feel 
   }
 });
 
-
 test("the authored roster is exactly the css-bearing sources under src/ (#360)", () => {
   // Equality, not coverage, so it bites in BOTH directions: a new authored sheet in
   // src/ (the .astro page with a scoped <style> the issue names) reds until someone
@@ -545,7 +567,7 @@ test("the css-source scan sees css, and sees the defects it polices (#360)", () 
     "a custom property is css",
   );
   assert.deepEqual(
-    fingerprintsOf('<style is:global>\n.x { color: red; }\n</style>'),
+    fingerprintsOf("<style is:global>\n.x { color: red; }\n</style>"),
     ["a <style> element"],
     "a style element is css whatever its declarations say",
   );
@@ -605,6 +627,21 @@ test("the css-source scan sees css, and sees the defects it polices (#360)", () 
   );
 });
 
+test("every generated tree names a source the sweeps actually read (#360)", () => {
+  // A tree on GENERATED_CSS is EXEMPT from the public/ walk, so without this the list
+  // is a way to opt css out of every sweep in this file by adding one string. The
+  // exemption is only honest while the tree's css is swept at its source instead.
+  const swept = new Set(SRC_CSS.map(([file]) => file));
+  for (const [tree, source] of GENERATED_CSS) {
+    assert.ok(
+      swept.has(source),
+      `${tree} is skipped by the public/ walk because ${source} is supposed to be ` +
+        `swept in its place, and ${source} is not on SRC_CSS. Either add it there or ` +
+        `stop exempting the tree; as it stands that css is in no sweep at all`,
+    );
+  }
+});
+
 test("the authored roster covers every stylesheet under public/ (#358)", () => {
   const sheets = readdirSync(root("public"), { recursive: true, encoding: "utf8" })
     .map((entry) => `public/${entry.split(sep).join("/")}`)
@@ -612,7 +649,7 @@ test("the authored roster covers every stylesheet under public/ (#358)", () => {
   for (const sheet of sheets) {
     assert.ok(
       AUTHORED_CSS.includes(sheet as (typeof AUTHORED_CSS)[number]) ||
-        GENERATED_CSS.some((tree) => sheet.startsWith(tree)),
+        GENERATED_CSS.some(([tree]) => sheet.startsWith(tree)),
       `${sheet} is on disk but not on AUTHORED_CSS, so every sweep skips it; add it, ` +
         `or add its tree to GENERATED_CSS if a generator writes it`,
     );
