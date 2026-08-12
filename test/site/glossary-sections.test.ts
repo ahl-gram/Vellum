@@ -17,6 +17,11 @@ import { fileURLToPath } from "node:url";
  *    modern numbered-homograph form. The no-duplicate-headword guard below is
  *    what makes that decision enforceable: glass and hand each earn one entry.
  *
+ * Most of these read the page's own shape rather than a list, so they keep
+ * biting as terms come and go. The one exception is the coverage test, which is
+ * deliberately a written-down spot-check: it pins the words that prompted #353,
+ * so deleting an entry cannot pass quietly.
+ *
  * The TOC guard exists because the table of contents is hand-authored while the
  * sections are not, and #353 adds seven sections at once.
  */
@@ -109,7 +114,7 @@ test("every term the voyage and the gazetteer print is documented (#353)", () =>
   const terms = withTerms().flatMap((s) => s.terms);
   for (const term of owed) {
     assert.ok(
-      terms.some((t) => t.toLowerCase().startsWith(term.toLowerCase())),
+      terms.some((t) => t.toLowerCase() === term.toLowerCase()),
       `the glossary does not document "${term}"; it prints in Vellum's own output`,
     );
   }
@@ -118,11 +123,20 @@ test("every term the voyage and the gazetteer print is documented (#353)", () =>
 test("no headword is defined twice: homographs run their senses together (#353)", () => {
   // The period convention (Smyth 1867) is one entry per headword. Two entries
   // for "Glass" would be the modern numbered-homograph form this page rejects.
-  const terms = withTerms().flatMap((s) => s.terms.map((t) => t.toLowerCase()));
-  const seen = new Set<string>();
-  for (const term of terms) {
-    assert.ok(!seen.has(term), `"${term}" is defined twice; #353 runs a headword's senses together in one entry`);
-    seen.add(term);
+  // Strip a parenthetical or comma qualifier first: "Bar (of a harbour)" and
+  // "Bar, of a river" are the numbered-homograph form decision 7 rejects, and a
+  // whole-string compare would wave both through.
+  const bare = (t: string): string => t.toLowerCase().replace(/\s*[(,].*$/, "").trim();
+  const seen = new Map<string, string>();
+  for (const term of withTerms().flatMap((s) => s.terms)) {
+    const key = bare(term);
+    const first = seen.get(key);
+    assert.ok(
+      first === undefined,
+      `"${term}" repeats the headword already defined as "${first}"; ` +
+        `#353 runs a headword's senses together in one entry rather than numbering them`,
+    );
+    seen.set(key, term);
   }
 });
 
@@ -136,5 +150,31 @@ test("the table of contents lists every section, and no section it lacks (#353)"
   }
   for (const href of linked) {
     assert.ok(ids.includes(href), `the TOC links "#${href}", which is not a section on the page`);
+  }
+});
+
+test("terms stay alphabetical inside their section (#353)", () => {
+  // The sort key drops a leading hyphen so the suffix entries (-grad, -tlan,
+  // -yama) file under their letter, which is how the culture lists already read.
+  const key = (term: string): string => term.toLowerCase().replace(/^-/, "");
+  for (const section of withTerms()) {
+    const sorted = [...section.terms].sort((a, b) => key(a).localeCompare(key(b)));
+    assert.deepEqual(
+      section.terms,
+      sorted,
+      `"${section.heading}" is out of alphabetical order; #353 keeps each section sorted`,
+    );
+  }
+});
+
+test("every term carries a definition (#353)", () => {
+  // Terms and defs alternate, so a dropped def silently orphans the headword
+  // above it. Counting per section catches the drift where it happens.
+  const bodies = source.split(/<h[23][^>]*>/).slice(1);
+  for (const body of bodies) {
+    const terms = [...body.matchAll(/<p class="term">/g)].length;
+    const defs = [...body.matchAll(/<p class="def">/g)].length;
+    if (terms === 0) continue;
+    assert.equal(defs, terms, `a section carries ${terms} terms but ${defs} definitions`);
   }
 });

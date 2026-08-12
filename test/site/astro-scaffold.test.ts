@@ -100,7 +100,7 @@ const PAGES: readonly PageSpec[] = [
     title: "The Glossary · Vellum",
     ogTitle: "The Glossary · Vellum",
     description:
-      "A glossary of the cartography, heraldry, and geography vocabulary printed on Vellum's charts, in its gazetteer, and across its realm names.",
+      "A glossary of the cartography, heraldry, seamanship, and geography vocabulary printed on Vellum's charts, in its gazetteer, its voyage journal, and across its realm names.",
     tagline: "the words on the charts",
   },
   {
