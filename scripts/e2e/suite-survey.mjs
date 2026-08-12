@@ -242,8 +242,10 @@ export async function run(ctx) {
       /(^|&)survey(&|$)/.test(sv2e.hash.slice(1)) && sv2e.status === "",
     JSON.stringify(sv2e),
   );
-  // And the untick really does clear it: with two stacked overlays this leaves one behind,
-  // on a sheet whose box is unticked and whose address carries no survey flag.
+  // And the untick really does clear it: the sheet ends bare, its box unticked and its
+  // address carrying no survey flag. Before #364 two stacked overlays left one behind here,
+  // since exitVoyage removed a single one; it removes every one now, so like SV2e above this
+  // asserts the invariant rather than reddening for the stale arm that used to break it.
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   const sv2f = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
     hash:location.hash,status:document.getElementById("status").textContent})`);

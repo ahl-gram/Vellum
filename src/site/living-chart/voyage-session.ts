@@ -59,7 +59,7 @@ export interface Session {
 }
 
 export interface SessionBuilderDeps {
-  /** The chart mount; build appends the overlay svg as its child. */
+  /** The chart mount; build drops any overlay already here, then appends its own (#364). */
   mapEl: HTMLElement;
   /** The margin-log panel instance; build renders the rows. */
   logPanel: VoyageLogPanel;

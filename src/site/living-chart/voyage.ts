@@ -45,7 +45,7 @@ export interface RestingTrackSink {
 }
 
 export interface VoyageDeps {
-  /** The chart mount; the overlay svg is appended as its child. */
+  /** The chart mount; it holds at most ONE overlay svg child, the builder's (#364). */
   mapEl: HTMLElement;
   /** The polite status line the one live-completion summary posts to. */
   statusEl: HTMLElement;
