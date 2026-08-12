@@ -21,6 +21,7 @@ import { createGlass } from "./glass.ts";
 import { wireControls } from "./controls.ts";
 import { wireFootnotes } from "./footnotes.ts";
 import { installExplorerHooks } from "./hooks.ts";
+import { createSurveyArm, afterNextPaint } from "./survey-arm.ts";
 import { createLivingChart } from "../living-chart/index.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
@@ -318,23 +319,40 @@ versoBtn.addEventListener("click", () => {
   versoBtn.textContent = flipped ? "Turn back" : "Turn the sheet";
 });
 
+// #300: the arm's heavy half, deferred one painted frame past the tick. rearmVoyage,
+// never applyVoyage: the arm rests on the completed track and posts nothing to #status
+// (the settle discipline). worldGen is drawGen, which draw() bumps at its top, ahead of
+// both re-arm paths. survey-arm.ts owns the window this yield opens.
+const surveyArm = createSurveyArm({
+  afterPaint: afterNextPaint,
+  isArmed: () => agesChk.checked,
+  worldGen: () => drawGen,
+  arm: () => { lc.rearmVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle); },
+});
+
 // #321 the survey ink: static chart furniture, the way `arms` inks the banners. Ticked
-// inks the completed survey track onto the sheet instantly, at rest (no clock, no
-// sweep); unticked leaves the sheet bare. Arming still snaps the camera home (the #165
-// world-sheet reset, ratified 2026-07-26, unchanged by the cut) and drops a committed
-// region inset first; a hash restore skips this handler entirely (the boot ticks the
-// box with no change event, and the first settle arms the track silently).
+// inks the completed survey track onto the sheet at rest (no clock, no sweep); unticked
+// leaves the sheet bare. Arming still snaps the camera home (the #165 world-sheet reset,
+// ratified 2026-07-26, unchanged by the cut) and drops a committed region inset first; a
+// hash restore skips this handler entirely (the boot ticks the box with no change event,
+// and the first settle arms the track silently).
+//
+// #300: everything that ACKNOWLEDGES the click is synchronous here (the checked box, the
+// camera home, the hash write); the ~900ms first build waits for the paint. exitAges keeps
+// both chamber-painter teardowns live on this bar-less host (#319), and cancel() drops an
+// arm still waiting on its frame so a tick undone inside that beat inks nothing.
 agesChk.addEventListener("change", () => {
   if (agesChk.checked) {
     glass.homeToWorld();
     glass.reset();
-    // rearmVoyage, never applyVoyage: the arm rests on the completed track with no
-    // sweep and posts nothing to #status (the settle discipline). exitAges on the way
-    // out keeps both chamber-painter teardowns live on this bar-less host (#319).
-    lc.rearmVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle);
-  } else lc.exitAges();
-  // #192: sync AFTER the arm and in both directions; still synchronous in the handler,
-  // so a copied link drops cx/cy/k now and carries the bare survey flag.
+    surveyArm.schedule();
+  } else {
+    surveyArm.cancel();
+    lc.exitAges();
+  }
+  // #192: sync AFTER the arm and in both directions; still synchronous in the handler, so
+  // a copied link drops cx/cy/k now and carries the bare survey flag. It reads the BOX,
+  // never the track, so deferring the build leaves the address unmoved.
   syncHash();
 });
 

@@ -1,4 +1,4 @@
-// The Survey Ink checks (SV1-SV10, #321, Survey and Story Sub 4): the static
+// The Survey Ink checks (SV1-SV11, #321, Survey and Story Sub 4): the static
 // Explorer. The scrubber panel, Play, the bar, and the journal strip are GONE from
 // the DOM (not hidden); the one `survey` checkbox is 1:1 with the bare `survey` hash
 // flag and inks the completed track instantly, at rest; an inbound `year=N` link
@@ -9,6 +9,9 @@
 // gate probes retired and the href sync is asserted in both directions instead.)
 // Successors for the retired Explorer-hosted live checks are the room-hosted RS/RW/
 // RV/RA suites (#320); this suite guards only what the static Explorer still owes.
+// #300 reshaped SV2 (ratified on the issue) and added SV2c/SV2d: the tick is now
+// acknowledged on its own frame and the session build waits for the paint, so the ink
+// lands a beat later and the beat is a window the box can move inside.
 // Self-contained like the hunt / Print Room / home suites (navigates itself, carries
 // its own scoped no-4xx + console-error delta).
 import { makeRoom } from "./room-support.mjs";
@@ -30,6 +33,33 @@ export async function run(ctx) {
     await waitReady();
     await waitSettled(label);
   };
+
+  // #300: the tick's build now waits for the paint, so the ink lands a beat after the
+  // change event rather than inside it. Anything that wants the track must wait for it.
+  // Capped, so a fix that never arms fails here instead of hanging the run. An evaluate
+  // sent mid-build simply queues behind it: the answer arrives when the main thread frees.
+  const waitInked = async (label) => {
+    for (let i = 0; i < 120; i++) {
+      const n = await evaluate(`(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
+        return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})()`);
+      if (n > 10) return n;
+      await sleep(50);
+    }
+    throw new Error("waitInked timeout " + label);
+  };
+
+  // Tick or untick the box the way a user would, and clock the whole arm from inside the
+  // page. The clock's own rAF-then-task is registered AFTER the handler's, so it queues
+  // behind the build and measures the entire beat, not just the handler's return.
+  const tick = (on, into) => evaluate(`(()=>{
+    const c=document.getElementById("ages");window.${into}=null;const t0=performance.now();
+    c.checked=${on};c.dispatchEvent(new Event("change",{bubbles:true}));
+    requestAnimationFrame(()=>setTimeout(()=>{window.${into}=performance.now()-t0;},0));
+    return{checked:c.checked,inked:!!document.querySelector("#map .voyage-overlay"),
+      overlays:document.querySelectorAll("#map .voyage-overlay").length,
+      hash:location.hash,status:document.getElementById("status").textContent,
+      href:document.getElementById("journal-link").getAttribute("href")};
+  })()`);
 
   // SV1: the cut itself. A bare visit carries NO scrubber panel, Play, bar, readout,
   // or journal strip anywhere in the document (gone from the DOM, not hidden), the
@@ -55,25 +85,28 @@ export async function run(ctx) {
     JSON.stringify(sv1),
   );
 
-  // SV2: ticking the box inks the COMPLETED track instantly, at rest. The handler is
-  // synchronous, so by the time this evaluate returns the full track must be on the
-  // sheet (a sweep would start near zero length), the status line silent, the hash
-  // carrying the bare survey flag, and the journal button's href carrying this
-  // world's survey address. The readback happens in the same call as the dispatch on
-  // purpose.
-  const sv2 = await evaluate(`(()=>{
-    const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
-    const t=document.querySelector("#map .voyage-overlay .voyage-track");
-    const pts=t?(t.getAttribute("points")||""):"";
-    return{vertices:pts?pts.trim().split(/\\s+/).length:0,
-      hash:location.hash,status:document.getElementById("status").textContent,
-      href:document.getElementById("journal-link").getAttribute("href")};
-  })()`);
+  // SV2 (reshaped by #300, on purpose): ticking the box ACKNOWLEDGES the click on its own
+  // frame and inks the completed track a beat later. The heavy half of the arm (the
+  // session build: prepareVoyageRouter plus the #184 all-pairs travel matrix) used to run
+  // inside the change handler, which meant the browser could not paint the checked box
+  // until it returned. So the readback in the dispatch's own turn now asserts the
+  // acknowledgment WITHOUT the track: box checked, bare survey flag written, journal href
+  // followed, status silent, and no overlay yet. That last clause is the guard on the
+  // yield itself -- restore the synchronous build and it reds. The completed track (a
+  // sweep would start near zero length) is then waited for, and the address must not have
+  // moved across the beat: the writer reads the box, never the track.
+  const sv2 = await tick(true, "__armMs");
+  const sv2Vertices = await waitInked("survey-first-arm");
+  const sv2After = await evaluate(`({status:document.getElementById("status").textContent,
+    hash:location.hash,overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    href:document.getElementById("journal-link").getAttribute("href"),ms:window.__armMs})`);
   check(
-    "SV2 ticking survey inks the completed track instantly, at rest, and writes the bare flag",
-    sv2.vertices > 10 && /(^|&)survey(&|$)/.test(sv2.hash.slice(1)) && !/year=/.test(sv2.hash) &&
-      sv2.status === "" && sv2.href === "/reading-room/" + sv2.hash,
-    JSON.stringify({ ...sv2, hash: sv2.hash }),
+    "SV2 ticking survey acknowledges on the click's own frame and inks the completed track a beat later (#300)",
+    sv2.checked && !sv2.inked && /(^|&)survey(&|$)/.test(sv2.hash.slice(1)) && !/year=/.test(sv2.hash) &&
+      sv2.status === "" && sv2.href === "/reading-room/" + sv2.hash &&
+      sv2Vertices > 10 && sv2After.overlays === 1 && sv2After.status === "" &&
+      sv2After.hash === sv2.hash && sv2After.href === sv2.href,
+    JSON.stringify({ ...sv2, vertices: sv2Vertices, after: sv2After }),
   );
   await shoot("explorer-survey-inked.png");
 
@@ -91,6 +124,61 @@ export async function run(ctx) {
     "SV2b the inked track is a rest: geometry frozen over 400ms, no animation runs on the overlay",
     p0 === p1 && sv2b.anims === 0,
     JSON.stringify({ same: p0 === p1, anims: sv2b.anims, len: (p0 || "").length }),
+  );
+
+  // SV2c: re-arming an UNCHANGED world stays effectively instant (#300 acceptance: the
+  // matrix cache behavior is untouched). The #184 travel matrix keys on seed +
+  // surveyFingerprint + port set, so only a walkable world's first arm pays for it; a
+  // re-arm is prepareVoyageRouter, the per-leg routing and the log panel, which are NOT
+  // cached and are what the budget below actually covers. Untick, re-tick, clock the
+  // second arm the same way. Two clauses, because either alone is blind: an absolute cap,
+  // and a ratio so a regression that slowed BOTH sides could not hide inside the cap.
+  // Measured 2026-08-12 on this seed in headless Brave: first arm 1120ms, re-arm 144ms,
+  // ratio 0.13 (in Node the engine halves clock 895-1207ms first, 23-36ms re-arm). The
+  // ratio is the machine-independent half and does the real work: lose the cache and it
+  // goes to ~1. The cap is sized for the ubuntu CI runner, a few times slower than this
+  // laptop, where a re-arm still lands well inside 800ms while an uncached one would run
+  // past three seconds.
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await tick(true, "__armMs2");
+  await waitInked("survey-rearm");
+  const sv2c = await evaluate(`({first:window.__armMs,again:window.__armMs2})`);
+  check(
+    "SV2c re-arming the same world is effectively instant: the travel matrix cache still holds (#300)",
+    typeof sv2c.again === "number" && sv2c.again < 800 && sv2c.again < sv2c.first / 2,
+    JSON.stringify(sv2c),
+  );
+
+  // SV2d: the beat between the tick and the build is a window that did not exist while
+  // the handler was synchronous, and the box can move inside it (#300). Both events are
+  // dispatched in ONE evaluate, so they land before the frame the arm waits on. Ticking
+  // and unticking inside the beat must ink nothing; tick/untick/tick must ink exactly ONE
+  // overlay. The count is the load-bearing number: the session builder appends its svg to
+  // the mount and never wipes, so a stale arm surviving alongside a live one would leave
+  // two tracks stacked on the sheet, and "a track is present" could not see it.
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");
+    c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
+    c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await sleep(500); // past a cached arm's whole beat, so "nothing inked" means nothing ever inks
+  const sv2dOff = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    checked:document.getElementById("ages").checked,hash:location.hash,
+    status:document.getElementById("status").textContent})`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");
+    c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
+    c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));
+    c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await waitInked("survey-retick");
+  await sleep(300); // let any superseded arm that was going to fire, fire
+  const sv2dOn = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    checked:document.getElementById("ages").checked,hash:location.hash,
+    status:document.getElementById("status").textContent})`);
+  check(
+    "SV2d a box that moves inside the deferred beat settles clean: tick+untick inks nothing, tick+untick+tick inks exactly one track (#300)",
+    sv2dOff.overlays === 0 && !sv2dOff.checked && !/survey/.test(sv2dOff.hash) && sv2dOff.status === "" &&
+      sv2dOn.overlays === 1 && sv2dOn.checked && /(^|&)survey(&|$)/.test(sv2dOn.hash.slice(1)) &&
+      sv2dOn.status === "",
+    JSON.stringify({ off: sv2dOff, on: sv2dOn }),
   );
 
   // SV3: the box and the flag are 1:1 in the other direction too. Unticking clears
@@ -250,6 +338,12 @@ export async function run(ctx) {
   // Tick the survey, change the style: the turn must ENGAGE (not an instant swap) and
   // the track must survive re-armed on the re-dressed sheet.
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  // #300: wait for the ink BEFORE starting the turn. The arm is deferred a frame now, and
+  // a style change dispatched into that gap bumps drawGen, which drops the pending arm and
+  // lets the landing re-arm do the work instead. SV10 would still pass that way, on a turn
+  // that began over a BARE sheet, quietly losing the premise it exists to guard (#153: the
+  // turn works with the track already on the sheet).
+  await waitInked("survey-armed-before-turn");
   await armTurnWatch();
   await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await waitTurned("survey-style-turn");
