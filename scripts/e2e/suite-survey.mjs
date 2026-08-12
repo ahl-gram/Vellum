@@ -212,8 +212,9 @@ export async function run(ctx) {
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(1500);
 
-  // SV7: the journal pointer is a real pointer: following the caption link lands in
-  // the Reading Room on THIS world's journal at the survey rest.
+  // SV7: the journal pointer is a real pointer: following the Press's journal
+  // button (#270 ruling 2; the caption line it replaced carried this same check)
+  // lands in the Reading Room on THIS world's journal at the survey rest.
   const sv7href = await evaluate(`document.getElementById("journal-link").getAttribute("href")`);
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${sv7href}` });
   const sv7up = (await room.boot()) && (await room.settled());
@@ -222,7 +223,7 @@ export async function run(ctx) {
         return{seed:window.__vellumReadingRoomState().seed,chamber:a?a.chamber:"",t:a?a.t:-1};})()`)
     : { seed: -1, chamber: "", t: -1 };
   check(
-    "SV7 the caption's journal link opens this world's journal in the room, at the survey rest",
+    "SV7 the journal button opens this world's journal in the room, at the survey rest",
     sv7up && sv7.seed === 42 && sv7.chamber === "survey" && sv7.t === 1,
     JSON.stringify({ sv7href, sv7up, sv7 }),
   );

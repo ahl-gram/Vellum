@@ -96,8 +96,13 @@
    beside their labels; each opens a marginalia note and follows to /glossary/. */
 a.fn { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
   text-decoration: none; color: var(--ink-brown);
-  font-size: 0.95em; vertical-align: super; line-height: 0; padding: 0 0.15em; }
+  font-size: 0.95em; vertical-align: super; line-height: 0; padding: 0 0.15em;
+  display: inline-block; } /* a transformable box, for the tip below */
 a.fn:hover, a.fn:focus-visible { color: var(--ink-dark); }
+/* #270 ruling 7: the marks follow through to /glossary/, and in Vellum what goes
+   somewhere tips (#289). The wordmark's numbers, the TOC-slip precedent; the
+   allowlist entry in test/site/tip-affordance.test.ts is the conscious record. */
+a.fn:hover { transform: translateY(-2px) rotate(-0.6deg); }
 /* The note: a marginalia scrap in the top layer (native popover; the [popover]
    UA rule keeps it display:none until shown, so no [hidden] juggling). It is a
    fixed-position box footnotes.ts anchors under its mark at show time, because

@@ -17,6 +17,7 @@ const read = (p: string) => readFileSync(root(p), "utf8");
 
 /** Every committed hand-authored stylesheet (generated css has its own source). */
 const AUTHORED_CSS = [
+  "public/explorer/broadside.css",
   "public/explorer/index.css",
   "public/faq/index.css",
   "public/fonts.css",
@@ -37,6 +38,9 @@ const TIPPING_LINKS = new Set([
   "motion.css :: body:has(.room-name) .wordmark a:hover",
   "faq/index.css :: .toc a:hover",
   "glossary/index.css :: .toc a:hover",
+  // #270 ruling 7: the footnote marks follow through to /glossary/ anchors, so
+  // they tip; this entry IS the conscious extension the ruling recorded.
+  "explorer/broadside.css :: a.fn:hover",
 ]);
 
 /** All `selector:hover { ...rotate(... }` rules in one sheet, comments stripped.
@@ -60,6 +64,14 @@ test("the TOC slips tip with the wordmark's text-scale gesture (#324 feel review
       `${file}: the TOC entries go somewhere, so they tip, at the wordmark's numbers`,
     );
   }
+});
+
+test("the footnote marks go to the glossary, so they tip, at the wordmark's numbers (#270 ruling 7)", () => {
+  assert.match(
+    read("public/explorer/broadside.css"),
+    /a\.fn:hover\s*\{\s*transform:\s*translateY\(-2px\)\s+rotate\(-0\.6deg\)/,
+    "the marks navigate but carry no tip; ruling 7 extends the tipping surface to them",
+  );
 });
 
 test("every hover tip belongs to a surface that goes somewhere (#289; #324 feel review)", () => {
