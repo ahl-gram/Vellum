@@ -179,6 +179,17 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     // feeds the sink trackEl's `points` verbatim, so a mark nested in the track would
     // bleed through to the back of the sheet, which #174 ruled it must never do.
     svg.append(trackEl, shipG, riderG);
+    // INVARIANT: one mount, one overlay (#364). This append is unconditional, so the
+    // builder drops whatever overlay is already in the mount rather than trusting the
+    // caller to have wiped it. Every arm shipping today is preceded by something that
+    // empties the mount (the Explorer's settle innerHTML swap and its turn commit,
+    // applyVoyage's own exitVoyage, the Reading Room's draw), which is exactly why
+    // nothing enforced this and why a future caller arming OUTSIDE a draw would stack
+    // two tracks on the sheet, one of which a later exit would strand. Guarded by e2e
+    // SV2g. Deliberately HERE and not at the top of build: every bail above returns
+    // with the mount exactly as it was found, so a survey-less world never strips the
+    // overlay a previous one left resting.
+    mapEl.querySelectorAll(".voyage-overlay").forEach((stale) => stale.remove());
     mapEl.appendChild(svg);
 
     return {

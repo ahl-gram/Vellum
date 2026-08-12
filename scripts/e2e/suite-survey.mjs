@@ -12,6 +12,8 @@
 // #300 reshaped SV2 (ratified on the issue) and added SV2c/SV2d: the tick is now
 // acknowledged on its own frame and the session build waits for the paint, so the ink
 // lands a beat later and the beat is a window the box can move inside.
+// #364 added SV2g/SV2h: the "one mount, one overlay" invariant asserted against the
+// ENGINE rather than against the callers that used to hold it by convention.
 // Self-contained like the hunt / Print Room / home suites (navigates itself, carries
 // its own scoped no-4xx + console-error delta).
 import { makeRoom } from "./room-support.mjs";
@@ -169,9 +171,9 @@ export async function run(ctx) {
   // the handler was synchronous, and the box can move inside it (#300). Both events are
   // dispatched in ONE evaluate, so they land before the frame the arm waits on. Ticking
   // and unticking inside the beat must ink nothing; tick/untick/tick must ink exactly ONE
-  // overlay. The count is the load-bearing number: the session builder appends its svg to
-  // the mount and never wipes, so a stale arm surviving alongside a live one would leave
-  // two tracks stacked on the sheet, and "a track is present" could not see it.
+  // overlay. The zero is what this check rests on: a cancelled arm that fires anyway inks
+  // a track on a sheet whose box is clear. (The one is now held by the #364 builder wipe
+  // as well as by the arm's supersede rule, so read it as a floor, not as the guard.)
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await evaluate(`(()=>{const c=document.getElementById("ages");window.__beat=false;
     c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
@@ -201,10 +203,16 @@ export async function run(ctx) {
   // SV2e: the box ticked while a draw is ALREADY IN FLIGHT. This is the one ordering the
   // arm's own worldGen snapshot cannot see, because the host bumps that counter when a draw
   // BEGINS, which here is before the tick, so the snapshot matches and always will. If the
-  // settle then arms the chart that lands and the pending arm lands too, the mount ends up
-  // with TWO stacked overlays, and a later untick strands one of them on an unticked sheet
-  // (the session builder appends and never wipes; exitVoyage removes a single overlay). The
+  // settle then arms the chart that lands and the pending arm lands too, both build. The
   // settle's cancel() is what closes it.
+  //
+  // HONEST SCOPE since #364: the two stacked overlays this pair was written against are no
+  // longer the symptom (the session builder now drops the overlay it finds), so these
+  // clauses would survive the settle's cancel() being deleted. What they still assert is
+  // the invariant itself, one track and a bare sheet after. The stale arm's remaining harm
+  // is a duplicate session build for one sheet: it reads the host's live refs when it
+  // fires, and the settle assigns those before arming, so it rebuilds the world that just
+  // landed rather than inking the outgoing one.
   //
   // Deterministic, not raced. After the tick the page HOLDS the main thread past the
   // worker's reply, so when it frees, the settle's message task and the arm's deferred task
@@ -243,6 +251,64 @@ export async function run(ctx) {
     "SV2f unticking after that leaves the sheet truly bare, no stranded track (#300)",
     sv2f.overlays === 0 && !/survey/.test(sv2f.hash) && sv2f.status === "",
     JSON.stringify(sv2f),
+  );
+
+  // SV2g: the invariant belongs to the ENGINE, not to the callers (#364). Every arm
+  // shipping today is preceded by something that empties the mount (the settle's
+  // innerHTML swap, the turn's commit, applyVoyage's own exitVoyage, the room's draw
+  // wipe), so "one mount, one overlay" was held by convention and nothing pinned it.
+  // This drives TWO consecutive arms through the production path with NO wipe between
+  // them: a second `change` event with the box LEFT CHECKED schedules a second deferred
+  // arm, and no draw runs in between, so the second rearmVoyage builds straight into a
+  // mount that already holds an overlay. The first arm is waited for before the second
+  // is dispatched, on purpose: two schedules inside one beat supersede (survey-arm.ts
+  // bumps its generation), which is a different mechanism and is SV2d's.
+  // The load-bearing number is `overlays`: with the builder appending unconditionally
+  // this leaves two tracks stacked on the sheet, and every other clause here passes.
+  await goto("#seed=42&style=antique", "survey-double-arm-base");
+  await tick(true, "__armMs3");
+  const firstArm = await waitInked("survey-double-arm-first");
+  const before = await evaluate(`document.querySelectorAll("#map .voyage-overlay").length`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");window.__beat=false;
+    c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
+    requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
+  await waitBeat("survey-double-arm-beat");
+  const sv2g = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    tracks:document.querySelectorAll("#map .voyage-overlay .voyage-track").length,
+    checked:document.getElementById("ages").checked,hash:location.hash,
+    status:document.getElementById("status").textContent,
+    vertices:(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
+      return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})()})`);
+  check(
+    "SV2g two consecutive arms into one mount leave exactly ONE track: the builder drops the overlay it finds (#364)",
+    before === 1 && sv2g.overlays === 1 && sv2g.tracks === 1 && sv2g.checked &&
+      sv2g.vertices === firstArm && /(^|&)survey(&|$)/.test(sv2g.hash.slice(1)) && sv2g.status === "",
+    JSON.stringify({ before, firstArm, ...sv2g }),
+  );
+
+  // SV2h: the other end of the same invariant (#364). exitVoyage reads the mount for
+  // overlays to remove, and a singular query strands every one past the first. The
+  // builder above makes two unreachable through any arm path, so the second one is
+  // PLANTED here: this asserts the teardown's contract for a sheet that somehow already
+  // holds two, which is the only way a one-token belt-and-braces change can be guarded
+  // at all. The decoy is a real overlay node, appended to the same mount the engine
+  // builds into, beside the one a real arm just inked. The base is re-established rather
+  // than inherited from SV2g, so a builder regression reds THAT check and not this one.
+  await goto("#seed=42&style=antique", "survey-plural-exit-base");
+  await tick(true, "__armMs4");
+  await waitInked("survey-plural-exit-arm");
+  await evaluate(`(()=>{const m=document.getElementById("map");
+    const d=document.createElementNS("http://www.w3.org/2000/svg","svg");
+    d.setAttribute("class","voyage-overlay");d.setAttribute("aria-hidden","true");
+    m.appendChild(d);})()`);
+  const planted = await evaluate(`document.querySelectorAll("#map .voyage-overlay").length`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  const sv2h = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    hash:location.hash,status:document.getElementById("status").textContent})`);
+  check(
+    "SV2h unticking a sheet that holds two overlays clears EVERY one, not just the first (#364)",
+    planted === 2 && sv2h.overlays === 0 && !/survey/.test(sv2h.hash) && sv2h.status === "",
+    JSON.stringify({ planted, ...sv2h }),
   );
 
   await goto("#seed=42&style=antique&survey", "survey-restore-for-sv3");

@@ -297,8 +297,12 @@ export function createVoyage(deps: VoyageDeps) {
   // so the mount is byte-identical to before (only the place overlay remains).
   function exitVoyage(): void {
     cancelVoyageRaf();
-    const existing = mapEl.querySelector(".voyage-overlay");
-    if (existing) existing.remove();
+    // EVERY match, not the first (#364). The session builder holds "one mount, one
+    // overlay" from the other end, so this is belt and braces: it costs one token and it
+    // means a sheet that somehow arrived carrying two is left truly bare rather than with
+    // one track stranded on an unticked sheet. Guarded by e2e SV2h, which plants the
+    // second overlay because no arm path can produce it any more.
+    mapEl.querySelectorAll(".voyage-overlay").forEach((overlay) => overlay.remove());
     if (voyage) statusEl.textContent = "";
     logPanel.hideLog(); // #121: the margin log is a sibling of the mount, so remove it explicitly
     voyage = null;

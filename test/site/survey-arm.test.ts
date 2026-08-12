@@ -71,8 +71,10 @@ test("#300 a re-tick supersedes the pending arm: one build, not two", () => {
   h.state.armed = true;
   h.arm.schedule();
   h.paint();
-  // Two builds would append two .voyage-overlay svgs to the mount: the session builder
-  // appends and never wipes, and only a redraw's innerHTML swap clears the old one.
+  // Two builds means the ~1.1s session build runs twice for one sheet, and the second one
+  // wins with the same world's track. (Before #364 it was also a DOM defect: the session
+  // builder appended and never wiped, so the two overlays stacked. The builder now drops
+  // the overlay it finds, so what this pins is the arm's own supersede rule.)
   assert.equal(h.state.builds, 1, "exactly one build survives tick/untick/tick");
 });
 
