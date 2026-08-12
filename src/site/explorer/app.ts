@@ -21,6 +21,7 @@ import { createGlass } from "./glass.ts";
 import { wireControls } from "./controls.ts";
 import { wireFootnotes } from "./footnotes.ts";
 import { installExplorerHooks } from "./hooks.ts";
+import { createSurveyArm, afterNextPaint } from "./survey-arm.ts";
 import { createLivingChart } from "../living-chart/index.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
@@ -218,6 +219,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
           lc.buildPlaceOverlay(res.manifest);
           // #321: re-arm the static survey track to the just-landed chart, at rest
           // (rearmVoyage, the bar-less arm entry #319 named for this conductor).
+          surveyArm.cancel(); // #300: this landing owns the arm; see the settle path below
           if (agesChk.checked) lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
           else lc.clearAges();
           glass.syncZoom(); // #164/#165: attach the zoom to the just-landed chart (every style)
@@ -240,6 +242,10 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         // verso's ghost and its track must always come from the same draw.
         // #120: re-arm from THIS draw's survey, never lastSurvey. A sea-level drag moves the
         // waterline, so the roads and open water the router walks moved with it.
+        // #300: this settle OWNS the arm, so drop any tick still waiting on its frame.
+        // drawGen cannot see a draw that was ALREADY IN FLIGHT when the box was ticked (it
+        // bumped before the tick), and that arm would land a second overlay. See survey-arm.ts.
+        surveyArm.cancel();
         if (agesChk.checked) lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
         else lc.clearAges();
         glass.syncZoom(); // #164/#165: attach the zoom to the just-drawn chart (every style)
@@ -318,23 +324,40 @@ versoBtn.addEventListener("click", () => {
   versoBtn.textContent = flipped ? "Turn back" : "Turn the sheet";
 });
 
+// #300: the arm's heavy half, deferred one painted frame past the tick. rearmVoyage,
+// never applyVoyage: the arm rests on the completed track and posts nothing to #status
+// (the settle discipline). worldGen is drawGen, which draw() bumps at its top, ahead of
+// both re-arm paths. survey-arm.ts owns the window this yield opens.
+const surveyArm = createSurveyArm({
+  afterPaint: afterNextPaint,
+  isArmed: () => agesChk.checked,
+  worldGen: () => drawGen,
+  arm: () => { lc.rearmVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle); },
+});
+
 // #321 the survey ink: static chart furniture, the way `arms` inks the banners. Ticked
-// inks the completed survey track onto the sheet instantly, at rest (no clock, no
-// sweep); unticked leaves the sheet bare. Arming still snaps the camera home (the #165
-// world-sheet reset, ratified 2026-07-26, unchanged by the cut) and drops a committed
-// region inset first; a hash restore skips this handler entirely (the boot ticks the
-// box with no change event, and the first settle arms the track silently).
+// inks the completed survey track onto the sheet at rest (no clock, no sweep); unticked
+// leaves the sheet bare. Arming still snaps the camera home (the #165 world-sheet reset,
+// ratified 2026-07-26, unchanged by the cut) and drops a committed region inset first; a
+// hash restore skips this handler entirely (the boot ticks the box with no change event,
+// and the first settle arms the track silently).
+//
+// #300: everything that ACKNOWLEDGES the click is synchronous here (the checked box, the
+// camera home, the hash write); the ~900ms first build waits for the paint. exitAges keeps
+// both chamber-painter teardowns live on this bar-less host (#319), and cancel() drops an
+// arm still waiting on its frame so a tick undone inside that beat inks nothing.
 agesChk.addEventListener("change", () => {
   if (agesChk.checked) {
     glass.homeToWorld();
     glass.reset();
-    // rearmVoyage, never applyVoyage: the arm rests on the completed track with no
-    // sweep and posts nothing to #status (the settle discipline). exitAges on the way
-    // out keeps both chamber-painter teardowns live on this bar-less host (#319).
-    lc.rearmVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle);
-  } else lc.exitAges();
-  // #192: sync AFTER the arm and in both directions; still synchronous in the handler,
-  // so a copied link drops cx/cy/k now and carries the bare survey flag.
+    surveyArm.schedule();
+  } else {
+    surveyArm.cancel();
+    lc.exitAges();
+  }
+  // #192: sync AFTER the arm and in both directions; still synchronous in the handler, so
+  // a copied link drops cx/cy/k now and carries the bare survey flag. It reads the BOX,
+  // never the track, so deferring the build leaves the address unmoved.
   syncHash();
 });
 

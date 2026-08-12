@@ -20,6 +20,15 @@ export async function run(ctx) {
     await waitReady();
     await waitSettled(label);
   };
+  // #300: the survey ink lands a beat after the tick, so BR2 waits for it rather than
+  // reading in the dispatch's own turn.
+  const waitInked = async (label) => {
+    for (let i = 0; i < 120; i++) {
+      if (await evaluate(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
+      await sleep(50);
+    }
+    throw new Error("waitInked timeout " + label);
+  };
   // The Explorer waits (waitReady/waitSettled) probe #status/#map, which plain
   // pages do not carry; the glossary hop below only needs the document loaded.
   const gotoPlain = async (url, label) => {
@@ -69,16 +78,23 @@ export async function run(ctx) {
   // BR2: the Press's second line never changes shape (#270 ruling 2): the two gold
   // links share the action-link dressing and the journal button stays standing and
   // in place through a survey tick and untick.
-  const br2 = await evaluate(`(()=>{
-    const j=document.getElementById("journal-link"),o=document.getElementById("order-plates");
-    const at=(el)=>({shown:el.getClientRects().length>0,top:Math.round(el.getBoundingClientRect().top)});
-    const before={j:at(j),o:at(o),cls:j.className===o.className&&j.classList.contains("action-link")};
-    const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
-    const during=at(j);
-    c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));
-    const after=at(j);
-    return{before,during,after,sameRow:before.j.top===before.o.top};
+  //
+  // #300 split this into three turns. It used to tick and untick inside ONE evaluate, which
+  // since the yield means the arm is cancelled before it ever builds, so `during` was
+  // measured on a sheet that was never armed and the clause stopped exercising anything.
+  // The tick, the wait for the ink, and the untick are separate now, so `during` is a
+  // genuinely armed state again.
+  const at = `((el)=>({shown:el.getClientRects().length>0,top:Math.round(el.getBoundingClientRect().top)}))`;
+  const before = await evaluate(`(()=>{
+    const j=document.getElementById("journal-link"),o=document.getElementById("order-plates");const at=${at};
+    return{j:at(j),o:at(o),cls:j.className===o.className&&j.classList.contains("action-link")};
   })()`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await waitInked("br2-survey-ink");
+  const during = await evaluate(`(()=>{const at=${at};return at(document.getElementById("journal-link"));})()`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  const after = await evaluate(`(()=>{const at=${at};return at(document.getElementById("journal-link"));})()`);
+  const br2 = { before, during, after, sameRow: before.j.top === before.o.top };
   check(
     "BR2 the journal button is the print link's steady gold peer: same row, standing through tick and untick",
     br2.before.cls && br2.sameRow && br2.before.j.shown && br2.during.shown && br2.after.shown &&
