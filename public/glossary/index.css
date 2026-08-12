@@ -41,11 +41,29 @@ h3 { font-size: 0.95rem; letter-spacing: 0.08em; color: var(--ink-faded);
   padding: 1rem 1.4rem; margin: 2rem 0 1rem; }
 /* Voice from /house.css (.archivist-label, #324). */
 .toc strong { display: block; margin-bottom: 0.4rem; }
-.toc ul { margin: 0; padding-left: 1.1rem; }
+/* Fifteen sections (#353, plus the Broadside's drafting table at #270) make a
+   tall single column, so the slips read in two where the sheet is wide enough:
+   down-then-across, as a printed contents does. `columns` rather than a grid
+   because it balances at any entry count: this list went from fourteen entries
+   to fifteen between the branch and its merge, and a grid sized for fourteen
+   would have spilled a third column rather than rebalancing to 8 + 7.
+   The gap has to clear a bullet: column two's markers hang OUTSIDE its content
+   box, into the gap, since padding-left only makes room at the left of the ul.
+   720px is the collapse boundary public/index.css already uses. */
+.toc ul { margin: 0; padding-left: 1.1rem; columns: 2; column-gap: 2.4rem; }
+.toc li { break-inside: avoid; }
+@media (max-width: 720px) { .toc ul { columns: 1; } }
 .toc a { color: var(--ink-dark); }
 /* The TOC's slips go somewhere, so they tip: the wordmark's text-scale gesture
    (#289; #324 feel review). Reduced-motion collapse lives in /motion.css. */
-.toc a { display: inline-block; transition: transform var(--paper-quick) var(--ease-paper); }
+/* vertical-align keeps the list marker on an entry's FIRST line. An
+   inline-block takes its baseline from its LAST line box, so once #353 grew
+   this TOC past a handful of entries the long ones wrapped at 320px and their
+   bullets dropped to line two. Only visible in the font-fallback first paint, which
+   font-display: swap makes every cold load. Do not drop back to display:inline
+   to fix it: the tip transform below needs a block box, and tip-affordance.test.ts
+   guards that gesture. glossary-sections.test.ts guards this line itself. */
+.toc a { display: inline-block; vertical-align: top; transition: transform var(--paper-quick) var(--ease-paper); }
 .toc a:hover { transform: translateY(-2px) rotate(-0.6deg); }
 .toc a:active { transform: translateY(0); }
 .term { font-weight: 600; color: var(--ink-dark); margin: 1.6rem 0 0.3rem;
