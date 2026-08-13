@@ -36,9 +36,10 @@ export async function run(ctx) {
   // atlas" (#atlas), which was consolidated into the Print Room. D4's reveal-on-scroll
   // stagger was an Explorer-only flourish (the Print Room's bound plates load eagerly, no
   // observer), so it retires outright. D5's shared-CSS plate hover-lift
-  // (.atlas-sheet figure img:hover) is STILL live -- the Print Room injects the same
-  // ATLAS_SHEET_CSS -- so its guard moved to suite-print-room's PR20b, which bites the same
-  // rule on #pr-atlas. Numbers left as a gap so F1/F2 keep their history 1:1.
+  // (.atlas-sheet figure a img:hover since #368 scoped it to plates that go somewhere) is
+  // STILL live -- the Print Room injects the same ATLAS_SHEET_CSS -- so its guard moved to
+  // suite-print-room's PR20b, which bites the same rule on #pr-atlas. Numbers left as a gap
+  // so F1/F2 keep their history 1:1.
 
   // F: the folio (#130). Cross-document View Transitions turn page-to-page nav into
   // leaves of one bound folio. The crossfade + the reduced-motion disable can't be

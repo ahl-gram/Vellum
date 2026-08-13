@@ -124,7 +124,18 @@ function plateFigure(svg: string, caption: string, cls = ""): string {
   // Eager, NOT loading="lazy" (unlike the Explorer's scroll view): the bound atlas is a
   // print target, and a below-fold lazy plate can print blank if the engine renders to PDF
   // before it loads. Loading all plates up front is exactly what "bind the whole atlas" wants.
-  return `<figure${classAttr}><img src="${url}" alt="${c}"><figcaption>${c}</figcaption></figure>`;
+  //
+  // The plate links its own full-size chart (#368): nothing is composed on click, because the
+  // blob above IS the full plate and the img merely scales it down (width:100% in the shared
+  // sheet css), so the link opens instantly with no waiting state. It opens in a NEW tab
+  // (Alex, 2026-08-12), which is a deliberate divergence from the homepage and gallery plates:
+  // navigating in place would tear down this page and revoke these blobs, costing the reader
+  // the bind they just paid for. Anchoring is also what earns the plate its hover lift, which
+  // the sheet css scopes to plates that go somewhere.
+  return (
+    `<figure${classAttr}><a href="${url}" target="_blank" rel="noopener">` +
+    `<img src="${url}" alt="${c}"></a><figcaption>${c}</figcaption></figure>`
+  );
 }
 
 // Render the whole atlas inline: a title header, then every plate and fragment in atlas

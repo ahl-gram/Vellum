@@ -53,8 +53,17 @@ test("ATLAS_SHEET_CSS: the shared inner CSS, scoped under .atlas-sheet, is the d
   // Scoped so it can be injected into the Explorer / Print Room without bleeding onto
   // the host page's own figure/table/h2.
   assert.match(ATLAS_SHEET_CSS, /\.atlas-sheet\s+figure\b/);
-  // The plate lift under the hand (atlas.test.ts guards this exact pattern downstream).
-  assert.match(ATLAS_SHEET_CSS, /\.atlas-sheet\s+figure\s+img:hover\s*\{[^}]*translateY/);
+  // The plate lift under the hand, scoped to plates that GO SOMEWHERE (#368 ruling): the
+  // gesture promises a destination (#289), so it may only attach to an anchored plate. All
+  // three hosts qualify after #368, two of them by wrapping their plates at runtime, so this
+  // scoping costs no host its lift; it costs a plate its lift exactly when the link is absent
+  // (scripting off in the download), which is the case the contract exists for.
+  assert.match(ATLAS_SHEET_CSS, /\.atlas-sheet\s+figure\s+a\s+img:hover\s*\{[^}]*translateY/);
+  assert.doesNotMatch(
+    ATLAS_SHEET_CSS,
+    /\.atlas-sheet\s+figure\s+img:hover\s*\{[^}]*transform/,
+    "an unanchored plate must not lift: that is the false affordance #368 ruled out",
+  );
   // A fallback so the self-contained download (no /motion.css) still resolves the timing.
   assert.match(ATLAS_SHEET_CSS, /var\(--paper,\s*\d+ms\)/);
   // Page chrome (body background, header) is NOT part of the shared inner block: it must
@@ -117,4 +126,35 @@ test("atlasDocument (data-URI mode): a self-contained doc with no anchors and no
   // still a complete, styled document
   assert.match(html, /<body class="atlas-sheet">/);
   assert.match(html, /\.atlas-sheet figure/);
+});
+
+test("data-URI mode: the plates become real links at load, without a second copy (#368)", () => {
+  const html = atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
+
+  // The one script this document has ever carried, and it exists for exactly one reason: a
+  // plate that lifts must go somewhere. A plain <a href="data:..."> cannot do the job, measured
+  // in Brave 151 from a real file:// origin: the tab opens on about:blank and the browser logs
+  // "Not allowed to navigate top frame to data URL", i.e. a BROKEN click, worse than no click.
+  // So the plate is wrapped at load in a link to a blob built from the data URI it already
+  // carries: a real link (focusable, middle-clickable), no second copy in the file.
+  assert.match(html, /<script>/, "the self-contained atlas links its plates at load");
+  assert.match(html, /URL\.createObjectURL/);
+  assert.match(html, /target="_blank"|\.target\s*=\s*"_blank"/, "opens beside the atlas, never over it");
+
+  // The reason anchor:false exists in the first place survives: still exactly one copy each.
+  assert.equal(
+    (html.match(/data:image\/svg\+xml;base64,/g) ?? []).length,
+    5,
+    "linking the plates must not re-embed them: the file would double",
+  );
+  assert.doesNotMatch(html, /<a href="data:/, "the inert form the measurement ruled out");
+});
+
+test("file-ref mode carries no plate-linking script: its anchors are already real (#368)", () => {
+  const html = atlasDocument(fixture(), (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
+  assert.doesNotMatch(
+    html,
+    /<script>/,
+    "the CLI page's plates are anchored server-side, so a script here would be dead weight",
+  );
 });

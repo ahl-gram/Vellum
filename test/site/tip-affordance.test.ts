@@ -229,6 +229,14 @@ const TIPPING_LINKS = new Set([
   // contact-sheet plate in <a href="${card.file}">, so the tile really does go
   // somewhere (to its full-size SVG). Legitimate, and until #360 unread.
   "src/cli/gallery.ts :: figure img:hover",
+  // #368, ruled 2026-08-12 and measured after: the atlas plate lift, now scoped to
+  // `figure a img` so it can only fire on a plate that IS a link. All three hosts of
+  // ATLAS_SHEET_CSS anchor their plates: the CLI /atlas/ page server-side (anchor:true),
+  // the Print Room preview to its existing blob (bound-atlas.ts), and the self-contained
+  // download at load (PLATE_LINK_SCRIPT, because a plain <a href="data:"> is refused by
+  // the browser). Where no link is made, no lift applies, so this entry cannot go stale
+  // into a false affordance the way the unscoped rule did.
+  "src/atlas/document.ts :: .atlas-sheet figure a img:hover",
 ]);
 
 /** Tips the #360 sweep reached for the first time whose surface does NOT navigate,
@@ -242,19 +250,14 @@ const TIPPING_LINKS = new Set([
  *  allowlist say something false about the page, which is exactly the failure #289
  *  exists to prevent. Better a second name that tells the truth. */
 const TIPS_AWAITING_A_RULING = new Set([
-  // The atlas plates lift on hover, and in two of their three hosts nothing wraps
-  // them, measured 2026-08-12:
-  //   - the CLI /atlas/ page passes anchor:true, so the plate links its full-size
-  //     SVG (src/atlas/document.ts:157). Goes somewhere.
-  //   - the Print Room's bound preview writes its own <figure><img> with no anchor
-  //     at all (src/site/print-room/bound-atlas.ts:127). Goes nowhere.
-  //   - the single-file download passes anchor:false (bound-atlas.ts:222). Goes nowhere.
-  // The lift predates the #289 tip contract (it moved here from the Explorer's
-  // retired D5, #199) and scripts/e2e/suite-print-room.mjs PR20b asserts it IS wired
-  // on the unanchored preview plates. So the contract and a shipped e2e guard now
-  // disagree about the same rule, and resolving that is Alex's call, not this sub's:
-  // changing the selector here would reverse a ratified decision from a test file.
-  "src/atlas/document.ts :: .atlas-sheet figure img:hover",
+  // EMPTY, and that is the finished state, not an unwritten one. Its only occupant was the
+  // atlas plate lift, parked here by #360 because the lift fired on all three hosts of
+  // ATLAS_SHEET_CSS while two of them wrapped nothing. #368 ruled it (2026-08-12): rather
+  // than pardon the gesture or drop it, all three hosts were made to navigate, so the entry
+  // graduated to TIPPING_LINKS above on the merits instead of being excused.
+  //
+  // The mechanism stays because the next tip that arrives ahead of its ruling needs
+  // somewhere honest to sit. Park a line here only with the measurement written under it.
 ]);
 
 /** All `selector:hover { ...rotate(... }` rules in one sheet, comments stripped.

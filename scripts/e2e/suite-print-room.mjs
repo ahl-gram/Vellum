@@ -348,23 +348,35 @@ export async function run(ctx) {
   // paper-timed transform transition on the image, the image resting with no transform, and
   // a :hover rule with a transform actually in the stylesheet (so the check bites the lift,
   // not just the plumbing). Read on screen media, before PR21 emulates print.
+  //
+  // #368 UPDATE. This check used to compare these plates to the homepage plates (#146) while
+  // asserting the lift on a plate that wrapped NOTHING, which put it in direct conflict with
+  // the #289 tip contract; the comparison never held, because every homepage plate it cites
+  // is itself anchor-wrapped. Alex ruled (2026-08-12) that the plates should navigate rather
+  // than that the gesture should be pardoned, so the comparison is now true and the assertion
+  // is stricter, not weaker: the lift is scoped to `figure a img`, and the plate must BE a
+  // link, opening in a new tab so a click cannot tear down the bound atlas and revoke its
+  // blobs. Asserting the anchor beside the lift is the point. They are one promise.
   const hover = await evaluate(`(()=>{
     const img=document.querySelector("#pr-atlas figure img");
     if(!img)return{img:false};
+    const a=img.closest("a");
     const cs=getComputedStyle(img);
     let hoverLift=false;
     for(const ss of document.styleSheets){let rules;try{rules=ss.cssRules;}catch(e){continue;}
       if(!rules)continue;
       for(const r of rules){
-        if(r.selectorText&&r.selectorText.includes(".atlas-sheet figure img:hover")&&r.style&&r.style.transform&&r.style.transform!=="none"&&img.matches(".atlas-sheet figure img")){hoverLift=true;}
+        if(r.selectorText&&r.selectorText.includes(".atlas-sheet figure a img:hover")&&r.style&&r.style.transform&&r.style.transform!=="none"&&img.matches(".atlas-sheet figure a img")){hoverLift=true;}
       }
     }
-    return{img:true,dur:cs.transitionDuration,prop:cs.transitionProperty,tform:cs.transform,hoverLift};
+    return{img:true,dur:cs.transitionDuration,prop:cs.transitionProperty,tform:cs.transform,hoverLift,
+      linked:!!a,href:a?a.href.slice(0,5):null,target:a?a.target:null,rel:a?a.rel:null};
   })()`);
   check(
-    "PR20b bound plates carry the shared hover-lift (paper-timed transition, rest flat, :hover transform rule exists)",
+    "PR20b bound plates go somewhere AND carry the shared hover-lift (#368: the lift is scoped to anchored plates)",
     hover.img && hover.dur.includes("0.26s") && hover.prop.includes("transform") &&
-      (hover.tform === "none" || hover.tform === "matrix(1, 0, 0, 1, 0, 0)") && hover.hoverLift === true,
+      (hover.tform === "none" || hover.tform === "matrix(1, 0, 0, 1, 0, 0)") && hover.hoverLift === true &&
+      hover.linked === true && hover.href === "blob:" && hover.target === "_blank" && hover.rel === "noopener",
     JSON.stringify(hover),
   );
 

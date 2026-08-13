@@ -58,9 +58,15 @@ export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
   border: 1px solid var(--line-tan); box-shadow: 0 10px 30px rgb(from var(--chart-ink) r g b / 0.18);
   transition: transform var(--paper, 260ms) var(--ease-paper, cubic-bezier(0.22, 0.61, 0.36, 1)),
               box-shadow var(--paper, 260ms) var(--ease-paper, cubic-bezier(0.22, 0.61, 0.36, 1)); }
-.atlas-sheet figure img:hover { transform: translateY(-5px) rotate(-0.6deg);
+/* The lift is scoped to ANCHORED plates (#368). In Vellum the tip promises a destination
+   (#289), and this rule used to fire on all three hosts while two of them wrapped nothing,
+   which is the false affordance the contract names. All three now anchor their plates, two
+   of them at runtime, so no host loses its lift; what loses it is a plate with no link, which
+   in practice means the download opened with scripting off. There the plate correctly sits
+   still rather than promising a click that cannot happen. */
+.atlas-sheet figure a img:hover { transform: translateY(-5px) rotate(-0.6deg);
   box-shadow: 0 20px 44px rgb(from var(--chart-ink) r g b / 0.28); }
-.atlas-sheet figure img:active { transform: translateY(-1px) rotate(0deg); }
+.atlas-sheet figure a img:active { transform: translateY(-1px) rotate(0deg); }
 .atlas-sheet figcaption { text-align: center; font-style: italic; color: var(--ink-brown); padding-top: 0.55rem;
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); }
 .atlas-sheet .styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
@@ -140,6 +146,43 @@ export function svgToDataUri(svg: string): string {
 // One <figure> for a plate: its <img> (optionally wrapped in a link to the same source,
 // for the CLI's file-backed page) and its caption. The download passes anchor:false so a
 // data-URI plate is never embedded twice.
+/**
+ * The self-contained download's plates, linked at load (#368).
+ *
+ * Its plates are inline data URIs, and a plain `<a href="data:...">` does NOT work: measured
+ * in Brave 151 from a real file:// origin, the click opens a tab that lands on about:blank and
+ * the browser logs "Not allowed to navigate top frame to data URL". That is a broken click,
+ * which is worse than no click at all. Wrapping the plate server-side would also double a
+ * ~20MB file, which is why `anchor:false` exists.
+ *
+ * So each plate is wrapped here in a REAL link whose href is a blob built from the data URI the
+ * img already carries: one copy in the file, and a genuine anchor rather than a click handler,
+ * so focus, middle-click and open-in-new-tab all behave. Measured working from file://.
+ *
+ * Two deliberate properties. The plates are linked only if this runs, and the lift is scoped to
+ * anchored plates, so with scripting off the page has no link AND no lift: it degrades to an
+ * honest gallery instead of to the false affordance #368 was filed about. And a plate whose
+ * blob cannot be built keeps its plain img, degrading the same way, one plate at a time.
+ */
+const PLATE_LINK_SCRIPT = `<script>
+for (const img of document.querySelectorAll(".atlas-sheet figure > img")) {
+  fetch(img.src)
+    .then((r) => r.blob())
+    .then((blob) => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.target = "_blank";
+      a.rel = "noopener";
+      img.parentNode.insertBefore(a, img);
+      a.appendChild(img);
+    })
+    .catch((err) => {
+      // Leave this plate a plain img: no link, and (per the css above) no lift either.
+      console.warn("Vellum: could not link a plate to its full-size chart.", err);
+    });
+}
+</script>`;
+
 function plateFigure(
   plate: AtlasPlate,
   section: PlateSection,
@@ -225,7 +268,7 @@ ${data.chronicleHtml}
 ${data.gazetteerHtml}
 
 <footer>DRAWN BY VELLUM · AN ATELIER OF IMAGINARY CARTOGRAPHY</footer>
-</body>
+${anchor ? "" : PLATE_LINK_SCRIPT + "\n"}</body>
 </html>
 `;
 }

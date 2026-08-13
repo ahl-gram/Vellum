@@ -95,11 +95,20 @@ test("the atlas joins the motion folio: links /motion.css and its figures lift u
       /<link rel="stylesheet" href="\/motion\.css">/,
       "atlas should link the shared motion desk so it joins the folio",
     );
-    // the plates lift gently under the hand, mirroring the Explorer atlas view (#146)
+    // The plates lift gently under the hand, mirroring the homepage plates (#146). Since
+    // #368 the lift is scoped to plates that GO SOMEWHERE, and this page's plates qualify
+    // the plainest way there is: buildAtlas passes anchor:true, so each is already wrapped
+    // in a link to its full-size SVG. Asserting the anchored selector here is what keeps
+    // this page's lift honest if that ever changes.
     assert.match(
       html,
-      /figure img:hover\s*\{[^}]*transform:[^}]*translateY/,
+      /figure a img:hover\s*\{[^}]*transform:[^}]*translateY/,
       "atlas figures should lift under the hand",
+    );
+    assert.match(
+      html,
+      /<figure><a href="world-antique\.svg"><img/,
+      "and the plate the lift fires on must be the link that earns it",
     );
   } finally {
     await rm(dir, { recursive: true, force: true });
