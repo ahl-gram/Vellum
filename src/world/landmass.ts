@@ -1,27 +1,10 @@
 import type { Field } from "../core/grid.ts";
 
 export type LandmassLabels = {
-  /**
-   * Landmass id per cell in first-seen row-major order; -1 for ocean. Int32 so
-   * an id (magnitude bounded by the cell count) can never overflow or collide
-   * with the -1 sentinel: a 320x240 world has 76800 cells, well past Int16.
-   */
   readonly ids: Int32Array;
-  /** Cell count of landmass k, indexed by id. `sizes.length` is the count. */
   readonly sizes: ReadonlyArray<number>;
 };
 
-/**
- * Label every land cell (elev > seaLevel) with the id of the connected landmass
- * it belongs to; ocean cells (elev <= seaLevel) are -1. Ids are assigned in
- * first-seen row-major order, so the labeling is a pure, deterministic function
- * of the heightfield with no rng.
- *
- * Connectivity is 4-connected (N/S/E/W): cells touching only at a corner are
- * separate landmasses, matching how the coastline renders. This mirrors the
- * flood in render/blobs.ts rather than reusing it, keeping the world layer free
- * of a render dependency.
- */
 export function labelLandmasses(elev: Field, seaLevel: number): LandmassLabels {
   const { w, h, data } = elev;
   const n = w * h;

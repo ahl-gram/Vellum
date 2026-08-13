@@ -9,16 +9,8 @@ import {
   recordingSink,
 } from "../../test-support/living-chart-hosts.ts";
 
-// #319 (Survey & Story Sub 2): how the living chart BEHAVES for a host that hands in no
-// scrubber. Sub 4's static Explorer mounts the engine for its overlays and the static
-// resting track and has no bar, no Play, no readout and no journal; without the optional
-// boundary it would have to ship hidden dead controls to assistive tech to satisfy a type.
-//
-// The split this file exists to pin, ratified 2026-08-09 on #319: the INSTRUMENT surface
-// goes silently inert (no-ops, never a throw) while the CHART side stays fully live. The
-// construction half of the boundary lives in living-chart-boundary.test.ts, which stays
-// DOM-free on purpose; this file installs the shared element shim, because proving the
-// chart side runs means actually running it.
+// #319: a host that hands in no scrubber. The ratified split (2026-08-09 comment on #319): the INSTRUMENT surface goes silently inert while the CHART side stays fully live.
+// The construction half lives in living-chart-boundary.test.ts (DOM-free on purpose); this file installs the element shim because proving the chart side runs means running it.
 
 test("the bar-less instrument surface is silent no-ops, and never throws (#319)", async () => {
   const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
@@ -26,10 +18,7 @@ test("the bar-less instrument surface is silent no-ops, and never throws (#319)"
   const { sink, calls } = recordingSink();
   const lc = createLivingChart({ mapEl: mount.el, statusEl: {} as unknown as HTMLElement, restingTrackSink: sink });
 
-  // A host that never wires Play cannot press it, so a throw would add a failure mode with
-  // no reachable trigger. Every instrument-side entry is exercised, including the two the
-  // ratification's list did not name: clearAges, which the Explorer calls on EVERY draw,
-  // and exitAges, which destroy() routes through.
+  // A throw would add a failure mode with no reachable trigger; clearAges and exitAges are exercised too, though the ratification's list did not name them.
   const noThrow = (label: string, fn: () => void) => assert.doesNotThrow(fn, `${label} is a silent no-op`);
   noThrow("applyAges", () => lc.applyAges(null, null, 42, ""));
   noThrow("rearmAges", () => lc.rearmAges(null, null, 42, ""));
@@ -45,16 +34,11 @@ test("the bar-less instrument surface is silent no-ops, and never throws (#319)"
   noThrow("clearAges", () => lc.clearAges());
   noThrow("exitAges", () => lc.exitAges());
 
-  // The instrument reads answer "off", which is what lets the composed entries in index.ts
-  // route to their CHART-side halves with no bar-less special casing: agesState() null keeps
-  // the address writer and the e2e hooks on their existing null paths, and isActive() false
-  // is what sends scrubTo to chronicle.scrubTo and syncRestingTrack to the raw voyage sync.
+  // The "off" reads are what let index.ts route composed entries to their chart-side halves with no bar-less special casing.
   assert.equal(lc.agesState(), null, "there is no instrument state to read");
   assert.equal(lc.scrubState(), null, "no scrub session exists on an undrawn mount");
 
-  // The chart side is LIVE, not stubbed: with no session the raw voyage sync clears the
-  // host's verso surface, which is the proof syncRestingTrack took the voyage path rather
-  // than the ages driver's rest-aware one.
+  // With no session the raw voyage sync clears the verso: proof syncRestingTrack took the voyage path, not the ages driver's rest-aware one.
   calls.length = 0;
   lc.syncRestingTrack();
   assert.deepEqual(calls, ["clear"], "the resting track clears through the host's sink");
@@ -70,22 +54,8 @@ test("destroy() on a bar-less host still tears down the chart side (#319)", asyn
   calls.length = 0;
   lc.destroy();
 
-  // destroy() routes through exitAges, so a bar-less exitAges that no-oped ENTIRELY would
-  // leave an unmounting host's voyage overlay in the mount and its ink on the verso forever.
-  // The instrument half of exitAges is what goes silent; the two chamber painters it tears
-  // down are chart-side and must still run. Asserted positively, so deleting either
-  // delegation goes red here rather than passing as "did not throw".
-  //
-  // SCOPE, precisely: these two assert that the teardown REACHED the mount and asked it for
-  // the nodes it removes, not that a node came off. This harness answers every query with
-  // "the mount is empty" by design (see element-shim.ts), so the `.remove()` calls at
-  // voyage.ts:305 (a querySelectorAll forEach since #364, no longer a single node) and
-  // place-overlay.ts:220 are not reachable THROUGH THIS HARNESS and are covered by e2e.
-  // What is proven here is that the delegation ran at all, which is the one thing #319
-  // could get wrong; the exact delegation set is pinned by the module ledger below.
-  // (#364 added test/site/voyage-session-mount.test.ts, which proves the BUILDER's removal
-  // against a mount double that answers with the nodes it holds. Nothing stops the same
-  // idiom being pointed at exitVoyage later; it is unwritten, not impossible.)
+  // destroy() routes through exitAges: the instrument half goes silent, but the two chart-side chamber teardowns must still run; asserted positively so a deleted delegation reds here.
+  // SCOPE: this proves the teardown ASKED the mount, not that a node came off; the shim answers every query with "empty" by design, so node removal is e2e's to prove (#364's voyage-session-mount.test.ts covers the builder's removal).
   assert.ok(
     mount.asked.some((s) => s.includes(".voyage-overlay")),
     "the teardown asked the mount for the voyage overlay (voyage.exitVoyage ran)",
@@ -100,11 +70,7 @@ test("destroy() on a bar-less host still tears down the chart side (#319)", asyn
 test("the bar-less ages driver delegates EXACTLY the two chart-side teardowns (#319)", async () => {
   const { barlessAges } = await import("../../src/site/living-chart/no-bar.ts");
 
-  // The whole substance of the bar-less driver is WHICH members stay silent and which still
-  // reach the chamber painters. Through the engine's public surface that split is invisible
-  // on an undrawn mount (both delegations no-op with no session), so it is pinned here, on
-  // the module, against its own injected collaborators. A blanket-no-op clearAges passes
-  // every other test in this file; it fails this one.
+  // Through the public surface the split is invisible on an undrawn mount, so it is pinned on the module against its injected collaborators; a blanket-no-op clearAges fails only here.
   const ledger = (drive: (a: ReturnType<typeof barlessAges>) => void): string[] => {
     const chronicle = recordingChamber();
     const voyage = recordingChamber();
@@ -112,17 +78,11 @@ test("the bar-less ages driver delegates EXACTLY the two chart-side teardowns (#
     return [...chronicle.calls, ...voyage.calls];
   };
 
-  // The Explorer calls clearAges after EVERY draw whose instrument is off, so this is the
-  // hot path: swallowing it leaks a stale chronicle session and the voyage overlay once per
-  // redraw on a host that never had a bar.
+  // The Explorer calls clearAges after EVERY draw with the instrument off: swallowing it leaks a stale session and overlay once per redraw.
   assert.deepEqual(ledger((a) => a.clearAges()), ["clearScrub", "clearVoyage"], "clearAges clears both chambers");
-  // destroy() reaches the chamber painters through here.
   assert.deepEqual(ledger((a) => a.exitAges()), ["exitScrub", "exitVoyage"], "exitAges exits both chambers");
 
-  // Everything else is the INSTRUMENT, and touches neither painter. syncSinkAtRest is in
-  // this list on purpose: index.ts gates it behind isActive(), so on a bar-less engine it is
-  // unreachable, and it must not acquire a delegation that would then be dead code
-  // pretending to be behaviour.
+  // syncSinkAtRest is here on purpose: index.ts gates it behind isActive(), so on a bar-less engine it must not acquire a dead delegation.
   for (const [name, drive] of [
     ["armAges", (a: ReturnType<typeof barlessAges>) => a.armAges(null, null, 42, "")],
     ["syncSinkAtRest", (a: ReturnType<typeof barlessAges>) => a.syncSinkAtRest()],
@@ -149,10 +109,7 @@ test("a host WITH a scrubber still gets the REAL instrument and journal, not the
     scrubber: bar as unknown as Parameters<typeof createLivingChart>[0]["scrubber"],
   });
 
-  // #319's branch decides which modules a host gets, and picking the stand-in for a FULL
-  // host would silently strip the Explorer's and the room's instrument and journal. Before
-  // this test only the e2e suites could see that: these are the cheapest DOM-free
-  // fingerprints of the real modules, taken on the one teardown reachable with no session.
+  // Picking the stand-in for a FULL host would silently strip the instrument and journal; these are the cheapest DOM-free fingerprints of the real modules.
   lc.exitAges();
   assert.ok(
     writes.includes("range.removeAttribute:aria-valuetext"),
@@ -173,9 +130,6 @@ test("a bar-less host BUILDS the place overlay over the baked chart (#319)", asy
 
   lc.buildPlaceOverlay(manifest);
 
-  // The overlay is a real child of the mount, with one focusable hit per place, each
-  // positioned by its manifest fraction and labelled for AT. The #53 story-card layer runs
-  // in full on a host that has no instrument at all.
   const overlay = mount.children.find((c) => c.classList.contains("place-overlay"));
   assert.ok(overlay, "the place overlay is appended to the host's mount");
   const hits = walk(overlay).filter((n) => n.classList.contains("place-hit"));
@@ -192,8 +146,7 @@ test("a bar-less host BUILDS the place overlay over the baked chart (#319)", asy
     ["blur", "click", "focus", "mouseenter", "mouseleave"],
     "hover / focus / tap are all wired",
   );
-  // The one reused parchment card rides INSIDE the overlay (#169: its % anchor must resolve
-  // against the same box the fractions describe).
+  // The card rides INSIDE the overlay (#169): its % anchor must resolve against the same box the fractions describe.
   const card = walk(overlay).find((n) => n.getAttribute("id") === "place-card");
   assert.ok(card, "the card is built inside the overlay");
   assert.equal(card.hidden, true, "and starts hidden");
@@ -203,13 +156,10 @@ test("a bar-less host PAINTS and clears the resting voyage track (#319)", async 
   const { manifest, survey } = await realWorld();
   const { lc, mount, calls } = await barlessHost();
 
-  // rearmVoyage is the instrument-less arm-at-rest entry, already on the surface since #191,
-  // which is why this sub adds no method. It rests on the FULL track at t=1 and, being
-  // non-quiet, mirrors it to the host's sink.
+  // rearmVoyage (on the surface since #191, so this sub adds no method): rests on the FULL track at t=1 and, non-quiet, mirrors it to the host's sink.
   lc.rearmVoyage(manifest, survey, 42, "as surveyed by Taiki the Wayfarer");
 
-  // The svg carries its class as an ATTRIBUTE (setAttribute("class"), the SVG idiom in
-  // voyage-session.ts), not through className like the HTML place overlay does.
+  // The svg carries its class as an ATTRIBUTE (the SVG idiom), not through className like the HTML overlay.
   const svg = mount.children.find((c) => c.getAttribute("class") === "voyage-overlay");
   assert.ok(svg, "the voyage overlay svg is appended to the mount");
   assert.equal(svg.getAttribute("aria-hidden"), "true", "the track is decorative: the log carries the a11y payload");
@@ -224,17 +174,12 @@ test("a bar-less host PAINTS and clears the resting voyage track (#319)", async 
   const [kind, payload] = calls[0]!.split(":");
   assert.equal(kind, "paint", "and it PAINTED, rather than clearing");
   const [points, viewBox] = payload!.split("|");
-  // A real track, not the degenerate origin point a synthetic fixture would have produced.
   const verts = points!.trim().split(/\s+/);
   assert.ok(verts.length > 2, `the painted track has ${verts.length} vertices, not a single point`);
   for (const v of verts) assert.match(v, /^-?[\d.]+,-?[\d.]+$/, "every vertex is an x,y pair");
   assert.equal(viewBox, `0 0 1500 ${manifest.heightPx}`, "the sink is told the chart's own viewBox");
 
-  // ...and the same host CLEARS the resting track, with no instrument anywhere in the path.
-  // "Clears" here is the resting track proper: the sink mirror and the session. Taking the
-  // svg node itself off the sheet needs a mount that can answer a query, which this harness
-  // deliberately cannot (see the destroy test), so that half is e2e's; the node is expected
-  // to still be a child below, and saying so keeps the gap visible rather than implied.
+  // "Clears" = the sink mirror and the session; taking the svg node off needs a query this harness deliberately cannot answer, so that half is e2e's.
   calls.length = 0;
   lc.exitVoyage();
   assert.deepEqual(calls, ["clear"], "the ink leaves the back of the sheet");
@@ -251,11 +196,7 @@ test("the bar-less scrubTo still reaches the chronicle's static reveal (#319)", 
   const { manifest } = await realWorld();
   const { lc } = await barlessHost();
 
-  // The ratification lists scrubTo among the no-ops; index.ts routes it to the chronicle
-  // whenever the instrument is inactive, which on a bar-less engine is always. Without this
-  // test a future session could read the ratification literally, make the whole entry inert,
-  // and stay green: chronicle.scrubTo is itself silent with no session, so "does not throw"
-  // cannot tell the two apart.
+  // The ratification lists scrubTo among the no-ops, but index.ts routes it to the chronicle when the instrument is inactive; "does not throw" cannot tell an inert entry apart, hence this test.
   lc.buildPlaceOverlay(manifest);
   lc.applyScrub();
   const armed = lc.scrubState();
@@ -271,10 +212,7 @@ test("the bar-less scrubTo still reaches the chronicle's static reveal (#319)", 
 
 test("the bar-less journal keeps the survey's prose and reports no rendered rows (#319)", async () => {
   const { barlessLogPanel } = await import("../../src/site/living-chart/no-bar.ts");
-  // No scrubber means no journal PANEL, but the log itself is world data the voyage still
-  // needs: paintFrame posts log.summary to the status line on a live completion, and
-  // voyageLog() is an e2e read hook. So the stand-in builds the REAL log and skips only the
-  // DOM, which it must do with no `document` at all.
+  // No scrubber means no PANEL, but the log is world data the voyage still needs (status line, e2e hook), so the stand-in builds the REAL log and skips only the DOM.
   const panel = barlessLogPanel();
   const { log, rows } = panel.buildLogPanel(
     [
@@ -309,9 +247,7 @@ test("the bar-less journal's log is identical to the rendering panel's (#319)", 
   ]);
   await realWorld(); // the shim: the REAL panel builds rows and needs a document
 
-  // The stand-in re-states the real panel's argument normalization (seed >>> 0,
-  // subtitle || ""). Nothing else pins that parity, and drift there would silently give a
-  // bar-less host different prose and a different status summary for the SAME world.
+  // The stand-in re-states the real panel's argument normalization (seed >>> 0, subtitle || ""); nothing else pins that parity.
   const ports = [
     { idx: 0, name: "Aelmoor", kind: "town" as const, founded: 300, arrivalMode: null, inlandHandoff: false, legLength: 0 },
     { idx: 1, name: "Cairn Hollow", kind: "town" as const, founded: 420, arrivalMode: "road" as const, inlandHandoff: false, legLength: 44 },
@@ -323,8 +259,7 @@ test("the bar-less journal's log is identical to the rendering panel's (#319)", 
   });
   const bare = barlessLogPanel();
 
-  // Including the paths the normalization exists for: a negative seed and 2**31, which
-  // >>> 0 maps into the unsigned domain buildVoyageLog's RNG fork expects.
+  // Includes a negative seed and 2**31, the paths >>> 0 exists for.
   for (const seed of [42, 0, -7, 2 ** 31]) {
     const a = real.buildLogPanel(ports, 1059, seed, "as surveyed by Taiki", null);
     const b = bare.buildLogPanel(ports, 1059, seed, "as surveyed by Taiki", null);

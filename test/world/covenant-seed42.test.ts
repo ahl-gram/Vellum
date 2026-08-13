@@ -3,17 +3,8 @@ import assert from "node:assert/strict";
 import { createRng } from "../../src/core/rng.ts";
 import { CULTURES } from "../../src/society/names.ts";
 
-/**
- * The covenant of seed 42 (issue #235). generate.ts picks a world's culture with
- * a single draw from an isolated fork: `rng.fork("culture").pick(CULTURES)`, and
- * pick() resolves `items[floor(u * items.length)]`. Seed 42's culture-fork draw
- * is u = 0.69486..., so floor(u * 10) = 6: oromi MUST sit at index 6 of the
- * ten-culture roster or seed 42 draws a different culture and the golden re-rolls.
- *
- * This guards that placement so no future tidy-up can silently break the golden.
- * The pick() assertion is the true invariant (survives any future edition that
- * re-derives the index); the index-6 assertion pins the current normative order.
- */
+// The covenant of seed 42 (#235): the culture fork draws u = 0.69486..., so pick() resolves floor(u * 10) = 6; oromi MUST sit at index 6 of the ten-culture roster or seed 42 draws a different culture and the golden re-rolls.
+// The pick() assertion is the true invariant (survives a future edition that re-derives the index); the index-6 assertion pins the current normative order.
 test("seed 42's culture fork resolves to oromi at index 6 (the covenant)", () => {
   assert.equal(
     CULTURES[6]?.id,

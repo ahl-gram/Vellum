@@ -2,24 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { El, installShim, walk } from "../../test-support/element-shim.ts";
 
-/**
- * The colophon dice (#318, Survey and Story Sub 1): a seed counter at the Reading
- * Room journal's foot, so the room is self-sufficient for wandering worlds. The two
- * open decisions were ratified by Alex on 2026-08-09 (dated comment on #318,
- * issuecomment-5235081872) as the issue's recommendations, refined by the
- * 2026-08-08 read-over comment there:
- *   1. A colophon at the journal's foot, mounted as a SIBLING of the instrument
- *      panel (.rf-ages) inside the reading column, never inside it: `armAges` and
- *      `clearAges` in `src/site/living-chart/ages.ts` drive `panel.hidden` through
- *      every teardown, so furniture nested in the panel would vanish on each counter
- *      draw and be absent before the first arm.
- *   2. Always visible, which the sibling placement makes true by construction.
- *
- * Like the frame, the colophon BUILDS its DOM, so this file installs the same
- * element shim (test-support/element-shim.ts). The redraw path the colophon drives
- * (drawGen supersession, the present-park rest, hash re-serialization) runs a real
- * worker and browser, so it lives in the e2e (suite-reading-room RR16-RR23), not here.
- */
+// The colophon dice (#318). Both open decisions ratified by Alex 2026-08-09 (issuecomment-5235081872 on #318): mounted as a SIBLING of the instrument panel, never inside it (the engine drives panel.hidden through every teardown, so nested furniture would vanish), and always visible, true by construction.
+// The colophon BUILDS its DOM, so the element shim installs; the redraw path it drives needs a real worker and browser, so that lives in e2e suite-reading-room RR16-RR23.
 
 installShim();
 
@@ -76,7 +60,6 @@ test("the colophon mounts as the panel's SIBLING at the journal's foot, outside 
   const panel = frame.host.scrubber.panel as unknown as El;
   assert.ok(reading.children.includes(panel), "the instrument panel lives in the reading column");
 
-  // Mount exactly as the room's conductor does, then assert the ratified placement.
   const c = createColophon();
   frame.reading.appendChild(c.root);
   const root = c.root as unknown as El;
@@ -89,10 +72,7 @@ test("the colophon mounts as the panel's SIBLING at the journal's foot, outside 
     "below the panel: the journal's foot, where one story ends and the next is invited",
   );
 
-  // The whole point of the placement, in its discriminating form: after the
-  // engine's teardown (panel.hidden = true in exitAges/clearAges), NO ancestor of
-  // the colophon is hidden. A colophon nested inside the panel fails this walk; the
-  // sibling mount passes. (Asserting only root.hidden would pass for any placement.)
+  // The discriminating form: after teardown NO ancestor of the colophon is hidden; asserting only root.hidden would pass for any placement.
   panel.hidden = true;
   for (let p = root.parentNode as El | null; p; p = p.parentNode) {
     assert.equal(p.hidden, false, `a hidden ancestor <${p.tagName.toLowerCase()}> would take the colophon with it`);

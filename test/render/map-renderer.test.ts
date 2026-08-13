@@ -3,8 +3,7 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 
-// structural tests (written alongside the renderer, not red-green:
-// aesthetics aren't unit-assertable — these pin the contract instead)
+// Structural tests, not red-green: aesthetics are not unit-assertable, so these pin the contract instead.
 
 const world = generateWorld(defaultRecipe(42, { gridW: 160, gridH: 120 }));
 
@@ -90,6 +89,5 @@ test("the SVG carries an accessible name and description", () => {
   assert.match(svg, /<svg\b[^>]*\saria-label="[^"]+"/, "root needs aria-label");
   assert.ok(/<title>.+<\/title>/.test(svg), "needs a <title>");
   assert.ok(/<desc>.+<\/desc>/.test(svg), "needs a <desc>");
-  // accessible text is derived from the world (stays deterministic)
   assert.ok(svg.includes(world.title.title), "name derived from the world");
 });

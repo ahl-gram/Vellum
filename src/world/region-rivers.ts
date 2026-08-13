@@ -10,19 +10,10 @@ import {
 import type { UvWindow } from "../terrain/heightfield.ts";
 import type { World } from "./types.ts";
 
-// Cover a projected major-river cell and its 2-cell neighbourhood, so a shadowing
-// extracted river is recognised even where the two grids disagree by a cell or two.
 const SHADOW_RADIUS = 2;
-// Drop an extracted river when at least half its cells shadow a projected major:
-// the major is authoritative there, and keeping both would ink the same river twice.
 const SHADOW_FRACTION = 0.5;
 
-/**
- * How many region cells cover one world cell's area of the window: the areal
- * density ratio. Flow accumulation counts (rain-weighted) upstream cells, so it
- * scales linearly with this ratio (#162), which is why the world river threshold
- * multiplies by it with the physical exponent 1.
- */
+/** Areal density ratio: flow accumulation scales linearly with it, so the world river threshold multiplies by it with exponent 1. */
 export function regionDensityRatio(
   worldGridW: number,
   worldGridH: number,
@@ -35,7 +26,6 @@ export function regionDensityRatio(
   return ((gridW - 1) * (gridH - 1)) / (du * dv * (worldGridW - 1) * (worldGridH - 1));
 }
 
-/** The parent world's river threshold, computed the way generateWorld did. */
 function worldRiverThreshold(world: World): number {
   const { data } = world.elev;
   const acc = world.flow.acc;
@@ -47,9 +37,6 @@ function worldRiverThreshold(world: World): number {
   return riverThreshold(landAcc); // default quantile 0.985, minAcc 8 (matches generateWorld)
 }
 
-/** The parent world's MAJOR rivers, split into their in-window runs and projected
- *  to region cells. Accumulation scales by the density ratio so the drawn stroke
- *  width matches the region's own re-derived rivers at this zoom. */
 function projectWorldMajors(
   world: World,
   window: UvWindow,
@@ -78,7 +65,6 @@ function projectWorldMajors(
           y: clamp(((v - window.v0) / dv) * (gridH - 1), 0, gridH - 1),
           acc: p.acc * density,
         });
-        // the true mouth reaches the sea only on the run that ends the river
         if (i === river.points.length - 1) flush(river.endsInOcean);
       } else {
         flush(false);
@@ -89,19 +75,7 @@ function projectWorldMajors(
   return runs;
 }
 
-/**
- * Region rivers, anchored to the parent world (#162). A cropped window re-runs
- * flow on its own grid, so a river entering from outside loses all of its
- * upstream drainage area and would vanish; the empirical cross-band test found NO
- * threshold exponent that restores it (missing area, not miscalibration). Two
- * additive fixes, then, and they cover different failure modes:
- *  - extract at a density-scaled ABSOLUTE threshold (exponent 1) so interior
- *    streams do not over- or under-draw against a window-local quantile;
- *  - lay the parent world's MAJOR rivers in as the authoritative through-network
- *    so named world rivers never vanish at the boundary.
- * Extracted rivers that shadow a projected major are dropped, so no river is
- * inked twice; the rest are the genuinely new finer detail the zoom reveals.
- */
+/** A cropped window loses upstream drainage, and NO threshold exponent restores it (missing area, not miscalibration): so extract at a density-scaled absolute threshold, and lay the parent's major rivers in as the authoritative through-network. */
 export function anchorRegionRivers(
   world: World,
   window: UvWindow,

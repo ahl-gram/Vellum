@@ -4,12 +4,7 @@ import { mkdir, readFile, rm } from "node:fs/promises";
 import { main } from "../../src/cli/main.ts";
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
 
-// The `chart` verb is the reproducibility covenant's one-command proof, and after
-// the CLI diet (#138) it is the ONLY verb main.ts carries. Nothing exercised main()'s
-// boundary before this: arg parsing -> generateWorld -> renderMap -> file. These pin
-// that boundary at the STRUCTURE level (the SVG's stamped recipe), never at bytes: an
-// SVG byte-compare drifts across OS/Node (Math.sin/cos are not correctly rounded) and
-// would red on CI. The --png path stays covered by raster.test.ts.
+// The chart verb is the covenant's one-command proof and, after the #138 CLI diet, the ONLY verb main.ts carries. Pinned at the STRUCTURE level (the stamped recipe), never bytes: an SVG byte-compare drifts across OS/Node; the --png path stays covered by raster.test.ts.
 
 const TMP = "out/test-tmp-chart";
 

@@ -4,11 +4,6 @@ import type { RenderCtx } from "../context.ts";
 import type { CartouchePlan } from "./cartouche.ts";
 import type { CompassPlan } from "./compass.ts";
 
-/**
- * Prevailing-wind arrows over open water (nautical charts). One seeded
- * direction per world, feathered shafts with a little angular jitter so
- * they read as hand-noted observations rather than a stamped pattern.
- */
 export function windsLayer(
   ctx: RenderCtx,
   cartouche: CartouchePlan,
@@ -33,9 +28,6 @@ export function windsLayer(
     for (let gx = 4; gx < w - 4; gx += 3) {
       const d = world.oceanDist[gx + gy * w] as number;
       if (d < 6) continue;
-      // #251: gate to the parent's genuine sea so a region's wind arrows never land
-      // in an inland lake (oceanDist alone cannot tell a lake from the sea). Inert on
-      // world sheets, so the committed goldens stay byte-identical.
       if (world.region?.seaGate && world.region.seaGate[gx + gy * w] === 0) continue;
       const px = proj.px(gx);
       const py = proj.py(gy);
@@ -59,11 +51,9 @@ export function windsLayer(
     const y1 = spot.y - (dy * len) / 2;
     const x2 = spot.x + (dx * len) / 2;
     const y2 = spot.y + (dy * len) / 2;
-    // chevron head
     const ha = a + Math.PI * 0.82;
     const hb = a - Math.PI * 0.82;
     const hl = 6.5 * k;
-    // feather ticks at the tail
     const fa = a + Math.PI / 2;
     const ticks: string[] = [];
     for (const t of [0, 0.18]) {
@@ -93,11 +83,6 @@ export function windsLayer(
   return el("g", { id: "layer-winds" }, arrows);
 }
 
-/**
- * Faint streaks across the Rainfall plate's land, following the prevailing
- * wind, so the plate shows the wind that (from #74) drives it. Null for any
- * other theme. Clipped to the coastline; the nautical arrows keep the sea.
- */
 export function windStreamsLayer(ctx: RenderCtx): SvgNode | null {
   if (ctx.theme !== "moisture") return null;
   const { style, world, proj, rng } = ctx;
@@ -126,7 +111,6 @@ export function windStreamsLayer(ctx: RenderCtx): SvgNode | null {
       el("path", {
         d: `M${x1.toFixed(1)} ${y1.toFixed(1)}L${(x1 + dx * len).toFixed(1)} ${(y1 + dy * len).toFixed(1)}`,
         fill: "none",
-        // the strong ink: inkSoft washes out against the moisture fills
         stroke: style.ink,
         "stroke-width": (1.0 * k).toFixed(2),
         "stroke-opacity": 0.35,

@@ -5,11 +5,6 @@ export type Lake = {
   readonly centroid: { readonly x: number; readonly y: number };
 };
 
-/**
- * Inland water: below-sea-level cells not connected to the border sea.
- * (Edge-falloff worlds always carry their ocean to the border, so
- * anything water-locked inland is a lake.)
- */
 export function findLakes(
   elev: Field,
   seaLevel: number,
@@ -40,7 +35,6 @@ export function findLakes(
     }
   };
 
-  // mark all border-connected water as sea
   for (let x = 0; x < w; x++) {
     for (const y of [0, h - 1]) {
       const i = x + y * w;

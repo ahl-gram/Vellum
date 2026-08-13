@@ -1,25 +1,13 @@
-// Glass Sub 9 (#170) Ceremony (G): the antique voice on the zoom cluster, the voiced
-// glide, and the redraft ink-in with tier-staggered name dry-in. Per the D-pattern,
-// these assert the PLUMBING (classes, tokens, inline dash props, aria/microcopy),
-// mid-flight and at rest, present normally and collapsed under reduced motion; the
-// choreography itself is eyeballed via out/ screenshots.
-//
-// Ground truth at seed 42 (scratch scan, 2026-07-19): the world sheet labels 25 of 26
-// settlements; the band-1 window centred (0.5, 0.5) newly labels exactly Lokai
-// (village); the k=3.6 hop to band 2 at the same centre reveals no new name. The
-// checks assert the self-consistent invariant (every dry-in name is absent from the
-// outgoing sheets' labels) rather than hardcoding names; Lokai is logged as detail.
+// Glass ceremony e2e (G, #170): the antique voice on the zoom cluster, the voiced glide, and the redraft ink-in; asserts the PLUMBING (classes, tokens, inline dash props, aria), while the choreography itself is eyeballed via out/ screenshots.
+// Measured ground truth at seed 42 (2026-07-19 scan): the world sheet labels 25 of 26 settlements, the band-1 window at (0.5, 0.5) newly labels exactly Lokai, and the k=3.6 hop to band 2 reveals no new name.
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled } = ctx;
 
-  // Clean antique seed-42 base, chronicle/voyage off, camera home, redraft OFF for
-  // the voice + glide block (geometric only; the ceremony block turns it on below).
   await evaluate(`(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
   await waitSettled("glass-ceremony-base");
   await evaluate(`window.__vellumSetRedraftEnabled(false)`);
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 
-  // Shared helpers (suite-zoom's idioms).
   const st = () => evaluate(`window.__vellumZoomState()`);
   const settleK = async (target) => {
     for (let i = 0; i < 100; i++) {
@@ -45,21 +33,11 @@ export async function run(ctx) {
     return await rgn();
   };
 
-  // G1: the cluster speaks in the antique voice and the keys legend is VISIBLE (Sub 4's
-  // handoff: the keys were announced only via the viewport aria-label, undiscoverable by
-  // a sighted mouse user; Alex chose a small legend by the cluster). Structural: group
-  // label, per-button voiced title + functional aria-label, drawn svg glyphs (no bare
-  // "+"/"-" text glyphs), and the legend present, aria-hidden, with visible text.
   const g1 = await evaluate(`(()=>{
     const grp=document.getElementById("zoom-controls");
     const btn=(id)=>{const b=document.getElementById(id);return{title:b.getAttribute("title"),aria:b.getAttribute("aria-label"),svg:!!b.querySelector("svg"),text:(b.textContent||"").trim()};};
     const legend=grp?grp.querySelector(".zoom-keys"):null;
     const legendVisible=!!legend&&legend.offsetWidth>0&&legend.offsetHeight>0;
-    // The hide rules, declaration-level (the F2 containment pattern): every media rule
-    // that hides .zoom-keys and mentions hover must ALSO require pointer: coarse. A bare
-    // (hover: none) over-matches pointerless environments (linux headless CI reports
-    // hover: none with pointer: NONE), hiding the legend exactly where a keyboard user
-    // could use it.
     let hideRules=0, hoverHideRules=0, coarseScopedHideRules=0;
     for(const ss of document.styleSheets){
       let rules;try{rules=ss.cssRules;}catch(e){continue;}
@@ -85,8 +63,6 @@ export async function run(ctx) {
       hideRules,hoverHideRules,coarseScopedHideRules,
       hoverNone:matchMedia("(hover: none)").matches,pointerCoarse:matchMedia("(pointer: coarse)").matches};
   })()`);
-  // legendVisible is asserted only where the environment says a legend SHOULD show
-  // (not a touch-primary device); the declaration check pins the scoping everywhere.
   const touchPrimary = g1.hoverNone && g1.pointerCoarse;
   check(
     "G1 the cluster speaks in the antique voice and the keys legend is visible by it (#170 voice + Sub 4 handoff)",
@@ -100,8 +76,6 @@ export async function run(ctx) {
     JSON.stringify(g1),
   );
 
-  // G2a: a button press GLIDES (animated, not instant): immediately after the click the
-  // camera has not yet reached the step target, then it settles exactly there.
   const g2aNow = await evaluate(`(()=>{document.getElementById("zoom-in").click();return window.__vellumZoomState().k;})()`);
   const g2aEnd = await settleK(1.4);
   check(
@@ -110,8 +84,6 @@ export async function run(ctx) {
     `immediately=${g2aNow} settled=${g2aEnd.k}`,
   );
 
-  // G2b: rapid presses COMPOUND against the pending glide target (never the mid-flight k):
-  // from home, two back-to-back presses land 1.4^2 = 1.96 exactly like two settled ones.
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await evaluate(`(()=>{const b=document.getElementById("zoom-in");b.click();b.click();})()`);
   const g2b = await settleK(1.96);
@@ -121,11 +93,7 @@ export async function run(ctx) {
     `settled=${g2b.k}`,
   );
 
-  // G2b2: the CROSS-FRAME burst (review finding). d3 starts a superseding transition one
-  // frame after it is scheduled, at which point it interrupts its predecessor -- whose
-  // end/interrupt handler must NOT clear the newer press's pending target (the glideSeq
-  // guard). Three presses spaced ~60ms (well past a frame, well inside the 300ms glide)
-  // must land 1.4^3 = 2.744, not a compound off some mid-flight k.
+  // d3 starts a superseding transition one frame after scheduling it, interrupting its predecessor, whose end/interrupt handler must NOT clear the newer press's pending target (the glideSeq guard).
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await evaluate(
     `(async()=>{const b=document.getElementById("zoom-in");const wait=(ms)=>new Promise(r=>setTimeout(r,ms));` +
@@ -139,9 +107,6 @@ export async function run(ctx) {
     `settled=${g2b2.k}`,
   );
 
-  // G2c: the keyboard rides the same glide, and "0" glides home AND drops cx/cy/k from the
-  // hash once the leaf lands (the explicit syncHash moved to the glide's end; a link copied
-  // after the home settles must never carry a stale camera).
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await evaluate(`(()=>{const vp=document.getElementById("map-viewport");vp.focus();vp.dispatchEvent(new KeyboardEvent("keydown",{key:"+",bubbles:true}));})()`);
   const g2cIn = await settleK(1.4);
@@ -161,8 +126,6 @@ export async function run(ctx) {
     `in=${g2cIn.k} home=${JSON.stringify(g2cHome)} hash=${JSON.stringify(g2cHash)}`,
   );
 
-  // G3: reduced motion collapses the glide to the instant baseline Sub 4 shipped: the
-  // button lands its step and "0" lands home IN THE SAME TURN, hash already clean.
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   const g3 = await evaluate(`(()=>{
     window.__vellumZoomTo({k:1,x:0,y:0});
@@ -181,15 +144,8 @@ export async function run(ctx) {
   );
   await send("Emulation.setEmulatedMedia", { features: [] });
 
-  // ---- The redraft ceremony (redraft ON from here) ------------------------------------
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
 
-  // G4: the redraft INKS ITSELF IN (AC1). Settle at the Z17 framing; at the commit the
-  // incoming inset svg carries .redrafting, its coastline is dashed for the ink draw
-  // (inline stroke-dasharray + --draw-len, the startArrival technique at the shorter
-  // redraft grade), and the name dry-in is tagged: at least one newly labeled settlement
-  // group carries .dry-in, EVERY .dry-in name is absent from the world sheet's placed
-  // labels (self-consistent, name-keyed), and every persisting labeled name carries none.
   const before4 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const s4 = await waitRedraft(before4);
@@ -221,9 +177,6 @@ export async function run(ctx) {
   await sleep(600); // into the village wait: the newly revealed name is mid-dry
   await shoot("explorer-sub9-redraft-dryin.png"); // manual: Lokai drying in while the persisting names stand
 
-  // G4b: the ceremony rests PRISTINE (the D2 discipline): every animation in the inset
-  // finishes, the inline dash + --draw-len are removed on animationend (byte-for-byte
-  // resting stroke, round joins intact), nothing left running.
   const g4b = await evaluate(`(async()=>{
     const svg=document.querySelector("#map .region-inset svg");
     await Promise.all(svg.getAnimations({subtree:true}).map(a=>a.finished.catch(()=>{})));
@@ -238,8 +191,6 @@ export async function run(ctx) {
   );
   await shoot("explorer-sub9-redraft-rested.png"); // manual: the committed survey at rest
 
-  // G5: the tier stagger is DECLARED (CSSOM, the F1/F2 pattern): the redraft tokens exist
-  // and the village wait is later than the town wait, so newly revealed towns dry first.
   const g5 = await evaluate(`(()=>{
     const cs=getComputedStyle(document.documentElement);
     const ms=(v)=>{const s=(v||"").trim();return s.endsWith("ms")?parseFloat(s):s.endsWith("s")?parseFloat(s)*1000:NaN;};
@@ -263,9 +214,6 @@ export async function run(ctx) {
     JSON.stringify(g5),
   );
 
-  // G7: a deeper hop re-inks the coast (the ceremony fires on EVERY redraft) but re-reveals
-  // nothing: every name the band-2 sheet labels was already labeled on the outgoing
-  // composition at this centre (measured ground truth), so zero .dry-in tags.
   const before7 = (await rgn()).redrafts;
   await enterAt(3.6, 0.5, 0.5);
   const s7 = await waitRedraft(before7);
@@ -282,9 +230,6 @@ export async function run(ctx) {
     `band=${s7.band} ${JSON.stringify(g7)}`,
   );
 
-  // G8: the voiced home from a committed band: one press of the full-sheet button fades the
-  // inset off over the world chart while the camera GLIDES home; at the landing the hash is
-  // clean and the world overlay is back (the easeHome + glideHome pairing).
   await evaluate(`document.getElementById("zoom-reset").click()`);
   const g8cam = await settleHome();
   let g8 = null;
@@ -300,9 +245,6 @@ export async function run(ctx) {
     `cam=${JSON.stringify(g8cam)} ${JSON.stringify(g8)}`,
   );
 
-  // G6: reduced motion collapses the WHOLE ceremony to Sub 8's instant swap (AC2): the
-  // commit lands with no .redrafting, no dashed coast, no .dry-in tags, zero functional
-  // loss (band, title, overlay all land as normal).
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   const before6 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
@@ -322,8 +264,6 @@ export async function run(ctx) {
   );
   await send("Emulation.setEmulatedMedia", { features: [] });
 
-  // Restore: inset off, camera home, redraft OFF (geometric-only for the suites that
-  // follow), clean antique seed-42 base.
   await evaluate(`document.getElementById("zoom-reset").click()`);
   await settleHome();
   await evaluate(`window.__vellumSetRedraftEnabled(false)`);

@@ -1,29 +1,6 @@
 import { NEIGHBORS_8 } from "./grid.ts";
 
-/**
- * Single-source, single-target 8-connected BFS over a grid, reconstructing the
- * cell chain through first-discovery predecessors. Returns the chain from `start`
- * to the nearest cell satisfying `isGoal` (inclusive), or null when none is
- * reachable across `passable` cells.
- *
- * A sibling of bfs-distance.ts rather than an extension of it: `bfsDistance` is a
- * multi-source distance FIELD with no predecessors, and world generation calls it
- * on every draw (generate.ts builds `oceanDist` with it). Bolting a predecessor
- * array onto that would allocate a second w*h array per world for callers that
- * never read it. Different contract, different function.
- *
- * `start` is enqueued whether or not it is passable, because the voyage's sea legs
- * launch from a LAND port under a sea-only passability test. A goal cell, by
- * contrast, is only ever discovered through `passable`, so an impassable goal is
- * reachable only when it IS the start.
- *
- * INVARIANT: determinism rests on there being no float compare here. Hops are
- * integers, the frontier is FIFO, and NEIGHBORS_8 is a fixed order, so every cell
- * is discovered from exactly one predecessor and identical inputs reconstruct an
- * identical chain. Swapping this for a cost-weighted Dijkstra (diagonals at
- * Math.SQRT2) would reintroduce exactly the float ordering the project forbids
- * relying on across engines.
- */
+/** start is enqueued even when impassable (the voyage's sea legs launch from a LAND port). Determinism rests on integer hops, a FIFO frontier, and the fixed NEIGHBORS_8 order; a float-cost Dijkstra would reintroduce cross-engine float ordering. */
 export function bfsPath(
   w: number,
   h: number,
@@ -55,7 +32,6 @@ export function bfsPath(
       if (seen[ni] || !passable(ni)) continue;
       seen[ni] = 1;
       prev[ni] = i;
-      // Checked on discovery, so the FIRST goal found is the fewest-hops one.
       if (isGoal(ni)) return reconstruct(prev, start, ni);
       queue[tail++] = ni;
     }

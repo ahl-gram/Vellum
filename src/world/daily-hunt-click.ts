@@ -3,10 +3,6 @@ import type { Quarry } from "./daily-hunt.ts";
 
 export type DistanceBand = "cold" | "cool" | "warm" | "hot";
 
-/**
- * Map a grid distance to a warmer/colder band for click feedback. Monotonic:
- * a direct hit (distance 0) is "hot", and increasing distance never warms.
- */
 export function classifyDistanceBand(gridDist: number, gridDiagonal: number): DistanceBand {
   const ratio = gridDiagonal > 0 ? gridDist / gridDiagonal : 0;
   if (ratio <= 0.1) return "hot";
@@ -15,27 +11,16 @@ export function classifyDistanceBand(gridDist: number, gridDiagonal: number): Di
   return "cold";
 }
 
-/** The outcome of one hunt click: a win, or a miss with warmer/colder guidance. */
 export type ClickFeedback =
   | { readonly kind: "hit" }
   | {
       readonly kind: "miss";
       readonly band: DistanceBand;
-      /** The click's own distance to the quarry, in grid units (#327): lets the
-       *  app rank soundings for "warmest yet" without re-deriving quarry geometry. */
       readonly dist: number;
       readonly pickedIdx: number;
       readonly pickedName: string;
     };
 
-/**
- * Classify one map click (in grid coordinates) into hunt feedback. The player
- * "selects" the settlement nearest the click; if that is the quarry it is a win
- * (unchanged from the original hunt). Otherwise the warmer/colder band is scored
- * from the CLICK-to-quarry distance -- continuous, so stepping toward the quarry
- * always warms -- and the selected settlement is named so a cluster of identical
- * village glyphs is no longer an indistinguishable dead-end "Hot".
- */
 export function classifyClick(
   world: World,
   quarry: Quarry,

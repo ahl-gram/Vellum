@@ -1,6 +1,5 @@
 import { createField, type Field } from "../core/grid.ts";
 
-/** Gradient magnitude via central differences (one-sided at edges). */
 export function slopeField(elev: Field): Field {
   const { w, h, data } = elev;
   const at = (x: number, y: number): number => data[x + y * w] as number;

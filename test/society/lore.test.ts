@@ -12,11 +12,7 @@ import {
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import type { NamedSettlement, World } from "../../src/world/types.ts";
 
-// createLoreWriter reads world.culture.id, world.elev.w, world.biomes[idx],
-// and world.history.events (for event-driven notes), so a minimal stub
-// exercises the gazetteer prose without standing up a whole world. An empty
-// history means no founding/ruin clauses, isolating the situational lines.
-// biomes left as ocean (0) so no biome note is appended.
+// createLoreWriter reads only culture.id, elev.w, biomes[idx], and history.events, so a minimal stub isolates the situational lines (empty history = no founding/ruin clauses; ocean biomes = no biome note).
 function stubWorld(cultureId: string): World {
   return {
     culture: { id: cultureId },
@@ -37,8 +33,7 @@ function harbor(i: number): NamedSettlement {
   } as unknown as NamedSettlement;
 }
 
-// goods that should never appear after "smell of": minerals and pelts have
-// no aroma. The reported bug was "Its quays smell of obsidian."
+// Goods that must never follow "smell of": minerals and pelts have no aroma; the reported bug was "Its quays smell of obsidian."
 const NON_AROMATIC = [
   "obsidian",
   "black pearls",
@@ -85,8 +80,7 @@ test("lore is deterministic for a given seed", () => {
   }
 });
 
-// contract pins for the reworked pools (red was verified above against the
-// pre-refactor code; these guard the new behavior from regressing)
+// Contract pins for the reworked pools (red was verified against the pre-refactor code).
 
 test("gazetteer notes reference the world's history (ruins + dated foundings)", () => {
   const w = generateWorld(defaultRecipe(42));

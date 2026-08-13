@@ -2,9 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { bfsPath } from "../../src/core/bfs-path.ts";
 
-// #120: the one path-finder behind both voyage leg kinds. A road leg walks it over
-// the road-cell mask, a sea leg over the sea mask, so every property proven here is
-// proven for both. Grids below are hand-drawn so the expected chain is exact.
+// #120: the one path-finder behind both voyage leg kinds (road legs walk the road mask, sea legs the sea mask), so every property here is proven for both; grids are hand-drawn so the expected chain is exact.
 
 /** Parse a picture grid: '.' passable, '#' blocked. Returns {w,h,passable}. */
 function pic(rows: string[]) {
@@ -30,7 +28,6 @@ test("start === goal yields the single-cell chain", () => {
 });
 
 test("routes around a wall instead of through it", () => {
-  // A 5x3 grid with a wall down the middle column, open along the bottom row.
   const { w, h, passable } = pic([
     "..#..",
     "..#..",
@@ -66,8 +63,7 @@ test("returns null when the goal predicate matches nothing", () => {
 });
 
 test("an impassable start still reaches a goal it already stands on", () => {
-  // The sea-leg launch calls this from a LAND port with a sea-only passability
-  // test; the start must be allowed to sit off the passable set.
+  // The sea-leg launch calls this from a LAND port with a sea-only passability test, so the start must be allowed to sit off the passable set.
   const { w, h } = pic(["..", ".."]);
   const path = bfsPath(w, h, 0, (c) => c === 0, () => false);
   assert.deepEqual(path, [0]);
@@ -83,7 +79,6 @@ test("moves 8-connected: a diagonal is one hop, not two", () => {
 test("finds the NEAREST goal when several match (first-discovered wins)", () => {
   const { w, h, passable } = pic(["......"]);
   const at = cell(w);
-  // goals at x=2 and x=5; the nearer must win
   const path = bfsPath(w, h, at(0, 0), (c) => c === at(2, 0) || c === at(5, 0), passable)!;
   assert.equal(path[path.length - 1], at(2, 0));
 });

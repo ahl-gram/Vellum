@@ -5,11 +5,6 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-/**
- * SVG → PNG without adding a rasterizer dependency: drive whatever
- * Chromium-family browser is already installed, headless.
- */
-
 const MAC_BROWSERS = [
   "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",

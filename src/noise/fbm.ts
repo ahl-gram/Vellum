@@ -10,10 +10,7 @@ export type WarpOptions = FbmOptions & {
   warpStrength?: number;
 };
 
-/**
- * Per-octave coordinate offsets so lattice zeros never align across
- * octaves (aligned zeros imprint a visible grid on the terrain).
- */
+/** Per-octave offsets so lattice zeros never align across octaves and imprint a visible grid. */
 const OCTAVE_OFFSETS: ReadonlyArray<readonly [number, number]> = [
   [0, 0],
   [127.1, 311.7],
@@ -27,7 +24,6 @@ const OCTAVE_OFFSETS: ReadonlyArray<readonly [number, number]> = [
 
 const OCTAVE_SEED_STEP = 1013904223;
 
-/** Fractal Brownian motion, normalized to ~[-1, 1]. */
 export function fbm2(
   x: number,
   y: number,
@@ -54,7 +50,6 @@ export function fbm2(
   return sum / norm;
 }
 
-/** Ridged multifractal-style noise in [0, 1] — sharp crests near 1. */
 export function ridged2(
   x: number,
   y: number,
@@ -85,7 +80,6 @@ export function ridged2(
   return sum / norm;
 }
 
-/** fBm sampled through a domain-warped coordinate frame. */
 export function warped2(
   x: number,
   y: number,

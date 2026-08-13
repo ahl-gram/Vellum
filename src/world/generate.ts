@@ -48,18 +48,12 @@ function weightedPick<T>(
   return (pairs[pairs.length - 1] as readonly [T, number])[0];
 }
 
-// A world's identity (terrain, realms, names, rivers) derives from the seed and
-// grid alone, never from which entry point draws it: the `chart` CLI verb, the
-// deploy's atlas/gallery builders, and the Print Room all resolve the SAME world
-// for a seed (the #26 invariant; it used to live in a per-command recipe wrapper,
-// src/cli/recipe.ts, retired with the CLI diet in #138).
+// A world's identity derives from the seed and grid alone, never from which entry point draws it.
 export function defaultRecipe(
   seed: number,
   overrides: Partial<WorldRecipe> = {},
 ): WorldRecipe {
   const rng = createRng(seed).fork("recipe");
-  // the seed always rolls every pick — overrides replace results, never
-  // skip draws, so forcing one parameter cannot shift the others
   const rolledType = weightedPick(MAP_TYPE_WEIGHTS, rng.next());
   const rolledBand = weightedPick(BAND_WEIGHTS, rng.next());
   const mapType = overrides.mapType ?? rolledType;
@@ -95,10 +89,8 @@ export function generateWorld(recipe: WorldRecipe): World {
   });
   const seaLevel = pickSeaLevel(elev, recipe.landFraction);
 
-  // one prevailing direction per world; its own fork so no other stream shifts
   const winds = { dir: rng.fork("winds").range(0, Math.PI * 2) };
 
-  // base moisture drives rainfall; final climate adds river wetness after
   const preClimate = computeClimate(elev, seaLevel, seed, {
     band: recipe.band,
     windDir: winds.dir,
@@ -134,11 +126,6 @@ export function generateWorld(recipe: WorldRecipe): World {
   );
 
   const roads = buildRoads(elev, seaLevel, riverCells, settlements);
-  // #140/#141 natural frontiers the realm flood may claim but never cross: major
-  // rivers (a distinct mask from riverCells, which is all rivers at soft cost) united
-  // with large mountain crests (elevation-gated watershed divides). Only these wall
-  // the flood, so a border falls onto the river or ridge where two realms meet across
-  // it. This supersedes #80's border snap entirely.
   const frontierMask = new Uint8Array(gridW * gridH);
   for (const r of rivers) {
     if (!isMajorRiver(r)) continue;
@@ -204,7 +191,6 @@ export function generateWorld(recipe: WorldRecipe): World {
         : [],
   };
 
-  // a city-state's chart is named for its city
   const capitalName = named.find((s) => s.kind === "capital")?.name;
   const title = makeMapTitle(
     rng.fork("title"),
@@ -213,8 +199,6 @@ export function generateWorld(recipe: WorldRecipe): World {
     citystate ? capitalName : undefined,
   );
 
-  // history runs LAST on its own fork: appending it cannot reshuffle any
-  // earlier stream, so geography, names, and the title are unchanged.
   const history = simulateHistory(
     {
       settlements: named,

@@ -1,25 +1,6 @@
 import type { PlaceMark } from "./place-manifest.ts";
 import { orderTour, refineTour } from "./voyage-tour.ts";
 
-/**
- * The pure core of the Wayfarer's Passage (#117, Sub 1 = #118). It turns a place
- * manifest into a deterministic survey itinerary: an ordered list of ports
- * starting at the capital, the legs that connect them, and one dated log line per
- * port in the surveyor's period voice.
- *
- * No DOM, no RNG. The animated overlay (a dotted track with a moving marker, the
- * log lines streamed into #status) lives in src/site/living-chart/voyage.ts (Sub 2) and
- * is covered by the Explorer e2e. Only this deterministic math lives here, kept
- * engine-side with no worker or draw-payload changes.
- *
- * Determinism is same-input-same-output plus idx tiebreaks: every selection keys
- * on the settlement's `idx`, never its array position, so a shuffled manifest
- * yields a byte-identical plan. Sub 3 (#120) swaps only the leg geometry and Sub 4
- * (#121) swaps only the log prose; both keep this plan shape and these callers.
- * #184 adds reorderPlanByTravel below: the overlay refines this plan's straight-line
- * order on actual routed travel before drawing it.
- */
-
 export type VoyageLeg = {
   readonly fromIdx: number;
   readonly toIdx: number;
@@ -38,16 +19,6 @@ export type VoyagePlan = {
 
 const EMPTY_PLAN: VoyagePlan = { ports: [], legs: [] };
 
-/**
- * The legs of a CLOSED itinerary (#275): each consecutive pair, then the closing leg
- * home to the origin. So `legs.length === ports.length` from two ports up, where it was
- * `ports.length - 1` while the survey rested where it ended.
- *
- * INVARIANT: a one-port survey has NO legs. A closing leg from the capital to itself
- * would route a zero-length track, draw a mark standing on its own start, and log a
- * homecoming from nowhere. The port list itself never repeats the capital either: the
- * homecoming is an arrival at a port already visited, not a second port.
- */
 function closedLegs(ports: ReadonlyArray<{ readonly idx: number }>): VoyageLeg[] {
   const legs: VoyageLeg[] = [];
   for (let i = 1; i < ports.length; i++) {
@@ -67,16 +38,6 @@ function logLineFor(place: PlaceMark, presentYear: number, isOrigin: boolean): s
   return `Year ${presentYear}: we came to ${place.name}, a ${noun} standing since ${place.founded}.`;
 }
 
-/**
- * Build a deterministic voyage itinerary from a place manifest.
- *
- * The survey departs the single capital (its home port, included even if the
- * chronicle later ruined it), visits every living town and village once, and sails
- * home: a closed round trip that sweeps AROUND the world rather than backtracking
- * (the tour algorithm lives in voyage-tour.ts). #275 closed it; before that it was an
- * open path that rested wherever it ended. A world with no capital has no survey and
- * yields an empty plan.
- */
 export function buildVoyagePlan(
   places: ReadonlyArray<PlaceMark>,
   presentYear: number,
@@ -84,10 +45,6 @@ export function buildVoyagePlan(
   const origin = places.find((p) => p.kind === "capital");
   if (!origin) return EMPTY_PLAN;
 
-  // The survey visits the capital plus every living town/village. The origin is kept
-  // even if the chronicle later ruined it (a ruined capital still departs); other
-  // ruins are excluded. Ordering keys on nx/ny (chart fractions), the same layout the
-  // marker draws over, so the drawn route matches the plotted one.
   const survey = places.filter((p) => p.idx === origin.idx || !p.ruined);
   const order = orderTour(survey.map((p) => ({ idx: p.idx, x: p.nx, y: p.ny })), origin.idx);
   const byIdx = new Map(places.map((p) => [p.idx, p]));
@@ -102,13 +59,6 @@ export function buildVoyagePlan(
   return { ports, legs: closedLegs(ports) };
 }
 
-/**
- * Rebuild a plan's ports and legs in the given visiting order (#184). `order` must
- * be a permutation of the plan's port idxs that keeps the origin first; each port
- * keeps its own log line (only the origin's line is position-bound, and the origin
- * does not move). Validated here because the order arrives from a caller-supplied
- * refinement, and a bad one would surface far away as a mid-sweep missing port.
- */
 export function applyTourOrder(plan: VoyagePlan, order: ReadonlyArray<number>): VoyagePlan {
   const current = plan.ports.map((p) => p.idx);
   const sameSet =
@@ -127,59 +77,21 @@ export function applyTourOrder(plan: VoyagePlan, order: ReadonlyArray<number>): 
   return { ports, legs: closedLegs(ports) };
 }
 
-/**
- * Reorder a plan's itinerary on ACTUAL travel distances (#184). `d` measures the
- * routed miles between two ports by idx (prepareVoyageRouter's legLength), so the
- * order is chosen on exactly the miles the drawn legs will ride, where the
- * straight-line tour above can still place two ports adjacent whose real road/sea
- * path backtracks. The straight-line plan seeds the refinement; the result never
- * rides more miles than it.
- */
 export function reorderPlanByTravel(plan: VoyagePlan, d: (a: number, b: number) => number): VoyagePlan {
   if (plan.ports.length <= 2) return plan;
   return applyTourOrder(plan, refineTour(plan.ports.map((p) => p.idx), d));
 }
 
-/**
- * How many margin-log entries a plan yields (#275): one departure plus one per leg.
- * NOT `ports.length`. Under the round trip the closing leg earns its own homecoming
- * entry, so a plan with n ports has n legs and n + 1 entries. An empty plan has none.
- *
- * INVARIANT: this is the completion threshold the overlay compares `frame.arrived`
- * against. `arrived` runs 1..legCount + 1, so it reaches this value exactly at t = 1.
- * Comparing against `ports.length` instead would post the survey's one #status summary
- * a leg EARLY (when the mark reaches the last port, before it sails home) and then
- * again at the homecoming, which is the "posts exactly once" criterion broken twice.
- */
 export function logEntryCount(plan: VoyagePlan): number {
   return plan.ports.length === 0 ? 0 : plan.legs.length + 1;
 }
 
-/**
- * A frame of the sweep: which leg the marker is on, how far along it (0..1), and how
- * many log entries it has earned so far (the departure counts, so `arrived` runs
- * 1..legCount+1; on a round trip the last of those is the homecoming, not a new port).
- */
 export type VoyageFrame = {
   readonly legIndex: number;
   readonly legT: number;
   readonly arrived: number;
 };
 
-/**
- * The animation timeline as a pure function of progress `t` (0..1), with time split
- * EQUALLY across legs so the survey arrives at a steady cadence (one log line per
- * port). Geometry (the port pixel positions, the marker) stays in the overlay; this
- * is only the deterministic progress math, so it is unit-tested like the plan.
- *
- * Assumes a non-empty plan. `legCount <= 0` is the one-port survey: the marker rests at
- * the origin, which counts as arrived.
- *
- * #275 left this function untouched on purpose. `arrived` has always run 1..legCount + 1,
- * which under the closed tour is exactly the margin log's entry count (a departure plus
- * one per leg), so the reveal still lands one row per arrival with the homecoming last.
- * What did change is who it is compared against: logEntryCount above, never ports.length.
- */
 export function frameAt(legCount: number, t: number): VoyageFrame {
   if (legCount <= 0) return { legIndex: -1, legT: 0, arrived: 1 };
   const clamped = t < 0 ? 0 : t > 1 ? 1 : t;

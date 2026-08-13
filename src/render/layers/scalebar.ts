@@ -2,13 +2,8 @@ import { el, type SvgNode } from "../svg.ts";
 import type { Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 
-/** Grid cells per league; exported for the daily hunt's leagues clue (#335)
- *  so the clue and the printed scale bar can never disagree. */
 export const CELLS_PER_LEAGUE = 2.2;
 const NICE_TOTALS = [20, 30, 40, 50, 60, 80, 100, 120, 150, 200];
-// #249: a regional survey zooms in (up to 8x), so px-per-league grows until even
-// the smallest world total (20) overruns the frame. Extend the ladder downward
-// with smaller round totals, all even so the mid tick (total / 2) stays whole.
 const REGION_NICE_TOTALS = [2, 4, 10, ...NICE_TOTALS];
 
 export type ScalebarPlan = { readonly box: Box };
@@ -31,7 +26,6 @@ export function planScalebar(ctx: RenderCtx): ScalebarPlan {
 export function scalebarLayer(ctx: RenderCtx, plan: ScalebarPlan): SvgNode {
   const { style, proj, world } = ctx;
   const k = proj.widthPx / 1500;
-  // leagues are defined in WORLD cells; regional charts zoom the scale
   const worldCellsPerCell = world.region
     ? ((world.region.window.u1 - world.region.window.u0) *
         (world.region.worldGridW - 1)) /
@@ -42,10 +36,6 @@ export function scalebarLayer(ctx: RenderCtx, plan: ScalebarPlan): SvgNode {
 
   let total: number;
   if (world.region) {
-    // #249: at a region's zoom the bar must FIT the plot, not merely sit closest
-    // to the target width, or a deep survey's bar overruns the frame. Take the
-    // largest round total whose bar is within target, falling back to the smallest
-    // (the extended ladder's floor always fits, so this never overflows).
     total = REGION_NICE_TOTALS[0] as number;
     for (const t of REGION_NICE_TOTALS) {
       if (t * pxPerLeague <= target) total = t;

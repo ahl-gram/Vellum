@@ -4,22 +4,8 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { API, bareEl } from "../../test-support/living-chart-hosts.ts";
 
-// #191 (Reading Room Sub 1): the living-chart machinery must be hostable by a page
-// that is NOT the Explorer. Two things blocked that, and each has a guard here:
-//   1. living-chart.ts, voyage.ts and voyage-log-panel.ts resolved
-//      document.getElementById against Explorer ids at MODULE scope, so any second
-//      host null-bound at import time. The proof of the fix is that Node, which has
-//      no `document` at all, can import the engine and construct it against a
-//      plain-object host: construction may only STORE the host's elements.
-//   2. app.ts had grown to 670 lines (465 triggered #183); the conductor must come
-//      back under the workspace 400-line guideline (.claude/rules/coding-style.md).
-//
-// #319 (Survey & Story Sub 2) added a third thing the boundary owes: the bar itself is
-// OPTIONAL, so a host may mount the engine for its overlays and the static resting track
-// and hand in no scrubber at all. The CONSTRUCTION half of that lives here, beside its
-// full-scrubber twin. Everything about how a bar-less engine BEHAVES lives in
-// living-chart-no-bar.test.ts, which needs an environment and a world; this file stays
-// deliberately DOM-free so guard 1 above keeps its meaning.
+// #191: the engine must be hostable by a page that is NOT the Explorer. Guard 1: the modules used to resolve getElementById at MODULE scope, so a second host null-bound at import; the proof is that document-less Node can import and construct. Guard 2: app.ts back under the 400-line guideline.
+// #319 added: the bar is OPTIONAL. The construction half lives here; bar-less BEHAVIOUR lives in living-chart-no-bar.test.ts. This file stays deliberately DOM-free so guard 1 keeps its meaning.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const ENGINE_DIR = resolve(REPO, "src/site/living-chart");
@@ -33,9 +19,7 @@ const assertFullApi = (lc: unknown, shape: string): void => {
       `the engine exposes ${method}() (${shape})`,
     );
   }
-  // Both directions, so the roster catches an ADDED entry as well as a missing one: #319's
-  // contract is that the optional bar earns no new method, and a one-directional roll-call
-  // could not see one appear.
+  // Both directions, so the roster catches an ADDED entry too: #319's contract is that the optional bar earns no new method.
   assert.deepEqual(
     returned.filter((k) => !(API as readonly string[]).includes(k)),
     [],
@@ -45,9 +29,7 @@ const assertFullApi = (lc: unknown, shape: string): void => {
 };
 
 test("the engine imports without a DOM: no module-scope document access (#191)", async () => {
-  // Node has no `document`; a module-scope getElementById would throw right here.
-  // The assertion is a contract, not decoration: nothing in THIS file may install the
-  // element shim, or the import below stops proving the engine is DOM-free at load.
+  // A contract, not decoration: nothing in THIS file may install the element shim, or the import below stops proving the engine is DOM-free at load.
   assert.equal(typeof (globalThis as { document?: unknown }).document, "undefined", "no DOM is installed here");
   const mod = await import("../../src/site/living-chart/index.ts");
   assert.equal(typeof mod.createLivingChart, "function", "the boundary exports createLivingChart");
@@ -55,9 +37,7 @@ test("the engine imports without a DOM: no module-scope document access (#191)",
 
 test("createLivingChart constructs against a plain-object host and exposes the full API (#191)", async () => {
   const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
-  // Plain empty objects, not DOM stubs: construction must only store the refs.
-  // Every element access has to happen inside a method call, or a page host that
-  // builds its DOM after wiring the engine would null-bind exactly like #191's bug.
+  // Plain empty objects, not DOM stubs: every element access must happen inside a method call, or a host that builds its DOM after wiring null-binds exactly like #191's bug.
   const lc = createLivingChart({
     mapEl: bareEl(),
     statusEl: bareEl(),
@@ -75,10 +55,7 @@ test("createLivingChart constructs against a plain-object host and exposes the f
 
 test("createLivingChart constructs against a host with NO scrubber: the bar is optional (#319)", async () => {
   const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
-  // The same plain-empty-object discipline as the test above. What is new is the ABSENT
-  // scrubber. Before #319 this threw a TypeError reading 'panel' at the
-  // createVoyageLogPanel call, because the engine reached through host.scrubber while
-  // wiring, so a bar-less host could not be constructed at all.
+  // Before #319 an ABSENT scrubber threw a TypeError reading 'panel' while wiring, so a bar-less host could not be constructed at all.
   const lc = createLivingChart({ mapEl: bareEl(), statusEl: bareEl() });
   // The SAME surface, not a narrower one: one boundary, one host type (ratified 2026-08-09).
   assertFullApi(lc, "a host with no scrubber");

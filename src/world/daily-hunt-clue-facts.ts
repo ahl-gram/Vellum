@@ -5,52 +5,25 @@ import type { Clue } from "./daily-hunt-clues.ts";
 import type { Quarry } from "./daily-hunt.ts";
 import type { NamedSettlement, World } from "./types.ts";
 
-/**
- * Truthful clue CANDIDATES for the daily hunt (#335). Every candidate pairs an
- * antique survey line (true of the quarry by construction) with a `holds`
- * predicate any candidate village can be tested against, so the selection walk
- * in daily-hunt-clues.ts can measure how far each line narrows the field.
- *
- * Findability rule: every candidate points at something the antique sheet
- * draws (terrain glyphs, roads and tracks, printed names, the scale bar). The
- * glyph thresholds and the leagues scale are IMPORTED from the render layers,
- * never mirrored, so a clue and the drawing cannot drift apart. Wind is
- * deliberately absent: style.winds is nautical-only, so a wind clue would not
- * be checkable on the hunt's antique sheet.
- */
+/** Every clue candidate must point at something the antique sheet DRAWS; wind is deliberately absent (style.winds is nautical-only, so a wind clue is not checkable on this sheet). */
 
-/** Grid-cell radius within which a named river or lake is "near" the quarry. */
 export const NEAR = 4;
 
-/**
- * Fraction of a chart dimension, either side of the midpoint, that counts as
- * "central": the middle quarter of the chart. Without a band, a quarry two
- * cells off dead-center reads "western reach", which live play proved
- * misleading (seed 20260731, #333).
- */
+/** The middle-quarter band: without it a quarry two cells off dead-center reads as a western reach. */
 const CENTRAL_BAND = 1 / 8;
 
-/** Radius (cells) of the neighborhood a terrain clue describes, and the
- *  minimum qualifying cells within it. The floor keeps the clue findable: the
- *  glyph field samples candidates, so a lone qualifying cell may draw nothing,
- *  but a neighborhood of six almost surely shows glyphs. */
+/** Neighborhood radius and floor: the glyph field samples candidates, so one qualifying cell may draw nothing, while six almost surely shows glyphs. */
 export const TERRAIN_RADIUS = 4;
 export const TERRAIN_MIN = 6;
 
-/** Reach (cells) within which the road network serves a settlement. */
 export const ROAD_NEAR = 1.5;
 
-/** Round leagues bounds the near clue may quote (read against the scale bar).
- *  Capped at 20: past that the circle covers so much chart the line reads as
- *  filler, so a farther-flung quarry simply gets no near clue. */
+/** Round leagues the near clue may quote; past 20 the circle reads as filler, so a farther quarry gets no near clue. */
 export const LEAGUE_LADDER: ReadonlyArray<number> = [3, 5, 8, 10, 12, 15, 20];
 
 export type PoolEntry = { readonly s: NamedSettlement; readonly idx: number };
 
-/** The base pool chooseQuarry draws from: non-seat villages, falling back to
- *  any non-capital non-seat settlement, then to everything. The narrowing walk
- *  counts consistent villages over this same pool, so the two never disagree
- *  about who the candidates are. */
+/** The one pool both chooseQuarry and the narrowing walk use, so they never disagree about the candidates. */
 export function quarryPool(world: World): ReadonlyArray<PoolEntry> {
   const seats = new Set(world.realms.seats);
   const indexed = world.settlements.map((s, idx) => ({ s, idx }));
@@ -66,28 +39,15 @@ export type ClueCandidate = {
 
 export type TerrainBand = "mountains" | "hills" | "forest" | "marsh" | "dunes";
 
-/**
- * The page's findability gates, applied BEFORE selection so every guarantee
- * (narrowing, floor, line count) holds on the list the player actually sees.
- * The rendered SVG is the only source of truth for what was drawn, so the
- * page supplies these; omitted gates admit everything (engine-side callers).
- */
 export type ClueFindability = {
-  /** Was this name printed on the sheet? Mind the case: capital and seat
-   *  labels render `.toUpperCase()` (`settlementsLayer` in
-   *  `src/render/layers/settlements.ts`). */
+  /** Mind the case: capital and seat labels render .toUpperCase() (settlements.ts). */
   readonly isLabeled?: (name: string) => boolean;
-  /** Does at least one DRAWN glyph of this band stand within TERRAIN_RADIUS
-   *  of the quarry? Eligible cells are not enough: `glyphsLayer` in
-   *  `src/render/layers/glyphs.ts` shuffles tree candidates and caps them
-   *  globally, so a wooded neighborhood can draw no tree at all. */
+  /** Eligible cells are not enough: glyphsLayer shuffles and caps tree glyphs, so a wooded neighborhood can draw no tree. */
   readonly hasGlyphNear?: (band: TerrainBand) => boolean;
 };
 
 export type ClueFacts = {
-  /** The two always-true compass bands, [east/west, north/south]. */
   readonly compass: ReadonlyArray<ClueCandidate>;
-  /** Every other clue that holds at the quarry AND passes the findability gates. */
   readonly features: ReadonlyArray<ClueCandidate>;
   readonly pool: ReadonlyArray<PoolEntry>;
 };
@@ -160,8 +120,6 @@ export function buildClueFacts(
   return { compass, features, pool };
 }
 
-// --- compass bands (#333) ----------------------------------------------------
-
 function ewBandOf(world: World, x: number): "east" | "west" | "central" {
   const c = (world.elev.w - 1) / 2;
   if (Math.abs(x - c) <= (world.elev.w - 1) * CENTRAL_BAND) return "central";
@@ -208,8 +166,6 @@ function nsCandidate(world: World, y: number): ClueCandidate {
   };
 }
 
-// --- terrain neighborhoods ----------------------------------------------------
-
 const TERRAIN_TEXT: Record<TerrainBand, string> = {
   mountains: "It sits in the shadow of the mountains.",
   hills: "Hill country rises all about it.",
@@ -218,8 +174,6 @@ const TERRAIN_TEXT: Record<TerrainBand, string> = {
   dunes: "Desert sands lie hard by its bounds.",
 };
 
-/** Glyph-eligible cell counts by band within TERRAIN_RADIUS of (x, y),
- *  classified by the exact chain glyphsLayer draws with. */
 function terrainCounts(
   world: World,
   span: number,
@@ -287,8 +241,6 @@ function terrainCandidates(
   return out;
 }
 
-// --- roads --------------------------------------------------------------------
-
 type RoadState = "road" | "track" | "pathless";
 
 const ROAD_TEXT: Record<RoadState, string> = {
@@ -326,11 +278,6 @@ function roadCandidate(world: World, x: number, y: number): ClueCandidate {
   };
 }
 
-// --- the near anchor ----------------------------------------------------------
-
-/** The nearest capital, realm seat, or town: the tiers whose labels sort first
- *  in placement and essentially always win space. The page still gates the
- *  emitted clue on the label actually having been drawn (the #91 prune). */
 function nearCandidate(world: World, quarry: Quarry): ClueCandidate | null {
   const seats = new Set(world.realms.seats);
   const from = quarry.settlement;
@@ -356,8 +303,6 @@ function nearCandidate(world: World, quarry: Quarry): ClueCandidate | null {
       Math.hypot(anchor.x - e.s.x, anchor.y - e.s.y) <= leagues * CELLS_PER_LEAGUE,
   };
 }
-
-// --- named-feature geometry ---------------------------------------------------
 
 function riverDist(world: World, riverIdx: number, x: number, y: number): number {
   let d = Infinity;

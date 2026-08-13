@@ -11,14 +11,8 @@ import {
   composePlaceCard,
 } from "../../src/render/place-card.ts";
 
-// Unit tests for #53: client-side composition of a place's story card from the
-// #52 manifest. Pure logic only; the DOM overlay (hover/focus/tap, edge flip,
-// pin/dismiss) lives in src/site/living-chart/place-overlay.ts and is covered by the Explorer e2e.
-//
-// The load-bearing assertion: a settlement's FOUNDING event and its RUIN event
-// both carry the same `settlement` idx (history.ts), so the abandonment tale
-// must be found by `settlement === idx && kind === "ruin"`. A lookup that filters
-// on settlement alone would surface the founding text instead.
+// #53: client-side composition of a place's story card from the #52 manifest; pure logic only, the DOM overlay is covered by the Explorer e2e.
+// Load-bearing: a founding and a ruin event carry the same settlement idx (history.ts), so the tale must be found by settlement === idx && kind === "ruin"; filtering on settlement alone surfaces the founding text.
 
 const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   idx: 0,
@@ -46,21 +40,17 @@ test("placeRank labels each kind, and a ruin overrides its kind", () => {
   assert.equal(placeRank(mark({ kind: "capital" })), "Capital");
   assert.equal(placeRank(mark({ kind: "town" })), "Town");
   assert.equal(placeRank(mark({ kind: "village" })), "Village");
-  // ruins are non-seat villages; the rank announces the ruin, not "Village"
   assert.equal(placeRank(mark({ kind: "village", ruined: true })), "Ruin");
 });
 
 test("placeRank calls a non-capital realm seat a Realm Seat, not a Town", () => {
-  // the card had no notion of a seat, so a realm's seat town read as plain "Town"
-  // while the chart drew it with the seat castle and halo (settlements.ts).
+  // The card had no notion of a seat: a realm's seat town read plain "Town" while the chart drew it with the seat castle and halo.
   assert.equal(placeRank(mark({ kind: "town", seat: true })), "Realm Seat");
   // realms.ts promotes a village when an inhabited landmass would otherwise be seatless
   assert.equal(placeRank(mark({ kind: "village", seat: true })), "Realm Seat");
 });
 
 test("placeRank calls a hamlet a Hamlet (#171)", () => {
-  // hamlets exist only on deepest-band region sheets; their manifest kind
-  // carries straight through to the card and the aria name.
   assert.equal(placeRank(mark({ kind: "hamlet" })), "Hamlet");
   assert.equal(
     placeAriaLabel(mark({ name: "Weki", kind: "hamlet" })),
@@ -69,9 +59,7 @@ test("placeRank calls a hamlet a Hamlet (#171)", () => {
 });
 
 test("placeRank ranks capital above seat: realm 0's seat IS the grand capital", () => {
-  // `selectSeats` in `src/society/realms.ts` pushes the capital as realm 0's seat,
-  // so the capital carries seat===true. It must still read "Capital", matching
-  // `tierOf` in `src/render/layers/settlements.ts`.
+  // `selectSeats` in `src/society/realms.ts` pushes the capital as realm 0's seat, so the capital carries seat===true; it must still read "Capital", matching `tierOf` in `src/render/layers/settlements.ts`.
   assert.equal(placeRank(mark({ kind: "capital", seat: true })), "Capital");
 });
 
@@ -88,7 +76,6 @@ test("placeAriaLabel is name + rank, so a ruin announces as it renders", () => {
 });
 
 test("composePlaceCard: a living town shows name/rank/founding and no tale", () => {
-  // give the town a founding event at its own idx: a tale must NOT appear for it
   const events = [ev({ kind: "founding", settlement: 0, text: "Settlers raised Aelmoor." })];
   const card = composePlaceCard(mark({ idx: 0, kind: "town", founded: 312 }), events);
   assert.equal(card.name, "Aelmoor");
@@ -106,15 +93,13 @@ test("composePlaceCard: a ruin shows its abandonment tale, not its founding text
     ev({ kind: "ruin", settlement: 2, year: 600, text: "Homaitani was abandoned to the gulls." }),
   ];
   const card = composePlaceCard(mark({ idx: 2, name: "Homaitani", kind: "village", ruined: true, founded: 400 }), events);
-  // the discriminator: a naive find-by-settlement surfaces the founding text
   assert.equal(card.tale, "Homaitani was abandoned to the gulls.");
   assert.notEqual(card.tale, "The hearths of Homaitani were first lit.", "must not surface the founding text");
   assert.equal(card.rank, "Ruin");
 });
 
 test("composePlaceCard: a ruin whose event was truncated degrades to no tale", () => {
-  // history.ts caps the chronicle at 14 events and pushes ruins LAST, so a ruin
-  // event can be sliced off; the card must still render (rank Ruin, no tale).
+  // history.ts caps the chronicle at 14 events and pushes ruins LAST, so a ruin event can be sliced off; the card must still render (rank Ruin, no tale).
   const events = [ev({ kind: "founding", settlement: 3, text: "Founding only." })];
   const card = composePlaceCard(mark({ idx: 3, kind: "village", ruined: true }), events);
   assert.equal(card.rank, "Ruin");

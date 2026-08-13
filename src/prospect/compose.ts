@@ -1,18 +1,3 @@
-/**
- * The skyline composer (#239): ProspectInput -> ProspectGeometry, the heart
- * of epic #229. Pure and deterministic: every choice derives from the input
- * and the world seed via labeled RNG forks, never from fresh randomness.
- * Composition only, in a single neutral dress; ink belongs to Sub 3.
- *
- * Stage rules, from the ratified record:
- * - harbor outranks river (the adaptive vantage opens from the sea), and
- *   sea and river plates take no land dressing: the waterfront is the stage.
- * - ruin keeps masonry (quay, bridge, weir) and loses craft (masts, ship,
- *   nets, jetty, the mill wheel); a ruined non-harbor fen site drowns.
- * - era "before-founding" (#239 body's degenerate case, applied by Sub 5)
- *   composes bare ground: terrain, water, and natural dressing only.
- */
-
 import { createRng } from "../core/rng.ts";
 import type { ProspectInput } from "./input.ts";
 import { type ForegroundElement, type ProspectGeometry, VIEW_X0 } from "./geometry.ts";
@@ -31,8 +16,6 @@ import { composeCollapseField, composeDrowned } from "./ruin.ts";
 
 export type ComposeOptions = { readonly era?: "standing" | "before-founding" };
 
-/** One sea plate in ~12 carries a far-off serpent quoting the chart's sea
- * decor (bold-delight, flagged in the PR; the spike's palm-isle flourish). */
 const SERPENT_ODDS = 1 / 12;
 
 export function composeProspect(

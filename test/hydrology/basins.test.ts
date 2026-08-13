@@ -6,8 +6,7 @@ import { computeBasins, watershedDivides, type Basins } from "../../src/hydrolog
 import { buildHeightfield } from "../../src/terrain/heightfield.ts";
 import { pickSeaLevel } from "../../src/terrain/sealevel.ts";
 
-// Build a Basins directly from an id grid, to test the divide logic in isolation
-// from the flow-convergence that produces basins on real terrain.
+// Build a Basins directly from an id grid, isolating the divide logic from the flow-convergence that produces basins on real terrain.
 function basinsFrom(ids: ReadonlyArray<number>): Basins {
   const arr = Int32Array.from(ids);
   const sizes = new Map<number, number>();
@@ -21,8 +20,7 @@ function basinsFrom(ids: ReadonlyArray<number>): Basins {
 }
 
 test("computeBasins labels every land cell by the mouth it drains to", () => {
-  // tilted plane: elevation rises with x, column x=0 is ocean, so each row drains
-  // left and mouths at its own (1, y). Basins are therefore per row.
+  // Tilted plane: elevation rises with x, column 0 is ocean, so each row drains left and mouths at its own (1, y); basins are per row.
   const w = 10;
   const h = 6;
   const f = createField(w, h, (x) => x);

@@ -14,10 +14,7 @@ function flatIsland(w: number, h: number, elevation = 0.15) {
   });
 }
 
-// #162: a regional survey normalizes its lapse-rate against the PARENT world's
-// elevation span, not the window's own max, so a locally-tall-but-globally-modest
-// summit does not read colder in the region than on the world chart (a snow seam
-// at the window boundary). An explicit elevSpan overrides the field's local max.
+// #162: a regional survey normalizes lapse-rate against the PARENT world's elevation span, not the window's own max, so a locally-tall-but-globally-modest summit does not read colder in the region (a snow seam at the window boundary); an explicit elevSpan overrides the local max.
 test("computeClimate honors an explicit elevSpan (region temperature continuity, #162)", () => {
   const w = 20, h = 20, sea = 0.2;
   // local max is 0.6 (span 0.4); the parent world's span is larger.
@@ -81,8 +78,7 @@ test("river corridors are wetter than dry plains", () => {
   const f = flatIsland(w, 40);
   const riverCells = new Uint8Array(w * 40);
   for (let y = 5; y < 35; y++) riverCells[20 + y * w] = 1; // vertical river at x=20
-  // wind from the east makes the far strip the maritime one, so the river
-  // corridor must out-wet a headwind handicap: this stays a pure river test
+  // Wind from the east makes the far strip the maritime one, so the river corridor must out-wet a headwind handicap: this stays a pure river test.
   const { moisture } = computeClimate(f, 0, 7, { riverCells, windDir: Math.PI });
   let nearSum = 0;
   let nearN = 0;

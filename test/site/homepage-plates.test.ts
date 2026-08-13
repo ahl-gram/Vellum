@@ -3,17 +3,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-/**
- * Consistency guard (2026-07-06, #130 follow-up): every chart surface on the site
- * rests FLAT and tips on hover, so the hand meets the homepage hero plates, the
- * generated atlas figures, and the Explorer's bound atlas the same way. This guards
- * the homepage plate against a regression back to a resting tilt (the earlier
- * "scattered on the desk" look, `--tilt` per plate), which is what made it the odd
- * surface out (it straightened on hover while every other chart tips).
- */
+// Consistency guard (#130 follow-up): every chart surface rests FLAT and tips on hover; guards the homepage plates against a regression to the old per-plate --tilt resting scatter.
 
-// Since Sub 5 (#206) the committed homepage source is the Astro page; the plate
-// markup lives verbatim in its content region.
 const indexAstro = fileURLToPath(new URL("../../src/pages/index.astro", import.meta.url));
 const motionCss = fileURLToPath(new URL("../../public/motion.css", import.meta.url));
 
@@ -21,11 +12,9 @@ test("homepage chart plates rest flat and tip on hover (consistent with the atla
   const html = await readFile(indexAstro, "utf8");
   const css = await readFile(motionCss, "utf8");
 
-  // the markup carries no resting-tilt scatter, but the plates are still there
   assert.ok(/class="plate"/.test(html), "the homepage plates should still be present");
   assert.ok(!/--tilt/.test(html), "no per-plate --tilt resting tilt should remain in the markup");
 
-  // the base .plate rule rests flat (no resting rotate); :hover tips (rotate) and lifts
   const base = css.match(/\.plate\s*\{([^}]*)\}/);
   assert.ok(base, ".plate base rule should exist in motion.css");
   assert.ok(!/rotate\(/.test(base[1]), ".plate should rest flat (no resting rotate)");
@@ -54,14 +43,10 @@ test("home's below-fold plates yield bandwidth to a clicked navigation (#329)", 
   );
 });
 
-// Green from the start by design (a guard, not red-green): pins the #289
-// review call that the wordmark makes the same tips-under-the-hand gesture as
-// the plates on room pages, and only there; home's wordmark IS home.
+// A guard, green from the start: pins the #289 review call that the wordmark tips under the hand on room pages only; home's wordmark IS home.
 test("the wordmark tips under the hand on room pages, and stays still on home", async () => {
   const css = await readFile(motionCss, "utf8");
-  // Keyed on .wordmark, not h1, since #288: on a room page the wordmark is a
-  // <p> and the h1 is the room name, which has no link to tip. Keying this on
-  // h1 would silently select nothing and the gesture would just vanish.
+  // Keyed on .wordmark, not h1 (#288): on a room page the h1 is the room name with no link to tip, so keying on h1 would silently select nothing.
   const hover = css.match(/body:has\(\.room-name\) \.wordmark a:hover\s*\{([^}]*)\}/);
   assert.ok(hover, "the room-scoped wordmark hover rule should exist in motion.css");
   assert.ok(

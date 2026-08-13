@@ -1,8 +1,4 @@
-// e2e harness: the static file server (with the worker-block toggle for the
-// fallback test), the headless-browser launch, the CDP/websocket client, and the
-// poll/evaluate/screenshot helpers. `start(opts)` brings the page up and returns a
-// `ctx` the check suites use; `cleanup()` tears everything down and is module-level
-// so the runner's trailing .then/.catch can call it even if start() throws partway.
+// e2e harness: the static file server, headless-browser launch, CDP client, and the poll/evaluate/screenshot helpers every suite shares; cleanup() is module-level so the runner can tear down even if start() throws partway.
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
 import http from "node:http";
@@ -39,24 +35,11 @@ const httpGet = (url) =>
       .on("error", reject);
   });
 
-// Mutable static file server. blockWorker flips the worker scripts to a 404 so the
-// inline fallback can be exercised without ever mutating the working tree on disk.
-// The fallback suite flips this same object via ctx.serverState. Since the Vite
-// fold (#208) there is ONE spawn target: both the Explorer and the Print Room
-// spawn the shared Vite-emitted worker chunk, so blocking this single path
-// 404s the worker for every page's fallback suite. (Before the fold the set
-// also held a second entry: the unbundled per-page worker the Print Room spawned.)
+// blockWorker 404s the ONE shared Vite-emitted worker chunk (since the #208 fold both pages spawn it), so the inline fallback is exercised without mutating the working tree.
 const serverState = { blockWorker: false };
 const BLOCKED_WORKERS = new Set(["/explorer/worker.bundle.js"]);
 
-// The suites' in-page test oracle: several checks dynamically import engine
-// modules IN THE BROWSER to compute expected values beside what the page drew
-// (same JS engine, so no cross-engine float drift). Since Sub 9 (#260) retired
-// the served tsc emit, the harness answers /explorer/engine/<p>.js itself by
-// type-stripping the engine SOURCE src/<p>.ts on demand (the exact files the
-// shipped bundles compile from) and rewriting the relative .ts specifiers the
-// browser cannot resolve. e2e-only serving: the deploy artifact carries no
-// engine tree.
+// In-page oracle: suites import engine modules IN THE BROWSER (same JS engine, no cross-engine float drift); since #260 the harness answers /explorer/engine/*.js by type-stripping src/*.ts on demand and rewriting .ts specifiers. e2e-only serving.
 const SRC_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "src");
 const ENGINE_MODULE = /^\/explorer\/engine\/(.+)\.js$/;
 function serveEngineModule(pathname, res) {
@@ -105,8 +88,6 @@ function startServer(SITE, PORT) {
     }
   });
   return new Promise((res, rej) => {
-    // Bare EADDRINUSE reads as a crash rather than as "that port is taken", which
-    // is the first thing a second concurrent lane hits (#339).
     server.on("error", (err) =>
       rej(
         err.code === "EADDRINUSE"
@@ -121,12 +102,7 @@ function startServer(SITE, PORT) {
   });
 }
 
-// #339 preflight. Nothing here binds DPORT (the browser does, later), and
-// getPageTarget attaches to whatever answers /json, so an orphaned browser left
-// holding the port is adopted in SILENCE and the whole run reports on its build.
-// A plain TCP connect is the occupancy signal: it settles immediately on
-// 127.0.0.1 and catches a non-browser squatter too, which would otherwise cost
-// the launch its three retries and then fail with "no devtools page target".
+// #339: getPageTarget attaches to whatever answers /json, so an orphaned browser holding the port would be adopted in SILENCE; a plain TCP connect also catches a non-browser squatter.
 function probeDebugPort(DPORT, timeoutMs = 300) {
   return new Promise((res) => {
     const socket = net.connect({ host: "127.0.0.1", port: DPORT });
@@ -140,8 +116,6 @@ function probeDebugPort(DPORT, timeoutMs = 300) {
   });
 }
 
-// Best effort, only to name the squatter in the failure: a stray headless browser
-// answers /json/version with a Browser string like "Chrome/141.0.0.0".
 async function debugPortIdentity(DPORT, timeoutMs = 1000) {
   try {
     const body = await new Promise((res, rej) => {
@@ -215,9 +189,6 @@ async function evaluate(expression, awaitPromise = false) {
   return r.result.value;
 }
 
-// The computed accessible description of the first element matching `selector`
-// (a button), via the Accessibility domain. Used to prove the #53 card body is
-// reachable AND readable through aria-describedby, not just that the attr is set.
 async function axDescription(selector) {
   const doc = await send("DOM.getDocument", { depth: -1 });
   const { nodeId } = await send("DOM.querySelector", { nodeId: doc.root.nodeId, selector });
@@ -229,10 +200,7 @@ async function axDescription(selector) {
 
 async function waitSettled(label = "") {
   for (let i = 0; i < 200; i++) {
-    // #199: the settle probe reads #verso-turn, not the retired #bind. The Turn button is
-    // disabled for the whole draw round-trip and re-enabled the instant the draw resolves
-    // (src/site/explorer/app.ts), exactly the lifecycle #bind had, so the settle semantics
-    // are unchanged; it is just no longer keyed on a button that no longer exists.
+    // The settle probe keys on #verso-turn's disabled flag (#199: it has the exact draw lifecycle the retired #bind button had).
     const s = await evaluate(
       `({status:document.getElementById("status").textContent,dis:document.getElementById("verso-turn").disabled,map:!!document.querySelector("#map svg")})`,
     );
@@ -248,12 +216,7 @@ async function waitReady() {
   }
   return false;
 }
-// waitTurned / armTurnWatch: shared by the sheet-turn (suite-turn) and the verso flip
-// (suite-verso), which test each other's turn-vs-flip races. A turn clears "Drafting…"
-// immediately (no 900ms status hang), so waitSettled resolves mid-turn; waitTurned waits
-// for the leaf to actually LAND (status clear, .sheet not turning, a chart present).
-// armTurnWatch arms a MutationObserver recording whether .sheet ever carried .turning, so
-// a check can tell a real 3D turn from an instant swap.
+// A turn clears "Drafting..." immediately, so waitSettled resolves MID-turn; waitTurned waits for the leaf to LAND, and armTurnWatch records whether .sheet ever carried .turning (a real 3D turn vs an instant swap).
 async function waitTurned(label = "") {
   for (let i = 0; i < 240; i++) {
     if (await evaluate(`(()=>{const s=document.getElementById("status").textContent;const t=document.querySelector(".sheet.turning");return s==="" && !t && !!document.querySelector("#map svg");})()`)) return;
@@ -265,40 +228,26 @@ function armTurnWatch() {
   return evaluate(`(()=>{window.__turned=false;if(window.__turnMo)window.__turnMo.disconnect();window.__turnMo=new MutationObserver(()=>{if(document.querySelector(".sheet.turning"))window.__turned=true;});window.__turnMo.observe(document.getElementById("sheet"),{subtree:true,attributes:true,attributeFilter:["class"]});return true;})()`);
 }
 
-// ---- real input primitives (Sub 5, #166) --------------------------------------
-// Thin wrappers over the same send() idiom the rest of the harness uses, dispatching
-// REAL browser input (not synthetic DOM events) so d3-zoom's own wheel/touch handlers
-// run exactly as they do for a user. Touch is gated on the page having booted as a
-// touch device: d3-zoom binds its touch listeners only when navigator.maxTouchPoints
-// is truthy at bind time (defaultTouchable), so setTouch()/mobileViewport() must be in
-// effect BEFORE the (re)navigate that boots the Explorer. suite-zoom-gestures proves
-// the wheel/pinch/pan behaviour the Sub 3/4 hooks proved programmatically.
+// Real browser input, not synthetic DOM events. d3-zoom binds touch listeners only if navigator.maxTouchPoints is truthy at bind time, so setTouch()/setMobileViewport() must be in effect BEFORE the navigate that boots the page.
 
-// A real mouse wheel at (x, y) page px. Negative deltaY zooms IN (d3's wheelDelta is
-// -deltaY * 0.002 at deltaMode 0), so the sign matches a user scrolling up to zoom.
+// Negative deltaY zooms IN (d3's wheelDelta is -deltaY * 0.002 at deltaMode 0), matching a user scrolling up.
 function wheel(x, y, deltaY, deltaX = 0) {
   return send("Input.dispatchMouseEvent", { type: "mouseWheel", x, y, deltaX, deltaY });
 }
 
-// One raw touch event. `points` is [{x, y, id}]; per CDP, touchStart/touchMove carry
-// the currently-down points and touchEnd/touchCancel MUST pass [] (CDP diffs against
-// the prior event to end every active point). The composed gestures below never leave
-// a gesture half-open, so a later suite's first touch starts from a clean slate.
+// Per CDP, touchStart/touchMove carry the currently-down points and touchEnd/touchCancel MUST pass [] (CDP diffs against the prior event to end every active point).
 function touch(type, points) {
   return send("Input.dispatchTouchEvent", { type, touchPoints: points });
 }
 
-// A one-finger drag from (x0, y0) to (x1, y1): start, one move, end. d3 pans by the
-// screen delta; at k=1 the constrain snaps it home, so the caller must be zoomed first.
+// d3 pans by the screen delta; at k=1 the constrain snaps it home, so the caller must be zoomed first.
 async function touchPan(x0, y0, x1, y1) {
   await touch("touchStart", [{ x: x0, y: y0, id: 0 }]);
   await touch("touchMove", [{ x: x1, y: y1, id: 0 }]);
   await touch("touchEnd", []);
 }
 
-// A two-finger pinch centred on (cx, cy): the pair starts `from` px apart and ends `to`
-// px apart, horizontally. d3 sets k to k_old * (to / from) about the centroid; one move
-// suffices because d3 scales against the touchstart spread, not incrementally.
+// One move suffices: d3 sets k to k_old * (to/from) about the centroid, scaling against the touchstart spread rather than incrementally.
 async function pinch(cx, cy, from, to) {
   const s = from / 2, e = to / 2;
   await touch("touchStart", [{ x: cx - s, y: cy, id: 0 }, { x: cx + s, y: cy, id: 1 }]);
@@ -306,21 +255,15 @@ async function pinch(cx, cy, from, to) {
   await touch("touchEnd", []);
 }
 
-// Emulate a touch device. maxTouchPoints > 0 makes d3's defaultTouchable() true, so the
-// NEXT navigate boots the Explorer with touch listeners bound. Call before (re)loading.
 function setTouch(enabled, maxTouchPoints = 5) {
   return send("Emulation.setTouchEmulationEnabled", { enabled, maxTouchPoints });
 }
 
-// Emulate a mobile viewport (small screen + touch). Reload after so the page boots as a
-// phone (the mobile touch-action wiring is what AC2 proves). Clear with clearMobile().
 async function setMobileViewport(width, height) {
   await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: true });
   await setTouch(true);
 }
 
-// Undo setMobileViewport/setTouch: back to the desktop window metrics, touch off. A
-// reload after this returns the page to a pristine desktop state for the next suite.
 async function clearMobile() {
   await send("Emulation.clearDeviceMetricsOverride");
   await setTouch(false);
@@ -337,16 +280,9 @@ async function shoot(file) {
   console.log(`  shot -> ${join(OUT_DIR, file)} (${h}px tall)`);
 }
 
-// Spawn the headless browser and wait for its DevTools page target, retrying a few
-// times with a fresh profile. A cold Chrome on a CI runner intermittently comes up
-// but never binds the remote-debugging port (a transient dbus/crashpad hiccup; the
-// process stays alive, so getPageTarget just times out). One attempt reds the whole
-// run for a flake, so retry. A genuine break (bad binary, missing lib, the browser
-// exits) still fails after the last attempt, with the captured browser output.
+// A cold Chrome on CI intermittently comes up but never binds the debugging port (a transient dbus/crashpad hiccup; the process stays alive), so retry with a fresh profile; a genuine break still fails after the last attempt with the captured output.
 async function launchBrowser(browser, DPORT) {
-  // Once, ABOVE the retry loop: a SIGKILLed attempt does not release the port
-  // synchronously, so preflighting per attempt would report our own dying
-  // browser as the stray one.
+  // Preflight once, ABOVE the retry loop: a SIGKILLed attempt does not release the port synchronously, so a per-attempt preflight would report our own dying browser as the stray.
   await assertDebugPortFree(DPORT);
   const MAX_ATTEMPTS = 3;
   let lastErr;
@@ -387,9 +323,7 @@ async function launchBrowser(browser, DPORT) {
   throw lastErr;
 }
 
-// Bring the page up: server, browser, CDP socket, domains enabled, navigated. The
-// passed-in results/consoleErrors/http4xx arrays are pushed to BY REFERENCE (the
-// ws handler + check close over them) so the runner's trailing tally sees them.
+// results/consoleErrors/http4xx are pushed to BY REFERENCE (the ws handler and check close over them) so the runner's trailing tally sees them.
 export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx }) {
   OUT_DIR = OUT;
   await mkdir(OUT, { recursive: true });
@@ -414,7 +348,6 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
       consoleErrors.push("console.error: " + JSON.stringify(m.params.args.map((a) => a.value)));
     } else if (m.method === "Log.entryAdded" && m.params.entry.level === "error") {
       const t = m.params.entry.text || "";
-      // resource-load failures are tracked precisely via the Network domain below
       if (!/favicon/i.test(t) && !/Failed to load resource/i.test(t)) consoleErrors.push("log.error: " + t);
     } else if (m.method === "Network.responseReceived" && m.params.response.status >= 400) {
       http4xx.push(`${m.params.response.status} ${m.params.response.url}`);
@@ -427,9 +360,7 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
   await send("Network.enable");
   await send("DOM.enable");
   await send("Accessibility.enable"); // #53: read the computed AX description of a hit
-  // Treat the headless page as focused so element.focus() fires real focus events
-  // (and :focus-visible applies). Without this, the #53 keyboard-focus card path
-  // silently no-ops under --headless. Best-effort: older builds may not support it.
+  // Treat the headless page as focused so element.focus() fires real events and :focus-visible applies; without this the keyboard-focus card path silently no-ops under --headless. Best-effort: older builds may not support it.
   try { await send("Emulation.setFocusEmulationEnabled", { enabled: true }); } catch {}
   await send("Page.navigate", { url: PAGE });
 

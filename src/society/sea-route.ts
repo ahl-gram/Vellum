@@ -1,18 +1,7 @@
 import { NEIGHBORS_4, type Field } from "../core/grid.ts";
 import type { Settlement } from "./sites.ts";
 
-/**
- * Attach every seatless landmass to the nearest realm by an over-water BFS, in
- * place. Reads a frozen snapshot of the post-flood labels so attachment order can
- * never let one islet chain onto an already-attached islet instead of a real
- * realm shore. Mirrors the FIFO BFS of core/bfs-distance.ts, the only true
- * breadth-first traversal in the codebase (the lakes/blobs floods are DFS stacks
- * and would reach an arbitrary reachable realm rather than the nearest by sea).
- *
- * After the realm flood a seated landmass is fully labelled and a seatless one is
- * entirely -1 (a seat floods its whole 4-connected landmass), so one
- * representative cell tells the two apart.
- */
+/** Reads a frozen snapshot of the post-flood labels, so attachment order can never chain an islet onto an already-attached islet; the flood must stay a true FIFO BFS to reach the NEAREST realm by sea (the DFS-stack floods elsewhere would not). */
 export function attachSeatlessLandmasses(
   labels: Int16Array,
   landmassIds: Int32Array,
@@ -41,7 +30,6 @@ export function attachSeatlessLandmasses(
     if (cells.length === 0) continue;
     if ((frozen[cells[0] as number] as number) >= 0) continue; // seated
 
-    // Seed with every ocean cell 4-adjacent to this landmass, in row-major order.
     visited.fill(0);
     let head = 0;
     let tail = 0;
@@ -59,7 +47,6 @@ export function attachSeatlessLandmasses(
       }
     }
 
-    // Flood over ocean; stop at the first ocean cell touching a realm shore.
     let target = -1;
     while (head < tail) {
       const i = queue[head++] as number;
@@ -93,11 +80,6 @@ export function attachSeatlessLandmasses(
   }
 }
 
-/**
- * Backstop for an islet with no sea route to any realm (a fully enclosed sea):
- * attach the whole islet to the seat nearest its centroid. Guarantees no land
- * cell is ever left unassigned.
- */
 function euclideanNearestSeat(
   cells: ReadonlyArray<number>,
   seats: ReadonlyArray<number>,

@@ -29,10 +29,7 @@ test("recipeFromSvg returns null for an SVG with no recipe", () => {
   assert.equal(recipeFromSvg("<svg><title>not vellum</title></svg>"), null);
 });
 
-// #137: coastWarp is an OPTIONAL identity field, stamped only when the recipe
-// carries an explicit warp (the Explorer coast slider or --coast-warp). A default
-// world omits it, so its bytes (the committed charts + the golden) are unchanged;
-// a warped world stamps it and round-trips back to the same warp.
+// #137: coastWarp is an OPTIONAL identity field, stamped only for an explicit warp; a default world omits it, keeping the committed charts and the golden byte-unchanged.
 test("a warped chart stamps and round-trips its coastWarp (#137)", () => {
   const world = generateWorld(defaultRecipe(7, { coastWarp: 0.8 }));
   const svg = renderMap(world, { style: "antique" });
@@ -66,15 +63,13 @@ test("a region without a regionRecipe omits the recipe but stays labelled", () =
     title: "Environs of the Capital",
   });
   const svg = renderMap(region, { style: "antique" });
-  // a region NOT opted-in (no regionRecipe, e.g. the atlas plates) must not embed a
-  // recipe -- a flat recipe alone would mislead, and this keeps the atlas bytes fixed
+  // A region NOT opted in (no regionRecipe, e.g. the atlas plates) must not embed a recipe: a flat recipe alone would mislead, and this keeps the atlas bytes fixed.
   assert.equal(recipeFromSvg(svg), null, "an un-opted region must not embed a recipe");
   assert.match(svg, /role="img"/, "but they stay labelled for a11y");
   assert.ok(/<title>.+<\/title>/.test(svg));
 });
 
-// #168: a region opts into being self-describing by passing regionRecipe. Then the
-// flat recipe AND the window are stamped, and recipeFromSvg round-trips both.
+// #168: a region opts into self-description by passing regionRecipe; then the flat recipe AND the window are stamped, and recipeFromSvg round-trips both.
 test("a region with a regionRecipe stamps and round-trips its window (#168)", () => {
   const world = generateWorld(defaultRecipe(42));
   const capital = world.settlements.find((s) => s.kind === "capital");
@@ -99,11 +94,7 @@ test("a region with a regionRecipe stamps and round-trips its window (#168)", ()
 });
 
 test("a stamped region redraws byte-for-byte with a title RE-DERIVED from the window (#169)", () => {
-  // Sub 7 stamps only the GEOMETRY (window + parent grid), never the title. Sub 8 makes the
-  // title a deterministic function of (world, window) via regionTitle, so the download-redraw
-  // path recomputes the SAME cartouche off the recovered window with NO title stamp to lean on.
-  // This is the real title-completeness proof (the #168 test reused a title constant on both
-  // sides, which could not have caught a title that varied with the derivation).
+  // Sub 7 stamps only GEOMETRY, never the title; Sub 8 makes the title a deterministic function of (world, window), so the redraw recomputes the SAME cartouche with no title stamp to lean on. This is the real title-completeness proof: the #168 test reused a title constant on both sides.
   const world = generateWorld(defaultRecipe(7, { mapType: "continent" }));
   const capital = world.settlements.find((s) => s.kind === "capital");
   assert.ok(capital);

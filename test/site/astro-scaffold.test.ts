@@ -7,20 +7,7 @@ import { join, relative } from "node:path";
 import { NAV_ITEMS } from "../../src/layouts/nav.ts";
 import { cleanPublicGenerated } from "../../scripts/clean-public-generated.ts";
 
-/**
- * Scriptorium Sub 2 (#203): the Astro scaffold and the shared layout. The spec is
- * the ratified Sub 1 decision doc (the 2026-07-21 comment on #202): home, FAQ, and
- * glossary render through one BaseLayout (head fan-out, canonical nav, constant
- * footer). Since Sub 5 (#206) retired docs/ and its dual-copy byte guards, the
- * committed sources are src/pages + public/ alone. Sub 8 (#254) ends the
- * app-shell exception: the Explorer, Print Room, and seed-of-the-day pages
- * render through the same BaseLayout. The Running Head (#268) re-shells the
- * generated gallery as a real route, so EVERY page is asserted here.
- *
- * The suite builds the Astro site once (into out/test-astro-build, left in place
- * for inspection; out/ is gitignored) and asserts against the rendered output plus
- * the committed sources.
- */
+// Scriptorium Sub 2 (#203): the Astro scaffold and shared layout. SPEC: the ratified 2026-07-21 comment on #202. Builds once into out/test-astro-build (gitignored) and asserts on the rendered output plus the committed sources.
 
 process.env.ASTRO_TELEMETRY_DISABLED = "1";
 
@@ -36,17 +23,7 @@ const decode = (s: string) =>
     .replace(/&gt;/g, ">")
     .replace(/&amp;/g, "&");
 
-// Per-page expectations. The Running Head (#268): `room` is the layout prop the
-// page passes; `title` is the head <title> the layout COMPUTES from it
-// ("The Print Room · Vellum"; home alone, roomless, keeps the atelier line).
-// `ogTitle` feeds og:title AND twitter:title (Q & A's differs in punctuation:
-// the og twins take the normalized form via ogRoom, never the &-form room).
-// `description` feeds name=description; `ogDescription` (defaulting to it)
-// feeds og:description AND twitter:description (seed-of-the-day's card copy is
-// shorter than its search snippet). `current` is the nav label marked
-// aria-current (absent on home: the wordmark carries the home link and there
-// is no Home nav item). The wordmark is uniform and the h1 is the room name
-// (#288); both are asserted in the header tests, not per page here.
+// Per-page expectations (#268): room is the layout prop and title is COMPUTED from it; ogTitle feeds the og/twitter twins; current is the aria-current nav label, absent on home (the wordmark carries the home link).
 type PageSpec = {
   route: string;
   dir: string;
@@ -59,11 +36,7 @@ type PageSpec = {
   tagline: string;
   /** App surfaces only: the is:inline bundle-twin script the page must keep. */
   scriptSrc?: string;
-  /**
-   * Content pages ship no script, with one stated exception (#289): home's
-   * seed-form intercept, a marker string the page's single inline script must
-   * carry. The pipeline rule (#260) records the reason at the script's head.
-   */
+  /** The one stated content-page script exception (#289): home's seed-form intercept marker. */
   inlineScript?: string;
 };
 
@@ -76,9 +49,7 @@ const PAGES: readonly PageSpec[] = [
     description:
       "Procedurally generated fantasy atlases: deterministic worlds drawn as antique, topographic, ink, and nautical SVG charts.",
     tagline: "an atelier of imaginary cartography",
-    // getElementById form: occurs ONLY inside the script (the form tag's own
-    // id="seed-form" would match anywhere), so the assertion proves the
-    // intercept exists, not merely the form.
+    // Occurs ONLY inside the script (the form tag's own id would match anywhere): proves the intercept exists, not merely the form.
     inlineScript: 'getElementById("seed-form")',
   },
   {
@@ -170,9 +141,7 @@ const rendered = new Map<string, string>();
 before(
   async () => {
     await rm(outDir, { recursive: true, force: true });
-    // Clean the generated trees first so the built output mirrors a deploy
-    // (fresh checkout): the dist-audit test below must not pass or fail on
-    // stale local generated files. The next build/dev regenerates them.
+    // Clean the generated trees so the dist-audit test sees a deploy-fresh checkout, not stale local files.
     await cleanPublicGenerated(root("public"));
     const { build } = await import("astro");
     await build({ root: root(""), outDir, logLevel: "error" });
@@ -237,8 +206,7 @@ test("the shell is authored exactly once: pages carry no header/nav/footer/meta 
 
   for (const p of PAGES) {
     const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
-    // The og/twitter markers are the meta-attribute forms: the app pages' verbatim
-    // content carries prose comments where a bare "og:" false-positives ("log:").
+    // Meta-attribute forms: a bare "og:" false-positives on prose ("log:").
     for (const marker of ["<footer", "topnav", 'property="og:', 'name="twitter:', "<title", "<header", "<html", "<head"]) {
       assert.ok(!source.includes(marker), `${p.route} source should not duplicate the shell (found ${marker})`);
     }
@@ -312,7 +280,6 @@ test("no head member arrives beyond the canonical set (nothing injected, nothing
     });
     assert.deepEqual(new Set(seen), expectedMeta, `${p.route} meta set should be exactly the canonical one`);
     assert.equal(seen.length, expectedMeta.size, `${p.route} should carry no duplicate meta`);
-    // rel="prefetch" joined the canonical set at #329 (the sibling-shell prefetch).
     assert.ok(!/<link(?![^>]*(?:rel="icon"|rel="stylesheet"|rel="prefetch"))/.test(head), `${p.route} has only icon/stylesheet/prefetch links`);
     assert.ok(!head.includes("canonical"), "no canonical tags exist today and the layout must not invent them");
   }
@@ -328,9 +295,7 @@ test("the canonical nav renders the typed items flat, root-absolute, one manicul
     assert.match(item.href, /^\/([a-z0-9-]+\/)*$/, `${item.label} href must be root-absolute directory form`);
   }
   assert.ok(!NAV_ITEMS.some((i) => i.href === "/"), "there is no Home item: the wordmark carries the home link");
-  // Nav labels stay mixed-case strings: the Fell SC cut sets the small caps.
-  // (No run of capitals, so "Print Room" never arrives as "PRINT ROOM"; the
-  // Q & A initialism's single capitals are fine.)
+  // The Fell SC cut sets the small caps, so nav labels stay mixed-case strings.
   for (const item of NAV_ITEMS) {
     assert.doesNotMatch(item.label, /[A-Z]{2,}/, `${item.label} must not be hand-uppercased`);
   }
@@ -340,8 +305,6 @@ test("the canonical nav renders the typed items flat, root-absolute, one manicul
     assert.equal(navs.length, 1, `${p.route} should have exactly one topnav (semantic <nav>)`);
     const nav = navs[0][1];
 
-    // The current page renders unlinked with the decorative manicule inside the
-    // span (aria-hidden, so the accessible name stays the bare label).
     const parts = [
       ...nav.matchAll(
         /<a href="([^"]+)">([^<]+)<\/a>|<span aria-current="page"><span class="manicule" aria-hidden="true">[^<]+<\/span>([^<]+)<\/span>/g,
@@ -389,8 +352,7 @@ test("the layout ships the two ratified shell rules: 0.82rem unification + aria-
       /\.topnav\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*display:\s*inline-block/,
       "the current label joins motion.css's inline-block rule so a multi-word label cannot wrap mid-label",
     );
-    // The Running Head's you-are-here marker (#268): ink-dark AND underlined,
-    // so with the manicule the marker never relies on color alone.
+    // With the manicule, the you-are-here marker never relies on color alone (#268).
     assert.match(
       css,
       /\.topnav\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*color:\s*var\(--ink-dark\)/,
@@ -401,7 +363,6 @@ test("the layout ships the two ratified shell rules: 0.82rem unification + aria-
       /\.topnav\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*text-decoration(?:-line)?:\s*underline/,
       "the current label is underlined",
     );
-    // The double hairline rule, the old ledger detail: 1px top and bottom.
     assert.match(
       css,
       /\.head-rule\s*\{[^}]*border-top:\s*1px solid var\(--ink-dark\)/,
@@ -412,26 +373,17 @@ test("the layout ships the two ratified shell rules: 0.82rem unification + aria-
       /\.head-rule\s*\{[^}]*border-bottom:\s*1px solid var\(--ink-dark\)/,
       "the head rule draws its bottom hairline",
     );
-    // The manicule's glyph coverage is inconsistent across the Fell fallback
-    // stack, so it pins the plain serif stack rather than the display role.
+    // Fell's manicule glyph coverage is inconsistent, so the manicule pins the plain serif stack.
     assert.match(
       css,
       /\.manicule\s*\{[^}]*font-family:\s*['"]?Iowan Old Style/,
       "the manicule never trusts the Fell font for its glyph",
     );
-    // Tracking stays restrained everywhere except the wordmark.
     assert.match(css, /\.wordmark\s*\{[^}]*letter-spacing:\s*0?\.3em/, "the wordmark alone is tracked out");
-    // #288 moved the h1 off the wordmark and onto the room name, so both head
-    // members now sit on a tag whose UA-default weight is the opposite of what
-    // it renders today (h1 is bold, p is normal). Both weights are pinned in
-    // the shell so the swap stays pixel-identical; assert both, since a
-    // dropped pin is invisible in source review and loud on the page.
+    // #288 swapped tags whose UA-default weights are the opposite of what renders (h1 bold, p normal); both pins keep the swap pixel-identical.
     assert.match(css, /\.wordmark\s*\{[^}]*font-weight:\s*700/, "the wordmark keeps the weight its h1 gave it");
     assert.match(css, /\.room-name\s*\{[^}]*font-weight:\s*400/, "the room name keeps the weight its p gave it");
-    // The head pins its own line-heights: page css sets body line-height per
-    // page (1.6 on the prose pages, unset elsewhere), and the head must not
-    // inherit that variance or its geometry differs page to page. 1.6 is the
-    // ratified height (the taller of the two the pages produced).
+    // Page css varies body line-height (1.6 on prose pages, unset elsewhere); the head pins the ratified 1.6 so its geometry matches on every page.
     for (const [label, sel] of [
       [".wordmark", "\\.wordmark"],
       [".room-name", "\\.room-name"],
@@ -448,8 +400,7 @@ test("the layout ships the two ratified shell rules: 0.82rem unification + aria-
 });
 
 test("the running head: uniform wordmark link, room name + tagline, double rule, then the nav band (#268)", () => {
-  // Astro escapes text expressions: the &-form room and the apostrophes in
-  // the taglines arrive entity-encoded.
+  // Astro entity-encodes text expressions: & and apostrophes arrive escaped.
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#39;");
   for (const p of PAGES) {
     const html = page(p.route);
@@ -463,8 +414,7 @@ test("the running head: uniform wordmark link, room name + tagline, double rule,
         `${p.route} names its room on the running head, as the page's h1 (#288)`,
       );
     } else {
-      // The markup form, not the bare class name: the shell css mentions
-      // .room-name on every page.
+      // Match the markup form, not the bare class: the shell css mentions .room-name on every page.
       assert.ok(
         !html.includes('<h1 class="room-name">'),
         `${p.route} is home: the atelier is not a room, the tagline stands alone`,
@@ -472,7 +422,6 @@ test("the running head: uniform wordmark link, room name + tagline, double rule,
     }
     assert.ok(html.includes(`<p class="tagline">${esc(p.tagline)}</p>`), `${p.route} keeps its tagline`);
 
-    // The folio order: running head, the double hairline rule, the nav band.
     const [head, rule, nav] = ['class="running-head"', 'class="head-rule"', 'class="topnav"'].map((m) =>
       html.indexOf(m),
     );
@@ -481,9 +430,6 @@ test("the running head: uniform wordmark link, room name + tagline, double rule,
 
   const homeHeader = page("index.html").match(/<header>([\s\S]*?)<\/header>/);
   assert.ok(homeHeader, "home should have a header");
-  // #289: the lede wall and the standalone seedline banner left the header for
-  // the cartouche hero in the body; home's header keeps only the shell members,
-  // identical to every room page.
   const order = ['class="wordmark"', 'class="tagline"', '<nav class="topnav">'];
   let at = -1;
   for (const marker of order) {
@@ -496,13 +442,6 @@ test("the running head: uniform wordmark link, room name + tagline, double rule,
   }
 });
 
-// #288: before this, all seven pages shared the identical `<h1>VELLUM</h1>` and
-// the page's own subject lived in a `<p class="room-name">`, which carries no
-// structural weight at all. The heading outline a screen reader walks therefore
-// said nothing about where the reader had landed. The fix is purely which tag
-// carries which text: the wordmark drops to a `<p class="wordmark">` and the
-// room name rises to the `<h1>`. Home is the correct exception -- it is roomless
-// (the atelier is not a room), so the wordmark stays its h1.
 test("every page's h1 names the page: the room on room pages, the wordmark on home (#288)", () => {
   const decodeAll = (s: string) => decode(s.replace(/<[^>]*>/g, ""));
   for (const p of PAGES) {
@@ -515,8 +454,6 @@ test("every page's h1 names the page: the room on room pages, the wordmark on ho
       `${p.route} h1 must name the page itself, not the masthead`,
     );
 
-    // The h1 is still the first heading, and it is still in the running head:
-    // #288 swaps tags in place, it does not relocate the heading into the body.
     const firstHeading = html.search(/<h[1-6]\b/);
     assert.equal(firstHeading, html.search(/<h1\b/), `${p.route} h1 is the first heading on the page`);
     const [headOpen, headClose] = [html.indexOf("<header>"), html.indexOf("</header>")];
@@ -526,8 +463,6 @@ test("every page's h1 names the page: the room on room pages, the wordmark on ho
     );
   }
 
-  // The masthead survives on every page, it just stops being the heading. On a
-  // room page it is a p; on home it IS the h1, so accept either tag around it.
   for (const p of PAGES) {
     const html = page(p.route);
     const tag = p.room ? "p" : "h1";
@@ -575,10 +510,7 @@ test("the footer is constant and appears exactly once per page", () => {
   }
 });
 
-// Green from the start by design (a guard, not red-green): the shell tests above
-// cover header-to-footer, so this pins the skeleton OUTSIDE it. <main> is
-// load-bearing (the page CSS centers via `main { max-width ... }`), and the
-// end-anchored close means nothing can be injected after the footer unseen.
+// A guard, green from the start: <main> is load-bearing (page CSS centers via it) and the end-anchored close means nothing can be injected after the footer unseen.
 test("the body skeleton pins the load-bearing <main> wrapper at both ends", () => {
   for (const p of PAGES) {
     const html = page(p.route);
@@ -592,12 +524,7 @@ test("the body skeleton pins the load-bearing <main> wrapper at both ends", () =
 });
 
 test("each app page keeps its bundle-twin module script, rendered verbatim inside <main>", () => {
-  // Sub 8 (#254): the shells render through the layout, but the app entry stays
-  // the Vite-pressed twin (#208), loaded by an is:inline script Astro must leave
-  // alone. A module script is deferred by spec, so living at the end of the page
-  // content (inside <main>, before the footer) is behavior-identical to the old
-  // shells' after-</main> position, and the end-anchored skeleton pin above
-  // keeps holding for every page.
+  // The app entry stays the Vite-pressed twin; a module script is deferred by spec, so rendering inside <main> is behavior-identical to the old after-main position.
   for (const p of PAGES) {
     const tag = `<script type="module" src="${p.scriptSrc}"></script>`;
     if (p.scriptSrc === undefined && p.inlineScript === undefined) {
@@ -606,8 +533,6 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
     }
     const html = page(p.route);
     if (p.inlineScript !== undefined) {
-      // #289: home's seed-form intercept is the one stated inline-script
-      // exception on a content page (reason recorded at the script's head).
       const scripts = [...html.matchAll(/<script\b/g)];
       assert.equal(scripts.length, 1, `${p.route} carries exactly one script, the seed-form intercept`);
       assert.ok(!html.includes('type="module"'), `${p.route} ships no module bundle, only the inline intercept`);
@@ -624,8 +549,6 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
 test("the cartouche hero: frame, hook, seed form, chart plate, fused caption, in order (#289)", () => {
   // normalize: prose markers must not break on source-line reflow.
   const html = normalize(decode(page("index.html")));
-  // The reading order the redesign ratified: cartouche (hook, divider, seed
-  // form, resurrected seedline), then the hero plate, then the fused caption.
   const order = [
     'class="cartouche"',
     "Give Vellum a number.",
@@ -671,12 +594,7 @@ test("How It Works opens with the Notice to Mariners and the merged lede; the co
 });
 
 test("every internal link and embed on the rendered pages resolves", () => {
-  // The per-deploy generated set resolves only against the allowlist: atlas/ is
-  // generated into the output by Sub 4, the gallery's chart SVGs and page css
-  // are generated by the same step (#268 re-shelled /gallery/ itself into an
-  // Astro route), and the app pages' bundle twins are pressed into public/ by
-  // astro:generate (#208); all are gitignored and absent on a fresh checkout
-  // (CI runs npm test before npm run build).
+  // Generated per deploy and gitignored (absent on a fresh checkout; CI runs npm test before npm run build), so these resolve only against this allowlist.
   const generated = [
     "/atlas/",
     "/gallery/index.css",
@@ -705,20 +623,14 @@ test("every internal link and embed on the rendered pages resolves", () => {
 });
 
 test("the support set the pages depend on is committed in public/", () => {
-  // The docs/-vs-public/ byte guards retired with docs/ at Sub 5; existence of
-  // the root-absolute support files is still worth pinning (og:image and the
-  // fonts.css url()s are meta/CSS references the link-resolver test cannot see).
+  // og:image and the fonts.css url()s are references the link-resolver test cannot see, so pin their existence here.
   for (const file of ["motion.css", "fonts.css", "favicon.svg", "og.png", "index.css"]) {
     assert.ok(existsSync(root(`public/${file}`)), `public/${file} should exist`);
   }
 });
 
 test("the deploy artifact serves no raw app source, no .d.ts, and no engine emit (#260)", async () => {
-  // Walk the built output: since Sub 9 every .js the site serves is a pressed
-  // twin or a shared chunk; the app source lives in src/site as TypeScript and
-  // the tsc engine emit is retired. The before() clean means the gitignored
-  // generated trees are absent here, so this audits exactly what the COMMITTED
-  // public/ content contributes to the artifact.
+  // Since #260 every served .js is a pressed twin or a chunk; the before() clean means this audits exactly what COMMITTED public/ contributes.
   const files: string[] = [];
   const walk = async (dir: string): Promise<void> => {
     for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -745,8 +657,6 @@ test("the hero charts and arms the home page embeds all resolve in public/charts
 
 test("the deploy build IS the Astro build (Sub 5 cutover, #206)", async () => {
   const pkg = JSON.parse(await readFile(root("package.json"), "utf8"));
-  // npm run site retired in Sub 4 (#205, decision D): charts:regen + the
-  // astro:generate showcase step own its jobs now.
   assert.equal(pkg.scripts.site, undefined, "npm run site stays retired");
   assert.equal(
     pkg.scripts.build,

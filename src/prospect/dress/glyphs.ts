@@ -1,15 +1,4 @@
-/**
- * The land vocabulary (#240): the small repeated glyphs the dress plants on
- * a plate, quoted from the spike's second state (PR #342), which itself
- * quotes the chart's glyph-symbols.ts idiom (profile glyphs, paper-filled,
- * ink-stroked). Positions and scales all come from Sub 2's geometry; this
- * layer only inks them. Inlined shapes, no <use>/<defs>, so many plates can
- * share one document without id collisions (the Explorer-plate rule).
- *
- * Determinism: no transcendental may run here (see the libm guard in
- * test/prospect/dress.test.ts); curves are authored constants, wiggle comes
- * from the SINE12 literal table.
- */
+/** Inlined shapes, never use/defs, so many plates can share one document without id collisions; no transcendental may run here (the libm guard in test/prospect/dress.test.ts), wiggle comes from the SINE12 literal table. */
 
 import { el, type SvgNode } from "../../render/svg.ts";
 import type { XYS } from "../geometry.ts";
@@ -94,8 +83,6 @@ export function waveFlourish(c: DressContext, x: number, y: number, s: number): 
   });
 }
 
-/** The far-off serpent, quoting the chart's sea decor (the spike's
- * palm-isle flourish; odds live in the composer, not here). */
 export function seaSerpent(c: DressContext, x: number, y: number, s: number): SvgNode {
   return el("g", { opacity: 0.85 }, [
     el("path", {
@@ -118,13 +105,11 @@ export function seaSerpent(c: DressContext, x: number, y: number, s: number): Sv
   ]);
 }
 
-/** Stilt posts under the fen houses: bare verticals from the sill down. */
 export function stiltNodes(c: DressContext, posts: ReadonlyArray<{ x: number; y: number }>): SvgNode {
   const d = posts.map((p) => `M${r1(p.x)} ${r1(p.y)}v5`).join("");
   return el("path", { d, fill: "none", ...stroke(c, 0.9) });
 }
 
-/** Strewn rubble stones across a collapse field. */
 export function rubbleNodes(c: DressContext, stones: ReadonlyArray<XYS>): SvgNode {
   const d = stones
     .map((s) => `M${r1(s.x)} ${r1(s.y)}l${r1(s.s * 0.5)} ${r1(-s.s * 0.55)}l${r1(s.s * 0.55)} ${r1(s.s * 0.55)}Z`)
@@ -132,7 +117,6 @@ export function rubbleNodes(c: DressContext, stones: ReadonlyArray<XYS>): SvgNod
   return el("path", { d, fill: c.paper, ...stroke(c, 0.7) });
 }
 
-/** Fallen roof beams leaning on the stumps. */
 export function beamNodes(
   c: DressContext,
   items: ReadonlyArray<{ x: number; y: number; dx: number; dy: number }>,
@@ -141,8 +125,7 @@ export function beamNodes(
   return el("path", { d, fill: "none", ...stroke(c, 0.8) });
 }
 
-/** sin(k*PI/6) for k = 0..11, as literals: the plowed furrows' wiggle
- * without a libm call (wavelength 12 dashes = 156 px). */
+/** sin(k*PI/6) for k = 0..11 as literals: the furrows' wiggle without a libm call. */
 const SINE12 = [0, 0.5, 0.866, 1, 0.866, 0.5, 0, -0.5, -0.866, -1, -0.866, -0.5];
 
 export function fieldRowNodes(

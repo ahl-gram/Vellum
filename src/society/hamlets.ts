@@ -8,43 +8,21 @@ import type { NamedSettlement, World } from "../world/types.ts";
 import { BIOME_APPEAL, EDGE_MARGIN } from "./sites.ts";
 import { createNamer, type Culture } from "./names.ts";
 
-/**
- * Hamlets (#171): the smallest places, revealed only on the deepest zoom band's
- * regional surveys. Candidates sit on a fixed world-space lattice and each lattice
- * point is hashed independently off the world seed, so a hamlet's existence, spot,
- * and name never depend on which window asked or in what order — the same seed +
- * window yields byte-identical sheets on every machine. Screening runs against the
- * PARENT world grid (fixed per seed), never the window's fine grid, for the same
- * reason; only the final snap-to-land happens at region resolution, mirroring how
- * region.ts projects settlements.
- */
-
-/** Lattice pitch in parent-world grid cells (world-space, window-independent). */
 export const HAMLET_LATTICE_WORLD_CELLS = 5;
 
-/** Minimum world-grid distance a hamlet keeps from every world settlement. */
 export const HAMLET_SPACING_WORLD_CELLS = 2.5;
 
-/** How far into its lattice cell a point may wander (fraction of the cell). At
- *  0.7, neighbours jittered toward each other still keep 0.3 cells apart. */
 const JITTER = 0.7;
 
-/** Acceptance scale against the site score below: flat grassland keeps roughly
- *  a third of its lattice points, steep desert almost none. The knob for overall
- *  density; measured over 16 seeds it yields a median of ~9 hamlets per
- *  deepest-band window (settlement-centred), max in the low 20s. */
 const DENSITY = 0.22;
 
 /** The same open-window inset region.ts applies when projecting settlements. */
 const WINDOW_INSET = 0.02;
 
-/** The same settled-elevation ceiling placeSettlements screens by. */
 const MAX_ELEV_BAND = 0.6;
 
-/** Name draws before a too-tight namespace drops the point instead. */
 const NAME_DRAWS = 12;
 
-/** A screened, named lattice point in world uv space (pre-projection). */
 export type HamletCandidate = {
   readonly u: number;
   readonly v: number;
@@ -55,9 +33,6 @@ export type HamletCandidate = {
   readonly founded: number;
 };
 
-/** Every name already spoken for on the world sheet, lowercased: settlements
- *  plus all feature names. The set is FIXED per seed, so a collision check
- *  against it is window-independent. */
 export function worldNameSet(world: World): Set<string> {
   const taken = new Set<string>();
   for (const s of world.settlements) taken.add(s.name.toLowerCase());
@@ -71,9 +46,7 @@ export function worldNameSet(world: World): Set<string> {
   return taken;
 }
 
-/** A hamlet's name: settlement-style draws until one clears `taken`, or null
- *  when the namespace is too tight (the point is dropped, never renamed — a
- *  rename would depend on retry order and break window-independence). */
+/** Null when the namespace is too tight: the point is dropped, never renamed, or retry order would break window-independence. */
 export function hamletName(
   rng: Rng,
   culture: Culture,
@@ -87,8 +60,6 @@ export function hamletName(
   return null;
 }
 
-/** The window's screened lattice candidates, in lattice order. Pure per-point:
- *  each candidate is a function of (world seed, lattice cell) alone. */
 export function hamletCandidates(world: World, window: UvWindow): HamletCandidate[] {
   const { seed, gridW, gridH } = world.recipe;
   const { data } = world.elev;
@@ -109,7 +80,6 @@ export function hamletCandidates(world: World, window: UvWindow): HamletCandidat
   const v0 = window.v0 + dv * WINDOW_INSET;
   const v1 = window.v1 - dv * WINDOW_INSET;
 
-  // one cell of slack each side so a point jittered into the window still shows
   const ix0 = Math.max(0, Math.floor(u0 / stepU) - 1);
   const ix1 = Math.floor(u1 / stepU) + 1;
   const iy0 = Math.max(0, Math.floor(v0 / stepV) - 1);
@@ -118,9 +88,7 @@ export function hamletCandidates(world: World, window: UvWindow): HamletCandidat
   const out: HamletCandidate[] = [];
   for (let iy = iy0; iy <= iy1; iy++) {
     for (let ix = ix0; ix <= ix1; ix++) {
-      // One fork per lattice cell, keyed by the cell alone, and a FIXED draw
-      // order within it: existence, spot, and name depend on nothing but the
-      // seed and the cell (the #171 covenant).
+      // One fork per lattice cell, FIXED draw order within it: reordering draws re-rolls every hamlet.
       const r = root.fork(`hamlet:${ix},${iy}`);
       const roll = r.next();
       const ju = r.next();
@@ -144,7 +112,6 @@ export function hamletCandidates(world: World, window: UvWindow): HamletCandidat
       if (biome === BIOMES.snow || biome === BIOMES.alpine) continue;
       if ((e - world.seaLevel) / span > MAX_ELEV_BAND) continue;
 
-      // the same terrain appeal placeSettlements scores by, thresholded
       const score =
         (1 - Math.min(1, (slope.data[i] as number) * 8)) +
         (BIOME_APPEAL[biome] ?? 0.3);
@@ -172,7 +139,6 @@ export function hamletCandidates(world: World, window: UvWindow): HamletCandidat
       const name = hamletName(r.fork("name"), world.culture, taken);
       if (name === null) continue;
 
-      // a modest age: hamlets are recent places, never older than the chronicle
       const presentYear = world.title.year;
       const founded =
         presentYear - 8 - r.fork("age").int(Math.max(1, Math.min(240, presentYear - 16)));
@@ -183,9 +149,6 @@ export function hamletCandidates(world: World, window: UvWindow): HamletCandidat
   return out;
 }
 
-/** Candidates projected onto the region grid (snap-to-land like region.ts does
- *  for settlements; unsnappable points drop), ready to append after the
- *  projected world settlements. */
 export function placeHamlets(
   world: World,
   window: UvWindow,
@@ -203,8 +166,6 @@ export function placeHamlets(
   for (const c of candidates) {
     let gx = Math.round(((c.u - window.u0) / du) * (gridW - 1));
     let gy = Math.round(((c.v - window.v0) / dv) * (gridH - 1));
-    // fine-grid coastline may wiggle off the base grid's land: snap to a nearby
-    // land cell or drop the point (the region.ts settlement precedent)
     if ((elev.data[gx + gy * gridW] as number) <= seaLevel) {
       let snapped = false;
       for (const [dx, dy] of NEIGHBORS_8) {

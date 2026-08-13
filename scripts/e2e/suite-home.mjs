@@ -1,14 +1,4 @@
-// The cartouche hero checks (H0-H6, with H5 split a/b) on the homepage
-// (#289): the hand-built hybrid frame at desktop (H1) and at a real 390px
-// device viewport (H3, the D6 promise), the hook and seedline dress (H2), and
-// above all the seed form's REAL promise (H4): type a number, land on
-// explorer/#seed=N, and watch that exact world drawn (the chart number in the
-// baked cartouche IS the seed, so the drawn SVG's own text identifies the
-// world; no oracle needed).
-//
-// Self-contained like the hunt and Print Room suites: runs after the health
-// checkpoint, navigates to its own page, and carries its own scoped no-4xx +
-// console-error delta.
+// Cartouche hero e2e (H0-H6, #289): the homepage frame at desktop and a real 390px viewport, the hook, and the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world); self-contained with scoped deltas.
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
 
@@ -25,12 +15,6 @@ export async function run(ctx) {
   }
   check("H0 the homepage loads with the seed form present", ready, "readyState complete + #seed-form");
 
-  // H1: the frame, measured, not declared: the outer border is the chart's
-  // 2.2k at the held k = 1.5, the paper is the chart-exact fill, and all four
-  // corner flourishes render at equal size.
-  // Zero-size rects would mean display:none flourishes, so the equal-size
-  // predicate alone is not enough: require them visibly sized (14k > 15px at
-  // the desktop k).
   const frame = ready ? await evaluate(`(() => {
     const c = document.querySelector(".cartouche");
     if (!c) return null;
@@ -40,10 +24,7 @@ export async function run(ctx) {
   })()`) : null;
   const flourishesShown = (fl, min) =>
     !!fl && fl.length === 4 && fl.every(([w, h]) => w > min && Math.abs(w - fl[0][0]) < 0.01 && Math.abs(h - w) < 0.01);
-  // The paper compares NUMERICALLY: since #324 the fill is written
-  // rgb(from var(--chart-paper) r g b / 0.94), which Chromium serializes as
-  // color(srgb ...) rather than rgba(...); the channels, not the spelling,
-  // are the chart-exactness under test.
+  // Compared NUMERICALLY: Chromium serializes rgb(from var(...) r g b / a) as color(srgb ...) rather than rgba(), so the channels, not the spelling, are under test (#324).
   const chartPaper = (bg) => {
     if (!bg) return false;
     let m = bg.match(/^rgba\((\d+), (\d+), (\d+), ([0-9.]+)\)$/);
@@ -58,8 +39,6 @@ export async function run(ctx) {
     JSON.stringify(frame),
   );
 
-  // H2: the ratified hook, both lines, the input prefilled 42, and the
-  // seedline in its ratified dress (italic: Alex's explicit call).
   const hero = ready ? await evaluate(`(() => {
     const hook = document.querySelector(".cartouche .hook");
     const input = document.getElementById("seed-input");
@@ -74,9 +53,6 @@ export async function run(ctx) {
   );
   await shoot("home-cartouche.png");
 
-  // H3: the D6 promise, on a real 390px device viewport: the flourishes stay,
-  // sized by the narrow k (14 x 1.1 = 15.4px), and the sheet does not scroll
-  // sideways. Reload so the page boots as a phone (harness doctrine).
   await setMobileViewport(390, 900);
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let mobileReady = false;
@@ -106,9 +82,6 @@ export async function run(ctx) {
     await sleep(75);
   }
 
-  // H4: the real promise. Type 777, press Draw it, land on explorer/#seed=777
-  // (the HASH form: the ?seed= GET fallback would prove the intercept dead),
-  // and the Explorer draws world 777, identified by its own baked chart number.
   if (ready) {
     await evaluate(`(() => {
       const i = document.getElementById("seed-input");
@@ -116,10 +89,7 @@ export async function run(ctx) {
       document.querySelector("#seed-form button").click();
     })()`);
   }
-  // The Explorer canonicalizes a bare #seed=N into its full recipe hash on
-  // boot (hash-sync), so accept any hash that keeps seed=777; the intercept's
-  // own form is proven by the search staying empty (a ?seed= GET would mean
-  // the inline script never ran).
+  // The Explorer canonicalizes a bare #seed=N on boot, so accept any hash keeping seed=777; the intercept itself is proven by the SEARCH staying empty (a ?seed= GET would mean the inline script never ran).
   let landed = null;
   let drew = false;
   for (let i = 0; i < 200; i++) {
@@ -143,10 +113,6 @@ export async function run(ctx) {
   );
   await shoot("home-drawit-777.png");
 
-  // H5: bad input degrades gracefully, two ways. Garbage fails the input's
-  // pattern, so the browser refuses the submit with its native hint and the
-  // page stays put; an EMPTY input passes the pattern, reaches the intercept,
-  // and falls back to the bare Explorer (today's world), never a broken hash.
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let backHome = false;
   for (let i = 0; i < 100; i++) {
@@ -155,8 +121,7 @@ export async function run(ctx) {
     if (ok) { backHome = true; break; }
     await sleep(75);
   }
-  // Navigation never commits inside the click's own task, so the "stayed"
-  // read must come AFTER a settle, or the check is vacuous (review catch).
+  // Navigation never commits inside the click's own task, so the "stayed" read must come AFTER a settle or the check is vacuous.
   let refused = null;
   if (backHome) {
     try {
@@ -178,8 +143,6 @@ export async function run(ctx) {
   );
   let degraded = null;
   if (backHome) {
-    // Guarded: if an unexpected navigation is mid-flight the eval context can
-    // die here, and an uncaught throw would kill the whole harness run.
     try {
       await evaluate(`(() => {
         const i = document.getElementById("seed-input");
@@ -195,23 +158,13 @@ export async function run(ctx) {
       await sleep(75);
     }
   }
-  // The Explorer boots today's world on a bare visit and hash-sync then puts
-  // ITS seed in the hash, so the hash proves nothing here; the empty search
-  // does (the no-JS GET fallback would have produced ?seed=).
   check(
     "H5b an empty seed reaches the intercept and degrades to the bare Explorer (no ?seed= GET)",
     !!degraded && degraded.startsWith("/explorer/") && !degraded.includes("?"),
     `landed at ${degraded}`,
   );
 
-  // H6: the whole home flow added no console errors and no new 4xx. One
-  // stock Chromium message is excused: "AbortError: Transition was skipped".
-  // motion.css opts the whole site into cross-document view transitions
-  // (@view-transition { navigation: auto }, the #130 folio turn), and when a
-  // navigation lands while a prior transition is still settling the browser
-  // skips it and surfaces this stock abort as an unhandled rejection. It is
-  // the folio ceremony's expected cancellation, not an app error; this suite
-  // is the first to chain page-to-page navigations fast enough to see it.
+  // "AbortError: Transition was skipped": motion.css opts the site into cross-document view transitions, and a navigation landing while a prior one settles surfaces this stock abort as an unhandled rejection; the folio's expected cancellation, not an app error.
   const errDelta = consoleErrors
     .slice(errBase)
     .filter((e) => !e.includes("AbortError: Transition was skipped"));

@@ -1,11 +1,5 @@
 import type { Field } from "../core/grid.ts";
 
-/**
- * Border-connected open sea: a 1 for every water cell (<= seaLevel) reachable
- * from the map edge, 0 elsewhere. The water cells this leaves out are exactly
- * the inland lakes (the same partition `findLakes` draws), so this is the
- * "is this the sea, not a lake?" test that furniture placement needs. Pure.
- */
 export function seaMask(elev: Field, seaLevel: number): Uint8Array {
   const { w, h, data } = elev;
   const isWater = (i: number): boolean => (data[i] as number) <= seaLevel;
@@ -18,7 +12,6 @@ export function seaMask(elev: Field, seaLevel: number): Uint8Array {
     }
   };
 
-  // seed from every border cell, then flood 4-connected (matching findLakes)
   for (let x = 0; x < w; x++) {
     visit(x);
     visit(x + (h - 1) * w);

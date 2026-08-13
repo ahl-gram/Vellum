@@ -4,7 +4,6 @@ import type { RenderCtx } from "../context.ts";
 import type { CompassPlan } from "./compass.ts";
 import type { CartouchePlan } from "./cartouche.ts";
 
-/** Wave flourishes, one sea serpent, one ship — antique/ink open water. */
 export function seaDecorLayer(
   ctx: RenderCtx,
   cartouche: CartouchePlan,
@@ -39,9 +38,6 @@ export function seaDecorLayer(
     for (let gx = 4; gx < w - 4; gx += 2) {
       const d = world.oceanDist[gx + gy * w] as number;
       if (d < 5) continue;
-      // #251: oceanDist runs just as deep inside an inland lake, so on a region gate
-      // to the parent's genuine sea or a wave/serpent/ship lands in a lake. Inert on
-      // world sheets (no seaGate), keeping the committed goldens byte-identical.
       if (world.region?.seaGate && world.region.seaGate[gx + gy * w] === 0) continue;
       const px = proj.px(gx);
       const py = proj.py(gy);
@@ -52,7 +48,6 @@ export function seaDecorLayer(
 
   const nodes: SvgNode[] = [];
 
-  // wave clusters
   const waveSpots = prunePoints(drng.fork("waves").shuffled(open), 120 * k, 16);
   for (const spot of waveSpots) {
     const s = (0.85 + drng.range(0, 0.35)) * k;
@@ -68,7 +63,6 @@ export function seaDecorLayer(
     nodes.push(wave(-8, 0), wave(-2, 5));
   }
 
-  // sea serpent: three humps, a curled head, a tail fin
   const deepSpots = open
     .filter((o) => o.d >= 8 && o.edgeOk && clearOf(o.x, o.y, 90 * k))
     .sort((a, b) => b.d - a.d);
@@ -92,12 +86,10 @@ export function seaDecorLayer(
     };
     nodes.push(
       el("g", { id: "sea-serpent", opacity: 0.85 }, [
-        // tail fin
         el("path", {
           d: `M${x - 34 * s} ${y}l${-6 * s} ${-7 * s}m${6 * s} ${7 * s}l${-8 * s} ${-2 * s}`,
           fill: "none", ...stroke,
         }),
-        // humps
         el("path", {
           d: `M${x - 32 * s} ${y}q${7 * s} ${-13 * s} ${14 * s} 0`,
           fill: style.paper, ...stroke,
@@ -106,17 +98,14 @@ export function seaDecorLayer(
           d: `M${x - 14 * s} ${y}q${7 * s} ${-16 * s} ${14 * s} 0`,
           fill: style.paper, ...stroke,
         }),
-        // neck and head
         el("path", {
           d: `M${x + 4 * s} ${y}q${2 * s} ${-12 * s} ${8 * s} ${-13 * s}q${7 * s} ${-1.4 * s} ${7 * s} ${4 * s}q0 ${3.4 * s} ${-5 * s} ${2.6 * s}l${2 * s} ${2.4 * s}`,
           fill: style.paper, ...stroke,
         }),
-        // eye
         el("circle", {
           cx: (x + 14.6 * s).toFixed(1), cy: (y - 10.4 * s).toFixed(1),
           r: (0.9 * k).toFixed(2), fill: style.ink,
         }),
-        // ripples
         el("path", {
           d: `M${x - 38 * s} ${y + 4 * s}h${10 * s}m${6 * s} 0h${12 * s}m${8 * s} 0h${10 * s}`,
           fill: "none", stroke: style.inkSoft,
@@ -126,7 +115,6 @@ export function seaDecorLayer(
     );
   }
 
-  // a small ship under sail, somewhere else in open water
   const shipAt = claimSpot(
     deepSpots.find(
       (o) =>

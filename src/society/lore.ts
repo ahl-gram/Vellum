@@ -2,16 +2,6 @@ import type { Rng } from "../core/rng.ts";
 import { BIOMES } from "../climate/biomes.ts";
 import type { NamedSettlement, World } from "../world/types.ts";
 
-/**
- * Travelers' notes for the atlas gazetteer: one or two deterministic
- * sentences per settlement, flavored by culture, situation, and rank.
- * A LoreWriter owns its repeat-avoidance memory, so one writer per
- * gazetteer pass keeps neighboring entries from echoing each other.
- */
-
-// Trade goods come in two registers so templates draw an appropriate fill:
-// AROMATIC for "smell of %a" (scented, organic), CARGO for "laden with %c"
-// (any freight, including minerals and craft goods).
 export const AROMATIC_GOODS: Record<string, readonly string[]> = {
   thalassic: ["olive oil", "brined olives", "orange peel", "salt cod", "pine pitch"],
   norden: ["whale oil", "pine tar", "smoked herring", "tallow", "juniper smoke"],
@@ -89,8 +79,6 @@ export const INLAND_NOTES = [
   "Wolves are heard in the hills on the coldest nights.",
 ];
 
-// The capital draws from its own register and never reuses a generic
-// situational line, so the entry readers look at first stays distinct.
 export const CAPITAL_NOTES = [
   "Here the court keeps its ledgers, levies, and grudges.",
   "Its walls were raised thrice and breached only once.",
@@ -124,8 +112,6 @@ const REALM_MOODS = [
   "swears fealty with one hand on its sword",
 ];
 
-// Notes for a ruined settlement: every one references its history (the
-// founding year and its abandonment), so the gazetteer speaks of events.
 export const RUIN_NOTES = [
   "Founded in the year %y, it was given up long ago; only wind moves in its lanes.",
   "A dead place now, its people gone these many years; the chronicle marks it a ruin.",
@@ -151,8 +137,6 @@ export function createLoreWriter(world: World, rng: Rng): LoreWriter {
   const cargo = CARGO_GOODS[world.culture.id] ?? CARGO_GOODS["thalassic"]!;
   const used = new Map<readonly string[], Set<string>>();
 
-  // founding years of the notable settlements the chronicle records, keyed by
-  // name (unique within a world) so a gazetteer note can cite the event.
   const foundingYear = new Map<string, number>();
   for (const e of world.history.events) {
     if (e.kind === "founding" && e.settlement !== undefined) {
@@ -160,9 +144,6 @@ export function createLoreWriter(world: World, rng: Rng): LoreWriter {
     }
   }
 
-  // cycle the whole pool before any repeat: pick only from the unused
-  // members, resetting when the pool is exhausted. Keeps distribution even
-  // and adjacent repeats rare, while staying a pure function of the seed.
   const freshPick = (list: readonly string[]): string => {
     let seen = used.get(list);
     if (!seen) {

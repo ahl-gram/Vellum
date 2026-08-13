@@ -1,58 +1,30 @@
-/**
- * Prospect geometry (#239): the neutral shape vocabulary the silhouette
- * grammar composes into and Sub 3 dresses. Shapes and positions ONLY: no
- * style tokens, no ink, no SVG. Coordinates live in the spike's ratified
- * plate space (#237 GO, PR #342 second state): a 520x384 plate, ground line
- * at y 232, y growing downward.
- *
- * Determinism contract: geometry numbers come from integer-mixed RNG draws
- * (core/rng.ts) combined with +,-,*,/ only, so they are bit-identical across
- * platforms. Math.sin/cos/atan2/hypot must not creep into this layer; see
- * the same rule in transect.ts. Coordinates are NOT rounded here: Sub 3
- * rounds at SVG emit, and groundingViolations relies on exact equality.
- */
+/** Coordinates are NOT rounded here: dressing rounds at SVG emit, and groundingViolations relies on exact equality. */
 
 export type Pt = { readonly x: number; readonly y: number };
 
 /** A placed decoration: position plus the glyph's local scale. */
 export type XYS = { readonly x: number; readonly y: number; readonly s: number };
 
-/** The plate frame the composition is laid out against. */
 export const PLATE_W = 520;
 export const PLATE_H = 384;
 export const PLATE_MARGIN = 23;
 export const VIEW_X0 = PLATE_MARGIN;
 export const VIEW_X1 = PLATE_W - PLATE_MARGIN;
-/** The flat ground line; river prospects stand on a raised bank above it
- * so the bridge reads in front of the town. */
 export const BASE_GROUND = 232;
 export const RIVER_BANK_DROP = 12;
-/** Waterline and water-band bottom on sea plates. */
 export const SHORE_DROP = 6;
 export const WATER_BOTTOM = 276;
-/** Depth raises: a back-row mass sits this many px above the ground line to
- * read as one street behind; a walled keep sits slightly above the wall. */
 export const BACK_ROW_RAISE = 8;
 export const WALLED_KEEP_RAISE = 4;
-/** The seat hill (#237 GO condition 5): a quadratic mound of this half-span,
- * centered on the plate, rising MOUND_MAX px at full siteRel. */
 export const MOUND_HALF_SPAN = 200;
 export const MOUND_MAX_RISE = 56;
-/** Backdrop ridge: vertical px per unit of relative elevation above the
- * site, and the rise below which the horizon reads flat and is omitted. */
 export const RIDGE_SCALE = 140;
 export const RIDGE_MIN_RISE = 0.02;
-/** Ground polyline sample step, matching the spike's 8px. */
 export const GROUND_SAMPLE_STEP = 8;
 
 export type MassForm = "gable" | "ridge" | "tower" | "spire" | "keep";
 
-/**
- * One building mass. `base` is the y of its foot; `raise` declares how far
- * above the ground function that foot deliberately sits (0 = on the ground
- * line). h is the wall height; the form's roof or spire rides on top and is
- * Sub 3's to draw from form + dimensions.
- */
+/** base is the y of the mass's foot; raise is how far above the ground function that foot deliberately sits. */
 export type Mass = {
   readonly form: MassForm;
   readonly x: number;
@@ -63,8 +35,7 @@ export type Mass = {
   readonly broken: boolean;
 };
 
-/** A curtain-wall run. Feet follow the ground function between x0 and x1;
- * `heel` is a lean in degrees (nonzero only on a ruined stub). */
+/** Feet follow the ground function; heel is a lean in degrees, nonzero only on a ruined stub. */
 export type WallSegment = {
   readonly x0: number;
   readonly x1: number;
@@ -73,8 +44,6 @@ export type WallSegment = {
   readonly heel: number;
 };
 
-/** The ground: a flat base with an optional centered mound. `line` is the
- * sampled polyline for rendering; groundAt() is the exact function. */
 export type Ground = {
   readonly base: number;
   readonly rise: number;
@@ -124,12 +93,6 @@ export type ForegroundElement =
   | { readonly kind: "birds"; readonly items: ReadonlyArray<XYS> }
   | { readonly kind: "seaSerpent"; readonly x: number; readonly y: number; readonly s: number };
 
-/**
- * A composed prospect. `masses`, `walls`, and `foreground` are in paint
- * order (back to front); within masses that is descending raise, with walls
- * painted between the back row and any walled keep, exactly the spike's
- * layering.
- */
 export type ProspectGeometry = {
   readonly seed: number;
   readonly index: number;
@@ -141,7 +104,6 @@ export type ProspectGeometry = {
   readonly foreground: ReadonlyArray<ForegroundElement>;
 };
 
-/** The exact ground function: base minus the centered quadratic mound. */
 export function groundAt(ground: Pick<Ground, "base" | "rise">, x: number): number {
   if (ground.rise === 0) return ground.base;
   const cx = (VIEW_X0 + VIEW_X1) / 2;
@@ -172,20 +134,6 @@ function covered(cover: ReadonlyArray<Interval>, x0: number, x1: number): boolea
   return cover.some((c) => x0 >= c.x0 - EPS && x1 <= c.x1 + EPS);
 }
 
-/**
- * The structural grounding check (#237 GO condition 8). The floating class
- * appeared twice in the spike (a seat on the far ridge, a raised back-row
- * house past the front row's cover), so this guards the CLASS, not the
- * instance: every mass must stand exactly on the ground function less its
- * declared raise, and any raise above zero is legal only where the merged
- * span of on-ground masses and walls fully covers it. Returns one message
- * per violation; empty means grounded.
- *
- * Class boundary: only g.masses is checked. A Mass embedded in a foreground
- * element (the bridge's gate tower, the mill house) deliberately stands on
- * its element's own anchor, the deck end or the near bank, not the ground
- * function; those anchors are pinned by the composer tests instead.
- */
 export function groundingViolations(g: ProspectGeometry): string[] {
   const out: string[] = [];
   for (const p of g.ground.line) {

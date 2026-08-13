@@ -1,16 +1,3 @@
-/**
- * The dress (#240): ProspectGeometry + a ratified style -> engraved SVG.
- * Ink and texture only: composition is Sub 2's (masses, walls, foreground,
- * in paint order), frame and caption are Sub 4's. Every color is a
- * render/style.ts token; the two-dress contract lives in context.ts.
- *
- * Determinism: dress-level jitter (waves, grass) draws from labeled forks
- * of the geometry's own seed, so the same (geometry, style) yields
- * byte-identical SVG; nothing here may call libm (guarded by
- * test/prospect/dress.test.ts). Coordinates round to 0.1 at emit, the
- * geometry.ts contract ("Sub 3 rounds at SVG emit").
- */
-
 import { el, renderSvg, type SvgNode } from "../../render/svg.ts";
 import type { MapStyle } from "../../render/style.ts";
 import { createRng } from "../../core/rng.ts";
@@ -57,12 +44,10 @@ import { bridgeNodes, millNodes, weirNodes } from "./rivercraft.ts";
 export { PROSPECT_DRESSES, type ProspectDress } from "./context.ts";
 
 export type DressOptions = {
-  /** Scopes filter/gradient ids when many plates share one document. */
   readonly idSuffix?: string;
 };
 
-/** One foreground element's ink. Exhaustive: a kind Sub 2 grows without a
- * dress breaks the build here, not silently on a blank plate. */
+/** Exhaustive on purpose: a new foreground kind without a dress breaks the build here, not silently on a blank plate. */
 export function foregroundNodes(c: DressContext, e: ForegroundElement): SvgNode[] {
   switch (e.kind) {
     case "fieldRows":
@@ -120,7 +105,6 @@ function unreachable(e: never): never {
   throw new RangeError(`no dress for foreground kind ${JSON.stringify(e)}`);
 }
 
-/** #rrggbb -> "r g b" channels in 0..1, 2dp, for the grain's color matrix. */
 function inkChannels(ink: string): [string, string, string] {
   if (!/^#[0-9a-fA-F]{6}$/.test(ink)) {
     throw new RangeError(`ink token ${ink} is not #rrggbb; the grain matrix needs 6-digit hex`);
@@ -171,9 +155,6 @@ export function renderProspect(
   const rWaves = rng.fork(`prospect:${g.index}:dress:waves`);
   const rGrass = rng.fork(`prospect:${g.index}:dress:grass`);
 
-  // Masses arrive back-to-front by descending raise; the walls paint after
-  // the depth-raised back row and before everything at ground level, the
-  // spike's ratified layering (geometry.ts's paint-order contract).
   const splitAt = g.masses.findIndex((m) => m.raise < BACK_ROW_RAISE);
   const split = splitAt === -1 ? g.masses.length : splitAt;
   const weightOf = (m: ProspectGeometry["masses"][number]): number =>

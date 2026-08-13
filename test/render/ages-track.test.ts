@@ -16,14 +16,9 @@ import {
 } from "../../src/render/ages-track.ts";
 import type { YearRange } from "../../src/render/chronicle-scrubber.ts";
 
-// Unit tests for #220's pure track math: bar position u <-> chamber position under
-// the ratified 50/50 split, the word-not-a-number readout, and the hard detent's
-// capture/escape state machine. The DOM wiring (range input, rAF clock, journal)
-// lives in src/site/living-chart/ and is covered by the Explorer e2e.
+// #220's pure track math: bar position u <-> chamber position under the ratified 50/50 split, the word-not-a-number readout, and the hard detent's capture/escape machine; the DOM wiring lives in src/site/living-chart/ and is covered by the Explorer e2e.
 
 const RANGE: YearRange = { min: 312, max: 1112 }; // span 800, so u steps land on years
-
-// --- the ratified structure -------------------------------------------------
 
 test("the seam is the ratified even 50/50 split", () => {
   assert.equal(SEAM_U, 0.5);
@@ -32,15 +27,11 @@ test("the seam is the ratified even 50/50 split", () => {
 test("the detent escape pin is pointer pixels with a narrow-track cap (measured 2026-07-28)", () => {
   assert.equal(DETENT_ESCAPE_PX, 28);
   assert.equal(DETENT_ESCAPE_MAX_U, 0.15);
-  // The two real layouts the pin was measured against: the 852px desktop track gives a
-  // light-but-deliberate band, and a wrapped ~230px phone line hits the cap's regime
-  // without ever walling off more than 15 percent of the bar.
+  // Measured against the two real layouts: the 852px desktop track gives a light-but-deliberate band, and a wrapped ~230px phone line hits the cap without ever walling off more than 15% of the bar.
   assert.ok(Math.abs(detentEscapeU(852 - 16) - 28 / 836) < 1e-12);
   assert.equal(detentEscapeU(100), DETENT_ESCAPE_MAX_U, "a narrow track caps at MAX_U");
   assert.equal(detentEscapeU(0), DETENT_ESCAPE_MAX_U, "a degenerate width cannot divide by zero");
 });
-
-// --- posAt: bar position to chamber position ---------------------------------
 
 test("the left half is the survey chamber, t linear in u", () => {
   assert.deepEqual(posAt(0, RANGE), { chamber: "survey", t: 0 });
@@ -79,8 +70,6 @@ test("a degenerate year range parks the whole ages chamber on its one year", () 
   assert.deepEqual(posAt(1, flat), { chamber: "ages", year: 900 });
 });
 
-// --- uFor: the inverse --------------------------------------------------------
-
 test("uFor places survey positions in the left half", () => {
   assert.equal(uFor({ chamber: "survey", t: 0 }, RANGE), 0);
   assert.equal(uFor({ chamber: "survey", t: 1 }, RANGE), SEAM_U);
@@ -114,8 +103,6 @@ test("posAt and uFor round-trip across the whole bar", () => {
   }
 });
 
-// --- the readout --------------------------------------------------------------
-
 test("the survey half reads as a word, never a year (ratified 2026-07-28)", () => {
   assert.equal(readoutFor({ chamber: "survey", t: 0.3 }), "the survey");
   assert.equal(readoutFor({ chamber: "survey", t: 1 }), "the survey");
@@ -124,8 +111,6 @@ test("the survey half reads as a word, never a year (ratified 2026-07-28)", () =
 test("the ages half reads the year in the chronicle's lowercase idiom", () => {
   assert.equal(readoutFor({ chamber: "ages", year: 847 }), "year 847");
 });
-
-// --- where Play opens ----------------------------------------------------------
 
 test("Play at the present park opens the whole story from the survey's first leg (Alex's PR #311 ruling)", () => {
   assert.deepEqual(playStart({ chamber: "ages", year: RANGE.max }, RANGE), { chamber: "survey", t: 0 });
@@ -144,8 +129,6 @@ test("a degenerate range's one year IS the park: Play opens the whole story", ()
   const flat: YearRange = { min: 900, max: 900 };
   assert.deepEqual(playStart({ chamber: "ages", year: 900 }, flat), { chamber: "survey", t: 0 });
 });
-
-// --- the hard detent ----------------------------------------------------------
 
 const ESC = 0.04; // the behavioral tests' explicit band; the live band is per-drag (detentEscapeU)
 

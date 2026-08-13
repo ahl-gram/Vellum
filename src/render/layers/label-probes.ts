@@ -1,24 +1,8 @@
 import type { Pt } from "../geometry.ts";
 import type { Projection } from "../transform.ts";
 
-/**
- * Candidate label positions drawn from a feature's own blob, nearest its centroid
- * first (#145, #175).
- *
- * Both the realm name and the mountain-range name used to search a single vertical
- * column through the blob centroid: five rungs, one x. When that column was taken
- * the label was dropped, even with thousands of the blob's cells free elsewhere.
- * Probing the blob itself is the escalation both of them fall back to.
- */
-
-/** Cap on probes, so a 20k-cell blob does not cost 20k box tests. */
 const MAX_INTERIOR_PROBES = 240;
 
-/**
- * Blob cells ordered nearest-centroid first, thinned to at most
- * MAX_INTERIOR_PROBES. Ties break on cell index, so the order never depends on how
- * the blob was walked and a shuffled blob yields a byte-identical placement.
- */
 export function interiorProbes(
   blob: ReadonlyArray<number>,
   gridW: number,

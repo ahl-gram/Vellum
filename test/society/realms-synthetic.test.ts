@@ -7,12 +7,7 @@ import { realmTintIndices, realmCentroids } from "../../src/render/realm-tints.t
 import { STYLES } from "../../src/render/style.ts";
 import type { Settlement } from "../../src/society/sites.ts";
 
-// Hand-built worlds that DRIVE code paths no natural seed reaches: real worlds
-// cap at ~5 realms, so the generation ceiling, the over-ceiling attachment, and
-// the >BASE_TINTS distance-aware tint path (#78) never run on generated data.
-// These also prove attachment goes BY SEA ROUTE, not straight-line -- the one
-// behaviour every generated-world test would still pass with the old Euclidean
-// fallback in place.
+// Hand-built worlds DRIVE paths no natural seed reaches (real worlds cap at ~5 realms): the generation ceiling, over-ceiling attachment, the >BASE_TINTS tint path (#78), and BY-SEA-ROUTE attachment, the one behaviour a generated-world test would still pass with the old Euclidean fallback.
 
 const SEA = 0.5;
 type Rect = { x0: number; y0: number; x1: number; y1: number };
@@ -45,7 +40,6 @@ test("#79 ceiling: 9 substantial inhabited islands yield 8 realms, the smallest 
 
   assert.equal(realms.seats.length, 8, "9 islands, ceiling 8");
 
-  // every land cell is assigned; no island is left unlabeled
   for (let i = 0; i < W * H; i++) {
     if ((elev.data[i] as number) > SEA) assert.ok((realms.labels[i] as number) >= 0);
   }
@@ -105,10 +99,7 @@ test("#78/#79 antique's 8-realm pigeonhole reuses a tint on a far pair, never a 
 });
 
 test("#79 attaches an islet by sea route, not by straight-line across land", () => {
-  // A big continent A (coast near the islet, seat deep and far); a compact B (seat
-  // straight-line-nearest to the islet). The islet is empty, so it attaches. Sea
-  // route reaches A's near coast first; straight-line-nearest seat is B. They must
-  // disagree, and the islet must join A.
+  // Continent A's coast is near the empty islet but its seat is deep and far; compact B's seat is straight-line-nearest. The sea route reaches A first, so the two answers must disagree and the islet must join A.
   const W = 80;
   const H = 40;
   const A: Rect = { x0: 25, y0: 0, x1: 75, y1: 39 }; // coast at x=25, near the islet
@@ -125,21 +116,17 @@ test("#79 attaches an islet by sea route, not by straight-line across land", () 
   const realmOfB = realms.labels[3 + 20 * W] as number; // town's cell
   assert.notEqual(realmOfA, realmOfB);
 
-  // the discriminator is real: straight-line-nearest SEAT is B, not A
   const ic = { x: 19.5, y: 20 };
   const dA = Math.hypot(70 - ic.x, 20 - ic.y);
   const dB = Math.hypot(3 - ic.x, 20 - ic.y);
   assert.ok(dB < dA, "setup: Euclidean-nearest seat is B (the wrong answer)");
 
-  // the islet joined A by sea route
   const isletLabel = realms.labels[19 + 20 * W] as number;
   assert.equal(isletLabel, realmOfA, "islet attaches to A's near coast by sea, not B by straight line");
 });
 
 test("#79 size wins: a settled but sub-substantial island attaches, it does not self-govern", () => {
-  // Alex's locked decision: size always wins. A small island with a town of its
-  // own still attaches to a neighbour by sea route -- its town becomes an ordinary
-  // settlement, not a realm seat. (n=5000 -> SUBSTANTIAL_FRACTION*n = 20 cells.)
+  // Alex's locked decision: size always wins. A settled sub-substantial island attaches by sea route, its town becoming an ordinary settlement (n=5000 -> SUBSTANTIAL_FRACTION*n = 20 cells).
   const W = 100;
   const H = 50;
   const A: Rect = { x0: 0, y0: 0, x1: 40, y1: 49 }; // mainland
@@ -158,16 +145,11 @@ test("#79 size wins: a settled but sub-substantial island attaches, it does not 
 });
 
 test("#79 backstop: an islet with no sea route (enclosed lake) still gets a realm", () => {
-  // Mainland A (seated). A seatless ring island B with an enclosed interior lake;
-  // a 1-cell islet C sits in that lake. C's only water touches B (itself seatless
-  // in the frozen snapshot), so no realm is reachable by sea -- the ONLY way C
-  // escapes -1 is the Euclidean backstop. This is seed 60's real geometry, driven
-  // deterministically. Fires once naturally in 300 seeds, so pin it here.
+  // Seed 60's real geometry, driven deterministically (fires once naturally in 300 seeds): islet C sits in seatless B's enclosed lake, so no realm is reachable by sea and only the Euclidean backstop saves C from -1.
   const W = 60;
   const H = 60;
   const A: Rect = { x0: 2, y0: 2, x1: 20, y1: 57 };
-  // ring B: an outer block minus an inner lake, kept as four walls so the lake is
-  // fully enclosed (no gap to the open ocean)
+  // Ring B is four walls so the lake is fully enclosed, no gap to the open ocean.
   const bTop: Rect = { x0: 32, y0: 15, x1: 54, y1: 21 };
   const bBottom: Rect = { x0: 32, y0: 39, x1: 54, y1: 45 };
   const bLeft: Rect = { x0: 32, y0: 15, x1: 37, y1: 45 };
@@ -178,10 +160,8 @@ test("#79 backstop: an islet with no sea route (enclosed lake) still gets a real
   const realms = partitionRealms(elev, SEA, noRivers(W, H), [capital]);
 
   assert.equal(realms.seats.length, 1, "only A governs; B is empty, C is enclosed");
-  // C escaped -1 only via the backstop (its lake reaches no realm shore by sea)
   const cLabel = realms.labels[43 + 30 * W] as number;
   assert.ok(cLabel >= 0, "the enclosed islet still gets a realm (no unassigned land)");
-  // and no land cell anywhere is left unassigned
   for (let i = 0; i < W * H; i++) {
     if ((elev.data[i] as number) > SEA) assert.ok((realms.labels[i] as number) >= 0, `unassigned land at ${i}`);
   }

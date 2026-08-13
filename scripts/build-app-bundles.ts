@@ -4,32 +4,10 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-/**
- * Sub 7 of the Scriptorium epic (#208): the bindery keeps one press. A single
- * multi-entry Vite build bundles the app surfaces into their gitignored
- * .bundle.js twins under public/. Since Sub 9 (#260) the entries are the
- * TypeScript sources in src/site, which import the engine's src/ directly, so
- * Vite compiles the whole graph itself (the tsc browser emit retired). The
- * worker is emitted ONCE (worker-client.ts's static import-URL spawn, which
- * Vite detects and rewrites) at the fixed path explorer/worker.bundle.js; both
- * the Explorer and the Print Room spawn that one chunk. Modules shared between
- * entries land in explorer/chunks/ (gitignored, fixed names, no hashing: the
- * app pages reference fixed entry names, and the e2e harness pins the worker
- * path).
- *
- * Every knob is chosen to keep the emitted code running identically to the
- * source it replaces (no minify, no downlevel, no preload polyfill), the same
- * behavior-preserving discipline the esbuild press had.
- *
- *   node scripts/build-app-bundles.ts          # bundles into public/
- *   node scripts/build-app-bundles.ts <root>   # another served root (tests)
- */
+/** #208 Sub 7: one multi-entry Vite press bundles the app surfaces into their gitignored .bundle.js twins under public/; the worker is emitted ONCE at explorer/worker.bundle.js (both pages spawn it), shared chunks land in explorer/chunks/ with fixed names, and every knob keeps the emitted code behaviorally identical to the source (no minify, no downlevel, no preload polyfill). */
 
 const REPO = fileURLToPath(new URL("..", import.meta.url));
 
-// entry (repo-relative TS source) -> twin (relative to the served root,
-// public/). Input keys are the twin names minus .bundle.js, so Rollup's [name]
-// emits each twin in place.
 export const BUNDLE_ENTRIES: ReadonlyArray<{ entry: string; twin: string }> = [
   { entry: "src/site/explorer/app.ts", twin: "explorer/app.bundle.js" },
   { entry: "src/site/print-room/app.ts", twin: "print-room/app.bundle.js" },
@@ -37,7 +15,6 @@ export const BUNDLE_ENTRIES: ReadonlyArray<{ entry: string; twin: string }> = [
   { entry: "src/site/reading-room/app.ts", twin: "reading-room/app.bundle.js" },
 ];
 
-// Behavior-preserving output shape shared by the page build and the worker build.
 const OUTPUT = {
   format: "es",
   entryFileNames: "[name].bundle.js",
@@ -48,19 +25,10 @@ const OUTPUT = {
 const pressConfig = (outDir: string): InlineConfig => ({
   configFile: false,
   logLevel: "warn",
-  // The repo is the Vite root: the entries live in src/site, import the engine
-  // src relatively, and pull d3 from node_modules (root-absolute imports
-  // retired with the JS source at Sub 9).
   root: REPO,
-  // CRITICAL: Vite's publicDir default is <root>/public, copied into the
-  // outDir verbatim; ours holds the whole served site, so any truthy value
-  // here would copy it into the staging tree and then back over itself.
   publicDir: false,
   build: {
-    // A staging dir, not root itself: writing into root would trip Vite's
-    // outDir-inside-root guard on every build. bundleAppSurfaces copies the
-    // emitted twins into place afterward. emptyOutDir is explicit so Vite does
-    // not warn about emptying a dir outside the project root.
+    // A staging dir, not root itself: writing into root trips Vite's outDir-inside-root guard; the emitted twins are copied into place afterward.
     outDir,
     emptyOutDir: true,
     target: "esnext", // no syntax downlevel; top-level await survives as authored
@@ -75,8 +43,7 @@ const pressConfig = (outDir: string): InlineConfig => ({
     },
   },
   worker: {
-    // The worker chunk must be an ES module: worker.ts imports the engine src
-    // and is spawned { type: "module" } (Vite's default worker format is iife).
+    // The worker chunk must be an ES module (it is spawned { type: "module" }); Vite's default worker format is iife.
     format: "es",
     rollupOptions: {
       output: { ...OUTPUT, entryFileNames: "explorer/worker.bundle.js" },
@@ -89,8 +56,6 @@ export async function bundleAppSurfaces(root: string): Promise<void> {
   const staging = await mkdtemp(join(tmpdir(), "vellum-press-"));
   try {
     await build(pressConfig(staging));
-    // The staging tree mirrors served-root-relative paths (explorer/app.bundle.js,
-    // explorer/chunks/*, ...), so a recursive copy lands every twin in place.
     await cp(staging, root, { recursive: true });
   } finally {
     await rm(staging, { recursive: true, force: true });
@@ -126,7 +91,6 @@ export async function bundleToString(absEntry: string): Promise<string> {
   throw new Error(`vite produced no entry chunk for ${absEntry}`);
 }
 
-// Run as a script (not when imported by a test): `node build-app-bundles.ts [root]`.
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const root = resolve(process.argv[2] ?? "public");
   bundleAppSurfaces(root).catch((err: unknown) => {

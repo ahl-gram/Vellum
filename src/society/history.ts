@@ -1,16 +1,7 @@
 import type { Rng } from "../core/rng.ts";
 import type { Settlement } from "./sites.ts";
 
-/**
- * A small deterministic history laid over the finished world: founding dates,
- * a few abandoned settlements (ruins), and a dated chronicle of events. Run on
- * its own `rng.fork("history")` appended LAST in the pipeline, so it can never
- * reshuffle a seed's geography or names — history is purely additive.
- *
- * Years are anchored to the present survey year (`title.year`) and derived as
- * fractions of an available span, so even a low survey year never yields a
- * negative date.
- */
+/** Runs on its own rng.fork("history"), appended LAST in the pipeline, so it can never reshuffle a seed's geography or names. */
 
 export type EventKind = "founding" | "rise" | "war" | "ruin";
 
@@ -18,9 +9,7 @@ export type HistoricalEvent = {
   readonly year: number;
   readonly kind: EventKind;
   readonly text: string;
-  /** Index into world.settlements, when the event concerns one. */
   readonly settlement?: number;
-  /** Realm id, when the event concerns one. */
   readonly realm?: number;
 };
 
@@ -28,24 +17,18 @@ export type History = {
   readonly events: ReadonlyArray<HistoricalEvent>;
 };
 
-/** The pre-history settlement shape (before founded/ruined are folded on). */
 type SettlementCore = Settlement & { readonly name: string };
 
 export type HistoryInput = {
   readonly settlements: ReadonlyArray<SettlementCore>;
-  /** Settlement indices that anchor a realm (never abandoned). */
   readonly seats: ReadonlyArray<number>;
-  /** Realm names by realm id; empty when the world has a single realm. */
   readonly realmNames: ReadonlyArray<string>;
-  /** The present survey year (world.title.year). */
   readonly presentYear: number;
 };
 
 export type HistoryResult = {
   readonly events: ReadonlyArray<HistoricalEvent>;
-  /** Founding year, parallel to settlements. */
   readonly founded: ReadonlyArray<number>;
-  /** Whether the settlement is a ruin, parallel to settlements. */
   readonly ruined: ReadonlyArray<boolean>;
 };
 
@@ -77,7 +60,6 @@ const RUIN_TEMPLATES = [
   "The people of %s drifted away, leaving only stones to the wind.",
 ];
 
-/** Cycles a pool without immediate repeats, deterministic from `rng`. */
 function makeCycler(rng: Rng, pool: readonly string[]): () => string {
   const used = new Set<string>();
   return () => {
@@ -93,21 +75,17 @@ export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
   const { settlements, seats, realmNames, presentYear } = input;
   const n = settlements.length;
 
-  // Recorded history spans a few centuries up to the present, scaled as a
-  // fraction of the present year so low survey years never go negative.
   const span = Math.min(900, Math.max(150, Math.round(presentYear * 0.7)));
   const epochStart = presentYear - span;
   const yearAt = (f: number): number =>
     Math.round(epochStart + Math.max(0, Math.min(1, f)) * span);
 
-  // --- founding years: capital oldest, towns next, villages youngest ---
   const founded: number[] = settlements.map((s) => {
     const base = s.kind === "capital" ? 0.02 : s.kind === "town" ? 0.3 : 0.55;
     const f = base + rng.next() * 0.3;
     return Math.min(presentYear - 1, yearAt(f));
   });
 
-  // --- ruins: a bounded handful of NON-SEAT villages (never a capital/seat) ---
   const seatSet = new Set(seats);
   const villageIdxs = settlements
     .map((_, i) => i)
@@ -117,14 +95,12 @@ export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
   const ruinedSet = new Set(ruinedIdx);
   const ruined: boolean[] = settlements.map((_, i) => ruinedSet.has(i));
 
-  // --- events ---
   const events: HistoricalEvent[] = [];
   const founding = makeCycler(rng, FOUNDING_TEMPLATES);
   const rise = makeCycler(rng, RISE_TEMPLATES);
   const war = makeCycler(rng, WAR_TEMPLATES);
   const ruin = makeCycler(rng, RUIN_TEMPLATES);
 
-  // foundings: the capital and the two earliest-founded towns
   const capIdx = settlements.findIndex((s) => s.kind === "capital");
   const townIdxs = settlements
     .map((_, i) => i)
@@ -141,7 +117,6 @@ export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
     });
   }
 
-  // realm rises (only meaningful with named realms, i.e. multi-realm worlds)
   realmNames.forEach((rn, realmId) => {
     if (rng.next() < 0.7) {
       events.push({
@@ -153,7 +128,6 @@ export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
     }
   });
 
-  // wars: 0..2 between distinct realms
   if (realmNames.length >= 2) {
     const warCount = rng.int(3);
     for (let k = 0; k < warCount; k++) {
@@ -169,7 +143,6 @@ export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
     }
   }
 
-  // ruin events: each abandoned village, dated after its founding
   for (const i of ruinedIdx) {
     const fy = founded[i]!;
     const ay = Math.min(

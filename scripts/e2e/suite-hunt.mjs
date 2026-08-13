@@ -1,26 +1,14 @@
-// The Daily Hunt checks (H1-H12) on the seed-of-the-day page: #56 (H1-H9),
-// the #88 legend-clearance guard (H10), the labeled-clue guard (H11, since
-// #335 covering near clues too), and the #335 drawn-terrain guard (H12).
-// Split from e2e-explorer.mjs; behavior + check order unchanged.
+// Daily Hunt e2e (H1-H12, HD, HG) on the seed-of-the-day page; split from e2e-explorer.mjs, behavior and check order unchanged.
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
-  // --- H: The Daily Hunt (#56) on the seed-of-the-day page ---
-  // The page seed is new Date() in UTC, so the click targets are derived from
-  // the browser's OWN world via dynamic import (immune to any node-side date
-  // assumption). This is the only coverage of the click -> projection-inversion
-  // -> nearest-settlement snap, which can silently break if widthPx/margin/the
-  // projection change while the chart still renders perfectly.
+  // Click targets are derived from the browser's OWN world via dynamic import, immune to any node-side date assumption; this is the only coverage of the click -> projection-inversion -> nearest-settlement snap.
   const huntErrBase = consoleErrors.length;
   const HUNT_PAGE = `http://127.0.0.1:${PORT}/seed-of-the-day/`;
-  // The hunt shares the explorer's origin, so a prior solved state could linger
-  // in localStorage. Clear it here (still on the same origin) so the hunt always
-  // starts unsolved and H3/H4 exercise the live miss/hit path deterministically.
   try { await evaluate(`localStorage.removeItem("vellum.hunt.v1")`); } catch {}
   await send("Page.navigate", { url: HUNT_PAGE });
   let huntReady = false;
   for (let i = 0; i < 200; i++) {
-    // evaluate may land in a context destroyed by the in-flight navigation;
-    // swallow that and retry (same defensive pattern as A10's post-reload poll).
+    // evaluate can land in a context destroyed by the in-flight navigation; swallow and retry.
     let s = null;
     try { s = await evaluate(`(()=>{const h=document.getElementById("hunt");const c=document.getElementById("clues");return{hunt:h&&!h.hidden,clues:c?c.children.length:0,map:!!document.querySelector("#map svg")};})()`); } catch {}
     if (s && s.hunt && s.clues >= 3 && s.map) { huntReady = true; break; }
@@ -31,8 +19,6 @@ export async function run(ctx) {
   const clueText = await evaluate(`Array.from(document.getElementById("clues").children).map((li)=>li.textContent).join(" | ")`);
   check("H2 clues never disclose ruin/abandon wording", !/ruin|abandon/i.test(clueText));
 
-  // Derive miss (capital) and hit (quarry) click fractions from the browser's
-  // own world, using the same engine + projection the page used to draw.
   const tgt = await evaluate(`(async()=>{
     const {defaultRecipe,generateWorld}=await import("../explorer/engine/world/generate.js");
     const {chooseQuarry,legendExcluded}=await import("../explorer/engine/world/daily-hunt.js");
@@ -41,8 +27,6 @@ export async function run(ctx) {
     const seed=seedForDate(new Date());
     const world=generateWorld(defaultRecipe(seed));
     const proj=createProjection(world.elev.w,world.elev.h,1500,Math.round(1500*0.045));
-    // mirror the page (#88): drop settlements hidden under the rendered legend,
-    // so the quarry computed here matches the one the page actually placed.
     const svg=document.querySelector("#map svg");
     const leg=svg&&svg.querySelector("#layer-legend");
     const sr=svg&&svg.getBoundingClientRect();
@@ -60,7 +44,6 @@ export async function run(ctx) {
   })()`, true);
   const clickHunt = (f) => evaluate(`(()=>{const svg=document.querySelector("#map svg");const r=svg.getBoundingClientRect();svg.dispatchEvent(new MouseEvent("click",{clientX:r.left+${f.fx}*r.width,clientY:r.top+${f.fy}*r.height,bubbles:true}));return{status:document.getElementById("hunt-status").textContent,solved:document.getElementById("map").classList.contains("solved")};})()`);
 
-  // Warmth word -> rank, for the #94 continuous-heat checks. "" if unrecognized.
   const bandRank = (s) => (/^Hot/.test(s) ? 3 : /^Warmer/.test(s) ? 2 : /^Cool/.test(s) ? 1 : /^Cold/.test(s) ? 0 : -1);
 
   const miss = await clickHunt(tgt.miss);
@@ -71,10 +54,6 @@ export async function run(ctx) {
     JSON.stringify(miss),
   );
 
-  // #129: a miss leaves a sounding over the map. It must be an OVERLAY on #map (never
-  // inside the SVG, so no chart bytes move) and pointer-transparent (a lingering dot
-  // must not eat the next click). Read right after the first miss, before the dot's
-  // ~2.6s fade removes it.
   const snd = await evaluate(`(()=>{const d=document.querySelector("#map .sounding-dot");return{dots:document.querySelectorAll("#map .sounding-dot").length,inSvg:!!document.querySelector("#map svg .sounding-dot"),pe:d?getComputedStyle(d).pointerEvents:null};})()`);
   check(
     "H3c a miss drops a pointer-transparent sounding over the map, never inside the SVG",
@@ -82,12 +61,7 @@ export async function run(ctx) {
     JSON.stringify(snd),
   );
 
-  // #94: heat is continuous -- a click halfway from the far capital to the quarry
-  // must not read COLDER than the capital click (it is nearer the quarry).
-  // The probe sits at 0.4 of the way, NOT halfway: the exact midpoint ties
-  // capital vs quarry and float noise in the rect roundtrip can snap it to
-  // the quarry on ~1 day in 5, silently solving and vacating H4's coverage.
-  // At 0.4 the capital is strictly nearer, so this is a guaranteed miss.
+  // The probe sits at 0.4 of the way, NOT halfway: the exact midpoint ties capital vs quarry and float noise in the rect roundtrip can snap it to the quarry (~1 day in 5), silently solving and vacating H4's coverage.
   const near = { fx: tgt.miss.fx + 0.4 * (tgt.hit.fx - tgt.miss.fx), fy: tgt.miss.fy + 0.4 * (tgt.hit.fy - tgt.miss.fy) };
   const nearMiss = await clickHunt(near);
   check(
@@ -97,12 +71,6 @@ export async function run(ctx) {
     JSON.stringify({ far: miss.status, near: nearMiss.status }),
   );
 
-  // #327: a miss that fails to beat the session's warmest sounding points back at it
-  // by name. Re-tapping the capital ties the first miss (same point) and loses to the
-  // 0.4 probe, so the warmest is the probe's sounding, named in the probe's own status
-  // line. The pointer is suppressed when both taps selected the same town ("warmest
-  // fell at X" right after "You mark X" says nothing), which happens on days when the
-  // probe point still snapped to the capital.
   const warmName = (nearMiss.status.match(/You mark ([^.]+)\./) || [])[1] || "";
   const again = await clickHunt(tgt.miss);
   const wantTrail = warmName !== "" && warmName !== tgt.missName;
@@ -124,9 +92,6 @@ export async function run(ctx) {
   check("H6 a win marker overlays the map and the Share button appears", post.star && post.share);
   check("H7 streak + localStorage persist, keyed on the day's seed", /Streak: 1 day/.test(post.streak) && new RegExp(`"solved":${tgt.seed},"streak":1`).test(post.ls || ""), `${post.streak} | ${post.ls}`);
 
-  // #129: a LIVE solve plays the win ceremony. Read the WIRED animation (name + trigger
-  // class) on the star and the reveal; the class persists after the run, so this is
-  // stable regardless of whether the animation is still in flight.
   const wire = await evaluate(`(()=>{const s=document.querySelector("#map .hunt-star");const rev=document.getElementById("reveal");return{starStamp:!!(s&&s.classList.contains("stamp")),starAnim:s?getComputedStyle(s).animationName:null,revUnfurl:!!(rev&&rev.classList.contains("unfurl")),revAnim:rev?getComputedStyle(rev).animationName:null};})()`);
   check(
     "H6b a live solve wires the win ceremony (star stamps in, reveal unfurls)",
@@ -134,12 +99,7 @@ export async function run(ctx) {
     JSON.stringify(wire),
   );
 
-  // --- HD: The Surveyor's Dispatch (#123) -- file the hunt as a drafted survey plate ---
-  // A LIVE win offers a "Draft dispatch" button that clones today's actual chart and plots
-  // the guess route over it: a dotted survey line, a numbered station at each wrong sounding,
-  // a star at the find, and one hand-set caption. The button is gated to the live-win path
-  // (HD3 below proves the restored path never offers it). We read the dispatch through a window
-  // hook rather than clicking it, so no real file download happens under CDP.
+  // The dispatch is read through the window hook rather than clicking the button, so no real file download happens under CDP.
   const disp = await evaluate(`(()=>{
     const btn=document.getElementById("dispatch");
     const fn=window.__vellumDispatchSvg;
@@ -152,19 +112,7 @@ export async function run(ctx) {
     JSON.stringify({ exists: disp.exists, hidden: disp.hidden }),
   );
 
-  // HD2 (AC1-AC5): the dispatch is a self-contained artifact. It must (a) preserve the chart's
-  // data-vellum-* recipe so it stays reproducible like every Vellum export; (b) plot one numbered
-  // station per miss (3 here: the capital twice, H3 + H3d, and the 0.4 probe); (c) caption the
-  // soundings tally in
-  // period voice; (d) be inline-styled with NO page-CSS class leaking into the added group; and
-  // (e) -- the AC that justifies storing GRID coordinates -- station #1 (the capital miss) must
-  // land at proj.px(cap.x)/py(cap.y), which only holds if the route was re-projected at draft
-  // time. If it had stored pixel or client-rect coords, re-projection would displace the station
-  // by ~100-500px and this fails hard. The residual we DO allow (~2-3px) is the synthesized
-  // click's clientX/Y being quantized to an integer by the browser, then amplified by the
-  // sheet-to-screen scale (viewBox 1500 / displayed width ~= 1.9-2.5x); the grid round-trip
-  // itself is exact. 5px comfortably covers that quantization yet stays 20x below any coord-space
-  // mismatch, so the guard still bites the moment the route stops being stored in grid space.
+  // The 5px station tolerance covers the synthesized click's integer clientX/Y quantization amplified by the sheet-to-screen scale (~2-3px measured), yet stays 20x below any grid-vs-pixel coord-space mismatch.
   const d = disp.svg || "";
   const g = d.slice(d.indexOf("data-vellum-dispatch")); // scope the style/leak checks to the added <g>
   const stations = (d.match(/data-dispatch-station/g) || []).length;
@@ -207,11 +155,6 @@ export async function run(ctx) {
   }
   check("H8 reload restores the solved state without inflating the streak", huntRestored);
 
-  // #129: the WIN ceremony must not replay on a solved-day reload (the old star
-  // animation did). Scoped to the win gate ONLY: the star is placed still (no .stamp)
-  // and the reveal is shown but not unrolled (no .unfurl). We deliberately do NOT
-  // assert the arrival ceremony is absent -- it replays on every load (the daily
-  // reveal), so the coast may still be mid-draw when this reads.
   const still = await evaluate(`(()=>{const s=document.querySelector("#map .hunt-star");const rev=document.getElementById("reveal");return{star:!!s,stamp:!!(s&&s.classList.contains("stamp")),starAnim:s?getComputedStyle(s).animationName:null,revShown:!!(rev&&!rev.hidden),unfurl:!!(rev&&rev.classList.contains("unfurl")),revAnim:rev?getComputedStyle(rev).animationName:null};})()`);
   check(
     "H8b a solved-day reload is still: star + reveal restored without replaying the win ceremony",
@@ -219,9 +162,6 @@ export async function run(ctx) {
     JSON.stringify(still),
   );
 
-  // HD3 (#123, AC3): the restored-solve path (win(false)) has no in-memory route to plot, so it
-  // must NOT offer the dispatch. Assert the button EXISTS but is hidden -- an absent button would
-  // let a naive "is it hidden?" check pass vacuously and hide a real regression.
   const dispRestored = await evaluate(`(()=>{const b=document.getElementById("dispatch");return{exists:!!b,hidden:b?b.hidden:false};})()`);
   check(
     "HD3 a restored solve never offers the dispatch: button present but hidden (#123)",
@@ -229,20 +169,7 @@ export async function run(ctx) {
     JSON.stringify(dispRestored),
   );
 
-  // --- HG: The Surveyor's Glass, Sub 6 (#167) -- the Daily Hunt takes the glass ---
-  // The Hunt adopts the shared zoom controller (src/site/shared/zoom-controller.ts),
-  // geometric-only. suite-zoom / suite-zoom-gestures prove the controller's pan/zoom
-  // and REAL pinch/drag/wheel on the Explorer; the Hunt wires the IDENTICAL instance, so
-  // the risk unique to this page is the guess interaction: does zoom break the guess-click
-  // math, and does a drag-pan leak in as a guess? These use REAL CDP mouse input (not
-  // synthetic DOM events) so d3-zoom's own click-distance handling runs exactly as a
-  // finger would: a clean tap (press+release, no move) fires the click the guess listens
-  // for; a moved drag makes d3 suppress the trailing click, so it never counts as a guess.
-  //
-  // Starts from a FRESH unsolved state (H8 left today solved): clear the store, reload.
-  // Characterization, so green from the first wired run; the RED that justified the
-  // controller (a drag's release-click registering as a guess) was demonstrated in dev by
-  // detaching the controller, not committed. Runs before H9 so its console output is gated.
+  // HG uses REAL CDP mouse input so d3-zoom's own click-distance handling runs: a clean tap (no move) fires the guess click, a moved drag suppresses the trailing click.
   try { await evaluate(`localStorage.removeItem("vellum.hunt.v1")`); } catch {}
   await send("Page.navigate", { url: HUNT_PAGE });
   let hgReady = false;
@@ -254,9 +181,6 @@ export async function run(ctx) {
   }
   check("HG0 the Hunt boots with the shared zoom controller wired (__vellumZoomTo present)", hgReady);
 
-  // Real CDP mouse primitives. A tap is press+release at ONE point (no move) -> d3 leaves
-  // the trailing click alone -> the guess fires. A drag moves between press and release ->
-  // d3 records a moved gesture and suppresses the click -> no guess.
   const mouseTap = async (x, y) => {
     await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1 });
     await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", buttons: 0, clickCount: 1 });
@@ -268,11 +192,6 @@ export async function run(ctx) {
     await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: x1, y: y1, button: "left", buttons: 0, clickCount: 1 });
   };
 
-  // HG1 (AC1): at home the idle DOM is byte-identical (no inline transform, no clip) yet the
-  // controller is attached -- .zoomable / touch-action:none is what enables pinch on touch
-  // (the shared module's real-pinch is proven in suite-zoom-gestures; here we prove the
-  // Hunt turns it on). Then zoomTo lands a resolved matrix on #map with the top-left origin,
-  // toggles .zoomed, and getState reads it back: the same geometric mode as the Explorer.
   const hg1 = await evaluate(`(()=>{
     const vp=document.getElementById("map-viewport"),m=document.getElementById("map");
     const idle={inline:m.style.transform,matrix:getComputedStyle(m).transform,zoomed:vp.classList.contains("zoomed"),zoomable:vp.classList.contains("zoomable"),touch:getComputedStyle(vp).touchAction};
@@ -289,22 +208,7 @@ export async function run(ctx) {
     JSON.stringify(hg1),
   );
 
-  // Frame a chart point (its sheet fractions) at k=2 and hand back its on-screen point plus
-  // the viewport centre. getBoundingClientRect reflects the live transform, so the point is
-  // read from the transformed svg box and the tap lands true whatever the controller did to
-  // the requested translate.
-  //
-  // The MISS tap frames and taps the CAPITAL, not a viewport corner. classifyClick snaps
-  // every tap to the NEAREST settlement with no distance cap, so the only point that can
-  // never snap to the quarry is another settlement's own position (the same guarantee H3
-  // leans on at k=1: chooseQuarry draws villages first, then the non-capital fallback, so
-  // the capital is never the quarry). The original derivation tapped "the corner farthest
-  // from the quarry on screen", which is a per-day lottery: on world 20260728 the far
-  // corner's nearest mark WAS the quarry (Zonva, alone in a sparse top-left), and with the
-  // quarry centred all four corners tie on screen distance, so the winner fell to sub-pixel
-  // layout noise: linux CI picked the solving corner, a Mac picked a safe one. One guess,
-  // "solved", HG2+HG3 red on main and unreproducible locally (#304). Do not bring the
-  // corner scan back.
+  // The MISS tap frames the CAPITAL, never a viewport corner: classifyClick snaps to the nearest settlement with no distance cap, and the old farthest-corner scan was a per-day lottery that solved the hunt on linux CI (#304). Do not bring it back.
   const framePoint = (k, fx, fy) => evaluate(`(()=>{
     const vp=document.getElementById("map-viewport"),W=vp.clientWidth,H=vp.clientHeight,k=${k};
     window.__vellumZoomTo({k,x:W*(0.5-k*${fx}),y:H*(0.5-k*${fy})});
@@ -317,9 +221,6 @@ export async function run(ctx) {
   await sleep(60);
   const fr = await framePoint(2, tgt.miss.fx, tgt.miss.fy);
 
-  // HG2 (AC2): a MISS tap while zoomed drops a sounding at the tapped spot. The sounding is a
-  // %-positioned overlay on #map, so it rides the transform and lands under the finger; it
-  // must be over #map (never inside the SVG, so no chart bytes move) and must not solve.
   await mouseTap(fr.px, fr.py);
   await sleep(80);
   const hg2 = await evaluate(`(()=>{const d=document.querySelector("#map .sounding-dot");return{dots:document.querySelectorAll("#map .sounding-dot").length,inSvg:!!document.querySelector("#map svg .sounding-dot"),solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent};})()`);
@@ -329,10 +230,6 @@ export async function run(ctx) {
     JSON.stringify(hg2),
   );
 
-  // HG3 (AC2): a drag-pan never counts as a guess. Snapshot the hunt, drag across the sheet
-  // (a moved gesture -> d3 suppresses the trailing click), and confirm nothing changed: still
-  // unsolved, the warmth line is untouched, and no NEW sounding dropped (a leaked click would
-  // have registered a miss and done all three). This is the tap-vs-pan disambiguation.
   const before = await evaluate(`(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,dots:document.querySelectorAll("#map .sounding-dot").length}))()`);
   await mouseDrag(fr.cx, fr.cy, fr.cx + 150, fr.cy + 95);
   await sleep(100);
@@ -343,12 +240,6 @@ export async function run(ctx) {
     JSON.stringify({ before, after }),
   );
 
-  // HG4 (AC2): a clean tap on the quarry resolves the guess at zoom. Frame the quarry (HG2/HG3
-  // framed the capital, and the drag panned that framing further), then tap its on-screen
-  // point: the guess-click math is ratio-based against getBoundingClientRect (which reflects
-  // the transform), so it snaps to the quarry and solves exactly as it would at k=1 -- proving
-  // the synthesized tap at the transformed screen position lands true. This is the counterpart
-  // to HG3: a real tap DOES count.
   const fr2 = await framePoint(2, tgt.hit.fx, tgt.hit.fy);
   await mouseTap(fr2.px, fr2.py);
   await sleep(120);
@@ -363,24 +254,13 @@ export async function run(ctx) {
 
   check("H9 the hunt run logged no JS exceptions or console errors", consoleErrors.length === huntErrBase, consoleErrors.slice(huntErrBase).join(" | ") || "clean");
 
-  // #88: the quarry must not be picked beneath the legend card. legFrac is the
-  // legend's measured box as viewport fractions; the chosen hit must fall clear
-  // of it (and a legend must actually have been drawn to make this meaningful).
   const hitInLegend =
     !!tgt.legFrac &&
     tgt.hit.fx >= tgt.legFrac.x0 && tgt.hit.fx <= tgt.legFrac.x1 &&
     tgt.hit.fy >= tgt.legFrac.y0 && tgt.hit.fy <= tgt.legFrac.y1;
   check("H10 the day's quarry sits clear of the rendered legend", !!tgt.legFrac && !hitInLegend, JSON.stringify({ leg: tgt.legFrac, hit: tgt.hit }));
 
-  // A displayed clue must point at something the chart actually DREW.
-  // Pre-fix, buildClues cited the nearest NAMED river even when the renderer
-  // skipped its label (short course / collision loser, feature-labels.ts), so
-  // the clue sent the player after a name printed nowhere on the map. Since
-  // #335 findability gates run BEFORE selection (ClueFindability in
-  // daily-hunt-clue-facts.ts), covering three name phrasings (river, lake,
-  // near) and the terrain bands. Capital/seat labels render .toUpperCase()
-  // (settlementsLayer), so the name check accepts either spelling. Vacuous on
-  // days with no such clue; bites the moment a gate regresses.
+  // Capital/seat labels render .toUpperCase() (settlementsLayer), so the name check accepts either spelling; vacuous on days with no river/lake/near clue.
   const labelCheck = await evaluate(`(()=>{
     const svg=document.querySelector("#map svg");
     const html=svg?svg.outerHTML:"";
@@ -399,11 +279,6 @@ export async function run(ctx) {
   })()`);
   check("H11 every displayed river/lake/near clue names something the chart labeled", labelCheck.missing.length === 0, JSON.stringify(labelCheck));
 
-  // #335: a terrain clue promises DRAWN glyphs near the quarry, not merely
-  // eligible cells (the glyph field shuffles + caps its candidates). Map each
-  // terrain phrasing to its glyph symbol prefix and assert one such <use>
-  // sits within the terrain radius (TERRAIN_RADIUS = 4 cells) of the quarry,
-  // in render-pixel space; the quarry and cell scale come from tgt above.
   const terrainCheck = await evaluate(`(()=>{
     const TEXTS={
       "It sits in the shadow of the mountains.":"gl-mtn",

@@ -1,11 +1,5 @@
-/** Geometry helpers for layer rendering: pruning, centroids, label boxes. */
-
 export type Pt = { readonly x: number; readonly y: number };
 
-/**
- * Greedy blue-noise pruning: walk candidates in their given (priority)
- * order, accept any point at least `minDist` from all accepted so far.
- */
 export function prunePoints<T extends Pt>(
   candidates: ReadonlyArray<T>,
   minDist: number,
@@ -40,7 +34,6 @@ export function centroidOf(points: ReadonlyArray<Pt>): Pt {
   return { x: sx / n, y: sy / n };
 }
 
-/** Principal axis angle (radians) of a point cloud, for label rotation. */
 export function principalAngle(points: ReadonlyArray<Pt>): number {
   if (points.length < 2) return 0;
   const c = centroidOf(points);
@@ -73,10 +66,6 @@ export function boxesOverlap(a: Box, b: Box, pad = 0): boolean {
   );
 }
 
-/** Approximate rendered text box for collision tests. `widthFactor` and
- *  `letterSpacing` default to the mixed-case, un-spaced case, so existing callers
- *  are byte-identical; a label drawn `.toUpperCase()` (and spaced) must pass caps
- *  width and its letter-spacing or it reserves ~20% less than it draws (#195). */
 export function textBox(
   x: number,
   y: number,
@@ -92,20 +81,11 @@ export function textBox(
   return { x: left, y: y - fontSize, w, h };
 }
 
-/**
- * Average glyph width as a fraction of the font size (#175). Capitals run wider
- * than mixed case, so a label that renders `.toUpperCase()` must be measured with
- * `caps` or it reserves about 20% less space than it draws, and two labels can
- * both claim successfully while their glyphs collide. Defined once, here.
- */
 export const WIDTH_FACTOR = {
-  /** Sea and forest names: drawn as written, italic. */
   mixed: 0.56,
-  /** Realm and mountain-range names: drawn `.toUpperCase()`. */
   caps: 0.72,
 } as const;
 
-/** Text box widened for letter-spacing, centered on (x, y). */
 export function spacedTextBox(
   x: number,
   y: number,
@@ -118,14 +98,6 @@ export function spacedTextBox(
   return { x: x - w / 2, y: y - fontSize, w, h: fontSize * 1.2 };
 }
 
-/**
- * A rotated label's footprint, as a chain of axis-aligned boxes hugging the ink
- * (#175). The arena stores axis-aligned boxes, so a spun label cannot reserve its
- * true oriented rectangle. One bounding box of the whole rotation over-reserves
- * badly (a 296x17 run at 32 degrees bounds to 260x171, ten times too tall) and
- * would push the label off the chart entirely; slicing along the baseline first
- * keeps each slice's bounding box close to the ink it covers.
- */
 export function rotatedSpanBoxes(
   box: Box,
   degrees: number,
@@ -157,9 +129,6 @@ export function rotatedSpanBoxes(
   return out;
 }
 
-/** The four corners of `box` rotated `degrees` about (originX, originY): the TRUE
- *  oriented footprint of a spun label, for an area-based overlap test that the
- *  axis-aligned slices only approximate. */
 export function rotatedRect(box: Box, degrees: number, originX: number, originY: number): Pt[] {
   const a = (degrees * Math.PI) / 180;
   const cos = Math.cos(a);
@@ -181,17 +150,8 @@ function shoelaceArea(pts: ReadonlyArray<Pt>): number {
   return Math.abs(s) / 2;
 }
 
-/**
- * Area shared by a convex polygon and an axis-aligned box, as a fraction of the
- * SMALLER of the two areas (0..1). Sutherland-Hodgman clip of `poly` against the
- * box's four edges (both convex, so the clip is their exact intersection). Used to
- * ask "does this rotated river name bury that label" by real ink area, not by the
- * fat bounding slices, so a few-percent graze reads as the near-miss it is (#178).
- */
 export function polyBoxOverlapFraction(poly: ReadonlyArray<Pt>, box: Box): number {
   const x0 = box.x, x1 = box.x + box.w, y0 = box.y, y1 = box.y + box.h;
-  // a Pt lerp; core/math.ts's lerp is scalar. Same `a + (b - a) * t` form, so
-  // delegating to it per axis would be byte-safe, just not clearer.
   const lerp = (a: Pt, b: Pt, t: number): Pt => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
   const edges: Array<{ inside: (p: Pt) => boolean; cut: (a: Pt, b: Pt) => Pt }> = [
     { inside: (p) => p.x >= x0, cut: (a, b) => lerp(a, b, (x0 - a.x) / (b.x - a.x)) },

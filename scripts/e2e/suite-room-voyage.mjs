@@ -1,21 +1,4 @@
-// The Wayfarer's voyage re-hosted on the Reading Room (RW1-RW13, #320 Sub 3, porting
-// the W1-W8 core of suite-voyage.mjs). Ratified 2026-08-10 on #320 (decision A): the
-// deterministic voyage seams retire from the Explorer at Sub 4, so every W check that
-// reaches a non-rest position needs a room-hosted successor HERE.
-//
-// The class-(a) criterion this suite is built on is the corrected one, also ratified on
-// #320: "requires a position that is not the survey-chamber t=1 rest or the present-year
-// park." The body's original "presses Play or drags mid-sweep" would have left W2/W3/W4
-// and most of the route suite behind, because those reach mid-itinerary ports through
-// __vellumVoyageStepTo and never touch the clock. suite-voyage-route.mjs:15 says as much
-// in its own header.
-//
-// What did NOT port:
-//   W7  "ages off: overlay removed, sessions dropped". The room is ALWAYS armed; there
-//       is no off.
-//   W8  "a redraw re-arms in the SAME chamber". This is deliberately Explorer-only: the
-//       room's ratified counter draw parks at the PRESENT (#221), which RR22 pins. The
-//       contract does not port, it is superseded. Sub 4 retires it rather than moving it.
+// Room voyage e2e (RW1-RW13, #320 Sub 3): the W-suite core re-hosted on the Reading Room; W7 and W8 deliberately did not port (the room is always armed, and its counter draw parks at the present, pinned by RR22).
 import { makeRoom, scopedHealth } from "./room-support.mjs";
 
 export async function run(ctx) {
@@ -23,8 +6,6 @@ export async function run(ctx) {
   const room = makeRoom(ctx);
   const gate = scopedHealth(ctx);
 
-  // The room arrives armed and parked at the present, which is exactly W1's post-toggle
-  // state, so the suite opens where the Explorer's opened after ticking the checkbox.
   const booted = await room.goto("#seed=42&style=antique&legend=1");
   check("RW0 the room boots armed and settled", booted);
 
@@ -34,9 +15,6 @@ export async function run(ctx) {
     return {capitalIdx:capital?capital.idx:-1,count:r.manifest.places.length};
   })()`);
 
-  // RW1 (W1): the armed present park. The voyage overlay is built inside the chart mount
-  // (hidden while the ages chamber holds the sheet), the plan starts at the capital, and
-  // the journal's annal rows all rest inked, the story fully told.
   const rw1 = await evaluate(`(()=>{
     const ov=document.querySelector(".rf-chart .voyage-overlay");
     const plan=window.__vellumVoyagePlan();
@@ -54,12 +32,6 @@ export async function run(ctx) {
     JSON.stringify(rw1) + ` capital=${vm.capitalIdx}`,
   );
 
-  // RW2 (W1c, #312): the manuscript dressing, mirrored rule for rule in BOTH hosts. The
-  // chronicler's heading stands once between the hands, the prologue gutter counts
-  // STRICTLY increasing days from day 1 (the year lives in the attribution alone), and
-  // each hand's first line opens with an initial. The day-gutter DOM in
-  // voyage-log-panel.ts has NO unit coverage, so this check and its Explorer twin are
-  // the only guards on it.
   const rw2 = await evaluate(`(()=>{
     const lis=[...document.querySelectorAll(".rf-log-strip li")];
     const heads=lis.filter((li)=>li.classList.contains("annals-head"));
@@ -78,9 +50,6 @@ export async function run(ctx) {
     JSON.stringify(rw2),
   );
 
-  // RW3 (W1b): the seam crossed LEFTWARD. Driving the bar to its midpoint enters the
-  // survey chamber at its rest (t=1, the ratified bare-survey pose): the track shows, the
-  // readout flips to the word, and the annals dim back to untold.
   const rw3 = await evaluate(`(()=>{
     const s=document.querySelector(".rf-range");
     s.value=String(Number(s.max)/2);
@@ -100,21 +69,17 @@ export async function run(ctx) {
   );
 
   const plan = await evaluate(`(()=>{const p=window.__vellumVoyagePlan();return{ports:p.ports.map((x)=>({idx:x.idx,logLine:x.logLine})),legs:p.legs.length};})()`);
-  // #275: legs === ports, and the LAST leg is the one home, so the step that lands on the
-  // final distinct port is legs - 1 and stepping to legs itself is the HOMECOMING (t=1).
+  // #275: legs === ports and the LAST leg is the one home, so legs-1 lands on the final distinct port and stepping to legs itself is the homecoming (t=1).
   const lastPort = plan.legs - 1;
   const homeStep = plan.legs;
   const midPort = Math.max(1, Math.floor(plan.legs / 2));
   const entries = plan.ports.length + 1;
 
-  // #120: the mark is a ship on sea legs and a rider on road legs, so select whichever is
-  // displayed. Reading .voyage-ship unconditionally throws on the ~94% of legs that ride.
+  // #120: the mark is a ship on sea legs and a rider on road legs; reading .voyage-ship unconditionally throws on the ~94% of legs that ride.
   const markFn = `const mark=()=>{const s=document.querySelector(".rf-chart .voyage-ship");const r=document.querySelector(".rf-chart .voyage-rider");return (s&&s.getAttribute("display")!=="none")?s:r;};`;
   const stepTo = (n) =>
     evaluate(`(()=>{${markFn}window.__vellumVoyageStepTo(${n});const m=mark();const t=m?m.getAttribute("transform"):"";const glyph=m?m.getAttribute("class"):"";const raw=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ");const log=window.__vellumVoyageLog();return{status:document.querySelector(".rf-status").textContent,tf:t,glyph,pts:raw.length,first:raw[0],last:raw[raw.length-1],logged:log?log.logged:-1,rows:log?log.rows:-1,visible:!!(log&&log.visible),lastText:log&&log.logged>0?log.entries[log.logged-1].text:""};})()`);
 
-  // RW4 (W2): step to the origin. One row per port plus the homecoming, the first
-  // brightened, and it reads as a DEPARTURE (the surveyor sets out, does not arrive).
   const s0 = await stepTo(0);
   check(
     "RW4 step to the capital: the margin log opens with the departure entry",
@@ -122,7 +87,6 @@ export async function run(ctx) {
     JSON.stringify({ s0, ports: plan.ports.length, entries }),
   );
 
-  // RW5 (W3): a mid port. That many entries brightened, the track grew, the mark moved.
   const sMid = await stepTo(midPort);
   check(
     "RW5 step to a mid port: the log accumulated to that port, the track grew, the mark moved",
@@ -130,11 +94,6 @@ export async function run(ctx) {
     JSON.stringify({ mid: midPort, sMid, s0pts: s0.pts }),
   );
 
-  // RW6 (W4): the last PORT. Every port's entry has brightened but the survey is NOT
-  // finished, so the homecoming row is still dim and the one status summary has not
-  // posted. This is the direct guard on #275's completion check: comparing `arrived`
-  // against ports.length instead of the log's entry count posts the summary a whole leg
-  // early, and then again at the homecoming.
   const sLast = await stepTo(lastPort);
   check(
     "RW6 step to the last port: every port is logged, but the survey has not come home yet",
@@ -143,10 +102,6 @@ export async function run(ctx) {
     JSON.stringify({ last: lastPort, sLast, ports: plan.ports.length, entries }),
   );
 
-  // RW7 (W4c, #275): step home. The homecoming row brightens last, it reads as a return,
-  // the single completion summary posts, and the resting track is a CLOSED CIRCUIT: its
-  // last vertex is string-identical to its first, the very projection of the capital that
-  // leg 0 started from.
   const sHome = await stepTo(homeStep);
   check(
     "RW7 the survey sails home: the homecoming closes the log and the track is a closed circuit",
@@ -156,10 +111,6 @@ export async function run(ctx) {
     JSON.stringify({ home: homeStep, sHome, entries }),
   );
 
-  // RW8 (W4b): stepping BACK from the finished survey clears the completion summary. The
-  // settle invariant that every draw and every poll keys on must hold at EVERY resting
-  // frame, not just t=1, so the status line must return to "" here and never hold a stale
-  // "The survey is charted...".
   const sBack = await stepTo(midPort);
   check(
     "RW8 stepping back from the last port clears the completion summary from the status line",
@@ -168,8 +119,6 @@ export async function run(ctx) {
   );
   await shoot("reading-room-voyage.png");
 
-  // RW9 (W5): the track lives in a SIBLING overlay svg, never inside the baked chart, so
-  // a saved chart can never contain it.
   const rw9 = await evaluate(`(()=>{
     const chart=document.querySelector(".rf-chart svg:not(.voyage-overlay)");
     const overlay=document.querySelector(".rf-chart .voyage-overlay");
@@ -178,10 +127,6 @@ export async function run(ctx) {
   })()`);
   check("RW9 the track is a sibling overlay, never inside the baked chart", rw9.chart && !rw9.trackInChart && rw9.trackInOverlay, JSON.stringify(rw9));
 
-  // RW10 (W6): the seam crossed RIGHTWARD by a discrete step. The bar rests at the seam
-  // from RW3; one step into the ages half crosses freely (the detent governs pointer
-  // drags only): the world jumps back to the earliest years, the surveyor's ink leaves
-  // the sheet, and the readout flips to the year.
   const glyphCount = `const shown=[...document.querySelectorAll(".rf-chart #layer-settlements g.settlement")].filter((g)=>g.style.display!=="none").length;`;
   const presentShown = await evaluate(`(()=>{${glyphCount}return shown;})()`);
   const rw10 = await evaluate(`(()=>{
@@ -205,8 +150,6 @@ export async function run(ctx) {
     JSON.stringify(rw10) + ` present=${presentShown}`,
   );
 
-  // RW11 (W6b): the crossing is REVERSIBLE. Stepping back to the seam restores the survey
-  // chamber exactly: the full present world, the resting track, the word.
   const rw11 = await evaluate(`(()=>{
     const s=document.querySelector(".rf-range");
     s.value=String(Number(s.max)/2);
@@ -224,15 +167,7 @@ export async function run(ctx) {
     JSON.stringify(rw11) + ` present=${presentShown}`,
   );
 
-  // RW12 (W6c): the HARD DETENT under a REAL CDP drag. A pointer drag from inside the
-  // survey half that crosses the seam by less than the escape band HOLDS at the seam;
-  // pulled past the band it releases into the ages chamber at the raw position. The room
-  // wires the same pointerdown/pointerup/pointercancel triple to the same engine entries,
-  // so the detent is the room's too.
-  //
-  // The moves carry button:"left" DELIBERATELY: Chromium's native slider drag controller
-  // ignores a move whose button is "none", so the thumb never follows and the detent has
-  // nothing to hold.
+  // The moves carry button:"left" DELIBERATELY: Chromium's native slider drag ignores a move whose button is "none", so the thumb would never follow and the detent would have nothing to hold.
   await evaluate(`(()=>{document.querySelector(".rf-range").scrollIntoView({block:"center"});})()`);
   const bar = await evaluate(`(()=>{const s=document.querySelector(".rf-range");const r=s.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height};})()`);
   const TH = 16; // the .ages-range thumb width (living-chart.css)
@@ -251,10 +186,6 @@ export async function run(ctx) {
     JSON.stringify({ held, escaped }),
   );
 
-  // RW13 (W6d): a running PLAY crosses the seam WITHOUT pausing (the detent governs drags
-  // only), so the voice hands off mid-flight. Start just shy of the survey's end so the
-  // crossing lands within a couple of seconds, then watch the chamber flip while the
-  // button stays "Pause".
   await evaluate(`(()=>{
     const s=document.querySelector(".rf-range");
     s.value=String(Math.round(Number(s.max)/2*0.97));

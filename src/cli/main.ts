@@ -116,8 +116,6 @@ export async function main(argv: string[]): Promise<void> {
     console.log(HELP);
     return;
   }
-  // chart is the only verb: posters, atlases, galleries, and PDF moved to the
-  // Print Room on the site (#132/#138). Anything else is an error, not a draw.
   if (command !== "chart") {
     throw new Error(`unknown command "${command}"\n${HELP}`);
   }

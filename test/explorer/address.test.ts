@@ -1,11 +1,5 @@
-// #192 The Address: the live-state keys of the Explorer hash. The grammar is pure and
-// DOM-free (src/site/explorer/address.ts) so it is unit-tested here in isolation; the
-// live plumbing (readHash/writeHash in hash-sync.ts, the conductor's one-shot restore)
-// is proven by the e2e suite-survey and the room-hosted RA suite (#321). Ratified
-// vocabulary (the 2026-07-26 comment on
-// #192): two mutually exclusive keys, a bare `survey` flag (the voyage at rest on its
-// completed track) and `year=N` (the chronicle wound to in-world year N). The writer
-// emits exactly one of them, or neither.
+// #192 The Address: the live-state keys of the Explorer hash, pure and DOM-free; the live plumbing is proven by e2e suite-survey and the room-hosted RA suite (#321).
+// Ratified vocabulary (the 2026-07-26 comment on #192): two mutually exclusive keys, a bare `survey` flag and `year=N`; the writer emits exactly one of them, or neither.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseLive, emitLive, finalizeHash, liveNow, forwardTarget } from "../../src/site/explorer/address.ts";
@@ -28,8 +22,7 @@ test("parseLive: year=N addresses the chronicle at a real in-world year", () => 
 });
 
 test("parseLive: year has no sentinel and no garbage; invalid years are ignored", () => {
-  // year=0 is dead by ratification (no world has a year 0; the survey key is the address
-  // of the survey), and the presence-gate discipline means a malformed value never throws.
+  // year=0 is dead by ratification (no world has a year 0), and the presence-gate discipline means a malformed value never throws.
   assert.equal(parseLive(P("year=0")), null);
   assert.equal(parseLive(P("year=-3")), null);
   assert.equal(parseLive(P("year=8.5")), null);
@@ -116,26 +109,17 @@ test("liveNow: an unknowable state or a disarmed instrument emits nothing", () =
   );
 });
 
-// #321 (Survey & Story Sub 4): the time forward. An Explorer link carrying a valid
-// `year=N` forwards to the Reading Room BEFORE any draw, hash verbatim (decision 2,
-// 2026-08-11: the room reads the same recipe keys and ignores what it cannot use, so
-// the forward strips nothing). Everything else stays in the Explorer exactly as today:
-// the bare survey flag is the Explorer's own address, a malformed year is ignored, and
-// the both-keys set is nonsensical and ignored whole (parseLive's discipline, reused).
+// #321 (decision 2, 2026-08-11): an Explorer link carrying a valid year=N forwards to the Reading Room BEFORE any draw, hash verbatim (the room reads the same recipe keys and ignores what it cannot use); everything else stays in the Explorer, parseLive's discipline reused.
 test("forwardTarget: a valid year=N link forwards to the Reading Room, hash verbatim", () => {
   assert.equal(
     forwardTarget("#seed=42&style=antique&legend=1&arms=0&year=814"),
     "/reading-room/#seed=42&style=antique&legend=1&arms=0&year=814",
   );
-  // The camera and every other rider forwards untouched; the room ignores what it
-  // cannot use (its applyHash allowlists), so nothing is stripped here.
   assert.equal(
     forwardTarget("#seed=7&style=ink&year=1&cx=0.5100&cy=0.4900&k=3.0000"),
     "/reading-room/#seed=7&style=ink&year=1&cx=0.5100&cy=0.4900&k=3.0000",
   );
-  // Non-canonical riders are where "verbatim" earns its name: a bare flag
-  // re-serializes as `flag=` and %20 as `+`, so any re-serialization fails here
-  // (the guard-prover's mutant survived every canonical fixture above).
+  // Non-canonical riders are where "verbatim" earns its name: a bare flag re-serializes as `flag=` and %20 as `+`, so any re-serialization fails here (the guard-prover's mutant survived every canonical fixture above).
   assert.equal(
     forwardTarget("#seed=42&year=814&flag&note=a%20b"),
     "/reading-room/#seed=42&year=814&flag&note=a%20b",

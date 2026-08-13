@@ -2,15 +2,11 @@ body {
   padding: 2.5rem 1.5rem 5rem;
   line-height: 1.6;
 }
-/* The Punchcutter's Case (#228), page members: the shell's .wordmark/nav/footer
-   display and .tagline flourish bindings live in BaseLayout (#263). */
 h2, h3 {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
 main { max-width: 760px; }
-/* The survey sheet (#289 review): twin of the FAQ's .sheet rule, see
-   faq/index.css for the doctrine (content on the sheet, shell members off
-   it); guarded by test/site/sheet-frame.test.ts. */
+/* Twin of the FAQ's .sheet rule (content on the sheet, shell members off it); guarded by test/site/sheet-frame.test.ts. */
 .sheet {
   background: var(--parchment-panel);
   background-image:
@@ -39,42 +35,20 @@ h3 { font-size: 0.95rem; letter-spacing: 0.08em; color: var(--ink-faded);
 .intro { margin: 1.2rem 0; }
 .toc { background: var(--parchment-panel); border: 1.5px solid var(--line-tan); border-radius: 4px;
   padding: 1rem 1.4rem; margin: 2rem 0 1rem; }
-/* Voice from /house.css (.archivist-label, #324). */
 .toc strong { display: block; margin-bottom: 0.4rem; }
-/* Fifteen sections (#353, plus the Broadside's drafting table at #270) make a
-   tall single column, so the slips read in two where the sheet is wide enough:
-   down-then-across, as a printed contents does. `columns` rather than a grid
-   because it balances at any entry count: this list went from fourteen entries
-   to fifteen between the branch and its merge, and a grid sized for fourteen
-   would have spilled a third column rather than rebalancing to 8 + 7.
-   The gap has to clear a bullet: column two's markers hang OUTSIDE its content
-   box, into the gap, since padding-left only makes room at the left of the ul.
-   720px is the collapse boundary public/index.css already uses. */
+/* columns, not a grid: it rebalances at any entry count (a grid sized for fourteen spilled a third column when #353 made fifteen); the gap must clear column two's bullets, which hang OUTSIDE its content box into the gap. */
 .toc ul { margin: 0; padding-left: 1.1rem; columns: 2; column-gap: 2.4rem; }
 .toc li { break-inside: avoid; }
 @media (max-width: 720px) { .toc ul { columns: 1; } }
 .toc a { color: var(--ink-dark); }
-/* The TOC's slips go somewhere, so they tip: the wordmark's text-scale gesture
-   (#289; #324 feel review). Reduced-motion collapse lives in /motion.css. */
-/* vertical-align keeps the list marker on an entry's FIRST line. An
-   inline-block takes its baseline from its LAST line box, so once #353 grew
-   this TOC past a handful of entries the long ones wrapped at 320px and their
-   bullets dropped to line two. Only visible in the font-fallback first paint, which
-   font-display: swap makes every cold load. Do not drop back to display:inline
-   to fix it: the tip transform below needs a block box, and tip-affordance.test.ts
-   guards that gesture. Since #358 the same file guards this line itself, by one
-   sweep over every authored sheet rather than a per-page guard: an inline-block
-   link either pins its bullet or is recorded there as living outside a
-   marker-bearing list. */
+/* vertical-align pins the marker to the FIRST line: an inline-block baselines from its LAST line box, so wrapped entries dropped their bullets to line two (visible only in the font-fallback first paint that font-display:swap makes every cold load). Do not revert to display:inline: the tip transform needs a block box (tip-affordance.test.ts guards the gesture, #358 sweeps this line). */
 .toc a { display: inline-block; vertical-align: top; transition: transform var(--paper-quick) var(--ease-paper); }
 .toc a:hover { transform: translateY(-2px) rotate(-0.6deg); }
 .toc a:active { transform: translateY(0); }
 .term { font-weight: 600; color: var(--ink-dark); margin: 1.6rem 0 0.3rem;
   font-size: 1.08rem; }
 .term:first-of-type, h3 + .term { margin-top: 0.8rem; }
-/* Terms do not tip: the tip gesture promises "goes somewhere" (#289) and a term
-   navigates nowhere. The #126 slip tip came out at the #324 post-use feel review;
-   tip-affordance.test.ts guards the promise. */
+/* Terms do not tip: the tip gesture promises "goes somewhere" (#289) and a term navigates nowhere; tip-affordance.test.ts guards the promise. */
 .def { margin: 0; }
 a { color: var(--ink-brown); }
 code { background: var(--parchment-deep); padding: 0.1em 0.4em; border-radius: 3px;

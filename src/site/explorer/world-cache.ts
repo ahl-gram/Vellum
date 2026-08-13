@@ -1,36 +1,24 @@
-// Single-entry base-world cache, shared by the render worker (src/site/explorer/worker.ts) and its
-// inline fallback (src/site/explorer/worker-client.ts). generateWorld is the CPU floor of any draw,
-// atlas, or regional survey; the Surveyor's Glass (#161/#168) fires a fresh region
-// job on every settle over the SAME base world, so memoizing the last resolved
-// (seed, overrides) world lets a pan/zoom re-survey without regenerating it.
-//
-// Single entry on purpose: a new key evicts the old, so a sea-level or coast drag
-// (landFraction / coastWarp move into `overrides`, changing the key) correctly
-// MISSES and regenerates -- the cache never serves a stale waterline. It stays
-// fully deterministic: worldFor(seed, overrides) returns exactly the world
-// generateWorld(defaultRecipe(seed, overrides)) would, cache hit or miss, so
-// worker/inline byte-parity is unaffected.
+// Single-entry base-world cache, shared by the render worker and its inline fallback:
+// the Glass fires a fresh region job on every settle over the SAME base world, so
+// memoizing the last (seed, overrides) world lets a pan/zoom re-survey without
+// regenerating. Single entry ON PURPOSE: a sea-level or coast drag changes the key,
+// correctly MISSES, and the cache never serves a stale waterline. Fully deterministic:
+// hit or miss, worldFor returns exactly what generateWorld(defaultRecipe(...)) would,
+// so worker/inline byte-parity is unaffected.
 import { defaultRecipe, generateWorld } from "../../world/generate.ts";
 import type { World, WorldRecipe } from "../../world/types.ts";
 
 type Overrides = Partial<WorldRecipe>;
 
-let entry: { key: string; world: World } | null = null; // { key, world }
+let entry: { key: string; world: World } | null = null;
 
-// overrides is a small FLAT object, so a sorted-key JSON is a canonical fingerprint
-// (key order can't change the hash). seed is prefixed so two seeds never collide.
+// overrides is a small FLAT object, so a sorted-key JSON is a canonical fingerprint; seed is prefixed so two seeds never collide.
 function keyOf(seed: number, overrides: Overrides | undefined): string {
   const o = overrides || {};
   return seed + "|" + JSON.stringify(o, Object.keys(o).sort());
 }
 
-/**
- * The base world for (seed, overrides), memoized single-entry. Returns
- * { world, cached } where `cached` is true exactly when this call SKIPPED
- * generateWorld (a repeat of the last key). The flag is what the region-cache
- * e2e asserts, so the "skips generateWorld the second time" AC needs no flaky
- * timing measurement.
- */
+/** The base world for (seed, overrides), memoized single-entry; `cached` is true exactly when this call SKIPPED generateWorld, which is the flag the region-cache e2e asserts instead of a flaky timing measurement. */
 export function worldFor(
   seed: number,
   overrides?: Overrides,

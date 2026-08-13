@@ -1,16 +1,9 @@
-// Coastline warp slider (#137), sibling of the sea-level slider
-// (src/site/explorer/sea-level.ts). The slider integer is coastWarp x 100 (an integer in
-// [0, 100]); the inverses are trivial so the gesture cannot ship backwards. coastWarp
-// domain-warps the radial falloff in the heightfield: 0 is the calm radial dome, up to 1 is
-// deeply lobed shores with offshore islets. clampCoast keeps every value inside [0, 1] so a
-// crafted hash cannot push the engine out of range. The `coastTouched` gate + the redraw
-// wiring stay in src/site/explorer/app.ts (the conductor); this module is the pure
-// conversions + the two DOM writes. The natural default is SHAPES[mapType].coastWarp,
-// uniformly 0.55 across every map type (src/terrain/heightfield.ts). The slider parks there
-// and, until the visitor moves it, src/site/explorer/app.ts sends NO coastWarp override, so
-// an untouched draw is byte-identical to today (the covenant charts and the golden are
-// untouched). If a future edit gives the map types different warp defaults, the additive
-// guard in heightfield.test.ts and this constant are the two places to revisit.
+// Coastline warp slider (#137), sibling of sea-level.ts: pure conversions + the two DOM
+// writes (the slider integer is coastWarp x 100; clampCoast keeps a crafted hash inside
+// [0, 1]). The natural default is SHAPES[mapType].coastWarp, uniformly 0.55 across every
+// map type; until the visitor moves the slider app.ts sends NO coastWarp override, so an
+// untouched draw stays byte-identical (the covenant charts and the golden are untouched).
+// If map types ever get different warp defaults, heightfield.test.ts's additive guard and this constant are the two places to revisit.
 const coastSlider = document.getElementById("coast") as HTMLInputElement;
 const coastReadout = document.getElementById("coast-readout") as HTMLElement;
 
@@ -31,9 +24,7 @@ export function updateCoastReadout(): void {
   coastSlider.setAttribute("aria-valuetext", `coastline warp ${w.toFixed(2)}`);
 }
 
-// Park the slider at the world's natural coastline (0.55) without touching the
-// overrides: an untouched coast slider sends no coastWarp override, exactly as the
-// sea-level slider parks at the natural waterline without forcing landFraction.
+// Park the slider at the natural coastline WITHOUT touching the overrides, exactly as the sea-level slider parks at the natural waterline without forcing landFraction.
 export function parkCoastDefault(): void {
   coastSlider.value = String(coastToSlider(DEFAULT_COAST_WARP));
 }

@@ -25,9 +25,7 @@ function classifyOne(elevRel: number, temp: number, moist: number): number {
   return biomes[1 + 1 * 3] as number;
 }
 
-// #162: biome bands (snow/alpine caps especially) normalize against the parent
-// world's elevation span in a regional survey, so a window that excludes the
-// world's true peaks does not sprout false snow on its own tallest hill.
+// #162: biome bands (snow/alpine caps especially) normalize against the parent world's elevation span, so a window that excludes the true peaks does not sprout false snow on its own tallest hill.
 test("classifyBiomes honors an explicit elevSpan (region snow-band continuity, #162)", () => {
   const w = 4, h = 4, sea = 0.2;
   const elev = createField(w, h, (x) => (x === 3 ? 1.0 : 0.3)); // one tall column

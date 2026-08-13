@@ -1,27 +1,13 @@
-/**
- * Independent ground truth for #175 / #178: reconstruct what a label ACTUALLY
- * draws, so a test can catch glyphs overlapping even when their claimed boxes did
- * not.
- *
- * Deliberately does not import `spacedTextBox`: the whole bug is that the claim
- * geometry disagreed with the rendered geometry, so a test that reuses the claim
- * helper would be blind to it. Everything here is derived from the SVG output.
- *
- * #178 taught it two things it used to be blind to: a river name's text is wrapped
- * in a `<tspan dy=...>` (so the old `[^<]*` content match skipped it entirely, and
- * the `dy` shifts the baseline), and settlement names are `text-anchor="start"`,
- * not the `middle` that `glyphPoly` used to assume.
- */
+// Independent ground truth for #175 / #178: label geometry derived from the SVG output only.
+// Deliberately does NOT import spacedTextBox: reusing the claim helper would be blind to claim-vs-render disagreement.
 
 export type Pt = { readonly x: number; readonly y: number };
 export type Poly = ReadonlyArray<Pt>;
 
 /** Caps run wider than the 0.56 mixed-case factor `spacedTextBox` used to assume. */
 export const CAPS_WIDTH_FACTOR = 0.72;
-/** Sea, forest and river names draw as written (mixed case), italic. */
 export const MIXED_WIDTH_FACTOR = 0.56;
 
-/** Caps labels (realm/range/capital) render `.toUpperCase()` and run ~20% wider. */
 function autoWidthFactor(text: string): number {
   return text === text.toUpperCase() && /[A-Za-z]/.test(text)
     ? CAPS_WIDTH_FACTOR
@@ -36,17 +22,14 @@ export type LabelNode = {
   readonly fontSize: number;
   readonly letterSpacing: number;
   readonly anchor: "start" | "middle" | "end";
-  /** SVG `rotate(deg ox oy)`, when the label is spun along a ridge or reach. */
   readonly rotate: { deg: number; ox: number; oy: number } | null;
 };
 
 const NUM = "([-\\d.]+)";
 
-/** Every <text> node in the SVG, with the attributes label geometry depends on. */
 export function textNodes(svg: string): LabelNode[] {
   const out: LabelNode[] = [];
-  // Non-greedy body so a river label's `<tspan>...</tspan>` is captured whole; the
-  // old `[^<]*` stopped at the tspan's `<` and dropped every river name.
+  // Non-greedy body: a river label's <tspan> must be captured whole; the old [^<]* match dropped every river name.
   for (const m of svg.matchAll(/<text([^>]*)>([\s\S]*?)<\/text>/g)) {
     const attrs = m[1] as string;
     let text = m[2] as string;
@@ -70,8 +53,7 @@ export function textNodes(svg: string): LabelNode[] {
       fontSize,
       letterSpacing,
       anchor: (anchorRaw as "start" | "middle" | "end") ?? "start",
-      // The rotate origin is the text element's own (x, y); the tspan dy shifts the
-      // baseline INSIDE that frame, so it must not move the pivot.
+      // Rotate origin is the text's own (x, y); tspan dy shifts the baseline inside that frame, never the pivot.
       rotate: r ? { deg: Number(r[1]), ox: Number(r[2]), oy: Number(r[3]) } : null,
     });
   }
@@ -87,14 +69,7 @@ function rotatePt(p: Pt, deg: number, ox: number, oy: number): Pt {
   return { x: ox + dx * c - dy * s, y: oy + dx * s + dy * c };
 }
 
-/**
- * The quadrilateral the glyphs actually cover. The run is placed off x per its
- * `text-anchor` (start/middle/end); the baseline sits at y (tspan dy already folded
- * in), with the cap height above it. Matches spacedTextBox's own vertical convention
- * (top at y - fontSize, height 1.2em). The width factor defaults to caps vs mixed by
- * the label's own casing, so one call handles a rotated caps range label and an
- * italic mixed-case river name alike.
- */
+/** Glyph quad: run anchored off x per text-anchor, top at y - fontSize, height 1.2em (spacedTextBox's vertical convention); width factor auto caps vs mixed. */
 export function glyphPoly(n: LabelNode, widthFactor = autoWidthFactor(n.text)): Poly {
   const w = n.text.length * (n.fontSize * widthFactor + n.letterSpacing);
   const h = n.fontSize * 1.2;
@@ -126,7 +101,6 @@ export function polysOverlap(a: Poly, b: Poly): boolean {
   return true;
 }
 
-/** Absolute area of a simple polygon (shoelace). */
 export function polyArea(p: Poly): number {
   let s = 0;
   for (let i = 0; i < p.length; i++) {
@@ -148,11 +122,7 @@ function signedArea(p: Poly): number {
   return s / 2;
 }
 
-/**
- * Area shared by two CONVEX polygons (Sutherland-Hodgman clip of `subject` by each
- * edge of `clip`). Both glyph quads are convex, so this is exact. The clip is
- * oriented counter-clockwise so "inside" is `cross >= 0` for every edge.
- */
+/** Area shared by two CONVEX polygons: Sutherland-Hodgman clip, exact for glyph quads; clip oriented CCW so inside is cross >= 0. */
 function convexIntersectionArea(subject: Poly, clip: Poly): number {
   const c = signedArea(clip) < 0 ? [...clip].reverse() : clip;
   let out: Pt[] = [...subject];
@@ -169,7 +139,6 @@ function convexIntersectionArea(subject: Poly, clip: Poly): number {
       const qIn = inside(Q);
       if (pIn) out.push(P);
       if (pIn !== qIn) {
-        // segment PQ crosses edge AB: add the intersection point
         const d1 = (b.x - a.x) * (P.y - a.y) - (b.y - a.y) * (P.x - a.x);
         const d2 = (b.x - a.x) * (Q.y - a.y) - (b.y - a.y) * (Q.x - a.x);
         const t = d1 / (d1 - d2);
@@ -180,11 +149,7 @@ function convexIntersectionArea(subject: Poly, clip: Poly): number {
   return out.length < 3 ? 0 : polyArea(out);
 }
 
-/**
- * How much two glyph quads overlap, as a fraction of the SMALLER one's area (0..1) --
- * the same metric #178 measured. A hair of touching (< ~0.15) is sub-visual; a real
- * collision buries a chunk of the smaller label.
- */
+/** Overlap as a fraction of the SMALLER quad's area (0..1), the metric #178 measured; below ~0.15 reads as sub-visual touching. */
 export function overlapFraction(a: Poly, b: Poly): number {
   const inter = convexIntersectionArea(a, b);
   if (inter <= 0) return 0;
