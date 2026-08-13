@@ -59,7 +59,7 @@ export interface Session {
 }
 
 export interface SessionBuilderDeps {
-  /** The chart mount; build appends the overlay svg as its child. */
+  /** The chart mount; build drops any overlay already here, then appends its own (#364). */
   mapEl: HTMLElement;
   /** The margin-log panel instance; build renders the rows. */
   logPanel: VoyageLogPanel;
@@ -179,6 +179,30 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     // feeds the sink trackEl's `points` verbatim, so a mark nested in the track would
     // bleed through to the back of the sheet, which #174 ruled it must never do.
     svg.append(trackEl, shipG, riderG);
+    // INVARIANT: on every path that APPENDS, the mount is left holding exactly one
+    // overlay, this one (#364). The append is unconditional, so the builder drops whatever
+    // overlay is already there rather than trusting the caller to have wiped it. (The
+    // bails above return without appending and leave the mount untouched, which is a
+    // deliberate limit, spelled out below.) Every arm shipping
+    // today is preceded by something that empties the mount (the Explorer's settle
+    // innerHTML swap and its turn commit, applyVoyage's own exitVoyage, the Reading
+    // Room's draw), which is exactly why nothing enforced this and why a future caller
+    // arming OUTSIDE a draw would stack two tracks on the sheet, one of which a later
+    // exit would strand. Guarded by e2e SV2g and, from the mount's own side (both nodes
+    // dropped, order, scope, the bail), test/site/voyage-session-mount.test.ts.
+    //
+    // Deliberately HERE and not at the top of build: every bail above returns with the
+    // mount exactly as it was found, so a survey-less world never strips the overlay a
+    // previous one left resting.
+    //
+    // What that costs, stated so nobody reads the invariant as wider than it is: a build
+    // that BAILS leaves the previous overlay in place, while rearmVoyage's own bail
+    // branch hides the margin log and returns. A caller arming outside a draw wipe
+    // against a survey-less world therefore leaves a stale track with no log under it.
+    // That state predates #364 and is unreachable from every caller today (all four wipe
+    // the mount first); the fix would be a wipe on the bail path that no test could
+    // reach, so it is left to its own issue, #371, rather than added here unguarded.
+    mapEl.querySelectorAll(".voyage-overlay").forEach((stale) => stale.remove());
     mapEl.appendChild(svg);
 
     return {

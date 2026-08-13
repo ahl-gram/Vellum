@@ -12,6 +12,8 @@
 // #300 reshaped SV2 (ratified on the issue) and added SV2c/SV2d: the tick is now
 // acknowledged on its own frame and the session build waits for the paint, so the ink
 // lands a beat later and the beat is a window the box can move inside.
+// #364 added SV2g/SV2h: the "one mount, one overlay" invariant asserted against the
+// ENGINE rather than against the callers that used to hold it by convention.
 // Self-contained like the hunt / Print Room / home suites (navigates itself, carries
 // its own scoped no-4xx + console-error delta).
 import { makeRoom } from "./room-support.mjs";
@@ -59,6 +61,12 @@ export async function run(ctx) {
     }
     throw new Error("waitBeat timeout " + label);
   };
+
+  // Move the box the way a user would, with no clock. The #364 checks below want the arm
+  // itself, not its duration, and a `tick()` whose timing global nothing reads would be a
+  // measurement taken for no reader.
+  const setBox = (on) => evaluate(`(()=>{const c=document.getElementById("ages");
+    c.checked=${on};c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
 
   // Tick or untick the box the way a user would, and clock the whole arm from inside the
   // page. The clock's own rAF-then-task is registered AFTER the handler's, so it queues
@@ -169,9 +177,9 @@ export async function run(ctx) {
   // the handler was synchronous, and the box can move inside it (#300). Both events are
   // dispatched in ONE evaluate, so they land before the frame the arm waits on. Ticking
   // and unticking inside the beat must ink nothing; tick/untick/tick must ink exactly ONE
-  // overlay. The count is the load-bearing number: the session builder appends its svg to
-  // the mount and never wipes, so a stale arm surviving alongside a live one would leave
-  // two tracks stacked on the sheet, and "a track is present" could not see it.
+  // overlay. The zero is what this check rests on: a cancelled arm that fires anyway inks
+  // a track on a sheet whose box is clear. (The one is now held by the #364 builder wipe
+  // as well as by the arm's supersede rule, so read it as a floor, not as the guard.)
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await evaluate(`(()=>{const c=document.getElementById("ages");window.__beat=false;
     c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
@@ -201,10 +209,16 @@ export async function run(ctx) {
   // SV2e: the box ticked while a draw is ALREADY IN FLIGHT. This is the one ordering the
   // arm's own worldGen snapshot cannot see, because the host bumps that counter when a draw
   // BEGINS, which here is before the tick, so the snapshot matches and always will. If the
-  // settle then arms the chart that lands and the pending arm lands too, the mount ends up
-  // with TWO stacked overlays, and a later untick strands one of them on an unticked sheet
-  // (the session builder appends and never wipes; exitVoyage removes a single overlay). The
+  // settle then arms the chart that lands and the pending arm lands too, both build. The
   // settle's cancel() is what closes it.
+  //
+  // HONEST SCOPE since #364: the two stacked overlays this pair was written against are no
+  // longer the symptom (the session builder now drops the overlay it finds), so these
+  // clauses would survive the settle's cancel() being deleted. What they still assert is
+  // the invariant itself, one track and a bare sheet after. The stale arm's remaining harm
+  // is a duplicate session build for one sheet: it reads the host's live refs when it
+  // fires, and the settle assigns those before arming, so it rebuilds the world that just
+  // landed rather than inking the outgoing one.
   //
   // Deterministic, not raced. After the tick the page HOLDS the main thread past the
   // worker's reply, so when it frees, the settle's message task and the arm's deferred task
@@ -234,8 +248,10 @@ export async function run(ctx) {
       /(^|&)survey(&|$)/.test(sv2e.hash.slice(1)) && sv2e.status === "",
     JSON.stringify(sv2e),
   );
-  // And the untick really does clear it: with two stacked overlays this leaves one behind,
-  // on a sheet whose box is unticked and whose address carries no survey flag.
+  // And the untick really does clear it: the sheet ends bare, its box unticked and its
+  // address carrying no survey flag. Before #364 two stacked overlays left one behind here,
+  // since exitVoyage removed a single one; it removes every one now, so like SV2e above this
+  // asserts the invariant rather than reddening for the stale arm that used to break it.
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   const sv2f = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
     hash:location.hash,status:document.getElementById("status").textContent})`);
@@ -243,6 +259,192 @@ export async function run(ctx) {
     "SV2f unticking after that leaves the sheet truly bare, no stranded track (#300)",
     sv2f.overlays === 0 && !/survey/.test(sv2f.hash) && sv2f.status === "",
     JSON.stringify(sv2f),
+  );
+
+  // SV2g: the invariant belongs to the ENGINE, not to the callers (#364). Every arm
+  // shipping today is preceded by something that empties the mount (the settle's
+  // innerHTML swap, the turn's commit, applyVoyage's own exitVoyage, the room's draw
+  // wipe), so "one mount, one overlay" was held by convention and nothing pinned it.
+  // This drives TWO consecutive arms through the production path with NO wipe between
+  // them: a second `change` event with the box LEFT CHECKED schedules a second deferred
+  // arm, and no draw runs in between, so the second rearmVoyage builds straight into a
+  // mount that already holds an overlay. The first arm is waited for before the second
+  // is dispatched, on purpose: two schedules inside one beat supersede (survey-arm.ts
+  // bumps its generation), which is a different mechanism and is SV2d's.
+  //
+  // TWO refinements the first cut of this check needed, both from the #364 review:
+  //   - a decoy overlay is PLANTED beside the armed one, so the mount holds two before the
+  //     second arm rather than one. A count of one afterwards then also pins that the wipe
+  //     is plural: take-the-first would leave the decoy and the new build stacked. (The
+  //     mount-side proof of that lives in test/site/voyage-session-mount.test.ts, which
+  //     can hold as many as it likes; this is the browser-real half.)
+  //   - every overlay in the mount is TAGGED before the arm, and none may carry the tag
+  //     afterwards. Without it every clause here is equally true of the state BEFORE the
+  //     second change is dispatched, so a future change that made a redundant change event
+  //     a no-op would leave this check green and empty rather than red.
+  await goto("#seed=42&style=antique", "survey-double-arm-base");
+  await setBox(true);
+  const firstArm = await waitInked("survey-double-arm-first");
+  const before = await evaluate(`(()=>{const m=document.getElementById("map");
+    const d=document.createElementNS("http://www.w3.org/2000/svg","svg");
+    d.setAttribute("class","voyage-overlay");d.setAttribute("aria-hidden","true");
+    m.appendChild(d);
+    const all=m.querySelectorAll(".voyage-overlay");
+    all.forEach((o)=>o.setAttribute("data-before-arm","1"));
+    return all.length;})()`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");window.__beat=false;
+    c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
+    requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
+  await waitBeat("survey-double-arm-beat");
+  const sv2g = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    tracks:document.querySelectorAll("#map .voyage-overlay .voyage-track").length,
+    stale:document.querySelectorAll("#map .voyage-overlay[data-before-arm]").length,
+    checked:document.getElementById("ages").checked,hash:location.hash,
+    status:document.getElementById("status").textContent,
+    vertices:(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
+      return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})()})`);
+  check(
+    "SV2g a second arm into a mount holding two overlays leaves exactly ONE, and it is the new build's (#364)",
+    before === 2 && sv2g.overlays === 1 && sv2g.tracks === 1 && sv2g.stale === 0 && sv2g.checked &&
+      sv2g.vertices === firstArm && /(^|&)survey(&|$)/.test(sv2g.hash.slice(1)) && sv2g.status === "",
+    JSON.stringify({ before, firstArm, ...sv2g }),
+  );
+
+  // SV2h: the other end of the same invariant (#364). exitVoyage reads the mount for
+  // overlays to remove, and a singular query strands every one past the first. The
+  // builder above makes two unreachable through any arm path, so the second one is
+  // PLANTED here: this asserts the teardown's contract for a sheet that somehow already
+  // holds two, which is the only way a one-token belt-and-braces change can be guarded
+  // at all. The decoy is a real overlay node, appended to the same mount the engine
+  // builds into, beside the one a real arm just inked. The base is re-established rather
+  // than inherited from SV2g, so a builder regression reds THAT check and not this one.
+  await goto("#seed=42&style=antique", "survey-plural-exit-base");
+  await setBox(true);
+  await waitInked("survey-plural-exit-arm");
+  await evaluate(`(()=>{const m=document.getElementById("map");
+    const d=document.createElementNS("http://www.w3.org/2000/svg","svg");
+    d.setAttribute("class","voyage-overlay");d.setAttribute("aria-hidden","true");
+    m.appendChild(d);})()`);
+  const planted = await evaluate(`document.querySelectorAll("#map .voyage-overlay").length`);
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  const sv2h = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    hash:location.hash,status:document.getElementById("status").textContent})`);
+  check(
+    "SV2h unticking a sheet that holds two overlays clears EVERY one, not just the first (#364)",
+    planted === 2 && sv2h.overlays === 0 && !/survey/.test(sv2h.hash) && sv2h.status === "",
+    JSON.stringify({ planted, ...sv2h }),
+  );
+
+  // SV2i: the settle OWNS the arm, asserted by identity rather than by counting overlays.
+  //
+  // This is SV2e's scenario (a tick during a draw already in flight, the one ordering the
+  // arm's own worldGen snapshot cannot see) with the assertion moved to where #364 left it.
+  // Before #364 a stale arm surviving the landing stacked a second overlay, so SV2e's count
+  // caught it. The builder now drops the overlay it finds, so the count is one either way
+  // and the count can no longer tell "the settle's arm is on the sheet" from "a second build
+  // replaced it". Measured, not assumed: with #364 in place and the settle's
+  // `surveyArm.cancel()` deleted, the whole suite stayed green.
+  //
+  // So this counts BUILDS, not overlays. A MutationObserver on the mount stamps every
+  // `.voyage-overlay` appended after it starts with a sequence number, which is the one
+  // seam that can distinguish them: the nodes are otherwise identical, since the deferred
+  // arm reads the host's live refs at fire time and so rebuilds the very world the settle
+  // just armed. Exactly one build after the landing, and the survivor is stamped 0.
+  //
+  // #366 makes this load-bearing rather than tidy: it defers the settle's own arm, so a
+  // stale arm and the landing's arm stop being the same world's track.
+  await goto("#seed=42&style=antique", "survey-settle-owns-arm-base");
+  await evaluate(`(()=>{
+    window.__armSeq=0;
+    window.__armObs=new MutationObserver((recs)=>{for(const r of recs)for(const n of r.addedNodes){
+      if(n.nodeType===1&&n.getAttribute&&(n.getAttribute("class")||"").split(/\\s+/).indexOf("voyage-overlay")>=0)
+        n.setAttribute("data-arm-seq",String(window.__armSeq++));}});
+    window.__armObs.observe(document.getElementById("map"),{childList:true});
+    document.getElementById("draw").click();
+    const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
+    const end=performance.now()+1500;while(performance.now()<end);
+  })()`);
+  await waitSettled("survey-settle-owns-arm-settle");
+  await waitInked("survey-settle-owns-arm-ink");
+  await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
+  await waitBeat("survey-settle-owns-arm-beat");
+  const sv2i = await evaluate(`(()=>{const ov=document.querySelector("#map .voyage-overlay");
+    const r={builds:window.__armSeq,seq:ov?ov.getAttribute("data-arm-seq"):null,
+      overlays:document.querySelectorAll("#map .voyage-overlay").length,
+      checked:document.getElementById("ages").checked,hash:location.hash,
+      status:document.getElementById("status").textContent,
+      vertices:(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
+        return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})()};
+    window.__armObs.disconnect();return r;})()`);
+  check(
+    "SV2i a tick during an in-flight draw builds ONCE: the track on the sheet is the settle's own arm (#300)",
+    sv2i.builds === 1 && sv2i.seq === "0" && sv2i.overlays === 1 && sv2i.checked && sv2i.vertices > 10 &&
+      /(^|&)survey(&|$)/.test(sv2i.hash.slice(1)) && sv2i.status === "",
+    JSON.stringify(sv2i),
+  );
+
+  // SV2j: the SAME class at the other instance. `surveyArm.cancel()` appears twice in the
+  // conductor, once in the settle (app.ts:248, above) and once at the #131 turn landing
+  // (app.ts:222), and a guard here comes out shaped like the class rather than like the
+  // one instance that happened to be reported. Coverage of the turn instance was ZERO
+  // before this branch: `scripts/e2e/suite-turn.mjs` unticks the survey box in its base
+  // setup, so no check anywhere has ever ticked it during a turn's flight.
+  //
+  // Deterministic, not raced, and the mechanism is worth reading carefully. The tick is
+  // dispatched from a MutationObserver watching the mount for the turn's own chart swap.
+  // sheet-turn.ts's finish(true) writes `mapEl.innerHTML = newSvg` and THEN resolves, so
+  // the observer's microtask is queued before the landing's promise reaction: the tick
+  // lands in the gap, and the arm it schedules is still pending when the landing runs.
+  // That gap is the only moment at which the turn's cancel() is load-bearing, and a
+  // wall-clock sleep cannot hit it reliably.
+  //
+  // The assertion is SV2i's: count BUILDS, not overlays. Since #364 the builder drops the
+  // overlay it finds, so a stale arm landing after the turn leaves one overlay either way
+  // and only the stamp can tell whose it is.
+  await goto("#seed=42&style=antique", "survey-turn-owns-arm-base");
+  await setBox(true);
+  await waitInked("survey-turn-owns-arm-first");
+  await evaluate(`(()=>{
+    window.__armSeq=0;window.__tickedAtLanding=false;
+    const m=document.getElementById("map");
+    window.__armObs=new MutationObserver((recs)=>{for(const r of recs)for(const n of r.addedNodes){
+      if(n.nodeType===1&&n.getAttribute&&(n.getAttribute("class")||"").split(/\\s+/).indexOf("voyage-overlay")>=0)
+        n.setAttribute("data-arm-seq",String(window.__armSeq++));}});
+    window.__armObs.observe(m,{childList:true});
+    window.__landObs=new MutationObserver((recs)=>{
+      if(window.__tickedAtLanding)return;
+      let swapped=false;
+      for(const r of recs)for(const n of r.addedNodes){
+        if(n.nodeType===1&&n.tagName&&n.tagName.toLowerCase()==="svg"&&
+           (n.getAttribute("class")||"").indexOf("voyage-overlay")<0) swapped=true;}
+      if(!swapped)return;
+      window.__tickedAtLanding=true;
+      const c=document.getElementById("ages");
+      c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));});
+    window.__landObs.observe(m,{childList:true});
+  })()`);
+  await armTurnWatch();
+  await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await waitTurned("survey-turn-owns-arm-turn");
+  await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
+  await waitBeat("survey-turn-owns-arm-beat");
+  const sv2j = await evaluate(`(()=>{const ov=document.querySelector("#map .voyage-overlay");
+    const chart=document.querySelector("#map svg:not(.voyage-overlay)");
+    const r={builds:window.__armSeq,seq:ov?ov.getAttribute("data-arm-seq"):null,
+      ticked:window.__tickedAtLanding,turned:window.__turned,
+      overlays:document.querySelectorAll("#map .voyage-overlay").length,
+      style:chart?chart.getAttribute("data-vellum-style"):null,
+      checked:document.getElementById("ages").checked,hash:location.hash,
+      status:document.getElementById("status").textContent,
+      vertices:(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
+        return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})()};
+    window.__armObs.disconnect();window.__landObs.disconnect();return r;})()`);
+  check(
+    "SV2j a tick inside the TURN's landing builds ONCE: the landing's own arm is the track that stays (#300)",
+    sv2j.turned === true && sv2j.ticked === true && sv2j.builds === 1 && sv2j.seq === "0" &&
+      sv2j.overlays === 1 && sv2j.style === "ink" && sv2j.checked && sv2j.vertices > 10 &&
+      /(^|&)survey(&|$)/.test(sv2j.hash.slice(1)) && sv2j.status === "",
+    JSON.stringify(sv2j),
   );
 
   await goto("#seed=42&style=antique&survey", "survey-restore-for-sv3");

@@ -69,6 +69,49 @@ export function emptyMount(): { el: HTMLElement; asked: string[] } {
   return { el: mount as unknown as HTMLElement, asked };
 }
 
+/**
+ * A chart mount that ALREADY HOLDS two voyage overlays, for the #364 builder invariant.
+ *
+ * It answers `querySelectorAll` with a FIXED pair of stubs and records every call in one
+ * ordered ledger, so a consuming test can read what the builder did to the mount and in
+ * what order: `ask:<selector>`, one `remove:` per stale node it took off, and `append:` for
+ * the overlay it added. Deliberately NOT a selector engine and NOT a widening of
+ * element-shim.ts: nothing here matches a selector, it returns what it was built holding
+ * and writes down what it was asked. The shim's blindness is what stops an assertion
+ * resting on a hand-rolled matcher, and returning fixed stubs rests on none.
+ *
+ * What it makes provable, none of which a real-browser e2e with a single stale overlay can
+ * see: that BOTH held nodes come off (a singular query would take one), that the wipe runs
+ * BEFORE the append and not after (the order in the ledger), that the query goes to the
+ * MOUNT and not to `document` (an empty ledger means it went somewhere else), and that a
+ * build which bails early touches the mount not at all.
+ */
+export function stackedMount(): { el: HTMLElement; ledger: string[] } {
+  const ledger: string[] = [];
+  const held = ["first", "second"].map((name) => ({
+    remove: () => ledger.push(`remove:${name}`),
+  }));
+  const mount = {
+    querySelectorAll: (sel: string) => {
+      ledger.push(`ask:${sel}`);
+      return held;
+    },
+    // The SINGULAR form answers too, with the first node held, because the mutation this
+    // double exists to catch is a builder that reaches for `querySelector` and takes one.
+    // A mount that simply lacked the method would red that mutation with a TypeError, which
+    // proves the double incomplete rather than the behaviour wrong.
+    querySelector: (sel: string) => {
+      ledger.push(`ask1:${sel}`);
+      return held[0]!;
+    },
+    appendChild: (kid: { getAttribute(name: string): string | null }) => {
+      ledger.push(`append:${kid.getAttribute("class")}`);
+      return kid;
+    },
+  };
+  return { el: mount as unknown as HTMLElement, ledger };
+}
+
 /** The host's optional verso surface (#174), recording so a paint or clear is provable. */
 export function recordingSink(): {
   sink: { paint(p: string, v: string): void; clear(): void };

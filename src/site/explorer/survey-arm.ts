@@ -10,11 +10,14 @@
 // The yield opens a window that did not exist while the handler was synchronous, and this
 // scheduler is what closes it. Three things can happen between the tick and the build,
 // and each has to drop the pending arm:
-//   - the box is unticked (cancel), or unticked and re-ticked (a second schedule): the
-//     session builder APPENDS its overlay svg and never wipes, so two arms surviving into
-//     one mount would leave two .voyage-overlay layers on the sheet;
+//   - the box is unticked (cancel), or unticked and re-ticked (a second schedule): an arm
+//     that fires for a box the reader has since moved inks a track nobody asked for, and
+//     two arms surviving into one mount would each build the ~1.1s session for one sheet;
 //   - a draw starts: its own settle (or turn landing) re-arms against the chart that
 //     lands, and this arm is holding the outgoing world's manifest.
+// (Until #364 a second arm ALSO left two .voyage-overlay layers stacked on the sheet: the
+// session builder appended and never wiped. The builder now drops the overlay it finds,
+// so the DOM symptom is gone and the reasons above are what remain.)
 // The host bumps `worldGen` for the last of those; `isArmed` is the live box read, kept as
 // the standing truth even where a generation already covers it.
 //
@@ -23,8 +26,11 @@
 // the drafting takes a snapshot that already matches and always will. That case is closed
 // from the other end: the settle and the turn landing each call cancel() before arming,
 // which is the host saying "this landing owns the arm now". Without it the settle's arm and
-// this one both land, and the mount ends up with TWO overlays stacked, since the session
-// builder appends and never wipes and exitVoyage removes only the first.
+// this one both land: before #364 that stacked two overlays on the sheet, and since #364 the
+// second build simply replaces the first. What remains is a duplicate ~1.1s session build
+// for one sheet, not wrong ink: `arm` reads the host's live refs when it FIRES, and the
+// settle assigns those before it arms, so an arm that outlives a landing rebuilds the world
+// that just landed. Worth dropping, but no longer a defect visible on the sheet.
 //
 // Deliberately DOM-free: the yield arrives as `afterPaint` so it is testable
 // (test/site/survey-arm.test.ts holds the frame open and acts inside it). The production
