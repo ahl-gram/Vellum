@@ -46,9 +46,9 @@ export type AtlasDocumentData = {
  */
 export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
 .atlas-sheet figure a { display: block; position: relative; }
-/* The waiting frame (#329): the img reserves its box via width/height attributes and
-   this label sits BEHIND it (negative z-index), so the opaque plate paints over it as
-   it lands. Anchor-wrapped plates only (the data-URI download decodes inline). */
+/* The waiting frame (#329) sits BEHIND the img (negative z-index), so the opaque plate
+   paints over it as it lands. Anchor-wrapped plates only, which since #368 includes the
+   download's: a lazy below-fold plate there shows it briefly though the bytes are local. */
 .atlas-sheet figure a::before { content: "Drafting…"; position: absolute; inset: 0; z-index: -1;
   display: grid; place-items: center; font-style: italic;
   background: var(--parchment-panel); color: var(--ink-faded); }
@@ -58,12 +58,8 @@ export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
   border: 1px solid var(--line-tan); box-shadow: 0 10px 30px rgb(from var(--chart-ink) r g b / 0.18);
   transition: transform var(--paper, 260ms) var(--ease-paper, cubic-bezier(0.22, 0.61, 0.36, 1)),
               box-shadow var(--paper, 260ms) var(--ease-paper, cubic-bezier(0.22, 0.61, 0.36, 1)); }
-/* The lift is scoped to ANCHORED plates (#368). In Vellum the tip promises a destination
-   (#289), and this rule used to fire on all three hosts while two of them wrapped nothing,
-   which is the false affordance the contract names. All three now anchor their plates, two
-   of them at runtime, so no host loses its lift; what loses it is a plate with no link, which
-   in practice means the download opened with scripting off. There the plate correctly sits
-   still rather than promising a click that cannot happen. */
+/* The lift is scoped to ANCHORED plates (#368): with scripting off the download has no
+   link and correctly no lift, rather than the false affordance #289's tip contract names. */
 .atlas-sheet figure a img:hover { transform: translateY(-5px) rotate(-0.6deg);
   box-shadow: 0 20px 44px rgb(from var(--chart-ink) r g b / 0.28); }
 .atlas-sheet figure a img:active { transform: translateY(-1px) rotate(0deg); }
@@ -143,26 +139,15 @@ export function svgToDataUri(svg: string): string {
   return `data:image/svg+xml;base64,${btoa(binary)}`;
 }
 
-// One <figure> for a plate: its <img> (optionally wrapped in a link to the same source,
-// for the CLI's file-backed page) and its caption. The download passes anchor:false so a
-// data-URI plate is never embedded twice.
 /**
- * The self-contained download's plates, linked at load (#368).
+ * The self-contained download's plates, linked at load (#368, ratified 2026-08-13).
  *
- * Its plates are inline data URIs, and a plain `<a href="data:...">` does NOT work: measured
- * in Brave 151 from a real file:// origin, the click opens a tab that lands on about:blank and
- * the browser logs "Not allowed to navigate top frame to data URL". That is a broken click,
- * which is worse than no click at all. Wrapping the plate server-side would also double a
- * ~20MB file, which is why `anchor:false` exists.
- *
- * So each plate is wrapped here in a REAL link whose href is a blob built from the data URI the
- * img already carries: one copy in the file, and a genuine anchor rather than a click handler,
- * so focus, middle-click and open-in-new-tab all behave. Measured working from file://.
- *
- * Two deliberate properties. The plates are linked only if this runs, and the lift is scoped to
- * anchored plates, so with scripting off the page has no link AND no lift: it degrades to an
- * honest gallery instead of to the false affordance #368 was filed about. And a plate whose
- * blob cannot be built keeps its plain img, degrading the same way, one plate at a time.
+ * A plain `<a href="data:...">` is refused: measured in Brave 151 from a file:// origin the
+ * tab lands on about:blank with "Not allowed to navigate top frame to data URL". Wrapping
+ * server-side would instead double a ~20MB file, which is why `anchor:false` exists. So each
+ * plate is wrapped here in a real link to a blob built from the data URI the img already
+ * carries. The blobs are held for the page's life (~16MB on a 22.5MB atlas), the accepted
+ * cost of a genuine anchor over a click handler: focus, middle-click and new-tab all behave.
  */
 const PLATE_LINK_SCRIPT = `<script>
 for (const img of document.querySelectorAll(".atlas-sheet figure > img")) {

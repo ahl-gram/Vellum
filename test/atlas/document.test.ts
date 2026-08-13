@@ -111,7 +111,7 @@ test("plates reserve their frames: img dims from the plate's own svg root, lazy 
   assert.match(ATLAS_SHEET_CSS, /figure\s+a::before\s*\{[^}]*z-index:\s*-1/);
 });
 
-test("atlasDocument (data-URI mode): a self-contained doc with no anchors and no external refs", () => {
+test("atlasDocument (data-URI mode): self-contained, with no anchors in the FILE and no external refs", () => {
   const data = fixture();
   const html = atlasDocument(data, (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
 
@@ -128,18 +128,72 @@ test("atlasDocument (data-URI mode): a self-contained doc with no anchors and no
   assert.match(html, /\.atlas-sheet figure/);
 });
 
-test("data-URI mode: the plates become real links at load, without a second copy (#368)", () => {
-  const html = atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
+// Exactly the browser surface PLATE_LINK_SCRIPT touches, and nothing else. Not a DOM and
+// deliberately not a selector engine (test-support/element-shim.ts's standing rule): the
+// script's own selector is recorded and checked against the real markup separately, and
+// every assertion below reads nodes the script itself rewired.
+class StubNode {
+  parentNode: StubNode | null = null;
+  children: StubNode[] = [];
+  src = "";
+  href = "";
+  target = "";
+  rel = "";
+  tag: string;
+  constructor(tag: string) { this.tag = tag; }
+  insertBefore(node: StubNode, ref: StubNode): void {
+    node.parentNode = this;
+    this.children.splice(this.children.indexOf(ref), 0, node);
+  }
+  appendChild(node: StubNode): void {
+    const from = node.parentNode?.children;
+    if (from) from.splice(from.indexOf(node), 1);
+    node.parentNode = this;
+    this.children.push(node);
+  }
+}
 
-  // The one script this document has ever carried, and it exists for exactly one reason: a
-  // plate that lifts must go somewhere. A plain <a href="data:..."> cannot do the job, measured
-  // in Brave 151 from a real file:// origin: the tab opens on about:blank and the browser logs
-  // "Not allowed to navigate top frame to data URL", i.e. a BROKEN click, worse than no click.
-  // So the plate is wrapped at load in a link to a blob built from the data URI it already
-  // carries: a real link (focusable, middle-clickable), no second copy in the file.
-  assert.match(html, /<script>/, "the self-contained atlas links its plates at load");
-  assert.match(html, /URL\.createObjectURL/);
-  assert.match(html, /target="_blank"|\.target\s*=\s*"_blank"/, "opens beside the atlas, never over it");
+// Runs the document's own script, so a syntax error throws here rather than shipping.
+async function runPlateScript(html: string, plates: number) {
+  const body = html.match(/<script>([\s\S]*?)<\/script>/);
+  assert.ok(body, "the self-contained atlas must carry its linking script");
+  const imgs = Array.from({ length: plates }, (_, i) => {
+    const figure = new StubNode("figure");
+    const img = new StubNode("img");
+    img.src = `data:image/svg+xml;base64,PLATE${i}`;
+    figure.appendChild(img);
+    return img;
+  });
+  const queried: string[] = [];
+  const doc = {
+    querySelectorAll: (sel: string) => { queried.push(sel); return imgs; },
+    createElement: (tag: string) => new StubNode(tag),
+  };
+  const fetchStub = async (src: string) => ({ blob: async () => ({ src }) });
+  const urlStub = { createObjectURL: (b: { src: string }) => `blob:vellum/${b.src.slice(-6)}` };
+  new Function("document", "fetch", "URL", "console", body[1])(doc, fetchStub, urlStub, { warn() {} });
+  await new Promise((r) => setTimeout(r, 0));
+  return { imgs, queried };
+}
+
+test("data-URI mode: running the document's own script really links every plate (#368)", async () => {
+  const html = atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
+  const { imgs, queried } = await runPlateScript(html, 5);
+
+  for (const img of imgs) {
+    const a = img.parentNode;
+    assert.ok(a && a.tag === "a", "every plate must end up inside an anchor");
+    assert.match(a.href, /^blob:/, "a data: href is the inert form the measurement ruled out");
+    assert.equal(a.target, "_blank", "opens beside the atlas, never over it");
+    assert.equal(a.rel, "noopener");
+    assert.equal(a.parentNode?.tag, "figure", "the anchor takes the img's place in the figure");
+  }
+
+  // The script's reach and the markup must not drift apart: it queries plate imgs as direct
+  // figure children, so plateFigure may not grow a wrapper around them.
+  assert.equal(queried.length, 1);
+  assert.match(queried[0], /figure\s*>\s*img\s*$/, "the plate query must stay a figure > img child match");
+  assert.equal((html.match(/<figure><img /g) ?? []).length, 5, "every plate img is a direct figure child");
 
   // The reason anchor:false exists in the first place survives: still exactly one copy each.
   assert.equal(
@@ -147,7 +201,7 @@ test("data-URI mode: the plates become real links at load, without a second copy
     5,
     "linking the plates must not re-embed them: the file would double",
   );
-  assert.doesNotMatch(html, /<a href="data:/, "the inert form the measurement ruled out");
+  assert.doesNotMatch(html, /<a href="data:/);
 });
 
 test("file-ref mode carries no plate-linking script: its anchors are already real (#368)", () => {
