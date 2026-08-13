@@ -48,6 +48,10 @@ export function resolveE2ePorts(env: E2ePortEnv): E2ePorts {
   return { PORT, DPORT };
 }
 
+export function e2eOutSubdir(port: number): string {
+  return port === DEFAULT_E2E_PORT ? "e2e" : `e2e-${port}`;
+}
+
 export function debugPortConflictMessage(dport: number, probe: DebugPortProbe): string | null {
   if (!probe.listening) return null;
   const who = probe.identity ? ` (it answers as ${probe.identity})` : "";
