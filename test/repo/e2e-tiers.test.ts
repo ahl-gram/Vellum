@@ -25,6 +25,21 @@ test("E2E_SUITE_ORDER is exactly the runner's SUITES map, in the same order", ()
   assert.deepEqual(runnerSuiteKeys(), E2E_SUITE_ORDER.slice());
 });
 
+test("each suite name maps to the run function imported from its own file", () => {
+  // A key wired to the wrong import ("render": runMotion) would run and PASS: check labels come from
+  // the suite itself and nothing asserts on them, so the tier would quietly cover a different suite.
+  const aliasFor = new Map(
+    [...RUNNER.matchAll(/import \{ run as (\w+) \} from "\.\/e2e\/suite-([\w-]+)\.mjs"/g)].map((m) => [m[2], m[1]]),
+  );
+  const block = RUNNER.match(/const SUITES = \{([\s\S]*?)\n\};/);
+  assert.ok(block, "the runner's SUITES map was not found");
+  for (const name of E2E_SUITE_ORDER) {
+    const wired = block[1].match(new RegExp(`"${name}":\\s*(\\w+)`));
+    assert.ok(wired, `${name} has no SUITES entry`);
+    assert.equal(wired[1], aliasFor.get(name), `${name} is wired to the wrong run function`);
+  }
+});
+
 test("every named suite has a suite file the runner imports", () => {
   for (const name of E2E_SUITE_ORDER) {
     const file = `scripts/e2e/suite-${name}.mjs`;
