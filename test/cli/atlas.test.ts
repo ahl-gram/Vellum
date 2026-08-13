@@ -12,7 +12,6 @@ test("the atlas includes the nautical plate under Other Draughtings", async () =
   try {
     await buildAtlas(seed, { out: dir });
     const html = await readFile(join(dir, "index.html"), "utf8");
-    // the file is written and the index links + captions it
     const svg = await readFile(join(dir, "world-nautical.svg"), "utf8");
     assert.match(svg, /^<svg/);
     assert.match(html, /world-nautical\.svg/);
@@ -88,18 +87,11 @@ test("the atlas joins the motion folio: links /motion.css and its figures lift u
   try {
     await buildAtlas(seed, { out: dir });
     const html = await readFile(join(dir, "index.html"), "utf8");
-    // root-absolute so it resolves at /atlas/ depth, exactly as the five
-    // hand-authored pages link it (the folio needs both pages opted in)
     assert.match(
       html,
       /<link rel="stylesheet" href="\/motion\.css">/,
       "atlas should link the shared motion desk so it joins the folio",
     );
-    // The plates lift gently under the hand, mirroring the homepage plates (#146). Since
-    // #368 the lift is scoped to plates that GO SOMEWHERE, and this page's plates qualify
-    // the plainest way there is: buildAtlas passes anchor:true, so each is already wrapped
-    // in a link to its full-size SVG. Asserting the anchored selector here is what keeps
-    // this page's lift honest if that ever changes.
     assert.match(
       html,
       /figure a img:hover\s*\{[^}]*transform:[^}]*translateY/,

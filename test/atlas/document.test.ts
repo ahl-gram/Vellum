@@ -193,6 +193,11 @@ test("data-URI mode: running the document's own script really links every plate 
   // figure children, so plateFigure may not grow a wrapper around them.
   assert.equal(queried.length, 1);
   assert.match(queried[0], /figure\s*>\s*img\s*$/, "the plate query must stay a figure > img child match");
+  // Scope derived, not pinned: a consistent rename stays green here (the literal belongs to the
+  // sibling CSS guards), but a script reaching for a class the document never emits reds.
+  const scope = queried[0].match(/^\.([\w-]+)\s/)?.[1];
+  assert.ok(scope, "the plate query must be scoped to a class");
+  assert.match(html, new RegExp(`<body class="[^"]*\\b${scope}\\b`), "the script's scope must be the class the document emits");
   assert.equal((html.match(/<figure><img /g) ?? []).length, 5, "every plate img is a direct figure child");
 
   // The reason anchor:false exists in the first place survives: still exactly one copy each.
