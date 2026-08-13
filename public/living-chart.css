@@ -1,50 +1,16 @@
-/* The living-chart engine's overlay dressing (#302): every rule here styles a node
-   the engine (src/site/living-chart/) creates or tags over a host's baked chart.
-   This sheet is the CSS twin of the #191 module boundary: #191 lifted the BEHAVIOR
-   into a host-agnostic engine, this sheet lifts the DRESSING, so a page that mounts
-   the engine is dressed by linking one sheet instead of forking the Explorer's.
+/* Living-chart engine overlay dressing (#302), host-agnostic. HOST CONTRACT, both halves or the overlays render undressed: link /living-chart.css AND put class="living-chart" on the chart mount handed to the engine. */
 
-   THE HOST CONTRACT (both halves, or the overlays render undressed):
-     1. link /living-chart.css (root-absolute; BaseLayout's extraCss prop);
-     2. put class="living-chart" on the chart mount it hands the engine (the
-        element the chart svg is injected into: the Explorer's #map, the reading
-        frame's .rf-chart). The #155 ink-in keys on that class, never on a host id,
-        because this sheet must not know any host's element names.
-
-   Palette tokens (--ink-dark etc.) come from BaseLayout's global style block and
-   timing tokens (--paper, --unfurl etc.) from /motion.css, both linked on every
-   page, so this sheet works wherever BaseLayout renders. Guarded by
-   test/site/living-chart-css.test.ts (roster + host-agnostic + one-home) and the
-   palette guards in test/site/shell-css.test.ts. */
-
-/* Living Chart overlay (#53): invisible focusable hit-targets sit over the baked
-   glyphs and feed one reused parchment card. The container ignores pointer
-   events so the rest of the page stays live; only the hits and card take them.
-   The .place-hit reset is load-bearing: a host page's own button styling (the
-   Explorer's cream button rule) would otherwise paint opaque boxes over each map
-   glyph, breaking idle parity. */
+/* The .place-hit reset is load-bearing: a host's own button styling would otherwise paint opaque boxes over each map glyph, breaking idle parity. */
 .place-overlay { position: absolute; inset: 0; pointer-events: none; }
 .place-hit {
   position: absolute;
-  /* #331 (revisited after live use): the WHOLE hit divides by the published zoom k,
-     so the target holds its designed 26px on screen at every depth. Scaled boxes kept
-     their k=1 overlaps while the marks LOOKED far apart, so a hover near one town
-     ringed its neighbor. The host publishes --zoom-k on the .place-overlay container
-     (a sibling of the chart svg, never the mount: the #164 jiggle rule); the (…,1)
-     fallback keeps a non-zooming host (the Reading Room) untouched. The scale's fixed
-     point is the element centre, which the translate pins to the mark, so the anchor
-     never moves; the ring + scrub pseudos inherit the division for free. */
+  /* #331: the WHOLE hit divides by --zoom-k (published on .place-overlay, never the mount, the #164 jiggle rule) so the target holds its designed 26px at every depth; the (,1) fallback keeps non-zooming hosts untouched. */
   transform: translate(-50%, -50%) scale(calc(1 / var(--zoom-k, 1)));
   width: 26px; height: 26px; box-sizing: border-box;
   background: transparent; border: 0; border-radius: 0; padding: 0;
   pointer-events: auto; cursor: pointer;
 }
-/* #128: the hover/focus ring grows in softly from 0.85 with a fade. It rides an
-   ::after (the scrub dot is ::before) so the .place-hit ELEMENT keeps the zero-
-   transition reset suite-cards P2c guards and stays transparent/borderless at idle
-   for P2; the pseudo is invisible (opacity 0) at rest, so idle parity holds. In scrub
-   mode the hit is pointer-events:none and not focusable, so the ring never shows.
-   Collapses to instant via the shared reduced-motion block in /motion.css. */
+/* The ring rides ::after (the scrub dot is ::before) so the .place-hit ELEMENT keeps the zero-transition reset e2e P2/P2c guard and idle parity holds. */
 .place-hit::after {
   content: ""; position: absolute; inset: 0; margin: auto;
   width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box;
@@ -53,26 +19,11 @@
   transition: opacity var(--paper-quick) var(--ease-paper),
               transform var(--paper-quick) var(--ease-paper);
 }
-/* The ring needs NO zoom division of its own: its element carries it (#331 above),
-   and a second division here would shrink the ring k-fold below its 20px design. */
+/* The ring needs NO zoom division of its own: its element carries it (#331), and a second division would shrink the ring k-fold below its 20px design. */
 .place-hit:hover::after, .place-hit:focus-visible::after {
   opacity: 1; transform: scale(1);
 }
-/* #place-card is the positioning shell only: its transform places the card by its
-   anchor corner (the flip variants below). The paper sheet + its #128 unfurl live on
-   the inner wrapper, so the unfurl's own transform never fights this positioning one.
-   The id is ENGINE-assigned (place-overlay.ts creates the card), so it is not a host
-   name and may be keyed here. */
-/* #164: the card is a tooltip, so it must NOT magnify with the chart while zoomed (a 4-8x
-   card fills and clips the frame). It lives inside the chart mount, so its anchor rides a
-   host zoom transform for free; the leading scale(1/k) counter-scales it back to a
-   constant, readable size. --zoom-k is published on THIS card element by the host (never
-   on the mount itself, which would re-rasterize the baked SVG labels every frame and make
-   them jiggle); the (…,1) fallback makes scale(1) on a host with no zoom, so the transform
-   reduces to the original translate and the idle card is byte-identical.
-   Scaling about the box origin (transform-origin 0 0, i.e. the mark point) keeps the anchor
-   corner a constant screen distance from the mark for EVERY flip variant, because the flip
-   offset rides inside the same scale. */
+/* #164: --zoom-k is published on THIS card element, never the mount (that would re-rasterize the baked labels every frame and jiggle); origin 0 0 keeps the anchor corner a constant screen distance from the mark for every flip variant. */
 #place-card {
   position: absolute; z-index: 5; max-width: 16rem; pointer-events: none;
   transform-origin: 0 0;
@@ -83,11 +34,6 @@
 #place-card.flip-h { transform: scale(calc(1 / var(--zoom-k, 1))) translate(calc(-100% - 10px), 10px); }
 #place-card.flip-v { transform: scale(calc(1 / var(--zoom-k, 1))) translate(10px, calc(-100% - 10px)); }
 #place-card.flip-h.flip-v { transform: scale(calc(1 / var(--zoom-k, 1))) translate(calc(-100% - 10px), calc(-100% - 10px)); }
-/* #128 The slow unfurl. The sheet unrolls from the edge nearest its place: top when
-   the card hangs below the anchor, bottom when it sits above (the flip-v cases). A
-   pinned/tapped card plays the full --unfurl ceremony; a hover/focus preview runs the
-   same curve at --unfurl-quick so sweeping a crowded coast stays nimble. Collapses via
-   the shared reduced-motion block in /motion.css (the `both` fill rests at rotateX 0). */
 .pc-inner {
   background: var(--control-cream); color: var(--ink-dark);
   border: 1px solid var(--ink-dark); border-radius: 4px;
@@ -104,45 +50,8 @@
 .pc-founded { display: block; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
 .pc-tale { margin: 0.4rem 0 0; font-style: italic; color: var(--ink-tale); }
 
-/* Chronicle scrub mode (#54, #93): the overlay hit-targets stay put but go inert
-   (pointer-events off; the engine sets tabindex -1) so cards are suppressed while
-   scrubbing. Scoped behind .place-overlay.scrub so idle mode is byte-identical
-   (a host's button styling must never reach these). chronicle.ts adds and removes
-   the scrub class. */
 .place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
-/* #155 The ink-in. #93 revealed each glyph with a hard display toggle; now the frame
-   that reveals it plays a brief ceremony, so towns settle onto the sheet in the Paper
-   & Ink vocabulary (#125) instead of popping. chronicle.ts in src/site/living-chart/
-   tags the crossing group data-ink with its grade, and THAT ATTRIBUTE IS THE WHOLE
-   SCOPE: only the scrubber ever writes it, it lives on the injected DOM, and Download
-   saves the pristine lastSvg string, so the baked chart, the committed charts, and
-   the golden never see it. Idle output is byte-identical by construction.
-
-   Keyed on the .living-chart mount class the host supplies (the #302 contract),
-   never on a host element id: this sheet cannot know what a host calls its mount.
-
-   Two grades, mirroring the pre-#93 dots this replaces: a founding is STAMPED onto
-   the sheet, a fall has no press to it and simply darkens into the record. The
-   animations ride the CHILDREN, never the group: the group's box spans halo, glyph
-   AND label, so scaling the group would drag the name in with the mark.
-
-   THE PRESS IS ANCHORED ON THE TOWN POINT, and no box centre will do it, which is why
-   the origin is NOT declared here: it is per-element data, so chronicle.ts writes it
-   inline on each mark it is about to grade. The chart deliberately mixes projections,
-   so a PROFILE glyph (the antique/ink castle) STANDS ON its point while a PLAN glyph
-   (the town circle, the star-in-circle) is centred on it, and a seat halo sits on a
-   third point again: for seed 42's capital those are y=474.21, 469.21 and 469.83. An
-   own-box origin therefore starts a castle's foot BELOW its town and slides it up over
-   the press, an error in CHART UNITS that the Surveyor's Glass magnifies up to 8x.
-   Anchored on the manifest point instead, halo and glyph share one origin and stay
-   concentric. Guarded by e2e S26, which MEASURES the town point staying fixed through
-   the press rather than trusting any declaration.
-
-   Held at --paper, the timing the dots used, because an event-proportional Play can
-   cross several foundings inside one dwell and a longer grade would smear them
-   together. The name dries in one quick beat behind the mark (the surveyor presses
-   the mark, then writes it up), the same staggered idiom as #170's redrafted names.
-   Both collapse to the end state via the shared reduced-motion block in /motion.css. */
+/* #155 ink-in: animations ride the CHILDREN, never the group (its box spans halo+glyph+label, so scaling the group drags the name with the mark); the origin is per-element data written inline by chronicle.ts because a PROFILE glyph stands ON its point while a PLAN glyph centres on it (e2e S26 measures the town point staying fixed). */
 .living-chart g.settlement[data-ink="founding"] > :not(text) {
   animation: inkStamp var(--paper) var(--ease-paper) both;
 }
@@ -153,30 +62,13 @@
   animation: dryingInk var(--paper-quick) var(--ease-paper) var(--paper-quick) both;
 }
 
-/* The Wayfarer's Passage overlay (#119). A client-only SVG layer over the baked chart: a
-   dotted survey track threads port to port behind a little ship, and each port's dated log
-   line lands in the host's status line. pointer-events:none so the #53 place-hit cards keep
-   working underneath; the track is a SIBLING <svg>, never inside the chart, so Download SVG
-   (the pristine lastSvg string) stays byte-identical. The rAF sweep is JS, so its
-   reduced-motion twin is the prefersReduce() gate in src/site/living-chart/voyage.ts (full
-   track shown at once); there is nothing here for /motion.css to collapse. */
-/* #367: the track casts no shadow, and deliberately says nothing about one. Both hosts used
-   to dress every svg in their mount, which caught this overlay and doubled the sheet's
-   shadow; the fix is in their mount rules (now qualified to the renderer's
-   [data-vellum-style]), not an opt-out here. An opt-out here could not have worked anyway:
-   this sheet is host-agnostic (#302), so it has no host selector to lean on, and a bare
-   `.voyage-overlay` is (0,1,0) against a (1,0,1) and a (0,1,1). It would have read as a fix
-   and lost every cascade it entered. */
+/* #119 voyage overlay: a SIBLING svg, never inside the chart (Download stays byte-identical); the rAF sweep's reduced-motion twin is the prefersReduce() gate in voyage.ts, nothing here for /motion.css to collapse. */
+/* #367: deliberately says nothing about a shadow; the double-shadow fix lives in the hosts' qualified mount rules, and an opt-out here would lose every cascade it entered (bare .voyage-overlay is 0,1,0 against 1,0,1). */
 .voyage-overlay { position: absolute; inset: 0; width: 100%; height: 100%;
   pointer-events: none; z-index: 3; overflow: visible; }
 .voyage-track { fill: none; stroke: var(--ink-dark); stroke-width: 3;
   stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
   vector-effect: non-scaling-stroke; opacity: 0.95; }
-/* #120: the mark is a ship at sea and a rider on the road, both drawn in PROFILE, in the
-   chart's own ink idiom (render/layers/glyph-symbols.ts: a paper-filled body, an ink
-   outline, a thinner stroke for interior detail, standing on a baseline at y=0). Only one
-   is displayed at a time; src/site/living-chart/voyage.ts toggles the SVG `display`
-   attribute at each port. */
 .voyage-ship path, .voyage-rider path { fill: var(--parchment-panel); stroke: var(--ink-dark); stroke-width: 1.5;
   stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .voyage-ship .rig { fill: none; stroke: var(--ink-dark); stroke-width: 1.1;
@@ -189,16 +81,7 @@
   stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .voyage-ship .ink, .voyage-rider .ink { fill: var(--ink-dark); stroke: none; }
 
-/* The ages bar (#220): the fused instrument's one range input, dressed as the ratified
-   two-chamber track. Chosen by look from the rendered candidates (out/220-bar-candidates,
-   2026-07-28): the survey half wears a diagonal hatch (the sheet still being drawn), the
-   ages half a plain deep parchment, and the seam carries a serifed threshold post that
-   stands PROUD of the track, so the hard detent's landmark stays visible even with the
-   thumb parked on it. All paint is background layers on the input itself (top layers
-   first: the post, its two caps, then the halves), sized against a 24px-tall box whose
-   middle 10px band is the track; appearance:none so both hosts render the same
-   instrument. The class ships in host markup (the Explorer's #scrub-range, the reading
-   frame's .rf-range); this sheet stays host-agnostic. */
+/* #220 ages bar: the background layers paint the instrument (threshold post, its two caps, hatched survey half, plain ages half) on a 24px box whose middle 10px band is the track; appearance:none so both hosts render the same instrument. */
 .ages-range { appearance: none; -webkit-appearance: none; height: 24px;
   margin: 0; background:
     linear-gradient(var(--ink-dark), var(--ink-dark)) 50% 0 / 6px 2px no-repeat,

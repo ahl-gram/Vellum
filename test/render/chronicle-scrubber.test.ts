@@ -17,19 +17,8 @@ import {
   sweepElapsedAt,
 } from "../../src/render/chronicle-scrubber.ts";
 
-// Unit tests for #54 (Chronicle year-scrubber): the pure core that the Explorer's
-// year-slider + Play sweep consume. The DOM wiring (slider, layer hide/restore,
-// rAF loop, redraw re-apply) lives in src/site/living-chart/chronicle.ts and is covered
-// by the Explorer e2e. Only the deterministic math is tested here.
-//
-// Two load-bearing behaviours:
-//  1. A ruined place is LIVING between its founding and its abandonment year, and
-//     only a RUIN once its ruin-event year has passed (NOT from founding on). A
-//     ruin whose event was sliced off the 14-event chronicle still crumbles, at
-//     the present year, rather than never.
-//  2. Play is EVENT-PROPORTIONAL (a deliberate override of the issue's "fixed
-//     linear sweep"): the sweep DWELLS at years that carry chronicle events, so a
-//     beat-year holds for a window of time while empty stretches are skimmed.
+// #54 (Chronicle year-scrubber): only the pure core; the DOM wiring lives in src/site/living-chart/chronicle.ts, covered by the Explorer e2e.
+// Load-bearing: a ruined place is LIVING between founding and abandonment and only a RUIN once its ruin year passes; a ruin event sliced off the 14-event chronicle still crumbles at the present year, rather than never.
 
 const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   idx: 0,
@@ -53,8 +42,6 @@ const ev = (over: Partial<HistoricalEvent> = {}): HistoricalEvent => ({
   ...over,
 });
 
-// --- the year range -------------------------------------------------------
-
 test("scrubRange spans the earliest founding to the present year", () => {
   const places = [
     mark({ idx: 0, kind: "capital", founded: 120 }),
@@ -63,8 +50,6 @@ test("scrubRange spans the earliest founding to the present year", () => {
   ];
   assert.deepEqual(scrubRange(places, 800), { min: 120, max: 800 });
 });
-
-// --- per-place state across the timeline ----------------------------------
 
 test("buildScrubMarks: one mark per place, ruin year resolved from its ruin event", () => {
   const places = [
@@ -85,9 +70,7 @@ test("buildScrubMarks: one mark per place, ruin year resolved from its ruin even
 });
 
 test("buildScrubMarks: a ruin whose event was sliced off still crumbles at the present year", () => {
-  // history.ts caps the chronicle at 14 events and pushes ruins LAST, so a ruined
-  // place can have NO ruin event in the manifest. It must still crumble (at
-  // presentYear), not stay a living town forever.
+  // history.ts caps the chronicle at 14 events and pushes ruins LAST, so a ruined place can have NO ruin event; it must still crumble at presentYear.
   const places = [mark({ idx: 0, kind: "village", founded: 400, ruined: true })];
   const events = [ev({ kind: "founding", settlement: 0, year: 400, text: "Founded only." })];
   const marks = buildScrubMarks(places, events, 900);
@@ -102,9 +85,7 @@ test("placeStateAt: a place is hidden before its founding, then living", () => {
 });
 
 test("placeStateAt: a ruin is LIVING between founding and abandonment, RUIN after", () => {
-  // The discriminator. A naive `ruined && year >= founded` rule (no ruin-year
-  // gate) would mark the town a ruin from its founding on, never showing the
-  // centuries it thrived.
+  // The discriminator: a naive ruined && year >= founded rule would mark the town a ruin from its founding on, never showing the centuries it thrived.
   const places = [mark({ idx: 0, kind: "village", founded: 400, ruined: true })];
   const events = [ev({ kind: "ruin", settlement: 0, year: 650, text: "Abandoned." })];
   const m = buildScrubMarks(places, events, 800)[0]!;
@@ -115,10 +96,7 @@ test("placeStateAt: a ruin is LIVING between founding and abandonment, RUIN afte
   assert.equal(placeStateAt(m, 800), "ruin");
 });
 
-// #93: glyphVisibleAt drives the real baked glyphs on/off by year (replacing the
-// #54 abstract dots). It differs from placeStateAt because the static chart bakes
-// each settlement in its PRESENT-DAY state only, so a glyph can only be shown in
-// the state it was drawn in ("state-begins").
+// #93: the static chart bakes each settlement in its PRESENT-DAY state only, so a glyph can only be shown in the state it was drawn in ("state-begins").
 test("glyphVisibleAt: a living town's glyph shows at and after founding, hidden before (#93)", () => {
   const mark = { idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null };
   assert.equal(glyphVisibleAt(mark, 299), false, "hidden before founding");
@@ -135,10 +113,7 @@ test("glyphVisibleAt: a ruined town follows state-begins - hidden through its li
   assert.equal(glyphVisibleAt(mark, 800), true, "and stays a ruin");
 });
 
-// #155: the ink-in. A glyph no longer pops into being: the frame that reveals it
-// plays a brief ceremony, so the scrubber needs to know WHICH marks crossed into
-// view between the last painted year and this one, and WHICH grade each plays.
-// Both are pure; the class/attribute plumbing and the CSS live in the Explorer.
+// #155 ink-in: the scrubber must know WHICH marks crossed into view between the last painted year and this one, and WHICH grade each plays; both pure, the plumbing lives in the Explorer.
 
 test("glyphRevealedBetween: true only on the frame that crosses a founding (#155)", () => {
   const m = { idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null };
@@ -149,31 +124,27 @@ test("glyphRevealedBetween: true only on the frame that crosses a founding (#155
 });
 
 test("glyphRevealedBetween: a park (fromYear === toYear) reveals nothing (#155)", () => {
-  // applyScrub and the #180 verso snap PARK the scrubber. A park must be silent:
-  // every glyph is already where it belongs, so nothing may re-stamp.
+  // applyScrub and the #180 verso snap PARK the scrubber; a park must be silent, or glyphs already in place re-stamp.
   const m = { idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null };
   assert.equal(glyphRevealedBetween(m, 900, 900), false, "parking at the present is not a reveal");
   assert.equal(glyphRevealedBetween(m, 300, 300), false, "nor is parking on the founding year itself");
 });
 
 test("glyphRevealedBetween: scrubbing BACKWARDS is not a reveal (#155)", () => {
-  // A backward drag hides glyphs. Hiding stays a hard cut: only the appearance
-  // carries a ceremony.
+  // Hiding stays a hard cut: only the appearance carries a ceremony.
   const m = { idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null };
   assert.equal(glyphRevealedBetween(m, 400, 299), false, "shown -> hidden is not a reveal");
 });
 
 test("glyphRevealedBetween: a ruin's beat is its FALL year, not its founding (#155)", () => {
-  // state-begins (#93): an eventually-ruined town has no living glyph baked, so it
-  // is hidden through its living centuries and its ruin glyph is what appears.
+  // state-begins (#93): an eventually-ruined town has no living glyph baked, so its ruin glyph is what appears.
   const m = { idx: 1, nx: 0.5, ny: 0.5, founded: 400, ruinYear: 650 };
   assert.equal(glyphRevealedBetween(m, 399, 400), false, "its founding draws nothing, so it is no beat");
   assert.equal(glyphRevealedBetween(m, 649, 650), true, "the fall year is where the ruin inks in");
 });
 
 test("inkGradeFor: a living town is stamped, a ruin dries in (#155)", () => {
-  // The two grades the CSS keys on: a founding presses a mark onto the sheet
-  // (inkStamp), a fall darkens into the record with no press (dryingInk).
+  // The two grades the CSS keys on: a founding presses a mark onto the sheet (inkStamp), a fall darkens into the record (dryingInk).
   assert.equal(inkGradeFor({ idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null }), "founding");
   assert.equal(inkGradeFor({ idx: 1, nx: 0.5, ny: 0.5, founded: 400, ruinYear: 650 }), "ruin");
 });
@@ -184,13 +155,7 @@ test("eventIsPast is inclusive of the current year", () => {
   assert.equal(eventIsPast(500, 501), true);
 });
 
-// --- the uniform Play sweep -------------------------------------------------
-
-// #54 shipped an event-proportional plan that dwelled on each beat-year (itself a
-// deliberate override of that issue's fixed linear sweep). Alex reversed it on
-// PR #311 (2026-07-28): the bar moves uniformly through the annals in every world,
-// so the sweep is linear in years over the fixed SWEEP_MS and events no longer
-// shape the pacing at all (the API takes no event years to consult).
+// #54 shipped an event-proportional sweep; Alex reversed it on PR #311 (2026-07-28): the bar moves uniformly in years over the fixed SWEEP_MS and events no longer shape the pacing (the API takes no event years to consult).
 
 test("sweepYearAt is linear: elapsed fractions map straight onto year fractions", () => {
   const range = { min: 0, max: 100 };
@@ -215,8 +180,7 @@ test("the sweep never goes backwards and covers the whole range", () => {
 });
 
 test("every interior year gets the same screen time: no beat-year plateaus", () => {
-  // The 1ms tally that once proved the dwells now proves their absence: with the
-  // uniform sweep no interior year's share may meaningfully exceed another's.
+  // The 1ms tally that once proved the dwells now proves their absence.
   const range = { min: 0, max: 100 };
   const tally = new Map<number, number>();
   for (let t = 0; t <= SWEEP_MS; t++) {
@@ -236,8 +200,6 @@ test("a degenerate one-year range (min===max) holds its one year throughout", ()
   assert.equal(sweepYearAt(flat, SWEEP_MS), 500);
 });
 
-// --- real-seed integration ------------------------------------------------
-
 test("integration: seed 42 marks, range, and sweep are internally consistent", () => {
   const world = generateWorld(defaultRecipe(42));
   const m = buildPlaceManifest(world, 1500);
@@ -247,14 +209,12 @@ test("integration: seed 42 marks, range, and sweep are internally consistent", (
   assert.equal(marks.length, m.places.length, "one mark per place");
   assert.equal(range.max, m.presentYear);
 
-  // every place is hidden before the range, present-or-ruined at the end
   for (const mk of marks) {
     assert.equal(placeStateAt(mk, range.min - 1), "hidden");
     const end = placeStateAt(mk, range.max);
     assert.ok(end === "living" || end === "ruin", "every place resolves by the present year");
   }
 
-  // seed 42 has a ruin: it must read living between founding and abandonment
   const ruin = marks.find((mk) => mk.ruinYear !== null);
   assert.ok(ruin, "seed 42 has a ruin with a resolvable abandonment year");
   assert.equal(placeStateAt(ruin!, ruin!.founded), "living");
@@ -265,9 +225,7 @@ test("integration: seed 42 marks, range, and sweep are internally consistent", (
 });
 
 test("integration: over seed 42's whole timeline every mark inks in exactly once (#155)", () => {
-  // Visibility is monotonic in year, so a year-by-year walk must find each mark's
-  // one crossing frame. A double count would mean a glyph re-stamping mid-sweep;
-  // a zero count would mean a place that never gets its beat.
+  // Visibility is monotonic in year, so a year walk finds each mark's one crossing frame; a double count means a glyph re-stamping mid-sweep, zero means a place that never gets its beat.
   const world = generateWorld(defaultRecipe(42));
   const m = buildPlaceManifest(world, 1500);
   const marks = buildScrubMarks(m.places, m.events, m.presentYear);
@@ -281,12 +239,11 @@ test("integration: over seed 42's whole timeline every mark inks in exactly once
     assert.equal(reveals, 1, `mark ${mk.idx} should ink in exactly once, saw ${reveals}`);
   }
 
-  // and both grades are exercised by this world: seed 42 has living towns and a ruin
   const grades = new Set(marks.map(inkGradeFor));
   assert.deepEqual([...grades].sort(), ["founding", "ruin"]);
 });
 
-// --- sweepElapsedAt: the inverse #220's fused Play resumes from ---------------
+// sweepElapsedAt is the inverse #220's fused Play resumes from.
 
 test("sweepElapsedAt round-trips every year through sweepYearAt exactly", () => {
   const range = { min: 300, max: 1100 };

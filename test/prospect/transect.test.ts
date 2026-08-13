@@ -67,12 +67,7 @@ test("flat ground falls back to the view from the south", () => {
 });
 
 test("harbor sites are viewed from the sea", () => {
-  // A single water column two cells west: inside the sea search radius but
-  // invisible to the gradient stencil (x +/- 3 lands on land either side),
-  // so this fixture discriminates the sea rule from the slope rule. The sea
-  // rule gives {dx: 1}; deleting it gives the {dx: 0, dy: -1} fallback; an
-  // un-negated sea direction gives {dx: -1}. A half-water world cannot tell
-  // those apart because uphill points away from the sea there anyway.
+  // A single water column two cells west: inside the sea search radius but invisible to the gradient stencil, so this discriminates the sea rule ({dx:1}) from the slope fallback ({dx:0,dy:-1}) and an un-negated sea direction ({dx:-1}); a half-water world cannot tell those apart.
   const f = createField(40, 40, (x) => (x === 18 ? 0 : 1));
   const v = viewDirection(f, 0.5, { x: 20, y: 20, harbor: true });
   assert.ok(v.dx > 0.9, `viewer at sea looks east, got dx=${v.dx}`);

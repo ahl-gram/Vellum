@@ -1,10 +1,3 @@
-/**
- * Harbor furniture ink (#240): the quay with its articulate face (#237 GO
- * condition 9: steps, arcade, bollards composed by Sub 2; the edge shadow
- * is THIS sub's ink), moored masts, the sea-decor ship, the mole with its
- * light, and the fisher shore (beached hulls, jetty, drying nets).
- */
-
 import { el, type SvgNode } from "../../render/svg.ts";
 import type { ForegroundElement, Pt } from "../geometry.ts";
 import { rippleDash } from "./glyphs.ts";
@@ -20,7 +13,6 @@ export function quayNodes(c: DressContext, q: Quay): SvgNode[] {
       fill: c.paper,
       ...stroke(c, 1.1),
     }),
-    // the edge shadow under the coping, the GO's missing articulation
     el("path", {
       d: `M${r1(x0 + 1.5)} ${r1(y - 2.4)}H${r1(x1 - 1.5)}`,
       fill: "none",
@@ -86,7 +78,6 @@ export function mastRowNodes(
   return out;
 }
 
-/** The sea-decor ship, quoted at local scale (the chart's open-water dress). */
 export function shipNodes(c: DressContext, x: number, y: number, s: number): SvgNode[] {
   const sk = stroke(c, 1.3);
   return [
@@ -109,9 +100,6 @@ export function shipNodes(c: DressContext, x: number, y: number, s: number): Svg
   ];
 }
 
-/** The mole curving out from the frame edge, a light at its head. The
- * shore sits 10 above headY, the composeSeaFront (src/prospect/
- * foreground.ts) anchor this quotes. */
 export function moleNodes(
   c: DressContext,
   m: { rootX: number; headX: number; headY: number },
@@ -164,7 +152,6 @@ export function jettyNodes(
   ];
 }
 
-/** Drying nets on their rack, the fisher village's mark. */
 export function netNodes(c: DressContext, x: number, y: number): SvgNode[] {
   return [
     el("path", {

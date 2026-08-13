@@ -1,25 +1,11 @@
-// The atelier's rasterizer (#135, epic #132 Sub 3). SVG string in, PNG Blob out, with
-// zero dependencies: a blob-URL Image, a canvas, and toBlob. It is deliberately the
-// site's first cross-page client library (src/site/lib/), page-agnostic and importing
-// nothing, so the Print Room's poster PNGs, the Surveyor's Dispatch (#123 v3), and any
-// future card compositor share one code path.
-//
-// PNGs are OUT of the determinism covenant: the CLI already never byte-compared rasters,
-// and a canvas PNG bakes the VIEWER's installed serif fonts, so two machines can differ
-// subtly. The SVG download stays the byte-faithful archival artifact; PNG is the
-// convenience copy. Never add a PDF/PNG byte check on the strength of this module.
-//
-// DOM discipline: every browser reference (Image, canvas, document, URL, Blob) lives
-// INSIDE rasterizeSvg's body, so the pure decision core below (readSvgSize,
-// fitScaleToBudget, rasterizeErrorMessage) imports cleanly into Node for unit testing.
+// The atelier's rasterizer (#135): SVG string in, PNG Blob out (a blob-URL Image, a
+// canvas, toBlob); the site's first cross-page client library, page-agnostic. PNGs are
+// OUT of the determinism covenant: a canvas PNG bakes the VIEWER's installed serif
+// fonts, so never add a PDF/PNG byte check on the strength of this module (the SVG stays
+// the byte-faithful archival artifact). Every browser reference lives INSIDE
+// rasterizeSvg's body, so the pure decision core imports cleanly into Node for testing.
 
-// The pixel budget a browser canvas imposes that the CLI's headless screenshot never
-// did. Over this ceiling toBlob can silently return a smaller image or null, so a
-// too-large request is fitted DOWN to the budget with a visible notice rather than
-// failing quietly. 24 megapixels clears every in-envelope poster at x1 (Grand 4200 is
-// ~13.2 Mpx) and forces the fallback exactly where it should: Grand and Wall at x2. Note
-// older iOS Safari caps its canvas well below this, which is why the failure paths below
-// surface a message instead of a silent null.
+// Over the budget toBlob can silently return a smaller image or null, so a too-large request is fitted DOWN with a visible notice; older iOS Safari caps well below this.
 export const MAX_PIXELS: number = 24_000_000;
 
 export interface SvgSize {
@@ -27,9 +13,7 @@ export interface SvgSize {
   height: number;
 }
 
-// Read the ROOT <svg>'s pixel width/height. Scoped to the opening tag and anchored on a
-// leading space (`\swidth=`), so the data-vellum-grid-w / grid-h attributes a naive
-// `width=` regex would grab (320x240) are never mistaken for the render size (4200x3150).
+// Scoped to the opening tag and anchored on a leading space (`\swidth=`), so the data-vellum-grid-w / grid-h attributes a naive `width=` regex would grab (320x240) are never mistaken for the render size (4200x3150).
 export function readSvgSize(svg: string): SvgSize {
   const root = /<svg\b[^>]*>/i.exec(String(svg));
   if (!root) throw new Error("no <svg> root found in the markup to rasterize");
@@ -47,11 +31,7 @@ export interface ScaleFit {
   clamped: boolean;
 }
 
-// Fit a requested scale under the pixel budget. Returns the requested scale untouched
-// when width*height*scale^2 fits; otherwise the largest scale that sits the render
-// EXACTLY on the budget (area * scale^2 == maxPixels), flagged clamped so the caller can
-// tell the visitor the resolution was reduced. Pure; the continuous fit maximizes
-// resolution within budget and generalizes past the x1/x2 poster presets for #123.
+// Pure: the requested scale untouched when width*height*scale^2 fits, else the largest scale sitting EXACTLY on the budget, flagged clamped so the caller can tell the visitor.
 export function fitScaleToBudget(
   width: number,
   height: number,
@@ -67,8 +47,7 @@ export function fitScaleToBudget(
   return { scale: maxScale, clamped: true };
 }
 
-// In-voice failure copy, one line per path, so a rasterize failure is a legible notice at
-// the counter, never a silent null. Survey-office register, em-dash-free (published copy).
+// In-voice failure copy, one line per path, so a rasterize failure is a legible notice, never a silent null. Survey-office register, em-dash-free (published copy).
 const RASTERIZE_MESSAGES: Record<string, string> = {
   decode: "The proof would not resolve into an image, so the plate could not be pulled as a PNG.",
   toBlob: "The press pulled a blank plate: the browser returned no image data.",
@@ -97,10 +76,7 @@ export interface RasterizeResult {
   clamped: boolean;
 }
 
-// Rasterize an SVG string to a PNG Blob. Returns the blob plus the actual output size and
-// the fitted scale (and whether it was clamped) so the caller can name the file and post
-// a resolution notice. Resolves the return object, not a bare Blob, precisely because the
-// clamp flag has to reach the UI. Every failure path rejects with an in-voice message.
+// Resolves the whole result object, not a bare Blob, precisely because the clamp flag has to reach the UI; every failure path rejects with an in-voice message.
 export async function rasterizeSvg(
   svgString: string,
   opts: RasterizeOptions = {},
@@ -127,9 +103,7 @@ export async function rasterizeSvg(
     if (!ctx) throw new Error(rasterizeErrorMessage("context"));
     ctx.drawImage(img, 0, 0, outW, outH);
     const blob = await new Promise<Blob>((resolve, reject) => {
-      // A tainted canvas (an SVG with external resources) makes toBlob throw a
-      // SecurityError synchronously; our charts are self-contained, but map it anyway so a
-      // future external-asset SVG surfaces a notice rather than an uncaught throw.
+      // A tainted canvas (an SVG with external resources) makes toBlob throw a SecurityError synchronously; our charts are self-contained, but map it anyway so a future external-asset SVG surfaces a notice rather than an uncaught throw.
       try {
         canvas.toBlob((b) => {
           if (b) resolve(b);

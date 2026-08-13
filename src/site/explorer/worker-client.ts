@@ -1,9 +1,8 @@
-// Render worker plumbing. The heavy world-gen + SVG render runs in ./worker.ts
-// off the main thread so the UI stays responsive. The worker is best-effort: if
-// it cannot be constructed (file://, strict CSP, an older browser) we fall back to
-// running the same engine inline on the main thread, so the page always works.
-// runInline mirrors src/site/explorer/worker.ts exactly (same engine calls, same serializableAtlas)
-// so the worker/inline byte-identity check (e2e A2/A3) stays a clean compare.
+// Render worker plumbing: the heavy world-gen + SVG render runs in ./worker.ts off the
+// main thread. Best-effort: if the worker cannot be constructed we fall back to the same
+// engine inline on the main thread, and runInline mirrors ./worker.ts exactly (same
+// engine calls, same serializableAtlas) so the worker/inline byte-identity check
+// (e2e A2/A3) stays a clean compare.
 import { renderMap, type RenderOptions } from "../../render/map-renderer.ts";
 import { buildPlaceManifest, type PlaceManifest } from "../../render/place-manifest.ts";
 import { buildSurvey, type Survey } from "../../render/survey.ts";
@@ -17,10 +16,7 @@ import type { StyleName } from "../../render/style.ts";
 import type { MapType, UvWindow } from "../../terrain/heightfield.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 
-// The message contract between this client and ./worker.ts, shared so the two
-// sides cannot drift: src/site/explorer/worker.ts imports these shapes with "import type" (type
-// only, so no runtime cycle). The same job/result shapes serve the inline
-// fallback, which is what keeps the worker/inline mirror honest at the type level.
+// The message contract, shared so the two sides cannot drift (./worker.ts imports these shapes with "import type"); the same job/result shapes serve the inline fallback.
 export interface DrawJob {
   readonly kind: "draw";
   readonly seed: number;
@@ -87,9 +83,7 @@ export type WorkerRequest =
   | (RegionJob & { readonly id: number })
   | (AtlasJob & { readonly id: number });
 
-// What the worker posts back: a result or failure tagged with its job id, or the
-// one id-less ready handshake. The optional never-set fields keep the plain
-// `d.id == null` and `e.data.ready` guards below narrowing under strict TS.
+// The optional never-set fields keep the plain `d.id == null` and `e.data.ready` guards below narrowing under strict TS.
 export type WorkerResponse =
   | (JobResult & { readonly id: number; readonly ready?: undefined })
   | { readonly id: number; readonly ok: false; readonly error: string; readonly ready?: undefined }
@@ -124,7 +118,7 @@ export function runInline(msg: RenderJob): JobResult {
       ok: true,
       svg: renderMap(world, msg.render),
       manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
-      survey: buildSurvey(world.elev, world.seaLevel, world.roads), // #120, mirrors worker.js
+      survey: buildSurvey(world.elev, world.seaLevel, world.roads), // #120, mirrors ./worker.ts
       title: world.title.title,
       subtitle: world.title.subtitle,
       mapType: world.recipe.mapType,
@@ -132,12 +126,9 @@ export function runInline(msg: RenderJob): JobResult {
     };
   }
   if (msg.kind === "region") {
-    // #168: an EXPLICIT region branch. Without it a region job would fall through to
-    // the atlas path below and silently run the wrong engine in the inline fallback.
+    // #168: an EXPLICIT region branch; without it a region job would fall through to the atlas path and silently run the wrong engine in the inline fallback.
     const { world, cached } = worldFor(msg.seed, msg.overrides);
-    // #169: derive the title from (world, window), mirroring src/site/explorer/worker.ts
-    // exactly so the inline fallback stays byte-identical; msg.title (if given) is honored
-    // for back-compat.
+    // #169: the title derives from (world, window), mirroring ./worker.ts exactly so the inline fallback stays byte-identical; msg.title (if given) is honored for back-compat.
     const title = msg.title ?? regionTitle(world, msg.window);
     const region = generateRegionWorld(world, {
       window: msg.window,
@@ -151,7 +142,7 @@ export function runInline(msg: RenderJob): JobResult {
       svg: renderMap(region, { ...msg.render, regionRecipe }),
       manifest: buildPlaceManifest(region, msg.render.widthPx ?? 1500),
       window: msg.window,
-      band: msg.band, // the LOD band index, mirrors worker.js
+      band: msg.band, // the LOD band index, echoed back
       title,
       cached,
     };
@@ -169,13 +160,11 @@ export function runJob(msg: RenderJob): Promise<JobResult> {
     const id = ++reqId;
     return new Promise((resolve, reject) => {
       pending.set(id, { resolve, reject });
-      // Non-null assertion: the truthy check above cannot narrow `worker` inside
-      // the closure (the executor runs synchronously, so it still holds).
+      // Non-null assertion: the truthy check cannot narrow `worker` inside the closure (the executor runs synchronously, so it still holds).
       worker!.postMessage({ ...msg, id });
     });
   }
-  // No worker: defer with a macrotask so the status line paints before the main
-  // thread blocks on the inline render.
+  // No worker: defer a macrotask so the status line paints before the main thread blocks on the inline render.
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       try { resolve(runInline(msg)); }
@@ -189,18 +178,7 @@ export function usesWorker(): boolean {
   return worker !== null;
 }
 
-// Construct the worker and wait for its ready handshake; resolves null (and falls
-// back to inline) on any failure. A crash after handshake nulls `worker` so later
-// jobs degrade to inline too.
-//
-// The spawn is the STATIC import-URL form, verbatim (#208): Vite only detects a
-// literal `new Worker(new URL("./worker.ts", import.meta.url), ...)` at build
-// time, bundles ./worker.ts (engine imports inlined) into the ONE emitted worker
-// chunk (explorer/worker.bundle.js), and rewrites the URL to it. Hoisting the expression into a
-// variable or parameter breaks the static analysis: no worker chunk is emitted,
-// the URL survives unrewritten, and every page 404s into a silent inline
-// fallback. Every spawning page (Explorer, Print Room, Reading Room, whose bundles
-// each inline this module) resolve to the SAME emitted worker.
+// Resolves null on any failure (inline fallback); a crash after handshake nulls the worker so later jobs degrade too.
 function connect(): Promise<Worker | null> {
   return new Promise((resolve) => {
     let w: Worker;
@@ -235,10 +213,7 @@ function connect(): Promise<Worker | null> {
   });
 }
 
-/**
- * Connect the worker (best-effort) and record it as the active transport. The
- * spawn target is Vite's: every caller gets the one emitted worker chunk (#208).
- */
+/** Connect the worker (best-effort) and record it as the active transport. */
 export async function initWorker(): Promise<void> {
   worker = await connect();
 }

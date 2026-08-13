@@ -1,15 +1,11 @@
-// Independent ground-truth geometry for the daily-hunt suite: never calls the
-// module internals under test, so clues re-verify against a second source. Lives
-// outside test/ so `node --test` does not collect it as a (0-test) test file.
+// Independent ground-truth mirrors for the daily-hunt suite; lives outside test/ so node --test does not collect it as a test file.
 
 import assert from "node:assert/strict";
 import { BIOMES } from "../src/climate/biomes.ts";
 import { chooseQuarry, type Clue, type Quarry } from "../src/world/daily-hunt.ts";
 import type { World } from "../src/world/types.ts";
 
-// Grid threshold (cells) within which buildClues will cite a named feature;
-// mirrored here so the test can bound an emitted feature clue's distance. The
-// test computes nearest features from raw geometry, independent of the module.
+// Mirrors buildClues' named-feature distance threshold (cells).
 export const NEAR = 4;
 
 export const ALLOWED_KINDS = new Set<Clue["kind"]>([
@@ -65,9 +61,7 @@ export function realmNameAt(world: World, x: number, y: number): string | null {
   return id >= 0 ? (world.names.realms[id] ?? null) : null;
 }
 
-// Central-band fraction (1/8 of the dimension either side of the midpoint,
-// i.e. the middle quarter of the chart); mirrored from buildClues so the
-// sweep re-derives the band from raw geometry.
+// Mirrored from buildClues: the central band is the middle quarter (1/8 either side of the midpoint).
 const CENTRAL_BAND = 1 / 8;
 
 export function expectedEW(world: World, x: number): "east" | "west" | "central" {
@@ -88,17 +82,12 @@ export function mustQuarry(world: World): Quarry {
   return q;
 }
 
-/** Count of the broad non-seat village pool chooseQuarry normally draws from. */
 export function villagePoolSize(world: World): number {
   const seats = new Set(world.realms.seats);
   return world.settlements.filter((s, i) => s.kind === "village" && !seats.has(i)).length;
 }
 
-// --- #335 mirrors: terrain glyphs, road reach, the near anchor ---------------
-// Numeric thresholds are MIRRORED from the render/engine constants, not
-// imported, so the sweep re-derives every claim from raw geometry. If a
-// mirrored value drifts from its source the sweep goes red, which is the alarm
-// working as intended.
+// #335 mirrors: thresholds below are MIRRORED from engine/render constants, not imported; drift turns the sweep red by design.
 
 /** Mirrors GLYPH_MTN_REL in src/render/layers/glyphs.ts. */
 export const MIRROR_MTN_REL = 0.5;
@@ -106,8 +95,7 @@ export const MIRROR_MTN_REL = 0.5;
 export const MIRROR_HILL_REL = 0.34;
 /** Mirrors CELLS_PER_LEAGUE in src/render/layers/scalebar.ts. */
 export const MIRROR_CELLS_PER_LEAGUE = 2.2;
-/** Mirrors TERRAIN_RADIUS / TERRAIN_MIN / ROAD_NEAR / LEAGUE_LADDER in
- *  src/world/daily-hunt-clue-facts.ts. */
+/** Mirrors TERRAIN_RADIUS / TERRAIN_MIN / ROAD_NEAR / LEAGUE_LADDER in src/world/daily-hunt-clue-facts.ts. */
 export const TERRAIN_RADIUS = 4;
 export const TERRAIN_MIN = 6;
 export const ROAD_NEAR = 1.5;
@@ -137,12 +125,7 @@ function elevSpan(world: World): number {
 
 export type TerrainBand = "mountains" | "hills" | "forest" | "marsh" | "dunes";
 
-/**
- * Counts of glyph-eligible cells of each band within TERRAIN_RADIUS of (x, y),
- * mirroring the classification chain in glyphsLayer (glyphs.ts): mountains on
- * high ground, hills below, marsh/dune tufts on the low chain, trees over the
- * forest biomes anywhere at or below mountain height.
- */
+/** Glyph-eligible cells per band within TERRAIN_RADIUS of (x, y), mirroring glyphsLayer's classification chain in glyphs.ts. */
 export function terrainCounts(world: World, x: number, y: number): Record<TerrainBand, number> {
   const { w, h, data } = world.elev;
   const sea = world.seaLevel;
@@ -171,7 +154,6 @@ export function terrainCounts(world: World, x: number, y: number): Record<Terrai
 
 export type RoadState = "road" | "track" | "pathless";
 
-/** The road network's state at (x, y): a trunk within reach, else a lane, else nothing. */
 export function roadState(world: World, x: number, y: number): RoadState {
   let trunk = Infinity;
   let lane = Infinity;
@@ -187,11 +169,7 @@ export function roadState(world: World, x: number, y: number): RoadState {
   return "pathless";
 }
 
-/**
- * The nearest anchor settlement (capital, realm seat, or town: the tiers whose
- * labels sort first in placement and essentially always win space), excluding
- * the quarry itself.
- */
+/** Nearest capital / realm seat / town: the tiers whose labels essentially always win placement space. */
 export function nearestAnchor(
   world: World,
   exceptIdx: number,
@@ -220,11 +198,7 @@ export function quarryPoolMirror(
   return villages.length > 0 ? villages : nonCapital.length > 0 ? nonCapital : indexed;
 }
 
-/**
- * Whether `clue`'s assertion holds at settlement (s, idx), from mirrors only.
- * This is the narrowing test's ground truth: the villages consistent with a
- * day's clue list are exactly those where every emitted clue holds.
- */
+/** Whether clue holds at (s, idx), from mirrors only: the narrowing test's ground truth. */
 export function clueHoldsAt(
   world: World,
   clue: Clue,
@@ -263,7 +237,6 @@ export function clueHoldsAt(
   }
 }
 
-/** Distance from (x, y) to the SPECIFIC named river/lake, <= NEAR. */
 function namedFeatureWithin(
   world: World,
   kind: "river" | "lake",
@@ -286,13 +259,9 @@ function namedFeatureWithin(
   return d <= NEAR + 1e-9;
 }
 
-// --- page-equivalent findability gates (mirror setupHunt in
-// src/site/seed-of-the-day/app.ts), built from the rendered SVG STRING so the
-// tests exercise the delivered list without a DOM. -----------------------------
+// Page-equivalent findability gates: mirror setupHunt in src/site/seed-of-the-day/app.ts, built from the rendered SVG string.
 
-/** A label emits as ">Name<"; capital and seat labels render .toUpperCase()
- *  (settlementsLayer in src/render/layers/settlements.ts), so both spellings
- *  count as printed. */
+/** A label emits as ">Name<"; capital and seat labels render .toUpperCase(), so both spellings count as printed. */
 export function labelGate(markup: string): (name: string) => boolean {
   return (name) => markup.includes(`>${name}<`) || markup.includes(`>${name.toUpperCase()}<`);
 }
@@ -306,7 +275,6 @@ export const GLYPH_PREFIX: Record<TerrainBand, string> = {
   dunes: "gl-dune",
 };
 
-/** Parse the drawn glyphs' symbol + render-pixel position out of the markup. */
 export function drawnGlyphs(
   markup: string,
 ): Array<{ symbol: string; x: number; y: number }> {
@@ -319,7 +287,6 @@ export function drawnGlyphs(
   return out;
 }
 
-/** True when a drawn glyph of `band` sits within `radiusPx` of (qpx, qpy). */
 export function glyphGate(
   markup: string,
   qpx: number,
@@ -333,10 +300,7 @@ export function glyphGate(
     );
 }
 
-/**
- * The exact prose each (kind, subject) pair must carry, so a swapped text-table
- * entry cannot ship a false line while the suite stays green.
- */
+/** The exact prose per (kind, subject), so a swapped text-table entry cannot ship a false line. */
 export function expectedClueText(clue: Clue): string {
   const s = clue.subject ?? "";
   switch (clue.kind) {
@@ -386,11 +350,7 @@ export function expectedClueText(clue: Clue): string {
   }
 }
 
-/**
- * Every truthful candidate clue the quarry could have drawn, as (kind, subject)
- * pairs, re-derived from mirrors. The exhaustion half of the narrowing
- * contract checks unemitted members of this set against the remaining field.
- */
+/** Every truthful candidate clue the quarry could have drawn, re-derived from mirrors; feeds the exhaustion check. */
 export function truthfulCandidates(
   world: World,
   q: Quarry,

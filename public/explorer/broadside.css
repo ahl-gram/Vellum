@@ -1,14 +1,6 @@
-/* #270 The Broadside: the Explorer's control sheet, grouped by what each control
-   does to the world (The Land reshapes it, The Hand dresses it, The Press acts on
-   the sheet). Linked by the page's extraCss ahead of its own index.css; the voice
-   (archivist heads, the control idiom) is /house.css's, so only the sheet's
-   geometry and its own dressings live here. Rulings 2026-08-11 on #270: the ledger
-   alignment, the countersigned seals, the marginalia notes, the gold links' row. */
+/* #270 The Broadside: the Explorer's control sheet (The Land / The Hand / The Press); the voice is /house.css's, only the sheet's geometry and its own dressings live here. */
 
-/* Vertical spacing runs tight throughout (the plate-reader measured the ledger
-   form ~190px taller than the old three-band strip at 1280; the form is the
-   ratified trade, but the chart still fights the controls for the viewport, so
-   no rem here is spent idly). */
+/* Spacing runs tight throughout: the plate-reader measured the ledger form ~190px taller than the old strip at 1280, and the chart still fights the controls for the viewport. */
 .controls.broadside { display: grid; grid-template-columns: 1.12fr 1fr; gap: 0 2rem;
   margin: 0.9rem auto; max-width: 960px; }
 .broadside .panel { padding: 0.15rem 0 0.55rem; min-width: 0; }
@@ -20,13 +12,7 @@
   margin: 0.1rem 0 0.55rem;
 }
 
-/* The ledger (ruling 3): one right-aligned label column per panel, and a control
-   column whose members share the same left and right edges. Misaligned controls
-   are an antipattern (Alex's directive on the round-1 mockup). Five columns:
-   label | endpoint word | track | endpoint word | readout. Ordinary controls
-   span the last four as one cell (.l-ctl); the slider rows sit directly on the
-   grid so BOTH tracks share the one track column and land twin-length whatever
-   their endpoint words weigh (the round-3 directive, pinned by e2e BR1b). */
+/* Five columns: label | endpoint word | track | endpoint word | readout. Ordinary controls span the last four (.l-ctl); slider rows sit directly on the grid so BOTH tracks share the one track column and land twin-length (pinned by e2e BR1b). */
 .broadside .ledger { display: grid; grid-template-columns: auto auto 1fr auto auto;
   gap: 0.5rem 0.6rem; align-items: center; }
 .broadside .l-label { grid-column: 1; text-align: right; white-space: nowrap; }
@@ -34,24 +20,18 @@
 .broadside .l-ctl { grid-column: 2 / -1; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
 .broadside .l-ctl > select,
 .broadside .l-ctl > input[type="number"] { flex: 1; min-width: 0; }
-/* The slider rows' own cells, columns pinned explicitly: auto-placement would
-   re-deal the row when the words drop out at the 560px tier below. */
+/* Columns pinned explicitly: auto-placement would re-deal the row when the endpoint words drop out at the 560px tier. */
 .broadside .ledger > .land-end-min { grid-column: 2; justify-self: end; }
 .broadside .ledger > input[type="range"] { grid-column: 3; width: 100%; min-width: 4rem;
   accent-color: var(--ink-dark); margin: 0; }
 .broadside .ledger > .land-end-max { grid-column: 4; }
 .broadside .ledger > .land-readout { grid-column: 5; }
 .land-end { font-size: 0.72rem; font-style: italic; color: var(--ink-faded); white-space: nowrap; }
-/* The reserved readout slot (acceptance: "34% land" / "warp 0.55" never push their
-   neighbors as values change length). */
+/* Reserved readout slot: "34% land" / "warp 0.55" must never push their neighbors as values change length. */
 .land-readout { font-style: italic; color: var(--ink-brown); font-size: 0.85rem;
   font-variant-numeric: tabular-nums; min-width: 4.6rem; text-align: right; }
 
-/* The seals (ruling 4, the countersigned variant): real checkboxes dressed as
-   chips. Pressing fills ink-dark AND writes a check mark into the reserved slot,
-   so state reads by shape as well as fill (print, forced colors, low vision).
-   The box itself hides (opacity, not display: assistive tech still reaches it);
-   its focus ring re-lands on the chip. */
+/* Seals: the checkbox hides by opacity, not display, so assistive tech still reaches it; the check mark fills a reserved ::before slot so state reads by shape as well as fill. */
 .broadside .seals { flex-wrap: wrap; }
 .broadside label.check.seal { display: inline-flex; align-items: center; gap: 0.35rem;
   cursor: pointer; user-select: none;
@@ -63,17 +43,12 @@
 .broadside .seal::before { content: ""; width: 0.72em; display: inline-block; }
 .broadside .seal:has(input:checked) { background: var(--ink-dark);
   border-color: var(--ink-dark); color: var(--chart-paper); }
-/* A pressed seal under the cursor stays pressed: without this, the unchecked
-   hover's bright cream would beat the dark fill (specificity) and wash the
-   chart-paper label out light-on-light, exactly in the state right after the
-   click. The primary button's hover idiom (lit dark) instead. */
+/* Without this the unchecked hover's bright cream would beat the dark fill (specificity) and wash the label out light-on-light, exactly in the state right after the click. */
 .broadside label.check.seal:has(input:checked):hover { background: var(--ink-press);
   border-color: var(--ink-press); }
 .broadside .seal:has(input:checked)::before { content: "\2713"; }
 .broadside .seal:has(input:focus-visible) { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
 
-/* The Press: a full-width bar beneath a horizontal rule, its head presiding over
-   two lines that share a left edge: the sheet actions, then the two gold links. */
 .broadside .press { grid-column: 1 / -1; border-top: 1px solid var(--line-tan);
   margin-top: 0.25rem; padding-top: 0.65rem;
   display: grid; grid-template-columns: auto 1fr; gap: 0.55rem 0.85rem; align-items: center; }
@@ -81,42 +56,23 @@
 .broadside .press-line { grid-column: 2; display: flex; align-items: center;
   gap: 0.85rem; flex-wrap: wrap; }
 
-/* #133 / #199: "Take to the Print Room" is the featured "take your world home"
-   step: button-shaped but warmer (parchment gold) than the cream outline peers,
-   never a second dark primary (Draw stays the sole primary). Still an <a>
-   (navigation, not a press). #270 ruling 2 gives it a gold peer, the journal
-   button, so the pair form the Press's second line. */
-/* CAUTION: this display declaration also makes the `hidden` ATTRIBUTE inert on
-   these links (an author display beats the UA's [hidden] { display: none }), so
-   el.hidden = true silently does nothing here. Hide via style.display if ever
-   needed. Found by the #270 guard-prover: a hidden-gate regression written that
-   way would no-op invisibly. */
+/* CAUTION: this display declaration makes the hidden ATTRIBUTE inert on these links (an author display beats the UA [hidden] rule), so el.hidden=true silently no-ops; hide via style.display (found by the #270 guard-prover). */
 .action-link { display: inline-flex; align-items: center; gap: 0.45rem;
   font-family: inherit; font-size: 0.95rem; letter-spacing: 0.04em; color: var(--ink-dark);
   background: var(--control-gold); border: 1.5px solid var(--ink-dark); border-radius: 4px;
   padding: 0.4rem 0.75rem; text-decoration: none; }
 .action-link:hover { background: var(--control-gold-lit); color: var(--ink-dark); }
-/* The glyphs are stroked in the link's own ink (currentColor), so they track the
-   text on hover and read as drawn, not printed. */
 .order-glyph { width: 1.2em; height: 1.2em; flex: none; fill: none; stroke: currentColor;
   stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .order-glyph circle { fill: currentColor; stroke: none; } /* the handle knob */
 
-/* The footnote apparatus (ruling 5): period marks in the flourish hand, superior
-   beside their labels; each opens a marginalia note and follows to /glossary/. */
 a.fn { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
   text-decoration: none; color: var(--ink-brown);
   font-size: 0.95em; vertical-align: super; line-height: 0; padding: 0 0.15em;
   display: inline-block; } /* a transformable box, for the tip below */
 a.fn:hover, a.fn:focus-visible { color: var(--ink-dark); }
-/* #270 ruling 7: the marks follow through to /glossary/, and in Vellum what goes
-   somewhere tips (#289). The wordmark's numbers, the TOC-slip precedent; the
-   allowlist entry in test/site/tip-affordance.test.ts is the conscious record. */
 a.fn:hover { transform: translateY(-2px) rotate(-0.6deg); }
-/* The note: a marginalia scrap in the top layer (native popover; the [popover]
-   UA rule keeps it display:none until shown, so no [hidden] juggling). It is a
-   fixed-position box footnotes.ts anchors under its mark at show time, because
-   static CSS cannot place a top-layer box relative to an anchor. */
+/* Native popover (the UA [popover] rule keeps it display:none until shown); fixed-position because static CSS cannot place a top-layer box relative to an anchor, so footnotes.ts anchors it at show time. */
 .fn-note { position: fixed; margin: 0; inset: auto; width: 15.5rem;
   transform: rotate(-0.4deg);
   background: var(--parchment-panel); border: 1px solid var(--line-tan);
@@ -128,18 +84,13 @@ a.fn:hover { transform: translateY(-2px) rotate(-0.6deg); }
 .fn-note > a { display: block; margin-top: 0.3rem; font-style: italic;
   font-size: 0.78rem; color: var(--ink-brown); } /* >= 12px rendered: the back-matter link must stay legible */
 
-/* Below ~700px the two panels stack (Land, Hand, Press): the ruled-ledger form is
-   the broadside's narrow layout, from the same grid. The existing 560px tier keeps
-   its own small-screen tweaks below. */
 @media (max-width: 700px) {
   .controls.broadside { grid-template-columns: 1fr; gap: 0; }
   .broadside .panel + .panel { border-left: 0; border-top: 1px solid var(--line-tan);
     padding-left: 0; padding-top: 0.9rem; margin-top: 0.5rem; }
 }
 @media (max-width: 560px) {
-  /* The tracks stay long; the readout carries the value. The ledger re-deals to
-     three columns so the track's left edge stays flush with the selects' (empty
-     word columns would each still cost a grid gap). */
+  /* Re-deals to three columns: empty word columns would each still cost a grid gap and unflush the track's left edge. */
   .broadside .ledger .land-end { display: none; }
   .broadside .ledger { grid-template-columns: auto 1fr auto; }
   .broadside .ledger > input[type="range"] { grid-column: 2; }

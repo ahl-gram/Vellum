@@ -2,8 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { labelComponents } from "../../src/core/mask-components.ts";
 
-// #120: the client's landmass labeller over the shipped land mask. A voyage leg
-// whose two ports sit in different components is a genuine sea crossing.
+// #120: the client's landmass labeller over the shipped land mask; a voyage leg whose two ports sit in different components is a genuine sea crossing.
 
 /** '#' set, '.' clear. */
 function mask(rows: string[]) {
@@ -39,8 +38,7 @@ test("two separated blobs get distinct ids, numbered in row-major first-seen ord
 });
 
 test("connectivity is 4-connected: corner-touching blobs are SEPARATE", () => {
-  // This is the load-bearing choice. It matches world/landmass.ts and the drawn
-  // coastline, and it is why a diagonal pinch counts as a sea crossing.
+  // The load-bearing choice: matches world/landmass.ts and the drawn coastline, and is why a diagonal pinch counts as a sea crossing.
   const { m, w, h } = mask(["#.", ".#"]);
   const ids = labelComponents(m, w, h);
   assert.notEqual(ids[0 + 0 * w], ids[1 + 1 * w]);
@@ -76,8 +74,7 @@ test("an all-set mask is a single component", () => {
 });
 
 test("connectivity 8 joins corner-touching blobs into ONE component", () => {
-  // Water is labelled this way, because the voyage's sea walk is 8-connected: a
-  // diagonally-joined strait is one sea, not two.
+  // Water is labelled 8-connected because the voyage's sea walk is: a diagonally-joined strait is one sea, not two.
   const { m, w, h } = mask(["#.", ".#"]);
   const ids = labelComponents(m, w, h, 8);
   assert.equal(ids[0 + 0 * w], ids[1 + 1 * w]);

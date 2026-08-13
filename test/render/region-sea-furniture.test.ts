@@ -18,13 +18,8 @@ import { windsLayer } from "../../src/render/layers/winds.ts";
 import type { SvgNode } from "../../src/render/svg.ts";
 import type { World } from "../../src/world/types.ts";
 
-// #251: sea furniture (compass rose, sea-decor, currents, winds, soundings) placed
-// on water via oceanDist / region-local seaMask, neither of which can tell an inland
-// lake from the open sea on a region (the crop reconnects the lake to the window
-// edge). So on a regional survey the furniture could sit in a lake. The parent's
-// authoritative partition, region.seaGate (from #234), gates them to genuine sea.
-// The compass, ratified with Alex, additionally falls back to a shrunk rose on open
-// LAND when a window has no qualifying sea, rather than vanishing.
+// #251: sea furniture placed via oceanDist / region-local seaMask could sit in an inland lake on a regional survey (the crop reconnects the lake to the window edge); region.seaGate (#234's parent partition) gates it to genuine sea.
+// The compass, ratified with Alex, additionally falls back to a shrunk rose on open LAND when a window has no qualifying sea, rather than vanishing.
 
 const WIDTH = 1500;
 const FULL_R = 47 * (WIDTH / 1500); // the compass radius at chart width
@@ -72,7 +67,6 @@ function planFurniture(ctx: RenderCtx): { compass: CompassPlan | null; cart: Ret
   return { compass, cart };
 }
 
-/** Grid cell under a pixel point, for the WIDTH projection of a 320x240 region. */
 function cellAt(w: World, px: number, py: number): { gx: number; gy: number; i: number } {
   const proj = createProjection(w.elev.w, w.elev.h, WIDTH, marginFor(WIDTH));
   const gx = Math.max(0, Math.min(w.elev.w - 1, Math.round((px - proj.margin) / proj.scale)));
@@ -87,8 +81,7 @@ function isGenuineSea(w: World, i: number): boolean {
   return (w.elev.data[i] as number) <= w.seaLevel && w.region!.seaGate![i] === 1;
 }
 
-/** A point unambiguously deep inside a lake: it and all 8 neighbours are lake water
- *  (below sea level but not genuine sea). Immune to the coarse seaGate boundary. */
+/** A point unambiguously deep inside a lake: it and all 8 neighbours are lake water, immune to the coarse seaGate boundary. */
 function deepInLake(w: World, gx: number, gy: number): boolean {
   const { w: W, h: H } = w.elev;
   for (let dy = -1; dy <= 1; dy++) {
@@ -103,8 +96,7 @@ function deepInLake(w: World, gx: number, gy: number): boolean {
   return true;
 }
 
-/** Every placement coordinate in a layer tree: circle centres, text anchors, and
- *  the first move-to of every path. */
+/** Every placement coordinate in a layer tree: circle centres, text anchors, and the first move-to of every path. */
 function collectPoints(node: SvgNode | null): Array<{ px: number; py: number }> {
   const out: Array<{ px: number; py: number }> = [];
   if (!node) return out;

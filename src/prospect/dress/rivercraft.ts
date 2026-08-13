@@ -1,11 +1,3 @@
-/**
- * River masonry ink (#240): the anchored bridge (#237 GO condition 4:
- * side-on arcade, visible abutments, the bridge-gate tower at the town
- * bank) and the village weir with its mill (GO condition 6). The wheel's
- * spokes use literal cos/sin(45deg) constants: no libm may run in the
- * dress (test/prospect/dress.test.ts guards the layer).
- */
-
 import { el, type SvgNode } from "../../render/svg.ts";
 import type { ForegroundElement } from "../geometry.ts";
 import { massNodes } from "./buildings.ts";
@@ -18,7 +10,6 @@ type Mill = Extract<ForegroundElement, { kind: "mill" }>;
 export function bridgeNodes(c: DressContext, b: Bridge): SvgNode[] {
   const { x0, x1, deckY, waterY } = b;
   const out: SvgNode[] = [];
-  // abutments: the bridge must visibly land on both banks (the GO's anchor)
   for (const ax of [x0, x1]) {
     out.push(
       el("path", {
@@ -48,7 +39,6 @@ export function bridgeNodes(c: DressContext, b: Bridge): SvgNode[] {
   return out;
 }
 
-/** The piers, arch rings, and the water stirring under each span. */
 function archSpanNodes(c: DressContext, b: Bridge): SvgNode[] {
   const { x0, deckY, waterY, arches } = b;
   const span = (b.x1 - x0) / arches;
@@ -99,8 +89,7 @@ export function weirNodes(c: DressContext, w: { x0: number; x1: number; y: numbe
   ];
 }
 
-/** cos/sin of 45deg as a literal: IEEE multiplication by a constant is
- * exactly rounded, so the spokes stay platform-identical. */
+/** cos/sin of 45deg as literals: multiplication by a constant is exactly rounded, so the spokes stay platform-identical. */
 const DIAG = 0.7071;
 const SPOKES: ReadonlyArray<readonly [number, number]> = [
   [1, 0],

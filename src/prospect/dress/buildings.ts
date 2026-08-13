@@ -1,11 +1,3 @@
-/**
- * Building ink (#240): one mass -> engraved SVG, the roof or spire drawn
- * from form + dimensions exactly as geometry.ts assigns ("the form's roof
- * or spire rides on top and is Sub 3's to draw"). Shapes quote the spike's
- * second state (PR #342): paper-filled ink outlines, separate thin shading
- * strokes, solid-ink doors and windows quoting the chart's castle glyph.
- */
-
 import { el, type SvgNode } from "../../render/svg.ts";
 import { groundAt, type Ground, type Mass, type WallSegment } from "../geometry.ts";
 import { r1, stroke, type DressContext } from "./context.ts";
@@ -23,8 +15,6 @@ function windowDashes(c: DressContext, m: Mass): SvgNode[] {
   return out;
 }
 
-/** Roof-shade flicks: the chart's freehand hatch idiom turned to a roof
- * pitch. Geometry-derived, never random per render (#240). */
 function roofHatch(
   parts: string[],
   x0: number,
@@ -77,7 +67,6 @@ function gableNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
   return out;
 }
 
-/** The broken tower or spire: the jagged shell, no merlons, no finial. */
 function brokenVerticalNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
   const { x, w, h, base } = m;
   const top = base - h;
@@ -106,7 +95,6 @@ function verticalNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
     }),
   );
   if (m.form === "tower") {
-    // merlons, quoting the chart's castle glyph
     const t = w / 5;
     const d = `M${r1(x - 0.5)} ${r1(top)}L${r1(x - 0.5)} ${r1(top - 2.6)}L${r1(x + t)} ${r1(top - 2.6)}L${r1(x + t)} ${r1(top)}M${r1(x + 2 * t)} ${r1(top)}L${r1(x + 2 * t)} ${r1(top - 2.6)}L${r1(x + 3 * t)} ${r1(top - 2.6)}L${r1(x + 3 * t)} ${r1(top)}M${r1(x + 4 * t)} ${r1(top)}L${r1(x + 4 * t)} ${r1(top - 2.6)}L${r1(x + w + 0.5)} ${r1(top - 2.6)}L${r1(x + w + 0.5)} ${r1(top)}`;
     out.push(el("path", { d, fill: "none", ...stroke(c, weight * 0.85) }));
@@ -138,9 +126,6 @@ function verticalNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
   return out;
 }
 
-/** A thrown-down keep: the jagged shell, no crenellation, no turrets, and
- * above all no pennant (GO condition 3: a ruin must read ruinous; the
- * intact crown on a fallen hold was the hole vellum-guard-prover found). */
 function brokenKeepNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
   const { x, w, h, base } = m;
   const top = base - h;
@@ -203,8 +188,6 @@ function keepNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
   return out;
 }
 
-/** Rubble at a broken mass's foot (the ruin bar: collapse, not just a
- * jagged roofline; the strewn field itself is a foreground element). */
 function footRubble(c: DressContext, m: Mass): SvgNode {
   const parts: string[] = [];
   for (let i = 0; i < 3; i++) {
@@ -214,8 +197,6 @@ function footRubble(c: DressContext, m: Mass): SvgNode {
   return el("path", { d: parts.join(""), fill: c.paper, ...stroke(c, 0.7) });
 }
 
-/** One building mass in the dress. Weight is the outline stroke width; the
- * plate assigns 0.9 to the raised back row, 1.3 to the keep, 1.2 forward. */
 export function massNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
   const body =
     m.form === "gable" || m.form === "ridge"
@@ -226,8 +207,6 @@ export function massNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
   return m.broken ? [...body, footRubble(c, m)] : body;
 }
 
-/** A curtain-wall run whose feet follow the ground function; a ruined stub
- * heels over about its own center. */
 export function wallNodes(c: DressContext, ground: Ground, w: WallSegment): SvgNode[] {
   const g = (x: number): number => groundAt(ground, x);
   const step = 8;
@@ -264,9 +243,6 @@ export function wallNodes(c: DressContext, ground: Ground, w: WallSegment): SvgN
   return out;
 }
 
-/** A drowned stub standing in the flood: tall-thin reads as a leaning tower
- * with a slit window, squat reads as a half-sunk gable (the spike's
- * Saltmere pair, generalized on proportion). */
 export function drownedStubNodes(
   c: DressContext,
   s: { x: number; w: number; h: number; base: number; tilt: number },

@@ -2,14 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-// #217 Part 1: the Print Room's order desk. The "Pressed as" labels speak in the period
-// voice (ratified 2026-07-29 on #217), the chart joins the plate row at its own width,
-// and the caveat teaches the split. Source-text assertions in the astro-scaffold idiom;
-// the behavior (SVG-only pull, filename, clamp bypass) is proven in the print-room e2e.
+// #217 Part 1: the order desk speaks in the period voice (ratified 2026-07-29 on #217); source-text assertions here, the behavior is proven in the print-room e2e.
 const page = readFileSync(new URL("../../src/pages/print-room/index.astro", import.meta.url), "utf8");
 
-// The option VALUES are the contract app.ts keys on (svg/png1/png2): the labels may move,
-// the values may not.
+// The option VALUES are the contract app.ts keys on (svg/png1/png2): the labels may move, the values may not.
 test("the Pressed as options carry the period labels over the stable values", () => {
   assert.match(page, /<option value="svg"[^>]*>The engraving itself \(SVG\)<\/option>/);
   assert.match(page, /<option value="png1">An impression \(PNG\)<\/option>/);

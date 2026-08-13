@@ -1,7 +1,4 @@
-/* The Reading Room (#221): page-specific dressing only. The frame's own layout is
-   the SHARED /reading-frame.css (linked via BaseLayout extraCss, #219), and the
-   engine's overlay dressing is /living-chart.css (#302); this file owes them nothing
-   but the page around them. Palette tokens are BaseLayout's shell block (#263). */
+/* Reading Room (#221) page dressing only: the frame's layout is the shared /reading-frame.css and the engine's dressing is /living-chart.css; this file owes them nothing but the page around them. */
 body {
   padding: 2.5rem 1.5rem 5rem;
   line-height: 1.6;
@@ -10,18 +7,11 @@ main { max-width: 1100px; }
 header { margin-bottom: 2rem; }
 footer { margin-top: 3.5rem; }
 
-/* Voice from /house.css (.intro, .warning, the control idiom); this file owes
-   the room only its widths and margins (#324). */
 .intro { max-width: 46rem; margin: 0 auto 1.6rem; }
 
 .warning { max-width: 46rem; margin: 0 auto 1.2rem; }
 
-/* #127 The Drafting Moment, reused: the chart settles onto the desk while its
-   coastline draws itself in ink. startArrival (src/site/explorer/draw-ceremony.ts)
-   sets --draw-len + the dasharray on the coast path and clears them on
-   animationend, so WITHOUT these mount-scoped rules the ceremony never plays AND
-   the inline stroke-dasharray is never cleaned off the live coastline. Collapses
-   to instant under the shared reduced-motion rule in /motion.css. */
+/* Without these mount-scoped rules the #127 arrival ceremony never plays AND startArrival's inline stroke-dasharray is never cleaned off the live coastline. */
 .rf-chart svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
 .rf-chart svg.arriving #layer-land path {
   animation: inkDraw var(--ink-draw) var(--ease-paper) both,
@@ -31,13 +21,7 @@ footer { margin-top: 3.5rem; }
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
-/* #318 the colophon dice: the invitation to the next story, at the journal's foot.
-   It is a SIBLING of .rf-ages (the ratified placement: the engine hides the panel
-   through every teardown, so furniture inside it would vanish on each counter
-   draw). The row wraps and the input may shrink, the #220 lesson: a flex item
-   defaults to min-width auto and refuses to go below min-content on a 320px
-   viewport. Voice from the Print Room's counter (label + dice) and /house.css's
-   control idiom. */
+/* #318 colophon: a SIBLING of .rf-ages (the engine hides the panel through every teardown, so furniture inside it would vanish on each counter draw); the row wraps and the input may shrink (the #220 min-width:auto lesson). */
 .rr-colophon { display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem;
   margin-top: 1.2rem; padding: 0.75rem 0.2rem 0;
   border-top: 1px solid var(--line-tan); }

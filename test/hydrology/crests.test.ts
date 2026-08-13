@@ -7,19 +7,12 @@ import { pickSeaLevel } from "../../src/terrain/sealevel.ts";
 import { computeFlow } from "../../src/hydrology/flow.ts";
 import { computeBasins, watershedDivides } from "../../src/hydrology/basins.ts";
 
-// #141 LOOSE elevation gate: a watershed divide is a hard realm frontier only where
-// it runs through the top half of land elevation (quantile ~0.5). A divide wandering
-// a plain is dropped; a crest through genuine high ground is kept. The gate does NOT
-// try to select "only the biggest ranges" -- MAJOR_BASIN_FRACTION already does that.
-// Tested directly on a hand-drawn divides mask + elevation, mirroring basins.test's
-// habit of driving the divide logic from injected inputs rather than a flow field.
+// #141 LOOSE elevation gate: a watershed divide is a hard realm frontier only where it runs through the top half of land elevation (quantile ~0.5); it does NOT try to select "only the biggest ranges", MAJOR_BASIN_FRACTION already does. Driven from a hand-drawn divides mask + elevation.
 
 const SEA = 0.5;
 const W = 6, H = 3;
 
-// Land rises with x: 0.60,0.65,0.70,0.75,0.80,0.85 (identical each row). All 18 cells
-// land. Sorted, the median (quantile helper index floor(0.5*17)=8) is 0.70, so the
-// LOOSE gate keeps elev >= 0.70 (x >= 2) and drops x=0,1.
+// Land rises with x (0.60..0.85, identical rows, all 18 cells land); sorted, the median (index floor(0.5*17)=8) is 0.70, so the LOOSE gate keeps x >= 2 and drops x=0,1.
 const risingLand = () => createField(W, H, (x) => 0.6 + x * 0.05);
 function divideAt(cols: ReadonlyArray<number>): Uint8Array {
   const d = new Uint8Array(W * H);
@@ -29,9 +22,7 @@ function divideAt(cols: ReadonlyArray<number>): Uint8Array {
 const at = (m: Uint8Array, x: number, y: number) => m[x + y * W] as number;
 
 test("#141 the gate keeps a divide through high terrain and drops one through a plain", () => {
-  // x=1 (elev 0.65, below the 0.70 median) is the plain crossing; x=4 (0.80) is the crest;
-  // x=2 sits EXACTLY on the 0.70 median threshold and must be kept -- the gate is inclusive
-  // (>=), so this bites a >= -> > off-by-one that would drop the threshold cell itself.
+  // x=1 (0.65) is the plain crossing, x=4 (0.80) the crest; x=2 sits EXACTLY on the 0.70 median and must be kept: the gate is inclusive, so this bites a >= to > off-by-one.
   const gated = gateDivideElevation(divideAt([1, 2, 4]), risingLand(), SEA, 0.5);
   for (let y = 0; y < H; y++) {
     assert.equal(at(gated, 4, y), 1, `high divide at (4,${y}) is kept`);
@@ -59,12 +50,7 @@ test("#141 with no land the gate keeps nothing (no threshold to clear)", () => {
 });
 
 test("#141 mountainCrests on a real island: the gate drops below-median divides, keeps the crest", () => {
-  // Seed 16 (120x90 island) has 213 major divides, 38 of them below the land median.
-  // A world where mountainCrests actually gates keeps only the ~175 above-median cells,
-  // so crest < divides. This bites the wiring: a mutation that returns raw divides
-  // (gate disconnected) makes crest == divides and fails here. Seed 7 -- the obvious
-  // pick -- has EVERY divide already above median, so the gate is a no-op there and lets
-  // exactly that mutation slip through the whole suite (per the #141 review).
+  // Seed 16: 213 major divides, 38 below the land median, so crest < divides bites the wiring (a gate-disconnected mutation makes crest == divides). Seed 7, the obvious pick, has EVERY divide above median, so the gate is a no-op there and that mutation slips the whole suite (per the #141 review).
   const gw = 120, gh = 90;
   const f = buildHeightfield({ seed: 16, gridW: gw, gridH: gh, mapType: "island" });
   const sea = pickSeaLevel(f, 0.35);

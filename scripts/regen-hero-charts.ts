@@ -3,19 +3,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { heroChartSvgs } from "./hero-charts.ts";
 
-/**
- * Scriptorium Sub 4 (#205), decision D requirement 2, per #40's sketch: the
- * thin successor to build-site.ts's hero-chart step, and the ONLY writer of the
- * committed charts/ goldens. Run it on a ratified re-roll or hero refresh, then
- * `npm run og`, and land the regen ALONE (CLAUDE.md regen discipline; verify by
- * diffing the committed charts old-vs-new, since the #40 drift guard is
- * circular right after a regen).
- *
- * Since Sub 5 (#206) retired docs/, public/charts is the ONLY committed charts
- * dir; the dual-copy window is over.
- *
- *   npm run charts:regen
- */
+/** npm run charts:regen (#205): the ONLY writer of the committed public/charts goldens. Run on a ratified re-roll or hero refresh, then npm run og, and land the regen ALONE, verified by diffing the committed charts old-vs-new (the #40 drift guard is circular right after a regen). */
 
 export const HERO_CHART_DIRS: ReadonlyArray<string> = ["public/charts"];
 

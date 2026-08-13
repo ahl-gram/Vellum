@@ -1,69 +1,25 @@
-/* ==========================================================================
-   The reading frame (#219, Sub 3 of the Reading Room epic #190)
-   --------------------------------------------------------------------------
-   The reading presentation: one chart over one dated log and nothing else. Host-
-   agnostic like the module it dresses, so it is linked by whatever page mounts the
-   frame (#221's /reading-room/ is its first host) rather than owned by one room. The
-   Explorer is untouched by this sub and keeps its own panels.
-
-   Palette tokens are BaseLayout's shell block (#263); the gestures are motion.css's
-   (#125), including the one universal block that collapses every transition below to
-   an instant end state for a reader who asks for stillness.
-   ========================================================================== */
+/* The reading frame (#219): one chart over one dated log; host-agnostic like the module it dresses, linked by whatever page mounts the frame. */
 
 .rf { max-width: 1100px; margin-inline: auto; }
 
-/* The chart mount. The baked chart svg lands here and the engine's overlays are
-   appended as its children, so it is the positioning context for all of them. The
-   hairline and the drop shadow are the site's one sheet-on-the-desk dressing, the same
-   pair the Explorer's chart and the home page's plates carry, so a chart reads as the
-   same object in every room. */
 .rf-chart { position: relative; }
-/* #367: qualified to `[data-vellum-style]`, the attribute the RENDERER stamps on a chart.
-   Unqualified this dressed every svg in the mount, and the engine appends its survey track
-   as one of them, so a room showing the track wore the hairline and the shadow twice in
-   exact register. The Explorer's mount had the identical spill. */
+/* #367: [data-vellum-style] scopes this to renderer-stamped charts; unqualified it also dressed the survey-track overlay svg, doubling the hairline and shadow in exact register. */
 .rf-chart svg[data-vellum-style] { display: block; width: 100%; height: auto;
   border: 1px solid var(--line-tan);
   box-shadow: var(--sheet-shadow); }
 
-/* The one polite line: voice from /house.css's .status role (#324; the frame's
-   host JS marks the element class="rf-status status"). It reserves its height
-   so the column never jumps when the voyage posts its summary and clears it. */
+/* Voice from /house.css's .status role (#324); it reserves its height so the column never jumps when the voyage posts and clears its summary. */
 .rf-status { margin: 0.6rem 0 0; }
 
-/* --------------------------------------------------------------------------
-   The reading column: the instrument, then the log, one continuous story.
-   -------------------------------------------------------------------------- */
 .rf-reading { margin-top: 0.8rem; }
 .rf-ages[hidden], .rf-log[hidden] { display: none; }
 
-/* #321 the arrival ceremony (ratified by Alex 2026-08-11, candidate C of the
-   out/321-unfurl variants): the reading column unrolls ONCE per visit, staged, the
-   instrument at the full unfurl grade and the journal one --paper-quick beat behind
-   (the #170 staggered idiom). Keyed on a HOST-applied class, never on [hidden]: the
-   engine drives the panel's hidden flag on every counter read and dice roll (the same
-   mechanism that forced #318's colophon to mount as the panel's sibling), display:none
-   terminates a CSS animation, and restoring display starts it AFRESH, so a
-   [hidden]-gated rule would replay the reveal as a flash on every read. The room's
-   conductor adds .rf-arrival on the FIRST successful settle only and removes it when
-   the journal lands, which is what makes later hidden toggles style-inert. Collapses
-   via motion.css's universal reduced-motion block. */
+/* #321 arrival: keyed on the HOST-applied .rf-arrival, never [hidden]. The engine toggles hidden on every counter read, and display:none terminates an animation while restoring display starts it AFRESH, so a [hidden]-gated rule would replay the unfurl as a flash; the conductor adds the class on the first settle only and removes it when the journal lands. */
 .rf-arrival .rf-instrument, .rf-arrival .rf-log { transform-origin: top center; }
 .rf-arrival .rf-instrument { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) both; }
 .rf-arrival .rf-log { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) var(--paper-quick) both; }
 
-/* The instrument slot (#220: the fused ages bar, Play, and the readout; the bar's
-   two-chamber dressing is the engine's .ages-range in /living-chart.css).
-   The row WRAPS, and the slider is allowed to shrink. Both halves are load-bearing and
-   were found by measuring a real 320px viewport (an iPhone SE, a folded Galaxy cover
-   screen): a flex item defaults to `min-width: auto` and so refuses to go below its
-   min-content width, and a range input's intrinsic width is around 129px. Play plus
-   slider plus the year readout could not fit, so the row pushed the whole PAGE sideways
-   to a 355px scrollWidth. A reading room that scrolls horizontally on a phone is worse
-   than the nested scroller the ratified decision removed.
-   (#220 also mended this block: the explanation above had leaked OUTSIDE its comment,
-   and CSS error recovery silently dropped the entire .rf-instrument rule with it.) */
+/* Measured at a real 320px viewport: a flex item's default min-width:auto plus a range input's ~129px intrinsic width pushed the whole PAGE to a 355px scrollWidth, so the row wraps AND the slider may shrink (min-width: 0); both halves are load-bearing. */
 .rf-instrument { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
   padding: 0.7rem 1rem; background: var(--parchment-panel);
   border: 1px solid var(--line-tan); border-radius: 6px 6px 0 0; }
@@ -72,43 +28,21 @@
 .rf-year { font-style: italic; color: var(--ink-brown);
   font-variant-numeric: tabular-nums; min-width: 5rem; text-align: right; }
 
-/* --------------------------------------------------------------------------
-   The log. One component, one slot, one dressing.
-   -------------------------------------------------------------------------- */
 .rf-log { background: var(--parchment-panel); border: 1px solid var(--line-tan);
   border-radius: 6px; padding: 0.8rem 1rem; }
-/* Under the instrument the two panels are one instrument: the seam between them
-   closes so the reading column reads as a single ruled sheet. */
 .rf-ages .rf-log { border-top: 0; border-radius: 0 0 6px 6px; }
 
-/* The surveyor's signature above the strip. The chronicle has no attribution, so its
-   line collapses rather than leaving a rule floating over nothing. */
 .rf-log-sig { margin: 0 0 0.5rem; font-style: italic; color: var(--ink-brown);
   border-bottom: 1px solid var(--line-faint); padding-bottom: 0.5rem; }
 .rf-log-sig:empty { display: none; }
 
-/* The strip FLOWS, at every width (Alex's call, 2026-07-27, on #219's open decision
-   2). It is bounded by construction rather than by a scrollbar: the chronicle is
-   capped at 14 events (src/society/history.ts) and #185 measured 19 to 24 voyage legs
-   across 150 seeds, so even the fused journal (#220) tops out around 35 rows. The PAGE
-   scroll owns the log at every size, which is what keeps the room from being the
-   nested scroll-trap the epic's acceptance forbids. There is deliberately no
-   breakpoint here: the reading experience must not differ by viewport width. */
+/* The strip FLOWS at every width (ratified 2026-07-27): bounded by construction, not a scrollbar (14 chronicle events max, 19-24 measured voyage legs, ~35 rows tops), and deliberately no breakpoint, since the reading must not differ by viewport width. */
 .rf-log-strip { list-style: none; margin: 0; padding: 0; }
 .rf-log-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
   border-bottom: 1px solid var(--line-faint); opacity: 0.4;
   transition: opacity 0.18s, transform 0.18s; }
 
-/* The brighten-on-arrival, canonicalized: a row that has come to pass brightens AND
-   slides a hair right, like an entry inked into the ledger as its moment arrives.
-   #220 collapsed the old three-name state (the component's `inked`, the chronicle's
-   `past`, the voyage's `logged`) onto `inked` alone: one journal, one producer pair,
-   one rule. */
 .rf-log-strip li.inked { opacity: 1; transform: translateX(2px); }
-/* The voice handoff (#220's Overture), dressed as a manuscript (#312, candidate D of
-   the 2026-07-28 contact sheet), mirroring the Explorer host rule for rule: walnut
-   italic surveyor behind a margin rule, iron-gall chronicler under his own heading,
-   an initial on each hand's first line. */
 .rf-log-strip li.prologue { border-left: 3px solid var(--line-tan); padding-left: 0.7rem; }
 .rf-log-strip li.prologue .cr-text { font-style: italic; color: var(--ink-surveyor); }
 .rf-log-strip li.prologue .cr-year { font-weight: 400; font-style: italic; color: var(--ink-surveyor-faded); }
@@ -120,8 +54,7 @@
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-size: 2.1em; line-height: 0.8; margin: 0.08em 0.12em 0 0; }
 
-/* The shared two-column row idiom every producer emits ("day 105" runs wider than a
-   bare year, so the column grew from 3rem at #312). */
+/* "day 105" runs wider than a bare year, so the gutter grew from 3rem at #312. */
 .rf-log-strip .cr-year { flex: 0 0 3.6rem; text-align: right;
   font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
 .rf-log-strip .cr-text { color: var(--ink-annals); }

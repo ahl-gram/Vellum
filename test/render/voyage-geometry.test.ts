@@ -23,8 +23,6 @@ import {
 const p = (x: number, y: number): Pt => ({ x, y });
 const near = (a: number, b: number, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} !== ${b}`);
 
-// --- arc length -------------------------------------------------------------
-
 test("cumulative arc length runs 0 to total along the polyline", () => {
   const g = buildLegGeometry([p(0, 0), p(3, 4), p(3, 14)]); // 5 then 10
   assert.deepEqual(Array.from(g.cum), [0, 5, 15]);
@@ -38,8 +36,7 @@ test("pointAtDistance hits the endpoints exactly", () => {
 });
 
 test("progress is by DISTANCE, not vertex index (the whole point of arc length)", () => {
-  // One long segment then one short. Halfway by distance lands inside the long one,
-  // which a vertex-index walk would wrongly place at the joint.
+  // One long segment then one short: halfway by distance lands inside the long one, which a vertex-index walk would wrongly place at the joint.
   const g = buildLegGeometry([p(0, 0), p(90, 0), p(100, 0)]);
   assert.equal(g.total, 100);
   assert.deepEqual(pointAtDistance(g, 50), p(50, 0));
@@ -73,9 +70,7 @@ test("repeated vertices (a zero-length segment) do not break the lookup", () => 
   assert.deepEqual(pointAtDistance(g, 5), p(5, 0));
 });
 
-// --- tilt -------------------------------------------------------------------
-// SVG y grows DOWNWARD. Bow-up on a northbound leg means a NEGATIVE rotate, which
-// is counter-clockwise on screen.
+// SVG y grows DOWNWARD: bow-up on a northbound leg is a NEGATIVE rotate, counter-clockwise on screen.
 
 test("due east and due west are level", () => {
   near(tiltFor(1, 0), 0);
@@ -117,8 +112,6 @@ test("a zero-length heading is level, not NaN", () => {
   near(tiltFor(0, 0), 0);
 });
 
-// --- facing -----------------------------------------------------------------
-
 test("a decisive east heading faces east, a decisive west heading faces west", () => {
   assert.equal(resolveFacing(10, 10, -1), 1);
   assert.equal(resolveFacing(-10, 10, 1), -1);
@@ -147,8 +140,6 @@ test("netFacing reads a leg's overall east/west sense, defaulting east", () => {
   assert.equal(netFacing([p(0, 0), p(0, 5)]), 1, "a due-north leg defaults to bow east");
   assert.equal(netFacing([]), 1);
 });
-
-// --- heading smoothing + the anti-flicker property --------------------------
 
 test("headingAt averages over a forward window, not the current segment", () => {
   const g = buildLegGeometry([p(0, 0), p(10, 0), p(20, 0)]);
@@ -185,9 +176,7 @@ function facingChanges(points: Pt[], startFacing: Facing = netFacing(points)): n
 }
 
 test("a switchbacking road does NOT flip the rider (the bug this sub creates)", () => {
-  // Climbs north while x oscillates east/west by 4px every 6px of climb. The RAW
-  // per-segment dx flips sign at every vertex; smoothed over LOOKAHEAD it nets ~0,
-  // lands inside the deadband, and the facing holds.
+  // Climbs north while x oscillates 4px per 6px of climb: the RAW per-segment dx flips sign at every vertex, smoothed over LOOKAHEAD it nets ~0, inside the deadband, and the facing holds.
   const zig: Pt[] = [];
   for (let i = 0; i <= 20; i++) zig.push(p(i % 2 === 0 ? 0 : 4, -6 * i));
   assert.ok(buildLegGeometry(zig).total > LOOKAHEAD * 2, "the leg is long enough to matter");
@@ -231,8 +220,6 @@ test("geometry helpers do not mutate their inputs (immutability rule)", () => {
   assert.deepEqual(pts, copy);
 });
 
-// --- pacing (#120 follow-up): time by length, not equal per leg -------------
-
 test("legDurations is monotonic: a longer leg never gets less time", () => {
   const d = legDurations([100, 200, 400, 800]);
   for (let i = 1; i < d.length; i++) assert.ok(d[i]! >= d[i - 1]!, `leg ${i} shorter time than ${i - 1}`);
@@ -250,13 +237,11 @@ test("legDurations floors a tiny hop so it still reads", () => {
 });
 
 test("legDurations caps the whole sweep, scaling every leg down together", () => {
-  // Many long legs would blow past MAX_SWEEP_MS; the total is clamped and the relative
-  // pacing preserved (each leg keeps its share).
+  // Many long legs would blow past MAX_SWEEP_MS; the total clamps and each leg keeps its relative share.
   const many = new Array(40).fill(1500);
   const d = legDurations(many);
   const total = d.reduce((s, x) => s + x, 0);
   assert.ok(total <= MAX_SWEEP_MS + 1e-6, `total ${total} exceeds the cap`);
-  // all equal-length legs keep equal durations after scaling
   assert.ok(d.every((x) => Math.abs(x - d[0]!) < 1e-6));
 });
 
@@ -270,8 +255,6 @@ test("legDurations anchors the near-town baseline near half a second", () => {
   const [near] = legDurations([120]);
   assert.ok(near! > 350 && near! < 750, `near-town leg ran ${near}ms, outside the ~0.5s baseline`);
 });
-
-// --- the mark's glyph by water span (#181) ----------------------------------
 
 test("markGlyphAt: the ship sails only the water span; both overland stubs ride", () => {
   const span = { from: 0.3, to: 0.9 };
@@ -289,8 +272,6 @@ test("markGlyphAt: a spanless sea leg keeps the whole-leg ship; land modes alway
     assert.equal(markGlyphAt("straight", null, t), "rider", "a straight leg never sails");
   }
 });
-
-// --- tAtElapsed / elapsedAtT: the schedule walk, lifted for #220's fused clock ---
 
 test("tAtElapsed maps the schedule onto equal-split t exactly as the tick's walk", () => {
   const cum = [0, 400, 1000, 1600]; // three legs: 400ms, 600ms, 600ms

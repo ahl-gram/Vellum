@@ -1,9 +1,5 @@
 import { NEIGHBORS_8 } from "./grid.ts";
 
-/**
- * Multi-source 8-connected BFS hop distance over a grid.
- * Impassable or unreachable cells stay Infinity.
- */
 export function bfsDistance(
   w: number,
   h: number,

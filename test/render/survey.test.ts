@@ -5,8 +5,7 @@ import type { Road } from "../../src/society/roads.ts";
 import { buildSurvey, surveyFingerprint } from "../../src/render/survey.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
-// #120: the world facts the worker ships so the client can route a voyage.
-// Integer-only by design, so the A2 worker-vs-inline parity compare is exact.
+// #120: the world facts the worker ships so the client can route a voyage; integer-only by design, so the A2 worker-vs-inline parity compare is exact.
 
 const field = (w: number, h: number, vals: number[]) => fieldFrom(w, h, Float64Array.from(vals));
 
@@ -77,7 +76,7 @@ test("does not mutate the elevation field (immutability rule)", () => {
   assert.deepEqual(Array.from(elev.data), before);
 });
 
-// --- #184: surveyFingerprint, the cache key for the Explorer's travel order -----
+// #184: surveyFingerprint is the cache key for the Explorer's travel order.
 
 const road = (pts: Array<[number, number]>): Road => ({ rank: "lane", points: pts.map(([x, y]) => ({ x, y })) });
 

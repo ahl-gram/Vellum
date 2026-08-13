@@ -3,13 +3,7 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 
-// Unit tests for #52: the projected place manifest, the data layer the Living
-// Chart epic (#51) consumes. The projection MUST match renderMap exactly
-// (`createProjection` in `src/render/map-renderer.ts`), so the expected pixel
-// coords here are reconstructed by
-// hand from world.elev.w/h and Math.round(widthPx*0.045), independent of
-// createProjection, so a regression in either the manifest OR the projection
-// helper is caught (not the tautological nx*widthPx === proj.px(s.x)).
+// #52: the projected place manifest the Living Chart epic (#51) consumes. The projection MUST match `createProjection` in `src/render/map-renderer.ts`; the expected pixels here are reconstructed BY HAND, independent of it, so a regression in either side is caught (never the tautological nx*widthPx === proj.px).
 
 const world = generateWorld(defaultRecipe(42, { gridW: 160, gridH: 120 }));
 const WIDTH = 1500;
@@ -43,9 +37,7 @@ test("seat flags exactly the settlements in world.realms.seats", () => {
   m.places.forEach((p, i) => {
     assert.equal(p.seat, expected.has(i), `place ${i} (${p.name}) seat flag`);
   });
-  // `selectSeats` in `src/society/realms.ts` seats the grand capital as realm 0,
-  // so the capital is a seat too;
-  // the capital-over-seat precedence lives in placeRank, not here.
+  // selectSeats seats the grand capital as realm 0, so the capital is a seat too; the capital-over-seat precedence lives in placeRank, not here.
   const capital = m.places.find((p) => p.kind === "capital")!;
   assert.equal(capital.seat, true, "the grand capital is realm 0's seat");
 });
@@ -97,10 +89,7 @@ test("nx/ny are width-independent fractions: a wider render scales pixels, not f
   });
 });
 
-// #120: the voyage router walks the world GRID (road cells, sea cells), so it needs
-// each settlement's grid cell. nx/ny cannot serve: they are fractions of the RENDERED
-// chart, margin-inset, so inverting them client-side would round-trip an integer the
-// worker already holds exactly. Ship the integers instead.
+// #120: the voyage router walks the world GRID, and nx/ny are margin-inset fractions of the RENDERED chart, so inverting them client-side would round-trip an integer the worker already holds exactly; ship the integers instead.
 test("every place carries its raw grid cell as gx/gy", () => {
   const m = buildPlaceManifest(world, WIDTH);
   m.places.forEach((p, i) => {

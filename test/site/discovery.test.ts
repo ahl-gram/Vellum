@@ -17,23 +17,11 @@ import {
   sitemapXml,
 } from "../../scripts/generate-discovery.ts";
 
-/**
- * #286: sitemap.xml, robots.txt and llms.txt. The point of the issue is that all
- * three are GENERATED from NAV_ITEMS, so the suite's real job is drift: every
- * route-shaped assertion below iterates NAV_ITEMS rather than restating a list,
- * because a hardcoded expectation here would rot exactly like the hand-written
- * files this replaces.
- *
- * The site origin is a PARAMETER, deliberately exercised with a domain that is
- * not Vellum's, so a hardcoded www.vellumworlds.com anywhere in the generators
- * fails here. That the real origin comes from astro.config.ts's `site` is pinned
- * separately: the 2026-07-24 domain move would otherwise have left a stale
- * Sitemap: line behind.
- */
+// #286: sitemap.xml, robots.txt and llms.txt are GENERATED from NAV_ITEMS, so every route assertion iterates NAV_ITEMS; a hardcoded list here would rot like the hand-written files this replaces.
+// The site origin is a PARAMETER, exercised with a non-Vellum domain so a hardcoded www.vellumworlds.com in a generator fails here; that the real origin comes from astro.config.ts is pinned separately.
 
 const root = (p = "") => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 
-// Not Vellum's domain, on purpose (see the header note).
 const TEST_SITE = "https://charts.example/";
 const abs = (route: string) => new URL(route, TEST_SITE).href;
 
@@ -71,7 +59,6 @@ test("sitemap.xml lists every route, absolute against the site, and nothing else
   );
   assert.ok(xml.trimEnd().endsWith("</urlset>"), "the urlset must close");
 
-  // Drift pin: driven by NAV_ITEMS, so a new nav entry fails here until it lists.
   for (const item of NAV_ITEMS) {
     assert.ok(xml.includes(`<loc>${abs(item.href)}</loc>`), `the sitemap must list the ${item.label} nav route`);
   }
@@ -141,15 +128,7 @@ test("the real origin comes from astro.config.ts, so a domain move updates all t
   assert.ok(sitemapXml(await configuredSite()).includes(`<loc>${config.site}/</loc>`), "home resolves against it");
 });
 
-/**
- * The wiring pins. The only test that runs a real `astro build` cleans the
- * generated trees first, so nothing downstream can see these three files in a
- * built artifact: a generator that is correct but never wired into astro:generate
- * would pass every test above while the live site keeps serving 404s. These three
- * assertions close that gap, and the chain they complete (content correct, step
- * wired, Astro copies public/ verbatim as the showcases already establish) is
- * what makes the files reach dist/.
- */
+// The wiring pins: a correct generator never wired into astro:generate would pass every test above while the live site serves 404s; these close that gap (content correct, step wired, Astro copies public/ verbatim).
 test("astro:generate ends by generating the discovery files into public/", () => {
   const pkg = JSON.parse(readFileSync(root("package.json"), "utf8"));
   assert.ok(

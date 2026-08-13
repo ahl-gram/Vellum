@@ -131,11 +131,8 @@ full <a href="https://en.wikipedia.org/wiki/Random_seed">reproducibility</a>.</p
 </section>
 
 <script is:inline>
-// Inline by stated exception (#289, pipeline rule #260): one form intercept
-// does not earn a bundle twin. The Explorer reads its recipe from the HASH
-// (explorer/#seed=N, keys gate on presence so its defaults hold); the plain
-// GET the form falls back to without JS lands on ?seed=N, which the Explorer
-// ignores, degrading to today's world.
+// Inline by stated exception (#289, pipeline rule #260): one form intercept does not earn a bundle twin.
+// The Explorer reads the HASH; the no-JS GET fallback lands on ?seed=N, which it ignores, degrading to today's world.
 document.getElementById("seed-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const raw = document.getElementById("seed-input").value.trim();

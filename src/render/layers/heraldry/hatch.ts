@@ -2,25 +2,6 @@ import { el, type SvgNode } from "../../svg.ts";
 import type { Tincture } from "../../../society/heraldry.ts";
 import { n } from "./geom.ts";
 
-/**
- * Petra Sancta tincture hatching (Silvestro de Petra Sancta, 1638): the engraving
- * convention that denotes a tincture by a mark pattern rather than colour, still
- * used by engravers today. It lets the monochrome `ink` style read like a period
- * engraving instead of a flat grey value-ladder where gules/vert and azure/purpure
- * are indistinguishable.
- *
- *   argent   plain paper            or       seme of dots (points)
- *   azure    horizontal lines       gules    vertical lines
- *   sable    crosshatch             vert     "\" from dexter chief  (top-left to base)
- *   purpure  "/" from sinister chief (top-right to base)
- *
- * PURE: all geometry derives from the shield width; every pattern id is scoped by
- * the caller's idSuffix so many arms share one document (the on-map
- * `--style ink --arms` path) with no pattern-id collisions. Each tile opens with an
- * opaque paper rect so a lower field never bleeds through a divided overlay's gaps
- * and terrain never shows through an on-map shield.
- */
-
 type Mark = "plain" | "dots" | "horizontal" | "vertical" | "crosshatch" | "bend" | "bendSinister";
 
 const MARK: Record<Tincture, Mark> = {
@@ -34,9 +15,7 @@ const MARK: Record<Tincture, Mark> = {
 };
 
 export type HatchScheme = {
-  /** <pattern> defs for the given field tinctures, scaled to width `w`, ids scoped by `suffix`. */
   defs(tinctures: Iterable<Tincture>, w: number, suffix: string): SvgNode[];
-  /** The fill value ("url(#…)") for a hatched field region of tincture `t`. */
   fill(t: Tincture, suffix: string): string;
 };
 
@@ -44,7 +23,6 @@ function hatchId(t: Tincture, suffix: string): string {
   return `hatch-${t}-${suffix}`;
 }
 
-/** One <pattern> tile for a tincture on a `paper` ground drawn in `ink`. */
 function tile(t: Tincture, w: number, suffix: string, paper: string, ink: string): SvgNode {
   const id = hatchId(t, suffix);
   const s = n(w * 0.13); // line spacing / tile size
@@ -76,7 +54,6 @@ function tile(t: Tincture, w: number, suffix: string, paper: string, ink: string
   }
 }
 
-/** The ink style's hatching, closing over its paper ground and ink colour. */
 export function inkHatch(paper: string, ink: string): HatchScheme {
   return {
     defs(tinctures, w, suffix) {

@@ -4,30 +4,15 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { STYLES } from "../../src/render/style.ts";
 
-/**
- * #158 legibility: realm borders must not read as roads, and realm names must
- * not fade into the parchment.
- *
- * Two root causes, both asserted on renderMap output (k = widthPx/1500 = 1 at the
- * 1500px default, so widths and dashes are the raw multipliers):
- *   - borders borrowed `style.road` (same color + dash as a track); now each style
- *     carries its own border token. antique/ink/nautical get a dark-ink dash-DOT
- *     boundary; topographic keeps its distinct border byte-for-byte.
- *   - realm names sat at fill-opacity 0.55 with no weight; now bold + 0.9 + a fatter
- *     halo. Font SIZE is deliberately unchanged: it is the one lever that feeds the
- *     label-placement test, so a bigger label could go unplaced.
- *
- * Same 160x120 seed-42 fixture as map-renderer.test (3 realms, borders drawn).
- */
+// #158 legibility: realm borders must not read as roads (they borrowed style.road; now each style carries its own border token, topographic untouched byte-for-byte), and realm names must not fade (bold + 0.9 opacity + a fatter halo).
+// Font SIZE is deliberately unchanged: it is the one lever that feeds label placement, so a bigger label could go unplaced. Same 160x120 seed-42 fixture as map-renderer.test.
 const world = generateWorld(defaultRecipe(42, { gridW: 160, gridH: 120 }));
 
-/** The realm-borders group's inner markup (paths only, no nested groups). */
 function borderGroup(svg: string): string {
   const m = svg.match(/<g id="layer-realm-borders">([\s\S]*?)<\/g>/);
   return m ? (m[1] as string) : "";
 }
 
-/** The opening <text ...> tag of the realm label whose text is name (all-caps). */
 function realmNameTag(svg: string, name: string): string {
   const marker = `>${name.toUpperCase()}</text>`;
   const idx = svg.indexOf(marker);
@@ -61,8 +46,7 @@ test("ink realm borders become dash-dot, distinct from the even-dashed roads", (
 });
 
 test("topographic realm borders are preserved byte-for-byte (already distinct)", () => {
-  // A preservation guard, not red-green: topographic's border already reads
-  // distinctly from its cased red roads, so #158 must not move it.
+  // A preservation guard, not red-green: topographic's border already reads distinct from its cased red roads, so #158 must not move it.
   const g = borderGroup(renderMap(world, { style: "topographic" }));
   assert.ok(g.includes(`stroke="${STYLES.topographic.ink}"`));
   assert.ok(g.includes('stroke-width="1.1"'));
@@ -81,8 +65,7 @@ test("realm names render bold, opaque, and haloed for legibility", () => {
 });
 
 test("realm-name font size is unchanged, so no realm loses its label", () => {
-  // Size feeds spacedTextBox -> tryClaim; leaving it at 16.5 keeps placement
-  // identical, so every realm that was labeled before still is.
+  // Size feeds spacedTextBox -> tryClaim; leaving it at 16.5 keeps placement identical, so every realm that was labeled before still is.
   const svg = renderMap(world, { style: "antique" });
   const tag = realmNameTag(svg, world.names.realms[0] as string);
   assert.ok(tag.includes('font-size="16.5"'), "font size held at 16.5");

@@ -231,8 +231,10 @@ audit built from scratch.
   findings or a documented failed attack, never approval). It is read-only and never posts to
   GitHub; relay its report in your reply and let Alex decide what lands on the PR.
 - **No em-dashes** in issue bodies, PR bodies, published copy, or new code comments.
-- A **local invariant belongs in a code comment at the line that breaks**, not only in the working
-  notes. If a future edit would silently break byte-identity or an ordering contract, say so there.
+- **Comments are the exception, not the rule.** A behavior a test already pins needs no comment:
+  the test is the record, delete the prose. A local invariant (byte-identity, an ordering
+  contract) earns a test first; only when no test can practically pin it (cross-platform float
+  drift, hand-measured browser quirks) does it keep a single-line comment at the line that breaks.
 
 ## Write visual samples to out/
 

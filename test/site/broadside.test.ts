@@ -2,19 +2,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-// #270 The Broadside: the Explorer's controls are grouped by what they do to the
-// WORLD, not by what kind of widget they are. The Land holds the generation
-// controls (touch these and the geography changes), The Hand the dressing
-// controls (the same world, dressed and annotated differently), The Press the
-// actions. The split IS the point of the issue, so these pins hold each control
-// to its group; moving one across the hairline is a re-ratification, not a tidy.
+// #270 The Broadside: controls grouped by what they do to the WORLD (The Land = generation, The Hand = dressing, The Press = actions). Moving one across the hairline is a re-ratification, not a tidy.
 const here = (p: string): string => readFileSync(new URL(p, import.meta.url), { encoding: "utf8" });
 const page = here("../../src/pages/explorer/index.astro");
 const glossary = here("../../src/pages/glossary/index.astro");
 const app = here("../../src/site/explorer/app.ts");
 
-// Each group is a role="group" region labelled by its head id. Slice the page
-// into the three group blocks by those ids, in reading order.
+// Each group is a role="group" region labelled by its head id; slice the page into the three blocks in reading order.
 function groupBlock(headId: string, nextHeadId: string | null): string {
   const start = page.indexOf(`aria-labelledby="${headId}"`);
   assert.ok(start >= 0, `the page is missing the ${headId} group`);
@@ -68,10 +62,7 @@ test("The Press holds the actions; Draw stays the sole primary; the Print Room s
   assert.match(block, /<a id="order-plates" class="action-link"/, "the Print Room link stopped being the action-link <a>");
 });
 
-// The journal pointer's new form (ratified 2026-08-11, decision 2 on #270): a gold
-// action-link button beside the Print Room's, ALWAYS visible. This consciously
-// updates #321 decision 3's hidden-unless-ticked caption; the old caption wrapper
-// must be gone, not hidden.
+// The journal pointer (ratified 2026-08-11, decision 2 on #270): always-visible gold action-link, consciously updating #321 decision 3's hidden caption; the old wrapper must be GONE, not hidden.
 test("the journal pointer is the always-visible action-link button, not the old caption (#270)", () => {
   assert.match(page, /<a id="journal-link" class="action-link"/, "the journal pointer is not the gold action-link button");
   assert.ok(!page.includes('id="journal-line"'), "the old #journal-line caption wrapper survived the move");
@@ -79,10 +70,7 @@ test("the journal pointer is the always-visible action-link button, not the old 
   assert.ok(!app.includes("journalLine"), "app.ts still gates a caption wrapper that no longer exists");
 });
 
-// The seals (ratified 2026-08-11, decision 4 on #270, variant B countersigned):
-// the three overlay checkboxes wear the seal dressing but stay REAL checkboxes
-// with their ids and label text untouched (explorer-page.test.ts pins the survey
-// label string; these pin the seal class on all three).
+// The seals (ratified 2026-08-11, decision 4 on #270, variant B countersigned): the three overlay checkboxes wear the seal dressing but stay REAL checkboxes with ids and label text untouched.
 test("the three overlay checkboxes wear the seal dressing with ids untouched (#270)", () => {
   for (const [label, id] of [["legend", "legend"], ["arms", "arms"], ["survey", "ages"]]) {
     const re = new RegExp(`<label class="[^"]*seal[^"]*">${label} <input id="${id}" type="checkbox"`);
@@ -90,9 +78,7 @@ test("the three overlay checkboxes wear the seal dressing with ids untouched (#2
   }
 });
 
-// The footnote apparatus (ratified 2026-08-11, decision 5 on #270): four marks in
-// the Fell set, each a real link to a /glossary/ anchor with its note real text in
-// the DOM (never a title attribute).
+// The footnote apparatus (ratified 2026-08-11, decision 5 on #270): four Fell marks, each a real link to a /glossary/ anchor with its note as real text, never a title attribute.
 const MARKS = [
   ["seeds-choice", "of the seed's choice"],
   ["coast-warp", "of the coast warp"],

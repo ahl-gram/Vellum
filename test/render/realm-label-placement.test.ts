@@ -7,14 +7,7 @@ import {
   type RealmLabelArena,
 } from "../../src/render/layers/realm-label-placement.ts";
 
-/**
- * #145: the placement ladder must never give up on a realm name.
- *
- * Stage 1 is the historical five-candidate vertical ladder and must win whenever
- * it can, so the committed charts do not move. Stage 2 searches the realm's own
- * heartland. Stage 3 forces the label in and claims its box, so a realm is always
- * named even on a chart with no free space at all.
- */
+// #145: the placement ladder must never give up on a realm name. Stage 1 is the historical five-candidate vertical ladder and must win whenever it can (so the committed charts do not move); stage 2 searches the realm's own heartland; stage 3 forces the label in and claims its box.
 const GRID_W = 40;
 const GRID_H = 30;
 const proj = createProjection(GRID_W, GRID_H, 1500, 68);
@@ -120,8 +113,7 @@ test("stage 3: when nothing is free the label is FORCED in, and its box is claim
 });
 
 test("stage 3: a forced label is nudged so its box never leaves the drawn map", () => {
-  // A realm hard against the left edge: the centroid alone would hang the label
-  // off the chart into the frame.
+  // A realm hard against the left edge: the centroid alone would hang the label off the chart into the frame.
   const blob = rectBlob(0, 10, 3, 18);
   const c = centroidOfBlob(blob);
   const arena: RealmLabelArena = { tryClaim: () => false, claim: () => {} };

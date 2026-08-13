@@ -7,16 +7,8 @@ import { seaMask } from "../../src/hydrology/sea-mask.ts";
 import { createProjection, marginFor } from "../../src/render/transform.ts";
 import type { World } from "../../src/world/types.ts";
 
-/**
- * #234: on a regional survey the sea caption placed on the deepest water landed on
- * whatever water was deepest in the window, even a landlocked LAKE, because
- * `oceanDist` cannot tell a lake from the open sea. Worse, a region-local sea/lake
- * test does not fix it: cropping reconnects an inland lake to the window edge, so
- * the region's OWN `seaMask` floods it as sea. The classification has to be
- * inherited from the PARENT world. These tests measure the placed caption against
- * the parent world's authoritative sea/lake partition, and check that the parent's
- * named lakes are carried into the window so a lake reads as a lake.
- */
+// #234: the sea caption placed on the deepest water in the window, even a landlocked LAKE (oceanDist cannot tell them apart), and a region-local sea/lake test cannot fix it: cropping reconnects an inland lake to the window edge, so the region's OWN seaMask floods it as sea.
+// The classification must be inherited from the PARENT world; these tests measure the placed caption against the parent's authoritative sea/lake partition and check the parent's named lakes carry into the window.
 
 function capitalRegion(seed: number, size = 0.38): { world: World; region: World; win: ReturnType<typeof windowAround> } {
   const world = generateWorld(defaultRecipe(seed, { gridW: 320, gridH: 240 }));
@@ -30,13 +22,11 @@ function capitalRegion(seed: number, size = 0.38): { world: World; region: World
 
 const escapeRe = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/** The pixel center of the placed sea caption, or null if the sea name is not drawn. */
 function seaCaptionCenter(svg: string, seaName: string): { px: number; py: number } | null {
   const m = new RegExp(`<text x="([\\d.]+)" y="([\\d.]+)"[^>]*>${escapeRe(seaName)}</text>`).exec(svg);
   return m ? { px: parseFloat(m[1]!), py: parseFloat(m[2]!) } : null;
 }
 
-/** Invert the render projection (px -> grid cell) for a region rendered at widthPx. */
 function pxToGrid(region: World, widthPx: number): (px: number, py: number) => { gx: number; gy: number } {
   const proj = createProjection(region.elev.w, region.elev.h, widthPx, marginFor(widthPx));
   const scale = (proj.px(1) - proj.px(0));
@@ -63,10 +53,7 @@ test("region sea caption never lands on a parent-world lake (#234, seed 42)", ()
   const { world, region, win } = capitalRegion(42);
   const svg = renderMap(region, { style: "antique", widthPx: WIDTH });
   const center = seaCaptionCenter(svg, region.names.sea);
-  // The invariant is: EITHER the sea caption is not drawn, OR it sits on genuine
-  // parent-sea. On seed 42's capital plate the deepest water is the parent lake
-  // "The Mairoa Pool", so before the fix the caption is drawn on a lake and this
-  // fails on the assertion below (not on a missing element).
+  // EITHER the caption is not drawn OR it sits on genuine parent-sea. On seed 42's capital plate the deepest water is the parent lake "The Mairoa Pool", so pre-fix this fails on the assertion below, not on a missing element.
   if (center !== null) {
     const { gx, gy } = pxToGrid(region, WIDTH)(center.px, center.py);
     assert.equal(
@@ -77,8 +64,7 @@ test("region sea caption never lands on a parent-world lake (#234, seed 42)", ()
 });
 
 test("a genuinely coastal region still captions its sea, on real ocean (#234 guard)", () => {
-  // seed 7's capital environs are open coast: the caption must survive the gate and
-  // sit on genuine parent-sea. Guards the fix against over-suppression.
+  // Seed 7's capital environs are open coast: the caption must survive the gate and sit on genuine parent-sea, guarding the fix against over-suppression.
   const { world, region, win } = capitalRegion(7);
   const svg = renderMap(region, { style: "antique", widthPx: WIDTH });
   const center = seaCaptionCenter(svg, region.names.sea);
@@ -92,7 +78,6 @@ test("a genuinely coastal region still captions its sea, on real ocean (#234 gua
 
 test("region carries the parent world's named lakes, and a lake reads as a lake (#234)", () => {
   const { world, region } = capitalRegion(42);
-  // The parent's lakes that fall inside the window are carried in, by name.
   assert.ok(region.names.lakes.length > 0, "region inherits the parent's in-window lakes");
   const names = new Set(region.names.lakes.map((l) => l.name));
   const parentInWindow = world.names.lakes.filter((l) => {
@@ -103,7 +88,6 @@ test("region carries the parent world's named lakes, and a lake reads as a lake 
   assert.ok(parentInWindow.length > 0, "precondition: seed 42's window contains parent lakes");
   for (const l of parentInWindow) assert.ok(names.has(l.name), `carried lake name "${l.name}"`);
 
-  // and at least one of those lake names is actually drawn on the plate
   const svg = renderMap(region, { style: "antique", widthPx: WIDTH });
   assert.ok(
     [...names].some((n) => svg.includes(`>${n}</text>`)),
@@ -120,7 +104,6 @@ test("region lake projection is deterministic across a regeneration (#234, redra
 test("world charts are un-gated: the sea gate is region-only (#234 byte-identity)", () => {
   const world = generateWorld(defaultRecipe(42, { gridW: 320, gridH: 240 }));
   assert.equal(world.region, undefined, "a standalone world carries no region metadata");
-  // the world path is the un-gated path: its sea caption is still placed as before
   const svg = renderMap(world, { style: "antique", widthPx: WIDTH });
   assert.ok(seaCaptionCenter(svg, world.names.sea), "world sea caption still drawn (gate inactive)");
 });

@@ -17,17 +17,13 @@ export type WorldRecipe = {
   readonly mapType: MapType;
   readonly landFraction: number;
   readonly band: ClimateBand;
-  /** Coastline irregularity in [0, 1]: 0 is the pure radial island, 1 deeply lobed
-   * with offshore islets. Omitted uses the map type's natural SHAPES value (0.55);
-   * the Explorer coast slider (#137) and --coast-warp set it. */
+  /** Coastline irregularity in [0, 1]; omitted uses the map type's SHAPES value. */
   readonly coastWarp?: number;
 };
 
 export type NamedSettlement = Settlement & {
   readonly name: string;
-  /** Founding year, from the history simulation. */
   readonly founded: number;
-  /** True when the settlement is a ruin (abandoned in the chronicle). */
   readonly ruined: boolean;
 };
 
@@ -48,12 +44,7 @@ export type FeatureNames = {
   readonly realms: ReadonlyArray<string>;
 };
 
-/**
- * The prevailing wind: radians, the direction the wind blows toward, in grid
- * coordinates (x east, y south). One roll per world on its own named fork;
- * the nautical arrows read it, and (from #74) so does the climate. Consumers
- * must read this value, never re-fork "winds" to derive their own.
- */
+/** Radians, the direction the wind blows TOWARD, in grid coords (x east, y south); consumers read this and never re-fork "winds". */
 export type Winds = { readonly dir: number };
 
 export type World = {
@@ -69,26 +60,17 @@ export type World = {
   readonly settlements: ReadonlyArray<NamedSettlement>;
   readonly roads: ReadonlyArray<Road>;
   readonly realms: RealmsResult;
-  /** One coat of arms per realm, indexed by realm id (empty when no realms). */
   readonly arms: ReadonlyArray<Arms>;
   readonly culture: Culture;
   readonly title: MapTitle;
   readonly names: FeatureNames;
-  /** The world's deterministic history: founding dates, ruins, a chronicle. */
   readonly history: History;
   /** Hop distance from the nearest land cell, over water. */
   readonly oceanDist: Float64Array;
-  /** Present on regional charts: ties scale back to the parent world. */
   readonly region?: {
     readonly window: UvWindow;
     readonly worldGridW: number;
-    /**
-     * #234: the parent world's sea/lake partition projected onto the region grid
-     * (1 = genuine border-connected sea, 0 = land or an inland lake). The region's
-     * own `seaMask` cannot be trusted for this: cropping reconnects an inland lake
-     * to the window edge, so it floods as sea. Furniture that must sit on the open
-     * sea (the sea caption) reads THIS, not `oceanDist`.
-     */
+    /** 1 = genuine border-connected sea, 0 = land or an inland lake; a cropped region's own seaMask floods lakes as sea, so sea furniture reads THIS, not oceanDist. */
     readonly seaGate?: Uint8Array;
   };
 };

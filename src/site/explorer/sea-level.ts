@@ -1,8 +1,6 @@
-// Sea-level slider (#55). The slider value is landFraction x 1000 (an integer in [100,
-// 700]); these are trivial inverses so the gesture cannot ship backwards. clampLand keeps
-// every value strictly inside (0, 1) so pickSeaLevel never throws on a crafted hash. The
-// slider's `landTouched` gate + the redraw wiring stay in src/site/explorer/app.ts (the
-// conductor); this module is the pure conversions + the two DOM writes.
+// Sea-level slider (#55): pure conversions + the two DOM writes (the slider value is
+// landFraction x 1000; clampLand keeps every value strictly inside (0, 1) so
+// pickSeaLevel never throws on a crafted hash). The landTouched gate + redraw wiring stay in app.ts.
 import { defaultRecipe } from "../../world/generate.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 
@@ -25,8 +23,7 @@ export function updateLandReadout(): void {
   landSlider.setAttribute("aria-valuetext", `${pct}% land`);
 }
 
-// Display-only: park the slider at the world's natural waterline. Must NOT mutate
-// the overrides passed to the worker (auto mode sends no landFraction override).
+// Display-only: park the slider at the world's natural waterline. Must NOT mutate the overrides passed to the worker (auto mode sends no landFraction override).
 export function syncAutoSlider(
   seed: number,
   overrides: Partial<WorldRecipe>,

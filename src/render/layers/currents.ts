@@ -15,12 +15,6 @@ const HALF_STEPS = 16; // steps traced each way from the seed
 const MIN_OCEAN_DIST = 4; // a streamline stays this many hops off any coast
 const START_OCEAN_DIST = 7; // seeds sit well offshore so lines have room
 
-/**
- * Flow direction at a grid point: the curl (perpendicular gradient) of an fBm
- * stream function. Curl is divergence-free, so streamlines swirl into closed
- * gyres rather than the uniform drift of the wind arrows. Returns null where
- * the field is too flat to give a stable direction.
- */
 function flowAt(x: number, y: number, seed: number): Vec | null {
   const eps = 0.6;
   const p = (xx: number, yy: number): number =>
@@ -34,13 +28,6 @@ function flowAt(x: number, y: number, seed: number): Vec | null {
   return [vx / m, vy / m];
 }
 
-/**
- * Trace one current streamline through open water, in GRID coordinates, by
- * integrating the flow field forward and backward from a seed cell. Every
- * returned point sits at least MIN_OCEAN_DIST hops from land and inside the
- * grid; tracing in a direction stops the moment it would leave open water.
- * Pure and deterministic — the water-adherence guarantee is unit-tested here.
- */
 export function traceStreamline(
   world: World,
   x0: number,
@@ -54,8 +41,6 @@ export function traceStreamline(
     const ix = Math.round(x);
     const iy = Math.round(y);
     if (ix < 1 || iy < 1 || ix > w - 2 || iy > h - 2) return false;
-    // A streamline stays in genuine sea: oceanDist cannot tell an inland lake from
-    // the open sea, and on a region the crop can reconnect a lake to the border.
     if (gate && gate[ix + iy * w] === 0) return false;
     return (od[ix + iy * w] as number) >= MIN_OCEAN_DIST;
   };
@@ -103,11 +88,6 @@ function chevron(
   });
 }
 
-/**
- * Ocean-current streamlines over open water (nautical charts). Flowing,
- * curving lines with a few downstream chevrons — read as currents, and stay
- * distinct from the straight, single-headed prevailing-wind arrows.
- */
 export function currentsLayer(
   ctx: RenderCtx,
   cartouche: CartouchePlan,
@@ -131,7 +111,6 @@ export function currentsLayer(
   for (let gy = 5; gy < h - 5; gy += 4) {
     for (let gx = 5; gx < w - 5; gx += 4) {
       if ((world.oceanDist[gx + gy * w] as number) < START_OCEAN_DIST) continue;
-      // #251: seed streamlines only in the parent's genuine sea, never an inland lake.
       if (world.region?.seaGate && world.region.seaGate[gx + gy * w] === 0) continue;
       const px = proj.px(gx);
       const py = proj.py(gy);
@@ -171,7 +150,6 @@ export function currentsLayer(
       }),
     );
 
-    // a few downstream chevrons spaced along the smoothed line
     const chevrons = 3;
     for (let c = 1; c <= chevrons; c++) {
       const i = Math.round(((line.length - 1) * c) / (chevrons + 1));

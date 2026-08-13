@@ -9,7 +9,6 @@ const { w, h } = world.elev;
 const noiseSeed = world.recipe.seed + 7919;
 const MIN_OCEAN_DIST = 4;
 
-// a sample of offshore seed cells to trace from
 const seeds: Array<[number, number]> = [];
 for (let gy = 5; gy < h - 5; gy += 6) {
   for (let gx = 5; gx < w - 5; gx += 6) {

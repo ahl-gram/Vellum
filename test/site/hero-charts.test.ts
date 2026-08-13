@@ -5,17 +5,8 @@ import { fileURLToPath } from "node:url";
 import { heroChartSvgs } from "../../scripts/hero-charts.ts";
 import { diffSvg, DRIFT_TOL } from "../../scripts/svg-drift.ts";
 
-/**
- * Drift guard (#40 part 2): the committed `public/charts/*.svg` heroes are content
- * the homepage embeds by relative path, but nothing re-rendered them from src/.
- * A `src/render` change that alters how seed 42 draws could leave the homepage
- * showing stale charts silently. This re-renders them via heroChartSvgs() (the
- * same function `npm run charts:regen` writes with) and compares via diffSvg,
- * which is tolerant of cross-platform float noise but catches real drift (see
- * svg-drift.ts for the why, and svg-drift.test.ts for the tolerance/structure
- * guarantees). On a real drift this fails loudly with the offending magnitudes;
- * then run `npm run charts:regen` (and land the regen alone).
- */
+// Drift guard (#40 part 2): nothing else re-renders the committed public/charts heroes, so a src/render change could leave the homepage stale; this re-renders via heroChartSvgs() (the charts:regen function) and compares via diffSvg, tolerant of cross-platform float noise.
+// On a real drift: run npm run charts:regen and land the regen ALONE. See svg-drift.ts for the tolerance rationale.
 
 const chartsDir = fileURLToPath(new URL("../../public/charts/", import.meta.url));
 

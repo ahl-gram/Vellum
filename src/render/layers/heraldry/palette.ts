@@ -2,21 +2,12 @@ import type { MapStyle } from "../../style.ts";
 import type { Tincture } from "../../../society/heraldry.ts";
 import { inkHatch, type HatchScheme } from "./hatch.ts";
 
-/**
- * Tincture palettes for arms. PURE: a small lookup keyed off the map style, so
- * the same arms render identically wherever they are drawn.
- */
-
 export type ArmsPalette = {
-  /** Fill hex for a tincture — used by charges everywhere, and by the field on colour styles. */
   tincture(t: Tincture): string;
-  /** Shield outline + charge linework. */
   readonly outline: string;
-  /** Field hatching for monochrome styles (ink); null on colour styles, which fill solid. */
   readonly hatch: HatchScheme | null;
 };
 
-// Canonical heraldic tinctures, muted a touch to sit on parchment.
 const HERALDIC: Record<Tincture, string> = {
   or: "#c8a032",
   argent: "#efe8d6",
@@ -27,9 +18,6 @@ const HERALDIC: Record<Tincture, string> = {
   purpure: "#6f4a78",
 };
 
-// The ink style hatches its FIELD (see hatch.ts); its CHARGES keep this grey value
-// ladder (metal light, colour dark), which stays crisp at on-map sizes where fine
-// hatch would turn to mud.
 const GREYS: Record<Tincture, string> = {
   argent: "#f1ece1",
   or: "#d6d0c2",

@@ -6,13 +6,6 @@ import { terrainGlyphsPresent } from "./glyphs.ts";
 import { THEMES } from "./field.ts";
 import { iconNode, type Icon } from "./legend-icons.ts";
 
-/**
- * A compact, style-aware "key" panel. It lists only the symbols a given map
- * actually carries and reuses the real glyph definitions so the key matches
- * the chart exactly. Opt-in (RenderOptions.legend); planned as furniture so
- * it sits clear of the cartouche, compass, and scale bar.
- */
-
 type Row = { icon: Icon; label: string };
 
 export type LegendPlan = {
@@ -40,7 +33,6 @@ const FOREST: ReadonlyArray<{ biomes: number[]; sym: string }> = [
   { biomes: [BIOMES.tropicalForest, BIOMES.jungle], sym: "gl-tree-palm" },
 ];
 
-/** The most common forest type's tree symbol, or null if no forests. */
 function dominantTree(ctx: RenderCtx): string | null {
   const counts = FOREST.map(() => 0);
   for (const b of ctx.world.biomes) {
@@ -63,7 +55,6 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
   const { style, world, theme } = ctx;
   const rows: Row[] = [];
 
-  // A thematic plate leads with its color key; the terrain symbology is suppressed.
   if (theme) {
     for (const sw of THEMES[theme].legendRows(world, style)) {
       rows.push({ icon: { kind: "swatch", color: sw.color }, label: sw.label });
@@ -74,24 +65,16 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
 
   const tiers = new Set(world.settlements.map((s) => s.kind));
   if (tiers.has("capital")) rows.push({ icon: { kind: "settlement", tier: "capital" }, label: "Capital" });
-  // A "Realm seat" row iff a seat glyph is actually drawn: some realm's seat is a
-  // non-capital settlement present on this sheet. On a world chart every seat index
-  // is valid, so this equals the old seats.length > 1 (golden-safe); on a regional
-  // survey (#162) seats carry -1 sentinels for off-window seats, so the atlas'
-  // capital plate no longer claims a seat key it never draws.
   const seatDrawn = world.realms.seats.some(
     (i) => i >= 0 && world.settlements[i]?.kind !== "capital",
   );
   if (seatDrawn) rows.push({ icon: { kind: "settlement", tier: "seat" }, label: "Realm seat" });
   if (tiers.has("town")) rows.push({ icon: { kind: "settlement", tier: "town" }, label: "Town" });
   if (tiers.has("village")) rows.push({ icon: { kind: "settlement", tier: "village" }, label: "Village" });
-  // hamlets exist only on deepest-band region sheets (#171), so this row can
-  // never appear on a world chart (golden-safe by the same kind-presence gate)
   if (tiers.has("hamlet")) rows.push({ icon: { kind: "settlement", tier: "hamlet" }, label: "Hamlet" });
   if (world.settlements.some((s) => s.ruined)) rows.push({ icon: { kind: "ruin" }, label: "Ruins" });
 
   if (theme) {
-    // terrain glyphs / hypso / nautical symbology are not drawn under a theme
   } else if (style.name === "nautical") {
     rows.push({ icon: { kind: "sounding" }, label: "Depth, fathoms" });
     rows.push({ icon: { kind: "rock" }, label: "Rock awash" });
@@ -114,8 +97,6 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
   const roadRanks = new Set(world.roads.map((r) => r.rank));
   if (roadRanks.has("trunk")) rows.push({ icon: { kind: "road", rank: "trunk" }, label: "Road" });
   if (roadRanks.has("lane")) rows.push({ icon: { kind: "road", rank: "lane" }, label: "Track" });
-  // Realm tints and borders are world-sheet-only (#161/#162): a regional survey
-  // draws none (its labels are all -1), so it must not key one either.
   if (
     !theme &&
     style.politicalTints &&
@@ -146,7 +127,6 @@ export function planLegend(ctx: RenderCtx, reserved: ReadonlyArray<Box>): Legend
   const bw = m.pad * 2 + contentW;
   const bh = m.pad * 2 + m.titleFs + m.titleGap + rows.length * m.rowH + m.noteGap + m.noteFs;
 
-  // try each corner, prefer the first that clears all reserved furniture
   const inset = 16 * k;
   const mg = proj.margin;
   const right = proj.widthPx - mg - inset - bw;

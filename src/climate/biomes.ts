@@ -32,10 +32,8 @@ export function biomeName(id: number): BiomeName {
 }
 
 function landBiome(rel: number, t: number, m: number): BiomeId {
-  // elevation overrides
   if (rel > 0.82) return t < 0.65 ? BIOMES.snow : BIOMES.alpine;
   if (rel > 0.68 && t < 0.75) return BIOMES.alpine;
-  // shoreline overrides
   if (rel < 0.035 && t > 0.3) return BIOMES.beach;
   if (rel < 0.08 && m > 0.78) return BIOMES.marsh;
 
@@ -68,8 +66,6 @@ export function classifyBiomes(
   const { data } = elev;
   const out = new Uint8Array(data.length);
 
-  // A regional survey passes the PARENT world's span (#162) so the snow/alpine
-  // bands do not shift at the window boundary; otherwise use the field's own max.
   let rawSpan = elevSpan;
   if (rawSpan === undefined) {
     let maxElev = -Infinity;

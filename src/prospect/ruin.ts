@@ -1,11 +1,3 @@
-/**
- * The ruin grammar (#239, #237 GO condition 3): a ruin is a FIELD of
- * collapse, not just broken rooflines. Strewn rubble, fallen beams leaning
- * on the stumps, greenery reclaiming the floors, the heeling wall stub
- * (masses.ts), and birds. The drowned fen variant sinks the skyline
- * beneath a water sheet (the spike's Saltmere plate).
- */
-
 import type { Rng } from "../core/rng.ts";
 import {
   VIEW_X0,
@@ -18,7 +10,6 @@ import {
   type Water,
 } from "./geometry.ts";
 
-/** The collapse field strewn across the townscape's run. */
 export function composeCollapseField(
   ground: Ground,
   front: ReadonlyArray<Mass>,
@@ -60,8 +51,6 @@ export type DrownedComposition = {
   readonly elements: ForegroundElement[];
 };
 
-/** A ruined fen settlement drowns: the water sheet covers the ground, and
- * only a leaning tower stub and a half-sunk gable still stand in it. */
 export function composeDrowned(ground: Ground, rng: Rng): DrownedComposition {
   const cx = (VIEW_X0 + VIEW_X1) / 2;
   const base = ground.base;

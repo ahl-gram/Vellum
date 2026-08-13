@@ -1,11 +1,3 @@
-/**
- * The tier ladder (#239, #237 GO condition 2): building masses from kind
- * and score, to the spike's second state (PR #342). Five tiers, packed
- * front and back rows, verticals rising from front-row slots, a keep for
- * capital and seat, and the curtain wall. The mapping is frozen: the same
- * site always composes the same skyline.
- */
-
 import type { Rng } from "../core/rng.ts";
 import type { ProspectKind } from "./input.ts";
 import {
@@ -28,7 +20,6 @@ type Tier = {
   readonly walled: boolean;
 };
 
-/** The five-tier ladder, from the spike's ratified townscape() table. */
 const TIERS: Record<ProspectKind, Tier> = {
   capital: { n: 11, hMin: 16, hMax: 30, spires: 3, keepW: 34, walled: true },
   seat: { n: 9, hMin: 14, hMax: 25, spires: 2, keepW: 26, walled: true },
@@ -37,11 +28,7 @@ const TIERS: Record<ProspectKind, Tier> = {
   hamlet: { n: 3, hMin: 9, hMax: 13, spires: 0, keepW: 0, walled: false },
 };
 
-/** Typical raw scores per tier (sites run ~0.3-8, hamlets sit on a slimmer
- * scale capped near 2; see input.ts). Score modulates WITHIN a kind.
- * Exported so test fixtures normalize with the SAME table the composer
- * uses; a retuned grammar must move both together or the tier tests start
- * hitting the 0.75/1.25 clamps differently while staying green. */
+/** Exported so test fixtures normalize with the SAME table; retune the grammar and this must move with it. */
 export const TYPICAL_SCORE: Record<ProspectKind, number> = {
   capital: 6,
   seat: 4.5,
@@ -50,17 +37,13 @@ export const TYPICAL_SCORE: Record<ProspectKind, number> = {
   hamlet: 1.2,
 };
 
-/** Score factor, clamped so tiers stay legible: an exceptional village never
- * out-masses a poor town's floor. */
 function scoreFactor(kind: ProspectKind, score: number): number {
   return Math.min(1.25, Math.max(0.75, score / TYPICAL_SCORE[kind]));
 }
 
 const KEEP_TALL_BONUS = 16;
 const KEEP_SHORT_BONUS = 10;
-/** Verticals ride above the roofline by a bonus dominated by the score's
- * height scale, keeping "higher score composes taller" true for every draw
- * (the random span 6 is smaller than the +-10% the scale can move). */
+/** The random span stays smaller than the score scale can move, keeping higher score composes taller true for every draw. */
 const VERTICAL_BONUS = 10;
 const VERTICAL_JITTER = 6;
 const WALL_MARGIN = 12;
@@ -97,11 +80,6 @@ function packRow(
   return row.map((b) => ({ ...b, x: b.x + shift }));
 }
 
-/**
- * Compose the townscape for one site. `fen` drops the wall (nothing walls a
- * fen town). Masses return in paint order: back row, keep, front row,
- * verticals; walls paint between the back row and the keep.
- */
 export function composeTownscape(
   kind: ProspectKind,
   score: number,
@@ -145,12 +123,6 @@ export function composeTownscape(
     keep = { form: "keep", x: cx - w / 2, w, h, base: g(cx) - raise, raise, broken };
   }
 
-  // GROUNDING INVARIANT (#237 GO condition 8, the spike's twice-seen failure
-  // class): a back-row mass is raised for depth, so it may exist ONLY where
-  // the packed front row fully covers it; anywhere else its raised base
-  // reads as a floating building. Packing keeps the front span one
-  // contiguous interval, so containment is the whole check, and
-  // groundingViolations() re-verifies the class on the finished geometry.
   const back: Mass[] = backRow
     .map((b) => ({ ...b, x: b.x + 6 }))
     .filter((b) => b.x >= first.x && b.x + b.w <= lastB.x + lastB.w)
@@ -175,8 +147,6 @@ export function composeTownscape(
   }));
 
   let masses: Mass[] = [...back, ...(keep ? [keep] : []), ...front, ...verticals];
-  // A ruined skyline must SHOW ruin: if every per-mass draw came up intact,
-  // break the tallest front mass (correctness insurance, rarely taken).
   if (ruined && !masses.some((m) => m.broken)) {
     let tallest = 0;
     front.forEach((m, i) => {
@@ -191,7 +161,6 @@ export function composeTownscape(
     walls.push({ x0: runX0, x1: runX1, h: kind === "capital" ? 13 : 10, gate: true, heel: 0 });
   }
   if (walled && ruined) {
-    // The broken wall: two stubs hugging the run, the right one heeling over.
     walls.push({ x0: runX0, x1: runX0 + 44, h: 9, gate: false, heel: 0 });
     walls.push({ x0: runX1 - 38, x1: runX1, h: 8, gate: false, heel: -5 });
   }

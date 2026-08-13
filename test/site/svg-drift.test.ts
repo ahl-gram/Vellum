@@ -2,13 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { diffSvg, DRIFT_TOL, type SvgDiff } from "../../scripts/svg-drift.ts";
 
-/**
- * Unit tests for the drift-guard comparison (svg-drift.ts). The hero-charts guard
- * (hero-charts.test.ts) exercises diffSvg against the real committed charts, but
- * on a single platform it only ever sees the byte-identical case. These pin the
- * behaviours that matter on CI and across machines — proven here with synthetic
- * inputs instead of by hand-perturbing committed files.
- */
+// Unit tests for the drift-guard comparison: on one platform the hero-charts guard only ever sees the byte-identical case, so the CI and cross-machine behaviours are pinned here with synthetic inputs.
 
 function expectNumeric(d: SvgDiff | null): Extract<SvgDiff, { kind: "numeric" }> {
   if (d?.kind !== "numeric") assert.fail(`expected a numeric diff, got ${d?.kind ?? "null"}`);
@@ -21,9 +15,7 @@ test("identical SVGs report no diff", () => {
 });
 
 test("trailing-ULP numeric noise is within tolerance (the cross-platform case)", () => {
-  // ~1e-13 delta — the magnitude CI measured (1.14e-13) between linux/node26 and
-  // mac/node22. Near 1.0 a 1e-13 difference is hundreds of ULPs, so the two
-  // strings parse to distinct doubles (unlike 1e-13 near 1157, which is sub-ULP).
+  // ~1e-13 is the delta CI measured between linux and mac; near 1.0 that is hundreds of ULPs, so the two strings parse to distinct doubles (near 1157 the same delta is sub-ULP).
   const a = "<path d=\"M1.0000000000001 0\"/>";
   const b = "<path d=\"M1.0000000000002 0\"/>";
   const d = expectNumeric(diffSvg(a, b));
@@ -64,6 +56,5 @@ test("a changed attribute value (no number change) is caught structurally", () =
 test("tolerance is configurable: the same 0.01 flip is drift under a tighter tol", () => {
   const tight = expectNumeric(diffSvg("<path d=\"M0.34 0\"/>", "<path d=\"M0.35 0\"/>", 0.001));
   assert.equal(tight.overTol, 1, "0.01 exceeds a 0.001 tolerance");
-  // and the default tolerance is the documented 0.05
   assert.equal(DRIFT_TOL, 0.05);
 });

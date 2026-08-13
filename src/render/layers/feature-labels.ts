@@ -17,30 +17,21 @@ const FOREST_BIOMES: ReadonlySet<number> = new Set<number>([
   BIOMES.taiga,
 ]);
 
-// #178: a river name may claim a reach as long as its true ink overlaps every label
-// by LESS than this fraction of the smaller box. Matches the issue's own >= 15%
-// "substantial collision" bar (and the label-overlap test), so a river grazing a
-// settlement name by a few percent keeps its label instead of vanishing, while a
-// real burial still yields. Terrain glyphs never reserve arena space, so this only
-// ever yields to other TEXT.
+// Ink may graze another label by under this fraction of the smaller box; terrain glyphs reserve nothing, so this yields only to TEXT.
 const RIVER_MAX_OVERLAP = 0.15;
 
-/** Offsets tried (in order) when a feature label's first spot is taken. */
 function offsetCandidates(y: number, k: number): number[] {
   return [y, y - 26 * k, y + 26 * k, y - 52 * k, y + 52 * k];
 }
 
 export type RealmAnchor = {
   readonly realm: number;
-  /** Center and half-extents of the placed realm label box, so a shield can be
-   *  tried on any side of it. */
   readonly cx: number;
   readonly cy: number;
   readonly halfW: number;
   readonly halfH: number;
 };
 
-/** Sea name, named rivers along their courses, mountain range, forest. */
 export function featureLabelsLayer(ctx: RenderCtx): {
   defs: SvgNode[];
   node: SvgNode;
@@ -53,11 +44,6 @@ export function featureLabelsLayer(ctx: RenderCtx): {
   const nodes: SvgNode[] = [];
   const realmAnchors: RealmAnchor[] = [];
 
-  // --- sea label in open water, shrinking until it fits ---
-  // #234: on a region, gate the candidates on the parent world's sea/lake partition
-  // so the caption never lands on an inland lake the crop reconnected to the window
-  // edge. World sheets have region === undefined, so this is inert there and the
-  // committed goldens stay byte-identical.
   const seaGate = world.region?.seaGate;
   const deep: Array<{ px: number; py: number; d: number }> = [];
   for (let gy = 3; gy < h - 3; gy += 2) {
@@ -98,17 +84,7 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     }
   }
 
-  // --- mountain range label over the LARGEST connected range ---
-  //
-  // CLAIM ORDER IS LOAD-BEARING (#175). The range name claims BEFORE the realm
-  // names, because it is pinned: it can only sit on its own ridge, at its own
-  // angle. A realm name can roam its whole heartland and, since #145, is force-
-  // placed if it must be. So first refusal goes to the label that cannot move.
-  // Claiming realms first (the pre-#175 order) starved the range name, and once
-  // its box told the truth it vanished from about one chart in eight.
-  //
-  // Painting in this order also puts the realm names ON TOP of the range's opaque
-  // paper casing, instead of the casing washing over them.
+  // Claim order is load-bearing: the range name claims FIRST because it cannot move, while realm names roam and force-place; painting in this order also keeps realm names on top of the range casing.
   if (world.names.range) {
     const blob = largestBlob(w, h, (i) => {
       const b = world.biomes[i] as number;
@@ -123,11 +99,6 @@ export function featureLabelsLayer(ctx: RenderCtx): {
       const angle = clamp((principalAngle(peaks) * 180) / Math.PI, -32, 32);
       const padX = 7 * k;
       const padY = 4 * k;
-      // #175: the range name renders .toUpperCase() and is drawn ROTATED along the
-      // ridge, behind an opaque paper casing that is painted OVER the realm names.
-      // It must therefore reserve what it paints: caps width, padded out to the
-      // casing, and spun into a chain of boxes that hug the ink rather than one
-      // bounding box ten times taller than the text.
       const claimAt = (cx: number, cy: number, fs: number): Box[] => {
         const text = spacedTextBox(cx, cy, world.names.range!, fs, 3 * k, WIDTH_FACTOR.caps);
         const casing = {
@@ -138,11 +109,6 @@ export function featureLabelsLayer(ctx: RenderCtx): {
         };
         return rotatedSpanBoxes(casing, angle, cx, cy);
       };
-      // The honest claim needs more room than the old dishonest one, so the label
-      // must be able to give ground rather than vanish. It escalates the way the
-      // realm name does (#145: the historical ladder first, then along the ridge
-      // itself), and then, like the sea name above, SHRINKS to fit rather than
-      // dropping off the chart.
       let placed: (Pt & { fs: number }) | undefined;
       for (const fsBase of [14.5, 13, 11.5, 10]) {
         const fs = fsBase * k;
@@ -158,9 +124,6 @@ export function featureLabelsLayer(ctx: RenderCtx): {
       }
       if (placed !== undefined) {
         const { x: placedX, y: placedY, fs } = placed;
-        // a soft paper casing clears a clean lane through the dense mountain
-        // glyphs so the spaced capitals read; the opaque fill + halo do the
-        // rest. Rotated with the label and drawn first, so text sits on top.
         const box = spacedTextBox(placedX, placedY, world.names.range, fs, 3 * k, WIDTH_FACTOR.caps);
         const spin = `rotate(${angle.toFixed(1)} ${placedX.toFixed(1)} ${placedY.toFixed(1)})`;
         nodes.push(
@@ -195,11 +158,8 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     }
   }
 
-  // --- realm names over their heartlands ---
   world.names.realms.forEach((name, realm) => {
     const blob = largestBlob(w, h, (i) => world.realms.labels[i] === realm);
-    // A realm with no cells cannot be labelled anywhere; every other realm gets a
-    // name, however small or however crowded its heartland (#145).
     if (blob.length === 0) return;
     const pts = blob.map((i) => ({
       x: proj.px(i % w),
@@ -219,9 +179,6 @@ export function featureLabelsLayer(ctx: RenderCtx): {
       ls,
       arena: labels,
     });
-    // Size the shield anchor with the same caps-aware width the label now claims,
-    // so a side-placed coat of arms clears the final letters instead of tucking
-    // over them.
     const labelW = name.length * (fs * WIDTH_FACTOR.caps + ls);
     realmAnchors.push({ realm, cx: placedX, cy: placedY - 0.4 * fs, halfW: labelW / 2, halfH: 0.6 * fs });
     nodes.push(
@@ -231,9 +188,7 @@ export function featureLabelsLayer(ctx: RenderCtx): {
           x: placedX, y: placedY, "text-anchor": "middle",
           "font-family": style.fontFamilyTitle,
           "font-size": fs.toFixed(1),
-          // #158: bold + near-opaque + a fatter halo so a realm name reads over
-          // mountains and forests. Size is held (see fs above): it is the only one
-          // of these that feeds tryClaim, so changing it could unplace a label.
+          // Only the font size feeds tryClaim, so changing it could unplace a label.
           "font-weight": 700,
           "letter-spacing": ls.toFixed(1),
           fill: style.labelColor,
@@ -247,9 +202,6 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     );
   });
 
-  // --- river names along the straightest reach of each course ---
-  // longest first so the major rivers win label space; collision avoidance
-  // (tryClaim) then limits density, so the count adapts to the chart size
   const named = [...world.names.rivers.entries()]
     .map(([idx, name]) => ({ river: world.rivers[idx]!, name }))
     .sort((a, b) => b.river.points.length - a.river.points.length);
@@ -258,19 +210,8 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     const raw = river.points.map((p) => [proj.px(p.x), proj.py(p.y)] as const);
     const pts = chaikinSmooth(raw, false, 2);
     const fs = 10.5 * k;
-    // Try the straightest reach first, then spread alternatives, so a river
-    // whose best spot is taken can still label a free stretch elsewhere. Each
-    // tryClaim only reserves on success, so failed candidates cost nothing.
     let place: RiverLabelPlacement | null = null;
     for (const cand of reachPlacements(pts, name.length * fs * 0.52)) {
-      // #178: the label is drawn ROTATED up to +/-50 degrees along the reach (see the
-      // emit below), so its collision test measures the TRUE oriented ink, not an axis-
-      // aligned box its swung ends escape. The width factor is honest already (rivers
-      // draw as written, mixed case, 0.56); rotate the box about (cand.x, cand.y) -- the
-      // emit's rotate() center -- after dropping the baseline by the tspan dy, so the
-      // quad is exactly what the glyphs cover. A reach is taken if that ink grazes every
-      // label by < RIVER_MAX_OVERLAP; the fatter slices are then reserved so later labels
-      // clear the whole run.
       const box = textBox(cand.x, cand.y - 4 * k, name, fs, "middle");
       const ink = rotatedRect(box, cand.angleDeg, cand.x, cand.y);
       const footprint = rotatedSpanBoxes(box, cand.angleDeg, cand.x, cand.y);
@@ -302,7 +243,6 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     );
   }
 
-  // --- lake names at their centroids ---
   for (const lake of world.names.lakes) {
     const lx = proj.px(lake.x);
     const ly = proj.py(lake.y);
@@ -327,7 +267,6 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     );
   }
 
-  // --- forest label at the largest forest blob ---
   if (world.names.forest) {
     const blob = largestBlob(w, h, (i) => FOREST_BIOMES.has(world.biomes[i] as number));
     if (blob.length >= 25) {

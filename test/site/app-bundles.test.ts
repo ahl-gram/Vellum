@@ -5,21 +5,13 @@ import { existsSync, mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync
 import { resolve, join } from "node:path";
 import { tmpdir } from "node:os";
 
-// Sub 7 of the Scriptorium epic (#208): the bindery keeps one press. The Glass
-// (#163) introduced esbuild to bundle the Explorer's d3-zoom; Astro brought
-// Vite. This sub folds the esbuild step into a Vite build (the ratified
-// 2026-07-23 decisions on #208): one multi-entry build covers the Explorer,
-// the Seed of the Day, AND the Print Room (no longer unbundled), the worker
-// spawn moves to the static import-URL form Vite rewrites, and Vite emits one
-// shared bundled worker both spawning pages use. esbuild retires.
+// The bindery keeps one press (#208, ratified 2026-07-23): one multi-entry Vite build covers every app page, the worker spawn moves to the static import-URL form Vite rewrites, and esbuild retires.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
 test("all four app pages load their bundled app twin via is:inline, none load raw source (#208, #254)", () => {
-  // is:inline is load-bearing: without it Astro routes the script through its
-  // own Vite pass, which #204's ratified analysis rejects for these surfaces
-  // (the twins are already pressed by scripts/build-app-bundles.ts).
+  // is:inline is load-bearing: without it Astro routes the script through its own Vite pass, which #204's ratified analysis rejects for these surfaces.
   for (const [pageSource, src] of [
     ["src/pages/explorer/index.astro", /<script type="module" src="\.\/app\.bundle\.js" is:inline><\/script>/],
     ["src/pages/print-room/index.astro", /<script type="module" src="\.\/app\.bundle\.js" is:inline><\/script>/],
@@ -33,9 +25,7 @@ test("all four app pages load their bundled app twin via is:inline, none load ra
 });
 
 test("the hand-coded public/ shells retired with the re-shell (#254): routes and public/ stay disjoint", () => {
-  // Sub 1 constraint 9: Astro documents no collision precedence between a
-  // public/ file and a same-path route, so the src/pages/ routes above must be
-  // the only claimants of these URLs.
+  // Sub 1 constraint 9: Astro documents no collision precedence between a public/ file and a same-path route, so the routes must be the only claimants of these URLs.
   for (const shell of [
     "public/explorer/index.html",
     "public/print-room/index.html",
@@ -48,16 +38,13 @@ test("the hand-coded public/ shells retired with the re-shell (#254): routes and
 
 test("the worker spawn is the static import-URL form Vite owns (#208, TS source since #260)", () => {
   const ts = read("src/site/explorer/worker-client.ts");
-  // Vite only rewrites a STATICALLY ANALYZABLE `new Worker(new URL("./worker.ts",
-  // import.meta.url), ...)`; a variable spawn target would emit no worker chunk
-  // and 404 at runtime. The literal form below is therefore contractual.
+  // Vite only rewrites a STATICALLY ANALYZABLE new Worker(new URL(...)); a variable spawn target would emit no worker chunk and 404 at runtime, so the literal form is contractual.
   assert.match(
     ts,
     /new Worker\(new URL\("\.\/worker\.ts", import\.meta\.url\), \{ type: "module" \}\)/,
     "worker-client must spawn via the static import-URL form",
   );
   assert.doesNotMatch(ts, /workerUrl/, "the parameterized spawn target retired with the twin arrangement");
-  // Every spawning page calls the bare form; the emitted worker URL is Vite's.
   assert.match(read("src/site/explorer/app.ts"), /await initWorker\(\);/);
   const printRoom = read("src/site/print-room/app.ts");
   assert.match(printRoom, /await initWorker\(\);/);
@@ -79,8 +66,7 @@ test("the press bundles from the src/site TypeScript entries (#260)", async () =
 });
 
 test("public/ holds no committed source: the raw app JS and the .d.ts twins retired (#260)", () => {
-  // git ls-files is the oracle: the generated twins/chunks are .js files too,
-  // but gitignored; the acceptance is about COMMITTED content.
+  // git ls-files is the oracle: the generated twins/chunks are .js too but gitignored; the acceptance is about COMMITTED content.
   const tracked = execFileSync("git", ["ls-files", "public"], { cwd: REPO, encoding: "utf8" })
     .split("\n")
     .filter((f) => f.endsWith(".js") || f.endsWith(".d.ts"));
@@ -115,17 +101,12 @@ test("the cleaned set and gitignore cover the Print Room and Reading Room twins 
   }
 });
 
-// The behavior-preserving guarantees of the press itself, on a hermetic fixture
-// (the real public/ entries import ./engine/*.js, which only exists after the tsc
-// emit; `npm test` runs before it, so the fixture keeps this test self-contained).
-// Characterization of the new press, like #163's were of esbuild: the full e2e
-// against dist/ is what proves the real entries stay invisible.
+// Characterization of the press on a hermetic fixture (the real entries only resolve after generation; npm test runs before it); the full e2e against dist/ is what proves the real entries stay invisible.
 
 async function withFixture<T>(run: (dir: string) => T | Promise<T>): Promise<T> {
   const dir = mkdtempSync(join(tmpdir(), "vellum-bundle-"));
   try {
-    // entry pulls a relative module, awaits at the top level, and carries a
-    // non-ASCII glyph (like the gazetteer): each exercises one press knob.
+    // The entry pulls a relative module, awaits at top level, and carries a non-ASCII glyph: each exercises one press knob.
     mkdirSync(join(dir, "lib"));
     writeFileSync(join(dir, "lib", "greet.js"), `export const greet = (n) => "salut " + n;\n`);
     writeFileSync(
@@ -146,19 +127,15 @@ const bundleToString = async (absEntry: string): Promise<string> =>
 
 test("the press inlines relative imports into a self-contained bundle (#208)", async () => {
   const out = await withFixture((dir) => bundleToString(resolve(dir, "entry.js")));
-  // the relative dependency is inlined, so no import statement survives
   assert.doesNotMatch(out, /\bimport\b[^\n]*\bfrom\b/);
   assert.doesNotMatch(out, /\bimport\s*\(/);
-  // ...and its body actually made it in
   assert.match(out, /salut /);
 });
 
 test("the press preserves top-level await (format es) and non-ASCII glyphs (#208)", async () => {
   const out = await withFixture((dir) => bundleToString(resolve(dir, "entry.js")));
-  // top-level await only survives an ESM-format bundle (an iife/cjs bundle would
-  // have thrown at build time), so its presence proves format stayed es
+  // Top-level await only survives an ESM-format bundle (iife/cjs would have thrown at build time), so its presence proves format stayed es.
   assert.match(out, /await Promise\.resolve/);
-  // the glyph stays a literal é, not a \u escape
   assert.match(out, /café/);
   assert.doesNotMatch(out, /caf\\u00e9/);
 });

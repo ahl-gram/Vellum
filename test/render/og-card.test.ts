@@ -12,8 +12,7 @@ test("the OG card is a 1200x630 SVG document", () => {
   const card = buildOgCard(heroChart());
   assert.equal(OG_WIDTH, 1200);
   assert.equal(OG_HEIGHT, 630);
-  // The root <svg> must carry integer width/height in that order so the
-  // headless rasterizer's svgDimensions() regex can read them.
+  // The root <svg> must carry integer width/height in that order so the headless rasterizer's svgDimensions() regex can read them.
   const root = /^<svg\b[^>]*\swidth="(\d+)"[^>]*\sheight="(\d+)"/.exec(card);
   assert.ok(root, "card should open with an <svg> carrying width then height");
   assert.equal(root[1], "1200");
@@ -30,8 +29,7 @@ test("the card carries the Vellum wordmark and tagline", () => {
 
 test("the embedded hero chart keeps its recipe metadata and is letterboxed", () => {
   const card = buildOgCard(heroChart());
-  // The chart root is rewritten in place, not stripped, so its embedded
-  // recipe (data-vellum-seed, viewBox) survives into the card.
+  // The chart root is rewritten in place, not stripped, so its embedded recipe survives into the card.
   assert.match(card, /data-vellum-seed="42"/);
   assert.match(card, /preserveAspectRatio="xMidYMid meet"/);
   // exactly one nested chart (two <svg> opens total: outer card + chart)
@@ -40,11 +38,9 @@ test("the embedded hero chart keeps its recipe metadata and is letterboxed", () 
 
 test("the embedded chart root is resized to the card viewport, not 1500x1158", () => {
   const card = buildOgCard(heroChart());
-  // isolate the nested chart's opening tag (the second <svg ...> in the doc).
   const nestedStart = card.indexOf("<svg", card.indexOf("<svg") + 1);
   const nestedTag = card.slice(nestedStart, card.indexOf(">", nestedStart) + 1);
-  // the root tag carries the card-region size, not the chart's native size
-  // (width="1500" still appears deeper in the chart's own coordinate space).
+  // The nested root carries the card-region size; width="1500" still appears deeper, in the chart's own coordinate space.
   assert.doesNotMatch(nestedTag, /width="1500"/);
   assert.doesNotMatch(nestedTag, /height="1158"/);
   assert.match(nestedTag, /\sx="\d+"/);

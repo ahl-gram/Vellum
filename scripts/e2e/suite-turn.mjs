@@ -1,19 +1,7 @@
-// The sheet Turn (T, #131): a STYLE change turns the sheet over and the SAME world lands
-// re-dressed in the new style; a new world (seed/type/climate) settles and never turns.
-// Covers the turn-engaged assertion plus interruption and settle-supersedes-turn races.
-// Split from suite-explorer-core.mjs (was the G-prefix); waitTurned/armTurnWatch now on ctx.
+// Sheet turn e2e (T, #131): a STYLE change turns the sheet and the same world lands re-dressed; a new world settles and never turns. e2e cannot SEE the 3D turn, so these assert end states plus armTurnWatch's .turning record (engaged vs instant swap).
 export async function run(ctx) {
   const { evaluate, check, shoot, sleep, waitSettled, waitTurned, armTurnWatch } = ctx;
-  // G: the style turn (#131). Changing the STYLE turns the sheet over and the SAME
-  // world lands re-dressed in the new style; a new world (seed/type/climate) settles
-  // per #127. The 3D page-turn itself cannot be SEEN by e2e (no hover/animation
-  // inspection), so these assert END STATES plus, via a MutationObserver on the
-  // sheet, whether the turn actually ENGAGED (the .turning class toggled) vs an
-  // instant swap. The place manifest is style-independent (style is a render dress
-  // over one world), so a turn leaves the hit count unchanged.
 
-  // A clean antique seed-42 base, chronicle off, so the turn path (not the scrub
-  // carve-out) is exercised and the manifest is known.
   await evaluate(`(()=>{
     const chk=document.getElementById("ages");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}
     document.getElementById("seed").value="42";document.getElementById("style").value="antique";
@@ -22,7 +10,6 @@ export async function run(ctx) {
   })()`);
   await waitSettled("turn-base");
   const gPlaces = await evaluate(`window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest.places.length`);
-  // T1: a style change turns the sheet and the same world lands re-dressed in ink.
   await armTurnWatch();
   await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await waitTurned("style->ink");
@@ -31,7 +18,6 @@ export async function run(ctx) {
   check("T1b it lands re-dressed: one #map svg, data-vellum-style=ink, SAME world (seed 42), overlay rebuilt", g1.svgCount === 1 && g1.style === "ink" && g1.seed === "42" && g1.hits === gPlaces && g1.back === 0 && g1.turning === false && g1.cap, JSON.stringify(g1) + ` places=${gPlaces}`);
   await shoot("explorer-style-turn-ink.png");
 
-  // T2: a SEED change SETTLES, it does not turn (style is the only turn trigger).
   await armTurnWatch();
   await evaluate(`(()=>{document.getElementById("seed").value="100";document.getElementById("draw").click();})()`);
   await waitSettled("seed-settle-no-turn");
@@ -39,9 +25,6 @@ export async function run(ctx) {
   const g2 = await evaluate(`(()=>{const svg=document.querySelector("#map svg");return{turned:window.__turned,seed:svg?svg.getAttribute("data-vellum-seed"):null,svgCount:document.querySelectorAll("#map svg").length};})()`);
   check("T2 a new world settles, it never turns (style is the only turn trigger)", g2.turned === false && g2.seed === "100" && g2.svgCount === 1, JSON.stringify(g2));
 
-  // T3 (interruption): interrupt a LIVE turn. Turn to ink, let it run mid-flight,
-  // then turn to topographic; the running ink turn is cancelled and the sheet lands
-  // on topographic with no orphan back face and no leaked WAAPI animation.
   await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("draw").click();})()`);
   await waitSettled("turn-interrupt-base");
   await armTurnWatch();
@@ -54,8 +37,6 @@ export async function run(ctx) {
   check("T3 interrupting a live turn lands on the latest style, no orphan sheet", g3.style === "topographic" && g3.svgCount === 1 && g3.back === 0 && g3.turning === false, JSON.stringify(g3));
   check("T4 no leaked choreography after the settle-window (no .turning, no back face, no live WAAPI anim on the leaf)", g3.turning === false && g3.back === 0 && g3.anims === 0, JSON.stringify(g3));
 
-  // T5: a turn interrupted by a SETTLE (style change, then a seed change) resolves to
-  // the seed's new world, not the turned style's world.
   await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("draw").click();})()`);
   await waitSettled("turn-then-settle-base");
   await evaluate(`(()=>{const s=document.getElementById("style");s.value="nautical";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
@@ -66,13 +47,7 @@ export async function run(ctx) {
   const g5 = await evaluate(`(()=>{const svg=document.querySelector("#map svg");return{seed:svg?svg.getAttribute("data-vellum-seed"):null,svgCount:document.querySelectorAll("#map svg").length,back:document.querySelectorAll(".sheet-back").length,turning:!!document.querySelector(".sheet.turning")};})()`);
   check("T5 a settle superseding a live turn wins: lands on the new world, no orphan", g5.seed === "7" && g5.svgCount === 1 && g5.back === 0 && g5.turning === false, JSON.stringify(g5));
 
-  // T6: a settle fired WHILE a turn is live must tear the turn down SYNCHRONOUSLY, not
-  // only when the settle's own worker resolves. Otherwise a turn superseded late self-
-  // commits its stale chart (its natural landing is gated on `settled`, not drawGen)
-  // and wipes the overlay before the settle lands. This asserts the turn is gone the
-  // instant the settle's draw() runs (cancelTurn at draw() top), and the settled world
-  // lands interactive. A regression that removed the synchronous cancelTurn would leave
-  // .sheet.turning still set right after the click, failing T6.
+  // A settle during a LIVE turn must tear it down SYNCHRONOUSLY (cancelTurn at draw() top): a turn superseded late self-commits its stale chart, since its natural landing is gated on `settled`, not drawGen, and wipes the overlay before the settle lands.
   await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("draw").click();})()`);
   await waitSettled("g6-base");
   await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);

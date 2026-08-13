@@ -3,11 +3,8 @@ import { washConflictMatrix } from "./cvd.ts";
 
 export type Centroid = { readonly x: number; readonly y: number };
 
-/** The frozen per-style base palette size; distance-aware assignment engages
- *  only beyond it, so every committed <=5-realm chart stays byte-identical. */
 export const BASE_TINTS = 5;
 
-/** Territory centroid (mean cell position) of each realm, indexed by realm id. */
 export function realmCentroids(
   labels: Int16Array,
   w: number,
@@ -35,8 +32,6 @@ export function realmCentroids(
   return out;
 }
 
-/** Realm border adjacency: `adjacency[i]` holds every realm id sharing a
- *  4-connected land border with realm i. */
 export function realmAdjacency(
   labels: Int16Array,
   w: number,
@@ -70,17 +65,6 @@ export function realmAdjacency(
 const dist2 = (a: Centroid, b: Centroid): number =>
   (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 
-/**
- * Assign a palette index to each realm so that realms which read as visually
- * close - within `confusionDist`, or sharing a land border - never receive the
- * same or a colour-blind-confusable tint, while far-apart realms may reuse a
- * colour. Proximity drives the difference, per #78 (two nearby islands must not
- * read as one nation), with border adjacency as an extra same-landmass guard.
- *
- * Pure and deterministic: realms are coloured in a fixed Welsh-Powell order
- * (highest confusion-degree first, realm id breaking ties), so the result is a
- * function of geometry alone with no float-ordering fragility.
- */
 export function assignRealmTints(
   centroids: readonly Centroid[],
   adjacency: readonly ReadonlySet<number>[],
@@ -91,7 +75,6 @@ export function assignRealmTints(
   const p = conflict.length;
   const near = confusionDist * confusionDist;
 
-  // confusion graph: an edge means the two realms must differ (proximity OR border)
   const neigh: Set<number>[] = Array.from({ length: n }, () => new Set<number>());
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
@@ -108,9 +91,6 @@ export function assignRealmTints(
 
   const color = new Array<number>(n).fill(-1);
   for (const r of order) {
-    // Two levels of block from already-coloured close neighbours: `idBlocked`
-    // is the hard one (the spec: a close realm must not share the exact tint);
-    // `cvdBlocked` is the soft one (avoid a colour-blind-confusable class).
     const idBlocked = new Array<boolean>(p).fill(false);
     const cvdBlocked = new Array<boolean>(p).fill(false);
     for (const m of neigh[r]!) {
@@ -121,15 +101,12 @@ export function assignRealmTints(
     }
 
     let pick = -1;
-    // 1: a distinct tint that is also colour-blind-safe against the neighbours.
     for (let c = 0; c < p; c++) {
       if (!idBlocked[c] && !cvdBlocked[c]) {
         pick = c;
         break;
       }
     }
-    // 2: the palette is CVD-constrained, but the spec's hard guarantee still
-    // holds - take a distinct tint even if it is a colour-blind twin of one.
     if (pick < 0) {
       for (let c = 0; c < p; c++) {
         if (!idBlocked[c]) {
@@ -138,9 +115,6 @@ export function assignRealmTints(
         }
       }
     }
-    // 3: genuinely more mutually-confusable realms (close or bordering) than
-    // tints - pigeonhole. Reuse the tint whose nearest same-tinted realm is
-    // farthest, id breaking ties. Unreachable on real planar maps at 7-8 tints.
     if (pick < 0) {
       let bestSep = -1;
       for (let c = 0; c < p; c++) {
@@ -163,10 +137,6 @@ export function assignRealmTints(
   return color;
 }
 
-/**
- * Per-realm palette index for a world+style. Identity (byte-stable) for worlds
- * within the frozen base palette; the distance-aware assignment beyond it.
- */
 export function realmTintIndices(
   labels: Int16Array,
   w: number,
@@ -179,7 +149,6 @@ export function realmTintIndices(
   const conflict = washConflictMatrix(style.realmTints, style.paper, opacity);
   const centroids = realmCentroids(labels, w, h, count);
   const adjacency = realmAdjacency(labels, w, h, count);
-  // Starting point on the 320x240 grid; calibrated on real archipelagos in #79.
   const confusionDist = 0.5 * Math.min(w, h);
   return assignRealmTints(centroids, adjacency, conflict, confusionDist);
 }

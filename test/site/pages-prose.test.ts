@@ -5,18 +5,8 @@ import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { CULTURES } from "../../src/society/names.ts";
 
-/**
- * Prose facts the pages state about the engine (#289): the culture roster has
- * been ten since the tsuren/zoryan/tezcal additions (the seed-42 covenant test
- * pins it), but the site kept saying "six invented" in four places. Source-scan
- * guard so the count can never silently split again.
- *
- * #292 closes the last gap: the glossary's "Words on your own map" section
- * documented six of the ten tongues, so its intro was deliberately made
- * countless rather than false. With all ten documented the count is stated
- * again, and the coverage guard below is what keeps the two honest, by reading
- * the roster from the engine rather than from a number written down twice.
- */
+// Prose facts the pages state about the engine (#289): the culture roster has been ten since tsuren/zoryan/tezcal, but the site kept saying "six invented" in four places; a source-scan guard so the count cannot silently split again.
+// #292: with all ten tongues documented the glossary states the count again; the coverage guard reads the roster from the engine, never a number written down twice.
 
 const pagesDir = fileURLToPath(new URL("../../src/pages", import.meta.url));
 
@@ -28,8 +18,7 @@ const astroSources = (dir: string): string[] =>
 test("no page still counts six: the roster is ten (#289)", () => {
   const sources = astroSources(pagesDir);
   assert.ok(sources.length >= 4, "the src/pages tree should hold the authored pages");
-  // Every phrasing the six-count ever wore, not just the one the issue quoted:
-  // the review caught "the six cultures" surviving one Q&A below the fixed line.
+  // Every phrasing the six-count ever wore: the review caught "the six cultures" surviving one Q&A below the fixed line.
   for (const path of sources) {
     const text = readFileSync(path, "utf8");
     for (const stale of ["six invented", "six cultures", "six languages", "six tongues"]) {
@@ -43,11 +32,7 @@ test("the FAQ states the ten-culture roster outright", () => {
   assert.ok(faq.includes("ten invented cultures"), "the FAQ names the ten-culture roster");
 });
 
-// The roster comes from CULTURES, not from a hand-kept list: an eleventh
-// culture reds this the moment it lands, which is exactly how the site fell
-// four tongues behind in the first place. Case-insensitive because the ids are
-// lowercase and the headings are capitalized; draket passes on the combined
-// "Thalassic &amp; Draket" heading it already shares with thalassic.
+// The roster comes from CULTURES, so an eleventh culture reds the moment it lands; case-insensitive, and draket passes on the combined "Thalassic &amp; Draket" heading it shares with thalassic.
 test("the glossary documents every culture in the roster (#292)", () => {
   const glossary = readFileSync(join(pagesDir, "glossary/index.astro"), "utf8").toLowerCase();
   const names = glossary.slice(glossary.indexOf('id="names"'));

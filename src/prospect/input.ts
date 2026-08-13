@@ -1,12 +1,3 @@
-/**
- * ProspectInput (#238): a pure, serializable description of one settlement's
- * prospect, sampled from the world it belongs to. Data only: no DOM, no SVG,
- * no I/O. Subs 2-4 compose and caption from this; Sub 5 applies the viewing
- * year. Deliberately year-agnostic: it carries the chronicle facts (founded,
- * ruined, ruinedYear) so the renderer can show empty ground before founding
- * and the broken skyline after a ruin.
- */
-
 import type { World } from "../world/types.ts";
 import type { Arms } from "../society/heraldry.ts";
 import { biomeName, type BiomeName } from "../climate/biomes.ts";
@@ -25,40 +16,27 @@ import {
   type ProspectView,
 } from "./transect.ts";
 
-/** Settlement tiers as the prospect grammar sees them (#237 GO condition 2):
- * a realm seat outranks its chart kind, and seats hang arms as capitals do. */
 export type ProspectKind = "capital" | "seat" | "town" | "village" | "hamlet";
 
 export type ProspectInput = {
   readonly seed: number;
-  /** Index into world.settlements of the world this was sampled from. NOT
-   * stable across region sheets, which filter and reindex settlements. */
+  /** Index into world.settlements; NOT stable across region sheets, which filter and reindex. */
   readonly index: number;
   readonly name: string;
   readonly kind: ProspectKind;
-  /** Raw site score from placeSettlements (roughly 0.3 to 8, unnormalized;
-   * harbor and river bonuses included). Hamlet scores come from a slimmer
-   * formula capped near 2 and are NOT on the same scale. */
+  /** Raw placeSettlements score, unnormalized; hamlet scores use a slimmer capped formula and are NOT on the same scale. */
   readonly score: number;
   readonly harbor: boolean;
   readonly onRiver: boolean;
   readonly founded: number;
   readonly ruined: boolean;
-  /** Year of the chronicle's ruin event, when one survived: history caps
-   * events at 14, so a ruined settlement can lack a dated event. */
   readonly ruinedYear: number | null;
-  /** Realm id (world.realms.labels at the site), -1 when unclaimed. */
   readonly realm: number;
-  /** Null on single-realm worlds, which have arms but no realm name. */
   readonly realmName: string | null;
   readonly arms: Arms | null;
-  /** Unit vector, viewer through site toward backdrop, in y-south grid space. */
   readonly view: ProspectView;
-  /** Site elevation relative to sea level, normalized by the world's span. */
   readonly siteRel: number;
-  /** Elevation profile behind the site, left to right, same normalization. */
   readonly backdrop: ReadonlyArray<number>;
-  /** Biome band in front of the site, left to right. */
   readonly foreground: ReadonlyArray<BiomeName>;
 };
 
@@ -70,17 +48,7 @@ function biomeAt(world: World, x: number, y: number): BiomeName {
   return biomeName(world.biomes[xi + yi * w] as number);
 }
 
-/**
- * Sample one settlement's prospect out of its world. Pure: same world and
- * index yield a byte-identical, JSON-serializable ProspectInput.
- *
- * World sheets only, for now. A region world (world.region set) carries no
- * realm labels, no arms, and an empty chronicle (world/region.ts), so a
- * region-sourced input would report realm -1, arms null, and ruinedYear null
- * even for a seat or a dated ruin. Region prospect insets are the epic's
- * "Later" bullet; whichever sub takes that on resolves realm identity and
- * chronicle facts through the parent world rather than loosening this one.
- */
+/** World sheets only: a region world carries no realm labels, arms, or chronicle, so a region-sourced input would silently degrade; region insets must resolve those through the parent world. */
 export function buildProspectInput(world: World, index: number): ProspectInput {
   const s = world.settlements[index];
   if (s === undefined) {
@@ -89,8 +57,6 @@ export function buildProspectInput(world: World, index: number): ProspectInput {
     );
   }
   const { elev, seaLevel } = world;
-  // The chart's own normalization (map-renderer, biomes): relief relative to
-  // sea level over the world's span above it. Sea floor goes negative.
   const span = minMax(elev).max - seaLevel || 1;
   const rel = (e: number): number => (e - seaLevel) / span;
 
@@ -118,8 +84,6 @@ export function buildProspectInput(world: World, index: number): ProspectInput {
       : world.realms.seats.includes(index)
         ? "seat"
         : s.kind;
-  // The ruin YEAR lives only in the event list; the cap of 14 events can
-  // drop it, so a ruined settlement may carry ruined: true with a null year.
   const ruinEvent = world.history.events.find(
     (e) => e.kind === "ruin" && e.settlement === index,
   );

@@ -1,19 +1,6 @@
 import { escapeXml } from "./svg.ts";
 
-/**
- * Builds a social-preview card: a fixed 1200x630 (the canonical Open Graph /
- * Twitter summary_large_image aspect) parchment panel with a hero chart
- * letterboxed on the right and the Vellum wordmark on the left.
- *
- * Hero charts are ~1.3:1, so rasterizing one directly would crop badly when a
- * scraper fits it to 1.91:1. The chart is nested as a child <svg>: its root tag
- * is rewritten in place (positioned, resized, preserveAspectRatio added) rather
- * than stripped, so its embedded recipe metadata (data-vellum-seed, viewBox)
- * survives for anyone who saves the card and inspects it.
- *
- * Output is a plain template string, not the el()/renderSvg() builder, because
- * the nested chart is already-rendered markup that must NOT be re-escaped.
- */
+/** A plain template string, not el()/renderSvg(): the nested chart is already-rendered markup that must NOT be re-escaped. */
 
 export const OG_WIDTH = 1200;
 export const OG_HEIGHT = 630;
@@ -24,27 +11,17 @@ const FADED = "#6b5a40";
 const RULE = "#b9a77f";
 const SERIF = "'Iowan Old Style', 'Palatino', Georgia, serif";
 
-// Left text column; the chart fills the rest, inset by a uniform margin.
 const TEXT_X = 64;
 const TEXT_W = 392;
 const MAP_X = TEXT_X + TEXT_W;
 const MARGIN = 30;
 
 export type OgCardOptions = {
-  /** Large wordmark. Defaults to VELLUM. */
   readonly wordmark?: string;
-  /** Italic tagline under the wordmark. */
   readonly tagline?: string;
-  /** Small footnote near the bottom of the text column. */
   readonly footnote?: string;
 };
 
-/**
- * Rewrites a rendered chart's root <svg> tag so the chart becomes a positioned,
- * letterboxed child viewport. Keeps every other attribute (viewBox, role,
- * aria-label, data-vellum-*); only width/height are replaced and x/y/
- * preserveAspectRatio are added.
- */
 function embedChart(
   chartSvg: string,
   x: number,

@@ -1,12 +1,4 @@
-// The room's instrument: the live-animation coverage re-hosted (#320, Survey and Story
-// Sub 3). RS* labels, so the Explorer-hosted S* originals stay green beside these for
-// the whole of this sub (the double coverage IS the point; Sub 4 retires the originals
-// with a named list, the a/b/c inventory on this PR).
-//
-// The room mounts the SAME engine through createLivingChart, so these are the S-suite's
-// assertions against .rf-* selectors and the room's own hooks. What did NOT port is
-// named in the inventory: the #ages checkbox arming, the verso flip, and the Explorer's
-// keep-the-chamber redraw (the room's ratified counter draw parks at the present, #221).
+// Room instrument e2e (RS*, #320 Sub 3): the S-suite's live-animation coverage re-hosted against .rf-* selectors and the room's own hooks; the Explorer-hosted S* originals stay green beside these until Sub 4 retires them by name.
 import { makeRoom, makeBar, scrubFacts, scopedHealth } from "./room-support.mjs";
 import { HOST_HOOK_NAMES } from "../../src/site/shared/host-hooks.ts";
 
@@ -16,16 +8,10 @@ export async function run(ctx) {
   const { setYear, yearNow, groupVis, roadsDisp, visibleGroups, clickPlay } = makeBar(ctx);
   const gate = scopedHealth(ctx);
 
-  // RS0: the widened instrument state. The room published {chamber, year} only; every
-  // check below reads the sweep through t / u / held / min / max / playing, which the
-  // Explorer's __vellumAgesState has always carried and the room narrowed away.
   const booted = await room.goto("#seed=42&style=antique&legend=1");
   check("RS0 the room boots and settles on the deep-linked world", booted);
 
-  // The chamber owns which of t / year is live and which is null (agesState's own
-  // contract), so the shape is asserted per chamber rather than "both are numbers":
-  // at this present park t is null BY DESIGN, and a check that demanded a number
-  // there would be pinning a bug.
+  // At a present park t is null BY DESIGN (agesState's chamber contract); a check demanding a number there would pin a bug.
   const state = await evaluate(`window.__vellumReadingRoomAges()`);
   check(
     "RS1 the room publishes the whole instrument state (u, held, min, max, playing, seamU), not just chamber+year",
@@ -42,17 +28,7 @@ export async function run(ctx) {
     JSON.stringify(state),
   );
 
-  // RS2: the shared host surface. Every LivingChart host publishes the same
-  // deterministic seams, so a ported check reads the same hook names on either page and
-  // the two hosts cannot drift apart in what they expose (ratified 2026-08-10, decision
-  // B on #320). __vellumRunInline rides along because it is the ground-truth oracle
-  // every ported check needs: the manifest the page's own engine would draw.
-  // The expected names come from the INSTALLER, not from a list restated here. A
-  // hand-copied list is one-sided: it catches a seam removed from the room, and cannot
-  // catch a seam added to installHostHooks that never reaches the room, since both sides
-  // would have to be edited together to disagree. Importing HOST_HOOK_NAMES makes adding
-  // a seam automatically extend this assertion. (The guard-prover flagged the hand-copied
-  // shape on the first cut: it proved RS2 bit on removal and could not bite on addition.)
+  // The expected names come from the INSTALLER (HOST_HOOK_NAMES): a hand-copied list catches a seam removed but can never catch one added to installHostHooks (the guard-prover proved that one-sidedness on the first cut).
   const surface = await evaluate(`(()=>{
     const names=${JSON.stringify(HOST_HOOK_NAMES)};
     return Object.fromEntries(names.map((n)=>[n,typeof window[n]]));
@@ -67,10 +43,6 @@ export async function run(ctx) {
 
   const sm = await scrubFacts(evaluate, 42);
 
-  // RS3 (S1's portable half): the room arrives ARMED and parked at the present with the
-  // bar at the far right. The Explorer reached this by ticking #ages; the room has no
-  // checkbox, the instrument IS the page, so the arming gesture does not port and only
-  // the parked pose does.
   const rs3 = await evaluate(`(()=>{
     const panel=document.querySelector(".rf-ages");
     const set=document.querySelector(".rf-chart #layer-settlements");
@@ -93,9 +65,6 @@ export async function run(ctx) {
   const rs4visible = await visibleGroups();
   check("RS4 parked at the present year: every settlement glyph is shown", rs4visible === sm.count, `${rs4visible} visible groups vs ${sm.count} places`);
 
-  // RS5/RS6 (S3/S3b): scrub to the earliest LIVING founding. That town's glyph is up, a
-  // later one is not, the roads hide in the past, and fewer glyphs stand than at the
-  // present: the headline #93 acceptance, asserted on the room's chart.
   await setYear(sm.earlyFounded);
   const rs5early = await groupVis(sm.earlyIdx);
   const rs5late = sm.lateIdx >= 0 ? await groupVis(sm.lateIdx) : "hidden";
@@ -112,8 +81,6 @@ export async function run(ctx) {
     `${rs6grown} visible at year ${sm.earlyFounded} vs ${sm.count} at present`,
   );
 
-  // RS7 (S4): a ruin's baked glyph is a RUIN, so it stays hidden through its living
-  // centuries (no living glyph is baked for it) and appears at the fall year.
   if (sm.ruinIdx >= 0) {
     await setYear(Math.floor((sm.ruinFounded + sm.ruinYear) / 2));
     const before = await groupVis(sm.ruinIdx);
@@ -128,10 +95,6 @@ export async function run(ctx) {
     check("RS7 seed 42 has a ruin to scrub through", false, "no ruin in manifest");
   }
 
-  // RS8/RS9 (S5/S5b): PLAY. The sweep runs monotonically through interior years and
-  // auto-pauses at the present with the button back to "Play"; the roads return at that
-  // end-of-Play park. Timing is not asserted, only that the year never goes backwards
-  // and the run terminates (the S-suite's discipline, uniform pacing since PR #311).
   const rs8start = await setYear(sm.minFounded);
   const startLabel = await evaluate(`(()=>{document.querySelector(".rf-play").click();return document.querySelector(".rf-play").textContent;})()`);
   let prev = -Infinity, mono = true, ended = false, lastYear = null, sawInterior = false;
@@ -151,9 +114,6 @@ export async function run(ctx) {
   const rs9roads = await roadsDisp();
   check("RS9 roads return at the end-of-Play present park", rs9roads !== "none", `roads=${rs9roads}`);
 
-  // RS10 (S6): a manual drag DURING Play pauses it and the sweep stops advancing. The
-  // trailing settle window is the leak detector: a rAF still ticking would carry the
-  // year past the dragged one.
   await setYear(sm.minFounded);
   await clickPlay();
   await sleep(220);
@@ -172,8 +132,6 @@ export async function run(ctx) {
     JSON.stringify(rs10) + ` settled=${rs10after}`,
   );
 
-  // RS11 (S9): drag-then-Play runs FORWARD from the dragged year (#220's "play from any
-  // year"), never restarting from the minimum.
   const rs11mid = Math.floor((sm.minFounded + sm.present) / 2);
   await setYear(rs11mid);
   await clickPlay();
@@ -190,10 +148,6 @@ export async function run(ctx) {
     `observed min=${rs11min} max=${rs11max} dragged=${rs11mid}`,
   );
 
-  // RS12 (S10): the Pause BUTTON freezes the sweep mid-flight and Play RESUMES from the
-  // frozen year (begin = now - elapsed), not from the minimum or the present. The early
-  // sample is the discriminator: a regression that restarted the whole sweep would read
-  // BELOW the frozen year in its first beats before climbing back.
   await setYear(sm.minFounded);
   await clickPlay();
   await sleep(700);
@@ -213,28 +167,10 @@ export async function run(ctx) {
     `frozen=${frozen.year} early=${resumedEarly} resumed=${resumed} min=${sm.minFounded} present=${sm.present}`,
   );
 
-  // Park at the present before the dressing checks: RS12 leaves the sweep PLAYING, and
-  // setYear pauses it (onManualScrub) AND drives every glyph to its present-day state.
   await setYear(sm.present);
 
-  // RS13 IS DELIBERATELY ABSENT, and the gap is the finding rather than an oversight.
-  //
-  // S11 pins that the instrument panel unfurls on show (paperUnfurl at the full grade).
-  // That dressing does not exist in the room: `paperUnfurl` is applied to the panel by
-  // exactly one rule in the repo, `.scrubber:not([hidden])` at public/explorer/index.css
-  // line 310, and public/reading-frame.css carries no unfurl rule at all. A ported check
-  // measured animationName "none" on .rf-ages.
-  //
-  // So S11 is not class (a): its behavior has no room successor to write. It is named in
-  // this PR's inventory as an open item for Sub 4, because retiring the Explorer's panel
-  // retires the paper-physics ceremony from the PRODUCT, not just from the suite. Whether
-  // the room owes that dressing is a visual decision for Alex (rendered variants first,
-  // and a plate-reader pass if it lands), not something this migration sub should invent.
-  //
-  // Pinning the absence instead would be a bad guard: it would go red the moment someone
-  // correctly adds the dressing. The label is left unused so the numbering stays stable.
+  // RS13 is deliberately absent: S11's panel unfurl had no room successor when this ported (RS26/RS27 became that successor at #321), and the label stays unused so the numbering is stable.
 
-  // RS14 (S12): the reveal is the real baked glyphs, not the pre-#93 abstract dots.
   const rs14 = await evaluate(`(()=>{
     const g=[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].find((el)=>getComputedStyle(el).display!=="none");
     return{hasGlyph:!!(g&&g.querySelector("path, circle, text")),
@@ -242,8 +178,6 @@ export async function run(ctx) {
   })()`);
   check("RS14 the sweep shows real glyphs, not dots (no data-state dots remain)", rs14.hasGlyph && rs14.dataStateHits === 0, JSON.stringify(rs14));
 
-  // RS15 (S13): the journal's inked rows slide. The row's own class is restored after
-  // probing, or a stripped row would red the every-row-inked counts that follow.
   const rs15 = await evaluate(`(()=>{
     const li=document.querySelector(".rf-log-strip li");
     if(!li)return{li:false};
@@ -255,13 +189,9 @@ export async function run(ctx) {
   })()`);
   check("RS15 journal inked-rows slide (transform in the transition + an indent)", rs15.li && rs15.prop.includes("transform") && rs15.pastTf !== "none", JSON.stringify(rs15));
 
-  // RS16 (S14, #93 Part 2): the strip is tall enough to show every entry at once.
   const rs16 = await evaluate(`(()=>{const s=document.querySelector(".rf-log-strip");return{rows:s.querySelectorAll("li").length,scrollH:s.scrollHeight,clientH:s.clientHeight};})()`);
   check("RS16 the journal strip shows every entry without scrolling (#93 Part 2)", rs16.rows > 0 && rs16.scrollH <= rs16.clientH + 1, JSON.stringify(rs16));
 
-  // RS17 (S17's portable half): a present park is a CHAMBER-END rest, so the next Play
-  // opens the WHOLE story from the survey's first leg (Alex's PR #311 ruling). The flip
-  // half of S17 does not port: the room has no verso.
   await setYear(sm.present);
   await clickPlay();
   let rs17open = null;
@@ -277,26 +207,7 @@ export async function run(ctx) {
     JSON.stringify(rs17open),
   );
 
-  // RS23 (S8): the cross-rebuild hazard. A draw of a DIFFERENT world must re-derive the
-  // instrument against THAT world: a fresh manifest, a fresh bar domain, and the new
-  // world's full glyph set. The Explorer reached this by typing a seed and clicking
-  // #draw; the room's redraw is the #318 colophon counter, and the room parks at the new
-  // world's own present rather than keeping the chamber (#221, so W8's contract does not
-  // port, only S8's does).
-  //
-  // The oracle is INDEPENDENT on purpose: the second world's facts come from
-  // __vellumRunInline, not from agesState. A self-referential form (year === max, both
-  // read off the same hook) cannot see a bar domain re-derived from the wrong world,
-  // which is exactly the regression S8 exists to catch, and it is why RR18/RR19/RR22 do
-  // not cover this.
-  //
-  // SEED 3, and the choice is load-bearing: it is the one nearby seed whose place COUNT
-  // differs from seed 42's (21 against 26). 13 of the 14 seeds sampled all carry 26, so
-  // the obvious pick (seed 100) leaves the `visible === count` clause inert, satisfied by
-  // coincidence rather than by the instrument having re-derived anything. Measured on the
-  // mutation run that proved this guard: freezing the overlay manifest reddened it on max
-  // and year while `visible` matched anyway. Seed 3 makes all three clauses discriminate.
-  // Do not "tidy" this back to a rounder number.
+  // SEED 3 is load-bearing: the one nearby seed whose place COUNT differs from seed 42's (21 vs 26; 13 of 14 sampled seeds carry 26), so visible===count actually discriminates (proved on the mutation run). Do not tidy it to a rounder number.
   const sm2 = await scrubFacts(evaluate, 3);
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="3";c.querySelector(".rr-read").click();})()`);
   let rs23 = null;
@@ -319,13 +230,6 @@ export async function run(ctx) {
     JSON.stringify({ rs23, expectedMax: 2 * Math.max(1, sm2.present - sm2.minFounded), expectedCount: sm2.count, present: sm2.present }),
   );
 
-  // RS26 (S11's successor; #321, ratified by Alex 2026-08-11, candidate C of the
-  // out/321-unfurl variants): the room's reading column plays the arrival unfurl ONCE
-  // per visit, staged: the instrument at the full grade, the journal one --paper-quick
-  // beat (180ms) behind. The ceremony is transient BY DESIGN (the conductor removes
-  // the class once the journal lands, so the engine's hidden toggles cannot replay it
-  // as a flash), so this probes from settle for the class while it is live and reads
-  // the computed animations at that moment, never after the fact.
   const arrivedRoom = await room.goto("#seed=42&style=antique&legend=1");
   let rs26 = null;
   for (let i = 0; i < 40; i++) {
@@ -344,11 +248,7 @@ export async function run(ctx) {
     JSON.stringify({ arrivedRoom, rs26 }),
   );
 
-  // RS27: the ceremony is FIRST arrival only, and the removal (not the [hidden] flag)
-  // is what holds that: display:none terminates a CSS animation and restoring display
-  // starts it AFRESH, and the engine drives the panel's hidden flag on every counter
-  // read, so a class left in place would replay the unfurl on every dice roll. Wait
-  // for the ceremony to retire, run a counter read, assert no unfurl re-applies.
+  // display:none terminates a CSS animation and restoring display starts it AFRESH; the engine drives the panel's hidden flag on every counter read, so a class left in place would replay the unfurl on every dice roll.
   let rs27clear = false;
   for (let i = 0; i < 60; i++) {
     const c = await evaluate(`document.querySelector(".rf").classList.contains("rf-arrival")`);
@@ -374,19 +274,13 @@ export async function run(ctx) {
     JSON.stringify({ rs27clear, rs27 }),
   );
 
-  // RS28 (pr-skeptic finding 4a): a counter read INSIDE the ceremony window. The read
-  // hides the panel mid-unfurl, which CANCELS the animations (display:none terminates
-  // them; end never fires), so a removal keyed on animationend alone leaves the class
-  // in place and the next unhide replays the whole unfurl. The fix retires the class
-  // on end OR cancel, whichever empties the column of running unfurls: by the time the
-  // read's draw settles, the class must be gone and nothing unfurling.
+  // A read mid-unfurl CANCELS the animations (display:none; animationend never fires), so a removal keyed on animationend alone leaves the class in place and the next unhide replays the whole unfurl.
   const arrivedAgain = await room.goto("#seed=42&style=antique&legend=1");
   let rs28armed = false;
   for (let i = 0; i < 40; i++) {
     if (await evaluate(`document.querySelector(".rf").classList.contains("rf-arrival")`)) { rs28armed = true; break; }
     await sleep(25);
   }
-  // Strike while the ceremony is in flight: the read tears the panel down mid-unfurl.
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="9";c.querySelector(".rr-read").click();})()`);
   let rs28 = null;
   for (let i = 0; i < 200; i++) {

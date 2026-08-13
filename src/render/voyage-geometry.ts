@@ -2,55 +2,12 @@ import type { Pt } from "../core/rdp.ts";
 import type { LegMode } from "./voyage-route.ts";
 import type { WaterSpan } from "./voyage-water.ts";
 
-/**
- * The moving mark's geometry (#120). Pure, DOM-free, so the overlay in
- * src/site/living-chart/voyage.ts stays glue and every rule below is proven in node:test
- * rather than parsed out of a transform string in the browser.
- *
- * Three problems, all created by giving legs real geometry:
- *  1. Legs are now polylines of differing length, so progress along one must be
- *     measured in DISTANCE, not vertex count (buildLegGeometry, pointAtDistance).
- *  2. A profile glyph has an "up", so it flips east/west and TILTS north/south
- *     instead of rotating (tiltFor). A full rotate lays the ship on its beam-ends
- *     on a due-north leg.
- *  3. Heading now changes at every vertex, so a switchbacking road would flip the
- *     rider back and forth every few frames (headingAt, resolveFacing).
- */
-
-/**
- * Pacing (#120 follow-up). v1 split a fixed 12s EQUALLY across legs, so the mark's
- * speed scaled with a leg's length and a long crossing blurred past. These give each
- * leg a duration by its length instead, anchored to the near-town speed the short legs
- * already had, with a mild speed-up for long legs (never a linear one). The whole sweep
- * therefore grows with the world rather than being pinned to 12s.
- *
- * PACE_EXP is the knob: 1 is constant speed (a long leg takes proportionally longer),
- * 0 is v1's equal-time (speed scales with length). 0.55 gives a ~1000px crossing about
- * 2.6x the near-town speed while still running ~1.6s. PACE_MS_PER_UNIT sets the baseline
- * (a ~120px near leg runs ~0.5s). Both re-verified against #275's round trip.
- *
- * MAX_SWEEP_MS IS A SAFETY VALVE, NOT A GOVERNOR. Measured over 150 seeds (#185,
- * 2026-07-25): every world runs 19 to 24 legs and a whole sweep takes 10.2s to 16.1s,
- * mean 13.4s, so the cap has never once bitten and the worst world sits 1.61x under it.
- * Reaching 26s over a full 24 legs needs every one of them near 540px, a p95 leg where
- * the corpus median is 141px; 16 legs at the corpus maximum (1175px, 1.66s) would do it
- * too. Neither is a world this generator makes, but both are nearer than "never", so the
- * valve is worth keeping. What it is NOT is the place to tune the sweep's LENGTH:
- * PACE_MS_PER_UNIT is the linear knob that reaches the screen, and the day the cap
- * starts biting is the day to lower that rather than raise this. MIN_LEG_MS lifts 125
- * of 945 legs (every leg under ~52px) off the curve and onto the floor.
- */
+/** PACE_EXP: 1 is constant speed, 0 is equal-time per leg; PACE_MS_PER_UNIT is the linear pace knob that reaches the screen; MAX_SWEEP_MS is a safety valve that has never bitten, tune the pace rather than raise it. */
 export const PACE_EXP = 0.55;
 export const PACE_MS_PER_UNIT = 34;
 export const MIN_LEG_MS = 300;
 export const MAX_SWEEP_MS = 26000;
 
-/**
- * Per-leg animation durations (ms) from per-leg pixel lengths. Sublinear in length so
- * long legs move faster per pixel than short ones but still take longer overall; floored
- * so a tiny hop still reads; the total is capped by scaling every leg down together, which
- * preserves the relative pacing. Pure, so play()'s real-time loop stays a thin consumer.
- */
 export function legDurations(lengths: ReadonlyArray<number>): number[] {
   if (lengths.length === 0) return [];
   const raw = lengths.map((len) =>
@@ -64,13 +21,7 @@ export function legDurations(lengths: ReadonlyArray<number>): number[] {
   return raw;
 }
 
-/**
- * Equal-split t from elapsed real time over a session's cumulative leg schedule.
- * `cumMs` has legs+1 entries, cumMs[i] = when leg i begins (voyage-session.ts); this
- * reproduces the walk play()'s rAF tick has always run, lifted here so #220's fused
- * clock and the animator share one conversion. A zero-duration leg is skipped
- * forward, exactly as the tick's while-loop always did.
- */
+/** cumMs has legs+1 entries; cumMs[i] is when leg i begins (voyage-session.ts). */
 export function tAtElapsed(cumMs: ReadonlyArray<number>, elapsedMs: number): number {
   const legCount = cumMs.length - 1;
   if (legCount <= 0) return 1;
@@ -83,7 +34,6 @@ export function tAtElapsed(cumMs: ReadonlyArray<number>, elapsedMs: number): num
   return (i + legT) / legCount;
 }
 
-/** The elapsed real time at equal-split t: tAtElapsed's inverse on the same schedule. */
 export function elapsedAtT(cumMs: ReadonlyArray<number>, t: number): number {
   const legCount = cumMs.length - 1;
   if (legCount <= 0) return 0;
@@ -92,53 +42,23 @@ export function elapsedAtT(cumMs: ReadonlyArray<number>, t: number): number {
   return cumMs[i]! + (scaled - i) * (cumMs[i + 1]! - cumMs[i]!);
 }
 
-/**
- * Degrees. The tilt is a damped function of climb, never the literal bearing.
- *
- * This ceiling is not an outlier clamp: measured over 945 legs at LOOKAHEAD 24 (#185,
- * 2026-07-25) the MEDIAN leg peaks at 23.6 degrees and 630 of them press past 20, so
- * MAX_TILT is close to what the mark simply looks like on a climbing leg. Changing it
- * is therefore a visible change to the whole sweep, not a tail adjustment, and it also
- * re-pins the e2e RV4 ceiling in scripts/e2e/suite-room-voyage-route.mjs (the sole
- * numeric guard since #321 retired its Explorer twin W20 with the Explorer's seams).
- */
+/** Degrees. */
 export const MAX_TILT = 24;
 
-/**
- * Chart px. The window the heading is averaged over, about half a ship-length. It sets
- * BOTH the facing hysteresis and how eagerly the tilt tracks a bend, so it cannot be
- * tuned on flip counts alone. Measured over 945 legs at FACING_DEADBAND 0.35, walking
- * each sweep at 60fps with the facing CARRIED between legs as the overlay carries it
- * (#185, 2026-07-25): 24px costs 558 facing flips, 4 backwards arrivals and 0.90
- * deg/frame of tilt movement, which beats an 18px window on all three (574 / 5 / a
- * busier 1.07). Widening to 32px is the only real alternative and it is a trade, not a
- * win: 496 flips and a calmer 0.72 deg/frame, bought with nearly 3x the backwards
- * arrivals (11).
- */
+/** Chart px the heading is averaged over; sets BOTH the facing hysteresis and tilt tracking, so never tune it on flip counts alone. */
 export const LOOKAHEAD = 24;
 
-/**
- * Normalized east-ness (-1..1) the heading must exceed to turn the mark around.
- *
- * 0.35 is the last value before suppressing the flicker starts causing the opposite
- * defect. Measured over 945 legs at LOOKAHEAD 24 (#185, 2026-07-25): widening
- * to 0.50 cuts flips 558 -> 497 but TRIPLES the legs that reach port facing away from
- * the way they are travelling (4 -> 13), and 0.65 takes that to 35. Judge any change
- * here on arrivals, never on the flip count alone, which improves monotonically all the
- * way to a mark that never turns at all.
- */
+/** Normalized east-ness (-1..1) to turn the mark; judge any change on backwards arrivals, never on flip count alone. */
 export const FACING_DEADBAND = 0.35;
 
 export type Facing = 1 | -1;
 
 export type LegGeometry = {
   readonly points: ReadonlyArray<Pt>;
-  /** cum[k] is the arc length from points[0] to points[k]; cum[0] === 0. */
   readonly cum: Float64Array;
   readonly total: number;
 };
 
-/** Precompute a leg's arc lengths ONCE, at build time, never per frame. */
 export function buildLegGeometry(points: ReadonlyArray<Pt>): LegGeometry {
   const cum = new Float64Array(points.length);
   for (let i = 1; i < points.length; i++) {
@@ -149,7 +69,6 @@ export function buildLegGeometry(points: ReadonlyArray<Pt>): LegGeometry {
   return { points, cum, total: points.length > 0 ? (cum[points.length - 1] as number) : 0 };
 }
 
-/** The point `s` units along the polyline, clamped to its ends. */
 export function pointAtDistance(geom: LegGeometry, s: number): Pt {
   const { points, cum, total } = geom;
   const n = points.length;
@@ -158,7 +77,6 @@ export function pointAtDistance(geom: LegGeometry, s: number): Pt {
   if (s <= 0) return points[0] as Pt;
   if (s >= total) return points[n - 1] as Pt;
 
-  // Binary search for the segment [cum[k], cum[k+1]] containing s.
   let lo = 0;
   let hi = n - 1;
   while (hi - lo > 1) {
@@ -169,21 +87,10 @@ export function pointAtDistance(geom: LegGeometry, s: number): Pt {
   const a = points[lo] as Pt;
   const b = points[lo + 1] as Pt;
   const segLen = (cum[lo + 1] as number) - (cum[lo] as number);
-  // A repeated vertex gives a zero-length segment; land on its start rather than
-  // dividing by zero.
   const u = segLen > 0 ? (s - (cum[lo] as number)) / segLen : 0;
   return { x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u };
 }
 
-/**
- * The heading as a chord across a window of `lookahead` units, rather than the raw
- * segment under the mark. This is what kills the switchback flicker: a road that
- * zigzags east and west while climbing nets out to "north" over the window, so the
- * facing rule below sees no decisive east-ness and holds.
- *
- * The window slides forward from `s` but is pinned to the leg's end, so it keeps its
- * full length near the finish instead of collapsing to a noisy stub.
- */
 export function headingAt(geom: LegGeometry, s: number, lookahead: number = LOOKAHEAD): Pt {
   const { total } = geom;
   if (total === 0) return { x: 0, y: 0 };
@@ -194,19 +101,6 @@ export function headingAt(geom: LegGeometry, s: number, lookahead: number = LOOK
   return { x: pb.x - pa.x, y: pb.y - pa.y };
 }
 
-/**
- * Degrees to rotate a profile glyph so its bow tips toward the climb. SVG y grows
- * downward, so a northbound leg has dy < 0, climb > 0, and a NEGATIVE (counter-
- * clockwise) rotation lifts the bow.
- *
- * INVARIANT: the tilt is `-MAX_TILT * climb`, so it is capped at MAX_TILT by
- * construction and stays monotonic in the bearing. Setting this to the literal
- * `atan2` angle reintroduces the beam-ends bug: a due-north leg would rotate the
- * ship a full 90 degrees onto its side.
- *
- * The caller mirrors with `scale(facing, 1)`, which negates x and preserves y, so
- * the SAME unsigned tilt lifts the bow whether the mark faces east or west.
- */
 export function tiltFor(dx: number, dy: number): number {
   const len = Math.hypot(dx, dy);
   if (len === 0) return 0;
@@ -214,11 +108,6 @@ export function tiltFor(dx: number, dy: number): number {
   return -MAX_TILT * climb;
 }
 
-/**
- * Which way the mark points. Only a decisively east or west heading turns it; inside
- * the deadband it holds `prevFacing`, and that hold IS the hysteresis. A perfectly
- * vertical heading has dx === 0, so the previous facing carries (issue gotcha 3).
- */
 export function resolveFacing(
   dx: number,
   len: number,
@@ -232,7 +121,6 @@ export function resolveFacing(
   return prevFacing;
 }
 
-/** A leg's overall east/west sense, used to face the mark before it sets out. */
 export function netFacing(points: ReadonlyArray<Pt>): Facing {
   if (points.length < 2) return 1;
   const dx = (points[points.length - 1] as Pt).x - (points[0] as Pt).x;
@@ -241,12 +129,6 @@ export function netFacing(points: ReadonlyArray<Pt>): Facing {
 
 export type MarkGlyph = "ship" | "rider";
 
-/**
- * Which glyph the mark shows at `legT` (the 0..1 arc fraction along the leg): a
- * ship only while inside the leg's water span, a rider everywhere else (#181).
- * A sea leg without a span keeps #120's whole-leg ship, so a degenerate span
- * degrades to the old behavior rather than to a swimming horse.
- */
 export function markGlyphAt(mode: LegMode, water: WaterSpan | null, legT: number): MarkGlyph {
   if (mode !== "sea") return "rider";
   if (!water) return "ship";

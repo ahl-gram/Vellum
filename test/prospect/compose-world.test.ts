@@ -47,10 +47,7 @@ test("every settlement in real worlds composes grounded, in-frame geometry", () 
   }
 });
 
-/** Floats are quantized to 3 decimals before hashing, the prospect pin
- * convention (see input.test.ts): ground and ridge descend from world.elev
- * and its Math.hypot ancestry, so raw float bytes can drift ~1e-13 across
- * platforms while 1e-3 is far below any real composition change. */
+/** Quantized to 3 decimals before hashing, the prospect pin convention (see input.test.ts): ground and ridge descend from world.elev's Math.hypot ancestry, so raw floats drift ~1e-13 across platforms while 1e-3 is far below any real composition change. */
 const q = (v: number): number => Math.round(v * 1000) / 1000;
 function quantize(v: unknown): unknown {
   if (typeof v === "number") return q(v);
@@ -72,10 +69,7 @@ function fnv1a(s: string): number {
   return h >>> 0;
 }
 
-// Pinned 2026-08-10 from a measured run (the golden-seed42 convention),
-// over the same five inputs input.test.ts pins: a change to the grammar's
-// frozen mappings re-pins these deliberately, with the cause named in the
-// commit.
+// Pinned 2026-08-10 from a measured run (the golden-seed42 convention) over the same five inputs input.test.ts pins; a change to the grammar's frozen mappings re-pins these deliberately, with the cause named in the commit.
 const PINNED: ReadonlyArray<{ seed: number; index: number; sum: number }> = [
   { seed: 42, index: 0, sum: 1146413912 }, // Laukuwelua, capital, harbor
   { seed: 42, index: 5, sum: 532485178 }, // Loatunui, town, harbor

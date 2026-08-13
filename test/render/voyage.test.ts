@@ -9,18 +9,8 @@ import {
   reorderPlanByTravel,
 } from "../../src/render/voyage.ts";
 
-// Unit tests for #118 (Sub 1 of the Wayfarer's Passage epic #117): the pure core
-// that turns a place manifest into a deterministic survey itinerary. No DOM, no
-// RNG. The animated overlay (src/site/living-chart/voyage.ts) is Sub 2 and is covered by
-// the Explorer e2e; only the deterministic plan math is tested here.
-//
-// Two load-bearing behaviours:
-//  1. The plan starts at the single capital and a CLOSED round trip visits every
-//     living town and village exactly once before sailing home (#275: legs.length
-//     === ports.length, the last leg returning to the capital).
-//  2. Every selection keys on the settlement's `idx`, never its array position,
-//     so a shuffled input yields a byte-identical plan. That is the determinism
-//     promise the epic makes ("same seed, same voyage").
+// #118 (Sub 1 of the Wayfarer's Passage epic #117): the pure itinerary core; the animated overlay is Sub 2, covered by the Explorer e2e.
+// Load-bearing: the plan starts at the single capital and a CLOSED round trip visits every living town/village exactly once (#275: legs.length === ports.length); and every selection keys on idx, never array position, so a shuffled input yields a byte-identical plan.
 
 const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   idx: 0,
@@ -31,16 +21,13 @@ const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   seat: false,
   nx: 0.5,
   ny: 0.5,
-  // #120 added the grid cell to PlaceMark. buildVoyagePlan orders ports by the chart
-  // fractions nx/ny and never reads gx/gy, so these are filler here, not fixtures.
+  // buildVoyagePlan orders ports by the chart fractions nx/ny and never reads gx/gy, so these are filler, not fixtures.
   gx: 0,
   gy: 0,
   ...over,
 });
 
-// A small hand-laid world whose sweep order is unambiguous. The capital sits at the
-// origin; A/C/B march out collinearly along the x-axis at 0.1 / 0.2 / 0.3, so the tour
-// is just the line in order, no ring and no detour.
+// A hand-laid world with unambiguous sweep order: the capital at the origin, A/C/B collinear along x at 0.1 / 0.2 / 0.3.
 const capital = mark({ idx: 0, name: "Aelmoor", kind: "capital", founded: 812, nx: 0, ny: 0 });
 const townA = mark({ idx: 1, name: "Nailo", kind: "town", founded: 947, nx: 0.1, ny: 0 });
 const townB = mark({ idx: 2, name: "Bexley", kind: "town", founded: 1003, nx: 0.3, ny: 0 });
@@ -55,8 +42,7 @@ test("plan starts at the capital", () => {
 });
 
 test("collinear ports sweep along the line in order, no backtrack", () => {
-  // On the x-axis the tour is just the sorted line: 0 (x=0) -> 1 (0.1) -> 3 (0.2) ->
-  // 2 (0.3). The order carries idx 3 before 2 because C sits between A and B.
+  // The sorted line: 0 -> 1 (0.1) -> 3 (0.2) -> 2 (0.3); idx 3 rides before 2 because C sits between A and B.
   const plan = buildVoyagePlan(lineWorld, 1059);
   assert.deepEqual(
     plan.ports.map((p) => p.idx),
@@ -65,8 +51,7 @@ test("collinear ports sweep along the line in order, no backtrack", () => {
 });
 
 test("the tour does not cross itself on a ring layout nearest-neighbour would tangle", () => {
-  // Capital at the top, a ring of towns, and one inland town near the centre: greedy
-  // NN dives inland then jumps back, crossing its own track. The swept tour must not.
+  // A ring with one inland town near the centre: greedy NN dives inland then jumps back, crossing its own track.
   const ringWorld = [
     mark({ idx: 0, name: "Cap", kind: "capital", nx: 0.5, ny: 0.9 }),
     mark({ idx: 1, name: "W", kind: "town", nx: 0.1, ny: 0.5 }),
@@ -84,8 +69,7 @@ test("the tour does not cross itself on a ring layout nearest-neighbour would ta
   const legs = plan.legs.map((l) => [at.get(l.fromIdx)!, at.get(l.toIdx)!] as const);
   for (let i = 0; i < legs.length; i++) {
     for (let j = i + 2; j < legs.length; j++) {
-      // #275: the closing leg is a real leg and is checked too. It shares a port with
-      // leg 0, so that one adjacent pair is the only exclusion.
+      // #275: the closing leg is real and checked too; it shares a port with leg 0, the one adjacent-pair exclusion.
       if (i === 0 && j === legs.length - 1) continue;
       assert.ok(!crosses(legs[i]![0], legs[i]![1], legs[j]![0], legs[j]![1]),
         `legs ${i} and ${j} cross`);
@@ -120,8 +104,7 @@ test("a two-port survey sails out and back, not out alone", () => {
 });
 
 test("no port is visited twice even though the survey comes home (the capital is one port)", () => {
-  // The homecoming is an ARRIVAL at a port already in the itinerary, never a second
-  // port. A plan that appended the capital again would double it here.
+  // The homecoming is an ARRIVAL at a port already in the itinerary, never a second port.
   const plan = buildVoyagePlan(lineWorld, 1059);
   const idxs = plan.ports.map((p) => p.idx);
   assert.equal(new Set(idxs).size, idxs.length, "the capital must not appear twice as a port");
@@ -166,9 +149,7 @@ test("deterministic for a fixed input", () => {
 });
 
 test("stable under shuffled input order (idx tiebreaks, not array position)", () => {
-  // Two candidates equidistant from the capital: idx 1 at (-0.1,0) and idx 2 at
-  // (0.1,0). A position-keyed tiebreak would flip when the array is reversed; an
-  // idx-keyed one always visits idx 1 first. The whole plan must be identical.
+  // Two candidates equidistant from the capital: a position-keyed tiebreak flips when the array reverses; an idx-keyed one always visits idx 1 first.
   const cap = mark({ idx: 0, kind: "capital", nx: 0, ny: 0 });
   const west = mark({ idx: 1, name: "West", kind: "town", nx: -0.1, ny: 0 });
   const east = mark({ idx: 2, name: "East", kind: "town", nx: 0.1, ny: 0 });
@@ -206,9 +187,7 @@ test("empty input yields an empty plan", () => {
 });
 
 test("does not mutate the caller's places array (immutability rule)", () => {
-  // A frozen input catches any refactor that drops the internal scratch copy and
-  // mutates the caller's array directly (splice/push would throw in strict mode);
-  // the deep-equal catches element-level mutation.
+  // A frozen input catches a dropped internal scratch copy (splice/push throws in strict mode); the deep-equal catches element-level mutation.
   const input = [capital, townA, townB, villageC];
   const snapshot = input.map((p) => ({ ...p }));
   Object.freeze(input);
@@ -217,8 +196,6 @@ test("does not mutate the caller's places array (immutability rule)", () => {
   assert.deepEqual(input, snapshot);
 });
 
-// --- #184: reordering the itinerary on actual travel distances -----------------
-
 /** A symmetric distance oracle from a sparse pair map; throws on an unknown pair. */
 const matrixD = (m: Record<string, number>) => (a: number, b: number): number => {
   const v = m[a < b ? `${a}:${b}` : `${b}:${a}`];
@@ -226,9 +203,7 @@ const matrixD = (m: Record<string, number>) => (a: number, b: number): number =>
   return v;
 };
 
-// The straight-line plan for lineWorld visits 0,1,3,2 (the collinear sweep). The
-// travel oracle puts a strait between A(1) and C(3): far by sea, so the true miles
-// prefer 0,1,2,3 even though C sits between A and B as the crow flies.
+// The straight-line plan visits 0,1,3,2; the oracle puts a strait between A(1) and C(3), so the true miles prefer 0,1,2,3.
 const straitD = matrixD({ "0:1": 1, "1:3": 10, "2:3": 1, "1:2": 2, "0:3": 4, "0:2": 3 });
 
 test("reorderPlanByTravel adopts the cheaper itinerary the travel distances reveal", () => {
@@ -283,8 +258,6 @@ test("reorderPlanByTravel: empty and one-port plans come back unchanged", () => 
   assert.deepEqual(reorderPlanByTravel(solo, straitD), solo);
 });
 
-// --- logEntryCount: the completion threshold (#275) ---------------------------
-
 test("logEntryCount: one departure plus one entry per leg, so a round trip logs a homecoming", () => {
   const plan = buildVoyagePlan(lineWorld, 1059);
   assert.equal(plan.ports.length, 4, "fixture premise");
@@ -292,9 +265,7 @@ test("logEntryCount: one departure plus one entry per leg, so a round trip logs 
 });
 
 test("logEntryCount: the sweep reaches it exactly at t=1, and NOT at the last port", () => {
-  // The bug this guards: comparing `arrived` against ports.length posts the survey's one
-  // #status summary a leg early (at the last port, before it sails home) and again at the
-  // homecoming. Against logEntryCount it fires once, at completion.
+  // Comparing arrived against ports.length posts the survey's one #status summary a leg early and again at the homecoming; against logEntryCount it fires once, at completion.
   const plan = buildVoyagePlan(lineWorld, 1059);
   const legCount = plan.legs.length;
   const entries = logEntryCount(plan);
@@ -307,8 +278,6 @@ test("logEntryCount: a one-port survey logs only its departure; an empty plan lo
   assert.equal(logEntryCount(buildVoyagePlan([capital], 1059)), 1);
   assert.equal(logEntryCount(buildVoyagePlan([], 1059)), 0);
 });
-
-// --- frameAt: the pure animation timeline (#119) ------------------------------
 
 test("frameAt: a one-port survey rests at the origin", () => {
   assert.deepEqual(frameAt(0, 0), { legIndex: -1, legT: 0, arrived: 1 });
@@ -356,9 +325,7 @@ test("frameAt: arrived never decreases as t advances", () => {
 });
 
 test("origin, arrival, and village/town use distinct log templates", () => {
-  // Structural, not literal: assert the branches DIFFER (so a regression that
-  // collapses them is caught) without pinning the exact prose, which Sub 4 (#121)
-  // owns and will rewrite. Same name + founded isolates the template difference.
+  // Structural, not literal: assert the branches DIFFER without pinning the prose Sub 4 (#121) owns; same name + founded isolates the template difference.
   const cap = mark({ idx: 0, name: "Same", kind: "capital", founded: 500, nx: 0, ny: 0 });
   const town = mark({ idx: 1, name: "Same", kind: "town", founded: 500, nx: 0.1, ny: 0 });
   const village = mark({ idx: 2, name: "Same", kind: "village", founded: 500, nx: 0.2, ny: 0 });

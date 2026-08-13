@@ -21,12 +21,10 @@ test("the chronicle is non-empty and bounded", () => {
 });
 
 test("history invariants hold across a seed sweep", () => {
-  // one generation per seed; assert every invariant on the same world
   for (let seed = 1; seed <= 24; seed++) {
     const w = generateWorld(defaultRecipe(seed));
     const seatSet = new Set(w.realms.seats);
 
-    // events dated ascending, all before the present survey year
     let prev = -Infinity;
     for (const e of w.history.events) {
       assert.ok(e.year >= prev, `seed ${seed}: ${e.year} >= ${prev}`);
@@ -34,7 +32,6 @@ test("history invariants hold across a seed sweep", () => {
       prev = e.year;
     }
 
-    // ruins: bounded, only non-seat villages
     const ruined = w.settlements.filter((s) => s.ruined);
     assert.ok(ruined.length <= 2, `seed ${seed}: <=2 ruins`);
     w.settlements.forEach((s, i) => {
@@ -42,7 +39,6 @@ test("history invariants hold across a seed sweep", () => {
         assert.equal(s.kind, "village", `seed ${seed}: ruin is a village`);
         assert.ok(!seatSet.has(i), `seed ${seed}: ruin is not a realm seat`);
       }
-      // founding years positive and before the present
       assert.ok(s.founded > 0 && s.founded < w.title.year, `seed ${seed}: founded`);
     });
   }
@@ -54,7 +50,6 @@ test("single-realm worlds still get a chronicle and never index empty realms", (
   assert.equal(w.recipe.mapType, "citystate");
   assert.deepEqual(w.names.realms, []);
   assert.ok(w.history.events.length >= 1);
-  // no rise/war events when there are no named realms
   for (const e of w.history.events) {
     assert.ok(e.kind === "founding" || e.kind === "ruin");
   }

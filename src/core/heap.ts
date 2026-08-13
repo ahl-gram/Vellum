@@ -1,5 +1,3 @@
-/** Binary min-heap of (index, value) pairs. Pop returns the index of the minimum value. */
-
 export type MinHeap = {
   push(idx: number, val: number): void;
   pop(): number;

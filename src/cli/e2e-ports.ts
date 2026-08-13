@@ -1,12 +1,3 @@
-/**
- * Which ports the browser-driven e2e run uses, and whether its debug port is
- * safe to launch onto.
- *
- * Split out of `scripts/e2e-explorer.mjs` (like `browser-policy.ts`) so both
- * decisions are unit-testable: the runner can only express them as a
- * `process.exit` or a thrown harness error, neither of which a test can read.
- */
-
 export const DEFAULT_E2E_PORT = 8765;
 export const DEFAULT_E2E_DPORT = 9222;
 
@@ -22,21 +13,14 @@ export interface E2ePorts {
   readonly DPORT: number;
 }
 
-/** What a connection attempt against the debug port found, before launching. */
 export interface DebugPortProbe {
   readonly listening: boolean;
-  /** e.g. the devtools `/json/version` Browser string, when it answered one. */
   readonly identity?: string;
 }
 
 const PORT_MIN = 1;
 const PORT_MAX = 65535;
 
-/**
- * A bad value THROWS rather than falling back to `fallback`. Falling back is
- * what re-creates the collision this override exists to prevent: two lanes
- * that both typo the variable would quietly land on the same default port.
- */
 export function resolvePort(env: E2ePortEnv, name: string, fallback: number): number {
   const raw = env[name];
   if (raw === undefined || raw === "") return fallback; // `FOO=` must not read as set
@@ -64,14 +48,6 @@ export function resolveE2ePorts(env: E2ePortEnv): E2ePorts {
   return { PORT, DPORT };
 }
 
-/**
- * The failure text for launching onto an occupied debug port, or null if it is
- * free. This is a hazard rather than a mere conflict: nothing in the run binds
- * the debug port, `getPageTarget` CONNECTS to whatever answers `/json`. A
- * crashed or orphaned run that left a headless browser holding the port is
- * therefore adopted in silence, and the suites go on to report on its build
- * (2026-07-29: unstyled pages, sticky mobile metrics, three bogus screenshots).
- */
 export function debugPortConflictMessage(dport: number, probe: DebugPortProbe): string | null {
   if (!probe.listening) return null;
   const who = probe.identity ? ` (it answers as ${probe.identity})` : "";

@@ -11,10 +11,7 @@ import { planLegend } from "../../src/render/layers/legend.ts";
 import { terrainGlyphsPresent } from "../../src/render/layers/glyphs.ts";
 import type { World } from "../../src/world/types.ts";
 
-// #23: foothills (gl-hill) and marsh tufts (gl-marsh) are drawn on antique/ink
-// charts but were missing from the key. The key lists "only the symbols a map
-// carries", so it must add Hills/Marsh/Dunes rows exactly when those glyphs
-// would be drawn — the same gates glyphsLayer uses.
+// #23: hills/marsh/dunes were drawn but missing from the key; the key lists "only the symbols a map carries", so rows appear exactly when those glyphs would be drawn, the same gates glyphsLayer uses.
 
 // A single interior cell (center of a 3x3) at a chosen relief and biome.
 function centerCtx(centerElev: number, centerBiome: number, span = 1): RenderCtx {
@@ -37,14 +34,12 @@ test("terrainGlyphsPresent mirrors the glyph layer's relief gates", () => {
   assert.deepEqual(terrainGlyphsPresent(centerCtx(0.7, BIOMES.grassland)), {
     hill: false, marsh: false, dune: false,
   });
-  // low marsh / desert land
   assert.deepEqual(terrainGlyphsPresent(centerCtx(0.1, BIOMES.marsh)), {
     hill: false, marsh: true, dune: false,
   });
   assert.deepEqual(terrainGlyphsPresent(centerCtx(0.1, BIOMES.desert)), {
     hill: false, marsh: false, dune: true,
   });
-  // plain low land carries none of these glyphs
   assert.deepEqual(terrainGlyphsPresent(centerCtx(0.1, BIOMES.grassland)), {
     hill: false, marsh: false, dune: false,
   });
@@ -87,8 +82,7 @@ test("the antique key lists Hills and Marsh when the map carries them", () => {
 });
 
 test("the key lists Dunes when the map carries desert", () => {
-  // deserts are rare in the climate model, so synthesize one: low grassland
-  // (below the hill threshold) reclassified to desert is exactly a dune cell.
+  // Deserts are rare in the climate model, so synthesize one: low grassland reclassified to desert is exactly a dune cell.
   const world = generateWorld(defaultRecipe(42, {}));
   const arid: World = {
     ...world,

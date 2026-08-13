@@ -1,17 +1,9 @@
-// #121 The margin log: the surveyor's dated journal beside the chart, and since #220
-// the PROLOGUE block of the fused journal (its host elements are the instrument
-// panel's sig and strip; the ages driver appends the annal rows after these). An HTML
-// panel (a SIBLING of the chart mount, not part of the SVG overlay) whose entries
-// brighten as the voyage sweep reaches each port. Extracted from
-// src/site/living-chart/voyage.ts (#189), made host-agnostic in #191: the host hands its
-// three panel elements in, nothing is looked up by id. The panel is HTML DOM, the voyage
-// engine is the animated SVG survey, and they share only DATA: buildLogPanel(logPorts, ...)
-// -> { log, rows } (build the log, render the strip) revealLog(rows, arrived) (brighten the
-// reached rows) hideLog() (empty + hide the panel) logSnapshot(log, rows) -> {...} (the e2e
-// read hook's payload) No overlay internals (plan / routing / geometry / marks / rAF) reach
-// this file, and none of these panel element refs reach the overlay. The overlay reads
-// exactly one field back, `log.summary` (for its status announcement); the log is shared
-// data, so that is expected, not leakage.
+// #121 the margin log: the surveyor's dated journal beside the chart, and since #220 the
+// PROLOGUE block of the fused journal (host elements are the instrument panel's sig and
+// strip; the ages driver appends the annal rows after these). Host-agnostic since #191:
+// the host hands its three panel elements in, nothing is looked up by id. The panel is
+// HTML DOM, the voyage engine is the animated SVG survey, and they share only DATA; the
+// overlay reads exactly one field back, `log.summary`.
 import {
   buildVoyageLog,
   type VoyageHomecoming,
@@ -30,19 +22,11 @@ export interface VoyageLogHost {
 
 export function createVoyageLogPanel(host: VoyageLogHost) {
   /**
-   * Build the log from the arrival ports and render the margin panel: every port a row
-   * up front (dimmed), the surveyor's signature above. Mirrors the chronicle's
-   * buildStrip so a snap or a reduced-motion jump can brighten them all at once. The
-   * dated year rides its own tabular column like the chronicle strip; the row text
-   * drops the redundant "Year N." lead the entry already carries.
-   *
-   * #275: `homecoming` is the CLOSING leg (last port back to the capital), which earns
-   * the log's final row, so rows = ports + 1 on a round trip. Pass null for a survey
-   * with no closing leg. The extra row is why revealLog is positional: its entry shares
-   * the capital's idx with row 0.
-   *
-   * The richer, seed-forked prose lives in the engine (world/voyage-log.ts); the plan's
-   * own `port.logLine` is the pure Sub-1 line and is not displayed.
+   * Build the log and render the margin panel: every port a row up front (dimmed), the
+   * signature above, so a snap or reduced-motion jump can brighten them all at once.
+   * #275: `homecoming` is the CLOSING leg, earning the final row, so rows = ports + 1 on
+   * a round trip; the extra row is why revealLog is positional (its entry shares the
+   * capital's idx with row 0). The seed-forked prose lives in world/voyage-log.ts.
    */
   function buildLogPanel(
     logPorts: ReadonlyArray<VoyageLogPort>,
@@ -55,14 +39,11 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
     host.sig.textContent = log.attribution;
     const rows = log.entries.map((e, i) => {
       const li = document.createElement("li");
-      // #220: these rows are the fused journal's PROLOGUE block, the surveyor's hand
-      // drawing the finished chart at the present, above the chronicler's dated annals.
-      // The class carries the voice distinction the Overture framing owes the reader.
+      // #220: the fused journal's PROLOGUE block; the class carries the voice distinction the Overture framing owes the reader.
       li.className = "prologue";
       const year = document.createElement("span");
       year.className = "cr-year";
-      // #312: the gutter counts the days of the voyage; the survey's one year lives
-      // in the attribution line alone (the Overture framing, amended 2026-07-28).
+      // #312: the gutter counts the days of the voyage; the survey's one year lives in the attribution line alone (the Overture framing, amended 2026-07-28).
       year.textContent = `day ${e.day}`;
       const text = document.createElement("span");
       text.className = "cr-text";
@@ -84,15 +65,9 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
     return { log, rows };
   }
 
-  /**
-   * Brighten the rows the survey has reached (rows [0, arrived)), dim the rest.
-   * Idempotent and order-independent, so stepping backward via the e2e hook
-   * un-brightens correctly. `arrived` is frameAt's count: the departure, one per
-   * arrival, and on a round trip the homecoming last.
-   */
+  /** Brighten rows [0, arrived), dim the rest. Idempotent and order-independent, so stepping backward un-brightens correctly. */
   function revealLog(rows: HTMLLIElement[], arrived: number): void {
-    // #220 collapsed the three arrived-classes (the chronicle's `past`, this panel's
-    // old `logged`, the dated-log component's `inked`) onto `inked` alone.
+    // #220 collapsed the three arrived-classes (`past`, `logged`, `inked`) onto `inked` alone.
     for (let i = 0; i < rows.length; i++) rows[i].classList.toggle("inked", i < arrived);
   }
 
@@ -103,11 +78,7 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
     host.sig.textContent = "";
   }
 
-  /**
-   * #121 e2e read payload: the margin log (attribution, summary, entries) plus how many
-   * rows are currently revealed and whether the panel is shown, so a suite can assert
-   * the mode-aware prose and the reveal-per-arrival without racing the rAF loop.
-   */
+  /** #121 e2e read payload: the log plus revealed-row count and visibility, so a suite asserts prose and reveal without racing the rAF loop. */
   function logSnapshot(log: VoyageLog, rows: HTMLLIElement[]) {
     return {
       attribution: log.attribution,

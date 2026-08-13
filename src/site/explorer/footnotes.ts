@@ -1,12 +1,8 @@
-// #270 The Broadside's footnote apparatus: a period mark (an <a class="fn"> in the
-// Fell set) on each opaque control opens a marginalia note and follows through to
-// the term's /glossary/ anchor, so the tooltip system IS the book's apparatus
-// (footnote -> back matter), not a parallel one. The note is real text in the DOM
-// (never a title attribute), shown through the native popover API so Esc and
-// light dismiss come free, and wired aria-describedby -> role="tooltip" in the
-// markup. On fine pointers hover/focus shows the note and a click follows the
-// link; on touch (no hover) the first tap TOGGLES the note instead of navigating
-// (the ratified tap-toggle) and the note's own glossary link carries the travel.
+// #270 the Broadside's footnote apparatus: a period mark (<a class="fn">) on each opaque
+// control opens a marginalia note and follows through to the term's /glossary/ anchor.
+// The note is real DOM text shown through the native popover API (Esc and light dismiss
+// come free), wired aria-describedby -> role="tooltip" in the markup. Fine pointers get
+// hover/focus + click-through; touch gets the ratified tap-toggle instead of navigation.
 interface NotePair {
   mark: HTMLAnchorElement;
   note: HTMLElement;
@@ -21,17 +17,10 @@ function pairs(): NotePair[] {
   return out;
 }
 
-// Anchor the note under its mark at show time: the note lives in the top layer as
-// a fixed-position box, and static CSS cannot place a top-layer box relative to
-// an in-flow anchor. It clears the whole control ROW, not just the mark's line:
-// the mark sits beside a label whose neighboring control (a select, the seal row)
-// is taller, and the note must annotate, never cover. Clamped to the viewport so
-// a mark near an edge never pushes its note off-screen.
+// Anchor the note under its mark at show time: the note lives in the top layer as a fixed-position box, and static CSS cannot place a top-layer box relative to an in-flow anchor. It clears the whole control ROW, not just the mark's line (the neighboring control may be taller), clamped to the viewport so an edge mark never pushes its note off-screen.
 function place(mark: HTMLElement, note: HTMLElement): void {
   const r = mark.getBoundingClientRect();
-  // A ledger row is the label cell plus every sibling up to the next label cell
-  // (the slider rows sit as loose cells on the grid); elsewhere the mark's own
-  // container is the row.
+  // A ledger row is the label cell plus every sibling up to the next label cell; elsewhere the mark's own container is the row.
   const cell = mark.closest(".l-label");
   let rowBottom = r.bottom;
   if (cell) {
@@ -50,13 +39,8 @@ function place(mark: HTMLElement, note: HTMLElement): void {
 export function wireFootnotes(): void {
   // A pre-popover engine keeps working marks: they stay plain glossary links.
   if (!("showPopover" in HTMLElement.prototype)) return;
-  // Touch-primary means hover:none AND pointer:coarse. A bare (hover: none)
-  // over-matches environments with NO pointer at all (linux headless CI reports
-  // hover:none with pointer:none), which would mute the focus path exactly
-  // where a keyboard user needs it; the zoom-keys rule in /explorer/index.css
-  // hit the same trap (pinned by e2e G1), and CI caught this one as BR4/BR5.
-  // Queried at event time, not captured at wire time, so a device-mode flip (or
-  // the e2e's emulation) is honored without a reload.
+  // Touch-primary means hover:none AND pointer:coarse: a bare (hover: none) over-matches environments with NO pointer at all (linux headless CI reports hover:none with pointer:none), muting the focus path exactly where a keyboard user needs it (e2e BR4/BR5; the zoom-keys css rule hit the same trap, G1).
+  // Queried at event time, not captured at wire time, so a device-mode flip (or the e2e's emulation) is honored without a reload.
   const touchPrimary = (): boolean => window.matchMedia("(hover: none) and (pointer: coarse)").matches;
   for (const { mark, note } of pairs()) {
     const show = (): void => {
@@ -67,19 +51,12 @@ export function wireFootnotes(): void {
     const hide = (): void => {
       if (note.matches(":popover-open")) note.hidePopover();
     };
-    // A tap fires the compat mouseenter and focus BEFORE its click, so on a
-    // touch-primary device these must stand down or the click's toggle inverts
-    // (the plate-reader's off-by-one, pinned by e2e BR6's real taps). Hover and
-    // keyboard focus keep the note everywhere else.
+    // A tap fires the compat mouseenter and focus BEFORE its click, so on a touch-primary device these must stand down or the click's toggle inverts (e2e BR6's real taps).
     mark.addEventListener("mouseenter", () => { if (!touchPrimary()) show(); });
     mark.addEventListener("mouseleave", () => { if (!touchPrimary()) hide(); });
     mark.addEventListener("focus", () => { if (!touchPrimary()) show(); });
     mark.addEventListener("blur", () => { if (!touchPrimary()) hide(); });
-    // The closing half of a tap never reaches the click handler as "open": the
-    // tap's own pointer-down light-dismisses an auto popover first. Record that
-    // close SYNCHRONOUSLY (beforetoggle; the toggle event is queued async and
-    // lands after the click), so a click on its heels reads as the close it was,
-    // instead of re-showing.
+    // The closing half of a tap never reaches the click handler as "open": the tap's own pointer-down light-dismisses an auto popover first. Record that close SYNCHRONOUSLY (beforetoggle; the toggle event is queued async and lands after the click), so a click on its heels reads as the close it was, instead of re-showing.
     let closedAt = 0;
     note.addEventListener("beforetoggle", (ev) => {
       if ((ev as ToggleEvent).newState === "closed") closedAt = performance.now();

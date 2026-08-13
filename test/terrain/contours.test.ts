@@ -121,16 +121,12 @@ test("ringArea computes the shoelace area", () => {
 
 test("pinned chaikin holds pinned corners sharp while free corners round (#223)", () => {
   const square: Pt[] = [[0, 0], [4, 0], [4, 4], [0, 4]];
-  // Pin the top edge's two corners; leave the bottom two free.
   const pinned = (p: Pt): boolean => p[1] === 0;
   const out = chaikinSmoothPinned(square, 3, pinned);
-  // Pinned corners survive exactly at their original coordinates...
   assert.ok(has(out, [0, 0]), "pinned corner (0,0) must be preserved exactly");
   assert.ok(has(out, [4, 0]), "pinned corner (4,0) must be preserved exactly");
-  // ...while the free corners are cut away (rounded, no longer present).
   assert.ok(!has(out, [4, 4]), "free corner (4,4) must be rounded off");
   assert.ok(!has(out, [0, 4]), "free corner (0,4) must be rounded off");
-  // Every output point stays within the square's bounds.
   for (const [x, y] of out) {
     assert.ok(x >= 0 && x <= 4 && y >= 0 && y <= 4, `point escaped bounds: ${x},${y}`);
   }
@@ -140,13 +136,11 @@ test("pinned chaikin with everything pinned is the ring itself (#223)", () => {
   const square: Pt[] = [[0, 0], [4, 0], [4, 4], [0, 4]];
   const out = chaikinSmoothPinned(square, 3, () => true);
   for (const c of square) assert.ok(has(out, c), `pinned vertex ${c} must survive`);
-  // No interpolated points are introduced when nothing is free to cut.
   assert.ok(out.length <= square.length + 1, "all-pinned ring gains no cut points");
 });
 
 test("pinned chaikin with nothing pinned equals plain chaikin (#223)", () => {
-  // The free-point arithmetic must be the exact 0.75/0.25 form plain uses, so a
-  // ring with no pins renders byte-identically. Guards the ULP invariant.
+  // The free-point arithmetic must be the exact 0.75/0.25 form plain uses, so a no-pin ring renders byte-identically (the ULP invariant).
   const ring: Pt[] = [[1, 0], [5, 1], [4, 6], [0, 5]];
   const plain = chaikinSmooth(ring, true, 2);
   const pinned = chaikinSmoothPinned(ring, 2, () => false);
@@ -154,9 +148,7 @@ test("pinned chaikin with nothing pinned equals plain chaikin (#223)", () => {
 });
 
 test("coastSmoothingIterations is a no-op at or below chart width (#27)", () => {
-  // The 2 here is load-bearing: it keeps the 1500px chart, the bound atlas, and
-  // the committed goldens byte-identical, since the chaikinSmooth call is then
-  // unchanged. Anything <= 1500 must return exactly 2.
+  // The 2 is load-bearing: it keeps the 1500px chart, the bound atlas, and the committed goldens byte-identical; anything <= 1500 must return exactly 2.
   for (const w of [1, 500, 1000, 1499, 1500]) {
     assert.equal(coastSmoothingIterations(w), 2, `width ${w} stays at 2`);
   }

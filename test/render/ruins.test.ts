@@ -16,7 +16,6 @@ test("the legend lists Ruins only when the world has any", () => {
   assert.ok(w.settlements.some((s) => s.ruined));
   assert.match(renderMap(w, { style: "antique", legend: true }), /Ruins/);
 
-  // same world with ruins cleared (immutable copy): no glyph, no key row
   const noRuins = {
     ...w,
     settlements: w.settlements.map((s) => ({ ...s, ruined: false })),

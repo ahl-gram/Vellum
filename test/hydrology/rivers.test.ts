@@ -75,7 +75,7 @@ test("river cells are claimed exactly once (no overlap except junctions)", () =>
   const rivers = extractRivers(f, flow, sea);
   const seen = new Set<string>();
   for (const r of rivers) {
-    // last point is shared (junction or ocean mouth) — all others are unique
+    // The last point is shared (junction or ocean mouth); all others are unique.
     for (let i = 0; i < r.points.length - 1; i++) {
       const k = `${r.points[i]!.x},${r.points[i]!.y}`;
       assert.ok(!seen.has(k), `cell claimed twice: ${k}`);
@@ -84,16 +84,11 @@ test("river cells are claimed exactly once (no overlap except junctions)", () =>
   }
 });
 
-// #162 (the Surveyor's Glass gate): a regional survey must anchor its river
-// threshold to the parent world instead of re-deriving a window-local quantile,
-// so a stream does not gain or lose river status between zoom levels. The pure
-// threshold function is exported so region.ts can compute the world's value and
-// scale it; absoluteThreshold feeds a pre-computed value back in.
+// #162: a regional survey anchors its river threshold to the parent world rather than a window-local quantile, so a stream does not gain or lose river status between zoom levels; absoluteThreshold feeds the pre-computed value back in.
 test("riverThreshold is the land-accumulation quantile, floored at minAcc (#162)", () => {
   const acc = [1, 2, 3, 4, 5, 6, 7, 8, 9, 100];
   // quantile(0.985) of 10 sorted values -> index floor(0.985 * 9) = 8 -> value 9
   assert.equal(riverThreshold(acc, 0.985, 4), 9);
-  // the minAcc floor wins when the quantile falls below it
   assert.equal(riverThreshold([1, 1, 1, 1], 0.5, 8), 8);
 });
 
@@ -101,12 +96,9 @@ test("absoluteThreshold overrides the window-local quantile (#162)", () => {
   const { f, sea } = valley();
   const flow = computeFlow(f, sea);
   const maxAcc = Math.max(...Array.from(flow.acc));
-  // A threshold above every land cell's flow draws nothing, whatever the local
-  // distribution the quantile would otherwise pick.
   const none = extractRivers(f, flow, sea, { absoluteThreshold: maxAcc + 1 });
   assert.equal(none.length, 0, "an absolute threshold above all flow draws no rivers");
-  // A low absolute threshold draws the trunk even with a near-max quantileQ,
-  // proving the quantile path is skipped entirely.
+  // A low absolute threshold draws the trunk even with a near-max quantileQ, proving the quantile path is skipped entirely.
   const many = extractRivers(f, flow, sea, { absoluteThreshold: 3, quantileQ: 0.999 });
   assert.ok(many.length >= 1, "a low absolute threshold ignores quantileQ");
 });

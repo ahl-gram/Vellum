@@ -17,19 +17,14 @@ import {
 } from "../../src/society/hamlets.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
 
-// #171 Hamlets: a region-only settlement tier that exists only on the deepest
-// band's sheets (window sizeUV 0.125). Candidates sit on a fixed world-space
-// lattice, each point hashed independently off the seed, so a hamlet's existence,
-// spot, and name are window-independent and interaction-order-independent, and no
-// hamlet name collides with any world-sheet name for its seed.
+// #171 Hamlets: a region-only tier on the deepest band's sheets (sizeUV 0.125). Candidates sit on a fixed world-space lattice, each point hashed independently off the seed, so existence, spot, and name are window- and interaction-order-independent, and no hamlet name collides with a world-sheet name.
 
 const world = generateWorld(defaultRecipe(42, { gridW: 320, gridH: 240 }));
 const DEEP = 0.125;
 
 const count = (svg: string, needle: string): number => svg.split(needle).length - 1;
 
-// The anchor window for the assertions below: the settlement environs with the
-// richest candidate crop, resolved once and reused (deterministic by construction).
+// The anchor window: the settlement environs with the richest candidate crop, resolved once and reused (deterministic by construction).
 let cachedRich: UvWindow | null = null;
 function richWindow(): UvWindow {
   if (cachedRich) return cachedRich;
@@ -88,8 +83,7 @@ test("hamletName is deterministic and draws past a taken name", () => {
 test("candidates are deterministic, and stable across a regeneration of the world", () => {
   const win = richWindow();
   assert.deepEqual(hamletCandidates(world, win), hamletCandidates(world, win));
-  // the download-redraw path regenerates the base world from the recovered
-  // recipe; hamlets must reproduce identically over that fresh world.
+  // The download-redraw path regenerates the base world from the recovered recipe; hamlets must reproduce identically over that fresh world.
   const regen = generateWorld(defaultRecipe(42, { gridW: 320, gridH: 240 }));
   assert.deepEqual(hamletCandidates(regen, win), hamletCandidates(world, win));
 });
@@ -185,12 +179,9 @@ test("placeHamlets projects candidates onto region land, appended by the region 
     assert.ok((region.elev.data[i] as number) > region.seaLevel, `${h.name} stands on region land`);
   }
 
-  // calling placeHamlets directly over the same region terrain reproduces them
   assert.deepEqual(placeHamlets(world, win, region.elev, region.seaLevel), hamlets);
 
-  // the projection is verified INDEPENDENTLY (review: the round-trip above runs the
-  // same code on the same inputs, so it cannot catch a deterministic scaling bug):
-  // each hamlet must land within one snap-cell of this test's own uv->cell math
+  // Verified INDEPENDENTLY (review: the round-trip above runs the same code on the same inputs, so it cannot catch a deterministic scaling bug): each hamlet must land within one snap-cell of this test's own uv->cell math.
   const byName = new Map(hamletCandidates(world, win).map((c) => [c.name, c]));
   for (const h of hamlets) {
     const c = byName.get(h.name);
@@ -231,10 +222,7 @@ test("hamlet marks are smaller than the village dot and label at the smallest si
 });
 
 test("label pressure drops hamlet labels first and never force-places them (#171)", () => {
-  // The AC "tier order preserved in label pressure": a hamlet that loses the
-  // placement contest goes label-less (like a village), while capital/seat/town
-  // always keep a label even in a crowd. Guarded here because the whole rule is
-  // one clause in settlementsLayer, and nothing else would catch its reversal.
+  // The AC "tier order preserved in label pressure": a hamlet may go label-less while capital/seat/town always keep one; the whole rule is one clause in settlementsLayer, and nothing else would catch its reversal.
   const win = richWindow();
   const region = generateRegionWorld(world, {
     window: win, gridW: 320, gridH: 240, title: "Crowded Environs",
@@ -247,7 +235,6 @@ test("label pressure drops hamlet labels first and never force-places them (#171
   const nextLayer = svg.indexOf('<g id="layer-', layerStart + 10);
   const layer = svg.slice(layerStart, nextLayer > 0 ? nextLayer : undefined);
 
-  // each settlement group's body runs to the next group's opening tag
   const marks = [...layer.matchAll(/<g class="settlement" data-idx="\d+" data-tier="([a-z]+)"[^>]*>/g)];
   assert.ok(marks.length > 0, "settlement groups drawn");
   const groups = marks.map((m, i) => ({
@@ -270,10 +257,7 @@ test("label pressure drops hamlet labels first and never force-places them (#171
 });
 
 test("region sheets set settlement labels larger; world sheets keep their type (readability)", () => {
-  // On a regional survey the labels are the reveal, and the committed inset is
-  // viewed at roughly viewport width, so base type reads tiny on a laptop and
-  // worse on a phone. Region sheets scale settlement type up by
-  // REGION_TYPE_SCALE; world sheets keep FONT_SIZE exactly (golden-locked).
+  // On a regional survey the labels are the reveal and the inset is viewed near viewport width, so region sheets scale settlement type by REGION_TYPE_SCALE; world sheets keep FONT_SIZE exactly (golden-locked).
   const win = richWindow();
   const region = generateRegionWorld(world, {
     window: win, gridW: 320, gridH: 240, title: "Legible Environs",
@@ -281,9 +265,7 @@ test("region sheets set settlement labels larger; world sheets keep their type (
   const regionSvg = renderMap(region, { style: "antique" });
   const worldSvg = renderMap(world, { style: "antique" });
 
-  // every labeled settlement on the survey is set at its tier's SCALED size,
-  // whatever tiers this window happens to hold (bounded to the settlements
-  // layer so the cartouche and feature labels cannot leak into the last slice)
+  // Every labeled settlement is set at its tier's SCALED size, bounded to the settlements layer so the cartouche and feature labels cannot leak into the last slice.
   const layerStart = regionSvg.indexOf('<g id="layer-settlements">');
   assert.ok(layerStart >= 0);
   const nextLayer = regionSvg.indexOf('<g id="layer-', layerStart + 10);
@@ -306,8 +288,6 @@ test("region sheets set settlement labels larger; world sheets keep their type (
     const expected = Number(REGION_FONT_SIZE[l.tier].toFixed(1));
     assert.equal(l.fs, expected, `a region ${l.tier} label is set at ${expected}, not ${l.fs}`);
   }
-  // every tier grows, the smallest tiers grow the most (they carry the
-  // readability problem), and the visual hierarchy stays strict
   for (const tier of Object.keys(FONT_SIZE) as Array<keyof typeof FONT_SIZE>) {
     assert.ok(REGION_FONT_SIZE[tier] > FONT_SIZE[tier], `region ${tier} type grows`);
   }
@@ -324,8 +304,7 @@ test("region sheets set settlement labels larger; world sheets keep their type (
   );
   assert.ok(REGION_FONT_SIZE.hamlet >= 12.5, "hamlet type is laptop-legible at display scale");
 
-  // the world sheet is untouched: its village labels stay at base FONT_SIZE
-  // (data-tier is region-only, so read the world label size off any village text)
+  // The world sheet is untouched: data-tier is region-only, so read the world label size off any village text.
   const worldVillage = worldSvg.match(
     new RegExp(`<text[^>]*font-size="${FONT_SIZE.village}"`),
   );

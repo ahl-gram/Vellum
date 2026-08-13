@@ -11,20 +11,8 @@ import {
 } from "../../src/terrain/contours.ts";
 import type { World } from "../../src/world/types.ts";
 
-/**
- * #223 root fix: on a regional survey the coast is closed against the zoom-window
- * rectangle, and plain Chaikin corner-cutting rounds those frame corners inward,
- * carving real land back over the ocean rect painted behind it (the "phantom
- * sea"). The fix pins the frame vertices so only the true shore rounds. These
- * tests measure the phantom sea directly: the fraction of genuine land grid
- * points (elevation above the waterline) that the drawn coast excludes.
- *
- * The metric is a self-consistent comparison in GRID space (same space the coast
- * rings and the heightfield share), so it needs no rasterizer and no golden. A
- * small residual survives even with no smoothing at all: it is the half-cell
- * quantization of the iso line, not a bug. The contract is that pinning removes
- * essentially all of the SMOOTHING-induced phantom sea, landing near that floor.
- */
+// #223 root fix: closing the coast against the zoom window let plain Chaikin round the frame corners inward, carving real land into "phantom sea"; the fix pins the frame vertices so only the true shore rounds.
+// The metric is self-consistent in GRID space (no rasterizer, no golden): a small residual survives even with no smoothing (the half-cell iso quantization), so the contract is that pinning lands near that floor.
 
 /** Even-odd point-in-polygon over a set of rings, matching the SVG land fill. */
 function drawnAsLand(rings: ReadonlyArray<ReadonlyArray<Point>>, px: number, py: number): boolean {
@@ -50,9 +38,7 @@ function phantomSeaFraction(world: World, rings: ReadonlyArray<ReadonlyArray<Poi
   const { elev, seaLevel } = world;
   let land = 0;
   let phantom = 0;
-  // Nudge off the integer lattice so a sample never lands exactly on a frame or
-  // marching-squares edge (both are lattice-aligned), which would make the
-  // even-odd parity ambiguous.
+  // Nudge off the integer lattice so a sample never lands exactly on a frame or marching-squares edge, where the even-odd parity is ambiguous.
   const EPS = 1e-4;
   for (let y = 0; y < elev.h; y++) {
     for (let x = 0; x < elev.w; x++) {
@@ -90,19 +76,15 @@ test("pinned region coast recovers the smoothing-induced phantom sea (#223)", ()
   const pinned = phantomSeaFraction(region, coastRingsGrid(region, COAST_ITERS));
   const floor = phantomSeaFraction(region, plainRings(region, 0)); // no smoothing
 
-  // Plain smoothing carves a real amount of land into ocean...
   assert.ok(plain > 0.03, `expected plain smoothing to show real phantom sea, got ${(plain * 100).toFixed(1)}%`);
-  // ...pinning cuts that by at least two thirds...
   assert.ok(pinned < plain / 3, `pinned ${(pinned * 100).toFixed(1)}% must be < plain/3 ${((plain / 3) * 100).toFixed(1)}%`);
-  // ...landing at the no-smoothing floor (the irreducible iso quantization).
   assert.ok(pinned <= floor + 0.005, `pinned ${(pinned * 100).toFixed(1)}% must sit near the floor ${(floor * 100).toFixed(1)}%`);
 });
 
 test("pinned region coast holds across seeds and an edge-clamped window (#223)", () => {
   const cases: Array<[string, World]> = [
     ["seed 100 capital", capitalRegion(100)],
-    // A large window clamps against the world edge, forcing long frame runs and
-    // real land hard up against the frame corners (the worst case for #223).
+    // A large window clamps against the world edge: long frame runs with real land hard against the corners, #223's worst case.
     ["seed 42 wide/clamped", capitalRegion(42, 0.7)],
   ];
   for (const [label, region] of cases) {
@@ -133,8 +115,7 @@ test("world charts carry no region clip, keeping goldens byte-identical (#223)",
 });
 
 test("world coast is unpinned: region gate does not touch world charts (#223)", () => {
-  // A standalone world has no region window, so coastRingsGrid must return the
-  // exact plain smooth (guards the byte-identity of the committed goldens).
+  // A standalone world has no region window, so coastRingsGrid must return the exact plain smooth (byte-identity of the committed goldens).
   const world = generateWorld(defaultRecipe(42));
   assert.equal(world.region, undefined);
   assert.deepEqual(coastRingsGrid(world, COAST_ITERS), plainRings(world, COAST_ITERS));

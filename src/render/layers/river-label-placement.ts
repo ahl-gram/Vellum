@@ -6,7 +6,6 @@ export type RiverLabelPlacement = {
   readonly angleDeg: number;
 };
 
-/** Total absolute turning (radians) of the polyline between indices i and j. */
 function reachTurn(
   pts: ReadonlyArray<readonly [number, number]>,
   i: number,
@@ -23,20 +22,7 @@ function reachTurn(
   return turn;
 }
 
-/**
- * Candidate label positions along a river polyline, each a straight reach long
- * enough to hold a label of `targetLen` px, returned as the reach's mid-point
- * and a reading-friendly rotation. Following the whole winding course smears
- * glyphs at bends; a single straight reach keeps the label legible.
- *
- * The list is ordered by preference. Element 0 is the same reach
- * `straightestReach` has always returned (the most-centered of the straightest
- * reaches), so a river whose best spot is free keeps its exact placement. The
- * rest are straightest-first alternatives, each far enough from every reach
- * already offered (>= `targetLen`) that it names a genuinely different stretch
- * of the course, so a river whose best spot is taken can still label a free
- * stretch elsewhere instead of going nameless.
- */
+/** Ordered by preference; element 0 is the reach straightestReach always returned, so a river whose best spot is free keeps its exact placement. */
 export function reachPlacements(
   pts: ReadonlyArray<readonly [number, number]>,
   targetLen: number,
@@ -51,8 +37,6 @@ export function reachPlacements(
   }
   const total = cum[cum.length - 1] as number;
 
-  // A placement built from a [lo, hi] reach: read left-to-right, gently rotated,
-  // anchored at the reach's arc-length midpoint on the river.
   const toPlacement = (lo: number, hi: number): RiverLabelPlacement => {
     let a = pts[lo]!;
     let b = pts[hi]!;
@@ -70,7 +54,6 @@ export function reachPlacements(
     };
   };
 
-  // Course too short to hold a full-length reach: label the whole thing.
   if (total <= targetLen) return [toPlacement(0, pts.length - 1)];
 
   const wins: Array<{ i: number; j: number; turn: number; center: number }> = [];
@@ -89,7 +72,6 @@ export function reachPlacements(
   const mid = total / 2;
   const minTurn = Math.min(...wins.map((w) => w.turn));
 
-  // Primary: the most-centered of the straightest reaches (unchanged pick).
   const primary = wins
     .filter((w) => w.turn <= minTurn + 0.08)
     .sort((a, b) => Math.abs(a.center - mid) - Math.abs(b.center - mid))[0]!;
@@ -107,11 +89,6 @@ export function reachPlacements(
   return chosen.map((w) => toPlacement(w.i, w.j));
 }
 
-/**
- * The single best reach for a river's label (the most-centered of the
- * straightest reaches), or null for a degenerate course. Thin wrapper over
- * `reachPlacements` so both share one definition of the primary reach.
- */
 export function straightestReach(
   pts: ReadonlyArray<readonly [number, number]>,
   targetLen: number,

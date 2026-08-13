@@ -4,11 +4,7 @@ import { createField } from "../../src/core/grid.ts";
 import { computeWindMoisture } from "../../src/climate/moisture-wind.ts";
 import { computeClimate } from "../../src/climate/climate.ts";
 
-// #74: moisture rides the prevailing wind — recharged over sea, rained out
-// over land, rained out harder where the wind climbs. Windward coasts and
-// faces read wet; leeward interiors sit in rain shadow. Every fixture puts
-// sea on the EAST and blows the wind WESTWARD (dir = PI points toward -x,
-// the same convention the nautical arrows draw), so east is upwind.
+// #74: moisture rides the prevailing wind: recharged over sea, rained out over land, harder where the wind climbs. Every fixture puts sea on the EAST and blows the wind WESTWARD (dir = PI points toward -x, the nautical-arrow convention), so east is upwind.
 
 const W = 80;
 const H = 40;
@@ -63,9 +59,7 @@ test("the windward ridge face is wetter than the leeward face", () => {
 });
 
 test("off-grid upwind reads as open sea, not desert", () => {
-  // no sea anywhere on the grid: the only moisture source is the off-grid
-  // horizon, so edge-touching continent land must not read bone-dry (#74
-  // acceptance for continent / citystate maps)
+  // No sea anywhere on the grid: the only moisture source is the off-grid horizon, so edge-touching continent land must not read bone-dry (#74 acceptance for continent/citystate maps).
   const allLand = createField(60, 40, () => 0.12);
   const wind = computeWindMoisture(allLand, 0, WEST_WIND);
   const upwindEdge = stripMean(wind, 60, 40, 54, 58);
@@ -77,9 +71,7 @@ test("off-grid upwind reads as open sea, not desert", () => {
 });
 
 test("a windowed crop continues its border terrain, no phantom upwind ocean", () => {
-  // a regional crop cut from a continent interior never borders the world's
-  // forced-water edge; with offGridSea=false the fetch clamps to the border
-  // cell instead of inventing a maritime band along the crop's upwind side
+  // A regional crop from a continent interior never borders the forced-water edge; with offGridSea=false the fetch clamps to the border cell instead of inventing a maritime band along the upwind side.
   const allLand = createField(60, 40, () => 0.12);
   const wind = computeWindMoisture(allLand, 0, WEST_WIND, false);
   const upwindEdge = stripMean(wind, 60, 40, 54, 58);
@@ -91,10 +83,7 @@ test("a windowed crop continues its border terrain, no phantom upwind ocean", ()
 });
 
 test("a north-blowing wind wets the north-facing side (vertical component)", () => {
-  // pins the sign of the vertical wind component: nothing else in the suite
-  // exercises uy, so a flipped sign would only surface as re-pinnable golden
-  // noise. Sea to the NORTH, an east-west tent ridge, wind blowing SOUTH
-  // (dir = PI/2 points +y): the north coast and north face must be the wet side.
+  // Pins the SIGN of the vertical wind component: nothing else exercises uy, so a flipped sign would only surface as re-pinnable golden noise. Sea to the NORTH, wind blowing SOUTH (dir = PI/2 points +y): the north coast and face must be the wet side.
   const w = 40;
   const h = 80;
   const f = createField(w, h, (x, y) => {

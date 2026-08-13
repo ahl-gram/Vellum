@@ -21,7 +21,6 @@ test("any instant within one UTC day yields the same seed", () => {
 });
 
 test("the day boundary is UTC, not local", () => {
-  // late UTC on the 19th is still the 19th's world, never the 20th's
   assert.equal(seedForDate(new Date("2026-06-19T23:30:00Z")), 20260619);
 });
 

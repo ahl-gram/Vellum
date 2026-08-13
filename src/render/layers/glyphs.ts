@@ -10,14 +10,9 @@ type Glyph = {
   scale: number;
 };
 
-// Relief thresholds on (elevation - seaLevel) / elevSpan. Shared with the
-// legend so its key can only list terrain the chart actually carries, and with
-// the daily hunt's terrain clues (#335) so a clue and the drawing cannot drift.
 export const GLYPH_MTN_REL = 0.5;
 export const GLYPH_HILL_REL = 0.34;
 
-/** Biomes that draw tree glyphs (at or below mountain relief). Shared with the
- *  daily hunt's forest clue (#335) for the same no-drift reason. */
 export const TREE_BIOMES: ReadonlySet<number> = new Set<number>([
   BIOMES.temperateForest,
   BIOMES.rainforest,
@@ -32,12 +27,6 @@ export type TerrainGlyphs = {
   readonly dune: boolean;
 };
 
-/**
- * Which non-mountain, non-tree terrain glyphs a glyph-style chart would draw.
- * Mirrors the candidate gates in glyphsLayer exactly (interior land cells, the
- * same relief thresholds, the same else-if order) so the legend never lists a
- * symbol the map lacks, nor omits one it carries.
- */
 export function terrainGlyphsPresent(ctx: RenderCtx): TerrainGlyphs {
   const { world, elevSpan } = ctx;
   const { w, h, data } = world.elev;
@@ -62,11 +51,6 @@ export function terrainGlyphsPresent(ctx: RenderCtx): TerrainGlyphs {
   return { hill, marsh, dune };
 }
 
-/**
- * Terrain glyph field for antique/ink styles: mountains on high ground,
- * hills below them, trees over forest biomes, marsh tufts, dune marks.
- * Painter-sorted by y so nearer glyphs occlude farther ones.
- */
 export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
   const { style, world, proj, elevSpan, rng } = ctx;
   if (!style.glyphs) return null;
@@ -74,7 +58,6 @@ export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
   const { w, h, data } = world.elev;
   const sea = world.seaLevel;
   const k = proj.widthPx / 1500;
-  // regional charts magnify terrain; spread and enlarge glyphs to match
   const zoom = world.region
     ? Math.sqrt(
         (w - 1) /
@@ -113,7 +96,6 @@ export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
 
   mtn.sort((a, b) => b.rel - a.rel || a.i - b.i);
   hill.sort((a, b) => b.rel - a.rel || a.i - b.i);
-  // trees/marsh/dunes: shuffle for even coverage instead of row bias
   const treeShuffled = jrng.fork("trees").shuffled(tree);
   const marshShuffled = jrng.fork("marsh").shuffled(marsh);
   const duneShuffled = jrng.fork("dunes").shuffled(dune);

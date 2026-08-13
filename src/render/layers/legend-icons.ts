@@ -122,7 +122,6 @@ export function iconNode(icon: Icon, cx: number, cy: number, ctx: RenderCtx): Sv
       });
     }
     case "current": {
-      // a curving stroke with one downstream chevron, echoing the layer glyph
       const x1 = cx - 10 * k;
       const x2 = cx + 10 * k;
       const hl = 4 * k;
@@ -137,8 +136,6 @@ export function iconNode(icon: Icon, cx: number, cy: number, ctx: RenderCtx): Sv
       });
     }
     case "iso": {
-      // a short contour squiggle in the plate's own iso stroke: bold grey-brown
-      // for the rainfall isohyets, the faint style stroke for the isotherms
       const s = isoStroke(ctx.theme ?? "", style);
       return el("path", {
         d: `M${(cx - 10 * k).toFixed(1)} ${(cy + 2 * k).toFixed(1)}Q${(cx - 3 * k).toFixed(1)} ${(cy - 4 * k).toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)}Q${(cx + 4 * k).toFixed(1)} ${(cy + 3 * k).toFixed(1)} ${(cx + 10 * k).toFixed(1)} ${(cy - 2 * k).toFixed(1)}`,

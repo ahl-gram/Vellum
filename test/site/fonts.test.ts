@@ -9,23 +9,14 @@ import { buildGallery } from "../../src/cli/gallery.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
-/**
- * The Punchcutter's Case (#228): the site chrome is set in the same century as the
- * charts. Three self-hosted OFL faces carry three roles: IM Fell English SC for
- * display (titles, section heads, nav), IM Fell English italic for flourishes
- * (taglines, captions, marginal notes), EB Garamond for body prose. This guards the
- * wiring end to end, and the BOUNDARY (the charts' own SVG lettering is out of scope,
- * so no chart byte changes and no regen is owed).
- */
+// The Punchcutter's Case (#228): three self-hosted OFL faces (Fell SC display, Fell italic flourish, EB Garamond body). Guards the wiring end to end and the BOUNDARY: the charts' own SVG lettering is out of scope, so no chart byte moves and no regen is owed.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const readText = (p: string) => readFile(root(p), "utf8").catch(() => "");
 
-// The three role custom properties fonts.css publishes, consumed site-wide.
 const ROLE_VARS = ["--font-display", "--font-flourish", "--font-body"] as const;
 
-// The self-hosted woff2 set: SC display, Fell italic flourish, EB Garamond body
-// (the 400/600/700 weights + the 400 italic the site's chrome actually asks for).
+// The woff2 set: exactly the weights and italics the site's chrome asks for.
 const WOFF2 = [
   "im-fell-english-sc-latin-400-normal.woff2",
   "im-fell-english-latin-400-italic.woff2",
@@ -35,20 +26,13 @@ const WOFF2 = [
   "eb-garamond-latin-700-normal.woff2",
 ] as const;
 
-// Every hand-authored page shell in the folio (the atlas + gallery are generated,
-// guarded through their generators below). Since Sub 8 (#254) all six pages
-// render through BaseLayout, so the one layout IS the folio's shell.
+// Since #254 all pages render through BaseLayout, so the one layout IS the folio's shell; the atlas + gallery are generated and guarded through their generators below.
 const AUTHORED_PAGES = ["src/layouts/BaseLayout.astro"] as const;
-
-// The shell's role bindings (body prose, the wordmark/nav/footer display line, the
-// tagline flourish) moved into BaseLayout's global style at #263; the page
-// files keep only their page-specific member bindings.
 
 test("fonts.css self-hosts the three Fell/Garamond faces with font-display: swap", async () => {
   const css = await readText("public/fonts.css");
   assert.ok(css.length > 0, "public/fonts.css should exist");
 
-  // The three families, each declared @font-face.
   for (const family of ["IM Fell English SC", "IM Fell English", "EB Garamond"]) {
     assert.ok(
       new RegExp(`@font-face[^}]*font-family:\\s*['"]${family}['"]`, "s").test(css),
@@ -56,15 +40,12 @@ test("fonts.css self-hosts the three Fell/Garamond faces with font-display: swap
     );
   }
 
-  // Nothing blocks on the font files: swap in a serif fallback while they load.
   assert.match(css, /font-display:\s*swap/, "faces must use font-display: swap");
 
-  // Self-hosted under the site's own assets: reference /fonts/, never a third party.
   assert.match(css, /url\(\s*['"]?\/fonts\/[^)]+\.woff2/, "faces must load from /fonts/");
   assert.doesNotMatch(css, /fonts\.googleapis\.com|fonts\.gstatic\.com/, "no third-party font host");
 
-  // The three role custom properties, each with the Iowan serif stack baked in as the
-  // fallback so a missing woff2 (or a page that never links fonts.css) still reads warm.
+  // The role vars bake in the Iowan serif fallback so a missing woff2, or a page that never links fonts.css, still reads warm.
   for (const v of ROLE_VARS) {
     assert.ok(css.includes(v), `fonts.css :root should publish ${v}`);
   }
@@ -131,7 +112,6 @@ test("atlasDocument: the deployed page joins the Case; the offline download fall
 
   const offline = atlasDocument(fixture, (p) => `data:${p.key}`, { anchor: false, motion: false });
   assert.doesNotMatch(offline, /href="\/fonts\.css"/, "the self-contained download links nothing external");
-  // It still degrades cleanly: the var carries the serif fallback inline for the no-fonts.css case.
   assert.match(offline, /var\(--font-body,[^)]*serif/, "the download must fall back to the serif stack");
 });
 
@@ -141,14 +121,9 @@ test("the gallery page css defers the sub's voice to the house intro role (#324)
   try {
     await buildGallery(100, { count: 1, out: dir });
     const css = await readFile(join(dir, "index.css"), "utf8").catch(() => "");
-    // The sub line is an intro since #324 (markup class="sub intro", pinned in
-    // house-style.test.ts), so its flourish voice arrives through /house.css;
-    // the generated css re-binding it would shadow a future re-ratification.
+    // The sub line is an intro since #324 (pinned in house-style.test.ts); the generated css re-binding it would shadow a future re-ratification.
     assert.ok(!/p\.sub[^{]*\{[^}]*font-family/.test(css), "the sub's voice belongs to /house.css, not the generated css");
-    // Display and body roles now arrive through BaseLayout: /gallery/ is a
-    // shelled route since #268 (covered by the layout binding test above and
-    // the scaffold suite), so the standalone document with its own fonts
-    // links retires.
+    // /gallery/ is a shelled route since #268, so the standalone document retires.
     assert.ok(!existsSync(join(dir, "index.html")), "buildGallery must not write the standalone shell anymore");
   } finally {
     await rm(dir, { recursive: true, force: true });
@@ -160,14 +135,7 @@ test("the e2e harness serves .woff2 with a real font MIME (no false-positive fal
   assert.match(text, /["']\.woff2["']\s*:\s*["']font\/woff2/, "the harness MIME map should serve .woff2 as font/woff2");
 });
 
-// ---------------------------------------------------------------------------
-// BOUNDARY GUARD (not red-green: green from the start, by design). #228 is site
-// chrome ONLY. The charts' own SVG lettering is out of scope because it is part of
-// the byte-determinism contract, so this asserts NO chart byte moved: the rendered
-// SVG never mentions the new faces, and render/style.ts still sets the Iowan stack.
-// If a future edit reaches into the SVG font, this fails and the regen discipline
-// (land a chart delta alone) applies.
-// ---------------------------------------------------------------------------
+// BOUNDARY GUARD, green from the start by design: #228 is site chrome ONLY; the chart SVG lettering is part of the byte-determinism contract, so no chart byte may move.
 test("boundary: the chart SVG lettering is untouched by the site's Punchcutter faces", () => {
   const svg = renderMap(generateWorld(defaultRecipe(42)), { style: "antique", widthPx: 480 });
   assert.doesNotMatch(svg, /IM Fell|EB Garamond/, "chart <text> must not adopt the site chrome faces");

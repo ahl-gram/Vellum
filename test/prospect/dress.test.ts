@@ -21,15 +21,10 @@ import {
 import { dressContext } from "../../src/prospect/dress/context.ts";
 import { attrsOf, landPathD } from "../../test-support/dress-svg.ts";
 
-/** The dress rounds coordinates to 0.1 at SVG emit (geometry.ts's "Sub 3
- * rounds at SVG emit"); tests locate elements by reproducing that rounding. */
+/** The dress rounds coordinates to 0.1 at SVG emit (geometry.ts); tests locate elements by reproducing that rounding. */
 const f = (v: number): string => String(Math.round(v * 10) / 10);
 
-// Synthetic fixtures reach arms real worlds cannot (see the header of
-// test-support/prospect-fixtures.ts) and, unlike world-sourced geometry,
-// carry no libm ancestry, so their rendered bytes are platform-stable and
-// safe to pin (the golden rule: never byte-compare across environments does
-// not bite when no transcendental ever ran).
+// Synthetic fixtures reach arms real worlds cannot (see test-support/prospect-fixtures.ts) and carry no libm ancestry, so their rendered bytes are platform-stable and safe to pin.
 const FIXTURES: Record<string, ProspectGeometry> = {
   harborCapital: composeProspect(
     makeInput({
@@ -51,8 +46,6 @@ const FIXTURES: Record<string, ProspectGeometry> = {
   fieldsHamlet: composeProspect(makeInput({ kind: "hamlet" })),
 };
 
-// ------------------------------------------------------------ the two dresses
-
 test("the ratified dresses are antique and ink, and only those render", () => {
   assert.deepEqual([...PROSPECT_DRESSES], ["antique", "ink"]);
   const g = FIXTURES.fieldsHamlet!;
@@ -63,11 +56,7 @@ test("the ratified dresses are antique and ink, and only those render", () => {
   assert.throws(() => prospectSvg(g, STYLES.nautical), RangeError);
 });
 
-// ------------------------------------------------- every ink is a style token
-
-/** The tokens the dress is allowed to draw from. Deliberately NOT the
- * whole style object: realmTints are excluded so a hard-coded grey that
- * happens to equal a tint (ink's realmTints hold "#888") still fails. */
+/** The tokens the dress may draw from; deliberately NOT the whole style object: realmTints are excluded so a hard-coded grey that happens to equal a tint still fails. */
 function tokenColors(dress: ProspectDress): Set<string> {
   const s = STYLES[dress];
   return new Set(
@@ -92,8 +81,6 @@ test("every ink in every plate is sourced from render/style.ts tokens", () => {
   }
 });
 
-// ------------------------------------- same shapes, different ink (#240 core)
-
 test("swapping the dress changes only the ink: paper-filled solids are identical", () => {
   for (const [name, g] of Object.entries(FIXTURES)) {
     const antique = landPathD(prospectSvg(g, STYLES.antique), STYLES.antique.land);
@@ -105,8 +92,6 @@ test("swapping the dress changes only the ink: paper-filled solids are identical
     assert.deepEqual(antique, ink, `${name}: composition is dress-invariant`);
   }
 });
-
-// --------------------------------------------------- layering and the ground
 
 test("walls paint between the back row and the keep, the spike's layering", () => {
   const g = FIXTURES.harborCapital!;
@@ -148,8 +133,6 @@ test("a risen site fills its mound; a drowned plate draws no ground line", () =>
   assert.ok(!dsvg.includes(lineStart), "no ground line under the flood");
 });
 
-// ------------------------------------------------------------------ the water
-
 test("the sea band wears the style's water tokens", () => {
   const g = FIXTURES.harborCapital!;
   const antique = prospectSvg(g, STYLES.antique);
@@ -173,12 +156,7 @@ test("the sea band wears the style's water tokens", () => {
   assert.ok(ink.includes(`stroke="${STYLES.ink.coastStroke}"`), "ink keeps the coast stroke");
 });
 
-// ------------------------------------------------------------ ruin reads ruin
-
-// Silhouette-specific on purpose: a whole-plate notEqual was satisfied by
-// the foot rubble alone, so a broken tower rendering intact (merlons and
-// all) escaped every test until vellum-guard-prover proved it. Guard each
-// form family's silhouette through massNodes, the class, not the instance.
+// Silhouette-specific on purpose: a whole-plate notEqual was satisfied by the foot rubble alone, so a broken tower rendering intact escaped every test until vellum-guard-prover proved it; guard each form family's silhouette through massNodes, the class, not the instance.
 test("a broken mass loses its intact silhouette, form by form", () => {
   const c = dressContext(STYLES.ink);
   const render = (m: Mass): string => massNodes(c, m, 1.2).map(renderSvg).join("");
@@ -204,8 +182,6 @@ test("a broken mass loses its intact silhouette, form by form", () => {
   assert.ok(!kb.includes(pennant), "a thrown-down keep flies no pennant");
   assert.ok(kb.includes(`L${f(240 + 34 * 0.2)} ${f(192 + 40 * 0.4)}`), "a broken keep jags");
 });
-
-// ------------------------------------------- every foreground element has ink
 
 const SAMPLE_ELEMENTS: ReadonlyArray<ForegroundElement> = [
   { kind: "fieldRows", rows: [{ y: 242, x0: 60, x1: 460 }] },
@@ -272,9 +248,7 @@ test("every foreground kind, every tree species, renders at least one node", () 
       seen.add(e.kind);
     }
   }
-  // The sample list itself must not rot: a kind added to the union without a
-  // sample here would dodge the coverage claim. Kept honest by tsc too: the
-  // renderer's switch is exhaustive with a never arm.
+  // The sample list must not rot: a kind added to the union without a sample here would dodge the coverage claim (tsc keeps it honest via the renderer's exhaustive never arm).
   const KINDS: Record<ForegroundElement["kind"], true> = {
     fieldRows: true,
     scrubRows: true,
@@ -302,8 +276,6 @@ test("every foreground kind, every tree species, renders at least one node", () 
   assert.deepEqual([...seen].sort(), Object.keys(KINDS).sort(), "every kind sampled");
 });
 
-// -------------------------------------------------------- determinism, pinned
-
 function fnv1a(s: string): number {
   let h = 0x811c9dc5 >>> 0;
   for (let i = 0; i < s.length; i++) {
@@ -313,10 +285,7 @@ function fnv1a(s: string): number {
   return h >>> 0;
 }
 
-// Pinned 2026-08-10 from a measured run (the compose-world.test.ts prospect
-// convention). Synthetic fixtures only: their arithmetic is libm-free end to
-// end, so the rounded bytes cannot drift across platforms. A deliberate dress
-// change re-pins these with the cause named in the commit.
+// Pinned 2026-08-10 from a measured run; the synthetic fixtures are libm-free end to end, so the rounded bytes cannot drift across platforms. A deliberate dress change re-pins these with the cause named in the commit.
 const PINNED: ReadonlyArray<{ fixture: string; dress: ProspectDress; sum: number }> = [
   { fixture: "harborCapital", dress: "antique", sum: 3614064183 },
   { fixture: "harborCapital", dress: "ink", sum: 3369968809 },
@@ -340,14 +309,7 @@ test("the same (geometry, dress) yields byte-identical, pinned SVG", () => {
   }
 });
 
-// The byte pins above are only sound while the WHOLE prospect chain stays
-// libm-free: the fixtures run through compose/masses/ground/foreground/
-// ruin, so one Math.sin in the composer would also make the pinned bytes
-// drift Mac-vs-CI (the golden rule's ~1e-13). Guard the class at its true
-// boundary, all of src/prospect/, the contract geometry.ts and transect.ts
-// state in prose (their prose mentions are why comments are stripped
-// before matching). Math.sqrt is exempt: IEEE requires it correctly
-// rounded, so it cannot drift.
+// The byte pins are only sound while ALL of src/prospect/ stays libm-free: one Math.sin in the composer would drift the pinned bytes Mac-vs-CI (~1e-13). Comments are stripped before matching because geometry.ts and transect.ts state the contract in prose; Math.sqrt is exempt, IEEE requires it correctly rounded.
 test("the prospect layer stays libm-free and clock-free", async () => {
   const { readdir, readFile } = await import("node:fs/promises");
   const { fileURLToPath } = await import("node:url");

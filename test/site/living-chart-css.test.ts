@@ -3,24 +3,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-/**
- * #302: the living-chart engine's overlay dressing is a SHARED sheet,
- * public/living-chart.css, linked by every page that mounts the engine (the
- * Explorer today, the Reading Room's page next). This is the CSS twin of the
- * #191 module boundary: #191 lifted the BEHAVIOR out of the Explorer, this
- * sheet lifts the DRESSING, so a non-Explorer host is no longer functionally
- * live but visually undressed.
- *
- * Three contracts, each with its own failure mode:
- *   1. the sheet dresses every hook the engine emits (a missing rule leaves
- *      UA-default buttons over the chart, or an unpositioned overlay);
- *   2. the sheet is host-agnostic: it never names a host's own element, so
- *      the #155 ink-in keys on the .living-chart mount class a host supplies,
- *      never on the Explorer's #map;
- *   3. the dressing has ONE home. The Explorer sheet must not keep copies,
- *      because two copies drift apart silently (the exact failure option 2 of
- *      #302 was rejected for).
- */
+// #302: the engine's overlay dressing is ONE shared sheet, public/living-chart.css, linked by every page that mounts the engine; the CSS twin of the #191 module boundary.
+// Three contracts: the sheet dresses every engine-emitted hook; it is host-agnostic (never names a host's own element); and the dressing has ONE home, because two copies drift apart silently.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => {
@@ -33,9 +17,7 @@ const read = (p: string) => {
 
 const SHEET = "public/living-chart.css";
 
-// Every rule opener the engine's dressing needs: the nodes place-overlay.ts,
-// voyage-session.ts, and chronicle.ts create or tag. Matched as literal
-// substrings of the sheet, so a rename on either side fails here first.
+// The nodes place-overlay.ts, voyage-session.ts and chronicle.ts create or tag, matched as literal substrings of the sheet so a rename on either side fails here first.
 const ENGINE_RULES = [
   ".place-overlay {",
   ".place-hit {",
@@ -88,17 +70,13 @@ test("the hit divides by --zoom-k once, on the element; the ring pseudos stay pl
 test("the shared sheet is host-agnostic: no host element id, ever (#302)", () => {
   const raw = read(SHEET);
   assert.ok(raw.length > 0, `${SHEET} exists and is non-empty`);
-  // Comments may cite a host by name to document the contract; SELECTORS must
-  // not. #place-card is ENGINE-created (place-overlay.ts assigns the id), so it
-  // may appear; #map is the Explorer host's own mount and must not.
+  // Comments may cite a host by name; SELECTORS must not. #place-card is ENGINE-created so it may appear; #map is the Explorer host's own mount.
   const css = raw.replace(/\/\*[\s\S]*?\*\//g, "");
   assert.ok(!css.includes("#map"), `${SHEET} must never key a rule on a host's #map`);
 });
 
 test("the dressing has one home: the Explorer sheet keeps no copy (#302)", () => {
-  // Strip comments first: prose may legitimately mention a class name (the
-  // button reset comment explains WHY .place-hit is excluded), and the
-  // :not(.place-hit) exclusion in the Explorer's button rule stays by design.
+  // Strip comments first: prose may legitimately mention a class name, and the :not(.place-hit) exclusion in the Explorer's button rule stays by design.
   const css = read("public/explorer/index.css").replace(/\/\*[\s\S]*?\*\//g, "");
   const banned = [
     ".place-overlay",
@@ -133,8 +111,7 @@ test("the Explorer host wires the contract: mount class + sheet link (#302)", ()
 });
 
 test("the Reading Room host wires the sheet-link half of the contract (#302, #221)", () => {
-  // The mount-class half is the frame's (guarded below); the page's half is the
-  // extraCss links, and deleting either sheet ships the room live but undressed.
+  // The mount-class half is the frame's (guarded below); the page's half is the extraCss links, and deleting either sheet ships the room live but undressed.
   const page = read("src/pages/reading-room/index.astro");
   assert.ok(page.includes("/living-chart.css"), "the Reading Room page links /living-chart.css");
   assert.ok(page.includes("/reading-frame.css"), "the Reading Room page links /reading-frame.css");

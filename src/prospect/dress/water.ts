@@ -1,17 +1,9 @@
-/**
- * The water band (#240): ocean sheet, the chart's 3-pass waterline halo,
- * the coast stroke, and dressed waves. Ink's ocean IS its paper (a token
- * fact, style.ts), so the sheet drops out and the waterline alone carries
- * the water, exactly as the chart behaves in that dress.
- */
-
 import { el, type SvgNode } from "../../render/svg.ts";
 import type { Rng } from "../../core/rng.ts";
 import { VIEW_X0, VIEW_X1, type Water } from "../geometry.ts";
 import { rippleDash, waveFlourish } from "./glyphs.ts";
 import { r1, stroke, type DressContext } from "./context.ts";
 
-/** The 3-pass halo the chart lays along its coasts, scaled to the plate. */
 const HALO = [
   { w: 5.5, o: 0.16 },
   { w: 3.3, o: 0.26 },
@@ -65,8 +57,6 @@ export function waterBandNodes(c: DressContext, water: Water, rng: Rng): SvgNode
   return out;
 }
 
-/** The river's near bank below the water: a bank line and its grasses.
- * Painted before the foreground so the bridge lands over it. */
 export function riverBankNodes(c: DressContext, water: Water, rng: Rng): SvgNode[] {
   const parts: string[] = [];
   for (let i = 0; i < 10; i++) {

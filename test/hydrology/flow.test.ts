@@ -43,7 +43,6 @@ test("bowl interior drains to ocean after depression filling", () => {
     return -1.0;
   });
   const { dir } = computeFlow(f, -0.5);
-  // center cell must reach an ocean sink in finitely many steps
   let i = 4 + 4 * w;
   let steps = 0;
   while ((dir[i] as number) !== -1) {

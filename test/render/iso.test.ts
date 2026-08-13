@@ -12,8 +12,7 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 const STYLE_NAMES: StyleName[] = ["antique", "topographic", "ink", "nautical"];
 
 test("isolines: a monotonic field yields evenly spaced levels, ordered by value", () => {
-  // vertical gradient 0..1; 13 rows and 10 level-slots are coprime, so no iso
-  // value ever lands exactly on a lattice value
+  // Vertical gradient 0..1; 13 rows and 10 level-slots are coprime, so no iso value ever lands exactly on a lattice value.
   const f = createField(20, 14, (_x, y) => y / 13);
   const sets = isolines(f, 9);
   assert.equal(sets.length, 9, "one set per requested level");
@@ -54,9 +53,7 @@ function maxExtent(points: ReadonlyArray<readonly [number, number]>): number {
 }
 
 test("isolines: a lone spike keeps its broad low ring but culls the sub-pixel high one", () => {
-  // one cell above a flat floor. Its rings shrink toward the peak: the 0.1 ring
-  // rides ~0.9 cell out from the centre (a real ~1.8-cell diamond), the 0.9 ring
-  // hugs the corner at ~0.1 cell out (a degenerate ~0.2-cell speck to be culled).
+  // One cell above a flat floor: the 0.1 ring rides ~0.9 cell out (a real ~1.8-cell diamond), the 0.9 ring hugs the corner at ~0.1 cell (a degenerate ~0.2-cell speck to be culled).
   const spike = createField(5, 5, (x, y) => (x === 2 && y === 2 ? 1 : 0));
   const sets = isolines(spike, 9); // interior levels 0.1 .. 0.9
   const low = sets.find((s) => Math.abs(s.value - 0.1) < 1e-9);
@@ -154,8 +151,7 @@ test("the rainfall plate carries coastline-clipped isohyets in every style", () 
 });
 
 test("isoLayer geometry: nine open, projected chains at their level's height", () => {
-  // a bare-bones ctx: vertical temperature gradient, anisotropic projection so
-  // a dropped proj.px/py is caught, empty coast (clip markup only)
+  // A bare-bones ctx: vertical temperature gradient, anisotropic projection so a dropped proj.px/py is caught, empty coast (clip markup only).
   const ctx = {
     theme: "climate",
     world: { climate: { temperature: createField(20, 14, (_x, y) => y / 13) } },

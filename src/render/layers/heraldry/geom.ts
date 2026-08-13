@@ -1,11 +1,6 @@
 import { el, type SvgNode } from "../../svg.ts";
 import type { Arms, Tincture } from "../../../society/heraldry.ts";
 
-/**
- * Shield geometry: the heater silhouette and the field divisions clipped to it.
- * PURE: all coordinates derive from the shield box, no RNG.
- */
-
 export function n(x: number): number {
   return Math.round(x * 100) / 100;
 }
@@ -35,7 +30,6 @@ export function geom(cx: number, cy: number, size: number): Geom {
   };
 }
 
-/** Heater shield silhouette: flat top, straight upper sides, curved taper. */
 export function shieldPath(g: Geom): string {
   const shoulder = g.top + g.h * 0.46;
   const lower = g.top + g.h * 0.82;
@@ -49,10 +43,6 @@ export function shieldPath(g: Geom): string {
   );
 }
 
-/** Base field plus, for a divided shield, the second tincture's region. All are
- *  clipped to the silhouette, so simple bbox shapes give exact divisions. `fieldFill`
- *  resolves a tincture to its region fill: a solid on colour styles, a hatch
- *  `url(#…)` on the ink style. */
 export function fieldNodes(arms: Arms, g: Geom, fieldFill: (t: Tincture) => string): SvgNode[] {
   const base = el("rect", {
     x: n(g.x0), y: n(g.top), width: n(g.w), height: n(g.h),

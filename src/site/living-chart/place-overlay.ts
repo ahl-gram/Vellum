@@ -1,23 +1,14 @@
-// #53 story cards: the per-draw DOM layer of invisible hit-targets over the baked
-// chart, positioned by manifest fractions (so they align at any width), feeding one
-// reused parchment card. Hover / tap / Tab-focus a place to unfurl it. Split out of
-// the old living-chart.ts at #191; the coupling with the chronicle scrubber (the card
-// is suppressed while scrubbing, the scrubber drives the same hits) crosses the
-// boundary as the injected `isSuppressed` predicate, wired by the engine's index.
-// Card text is composed CLIENT-SIDE from the manifest (composePlaceCard), never
-// createLoreWriter, whose order/rng-dependent prose would diverge from the gazetteer
-// for the same town.
+// #53 story cards: the per-draw DOM layer of invisible hit-targets over the baked chart,
+// positioned by manifest fractions, feeding one reused parchment card. The chronicle
+// coupling crosses the boundary as the injected `isSuppressed` predicate. Card text is
+// composed CLIENT-SIDE from the manifest (composePlaceCard), never createLoreWriter,
+// whose order/rng-dependent prose would diverge from the gazetteer for the same town.
 import { composePlaceCard, placeAriaLabel, cardSide } from "../../render/place-card.ts";
 import type { PlaceManifest, PlaceMark } from "../../render/place-manifest.ts";
 import type { HistoricalEvent } from "../../society/history.ts";
 
-// Overlay state. Rebuilt every draw because the host's innerHTML swap wipes the chart
-// mount's children. `pinned` keeps a tapped or Enter/Space card open (touch has no
-// mouseleave); `currentIdx` is the place the card last previewed (moves on every
-// hover/focus); `pinnedIdx` is the place a tap/Enter pinned. currentIdx and
-// pinnedIdx MUST be distinct: a genuine click is always preceded by a preview of
-// the same place, so keying the pin toggle off currentIdx would dismiss instead of
-// switch when pinning B after A was pinned.
+// Rebuilt every draw (the host's innerHTML swap wipes the mount's children). `pinned` keeps a tapped or Enter/Space card open (touch has no mouseleave).
+// currentIdx and pinnedIdx MUST stay distinct: a genuine click is always preceded by a preview of the same place, so keying the pin toggle off currentIdx would dismiss instead of switch when pinning B after A was pinned.
 interface PlaceOverlayState {
   card: HTMLDivElement;
   places: ReadonlyArray<PlaceMark>;
@@ -89,15 +80,10 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const side = cardSide(place.nx, place.ny);
     el.classList.toggle("flip-h", side.h === "left");
     el.classList.toggle("flip-v", side.v === "above");
-    // #128: a card pinned to THIS place plays the full unfurl grade; a hover/focus
-    // preview (pinned false, or pinned to another place) runs the short grade.
+    // #128: a card pinned to THIS place plays the full unfurl grade; a hover/focus preview runs the short grade.
     el.classList.toggle("pinned", placeOverlay.pinned && placeOverlay.pinnedIdx === idx);
     el.hidden = false;
-    // Restart the unfurl cleanly at the current grade on every show. A CSS animation
-    // would not otherwise replay while the card stays displayed across a content swap
-    // (sweep or pin-from-preview), and a mid-flight grade change would leave a partial
-    // roll; the none/reflow/restore reset guarantees a fresh roll every time. The short
-    // hover grade keeps a fast sweep nimble.
+    // Restart the unfurl cleanly at the current grade on every show: a CSS animation would not replay while the card stays displayed across a content swap, and a mid-flight grade change would leave a partial roll; the none/reflow/restore reset guarantees a fresh roll.
     inner.style.animation = "none";
     void inner.offsetWidth;
     inner.style.animation = "";
@@ -111,25 +97,16 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     placeOverlay.card.hidden = true;
   }
 
-  // After each draw: lay invisible focusable hit-targets over the baked glyphs (the
-  // chart exposes no per-feature ids) and feed one reused parchment card.
-  // #169: opts.preservePinByName re-pins a currently-pinned card to the SAME-NAMED settlement
-  // in the new manifest. A region redraft renumbers settlements (region worlds re-index), so a
-  // pin kept by array index would jump to a different town or dangle; keying by name keeps the
-  // card on the place the reader pinned. Default draws (a new world) pass nothing: no continuity.
-  // #169: opts.box positions the overlay over a region INSET's rect (sheet fractions of the
-  // mount) instead of the whole sheet, so a region manifest's own nx/ny fractions land on the
-  // inset's drawn glyphs. The card moved inside the overlay for the same reason: its % anchor
-  // must resolve against the same box the fractions describe (the full sheet when box is
-  // absent, so world overlays are unchanged).
+  // After each draw: lay invisible focusable hit-targets over the baked glyphs (the chart exposes no per-feature ids) and feed one reused parchment card.
+  // #169: preservePinByName re-pins a pinned card to the SAME-NAMED settlement in the new manifest (a region redraft renumbers, so an index-keyed pin would jump or dangle); default draws pass nothing.
+  // #169: opts.box positions the overlay over a region INSET's rect so the region manifest's own nx/ny fractions land on the inset's drawn glyphs; the card lives inside the overlay so its % anchor resolves against the same box.
   function buildPlaceOverlay(manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts): void {
     if (!manifest || !manifest.places) return;
     const preserveName =
       opts && opts.preservePinByName && placeOverlay && placeOverlay.pinned && placeOverlay.pinnedIdx >= 0
         ? ((placeOverlay.places[placeOverlay.pinnedIdx] || {}) as Partial<PlaceMark>).name
         : null;
-    // An inset commit rebuilds the overlay with no mount wipe before it (unlike a draw), so
-    // this builder owns removing the previous overlay + card. A no-op after a wipe.
+    // An inset commit rebuilds the overlay with no mount wipe before it (unlike a draw), so this builder owns removing the previous overlay + card; a no-op after a wipe.
     for (const stale of mapEl.querySelectorAll(":scope > .place-overlay, :scope > #place-card")) stale.remove();
     const overlay = document.createElement("div");
     overlay.className = "place-overlay";
@@ -144,14 +121,10 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     }
     const card = document.createElement("div");
     card.id = "place-card";
-    // role=tooltip + aria-describedby (set per hit below) is the robust path: it
-    // reads the card as the focused hit's description. No aria-live, which on a
-    // populate-while-hidden region announces unreliably and would double up.
+    // role=tooltip + aria-describedby (set per hit below) reads the card as the focused hit's description; no aria-live, which on a populate-while-hidden region announces unreliably and would double up.
     card.setAttribute("role", "tooltip");
     card.hidden = true;
-    // #128: the paper sheet is a persistent inner wrapper. Content is swapped into it
-    // per place, but the element is stable, so the unfurl animation replays only on a
-    // real unhide (display:none -> block on the card), not on a content swap.
+    // #128: the paper sheet is a persistent inner wrapper; content swaps per place but the element is stable, so the unfurl replays only on a real unhide, not on a content swap.
     const inner = document.createElement("div");
     inner.className = "pc-inner";
     card.appendChild(inner);
@@ -165,14 +138,12 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       hit.setAttribute("aria-describedby", "place-card");
       hit.style.left = `${place.nx * 100}%`;
       hit.style.top = `${place.ny * 100}%`;
-      // Hover / keyboard focus previews the card; the preview can move the open
-      // card between places, and the pin only governs whether leaving dismisses it.
+      // A preview can move the open card between places; the pin only governs whether leaving dismisses it.
       hit.addEventListener("mouseenter", () => showPlaceCard(idx));
       hit.addEventListener("focus", () => showPlaceCard(idx));
       hit.addEventListener("mouseleave", () => { if (!placeOverlay!.pinned) placeOverlay!.card.hidden = true; });
       hit.addEventListener("blur", () => { if (!placeOverlay!.pinned) placeOverlay!.card.hidden = true; });
-      // Tap / Enter / Space all fire a button click: pin the card open, or switch
-      // the pin to this place. Activating the already-pinned place toggles it off.
+      // Tap / Enter / Space all fire a button click: pin the card open, or switch the pin; activating the already-pinned place toggles it off.
       hit.addEventListener("click", () => {
         if (placeOverlay!.pinned && placeOverlay!.pinnedIdx === idx) { hidePlaceCard(); return; }
         placeOverlay!.pinned = true;
@@ -183,8 +154,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     });
     overlay.appendChild(card); // inside the overlay so its % anchor shares the overlay's box
     mapEl.appendChild(overlay);
-    // #169: restore a pinned card onto the same-named settlement if it survived into the new
-    // sheet; if the place is off the new window, leave the card dismissed.
+    // #169: restore a pinned card onto the same-named settlement if it survived into the new sheet; off the new window, leave it dismissed.
     if (preserveName != null) {
       const idx = manifest.places.findIndex((p) => p.name === preserveName);
       if (idx >= 0) {
@@ -195,9 +165,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     }
   }
 
-  // Document-level dismiss, wired once by the host: Escape or a click/tap off any mark
-  // closes a pinned card. A click on a hit or the card itself is ignored here (the
-  // hit's own handler owns pinning).
+  // Document-level dismiss, wired once by the host: Escape or a click off any mark closes a pinned card; a click on a hit or the card is ignored here (the hit's own handler owns pinning).
   function onDocKeydown(e: KeyboardEvent): void {
     if (e.key === "Escape" && placeOverlay && !placeOverlay.card.hidden) hidePlaceCard();
   }

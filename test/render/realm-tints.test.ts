@@ -16,8 +16,6 @@ const noAdj = (n: number): Set<number>[] =>
 const at = (x: number, y: number): Centroid => ({ x, y });
 
 test("two close realms get different tints; a far realm may reuse one", () => {
-  // A,B within the confusion distance -> must differ; C far from both -> free
-  // to reuse a colour even though only 2 tints exist.
   const c = [at(0, 0), at(5, 0), at(100, 0)];
   const out = assignRealmTints(c, noAdj(3), noConflict(2), 10);
   assert.notEqual(out[0], out[1], "close pair must differ");
@@ -25,7 +23,6 @@ test("two close realms get different tints; a far realm may reuse one", () => {
 });
 
 test("far-apart close-pairs reuse the whole palette", () => {
-  // {A,B} close, {C,D} close, but the two pairs are a sea apart: 2 tints suffice.
   const c = [at(0, 0), at(6, 0), at(200, 0), at(206, 0)];
   const out = assignRealmTints(c, noAdj(4), noConflict(2), 12);
   assert.notEqual(out[0], out[1]);
@@ -34,8 +31,6 @@ test("far-apart close-pairs reuse the whole palette", () => {
 });
 
 test("CVD-confusable tints never land on two close realms", () => {
-  // tints 0 and 1 collapse under colour-blindness; two close realms must not
-  // take that pair even though the indices differ.
   const conflict = noConflict(3);
   conflict[0]![1] = true;
   conflict[1]![0] = true;
@@ -49,7 +44,6 @@ test("CVD-confusable tints never land on two close realms", () => {
 });
 
 test("a shared border forces difference even beyond the confusion distance", () => {
-  // Two realms whose centroids are far apart but which share a land border.
   const adj = noAdj(2);
   adj[0]!.add(1);
   adj[1]!.add(0);
@@ -58,9 +52,7 @@ test("a shared border forces difference even beyond the confusion distance", () 
 });
 
 test("distinct-tint guarantee wins over CVD avoidance when the palette is CVD-boxed", () => {
-  // 3 close realms, 3 tints, but EVERY tint pair is colour-blind-confusable. The
-  // soft CVD rule cannot be satisfied, yet the spec's hard rule (close realms get
-  // different tints) still must - so all three take distinct indices.
+  // EVERY tint pair is CVD-confusable, so the soft rule cannot be satisfied; the spec's hard rule (close realms get different tints) still must be.
   const conflict = [
     [false, true, true],
     [true, false, true],
@@ -71,8 +63,6 @@ test("distinct-tint guarantee wins over CVD avoidance when the palette is CVD-bo
 });
 
 test("more mutually-close realms than tints: no throw, valid reuse", () => {
-  // 3 realms all within the confusion distance, only 2 tints -> the fallback
-  // must reuse a colour rather than fail, and use both tints.
   const out = assignRealmTints([at(0, 0), at(3, 0), at(0, 3)], noAdj(3), noConflict(2), 10);
   assert.equal(out.length, 3);
   assert.ok(out.every((c) => c >= 0 && c < 2));
@@ -110,8 +100,7 @@ test("realmAdjacency links bordering realms and not sea-separated ones", () => {
 });
 
 test("realmAdjacency ignores out-of-range labels instead of throwing", () => {
-  // Defense-in-depth: a label >= count must be skipped, not indexed into the
-  // adjacency array (which would be a TypeError).
+  // Defense-in-depth: a label >= count must be skipped, not indexed into the adjacency array (a TypeError).
   const adj = realmAdjacency(Int16Array.from([0, 5]), 2, 1, 2);
   assert.equal(adj.length, 2);
   assert.equal(adj[0]!.size, 0, "the in-range realm borders no valid neighbour");
@@ -125,8 +114,7 @@ test("realmTintIndices is identity within the base palette (byte-stable)", () =>
 });
 
 test("realmTintIndices engages the assignment beyond the base palette", () => {
-  // 6 column-block realms in a row on antique (7 tints): each borders its
-  // neighbours, so consecutive realms must differ.
+  // 6 column-block realms in a row on antique (7 tints): each borders its neighbours, so consecutive realms must differ.
   const w = 12, h = 1, count = 6;
   const labels = new Int16Array(w);
   for (let x = 0; x < w; x++) labels[x] = Math.floor(x / 2) as number;

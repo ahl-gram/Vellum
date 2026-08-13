@@ -1,7 +1,5 @@
-// The Explorer's DOM refs, extracted from app.ts at #192: the one getElementById pass
-// over the page, shared by the conductor and its wiring. Module scripts are deferred,
-// so the DOM is parsed before this resolves. DOM-bound at module scope by design (the
-// sea-level.ts / coast-warp.ts precedent), so never import this from a unit test.
+// The Explorer's one getElementById pass (#192), shared by the conductor and its wiring.
+// Module scripts are deferred, so the DOM is parsed before this resolves; DOM-bound at module scope by design, so never import this from a unit test.
 export const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 export const seedInput = $<HTMLInputElement>("seed");
 export const styleSel = $<HTMLSelectElement>("style");

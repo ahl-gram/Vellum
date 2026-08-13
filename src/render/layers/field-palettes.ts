@@ -1,20 +1,6 @@
 import { BIOMES } from "../../climate/biomes.ts";
 import type { StyleName } from "../style.ts";
 
-/**
- * Per-style palettes for the thematic data plates (#71). Each map style paints
- * the same simulated field in its own register: antique keeps its parchment
- * ramps, topographic brightens onto clean paper, nautical leans into navy ink,
- * and ink collapses to a single light-to-dark monochrome wash. The tables are
- * built once at module load so the field painter's per-cell `color()` stays a
- * cheap array lookup rather than re-interpolating a ramp for every cell.
- *
- * Antique's tables are kept byte-identical to the pre-#71 constants so the
- * committed style charts and the antique-assigned plate never drift.
- */
-
-// --- hex ramp helpers --------------------------------------------------------
-
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
   return [
@@ -28,7 +14,6 @@ function toHex(n: number): string {
   return Math.round(Math.max(0, Math.min(255, n))).toString(16).padStart(2, "0");
 }
 
-/** N evenly-spaced colors interpolated through the anchor hex stops. */
 function ramp(anchors: ReadonlyArray<string>, n: number): string[] {
   const rgb = anchors.map(hexToRgb);
   const out: string[] = [];
@@ -54,12 +39,8 @@ const byStyle = <T,>(f: (s: StyleName) => T): ByStyle<T> => ({
   nautical: f("nautical"),
 });
 
-// ink: a single warm light-to-dark wash, shared by every theme so the pen-and-
-// ink plates read as monochrome surveys rather than the antique colour ramps.
 const INK_LIGHT = "#ddd6c4";
 const INK_DARK = "#241c10";
-
-// --- temperature: cold -> hot ------------------------------------------------
 
 export const TEMP_BANDS = 12;
 const TEMP_ANCHORS: ByStyle<readonly string[]> = {
@@ -73,8 +54,6 @@ export const TEMP_KEY: ReadonlyArray<[number, string]> = [
   [0, "Cold"], [3, "Cool"], [6, "Temperate"], [9, "Warm"], [11, "Hot"],
 ];
 
-// --- moisture: dry -> wet ----------------------------------------------------
-
 export const MOIST_BANDS = 10;
 const MOIST_ANCHORS: ByStyle<readonly string[]> = {
   antique: ["#d8c592", "#c7c789", "#9fbb84", "#74a78f", "#5b8f9a"],
@@ -87,8 +66,6 @@ export const MOIST_KEY: ReadonlyArray<[number, string]> = [
   [0, "Arid"], [3, "Dry"], [5, "Moderate"], [7, "Humid"], [9, "Wet"],
 ];
 
-// --- population: sparse -> dense ---------------------------------------------
-
 export const POP_LEVELS = 5;
 const POP_ANCHORS: ByStyle<readonly string[]> = {
   antique: ["#e7ddc1", "#cdb88a", "#b08d5f", "#855f3e"],
@@ -98,12 +75,6 @@ const POP_ANCHORS: ByStyle<readonly string[]> = {
 };
 export const POP_RAMPS: ByStyle<string[]> = byStyle((s) => ramp(POP_ANCHORS[s], POP_LEVELS));
 export const POP_LABELS = ["Sparse", "Light", "Moderate", "Settled", "Dense"];
-
-// --- vegetation: categorical biomes ------------------------------------------
-// Colored styles share the earthy biome palette: the biome greens and tans sit
-// well on any of the three warm papers, and the field painter redraws the coast
-// in each style's stroke. Ink collapses the biomes to six density levels, barren
-// ground pale and closed canopy dark, so the plate reads as a monochrome survey.
 
 export const BIOME_COLORS: Record<number, string> = {
   [BIOMES.beach]: "#e6d8ad",
@@ -124,12 +95,6 @@ export const BIOME_COLORS: Record<number, string> = {
 };
 export const VEGETATION_DEFAULT = "#cabf9f";
 
-/**
- * The legend's vegetation groups, in key order (densest first). Each carries its
- * antique swatch colour and an `inkLevel` (0 barren .. 5 forest) for the ink
- * monochrome plate. This is the single source of truth for both the legend rows
- * and the per-biome ink shade.
- */
 export const VEGETATION_GROUPS: ReadonlyArray<{
   readonly label: string;
   readonly color: string;
@@ -147,7 +112,6 @@ export const VEGETATION_GROUPS: ReadonlyArray<{
 const VEG_INK_LEVELS = 6;
 export const VEG_INK_RAMP = ramp([INK_LIGHT, INK_DARK], VEG_INK_LEVELS);
 
-/** Biome id -> ink density level (0..5), derived from the vegetation groups. */
 export const BIOME_INK_LEVEL: Record<number, number> = (() => {
   const m: Record<number, number> = {};
   for (const g of VEGETATION_GROUPS) for (const id of g.ids) m[id] = g.inkLevel;

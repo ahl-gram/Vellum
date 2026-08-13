@@ -1,9 +1,3 @@
-/**
- * Hash-lattice gradient noise (Perlin-style) over an infinite 2D domain.
- * No permutation table: corner gradients come from a mixed integer hash of
- * (ix, iy, seed), so the field is fully determined by the seed.
- */
-
 import { lerp } from "../core/math.ts";
 
 const TAU = Math.PI * 2;
@@ -33,7 +27,6 @@ function cornerDot(
   return Math.cos(angle) * dx + Math.sin(angle) * dy;
 }
 
-/** Returns ~[-1, 1]; exactly 0 at integer lattice points. */
 export function gradientNoise2(x: number, y: number, seed: number): number {
   const ix = Math.floor(x);
   const iy = Math.floor(y);
@@ -47,6 +40,5 @@ export function gradientNoise2(x: number, y: number, seed: number): number {
 
   const u = fade(fx);
   const v = fade(fy);
-  // bilinear: lerp along the top and bottom edges, then between the two
   return lerp(lerp(d00, d10, u), lerp(d01, d11, u), v) * Math.SQRT2;
 }

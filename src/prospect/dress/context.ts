@@ -1,14 +1,4 @@
-/**
- * The dress context (#240): which dresses a prospect may wear, and the ink
- * shorthand every dress module draws with. The two-dress contract is the
- * 2026-08-09 ratification on #229 (mirrored on #240): prospects render in
- * antique and ink only; topographic and nautical are out of the epic's
- * scope. Sub 5's fallback rule maps every dropped chart style to antique.
- *
- * Every color here is a render/style.ts token; if a value is not a token,
- * it is a bug (#240 acceptance). `paper` is style.land, the building/glyph
- * fill, per the chart's glyph-symbols.ts convention the spike quoted.
- */
+/** paper is style.land (the chart's glyph-fill convention); every color here must be a render/style.ts token. */
 
 import type { MapStyle } from "../../render/style.ts";
 
@@ -31,11 +21,9 @@ export function dressContext(style: MapStyle): DressContext {
   return { style, ink: style.ink, soft: style.inkSoft, paper: style.land };
 }
 
-/** Round to 0.1 px at SVG emit; geometry stays unrounded upstream so
- * groundingViolations keeps its exact equality (geometry.ts contract). */
+/** Round to 0.1 px at emit only; upstream geometry stays unrounded for groundingViolations' exact equality. */
 export const r1 = (v: number): number => Math.round(v * 10) / 10;
 
-/** The shared stroke shorthand, always the style's full ink. */
 export function stroke(
   c: DressContext,
   w: number,

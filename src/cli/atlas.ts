@@ -17,9 +17,6 @@ export async function buildAtlas(
   const dir = resolve(opts.out ?? `out/atlas-${seed}`);
   await mkdir(dir, { recursive: true });
 
-  // Write every plate to the file the document will reference. The filename scheme lives
-  // in one place now (atlasPlateFilename), shared by this write loop and the document, so
-  // the two can never disagree on a plate's name.
   await writeFile(join(dir, atlasPlateFilename(atlas.hero, "hero")), atlas.hero.svg, "utf8");
   for (const d of atlas.draughtings) {
     await writeFile(join(dir, atlasPlateFilename(d, "draughting")), d.svg, "utf8");
@@ -31,8 +28,6 @@ export async function buildAtlas(
     await writeFile(join(dir, atlasPlateFilename(r, "region")), r.svg, "utf8");
   }
 
-  // The header fields the document needs, drawn from the World here (the browser download
-  // path reads them off serializableAtlas instead, which carries the same three).
   const data: AtlasDocumentData = {
     title: world.title.title,
     subtitle: world.title.subtitle,

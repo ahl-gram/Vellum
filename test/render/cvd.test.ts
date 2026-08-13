@@ -6,8 +6,7 @@ const ANTIQUE_PAPER = "#f2e8cf";
 const TOPO_PAPER = "#f7f4ee";
 
 test("frozen antique slate & mauve collapse under CVD as 0.11 washes", () => {
-  // Distinct-ish in normal vision, but a deuteranope cannot tell them apart -
-  // this is exactly why the assignment must be CVD-aware, not just spatial.
+  // Distinct in normal vision but a deuteranope cannot tell them apart: exactly why the assignment must be CVD-aware, not just spatial.
   assert.ok(
     washesConfusable("#7a8aa6", "#a97ba6", ANTIQUE_PAPER, 0.11),
     "slate vs mauve should register as confusable",
@@ -25,8 +24,6 @@ test("the two new antique tints are not confusable with each other", () => {
 });
 
 test("red-green tints collapse under CVD even when distinct normally", () => {
-  // Terracotta (red) and sage (green) read clearly apart in normal vision, but
-  // a deuteranope loses the difference - the assignment must keep them apart.
   assert.ok(washesConfusable("#c46d5e", "#7d9a6a", ANTIQUE_PAPER, 0.11));
 });
 

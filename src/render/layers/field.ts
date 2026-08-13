@@ -10,50 +10,25 @@ import {
   POP_LEVELS, POP_RAMPS, POP_LABELS,
 } from "./field-palettes.ts";
 
-/**
- * Thematic "data plates": the simulation that the normal chart discards for
- * display — biome, climate, moisture, settlement density — painted as flat
- * colored cells.
- *
- * One painter serves every theme. Each theme assigns each land cell an integer
- * class and a style-aware color; the painter run-length merges same-class cells
- * per row into <rect>s and clips the lot to the smooth coastline. The grid is
- * fine enough (≈4.7px/cell at 1500px) that the blocky fill reads as a continuous
- * wash, and staying in cells avoids the speckle and seams that per-class marching
- * squares would produce over noisy biome masks.
- *
- * Palettes follow the active map style (#71): the per-style ramps and biome
- * tables live in `field-palettes.ts`; this module just classes cells and looks
- * the colors up.
- */
-
 export type ThemeName = "vegetation" | "climate" | "moisture" | "population";
 
 export type SwatchRow = { readonly color: string; readonly label: string };
 
 export type ThemeSpec = {
   readonly name: ThemeName;
-  /** Per-cell class for the painter; null leaves the cell unpainted (ocean / no data). */
   cellClass(world: World): (i: number) => number | null;
-  /** Fill color for a class index, in the active map style. */
   color(cls: number, style: MapStyle): string;
-  /** Key rows for the active style; the palette may draw finer distinctions than the key groups. */
   legendRows(world: World, style: MapStyle): SwatchRow[];
-  /** The legend's footnote for this theme. */
   readonly note: string;
-  /** Legend label for the plate's iso lines, when it carries any. */
   readonly isoLabel?: string;
 };
 
 const isOcean = (world: World, i: number): boolean =>
   (world.biomes[i] as number) === BIOMES.ocean;
 
-/** Quantize a [0,1] field cell into one of `n` bands. */
 function band(value: number, n: number): number {
   return Math.max(0, Math.min(n - 1, Math.floor(value * n)));
 }
-
-// --- vegetation: land colored by biome ----------------------------------------
 
 const VEGETATION: ThemeSpec = {
   name: "vegetation",
@@ -74,8 +49,6 @@ const VEGETATION: ThemeSpec = {
   },
   note: "land coloured by biome",
 };
-
-// --- climate (temperature) and moisture: quantized continuous fields ----------
 
 function scalarTheme(
   name: ThemeName,
@@ -119,11 +92,8 @@ const MOISTURE = scalarTheme(
   "Isohyet",
 );
 
-// --- population: choropleth over realms, shaded by settlement density ----------
-
 const POP_WEIGHT: Record<string, number> = { capital: 4, town: 2, village: 1 };
 
-/** A density level (0..POP_LEVELS-1) per realm, from weighted settlements / area. */
 function realmDensityLevels(world: World): number[] {
   const { labels, seats } = world.realms;
   const R = seats.length;
@@ -175,7 +145,6 @@ export const THEMES: Record<ThemeName, ThemeSpec> = {
   population: POPULATION,
 };
 
-/** Flat colored cells for the active theme, clipped to land. Null when no theme. */
 export function fieldLayer(ctx: RenderCtx): SvgNode | null {
   if (!ctx.theme) return null;
   const theme = THEMES[ctx.theme];
@@ -220,8 +189,7 @@ export function fieldLayer(ctx: RenderCtx): SvgNode | null {
   return el("g", { id: "layer-field" }, [
     clipPath,
     el("g", { "clip-path": "url(#field-clip)" }, rects),
-    // the cells cover the inner half of the land layer's coast stroke; redraw it
-    // on top so the defining coastline stays crisp
+    // The cells cover the inner half of the coast stroke; redraw it on top so the coastline stays crisp.
     el("path", {
       d: coastD,
       fill: "none",

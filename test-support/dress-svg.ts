@@ -1,8 +1,4 @@
-/**
- * SVG-string probes for the prospect dress tests (#240). String-level on
- * purpose: the tests assert on the exact bytes the renderer emits, not on a
- * parsed DOM's idea of them.
- */
+// String-level SVG probes for the prospect dress tests (#240): assertions are on the exact emitted bytes, not a parsed DOM.
 
 export function attrsOf(elem: string): Record<string, string> {
   const out: Record<string, string> = {};
@@ -12,9 +8,7 @@ export function attrsOf(elem: string): Record<string, string> {
   return out;
 }
 
-/** All <path> d strings whose fill is the style's land token, sorted. The
- * paper-filled solids (masses, walls, ridge, mound, hulls...) are exactly
- * the composition, so their d multiset must be dress-invariant. */
+/** All land-filled <path> d strings, sorted: the composition solids, whose d multiset must be dress-invariant. */
 export function landPathD(svg: string, land: string): string[] {
   const out: string[] = [];
   for (const m of svg.matchAll(/<path\b[^>]*>/g)) {
