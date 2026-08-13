@@ -279,9 +279,14 @@ export function createVoyage(deps: VoyageDeps) {
     paintFrame(voyage!, 1, false); // silent: the draw's settle needs the status to stay ""
     // #174: repaint the back face too. The Explorer's renderVerso replaceChildren wipes
     // the verso track on every draw, exactly as the mount's innerHTML wipes the recto
-    // overlay, so BOTH faces have to be rebuilt. In the conductor's settle path
-    // rebuildVerso runs AFTER this and wipes it again, which is why the conductor calls
-    // syncRestingTrack once more on the far side of that wipe.
+    // overlay, so BOTH faces have to be rebuilt.
+    //
+    // #366 reversed who runs last, and the Explorer's own comment at that line is the
+    // authority now. When this arm is DEFERRED past the paint it runs after rebuildVerso,
+    // so this call is the one that inks the back face and the conductor makes none. Only
+    // when the arm runs inside the settle (the sheet resting on its verso, or a quiet
+    // mid-drag redraw) does rebuildVerso still come afterwards, and only then does the
+    // conductor repaint on the far side of that wipe.
     //
     // INVARIANT: the sink's ghost and its track always come from the SAME draw. A quiet
     // mid-drag redraw (the sea-level slider) deliberately does NOT rebuild the ghost,

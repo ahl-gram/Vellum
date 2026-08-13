@@ -14,6 +14,15 @@
 // lands a beat later and the beat is a window the box can move inside.
 // #364 added SV2g/SV2h: the "one mount, one overlay" invariant asserted against the
 // ENGINE rather than against the callers that used to hold it by convention.
+// #366 carried that to the other two arm paths (the settle and the #131 turn's landing),
+// so the ink lands a beat after a DRAW too. This branch owns SV2k through SV2p: SV2p (the
+// settle's ordering), SV2k (the back face on a Draw), SV2l (the turn landing's ordering,
+// riding on SV10's turn), SV2m (the arm dropped inside the settle's beat), SV2n (reduced
+// motion), and SV2o for the one landing that does NOT defer, a draw taken while the sheet
+// rests on its verso, where the chart is facing away and the back face is what the reader
+// sees. SV4, SV6 and SV10 gained waits for the ink where they used to read in the settle's
+// shadow. SV2g through SV2j belong to #364 (PR #372), whose engine source cites them by
+// name; its SV2j is a different contract from anything here.
 // Self-contained like the hunt / Print Room / home suites (navigates itself, carries
 // its own scoped no-4xx + console-error delta).
 import { makeRoom } from "./room-support.mjs";
@@ -447,6 +456,178 @@ export async function run(ctx) {
     JSON.stringify(sv2j),
   );
 
+  // SV2p (#366): a Draw made WITH the survey already inked must paint the new chart without
+  // waiting on the arm. The settle wrote the new chart into #map and re-armed in the SAME
+  // task, so the browser could not paint the chart the settle had just written until the
+  // arm returned: 1245ms from the settle to the first delivered frame carrying the new
+  // chart, measured in screencast frames before the fix, and about 105ms after it.
+  //
+  // Asserted as TASK ORDERING, never as a duration. A MutationObserver callback runs at the
+  // microtask checkpoint of the task that mutated, so two mutations made in ONE task arrive
+  // in one batch and two made in two tasks arrive in two. The batch carrying the chart swap
+  // must therefore not also carry the voyage overlay, and a rendering opportunity (the frame
+  // the arm waits for) must fall between the two batches. Nothing here sleeps, so there is
+  // no threshold a slower runner could outlast, and the check cannot pass by being fast.
+  await goto("#seed=7&style=antique&survey", "survey-draw-beat-base");
+  await waitInked("survey-draw-beat-base-ink");
+  await evaluate(`(()=>{window.__land={batches:[],frames:0,raf:0};
+    const bump=()=>{window.__land.frames++;window.__land.raf=requestAnimationFrame(bump);};bump();
+    window.__mo=new MutationObserver((recs)=>{let chart=false,overlay=false;
+      for(const r of recs)for(const n of r.addedNodes){if(n.nodeType!==1)continue;
+        if(n.classList&&n.classList.contains("voyage-overlay"))overlay=true;
+        else if(String(n.tagName).toLowerCase()==="svg")chart=true;}
+      if(chart||overlay)window.__land.batches.push({chart,overlay,frames:window.__land.frames,
+        verso:!!document.querySelector("#verso .verso-track")});});
+    window.__mo.observe(document.getElementById("map"),{childList:true});return true;})()`);
+  await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("draw").click();})()`);
+  await waitSettled("survey-draw-beat-settle");
+  await waitInked("survey-draw-beat-ink");
+  const sv2p = await evaluate(`(()=>{window.__mo.disconnect();cancelAnimationFrame(window.__land.raf);
+    const b=window.__land.batches;const c=b.findIndex((x)=>x.chart);const i=b.findIndex((x)=>x.overlay);
+    const recto=document.querySelector("#map .voyage-overlay .voyage-track");
+    const back=document.querySelector("#verso .verso-track");
+    return{batches:b,chartBatch:c,inkBatch:i,chartAlone:c>=0&&!b[c].overlay,
+      framesBetween:c>=0&&i>=0?b[i].frames-b[c].frames:-1,
+      versoAtSwap:c>=0?b[c].verso:null,
+      facesAgree:!!recto&&!!back&&recto.getAttribute("points")===back.getAttribute("points"),
+      overlays:document.querySelectorAll("#map .voyage-overlay").length,
+      vertices:(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
+        return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})(),
+      status:document.getElementById("status").textContent,hash:location.hash};})()`);
+  check(
+    "SV2p a Draw with the survey inked paints the new chart before the arm: the swap and the ink land in different tasks, a frame apart (#366)",
+    // framesBetween is LOAD-BEARING and is not redundant with the two clauses beside it. A
+    // guard-prover run replaced afterNextPaint with queueMicrotask, so the arm only LOOKED
+    // deferred while still running inside the settle's task: chartAlone and the batch order
+    // both still passed (a microtask checkpoint per callback splits the batches), and this
+    // clause alone went red at framesBetween 0. It is the only thing in the suite that can
+    // tell one task from two. Do not drop it as redundant.
+    sv2p.chartAlone && sv2p.inkBatch > sv2p.chartBatch && sv2p.framesBetween >= 1 &&
+      // Exactly two batches and exactly one overlay: a real bound, unlike a vertex count,
+      // which waitInked above has already guaranteed. A second arm surviving alongside this
+      // one would show up as a third batch or a second overlay.
+      sv2p.batches.length === 2 && sv2p.overlays === 1 && sv2p.status === "" &&
+      /(^|&)survey(&|$)/.test(sv2p.hash.slice(1)),
+    JSON.stringify(sv2p),
+  );
+  // SV2k (#366): the back face, on the same run. Deferring the arm inverts an ordering the
+  // settle relied on: rearmVoyage used to rebuild the session and paint BOTH faces before
+  // rebuildVerso's replaceChildren wiped the verso, which is why the conductor repainted on
+  // the far side of that wipe (voyage.ts, rearmVoyage's own note). With the arm pending the
+  // engine still holds the OUTGOING world's session, so that repaint would strike the old
+  // world's track over the new ghost: the #174 invariant is that a face's ghost and its
+  // track come from the SAME draw. The settle now leaves the back face bare and the arm
+  // inks it, exactly as the recto is inked. Read in the settle's own microtask checkpoint
+  // (the observer batch above), so this cannot sample a frame late.
+  check(
+    "SV2k the settle leaves the back face to the deferred arm: no outgoing track over the new ghost, and both faces agree once it lands (#174/#366)",
+    sv2p.versoAtSwap === false && sv2p.facesAgree,
+    JSON.stringify({ versoAtSwap: sv2p.versoAtSwap, facesAgree: sv2p.facesAgree, batches: sv2p.batches }),
+  );
+
+  // SV2m (#366): the window the deferral opens on the BACK face. A settle's arm is droppable
+  // (a fresh draw bumps worldGen and supersedes it), so a style change made inside the settle's
+  // own beat leaves the engine holding the session for the world before last. The turn draw
+  // that follows rebuilds the verso ghost for the NEW world, and if the settle repainted the
+  // resting track there it would strike that older world's survey over it, for the ~900ms the
+  // turn runs. That is the #174 same-draw invariant, and SV2k cannot see it because SV2k
+  // drives a Draw and never a turn.
+  //
+  // Driven exactly, not raced: a MutationObserver callback runs at the microtask checkpoint of
+  // the task that mutated, which for the chart swap is INSIDE the settle's own task and so
+  // inside the pending arm's rAF window. Dispatching the style change from there is the only
+  // way to land it in that window every time.
+  await goto("#seed=7&style=antique&survey", "survey-dropped-arm-base");
+  await waitInked("survey-dropped-arm-base-ink");
+  const trackA = await evaluate(`document.querySelector("#map .voyage-overlay .voyage-track").getAttribute("points")`);
+  await evaluate(`(()=>{window.__fired=false;
+    window.__mo2=new MutationObserver((recs)=>{if(window.__fired)return;let chart=false;
+      for(const r of recs)for(const n of r.addedNodes){if(n.nodeType!==1)continue;
+        if(!(n.classList&&n.classList.contains("voyage-overlay"))&&String(n.tagName).toLowerCase()==="svg")chart=true;}
+      if(!chart)return;window.__fired=true;
+      const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));});
+    window.__mo2.observe(document.getElementById("map"),{childList:true});return true;})()`);
+  await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("draw").click();})()`);
+  let turningSeen = false;
+  for (let i = 0; i < 300; i++) {
+    if (await evaluate(`!!document.querySelector(".sheet.turning")`)) { turningSeen = true; break; }
+    await sleep(20);
+  }
+  const sv2m = await evaluate(`(()=>{window.__mo2.disconnect();
+    const back=document.querySelector("#verso .verso-track");
+    return{fired:window.__fired,turning:!!document.querySelector(".sheet.turning"),
+      versoPoints:back?back.getAttribute("points"):"",
+      status:document.getElementById("status").textContent};})()`);
+  await waitTurned("survey-dropped-arm-turn");
+  await waitInked("survey-dropped-arm-ink");
+  const sv2mAfter = await evaluate(`(()=>{
+    const recto=document.querySelector("#map .voyage-overlay .voyage-track");
+    const back=document.querySelector("#verso .verso-track");
+    return{overlays:document.querySelectorAll("#map .voyage-overlay").length,
+      facesAgree:!!recto&&!!back&&recto.getAttribute("points")===back.getAttribute("points"),
+      style:(document.querySelector("#map svg:not(.voyage-overlay)")||{getAttribute:()=>null}).getAttribute("data-vellum-style"),
+      status:document.getElementById("status").textContent};})()`);
+  check(
+    "SV2m a style change inside the settle's beat never strands the previous world's track on the new world's back face (#174/#366)",
+    // The load-bearing clause is the first: with the settle repainting the back face, this
+    // reads the seed-7 survey struck over the seed-42 ghost, byte-identical to trackA.
+    turningSeen && sv2m.fired && sv2m.versoPoints !== trackA &&
+      sv2mAfter.overlays === 1 && sv2mAfter.facesAgree && sv2mAfter.style === "ink" &&
+      sv2m.status === "" && sv2mAfter.status === "",
+    JSON.stringify({ turningSeen, ...sv2m, versoPoints: (sv2m.versoPoints || "").slice(0, 40),
+      versoIsPreviousWorld: sv2m.versoPoints === trackA, after: sv2mAfter }),
+  );
+
+  // SV2o (#366): a Draw made while the sheet is ALREADY resting on its verso. shouldTurn takes
+  // `flipped`, so that draw settles rather than turning (test/explorer/sheet-turn.test.ts), and
+  // the back face is then the VISIBLE one. rebuildVerso replaces it with the new world's ghost,
+  // so if the resting track is left to a deferred arm the reader watches a bare new ghost for
+  // the whole beat, on the surface they are actually looking at. The deferral buys nothing here
+  // either, since the chart it would let paint is facing away. So this draw arms INLINE and the
+  // back face changes whole: ghost and track from the same draw, in one task, the #174 rule.
+  //
+  // Read at the settle's own microtask checkpoint, which is before any deferred arm could have
+  // run, so this cannot pass by sampling late.
+  await goto("#seed=7&style=antique&survey", "survey-flipped-base");
+  await waitInked("survey-flipped-base-ink");
+  await evaluate(`document.getElementById("verso-turn").click()`);
+  await sleep(1500); // the ceremonial flip transition (--verso-turn 1200ms)
+  const flippedTrackA = await evaluate(`(()=>{const b=document.querySelector("#verso .verso-track");
+    return b?b.getAttribute("points"):"";})()`);
+  await evaluate(`(()=>{window.__flip={batches:[]};
+    window.__mo3=new MutationObserver((recs)=>{let chart=false;
+      for(const r of recs)for(const n of r.addedNodes){if(n.nodeType!==1)continue;
+        if(!(n.classList&&n.classList.contains("voyage-overlay"))&&String(n.tagName).toLowerCase()==="svg")chart=true;}
+      if(!chart)return;
+      const back=document.querySelector("#verso .verso-track");
+      const recto=document.querySelector("#map .voyage-overlay .voyage-track");
+      window.__flip.batches.push({back:back?back.getAttribute("points"):"",
+        recto:recto?recto.getAttribute("points"):"",
+        versoed:document.getElementById("sheet").classList.contains("versoed")});});
+    window.__mo3.observe(document.getElementById("map"),{childList:true});return true;})()`);
+  await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("draw").click();})()`);
+  await waitSettled("survey-flipped-settle");
+  await waitInked("survey-flipped-ink");
+  const sv2o = await evaluate(`(()=>{window.__mo3.disconnect();
+    const b=window.__flip.batches[0]||null;
+    const back=document.querySelector("#verso .verso-track");
+    const recto=document.querySelector("#map .voyage-overlay .voyage-track");
+    return{atSwap:b,batches:window.__flip.batches.length,
+      settledAgree:!!back&&!!recto&&back.getAttribute("points")===recto.getAttribute("points"),
+      versoed:document.getElementById("sheet").classList.contains("versoed"),
+      status:document.getElementById("status").textContent};})()`);
+  await evaluate(`document.getElementById("verso-turn").click()`); // back to the recto for what follows
+  await sleep(1500);
+  check(
+    "SV2o a Draw taken while resting on the verso changes the visible back face whole: ghost and track from the same draw, never a bare new ghost (#174/#366)",
+    !!sv2o.atSwap && sv2o.atSwap.versoed && sv2o.atSwap.back !== "" &&
+      sv2o.atSwap.back !== flippedTrackA && sv2o.atSwap.back === sv2o.atSwap.recto &&
+      sv2o.settledAgree && sv2o.status === "",
+    JSON.stringify({ outgoing: (flippedTrackA || "").slice(0, 30), ...sv2o,
+      atSwap: sv2o.atSwap ? { ...sv2o.atSwap, back: (sv2o.atSwap.back || "").slice(0, 30),
+        recto: (sv2o.atSwap.recto || "").slice(0, 30) } : null }),
+  );
+
   await goto("#seed=42&style=antique&survey", "survey-restore-for-sv3");
   await waitInked("survey-sv3-ink");
   // SV3: the box and the flag are 1:1 in the other direction too. Unticking clears
@@ -469,16 +650,28 @@ export async function run(ctx) {
   // rests on the completed track silently (the boot ticks with no change event; the
   // first settle arms the resting track through the re-arm branch).
   await goto("#seed=42&style=antique&survey", "survey-restore");
+  // #366: the boot settle's arm is deferred like every other landing's, and waitSettled keys
+  // on #status, which the settle clears BEFORE the arm. So wait for the ink rather than
+  // reading in the settle's shadow. An added wait, not a relaxed predicate: every clause
+  // below still asserts the completed track and the silent status line.
+  await waitInked("survey-restore-ink");
   const sv4 = await evaluate(`(()=>{
     const t=document.querySelector("#map .voyage-overlay .voyage-track");
     return{checked:document.getElementById("ages").checked,
       vertices:t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0,
+      overlays:document.querySelectorAll("#map .voyage-overlay").length,
       hash:location.hash,status:document.getElementById("status").textContent,
       href:document.getElementById("journal-link").getAttribute("href")};
   })()`);
   check(
+    // The completed track is back in the predicate, because the title claims it. waitInked above
+    // already guarantees it, so the clause cannot fail on its own; it is kept so the check reads
+    // as the whole statement it is named for, and so it still bites if that wait is ever
+    // removed. `overlays === 1` is the clause the wait does NOT give: a boot that armed twice
+    // would show up as two.
     "SV4 a survey deep link restores ticked, resting on the completed track, silently",
-    sv4.checked && sv4.vertices > 10 && /(^|&)survey(&|$)/.test(sv4.hash.slice(1)) && sv4.status === "" &&
+    sv4.checked && sv4.vertices > 10 && sv4.overlays === 1 &&
+      /(^|&)survey(&|$)/.test(sv4.hash.slice(1)) && sv4.status === "" &&
       sv4.href === "/reading-room/" + sv4.hash,
     JSON.stringify(sv4),
   );
@@ -539,6 +732,11 @@ export async function run(ctx) {
     JSON.stringify(sv5c),
   );
   await goto("#seed=42&style=antique&survey&year=1030", "survey-bothkeys");
+  // #366: assert the absence on the far side of a landing's beat, so "arms nothing" cannot
+  // be read a frame too early. The box is unticked here, so nothing was ever scheduled; this
+  // makes that provable rather than assumed.
+  await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
+  await waitBeat("survey-bothkeys-beat");
   const sv5d = await evaluate(`({path:location.pathname,checked:document.getElementById("ages").checked,track:!!document.querySelector("#map .voyage-overlay")})`);
   check(
     "SV5d the both-keys set stays in the Explorer and arms nothing (ignored whole)",
@@ -551,6 +749,10 @@ export async function run(ctx) {
   // points strings (same document, same draw: a byte compare is the right tool), flip
   // back.
   await goto("#seed=42&style=antique&survey", "survey-verso");
+  // #366: the boot settle defers its arm, and the arm is what paints BOTH faces, so flip
+  // only once the recto is inked. Without this the flip can land inside the beat and the
+  // comparison below would read a back face the arm had not reached yet.
+  await waitInked("survey-verso-ink");
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(1500); // the ceremonial flip transition (--verso-turn 1200ms)
   const sv6 = await evaluate(`(()=>{
@@ -613,22 +815,104 @@ export async function run(ctx) {
   // turn works with the track already on the sheet).
   await waitInked("survey-armed-before-turn");
   await armTurnWatch();
+  // #366 SV2l rides on this same turn (see below): the observer is armed BEFORE the style
+  // change is dispatched, because the mutation under test is runTurn's own commit ~900ms later.
+  await evaluate(`(()=>{window.__land={batches:[],frames:0,raf:0};
+    const bump=()=>{window.__land.frames++;window.__land.raf=requestAnimationFrame(bump);};bump();
+    window.__mo=new MutationObserver((recs)=>{let chart=false,overlay=false;
+      for(const r of recs)for(const n of r.addedNodes){if(n.nodeType!==1)continue;
+        if(n.classList&&n.classList.contains("voyage-overlay"))overlay=true;
+        else if(String(n.tagName).toLowerCase()==="svg")chart=true;}
+      if(chart||overlay)window.__land.batches.push({chart,overlay,frames:window.__land.frames});});
+    window.__mo.observe(document.getElementById("map"),{childList:true});return true;})()`);
   await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await waitTurned("survey-style-turn");
-  const sv10 = await evaluate(`(()=>{
+  // #366: the turn's landing defers its arm too, and runTurn commits the new dress into
+  // #map (wiping the old overlay) BEFORE it drops .turning, so waitTurned returns over a
+  // bare sheet and this wait cannot be satisfied by the outgoing track.
+  await waitInked("survey-turn-rearm");
+  const sv10 = await evaluate(`(()=>{window.__mo.disconnect();cancelAnimationFrame(window.__land.raf);
     const svg=document.querySelector("#map svg:not(.voyage-overlay)");
     const t=document.querySelector("#map .voyage-overlay .voyage-track");
+    const b=window.__land.batches;const c=b.findIndex((x)=>x.chart);const i=b.findIndex((x)=>x.overlay);
     return{turned:window.__turned,style:svg?svg.getAttribute("data-vellum-style"):null,
       vertices:t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0,
+      overlays:document.querySelectorAll("#map .voyage-overlay").length,
+      batches:b,chartBatch:c,inkBatch:i,chartAlone:c>=0&&!b[c].overlay,
+      framesBetween:c>=0&&i>=0?b[i].frames-b[c].frames:-1,
       hash:location.hash,status:document.getElementById("status").textContent};
   })()`);
   check(
     "SV10 the style turn engages with the track armed and the track survives on the new dress (#153)",
-    sv10.turned === true && sv10.style === "ink" && sv10.vertices > 10 &&
+    // The surviving track is named in the title, so it stays in the predicate even though the
+    // waitInked above guarantees it (see SV4). overlays === 1 is the clause that wait does not
+    // give, and it is the one that would catch a landing arm stacking on top of a tick's.
+    sv10.turned === true && sv10.style === "ink" && sv10.vertices > 10 && sv10.overlays === 1 &&
       /(^|&)survey(&|$)/.test(sv10.hash.slice(1)) && sv10.status === "",
-    JSON.stringify(sv10),
+    JSON.stringify({ ...sv10, batches: undefined }),
+  );
+  // SV2l (#366): the OTHER deferred arm path, guarded on its own. SV2p drives a Draw, so it
+  // cannot see the #131 turn's landing at all: reverting only the turn's call site to an
+  // inline re-arm left SV2p, SV2k and SV10 all green (the guard-prover proved exactly that),
+  // because an inline turn re-arm satisfies SV10's waitInked immediately. Same observer
+  // idiom, same discriminator: runTurn commits the new dress as an added <svg> child of #map,
+  // and the arm's overlay must arrive in a LATER task with a rendering opportunity between.
+  //
+  // framesBetween is even more load-bearing here than in SV2p, and the two clauses beside it
+  // are near-decorative on this path: runTurn commits from `anim.finished.then(...)` while the
+  // landing arms from `runTurn(...).then(...)`, two microtasks of the SAME task, so the batch
+  // ALWAYS splits and chartAlone plus the batch order pass even with the arm inline. Measured
+  // on the reverted call site: chartAlone true, inkBatch 1 > chartBatch 0, framesBetween 0.
+  check(
+    "SV2l the turn's landing pays its arm after the new dress paints, not with it (#366)",
+    sv10.chartAlone && sv10.inkBatch > sv10.chartBatch && sv10.framesBetween >= 1 &&
+      sv10.batches.length === 2,
+    JSON.stringify({ batches: sv10.batches, chartBatch: sv10.chartBatch, inkBatch: sv10.inkBatch,
+      chartAlone: sv10.chartAlone, framesBetween: sv10.framesBetween }),
   );
   await shoot("explorer-survey-turned-ink.png");
+
+  // SV2n (#366): reduced motion, which the acceptance names and nothing here covered. Under
+  // `prefers-reduced-motion: reduce` shouldTurn is false, so a style change takes the SETTLE
+  // branch instead of the turn: a path this change moved from an inline re-arm to a deferred
+  // one. "Unaffected" is asserted as three things rather than assumed. The sheet still does
+  // not turn (an instant swap, as before), the deferral behaves exactly as it does with motion
+  // on (the swap and the ink in different tasks, a frame apart), and no animation runs on the
+  // overlay, which is SV2b's claim re-asserted on this path since a scheduling yield is not
+  // motion and must not have become any.
+  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  await goto("#seed=42&style=antique&survey", "survey-reduce-base");
+  await waitInked("survey-reduce-base-ink");
+  await armTurnWatch();
+  await evaluate(`(()=>{window.__land={batches:[],frames:0,raf:0};
+    const bump=()=>{window.__land.frames++;window.__land.raf=requestAnimationFrame(bump);};bump();
+    window.__mo=new MutationObserver((recs)=>{let chart=false,overlay=false;
+      for(const r of recs)for(const n of r.addedNodes){if(n.nodeType!==1)continue;
+        if(n.classList&&n.classList.contains("voyage-overlay"))overlay=true;
+        else if(String(n.tagName).toLowerCase()==="svg")chart=true;}
+      if(chart||overlay)window.__land.batches.push({chart,overlay,frames:window.__land.frames});});
+    window.__mo.observe(document.getElementById("map"),{childList:true});return true;})()`);
+  await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await waitSettled("survey-reduce-settle");
+  await waitInked("survey-reduce-rearm");
+  const sv2n = await evaluate(`(()=>{window.__mo.disconnect();cancelAnimationFrame(window.__land.raf);
+    const b=window.__land.batches;const c=b.findIndex((x)=>x.chart);const i=b.findIndex((x)=>x.overlay);
+    const ov=document.querySelector("#map .voyage-overlay");
+    const svg=document.querySelector("#map svg:not(.voyage-overlay)");
+    return{reduce:matchMedia("(prefers-reduced-motion: reduce)").matches,turned:window.__turned,
+      style:svg?svg.getAttribute("data-vellum-style"):null,
+      chartAlone:c>=0&&!b[c].overlay,inkAfter:i>c,framesBetween:c>=0&&i>=0?b[i].frames-b[c].frames:-1,
+      anims:ov&&ov.getAnimations?ov.getAnimations({subtree:true}).length:-1,
+      overlays:document.querySelectorAll("#map .voyage-overlay").length,
+      status:document.getElementById("status").textContent};})()`);
+  await send("Emulation.setEmulatedMedia", { features: [] });
+  check(
+    "SV2n under reduced motion the style change swaps instead of turning, defers its arm the same way, and starts no animation (#366)",
+    sv2n.reduce === true && sv2n.turned === false && sv2n.style === "ink" &&
+      sv2n.chartAlone && sv2n.inkAfter && sv2n.framesBetween >= 1 &&
+      sv2n.anims === 0 && sv2n.overlays === 1 && sv2n.status === "",
+    JSON.stringify(sv2n),
+  );
 
   // SV8: the Explorer never authors year=. The whole suite drove every author path
   // (boot, tick, untick, restore, flip, turn); this is the standing sweep at the end.
