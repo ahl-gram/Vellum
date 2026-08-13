@@ -17,8 +17,10 @@ import { MAX_PIXELS, fitScaleToBudget } from "../../src/site/lib/rasterize.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
-const stripLineComments = (code: string) =>
-  code.split("\n").filter((l) => !l.trim().startsWith("//")).join("\n");
+// Truncate each line at // so no comment, full-line or trailing, can count as code.
+// Naive about strings, which is fine: neither guarded file carries // inside a literal.
+const codeOnly = (code: string) =>
+  code.split("\n").map((l) => { const i = l.indexOf("//"); return i === -1 ? l : l.slice(0, i); }).join("\n");
 const walk = (dir: string): string[] =>
   readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) =>
     e.isDirectory() ? walk(join(dir, e.name)) : e.name.endsWith(".ts") ? [join(dir, e.name)] : [],
@@ -69,25 +71,33 @@ test("the e2e RV4 tilt ceiling tracks MAX_TILT", () => {
 
 // The margin mirrors accept either the duplicated literal (which must equal
 // MARGIN_FRACTION) or the imported constant itself, so the clean fix stays green.
-const marginMirror = (m: RegExpMatchArray | null, where: string) => {
+// The identifier form only counts if it really is transform.ts's constant: the file
+// must import it from render/transform and must not rebind the name anywhere.
+const marginMirror = (code: string, re: RegExp, where: string) => {
+  const m = codeOnly(code).match(re);
   assert.ok(m, `margin expression not found in ${where}`);
-  if (m[1] !== "MARGIN_FRACTION") assert.equal(Number(m[1]), MARGIN_FRACTION, where);
+  if (m[1] === "MARGIN_FRACTION") {
+    assert.match(code, /import \{[^}]*\bMARGIN_FRACTION\b[^}]*\} from "[^"]*render\/transform(\.ts)?"/, `${where} must import MARGIN_FRACTION from render/transform`);
+    assert.doesNotMatch(code, /\b(const|let|var)\s+MARGIN_FRACTION\b/, `${where} must not rebind MARGIN_FRACTION`);
+  } else {
+    assert.equal(Number(m[1]), MARGIN_FRACTION, where);
+  }
 };
 
 test("seed-of-the-day's MARGIN mirrors renderMap's margin fraction", () => {
-  const m = src("src/site/seed-of-the-day/app.ts").match(/const MARGIN = Math\.round\(1500 \* ([\d.]+|MARGIN_FRACTION)\)/);
-  marginMirror(m, "seed-of-the-day/app.ts");
+  const code = src("src/site/seed-of-the-day/app.ts");
+  marginMirror(code, /const MARGIN = Math\.round\(1500 \* ([\d.]+|MARGIN_FRACTION)\)/, "seed-of-the-day/app.ts");
 });
 
 test("the voyage session's projection margin mirrors renderMap's margin fraction", () => {
-  const m = src("src/site/living-chart/voyage-session.ts").match(/Math\.round\(wPx \* ([\d.]+|MARGIN_FRACTION)\)/);
-  marginMirror(m, "voyage-session.ts");
+  const code = src("src/site/living-chart/voyage-session.ts");
+  marginMirror(code, /Math\.round\(wPx \* ([\d.]+|MARGIN_FRACTION)\)/, "voyage-session.ts");
 });
 
 test("every worker spawn under src/site keeps the static form Vite's build analysis requires", () => {
   let spawns = 0;
   for (const file of walk("src/site")) {
-    const code = stripLineComments(readFileSync(join(ROOT, file), "utf8"));
+    const code = codeOnly(readFileSync(join(ROOT, file), "utf8"));
     const found = code.match(/new Worker\(/g) ?? [];
     const statics = code.match(/new Worker\(new URL\("\.\/[\w-]+\.ts", import\.meta\.url\), \{ type: "module" \}\)/g) ?? [];
     assert.equal(statics.length, found.length, `${file} spawns a worker in a non-static form`);
@@ -97,7 +107,7 @@ test("every worker spawn under src/site keeps the static form Vite's build analy
 });
 
 test("every publicDir in the press config is false", () => {
-  const code = stripLineComments(src("scripts/build-app-bundles.ts"));
+  const code = codeOnly(src("scripts/build-app-bundles.ts"));
   const hits = code.match(/publicDir:\s*\S+/g) ?? [];
   assert.ok(hits.length >= 2, "expected both press configs to set publicDir");
   for (const hit of hits) assert.match(hit, /^publicDir: false[,)}\s]?$/);
