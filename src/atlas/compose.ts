@@ -8,41 +8,22 @@ import { createLoreWriter } from "../society/lore.ts";
 import { generateRegionWorld, windowAround } from "../world/region.ts";
 import type { World } from "../world/types.ts";
 
-/**
- * One drawn surface of an atlas: a rendered SVG plus the metadata a caller
- * needs to place it. `key` is a stable identifier (the CLI derives the SVG
- * filename from it; the Explorer uses it as a list key); `title` is the human
- * caption. The SVG string is the single source of truth for the drawing, shared
- * by the CLI (writes it to a file) and the Explorer (wraps it in a blob URL).
- */
+/** key is a stable identifier (the CLI derives filenames from it, the Explorer uses it as a list key); svg is the single source of truth for the drawing. */
 export type AtlasPlate = {
   readonly key: string;
   readonly title: string;
   readonly svg: string;
 };
 
-/**
- * The filesystem-free pieces of an atlas, composed from an already-generated
- * World. Browser-safe (no node:fs), so the CLI and the web Explorer build the
- * same atlas from one place. Callers decide how to embed the plates (the CLI
- * writes SVG files and references them; the Explorer injects blob-URL images)
- * and how to wrap the HTML fragments.
- */
+/** Filesystem-free and browser-safe (no node:fs), so the CLI and the Explorer compose the same atlas. */
 export type AtlasComposition = {
   readonly world: World;
-  /** The reference chart, drawn antique. */
   readonly hero: AtlasPlate;
-  /** The same world in the other land styles (topographic, ink, nautical). */
   readonly draughtings: ReadonlyArray<AtlasPlate>;
-  /** Thematic data plates: vegetation, temperature, rainfall, population. */
   readonly themes: ReadonlyArray<AtlasPlate>;
-  /** Regional surveys: the capital's environs + the farthest town's. */
   readonly regions: ReadonlyArray<AtlasPlate>;
-  /** "Banners of the Realms" section, or "" when the world has no arms. */
   readonly bannersHtml: string;
-  /** The "Chronicle" section: the world's dated history, or "" when empty. */
   readonly chronicleHtml: string;
-  /** The gazetteer section: settlements table + realm notes. */
   readonly gazetteerHtml: string;
 };
 
@@ -55,8 +36,7 @@ const KIND_LABEL: Record<string, string> = {
 
 function gazetteerHtml(world: World): string {
   const lore = createLoreWriter(world, createRng(world.recipe.seed).fork("lore"));
-  // hamlet is unreachable here (the gazetteer reads the BASE world, which never
-  // carries one, #171), listed only to keep the kind index total.
+  // hamlet is unreachable (the gazetteer reads the BASE world); listed to keep the kind index total.
   const order = { capital: 0, town: 1, village: 2, hamlet: 3 };
   const sorted = [...world.settlements].sort(
     (a, b) => order[a.kind] - order[b.kind] || a.name.localeCompare(b.name),
@@ -98,10 +78,6 @@ ${rows}
 </section>`;
 }
 
-/** A plate of every realm's coat of arms. Iterates world.arms (one per seat), so a
- *  single-realm world still shows its banner, labelled by its seat. Drawn in the
- *  given style so the Explorer can show the ink style's Petra Sancta hatching at
- *  banner size; every colour style shares one palette, so only `ink` differs. */
 function bannersHtml(world: World, style: StyleName): string {
   if (world.arms.length === 0) return "";
   const pal = paletteForStyle(STYLES[style]);
@@ -127,7 +103,6 @@ ${banners}
 </section>`;
 }
 
-/** The Chronicle: the world's history as a dated, ordered list of events. */
 function chronicleHtml(world: World): string {
   const events = world.history.events;
   if (events.length === 0) return "";
@@ -146,7 +121,6 @@ ${items}
 </section>`;
 }
 
-/** The regional surveys: the capital's environs and the farthest town's. */
 function regionPlates(world: World, width: number): AtlasPlate[] {
   const { recipe } = world;
   const capital = world.settlements.find((s) => s.kind === "capital");
@@ -179,15 +153,7 @@ function regionPlates(world: World, width: number): AtlasPlate[] {
   });
 }
 
-/**
- * The thematic data plates, in atlas order, with their reader-facing captions
- * and the map style each is drawn in (#71). Each style appears once, chosen to
- * suit the theme: vegetation keeps the parchment biome palette (antique),
- * temperature reads cleanest on the bright topographic sheet, rainfall takes the
- * navy nautical register, and population is a pen-and-ink density choropleth.
- * The Explorer still crosses every style with every theme; this is just the
- * curated set the bound atlas shows.
- */
+/** The curated theme-to-style pairing the bound atlas shows; the Explorer still crosses every style with every theme. */
 const THEMATIC: ReadonlyArray<{ theme: ThemeName; title: string; style: StyleName }> = [
   { theme: "vegetation", title: "Vegetation", style: "antique" },
   { theme: "climate", title: "Temperature", style: "topographic" },
@@ -195,18 +161,11 @@ const THEMATIC: ReadonlyArray<{ theme: ThemeName; title: string; style: StyleNam
   { theme: "population", title: "Population", style: "ink" },
 ];
 
-/**
- * Compose the atlas of a world: the antique hero chart, the other land styles,
- * the thematic data plates, the regional surveys, and the gazetteer/banners HTML
- * fragments. Pure and deterministic — same World in, same bytes out.
- */
 export function composeAtlas(
   world: World,
   opts: { width?: number; bannerStyle?: StyleName } = {},
 ): AtlasComposition {
   const width = opts.width ?? 1500;
-  // The bound atlas and CLI showcase keep colour banners (default); the Explorer
-  // passes the on-screen style so viewing in `ink` shows hatched banners.
   const bannerStyle = opts.bannerStyle ?? "antique";
   const hero: AtlasPlate = {
     key: "antique",

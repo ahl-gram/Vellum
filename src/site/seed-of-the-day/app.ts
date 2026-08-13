@@ -1,9 +1,6 @@
-// Seed-of-the-day controller. Draws today's world client-side: today's UTC date
-// is the seed, so the page is purely static yet shows a fresh world each day
-// (no rebuild needed). Reuses the same browser engine as the Explorer; one
-// render, run inline on the main thread. On top of the render it wires the
-// Daily Hunt: a deterministic click-to-find puzzle over the already-generated
-// world (no extra world-gen, no worker, no seed re-roll).
+// Seed-of-the-day controller: today's UTC date is the seed, so a purely static page
+// shows a fresh world each day, rendered inline on the main thread. The Daily Hunt is a
+// deterministic click-to-find puzzle over that already-generated world.
 import { defaultRecipe, generateWorld } from "../../world/generate.ts";
 import { renderMap } from "../../render/map-renderer.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
@@ -19,17 +16,11 @@ import {
   type TerrainBand,
 } from "../../world/daily-hunt.ts";
 import { createProjection, type Projection } from "../../render/transform.ts";
-// The #127/#129 arrival ceremony, shared with the Explorer (extracted in #183). This
-// page has no Download or golden, so styling the live SVG is free; the ceremony only
-// adds the .arriving class and animates the coastline dash, and each page's CSS decides
-// what .arriving does (here it also runs paperSettle).
 import { startArrival } from "../explorer/draw-ceremony.ts";
-// #167 The Surveyor's Glass, Sub 6: the SAME shared zoom controller the Explorer uses.
 import { createZoomController } from "../shared/zoom-controller.ts";
 import type { ZoomState } from "../shared/zoom-controller.ts";
 import type { World } from "../../world/types.ts";
 
-// The deterministic e2e hooks this page hangs on window, typed once here.
 declare global {
   interface Window {
     __vellumZoomTo: (t: ZoomState) => void;
@@ -53,41 +44,23 @@ const dateLabel = new Intl.DateTimeFormat("en-GB", {
 
 $("dateline").textContent = `${dateLabel} · seed ${seed}`;
 $<HTMLAnchorElement>("explore").href = `../explorer/#seed=${seed}&style=antique&legend=1`;
-// #221: the Reading Room cross-link carries the seed explicitly, so the link keeps
-// opening THIS page's world even if the visitor clicks after UTC midnight rolls the
-// bare-visit default over to a new day.
+// #221: the cross-link carries the seed explicitly, so it keeps opening THIS page's world even after UTC midnight rolls the bare-visit default to a new day.
 $<HTMLAnchorElement>("watch").href = `../reading-room/#seed=${seed}`;
 
-// --- The Surveyor's Glass, Sub 6 (#167): geometric pan/zoom on today's chart --
-// The Hunt adopts the SAME shared controller the Explorer built in Sub 3, geometric-only.
-// It binds to the STABLE #map-viewport (never wiped when the deferred render replaces
-// #map's innerHTML) and lands its live CSS transform on #map, so the chart SVG and the
-// %-positioned hunt star + soundings ride one composited frame with no redraw. Attached
-// once at load: the world is fixed and always antique, so the glass is always live.
-//
-// Deliberately NO onSettle: the Hunt is a FIXED world (epic #161). A semantic redraft
-// would reveal new places and change the clue difficulty, so it never imports the LOD or
-// region-worker paths -- the magnify stays purely geometric. The guess-click math needs
-// zero changes: it is ratio-based against getBoundingClientRect(), which reflects the live
-// transform by definition, and d3-zoom's own click-distance handling makes a drag-pan never
-// register as a guess (a moved gesture suppresses the trailing click). reducedMotion is left
-// unset so the controller reads the OS setting live (the double-click zoom is the one
-// animation it collapses).
+// #167: the SAME shared zoom controller as the Explorer, bound to the STABLE #map-viewport (never wiped by the deferred render) with its live transform landing on #map.
+// Deliberately NO onSettle: the Hunt is a FIXED world (#161); a semantic redraft would reveal new places and change clue difficulty, so the magnify stays purely geometric.
+// The guess-click math needs no changes: it is ratio-based against getBoundingClientRect(), and d3-zoom's click-distance handling keeps a drag-pan from registering as a guess.
 const zoomController = createZoomController({
   viewportEl: $("map-viewport"),
   targetEl: $("map"),
   scaleExtent: [1, 8],
 });
 zoomController.attach();
-// Deterministic zoom hooks for the e2e (mirror the Explorer's): zoomTo drives the camera
-// through the same clamp a live gesture uses; zoomState reads back the settled {x,y,k}.
+// Deterministic zoom hooks for the e2e, mirroring the Explorer's.
 window.__vellumZoomTo = (t) => zoomController.zoomTo(t);
 window.__vellumZoomState = () => zoomController.getState();
 
-// --- The daily reveal (#129 arrival ceremony) --------------------------------
-
-// Restart a one-shot CSS animation by toggling its trigger class across a reflow,
-// so it replays even when the class is already present (a re-shown element).
+// Restart a one-shot CSS animation by toggling its trigger class across a reflow, so it replays even when the class is already present.
 function restart(el: HTMLElement | null, cls: string): void {
   if (!el) return;
   el.classList.remove(cls);
@@ -102,8 +75,7 @@ function dryIn(el: HTMLElement | null, delay: string): void {
   el.classList.add("drying");
 }
 
-// Defer one macrotask so the "Drafting…" status paints before the main thread
-// blocks on the render.
+// Defer one macrotask so the "Drafting…" status paints before the main thread blocks on the render.
 setTimeout(() => {
   try {
     const world = generateWorld(defaultRecipe(seed));
@@ -129,15 +101,10 @@ setTimeout(() => {
   }
 }, 0);
 
-// --- The Daily Hunt ----------------------------------------------------------
-
 const STORE_KEY = "vellum.hunt.v1";
-const MARGIN = Math.round(1500 * 0.045); // matches renderMap's default margin
+const MARGIN = Math.round(1500 * 0.045);
 
-// --- The Surveyor's Dispatch (#123): SVG helpers -----------------------------
-// The dispatch clones the live chart and appends a survey overlay + a caption band.
-// Everything it adds is inline-styled and font-independent, because a downloaded SVG
-// travels with NO page CSS (index.css never reaches the file) and no guaranteed fonts.
+// #123: everything the dispatch adds is inline-styled and font-independent, because a downloaded SVG travels with NO page CSS and no guaranteed fonts.
 const SVG_NS = "http://www.w3.org/2000/svg";
 const DISPATCH_BAND = 104; // extra sheet drawn below the plate to seat the caption
 
@@ -147,8 +114,7 @@ const svgEl = (name: string, attrs: Record<string, string | number>): SVGElement
   return e;
 };
 
-// A five-pointed vector star at (cx,cy): a polygon, so it renders identically in any SVG
-// viewer without depending on a "★" glyph being present in the reader's installed fonts.
+// A five-pointed vector star: a polygon renders identically in any SVG viewer, without depending on a "★" glyph being present in the reader's installed fonts.
 const starNode = (cx: number, cy: number, fill: string): SVGElement => {
   const rOuter = 26, rInner = 11, pts = [];
   for (let i = 0; i < 10; i++) {
@@ -170,7 +136,6 @@ const BAND_PROSE = {
   cold: "Cold. It lies well away.",
 };
 
-// What the hunt remembers between visits: the last solved seed and the streak.
 type HuntStore = { solved?: number; streak?: number };
 
 function readStore(): HuntStore {
@@ -189,8 +154,7 @@ function writeStore(obj: HuntStore): void {
   }
 }
 
-// Yesterday's seed in UTC, for the consecutive-day streak test. Seeds are
-// YYYYMMDD integers, so step back one calendar day via a UTC Date.
+// Seeds are YYYYMMDD integers, so step back one calendar day via a UTC Date.
 function prevSeed(s: number): number {
   const y = Math.floor(s / 10000);
   const m = (Math.floor(s / 100) % 100) - 1;
@@ -200,9 +164,7 @@ function prevSeed(s: number): number {
   return seedForDate(dt);
 }
 
-// Read the rendered legend's box in the chart's pixel space (via the same
-// client-rect mapping the click handler uses) and ask the engine which
-// settlements fall under it. Empty if the legend isn't drawn or measurable.
+// Read the rendered legend's box in chart pixel space (the same client-rect mapping the click handler uses) and ask the engine which settlements fall under it.
 function legendExclusions(world: World, svg: SVGSVGElement, proj: Projection): ReadonlySet<number> {
   const el = svg.querySelector("#layer-legend");
   const sr = svg.getBoundingClientRect();
@@ -217,11 +179,7 @@ function legendExclusions(world: World, svg: SVGSVGElement, proj: Projection): R
   return legendExcluded(world, box, proj.widthPx);
 }
 
-// Show the warmer/colder line in its panel slot AND mirror it into the fixed
-// mobile bar, so the latest feedback stays in view without scrolling. The panel
-// line is the aria-live region, so its textContent swap is what a screen reader
-// announces; #129 adds a visual-only drying blur on that rendered text and slides
-// the mobile bar up the first time it appears.
+// The panel line is the aria-live region (its textContent swap is what a screen reader announces); the fixed mobile bar mirrors it visual-only so the latest feedback stays in view without scrolling.
 let stickyShown = false;
 function setHuntStatus(text: string): void {
   const line = $("hunt-status");
@@ -233,8 +191,7 @@ function setHuntStatus(text: string): void {
   sticky.textContent = text;
   sticky.classList.toggle("active", show);
   sticky.hidden = !show;
-  // Slide up only on the hidden -> shown transition, never on every miss. aria-hidden
-  // stays true (the bar mirrors the aria-live panel line above; see index.css).
+  // Slide up only on the hidden -> shown transition, never on every miss; aria-hidden stays true (the bar mirrors the aria-live line above).
   if (show && !stickyShown) restart(sticky, "rise");
   stickyShown = show;
 }
@@ -248,19 +205,12 @@ function setupHunt(world: World): void {
   const quarry = chooseQuarry(world, { exclude: legendExclusions(world, svg, proj) });
   if (!quarry) return;
 
-  // clues: a plain antique ordered list. The rendered SVG is the source of
-  // truth for what was drawn, so the findability gates read it and run BEFORE
-  // selection (#335): a clue never cites a name or terrain the player cannot
-  // find, and the narrowing/floor guarantees hold on this exact list.
-  // A label emits as ">Name<" in the markup, except capital and seat labels,
-  // which `settlementsLayer` in `src/render/layers/settlements.ts` renders
-  // `.toUpperCase()`, so both spellings must be checked.
+  // The rendered SVG is the source of truth for what was drawn: the findability gates read it and run BEFORE selection (#335), so a clue never cites a name or terrain the player cannot find.
+  // A label emits as ">Name<" except capital and seat labels, which `settlementsLayer` in `src/render/layers/settlements.ts` renders .toUpperCase(), so both spellings are checked.
   const markup = svg.outerHTML;
   const isLabeled = (name: string) =>
     markup.includes(`>${name}<`) || markup.includes(`>${name.toUpperCase()}<`);
-  // Terrain: eligible cells are not enough, only DRAWN glyphs count (the glyph
-  // field shuffles and caps its candidates). Parse the glyph layer's <use>
-  // translates back to render-pixel space and test them against the quarry.
+  // Only DRAWN glyphs count (the glyph field shuffles and caps its candidates): parse the glyph layer's <use> translates back to render-pixel space and test against the quarry.
   const glyphs = Array.from(svg.querySelectorAll("#layer-glyphs use")).flatMap((u) => {
     const m = /translate\((-?[\d.]+) (-?[\d.]+)\)/.exec(u.getAttribute("transform") ?? "");
     return m ? [{ href: u.getAttribute("href") ?? "", x: Number(m[1]), y: Number(m[2]) }] : [];
@@ -293,13 +243,10 @@ function setupHunt(world: World): void {
 
   let guesses = 0;
   const missRoute: { gx: number; gy: number }[] = []; // #123: each miss as {gx,gy} in GRID space, re-projected at draft time
-  // #327: the session's warmest sounding (smallest click-to-quarry distance), named
-  // so a colder miss can point back at it. Ties keep the earlier one; forgotten on
-  // reload, the same lifetime as the plotted route above.
+  // #327: the session's warmest sounding (smallest click-to-quarry distance), so a colder miss can point back at it; ties keep the earlier one, forgotten on reload.
   let warmest: { readonly dist: number; readonly name: string } | null = null;
 
-  // #129: on a LIVE solve the star stamps in (.stamp); on a solved-day reload it is
-  // placed still (no .stamp), so the win no longer replays its animation on reload.
+  // #129: a LIVE solve stamps the star in (.stamp); a solved-day reload places it still, so the win never replays its animation on reload.
   const placeStar = (ceremony: boolean) => {
     if ($("map").querySelector(".hunt-star")) return;
     const star = document.createElement("div");
@@ -342,8 +289,7 @@ function setupHunt(world: World): void {
     const share = $("share");
     share.hidden = false;
     if (fromClick) restart(share, "rise"); // #129: the share button rises on a live solve
-    // #123: only a LIVE win has a route in memory to plot, so the dispatch is offered here and
-    // nowhere else. The restored-solve path (win(false)) leaves the Draft dispatch button hidden.
+    // #123: only a LIVE win has a route in memory to plot; the restored-solve path leaves the Draft dispatch button hidden.
     if (fromClick) $("dispatch").hidden = false;
     setHuntStatus(
       fromClick
@@ -354,12 +300,8 @@ function setupHunt(world: World): void {
     if (fromClick) restart($("streak"), "stamp"); // #129: the streak stamps on increment
   };
 
-  // #123 The Surveyor's Dispatch: file the hunt as a survey plate. Clone today's actual chart
-  // (keeping its data-vellum-* recipe, so the artifact stays reproducible like every Vellum
-  // export) and append one survey overlay -- the guess route as a dotted line, a numbered
-  // station at each miss, a star at the find -- plus a caption band beneath the plate. The
-  // route is stored in GRID space and re-projected HERE, at draft time, so it is identical no
-  // matter the window size when each guess was clicked.
+  // #123 the Surveyor's Dispatch: clone today's actual chart (keeping its data-vellum-* recipe, so the artifact stays reproducible like every Vellum export) and append one survey overlay plus a caption band.
+  // The route is stored in GRID space and re-projected HERE, at draft time, so it is identical no matter the window size when each guess was clicked.
   const dispatchCaption = () => {
     const n = guesses;
     const streak = readStore().streak || 0;
@@ -371,8 +313,7 @@ function setupHunt(world: World): void {
   const buildDispatchSvg = () => {
     const clone = svg.cloneNode(true) as SVGSVGElement;
     clone.removeAttribute("class"); // drop any transient arrival class; the chart draws CSS-free
-    // The background paper is a DIRECT child rect; the defs/pattern rects are nested, so
-    // :scope > rect selects the plate colour (not a texture tile) to back the caption band.
+    // The background paper is a DIRECT child rect (the defs/pattern rects are nested), so :scope > rect selects the plate colour, not a texture tile.
     const paper = clone.querySelector(":scope > rect")?.getAttribute("fill") || "#f4ecd8";
     const bandTop = proj.heightPx;
     const vbH = proj.heightPx + DISPATCH_BAND;
@@ -386,14 +327,12 @@ function setupHunt(world: World): void {
     const misses = missRoute.map((m) => [proj.px(m.gx), proj.py(m.gy)]);
     const qx = proj.px(quarry.settlement.x), qy = proj.py(quarry.settlement.y);
 
-    // dotted survey line: miss 1 -> ... -> miss N -> the find
     if (misses.length > 0) {
       g.appendChild(svgEl("polyline", {
         points: [...misses, [qx, qy]].map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" "),
         style: `fill:none;stroke:${INK};stroke-width:3;stroke-dasharray:1 13;stroke-linecap:round;opacity:0.8`,
       }));
     }
-    // a numbered station at each wrong sounding
     misses.forEach(([x, y], i) => {
       g.appendChild(svgEl("circle", {
         "data-dispatch-station": "",
@@ -456,9 +395,7 @@ function setupHunt(world: World): void {
   $("share").hidden = true;
   updateStreak();
 
-  // #129: drop a sounding at the click point over the map (a spreading ring + a
-  // graphite pencil dot that lingers, then fades). Overlay divs on #map only; the
-  // SVG is never touched, and both are pointer-transparent + self-removing.
+  // #129: a sounding at the click point (a spreading ring + a lingering pencil dot). Overlay divs on #map only; the SVG is never touched, and both are pointer-transparent + self-removing.
   const mapEl = $("map");
   const spawnSounding = (clientX: number, clientY: number) => {
     const r = mapEl.getBoundingClientRect();
@@ -491,12 +428,7 @@ function setupHunt(world: World): void {
     } else {
       missRoute.push({ gx, gy }); // #123: record the route in GRID space (resize-proof)
       spawnSounding(ev.clientX, ev.clientY); // #129: a sounding at the miss point
-      // Continuous heat (from the click's own distance to the quarry) plus the
-      // name of the mark the click selected, so a cluster of identical village
-      // glyphs no longer reads as an indistinguishable dead-end. "You mark X"
-      // anchors the name to the CLICK (#327: "nearest mark" read as nearest to
-      // the quarry, contradicting a colder band); a miss that fails to beat the
-      // session's warmest sounding points back at it instead of repeating itself.
+      // #327: "You mark X" anchors the name to the CLICK (a "nearest mark" read as nearest-to-quarry contradicted colder bands); a miss that fails to beat the session's warmest sounding points back at it instead of repeating itself.
       const marked = feedback.pickedName ? ` You mark ${feedback.pickedName}.` : "";
       const beaten = warmest !== null && feedback.dist < warmest.dist;
       const trail =

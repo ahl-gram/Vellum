@@ -3,32 +3,8 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 
-/**
- * #145: every realm must carry its name. A realm that reaches the chart with a
- * tint, a border, and a coat of arms but no label is a chart that cannot be read.
- *
- * `feature-labels.ts` used to drop a realm name silently on two paths:
- *   - the largest contiguous blob was under 60 cells, or
- *   - all five placement candidates failed `tryClaim`. The candidates only ever
- *     moved vertically, all at the blob centroid's x, so one crowded column of
- *     settlement labels (settlements claim the arena first) killed the name even
- *     when thousands of the realm's own cells sat free elsewhere.
- *
- * The two seeds below are the ones Alex filed, recovered from the charts' own
- * `CHART No` (the chart number IS the seed). Each has exactly one silently
- * dropped realm.
- *
- * #235 (Names: Second Edition) re-rolled culture and names for every non-42 seed.
- * Culture is picked AFTER the realm partition, so each seed's blobs and seat order
- * are byte-identical; only the name strings changed, so realm index i is the same
- * realm. Both fixtures re-pinned to the new title and the new name of that SAME
- * geometrically-dropped realm:
- *   seed 1619895893: "The Whispering Reaches of Rau" -> "...Ciapa";
- *     dropped realm[0] "Greater Woropau" -> "The Empire of Non".
- *   seed 3767410253: "The Verdant Isle of Gyath" -> "...Noca";
- *     dropped realm[1] "The Gyamarde Dominion" -> "The Niayax Dominion".
- * The behavior guarded (every realm is labelled) is unchanged; only strings moved.
- */
+// #145: every realm must carry its name. feature-labels.ts used to drop one silently when the largest blob was under 60 cells, or when all five candidates failed tryClaim (all at the centroid's x, so one crowded settlement column killed the name even with thousands of free cells elsewhere).
+// The two seeds are the charts Alex filed (the chart number IS the seed), each with exactly one silently dropped realm. #235 re-rolled only the name STRINGS (culture is picked AFTER the partition, so realm index i is the same realm); both fixtures re-pinned to the new names.
 const CASES = [
   { seed: 1619895893, chart: "The Whispering Reaches of Ciapa", dropped: "The Empire of Non" },
   { seed: 3767410253, chart: "The Verdant Isle of Noca", dropped: "The Niayax Dominion" },

@@ -18,9 +18,7 @@ function worldFor(seed: number): World {
   return w;
 }
 
-// No byte pins here: world-sourced geometry descends from Math.hypot, so its
-// rendered bytes may drift across platforms (the compose-world.test.ts
-// caveat). Purity and dress-invariance are same-process claims and safe.
+// No byte pins here: world-sourced geometry descends from Math.hypot, so its rendered bytes may drift across platforms (the compose-world.test.ts caveat); purity and dress-invariance are same-process claims and safe.
 test("every settlement in real worlds dresses in both inks, dress-invariantly", () => {
   for (const seed of [1, 42]) {
     const w = worldFor(seed);

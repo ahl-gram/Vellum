@@ -14,17 +14,9 @@ export type Climate = {
 export type ClimateOptions = {
   band?: ClimateBand;
   riverCells?: Uint8Array;
-  /** Prevailing wind in radians, blown toward (world.winds.dir). */
   windDir: number;
-  /** World-space crop for regional charts (keeps latitude consistent). */
   window?: { u0: number; v0: number; u1: number; v1: number };
   worldAspect?: number;
-  /**
-   * Elevation span (maxElev - seaLevel) to normalize the lapse-rate against. A
-   * regional survey (#162) passes the PARENT world's span so temperature and the
-   * snow/alpine bands match the world chart at the window boundary; omitted, the
-   * field's own local max is used (the world-chart default).
-   */
   elevSpan?: number;
 };
 
@@ -51,9 +43,6 @@ export function computeClimate(
   const toU = (x: number): number => win.u0 + (x / (w - 1)) * (win.u1 - win.u0);
   const toV = (y: number): number => win.v0 + (y / (h - 1)) * (win.v1 - win.v0);
 
-  // A regional survey normalizes its lapse-rate against the PARENT world's span
-  // (#162) so temperature/snow bands match the world chart; otherwise the field's
-  // own local max is the span (the world-chart default).
   let span = opts.elevSpan;
   if (span === undefined) {
     let maxElev = -Infinity;
@@ -74,10 +63,6 @@ export function computeClimate(
     return clamp(band.base + band.latSpan * lat + wobble - above * LAPSE, 0, 1);
   });
 
-  // wind-driven rain replaces the old symmetric distance-to-coast bonus (#74);
-  // the noise floor drops with it so rain shadows can actually reach arid.
-  // Only a full world chart borders the true (forced-water) map edge; a
-  // windowed regional crop continues its border terrain instead of sea.
   const windRain = computeWindMoisture(elev, seaLevel, opts.windDir, !opts.window);
 
   const riverCells = opts.riverCells;
@@ -95,7 +80,6 @@ export function computeClimate(
       }) *
         0.22;
     const i = x + y * w;
-    // spent air parches: deep rain shadows dip below the noise floor (#74)
     const windBonus = 0.5 * (windRain[i] as number) - 0.06;
     const riverBonus = riverDist
       ? 0.3 * (1 - smoothstep(0, 6, riverDist[i] as number))

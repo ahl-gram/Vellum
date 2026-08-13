@@ -1,6 +1,5 @@
 import { quantile, type Field } from "../core/grid.ts";
 
-/** Sea level as an elevation quantile, so land fraction hits the target. */
 export function pickSeaLevel(elev: Field, landFraction: number): number {
   if (landFraction <= 0 || landFraction >= 1) {
     throw new RangeError(`landFraction must be in (0, 1), got ${landFraction}`);

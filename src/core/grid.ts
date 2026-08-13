@@ -1,11 +1,3 @@
-/**
- * Row-major Float64 scalar fields over a w×h grid.
- *
- * Fields are immutable by convention: builders fill a fresh array at
- * construction, transforms return new fields. Hot loops may read
- * `field.data` directly with `index()` math.
- */
-
 export type Field = {
   readonly w: number;
   readonly h: number;

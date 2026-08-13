@@ -1,11 +1,7 @@
-// The URL hash <-> controls bridge, extracted from src/site/explorer/app.ts (#183).
-// readHash seeds the controls from a shared/bookmarked link on load; writeHash mirrors the
-// current control values back into location.hash on every draw, so the link is always
-// shareable. Kept out of the conductor because it is a self-contained mapping with no stake
-// in the draw/bind race guards. landTouched (the #55 manual-override gate) stays OWNED by
-// src/site/explorer/app.ts: readHash reports whether the link carried a land value (so the
-// conductor can set the gate) rather than reaching back into the conductor's state, and
-// writeHash takes the gate's current value as an argument.
+// The URL hash <-> controls bridge (#183): readHash seeds the controls from a shared
+// link on load; writeHash mirrors the control values back into location.hash on every
+// draw. landTouched (the #55 manual-override gate) stays OWNED by app.ts: readHash only
+// reports whether the link carried a value, and writeHash takes the gate as an argument.
 import { landToSlider, sliderToLand, updateLandReadout } from "./sea-level.ts";
 import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.ts";
 import { parseLive, emitLive, finalizeHash, type Live } from "./address.ts";
@@ -23,17 +19,7 @@ export interface Controls {
   coastSlider: HTMLInputElement;
 }
 
-/**
- * Apply a bookmarked/shared hash to the controls. Only keys present and valid are
- * applied, so a partial link leaves the rest at their defaults.
- * @param {Controls} controls
- * @returns {{ land: boolean, coast: boolean, camera: {cx:number,cy:number,k:number}|null,
- *   live: import("./address.ts").Live | null }}
- *   which slider gates the link touched (so the conductor can set landTouched/coastTouched),
- *   the #165 camera (world-uv centre + zoom) if the link carried one, and the #192 live
- *   address (bare `survey` or `year=N`) if it carried one. The conductor restores the
- *   camera after the first chart lands; absent params mean home, still, disarmed.
- */
+/** Apply a bookmarked hash to the controls; only keys present and valid apply. Returns which slider gates the link touched, the #165 camera if carried (restored by the conductor after the first chart lands), and the #192 live address; absent params mean home, still, disarmed. */
 export function readHash(controls: Controls): {
   land: boolean;
   coast: boolean;
@@ -42,9 +28,7 @@ export function readHash(controls: Controls): {
 } {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider } = controls;
   const params = new URLSearchParams(location.hash.slice(1));
-  // Gate on PRESENCE, not just validity: Number(null) === 0 would pass the integer
-  // guard and clobber a bare visit's bootstrap default (today's seed-of-the-day) down
-  // to seed 0. A missing seed leaves seedInput at whatever default the conductor set.
+  // Gate on PRESENCE, not just validity: Number(null) === 0 would pass the integer guard and clobber a bare visit's seed-of-the-day default down to seed 0.
   const seedRaw = params.get("seed");
   const seed = Number(seedRaw);
   if (seedRaw !== null && Number.isInteger(seed) && seed >= 0) seedInput.value = String(seed);
@@ -72,9 +56,7 @@ export function readHash(controls: Controls): {
       landTouched = true;
     }
   }
-  // #137: the coast= param carries coastWarp x 100 (an integer), the same encoding
-  // writeHash emits below. Present + finite means the link warped the coast, so the
-  // conductor sets coastTouched and the draw sends the override.
+  // #137: coast= carries coastWarp x 100, the same encoding writeHash emits below.
   const coast = params.get("coast");
   let coastTouched = false;
   if (coast !== null) {
@@ -85,10 +67,7 @@ export function readHash(controls: Controls): {
       coastTouched = true;
     }
   }
-  // #165: the camera. cx/cy are the world-uv centre (0..1) and k the continuous zoom.
-  // All three must be present and finite, and k in [1, 8], for a valid frame; a partial
-  // or nonsensical set is ignored (the chart opens home), so a hand-edited link never
-  // throws. Applying the frame is the conductor's job once the chart is on screen.
+  // #165: cx/cy are the world-uv centre (0..1), k the continuous zoom. All three must be present and finite with k in [1, 8]; a partial or nonsensical set is ignored (the chart opens home), so a hand-edited link never throws.
   const cxRaw = params.get("cx");
   const cyRaw = params.get("cy");
   const kRaw = params.get("k");
@@ -99,23 +78,10 @@ export function readHash(controls: Controls): {
     const k = Number(kRaw);
     if ([cx, cy, k].every(Number.isFinite) && k >= 1 && k <= 8) camera = { cx, cy, k };
   }
-  // #192: the live address (bare `survey` / `year=N`), validated by the pure grammar.
   return { land: landTouched, coast: coastTouched, camera, live: parseLive(params) };
 }
 
-/**
- * Mirror the current control values into location.hash (via replaceState, so it does
- * not push history). The land= param is written only once the tide gate is touched.
- * @param {Controls} controls
- * @param {boolean} landTouched whether the manual sea-level override is in effect
- * @param {boolean} coastTouched whether the manual coast-warp override is in effect
- * @param {{cx:number,cy:number,k:number}} [camera] the #165 camera. cx/cy/k are written
- *   only when the camera is NOT home (k !== 1), so a home view links clean and every
- *   existing (never-zoomed) shared link is byte-identical. Quantized to 4dp: enough to
- *   restore the framing indistinguishably, short enough to keep the hash readable.
- * @param {import("./address.ts").Live | null} [live] the #192 live address. Emitted only
- *   when an instrument is armed, so a disarmed chart links byte-identical to today's.
- */
+/** Mirror the control values into location.hash via replaceState (no history push). land=/coast= are written only once their gates are touched; the camera is quantized to 4dp and written only when NOT home, and the live key emits only when an instrument is armed, so a plain chart links byte-identical to today's. */
 export function writeHash(
   controls: Controls,
   landTouched: boolean,
@@ -133,15 +99,10 @@ export function writeHash(
   params.set("legend", legendChk.checked ? "1" : "0");
   params.set("arms", armsChk.checked ? "1" : "0");
   if (landTouched) params.set("land", String(Math.round(sliderToLand(landSlider.value) * 1000)));
-  // #137: coast= is written only once the coast gate is touched, mirroring land=.
   if (coastTouched) params.set("coast", String(Math.round(sliderToCoast(coastSlider.value) * 100)));
-  // #192: the one live key, exactly one or neither (the writer's half of the ratified
-  // mutual exclusion; the grammar lives in address.ts). Before the camera, so the
-  // address reads instrument-then-framing, as in the ratified examples.
+  // #192: exactly one live key or neither (the writer's half of the ratified mutual exclusion; the grammar lives in address.ts). Before the camera, so the address reads instrument-then-framing.
   emitLive(params, live);
-  // #165: the camera is written ONLY when zoomed. k===1 is home (the controller snaps k
-  // to exactly 1 at the min extent and on reset/rebase), so the gate is exact. A world-
-  // sheet-changing action snaps home first, so any draw drops cx/cy/k for free.
+  // #165: written ONLY when zoomed. k===1 is home and the controller snaps k to exactly 1 at the min extent and on reset/rebase, so the gate is exact; any draw snaps home first and drops cx/cy/k for free.
   if (camera && camera.k !== 1) {
     params.set("cx", camera.cx.toFixed(4));
     params.set("cy", camera.cy.toFixed(4));

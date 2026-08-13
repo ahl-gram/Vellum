@@ -1,7 +1,6 @@
 import { el, type SvgNode } from "../svg.ts";
 import type { RenderCtx } from "../context.ts";
 
-/** feTurbulence parchment mottling + radial vignette (antique style). */
 export function textureDefs(ctx: RenderCtx): SvgNode[] {
   if (!ctx.style.parchmentTexture) return [];
   const seed = ctx.world.recipe.seed % 997;

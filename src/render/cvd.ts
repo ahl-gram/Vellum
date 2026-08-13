@@ -1,14 +1,4 @@
-/**
- * Colour-vision-deficiency helpers for the realm-tint assignment (#78).
- *
- * Two realm washes must not read as one nation even for a colour-blind viewer,
- * so the assignment treats palette colours that collapse under deuteranopia or
- * protanopia (or are already near-twins in normal vision) as a single class that
- * may never land on two close realms. Simulation uses the Machado et al. 2009
- * severity-1.0 matrices applied in linear RGB; distance is CIE76 dE in Lab,
- * measured on the wash composited over the style's paper, since that is how the
- * tint actually reads on the plate rather than at full strength.
- */
+/** Machado et al. 2009 severity-1.0 matrices applied in linear RGB; distance is CIE76 dE in Lab, measured on the wash composited over the style's paper. */
 
 type Rgb = readonly [number, number, number];
 type Vec3 = [number, number, number];
@@ -24,7 +14,6 @@ function hexToRgb(hex: string): Rgb {
   ];
 }
 
-// Machado et al. 2009, dichromat severity 1.0.
 const DEUTERANOPIA: Mat3 = [
   [0.367322, 0.860646, -0.227968],
   [0.280085, 0.672501, 0.047413],
@@ -41,7 +30,6 @@ const srgbToLinear = (c: number): number => {
   return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
 };
 
-/** sRGB `over` composite of a tint on paper, then linearised for the matrices. */
 function compositeLinear(fg: Rgb, bg: Rgb, alpha: number): Vec3 {
   return [0, 1, 2].map((i) =>
     srgbToLinear(alpha * fg[i]! + (1 - alpha) * bg[i]!),
@@ -71,10 +59,6 @@ function linearToLab([R, G, B]: Vec3): Vec3 {
 const deltaE = (a: Vec3, b: Vec3): number =>
   Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 
-/**
- * True if two tints, painted as washes over `paper` at `opacity`, are hard to
- * tell apart in normal vision OR under deuteranopia OR protanopia.
- */
 export function washesConfusable(
   a: string,
   b: string,
@@ -92,10 +76,6 @@ export function washesConfusable(
   return false;
 }
 
-/**
- * Symmetric conflict matrix over a palette: `[i][j]` is true iff tints i and j
- * are confusable as washes (normal / deuteranopia / protanopia). Diagonal false.
- */
 export function washConflictMatrix(
   palette: readonly string[],
   paper: string,

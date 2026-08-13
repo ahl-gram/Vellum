@@ -79,7 +79,6 @@ test("a thematic plate describes itself by theme for assistive tech", () => {
   const world = generateWorld(defaultRecipe(42));
   assert.match(renderMap(world, { theme: "vegetation" }), /Vegetation map of /);
   assert.match(renderMap(world, { theme: "population" }), /Population map of /);
-  // a no-theme chart keeps the style-based description unchanged
   assert.match(renderMap(world, {}), /Antique chart of /);
 });
 
@@ -91,14 +90,8 @@ test("a single-realm world still produces a population plate", () => {
   assert.ok(svg.includes("<rect"), "the lone realm is shaded");
 });
 
-// --- #71: style-aware theme plates -------------------------------------------
-
 test("each theme's fill palette differs between two distinct styles", () => {
-  // Acceptance #5: the same world drawn under different styles must paint
-  // different cell fills. Antique and ink are the universal pair — ink is a
-  // monochrome wash for every theme, antique a chromatic ramp. (Across the three
-  // colored styles, scalar themes differ but vegetation is shared by design; the
-  // next test pins that invariant.)
+  // Acceptance #5: antique and ink are the universal pair (ink is a monochrome wash for every theme, antique a chromatic ramp); across the colored styles vegetation is shared by design, pinned in the next test.
   for (const theme of THEME_NAMES) {
     const spec = THEMES[theme];
     const samples = theme === "vegetation"
@@ -111,9 +104,7 @@ test("each theme's fill palette differs between two distinct styles", () => {
 });
 
 test("colored styles differ for scalar themes but share the vegetation palette", () => {
-  // Scalar themes derive a distinct ramp per style; vegetation shares one earthy
-  // biome palette across the three colored styles (it sits on any warm paper) and
-  // only rebins to a monochrome wash for ink.
+  // Scalar themes derive a distinct ramp per style; vegetation shares one earthy biome palette across the three colored styles and only rebins to a monochrome wash for ink.
   for (const theme of ["climate", "moisture", "population"] as ThemeName[]) {
     const s = THEMES[theme];
     assert.notDeepEqual(
@@ -131,10 +122,7 @@ test("colored styles differ for scalar themes but share the vegetation palette",
 });
 
 test("antique theme palettes stay byte-identical (full interpolated ramps pinned)", () => {
-  // Antique must not drift: the committed style charts and the antique-assigned
-  // plate depend on these exact values, and no committed artifact exercises a
-  // theme plate, so this literal pin is the antique ramps' only regression guard.
-  // The literals were computed from the verified pre-#71 ramps.
+  // No committed artifact exercises a theme plate, so this literal pin (computed from the verified pre-#71 ramps) is the antique ramps' only regression guard.
   const fills = (theme: ThemeName, n: number) =>
     Array.from({ length: n }, (_, i) => THEMES[theme].color(i, STYLES.antique));
   assert.deepEqual(fills("climate", 12), [
@@ -153,8 +141,7 @@ test("antique theme palettes stay byte-identical (full interpolated ramps pinned
 });
 
 test("every style yields 6-digit hex legend swatches for every theme", () => {
-  // The ink style's realmTints are 3-digit (#888); theme swatches must never
-  // borrow those — every swatch routes through the padded ramp helper.
+  // Ink's realmTints are 3-digit (#888); theme swatches must never borrow those, so every swatch routes through the padded ramp helper.
   const world = generateWorld(defaultRecipe(42));
   for (const style of STYLE_NAMES) {
     for (const theme of THEME_NAMES) {
@@ -166,8 +153,7 @@ test("every style yields 6-digit hex legend swatches for every theme", () => {
 });
 
 test("the ink theme palette reads as monochrome, not a chromatic ramp", () => {
-  // Under ink, every theme swatch is a near-neutral light-to-dark wash: its
-  // RGB channels sit close together, unlike the antique green-to-blue ramps.
+  // Under ink every swatch is a near-neutral light-to-dark wash: RGB channels sit close together, unlike the antique green-to-blue ramps.
   const world = generateWorld(defaultRecipe(42));
   for (const theme of THEME_NAMES) {
     for (const r of THEMES[theme].legendRows(world, STYLES.ink)) {

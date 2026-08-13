@@ -1,13 +1,5 @@
 import type { Field } from "../core/grid.ts";
 
-/**
- * Marching squares isoline extraction with consistent orientation:
- * the region ABOVE the iso value always lies on the LEFT of travel.
- * In grid coordinates (y down) that makes "land inside" rings and
- * "hole inside" rings wind in opposite directions, so the signed
- * shoelace area distinguishes islands from lakes.
- */
-
 export type Point = readonly [number, number];
 
 export type Contour = {
@@ -17,8 +9,7 @@ export type Contour = {
 
 type Seg = readonly [number, number, number, number];
 
-// Clamp keeps crossings off exact lattice corners, where four cells
-// would share one point and chain-walking would become ambiguous.
+// The clamp keeps crossings off exact lattice corners, where chain-walking would become ambiguous.
 const T_MIN = 1e-6;
 const T_MAX = 1 - 1e-6;
 
@@ -127,7 +118,6 @@ function chainSegments(segs: ReadonlyArray<Seg>): Contour[] {
     const points: Point[] = [[first[0], first[1]], [first[2], first[3]]];
     const startKey = key(first[0], first[1]);
 
-    // walk forward from the chain's end
     let endKey = key(first[2], first[3]);
     while (endKey !== startKey) {
       const next = takeFrom(endKey);
@@ -144,7 +134,6 @@ function chainSegments(segs: ReadonlyArray<Seg>): Contour[] {
       continue;
     }
 
-    // open chain: extend backward from the start (we may have begun mid-chain)
     const prefix: Point[] = [];
     let headKey = startKey;
     for (;;) {
@@ -170,12 +159,6 @@ function chainSegments(segs: ReadonlyArray<Seg>): Contour[] {
   return contours;
 }
 
-/**
- * Close open chains against the grid boundary rectangle by walking the
- * border counterclockwise in screen coords (interior — the "above"
- * region — stays on the left), splicing in corners as they pass.
- * Closed input rings pass through untouched.
- */
 export function closeChainsOnBoundary(
   contours: ReadonlyArray<Contour>,
   w: number,
@@ -258,13 +241,10 @@ export function closeChainsOnBoundary(
   return out;
 }
 
-/** Iso rings ready for area fills: boundary-cut chains closed against the rect. */
 export function closedIsoRings(field: Field, iso: number): Contour[] {
   return closeChainsOnBoundary(marchingSquares(field, iso), field.w, field.h);
 }
 
-// Polyline utilities moved to ./polyline.ts; re-exported here so importers of
-// this module keep their existing path.
 export {
   chaikinSmooth,
   chaikinSmoothPinned,

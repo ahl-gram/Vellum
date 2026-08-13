@@ -3,8 +3,6 @@ import { textBox, WIDTH_FACTOR } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { NamedSettlement } from "../../world/types.ts";
 
-/** Render tier for a settlement mark. "seat" is a non-capital realm seat: a town
- *  that heads its own realm, drawn a notch grander than a plain town. */
 export type SettlementTier = NamedSettlement["kind"] | "seat";
 
 export const FONT_SIZE: Record<SettlementTier, number> = {
@@ -15,13 +13,7 @@ export const FONT_SIZE: Record<SettlementTier, number> = {
   hamlet: 8.5,
 };
 
-/** Settlement type on REGIONAL surveys only, tier-graded: the smallest tiers
- *  gain the most, since they carry the readability problem. A committed inset
- *  is viewed at roughly viewport width (a 1500px render shown at ~1000px on a
- *  laptop, and at band 3 no deeper band's in-band zoom can ever grow it), so
- *  base type reads tiny on screen; the finer sheet has the label room to spare
- *  ("labels are the reveal", #170). World sheets keep FONT_SIZE exactly: their
- *  bytes are golden-locked, and a change there owes a regen. */
+/** Regional sheets only; world sheets keep FONT_SIZE exactly (golden-locked, a change owes a regen). */
 export const REGION_FONT_SIZE: Record<SettlementTier, number> = {
   capital: 24,
   seat: 20,
@@ -30,7 +22,6 @@ export const REGION_FONT_SIZE: Record<SettlementTier, number> = {
   hamlet: 13,
 };
 
-/** Grand capital and provincial-seat marks scale the same base glyph. */
 const CAPITAL_GLYPH_SCALE = 1.25;
 const SEAT_GLYPH_SCALE = 0.85;
 const HALO_OPACITY = 0.33;
@@ -43,7 +34,6 @@ export type LabelCandidate = {
   readonly anchor: LabelAnchor;
 };
 
-/** Anchor positions in preference order: E, W, N, S, then diagonals. */
 export function labelCandidates(
   px: number,
   py: number,
@@ -62,9 +52,7 @@ export function labelCandidates(
   ];
 }
 
-/** The map mark for a settlement tier; reused by the legend so the two match.
- *  Grand capitals and realm seats share one base glyph (a castle in the inked
- *  styles, a star-in-circle otherwise), scaled so the capital reads grander. */
+/** Reused by the legend so the map mark and its key row match. */
 export function settlementGlyph(
   tier: SettlementTier,
   px: number,
@@ -88,8 +76,6 @@ export function settlementGlyph(
     });
   }
   if (tier === "hamlet") {
-    // the smallest mark on any sheet (#171): a solid ink fleck under the
-    // village dot, haloed a hair so it survives the darker washes
     return el("circle", {
       cx: px, cy: py, r: 1.5 * k,
       fill: style.ink, stroke: style.labelHalo, "stroke-width": 0.8 * k,
@@ -101,7 +87,6 @@ export function settlementGlyph(
   });
 }
 
-/** A star set in a haloed disc; the capital mark for the un-inked styles. */
 function starInCircle(px: number, py: number, ks: number, ctx: RenderCtx): SvgNode {
   const { style } = ctx;
   const r = 6.5 * ks;
@@ -115,8 +100,6 @@ function starInCircle(px: number, py: number, ks: number, ctx: RenderCtx): SvgNo
   ]);
 }
 
-/** A soft realm-tint aura behind a seat mark; ties the seat to its territory.
- *  Drawn before the glyph so the paper-filled mark sits on top, leaving a ring. */
 function seatHalo(
   px: number,
   py: number,
@@ -137,12 +120,9 @@ function seatHalo(
   });
 }
 
-/** A broken-tower mark for a ruined settlement; reused by the legend. */
 export function ruinGlyph(px: number, py: number, ctx: RenderCtx): SvgNode {
   const { style } = ctx;
   const s = ctx.proj.widthPx / 1500;
-  // a wall standing taller on the left, broken away in a jagged line to a
-  // shorter stub on the right
   const d =
     `M${px - 3 * s} ${py}` +
     `L${px - 3 * s} ${py - 7 * s}` +
@@ -151,7 +131,6 @@ export function ruinGlyph(px: number, py: number, ctx: RenderCtx): SvgNode {
     `L${px + 0.7 * s} ${py - 3.4 * s}` +
     `L${px + 2.7 * s} ${py - 4.2 * s}` +
     `L${px + 2.7 * s} ${py}Z`;
-  // a narrow dark window slit reads as a hollow, roofless tower
   const slit =
     `M${px - 2 * s} ${py}L${px - 2 * s} ${py - 3.4 * s}` +
     `L${px - 1 * s} ${py - 3.4 * s}L${px - 1 * s} ${py}Z`;
@@ -204,8 +183,6 @@ function starPath(cx: number, cy: number, r: number, points: number): string {
   return d + "Z";
 }
 
-/** A settlement label, styled by tier: grand capitals shout in large spaced
- *  caps, seats use smaller spaced caps, towns and villages stay as set. */
 function labelNode(
   display: string,
   tier: SettlementTier,
@@ -242,9 +219,6 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
   const seats = world.realms.seats;
   const seatRealm = new Map<number, number>();
   seats.forEach((idx, realmId) => seatRealm.set(idx, realmId));
-  // On a regional survey (world.region set) seats are projected but realm tints,
-  // borders, and labels stay world-sheet-only (#161/#162), so the tint-halo would
-  // paint plausible-but-wrong colours: gate it off. The seat glyph itself stays.
   const showHalo =
     style.politicalTints && seats.length > 1 && world.region === undefined;
 
@@ -252,7 +226,6 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
   const tierOf = (s: NamedSettlement, i: number): SettlementTier =>
     s.kind === "capital" ? "capital" : seatRealm.has(i) ? "seat" : s.kind;
 
-  // capitals then seats first so the seats of power always win label space
   const ordered = world.settlements
     .map((s, i) => ({ s, i, tier: tierOf(s, i) }))
     .sort((a, b) => RANK[a.tier] - RANK[b.tier]);
@@ -261,11 +234,6 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
     const px = proj.px(s.x);
     const py = proj.py(s.y);
 
-    // #93: each settlement's marks (halo, glyph, label) go into one addressable
-    // <g class="settlement" data-idx="i"> so the Explorer's chronicle can reveal
-    // the real glyph as its founding year passes. `i` is the WORLD index (matches
-    // the manifest place idx); the wrapper is inert (no style rule targets it), so
-    // idle output is byte-identical bar the tag itself, which regenerates the golden.
     const group: SvgNode[] = [];
 
     if (showHalo && (tier === "capital" || tier === "seat") && !s.ruined) {
@@ -275,8 +243,6 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
     }
     group.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(tier, px, py, ctx));
 
-    // region-gated so world sheets stay byte-identical; the gap grows with the
-    // type so the larger setting does not crowd its own mark
     const sized = world.region !== undefined ? REGION_FONT_SIZE : FONT_SIZE;
     const fs = sized[tier] * k;
     const gap =
@@ -285,10 +251,6 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
     const upper = tier === "capital" || tier === "seat";
     const text = s.name;
     const display = upper ? text.toUpperCase() : text;
-    // #195: capitals and seats render .toUpperCase() (and letter-spaced), so their
-    // claim must use caps width + that spacing or the box is ~20% narrower than the
-    // drawn name, letting a neighbour (e.g. a river reach, #178) bury the final
-    // letters. Towns and villages draw as set, so they keep the mixed default.
     const wf = upper ? WIDTH_FACTOR.caps : WIDTH_FACTOR.mixed;
     const ls = tier === "capital" ? 0.8 : tier === "seat" ? 0.5 : 0;
     const tries = labelCandidates(px, py, fs, gap);
@@ -303,15 +265,10 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
       break;
     }
     if (!placed && tier !== "village" && tier !== "hamlet") {
-      // important places keep their label even in a crowd; villages and
-      // hamlets lose theirs, preserving tier order under label pressure
       const t = tries[0]!;
       group.push(labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx));
     }
 
-    // #162: a regional survey stamps data-tier/data-name so Sub 9's redraft can
-    // dry the names in. Conditional-spread on world.region so a world sheet stays
-    // byte-identical (golden-safe): the spread is {} there, leaving the tag as-is.
     nodes.push(
       el(
         "g",

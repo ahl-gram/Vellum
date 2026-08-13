@@ -13,8 +13,7 @@ const world = generateWorld(defaultRecipe(42, { gridW: 160, gridH: 120 }));
 
 const count = (svg: string, needle: string): number => svg.split(needle).length - 1;
 
-// A production-grid multi-realm fixture: seat projection and river/climate
-// continuity are only meaningful at a real chart resolution.
+// A production-grid multi-realm fixture: seat projection and river/climate continuity are only meaningful at a real chart resolution.
 const bigWorld = generateWorld(defaultRecipe(42, { gridW: 320, gridH: 240 }));
 
 test("region world keeps the parent's waterline and terrain", () => {
@@ -31,15 +30,12 @@ test("region world keeps the parent's waterline and terrain", () => {
   assert.equal(region.culture.id, world.culture.id);
   assert.ok(region.region, "region metadata present");
 
-  // capital must survive projection, same name, on land
   const cap = region.settlements.find((s) => s.kind === "capital");
   assert.ok(cap, "capital inside its own environs");
   assert.equal(cap.name, capital.name);
   const i = cap.x + cap.y * region.elev.w;
   assert.ok((region.elev.data[i] as number) > region.seaLevel);
 });
-
-// --- #162 The Surveyor's Glass gate: trustworthy regional surveys ---
 
 test("region projects world realm seats to region indices (no town-dot downgrade, #162)", () => {
   assert.ok(bigWorld.realms.seats.length > 1, "fixture is multi-realm");
@@ -86,8 +82,7 @@ test("a region seat renders a castle glyph with no political halo (AC #162)", ()
 });
 
 test("region temperature is continuous with the world via the parent elevSpan (AC #162)", () => {
-  // a low window well away from the world's peak (seed 42's summit is at uv
-  // ~0.39,0.62), so the region's local max sits well below the world's.
+  // A low window away from seed 42's summit (uv ~0.39,0.62), so the region's local max sits well below the world's.
   const win = { u0: 0.02, v0: 0.16, u1: 0.37, v1: 0.51 };
   const region = generateRegionWorld(bigWorld, {
     window: win,
@@ -102,8 +97,7 @@ test("region temperature is continuous with the world via the parent elevSpan (A
   const worldSpan = Math.max(1e-9, worldMax - seaLevel);
   assert.ok(worldMax - localMax > 0.05, "precondition: this window excludes the world peak");
 
-  // Temperature ignores riverCells, so a reference computed on the region's own
-  // elevation with the WORLD span must reproduce the region's temperature exactly.
+  // Temperature ignores riverCells, so a reference computed on the region's own elevation with the WORLD span must reproduce the region's temperature exactly.
   const aspect = (bigWorld.recipe.gridW - 1) / (bigWorld.recipe.gridH - 1);
   const ref = computeClimate(region.elev, seaLevel, bigWorld.recipe.seed, {
     band: bigWorld.recipe.band,
@@ -120,10 +114,7 @@ test("region temperature is continuous with the world via the parent elevSpan (A
 });
 
 test("region biomes are continuous with the world via the parent elevSpan (AC #162)", () => {
-  // An inland highland window whose local max sits well below the world peak; under
-  // its own local span every hilltop would read snow/alpine, which the world span
-  // suppresses. This is the INTEGRATION check: the climate/biomes unit tests pass
-  // even if region.ts forgets to thread elevSpan into classifyBiomes, but this does not.
+  // An inland highland window: under its own local span every hilltop would read snow/alpine. The INTEGRATION check: the climate/biomes unit tests pass even if region.ts forgets to thread elevSpan into classifyBiomes, this does not.
   const win = { u0: 0.15, v0: 0.22, u1: 0.31, v1: 0.38 };
   const region = generateRegionWorld(bigWorld, {
     window: win, gridW: 320, gridH: 240, title: "Highland Environs",
@@ -156,8 +147,7 @@ test("region biomes are continuous with the world via the parent elevSpan (AC #1
 });
 
 test("region rivers match the world's major-river set at the window boundary (AC #162)", () => {
-  // A river-rich seed (seed 27 at production grid carries many major rivers), and
-  // a window centred on a major river's midsection so rivers cross its edges.
+  // A river-rich seed (27 at production grid) and a window centred on a major river's midsection so rivers cross its edges.
   const riverWorld = generateWorld(defaultRecipe(27, { gridW: 320, gridH: 240 }));
   const majors = riverWorld.rivers
     .filter(isMajorRiver)
@@ -187,9 +177,7 @@ test("region rivers match the world's major-river set at the window boundary (AC
     return false;
   };
 
-  // Project every world MAJOR-river cell into the window INDEPENDENTLY (this test
-  // owns the uv->cell mapping, so region.ts's projection has to agree, not just
-  // echo itself), classified into an interior band and an 8%-of-window edge band.
+  // Project every world MAJOR-river cell into the window INDEPENDENTLY (this test owns the uv->cell mapping, so region.ts's projection has to agree, not just echo itself), split into an interior band and an 8%-of-window edge band.
   const Ww = riverWorld.recipe.gridW, Wh = riverWorld.recipe.gridH;
   const du = win.u1 - win.u0, dv = win.v1 - win.v0, edgeFrac = 0.08;
   let iHit = 0, iMiss = 0, bHit = 0, bMiss = 0;
@@ -221,11 +209,7 @@ test("region rivers match the world's major-river set at the window boundary (AC
 });
 
 test("region rivers are not inked twice: no extracted river shadows a projected major (#162)", () => {
-  // Same river-rich window as the continuity test. Projected world majors carry
-  // fractional cell coords (a uv division); the region's own extracted rivers carry
-  // integer coords (grid cells). The shadow filter drops any extracted river that
-  // duplicates a projected major, so no extracted river may cover >=50% of its cells
-  // within the majors' 2-cell shadow. (Guards the no-double-ink return in region-rivers.ts.)
+  // Projected majors carry fractional coords, extracted rivers integer ones; the shadow filter drops any extracted river covering >=50% of its cells within the majors' 2-cell shadow (guards the no-double-ink return in region-rivers.ts).
   const riverWorld = generateWorld(defaultRecipe(27, { gridW: 320, gridH: 240 }));
   const majors = riverWorld.rivers
     .filter(isMajorRiver)
@@ -268,8 +252,6 @@ test("region rivers are not inked twice: no extracted river shadows a projected 
   assert.ok(extractedRivers > 0, "the window also carries genuinely new extracted detail");
 });
 
-// --- #171 Hamlets: the deepest band's payoff, gated on window size ---
-
 test("only the deepest band grows hamlets; they never seat a realm or take a road (#171)", () => {
   // anchor on the settlement whose deepest window carries the most hamlets
   let best: { win: ReturnType<typeof windowAround>; n: number } | null = null;
@@ -288,12 +270,10 @@ test("only the deepest band grows hamlets; they never seat a realm or take a roa
   });
   const hamlets = deep.settlements.filter((s) => s.kind === "hamlet");
 
-  // never a seat: every projected seat still points at a projected world settlement
   for (const si of deep.realms.seats) {
     if (si === -1) continue;
     assert.notEqual(deep.settlements[si]!.kind, "hamlet", "a hamlet never seats a realm");
   }
-  // never a road terminus: roads are built over the projected world settlements only
   const hamletCells = new Set(hamlets.map((h) => `${h.x},${h.y}`));
   for (const road of deep.roads) {
     const a = road.points[0]!;
@@ -365,9 +345,7 @@ test("a writer avoids back-to-back template repeats", () => {
   }
 });
 
-// #169: the region title must be a deterministic function of (world, window) so the
-// Explorer's live redraft and a downloaded sheet's redraw (which recover only the window,
-// never the title) agree byte-for-byte.
+// #169: the region title must be a deterministic function of (world, window): the Explorer's live redraft and a downloaded sheet's redraw recover only the window, never the title, and must agree byte-for-byte.
 test("regionTitle names the settlement nearest the window centre (#169)", () => {
   const w = bigWorld;
   const capital = w.settlements.find((s) => s.kind === "capital");
@@ -395,8 +373,7 @@ test("regionTitle names the settlement nearest the window centre (#169)", () => 
 });
 
 test("regionTitle is stable across a regeneration of the same world (#169)", () => {
-  // The download-redraw path regenerates the base world from the recovered flat recipe;
-  // regionTitle must return the identical string over that fresh world for byte-identity.
+  // The download-redraw path regenerates the base world from the recovered flat recipe; regionTitle must return the identical string over that fresh world.
   const win = windowAround(bigWorld, bigWorld.settlements[0], 0.5);
   const regen = generateWorld(defaultRecipe(42, { gridW: 320, gridH: 240 }));
   assert.equal(regionTitle(bigWorld, win), regionTitle(regen, win));

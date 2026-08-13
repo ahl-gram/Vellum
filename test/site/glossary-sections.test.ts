@@ -3,28 +3,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-/**
- * The glossary's shape, guarded structurally rather than by a written-down list
- * (#353). Three ratified rules from that issue:
- *
- * 1. A section caps at 5 to 8 terms, which is why the voyage journal's nautical
- *    vocabulary lands as three sections rather than one of twenty. Before #353
- *    "On the chart itself" carried 13, so this guard was red on arrival.
- * 2. Zoryan and Ordai stay over cap by ratified exception: splitting a single
- *    culture's word-list costs more legibility than the overage does.
- * 3. Homographs take the period form, one headword whose senses run together
- *    ("Also, ..."), following Smyth's Sailor's Word-Book (1867), rather than the
- *    modern numbered-homograph form. The no-duplicate-headword guard below is
- *    what makes that decision enforceable: glass and hand each earn one entry.
- *
- * Most of these read the page's own shape rather than a list, so they keep
- * biting as terms come and go. The one exception is the coverage test, which is
- * deliberately a written-down spot-check: it pins the words that prompted #353,
- * so deleting an entry cannot pass quietly.
- *
- * The TOC guard exists because the table of contents is hand-authored while the
- * sections are not, and #353 adds seven sections at once.
- */
+// The glossary's shape, guarded structurally (#353): sections cap at 5-8 terms; Zoryan and Ordai run over cap by ratified exception; homographs take Smyth's (1867) period form, one headword with its senses run together.
+// The coverage test is deliberately a written-down spot-check pinning the words that prompted #353; the TOC guard exists because the TOC is hand-authored while the sections are not.
 
 const glossaryPath = fileURLToPath(new URL("../../src/pages/glossary/index.astro", import.meta.url));
 const source = readFileSync(glossaryPath, "utf8");
@@ -41,7 +21,6 @@ interface Section {
   readonly terms: readonly string[];
 }
 
-/** Split the page into its h2/h3 sections and the terms each one carries. */
 const sections = (html: string): readonly Section[] => {
   const parts = html.split(/<h([23])[^>]*>([\s\S]*?)<\/h\1>/);
   const out: Section[] = [];
@@ -50,9 +29,7 @@ const sections = (html: string): readonly Section[] => {
     const level = Number(parts[i]);
     const heading = parts[i + 1].replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").trim();
     const body = parts[i + 2] ?? "";
-    // Tolerate attributes on the term: #270's footnote marks link per-term ids
-    // (`<p class="term" id="verso">`), and an exact-tag match made every one of
-    // those entries invisible to all the guards below rather than failing loudly.
+    // Tolerate attributes on the term: #270's per-term ids made an exact-tag match silently skip every such entry.
     const terms = [...body.matchAll(/<p class="term"[^>]*>([\s\S]*?)<\/p>/g)].map((m) =>
       m[1].replace(/<[^>]*>/g, "").trim(),
     );
@@ -106,8 +83,7 @@ test("the chart section is split into the three #353 ratified (#353)", () => {
 });
 
 test("every term the voyage and the gazetteer print is documented (#353)", () => {
-  // A spot-check across all seven new sections plus the chart split, drawn from
-  // the terms that actually print in lore.ts, voyage-log.ts and the scale bar.
+  // Drawn from the terms that actually print in lore.ts, voyage-log.ts and the scale bar.
   const owed = [
     "Quay", "Weir", "Breakwater", "Chandler", "Osier", "Drover", "Reeve", "Reach",
     "Holding ground", "Warp", "Beck", "Fen", "Waterman", "Wharf", "Moorings",
@@ -124,11 +100,7 @@ test("every term the voyage and the gazetteer print is documented (#353)", () =>
 });
 
 test("no headword is defined twice: homographs run their senses together (#353)", () => {
-  // The period convention (Smyth 1867) is one entry per headword. Two entries
-  // for "Glass" would be the modern numbered-homograph form this page rejects.
-  // Strip a parenthetical or comma qualifier first: "Bar (of a harbour)" and
-  // "Bar, of a river" are the numbered-homograph form decision 7 rejects, and a
-  // whole-string compare would wave both through.
+  // Strip a parenthetical or comma qualifier first: "Bar (of a harbour)" vs "Bar, of a river" is the numbered-homograph form decision 7 rejects, and a whole-string compare would wave both through.
   const bare = (t: string): string => t.toLowerCase().replace(/\s*[(,].*$/, "").trim();
   const seen = new Map<string, string>();
   for (const term of withTerms().flatMap((s) => s.terms)) {
@@ -157,8 +129,7 @@ test("the table of contents lists every section, and no section it lacks (#353)"
 });
 
 test("terms stay alphabetical inside their section (#353)", () => {
-  // The sort key drops a leading hyphen so the suffix entries (-grad, -tlan,
-  // -yama) file under their letter, which is how the culture lists already read.
+  // The key drops a leading hyphen so the suffix entries (-grad, -tlan, -yama) file under their letter.
   const key = (term: string): string => term.toLowerCase().replace(/^-/, "");
   for (const section of withTerms()) {
     const sorted = [...section.terms].sort((a, b) => key(a).localeCompare(key(b)));
@@ -171,10 +142,6 @@ test("terms stay alphabetical inside their section (#353)", () => {
 });
 
 test("the grown TOC reads in two columns, and stacks on mobile (#353)", () => {
-  // Fifteen entries in a single column push the first term below the fold.
-  // Two columns halve the block where there is room to hold them, and collapse
-  // at the 720px boundary the homepage grids already use (public/index.css).
-  // break-inside keeps a wrapped entry from splitting across the column break.
   const css = readFileSync(
     fileURLToPath(new URL("../../public/glossary/index.css", import.meta.url)),
     "utf8",
@@ -196,25 +163,17 @@ test("the grown TOC reads in two columns, and stacks on mobile (#353)", () => {
   );
 });
 
-// The wrapped-slip bullet rule (#353) is no longer guarded here. It is a
-// property of the tip gesture rather than of this page, so since #358 one sweep
-// in test/site/tip-affordance.test.ts holds every authored sheet, this one
-// included, and the settledTocLink twin that lived here folded into its
-// settled() helper.
+// The wrapped-slip bullet rule moved at #358: one sweep in test/site/tip-affordance.test.ts now holds every authored sheet, this one included.
 
 test("every term carries a definition (#353)", () => {
-  // Terms and defs alternate, so a dropped def silently orphans the headword
-  // above it. Counting per section catches the drift where it happens.
+  // Terms and defs alternate, so a dropped def silently orphans the headword above; counting per section catches the drift where it happens.
   const bodies = source.split(/<h([23])[^>]*>([\s\S]*?)<\/h\1>/);
   for (let i = 1; i + 2 < bodies.length + 1; i += 3) {
     const heading = (bodies[i + 1] ?? "").replace(/<[^>]*>/g, "").trim();
     const body = bodies[i + 2] ?? "";
     const terms = [...body.matchAll(/<p class="term"[^>]*>/g)].length;
     const defs = [...body.matchAll(/<p class="def">/g)].length;
-    // Skipping every term-less section would hide a body that carries defs and
-    // no headwords at all, which is exactly what an unmatched term tag looks
-    // like. Only a section with neither is legitimately empty (an h2 whose
-    // terms all live under its h3 subsections).
+    // A section with terms=0 but defs>0 is what an unmatched term tag looks like; only neither is legitimately empty (an h2 whose terms live under its h3s).
     if (terms === 0 && defs === 0) continue;
     assert.equal(defs, terms, `"${heading}" carries ${terms} terms but ${defs} definitions`);
   }

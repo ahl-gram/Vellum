@@ -41,7 +41,6 @@ export function planCartouche(ctx: RenderCtx): CartouchePlan {
     { corner: "bl" as const, x: m + inset, y: proj.heightPx - m - inset - height },
   ];
 
-  // pick the corner with the least land under it
   const { w, data } = world.elev;
   let best = corners[0]!;
   let bestLand = Infinity;
@@ -90,7 +89,6 @@ export function cartoucheLayer(ctx: RenderCtx, plan: CartouchePlan): SvgNode {
       x: x + 5 * k, y: y + 5 * k, width: w - 10 * k, height: h - 10 * k,
       fill: "none", stroke: style.ink, "stroke-width": 0.8 * k,
     }),
-    // corner flourishes
     ...(["tl", "tr", "bl", "br"] as const).map((c) => {
       const fx = c.includes("l") ? x + 5 * k : x + w - 5 * k;
       const fy = c.startsWith("t") ? y + 5 * k : y + h - 5 * k;
@@ -112,7 +110,6 @@ export function cartoucheLayer(ctx: RenderCtx, plan: CartouchePlan): SvgNode {
       },
       [world.title.title],
     ),
-    // divider with center diamond
     el("line", {
       x1: cx - w * 0.3, y1: y + 46 * k, x2: cx + w * 0.3, y2: y + 46 * k,
       stroke: style.ink, "stroke-width": 0.9 * k,

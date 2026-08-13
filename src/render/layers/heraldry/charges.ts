@@ -7,13 +7,6 @@ import type {
 import type { ArmsPalette } from "./palette.ts";
 import { n, type Geom } from "./geom.ts";
 
-/**
- * Ordinaries and mobile charges: the device borne on the field. PURE: all
- * geometry derives from the shield box / charge center, no RNG.
- */
-
-/** Ordinaries are bold bands; drawn as thick clipped strokes that read as
- *  reaching the shield edge. */
 function ordinaryNode(ord: Ordinary, g: Geom, fill: string): SvgNode {
   const bw = g.w * 0.2;
   const common = {
@@ -40,7 +33,6 @@ function ordinaryNode(ord: Ordinary, g: Geom, fill: string): SvgNode {
   }
 }
 
-/** A culture charge centered at (X, Y) within radius R, in tincture `fill`. */
 function chargeGlyph(
   charge: MobileCharge,
   X: number,
@@ -85,7 +77,6 @@ function chargeGlyph(
       kids.push(el("path", { d: M(X + R * 0.1, Y - R * 0.9) + Q(X + R, Y - R * 0.45, X + R * 0.45, Y - R * 0.05) + "Z", ...solid }));
       break;
     case "raven":
-      // a perched corvid in profile facing dexter: stout beak, wedge tail, two legs
       kids.push(el("path", {
         d: M(X - R * 0.66, Y - R * 0.16) + // upper beak base / brow
           Q(X - R * 0.34, Y - R * 0.52, X + R * 0.06, Y - R * 0.44) + // crown to nape
@@ -133,8 +124,6 @@ function chargeGlyph(
       }));
       break;
     case "scimitar":
-      // a curved sabre: grip + pommel + crossguard below a broad blade that curves
-      // up and widens to a pointed tip — unmistakably curved, unlike the straight sword
       kids.push(el("path", { d: M(X - R * 0.32, Y + R * 0.95) + L(X - R * 0.12, Y + R * 0.5), ...line, "stroke-width": n(R * 0.12) }));
       kids.push(el("circle", { cx: n(X - R * 0.34), cy: n(Y + R * 0.98), r: n(R * 0.1), fill }));
       kids.push(el("path", { d: M(X - R * 0.42, Y + R * 0.52) + Q(X - R * 0.1, Y + R * 0.34, X + R * 0.3, Y + R * 0.5), ...line, "stroke-width": n(R * 0.1) }));
@@ -201,8 +190,6 @@ function chargeGlyph(
       kids.push(el("path", { d: M(X, Y + R * 0.5) + L(X, Y + R * 0.9), ...line }));
       break;
     case "flame":
-      // an asymmetric fire: a rounded base rising to a tall central tongue with a
-      // shorter tongue to each side — distinct from the symmetric `leaf` almond
       kids.push(el("path", {
         d: M(X, Y + R * 0.92) +
           Q(X - R * 0.6, Y + R * 0.55, X - R * 0.46, Y) + // left base bulge

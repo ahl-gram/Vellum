@@ -1,10 +1,7 @@
-// The Wayfarer's marks (#119/#120): the ship and the rider the voyage overlay moves
-// along the survey track. Pure glyph data + a DOM builder; no engine state.
-//
-// Both marks are drawn in PROFILE, pointing +x (bow / muzzle east), with the origin on
-// their ground contact line: the ship's waterline, the horse's hooves. So the mark stands
-// ON its track point the way a mountain stands on its own, and the tilt pivots about that
-// contact point. Sized in viewBox pixels against the 1500px chart.
+// The Wayfarer's marks (#119/#120): the ship and the rider, pure glyph data + a DOM
+// builder. Both are drawn in PROFILE pointing +x, with the origin on their ground
+// contact line (the ship's waterline, the horse's hooves), so the mark stands ON its
+// track point and the tilt pivots about that contact. Sized in viewBox pixels against the 1500px chart.
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -13,8 +10,7 @@ type MarkPart =
   | { readonly d: string; readonly circle?: undefined; readonly cls?: string }
   | { readonly circle: readonly [number, number, number]; readonly d?: undefined; readonly cls?: string };
 
-// A cog under sail: hull, stern castle, standing rigging, a square sail bellying east,
-// and a pennant. About 40 units wide against a chart whose peaks run 18 to 20.
+// A cog under sail: hull, stern castle, rigging, a square sail bellying east, a pennant. About 40 units wide against a chart whose peaks run 18 to 20.
 export const SHIP_PARTS: ReadonlyArray<MarkPart> = [
   { d: "M -17 -5 Q -19 -1 -13 4 L 11 4 Q 17 1 17 -5 Z" },
   { d: "M -17 -5 L -17 -10 L -11 -10 L -11 -5 Z" },
@@ -23,9 +19,7 @@ export const SHIP_PARTS: ReadonlyArray<MarkPart> = [
   { d: "M -1 -23 L 6 -24 L -1 -25.5 Z", cls: "ink" },
 ];
 
-// A horse walking east under a cloaked, hatted rider, in profile with the hooves on
-// the baseline: a flowing tail, the barrel, the arched neck rising to a small eared
-// head, four legs mid-stride, then the rider (torso, hatted head, hat brim, rein).
+// A horse walking east under a cloaked, hatted rider: tail, barrel, arched neck, small eared head, four legs mid-stride, then the rider (torso, hatted head, brim, rein).
 export const RIDER_PARTS: ReadonlyArray<MarkPart> = [
   { d: "M -13 -11 Q -18 -10 -21 -4", cls: "tail" },
   { d: "M -13 -11 Q -14 -14 -10 -14 L 4 -14 Q 8 -14 9 -11 L 9 -8 Q 8 -6 3 -6 L -8 -6 Q -12 -6 -13 -11 Z" },

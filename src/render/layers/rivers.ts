@@ -4,7 +4,6 @@ import type { RenderCtx } from "../context.ts";
 
 type Wpt = readonly [number, number, number]; // x, y, strokeWidth
 
-/** Chaikin corner-cutting over (x, y, width) triples. */
 function smoothWeighted(pts: ReadonlyArray<Wpt>, iterations: number): Wpt[] {
   let cur: Wpt[] = [...pts];
   for (let it = 0; it < iterations; it++) {
@@ -45,7 +44,6 @@ export function riversLayer(ctx: RenderCtx): SvgNode {
     ]);
     const smooth = smoothWeighted(weighted, 2);
 
-    // group consecutive points into short constant-width segments
     const STEP = 4;
     const segs: SvgNode[] = [];
     for (let i = 0; i < smooth.length - 1; i += STEP) {

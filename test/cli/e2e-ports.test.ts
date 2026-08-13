@@ -8,15 +8,8 @@ import {
   resolvePort,
 } from "../../src/cli/e2e-ports.ts";
 
-// Two behaviors matter here, and the second is the dangerous one (#339).
-//
-// 1. Both ports must be overridable, so two checkouts can run the e2e at once.
-//    A bad override must THROW rather than fall back to the default: a silent
-//    fallback puts both lanes back on the same port, which is the bug.
-// 2. A stray browser already holding the debug port must be a loud failure.
-//    Nothing binds that port during launch, so `getPageTarget` happily attaches
-//    to whatever answers /json. On 2026-07-29 that meant a whole run reported
-//    results from an OLD browser and an OLD build, with no error anywhere.
+// Both ports must be overridable (two checkouts, one machine), and a bad override must THROW: a silent fallback puts both lanes back on the same port, which is the bug.
+// The dangerous half (#339): a stray browser already holding the debug port means getPageTarget attaches to whatever answers /json; on 2026-07-29 a whole run reported results from an OLD browser and an OLD build with no error anywhere.
 
 test("unset env keeps today's defaults, so every existing invocation is unchanged", () => {
   assert.equal(resolvePort({}, "VELLUM_E2E_PORT", DEFAULT_E2E_PORT), DEFAULT_E2E_PORT);
@@ -61,8 +54,7 @@ test("surrounding whitespace is tolerated", () => {
   assert.equal(resolvePort({ VELLUM_E2E_PORT: " 8790 " }, "VELLUM_E2E_PORT", DEFAULT_E2E_PORT), 8790);
 });
 
-// Setting one port onto the other's default is the easy way to break a lane by
-// hand, and it fails deep inside the browser launch rather than at the setting.
+// Setting one port onto the other's default fails deep inside the browser launch rather than at the setting, so it must throw here instead.
 test("the two ports may not collide, including against the other's default", () => {
   assert.throws(() => resolveE2ePorts({ VELLUM_E2E_PORT: "9333", VELLUM_E2E_DPORT: "9333" }), /9333/);
   assert.throws(() => resolveE2ePorts({ VELLUM_E2E_PORT: String(DEFAULT_E2E_DPORT) }), /9222/);
@@ -85,8 +77,7 @@ test("the conflict message names the stray browser when it identified itself", (
   assert.match(msg, /Chrome\/141\.0\.0\.0/);
 });
 
-// The whole point: attaching to a live browser is worse than colliding with one,
-// because the run stays green while reporting on a build that is not this one.
+// Attaching to a live browser is worse than colliding with one: the run stays green while reporting on a build that is not this one.
 test("the conflict message explains that the run would otherwise use a stale build", () => {
   const msg = debugPortConflictMessage(9222, { listening: true });
   assert.ok(msg);

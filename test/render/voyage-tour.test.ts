@@ -2,16 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { orderTour, refineTour, type TourPoint } from "../../src/render/voyage-tour.ts";
 
-// #120 follow-up: the itinerary must sweep around the world, not backtrack. The
-// load-bearing property is that no two legs of the tour CROSS; a greedy
-// nearest-neighbour tour does, a hull-insertion + 2-opt tour does not.
-//
-// #275 closed the tour into a round trip. orderTour still returns the visiting order
-// with no repeated start, but that order is now read as a CYCLE: the survey sails home
-// from the last port to the capital, so the closing leg is a real leg and takes part in
-// every property below. Optimizing the open path and bolting a return leg on is not the
-// same thing: the open optimum can end far from home, and its return edge can cross the
-// tour it just swept.
+// #120 follow-up: the itinerary must sweep around the world, not backtrack; the load-bearing property is that no two legs CROSS (greedy nearest-neighbour does, hull-insertion + 2-opt does not).
+// #275 closed the tour: orderTour's order is read as a CYCLE, so the closing leg takes part in every property; the open optimum can end far from home with a return edge that crosses the sweep it just made.
 
 const p = (idx: number, x: number, y: number): TourPoint => ({ idx, x, y });
 
@@ -26,12 +18,7 @@ function properlyCross(a: TourPoint, b: TourPoint, c: TourPoint, d: TourPoint): 
   return o1 !== o2 && o3 !== o4 && o1 !== 0 && o2 !== 0 && o3 !== 0 && o4 !== 0;
 }
 
-/**
- * Count crossings among non-adjacent legs of the CLOSED tour (#275). The closing leg
- * (last port -> capital) is a real leg now, so it is built here and checked like any
- * other. Only genuinely adjacent pairs are skipped: consecutive legs share a port, and
- * so do leg 0 and the closing leg, which is the one wraparound exclusion left.
- */
+/** Crossings among non-adjacent legs of the CLOSED tour (#275): the closing leg is built and checked like any other; leg 0 and the closing leg share a port, the one wraparound exclusion. */
 function crossings(order: number[], byIdx: Map<number, TourPoint>): number {
   if (order.length < 3) return 0; // a 2-port cycle retraces one segment; nothing to cross
   const legs = order.map(
@@ -49,9 +36,7 @@ function crossings(order: number[], byIdx: Map<number, TourPoint>): number {
 
 const index = (pts: TourPoint[]) => new Map(pts.map((q) => [q.idx, q]));
 
-// A diamond of four ports with the capital at the top and one port near the centre.
-// Nearest-neighbour from the capital dives to the centre port, then to the bottom,
-// then back up the sides, so the horizontal leg crosses the vertical one.
+// A diamond with the capital at top and one port near the centre: NN dives to the centre, then the bottom, then back up the sides, so the horizontal leg crosses the vertical one.
 const diamond: TourPoint[] = [
   p(0, 0.5, 0.9), // capital, top
   p(1, 0.1, 0.5), // left
@@ -67,7 +52,6 @@ test("the tour has no self-crossing on a layout where nearest-neighbour would cr
 
 test("the tour starts at the given capital", () => {
   assert.equal(orderTour(diamond, 0)[0], 0);
-  // and honours a different start
   assert.equal(orderTour(diamond, 3)[0], 3);
 });
 
@@ -77,8 +61,7 @@ test("the tour visits every port exactly once", () => {
 });
 
 test("an inland town is a detour, not a reordering of the coastal ring", () => {
-  // Four coastal towns on a square ring + the capital just inside one edge. The ring
-  // order must survive; the capital is inserted between its two nearest ring towns.
+  // Four coastal towns on a square ring + the capital just inside one edge: the ring order must survive, the capital inserted between its two nearest ring towns.
   const ring: TourPoint[] = [
     p(0, 0.5, 0.85), // capital, just inside the top edge
     p(1, 0.1, 0.9), // NW
@@ -88,7 +71,6 @@ test("an inland town is a detour, not a reordering of the coastal ring", () => {
   ];
   const order = orderTour(ring, 0);
   assert.equal(crossings(order, index(ring)), 0);
-  // the four corners appear in a rotational (ring) order, not crossed
   const corners = order.filter((i) => i !== 0);
   const ccw = [1, 4, 3, 2]; // NW -> SW -> SE -> NE
   const cw = [2, 3, 4, 1];
@@ -102,8 +84,7 @@ test("an inland town is a detour, not a reordering of the coastal ring", () => {
 });
 
 test("no crossings on a scattered pseudo-random cloud (100 points, several seeds)", () => {
-  // A cheap deterministic LCG so the test has no dependency; the point is only that a
-  // hull-insertion + 2-opt tour is crossing-free on arbitrary layouts.
+  // A cheap deterministic LCG so the test has no dependency.
   for (let seed = 1; seed <= 8; seed++) {
     let s = seed * 2654435761 >>> 0;
     const rnd = () => ((s = (s * 1103515245 + 12345) >>> 0) / 0xffffffff);
@@ -140,11 +121,7 @@ test("does not mutate the caller's points array", () => {
   assert.deepEqual(input, diamond);
 });
 
-// ---------------------------------------------------------------------------
-// #184: refineTour. The straight-line tour above is the SEED order; refineTour
-// re-optimizes it on ACTUAL travel distances (a matrix oracle, routed miles),
-// because two ports adjacent as the crow flies can be far apart by road and sea.
-// ---------------------------------------------------------------------------
+// #184: refineTour re-optimizes the straight-line SEED order on ACTUAL travel distances, because two ports adjacent as the crow flies can be far apart by road and sea.
 
 /** A symmetric distance oracle from a sparse pair map; throws on an unknown pair. */
 const matrixD = (m: Record<string, number>) => (a: number, b: number): number => {
@@ -162,17 +139,13 @@ const tourCost = (path: ReadonlyArray<number>, d: (a: number, b: number) => numb
 };
 
 test("refineTour: adopts the cheaper order when travel disagrees with the given one", () => {
-  // A strait separates ports 1 and 2: adjacent as given (cost 10), but swapping the
-  // tail to 0,1,3,2 rides 1+2+1. One 2-opt reversal away, so any refinement finds it.
+  // A strait between 1 and 2: swapping the tail to 0,1,3,2 is one 2-opt reversal away, so any refinement finds it.
   const d = matrixD({ "0:1": 1, "1:2": 10, "2:3": 1, "0:2": 3, "1:3": 2, "0:3": 4 });
   assert.deepEqual(refineTour([0, 1, 2, 3], d), [0, 1, 3, 2]);
 });
 
 test("refineTour: optimizes the CYCLE, so it will pay more on the way out to come home cheaper", () => {
-  // The whole point of #275. Ports on a chain: 0-1-2-3 are each 1 apart, but the return
-  // edge 3->0 costs 10 while 2->0 costs 5. As an OPEN path 0,1,2,3 is optimal (cost 3)
-  // and ends at the far end of the chain; as a CYCLE it costs 13, and 0,1,3,2 costs 12.
-  // A refiner that optimizes the open path and bolts on a return leg keeps 0,1,2,3.
+  // The whole point of #275: as an OPEN path 0,1,2,3 is optimal (cost 3) but as a CYCLE it costs 13 against 0,1,3,2's 12; a refiner that optimizes the open path and bolts on a return leg keeps 0,1,2,3.
   const d = matrixD({ "0:1": 1, "1:2": 1, "2:3": 1, "0:3": 10, "0:2": 5, "1:3": 5 });
   assert.deepEqual(refineTour([0, 1, 2, 3], d), [0, 1, 3, 2]);
   assert.equal(tourCost([0, 1, 3, 2], d), 12);
@@ -180,9 +153,7 @@ test("refineTour: optimizes the CYCLE, so it will pay more on the way out to com
 });
 
 test("refineTour: the cycle's orientation is canonical, so a tie never flips the itinerary", () => {
-  // A cycle and its reverse cost exactly the same, so orientation cannot be left to
-  // whichever the optimizer happens to land on. The survey heads to its NEARER
-  // neighbour first, the same rule the open path used when it broke the cycle open.
+  // A cycle and its reverse cost exactly the same, so orientation is pinned: the survey heads to its NEARER neighbour first, the same rule the open path used.
   const d = matrixD({ "0:1": 1, "1:2": 1, "2:3": 1, "0:3": 10, "0:2": 5, "1:3": 5 });
   const forward = refineTour([0, 1, 2, 3], d);
   const reversed = refineTour([0, 2, 3, 1], d); // the same cycle, entered the other way
@@ -191,8 +162,6 @@ test("refineTour: the cycle's orientation is canonical, so a tie never flips the
 });
 
 test("refineTour: never worse than the given order, start pinned, set preserved", () => {
-  // Deterministic LCG matrices over 8 ports: the refined tour must always cost at
-  // most the given one, keep position 0, and visit the same set exactly once.
   for (let seed = 1; seed <= 6; seed++) {
     let s = (seed * 2654435761) >>> 0;
     const rnd = () => ((s = (s * 1103515245 + 12345) >>> 0) / 0xffffffff);

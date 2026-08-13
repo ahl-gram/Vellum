@@ -1,10 +1,3 @@
-/**
- * Ground and backdrop for a prospect (#239): the base line the townscape
- * stands on, the seat hill, and the ridge drawn from the transect the
- * chart's own heightfield produced (Sub 1). Pure arithmetic only, per the
- * determinism contract in geometry.ts.
- */
-
 import type { ProspectInput } from "./input.ts";
 import {
   BASE_GROUND,
@@ -20,13 +13,9 @@ import {
   type Pt,
 } from "./geometry.ts";
 
-/** siteRel below this stands on flat ground; the mound then grows linearly
- * to MOUND_MAX_RISE at MOUND_REL_FULL. The 0.28 threshold sits just above
- * the coastal shelf most harbors occupy, so ports stay flat while hill and
- * mountain seats rise (#237 GO condition 5). */
+/** 0.28 sits just above the coastal shelf most harbors occupy, so ports stay flat while hill and mountain seats rise. */
 export const MOUND_REL_START = 0.28;
 export const MOUND_REL_FULL = 0.78;
-/** Rises smaller than this read as noise, not a hill. */
 export const MOUND_MIN_RISE = 8;
 
 export function moundRise(siteRel: number): number {
@@ -35,8 +24,6 @@ export function moundRise(siteRel: number): number {
   return rise < MOUND_MIN_RISE ? 0 : rise;
 }
 
-/** River sites stand on a raised bank so the bridge reads in front of the
- * town; a harbor site keeps the sea vantage and the flat shore instead. */
 export function buildGround(input: ProspectInput): Ground {
   const base =
     input.onRiver && !input.harbor ? BASE_GROUND - RIVER_BANK_DROP : BASE_GROUND;
@@ -49,14 +36,7 @@ export function buildGround(input: ProspectInput): Ground {
   return { base, rise, line };
 }
 
-/**
- * The backdrop ridge: the transect's elevation profile behind the site,
- * relative to the site's own ground plane, spread across the view. A
- * backdrop that never rises past RIDGE_MIN_RISE above the site reads as a
- * flat horizon and draws nothing (fen prospects get this for free from the
- * data). The x step is 462/128 = 231/64, a dyadic fraction, so positions
- * are IEEE-exact.
- */
+/** The x step is 462/128, a dyadic fraction, so positions are IEEE-exact. */
 export function buildRidge(input: ProspectInput, ground: Ground): ReadonlyArray<Pt> | null {
   const rises = input.backdrop.map((v) => Math.max(0, v - input.siteRel));
   if (Math.max(...rises) < RIDGE_MIN_RISE) return null;

@@ -3,14 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-/**
- * The Go Deeper card criterion (#314; ratified 2026-07-29 as a comment on
- * #202): one card per distinct mode of encounter, and the section's copy says
- * the mode out loud. A gloss line sits under the head, and EVERY card opens
- * with a verb kicker before its title. Derived from the cards actually
- * present, never a literal count, so a future card (the Reading Room's
- * "Watch one", #221) is forced to carry its verb the moment it lands.
- */
+// The Go Deeper card criterion (#314, ratified 2026-07-29 as a comment on #202): one card per distinct mode of encounter, a gloss line under the head, and EVERY card opens with a verb kicker; derived from the cards present, never a literal count.
 
 const homeSource = readFileSync(
   fileURLToPath(new URL("../../src/pages/index.astro", import.meta.url)),

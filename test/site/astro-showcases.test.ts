@@ -8,15 +8,7 @@ import { GENERATED_SUBTREES } from "../../scripts/clean-public-generated.ts";
 import { generateShowcases } from "../../scripts/generate-showcases.ts";
 import { HERO_CHART_DIRS, regenHeroCharts } from "../../scripts/regen-hero-charts.ts";
 
-/**
- * Scriptorium Sub 4 (#205): build-time generation replaces the homegrown site
- * build. The spec is the ratified Sub 1 decision doc (the 2026-07-21 comment on
- * #202), section 2 (atlas/gallery keep generating) and decision D (generate
- * into public/ BEFORE astro build, clean-before-regen grows to cover the
- * showcases, and a thin charts:regen successor exists before build-site.ts
- * dies). The hero-charts decision was ratified 2026-07-24: option (a), the
- * goldens stay committed; test/site/hero-charts.test.ts passes unmodified.
- */
+// Scriptorium Sub 4 (#205): build-time generation replaces the homegrown site build. SPEC: the ratified 2026-07-21 comment on #202, section 2 and decision D; the hero-charts decision ratified 2026-07-24 (option a, the goldens stay committed).
 
 const root = (p = "") => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 
@@ -64,24 +56,18 @@ test("generateShowcases writes the atlas and gallery a deploy expects", { timeou
   assert.ok(atlasHtml.includes('href="/motion.css"'), "atlas links the root-absolute motion.css it hard-depends on");
   const atlasSvgs = readdirSync(join(tmp, "atlas")).filter((f) => f.endsWith(".svg"));
   assert.equal(atlasSvgs.length, 10, "atlas should hold 10 SVGs");
-  // Identity pin (green from the start by design, like Sub 2's boundary
-  // guards): counts alone would pass a wrong-seed showcase. The atlas title
-  // carries the seed-42 hero world's deterministic name, so a wrong seed or a
-  // silent re-roll changes it.
+  // Identity pin, green from the start by design: counts alone would pass a wrong-seed showcase; the title carries seed-42's deterministic name.
   assert.ok(
     atlasHtml.includes("The Isle of Rahai: a Vellum atlas"),
     "the atlas must be the seed-42 hero world's bound volume",
   );
 
-  // The gallery is a shelled Astro route since #268, so its generated tree is
-  // assets alone: the chart SVGs and the page css, never an index.html that
-  // would collide with the route in dist/.
+  // The gallery is a shelled route since #268: its generated tree is assets alone, never an index.html that would collide with the route in dist/.
   const galleryFiles = readdirSync(join(tmp, "gallery"));
   assert.equal(galleryFiles.filter((f) => f.endsWith(".svg")).length, 12, "gallery should hold 12 SVGs");
   assert.ok(galleryFiles.includes("index.css"), "gallery should hold the generated page css");
   assert.ok(!galleryFiles.includes("index.html"), "the standalone gallery shell retired with the #268 re-shell");
-  // Identity pins: the ratified seed-100, count-12 contact sheet on its prime
-  // stride (7919), pinned by the first and last card filenames.
+  // The ratified seed-100, count-12 contact sheet on its prime stride (7919), pinned by the first and last card filenames.
   assert.ok(galleryFiles.includes("chart-100.svg"), "the first card must be seed 100");
   assert.ok(galleryFiles.includes(`chart-${100 + 11 * 7919}.svg`), "the last card must sit 11 prime strides along");
   rmSync(tmp, { recursive: true, force: true });

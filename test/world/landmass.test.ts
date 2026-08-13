@@ -3,10 +3,7 @@ import assert from "node:assert/strict";
 import { fieldFrom, type Field } from "../../src/core/grid.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
 
-/**
- * Build a Field from an ASCII map: '#' is land (elev 1), '.' is ocean (elev 0).
- * With seaLevel 0, land is elev > seaLevel, matching the engine convention.
- */
+/** Build a Field from ASCII: '#' land (elev 1), '.' ocean (elev 0); with seaLevel 0 land is elev > seaLevel, the engine convention. */
 function fieldFromRows(rows: string[]): Field {
   const h = rows.length;
   const w = rows[0]!.length;
@@ -23,8 +20,7 @@ const idAt = (labels: { ids: Int32Array }, w: number, x: number, y: number) =>
   labels.ids[x + y * w] as number;
 
 test("labels three separate islands with correct first-seen ids and sizes", () => {
-  // Three fully-isolated islands (no 4- or 8-neighbour contact between them):
-  //   island at (0,0): size 3    island at cols 3-4: size 4    island (2,5): size 1
+  // Three fully isolated islands: (0,0) size 3, cols 3-4 size 4, (2,5) size 1.
   const rows = [
     "##....",
     "#.....",
@@ -43,19 +39,16 @@ test("labels three separate islands with correct first-seen ids and sizes", () =
   assert.equal(idAt(out, w, 3, 2), 1);
   assert.equal(idAt(out, w, 2, 5), 2);
 
-  // Every land cell of an island shares its island's id.
   assert.equal(idAt(out, w, 1, 0), 0);
   assert.equal(idAt(out, w, 0, 1), 0);
   assert.equal(idAt(out, w, 4, 3), 1);
 
-  // sizes sum equals the total land-cell count.
   const land = rows.join("").split("").filter((c) => c === "#").length;
   assert.equal([...out.sizes].reduce((a, b) => a + b, 0), land);
 });
 
 test("ocean cells are -1, not landmass 0 (Int16Array zero-fill trap)", () => {
-  // This catches the missing .fill(-1): with a real island present, an ocean
-  // cell reading 0 would silently collide with a real landmass id.
+  // Catches a missing .fill(-1): an ocean cell reading 0 would silently collide with a real landmass id.
   const rows = [
     "#..",
     "...",
@@ -69,8 +62,7 @@ test("ocean cells are -1, not landmass 0 (Int16Array zero-fill trap)", () => {
 });
 
 test("4-connectivity: corner-touching cells are separate landmasses", () => {
-  // Land at (1,1) and (2,2); ocean at (1,2) and (2,1). They share no land
-  // 4-neighbour, so 4-connectivity yields two ids (8-connectivity would give 1).
+  // Land at (1,1) and (2,2) share no land 4-neighbour, so 4-connectivity yields two ids (8-connectivity would give 1).
   const rows = [
     "....",
     ".#..",
@@ -87,9 +79,7 @@ test("4-connectivity: corner-touching cells are separate landmasses", () => {
 });
 
 test("flood traverses all four directions, not just right/down", () => {
-  // The first-seen seed is always the topmost-leftmost cell, so fixtures built
-  // only from right/down reach would pass even if the flood dropped left or up.
-  // A plus forces LEFT and RIGHT from its centre; a U forces UP up the far side.
+  // First-seen seeds at the topmost-leftmost cell, so right/down-only fixtures would pass a broken flood; the plus forces LEFT and RIGHT, the U forces UP.
   const plus = labelLandmasses(fieldFromRows([".#.", "###", ".#."]), 0);
   assert.deepEqual([...plus.sizes], [5], "plus is one landmass (needs left+right)");
 

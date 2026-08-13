@@ -19,17 +19,9 @@ export type TerrainParams = {
   readonly featureScale?: number;
   readonly warpStrength?: number;
   readonly ridgedWeight?: number;
-  /**
-   * Breaks the radial falloff's circular symmetry: low-frequency noise wobbles
-   * the falloff radius by direction, so the coast forms lobes and peninsulas
-   * instead of an oval, most visible when the sea is drained and the outer coast
-   * sits in the falloff zone. Range [0, 1]; 0 reproduces the pure radial dome.
-   * When omitted, the map type's SHAPES value (0.55) is used.
-   */
+  /** Wobbles the radial falloff by direction so the coast forms lobes and peninsulas instead of an oval. Range [0, 1]; 0 is the pure radial dome; omitted takes the map type's SHAPES value. */
   readonly coastWarp?: number;
-  /** World-space crop for regional charts; defaults to the full world. */
   readonly window?: UvWindow;
-  /** Aspect of the FULL world; required for windows to line up. */
   readonly worldAspect?: number;
 };
 
@@ -75,7 +67,6 @@ const SHAPES: Record<MapType, Shape> = {
     sinkDepth: 0.25,
     coastWarp: 0.55,
   },
-  // one compact landmass: a city and its hinterland
   citystate: {
     featureScale: 2.6,
     warpStrength: 0.4,
@@ -91,16 +82,10 @@ const SHAPES: Record<MapType, Shape> = {
 const RIDGE_SEED_SALT = 0x7fe9b2c5;
 const COAST_SEED_SALT_X = 0x3c6ef35f;
 const COAST_SEED_SALT_Y = 0x1b56c4e9;
-// frequency + octaves of the coast displacement: enough lobes for peninsulas
-// and bays, not so fine it becomes noisy crenellation
 const COAST_WARP_SCALE = 4.0;
 const COAST_WARP_OCTAVES = 5;
 
-/**
- * Elevation is a pure function of world-space (u, v) and the seed, so a
- * finer grid over the same recipe samples the identical landscape —
- * this is what makes consistent regional zoom charts possible.
- */
+/** Elevation is a pure function of world-space (u, v) and the seed, so a finer grid over the same recipe samples the identical landscape. */
 export function buildHeightfield(params: TerrainParams): Field {
   const { seed, gridW, gridH, mapType } = params;
   const shape = SHAPES[mapType];
@@ -108,7 +93,6 @@ export function buildHeightfield(params: TerrainParams): Field {
   const warpStrength = params.warpStrength ?? shape.warpStrength;
   const ridgedWeight = params.ridgedWeight ?? shape.ridgedWeight;
   const coastWarp = params.coastWarp ?? shape.coastWarp;
-  // span-based aspect: identical for any resolution over the same world
   const aspect = params.worldAspect ?? (gridW - 1) / (gridH - 1);
   const win = params.window ?? { u0: 0, v0: 0, u1: 1, v1: 1 };
 
@@ -130,15 +114,10 @@ export function buildHeightfield(params: TerrainParams): Field {
     const ridgeMask = smoothstep(0.52, 0.78, e01);
     let e = e01 + ridgedWeight * ridge * ridgeMask;
 
-    // radial falloff sinks the map edges into ocean
     const dx = (u - 0.5) * 2;
     const dy = (v - 0.5) * 2;
     let d = Math.hypot(dx, dy);
-    // domain-warp the falloff dome's position: a per-location noise offset
-    // pushes the radial center around, so the coast forms peninsulas, bays, and
-    // the odd offshore islet instead of a circle. The displacement is bounded
-    // well inside the deep-water border guarantee below, so land never clips
-    // the frame.
+    // The displacement stays bounded inside the deep-water border guarantee below, so land never clips the frame.
     if (coastWarp !== 0) {
       const wx = fbm2(
         u * COAST_WARP_SCALE * aspect,
@@ -154,7 +133,6 @@ export function buildHeightfield(params: TerrainParams): Field {
       );
       d = Math.hypot(dx + coastWarp * wx, dy + coastWarp * wy);
     }
-    // keep baseKeep of the elevation at the rim, all of it at the center
     const falloff = 1 - smoothstep(shape.falloffStart, shape.falloffEnd, d);
     e = e * lerp(shape.baseKeep, 1, falloff) - (1 - falloff) * shape.sinkDepth;
 

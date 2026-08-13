@@ -3,11 +3,7 @@ import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
 
-// #79: islands are their own realms. Open water is a hard frontier; a realm never
-// spans the sea; a substantial inhabited island is its own realm; small or empty
-// islands attach to the nearest realm by sea route. Behaviour is exercised on the
-// 320x240 production grid via generateWorld (archipelago geometry is a full-grid
-// phenomenon). Seed 9 = "The Kost Archipelago" (47 landmasses), the headline case.
+// #79: islands are their own realms. Open water is a hard frontier; a substantial inhabited island self-governs, small or empty islands attach by sea route. Exercised on the 320x240 production grid (archipelago geometry is a full-grid phenomenon); seed 9 "The Kost Archipelago" (47 landmasses) is the headline case.
 
 function landmassOf(w: ReturnType<typeof generateWorld>) {
   const { ids, sizes } = labelLandmasses(w.elev, w.seaLevel);
@@ -84,21 +80,17 @@ test("#79 seats-indexed integrity holds as realm count rises", () => {
   for (const seed of [9, 5, 42, 100]) {
     const w = generateWorld(defaultRecipe(seed));
     const { seats, labels } = w.realms;
-    // (1) every seat is a valid settlement index
     for (const si of seats) {
       assert.ok(si >= 0 && si < w.settlements.length, `bad seat index ${si} (seed ${seed})`);
     }
-    // (2) every label is in [-1, seats.length-1]
     for (let i = 0; i < labels.length; i++) {
       const r = labels[i] as number;
       assert.ok(r >= -1 && r < seats.length, `label ${r} out of range (seed ${seed})`);
     }
-    // (3) realm id == index into the parallel arms/names arrays
     assert.equal(w.arms.length, seats.length, `arms/seat length mismatch (seed ${seed})`);
     if (seats.length > 1) {
       assert.equal(w.names.realms.length, seats.length, `names/seat length mismatch (seed ${seed})`);
     }
-    // ceiling holds
     assert.ok(seats.length <= 8, `realm count ${seats.length} exceeds ceiling 8 (seed ${seed})`);
   }
 });

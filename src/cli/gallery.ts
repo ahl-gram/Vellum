@@ -6,10 +6,8 @@ import type { StyleName } from "../render/style.ts";
 import { createProjection, marginFor } from "../render/transform.ts";
 import { defaultRecipe, generateWorld } from "../world/generate.ts";
 
-/** The ratified contact sheet the deploy generates for /gallery/ (#205 decision D). */
 export const GALLERY_SEED = 100;
 export const GALLERY_COUNT = 12;
-/** Cards render at this width everywhere a gallery plate is drawn or measured. */
 export const GALLERY_PLATE_WIDTH = 900;
 
 const SEED_STRIDE = 7919; // a prime walk through seed space
@@ -20,9 +18,7 @@ export interface GalleryCard {
   readonly title: string;
   readonly mapType: string;
   readonly band: string;
-  /** The plate's frame (#329), reserved on the <img> so the grid lays out before
-   *  a byte of chart arrives. MUST equal the svg root's rounded width/height
-   *  (map-renderer.ts emits Math.round of the same projection). */
+  /** MUST equal the svg root's rounded width/height (map-renderer.ts rounds the same projection). */
   readonly width: number;
   readonly height: number;
 }
@@ -31,8 +27,6 @@ export function gallerySeeds(startSeed: number, count: number): readonly number[
   return Array.from({ length: count }, (_, i) => (startSeed + i * SEED_STRIDE) >>> 0);
 }
 
-// The gallery page's frontmatter asks for the same cards on every dev-server
-// render; worlds are deterministic, so memoizing the pure result is safe.
 const cardsMemo = new Map<string, readonly GalleryCard[]>();
 
 export function galleryCards(startSeed: number, count: number): readonly GalleryCard[] {
@@ -61,11 +55,6 @@ export function galleryCards(startSeed: number, count: number): readonly Gallery
   return cards;
 }
 
-/**
- * One contact-sheet card. The /gallery/ Astro page composes its content from
- * exactly this markup (#268 re-shell), so the figures the site shows are the
- * standalone gallery's figures, adopted unchanged.
- */
 export function cardFigureHtml(card: GalleryCard): string {
   return `<figure>
   <a href="${card.file}"><img src="${card.file}" width="${card.width}" height="${card.height}" loading="lazy" decoding="async" alt="${escapeXml(card.title)}"></a>
@@ -74,9 +63,6 @@ export function cardFigureHtml(card: GalleryCard): string {
 </figure>`;
 }
 
-// The page css the composer writes beside the SVGs: the page-specific rules
-// the old standalone shell carried. The shell rules and palette arrive
-// through BaseLayout since #263/#268, consumed here as var().
 export const GALLERY_PAGE_CSS = `body { padding: 2rem 1.5rem 4rem; }
 main { max-width: 1500px; }
 header { margin-bottom: 2rem; }
@@ -119,7 +105,6 @@ export async function buildGallery(
   await mkdir(dir, { recursive: true });
 
   for (const seed of gallerySeeds(startSeed, count)) {
-    // use the default grid so a gallery seed matches its `chart` / Explorer render
     const world = generateWorld(defaultRecipe(seed));
     const svg = renderMap(world, { style, widthPx: GALLERY_PLATE_WIDTH });
     await writeFile(join(dir, `chart-${seed}.svg`), svg, "utf8");

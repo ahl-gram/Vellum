@@ -1,25 +1,6 @@
 import type { Field } from "../core/grid.ts";
 import { clamp } from "../core/math.ts";
 
-/**
- * Wind-driven orographic moisture (#74). For every cell, sample the upwind
- * fetch and integrate an air parcel downwind toward it: sea recharges the
- * parcel's supply toward a cap, flat land rains out a base fraction each
- * step, and climbing terrain rains out extra in proportion to the along-wind
- * elevation gain. The returned value is the rain deposited at the cell,
- * normalized so a flat windward coast reads solidly wet and strong orographic
- * lift saturates toward 1. Leeward of a range the supply is spent: rain shadow.
- *
- * Off-grid upwind is treated as open sea (offGridSea) so edge-touching
- * continent and citystate maps read maritime at the upwind edge, not
- * artificially arid. That rule is only true at the world border, which the
- * heightfield forces to deep water; a regional crop cut from a world's
- * interior must NOT inherit a phantom ocean, so windowed calls pass
- * offGridSea=false and the fetch clamps to the border cell's terrain instead.
- * Steps are local grid hops, the same convention as the river-distance term.
- * Pure and seedless: same heightfield + wind, same field.
- */
-
 const STEPS = 40;
 const SUPPLY_START = 0.8;
 const SUPPLY_CAP = 1;
@@ -27,7 +8,6 @@ const SEA_RECHARGE = 0.22;
 const RAINOUT_BASE = 0.035;
 const OROG_GAIN = 2.0;
 const RATE_MAX = 0.35;
-/** A flat coast one step off a saturated sea maps to 1/HEADROOM. */
 const HEADROOM = 1.6;
 const COAST_RAIN = SUPPLY_CAP * RAINOUT_BASE * HEADROOM;
 
@@ -43,7 +23,6 @@ export function computeWindMoisture(
   for (const v of data) if (v > maxElev) maxElev = v;
   const elevSpan = Math.max(1e-9, maxElev - seaLevel);
 
-  // the wind blows toward (cos, sin); the fetch lies the other way
   const ux = -Math.cos(windDir);
   const uy = -Math.sin(windDir);
 
@@ -65,8 +44,6 @@ export function computeWindMoisture(
         }
       }
 
-      // the parcel rides at sea level over water, so a shore cell climbs
-      // from the waterline, never from the sea floor
       let supply = SUPPLY_START;
       for (let j = STEPS - 1; j >= 1; j--) {
         const e = path[j] as number;

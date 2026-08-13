@@ -5,13 +5,7 @@ import { routeVoyage, type RoutedLeg } from "../../src/render/voyage-route.ts";
 import { INLAND_STUB_CELLS } from "../../src/render/voyage-water.ts";
 import type { Pt } from "../../src/core/rdp.ts";
 
-// #181: the water span. A sea leg's chain is [fromPort, ...water..., toPort], so the
-// mark rides an overland stub at each end; the span says where the water actually is,
-// as arc fractions of the drawn polyline, and flags the legs whose stub is long enough
-// to narrate. Tiny hand-drawn worlds so every expected stub length is exact; the real-
-// world distribution (one genuine handoff on the isle seed) is pinned in
-// voyage-travel.test.ts.
-//
+// #181 the water span: a sea leg's chain is [fromPort, ...water..., toPort], the span says where the water actually is (arc fractions of the drawn polyline) and flags stubs long enough to narrate; the real-world distribution is pinned in voyage-travel.test.ts.
 // Picture legend: '#' land, '.' sea, '=' land carrying a road.
 
 function survey(rows: string[]): Survey {
@@ -47,8 +41,7 @@ const stubs = (l: RoutedLeg): { from: number; to: number } => {
   return { from: l.water.from * len, to: (1 - l.water.to) * len };
 };
 
-// An inland port: the western port stands 5 cells from its shore, the eastern one 2.
-// The straight embark jump is the chain's first segment, so the stub lengths are exact.
+// The western port stands 5 cells from its shore, the eastern 2; the straight embark jump is the chain's first segment, so the stub lengths are exact.
 const inlandRows = [
   "#####..........##",
   "#####..........##",

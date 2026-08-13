@@ -15,12 +15,6 @@ const RIVER_CROSSING = 4.5;
 const REUSE_DISCOUNT = 0.3;
 const VILLAGE_BUDGET = 260;
 
-/**
- * Connect settlements with terrain-aware Dijkstra paths. Each new road
- * runs to the NEAREST cell of the existing network, and steps onto
- * existing road cells at a steep discount — so shared trunk corridors
- * emerge instead of a star of independent paths.
- */
 export function buildRoads(
   elev: Field,
   seaLevel: number,
@@ -98,7 +92,6 @@ export function buildRoads(
       points.push({ x: cur % w, y: (cur / w) | 0 });
       cur = prev[cur] as number;
     }
-    // points run found → start; orient start → network for readability
     points.reverse();
     for (const p of points) network[p.x + p.y * w] = 1;
     roads.push({ points, rank });

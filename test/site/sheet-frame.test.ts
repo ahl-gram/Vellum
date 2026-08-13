@@ -3,15 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-/**
- * Pins the #289 review call that the FAQ and Glossary CONTENT lies on the
- * desk as a bounded survey sheet (adapted from Alex's ideas sheet): a
- * hairline frame with a double rule floating outside it, corner ticks at
- * top-left and bottom-right, a raised shadow, and panel paper a shade
- * lighter than the page ground. The running head, nav, and footer stay OFF
- * the sheet, on the desk (Alex's correction): the frame lives on a .sheet
- * wrapper inside the page content, never on main.
- */
+// Pins the #289 review call: FAQ/Glossary CONTENT lies on the desk as a bounded survey sheet (hairline frame, outer double rule, corner ticks, raised shadow, lighter panel paper); the running head, nav, and footer stay OFF the sheet, so the frame lives on .sheet, never on main.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 

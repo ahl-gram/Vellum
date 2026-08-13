@@ -1,48 +1,26 @@
-// #116 The Verso (epic: the Paper & Ink material-object lens). Turn the sheet over and find
-// the chart's back: a mirrored bleed-through ghost of the current chart, a docket line
-// along the fold, the surveyor's attribution, and a survey-office ink stamp. Every page of
-// the site insists a Vellum chart is a document; giving the sheet a readable back asserts
-// object-hood in one gesture no screenshot conveys. The flip REUSES #131's shared .sheet /
-// #sheet-inner perspective wrapper but owns a SEPARATE, persistent state (a held
-// rotateY(-180) rest on the back face), kept out of src/site/explorer/sheet-turn.ts's
-// transient style-turn state machine so the two never entangle. The one hard invariant: the
-// turn (#131) and the flip (#116) must never both own #sheet-inner's rotateY at once.
-// src/site/explorer/app.ts enforces it (a style change while flipped is suppressed from
-// turning; the Turn button is disabled during a draw or a turn). Kept free of top-level
-// DOM/globals so buildDocket (the pure docket-string builder) is unit-testable under Node;
-// renderVerso / the flip helpers touch the DOM only inside their bodies and are proven by
-// the e2e end-states + a CDP probe.
+// #116 the Verso: the chart's back face (mirrored bleed-through ghost, docket line,
+// surveyor's attribution, survey-office stamp). The flip REUSES #131's shared .sheet /
+// #sheet-inner wrapper but owns a SEPARATE, persistent state (a held rotateY(-180) rest);
+// the turn (#131) and the flip (#116) must never both own #sheet-inner's rotateY at once,
+// and app.ts enforces it. Kept free of top-level DOM so buildDocket stays unit-testable.
 
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 
 export interface DocketFields {
-  /** The world's seed (the chart number). */
   seed: number;
-  /** The chart's title. */
   title: string;
-  /** The world's present year. */
   presentYear: number;
-  /** The capital's name, when the world has one (omitted otherwise). */
   capital?: string;
 }
 
-/**
- * The docket line stamped along the fold: chart number, title, present year, and the
- * capital's name when the world has one. Pure so it is unit-testable; the rest of the
- * verso is DOM.
- * @param {{seed:number, title:string, presentYear:number, capital?:string}} o
- * @returns {string}
- */
+/** The docket line stamped along the fold. Pure so it is unit-testable; the rest of the verso is DOM. */
 export function buildDocket({ seed, title, presentYear, capital }: DocketFields): string {
   const parts = [`CHART № ${seed}`, title, `Year ${presentYear}`];
   if (capital) parts.push(capital);
   return parts.join(" · ");
 }
 
-// The survey-office ink stamp: one oval, built as inline SVG with NO ids (the chart
-// injected into this same document owns the id space, so the verso stays id-free) in a
-// faded oxblood, slightly rotated (CSS) and ink-thin. Decorative, out of the a11y
-// tree. Built with DOM nodes, not markup, so the module has no HTML-injection sink.
+// The ink stamp: inline SVG with NO ids (the chart injected into this document owns the id space), decorative and out of the a11y tree; built with DOM nodes, so no HTML-injection sink.
 const SVGNS = "http://www.w3.org/2000/svg";
 
 function svgEl(tag: string, attrs: Record<string, string | number>, text?: string): SVGElement {
@@ -66,20 +44,10 @@ function buildStamp(): SVGElement {
   return svg;
 }
 
-// The current ghost's object URL, revoked on every rebuild. Without this the page
-// leaks about 1 MB per redraw (a fresh chart Blob URL that is never released).
+// The current ghost's object URL, revoked on every rebuild; without this the page leaks ~1 MB per redraw.
 let ghostUrl = "";
 
-/**
- * Fill the verso back face: the mirrored bleed-through ghost of the CURRENT chart, the
- * docket line, the surveyor's attribution, and the office stamp. The ghost <img>
- * carries the chart's height, so the sheet turns over at exactly the recto's size.
- *
- * The docket and surveyor are world-generated strings set via textContent, and the
- * stamp is built from DOM nodes (buildStamp), so nothing is injected as markup.
- * @param {HTMLElement} versoEl the #verso back face
- * @param {{svg:string, docket:string, surveyor:string}} o
- */
+/** Fill the verso back face. The ghost <img> carries the chart's height, so the sheet turns over at exactly the recto's size; all text lands via textContent and the stamp is DOM-built, so nothing is injected as markup. */
 export function renderVerso(
   versoEl: HTMLElement,
   { svg, docket, surveyor }: { svg: string; docket: string; surveyor: string },
@@ -99,16 +67,7 @@ export function renderVerso(
   versoEl.replaceChildren(ghost, docketEl, surveyEl, buildStamp());
 }
 
-/**
- * #116: refresh the verso back face for the chart that just drew. Composes the docket
- * from the draw result and hands it to renderVerso. Rebuilt on every draw (whether
- * flipped or not, per the acceptance criterion) so a flip always shows the current
- * world; renderVerso revokes the prior ghost URL, so redraws do not leak. Extracted
- * from src/site/explorer/app.ts (#183) to sit beside the renderVerso / buildDocket it calls.
- * @param {HTMLElement} versoEl the #verso back face
- * @param {{svg:string, title:string, subtitle:string, manifest:{presentYear:number, places:Array<{kind:string,name:string}>}}} res
- * @param {number} seed
- */
+/** #116: refresh the verso for the chart that just drew. Rebuilt on every draw, flipped or not, so a flip always shows the current world; renderVerso revokes the prior ghost URL. */
 export function rebuildVerso(
   versoEl: HTMLElement,
   res: { svg: string; title: string; subtitle: string; manifest: PlaceManifest },
@@ -127,27 +86,11 @@ export function rebuildVerso(
   });
 }
 
-// #174 The surveyor's ink bleeds through. The ghost is a snapshot of the chart as the
-// WORKER drew it, so a client overlay (the voyage track) has no path onto the back face.
-// It gets one here: a mirrored <polyline> sharing the ghost's box, fed the very same
-// `points` string the recto track carries.
-//
-// INVARIANT: never rebuild the ghost Blob to refresh the track. #116 leaks about 1 MB per
-// redraw (a chart Blob URL that is never released), and renderVerso is the only place
-// allowed to churn one. Writing `points` is free; re-blobbing is not.
-//
-// The layer is inserted directly AFTER the ghost, so it paints over the bleed-through but
-// under the docket, the attribution, and the stamp (all positioned, so DOM order decides).
-// It carries no ship: the track is ink the surveyor laid on the recto, while the ship is
-// the survey itself, a thing moving over the world rather than painted on the sheet. That
-// also keeps this function glyph-agnostic, indifferent to what the marker looks like.
+// #174: the ghost is a snapshot of the chart as the WORKER drew it, so the client voyage track gets its only path onto the back face here: a mirrored <polyline> sharing the ghost's box, fed the very same points string the recto carries.
+// INVARIANT: never rebuild the ghost Blob to refresh the track; renderVerso is the only place allowed to churn one (writing points is free, re-blobbing costs ~1 MB per redraw).
+// The layer is inserted directly AFTER the ghost, so it paints over the bleed-through but under the docket, attribution and stamp (all positioned, so DOM order decides); it carries no ship, keeping this glyph-agnostic.
 
-/**
- * Paint (or refresh) the verso's bleed-through track. Creates the layer on first use.
- * @param {HTMLElement} versoEl the #verso back face
- * @param {string} points the recto track's `points` attribute, verbatim
- * @param {string} viewBox the recto overlay's viewBox, so the two faces share a space
- */
+/** Paint (or refresh) the verso's bleed-through track; creates the layer on first use. viewBox is the recto overlay's, so the two faces share a space. */
 export function paintVersoTrack(versoEl: HTMLElement, points: string, viewBox: string): void {
   if (!points) { clearVersoTrack(versoEl); return; }
   let layer = versoEl.querySelector(".verso-track-layer");
@@ -176,19 +119,10 @@ export function isFlipped(sheetEl: HTMLElement): boolean {
   return sheetEl.classList.contains("versoed");
 }
 
-// The flip toggles two classes on .sheet (see index.css):
-//   .flip3d  -- lights the 3D context + reveals #verso; must persist until the leaf
-//               lands FLAT on the recto again, so on the way back it is stripped on
-//               transitionend (restoring the recto's idle byte-parity, like #131).
-//   .versoed -- the rotation target: present => rotateY(-180deg) held.
-// A superseding re-flip (versoed came back before the back-turn landed) leaves .flip3d
-// alone via the !versoed guard, so a reversal never tears the 3D context down mid-turn.
+// The flip toggles two classes on .sheet: .flip3d (lights the 3D context + reveals #verso; stripped only when the leaf lands FLAT on the recto again, restoring idle byte-parity) and .versoed (the held rotateY(-180deg) target).
+// A superseding re-flip leaves .flip3d alone via the !versoed guard, so a reversal never tears the 3D context down mid-turn.
 
-/**
- * Toggle the sheet between its recto and its verso. Returns the new flipped state.
- * @param {HTMLElement} sheetEl the #sheet wrapper
- * @returns {boolean} true if now showing the verso
- */
+/** Toggle the sheet between recto and verso; returns true if now showing the verso. */
 export function toggleFlip(sheetEl: HTMLElement): boolean {
   if (isFlipped(sheetEl)) { flipToRecto(sheetEl); return false; }
   flipToVerso(sheetEl);
@@ -197,10 +131,7 @@ export function toggleFlip(sheetEl: HTMLElement): boolean {
 
 function flipToVerso(sheetEl: HTMLElement): void {
   sheetEl.classList.add("flip3d");
-  // Force a reflow so .flip3d's flat (rotateY0) state commits BEFORE the rotation
-  // target, guaranteeing the transition runs (a same-tick class pair can otherwise be
-  // coalesced and skip it). Setting .versoed synchronously keeps isFlipped correct
-  // the instant the click returns (no deferred-frame gap).
+  // Force a reflow so .flip3d's flat state commits BEFORE the rotation target (a same-tick class pair can be coalesced, skipping the transition); .versoed lands synchronously so isFlipped is correct the instant the click returns.
   void sheetEl.offsetWidth;
   sheetEl.classList.add("versoed");
 }
@@ -212,8 +143,7 @@ function flipToRecto(sheetEl: HTMLElement): void {
     if (settled) return;
     settled = true;
     inner.removeEventListener("transitionend", onEnd);
-    // Only tear the 3D context down if the leaf really landed on the recto; a fast
-    // re-flip may have put us back on the verso while this turn-back was in flight.
+    // Tear the 3D context down only if the leaf really landed on the recto; a fast re-flip may have put us back on the verso while this turn-back was in flight.
     if (!sheetEl.classList.contains("versoed")) sheetEl.classList.remove("flip3d");
   };
   const onEnd = (e: TransitionEvent): void => {
@@ -221,8 +151,6 @@ function flipToRecto(sheetEl: HTMLElement): void {
   };
   inner.addEventListener("transitionend", onEnd);
   sheetEl.classList.remove("versoed");
-  // Backstop past --verso-turn: if transitionend never arrives (a browser that skips
-  // it for a ~0ms reduced-motion transition, or an interrupted turn), still restore
-  // byte-parity so the recto never rests with the 3D context lit.
+  // Backstop past --verso-turn: a browser can skip transitionend for a ~0ms reduced-motion transition (or an interrupted turn); still restore byte-parity so the recto never rests with the 3D context lit.
   setTimeout(settle, 1600);
 }

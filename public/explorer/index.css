@@ -1,51 +1,22 @@
 body {
   padding: 2rem 1.5rem 4rem;
 }
-/* The Punchcutter's Case (#228), page members: the shell's .wordmark/.topnav/footer
-   display and .tagline flourish bindings live in BaseLayout (#263). */
 .caption {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
 main { max-width: 1100px; }
 header { margin-bottom: 1.4rem; }
-/* #270 The Broadside: the controls sheet (the old #87 Map/Display/Actions bands)
-   regrouped as The Land / The Hand / The Press and moved WHOLE to
-   /explorer/broadside.css, linked by the page's extraCss ahead of this sheet.
-   The .action-link / .order-glyph dressings and the slider furniture went with
-   it (the journal button is the print link's gold peer there). This sheet keeps
-   only the page's own furniture: the Glass, the verso, the arrival ceremony,
-   the caption lines. */
-/* Control skin and .status voice from /house.css (#324; its hover keeps the
-   .place-hit exclusion the engine depends on). */
 .status { margin-bottom: 0.8rem; }
-/* #164 The Surveyor's Glass. #map-viewport is the layout + clipping box (it owns the
-   centering #map used to); #map is the transform target the zoom-controller drives.
-   transform-origin 0 0 makes the CSS scale pivot at the top-left, matching d3-zoom's
-   screen-space math (point*k + translate) so gestures land true and the overlays stay
-   pixel-aligned with their marks. overflow:hidden clips ONLY while zoomed (.zoomed,
-   toggled by the controller): at k=1 (home) the arrival ceremony's translate/rotate
-   and the chart's drop shadow must overflow the frame exactly as today, so the idle
-   page is byte-identical. */
+/* #164: transform-origin 0 0 matches d3-zoom's screen-space math; overflow clips only while .zoomed so the idle page (ceremony and shadow overflow the frame) stays byte-identical. */
 #map-viewport { max-width: 1100px; margin-inline: auto; position: relative; }
 #map-viewport.zoomed { overflow: hidden; }
-/* #164: touch drag/pinch need touch-action:none, which d3-zoom does NOT set; without
-   it the browser's native pan/pinch preempts the gesture. The controller adds .zoomable
-   only while attached (antique in this sub), so non-zoomable styles keep normal touch
-   scrolling over the chart. Tradeoff: on antique, a touch/wheel over the sheet no longer
-   scrolls the page past it (standard slippy-map behavior). */
+/* #164: d3-zoom does NOT set touch-action; without none the browser's native pan/pinch preempts the gesture. */
 #map-viewport.zoomable { touch-action: none; }
-/* #165: the map viewport is focusable (tabindex) so keyboard users pan/zoom it with the
-   arrows and +/-. Show the focus ring only for keyboard focus (:focus-visible), so a mouse
-   click on the sheet does not leave it outlined. */
 #map-viewport:focus-visible { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
-/* #165 The Surveyor's Glass: the on-screen zoom cluster, a corner overlay. position:absolute
-   anchors it to the viewport box (NOT #map's live transform); z-index lifts it over the chart.
-   Compact and plain here; Sub 9 (#170) gives it the antique voice. */
 .zoom-controls {
   position: absolute; top: 10px; right: 10px; z-index: 2;
   display: flex; flex-direction: column; gap: 4px;
-  /* #170: the keys legend below is wider than the 2rem buttons; keep the buttons
-     hugging the frame corner instead of stretching to the legend's width. */
+  /* #170: keeps the buttons hugging the corner instead of stretching to the wider keys legend. */
   align-items: flex-end;
 }
 .zoom-controls button {
@@ -54,11 +25,6 @@ header { margin-bottom: 1.4rem; }
   background: rgb(247 237 207 / 0.92); border: 1px solid var(--line-tan); color: var(--ink-dark);
 }
 .zoom-controls button:hover { background: var(--parchment-bright); }
-/* #170: the keys legend, Sub 4's handoff resolved (Alex's call: a small visible slip by
-   the cluster, the only form a sighted mouse user can DISCOVER without hover). It is
-   aria-hidden: the same keys are already announced by the #map-viewport aria-label, so
-   voicing it twice would double up for AT users. Hidden where keys make no sense (touch
-   devices) and where the stacked controls already crowd a small screen. */
 .zoom-keys {
   margin-top: 2px; padding: 0.28rem 0.45rem;
   background: rgb(247 237 207 / 0.92); border: 1px solid var(--line-tan); border-radius: 3px;
@@ -68,47 +34,25 @@ header { margin-bottom: 1.4rem; }
   letter-spacing: 0.04em; color: var(--ink-brown); text-align: right; white-space: nowrap;
 }
 .zoom-keys kbd { font-family: inherit; font-style: normal; font-weight: 600; color: var(--ink-dark); }
-/* Touch-primary means hover:none AND pointer:coarse. A bare (hover: none) over-matches
-   environments with NO pointer at all (linux headless CI reports hover:none with
-   pointer:none), which would hide the legend exactly where a keyboard user could use
-   it; caught by CI, pinned by e2e G1's rule-scoping check. */
+/* A bare (hover: none) over-matches pointerless environments (linux headless CI reports hover:none with pointer:none), hiding the legend where a keyboard user could use it; pinned by e2e G1. */
 @media (hover: none) and (pointer: coarse), (max-width: 560px) { .zoom-keys { display: none; } }
 #map { position: relative; transform-origin: 0 0; }
-/* #367: qualified to `[data-vellum-style]`, which the RENDERER stamps on a chart and
-   nothing else carries. Unqualified, this dressed every svg in the mount, and the engine
-   appends its survey track as one of them, so an armed sheet wore the hairline and the
-   shadow TWICE in exact register and sat measurably deeper than a bare one (22.5 luminance
-   units at the sheet edge). Fixed here rather than by an opt-out on the overlay, because
-   the engine's dressing has one home by #302 and this sheet may not name its classes. */
+/* #367: [data-vellum-style] scopes this to renderer-stamped charts; unqualified it also dressed the survey-track svg, striking border+shadow twice in exact register (22.5 luminance units deeper at the sheet edge). */
 #map svg[data-vellum-style] { width: 100%; height: auto; display: block;
   border: 1px solid var(--line-tan); box-shadow: var(--sheet-shadow); }
 
-/* #169 The redraft inset. A committed regional survey mounts INSIDE #map, positioned over the
-   exact window it re-surveys, so it rides the live zoom transform with the chart and reads as
-   a detail sheet pasted on the master chart. It fades in over the coarser content and the
-   camera never moves at the commit; the outgoing inset (if any) is torn down only once the
-   incoming one is opaque, so the swap never shows a gap frame. pointer-events:none keeps
-   gestures and place-hits flowing through it. Reduced motion swaps instantly (the JS also
-   skips the transition path). --fade is the single timing source. */
 .region-inset {
   position: absolute; pointer-events: none;
   opacity: 0; transition: opacity var(--fade, 200ms) ease;
 }
 .region-inset.in { opacity: 1; }
-/* #map svg (the id-strength rule above) would border+shadow this svg too; the inset instead
-   keeps its own drawn neatline and casts a small paste-up shadow. width/height 100% (not
-   auto) pin it to the computed box so no rounding gap opens at the window edge. */
+/* width/height 100% (not auto) pin the inset svg to its computed box so no rounding gap opens at the window edge; border 0 undoes the #map svg rule above. */
 #map .region-inset svg {
   width: 100%; height: 100%;
   border: 0; box-shadow: 0 2px 9px rgb(from var(--chart-ink) r g b / 0.35);
 }
 @media (prefers-reduced-motion: reduce) { .region-inset { transition-duration: 0ms; } }
 
-/* #169 The drafting pencil: while a finer survey is being drawn in the worker, its target
-   window is pencilled on the chart -- a dashed outline that breathes -- so the wait reads as
-   "the surveyor is drafting here", not as a stall. Mounted inside #map (it marks WORLD
-   terrain, so it must ride the transform); the JS counter-scales the border width by 1/k.
-   Reduced motion holds it steady. */
 .survey-pencil {
   position: absolute; pointer-events: none;
   border: 2px dashed rgb(from var(--ink-dark) r g b / 0.55);
@@ -121,16 +65,6 @@ header { margin-bottom: 1.4rem; }
 }
 @media (prefers-reduced-motion: reduce) { .survey-pencil { animation: none; } }
 
-/* #170 The redraft inks itself in. The incoming inset svg gets .redrafting at the commit
-   (lod-controller startRedraft): the region coastline draws in ink at the redraft grade
-   (a shorter pass than the once-per-draw #127 arrival, because this fires on every
-   settle) while the land wash and waterline halos dry in behind it, and the names the
-   finer sheet newly labels dry in tier-staggered (.dry-in on the settlement GROUP, the
-   animation on its label text only: the glyph was already visible at world scale, so
-   only the NAME is news). Persisting names carry no class and never re-animate (AC1).
-   All of it is DOM styling of the live inset only; Download blobs the pristine res.svg
-   string, so saved sheets are untouched. Reduced motion never adds these classes (the
-   JS gate), and the /motion.css universal collapse flattens a mid-flight OS flip. */
 #map .region-inset svg.redrafting #layer-land path {
   animation: inkDraw var(--redraft-draw, 600ms) var(--ease-paper) both,
              washDry var(--redraft-dry, 450ms) var(--ease-paper) 200ms both;
@@ -141,33 +75,19 @@ header { margin-bottom: 1.4rem; }
 #map .region-inset svg.redrafting g.settlement.dry-in text {
   animation: dryingInk var(--redraft-dry, 450ms) var(--ease-paper) var(--redraft-dry-wait, 260ms) both;
 }
-/* Villages wait for the towns: the tier stagger (#170). Both waits sit past the inset's
-   200ms crossfade so a name never dries onto a still-translucent sheet. */
+/* The tier-stagger delays sit past the inset's 200ms crossfade so a name never dries onto a still-translucent sheet. */
 #map .region-inset svg.redrafting g.settlement.dry-in[data-tier="village"] text {
   animation-delay: var(--redraft-dry-wait-village, 500ms);
 }
-/* Hamlets follow the villages (#171): the smallest places dry in last. */
 #map .region-inset svg.redrafting g.settlement.dry-in[data-tier="hamlet"] text {
   animation-delay: var(--redraft-dry-wait-hamlet, 740ms);
 }
 
-/* #131 The style turn. Changing the style turns this leaf over: the outgoing chart turns
-   away and the same world lands re-dressed in the new style
-   (src/site/explorer/sheet-turn.ts). The 3D context is INERT at rest and lit only while
-   .turning is set, so the chart, the place overlay, and the pinned card behave
-   byte-for-byte as before between turns (verified by the #131 CDP spike). #sheet-inner
-   stays position:relative so the transient back face (added only during a turn) anchors
-   over the recto. This perspective wrapper is the shared flip infrastructure the Verso
-   (#116) reuses. The turn is a WAAPI animation (JS, not CSS), so its reduced-motion twin is
-   the shouldTurn() gate (reduced motion -> instant swap), a JS matchMedia move rather than
-   a CSS collapse; there is nothing here for the /motion.css collapse to reach. */
+/* #131 style turn: the 3D context is inert at rest (byte-parity between turns, verified by CDP spike); the turn is WAAPI, so its reduced-motion twin is the shouldTurn() JS gate, nothing here for /motion.css to reach. */
 .sheet-inner { position: relative; }
 .sheet.turning { perspective: 2200px; }
 .sheet-inner.turning { transform-style: preserve-3d; }
-/* #164: the backface hides on #map-viewport (the direct child of the preserve-3d
-   #sheet-inner), not #map: the viewport is a flat plane -- transform-style flat is the
-   default, and the .zoomed overflow:hidden would force it regardless -- so #map renders
-   flattened into it, and it is the viewport's facing that must flip out of view. */
+/* #164: backface-visibility must sit on #map-viewport (the direct preserve-3d child); #map renders flattened into it, so it is the viewport's facing that flips out of view. */
 .sheet-inner.turning #map-viewport { backface-visibility: hidden; }
 .sheet-back {
   position: absolute; inset: 0 0 auto 0;
@@ -176,17 +96,7 @@ header { margin-bottom: 1.4rem; }
 .sheet-back img { width: 100%; height: auto; display: block;
   border: 1px solid var(--line-tan); box-shadow: var(--sheet-shadow); }
 
-/* #116 The Verso. The flip REUSES #131's .sheet / #sheet-inner perspective wrapper,
-   but where #131's turn is transient (it lands back on the recto re-dressed), the
-   Verso RESTS on the back face: a held rotateY(-180deg). Two classes carry that:
-     .flip3d  -- lights perspective + preserve-3d and reveals #verso. Added the instant
-                 a flip starts (either direction) and removed only once the leaf lands
-                 flat on the recto again (transitionend), so idle byte-parity on the
-                 recto is restored exactly like #131's at-rest invariant.
-     .versoed -- the rotation TARGET: present => the leaf holds rotateY(-180deg).
-   The transition is scoped OFF while a #131 style-turn owns the leaf (.turning), so
-   the WAAPI turn and this CSS transition never drive #sheet-inner at once. Reduced
-   motion collapses the transition via /motion.css, so the face swaps instantly. */
+/* #116 Verso: .flip3d lights the 3D context, .versoed holds the rotateY(-180deg) target; the transition is scoped off while .turning so the WAAPI turn and this transition never drive #sheet-inner at once. */
 .sheet:not(.turning) .sheet-inner {
   transition: transform var(--verso-turn, 1200ms) var(--ease-turn, ease-in-out);
 }
@@ -195,9 +105,7 @@ header { margin-bottom: 1.4rem; }
 .sheet.flip3d #map-viewport { backface-visibility: hidden; } /* #164: retargeted from #map, see the turn rule above */
 .sheet.versoed .sheet-inner { transform: rotateY(-180deg); }
 
-/* The back face: a permanent sibling of #map, sized by its ghost image so the sheet
-   turns over at the chart's exact height. Hidden at rest (visibility, not a 3D trick)
-   so the 3D context can stay off between flips. */
+/* Sized by its ghost image; hidden at rest with visibility (not a 3D trick) so the 3D context can stay off between flips. */
 #verso {
   position: absolute; inset: 0 0 auto 0;
   visibility: hidden;
@@ -207,29 +115,15 @@ header { margin-bottom: 1.4rem; }
   overflow: hidden;
 }
 .sheet.flip3d #verso { visibility: visible; }
-/* The bleed-through ghost: the current chart struck through the vellum, mirrored and
-   faint, the way iron-gall ink shows on the reverse. Also sizes #verso (block flow). */
 .verso-ghost { display: block; width: 100%; height: auto;
   transform: scaleX(-1); opacity: 0.1; filter: blur(1.2px); }
-/* #174 The surveyor's ink bleeds through too. The voyage track is a client overlay on the
-   recto, never baked into the chart string the ghost is made of, so it is drawn again here
-   as a mirrored polyline. It MUST share the ghost's box and its scaleX(-1) about the same
-   centre, or the track will not register with the coastline it is bleeding through: the
-   ghost is width:100%/height:auto in block flow, and this layer is inset:0 over the same
-   padding box, so the two boxes coincide. Struck a little stronger than the ghost's 0.1:
-   that opacity is tuned for a whole chart's worth of ink, and a 3px dotted stroke at 0.1
-   simply disappears. Set on the layer, not the polyline, so it reads as one bleed.
-   The stroke is the TRACK's ink (matching .voyage-track; both merged into --ink-dark
-   at the #269 review): what soaks through the sheet is the line the surveyor drew on
-   it, never the ship, which is the survey moving OVER the world. */
+/* #174: this layer must share the ghost's box and its scaleX(-1) centre or the bleed-through track misregisters with the coastline; struck at 0.26 because a 3px dotted stroke at the ghost's 0.1 simply disappears. */
 .verso-track-layer { position: absolute; inset: 0; width: 100%; height: 100%;
   pointer-events: none; transform: scaleX(-1);
   opacity: 0.26; filter: blur(1.1px); overflow: visible; }
 .verso-track { fill: none; stroke: var(--ink-dark); stroke-width: 3;
   stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
   vector-effect: non-scaling-stroke; }
-/* The docket line stamped along the fold, the surveyor's attribution, and the office
-   stamp all sit over the ghost. Percentages track the ghost's height at any world. */
 .verso-docket, .verso-survey { position: absolute; left: 8%; right: 8%;
   text-align: center; }
 .verso-docket { top: 9%; text-transform: uppercase; letter-spacing: 0.18em;
@@ -241,14 +135,6 @@ header { margin-bottom: 1.4rem; }
   width: clamp(90px, 17%, 190px); height: auto; opacity: 0.5;
   transform: rotate(-8deg); }
 
-/* #127 The Drafting Moment: a freshly drawn chart settles onto the desk while the coastline
-   draws itself in ink and the land wash + waterline halos dry in behind it. Gated behind
-   .arriving (added by src/site/explorer/app.ts after injection) so the sea-level drag can
-   suppress the ceremony; src/site/explorer/app.ts sets --draw-len + stroke-dasharray on the
-   coast path and clears them on animationend, restoring the pristine stroke. This is
-   DOM-only styling of the injected SVG, so Download (the pristine lastSvg string) stays
-   byte-identical. All of it collapses under the shared prefers-reduced-motion rule in
-   /motion.css (chart instant, coast pre-drawn). */
 #map svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
 #map svg.arriving #layer-land path {
   animation: inkDraw var(--ink-draw) var(--ease-paper) both,
@@ -258,18 +144,6 @@ header { margin-bottom: 1.4rem; }
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
-/* The living-chart engine's own dressing (.place-overlay, .place-hit, #place-card,
-   .pc-*, the scrub inert state, the #155 ink-in, .voyage-overlay/.voyage-track and
-   the ship/rider marks) moved to the SHARED /living-chart.css at #302, linked by
-   every page that mounts the engine. This page keeps only its own furniture: the
-   Glass, the verso, the arrival ceremony, the caption lines. The #map mount carries
-   class="living-chart" (the #302 host contract) so the shared ink-in rules key on it. */
-
-/* #321: the ages instrument panel and its journal left this page entirely (the
-   Explorer keeps SPACE, the Reading Room keeps TIME; the panel dressing lives on in
-   /reading-frame.css, worn by whatever page mounts the frame). What remains of the
-   instrument here is the survey seal in The Hand; the journal pointer is the gold
-   #journal-link button in The Press since #270 (ruling 2), dressed in broadside.css. */
 .caption { text-align: center; font-style: italic; color: var(--ink-brown);
   padding-top: 0.6rem; }
 footer { margin-top: 3rem; }

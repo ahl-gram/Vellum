@@ -2,29 +2,21 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cameraFromTransform, transformFromCamera } from "../../src/site/explorer/camera.ts";
 
-// The Surveyor's Glass, Sub 4 (#165): the camera <-> transform bridge that a shared
-// link stores as cx/cy/k (world-uv centre + continuous zoom). These validate the NEW
-// behaviour of the pure math (there is no prior bug to reproduce); the live hash
-// round-trip and the on-load restore are proven end to end by e2e suite-zoom. Storing
-// the centre in uv is the whole point: it must be viewport-size independent, so the
-// round-trip is asserted across two different viewport sizes.
+// The Glass Sub 4 (#165): the camera <-> transform bridge a shared link stores as cx/cy/k. Storing the centre in uv is the whole point (viewport-size independent), so the round-trip is asserted across two viewport sizes; the live hash restore is proven by e2e suite-zoom.
 
 test("cameraFromTransform reads the world-uv centre a transform is framing (#165)", () => {
-  // A centred 4x magnification: the sheet point at the viewport centre is the sheet
-  // centre, so cx/cy are 0.5 regardless of k.
+  // A centred 4x: the sheet point at the viewport centre is the sheet centre, so cx/cy are 0.5 regardless of k.
   assert.deepEqual(cameraFromTransform({ x: -1500, y: -1200, k: 4 }, 1000, 800), {
     cx: 0.5,
     cy: 0.5,
     k: 4,
   });
-  // An off-centre 2x: the arithmetic, not the centre. cx=(500+100)/2000=0.3,
-  // cy=(400+50)/1600=0.28125.
+  // Off-centre 2x arithmetic: cx=(500+100)/2000=0.3, cy=(400+50)/1600=0.28125.
   assert.deepEqual(cameraFromTransform({ x: -100, y: -50, k: 2 }, 1000, 800), {
     cx: 0.3,
     cy: 0.28125,
     k: 2,
   });
-  // Home (k=1, no offset) frames the sheet centre.
   assert.deepEqual(cameraFromTransform({ x: 0, y: 0, k: 1 }, 1000, 800), {
     cx: 0.5,
     cy: 0.5,

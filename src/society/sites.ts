@@ -5,8 +5,6 @@ import type { FlowResult } from "../hydrology/flow.ts";
 import { slopeField } from "../terrain/slope.ts";
 import { clamp } from "../core/math.ts";
 
-/** "hamlet" is a region-only tier (#171): grown by hamlets.ts at the deepest zoom
- *  band, never by placeSettlements, so a world sheet never carries one. */
 export type SettlementKind = "capital" | "town" | "village" | "hamlet";
 
 export type Settlement = {
@@ -23,7 +21,6 @@ export type SiteOptions = {
   maxVillages?: number;
 };
 
-/** Shared with hamlets.ts (#171): hamlets screen sites by the same appeal table. */
 export const BIOME_APPEAL: Partial<Record<number, number>> = {
   [BIOMES.grassland]: 1.0,
   [BIOMES.temperateForest]: 0.85,
@@ -42,7 +39,6 @@ export const BIOME_APPEAL: Partial<Record<number, number>> = {
 
 const TOWN_SPACING = 9;
 const VILLAGE_SPACING = 6;
-/** Shared with hamlets.ts (#171): hamlets keep the same world-border margin. */
 export const EDGE_MARGIN = 4;
 
 type Candidate = {

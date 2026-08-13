@@ -49,8 +49,7 @@ test("degenerate inputs pass through untouched", () => {
 });
 
 test("a closed loop (identical endpoints) keeps the far vertex, not just the endpoints", () => {
-  // Guards the classic RDP degenerate: a zero-length chord makes perpendicular
-  // distance undefined, so the recursion must fall back to point distance.
+  // The classic RDP degenerate: a zero-length chord makes perpendicular distance undefined, so the recursion must fall back to point distance.
   const out = simplifyPath([p(0, 0), p(5, 0), p(0, 0)], 0.75);
   assert.equal(out.length, 3);
   assert.deepEqual(out[1], p(5, 0));

@@ -5,10 +5,6 @@ import type { RenderCtx } from "../context.ts";
 import type { CartouchePlan } from "./cartouche.ts";
 import type { CompassPlan } from "./compass.ts";
 
-/**
- * Nautical depth soundings: hand-noted fathom numbers over open water,
- * rock-awash crosses near the shore.
- */
 export function soundingsLayer(
   ctx: RenderCtx,
   cartouche: CartouchePlan,
@@ -37,8 +33,6 @@ export function soundingsLayer(
       const i = gx + gy * w;
       const e = data[i] as number;
       if (e > sea) continue;
-      // #251: gate to the parent's genuine sea so a region never soundings a lake as
-      // if it were open ocean. Inert on world sheets (no seaGate), goldens unchanged.
       if (world.region?.seaGate && world.region.seaGate[i] === 0) continue;
       const dist = world.oceanDist[i] as number;
       const px = proj.px(gx + srng.range(-0.6, 0.6));

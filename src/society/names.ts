@@ -2,12 +2,6 @@ import type { Rng } from "../core/rng.ts";
 import type { MapType } from "../terrain/heightfield.ts";
 import { editDistanceWithin1 } from "../core/text.ts";
 
-// Common English words the syllable grammar can stumble into. A base matching
-// one only reads as plain English when it surfaces as its OWN word in a name
-// ("the main atolls", "the sea of dad"); fused into a longer token — a town
-// suffix ("Manvik") or a glued template ("%ia" -> "Braia") — it reads as
-// invented and is fine. So this screen only fires for a standalone slot (see
-// uniqueBase). Small and targeted, not exhaustive.
 export const ENGLISH_BLOCKLIST = new Set<string>([
   "main", "deep", "reach", "run", "rest", "sand", "land", "band",
   "mine", "mane", "mare", "more", "core", "bore", "sore", "lore", "gore",
@@ -26,22 +20,12 @@ function isShortPrefix(a: string, b: string): boolean {
   return shorter.length <= 3 && longer.startsWith(shorter);
 }
 
-// A template's "%" reads as its own word only when it is not glued to letters
-// on either side: "The Sea of %" / "Greater %" are standalone slots, while
-// "%ia" / "The %wood" fuse the base into a longer token.
 export function isStandaloneSlot(template: string): boolean {
   const i = template.indexOf("%");
   const isLetter = (c: string | undefined): boolean =>
     c !== undefined && /[a-z]/i.test(c);
   return !isLetter(template[i - 1]) && !isLetter(template[i + 1]);
 }
-
-/**
- * Syllable-grammar name generator. Each culture defines phoneme inventories
- * and pattern templates (O = onset, N = nucleus, C = coda). Feature names
- * (rivers, seas, peaks…) wrap a generated base in culture-flavored templates,
- * where "%" stands for the base.
- */
 
 export type Culture = {
   readonly id: string;
@@ -58,13 +42,6 @@ export type Culture = {
   readonly realmTemplates: readonly string[];
 };
 
-// The order of this array is normative. `generateWorld` in `src/world/generate.ts`
-// picks a world's culture with `rng.fork("culture").pick(CULTURES)`, and
-// pick() = floor(u * length). Seed
-// 42's culture-fork draw is u = 0.69486..., so floor(u * 10) = 6: oromi MUST stay
-// at index 6 or the golden re-rolls its culture and every seed-42 name changes.
-// This is the covenant of seed 42 (issue #235); the guard test in
-// test/world/covenant-seed42.test.ts fails if oromi ever leaves index 6.
 export const CULTURES: readonly Culture[] = [
   {
     id: "thalassic", // a Mediterranean maritime culture (Greek thalassa: the sea)
@@ -169,10 +146,7 @@ export const CULTURES: readonly Culture[] = [
     id: "zoryan", // NEW: a Slavic culture - -grad and -ov, limans, birch taigas
     onsets: ["v", "z", "r", "d", "b", "g", "k", "s", "m", "n", "l", "p", "vl", "gr", "dr", "sk", "st", "br", "tr", "kr", "sv", "zv"],
     nuclei: ["a", "o", "e", "i", "u", "y"],
-    // no bare "v"/"ov" coda (the "Striovvya" collision of early drafts). Codas are
-    // single consonants only: cluster codas ("sk"/"st") met the cluster onsets and
-    // stacked into unpronounceable piles ("Kraskstov"). The -sk ending survives as
-    // a town suffix, "sk" survives as an onset; just not as a coda.
+    // Single-consonant codas only: cluster codas met the cluster onsets and stacked into unpronounceable piles.
     codas: ["", "r", "n", "d", "l", "k"],
     patterns: ["ONC", "ONCONC", "ONCON", "ON"],
     townSuffixes: ["grad", "ov", "sk", "in", "itsa"],
@@ -187,8 +161,7 @@ export const CULTURES: readonly Culture[] = [
     id: "tezcal", // NEW: a Nahuatl and Maya culture - -tlan and -pec, cenotes, the Fifth Sun
     onsets: ["", "t", "tl", "tz", "x", "ch", "c", "m", "n", "l", "p", "hu", "cu", "y"],
     nuclei: ["a", "e", "i", "o", "ia", "ua"],
-    // "tl" stays an onset and the -tlan suffix, but not a coda: as a coda it
-    // stacked with tl-onsets and -tlan into "Tletltlan"-style pile-ups.
+    // tl stays an onset and the -tlan suffix but never a coda: as a coda it stacked into Tletltlan-style pile-ups.
     codas: ["", "", "n", "c", "l", "x"],
     patterns: ["ONC", "ONON", "ONONC", "ON"],
     townSuffixes: ["tlan", "pec", "pan", "co", "can"],
@@ -238,7 +211,6 @@ function capitalize(s: string): string {
 
 export function createNamer(rng: Rng, culture: Culture): Namer {
   const used = new Set<string>();
-  // the raw stems accepted so far, screened so no two are near-duplicates
   const usedBases: string[] = [];
   let overflow = 0;
 
@@ -253,15 +225,9 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
     return s;
   };
 
-  // reject a stem that sits within one edit (or is a short prefix) of one
-  // already used — "Mai"/"Main", "Vela"/"Veles" and the like
   const nearDuplicate = (stem: string): boolean =>
     usedBases.some((b) => editDistanceWithin1(b, stem) || isShortPrefix(b, stem));
 
-  // `standalone` is true when the base will read as its own word in the final
-  // name (a settlement with no suffix, or a template whose "%" is a standalone
-  // slot). Only then does an English-word base read as plain English and get
-  // re-rolled; fused into a longer token it is left alone.
   const uniqueBase = (suffix: string, standalone: boolean): string => {
     for (let attempt = 0; attempt < 30; attempt++) {
       let s = rawBase();
@@ -282,10 +248,6 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
         return full;
       }
     }
-    // tight namespace: a Roman-numeral base, kept unique by construction. The
-    // numeral disambiguates, so these are exempt from the near-dup screen — but
-    // the base still renders as its own word ("Bra II"), so the English-word
-    // screen always applies here.
     for (let tries = 0; tries < 1000; tries++) {
       const base = rawBase();
       if (ENGLISH_BLOCKLIST.has(base.toLowerCase())) continue;
@@ -295,7 +257,6 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
         return fallback;
       }
     }
-    // unreachable in practice; guarantees termination
     return `${capitalize(rawBase())} ${overflow++}`;
   };
 

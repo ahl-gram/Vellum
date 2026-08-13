@@ -9,9 +9,7 @@ test("the prevailing wind is a deterministic world property in [0, 2pi)", () => 
   const b = generateWorld(defaultRecipe(42));
   assert.equal(a.winds.dir, b.winds.dir, "same seed, same wind");
   assert.ok(a.winds.dir >= 0 && a.winds.dir < Math.PI * 2, "radians in range");
-  // pin the provenance: the named fork, never the parent stream. #74's climate
-  // consumes this value; a parent-stream draw would silently re-roll it the
-  // moment any earlier draw is inserted.
+  // Pin the provenance: the named fork, never the parent stream; a parent-stream draw would silently re-roll the moment any earlier draw is inserted.
   assert.equal(
     a.winds.dir,
     createRng(42).fork("winds").range(0, Math.PI * 2),
@@ -26,11 +24,7 @@ test("different seeds roll different winds", () => {
   assert.ok(dirs.size >= 3, `winds vary across seeds (got ${dirs.size} distinct)`);
 });
 
-// (The seed-42 identity pins that used to sit here proved #73's winds fork
-// reshuffled nothing. Since #74 the climate CONSUMES the wind by design, so
-// identity pins can no longer witness fork independence; the provenance
-// assertion above is the durable guard, and world identity is pinned once,
-// in test/world/golden-seed42.test.ts.)
+// The seed-42 identity pins that sat here are gone: since #74 the climate CONSUMES the wind, so identity cannot witness fork independence; the provenance assertion above is the durable guard, and identity is pinned in test/world/golden-seed42.test.ts.
 
 test("the nautical arrows read the world's wind", () => {
   const world = generateWorld(defaultRecipe(42));

@@ -34,8 +34,7 @@ function fnv1a(s: string): number {
   return h >>> 0;
 }
 
-/** Independent oracle for the wiring tests: a second bilinear, written here
- * so a transect.ts regression cannot hide behind its own sampler. */
+/** Independent oracle: a second bilinear written here, so a transect.ts regression cannot hide behind its own sampler. */
 function bilinear(w: World, x: number, y: number): number {
   const f = w.elev;
   const cx = Math.min(Math.max(x, 0), f.w - 1);
@@ -57,9 +56,7 @@ function relOf(w: World, e: number): number {
 }
 
 test("a prospect input is deterministic and serializable byte for byte", () => {
-  // Two independent generations per seed, compared within this process:
-  // byte-identity of raw floats is a same-environment claim (the pinned
-  // checksums below handle the cross-platform story with quantization).
+  // Byte-identity of raw floats is a same-environment claim; the pinned checksums below handle the cross-platform story with quantization.
   for (const seed of [42, 7]) {
     const a = generateWorld(defaultRecipe(seed));
     const b = generateWorld(defaultRecipe(seed));
@@ -73,8 +70,7 @@ test("a prospect input is deterministic and serializable byte for byte", () => {
         JSON.stringify(pb),
         `seed ${seed} index ${i} byte-identical`,
       );
-      // node:assert/strict deepEqual distinguishes -0 from 0, so this catches
-      // any -0 component that JSON would silently flatten.
+      // strict deepEqual distinguishes -0 from 0, catching any -0 component JSON would silently flatten.
       assert.deepEqual(
         JSON.parse(JSON.stringify(pa)),
         pa,
@@ -84,12 +80,7 @@ test("a prospect input is deterministic and serializable byte for byte", () => {
   }
 });
 
-/** Floats are quantized to 3 decimals before hashing: world.elev descends
- * from Math.hypot (terrain/heightfield.ts), which is not correctly rounded,
- * so raw float bytes can drift ~1e-13 between macOS and linux CI (the
- * CLAUDE.md never-byte-compare rule; golden-seed42 likewise hashes no raw
- * float). 1e-3 is far above any libm drift and far below any real geometry
- * change, which moves samples by whole cells. */
+/** Quantize to 3 decimals before hashing: world.elev descends from Math.hypot, which is not correctly rounded, so raw floats drift ~1e-13 between macOS and linux CI; 1e-3 is far above libm drift and far below any real geometry change. */
 const q = (v: number): number => Math.round(v * 1000) / 1000;
 
 function pinProjection(p: ProspectInput): unknown {
@@ -102,11 +93,7 @@ function pinProjection(p: ProspectInput): unknown {
   };
 }
 
-// Pinned 2026-08-09 from a measured run (the golden-seed42 convention): any
-// change to sampling geometry, normalization, or the ProspectInput shape
-// re-pins these deliberately, with the cause named in the commit. The five
-// cases span the shape space: a capital, harbor towns, a realm seat, and an
-// inland ruined village (slope vantage, dated ruin).
+// Pinned 2026-08-09 from a measured run (the golden-seed42 convention): a deliberate change re-pins these with the cause named in the commit. The five cases span the shape space: a capital, harbor towns, a realm seat, an inland ruined village.
 const PINNED: ReadonlyArray<{ seed: number; index: number; sum: number }> = [
   { seed: 42, index: 0, sum: 861063081 }, // Laukuwelua, capital, harbor
   { seed: 42, index: 5, sum: 2958303229 }, // Loatunui, town, harbor
@@ -201,9 +188,7 @@ test("the backdrop is the chart's own terrain behind the site", () => {
       assert.ok(b in BIOMES, `foreground biome ${b} is a real biome`);
     }
     assert.equal(p.siteRel, relOf(w, w.elev.at(s.x, s.y)), "siteRel is the chart's cell");
-    // The center backdrop sample must be the heightfield BACKDROP_OFFSET
-    // cells behind the site along the view, checked with this file's own
-    // bilinear oracle so the sign of "behind" cannot silently flip.
+    // The center backdrop sample must sit BACKDROP_OFFSET cells behind the site along the view, checked with this file's own bilinear oracle so the sign of "behind" cannot silently flip.
     const mid = (BACKDROP_SAMPLES - 1) / 2;
     const bx = s.x + BACKDROP_OFFSET * p.view.dx;
     const by = s.y + BACKDROP_OFFSET * p.view.dy;
@@ -211,8 +196,7 @@ test("the backdrop is the chart's own terrain behind the site", () => {
       Math.abs(p.backdrop[mid]! - relOf(w, bilinear(w, bx, by))) < 1e-12,
       `seed 42 index ${i} backdrop center matches the heightfield`,
     );
-    // Same oracle for the foreground center, indexed independently into the
-    // bare biome array, so the sign of "in front" cannot silently flip.
+    // Same oracle for the foreground center, indexed independently into the bare biome array, so the sign of "in front" cannot flip either.
     const fmid = (FOREGROUND_SAMPLES - 1) / 2;
     const fx = Math.min(
       Math.max(Math.round(s.x - FOREGROUND_OFFSET * p.view.dx), 0),
@@ -233,12 +217,7 @@ test("the backdrop is the chart's own terrain behind the site", () => {
 });
 
 test("the adaptive vantage points the right way", () => {
-  // World sheets are harbor-dominated (measured 2026-08-09: 305 of 307
-  // settlements across seeds 1-12 carry the harbor flag), so the sea rule is
-  // tested as an aggregate with margin (measured 293/305, 0.961) while the
-  // rare inland sites are each held to the local claim the slope rule makes:
-  // ground rises behind the site at gradient-stencil scale. Twelve cells out
-  // the terrain may legitimately dip; that is scenery, not a wrong vantage.
+  // World sheets are harbor-dominated (measured 2026-08-09: 305/307 settlements, seeds 1-12), so the sea rule is an aggregate with margin while each rare inland site is held to the local slope claim at gradient-stencil scale.
   let harbors = 0;
   let harborsFacingSea = 0;
   let inland = 0;
@@ -265,8 +244,7 @@ test("the adaptive vantage points the right way", () => {
   }
   assert.ok(harbors >= 100, `sweep saw ${harbors} harbors`);
   assert.ok(inland >= 1, `sweep saw ${inland} inland sites`);
-  // Pinned near the measured constant (293/305 = 0.961), not a loose lean:
-  // a regression flipping even a tenth of the vantages must go red.
+  // Pinned near the measured constant (293/305 = 0.961), not a loose lean: a regression flipping even a tenth of the vantages must go red.
   assert.ok(
     harborsFacingSea / harbors > 0.95,
     `harbors face the sea: ${harborsFacingSea}/${harbors}`,

@@ -17,16 +17,8 @@ import { buildVoyagePlan } from "../../src/render/voyage.ts";
 import { buildSurvey } from "../../src/render/survey.ts";
 import { routeVoyage } from "../../src/render/voyage-route.ts";
 
-// Unit tests for #121 (Sub 4 of the Wayfarer's Passage epic #117): the surveyor's
-// margin log. A pure post-world module on the daily-hunt pattern: it forks its own
-// RNG off the recipe seed, so it adds no World field, is never imported by
-// generate.ts, and cannot move a chart byte (golden checksum untouched). The scrollable
-// panel + the reveal-per-arrival wiring live in src/site/living-chart/voyage.ts and are covered
-// by the Explorer e2e; only the deterministic prose lives here.
-//
-// The prose consumes the leg mode from #120: a sea arrival reads as a voyage, a road (or
-// the degraded "straight") arrival as a ride, and the origin as a departure. Flavor is
-// drawn from small authored pools with no repeat until the pool is exhausted.
+// #121 (Sub 4 of the Wayfarer's Passage epic #117): the surveyor's margin log, a pure post-world module on the daily-hunt pattern: it forks its own RNG off the recipe seed, adds no World field, and cannot move a chart byte; the panel wiring is covered by the Explorer e2e.
+// The prose consumes #120's leg mode: sea reads as a voyage, road (or the degraded "straight") as a ride, the origin as a departure; flavor draws from small authored pools with no repeat until the pool is exhausted.
 
 const SUBTITLE =
   "Being a true & faithful chart of these waters, as surveyed by " +
@@ -43,8 +35,7 @@ const port = (over: Partial<VoyageLogPort> = {}): VoyageLogPort => ({
   ...over,
 });
 
-// A small ordered survey: the capital origin (departs), a road-arrival village, a
-// sea-arrival village. Ordered as visited, exactly as buildVoyagePlan hands them over.
+// A small ordered survey, exactly as buildVoyagePlan hands it over: the capital origin, a road-arrival village, a sea-arrival village.
 const origin = port({ idx: 0, name: "Laukuwelua", kind: "capital", founded: 451, arrivalMode: null, legLength: 0 });
 const roadTown = port({ idx: 1, name: "Haireno", kind: "village", founded: 860, arrivalMode: "road" });
 const seaVillage = port({ idx: 2, name: "Meamere", kind: "village", founded: 420, arrivalMode: "sea" });
@@ -130,8 +121,7 @@ test("deterministic per seed: same inputs, same log", () => {
 });
 
 test("varies across seeds: a different seed changes the flavor", () => {
-  // A survey long enough that flavor is drawn several times, so two seeds almost
-  // certainly diverge on at least one clause.
+  // Long enough that flavor draws several times, so two seeds almost certainly diverge on at least one clause.
   const long = [origin, ...Array.from({ length: 8 }, (_, i) =>
     port({ idx: i + 1, name: `Port${i + 1}`, kind: "village", founded: 800 + i, arrivalMode: "road" }))];
   const a = buildVoyageLog(long, 1059, 42, SUBTITLE).entries.map((e) => e.text);
@@ -140,9 +130,7 @@ test("varies across seeds: a different seed changes the flavor", () => {
 });
 
 test("no flavor repeats within one voyage until the pool is exhausted", () => {
-  // Identical road ports, so entries differ ONLY by their drawn flavor clause. The
-  // first LAND_ARRIVALS.length arrivals must all be distinct (no repeat until the pool
-  // empties); one more forces a reuse, proving the cycler wraps rather than throws.
+  // Identical road ports, so entries differ ONLY by drawn flavor; the first LAND_ARRIVALS.length arrivals must be distinct, and one more forces a wrap rather than a throw.
   const n = LAND_ARRIVALS.length;
   const clones = (count: number) =>
     Array.from({ length: count }, (_, i) => port({ idx: i + 1, name: "Same", kind: "town", founded: 500, arrivalMode: "road" }));
@@ -160,7 +148,7 @@ test("pools are non-trivial and em-dash free (authored copy sanity)", () => {
   }
 });
 
-// --- the inland handoff narrative (#181, ratified 2026-07-24) -------------------
+// The inland handoff narrative (#181, ratified 2026-07-24).
 
 test("an inland handoff reads as the full ride-sail-ride narrative", () => {
   const handoff = port({ idx: 2, name: "Meamere", kind: "village", founded: 420, arrivalMode: "sea", inlandHandoff: true });
@@ -200,14 +188,7 @@ test("handoff closings cycle without repeating until the pool is exhausted", () 
   assert.equal(new Set(texts).size, n, "each handoff draws a fresh closing until the pool empties");
 });
 
-// --- the homecoming (#275, prose shape ratified by Alex 2026-07-24) -------------
-//
-// The survey now sails home, so the log gains ONE entry for the closing leg. It is an
-// arrival at a port already logged, not a new port: the capital is `ports[0]` and stays
-// there, and only the closing leg's character crosses the boundary. The invariant is
-// `entries = legs + 1` (one departure plus one per leg), which for a round trip reads
-// as ports + 1. Prose: a mode-aware pool exactly like SEA_ARRIVALS / LAND_ARRIVALS,
-// with NO fixed closing sentence, and "whence we set out" in place of a descriptor.
+// The homecoming (#275, prose shape ratified by Alex 2026-07-24): ONE entry for the closing leg, an arrival at a port already logged; the invariant is entries = legs + 1, and the prose pool is mode-aware with NO fixed closing sentence, "whence we set out" in place of a descriptor.
 
 const homeBySea = { arrivalMode: "sea", inlandHandoff: false, legLength: 40 } as const;
 const homeByRoad = { arrivalMode: "road", inlandHandoff: false, legLength: 40 } as const;
@@ -314,8 +295,7 @@ test("no em-dashes in a log that comes home (house rule)", () => {
 });
 
 test("a one-port survey has no closing leg, so no homecoming is logged", () => {
-  // The capital alone: buildVoyagePlan yields no legs, so the caller passes no homecoming
-  // and the log is the single departure. Nothing to sail home from.
+  // The capital alone yields no legs, so the caller passes no homecoming and the log is the single departure.
   const log = buildVoyageLog([origin], 1059, 42, SUBTITLE, null);
   assert.equal(log.entries.length, 1);
   assert.ok(log.entries[0]!.text.includes("set out"));
@@ -327,13 +307,7 @@ test("empty survey yields an attributed but empty log", () => {
   assert.equal(log.attribution, SUBTITLE);
 });
 
-// --- the days of the voyage (#312, ratified 2026-07-28) -------------------------
-//
-// The prologue gutter counts days instead of repeating the survey year (the year
-// lives in the attribution line alone). Days derive from cumulative grid-space leg
-// length at GRID_UNITS_PER_DAY, STRICTLY INCREASING by ruling: each entry's day is
-// max(previousDay + 1, 1 + round(cumLength / GRID_UNITS_PER_DAY)), so a long sail
-// jumps many days, a short hop advances at least one, and no two rows share a day.
+// The days of the voyage (#312, ratified 2026-07-28): day = max(previousDay + 1, 1 + round(cumLength / GRID_UNITS_PER_DAY)), STRICTLY increasing by ruling, so a long sail jumps many days and no two rows share a day.
 
 test("the origin departs on day 1", () => {
   const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE);
@@ -360,8 +334,7 @@ test("days are STRICTLY increasing: back-to-back short hops never share a day", 
 });
 
 test("the bump never outruns a real distance: a later long leg still lands on its computed day", () => {
-  // A short hop (bumped to day 2) followed by a long leg: the long leg's computed day
-  // wins over previous+1, so the count returns to the distance-derived timeline.
+  // A short hop (bumped to day 2) then a long leg: the computed day wins over previous+1, returning to the distance-derived timeline.
   const mixed = [
     origin,
     port({ idx: 1, name: "Near", legLength: 1 }),
@@ -390,8 +363,6 @@ test("every entry still carries the survey year in its data: only the display mo
   const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE);
   for (const e of log.entries) assert.equal(e.year, 1059);
 });
-
-// --- real-world integration: the mode wiring on seed 42 ------------------------
 
 test("on a real routed world the mode-aware voice reaches the right ports (seed 42)", () => {
   const world = generateWorld(defaultRecipe(42));

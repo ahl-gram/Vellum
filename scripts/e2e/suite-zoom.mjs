@@ -1,27 +1,9 @@
-// The Surveyor's Glass (Z): geometric CSS pan/zoom on the Explorer chart, driven by the
-// shared d3-zoom controller (src/site/shared/zoom-controller.ts). The live transform lands on
-// #map inside the #map-viewport clip box; nothing re-renders (the semantic redraft is Sub 8).
-//
-// Sub 3 (#164) built the glass on antique via the deterministic window.__vellumZoomTo /
-// __vellumZoomState hooks (Z1-Z8). Sub 4 (#165) makes it a full citizen: ALL four styles
-// (Z11), keyboard driving that enters the same pipeline as gestures (Z9), on-screen buttons
-// (Z10), a bookmarkable cx/cy/k camera (Z12 write, Z13 on-load restore), the home-reset rule
-// for every world-sheet-changing action (Z5 verso, Z14 draw/turn/chronicle), and reduced
-// motion collapsing the one programmatic animation (Zrm). Z5 and Z7 are UPDATED for Sub 4:
-// the flip now homes the camera (Sub 3's "recto keeps its scale" is superseded), and
-// touch-action:none holds on every style (it no longer reverts off antique).
-//
-// getComputedStyle(#map).transform is asserted as a resolved matrix on purpose: it is
-// "none" if the browser rejected the value, so it doubles as proof the px-suffixed string
-// the controller builds is actually valid CSS (d3's own toString() is not).
+// Surveyor's Glass e2e (Z): pan/zoom on the Explorer chart via the shared d3-zoom controller, plus the settle-to-region redraft (Z17+).
+// Resolved matrices are asserted on purpose: getComputedStyle returns "none" for a rejected value, so the assertion doubles as proof the px-suffixed transform is valid CSS (d3's own toString() is not).
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, waitTurned, PORT } = ctx;
 
-  // #300: the survey tick's build now waits for a painted frame, so the track appears a
-  // beat after the change event. Z20d and Z20g each used a fixed sleep (80ms, 120ms) that
-  // happened to outlast it on this laptop only because a CDP evaluate sent mid-build queues
-  // behind the blocked main thread. Wait for the ink itself instead: on a slower runner the
-  // sleep could return before the rAF had even fired, and the check would red for timing.
+  // Fixed sleeps only outlasted the #300 deferred ink because a CDP evaluate sent mid-build queues behind the blocked main thread; wait for the ink itself.
   const waitInked = async (label) => {
     for (let i = 0; i < 120; i++) {
       if (await evaluate(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
@@ -30,20 +12,12 @@ export async function run(ctx) {
     throw new Error("waitInked timeout " + label);
   };
 
-  // Clean antique seed-42 base, chronicle/voyage off, resting on the recto.
   await evaluate(`(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
   await waitSettled("zoom-base");
-  // #169: Z1-Z16 characterize the GEOMETRIC glass (Sub 3-4). Sub 8 makes an antique settle also
-  // redraft a region, which would rebase the camera + swap the sheet mid-assertion; turn the
-  // semantic redraft OFF for the geometric block and back ON for Z17-Z20 below. Runtime flag,
-  // re-set after every reload (Z13, and the gesture suite) since a fresh page defaults it ON.
+  // #169: the semantic redraft is OFF for the geometric block (Z1-Z16) and back ON for Z17+; a fresh page defaults it ON, so re-set it after every reload.
   await evaluate(`window.__vellumSetRedraftEnabled(false)`);
   await shoot("explorer-zoom-k1.png"); // home: the arrival ceremony + drop shadow overflow the frame, exactly as today
 
-  // Z1: zoomTo lands an in-bounds transform on #map. Assert the resolved matrix (proves
-  // the CSS was accepted, i.e. the px units are right), the top-left transform-origin
-  // (so the scale pivot matches d3's screen-space math and the overlays stay aligned),
-  // the .zoomed class on the viewport, and that getState reads the value back.
   const z1 = await evaluate(`(()=>{window.__vellumZoomTo({k:3,x:-20,y:-15});const s=window.__vellumZoomState();const m=document.getElementById("map");const cs=getComputedStyle(m);return{s,matrix:cs.transform,origin:cs.transformOrigin,zoomed:document.getElementById("map-viewport").classList.contains("zoomed")};})()`);
   check(
     "Z1 zoomTo lands the expected transform on #map (matrix + top-left origin, .zoomed, getState reads it)",
@@ -52,8 +26,6 @@ export async function run(ctx) {
     JSON.stringify(z1),
   );
 
-  // Z2: clamps at the MAX extent. Scale saturates at 8; the pan saturates at the far
-  // edge (x = -(k-1)*W, y = -(k-1)*H), so the magnified sheet always covers the viewport.
   const z2 = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:99,x:-99999,y:-99999});const s=window.__vellumZoomState();return{s,ex:-(7*W),ey:-(7*H),W,H};})()`);
   check(
     "Z2 clamps at the max extent (k->8, pan pinned to the far edge so the sheet still covers the viewport)",
@@ -62,13 +34,9 @@ export async function run(ctx) {
   );
   await shoot("explorer-zoom-k8.png"); // max magnify (blurrier is expected here; the semantic redraft is Sub 8)
 
-  // A mid, centered magnification for the k=4 reference screenshot.
   await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:4,x:-(3*W)/2,y:-(3*H)/2});})()`);
   await shoot("explorer-zoom-k4.png");
 
-  // Z3: clamps at the MIN extent. Scale floors at 1 and any pan snaps home; the home
-  // state restores the idle DOM byte-for-byte (no inline transform, computed none, and
-  // the .zoomed clip removed) -- the guarantee that keeps ceremony/turn/verso untouched.
   const z3 = await evaluate(`(()=>{window.__vellumZoomTo({k:0.1,x:500,y:500});const s=window.__vellumZoomState();const m=document.getElementById("map");return{s,matrix:getComputedStyle(m).transform,inline:m.style.transform,zoomed:document.getElementById("map-viewport").classList.contains("zoomed")};})()`);
   check(
     "Z3 clamps at the min extent (k->1, pan->home; idle DOM restored: transform none, no .zoomed)",
@@ -76,7 +44,6 @@ export async function run(ctx) {
     JSON.stringify(z3),
   );
 
-  // Z4: an in-bounds transform round-trips through getState unchanged (no clamp fires).
   const z4 = await evaluate(`(()=>{window.__vellumZoomTo({k:2,x:-10,y:-10});const a=window.__vellumZoomState();window.__vellumZoomTo(a);const b=window.__vellumZoomState();return{a,b};})()`);
   check(
     "Z4 getState round-trips an in-bounds transform (k=2, x=-10, y=-10)",
@@ -84,11 +51,6 @@ export async function run(ctx) {
     JSON.stringify(z4),
   );
 
-  // Z6 (AC2): a card pinned while zoomed rides the transform with its mark -- both are
-  // %-positioned inside #map, so they share one coordinate space and stay aligned at any
-  // scale. Zoom to k=2 centered, pin the place nearest the viewport centre, and confirm
-  // the card shows over the still-scaled chart. The screenshot is the visual alignment
-  // check (and shows how .zoomed's overflow clips a card that unfurls past the frame edge).
   const z6 = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:2,x:-W/2,y:-H/2});const vr=vp.getBoundingClientRect();const cx=vr.left+vr.width/2,cy=vr.top+vr.height/2;const hits=[...document.querySelectorAll("#map .place-hit")];let best=null,bd=Infinity;for(const h of hits){const r=h.getBoundingClientRect();if(r.width===0)continue;const d=Math.hypot(r.left+r.width/2-cx,r.top+r.height/2-cy);if(d<bd){bd=d;best=h;}}if(!best)return{ok:false};best.click();const card=document.getElementById("place-card");const m=document.getElementById("map");return{ok:true,shown:!card.hidden,pinned:card.classList.contains("pinned"),scaled:getComputedStyle(m).transform.startsWith("matrix(2, 0, 0, 2,")};})()`);
   check(
     "Z6 a card pinned while zoomed shows over the scaled chart (AC2: pinned card rides its mark)",
@@ -99,11 +61,6 @@ export async function run(ctx) {
   await shoot("explorer-zoom-card.png"); // manual: card anchored to its mark at 2x (edge unfurls clip)
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`); // dismiss the pin
 
-  // Z8 (AC2, Alex's call): a pinned card reads at a CONSTANT screen size at any zoom -- it
-  // must not magnify with the chart (an 8x card fills and clips the frame). The card rides
-  // #map's transform for its anchor but is counter-scaled by 1/k (--zoom-k, published on
-  // #place-card by the controller). Pin a central place at home, measure the card's screen
-  // width, zoom to k=8, and confirm the width is unchanged while --zoom-k tracks k.
   const z8 = await evaluate(`(()=>{
     const vp=document.getElementById("map-viewport");
     window.__vellumZoomTo({k:1,x:0,y:0});
@@ -134,15 +91,6 @@ export async function run(ctx) {
   await shoot("explorer-zoom-card-k8.png"); // the constant-size card at max zoom (cf. the ballooned before)
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`); // dismiss the pin
 
-  // Z8b (#331, revisited after live use): the WHOLE hit divides by the published k,
-  // so target and ring hold their designed size at depth (scaled boxes kept their
-  // k=1 overlaps while the marks looked far apart, so a hover near one town ringed
-  // its neighbor). Frame a central place at k=4, hover it with a REAL mouse move
-  // (CDP hit-testing, so :hover is the browser's own), and assert the outcome: the
-  // hit's on-screen box holds ~26px, the ring pseudo resolves to scale(1) (its
-  // element carries the one division; a second would shrink the ring k-fold), and
-  // --zoom-k rides the .place-overlay container, never #map (the #164 jiggle rule;
-  // Z8 pins the card half of the same contract).
   const z8b = await evaluate(`(()=>{
     const vp=document.getElementById("map-viewport");
     window.__vellumZoomTo({k:1,x:0,y:0});
@@ -178,15 +126,6 @@ export async function run(ctx) {
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 }); // park the pointer off the map
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 
-  // ---- Sub 4 (#165) ------------------------------------------------------------------
-
-  // Z9 (AC2, a11y hard requirement): keyboard-only reaches full zoom. The keys dispatch as
-  // real KeyboardEvents on the focusable viewport and drive the controller's glide/pan,
-  // i.e. d3's own scaleTo/translateBy -- the SAME "zoom" pipeline as a gesture. '+' twice is
-  // 1.4^2=1.96; '-' back to 1.4; ArrowRight pans x more negative; '0' homes. #170: the zoom
-  // steps and home now GLIDE (pan stays instant), so each step is awaited to its settled k
-  // (the issue's own note: an added transition must be waited out); rapid presses compound
-  // against the pending target, so the two immediate '+' still land exactly 1.96.
   const z9 = await evaluate(`(async()=>{
     const vp=document.getElementById("map-viewport");
     window.__vellumZoomTo({k:1,x:0,y:0});
@@ -210,9 +149,6 @@ export async function run(ctx) {
     JSON.stringify(z9),
   );
 
-  // Z10: the on-screen minus / reset / plus buttons drive the same controller entry points
-  // (voiced + gliding since Sub 9, #170: each step awaited to its settled k, and the two
-  // rapid ins compound to 1.96 via the pending glide target).
   const z10 = await evaluate(`(async()=>{
     const st=()=>window.__vellumZoomState();
     const settleK=async(t)=>{for(let i=0;i<100;i++){if(Math.abs(st().k-t)<1e-6)return st().k;await new Promise(r=>setTimeout(r,40));}return st().k;};
@@ -232,12 +168,6 @@ export async function run(ctx) {
     JSON.stringify(z10),
   );
 
-  // Z10b (regression, Alex's report): a rapid double-click on a zoom button makes the browser
-  // fire a `dblclick` on it, and because the cluster sits INSIDE the d3-zoom-bound #map-viewport
-  // that dblclick used to bubble into d3's own double-click-to-zoom (a 2x magnify about the
-  // pointer -- the button corner), lurching/panning the map. The cluster now stops gesture
-  // events, so a dblclick on a button leaves the camera untouched. Sleep past any (buggy) 250ms
-  // dblclick animation before reading, so the check is deterministic, not a race.
   await evaluate(`(()=>{window.__vellumZoomTo({k:1,x:0,y:0});document.getElementById("zoom-in").dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,view:window}));})()`);
   await sleep(350); // let any leaked d3 dblclick-zoom animation finish
   const z10b = await evaluate(`window.__vellumZoomState()`);
@@ -247,10 +177,6 @@ export async function run(ctx) {
     JSON.stringify(z10b),
   );
 
-  // Z11 (AC1): all four styles pan/zoom identically. Antique is proven above; topographic,
-  // ink, nautical each magnify to the same matrix, keep touch-action:none, and keep the
-  // %-positioned #place-hit overlay (the manifest is style-independent, so the marks carry
-  // over). One non-antique zoom is screenshotted for the visual record.
   for (const style of ["topographic", "ink", "nautical"]) {
     await evaluate(`(()=>{window.__vellumZoomTo({k:1,x:0,y:0});const s=document.getElementById("style");s.value=${JSON.stringify(style)};s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     await waitTurned("zoom-style-" + style);
@@ -262,13 +188,9 @@ export async function run(ctx) {
     );
     if (style === "topographic") await shoot("explorer-zoom-topographic-k3.png");
   }
-  // Back to a clean antique home for the hash + reset checks below.
   await evaluate(`(()=>{window.__vellumZoomTo({k:1,x:0,y:0});const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await waitTurned("zoom-styles-restore-antique");
 
-  // Z12 (AC3 write): a settled zoom mirrors the camera into the hash as cx/cy/k (world-uv
-  // centre + zoom, 4dp), written only after the settle debounce. The centre is chosen so
-  // cx/cy are exact regardless of viewport size: cx=(0.5+0.2)/2=0.35, cy=(0.5+0.3)/2=0.4.
   await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:2,x:-0.2*W,y:-0.3*H});})()`);
   await sleep(400); // > the 250ms settle debounce, so onSettle has written the hash
   const z12 = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k")};})()`);
@@ -278,10 +200,6 @@ export async function run(ctx) {
     JSON.stringify(z12),
   );
 
-  // Z5 (AC4, UPDATED for Sub 4): the verso flip snaps the camera HOME first (Sub 3's "the
-  // hidden recto keeps its scale while flipped" is superseded by the reset policy). Zoom,
-  // flip, and confirm k=1 AND that cx/cy/k were dropped from the hash EXPLICITLY (not left
-  // to a debounced settle), while the flip still lands (versoed + a ghost).
   await evaluate(`window.__vellumZoomTo({k:3,x:-40,y:-30})`);
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(1300); // let the 1.2s flip land
@@ -292,14 +210,9 @@ export async function run(ctx) {
     JSON.stringify(z5),
   );
   await shoot("explorer-zoom-verso.png"); // manual: the verso reads clean over a now-home recto
-  // Flip back to the recto.
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(1300);
 
-  // Z14 (AC4): every OTHER world-sheet-changing action homes the camera first too. Each
-  // starts zoomed and asserts k=1 immediately after the trigger (draw() rebases the camera
-  // synchronously at its top, before the worker round-trip). #a draw, #b style turn, #c the
-  // chronicle (which also clears cx/cy/k from the hash).
   await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
   const r14a = await evaluate(`(()=>{document.getElementById("draw").click();return window.__vellumZoomState().k;})()`);
   await waitSettled("reset-on-draw");
@@ -321,11 +234,6 @@ export async function run(ctx) {
   );
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the chronicle
 
-  // Zrm (AC5): prefers-reduced-motion collapses the one programmatic zoom animation (d3's
-  // double-click smooth-zoom) to an instant jump. The keyboard/buttons are instant already;
-  // the controller reads reduced motion LIVE, so emulating it here flips the double-click to
-  // its synchronous branch and getState reads k=2 in the same turn (an animated one would
-  // still be at k~1). Snap home, emulate, real double-click at the centre, assert, un-emulate.
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   const rmOn = await evaluate(`matchMedia("(prefers-reduced-motion: reduce)").matches`); // precondition
@@ -338,10 +246,6 @@ export async function run(ctx) {
   await send("Emulation.setEmulatedMedia", { features: [] }); // clear the emulation
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 
-  // Z7 (AC1 touch, UPDATED for Sub 4): every style now zooms, so touch-action:none holds on
-  // ALL four (Sub 3 asserted it reverted off antique; superseded). It is the one thing no
-  // headless gesture test can reach: without it the browser's native pan/pinch preempts a
-  // drag/pinch. Antique and a non-antique both report none.
   const z7a = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
   await evaluate(`(()=>{const s=document.getElementById("style");s.value="nautical";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await waitTurned("zoom-touch-nautical");
@@ -352,10 +256,6 @@ export async function run(ctx) {
     JSON.stringify({ z7a, z7b }),
   );
 
-  // Z13 (AC3 load): a deep link with cx/cy/k restores the same framing ON LOAD. Navigate
-  // fresh to a camera link (about:blank first forces a full reload, the print-room suite's
-  // precedent) and confirm the settled chart opens at that zoom and centre. cx=cy=0.5,k=4
-  // frames the sheet centre at 4x, so x = W/2 - 0.5*4*W = -1.5*W.
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique&cx=0.5&cy=0.5&k=4` });
   await waitReady();
@@ -370,19 +270,7 @@ export async function run(ctx) {
   );
   await shoot("explorer-zoom-deeplink-k4.png"); // manual: opened straight into a 4x framing from the link
 
-  // Z15/Z16 (#168, Glass Sub 7): the finer-survey ENGINE behind the settle. These drive
-  // the additive "region" worker job directly via __vellumRunJob (Sub 8 wires it to the
-  // camera settle), so they touch no page zoom state. A fixed literal window keeps them
-  // deterministic. The A2/A3-style worker/inline byte-parity for the kind is R14 (render).
-
-  // Z15: a region job returns a valid, stamped, genuinely-regional CROP of the world
-  // (AC1). "region-land-clip" is the coast-clip def only a region sheet emits, proving a
-  // real regional render. The crop is proven env-stably by projected-settlement COUNT:
-  // the window holds a strict, non-empty SUBSET of the world's places (0 < region < world)
-  // -- integer counts are immune to the cross-engine float drift that bars an SVG byte
-  // compare here. (The FINER terrain itself is a numeric claim, so it is guarded by the
-  // same-process unit tests test/terrain/window.test.ts + test/world/region.test.ts and
-  // shown in out/sub7-*; an e2e must not byte-compare terrain across environments.)
+  // The crop is proven by projected-settlement COUNT: integer counts are immune to the cross-engine float drift that bars an SVG byte compare here.
   const z15 = await evaluate(
     `(async()=>{const win={u0:0.375,v0:0.375,u1:0.625,v1:0.625};` +
       `const r=await window.__vellumRunJob({kind:"region",seed:42,overrides:{},window:win,band:2,gridW:320,gridH:240,title:"Survey",render:{style:"antique",widthPx:1500,legend:true}});` +
@@ -402,10 +290,6 @@ export async function run(ctx) {
     JSON.stringify(z15),
   );
 
-  // Z16: two identical region jobs skip generateWorld the second time (AC2). Asserted via
-  // the worldFor `cached` flag (deterministic), not timing; the ta/tb ms are logged only, as
-  // corroboration. A primer draw at another seed first evicts the single-entry cache, so the
-  // first region job is a guaranteed MISS and the second a guaranteed HIT.
   const z16 = await evaluate(
     `(async()=>{await window.__vellumRunJob({kind:"draw",seed:117,overrides:{},render:{style:"antique",widthPx:1500}});` +
       `const win={u0:0.375,v0:0.375,u1:0.625,v1:0.625};` +
@@ -420,24 +304,10 @@ export async function run(ctx) {
     `miss=${z16.aCached} hit=${z16.bCached} sameSvg=${z16.sameSvg} (ta=${z16.ta}ms tb=${z16.tb}ms, timing is corroboration only)`,
   );
 
-  // #169: turn the semantic redraft back ON for the Sub 8 tests (off for the geometric
-  // block above).
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
 
-  // ---- Z17-Z20 (#169, Glass Sub 8): the settle -> region REDRAFT, wired to the camera.
-  // Redesigned in PR #245 review: the camera stays WORLD-relative at every band and a commit
-  // mounts the survey as an INSET (#map .region-inset) laid over its window on the world sheet.
-  // The load-bearing new invariant asserted throughout: a commit NEVER moves the camera
-  // (__vellumZoomState is byte-stable across a redraft), which is what makes pan work at every
-  // band and kills the zoom-out snap. Unlike Z15/Z16 (which drove the worker job directly),
-  // these drive a real camera settle via __vellumZoomTo and observe the committed survey via
-  // window.__vellumRegion() -> {band, window, title, committed, redrafts}. Reduced motion is
-  // OFF here (Zrm cleared it); poll the monotonic redraft counter rather than sleeping a fixed
-  // time. Between cases the on-screen home button drops the inset + homes the camera.
   const rgn = () => evaluate(`window.__vellumRegion()`);
   const goHome = async () => { await evaluate(`document.getElementById("zoom-reset").click()`); await sleep(40); };
-  // Frame world-uv (cu,cv) at zoom k on the world sheet: the exact inverse of
-  // cameraFromTransform, so a settle at k=2 centred on 0.5 lands the band-1 window at 0.5.
   const enterAt = (k, cu, cv) =>
     evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
   const waitRedraft = async (prev) => {
@@ -445,9 +315,6 @@ export async function run(ctx) {
     return await rgn();
   };
   const captionMs = () => evaluate(`(()=>{const m=(document.getElementById("caption").textContent||"").match(/drawn in (\\d+)ms/);return m?+m[1]:-1;})()`);
-  // The inset-architecture DOM invariants, read together: the world sheet stays mounted as
-  // #map's own <svg> (never region-stamped), and the committed survey is a stamped svg inside
-  // .region-inset. zoomState rides along so callers can pin camera stability.
   const insetView = () =>
     evaluate(
       `(()=>{const world=document.querySelector("#map > svg");const inset=document.querySelector("#map .region-inset");` +
@@ -457,17 +324,7 @@ export async function run(ctx) {
         `hits:document.querySelectorAll("#map .place-hit").length,zx:z.x,zy:z.y,zk:z.k,caption:document.getElementById("caption").textContent||""};})()`,
     );
 
-  // Z17: one camera settle on antique redrafts ONE finer regional survey (AC1), committed as an
-  // inset. Frame the world centre at k=2 (band 1); assert the committed band, a title "The
-  // Environs of X" derived from the window, the overlay rebuilt against the region manifest
-  // (place-hits present), the stamped inset svg OVER the still-mounted world sheet, the caption's
-  // drawn-in-ms (AC3), exactly ONE redraft -- and the camera EXACTLY where the settle left it
-  // (k=2, centred: x = -W/2), the no-jump invariant the redesign exists for. A centred band-1
-  // window mounts at left 25% / width 50% (the pure-math invariant, seen live).
-  // Warm up first, so Z17's logged desktop ms is the STEADY-STATE redraft a real pan hits, not a
-  // one-off: Z15/Z16 left another seed in the worker's single-entry world cache (a cold
-  // generateWorld), and the first region gen also pays one-time JIT of the region code path. A
-  // throwaway redraft over seed 42 warms both; the real number is what the reviewer should read.
+  // Warm up first: Z15/Z16 left another seed in the worker's single-entry world cache and the first region gen pays one-time JIT, so a cold run would not log the steady-state redraft ms.
   const warm0 = (await rgn()).redrafts;
   await enterAt(2, 0.4, 0.4);
   await waitRedraft(warm0);
@@ -490,29 +347,17 @@ export async function run(ctx) {
   );
   await sleep(400); // let the crossfade land so the artifact shows the committed (opaque) inset
   await shoot("explorer-sub8-region-band1.png"); // manual: a finer survey pasted over its window
-  // A second artifact for the reviewer: geometric zoom OUT within the band (a noop settle --
-  // same window, hysteresis holds band 1) so the committed inset sits small on the master
-  // chart with the world visible around it: the pasted-detail-survey look the redesign buys.
   await enterAt(1.35, 0.5, 0.5);
   await sleep(600);
   await shoot("explorer-sub8-inset-context.png"); // manual: the survey as a detail sheet on the world chart
 
-  // Z18: within a committed window a settle does NOT redraft; PANNING into a new quantized
-  // window does (AC2). This is the review quirk-1 regression test: with a survey committed, the
-  // camera pans exactly as it would on the bare world sheet (the world extent is the constraint,
-  // there is no region extent), and the pan re-surveys after the fact. No goHome between the
-  // steps -- the pan starts FROM the committed region, where the old rebase design was frozen.
   await goHome();
   const before18 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const enter18 = await waitRedraft(before18); // window A, band 1, centred 0.5
-  // A settle that zooms to k=2.2 at the same centre stays band 1 (hysteresis) in the same
-  // lattice cell: no redraft.
   await enterAt(2.2, 0.5, 0.5);
   await sleep(500); // well past the 250ms settle debounce; assert NO new commit
   const same18 = await rgn();
-  // A PAN at band 1 (same k, centre moved past half a lattice cell): the camera must actually
-  // move (the old design clamped it dead), and the settle lands a NEW window -> one redraft.
   await enterAt(2, 0.42, 0.42);
   const new18 = await waitRedraft(same18.redrafts);
   const pan18 = await evaluate(`window.__vellumZoomState()`);
@@ -527,9 +372,6 @@ export async function run(ctx) {
       `pan x=${pan18.x} (expected ${pannedTo}, a dead pan would sit at ${-0.5 * W18})`,
   );
 
-  // Z19: rapid successive settles commit only the LAST (AC2: the settle debounce coalesces and
-  // the monotonic guard drops superseded jobs). Three different band-1 framings fired back to
-  // back land exactly ONE redraft.
   await goHome();
   const before19 = (await rgn()).redrafts;
   await evaluate(
@@ -545,11 +387,6 @@ export async function run(ctx) {
     `redrafts ${before19}->${after19.redrafts} (expected +1), band=${after19.band}`,
   );
 
-  // Z19b (review): the supersession guard itself (regionGen), which Z19 does NOT reach (its
-  // three framings coalesce in the 250ms settle debounce, so only one job ever dispatches).
-  // Here a job is genuinely IN FLIGHT when home is hit: the settle fires at ~250ms, the warm
-  // redraft takes ~500ms, and home lands between the two. The resolved job must be discarded:
-  // no commit, no inset, the redraft counter unmoved.
   await goHome();
   const before19b = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
@@ -564,13 +401,6 @@ export async function run(ctx) {
     `redrafts ${before19b}->${after19b.redrafts} (expected unchanged) band=${after19b.band} insets=${insets19b}`,
   );
 
-  // Z20: a zoom-out past the band-0 threshold drops the inset over the world chart that was
-  // under it -- no worker round-trip. While a region is committed the LOD state carries that
-  // sheet + its band + its derived title; after the revert no inset remains, the world sheet
-  // is (still) mounted, and the overlay is the world's. The camera lands where the zoom-out
-  // put it, un-snapped. (This was #169 AC4's "Download saves what you see" until #217 Part 2
-  // retired the Explorer's Download button; the committed-sheet state it keyed on IS the LOD
-  // contract, so the assertions stand unchanged under the new framing.)
   await goHome();
   const before20 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
@@ -589,8 +419,6 @@ export async function run(ctx) {
     `committedRegion=${regionCommitted} -> band=${world20.band} committed=${world20.committed} insets=${gone20} world=${worldView.worldMounted} hits=${worldView.hits} k=${worldView.zk}`,
   );
 
-  // Z20b: reduced motion redrafts INSTANTLY (AC4) -- the commit lands with the inset already
-  // opaque (no transition ran) and exactly one inset mounted.
   await goHome();
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   const beforeRm = (await rgn()).redrafts;
@@ -607,11 +435,7 @@ export async function run(ctx) {
   );
   await send("Emulation.setEmulatedMedia", { features: [] });
 
-  // Z20c: settle-to-sheet under a 4x main-thread CPU throttle, MEASURED (AC3). NB the redraft
-  // (generateRegionWorld + renderMap) runs in the Web WORKER, which CDP's setCPUThrottlingRate
-  // does NOT slow -- so this mainly proves the redraft never blocks the main thread (the number
-  // stays ~the warm desktop ms, not 4x it), and the worker compute (~0.5s here) sits well under
-  // the ~1.5s mid-mobile budget with headroom. Loose flake-guard ceiling; ms is corroboration.
+  // CDP's setCPUThrottlingRate does NOT slow the Web Worker, so this mainly proves the redraft never blocks the main thread; the ms is corroboration.
   await goHome();
   await send("Emulation.setCPUThrottlingRate", { rate: 4 });
   const beforePerf = (await rgn()).redrafts;
@@ -625,12 +449,6 @@ export async function run(ctx) {
     `drawn in ${perfMs}ms under 4x throttle (target ~1.5s; 4000ms ceiling is a flake guard, not the target)`,
   );
 
-  // Z20d (scope: survey mutual exclusion; retitled at #321, same contract): inking the
-  // survey track reverts a committed region to the WORLD sheet (the track is a WORLD
-  // overlay: world coordinates, world roads; a finer regional sheet would orphan it),
-  // so no region job can be in flight while the track is inked. Enter a region, tick
-  // the survey box, assert the sheet is the world chart (no region stamp) and the
-  // resting track is on it.
   await goHome();
   const before20d = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
@@ -649,11 +467,6 @@ export async function run(ctx) {
   );
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`); // clear the survey ink
 
-  // Z20e (scope: overlay rebuild, card continuity keyed by NAME): a card pinned in one
-  // survey stays pinned to the SAME-named settlement across a redraft, even though region
-  // worlds renumber indices. Pin the settlement nearest the centre (the survey's namesake),
-  // zoom into the next finer band still centred on it, and assert the card is still open on
-  // that same name.
   await goHome();
   const before20e = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
@@ -672,10 +485,6 @@ export async function run(ctx) {
   await enterAt(3.6, 0.5, 0.5); // past the 1/2 up-cross: the next finer band, same centre
   await waitRedraft(e20e1.redrafts);
   await sleep(80);
-  // The rebuilt card must also carry the LIVE zoom's counter-scale (--zoom-k): the overlay
-  // rebuild creates a fresh #place-card, and a commit no longer touches the camera, so the
-  // controller must re-publish k onto it or the card renders k-times too large (review quirk:
-  // gigantic cards on a region sheet).
   const kept = await evaluate(
     `(()=>{const card=document.getElementById("place-card");const nm=card.querySelector(".pc-name");` +
       `return{hidden:card.hidden,name:nm?nm.textContent:null,zoomK:card.style.getPropertyValue("--zoom-k")};})()`,
@@ -687,18 +496,12 @@ export async function run(ctx) {
   );
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`); // dismiss the pin
 
-  // Z20f (review quirk 3): a PARTIAL zoom-out steps down one band by swapping the inset in
-  // place -- the world chart shows around it throughout and the camera stays exactly where the
-  // zoom-out put it (no snap, no full-viewport shrink into void). From band 3 (k=8), settle at
-  // k=4: bandFor(4, 3) = 2, so the band-2 survey commits while the camera holds k=4.
   await goHome();
   const before20f = (await rgn()).redrafts;
   await enterAt(8, 0.5, 0.5);
   const deep20f = await waitRedraft(before20f);
   await enterAt(4, 0.5, 0.5);
   const step20f = await waitRedraft(deep20f.redrafts);
-  // The commit mounts the band-2 inset immediately; the band-3 one is torn down only once the
-  // crossfade lands (both up during the fade IS the no-gap-frame discipline), so poll to 1.
   let view20f = await insetView();
   for (let i = 0; i < 50 && view20f.insets !== 1; i++) { await sleep(40); view20f = await insetView(); }
   check(
@@ -708,12 +511,6 @@ export async function run(ctx) {
     `band ${deep20f.band}->${step20f.band} insets=${view20f.insets} world=${view20f.worldMounted} k=${view20f.zk} (expected 4)`,
   );
 
-  // Z20g: the survey ink mutually excludes the redraft, mirroring Z20d (#321: no bar
-  // to step any more, the box alone is the survey). Its track narrates the WORLD
-  // survey at world coordinates, so (a) ticking drops a committed inset and builds
-  // the world track over the world sheet -- and since the 2026-07-26 ratification the
-  // arming ceremony snaps the camera HOME (kept by the cut) -- and (b) while the
-  // track is inked, a settle stays geometric: no redraft.
   await goHome();
   const before20g = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
@@ -736,13 +533,6 @@ export async function run(ctx) {
     `on-toggle ${JSON.stringify(von)} settleWhileInked redrafts=${vsettle.redrafts}(==${reg20g.redrafts}) band=${vsettle.band}`,
   );
 
-  // Z21 (#171, Glass Sub 10): HAMLETS are the deepest band's payoff, a region-only
-  // smallest tier grown from a fixed world-space lattice. The target window is derived
-  // in-page from the engine itself (the same lattice the worker draws from), and the
-  // committed inset is then checked for COUNT and NAME parity against the engine run
-  // over the window the sheet actually STAMPED, so the settle quantization can never
-  // desync the expectation. Tier order (capital/seat/town/village/hamlet) must hold in
-  // document order: that is the label-pressure order, higher tiers claim space first.
   await goHome();
   const target21 = await evaluate(
     `(async()=>{const {defaultRecipe,generateWorld}=await import("/explorer/engine/world/generate.js");` +
@@ -793,8 +583,6 @@ export async function run(ctx) {
       `namesMatch=${dom21.namesMatch} worldSheetHamlets=${dom21.outside} (scouted n=${target21.n})`,
   );
 
-  // Z21b: absent at every shallower band. One band up over the SAME centre: zero
-  // hamlet marks (and the legend keys no Hamlet row a band-2 sheet never draws).
   await enterAt(4, target21.cx, target21.cy);
   const step21 = await waitRedraft(deep21.redrafts);
   let view21b = await insetView();
@@ -812,7 +600,6 @@ export async function run(ctx) {
   await goHome(); // leave the world sheet for the restore tail below
   await evaluate(`window.__vellumSetRedraftEnabled(false)`); // #169: geometric-only again for the suites that follow
 
-  // Restore a clean antique seed-42 HOME base (chronicle off) for the suites that follow.
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await evaluate(`(()=>{const c=document.getElementById("ages");if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
   await waitSettled("post-zoom-restore");

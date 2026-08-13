@@ -2,11 +2,8 @@ import { NEIGHBORS_8, type Field } from "../core/grid.ts";
 import { createMinHeap } from "../core/heap.ts";
 
 export type FlowResult = {
-  /** Depression-filled elevations: every land cell drains to the ocean. */
   readonly fill: Float64Array;
-  /** Downstream cell index per cell; -1 for ocean sinks. */
   readonly dir: Int32Array;
-  /** Flow accumulation (rain-weighted, default 1 per land cell). */
   readonly acc: Float64Array;
 };
 
@@ -20,7 +17,6 @@ export function computeFlow(
   const { w, h, data } = elev;
   const n = w * h;
 
-  // --- priority-flood: raise pits to their spill level (+EPS, so no flats) ---
   const fill = Float64Array.from(data);
   const visited = new Uint8Array(n);
   const heap = createMinHeap();
@@ -58,7 +54,6 @@ export function computeFlow(
     }
   }
 
-  // --- D8 steepest descent on the filled surface ---
   const dir = new Int32Array(n).fill(-1);
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
@@ -81,7 +76,6 @@ export function computeFlow(
     }
   }
 
-  // --- accumulate downstream, highest fill first ---
   const acc = new Float64Array(n);
   const landOrder: number[] = [];
   for (let i = 0; i < n; i++) {

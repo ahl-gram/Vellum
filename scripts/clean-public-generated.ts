@@ -2,26 +2,9 @@ import { rm } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-/**
- * Scriptorium Sub 3 (#204), decision D requirement 1 (clean-before-regen):
- * remove the generated runtime subtrees under a public/-shaped root before
- * regenerating them. buildAtlas/buildGallery write by overwrite only and tsc
- * never deletes orphans, so without this a renamed engine module leaves an
- * importable orphan in public/explorer/engine that masks a 404 locally (CI and
- * deploy always fresh-checkout, so this protects LOCAL builds and dev). Runs
- * first in `npm run astro:generate`; Sub 4 (#205) grows the cleaned set with
- * atlas/ and gallery/ when generation moves into public/.
- *
- *   node scripts/clean-public-generated.ts          # cleans public/
- *   node scripts/clean-public-generated.ts <root>   # cleans another root (tests)
- */
+/** #204 decision D, clean-before-regen: the generators write by overwrite only and never delete orphans, so without this a renamed module leaves an importable orphan that masks a 404 locally (CI always fresh-checkouts); runs first in npm run astro:generate. */
 
-// Relative to the cleaned root: the gitignored generated set under public/
-// (runtime trees from Sub 3 #204, showcases from Sub 4 #205). explorer/engine
-// is a TOMBSTONE since Sub 9 (#260) retired the tsc emit: nothing regenerates
-// it, but cleaning it keeps a stale pre-#260 local tree out of the artifact.
-// The discovery files (#286) are plain files rather than trees; rm handles both,
-// and cleaning them means a retired route cannot linger in a local sitemap.
+// explorer/engine is a TOMBSTONE (#260 retired the tsc emit): nothing regenerates it, but cleaning it keeps a stale pre-#260 local tree out of the artifact; the discovery files are cleaned so a retired route cannot linger in a local sitemap.
 export const GENERATED_SUBTREES: ReadonlyArray<string> = [
   "explorer/engine",
   "explorer/app.bundle.js",

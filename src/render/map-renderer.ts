@@ -36,18 +36,9 @@ import { currentsLayer } from "./layers/currents.ts";
 export type RenderOptions = {
   widthPx?: number;
   style?: StyleName;
-  /** Draw a compact, style-aware key. Opt-in; off by default. */
   legend?: boolean;
-  /** Draw each realm's coat of arms beside its label. Opt-in; off by default. */
   arms?: boolean;
-  /** Render a thematic data plate instead of the normal land symbology. */
   theme?: ThemeName;
-  /**
-   * #168: opt a regional survey into being self-describing. When present, the
-   * sheet is stamped with the flat recipe AND the region window (data-vellum-region-*),
-   * so a downloaded region redraws from seed + window. The atlas region plates leave
-   * this undefined, so their bytes stay un-stamped (byte-identical to before).
-   */
   regionRecipe?: RegionRecipe;
 };
 
@@ -72,13 +63,6 @@ const THEME_LEADS: Record<ThemeName, string> = {
   population: "Population map",
 };
 
-/**
- * One-line accessible summary, e.g. "Antique chart of The Isle of Rahai, an
- * island in a temperate climate." A thematic plate leads with its subject
- * ("Vegetation map of …") so assistive tech announces what the colors mean.
- * Every field is total over its type, so the sentence can never contain
- * `undefined`; derived from the world, so it stays byte-deterministic.
- */
 function describeChart(
   world: World,
   styleName: StyleName,
@@ -97,10 +81,6 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   const margin = marginFor(widthPx);
   const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
 
-  // The coastline gets width-scaled corner-cutting: 2 iterations at chart width
-  // (byte-identical there) and more on big posters, so the shore reads as a fine
-  // plate at 4200px instead of showing grid-scale facets. Render-time only; the
-  // realm borders, names, and rivers are computed elsewhere and do not move.
   const coastIters = coastSmoothingIterations(widthPx);
   let coastRings = coastRingsGrid(world, coastIters).map((ring) =>
     ring.map(([x, y]) => [proj.px(x), proj.py(y)] as const),
@@ -108,7 +88,6 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   if (coastRings.length === 0) {
     const mid = world.elev.at(world.elev.w >> 1, world.elev.h >> 1);
     if (mid > world.seaLevel) {
-      // window is solid land: the whole map area is the landmass
       const m = margin;
       coastRings = [[
         [m, m],
@@ -138,13 +117,10 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     theme: opts.theme,
   };
 
-  // furniture is planned first so text layers can route around it
   const cartouchePlan = planCartouche(ctx);
   ctx.labels.claim(cartouchePlan.rect);
   const scalebarPlan = planScalebar(ctx);
   ctx.labels.claim(scalebarPlan.box);
-  // The legend anchors to a corner, so plan it before the (flexible) compass and
-  // let the rose route around it, not the other way round.
   const legendPlan = opts.legend
     ? planLegend(ctx, [cartouchePlan.rect, scalebarPlan.box])
     : null;
@@ -152,26 +128,14 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   const compassPlan = planCompass(ctx, cartouchePlan, scalebarPlan.box, legendPlan?.box);
   if (compassPlan) ctx.labels.claim(compassPlan.box);
 
-  // evaluation order = label priority: settlements claim space before
-  // flexible feature labels, which claim before decorative art
+  // Evaluation order IS label priority: settlements claim before feature labels, before decorative art.
   const settlements = settlementsLayer(ctx);
   const featureLabels = featureLabelsLayer(ctx);
   const seaDecor = seaDecorLayer(ctx, cartouchePlan, compassPlan);
-  // arms claim last: decorative and opt-in, they yield to every real label
   const heraldry = opts.arms ? heraldryLayer(ctx, featureLabels.realmAnchors) : null;
 
-  // A thematic plate replaces the land symbology (elevation tint, contours,
-  // terrain glyphs, political wash) with its own colored cells; the coastline,
-  // water, rivers, roads, settlements, and labels stay as reference.
   const themed = opts.theme !== undefined;
 
-  // On a regional survey a river still runs one ocean cell past its mouth by
-  // design (hydrology terminates a stream just offshore), so it would draw a
-  // short stub into open water seaward of the drawn coast. Clip the rivers to
-  // the coast on region sheets so every stream ends exactly at the shore (#223).
-  // Terrain glyphs need no clip: the frame-pinned coast now faithfully contains
-  // the land they sit on. World charts have no region window and are untouched,
-  // keeping the committed goldens byte-identical.
   const clipRegionLand = (node: SvgNode): SvgNode =>
     world.region
       ? el("g", { "clip-path": "url(#region-land-clip)" }, [node])
@@ -232,11 +196,6 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     ...textureDefs(ctx),
   ]);
 
-  // A regional inset needs its zoom window to redraw, so a FLAT recipe alone would
-  // mislead. A world chart is reproducible from its flat recipe; a region becomes
-  // reproducible only when the caller opts in with a regionRecipe, which also stamps
-  // the window (#168). The atlas region plates pass no regionRecipe, so they stay
-  // un-stamped and byte-identical to before.
   const reproducible = world.region === undefined || opts.regionRecipe !== undefined;
 
   const root = el(
@@ -246,14 +205,10 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
       width: Math.round(proj.widthPx),
       height: Math.round(proj.heightPx),
       viewBox: `0 0 ${proj.widthPx} ${proj.heightPx}`,
-      // a chart is one graphic to assistive tech; a self-contained aria-label
-      // avoids the duplicate-id hazard of aria-labelledby on multi-chart pages
+      // A self-contained aria-label avoids the duplicate-id hazard of aria-labelledby on multi-chart pages.
       role: "img",
       "aria-label": description,
       ...(reproducible ? recipeAttrs(world, style.name) : {}),
-      // #168: conditional-spread on the region window too, so a world chart or an
-      // un-opted region emits ZERO region attrs (never an undefined key) and keeps
-      // its committed bytes; mirrors the coastWarp discipline (#137).
       ...(opts.regionRecipe ? regionRecipeAttrs(opts.regionRecipe) : {}),
     },
     [

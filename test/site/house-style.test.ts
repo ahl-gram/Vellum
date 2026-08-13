@@ -3,19 +3,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-/**
- * The Specimen Book (#324): the ratified house style lives ONCE in the root
- * sheet /house.css, linked by BaseLayout on every page beside /fonts.css and
- * /motion.css. The specs asserted here are the 2026-07-30 ledger ratifications
- * (the comment on #324); a change to any of them is a re-ratification, not a
- * refactor, so these pins are deliberately literal.
- */
+// The Specimen Book (#324): the house style lives ONCE in /house.css, linked by BaseLayout on every page. The specs are the 2026-07-30 ledger ratifications (the comment on #324); a change is a re-ratification, so these pins are deliberately literal.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
 const house = () => read("public/house.css");
 
-/** The css of one selector's rule block (first match), braces stripped. */
 const ruleOf = (css: string, selector: RegExp): string => {
   const m = css.match(new RegExp(`(^|\\n)\\s*${selector.source}[^{]*\\{([^}]*)\\}`));
   return m ? m[2] : "";
@@ -129,19 +122,14 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
   wears("src/pages/seed-of-the-day/index.astro", /<a[^>]*class="[^"]*control/, "the actions link wears the idiom");
   wears("src/pages/print-room/index.astro", /class="[^"]*desk-head archivist-head/, "the desk head is a standing head");
   wears("src/pages/print-room/index.astro", /class="[^"]*offering-field archivist-label/, "the offering field is an inline label");
-  // #270: the Broadside promoted the Explorer's group heads from the inline tier
-  // (the old Map/Display/Actions row labels) to the standing tier: The Land / The
-  // Hand / The Press each preside over a panel, the print-room desk-head precedent.
+  // #270 promoted the Explorer's group heads from the inline tier to the standing tier, the print-room desk-head precedent.
   wears("src/pages/explorer/index.astro", /class="panel-head archivist-head"/, "the Broadside group heads are standing heads");
   wears("src/pages/faq/index.astro", /<strong class="archivist-label">/, "the TOC heading is an inline label");
   wears("src/pages/glossary/index.astro", /<strong class="archivist-label">/, "the TOC heading is an inline label");
 });
 
 test("the Notice to Mariners folds into the families (#324 follow-up, candidate C)", () => {
-  // The audit missed this block; Alex chose the full fold from the rendered
-  // candidates (2026-07-30): the 6px panel family, the archivist standing
-  // head (markup class, pinned above), and the flourish body like home's
-  // other asides.
+  // Alex chose the full fold from the rendered candidates (2026-07-30): the panel family, the archivist standing head, the flourish body.
   const css = read("public/index.css");
   assert.match(css, /\.notice[^{]*\{[^}]*border-radius:\s*6px/, ".notice wears the panel radius");
   assert.ok(
@@ -173,9 +161,7 @@ test("the old page-local skins are gone (#324)", () => {
 });
 
 test("no token value smuggled past the guards in rgb() form (#324)", async () => {
-  // rgb(74 56 38 / a) IS --ink-dark with alpha; the hex guard cannot see it.
-  // Alpha over a token is written rgb(from var(--token) r g b / a) instead, so
-  // the quotation stays attached to its name.
+  // rgb(74 56 38 / a) IS --ink-dark with alpha, invisible to the hex guard; alpha over a token is written rgb(from var(--token) r g b / a) so the quotation stays attached to its name.
   const { SITE_PALETTE } = await import("../../src/atlas/palette.ts");
   const sources = [
     "public/index.css", "public/explorer/index.css", "public/explorer/broadside.css",
@@ -201,9 +187,7 @@ test("no token value smuggled past the guards in rgb() form (#324)", async () =>
 });
 
 test("the chart quotations equal the render constants they quote (#324)", async () => {
-  // The --chart-* namespace exists so a site-side value BORROWED from the
-  // chart renderer can never silently drift from it. The render side is the
-  // byte-identity domain: this test reads it, never changes it.
+  // The --chart-* namespace exists so a site-side value BORROWED from the chart renderer can never silently drift; the render side is byte-identity domain, read here, never changed.
   const { SITE_PALETTE } = await import("../../src/atlas/palette.ts");
   const { STYLES } = await import("../../src/render/style.ts");
   assert.equal(SITE_PALETTE["--chart-paper"], STYLES.antique.paper,

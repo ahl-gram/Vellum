@@ -1,8 +1,6 @@
 body {
   padding: 3rem 1.5rem 5rem;
 }
-/* The Punchcutter's Case (#228), page members: the shell's .wordmark/.topnav/footer
-   display and .tagline flourish bindings live in BaseLayout (#263). */
 h2, .card h3 {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
@@ -11,31 +9,11 @@ figcaption, .card p, .underhood, .notice-body {
 }
 main { max-width: 1080px; }
 header { margin-bottom: 2.5rem; }
-/* Deliberate landing-page deviation (#268 follow-up): the wordmark alone is
-   grander on home, whose head has no room name to fill the right side; the
-   taller line box also restores the vertical presence the room pages get.
-   Pinned above the shell's specificity because the layout's inline style
-   renders after this file, so an equal-specificity rule here would lose.
-   Home's other deviation is the grander footer below.
-   Keyed on .wordmark, not h1, since #288: the shell now sizes the wordmark
-   through a class, and a bare `header h1` (0,0,2) LOSES to `.wordmark` (0,1,0),
-   which would silently drop home back to the room-page 1.75rem. */
+/* Home's deliberate wordmark deviation, keyed on .wordmark not h1 (#288): a bare header h1 at (0,0,2) LOSES to the shell's .wordmark class and home would silently drop to the room-page 1.75rem; pinned by e2e RH3. */
 header .wordmark { font-size: 2.7rem; }
 h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   padding-bottom: 0.3rem; margin-top: 3.5rem; }
-/* The title cartouche (#289): the charts' own cartouche form, mirrored by hand
-   from src/render/layers/cartouche.ts at a held k (the renderer's
-   k = widthPx / 1500) and rebuilt the hybrid way: CSS borders for the two
-   rects, fixed-size corner SVGs for the flourish quads, an SVG diamond over a
-   CSS divider line, so the frame reflows at any width with zero distortion.
-   If the renderer's cartouche ever changes shape, this is the copy to redraw.
-   The paper is the chart's own at the chart's own 0.94, quoted through
-   --chart-paper (#324; house-style.test.ts pins the token to the render
-   constant), a deliberate D4 exception to the shell palette; the ink hexes
-   already ARE the shell's tokens, consumed as vars below. Full main width, like the hero plate under
-   it (Alex's call, 2026-07-25). The cartouche body keeps the chart's serif
-   stack; the hook alone takes the site's display face, a second deliberate
-   divergence from the chart title, called at the same review. */
+/* #289: the chart cartouche mirrored BY HAND from src/render/layers/cartouche.ts at a held k=1.5 (CSS borders plus fixed corner SVGs, so the frame reflows without distortion); if the renderer's cartouche ever changes shape, this is the copy to redraw. */
 .cartouche {
   --k: 1.5;
   margin: 2.5rem auto 0;
@@ -61,8 +39,7 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
 .cartouche .flourish.bl { bottom: 0; left: 0; transform: scaleY(-1); }
 .cartouche .flourish.br { bottom: 0; right: 0; transform: scale(-1, -1); }
 .cartouche .hook {
-  /* the vw cap fits the hook's longer ratified line on one line down to
-     ~360px, the way the renderer's titleFs shrinks the chart title to fit */
+  /* the vw cap fits the hook's longer line on one line down to ~360px, the way the renderer's titleFs shrinks to fit */
   font-size: min(calc(var(--k) * 24px), 5vw);
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
   letter-spacing: calc(var(--k) * 1.4px);
@@ -71,9 +48,7 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
 .cartouche .divider {
   position: relative; height: calc(var(--k) * 7.2px);
   margin: calc(var(--k) * 11px) auto calc(var(--k) * 13px);
-  /* the renderer spans 60% of the OUTER rect; this box lives in .rule's
-     content box, inset 28k per side (2.2 outer border + 5 margin + 0.8 rule
-     + 20 padding), so add back 0.6 x 56k to keep the chart's proportion */
+  /* the renderer spans 60% of the OUTER rect; this box is inset 28k per side (2.2+5+0.8+20), so add back 0.6 x 56k to keep the chart's proportion */
   width: calc(60% + var(--k) * 33.6px);
 }
 .cartouche .divider::before {
@@ -89,10 +64,6 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   display: flex; gap: calc(var(--k) * 8px);
   justify-content: center; align-items: center; margin: 0;
 }
-/* The seed form joined the house control idiom at #324 (Alex's call,
-   2026-07-30: no cartouche exception): skin from /house.css, the button as
-   the page's one dark primary. Only the k-scaled geometry and the input's
-   iOS floor stay local. */
 .cartouche .seedrow input {
   /* 16px floor: a smaller input font makes iOS Safari zoom the page on focus */
   font-size: 16px;
@@ -103,9 +74,6 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
   font-size: calc(var(--k) * 11px);
   padding: calc(var(--k) * 6.5px) calc(var(--k) * 12px);
 }
-/* The resurrected seedline (D3), wearing the chart SUBTITLE's exact voice
-   (cartouche.ts: 10.5k italic inkSoft, no tracking, sentence case), not the
-   CHART № line's: Alex's call at the shipped-hero review, 2026-07-25. */
 .cartouche-seedline {
   font-size: calc(var(--k) * 10.5px);
   font-style: italic; color: var(--ink-faded);
@@ -133,11 +101,6 @@ figcaption { text-align: center; font-style: italic; color: var(--ink-brown); pa
 .card:hover { background: var(--control-cream); }
 .card h3 { margin: 0 0 0.4rem; letter-spacing: 0.05em; }
 .card p { margin: 0; font-style: italic; color: var(--ink-brown); line-height: 1.5; }
-/* Notice to Mariners (#289): the parody block heading How It Works, in the
-   voice of a real chart's disclaimer. The audit missed it; folded into the
-   families at the #324 follow-up (Alex's call from the rendered candidates,
-   2026-07-30, C): the 6px panel radius, the archivist standing head (markup
-   class), and the flourish body like home's other asides. */
 .notice {
   max-width: 46rem; margin: 1.2rem 0 1.6rem;
   border: 1px solid var(--line-tan); background: var(--parchment-panel);
@@ -152,6 +115,5 @@ figcaption { text-align: center; font-style: italic; color: var(--ink-brown); pa
 .underhood a { color: var(--ink-brown); }
 code { background: var(--parchment-deep); padding: 0.1em 0.4em; border-radius: 3px;
   font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
-/* Landing-page footer deviations (#263): grander size and spacing, pinned
-   above the shell rule for the same cascade reason as the masthead pins. */
+/* Home's grander footer, pinned above the shell rule for the same cascade reason as the masthead (e2e RH4). */
 main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }

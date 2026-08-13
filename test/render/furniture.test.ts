@@ -11,10 +11,7 @@ import { planScalebar } from "../../src/render/layers/scalebar.ts";
 import { planLegend } from "../../src/render/layers/legend.ts";
 import { boxesOverlap } from "../../src/render/geometry.ts";
 
-// The compass, scale bar, and cartouche are decorative "furniture" placed in
-// pixel space. The scale bar is pinned to the bottom-left; the compass searches
-// open ocean. Without coordination the compass lands on the scale bar (it did
-// on ~85% of seeds before this was fixed), so these pin the no-overlap contract.
+// The compass, scale bar, and cartouche are pixel-space "furniture"; without coordination the compass landed on the scale bar on ~85% of seeds, so these pin the no-overlap contract.
 
 function ctxFor(seed: number): RenderCtx {
   const world = generateWorld(defaultRecipe(seed, { gridW: 160, gridH: 120 }));
@@ -56,8 +53,7 @@ test("the compass rose clears the scale bar and cartouche", () => {
 });
 
 test("the compass rose clears the legend", () => {
-  // the legend is planned before the compass so the (flexible) compass yields to
-  // the (corner-anchored) legend; pins that the compass never lands on it
+  // The legend is planned before the compass, so the flexible compass yields to the corner-anchored legend.
   let drawn = 0;
   for (let seed = 1; seed <= 40; seed++) {
     const ctx = ctxFor(seed);

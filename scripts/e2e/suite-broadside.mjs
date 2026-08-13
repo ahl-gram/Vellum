@@ -1,12 +1,4 @@
-// The Broadside checks (BR1-BR8, #270): the Explorer's controls regrouped by what
-// they do to the world (The Land reshapes, The Hand dresses, The Press acts), the
-// countersigned seals, the always-visible journal button, and the footnote
-// apparatus (marks that note on hover/focus, toggle on touch, and land on real
-// /glossary/ anchors). The unit pins in test/site/broadside.test.ts hold the
-// SOURCE to this shape; these checks hold the built, running page to it: rendered
-// grouping, real input (CDP mouse/keys, emulated hover:none), and the popover
-// behavior no source test can see. Self-contained like the survey suite
-// (navigates itself, scoped no-4xx + console-error delta).
+// Broadside e2e (BR1-BR8, #270): the regrouped controls, seals, journal button, and footnote apparatus on the built running page (the unit pins in test/site/broadside.test.ts hold the SOURCE to this shape); self-contained with scoped deltas.
 export async function run(ctx) {
   const { evaluate, send, check, sleep, waitSettled, waitReady, touch, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
 
@@ -20,8 +12,6 @@ export async function run(ctx) {
     await waitReady();
     await waitSettled(label);
   };
-  // #300: the survey ink lands a beat after the tick, so BR2 waits for it rather than
-  // reading in the dispatch's own turn.
   const waitInked = async (label) => {
     for (let i = 0; i < 120; i++) {
       if (await evaluate(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
@@ -29,8 +19,6 @@ export async function run(ctx) {
     }
     throw new Error("waitInked timeout " + label);
   };
-  // The Explorer waits (waitReady/waitSettled) probe #status/#map, which plain
-  // pages do not carry; the glossary hop below only needs the document loaded.
   const gotoPlain = async (url, label) => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url });
@@ -41,8 +29,6 @@ export async function run(ctx) {
     throw new Error("gotoPlain timeout " + label);
   };
 
-  // BR1: the grouping truth, in the RENDERED page: every control sits in the group
-  // its wiring earns (the point of the issue), read from the live DOM.
   await goto(EXP + "#seed=42&style=antique", "broadside-base");
   const br1 = await evaluate(`(()=>{
     const groupOf=(id)=>{const el=document.getElementById(id);const g=el&&el.closest('[role="group"]');
@@ -60,9 +46,6 @@ export async function run(ctx) {
     JSON.stringify(br1),
   );
 
-  // BR1b: the two slider tracks are twins (Alex's ledger directive, round 3): the
-  // endpoint words differ in width, so without real columns the flexed tracks
-  // drift apart on both ends. Same left edge, same right edge, within 1px.
   const br1b = await evaluate(`(()=>{
     const l=document.getElementById("land").getBoundingClientRect();
     const c=document.getElementById("coast").getBoundingClientRect();
@@ -75,15 +58,7 @@ export async function run(ctx) {
     JSON.stringify(br1b),
   );
 
-  // BR2: the Press's second line never changes shape (#270 ruling 2): the two gold
-  // links share the action-link dressing and the journal button stays standing and
-  // in place through a survey tick and untick.
-  //
-  // #300 split this into three turns. It used to tick and untick inside ONE evaluate, which
-  // since the yield means the arm is cancelled before it ever builds, so `during` was
-  // measured on a sheet that was never armed and the clause stopped exercising anything.
-  // The tick, the wait for the ink, and the untick are separate now, so `during` is a
-  // genuinely armed state again.
+  // Tick, wait-for-ink, and untick are three separate turns (#300): inside ONE evaluate the yield cancels the arm before it builds, so `during` would be measured on a never-armed sheet.
   const at = `((el)=>({shown:el.getClientRects().length>0,top:Math.round(el.getBoundingClientRect().top)}))`;
   const before = await evaluate(`(()=>{
     const j=document.getElementById("journal-link"),o=document.getElementById("order-plates");const at=${at};
@@ -102,9 +77,6 @@ export async function run(ctx) {
     JSON.stringify(br2),
   );
 
-  // BR3: the seals are real checkboxes in chip dress. Clicking the LABEL (the user
-  // path) toggles the box and the countersign: the reserved slot gains the check
-  // mark and the fill flips, so state never reads by color alone.
   const br3 = await evaluate(`(()=>{
     const box=document.getElementById("ages");const lbl=box.closest("label");
     const face=()=>({mark:getComputedStyle(lbl,"::before").content,bg:getComputedStyle(lbl).backgroundColor});
@@ -124,10 +96,6 @@ export async function run(ctx) {
     JSON.stringify(br3),
   );
 
-  // BR4: the footnote apparatus, keyboard side. Focusing a mark opens its note
-  // (a top-layer popover, real text wired aria-describedby -> role="tooltip");
-  // blurring closes it; Escape (a real key, the popover's own close request)
-  // closes a re-opened note while focus stays on the mark.
   const br4a = await evaluate(`(()=>{
     const mark=document.querySelector('a.fn[data-note="note-seeds-choice"]');
     const note=document.getElementById("note-seeds-choice");
@@ -151,8 +119,6 @@ export async function run(ctx) {
     JSON.stringify({ br4a, br4b }),
   );
 
-  // BR5: the hover side, through a REAL mouse move (mouseenter must fire as it does
-  // for a user). Over the coast mark the note shows; away again it hides.
   const rect = await evaluate(`(()=>{const m=document.querySelector('a.fn[data-note="note-coast-warp"]');
     const r=m.getBoundingClientRect();return{x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rect.x, y: rect.y });
@@ -163,20 +129,10 @@ export async function run(ctx) {
   const awayClosed = await evaluate(`!document.getElementById("note-coast-warp").matches(":popover-open")`);
   check("BR5 the note shows under a real hover and hides when the pointer leaves", overOpen && awayClosed, JSON.stringify({ overOpen, awayClosed }));
 
-  // BR6: the touch side, the ratified tap-toggle, through REAL taps (CDP touch,
-  // which fires the full compat sequence: mouseenter, focus, click, and the
-  // popover's own pointerdown light dismiss; a synthetic .click() skips those and
-  // once hid a real off-by-one here). Device emulation is the suite-zoom-gestures
-  // idiom: metrics override + touch is what actually flips the hover/pointer
-  // media in this browser; setEmulatedMedia's feature overrides are a no-op.
-  // First tap opens the note (no navigation), second tap closes it.
+  // REAL CDP taps fire the full compat sequence a synthetic .click() skips (which once hid an off-by-one here); device metrics + touch emulation is what actually flips the hover/pointer media in this browser, setEmulatedMedia's feature overrides are a no-op.
   await setMobileViewport(390, 700);
   const emulated = await evaluate(`window.matchMedia("(hover: none)").matches`);
-  // Every probe guards against the mark's document being GONE: the regression this
-  // check forbids is precisely "the tap navigated away", and the post-tap sleep is
-  // what lets a pending anchor navigation commit before the fresh evaluate reads
-  // the path (a same-evaluate read cannot see it; the guard-prover proved a
-  // dropped preventDefault survived that shape).
+  // The post-tap sleep lets a pending anchor navigation COMMIT before a fresh evaluate reads the path: a same-evaluate read cannot see it (the guard-prover proved a dropped preventDefault survived that shape).
   const tapAt = async () => {
     const p = await evaluate(`(()=>{const m=document.querySelector('a.fn[data-note="note-survey"]');
       if(!m)return null;
@@ -203,8 +159,6 @@ export async function run(ctx) {
     JSON.stringify({ emulated, tapped1, tapped2, afterTap1, afterTap2 }),
   );
 
-  // BR7: the back matter is real: every anchor the marks point at exists on the
-  // BUILT glossary page, inside the new drafting-table section (ruling 6).
   await gotoPlain(`http://127.0.0.1:${PORT}/glossary/`, "broadside-glossary");
   const br7 = await evaluate(`(()=>{
     const ids=["seeds-choice","coast-warp","survey","verso"].map((id)=>[id,!!document.getElementById(id)]);
@@ -219,7 +173,6 @@ export async function run(ctx) {
     JSON.stringify(br7),
   );
 
-  // BR8: the whole flow above ran clean (scoped console/network health).
   const errDelta = consoleErrors.slice(errBase);
   check(
     "BR8 the broadside flow is clean (no console errors, no 4xx)",

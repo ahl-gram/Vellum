@@ -7,9 +7,7 @@ import { attachSeatlessLandmasses } from "./sea-route.ts";
 import type { Settlement } from "./sites.ts";
 
 export type RealmsResult = {
-  /** Realm id per cell; -1 for ocean. */
   readonly labels: Int16Array;
-  /** Settlement index of each realm's seat; index in this array = realm id. */
   readonly seats: ReadonlyArray<number>;
 };
 
@@ -17,38 +15,14 @@ const SLOPE_WEIGHT = 6;
 const RIVER_WEIGHT = 1.5;
 const MIN_SEAT_SPACING = 24;
 
-// #79 per-landmass realm budget: the pre-#79 world formula
-// `clamp(round((landCells/n)*8), 1, 5)`, now scoped to each landmass. Realm count
-// is a property of the fictional world (its grid FRACTION), so it stays
-// resolution-independent across the 320x240 production grid and the smaller grids
-// the unit/render tests use, rather than tracking pixel count.
+// Realm budget scales with the grid FRACTION, so counts stay resolution-independent across production and test grids.
 const REALM_LAND_DIVISOR = 8;
 const MAX_REALMS_PER_LANDMASS = 5;
-// A landmass below this fraction of the grid (~0.4%, about 300 cells at 320x240)
-// attaches to a neighbour by sea route even when settled (size wins): only a
-// substantial island governs itself.
 const SUBSTANTIAL_FRACTION = 0.004;
-// Overall realm ceiling per world; an over-ceiling archipelago attaches its
-// smallest islands to neighbours instead of minting more realms.
 const GENERATION_CEILING = 8;
 
-/**
- * Partition land into realms. Open water is a hard frontier: connected landmasses
- * (from labelLandmasses) each host their own realms, the terrain-cost flood never
- * crosses to another landmass, and a substantial inhabited island is its own
- * realm. Small or empty islands attach to the nearest realm by sea route. Rivers
- * and ridges cost more to cross, so internal borders follow natural features.
- */
 export type RealmOptions = {
-  /** Overall realm ceiling for the world (e.g. 1 for a city-state). */
   maxRealms?: number;
-  /**
-   * Natural-frontier cells the realm flood may claim but never cross (#140/#141):
-   * major rivers united with large mountain crests (elevation-gated watershed
-   * divides). Where two realms grow toward each other across one they meet on it, so
-   * the river or ridge becomes their frontier. Opt-in, so unit-test partitions stay
-   * feature-agnostic; generate.ts builds it in world/generate.ts.
-   */
   barrier?: Uint8Array;
 };
 
@@ -87,11 +61,6 @@ export function partitionRealms(
   return { labels, seats };
 }
 
-/**
- * Choose one seat per realm: the capital seats realm 0 and its landmass always
- * governs itself; every other substantial, inhabited landmass adds realms up to
- * its own area budget, largest first, until the world ceiling is reached.
- */
 function selectSeats(
   settlements: ReadonlyArray<Settlement>,
   sizes: ReadonlyArray<number>,
@@ -137,8 +106,6 @@ function selectSeats(
     const budget = Math.min(budgetOf(lm), overallCap - seats.length);
     let picks = pickTownSeats(settlements, lmOf, lm, budget, []);
     if (picks.length === 0) {
-      // Inhabited but seatless: promote its top settlement (a village) so the
-      // seats-indexed model still holds.
       const top = topSettlementOnLandmass(settlements, lmOf, lm);
       if (top >= 0) picks = [top];
     }
@@ -151,12 +118,6 @@ function selectSeats(
   return seats;
 }
 
-/**
- * Greedy farthest-point selection over the towns of one landmass, seeded with the
- * seats already fixed on it. This is the pre-#79 global seat loop scoped to a
- * single landmass; with every town on the mainland it reproduces the old
- * selection exactly.
- */
 function pickTownSeats(
   settlements: ReadonlyArray<Settlement>,
   lmOf: (s: Settlement) => number,
@@ -190,7 +151,6 @@ function pickTownSeats(
   return chosen;
 }
 
-/** Highest-desirability settlement on a landmass; ties break by position (x, y). */
 function topSettlementOnLandmass(
   settlements: ReadonlyArray<Settlement>,
   lmOf: (s: Settlement) => number,
@@ -215,12 +175,6 @@ function topSettlementOnLandmass(
   return best;
 }
 
-/**
- * Terrain-cost Voronoi flood from the seats, confined to land and to a single
- * landmass: the 8-connected step is blocked both at the sea (`<= seaLevel`) and at
- * any diagonal corner where the neighbour belongs to a different landmass, so a
- * realm never bleeds across open water.
- */
 function floodRealms(
   labels: Int16Array,
   elev: Field,
@@ -252,9 +206,6 @@ function floodRealms(
     const i = heap.pop();
     if (done[i]) continue;
     done[i] = 1;
-    // #140 barrier: a major-river cell is claimable but never propagates (a
-    // membrane), so two realms meet on it -- except a seat, which must always
-    // flood its own realm even when the river runs through its cell.
     if (barrier !== undefined && barrier[i] === 1 && isSeatCell[i] === 0) continue;
     const d = dist[i] as number;
     const x = i % w;
@@ -268,8 +219,6 @@ function floodRealms(
       if (done[ni]) continue;
       if ((data[ni] as number) <= seaLevel) continue;
       if ((landmassIds[ni] as number) !== lm) continue;
-      // #140: a diagonal step must not slip between two diagonally-adjacent barrier
-      // cells, or the flood would leak across a diagonal river.
       if (
         barrier !== undefined &&
         dx !== 0 &&
@@ -293,16 +242,6 @@ function floodRealms(
   }
 }
 
-/**
- * A major-river barrier can strand land reachable only across a river (e.g. two
- * rivers seal a landmass coast-to-coast, isolating a seatless half). Assign every
- * such cell so no land is left unassigned: re-run the flood WITHOUT the barrier and
- * adopt its label only where the barrier flood left -1. The annexing realm simply
- * owns both banks there (the river is interior, not a frontier, where one realm
- * holds both sides). Deterministic; the second flood is skipped unless a barrier
- * actually walled off part of a SEATED landmass -- seatless islands, which are -1
- * here too, are left for attachSeatlessLandmasses.
- */
 function fillBarrierStrandedLand(
   labels: Int16Array,
   elev: Field,
@@ -315,9 +254,6 @@ function fillBarrierStrandedLand(
 ): void {
   const { w, h, data } = elev;
   const n = w * h;
-  // Genuine stranding is only on a SEATED landmass: a seatless island is -1 here too,
-  // but the barrier-free reflood (also landmass-confined) leaves it -1, so it is not
-  // stranded -- excluding it keeps the second flood from running on nearly every world.
   const seatedLm = new Set<number>();
   for (const si of seats) {
     const s = settlements[si] as Settlement;
@@ -335,10 +271,6 @@ function fillBarrierStrandedLand(
     }
   }
   if (!stranded) return;
-  // Re-flood with no barrier: this assigns every seated-landmass cell, so adopting
-  // its label wherever the barrier flood left -1 fills the stranded region without
-  // disturbing any cell the barrier already placed. Seatless landmasses stay -1 for
-  // attachSeatlessLandmasses to handle.
   const full = new Int16Array(n).fill(-1);
   floodRealms(full, elev, seaLevel, slope, riverCells, landmassIds, settlements, seats);
   for (let i = 0; i < n; i++) {

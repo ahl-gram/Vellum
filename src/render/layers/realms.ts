@@ -25,7 +25,6 @@ function boxBlur(f: Field, passes: number): Field {
   return cur;
 }
 
-/** Soft hand-tinted color washes over each realm's territory. */
 export function realmTintsLayer(ctx: RenderCtx): SvgNode | null {
   const { world, proj, style } = ctx;
   const { labels, seats } = world.realms;
@@ -83,7 +82,6 @@ function chainBorderSegments(segs: ReadonlyArray<Seg>): Point[][] {
     const s = segs[i] as Seg;
     const chain: Point[] = [[s[0], s[1]], [s[2], s[3]]];
 
-    // extend both ends greedily
     for (const end of [1, 0] as const) {
       for (;;) {
         const tip = end === 1 ? chain[chain.length - 1]! : chain[0]!;
@@ -110,7 +108,6 @@ function chainBorderSegments(segs: ReadonlyArray<Seg>): Point[][] {
   return chains;
 }
 
-/** Political borders along realm boundaries, in the style's own boundary treatment. */
 export function realmBordersLayer(ctx: RenderCtx): SvgNode | null {
   const { world, proj, style } = ctx;
   const { labels, seats } = world.realms;
@@ -145,10 +142,7 @@ export function realmBordersLayer(ctx: RenderCtx): SvgNode | null {
     ),
   );
 
-  // KEEP THIS ATTRIBUTE ORDER (#158). Attributes serialize in insertion order, and
-  // topographic's committed border is byte-identical to its pre-#158 form only while
-  // the order stays d, fill, stroke, stroke-width, stroke-dasharray, stroke-linecap,
-  // stroke-opacity. Reordering them regenerates the committed charts for no reason.
+  // KEEP THIS ATTRIBUTE ORDER: attributes serialize in insertion order, and reordering them regenerates the committed charts for no reason.
   return el(
     "g",
     { id: "layer-realm-borders" },

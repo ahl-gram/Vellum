@@ -8,26 +8,11 @@ import { cleanPublicGenerated, GENERATED_SUBTREES } from "../../scripts/clean-pu
 
 process.env.ASTRO_TELEMETRY_DISABLED = "1";
 
-/**
- * Scriptorium Sub 3 (#204): the app surfaces' source served verbatim from
- * public/. The spec is the ratified Sub 1 decision doc (the 2026-07-21 comment
- * on #202), sections 1 and 3 plus constraints 2, 3, 4, and 10: the committed
- * app sources under public/{explorer,print-room,seed-of-the-day,lib,shared}
- * ship verbatim (since Sub 8 (#254) the page SHELLS render through BaseLayout
- * instead; only the JS/CSS source keeps its public/ home), and the gitignored
- * runtime trees (the tsc engine emit + the Vite bundle twins and their shared
- * chunks, #208) are regenerated into public/ by `npm run astro:generate`
- * before every astro dev/build, with decision D's clean-before-regen so a
- * renamed engine module cannot leave an importable orphan that masks a 404
- * locally.
- */
+// Scriptorium Sub 3 (#204): the app surfaces' source served verbatim from public/. SPEC: the ratified 2026-07-21 comment on #202 (sections 1 and 3, constraints 2, 3, 4, 10), with decision D's clean-before-regen so a renamed engine module cannot leave an importable orphan that masks a 404 locally.
 
 const root = (p = "") => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 
-// The literal Sub 3 floor. Deliberately NOT derived from GENERATED_SUBTREES:
-// the review of this sub caught that a constant serving as both subject and
-// oracle lets a botched Sub 4 list edit (drop explorer/engine while adding
-// atlas/gallery) pass every guard. Sub 4 may only GROW the cleaned set.
+// The literal Sub 3 floor, deliberately NOT derived from GENERATED_SUBTREES: a constant serving as both subject and oracle lets a botched list edit pass every guard. Sub 4 may only GROW the cleaned set.
 const SUB3_GENERATED = [
   "explorer/engine",
   "explorer/app.bundle.js",
@@ -73,8 +58,7 @@ test("clean-before-regen removes exactly its own generated subtrees, tolerating 
   writeFileSync(join(tmp, "explorer", "app.js"), "// committed source, must survive");
 
   await cleanPublicGenerated(tmp);
-  // Assert the LITERAL paths, not GENERATED_SUBTREES: the subject iterates that
-  // constant, so an assertion derived from it would be circular.
+  // Assert the LITERAL paths: an assertion derived from GENERATED_SUBTREES would be circular.
   assert.ok(!existsSync(join(tmp, "explorer", "engine")), "the engine subtree should be cleaned before regen");
   for (const twin of SUB3_GENERATED.filter((s) => s.endsWith(".bundle.js"))) {
     assert.ok(!existsSync(join(tmp, twin)), `${twin} should be cleaned before regen`);

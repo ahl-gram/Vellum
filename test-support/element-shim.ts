@@ -1,26 +1,6 @@
-// The element shim for site modules that BUILD DOM (the reading frame, the room's
-// colophon, and since #319 the living chart's overlays), extracted from
-// test/site/reading-frame.test.ts when #318 gave it a second consumer. Node has no
-// `document`; this stands in for the ENVIRONMENT only, never for the module under test:
-// create / append / classify / attribute / position / listen, and nothing else, so every
-// assertion in a consuming test reads structure the real code produced.
-//
-// #319 widened it by exactly what the place overlay and the voyage session build needs:
-// `createElementNS` (the overlay svg, its polyline, the two marks), `style` and `dataset`
-// (the hit-targets are positioned by manifest fractions), and `addEventListener` (the
-// hits wire hover/focus/click, which this records rather than dispatches).
-//
-// It also answers queries, and the shape of that answer is deliberate: `querySelector`
-// returns null and `querySelectorAll` returns empty, which is EXACTLY true of a mount
-// nothing has drawn into yet. This is not a selector engine and must never grow into one:
-// a hand-rolled `:scope >` matcher would be checked by nothing, so a subtly wrong one
-// would make a caller's stale-node removal silently no-op while its test still passed.
-// Consuming tests therefore assert on the nodes the code CREATED, never on what a query
-// found.
-//
-// Lives in test-support/ (not test/) because `node --test` with no path arg collects
-// every file under test/, and a bare helper module there would run as a phantom
-// 0-subtest "pass".
+// DOM element shim for site modules that build DOM: environment only, never the module under test.
+// Queries deliberately answer "nothing here", true of an undrawn mount; never grow this into a selector engine.
+// Lives outside test/ so node --test does not collect it as a phantom 0-test file.
 
 export class El {
   tagName: string;
@@ -45,8 +25,7 @@ export class El {
     this.tagName = tag.toUpperCase();
   }
 
-  // `id` reflects to the ATTRIBUTE, not a plain field: the no-ids guard reads attrs,
-  // so a stray `el.id = "map"` has to land where the guard can see it.
+  // id reflects to the ATTRIBUTE so the no-ids guard can see a stray el.id assignment.
   get id(): string { return this.attrs.get("id") ?? ""; }
   set id(v: string) { this.attrs.set("id", String(v)); }
   get className(): string { return [...this.classes].join(" "); }
@@ -95,7 +74,6 @@ export class El {
   getAttribute(name: string): string | null { return this.attrs.get(name) ?? null; }
   removeAttribute(name: string): void { this.attrs.delete(name); }
   addEventListener(type: string): void { this.listeners.push(type); }
-  // "Nothing is here", which is true of an undrawn mount. See the header: not a matcher.
   querySelector(): El | null { return null; }
   querySelectorAll(): El[] { return []; }
   remove(): void {
@@ -109,13 +87,8 @@ export class El {
 export const installShim = (): void => {
   (globalThis as { document?: unknown }).document = {
     createElement: (tag: string) => new El(tag),
-    // #319: the voyage overlay's svg, its track polyline, and the ship/rider marks. The
-    // namespace is discarded: nothing under test reads it back, and an El that remembered
-    // it would invite assertions on the shim instead of on the code.
+    // Namespace discarded: nothing under test reads it back.
     createElementNS: (_ns: string, tag: string) => new El(tag),
-    // #312: the engine's log builder wraps the drop-cap initial beside a plain text
-    // node. A text node is an El with no children, so textContent aggregation and
-    // shape() need nothing new.
     createTextNode: (t: string) => {
       const n = new El("#text");
       n.textContent = String(t);
@@ -124,7 +97,6 @@ export const installShim = (): void => {
   };
 };
 
-/** Depth-first walk of a shim tree. */
 export function walk(el: El, seen: El[] = []): El[] {
   seen.push(el);
   for (const c of el.children) walk(c, seen);

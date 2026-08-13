@@ -1,5 +1,3 @@
-/** Minimal immutable SVG document builder. */
-
 export type SvgNode = {
   readonly tag: string;
   readonly attrs: Readonly<Record<string, string | number>>;

@@ -51,8 +51,6 @@ const verticals = (g: ProspectGeometry): Mass[] =>
 const keeps = (g: ProspectGeometry): Mass[] =>
   g.masses.filter((m) => m.form === "keep");
 
-// ---------------------------------------------------------------- tier ladder
-
 test("the five-tier ladder drives mass count and height", () => {
   const byKind = Object.fromEntries(
     (Object.keys(TYPICAL_SCORE) as ProspectKind[]).map((kind) => [
@@ -112,8 +110,6 @@ test("score modulates density within a kind", () => {
   assert.ok(tallest(high) > tallest(low), "high score composes taller");
 });
 
-// ------------------------------------------------------------- sea foreground
-
 test("a harbor town fronts the sea: quay, masts, ship", () => {
   const g = composeProspect(makeInput({ kind: "town", harbor: true }));
   assert.ok(g.water, "harbor composes water");
@@ -160,8 +156,6 @@ test("a fisher village beaches its hulls instead of building a quay", () => {
   assert.equal(els(h, "nets").length, 0, "a hamlet dries no nets");
 });
 
-// ----------------------------------------------------------- river foreground
-
 test("a river town stands on the bank and anchors its bridge", () => {
   const g = composeProspect(makeInput({ kind: "town", onRiver: true }));
   assert.equal(g.ground.base, BASE_GROUND - RIVER_BANK_DROP, "river towns stand on the bank");
@@ -203,8 +197,6 @@ test("harbor outranks river when a site is both", () => {
   assert.equal(els(g, "bridge").length, 0);
   one(g, "quay");
 });
-
-// ----------------------------------------------------------- biome dressing
 
 const band = (b: BiomeName): ReadonlyArray<BiomeName> => bandOf([b, FOREGROUND_SAMPLES]);
 
@@ -250,8 +242,6 @@ test("marsh villages stand on stilts", () => {
   assert.equal(els(town, "stilts").length, 0);
 });
 
-// ------------------------------------------------------------ ground & ridge
-
 test("high ground composes the seat hill and the backdrop ridge", () => {
   const flat = composeProspect(
     makeInput({ siteRel: 0.1, backdrop: Array(BACKDROP_SAMPLES).fill(0.1) }),
@@ -274,8 +264,6 @@ test("high ground composes the seat hill and the backdrop ridge", () => {
   assert.ok(Math.min(...ys) < BASE_GROUND - 35, "the ridge climbs behind the town");
 });
 
-// -------------------------------------------------------------------- ruins
-
 test("a ruin composes a field of collapse, not just broken rooflines", () => {
   const g = composeProspect(makeInput({ kind: "town", ruined: true, ruinedYear: 1361 }));
   assert.ok(g.masses.some((m) => m.broken), "broken silhouettes stand in the ruin");
@@ -286,7 +274,6 @@ test("a ruin composes a field of collapse, not just broken rooflines", () => {
     "greenery reclaims the floors",
   );
   assert.equal(one(g, "birds").items.length, 6, "birds circle the ruin");
-  // The heeling wall: two stubs, one leaning, the gate fallen.
   assert.equal(g.walls.length, 2, "the wall breaks to two stubs");
   assert.ok(g.walls.some((w) => w.heel !== 0), "one stub heels over");
   assert.ok(g.walls.every((w) => !w.gate), "no gate survives");
@@ -313,8 +300,6 @@ test("a drowned fen village sinks beneath the water sheet", () => {
   assert.ok(stubs.stubs.some((s) => s.tilt !== 0), "one stub leans");
 });
 
-// ------------------------------------------------------- eras & invariants
-
 test("before founding the ground is empty", () => {
   const g = composeProspect(
     makeInput({ kind: "town", harbor: true }),
@@ -335,8 +320,7 @@ test("before founding the ground is empty", () => {
 });
 
 test("before founding the land wears only its natural dressing", () => {
-  // Guards the era branch's built:false arm (skeptic finding 3): flipping
-  // it to true would re-plow the fields and re-stilt the fen.
+  // Guards the era branch's built:false arm (skeptic finding 3): flipping it to true would re-plow the fields and re-stilt the fen.
   const fields = composeProspect(makeInput({}), { era: "before-founding" });
   assert.equal(fields.masses.length, 0);
   assert.equal(els(fields, "fieldRows").length, 0, "no furrows before the plow");
@@ -358,9 +342,7 @@ test("every composition is grounded and in frame", () => {
     makeInput({ kind: "village", foreground: band("marsh") }),
     makeInput({ kind: "town", ruined: true }),
     makeInput({ kind: "hamlet" }),
-    // Unwalled hamlets are where the back-row containment filter actually
-    // fires (no wall widens the cover); guard-prover measured these seeds
-    // as live witnesses (2026-08-10).
+    // Unwalled hamlets are where the back-row containment filter actually fires; guard-prover measured these seeds as live witnesses (2026-08-10).
     makeInput({ kind: "hamlet", seed: 3 }),
     makeInput({ kind: "hamlet", ruined: true, seed: 1 }),
   ];
@@ -376,10 +358,7 @@ test("every composition is grounded and in frame", () => {
       assert.ok(m.base - m.h > 0 && m.base < PLATE_H, "mass inside the plate");
     }
   }
-  // Bite-proof for the containment filter: at seed 3 the hamlet packs TWO
-  // back-row masses and the filter must drop exactly one (measured, see
-  // above). A deleted filter reds here on the count; a mass that escapes
-  // the cover reds above in groundingViolations.
+  // Bite-proof: at seed 3 the hamlet packs TWO back-row masses and the filter must drop exactly one (measured); a deleted filter reds here on the count, an escaping mass reds above in groundingViolations.
   const filtered = composeProspect(makeInput({ kind: "hamlet", seed: 3 }));
   assert.equal(
     filtered.masses.filter((m) => m.raise > 0).length,
@@ -389,10 +368,7 @@ test("every composition is grounded and in frame", () => {
 });
 
 test("a ruined skyline shows ruin even when every draw comes up intact", () => {
-  // Measured witness (guard-prover, 2026-08-10): at seed 7321 every
-  // per-mass broken draw comes up intact for a ruined hamlet (~1 in 13,500
-  // compositions), so only composeTownscape's insurance breaks the tallest
-  // front mass. Deleting that insurance goes red exactly here.
+  // Measured witness (guard-prover, 2026-08-10): at seed 7321 every per-mass broken draw comes up intact for a ruined hamlet (~1 in 13,500 compositions), so only composeTownscape's insurance breaks the tallest front mass; deleting it goes red exactly here.
   const g = composeProspect(
     makeInput({ kind: "hamlet", ruined: true, ruinedYear: 1361, seed: 7321 }),
   );
@@ -422,13 +398,10 @@ test("the grounding check bites on a floated or uncovered mass", () => {
   );
 });
 
-/** Base that keeps the moved mass on the ground function, so the uncovered
- * case fails on COVER alone, not incidentally on the ground equation. */
+/** Base that keeps the moved mass on the ground function, so the uncovered case fails on COVER alone, not incidentally on the ground equation. */
 function groundingBase(g: ProspectGeometry, x: number, m: Mass): number {
   return g.ground.base - m.raise;
 }
-
-// ----------------------------------------------------------- purity & bytes
 
 test("the same input composes byte-identical geometry", () => {
   const input = makeInput({ kind: "capital", harbor: true, siteRel: 0.3 });

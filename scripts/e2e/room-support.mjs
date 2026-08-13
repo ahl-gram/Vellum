@@ -1,14 +1,4 @@
-// Shared helpers for the Reading-Room-hosted suites (#320).
-//
-// suite-reading-room.mjs carries its own copies of boot() and settled() and is left
-// untouched by this sub (its checks stay green exactly as written, the double-coverage
-// premise). New room suites import these instead of copying them a third and fourth
-// time.
-//
-// The room's settle is NOT the shared waitSettled: that keys on the Explorer's
-// #verso-turn, which this page does not have. It is the engine's settle-signal
-// contract read off the frame itself, the chart svg landed in the mount and .rf-status
-// back to "" (an overlay writing there mid-draw hangs the redraw, the standing rule).
+// Shared helpers for the Reading-Room-hosted suites (#320); suite-reading-room.mjs deliberately keeps its own copies (the double-coverage premise), and the room's settle is NOT the shared waitSettled, which keys on the Explorer's #verso-turn.
 
 /** The chart svg, never the voyage overlay that shares the mount. */
 export const CHART_SVG = ".rf-chart svg:not(.voyage-overlay)";
@@ -36,10 +26,7 @@ export const makeRoom = (ctx) => {
     return false;
   };
 
-  // Every room check re-bootstraps through about:blank: a navigate differing only in
-  // the hash is a same-document change and never re-runs the boot (the suite-zoom Z13
-  // idiom the address and reading-room suites both follow), and the room reads its hash
-  // once at boot with no hashchange listener.
+  // Re-bootstrap through about:blank (the Z13 idiom): a hash-only navigate is same-document, and the room reads its hash once at boot with no hashchange listener.
   const goto = async (hash) => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/${hash}` });
@@ -50,10 +37,7 @@ export const makeRoom = (ctx) => {
   return { boot, settled, goto };
 };
 
-// The room's bar helpers, against .rf-* selectors. Same #220 domain as the Explorer's
-// ([0, 2*span] with the seam at the midpoint, so a year lands at barMax/2 + (year - min)).
-// The earliest year is the ONE bar position the seam already owns, so setYear clamps to
-// min+1 exactly as the S-suite's helper does.
+// Same #220 domain as the Explorer ([0, 2*span], seam at the midpoint, a year at barMax/2 + (year - min)); the earliest year is the one position the seam already owns, so setYear clamps to min+1.
 export const makeBar = (ctx) => {
   const { evaluate } = ctx;
   return {
@@ -71,11 +55,7 @@ export const makeBar = (ctx) => {
   };
 };
 
-/**
- * The manifest facts a scrubber check needs, read from the page's OWN engine through the
- * shared oracle: the range, the present year, the earliest and a later LIVING founding
- * (so their glyph groups reveal cleanly), and the ruin's founding + fall year.
- */
+/** The manifest facts a scrubber check needs, read from the page's OWN engine through the shared oracle. */
 export const scrubFacts = (evaluate, seed) =>
   evaluate(`(()=>{
     const r=window.__vellumRunInline({kind:"draw",seed:${seed},overrides:{},render:{style:"antique",widthPx:1500,legend:true}});
@@ -94,24 +74,13 @@ export const scrubFacts = (evaluate, seed) =>
       ruinFounded:ruin?ruin.founded:null};
   })()`);
 
-/**
- * A suite-scoped console-error + 4xx delta, the convention EVERY suite after the health
- * checkpoint (N1/N2) follows: hunt's H9, the Print Room's, home's, the address suite's
- * A10, the room's RR12/RR13. runHealth asserts the accumulated state of everything
- * BEFORE it, so a suite that runs after it and carries no delta of its own drives the
- * page with nothing watching for a thrown exception.
- *
- * Call at the top of a suite, then `await gate.check(label)` at the bottom.
- */
+/** Suite-scoped console-error + 4xx delta: every suite after the health checkpoint must carry its own, or it drives the page with nothing watching for a thrown exception. Call at the top, gate.check(label) at the bottom. */
 export const scopedHealth = (ctx) => {
   const { check, consoleErrors, http4xx } = ctx;
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
   return {
     check: (label) => {
-      // motion.css opts the site into cross-document view transitions and these suites
-      // chain navigations fast enough to skip some, so the stock AbortError is excused
-      // exactly as suite-home and the address suite excuse it.
       const errDelta = consoleErrors
         .slice(errBase)
         .filter((e) => !e.includes("AbortError: Transition was skipped"));

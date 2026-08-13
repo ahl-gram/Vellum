@@ -1,14 +1,4 @@
-/**
- * Deterministic seeded PRNG (mulberry32) with labeled fork streams.
- *
- * Forks derive from the parent SEED + label, never from stream position,
- * so `rng.fork("names")` yields the same stream no matter how many draws
- * happened before — adding pipeline stages never reshuffles other stages.
- *
- * Rng instances are the project's one sanctioned stateful object: a PRNG is
- * a stream by nature, and a pure state-passing API would infect every
- * consumer. Everything an Rng produces is immutable.
- */
+/** mulberry32 with labeled forks; forks derive from seed + label, never stream position. Rng is the project's one sanctioned stateful object; everything it produces is immutable. */
 
 export type Rng = {
   readonly seed: number;

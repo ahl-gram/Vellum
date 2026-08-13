@@ -12,7 +12,6 @@ test("a gallery card is the same world as the canonical chart for that seed", as
   await rm(dir, { recursive: true, force: true });
   try {
     await buildGallery(seed, { count: 1, out: dir });
-    // the first card is rendered at the start seed, antique, 900px wide
     const card = await readFile(join(dir, `chart-${seed}.svg`), "utf8");
     const canonical = renderMap(generateWorld(defaultRecipe(seed)), {
       style: "antique",
@@ -54,10 +53,8 @@ test("the gallery stays in the motion folio: its tiles tip under the hand on the
   await rm(dir, { recursive: true, force: true });
   try {
     await buildGallery(100, { count: 1, out: dir });
-    // Since #268 the composer writes the page css (the shelled /gallery/ route
-    // links /motion.css through BaseLayout, so the link left with the shell).
+    // Since #268 the composer writes the page css; the shelled /gallery/ route links /motion.css through BaseLayout, so that link left with the shell.
     const css = await readFile(join(dir, "index.css"), "utf8").catch(() => "");
-    // the contact-sheet tiles tip like loose plates: a hover transform that rotates
     assert.match(
       css,
       /figure img:hover\s*\{[^}]*transform:[^}]*rotate/,

@@ -50,7 +50,6 @@ test("feature kinds produce flavored names", () => {
     assert.ok(n.length >= 3);
     assert.equal(n[0], n[0]!.toUpperCase());
   }
-  // each kind set is distinct
   assert.equal(new Set([river, sea, peak, forest, realm]).size, 5);
 });
 
@@ -65,8 +64,7 @@ test("some settlement names carry a culture suffix", () => {
   assert.ok(suffixed >= 10, `expected suffixes to appear, got ${suffixed}`);
 });
 
-// Independent full Levenshtein (not the implementation's early-exit check),
-// so the test cannot share a bug with the screen it guards.
+// Independent full Levenshtein (not the implementation's early-exit check), so the test cannot share a bug with the screen it guards.
 function levenshtein(a: string, b: string): number {
   const m = a.length, n = b.length;
   const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
@@ -88,8 +86,7 @@ test("no two bare bases within a world are near-duplicates (edit distance >= 2)"
       for (let i = 0; i < 30; i++) bases.push(namer.name("bare").toLowerCase());
       for (let i = 0; i < bases.length; i++) {
         for (let j = i + 1; j < bases.length; j++) {
-          // Roman-numeral fallbacks (e.g. "kara ii") are deliberately exempt:
-          // the numeral disambiguates a genuinely tight namespace.
+          // Roman-numeral fallbacks ("kara ii") are exempt: the numeral disambiguates a genuinely tight namespace.
           if (/ [ivx]+$/.test(bases[i]!) || / [ivx]+$/.test(bases[j]!)) continue;
           assert.ok(
             levenshtein(bases[i]!, bases[j]!) >= 2,
@@ -115,11 +112,7 @@ test("generated bases avoid common English words", () => {
 });
 
 test("a standalone-slot base is never a blocklisted word", () => {
-  // The English-word screen keeps a plain word from reading as its own word in a
-  // name ("The Sea of Dad", "Greater Bra"). A standalone template slot fills the
-  // base via the identical uniqueBase(_, true) path that `bare` uses, so testing
-  // `bare` over many worlds against the FULL blocklist covers every standalone
-  // slot. (Template descriptors like "The % Deep" are literal, not the base.)
+  // A standalone slot fills its base via the identical uniqueBase(_, true) path `bare` uses, so testing `bare` against the FULL blocklist covers every standalone slot (template descriptors are literal, not the base).
   for (const culture of CULTURES) {
     for (let seed = 1; seed <= 120; seed++) {
       const namer = createNamer(createRng(seed).fork("names"), culture);
@@ -144,11 +137,7 @@ test("isStandaloneSlot classifies template slots by letter-adjacency", () => {
 });
 
 test("a settlement keeps a blocklisted base when a town suffix fuses onto it", () => {
-  // The headline of #65: a blockword base must be KEPT, not re-rolled, when a
-  // town suffix fuses it into a longer word ("bra" + "vik" -> "Bravik"). Scoped
-  // to norden, whose phonemes cannot regenerate these fused forms as a single
-  // base, so a match can ONLY come from base+suffix fusion — impossible on the
-  // old always-screen code (verified red-green). Mirrors uniqueBase's elision.
+  // The headline of #65: a blockword base must be KEPT, not re-rolled, when a town suffix fuses it ("bra" + "vik" -> "Bravik"). Scoped to norden, whose phonemes cannot regenerate fused forms as a single base, so a match can ONLY come from fusion (verified red-green).
   const norden = CULTURES.find((c) => c.id === "norden")!;
   const fused = new Set<string>();
   for (const w of ENGLISH_BLOCKLIST) {
@@ -171,9 +160,7 @@ test("a settlement keeps a blocklisted base when a town suffix fuses onto it", (
 });
 
 test("the near-dup screen rarely forces the Roman-numeral fallback", () => {
-  // a real world draws ~40 names from one namer; if the screen were too
-  // aggressive (esp. for short-phoneme cultures) it would degrade output to
-  // "Xxx II/III". Guard that the fallback stays well under 5%.
+  // A real world draws ~40 names from one namer; an over-aggressive screen degrades output to "Xxx II/III", so the fallback must stay well under 5%.
   const isFallback = (n: string) => / (II|III|IV|V|VI|VII|VIII|IX|X)$/.test(n);
   for (const culture of CULTURES) {
     let fallbacks = 0;

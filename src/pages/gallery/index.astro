@@ -2,10 +2,8 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { GALLERY_COUNT, GALLERY_SEED, cardFigureHtml, galleryCards } from "../../cli/gallery.ts";
 
-// The contact sheet is composed at build time from the same deterministic
-// composer generate-showcases renders the SVGs with, so the two runs always
-// agree on worlds and filenames. The figure markup is the old standalone
-// gallery's, adopted unchanged (#268).
+// Composed at build time from the same deterministic composer generate-showcases renders
+// the SVGs with, so the two runs always agree on worlds and filenames (#268).
 const figures = galleryCards(GALLERY_SEED, GALLERY_COUNT).map(cardFigureHtml).join("\n");
 ---
 

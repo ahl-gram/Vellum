@@ -17,7 +17,6 @@ export function oceanLayer(ctx: RenderCtx): SvgNode {
   ];
 
   if (style.oceanDeep) {
-    // paint progressively shallower water over the deep base
     const { min } = minMax(world.elev);
     const below = world.seaLevel - min;
     const bands: Array<{ frac: number; color: string; opacity: number }> = [
@@ -47,7 +46,6 @@ export function oceanLayer(ctx: RenderCtx): SvgNode {
   }
 
   if (style.shoalTint) {
-    // shallow-water wash out to the dashed "danger line" (nautical)
     const { min } = minMax(world.elev);
     const iso = world.seaLevel - 0.08 * (world.seaLevel - min);
     const rings = closedIsoRings(world.elev, iso).map((c) =>

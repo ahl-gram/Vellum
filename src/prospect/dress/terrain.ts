@@ -1,17 +1,8 @@
-/**
- * Terrain ink (#240): sky, the backdrop ridge, the ground line or seat
- * mound, and grass flicks. The ridge is Sub 2's sampled transect polyline
- * (real elevation data), filled as one paper mass so the flank hatch reads
- * as engraved shading; the mound occludes it per the #237 GO (condition 5:
- * a settlement never floats on the peaks behind it).
- */
-
 import { el, type SvgNode } from "../../render/svg.ts";
 import type { Rng } from "../../core/rng.ts";
 import { VIEW_X0, VIEW_X1, type Ground, type Pt } from "../geometry.ts";
 import { r1, stroke, type DressContext } from "./context.ts";
 
-/** Faint horizontals over the ink dress's sky, the engraver's tint. */
 export function skyNodes(c: DressContext): SvgNode[] {
   const lines: string[] = [];
   for (let i = 0; i < 4; i++) lines.push(`M${VIEW_X0 + 14} ${58 + i * 7}H${VIEW_X1 - 14}`);
@@ -26,7 +17,6 @@ export function skyNodes(c: DressContext): SvgNode[] {
   ];
 }
 
-/** Piecewise-linear y of the ridge polyline at x (rational arithmetic only). */
 function ridgeYAt(ridge: ReadonlyArray<Pt>, x: number): number {
   if (x <= ridge[0]!.x) return ridge[0]!.y;
   for (let i = 1; i < ridge.length; i++) {
@@ -37,10 +27,6 @@ function ridgeYAt(ridge: ReadonlyArray<Pt>, x: number): number {
   return ridge[ridge.length - 1]!.y;
 }
 
-/** The backdrop ridge: the profile filled down to the horizon, with hatch
- * flicks descending the apex's far flank, quoting the chart's mountain-
- * glyph shading (glyph-symbols.ts). The ink dress hatches one flick
- * denser, the engraver's heavier hand. */
 export function ridgeNodes(c: DressContext, ridge: ReadonlyArray<Pt>, base: number): SvgNode[] {
   const horizon = base + 2;
   const first = ridge[0]!;
@@ -64,12 +50,6 @@ export function ridgeNodes(c: DressContext, ridge: ReadonlyArray<Pt>, base: numb
   return out;
 }
 
-/**
- * The ground: a risen site fills its mound as a MASS occluding the far
- * peaks (#237 GO condition 5); flat ground is a bare line; a drowned plate
- * draws nothing, the flood is the ground. The polyline is Sub 2's exact
- * sampling, so the feet of masses and walls land on the drawn line.
- */
 export function groundNodes(c: DressContext, ground: Ground, drowned: boolean): SvgNode[] {
   if (drowned) return [];
   const pts = ground.line;
@@ -86,7 +66,6 @@ export function groundNodes(c: DressContext, ground: Ground, drowned: boolean): 
   return [el("path", { d: `M${r1(first.x)} ${r1(first.y)}${line}`, fill: "none", ...stroke(c, 1.3) })];
 }
 
-/** Soft grass flicks strewn over a ground function. */
 export function grassFlicks(
   c: DressContext,
   rng: Rng,

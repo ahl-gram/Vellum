@@ -49,7 +49,6 @@ test("coast warp is on by default and reshapes the landmass", () => {
 });
 
 test("coast warp still honors the deep-water border guarantee", () => {
-  // a bold warp must not push land into the framed ocean fringe
   const f = buildHeightfield({ ...RECIPE, coastWarp: 0.55 });
   for (let x = 0; x < f.w; x++) {
     assert.ok(f.at(x, 0) < 0 && f.at(x, f.h - 1) < 0, `top/bottom edge land at x=${x}`);
@@ -60,9 +59,7 @@ test("coast warp still honors the deep-water border guarantee", () => {
 });
 
 test("coast warp honors the deep-water border across the full slider range (#137)", () => {
-  // the Explorer coast slider reaches coastWarp 1.0, bolder than the 0.55 default; the
-  // hard edge sink (heightfield.ts) is warp-independent, so every edge cell stays ocean
-  // at any warp the slider can dial in.
+  // The Explorer slider reaches coastWarp 1.0, bolder than the 0.55 default; the hard edge sink is warp-independent, so every edge cell stays ocean at any dialable warp.
   for (const coastWarp of [0.55, 0.8, 1.0]) {
     const f = buildHeightfield({ ...RECIPE, coastWarp });
     for (let x = 0; x < f.w; x++) {
@@ -141,12 +138,7 @@ test("slope of a flat field is zero; tilted plane is uniform", () => {
   assert.ok(Math.abs(tilted.at(3, 3) - 2) < 1e-9);
 });
 
-// --- #55 Tide Wheel: the override the sea-level slider rides on -----------------
-// These lock the engine assumption behind the Explorer slider: landFraction is an
-// additive recipe override that only moves the waterline. The slider adds no engine
-// code, so these characterize existing behavior (they pass on first write) and act
-// as a regression guard. They exercise the FULL pipeline the worker runs, unlike the
-// pickSeaLevel + landMask test above which only covers the quantile layer.
+// #55 Tide Wheel: landFraction is an additive recipe override that only moves the waterline; characterization (green on first write) exercising the FULL pipeline the worker runs, unlike the quantile-layer test above.
 
 const MAP_TYPES: MapType[] = ["island", "archipelago", "continent", "citystate"];
 
@@ -165,8 +157,6 @@ test("generateWorld survives the full slider landFraction band on every map type
 });
 
 test("generateWorld survives the full coast-warp slider band on every map type (#137)", () => {
-  // the Explorer coast slider spans 0 (calm radial) to 1 (deeply lobed); a full world
-  // must still generate settlements at either extreme, on every map type and seed.
   for (const seed of [42, 7, 1234]) {
     for (const mapType of MAP_TYPES) {
       for (const coastWarp of [0, 1]) {

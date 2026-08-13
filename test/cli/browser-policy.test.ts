@@ -2,10 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { browserlessAction } from "../../src/cli/browser-policy.ts";
 
-// The behavior that matters: an UNATTENDED run with no browser must fail loud.
-// Before this policy existed the runner skipped (exit 0) unless the caller
-// remembered VELLUM_REQUIRE_BROWSER, so a cloud agent or a cron run on an image
-// with no Chrome reported green having exercised nothing.
+// An UNATTENDED run with no browser must fail loud: before this policy the runner skipped (exit 0) unless the caller remembered VELLUM_REQUIRE_BROWSER, so a cloud or cron run with no Chrome reported green having exercised nothing.
 
 test("unattended run with no browser fails instead of skipping", () => {
   assert.equal(browserlessAction({}, false), "fail");
@@ -34,8 +31,7 @@ test("contradictory flags resolve to fail: silence is the dangerous outcome", ()
   );
 });
 
-// process.env yields "" for `FOO=` rather than undefined, and an empty opt-out
-// must not quietly disarm the guard it looks like it is setting.
+// process.env yields "" for FOO=, and an empty opt-out must not quietly disarm the guard it looks like it is setting.
 test("empty-string env vars count as unset", () => {
   assert.equal(browserlessAction({ VELLUM_ALLOW_NO_BROWSER: "" }, false), "fail");
   assert.equal(browserlessAction({ VELLUM_REQUIRE_BROWSER: "" }, true), "skip");

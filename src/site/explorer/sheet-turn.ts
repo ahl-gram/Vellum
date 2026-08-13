@@ -1,25 +1,9 @@
-// #131 The style turn (epic #125, the Paper & Ink motion doctrine, Sub 6).
-// Changing the STYLE in the Explorer turns the sheet over: the outgoing chart
-// turns away on a slow 3D page-turn and the SAME world lands re-dressed in the new
-// style, instead of hard-popping. The semantic rule: the same world in a new dress
-// TURNS; a new world (seed, type, climate) SETTLES per #127. Style is the only turn
-// trigger in v1.
-//
-// Two faces on one bound leaf: the front is the live #map (the outgoing chart), the
-// back is the incoming chart as a blob-url <img> (the same pattern the verso ghost
-// uses) so #map itself never holds a second <svg> and the "exactly one #map svg" invariant
-// holds structurally through the turn. The leaf (#sheet-inner) rotates 0 -> -180deg
-// under a perspective lit only while .turning is set (idle parity between turns);
-// at -180 the back face faces the reader un-mirrored, then #map is re-dressed in one
-// synchronous tick and the scaffold is torn down.
-//
-// The 3D context is INERT at rest, so the chart, the place overlay, and the pinned
-// card behave byte-for-byte as before between turns (verified by the #131 CDP spike).
-// This establishes the perspective wrapper the Verso (#116) reuses.
-//
-// Kept free of top-level DOM/globals so shouldTurn (the pure semantic gate) is
-// unit-testable under Node; runTurn/cancelTurn touch the DOM only inside their
-// bodies and are proven by the e2e end-states + a CDP probe.
+// #131 the style turn: a style change turns the sheet over and the SAME world lands
+// re-dressed in the new style; a new world (seed, type, climate) SETTLES per #127. Two
+// faces on one bound leaf: the front is the live #map, the back is the incoming chart as
+// a blob-url <img>, so #map never holds a second <svg> and the "exactly one #map svg"
+// invariant holds structurally through the turn. The 3D context is INERT at rest (idle
+// byte-parity between turns); shouldTurn stays pure and unit-testable under Node.
 
 export interface TurnDecision {
   /** This draw was triggered by a style change (the only turn trigger in v1). */
@@ -33,30 +17,14 @@ export interface TurnDecision {
   /** #116: the sheet is flipped to its verso (the flip owns the sheet, not the turn). */
   flipped?: boolean;
 }
-// #321 deleted the `chronicle` member: the Explorer's only armed state is the static
-// survey track, a DOM overlay with no per-glyph mutations, so the style turn works
-// armed (resolving #153). Do not re-add a suppression term without a state that
-// genuinely cannot ride a turn; the sheet-turn unit test pins that a stale
-// `chronicle: true` no longer suppresses.
+// #321 deleted the `chronicle` member (resolving #153). Do not re-add a suppression term without a state that genuinely cannot ride a turn; the sheet-turn unit test pins that a stale chronicle:true no longer suppresses.
 
-/**
- * Whether this draw should turn the sheet rather than settle. A style change over a
- * live chart turns; everything else (a new world, reduced motion, the worker
- * fallback, or the first draw) takes today's instant/settle path.
- * A style change while the sheet is flipped to its verso (#116) rebuilds the verso
- * in place instead of turning: the turn and the flip both drive #sheet-inner's
- * rotateY, so they must never both own it.
- * @param {{isTurn:boolean, reduceMotion:boolean, usesWorker:boolean, hasChart:boolean, flipped?:boolean}} s
- * @returns {boolean}
- */
+/** A style change over a live chart turns; everything else settles, and a flipped sheet rebuilds the verso in place instead (the turn and the flip both drive #sheet-inner's rotateY, so they must never both own it). */
 export function shouldTurn(s: TurnDecision): boolean {
   return !!(s.isTurn && !s.reduceMotion && s.usesWorker && s.hasChart && !s.flipped);
 }
 
-// #131: the turn's duration + easing come from /motion.css (the single timing source).
-// Read lazily so the stylesheet is applied, with the ratified fallback if a custom
-// property is unreadable (e.g. the stylesheet has not loaded yet). Lives beside the
-// turn it times (moved from app.ts at #191).
+// #131: duration + easing from /motion.css (the single timing source), read lazily so the stylesheet is applied, with the ratified fallback if a custom property is unreadable.
 export function turnTiming(): { ms: number; ease: string } {
   const cs = getComputedStyle(document.documentElement);
   const ms = parseFloat(cs.getPropertyValue("--turn")) || 900;
@@ -64,44 +32,26 @@ export function turnTiming(): { ms: number; ease: string } {
   return { ms, ease };
 }
 
-// The single in-flight turn, or null. One turn at a time: runTurn cancels any prior
-// turn before starting, and every draw resolution cancels a leftover turn before it
-// touches #map, so a superseded turn can never orphan a sheet.
+// The single in-flight turn, or null. runTurn cancels any prior turn and every draw resolution cancels a leftover before touching #map, so a superseded turn can never orphan a sheet.
 let active: { abort: () => void } | null = null;
 
-/**
- * Tear down any in-flight turn WITHOUT committing its content (the superseding draw
- * owns the final #map). Idempotent and safe to call when nothing is turning.
- */
+/** Tear down any in-flight turn WITHOUT committing its content (the superseding draw owns the final #map). Idempotent and safe when nothing is turning. */
 export function cancelTurn(): void {
   if (active) active.abort();
   active = null;
 }
 
-/**
- * Turn the sheet: build the incoming chart as a back face, rotate the leaf over, and
- * re-dress #map with the new chart when it lands. Resolves ONLY on a real landing
- * (so the caller rebuilds the overlay against the new chart); a superseding
- * cancelTurn() aborts it and the promise never resolves. It never rejects.
- *
- * @param {{sheetEl:HTMLElement, innerEl:HTMLElement, mapEl:HTMLElement, newSvg:string, durationMs:number, easing:string}} o
- * @returns {Promise<void>}
- */
+/** Turn the sheet, re-dressing #map when the leaf lands. Resolves ONLY on a real landing (the caller then rebuilds the overlay); a superseding cancelTurn() aborts it and the promise stays pending forever. It NEVER rejects: an unbuildable 3D scaffold degrades to an instant swap and resolves, so the caller needs no .catch. */
 export function runTurn(
   { sheetEl, innerEl, mapEl, newSvg, durationMs, easing }:
   { sheetEl: HTMLElement; innerEl: HTMLElement; mapEl: HTMLElement; newSvg: string; durationMs: number; easing: string },
 ): Promise<void> {
   cancelTurn(); // never stack turns
-  // Contract: this NEVER rejects. It resolves when the turn lands (so the caller
-  // rebuilds the overlay); a superseding cancelTurn() aborts it and it stays pending;
-  // and if the 3D scaffold cannot be built (e.g. WAAPI is unavailable) it degrades to
-  // an instant swap and resolves. So the caller needs no .catch.
   return new Promise<void>((resolve) => {
     let blobUrl = "";
     let back: HTMLDivElement | null = null;
     try {
-      // Back face: the incoming chart as a blob <img>, pre-rotated so it reads
-      // un-mirrored at -180deg. Kept out of the a11y tree (the recto is the chart).
+      // The incoming chart as a blob <img>, pre-rotated so it reads un-mirrored at -180deg; kept out of the a11y tree (the recto is the chart).
       blobUrl = URL.createObjectURL(new Blob([newSvg], { type: "image/svg+xml" }));
       back = document.createElement("div");
       back.className = "sheet-back";
@@ -121,10 +71,7 @@ export function runTurn(
       );
 
       let settled = false;
-      // Tear down the 3D scaffold and restore the flat leaf. When committing (a real
-      // landing) the new chart is written into #map FIRST, in the same synchronous
-      // tick, so the reader never sees a frame between the back face and the re-dressed
-      // recto (both show the identical new chart).
+      // When committing, the new chart is written into #map FIRST, in the same synchronous tick, so the reader never sees a frame between the back face and the re-dressed recto.
       const finish = (commit: boolean): void => {
         if (settled) return;
         settled = true;
@@ -139,13 +86,11 @@ export function runTurn(
         if (commit) resolve();
       };
 
-      // A natural landing commits; a cancel rejects this promise, which we swallow (the
-      // AbortError is expected teardown, not an error) so it never reaches the console.
+      // A natural landing commits; a cancel rejects anim.finished, swallowed (expected teardown, not an error).
       anim.finished.then(() => finish(true)).catch(() => {});
       active = { abort: () => finish(false) };
     } catch {
-      // Setup failed: undo any partial scaffold and fall back to an instant swap, so
-      // the chart still updates and the caller still rebuilds the overlay.
+      // Setup failed: undo any partial scaffold and fall back to an instant swap, so the chart still updates and the caller still rebuilds the overlay.
       try { sheetEl.classList.remove("turning"); innerEl.classList.remove("turning"); } catch {}
       if (back && back.parentNode) back.remove();
       if (blobUrl) { try { URL.revokeObjectURL(blobUrl); } catch {} }

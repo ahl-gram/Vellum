@@ -1,4 +1,3 @@
-/** Largest 4-connected component of cells satisfying a predicate. */
 export function largestBlob(
   w: number,
   h: number,

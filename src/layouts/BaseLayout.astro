@@ -1,44 +1,23 @@
 ---
 import { NAV_ITEMS } from "./nav.ts";
 
-// The one shared shell (#203, per the ratified Sub 1 decision doc on #202):
-// head meta with the prop fan-out, the canonical nav, the constant footer.
-// Every page renders through it since Sub 8 (#254). The Running Head (#268)
-// replaced the centered masthead with the folio page-header form and moved
-// the <title> into the layout, computed from `room`, so title drift across
-// pages is structurally impossible.
+// The one shared shell (#203, ratified in the Sub 1 decision doc comment on #202): head
+// meta with the prop fan-out, the canonical nav, the constant footer. The Running Head
+// (#268) computes <title> from `room`, so title drift across pages is structurally impossible.
 interface Props {
-  /**
-   * The page's name on the running head's right side, and the computed
-   * <title> ("The Print Room · Vellum"). Absent on home ALONE, whose title
-   * stays the atelier's own line. The atlas keeps its in-fiction title
-   * exception outside this layout entirely.
-   */
+  /** The running head's right side and the computed <title> ("The Print Room · Vellum"); absent on home ALONE, whose title stays the atelier's own line. */
   room?: string;
-  /**
-   * The og twins' punctuation-normalized room, only when it differs from
-   * `room` (the Q & A page's &-form split): og:title AND twitter:title take
-   * `${ogRoom} · Vellum` instead of the computed title.
-   */
+  /** The og twins' punctuation-normalized room, only when it differs from `room`: og:title AND twitter:title take `${ogRoom} · Vellum`. */
   ogRoom?: string;
   /** The name=description search snippet; also the og twins' default. */
   description: string;
-  /**
-   * Fans out to og:description AND twitter:description. Only for a page whose
-   * card copy is shorter than its search snippet (seed-of-the-day); defaults
-   * to description, exactly parallel to the room/ogRoom split.
-   */
+  /** Fans out to og:description AND twitter:description, for a page whose card copy is shorter than its snippet; defaults to description. */
   ogDescription?: string;
   /** Root-absolute trailing-slash route ("/", "/faq/"): og:url + aria-current. */
   path: string;
   /** The flourish line under the room name (under the wordmark alone on home). */
   tagline: string;
-  /**
-   * Extra root-absolute stylesheet hrefs for SHARED sheets a page opts into
-   * (/living-chart.css for pages that mount the engine, /reading-frame.css for
-   * pages that mount the frame). Linked after the global sheets and before the
-   * page's own relative index.css, so page rules keep the last word.
-   */
+  /** Extra root-absolute hrefs for SHARED sheets a page opts into; linked after the global sheets and before the page's own relative index.css, so page rules keep the last word. */
   extraCss?: readonly string[];
 }
 
@@ -98,20 +77,16 @@ const cardDescription = ogDescription ?? description;
 <link rel="stylesheet" href="/house.css">
 {extraCss.map((href) => <link rel="stylesheet" href={href} />)}
 <link rel="stylesheet" href="index.css">
-{/* #329: prefetch the sibling shells (a few KB each) so a first click commits
-    instantly even while this page's plates are still streaming; without it the
-    clicked room's HTML queues behind megabytes of in-flight SVG. Derived from
-    NAV_ITEMS plus home so the list can never rot; self is skipped. */}
+{/* #329: prefetch the sibling shells so a first click commits instantly even while this
+    page's plates are still streaming; derived from NAV_ITEMS plus home so the list can
+    never rot; self is skipped. */}
 {["/", ...NAV_ITEMS.map((item) => item.href)]
   .filter((href) => href !== Astro.url.pathname)
   .map((href) => <link rel="prefetch" href={href} />)}
 <style is:global>
-/* The shell dresses once (#263), part B: the recurring parchment/ink palette,
-   named here and consumed as var() by the page css files. The old body-text
-   and voyage-track near-miss inks merged into --ink-dark at the PR #269
-   review (item 4) and are retired. The charts' own label ink stays the
-   renderer's (byte-identity domain), so site prose and chart lettering are
-   deliberately no longer the same hex. Guarded by test/site/shell-css.test.ts. */
+/* The shell dresses once (#263), part B: the recurring parchment/ink palette, consumed
+   as var() by the page css files (guarded by test/site/shell-css.test.ts). The charts'
+   own label ink stays the renderer's (byte-identity domain), deliberately not this hex. */
 :root {
   --ink-dark: #4a3826;         /* dark walnut ink: borders, buttons, prose, emphasis */
   --ink-brown: #6b5a40;        /* flourish brown: taglines, captions, asides */
@@ -122,16 +97,11 @@ const cardDescription = ogDescription ?? description;
   --parchment-bright: #fff7e4; /* the lit cream: hovers and the reveal */
   --parchment-deep: #e6d9b8;   /* the pressed tan: code chips */
   --line-faint: #cdbd97;       /* the softer hairline, a shade lighter than --line-tan */
-  /* #367 The sheet's lift: the one depth a chart rests at, on every page that lays one
-     down. Named here because it was seven longhand copies across five sheets before, so
-     the depth could only be changed in seven places at once. Deeper than the 0.2 those
-     copies carried: an armed Explorer had been casting a DOUBLE of the old shadow (the
-     id-strength `#map svg` rule dressed the survey overlay too), that doubling read as
-     0.385 when measured, and it was ratified as the house depth at 0.4. Anything laid
-     OVER a chart inside the mount must opt out of it; see public/living-chart.css. */
+  /* #367: the ONE depth a chart rests at, everywhere (was seven longhand 0.2 copies; the
+     armed Explorer's doubled shadow measured 0.385 and 0.4 was ratified as the house
+     depth). Anything laid OVER a chart inside the mount opts out: see public/living-chart.css. */
   --sheet-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.4);
-  /* The Specimen Book (#324, ratified 2026-07-30); the roster mirrors
-     src/atlas/palette.ts exactly (the shell-css deepEqual). */
+  /* The Specimen Book (#324, ratified 2026-07-30); the roster mirrors src/atlas/palette.ts exactly (the shell-css deepEqual). */
   --ink-annals: #3f3122;       /* the chronicler's iron-gall (journal entries, #312) */
   --ink-surveyor: #7a5f38;     /* the surveyor's walnut italic (journal prologue, #312) */
   --ink-surveyor-faded: #99855f; /* the surveyor's unbolded gutter days (#312) */
@@ -141,31 +111,23 @@ const cardDescription = ogDescription ?? description;
   --control-gold-lit: #f7edcd; /* the gold, lit on hover */
   --ink-tale: #54452f;         /* the tale/note ink: place-card tales, atlas notes */
   --iron-red: #7a1f12;         /* the site's ink red (hunt star, statuses); was motion.css's */
-  /* The --chart-* quotations: values borrowed from render/style.ts, named so
-     the exception declares itself. house-style.test.ts pins each to the
-     render constant it quotes. --chart-ink is the retired lettering ink's
-     ONE sanctioned home on the site side (shell-css pins it to exactly this
-     declaration): shadows are cast in chart ink, consumed as
-     rgb(from var(--chart-ink) r g b / a). */
+  /* The --chart-* quotations borrow render/style.ts values (house-style.test.ts pins each
+     to the constant it quotes). --chart-ink is the retired lettering ink's ONE sanctioned
+     site-side home (shell-css pins this declaration); shadows consume it via rgb(from ...). */
   --chart-paper: #f2e8cf;      /* the antique chart's paper: primary lettering, cartouche ground */
   --chart-ink: #3d2f1f;        /* the chart's lettering ink: every site shadow */
 }
-/* The shell dresses once (#263), part A: the rules every page shell shares.
-   Per-page values stay in the page files: body padding and line-height, main
-   max-width, header margin-bottom, footer margin-top. Since #268 the header
-   is the Running Head, identical on every page (home keeps only its grander
-   footer, pinned in public/index.css ABOVE this block's specificity because
-   the page css link renders before this inline style). */
+/* The shell dresses once (#263), part A: the rules every page shell shares; per-page
+   values stay in the page files. Since #268 the header is the Running Head, identical on
+   every page (home's grander footer is pinned in public/index.css, whose link renders
+   before this inline style and so sits above it in the cascade). */
 :root { color-scheme: light; }
 body {
   margin: 0;
   background: var(--parchment); color: var(--ink-dark);
-  /* The daylight wash (Alex's call at the #289 review, from his ideas
-     sheet): a warm light anchored near the top of the DOCUMENT and an umber
-     shade at its foot, sized to the whole page, so every sheet reads lit
-     from above and gradually dims as it scrolls. Alpha washes over
-     --parchment, deliberately not palette tokens (guarded in
-     shell-css.test.ts, the daylight-wash test). */
+  /* The daylight wash (Alex's call at the #289 review): lit from above, dimming at the
+     foot, sized to the whole DOCUMENT. Alpha washes over --parchment, deliberately not
+     palette tokens (shell-css.test.ts, the daylight-wash test). */
   background-image:
     radial-gradient(ellipse at 20% 10%, rgb(255 250 235 / 0.5), transparent 60%),
     radial-gradient(ellipse at 85% 90%, rgb(120 95 50 / 0.18), transparent 55%);
@@ -173,28 +135,20 @@ body {
 }
 main { margin-inline: auto; }
 header { text-align: center; }
-/* The Punchcutter's Case (#228) roles on the shell members: display for the
-   wordmark, room name, nav band, and footer; flourish for the tagline. Page
-   files keep their page-specific members. */
+/* Punchcutter's Case (#228) roles on the shell members: display for wordmark, room name, nav band, footer; flourish for the tagline. */
 .wordmark, .room-name, .topnav, footer {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
-/* The Running Head (#268): the page header of an old folio. Left, the wordmark,
-   the one place tracking opens up (Fell falls apart tracked out at text sizes);
-   right, the room name with its tagline beneath, baseline-aligned so Fell's
-   irregular x-height cannot float it; beneath both, the double hairline rule
-   of an old ledger; then the nav band, centered. */
+/* The Running Head (#268): a folio page header. The wordmark is the one place tracking
+   opens up (Fell falls apart tracked out at text sizes); the room name baseline-aligns
+   so Fell's irregular x-height cannot float it; beneath both, the ledger's double rule. */
 .running-head { display: flex; justify-content: space-between; align-items: baseline;
   gap: 0.5rem 2rem; text-align: left; }
-/* The head members pin line-height 1.6 (here and on .topnav below): page css
-   sets body line-height per page, and the head must not inherit that variance
-   or its geometry differs page to page. */
-/* Both head members pin font-weight because #288 moved the h1 off the wordmark
-   and onto the room name, and the two tags carry OPPOSITE UA defaults (h1 bold,
-   p normal). Unpinned, the swap would lighten the wordmark and embolden the
-   room name -- and the display face has no bold cut, so that arrives as
-   synthetic bold, which is very visible. These two declarations are the whole
-   reason the swap renders identically; do not "simplify" them away. */
+/* Head members pin line-height 1.6 (here and on .topnav): page css sets body line-height
+   per page, and the head must not inherit that variance or its geometry differs page to page. */
+/* Both head members pin font-weight: #288 swapped which tag carries which text, and h1/p
+   carry OPPOSITE UA weight defaults while the display face has no bold cut, so unpinned
+   the room name arrives as very visible synthetic bold. Do not "simplify" these away. */
 .wordmark { font-size: 1.75rem; letter-spacing: 0.3em; margin: 0; line-height: 1.6; font-weight: 700; }
 .wordmark a { color: inherit; text-decoration: none; }
 .room { text-align: right; }
@@ -206,24 +160,20 @@ header { text-align: center; }
 .head-rule { height: 3px; border-top: 1px solid var(--ink-dark);
   border-bottom: 1px solid var(--ink-dark); margin: 0.7rem 0 0; }
 @media (max-width: 480px) {
-  /* The longer room names collide with the wordmark on a narrow sheet: stack
-     the head centered. The negative margin recenters the wordmark over its
-     trailing letter-space. */
+  /* Longer room names collide with the wordmark on a narrow sheet: stack the head
+     centered; the negative margin recenters the wordmark over its trailing letter-space. */
   .running-head { flex-direction: column; align-items: center; gap: 0.2rem; text-align: center; }
   .wordmark { margin-right: -0.3em; }
   .room { text-align: center; }
 }
 .topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: var(--ink-faded); margin: 0.9rem 0 0; line-height: 1.6; }
-/* motion.css makes nav LINKS inline-block so a multi-word label never wraps
-   mid-label; the current page renders as a span, so it takes the same rule.
-   Ink-dark + manicule + underline: the you-are-here marker never relies on
-   color alone (#268). */
+/* motion.css makes nav LINKS inline-block so a multi-word label never wraps mid-label;
+   the current page renders as a span, so it takes the same rule here. Ink-dark +
+   manicule + underline: the you-are-here marker never relies on color alone (#268). */
 .topnav [aria-current="page"] { display: inline-block; color: var(--ink-dark);
   text-decoration: underline; text-underline-offset: 0.45em; text-decoration-thickness: 1px; }
 .topnav a { color: inherit; }
-/* The manicule's glyph coverage is inconsistent across the Fell fallback
-   stack: pin the plain serif stack and let the system substitute, never the
-   display role. */
+/* The manicule's glyph coverage is inconsistent across the Fell fallback stack: pin the plain serif stack and let the system substitute, never the display role. */
 .manicule { font-family: 'Iowan Old Style', 'Palatino', Georgia, serif; }
 footer { text-align: center; font-size: 0.72rem; letter-spacing: 0.22em; color: var(--ink-faded); }
 footer a { color: inherit; }
@@ -233,12 +183,9 @@ footer a { color: inherit; }
 <main>
 <header>
   <div class="running-head">
-    {/* #288: which tag carries which text. The page's own subject is its h1, so
-        the heading outline a screen reader walks names the room rather than
-        repeating VELLUM on every page. Home is the correct exception: it
-        is roomless (the atelier is not a room), so the wordmark stays its h1
-        and there is exactly one h1 either way. The masthead is unchanged
-        visually and still links home from every page (#268's rule). */}
+    {/* #288: the room is the page's h1, so the heading outline a screen reader walks
+        names the room rather than repeating VELLUM; home is roomless, so the wordmark
+        stays its h1. Exactly one h1 either way, and the masthead still links home. */}
     {room
       ? <p class="wordmark"><a href="/">VELLUM</a></p>
       : <h1 class="wordmark"><a href="/">VELLUM</a></h1>}

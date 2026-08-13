@@ -1,36 +1,19 @@
-// The one dated log (#219, Reading Room Sub 3). Both living-chart subsystems already
-// write the same visual idiom into two different panels: a row is a right-aligned
-// tabular year in `.cr-year` beside its prose in `.cr-text`, resting at 0.4 opacity
-// and brightening as its moment arrives (the chronicle's `.past`, the voyage's
-// `.logged`). This module is that idiom as ONE component, which is the slot #220's
-// fused journal needs to exist before it can read as one journal.
+// The one dated log (#219): the shared row idiom (a right-aligned tabular year in
+// .cr-year beside its prose in .cr-text, resting dim and brightening as its moment
+// arrives) as ONE component; `inked` is the arrived-class. Host-agnostic: it BUILDS its
+// elements, owns no ids, and deliberately does NOT touch panel.hidden, because the
+// engine's builders already drive hidden on the panels the frame hands them and a
+// component that also set it would be a second hand on the same switch.
 //
-// Host-agnostic like the engine it sits beside: it BUILDS its elements rather than
-// looking any up, owns no ids, and imports nothing from a page. It deliberately does
-// NOT touch `panel.hidden`: visibility belongs to whoever mounted it, because the
-// engine's own builders already drive `hidden` on the panels the frame hands them
-// (voyage-log-panel.ts's buildLogPanel/hideLog, chronicle.ts's applyScrub/exitScrub).
-// A component that also set it would be a second hand on the same switch.
-//
-// ## Two paths fill a strip, and render/reveal/snapshot are only one of them
-// This tripped two independent reviewers, so it is written down at the line that
-// breaks. A strip can be filled EITHER by this component (render/reveal/snapshot,
-// the host-driven path the harness exercises) OR by the engine writing into the
-// element the frame handed it, which is what happens for the frame's one instance:
-// #220's fused journal landed ENGINE-driven (the ages driver and the log panel write
-// the prologue and annal rows directly). On the engine-driven path this component's
-// `rows` stays empty by design, so reveal() is inert and snapshot() reports zero. That
-// is not a gap to close: the engine already owns the read hooks for its own path
-// (`lc.voyageLog()` and `lc.agesState()`, per the capability map in
-// living-chart/index.ts), and since #220 its rows carry the same `inked` class.
-// Wiring this component over engine-written rows would put two hands on one switch and
-// would detach the very nodes voyage.ts still holds in `logRows`. Do not "fix" it.
-//
-// The component's own arrived-class is `inked`, from the metaphor both existing
-// panels are commented with: an entry inked into the ledger as its year arrives.
+// TWO paths fill a strip, and render/reveal/snapshot are only ONE of them (this tripped
+// two independent reviewers): the frame's one instance is ENGINE-driven (#220's fused
+// journal writes the prologue and annal rows directly), so on that path this component's
+// `rows` stays empty by design, reveal() is inert, and snapshot() reports zero. Not a
+// gap: the engine owns the read hooks for its own path (lc.voyageLog / lc.agesState),
+// and wiring this component over engine-written rows would put two hands on one switch
+// and detach the very nodes voyage.ts still holds in `logRows`. Do not "fix" it.
 
-/** One dated row. Both existing shapes reduce to this: a HistoricalEvent's
- *  {year, text} and a VoyageLogEntry's {year, text}. */
+/** One dated row; a HistoricalEvent's {year, text} and a VoyageLogEntry's {year, text} both reduce to this. */
 export interface DatedRow {
   readonly year: number;
   readonly text: string;
@@ -51,8 +34,7 @@ export interface DatedLogSnapshot {
 export function createDatedLog(opts: DatedLogOpts) {
   const panel = document.createElement("div");
   panel.className = "rf-log";
-  // A landmark a screen reader can jump to, named: the Explorer gives the margin log
-  // exactly this treatment, and the chronicle strip gains it here.
+  // A named landmark a screen reader can jump to, matching the Explorer's margin log.
   panel.setAttribute("role", "region");
   panel.setAttribute("aria-label", opts.label);
 
@@ -66,12 +48,7 @@ export function createDatedLog(opts: DatedLogOpts) {
 
   let rows: HTMLLIElement[] = [];
 
-  /**
-   * Render the log: the attribution line above, one dimmed row per entry below.
-   * Every row up front (like both engine builders), so a snap or a reduced-motion
-   * jump can brighten them all at once. Prose is written with textContent, never
-   * innerHTML: entry text is plain text from the generator, and it stays that way.
-   */
+  /** Render the log: attribution above, one dimmed row per entry, every row up front so a snap or reduced-motion jump can brighten all at once. Prose lands via textContent, never innerHTML. */
   function render(dated: ReadonlyArray<DatedRow>, attribution = ""): HTMLLIElement[] {
     sig.textContent = attribution;
     rows = dated.map((r) => {
@@ -89,11 +66,7 @@ export function createDatedLog(opts: DatedLogOpts) {
     return rows;
   }
 
-  /**
-   * Brighten rows [0, arrived) and dim the rest. Idempotent and order-independent,
-   * so a driver stepping BACKWARD (a scrub dragged left, an e2e hook walking the
-   * sweep) un-brightens correctly rather than accumulating state.
-   */
+  /** Brighten rows [0, arrived) and dim the rest. Idempotent and order-independent, so a driver stepping BACKWARD un-brightens correctly rather than accumulating state. */
   function reveal(arrived: number): void {
     for (let i = 0; i < rows.length; i++) rows[i].classList.toggle("inked", i < arrived);
   }

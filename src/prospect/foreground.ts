@@ -1,11 +1,3 @@
-/**
- * The foreground grammar (#239): what stands between the townscape and the
- * plate's foot. Harbor places the quay, water, and masts (the main stage:
- * 590 of 609 settlements are harbors, per the 2026-08-10 measured facts on
- * #229); a river places the bridge or the village weir; otherwise the biome
- * band dresses the ground. Shapes and positions only; ink is Sub 3's.
- */
-
 import type { Rng } from "../core/rng.ts";
 import type { ProspectKind } from "./input.ts";
 import type { BiomeName } from "../climate/biomes.ts";
@@ -22,7 +14,6 @@ import {
   type XYS,
 } from "./geometry.ts";
 
-/** The dress vocabularies the band can wear, from the spike's plates. */
 export type Treatment =
   | "fields"
   | "forest"
@@ -51,7 +42,6 @@ const TREATMENT_OF: Record<BiomeName, Treatment | null> = {
   snow: "scrub",
 };
 
-/** Tie-break priority: the more distinctive dress wins an even band. */
 const PRIORITY: ReadonlyArray<Treatment> = [
   "marsh",
   "forest",
@@ -62,8 +52,6 @@ const PRIORITY: ReadonlyArray<Treatment> = [
   "fields",
 ];
 
-/** Majority treatment over the band's land samples; an all-ocean band (a
- * site in open water's lee) falls back to the strand. */
 export function treatmentFor(band: ReadonlyArray<BiomeName>): Treatment {
   const counts = new Map<Treatment, number>();
   for (const biome of band) {
@@ -93,9 +81,6 @@ function scatter(
   return Array.from({ length: count }, (_, i) => make(rng, i));
 }
 
-/** Natural (pre-founding) dressing for the land band. Fields are plowed and
- * so man-made; before the founding their ground reads bare (grass texture
- * is Sub 3 dress), but the boundary trees stay. */
 export function composeLandDressing(
   treatment: Treatment,
   kind: ProspectKind,
@@ -195,7 +180,6 @@ export function composeLandDressing(
           s: 0.8,
         })),
       });
-      // Stilts under the fen village's near houses (the spike's Reedholt).
       if (opts.built && kind === "village") {
         const posts = opts.frontRow.slice(0, 3).flatMap((b) => [
           { x: b.x + 2, y: b.base },
@@ -226,11 +210,6 @@ export function riverWater(ground: Ground): Water {
   return { kind: "river", y0: ground.base + 10, y1: ground.base + 38 };
 }
 
-/** The harbor stage (#229 measured facts: design it first). Capital, seat,
- * and town build the quay with its articulate face (#237 GO condition 9:
- * steps, arcade, bollards; the edge shadow is Sub 3 ink) and moor a mast
- * row; a village or hamlet beaches its hulls on the strand instead. Ruin
- * keeps the masonry and loses the craft. */
 export function composeSeaFront(
   kind: ProspectKind,
   ruined: boolean,
@@ -300,12 +279,6 @@ export function composeSeaFront(
   return out;
 }
 
-/** The river stage: capital, seat, and town anchor a bridge (#237 GO
- * condition 4: abutments and a bridge-gate tower at the town bank; the
- * capital spans five arches); the village keeps the ratified weir, its mill
- * turning only while the village lives (GO condition 6, keyed on river
- * villages); a hamlet fords. Bridges and weirs are masonry and survive
- * ruin; the mill wheel does not. */
 export function composeRiverFront(
   kind: ProspectKind,
   ruined: boolean,
@@ -351,8 +324,6 @@ export function composeRiverFront(
   return out;
 }
 
-/** Birds over the plate: a pair riding the sea wind, a wheeling six over a
- * ruin (the spike's ratified counts). */
 export function composeBirds(count: number, rng: Rng): ForegroundElement {
   return {
     kind: "birds",

@@ -41,7 +41,6 @@ test("the legend adapts to the style", () => {
   assert.ok(/fathom/i.test(naut), "nautical key should mention fathoms");
   const antique = renderMap(world, { style: "antique", legend: true });
   assert.ok(/Mountains|Forest/.test(antique), "antique key should name terrain glyphs");
-  // antique uses no hypsometric ramp; topographic should not draw land glyphs
   const topo = renderMap(world, { style: "topographic", legend: true });
   assert.ok(/high ground|Contour/.test(topo), "topographic key should name elevation tints");
 });
@@ -87,7 +86,6 @@ test("the legend names the iso lines on the climate and moisture plates only", (
   const w = generateWorld(defaultRecipe(42, { gridW: 160, gridH: 120 }));
   assert.match(renderMap(w, { theme: "moisture", legend: true }), /Isohyet/);
   assert.match(renderMap(w, { theme: "climate", legend: true }), /Isotherm/);
-  // the other plates and the plain chart carry no iso line, so none is named
   assert.doesNotMatch(renderMap(w, { theme: "vegetation", legend: true }), /Isohyet|Isotherm/);
   assert.doesNotMatch(renderMap(w, { theme: "population", legend: true }), /Isohyet|Isotherm/);
   assert.doesNotMatch(renderMap(w, { legend: true }), /Isohyet|Isotherm/);

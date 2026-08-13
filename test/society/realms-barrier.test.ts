@@ -4,11 +4,7 @@ import { createField } from "../../src/core/grid.ts";
 import { partitionRealms } from "../../src/society/realms.ts";
 import type { Settlement } from "../../src/society/sites.ts";
 
-// #140: a major river passed as opts.barrier is a HARD frontier -- the realm flood
-// may claim a barrier cell but never propagate across it, so where two realms grow
-// toward each other across the river they meet ON it. These drive the opt-in barrier
-// path with hand-drawn masks (no River/flow construction) on a synthetic grid. Seats
-// must sit > MIN_SEAT_SPACING (24) apart to be picked.
+// #140: opts.barrier is a HARD frontier: the realm flood may claim a barrier cell but never propagate across it, so realms meet ON the river. Hand-drawn masks on a synthetic grid; seats must sit > MIN_SEAT_SPACING (24) apart to be picked.
 
 const SEA = 0.5;
 const allLand = (w: number, h: number) => createField(w, h, () => 1);
@@ -43,10 +39,8 @@ test("#140 a major-river barrier is the frontier: it walls a realm off from land
   const r0 = at(realms.labels, 8, ROW, W);
   const r1 = at(realms.labels, 52, ROW, W);
   assert.notEqual(r0, r1);
-  // west of the barrier stays realm 0; the barrier column is realm 0's frontier edge
   assert.equal(at(realms.labels, 19, ROW, W), r0, "x=19 (just west) is realm 0");
   assert.equal(at(realms.labels, 20, ROW, W), r0, "the barrier column is realm 0's frontier");
-  // east of the barrier flips to realm 1 -- realm 0 is walled off from land a plain flood gives it
   assert.equal(at(realms.labels, 21, ROW, W), r1, "x=21 (just east of the river) flipped to realm 1");
   assert.equal(at(realms.labels, 29, ROW, W), r1, "x=29 flipped to realm 1");
 });
@@ -82,19 +76,14 @@ test("#140 a seat sitting on a barrier cell still governs a full realm (seat exe
   const capitalRealm = at(realms.labels, 8, 10, W);
   assert.ok(townRealm >= 0, "the seat cell is labeled");
   assert.notEqual(townRealm, capitalRealm);
-  // (30,10) sits west of the barrier but east of the plain bisector (x=23): only the
-  // town seat's own propagation wins it. Drop the exemption and the walled seat cannot
-  // reach here -- the cell flips to the capital (or is merely backfilled) -- so this,
-  // not count>1, is what actually guards the exemption.
+  // (30,10) sits west of the barrier but east of the plain bisector (x=23): only the walled seat's own propagation wins it, so this, not count>1, is what actually guards the exemption.
   assert.equal(at(realms.labels, 30, 10, W), townRealm, "the seat's propagation wins land past the bisector");
 });
 
 test("#140 the diagonal-slip guard stops a flood leaking across a diagonal river", () => {
   const W = 30, H = 30;
   const elev = allLand(W, H);
-  // Asymmetric seats so the cost bisector does NOT coincide with the diagonal: (14,0)
-  // lies in the town's upper-right triangle yet is Euclidean-nearer the capital, so
-  // only the diagonal barrier + its slip-guard keep it the town's. (hypot 24.7 > 24.)
+  // Asymmetric seats so the cost bisector does NOT coincide with the diagonal: (14,0) is in the town's triangle yet Euclidean-nearer the capital (hypot 24.7 > 24), so only the barrier + slip-guard keep it the town's.
   const settlements = [settle(1, 4, "capital"), settle(25, 10, "town")];
   const withBarrier = partitionRealms(elev, SEA, noRivers(W, H), settlements, { barrier: diagBarrier(W, H) });
   const townRealm = at(withBarrier.labels, 25, 10, W);
@@ -102,8 +91,7 @@ test("#140 the diagonal-slip guard stops a flood leaking across a diagonal river
   assert.notEqual(townRealm, capitalRealm);
   assert.equal(at(withBarrier.labels, 14, 0, W), townRealm,
     "the slip-guard walls the capital's flood out of the town's triangle");
-  // control: with no barrier the capital is the natural (nearer) owner of (14,0), so the
-  // assertion above is caused by the guard, not by geometry.
+  // Control: with no barrier the capital naturally owns (14,0), so the assertion above is caused by the guard, not by geometry.
   const bare = partitionRealms(elev, SEA, noRivers(W, H), settlements);
   assert.equal(at(bare.labels, 14, 0, W), at(bare.labels, 1, 4, W),
     "without the barrier the capital wins (14,0)");
@@ -113,15 +101,13 @@ test("#140 the fill backfills only stranded (-1) land, never a cell the barrier 
   const W = 64, H = 20, ROW = 10;
   const elev = allLand(W, H);
   const settlements = [settle(8, ROW, "capital"), settle(40, ROW, "town")];
-  // col 20 reshapes the frontier (walls the capital off from land the plain bisector at
-  // x=24 gives it); col 50 strands the seatless east, forcing the barrier-free backfill.
+  // Col 20 reshapes the frontier; col 50 strands the seatless east, forcing the barrier-free backfill.
   const barrier = vBarrier(W, H, 20);
   const east = vBarrier(W, H, 50);
   for (let i = 0; i < barrier.length; i++) if (east[i]) barrier[i] = 1;
   const realms = partitionRealms(elev, SEA, noRivers(W, H), settlements, { barrier });
   const townRealm = at(realms.labels, 40, ROW, W);
-  // (22,10) is a reshaped-frontier cell the barrier handed to the town; a fill that
-  // overwrote non-(-1) cells with the plain flood would flip it back to the capital.
+  // (22,10) is a reshaped-frontier cell the barrier handed to the town; a fill that overwrote non-(-1) cells with the plain flood would flip it back to the capital.
   assert.equal(at(realms.labels, 22, ROW, W), townRealm, "the reshaped frontier survives the stranded-land backfill");
   for (let i = 0; i < W * H; i++) assert.ok((realms.labels[i] as number) >= 0, "no land left unassigned");
 });

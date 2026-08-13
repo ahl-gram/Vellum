@@ -16,12 +16,7 @@ export type MapStyle = {
   readonly contourStroke: string | null;
   readonly river: string;
   readonly road: string;
-  /**
-   * #158 political boundary treatment, kept distinct from the road so a border
-   * never reads as a track. antique/ink/nautical use a dark-ink dash-DOT line;
-   * topographic keeps its already-distinct dashed ink. `borderWidth` and the
-   * `borderDash` values are k-multipliers (k = widthPx/1500), matching the road.
-   */
+  /** borderWidth and the borderDash values are k-multipliers (k = widthPx/1500), matching the road. */
   readonly borderStroke: string;
   readonly borderWidth: number;
   readonly borderDash: ReadonlyArray<number>;
@@ -35,13 +30,9 @@ export type MapStyle = {
   readonly seaDecorations: boolean;
   readonly rhumbLines: boolean;
   readonly politicalTints: boolean;
-  /** Shallow-water tint painted out to the danger line (nautical). */
   readonly shoalTint: string | null;
-  /** Depth soundings scattered over open water (nautical). */
   readonly soundings: boolean;
-  /** Prevailing-wind arrows over open water (nautical). */
   readonly winds: boolean;
-  /** Ocean-current streamlines over open water (nautical). */
   readonly currents: boolean;
   readonly realmTints: ReadonlyArray<string>;
 };
@@ -77,8 +68,6 @@ const ANTIQUE: MapStyle = {
   soundings: false,
   winds: false,
   currents: false,
-  // Frozen base 5 + #78 additions (teal, deep olive). Deep olive is deliberately
-  // dark: it dodges the deuteranopia collision the lighter olive had with ochre.
   realmTints: ["#c46d5e", "#7d9a6a", "#bf9b4f", "#7a8aa6", "#a97ba6", "#5f9e91", "#5f6b2e"],
 };
 
@@ -105,8 +94,6 @@ const TOPOGRAPHIC: MapStyle = {
   contourStroke: "#8d7d62",
   river: "#3f88c5",
   road: "#c0392b",
-  // Preserved from the pre-#158 border (dashed dark ink): topographic already
-  // reads distinctly from its cased red roads, so its treatment does not move.
   borderStroke: "#3a3a3a",
   borderWidth: 1.1,
   borderDash: [1.2, 3.2],
@@ -124,8 +111,6 @@ const TOPOGRAPHIC: MapStyle = {
   soundings: false,
   winds: false,
   currents: false,
-  // Frozen base 5 + #78 additions (turquoise, lime, magenta); the brights leave
-  // real hue room, so all three land and topographic reaches 8.
   realmTints: ["#e74c3c", "#27ae60", "#f39c12", "#2980b9", "#8e44ad", "#1abc9c", "#9bc53d", "#e84393"],
 };
 

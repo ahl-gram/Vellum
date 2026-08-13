@@ -1,26 +1,5 @@
-// Real routes, the mode-aware marker, the margin log, the water-span handoff and the
-// straight fallback's land walk, re-hosted on the Reading Room (RR-route: RV1-RV12,
-// #320 Sub 3, porting W17-W28 of suite-voyage-route.mjs).
-//
-// These are the checks the issue's original class-(a) criterion would have stranded:
-// almost none of them presses Play or drags, they reach mid-leg positions through
-// __vellumVoyagePaintAt. Under the corrected criterion ratified on #320 ("requires a
-// position that is not the survey-chamber t=1 rest or the present-year park") they are
-// squarely class (a), and decision A retires the Explorer's seams at Sub 4, so this is
-// the only host that will still be able to run them.
-//
-// Two of these are the sub's real stakes, per spec-recon:
-//   RV4  is the room's half of the only NUMERIC guard on MAX_TILT. The unit tests pin the
-//        clamp symbolically (near(tiltFor(0,-1), -MAX_TILT)), so they cannot catch a value
-//        change: proven, a 24 -> 30 mutation leaves all 1058 unit tests green and reds
-//        only RV4 (and, until #321, its Explorer twin W20). Since Sub 4 retired W20
-//        with the Explorer seams, the literal 24.0001 asserts HERE alone.
-//   RV3 / RV9 / RV10 guard showMark in src/site/living-chart/voyage.ts, the #181 swap
-//        WIRING, which has no unit coverage at all.
-//
-// The room reaches a world by NAVIGATION rather than by a #seed field and a #draw click
-// (it has no draw controls), and the bare `survey` key lands it in the survey chamber at
-// the completed track, which is the resting base every check here wants.
+// Room voyage-route e2e (RV1-RV12, #320 Sub 3): W17-W28 re-hosted on the Reading Room; Sub 4 retired the Explorer's voyage seams, so this is the only host that can still run them.
+// RV4 is the ONLY numeric guard on MAX_TILT anywhere (a 24 -> 30 mutation leaves all 1058 unit tests green and reds only RV4); RV3/RV9/RV10 guard showMark's #181 wiring, which has no unit coverage.
 import { makeRoom, scopedHealth } from "./room-support.mjs";
 
 export async function run(ctx) {
@@ -28,8 +7,7 @@ export async function run(ctx) {
   const room = makeRoom(ctx);
   const gate = scopedHealth(ctx);
 
-  // Seed 526413615 ("The Isle of Selivelai"): 24 ports and, since #275, a closed round
-  // trip of 24 legs, 15 road and 9 sea, one of which is the genuine inland handoff.
+  // Seed 526413615 ("The Isle of Selivelai"): 24 ports, a closed 24-leg round trip (15 road, 9 sea), exactly one genuine inland handoff.
   const based = await room.goto("#seed=526413615&style=antique&legend=1&survey");
   check("RV0 the room lands on the routed world at the survey rest", based);
 
@@ -46,7 +24,6 @@ export async function run(ctx) {
     JSON.stringify(rv1),
   );
 
-  // RV2 (W18): the routed track is a real polyline, not a port-to-port lerp.
   const rv2 = await evaluate(`(()=>{
     window.__vellumVoyageStepTo(999);
     const plan=window.__vellumVoyagePlan();
@@ -55,8 +32,6 @@ export async function run(ctx) {
   })()`);
   check("RV2 the resting track is a multi-point routed path, not a port-to-port lerp", rv2.pts > rv2.ports, JSON.stringify(rv2));
 
-  // RV3 (W19): the mark swaps ship <-> rider at the port, driven by the leg's mode. This
-  // is showMark's wiring, which no unit test covers.
   const rv3 = await evaluate(`(()=>{
     const legs=window.__vellumVoyagePlan().legs;
     const seaLeg=legs.findIndex((l)=>l.mode==="sea");
@@ -76,11 +51,7 @@ export async function run(ctx) {
     JSON.stringify(rv3),
   );
 
-  // RV4/RV5 (W20/W20b): the tilt cap and the anti-flicker facing. voyageStepTo lands only
-  // ON ports (legT=0) so it can never sample a mid-leg frame, which is exactly where the
-  // tilt varies; the samples come from voyagePaintAt. The anti-flicker leg is selected by
-  // the metric ASSERTED (naive facing flips), never by index, because selecting on one
-  // metric and asserting on another once left this check passing on a tie.
+  // Samples come from voyagePaintAt (stepTo lands only ON ports, never mid-leg where the tilt varies); the anti-flicker leg is selected by the metric ASSERTED, never by index, which once left this passing on a tie.
   const rv45 = await evaluate(`(()=>{
     const plan=window.__vellumVoyagePlan();
     const mark=()=>{const s=document.querySelector(".rf-chart .voyage-ship");const r=document.querySelector(".rf-chart .voyage-rider");return (s&&s.getAttribute("display")!=="none")?s:r;};
@@ -120,8 +91,6 @@ export async function run(ctx) {
     JSON.stringify(rv45),
   );
 
-  // RV6 (W21): the routed track AND both glyphs stay in the sibling overlay, never in the
-  // baked chart.
   const rv6 = await evaluate(`(()=>{
     const chart=document.querySelector(".rf-chart svg:not(.voyage-overlay)");
     return{
@@ -137,9 +106,6 @@ export async function run(ctx) {
     JSON.stringify(rv6),
   );
 
-  // RV7 (W22): the full sweep accumulates one dated entry per LEG plus the departure, so a
-  // round trip logs ports + 1. The panel opens with the surveyor's attribution and a
-  // departure, closes on the return, and all of it persists brightened at rest.
   const rv7 = await evaluate(`(()=>{
     window.__vellumVoyageStepTo(999);
     const plan=window.__vellumVoyagePlan();
@@ -165,9 +131,6 @@ export async function run(ctx) {
     JSON.stringify({ ...rv7, attribution: rv7.attribution.slice(0, 24) }),
   );
 
-  // RV8 (W23): the voice consumes the leg mode. A port reached by a sea leg reads as a
-  // voyage ("made sail"); one reached by a road leg reads as a ride ("rode on"). The
-  // search skips the closing leg so it always lands on a plain arrival.
   const rv8 = await evaluate(`(()=>{
     const plan=window.__vellumVoyagePlan();
     const log=window.__vellumVoyageLog();
@@ -184,10 +147,6 @@ export async function run(ctx) {
     JSON.stringify(rv8),
   );
 
-  // RV9 (W24): the panel rows mirror the engine entries (the reveal drops only the
-  // redundant "Year N." lead the entry carries in DATA), the journal lives OUTSIDE the
-  // chart mount, and the status line holds the survey's one summary. The #312 day gutter
-  // asserted here has no unit coverage.
   const rv9 = await evaluate(`(()=>{
     const log=window.__vellumVoyageLog();
     const first=document.querySelector(".rf-log-strip li.prologue");
@@ -207,10 +166,6 @@ export async function run(ctx) {
     JSON.stringify(rv9),
   );
 
-  // RV10 (W25/W26): the water span. Every sea leg carries a span, non-handoff crossings
-  // keep their swap at the port (tiny stub fractions), and this world's one genuine
-  // handoff sails mid-span and RIDES the landfall stub, narrated as ride-sail-ride rather
-  // than a plain sail.
   const rv10 = await evaluate(`(()=>{
     const legs=window.__vellumVoyageLegGeometry();
     const sea=legs.filter((l)=>l.mode==="sea");
@@ -244,9 +199,7 @@ export async function run(ctx) {
   await evaluate(`window.__vellumVoyageStepTo(999)`);
   await shoot("reading-room-voyage-routed.png");
 
-  // RV11 (W27): seed 39 carries the worst measured handoffs (a 26-cell embark stub into
-  // Feniefena and a 48-cell landfall stub into Loriemirmere, back to back), so it proves
-  // the swap in BOTH directions: ride to the shore, sail, ride again.
+  // Seed 39 carries the worst measured handoffs (a 26-cell embark stub and a 48-cell landfall stub, back to back), proving the swap in BOTH directions.
   await room.goto("#seed=39&style=antique&legend=1&survey");
   const rv11 = await evaluate(`(()=>{
     const legs=window.__vellumVoyageLegGeometry();
@@ -278,13 +231,7 @@ export async function run(ctx) {
   );
   await shoot("reading-room-voyage-handoff.png");
 
-  // RV12 (W28, #298): a straight fallback leg walks the land, never across open water.
-  // Seed 430445745 puts ports on THREE landmasses with roads only on the capital's, so
-  // most legs degrade to the roadless-landmass fallback; before #298 the worst drawn chord
-  // ran 33 continuous cells over open sea with the rider glyph on it. Legs are selected by
-  // the metric asserted, never by index. The wet-run bound is 1.5 cells (1.16 measured
-  // post-fix, against 33.4 pre-fix). The ground truth comes from __vellumRunInline, which
-  // returns the same survey grid the worker would, synchronously.
+  // Seed 430445745 puts ports on THREE landmasses with roads only on the capital's; the 1.5-cell wet-run bound sits against 1.16 measured post-fix and 33.4 pre-fix (#298), legs selected by the metric asserted.
   await room.goto("#seed=430445745&style=antique&legend=1&survey");
   const rv12 = await evaluate(`(()=>{
     const res=window.__vellumRunInline({kind:"draw",seed:430445745,overrides:{},render:{style:"antique",widthPx:1500,legend:true,arms:false}});

@@ -51,8 +51,7 @@ test("the streaks follow the world's wind", () => {
     "rotating world.winds turns the streaks",
   );
 
-  // and not merely "responds to": every streak points along the wind. The
-  // two-point d= pattern excludes the multi-segment coast clip path.
+  // Every streak points ALONG the wind, not merely responds to it; the two-point d= pattern excludes the multi-segment coast clip path.
   const svg = renderMap(world, { theme: "moisture" });
   const layer = svg.match(/<g id="layer-wind-streams">[\s\S]*?<\/g><\/g>/)?.[0] ?? "";
   const segs = [...layer.matchAll(/d="M(-?[\d.]+) (-?[\d.]+)L(-?[\d.]+) (-?[\d.]+)"/g)];
