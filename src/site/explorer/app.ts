@@ -21,7 +21,7 @@ import { createGlass } from "./glass.ts";
 import { wireControls } from "./controls.ts";
 import { wireFootnotes } from "./footnotes.ts";
 import { installExplorerHooks } from "./hooks.ts";
-import { createSurveyArm, afterNextPaint } from "./survey-arm.ts";
+import { wireSurveyToggle, armOnLanding, deferLandingArm } from "./survey-arm.ts";
 import { createLivingChart } from "../living-chart/index.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
@@ -208,7 +208,9 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       // #321/#153: the chronicle suppression term is DELETED. The Explorer's only
       // armed state is the static survey track, a DOM overlay with no per-glyph
       // mutations, so the style turn works armed.
-      if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, flipped: isFlipped(sheetEl) })) {
+      const flipped = isFlipped(sheetEl);
+      const deferArm = deferLandingArm(quiet, flipped); // #366: survey-arm.ts carries the why
+      if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, flipped })) {
         // #131 The style turn: the same world in a new dress. The sheet turns over,
         // and the overlay/scrub rebuild against the new chart only after it LANDS (so
         // the marks never rebuild over the outgoing chart). The turn suppresses the
@@ -219,13 +221,19 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
           lc.buildPlaceOverlay(res.manifest);
           // #321: re-arm the static survey track to the just-landed chart, at rest
           // (rearmVoyage, the bar-less arm entry #319 named for this conductor).
-          surveyArm.cancel(); // #300: this landing owns the arm; see the settle path below
-          if (agesChk.checked) lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
-          else lc.clearAges();
+          // #300/#366: this landing owns the arm, and SCHEDULES it a painted frame past the
+          // commit rather than running it here. A cached re-arm is ~139ms, but a style change
+          // made inside the settle's own beat drops that pending arm, so this landing can
+          // still pay the full cold-matrix miss. See the settle path below.
+          // defer passed EXPLICITLY: a turn is never quiet and never flipped, so it is `true`
+          // today, but the verso block below reads the same deferArm, and two readers of one
+          // decision agreeing only by luck is how SV2m's bug returns where SV2m cannot see it.
+          armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
+            rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
           glass.syncZoom(); // #164/#165: attach the zoom to the just-landed chart (every style)
           // #169: record the (re-dressed) world sheet so a settle can redraft over it.
           glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
-          syncHash(); // #192: converge the address after the landing re-arms
+          syncHash(); // #192: converge the address; it reads the BOX, never the armed session, so #366's deferral leaves it unmoved
         });
       } else {
         // Settle (#127): inject the chart and run the arrival ceremony (unless this is
@@ -245,9 +253,11 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         // #300: this settle OWNS the arm, so drop any tick still waiting on its frame.
         // drawGen cannot see a draw that was ALREADY IN FLIGHT when the box was ticked (it
         // bumped before the tick), and that arm would land a second overlay. See survey-arm.ts.
-        surveyArm.cancel();
-        if (agesChk.checked) lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet });
-        else lc.clearAges();
+        // #366: and it SCHEDULES rather than runs, so the chart written into #map three lines
+        // up paints before the arm is paid for. Both are the same single slot, so exactly one
+        // arm survives into the mount. A quiet mid-drag redraw arms inline instead.
+        armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
+          rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
         glass.syncZoom(); // #164/#165: attach the zoom to the just-drawn chart (every style)
         // #169: record this world sheet BEFORE a deep-link camera is applied, so the settle
         // that camera triggers can redraft a region over the SAME base world (cache hit).
@@ -266,16 +276,28 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       // drag redraws (like the arrival ceremony) so a sea-level drag does not churn an
       // invisible verso Blob every frame; the release's non-quiet draw rebuilds it.
       // #174: renderVerso's replaceChildren WIPES the verso's voyage track, exactly as
-      // mapDiv.innerHTML wipes the recto overlay above, so repaint it on the far side of
-      // the wipe. syncRestingTrack is silent (safe inside this settle) and a no-op with no
-      // voyage. In the settle path the voyage was re-armed just above, so it paints the new
-      // world. In the TURN path the re-arm is still ~900ms out, so this paints the outgoing
-      // session: harmless, because only styleSel turns and a style turn re-dresses the SAME
-      // world, making those points identical to the ones the landing re-arm will paint.
-      // Both invariants (turn => same world, turn => never flipped) are pinned by e2e W16.
+      // mapDiv.innerHTML wipes the recto overlay above, so it has to be repainted on the far
+      // side of the wipe. syncRestingTrack is silent (safe inside this settle) and a no-op
+      // with no voyage.
+      //
+      // #366 INVARIANT: whoever paints the track LAST owns this repaint and the settle must not
+      // race them. A DEFERRED arm owns it, so the settle leaves the back face bare and the arm
+      // inks it a frame later, exactly as it inks the recto. The turn path used to be waved
+      // through here ("the re-arm is ~900ms out, so this paints the outgoing session: harmless,
+      // a style turn re-dresses the SAME world"); the deferral killed that, because a settle's
+      // arm is droppable, so a style change inside the settle's beat drops it and leaves the
+      // engine on the world BEFORE last, which the turn would strike over the new world's ghost
+      // for its ~900ms (reproduced in a browser first; e2e SV2m, and SV2k on the settle).
+      // That bare beat is deliberate on the recto's side and NOT acceptable on the face being
+      // looked at, which is why deferArm is false while flipped: that arm ran inline, so this
+      // call repaints what it just rebuilt, ghost and track from one draw in one task (SV2o).
+      // Unticked keeps the old behavior: exitAges nulled the session and this clears the sink.
+      // (turn => never flipped, and turn => a style change and so the same world, are pinned by
+      // test/explorer/sheet-turn.test.ts.)
+      const armPaintsVerso = agesChk.checked && deferArm;
       if (!quiet) {
         rebuildVerso(versoEl, res, seed);
-        lc.syncRestingTrack();
+        if (!armPaintsVerso) lc.syncRestingTrack();
       }
     })
     .catch((err) => {
@@ -324,41 +346,21 @@ versoBtn.addEventListener("click", () => {
   versoBtn.textContent = flipped ? "Turn back" : "Turn the sheet";
 });
 
-// #300: the arm's heavy half, deferred one painted frame past the tick. rearmVoyage,
-// never applyVoyage: the arm rests on the completed track and posts nothing to #status
-// (the settle discipline). worldGen is drawGen, which draw() bumps at its top, ahead of
-// both re-arm paths. survey-arm.ts owns the window this yield opens.
-const surveyArm = createSurveyArm({
-  afterPaint: afterNextPaint,
-  isArmed: () => agesChk.checked,
-  worldGen: () => drawGen,
-  arm: () => { lc.rearmVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle); },
-});
-
 // #321 the survey ink: static chart furniture, the way `arms` inks the banners. Ticked
 // inks the completed survey track onto the sheet at rest (no clock, no sweep); unticked
-// leaves the sheet bare. Arming still snaps the camera home (the #165 world-sheet reset,
-// ratified 2026-07-26, unchanged by the cut) and drops a committed region inset first; a
-// hash restore skips this handler entirely (the boot ticks the box with no change event,
-// and the first settle arms the track silently).
+// leaves the sheet bare.
 //
-// #300: everything that ACKNOWLEDGES the click is synchronous here (the checked box, the
-// camera home, the hash write); the ~900ms first build waits for the paint. exitAges keeps
-// both chamber-painter teardowns live on this bar-less host (#319), and cancel() drops an
-// arm still waiting on its frame so a tick undone inside that beat inks nothing.
-agesChk.addEventListener("change", () => {
-  if (agesChk.checked) {
-    glass.homeToWorld();
-    glass.reset();
-    surveyArm.schedule();
-  } else {
-    surveyArm.cancel();
-    lc.exitAges();
-  }
-  // #192: sync AFTER the arm and in both directions; still synchronous in the handler, so
-  // a copied link drops cx/cy/k now and carries the bare survey flag. It reads the BOX,
-  // never the track, so deferring the build leaves the address unmoved.
-  syncHash();
+// #300/#366: survey-arm.ts owns the box's wiring AND the one slot every arm goes through,
+// the tick's and both landings'. rearmVoyage, never applyVoyage: the arm rests on the
+// completed track and posts nothing to #status (the settle discipline). worldGen is drawGen,
+// which draw() bumps at its top, ahead of every arm path.
+const surveyArm = wireSurveyToggle({
+  box: agesChk,
+  worldGen: () => drawGen,
+  home: () => { glass.homeToWorld(); glass.reset(); },
+  arm: () => { lc.rearmVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle); },
+  exit: lc.exitAges,
+  syncHash,
 });
 
 // #321 the time forward: an inbound link carrying a valid `year=N` belongs to the
