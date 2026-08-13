@@ -164,7 +164,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
           glass.applyCamera(cam);
         }
       }
-      // #174/#366: whoever paints the track LAST owns this repaint; a DEFERRED arm owns it, so the settle leaves the back face to the arm.
+      // #174/#366: whoever paints the track LAST owns this repaint; a DEFERRED arm owns it, so the settle leaves the back face to the arm (e2e SV2k/SV2m/SV2o).
       const armPaintsVerso = agesChk.checked && deferArm;
       if (!quiet) {
         rebuildVerso(versoEl, res, seed);
