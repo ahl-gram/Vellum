@@ -53,8 +53,17 @@ test("ATLAS_SHEET_CSS: the shared inner CSS, scoped under .atlas-sheet, is the d
   // Scoped so it can be injected into the Explorer / Print Room without bleeding onto
   // the host page's own figure/table/h2.
   assert.match(ATLAS_SHEET_CSS, /\.atlas-sheet\s+figure\b/);
-  // The plate lift under the hand (atlas.test.ts guards this exact pattern downstream).
-  assert.match(ATLAS_SHEET_CSS, /\.atlas-sheet\s+figure\s+img:hover\s*\{[^}]*translateY/);
+  // The plate lift under the hand, scoped to plates that GO SOMEWHERE (#368 ruling): the
+  // gesture promises a destination (#289), so it may only attach to an anchored plate. All
+  // three hosts qualify after #368, two of them by wrapping their plates at runtime, so this
+  // scoping costs no host its lift; it costs a plate its lift exactly when the link is absent
+  // (scripting off in the download), which is the case the contract exists for.
+  assert.match(ATLAS_SHEET_CSS, /\.atlas-sheet\s+figure\s+a\s+img:hover\s*\{[^}]*translateY/);
+  assert.doesNotMatch(
+    ATLAS_SHEET_CSS,
+    /\.atlas-sheet\s+figure\s+img:hover\s*\{[^}]*transform/,
+    "an unanchored plate must not lift: that is the false affordance #368 ruled out",
+  );
   // A fallback so the self-contained download (no /motion.css) still resolves the timing.
   assert.match(ATLAS_SHEET_CSS, /var\(--paper,\s*\d+ms\)/);
   // Page chrome (body background, header) is NOT part of the shared inner block: it must
@@ -102,7 +111,7 @@ test("plates reserve their frames: img dims from the plate's own svg root, lazy 
   assert.match(ATLAS_SHEET_CSS, /figure\s+a::before\s*\{[^}]*z-index:\s*-1/);
 });
 
-test("atlasDocument (data-URI mode): a self-contained doc with no anchors and no external refs", () => {
+test("atlasDocument (data-URI mode): self-contained, with no anchors in the FILE and no external refs", () => {
   const data = fixture();
   const html = atlasDocument(data, (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
 
@@ -117,4 +126,94 @@ test("atlasDocument (data-URI mode): a self-contained doc with no anchors and no
   // still a complete, styled document
   assert.match(html, /<body class="atlas-sheet">/);
   assert.match(html, /\.atlas-sheet figure/);
+});
+
+// Exactly the browser surface PLATE_LINK_SCRIPT touches, and nothing else. Not a DOM and
+// deliberately not a selector engine (test-support/element-shim.ts's standing rule): the
+// script's own selector is recorded and checked against the real markup separately, and
+// every assertion below reads nodes the script itself rewired.
+class StubNode {
+  parentNode: StubNode | null = null;
+  children: StubNode[] = [];
+  src = "";
+  href = "";
+  target = "";
+  rel = "";
+  tag: string;
+  constructor(tag: string) { this.tag = tag; }
+  insertBefore(node: StubNode, ref: StubNode): void {
+    node.parentNode = this;
+    this.children.splice(this.children.indexOf(ref), 0, node);
+  }
+  appendChild(node: StubNode): void {
+    const from = node.parentNode?.children;
+    if (from) from.splice(from.indexOf(node), 1);
+    node.parentNode = this;
+    this.children.push(node);
+  }
+}
+
+// Runs the document's own script, so a syntax error throws here rather than shipping.
+async function runPlateScript(html: string, plates: number) {
+  const body = html.match(/<script>([\s\S]*?)<\/script>/);
+  assert.ok(body, "the self-contained atlas must carry its linking script");
+  const imgs = Array.from({ length: plates }, (_, i) => {
+    const figure = new StubNode("figure");
+    const img = new StubNode("img");
+    img.src = `data:image/svg+xml;base64,PLATE${i}`;
+    figure.appendChild(img);
+    return img;
+  });
+  const queried: string[] = [];
+  const doc = {
+    querySelectorAll: (sel: string) => { queried.push(sel); return imgs; },
+    createElement: (tag: string) => new StubNode(tag),
+  };
+  const fetchStub = async (src: string) => ({ blob: async () => ({ src }) });
+  const urlStub = { createObjectURL: (b: { src: string }) => `blob:vellum/${b.src.slice(-6)}` };
+  new Function("document", "fetch", "URL", "console", body[1])(doc, fetchStub, urlStub, { warn() {} });
+  await new Promise((r) => setTimeout(r, 0));
+  return { imgs, queried };
+}
+
+test("data-URI mode: running the document's own script really links every plate (#368)", async () => {
+  const html = atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
+  const { imgs, queried } = await runPlateScript(html, 5);
+
+  for (const img of imgs) {
+    const a = img.parentNode;
+    assert.ok(a && a.tag === "a", "every plate must end up inside an anchor");
+    assert.match(a.href, /^blob:/, "a data: href is the inert form the measurement ruled out");
+    assert.equal(a.target, "_blank", "opens beside the atlas, never over it");
+    assert.equal(a.rel, "noopener");
+    assert.equal(a.parentNode?.tag, "figure", "the anchor takes the img's place in the figure");
+  }
+
+  // The script's reach and the markup must not drift apart: it queries plate imgs as direct
+  // figure children, so plateFigure may not grow a wrapper around them.
+  assert.equal(queried.length, 1);
+  assert.match(queried[0], /figure\s*>\s*img\s*$/, "the plate query must stay a figure > img child match");
+  // Scope derived, not pinned: a consistent rename stays green here (the literal belongs to the
+  // sibling CSS guards), but a script reaching for a class the document never emits reds.
+  const scope = queried[0].match(/^\.([\w-]+)\s/)?.[1];
+  assert.ok(scope, "the plate query must be scoped to a class");
+  assert.match(html, new RegExp(`<body class="[^"]*\\b${scope}\\b`), "the script's scope must be the class the document emits");
+  assert.equal((html.match(/<figure><img /g) ?? []).length, 5, "every plate img is a direct figure child");
+
+  // The reason anchor:false exists in the first place survives: still exactly one copy each.
+  assert.equal(
+    (html.match(/data:image\/svg\+xml;base64,/g) ?? []).length,
+    5,
+    "linking the plates must not re-embed them: the file would double",
+  );
+  assert.doesNotMatch(html, /<a href="data:/);
+});
+
+test("file-ref mode carries no plate-linking script: its anchors are already real (#368)", () => {
+  const html = atlasDocument(fixture(), (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
+  assert.doesNotMatch(
+    html,
+    /<script>/,
+    "the CLI page's plates are anchored server-side, so a script here would be dead weight",
+  );
 });

@@ -1,22 +1,16 @@
-// The atlas document: the standalone-page wrapper (head, header, section layout,
-// footer) plus the shared inner CSS, extracted out of src/cli/atlas.ts so the CLI
-// deploy path and the Print Room's bound atlas both draw from ONE source. Browser-safe
-// by construction: no node: imports, only pure string
-// building and the btoa/TextEncoder globals both Node and the browser provide. buildAtlas
-// keeps all of the filesystem work; this module never touches the disk or the DOM.
+// The atlas document: the standalone-page wrapper plus the shared inner CSS, the ONE
+// source the CLI deploy path and the Print Room's bound atlas both draw from. Browser-safe
+// by construction: no node: imports, no disk, no DOM (buildAtlas keeps the filesystem work).
 import { escapeXml } from "../render/svg.ts";
 import { paletteRootCss } from "./palette.ts";
 import type { AtlasPlate } from "./compose.ts";
 
-// Which band of the atlas a plate sits in. Drives the filename scheme (the style
-// plates carry the world- prefix the CLI has always written) and the page layout.
+// Drives the filename scheme and the page layout.
 export type PlateSection = "hero" | "draughting" | "theme" | "region";
 
-// The header fields + the composed plates and fragments an atlas document needs. This
-// is exactly the shape serializableAtlas produces (src/site/explorer/serializable-atlas.ts),
-// so the Print Room can hand a worker's atlas result straight in; the CLI builds the same
-// shape from the World it holds. No `world` here on purpose: the worker strips it (its
-// Field methods are not structured-cloneable), so the document must never need it.
+// Exactly the shape `serializableAtlas` in `src/site/explorer/serializable-atlas.ts`
+// produces. No `world` on purpose: the worker strips it (Fields are not
+// structured-cloneable), so the document must never need it.
 export type AtlasDocumentData = {
   readonly title: string;
   readonly subtitle: string;
@@ -31,24 +25,15 @@ export type AtlasDocumentData = {
 };
 
 /**
- * The shared inner atlas CSS: the single source of truth for how the composed plates,
- * tables, banners, and chronicle are drawn. Scoped under `.atlas-sheet` so it can be
- * injected into any host page with its own figure/table/h2 without bleeding: the Print Room
- * (src/site/print-room/bound-atlas.ts injects it) and the generated atlas document
- * (buildAtlas embeds it). This CLOSES the drift trap: before, these exact rules were
- * hand-mirrored in both src/cli/atlas.ts's <style> and the Explorer's inline bind view.
- * (The Explorer's own "Bind as atlas" was retired in #199 and its bound atlas consolidated
- * into the Print Room.) Deliberately does NOT carry page chrome (body background, header,
- * footer) or the divergent bits (page-chrome spacing like the standalone's h2 margin-top):
- * those stay context-local so each host is unchanged. The transition timing falls back to
- * literal values (var(--paper, 260ms)) so the self-contained download, which links no
- * /motion.css, still eases correctly.
+ * The shared inner atlas CSS, scoped under `.atlas-sheet` so any host can inject it without
+ * bleeding. Carries no page chrome, so each host keeps its own. Transition timings fall back
+ * to literals (var(--paper, 260ms)): the download links no /motion.css and must still ease.
  */
 export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
 .atlas-sheet figure a { display: block; position: relative; }
-/* The waiting frame (#329): the img reserves its box via width/height attributes and
-   this label sits BEHIND it (negative z-index), so the opaque plate paints over it as
-   it lands. Anchor-wrapped plates only (the data-URI download decodes inline). */
+/* The waiting frame (#329) sits BEHIND the img (negative z-index), so the opaque plate
+   paints over it as it lands. Anchor-wrapped plates only, which since #368 includes the
+   download's: a lazy below-fold plate there shows it briefly though the bytes are local. */
 .atlas-sheet figure a::before { content: "Drafting…"; position: absolute; inset: 0; z-index: -1;
   display: grid; place-items: center; font-style: italic;
   background: var(--parchment-panel); color: var(--ink-faded); }
@@ -58,9 +43,11 @@ export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
   border: 1px solid var(--line-tan); box-shadow: 0 10px 30px rgb(from var(--chart-ink) r g b / 0.18);
   transition: transform var(--paper, 260ms) var(--ease-paper, cubic-bezier(0.22, 0.61, 0.36, 1)),
               box-shadow var(--paper, 260ms) var(--ease-paper, cubic-bezier(0.22, 0.61, 0.36, 1)); }
-.atlas-sheet figure img:hover { transform: translateY(-5px) rotate(-0.6deg);
+/* The lift is scoped to ANCHORED plates (#368): with scripting off the download has no
+   link and correctly no lift, rather than the false affordance #289's tip contract names. */
+.atlas-sheet figure a img:hover { transform: translateY(-5px) rotate(-0.6deg);
   box-shadow: 0 20px 44px rgb(from var(--chart-ink) r g b / 0.28); }
-.atlas-sheet figure img:active { transform: translateY(-1px) rotate(0deg); }
+.atlas-sheet figure a img:active { transform: translateY(-1px) rotate(0deg); }
 .atlas-sheet figcaption { text-align: center; font-style: italic; color: var(--ink-brown); padding-top: 0.55rem;
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); }
 .atlas-sheet .styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
@@ -82,10 +69,8 @@ export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
 .atlas-sheet ol.chronicle .year { flex: 0 0 3.2rem; text-align: right; font-variant-numeric: tabular-nums;
   font-weight: 600; color: var(--ink-faded); }`;
 
-// The page chrome for the STANDALONE document only (the CLI /atlas/ page and the
-// single-file download). Never injected into a host page, which supplies its own body
-// and header. h2 margin-top lives here at the standalone's 3rem, kept off the shared
-// block on purpose so each host keeps its own spacing.
+// STANDALONE documents only, never injected into a host page: h2 margin-top sits here,
+// off the shared block, so each host keeps its own spacing.
 const PAGE_CHROME_CSS = `:root { color-scheme: light; }
 ${paletteRootCss()}
 body {
@@ -112,21 +97,16 @@ footer { margin-top: 4rem; text-align: center; letter-spacing: 0.25em;
   font-size: 0.75rem; color: var(--ink-faded); }
 a { color: inherit; }`;
 
-// The plate's SVG filename in its atlas section. The style plates (the antique hero and
-// the other draughtings) carry the world- prefix the CLI has written since the first
-// atlas; the theme/region keys already read theme-* / region-*, so they stand alone.
+// Style plates carry the world- prefix the CLI has always written; theme/region keys
+// already read theme-* / region-*, so they stand alone.
 export function atlasPlateFilename(plate: { key: string }, section: PlateSection): string {
   return section === "hero" || section === "draughting"
     ? `world-${plate.key}.svg`
     : `${plate.key}.svg`;
 }
 
-// A base64 `data:image/svg+xml` URI for a plate, so the single-file download inlines its
-// plates and opens offline with no external references. Base64 over a UTF-8 byte view
-// (not btoa(svg) directly) so a world title carrying non-ASCII glyphs survives; chunked
-// through String.fromCharCode so a multi-megabyte plate never overflows the argument
-// stack. PNGs and PDFs stay out of the determinism covenant; so does this (it is an
-// <img> embed of the byte-faithful SVG, not a re-render).
+// Base64 over a UTF-8 byte view (not btoa(svg)) so a non-ASCII world title survives, and
+// chunked so a multi-megabyte plate never overflows the argument stack.
 export function svgToDataUri(svg: string): string {
   const bytes = new TextEncoder().encode(svg);
   let binary = "";
@@ -137,9 +117,35 @@ export function svgToDataUri(svg: string): string {
   return `data:image/svg+xml;base64,${btoa(binary)}`;
 }
 
-// One <figure> for a plate: its <img> (optionally wrapped in a link to the same source,
-// for the CLI's file-backed page) and its caption. The download passes anchor:false so a
-// data-URI plate is never embedded twice.
+/**
+ * The self-contained download's plates, linked at load (#368, ratified 2026-08-13).
+ *
+ * A plain `<a href="data:...">` is refused: measured in Brave 151 from a file:// origin the
+ * tab lands on about:blank with "Not allowed to navigate top frame to data URL". Wrapping
+ * server-side would instead double a ~20MB file, which is why `anchor:false` exists. So each
+ * plate is wrapped here in a real link to a blob built from the data URI the img already
+ * carries. The blobs are held for the page's life (~16MB on a 22.5MB atlas), the accepted
+ * cost of a genuine anchor over a click handler: focus, middle-click and new-tab all behave.
+ */
+const PLATE_LINK_SCRIPT = `<script>
+for (const img of document.querySelectorAll(".atlas-sheet figure > img")) {
+  fetch(img.src)
+    .then((r) => r.blob())
+    .then((blob) => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.target = "_blank";
+      a.rel = "noopener";
+      img.parentNode.insertBefore(a, img);
+      a.appendChild(img);
+    })
+    .catch((err) => {
+      // Leave this plate a plain img: no link, and (per the css above) no lift either.
+      console.warn("Vellum: could not link a plate to its full-size chart.", err);
+    });
+}
+</script>`;
+
 function plateFigure(
   plate: AtlasPlate,
   section: PlateSection,
@@ -148,9 +154,8 @@ function plateFigure(
 ): string {
   const src = plateSrc(plate, section);
   const alt = escapeXml(plate.title);
-  // #329: reserve the frame the plate's own svg root declares (map-renderer emits
-  // rounded width/height first among the root attrs), so the document lays out
-  // before a byte of chart arrives. Graceful when a plate carries no dims.
+  // #329: reserve the frame from the svg root's own dims so the document lays out before
+  // a byte of chart arrives; graceful when a plate carries none.
   const dims = plate.svg.match(/width="(\d+)" height="(\d+)"/);
   const frame = dims ? ` width="${dims[1]}" height="${dims[2]}"` : "";
   const img = `<img src="${src}"${frame} loading="lazy" decoding="async" alt="${alt}">`;
@@ -159,12 +164,9 @@ function plateFigure(
 }
 
 /**
- * Assemble a complete standalone atlas HTML document from composed plates. `plateSrc`
- * decides how each plate is embedded: the CLI returns a filename (and sets anchor:true
- * so the sheet links its full-size SVG); the single-file download returns a base64 data
- * URI (anchor:false). `motion` links the shared /fonts.css (the Punchcutter faces, #228)
- * and /motion.css desk (the CLI page and the folio); the offline download omits both and
- * relies on the CSS fallbacks above (serif type, literal-valued transitions).
+ * `plateSrc` decides how a plate is embedded: a filename (CLI, with anchor:true) or a data
+ * URI (download, anchor:false). `motion` links /fonts.css and /motion.css; the offline
+ * download omits both and relies on the CSS fallbacks above.
  */
 export function atlasDocument(
   data: AtlasDocumentData,
@@ -225,7 +227,7 @@ ${data.chronicleHtml}
 ${data.gazetteerHtml}
 
 <footer>DRAWN BY VELLUM · AN ATELIER OF IMAGINARY CARTOGRAPHY</footer>
-</body>
+${anchor ? "" : PLATE_LINK_SCRIPT + "\n"}</body>
 </html>
 `;
 }

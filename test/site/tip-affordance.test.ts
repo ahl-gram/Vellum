@@ -6,57 +6,15 @@ import { fileURLToPath } from "node:url";
 import { GALLERY_PAGE_CSS } from "../../src/cli/gallery.ts";
 import { atlasDocument } from "../../src/atlas/document.ts";
 
-/**
- * The tip is a promise (#289, motion.css): in Vellum, what goes somewhere tips.
- * A hover tip on an element that navigates nowhere is a false affordance, the
- * exact miss the post-use feel review of #324 caught on the glossary terms.
- * This sweep finds every :hover rule that rotates and requires its selector to
- * be on the measured allowlist of surfaces that really go somewhere. Adding a
- * new tip means either making it navigate or consciously extending the list.
- *
- * The file also guards what the tip COSTS. It needs a block box, so a tipping
- * link is an inline-block, and that changes where a wrapped entry's list marker
- * sits (#356). Same gesture, second contract, swept the same way (#358): find
- * every inline-block link mechanically, and require each one to either pin its
- * bullet or be recorded as living outside a marker-bearing list.
- *
- * Since #360 both contracts read every authored sheet the site has, public/ and src/
- * alike. Before it, every sweep here read a list of files under public/ and three
- * sources in src/ sat outside all of them: a tip added there promised something
- * nobody checked, and an inline-block link added there went green through all 1102
- * tests. That mutation is what filed the issue. The roster that closes it, and the
- * scan that keeps the roster complete, are at the foot of this file, because a sweep
- * is only worth its coverage.
- *
- * That is coverage of FILES. Be careful not to read it as coverage of the contract:
- * what each sweep then looks FOR is unchanged from #289 and #358, and the tip half is
- * still shaped like `rotate(`. A hover lift written as translate alone is not a tip by
- * this file's definition and is not swept, which is a live shape, not a hypothetical:
- * motion.css's `.card:hover` and `.topnav a:hover` both lift with translateY and no
- * rotate. Neither is a false affordance today (both are anchors), so nothing is broken,
- * and widening the definition is a #289 question rather than a #360 one. Recorded here
- * because #360 widened WHERE this file looks, and it would be easy to come away
- * thinking it had widened what counts. */
+// Two contracts over every authored sheet the site has, public/ and src/ alike (#289, #356, #358, #360): what tips must go somewhere, and an inline-block link must pin its bullet or be recorded as living outside a marker-bearing list.
+// A tip is defined by the shape `rotate(`, so a hover lift written as translate alone is not swept: motion.css's .card and .topnav a both lift with translateY and no rotate. Neither is a false affordance today (both are anchors), and widening the definition is a #289 question.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
 
-/** Trees under public/ a generator writes, so they are gitignored: absent from a
- *  fresh clone and present after a build. The public/ walk below still skips them,
- *  because on a fresh clone there is nothing there to walk. They are no longer a gap:
- *  since #360 each is swept at its SOURCE instead, and each therefore has to NAME that
- *  source, which must be on SRC_CSS. public/gallery/index.css is written verbatim from
- *  GALLERY_PAGE_CSS in src/cli/gallery.ts, so sweeping the source sweeps the sheet, and
- *  the source is in every clone rather than only after a build.
- *
- *  The mapping is enforced below, not merely described here. Left as prose it would be
- *  an invariant with nothing behind it: the next session could silence a red by adding
- *  a tree prefix to this list and re-open the exact gap #360 was filed to close, since
- *  a listed tree is skipped by the public/ walk. Adding a tree now costs naming the
- *  src/ module that writes it, which is the decision, made on purpose. */
+/** Generator-written trees under public/, gitignored and so absent from a fresh clone: each is skipped by the public/ walk and swept at the src/ source named beside it instead. */
 const GENERATED_CSS = [["public/gallery/", "src/cli/gallery.ts"]] as const;
 
-/** Every committed hand-authored stylesheet (generated css has its own source). */
 const AUTHORED_CSS = [
   "public/explorer/broadside.css",
   "public/explorer/index.css",
@@ -73,31 +31,11 @@ const AUTHORED_CSS = [
   "public/seed-of-the-day/index.css",
 ] as const;
 
-/** Every `<style>` element's css in one source, joined. A file may hold more than
- *  one (an .astro page's scoped block beside the layout's global one), and joining
- *  them is safe here: the sweeps read rules independently, none cares about cascade
- *  order between blocks. */
+/** Joining a source's several <style> blocks is safe here: every sweep reads rules independently, none depends on cascade order between blocks. */
 const styleBlocksIn = (source: string): string =>
   [...source.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n");
 
-/** The atlas document's css, resolved by BUILDING one (#360).
- *
- *  src/atlas/document.ts is the awkward source the issue flagged: its <style> is
- *  `${PAGE_CHROME_CSS}\n${ATLAS_SHEET_CSS}`. Be precise about which half is awkward,
- *  because an earlier draft of this comment was not: ATLAS_SHEET_CSS IS exported and
- *  could simply be imported. PAGE_CHROME_CSS is the problem. It is not exported, and
- *  it interpolates `${paletteRootCss()}`, so read as text it yields a `${...}` marker
- *  rather than css.
- *
- *  Running the real function is still the better answer for BOTH halves, and not just
- *  because it avoids adding an export for a test's convenience. Importing the two
- *  constants would test the two constants. This tests the DOCUMENT: if a refactor
- *  stopped including one of them in the <style>, importing it would keep sweeping css
- *  no page ships, reporting coverage that had quietly become fictional, while this
- *  follows the document and stops. That is the same reason the roster exists at all.
- *
- *  The data never reaches the css (verified: a fully populated fixture yields a
- *  byte-identical style block), so the fixture is empty. */
+/** Built rather than importing the two css constants, so this sweeps what the DOCUMENT ships: a refactor that dropped one from the <style> stops the sweep instead of leaving it to report coverage that had gone fictional. The fixture is empty because the data never reaches the css (measured: a fully populated fixture yields a byte-identical style block). */
 const atlasCss = (): string => {
   const plate = { key: "x", title: "x", svg: "<svg></svg>" };
   return styleBlocksIn(
@@ -119,80 +57,25 @@ const atlasCss = (): string => {
   );
 };
 
-/** Authored css that does NOT live under public/ (#360).
- *
- *  Each entry pairs the file with a way to get its css as a STRING. Extraction is
- *  per-source on purpose, because the three arrive differently: a <style> block is
- *  plain css and yields to a regex, an exported constant is read as the value it
- *  already is, and an interpolated one is resolved by running the code that builds it.
- *  Keys keep the `src/` path whole, so they never collide with the public/ side
- *  (which strips its prefix) and so the key names the file you go open. */
+/** Authored css outside public/ (#360), each paired with a way to get its css as a string. Keys keep the whole src/ path, so they cannot collide with the public/ side, which strips its prefix. */
 const SRC_CSS: ReadonlyArray<readonly [string, () => string]> = [
   ["src/layouts/BaseLayout.astro", () => styleBlocksIn(read("src/layouts/BaseLayout.astro"))],
   ["src/cli/gallery.ts", () => GALLERY_PAGE_CSS],
   ["src/atlas/document.ts", atlasCss],
 ];
 
-/** Every authored sheet, as (key, css) pairs: the committed files under public/,
- *  then the src/ sources. One list, so a sweep cannot cover one side and quietly
- *  miss the other, which is the whole defect #360 closes. */
 const authoredSheets = (): ReadonlyArray<readonly [string, string]> => [
   ...AUTHORED_CSS.map((file) => [file.replace("public/", ""), read(file)] as const),
   ...SRC_CSS.map(([file, css]) => [file, css()] as const),
 ];
 
-/** Comments are prose, and prose is full of hyphenated words followed by a colon
- *  ("touch-primary: the click falls through", footnotes.ts), which is a css
- *  declaration's shape exactly. Strip them or three files holding no css at all join
- *  the roster. `//` only opens a comment where it does not follow a `:`, so a
- *  `url(https://...)` inside a css block survives. Deliberately not the comment strip
- *  the css readers below use: those read css, where `//` starts nothing. */
 const withoutComments = (source: string): string =>
   source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 
-/** A brace block holding an UNQUOTED HYPHENATED property with a `;`-terminated value.
- *
- *  The HYPHEN is what does the work: an unquoted hyphenated key is not legal JS or TS,
- *  so `{ t: 0.14, color: "#c3d5a1" }` in render/style.ts cannot match, while
- *  `font-family:`, `box-shadow:` and `--ink-dark:` all do. The key boundary
- *  `(?:^|[\s;{])` is the second real discriminator: it rejects src/atlas/palette.ts's
- *  `"--ink-dark": "#4a3826"`, whose key is quoted BECAUSE the hyphen forces it.
- *
- *  The `;` terminator really does discriminate (it is what would reject a
- *  comma-separated `{ a: 1, foo-bar: 2 }`), but be honest about its value HERE:
- *  measured on today's tree, relaxing it to accept a comma still selects the same
- *  three files, because the other two have already excluded every object literal in
- *  src/. It is insurance against a future one, not a load-bearing part of the current
- *  result. An earlier draft of this comment claimed all three discriminators were
- *  doing work and the self-test below claimed to pin them; neither was true, and the
- *  guard-prover weakened two of them and escaped all 1105 tests. Both now hold. */
 const HYPHENATED_DECLARATION =
   /\{[^{}]*(?:^|[\s;{])(?:-{0,2}[a-z][a-z0-9]*(?:-[a-z0-9]+)+)\s*:\s*[^{};]*;/m;
 
-/** What makes a file authored css. A file matching ANY of these joins the roster.
- *
- *  The union exists because a single fingerprint was measurably blind, and blind in
- *  the worst possible place. The first cut of this scan required a hyphenated property,
- *  and `display` and `transform` carry no hyphen: those are the exact two properties
- *  BOTH contracts in this file exist to police. A scoped <style> in a page whose only
- *  declarations were `display: inline-block` and a `transform: rotate()` tip therefore
- *  never joined the roster, and went green through all 1105 tests carrying both defects
- *  at once. Worse, the bias ran the wrong way: the FIX (`vertical-align: top`) is
- *  hyphenated and would have been seen, the DEFECT is not. Found by the guard-prover
- *  on #360 before this shipped, on src/pages/faq/index.astro, which is precisely the
- *  "any future page" case the issue was filed to prevent.
- *
- *  So the last two fingerprints name the two defects literally. They are narrow and
- *  that is fine: they are a floor under the general ones, not a replacement for them.
- *
- *  Measured 2026-08-12 across all 174 .ts/.astro files under src/: the union selects
- *  exactly the three real css sources and nothing else, which is why no hand-kept
- *  not-css exemption list is needed here to rot. Each was measured alone too, and
- *  `<style` WITHOUT its closing tag is not one of them: it also matches src/cli/main.ts,
- *  whose --help text spells the flag `--style <style>`.
- *
- *  A fingerprint only has to be right about the FILE, not about every rule in it: one
- *  hit puts the file on the roster, and extraction there is exact. */
+/** A file matching ANY of these joins the roster: one hit is enough, because a fingerprint only has to be right about the FILE, and extraction there is exact. */
 const CSS_FINGERPRINTS: ReadonlyArray<readonly [string, (source: string) => boolean]> = [
   ["a <style> element", (s) => /<style[^>]*>[\s\S]*?<\/style>/.test(s)],
   ["a hyphenated declaration", (s) => HYPHENATED_DECLARATION.test(s)],
@@ -200,16 +83,11 @@ const CSS_FINGERPRINTS: ReadonlyArray<readonly [string, (source: string) => bool
   ["a rotate-on-hover tip", (s) => /:hover/.test(s) && /rotate\(/.test(s)],
 ];
 
-/** Every file under src/ carrying authored css, found mechanically rather than listed.
- *  public/ and src/ are the whole authored-css surface: CLAUDE.md forbids .js outside
- *  src/, and public/ is otherwise static assets, so nothing else can hold a stylesheet. */
+/** public/ and src/ are the whole authored-css surface: CLAUDE.md forbids .js outside src/, and public/ is otherwise static assets, so nothing else can hold a stylesheet. */
 const cssBearingSources = (): string[] =>
   readdirSync(root("src"), { recursive: true, encoding: "utf8" })
     .map((entry) => `src/${entry.split(sep).join("/")}`)
-    // .css is here for a file that does not exist yet: there are zero stylesheets
-    // under src/ today (they all live in public/). Cheaper to scan the extension now
-    // than to discover later that the one obvious way to add authored css was the
-    // one the scan did not look at.
+    // .css is scanned though there are zero stylesheets under src/ today, so the one obvious way to add authored css is not the way the scan misses.
     .filter((p) => p.endsWith(".ts") || p.endsWith(".astro") || p.endsWith(".css"))
     .filter((p) => {
       const source = withoutComments(read(p));
@@ -222,43 +100,21 @@ const TIPPING_LINKS = new Set([
   "motion.css :: body:has(.room-name) .wordmark a:hover",
   "faq/index.css :: .toc a:hover",
   "glossary/index.css :: .toc a:hover",
-  // #270 ruling 7: the footnote marks follow through to /glossary/ anchors, so
-  // they tip; this entry IS the conscious extension the ruling recorded.
+  // #270 ruling 7: the footnote marks follow through to /glossary/ anchors, so the ruling extended the tipping surface to them.
   "explorer/broadside.css :: a.fn:hover",
-  // #360, measured 2026-08-12: cardFigureHtml (src/cli/gallery.ts:70) wraps every
-  // contact-sheet plate in <a href="${card.file}">, so the tile really does go
-  // somewhere (to its full-size SVG). Legitimate, and until #360 unread.
+  // #360, measured 2026-08-12: `cardFigureHtml` in `src/cli/gallery.ts` wraps every contact-sheet plate in a link to its full-size SVG.
   "src/cli/gallery.ts :: figure img:hover",
+  // #368, ruled 2026-08-12 and measured after: the lift is scoped to `figure a img`, and all three hosts of ATLAS_SHEET_CSS anchor their plates, so where no link is made no lift applies.
+  "src/atlas/document.ts :: .atlas-sheet figure a img:hover",
 ]);
 
-/** Tips the #360 sweep reached for the first time whose surface does NOT navigate,
- *  and which are NOT being changed here because a shipped guard already ratified the
- *  gesture. This set is a QUESTION on the record, not a pardon: the entry stays until
- *  Alex rules, and a new tip cannot be parked here casually, because writing the line
- *  means writing the measurement under it.
- *
- *  Kept apart from TIPPING_LINKS deliberately. That set means "measured: this surface
- *  goes somewhere", and filing a non-navigating surface into it would make the
- *  allowlist say something false about the page, which is exactly the failure #289
- *  exists to prevent. Better a second name that tells the truth. */
-const TIPS_AWAITING_A_RULING = new Set([
-  // The atlas plates lift on hover, and in two of their three hosts nothing wraps
-  // them, measured 2026-08-12:
-  //   - the CLI /atlas/ page passes anchor:true, so the plate links its full-size
-  //     SVG (src/atlas/document.ts:157). Goes somewhere.
-  //   - the Print Room's bound preview writes its own <figure><img> with no anchor
-  //     at all (src/site/print-room/bound-atlas.ts:127). Goes nowhere.
-  //   - the single-file download passes anchor:false (bound-atlas.ts:222). Goes nowhere.
-  // The lift predates the #289 tip contract (it moved here from the Explorer's
-  // retired D5, #199) and scripts/e2e/suite-print-room.mjs PR20b asserts it IS wired
-  // on the unanchored preview plates. So the contract and a shipped e2e guard now
-  // disagree about the same rule, and resolving that is Alex's call, not this sub's:
-  // changing the selector here would reverse a ratified decision from a test file.
-  "src/atlas/document.ts :: .atlas-sheet figure img:hover",
+/** A tip whose surface does not navigate, held on the record until Alex rules: kept apart from TIPPING_LINKS so that set stays true when it says a surface goes somewhere. */
+// Explicitly Set<string>: while the set is empty an inferred Set<never> reds every `.has(key)` below rather than accepting a parked line.
+const TIPS_AWAITING_A_RULING = new Set<string>([
+  // Empty on purpose: #368 (2026-08-12) made all three hosts of the atlas plate lift navigate, so its only occupant graduated to TIPPING_LINKS on the merits. Park a line here only with the measurement written under it.
 ]);
 
-/** All `selector:hover { ...rotate(... }` rules in one sheet, comments stripped.
- *  A flat matcher, not a css parser: fine while tips live in top-level rules. */
+/** A flat matcher over `rotate(` hover rules, not a css parser: fine while tips live in top-level rules. */
 const hoverTipsIn = (css: string): string[] => {
   const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const tips: string[] = [];
@@ -288,11 +144,6 @@ test("the footnote marks go to the glossary, so they tip, at the wordmark's numb
   );
 });
 
-/** One selector list split on its TOP-LEVEL commas. A plain split(",") breaks
- *  `:is(.toc, .gazetteer) a` into two fragments, and the second, `.gazetteer) a`,
- *  is a selector no rule has: it would be looked up, found nowhere, and quietly
- *  dropped. `:is()` and `:not()` are house style here (house.css:107), so the
- *  reader has to survive them. */
 const selectorsIn = (selectorList: string): string[] => {
   const out: string[] = [];
   let depth = 0;
@@ -311,9 +162,6 @@ const selectorsIn = (selectorList: string): string[] => {
   return out.map((s) => s.trim().replace(/\s+/g, " ")).filter(Boolean);
 };
 
-/** The element a selector finally styles: its last compound. Combinators inside
- *  a functional pseudo-class do not divide it, so `:is(.toc > .index) a` has the
- *  subject `a`, the element that actually takes the declarations. */
 const subjectOf = (selector: string): string => {
   let depth = 0;
   let subject = "";
@@ -329,13 +177,7 @@ const subjectOf = (selector: string): string => {
   return subject;
 };
 
-/** Every declaration a selector finally wins, merged in source order. Reading
- *  only the FIRST matching rule would miss a later override, and would go red on
- *  the behavior-preserving split of one declaration into its own rule. Flat, like
- *  hoverTipsIn above: a rule nested in @media counts as unconditional. That errs
- *  toward reporting an override, and for the bullet sweep it also errs the other
- *  way, since a pin written ONLY inside a media query would satisfy a sweep that
- *  wants an unconditional one. Both pins are unconditional today. */
+/** Merged in source order so a later override wins; flat like hoverTipsIn, so a rule nested in @media counts as unconditional, and both bullet pins are unconditional today. */
 const settled = (css: string, selector: string): Readonly<Record<string, string>> => {
   const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const out: Record<string, string> = {};
@@ -349,39 +191,8 @@ const settled = (css: string, selector: string): Readonly<Record<string, string>
   return out;
 };
 
-/**
- * The tip has a cost, and this is it (#356, #353). A slip is an inline-block so
- * it can carry the transform, and an inline-block takes its baseline from its
- * LAST line box: let one wrap and its list marker drops beside the second line,
- * measured at 26.00px down. At 320 to 330px three of the FAQ's five entries wrap
- * even on the fully loaded webfont, so in that band it is the steady state rather
- * than a first-paint flash; from 335 to 360 only the fallback paint wraps. On the
- * glossary, 5 of 15 wrap at 320px in the font-fallback paint that font-display:
- * swap makes the first paint of every cold load. vertical-align: top pins the
- * marker back to the first line.
- *
- * No structural test can see this: nothing overflows (scrollWidth equals
- * clientWidth), and a ::marker is not reachable from the DOM, so the bullet's
- * position only exists in paint. That is why the rule is guarded as text here,
- * and why both fixes shipped with a rendered measurement rather than a green suite.
- *
- * Guarded as a CLASS (#358), because the rule is a property of the tip gesture
- * and not of either page: any future page that tips a wrapping list-item link
- * inherits the same defect. The two per-file guards this replaces (#356 here,
- * #353 in glossary-sections.test.ts) could each only see their own file.
- *
- * The class is link-shaped because the tip is. Whether an element sits in a
- * marker-bearing list is an html fact, not a css one, and the markup that would
- * answer it is spread across the page, the shared BaseLayout and generated dom,
- * so the sweep asks css what it can answer (is this an inline-block link) and
- * keeps the html half as a measured allowlist, the same shape as TIPPING_LINKS.
- */
-/** Each entry is a MEASUREMENT of the markup, taken 2026-08-12, not a rule. It
- *  says this selector's boxes are not list items today, on the pages that use it
- *  today. Two of the four live in sheets every page links, so a later use of the
- *  same class inside a marker-bearing li would inherit the defect behind its
- *  exemption. Re-take the measurement when you touch one:
- *  `grep -rn 'class="[^"]*control' src/` and its siblings. */
+// Hand-measured (#356, #353): an inline-block takes its baseline from its LAST line box, so a wrapped tipping slip drops its bullet 26.00px to line two (3 of the FAQ's 5 entries wrap at 320 to 330px, 5 of the glossary's 15 in the font-fallback paint of every cold load), and vertical-align: top pins it back. Nothing overflows and a ::marker is not reachable from the DOM, so the bullet's position exists only in paint: no structural test can see it, which is why the rule is guarded as text.
+/** Each entry is a MEASUREMENT of the markup taken 2026-08-12, not a rule: it says these boxes are not list items on the pages that use them today, so re-take it when you touch one. */
 const INLINE_BLOCKS_OUTSIDE_MARKER_LISTS = new Set([
   // <div class="actions"> on the seed page (src/pages/seed-of-the-day/index.astro:51).
   "house.css :: a.control",
@@ -391,31 +202,11 @@ const INLINE_BLOCKS_OUTSIDE_MARKER_LISTS = new Set([
   "motion.css :: .wordmark a",
   // A period mark inline in a control's label (#270), not a list item.
   "explorer/broadside.css :: a.fn",
-  // #360, measured 2026-08-12: the you-are-here <span> is a direct child of
-  // <nav class="topnav"> (BaseLayout.astro:250), the same middot-separated nav
-  // with no list at all that the `motion.css :: .topnav a` line above measures.
-  // It takes display: inline-block for that rule's reason, not a tip's: a
-  // multi-word nav label must not wrap mid-label (BaseLayout.astro:211).
+  // #360, measured 2026-08-12: the you-are-here span is another direct child of the same middot-separated topnav, an inline-block only so a multi-word label cannot wrap mid-label.
   'src/layouts/BaseLayout.astro :: .topnav [aria-current="page"]',
 ]);
 
-/** Every selector in one sheet whose settled box is an inline-block.
- *
- *  Not "every inline-block LINK": a link is not identifiable from css. The first
- *  cut required the subject to be an `a` type selector, which reads as the class
- *  but is narrower than it, since `.toc .slip { display: inline-block }` on an
- *  <a class="slip"> is the same defect wearing a class. Sweeping every box costs
- *  nothing today (all six live inline-blocks in authored css are already links)
- *  and closes that hole; the cost lands on whoever adds an inline-block that is
- *  genuinely not a list item, as one allowlist line.
- *
- *  The test is on the SUBJECT, not the whole selector: a pseudo-class on an
- *  ancestor says nothing about the box the declarations land on, so
- *  `.toc li:first-child a` is swept. A subject carrying its own `:` is not: that
- *  is a state (`a:hover`) or generated content (`.seal::before`), neither of
- *  which is the element's own steady-state box. Attribute values are stripped
- *  before that test, since `a[href^="https://x"]` carries a colon that is not a
- *  pseudo-class. */
+/** Every inline-block BOX, not every inline-block link: a link is not identifiable from css, and the same defect wearing a class on an anchor would escape a narrower sweep. */
 const inlineBlocksIn = (css: string): string[] => {
   const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const found = new Set<string>();
@@ -428,7 +219,6 @@ const inlineBlocksIn = (css: string): string[] => {
   return [...found];
 };
 
-/** Every inline-block the sweep finds, keyed as the allowlist keys it. */
 const sweptBoxes = (): Set<string> =>
   new Set(
     authoredSheets().flatMap(([key, css]) =>
@@ -436,10 +226,6 @@ const sweptBoxes = (): Set<string> =>
     ),
   );
 
-/** The links the sweep must still reach. Candidacy is derived from `display:
- *  inline-block`, so dropping that declaration would drop the entry out of the
- *  sweep in silence; this is the premise check the two per-file guards made by
- *  hand, kept because a guard that can quietly stop guarding is not one. */
 const PINNED_MARKER_LIST_LINKS = [
   ["public/faq/index.css", ".toc a"],
   ["public/glossary/index.css", ".toc a"],
@@ -463,9 +249,6 @@ test("an inline-block in a marker-bearing list keeps its bullet on line one (#35
 });
 
 test("every marker-list exemption still names a live inline-block (#358)", () => {
-  // The pinned side has a premise test; without this the exempted side has none,
-  // and an exemption whose rule is gone or renamed sits forever, silently
-  // covering nothing while reading as a considered decision.
   const swept = sweptBoxes();
   for (const key of INLINE_BLOCKS_OUTSIDE_MARKER_LISTS) {
     assert.ok(
@@ -477,9 +260,6 @@ test("every marker-list exemption still names a live inline-block (#358)", () =>
 });
 
 test("the sweep's selector reader survives the house's :is() and :not() forms (#358)", () => {
-  // Found by mutation: the first cut split selector lists on every comma and
-  // rejected any selector carrying a `:`, so `.toc li:first-child a` and
-  // `:is(.toc) a` both escaped the sweep while looking exactly like the defect.
   assert.deepEqual(selectorsIn(":is(.toc, .gazetteer) a, .faq a"), [
     ":is(.toc, .gazetteer) a",
     ".faq a",
@@ -500,11 +280,6 @@ test("both TOC slips still enter the bullet sweep (#358, the guard's premise)", 
 });
 
 test("every tip allowlisted or parked still names a live tip (#360)", () => {
-  // The bullet contract got this premise check at #358 and the tip contract never
-  // had one, which was survivable while every entry sat in a file a per-rule guard
-  // also pinned. Two of them no longer do: the gallery and atlas tips are reached
-  // only by the src/ sweep, so a rename there would leave a line that reads as a
-  // considered ruling while covering nothing. Cheap, and it holds both lists.
   const swept = new Set(
     authoredSheets().flatMap(([key, css]) => hoverTipsIn(css).map((s) => `${key} :: ${s}`)),
   );
@@ -532,11 +307,6 @@ test("every hover tip belongs to a surface that goes somewhere (#289; #324 feel 
 });
 
 test("the authored roster is exactly the css-bearing sources under src/ (#360)", () => {
-  // Equality, not coverage, so it bites in BOTH directions: a new authored sheet in
-  // src/ (the .astro page with a scoped <style> the issue names) reds until someone
-  // adds it and writes its extractor, and a roster entry the scan no longer finds
-  // reds too. That second half is this guard's own premise check: without it a scan
-  // that had quietly gone blind would leave the roster passing on nothing.
   assert.deepEqual(
     cssBearingSources().sort(),
     SRC_CSS.map(([file]) => file).sort(),
@@ -545,17 +315,10 @@ test("the authored roster is exactly the css-bearing sources under src/ (#360)",
   );
 });
 
-/** The scan's verdict on one source, as the names of the fingerprints that hit. */
 const fingerprintsOf = (source: string): string[] =>
   CSS_FINGERPRINTS.filter(([, matches]) => matches(withoutComments(source))).map(([name]) => name);
 
 test("the css-source scan sees css, and sees the defects it polices (#360)", () => {
-  // The scan is a hand-rolled reader, and #358 shipped three escapes from one of
-  // those. Each case below is named for the fingerprint it pins, so deleting or
-  // loosening that one goes red HERE rather than silently emptying the roster the
-  // test above compares against. The first cut of this test did not do that: two of
-  // its negatives passed on the hyphen rule no matter what the other discriminators
-  // did, so the guard-prover could weaken those and escape all 1105 tests.
   assert.deepEqual(
     fingerprintsOf(".toc a { font-family: serif; }"),
     ["a hyphenated declaration"],
@@ -572,8 +335,6 @@ test("the css-source scan sees css, and sees the defects it polices (#360)", () 
     "a style element is css whatever its declarations say",
   );
 
-  // The row-1 escape, pinned. Neither declaration carries a hyphen, so the general
-  // rule cannot see either, and both ARE the defects the sweeps look for.
   assert.deepEqual(
     fingerprintsOf(".slip { display: inline-block; }"),
     ["an inline-block"],
@@ -585,7 +346,6 @@ test("the css-source scan sees css, and sees the defects it polices (#360)", () 
     "the tip defect must be visible to the scan without a hyphen anywhere",
   );
 
-  // Not css, by each general fingerprint's own discriminator.
   assert.deepEqual(
     fingerprintsOf('const P = {\n  "--ink-dark": "#4a3826",\n  "--ink-brown": "#6b5a40",\n};'),
     [],
@@ -609,7 +369,6 @@ test("the css-source scan sees css, and sees the defects it polices (#360)", () 
     "help text naming a --style flag is not a <style> element; it has no closing tag",
   );
 
-  // Comment stripping, which every fingerprint runs behind: prose wears the css shape.
   assert.deepEqual(
     fingerprintsOf("const x = 1;\n// touch-primary: the click falls through\n"),
     [],
@@ -628,9 +387,6 @@ test("the css-source scan sees css, and sees the defects it polices (#360)", () 
 });
 
 test("every generated tree names a source the sweeps actually read (#360)", () => {
-  // A tree on GENERATED_CSS is EXEMPT from the public/ walk, so without this the list
-  // is a way to opt css out of every sweep in this file by adding one string. The
-  // exemption is only honest while the tree's css is swept at its source instead.
   const swept = new Set(SRC_CSS.map(([file]) => file));
   for (const [tree, source] of GENERATED_CSS) {
     assert.ok(

@@ -12,7 +12,6 @@ test("the atlas includes the nautical plate under Other Draughtings", async () =
   try {
     await buildAtlas(seed, { out: dir });
     const html = await readFile(join(dir, "index.html"), "utf8");
-    // the file is written and the index links + captions it
     const svg = await readFile(join(dir, "world-nautical.svg"), "utf8");
     assert.match(svg, /^<svg/);
     assert.match(html, /world-nautical\.svg/);
@@ -88,18 +87,20 @@ test("the atlas joins the motion folio: links /motion.css and its figures lift u
   try {
     await buildAtlas(seed, { out: dir });
     const html = await readFile(join(dir, "index.html"), "utf8");
-    // root-absolute so it resolves at /atlas/ depth, exactly as the five
-    // hand-authored pages link it (the folio needs both pages opted in)
     assert.match(
       html,
       /<link rel="stylesheet" href="\/motion\.css">/,
       "atlas should link the shared motion desk so it joins the folio",
     );
-    // the plates lift gently under the hand, mirroring the Explorer atlas view (#146)
     assert.match(
       html,
-      /figure img:hover\s*\{[^}]*transform:[^}]*translateY/,
+      /figure a img:hover\s*\{[^}]*transform:[^}]*translateY/,
       "atlas figures should lift under the hand",
+    );
+    assert.match(
+      html,
+      /<figure><a href="world-antique\.svg"><img/,
+      "and the plate the lift fires on must be the link that earns it",
     );
   } finally {
     await rm(dir, { recursive: true, force: true });
