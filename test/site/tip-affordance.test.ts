@@ -249,7 +249,9 @@ const TIPPING_LINKS = new Set([
  *  goes somewhere", and filing a non-navigating surface into it would make the
  *  allowlist say something false about the page, which is exactly the failure #289
  *  exists to prevent. Better a second name that tells the truth. */
-const TIPS_AWAITING_A_RULING = new Set([
+// Explicitly Set<string>: while the set is empty the element type cannot be inferred, and
+// an inferred Set<never> reds every `.has(key)` below rather than accepting a parked line.
+const TIPS_AWAITING_A_RULING = new Set<string>([
   // EMPTY, and that is the finished state, not an unwritten one. Its only occupant was the
   // atlas plate lift, parked here by #360 because the lift fired on all three hosts of
   // ATLAS_SHEET_CSS while two of them wrapped nothing. #368 ruled it (2026-08-12): rather
