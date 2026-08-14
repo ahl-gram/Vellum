@@ -3,7 +3,14 @@ import { fileURLToPath } from "node:url";
 import { join, resolve } from "node:path";
 import { findBrowser } from "../src/cli/raster.ts";
 import { browserlessAction } from "../src/cli/browser-policy.ts";
-import { resolveE2ePorts } from "../src/cli/e2e-ports.ts";
+import { resolveE2ePorts, e2eOutSubdir } from "../src/cli/e2e-ports.ts";
+import {
+  resolveSuiteSelection,
+  suitesCertifiedByHealth,
+  runSelected,
+  runOutcome,
+  E2E_SUITE_ORDER,
+} from "../src/cli/e2e-suites.ts";
 import { start, cleanup } from "./e2e/harness.mjs";
 import { run as runRender } from "./e2e/suite-render.mjs";
 import { run as runMotion } from "./e2e/suite-motion.mjs";
@@ -32,14 +39,15 @@ const HERE = fileURLToPath(new URL(".", import.meta.url)); // scripts/
 const REPO = resolve(HERE, "..");
 // Serves the built dist/ so the e2e validates exactly what gets published (VELLUM_SITE_DIR overrides; run `npm run build` first).
 const SITE = process.env["VELLUM_SITE_DIR"] ? resolve(process.env["VELLUM_SITE_DIR"]) : join(REPO, "dist");
-const OUT = join(REPO, "out", "e2e");
 // #339: VELLUM_E2E_PORT / VELLUM_E2E_DPORT (defaults 8765 / 9222) let two checkouts run side by side; a bad value fails here rather than falling back, since a silent fallback puts both lanes back on the same port.
-const { PORT, DPORT } = readPorts();
+const { PORT, DPORT } = fatalOnThrow(() => resolveE2ePorts(process.env));
+const OUT = join(REPO, "out", e2eOutSubdir(PORT));
 const PAGE = `http://127.0.0.1:${PORT}/explorer/`;
+const { names: SELECTED, tier: TIER } = fatalOnThrow(() => resolveSuiteSelection(process.env));
 
-function readPorts() {
+function fatalOnThrow(fn) {
   try {
-    return resolveE2ePorts(process.env);
+    return fn();
   } catch (err) {
     console.error(`FAIL: ${err.message}`);
     process.exit(1);
@@ -68,39 +76,60 @@ const results = [];
 const consoleErrors = [];
 const http4xx = [];
 
+// Key order IS the run order, and it is load-bearing: render asserts the pristine bare-visit boot, and the health checkpoint (N1/N2) asserts accumulated console/network state from everything before it. A selection is filtered to this order, never run in the order it was requested.
+const SUITES = {
+  "render": runRender,
+  "motion": runMotion,
+  "turn": runTurn,
+  "verso": runVerso,
+  "zoom": runZoom,
+  "zoom-gestures": runZoomGestures,
+  "glass-ceremony": runGlassCeremony,
+  "cards": runCards,
+  "health": runHealth,
+  "fallback": runFallback,
+  "hunt": runHunt,
+  "print-room": runPrintRoom,
+  "home": runHome,
+  "survey": runSurvey,
+  "broadside": runBroadside,
+  "reading-room": runReadingRoom,
+  "room-instrument": runRoomInstrument,
+  "room-ink": runRoomInk,
+  "room-voyage": runRoomVoyage,
+  "room-voyage-route": runRoomVoyageRoute,
+  "room-address": runRoomAddress,
+  "runninghead": runRunningHead,
+};
+
+const missing = E2E_SUITE_ORDER.filter((name) => !SUITES[name]);
+if (missing.length > 0) {
+  console.error(`FAIL: E2E_SUITE_ORDER names suites this runner cannot run: ${missing.join(", ")}`);
+  process.exit(1);
+}
+
 async function main() {
   const ctx = await start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx });
-  // Order is load-bearing: the health checkpoint (N1/N2) asserts accumulated console/network state from everything before it, and render -> motion -> turn -> verso each redraw their own clean base.
-  await runRender(ctx);
-  await runMotion(ctx);
-  await runTurn(ctx);
-  await runVerso(ctx);
-  await runZoom(ctx);
-  await runZoomGestures(ctx);
-  await runGlassCeremony(ctx);
-  await runCards(ctx);
-  await runHealth(ctx);
-  await runFallback(ctx);
-  await runHunt(ctx);
-  await runPrintRoom(ctx);
-  await runHome(ctx);
-  await runSurvey(ctx);
-  await runBroadside(ctx);
-  await runReadingRoom(ctx);
-  await runRoomInstrument(ctx);
-  await runRoomInk(ctx);
-  await runRoomVoyage(ctx);
-  await runRoomVoyageRoute(ctx);
-  await runRoomAddress(ctx);
-  await runRunningHead(ctx);
+  await runSelected(SELECTED, SUITES, ctx);
 }
 
 main()
   .then(() => {
-    const passed = results.every((r) => r.ok);
-    console.log(`\n${passed ? "ALL PASS" : "SOME FAILED"}  (${results.filter((r) => r.ok).length}/${results.length})`);
+    const certified = suitesCertifiedByHealth(SELECTED);
+    if (TIER !== "full") {
+      console.log(`\ntier: ${TIER} (${SELECTED.length}/${E2E_SUITE_ORDER.length} suites): ${SELECTED.join(", ")}`);
+      console.log(
+        certified.length > 0
+          ? `  N1/N2 certified the console/network state of: ${certified.join(", ")}`
+          : SELECTED.includes("health")
+            ? `  N1/N2 ran, but nothing preceded them, so they certify no suite.`
+            : `  N1/N2 did not run, so nothing here carries a console/network clean bill.`,
+      );
+    }
+    const outcome = runOutcome(results);
+    console.log(`\n${outcome.line}`);
     cleanup();
-    process.exit(passed ? 0 : 1);
+    process.exit(outcome.ok ? 0 : 1);
   })
   .catch((e) => {
     console.error("HARNESS ERROR:", e);

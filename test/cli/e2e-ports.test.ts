@@ -4,6 +4,7 @@ import {
   DEFAULT_E2E_DPORT,
   DEFAULT_E2E_PORT,
   debugPortConflictMessage,
+  e2eOutSubdir,
   resolveE2ePorts,
   resolvePort,
 } from "../../src/cli/e2e-ports.ts";
@@ -82,4 +83,18 @@ test("the conflict message explains that the run would otherwise use a stale bui
   const msg = debugPortConflictMessage(9222, { listening: true });
   assert.ok(msg);
   assert.match(msg, /stale|old|previous/i);
+});
+
+test("the screenshot directory follows a non-default port, so lanes cannot overwrite each other", () => {
+  // Sweep the class: EVERY non-default port must get its own directory, not just one sampled port.
+  // shoot() output is diagnostic, so a collision silently overwrites an image rather than failing,
+  // which is exactly the kind of loss no other check would report.
+  assert.equal(e2eOutSubdir(DEFAULT_E2E_PORT), "e2e", "the default port keeps the familiar path");
+  const seen = new Set([e2eOutSubdir(DEFAULT_E2E_PORT)]);
+  for (const port of [1, 8080, 8764, 8766, 8790, 9222, 65535]) {
+    const dir = e2eOutSubdir(port);
+    assert.notEqual(dir, "e2e", `port ${port} still writes into the default directory`);
+    assert.ok(!seen.has(dir), `port ${port} collides with an earlier lane on ${dir}`);
+    seen.add(dir);
+  }
 });
