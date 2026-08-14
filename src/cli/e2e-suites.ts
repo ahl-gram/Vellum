@@ -27,10 +27,9 @@ export const E2E_SUITE_ORDER = [
 
 export type E2eSuiteName = (typeof E2E_SUITE_ORDER)[number];
 
-// Coverage floor of a smoke-green PR (#266), measured at 125 of 331 checks: every bundled page
-// boots, both worker-bearing surfaces prove the worker live AND degrading, health checks the
-// console. What is absent here is what a smoke-green PR does not prove, which is the accepted trade.
-// The timing-heavy suites stay out; if lanes are ever added they belong together in ONE lane.
+// A local debugging tier since #381 took its CI wiring out: 125 of 331 checks, ~1m10s, enough that
+// every bundled page boots, both worker-bearing surfaces prove the worker live AND degrading, and
+// health checks the console. It is also the retreat rung if the lanes ever have to come out.
 export const SMOKE_SUITES: readonly E2eSuiteName[] = [
   "render",
   "health",
@@ -105,16 +104,42 @@ export interface E2eOutcome {
 
 export type E2eSuiteRunners = Readonly<Record<string, (ctx: unknown) => Promise<unknown>>>;
 
+export interface E2eSuiteTiming {
+  readonly name: E2eSuiteName;
+  readonly ms: number;
+}
+
 export async function runSelected(
   names: readonly E2eSuiteName[],
   suites: E2eSuiteRunners,
   ctx: unknown,
-): Promise<void> {
+  now: () => number = () => performance.now(),
+): Promise<readonly E2eSuiteTiming[]> {
+  const timings: E2eSuiteTiming[] = [];
   for (const name of names) {
     const run = suites[name];
     if (!run) throw new Error(`the runner has no suite named ${name}`);
+    const started = now();
     await run(ctx);
+    timings.push({ name, ms: now() - started });
   }
+  return timings;
+}
+
+const seconds = (ms: number) => `${(ms / 1000).toFixed(1)}s`;
+
+export function formatSuiteTimings(timings: readonly E2eSuiteTiming[]): readonly string[] {
+  if (timings.length === 0) return [];
+  const total = timings.reduce((sum, t) => sum + t.ms, 0);
+  const ranked = timings.slice().sort((a, b) => b.ms - a.ms);
+  const width = Math.max(...ranked.map((t) => t.name.length));
+  return [
+    `per-suite wall clock (${timings.length} suites, ${seconds(total)} total):`,
+    ...ranked.map((t) => {
+      const share = total === 0 ? 0 : (t.ms / total) * 100;
+      return `  ${t.name.padEnd(width)}  ${seconds(t.ms).padStart(6)}  ${share.toFixed(1).padStart(5)}%`;
+    }),
+  ];
 }
 
 export function runOutcome(results: readonly E2eCheckResult[]): E2eOutcome {

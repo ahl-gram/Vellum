@@ -183,7 +183,11 @@ site that serves it.
 
 Day to day: `npm test` (unit), `npm run check` (typecheck), `npm run test:e2e`
 (headless-browser suite against a built `dist/`; needs a Chromium-family
-browser), `npm run dev` (local site).
+browser), `npm run dev` (local site). CI runs the e2e as
+`npm run test:e2e:lanes`, which is the same 22 suites split across two
+concurrent browsers on their own ports; either lane failing fails the job.
+`VELLUM_E2E_SUITES` narrows a serial run to one suite, a comma list, or
+`smoke`, which is a local debugging tier and no longer wired to CI.
 
 ### Committed goldens
 

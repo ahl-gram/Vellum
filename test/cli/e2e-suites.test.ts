@@ -4,6 +4,7 @@ import {
   E2E_SUITES_VAR,
   E2E_SUITE_ORDER,
   SMOKE_SUITES,
+  formatSuiteTimings,
   resolveSuiteSelection,
   runOutcome,
   runSelected,
@@ -118,6 +119,38 @@ test("a run that executed no checks fails instead of reporting ALL PASS (0/0)", 
   assert.match(runOutcome([{ ok: true }, { ok: true }]).line, /ALL PASS {2}\(2\/2\)/);
   assert.equal(runOutcome([{ ok: true }, { ok: false }]).ok, false);
   assert.match(runOutcome([{ ok: true }, { ok: false }]).line, /SOME FAILED {2}\(1\/2\)/);
+});
+
+test("runSelected times each suite it ran, in the order it ran them", () => {
+  // The measured cost of a suite is the only honest input to a lane split; check counts lie
+  // (hunt carries 25 checks in 3.4s, room-address carries 8 in 19.6s).
+  const clock = [0, 5, 5, 12, 12, 13];
+  let tick = 0;
+  const now = () => clock[tick++];
+  const suites = Object.fromEntries(E2E_SUITE_ORDER.map((n) => [n, async () => {}]));
+  return (async () => {
+    const timings = await runSelected(["render", "health", "hunt"], suites, {}, now);
+    assert.deepEqual(timings.map((t) => t.name), ["render", "health", "hunt"]);
+    assert.deepEqual(timings.map((t) => t.ms), [5, 7, 1], "a suite's time is its own, not the elapsed total");
+  })();
+});
+
+test("the timing table ranks suites by cost and totals them, so a split can be measured", () => {
+  const lines = formatSuiteTimings([
+    { name: "render", ms: 1000 },
+    { name: "survey", ms: 3000 },
+    { name: "health", ms: 0 },
+  ]);
+  assert.match(lines[0], /4\.0s/, "the header must total the run");
+  assert.deepEqual(
+    lines.slice(1).map((l) => l.trim().split(/\s+/)[0]),
+    ["survey", "render", "health"],
+    "the table must rank by cost, since the point is to find the expensive suites",
+  );
+  assert.match(lines[1], /3\.0s/);
+  assert.match(lines[1], /75\.0%/, "the share of the run is what a split is reasoned from");
+  assert.deepEqual(formatSuiteTimings([]), [], "nothing ran, so there is nothing to rank");
+  assert.doesNotThrow(() => formatSuiteTimings([{ name: "health", ms: 0 }]), "a zero-cost run must not divide by zero");
 });
 
 test("a suite that inherits the harness's page pulls in render, which consumes the boot draw", () => {
