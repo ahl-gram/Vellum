@@ -109,14 +109,24 @@ export async function run(ctx) {
       mapK:getComputedStyle(document.getElementById("map")).getPropertyValue("--zoom-k").trim()};
   })()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: z8b.x ?? 0, y: z8b.y ?? 0 });
-  await sleep(400); // the ring's --paper-quick grow-in settles
-  const z8bRing = await evaluate(`(()=>{
+  // The ring's --paper-quick grow-in fires no event, so poll for its rest rather than sleeping a
+  // fixed 400ms: opacity below is read with NO tolerance, and #381's second lane stretched the
+  // grow-in past 400ms once in eight runs (sampled at o=0.906, scale=0.986, both still climbing).
+  // A ring that never reaches rest still fails the check, on whatever the last sample held.
+  const ringScale = (r) => parseFloat(((r.t || "").match(/matrix\(([-\d.]+)/) || [])[1] ?? "NaN");
+  const ringAtRest = (r) => r.hover && parseFloat(r.o) === 1 && Math.abs(ringScale(r) - 1) <= 0.02;
+  const readRing = () => evaluate(`(()=>{
     const h=document.querySelector("#map .place-hit:hover");
     if(!h)return{hover:false};
     const s=getComputedStyle(h,"::after");
     return{hover:true,t:s.transform,o:s.opacity};
   })()`);
-  const z8bScale = parseFloat(((z8bRing.t || "").match(/matrix\(([-\d.]+)/) || [])[1] ?? "NaN");
+  let z8bRing = await readRing();
+  for (let i = 0; i < 60 && !ringAtRest(z8bRing); i++) {
+    await sleep(50);
+    z8bRing = await readRing();
+  }
+  const z8bScale = ringScale(z8bRing);
   check(
     "Z8b a hovered hit holds its designed ~26px box at zoom, ring pseudo at scale(1), var on the overlay never #map (#331)",
     z8b.ok && z8bRing.hover && Math.abs(z8bScale - 1) <= 0.02 && parseFloat(z8bRing.o) === 1 &&
@@ -192,8 +202,15 @@ export async function run(ctx) {
   await waitTurned("zoom-styles-restore-antique");
 
   await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:2,x:-0.2*W,y:-0.3*H});})()`);
-  await sleep(400); // > the 250ms settle debounce, so onSettle has written the hash
-  const z12 = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k")};})()`);
+  // Poll past the 250ms settle debounce rather than sleeping 400ms: the assertion below is strict
+  // string equality with no tolerance, and a deferred timer under #381's second lane can land after
+  // any fixed wait. A hash that never gets written still fails, on whatever the last read held.
+  const readZ12 = () => evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k")};})()`);
+  let z12 = await readZ12();
+  for (let i = 0; i < 60 && z12.k !== "2.0000"; i++) {
+    await sleep(50);
+    z12 = await readZ12();
+  }
   check(
     "Z12 a settled zoom writes cx/cy/k to the hash (AC3 write: uv centre + zoom, 4dp)",
     z12.cx === "0.3500" && z12.cy === "0.4000" && z12.k === "2.0000",
