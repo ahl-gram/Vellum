@@ -165,7 +165,6 @@ test("composePlaceCard reads the name aloud in the philologist's register (#124)
 test("the hedge is drawn from the name, so a card reads the same way every time it opens", () => {
   const once = composeDerivation("Naukoa", "oromi");
   assert.deepEqual(composeDerivation("Naukoa", "oromi"), once);
-  // A constant wearing a hash's clothes would pass the line above; two names must differ.
   const hedges = new Set(
     ["Naukoa", "Weki", "Paukilua", "Laukuwelua", "Laihoanui"].map(
       (n) => composeDerivation(n, "oromi").derivationLine.split(". ").at(-1),

@@ -267,6 +267,23 @@ export async function run(ctx) {
     JSON.stringify(mobile),
   );
 
+  // #124: the room builds the same overlay the Explorer does, so it LOOKS like it should card.
+  // It does not: the ages chamber is armed on every draw, so the overlay is permanently .scrub
+  // and every hit is inert. Pinned because reading the call site alone says the opposite.
+  const rrCard = await evaluate(`(()=>{
+    const hits=[...document.querySelectorAll(".place-hit")];
+    const card=document.getElementById("place-card");
+    if(!hits.length||!card) return {hits:hits.length,card:!!card};
+    const hit=hits[Math.floor(hits.length/2)];
+    hit.focus(); hit.click();
+    return {hits:hits.length,card:true,scrub:document.querySelector(".place-overlay").classList.contains("scrub"),pe:getComputedStyle(hit).pointerEvents,hidden:card.hidden};
+  })()`);
+  check(
+    "RR11b the room's marks are scrub handles, not card hits: the place card never opens there",
+    rrCard.hits > 0 && rrCard.card === true && rrCard.scrub === true && rrCard.pe === "none" && rrCard.hidden === true,
+    JSON.stringify(rrCard),
+  );
+
   const newErrs = consoleErrors.slice(rrErrBase).filter((e) => !e.includes("AbortError: Transition was skipped"));
   check("RR12 the reading-room run logged no JS exceptions or console errors", newErrs.length === 0, newErrs.join(" | ") || "clean");
   const new4xx = http4xx.slice(rrHttpBase).filter((u) => !/favicon/i.test(u));

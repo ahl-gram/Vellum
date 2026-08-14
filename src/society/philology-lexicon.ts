@@ -33,7 +33,7 @@ export const PHILOLOGY_LEXICON: Readonly<Record<string, TongueLexicon>> = {
       dor: "land, holding",
     },
     suffixes: {
-      mere: "a still water, which the sylvan grammars insist was theirs first",
+      mere: "a still water, which the sylvan grammars claim was theirs",
       haven: "a safe anchorage",
       port: "a trading harbor",
       mar: "set upon the sea",
@@ -128,7 +128,7 @@ export const PHILOLOGY_LEXICON: Readonly<Record<string, TongueLexicon>> = {
     },
     suffixes: {
       dell: "a small wooded valley",
-      mere: "a still pool, a word the thalassic merchants say they lent",
+      mere: "a still pool, which the thalassic merchants say they lent",
       brook: "a running stream",
       hollow: "a sheltered dale",
       glade: "a clearing",
@@ -183,7 +183,7 @@ export const PHILOLOGY_LEXICON: Readonly<Record<string, TongueLexicon>> = {
       th: "sworn",
       rg: "crag",
       d: "shut fast",
-      mar: "boundary, march, and no kin to the thalassic sea whatever the charts suggest",
+      mar: "boundary, march, no kin to the thalassic sea",
       gat: "gate, pass",
     },
     suffixes: {

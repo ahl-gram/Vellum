@@ -17,9 +17,8 @@ const read = (p: string) => {
 
 const SHEET = "public/living-chart.css";
 
-// A rule is only as good as the last block that declares it, and source prose can impersonate
-// code. Both guards below were green against a display:none twin appended after the real rule,
-// and against a commented-out assignment left where the real one used to be.
+// A rule is only as good as the LAST block that declares it, and a commented-out assignment
+// reads as code to a substring match; both defeated an earlier cut of the two guards below.
 const soleRule = (css: string, selector: string): string => {
   const blocks = [...css.matchAll(new RegExp(`${selector.replace(/\./g, "\\.")}\\s*\\{[^}]*\\}`, "g"))];
   assert.equal(blocks.length, 1, `${SHEET} declares ${selector} ${blocks.length} times, so the last one wins`);
@@ -80,8 +79,7 @@ test("the hit divides by --zoom-k once, on the element; the ring pseudos stay pl
   }
 });
 
-// ENGINE_RULES matches a bare selector as a SUBSTRING, so it stays green when a rule is gutted to
-// display:none and when .pc-tongue is renamed to .pc-tongue-note. Both ship the glass invisible.
+// ENGINE_RULES matches a bare selector as a SUBSTRING, so it cannot see a rule gutted to display:none, nor a rename to .pc-tongue-note.
 test("the philologist's note is dressed, visible, and named the same on both sides (#124)", () => {
   const css = read(SHEET);
   const tongue = soleRule(css, ".pc-tongue");
@@ -95,9 +93,7 @@ test("the philologist's note is dressed, visible, and named the same on both sid
   }
 });
 
-// A card anchored on the mark's side is shrink-to-fit against the gap it flips AWAY from, so a
-// town near the right edge gets a column, not a card. The measured case was 97px wide and 478px
-// tall inside a 266px chart. Presence of a .flip-h rule does not see that; the anchor side does.
+// A card anchored on the mark's side is shrink-to-fit against the gap it flips AWAY from, so a town near the right edge gets a column, not a card (public/living-chart.css:35 carries the measurement).
 test("a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)", () => {
   const css = read(SHEET);
   const flip = soleRule(css, "#place-card.flip-h");

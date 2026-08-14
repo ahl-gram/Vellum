@@ -38,7 +38,14 @@ type Inventory = {
 };
 
 const byId = new Map(CULTURES.map((c) => [c.id, c]));
-const inventories = new Map<string, Inventory>();
+const INVENTORIES: ReadonlyMap<string, Inventory> = new Map(
+  CULTURES.map((c) => [c.id, {
+    onsets: [...new Set(c.onsets)],
+    nuclei: [...new Set(c.nuclei)],
+    codas: [...new Set(c.codas)],
+    suffixes: [...new Set(c.townSuffixes)].filter((s) => s !== ""),
+  }]),
+);
 
 export function cultureById(id: string): Culture | undefined {
   return byId.get(id);
@@ -46,19 +53,6 @@ export function cultureById(id: string): Culture | undefined {
 
 export function tongueName(cultureId: string): string {
   return cultureId.charAt(0).toUpperCase() + cultureId.slice(1);
-}
-
-function inventoryOf(culture: Culture): Inventory {
-  const cached = inventories.get(culture.id);
-  if (cached) return cached;
-  const inv: Inventory = {
-    onsets: [...new Set(culture.onsets)],
-    nuclei: [...new Set(culture.nuclei)],
-    codas: [...new Set(culture.codas)],
-    suffixes: [...new Set(culture.townSuffixes)].filter((s) => s !== ""),
-  };
-  inventories.set(culture.id, inv);
-  return inv;
 }
 
 function rootCount(syllables: readonly Syllable[]): number {
@@ -175,8 +169,10 @@ export function segmentName(name: string, cultureId: string): Segmentation | nul
   if (!culture) return null;
   const stem = name.trim().replace(OVERFLOW_TAIL, "").toLowerCase();
   if (!stem) return null;
+  const inventory = INVENTORIES.get(culture.id);
+  if (!inventory) return null;
   let best: Candidate | null = null;
-  for (const candidate of candidatesFor(stem, inventoryOf(culture))) {
+  for (const candidate of candidatesFor(stem, inventory)) {
     if (!best || betterCandidate(candidate, best)) best = candidate;
   }
   if (!best) return null;

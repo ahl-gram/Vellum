@@ -9,6 +9,7 @@ import {
   glossName,
   tongueName,
 } from "../../src/society/philology.ts";
+import { composeDerivation } from "../../src/render/place-card.ts";
 
 // #124: a re-parse of a settlement name against the grammar that made it. Pure, no rng, never
 // imported by generate.ts, so it cannot move a world.
@@ -95,9 +96,8 @@ test("a town suffix is read whole, not spelled out as the consonants it happens 
   assert.equal(seg.syllables.length, 1);
 });
 
-// One real name per tongue, pinned after measuring: the canonical reading is a RANKING (suffix
-// first, then roots, then fewest syllables, then no repair, then leftmost-longest), and each key
-// is invisible in a test that only asserts "it parsed". A shift in any of them moves a row here.
+// One real name per tongue, pinned after measuring. The canonical reading is a five-key ranking:
+// suffix whole, then most roots, then fewest syllables, then no repair, then leftmost-longest.
 const CANONICAL: ReadonlyArray<readonly [string, string, string]> = [
   ["Talanaihaven", "thalassic", "tala|nai|haven"],
   ["Keghjend", "norden", "keg|hjend"],
@@ -109,9 +109,7 @@ const CANONICAL: ReadonlyArray<readonly [string, string, string]> = [
   ["Vunsvyov", "zoryan", "vun|svy|ov"],
   ["Tluachican", "tezcal", "tlua|chi|can"],
   ["Lekebulak", "ordai", "le|ke|bulak"],
-  // The four above were blind to the leftmost-longest key: every one of them reads the same way
-  // when it is inverted, while 39 corpus names change. These four are the ones that move, and
-  // they are the tongues that admit a vowel-initial syllable, where the key has something to do.
+  // The ten above are all blind to the leftmost-longest key; these four are names that move when it is inverted.
   ["Soshen", "ordai", "sosh|en"],
   ["Khilol", "ordai", "khil|ol"],
   ["Elaela", "sylvan", "elae|la"],
@@ -188,6 +186,19 @@ test("tongueName names each of the ten speeches from its culture id", () => {
 const CORPUS = Array.from({ length: 60 }, (_, i) => {
   const world = generateWorld(defaultRecipe(i + 1));
   return { seed: i + 1, cultureId: world.culture.id, names: world.settlements.map((s) => s.name) };
+});
+
+test("no derivation line outruns the card it is printed on", () => {
+  // The card is a 16rem sheet; line length IS card height, and at 390px it is the difference
+  // between a two-line appendix and a column. Measured over 1540 names: median 85, p90 123.
+  let longest = "";
+  for (const world of CORPUS) {
+    for (const name of world.names) {
+      const line = composeDerivation(name, world.cultureId).derivationLine;
+      if (line.length > longest.length) longest = line;
+    }
+  }
+  assert.ok(longest.length <= 180, `${longest.length} chars: "${longest}"`);
 });
 
 test("every settlement name across seeds 1-60 derives: zero blanks, zero throws (#124 acceptance)", () => {

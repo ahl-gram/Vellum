@@ -100,7 +100,6 @@ test("every place carries its raw grid cell as gx/gy", () => {
   });
 });
 
-// #124: the card glosses client-side, and the manifest is all it gets, so the world's tongue has to ride along.
 test("the manifest names the world's tongue, and names the world's OWN tongue", () => {
   assert.equal(buildPlaceManifest(world, WIDTH).cultureId, world.culture.id);
   const other = generateWorld(defaultRecipe(1));
