@@ -121,7 +121,9 @@ main()
       console.log(
         certified.length > 0
           ? `  N1/N2 certified the console/network state of: ${certified.join(", ")}`
-          : `  N1/N2 did not run, so nothing here carries a console/network clean bill.`,
+          : SELECTED.includes("health")
+            ? `  N1/N2 ran, but nothing preceded them, so they certify no suite.`
+            : `  N1/N2 did not run, so nothing here carries a console/network clean bill.`,
       );
     }
     const outcome = runOutcome(results);

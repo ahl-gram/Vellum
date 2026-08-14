@@ -27,6 +27,16 @@ export const E2E_SUITE_ORDER = [
 
 export type E2eSuiteName = (typeof E2E_SUITE_ORDER)[number];
 
+// The coverage floor a smoke-green PR guarantees, re-derived from measurement rather than from the
+// issue's stale "~60 checks": 125 of 331 checks. Every page that ships its own bundle
+// (BUNDLE_ENTRIES: explorer, print-room, seed-of-the-day, reading-room) boots and renders; the two
+// surfaces that spawn the shared worker chunk assert it is live AND degrade correctly when it 404s
+// (render R1 + fallback B1-B3 for the Explorer, reading-room RR1 + its blockWorker block); health
+// carries the console/network checkpoint. Anything not listed here is what a smoke-green PR does NOT
+// prove, which is the trade #266 accepts.
+// Lane note (#266, 2026-08-13): the timing-heavy suites (motion, turn, survey, zoom) are all OUT of
+// this tier, so smoke never contends with itself; if lanes are ever added, those four belong in ONE
+// lane so they never compete, since they assert against measured frame counts and wall-clock timings.
 export const SMOKE_SUITES: readonly E2eSuiteName[] = [
   "render",
   "health",
@@ -34,7 +44,7 @@ export const SMOKE_SUITES: readonly E2eSuiteName[] = [
   "hunt",
   "print-room",
   "home",
-  "room-address",
+  "reading-room",
 ];
 
 export type E2eTier = "full" | "smoke" | "custom";

@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { E2E_SUITE_ORDER, SMOKE_SUITES, E2E_SUITES_VAR } from "../../src/cli/e2e-suites.ts";
+import type { E2eSuiteName } from "../../src/cli/e2e-suites.ts";
+import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
 
 // The e2e tier is selected by NAME, so a name that drifts from the runner is the whole risk: a stale
 // entry either crashes the run or, worse, quietly drops a suite from the tier PRs depend on. The
@@ -50,30 +52,53 @@ test("every named suite has a suite file the runner imports", () => {
 });
 
 test("the smoke tier covers every page that ships its own bundle", () => {
-  // The ratified coverage floor. A surface dropped from here is a surface a green PR stops proving,
-  // and nothing else in the suite would go red to say so.
-  const surfaces = {
+  // Derived from BUNDLE_ENTRIES, not hardcoded: a FIFTH bundle added later must fail here rather
+  // than ship with zero smoke coverage while a hand-written list still reads green.
+  const covers: Readonly<Record<string, readonly E2eSuiteName[]>> = {
     "explorer": ["render"],
-    "seed-of-the-day": ["hunt"],
     "print-room": ["print-room"],
-    "reading-room": ["room-address"],
-    "home": ["home"],
+    "seed-of-the-day": ["hunt"],
+    "reading-room": ["reading-room"],
   };
-  for (const [surface, suites] of Object.entries(surfaces)) {
+  for (const { twin } of BUNDLE_ENTRIES) {
+    const surface = twin.replace(/\/app\.bundle\.js$/, "");
+    const suites = covers[surface];
+    assert.ok(suites, `bundle ${surface} has no smoke suite mapped, so it ships uncovered`);
     assert.ok(
-      suites.some((s) => SMOKE_SUITES.includes(s as never)),
+      suites.some((s) => SMOKE_SUITES.includes(s)),
       `the smoke tier no longer boots ${surface} (wanted one of ${suites.join(", ")})`,
     );
   }
 });
 
+test("the two worker-bearing surfaces assert the worker is live AND that it degrades", () => {
+  // #266 scope: "one worker/fallback check per surface". Booting a page is not that. The Explorer
+  // pairs render's R1 with suite-fallback's 404 of the worker chunk; the Reading Room pairs RR1 with
+  // its own blockWorker block. suite-room-address boots the room but only checks the hook EXISTS,
+  // never that it returns true and never with the worker blocked, so it cannot stand in here.
+  for (const suite of ["render", "fallback", "reading-room"] as const) {
+    assert.ok(SMOKE_SUITES.includes(suite), `smoke must keep ${suite} for worker/fallback coverage`);
+  }
+  const assertsWorkerLive = (file: string) => /__vellum\w*UsesWorker(\(\))?\s*===?\s*true/.test(src(file));
+  assert.ok(assertsWorkerLive("scripts/e2e/suite-render.mjs"), "render no longer asserts the worker is live");
+  assert.ok(assertsWorkerLive("scripts/e2e/suite-reading-room.mjs"), "reading-room no longer asserts the worker is live");
+  for (const file of ["scripts/e2e/suite-fallback.mjs", "scripts/e2e/suite-reading-room.mjs"]) {
+    assert.match(src(file), /serverState\.blockWorker = true/, `${file} no longer exercises the 404 fallback`);
+  }
+});
+
 test("the smoke tier stays materially cheaper than the full suite", () => {
-  // A tier that creeps back toward the full run costs the same wall clock while proving less, which
-  // is the worst of both. Half is the line at which the trade stops paying.
+  // Suite COUNT is a weak proxy: cost is wildly uneven, so a 7-suite tier built from the slowest
+  // suites would pass a count-only check while saving nothing. The real cost driver is the
+  // timing-heavy suites, which spend their time in sleeps, frame counting and CPU throttling rather
+  // than in checks, so they are pinned OUT by name as well.
   assert.ok(
     SMOKE_SUITES.length * 2 < E2E_SUITE_ORDER.length,
     `smoke is ${SMOKE_SUITES.length}/${E2E_SUITE_ORDER.length} suites, no longer a tier worth the risk`,
   );
+  for (const slow of ["motion", "turn", "survey", "zoom", "zoom-gestures"] as const) {
+    assert.ok(!SMOKE_SUITES.includes(slow), `${slow} is timing-heavy and belongs outside the smoke tier`);
+  }
 });
 
 test("ci.yml runs smoke on pull_request and the full suite on main", () => {
