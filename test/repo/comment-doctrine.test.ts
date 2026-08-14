@@ -1,6 +1,6 @@
 // #384: #378 ratified "comments are the exception" as prose in CLAUDE.md and prose lost twice, so the SHAPE half is mechanical here. A mid-file comment runs to at most TWO lines, because restating a tested behavior takes room while an untestable gotcha usually fits in one or two. ONE line was measured first and rejected: it needs 285 blocks grandfathered against this repo, which is the codebase rather than a debt list, and a guard that reds on ordinary compliant code gets worked around.
 // Comments are located by TypeScript's OWN parser, never by hand-rolled lexing. Two hand-written attempts were each silently blinded by input the real parser handles for free (a backtick inside a string or a regex literal, a <style> mention in prose), and a guard that goes quiet is worse than no guard.
-// What this CANNOT see, all of it vellum-pr-skeptic's half: whether a one or two line comment restates a test, a paragraph written as blank-separated one-liners (a blank splits a run here, because joining across blanks flags two genuinely separate compliant one-liners just as readily), .astro (a template language the parser cannot read, and where both blinding holes lived), and .yml/.css/.md/.js or anything outside CODE_ROOTS.
+// What this CANNOT see, all of it vellum-pr-skeptic's half: whether a one or two line comment restates a test, a paragraph written as blank-separated one-liners (a blank splits a run here, because joining across blanks flags two genuinely separate compliant one-liners just as readily), a trailing comment hung off a code line (an inline annotation, not a block, so it does not count toward the run and a writer gets three prose lines that way), .astro (a template language the parser cannot read, and where two blinding holes lived), and .yml/.css/.md/.js or anything outside CODE_ROOTS.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -85,7 +85,11 @@ function commentSpans(source: string): Array<[number, number]> {
   const file = ts.createSourceFile("probe.ts", source, ts.ScriptTarget.ESNext, true);
   const spans = new Map<number, [number, number]>();
   const visit = (node: ts.Node): void => {
+    // BOTH range kinds, because leading trivia only starts collecting after a newline: a block comment whose `/*` opens on a code line is dropped entirely by the leading scan, and its inner lines then read as code however many there are (#384 guard-prover, third pass).
     for (const range of ts.getLeadingCommentRanges(source, node.pos) ?? []) {
+      spans.set(range.pos, [range.pos, range.end]);
+    }
+    for (const range of ts.getTrailingCommentRanges(source, node.end) ?? []) {
       spans.set(range.pos, [range.pos, range.end]);
     }
     for (const child of node.getChildren(file)) visit(child);
@@ -178,6 +182,9 @@ test("the parser survives the shapes that would blind it", () => {
   assert.equal(longest("const re = /[`~]/;\n// one\n// two\n// three\n"), 3, "a backtick in a REGEX literal must not blind the scan");
   assert.equal(longest('const s = "<style> in prose";\n// one\n// two\n// three\n'), 3, "a <style> mention in a string must not blind the scan");
   assert.equal(longest("code(); // trailing\nmore(); // trailing\n"), 0, "a trailing comment is not a comment LINE");
+  assert.equal(longest("const a = 1; /* one\n * two\n * three\n */\n"), 3, "a block comment opening on a code line is still a mid-file block");
+  // A trailing comment stays code, so hanging the first line off a code line does not buy a free prose line; it also does not count the trailing line itself, which is an inline annotation rather than a block.
+  assert.equal(longest("const a = 1; // one\n// two\n// three\n"), 2, "a trailing first line does not buy a free prose line");
   assert.equal(longest("const t = `unterminated\n// one\n// two\n// three\n"), 0, "an unterminated template swallows the rest, and the scanner says so rather than guessing");
   assert.notEqual(
     runs("const a = 1;\n// alpha here\n// second\n")[0].key,
