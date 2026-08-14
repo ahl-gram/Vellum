@@ -27,16 +27,10 @@ export const E2E_SUITE_ORDER = [
 
 export type E2eSuiteName = (typeof E2E_SUITE_ORDER)[number];
 
-// The coverage floor a smoke-green PR guarantees, re-derived from measurement rather than from the
-// issue's stale "~60 checks": 125 of 331 checks. Every page that ships its own bundle
-// (BUNDLE_ENTRIES: explorer, print-room, seed-of-the-day, reading-room) boots and renders; the two
-// surfaces that spawn the shared worker chunk assert it is live AND degrade correctly when it 404s
-// (render R1 + fallback B1-B3 for the Explorer, reading-room RR1 + its blockWorker block); health
-// carries the console/network checkpoint. Anything not listed here is what a smoke-green PR does NOT
-// prove, which is the trade #266 accepts.
-// Lane note (#266, 2026-08-13): the timing-heavy suites (motion, turn, survey, zoom) are all OUT of
-// this tier, so smoke never contends with itself; if lanes are ever added, those four belong in ONE
-// lane so they never compete, since they assert against measured frame counts and wall-clock timings.
+// Coverage floor of a smoke-green PR (#266), measured at 125 of 331 checks: every bundled page
+// boots, both worker-bearing surfaces prove the worker live AND degrading, health checks the
+// console. What is absent here is what a smoke-green PR does not prove, which is the accepted trade.
+// The timing-heavy suites stay out; if lanes are ever added they belong together in ONE lane.
 export const SMOKE_SUITES: readonly E2eSuiteName[] = [
   "render",
   "health",
@@ -58,11 +52,8 @@ export interface E2eSuiteEnv {
   readonly [key: string]: string | undefined;
 }
 
-// These run against the page the harness already loaded rather than navigating themselves, and
-// waitSettled resolves as soon as the page is settled. So if the boot auto-draw has not been
-// consumed, one of these can settle on the boot world instead of its own draw: VELLUM_E2E_SUITES=turn
-// fails T1b with the seed-of-the-day seed where it asserts 42. render is the suite that consumes the
-// boot draw (R0/R0b assert the pristine bare visit), so requesting an inheritor pulls render in.
+// waitSettled resolves on ANY settled page, so these non-navigating suites can settle on the boot
+// auto-draw instead of their own; render is what consumes that boot draw.
 const INHERITS_HARNESS_PAGE: readonly E2eSuiteName[] = [
   "motion",
   "turn",
@@ -114,8 +105,6 @@ export interface E2eOutcome {
 
 export type E2eSuiteRunners = Readonly<Record<string, (ctx: unknown) => Promise<unknown>>>;
 
-// The run loop lives here, not in the .mjs runner, so that "only the selected suites run, in this
-// order" is a behavior a test can execute rather than a line a test can only grep for.
 export async function runSelected(
   names: readonly E2eSuiteName[],
   suites: E2eSuiteRunners,
@@ -129,8 +118,6 @@ export async function runSelected(
 }
 
 export function runOutcome(results: readonly E2eCheckResult[]): E2eOutcome {
-  // An empty run is what a selection flag newly makes reachable: `every()` is true for [], so a
-  // selection that matched nothing would otherwise report ALL PASS (0/0) and exit green.
   if (results.length === 0) return { ok: false, line: "FAIL: no checks ran, so this run proves nothing." };
   const passed = results.filter((r) => r.ok).length;
   return { ok: passed === results.length, line: `${passed === results.length ? "ALL PASS" : "SOME FAILED"}  (${passed}/${results.length})` };

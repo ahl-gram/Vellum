@@ -42,15 +42,11 @@ jobs:
       # bundles, showcases), then `astro build` assembles dist/.
       - name: Build site into dist/
         run: npm run build
-      # Tier trade (#266): a PR runs the fixed smoke tier, so a smoke-green PR CAN merge a
-      # regression the full suite would have caught. It surfaces as a red main run just after
-      # merge, and revert is cheap here. main and workflow_dispatch always run the full suite, and
-      # a PR author who knows the change is risky uses the `full-e2e` label to force it.
-      # HOW TO USE THE LABEL: apply it BEFORE opening the PR, or push a commit after applying it.
-      # `on: pull_request` carries no `types:`, so it fires only on opened/synchronize/reopened;
-      # labelling an already-open PR starts no run, and re-running an existing one replays the
-      # original event payload, which does not carry the new label. Adding `labeled` to `types`
-      # would fix that at the cost of a CI run on every label of any kind.
+      # Tier trade (#266): a PR runs the smoke tier, so a smoke-green PR CAN merge a regression the
+      # full suite would have caught; it surfaces as a red main run just after merge, and revert is
+      # cheap here. main and workflow_dispatch always run full. To force full on a risky PR, apply
+      # the `full-e2e` label BEFORE opening it, or push a commit after applying it: `pull_request`
+      # has no `types:`, so labelling an open PR starts no run and a re-run replays the old payload.
       - name: Explorer e2e (headless browser, against dist/)
         run: npm run test:e2e
         env:
