@@ -29,6 +29,8 @@ jobs:
   build-and-e2e:
     name: build & e2e
     runs-on: ubuntu-latest
+    # A hung lane is the one failure the outcome rule cannot catch; measured worst case is 7m05s.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -42,15 +44,11 @@ jobs:
       # bundles, showcases), then `astro build` assembles dist/.
       - name: Build site into dist/
         run: npm run build
-      # Tier trade (#266): a PR runs the smoke tier, so a smoke-green PR CAN merge a regression the
-      # full suite would have caught; it surfaces as a red main run just after merge, and revert is
-      # cheap here. main and workflow_dispatch always run full. To force full on a risky PR, apply
-      # the `full-e2e` label BEFORE opening it, or push a commit after applying it: `pull_request`
-      # has no `types:`, so labelling an open PR starts no run and a re-run replays the old payload.
-      - name: Explorer e2e (headless browser, against dist/)
-        run: npm run test:e2e
+      # Two lanes in THIS job (#381), never a matrix: a matrix would need build-once-and-upload
+      # artifact plumbing first, which is what #266 priced and treated as the blocker.
+      - name: Explorer e2e (headless browser, against dist/, two lanes)
+        run: npm run test:e2e:lanes
         env:
-          VELLUM_E2E_SUITES: ${{ (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'full-e2e')) && 'smoke' || 'full' }}
           # ubuntu-latest ships a real (non-snap) Google Chrome here. Point at it
           # explicitly: findBrowser() would otherwise pick /usr/bin/chromium first,
           # which is snap-confined and can't use a --user-data-dir under /tmp.

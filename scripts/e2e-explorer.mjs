@@ -7,6 +7,7 @@ import { resolveE2ePorts, e2eOutSubdir } from "../src/cli/e2e-ports.ts";
 import {
   resolveSuiteSelection,
   suitesCertifiedByHealth,
+  formatSuiteTimings,
   runSelected,
   runOutcome,
   E2E_SUITE_ORDER,
@@ -110,11 +111,13 @@ if (missing.length > 0) {
 
 async function main() {
   const ctx = await start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx });
-  await runSelected(SELECTED, SUITES, ctx);
+  return runSelected(SELECTED, SUITES, ctx);
 }
 
 main()
-  .then(() => {
+  .then((timings) => {
+    console.log("");
+    for (const line of formatSuiteTimings(timings)) console.log(line);
     const certified = suitesCertifiedByHealth(SELECTED);
     if (TIER !== "full") {
       console.log(`\ntier: ${TIER} (${SELECTED.length}/${E2E_SUITE_ORDER.length} suites): ${SELECTED.join(", ")}`);

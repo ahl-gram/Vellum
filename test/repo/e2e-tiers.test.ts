@@ -89,37 +89,58 @@ test("the smoke tier stays materially cheaper than the full suite", () => {
   }
 });
 
-test("ci.yml runs smoke on pull_request and the full suite on main", () => {
-  const tier = CI.match(new RegExp(`${E2E_SUITES_VAR}:\\s*(.+)`));
-  assert.ok(tier, `ci.yml never sets ${E2E_SUITES_VAR}, so both tiers would run the full suite`);
-  const expr = tier[1];
-  assert.match(expr, /github\.event_name == 'pull_request'/, "the tier must key off the event");
-  // POLARITY, not presence: a swapped ternary leaves both strings in place and inverts the tiers.
-  assert.match(
-    expr,
-    /&&\s*'smoke'\s*\|\|\s*'full'/,
-    "the ternary is inverted: PRs would run full and main would run smoke",
-  );
-});
-
-test("the full-e2e label forces the full suite back on for a risky PR", () => {
-  assert.match(
+test("ci.yml runs the lane driver, and nothing in it can narrow what the lanes cover", () => {
+  assert.match(CI, /run: npm run test:e2e:lanes/, "ci.yml no longer runs the lane driver");
+  // Presence of the driver is not enough: a VELLUM_E2E_SUITES line beside it still narrows coverage.
+  assert.doesNotMatch(
     CI,
-    /!contains\(github\.event\.pull_request\.labels\.\*\.name, 'full-e2e'\)/,
-    "ci.yml's full-e2e term is missing or un-negated",
+    new RegExp(`${E2E_SUITES_VAR}\\s*:`),
+    `ci.yml sets ${E2E_SUITES_VAR} again; the lanes ARE the selection, so any value there narrows coverage`,
   );
+  assert.doesNotMatch(CI, /run: npm run test:e2e\s*$/m, "ci.yml still runs the serial single-lane e2e too");
 });
 
-test("the runner actually uses the selection and the outcome rule it imports", () => {
+test("the e2e job is bounded, so a hung lane cannot hold a runner for hours", () => {
+  const bound = CI.match(/timeout-minutes:\s*(\d+)/);
+  assert.ok(bound, "the build & e2e job has no timeout-minutes, so a hung lane runs to GitHub's 6-hour default");
+  const minutes = Number(bound[1]);
+  assert.ok(minutes >= 15, `timeout-minutes is ${minutes}, under the measured 7m05s worst case plus headroom`);
+  assert.ok(minutes <= 60, `timeout-minutes is ${minutes}, long enough that a hang still costs an hour`);
+});
+
+test("every CI trigger gets the same full coverage, so nothing is conditional on the event", () => {
+  // The #266 tier keyed off github.event_name, which is exactly what let a PR prove less than main.
+  const at = CI.indexOf("test:e2e:lanes");
+  // slice(-1) is the file's LAST CHARACTER, not the whole file, so a missing anchor would leave both
+  // assertions below passing against nothing at all.
+  assert.notEqual(at, -1, "the e2e step is gone, so this guard would be reading an empty slice");
+  const step = CI.slice(at);
+  assert.doesNotMatch(step, /github\.event_name/, "the e2e step is conditional on the event again");
+  assert.doesNotMatch(step, /full-e2e/, "the full-e2e label is wired back in, so PRs differ from main again");
+});
+
+test("the runner actually uses the selection, the timings and the outcome rule it imports", () => {
   // The runner needs a browser, so behavior is tested in e2e-suites.test.ts and only the CALL
-  // sites are pinned here. Disconnecting either escaped every other guard.
+  // sites are pinned here. Disconnecting any of them escaped every other guard.
   assert.match(RUNNER, /runSelected\(SELECTED, SUITES, ctx\)/, "the runner does not run the SELECTED suites");
   assert.match(RUNNER, /runOutcome\(results\)/, "the runner does not use the outcome rule, so 0/0 can pass again");
   assert.match(RUNNER, /join\(REPO, "out", e2eOutSubdir\(PORT\)\)/, "the runner's out dir no longer follows the port");
+  assert.match(
+    RUNNER,
+    /formatSuiteTimings\(timings\)/,
+    "the runner measures per-suite time and then drops it, so no future split can be measured",
+  );
 });
 
-test("CI states the trade the smoke tier accepts", () => {
-  const wiring = CI.slice(Math.max(0, CI.indexOf(E2E_SUITES_VAR) - 900), CI.indexOf(E2E_SUITES_VAR));
-  assert.match(wiring, /main/i, "the trade must say the full suite still gates main");
-  assert.match(wiring, /regression|miss|escape/i, "the trade must name what a smoke-green PR can miss");
+test("the lane driver spawns the runner itself and refuses an ambient selection", () => {
+  const DRIVER = src("scripts/e2e-lanes.mjs");
+  assert.match(DRIVER, /spawn\(process\.execPath, \[RUNNER\]/, "a lane must spawn the runner directly, so its exit code survives");
+  assert.match(DRIVER, /ambientSelectionRefusal\(process\.env\)/, "the driver no longer refuses a narrowing selection");
+  assert.match(DRIVER, /laneOutcome\(results\)/, "the driver does not aggregate the lanes, so one could fail unnoticed");
+  assert.match(DRIVER, /process\.exit\(outcome\.ok \? 0 : 1\)/, "the driver's exit code is not the lanes' outcome");
+  // Second lock on the subset hole; laneOutcome refuses a short result set at runtime.
+  assert.match(DRIVER, /E2E_LANES\.map\(runLane\)/, "the driver runs a subset of the lanes, not every lane");
+  assert.match(DRIVER, /browserlessAction\(process\.env, Boolean\(process\.stdout\.isTTY\)\)/, "the driver no longer decides the browserless policy against its own TTY");
+  const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
+  assert.equal(pkg.scripts["test:e2e:lanes"], "node scripts/e2e-lanes.mjs");
 });
