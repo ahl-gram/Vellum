@@ -21,9 +21,6 @@ const LEGACY_BLOCKS: Readonly<Record<string, readonly string[]>> = {
     "The self-contained download's plates, linked at load (#368, ratified 2026-08-13). A plain ",
     "`plateSrc` decides how a plate is embedded: a filename (CLI, with anchor:true) or a data U",
   ],
-  "src/cli/e2e-suites.ts": [
-    "Coverage floor of a smoke-green PR (#266), measured at 125 of 331 checks: every bundled pa",
-  ],
   "src/layouts/BaseLayout.astro": [
     "The one shared shell (#203, ratified in the Sub 1 decision doc comment on #202): head meta",
     "#329: prefetch the sibling shells so a first click commits instantly even while this page'",
