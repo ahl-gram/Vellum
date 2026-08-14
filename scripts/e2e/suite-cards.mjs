@@ -120,10 +120,7 @@ export async function run(ctx) {
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5, buttons: 0 });
   await sleep(40);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: p15c.x, y: p15c.y, buttons: 0 });
-  // Poll the ring's --paper-quick (180ms) grow-in to rest rather than sleeping past it: ringOp below
-  // is read to 2dp, so it tolerates 0.005, and a fixed wait had 60ms of slack. Z8b in suite-zoom is
-  // the same read on the same pseudo-element and it went red once under #381's second lane, with
-  // nearly four times this margin. A ring that never reaches 1.00 still fails, on its last sample.
+  // Poll, never sleep: ringOp is read to 2dp so it tolerates 0.005, and this is the same ring Z8b reads in suite-zoom, where a fixed wait with four times the slack still went red under #381's second lane.
   const readP15 = () => evaluate(`(()=>{const h=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');const cs=getComputedStyle(h);const ring=getComputedStyle(h,"::after");return{bg:cs.backgroundColor,bw:cs.borderTopWidth,ringOp:Number(ring.opacity).toFixed(2)};})()`);
   let p15 = await readP15();
   for (let i = 0; i < 60 && p15.ringOp !== "1.00"; i++) {

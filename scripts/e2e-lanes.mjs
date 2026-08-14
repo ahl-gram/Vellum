@@ -1,5 +1,5 @@
 // e2e lane driver (npm run test:e2e:lanes): spawns one e2e-explorer per lane on its own port, streams both outputs line-prefixed, and fails if either lane does. Two processes in ONE CI job, so there is no build-once-and-upload artifact plumbing a job matrix would need.
-// .mjs rather than .ts (CLAUDE.md's one-language rule asks for the reason at the file head): this is the matched sibling of scripts/e2e-explorer.mjs, the other thin e2e entrypoint, and scripts/ is outside tsconfig's include so a .ts here would be unchecked anyway. Every decision it makes lives in src/cli/e2e-lanes.ts, which IS checked and unit-tested.
+// .mjs, the reason CLAUDE.md's one-language rule asks for at the file head: sibling of scripts/e2e-explorer.mjs, and scripts/ is outside tsconfig's include so a .ts here would be unchecked. Every decision it makes lives in the checked, unit-tested src/cli/e2e-lanes.ts.
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
@@ -24,8 +24,7 @@ if (refusal) {
   process.exit(1);
 }
 
-// Decide the browserless policy HERE, against this process's real TTY: the lanes' stdio is piped, so
-// a child would see isTTY false and hard-fail where `npm run test:e2e` skips.
+// Piped stdio hides the TTY from a child, so the policy is resolved HERE or a browserless local run hard-fails where `npm run test:e2e` skips.
 if (!findBrowser()) {
   if (browserlessAction(process.env, Boolean(process.stdout.isTTY)) === "fail") {
     console.error(
@@ -66,8 +65,6 @@ function runLane(lane) {
     });
     let skipped = false;
     let tally = null;
-    // A child can still skip when VELLUM_ALLOW_NO_BROWSER is set explicitly, and its own tally is
-    // the only place the check counts exist.
     const readLine = (line) => {
       if (laneLineIsSkip(line)) skipped = true;
       tally = laneCheckTally(line) ?? tally;
@@ -75,7 +72,7 @@ function runLane(lane) {
     const prefix = `[${lane.name}]`;
     streamLines(child.stdout, prefix, (l) => console.log(l), readLine);
     streamLines(child.stderr, prefix, (l) => console.error(l), readLine);
-    // A null exit code means a signal or a failed spawn, so the lane never reported an outcome at all: that is a harness failure (2), not a failed check (1).
+    // A null code is a signal or a failed spawn, so the lane reported no outcome at all: harness failure (2), not failed check (1).
     const done = (code) => settle({ name: lane.name, code: code ?? 2, ms: performance.now() - started, skipped, tally });
     child.on("error", (err) => {
       console.error(`${prefix} FAIL: lane could not start: ${err.message}`);

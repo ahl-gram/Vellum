@@ -122,8 +122,6 @@ test("a run that executed no checks fails instead of reporting ALL PASS (0/0)", 
 });
 
 test("runSelected times each suite it ran, in the order it ran them", () => {
-  // The measured cost of a suite is the only honest input to a lane split; check counts lie
-  // (hunt carries 25 checks in 3.4s, room-address carries 8 in 19.6s).
   const clock = [0, 5, 5, 12, 12, 13];
   let tick = 0;
   const now = () => clock[tick++];

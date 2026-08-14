@@ -27,9 +27,7 @@ export const E2E_SUITE_ORDER = [
 
 export type E2eSuiteName = (typeof E2E_SUITE_ORDER)[number];
 
-// A local debugging tier since #381 took its CI wiring out: 125 of 331 checks, ~1m10s, enough that
-// every bundled page boots, both worker-bearing surfaces prove the worker live AND degrading, and
-// health checks the console. It is also the retreat rung if the lanes ever have to come out.
+// A local tier since #381 took its CI wiring out (125 of 331 checks, ~1m10s), and the retreat rung.
 export const SMOKE_SUITES: readonly E2eSuiteName[] = [
   "render",
   "health",

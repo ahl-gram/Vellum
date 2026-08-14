@@ -109,10 +109,7 @@ export async function run(ctx) {
       mapK:getComputedStyle(document.getElementById("map")).getPropertyValue("--zoom-k").trim()};
   })()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: z8b.x ?? 0, y: z8b.y ?? 0 });
-  // The ring's --paper-quick grow-in fires no event, so poll for its rest rather than sleeping a
-  // fixed 400ms: opacity below is read with NO tolerance, and #381's second lane stretched the
-  // grow-in past 400ms once in eight runs (sampled at o=0.906, scale=0.986, both still climbing).
-  // A ring that never reaches rest still fails the check, on whatever the last sample held.
+  // Poll, never sleep: opacity below has NO tolerance, and #381's second lane stretched this 180ms grow-in past a fixed 400ms once in eight runs (o=0.906, still climbing).
   const ringScale = (r) => parseFloat(((r.t || "").match(/matrix\(([-\d.]+)/) || [])[1] ?? "NaN");
   const ringAtRest = (r) => r.hover && parseFloat(r.o) === 1 && Math.abs(ringScale(r) - 1) <= 0.02;
   const readRing = () => evaluate(`(()=>{
@@ -202,9 +199,7 @@ export async function run(ctx) {
   await waitTurned("zoom-styles-restore-antique");
 
   await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:2,x:-0.2*W,y:-0.3*H});})()`);
-  // Poll past the 250ms settle debounce rather than sleeping 400ms: the assertion below is strict
-  // string equality with no tolerance, and a deferred timer under #381's second lane can land after
-  // any fixed wait. A hash that never gets written still fails, on whatever the last read held.
+  // Poll the 250ms settle debounce: the assertion below is strict string equality, and a deferred timer under #381's second lane can land after any fixed wait.
   const readZ12 = () => evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k")};})()`);
   let z12 = await readZ12();
   for (let i = 0; i < 60 && z12.k !== "2.0000"; i++) {

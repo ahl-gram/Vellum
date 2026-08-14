@@ -83,14 +83,11 @@ export interface LaneChunk {
   readonly rest: string;
 }
 
-// A child's stdout arrives in chunks that split mid-line, so a naive per-chunk prefix would cut
-// check labels in half and lose the last line when it arrives without a trailing newline.
 export function splitLaneChunk(rest: string, chunk: string): LaneChunk {
   const parts = (rest + chunk).split("\n");
   return { lines: parts.slice(0, -1), rest: parts[parts.length - 1] ?? "" };
 }
 
-// The runner exits 0 when it finds no browser, so a lane can be green having exercised nothing.
 export function laneLineIsSkip(line: string): boolean {
   return line.startsWith("SKIP:");
 }
@@ -100,8 +97,6 @@ export interface LaneTally {
   readonly total: number;
 }
 
-// Reads the tally off the runner's own outcome line, so the combined line can state the number the
-// acceptance criterion names rather than leaving it to be summed by eye across two lanes.
 export function laneCheckTally(line: string): LaneTally | null {
   const m = line.match(/\((\d+)\/(\d+)\)\s*$/);
   return m ? { passed: Number(m[1]), total: Number(m[2]) } : null;
@@ -125,8 +120,6 @@ const laneDetail = (r: LaneResult): string => {
 
 export function laneOutcome(results: readonly LaneResult[]): E2eOutcome {
   if (results.length === 0) return { ok: false, line: "FAIL: no lanes ran, so this run proves nothing." };
-  // A driver that spawned only some of the lanes would otherwise report every lane it DID run as
-  // green, which is half the suite passing under a line that reads like all of it.
   const reported = new Set(results.map((r) => r.name));
   const absent = E2E_LANES.filter((lane) => !reported.has(lane.name)).map((l) => l.name);
   if (absent.length > 0) {

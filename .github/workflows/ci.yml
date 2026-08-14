@@ -29,8 +29,7 @@ jobs:
   build-and-e2e:
     name: build & e2e
     runs-on: ubuntu-latest
-    # The lanes are waited on together, so a lane that hangs rather than failing would hold the job
-    # to GitHub's 6-hour default. Measured worst case across the #381 runs is 7m05s.
+    # A hung lane is the one failure the outcome rule cannot catch; measured worst case is 7m05s.
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -45,11 +44,8 @@ jobs:
       # bundles, showcases), then `astro build` assembles dist/.
       - name: Build site into dist/
         run: npm run build
-      # Every trigger runs all 22 suites, split across two lanes in THIS job (#381): one npm ci,
-      # one build, two runner processes on their own ports, and the job fails if either lane does.
-      # A job matrix would instead need a build-once-and-upload artifact step; two lanes in one job
-      # need none of it. Setting VELLUM_E2E_SUITES here would narrow what the lanes cover, so the
-      # driver refuses to start if it is set.
+      # Two lanes in THIS job (#381), never a matrix: a matrix would need build-once-and-upload
+      # artifact plumbing first, which is what #266 priced and treated as the blocker.
       - name: Explorer e2e (headless browser, against dist/, two lanes)
         run: npm run test:e2e:lanes
         env:

@@ -21,10 +21,8 @@ import {
 import type { E2eSuiteName } from "../../src/cli/e2e-suites.ts";
 import { E2E_PORT_VAR, E2E_DPORT_VAR, e2eOutSubdir } from "../../src/cli/e2e-ports.ts";
 
-// Per-suite wall clock in seconds, copied from the runner's own timing table on a
-// `npm run test:e2e:lanes` run (16-core Mac, 2026-08-14). Refresh it from that same output when
-// the split is revisited: it is what makes the balance below a measurement rather than a guess,
-// and check count is a terrible proxy (hunt carries 25 checks in 3.4s, room-address 8 in 19.3s).
+// Seconds per suite, from the runner's own timing table (16-core Mac, 2026-08-14); refresh it from
+// that same output when the split is revisited.
 const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "survey": 51.4,
   "zoom": 45.8,
@@ -65,8 +63,7 @@ const everyLane = (over: Partial<LaneResult> = {}) =>
   E2E_LANES.map((lane) => result({ name: lane.name, ...over }));
 
 test("the lanes are an exact partition of the runner's suites, so nothing is dropped or doubled", () => {
-  // A union/count check passes a swap that drops one suite while duplicating another, so every
-  // suite is counted individually. A dropped suite is the false green this whole issue must not buy.
+  // Counted suite by suite: a union or count check passes a swap that drops one and duplicates another.
   for (const suite of E2E_SUITE_ORDER) {
     const carrying = E2E_LANES.filter((lane) => lane.suites.includes(suite)).map((l) => l.name);
     assert.equal(carrying.length, 1, `${suite} runs in ${carrying.length} lanes (${carrying.join(", ") || "none"})`);
@@ -80,8 +77,7 @@ test("the lanes are an exact partition of the runner's suites, so nothing is dro
 });
 
 test("every suite that inherits the harness page shares a lane with render", () => {
-  // waitSettled resolves on ANY settled page, so an inheritor split away from render settles on the
-  // boot auto-draw and fails for reasons unrelated to the change under test.
+  // waitSettled resolves on ANY settled page, so an inheritor without render settles on the boot auto-draw.
   const renderLane = E2E_LANES.find((lane) => lane.suites.includes("render"));
   assert.ok(renderLane, "no lane runs render at all");
   for (const inheritor of ["motion", "turn", "verso", "glass-ceremony", "cards", "fallback"] as const) {
@@ -106,9 +102,6 @@ test("splitting into lanes costs no console/network certification", () => {
 });
 
 test("each lane runs its suites in the runner's canonical order", () => {
-  // The runner's key order is load-bearing (render asserts a pristine boot, health asserts what
-  // preceded it), and resolveSuiteSelection re-canonicalises anyway, so a lane listed out of order
-  // would not run as written.
   for (const lane of E2E_LANES) {
     const ranks = lane.suites.map((s) => E2E_SUITE_ORDER.indexOf(s));
     assert.deepEqual(ranks, ranks.slice().sort((a, b) => a - b), `lane ${lane.name} is out of runner order`);
@@ -144,7 +137,6 @@ test("a lane's child env carries its own suites and ports, and inherits the rest
 });
 
 test("an ambient suite selection is refused, since the lanes ARE the selection", () => {
-  // Honouring it would run less than the full suite and still report the lanes green.
   for (const raw of ["smoke", "render", "full"]) {
     const refusal = ambientSelectionRefusal({ [E2E_SUITES_VAR]: raw });
     assert.ok(refusal, `${raw} was allowed to narrow the lanes`);
@@ -159,8 +151,7 @@ test("the split is balanced against measured cost, not check counts", () => {
   const total = laneSeconds(E2E_SUITE_ORDER);
   for (const lane of E2E_LANES) {
     const share = laneSeconds(lane.suites) / total;
-    // The rejected naive seam (cut at the Explorer cluster) puts a lane at 65%, so the ceiling sits
-    // below that: a split that drifts back toward it stops being worth the second browser.
+    // The rejected naive seam puts a lane at 65%, so the ceiling sits below it.
     assert.ok(
       share <= 0.6,
       `lane ${lane.name} is ${(share * 100).toFixed(1)}% of measured serial cost, so the lanes buy little`,
@@ -202,8 +193,6 @@ test("no lanes at all fails instead of reporting a vacuous pass", () => {
 });
 
 test("a lane that never reported fails the run, so half the suite cannot pass as all of it", () => {
-  // The driver spawning only some of E2E_LANES is the one place half the checks can vanish into a
-  // green line: every lane it DID run is green, and nothing else notices the missing one.
   for (const lane of E2E_LANES) {
     const partial = laneOutcome([result({ name: lane.name })]);
     assert.equal(partial.ok, false, `a run of lane ${lane.name} alone reported a pass`);
@@ -216,8 +205,7 @@ test("a lane that never reported fails the run, so half the suite cannot pass as
 });
 
 test("the combined line states the check total the acceptance criterion names", () => {
-  // Coupled to the runner's own outcome line rather than a hand-written format: a reworded tally
-  // would otherwise leave the driver silently reporting no counts at all.
+  // Built from runOutcome, not a hand-written format: a reworded tally would silently report no counts.
   assert.deepEqual(laneCheckTally(runOutcome([{ ok: true }, { ok: true }]).line), { passed: 2, total: 2 });
   assert.deepEqual(laneCheckTally(runOutcome([{ ok: true }, { ok: false }]).line), { passed: 1, total: 2 });
   assert.equal(laneCheckTally("shot -> out/e2e/explorer.png (1584px tall)"), null, "only the outcome line carries a tally");
@@ -230,8 +218,6 @@ test("the combined line states the check total the acceptance criterion names", 
 });
 
 test("a lane's output is split into whole lines, across chunk boundaries and at the end", () => {
-  // A chunk splitting mid-line would cut a check label in half; a last line with no trailing
-  // newline (the runner's exit path) would vanish entirely.
   const first = splitLaneChunk("", "PASS one\nPASS tw");
   assert.deepEqual(first.lines, ["PASS one"]);
   assert.equal(first.rest, "PASS tw", "a partial line must be held, not emitted");
@@ -244,8 +230,7 @@ test("a lane's output is split into whole lines, across chunk boundaries and at 
 });
 
 test("the skip line the driver watches for is the one the runner actually prints", () => {
-  // Read as source: the runner needs a browser, so this coupling cannot be exercised end to end
-  // on a machine that has one, and a reworded SKIP would silently turn an empty run green.
+  // Read as source: a machine with a browser never takes this path, and a reworded SKIP would silently turn an empty run green.
   const runner = readFileSync(
     join(import.meta.dirname, "..", "..", "scripts", "e2e-explorer.mjs"),
     "utf8",
@@ -258,8 +243,7 @@ test("the skip line the driver watches for is the one the runner actually prints
 });
 
 test("lanes that skipped for want of a browser never read as a pass", () => {
-  // The single-lane runner exits 0 when it skips, so the lanes do too; the LINE must not claim
-  // otherwise, or a local run reports a triumphant green having exercised nothing.
+  // The single-lane runner exits 0 when it skips, so the lanes do too; only the LINE can say so.
   const skipped = laneOutcome([
     result({ name: "A", skipped: true }),
     result({ name: "B", skipped: true }),

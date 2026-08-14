@@ -91,8 +91,7 @@ test("the smoke tier stays materially cheaper than the full suite", () => {
 
 test("ci.yml runs the lane driver, and nothing in it can narrow what the lanes cover", () => {
   assert.match(CI, /run: npm run test:e2e:lanes/, "ci.yml no longer runs the lane driver");
-  // Presence of the driver is not enough: a VELLUM_E2E_SUITES line beside it would either narrow
-  // coverage or be silently refused, and a leftover serial step would double the e2e's cost.
+  // Presence of the driver is not enough: a VELLUM_E2E_SUITES line beside it still narrows coverage.
   assert.doesNotMatch(
     CI,
     new RegExp(`${E2E_SUITES_VAR}\\s*:`),
@@ -102,8 +101,6 @@ test("ci.yml runs the lane driver, and nothing in it can narrow what the lanes c
 });
 
 test("the e2e job is bounded, so a hung lane cannot hold a runner for hours", () => {
-  // Both lanes are waited on together; a hang is the one failure the outcome rule cannot catch,
-  // because it never produces an outcome at all.
   const bound = CI.match(/timeout-minutes:\s*(\d+)/);
   assert.ok(bound, "the build & e2e job has no timeout-minutes, so a hung lane runs to GitHub's 6-hour default");
   const minutes = Number(bound[1]);
@@ -141,10 +138,8 @@ test("the lane driver spawns the runner itself and refuses an ambient selection"
   assert.match(DRIVER, /ambientSelectionRefusal\(process\.env\)/, "the driver no longer refuses a narrowing selection");
   assert.match(DRIVER, /laneOutcome\(results\)/, "the driver does not aggregate the lanes, so one could fail unnoticed");
   assert.match(DRIVER, /process\.exit\(outcome\.ok \? 0 : 1\)/, "the driver's exit code is not the lanes' outcome");
-  // laneOutcome refuses a short result set too, so this is the second lock on the same hole:
-  // spawning a subset is where half the checks can vanish under a line that reads like all of them.
+  // Second lock on the subset hole; laneOutcome refuses a short result set at runtime.
   assert.match(DRIVER, /E2E_LANES\.map\(runLane\)/, "the driver runs a subset of the lanes, not every lane");
-  // Its stdio is piped, so a child sees isTTY false and would hard-fail where `npm run test:e2e` skips.
   assert.match(DRIVER, /browserlessAction\(process\.env, Boolean\(process\.stdout\.isTTY\)\)/, "the driver no longer decides the browserless policy against its own TTY");
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
   assert.equal(pkg.scripts["test:e2e:lanes"], "node scripts/e2e-lanes.mjs");
