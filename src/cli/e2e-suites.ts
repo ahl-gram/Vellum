@@ -77,6 +77,39 @@ export function resolveSuiteSelection(env: E2eSuiteEnv): E2eSelection {
   return { names: canonicalise(new Set(requested)), tier: "custom" };
 }
 
+export interface E2eCheckResult {
+  readonly ok: boolean;
+}
+
+export interface E2eOutcome {
+  readonly ok: boolean;
+  readonly line: string;
+}
+
+export type E2eSuiteRunners = Readonly<Record<string, (ctx: unknown) => Promise<unknown>>>;
+
+// The run loop lives here, not in the .mjs runner, so that "only the selected suites run, in this
+// order" is a behavior a test can execute rather than a line a test can only grep for.
+export async function runSelected(
+  names: readonly E2eSuiteName[],
+  suites: E2eSuiteRunners,
+  ctx: unknown,
+): Promise<void> {
+  for (const name of names) {
+    const run = suites[name];
+    if (!run) throw new Error(`the runner has no suite named ${name}`);
+    await run(ctx);
+  }
+}
+
+export function runOutcome(results: readonly E2eCheckResult[]): E2eOutcome {
+  // An empty run is what a selection flag newly makes reachable: `every()` is true for [], so a
+  // selection that matched nothing would otherwise report ALL PASS (0/0) and exit green.
+  if (results.length === 0) return { ok: false, line: "FAIL: no checks ran, so this run proves nothing." };
+  const passed = results.filter((r) => r.ok).length;
+  return { ok: passed === results.length, line: `${passed === results.length ? "ALL PASS" : "SOME FAILED"}  (${passed}/${results.length})` };
+}
+
 export function suitesCertifiedByHealth(names: readonly E2eSuiteName[]): readonly E2eSuiteName[] {
   const at = names.indexOf("health");
   return at === -1 ? [] : names.slice(0, at);

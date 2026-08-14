@@ -32,10 +32,11 @@ test("each suite name maps to the run function imported from its own file", () =
     [...RUNNER.matchAll(/import \{ run as (\w+) \} from "\.\/e2e\/suite-([\w-]+)\.mjs"/g)].map((m) => [m[2], m[1]]),
   );
   const block = RUNNER.match(/const SUITES = \{([\s\S]*?)\n\};/);
-  assert.ok(block, "the runner's SUITES map was not found");
+  if (!block) throw new Error("the runner's SUITES map was not found");
+  const body = block[1];
   for (const name of E2E_SUITE_ORDER) {
-    const wired = block[1].match(new RegExp(`"${name}":\\s*(\\w+)`));
-    assert.ok(wired, `${name} has no SUITES entry`);
+    const wired = body.match(new RegExp(`"${name}":\\s*(\\w+)`));
+    if (!wired) throw new Error(`${name} has no SUITES entry`);
     assert.equal(wired[1], aliasFor.get(name), `${name} is wired to the wrong run function`);
   }
 });
@@ -80,18 +81,34 @@ test("ci.yml runs smoke on pull_request and the full suite on main", () => {
   assert.ok(tier, `ci.yml never sets ${E2E_SUITES_VAR}, so both tiers would run the full suite`);
   const expr = tier[1];
   assert.match(expr, /github\.event_name == 'pull_request'/, "the tier must key off the event");
-  assert.match(expr, /'smoke'/, "pull_request must select the smoke tier");
-  assert.match(expr, /'full'/, "every non-PR trigger must select the full tier");
+  // POLARITY, not presence. Swapping the ternary to `&& 'full' || 'smoke'` leaves both strings in
+  // place while sending every PR to the full suite and letting MAIN merge on smoke, which is the
+  // exact inverse of what #266 ratified. A test that only asserts both words appear cannot see it.
+  assert.match(
+    expr,
+    /&&\s*'smoke'\s*\|\|\s*'full'/,
+    "the ternary is inverted: PRs would run full and main would run smoke",
+  );
 });
 
 test("the full-e2e label forces the full suite back on for a risky PR", () => {
-  // The escape hatch the issue ratified: without this term a PR author has no way to demand the full
-  // suite, and the accepted trade becomes unconditional rather than opt-out.
+  // The escape hatch the issue ratified. The negation is the whole term: drop the `!` and the label
+  // forces SMOKE onto precisely the PRs an author flagged as risky, with both tests still green.
   assert.match(
     CI,
-    /contains\(github\.event\.pull_request\.labels\.\*\.name, 'full-e2e'\)/,
-    "ci.yml has no full-e2e label term",
+    /!contains\(github\.event\.pull_request\.labels\.\*\.name, 'full-e2e'\)/,
+    "ci.yml's full-e2e term is missing or un-negated",
   );
+});
+
+test("the runner actually uses the selection and the outcome rule it imports", () => {
+  // The one seam a unit test cannot execute: scripts/e2e-explorer.mjs needs a browser and four
+  // minutes to run. Both behaviors are tested directly in test/cli/e2e-suites.test.ts, so all that
+  // is left to pin is that the runner CALLS them. Disconnecting either escaped every other guard:
+  // iterating E2E_SUITE_ORDER instead of the selection silently turns every tier into the full suite.
+  assert.match(RUNNER, /runSelected\(SELECTED, SUITES, ctx\)/, "the runner does not run the SELECTED suites");
+  assert.match(RUNNER, /runOutcome\(results\)/, "the runner does not use the outcome rule, so 0/0 can pass again");
+  assert.match(RUNNER, /join\(REPO, "out", e2eOutSubdir\(PORT\)\)/, "the runner's out dir no longer follows the port");
 });
 
 test("CI states the trade the smoke tier accepts", () => {

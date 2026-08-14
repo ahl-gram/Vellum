@@ -5,6 +5,8 @@ import {
   E2E_SUITE_ORDER,
   SMOKE_SUITES,
   resolveSuiteSelection,
+  runOutcome,
+  runSelected,
   suitesCertifiedByHealth,
 } from "../../src/cli/e2e-suites.ts";
 
@@ -89,4 +91,36 @@ test("health reports the suites its clean bill actually covers, not the whole se
   assert.deepEqual(suitesCertifiedByHealth(["render", "motion", "health", "hunt"]), ["render", "motion"]);
   assert.deepEqual(suitesCertifiedByHealth(["render", "hunt"]), [], "no health in the run certifies nothing");
   assert.deepEqual(suitesCertifiedByHealth(["health", "hunt"]), [], "health first certifies nothing");
+});
+
+test("runSelected runs the selected suites, in the order given, and nothing else", () => {
+  // The mutation this exists for: a run loop that iterates E2E_SUITE_ORDER instead of the selection.
+  // Every selection test above still passes under it, because they test the resolver and never its
+  // one caller, so the whole tier silently becomes the full suite.
+  const ran: string[] = [];
+  const suites = Object.fromEntries(
+    E2E_SUITE_ORDER.map((n) => [n, async () => { ran.push(n); }]),
+  );
+  return (async () => {
+    const picked = canonical(SMOKE_SUITES);
+    await runSelected(picked, suites, {});
+    assert.deepEqual(ran, picked.slice(), "runSelected ran a different set or order than it was given");
+    assert.ok(ran.length < E2E_SUITE_ORDER.length, "runSelected ran the whole suite despite a subset");
+  })();
+});
+
+test("runSelected hands every suite the same ctx, and refuses a name the runner cannot run", async () => {
+  const ctx = { marker: 42 };
+  const seen: unknown[] = [];
+  await runSelected(["render", "health"], { render: async (c) => { seen.push(c); }, health: async (c) => { seen.push(c); } }, ctx);
+  assert.deepEqual(seen, [ctx, ctx]);
+  await assert.rejects(() => runSelected(["render"], {}, {}), /no suite named render/);
+});
+
+test("a run that executed no checks fails instead of reporting ALL PASS (0/0)", () => {
+  assert.deepEqual(runOutcome([]), { ok: false, line: "FAIL: no checks ran, so this run proves nothing." });
+  assert.equal(runOutcome([{ ok: true }]).ok, true);
+  assert.match(runOutcome([{ ok: true }, { ok: true }]).line, /ALL PASS {2}\(2\/2\)/);
+  assert.equal(runOutcome([{ ok: true }, { ok: false }]).ok, false);
+  assert.match(runOutcome([{ ok: true }, { ok: false }]).line, /SOME FAILED {2}\(1\/2\)/);
 });

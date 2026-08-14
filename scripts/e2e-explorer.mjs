@@ -4,7 +4,13 @@ import { join, resolve } from "node:path";
 import { findBrowser } from "../src/cli/raster.ts";
 import { browserlessAction } from "../src/cli/browser-policy.ts";
 import { resolveE2ePorts, e2eOutSubdir } from "../src/cli/e2e-ports.ts";
-import { resolveSuiteSelection, suitesCertifiedByHealth, E2E_SUITE_ORDER } from "../src/cli/e2e-suites.ts";
+import {
+  resolveSuiteSelection,
+  suitesCertifiedByHealth,
+  runSelected,
+  runOutcome,
+  E2E_SUITE_ORDER,
+} from "../src/cli/e2e-suites.ts";
 import { start, cleanup } from "./e2e/harness.mjs";
 import { run as runRender } from "./e2e/suite-render.mjs";
 import { run as runMotion } from "./e2e/suite-motion.mjs";
@@ -104,7 +110,7 @@ if (missing.length > 0) {
 
 async function main() {
   const ctx = await start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx });
-  for (const name of SELECTED) await SUITES[name](ctx);
+  await runSelected(SELECTED, SUITES, ctx);
 }
 
 main()
@@ -118,17 +124,10 @@ main()
           : `  N1/N2 did not run, so nothing here carries a console/network clean bill.`,
       );
     }
-    // An empty run is the failure mode this tier invites: results.every() is true for [], so a
-    // selection that executed nothing would otherwise print ALL PASS (0/0) and exit green.
-    if (results.length === 0) {
-      console.error("\nFAIL: no checks ran, so this run proves nothing.");
-      cleanup();
-      process.exit(1);
-    }
-    const passed = results.every((r) => r.ok);
-    console.log(`\n${passed ? "ALL PASS" : "SOME FAILED"}  (${results.filter((r) => r.ok).length}/${results.length})`);
+    const outcome = runOutcome(results);
+    console.log(`\n${outcome.line}`);
     cleanup();
-    process.exit(passed ? 0 : 1);
+    process.exit(outcome.ok ? 0 : 1);
   })
   .catch((e) => {
     console.error("HARNESS ERROR:", e);
