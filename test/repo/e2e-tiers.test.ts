@@ -127,6 +127,11 @@ test("the lane driver spawns the runner itself and refuses an ambient selection"
   assert.match(DRIVER, /ambientSelectionRefusal\(process\.env\)/, "the driver no longer refuses a narrowing selection");
   assert.match(DRIVER, /laneOutcome\(results\)/, "the driver does not aggregate the lanes, so one could fail unnoticed");
   assert.match(DRIVER, /process\.exit\(outcome\.ok \? 0 : 1\)/, "the driver's exit code is not the lanes' outcome");
+  // laneOutcome refuses a short result set too, so this is the second lock on the same hole:
+  // spawning a subset is where half the checks can vanish under a line that reads like all of them.
+  assert.match(DRIVER, /E2E_LANES\.map\(runLane\)/, "the driver runs a subset of the lanes, not every lane");
+  // Its stdio is piped, so a child sees isTTY false and would hard-fail where `npm run test:e2e` skips.
+  assert.match(DRIVER, /browserlessAction\(process\.env, Boolean\(process\.stdout\.isTTY\)\)/, "the driver no longer decides the browserless policy against its own TTY");
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
   assert.equal(pkg.scripts["test:e2e:lanes"], "node scripts/e2e-lanes.mjs");
 });

@@ -99,7 +99,7 @@ export async function run(ctx) {
     JSON.stringify({ same: p0 === p1, anims: sv2b.anims, len: (p0 || "").length }),
   );
 
-  // Measured 2026-08-12 headless Brave: first arm 1120ms, re-arm 144ms; the ratio clause guards the cache, the 800ms cap is sized for the slower ubuntu CI runner.
+  // Measured 2026-08-12 headless Brave: first arm 1120ms, re-arm 144ms; the ratio clause guards the cache, the 800ms cap is sized for the slower ubuntu CI runner. Since #381 that runner also carries the other lane: the re-arm measured 245ms serial and 301-392ms under lanes, so the cap's headroom is 2x, not 3.3x.
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await tick(true, "__armMs2");
   await waitInked("survey-rearm");

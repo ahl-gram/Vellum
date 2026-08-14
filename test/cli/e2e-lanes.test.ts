@@ -5,6 +5,7 @@ import { join } from "node:path";
 import {
   E2E_LANES,
   ambientSelectionRefusal,
+  laneCheckTally,
   laneChildEnv,
   laneLineIsSkip,
   laneOutcome,
@@ -14,6 +15,7 @@ import type { LaneResult } from "../../src/cli/e2e-lanes.ts";
 import {
   E2E_SUITE_ORDER,
   E2E_SUITES_VAR,
+  runOutcome,
   suitesCertifiedByHealth,
 } from "../../src/cli/e2e-suites.ts";
 import type { E2eSuiteName } from "../../src/cli/e2e-suites.ts";
@@ -55,8 +57,12 @@ const result = (over: Partial<LaneResult> & { name: string }): LaneResult => ({
   code: 0,
   ms: 1000,
   skipped: false,
+  tally: null,
   ...over,
 });
+
+const everyLane = (over: Partial<LaneResult> = {}) =>
+  E2E_LANES.map((lane) => result({ name: lane.name, ...over }));
 
 test("the lanes are an exact partition of the runner's suites, so nothing is dropped or doubled", () => {
   // A union/count check passes a swap that drops one suite while duplicating another, so every
@@ -153,8 +159,10 @@ test("the split is balanced against measured cost, not check counts", () => {
   const total = laneSeconds(E2E_SUITE_ORDER);
   for (const lane of E2E_LANES) {
     const share = laneSeconds(lane.suites) / total;
+    // The rejected naive seam (cut at the Explorer cluster) puts a lane at 65%, so the ceiling sits
+    // below that: a split that drifts back toward it stops being worth the second browser.
     assert.ok(
-      share <= 0.65,
+      share <= 0.6,
       `lane ${lane.name} is ${(share * 100).toFixed(1)}% of measured serial cost, so the lanes buy little`,
     );
   }
@@ -191,6 +199,34 @@ test("a harness error is reported as its own category, not as a failed check", (
 test("no lanes at all fails instead of reporting a vacuous pass", () => {
   assert.equal(laneOutcome([]).ok, false);
   assert.match(laneOutcome([]).line, /FAIL/);
+});
+
+test("a lane that never reported fails the run, so half the suite cannot pass as all of it", () => {
+  // The driver spawning only some of E2E_LANES is the one place half the checks can vanish into a
+  // green line: every lane it DID run is green, and nothing else notices the missing one.
+  for (const lane of E2E_LANES) {
+    const partial = laneOutcome([result({ name: lane.name })]);
+    assert.equal(partial.ok, false, `a run of lane ${lane.name} alone reported a pass`);
+    assert.match(partial.line, /never reported/, "the line must say a lane is missing, not just fail");
+    for (const absent of E2E_LANES.filter((l) => l.name !== lane.name)) {
+      assert.match(partial.line, new RegExp(`lane .*${absent.name}`), `the line does not name absent lane ${absent.name}`);
+    }
+  }
+  assert.equal(laneOutcome(everyLane()).ok, true, "every lane reporting green must still pass");
+});
+
+test("the combined line states the check total the acceptance criterion names", () => {
+  // Coupled to the runner's own outcome line rather than a hand-written format: a reworded tally
+  // would otherwise leave the driver silently reporting no counts at all.
+  assert.deepEqual(laneCheckTally(runOutcome([{ ok: true }, { ok: true }]).line), { passed: 2, total: 2 });
+  assert.deepEqual(laneCheckTally(runOutcome([{ ok: true }, { ok: false }]).line), { passed: 1, total: 2 });
+  assert.equal(laneCheckTally("shot -> out/e2e/explorer.png (1584px tall)"), null, "only the outcome line carries a tally");
+  assert.equal(laneCheckTally("PASS  R1 the chart draws"), null);
+
+  const counted = laneOutcome(everyLane({ tally: { passed: 100, total: 100 } }));
+  assert.match(counted.line, /200\/200 checks/, "the lanes' tallies must be summed onto the combined line");
+  assert.match(laneOutcome(everyLane()).line, /ALL LANES PASS/, "a run with no tally read must still report");
+  assert.doesNotMatch(laneOutcome(everyLane()).line, /checks/, "no tally read means no invented count");
 });
 
 test("a lane's output is split into whole lines, across chunk boundaries and at the end", () => {

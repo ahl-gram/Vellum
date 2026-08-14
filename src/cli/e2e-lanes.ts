@@ -53,6 +53,7 @@ export interface LaneResult {
   readonly code: number;
   readonly ms: number;
   readonly skipped: boolean;
+  readonly tally: LaneTally | null;
 }
 
 export function laneChildEnv(lane: E2eLane, base: E2eSuiteEnv): Record<string, string> {
@@ -94,6 +95,27 @@ export function laneLineIsSkip(line: string): boolean {
   return line.startsWith("SKIP:");
 }
 
+export interface LaneTally {
+  readonly passed: number;
+  readonly total: number;
+}
+
+// Reads the tally off the runner's own outcome line, so the combined line can state the number the
+// acceptance criterion names rather than leaving it to be summed by eye across two lanes.
+export function laneCheckTally(line: string): LaneTally | null {
+  const m = line.match(/\((\d+)\/(\d+)\)\s*$/);
+  return m ? { passed: Number(m[1]), total: Number(m[2]) } : null;
+}
+
+const sumTallies = (results: readonly LaneResult[]): LaneTally | null => {
+  const seen = results.map((r) => r.tally).filter((t): t is LaneTally => t !== null);
+  if (seen.length === 0) return null;
+  return {
+    passed: seen.reduce((n, t) => n + t.passed, 0),
+    total: seen.reduce((n, t) => n + t.total, 0),
+  };
+};
+
 const laneDetail = (r: LaneResult): string => {
   const took = `${(r.ms / 1000).toFixed(1)}s`;
   if (r.code === 2) return `${r.name} HARNESS ERROR (exit 2) ${took}`;
@@ -103,7 +125,19 @@ const laneDetail = (r: LaneResult): string => {
 
 export function laneOutcome(results: readonly LaneResult[]): E2eOutcome {
   if (results.length === 0) return { ok: false, line: "FAIL: no lanes ran, so this run proves nothing." };
-  const detail = results.map(laneDetail).join(", ");
+  // A driver that spawned only some of the lanes would otherwise report every lane it DID run as
+  // green, which is half the suite passing under a line that reads like all of it.
+  const reported = new Set(results.map((r) => r.name));
+  const absent = E2E_LANES.filter((lane) => !reported.has(lane.name)).map((l) => l.name);
+  if (absent.length > 0) {
+    return {
+      ok: false,
+      line: `FAIL: lane ${absent.join(" and ")} never reported, so ${results.length} of ${E2E_LANES.length} lanes ran and this run covers less than the full suite.`,
+    };
+  }
+  const tally = sumTallies(results);
+  const checks = tally ? `${tally.passed}/${tally.total} checks; ` : "";
+  const detail = `${checks}${results.map(laneDetail).join(", ")}`;
   const failed = results.filter((r) => r.code !== 0);
   if (failed.length > 0) {
     const which = failed.map((r) => r.name).join(" and ");
