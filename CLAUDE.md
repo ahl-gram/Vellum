@@ -235,13 +235,11 @@ audit built from scratch.
   the test is the record, delete the prose. A local invariant (byte-identity, an ordering
   contract) earns a test first; only when no test can practically pin it (cross-platform float
   drift, hand-measured browser quirks) does it keep a single-line comment at the line that breaks.
-  **Part of this is enforced, so do not rely on remembering it** (#384, after the prose alone
-  failed twice). `test/repo/comment-doctrine.test.ts` reds on a mid-file comment of THREE lines or
-  more, in `src`/`test`/`test-support`/`scripts` `.ts`/`.mjs`/`.astro`; grandfathered blocks are
-  named by their opening text, so a rewritten or relocated block reds too. **Everything else is
-  still on you and on `vellum-pr-skeptic`**: a one or two line comment restating a test, a
-  paragraph written as blank-separated one-liners, and `.yml`/`.css`/`.md`/`.js`, which no guard
-  reads. One line remains the target the ruling states; two is only where a machine can draw it.
+  **NO test enforces this** (#384 built one and withdrew it; see PR #385 for the design and the
+  measurements if it is ever worth another try). `vellum-pr-skeptic` is the only gate, and it runs
+  after the code is written, so the discipline at authoring time is still yours. The house writes a
+  comment as ONE long line, not a wrapped block: a wrapped multi-line comment mid-file is the
+  reliable tell that the prose is restating something a test already pins.
 
 ## Write visual samples to out/
 
