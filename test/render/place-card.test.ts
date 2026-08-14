@@ -180,7 +180,7 @@ test("a name the grammar cannot have made degrades in-fiction, never to a blank 
   assert.equal(card.derivationLine, UNCERTAIN_LINE);
 });
 
-test("a tongue with no lexicon still cards, so an eleventh culture cannot ship a blank line", () => {
+test("a culture the philologists have never met still cards, and says so in register", () => {
   const card = composePlaceCard(mark({ name: "Laukuwelua" }), [], "atlantean");
   assert.equal(card.tongueLine, "A word of no speech the philologists can name.");
   assert.equal(card.derivationLine, UNCERTAIN_LINE);

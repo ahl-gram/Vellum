@@ -69,6 +69,26 @@ test("the hit divides by --zoom-k once, on the element; the ring pseudos stay pl
   }
 });
 
+// ENGINE_RULES matches a bare selector as a SUBSTRING, so it stays green when a rule is gutted to
+// display:none and when .pc-tongue is renamed to .pc-tongue-note. Both ship the glass invisible.
+test("the philologist's note is dressed, visible, and named the same on both sides (#124)", () => {
+  const css = read(SHEET);
+  const ruleFor = (selector: string): string => {
+    const at = css.indexOf(`${selector} {`);
+    assert.notEqual(at, -1, `${SHEET} has no "${selector} {" rule`);
+    return css.slice(at, css.indexOf("}", at) + 1);
+  };
+  const tongue = ruleFor(".pc-tongue");
+  assert.match(tongue, /border-top:/, ".pc-tongue lost the hairline that sets the note apart");
+  for (const [selector, rule] of [[".pc-tongue", tongue], [".pc-roots", ruleFor(".pc-roots")]] as const) {
+    assert.doesNotMatch(rule, /display:\s*none/, `${selector} is dressed but hidden`);
+  }
+  const overlay = read("src/site/living-chart/place-overlay.ts");
+  for (const cls of ["pc-tongue", "pc-roots"]) {
+    assert.ok(overlay.includes(`className = "${cls}"`), `the engine no longer writes .${cls}`);
+  }
+});
+
 test("the shared sheet is host-agnostic: no host element id, ever (#302)", () => {
   const raw = read(SHEET);
   assert.ok(raw.length > 0, `${SHEET} exists and is non-empty`);

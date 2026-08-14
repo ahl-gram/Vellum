@@ -63,6 +63,26 @@ test("segmentName returns null rather than throwing on a name the grammar cannot
   assert.equal(segmentName("Xyzzy", "oromi"), null);
   assert.equal(segmentName("", "oromi"), null);
   assert.equal(segmentName("Laukuwelua", "no-such-tongue"), null);
+  // The lexicon lookup is a separate early return from the parse, and it is the one an
+  // eleventh culture would hit first; a throw there escapes every card-level fixture.
+  assert.equal(glossName("Laukuwelua", "no-such-tongue"), null);
+});
+
+test("the repair is a LAST resort: two readings that tie are decided for the letters actually there", () => {
+  // ordai "Deingan" reads as dein + -gan, or as deing + -gan once the g the suffix ate is put
+  // back. Both are one syllable and two roots, so only the no-repair preference separates them,
+  // and it decides which coda the card prints: -n "of that people" or -ng "the sound of it".
+  const seg = segmentName("Deingan", "ordai");
+  assert.ok(seg, "Deingan is grammatical ordai");
+  assert.equal(seg.repair, "");
+  assert.deepEqual(seg.syllables.map((s) => s.coda), ["n"]);
+});
+
+test("a vowel-initial suffix never leaves a bare consonant standing as a syllable", () => {
+  // The repair letter is truncated back off for display, and when the suffix is vowel-initial
+  // that can strand a vowel-less fragment. Both tongues that take a vowel-initial suffix:
+  assert.deepEqual(segmentName("Trudvitsa", "zoryan")?.chunks.slice(), ["trudv", "itsa"]);
+  assert.deepEqual(segmentName("Zaakhir", "veshari")?.chunks.slice(), ["zaakh", "ir"]);
 });
 
 test("a town suffix is read whole, not spelled out as the consonants it happens to contain", () => {
@@ -73,6 +93,44 @@ test("a town suffix is read whole, not spelled out as the consonants it happens 
   assert.ok(seg, "Talamar is grammatical thalassic");
   assert.equal(seg.suffix, "mar");
   assert.equal(seg.syllables.length, 1);
+});
+
+// One real name per tongue, pinned after measuring: the canonical reading is a RANKING (suffix
+// first, then roots, then fewest syllables, then no repair, then leftmost-longest), and each key
+// is invisible in a test that only asserts "it parsed". A shift in any of them moves a row here.
+const CANONICAL: ReadonlyArray<readonly [string, string, string]> = [
+  ["Talanaihaven", "thalassic", "tala|nai|haven"],
+  ["Keghjend", "norden", "keg|hjend"],
+  ["Faraqash", "veshari", "fara|qash"],
+  ["Aeleiwenbrook", "sylvan", "aelei|wen|brook"],
+  ["Maiyohai", "tsuren", "mai|yo|hai"],
+  ["Thyargdrekeep", "draket", "thyarg|dre|keep"],
+  ["Laukuwelua", "oromi", "lau|ku|we|lua"],
+  ["Vunsvyov", "zoryan", "vun|svy|ov"],
+  ["Tluachican", "tezcal", "tlua|chi|can"],
+  ["Lekebulak", "ordai", "le|ke|bulak"],
+];
+
+test("the canonical reading of a name in each of the ten tongues holds", () => {
+  for (const [name, cultureId, chunks] of CANONICAL) {
+    const seg = segmentName(name, cultureId);
+    assert.ok(seg, `${cultureId} lost the reading of ${name}`);
+    assert.equal(seg.chunks.join("|"), chunks, `${cultureId} ${name}`);
+  }
+});
+
+test("no chunk of a name is left without a vowel to sing it", () => {
+  for (const world of CORPUS) {
+    for (const name of world.names) {
+      const seg = segmentName(name, world.cultureId);
+      assert.ok(seg, `${world.cultureId}:${name} did not parse`);
+      // The town suffix keeps its own spelling (zoryan's -sk is a whole word); the base does not.
+      const base = seg.suffix ? seg.chunks.slice(0, -1) : seg.chunks;
+      for (const chunk of base) {
+        assert.match(chunk, /[aeiouy]/, `${world.cultureId} "${name}" reads as ${seg.chunks.join("·")}`);
+      }
+    }
+  }
 });
 
 test("glossName reads a name in the philologist's register: tongue, syllables, roots", () => {
