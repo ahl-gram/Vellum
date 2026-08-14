@@ -83,8 +83,8 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     derivation.className = "pc-roots";
     derivation.textContent = card.derivationLine;
     inner.append(tongue, derivation);
-    el.style.left = `${place.nx * 100}%`;
-    el.style.top = `${place.ny * 100}%`;
+    el.style.setProperty("--pc-nx", String(place.nx));
+    el.style.setProperty("--pc-ny", String(place.ny));
     const side = cardSide(place.nx, place.ny);
     el.classList.toggle("flip-h", side.h === "left");
     el.classList.toggle("flip-v", side.v === "above");

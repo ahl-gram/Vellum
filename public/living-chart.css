@@ -26,14 +26,19 @@
 /* #164: --zoom-k is published on THIS card element, never the mount (that would re-rasterize the baked labels every frame and jiggle); origin 0 0 keeps the anchor corner a constant screen distance from the mark for every flip variant. */
 #place-card {
   position: absolute; z-index: 5; max-width: 16rem; pointer-events: none;
+  left: calc(var(--pc-nx, 0) * 100%); top: calc(var(--pc-ny, 0) * 100%);
   transform-origin: 0 0;
   transform: scale(calc(1 / var(--zoom-k, 1))) translate(10px, 10px);
 }
 /* id+attr specificity beats the id-only rule above, so [hidden] really hides. */
 #place-card[hidden] { display: none; }
-#place-card.flip-h { transform: scale(calc(1 / var(--zoom-k, 1))) translate(calc(-100% - 10px), 10px); }
+/* #124: a flipped card is anchored on the side it flips TOWARD, so shrink-to-fit measures the room it will actually occupy. Anchored on the mark's side, a town at nx 0.72 got a column as wide as the 28% gap it was flipping away from, and the derivation fell into a 97px ribbon 478px tall inside a 266px chart. */
+#place-card.flip-h { left: auto; right: calc(100% - var(--pc-nx, 0) * 100%);
+  transform-origin: 100% 0;
+  transform: scale(calc(1 / var(--zoom-k, 1))) translate(-10px, 10px); }
 #place-card.flip-v { transform: scale(calc(1 / var(--zoom-k, 1))) translate(10px, calc(-100% - 10px)); }
-#place-card.flip-h.flip-v { transform: scale(calc(1 / var(--zoom-k, 1))) translate(calc(-100% - 10px), calc(-100% - 10px)); }
+#place-card.flip-h.flip-v { transform-origin: 100% 0;
+  transform: scale(calc(1 / var(--zoom-k, 1))) translate(-10px, calc(-100% - 10px)); }
 .pc-inner {
   background: var(--control-cream); color: var(--ink-dark);
   border: 1px solid var(--ink-dark); border-radius: 4px;

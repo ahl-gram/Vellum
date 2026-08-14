@@ -109,6 +109,13 @@ const CANONICAL: ReadonlyArray<readonly [string, string, string]> = [
   ["Vunsvyov", "zoryan", "vun|svy|ov"],
   ["Tluachican", "tezcal", "tlua|chi|can"],
   ["Lekebulak", "ordai", "le|ke|bulak"],
+  // The four above were blind to the leftmost-longest key: every one of them reads the same way
+  // when it is inverted, while 39 corpus names change. These four are the ones that move, and
+  // they are the tongues that admit a vowel-initial syllable, where the key has something to do.
+  ["Soshen", "ordai", "sosh|en"],
+  ["Khilol", "ordai", "khil|ol"],
+  ["Elaela", "sylvan", "elae|la"],
+  ["Chania", "tezcal", "chan|ia"],
 ];
 
 test("the canonical reading of a name in each of the ten tongues holds", () => {
