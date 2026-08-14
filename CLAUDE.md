@@ -235,6 +235,10 @@ audit built from scratch.
   the test is the record, delete the prose. A local invariant (byte-identity, an ordering
   contract) earns a test first; only when no test can practically pin it (cross-platform float
   drift, hand-measured browser quirks) does it keep a single-line comment at the line that breaks.
+  **Half of this is enforced, so do not rely on remembering it** (#384, after the prose alone
+  failed twice): `test/repo/comment-doctrine.test.ts` reds on a mid-file comment longer than one
+  line, and `vellum-pr-skeptic` flags an added comment whose behavior a test already pins. The
+  file head is exempt, `.yml` is out of scope, and the roster of grandfathered files only shrinks.
 
 ## Write visual samples to out/
 
