@@ -1,15 +1,16 @@
+// #384: #378 ratified "comments are the exception" as prose in CLAUDE.md and prose lost twice, so the SHAPE half is mechanical here. A mid-file comment runs to at most TWO lines, because restating a tested behavior takes room while an untestable gotcha usually fits in one or two. ONE line was measured first and rejected: it needs 285 blocks grandfathered against this repo, which is the codebase rather than a debt list, and a guard that reds on ordinary compliant code gets worked around.
+// Comments are located by TypeScript's OWN parser, never by hand-rolled lexing. Two hand-written attempts were each silently blinded by input the real parser handles for free (a backtick inside a string or a regex literal, a <style> mention in prose), and a guard that goes quiet is worse than no guard.
+// What this CANNOT see, all of it vellum-pr-skeptic's half: whether a one or two line comment restates a test, a paragraph written as blank-separated one-liners (a blank splits a run here, because joining across blanks flags two genuinely separate compliant one-liners just as readily), .astro (a template language the parser cannot read, and where both blinding holes lived), and .yml/.css/.md/.js or anything outside CODE_ROOTS.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
-
-// #384: #378 ratified "comments are the exception" as prose in CLAUDE.md and prose lost twice, so the SHAPE half is mechanical here. A mid-file comment runs to at most TWO lines, because restating a tested behavior takes room while an untestable gotcha usually fits in one or two. ONE line was measured first and rejected: it needs 285 blocks grandfathered against this repo, which is the codebase rather than a debt list, and a guard that reds on ordinary compliant code gets worked around.
-// What this CANNOT see, all of it vellum-pr-skeptic's half: whether a one or two line comment restates a test, a paragraph written as blank-separated one-liners (a blank splits a run here, because joining across blanks flags two genuinely separate compliant one-liners just as readily), and .yml, .css, .md, .js or anything outside CODE_ROOTS, including astro.config.ts at the repo root.
+import ts from "typescript";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const CODE_ROOTS = ["src", "test", "test-support", "scripts"];
 const SKIP_DIRS = new Set(["node_modules", "dist", "out", ".git", ".claude"]);
-const SOURCE = /\.(ts|mjs|astro)$/;
+const SOURCE = /\.(ts|mjs)$/;
 
 // Each grandfathered block is named by its OPENING TEXT, never by a line number (which drifts) and never by a per-file ceiling (which would let a brand new block of the same size ride the old one's allowance forever, the #384 skeptic's finding 6). A block whose wording changes reds, which is the right moment to ask whether it still earns the room.
 const MAX_MIDFILE_RUN = 2;
@@ -20,11 +21,6 @@ const LEGACY_BLOCKS: Readonly<Record<string, readonly string[]>> = {
     "The shared inner atlas CSS, scoped under `.atlas-sheet` so any host can inject it without ",
     "The self-contained download's plates, linked at load (#368, ratified 2026-08-13). A plain ",
     "`plateSrc` decides how a plate is embedded: a filename (CLI, with anchor:true) or a data U",
-  ],
-  "src/layouts/BaseLayout.astro": [
-    "The one shared shell (#203, ratified in the Sub 1 decision doc comment on #202): head meta",
-    "#329: prefetch the sibling shells so a first click commits instantly even while this page'",
-    "#288: the room is the page's h1, so the heading outline a screen reader walks names the ro",
   ],
   "src/site/explorer/draw-ceremony.ts": [
     "#170: the redraft's shorter ceremony: the same ink-draw on the incoming inset's coastline ",
@@ -79,73 +75,39 @@ function walk(dir: string, out: string[] = []): string[] {
 const sourceFiles = (): string[] =>
   CODE_ROOTS.flatMap((root) => walk(join(REPO, root))).filter((f) => SOURCE.test(f));
 
-interface ScanState {
-  readonly inBlock: boolean;
-  readonly inTemplate: boolean;
-  readonly inStyle: boolean;
-}
-
-// Advances the lexer across ONE line, skipping the bodies of comments and of every kind of string. A backtick inside a comment or a quoted string must not toggle template state: the #384 guard-prover proved one odd backtick silently blinded this parser for the rest of a file, which is the worst failure a guard can have.
-function scanLine(line: string, prior: ScanState, markup: boolean): ScanState {
-  let { inBlock, inTemplate, inStyle } = prior;
-  // Only .astro carries a real <style> element. In .ts the same text is a string, a regex or prose, and a lone mention used to blind the rest of the file (#384 skeptic finding 2); CSS in .ts lives in template literals, which the backtick tracking already covers.
-  if (markup && !inTemplate && !inBlock && /<style[\s>]/.test(line)) inStyle = true;
-  if (inStyle) {
-    if (line.includes("</style>")) inStyle = false;
-    return { inBlock, inTemplate, inStyle };
-  }
-  let i = 0;
-  while (i < line.length) {
-    const pair = line.slice(i, i + 2);
-    if (inBlock) {
-      if (pair === "*/") { inBlock = false; i += 2; continue; }
-      i += 1;
-      continue;
-    }
-    if (inTemplate) {
-      if (line[i] === "\\") { i += 2; continue; }
-      if (line[i] === "`") { inTemplate = false; i += 1; continue; }
-      i += 1;
-      continue;
-    }
-    if (pair === "//") break;
-    if (pair === "/*") { inBlock = true; i += 2; continue; }
-    if (line[i] === "`") { inTemplate = true; i += 1; continue; }
-    if (line[i] === '"' || line[i] === "'") {
-      const quote = line[i];
-      i += 1;
-      while (i < line.length && line[i] !== quote) i += line[i] === "\\" ? 2 : 1;
-      i += 1;
-      continue;
-    }
-    i += 1;
-  }
-  return { inBlock, inTemplate, inStyle };
-}
-
-// `{/* ... */}` is the house's Astro comment form, so an opener is not always at the start of the line (#384 skeptic finding 9).
-const OPENS_COMMENT = /^(\/\/|\/\*|\{\s*\/\*)/;
-
 interface LineKinds {
   readonly comment: boolean[];
   readonly code: boolean[];
-  readonly unterminated: boolean;
 }
 
-function classifyLines(source: string, markup: boolean): LineKinds {
+// A line counts as a comment line when its first non-space character sits inside a comment TypeScript's parser found, so `code(); // note` is code and a "//" inside a string is neither. The parser rather than a bare scanner: resolving a regex literal from a division sign, or a template's ${} substitutions, needs parse context, and without it the CSS inside GALLERY_PAGE_CSS reads as code comments.
+function commentSpans(source: string): Array<[number, number]> {
+  const file = ts.createSourceFile("probe.ts", source, ts.ScriptTarget.ESNext, true);
+  const spans = new Map<number, [number, number]>();
+  const visit = (node: ts.Node): void => {
+    for (const range of ts.getLeadingCommentRanges(source, node.pos) ?? []) {
+      spans.set(range.pos, [range.pos, range.end]);
+    }
+    for (const child of node.getChildren(file)) visit(child);
+  };
+  visit(file);
+  return [...spans.values()];
+}
+
+function classifyLines(source: string): LineKinds {
+  const spans = commentSpans(source);
   const comment: boolean[] = [];
   const code: boolean[] = [];
-  let state: ScanState = { inBlock: false, inTemplate: false, inStyle: false };
+  let offset = 0;
   for (const line of source.split("\n")) {
     const text = line.trim();
-    const quoted = state.inTemplate || state.inStyle;
-    const isComment = state.inBlock || (!quoted && OPENS_COMMENT.test(text));
+    const at = offset + (text === "" ? 0 : line.indexOf(text.charAt(0)));
+    const isComment = text !== "" && spans.some(([a, b]) => at >= a && at < b);
     comment.push(isComment);
-    // The .astro frontmatter fence is not code, so a head block sitting under it is still a head block (#384 skeptic finding 8).
-    code.push(!isComment && text !== "" && text !== "---");
-    state = scanLine(line, state, markup);
+    code.push(!isComment && text !== "");
+    offset += line.length + 1;
   }
-  return { comment, code, unterminated: state.inTemplate || state.inBlock || state.inStyle };
+  return { comment, code };
 }
 
 const keyOf = (lines: readonly string[]): string =>
@@ -163,8 +125,8 @@ interface Run {
 }
 
 // Only CODE closes a run, never a blank line: the same paragraph written with blank lines between its sentences was the first evasion the #384 guard-prover found. A run with no code above it anywhere is the file head, whose job is orienting a reader rather than annotating a line.
-function midFileRuns(source: string, markup: boolean): { runs: Run[]; unterminated: boolean } {
-  const { comment, code, unterminated } = classifyLines(source, markup);
+function midFileRuns(source: string): { runs: Run[] } {
+  const { comment, code } = classifyLines(source);
   const lines = source.split("\n");
   const runs: Run[] = [];
   let seenCode = false;
@@ -187,22 +149,21 @@ function midFileRuns(source: string, markup: boolean): { runs: Run[]; unterminat
     if (code[i]) seenCode = true;
   });
   close();
-  return { runs, unterminated };
+  return { runs };
 }
 
-const measured = (): Map<string, { runs: Run[]; unterminated: boolean }> => {
-  const out = new Map<string, { runs: Run[]; unterminated: boolean }>();
+const measured = (): Map<string, { runs: Run[] }> => {
+  const out = new Map<string, { runs: Run[] }>();
   for (const file of sourceFiles()) {
-    out.set(relative(REPO, file), midFileRuns(readFileSync(file, "utf8"), file.endsWith(".astro")));
+    out.set(relative(REPO, file), midFileRuns(readFileSync(file, "utf8")));
   }
   return out;
 };
 
 // Every other test here reads the parser's own output over the whole tree, so none of them can see a parser bug. These fixtures are the only place the parser meets input it did not produce.
 test("the parser survives the shapes that would blind it", () => {
-  const runs = (src: string, markup = false) => midFileRuns(src, markup).runs;
-  const longest = (src: string, markup = false) =>
-    runs(src, markup).reduce((n, r) => Math.max(n, r.len), 0);
+  const runs = (src: string) => midFileRuns(src).runs;
+  const longest = (src: string) => runs(src).reduce((n, r) => Math.max(n, r.len), 0);
   assert.equal(longest("const a = 1;\n// one\n// two\n"), 2, "a plain two-line run");
   // KNOWN GAP, accepted deliberately: a blank line splits a run, so a paragraph written as blank-separated one-liners evades this guard. Joining across blanks was measured and flags two genuinely separate compliant one-liners just as readily, which would red compliant code. That case goes to vellum-pr-skeptic.
   assert.equal(longest("const a = 1;\n// one\n\n// two\n\n// three\n"), 0, "a blank line splits a run, the accepted gap");
@@ -212,12 +173,12 @@ test("the parser survives the shapes that would blind it", () => {
   assert.equal(longest("const t = `\n/* css comment */\n/* still css */\n`;\n"), 0, "a template literal is not code comment");
   assert.equal(longest("const a = 1;\n/** one\n * two\n * three\n */\n"), 4, "a doc block is a run");
   assert.equal(longest("// head\n// still head\nconst a = 1;\n"), 0, "the file head is exempt");
-  assert.equal(longest("---\nimport x from 'y';\n---\nconst a = 1;\n// one\n// two\n"), 2, "astro frontmatter still has code in it");
-  assert.equal(longest("---\n// head under the fence\n// second line\n---\n", true), 0, "an astro head block sits under the frontmatter fence");
-  assert.equal(longest("const a = 1;\n{/* one\n  two */}\n"), 2, "the astro {/* */} form is a comment");
   assert.equal(longest('const a = 1;\nconst s = "// not a comment";\n// real\n'), 0, "a comment marker inside a string is not a comment");
-  assert.equal(midFileRuns("const t = `unterminated\n// one\n", false).unterminated, true, "an unterminated span is reported, not silently trusted");
-  assert.equal(midFileRuns("const a = 1;\n// one\n", false).unterminated, false);
+  // The two shapes that silently blinded the hand-rolled attempts, and the reason the real scanner replaced it.
+  assert.equal(longest("const re = /[`~]/;\n// one\n// two\n// three\n"), 3, "a backtick in a REGEX literal must not blind the scan");
+  assert.equal(longest('const s = "<style> in prose";\n// one\n// two\n// three\n'), 3, "a <style> mention in a string must not blind the scan");
+  assert.equal(longest("code(); // trailing\nmore(); // trailing\n"), 0, "a trailing comment is not a comment LINE");
+  assert.equal(longest("const t = `unterminated\n// one\n// two\n// three\n"), 0, "an unterminated template swallows the rest, and the scanner says so rather than guessing");
   assert.notEqual(
     runs("const a = 1;\n// alpha here\n// second\n")[0].key,
     runs("const a = 1;\n// beta here\n// second\n")[0].key,
@@ -274,8 +235,7 @@ test("the guard reads the whole tree it claims to, and this file obeys its own r
     const seen = [...files.keys()].filter((f) => f.startsWith(root + "/")).length;
     assert.ok(seen >= FLOOR[root], `${root} contributed ${seen} files, under its floor of ${FLOOR[root]}`);
   }
-  const broken = [...files].filter(([, m]) => m.unterminated).map(([rel]) => rel);
-  assert.deepEqual(broken, [], `the parser hit EOF inside a comment or template here, so the result is not trustworthy:\n${broken.join("\n")}`);
+  assert.ok(![...files.keys()].some((f) => f.endsWith(".astro")), "astro is out of scope; the scanner cannot read it, so a green here would be a false clean bill");
   const self = "test/repo/comment-doctrine.test.ts";
   assert.ok(files.has(self), "the guard does not scan itself");
   assert.ok(!(self in LEGACY_BLOCKS), "the guard grandfathered itself, which is the one file that cannot");
