@@ -30,6 +30,8 @@ const ENGINE_RULES = [
   ".pc-name",
   ".pc-rank",
   ".pc-founded",
+  ".pc-tongue",
+  ".pc-roots",
   ".pc-tale",
   ".place-overlay.scrub .place-hit",
   '.living-chart g.settlement[data-ink="founding"]',

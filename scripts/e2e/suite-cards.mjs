@@ -130,6 +130,47 @@ export async function run(ctx) {
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5, buttons: 0 });
   check("P15 hover keeps the hit transparent + borderless (no button:hover box) and grows the ring", p15.bg === "rgba(0, 0, 0, 0)" && p15.bw === "0px" && p15.ringOp === "1.00", JSON.stringify(p15));
 
+  // #124 the philologist's glass. Seed 42 speaks oromi (the seed-42 covenant pins that), so the
+  // tongue line is checkable by name and not merely by shape.
+  const p16 = await evaluate(`(()=>{
+    if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+    const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');
+    hit.focus();
+    const c=document.getElementById("place-card");
+    return{
+      tongue:(c.querySelector(".pc-tongue")||{}).textContent,
+      roots:(c.querySelector(".pc-roots")||{}).textContent,
+      order:[...c.querySelectorAll(".pc-inner > *")].map((e)=>e.className).join(","),
+    };
+  })()`);
+  check("P16 the glass reads the capital's name: tongue, syllabified word, glossed roots (#124)",
+    typeof p16.tongue === "string" && p16.tongue.startsWith("A word of the Oromi speech: ") && p16.tongue.includes("·") &&
+    typeof p16.roots === "string" && p16.roots.includes(", ") && !p16.roots.startsWith("Of uncertain") &&
+    p16.order === "pc-name,pc-rank,pc-founded,pc-tongue,pc-roots",
+    JSON.stringify(p16));
+
+  if (pm.ruinIdx >= 0) {
+    const p17 = await evaluate(`(()=>{
+      const hit=document.querySelector('.place-hit[data-idx="'+${pm.ruinIdx}+'"]');
+      hit.focus();
+      const c=document.getElementById("place-card");
+      return{
+        order:[...c.querySelectorAll(".pc-inner > *")].map((e)=>e.className).join(","),
+        tale:(c.querySelector(".pc-tale")||{}).textContent,
+        roots:(c.querySelector(".pc-roots")||{}).textContent,
+      };
+    })()`);
+    check("P17 a ruin keeps its tale and gains the note beneath it, in that order (#124)",
+      p17.order === "pc-name,pc-rank,pc-founded,pc-tale,pc-tongue,pc-roots" &&
+      p17.tale === pm.tale && typeof p17.roots === "string" && p17.roots.length > 0,
+      JSON.stringify(p17));
+    const axDesc16 = await axDescription(`.place-hit[data-idx="${pm.ruinIdx}"]`);
+    check("P17b the derivation is spoken too, not only drawn", !!axDesc16 && axDesc16.includes("A word of the Oromi speech"), JSON.stringify(axDesc16));
+  } else {
+    check("P17 seed 42 has a ruin to read", false, "no ruin in manifest");
+  }
+  await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
+
   await evaluate(`(()=>{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();document.querySelector('.place-hit[data-idx="'+${pm.ruinIdx >= 0 ? pm.ruinIdx : pm.cap}+'"]').focus();})()`);
   await sleep(500);
   await shoot("explorer-place-card.png");

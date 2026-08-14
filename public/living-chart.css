@@ -49,6 +49,12 @@
   letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.1rem; }
 .pc-founded { display: block; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
 .pc-tale { margin: 0.4rem 0 0; font-style: italic; color: var(--ink-tale); }
+/* #124 the philologist's note: an appendix under a hairline, set smaller than the card's own voice so the derivation reads as apparatus rather than as more of the town's story. */
+.pc-tongue { display: block; margin: 0.45rem 0 0; padding-top: 0.4rem;
+  border-top: 1px solid rgb(from var(--ink-dark) r g b / 0.22);
+  font-size: 0.8rem; color: var(--ink-brown); }
+.pc-roots { margin: 0.15rem 0 0; font-size: 0.78rem; line-height: 1.3;
+  font-style: italic; color: var(--ink-tale); }
 
 .place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
 /* #155 ink-in: animations ride the CHILDREN, never the group (its box spans halo+glyph+label, so scaling the group drags the name with the mark); the origin is per-element data written inline by chronicle.ts because a PROFILE glyph stands ON its point while a PLAN glyph centres on it (e2e S26 measures the town point staying fixed). */

@@ -100,6 +100,14 @@ test("every place carries its raw grid cell as gx/gy", () => {
   });
 });
 
+// #124: the card glosses client-side, and the manifest is all it gets, so the world's tongue has to ride along.
+test("the manifest names the world's tongue, and names the world's OWN tongue", () => {
+  assert.equal(buildPlaceManifest(world, WIDTH).cultureId, world.culture.id);
+  const other = generateWorld(defaultRecipe(1));
+  assert.notEqual(other.culture.id, world.culture.id, "seeds 1 and 42 speak different tongues");
+  assert.equal(buildPlaceManifest(other, WIDTH).cultureId, other.culture.id);
+});
+
 test("gx/gy are grid coords, distinct from the chart-space nx/ny", () => {
   const m = buildPlaceManifest(world, WIDTH);
   const p = m.places[0]!;
