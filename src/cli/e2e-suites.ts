@@ -58,6 +58,20 @@ export interface E2eSuiteEnv {
   readonly [key: string]: string | undefined;
 }
 
+// These run against the page the harness already loaded rather than navigating themselves, and
+// waitSettled resolves as soon as the page is settled. So if the boot auto-draw has not been
+// consumed, one of these can settle on the boot world instead of its own draw: VELLUM_E2E_SUITES=turn
+// fails T1b with the seed-of-the-day seed where it asserts 42. render is the suite that consumes the
+// boot draw (R0/R0b assert the pristine bare visit), so requesting an inheritor pulls render in.
+const INHERITS_HARNESS_PAGE: readonly E2eSuiteName[] = [
+  "motion",
+  "turn",
+  "verso",
+  "glass-ceremony",
+  "cards",
+  "fallback",
+];
+
 const FULL_WORDS = new Set(["full", "all"]);
 const canonicalise = (wanted: ReadonlySet<string>): E2eSuiteName[] =>
   E2E_SUITE_ORDER.filter((name) => wanted.has(name));
@@ -84,7 +98,9 @@ export function resolveSuiteSelection(env: E2eSuiteEnv): E2eSelection {
         `Name at least one suite, or unset it to run the full suite.`,
     );
   }
-  return { names: canonicalise(new Set(requested)), tier: "custom" };
+  const wanted = new Set(requested);
+  if (INHERITS_HARNESS_PAGE.some((name) => wanted.has(name))) wanted.add("render");
+  return { names: canonicalise(wanted), tier: "custom" };
 }
 
 export interface E2eCheckResult {
