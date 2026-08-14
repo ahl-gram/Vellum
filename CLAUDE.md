@@ -42,13 +42,13 @@ build, test-first) stand on their own and are the part worth having.
 ## Session handoff: keep the roadmap Project current
 
 The live roadmap is the private GitHub Project "Vellum Roadmap" (project number 1 under
-`ahl-gram`), grouped by a single-select "Roadmap" field. As of 2026-07-24 the options run
-`Now: sweep`, `1. Print Room`, `2. Glass`, `3. Scriptorium`, `4. Reading Room`, `4.5 Errata`,
-`5. Prospects`, plus `Delight / anytime`, `Horizon`, `Golden tail`, `Parked`. **The board is
-the authority, this list is only a convenience** and went stale once already (it was missing
-four options for weeks): read the current set with `gh project field-list 1 --owner ahl-gram`
-before trusting it. At every handoff, keep it current with `gh`: newly filed issues get added
-and phased; shipped issues get closed. The global `session-handoff` skill updates SESSION-NOTES (here at
+`ahl-gram`), grouped by a single-select "Roadmap" field. **Read the phase options from the board,
+never from here**: `gh project field-list 1 --owner ahl-gram`. This file used to carry a copy of
+the list as a convenience and it went stale TWICE (missing four options for weeks, then two more),
+which is the same failure that retired the workspace's `PROJECTS.md` in 2026-08. A copy that costs
+a PR to update and sits beside the command that replaces it earns nothing. At every handoff, keep
+the board current with `gh`: newly filed issues get added and phased; shipped issues get closed.
+The global `session-handoff` skill updates SESSION-NOTES (here at
 `session-notes/SESSION-NOTES.md`, not the repo root), RESUME-HERE, and auto-memory
 but does NOT know about the Project, so this is the Vellum-specific extra step. The durable
 sequencing RULES (golden flight-exclusion, land-regens-alone, the cost axis, cross-epic
