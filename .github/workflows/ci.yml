@@ -29,6 +29,9 @@ jobs:
   build-and-e2e:
     name: build & e2e
     runs-on: ubuntu-latest
+    # The lanes are waited on together, so a lane that hangs rather than failing would hold the job
+    # to GitHub's 6-hour default. Measured worst case across the #381 runs is 7m05s.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

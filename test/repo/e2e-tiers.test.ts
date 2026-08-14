@@ -101,9 +101,23 @@ test("ci.yml runs the lane driver, and nothing in it can narrow what the lanes c
   assert.doesNotMatch(CI, /run: npm run test:e2e\s*$/m, "ci.yml still runs the serial single-lane e2e too");
 });
 
+test("the e2e job is bounded, so a hung lane cannot hold a runner for hours", () => {
+  // Both lanes are waited on together; a hang is the one failure the outcome rule cannot catch,
+  // because it never produces an outcome at all.
+  const bound = CI.match(/timeout-minutes:\s*(\d+)/);
+  assert.ok(bound, "the build & e2e job has no timeout-minutes, so a hung lane runs to GitHub's 6-hour default");
+  const minutes = Number(bound[1]);
+  assert.ok(minutes >= 15, `timeout-minutes is ${minutes}, under the measured 7m05s worst case plus headroom`);
+  assert.ok(minutes <= 60, `timeout-minutes is ${minutes}, long enough that a hang still costs an hour`);
+});
+
 test("every CI trigger gets the same full coverage, so nothing is conditional on the event", () => {
   // The #266 tier keyed off github.event_name, which is exactly what let a PR prove less than main.
-  const step = CI.slice(CI.indexOf("test:e2e:lanes"));
+  const at = CI.indexOf("test:e2e:lanes");
+  // slice(-1) is the file's LAST CHARACTER, not the whole file, so a missing anchor would leave both
+  // assertions below passing against nothing at all.
+  assert.notEqual(at, -1, "the e2e step is gone, so this guard would be reading an empty slice");
+  const step = CI.slice(at);
   assert.doesNotMatch(step, /github\.event_name/, "the e2e step is conditional on the event again");
   assert.doesNotMatch(step, /full-e2e/, "the full-e2e label is wired back in, so PRs differ from main again");
 });
