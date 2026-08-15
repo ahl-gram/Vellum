@@ -45,6 +45,11 @@ export { PROSPECT_DRESSES, type ProspectDress } from "./context.ts";
 
 export type DressOptions = {
   readonly idSuffix?: string;
+  /** Painted under the parchment grain (the corner arms); the finished plate's spike-ratified layering. */
+  readonly engraved?: ReadonlyArray<SvgNode>;
+  /** Painted last, above the grain: caption lettering and the plate frame. */
+  readonly furniture?: ReadonlyArray<SvgNode>;
+  readonly ariaLabel?: string;
 };
 
 /** Exhaustive on purpose: a new foreground kind without a dress breaks the build here, not silently on a blank plate. */
@@ -175,7 +180,9 @@ export function renderProspect(
     ...(g.water === null
       ? [grassFlicks(c, rGrass, (x) => groundAt(g.ground, x), VIEW_X0 + 14, VIEW_X1 - 14, 12)]
       : []),
+    ...(opts.engraved ?? []),
     ...(parchment ? parchmentOverlay(suffix) : []),
+    ...(opts.furniture ?? []),
   ];
 
   return el(
@@ -186,7 +193,7 @@ export function renderProspect(
       width: PLATE_W,
       height: PLATE_H,
       role: "img",
-      "aria-label": `An engraved prospect, plate ${r1(g.index)} of seed ${r1(g.seed)}`,
+      "aria-label": opts.ariaLabel ?? `An engraved prospect, plate ${r1(g.index)} of seed ${r1(g.seed)}`,
     },
     children,
   );

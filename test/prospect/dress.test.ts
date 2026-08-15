@@ -19,7 +19,7 @@ import {
   type ProspectDress,
 } from "../../src/prospect/dress/plate.ts";
 import { dressContext } from "../../src/prospect/dress/context.ts";
-import { attrsOf, landPathD } from "../../test-support/dress-svg.ts";
+import { attrsOf, fnv1a, landPathD, tokenColors } from "../../test-support/dress-svg.ts";
 
 /** The dress rounds coordinates to 0.1 at SVG emit (geometry.ts); tests locate elements by reproducing that rounding. */
 const f = (v: number): string => String(Math.round(v * 10) / 10);
@@ -56,16 +56,6 @@ test("the ratified dresses are antique and ink, and only those render", () => {
   assert.throws(() => prospectSvg(g, STYLES.nautical), RangeError);
 });
 
-/** The tokens the dress may draw from; deliberately NOT the whole style object: realmTints are excluded so a hard-coded grey that happens to equal a tint still fails. */
-function tokenColors(dress: ProspectDress): Set<string> {
-  const s = STYLES[dress];
-  return new Set(
-    [s.paper, s.ink, s.inkSoft, s.ocean, s.waterline, s.coastStroke, s.land].map((c) =>
-      c.toLowerCase(),
-    ),
-  );
-}
-
 test("every ink in every plate is sourced from render/style.ts tokens", () => {
   for (const [name, g] of Object.entries(FIXTURES)) {
     for (const dress of PROSPECT_DRESSES) {
@@ -73,7 +63,7 @@ test("every ink in every plate is sourced from render/style.ts tokens", () => {
       const found = svg.match(/#[0-9a-fA-F]{3,8}\b/g) ?? [];
       const inks = found.filter((c) => /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3,5})?$/.test(c));
       assert.ok(inks.length >= 3, `${name}/${dress}: plate actually carries ink`);
-      const allowed = tokenColors(dress);
+      const allowed = tokenColors(STYLES[dress]);
       for (const c of inks) {
         assert.ok(allowed.has(c.toLowerCase()), `${name}/${dress}: ${c} is not a token`);
       }
@@ -276,15 +266,6 @@ test("every foreground kind, every tree species, renders at least one node", () 
   assert.deepEqual([...seen].sort(), Object.keys(KINDS).sort(), "every kind sampled");
 });
 
-function fnv1a(s: string): number {
-  let h = 0x811c9dc5 >>> 0;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 0x01000193) >>> 0;
-  }
-  return h >>> 0;
-}
-
 // Pinned 2026-08-10 from a measured run; the synthetic fixtures are libm-free end to end, so the rounded bytes cannot drift across platforms. A deliberate dress change re-pins these with the cause named in the commit.
 const PINNED: ReadonlyArray<{ fixture: string; dress: ProspectDress; sum: number }> = [
   { fixture: "harborCapital", dress: "antique", sum: 3614064183 },
@@ -315,7 +296,7 @@ test("the prospect layer stays libm-free and clock-free", async () => {
   const { fileURLToPath } = await import("node:url");
   const dir = fileURLToPath(new URL("../../src/prospect/", import.meta.url));
   const files = (await readdir(dir, { recursive: true })).filter((f) => f.endsWith(".ts"));
-  assert.ok(files.length >= 10, `scans the whole prospect layer (${files.length} files)`);
+  assert.ok(files.length >= 20, `scans the whole prospect layer incl. the plate furniture (${files.length} files)`);
   const banned =
     /Math\.(sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|hypot|cbrt|log|log2|log10|log1p|exp|expm1|pow|random)\b|Date\.now|new Date/;
   for (const file of files) {
