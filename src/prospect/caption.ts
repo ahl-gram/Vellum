@@ -40,7 +40,9 @@ function standingEpithet(
   const sea = seaName === null ? "the sea" : lowerThe(seaName);
   switch (input.kind) {
     case "capital":
-      if (input.realmName === null) return `a chief city upon ${sea}`;
+      if (input.realmName === null) {
+        return input.harbor ? `a chief city upon ${sea}` : `a chief city ${habitat}`;
+      }
       return input.harbor
         ? `chief port of ${lowerThe(input.realmName)}`
         : `chief city of ${lowerThe(input.realmName)}`;

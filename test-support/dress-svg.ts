@@ -1,4 +1,4 @@
-// String-level SVG probes for the prospect dress tests (#240): assertions are on the exact emitted bytes, not a parsed DOM.
+// String-level SVG probes shared by the prospect dress and finished-plate tests (#240, #241): assertions are on the exact emitted bytes, not a parsed DOM.
 
 import type { MapStyle } from "../src/render/style.ts";
 

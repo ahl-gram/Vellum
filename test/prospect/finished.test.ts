@@ -50,6 +50,8 @@ test("the epithet register keys on tier, realm, and drawn features", () => {
   const cases: Array<[Parameters<typeof makeInput>[0], string]> = [
     [{ kind: "capital", harbor: true, ...realm }, "chief port of the Chiefdom of Rekekoa"],
     [{ kind: "capital", ...realm }, "chief city of the Chiefdom of Rekekoa"],
+    [{ kind: "capital", realmName: null, harbor: true }, "a chief city upon the sea"],
+    [{ kind: "capital", realmName: null }, "a chief city of the open fields"],
     [{ kind: "seat", ...realm }, "seat of the Chiefdom of Rekekoa"],
     [{ kind: "town", onRiver: true }, "a bridge town upon the river"],
     [{ kind: "village", onRiver: true }, "a village at the weir"],
@@ -300,9 +302,7 @@ test("the same finished tuple renders byte-identically", () => {
   }
 });
 
-// Pinned 2026-08-14 from a measured run; armless synthetic fixtures only (the arms spend
-// render/layers/heraldry, whose charges carry libm ancestry), so these bytes cannot drift
-// across platforms. A deliberate plate change re-pins these with the cause named in the commit.
+// Pinned 2026-08-14 from a measured run; armless synthetic fixtures only (the arms spend render/layers/heraldry, whose charges carry libm ancestry), so these bytes cannot drift across platforms. A deliberate plate change re-pins these with the cause named in the commit.
 const PINNED: ReadonlyArray<{ name: string; year: number; style: "antique" | "ink"; sum: number }> = [
   { name: "harborCapital", year: 1300, style: "antique", sum: 3845457821 },
   { name: "harborCapital", year: 1300, style: "ink", sum: 2154475468 },

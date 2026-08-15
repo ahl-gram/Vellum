@@ -45,9 +45,7 @@ export { PROSPECT_DRESSES, type ProspectDress } from "./context.ts";
 
 export type DressOptions = {
   readonly idSuffix?: string;
-  /** Painted under the parchment grain (the corner arms); the finished plate's spike-ratified layering. */
   readonly engraved?: ReadonlyArray<SvgNode>;
-  /** Painted last, above the grain: caption lettering and the plate frame. */
   readonly furniture?: ReadonlyArray<SvgNode>;
   readonly ariaLabel?: string;
 };
