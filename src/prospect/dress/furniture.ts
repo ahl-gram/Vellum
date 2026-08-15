@@ -32,7 +32,7 @@ function dividerNodes(c: DressContext, y: number): SvgNode[] {
 }
 
 function titleNode(c: DressContext, text: string, y: number, ruined: boolean): SvgNode {
-  const fs = Math.min(14.5, (PLATE_W - 120) / (text.length * 0.62));
+  const fs = Math.min(14.5, (PLATE_W - 120 - 1.3 * (text.length - 1)) / (text.length * 0.66));
   return el("text", {
     x: CX, y, "text-anchor": "middle",
     "font-family": c.style.fontFamilyTitle, "font-size": r1(fs),

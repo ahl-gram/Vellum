@@ -228,6 +228,19 @@ test("the key strip renders when entries exist and is omitted when empty", () =>
   assert.ok(!bare.includes("A. The "), "a hamlet's key is omitted, not empty");
 });
 
+// Measured 2026-08-14 by vellum-plate-reader: at the cap the title inks ~0.65*fs units per character plus the constant 1.3 letter-spacing, so the fit must divide the spacing out before scaling the glyphs.
+test("a very long name shrinks its title and stays inside the inner frame", () => {
+  const name = "Weluarapa-upon-Woaku-by-the-Strand-of-Hakoawelua";
+  const svg = finishedPlateSvg(makeInput({ name }), STYLES.antique, 1300);
+  const m = svg.match(/font-size="([\d.]+)" letter-spacing="1.3"/);
+  assert.ok(m, "title text node found");
+  const fs = parseFloat(m[1]!);
+  assert.ok(fs < 14.5, `the title shrinks (${fs})`);
+  const len = `THE PROSPECT OF ${name}`.length;
+  const inkWidth = len * fs * 0.65 + (len - 1) * 1.3;
+  assert.ok(inkWidth <= 492, `estimated title ink ${inkWidth} exceeds the inner frame span`);
+});
+
 test("the two ratified dresses render; the others refuse", () => {
   const input = makeInput({});
   assert.ok(finishedPlateSvg(input, STYLES.antique, 1300).startsWith("<svg"));
