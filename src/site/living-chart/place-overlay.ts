@@ -13,6 +13,7 @@ interface PlaceOverlayState {
   card: HTMLDivElement;
   places: ReadonlyArray<PlaceMark>;
   events: ReadonlyArray<HistoricalEvent>;
+  cultureId: string;
   presentYear: number;
   currentIdx: number;
   pinned: boolean;
@@ -54,7 +55,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     if (!placeOverlay || isSuppressed()) return; // the hover card is suppressed while scrubbing
     const place = placeOverlay.places[idx];
     if (!place) return;
-    const card = composePlaceCard(place, placeOverlay.events);
+    const card = composePlaceCard(place, placeOverlay.events, placeOverlay.cultureId);
     const el = placeOverlay.card;
     const inner = el.querySelector(".pc-inner") as HTMLElement;
     // Rebuilt from textContent only (no innerHTML): the fields are plain strings.
@@ -75,8 +76,15 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       tale.textContent = card.tale;
       inner.append(tale);
     }
-    el.style.left = `${place.nx * 100}%`;
-    el.style.top = `${place.ny * 100}%`;
+    const tongue = document.createElement("p");
+    tongue.className = "pc-tongue";
+    tongue.textContent = card.tongueLine;
+    const derivation = document.createElement("p");
+    derivation.className = "pc-roots";
+    derivation.textContent = card.derivationLine;
+    inner.append(tongue, derivation);
+    el.style.setProperty("--pc-nx", String(place.nx));
+    el.style.setProperty("--pc-ny", String(place.ny));
     const side = cardSide(place.nx, place.ny);
     el.classList.toggle("flip-h", side.h === "left");
     el.classList.toggle("flip-v", side.v === "above");
@@ -128,7 +136,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const inner = document.createElement("div");
     inner.className = "pc-inner";
     card.appendChild(inner);
-    placeOverlay = { card, places: manifest.places, events: manifest.events, presentYear: manifest.presentYear, currentIdx: -1, pinned: false, pinnedIdx: -1 };
+    placeOverlay = { card, places: manifest.places, events: manifest.events, cultureId: manifest.cultureId, presentYear: manifest.presentYear, currentIdx: -1, pinned: false, pinnedIdx: -1 };
     manifest.places.forEach((place, idx) => {
       const hit = document.createElement("button");
       hit.type = "button";

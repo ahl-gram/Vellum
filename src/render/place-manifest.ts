@@ -19,6 +19,7 @@ export type PlaceMark = {
 export type PlaceManifest = {
   readonly places: ReadonlyArray<PlaceMark>;
   readonly events: ReadonlyArray<HistoricalEvent>;
+  readonly cultureId: string;
   readonly presentYear: number;
   readonly widthPx: number;
   readonly heightPx: number;
@@ -44,6 +45,7 @@ export function buildPlaceManifest(world: World, widthPx: number): PlaceManifest
   return {
     places,
     events: world.history.events,
+    cultureId: world.culture.id,
     presentYear: world.title.year,
     widthPx,
     heightPx: proj.heightPx,

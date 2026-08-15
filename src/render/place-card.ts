@@ -1,5 +1,6 @@
 import type { PlaceMark } from "./place-manifest.ts";
 import type { HistoricalEvent } from "../society/history.ts";
+import { glossName, tongueName, cultureById } from "../society/philology.ts";
 
 /** Deliberately NOT createLoreWriter: its prose depends on call order and its own rng, and would silently disagree with the bound-atlas gazetteer for the same town. */
 
@@ -8,8 +9,26 @@ export type PlaceCard = {
   readonly rank: string;
   readonly founded: number;
   readonly foundedLine: string;
+  readonly tongueLine: string;
+  readonly derivationLine: string;
   readonly tale?: string;
 };
+
+const HEDGES = [
+  "Or so the philologists venture.",
+  "If the old grammars have the right of it.",
+  "So the lexicographers of the age would have it.",
+  "Though no scholar will swear to it.",
+  "The reading is disputed.",
+];
+
+const UNCERTAIN = "Of uncertain derivation, even to the philologists.";
+
+function hedgeFor(name: string): string {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 100003;
+  return HEDGES[h % HEDGES.length] as string;
+}
 
 const RANK_LABEL: Record<"capital" | "town" | "village" | "hamlet", string> = {
   capital: "Capital",
@@ -42,9 +61,28 @@ function ruinTale(mark: PlaceMark, events: ReadonlyArray<HistoricalEvent>): stri
   return events.find((e) => e.settlement === mark.idx && e.kind === "ruin")?.text;
 }
 
+export type Derivation = {
+  readonly tongueLine: string;
+  readonly derivationLine: string;
+};
+
+export function composeDerivation(name: string, cultureId: string): Derivation {
+  if (!cultureById(cultureId)) {
+    return { tongueLine: "A word of no speech the philologists can name.", derivationLine: UNCERTAIN };
+  }
+  const gloss = glossName(name, cultureId);
+  const speech = `A word of the ${gloss ? gloss.tongue : tongueName(cultureId)} speech`;
+  if (!gloss) return { tongueLine: `${speech}: ${name}`, derivationLine: UNCERTAIN };
+  return {
+    tongueLine: `${speech}: ${gloss.syllabified}`,
+    derivationLine: `${gloss.roots.map((r) => `${r.root}, ${r.gloss}`).join("; ")}. ${hedgeFor(name)}`,
+  };
+}
+
 export function composePlaceCard(
   mark: PlaceMark,
   events: ReadonlyArray<HistoricalEvent>,
+  cultureId: string,
 ): PlaceCard {
   const tale = ruinTale(mark, events);
   return {
@@ -52,6 +90,7 @@ export function composePlaceCard(
     rank: placeRank(mark),
     founded: mark.founded,
     foundedLine: `Founded in the year ${mark.founded}.`,
+    ...composeDerivation(mark.name, cultureId),
     ...(tale ? { tale } : {}),
   };
 }

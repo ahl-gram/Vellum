@@ -23,17 +23,22 @@
 .place-hit:hover::after, .place-hit:focus-visible::after {
   opacity: 1; transform: scale(1);
 }
-/* #164: --zoom-k is published on THIS card element, never the mount (that would re-rasterize the baked labels every frame and jiggle); origin 0 0 keeps the anchor corner a constant screen distance from the mark for every flip variant. */
+/* #164: --zoom-k is published on THIS card element, never the mount (that would re-rasterize the baked labels every frame and jiggle); the origin sits on whichever corner the card is ANCHORED by, which #124 moved to the right edge for the flipped variants, so the gap at the mark holds a constant screen distance at every depth. */
 #place-card {
   position: absolute; z-index: 5; max-width: 16rem; pointer-events: none;
+  left: calc(var(--pc-nx, 0) * 100%); top: calc(var(--pc-ny, 0) * 100%);
   transform-origin: 0 0;
   transform: scale(calc(1 / var(--zoom-k, 1))) translate(10px, 10px);
 }
 /* id+attr specificity beats the id-only rule above, so [hidden] really hides. */
 #place-card[hidden] { display: none; }
-#place-card.flip-h { transform: scale(calc(1 / var(--zoom-k, 1))) translate(calc(-100% - 10px), 10px); }
+/* #124: a flipped card is anchored on the side it flips TOWARD, so shrink-to-fit measures the room it will actually occupy. Anchored on the mark's side, a town at nx 0.72 got a column as wide as the 28% gap it was flipping away from, and the derivation fell into a 97px ribbon 478px tall inside a 266px chart. */
+#place-card.flip-h { left: auto; right: calc(100% - var(--pc-nx, 0) * 100%);
+  transform-origin: 100% 0;
+  transform: scale(calc(1 / var(--zoom-k, 1))) translate(-10px, 10px); }
 #place-card.flip-v { transform: scale(calc(1 / var(--zoom-k, 1))) translate(10px, calc(-100% - 10px)); }
-#place-card.flip-h.flip-v { transform: scale(calc(1 / var(--zoom-k, 1))) translate(calc(-100% - 10px), calc(-100% - 10px)); }
+#place-card.flip-h.flip-v { transform-origin: 100% 0;
+  transform: scale(calc(1 / var(--zoom-k, 1))) translate(-10px, calc(-100% - 10px)); }
 .pc-inner {
   background: var(--control-cream); color: var(--ink-dark);
   border: 1px solid var(--ink-dark); border-radius: 4px;
@@ -49,6 +54,11 @@
   letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.1rem; }
 .pc-founded { display: block; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
 .pc-tale { margin: 0.4rem 0 0; font-style: italic; color: var(--ink-tale); }
+.pc-tongue { display: block; margin: 0.45rem 0 0; padding-top: 0.4rem;
+  border-top: 1px solid rgb(from var(--ink-dark) r g b / 0.22);
+  font-size: 0.8rem; color: var(--ink-brown); }
+.pc-roots { margin: 0.15rem 0 0; font-size: 0.78rem; line-height: 1.3;
+  font-style: italic; color: var(--ink-tale); }
 
 .place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
 /* #155 ink-in: animations ride the CHILDREN, never the group (its box spans halo+glyph+label, so scaling the group drags the name with the mark); the origin is per-element data written inline by chronicle.ts because a PROFILE glyph stands ON its point while a PLAN glyph centres on it (e2e S26 measures the town point staying fixed). */

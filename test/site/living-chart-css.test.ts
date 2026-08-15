@@ -17,6 +17,16 @@ const read = (p: string) => {
 
 const SHEET = "public/living-chart.css";
 
+// A rule is only as good as the LAST block that declares it, and a commented-out assignment
+// reads as code to a substring match; both defeated an earlier cut of the two guards below.
+const soleRule = (css: string, selector: string): string => {
+  const blocks = [...css.matchAll(new RegExp(`${selector.replace(/\./g, "\\.")}\\s*\\{[^}]*\\}`, "g"))];
+  assert.equal(blocks.length, 1, `${SHEET} declares ${selector} ${blocks.length} times, so the last one wins`);
+  return blocks[0]![0];
+};
+const codeOf = (path: string): string =>
+  read(path).replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
 // The nodes place-overlay.ts, voyage-session.ts and chronicle.ts create or tag, matched as literal substrings of the sheet so a rename on either side fails here first.
 const ENGINE_RULES = [
   ".place-overlay {",
@@ -30,6 +40,8 @@ const ENGINE_RULES = [
   ".pc-name",
   ".pc-rank",
   ".pc-founded",
+  ".pc-tongue",
+  ".pc-roots",
   ".pc-tale",
   ".place-overlay.scrub .place-hit",
   '.living-chart g.settlement[data-ink="founding"]',
@@ -65,6 +77,42 @@ test("the hit divides by --zoom-k once, on the element; the ring pseudos stay pl
   for (const rule of pseudos) {
     assert.doesNotMatch(rule, /--zoom-k/, "a ring pseudo must not divide again; its element already does");
   }
+});
+
+// ENGINE_RULES matches a bare selector as a SUBSTRING, so it cannot see a rule gutted to display:none, nor a rename to .pc-tongue-note.
+test("the philologist's note is dressed, visible, and named the same on both sides (#124)", () => {
+  const css = read(SHEET);
+  const tongue = soleRule(css, ".pc-tongue");
+  assert.match(tongue, /border-top:/, ".pc-tongue lost the hairline that sets the note apart");
+  for (const [selector, rule] of [[".pc-tongue", tongue], [".pc-roots", soleRule(css, ".pc-roots")]] as const) {
+    assert.doesNotMatch(rule, /display:\s*none/, `${selector} is dressed but hidden`);
+  }
+  const overlay = codeOf("src/site/living-chart/place-overlay.ts");
+  for (const cls of ["pc-tongue", "pc-roots"]) {
+    assert.ok(overlay.includes(`className = "${cls}"`), `the engine no longer writes .${cls}`);
+  }
+});
+
+// A card anchored on the mark's side is shrink-to-fit against the gap it flips AWAY from, so a town near the right edge gets a column, not a card (public/living-chart.css:35 carries the measurement).
+test("a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)", () => {
+  const css = read(SHEET);
+  const flip = soleRule(css, "#place-card.flip-h");
+  assert.match(flip, /left:\s*auto/, "flip-h still anchors left, so its width is the wrong gap");
+  assert.match(flip, /right:\s*calc\(100% - var\(--pc-nx/, "flip-h does not anchor to the mark from the right");
+  assert.match(flip, /transform-origin:\s*100% 0/, "a right-anchored card must counter-scale about its right edge");
+  const base = soleRule(css, "#place-card");
+  assert.match(base, /left:\s*calc\(var\(--pc-nx/, "the unflipped card no longer reads --pc-nx");
+  assert.match(base, /top:\s*calc\(var\(--pc-ny/, "the unflipped card no longer reads --pc-ny");
+  const overlay = codeOf("src/site/living-chart/place-overlay.ts");
+  for (const prop of ["--pc-nx", "--pc-ny"]) {
+    assert.ok(overlay.includes(`setProperty("${prop}"`), `the engine no longer publishes ${prop}`);
+  }
+  // The overlay box and the hits keep their inline left; only the CARD's must go, and an inline
+  // left would silently beat the sheet's flip rule and restore the squeeze.
+  const at = overlay.indexOf("function showPlaceCard");
+  assert.notEqual(at, -1, "showPlaceCard is gone, so this guard reads an empty slice");
+  const body = overlay.slice(at, overlay.indexOf("\n  function ", at + 1));
+  assert.doesNotMatch(body, /\.style\.left\s*=/, "the card is positioned with an inline left again");
 });
 
 test("the shared sheet is host-agnostic: no host element id, ever (#302)", () => {
