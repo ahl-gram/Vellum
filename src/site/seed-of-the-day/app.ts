@@ -3,7 +3,7 @@
 // deterministic click-to-find puzzle over that already-generated world.
 import { defaultRecipe, generateWorld } from "../../world/generate.ts";
 import { renderMap } from "../../render/map-renderer.ts";
-import { seedForDate } from "../../world/seed-of-the-day.ts";
+import { seedForDate, capitalBlurb } from "../../world/seed-of-the-day.ts";
 import { createRng } from "../../core/rng.ts";
 import { createLoreWriter } from "../../society/lore.ts";
 import {
@@ -92,8 +92,7 @@ setTimeout(() => {
     if (capital) {
       const lore = createLoreWriter(world, createRng(seed).fork("seed-of-the-day"));
       dryIn($("blurb"), "400ms");
-      const former = capital.formerName ? ` Once called ${capital.formerName}.` : "";
-      $("blurb").textContent = `${capital.name}, the capital.${former} ${lore.settlementNote(capital)}`;
+      $("blurb").textContent = capitalBlurb(capital, lore.settlementNote(capital));
     }
     $("status").textContent = "";
     setupHunt(world);
