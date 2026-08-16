@@ -75,11 +75,33 @@ test("#309: an islet attached to a realm is that realm's second shore, roaded wi
   const cells = roadCellSet(roads, W);
   assert.ok(cells.has(101 + 26 * W), "the islet village has no road");
   assert.ok(cells.has(102 + 27 * W), "the islet's anchor settlement has no road");
+  const { ids } = labelLandmasses(elev, SEA);
+  const isletLm = ids[102 + 27 * W];
+  const isletRoads = roads.filter((r) => r.points.some((p) => ids[p.x + p.y * W] === isletLm));
+  assert.ok(
+    isletRoads.length >= 1 && isletRoads.every((r) => r.rank === "lane"),
+    "the islet web anchors at its top-score town, so its village rides a LANE; a trunk here means the anchor was picked upside down",
+  );
   for (const road of roads) {
     for (const p of road.points) {
       assert.ok((elev.data[p.x + p.y * W] as number) > SEA, `road bridges the sea at ${p.x},${p.y}`);
     }
   }
+});
+
+test("#309: a seatless survey realm anchors at its top settlement", () => {
+  const W = 80;
+  const H = 40;
+  const elev = land(W, H, [{ x0: 10, y0: 10, x1: 69, y1: 29 }]);
+  const settlements = [settle(20, 20, "town", 2), settle(50, 20, "village")];
+  const labels = new Int16Array(W * H);
+  const roads = buildRoads(elev, SEA, noRivers(W, H), settlements, { labels, seats: [-1] });
+  assert.equal(roads.length, 1, "one member joins the anchor");
+  assert.equal(
+    roads[0]!.rank,
+    "lane",
+    "the town anchors and the village rides a lane; a trunk means the village anchored instead",
+  );
 });
 
 test("#309: village reach scales with realm size", () => {
