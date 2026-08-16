@@ -38,6 +38,7 @@ export type LegendBox = {
 
 export type Reveal = {
   readonly name: string;
+  readonly formerName?: string;
   readonly founded: number;
   readonly line: string;
 };
@@ -92,5 +93,10 @@ export function revealLore(world: World, quarry: Quarry): Reveal {
     return { name: s.name, founded: s.founded, line };
   }
   const lore = createLoreWriter(world, createRng(world.recipe.seed).fork("daily-hunt-lore"));
-  return { name: s.name, founded: s.founded, line: lore.settlementNote(s) };
+  return {
+    name: s.name,
+    ...(s.formerName === undefined ? {} : { formerName: s.formerName }),
+    founded: s.founded,
+    line: lore.settlementNote(s),
+  };
 }

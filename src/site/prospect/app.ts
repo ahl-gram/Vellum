@@ -53,7 +53,8 @@ runJob({ kind: "prospect", seed, overrides, index: addr.index, dress, year: addr
     plate.alt = `The prospect of ${res.name}, chart ${seed}`;
     plate.hidden = false;
     const viewed = res.year !== res.presentYear ? ` · viewed in the year ${res.year}` : "";
-    caption.textContent = `The Prospect of ${res.name} · ${res.title} · seed ${seed}${viewed}`;
+    const former = res.formerName ? ` · once called ${res.formerName}` : "";
+    caption.textContent = `The Prospect of ${res.name}${former} · ${res.title} · seed ${seed}${viewed}`;
     status.textContent = "";
     last = {
       seed,

@@ -27,6 +27,7 @@ export async function run(ctx) {
   const v1 = await evaluate(`(()=>{const sh=document.getElementById("sheet");const g=document.querySelector("#verso .verso-ghost");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d"),ghost:!!g,ghostBlob:!!(g&&/^blob:/.test(g.src)),docket:(document.querySelector("#verso .verso-docket")||{}).textContent||"",survey:((document.querySelector("#verso .verso-survey")||{}).textContent||"").length,stamp:!!document.querySelector("#verso .verso-stamp"),vis:getComputedStyle(document.getElementById("verso")).visibility,label:document.getElementById("verso-turn").textContent};})()`);
   check("V1 Turn the sheet flips to the verso (.versoed + .flip3d, #verso visible, ghost/docket/survey/stamp present)", v1.versoed && v1.flip3d && v1.ghost && v1.ghostBlob && v1.stamp && v1.survey > 0 && v1.vis === "visible" && v1.label === "Turn back", JSON.stringify({ ...v1, docket: v1.docket.slice(0, 40) }));
   check("V1b the docket reads the drawn chart number and title", v1.docket.startsWith("CHART № 42 · ") && v1.docket.includes(vTitle) && v1.docket.includes("Year"), JSON.stringify({ docket: v1.docket }));
+  check("V1c the docket names the capital's former name (#49)", v1.docket.includes("Laukuwelua (once Haitani)"), JSON.stringify({ docket: v1.docket }));
   await sleep(1300); // let the 1.2s flip land before the screenshot
   await shoot("explorer-verso.png");
 

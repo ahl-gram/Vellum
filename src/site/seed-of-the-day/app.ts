@@ -92,7 +92,8 @@ setTimeout(() => {
     if (capital) {
       const lore = createLoreWriter(world, createRng(seed).fork("seed-of-the-day"));
       dryIn($("blurb"), "400ms");
-      $("blurb").textContent = `${capital.name}, the capital. ${lore.settlementNote(capital)}`;
+      const former = capital.formerName ? ` Once called ${capital.formerName}.` : "";
+      $("blurb").textContent = `${capital.name}, the capital.${former} ${lore.settlementNote(capital)}`;
     }
     $("status").textContent = "";
     setupHunt(world);

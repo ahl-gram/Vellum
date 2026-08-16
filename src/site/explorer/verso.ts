@@ -11,12 +11,13 @@ export interface DocketFields {
   title: string;
   presentYear: number;
   capital?: string;
+  capitalFormerName?: string;
 }
 
 /** The docket line stamped along the fold. Pure so it is unit-testable; the rest of the verso is DOM. */
-export function buildDocket({ seed, title, presentYear, capital }: DocketFields): string {
+export function buildDocket({ seed, title, presentYear, capital, capitalFormerName }: DocketFields): string {
   const parts = [`CHART № ${seed}`, title, `Year ${presentYear}`];
-  if (capital) parts.push(capital);
+  if (capital) parts.push(capitalFormerName ? `${capital} (once ${capitalFormerName})` : capital);
   return parts.join(" · ");
 }
 
@@ -81,6 +82,7 @@ export function rebuildVerso(
       title: res.title,
       presentYear: res.manifest.presentYear,
       capital: capital ? capital.name : "",
+      ...(capital?.formerName === undefined ? {} : { capitalFormerName: capital.formerName }),
     }),
     surveyor: res.subtitle,
   });
