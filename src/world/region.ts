@@ -101,7 +101,6 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
 
   const seats = world.realms.seats.map((wi) => regionIdxOf.get(wi) ?? -1);
 
-  // Roads want the parent's realm assignment on this grid; the render contract below still returns labels of -1 (regions draw no tints).
   const roadLabels = new Int16Array(gridW * gridH).fill(-1);
   for (let gy = 0; gy < gridH; gy++) {
     for (let gx = 0; gx < gridW; gx++) {

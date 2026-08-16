@@ -172,7 +172,7 @@ export async function run(ctx) {
     const missing=sea.filter((l)=>!l.water).length;
     const badOrder=sea.filter((l)=>l.water&&!(l.water.from>0&&l.water.from<l.water.to&&l.water.to<1)).length;
     const landSpans=legs.filter((l)=>l.mode!=="sea"&&(l.water||l.inlandHandoff)).length;
-    // Stubs are judged in grid CELLS (the engine contract, INLAND_STUB_CELLS=4), not leg fractions: #309 added short sea hops where a legal 1.4-cell stub is a tenth of the leg.
+    // Stubs are judged in grid CELLS, not leg fractions: #309 added short sea hops where a legal 1.4-cell stub is a tenth of the leg. 1500px, the 4.5% margin and the 320-wide grid are this suite's chart constants; the 4.5 bound is INLAND_STUB_CELLS=4 plus RDP slack.
     const scale=(1500-2*Math.round(1500*0.045))/(320-1);
     const plen=(pts)=>{let d=0;for(let i=1;i<pts.length;i++)d+=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y);return d;};
     const fatStub=sea.filter((l)=>!l.inlandHandoff).filter((l)=>{
