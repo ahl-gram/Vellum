@@ -96,4 +96,9 @@ test("the gazetteer's former-name class is the one the stylesheet targets", () =
     ATLAS_SHEET_CSS.includes("text-transform: none"),
     "a renamed CAPITAL would inherit the uppercase rule on td.name.capital",
   );
+  // Measured: td.name is nowrap, so without this the sentence sets a min-content floor and 20 of 60 seeds scroll a 390 page sideways. Asserted as the declaration, so flipping it to nowrap fails too.
+  assert.ok(
+    /td\.name \.former \{[^}]*white-space: normal/.test(ATLAS_SHEET_CSS),
+    "the former line must be allowed to wrap inside the nowrap name cell",
+  );
 });
