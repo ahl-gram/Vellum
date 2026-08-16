@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import { prospectPlate } from "../../src/prospect/finished.ts";
 import { STYLES, type StyleName } from "../../src/render/style.ts";
+import type { World } from "../../src/world/types.ts";
 import {
   plateDressFor,
   resolveProspectIndex,
@@ -30,6 +31,10 @@ test("resolveProspectIndex passes a valid index through and falls back to the ca
   assert.equal(resolveProspectIndex(world, null), capital, "no index means the capital");
   assert.equal(resolveProspectIndex(world, world.settlements.length), capital, "past-the-end falls back");
   assert.equal(resolveProspectIndex(world, -1), capital, "negative falls back");
+  // Every generated world seats its capital at index 0 (measured, seeds 1-30), so only a reordered
+  // synthetic fixture can tell the kind lookup from a bare `return 0` (the guard-prover's M4 hole).
+  const shuffled = { ...world, settlements: [world.settlements[1]!, world.settlements[0]!] } as World;
+  assert.equal(resolveProspectIndex(shuffled, null), 1, "the capital is found by kind, not by sitting at index 0");
 });
 
 test("prospectResultFor renders through prospectPlate byte-for-byte and defaults the year to the present", () => {
