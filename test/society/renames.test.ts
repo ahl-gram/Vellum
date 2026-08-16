@@ -2,6 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { nameSetOf, worldNameSet } from "../../src/society/hamlets.ts";
+import { assignFormerNames } from "../../src/society/renames.ts";
+import { CULTURES, isNearExisting, type Culture } from "../../src/society/names.ts";
+import { createRng } from "../../src/core/rng.ts";
 import { editDistanceWithin1 } from "../../src/core/text.ts";
 import type { World } from "../../src/world/types.ts";
 
@@ -79,6 +82,59 @@ test("capitals and realm seats are eligible", () => {
     );
   });
   assert.ok(ranked.length > 0, "no capital or realm seat carried a former name in any seed");
+});
+
+// 4 is MEASURED off seed 42 (26 settlements, 4 renamed), deliberately a literal and not an import of MAX: importing it would move both sides of the assertion together and see nothing.
+test("only a few are renamed, against the measured bound", () => {
+  for (const seed of SEEDS) {
+    const w = worldFor(seed);
+    assert.ok(
+      renamed(w).length <= 4,
+      `seed ${seed} renamed ${renamed(w).length}; "a few" is the ruling`,
+    );
+  }
+});
+
+test("seed 42's former names are exactly these", () => {
+  assert.deepEqual(
+    renamed(worldFor(42)).map((m) => [m.name, m.formerName]),
+    [
+      ["Laukuwelua", "Haitani"],
+      ["Paukilua", "Lainai"],
+      ["Poalo", "Kautana"],
+      ["Pale", "Pangnui"],
+    ],
+  );
+});
+
+// The world sweep cannot exercise collision: 12 seeds happen never to collide, so the guard holds by fixture luck. These drive assignFormerNames directly with a taken set built to collide.
+const FIXTURE = Array.from({ length: 12 }, (_, i) => ({
+  name: `Fixture${i}`,
+  ruined: false,
+}));
+
+const drawWith = (taken: ReadonlySet<string>): string[] => [
+  ...assignFormerNames(FIXTURE, CULTURES[0] as Culture, createRng(7).fork("renames"), taken).values(),
+];
+
+test("a former name yields to a word the world already uses", () => {
+  const free = drawWith(new Set());
+  assert.ok(free.length > 0, "fixture drew nothing");
+  const forbidden = new Set(free.map((n) => n.toLowerCase()));
+  for (const name of drawWith(forbidden)) {
+    assert.ok(!forbidden.has(name.toLowerCase()), `${name} was already taken`);
+  }
+});
+
+test("a former name yields to a NEAR duplicate, not only an exact one", () => {
+  const free = drawWith(new Set());
+  const near = free.map((n) => `${n.slice(0, -1)}x`.toLowerCase());
+  for (const name of drawWith(new Set(near))) {
+    assert.ok(
+      !isNearExisting(name.toLowerCase(), near),
+      `${name} reads as a typo of a name already on the chart`,
+    );
+  }
 });
 
 test("a former name reserves the word against hamlet naming", () => {

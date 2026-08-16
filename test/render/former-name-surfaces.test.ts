@@ -4,6 +4,7 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 import { composePlaceCard } from "../../src/render/place-card.ts";
 import { composeAtlas } from "../../src/atlas/compose.ts";
+import { ATLAS_SHEET_CSS } from "../../src/atlas/document.ts";
 
 // #49: the two PR 1 surfaces. Ruling 4 is the plain voice, ruling 5 keeps ruins out.
 
@@ -65,5 +66,34 @@ test("the gazetteer prints the former name, escaped, once per renamed place", ()
     html.split('<span class="former">').length - 1,
     withFormer.length,
     "one former-name span per renamed settlement",
+  );
+});
+
+// No generated name carries an XML-special char, so the sweep above cannot see escapeXml go missing. Drive one through.
+test("the gazetteer escapes a former name that carries markup", () => {
+  const hostile = "Ash & <Ford>";
+  const idx = world.settlements.findIndex((s) => s.formerName !== undefined);
+  const injected = {
+    ...world,
+    settlements: world.settlements.map((s, i) =>
+      i === idx ? { ...s, formerName: hostile } : s,
+    ),
+  };
+  const html = composeAtlas(injected).gazetteerHtml;
+  assert.ok(html.includes("Ash &amp; &lt;Ford&gt;"), "former name was not escaped");
+  assert.ok(!html.includes("<Ford>"), "raw markup reached the gazetteer");
+});
+
+// The class compose.ts emits and the selector document.ts styles must agree, or a rename on one side ships an unstyled line that no structural test can see.
+test("the gazetteer's former-name class is the one the stylesheet targets", () => {
+  const doc = composeAtlas(world).gazetteerHtml;
+  assert.ok(doc.includes('<span class="former">'));
+  assert.ok(
+    ATLAS_SHEET_CSS.includes("td.name .former"),
+    "the stylesheet does not target the class the gazetteer emits",
+  );
+  assert.ok(
+    ATLAS_SHEET_CSS.includes("text-transform: none"),
+    "a renamed CAPITAL would inherit the uppercase rule on td.name.capital",
   );
 });
