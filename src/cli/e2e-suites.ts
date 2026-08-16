@@ -13,6 +13,7 @@ export const E2E_SUITE_ORDER = [
   "fallback",
   "hunt",
   "print-room",
+  "prospect",
   "home",
   "survey",
   "broadside",
@@ -34,6 +35,7 @@ export const SMOKE_SUITES: readonly E2eSuiteName[] = [
   "fallback",
   "hunt",
   "print-room",
+  "prospect",
   "home",
   "reading-room",
 ];

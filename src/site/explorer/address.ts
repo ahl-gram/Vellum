@@ -35,6 +35,14 @@ export function forwardTarget(hash: string): string | null {
   return live?.kind === "year" ? "/reading-room/#" + raw : null;
 }
 
+// #242: a place card's way in to the prospect page. The chart's own hash rides through
+// VERBATIM (the #321 rule: never re-serialize someone else's address) with the settlement
+// index appended; the page ignores the keys it does not read (camera, survey, theme).
+export function prospectTarget(hash: string, idx: number): string {
+  const raw = hash.startsWith("#") ? hash.slice(1) : hash;
+  return "/prospect/#" + (raw ? raw + "&" : "") + "i=" + idx;
+}
+
 // What the writer should say right now. Reads the CHECKBOX first, not engine-session existence: the box is truthful at every syncHash call site, while the instrument's session lags the gesture that arms it. While it lags, the caller's `pending` fallback keeps a deep link alive through the first draw's sync; an unknowable state emits nothing rather than a guess.
 export function liveNow(state: {
   ages: boolean;

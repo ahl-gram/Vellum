@@ -9,6 +9,7 @@ import { buildSurvey, type Survey } from "../../render/survey.ts";
 import { generateRegionWorld, regionTitle } from "../../world/region.ts";
 import { composeAtlas } from "../../atlas/compose.ts";
 import { serializableAtlas } from "./serializable-atlas.ts";
+import { prospectResultFor, type PlateDress, type ProspectPlateResult } from "./prospect-job.ts";
 import { worldFor } from "./world-cache.ts";
 import type { AtlasDocumentData } from "../../atlas/document.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
@@ -46,7 +47,18 @@ export interface AtlasJob {
   readonly bannerStyle?: StyleName;
 }
 
-export type RenderJob = DrawJob | RegionJob | AtlasJob;
+export interface ProspectJob {
+  readonly kind: "prospect";
+  readonly seed: number;
+  readonly overrides?: Partial<WorldRecipe>;
+  /** Settlement index into world.settlements; null falls back to the capital (#242). */
+  readonly index: number | null;
+  readonly dress: PlateDress;
+  /** Viewing year; null means the present year. */
+  readonly year: number | null;
+}
+
+export type RenderJob = DrawJob | RegionJob | AtlasJob | ProspectJob;
 
 export interface DrawResult {
   readonly ok: true;
@@ -75,13 +87,16 @@ export interface AtlasResult {
   readonly atlas: AtlasDocumentData;
 }
 
-export type JobResult = DrawResult | RegionResult | AtlasResult;
+export type ProspectResult = ProspectPlateResult & { readonly ok: true };
+
+export type JobResult = DrawResult | RegionResult | AtlasResult | ProspectResult;
 
 /** A job crossing the wire: the client staples on the id the response echoes back. */
 export type WorkerRequest =
   | (DrawJob & { readonly id: number })
   | (RegionJob & { readonly id: number })
-  | (AtlasJob & { readonly id: number });
+  | (AtlasJob & { readonly id: number })
+  | (ProspectJob & { readonly id: number });
 
 // The optional never-set fields keep the plain `d.id == null` and `e.data.ready` guards below narrowing under strict TS.
 export type WorkerResponse =
@@ -110,6 +125,7 @@ function onJobMessage(e: MessageEvent<WorkerResponse>): void {
 export function runInline(msg: DrawJob): DrawResult;
 export function runInline(msg: RegionJob): RegionResult;
 export function runInline(msg: AtlasJob): AtlasResult;
+export function runInline(msg: ProspectJob): ProspectResult;
 export function runInline(msg: RenderJob): JobResult;
 export function runInline(msg: RenderJob): JobResult {
   if (msg.kind === "draw") {
@@ -147,6 +163,11 @@ export function runInline(msg: RenderJob): JobResult {
       cached,
     };
   }
+  if (msg.kind === "prospect") {
+    // #242: the engine glue is shared with ./worker.ts (prospect-job.ts), so the inline fallback stays byte-identical.
+    const { world } = worldFor(msg.seed, msg.overrides);
+    return { ok: true, ...prospectResultFor(world, msg) };
+  }
   const { world } = worldFor(msg.seed, msg.overrides);
   return { ok: true, atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })) };
 }
@@ -154,6 +175,7 @@ export function runInline(msg: RenderJob): JobResult {
 export function runJob(msg: DrawJob): Promise<DrawResult>;
 export function runJob(msg: RegionJob): Promise<RegionResult>;
 export function runJob(msg: AtlasJob): Promise<AtlasResult>;
+export function runJob(msg: ProspectJob): Promise<ProspectResult>;
 export function runJob(msg: RenderJob): Promise<JobResult>;
 export function runJob(msg: RenderJob): Promise<JobResult> {
   if (worker) {

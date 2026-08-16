@@ -26,6 +26,7 @@ const AUTHORED_CSS = [
   "public/living-chart.css",
   "public/motion.css",
   "public/print-room/index.css",
+  "public/prospect/index.css",
   "public/reading-frame.css",
   "public/reading-room/index.css",
   "public/seed-of-the-day/index.css",
@@ -106,6 +107,8 @@ const TIPPING_LINKS = new Set([
   "src/cli/gallery.ts :: figure img:hover",
   // #368, ruled 2026-08-12 and measured after: the lift is scoped to `figure a img`, and all three hosts of ATLAS_SHEET_CSS anchor their plates, so where no link is made no lift applies.
   "src/atlas/document.ts :: .atlas-sheet figure a img:hover",
+  // #242: the place card's "View the prospect" slip navigates to /prospect/, so it tips (#289's promise).
+  "living-chart.css :: .pc-prospect:hover, .pc-prospect:focus-visible",
 ]);
 
 /** A tip whose surface does not navigate, held on the record until Alex rules: kept apart from TIPPING_LINKS so that set stays true when it says a surface goes somewhere. */

@@ -13,6 +13,7 @@ export const BUNDLE_ENTRIES: ReadonlyArray<{ entry: string; twin: string }> = [
   { entry: "src/site/print-room/app.ts", twin: "print-room/app.bundle.js" },
   { entry: "src/site/seed-of-the-day/app.ts", twin: "seed-of-the-day/app.bundle.js" },
   { entry: "src/site/reading-room/app.ts", twin: "reading-room/app.bundle.js" },
+  { entry: "src/site/prospect/app.ts", twin: "prospect/app.bundle.js" },
 ];
 
 const OUTPUT = {

@@ -152,6 +152,36 @@ test("a bar-less host BUILDS the place overlay over the baked chart (#319)", asy
   assert.equal(card.hidden, true, "and starts hidden");
 });
 
+test("the place card carries the prospect way in only on a world sheet whose host provides one (#242)", async () => {
+  const { walk } = await import("../../test-support/element-shim.ts");
+  const { manifest } = await realWorld();
+
+  const linked = await barlessHost({ prospectHref: (idx) => `/prospect/#i=${idx}` });
+  linked.lc.buildPlaceOverlay(manifest);
+  const overlay = linked.mount.children.find((c) => c.classList.contains("place-overlay"))!;
+  const link = walk(overlay).find((n) => n.classList.contains("pc-prospect"));
+  assert.ok(link, "a world-sheet card holds the way in to the prospect page");
+  assert.equal(link.tagName, "A", "and it is a real link, not a button");
+  assert.match(link.textContent, /prospect/i, "named for what it opens");
+
+  // A region inset renumbers its places (#169), so a world-index link there would name the WRONG settlement.
+  linked.lc.buildPlaceOverlay(manifest, { box: { x: 0.25, y: 0.25, w: 0.5, h: 0.5 } });
+  const overlays = linked.mount.children.filter((c) => c.classList.contains("place-overlay"));
+  const inset = overlays[overlays.length - 1]!;
+  assert.ok(
+    !walk(inset).some((n) => n.classList.contains("pc-prospect")),
+    "a region inset's renumbered card carries no prospect link",
+  );
+
+  const bare = await barlessHost();
+  bare.lc.buildPlaceOverlay(manifest);
+  const bareOverlay = bare.mount.children.find((c) => c.classList.contains("place-overlay"))!;
+  assert.ok(
+    !walk(bareOverlay).some((n) => n.classList.contains("pc-prospect")),
+    "a host with no prospect surface (the Reading Room) gets no link",
+  );
+});
+
 test("a bar-less host PAINTS and clears the resting voyage track (#319)", async () => {
   const { manifest, survey } = await realWorld();
   const { lc, mount, calls } = await barlessHost();

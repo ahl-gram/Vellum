@@ -133,7 +133,9 @@ export async function realWorld(): Promise<{ manifest: PlaceManifest; survey: Su
   return world42;
 }
 
-export async function barlessHost(): Promise<{ lc: LivingChart; mount: El; calls: string[] }> {
+export async function barlessHost(
+  opts?: { prospectHref?: (idx: number) => string },
+): Promise<{ lc: LivingChart; mount: El; calls: string[] }> {
   const [{ El }, { createLivingChart }] = await Promise.all([
     import("./element-shim.ts"),
     import("../src/site/living-chart/index.ts"),
@@ -145,6 +147,7 @@ export async function barlessHost(): Promise<{ lc: LivingChart; mount: El; calls
     mapEl: mount as unknown as HTMLElement,
     statusEl: new El("p") as unknown as HTMLElement,
     restingTrackSink: sink,
+    ...(opts && opts.prospectHref ? { prospectHref: opts.prospectHref } : {}),
   });
   return { lc, mount, calls };
 }

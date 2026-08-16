@@ -146,7 +146,7 @@ export async function run(ctx) {
   check("P16 the glass reads the capital's name: tongue, syllabified word, glossed roots (#124)",
     typeof p16.tongue === "string" && p16.tongue.startsWith("A word of the Oromi speech: ") && p16.tongue.includes("·") &&
     typeof p16.roots === "string" && p16.roots.includes(", ") && !p16.roots.startsWith("Of uncertain") &&
-    p16.order === "pc-name,pc-rank,pc-founded,pc-tongue,pc-roots",
+    p16.order === "pc-name,pc-rank,pc-founded,pc-prospect,pc-tongue,pc-roots",
     JSON.stringify(p16));
 
   if (pm.ruinIdx >= 0) {
@@ -161,7 +161,7 @@ export async function run(ctx) {
       };
     })()`);
     check("P17 a ruin keeps its tale and gains the note beneath it, in that order (#124)",
-      p17.order === "pc-name,pc-rank,pc-founded,pc-tale,pc-tongue,pc-roots" &&
+      p17.order === "pc-name,pc-rank,pc-founded,pc-prospect,pc-tale,pc-tongue,pc-roots" &&
       p17.tale === pm.tale && typeof p17.roots === "string" && p17.roots.length > 0,
       JSON.stringify(p17));
     const axDesc16 = await axDescription(`.place-hit[data-idx="${pm.ruinIdx}"]`);
