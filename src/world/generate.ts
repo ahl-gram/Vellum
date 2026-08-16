@@ -127,7 +127,6 @@ export function generateWorld(recipe: WorldRecipe): World {
     citystate ? { maxTowns: 2, maxVillages: 18 } : {},
   );
 
-  const roads = buildRoads(elev, seaLevel, riverCells, settlements);
   const frontierMask = new Uint8Array(gridW * gridH);
   for (const r of rivers) {
     if (!isMajorRiver(r)) continue;
@@ -142,6 +141,7 @@ export function generateWorld(recipe: WorldRecipe): World {
     ...(citystate ? { maxRealms: 1 } : {}),
     barrier: frontierMask,
   });
+  const roads = buildRoads(elev, seaLevel, riverCells, settlements, realms);
 
   const culture = rng.fork("culture").pick(CULTURES);
   const arms = blazonRealms(culture, realms.seats.length, rng.fork("heraldry"));

@@ -222,7 +222,7 @@ const realWorld = (seed: number) => {
 };
 
 test("seed 526413615 sails: it has at least one sea leg and many road legs", () => {
-  // The Isle of Selivelai, straight-line order. Re-measured 2026-07-24 under #275: 24 legs = 6 sea + 18 road here (travel-ordered, the same isle runs 9 sea + 15 road); per-leg numbers taken before #275 are void.
+  // The Isle of Selivelai, straight-line order. Re-measured 2026-08-16 under #309: 24 legs = 8 sea + 16 road here (travel-ordered, the same isle runs 10 sea + 14 road); per-leg numbers taken before #309 are void.
   const { routed } = realWorld(526413615);
   const modes = routed.map((l) => l.mode);
   assert.ok(modes.filter((m) => m === "sea").length >= 1, `expected a sea leg, got ${modes.join(",")}`);
@@ -375,15 +375,21 @@ test("on real worlds, EVERY cross-landmass leg sails, never degrading to a strai
 });
 
 test("a straight fallback leg walks the land, never across open water (#298)", () => {
-  // Seed 430445745: ports sit on THREE landmasses while roads exist only on the capital's, so 17 of this world's 24 straight-line legs degrade to the roadless fallback; before #298 the worst chord ran 33 continuous cells over open water.
-  // NOTE #309 (roads on settled secondary landmasses) will shrink the straight population when it lands; the floor below keeps this from going vacuous.
+  // #309 roads every settled landmass, so no natural fixture still degrades; this U of roadless land forces the fallback the guard walks, with the chord crossing the bay.
   const BOUND = RDP_EPSILON + 0.5;
-  const { s, routed } = realWorld(430445745);
+  const s = survey([
+    "............",
+    ".##......##.",
+    ".##......##.",
+    ".##......##.",
+    ".##......##.",
+    ".##########.",
+    ".##########.",
+    "............",
+  ]);
+  const routed = routeVoyage([leg(0, 1)], [site(0, 2, 1), site(1, 9, 1)], s);
   const straight = routed.filter((l) => l.mode === "straight");
-  assert.ok(
-    straight.length >= 10,
-    `the degraded fixture should have straight legs to assert on, got ${straight.length}`,
-  );
+  assert.equal(straight.length, 1, "a roadless same-landmass leg must degrade to the fallback");
 
   const nearestLand = (x: number, y: number) => {
     let best = Infinity;
@@ -415,6 +421,14 @@ test("a straight fallback leg walks the land, never across open water (#298)", (
         );
       }
     }
+  }
+});
+
+test("#309: the fixture worlds route with zero straight legs", () => {
+  for (const seed of [430445745, 42, 39, 526413615]) {
+    const { routed } = realWorld(seed);
+    const straight = routed.filter((l) => l.mode === "straight").length;
+    assert.equal(straight, 0, `seed ${seed} still degrades ${straight} of ${routed.length} legs`);
   }
 });
 

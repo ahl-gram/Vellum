@@ -8,6 +8,7 @@ import { extractRivers } from "../../src/hydrology/rivers.ts";
 import { computeClimate } from "../../src/climate/climate.ts";
 import { classifyBiomes } from "../../src/climate/biomes.ts";
 import { placeSettlements } from "../../src/society/sites.ts";
+import { partitionRealms } from "../../src/society/realms.ts";
 import { buildRoads } from "../../src/society/roads.ts";
 
 function makeWorld(seed: number) {
@@ -22,12 +23,13 @@ function makeWorld(seed: number) {
   const climate = computeClimate(elev, sea, seed, { riverCells, windDir: 0.9 });
   const biomes = classifyBiomes(elev, sea, climate);
   const settlements = placeSettlements(elev, sea, flow, riverCells, biomes, createRng(seed));
-  return { elev, sea, riverCells, biomes, settlements };
+  const realms = partitionRealms(elev, sea, riverCells, settlements);
+  return { elev, sea, riverCells, biomes, settlements, realms };
 }
 
 test("roads connect every town to the network, over land only", () => {
-  const { elev, sea, riverCells, settlements } = makeWorld(42);
-  const roads = buildRoads(elev, sea, riverCells, settlements);
+  const { elev, sea, riverCells, settlements, realms } = makeWorld(42);
+  const roads = buildRoads(elev, sea, riverCells, settlements, realms);
   const towns = settlements.filter((s) => s.kind !== "village");
   if (towns.length < 2) return;
 
@@ -42,8 +44,8 @@ test("roads connect every town to the network, over land only", () => {
 });
 
 test("road endpoints touch settlements or other roads", () => {
-  const { elev, sea, riverCells, settlements } = makeWorld(42);
-  const roads = buildRoads(elev, sea, riverCells, settlements);
+  const { elev, sea, riverCells, settlements, realms } = makeWorld(42);
+  const roads = buildRoads(elev, sea, riverCells, settlements, realms);
   const anchors = new Set(settlements.map((s) => `${s.x},${s.y}`));
   const roadCells = new Set<string>();
   for (const road of roads) {
@@ -63,10 +65,10 @@ test("road endpoints touch settlements or other roads", () => {
 });
 
 test("later roads reuse existing corridors (trunk roads emerge)", () => {
-  const { elev, sea, riverCells, settlements } = makeWorld(7);
+  const { elev, sea, riverCells, settlements, realms } = makeWorld(7);
   const towns = settlements.filter((s) => s.kind !== "village");
   if (towns.length < 3) return;
-  const roads = buildRoads(elev, sea, riverCells, settlements);
+  const roads = buildRoads(elev, sea, riverCells, settlements, realms);
   // Cells used by 2+ roads: the reuse discount should produce overlap.
   const counts = new Map<string, number>();
   for (const road of roads) {
@@ -80,8 +82,8 @@ test("later roads reuse existing corridors (trunk roads emerge)", () => {
 });
 
 test("roads are deterministic", () => {
-  const { elev, sea, riverCells, settlements } = makeWorld(9);
-  const a = buildRoads(elev, sea, riverCells, settlements);
-  const b = buildRoads(elev, sea, riverCells, settlements);
+  const { elev, sea, riverCells, settlements, realms } = makeWorld(9);
+  const a = buildRoads(elev, sea, riverCells, settlements, realms);
+  const b = buildRoads(elev, sea, riverCells, settlements, realms);
   assert.deepEqual(a, b);
 });
