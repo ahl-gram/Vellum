@@ -14,6 +14,8 @@ import { buildRoads } from "../society/roads.ts";
 import { partitionRealms } from "../society/realms.ts";
 import { blazonRealms } from "../society/heraldry.ts";
 import { simulateHistory } from "../society/history.ts";
+import { assignFormerNames } from "../society/renames.ts";
+import { nameSetOf } from "../society/hamlets.ts";
 import type { FeatureNames, World, WorldRecipe } from "./types.ts";
 
 const MAP_TYPE_WEIGHTS: ReadonlyArray<readonly [MapType, number]> = [
@@ -208,11 +210,21 @@ export function generateWorld(recipe: WorldRecipe): World {
     },
     rng.fork("history"),
   );
-  const settled = named.map((s, i) => ({
+  const dated = named.map((s, i) => ({
     ...s,
     founded: history.founded[i] as number,
     ruined: history.ruined[i] as boolean,
   }));
+  const formerNames = assignFormerNames(
+    dated,
+    culture,
+    rng.fork("renames"),
+    nameSetOf(dated, names),
+  );
+  const settled = dated.map((s, i) => {
+    const formerName = formerNames.get(i);
+    return formerName === undefined ? s : { ...s, formerName };
+  });
 
   const oceanDist = bfsDistance(gridW, gridH, (x, y) =>
     (elev.data[x + y * gridW] as number) > seaLevel,

@@ -25,6 +25,7 @@ export type NamedSettlement = Settlement & {
   readonly name: string;
   readonly founded: number;
   readonly ruined: boolean;
+  readonly formerName?: string;
 };
 
 export type NamedLake = {

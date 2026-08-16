@@ -188,6 +188,13 @@ export const CULTURES: readonly Culture[] = [
   },
 ];
 
+export function isNearExisting(stem: string, taken: Iterable<string>): boolean {
+  for (const t of taken) {
+    if (editDistanceWithin1(t, stem) || isShortPrefix(t, stem)) return true;
+  }
+  return false;
+}
+
 export type NameKind =
   | "settlement"
   | "river"
@@ -225,8 +232,7 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
     return s;
   };
 
-  const nearDuplicate = (stem: string): boolean =>
-    usedBases.some((b) => editDistanceWithin1(b, stem) || isShortPrefix(b, stem));
+  const nearDuplicate = (stem: string): boolean => isNearExisting(stem, usedBases);
 
   const uniqueBase = (suffix: string, standalone: boolean): string => {
     for (let attempt = 0; attempt < 30; attempt++) {

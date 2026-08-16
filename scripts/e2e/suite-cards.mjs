@@ -18,7 +18,9 @@ export async function run(ctx) {
     const ruinIdx=places.findIndex((p)=>p.ruined);
     const tale=ruinIdx>=0?r.manifest.events.find((e)=>e.settlement===ruinIdx&&e.kind==="ruin"):null;
     const seatIdx=places.findIndex((p)=>p.seat&&p.kind!=="capital");
-    return{count:places.length,cap,capName:places[cap].name,capFounded:places[cap].founded,ruinIdx,ruinName:ruinIdx>=0?places[ruinIdx].name:null,tale:tale?tale.text:null,seatIdx,seatName:seatIdx>=0?places[seatIdx].name:null,capSeat:places[cap].seat};
+    const plainIdx=places.findIndex((p)=>!p.ruined&&p.formerName===undefined);
+    const formerIdx=places.findIndex((p)=>p.formerName!==undefined);
+    return{count:places.length,cap,capName:places[cap].name,capFounded:places[cap].founded,ruinIdx,ruinName:ruinIdx>=0?places[ruinIdx].name:null,tale:tale?tale.text:null,seatIdx,seatName:seatIdx>=0?places[seatIdx].name:null,capSeat:places[cap].seat,formerIdx,formerName:formerIdx>=0?places[formerIdx].formerName:null,plainIdx};
   })()`);
 
   const p1 = await evaluate(`(()=>{const ov=document.querySelector("#map .place-overlay");const hits=document.querySelectorAll("#map .place-hit").length;const card=!!document.getElementById("place-card");return{ov:!!ov,hits,card};})()`);
@@ -140,14 +142,43 @@ export async function run(ctx) {
     return{
       tongue:(c.querySelector(".pc-tongue")||{}).textContent,
       roots:(c.querySelector(".pc-roots")||{}).textContent,
+      former:(c.querySelector(".pc-former")||{}).textContent,
       order:[...c.querySelectorAll(".pc-inner > *")].map((e)=>e.className).join(","),
     };
   })()`);
   check("P16 the glass reads the capital's name: tongue, syllabified word, glossed roots (#124)",
     typeof p16.tongue === "string" && p16.tongue.startsWith("A word of the Oromi speech: ") && p16.tongue.includes("·") &&
     typeof p16.roots === "string" && p16.roots.includes(", ") && !p16.roots.startsWith("Of uncertain") &&
-    p16.order === "pc-name,pc-rank,pc-founded,pc-prospect,pc-tongue,pc-roots",
+    p16.order.split(",").filter((c)=>c!=="pc-former").join(",") === "pc-name,pc-rank,pc-founded,pc-prospect,pc-tongue,pc-roots",
     JSON.stringify(p16));
+  if (pm.formerIdx >= 0) {
+    const p18 = await evaluate(`(()=>{
+      if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+      document.querySelector('.place-hit[data-idx="'+${pm.formerIdx}+'"]').focus();
+      const c=document.getElementById("place-card");
+      return{former:(c.querySelector(".pc-former")||{}).textContent,order:[...c.querySelectorAll(".pc-inner > *")].map((e)=>e.className).join(",")};
+    })()`);
+    check("P18 a renamed place states its former name plainly, between the founding and the slip (#49)",
+      p18.former === `Once called ${pm.formerName}.` &&
+      p18.order === "pc-name,pc-rank,pc-founded,pc-former,pc-prospect,pc-tongue,pc-roots",
+      JSON.stringify(p18));
+  } else {
+    check("P18 seed 42 has a renamed place to read", false, "none in manifest");
+  }
+
+  if (pm.plainIdx >= 0) {
+    const p18b = await evaluate(`(()=>{
+      if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+      document.querySelector('.place-hit[data-idx="'+${pm.plainIdx}+'"]').focus();
+      const c=document.getElementById("place-card");
+      return{former:!!c.querySelector(".pc-former"),order:[...c.querySelectorAll(".pc-inner > *")].map((e)=>e.className).join(",")};
+    })()`);
+    check("P18b a place that was never renamed shows no former line at all (#49)",
+      p18b.former === false && p18b.order === "pc-name,pc-rank,pc-founded,pc-prospect,pc-tongue,pc-roots",
+      JSON.stringify(p18b));
+  } else {
+    check("P18b seed 42 has an unrenamed living place to read", false, "none in manifest");
+  }
 
   if (pm.ruinIdx >= 0) {
     const p17 = await evaluate(`(()=>{

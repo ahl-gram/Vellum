@@ -57,6 +57,9 @@ export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
 .atlas-sheet td { border-bottom: 1px solid var(--line-faint); padding: 0.45rem 0.6rem; vertical-align: top; }
 .atlas-sheet td.name { font-weight: 600; white-space: nowrap; }
 .atlas-sheet td.name.capital { text-transform: uppercase; letter-spacing: 0.06em; }
+/* white-space: normal is load-bearing: td.name is nowrap, so an unbreakable "Once called X." sets a min-content floor that scrolls a 390 page sideways (measured: 20 of 60 seeds newly overflow without it). */
+.atlas-sheet td.name .former { display: block; white-space: normal; font-weight: 400; font-size: 0.86em;
+  color: var(--ink-brown); text-transform: none; letter-spacing: normal; }
 .atlas-sheet td.note { font-style: italic; color: var(--ink-tale); }
 .atlas-sheet .realms { font-style: italic; color: var(--ink-brown); }
 .atlas-sheet .banners { display: flex; flex-wrap: wrap; gap: 1.1rem; justify-content: center; }
