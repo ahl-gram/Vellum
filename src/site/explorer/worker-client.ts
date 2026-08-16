@@ -51,10 +51,8 @@ export interface ProspectJob {
   readonly kind: "prospect";
   readonly seed: number;
   readonly overrides?: Partial<WorldRecipe>;
-  /** Settlement index into world.settlements; null falls back to the capital (#242). */
   readonly index: number | null;
   readonly dress: PlateDress;
-  /** Viewing year; null means the present year. */
   readonly year: number | null;
 }
 
@@ -164,7 +162,6 @@ export function runInline(msg: RenderJob): JobResult {
     };
   }
   if (msg.kind === "prospect") {
-    // #242: the engine glue is shared with ./worker.ts (prospect-job.ts), so the inline fallback stays byte-identical.
     const { world } = worldFor(msg.seed, msg.overrides);
     return { ok: true, ...prospectResultFor(world, msg) };
   }

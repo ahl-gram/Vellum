@@ -1,7 +1,4 @@
-// Prospect e2e (PB1-PB11, #242): the Explorer card's way in, the destination page, the
-// two-dress fallback, year-awareness, and same-address byte determinism; hand-authored
-// like its sibling suites and self-contained (navigates itself, carries scoped no-4xx
-// and console-error deltas, the print-room suite's shape).
+// Prospect e2e (PB1-PB11, #242): the Explorer card's way in, the destination page, the two-dress fallback, year-awareness, and same-address byte determinism; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 export async function run(ctx) {
   const { evaluate, send, check, sleep, consoleErrors, http4xx, PORT } = ctx;
 
@@ -27,19 +24,27 @@ export async function run(ctx) {
     !!href && href.startsWith("/prospect/#") && /seed=42/.test(href) && /&i=0$/.test(href),
     String(href),
   );
+  // Index 0 is the one settlement where a hard-coded index agrees with the right code, so a NONZERO card must witness the wiring too.
+  let href1 = null;
+  if (exReady) {
+    await evaluate(`document.querySelector('.place-hit[data-idx="1"]').click()`);
+    for (let i = 0; i < 40; i++) {
+      try { href1 = await evaluate(`(()=>{const a=document.querySelector('#place-card .pc-prospect');return a?a.getAttribute('href'):null;})()`); } catch {}
+      if (href1 && /&i=1$/.test(href1)) break;
+      await sleep(50);
+    }
+  }
+  check("PB1b a nonzero settlement's card addresses its own index", !!href1 && /&i=1$/.test(href1), String(href1));
 
   // Health bases AFTER the Explorer leg: its load belongs to earlier suites, this page's own requests fire below.
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
 
   const page = (hash) => `http://127.0.0.1:${PORT}/prospect/${hash}`;
-  // The page draws ONCE per visit (the Print Room precedent), and a hash-to-hash Page.navigate on
-  // one path is a SAME-DOCUMENT navigation that never re-boots it, so every fresh address must
-  // arrive through a real cross-path hop.
+  // The page draws ONCE per visit, and a hash-to-hash Page.navigate on one path is a SAME-DOCUMENT navigation that never re-boots it, so every fresh address must arrive through a real cross-path hop (the Print Room precedent).
   const goto = async (hash) => {
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/faq/` });
-    // Poll for the hop page COMMITTING (no fixed sleep): until the prospect DOM is gone, a poll
-    // below could read the OLD document's settled state and pass against stale bytes.
+    // Poll for the hop COMMITTING, never a fixed sleep: until the prospect DOM is gone, a poll below could read the OLD document's settled state.
     for (let i = 0; i < 100; i++) {
       let away = null;
       try { away = await evaluate(`!document.getElementById("pp-plate")`); } catch {}

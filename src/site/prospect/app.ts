@@ -1,7 +1,4 @@
-// The Prospect page controller (#242): resolves the address to (world, settlement, dress,
-// year), pulls the plate through the SHARED render worker, and binds it as a blob <img>
-// (Explorer plates are <img> blob URLs, never inline <svg>). Drawn ONCE per visit, the
-// Reading Room's precedent: a prospect address is a photograph, not a live surface.
+// The Prospect page controller (#242): resolves the address, pulls the plate through the SHARED render worker, and binds it as a blob <img> (never inline <svg>: the cross-chart url(#) id rule). Drawn ONCE per visit, the room's precedent.
 import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
 import { plateDressFor, type PlateDress } from "../explorer/prospect-job.ts";
 import { parseProspectAddress, chartTarget } from "./address.ts";

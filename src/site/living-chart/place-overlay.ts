@@ -18,7 +18,7 @@ interface PlaceOverlayState {
   currentIdx: number;
   pinned: boolean;
   pinnedIdx: number;
-  /** #242: the persistent prospect link, re-appended per show; null on region insets (their indices renumber, #169) and on hosts with no prospect surface. */
+  /** #242: the persistent prospect link, re-appended per show; null when the card carries none. */
   prospectLink: HTMLAnchorElement | null;
 }
 
@@ -144,7 +144,6 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const inner = document.createElement("div");
     inner.className = "pc-inner";
     card.appendChild(inner);
-    // #242: created once per build so its presence is structural; showPlaceCard re-appends it after every content swap. Region insets get none: their manifest indices renumber (#169), so a world-index link would name the wrong settlement.
     let prospectLink: HTMLAnchorElement | null = null;
     if (prospectHref && !(opts && opts.box)) {
       prospectLink = document.createElement("a");

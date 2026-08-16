@@ -16,19 +16,14 @@ export interface ProspectAddress {
   readonly style: StyleName | null;
   readonly type: MapType | null;
   readonly band: ClimateBand | null;
-  /** landFraction, already decoded from the hash's land= (x1000) and clamped to the engine's range. */
   readonly land: number | null;
-  /** coastWarp, decoded from coast= (x100) and clamped. */
   readonly coast: number | null;
-  /** The settlement index (i=); bounds against the world resolve worker-side. */
   readonly index: number | null;
-  /** The viewing year (year=), a positive integer like the room's key; null means the present. */
   readonly year: number | null;
 }
 
 export function parseProspectAddress(hash: string): ProspectAddress {
   const p = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
-  // Presence-gated like every reader of these keys: Number(null) === 0 would fabricate seed 0 or index 0.
   const nat = (key: string): number | null => {
     const raw = p.get(key);
     const n = Number(raw);
@@ -59,7 +54,6 @@ export function parseProspectAddress(hash: string): ProspectAddress {
   };
 }
 
-/** The way back: the Explorer link keeps the world's keys byte-for-byte and drops only this page's own (`i`, `year`), so no other pair is ever re-serialized (#321). */
 export function chartTarget(hash: string): string {
   const raw = hash.startsWith("#") ? hash.slice(1) : hash;
   const kept = raw.split("&").filter((kv) => kv !== "" && !/^(i|year)(=|$)/.test(kv));

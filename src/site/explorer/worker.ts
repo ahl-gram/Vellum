@@ -67,7 +67,6 @@ ctx.onmessage = (e) => {
         atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })),
       });
     } else if (msg.kind === "prospect") {
-      // #242: prospect-job.ts is the one engine glue for both transports, so worker and inline agree byte-for-byte.
       const { world } = worldFor(msg.seed, msg.overrides);
       ctx.postMessage({ id: msg.id, ok: true, ...prospectResultFor(world, msg) });
     }

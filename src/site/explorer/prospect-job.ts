@@ -21,10 +21,8 @@ export function resolveProspectIndex(world: World, index: number | null): number
 }
 
 export interface ProspectSpec {
-  /** The settlement index into world.settlements; null or out of range falls back to the capital. */
   readonly index: number | null;
   readonly dress: PlateDress;
-  /** The viewing year; null means the present year. */
   readonly year: number | null;
 }
 

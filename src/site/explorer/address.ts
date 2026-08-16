@@ -35,9 +35,7 @@ export function forwardTarget(hash: string): string | null {
   return live?.kind === "year" ? "/reading-room/#" + raw : null;
 }
 
-// #242: a place card's way in to the prospect page. The chart's own hash rides through
-// VERBATIM (the #321 rule: never re-serialize someone else's address) with the settlement
-// index appended; the page ignores the keys it does not read (camera, survey, theme).
+// #242: the card's way in to the prospect page; the chart's hash rides through VERBATIM (#321) with the settlement index appended.
 export function prospectTarget(hash: string, idx: number): string {
   const raw = hash.startsWith("#") ? hash.slice(1) : hash;
   return "/prospect/#" + (raw ? raw + "&" : "") + "i=" + idx;
