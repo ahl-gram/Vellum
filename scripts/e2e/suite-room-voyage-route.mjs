@@ -7,7 +7,7 @@ export async function run(ctx) {
   const room = makeRoom(ctx);
   const gate = scopedHealth(ctx);
 
-  // Seed 526413615 ("The Isle of Selivelai"): 24 ports, a closed 24-leg round trip (15 road, 9 sea), exactly one genuine inland handoff.
+  // Seed 526413615 ("The Isle of Selivelai"): 24 ports, a closed 24-leg round trip, exactly one genuine inland handoff.
   const based = await room.goto("#seed=526413615&style=antique&legend=1&survey");
   check("RV0 the room lands on the routed world at the survey rest", based);
 
@@ -172,7 +172,13 @@ export async function run(ctx) {
     const missing=sea.filter((l)=>!l.water).length;
     const badOrder=sea.filter((l)=>l.water&&!(l.water.from>0&&l.water.from<l.water.to&&l.water.to<1)).length;
     const landSpans=legs.filter((l)=>l.mode!=="sea"&&(l.water||l.inlandHandoff)).length;
-    const fatStub=sea.filter((l)=>!l.inlandHandoff).filter((l)=>l.water.from>0.08||l.water.to<0.92).length;
+    // Stubs are judged in grid CELLS, not leg fractions: #309 added short sea hops where a legal 1.4-cell stub is a tenth of the leg. 1500px, the 4.5% margin and the 320-wide grid are this suite's chart constants; the 4.5 bound is INLAND_STUB_CELLS=4 plus RDP slack.
+    const scale=(1500-2*Math.round(1500*0.045))/(320-1);
+    const plen=(pts)=>{let d=0;for(let i=1;i<pts.length;i++)d+=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y);return d;};
+    const fatStub=sea.filter((l)=>!l.inlandHandoff).filter((l)=>{
+      const cells=plen(l.points)/scale;
+      return l.water.from*cells>4.5||(1-l.water.to)*cells>4.5;
+    }).length;
     const handoffs=sea.filter((l)=>l.inlandHandoff).length;
     const n=legs.length;
     const hi=legs.findIndex((l)=>l.inlandHandoff);
@@ -231,47 +237,20 @@ export async function run(ctx) {
   );
   await shoot("reading-room-voyage-handoff.png");
 
-  // Seed 430445745 puts ports on THREE landmasses with roads only on the capital's; the 1.5-cell wet-run bound sits against 1.16 measured post-fix and 33.4 pre-fix (#298), legs selected by the metric asserted.
+  // Seed 430445745 puts ports on THREE landmasses; before #309 only the capital's shore had roads and 17 of its 24 legs degraded to straight chords. #298's walk-the-land guard now lives on a synthetic fixture in voyage-route.test.ts.
   await room.goto("#seed=430445745&style=antique&legend=1&survey");
   const rv12 = await evaluate(`(()=>{
-    const res=window.__vellumRunInline({kind:"draw",seed:430445745,overrides:{},render:{style:"antique",widthPx:1500,legend:true,arms:false}});
-    const {gridW,gridH,land}=res.survey;
     const legs=window.__vellumVoyageLegGeometry();
-    const margin=Math.round(1500*0.045);
-    const scale=(1500-2*margin)/(gridW-1);
-    const inv=(v)=>(v-margin)/scale;
-    const straight=legs.map((l,i)=>({l,i})).filter((x)=>x.l.mode==="straight");
-    let maxRun=0;
-    let longest={i:-1,len:0};
-    for(const {l,i} of straight){
-      const pts=l.points;
-      let run=0, legLen=0;
-      for(let j=1;j<pts.length;j++){
-        const a=pts[j-1],b=pts[j];
-        const len=Math.hypot(b.x-a.x,b.y-a.y)/scale;
-        legLen+=len;
-        const steps=Math.max(2,Math.ceil(len*4));
-        for(let k=0;k<=steps;k++){
-          const t=k/steps;
-          const gx=Math.round(inv(a.x+(b.x-a.x)*t));
-          const gy=Math.round(inv(a.y+(b.y-a.y)*t));
-          const sea=gx>=0&&gy>=0&&gx<gridW&&gy<gridH?land[gx+gy*gridW]===0:true;
-          if(sea){run+=len/steps;maxRun=Math.max(maxRun,run);}else{run=0;}
-        }
-      }
-      if(legLen>longest.len)longest={i,len:legLen};
-    }
-    window.__vellumVoyagePaintAt((longest.i+0.5)/legs.length);
-    const ship=document.querySelector(".rf-chart .voyage-ship");
-    return{straightCount:straight.length,maxRunCells:Number(maxRun.toFixed(2)),
-      glyphMid:(!!ship&&ship.getAttribute("display")!=="none")?"ship":"rider"};
+    const modes={};
+    for(const l of legs) modes[l.mode]=(modes[l.mode]||0)+1;
+    return{legs:legs.length,road:modes.road||0,sea:modes.sea||0,straight:modes.straight||0};
   })()`);
   check(
-    "RV12 seed 430445745: every straight fallback leg's track stays on land (#298)",
-    rv12.straightCount >= 10 && rv12.maxRunCells <= 1.5 && rv12.glyphMid === "rider",
+    "RV12 seed 430445745: every leg of the three-landmass world rides or sails, none degrades to a straight chord (#309)",
+    rv12.straight === 0 && rv12.road >= 10 && rv12.sea >= 2,
     JSON.stringify(rv12),
   );
-  await shoot("reading-room-voyage-straight-land.png");
+  await shoot("reading-room-voyage-roaded-landmasses.png");
 
   gate.check("RV13 the room route run is clean (no console errors, no new 4xx)");
 }

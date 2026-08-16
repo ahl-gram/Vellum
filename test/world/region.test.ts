@@ -378,3 +378,38 @@ test("regionTitle is stable across a regeneration of the same world (#169)", () 
   const regen = generateWorld(defaultRecipe(42, { gridW: 320, gridH: 240 }));
   assert.equal(regionTitle(bigWorld, win), regionTitle(regen, win));
 });
+
+test("#309: a survey window holding no capital still grows its roads", () => {
+  const capital = bigWorld.settlements.find((s) => s.kind === "capital")!;
+  const byFar = bigWorld.settlements
+    .filter((s) => s.kind === "town")
+    .sort(
+      (a, b) =>
+        Math.hypot(b.x - capital.x, b.y - capital.y) - Math.hypot(a.x - capital.x, a.y - capital.y),
+    );
+  let region = null;
+  for (const town of byFar) {
+    const win = windowAround(bigWorld, town, 0.28);
+    const candidate = generateRegionWorld(bigWorld, {
+      window: win,
+      gridW: 320,
+      gridH: 240,
+      title: "Test Environs",
+    });
+    if (!candidate.settlements.some((s) => s.kind === "capital")) {
+      region = candidate;
+      break;
+    }
+  }
+  assert.ok(region, "fixture: seed 42 must offer a town window that excludes the capital");
+  assert.ok(region.settlements.length >= 2, "fixture: the window holds settlements to connect");
+  assert.ok(region.roads.length > 0, "a window away from the capital shows a roadless survey");
+  for (const road of region.roads) {
+    for (const p of road.points) {
+      assert.ok(
+        (region.elev.data[p.x + p.y * region.elev.w] as number) > region.seaLevel,
+        `region road in the sea at ${p.x},${p.y}`,
+      );
+    }
+  }
+});

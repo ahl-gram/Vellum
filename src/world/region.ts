@@ -101,7 +101,23 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
 
   const seats = world.realms.seats.map((wi) => regionIdxOf.get(wi) ?? -1);
 
-  const roads = buildRoads(elev, seaLevel, riverCells, settlements);
+  const roadLabels = new Int16Array(gridW * gridH).fill(-1);
+  for (let gy = 0; gy < gridH; gy++) {
+    for (let gx = 0; gx < gridW; gx++) {
+      if ((elev.data[gx + gy * gridW] as number) <= seaLevel) continue;
+      const u = window.u0 + (gx / (gridW - 1)) * du;
+      const v = window.v0 + (gy / (gridH - 1)) * dv;
+      const wx = Math.round(u * (recipe.gridW - 1));
+      const wy = Math.round(v * (recipe.gridH - 1));
+      roadLabels[gx + gy * gridW] = world.realms.labels[wx + wy * recipe.gridW] as number;
+    }
+  }
+  for (const [worldIdx, regionIdx] of regionIdxOf) {
+    const ws = world.settlements[worldIdx] as NamedSettlement;
+    const rs = settlements[regionIdx] as NamedSettlement;
+    roadLabels[rs.x + rs.y * gridW] = world.realms.labels[ws.x + ws.y * recipe.gridW] as number;
+  }
+  const roads = buildRoads(elev, seaLevel, riverCells, settlements, { labels: roadLabels, seats });
 
   const deepestSizeUV = (LOD_BANDS[LOD_BANDS.length - 1] as (typeof LOD_BANDS)[number]).sizeUV;
   const hamlets =
