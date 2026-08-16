@@ -173,7 +173,8 @@ export async function run(ctx) {
     JSON.stringify(br7),
   );
 
-  const errDelta = consoleErrors.slice(errBase);
+  // "AbortError: Transition was skipped" is the cross-document view-transition's expected cancellation when navigations chain fast, not an app error; this suite chains Page.navigate hops from its first goto.
+  const errDelta = consoleErrors.slice(errBase).filter((e) => !e.includes("AbortError: Transition was skipped"));
   check(
     "BR8 the broadside flow is clean (no console errors, no 4xx)",
     errDelta.length === 0 && http4xx.length === httpBase,
