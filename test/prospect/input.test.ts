@@ -95,11 +95,11 @@ function pinProjection(p: ProspectInput): unknown {
 
 // Pinned 2026-08-09 from a measured run (the golden-seed42 convention): a deliberate change re-pins these with the cause named in the commit. The five cases span the shape space: a capital, harbor towns, a realm seat, an inland ruined village.
 const PINNED: ReadonlyArray<{ seed: number; index: number; sum: number }> = [
-  { seed: 42, index: 0, sum: 1463803185 }, // Laukuwelua, capital, harbor. Re-pinned #49 PR 2: renamed, so ProspectInput gains formerName.
+  { seed: 42, index: 0, sum: 861063081 }, // Laukuwelua, capital, harbor
   { seed: 42, index: 5, sum: 2958303229 }, // Loatunui, town, harbor
   { seed: 1, index: 1, sum: 3387866517 }, // Mectlan, seat
   { seed: 3, index: 19, sum: 69144944 }, // Saharabad, village, inland + ruined
-  { seed: 7, index: 3, sum: 1397511200 }, // Wutoanu, town, harbor. Re-pinned #49 PR 2: renamed, so ProspectInput gains formerName.
+  { seed: 7, index: 3, sum: 2611738395 }, // Wutoanu, town, harbor
 ];
 
 test("pinned prospect checksums over several seeds and indices", () => {

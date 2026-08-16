@@ -81,6 +81,11 @@ export function legendExcluded(
 }
 
 /** The reveal draws on its own "daily-hunt-lore" fork, distinct from the page's lore fork, so it never echoes the capital blurb. */
+/** Ruling 4's form, shared with the place card and the gazetteer so one fact reaches the reader in one voice. */
+export function revealFormerLine(r: Reveal): string | null {
+  return r.formerName ? `Once called ${r.formerName}.` : null;
+}
+
 export function revealLore(world: World, quarry: Quarry): Reveal {
   const s = quarry.settlement;
   if (s.ruined) {

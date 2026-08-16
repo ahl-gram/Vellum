@@ -23,7 +23,6 @@ export type ProspectInput = {
   /** Index into world.settlements; NOT stable across region sheets, which filter and reindex. */
   readonly index: number;
   readonly name: string;
-  readonly formerName?: string;
   readonly kind: ProspectKind;
   /** Raw placeSettlements score, unnormalized; hamlet scores use a slimmer capped formula and are NOT on the same scale. */
   readonly score: number;
@@ -93,7 +92,6 @@ export function buildProspectInput(world: World, index: number): ProspectInput {
     seed: world.recipe.seed,
     index,
     name: s.name,
-    ...(s.formerName === undefined ? {} : { formerName: s.formerName }),
     kind,
     score: s.score,
     harbor: s.harbor,
