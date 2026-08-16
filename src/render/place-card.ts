@@ -9,6 +9,7 @@ export type PlaceCard = {
   readonly rank: string;
   readonly founded: number;
   readonly foundedLine: string;
+  readonly formerLine?: string;
   readonly tongueLine: string;
   readonly derivationLine: string;
   readonly tale?: string;
@@ -90,6 +91,7 @@ export function composePlaceCard(
     rank: placeRank(mark),
     founded: mark.founded,
     foundedLine: `Founded in the year ${mark.founded}.`,
+    ...(mark.formerName ? { formerLine: `Once called ${mark.formerName}.` } : {}),
     ...composeDerivation(mark.name, cultureId),
     ...(tale ? { tale } : {}),
   };

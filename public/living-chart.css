@@ -53,6 +53,7 @@
 .pc-rank { display: block; font-style: italic; color: var(--ink-brown); font-size: 0.82rem;
   letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.1rem; }
 .pc-founded { display: block; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
+.pc-former { display: block; margin-top: 0.15rem; }
 .pc-tale { margin: 0.4rem 0 0; font-style: italic; color: var(--ink-tale); }
 /* #242: the card's way in to the prospect page, in the featured action-link gold; pointer-events restored because the card box is pointer-events: none. */
 .pc-prospect { display: inline-block; vertical-align: top; margin-top: 0.45rem;

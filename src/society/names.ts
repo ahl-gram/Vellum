@@ -188,6 +188,14 @@ export const CULTURES: readonly Culture[] = [
   },
 ];
 
+/** The near-duplicate bar createNamer holds within one world, lent to callers that draw on a separate fork and so cannot see its used set. */
+export function isNearExisting(stem: string, taken: Iterable<string>): boolean {
+  for (const t of taken) {
+    if (editDistanceWithin1(t, stem) || isShortPrefix(t, stem)) return true;
+  }
+  return false;
+}
+
 export type NameKind =
   | "settlement"
   | "river"

@@ -74,6 +74,12 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     founded.className = "pc-founded";
     founded.textContent = card.foundedLine;
     inner.append(name, rank, founded);
+    if (card.formerLine) {
+      const former = document.createElement("span");
+      former.className = "pc-former";
+      former.textContent = card.formerLine;
+      inner.append(former);
+    }
     if (placeOverlay.prospectLink) {
       placeOverlay.prospectLink.href = prospectHref!(place.idx);
       inner.append(placeOverlay.prospectLink);

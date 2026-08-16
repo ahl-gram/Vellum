@@ -50,8 +50,11 @@ function gazetteerHtml(world: World): string {
           ? (world.names.realms[realmId] ?? "—")
           : "—";
       const note = lore.settlementNote(s);
+      const former = s.formerName
+        ? `<span class="former">Once called ${escapeXml(s.formerName)}.</span>`
+        : "";
       return `<tr>
-  <td class="name ${s.kind}">${escapeXml(s.name)}</td>
+  <td class="name ${s.kind}">${escapeXml(s.name)}${former}</td>
   <td>${KIND_LABEL[s.kind]}</td>
   <td>${escapeXml(realm)}</td>
   <td class="note">${escapeXml(note)}</td>

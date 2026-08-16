@@ -4,7 +4,7 @@ import { BIOMES } from "../climate/biomes.ts";
 import { slopeField } from "../terrain/slope.ts";
 import { clamp } from "../core/math.ts";
 import type { UvWindow } from "../terrain/heightfield.ts";
-import type { NamedSettlement, World } from "../world/types.ts";
+import type { FeatureNames, NamedSettlement, World } from "../world/types.ts";
 import { BIOME_APPEAL, EDGE_MARGIN } from "./sites.ts";
 import { createNamer, type Culture } from "./names.ts";
 
@@ -33,10 +33,15 @@ export type HamletCandidate = {
   readonly founded: number;
 };
 
-export function worldNameSet(world: World): Set<string> {
+export function nameSetOf(
+  settlements: ReadonlyArray<NamedSettlement>,
+  n: FeatureNames,
+): Set<string> {
   const taken = new Set<string>();
-  for (const s of world.settlements) taken.add(s.name.toLowerCase());
-  const n = world.names;
+  for (const s of settlements) {
+    taken.add(s.name.toLowerCase());
+    if (s.formerName) taken.add(s.formerName.toLowerCase());
+  }
   taken.add(n.sea.toLowerCase());
   if (n.range) taken.add(n.range.toLowerCase());
   if (n.forest) taken.add(n.forest.toLowerCase());
@@ -44,6 +49,10 @@ export function worldNameSet(world: World): Set<string> {
   for (const lake of n.lakes) taken.add(lake.name.toLowerCase());
   for (const realm of n.realms) taken.add(realm.toLowerCase());
   return taken;
+}
+
+export function worldNameSet(world: World): Set<string> {
+  return nameSetOf(world.settlements, world.names);
 }
 
 /** Null when the namespace is too tight: the point is dropped, never renamed, or retry order would break window-independence. */
