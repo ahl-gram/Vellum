@@ -74,6 +74,7 @@ export async function run(ctx) {
     JSON.stringify({ seed: cap.seed, index: cap.index, name: cap.name }),
   );
   check("PB3 the caption names the place and its world", /Laukuwelua/.test(cap.caption) && /The Isle of Rahai/.test(cap.caption), cap.caption);
+  check("PB3b the caption names what the place was once called (#49)", /once called Haitani/.test(cap.caption), cap.caption);
   check("PB4 the render worker serves the page (no silent inline fallback)", await evaluate(`window.__vellumProspectUsesWorker() === true`));
 
   const first = await svgOf();

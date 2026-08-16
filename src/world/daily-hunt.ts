@@ -38,6 +38,7 @@ export type LegendBox = {
 
 export type Reveal = {
   readonly name: string;
+  readonly formerName?: string;
   readonly founded: number;
   readonly line: string;
 };
@@ -80,6 +81,11 @@ export function legendExcluded(
 }
 
 /** The reveal draws on its own "daily-hunt-lore" fork, distinct from the page's lore fork, so it never echoes the capital blurb. */
+/** Ruling 4's form, shared with the place card and the gazetteer so one fact reaches the reader in one voice. */
+export function revealFormerLine(r: Reveal): string | null {
+  return r.formerName ? `Once called ${r.formerName}.` : null;
+}
+
 export function revealLore(world: World, quarry: Quarry): Reveal {
   const s = quarry.settlement;
   if (s.ruined) {
@@ -92,5 +98,10 @@ export function revealLore(world: World, quarry: Quarry): Reveal {
     return { name: s.name, founded: s.founded, line };
   }
   const lore = createLoreWriter(world, createRng(world.recipe.seed).fork("daily-hunt-lore"));
-  return { name: s.name, founded: s.founded, line: lore.settlementNote(s) };
+  return {
+    name: s.name,
+    ...(s.formerName === undefined ? {} : { formerName: s.formerName }),
+    founded: s.founded,
+    line: lore.settlementNote(s),
+  };
 }

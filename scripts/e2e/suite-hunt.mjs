@@ -40,7 +40,7 @@ export async function run(ctx) {
     const q=chooseQuarry(world,{exclude});
     const cap=world.settlements.find((s)=>s.kind==="capital")??world.settlements[0];
     const frac=(s)=>({fx:proj.px(s.x)/proj.widthPx,fy:proj.py(s.y)/proj.heightPx});
-    return{seed,name:q.settlement.name,hit:frac(q.settlement),miss:frac(cap),missName:cap.name,legFrac,wpx:proj.widthPx,hpx:proj.heightPx,scale:proj.scale};
+    return{seed,name:q.settlement.name,formerName:q.settlement.formerName??null,hit:frac(q.settlement),miss:frac(cap),missName:cap.name,legFrac,wpx:proj.widthPx,hpx:proj.heightPx,scale:proj.scale};
   })()`, true);
   const clickHunt = (f) => evaluate(`(()=>{const svg=document.querySelector("#map svg");const r=svg.getBoundingClientRect();svg.dispatchEvent(new MouseEvent("click",{clientX:r.left+${f.fx}*r.width,clientY:r.top+${f.fy}*r.height,bubbles:true}));return{status:document.getElementById("hunt-status").textContent,solved:document.getElementById("map").classList.contains("solved")};})()`);
 
@@ -89,6 +89,9 @@ export async function run(ctx) {
 
   const post = await evaluate(`(()=>{const rev=document.getElementById("reveal");const star=document.querySelector("#map .hunt-star");const share=document.getElementById("share");return{reveal:rev&&!rev.hidden,revealText:rev?rev.textContent:"",star:!!star,share:share&&!share.hidden,streak:document.getElementById("streak").textContent,ls:localStorage.getItem("vellum.hunt.v1")};})()`);
   check("H5 reveal names the found place and its founding year", post.reveal && post.revealText.includes(tgt.name) && /founded in the year/i.test(post.revealText), post.revealText.slice(0, 80));
+  check("H5b the reveal names what the place was once called, or says nothing (#49)",
+    tgt.formerName ? post.revealText.includes(`Once called ${tgt.formerName}.`) : !/Once called/.test(post.revealText),
+    JSON.stringify({ formerName: tgt.formerName ?? null, text: post.revealText.slice(0, 120) }));
   check("H6 a win marker overlays the map and the Share button appears", post.star && post.share);
   check("H7 streak + localStorage persist, keyed on the day's seed", /Streak: 1 day/.test(post.streak) && new RegExp(`"solved":${tgt.seed},"streak":1`).test(post.ls || ""), `${post.streak} | ${post.ls}`);
 

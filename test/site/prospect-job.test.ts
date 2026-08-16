@@ -59,3 +59,15 @@ test("prospectResultFor with no index opens the capital's plate", () => {
   assert.equal(res.name, world.settlements[capital]!.name);
   assert.equal(res.svg, prospectPlate(world, capital, STYLES.antique, world.title.year));
 });
+
+test("prospectResultFor carries the former name through to the page (#49)", () => {
+  const i = world.settlements.findIndex((s) => s.formerName !== undefined);
+  assert.equal(
+    prospectResultFor(world, { index: i, dress: "antique", year: null }).formerName,
+    world.settlements[i]!.formerName,
+  );
+  const j = world.settlements.findIndex((s) => s.formerName === undefined && !s.ruined);
+  const plain = prospectResultFor(world, { index: j, dress: "antique", year: null });
+  assert.equal(plain.formerName, undefined);
+  assert.ok(!("formerName" in plain), "an absent former name should not leave the key behind");
+});

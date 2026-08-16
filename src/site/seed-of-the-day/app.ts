@@ -3,7 +3,7 @@
 // deterministic click-to-find puzzle over that already-generated world.
 import { defaultRecipe, generateWorld } from "../../world/generate.ts";
 import { renderMap } from "../../render/map-renderer.ts";
-import { seedForDate } from "../../world/seed-of-the-day.ts";
+import { seedForDate, capitalBlurb } from "../../world/seed-of-the-day.ts";
 import { createRng } from "../../core/rng.ts";
 import { createLoreWriter } from "../../society/lore.ts";
 import {
@@ -13,8 +13,8 @@ import {
   legendExcluded,
   revealLore,
   TERRAIN_RADIUS,
-  type TerrainBand,
-} from "../../world/daily-hunt.ts";
+  type TerrainBand } from "../../world/daily-hunt.ts";
+import { renderReveal } from "./reveal.ts";
 import { createProjection, type Projection } from "../../render/transform.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
 import { createZoomController } from "../shared/zoom-controller.ts";
@@ -92,7 +92,7 @@ setTimeout(() => {
     if (capital) {
       const lore = createLoreWriter(world, createRng(seed).fork("seed-of-the-day"));
       dryIn($("blurb"), "400ms");
-      $("blurb").textContent = `${capital.name}, the capital. ${lore.settlementNote(capital)}`;
+      $("blurb").textContent = capitalBlurb(capital, lore.settlementNote(capital));
     }
     $("status").textContent = "";
     setupHunt(world);
@@ -258,14 +258,8 @@ function setupHunt(world: World): void {
   };
 
   const showReveal = (ceremony: boolean) => {
-    const r = revealLore(world, quarry);
     const reveal = $("reveal");
-    reveal.replaceChildren();
-    const head = document.createElement("strong");
-    head.textContent = `${r.name}, founded in the year ${r.founded}.`;
-    const body = document.createElement("p");
-    body.textContent = r.line;
-    reveal.append(head, body);
+    renderReveal(reveal, revealLore(world, quarry));
     reveal.classList.toggle("unfurl", !!ceremony); // #129: unroll on a live solve only
     reveal.hidden = false;
   };

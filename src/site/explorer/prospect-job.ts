@@ -33,6 +33,7 @@ export interface ProspectPlateResult {
   readonly year: number;
   readonly presentYear: number;
   readonly title: string;
+  readonly formerName?: string;
 }
 
 export function prospectResultFor(world: World, spec: ProspectSpec): ProspectPlateResult {
@@ -41,6 +42,9 @@ export function prospectResultFor(world: World, spec: ProspectSpec): ProspectPla
   return {
     svg: prospectPlate(world, index, STYLES[spec.dress], year),
     name: world.settlements[index]!.name,
+    ...(world.settlements[index]!.formerName === undefined
+      ? {}
+      : { formerName: world.settlements[index]!.formerName }),
     index,
     year,
     presentYear: world.title.year,
