@@ -7,7 +7,7 @@ export async function run(ctx) {
   const room = makeRoom(ctx);
   const gate = scopedHealth(ctx);
 
-  // Seed 526413615 ("The Isle of Selivelai"): 24 ports, a closed 24-leg round trip (14 road, 10 sea since #309 rewove the webs), exactly one genuine inland handoff.
+  // Seed 526413615 ("The Isle of Selivelai"): 24 ports, a closed 24-leg round trip (13 road, 11 sea since #309 rewove the webs), exactly one genuine inland handoff.
   const based = await room.goto("#seed=526413615&style=antique&legend=1&survey");
   check("RV0 the room lands on the routed world at the survey rest", based);
 

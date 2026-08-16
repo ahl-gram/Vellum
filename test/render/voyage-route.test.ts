@@ -222,7 +222,7 @@ const realWorld = (seed: number) => {
 };
 
 test("seed 526413615 sails: it has at least one sea leg and many road legs", () => {
-  // The Isle of Selivelai, straight-line order. Re-measured 2026-08-16 under #309: 24 legs = 8 sea + 16 road here (travel-ordered, the same isle runs 10 sea + 14 road); per-leg numbers taken before #309 are void.
+  // The Isle of Selivelai, straight-line order. Re-measured 2026-08-16 under #309: 24 legs = 8 sea + 16 road here (travel-ordered, the same isle runs 11 sea + 13 road); per-leg numbers taken before #309 are void.
   const { routed } = realWorld(526413615);
   const modes = routed.map((l) => l.mode);
   assert.ok(modes.filter((m) => m === "sea").length >= 1, `expected a sea leg, got ${modes.join(",")}`);

@@ -5,6 +5,7 @@ import { labelComponents } from "../../src/core/mask-components.ts";
 import { partitionRealms } from "../../src/society/realms.ts";
 import { buildRoads } from "../../src/society/roads.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
+import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import type { Settlement } from "../../src/society/sites.ts";
 
 // #309 guards on hand-built worlds: exact realm and landmass geometry no natural seed guarantees.
@@ -163,6 +164,48 @@ test("#309: realm webs sharing a landmass are joined into one component by a roy
   const ids = new Set<number>();
   for (const c of cells) ids.add(comp[c] as number);
   assert.equal(ids.size, 1, "the two realm webs never meet: no royal trunk joins them");
+});
+
+test("#309: no road shadows another; a royal trunk rides its home web out of town", () => {
+  // Seeds 31776, 22, 25 carried the worst measured shadow pairs: a royal trunk re-walking its realm's own corridor beside an existing road.
+  for (const seed of [31776, 22, 25]) {
+    const w = generateWorld(defaultRecipe(seed));
+    const W = w.elev.w;
+    const seatCells = new Set(
+      w.realms.seats.map((si) => {
+        const s = w.settlements[si]!;
+        return s.x + s.y * W;
+      }),
+    );
+    const groupOf = (r: (typeof w.roads)[number]) => {
+      const p0 = r.points[0]!;
+      const royal = seatCells.has(p0.x + p0.y * W);
+      return `${royal ? "R" : "w"}${w.realms.labels[p0.x + p0.y * W]}`;
+    };
+    const cellSets = w.roads.map((r) => new Set(r.points.map((p) => p.x + p.y * W)));
+    const near = (cells: Set<number>, x: number, y: number) => {
+      for (let dy = -3; dy <= 3; dy++)
+        for (let dx = -3; dx <= 3; dx++) if (cells.has(x + dx + (y + dy) * W)) return true;
+      return false;
+    };
+    for (let a = 0; a < w.roads.length; a++) {
+      for (let b = 0; b < w.roads.length; b++) {
+        if (a === b || groupOf(w.roads[a]!) === groupOf(w.roads[b]!)) continue;
+        let run = 0;
+        let best = 0;
+        for (const p of w.roads[a]!.points) {
+          if (!cellSets[b]!.has(p.x + p.y * W) && near(cellSets[b]!, p.x, p.y)) {
+            run++;
+            best = Math.max(best, run);
+          } else run = 0;
+        }
+        assert.ok(
+          best < 15,
+          `seed ${seed}: road ${a} shadows road ${b} for ${best} cells without touching it`,
+        );
+      }
+    }
+  }
 });
 
 test("#309: roads with realms are deterministic", () => {

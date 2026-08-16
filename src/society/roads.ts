@@ -127,7 +127,9 @@ function layRoyalTrunks(wiring: Wiring, webs: ReadonlyArray<RealmWeb>): void {
   for (const { cells, principal } of webs) {
     if (cells.length === 0) continue;
     if (seeded && principal !== undefined) {
-      connectToNetwork(wiring, web, principal.x, principal.y, "trunk", Infinity);
+      const ride = new Uint8Array(wiring.n);
+      for (const c of cells) ride[c] = 1;
+      connectToNetwork(wiring, web, principal.x, principal.y, "trunk", Infinity, ride);
     }
     for (const c of cells) web[c] = 1;
     seeded = true;
@@ -160,6 +162,7 @@ function connectToNetwork(
   sy: number,
   rank: Road["rank"],
   budget: number,
+  ride?: Uint8Array,
 ): void {
   const { w, h, n, data, seaLevel, terrainCost } = wiring;
   const start = sx + sy * w;
@@ -193,7 +196,7 @@ function connectToNetwork(
       if (done[ni]) continue;
       if ((data[ni] as number) <= seaLevel) continue;
       let step = stepDist * terrainCost(ni);
-      if (network[ni]) step *= REUSE_DISCOUNT;
+      if (network[ni] || (ride !== undefined && ride[ni] === 1)) step *= REUSE_DISCOUNT;
       const nd = d + step;
       if (nd < (dist[ni] as number)) {
         dist[ni] = nd;
