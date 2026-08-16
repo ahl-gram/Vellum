@@ -40,6 +40,7 @@ const ENGINE_RULES = [
   ".pc-name",
   ".pc-rank",
   ".pc-founded",
+  ".pc-former",
   ".pc-tongue",
   ".pc-roots",
   ".pc-tale",

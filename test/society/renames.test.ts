@@ -5,6 +5,7 @@ import { nameSetOf, worldNameSet } from "../../src/society/hamlets.ts";
 import { assignFormerNames } from "../../src/society/renames.ts";
 import { CULTURES, isNearExisting, type Culture } from "../../src/society/names.ts";
 import { createRng } from "../../src/core/rng.ts";
+import { renderMap } from "../../src/render/map-renderer.ts";
 import { editDistanceWithin1 } from "../../src/core/text.ts";
 import type { World } from "../../src/world/types.ts";
 
@@ -12,7 +13,14 @@ import type { World } from "../../src/world/types.ts";
 
 const SEEDS = [1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 42, 99];
 
-const worldFor = (seed: number): World => generateWorld(defaultRecipe(seed));
+const worlds = new Map<number, World>();
+const worldFor = (seed: number): World => {
+  const cached = worlds.get(seed);
+  if (cached) return cached;
+  const w = generateWorld(defaultRecipe(seed));
+  worlds.set(seed, w);
+  return w;
+};
 
 const renamed = (w: World): ReadonlyArray<{ name: string; formerName: string }> =>
   w.settlements.flatMap((s) =>
@@ -84,15 +92,29 @@ test("capitals and realm seats are eligible", () => {
   assert.ok(ranked.length > 0, "no capital or realm seat carried a former name in any seed");
 });
 
-// 4 is MEASURED off seed 42 (26 settlements, 4 renamed), deliberately a literal and not an import of MAX: importing it would move both sides of the assertion together and see nothing.
-test("only a few are renamed, against the measured bound", () => {
-  for (const seed of SEEDS) {
-    const w = worldFor(seed);
-    assert.ok(
-      renamed(w).length <= 4,
-      `seed ${seed} renamed ${renamed(w).length}; "a few" is the ruling`,
-    );
+// MEASURED per seed. A bound (<= 4) is unfalsifiable here: every seed either clamps to MAX or sits under it, so raising SHARE to 1.0 moves the real counts and a bound still passes. The exact count reds instead: seeds 3 and 13 have 19 living settlements and take 3.
+const RENAME_COUNT: ReadonlyArray<readonly [number, number]> = [
+  [1, 4], [2, 4], [3, 3], [5, 4], [7, 4], [11, 4],
+  [13, 3], [17, 4], [19, 4], [23, 4], [42, 4], [99, 4],
+];
+
+test("each seed renames exactly this many", () => {
+  for (const [seed, count] of RENAME_COUNT) {
+    assert.equal(renamed(worldFor(seed)).length, count, `seed ${seed}`);
   }
+});
+
+// The per-seed counts above cannot reach MAX or MIN: no seed has enough living settlements to exceed the cap, and none has few enough to hit the floor. Drive the bounds directly.
+test("the cap holds however many places are eligible", () => {
+  const many = Array.from({ length: 120 }, (_, i) => ({ name: `Many${i}`, ruined: false }));
+  const got = assignFormerNames(many, CULTURES[0] as Culture, createRng(3).fork("renames"), new Set());
+  assert.equal(got.size, 4, "120 living settlements should still yield only a few");
+});
+
+test("the floor holds when almost nothing is eligible", () => {
+  const few = [{ name: "Only", ruined: false }, { name: "Gone", ruined: true }];
+  const got = assignFormerNames(few, CULTURES[0] as Culture, createRng(3).fork("renames"), new Set());
+  assert.equal(got.size, 1, "one living settlement should still be renameable");
 });
 
 test("seed 42's former names are exactly these", () => {
@@ -146,6 +168,22 @@ test("a former name reserves the word against hamlet naming", () => {
         taken.has(formerName.toLowerCase()),
         `seed ${seed}: ${formerName} is free for a hamlet to take`,
       );
+    }
+  }
+});
+
+// Ruling 1: the former name never prints on the chart. The empty byte diff on seed 42's committed charts is one instance, not the class.
+test("no former name reaches the rendered chart, in any style", () => {
+  for (const seed of [42, 3, 7]) {
+    const w = worldFor(seed);
+    for (const style of ["antique", "ink", "nautical", "topographic"] as const) {
+      const svg = renderMap(w, { style, widthPx: 1200, legend: true });
+      for (const { formerName } of renamed(w)) {
+        assert.ok(
+          !svg.includes(formerName),
+          `seed ${seed} ${style}: ${formerName} printed on the chart`,
+        );
+      }
     }
   }
 });

@@ -84,7 +84,6 @@ test("the gazetteer escapes a former name that carries markup", () => {
   assert.ok(!html.includes("<Ford>"), "raw markup reached the gazetteer");
 });
 
-// The class compose.ts emits and the selector document.ts styles must agree, or a rename on one side ships an unstyled line that no structural test can see.
 test("the gazetteer's former-name class is the one the stylesheet targets", () => {
   const doc = composeAtlas(world).gazetteerHtml;
   assert.ok(doc.includes('<span class="former">'));
@@ -96,7 +95,7 @@ test("the gazetteer's former-name class is the one the stylesheet targets", () =
     ATLAS_SHEET_CSS.includes("text-transform: none"),
     "a renamed CAPITAL would inherit the uppercase rule on td.name.capital",
   );
-  // Measured: td.name is nowrap, so without this the sentence sets a min-content floor and 20 of 60 seeds scroll a 390 page sideways. Asserted as the declaration, so flipping it to nowrap fails too.
+  // Measured: 20 of 60 seeds scroll a 390 page sideways without it.
   assert.ok(
     /td\.name \.former \{[^}]*white-space: normal/.test(ATLAS_SHEET_CSS),
     "the former line must be allowed to wrap inside the nowrap name cell",
