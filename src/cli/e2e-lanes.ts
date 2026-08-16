@@ -33,6 +33,7 @@ export const E2E_LANES: readonly E2eLane[] = [
     suites: [
       "hunt",
       "print-room",
+      "prospect",
       "home",
       "broadside",
       "reading-room",

@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 
 // LITERAL on purpose: home is not a nav item, and a page dropping out of the nav must not silently drop out of this guard; /atlas/ is generated and carries no shell.
-const SHELLED = ["/", "/explorer/", "/print-room/", "/reading-room/", "/gallery/", "/faq/", "/glossary/", "/seed-of-the-day/"];
+const SHELLED = ["/", "/explorer/", "/print-room/", "/reading-room/", "/gallery/", "/faq/", "/glossary/", "/seed-of-the-day/", "/prospect/"];
 
 // MEASURED split: /, /explorer/, /gallery/ leave body leading normal, every other page sets 1.6; RH6 needs PROSE and APP to differ in body leading or it proves nothing.
 const PROSE = "/faq/";

@@ -2,7 +2,7 @@
 // Ratified vocabulary (the 2026-07-26 comment on #192): two mutually exclusive keys, a bare `survey` flag and `year=N`; the writer emits exactly one of them, or neither.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseLive, emitLive, finalizeHash, liveNow, forwardTarget } from "../../src/site/explorer/address.ts";
+import { parseLive, emitLive, finalizeHash, liveNow, forwardTarget, prospectTarget } from "../../src/site/explorer/address.ts";
 
 const P = (s: string) => new URLSearchParams(s);
 
@@ -143,4 +143,21 @@ test("forwardTarget: a malformed year stays in the Explorer, ignored as today", 
 
 test("forwardTarget: the both-keys set is ignored whole, so it stays", () => {
   assert.equal(forwardTarget("#seed=42&survey&year=814"), null);
+});
+
+test("prospectTarget: the chart's hash rides through verbatim with the settlement index appended (#242)", () => {
+  assert.equal(
+    prospectTarget("#seed=42&style=ink&legend=1&arms=0", 3),
+    "/prospect/#seed=42&style=ink&legend=1&arms=0&i=3",
+  );
+  // Non-canonical riders survive byte-for-byte: a canonical fixture cannot see re-serialization (#321).
+  assert.equal(
+    prospectTarget("#seed=7&style=antique&cx=0.5100&cy=0.4900&k=3.0000&flag&note=a%20b", 0),
+    "/prospect/#seed=7&style=antique&cx=0.5100&cy=0.4900&k=3.0000&flag&note=a%20b&i=0",
+  );
+});
+
+test("prospectTarget: a bare-visit Explorer (empty hash) still addresses the place", () => {
+  assert.equal(prospectTarget("", 5), "/prospect/#i=5");
+  assert.equal(prospectTarget("#", 5), "/prospect/#i=5");
 });

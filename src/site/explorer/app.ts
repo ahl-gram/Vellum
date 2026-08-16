@@ -7,7 +7,7 @@ import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts"
 import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
-import { forwardTarget } from "./address.ts";
+import { forwardTarget, prospectTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
 import { wireControls } from "./controls.ts";
 import { wireFootnotes } from "./footnotes.ts";
@@ -51,6 +51,8 @@ function prefersReduce(): boolean {
 const lc = createLivingChart({
   mapEl: mapDiv,
   statusEl: status,
+  // #242: read at show time, so the card's link always carries the hash on screen.
+  prospectHref: (idx) => prospectTarget(location.hash, idx),
   restingTrackSink: {
     paint: (points, viewBox) => paintVersoTrack(versoEl, points, viewBox),
     clear: () => clearVersoTrack(versoEl),

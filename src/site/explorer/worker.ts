@@ -7,6 +7,7 @@ import { buildSurvey } from "../../render/survey.ts";
 import { generateRegionWorld, regionTitle } from "../../world/region.ts";
 import { composeAtlas } from "../../atlas/compose.ts";
 import { serializableAtlas } from "./serializable-atlas.ts";
+import { prospectResultFor } from "./prospect-job.ts";
 import { worldFor } from "./world-cache.ts";
 import type { WorkerRequest, WorkerResponse } from "./worker-client.ts";
 
@@ -65,6 +66,9 @@ ctx.onmessage = (e) => {
         ok: true,
         atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })),
       });
+    } else if (msg.kind === "prospect") {
+      const { world } = worldFor(msg.seed, msg.overrides);
+      ctx.postMessage({ id: msg.id, ok: true, ...prospectResultFor(world, msg) });
     }
   } catch (err) {
     ctx.postMessage({ id: msg.id, ok: false, error: ((err as { message?: string } | null) && (err as { message?: string }).message) || String(err) });

@@ -54,6 +54,15 @@
   letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.1rem; }
 .pc-founded { display: block; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
 .pc-tale { margin: 0.4rem 0 0; font-style: italic; color: var(--ink-tale); }
+/* #242: the card's way in to the prospect page, in the featured action-link gold; pointer-events restored because the card box is pointer-events: none. */
+.pc-prospect { display: inline-block; vertical-align: top; margin-top: 0.45rem;
+  padding: 0.16rem 0.55rem; pointer-events: auto;
+  font-size: 0.82rem; letter-spacing: 0.03em; text-decoration: none;
+  color: var(--ink-dark); background: var(--control-gold);
+  border: 1px solid var(--line-tan); border-radius: 4px;
+  transition: transform 160ms ease, border-color 160ms ease; }
+.pc-prospect:hover, .pc-prospect:focus-visible { border-color: var(--ink-brown);
+  transform: translateY(-2px) rotate(-0.6deg); }
 .pc-tongue { display: block; margin: 0.45rem 0 0; padding-top: 0.4rem;
   border-top: 1px solid rgb(from var(--ink-dark) r g b / 0.22);
   font-size: 0.8rem; color: var(--ink-brown); }

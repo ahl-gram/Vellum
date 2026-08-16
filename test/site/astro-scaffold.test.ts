@@ -124,6 +124,17 @@ const PAGES: readonly PageSpec[] = [
     scriptSrc: "app.bundle.js",
   },
   {
+    route: "prospect/index.html",
+    dir: "/prospect/",
+    room: "The Prospect",
+    title: "The Prospect · Vellum",
+    ogTitle: "The Prospect · Vellum",
+    description:
+      "Any settlement's engraved townscape plate: the second camera beside the chart, drawn side-on from the place's own ground.",
+    tagline: "the second camera",
+    scriptSrc: "./app.bundle.js",
+  },
+  {
     route: "gallery/index.html",
     dir: "/gallery/",
     current: "Gallery",
@@ -602,6 +613,7 @@ test("every internal link and embed on the rendered pages resolves", () => {
     "/print-room/app.bundle.js",
     "/seed-of-the-day/app.bundle.js",
     "/reading-room/app.bundle.js",
+    "/prospect/app.bundle.js",
   ];
   const routes = new Set<string>(PAGES.map((p) => p.dir));
   for (const p of PAGES) {

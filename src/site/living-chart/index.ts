@@ -40,6 +40,8 @@ export interface LivingChartHost {
   scrubber?: ScrubberRefs;
   /** #174: optional second surface the RESTING voyage track mirrors to; painted only at rest, never from the rAF tick. */
   restingTrackSink?: RestingTrackSink;
+  /** #242: builds a settlement's way in to the prospect page (world-sheet cards only). Optional: a host with no prospect surface (the Reading Room) passes none. */
+  prospectHref?: (idx: number) => string;
 }
 
 export function createLivingChart(host: LivingChartHost) {
@@ -47,6 +49,7 @@ export function createLivingChart(host: LivingChartHost) {
   const overlay = createPlaceOverlay({
     mapEl: host.mapEl,
     isSuppressed: () => chronicle.isActive(),
+    ...(host.prospectHref ? { prospectHref: host.prospectHref } : {}),
   });
   const chronicle = createChronicle({
     mapEl: host.mapEl,

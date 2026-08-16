@@ -18,6 +18,8 @@ interface PlaceOverlayState {
   currentIdx: number;
   pinned: boolean;
   pinnedIdx: number;
+  /** #242: the persistent prospect link, re-appended per show; null when the card carries none. */
+  prospectLink: HTMLAnchorElement | null;
 }
 
 /** The manifest slice the chronicle scrubber reads back through the engine's index. */
@@ -44,10 +46,12 @@ export interface PlaceOverlayDeps {
   mapEl: HTMLElement;
   /** True while the chronicle scrubber owns the sheet: the hover card is suppressed. */
   isSuppressed: () => boolean;
+  /** #242: builds the shown place's way in to the prospect page from its world settlement index. */
+  prospectHref?: (idx: number) => string;
 }
 
 export function createPlaceOverlay(deps: PlaceOverlayDeps) {
-  const { mapEl, isSuppressed } = deps;
+  const { mapEl, isSuppressed, prospectHref } = deps;
 
   let placeOverlay: PlaceOverlayState | null = null;
 
@@ -70,6 +74,10 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     founded.className = "pc-founded";
     founded.textContent = card.foundedLine;
     inner.append(name, rank, founded);
+    if (placeOverlay.prospectLink) {
+      placeOverlay.prospectLink.href = prospectHref!(place.idx);
+      inner.append(placeOverlay.prospectLink);
+    }
     if (card.tale) {
       const tale = document.createElement("p");
       tale.className = "pc-tale";
@@ -136,7 +144,14 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const inner = document.createElement("div");
     inner.className = "pc-inner";
     card.appendChild(inner);
-    placeOverlay = { card, places: manifest.places, events: manifest.events, cultureId: manifest.cultureId, presentYear: manifest.presentYear, currentIdx: -1, pinned: false, pinnedIdx: -1 };
+    let prospectLink: HTMLAnchorElement | null = null;
+    if (prospectHref && !(opts && opts.box)) {
+      prospectLink = document.createElement("a");
+      prospectLink.className = "pc-prospect";
+      prospectLink.textContent = "View the prospect";
+      inner.appendChild(prospectLink);
+    }
+    placeOverlay = { card, places: manifest.places, events: manifest.events, cultureId: manifest.cultureId, presentYear: manifest.presentYear, currentIdx: -1, pinned: false, pinnedIdx: -1, prospectLink };
     manifest.places.forEach((place, idx) => {
       const hit = document.createElement("button");
       hit.type = "button";

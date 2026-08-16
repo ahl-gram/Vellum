@@ -43,6 +43,7 @@ const ENGINE_RULES = [
   ".pc-tongue",
   ".pc-roots",
   ".pc-tale",
+  ".pc-prospect",
   ".place-overlay.scrub .place-hit",
   '.living-chart g.settlement[data-ink="founding"]',
   '.living-chart g.settlement[data-ink="ruin"]',
