@@ -1,7 +1,7 @@
 // #300/#366: the survey's arm, deferred one painted frame past every arm path (the tick,
 // the settle, the turn's commit), all through ONE slot so exactly one arm survives into
-// the mount. #373 adds the second wait: the #184 travel matrix is computed off-thread, and
-// the arm holds for it, so what was ~1s of blocked main thread is now ~1s of nothing blocked.
+// the mount. #373 added the second wait: the #184 travel matrix is computed off-thread now, and
+// the arm HOLDS for it rather than blocking on it. Measurements live on that issue.
 export interface SurveyArmDeps {
   /** Run `run` after the browser has painted the frame the click produced. */
   afterPaint: (run: () => void) => void;
@@ -99,8 +99,8 @@ export function deferLandingArm(quiet: boolean, flipped: boolean): boolean {
   return !quiet && !flipped;
 }
 
+// #373: the un-deferred branch arms in the settle's OWN task and never waits, because a FLIPPED landing has to ink the back face inside the task that swaps the chart or the verso shows a bare new ghost first (#174; e2e SV2o measured exactly that when this branch was made to wait). It takes whatever order is already prepared, and pays the matrix inline when there is none.
 /** #366: a landing arms through the SAME single slot the tick uses, one painted frame later; schedule() bumps the generation cancel() does, so it IS the cancel and exactly one arm survives. */
-// #373: an un-deferred landing arms in the settle's OWN task and never waits for an off-thread order. A quiet mid-drag frame would otherwise let each throttled redraw drop the one before it, and a FLIPPED landing must ink the back face inside the task that swaps the chart, so the verso changes whole rather than showing a bare new ghost (#174, e2e SV2o). Both take whatever order is already prepared; a flipped landing with none still pays the matrix inline.
 export function armOnLanding(o: LandingArm): void {
   if (!o.armed) { o.arm.cancel(); o.clear(); return; }
   if (o.defer === false) { o.arm.cancel(); o.rearm(); return; }
