@@ -3,7 +3,7 @@
 // coupling crosses the boundary as the injected `isSuppressed` predicate. Card text is
 // composed CLIENT-SIDE from the manifest (composePlaceCard), never createLoreWriter,
 // whose order/rng-dependent prose would diverge from the gazetteer for the same town.
-import { composePlaceCard, placeAriaLabel, cardSide, clampOffset, type CardBox } from "../../render/place-card.ts";
+import { composePlaceCard, placeAriaLabel, cardSide, clampOffset, type CardBox, type PlaceCard } from "../../render/place-card.ts";
 import type { PlaceManifest, PlaceMark } from "../../render/place-manifest.ts";
 import type { HistoricalEvent } from "../../society/history.ts";
 
@@ -48,7 +48,7 @@ export interface PlaceOverlayDeps {
   isSuppressed: () => boolean;
   /** #242: builds the shown place's way in to the prospect page from its world settlement index. */
   prospectHref?: (idx: number) => string;
-  /** #387/#388: the box a shown card is clamped into, in client coordinates. A host that wires none leaves the card wherever cardSide anchored it. */
+  /** #387/#388: the box a shown card is clamped into, in client coordinates. */
   clampBox?: () => CardBox | null;
 }
 
@@ -57,14 +57,8 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
 
   let placeOverlay: PlaceOverlayState | null = null;
 
-  function showPlaceCard(idx: number): void {
-    if (!placeOverlay || isSuppressed()) return; // the hover card is suppressed while scrubbing
-    const place = placeOverlay.places[idx];
-    if (!place) return;
-    const card = composePlaceCard(place, placeOverlay.events, placeOverlay.cultureId);
-    const el = placeOverlay.card;
-    const inner = el.querySelector(".pc-inner") as HTMLElement;
-    // Rebuilt from textContent only (no innerHTML): the fields are plain strings.
+  // Rebuilt from textContent only (no innerHTML): the fields are plain strings.
+  function fillCardInner(inner: HTMLElement, card: PlaceCard, place: PlaceMark): void {
     inner.replaceChildren();
     const name = document.createElement("strong");
     name.className = "pc-name";
@@ -82,9 +76,9 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       former.textContent = card.formerLine;
       inner.append(former);
     }
-    if (placeOverlay.prospectLink) {
-      placeOverlay.prospectLink.href = prospectHref!(place.idx);
-      inner.append(placeOverlay.prospectLink);
+    if (placeOverlay!.prospectLink) {
+      placeOverlay!.prospectLink.href = prospectHref!(place.idx);
+      inner.append(placeOverlay!.prospectLink);
     }
     if (card.tale) {
       const tale = document.createElement("p");
@@ -99,6 +93,16 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     derivation.className = "pc-roots";
     derivation.textContent = card.derivationLine;
     inner.append(tongue, derivation);
+  }
+
+  function showPlaceCard(idx: number): void {
+    if (!placeOverlay || isSuppressed()) return; // the hover card is suppressed while scrubbing
+    const place = placeOverlay.places[idx];
+    if (!place) return;
+    const card = composePlaceCard(place, placeOverlay.events, placeOverlay.cultureId);
+    const el = placeOverlay.card;
+    const inner = el.querySelector(".pc-inner") as HTMLElement;
+    fillCardInner(inner, card, place);
     el.style.setProperty("--pc-nx", String(place.nx));
     el.style.setProperty("--pc-ny", String(place.ny));
     const side = cardSide(place.nx, place.ny);
@@ -115,7 +119,13 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     placeOverlay.currentIdx = idx;
   }
 
-  // #387/#388: only the runtime knows the card's measured box, so the nudge cannot live in the stylesheet.
+  // #387/#388: the nudge is arithmetic over a MEASURED box, so anything that moves or rescales the sheet under an open card invalidates it. Two paths reach a card whose nudge was computed against geometry that no longer holds: a camera change with the card still pinned, and a redraft, whose fresh card is shown here before the host has published its counter-scale onto it.
+  function reclampCard(): void {
+    if (!placeOverlay || placeOverlay.card.hidden) return;
+    clampIntoView(placeOverlay.card);
+  }
+
+  // Only the runtime knows the card's measured box, so the nudge cannot live in the stylesheet.
   function clampIntoView(el: HTMLElement): void {
     if (!clampBox) return;
     // Zeroed first: the card element is reused across places, and getBoundingClientRect below flushes layout, so an unzeroed card would be measured through the PREVIOUS card's nudge.
@@ -234,7 +244,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     placeOverlay = null;
   }
 
-  return { buildPlaceOverlay, onDocKeydown, onDocClick, hideCard: hidePlaceCard, data, teardown };
+  return { buildPlaceOverlay, onDocKeydown, onDocClick, hideCard: hidePlaceCard, reclampCard, data, teardown };
 }
 
 export type PlaceOverlay = ReturnType<typeof createPlaceOverlay>;

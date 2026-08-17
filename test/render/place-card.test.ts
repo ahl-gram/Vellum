@@ -201,10 +201,7 @@ test("integration: every seed 42 place carries a derivation, and the ruin keeps 
   assert.ok(ruinCard.tale && ruinCard.tale.includes(ruin.name), "the ruin's tale survives the new lines");
 });
 
-// #387/#388: one mechanism on two axes, ruled 2026-08-16. cardSide stays pure and undisturbed;
-// this is the nudge applied AFTER it has chosen a side, and it is the only part of the fix a
-// unit test can see. Screen px throughout: the CSS folds it in after the counter-scale, so a
-// nudge means the same distance at k=1 and at k=8.
+// #387/#388: one mechanism on two axes, ruled 2026-08-16. cardSide stays pure and undisturbed; this is the nudge applied AFTER it has chosen a side. Screen px throughout, because the CSS folds it in after the counter-scale.
 const box = { left: 0, top: 0, right: 342, bottom: 266 };
 const at = (left: number, top: number, w: number, h: number) => ({ left, top, right: left + w, bottom: top + h });
 

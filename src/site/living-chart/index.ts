@@ -97,6 +97,7 @@ export function createLivingChart(host: LivingChartHost) {
       overlay.buildPlaceOverlay(manifest, opts),
     onDocKeydown: overlay.onDocKeydown,
     onDocClick: overlay.onDocClick,
+    reclampCard: overlay.reclampCard,
     applyAges: (manifest: PlaceManifest | null, survey: Survey | null, seed: number, subtitle: string) =>
       ages.armAges(manifest, survey, seed, subtitle),
     rearmAges: (

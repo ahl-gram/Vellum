@@ -71,7 +71,7 @@ function axisNudge(lo: number, hi: number, boxLo: number, boxHi: number): number
   return 0;
 }
 
-/** #387/#388: the screen-px nudge that pulls a shown card back inside `box`, applied after cardSide has chosen its side. A card larger than the box keeps its leading edge, because clamping fits a card, it does not shrink one. */
+/** #387/#388: the screen-px nudge that pulls a shown card back inside `box`, applied after cardSide has chosen its side. */
 export function clampOffset(card: CardBox, box: CardBox): { dx: number; dy: number } {
   return {
     dx: axisNudge(card.left, card.right, box.left, box.right),

@@ -19,6 +19,8 @@ interface GlassDeps {
   runJob: Parameters<typeof createLodController>[0]["runJob"];
   /** The engine's overlay builder; every redraft path rebuilds the overlay through it. */
   buildPlaceOverlay: (manifest: PlaceManifest, opts?: { preservePinByName?: boolean; box?: { x: number; y: number; w: number; h: number } }) => void;
+  /** #387/#388: re-measure an open card against the camera as it now stands; a no-op with no card shown. */
+  reclampCard: () => void;
   setCaption: (text: string) => void;
   prefersReduce: () => boolean;
   /** #169: whether a settle should redraft (style, chronicle/voyage/verso, test seam). */
@@ -47,6 +49,8 @@ export function createGlass(deps: GlassDeps) {
       if (k === 1) el.style.removeProperty("--zoom-k");
       else el.style.setProperty("--zoom-k", String(k));
     }
+    // #387/#388: this is the ONE call reached both by every camera apply and by every redraft rebuild, so it is where a nudge measured against stale geometry gets corrected. Ordered after the publish above: the redraft's fresh card has no counter-scale until that line runs, and a card measured without it is measured k times too large.
+    deps.reclampCard();
   }
 
   // #165: the camera is bookmarkable: a settle mirrors the frame into the hash as cx/cy/k, dropped at home so a home view links clean. reducedMotion is left unset so the controller reads the OS setting LIVE.

@@ -2,13 +2,16 @@
 // Queries deliberately answer "nothing here", true of an undrawn mount; never grow this into a selector engine.
 // Lives outside test/ so node --test does not collect it as a phantom 0-test file.
 
-/** An inline style bag that also answers setProperty/getPropertyValue, which is how the engine writes its custom properties. */
+/** An inline style bag that also answers setProperty/getPropertyValue, which is how the engine writes its custom properties. The two methods are NON-enumerable, so Object.keys of the bag still returns only the properties something actually wrote. */
 function styleBag() {
   const bag: Record<string, string> = {};
-  return Object.assign(bag, {
-    setProperty: (name: string, value: string): void => { bag[name] = String(value); },
-    getPropertyValue: (name: string): string => bag[name] ?? "",
-  });
+  return Object.defineProperties(bag, {
+    setProperty: { value: (name: string, value: string): void => { bag[name] = String(value); }, enumerable: false },
+    getPropertyValue: { value: (name: string): string => bag[name] ?? "", enumerable: false },
+  }) as Record<string, string> & {
+    setProperty(name: string, value: string): void;
+    getPropertyValue(name: string): string;
+  };
 }
 
 export class El {

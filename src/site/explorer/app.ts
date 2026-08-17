@@ -78,6 +78,7 @@ const glass = createGlass({
   mapDiv,
   runJob,
   buildPlaceOverlay: lc.buildPlaceOverlay,
+  reclampCard: lc.reclampCard,
   setCaption: (t) => { caption.textContent = t; },
   prefersReduce,
   regionEligible,
