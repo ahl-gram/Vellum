@@ -200,7 +200,7 @@ export function createAges(deps: AgesDeps) {
       clearAges();
       return;
     }
-    // The quiet flag passes THROUGH, never pinned on: rearmVoyage's quiet also skips the #184 travel-order matrix, and pinning it true armed every fresh world on an UNORDERED itinerary (e2e W25); a non-quiet rearm's sink paint is settled by syncSinkAtRest below (#174).
+    // The quiet flag passes THROUGH, never pinned on: rearmVoyage's quiet also skips the #184 travel-order matrix, and pinning it true armed every fresh world on an UNORDERED itinerary (test/site/voyage-tour-order.test.ts pins the mechanism, a quiet build with nothing ready taking the straight-line tour; the e2e W25 this cited died with suite-voyage-route.mjs at #321 Sub 4, PR #352); a non-quiet rearm's sink paint is settled by syncSinkAtRest below (#174).
     voyage.rearmVoyage(manifest, survey, seed, subtitle, { quiet: !!opts.quiet });
     const range = rangeOf();
     const barMax = 2 * Math.max(1, range.max - range.min);

@@ -228,6 +228,43 @@ export async function run(ctx) {
     JSON.stringify({ pre, usurped }),
   );
 
+  // #418: the arm waits for an off-thread travel order, so a window NEW to this issue opens between the painted chart and the armed instrument. The panel is hidden across it, but .rf-play and .rf-range are in the DOM from the frame's construction and the document listeners are live, so a reader really can reach them. Every entry point guards on `if (!ages) return`; nothing else pins that, and the window did not exist to be tested before.
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
+  const pokeBooted = await boot();
+  let unarmed = null;
+  for (let i = 0; i < 300; i++) {
+    try {
+      unarmed = await evaluate(`(()=>{const svg=!!document.querySelector(".rf-chart svg");
+        const st=(document.querySelector(".rf-status")||{}).textContent;
+        const a=window.__vellumReadingRoomAges?window.__vellumReadingRoomAges():undefined;
+        return svg&&st!==""&&a===null?{panelHidden:document.querySelector(".rf-ages").hidden}:null;})()`);
+    } catch {}
+    if (unarmed) break;
+    await sleep(15);
+  }
+  const poked = await evaluate(`(()=>{
+    const before=window.__vellumReadingRoomAges();
+    document.querySelector(".rf-play").click();
+    const r=document.querySelector(".rf-range");
+    r.value=r.max||"50";
+    r.dispatchEvent(new Event("input",{bubbles:true}));
+    r.dispatchEvent(new Event("change",{bubbles:true}));
+    document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));
+    document.dispatchEvent(new MouseEvent("click",{bubbles:true}));
+    return{before,after:window.__vellumReadingRoomAges(),play:document.querySelector(".rf-play").textContent};
+  })()`);
+  const pokeSettled = await settled();
+  const pokeRead = await evaluate(agesRead);
+  check(
+    "RR24 scrubbing, playing or clicking BEFORE the arm changes nothing, and the room still arrives at rest (#418)",
+    pokeBooted && !!unarmed && unarmed.panelHidden === true &&
+      poked.before === null && poked.after === null && poked.play === "Play" &&
+      pokeSettled && !!pokeRead.ages && pokeRead.ages.chamber === "ages" &&
+      pokeRead.play === "Play" && pokeRead.panelHidden === false,
+    JSON.stringify({ unarmed, poked, read: pokeRead }),
+  );
+
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let card = null;
   for (let i = 0; i < 120; i++) {
