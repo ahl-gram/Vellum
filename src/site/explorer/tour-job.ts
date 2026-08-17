@@ -12,6 +12,5 @@ export interface TourJobInput {
 }
 
 export function tourOrderFor(job: TourJobInput): ReadonlyArray<number> {
-  if (job.ports.length <= 2) return [...job.ports];
   return refineTour(job.ports, prepareVoyageRouter(job.sites, job.survey).legLength);
 }

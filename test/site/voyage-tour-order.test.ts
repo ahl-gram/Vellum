@@ -134,28 +134,51 @@ test("#373 the off-thread job returns the order the inline computation would hav
   assert.deepEqual([...order], travelOrderOf(manifest, survey), "one tour, whichever thread computed it");
 });
 
-test("#373 the job leaves a two-port tour alone, as reorderPlanByTravel does", async () => {
+test("#373 the job and the inline path agree at every port count, not just this world's", async () => {
   const { manifest, survey } = await realWorld();
-  const ports = portsOf(manifest).slice(0, 2);
+  const sites = sitesOf(manifest);
+  const all = portsOf(manifest);
 
-  assert.deepEqual([...tourOrderFor({ sites: sitesOf(manifest), survey, ports })], ports);
+  // A single full-size oracle cannot see a drift that only shows at another port count, and 2 is the boundary where reorderPlanByTravel short circuits and refineTour does not reorder.
+  for (const n of [12, 5, 2]) {
+    const ports = all.slice(0, n);
+    const plan = { ports: ports.map((idx) => ({ idx, name: "", logLine: "" })), legs: [] };
+    const router = prepareVoyageRouter(sites, survey);
+    const inline = reorderPlanByTravel(plan, router.legLength).ports.map((p) => p.idx);
+    assert.deepEqual([...tourOrderFor({ sites, survey, ports })], inline, `port count ${n}`);
+  }
 });
 
-/** A tour-order module over a fake transport: `answer` decides what the "worker" returns for a job. */
+test("#373 the adopted order is CACHED, so a later quiet rebuild still sails it", async () => {
+  const { manifest, survey } = await realWorld();
+  const wanted = reversedTour(portsOf(manifest));
+  let ready: ReadonlyArray<number> | null = wanted;
+  const { sessions } = await builderWith({ get: () => ready });
+
+  sessions.build(manifest, survey, SEED, SUBTITLE);
+  ready = null; // the host holds ONE world, and priming a second evicted this one
+  const again = sessions.build(manifest, survey, SEED, SUBTITLE, true);
+
+  assert.ok(again);
+  // Dropping the builder's own cache write escaped every other case here, because they all re-read a live source (guard-prover run, mutation M4). A quiet rebuild is the one that cannot fall back and recompute.
+  assert.deepEqual(again.plan.ports.map((p) => p.idx), wanted, "the order outlives the source that supplied it");
+});
+
+/** A tour-order module over a fake transport: `answer` decides what the "worker" returns for a job. release() settles EVERY job outstanding, so a lost dedupe fails an assertion instead of hanging the suite on a job nobody can answer. */
 function tourHarness(answer: (ports: ReadonlyArray<number>) => ReadonlyArray<number> | Error) {
   const jobs: Array<{ seed: number; ports: ReadonlyArray<number> }> = [];
-  let release: (() => void) | null = null;
+  const waiting: Array<() => void> = [];
   const orders = createTourOrder({
     runJob: (job) => {
       jobs.push({ seed: job.seed, ports: job.ports });
       const out = answer(job.ports);
       const settle = out instanceof Error ? Promise.reject(out) : Promise.resolve({ ok: true as const, order: out });
       return new Promise((resolve, reject) => {
-        release = () => settle.then(resolve, reject);
+        waiting.push(() => { settle.then(resolve, reject); });
       });
     },
   });
-  return { orders, jobs, release: () => { const r = release; release = null; if (r) r(); } };
+  return { orders, jobs, release: () => { for (const r of waiting.splice(0)) r(); } };
 }
 
 test("#373 a primed order reaches the builder: the host and the engine agree on the key", async () => {
@@ -246,11 +269,62 @@ test("#373 a tour job that fails leaves the engine to compute the order inline",
   );
 });
 
-test("#373 a one-port world asks the worker for nothing", async () => {
+test("#373 a held order answers ONLY for the world it was computed for", async () => {
+  const { manifest, survey } = await realWorld();
+  const h = tourHarness(() => reversedTour(portsOf(manifest)));
+  const primed = h.orders.prime(manifest, survey, SEED);
+  h.release();
+  await primed;
+  const ports = portsOf(manifest);
+
+  assert.ok(h.orders.get(SEED, survey, ports), "the world it was asked for");
+  // All three components of the key, swept: a get() that ignored the key entirely passed every other case in this file (guard-prover run, mutation M5). Handing one world's order to another throws out of applyTourOrder.
+  assert.equal(h.orders.get(SEED + 1, survey, ports), null, "another seed");
+  assert.equal(h.orders.get(SEED, { ...survey, gridW: survey.gridW + 1 }, ports), null, "another survey");
+  assert.equal(h.orders.get(SEED, survey, ports.slice(0, -1)), null, "another port set");
+});
+
+test("#373 a world with no manifest asks the worker for nothing", async () => {
   const { survey } = await realWorld();
   const h = tourHarness(() => []);
 
   await h.orders.prime(null, survey, SEED);
 
   assert.equal(h.jobs.length, 0, "no manifest, no tour");
+});
+
+/** A hand-built manifest with `n` ports: the real seed-42 world has 24 and cannot reach the short circuit. */
+function portsManifest(n: number): PlaceManifest {
+  const places = Array.from({ length: n }, (_, idx) => ({
+    idx, name: `P${idx}`, kind: idx === 0 ? "capital" : "town", founded: 1, ruined: false,
+    seat: idx === 0, nx: 0.1 * idx, ny: 0.1 * idx, gx: 10 * idx, gy: 10 * idx,
+  }));
+  return { places, events: [], cultureId: "x", presentYear: 100, widthPx: 1500, heightPx: 1000, marginPx: 67 } as unknown as PlaceManifest;
+}
+
+test("#373 a two-port world asks the worker for nothing, and a three-port world does ask", async () => {
+  const { survey } = await realWorld();
+  const h = tourHarness((ports) => ports);
+
+  await h.orders.prime(portsManifest(2), survey, SEED);
+  assert.equal(h.jobs.length, 0, "two ports admit one tour: nothing to order");
+
+  void h.orders.prime(portsManifest(3), survey, SEED);
+  // The boundary in both directions; a guard written as `< 2` or `<= 3` passes a one-sided test.
+  assert.equal(h.jobs.length, 1, "three is where an itinerary starts having a choice");
+  h.release();
+});
+
+test("#373 a worker that never answers at all does not hold the arm for ever", async () => {
+  const { manifest, survey } = await realWorld();
+  const orders = createTourOrder({ runJob: () => new Promise(() => {}), timeoutMs: 5 });
+
+  // Raced rather than awaited: a lost timeout must fail this case, not hang the suite (there is no default --test-timeout in this repo).
+  const outcome = await Promise.race([
+    orders.prime(manifest, survey, SEED).then(() => "settled"),
+    new Promise((resolve) => setTimeout(() => resolve("hung"), 500)),
+  ]);
+
+  assert.equal(outcome, "settled", "a worker that stops answering fires no onerror, and the arm waiting on this would leave the sheet bare for good");
+  assert.equal(orders.get(SEED, survey, portsOf(manifest)), null, "nothing held, so the builder computes the order inline");
 });

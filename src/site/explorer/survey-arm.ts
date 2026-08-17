@@ -19,7 +19,6 @@ export function createSurveyArm(deps: SurveyArmDeps) {
   // Monotonic, bumped by BOTH schedule and cancel, so every change event supersedes the arm pending before it.
   let gen = 0;
 
-  // The three supersession reads, named because #373 made them run TWICE: once on the painted frame, once on the far side of the wait, never captured in between.
   const live = (mine: number, world: number): boolean =>
     mine === gen && world === deps.worldGen() && deps.isArmed();
 
@@ -31,7 +30,6 @@ export function createSurveyArm(deps: SurveyArmDeps) {
       if (!live(mine, world)) return;
       if (!deps.prime) { run(); return; }
       const armIfLive = () => { if (live(mine, world)) run(); };
-      // Settled BOTH ways: a source that rejected is a source with nothing ready, and the arm has to proceed to the inline order rather than leave the sheet bare on an unhandled rejection.
       void deps.prime().then(armIfLive, armIfLive);
     });
   }
@@ -59,7 +57,7 @@ export interface SurveyToggleDeps {
   exit: () => void;
   /** #192: the one hash writer, run after the arm in BOTH directions. */
   syncHash: () => void;
-  /** #373: the off-thread preparation every arm through this slot waits for. */
+  /** #373, passed through to the slot. */
   prime?: () => Promise<void>;
   /** Test seam; production is afterNextPaint below. */
   afterPaint?: (run: () => void) => void;
@@ -101,7 +99,7 @@ export function deferLandingArm(quiet: boolean, flipped: boolean): boolean {
   return !quiet && !flipped;
 }
 
-// #373: the un-deferred branch arms in the settle's OWN task and never waits, because a FLIPPED landing has to ink the back face inside the task that swaps the chart or the verso shows a bare new ghost first (#174; e2e SV2o measured exactly that when this branch was made to wait). It takes whatever order is already prepared, and pays the matrix inline when there is none.
+// #373: the un-deferred branch must NOT wait; e2e SV2o and test/site/survey-arm-wait.test.ts carry the why.
 /** #366: a landing arms through the SAME single slot the tick uses, one painted frame later; schedule() bumps the generation cancel() does, so it IS the cancel and exactly one arm survives. */
 export function armOnLanding(o: LandingArm): void {
   if (!o.armed) { o.arm.cancel(); o.clear(); return; }

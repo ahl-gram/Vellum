@@ -214,7 +214,6 @@ const surveyArm = wireSurveyToggle({
   worldGen: () => drawGen,
   home: () => { glass.homeToWorld(); glass.reset(); },
   arm: () => { lc.rearmVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle); },
-  // #373: reads live, like arm does; an arm whose world moved under the wait is dropped by the slot's own generation check, not by what this closure captured.
   prime: () => tourOrder.prime(lastManifest, lastSurvey, lastSeed),
   exit: lc.exitAges,
   syncHash,

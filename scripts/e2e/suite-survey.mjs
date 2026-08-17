@@ -111,7 +111,7 @@ export async function run(ctx) {
     JSON.stringify({ same: p0 === p1, anims: sv2b.anims, len: (p0 || "").length }),
   );
 
-  // #373 rewrote what these two measure. The matrix runs in the render worker now, so __armMs (a rAF-then-task hop) collapses to one frame whether the order is cached or not (5.4 and 149.4ms here, against 1120 and 144 before), and the ratio it used to carry moved to the wall clock from tick to ink. Measured 2026-08-17 headless Brave: first ink 1150ms, re-ink 170ms. The 2500ms cap is sized for the slower ubuntu CI runner carrying the other #381 lane.
+  // #373 rewrote what these two measure. The matrix runs in the render worker now, so __armMs (a rAF-then-task hop) collapses to one frame whether the order is cached or not (5.4 and 149.4ms here, against 1120 and 144 before), and the ratio it used to carry moved to the wall clock from tick to ink. Measured 2026-08-17: 1150ms first / 170ms re-inked here, 2082 / 204 on the CI runner under the #381 lanes. The 800ms cap is sized to that 204, the same 2 to 4x headroom the 800ms arm cap it replaces was sized to, NOT to the tick-to-ink of a cold world.
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   const reInkT0 = Date.now();
   await tick(true, "__armMs2");
@@ -120,7 +120,7 @@ export async function run(ctx) {
   const sv2c = await evaluate(`({first:window.__armMs,again:window.__armMs2})`);
   check(
     "SV2c re-arming the same world is effectively instant: the travel matrix cache still holds (#300/#373)",
-    typeof sv2c.again === "number" && reInkMs < 2500 && reInkMs < firstInkMs / 2,
+    reInkMs < 800 && reInkMs < firstInkMs / 2,
     JSON.stringify({ ...sv2c, firstInkMs, reInkMs }),
   );
 
@@ -304,8 +304,14 @@ export async function run(ctx) {
 
   await goto("#seed=7&style=antique&survey", "survey-draw-beat-base");
   await waitInked("survey-draw-beat-base-ink");
-  await evaluate(`(()=>{window.__land={batches:[],frames:0,raf:0};
-    const bump=()=>{window.__land.frames++;window.__land.raf=requestAnimationFrame(bump);};bump();
+  // #373: the same rAF loop samples the coastline's inkDraw, whose stroke-dashoffset is not compositable and so advances ONLY while the main thread is free. dashCoastForInk (draw-ceremony.ts) sets the dash; animationend clears it.
+  await evaluate(`(()=>{window.__land={batches:[],frames:0,raf:0,dashSteps:0,lastDash:"",dashSeen:0};
+    const bump=()=>{window.__land.frames++;
+      const c=document.querySelector("#map #layer-land path");
+      if(c){const v=getComputedStyle(c).strokeDashoffset;
+        if(v&&v!=="none"&&v!=="0px")window.__land.dashSeen++;
+        if(v!==window.__land.lastDash){window.__land.lastDash=v;window.__land.dashSteps++;}}
+      window.__land.raf=requestAnimationFrame(bump);};bump();
     window.__mo=new MutationObserver((recs)=>{let chart=false,overlay=false;
       for(const r of recs)for(const n of r.addedNodes){if(n.nodeType!==1)continue;
         if(n.classList&&n.classList.contains("voyage-overlay"))overlay=true;
@@ -321,6 +327,7 @@ export async function run(ctx) {
     const recto=document.querySelector("#map .voyage-overlay .voyage-track");
     const back=document.querySelector("#verso .verso-track");
     return{batches:b,chartBatch:c,inkBatch:i,chartAlone:c>=0&&!b[c].overlay,
+      dashSteps:window.__land.dashSteps,dashSeen:window.__land.dashSeen,frames:window.__land.frames,
       framesBetween:c>=0&&i>=0?b[i].frames-b[c].frames:-1,
       versoAtSwap:c>=0?b[c].verso:null,
       facesAgree:!!recto&&!!back&&recto.getAttribute("points")===back.getAttribute("points"),
@@ -335,6 +342,12 @@ export async function run(ctx) {
       sv2p.batches.length === 2 && sv2p.overlays === 1 && sv2p.status === "" &&
       /(^|&)survey(&|$)/.test(sv2p.hash.slice(1)),
     JSON.stringify(sv2p),
+  );
+  check(
+    "SV2r the #127 arrival ceremony RUNS while the survey is being prepared: inkDraw advances instead of stalling (#373)",
+    // The ratified acceptance, on the ruled path (a Draw with the box ticked), and the only check here that watches the ceremony itself rather than the arm. stroke-dashoffset is not compositable, so a matrix left on the main thread freezes it: 106 distinct values measured on this branch, against a ~700ms stall that would eat most of inkDraw's ~1170ms.
+    sv2p.dashSeen > 0 && sv2p.dashSteps >= 40,
+    JSON.stringify({ dashSteps: sv2p.dashSteps, dashSeen: sv2p.dashSeen, frames: sv2p.frames }),
   );
   check(
     "SV2k the settle leaves the back face to the deferred arm: no outgoing track over the new ghost, and both faces agree once it lands (#174/#366)",

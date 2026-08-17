@@ -61,7 +61,6 @@ export interface ProspectJob {
 /** #373: the #184 travel matrix, off the main thread. Self-contained on purpose (no seed lookup, no world rebuild): the inputs ARE the world facts the router walks, so the two sides cannot compute over different worlds. */
 export interface TourJob {
   readonly kind: "tour";
-  /** Carried for the client's cache key and for job attribution; the computation never reads it. */
   readonly seed: number;
   readonly sites: ReadonlyArray<Site>;
   readonly survey: Survey;
