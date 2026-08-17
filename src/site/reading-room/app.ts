@@ -9,6 +9,8 @@ import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { parseLive, emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
 import { createReadingFrame } from "../reading-frame/index.ts";
 import { createColophon } from "./colophon.ts";
+import { createTourOrder } from "../explorer/tour-order.ts";
+import { stillResting } from "./rearm-window.ts";
 import { createLivingChart, type AgesPos, type LivingChart } from "../living-chart/index.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
@@ -21,6 +23,8 @@ declare global {
     __vellumReadingRoomUsesWorker?: typeof usesWorker;
     __vellumReadingRoomState?: () => { seed: number; title: string };
     __vellumReadingRoomAges?: LivingChart["agesState"];
+    /** #373: false while the travel order is still being computed off-thread, so a suite reading the itinerary is not racing the silent re-arm. */
+    __vellumReadingRoomOrdered?: () => boolean;
   }
 }
 
@@ -35,7 +39,9 @@ const warning = document.getElementById("rr-warning") as HTMLElement;
 
 // onPark is #192's seam: Play's parks are the one rest no input event announces.
 const frame = createReadingFrame(mount, { onPark: () => syncHash() });
-const lc = createLivingChart(frame.host);
+// #373: the #184 travel matrix runs in the render worker, so it no longer blocks the arrival ceremony or the #321 unfurl.
+const tourOrder = createTourOrder({ runJob });
+const lc = createLivingChart({ ...frame.host, tourOrder });
 // #318: the colophon mounts as the instrument panel's SIBLING, never inside it (the ratified placement: the engine hides the panel through every teardown, and the colophon must stand).
 const colophon = createColophon();
 frame.reading.appendChild(colophon.root);
@@ -127,8 +133,11 @@ const retireArrival = (e: AnimationEvent): void => {
 frame.root.addEventListener("animationend", retireArrival);
 frame.root.addEventListener("animationcancel", retireArrival);
 
+let ordered = false;
+
 function draw(): void {
   const myGen = ++drawGen;
+  ordered = false;
   // pauseScrub rather than a bare raf cancel: a sweep interrupted by a read is PARKED (playing flag, Play label) even if the draw then fails, and it never fires onPark, so nothing writes the address mid-draft.
   lc.pauseScrub();
   lc.cancelVoyageRaf();
@@ -163,7 +172,8 @@ function draw(): void {
       pendingLive = null;
       // #318: every draw here is a fresh ARRIVAL, never a redraw of the world on screen, so drop any prior session before arming (e2e RR22); clearAges is the post-wipe teardown.
       lc.clearAges();
-      lc.rearmAges(res.manifest, res.survey, seed, res.subtitle, { rest });
+      // #373: QUIET, which is the one flag that skips the #184 matrix, so this arm cannot block the ceremony it sits inside. ages.ts warns against pinning quiet true because that ships an unordered itinerary; this does not pin it, it pairs it with the re-arm below, which restores the travel order the moment the worker has one.
+      lc.rearmAges(res.manifest, res.survey, seed, res.subtitle, { rest, quiet: true });
       // #321: added AFTER the arm so the panel is visible when the animation starts (see the flag's comment above).
       if (!arrived) {
         arrived = true;
@@ -172,9 +182,22 @@ function draw(): void {
       frame.host.statusEl.textContent = "";
       // Converge the address after the arm, so a bare visit's URL immediately carries the world it landed on.
       syncHash();
+      // #373: the arm above sailed the straight-line tour. This one sails the travel order: instant when the worker answered, and paying the matrix inline (as the room always did) when it did not, so a dead worker costs the old block rather than a wrong itinerary.
+      // The room's rest shows the ages chamber, where the voyage overlay is hidden (ages.ts setOverlayVisible), so the swap is not visible. A reader who has scrubbed, played, or crossed to the survey chamber keeps what they are looking at.
+      const armedAt = lc.agesState();
+      const settleOrder = (): void => {
+        if (myGen !== drawGen) return;
+        if (stillResting(armedAt, lc.agesState())) {
+          lc.rearmAges(res.manifest, res.survey, seed, res.subtitle, { rest });
+          syncHash();
+        }
+        ordered = true;
+      };
+      void tourOrder.prime(res.manifest, res.survey, seed).then(settleOrder, settleOrder);
     })
     .catch((err) => {
       if (myGen !== drawGen) return;
+      ordered = true; // nothing will arm, so nothing is waiting on an order
       // The previous world is still on screen with its instrument armed: converge the module state back onto it, or the next park would serialize the failed seed into a shareable wrong address.
       seed = shownSeed;
       colophon.seedInput.value = String(shownSeed);
@@ -201,6 +224,7 @@ document.addEventListener("click", lc.onDocClick);
 
 await initWorker();
 window.__vellumReadingRoomUsesWorker = usesWorker;
+window.__vellumReadingRoomOrdered = () => ordered;
 window.__vellumReadingRoomState = () => ({ seed, title: lastTitle });
 // #320: published whole, never narrowed; both names below are the same function object, so they cannot disagree.
 window.__vellumReadingRoomAges = lc.agesState;

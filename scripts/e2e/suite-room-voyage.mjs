@@ -6,7 +6,8 @@ export async function run(ctx) {
   const room = makeRoom(ctx);
   const gate = scopedHealth(ctx);
 
-  const booted = await room.goto("#seed=42&style=antique&legend=1");
+  // #373: the itinerary is what this suite walks, so wait out the silent re-arm the off-thread travel order triggers.
+  const booted = (await room.goto("#seed=42&style=antique&legend=1")) && (await room.ordered());
   check("RW0 the room boots armed and settled", booted);
 
   const vm = await evaluate(`(()=>{

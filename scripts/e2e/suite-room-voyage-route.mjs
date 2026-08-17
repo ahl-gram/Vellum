@@ -8,7 +8,7 @@ export async function run(ctx) {
   const gate = scopedHealth(ctx);
 
   // Seed 526413615 ("The Isle of Selivelai"): 24 ports, a closed 24-leg round trip, exactly one genuine inland handoff.
-  const based = await room.goto("#seed=526413615&style=antique&legend=1&survey");
+  const based = (await room.goto("#seed=526413615&style=antique&legend=1&survey")) && (await room.ordered());
   check("RV0 the room lands on the routed world at the survey rest", based);
 
   const rv1 = await evaluate(`(()=>{
@@ -207,6 +207,7 @@ export async function run(ctx) {
 
   // Seed 39 carries the worst measured handoffs (a 26-cell embark stub and a 48-cell landfall stub, back to back), proving the swap in BOTH directions.
   await room.goto("#seed=39&style=antique&legend=1&survey");
+  await room.ordered();
   const rv11 = await evaluate(`(()=>{
     const legs=window.__vellumVoyageLegGeometry();
     const n=legs.length;
@@ -239,6 +240,7 @@ export async function run(ctx) {
 
   // Seed 430445745 puts ports on THREE landmasses; before #309 only the capital's shore had roads and 17 of its 24 legs degraded to straight chords. #298's walk-the-land guard now lives on a synthetic fixture in voyage-route.test.ts.
   await room.goto("#seed=430445745&style=antique&legend=1&survey");
+  await room.ordered();
   const rv12 = await evaluate(`(()=>{
     const legs=window.__vellumVoyageLegGeometry();
     const modes={};

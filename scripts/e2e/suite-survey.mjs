@@ -348,7 +348,8 @@ export async function run(ctx) {
     "SV2r the #127 arrival ceremony RUNS while the survey is being prepared: inkDraw advances instead of stalling (#373)",
     // The ratified acceptance, on the ruled path (a Draw with the box ticked), and the only check here that watches the ceremony itself rather than the arm. stroke-dashoffset is not compositable, so a matrix left on the main thread starves it.
     // TWO clauses, because the frame COUNT is environment-scaled and the gap is not: 104 steps on the authoring laptop against 39 on the CI runner, both healthy, where an arm put back on the main thread reads 3. A count threshold sized to the laptop red CI at 39, which is how the gap clause got here.
-    sv2p.dashSeen >= 12 && sv2p.gap > 0 && sv2p.gap < 400,
+    // The gap cap is 600, not SV2q's 400: this window also carries the innerHTML swap, buildPlaceOverlay and the arm's own cold routing, and CI measured 283.3 against SV2q's 166.6 on the same run. The mutant reads 1066.6, so both clauses keep roughly 2x either way.
+    sv2p.dashSeen >= 12 && sv2p.gap > 0 && sv2p.gap < 600,
     JSON.stringify({ dashSteps: sv2p.dashSteps, dashSeen: sv2p.dashSeen, gap: sv2p.gap, frames: sv2p.frames }),
   );
   check(
