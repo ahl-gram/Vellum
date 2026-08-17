@@ -305,13 +305,14 @@ export async function run(ctx) {
   await goto("#seed=7&style=antique&survey", "survey-draw-beat-base");
   await waitInked("survey-draw-beat-base-ink");
   // #373: the same rAF loop samples the coastline's inkDraw, whose stroke-dashoffset is not compositable and so advances ONLY while the main thread is free. dashCoastForInk (draw-ceremony.ts) sets the dash; animationend clears it.
-  await evaluate(`(()=>{window.__land={batches:[],frames:0,raf:0,dashSteps:0,lastDash:"",dashSeen:0};
-    const bump=()=>{window.__land.frames++;
+  await evaluate(`(()=>{window.__land={batches:[],frames:0,raf:0,dashSteps:0,lastDash:"",dashSeen:0,gap:0,last:performance.now()};
+    const bump=(now)=>{window.__land.frames++;
+      window.__land.gap=Math.max(window.__land.gap,now-window.__land.last);window.__land.last=now;
       const c=document.querySelector("#map #layer-land path");
       if(c){const v=getComputedStyle(c).strokeDashoffset;
         if(v&&v!=="none"&&v!=="0px")window.__land.dashSeen++;
         if(v!==window.__land.lastDash){window.__land.lastDash=v;window.__land.dashSteps++;}}
-      window.__land.raf=requestAnimationFrame(bump);};bump();
+      window.__land.raf=requestAnimationFrame(bump);};requestAnimationFrame(bump);
     window.__mo=new MutationObserver((recs)=>{let chart=false,overlay=false;
       for(const r of recs)for(const n of r.addedNodes){if(n.nodeType!==1)continue;
         if(n.classList&&n.classList.contains("voyage-overlay"))overlay=true;
@@ -327,7 +328,7 @@ export async function run(ctx) {
     const recto=document.querySelector("#map .voyage-overlay .voyage-track");
     const back=document.querySelector("#verso .verso-track");
     return{batches:b,chartBatch:c,inkBatch:i,chartAlone:c>=0&&!b[c].overlay,
-      dashSteps:window.__land.dashSteps,dashSeen:window.__land.dashSeen,frames:window.__land.frames,
+      dashSteps:window.__land.dashSteps,dashSeen:window.__land.dashSeen,frames:window.__land.frames,gap:window.__land.gap,
       framesBetween:c>=0&&i>=0?b[i].frames-b[c].frames:-1,
       versoAtSwap:c>=0?b[c].verso:null,
       facesAgree:!!recto&&!!back&&recto.getAttribute("points")===back.getAttribute("points"),
@@ -345,9 +346,10 @@ export async function run(ctx) {
   );
   check(
     "SV2r the #127 arrival ceremony RUNS while the survey is being prepared: inkDraw advances instead of stalling (#373)",
-    // The ratified acceptance, on the ruled path (a Draw with the box ticked), and the only check here that watches the ceremony itself rather than the arm. stroke-dashoffset is not compositable, so a matrix left on the main thread freezes it: 106 distinct values measured on this branch, against a ~700ms stall that would eat most of inkDraw's ~1170ms.
-    sv2p.dashSeen > 0 && sv2p.dashSteps >= 40,
-    JSON.stringify({ dashSteps: sv2p.dashSteps, dashSeen: sv2p.dashSeen, frames: sv2p.frames }),
+    // The ratified acceptance, on the ruled path (a Draw with the box ticked), and the only check here that watches the ceremony itself rather than the arm. stroke-dashoffset is not compositable, so a matrix left on the main thread starves it.
+    // TWO clauses, because the frame COUNT is environment-scaled and the gap is not: 104 steps on the authoring laptop against 39 on the CI runner, both healthy, where an arm put back on the main thread reads 3. A count threshold sized to the laptop red CI at 39, which is how the gap clause got here.
+    sv2p.dashSeen >= 12 && sv2p.gap > 0 && sv2p.gap < 400,
+    JSON.stringify({ dashSteps: sv2p.dashSteps, dashSeen: sv2p.dashSeen, gap: sv2p.gap, frames: sv2p.frames }),
   );
   check(
     "SV2k the settle leaves the back face to the deferred arm: no outgoing track over the new ghost, and both faces agree once it lands (#174/#366)",
