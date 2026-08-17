@@ -15,7 +15,9 @@ import { partitionRealms } from "../society/realms.ts";
 import { blazonRealms } from "../society/heraldry.ts";
 import { simulateHistory } from "../society/history.ts";
 import { assignFormerNames } from "../society/renames.ts";
+import { conjureBestiary } from "../society/bestiary.ts";
 import { nameSetOf } from "../society/hamlets.ts";
+import { seaMask } from "../hydrology/sea-mask.ts";
 import type { FeatureNames, World, WorldRecipe } from "./types.ts";
 
 const MAP_TYPE_WEIGHTS: ReadonlyArray<readonly [MapType, number]> = [
@@ -230,6 +232,21 @@ export function generateWorld(recipe: WorldRecipe): World {
     (elev.data[x + y * gridW] as number) > seaLevel,
   );
 
+  const beasts = conjureBestiary(
+    {
+      gridW,
+      gridH,
+      oceanDist,
+      seaMask: seaMask(elev, seaLevel),
+      mapType,
+      culture,
+      settlements: settled,
+      presentYear: title.year,
+    },
+    rng.fork("bestiary"),
+    nameSetOf(settled, names),
+  );
+
   return {
     recipe,
     elev,
@@ -248,6 +265,7 @@ export function generateWorld(recipe: WorldRecipe): World {
     title,
     names,
     history: { events: history.events },
+    beasts,
     oceanDist,
   };
 }

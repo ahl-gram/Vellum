@@ -9,6 +9,7 @@ import type { Settlement } from "../society/sites.ts";
 import type { RealmsResult } from "../society/realms.ts";
 import type { Arms } from "../society/heraldry.ts";
 import type { History } from "../society/history.ts";
+import type { SeaBeast } from "../society/bestiary.ts";
 
 export type WorldRecipe = {
   readonly seed: number;
@@ -66,6 +67,8 @@ export type World = {
   readonly title: MapTitle;
   readonly names: FeatureNames;
   readonly history: History;
+  /** The deep's named inhabitants; whether a chart draws them is a view option. */
+  readonly beasts: ReadonlyArray<SeaBeast>;
   /** Hop distance from the nearest land cell, over water. */
   readonly oceanDist: Float64Array;
   readonly region?: {

@@ -27,6 +27,7 @@ Options:
   --scale <n>       PNG pixel scale 0.5 to 4 (default: 2)
   --legend          Draw a compact key explaining the symbols (default: off)
   --arms            Draw each realm's coat of arms beside its label (default: off)
+  --beasts          Summon the deep's named beasts onto the open sea (default: off)
   --theme <t>       Thematic data plate: vegetation | climate | moisture | population
   --out <path>      Output file (default: out/chart-<seed>-<style>.svg)
 
@@ -106,6 +107,7 @@ export async function main(argv: string[]): Promise<void> {
       scale: { type: "string" },
       legend: { type: "boolean", default: false },
       arms: { type: "boolean", default: false },
+      beasts: { type: "boolean", default: false },
       theme: { type: "string" },
       out: { type: "string" },
       help: { type: "boolean", default: false },
@@ -157,7 +159,7 @@ export async function main(argv: string[]): Promise<void> {
   const t0 = performance.now();
   const world = generateWorld(recipe);
   const t1 = performance.now();
-  const svg = renderMap(world, { widthPx, style, legend: values.legend, arms: values.arms, theme });
+  const svg = renderMap(world, { widthPx, style, legend: values.legend, arms: values.arms, beasts: values.beasts, theme });
   const t2 = performance.now();
   const out = resolve(values.out ?? `out/chart-${seed}-${style}.svg`);
   await writeOut(out, svg);

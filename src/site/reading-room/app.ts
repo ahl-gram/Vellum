@@ -55,9 +55,10 @@ const carried: {
   theme: ThemeName | "";
   legend: boolean;
   arms: boolean;
+  beasts: boolean;
   land: number | null;
   coast: number | null;
-} = { type: "", band: "", theme: "", legend: true, arms: false, land: null, coast: null };
+} = { type: "", band: "", theme: "", legend: true, arms: false, beasts: false, land: null, coast: null };
 
 function applyHash(): void {
   const p = new URLSearchParams(location.hash.slice(1));
@@ -78,6 +79,8 @@ function applyHash(): void {
   if (legend !== null) carried.legend = legend === "1";
   const arms = p.get("arms");
   if (arms !== null) carried.arms = arms === "1";
+  const beasts = p.get("beasts");
+  if (beasts !== null) carried.beasts = beasts === "1";
   const land = p.get("land");
   if (land !== null) {
     const f = Number(land) / 1000;
@@ -101,6 +104,7 @@ function syncHash(): void {
   if (carried.theme) p.set("theme", carried.theme);
   p.set("legend", carried.legend ? "1" : "0");
   p.set("arms", carried.arms ? "1" : "0");
+  p.set("beasts", carried.beasts ? "1" : "0");
   if (carried.land != null) p.set("land", String(Math.round(carried.land * 1000)));
   if (carried.coast != null) p.set("coast", String(Math.round(carried.coast * 100)));
   const a = lc.agesState();
@@ -145,7 +149,7 @@ function draw(): void {
     kind: "draw",
     seed,
     overrides,
-    render: { style, widthPx: 1500, legend: carried.legend, arms: carried.arms, theme: carried.theme || undefined },
+    render: { style, widthPx: 1500, legend: carried.legend, arms: carried.arms, beasts: carried.beasts, theme: carried.theme || undefined },
   })
     .then((res) => {
       if (myGen !== drawGen) return;

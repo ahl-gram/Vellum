@@ -15,6 +15,7 @@ export interface Controls {
   themeSel: HTMLSelectElement;
   legendChk: HTMLInputElement;
   armsChk: HTMLInputElement;
+  beastsChk: HTMLInputElement;
   landSlider: HTMLInputElement;
   coastSlider: HTMLInputElement;
 }
@@ -26,7 +27,7 @@ export function readHash(controls: Controls): {
   camera: Camera | null;
   live: Live | null;
 } {
-  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider } = controls;
+  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider } = controls;
   const params = new URLSearchParams(location.hash.slice(1));
   // Gate on PRESENCE, not just validity: Number(null) === 0 would pass the integer guard and clobber a bare visit's seed-of-the-day default down to seed 0.
   const seedRaw = params.get("seed");
@@ -46,6 +47,8 @@ export function readHash(controls: Controls): {
   if (legend !== null) legendChk.checked = legend === "1";
   const arms = params.get("arms");
   if (arms !== null) armsChk.checked = arms === "1";
+  const beasts = params.get("beasts");
+  if (beasts !== null) beastsChk.checked = beasts === "1";
   const land = params.get("land");
   let landTouched = false;
   if (land !== null) {
@@ -89,7 +92,7 @@ export function writeHash(
   camera?: Camera,
   live?: Live | null,
 ): void {
-  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider } = controls;
+  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider } = controls;
   const params = new URLSearchParams();
   params.set("seed", seedInput.value);
   params.set("style", styleSel.value);
@@ -98,6 +101,7 @@ export function writeHash(
   if (themeSel.value) params.set("theme", themeSel.value);
   params.set("legend", legendChk.checked ? "1" : "0");
   params.set("arms", armsChk.checked ? "1" : "0");
+  params.set("beasts", beastsChk.checked ? "1" : "0");
   if (landTouched) params.set("land", String(Math.round(sliderToLand(landSlider.value) * 1000)));
   if (coastTouched) params.set("coast", String(Math.round(sliderToCoast(coastSlider.value) * 100)));
   // #192: exactly one live key or neither (the writer's half of the ratified mutual exclusion; the grammar lives in address.ts). Before the camera, so the address reads instrument-then-framing.

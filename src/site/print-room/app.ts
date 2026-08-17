@@ -61,9 +61,10 @@ const carried: {
   theme: ThemeName | "";
   legend: boolean;
   arms: boolean;
+  beasts: boolean;
   land: number | null;
   coast: number | null;
-} = { type: "", band: "", theme: "", legend: true, arms: false, land: null, coast: null };
+} = { type: "", band: "", theme: "", legend: true, arms: false, beasts: false, land: null, coast: null };
 
 let drawGen = 0;
 // True from a draw's synchronous start until its own settle (#212): pairs with `ordering` so the order surface stays closed for the whole round-trip.
@@ -107,6 +108,8 @@ function applyHash(): void {
   if (legend !== null) carried.legend = legend === "1";
   const arms = p.get("arms");
   if (arms !== null) carried.arms = arms === "1";
+  const beasts = p.get("beasts");
+  if (beasts !== null) carried.beasts = beasts === "1";
   const land = p.get("land");
   if (land !== null) {
     const f = Number(land) / 1000;
@@ -130,6 +133,7 @@ function writeHash(seed: number, style: string): void {
   if (carried.theme) p.set("theme", carried.theme);
   p.set("legend", carried.legend ? "1" : "0");
   p.set("arms", carried.arms ? "1" : "0");
+  p.set("beasts", carried.beasts ? "1" : "0");
   if (carried.land != null) p.set("land", String(Math.round(carried.land * 1000)));
   if (carried.coast != null) p.set("coast", String(Math.round(carried.coast * 100)));
   history.replaceState(null, "", "#" + p.toString());
@@ -155,7 +159,7 @@ function draw(): void {
     kind: "draw",
     seed,
     overrides,
-    render: { style, widthPx: PREVIEW_WIDTH, legend: carried.legend, arms: carried.arms, theme: carried.theme || undefined },
+    render: { style, widthPx: PREVIEW_WIDTH, legend: carried.legend, arms: carried.arms, beasts: carried.beasts, theme: carried.theme || undefined },
   })
     .then((res) => {
       if (myGen !== drawGen) return;
@@ -168,7 +172,7 @@ function draw(): void {
       lastSeed = seed;
       lastTitle = res.title;
       // overrides is built fresh per draw and never mutated, so holding the reference is safe.
-      posterBasis = { seed, style, overrides, legend: carried.legend, arms: carried.arms, theme: carried.theme || undefined };
+      posterBasis = { seed, style, overrides, legend: carried.legend, arms: carried.arms, beasts: carried.beasts, theme: carried.theme || undefined };
       drawing = false;
       refreshOrderControls(); // the new world is on the desk: re-open the counter (unless an order still holds it)
       enableBind();
@@ -229,7 +233,7 @@ function orderPoster(key: string): void {
     kind: "draw",
     seed: basis.seed,
     overrides: basis.overrides,
-    render: { style: basis.style, widthPx: width, legend: basis.legend, arms: basis.arms, theme: basis.theme },
+    render: { style: basis.style, widthPx: width, legend: basis.legend, arms: basis.arms, beasts: basis.beasts, theme: basis.theme },
   })
     .then(async (res) => {
       if (myGen !== posterGen) return;

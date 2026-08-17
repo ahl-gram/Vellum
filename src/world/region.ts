@@ -179,6 +179,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
       realms: [],
     },
     history: { events: [] },
+    beasts: [],
     oceanDist,
     region: { window, worldGridW: recipe.gridW, seaGate },
   };

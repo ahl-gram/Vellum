@@ -24,7 +24,7 @@ import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import type { Camera } from "./camera.ts";
 import {
-  $, seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider,
+  $, seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider,
   coastSlider, status, mapDiv, mapViewport, sheetEl, innerEl, caption, versoEl, versoBtn,
   agesChk, orderLink, journalLink, hashControls,
 } from "./elements.ts";
@@ -121,6 +121,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
   const theme = themeSel.value as ThemeName | "";
   const legend = legendChk.checked;
   const arms = armsChk.checked;
+  const beasts = beastsChk.checked;
   // Whether this draw TURNS is decided at the swap; capture the presence while the outgoing chart is still on screen.
   const hadChart = !!mapDiv.querySelector("svg");
   const t0 = performance.now();
@@ -128,7 +129,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
     kind: "draw",
     seed,
     overrides,
-    render: { style, widthPx: 1500, legend, arms, theme: theme || undefined },
+    render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined },
   })
     .then((res) => {
       if (myGen !== drawGen) return;
@@ -153,7 +154,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
           armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
             rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
           glass.syncZoom();
-          glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
+          glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined }, manifest: res.manifest });
           syncHash();
         });
       } else {
@@ -166,7 +167,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
           rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
         glass.syncZoom();
         // #169: record this world sheet BEFORE a deep-link camera is applied, so the settle that camera triggers redrafts over the SAME base world.
-        glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, theme: theme || undefined }, manifest: res.manifest });
+        glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined }, manifest: res.manifest });
         syncHash();
         if (pendingCamera) {
           const cam = pendingCamera;
@@ -191,7 +192,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
 }
 
 wireControls({
-  seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider,
+  seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider,
   drawBtn: $("draw"), randomBtn: $("random"),
   touched, draw,
   onDocKeydown: lc.onDocKeydown, onDocClick: lc.onDocClick,
