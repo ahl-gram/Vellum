@@ -11,7 +11,6 @@ export interface TourJobInput {
   readonly ports: ReadonlyArray<number>;
 }
 
-/** The travel-ordered ports. Mirrors reorderPlanByTravel's own guard: two ports admit one tour, so the matrix is never walked for them. */
 export function tourOrderFor(job: TourJobInput): ReadonlyArray<number> {
   if (job.ports.length <= 2) return [...job.ports];
   return refineTour(job.ports, prepareVoyageRouter(job.sites, job.survey).legLength);

@@ -54,7 +54,7 @@ export interface Session {
   shownArrived: number;
 }
 
-/** #373: a host's off-thread answer to the #184 travel matrix. Synchronous by contract: the builder never waits, it takes what is ready. */
+/** #373: a host's off-thread answer to the #184 travel matrix, read synchronously; the builder never waits, it takes what is ready. */
 export interface TourOrderSource {
   get(seed: number, survey: Survey, ports: ReadonlyArray<number>): ReadonlyArray<number> | null;
 }
@@ -85,7 +85,6 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     const ports = plan.ports.map((p) => p.idx);
     const key = `${seed}:${surveyFingerprint(survey)}:${ports.join(",")}`;
     if (travelOrder && travelOrder.key === key) return applyTourOrder(plan, travelOrder.order);
-    // #373: a host that computed it off-thread answers here; the matrix below then never runs on the main thread.
     const supplied = tourOrder ? tourOrder.get(seed, survey, ports) : null;
     if (supplied) {
       travelOrder = { key, order: supplied };

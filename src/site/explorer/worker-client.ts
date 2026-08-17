@@ -2,7 +2,7 @@
 // main thread. Best-effort: if the worker cannot be constructed we fall back to the same
 // engine inline on the main thread, and runInline mirrors ./worker.ts exactly (same
 // engine calls, same serializableAtlas) so the worker/inline byte-identity check
-// (e2e A2/A3) stays a clean compare.
+// (e2e R2/R3) stays a clean compare.
 import { renderMap, type RenderOptions } from "../../render/map-renderer.ts";
 import { buildPlaceManifest, type PlaceManifest } from "../../render/place-manifest.ts";
 import { buildSurvey, type Survey } from "../../render/survey.ts";
@@ -145,10 +145,7 @@ export function runInline(msg: ProspectJob): ProspectResult;
 export function runInline(msg: TourJob): TourResult;
 export function runInline(msg: RenderJob): JobResult;
 export function runInline(msg: RenderJob): JobResult {
-  if (msg.kind === "tour") {
-    // No worldFor: the job carries the survey, so the fallback cannot drift from the worker over a cache eviction.
-    return { ok: true, order: tourOrderFor(msg) };
-  }
+  if (msg.kind === "tour") return { ok: true, order: tourOrderFor(msg) };
   if (msg.kind === "draw") {
     const { world } = worldFor(msg.seed, msg.overrides);
     return {

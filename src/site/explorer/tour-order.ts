@@ -22,7 +22,7 @@ export function createTourOrder(deps: TourOrderDeps) {
     return held && held.key === keyOf(seed, survey, ports) ? held.order : null;
   }
 
-  /** Compute this world's order off-thread, resolving when get() can answer for it. A dead worker resolves all the same: the arm must proceed, and the builder then computes the order inline. */
+  /** Compute this world's order off-thread, resolving when get() can answer for it. */
   function prime(manifest: PlaceManifest | null, survey: Survey | null, seed: number): Promise<void> {
     if (!manifest || !survey) return Promise.resolve();
     const ports = buildVoyagePlan(manifest.places, manifest.presentYear).ports.map((p) => p.idx);

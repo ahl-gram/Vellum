@@ -30,7 +30,6 @@ export interface VoyageDeps {
   statusEl: HTMLElement;
   logPanel: VoyageLogPanel;
   restingTrackSink?: RestingTrackSink;
-  /** #373: the host's off-thread travel order, if it has one. */
   tourOrder?: TourOrderSource;
 }
 

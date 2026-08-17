@@ -19,7 +19,7 @@ export function createSurveyArm(deps: SurveyArmDeps) {
   // Monotonic, bumped by BOTH schedule and cancel, so every change event supersedes the arm pending before it.
   let gen = 0;
 
-  // Re-read on the far side of the wait, never captured: an arm that waited out a prime answers to the world and the box as they are when it lands.
+  // The three supersession reads, named because #373 made them run TWICE: once on the painted frame, once on the far side of the wait, never captured in between.
   const live = (mine: number, world: number): boolean =>
     mine === gen && world === deps.worldGen() && deps.isArmed();
 
