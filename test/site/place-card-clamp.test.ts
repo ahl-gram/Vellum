@@ -32,7 +32,6 @@ const published = (card: El) => ({
   dy: card.style.getPropertyValue("--pc-dy"),
 });
 
-/** Show a card whose UNNUDGED box is `base`, and read back what the engine published. */
 const shownWith = (card: El, hit: El, base: typeof CHART) => {
   // Measured THROUGH the published nudge, the way a browser does: a shim that ignores it cannot see a card measured against the previous card's offset.
   card.getBoundingClientRect = () => {

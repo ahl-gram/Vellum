@@ -201,7 +201,7 @@ test("integration: every seed 42 place carries a derivation, and the ruin keeps 
   assert.ok(ruinCard.tale && ruinCard.tale.includes(ruin.name), "the ruin's tale survives the new lines");
 });
 
-// #387/#388: one mechanism on two axes, ruled 2026-08-16. cardSide stays pure and undisturbed; this is the nudge applied AFTER it has chosen a side. Screen px throughout, because the CSS folds it in after the counter-scale.
+// #387/#388: one mechanism on two axes, ruled 2026-08-16. cardSide stays pure and undisturbed; this is the nudge applied AFTER it has chosen a side, in screen px because the CSS folds it in after the counter-scale. The spills below are the measured worst cases on seed 42 at 390, Laukuwelua at the bottom edge and Homaitani at the top.
 const box = { left: 0, top: 0, right: 342, bottom: 266 };
 const at = (left: number, top: number, w: number, h: number) => ({ left, top, right: left + w, bottom: top + h });
 
@@ -210,12 +210,10 @@ test("#387 a card that fits inside the chart is left exactly where it was anchor
 });
 
 test("#387 a card hanging off the bottom is pulled up by its overhang, and no further", () => {
-  // Laukuwelua's case: the worst measured bottom spill on seed 42 at 390.
   assert.deepEqual(clampOffset(at(80, 200, 174, 190), box), { dx: 0, dy: -124 });
 });
 
 test("#387 a card hanging off the top is pushed down by its overhang", () => {
-  // Homaitani's case, the flip-v side of the same defect.
   assert.deepEqual(clampOffset(at(80, -101, 174, 190), box), { dx: 0, dy: 101 });
 });
 
