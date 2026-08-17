@@ -1,10 +1,14 @@
 // The Reading Room conductor (#221): takes a world from the URL hash (read ONCE at boot,
 // no hashchange listener), draws it through the SHARED render worker, and mounts the
 // reading frame (#219) driving the fused ages instrument (#220). The room is ALWAYS
-// armed, and arrival is at rest on every path (ratified 2026-07-29 on #221).
-import { runJob, runInline, usesWorker, initWorker } from "../explorer/worker-client.ts";
+// armed, and arrival is at rest on every path (ratified 2026-07-29 on #221); since #418
+// that arrival COMPLETES one travel order later than the chart on an uncached world.
+import { runJob, runInline, usesWorker, initWorker, type DrawResult } from "../explorer/worker-client.ts";
 import { installHostHooks } from "../shared/host-hooks.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
+import { afterNextPaint } from "../explorer/survey-arm.ts";
+import { createTourOrder } from "../explorer/tour-order.ts";
+import { createRoomArm } from "./arm.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { parseLive, emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
 import { createReadingFrame } from "../reading-frame/index.ts";
@@ -33,9 +37,14 @@ const THEMES = ["vegetation", "climate", "moisture", "population"];
 const mount = document.getElementById("rr-mount") as HTMLElement;
 const warning = document.getElementById("rr-warning") as HTMLElement;
 
+// Roughly 3x the slowest matrix measured on CI (2.1s), and far shorter than the Explorer's 20s on purpose: the survey is an opt-in tick there, but the instrument IS this surface, so a worker that stops answering must not hold the panel, the journal and the unfurl back for twenty seconds; the fallback is the SAME order computed inline (voyage-session.ts orderItinerary), so a timeout costs a main-thread block, never a different itinerary.
+const ROOM_TOUR_TIMEOUT_MS = 6000;
+
 // onPark is #192's seam: Play's parks are the one rest no input event announces.
 const frame = createReadingFrame(mount, { onPark: () => syncHash() });
-const lc = createLivingChart(frame.host);
+// #418: the #184 travel matrix runs in the render worker, so it lands on neither the #127 ink ceremony nor the #321 unfurl.
+const tourOrder = createTourOrder({ runJob, timeoutMs: ROOM_TOUR_TIMEOUT_MS });
+const lc = createLivingChart({ ...frame.host, tourOrder });
 // #318: the colophon mounts as the instrument panel's SIBLING, never inside it (the ratified placement: the engine hides the panel through every teardown, and the colophon must stand).
 const colophon = createColophon();
 frame.reading.appendChild(colophon.root);
@@ -110,6 +119,8 @@ function syncHash(): void {
 }
 
 let drawGen = 0;
+// #418: every arm goes through this ONE slot, one painted frame past the settle and one travel order later.
+const roomArm = createRoomArm({ afterPaint: afterNextPaint, worldGen: () => drawGen });
 
 // #321: the arrival unfurl runs ONCE per visit, retired by CLASS REMOVAL the moment nothing is unfurling: display:none terminates a CSS animation and restoring display starts it AFRESH, so a class left in place would replay the unfurl as a flash on every dice roll (e2e RS28).
 // Chrome has never implemented animationcancel (a Blink gap), so a mid-ceremony hidden toggle fires no event there; draw() retires the class deterministically at its top, and the cancel listener stays for engines that do fire it.
@@ -127,6 +138,32 @@ const retireArrival = (e: AnimationEvent): void => {
 frame.root.addEventListener("animationend", retireArrival);
 frame.root.addEventListener("animationcancel", retireArrival);
 
+// The carried recipe as the engine's override bag: only the keys a link actually pinned, so an unpinned dial stays the world's own.
+function recipeOverrides(): { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number } {
+  return {
+    ...(carried.type ? { mapType: carried.type } : {}),
+    ...(carried.band ? { band: carried.band } : {}),
+    ...(carried.land != null ? { landFraction: carried.land } : {}),
+    ...(carried.coast != null ? { coastWarp: carried.coast } : {}),
+  };
+}
+
+// The arm and the ceremony it carries, run once the travel order is in hand (#418). The quiet flag stays UNSET: quiet also suppresses the #184 travel-order matrix, and an arm path that pins it ships an unordered itinerary.
+function armRoom(res: DrawResult, forSeed: number, rest: AgesPos | undefined): void {
+  // #318: every draw here is a fresh ARRIVAL, never a redraw of the world on screen, so drop any prior session before arming (e2e RR22); clearAges is the post-wipe teardown.
+  lc.clearAges();
+  lc.rearmAges(res.manifest, res.survey, forSeed, res.subtitle, { rest });
+  // #321: added AFTER the arm so the panel is visible when the animation starts (see the flag's comment above).
+  if (!arrived) {
+    arrived = true;
+    frame.root.classList.add("rf-arrival");
+  }
+  // Converge the address after the arm, so the URL carries the rest the reader actually landed at.
+  syncHash();
+  // LAST, after every visible effect: an empty status line is the suites' settle signal, and #418 keeps it meaning "armed and at rest" by clearing it HERE rather than at the chart's settle. Deferring the whole block as a unit leaves the order every check already observes (arm, unfurl, address, gate) exactly as it was.
+  frame.host.statusEl.textContent = "";
+}
+
 function draw(): void {
   const myGen = ++drawGen;
   // pauseScrub rather than a bare raf cancel: a sweep interrupted by a read is PARKED (playing flag, Play label) even if the draw then fails, and it never fires onPark, so nothing writes the address mid-draft.
@@ -136,11 +173,7 @@ function draw(): void {
   frame.root.classList.remove("rf-arrival");
   colophon.seedInput.value = String(seed);
   frame.host.statusEl.textContent = "Drafting…";
-  const overrides: { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number } = {};
-  if (carried.type) overrides.mapType = carried.type;
-  if (carried.band) overrides.band = carried.band;
-  if (carried.land != null) overrides.landFraction = carried.land;
-  if (carried.coast != null) overrides.coastWarp = carried.coast;
+  const overrides = recipeOverrides();
   runJob({
     kind: "draw",
     seed,
@@ -156,22 +189,16 @@ function draw(): void {
       lastTitle = res.title;
       shownSeed = seed;
       // #221: the deep link's key becomes the arm's rest, one-shot; rearmAges, never applyAges (a restored link is a photograph, not an arming gesture).
-      // The quiet flag stays UNSET: quiet also suppresses the #184 travel-order matrix, and an arm path that pins it ships an unordered itinerary.
       const rest: AgesPos | undefined =
         pendingLive?.kind === "year" ? { chamber: "ages", year: pendingLive.year }
         : pendingLive?.kind === "survey" ? { chamber: "survey", t: 1 } : undefined;
       pendingLive = null;
-      // #318: every draw here is a fresh ARRIVAL, never a redraw of the world on screen, so drop any prior session before arming (e2e RR22); clearAges is the post-wipe teardown.
-      lc.clearAges();
-      lc.rearmAges(res.manifest, res.survey, seed, res.subtitle, { rest });
-      // #321: added AFTER the arm so the panel is visible when the animation starts (see the flag's comment above).
-      if (!arrived) {
-        arrived = true;
-        frame.root.classList.add("rf-arrival");
-      }
-      frame.host.statusEl.textContent = "";
-      // Converge the address after the arm, so a bare visit's URL immediately carries the world it landed on.
-      syncHash();
+      const forSeed = seed;
+      // #418: both halves close over THIS draw's res, never module state, so a counter read landing mid-wait cannot arm one world's instrument against another's chart (#120).
+      roomArm.schedule({
+        prime: () => tourOrder.prime(res.manifest, res.survey, forSeed),
+        arm: () => armRoom(res, forSeed, rest),
+      });
     })
     .catch((err) => {
       if (myGen !== drawGen) return;

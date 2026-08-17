@@ -3,13 +3,49 @@
 import { makeRoom, scopedHealth } from "./room-support.mjs";
 
 export async function run(ctx) {
-  const { evaluate, check, shoot } = ctx;
+  const { evaluate, check, shoot, send, PORT } = ctx;
   const room = makeRoom(ctx);
   const gate = scopedHealth(ctx);
 
   // Seed 526413615 ("The Isle of Selivelai"): 24 ports, a closed 24-leg round trip, exactly one genuine inland handoff.
-  const based = await room.goto("#seed=526413615&style=antique&legend=1&survey");
+  // #418: landed by hand rather than through room.goto, because both guards below have to instrument the page BETWEEN the boot and the arm; this is the room's FIRST arm on this world, the only uncached one, and a later arm takes the held order and would pass either check blind.
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=526413615&style=antique&legend=1&survey` });
+  const booted = await room.boot();
+  const armT0 = Date.now();
+  await evaluate(`(()=>{window.__gap=0;window.__gapStop=false;let last=performance.now();
+    const step=(now)=>{window.__gap=Math.max(window.__gap,now-last);last=now;
+      if(!window.__gapStop)requestAnimationFrame(step);};requestAnimationFrame(step);
+    window.__firstTrack=null;
+    const grab=()=>{const t=document.querySelector(".rf-chart .voyage-track");
+      if(t&&!window.__firstTrack){const p=t.getAttribute("points");if(p)window.__firstTrack=p;}};
+    new MutationObserver(grab).observe(document.body,{childList:true,subtree:true,attributes:true});
+    grab();})()`);
+  const based = booted && (await room.settled());
+  const armMs = Date.now() - armT0;
+  const rv0a = await evaluate(`(()=>{window.__gapStop=true;return{gap:window.__gap};})()`);
   check("RV0 the room lands on the routed world at the survey rest", based);
+  check(
+    "RV0a the main thread keeps painting right through the room's arm: the travel matrix is off it (#418)",
+    // RATIO, not a wall clock (SV2q's reasoning, and its measurements): the arm's own routing is real main-thread work that scales with the runner, so a fixed cap is a coin flip on a loaded CI box. A BLOCKED thread makes the largest gap essentially the whole boot-to-arm, so a third of it separates the two populations at any speed.
+    based && rv0a.gap > 0 && rv0a.gap < armMs / 3,
+    JSON.stringify({ ...rv0a, armMs, share: +(rv0a.gap / armMs).toFixed(3) }),
+  );
+
+  const rv0b = await evaluate(`(()=>{
+    const ports=window.__vellumVoyagePlan().ports.map((p)=>p.idx);
+    const r=window.__vellumRunInline({kind:"draw",seed:526413615,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});
+    const sites=r.manifest.places.map((p)=>({idx:p.idx,x:p.gx,y:p.gy}));
+    const refined=window.__vellumRunInline({kind:"tour",seed:526413615,sites,survey:r.survey,ports}).order;
+    const now=document.querySelector(".rf-chart .voyage-track").getAttribute("points");
+    return{ports,refined,held:window.__firstTrack!==null,frozen:now===window.__firstTrack};
+  })()`);
+  check(
+    "RV0b the first track the room paints IS the travel order, and no second order ever re-shuffles it (#418)",
+    // The refinement is idempotent on its own output, so a fixed point proves the arm sailed the ROUTED itinerary; the straight-line tour a quiet arm would ship is not one. `frozen` is the ratified half: a survey rest SHOWS the track (ages.ts setOverlayVisible), so a re-ordering second arm would re-shuffle it in front of the reader.
+    rv0b.held && rv0b.frozen && JSON.stringify(rv0b.ports) === JSON.stringify(rv0b.refined),
+    JSON.stringify({ frozen: rv0b.frozen, held: rv0b.held, ports: rv0b.ports.slice(0, 6), refined: rv0b.refined.slice(0, 6) }),
+  );
 
   const rv1 = await evaluate(`(()=>{
     const plan=window.__vellumVoyagePlan();

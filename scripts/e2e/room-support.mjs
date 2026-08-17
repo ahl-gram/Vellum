@@ -16,8 +16,9 @@ export const makeRoom = (ctx) => {
     return false;
   };
 
+  // #418: the status line still clears at the ARM, so this still means "armed and at rest"; the budget widens to 15s because the arm now waits out an off-thread travel order, and a worker that stops answering spends ROOM_TOUR_TIMEOUT_MS (6s) before the inline fallback arms anyway.
   const settled = async () => {
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 300; i++) {
       let s = null;
       try { s = await evaluate(`({svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent})`); } catch {}
       if (s && s.svg && s.status === "") return true;
