@@ -1,9 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { realWorld, stackedMount } from "../../test-support/living-chart-hosts.ts";
+import { bareEl, realWorld, recordingSink, stackedMount } from "../../test-support/living-chart-hosts.ts";
 
 // #364: what the session builder does to the MOUNT, asserted against a mount that already holds overlays: the wipe of every .voyage-overlay immediately before the unconditional append.
 // Not only e2e because three ways of getting that line wrong were measured to survive SV2g/SV2h (a singular querySelector, the wipe hoisted above the bails, the query widened to document); all three are visible from the mount's own side, via stackedMount's ordered ledger.
+// #371 adds the OTHER side of the same call: what the ENGINE does to the mount when that build bails. No arm path can reach a bailing arm through the UI, so an e2e cannot see this at all.
 
 const SUBTITLE = "as surveyed by Taiki the Wayfarer";
 
@@ -55,4 +56,57 @@ test("#364 a build that bails leaves the mount exactly as it found it", async ()
   assert.equal(session, null, "the build bailed");
   // Why the wipe sits AFTER the bails: hoisted, a survey-less arm would strip a previous world's resting overlay and put nothing in its place, and nothing else in the suite or e2e can see that.
   assert.deepEqual(mount.ledger, [], "the mount was neither asked nor touched");
+});
+
+async function engineOverStack() {
+  const [{ createVoyage }, { barlessLogPanel }] = await Promise.all([
+    import("../../src/site/living-chart/voyage.ts"),
+    import("../../src/site/living-chart/no-bar.ts"),
+  ]);
+  const { manifest, survey } = await realWorld();
+  const mount = stackedMount();
+  const { sink, calls } = recordingSink();
+  const voyage = createVoyage({
+    mapEl: mount.el,
+    statusEl: bareEl(),
+    logPanel: barlessLogPanel(),
+    restingTrackSink: sink,
+  });
+  return { voyage, mount, manifest, survey, calls };
+}
+
+test("#371 a re-arm whose build bails leaves NO stale overlay resting on the mount", async () => {
+  const { voyage, mount, manifest } = await engineOverStack();
+
+  // The builder's own wipe sits after its bails by design (#364 above), so on this path the mount is never asked at all unless rearmVoyage asks it.
+  voyage.rearmVoyage(manifest, null, 42, SUBTITLE);
+
+  assert.deepEqual(
+    mount.ledger,
+    ["ask:.voyage-overlay", "remove:first", "remove:second"],
+    "a bailing re-arm drops every overlay the mount holds and appends nothing",
+  );
+});
+
+test("#371 a QUIET bail wipes the recto and leaves the verso frozen", async () => {
+  const { voyage, mount, manifest, calls } = await engineOverStack();
+
+  voyage.rearmVoyage(manifest, null, 42, SUBTITLE, { quiet: true });
+
+  assert.ok(mount.ledger.includes("remove:first"), "the quiet path wipes too");
+  // #174: routing the bail through exitVoyage() would clear the sink here, and a quiet mid-drag redraw exists precisely to leave the back face alone.
+  assert.deepEqual(calls, [], "the bail never touches the verso sink");
+});
+
+test("#371 control: a re-arm that BUILDS still appends, and the wipe is the builder's", async () => {
+  const { voyage, mount, manifest, survey, calls } = await engineOverStack();
+
+  voyage.rearmVoyage(manifest, survey, 42, SUBTITLE);
+
+  assert.deepEqual(
+    mount.ledger,
+    ["ask:.voyage-overlay", "remove:first", "remove:second", "append:voyage-overlay"],
+    "one wipe, the builder's, then the session's own overlay",
+  );
+  assert.equal(calls.length, 1, "a loud re-arm mirrors the resting track to the verso");
 });
