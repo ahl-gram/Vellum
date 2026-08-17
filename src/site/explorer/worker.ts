@@ -8,6 +8,7 @@ import { generateRegionWorld, regionTitle } from "../../world/region.ts";
 import { composeAtlas } from "../../atlas/compose.ts";
 import { serializableAtlas } from "./serializable-atlas.ts";
 import { prospectResultFor } from "./prospect-job.ts";
+import { tourOrderFor } from "./tour-job.ts";
 import { worldFor } from "./world-cache.ts";
 import type { WorkerRequest, WorkerResponse } from "./worker-client.ts";
 
@@ -69,6 +70,9 @@ ctx.onmessage = (e) => {
     } else if (msg.kind === "prospect") {
       const { world } = worldFor(msg.seed, msg.overrides);
       ctx.postMessage({ id: msg.id, ok: true, ...prospectResultFor(world, msg) });
+    } else if (msg.kind === "tour") {
+      // #373: the ONE job that does not touch worldFor; it carries the survey it walks, so a region job evicting the cached world cannot change the itinerary.
+      ctx.postMessage({ id: msg.id, ok: true, order: tourOrderFor(msg) });
     }
   } catch (err) {
     ctx.postMessage({ id: msg.id, ok: false, error: ((err as { message?: string } | null) && (err as { message?: string }).message) || String(err) });

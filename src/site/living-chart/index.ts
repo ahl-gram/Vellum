@@ -9,6 +9,7 @@
 import { createPlaceOverlay, type BuildPlaceOverlayOpts } from "./place-overlay.ts";
 import { createChronicle } from "./chronicle.ts";
 import { createVoyage, type RestingTrackSink } from "./voyage.ts";
+import type { TourOrderSource } from "./voyage-session.ts";
 import { createVoyageLogPanel } from "./voyage-log-panel.ts";
 import { createAges } from "./ages.ts";
 import { barlessAges, barlessLogPanel } from "./no-bar.ts";
@@ -17,7 +18,7 @@ import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
 import type { CardBox } from "../../render/place-card.ts";
 
-export type { BuildPlaceOverlayOpts, RestingTrackSink };
+export type { BuildPlaceOverlayOpts, RestingTrackSink, TourOrderSource };
 export type { AgesPos };
 
 /** The fused instrument's elements (#319); createReadingFrame's returned host is the full shape. */
@@ -45,6 +46,8 @@ export interface LivingChartHost {
   prospectHref?: (idx: number) => string;
   /** #387/#388: the box a shown place card is clamped into, in client coordinates. Optional: a host that never shows a card (the Reading Room, permanently .scrub) passes none. */
   clampBox?: () => CardBox | null;
+  /** #373: an order the host prepared off-thread for the survey it is about to arm. Optional: a host that passes none computes the #184 matrix inline, on its own thread, as every host did before. */
+  tourOrder?: TourOrderSource;
 }
 
 export function createLivingChart(host: LivingChartHost) {
@@ -70,6 +73,7 @@ export function createLivingChart(host: LivingChartHost) {
     statusEl: host.statusEl,
     logPanel,
     restingTrackSink: host.restingTrackSink,
+    ...(host.tourOrder ? { tourOrder: host.tourOrder } : {}),
   });
   const ages = bar
     ? createAges({

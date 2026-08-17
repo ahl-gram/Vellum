@@ -69,8 +69,15 @@ export async function run(ctx) {
     JSON.stringify(sv1),
   );
 
+  // #373: the frame clock runs across the FIRST arm, the only uncached one; every later arm takes the held order and would pass this blind.
+  await evaluate(`(()=>{window.__gap=0;window.__gapStop=false;let last=performance.now();
+    const step=(now)=>{window.__gap=Math.max(window.__gap,now-last);last=now;
+      if(!window.__gapStop)requestAnimationFrame(step);};requestAnimationFrame(step);})()`);
+  const inkT0 = Date.now();
   const sv2 = await tick(true, "__armMs");
   const sv2Vertices = await waitInked("survey-first-arm");
+  const firstInkMs = Date.now() - inkT0;
+  const sv2q = await evaluate(`(()=>{window.__gapStop=true;return{gap:window.__gap};})()`);
   const sv2After = await evaluate(`({status:document.getElementById("status").textContent,
     hash:location.hash,overlays:document.querySelectorAll("#map .voyage-overlay").length,
     href:document.getElementById("journal-link").getAttribute("href"),ms:window.__armMs})`);
@@ -82,6 +89,11 @@ export async function run(ctx) {
       sv2Vertices > 10 && sv2After.overlays === 1 && sv2After.status === "" &&
       sv2After.hash === sv2.hash && sv2After.href === sv2.href,
     JSON.stringify({ ...sv2, vertices: sv2Vertices, after: sv2After }),
+  );
+  check(
+    "SV2q the main thread keeps painting right through the arm: the travel matrix is off it (#373)",
+    sv2q.gap > 0 && sv2q.gap < 400,
+    JSON.stringify({ ...sv2q, firstInkMs }),
   );
   await shoot("explorer-survey-inked.png");
 
@@ -99,15 +111,17 @@ export async function run(ctx) {
     JSON.stringify({ same: p0 === p1, anims: sv2b.anims, len: (p0 || "").length }),
   );
 
-  // Measured 2026-08-12 headless Brave: first arm 1120ms, re-arm 144ms; the ratio clause guards the cache, the 800ms cap is sized for the slower ubuntu CI runner. Since #381 that runner also carries the other lane: the re-arm measured 245ms serial and 301-392ms under lanes, so the cap's headroom is 2x, not 3.3x.
+  // #373 rewrote what these two measure. The matrix runs in the render worker now, so __armMs (a rAF-then-task hop) collapses to one frame whether the order is cached or not (5.4 and 149.4ms here, against 1120 and 144 before), and the ratio it used to carry moved to the wall clock from tick to ink. Measured 2026-08-17 headless Brave: first ink 1150ms, re-ink 170ms. The 2500ms cap is sized for the slower ubuntu CI runner carrying the other #381 lane.
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  const reInkT0 = Date.now();
   await tick(true, "__armMs2");
   await waitInked("survey-rearm");
+  const reInkMs = Date.now() - reInkT0;
   const sv2c = await evaluate(`({first:window.__armMs,again:window.__armMs2})`);
   check(
-    "SV2c re-arming the same world is effectively instant: the travel matrix cache still holds (#300)",
-    typeof sv2c.again === "number" && sv2c.again < 800 && sv2c.again < sv2c.first / 2,
-    JSON.stringify(sv2c),
+    "SV2c re-arming the same world is effectively instant: the travel matrix cache still holds (#300/#373)",
+    typeof sv2c.again === "number" && reInkMs < 2500 && reInkMs < firstInkMs / 2,
+    JSON.stringify({ ...sv2c, firstInkMs, reInkMs }),
   );
 
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);

@@ -1,7 +1,7 @@
 // #300/#366: the survey's arm, deferred one painted frame past every arm path (the tick,
 // the settle, the turn's commit), all through ONE slot so exactly one arm survives into
-// the mount. The session build blocks paint for ~1s (the #184 travel matrix is ~97% of
-// it, measured 895-1207ms across five seeds), so the chart paints first, the track follows.
+// the mount. #373 adds the second wait: the #184 travel matrix is computed off-thread, and
+// the arm holds for it, so what was ~1s of blocked main thread is now ~1s of nothing blocked.
 export interface SurveyArmDeps {
   /** Run `run` after the browser has painted the frame the click produced. */
   afterPaint: (run: () => void) => void;
@@ -9,23 +9,28 @@ export interface SurveyArmDeps {
   isArmed: () => boolean;
   /** A counter the host bumps whenever the chart under the arm is replaced. */
   worldGen: () => number;
-  /** The heavy build, run only if the window closed clean. */
+  /** The build, run only if the window closed clean. */
   arm: () => void;
+  /** #373: off-thread preparation for the chart now on screen, awaited between the paint and the arm. Optional: with none, every arm is synchronous as before. */
+  prime?: () => Promise<void>;
 }
 
 export function createSurveyArm(deps: SurveyArmDeps) {
   // Monotonic, bumped by BOTH schedule and cancel, so every change event supersedes the arm pending before it.
   let gen = 0;
 
+  // Re-read on the far side of the wait, never captured: an arm that waited out a prime answers to the world and the box as they are when it lands.
+  const live = (mine: number, world: number): boolean =>
+    mine === gen && world === deps.worldGen() && deps.isArmed();
+
   /** @param run the arm to run, defaulting to the tick's (deps.arm). */
   function schedule(run: () => void = deps.arm): void {
     const mine = ++gen;
     const world = deps.worldGen();
     deps.afterPaint(() => {
-      if (mine !== gen) return; // a later change event superseded this arm
-      if (world !== deps.worldGen()) return; // a draw landed; its settle owns the arm
-      if (!deps.isArmed()) return; // the box is the truth
-      run();
+      if (!live(mine, world)) return;
+      if (!deps.prime) { run(); return; }
+      void deps.prime().then(() => { if (live(mine, world)) run(); });
     });
   }
 
@@ -52,6 +57,8 @@ export interface SurveyToggleDeps {
   exit: () => void;
   /** #192: the one hash writer, run after the arm in BOTH directions. */
   syncHash: () => void;
+  /** #373: the off-thread preparation every arm through this slot waits for. */
+  prime?: () => Promise<void>;
   /** Test seam; production is afterNextPaint below. */
   afterPaint?: (run: () => void) => void;
 }
@@ -63,6 +70,7 @@ export function wireSurveyToggle(deps: SurveyToggleDeps): SurveyArm {
     isArmed: () => deps.box.checked,
     worldGen: deps.worldGen,
     arm: deps.arm,
+    ...(deps.prime ? { prime: deps.prime } : {}),
   });
   deps.box.addEventListener("change", () => {
     if (deps.box.checked) { deps.home(); arm.schedule(); }
@@ -92,6 +100,7 @@ export function deferLandingArm(quiet: boolean, flipped: boolean): boolean {
 }
 
 /** #366: a landing arms through the SAME single slot the tick uses, one painted frame later; schedule() bumps the generation cancel() does, so it IS the cancel and exactly one arm survives. */
+// #373: an un-deferred landing arms in the settle's OWN task and never waits for an off-thread order. A quiet mid-drag frame would otherwise let each throttled redraw drop the one before it, and a FLIPPED landing must ink the back face inside the task that swaps the chart, so the verso changes whole rather than showing a bare new ghost (#174, e2e SV2o). Both take whatever order is already prepared; a flipped landing with none still pays the matrix inline.
 export function armOnLanding(o: LandingArm): void {
   if (!o.armed) { o.arm.cancel(); o.clear(); return; }
   if (o.defer === false) { o.arm.cancel(); o.rearm(); return; }

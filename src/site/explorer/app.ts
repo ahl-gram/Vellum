@@ -13,6 +13,7 @@ import { wireControls } from "./controls.ts";
 import { wireFootnotes } from "./footnotes.ts";
 import { installExplorerHooks } from "./hooks.ts";
 import { wireSurveyToggle, armOnLanding, deferLandingArm } from "./survey-arm.ts";
+import { createTourOrder } from "./tour-order.ts";
 import { createLivingChart } from "../living-chart/index.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
@@ -48,9 +49,13 @@ function prefersReduce(): boolean {
   return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 }
 
+// #373: the #184 travel matrix runs in the render worker, so the arm no longer blocks the #127 arrival ceremony.
+const tourOrder = createTourOrder({ runJob });
+
 const lc = createLivingChart({
   mapEl: mapDiv,
   statusEl: status,
+  tourOrder,
   // #242: read at show time, so the card's link always carries the hash on screen.
   prospectHref: (idx) => prospectTarget(location.hash, idx),
   // #387/#388: at k=1 this rect IS the chart box, and under the Glass it is the room actually on screen, which is why one box serves both errata.
@@ -209,6 +214,8 @@ const surveyArm = wireSurveyToggle({
   worldGen: () => drawGen,
   home: () => { glass.homeToWorld(); glass.reset(); },
   arm: () => { lc.rearmVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle); },
+  // #373: reads live, like arm does; an arm whose world moved under the wait is dropped by the slot's own generation check, not by what this closure captured.
+  prime: () => tourOrder.prime(lastManifest, lastSurvey, lastSeed),
   exit: lc.exitAges,
   syncHash,
 });
