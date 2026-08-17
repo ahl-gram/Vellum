@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { bareEl, realWorld, recordingSink, stackedMount } from "../../test-support/living-chart-hosts.ts";
+import { bareEl, realWorld, recordingLogPanel, recordingSink, stackedMount } from "../../test-support/living-chart-hosts.ts";
 
 // #364: what the session builder does to the MOUNT, asserted against a mount that already holds overlays: the wipe of every .voyage-overlay immediately before the unconditional append.
 // Not only e2e because three ways of getting that line wrong were measured to survive SV2g/SV2h (a singular querySelector, the wipe hoisted above the bails, the query widened to document); all three are visible from the mount's own side, via stackedMount's ordered ledger.
@@ -54,61 +54,55 @@ test("#364 a build that bails leaves the mount exactly as it found it", async ()
   const session = sessions.build(manifest, null, 42, SUBTITLE);
 
   assert.equal(session, null, "the build bailed");
-  // Why the wipe sits AFTER the bails: hoisted, a survey-less arm would strip a previous world's resting overlay and put nothing in its place, and nothing else in the suite or e2e can see that.
+  // The builder does not own its caller's teardown: an arm that bails wipes on its own bail path (#371), so this one stays a pure no-op.
   assert.deepEqual(mount.ledger, [], "the mount was neither asked nor touched");
 });
 
 async function engineOverStack() {
-  const [{ createVoyage }, { barlessLogPanel }] = await Promise.all([
-    import("../../src/site/living-chart/voyage.ts"),
-    import("../../src/site/living-chart/no-bar.ts"),
-  ]);
+  const { createVoyage } = await import("../../src/site/living-chart/voyage.ts");
   const { manifest, survey } = await realWorld();
   const mount = stackedMount();
   const { sink, calls } = recordingSink();
-  const voyage = createVoyage({
-    mapEl: mount.el,
-    statusEl: bareEl(),
-    logPanel: barlessLogPanel(),
-    restingTrackSink: sink,
-  });
-  return { voyage, mount, manifest, survey, calls };
+  const { panel, calls: journal } = await recordingLogPanel();
+  const voyage = createVoyage({ mapEl: mount.el, statusEl: bareEl(), logPanel: panel, restingTrackSink: sink });
+  return { voyage, mount, manifest, survey, calls, journal };
 }
 
 const BAILED = ["ask:.voyage-overlay", "remove:first", "remove:second"];
 
-test("#371 a re-arm whose build bails strips BOTH faces, not just the mount", async () => {
-  const { voyage, mount, manifest, calls } = await engineOverStack();
+test("#371 a re-arm whose build bails strips all three surfaces, not just the mount", async () => {
+  const { voyage, mount, manifest, calls, journal } = await engineOverStack();
 
   voyage.rearmVoyage(manifest, null, 42, SUBTITLE);
 
   assert.deepEqual(mount.ledger, BAILED, "a bailing re-arm drops every overlay the mount holds and appends nothing");
-  // #174 says the faces can never disagree, and a wiped recto over a verso still carrying the last world's track is exactly that.
   assert.deepEqual(calls, ["clear"], "the ink stays on the back of the sheet after the front was scraped");
+  assert.deepEqual(journal, ["hide"], "the journal is the surface this issue is named for, and it outlives the mount wipe");
 });
 
 test("#371 a QUIET bail wipes the recto and leaves the verso frozen", async () => {
-  const { voyage, mount, manifest, calls } = await engineOverStack();
+  const { voyage, mount, manifest, calls, journal } = await engineOverStack();
 
   voyage.rearmVoyage(manifest, null, 42, SUBTITLE, { quiet: true });
 
   assert.deepEqual(mount.ledger, BAILED, "the quiet path wipes the mount the same way");
-  // The one asymmetry that is deliberate: re-blobbing the ghost per drag frame is the ~1 MB leak #116 exists to avoid, so a quiet arm freezes the whole back face, bail included.
+  // Re-blobbing the ghost per drag frame is the ~1 MB leak #116 exists to avoid, so a quiet arm freezes the whole back face, bail included.
   assert.deepEqual(calls, [], "the quiet bail never touches the verso sink");
+  assert.deepEqual(journal, ["hide"], "the journal is not part of that bargain: it hides on both bails");
 });
 
 test("#371 the class: applyVoyage's bail leaves the mount bare too, by its leading exit", async () => {
-  const { voyage, mount, manifest, calls } = await engineOverStack();
+  const { voyage, mount, manifest, calls, journal } = await engineOverStack();
 
   voyage.applyVoyage(manifest, null, 42, SUBTITLE);
 
-  // rearmVoyage earns this with its own wipe; applyVoyage earns it only from the exitVoyage() at its head, so the invariant here rests on CALL ORDER and nothing else was watching it.
   assert.deepEqual(mount.ledger, BAILED, "a bailing toggle-ON leaves the previous overlay resting");
   assert.deepEqual(calls, ["clear"], "and leaves its track on the verso");
+  assert.deepEqual(journal, ["hide"], "and leaves its journal in the margin");
 });
 
 test("#371 control: a re-arm that BUILDS still appends, and the wipe is the builder's", async () => {
-  const { voyage, mount, manifest, survey, calls } = await engineOverStack();
+  const { voyage, mount, manifest, survey, calls, journal } = await engineOverStack();
 
   voyage.rearmVoyage(manifest, survey, 42, SUBTITLE);
 
@@ -119,4 +113,21 @@ test("#371 control: a re-arm that BUILDS still appends, and the wipe is the buil
   );
   assert.equal(calls.length, 1, "a loud re-arm mirrors the resting track to the verso");
   assert.match(calls[0] as string, /^paint:/, "and mirrors it by PAINTING, not by clearing");
+  assert.ok(!journal.includes("hide"), "a successful arm hid the journal it just filled");
+});
+
+// applyVoyage bails BEFORE it can paint only because exitVoyage() runs first; permuting those two lines keeps every bail assertion byte-identical and TypeErrors on the success path instead.
+test("#371 control: a toggle-ON that BUILDS wipes twice, appends, and inks the verso", async () => {
+  const { voyage, mount, manifest, survey, calls } = await engineOverStack();
+
+  voyage.applyVoyage(manifest, survey, 42, SUBTITLE, { skipSweep: true });
+
+  assert.deepEqual(
+    mount.ledger,
+    [...BAILED, ...BAILED, "append:voyage-overlay"],
+    "the exit's wipe, then the builder's, and the append survives both",
+  );
+  assert.equal(calls.length, 2, "the exit clears the verso and the rest paints it");
+  assert.equal(calls[0], "clear", "the exit goes first");
+  assert.match(calls[1] as string, /^paint:/, "the verso ends carrying the new world, not a clear");
 });

@@ -1,6 +1,7 @@
 // Shared hosts and recorders for the living-chart boundary suites; lives outside test/ so node --test does not collect it.
 // The engine is imported DYNAMICALLY inside the functions that need it, so importing this helper cannot smuggle the engine past the #191 no-DOM import guard.
 import type { LivingChart } from "../src/site/living-chart/index.ts";
+import type { VoyageLogPanel } from "../src/site/living-chart/voyage-log-panel.ts";
 import type { PlaceManifest } from "../src/render/place-manifest.ts";
 import type { Survey } from "../src/render/survey.ts";
 import type { El } from "./element-shim.ts";
@@ -60,6 +61,25 @@ export function stackedMount(): { el: HTMLElement; ledger: string[] } {
     },
   };
   return { el: mount as unknown as HTMLElement, ledger };
+}
+
+/** barlessLogPanel with its two visibility calls recorded (#371). The #121 margin log is a SIBLING of the mount, so no mount ledger can ever see it: a call ledger is the only way to prove a bail hid the journal it left behind. */
+export async function recordingLogPanel(): Promise<{ panel: VoyageLogPanel; calls: string[] }> {
+  const { barlessLogPanel } = await import("../src/site/living-chart/no-bar.ts");
+  const base = barlessLogPanel();
+  const calls: string[] = [];
+  const panel: VoyageLogPanel = {
+    ...base,
+    revealLog: (rows, arrived) => {
+      calls.push(`reveal:${arrived}`);
+      base.revealLog(rows, arrived);
+    },
+    hideLog: () => {
+      calls.push("hide");
+      base.hideLog();
+    },
+  };
+  return { panel, calls };
 }
 
 /** The host's optional verso surface (#174), recording so a paint or clear is provable. */
