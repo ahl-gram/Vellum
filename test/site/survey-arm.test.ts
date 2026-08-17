@@ -222,7 +222,6 @@ test("#192 the hash is written in BOTH directions, in the handler's own turn", (
   // The write being SYNCHRONOUS is what keeps a link copied right after the click correct; no paint has run here.
 });
 
-
 test("#366 the slot it hands back is the one the landings arm through", () => {
   const h = toggleHarness();
   let landed = 0;

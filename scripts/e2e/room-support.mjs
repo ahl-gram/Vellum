@@ -26,16 +26,6 @@ export const makeRoom = (ctx) => {
     return false;
   };
 
-  // #373: the room's settle does NOT cover the arm. The travel matrix runs in the worker now, so a cold world arms on the straight-line tour and re-arms silently when the order lands; anything reading the ITINERARY (the RV leg geometry, the RW port walk) must await this first.
-  // Deliberately NOT folded into goto(): it resolves a second or so in, and the arrival-ceremony checks (RS26/RS28) sample paperUnfurl while it is still running. Ordering reads wait, ceremony reads must not.
-  const ordered = async () => {
-    for (let i = 0; i < 200; i++) {
-      if (await evaluate(`window.__vellumReadingRoomOrdered ? window.__vellumReadingRoomOrdered() === true : true`)) return true;
-      await sleep(50);
-    }
-    return false;
-  };
-
   // Re-bootstrap through about:blank (the Z13 idiom): a hash-only navigate is same-document, and the room reads its hash once at boot with no hashchange listener.
   const goto = async (hash) => {
     await send("Page.navigate", { url: "about:blank" });
@@ -44,7 +34,7 @@ export const makeRoom = (ctx) => {
     return booted && (await settled());
   };
 
-  return { boot, settled, ordered, goto };
+  return { boot, settled, goto };
 };
 
 // Same #220 domain as the Explorer ([0, 2*span], seam at the midpoint, a year at barMax/2 + (year - min)); the earliest year is the one position the seam already owns, so setYear clamps to min+1.
