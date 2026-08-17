@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-// #379: this markup was covered only by e2e PR20b, a browser round of roughly ten minutes, and the prover measured that un-anchoring it left the whole unit suite green. It could not be tested where it lived, because bound-atlas.ts reads the DOM at module scope and a bare Node import throws before any test runs.
+// #379: these cannot move back into bound-atlas.ts. It reads the DOM at module scope, so a bare Node import throws before any test runs, and the markup's only other guard is a ten-minute browser round.
 
 const MODULE = "../../src/site/print-room/plate-markup.ts";
 const HREF = "blob:http://127.0.0.1:4173/8b1f2c3d-0000-4a5b-9c1d-2e3f4a5b6c7d";
@@ -25,7 +25,6 @@ test("#379 a bound plate is an anchor on the plate itself, opening in a new tab 
   assert.ok(anchor.includes(`href="${HREF}"`), "the anchor does not point at the plate it was given");
   assert.match(anchor, /target="_blank"/, "navigating in place tears down the page and revokes the blob the link points at");
   assert.match(anchor, /rel="noopener"/, "a target=_blank link without rel=noopener hands the opened tab a window.opener handle");
-  // Identity, never presence: an img with a blank or foreign src is still an img inside an anchor, and it prints blank.
   assert.ok(anchor.includes(`<img src="${HREF}"`), "the plate the reader clicks and the plate they see are different files");
 });
 
@@ -44,7 +43,7 @@ test("#379 every value the host hands in is escaped, and the href is one of them
 
   const html = plateFigure(`x" onerror="alert(1)`, `Rahai <script> & "the North"`);
 
-  // The quote is the whole attack: escaped, the payload is inert text inside the attribute; raw, it closes href and opens a handler, and this markup goes to innerHTML.
+  // The quote is the whole attack: escaped, the payload stays inert text INSIDE the attribute, so only a real closing quote is a breakout.
   assert.doesNotMatch(html, /onerror="/, "an href breaks out of its own attribute");
   assert.doesNotMatch(html, /<script>/, "an unescaped caption reaches innerHTML as markup");
   assert.match(html, /alt="Rahai &lt;script&gt; &amp; &quot;the North&quot;"/, "the alt text is unescaped");
