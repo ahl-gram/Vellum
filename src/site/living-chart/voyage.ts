@@ -52,7 +52,7 @@ export function createVoyage(deps: VoyageDeps) {
     }
   }
 
-  // EVERY match, not the first (#364): a sheet that somehow arrived carrying two overlays is left truly bare. e2e SV2h plants the second overlay no arm path can produce any more.
+  // EVERY match, not the first (#364): a sheet that somehow arrived carrying two overlays is left truly bare. e2e SV2h plants that second overlay and exercises this through exitVoyage.
   function dropOverlays(): void {
     mapEl.querySelectorAll(".voyage-overlay").forEach((overlay) => overlay.remove());
   }
@@ -207,8 +207,12 @@ export function createVoyage(deps: VoyageDeps) {
   ): void {
     cancelVoyageRaf();
     voyage = null;
-    // #371: the builder's own wipe sits after ITS bails, so a bailing arm has to take the previous world's resting overlay off itself or it rests on with no journal under it. Not exitVoyage(): that clears the verso sink, which a quiet mid-drag re-arm exists to leave frozen (#174).
-    if (!buildVoyage(manifest, survey, seed, subtitle, opts.quiet)) { dropOverlays(); logPanel.hideLog(); return; }
+    if (!buildVoyage(manifest, survey, seed, subtitle, opts.quiet)) {
+      dropOverlays();
+      logPanel.hideLog();
+      if (!opts.quiet) syncRestingTrack();
+      return;
+    }
     paintFrame(voyage!, 1, false); // silent: the draw's settle needs the status to stay ""
     // #366: a DEFERRED arm runs after rebuildVerso and is the one that inks the back face; the conductor's repaint comment in ../explorer/app.ts is the authority.
     // #174 INVARIANT: the sink's ghost and its track come from the SAME draw; a quiet mid-drag redraw freezes the whole back face (re-blobbing the ghost per frame is the ~1 MB leak #116 exists to avoid).

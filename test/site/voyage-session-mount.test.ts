@@ -75,17 +75,16 @@ async function engineOverStack() {
   return { voyage, mount, manifest, survey, calls };
 }
 
-test("#371 a re-arm whose build bails leaves NO stale overlay resting on the mount", async () => {
-  const { voyage, mount, manifest } = await engineOverStack();
+const BAILED = ["ask:.voyage-overlay", "remove:first", "remove:second"];
 
-  // The builder's own wipe sits after its bails by design (#364 above), so on this path the mount is never asked at all unless rearmVoyage asks it.
+test("#371 a re-arm whose build bails strips BOTH faces, not just the mount", async () => {
+  const { voyage, mount, manifest, calls } = await engineOverStack();
+
   voyage.rearmVoyage(manifest, null, 42, SUBTITLE);
 
-  assert.deepEqual(
-    mount.ledger,
-    ["ask:.voyage-overlay", "remove:first", "remove:second"],
-    "a bailing re-arm drops every overlay the mount holds and appends nothing",
-  );
+  assert.deepEqual(mount.ledger, BAILED, "a bailing re-arm drops every overlay the mount holds and appends nothing");
+  // #174 says the faces can never disagree, and a wiped recto over a verso still carrying the last world's track is exactly that.
+  assert.deepEqual(calls, ["clear"], "the ink stays on the back of the sheet after the front was scraped");
 });
 
 test("#371 a QUIET bail wipes the recto and leaves the verso frozen", async () => {
@@ -93,9 +92,19 @@ test("#371 a QUIET bail wipes the recto and leaves the verso frozen", async () =
 
   voyage.rearmVoyage(manifest, null, 42, SUBTITLE, { quiet: true });
 
-  assert.ok(mount.ledger.includes("remove:first"), "the quiet path wipes too");
-  // #174: routing the bail through exitVoyage() would clear the sink here, and a quiet mid-drag redraw exists precisely to leave the back face alone.
-  assert.deepEqual(calls, [], "the bail never touches the verso sink");
+  assert.deepEqual(mount.ledger, BAILED, "the quiet path wipes the mount the same way");
+  // The one asymmetry that is deliberate: re-blobbing the ghost per drag frame is the ~1 MB leak #116 exists to avoid, so a quiet arm freezes the whole back face, bail included.
+  assert.deepEqual(calls, [], "the quiet bail never touches the verso sink");
+});
+
+test("#371 the class: applyVoyage's bail leaves the mount bare too, by its leading exit", async () => {
+  const { voyage, mount, manifest, calls } = await engineOverStack();
+
+  voyage.applyVoyage(manifest, null, 42, SUBTITLE);
+
+  // rearmVoyage earns this with its own wipe; applyVoyage earns it only from the exitVoyage() at its head, so the invariant here rests on CALL ORDER and nothing else was watching it.
+  assert.deepEqual(mount.ledger, BAILED, "a bailing toggle-ON leaves the previous overlay resting");
+  assert.deepEqual(calls, ["clear"], "and leaves its track on the verso");
 });
 
 test("#371 control: a re-arm that BUILDS still appends, and the wipe is the builder's", async () => {
@@ -105,8 +114,9 @@ test("#371 control: a re-arm that BUILDS still appends, and the wipe is the buil
 
   assert.deepEqual(
     mount.ledger,
-    ["ask:.voyage-overlay", "remove:first", "remove:second", "append:voyage-overlay"],
+    [...BAILED, "append:voyage-overlay"],
     "one wipe, the builder's, then the session's own overlay",
   );
   assert.equal(calls.length, 1, "a loud re-arm mirrors the resting track to the verso");
+  assert.match(calls[0] as string, /^paint:/, "and mirrors it by PAINTING, not by clearing");
 });
