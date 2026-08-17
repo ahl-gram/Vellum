@@ -265,6 +265,25 @@ test("#373 an un-deferred landing never waits: it arms in the settle's own task"
   assert.equal(h.state.landings, 1, "and the arm has already run");
 });
 
+test("#373 a prime that REJECTS still arms: the survey falls back to the inline order", async () => {
+  const q = paintQueue();
+  let builds = 0;
+  const arm = createSurveyArm({
+    afterPaint: q.afterPaint,
+    isArmed: () => true,
+    worldGen: () => 0,
+    arm: () => { builds++; },
+    prime: () => Promise.reject(new Error("the render worker crashed")),
+  });
+
+  arm.schedule();
+  q.paint();
+  await Promise.resolve().then(() => {}).then(() => {});
+
+  // A one-sided .then here leaves the sheet permanently bare AND raises an unhandled rejection, and no other test in this file would notice either.
+  assert.equal(builds, 1, "a dead source degrades to the inline computation, it does not cancel the survey");
+});
+
 test("#373 with no off-thread source at all, every arm is synchronous", () => {
   const h = harness(); // no prime dep: the Reading Room's shape, and every host without a worker
   h.state.armed = true;

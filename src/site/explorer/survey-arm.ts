@@ -30,7 +30,9 @@ export function createSurveyArm(deps: SurveyArmDeps) {
     deps.afterPaint(() => {
       if (!live(mine, world)) return;
       if (!deps.prime) { run(); return; }
-      void deps.prime().then(() => { if (live(mine, world)) run(); });
+      const armIfLive = () => { if (live(mine, world)) run(); };
+      // Settled BOTH ways: a source that rejected is a source with nothing ready, and the arm has to proceed to the inline order rather than leave the sheet bare on an unhandled rejection.
+      void deps.prime().then(armIfLive, armIfLive);
     });
   }
 
