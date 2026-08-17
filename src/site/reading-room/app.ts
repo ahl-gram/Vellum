@@ -25,6 +25,8 @@ declare global {
     __vellumReadingRoomAges?: LivingChart["agesState"];
     /** #373: false while the travel order is still being computed off-thread, so a suite reading the itinerary is not racing the silent re-arm. */
     __vellumReadingRoomOrdered?: () => boolean;
+    /** #373: how many times the silent re-arm actually ran, so a suite can tell "the order arrived" from "the window closed". */
+    __vellumReadingRoomReorders?: () => number;
   }
 }
 
@@ -134,6 +136,7 @@ frame.root.addEventListener("animationend", retireArrival);
 frame.root.addEventListener("animationcancel", retireArrival);
 
 let ordered = false;
+let reorders = 0;
 
 function draw(): void {
   const myGen = ++drawGen;
@@ -190,6 +193,7 @@ function draw(): void {
         if (stillResting(armedAt, lc.agesState())) {
           lc.rearmAges(res.manifest, res.survey, seed, res.subtitle, { rest });
           syncHash();
+          reorders++;
         }
         ordered = true;
       };
@@ -225,6 +229,7 @@ document.addEventListener("click", lc.onDocClick);
 await initWorker();
 window.__vellumReadingRoomUsesWorker = usesWorker;
 window.__vellumReadingRoomOrdered = () => ordered;
+window.__vellumReadingRoomReorders = () => reorders;
 window.__vellumReadingRoomState = () => ({ seed, title: lastTitle });
 // #320: published whole, never narrowed; both names below are the same function object, so they cannot disagree.
 window.__vellumReadingRoomAges = lc.agesState;

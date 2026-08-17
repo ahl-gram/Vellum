@@ -92,8 +92,9 @@ export async function run(ctx) {
   );
   check(
     "SV2q the main thread keeps painting right through the arm: the travel matrix is off it (#373)",
-    sv2q.gap > 0 && sv2q.gap < 400,
-    JSON.stringify({ ...sv2q, firstInkMs }),
+    // RATIO, not a wall clock: the arm's own cold routing is real main-thread work that scales with the runner, and a fixed cap sized here read 383.4 against 400 on a loaded CI runner, which is a coin flip. A BLOCKED thread makes the largest gap essentially the whole tick-to-ink, so a third of it separates the two populations at any speed: measured 141.7/1148 and 383.4/3149 healthy, against 1074.7/1089 with the matrix put back.
+    sv2q.gap > 0 && sv2q.gap < firstInkMs / 3,
+    JSON.stringify({ ...sv2q, firstInkMs, share: +(sv2q.gap / firstInkMs).toFixed(3) }),
   );
   await shoot("explorer-survey-inked.png");
 
@@ -348,8 +349,8 @@ export async function run(ctx) {
     "SV2r the #127 arrival ceremony RUNS while the survey is being prepared: inkDraw advances instead of stalling (#373)",
     // The ratified acceptance, on the ruled path (a Draw with the box ticked), and the only check here that watches the ceremony itself rather than the arm. stroke-dashoffset is not compositable, so a matrix left on the main thread starves it.
     // TWO clauses, because the frame COUNT is environment-scaled and the gap is not: 104 steps on the authoring laptop against 39 on the CI runner, both healthy, where an arm put back on the main thread reads 3. A count threshold sized to the laptop red CI at 39, which is how the gap clause got here.
-    // The gap cap is 600, not SV2q's 400: this window also carries the innerHTML swap, buildPlaceOverlay and the arm's own cold routing, and CI measured 283.3 against SV2q's 166.6 on the same run. The mutant reads 1066.6, so both clauses keep roughly 2x either way.
-    sv2p.dashSeen >= 12 && sv2p.gap > 0 && sv2p.gap < 600,
+    // dashSeen carries the discrimination because it is a COUNT and does not scale with runner load: 104 here, 39 and 35 on two CI runs, against 3 with the matrix put back. The gap is the loose second opinion, capped well clear of the 383.3 a loaded CI runner reported and well under the 1066.6 the mutant reads.
+    sv2p.dashSeen >= 12 && sv2p.gap > 0 && sv2p.gap < 900,
     JSON.stringify({ dashSteps: sv2p.dashSteps, dashSeen: sv2p.dashSeen, gap: sv2p.gap, frames: sv2p.frames }),
   );
   check(

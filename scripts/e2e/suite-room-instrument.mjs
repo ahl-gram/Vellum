@@ -300,28 +300,25 @@ export async function run(ctx) {
     JSON.stringify({ arrivedAgain, rs28armed, rs28 }),
   );
 
-  // #373: the room ran the #184 travel matrix synchronously inside the draw's own .then, with none of the Explorer's deferral, so it froze BOTH ceremonies (the chart's inkDraw and this panel's unfurl). The matrix is in the render worker now and the room arms at once on whatever order is ready, re-arming silently when the real one lands.
+  // #373: the room ran the #184 travel matrix synchronously inside the draw's own .then, with none of the Explorer's deferral, so it froze BOTH ceremonies (the chart's inkDraw and this panel's unfurl). It now arms QUIET, which skips the matrix, and re-arms once the worker has the order.
+  // This pins the RE-ARM, not the timing: the wall-clock improvement is real and measured on the PR (largest rAF gap 1482.4ms before, 165.9ms after), but every mutation I could write left the gap unchanged, and an assertion nothing can red is a hole rather than a guard. The re-arm is what a regression would silently drop, and dropping it leaves the room on the straight-line tour for good.
   await room.goto("#seed=42&style=antique&legend=1");
-  await evaluate(`(()=>{window.__rsGap=0;let last=performance.now();
-    const step=(now)=>{window.__rsGap=Math.max(window.__rsGap,now-last);last=now;
-      if(!window.__rsStop)requestAnimationFrame(step);};window.__rsStop=false;requestAnimationFrame(step);
-    const c=document.querySelector(".rr-colophon");c.querySelector("input").value="1234";c.querySelector(".rr-read").click();})()`);
+  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="1234";c.querySelector(".rr-read").click();})()`);
   let rs29 = null;
   for (let i = 0; i < 200; i++) {
     let s = null;
     try {
       s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();
         return{seed:st.seed,status:(document.querySelector(".rf-status")||{}).textContent,
-          ordered:window.__vellumReadingRoomOrdered()};})()`);
+          ordered:window.__vellumReadingRoomOrdered(),reorders:window.__vellumReadingRoomReorders()};})()`);
     } catch {}
     if (s && s.status === "" && s.seed === 1234 && s.ordered) { rs29 = s; break; }
     await sleep(50);
   }
-  const rs29gap = await evaluate(`(()=>{window.__rsStop=true;return window.__rsGap;})()`);
   check(
-    "RS29 a counter read keeps painting throughout: the travel matrix is off the room's thread too (#373)",
-    !!rs29 && rs29gap > 0 && rs29gap < 600,
-    JSON.stringify({ ...rs29, gap: rs29gap }),
+    "RS29 a counter read re-arms once the travel order lands: the room does not keep the straight-line tour (#373)",
+    !!rs29 && rs29.reorders === 1,
+    JSON.stringify({ ...rs29 }),
   );
 
   gate.check("RS24 the room instrument run is clean (no console errors, no new 4xx)");
