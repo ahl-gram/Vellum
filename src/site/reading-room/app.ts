@@ -155,7 +155,7 @@ function restFor(live: Live | null): AgesPos | undefined {
   return undefined;
 }
 
-// The arm and the ceremony it carries, run once the travel order is in hand (#418). The quiet flag stays UNSET: quiet also suppresses the #184 travel-order matrix, and an arm path that pins it ships an unordered itinerary.
+// The arm and the ceremony it carries, run once the travel order is in hand (#418). The quiet flag stays UNSET: quiet skips the matrix COMPUTE (not a primed answer), so it only bites when the source has nothing ready, and there it ships the straight-line tour (test/site/voyage-tour-order.test.ts).
 // It does NOT write the status line: the settle path clears it after this returns and the failure path reports an error instead, so the one signal the suites gate on stays with the caller that knows which happened.
 function armRoom(res: DrawResult, forSeed: number, rest: AgesPos | undefined): void {
   lc.rearmAges(res.manifest, res.survey, forSeed, res.subtitle, { rest });
@@ -195,7 +195,7 @@ function draw(): void {
       const rest = restFor(pendingLive);
       pendingLive = null;
       lastRes = res;
-      // #318: every draw here is a fresh ARRIVAL, never a redraw of the world on screen, so the prior session is dropped HERE, in the task that swaps the chart, and never with the deferred arm (e2e RR22/RR25). Held back with the arm it would leave the PREVIOUS world's instrument armed and on screen over the NEW chart for the whole wait, where a scrub filters this world's glyphs by that world's years and a release writes that year into this world's address.
+      // #318/#418: every draw is a fresh ARRIVAL, so the prior session is dropped in the task that swaps the chart, never with the deferred arm (e2e RR22 pins the drop, RR25 the timing).
       lc.clearAges();
       const forSeed = seed;
       // #120: both halves close over THIS draw's res, never module state, so an arm landing late cannot meet another world's chart.
