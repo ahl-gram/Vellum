@@ -67,7 +67,7 @@ export type World = {
   readonly title: MapTitle;
   readonly names: FeatureNames;
   readonly history: History;
-  /** The deep's named inhabitants; whether a chart draws them is a view option. */
+  /** The deep's named inhabitants. */
   readonly beasts: ReadonlyArray<SeaBeast>;
   /** Hop distance from the nearest land cell, over water. */
   readonly oceanDist: Float64Array;

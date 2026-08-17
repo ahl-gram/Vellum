@@ -105,7 +105,7 @@ export async function run(ctx) {
 
   const beastsPresent = await evaluate(`!!document.getElementById("beasts")`);
   if (!beastsPresent) {
-    check("R13 beasts checkbox present", false, "#beasts control missing");
+    check("R15 beasts checkbox present", false, "#beasts control missing");
   } else {
     await evaluate(`(()=>{
       document.getElementById("seed").value="42";
@@ -118,12 +118,12 @@ export async function run(ctx) {
     })()`);
     await waitSettled("beasts-off");
     const a13off = await evaluate(`({bestiary:document.querySelector("#map svg").outerHTML.includes("layer-bestiary"),hash:location.hash.includes("beasts=0")})`);
-    check("R13a beasts off: no bestiary layer, beasts=0 in hash", !a13off.bestiary && a13off.hash, `bestiary=${a13off.bestiary} hash=${a13off.hash}`);
+    check("R15a beasts off: no bestiary layer, beasts=0 in hash", !a13off.bestiary && a13off.hash, `bestiary=${a13off.bestiary} hash=${a13off.hash}`);
 
     await evaluate(`(()=>{const b=document.getElementById("beasts");b.checked=true;b.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     await waitSettled("beasts-on");
     const a13on = await evaluate(`({bestiary:document.querySelector("#map svg").outerHTML.includes("layer-bestiary"),hash:location.hash.includes("beasts=1")})`);
-    check("R13b beasts on: bestiary layer drawn, beasts=1 in hash", a13on.bestiary && a13on.hash, `bestiary=${a13on.bestiary} hash=${a13on.hash}`);
+    check("R15b beasts on: bestiary layer drawn, beasts=1 in hash", a13on.bestiary && a13on.hash, `bestiary=${a13on.bestiary} hash=${a13on.hash}`);
   }
 
   const coastPresent = await evaluate(`!!document.getElementById("coast")`);

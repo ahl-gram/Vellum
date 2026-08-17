@@ -11,7 +11,7 @@ export type SeaBeast = {
   readonly name: string;
   /** "the Island that Swims"; lowercase article, appended after the name. */
   readonly epithet: string;
-  /** The haunt, in grid coordinates: genuine border-connected sea, far from every coast. */
+  /** The haunt, in grid coordinates. */
   readonly x: number;
   readonly y: number;
   readonly firstSeen: number;
@@ -76,7 +76,7 @@ export type BestiaryInput = {
   readonly gridH: number;
   /** Hop distance from the nearest land cell, over water. */
   readonly oceanDist: Float64Array;
-  /** 1 = border-connected sea; keeps beasts out of lakes. */
+  /** 1 = border-connected sea. */
   readonly seaMask: Uint8Array;
   readonly mapType: string;
   readonly culture: Culture;
@@ -136,8 +136,9 @@ function freshPick<T>(rng: Rng, list: readonly T[], used: Set<T>): T {
 export function conjureBestiary(
   input: BestiaryInput,
   rng: Rng,
-  taken: Set<string>,
+  takenNames: ReadonlySet<string>,
 ): ReadonlyArray<SeaBeast> {
+  const taken = new Set(takenNames);
   const count = COUNT_BY_TYPE[input.mapType] ?? 2;
   let cells = deepCells(input, DEEP);
   if (cells.length < count * 12) cells = deepCells(input, DEEP_FALLBACK);

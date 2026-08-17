@@ -134,7 +134,7 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   const settlements = settlementsLayer(ctx);
   const featureLabels = featureLabelsLayer(ctx);
   const bestiary = opts.beasts ? beastsLayer(ctx, cartouchePlan, compassPlan) : null;
-  const seaDecor = seaDecorLayer(ctx, cartouchePlan, compassPlan, { serpent: !opts.beasts });
+  const seaDecor = seaDecorLayer(ctx, cartouchePlan, compassPlan, { serpent: bestiary === null });
   const heraldry = opts.arms ? heraldryLayer(ctx, featureLabels.realmAnchors) : null;
 
   const themed = opts.theme !== undefined;

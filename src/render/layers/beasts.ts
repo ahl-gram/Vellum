@@ -35,7 +35,6 @@ export function beastsLayer(
     for (let gx = 4; gx < w - 4; gx += 2) {
       const d = world.oceanDist[gx + gy * w] as number;
       if (d < 8) continue;
-      if (world.region?.seaGate && world.region.seaGate[gx + gy * w] === 0) continue;
       open.push({ x: proj.px(gx), y: proj.py(gy), d });
     }
   }

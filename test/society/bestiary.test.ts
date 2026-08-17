@@ -40,7 +40,7 @@ test("beast names collide with nothing already on the chart", () => {
   }
 });
 
-test("conjuring draws nothing from the world's other forks", () => {
+test("the bestiary reproduces from the bestiary fork alone", () => {
   const rng = createRng(world.recipe.seed);
   const input = {
     gridW: world.elev.w,
@@ -56,7 +56,7 @@ test("conjuring draws nothing from the world's other forks", () => {
   assert.deepEqual(direct, world.beasts);
 });
 
-test("the chart is byte-identical with the bestiary left ashore", () => {
+test("the bestiary layer appears only when summoned", () => {
   const svg = renderMap(world, { style: "antique" });
   assert.ok(!svg.includes("layer-bestiary"), "beasts drawn without being summoned");
   const withBeasts = renderMap(world, { style: "antique", beasts: true });
