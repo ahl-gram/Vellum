@@ -42,7 +42,6 @@ const ROOM_TOUR_TIMEOUT_MS = 6000;
 
 // onPark is #192's seam: Play's parks are the one rest no input event announces.
 const frame = createReadingFrame(mount, { onPark: () => syncHash() });
-// #418: the #184 travel matrix runs in the render worker, so it lands on neither the #127 ink ceremony nor the #321 unfurl.
 const tourOrder = createTourOrder({ runJob, timeoutMs: ROOM_TOUR_TIMEOUT_MS });
 const lc = createLivingChart({ ...frame.host, tourOrder });
 // #318: the colophon mounts as the instrument panel's SIBLING, never inside it (the ratified placement: the engine hides the panel through every teardown, and the colophon must stand).
@@ -54,6 +53,8 @@ let seed = 0;
 let shownSeed = 0;
 let style: StyleName = "antique";
 let lastTitle = "";
+// The last draw that SETTLED, so a failure can restore the instrument for the world still on screen.
+let lastRes: DrawResult | null = null;
 // #192/#220: a deep link's live key, one-shot; it becomes the arm's rest on the first draw, and liveNow reads it so an early sync cannot drop the address.
 let pendingLive: Live | null = null;
 
@@ -119,7 +120,6 @@ function syncHash(): void {
 }
 
 let drawGen = 0;
-// #418: every arm goes through this ONE slot, one painted frame past the settle and one travel order later.
 const roomArm = createRoomArm({ afterPaint: afterNextPaint, worldGen: () => drawGen });
 
 // #321: the arrival unfurl runs ONCE per visit, retired by CLASS REMOVAL the moment nothing is unfurling: display:none terminates a CSS animation and restoring display starts it AFRESH, so a class left in place would replay the unfurl as a flash on every dice roll (e2e RS28).
@@ -148,10 +148,16 @@ function recipeOverrides(): { mapType?: MapType; band?: ClimateBand; landFractio
   };
 }
 
+// #221: a deep link's key becomes the arm's rest, one-shot, and it reaches the instrument through rearmAges rather than applyAges (a restored link is a photograph, not an arming gesture).
+function restFor(live: Live | null): AgesPos | undefined {
+  if (live?.kind === "year") return { chamber: "ages", year: live.year };
+  if (live?.kind === "survey") return { chamber: "survey", t: 1 };
+  return undefined;
+}
+
 // The arm and the ceremony it carries, run once the travel order is in hand (#418). The quiet flag stays UNSET: quiet also suppresses the #184 travel-order matrix, and an arm path that pins it ships an unordered itinerary.
+// It does NOT write the status line: the settle path clears it after this returns and the failure path reports an error instead, so the one signal the suites gate on stays with the caller that knows which happened.
 function armRoom(res: DrawResult, forSeed: number, rest: AgesPos | undefined): void {
-  // #318: every draw here is a fresh ARRIVAL, never a redraw of the world on screen, so drop any prior session before arming (e2e RR22); clearAges is the post-wipe teardown.
-  lc.clearAges();
   lc.rearmAges(res.manifest, res.survey, forSeed, res.subtitle, { rest });
   // #321: added AFTER the arm so the panel is visible when the animation starts (see the flag's comment above).
   if (!arrived) {
@@ -160,8 +166,6 @@ function armRoom(res: DrawResult, forSeed: number, rest: AgesPos | undefined): v
   }
   // Converge the address after the arm, so the URL carries the rest the reader actually landed at.
   syncHash();
-  // LAST, after every visible effect: an empty status line is the suites' settle signal, and #418 keeps it meaning "armed and at rest" by clearing it HERE rather than at the chart's settle. Deferring the whole block as a unit leaves the order every check already observes (arm, unfurl, address, gate) exactly as it was.
-  frame.host.statusEl.textContent = "";
 }
 
 function draw(): void {
@@ -188,23 +192,28 @@ function draw(): void {
       startArrival(frame.host.mapEl.querySelector("svg"));
       lastTitle = res.title;
       shownSeed = seed;
-      // #221: the deep link's key becomes the arm's rest, one-shot; rearmAges, never applyAges (a restored link is a photograph, not an arming gesture).
-      const rest: AgesPos | undefined =
-        pendingLive?.kind === "year" ? { chamber: "ages", year: pendingLive.year }
-        : pendingLive?.kind === "survey" ? { chamber: "survey", t: 1 } : undefined;
+      const rest = restFor(pendingLive);
       pendingLive = null;
+      lastRes = res;
+      // #318: every draw here is a fresh ARRIVAL, never a redraw of the world on screen, so the prior session is dropped HERE, in the task that swaps the chart, and never with the deferred arm (e2e RR22/RR25). Held back with the arm it would leave the PREVIOUS world's instrument armed and on screen over the NEW chart for the whole wait, where a scrub filters this world's glyphs by that world's years and a release writes that year into this world's address.
+      lc.clearAges();
       const forSeed = seed;
-      // #418: both halves close over THIS draw's res, never module state, so a counter read landing mid-wait cannot arm one world's instrument against another's chart (#120).
+      // #120: both halves close over THIS draw's res, never module state, so an arm landing late cannot meet another world's chart.
       roomArm.schedule({
         prime: () => tourOrder.prime(res.manifest, res.survey, forSeed),
-        arm: () => armRoom(res, forSeed, rest),
+        arm: () => {
+          armRoom(res, forSeed, rest);
+          frame.host.statusEl.textContent = "";
+        },
       });
     })
     .catch((err) => {
       if (myGen !== drawGen) return;
-      // The previous world is still on screen with its instrument armed: converge the module state back onto it, or the next park would serialize the failed seed into a shareable wrong address.
+      // The previous world is still on screen: converge the module state back onto it, or the next park would serialize the failed seed into a shareable wrong address.
       seed = shownSeed;
       colophon.seedInput.value = String(shownSeed);
+      // #418: a read that supersedes an arm still WAITING drops that arm, so a superseding draw that then fails would leave a chart with no instrument at all and no way back (the hash is read once, at boot). Re-arm the world actually on screen, so #221's "arrival is at rest on every path" survives this path too; already armed, this is a no-op.
+      if (!lc.agesState() && lastRes) armRoom(lastRes, shownSeed, undefined);
       frame.host.statusEl.textContent = "The cartographer spilled the ink: " + err.message;
     });
 }

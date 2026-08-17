@@ -2,12 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRoomArm } from "../../src/site/reading-room/arm.ts";
 
-// #418: the room's arm HOLDS for the off-thread travel order instead of blocking on it. Alex ruled
-// on 2026-08-17 that the #321 unfurl may land later than the chart on a cold world: one arm, always
-// the travel order, so nothing re-shuffles in front of a reader resting in the survey chamber.
-// Not survey-arm.ts: that slot serves a CONTROL (a box that unticks, a tick arm and a landing arm
-// sharing one generation). The room is always armed and every arm belongs to exactly one draw, so
-// the draw generation IS the generation and there is nothing to cancel.
+// #418: the slot's contract, whose why lives at the head of src/site/reading-room/arm.ts.
 
 /** A held-open frame: `afterPaint` queues, `paint()` releases everything queued so far. */
 function paintQueue() {
@@ -58,8 +53,7 @@ test("#418 the arm is deferred past the settle's paint, so the ink ceremony gets
   const h = harness();
   h.schedule();
 
-  // A cached world's prime resolves immediately, which would put the whole ~130ms arm back inside
-  // the settle's task and re-block the #127 inkDraw the deferral exists to protect.
+  // A cached world's prime resolves immediately, so without this the whole ~130ms arm lands back inside the settle's task and re-blocks the #127 inkDraw the deferral exists to protect.
   assert.equal(h.calls(), 0, "nothing is asked for until the chart has painted");
   assert.equal(h.state.arms, 0);
 });
@@ -113,7 +107,6 @@ test("#418 a prime that REJECTS still arms: the room falls back to the inline or
   q.paint();
   await Promise.resolve().then(() => {}).then(() => {});
 
-  // A one-sided .then here leaves the room permanently bare (no panel, no journal, no unfurl: the
-  // instrument IS this surface) AND raises an unhandled rejection. #371 is the same failure class.
+  // A one-sided .then leaves the room bare for good AND raises an unhandled rejection; #371 is the same failure class.
   assert.equal(arms, 1, "a dead source degrades to the inline computation, it does not cancel the room");
 });
