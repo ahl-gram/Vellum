@@ -52,6 +52,10 @@ export function createVoyage(deps: VoyageDeps) {
     }
   }
 
+  function dropOverlays(): void {
+    mapEl.querySelectorAll(".voyage-overlay").forEach((overlay) => overlay.remove());
+  }
+
   // The #121 margin log is a SIBLING of the mount, so it survives the innerHTML wipe and must be hidden explicitly.
   function clearVoyage(): void {
     logPanel.hideLog();
@@ -202,8 +206,12 @@ export function createVoyage(deps: VoyageDeps) {
   ): void {
     cancelVoyageRaf();
     voyage = null;
-    if (!buildVoyage(manifest, survey, seed, subtitle, opts.quiet)) { logPanel.hideLog(); return; }
-    paintFrame(voyage!, 1, false); // silent: the draw's settle needs the status to stay ""
+    if (buildVoyage(manifest, survey, seed, subtitle, opts.quiet)) {
+      paintFrame(voyage!, 1, false); // silent: the draw's settle needs the status to stay ""
+    } else {
+      dropOverlays();
+      logPanel.hideLog();
+    }
     // #366: a DEFERRED arm runs after rebuildVerso and is the one that inks the back face; the conductor's repaint comment in ../explorer/app.ts is the authority.
     // #174 INVARIANT: the sink's ghost and its track come from the SAME draw; a quiet mid-drag redraw freezes the whole back face (re-blobbing the ghost per frame is the ~1 MB leak #116 exists to avoid).
     if (!opts.quiet) syncRestingTrack();
@@ -211,8 +219,7 @@ export function createVoyage(deps: VoyageDeps) {
 
   function exitVoyage(): void {
     cancelVoyageRaf();
-    // EVERY match, not the first (#364): a sheet that somehow arrived carrying two overlays is left truly bare. e2e SV2h plants the second overlay no arm path can produce any more.
-    mapEl.querySelectorAll(".voyage-overlay").forEach((overlay) => overlay.remove());
+    dropOverlays();
     if (voyage) statusEl.textContent = "";
     logPanel.hideLog(); // #121: the margin log is a sibling of the mount, so remove it explicitly
     voyage = null;

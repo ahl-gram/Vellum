@@ -1,6 +1,7 @@
 // Shared hosts and recorders for the living-chart boundary suites; lives outside test/ so node --test does not collect it.
 // The engine is imported DYNAMICALLY inside the functions that need it, so importing this helper cannot smuggle the engine past the #191 no-DOM import guard.
 import type { LivingChart } from "../src/site/living-chart/index.ts";
+import type { VoyageLogPanel } from "../src/site/living-chart/voyage-log-panel.ts";
 import type { PlaceManifest } from "../src/render/place-manifest.ts";
 import type { Survey } from "../src/render/survey.ts";
 import type { El } from "./element-shim.ts";
@@ -21,6 +22,16 @@ export const API = [
 
 /** A plain empty element: construction may only STORE refs, so this is enough for it. */
 export const bareEl = (): HTMLElement => ({}) as unknown as HTMLElement;
+
+/** A status line recording every WRITE, so "the engine posted nothing" is provable: bareEl swallows the assignment, and the host's whole settle signal is this element staying "" (#371). */
+export function recordingStatus(): { el: HTMLElement; writes: string[] } {
+  const writes: string[] = [];
+  const el = {
+    get textContent(): string { return writes[writes.length - 1] ?? ""; },
+    set textContent(v: string) { writes.push(v); },
+  };
+  return { el: el as unknown as HTMLElement, writes };
+}
 
 /** An empty chart mount that records what was ASKED; deliberately not a selector engine. */
 export function emptyMount(): { el: HTMLElement; asked: string[] } {
@@ -60,6 +71,25 @@ export function stackedMount(): { el: HTMLElement; ledger: string[] } {
     },
   };
   return { el: mount as unknown as HTMLElement, ledger };
+}
+
+/** The #121 margin log is a SIBLING of the mount, so no mount ledger can ever see it, and barlessLogPanel's own hideLog records nothing: this call ledger is the only way to prove a bail hid the journal it left behind (#371). */
+export async function recordingLogPanel(): Promise<{ panel: VoyageLogPanel; calls: string[] }> {
+  const { barlessLogPanel } = await import("../src/site/living-chart/no-bar.ts");
+  const base = barlessLogPanel();
+  const calls: string[] = [];
+  const panel: VoyageLogPanel = {
+    ...base,
+    revealLog: (rows, arrived) => {
+      calls.push(`reveal:${arrived}`);
+      base.revealLog(rows, arrived);
+    },
+    hideLog: () => {
+      calls.push("hide");
+      base.hideLog();
+    },
+  };
+  return { panel, calls };
 }
 
 /** The host's optional verso surface (#174), recording so a paint or clear is provable. */

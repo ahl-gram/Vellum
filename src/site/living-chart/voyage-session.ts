@@ -154,8 +154,7 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     // INVARIANT: the marks are SIBLINGS of trackEl, never inside it; syncRestingTrack feeds the sink trackEl's `points` verbatim, and a mark nested in the track would bleed through to the back of the sheet (#174).
     svg.append(trackEl, shipG, riderG);
     // INVARIANT (#364): on every path that APPENDS, the mount is left holding exactly ONE overlay, this one; the builder drops whatever overlay is already there rather than trusting the caller to have wiped it (e2e SV2g; test/site/voyage-session-mount.test.ts).
-    // Deliberately HERE and not at the top of build: every bail above returns with the mount exactly as found, so a survey-less world never strips the overlay a previous one left resting.
-    // Known limit: a caller arming OUTSIDE a draw wipe against a survey-less world would leave a stale track with no log under it; unreachable from every caller today (all four wipe the mount first), left to its own issue, #371.
+    // Deliberately HERE and not at the top of build: the builder never owns its caller's teardown, so every bail above returns with the mount exactly as found.
     mapEl.querySelectorAll(".voyage-overlay").forEach((stale) => stale.remove());
     mapEl.appendChild(svg);
 
