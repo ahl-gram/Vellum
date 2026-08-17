@@ -2,6 +2,15 @@
 // Queries deliberately answer "nothing here", true of an undrawn mount; never grow this into a selector engine.
 // Lives outside test/ so node --test does not collect it as a phantom 0-test file.
 
+/** An inline style bag that also answers setProperty/getPropertyValue, which is how the engine writes its custom properties. */
+function styleBag() {
+  const bag: Record<string, string> = {};
+  return Object.assign(bag, {
+    setProperty: (name: string, value: string): void => { bag[name] = String(value); },
+    getPropertyValue: (name: string): string => bag[name] ?? "",
+  });
+}
+
 export class El {
   tagName: string;
   children: El[] = [];
@@ -14,15 +23,27 @@ export class El {
   max = "";
   step = "";
   type = "";
-  /** Inline positioning only. A plain bag: nothing here resolves or cascades. */
-  style: Record<string, string> = {};
+  /** Inline positioning only, custom properties included. A plain bag: nothing here resolves or cascades. */
+  style = styleBag();
   dataset: Record<string, string> = {};
-  /** Recorded, never dispatched: the wiring is the assertion, not the behaviour. */
+  /** Recorded for the wiring assertions; `handlers` below is what lets a test FIRE one. */
   listeners: string[] = [];
+  handlers = new Map<string, ((e?: unknown) => void)[]>();
+  /** What getBoundingClientRect answers. The shim does no layout, so a test that measures must say what it is measuring. */
+  rect: { left: number; top: number; right: number; bottom: number } = { left: 0, top: 0, right: 0, bottom: 0 };
   #text = "";
 
   constructor(tag: string) {
     this.tagName = tag.toUpperCase();
+  }
+
+  getBoundingClientRect() {
+    return { ...this.rect, width: this.rect.right - this.rect.left, height: this.rect.bottom - this.rect.top };
+  }
+
+  /** Fire every handler registered for `type` on THIS element. No bubbling: nothing under test depends on it. */
+  fire(type: string, e?: unknown): void {
+    for (const h of this.handlers.get(type) ?? []) h(e);
   }
 
   // id reflects to the ATTRIBUTE so the no-ids guard can see a stray el.id assignment.
@@ -73,7 +94,10 @@ export class El {
   setAttribute(name: string, v: string): void { this.attrs.set(name, String(v)); }
   getAttribute(name: string): string | null { return this.attrs.get(name) ?? null; }
   removeAttribute(name: string): void { this.attrs.delete(name); }
-  addEventListener(type: string): void { this.listeners.push(type); }
+  addEventListener(type: string, handler?: (e?: unknown) => void): void {
+    this.listeners.push(type);
+    if (handler) this.handlers.set(type, [...(this.handlers.get(type) ?? []), handler]);
+  }
   querySelector(): El | null { return null; }
   querySelectorAll(): El[] { return []; }
   remove(): void {

@@ -24,21 +24,26 @@
   opacity: 1; transform: scale(1);
 }
 /* #164: --zoom-k is published on THIS card element, never the mount (that would re-rasterize the baked labels every frame and jiggle); the origin sits on whichever corner the card is ANCHORED by, which #124 moved to the right edge for the flipped variants, so the gap at the mark holds a constant screen distance at every depth. */
+/* #387/#388: --pc-dx/--pc-dy ride INSIDE the counter-scaled translate, never before the scale. The mount carries the Glass's own scale(k), so a nudge placed ahead of scale(1/k) composes as k times itself: right at k=1, four times too far at k=4, which is the depth the defect lives at. Folded in here the two scales cancel and the value is honest screen px at every depth. All four variants below carry it or that variant never clamps. */
 #place-card {
   position: absolute; z-index: 5; max-width: 16rem; pointer-events: none;
   left: calc(var(--pc-nx, 0) * 100%); top: calc(var(--pc-ny, 0) * 100%);
   transform-origin: 0 0;
-  transform: scale(calc(1 / var(--zoom-k, 1))) translate(10px, 10px);
+  transform: scale(calc(1 / var(--zoom-k, 1)))
+    translate(calc(10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)));
 }
 /* id+attr specificity beats the id-only rule above, so [hidden] really hides. */
 #place-card[hidden] { display: none; }
 /* #124: a flipped card is anchored on the side it flips TOWARD, so shrink-to-fit measures the room it will actually occupy. Anchored on the mark's side, a town at nx 0.72 got a column as wide as the 28% gap it was flipping away from, and the derivation fell into a 97px ribbon 478px tall inside a 266px chart. */
 #place-card.flip-h { left: auto; right: calc(100% - var(--pc-nx, 0) * 100%);
   transform-origin: 100% 0;
-  transform: scale(calc(1 / var(--zoom-k, 1))) translate(-10px, 10px); }
-#place-card.flip-v { transform: scale(calc(1 / var(--zoom-k, 1))) translate(10px, calc(-100% - 10px)); }
+  transform: scale(calc(1 / var(--zoom-k, 1)))
+    translate(calc(-10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px))); }
+#place-card.flip-v { transform: scale(calc(1 / var(--zoom-k, 1)))
+  translate(calc(10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px))); }
 #place-card.flip-h.flip-v { transform-origin: 100% 0;
-  transform: scale(calc(1 / var(--zoom-k, 1))) translate(-10px, calc(-100% - 10px)); }
+  transform: scale(calc(1 / var(--zoom-k, 1)))
+    translate(calc(-10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px))); }
 .pc-inner {
   background: var(--control-cream); color: var(--ink-dark);
   border: 1px solid var(--ink-dark); border-radius: 4px;

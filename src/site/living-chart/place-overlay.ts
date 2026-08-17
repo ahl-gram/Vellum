@@ -3,7 +3,7 @@
 // coupling crosses the boundary as the injected `isSuppressed` predicate. Card text is
 // composed CLIENT-SIDE from the manifest (composePlaceCard), never createLoreWriter,
 // whose order/rng-dependent prose would diverge from the gazetteer for the same town.
-import { composePlaceCard, placeAriaLabel, cardSide } from "../../render/place-card.ts";
+import { composePlaceCard, placeAriaLabel, cardSide, clampOffset, type CardBox } from "../../render/place-card.ts";
 import type { PlaceManifest, PlaceMark } from "../../render/place-manifest.ts";
 import type { HistoricalEvent } from "../../society/history.ts";
 
@@ -48,10 +48,12 @@ export interface PlaceOverlayDeps {
   isSuppressed: () => boolean;
   /** #242: builds the shown place's way in to the prospect page from its world settlement index. */
   prospectHref?: (idx: number) => string;
+  /** #387/#388: the box a shown card is clamped into, in client coordinates. A host that wires none leaves the card wherever cardSide anchored it. */
+  clampBox?: () => CardBox | null;
 }
 
 export function createPlaceOverlay(deps: PlaceOverlayDeps) {
-  const { mapEl, isSuppressed, prospectHref } = deps;
+  const { mapEl, isSuppressed, prospectHref, clampBox } = deps;
 
   let placeOverlay: PlaceOverlayState | null = null;
 
@@ -109,7 +111,21 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     inner.style.animation = "none";
     void inner.offsetWidth;
     inner.style.animation = "";
+    clampIntoView(el);
     placeOverlay.currentIdx = idx;
+  }
+
+  // #387/#388: only the runtime knows the card's measured box, so the nudge cannot live in the stylesheet.
+  function clampIntoView(el: HTMLElement): void {
+    if (!clampBox) return;
+    // Zeroed first: the card element is reused across places, and getBoundingClientRect below flushes layout, so an unzeroed card would be measured through the PREVIOUS card's nudge.
+    el.style.setProperty("--pc-dx", "0px");
+    el.style.setProperty("--pc-dy", "0px");
+    const box = clampBox();
+    if (!box) return;
+    const { dx, dy } = clampOffset(el.getBoundingClientRect(), box);
+    el.style.setProperty("--pc-dx", `${dx}px`);
+    el.style.setProperty("--pc-dy", `${dy}px`);
   }
 
   function hidePlaceCard(): void {
