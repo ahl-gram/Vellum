@@ -1,5 +1,6 @@
 // The Print Room's bound atlas (#136, epic #132 Sub 4): composes the full atlas of the proof on the desk off-thread, lays it out as a print-first sheet, and delivers it by browser Save-as-PDF or self-contained single-file download.
 import { runJob } from "../explorer/worker-client.ts";
+import { plateFigure } from "./plate-markup.ts";
 import { escapeXml } from "../../render/svg.ts";
 import { ATLAS_SHEET_CSS, atlasDocument, svgToDataUri } from "../../atlas/document.ts";
 import type { AtlasDocumentData } from "../../atlas/document.ts";
@@ -83,25 +84,20 @@ export function enableBind(): void {
   bindBtn.disabled = false;
 }
 
-function plateFigure(svg: string, caption: string, cls = ""): string {
+// The markup itself is DOM-free and unit-pinned in plate-markup.ts (#379); this half is the part that cannot leave the browser, minting the blob and keeping it for revocation.
+function plateUrl(svg: string): string {
   const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
   atlasUrls.push(url);
-  const c = escapeXml(caption);
-  const classAttr = cls ? ` class="${cls}"` : "";
-  // No loading="lazy" here, unlike the Explorer's scroll view: a below-fold lazy plate can print blank when the engine renders to PDF before it loads.
-  // The plate opens in a NEW tab (#368, ruled 2026-08-12): navigating in place would tear down this page and revoke the very blobs the link points at.
-  return (
-    `<figure${classAttr}><a href="${url}" target="_blank" rel="noopener">` +
-    `<img src="${url}" alt="${c}"></a><figcaption>${c}</figcaption></figure>`
-  );
+  return url;
 }
 
 // innerHTML takes trusted input only: every recipe param is validated against a fixed allowlist by `applyHash` in `src/site/print-room/app.ts` before any worker job runs, and the rest is escaped or engine-composed.
 function renderBoundAtlas(atlas: AtlasDocumentData): void {
-  const hero = plateFigure(atlas.hero.svg, atlas.hero.title, "hero-plate print-only");
-  const draughtings = atlas.draughtings.map((p) => plateFigure(p.svg, p.title)).join("\n");
-  const themes = atlas.themes.map((p) => plateFigure(p.svg, p.title)).join("\n");
-  const regions = atlas.regions.map((p) => plateFigure(p.svg, p.title)).join("\n");
+  const plate = (p: { svg: string; title: string }, cls = ""): string => plateFigure(plateUrl(p.svg), p.title, cls);
+  const hero = plate(atlas.hero, "hero-plate print-only");
+  const draughtings = atlas.draughtings.map((p) => plate(p)).join("\n");
+  const themes = atlas.themes.map((p) => plate(p)).join("\n");
+  const regions = atlas.regions.map((p) => plate(p)).join("\n");
   atlasDiv.innerHTML = `<header class="atlas-head print-only">
   <h1>${escapeXml(atlas.title)}</h1>
   <p class="subtitle">${escapeXml(atlas.subtitle)}</p>
