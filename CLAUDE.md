@@ -52,7 +52,13 @@ The global `session-handoff` skill updates SESSION-NOTES (here at
 `session-notes/SESSION-NOTES.md`, not the repo root), RESUME-HERE, and auto-memory
 but does NOT know about the Project, so this is the Vellum-specific extra step. The durable
 sequencing RULES (golden flight-exclusion, land-regens-alone, the cost axis, cross-epic
-coordination) live in pinned issue #193; update that only when a RULE changes, which is rare.
+coordination) live in pinned issue #193, and **#193 is the one issue here whose BODY is
+normative**: it is the complete current rulebook, its comments are history and never
+authoritative, and new information goes INTO the body. Keep it fresh, editing the body for a
+corrected fact as readily as for a changed rule. Before this was inverted on 2026-08-17 that
+issue carried seventy percent of its content in comments, and two separate sessions read the
+body, restated a rule three comments had already amended, and each labelled the sweep "no rule
+changed".
 
 `gh project` needs the `project` token scope (`gh auth refresh -s project`). Read the plan at
 session start with `gh project item-list 1 --owner ahl-gram`, or open the Project in the browser.
@@ -195,6 +201,10 @@ The Reading Room works the same way: the 2026-07-25 re-baseline, correcting 73 s
 So fetch both, every time. Newest ratified statement wins, and **when a comment and the body
 disagree the comment supersedes** unless it says otherwise. That is the whole point of the
 convention: a body written before a big epic landed is historical intent, not current fact.
+
+**The one exception is the rulebook, #193**, where this is inverted: its body is normative and
+its comments are history. Do not read #193's comments to learn the rules, and put anything new
+into its body. Its own body says so at the top; see the handoff section above.
 
 ```
 gh api repos/ahl-gram/Vellum/issues/N            # the body
