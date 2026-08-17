@@ -24,7 +24,7 @@
   opacity: 1; transform: scale(1);
 }
 /* #164: --zoom-k is published on THIS card element, never the mount (that would re-rasterize the baked labels every frame and jiggle); the origin sits on whichever corner the card is ANCHORED by, which #124 moved to the right edge for the flipped variants, so the gap at the mark holds a constant screen distance at every depth. */
-/* #387/#388: --pc-dx/--pc-dy ride INSIDE the counter-scaled translate, never before the scale. The mount carries the Glass's own scale(k), so a nudge placed ahead of scale(1/k) composes as k times itself: right at k=1, four times too far at k=4, which is the depth the defect lives at. Folded in here the two scales cancel and the value is honest screen px at every depth. All four variants below carry it or that variant never clamps. */
+/* #387/#388: the clamp rides INSIDE the counter-scaled translate. The mount carries the Glass's own scale(k), so a nudge placed ahead of scale(1/k) composes as k times itself, which no unit test can catch because it is exactly right at k=1. */
 #place-card {
   position: absolute; z-index: 5; max-width: 16rem; pointer-events: none;
   left: calc(var(--pc-nx, 0) * 100%); top: calc(var(--pc-ny, 0) * 100%);

@@ -34,7 +34,7 @@ const published = (card: El) => ({
 
 /** Show a card whose UNNUDGED box is `base`, and read back what the engine published. */
 const shownWith = (card: El, hit: El, base: typeof CHART) => {
-  // Measured THROUGH the published nudge, the way a browser does: a shim that ignores it cannot see a card measured against the previous card's offset, which is the whole reason the engine zeroes before measuring.
+  // Measured THROUGH the published nudge, the way a browser does: a shim that ignores it cannot see a card measured against the previous card's offset.
   card.getBoundingClientRect = () => {
     const dx = parseFloat(card.style.getPropertyValue("--pc-dx")) || 0;
     const dy = parseFloat(card.style.getPropertyValue("--pc-dy")) || 0;
@@ -63,7 +63,7 @@ test("#388 a card measured off the side of the viewport publishes the nudge on t
   assert.deepEqual(nudge, { dx: "194px", dy: "0px" });
 });
 
-// The card element is REUSED across places (#128 keeps it stable so the unfurl replays cleanly), so a nudge left standing is applied to the next card AND folded into the box that card is measured from.
+// The card element is REUSED across places (#128 keeps it stable so the unfurl replays cleanly).
 test("#387/#388 the nudge is recomputed per show, never inherited from the card before it", async () => {
   const { card, hits } = await overlayOver(() => CHART);
 
@@ -131,6 +131,6 @@ test("#387/#388 the host's box reaches the card through createLivingChart, not o
   card.querySelector = ((sel: string) => (sel === ".pc-inner" ? inner : null)) as El["querySelector"];
   const hit = nodes.find((n) => n.classList.contains("place-hit"))!;
 
-  // The engine spreads the box in conditionally; dropping that one line costs every real host its clamp and leaves the whole site suite green.
+  // The engine spreads the box in conditionally, and dropping that one line costs every real host its clamp.
   assert.deepEqual(shownWith(card, hit, { left: 80, top: 200, right: 254, bottom: 390 }), { dx: "0px", dy: "-124px" });
 });

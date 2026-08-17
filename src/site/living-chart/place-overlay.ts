@@ -119,7 +119,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     placeOverlay.currentIdx = idx;
   }
 
-  // #387/#388: the nudge is arithmetic over a MEASURED box, so anything that moves or rescales the sheet under an open card invalidates it. Two paths reach a card whose nudge was computed against geometry that no longer holds: a camera change with the card still pinned, and a redraft, whose fresh card is shown here before the host has published its counter-scale onto it.
+  // #387/#388: the nudge is arithmetic over a MEASURED box, so anything that moves or rescales the sheet under an open card invalidates it.
   function reclampCard(): void {
     if (!placeOverlay || placeOverlay.card.hidden) return;
     clampIntoView(placeOverlay.card);
@@ -128,7 +128,6 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   // Only the runtime knows the card's measured box, so the nudge cannot live in the stylesheet.
   function clampIntoView(el: HTMLElement): void {
     if (!clampBox) return;
-    // Zeroed first: the card element is reused across places, and getBoundingClientRect below flushes layout, so an unzeroed card would be measured through the PREVIOUS card's nudge.
     el.style.setProperty("--pc-dx", "0px");
     el.style.setProperty("--pc-dy", "0px");
     const box = clampBox();

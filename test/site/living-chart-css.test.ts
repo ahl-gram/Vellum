@@ -128,7 +128,6 @@ test("every card variant reads the clamp, and reads it INSIDE the counter-scale 
     for (const prop of ["--pc-dx", "--pc-dy"]) {
       assert.ok(t.includes(prop), `${selector} never reads ${prop}, so that variant of the card cannot clamp`);
     }
-    // Counted, not merely matched: a SECOND translate ahead of the scale satisfies any "scale then translate" pattern and still lands the nudge in the wrong space.
     assert.ok(t.startsWith("scale(calc(1 / var(--zoom-k, 1))) translate("), `${selector} does not lead with its counter-scale`);
     assert.equal(t.split("translate(").length - 1, 1, `${selector} carries a second translate, and one of them is outside the counter-scale`);
     assert.equal(t.split("scale(").length - 1, 1, `${selector} carries a second scale`);

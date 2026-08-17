@@ -229,8 +229,7 @@ test("#388 both axes move at once: the corner case is one call, not two mechanis
 });
 
 test("#387 the accepted cost: a card TALLER than the chart keeps its top edge and overflows the bottom", () => {
-  // Clamping fits the card, it does not shrink it (ruled 2026-08-16). Pulling this one up by its
-  // full overhang would push its own heading off the top, which is strictly worse to read.
+  // Ruled 2026-08-16. Pulling it up by its full overhang would push its own heading off the top, which reads strictly worse.
   assert.deepEqual(clampOffset(at(80, 40, 174, 400), box), { dx: 0, dy: -40 });
 });
 

@@ -19,7 +19,7 @@ interface GlassDeps {
   runJob: Parameters<typeof createLodController>[0]["runJob"];
   /** The engine's overlay builder; every redraft path rebuilds the overlay through it. */
   buildPlaceOverlay: (manifest: PlaceManifest, opts?: { preservePinByName?: boolean; box?: { x: number; y: number; w: number; h: number } }) => void;
-  /** #387/#388: re-measure an open card against the camera as it now stands; a no-op with no card shown. */
+  /** #387/#388: re-measure an open card against the camera as it now stands. */
   reclampCard: () => void;
   setCaption: (text: string) => void;
   prefersReduce: () => boolean;
@@ -49,7 +49,7 @@ export function createGlass(deps: GlassDeps) {
       if (k === 1) el.style.removeProperty("--zoom-k");
       else el.style.setProperty("--zoom-k", String(k));
     }
-    // #387/#388: this is the ONE call reached both by every camera apply and by every redraft rebuild, so it is where a nudge measured against stale geometry gets corrected. Ordered after the publish above: the redraft's fresh card has no counter-scale until that line runs, and a card measured without it is measured k times too large.
+    // #387/#388: ordered AFTER the publish above, and reached by every camera apply and every redraft rebuild. A redraft's fresh card has no counter-scale until that loop runs, so re-measuring before it measures the card k times too large.
     deps.reclampCard();
   }
 

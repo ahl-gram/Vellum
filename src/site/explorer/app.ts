@@ -53,7 +53,7 @@ const lc = createLivingChart({
   statusEl: status,
   // #242: read at show time, so the card's link always carries the hash on screen.
   prospectHref: (idx) => prospectTarget(location.hash, idx),
-  // #387/#388: the Glass's clip box. At k=1 it IS the chart box; under the Glass it is the room actually on screen, which is why one box serves both errata.
+  // #387/#388: at k=1 this rect IS the chart box, and under the Glass it is the room actually on screen, which is why one box serves both errata.
   clampBox: () => mapViewport.getBoundingClientRect(),
   restingTrackSink: {
     paint: (points, viewBox) => paintVersoTrack(versoEl, points, viewBox),

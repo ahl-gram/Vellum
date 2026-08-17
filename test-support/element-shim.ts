@@ -44,7 +44,7 @@ export class El {
     return { ...this.rect, width: this.rect.right - this.rect.left, height: this.rect.bottom - this.rect.top };
   }
 
-  /** Fire every handler registered for `type` on THIS element. No bubbling: nothing under test depends on it. */
+  /** No bubbling: nothing under test depends on it. */
   fire(type: string, e?: unknown): void {
     for (const h of this.handlers.get(type) ?? []) h(e);
   }
