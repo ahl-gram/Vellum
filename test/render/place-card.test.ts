@@ -8,6 +8,7 @@ import {
   placeRank,
   placeAriaLabel,
   cardSide,
+  clampOffset,
   composePlaceCard,
   composeDerivation,
 } from "../../src/render/place-card.ts";
@@ -198,4 +199,44 @@ test("integration: every seed 42 place carries a derivation, and the ruin keeps 
   const ruin = m.places.find((p) => p.ruined)!;
   const ruinCard = composePlaceCard(ruin, m.events, m.cultureId);
   assert.ok(ruinCard.tale && ruinCard.tale.includes(ruin.name), "the ruin's tale survives the new lines");
+});
+
+// #387/#388: one mechanism on two axes, ruled 2026-08-16. cardSide stays pure and undisturbed; this is the nudge applied AFTER it has chosen a side, in screen px because the CSS folds it in after the counter-scale. The spills below are the measured worst cases on seed 42 at 390, Laukuwelua at the bottom edge and Homaitani at the top.
+const box = { left: 0, top: 0, right: 342, bottom: 266 };
+const at = (left: number, top: number, w: number, h: number) => ({ left, top, right: left + w, bottom: top + h });
+
+test("#387 a card that fits inside the chart is left exactly where it was anchored", () => {
+  assert.deepEqual(clampOffset(at(40, 40, 190, 120), box), { dx: 0, dy: 0 });
+});
+
+test("#387 a card hanging off the bottom is pulled up by its overhang, and no further", () => {
+  assert.deepEqual(clampOffset(at(80, 200, 174, 190), box), { dx: 0, dy: -124 });
+});
+
+test("#387 a card hanging off the top is pushed down by its overhang", () => {
+  assert.deepEqual(clampOffset(at(80, -101, 174, 190), box), { dx: 0, dy: 101 });
+});
+
+test("#388 a card opened off the side of the viewport comes back in", () => {
+  assert.deepEqual(clampOffset(at(-194, 40, 193, 120), box), { dx: 194, dy: 0 });
+  assert.deepEqual(clampOffset(at(300, 40, 193, 120), box), { dx: -151, dy: 0 });
+});
+
+test("#388 both axes move at once: the corner case is one call, not two mechanisms", () => {
+  assert.deepEqual(clampOffset(at(-30, 220, 193, 120), box), { dx: 30, dy: -74 });
+});
+
+test("#387 the accepted cost: a card TALLER than the chart keeps its top edge and overflows the bottom", () => {
+  // Ruled 2026-08-16. Pulling it up by its full overhang would push its own heading off the top, which reads strictly worse.
+  assert.deepEqual(clampOffset(at(80, 40, 174, 400), box), { dx: 0, dy: -40 });
+});
+
+test("#388 a card WIDER than the viewport keeps its left edge, the same way", () => {
+  assert.deepEqual(clampOffset(at(-50, 40, 500, 120), box), { dx: 50, dy: 0 });
+});
+
+test("#387 the box is read as given, not assumed to start at the origin", () => {
+  const inset = { left: 100, top: 60, right: 442, bottom: 326 };
+  assert.deepEqual(clampOffset(at(0, 0, 190, 120), inset), { dx: 100, dy: 60 });
+  assert.deepEqual(clampOffset(at(120, 80, 190, 120), inset), { dx: 0, dy: 0 });
 });

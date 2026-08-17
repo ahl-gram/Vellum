@@ -8,7 +8,7 @@ import type { El } from "./element-shim.ts";
 
 /** The engine's whole public surface; #319 pins the SAME list for both host shapes, and the length is asserted from the array, never quoted from a comment. */
 export const API = [
-  "buildPlaceOverlay", "onDocKeydown", "onDocClick",
+  "buildPlaceOverlay", "onDocKeydown", "onDocClick", "reclampCard",
   "applyAges", "rearmAges", "exitAges", "clearAges",
   "agesSnapToRest", "agesState", "agesDragStart", "agesDragEnd",
   "applyScrub", "exitScrub", "clearScrub", "cancelScrubRaf",

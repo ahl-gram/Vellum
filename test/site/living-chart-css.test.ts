@@ -117,6 +117,27 @@ test("a flipped card is anchored on the side it flips toward, and reads its anch
   assert.doesNotMatch(body, /\.style\.left\s*=/, "the card is positioned with an inline left again");
 });
 
+// The class, not the instance: four declarations position this card, and a variant quietly missing the clamp vars simply never clamps, which no JS test can see because the engine publishes the same two properties either way.
+test("every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)", () => {
+  const css = read(SHEET);
+  const variants = ["#place-card", "#place-card.flip-h", "#place-card.flip-v", "#place-card.flip-h.flip-v"];
+  for (const selector of variants) {
+    const transform = soleRule(css, selector).match(/transform:\s*([^;}]+)/);
+    assert.ok(transform, `${selector} declares no transform`);
+    const t = transform[1].replace(/\s+/g, " ");
+    for (const prop of ["--pc-dx", "--pc-dy"]) {
+      assert.ok(t.includes(prop), `${selector} never reads ${prop}, so that variant of the card cannot clamp`);
+    }
+    assert.ok(t.startsWith("scale(calc(1 / var(--zoom-k, 1))) translate("), `${selector} does not lead with its counter-scale`);
+    assert.equal(t.split("translate(").length - 1, 1, `${selector} carries a second translate, and one of them is outside the counter-scale`);
+    assert.equal(t.split("scale(").length - 1, 1, `${selector} carries a second scale`);
+  }
+  const overlay = codeOf("src/site/living-chart/place-overlay.ts");
+  for (const prop of ["--pc-dx", "--pc-dy"]) {
+    assert.ok(overlay.includes(`setProperty("${prop}"`), `the engine no longer publishes ${prop}`);
+  }
+});
+
 test("the shared sheet is host-agnostic: no host element id, ever (#302)", () => {
   const raw = read(SHEET);
   assert.ok(raw.length > 0, `${SHEET} exists and is non-empty`);

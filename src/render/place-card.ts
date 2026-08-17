@@ -57,6 +57,28 @@ export function cardSide(
   return { h: nx > 0.5 ? "left" : "right", v: ny > 0.5 ? "above" : "below" };
 }
 
+export type CardBox = {
+  readonly left: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+};
+
+function axisNudge(lo: number, hi: number, boxLo: number, boxHi: number): number {
+  if (hi - lo >= boxHi - boxLo) return boxLo - lo;
+  if (hi > boxHi) return boxHi - hi;
+  if (lo < boxLo) return boxLo - lo;
+  return 0;
+}
+
+/** #387/#388: the screen-px nudge that pulls a shown card back inside `box`, applied after cardSide has chosen its side. */
+export function clampOffset(card: CardBox, box: CardBox): { dx: number; dy: number } {
+  return {
+    dx: axisNudge(card.left, card.right, box.left, box.right),
+    dy: axisNudge(card.top, card.bottom, box.top, box.bottom),
+  };
+}
+
 function ruinTale(mark: PlaceMark, events: ReadonlyArray<HistoricalEvent>): string | undefined {
   if (!mark.ruined) return undefined;
   return events.find((e) => e.settlement === mark.idx && e.kind === "ruin")?.text;

@@ -15,6 +15,7 @@ import { barlessAges, barlessLogPanel } from "./no-bar.ts";
 import type { AgesPos } from "../../render/ages-track.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
+import type { CardBox } from "../../render/place-card.ts";
 
 export type { BuildPlaceOverlayOpts, RestingTrackSink };
 export type { AgesPos };
@@ -42,6 +43,8 @@ export interface LivingChartHost {
   restingTrackSink?: RestingTrackSink;
   /** #242: builds a settlement's way in to the prospect page (world-sheet cards only). Optional: a host with no prospect surface (the Reading Room) passes none. */
   prospectHref?: (idx: number) => string;
+  /** #387/#388: the box a shown place card is clamped into, in client coordinates. Optional: a host that never shows a card (the Reading Room, permanently .scrub) passes none. */
+  clampBox?: () => CardBox | null;
 }
 
 export function createLivingChart(host: LivingChartHost) {
@@ -50,6 +53,7 @@ export function createLivingChart(host: LivingChartHost) {
     mapEl: host.mapEl,
     isSuppressed: () => chronicle.isActive(),
     ...(host.prospectHref ? { prospectHref: host.prospectHref } : {}),
+    ...(host.clampBox ? { clampBox: host.clampBox } : {}),
   });
   const chronicle = createChronicle({
     mapEl: host.mapEl,
@@ -93,6 +97,7 @@ export function createLivingChart(host: LivingChartHost) {
       overlay.buildPlaceOverlay(manifest, opts),
     onDocKeydown: overlay.onDocKeydown,
     onDocClick: overlay.onDocClick,
+    reclampCard: overlay.reclampCard,
     applyAges: (manifest: PlaceManifest | null, survey: Survey | null, seed: number, subtitle: string) =>
       ages.armAges(manifest, survey, seed, subtitle),
     rearmAges: (
