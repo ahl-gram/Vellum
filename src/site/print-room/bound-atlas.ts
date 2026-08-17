@@ -4,6 +4,7 @@ import { plateFigure } from "./plate-markup.ts";
 import { escapeXml } from "../../render/svg.ts";
 import { ATLAS_SHEET_CSS, atlasDocument, svgToDataUri } from "../../atlas/document.ts";
 import type { AtlasDocumentData } from "../../atlas/document.ts";
+import type { AtlasPlate } from "../../atlas/compose.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import type { WorldRecipe } from "../../world/types.ts";
@@ -84,7 +85,6 @@ export function enableBind(): void {
   bindBtn.disabled = false;
 }
 
-// The markup itself is DOM-free and unit-pinned in plate-markup.ts (#379); this half is the part that cannot leave the browser, minting the blob and keeping it for revocation.
 function plateUrl(svg: string): string {
   const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
   atlasUrls.push(url);
@@ -93,7 +93,7 @@ function plateUrl(svg: string): string {
 
 // innerHTML takes trusted input only: every recipe param is validated against a fixed allowlist by `applyHash` in `src/site/print-room/app.ts` before any worker job runs, and the rest is escaped or engine-composed.
 function renderBoundAtlas(atlas: AtlasDocumentData): void {
-  const plate = (p: { svg: string; title: string }, cls = ""): string => plateFigure(plateUrl(p.svg), p.title, cls);
+  const plate = (p: AtlasPlate, cls = ""): string => plateFigure(plateUrl(p.svg), p.title, cls);
   const hero = plate(atlas.hero, "hero-plate print-only");
   const draughtings = atlas.draughtings.map((p) => plate(p)).join("\n");
   const themes = atlas.themes.map((p) => plate(p)).join("\n");
