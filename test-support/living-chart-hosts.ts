@@ -23,6 +23,16 @@ export const API = [
 /** A plain empty element: construction may only STORE refs, so this is enough for it. */
 export const bareEl = (): HTMLElement => ({}) as unknown as HTMLElement;
 
+/** A status line recording every WRITE, so "the engine posted nothing" is provable: bareEl swallows the assignment, and the host's whole settle signal is this element staying "" (#371). */
+export function recordingStatus(): { el: HTMLElement; writes: string[] } {
+  const writes: string[] = [];
+  const el = {
+    get textContent(): string { return writes[writes.length - 1] ?? ""; },
+    set textContent(v: string) { writes.push(v); },
+  };
+  return { el: el as unknown as HTMLElement, writes };
+}
+
 /** An empty chart mount that records what was ASKED; deliberately not a selector engine. */
 export function emptyMount(): { el: HTMLElement; asked: string[] } {
   const asked: string[] = [];
@@ -63,7 +73,7 @@ export function stackedMount(): { el: HTMLElement; ledger: string[] } {
   return { el: mount as unknown as HTMLElement, ledger };
 }
 
-/** barlessLogPanel with its two visibility calls recorded (#371). The #121 margin log is a SIBLING of the mount, so no mount ledger can ever see it: a call ledger is the only way to prove a bail hid the journal it left behind. */
+/** The #121 margin log is a SIBLING of the mount, so no mount ledger can ever see it, and barlessLogPanel's own hideLog records nothing: this call ledger is the only way to prove a bail hid the journal it left behind (#371). */
 export async function recordingLogPanel(): Promise<{ panel: VoyageLogPanel; calls: string[] }> {
   const { barlessLogPanel } = await import("../src/site/living-chart/no-bar.ts");
   const base = barlessLogPanel();

@@ -207,13 +207,12 @@ export function createVoyage(deps: VoyageDeps) {
   ): void {
     cancelVoyageRaf();
     voyage = null;
-    if (!buildVoyage(manifest, survey, seed, subtitle, opts.quiet)) {
+    if (buildVoyage(manifest, survey, seed, subtitle, opts.quiet)) {
+      paintFrame(voyage!, 1, false); // silent: the draw's settle needs the status to stay ""
+    } else {
       dropOverlays();
       logPanel.hideLog();
-      if (!opts.quiet) syncRestingTrack();
-      return;
     }
-    paintFrame(voyage!, 1, false); // silent: the draw's settle needs the status to stay ""
     // #366: a DEFERRED arm runs after rebuildVerso and is the one that inks the back face; the conductor's repaint comment in ../explorer/app.ts is the authority.
     // #174 INVARIANT: the sink's ghost and its track come from the SAME draw; a quiet mid-drag redraw freezes the whole back face (re-blobbing the ghost per frame is the ~1 MB leak #116 exists to avoid).
     if (!opts.quiet) syncRestingTrack();
