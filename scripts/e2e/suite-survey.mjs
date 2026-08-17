@@ -69,8 +69,15 @@ export async function run(ctx) {
     JSON.stringify(sv1),
   );
 
+  // #373: the frame clock runs across the FIRST arm, the only uncached one; every later arm takes the held order and would pass this blind.
+  await evaluate(`(()=>{window.__gap=0;window.__gapStop=false;let last=performance.now();
+    const step=(now)=>{window.__gap=Math.max(window.__gap,now-last);last=now;
+      if(!window.__gapStop)requestAnimationFrame(step);};requestAnimationFrame(step);})()`);
+  const inkT0 = Date.now();
   const sv2 = await tick(true, "__armMs");
   const sv2Vertices = await waitInked("survey-first-arm");
+  const firstInkMs = Date.now() - inkT0;
+  const sv2q = await evaluate(`(()=>{window.__gapStop=true;return{gap:window.__gap};})()`);
   const sv2After = await evaluate(`({status:document.getElementById("status").textContent,
     hash:location.hash,overlays:document.querySelectorAll("#map .voyage-overlay").length,
     href:document.getElementById("journal-link").getAttribute("href"),ms:window.__armMs})`);
@@ -82,6 +89,12 @@ export async function run(ctx) {
       sv2Vertices > 10 && sv2After.overlays === 1 && sv2After.status === "" &&
       sv2After.hash === sv2.hash && sv2After.href === sv2.href,
     JSON.stringify({ ...sv2, vertices: sv2Vertices, after: sv2After }),
+  );
+  check(
+    "SV2q the main thread keeps painting right through the arm: the travel matrix is off it (#373)",
+    // RATIO, not a wall clock: the arm's own cold routing is real main-thread work that scales with the runner, and a fixed cap sized here read 383.4 against 400 on a loaded CI runner, which is a coin flip. A BLOCKED thread makes the largest gap essentially the whole tick-to-ink, so a third of it separates the two populations at any speed: measured 141.7/1148 and 383.4/3149 healthy, against 1074.7/1089 with the matrix put back.
+    sv2q.gap > 0 && sv2q.gap < firstInkMs / 3,
+    JSON.stringify({ ...sv2q, firstInkMs, share: +(sv2q.gap / firstInkMs).toFixed(3) }),
   );
   await shoot("explorer-survey-inked.png");
 
@@ -99,15 +112,17 @@ export async function run(ctx) {
     JSON.stringify({ same: p0 === p1, anims: sv2b.anims, len: (p0 || "").length }),
   );
 
-  // Measured 2026-08-12 headless Brave: first arm 1120ms, re-arm 144ms; the ratio clause guards the cache, the 800ms cap is sized for the slower ubuntu CI runner. Since #381 that runner also carries the other lane: the re-arm measured 245ms serial and 301-392ms under lanes, so the cap's headroom is 2x, not 3.3x.
+  // #373 rewrote what these two measure. The matrix runs in the render worker now, so __armMs (a rAF-then-task hop) collapses to one frame whether the order is cached or not (5.4 and 149.4ms here, against 1120 and 144 before), and the ratio it used to carry moved to the wall clock from tick to ink. Measured 2026-08-17: 1150ms first / 170ms re-inked here, 2082 / 204 on the CI runner under the #381 lanes. The 800ms cap is sized to that 204, the same 2 to 4x headroom the 800ms arm cap it replaces was sized to, NOT to the tick-to-ink of a cold world.
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  const reInkT0 = Date.now();
   await tick(true, "__armMs2");
   await waitInked("survey-rearm");
+  const reInkMs = Date.now() - reInkT0;
   const sv2c = await evaluate(`({first:window.__armMs,again:window.__armMs2})`);
   check(
-    "SV2c re-arming the same world is effectively instant: the travel matrix cache still holds (#300)",
-    typeof sv2c.again === "number" && sv2c.again < 800 && sv2c.again < sv2c.first / 2,
-    JSON.stringify(sv2c),
+    "SV2c re-arming the same world is effectively instant: the travel matrix cache still holds (#300/#373)",
+    reInkMs < 800 && reInkMs < firstInkMs / 2,
+    JSON.stringify({ ...sv2c, firstInkMs, reInkMs }),
   );
 
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
@@ -290,8 +305,15 @@ export async function run(ctx) {
 
   await goto("#seed=7&style=antique&survey", "survey-draw-beat-base");
   await waitInked("survey-draw-beat-base-ink");
-  await evaluate(`(()=>{window.__land={batches:[],frames:0,raf:0};
-    const bump=()=>{window.__land.frames++;window.__land.raf=requestAnimationFrame(bump);};bump();
+  // #373: the same rAF loop samples the coastline's inkDraw, whose stroke-dashoffset is not compositable and so advances ONLY while the main thread is free. dashCoastForInk (draw-ceremony.ts) sets the dash; animationend clears it.
+  await evaluate(`(()=>{window.__land={batches:[],frames:0,raf:0,dashSteps:0,lastDash:"",dashSeen:0,gap:0,last:performance.now()};
+    const bump=(now)=>{window.__land.frames++;
+      window.__land.gap=Math.max(window.__land.gap,now-window.__land.last);window.__land.last=now;
+      const c=document.querySelector("#map #layer-land path");
+      if(c){const v=getComputedStyle(c).strokeDashoffset;
+        if(v&&v!=="none"&&v!=="0px")window.__land.dashSeen++;
+        if(v!==window.__land.lastDash){window.__land.lastDash=v;window.__land.dashSteps++;}}
+      window.__land.raf=requestAnimationFrame(bump);};requestAnimationFrame(bump);
     window.__mo=new MutationObserver((recs)=>{let chart=false,overlay=false;
       for(const r of recs)for(const n of r.addedNodes){if(n.nodeType!==1)continue;
         if(n.classList&&n.classList.contains("voyage-overlay"))overlay=true;
@@ -307,6 +329,7 @@ export async function run(ctx) {
     const recto=document.querySelector("#map .voyage-overlay .voyage-track");
     const back=document.querySelector("#verso .verso-track");
     return{batches:b,chartBatch:c,inkBatch:i,chartAlone:c>=0&&!b[c].overlay,
+      dashSteps:window.__land.dashSteps,dashSeen:window.__land.dashSeen,frames:window.__land.frames,gap:window.__land.gap,
       framesBetween:c>=0&&i>=0?b[i].frames-b[c].frames:-1,
       versoAtSwap:c>=0?b[c].verso:null,
       facesAgree:!!recto&&!!back&&recto.getAttribute("points")===back.getAttribute("points"),
@@ -321,6 +344,14 @@ export async function run(ctx) {
       sv2p.batches.length === 2 && sv2p.overlays === 1 && sv2p.status === "" &&
       /(^|&)survey(&|$)/.test(sv2p.hash.slice(1)),
     JSON.stringify(sv2p),
+  );
+  check(
+    "SV2r the #127 arrival ceremony RUNS while the survey is being prepared: inkDraw advances instead of stalling (#373)",
+    // The ratified acceptance, on the ruled path (a Draw with the box ticked), and the only check here that watches the ceremony itself rather than the arm. stroke-dashoffset is not compositable, so a matrix left on the main thread starves it.
+    // TWO clauses, because the frame COUNT is environment-scaled and the gap is not: 104 steps on the authoring laptop against 39 on the CI runner, both healthy, where an arm put back on the main thread reads 3. A count threshold sized to the laptop red CI at 39, which is how the gap clause got here.
+    // dashSeen DOES move with runner load (104 here, 35 to 39 on CI), but not the way a wall clock does: a slower runner delivers fewer ceremony frames while a BLOCKED one delivers almost none, so 3 with the matrix put back sits an order of magnitude below the slowest healthy reading. The gap is the loose second opinion, capped well clear of the 383.3 a loaded CI runner reported and well under the 1066.6 the mutant reads.
+    sv2p.dashSeen >= 12 && sv2p.gap > 0 && sv2p.gap < 900,
+    JSON.stringify({ dashSteps: sv2p.dashSteps, dashSeen: sv2p.dashSeen, gap: sv2p.gap, frames: sv2p.frames }),
   );
   check(
     "SV2k the settle leaves the back face to the deferred arm: no outgoing track over the new ghost, and both faces agree once it lands (#174/#366)",

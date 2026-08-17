@@ -54,15 +54,22 @@ export interface Session {
   shownArrived: number;
 }
 
+/** #373: a host's off-thread answer to the #184 travel matrix, read synchronously; the builder never waits, it takes what is ready. */
+export interface TourOrderSource {
+  get(seed: number, survey: Survey, ports: ReadonlyArray<number>): ReadonlyArray<number> | null;
+}
+
 export interface SessionBuilderDeps {
   /** The chart mount; build drops any overlay already here, then appends its own (#364). */
   mapEl: HTMLElement;
   /** The margin-log panel instance; build renders the rows. */
   logPanel: VoyageLogPanel;
+  /** Optional (#373): a host with no worker, and every host with no source, computes the order inline as before. */
+  tourOrder?: TourOrderSource;
 }
 
 export function createSessionBuilder(deps: SessionBuilderDeps) {
-  const { mapEl, logPanel } = deps;
+  const { mapEl, logPanel, tourOrder } = deps;
 
   // #184: the itinerary is ordered on ACTUAL travel (an all-pairs matrix over the prepared router, ~0.9s on a 24-port world), computed only when the walkable world changed: the cache keys on seed + port set + surveyFingerprint.
   // A QUIET rebuild (a mid-drag sea-level frame) NEVER computes: it reuses a matching cached order or falls back to the straight-line tour for that transient frame; the release redraw is non-quiet, so at rest the order is a pure function of the world, never of the interaction path.
@@ -75,8 +82,14 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     seed: number,
     quiet: boolean,
   ): VoyagePlan {
-    const key = `${seed}:${surveyFingerprint(survey)}:${plan.ports.map((p) => p.idx).join(",")}`;
+    const ports = plan.ports.map((p) => p.idx);
+    const key = `${seed}:${surveyFingerprint(survey)}:${ports.join(",")}`;
     if (travelOrder && travelOrder.key === key) return applyTourOrder(plan, travelOrder.order);
+    const supplied = tourOrder ? tourOrder.get(seed, survey, ports) : null;
+    if (supplied) {
+      travelOrder = { key, order: supplied };
+      return applyTourOrder(plan, supplied);
+    }
     if (quiet) return plan;
     const ordered = reorderPlanByTravel(plan, router.legLength);
     travelOrder = { key, order: ordered.ports.map((p) => p.idx) };

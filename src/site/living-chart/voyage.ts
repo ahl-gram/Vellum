@@ -12,7 +12,7 @@ import {
   tAtElapsed,
   type MarkGlyph,
 } from "../../render/voyage-geometry.ts";
-import { createSessionBuilder, type Session } from "./voyage-session.ts";
+import { createSessionBuilder, type Session, type TourOrderSource } from "./voyage-session.ts";
 import type { VoyageLogPanel } from "./voyage-log-panel.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
@@ -30,6 +30,7 @@ export interface VoyageDeps {
   statusEl: HTMLElement;
   logPanel: VoyageLogPanel;
   restingTrackSink?: RestingTrackSink;
+  tourOrder?: TourOrderSource;
 }
 
 function prefersReduce(): boolean {
@@ -40,7 +41,11 @@ const fmt = (p: Pt) => `${p.x},${p.y}`;
 
 export function createVoyage(deps: VoyageDeps) {
   const { mapEl, statusEl, logPanel, restingTrackSink } = deps;
-  const sessions = createSessionBuilder({ mapEl, logPanel });
+  const sessions = createSessionBuilder({
+    mapEl,
+    logPanel,
+    ...(deps.tourOrder ? { tourOrder: deps.tourOrder } : {}),
+  });
 
   // null when the toggle is off; rebuilt every draw (the host's innerHTML swap wipes the mount's children).
   let voyage: Session | null = null;

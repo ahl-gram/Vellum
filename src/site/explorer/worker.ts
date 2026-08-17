@@ -8,6 +8,7 @@ import { generateRegionWorld, regionTitle } from "../../world/region.ts";
 import { composeAtlas } from "../../atlas/compose.ts";
 import { serializableAtlas } from "./serializable-atlas.ts";
 import { prospectResultFor } from "./prospect-job.ts";
+import { tourOrderFor } from "./tour-job.ts";
 import { worldFor } from "./world-cache.ts";
 import type { WorkerRequest, WorkerResponse } from "./worker-client.ts";
 
@@ -28,7 +29,7 @@ ctx.onmessage = (e) => {
         // widthPx reaches renderMap UNCLAMPED by design: callers own that guard (the CLI bounds 400-6000; the Print Room clamps posters to the [2400, 4200] envelope), so a hand-edited width can never ask for a tab-killing render.
         svg: renderMap(world, msg.render),
         manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
-        // #120: the world facts the voyage router walks, shipped on EVERY draw because the voyage toggle arms with no redraw; mirrored in worker-client.ts runInline (e2e A2 proves the two agree).
+        // #120: the world facts the voyage router walks, shipped on EVERY draw because the voyage toggle arms with no redraw; mirrored in worker-client.ts runInline (e2e R2 proves the two agree).
         survey: buildSurvey(world.elev, world.seaLevel, world.roads),
         title: world.title.title,
         subtitle: world.title.subtitle,
@@ -69,6 +70,9 @@ ctx.onmessage = (e) => {
     } else if (msg.kind === "prospect") {
       const { world } = worldFor(msg.seed, msg.overrides);
       ctx.postMessage({ id: msg.id, ok: true, ...prospectResultFor(world, msg) });
+    } else if (msg.kind === "tour") {
+      // #373: the ONE job that does not touch worldFor; it carries the survey it walks, so a region job evicting the cached world cannot change the itinerary.
+      ctx.postMessage({ id: msg.id, ok: true, order: tourOrderFor(msg) });
     }
   } catch (err) {
     ctx.postMessage({ id: msg.id, ok: false, error: ((err as { message?: string } | null) && (err as { message?: string }).message) || String(err) });
