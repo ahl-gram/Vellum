@@ -52,7 +52,6 @@ export function createVoyage(deps: VoyageDeps) {
     }
   }
 
-  // EVERY match, not the first (#364): a sheet that somehow arrived carrying two overlays is left truly bare. e2e SV2h plants that second overlay and exercises this through exitVoyage.
   function dropOverlays(): void {
     mapEl.querySelectorAll(".voyage-overlay").forEach((overlay) => overlay.remove());
   }

@@ -54,7 +54,6 @@ test("#364 a build that bails leaves the mount exactly as it found it", async ()
   const session = sessions.build(manifest, null, 42, SUBTITLE);
 
   assert.equal(session, null, "the build bailed");
-  // The builder does not own its caller's teardown: an arm that bails wipes on its own bail path (#371), so this one stays a pure no-op.
   assert.deepEqual(mount.ledger, [], "the mount was neither asked nor touched");
 });
 
@@ -104,7 +103,7 @@ test("#371 the class: applyVoyage's bail leaves the mount bare too, by its leadi
   assert.deepEqual(status, [], "and posts to the status line on a path that surveyed nothing");
 });
 
-// The three bails above run on a VIRGIN engine, where the cleared verso could equally be an engine that never painted. This one bails a world that really is resting on both faces.
+// The three bails above run on a VIRGIN engine, where a cleared verso could equally be an engine that never painted.
 test("#371 a bail after a real arm scrapes the world that was resting there", async () => {
   const { voyage, manifest, survey, calls, journal } = await engineOverStack();
 
@@ -132,7 +131,7 @@ test("#371 control: a re-arm that BUILDS still appends, and the wipe is the buil
   assert.ok(!journal.includes("hide"), "a successful arm hid the journal it just filled");
 });
 
-// Both applyVoyage tests stay green with exitVoyage() moved INTO the bail; only this control's DOUBLE wipe can see that its teardown is unconditional.
+// Only this control's DOUBLE wipe can see that applyVoyage's teardown is unconditional rather than a bail-path wipe.
 test("#371 control: a toggle-ON that BUILDS wipes twice, appends, and inks the verso", async () => {
   const { voyage, mount, manifest, survey, calls } = await engineOverStack();
 
