@@ -238,7 +238,6 @@ export function generateWorld(recipe: WorldRecipe): World {
       gridH,
       oceanDist,
       seaMask: seaMask(elev, seaLevel),
-      mapType,
       culture,
       settlements: settled,
       presentYear: title.year,

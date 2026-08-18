@@ -15,7 +15,6 @@ const worldInput = (): BestiaryInput => ({
   gridH: world.elev.h,
   oceanDist: world.oceanDist,
   seaMask: seaMask(world.elev, world.seaLevel),
-  mapType: world.recipe.mapType,
   culture: world.culture,
   settlements: world.settlements,
   presentYear: world.title.year,
@@ -29,7 +28,7 @@ test("the bestiary is deterministic: same seed, same beasts", () => {
 test("every beast haunts genuine border-connected deep sea", () => {
   const { w, h } = world.elev;
   const mask = seaMask(world.elev, world.seaLevel);
-  assert.ok(world.beasts.length >= 2, "seed 42 conjures at least two beasts");
+  assert.equal(world.beasts.length, 1, "a chart carries at most one beast, and seed 42 has the water for it");
   for (const b of world.beasts) {
     assert.equal(mask[b.x + b.y * w], 1, `${b.name} haunts a lake or dry land`);
     assert.ok(
@@ -68,27 +67,34 @@ test("a taken name forces a fresh draw, never a collision", () => {
   }
 });
 
-test("a deep lake tempts no beast: haunts are true sea, and deep", () => {
-  const gridW = 120;
-  const gridH = 100;
-  const oceanDist = new Float64Array(gridW * gridH).fill(2);
-  const mask = new Uint8Array(gridW * gridH).fill(1);
-  for (let y = 30; y <= 45; y++) {
-    for (let x = 30; x <= 45; x++) oceanDist[x + y * gridW] = 20;
-  }
-  for (let y = 45; y <= 65; y++) {
-    for (let x = 70; x <= 90; x++) {
-      oceanDist[x + y * gridW] = 20;
-      mask[x + y * gridW] = 0;
+type SyntheticSea = { oceanDist: Float64Array; mask: Uint8Array };
+
+const GRID_W = 120;
+const GRID_H = 100;
+
+function shallowSea(): SyntheticSea {
+  return {
+    oceanDist: new Float64Array(GRID_W * GRID_H).fill(2),
+    mask: new Uint8Array(GRID_W * GRID_H).fill(1),
+  };
+}
+
+function paintDeep(sea: SyntheticSea, x0: number, x1: number, y0: number, y1: number, isLake: boolean): void {
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      sea.oceanDist[x + y * GRID_W] = 20;
+      if (isLake) sea.mask[x + y * GRID_W] = 0;
     }
   }
-  const beasts = conjureBestiary(
+}
+
+function conjureOn(sea: SyntheticSea) {
+  return conjureBestiary(
     {
-      gridW,
-      gridH,
-      oceanDist,
-      seaMask: mask,
-      mapType: "island",
+      gridW: GRID_W,
+      gridH: GRID_H,
+      oceanDist: sea.oceanDist,
+      seaMask: sea.mask,
       culture: CULTURES[0]!,
       settlements: [{ name: "Testhaven", x: 20, y: 20, harbor: true, founded: 500 }],
       presentYear: 1000,
@@ -96,11 +102,22 @@ test("a deep lake tempts no beast: haunts are true sea, and deep", () => {
     createRng(7).fork("bestiary"),
     new Set<string>(),
   );
-  assert.ok(beasts.length >= 1, "the deep pocket conjured nothing");
-  for (const b of beasts) {
-    assert.equal(mask[b.x + b.y * gridW], 1, `a beast haunts the lake at (${b.x},${b.y})`);
-    assert.ok((oceanDist[b.x + b.y * gridW] as number) >= 8, `a beast haunts the shallows at (${b.x},${b.y})`);
-  }
+}
+
+test("a world whose only deep water is a lake conjures nothing", () => {
+  const sea = shallowSea();
+  paintDeep(sea, 70, 90, 45, 65, true);
+  assert.equal(conjureOn(sea).length, 0, "a beast rose from a lake or the shallows");
+});
+
+test("a true-sea deep pocket conjures exactly one beast, and it haunts the pocket", () => {
+  const sea = shallowSea();
+  paintDeep(sea, 30, 45, 30, 45, false);
+  const beasts = conjureOn(sea);
+  assert.equal(beasts.length, 1);
+  const b = beasts[0]!;
+  assert.equal(sea.mask[b.x + b.y * GRID_W], 1);
+  assert.ok((sea.oceanDist[b.x + b.y * GRID_W] as number) >= 8, `the beast haunts the shallows at (${b.x},${b.y})`);
 });
 
 test("the decor serpent yields only to a drawn bestiary (seed 2)", () => {

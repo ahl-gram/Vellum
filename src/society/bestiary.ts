@@ -18,13 +18,6 @@ export type SeaBeast = {
   readonly tale: string;
 };
 
-const COUNT_BY_TYPE: Record<string, number> = {
-  island: 3,
-  archipelago: 4,
-  continent: 2,
-  citystate: 2,
-};
-
 const KINDS: ReadonlyArray<BeastKind> = ["serpent", "whale", "kraken"];
 
 const EPITHETS: Record<BeastKind, readonly string[]> = {
@@ -78,7 +71,6 @@ export type BestiaryInput = {
   readonly oceanDist: Float64Array;
   /** 1 = border-connected sea. */
   readonly seaMask: Uint8Array;
-  readonly mapType: string;
   readonly culture: Culture;
   readonly settlements: ReadonlyArray<Settled>;
   readonly presentYear: number;
@@ -100,17 +92,6 @@ function deepCells(input: BestiaryInput, deep: number): Haunt[] {
     }
   }
   return out;
-}
-
-function pickHaunts(cells: Haunt[], count: number, minSep: number, rng: Rng): Haunt[] {
-  const picked: Haunt[] = [];
-  for (const c of rng.shuffled(cells)) {
-    if (picked.length >= count) break;
-    if (picked.every((p) => Math.hypot(p.x - c.x, p.y - c.y) >= minSep)) {
-      picked.push(c);
-    }
-  }
-  return picked;
 }
 
 function nearestPort(haunt: Haunt, settlements: ReadonlyArray<Settled>): Settled | undefined {
@@ -139,17 +120,12 @@ export function conjureBestiary(
   takenNames: ReadonlySet<string>,
 ): ReadonlyArray<SeaBeast> {
   const taken = new Set(takenNames);
-  const count = COUNT_BY_TYPE[input.mapType] ?? 2;
   let cells = deepCells(input, DEEP);
-  if (cells.length < count * 12) cells = deepCells(input, DEEP_FALLBACK);
+  if (cells.length < 12) cells = deepCells(input, DEEP_FALLBACK);
   if (cells.length === 0) return [];
 
-  const minSep = Math.max(40, Math.round((input.gridW + input.gridH) / 8));
-  const haunts = pickHaunts(cells, count, minSep, rng.fork("haunts"));
-
-  const kindRng = rng.fork("kinds");
-  const kinds = kindRng.shuffled(KINDS);
-  while (kinds.length < haunts.length) kinds.push(kindRng.pick(KINDS));
+  const haunts = rng.fork("haunts").shuffled(cells).slice(0, 1);
+  const kinds = rng.fork("kinds").shuffled(KINDS);
 
   const namer = createNamer(rng.fork("names"), input.culture);
   const loreRng = rng.fork("lore");
