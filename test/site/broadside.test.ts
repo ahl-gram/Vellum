@@ -18,7 +18,7 @@ function groupBlock(headId: string, nextHeadId: string | null): string {
 }
 
 const LAND = ['id="seed"', 'id="random"', 'id="type"', 'id="band"', 'id="land"', 'id="coast"'];
-const HAND = ['id="style"', 'id="theme"', 'id="legend"', 'id="arms"', 'id="ages"'];
+const HAND = ['id="style"', 'id="theme"', 'id="legend"', 'id="arms"', 'id="beasts"', 'id="ages"'];
 const PRESS = ['id="draw"', 'id="verso-turn"', 'id="order-plates"', 'id="journal-link"'];
 
 test("the Broadside groups exist in reading order: Land, Hand, Press (#270)", () => {
@@ -70,9 +70,9 @@ test("the journal pointer is the always-visible action-link button, not the old 
   assert.ok(!app.includes("journalLine"), "app.ts still gates a caption wrapper that no longer exists");
 });
 
-// The seals (ratified 2026-08-11, decision 4 on #270, variant B countersigned): the three overlay checkboxes wear the seal dressing but stay REAL checkboxes with ids and label text untouched.
-test("the three overlay checkboxes wear the seal dressing with ids untouched (#270)", () => {
-  for (const [label, id] of [["legend", "legend"], ["arms", "arms"], ["survey", "ages"]]) {
+// The seals (ratified 2026-08-11, decision 4 on #270, variant B countersigned): the overlay checkboxes wear the seal dressing but stay REAL checkboxes with ids and label text untouched.
+test("the overlay checkboxes wear the seal dressing with ids untouched (#270)", () => {
+  for (const [label, id] of [["legend", "legend"], ["arms", "arms"], ["beasts", "beasts"], ["survey", "ages"]]) {
     const re = new RegExp(`<label class="[^"]*seal[^"]*">${label} <input id="${id}" type="checkbox"`);
     assert.match(page, re, `the ${label} checkbox is not dressed as a seal (or its markup shape drifted)`);
   }

@@ -19,6 +19,7 @@ interface ControlsDeps {
   themeSel: HTMLSelectElement;
   legendChk: HTMLInputElement;
   armsChk: HTMLInputElement;
+  beastsChk: HTMLInputElement;
   landSlider: HTMLInputElement;
   coastSlider: HTMLInputElement;
   drawBtn: HTMLElement;
@@ -35,7 +36,7 @@ function randomSeed(): number {
 }
 
 export function wireControls(deps: ControlsDeps): void {
-  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider, touched, draw } = deps;
+  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider, touched, draw } = deps;
 
   // Sea-level drag redraw throttle (#55); the release (change) redraw is authoritative.
   let landDebounce: ReturnType<typeof setTimeout> | 0 = 0;
@@ -54,7 +55,7 @@ export function wireControls(deps: ControlsDeps): void {
       draw();
     }
   });
-  for (const sel of [bandSel, themeSel, legendChk, armsChk]) {
+  for (const sel of [bandSel, themeSel, legendChk, armsChk, beastsChk]) {
     sel.addEventListener("change", draw as unknown as EventListener);
   }
   styleSel.addEventListener("change", () => draw({ turn: true }));

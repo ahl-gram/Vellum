@@ -66,7 +66,7 @@ export async function run(ctx) {
   const hash = await evaluate(`location.hash`);
   check("PR5 a manual draw round-trips the world into the hash", /(^|&|#)seed=100(&|$)/.test(hash) && /style=antique/.test(hash), hash);
 
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/#seed=42&style=antique&type=archipelago&band=tropical&theme=vegetation&arms=1&legend=0&land=350` });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/#seed=42&style=antique&type=archipelago&band=tropical&theme=vegetation&arms=1&beasts=1&legend=0&land=350` });
   let carried = null;
   for (let i = 0; i < 160; i++) {
     let s = null;
@@ -78,8 +78,9 @@ export async function run(ctx) {
     !!carried &&
     /type=archipelago/.test(carried.hash) && /band=tropical/.test(carried.hash) &&
     /theme=vegetation/.test(carried.hash) && /arms=1/.test(carried.hash) &&
+    /beasts=1/.test(carried.hash) &&
     /legend=0/.test(carried.hash) && /land=350/.test(carried.hash) && /seed=42/.test(carried.hash);
-  check("PRC carried params (type/band/theme/legend/arms/land) round-trip at non-defaults", carriedOk, carried ? carried.hash : "no preview");
+  check("PRC carried params (type/band/theme/legend/arms/beasts/land) round-trip at non-defaults", carriedOk, carried ? carried.hash : "no preview");
 
   // about:blank first, here and at every re-entry below: a navigate that differs only in the hash is same-document and never re-bootstraps the page.
   await send("Page.navigate", { url: "about:blank" });

@@ -25,6 +25,7 @@ import { legendLayer, planLegend } from "./layers/legend.ts";
 import { featureLabelsLayer } from "./layers/feature-labels.ts";
 import { heraldryLayer } from "./layers/heraldry.ts";
 import { seaDecorLayer } from "./layers/sea-decor.ts";
+import { beastsLayer } from "./layers/beasts.ts";
 import { textureDefs, textureOverlay } from "./layers/texture.ts";
 import { roadsLayer } from "./layers/roads.ts";
 import { realmBordersLayer, realmTintsLayer } from "./layers/realms.ts";
@@ -38,6 +39,7 @@ export type RenderOptions = {
   style?: StyleName;
   legend?: boolean;
   arms?: boolean;
+  beasts?: boolean;
   theme?: ThemeName;
   regionRecipe?: RegionRecipe;
 };
@@ -131,7 +133,8 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   // Evaluation order IS label priority: settlements claim before feature labels, before decorative art.
   const settlements = settlementsLayer(ctx);
   const featureLabels = featureLabelsLayer(ctx);
-  const seaDecor = seaDecorLayer(ctx, cartouchePlan, compassPlan);
+  const bestiary = opts.beasts ? beastsLayer(ctx, cartouchePlan, compassPlan) : null;
+  const seaDecor = seaDecorLayer(ctx, cartouchePlan, compassPlan, { serpent: bestiary === null });
   const heraldry = opts.arms ? heraldryLayer(ctx, featureLabels.realmAnchors) : null;
 
   const themed = opts.theme !== undefined;
@@ -160,6 +163,7 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     currentsLayer(ctx, cartouchePlan, compassPlan),
     windsLayer(ctx, cartouchePlan, compassPlan),
     seaDecor,
+    bestiary,
     settlements,
     featureLabels.node,
     heraldry,

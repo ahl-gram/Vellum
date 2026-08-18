@@ -15,6 +15,7 @@ export type PosterBasis = {
   overrides: Partial<WorldRecipe>;
   legend: boolean;
   arms: boolean;
+  beasts: boolean;
   theme: ThemeName | undefined;
 };
 

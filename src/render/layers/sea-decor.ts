@@ -8,6 +8,7 @@ export function seaDecorLayer(
   ctx: RenderCtx,
   cartouche: CartouchePlan,
   compass: CompassPlan | null,
+  decor: { serpent?: boolean } = {},
 ): SvgNode | null {
   const { style, world, proj, rng } = ctx;
   if (!style.seaDecorations) return null;
@@ -73,10 +74,12 @@ export function seaDecorLayer(
     )
       ? o
       : undefined;
-  const serpentAt = claimSpot(
-    deepSpots.find((o) => clearOf(o.x, o.y, 90 * k)),
-    60 * k,
-  );
+  const serpentAt = decor.serpent === false
+    ? undefined
+    : claimSpot(
+        deepSpots.find((o) => clearOf(o.x, o.y, 90 * k)),
+        60 * k,
+      );
   if (serpentAt) {
     const s = 1.5 * k;
     const { x, y } = serpentAt;

@@ -8,6 +8,7 @@ export const bandSel = $<HTMLSelectElement>("band");
 export const themeSel = $<HTMLSelectElement>("theme");
 export const legendChk = $<HTMLInputElement>("legend");
 export const armsChk = $<HTMLInputElement>("arms");
+export const beastsChk = $<HTMLInputElement>("beasts");
 export const landSlider = $<HTMLInputElement>("land");
 export const coastSlider = $<HTMLInputElement>("coast");
 export const status = $("status");
@@ -23,4 +24,4 @@ export const orderLink = $<HTMLAnchorElement>("order-plates"); // #133: "Take to
 export const journalLink = $<HTMLAnchorElement>("journal-link"); // #270 ruling 2: the always-visible journal button; href kept current beside the hash write
 
 // #183: the controls readHash/writeHash (hash-sync.ts) mirror to and from location.hash.
-export const hashControls = { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, landSlider, coastSlider };
+export const hashControls = { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider };
