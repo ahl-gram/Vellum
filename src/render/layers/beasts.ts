@@ -53,14 +53,11 @@ export function beastsLayer(
       o.x + ext.halfW <= proj.widthPx - proj.margin - 8 &&
       o.y - ext.up >= proj.margin + 8 &&
       o.y + ext.down + 20 * k <= proj.heightPx - proj.margin - 8;
-    const near = [home, ...open
-      .filter((o) =>
-        frameViable(o) &&
-        clearOf(o.x, o.y, ext.halfW * 0.7) &&
-        Math.hypot(o.x - home.x, o.y - home.y) < 460 * k)
-      .sort((a, b) =>
-        Math.hypot(a.x - home.x, a.y - home.y) - Math.hypot(b.x - home.x, b.y - home.y),
-      )].slice(0, 140);
+    const fromHome = (o: Spot): number => Math.hypot(o.x - home.x, o.y - home.y);
+    const viable = open
+      .filter((o) => frameViable(o) && clearOf(o.x, o.y, ext.halfW * 0.7))
+      .sort((a, b) => fromHome(a) - fromHome(b));
+    const near = [home, ...viable.filter((o) => fromHome(o) < 460 * k)].slice(0, 140);
 
     const overWater = (box: Box, minD: number): boolean => {
       const gx0 = Math.floor((box.x - proj.px(0)) / cellPx);
@@ -101,12 +98,15 @@ export function beastsLayer(
 
     const full = `${beast.name}, ${beast.epithet}`;
     let placed: { spot: Spot; text: string | null } | null = null;
-    for (const text of [full, beast.name, null]) {
-      for (const spot of near) {
-        if (fits(spot, text)) {
-          placed = { spot, text };
-          break;
+    for (const candidates of [near, viable]) {
+      for (const text of [full, beast.name, null]) {
+        for (const spot of candidates) {
+          if (fits(spot, text)) {
+            placed = { spot, text };
+            break;
+          }
         }
+        if (placed) break;
       }
       if (placed) break;
     }

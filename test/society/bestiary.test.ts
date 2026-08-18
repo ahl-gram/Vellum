@@ -120,6 +120,12 @@ test("a true-sea deep pocket conjures exactly one beast, and it haunts the pocke
   assert.ok((sea.oceanDist[b.x + b.y * GRID_W] as number) >= 8, `the beast haunts the shallows at (${b.x},${b.y})`);
 });
 
+test("a legend over the haunt moves the beast, never erases it (seed 1234)", () => {
+  const w1234 = generateWorld(defaultRecipe(1234));
+  const svg = renderMap(w1234, { style: "antique", legend: true, beasts: true });
+  assert.ok(svg.includes("layer-bestiary"), "the whale vanished under the legend");
+});
+
 test("the decor serpent yields only to a drawn bestiary (seed 2)", () => {
   const w2 = generateWorld(defaultRecipe(2));
   const off = renderMap(w2, { style: "antique" });
