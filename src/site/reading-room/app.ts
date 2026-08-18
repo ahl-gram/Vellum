@@ -37,7 +37,7 @@ const THEMES = ["vegetation", "climate", "moisture", "population"];
 const mount = document.getElementById("rr-mount") as HTMLElement;
 const warning = document.getElementById("rr-warning") as HTMLElement;
 
-// Roughly 3x the slowest matrix measured on CI (2.1s), and far shorter than the Explorer's 20s on purpose: the survey is an opt-in tick there, but the instrument IS this surface, so a worker that stops answering must not hold the panel, the journal and the unfurl back for twenty seconds; the fallback is the SAME order computed inline (voyage-session.ts orderItinerary), so a timeout costs a main-thread block, never a different itinerary.
+// Roughly 3x the slowest matrix measured on CI (2.1s), against the Explorer's 20s: the instrument IS this surface, so a dead worker must not hold the unfurl back for twenty seconds, and a timeout costs a main-thread block, never a different itinerary (voyage-session.ts orderItinerary computes the SAME order inline).
 const ROOM_TOUR_TIMEOUT_MS = 6000;
 
 // onPark is #192's seam: Play's parks are the one rest no input event announces.

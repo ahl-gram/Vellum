@@ -200,7 +200,7 @@ export function createAges(deps: AgesDeps) {
       clearAges();
       return;
     }
-    // The quiet flag passes THROUGH, never pinned on: rearmVoyage's quiet also skips the #184 travel-order matrix, and pinning it true armed every fresh world on an UNORDERED itinerary (test/site/voyage-tour-order.test.ts: a quiet build with nothing ready takes the straight-line tour); a non-quiet rearm's sink paint is settled by syncSinkAtRest below (#174).
+    // The quiet flag passes THROUGH, never pinned on (test/site/voyage-tour-order.test.ts pins what a pinned flag would ship); a non-quiet rearm's sink paint is settled by syncSinkAtRest below (#174).
     voyage.rearmVoyage(manifest, survey, seed, subtitle, { quiet: !!opts.quiet });
     const range = rangeOf();
     const barMax = 2 * Math.max(1, range.max - range.min);
