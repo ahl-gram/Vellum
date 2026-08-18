@@ -211,7 +211,7 @@ export async function run(ctx) {
   const sm2 = await scrubFacts(evaluate, 3);
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="3";c.querySelector(".rr-read").click();})()`);
   let rs23 = null;
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 300; i++) {
     let s = null;
     try {
       s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumAgesState();const bar=document.querySelector(".rf-range");return{seed:st.seed,status:(document.querySelector(".rf-status")||{}).textContent,
@@ -257,7 +257,7 @@ export async function run(ctx) {
   }
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="7";c.querySelector(".rr-read").click();})()`);
   let rs27 = null;
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 300; i++) {
     let s = null;
     try {
       s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,
@@ -283,7 +283,7 @@ export async function run(ctx) {
   }
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="9";c.querySelector(".rr-read").click();})()`);
   let rs28 = null;
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 300; i++) {
     let s = null;
     try {
       s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,

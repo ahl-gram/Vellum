@@ -119,7 +119,7 @@ export async function run(ctx) {
   const ra7pre = await evaluate(`new URLSearchParams(location.hash.slice(1)).get("year")`);
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="100";c.querySelector(".rr-read").click();})()`);
   let ra7 = null;
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 300; i++) {
     let s = null;
     try {
       s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumAgesState();return{seed:st.seed,status:(document.querySelector(".rf-status")||{}).textContent,chamber:a&&a.chamber,year:a&&a.year,max:a&&a.max,hash:location.hash.slice(1)};})()`);

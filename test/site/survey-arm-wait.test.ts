@@ -162,7 +162,8 @@ test("#373 with no off-thread source at all, every arm is synchronous", () => {
   arm.schedule();
   q.paint();
 
-  assert.equal(builds, 1, "the Reading Room's shape, and every host without a worker");
+  // The Reading Room stopped being this shape at #418: it now passes a source too, through its own slot in reading-room/arm.ts.
+  assert.equal(builds, 1, "every host without a worker, and any future one that wires no source");
 });
 
 function fakeBox() {

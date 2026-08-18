@@ -1,4 +1,4 @@
-// Reading Room e2e (RR0-RR23; #221 plus #318's colophon dice): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
+// Reading Room e2e (RR0-RR25; #221 plus #318's colophon dice and #418's pre-arm window): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
 import { seedForDate } from "../../src/world/seed-of-the-day.ts";
 
 export async function run(ctx) {
@@ -15,7 +15,7 @@ export async function run(ctx) {
   };
   // The shared waitSettled keys on the Explorer's #verso-turn, which this page does not have, so the suite carries its own settle poll like the Print Room does.
   const settled = async () => {
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 300; i++) {
       let s = null;
       try { s = await evaluate(`({svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent})`); } catch {}
       if (s && s.svg && s.status === "") return true;
@@ -118,7 +118,7 @@ export async function run(ctx) {
 
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="42";c.querySelector(".rr-read").click();})()`);
   let counter = null;
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 300; i++) {
     let s = null;
     try {
       s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,svg:!!document.querySelector(".rf-chart svg")};})()`);
@@ -153,7 +153,7 @@ export async function run(ctx) {
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");const i=c.querySelector("input");const r=c.querySelector(".rr-read");i.value="7";r.click();i.value="42";r.click();})()`);
   let raced = null;
   let sawForeign = false;
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 300; i++) {
     let s = null;
     try {
       s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent};})()`);
@@ -172,7 +172,7 @@ export async function run(ctx) {
 
   await evaluate(`document.querySelector(".rr-dice").click()`);
   let rolled = null;
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 300; i++) {
     let s = null;
     try {
       s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();const v=document.querySelector(".rr-colophon input").value;return{seed:st.seed,input:v,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,hash:location.hash};})()`);
@@ -190,7 +190,7 @@ export async function run(ctx) {
   const midPlay = await evaluate(`(()=>{const p=document.querySelector(".rf-play");return{label:p.textContent};})()`);
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="42";c.querySelector(".rr-read").click();})()`);
   let interrupted = null;
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 300; i++) {
     let s = null;
     try {
       s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const rows=[...document.querySelectorAll(".rf-log-strip li")].filter(r=>!r.classList.contains("annals-head"));return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,chamber:a&&a.chamber,play:p.textContent,entries:rows.length,inked:rows.filter(r=>r.classList.contains("inked")).length};})()`);
@@ -212,7 +212,7 @@ export async function run(ctx) {
   check("RR23a the deep-linked boot draft is underway", await boot());
   const pre = await evaluate(`(()=>{const st=(document.querySelector(".rf-status")||{}).textContent;const c=document.querySelector(".rr-colophon");c.querySelector("input").value="42";c.querySelector(".rr-read").click();return{preStatus:st};})()`);
   let usurped = null;
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 300; i++) {
     let s = null;
     try {
       s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumReadingRoomAges();return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,ages:a,hash:location.hash};})()`);
@@ -226,6 +226,70 @@ export async function run(ctx) {
       usurped.ages.chamber === "ages" && usurped.ages.year === 1059 &&
       /year=1059(&|$)/.test(usurped.hash) && !/year=850/.test(usurped.hash),
     JSON.stringify({ pre, usurped }),
+  );
+
+  // #418: the arm waits for an off-thread travel order, so a window NEW to this issue opens between the painted chart and the armed instrument. `.rf-ages` is hidden across it (reading-frame.css gives [hidden] display:none), so a reader cannot click the scrubber; what IS live is every handler behind it, reachable from a stray keypress, a document click, or any programmatic dispatch. Each guards on `if (!ages) return`, and until this window existed nothing could test that they do.
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
+  const pokeBooted = await boot();
+  let unarmed = null;
+  for (let i = 0; i < 400; i++) {
+    try {
+      unarmed = await evaluate(`(()=>{const svg=!!document.querySelector(".rf-chart svg");
+        const st=(document.querySelector(".rf-status")||{}).textContent;
+        const a=window.__vellumReadingRoomAges?window.__vellumReadingRoomAges():undefined;
+        return svg&&st!==""&&a===null?{panelHidden:document.querySelector(".rf-ages").hidden}:null;})()`);
+    } catch {}
+    if (unarmed) break;
+    await sleep(25);
+  }
+  const poked = await evaluate(`(()=>{
+    const before=window.__vellumReadingRoomAges();
+    document.querySelector(".rf-play").click();
+    const r=document.querySelector(".rf-range");
+    r.value=r.max||"50";
+    r.dispatchEvent(new Event("input",{bubbles:true}));
+    r.dispatchEvent(new Event("change",{bubbles:true}));
+    document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));
+    document.dispatchEvent(new MouseEvent("click",{bubbles:true}));
+    return{before,after:window.__vellumReadingRoomAges(),play:document.querySelector(".rf-play").textContent};
+  })()`);
+  const pokeSettled = await settled();
+  const pokeRead = await evaluate(agesRead);
+  check(
+    "RR24 scrubbing, playing or clicking BEFORE the arm changes nothing, and the room still arrives at rest (#418)",
+    pokeBooted && !!unarmed && unarmed.panelHidden === true &&
+      poked.before === null && poked.after === null && poked.play === "Play" &&
+      pokeSettled && !!pokeRead.ages && pokeRead.ages.chamber === "ages" &&
+      pokeRead.play === "Play" && pokeRead.panelHidden === false,
+    JSON.stringify({ unarmed, poked, read: pokeRead }),
+  );
+
+  // #418: on a COUNTER read the arm waits too, and the previous world's instrument must not outlive the chart it belonged to. clearAges runs in the task that swaps the chart, never with the deferred arm; held back with the arm, this window would show the OLD world's panel armed over the NEW world's chart, where a scrub filters these glyphs by that world's years and a release writes that year into this world's address.
+  const rr25Before = await evaluate(`window.__vellumReadingRoomState().title`);
+  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="526413615";c.querySelector(".rr-read").click();})()`);
+  let rr25Window = null;
+  for (let i = 0; i < 400; i++) {
+    try {
+      rr25Window = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();
+        const status=(document.querySelector(".rf-status")||{}).textContent;
+        if(st.title===${JSON.stringify(rr25Before)}||status==="")return null;
+        const p=document.querySelector(".rf-ages");
+        return{title:st.title,seed:st.seed,ages:window.__vellumReadingRoomAges(),
+          panelHidden:p?p.hidden:null,tracks:document.querySelectorAll(".rf-chart .voyage-track").length};})()`);
+    } catch {}
+    if (rr25Window) break;
+    await sleep(25);
+  }
+  const rr25Settled = await settled();
+  const rr25After = await evaluate(agesRead);
+  check(
+    "RR25 a counter read tears the old instrument down with the chart it belonged to, then arms the new world (#418)",
+    !!rr25Window && rr25Window.ages === null && rr25Window.panelHidden === true &&
+      rr25Window.tracks === 0 && rr25Window.seed === 526413615 &&
+      rr25Settled && !!rr25After.ages && rr25After.panelHidden === false &&
+      rr25After.ages.chamber === "ages",
+    JSON.stringify({ before: rr25Before, window: rr25Window, after: rr25After }),
   );
 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
