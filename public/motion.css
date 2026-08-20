@@ -23,6 +23,12 @@
   --ease-unfurl: cubic-bezier(0.66, 0, 0.2, 1.03);
   --ease-turn: cubic-bezier(0.62, 0, 0.34, 1);  /* weighty ease-in-out, slow at both edges */
 
+  /* #405 the house lift (the --sheet-shadow precedent): every surface that raises on hover raises by these; .plate's grander scale is the one sanctioned exception. */
+  --raise: -2px;
+  --press: 1px;
+  --raise-grand: -3px;  /* the card's deeper lift */
+  --raise-shadow: 0 6px 16px rgb(from var(--chart-ink) r g b / 0.2);
+  --press-shadow: 0 1px 3px rgb(from var(--chart-ink) r g b / 0.14);
 }
 
 @keyframes paperSettle {
@@ -77,17 +83,17 @@ button:not(.place-hit),
 button:not(.place-hit):hover,
 .actions a:hover,
 .action-link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgb(from var(--chart-ink) r g b / 0.2);
+  transform: translateY(var(--raise));
+  box-shadow: var(--raise-shadow);
 }
 button:not(.place-hit):active,
 .actions a:active,
 .action-link:active {
-  transform: translateY(1px);
-  box-shadow: 0 1px 3px rgb(from var(--chart-ink) r g b / 0.14);
+  transform: translateY(var(--press));
+  box-shadow: var(--press-shadow);
 }
-.card:hover  { transform: translateY(-3px); box-shadow: 0 14px 30px rgb(from var(--chart-ink) r g b / 0.2); }
-.card:active { transform: translateY(1px);  box-shadow: 0 4px 12px rgb(from var(--chart-ink) r g b / 0.12); }
+.card:hover  { transform: translateY(var(--raise-grand)); box-shadow: 0 14px 30px rgb(from var(--chart-ink) r g b / 0.2); }
+.card:active { transform: translateY(var(--press));  box-shadow: 0 4px 12px rgb(from var(--chart-ink) r g b / 0.12); }
 
 .topnav a {
   display: inline-block;
@@ -105,7 +111,7 @@ button:not(.place-hit):active,
   transform-origin: left center;
   transition: transform var(--paper-quick) var(--ease-paper);
 }
-.topnav a:hover              { transform: translateY(-2px); }
+.topnav a:hover              { transform: translateY(var(--raise)); }
 .topnav a:active             { transform: translateY(0); }
 .topnav a:hover::after,
 .topnav a:focus-visible::after,
@@ -126,7 +132,7 @@ button:not(.place-hit):active,
   display: inline-block;
   transition: transform var(--paper) var(--ease-paper);
 }
-body:has(.room-name) .wordmark a:hover { transform: translateY(-2px) rotate(-0.6deg); }
+body:has(.room-name) .wordmark a:hover { transform: translateY(var(--raise)) rotate(-0.6deg); }
 body:has(.room-name) .wordmark a:active { transform: translateY(0); }
 
 /* #130 folio: cross-document view transitions; their pseudo-elements live on their own tree, out of reach of the universal * reduced-motion collapse, so the nested @view-transition {navigation:none} below is what turns the folio off. */
