@@ -66,7 +66,7 @@ export function realmBordersLayer(ctx: RenderCtx): SvgNode | null {
   const { w, h } = world.elev;
   const k = proj.widthPx / 1500;
 
-  // Carried chains, ONE per land boundary: stroking each realm's ring would trace every seam twice, and the plate-reader measured the coincident dash phases filling each other's gaps into a solid line on seed 42.
+  // Per-realm rings trace a shared seam twice, and the coincident dash phases measured as a SOLID line in real paint (plate-reader, seed 42), which no structural test can see.
   const carried = world.region?.realmBorders;
   if (carried) {
     return el(

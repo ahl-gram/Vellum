@@ -69,7 +69,6 @@ test("the interior border strokes each seam ONCE, inside the land clip (#423)", 
   );
   const borders = svg.match(/<g id="layer-realm-borders">([\s\S]*?)<\/g>/);
   assert.ok(borders && /stroke-dasharray/.test(borders[1]!), "the border must draw its dashed strokes");
-  // One path per carried chain: strokes from per-realm rings trace every seam twice, and the plate-reader measured the coincident dash phases reading as a SOLID line on seed 42.
   const region = generateRegionWorld(world42, { window, gridW: 320, gridH: 240, title: "t" });
   const paths = [...borders[1]!.matchAll(/<path /g)].length;
   assert.equal(
@@ -103,9 +102,7 @@ test("the world sheet's realm layers are untouched: no clip wrapper, label-deriv
 });
 
 test("the tint index is the PARENT's, proven where recomputation would disagree (#423)", () => {
-  // No natural seed exceeds 5 realms, so paint six stripes onto seed 42's land. Above BASE_TINTS
-  // the assignment runs graph colouring, where a cropped window computes different centroids and
-  // adjacency, which is exactly the #162 hazard #113 will make live.
+  // No natural seed exceeds 5 realms, so paint six stripes onto seed 42's land: above BASE_TINTS the assignment runs graph colouring, where a cropped window computes different centroids and adjacency (the #162 hazard #113 will make live).
   const { w, h } = world42.elev;
   const REALMS = 6;
   const labels = new Int16Array(w * h).fill(-1);
