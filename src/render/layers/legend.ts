@@ -97,12 +97,7 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
   const roadRanks = new Set(world.roads.map((r) => r.rank));
   if (roadRanks.has("trunk")) rows.push({ icon: { kind: "road", rank: "trunk" }, label: "Road" });
   if (roadRanks.has("lane")) rows.push({ icon: { kind: "road", rank: "lane" }, label: "Track" });
-  if (
-    !theme &&
-    style.politicalTints &&
-    world.region === undefined &&
-    world.realms.seats.length > 1
-  ) {
+  if (!theme && style.politicalTints && world.realms.seats.length > 1) {
     rows.push({ icon: { kind: "realm" }, label: "Realm & border" });
   }
 

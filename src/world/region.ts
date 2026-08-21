@@ -8,6 +8,7 @@ import { buildHeightfield, type UvWindow } from "../terrain/heightfield.ts";
 import { buildRoads } from "../society/roads.ts";
 import { placeHamlets } from "../society/hamlets.ts";
 import { anchorRegionRivers } from "./region-rivers.ts";
+import { mapChainsToWindow, mapRingsToWindow, realmBorderChains, realmCarryRings } from "./realm-carry.ts";
 import { seaMask } from "../hydrology/sea-mask.ts";
 import { LOD_BANDS } from "./lod.ts";
 import type { NamedLake, NamedSettlement, World } from "./types.ts";
@@ -162,7 +163,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     biomes,
     settlements: peopled,
     roads,
-    realms: { labels: new Int16Array(gridW * gridH).fill(-1), seats },
+    realms: { labels: roadLabels, seats },
     arms: [],
     culture: world.culture,
     title: {
@@ -176,12 +177,34 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
       range: null,
       forest: null,
       lakes: regionLakes,
-      realms: [],
+      realms: world.names.realms,
     },
     history: { events: [] },
     beasts: [],
     oceanDist,
-    region: { window, worldGridW: recipe.gridW, seaGate },
+    region: {
+      window,
+      worldGridW: recipe.gridW,
+      worldGridH: recipe.gridH,
+      seaGate,
+      realmRings: mapRingsToWindow(
+        realmCarryRings(world),
+        window,
+        recipe.gridW,
+        recipe.gridH,
+        gridW,
+        gridH,
+      ),
+      realmBorders: mapChainsToWindow(
+        realmBorderChains(world),
+        window,
+        recipe.gridW,
+        recipe.gridH,
+        gridW,
+        gridH,
+      ),
+      parentRealmLabels: world.realms.labels,
+    },
   };
 }
 

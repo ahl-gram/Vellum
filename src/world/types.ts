@@ -74,7 +74,17 @@ export type World = {
   readonly region?: {
     readonly window: UvWindow;
     readonly worldGridW: number;
+    readonly worldGridH?: number;
     /** 1 = genuine border-connected sea, 0 = land or an inland lake; a cropped region's own seaMask floods lakes as sea, so sea furniture reads THIS, not oceanDist. */
     readonly seaGate?: Uint8Array;
+    /** #423 the realm carry: the parent's grown realm outlines mapped into this window's grid coordinates, drawn by the realm layers in place of label-derived geometry. */
+    readonly realmRings?: ReadonlyArray<{
+      readonly realm: number;
+      readonly rings: ReadonlyArray<ReadonlyArray<readonly [number, number]>>;
+    }>;
+    /** #423: the parent's border chains (one per land boundary) in this window's grid coordinates; strokes come from these, never from the rings, so a seam is inked once. */
+    readonly realmBorders?: ReadonlyArray<ReadonlyArray<readonly [number, number]>>;
+    /** #423: the parent's full realm label field, so tint assignment is computed from the PARENT's geometry (the #162 hazard) for whichever style renders. */
+    readonly parentRealmLabels?: Int16Array;
   };
 };
