@@ -1,7 +1,6 @@
 import { bfsPath } from "../core/bfs-path.ts";
 import type { World } from "../world/types.ts";
 
-/** Every road cell plus every settlement cell, so a walk can launch from a doorstep. */
 export function roadMask(world: World): Uint8Array {
   const w = world.elev.w;
   const mask = new Uint8Array(w * world.elev.h);
@@ -12,7 +11,6 @@ export function roadMask(world: World): Uint8Array {
   return mask;
 }
 
-/** Dense per-cell road walk between two settlements, or null when no road joins them. */
 export function roadWalk(
   world: World,
   mask: Uint8Array,
@@ -33,7 +31,6 @@ export function roadWalk(
   );
 }
 
-/** Settlement indices road-reachable from the given one, in settlement order. */
 export function roadReachable(world: World, mask: Uint8Array, fromIdx: number): number[] {
   const w = world.elev.w;
   const h = world.elev.h;

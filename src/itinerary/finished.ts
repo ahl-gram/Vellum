@@ -31,7 +31,6 @@ export function ribbonSvgFor(input: RibbonInput, styleName: StyleName): string {
   return renderSvg(root);
 }
 
-/** The facade: world + two settlement indices to a finished plate, or null when no road joins them. */
 export function ribbonPlate(
   world: World,
   fromIdx: number,

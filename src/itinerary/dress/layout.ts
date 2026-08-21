@@ -71,10 +71,11 @@ export function layoutRibbon(input: RibbonInput): RibbonLayout {
   const latMax = stripW / 2 - 34;
 
   const strips: StripLayout[] = [];
+  const overlap = Math.min(0.75, STRIP_PAD / pxPerCell);
   for (let s = 0; s < n; s++) {
     const d0 = cellsPer * s;
     const d1 = cellsPer * (s + 1);
-    const inRange = input.samples.filter((p) => p.dist >= d0 - 0.75 && p.dist <= d1 + 0.75);
+    const inRange = input.samples.filter((p) => p.dist >= d0 - overlap && p.dist <= d1 + overlap);
     const chord = chordOf(inRange.length >= 2 ? inRange : input.samples);
     const x0 = left + s * (stripW + STRIP_GAP);
     const xc = x0 + stripW / 2;

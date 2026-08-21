@@ -12,11 +12,13 @@ import { stripCompass } from "./compass.ts";
 
 const ROAD_HALF = 2.3;
 const DECOR_STRIDE = 2;
+const STRIP_LIFT = "#ffffff";
+const STRIP_LIFT_OPACITY = 0.16;
 const FOREST = new Set<number>([BIOMES.temperateForest, BIOMES.rainforest, BIOMES.tropicalForest]);
 
 function frame(c: DressContext, s: StripLayout): SvgNode[] {
   return [
-    el("rect", { x: s.x0, y: s.y0, width: s.w, height: s.h, fill: "#ffffff", "fill-opacity": 0.16 }),
+    el("rect", { x: s.x0, y: s.y0, width: s.w, height: s.h, fill: STRIP_LIFT, "fill-opacity": STRIP_LIFT_OPACITY }),
     el("rect", { x: s.x0, y: s.y0, width: s.w, height: s.h, fill: "none", stroke: c.ink, "stroke-width": 1.1 }),
     el("rect", { x: s.x0 + 3, y: s.y0 + 3, width: s.w - 6, height: s.h - 6, fill: "none", stroke: c.soft, "stroke-width": 0.5 }),
   ];

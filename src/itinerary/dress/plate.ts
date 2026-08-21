@@ -3,7 +3,7 @@ import { r1, type DressContext } from "../../prospect/dress/context.ts";
 import type { Rng } from "../../core/rng.ts";
 import type { RibbonInput } from "../input.ts";
 import { ribbonTitle } from "../prose.ts";
-import { layoutRibbon, RIBBON_H, RIBBON_MARGIN, RIBBON_W, TITLE_BAND } from "./layout.ts";
+import { layoutRibbon, RIBBON_H, RIBBON_MARGIN, RIBBON_W } from "./layout.ts";
 import { stripNodes } from "./strip.ts";
 
 function grain(c: DressContext, id: string, seed: number): SvgNode[] {
@@ -104,5 +104,3 @@ export function renderRibbon(c: DressContext, input: RibbonInput, rng: Rng): Svg
     colophon(c, input),
   ]);
 }
-
-export const RIBBON_TITLE_BAND = TITLE_BAND;

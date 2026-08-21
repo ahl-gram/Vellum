@@ -50,14 +50,12 @@ export function parseRibbonAddress(hash: string): RibbonAddress {
   };
 }
 
-/** Back to the Explorer with the journey keys shed, the chartTarget idiom. */
 export function chartTarget(hash: string): string {
   const raw = hash.startsWith("#") ? hash.slice(1) : hash;
   const kept = raw.split("&").filter((kv) => kv !== "" && !/^(a|b)(=|$)/.test(kv));
   return "/explorer/" + (kept.length ? "#" + kept.join("&") : "");
 }
 
-/** The current hash with `a` and `b` replaced, for the picker's replaceState writes. */
 export function journeyHash(hash: string, from: number, to: number): string {
   const raw = hash.startsWith("#") ? hash.slice(1) : hash;
   const kept = raw.split("&").filter((kv) => kv !== "" && !/^(a|b)(=|$)/.test(kv));
