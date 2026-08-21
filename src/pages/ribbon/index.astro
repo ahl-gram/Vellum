@@ -1,0 +1,41 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { RIBBON_W, RIBBON_H } from "../../itinerary/finished.ts";
+---
+
+<BaseLayout
+  room="The Wayfarer's Ribbon"
+  description="Any road journey unrolled as an itinerary strip chart: the way drawn league by league up the scroll, with a compass turning to keep true north."
+  path="/ribbon/"
+  tagline="the road, unrolled"
+>
+
+<p class="intro">A chart shows the whole country at once; a wayfarer only ever needs the
+road ahead. The old road-books solved this with the itinerary strip chart: the journey cut
+into ribbons that read up the scroll, the road always climbing the strip while a little
+compass turns beside it to confess where north really lies. Choose where you set out and
+where you are bound, and the surveyor unrolls the way between: every bridge and ford,
+every wayside village, every fork signed for the town it leaves for.</p>
+
+<p id="rb-warning" class="warning" hidden>Your browser could not start the render worker,
+so the scroll is drawn on the main thread. It may pause the page for a moment.</p>
+
+<div class="journey">
+  <label for="rb-from">Setting out from</label>
+  <select id="rb-from" class="control"></select>
+  <label for="rb-to">bound for</label>
+  <select id="rb-to" class="control"></select>
+  <button id="rb-swap" class="control" type="button">Turn about</button>
+</div>
+
+<p class="status" id="rb-status" role="status" aria-live="polite"></p>
+
+<figure class="plate-figure">
+  <img id="rb-plate" width={RIBBON_W} height={RIBBON_H} alt="" hidden>
+  <figcaption class="caption" id="rb-caption"></figcaption>
+</figure>
+
+<div class="actions"><a id="rb-chart-link" class="control" href="/explorer/">Return to the Explorer</a></div>
+
+<script type="module" src="./app.bundle.js" is:inline></script>
+</BaseLayout>

@@ -8,6 +8,7 @@ import { GENERATED_SUBTREES } from "../../scripts/clean-public-generated.ts";
 import {
   ATLAS_ROUTE,
   PROSPECT_ROUTE,
+  RIBBON_ROUTE,
   DISCOVERY_ROUTES,
   HOME_ROUTE,
   ROUTE_ENTRIES,
@@ -26,13 +27,13 @@ const root = (p = "") => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const TEST_SITE = "https://charts.example/";
 const abs = (route: string) => new URL(route, TEST_SITE).href;
 
-test("the route set is NAV_ITEMS plus the three routes the nav omits: home, the atlas, and the prospect", () => {
+test("the route set is NAV_ITEMS plus the four routes the nav omits: home, the atlas, the prospect, and the ribbon", () => {
   assert.deepEqual(
     [...DISCOVERY_ROUTES],
-    [HOME_ROUTE, ...NAV_ITEMS.map((i) => i.href), ATLAS_ROUTE, PROSPECT_ROUTE],
-    "the routes are derived, never restated: home, the nav in its order, then the atlas and the prospect",
+    [HOME_ROUTE, ...NAV_ITEMS.map((i) => i.href), ATLAS_ROUTE, PROSPECT_ROUTE, RIBBON_ROUTE],
+    "the routes are derived, never restated: home, the nav in its order, then the atlas, the prospect, and the ribbon",
   );
-  assert.equal(DISCOVERY_ROUTES.length, NAV_ITEMS.length + 3, "seven nav items plus home, the atlas, and the prospect");
+  assert.equal(DISCOVERY_ROUTES.length, NAV_ITEMS.length + 4, "seven nav items plus home, the atlas, the prospect, and the ribbon");
   assert.equal(new Set(DISCOVERY_ROUTES).size, DISCOVERY_ROUTES.length, "no route may be listed twice");
   for (const route of DISCOVERY_ROUTES) {
     assert.match(route, /^\/([a-z0-9-]+\/)*$/, `${route} must be root-absolute trailing-slash form (constraint 8)`);

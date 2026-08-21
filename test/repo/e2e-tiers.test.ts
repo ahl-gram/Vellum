@@ -53,6 +53,7 @@ test("the smoke tier covers every page that ships its own bundle", () => {
     "seed-of-the-day": ["hunt"],
     "reading-room": ["reading-room"],
     "prospect": ["prospect"],
+    "ribbon": ["ribbon"],
   };
   for (const { twin } of BUNDLE_ENTRIES) {
     const surface = twin.replace(/\/app\.bundle\.js$/, "");

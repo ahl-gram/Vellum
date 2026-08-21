@@ -34,6 +34,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "room-voyage-route": 9.0,
   "glass-ceremony": 8.1,
   "prospect": 5.2, // measured 2026-08-15, local single-suite run (#242)
+  "ribbon": 1.9, // measured 2026-08-20, local single-suite run
   "verso": 7.1,
   "turn": 6.5,
   "runninghead": 3.9,
