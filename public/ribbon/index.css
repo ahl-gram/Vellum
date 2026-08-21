@@ -25,7 +25,7 @@ header { margin-bottom: 1.2rem; }
 .status { margin-bottom: 0.8rem; }
 
 .plate-figure { margin: 1.6rem auto 0; text-align: center; }
-#rb-plate { display: block; width: min(100%, 66rem); height: auto; margin: 0 auto;
+#rb-plate { display: block; box-sizing: border-box; width: min(100%, 66rem); height: auto; margin: 0 auto;
   border: 1px solid var(--line-tan);
   box-shadow: var(--sheet-shadow); }
 .plate-figure .caption { margin-top: 0.9rem; }
