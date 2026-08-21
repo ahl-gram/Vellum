@@ -68,7 +68,7 @@
   border: 1px solid var(--line-tan); border-radius: 4px;
   transition: transform 160ms ease, border-color 160ms ease; }
 .pc-prospect:hover, .pc-prospect:focus-visible { border-color: var(--ink-brown);
-  transform: translateY(-2px) rotate(-0.6deg); }
+  transform: translateY(var(--raise)) rotate(-0.6deg); }
 .pc-tongue { display: block; margin: 0.45rem 0 0; padding-top: 0.4rem;
   border-top: 1px solid rgb(from var(--ink-dark) r g b / 0.22);
   font-size: 0.8rem; color: var(--ink-brown); }

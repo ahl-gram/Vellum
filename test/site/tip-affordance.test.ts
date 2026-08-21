@@ -133,7 +133,7 @@ test("the TOC slips tip with the wordmark's text-scale gesture (#324 feel review
     const css = read(file);
     assert.match(
       css,
-      /\.toc a:hover\s*\{\s*transform:\s*translateY\(-2px\)\s+rotate\(-0\.6deg\)/,
+      /\.toc a:hover\s*\{\s*transform:\s*translateY\(var\(--raise\)\)\s+rotate\(-0\.6deg\)/,
       `${file}: the TOC entries go somewhere, so they tip, at the wordmark's numbers`,
     );
   }
@@ -142,7 +142,7 @@ test("the TOC slips tip with the wordmark's text-scale gesture (#324 feel review
 test("the footnote marks go to the glossary, so they tip, at the wordmark's numbers (#270 ruling 7)", () => {
   assert.match(
     read("public/explorer/broadside.css"),
-    /a\.fn:hover\s*\{\s*transform:\s*translateY\(-2px\)\s+rotate\(-0\.6deg\)/,
+    /a\.fn:hover\s*\{\s*transform:\s*translateY\(var\(--raise\)\)\s+rotate\(-0\.6deg\)/,
     "the marks navigate but carry no tip; ruling 7 extends the tipping surface to them",
   );
 });

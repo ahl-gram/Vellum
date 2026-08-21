@@ -37,7 +37,7 @@ h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
 .toc a { color: var(--ink-dark); }
 /* vertical-align pins the marker to the FIRST line (#356): an inline-block baselines from its LAST line box, dropping a wrapped entry's bullet 26px down (at 320-330px this is the steady state, not a first-paint flash). Do not revert to display:inline: the tip transform needs a block box (#358's sweep in tip-affordance.test.ts holds this line). */
 .toc a { display: inline-block; vertical-align: top; transition: transform var(--paper-quick) var(--ease-paper); }
-.toc a:hover { transform: translateY(-2px) rotate(-0.6deg); }
+.toc a:hover { transform: translateY(var(--raise)) rotate(-0.6deg); }
 .toc a:active { transform: translateY(0); }
 .q { font-weight: 600; color: var(--ink-dark); margin: 1.6rem 0 0.3rem;
   font-size: 1.08rem; }

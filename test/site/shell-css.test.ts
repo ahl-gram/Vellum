@@ -162,6 +162,7 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
 
   const consumers: Array<[string, string]> = [
     ...AUTHORED_CSS.map((p): [string, string] => [p, read(p)]),
+    ["public/motion.css", read("public/motion.css")],
     ["BaseLayout <style is:global>", layoutStyle()],
     ["src/atlas/document.ts", read("src/atlas/document.ts")],
     ["src/cli/gallery.ts", read("src/cli/gallery.ts")],
@@ -278,6 +279,116 @@ test("the chart marker is real: the renderer stamps it on every committed chart 
       /data-vellum-style="/,
       `${chart} should carry the data-vellum-style marker the mount rules select on`,
     );
+  }
+});
+
+// #405: the hover raise and press are house values, named in motion.css's :root (the one sheet both the site pages and the standalone atlas page load; BaseLayout cannot reach the atlas).
+const RAISE_TOKENS = [
+  ["--raise", "-2px"],
+  ["--press", "1px"],
+  ["--raise-grand", "-3px"],
+  ["--raise-shadow", "0 6px 16px rgb(from var(--chart-ink) r g b / 0.2)"],
+  ["--press-shadow", "0 1px 3px rgb(from var(--chart-ink) r g b / 0.14)"],
+] as const;
+
+test("motion.css declares each raise/press token once, at its ratified value (#405)", () => {
+  const css = read("public/motion.css");
+  for (const [name, value] of RAISE_TOKENS) {
+    assert.equal(
+      css.split(`${name}: ${value};`).length - 1, 1,
+      `motion.css should declare ${name}: ${value}; exactly once`,
+    );
+    assert.equal(
+      css.split(`${name}:`).length - 1, 1,
+      `${name} should have exactly one declaration in motion.css`,
+    );
+  }
+});
+
+// The grander plate, gallery and atlas scales are a question #405 left standing, so each literal is sanctioned at its exact selector and value, and every comma arm of a literal-bearing rule must be individually sanctioned: a new surface cannot borrow an exception.
+const SANCTIONED_LIFTS: Record<string, string> = {
+  ".plate:hover": "-5px",
+  ".plate:active": "-1px",
+  ".atlas-sheet figure a img:hover": "-5px",
+  ".atlas-sheet figure a img:active": "-1px",
+  "figure img:hover": "-4px",
+  "figure img:active": "-1px",
+};
+
+const atlasStyleBlocks = async (): Promise<string> => {
+  const { atlasDocument, atlasPlateFilename } = await import("../../src/atlas/document.ts");
+  const plate = { key: "antique", title: "hero", svg: "<svg></svg>" };
+  const html = atlasDocument(
+    {
+      title: "T", subtitle: "s", seed: 7,
+      hero: plate, draughtings: [], themes: [], regions: [],
+      bannersHtml: "", chronicleHtml: "", gazetteerHtml: "",
+    },
+    (p, s) => atlasPlateFilename(p, s),
+    { anchor: true, motion: true },
+  );
+  return [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n");
+};
+
+test("no hover or active rule states a lift as a px literal: the raise is a token (#405)", async () => {
+  // Scoped to :hover/:active selectors, so keyframe steps pass by construction (their selectors are waypoints like "70%": the paperSettle trap at motion.css:30); translateY(0) is a return to rest, not a lift.
+  const { GALLERY_PAGE_CSS } = await import("../../src/cli/gallery.ts");
+  const sheets: Array<[string, string]> = [
+    ...AUTHORED_CSS.map((p): [string, string] => [p, read(p)]),
+    ["public/motion.css", read("public/motion.css")],
+    ["public/fonts.css", read("public/fonts.css")],
+    ["BaseLayout <style is:global>", layoutStyle()],
+    ["src/cli/gallery.ts", GALLERY_PAGE_CSS],
+    ["src/atlas/document.ts", await atlasStyleBlocks()],
+  ];
+  for (const [name, css] of sheets) {
+    for (const { selector, body } of rulesIn(css)) {
+      if (!/:hover|:active/.test(selector)) continue;
+      for (const m of body.matchAll(/translateY\(([^)]*)\)/g)) {
+        const arg = m[1].trim();
+        if (arg === "0" || arg.startsWith("var(")) continue;
+        const sanctioned = selector
+          .split(",")
+          .every((arm) => SANCTIONED_LIFTS[arm.trim()] === arg);
+        assert.ok(
+          sanctioned,
+          `${name}: "${selector}" lifts by the literal ${arg}; ` +
+            `the house lift is translateY(var(--raise)) (or --press, --raise-grand)`,
+        );
+      }
+    }
+  }
+});
+
+// #405 identity, not presence: the sweep proves a lift is SOME token; this pins WHICH one each consumer uses. broadside's a.fn and the faq/glossary .toc tips are pinned by tip-affordance's re-pins.
+const TOKEN_CONSUMERS: ReadonlyArray<{ file: string; arm: string; lift: string; shadow?: string }> = [
+  { file: "public/motion.css", arm: "button:not(.place-hit):hover", lift: "--raise", shadow: "--raise-shadow" },
+  { file: "public/motion.css", arm: "button:not(.place-hit):active", lift: "--press", shadow: "--press-shadow" },
+  { file: "public/motion.css", arm: ".card:hover", lift: "--raise-grand" },
+  { file: "public/motion.css", arm: ".card:active", lift: "--press" },
+  { file: "public/motion.css", arm: ".topnav a:hover", lift: "--raise" },
+  { file: "public/motion.css", arm: "body:has(.room-name) .wordmark a:hover", lift: "--raise" },
+  { file: "public/living-chart.css", arm: ".pc-prospect:hover", lift: "--raise" },
+];
+
+test("each lifting surface consumes ITS token, not just a token (#405)", () => {
+  for (const { file, arm, lift, shadow } of TOKEN_CONSUMERS) {
+    const rule = rulesIn(read(file)).find((r) =>
+      r.selector.split(",").map((s) => s.trim().replace(/\s+/g, " ")).includes(arm),
+    );
+    assert.ok(rule, `${file} should carry a rule selecting ${arm}`);
+    assert.match(
+      rule.body,
+      new RegExp(`transform:\\s*translateY\\(var\\(${lift}\\)\\)`),
+      `${arm} should lift by var(${lift})`,
+    );
+    if (shadow) {
+      assert.match(
+        rule.body,
+        new RegExp(`box-shadow:\\s*var\\(${shadow}\\)`),
+        `${arm} should cast var(${shadow})`,
+      );
+    }
   }
 });
 

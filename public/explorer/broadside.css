@@ -71,7 +71,7 @@ a.fn { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia,
   font-size: 0.95em; vertical-align: super; line-height: 0; padding: 0 0.15em;
   display: inline-block; } /* a transformable box, for the tip below */
 a.fn:hover, a.fn:focus-visible { color: var(--ink-dark); }
-a.fn:hover { transform: translateY(-2px) rotate(-0.6deg); }
+a.fn:hover { transform: translateY(var(--raise)) rotate(-0.6deg); }
 /* Native popover (the UA [popover] rule keeps it display:none until shown); fixed-position because static CSS cannot place a top-layer box relative to an anchor, so footnotes.ts anchors it at show time. */
 .fn-note { position: fixed; margin: 0; inset: auto; width: 15.5rem;
   transform: rotate(-0.4deg);
