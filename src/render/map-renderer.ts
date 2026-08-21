@@ -108,13 +108,21 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     coastRings,
     elevSpan: Math.max(1e-9, max - world.seaLevel),
     rng: createRng(world.recipe.seed).fork("render"),
-    realmTint: realmTintIndices(
-      world.realms.labels,
-      world.elev.w,
-      world.elev.h,
-      world.realms.seats.length,
-      style,
-    ),
+    realmTint: world.region?.parentRealmLabels
+      ? realmTintIndices(
+          world.region.parentRealmLabels,
+          world.region.worldGridW,
+          world.region.worldGridH ?? world.elev.h,
+          world.realms.seats.length,
+          style,
+        )
+      : realmTintIndices(
+          world.realms.labels,
+          world.elev.w,
+          world.elev.h,
+          world.realms.seats.length,
+          style,
+        ),
     labels: createLabelArena(),
     theme: opts.theme,
   };
@@ -143,6 +151,8 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     world.region
       ? el("g", { "clip-path": "url(#region-land-clip)" }, [node])
       : node;
+  const clipRegionLandMaybe = (node: SvgNode | null): SvgNode | null =>
+    node === null ? null : clipRegionLand(node);
 
   const mapLayers: Array<SvgNode | null> = [
     oceanLayer(ctx),
@@ -154,11 +164,11 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     themed ? isoLayer(ctx) : null,
     themed ? null : hypsometricLayer(ctx),
     themed ? null : contoursLayer(ctx),
-    themed ? null : realmTintsLayer(ctx),
+    themed ? null : clipRegionLandMaybe(realmTintsLayer(ctx)),
     clipRegionLand(riversLayer(ctx)),
     themed ? null : glyphsLayer(ctx),
     roadsLayer(ctx),
-    realmBordersLayer(ctx),
+    clipRegionLandMaybe(realmBordersLayer(ctx)),
     soundingsLayer(ctx, cartouchePlan, compassPlan),
     currentsLayer(ctx, cartouchePlan, compassPlan),
     windsLayer(ctx, cartouchePlan, compassPlan),
