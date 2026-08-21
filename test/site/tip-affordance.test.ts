@@ -129,7 +129,6 @@ const hoverTipsIn = (css: string): string[] => {
 };
 
 test("the TOC slips tip with the wordmark's text-scale gesture (#324 feel review)", () => {
-  // The wordmark's lift is the house raise since #405, so "at the wordmark's numbers" is the token plus the rotate.
   for (const file of ["public/faq/index.css", "public/glossary/index.css"]) {
     const css = read(file);
     assert.match(

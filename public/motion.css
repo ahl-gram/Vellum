@@ -23,10 +23,10 @@
   --ease-unfurl: cubic-bezier(0.66, 0, 0.2, 1.03);
   --ease-turn: cubic-bezier(0.62, 0, 0.34, 1);  /* weighty ease-in-out, slow at both edges */
 
-  /* #405 the house lift (the --sheet-shadow precedent): every surface that raises on hover raises by these; .plate's grander scale is the one sanctioned exception. */
+  /* #405 the house lift and press */
   --raise: -2px;
   --press: 1px;
-  --raise-grand: -3px;  /* the card's deeper lift */
+  --raise-grand: -3px;
   --raise-shadow: 0 6px 16px rgb(from var(--chart-ink) r g b / 0.2);
   --press-shadow: 0 1px 3px rgb(from var(--chart-ink) r g b / 0.14);
 }
