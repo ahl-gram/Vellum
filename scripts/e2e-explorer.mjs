@@ -26,6 +26,7 @@ import { run as runFallback } from "./e2e/suite-fallback.mjs";
 import { run as runHunt } from "./e2e/suite-hunt.mjs";
 import { run as runPrintRoom } from "./e2e/suite-print-room.mjs";
 import { run as runProspect } from "./e2e/suite-prospect.mjs";
+import { run as runRibbon } from "./e2e/suite-ribbon.mjs";
 import { run as runHome } from "./e2e/suite-home.mjs";
 import { run as runSurvey } from "./e2e/suite-survey.mjs";
 import { run as runBroadside } from "./e2e/suite-broadside.mjs";
@@ -93,6 +94,7 @@ const SUITES = {
   "hunt": runHunt,
   "print-room": runPrintRoom,
   "prospect": runProspect,
+  "ribbon": runRibbon,
   "home": runHome,
   "survey": runSurvey,
   "broadside": runBroadside,

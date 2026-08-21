@@ -27,6 +27,7 @@ const AUTHORED_CSS = [
   "public/motion.css",
   "public/print-room/index.css",
   "public/prospect/index.css",
+  "public/ribbon/index.css",
   "public/reading-frame.css",
   "public/reading-room/index.css",
   "public/seed-of-the-day/index.css",

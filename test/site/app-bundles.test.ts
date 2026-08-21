@@ -61,6 +61,7 @@ test("the press bundles from the src/site TypeScript entries (#260)", async () =
       { entry: "src/site/seed-of-the-day/app.ts", twin: "seed-of-the-day/app.bundle.js" },
       { entry: "src/site/reading-room/app.ts", twin: "reading-room/app.bundle.js" },
       { entry: "src/site/prospect/app.ts", twin: "prospect/app.bundle.js" },
+      { entry: "src/site/ribbon/app.ts", twin: "ribbon/app.bundle.js" },
     ],
     "entries are the TS sources; twins keep their served names untouched",
   );

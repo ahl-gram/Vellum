@@ -10,6 +10,8 @@ export const HOME_ROUTE = "/";
 export const ATLAS_ROUTE = "/atlas/";
 /** The prospect page (#242): a real route reached from the Explorer's place cards, never in the nav (the atlas precedent: the nav lists rooms). */
 export const PROSPECT_ROUTE = "/prospect/";
+/** The Wayfarer's Ribbon: itinerary strip charts, a deep-link surface like the prospect, never in the nav. */
+export const RIBBON_ROUTE = "/ribbon/";
 
 // Deliberately NOT grouped by NavItem.kind: nav.ts declares kind a placeholder nothing may depend on, so these files stay flat.
 export const DISCOVERY_ROUTES: readonly string[] = [
@@ -17,6 +19,7 @@ export const DISCOVERY_ROUTES: readonly string[] = [
   ...NAV_ITEMS.map((item) => item.href),
   ATLAS_ROUTE,
   PROSPECT_ROUTE,
+  RIBBON_ROUTE,
 ];
 
 export interface RouteEntry {
@@ -65,6 +68,10 @@ export const ROUTE_ENTRIES: Readonly<Record<string, RouteEntry | undefined>> = {
   [PROSPECT_ROUTE]: {
     title: "The Prospect",
     blurb: "Any settlement's engraved townscape plate, opened from its place card in the Explorer and addressed by chart, place, and year.",
+  },
+  [RIBBON_ROUTE]: {
+    title: "The Wayfarer's Ribbon",
+    blurb: "Any road journey unrolled as an itinerary strip chart: the way drawn league by league up the scroll, with a compass turning to keep true north.",
   },
 };
 

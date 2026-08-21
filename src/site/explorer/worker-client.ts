@@ -10,6 +10,7 @@ import { generateRegionWorld, regionTitle } from "../../world/region.ts";
 import { composeAtlas } from "../../atlas/compose.ts";
 import { serializableAtlas } from "./serializable-atlas.ts";
 import { prospectResultFor, type PlateDress, type ProspectPlateResult } from "./prospect-job.ts";
+import { ribbonResultFor, type RibbonPlateData } from "./ribbon-job.ts";
 import { tourOrderFor } from "./tour-job.ts";
 import { worldFor } from "./world-cache.ts";
 import type { Site } from "../../render/voyage-route.ts";
@@ -58,6 +59,15 @@ export interface ProspectJob {
   readonly year: number | null;
 }
 
+export interface RibbonJob {
+  readonly kind: "ribbon";
+  readonly seed: number;
+  readonly overrides?: Partial<WorldRecipe>;
+  readonly from: number | null;
+  readonly to: number | null;
+  readonly dress: PlateDress;
+}
+
 /** #373: the #184 travel matrix, off the main thread. Self-contained on purpose (no seed lookup, no world rebuild): the inputs ARE the world facts the router walks, so the two sides cannot compute over different worlds. */
 export interface TourJob {
   readonly kind: "tour";
@@ -67,7 +77,7 @@ export interface TourJob {
   readonly ports: ReadonlyArray<number>;
 }
 
-export type RenderJob = DrawJob | RegionJob | AtlasJob | ProspectJob | TourJob;
+export type RenderJob = DrawJob | RegionJob | AtlasJob | ProspectJob | RibbonJob | TourJob;
 
 export interface DrawResult {
   readonly ok: true;
@@ -98,12 +108,14 @@ export interface AtlasResult {
 
 export type ProspectResult = ProspectPlateResult & { readonly ok: true };
 
+export type RibbonResult = RibbonPlateData & { readonly ok: true };
+
 export interface TourResult {
   readonly ok: true;
   readonly order: ReadonlyArray<number>;
 }
 
-export type JobResult = DrawResult | RegionResult | AtlasResult | ProspectResult | TourResult;
+export type JobResult = DrawResult | RegionResult | AtlasResult | ProspectResult | RibbonResult | TourResult;
 
 /** A job crossing the wire: the client staples on the id the response echoes back. */
 export type WorkerRequest =
@@ -111,6 +123,7 @@ export type WorkerRequest =
   | (RegionJob & { readonly id: number })
   | (AtlasJob & { readonly id: number })
   | (ProspectJob & { readonly id: number })
+  | (RibbonJob & { readonly id: number })
   | (TourJob & { readonly id: number });
 
 // The optional never-set fields keep the plain `d.id == null` and `e.data.ready` guards below narrowing under strict TS.
@@ -141,6 +154,7 @@ export function runInline(msg: DrawJob): DrawResult;
 export function runInline(msg: RegionJob): RegionResult;
 export function runInline(msg: AtlasJob): AtlasResult;
 export function runInline(msg: ProspectJob): ProspectResult;
+export function runInline(msg: RibbonJob): RibbonResult;
 export function runInline(msg: TourJob): TourResult;
 export function runInline(msg: RenderJob): JobResult;
 export function runInline(msg: RenderJob): JobResult {
@@ -184,6 +198,10 @@ export function runInline(msg: RenderJob): JobResult {
     const { world } = worldFor(msg.seed, msg.overrides);
     return { ok: true, ...prospectResultFor(world, msg) };
   }
+  if (msg.kind === "ribbon") {
+    const { world } = worldFor(msg.seed, msg.overrides);
+    return { ok: true, ...ribbonResultFor(world, msg) };
+  }
   const { world } = worldFor(msg.seed, msg.overrides);
   return { ok: true, atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })) };
 }
@@ -192,6 +210,7 @@ export function runJob(msg: DrawJob): Promise<DrawResult>;
 export function runJob(msg: RegionJob): Promise<RegionResult>;
 export function runJob(msg: AtlasJob): Promise<AtlasResult>;
 export function runJob(msg: ProspectJob): Promise<ProspectResult>;
+export function runJob(msg: RibbonJob): Promise<RibbonResult>;
 export function runJob(msg: TourJob): Promise<TourResult>;
 export function runJob(msg: RenderJob): Promise<JobResult>;
 export function runJob(msg: RenderJob): Promise<JobResult> {
