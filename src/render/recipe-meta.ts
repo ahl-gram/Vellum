@@ -8,7 +8,6 @@ import { el, type SvgNode } from "./svg.ts";
 export type RegionRecipe = {
   readonly window: UvWindow;
   readonly worldGridW: number;
-  /** Required, not optional: a sheet must state the detail it was DRAWN at so it redraws as itself, and a missing value would silently mean 0 (#398). A pre-#376 stamp has no attribute and parses as 0, which is what those sheets were drawn at. */
   readonly detail: number;
 };
 
@@ -118,6 +117,13 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
   };
 }
 
+/** An absent attribute is every sheet drawn before #376, and a hand-edited one is untrusted file content: both read as the plain field rather than reaching buildHeightfield's RangeError. */
+function detail0(raw: string | null): number {
+  if (raw === null) return 0;
+  const n = Number(raw);
+  return Number.isInteger(n) && n >= 0 ? n : 0;
+}
+
 function parseRegion(svg: string): { region?: RegionRecipe } {
   const u0 = readAttr(svg, "data-vellum-region-u0");
   const v0 = readAttr(svg, "data-vellum-region-v0");
@@ -127,12 +133,12 @@ function parseRegion(svg: string): { region?: RegionRecipe } {
   if (u0 === null || v0 === null || u1 === null || v1 === null || worldGridW === null) {
     return {};
   }
-  const detail = readAttr(svg, "data-vellum-region-detail");
+  const detail = detail0(readAttr(svg, "data-vellum-region-detail"));
   return {
     region: {
       window: { u0: Number(u0), v0: Number(v0), u1: Number(u1), v1: Number(v1) },
       worldGridW: Number(worldGridW),
-      detail: detail === null ? 0 : Number(detail),
+      detail,
     },
   };
 }

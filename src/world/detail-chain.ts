@@ -8,10 +8,10 @@ import {
 import { floorToParent, parentSurfaceOnWindow, rejectBridges } from "../terrain/detail-guarantees.ts";
 import { FULL_WINDOW, LOD_BANDS, lodWindowFor, quantizeCenter, type LodBand } from "./lod.ts";
 
+/** No band index: the window alone fixes the ancestry, its depth and every detail level, so a caller cannot pass a band that disagrees with its window. */
 export type ChainSpec = {
   readonly seed: number;
   readonly mapType: MapType;
-  readonly band: number;
   readonly window: UvWindow;
   readonly gridW: number;
   readonly gridH: number;
@@ -29,7 +29,7 @@ export type ChainCache = {
 
 const CACHE_CAPACITY = 24;
 
-/** Derived from the WINDOW alone, never the camera path or the band: two routes to one window must agree cell for cell, the byte-identity contract in lod.ts. A window that cannot be doubled inside the sheet parents on the full window, which covers bands 0 and 1 without asking what band it is, so the atlas window (not a LOD band, #423) chains too. */
+/** Derived from the WINDOW alone, never the camera path or a band index: two routes to one window must agree cell for cell, the byte-identity contract in lod.ts. A window that cannot be doubled inside the sheet parents on the full window. */
 export function canonicalParent(win: UvWindow): UvWindow {
   const parentSize = (win.u1 - win.u0) * 2;
   if (parentSize >= 1) return FULL_WINDOW;
@@ -37,14 +37,13 @@ export function canonicalParent(win: UvWindow): UvWindow {
   return lodWindowFor(q.cx, q.cy, parentSize);
 }
 
-/** The window's ancestry, nearest parent first, ending at the full window. */
+/** The window's ancestry, nearest parent first, ending at the full window. Each step at least doubles the size, so it terminates. */
 export function ancestorWindows(win: UvWindow): UvWindow[] {
   const out: UvWindow[] = [];
   let w = win;
   while (w.u1 - w.u0 < 1) {
     w = canonicalParent(w);
     out.push(w);
-    if (w.u1 - w.u0 >= 1) break;
   }
   return out;
 }
@@ -55,13 +54,12 @@ export function detailForWindow(win: UvWindow): number {
   return Math.min(Math.max(level, 0), MAX_DETAIL);
 }
 
+/** The window fixes the detail level, so the window bounds here carry it; a spec that ever takes an EXPLICIT detail must add it to this key. */
 export function chainCacheKey(spec: ChainSpec): string {
   const w = spec.window;
   return [
     spec.seed,
     spec.mapType,
-    spec.band,
-    detailForWindow(spec.window),
     w.u0, w.v0, w.u1, w.v1,
     spec.gridW, spec.gridH,
     spec.worldAspect,
@@ -102,8 +100,8 @@ export function createChainCache(capacity: number = CACHE_CAPACITY): ChainCache 
   };
 }
 
-/** NaN means a cell no ancestor covers, so it must not win the max and must stay NaN when every ancestor abstains: floorToParent then leaves the fine value alone. */
-function maxOfSurfaces(surfaces: ReadonlyArray<Field>, w: number, h: number): Field {
+/** The chain's coarse reference: what it floors against and what rejectBridges partitions. NaN means a cell no ancestor covers, so it must not win the max and must stay NaN when every ancestor abstains. */
+export function maxOfSurfaces(surfaces: ReadonlyArray<Field>, w: number, h: number): Field {
   const data = new Float64Array(w * h).fill(NaN);
   for (const s of surfaces) {
     for (let i = 0; i < data.length; i++) {
@@ -116,15 +114,17 @@ function maxOfSurfaces(surfaces: ReadonlyArray<Field>, w: number, h: number): Fi
   return fieldFrom(w, h, data);
 }
 
-function bandGrid(band: number): { readonly gridW: number; readonly gridH: number } {
-  const b = LOD_BANDS[band] as LodBand | undefined;
-  return b ? { gridW: b.gridW, gridH: b.gridH } : { gridW: 320, gridH: 240 };
+/** An ancestor is a canonical thing, so it draws at its own band's grid and siblings share it whatever grid the target asked for. */
+function gridForWindow(win: UvWindow): { readonly gridW: number; readonly gridH: number } {
+  const size = win.u1 - win.u0;
+  const band = LOD_BANDS.find((b) => Math.abs(b.sizeUV - size) < 1e-9) ?? (LOD_BANDS[0] as LodBand);
+  return { gridW: band.gridW, gridH: band.gridH };
 }
 
-/** Each band floored and de-bridged against the PREVIOUS band's adjusted field, not against band 0: anchoring everything to the world chart leaves features born mid-descent unprotected at the next band. */
-export function buildChainedField(spec: ChainSpec, cache?: ChainCache): Field {
+/** Floored and de-bridged against EVERY ancestor, not only the nearest: two bilinear resamples in a row smooth differently from one, so parent-only flooring lets waterline cells sink relative to a grandparent. The cache defaults to a fresh one per top-level call because the recursion would otherwise rebuild each ancestor's own ancestry, costing 2^depth field builds instead of depth. */
+export function buildChainedField(spec: ChainSpec, cache: ChainCache = createChainCache()): Field {
   const key = chainCacheKey(spec);
-  const hit = cache?.get(key);
+  const hit = cache.get(key);
   if (hit !== undefined) return hit;
 
   const bare = buildHeightfield({
@@ -138,16 +138,12 @@ export function buildChainedField(spec: ChainSpec, cache?: ChainCache): Field {
     ...(spec.coastWarp !== undefined ? { coastWarp: spec.coastWarp } : {}),
   });
 
+  const ancestors = ancestorWindows(spec.window);
   let out = bare;
-  if (spec.band > 0) {
-    // Floored against EVERY ancestor, not just the parent (Alex, 2026-08-22). Two bilinear resamples in a row smooth differently from one, so parent-only flooring let ~30 waterline cells per window sink relative to a grandparent; the elementwise max makes "nothing that was land ever sinks" exact from any ancestor at any depth.
-    const windows = ancestorWindows(spec.window).slice(0, spec.band);
-    const surfaces = windows.map((w, i) =>
+  if (ancestors.length > 0) {
+    const surfaces = ancestors.map((w) =>
       parentSurfaceOnWindow(
-        buildChainedField(
-          { ...spec, band: spec.band - 1 - i, window: w, ...bandGrid(spec.band - 1 - i) },
-          cache,
-        ),
+        buildChainedField({ ...spec, window: w, ...gridForWindow(w) }, cache),
         w,
         spec.window,
         spec.gridW,
@@ -158,6 +154,6 @@ export function buildChainedField(spec: ChainSpec, cache?: ChainCache): Field {
     out = rejectBridges(coarse, floorToParent(bare, coarse), spec.seaLevel);
   }
 
-  cache?.set(key, out);
+  cache.set(key, out);
   return out;
 }

@@ -183,7 +183,7 @@ export function runInline(msg: RenderJob): JobResult {
       gridH: msg.gridH,
       title,
     });
-    // detail 0 because this path draws the unchained field; #400 raises it to the detail the sheet is ACTUALLY drawn at when it wires the chain, never to what the window would imply.
+    // detail 0: this path draws the unchained field. #400 raises it to what is DRAWN, never to what the window implies.
     const regionRecipe = { window: msg.window, worldGridW: world.recipe.gridW, detail: 0 };
     return {
       ok: true,

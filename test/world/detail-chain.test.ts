@@ -1,19 +1,22 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  ancestorWindows,
   buildChainedField,
   canonicalParent,
   chainCacheKey,
   createChainCache,
   detailForWindow,
+  maxOfSurfaces,
   type ChainSpec,
 } from "../../src/world/detail-chain.ts";
+import type { Field } from "../../src/core/grid.ts";
 import { FULL_WINDOW, LOD_BANDS, decideSettle, lodWindowFor, quantizeCenter } from "../../src/world/lod.ts";
 import { buildHeightfield, MAX_DETAIL, type UvWindow } from "../../src/terrain/heightfield.ts";
 import { pickSeaLevel } from "../../src/terrain/sealevel.ts";
 import { defaultRecipe } from "../../src/world/generate.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
-import { parentSurfaceOnWindow } from "../../src/terrain/detail-guarantees.ts";
+import { floorToParent, parentSurfaceOnWindow, rejectBridges } from "../../src/terrain/detail-guarantees.ts";
 
 const SEED = 42;
 const recipe = defaultRecipe(SEED);
@@ -50,12 +53,11 @@ function reachableWindows(band: number): UvWindow[] {
   return [...seen.values()];
 }
 
-function specFor(band: number, window: UvWindow, over: Partial<ChainSpec> = {}): ChainSpec {
-  const b = LOD_BANDS[band] as (typeof LOD_BANDS)[number];
+function specFor(window: UvWindow, over: Partial<ChainSpec> = {}): ChainSpec {
+  const b = LOD_BANDS[0] as (typeof LOD_BANDS)[number];
   return {
     seed: SEED,
     mapType: recipe.mapType,
-    band,
     window,
     gridW: b.gridW,
     gridH: b.gridH,
@@ -63,6 +65,34 @@ function specFor(band: number, window: UvWindow, over: Partial<ChainSpec> = {}):
     seaLevel: SEA,
     ...over,
   };
+}
+
+function fusedCells(coarse: Field, fine: Field, sea: number = SEA): number {
+  const { ids: pIds } = labelLandmasses(coarse, sea);
+  const { ids: cIds } = labelLandmasses(fine, sea);
+  const owner = new Map<number, number>();
+  let fused = 0;
+  for (let i = 0; i < pIds.length; i++) {
+    const pid = pIds[i] as number;
+    const cid = cIds[i] as number;
+    if (pid === -1 || cid === -1) continue;
+    const prev = owner.get(cid);
+    if (prev === undefined) owner.set(cid, pid);
+    else if (prev !== pid) fused++;
+  }
+  return fused;
+}
+
+function bareFieldFor(window: UvWindow, gridW: number, gridH: number): Field {
+  return buildHeightfield({
+    seed: SEED,
+    gridW,
+    gridH,
+    mapType: recipe.mapType,
+    window,
+    worldAspect: WORLD_ASPECT,
+    detail: detailForWindow(window),
+  });
 }
 
 test("the canonical parent doubles the window and lands on the parent band's own lattice (#398)", () => {
@@ -89,7 +119,7 @@ test("the canonical parent doubles the window and lands on the parent band's own
 });
 
 test("the canonical parent covers its child everywhere the Glass can settle (#398)", () => {
-  // lodWindowFor clamps a window to the sheet, so a parent could in principle fail to cover a child near an edge; measured across all 3955 reachable windows it never does, and an uncovered strip would leave real land unprotected by the floor.
+  // parentSurfaceOnWindow returns NaN outside coverage, so an uncovered strip leaves real land unfloored rather than throwing.
   let checked = 0;
   for (const band of [1, 2, 3]) {
     for (const child of reachableWindows(band)) {
@@ -117,7 +147,7 @@ test("the detail level is keyed off the window size, one octave per halving (#39
   assert.equal(detailForWindow(lodWindowFor(0.5, 0.5, 0.5)), 1);
   assert.equal(detailForWindow(lodWindowFor(0.5, 0.5, 0.25)), 2);
   assert.equal(detailForWindow(lodWindowFor(0.5, 0.5, 0.125)), 3);
-  // guard-prover round 1: every power-of-two fixture reads the same under round and floor, so the schedule was unpinned for exactly the windows canonicalParent declares support for (the atlas window is not a LOD band, #423).
+  // Non-powers of two: on the LOD sizes above, round and floor agree, so those fixtures cannot see the rounding rule at all.
   for (const [size, level] of [[0.7, 1], [0.3, 2], [0.15, 3]] as const) {
     assert.equal(
       detailForWindow(lodWindowFor(0.5, 0.5, size)),
@@ -128,18 +158,21 @@ test("the detail level is keyed off the window size, one octave per halving (#39
 });
 
 test("band 0 of the chain IS the world field, so the chain anchors on the golden (#398)", () => {
-  const chained = buildChainedField(specFor(0, FULL_WINDOW));
+  const chained = buildChainedField(specFor(FULL_WINDOW));
   assertSameField(chained.data, world.data, "the chain's band 0 diverged from buildHeightfield's world field");
 });
 
 test("two zoom routes to the same window produce a byte-identical field (#398)", () => {
-  // The epic's "single easiest thing to get wrong": a parent derived from the camera path rather than the window made 123 of 76800 cells differ in VALUE. Same environment, so this comparison is exact by design; the float-drift rule bans byte comparison ACROSS environments only.
+  // Same environment, so this comparison is exact by design; the float-drift rule bans byte comparison ACROSS environments only.
   const target = { cx: 0.53, cy: 0.42, k: 8 };
   const routeA = [{ cx: 0.53, cy: 0.42, k: 1 }, { cx: 0.53, cy: 0.42, k: 2.6 }, { cx: 0.53, cy: 0.42, k: 5.2 }, target];
   const routeB = [{ cx: 0.12, cy: 0.87, k: 1 }, { cx: 0.12, cy: 0.87, k: 6.5 }, { cx: 0.30, cy: 0.60, k: 6.5 }, target];
-  const walk = (route: ReadonlyArray<{ cx: number; cy: number; k: number }>): { band: number; window: UvWindow } => {
+  const walk = (
+    route: ReadonlyArray<{ cx: number; cy: number; k: number }>,
+  ): Array<{ band: number; window: UvWindow }> => {
     let band = 0;
     let window: UvWindow = FULL_WINDOW;
+    const visited: Array<{ band: number; window: UvWindow }> = [];
     for (const camera of route) {
       const d = decideSettle({ camera, currentWindow: window, currentBand: band });
       if (d.action === "region") {
@@ -149,24 +182,74 @@ test("two zoom routes to the same window produce a byte-identical field (#398)",
         band = 0;
         window = FULL_WINDOW;
       }
+      visited.push({ band, window });
     }
-    return { band, window };
+    return visited;
   };
   const a = walk(routeA);
   const b = walk(routeB);
-  assert.equal(a.band, 3, "route A did not land at band 3");
-  assert.ok(windowsEqual(a.window, b.window), "the two routes did not land on the same window");
-  const fa = buildChainedField(specFor(a.band, a.window));
-  const fb = buildChainedField(specFor(b.band, b.window), createChainCache());
+  assert.equal(a.at(-1)?.band, 3, "route A did not land at band 3");
+  const endA = a.at(-1)?.window as UvWindow;
+  const endB = b.at(-1)?.window as UvWindow;
+  assert.ok(windowsEqual(endA, endB), "the two routes did not land on the same window");
+
+  // The routes reach that window through DIFFERENT intermediate windows, which is the whole hazard: a parent taken from where the camera came from is not the parent taken from the window.
+  const routedParent = b.at(-2)?.window as UvWindow;
+  const canonical = canonicalParent(endA);
+  assert.ok(
+    !windowsEqual(routedParent, canonical),
+    "the fixture routes share their previous window, so a path-derived parent could not differ",
+  );
+
+  const fa = buildChainedField(specFor(endA));
+  const fb = buildChainedField(specFor(endB), createChainCache());
   assertSameField(fb.data, fa.data, "the same window drew different terrain by route");
 
-  // A cache carrying route B's unrelated ancestry must not leak into the answer: the field is a function of the window, not of what the session happened to draw before it.
+  // What a path-derived parent WOULD have drawn, built with Sub 2's own functions off route B's previous window. It must differ, or this window cannot tell the two constructions apart and the guard above is proving nothing.
+  const bare = bareFieldFor(endA, fa.w, fa.h);
+  const routedSurface = parentSurfaceOnWindow(
+    buildChainedField(specFor(routedParent)),
+    routedParent,
+    endA,
+    fa.w,
+    fa.h,
+  );
+  const routedField = rejectBridges(routedSurface, floorToParent(bare, routedSurface), SEA);
+  let differing = 0;
+  for (let i = 0; i < routedField.data.length; i++) {
+    if (routedField.data[i] !== fa.data[i]) differing++;
+  }
+  assert.ok(
+    differing > 0,
+    "a parent taken from the camera path drew the identical field, so path-independence is untestable here",
+  );
+
+  // A cache carrying unrelated ancestry must not leak into the answer either.
   const warmed = createChainCache();
   for (const w of [lodWindowFor(0.125, 0.875, 0.125), lodWindowFor(0.375, 0.125, 0.25)]) {
-    buildChainedField(specFor(w.u1 - w.u0 > 0.2 ? 2 : 3, w), warmed);
+    buildChainedField(specFor(w), warmed);
   }
-  const fc = buildChainedField(specFor(a.band, a.window), warmed);
+  const fc = buildChainedField(specFor(endA), warmed);
   assertSameField(fc.data, fa.data, "a warmed cache changed the terrain for the same window");
+});
+
+test("the atlas window chains, at the depth its own size implies (#398)", () => {
+  // canonicalParent claims support for a non-LOD window; the atlas plate window is the live one (windowAround(world, anchor, 0.38) in src/atlas/compose.ts), and it is NOT a band, so nothing but the window itself can say how deep its ancestry runs.
+  const atlas = lodWindowFor(0.5, 0.5, 0.38);
+  const ancestry = ancestorWindows(atlas);
+  assert.equal(ancestry.length, 2, "a 0.38 window doubles to 0.76 and then to the full sheet");
+  assert.ok(windowsEqual(ancestry[1] as UvWindow, FULL_WINDOW), "the ancestry must end at the full window");
+
+  const field = buildChainedField(specFor(atlas));
+  const fromWorld = parentSurfaceOnWindow(world, FULL_WINDOW, atlas, field.w, field.h);
+  let land = 0;
+  for (let i = 0; i < fromWorld.data.length; i++) {
+    const pv = fromWorld.data[i] as number;
+    if (!Number.isFinite(pv) || pv <= SEA) continue;
+    land++;
+    assert.ok((field.data[i] as number) > SEA, `world-chart land sank on the atlas window at cell ${i}`);
+  }
+  assert.ok(land > 10000, `too little land checked on the atlas window: ${land}`);
 });
 
 test("the detail level never exceeds what buildHeightfield accepts (#398)", () => {
@@ -189,97 +272,95 @@ test("the detail level never exceeds what buildHeightfield accepts (#398)", () =
 test("the chain protects every link: no land sinks, band to band and end to end (#398)", () => {
   const cache = createChainCache();
   const target = lodWindowFor(0.5, 0.4375, 0.125);
-  const fields = new Map<number, { window: UvWindow; field: ReturnType<typeof buildChainedField> }>();
-  let win = target;
-  for (let band = 3; band >= 1; band--) {
-    fields.set(band, { window: win, field: buildChainedField(specFor(band, win), cache) });
-    win = canonicalParent(win);
-  }
-  fields.set(0, { window: FULL_WINDOW, field: buildChainedField(specFor(0, FULL_WINDOW), cache) });
+  const chain = [target, ...ancestorWindows(target)];
+  assert.equal(chain.length, 4, "a band-3 window must carry three ancestors");
 
   let checkedLinks = 0;
   let sinkableSeen = 0;
-  for (let band = 1; band <= 3; band++) {
-    const child = fields.get(band) as { window: UvWindow; field: ReturnType<typeof buildChainedField> };
-    const parent = fields.get(band - 1) as { window: UvWindow; field: ReturnType<typeof buildChainedField> };
-    const surface = parentSurfaceOnWindow(
-      parent.field,
-      parent.window,
-      child.window,
-      child.field.w,
-      child.field.h,
-    );
-    const bare = buildHeightfield({
-      seed: SEED,
-      gridW: child.field.w,
-      gridH: child.field.h,
-      mapType: recipe.mapType,
-      window: child.window,
-      worldAspect: WORLD_ASPECT,
-      detail: detailForWindow(child.window),
-    });
+  for (let link = 0; link < chain.length - 1; link++) {
+    const childWindow = chain[link] as UvWindow;
+    const parentWindow = chain[link + 1] as UvWindow;
+    const child = buildChainedField(specFor(childWindow), cache);
+    const parent = buildChainedField(specFor(parentWindow), cache);
+    const surface = parentSurfaceOnWindow(parent, parentWindow, childWindow, child.w, child.h);
+    const bare = bareFieldFor(childWindow, child.w, child.h);
     for (let i = 0; i < surface.data.length; i++) {
       const pv = surface.data[i] as number;
       if (!Number.isFinite(pv) || pv <= SEA) continue;
       checkedLinks++;
       if ((bare.data[i] as number) <= SEA) sinkableSeen++;
       assert.ok(
-        (child.field.data[i] as number) > SEA,
-        `band ${band - 1} land sank at band ${band}, cell ${i % child.field.w},${(i / child.field.w) | 0}`,
+        (child.data[i] as number) > SEA,
+        `parent land sank one link down at cell ${i % child.w},${(i / child.w) | 0}`,
       );
     }
   }
   assert.ok(checkedLinks > 10000, `too few parent-land cells checked: ${checkedLinks}`);
   assert.ok(sinkableSeen > 0, `no cell would have drowned unprotected, the guard proves nothing: ${sinkableSeen}`);
 
-  // transitive: band 0 land is still land at band 3, through two intermediate links
-  const deep = fields.get(3) as { window: UvWindow; field: ReturnType<typeof buildChainedField> };
-  const fromWorld = parentSurfaceOnWindow(world, FULL_WINDOW, deep.window, deep.field.w, deep.field.h);
+  const deep = buildChainedField(specFor(target), cache);
+  const fromWorld = parentSurfaceOnWindow(world, FULL_WINDOW, target, deep.w, deep.h);
   let transitive = 0;
   for (let i = 0; i < fromWorld.data.length; i++) {
     const pv = fromWorld.data[i] as number;
     if (!Number.isFinite(pv) || pv <= SEA) continue;
     transitive++;
-    assert.ok((deep.field.data[i] as number) > SEA, `world-chart land sank by band 3 at cell ${i}`);
+    assert.ok((deep.data[i] as number) > SEA, `world-chart land sank by band 3 at cell ${i}`);
   }
   assert.ok(transitive > 3000, `too few world-land cells checked transitively: ${transitive}`);
 });
 
-test("the chain never fuses landmasses, at any link (#398)", () => {
+test("the chain never fuses two landmasses of its own coarse reference (#398)", () => {
+  // The reference is the ancestor floor the chain actually rejects against, which is what rejectBridges can enforce. It is NOT the world chart: resampling cannot hold a one-cell strait, so a coarse field redrawn finer can close a channel and join two islands before any of this runs. That defect and its measurements are #443; the guarantee below is the one this construction really makes.
+  const seed = 2;
+  const archipelago = defaultRecipe(seed);
+  const parentWorld = buildHeightfield({ seed, gridW: 320, gridH: 240, mapType: archipelago.mapType });
+  const sea = pickSeaLevel(parentWorld, archipelago.landFraction);
+  const spec = (window: UvWindow): ChainSpec => ({
+    seed,
+    mapType: archipelago.mapType,
+    window,
+    gridW: 320,
+    gridH: 240,
+    worldAspect: WORLD_ASPECT,
+    seaLevel: sea,
+  });
   const cache = createChainCache();
-  const target = lodWindowFor(0.5, 0.4375, 0.125);
-  const windows: UvWindow[] = [target];
-  for (let band = 3; band >= 1; band--) {
-    windows.unshift(canonicalParent(windows[0] as UvWindow));
+  const target = lodWindowFor(0.875, 0.25, 0.125);
+  const chain = [target, ...ancestorWindows(target)];
+
+  let controlFusions = 0;
+  for (let link = 0; link < chain.length - 1; link++) {
+    const childWindow = chain[link] as UvWindow;
+    const child = buildChainedField(spec(childWindow), cache);
+    const surfaces = ancestorWindows(childWindow).map((a) =>
+      parentSurfaceOnWindow(buildChainedField(spec(a), cache), a, childWindow, child.w, child.h),
+    );
+    const coarse = maxOfSurfaces(surfaces, child.w, child.h);
+    assert.equal(fusedCells(coarse, child, sea), 0, "the chain fused two landmasses of its coarse reference");
+    const bare = buildHeightfield({
+      seed,
+      gridW: child.w,
+      gridH: child.h,
+      mapType: archipelago.mapType,
+      window: childWindow,
+      worldAspect: WORLD_ASPECT,
+      detail: detailForWindow(childWindow),
+    });
+    controlFusions += fusedCells(coarse, floorToParent(bare, coarse), sea);
   }
-  for (let band = 1; band <= 3; band++) {
-    const childWindow = windows[band] as UvWindow;
-    const parentWindow = windows[band - 1] as UvWindow;
-    const child = buildChainedField(specFor(band, childWindow), cache);
-    const parent = buildChainedField(specFor(band - 1, parentWindow), cache);
-    const surface = parentSurfaceOnWindow(parent, parentWindow, childWindow, child.w, child.h);
-    const { ids: pIds } = labelLandmasses(surface, SEA);
-    const { ids: cIds } = labelLandmasses(child, SEA);
-    const owner = new Map<number, number>();
-    let fused = 0;
-    for (let i = 0; i < pIds.length; i++) {
-      const pid = pIds[i] as number;
-      const cid = cIds[i] as number;
-      if (pid === -1 || cid === -1) continue;
-      const prev = owner.get(cid);
-      if (prev === undefined) owner.set(cid, pid);
-      else if (prev !== pid) fused++;
-    }
-    assert.equal(fused, 0, `band ${band - 1} landmasses fused at band ${band}`);
-  }
+  assert.ok(
+    controlFusions > 100,
+    `without bridge rejection this fixture barely fuses, so the guard proves nothing: ${controlFusions}`,
+  );
 });
 
 test("the cache serves siblings and never confuses two detail levels (#398)", () => {
   const cache = createChainCache();
   const win = lodWindowFor(0.5, 0.4375, 0.125);
-  const first = buildChainedField(specFor(3, win), cache);
+  const first = buildChainedField(specFor(win), cache);
   const missesAfterFirst = cache.misses;
-  const second = buildChainedField(specFor(3, win), cache);
+  const second = buildChainedField(specFor(win), cache);
   assertSameField(second.data, first.data, "a cache hit returned a different field");
   assert.ok(cache.hits > 0, "the second build of the same spec never hit the cache");
   assert.equal(cache.misses, missesAfterFirst, "the second build recomputed something");
@@ -292,18 +373,38 @@ test("the cache serves siblings and never confuses two detail levels (#398)", ()
   );
   assert.ok(!windowsEqual(sibling, win), "the fixture sibling is the same window");
   const missesBeforeSibling = cache.misses;
-  buildChainedField(specFor(3, sibling), cache);
+  buildChainedField(specFor(sibling), cache);
   assert.equal(
     cache.misses - missesBeforeSibling,
     1,
     "a sibling sharing its parent must build only itself",
   );
 
-  const a = chainCacheKey(specFor(3, win));
-  const b = chainCacheKey(specFor(2, win));
-  assert.notEqual(a, b, "two different detail levels share one cache key");
-  const c = chainCacheKey(specFor(3, win, { coastWarp: 1 }));
-  assert.notEqual(a, c, "a different coast warp shares one cache key");
-  const d = chainCacheKey(specFor(3, sibling));
-  assert.notEqual(a, d, "two different windows share one cache key");
+  const a = chainCacheKey(specFor(win));
+  const coarser = lodWindowFor(0.5, 0.4375, 0.25);
+  assert.notEqual(
+    detailForWindow(coarser),
+    detailForWindow(win),
+    "the fixture windows must actually differ in detail level",
+  );
+  assert.notEqual(chainCacheKey(specFor(coarser)), a, "two detail levels share one cache key");
+  assert.notEqual(
+    chainCacheKey(specFor(win, { coastWarp: 1 })),
+    a,
+    "a different coast warp shares one cache key",
+  );
+  assert.notEqual(chainCacheKey(specFor(sibling)), a, "two windows of one size share a cache key");
+  assert.notEqual(
+    chainCacheKey(specFor(win, { gridW: 160, gridH: 120 })),
+    a,
+    "two grids share one cache key",
+  );
+});
+
+test("an uncached call does not rebuild each ancestor's own ancestry (#398)", () => {
+  // Without a shared cache the recursion costs 2^depth field builds instead of depth, roughly doubling the epic's accepted band-3 cost; the default cache is what keeps it linear.
+  const win = lodWindowFor(0.5, 0.4375, 0.125);
+  const cache = createChainCache();
+  buildChainedField(specFor(win), cache);
+  assert.equal(cache.misses, 4, "a band-3 chain must build exactly four fields: itself and three ancestors");
 });

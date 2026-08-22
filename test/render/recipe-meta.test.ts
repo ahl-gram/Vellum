@@ -118,6 +118,14 @@ test("a region sheet stamps the detail it was drawn at, and an unstamped sheet r
     0,
     "a sheet stamped before this epic has no detail attribute and must read as 0",
   );
+  for (const junk of ["abc", "-1", "2.5", ""]) {
+    const edited = plain.replace(/data-vellum-region-detail="0"/, `data-vellum-region-detail="${junk}"`);
+    assert.equal(
+      recipeFromSvg(edited)?.region?.detail,
+      0,
+      `a hand-edited detail of "${junk}" must read as the plain field, not reach the engine`,
+    );
+  }
   assert.notEqual(
     recipeFromSvg(svg)?.region?.detail,
     recipeFromSvg(plain)?.region?.detail,
