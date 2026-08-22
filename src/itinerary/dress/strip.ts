@@ -10,7 +10,7 @@ import { stripPos, type StripLayout, type StripPoint } from "./layout.ts";
 import { bridgeMark, fordMark, hillProfile, mountainProfile, settlementCluster } from "./glyphs.ts";
 import { stripCompass } from "./compass.ts";
 
-export const ROAD_HALF = 2.3;
+const ROAD_HALF = 2.3;
 const DECOR_STRIDE = 2;
 const STRIP_LIFT = "#ffffff";
 const STRIP_LIFT_OPACITY = 0.16;

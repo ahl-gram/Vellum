@@ -2,10 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { parseRibbonAddress, chartTarget, journeyHash } from "../../src/site/ribbon/address.ts";
 
-// #427 item 4: the ribbon's address grammar, mirroring its exact sibling
-// test/site/prospect-address.test.ts. The one thing the sibling cannot cover is the `band`
-// collision: the ribbon drops `a` and `b` and the Explorer's own `band` key starts with a `b`.
-
 test("parseRibbonAddress reads the Explorer's world keys plus a and b", () => {
   const a = parseRibbonAddress("#seed=42&style=ink&type=citystate&band=polar&land=350&coast=55&a=3&b=9");
   assert.deepEqual(a, {
@@ -45,8 +41,6 @@ test("parseRibbonAddress: invalid values are ignored, not guessed at", () => {
   assert.equal(parseRibbonAddress("#a=abc").from, null);
   assert.equal(parseRibbonAddress("#b=2.5").to, null, "a settlement index is a whole number");
   assert.equal(parseRibbonAddress("#seed=-3").seed, null);
-  // land and coast go through a different helper from the whole-number keys, and it is the only
-  // one that can be handed a NaN: Math.min/max propagate it silently into the engine's range.
   assert.equal(parseRibbonAddress("#land=abc").land, null, "a non-numeric land is refused, not passed as NaN");
   assert.equal(parseRibbonAddress("#coast=abc").coast, null);
 });

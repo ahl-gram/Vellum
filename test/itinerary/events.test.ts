@@ -6,10 +6,8 @@ import { buildRibbonInput, type RibbonInput } from "../../src/itinerary/input.ts
 import { eventCaption } from "../../src/itinerary/prose.ts";
 import type { RibbonEvent } from "../../src/itinerary/events.ts";
 
-// #427 item 3: what the road actually passes, pinned against two journeys measured on this branch
-// 2026-08-22. The issue named seed 15's river "River Skeksvy"; the world says "River Skuksvy", and
-// the covenant golden plus a single commit touching src/itinerary since #425 say the engine has not
-// moved, so the issue carries a transcription slip and the measured name is the one pinned here.
+// #427 named seed 15's river "River Skeksvy"; the world says "River Skuksvy", and the golden plus a
+// single commit touching src/itinerary since #425 say the engine has not moved. Measured wins.
 
 function journey(seed: number, toName: string): { input: RibbonInput; rng: ReturnType<typeof createRng> } {
   const world = generateWorld(defaultRecipe(seed));
@@ -47,17 +45,12 @@ test("seed 42, Laukuwelua to Homaitani: a side road signed for Lamahai, and a su
   );
   const summits = only(input, "summit");
   assert.equal(summits.length, 1, "one summit is marked, the highest point of the way");
-  const ends = Math.max(input.samples[0]!.rel, input.samples[input.samples.length - 1]!.rel);
-  assert.ok(
-    summits[0]!.rel - ends >= 0.05,
-    "and it stands clear of BOTH ends of the road, which is the gate's actual contract",
-  );
+  // No rel assertion: input.samples holds the numbers summitEvent already compared, so it would
+  // re-derive the gate rather than test it. The level journey below is what pins the gate.
 });
 
+// The gate is untestable against a journey that HAS a summit: deleting it still yields exactly one.
 test("a road that never rises above its ends is given no summit at all", () => {
-  // Seed 2, Vunsvyov to Dru: 6.7 leagues, 3 events, and measurably flat. Without this the summit
-  // height gate is untestable, because a journey that HAS a summit still has exactly one when the
-  // gate is deleted, and every other fixture here has one.
   const world = generateWorld(defaultRecipe(2));
   const from = world.settlements.findIndex((s) => s.name === "Vunsvyov");
   const to = world.settlements.findIndex((s) => s.name === "Dru");
@@ -73,8 +66,6 @@ test("a road that never rises above its ends is given no summit at all", () => {
 });
 
 test("an unnamed crossing is a real case in the world, not just a fixture", () => {
-  // The ford branch of eventCaption only fires when a crossing has no river name. If no generated
-  // world produced one, that branch would be dead code and its fork key would not matter.
   const world = generateWorld(defaultRecipe(2));
   const from = world.settlements.findIndex((s) => s.name === "Vunsvyov");
   const to = world.settlements.findIndex((s) => s.name === "Zakvigrad");

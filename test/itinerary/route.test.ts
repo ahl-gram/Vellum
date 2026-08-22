@@ -3,10 +3,6 @@ import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import { roadMask, roadReachable, roadWalk } from "../../src/itinerary/route.ts";
 
-// #427 item 2: the route walk's contracts. Everything the ribbon draws hangs off the chain
-// roadWalk returns, so the chain's own shape is the first thing worth pinning: it starts and
-// ends where it was asked to, it never leaves the road, and it never teleports.
-
 const world = generateWorld(defaultRecipe(42));
 const mask = roadMask(world);
 const W = world.elev.w;
@@ -67,6 +63,7 @@ test("roadReachable never lists the place you set out from, and is symmetric wit
   assert.ok(!reachable.includes(capital), "you do not travel to where you already are");
   assert.equal(new Set(reachable).size, reachable.length, "no settlement is listed twice");
   const stranded = world.settlements.findIndex((_, i) => i !== capital && !reachable.includes(i));
+  assert.ok(stranded >= 0, "seed 42 strands one, so the check below is not passing on an empty list");
   assert.ok(
     !roadReachable(world, mask, stranded).includes(capital),
     "a stranded settlement cannot reach the capital either",

@@ -16,7 +16,6 @@ import { BIOMES } from "../../src/climate/biomes.ts";
 const BRIDGE_MARK = "M-6.4 -3.4H6.4M-6.4 3.4H6.4";
 const fordStones = (svg: string): number => svg.split('r="0.7"').length - 1;
 
-/** The next double below x: the smallest perturbation an accumulated sum can carry. */
 function justBelow(x: number): number {
   const view = new DataView(new ArrayBuffer(8));
   view.setFloat64(0, x);
@@ -115,7 +114,6 @@ test("a summit one double below a .5 boundary keeps its caption", () => {
 });
 
 test("a strip boundary one double below .5 keeps its flanking decor (the decor fork)", () => {
-  // Three strips over 40.5 cells put strip 1's start at exactly 13.5.
   const lower = justBelow(40.5);
   assert.equal(Math.round(40.5 / 3), 14, "strip 1 starts on a rounding boundary");
   assert.equal(Math.round(lower / 3), 13, "and one double lower it rounds down");

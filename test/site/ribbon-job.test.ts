@@ -7,9 +7,8 @@ import { roadMask, roadReachable, roadWalk } from "../../src/itinerary/route.ts"
 import { ribbonResultFor } from "../../src/site/explorer/ribbon-job.ts";
 import type { World } from "../../src/world/types.ts";
 
-// #427 item 5: the ribbon job's fallbacks, the glue both transports share. A hash a visitor can
-// type is the untrusted boundary here, so every way of asking for a journey that does not exist
-// has to land somewhere sensible rather than throw a stack at the page.
+// A hash a visitor can type is the untrusted boundary here: every way of asking for a journey that
+// does not exist has to land somewhere sensible rather than throw a stack at the page.
 
 const world = generateWorld(defaultRecipe(42));
 const mask = roadMask(world);
@@ -41,9 +40,6 @@ test("an invalid `from` falls back to the capital rather than refusing the page"
   }
 });
 
-// Named for what it can actually see: it compares two results that share farthestReachable, so it
-// pins "the stranded place is refused and the fallback agrees with the default" and NOT "farthest".
-// The test below it is the one that pins farthest, against a measured chain length.
 test("a `to` that no road reaches is refused, and lands on the same road an absent `to` picks", () => {
   assert.ok(stranded >= 0, "seed 42 strands a settlement off the network");
   const res = ribbonResultFor(world, { from: capital, to: stranded, dress: "antique" });
@@ -67,8 +63,6 @@ test("the fallback is the FARTHEST reachable road, not merely a reachable one", 
 });
 
 test("a `from` that no road leaves falls back to the capital", () => {
-  // A stranded settlement is a valid index, so validIndex passes it through; only the second
-  // fallback in ribbonResultFor rescues it, and nothing else here exercises that branch.
   assert.ok(stranded >= 0, "seed 42 strands a settlement off the network");
   const res = ribbonResultFor(world, { from: stranded, to: null, dress: "antique" });
   assert.equal(res.fromIdx, capital, "the survey sets out from the capital instead");
