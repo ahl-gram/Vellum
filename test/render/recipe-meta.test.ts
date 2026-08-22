@@ -118,7 +118,8 @@ test("a region sheet stamps the detail it was drawn at, and an unstamped sheet r
     0,
     "a sheet stamped before this epic has no detail attribute and must read as 0",
   );
-  for (const junk of ["abc", "-1", "2.5", ""]) {
+  // "" is deliberately absent: Number("") is 0, so it reads 0 with or without validation and proves nothing.
+  for (const junk of ["abc", "-1", "2.5", "1e3"]) {
     const edited = plain.replace(/data-vellum-region-detail="0"/, `data-vellum-region-detail="${junk}"`);
     assert.equal(
       recipeFromSvg(edited)?.region?.detail,

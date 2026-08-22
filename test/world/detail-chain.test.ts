@@ -10,7 +10,7 @@ import {
   maxOfSurfaces,
   type ChainSpec,
 } from "../../src/world/detail-chain.ts";
-import type { Field } from "../../src/core/grid.ts";
+import { fieldFrom, type Field } from "../../src/core/grid.ts";
 import { FULL_WINDOW, LOD_BANDS, decideSettle, lodWindowFor, quantizeCenter } from "../../src/world/lod.ts";
 import { buildHeightfield, MAX_DETAIL, type UvWindow } from "../../src/terrain/heightfield.ts";
 import { pickSeaLevel } from "../../src/terrain/sealevel.ts";
@@ -399,6 +399,25 @@ test("the cache serves siblings and never confuses two detail levels (#398)", ()
     a,
     "two grids share one cache key",
   );
+});
+
+test("maxOfSurfaces takes the highest ancestor and abstains where none covers (#398)", () => {
+  const a = fieldFrom(2, 2, Float64Array.from([0.1, 0.9, NaN, NaN]));
+  const b = fieldFrom(2, 2, Float64Array.from([0.5, 0.2, 0.7, NaN]));
+  const out = maxOfSurfaces([a, b], 2, 2);
+  assert.equal(out.at(0, 0), 0.5, "the higher ancestor must win");
+  assert.equal(out.at(1, 0), 0.9, "the higher ancestor must win whichever surface it came from");
+  assert.equal(out.at(0, 1), 0.7, "a lone covering ancestor must win over an abstaining one");
+  assert.ok(Number.isNaN(out.at(1, 1)), "a cell no ancestor covers must stay NaN so the floor leaves it alone");
+});
+
+test("the cache evicts by capacity without corrupting what it still holds (#398)", () => {
+  const cache = createChainCache(2);
+  const fields = [0, 1, 2].map((i) => fieldFrom(1, 1, Float64Array.from([i])));
+  fields.forEach((f, i) => cache.set(`k${i}`, f));
+  assert.equal(cache.get("k0"), undefined, "the oldest entry must be evicted past capacity");
+  assert.equal(cache.get("k2")?.at(0, 0), 2, "the newest entry must survive");
+  assert.equal(cache.get("k1")?.at(0, 0), 1, "a surviving entry must keep its own field");
 });
 
 test("an uncached call does not rebuild each ancestor's own ancestry (#398)", () => {

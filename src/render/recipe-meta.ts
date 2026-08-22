@@ -1,5 +1,5 @@
 import type { World, WorldRecipe } from "../world/types.ts";
-import type { MapType, UvWindow } from "../terrain/heightfield.ts";
+import { MAX_DETAIL, type MapType, type UvWindow } from "../terrain/heightfield.ts";
 import type { ClimateBand } from "../climate/climate.ts";
 import type { StyleName } from "./style.ts";
 import { el, type SvgNode } from "./svg.ts";
@@ -121,7 +121,7 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
 function detail0(raw: string | null): number {
   if (raw === null) return 0;
   const n = Number(raw);
-  return Number.isInteger(n) && n >= 0 ? n : 0;
+  return Number.isInteger(n) && n >= 0 && n <= MAX_DETAIL ? n : 0;
 }
 
 function parseRegion(svg: string): { region?: RegionRecipe } {
