@@ -10,7 +10,7 @@ import { stripPos, type StripLayout, type StripPoint } from "./layout.ts";
 import { bridgeMark, fordMark, hillProfile, mountainProfile, settlementCluster } from "./glyphs.ts";
 import { stripCompass } from "./compass.ts";
 
-const ROAD_HALF = 2.3;
+export const ROAD_HALF = 2.3;
 const DECOR_STRIDE = 2;
 const STRIP_LIFT = "#ffffff";
 const STRIP_LIFT_OPACITY = 0.16;
@@ -102,7 +102,7 @@ function leagueDots(c: DressContext, strip: StripLayout): SvgNode[] {
 
 function decorNodes(c: DressContext, strip: StripLayout, rng: Rng): SvgNode[] {
   const nodes: SvgNode[] = [];
-  const fork = rng.fork(`decor-${Math.round(strip.d0)}`);
+  const fork = rng.fork(`decor-${strip.index}`);
   for (let i = 0; i < strip.samples.length; i += DECOR_STRIDE) {
     const smp = strip.samples[i];
     const pt = strip.pts[i];
@@ -216,7 +216,7 @@ function eventNodes(c: DressContext, input: RibbonInput, strip: StripLayout, rng
         break;
       }
       case "crossing": {
-        const tilt = rng.fork(`tilt-${Math.round(e.dist)}`).range(-9, 9);
+        const tilt = rng.fork(`tilt-${e.k}`).range(-9, 9);
         nodes.push(riverBand(c, strip, p.sy, tilt));
         const deg = roadAngleDeg(strip, e.dist);
         nodes.push(e.major || e.name !== null ? bridgeMark(c, p.sx, p.sy, deg) : fordMark(c, p.sx, p.sy, deg));

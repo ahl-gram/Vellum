@@ -3,18 +3,20 @@ import { bfsPath } from "../core/bfs-path.ts";
 import type { SettlementKind } from "../society/sites.ts";
 import type { World } from "../world/types.ts";
 
+/** `k` is the event's integer step along the road chain: fork keys use it, never `dist`, which is an accumulated float no two libm round alike. */
 export type RibbonEvent =
   | {
       readonly kind: "waypoint";
       readonly dist: number;
+      readonly k: number;
       readonly index: number;
       readonly name: string;
       readonly tier: SettlementKind;
       readonly endpoint: boolean;
     }
-  | { readonly kind: "crossing"; readonly dist: number; readonly name: string | null; readonly major: boolean }
-  | { readonly kind: "branch"; readonly dist: number; readonly side: -1 | 1; readonly toName: string }
-  | { readonly kind: "summit"; readonly dist: number; readonly rel: number };
+  | { readonly kind: "crossing"; readonly dist: number; readonly k: number; readonly name: string | null; readonly major: boolean }
+  | { readonly kind: "branch"; readonly dist: number; readonly k: number; readonly side: -1 | 1; readonly toName: string }
+  | { readonly kind: "summit"; readonly dist: number; readonly k: number; readonly rel: number };
 
 const MAX_BRANCHES = 10;
 
@@ -50,6 +52,7 @@ function waypointEvents(
         out.push({
           kind: "waypoint",
           dist: dists[k] as number,
+          k,
           index: i,
           name: s.name,
           tier: s.kind,
@@ -80,6 +83,7 @@ function crossingEvents(
       out.push({
         kind: "crossing",
         dist: dists[mid] as number,
+        k: mid,
         name: idx === undefined ? null : (world.names.rivers.get(idx) ?? null),
         major: river !== undefined && isMajorRiver(river),
       });
@@ -126,6 +130,7 @@ function branchEvents(
         out.push({
           kind: "branch",
           dist: dists[k] as number,
+          k,
           side: cross > 0 ? 1 : -1,
           toName: (world.settlements[destIdx] as { name: string }).name,
         });
@@ -164,7 +169,7 @@ function summitEvent(
   if (bestK < 0) return null;
   const ends = Math.max(rel(chain[0] as number), rel(chain[chain.length - 1] as number));
   if (bestRel - ends < 0.05) return null;
-  return { kind: "summit", dist: dists[bestK] as number, rel: bestRel };
+  return { kind: "summit", dist: dists[bestK] as number, k: bestK, rel: bestRel };
 }
 
 export function findEvents(

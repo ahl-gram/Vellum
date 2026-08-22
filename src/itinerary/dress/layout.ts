@@ -12,6 +12,7 @@ const LEAGUES_PER_STRIP = 16;
 export type StripPoint = { readonly sx: number; readonly sy: number; readonly dist: number };
 
 export type StripLayout = {
+  readonly index: number;
   readonly x0: number;
   readonly y0: number;
   readonly w: number;
@@ -91,6 +92,7 @@ export function layoutRibbon(input: RibbonInput): RibbonLayout {
     });
     const lean = pts.length === 0 ? 0 : pts.reduce((a, p) => a + p.sx - xc, 0) / pts.length;
     strips.push({
+      index: s,
       x0,
       y0,
       w: stripW,

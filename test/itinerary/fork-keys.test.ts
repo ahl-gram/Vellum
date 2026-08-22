@@ -1,0 +1,103 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
+import type { RibbonEvent } from "../../src/itinerary/events.ts";
+import type { RibbonInput, RibbonSample } from "../../src/itinerary/input.ts";
+import { BIOMES } from "../../src/climate/biomes.ts";
+
+// #427: the ribbon's decorative forks were keyed by `Math.round` of a distance, and every distance
+// here is a cumulative sum of Math.hypot steps, which no platform is obliged to round the same way.
+// A value sitting on a .5 boundary therefore picked a different caption, tilt or glyph set on a
+// different libm, off the same seed. Each test nudges exactly one such distance to the next lower
+// double and demands the bytes hold. The `Math.round` precondition is asserted first, so a nudge
+// too small to cross the boundary fails loudly instead of passing for the wrong reason.
+
+/** The next double below x: the smallest perturbation an accumulated sum can carry. */
+function justBelow(x: number): number {
+  const view = new DataView(new ArrayBuffer(8));
+  view.setFloat64(0, x);
+  view.setBigUint64(0, view.getBigUint64(0) - 1n);
+  return view.getFloat64(0);
+}
+
+function sampleAt(dist: number, biome: number): RibbonSample {
+  return {
+    x: 100,
+    y: 100 + dist,
+    dist,
+    rel: 0.4,
+    relL: 0.4,
+    relR: 0.4,
+    biomeL: biome,
+    biomeR: biome,
+  };
+}
+
+function inputWith(
+  events: ReadonlyArray<RibbonEvent>,
+  totalCells: number,
+  biome: number,
+): RibbonInput {
+  const samples: RibbonSample[] = [];
+  for (let d = 0; d <= 40; d++) samples.push(sampleAt(d, biome));
+  samples.push(sampleAt(totalCells, biome));
+  return {
+    seed: 7,
+    fromIdx: 0,
+    toIdx: 5,
+    fromName: "Aester",
+    toName: "Bellry",
+    fromKind: "capital",
+    toKind: "town",
+    realmName: "The Marches",
+    worldName: "Test",
+    year: 800,
+    totalCells,
+    totalLeagues: 18.4,
+    samples,
+    events,
+  };
+}
+
+test("a crossing one double below a .5 boundary presses the same scroll (the ford/bridge and tilt forks)", () => {
+  const lower = justBelow(12.5);
+  assert.equal(Math.round(12.5), 13, "the boundary is real: 12.5 rounds up");
+  assert.equal(Math.round(lower), 12, "and the double below it rounds down");
+  const at = (dist: number): RibbonInput =>
+    inputWith([{ kind: "crossing", k: 12, dist, name: "Aln", major: true }], 40, BIOMES.grassland);
+  const drawn = ribbonSvgFor(at(12.5), "antique");
+  assert.ok(drawn.includes("Aln"), "the fixture actually draws the crossing it is about to compare");
+  assert.equal(
+    drawn,
+    ribbonSvgFor(at(lower), "antique"),
+    "one double of accumulated float must not repaint the river band or reword the crossing",
+  );
+});
+
+test("a summit one double below a .5 boundary keeps its caption", () => {
+  const lower = justBelow(12.5);
+  const at = (dist: number): RibbonInput =>
+    inputWith([{ kind: "summit", k: 12, dist, rel: 0.7 }], 40, BIOMES.grassland);
+  const drawn = ribbonSvgFor(at(12.5), "antique");
+  assert.notEqual(
+    drawn,
+    ribbonSvgFor(inputWith([], 40, BIOMES.grassland), "antique"),
+    "the fixture actually draws the summit it is about to compare",
+  );
+  assert.equal(drawn, ribbonSvgFor(at(lower), "antique"));
+});
+
+test("a strip boundary one double below .5 keeps its flanking decor (the decor fork)", () => {
+  // Three strips over 40.5 cells put strip 1's start at exactly 13.5.
+  const lower = justBelow(40.5);
+  assert.equal(Math.round(40.5 / 3), 14, "strip 1 starts on a rounding boundary");
+  assert.equal(Math.round(lower / 3), 13, "and one double lower it rounds down");
+  const at = (totalCells: number): RibbonInput => inputWith([], totalCells, BIOMES.temperateForest);
+  const drawn = ribbonSvgFor(at(40.5), "antique");
+  assert.ok(drawn.split("<path").length > 12, "the fixture actually draws flanking decor");
+  assert.equal(
+    drawn,
+    ribbonSvgFor(at(lower), "antique"),
+    "one double of accumulated float must not reshuffle the wayside trees",
+  );
+});
