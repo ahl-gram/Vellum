@@ -228,6 +228,27 @@ CURRENT / STALE / UNVERIFIABLE ledger plus the open decisions awaiting Alex. It 
 #132 (6 of 7 subs stale) and #190 (73 stale claims, 20 blocking) each cost a 12 to 13-agent
 audit built from scratch.
 
+## Thresholds and test guards
+
+A bound taken from one run is a bound that fits one machine. Neither rule here is new practice; they
+are written down because nothing said so, and a session that reinvents them reinvents them smaller.
+
+- **A threshold is measured over the space, not taken from a run.** Sweep the seeds, record the
+  worst case actually observed, and set the bound above it with the headroom named. Do not fix a
+  sample size in advance, and treat any handful of local runs as the shape that passes on a Mac and
+  flakes on linux CI: the chord bound in `test/render/voyage-route.test.ts` is pinned against a
+  worst case measured over seeds 1..40, and the fixture in
+  `test/terrain/heightfield-detail.test.ts` swept seeds 1-120 to find its single witness.
+- **The provenance goes in ONE line at the constant**, dated, naming the range swept and the worst
+  case. This is the "no test can practically pin it" carve-out of the comment rule below, not an
+  exemption from it: a wrapped block listing individual runs is the exact tell that rule names.
+- **A guard proves it can fail; a scanner proves which way it errs.** A guard that could pass
+  vacuously carries the witness that makes it bite, named at the test (`heightfield-detail.test.ts`
+  keeps the one seed of 120 that does). A scanner cannot enumerate its own blind spots, so it names
+  them and argues the direction instead: `test/repo/comment-citations.test.ts` reads a `//` inside a
+  string literal as a comment and says so, because that costs a false positive at worst and never a
+  miss. An unnamed blind spot with no direction argued is the bug.
+
 ## Process
 
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him.
@@ -240,6 +261,7 @@ audit built from scratch.
   mutates one behavior at a time in its own throwaway worktree and reports which single test went
   red. A green suite is not evidence: #73's fork mutant escaped all 340 tests, #141's gate mutation
   escaped all 409, and #140 shipped three guards that were deletable. Zero red is a hole, not a pass.
+  A guard you cannot make bite is not a weak guard, it is an absent one: delete it rather than ship it.
 - **Run the `vellum-pr-skeptic` subagent on every PR after it is pushed, before asking Alex to review.**
   Dispatch it COLD: the prompt is the PR number or branch name and NOTHING else, no summary of the
   work and no claims about it. It is agnostic (a fresh context that reconstructs the spec from the
