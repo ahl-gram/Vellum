@@ -65,9 +65,10 @@ test("#402 a null year (survey chamber, teardown) hides the plate", async () => 
   assert.equal(stage.root.hidden, true);
 });
 
-test("#402 the world's beats prefetch once and a 60fps repaint fetches nothing more", async () => {
+test("#402 prefetch pulls every beat ahead of the sweep, and a 60fps repaint fetches nothing more", async () => {
   const { stage, fetched, fetchPlate, hrefFor } = harness();
   stage.setWorld(BEATS, fetchPlate, hrefFor);
+  stage.prefetch();
   assert.equal(fetched.length, BEATS.length, "every beat's plate is pulled ahead of the sweep");
   stage.onYear(460);
   stage.onYear(470);
@@ -75,6 +76,18 @@ test("#402 the world's beats prefetch once and a 60fps repaint fetches nothing m
   await tick();
   assert.equal(fetched.length, BEATS.length, "repaints inside one beat fetch nothing");
   assert.equal((stage.img as { src?: string }).src, "url:svg-0");
+});
+
+// The failure path re-arms the world beside lastRes with no prefetch step (the skeptic's
+// 2026-08-22 finding), so a plate asked for before any prefetch must fetch on demand.
+test("#402 a beat shown before any prefetch still fetches on demand", async () => {
+  const { stage, fetched, fetchPlate, hrefFor } = harness();
+  stage.setWorld(BEATS, fetchPlate, hrefFor);
+  assert.equal(fetched.length, 0, "setWorld alone pulls nothing: prefetch is the arm's step");
+  stage.onYear(451);
+  await tick();
+  assert.equal(stage.root.hidden, false, "the plate still arrives, fetched on demand");
+  assert.equal(fetched.length, 1, "one beat asked for, one fetch");
 });
 
 test("#402 a late plate for a beat the story already left never lands", async () => {
@@ -100,6 +113,7 @@ test("#402 a counter draw revokes the old world's plates and unbinds in-flight o
   const slowFetch = (b: StoryBeat) =>
     new Promise<{ svg: string; name: string }>((res) => holds.set(b.index, res));
   stage.setWorld(BEATS, slowFetch, hrefFor);
+  stage.prefetch();
   stage.onYear(451);
   holds.get(0)!({ svg: "svg-0", name: "Town0" });
   await tick();

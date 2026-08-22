@@ -22,7 +22,7 @@ export function storyBeats(events: ReadonlyArray<HistoricalEvent>): StoryBeat[] 
 export function latestBeatAt(beats: ReadonlyArray<StoryBeat>, year: number): StoryBeat | null {
   let latest: StoryBeat | null = null;
   for (const b of beats) {
-    if (eventIsPast(b.year, year) && (latest === null || b.year > latest.year)) latest = b;
+    if (eventIsPast(b.year, year) && (latest === null || b.year >= latest.year)) latest = b;
   }
   return latest;
 }

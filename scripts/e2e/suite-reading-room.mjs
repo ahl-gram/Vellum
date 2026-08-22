@@ -67,12 +67,12 @@ export async function run(ctx) {
     JSON.stringify(journal),
   );
 
-  // Seed 42's beats, measured 2026-08-22: foundings 451/552/597 (i=0/4/6), twin ruins 1039 (i=19/22, first holds the stage), present 1059.
+  // Seed 42's beats, measured 2026-08-22: foundings 451/552/597 (i=0/4/6), twin ruins 1039 (i=19/22; the LAST told holds the stage, ruled 2026-08-22), present 1059.
   const plate = await plateShown();
   check(
     "RR26 the present park stages the story's last beat, the ruin plate, linked to its prospect (#402)",
-    !!plate && plate.href === "/prospect/#seed=42&style=antique&i=19&year=1039" &&
-      /Laihoanui/.test(plate.alt || "") && plate.sibling === true,
+    !!plate && plate.href === "/prospect/#seed=42&style=antique&i=22&year=1039" &&
+      /Homaitani/.test(plate.alt || "") && plate.sibling === true,
     JSON.stringify(plate),
   );
 
@@ -165,10 +165,10 @@ export async function run(ctx) {
     await sleep(50);
   }
   check("RR17b the counter draw replays the arrival ceremony and clears its coast dasharray (no residue)", reInked);
-  const restaged = await plateShown("i=19&year=1039");
+  const restaged = await plateShown("i=22&year=1039");
   check(
     "RR28 the counter draw restages the NEW world's last beat, not the old world's plate (#402)",
-    !!restaged && /Laihoanui/.test(restaged.alt || ""),
+    !!restaged && /Homaitani/.test(restaged.alt || ""),
     JSON.stringify(restaged),
   );
 

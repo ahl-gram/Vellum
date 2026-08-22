@@ -37,7 +37,6 @@ footer { margin-top: 3.5rem; }
   box-shadow: 0 4px 14px rgb(from var(--chart-ink) r g b / 0.12);
   animation: prospectReveal 600ms var(--ease-paper) backwards;
   transition: transform 0.26s var(--ease-paper), box-shadow 0.26s var(--ease-paper); }
-/* The plate is a link, so it carries the atlas plates' lift (#368: the gesture promises a destination, and this one has one). */
 .rr-prospect a:hover img, .rr-prospect a:focus-visible img {
   transform: translateY(var(--raise)) rotate(-0.5deg);
   box-shadow: var(--raise-shadow); }

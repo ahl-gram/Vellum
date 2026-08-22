@@ -218,22 +218,23 @@ function draw(): void {
       const rest = restFor(pendingLive);
       pendingLive = null;
       lastRes = res;
+      const forSeed = seed;
+      // #402: the stage's world binds in lockstep with lastRes, so the failure path's re-arm can never paint one world's plate over another's chart; fetches are on demand, prefetch is the arm's step.
+      const dress = plateDressFor(style);
+      stage.setWorld(
+        storyBeats(res.manifest.events),
+        (b) =>
+          runJob({ kind: "prospect", seed: forSeed, overrides, index: b.index, dress, year: b.year })
+            .then((r) => ({ svg: r.svg, name: r.name })),
+        (b) => prospectHrefFor(forSeed, b),
+      );
       // #318/#418: every draw is a fresh ARRIVAL, so the prior session is dropped in the task that swaps the chart, never with the deferred arm (e2e RR22 pins the drop, RR25 the timing).
       lc.clearAges();
-      const forSeed = seed;
       // #120: both halves close over THIS draw's res, never module state, so an arm landing late cannot meet another world's chart.
       roomArm.schedule({
         prime: () => tourOrder.prime(res.manifest, res.survey, forSeed),
         arm: () => {
-          // #402: beats before the arm, so the arming paint's own year signal finds them; the plate fetches queue behind the primed travel order, off the settle path.
-          const dress = plateDressFor(style);
-          stage.setWorld(
-            storyBeats(res.manifest.events),
-            (b) =>
-              runJob({ kind: "prospect", seed: forSeed, overrides, index: b.index, dress, year: b.year })
-                .then((r) => ({ svg: r.svg, name: r.name })),
-            (b) => prospectHrefFor(forSeed, b),
-          );
+          stage.prefetch();
           armRoom(res, forSeed, rest);
           frame.host.statusEl.textContent = "";
         },

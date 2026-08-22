@@ -25,6 +25,7 @@ interface BoundPlate {
 
 interface WorldPlates {
   readonly beats: ReadonlyArray<StoryBeat>;
+  readonly fetchPlate: (beat: StoryBeat) => Promise<PlateResult>;
   readonly hrefFor: (beat: StoryBeat) => string;
   readonly cache: Map<StoryBeat, Promise<BoundPlate>>;
 }
@@ -52,33 +53,41 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
     root.hidden = true;
   }
 
+  function plateFor(w: WorldPlates, beat: StoryBeat): Promise<BoundPlate> {
+    const held = w.cache.get(beat);
+    if (held) return held;
+    const bound = w.fetchPlate(beat).then((r) => {
+      const url = toUrl(r.svg);
+      if (world !== w) {
+        revokeUrl(url);
+        throw new Error("stale world");
+      }
+      return { url, name: r.name };
+    });
+    bound.catch(() => {});
+    w.cache.set(beat, bound);
+    return bound;
+  }
+
   function setWorld(
     beats: ReadonlyArray<StoryBeat>,
     fetchPlate: (beat: StoryBeat) => Promise<PlateResult>,
     hrefFor: (beat: StoryBeat) => string,
   ): void {
     const prior = world;
-    const next: WorldPlates = { beats, hrefFor, cache: new Map() };
-    world = next;
+    world = { beats, fetchPlate, hrefFor, cache: new Map() };
     hide();
-    // A plate resolving after its world left revokes itself on arrival, so the swap needs no ledger of in-flight fetches.
-    for (const b of beats) {
-      const bound = fetchPlate(b).then((r) => {
-        const url = toUrl(r.svg);
-        if (world !== next) {
-          revokeUrl(url);
-          throw new Error("stale world");
-        }
-        return { url, name: r.name };
-      });
-      bound.catch(() => {});
-      next.cache.set(b, bound);
-    }
     if (prior) {
       for (const bound of prior.cache.values()) {
         bound.then((p) => revokeUrl(p.url)).catch(() => {});
       }
     }
+  }
+
+  /** Pull every beat's plate ahead of the sweep; the host calls this once the travel order is primed, so the fetches queue off the settle path. */
+  function prefetch(): void {
+    if (world === null) return;
+    for (const b of world.beats) plateFor(world, b);
   }
 
   function onYear(year: number | null): void {
@@ -94,8 +103,7 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
     }
     if (beat === shown) return;
     shown = beat;
-    w.cache
-      .get(beat)!
+    plateFor(w, beat)
       .then((p) => {
         if (world !== w || shown !== beat) return;
         img.src = p.url;
@@ -108,7 +116,7 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
       });
   }
 
-  return { root, link, img, setWorld, onYear };
+  return { root, link, img, setWorld, prefetch, onYear };
 }
 
 export type ProspectStage = ReturnType<typeof createProspectStage>;

@@ -47,12 +47,12 @@ test("#402 latestBeatAt lights exactly when the journal row inks", () => {
   assert.equal(latestBeatAt([], 1218), null, "no beats, no plate");
 });
 
-test("#402 equal-year beats resolve to the first in story order (seed 42's twin ruins)", () => {
+test("#402 equal-year beats resolve to the LAST told (seed 42's twin ruins; ruled 2026-08-22)", () => {
   const beats: StoryBeat[] = [
     { index: 19, year: 1039, kind: "ruin" },
     { index: 22, year: 1039, kind: "ruin" },
   ];
-  assert.deepEqual(latestBeatAt(beats, 1059), beats[0], "the chronicle lists them in order; the first holds the stage");
+  assert.deepEqual(latestBeatAt(beats, 1059), beats[1], "the journal's final line is the freshest thing told");
 });
 
 test("#402 latestBeatAt picks by year even when beats arrive unordered", () => {
