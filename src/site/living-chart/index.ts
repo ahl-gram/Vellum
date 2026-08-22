@@ -31,6 +31,8 @@ export interface ScrubberRefs {
   strip: HTMLElement;
   /** #192: invoked when Play parks, the one rest no input event announces. Optional. */
   onPark?: () => void;
+  /** #402: invoked on every instrument paint with the ages year, null off the ages chamber and on teardown. Optional. */
+  onAgesYear?: (year: number | null) => void;
 }
 
 export interface LivingChartHost {
@@ -83,6 +85,7 @@ export function createLivingChart(host: LivingChartHost) {
         readout: bar.year,
         strip: bar.strip,
         onPark: bar.onPark,
+        onAgesYear: bar.onAgesYear,
         overlay: { data: () => overlay.data() },
         chronicle,
         voyage,

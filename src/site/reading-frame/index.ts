@@ -12,6 +12,8 @@ import type { LivingChartHost, ScrubberRefs } from "../living-chart/index.ts";
 export interface ReadingFrameOpts {
   /** #192: forwarded to the chronicle's park seam, so a host with an address writer can record the rest Play's programmatic slider writes announce no event for. Optional. */
   readonly onPark?: () => void;
+  /** #402: forwarded to the instrument's year signal, so a host can decorate the story's beats. Optional. */
+  readonly onAgesYear?: (year: number | null) => void;
 }
 
 export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = {}) {
@@ -75,6 +77,7 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
       sig: log.sig,
       strip: log.strip,
       onPark: opts.onPark,
+      onAgesYear: opts.onAgesYear,
     },
   };
 

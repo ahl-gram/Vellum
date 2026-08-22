@@ -111,6 +111,8 @@ const TIPPING_LINKS = new Set([
   "src/atlas/document.ts :: .atlas-sheet figure a img:hover",
   // #242: the place card's "View the prospect" slip navigates to /prospect/, so it tips (#289's promise).
   "living-chart.css :: .pc-prospect:hover, .pc-prospect:focus-visible",
+  // #402: the Reading Room's beat plate links to /prospect/, so it carries the atlas plates' lift.
+  "reading-room/index.css :: .rr-prospect a:hover img, .rr-prospect a:focus-visible img",
 ]);
 
 /** A tip whose surface does not navigate, held on the record until Alex rules: kept apart from TIPPING_LINKS so that set stays true when it says a surface goes somewhere. */
