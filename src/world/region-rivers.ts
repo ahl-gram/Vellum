@@ -6,11 +6,15 @@ import {
   isMajorRiver,
   riverThreshold,
   type River,
+  type RiverPoint,
 } from "../hydrology/rivers.ts";
 import type { UvWindow } from "../terrain/heightfield.ts";
 import type { World } from "./types.ts";
 
 const SHADOW_RADIUS = 2;
+
+/** The shore excursion #376 measured at band 3 was 2.38 parent cells, so three is the reach a stranded mouth may need and a cap on how far a walk can wander. */
+const MOUTH_REACH_PARENT_CELLS = 3;
 const SHADOW_FRACTION = 0.5;
 
 /** Areal density ratio: flow accumulation scales linearly with it, so the world river threshold multiplies by it with exponent 1. */
@@ -75,6 +79,33 @@ function projectWorldMajors(
   return runs;
 }
 
+/** A parent major's mouth is a parent SEA cell, and on a detailed region field that cell can be new land, leaving the river drawn short of the water (#399). The region's own drainage is where the water would actually go. */
+export function extendMouthToWater(
+  points: ReadonlyArray<RiverPoint>,
+  elev: Field,
+  flow: FlowResult,
+  seaLevel: number,
+  maxSteps: number,
+): ReadonlyArray<RiverPoint> {
+  const last = points[points.length - 1];
+  if (last === undefined) return points;
+  const w = elev.w;
+  let cell = Math.round(last.x) + Math.round(last.y) * w;
+  if ((elev.data[cell] as number) <= seaLevel) return points;
+
+  const walked: RiverPoint[] = [];
+  const seen = new Set<number>([cell]);
+  for (let step = 0; step < maxSteps; step++) {
+    const next = flow.dir[cell] as number;
+    if (next < 0 || seen.has(next)) break;
+    seen.add(next);
+    cell = next;
+    walked.push({ x: cell % w, y: (cell / w) | 0, acc: last.acc });
+    if ((elev.data[cell] as number) <= seaLevel) return [...points, ...walked];
+  }
+  return points;
+}
+
 /** A cropped window loses upstream drainage, and NO threshold exponent restores it (missing area, not miscalibration): so extract at a density-scaled absolute threshold, and lay the parent's major rivers in as the authoritative through-network. */
 export function anchorRegionRivers(
   world: World,
@@ -95,7 +126,18 @@ export function anchorRegionRivers(
   const absoluteThreshold = worldRiverThreshold(world) * density; // exponent 1 (see doc above)
   const extracted = extractRivers(elev, flow, seaLevel, { absoluteThreshold });
 
-  const projected = projectWorldMajors(world, window, gridW, gridH, density);
+  const mouthReach = Math.ceil(
+    (MOUTH_REACH_PARENT_CELLS * (gridW - 1)) /
+      ((window.u1 - window.u0) * (world.recipe.gridW - 1)),
+  );
+  const projected = projectWorldMajors(world, window, gridW, gridH, density).map((river) =>
+    river.endsInOcean
+      ? {
+          points: extendMouthToWater(river.points, elev, flow, seaLevel, mouthReach),
+          endsInOcean: true,
+        }
+      : river,
+  );
   if (projected.length === 0) return extracted;
 
   const shadow = new Set<number>();
