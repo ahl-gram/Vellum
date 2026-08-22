@@ -67,10 +67,26 @@ Fix what it finds, re-verify, and never `git checkout` over an uncommitted revie
 
 ## 8. Done means
 
-/goal all acceptance criteria met, tests pass, and a PR is opened.
+Every acceptance criterion met, the full suite green, and a PR opened.
 
 Then STOP. **Alex reviews and merges.** Do not merge for him, and do not report a PR as delivered
 until CI is actually green: name the command whose output says so.
+
+The `/goal` evaluator reads only what this session has SURFACED, never the repo, so a condition is
+only checkable if the transcript carries its evidence. Paste the test summary and the CI verdict
+into your reply rather than asserting them, or a met goal reads as unmet.
+
+**Alex, for an unattended run**, set the goal yourself when you invoke this skill; a `/goal` line
+written in a skill file is inert, since setting one registers a session-scoped Stop hook and only
+your input can do that:
+
+```
+/goal all acceptance criteria met, tests pass, and a PR is opened.
+```
+
+Background work defers goal evaluation: a running subagent or background shell skips that turn's
+check. `vellum-pr-skeptic` and a `gh run watch` both trigger this, so expect the goal to wait,
+and read the check-in when it comes rather than starting parallel work.
 
 ## 9. Hand off
 
