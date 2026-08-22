@@ -279,6 +279,23 @@ are written down because nothing said so, and a session that reinvents them rein
   comment as ONE long line, not a wrapped block: a wrapped multi-line comment mid-file is the
   reliable tell that the prose is restating something a test already pins.
 
+## Worktrees
+
+Worktrees live in `.claude/worktrees/`, which `.gitignore` ignores as a directory. Anywhere else is
+NOT ignored, and the throwaway recipe's `ln -s ../../../node_modules` depth in
+`.claude/agents/vellum-guard-prover.md` assumes that location; PR #369 is what committing from a
+worktree costs when both go wrong.
+
+- **EnterWorktree is the normal way in.** It branches from `origin/main` rather than local HEAD, so
+  the tree is current without a pull. Two things need fixing by hand: the branch arrives named
+  `worktree-<name>`, and a `/` in the name becomes `+` in the directory. Rename the branch before
+  the first commit, or the PR carries the harness's name instead of yours.
+- **`vellum-guard-prover` is the documented exception.** It must mutate the code under review, which
+  is HEAD and not `origin/main`, so it builds its own detached worktree by the recipe in its agent
+  file. Do not point it at harness isolation.
+- **Never remove the worktree the session is standing in.** Name it for Alex and leave it. The shell
+  recovers to the parent when a worktree vanishes underneath it, but the cwd is lost mid-task.
+
 ## Write visual samples to out/
 
 Any chart, diagnostic overlay, before/after image, or other visual artifact you write to the
