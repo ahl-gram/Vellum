@@ -13,7 +13,7 @@ import type { World } from "./types.ts";
 
 const SHADOW_RADIUS = 2;
 
-/** The shore excursion #376 measured at band 3 was 2.38 parent cells, so three is the reach a stranded mouth may need and a cap on how far a walk can wander. */
+/** A policy cap, not a derived bound: past about this far the walk stops repairing a mouth and starts inventing a river, so a run needing further is left as the parent drew it (#443 records the ones that do). */
 const MOUTH_REACH_PARENT_CELLS = 3;
 const SHADOW_FRACTION = 0.5;
 

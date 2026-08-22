@@ -48,6 +48,26 @@ test("the snap stays inside the grid at a corner", () => {
   assert.equal(snapToLand(oneLandCell(8, 8, 7, 7), SEA, 0, 0, 4), null);
 });
 
+test("the tie-break holds at the radii production uses, not only at radius 1", () => {
+  // (4,3) and (3,4) are exactly the same distance away. NEIGHBORS_8's order takes the larger
+  // |dx| first, and every band radius must break the tie the same way or two devices drawing the
+  // same window place the settlement on different cells.
+  const both = createField(32, 32, (x, y) =>
+    (x === 20 && y === 19) || (x === 19 && y === 20) ? 1 : -1,
+  );
+  for (const radius of [5, 8]) {
+    assert.deepEqual(snapToLand(both, SEA, 16, 16, radius), { x: 20, y: 19 }, `radius ${radius}`);
+  }
+  const mirrored = createField(32, 32, (x, y) =>
+    (x === 12 && y === 19) || (x === 19 && y === 12) ? 1 : -1,
+  );
+  assert.deepEqual(
+    snapToLand(mirrored, SEA, 16, 16, 8),
+    { x: 12, y: 19 },
+    "the larger |dx| wins on its size, not its sign",
+  );
+});
+
 test("at radius 1 the snap agrees with the 8-neighbour scan it replaces, tie-break included", () => {
   // Both a NEIGHBORS_8 orthogonal and a diagonal qualify: the replacement must pick the same
   // one the old inline scan did, or every region sheet's snapped settlements shift a cell.

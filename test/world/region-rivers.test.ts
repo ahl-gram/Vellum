@@ -41,6 +41,25 @@ test("a mouth stranded on new land follows the region's own drainage to the wate
   assert.ok((elev.data[(out[out.length - 1]!.x) + 1 * 20] as number) <= SEA, "it ends in water");
 });
 
+test("a cell exactly at the waterline counts as water, and the walk stops there", () => {
+  // seaLevel itself is water everywhere else in the engine; a strict comparison here would walk
+  // straight past the waterline, and no random-world fixture ever lands exactly on it.
+  const w = 20;
+  const h = 4;
+  const elev = createField(w, h, (x) => (x === 9 ? SEA : x > 9 ? -0.5 : 1 - x * 0.01));
+  const dir = new Int32Array(w * h).fill(-1);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w - 1; x++) dir[x + y * w] = x + 1 + y * w;
+  }
+  const flow: FlowResult = {
+    dir,
+    acc: new Float64Array(w * h).fill(1),
+    fill: new Float64Array(w * h),
+  };
+  const out = extendMouthToWater([{ x: 6, y: 1, acc: 5 }], elev, flow, SEA, 12);
+  assert.deepEqual(out.map((p) => p.x), [6, 7, 8, 9], "it halts on the cell that sits at sea level");
+});
+
 test("a mouth with no water within reach is left alone rather than dragged across the sheet", () => {
   const { elev, flow } = chute(20, 4, 19);
   const points = [{ x: 1, y: 1, acc: 5 }, { x: 2, y: 1, acc: 5 }];

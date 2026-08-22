@@ -6,7 +6,7 @@ import { buildChainedField } from "../../src/world/detail-chain.ts";
 import { buildHeightfield } from "../../src/terrain/heightfield.ts";
 import { lodWindowFor } from "../../src/world/lod.ts";
 import { snapToLand } from "../../src/world/snap-to-land.ts";
-import type { Field } from "../../src/core/grid.ts";
+import { createField, type Field } from "../../src/core/grid.ts";
 import type { NamedSettlement, World } from "../../src/world/types.ts";
 
 /** deepEqual on 76,800 cells does not fail, it hangs and exhausts memory, so a regression would read as an infrastructure fault rather than a red test. */
@@ -24,6 +24,13 @@ const world = generateWorld(defaultRecipe(2));
 const window = lodWindowFor(0.5625, 0.4375, 0.125); // a band-3 window with a real coast in it
 const worldAspect = (world.recipe.gridW - 1) / (world.recipe.gridH - 1);
 const spec = { window, gridW: 320, gridH: 240, title: "Detail Environs" };
+
+test("firstDifference reads from cell 0: the routing defect it guards diverges there", () => {
+  const a = createField(2, 1, (x) => (x === 0 ? 1 : 5));
+  const b = createField(2, 1, () => 5);
+  assert.match(firstDifference(a, b) ?? "", /^cell 0,0:/);
+  assert.equal(firstDifference(a, createField(2, 1, (x) => (x === 0 ? 1 : 5))), null);
+});
 
 test("with no detail asked for, the region draws exactly the bare heightfield it always did", () => {
   const region = generateRegionWorld(world, spec);
