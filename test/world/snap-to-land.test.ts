@@ -18,6 +18,15 @@ test("the snap radius is the fine cells per parent cell, one per band rung", () 
   assert.equal(landSnapRadius(160, band(0.5), 320), 1, "a coarser region grid never snaps further");
 });
 
+test("a degenerate window or grid falls back to radius 1 rather than an unbounded search", () => {
+  // Without the guard these divide by zero and Math.round(Infinity) reaches the ring builder.
+  assert.equal(landSnapRadius(320, { u0: 0.5, v0: 0.5, u1: 0.5, v1: 0.5 }, 320), 1);
+  assert.equal(landSnapRadius(320, { u0: 0, v0: 0, u1: 1, v1: 1 }, 1), 1);
+  assert.equal(landSnapRadius(1, { u0: 0, v0: 0, u1: 1, v1: 1 }, 320), 1);
+  const elev = oneLandCell(8, 8, 1, 0);
+  assert.deepEqual(snapToLand(elev, SEA, 0, 0, 0), { x: 1, y: 0 }, "radius 0 still scans one ring");
+});
+
 test("a settlement a few fine cells inside a crenellated bay finds its shore", () => {
   // The shore has receded 5 cells from where the parent charted it: radius 1 loses the
   // settlement outright, the band-scaled radius rescues it onto the nearest land.
