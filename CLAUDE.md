@@ -255,6 +255,9 @@ are written down because nothing said so, and a session that reinvents them rein
 - **When asking Alex to make an open decision** (on a feature, a bug, a test, anything else),
   explain the context and what you need from him in simple terms, so he can have a good
   understanding of what he is deciding: no jargon, no overly technical language, no acronyms.
+  Put it in the AskUserQuestion menu rather than in prose, so he picks an option and reads its
+  consequence instead of answering paragraphs, and STOP there. A decision that is his is not one
+  to default your way and mention afterwards.
 - **Write the failing test first.** It must fail on the assertion you care about, not on a missing
   module.
 - **Run the `vellum-guard-prover` subagent on new or strengthened guards before opening the PR.** It
@@ -295,6 +298,10 @@ worktree costs when both go wrong.
   file. Do not point it at harness isolation.
 - **Never remove the worktree the session is standing in.** Name it for Alex and leave it. The shell
   recovers to the parent when a worktree vanishes underneath it, but the cwd is lost mid-task.
+- **Other sessions hold their own worktrees here.** Leave them alone: do not remove them, commit
+  from them, or tidy them away as housekeeping. And never `git stash` bare, since the stash stack is
+  shared across every worktree in the repo and a parallel session can pop yours. Set work aside with
+  a WIP commit instead.
 
 ## Write visual samples to out/
 
