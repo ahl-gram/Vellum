@@ -120,7 +120,6 @@ test("normOctaves defaults to octaves: explicit pin is bit-identical to omitted 
 });
 
 test("warped2 forwards normOctaves to the sampled field (#396)", () => {
-  // Both paths: the warpStrength 0 shortcut and the displaced sample.
   const shortcut = warped2(2.2, 3.3, 21, { warpStrength: 0, octaves: 8, normOctaves: 5 });
   assert.equal(shortcut, fbm2(2.2, 3.3, 21, { octaves: 8, normOctaves: 5 }));
   const pinned = warped2(2.2, 3.3, 21, { warpStrength: 0.45, octaves: 8, normOctaves: 5 });
