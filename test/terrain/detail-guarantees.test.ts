@@ -114,6 +114,28 @@ test("a diagonal touch is not a bridge under 4-connectivity (#397)", () => {
   assert.equal(landmassCount(out, SEA), 2, "the diagonal pair must stay two landmasses in the adjusted field");
 });
 
+test("two diagonal spurs are two one-touch components, never one bridge (#397)", () => {
+  // guard-prover round 1: labelling the gained mask 8-connected escaped all 1409 tests, because it fuses these two spurs into one two-touch component and drowns both; the other diagonal case (spur to landmass) is pinned above.
+  const coarse = fieldFromRows([
+    "......",
+    "......",
+    ".#....",
+    "....#.",
+    "......",
+  ]);
+  const fine = fieldFromRows([
+    "......",
+    "......",
+    ".##...",
+    "...##.",
+    "......",
+  ]);
+  const out = rejectBridges(coarse, fine, SEA);
+  assert.ok(out.at(2, 2) > SEA, "a spur off the left shore must survive its diagonal neighbour spur");
+  assert.ok(out.at(3, 3) > SEA, "a spur off the right shore must survive its diagonal neighbour spur");
+  assert.equal(landmassCount(out, SEA), 2, "each spur joins its own shore and the shores stay apart");
+});
+
 test("rejectBridges rejects the whole bridging component, spur and neck alike (#397)", () => {
   const coarse = fieldFromRows([
     "........",
