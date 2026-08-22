@@ -1,5 +1,5 @@
 import type { World, WorldRecipe } from "../world/types.ts";
-import type { MapType, UvWindow } from "../terrain/heightfield.ts";
+import { MAX_DETAIL, type MapType, type UvWindow } from "../terrain/heightfield.ts";
 import type { ClimateBand } from "../climate/climate.ts";
 import type { StyleName } from "./style.ts";
 import { el, type SvgNode } from "./svg.ts";
@@ -8,6 +8,7 @@ import { el, type SvgNode } from "./svg.ts";
 export type RegionRecipe = {
   readonly window: UvWindow;
   readonly worldGridW: number;
+  readonly detail: number;
 };
 
 // Kept local: render is browser-bundled, and a shared src/version.ts would widen that graph for one string.
@@ -56,13 +57,14 @@ export function regionRecipeAttrs(
     "data-vellum-region-u1": rr.window.u1,
     "data-vellum-region-v1": rr.window.v1,
     "data-vellum-region-world-grid-w": rr.worldGridW,
+    "data-vellum-region-detail": rr.detail,
   };
 }
 
 function regionMetadataSuffix(rr: RegionRecipe | undefined): string {
   if (rr === undefined) return "";
   const w = rr.window;
-  return ` region=[${w.u0},${w.v0},${w.u1},${w.v1}] worldGrid=${rr.worldGridW}`;
+  return ` region=[${w.u0},${w.v0},${w.u1},${w.v1}] worldGrid=${rr.worldGridW} detail=${rr.detail}`;
 }
 
 export type ParsedRecipe = {
@@ -115,6 +117,13 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
   };
 }
 
+/** An absent attribute is every sheet drawn before #376, and a hand-edited one is untrusted file content: both read as the plain field rather than reaching buildHeightfield's RangeError. */
+function detail0(raw: string | null): number {
+  if (raw === null) return 0;
+  const n = Number(raw);
+  return Number.isInteger(n) && n >= 0 && n <= MAX_DETAIL ? n : 0;
+}
+
 function parseRegion(svg: string): { region?: RegionRecipe } {
   const u0 = readAttr(svg, "data-vellum-region-u0");
   const v0 = readAttr(svg, "data-vellum-region-v0");
@@ -124,10 +133,12 @@ function parseRegion(svg: string): { region?: RegionRecipe } {
   if (u0 === null || v0 === null || u1 === null || v1 === null || worldGridW === null) {
     return {};
   }
+  const detail = detail0(readAttr(svg, "data-vellum-region-detail"));
   return {
     region: {
       window: { u0: Number(u0), v0: Number(v0), u1: Number(u1), v1: Number(v1) },
       worldGridW: Number(worldGridW),
+      detail,
     },
   };
 }

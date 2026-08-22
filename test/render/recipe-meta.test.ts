@@ -81,7 +81,7 @@ test("a region with a regionRecipe stamps and round-trips its window (#168)", ()
     gridH: 240,
     title: "The Environs of the Capital",
   });
-  const rr = { window, worldGridW: world.recipe.gridW };
+  const rr = { window, worldGridW: world.recipe.gridW, detail: 0 };
   const svg = renderMap(region, { style: "antique", regionRecipe: rr });
 
   assert.match(svg, /data-vellum-region-u0=/, "the window is stamped on the root");
@@ -91,6 +91,47 @@ test("a region with a regionRecipe stamps and round-trips its window (#168)", ()
   assert.deepEqual(parsed.region.window, window, "the window round-trips exactly");
   assert.equal(parsed.region.worldGridW, world.recipe.gridW, "the parent grid round-trips");
   assert.equal(parsed.recipe.seed, 42, "the flat recipe rides along for the parent world");
+});
+
+test("a region sheet stamps the detail it was drawn at, and an unstamped sheet reads as 0 (#398)", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const capital = world.settlements.find((s) => s.kind === "capital");
+  assert.ok(capital);
+  const window = windowAround(world, capital, 0.25);
+  const region = generateRegionWorld(world, { window, gridW: 320, gridH: 240, title: "Detail" });
+  const svg = renderMap(region, {
+    style: "antique",
+    regionRecipe: { window, worldGridW: world.recipe.gridW, detail: 3 },
+  });
+  assert.match(svg, /data-vellum-region-detail="3"/, "the drawn detail is stamped on the root");
+  assert.match(svg, /detail=3/, "the metadata summary carries the detail");
+  assert.equal(recipeFromSvg(svg)?.region?.detail, 3, "the detail round-trips");
+
+  const plain = renderMap(region, {
+    style: "antique",
+    regionRecipe: { window, worldGridW: world.recipe.gridW, detail: 0 },
+  });
+  assert.equal(recipeFromSvg(plain)?.region?.detail, 0);
+  const preEpic = plain.replace(/ data-vellum-region-detail="0"/, "");
+  assert.equal(
+    recipeFromSvg(preEpic)?.region?.detail,
+    0,
+    "a sheet stamped before this epic has no detail attribute and must read as 0",
+  );
+  // "" is deliberately absent: Number("") is 0, so it reads 0 with or without validation and proves nothing.
+  for (const junk of ["abc", "-1", "2.5", "1e3"]) {
+    const edited = plain.replace(/data-vellum-region-detail="0"/, `data-vellum-region-detail="${junk}"`);
+    assert.equal(
+      recipeFromSvg(edited)?.region?.detail,
+      0,
+      `a hand-edited detail of "${junk}" must read as the plain field, not reach the engine`,
+    );
+  }
+  assert.notEqual(
+    recipeFromSvg(svg)?.region?.detail,
+    recipeFromSvg(plain)?.region?.detail,
+    "two detail levels must not stamp the same recipe",
+  );
 });
 
 test("a stamped region redraws byte-for-byte with a title RE-DERIVED from the window (#169)", () => {
@@ -105,7 +146,7 @@ test("a stamped region redraws byte-for-byte with a title RE-DERIVED from the wi
     gridH: 240,
     title: regionTitle(world, window), // as the Explorer's live redraft draws it
   });
-  const rr = { window, worldGridW: world.recipe.gridW };
+  const rr = { window, worldGridW: world.recipe.gridW, detail: 0 };
   const svg = renderMap(region, { style: "antique", regionRecipe: rr });
 
   const parsed = recipeFromSvg(svg);
