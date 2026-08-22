@@ -1,9 +1,14 @@
 /** paper is style.land (the chart's glyph-fill convention); every color here must be a render/style.ts token. */
 
-import type { MapStyle } from "../../render/style.ts";
+import type { MapStyle, StyleName } from "../../render/style.ts";
 
 export const PROSPECT_DRESSES = ["antique", "ink"] as const;
 export type ProspectDress = (typeof PROSPECT_DRESSES)[number];
+
+/** The #237 fallback: an ink chart opens an ink plate, every other style antique. */
+export function plateDressFor(style: StyleName): ProspectDress {
+  return style === "ink" ? "ink" : "antique";
+}
 
 export type DressContext = {
   readonly style: MapStyle;

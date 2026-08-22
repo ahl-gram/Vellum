@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { composeAtlas } from "../../src/atlas/compose.ts";
+import { prospectPlate } from "../../src/prospect/finished.ts";
+import { STYLES } from "../../src/render/style.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
 test("composeAtlas yields the hero, the other draughtings, and the surveys", () => {
@@ -76,6 +78,34 @@ test("#25 banners default to colour, and hatch only when bannerStyle is ink", ()
   assert.equal(ids.length, new Set(ids).size, `banner pattern ids must be unique, got ${ids.join(", ")}`);
 });
 
+test("#412 the atlas carries the capital's prospect at the present year", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const atlas = composeAtlas(world);
+
+  assert.equal(atlas.prospects.length, 1);
+  const plate = atlas.prospects[0]!;
+  const capital = world.settlements.findIndex((s) => s.kind === "capital");
+  assert.ok(capital >= 0, "fixture should have a capital");
+  assert.equal(plate.key, "prospect-capital");
+  assert.equal(plate.title, `The Prospect of ${world.settlements[capital]!.name}`);
+  assert.equal(plate.svg, prospectPlate(world, capital, STYLES.antique, world.title.year));
+});
+
+test("#412 the prospect's dress follows the banners: ink banners open an ink plate", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const capital = world.settlements.findIndex((s) => s.kind === "capital");
+
+  const ink = composeAtlas(world, { bannerStyle: "ink" });
+  assert.equal(ink.prospects[0]?.svg, prospectPlate(world, capital, STYLES.ink, world.title.year));
+
+  const nautical = composeAtlas(world, { bannerStyle: "nautical" });
+  assert.equal(
+    nautical.prospects[0]?.svg,
+    prospectPlate(world, capital, STYLES.antique, world.title.year),
+    "only ink banners change the dress: a colour atlas keeps the antique plate",
+  );
+});
+
 test("composeAtlas is deterministic for a seed", () => {
   const a = composeAtlas(generateWorld(defaultRecipe(7)));
   const b = composeAtlas(generateWorld(defaultRecipe(7)));
@@ -84,6 +114,7 @@ test("composeAtlas is deterministic for a seed", () => {
   assert.deepEqual(a.draughtings, b.draughtings);
   assert.deepEqual(a.themes, b.themes);
   assert.deepEqual(a.regions, b.regions);
+  assert.deepEqual(a.prospects, b.prospects);
   assert.equal(a.gazetteerHtml, b.gazetteerHtml);
   assert.equal(a.bannersHtml, b.bannersHtml);
   assert.equal(a.chronicleHtml, b.chronicleHtml);
@@ -95,5 +126,6 @@ test("a single-realm world (city-state) still composes a banner and a survey", (
 
   assert.match(atlas.hero.svg, /^<svg/);
   assert.ok(atlas.regions.length >= 1, "the capital environs at least");
+  assert.equal(atlas.prospects.length, 1, "the capital's prospect");
   assert.match(atlas.bannersHtml, /Banners of the Realms/);
 });

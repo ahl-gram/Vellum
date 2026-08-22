@@ -25,6 +25,7 @@ function fixture(): AtlasDocumentData {
     draughtings: [plate("topographic", "Topographic"), plate("ink", "Pen & ink")],
     themes: [plate("theme-vegetation", "Vegetation")],
     regions: [plate("region-1", "The Environs of Café")],
+    prospects: [plate("prospect-capital", "The Prospect of Café")],
     bannersHtml: '<section><h2>Banners of the Realms</h2><div class="banners"></div></section>',
     chronicleHtml: '<section><h2>Chronicle</h2><ol class="chronicle"></ol></section>',
     gazetteerHtml: "<section><h2>Gazetteer</h2><table></table></section>",
@@ -37,6 +38,7 @@ test("atlasPlateFilename: style plates get the world- prefix, themes/regions use
   assert.equal(atlasPlateFilename({ key: "ink" }, "draughting"), "world-ink.svg");
   assert.equal(atlasPlateFilename({ key: "theme-vegetation" }, "theme"), "theme-vegetation.svg");
   assert.equal(atlasPlateFilename({ key: "region-1" }, "region"), "region-1.svg");
+  assert.equal(atlasPlateFilename({ key: "prospect-capital" }, "prospect"), "prospect-capital.svg");
 });
 
 test("svgToDataUri: a base64 SVG data URI that round-trips Unicode", () => {
@@ -90,6 +92,7 @@ test("atlasDocument (file-ref mode): a standalone doc that references plate SVG 
   assert.match(html, /world-topographic\.svg/);
   assert.match(html, /theme-vegetation\.svg/);
   assert.match(html, /region-1\.svg/);
+  assert.match(html, /<a href="prospect-capital\.svg"><img src="prospect-capital\.svg"/);
   // fragments flow in
   assert.match(html, /Banners of the Realms/);
   assert.match(html, /<h2>Chronicle<\/h2>/);
@@ -115,9 +118,9 @@ test("atlasDocument (data-URI mode): self-contained, with no anchors in the FILE
   const data = fixture();
   const html = atlasDocument(data, (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
 
-  // every plate inlined as a base64 data URI: 1 hero + 2 draughtings + 1 theme + 1 region = 5
+  // every plate inlined as a base64 data URI: 1 hero + 2 draughtings + 1 theme + 1 region + 1 prospect = 6
   const dataUris = (html.match(/data:image\/svg\+xml;base64,/g) ?? []).length;
-  assert.equal(dataUris, 5, "each plate must be inlined exactly once (self-contained, no doubling)");
+  assert.equal(dataUris, 6, "each plate must be inlined exactly once (self-contained, no doubling)");
   // no anchor wrappers around plates (they would double the ~20MB payload)
   assert.doesNotMatch(html, /<a href="data:/);
   // self-contained: no external stylesheet (motion:false), no file-ref plate srcs
@@ -178,7 +181,7 @@ async function runPlateScript(html: string, plates: number) {
 
 test("data-URI mode: running the document's own script really links every plate (#368)", async () => {
   const html = atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
-  const { imgs, queried } = await runPlateScript(html, 5);
+  const { imgs, queried } = await runPlateScript(html, 6);
 
   for (const img of imgs) {
     const a = img.parentNode;
@@ -198,15 +201,31 @@ test("data-URI mode: running the document's own script really links every plate 
   const scope = queried[0].match(/^\.([\w-]+)\s/)?.[1];
   assert.ok(scope, "the plate query must be scoped to a class");
   assert.match(html, new RegExp(`<body class="[^"]*\\b${scope}\\b`), "the script's scope must be the class the document emits");
-  assert.equal((html.match(/<figure><img /g) ?? []).length, 5, "every plate img is a direct figure child");
+  assert.equal((html.match(/<figure><img /g) ?? []).length, 6, "every plate img is a direct figure child");
 
   // The reason anchor:false exists in the first place survives: still exactly one copy each.
   assert.equal(
     (html.match(/data:image\/svg\+xml;base64,/g) ?? []).length,
-    5,
+    6,
     "linking the plates must not re-embed them: the file would double",
   );
   assert.doesNotMatch(html, /<a href="data:/);
+});
+
+test("#412 the prospect section sits between the regional surveys and the banners", () => {
+  const html = atlasDocument(fixture(), (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
+  const regions = html.indexOf("<h2>Regional Surveys</h2>");
+  const prospect = html.indexOf("<h2>The Prospect of the Capital</h2>");
+  const banners = html.indexOf("Banners of the Realms");
+  assert.ok(regions >= 0, "regional surveys present");
+  assert.ok(prospect > regions, "the prospect follows the regional surveys");
+  assert.ok(banners > prospect, "the banners follow the prospect");
+});
+
+test("#412 a composition with no prospect emits no prospect section", () => {
+  const data = { ...fixture(), prospects: [] };
+  const html = atlasDocument(data, (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
+  assert.doesNotMatch(html, /The Prospect of the Capital/);
 });
 
 test("file-ref mode carries no plate-linking script: its anchors are already real (#368)", () => {

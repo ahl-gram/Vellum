@@ -1,4 +1,6 @@
 import { createRng } from "../core/rng.ts";
+import { plateDressFor } from "../prospect/dress/context.ts";
+import { prospectPlate } from "../prospect/finished.ts";
 import { renderMap } from "../render/map-renderer.ts";
 import { armsSvgDocument, paletteForStyle } from "../render/layers/heraldry.ts";
 import type { ThemeName } from "../render/layers/field.ts";
@@ -22,6 +24,7 @@ export type AtlasComposition = {
   readonly draughtings: ReadonlyArray<AtlasPlate>;
   readonly themes: ReadonlyArray<AtlasPlate>;
   readonly regions: ReadonlyArray<AtlasPlate>;
+  readonly prospects: ReadonlyArray<AtlasPlate>;
   readonly bannersHtml: string;
   readonly chronicleHtml: string;
   readonly gazetteerHtml: string;
@@ -156,6 +159,18 @@ function regionPlates(world: World, width: number): AtlasPlate[] {
   });
 }
 
+function prospectPlates(world: World, bannerStyle: StyleName): AtlasPlate[] {
+  const capital = world.settlements.findIndex((s) => s.kind === "capital");
+  if (capital < 0) return [];
+  return [
+    {
+      key: "prospect-capital",
+      title: `The Prospect of ${world.settlements[capital]!.name}`,
+      svg: prospectPlate(world, capital, STYLES[plateDressFor(bannerStyle)], world.title.year),
+    },
+  ];
+}
+
 /** The curated theme-to-style pairing the bound atlas shows; the Explorer still crosses every style with every theme. */
 const THEMATIC: ReadonlyArray<{ theme: ThemeName; title: string; style: StyleName }> = [
   { theme: "vegetation", title: "Vegetation", style: "antique" },
@@ -203,6 +218,7 @@ export function composeAtlas(
     draughtings,
     themes,
     regions: regionPlates(world, width),
+    prospects: prospectPlates(world, bannerStyle),
     bannersHtml: bannersHtml(world, bannerStyle),
     chronicleHtml: chronicleHtml(world),
     gazetteerHtml: gazetteerHtml(world),
