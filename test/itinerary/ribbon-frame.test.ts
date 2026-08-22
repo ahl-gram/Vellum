@@ -11,11 +11,13 @@ import type { World } from "../../src/world/types.ts";
 
 // #427 item 1, the skeptic's blocking find on PR #425: the strip overlap was a flat 0.75 cells
 // against a 16px pad, so a short journey (few cells per strip, so many px per cell) sampled road
-// far past the strip it belonged to and drew the ink off the sheet. Measured 2026-08-22 on this
-// branch: with the fix reverted, seed 99 Mialiscove to Con puts road ink 45.40px below strip 1's
-// frame; with the fix, the worst overshoot across 118 journeys is 0.40px, which is the casing's
-// own half-width leaning on the frame stroke. The tolerance below is that half-width, so the
-// guard still bites the regression by a factor of ~20.
+// far past the strip it belonged to and drew the ink past its frame. Measured 2026-08-22 on this
+// branch over all 1457 connected pairs across seeds 2/15/42/99/123: with the fix reverted, seed 99
+// Mialiscove to Con puts road ink 45.40px below strip 1's frame; with the fix the worst overshoot
+// anywhere is 0.60px (seed 99 Taliport to Ceasairmere), which is the casing's own half-width
+// leaning on the frame stroke. The tolerance below is that half-width, so the guard still bites the
+// regression by a factor of ~20. The sub's "0.1px overshoot" and "under roughly 24 leagues" are
+// both understated: the clamp binds out to 35.48 leagues, on 317 of the 1457.
 
 const SEEDS = [99, 15, 42];
 
@@ -124,6 +126,37 @@ test("seed 99's Mialiscove to Con, the journey that first drew off the sheet, st
         y >= strip.y0 - ROAD_HALF && y <= strip.y0 + strip.h + ROAD_HALF,
         `strip ${strip.index} keeps its ink: ${y} outside [${strip.y0}, ${strip.y0 + strip.h}]`,
       );
+    }
+  }
+});
+
+test("the journeys that lean hardest on the frame, which are not the capital's, still hold", () => {
+  // The worst overshoots in the all-pairs sweep set out from towns, so a capital-only sweep
+  // never sees them. These three are the measured top of that list.
+  const extremes = [
+    { seed: 99, from: "Taliport", to: "Ceasairmere", measured: 0.6 },
+    { seed: 15, from: "Stanbyl", to: "Gistel", measured: 0.4 },
+    { seed: 2, from: "Skorsty", to: "Zakvigrad", measured: 0.2 },
+  ];
+  for (const { seed, from, to } of extremes) {
+    const world = worlds.find((w) => w.seed === seed)?.world ?? generateWorld(defaultRecipe(seed));
+    const a = world.settlements.findIndex((s) => s.name === from);
+    const b = world.settlements.findIndex((s) => s.name === to);
+    assert.ok(a >= 0 && b >= 0, `seed ${seed} still names ${from} and ${to}`);
+    const input = buildRibbonInput(world, a, b);
+    assert.ok(input, `seed ${seed} still joins ${from} to ${to} by road`);
+    const layout = layoutRibbon(input);
+    for (const shape of roadShapes(ribbonSvgFor(input, "antique"), STYLES.antique.road)) {
+      const head = shape.pts[0];
+      if (!head) continue;
+      const strip = layout.strips.find((s) => head[0] >= s.x0 - 30 && head[0] <= s.x0 + s.w + 30);
+      if (!strip) continue;
+      for (const [, y] of shape.pts) {
+        assert.ok(
+          y >= strip.y0 - ROAD_HALF && y <= strip.y0 + strip.h + ROAD_HALF,
+          `seed ${seed} ${from} to ${to}, strip ${strip.index}: ${y} outside [${strip.y0}, ${strip.y0 + strip.h}]`,
+        );
+      }
     }
   }
 });
