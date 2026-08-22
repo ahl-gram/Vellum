@@ -92,7 +92,7 @@ test("detail is keyed off the window, never the grid: same window + detail, fine
 });
 
 test("ridged2's octave count is independent of the detail level (#396)", () => {
-  // coastWarp 0 + a centre window keep falloff at 1 and the edge sink at 0, so e = e01 + ridgedWeight * ridge * ridgeMask(e01) exactly; where the mask is saturated at both detail levels the weighted difference isolates ridge alone. Seed 30 measured 174 cells at e01 >= 0.8 in this window (seeds 1-120 swept, all others carry 0), so the fixture is the one seed that makes the guard non-vacuous.
+  // coastWarp 0 + a centre window keep falloff at 1 and the edge sink at 0, so e = e01 + ridgedWeight * ridge * ridgeMask(e01) exactly; where the mask is saturated at both detail levels the weighted difference isolates ridge alone. Seed 30 measured 174 cells at e01 >= 0.8 in this window, 170 of them surviving the filter at both detail levels (seeds 1-120 swept, all others carry 0), so the fixture is the one seed that makes the guard non-vacuous.
   const base = {
     seed: 30,
     gridW: 80,
