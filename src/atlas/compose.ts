@@ -159,14 +159,14 @@ function regionPlates(world: World, width: number): AtlasPlate[] {
   });
 }
 
-export function prospectPlates(world: World, bannerStyle: StyleName): AtlasPlate[] {
+export function prospectPlates(world: World, bannerStyle: StyleName, width: number): AtlasPlate[] {
   const capital = world.settlements.findIndex((s) => s.kind === "capital");
   if (capital < 0) return [];
   return [
     {
       key: "prospect-capital",
       title: `The Prospect of ${world.settlements[capital]!.name}`,
-      svg: prospectPlate(world, capital, STYLES[plateDressFor(bannerStyle)], world.title.year),
+      svg: prospectPlate(world, capital, STYLES[plateDressFor(bannerStyle)], world.title.year, width),
     },
   ];
 }
@@ -218,7 +218,7 @@ export function composeAtlas(
     draughtings,
     themes,
     regions: regionPlates(world, width),
-    prospects: prospectPlates(world, bannerStyle),
+    prospects: prospectPlates(world, bannerStyle, width),
     bannersHtml: bannersHtml(world, bannerStyle),
     chronicleHtml: chronicleHtml(world),
     gazetteerHtml: gazetteerHtml(world),

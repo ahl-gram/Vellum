@@ -88,7 +88,7 @@ test("#412 the atlas carries the capital's prospect at the present year", () => 
   assert.ok(capital >= 0, "fixture should have a capital");
   assert.equal(plate.key, "prospect-capital");
   assert.equal(plate.title, `The Prospect of ${world.settlements[capital]!.name}`);
-  assert.equal(plate.svg, prospectPlate(world, capital, STYLES.antique, world.title.year));
+  assert.equal(plate.svg, prospectPlate(world, capital, STYLES.antique, world.title.year, 1500));
 });
 
 test("#412 the prospect's dress follows the banners: ink banners open an ink plate", () => {
@@ -96,14 +96,28 @@ test("#412 the prospect's dress follows the banners: ink banners open an ink pla
   const capital = world.settlements.findIndex((s) => s.kind === "capital");
 
   const ink = composeAtlas(world, { bannerStyle: "ink" });
-  assert.equal(ink.prospects[0]?.svg, prospectPlate(world, capital, STYLES.ink, world.title.year));
+  assert.equal(ink.prospects[0]?.svg, prospectPlate(world, capital, STYLES.ink, world.title.year, 1500));
 
   const nautical = composeAtlas(world, { bannerStyle: "nautical" });
   assert.equal(
     nautical.prospects[0]?.svg,
-    prospectPlate(world, capital, STYLES.antique, world.title.year),
+    prospectPlate(world, capital, STYLES.antique, world.title.year, 1500),
     "only ink banners change the dress: a colour atlas keeps the antique plate",
   );
+});
+
+test("#412 the prospect opens at the atlas plate width, not its intrinsic 520", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const root = (svg: string): string => svg.slice(0, svg.indexOf(">") + 1);
+
+  const composed = root(composeAtlas(world).prospects[0]!.svg);
+  assert.ok(composed.includes('width="1500"'), `default atlas width, got ${composed}`);
+  assert.ok(composed.includes('height="1107.7"'), "height keeps the 520:384 aspect");
+  assert.ok(composed.includes('viewBox="0 0 520 384"'), "the drawing space is untouched");
+
+  const narrow = root(prospectPlates(world, "antique", 750)[0]!.svg);
+  assert.ok(narrow.includes('width="750"'), "the plate follows the composition width");
+  assert.ok(narrow.includes('height="553.8"'), `aspect held at 750 wide, got ${narrow}`);
 });
 
 // The composed plate is year-insensitive within an era (a hardcoded same-era year renders byte-identically), so this pins the year on a world where it visibly matters: present 400 predates the founding, baring the ground.
@@ -112,12 +126,12 @@ test("#412 the composer reads the world's own present year, not a fixed one", ()
   const capital = world.settlements.findIndex((s) => s.kind === "capital");
   const early = { ...world, title: { ...world.title, year: 400 } };
 
-  const plates = prospectPlates(early, "antique");
+  const plates = prospectPlates(early, "antique", 1500);
   assert.equal(plates.length, 1);
-  assert.equal(plates[0]!.svg, prospectPlate(early, capital, STYLES.antique, 400));
+  assert.equal(plates[0]!.svg, prospectPlate(early, capital, STYLES.antique, 400, 1500));
   assert.notEqual(
     plates[0]!.svg,
-    prospectPlate(world, capital, STYLES.antique, world.title.year),
+    prospectPlate(world, capital, STYLES.antique, world.title.year, 1500),
     "year 400 predates the founding, so its plate must differ from the present one",
   );
 });

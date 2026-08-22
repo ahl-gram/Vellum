@@ -12,6 +12,7 @@ import { renderProspect } from "./dress/plate.ts";
 export type PlateOptions = {
   readonly idSuffix?: string;
   readonly seaName?: string | null;
+  readonly widthPx?: number;
 };
 
 export function finishProspect(
@@ -36,6 +37,7 @@ export function finishProspect(
     engraved,
     furniture,
     ariaLabel: `The prospect of ${input.name}, chart ${input.seed}`,
+    widthPx: opts.widthPx,
   });
 }
 
@@ -53,8 +55,10 @@ export function prospectPlate(
   index: number,
   style: MapStyle,
   year: number,
+  widthPx?: number,
 ): string {
   return finishedPlateSvg(buildProspectInput(world, index), style, year, {
     seaName: world.names.sea,
+    widthPx,
   });
 }
