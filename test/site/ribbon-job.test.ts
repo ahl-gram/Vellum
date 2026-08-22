@@ -41,7 +41,10 @@ test("an invalid `from` falls back to the capital rather than refusing the page"
   }
 });
 
-test("a `to` that no road reaches falls back to the farthest road, not to an error", () => {
+// Named for what it can actually see: it compares two results that share farthestReachable, so it
+// pins "the stranded place is refused and the fallback agrees with the default" and NOT "farthest".
+// The test below it is the one that pins farthest, against a measured chain length.
+test("a `to` that no road reaches is refused, and lands on the same road an absent `to` picks", () => {
   assert.ok(stranded >= 0, "seed 42 strands a settlement off the network");
   const res = ribbonResultFor(world, { from: capital, to: stranded, dress: "antique" });
   assert.notEqual(res.toIdx, stranded, "the stranded place is not drawn");

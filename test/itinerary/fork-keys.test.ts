@@ -12,6 +12,10 @@ import { BIOMES } from "../../src/climate/biomes.ts";
 // double and demands the bytes hold. The `Math.round` precondition is asserted first, so a nudge
 // too small to cross the boundary fails loudly instead of passing for the wrong reason.
 
+/** bridgeMark's parapet, and fordMark's stepping stones: the two crossing glyphs, told apart structurally. */
+const BRIDGE_MARK = "M-6.4 -3.4H6.4M-6.4 3.4H6.4";
+const fordStones = (svg: string): number => svg.split('r="0.7"').length - 1;
+
 /** The next double below x: the smallest perturbation an accumulated sum can carry. */
 function justBelow(x: number): number {
   const view = new DataView(new ArrayBuffer(8));
@@ -74,6 +78,7 @@ test("a named crossing one double below a .5 boundary presses the same scroll (t
       inputWith([{ kind: "crossing", k: 7, dist, name: "Aln", major: true }], 40, BIOMES.grassland);
     const drawn = ribbonSvgFor(at(boundary), "antique");
     assert.ok(drawn.includes("Aln"), `the fixture at ${boundary} actually draws its crossing`);
+    assert.ok(drawn.includes(BRIDGE_MARK), `and draws it as a bridge at ${boundary}`);
     assert.equal(
       drawn,
       ribbonSvgFor(at(lower), "antique"),
@@ -87,11 +92,10 @@ test("an unnamed crossing keeps its ford, which no other fixture here reaches", 
     const at = (dist: number): RibbonInput =>
       inputWith([{ kind: "crossing", k: 7, dist, name: null, major: false }], 40, BIOMES.grassland);
     const drawn = ribbonSvgFor(at(boundary), "antique");
-    assert.notEqual(
-      drawn,
-      ribbonSvgFor(inputWith([], 40, BIOMES.grassland), "antique"),
-      `the fixture at ${boundary} actually draws its ford`,
-    );
+    // Not "something was painted": an unnamed crossing must be painted as a FORD, three stepping
+    // stones, and never as a bridge. Diffing against an empty render cannot tell those apart.
+    assert.equal(fordStones(drawn), 3, `the fixture at ${boundary} draws a ford's three stones`);
+    assert.ok(!drawn.includes(BRIDGE_MARK), `and no bridge at ${boundary}`);
     assert.equal(drawn, ribbonSvgFor(at(justBelow(boundary)), "antique"), `the ford holds at ${boundary}`);
   }
 });
@@ -117,7 +121,13 @@ test("a strip boundary one double below .5 keeps its flanking decor (the decor f
   assert.equal(Math.round(lower / 3), 13, "and one double lower it rounds down");
   const at = (totalCells: number): RibbonInput => inputWith([], totalCells, BIOMES.temperateForest);
   const drawn = ribbonSvgFor(at(40.5), "antique");
-  assert.ok(drawn.split("<path").length > 12, "the fixture actually draws flanking decor");
+  // A bare count is vacuous: the frame, road and league dots already clear any fixed threshold with
+  // no decor at all. Grassland draws no glyph, so the DELTA is the decor and nothing else.
+  const bare = ribbonSvgFor(inputWith([], 40.5, BIOMES.grassland), "antique");
+  assert.ok(
+    drawn.split("<path").length - bare.split("<path").length > 0,
+    "the fixture actually draws flanking decor, measured against a treeless twin",
+  );
   assert.equal(
     drawn,
     ribbonSvgFor(at(lower), "antique"),

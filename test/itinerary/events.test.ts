@@ -47,7 +47,11 @@ test("seed 42, Laukuwelua to Homaitani: a side road signed for Lamahai, and a su
   );
   const summits = only(input, "summit");
   assert.equal(summits.length, 1, "one summit is marked, the highest point of the way");
-  assert.ok(summits[0]!.rel > 0.05, "and it stands above the ends of the road");
+  const ends = Math.max(input.samples[0]!.rel, input.samples[input.samples.length - 1]!.rel);
+  assert.ok(
+    summits[0]!.rel - ends >= 0.05,
+    "and it stands clear of BOTH ends of the road, which is the gate's actual contract",
+  );
 });
 
 test("a road that never rises above its ends is given no summit at all", () => {
