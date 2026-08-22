@@ -1,4 +1,4 @@
-// Reading Room e2e (RR0-RR25; #221 plus #318's colophon dice and #418's pre-arm window): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
+// Reading Room e2e (RR0-RR28; #221 plus #318's colophon dice, #418's pre-arm window, and #402's prospect stage): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
 import { seedForDate } from "../../src/world/seed-of-the-day.ts";
 
 export async function run(ctx) {
@@ -24,6 +24,17 @@ export async function run(ctx) {
     return false;
   };
   const agesRead = `(()=>{const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const panel=document.querySelector(".rf-ages");return{ages:a,play:p?p.textContent:null,panelHidden:panel?panel.hidden:null,hash:location.hash};})()`;
+  // #402 the prospect stage: href read raw (getAttribute), src as the browser's absolute blob URL. Placement ruled 2026-08-22: inside the panel, below the bar, above the journal.
+  const stageRead = `(()=>{const f=document.querySelector(".rr-prospect");if(!f)return null;const img=f.querySelector("img");const a=f.querySelector("a");const panel=document.querySelector(".rf-ages");const prev=f.previousElementSibling;const next=f.nextElementSibling;return{hidden:f.hidden,src:img?String(img.src||""):null,alt:img?img.alt:null,href:a?a.getAttribute("href"):null,belowBar:!!(panel&&panel.contains(f)&&prev&&prev.classList.contains("rf-instrument")&&next&&next.classList.contains("rf-log"))};})()`;
+  const plateShown = async (hrefTail) => {
+    for (let i = 0; i < 160; i++) {
+      let s = null;
+      try { s = await evaluate(stageRead); } catch {}
+      if (s && s.hidden === false && s.src && s.src.startsWith("blob:") && (!hrefTail || (s.href || "").endsWith(hrefTail))) return s;
+      await sleep(50);
+    }
+    return null;
+  };
 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
   const rrErrBase = consoleErrors.length;
@@ -56,6 +67,15 @@ export async function run(ctx) {
     JSON.stringify(journal),
   );
 
+  // Seed 42's beats, measured 2026-08-22: foundings 451/552/597 (i=0/4/6), twin ruins 1039 (i=19/22; the LAST told holds the stage, ruled 2026-08-22), present 1059.
+  const plate = await plateShown();
+  check(
+    "RR26 the present park stages the story's last beat between the bar and the journal (#402)",
+    !!plate && plate.href === "/prospect/#seed=42&style=antique&i=22&year=1039" &&
+      /Homaitani/.test(plate.alt || "") && plate.belowBar === true,
+    JSON.stringify(plate),
+  );
+
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&survey` });
   check("RR6a the survey address boots and settles", (await boot()) && (await settled()));
@@ -78,12 +98,22 @@ export async function run(ctx) {
     JSON.stringify(year),
   );
 
+  const plate650 = await plateShown();
+  check(
+    "RR27 at year 650 the stage holds the latest crossed beat, Lamahai's founding (#402)",
+    !!plate650 && plate650.href === "/prospect/#seed=42&style=antique&i=6&year=597" && /Lamahai/.test(plate650.alt || ""),
+    JSON.stringify(plate650),
+  );
+
   const scrubbed = await evaluate(`(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));r.dispatchEvent(new Event("change",{bubbles:true}));const a=window.__vellumReadingRoomAges();return{chamber:a&&a.chamber,hash:location.hash};})()`);
   check(
     "RR8 a manual scrub to the survey half re-serializes the address on release",
     scrubbed.chamber === "survey" && /(^|#|&)survey(&|$)/.test(scrubbed.hash) && !/year=/.test(scrubbed.hash),
     JSON.stringify(scrubbed),
   );
+
+  const stowed = await evaluate(`(()=>{const f=document.querySelector(".rr-prospect");return f?f.hidden:null;})()`);
+  check("RR27b the survey chamber stows the plate: the year signal goes null and the stage hides (#402)", stowed === true);
 
   await shoot("reading-room.png");
 
@@ -135,6 +165,12 @@ export async function run(ctx) {
     await sleep(50);
   }
   check("RR17b the counter draw replays the arrival ceremony and clears its coast dasharray (no residue)", reInked);
+  const restaged = await plateShown("i=22&year=1039");
+  check(
+    "RR28 the counter draw restages the NEW world's last beat, not the old world's plate (#402)",
+    !!restaged && /Homaitani/.test(restaged.alt || "") && restaged.belowBar === true,
+    JSON.stringify(restaged),
+  );
 
   const after = await evaluate(`(()=>{const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const panel=document.querySelector(".rf-ages");const rows=[...document.querySelectorAll(".rf-log-strip li")];const entries=rows.filter(r=>!r.classList.contains("annals-head"));return{ages:a,play:p?p.textContent:null,panelHidden:panel?panel.hidden:null,hash:location.hash,entries:entries.length,inked:entries.filter(r=>r.classList.contains("inked")).length};})()`);
   check(

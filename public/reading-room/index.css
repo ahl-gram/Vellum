@@ -28,3 +28,16 @@ footer { margin-top: 3.5rem; }
 .rr-colophon-invite { font-style: italic; color: var(--ink-brown); }
 .rr-colophon label { font-size: 0.85rem; letter-spacing: 0.05em; color: var(--ink-brown); }
 .rr-colophon input { width: 8.5rem; min-width: 0; font-variant-numeric: tabular-nums; }
+
+/* #402 the prospect stage, between the bar and the journal inside .rf-ages (ruled 2026-08-22). hidden toggles display, so prospectReveal restarts on every showing (the #321 display-restart behavior, the mechanism here rather than the bug); a beat-to-beat swap while visible deliberately does not replay it. */
+.rr-prospect { margin: 1rem auto 1.2rem; max-width: 34rem; }
+.rr-prospect a { display: block; }
+.rr-prospect img { width: 100%; height: auto; display: block;
+  border: 1px solid var(--line-tan);
+  box-shadow: 0 4px 14px rgb(from var(--chart-ink) r g b / 0.12);
+  animation: prospectReveal 600ms var(--ease-paper) backwards;
+  transition: transform 0.26s var(--ease-paper), box-shadow 0.26s var(--ease-paper); }
+.rr-prospect a:hover img, .rr-prospect a:focus-visible img {
+  transform: translateY(var(--raise)) rotate(-0.5deg);
+  box-shadow: var(--raise-shadow); }
+@keyframes prospectReveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }

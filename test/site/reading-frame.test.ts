@@ -59,6 +59,15 @@ test("the frame mounts and hands the engine a complete host (#219, the first non
   }
 });
 
+test("#402 the frame forwards onAgesYear to the scrubber host beside onPark", async () => {
+  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const onAgesYear = (_y: number | null): void => {};
+  const onPark = (): void => {};
+  const frame = createReadingFrame(new El("div") as unknown as HTMLElement, { onPark, onAgesYear });
+  assert.equal(frame.host.scrubber.onAgesYear, onAgesYear, "the year signal reaches the engine's deps");
+  assert.equal(frame.host.scrubber.onPark, onPark, "onPark still rides beside it");
+});
+
 test("the instrument panel starts hidden and the ONE journal nests inside it (#219, fused at #220)", async () => {
   const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement);

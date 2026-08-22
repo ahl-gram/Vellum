@@ -9,6 +9,9 @@ import { startArrival } from "../explorer/draw-ceremony.ts";
 import { afterNextPaint } from "../explorer/survey-arm.ts";
 import { createTourOrder } from "../explorer/tour-order.ts";
 import { createRoomArm } from "./arm.ts";
+import { createProspectStage } from "./prospect-stage.ts";
+import { storyBeats, type StoryBeat } from "./beats.ts";
+import { plateDressFor } from "../explorer/prospect-job.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { parseLive, emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
 import { createReadingFrame } from "../reading-frame/index.ts";
@@ -40,11 +43,13 @@ const warning = document.getElementById("rr-warning") as HTMLElement;
 // Roughly 3x the slowest matrix measured on CI (2.1s), against the Explorer's 20s: the instrument IS this surface, so a dead worker must not hold the unfurl back for twenty seconds, and a timeout costs a main-thread block, never a different itinerary (voyage-session.ts orderItinerary computes the SAME order inline).
 const ROOM_TOUR_TIMEOUT_MS = 6000;
 
-// onPark is #192's seam: Play's parks are the one rest no input event announces.
-const frame = createReadingFrame(mount, { onPark: () => syncHash() });
+// onPark is #192's seam: Play's parks are the one rest no input event announces; onAgesYear is #402's, the story's year for the prospect stage.
+const frame = createReadingFrame(mount, { onPark: () => syncHash(), onAgesYear: (y) => stage.onYear(y) });
 const tourOrder = createTourOrder({ runJob, timeoutMs: ROOM_TOUR_TIMEOUT_MS });
 const lc = createLivingChart({ ...frame.host, tourOrder });
-// #318: the colophon mounts as the instrument panel's SIBLING, never inside it (the ratified placement: the engine hides the panel through every teardown, and the colophon must stand).
+// #402 the stage nests INSIDE the panel between the bar and the journal (ruled 2026-08-22: the scrubber and the plate share a screen), inheriting the panel's hidden teardowns on purpose; #318's colophon stays the panel's SIBLING because it must stand through them.
+const stage = createProspectStage();
+frame.host.scrubber.panel.insertBefore(stage.root, frame.log.panel);
 const colophon = createColophon();
 frame.reading.appendChild(colophon.root);
 
@@ -102,6 +107,20 @@ function applyHash(): void {
     if (Number.isFinite(w)) carried.coast = Math.min(1, Math.max(0, w));
   }
   pendingLive = parseLive(p);
+}
+
+// #402 the beat's way in: canonical recipe keys (the room owns this writer, no verbatim rule) plus the beat's own settlement and year, so the page opens on exactly the engraving shown.
+function prospectHrefFor(forSeed: number, b: StoryBeat): string {
+  const p = new URLSearchParams();
+  p.set("seed", String(forSeed));
+  p.set("style", style);
+  if (carried.type) p.set("type", carried.type);
+  if (carried.band) p.set("band", carried.band);
+  if (carried.land != null) p.set("land", String(Math.round(carried.land * 1000)));
+  if (carried.coast != null) p.set("coast", String(Math.round(carried.coast * 100)));
+  p.set("i", String(b.index));
+  p.set("year", String(b.year));
+  return "/prospect/#" + p.toString();
 }
 
 // The one hash writer: recipe plus the live key, in the Explorer's exact format, so a copied link opens the same world at the same rest in any surface.
@@ -199,13 +218,23 @@ function draw(): void {
       const rest = restFor(pendingLive);
       pendingLive = null;
       lastRes = res;
+      const forSeed = seed;
+      // #402: the stage's world binds in lockstep with lastRes, so the failure path's re-arm can never paint one world's plate over another's chart; fetches are on demand, prefetch is the arm's step.
+      const dress = plateDressFor(style);
+      stage.setWorld(
+        storyBeats(res.manifest.events),
+        (b) =>
+          runJob({ kind: "prospect", seed: forSeed, overrides, index: b.index, dress, year: b.year })
+            .then((r) => ({ svg: r.svg, name: r.name })),
+        (b) => prospectHrefFor(forSeed, b),
+      );
       // #318/#418: every draw is a fresh ARRIVAL, so the prior session is dropped in the task that swaps the chart, never with the deferred arm (e2e RR22 pins the drop, RR25 the timing).
       lc.clearAges();
-      const forSeed = seed;
       // #120: both halves close over THIS draw's res, never module state, so an arm landing late cannot meet another world's chart.
       roomArm.schedule({
         prime: () => tourOrder.prime(res.manifest, res.survey, forSeed),
         arm: () => {
+          stage.prefetch();
           armRoom(res, forSeed, rest);
           frame.host.statusEl.textContent = "";
         },

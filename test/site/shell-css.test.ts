@@ -360,6 +360,18 @@ test("no hover or active rule states a lift as a px literal: the raise is a toke
   }
 });
 
+test("#402 the prospect reveal releases its transform: fill backwards, never both/forwards", () => {
+  const css = read("public/reading-room/index.css");
+  const rule = rulesIn(css).find((r) => /\.rr-prospect img\b/.test(r.selector) && /animation\s*:/.test(r.body));
+  assert.ok(rule, ".rr-prospect img carries the prospectReveal animation");
+  const anim = /animation\s*:\s*([^;]+)/.exec(rule.body)?.[1] ?? "";
+  assert.ok(
+    /\bbackwards\b/.test(anim) && !/\b(both|forwards)\b/.test(anim),
+    `a both/forwards fill pins the final keyframe's transform at animation priority forever, ` +
+      `which outranks the hover lift (measured 2026-08-22, the #402 plate-reader control probe); got "${anim}"`,
+  );
+});
+
 // #405 identity, not presence: the sweep proves a lift is SOME token; this pins WHICH one each consumer uses. broadside's a.fn and the faq/glossary .toc tips are pinned by tip-affordance's re-pins.
 const TOKEN_CONSUMERS: ReadonlyArray<{ file: string; arm: string; lift: string; shadow?: string }> = [
   { file: "public/motion.css", arm: "button:not(.place-hit):hover", lift: "--raise", shadow: "--raise-shadow" },
