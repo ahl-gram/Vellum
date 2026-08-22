@@ -25,6 +25,16 @@ function windowsEqual(a: UvWindow, b: UvWindow): boolean {
   return a.u0 === b.u0 && a.v0 === b.v0 && a.u1 === b.u1 && a.v1 === b.v1;
 }
 
+/** deepEqual on a 76800-cell Float64Array spends minutes rendering its diff before it can fail, so byte-identity reports the first differing cell instead. */
+function assertSameField(actual: Float64Array, expected: Float64Array, message: string): void {
+  assert.equal(actual.length, expected.length, `${message}: field sizes differ`);
+  for (let i = 0; i < actual.length; i++) {
+    if (actual[i] !== expected[i]) {
+      assert.fail(`${message}: first difference at cell ${i} (${actual[i]} vs ${expected[i]})`);
+    }
+  }
+}
+
 /** Every window the Glass can settle on at a band: lattice centers through quantizeCenter and lodWindowFor, which is exactly what decideSettle emits. */
 function reachableWindows(band: number): UvWindow[] {
   const size = (LOD_BANDS[band] as (typeof LOD_BANDS)[number]).sizeUV;
@@ -107,11 +117,19 @@ test("the detail level is keyed off the window size, one octave per halving (#39
   assert.equal(detailForWindow(lodWindowFor(0.5, 0.5, 0.5)), 1);
   assert.equal(detailForWindow(lodWindowFor(0.5, 0.5, 0.25)), 2);
   assert.equal(detailForWindow(lodWindowFor(0.5, 0.5, 0.125)), 3);
+  // guard-prover round 1: every power-of-two fixture reads the same under round and floor, so the schedule was unpinned for exactly the windows canonicalParent declares support for (the atlas window is not a LOD band, #423).
+  for (const [size, level] of [[0.7, 1], [0.3, 2], [0.15, 3]] as const) {
+    assert.equal(
+      detailForWindow(lodWindowFor(0.5, 0.5, size)),
+      level,
+      `a window of ${size} must round to the NEAREST octave, not down`,
+    );
+  }
 });
 
 test("band 0 of the chain IS the world field, so the chain anchors on the golden (#398)", () => {
   const chained = buildChainedField(specFor(0, FULL_WINDOW));
-  assert.deepEqual(chained.data, world.data, "the chain's band 0 diverged from buildHeightfield's world field");
+  assertSameField(chained.data, world.data, "the chain's band 0 diverged from buildHeightfield's world field");
 });
 
 test("two zoom routes to the same window produce a byte-identical field (#398)", () => {
@@ -140,7 +158,7 @@ test("two zoom routes to the same window produce a byte-identical field (#398)",
   assert.ok(windowsEqual(a.window, b.window), "the two routes did not land on the same window");
   const fa = buildChainedField(specFor(a.band, a.window));
   const fb = buildChainedField(specFor(b.band, b.window), createChainCache());
-  assert.deepEqual(fb.data, fa.data, "the same window drew different terrain by route");
+  assertSameField(fb.data, fa.data, "the same window drew different terrain by route");
 
   // A cache carrying route B's unrelated ancestry must not leak into the answer: the field is a function of the window, not of what the session happened to draw before it.
   const warmed = createChainCache();
@@ -148,7 +166,7 @@ test("two zoom routes to the same window produce a byte-identical field (#398)",
     buildChainedField(specFor(w.u1 - w.u0 > 0.2 ? 2 : 3, w), warmed);
   }
   const fc = buildChainedField(specFor(a.band, a.window), warmed);
-  assert.deepEqual(fc.data, fa.data, "a warmed cache changed the terrain for the same window");
+  assertSameField(fc.data, fa.data, "a warmed cache changed the terrain for the same window");
 });
 
 test("the detail level never exceeds what buildHeightfield accepts (#398)", () => {
@@ -262,7 +280,7 @@ test("the cache serves siblings and never confuses two detail levels (#398)", ()
   const first = buildChainedField(specFor(3, win), cache);
   const missesAfterFirst = cache.misses;
   const second = buildChainedField(specFor(3, win), cache);
-  assert.deepEqual(second.data, first.data, "a cache hit returned a different field");
+  assertSameField(second.data, first.data, "a cache hit returned a different field");
   assert.ok(cache.hits > 0, "the second build of the same spec never hit the cache");
   assert.equal(cache.misses, missesAfterFirst, "the second build recomputed something");
 
