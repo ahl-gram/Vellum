@@ -159,7 +159,7 @@ function regionPlates(world: World, width: number): AtlasPlate[] {
   });
 }
 
-function prospectPlates(world: World, bannerStyle: StyleName): AtlasPlate[] {
+export function prospectPlates(world: World, bannerStyle: StyleName): AtlasPlate[] {
   const capital = world.settlements.findIndex((s) => s.kind === "capital");
   if (capital < 0) return [];
   return [

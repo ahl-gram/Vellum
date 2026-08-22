@@ -238,7 +238,7 @@ export async function run(ctx) {
   for (let i = 0; i < 300; i++) {
     let s = null;
     try {
-      s = await evaluate(`(()=>{const b=window.__vellumBoundAtlas;if(!b)return null;const imgs=[...document.querySelectorAll("#pr-atlas img")];const hero=document.querySelector("#pr-atlas .hero-plate");return{seed:b.seed,title:b.title,figs:b.figures,plates:document.querySelectorAll("#pr-atlas figure:not(.banner)").length,print:!document.getElementById("pr-print").disabled,dl:!document.getElementById("pr-download").disabled,hide:!document.getElementById("pr-hide").disabled,hasAtlas:document.body.classList.contains("has-atlas"),imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),heroHiddenOnScreen:hero?getComputedStyle(hero).display==="none":false};})()`);
+      s = await evaluate(`(()=>{const b=window.__vellumBoundAtlas;if(!b)return null;const imgs=[...document.querySelectorAll("#pr-atlas img")];const hero=document.querySelector("#pr-atlas .hero-plate");return{seed:b.seed,title:b.title,figs:b.figures,plates:document.querySelectorAll("#pr-atlas figure:not(.banner)").length,print:!document.getElementById("pr-print").disabled,dl:!document.getElementById("pr-download").disabled,hide:!document.getElementById("pr-hide").disabled,hasAtlas:document.body.classList.contains("has-atlas"),imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),heroHiddenOnScreen:hero?getComputedStyle(hero).display==="none":false,heads:[...document.querySelectorAll("#pr-atlas h2")].map(h=>h.textContent),prospectPlate:[...document.querySelectorAll("#pr-atlas figcaption")].some(f=>f.textContent.startsWith("The Prospect of "))};})()`);
     } catch {}
     if (s && s.loaded) { bound = s; break; }
     await sleep(50);
@@ -249,6 +249,14 @@ export async function run(ctx) {
       bound.print === true && bound.dl === true && bound.hide === true && bound.hasAtlas === true &&
       bound.loaded === true && bound.heroHiddenOnScreen === true,
     JSON.stringify(bound),
+  );
+
+  const prospectAt = bound ? bound.heads.indexOf("The Prospect of the Capital") : -1;
+  check(
+    "PR20c the bound preview shelves the capital's prospect between the surveys and the banners (#412)",
+    !!bound && bound.prospectPlate === true && prospectAt > bound.heads.indexOf("Regional Surveys") &&
+      prospectAt >= 0 && prospectAt < bound.heads.indexOf("Banners of the Realms"),
+    JSON.stringify(bound && { heads: bound.heads, prospectPlate: bound.prospectPlate }),
   );
 
   await shoot("print-room-bound.png");

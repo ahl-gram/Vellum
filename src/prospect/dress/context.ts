@@ -5,7 +5,6 @@ import type { MapStyle, StyleName } from "../../render/style.ts";
 export const PROSPECT_DRESSES = ["antique", "ink"] as const;
 export type ProspectDress = (typeof PROSPECT_DRESSES)[number];
 
-/** The #237 fallback: an ink chart opens an ink plate, every other style antique. */
 export function plateDressFor(style: StyleName): ProspectDress {
   return style === "ink" ? "ink" : "antique";
 }

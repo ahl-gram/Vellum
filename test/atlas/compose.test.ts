@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { composeAtlas } from "../../src/atlas/compose.ts";
+import { composeAtlas, prospectPlates } from "../../src/atlas/compose.ts";
 import { prospectPlate } from "../../src/prospect/finished.ts";
 import { STYLES } from "../../src/render/style.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
@@ -103,6 +103,22 @@ test("#412 the prospect's dress follows the banners: ink banners open an ink pla
     nautical.prospects[0]?.svg,
     prospectPlate(world, capital, STYLES.antique, world.title.year),
     "only ink banners change the dress: a colour atlas keeps the antique plate",
+  );
+});
+
+// The composed plate is year-insensitive within an era (a hardcoded same-era year renders byte-identically), so this pins the year on a world where it visibly matters: present 400 predates the founding, baring the ground.
+test("#412 the composer reads the world's own present year, not a fixed one", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const capital = world.settlements.findIndex((s) => s.kind === "capital");
+  const early = { ...world, title: { ...world.title, year: 400 } };
+
+  const plates = prospectPlates(early, "antique");
+  assert.equal(plates.length, 1);
+  assert.equal(plates[0]!.svg, prospectPlate(early, capital, STYLES.antique, 400));
+  assert.notEqual(
+    plates[0]!.svg,
+    prospectPlate(world, capital, STYLES.antique, world.title.year),
+    "year 400 predates the founding, so its plate must differ from the present one",
   );
 });
 
