@@ -17,6 +17,12 @@ const SHADOW_RADIUS = 2;
 const MOUTH_REACH_PARENT_CELLS = 3;
 const SHADOW_FRACTION = 0.5;
 
+export function mouthReachCells(gridW: number, window: UvWindow, worldGridW: number): number {
+  const du = window.u1 - window.u0;
+  if (!(du > 0) || worldGridW < 2 || gridW < 2) return MOUTH_REACH_PARENT_CELLS;
+  return Math.ceil((MOUTH_REACH_PARENT_CELLS * (gridW - 1)) / (du * (worldGridW - 1)));
+}
+
 /** Areal density ratio: flow accumulation scales linearly with it, so the world river threshold multiplies by it with exponent 1. */
 export function regionDensityRatio(
   worldGridW: number,
@@ -124,10 +130,7 @@ export function anchorRegionRivers(
   const absoluteThreshold = worldRiverThreshold(world) * density; // exponent 1 (see doc above)
   const extracted = extractRivers(elev, flow, seaLevel, { absoluteThreshold });
 
-  const mouthReach = Math.ceil(
-    (MOUTH_REACH_PARENT_CELLS * (gridW - 1)) /
-      ((window.u1 - window.u0) * (world.recipe.gridW - 1)),
-  );
+  const mouthReach = mouthReachCells(gridW, window, world.recipe.gridW);
   const projected = projectWorldMajors(world, window, gridW, gridH, density).map((river) =>
     river.endsInOcean
       ? {

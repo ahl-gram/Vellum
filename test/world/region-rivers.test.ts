@@ -9,7 +9,7 @@ import type { FlowResult } from "../../src/hydrology/flow.ts";
 
 const SEA = 0;
 
-/** A 1D chute running east: every land cell drains to its neighbour, the last two cells are water. */
+/** A 1D chute running east: every land cell drains to its neighbour, the tail is water. */
 function chute(w: number, h: number, waterFrom: number): {
   elev: ReturnType<typeof createField>;
   flow: FlowResult;
@@ -29,7 +29,6 @@ test("a mouth already in water is left exactly as the parent drew it", () => {
 });
 
 test("a mouth stranded on new land follows the region's own drainage to the waterline", () => {
-  // The parent charted the sea at x=6; the detailed field has land out to x=9.
   const { elev, flow } = chute(20, 4, 10);
   const points = [{ x: 5, y: 1, acc: 5 }, { x: 6, y: 1, acc: 5 }];
   const out = extendMouthToWater(points, elev, flow, SEA, 12);
@@ -42,8 +41,7 @@ test("a mouth stranded on new land follows the region's own drainage to the wate
 });
 
 test("a cell exactly at the waterline counts as water, and the walk stops there", () => {
-  // seaLevel itself is water everywhere else in the engine; a strict comparison here would walk
-  // straight past the waterline, and no random-world fixture ever lands exactly on it.
+  // No random-world fixture ever lands exactly on sea level, so only an integer one can pin this.
   const w = 20;
   const h = 4;
   const elev = createField(w, h, (x) => (x === 9 ? SEA : x > 9 ? -0.5 : 1 - x * 0.01));
@@ -67,8 +65,7 @@ test("a mouth with no water within reach is left alone rather than dragged acros
 });
 
 test("on the detailed field no region river stops on interior dry land (seed 2, band 2)", () => {
-  // The window where the sweep caught it: a parent major's mouth cell is parent SEA and
-  // detailed-region LAND, so without the extension the river is drawn short of the water.
+  // The window the sweep caught: a parent mouth that is parent SEA and detailed-region LAND.
   const world = generateWorld(defaultRecipe(2));
   const window = lodWindowFor(0.625, 0.375, 0.25);
   const region = generateRegionWorld(world, {

@@ -41,7 +41,6 @@ function offsetsWithin(radius: number): ReadonlyArray<Offset> {
   return frozen;
 }
 
-/** Nearest land first, with a tie-break fixed by NEIGHBORS_8's order so lod.ts's byte-identity contract holds and radius 1 stays exactly the scan this replaced. */
 export function snapToLand(
   elev: Field,
   seaLevel: number,

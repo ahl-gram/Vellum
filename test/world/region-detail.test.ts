@@ -4,12 +4,13 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld } from "../../src/world/region.ts";
 import { buildChainedField } from "../../src/world/detail-chain.ts";
 import { buildHeightfield } from "../../src/terrain/heightfield.ts";
-import { lodWindowFor } from "../../src/world/lod.ts";
+import { FULL_WINDOW, lodWindowFor } from "../../src/world/lod.ts";
+import { mouthReachCells } from "../../src/world/region-rivers.ts";
 import { snapToLand } from "../../src/world/snap-to-land.ts";
 import { createField, type Field } from "../../src/core/grid.ts";
 import type { NamedSettlement, World } from "../../src/world/types.ts";
 
-/** deepEqual on 76,800 cells does not fail, it hangs and exhausts memory, so a regression would read as an infrastructure fault rather than a red test. */
+/** deepEqual on two broadly differing 76,800-cell fields takes 11s and builds a 2MB message, which is what a real routing regression produces; this reports the first differing cell instead. */
 function firstDifference(a: Field, b: Field): string | null {
   if (a.data.length !== b.data.length) return `lengths ${a.data.length} vs ${b.data.length}`;
   for (let i = 0; i < a.data.length; i++) {
@@ -64,7 +65,6 @@ test("detail: true draws the chained field, cell for cell", () => {
   );
 });
 
-/** Replaces the settlement list with towns at chosen region cells, so the projection can be aimed. */
 function townsAt(base: World, cells: ReadonlyArray<{ x: number; y: number; name: string }>): World {
   const du = window.u1 - window.u0;
   const dv = window.v1 - window.v0;
@@ -82,7 +82,7 @@ function townsAt(base: World, cells: ReadonlyArray<{ x: number; y: number; name:
   return { ...base, settlements, realms: { ...base.realms, seats: [0] } };
 }
 
-/** Water cells outside the old 8-neighbour reach: `withinBand` picks the ones the band radius rescues, its negation the ones nothing can. */
+/** `withinBand` picks the water cells the band radius rescues, its negation the ones nothing can. */
 function offshoreCells(field: Field, withinBand: boolean, wanted: number): Array<{ x: number; y: number }> {
   const found: Array<{ x: number; y: number }> = [];
   for (let gy = 40; gy < 200 && found.length < wanted; gy++) {
@@ -99,8 +99,6 @@ function offshoreCells(field: Field, withinBand: boolean, wanted: number): Array
 
 test("a settlement a few cells offshore is walked to the new shore, not dropped", () => {
   const field = generateRegionWorld(world, spec).elev;
-  // A water cell whose nearest land is out of the old 8-neighbour reach but inside the band's:
-  // at radius 1 this settlement is dropped outright, at the band radius it lands.
   const target = offshoreCells(field, true, 1)[0];
   assert.ok(target, "the fixture window has a cell in the old blind spot");
   const doctored = townsAt(world, [{ ...target, name: "Testholm" }]);
@@ -155,4 +153,43 @@ test("a settlement with no shore in reach is named in a warning, never dropped i
   assert.match(warnings[0]!, /Testholm/, "the warning names every settlement that was lost");
   assert.match(warnings[0]!, /Drownwich/, "including the second one");
   assert.match(warnings[0]!, /Detail Environs/, "and the sheet they were lost from");
+});
+
+test("mouthReachCells is three parent cells, whatever the band scales that to", () => {
+  const band = (size: number) => ({ u0: 0.25, v0: 0.25, u1: 0.25 + size, v1: 0.25 + size });
+  assert.equal(mouthReachCells(320, band(0.5), 320), 6, "band 1");
+  assert.equal(mouthReachCells(320, band(0.25), 320), 12, "band 2");
+  assert.equal(mouthReachCells(320, band(0.125), 320), 24, "band 3");
+  assert.equal(mouthReachCells(320, FULL_WINDOW, 320), 3, "the world window");
+  assert.equal(mouthReachCells(320, { u0: 0.5, v0: 0.5, u1: 0.5, v1: 0.5 }, 320), 3, "degenerate");
+});
+
+// The two ways this sub reaches sheets Alex can already see, both on the BARE arm; scripts/region-detail-probes.ts sweeps the class these two name.
+test("the band radius rescues a named hamlet on today's sheets (seed 42, Poakoa)", () => {
+  const hero = generateWorld(defaultRecipe(42));
+  const win = lodWindowFor(0.5625, 0.4375, 0.125);
+  const region = generateRegionWorld(hero, { window: win, gridW: 320, gridH: 240, title: "Poakoa" });
+  const poakoa = region.settlements.find((s) => s.name === "Poakoa");
+  assert.ok(poakoa, "Poakoa is placed, where the old 8-neighbour scan dropped her");
+  assert.ok((region.elev.data[poakoa.x + poakoa.y * 320] as number) > region.seaLevel);
+  assert.equal(
+    snapToLand(region.elev, region.seaLevel, 152, 70, 1),
+    null,
+    "and radius 1 genuinely cannot reach that shore, or this guard proves nothing",
+  );
+});
+
+test("the mouth walk fires on today's sheets too (seed 15, band 1)", () => {
+  const w15 = generateWorld(defaultRecipe(15));
+  const win = lodWindowFor(0.25, 0.25, 0.5);
+  const region = generateRegionWorld(w15, { window: win, gridW: 320, gridH: 240, title: "Mouths" });
+  const ends = region.rivers.map((r) => r.points[r.points.length - 1]!);
+  assert.ok(
+    ends.some((p) => (region.elev.data[Math.round(p.x) + Math.round(p.y) * 320] as number) <= region.seaLevel),
+    "at least one run reaches water",
+  );
+  assert.ok(
+    !ends.some((p) => Math.round(p.x) === 262 && Math.round(p.y) === 81),
+    "the mouth at (262,81) no longer stops on the land the parent charted as sea",
+  );
 });

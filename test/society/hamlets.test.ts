@@ -345,8 +345,7 @@ test("hamlets snap on the band's radius too, not the old 8-neighbour scan (#399)
       return Math.min(gx + OFFSET, 319) + gy * 320;
     }),
   );
-  // Every candidate lands in water with its only land OFFSET cells east: the old scan drops
-  // them all, the band-scaled snap walks every one of them ashore.
+  // Every candidate lands in water with its only land OFFSET cells east: the old scan drops them all.
   const elev = createField(320, 240, (x, y) => (shore.has(x + y * 320) ? 1 : -1));
 
   const placed = placeHamlets(world, window, elev, 0);
