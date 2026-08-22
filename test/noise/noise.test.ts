@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { gradientNoise2 } from "../../src/noise/gradient.ts";
-import { fbm2, ridged2, warped2 } from "../../src/noise/fbm.ts";
+import { fbm2, ridged2, warped2, OCTAVE_OFFSETS } from "../../src/noise/fbm.ts";
 import { createRng } from "../../src/core/rng.ts";
 
 test("gradient noise is deterministic", () => {
@@ -83,4 +83,63 @@ test("warping actually displaces the field", () => {
   const a = warped2(2.2, 3.3, 21, { warpStrength: 0.6 });
   const b = fbm2(2.2, 3.3, 21);
   assert.notEqual(a, b);
+});
+
+test("normOctaves pins the amplitude normalizer to the base octave count (#396)", () => {
+  // At gain 0.5 the amplitude sum is 2 - 2^(1-n): 1.9375 for 5 octaves, 1.9921875 for 8. Pinned and naive divide the same octave sum, so pinned * norm5 === naive * norm8.
+  const NORM5 = 1.9375;
+  const NORM8 = 1.9921875;
+  const rng = createRng(7);
+  for (let i = 0; i < 200; i++) {
+    const x = rng.range(-30, 30);
+    const y = rng.range(-30, 30);
+    const naive = fbm2(x, y, 17, { octaves: 8 });
+    const pinned = fbm2(x, y, 17, { octaves: 8, normOctaves: 5 });
+    assert.notEqual(pinned, naive, `pin had no effect at ${x},${y}`);
+    assert.ok(
+      Math.abs(pinned * NORM5 - naive * NORM8) < 1e-12,
+      `pinned value is not the same octave sum over the base normalizer at ${x},${y}`,
+    );
+  }
+});
+
+test("normOctaves defaults to octaves: explicit pin is bit-identical to omitted (#396)", () => {
+  const rng = createRng(8);
+  for (let i = 0; i < 100; i++) {
+    const x = rng.range(-30, 30);
+    const y = rng.range(-30, 30);
+    assert.equal(
+      fbm2(x, y, 17, { octaves: 5, normOctaves: 5 }),
+      fbm2(x, y, 17, { octaves: 5 }),
+    );
+    assert.equal(
+      fbm2(x, y, 17, { octaves: 6, normOctaves: 6 }),
+      fbm2(x, y, 17, { octaves: 6 }),
+    );
+  }
+});
+
+test("warped2 forwards normOctaves to the sampled field (#396)", () => {
+  // Both paths: the warpStrength 0 shortcut and the displaced sample.
+  const shortcut = warped2(2.2, 3.3, 21, { warpStrength: 0, octaves: 8, normOctaves: 5 });
+  assert.equal(shortcut, fbm2(2.2, 3.3, 21, { octaves: 8, normOctaves: 5 }));
+  const pinned = warped2(2.2, 3.3, 21, { warpStrength: 0.45, octaves: 8, normOctaves: 5 });
+  const naive = warped2(2.2, 3.3, 21, { warpStrength: 0.45, octaves: 8 });
+  assert.notEqual(pinned, naive, "the pin did not reach the warped sample");
+});
+
+test("OCTAVE_OFFSETS covers the extended octave range without wrapping onto octave 0 (#396)", () => {
+  assert.ok(
+    OCTAVE_OFFSETS.length >= 12,
+    `need at least 12 offsets so base 6 + 3 detail octaves never wrap, got ${OCTAVE_OFFSETS.length}`,
+  );
+  const seen = new Set(OCTAVE_OFFSETS.map(([ox, oy]) => `${ox},${oy}`));
+  assert.equal(seen.size, OCTAVE_OFFSETS.length, "duplicate octave offsets");
+  for (let i = 1; i < OCTAVE_OFFSETS.length; i++) {
+    const [ox, oy] = OCTAVE_OFFSETS[i] as readonly [number, number];
+    assert.ok(
+      !Number.isInteger(ox) && !Number.isInteger(oy),
+      `offset ${i} sits on the integer lattice, whose zeros align with octave 0's`,
+    );
+  }
 });
