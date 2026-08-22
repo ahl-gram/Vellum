@@ -6,12 +6,17 @@ export type FbmOptions = {
   gain?: number;
 };
 
-export type WarpOptions = FbmOptions & {
+export type FbmDetailOptions = FbmOptions & {
+  /** Pins the amplitude normalizer to this base octave count so octaves beyond it are purely additive; defaults to octaves (#396). */
+  normOctaves?: number;
+};
+
+export type WarpOptions = FbmDetailOptions & {
   warpStrength?: number;
 };
 
 /** Per-octave offsets so lattice zeros never align across octaves and imprint a visible grid. */
-const OCTAVE_OFFSETS: ReadonlyArray<readonly [number, number]> = [
+export const OCTAVE_OFFSETS: ReadonlyArray<readonly [number, number]> = [
   [0, 0],
   [127.1, 311.7],
   [269.5, 183.3],
@@ -20,6 +25,10 @@ const OCTAVE_OFFSETS: ReadonlyArray<readonly [number, number]> = [
   [673.7, 443.1],
   [809.2, 277.5],
   [931.1, 521.7],
+  [1063.9, 653.3],
+  [1187.3, 419.6],
+  [1301.7, 743.9],
+  [1439.2, 87.1],
 ];
 
 const OCTAVE_SEED_STEP = 1013904223;
@@ -28,9 +37,10 @@ export function fbm2(
   x: number,
   y: number,
   seed: number,
-  opts: FbmOptions = {},
+  opts: FbmDetailOptions = {},
 ): number {
   const { octaves = 5, lacunarity = 2, gain = 0.5 } = opts;
+  const normOctaves = opts.normOctaves ?? octaves;
   let amp = 1;
   let freq = 1;
   let sum = 0;
@@ -43,7 +53,7 @@ export function fbm2(
     sum +=
       amp *
       gradientNoise2(x * freq + ox, y * freq + oy, seed + o * OCTAVE_SEED_STEP);
-    norm += amp;
+    if (o < normOctaves) norm += amp;
     amp *= gain;
     freq *= lacunarity;
   }
