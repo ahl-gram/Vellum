@@ -47,9 +47,9 @@ const ROOM_TOUR_TIMEOUT_MS = 6000;
 const frame = createReadingFrame(mount, { onPark: () => syncHash(), onAgesYear: (y) => stage.onYear(y) });
 const tourOrder = createTourOrder({ runJob, timeoutMs: ROOM_TOUR_TIMEOUT_MS });
 const lc = createLivingChart({ ...frame.host, tourOrder });
-// #402 the prospect stage and #318 the colophon both mount as the instrument panel's SIBLINGS, never inside it (the ratified placement: the engine hides the panel through every teardown, and the furniture must stand).
+// #402 the stage nests INSIDE the panel between the bar and the journal (ruled 2026-08-22: the scrubber and the plate share a screen), inheriting the panel's hidden teardowns on purpose; #318's colophon stays the panel's SIBLING because it must stand through them.
 const stage = createProspectStage();
-frame.reading.appendChild(stage.root);
+frame.host.scrubber.panel.insertBefore(stage.root, frame.log.panel);
 const colophon = createColophon();
 frame.reading.appendChild(colophon.root);
 

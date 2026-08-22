@@ -24,8 +24,8 @@ export async function run(ctx) {
     return false;
   };
   const agesRead = `(()=>{const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const panel=document.querySelector(".rf-ages");return{ages:a,play:p?p.textContent:null,panelHidden:panel?panel.hidden:null,hash:location.hash};})()`;
-  // #402 the prospect stage: href read raw (getAttribute), src as the browser's absolute blob URL.
-  const stageRead = `(()=>{const f=document.querySelector(".rr-prospect");if(!f)return null;const img=f.querySelector("img");const a=f.querySelector("a");const panel=document.querySelector(".rf-ages");return{hidden:f.hidden,src:img?String(img.src||""):null,alt:img?img.alt:null,href:a?a.getAttribute("href"):null,sibling:!!(panel&&f.parentElement===panel.parentElement)};})()`;
+  // #402 the prospect stage: href read raw (getAttribute), src as the browser's absolute blob URL. Placement ruled 2026-08-22: inside the panel, below the bar, above the journal.
+  const stageRead = `(()=>{const f=document.querySelector(".rr-prospect");if(!f)return null;const img=f.querySelector("img");const a=f.querySelector("a");const panel=document.querySelector(".rf-ages");const prev=f.previousElementSibling;const next=f.nextElementSibling;return{hidden:f.hidden,src:img?String(img.src||""):null,alt:img?img.alt:null,href:a?a.getAttribute("href"):null,belowBar:!!(panel&&panel.contains(f)&&prev&&prev.classList.contains("rf-instrument")&&next&&next.classList.contains("rf-log"))};})()`;
   const plateShown = async (hrefTail) => {
     for (let i = 0; i < 160; i++) {
       let s = null;
@@ -70,9 +70,9 @@ export async function run(ctx) {
   // Seed 42's beats, measured 2026-08-22: foundings 451/552/597 (i=0/4/6), twin ruins 1039 (i=19/22; the LAST told holds the stage, ruled 2026-08-22), present 1059.
   const plate = await plateShown();
   check(
-    "RR26 the present park stages the story's last beat, the ruin plate, linked to its prospect (#402)",
+    "RR26 the present park stages the story's last beat between the bar and the journal (#402)",
     !!plate && plate.href === "/prospect/#seed=42&style=antique&i=22&year=1039" &&
-      /Homaitani/.test(plate.alt || "") && plate.sibling === true,
+      /Homaitani/.test(plate.alt || "") && plate.belowBar === true,
     JSON.stringify(plate),
   );
 
@@ -168,7 +168,7 @@ export async function run(ctx) {
   const restaged = await plateShown("i=22&year=1039");
   check(
     "RR28 the counter draw restages the NEW world's last beat, not the old world's plate (#402)",
-    !!restaged && /Homaitani/.test(restaged.alt || ""),
+    !!restaged && /Homaitani/.test(restaged.alt || "") && restaged.belowBar === true,
     JSON.stringify(restaged),
   );
 

@@ -1,10 +1,11 @@
 // The prospect stage (#402): the room's engraved plate for the story's beats, revealed
 // when the chronicle crosses a founding or a ruin. Its own element, never the card path
-// (RR11b keeps every place card dead here); mounts as a SIBLING of the instrument panel
-// (the #318 colophon rule: the engine hides the panel through every teardown). The plate
-// is a blob <img>, never inline <svg> (the cross-chart url(#) id rule), and it is a LINK
-// to the full Prospect page, so the picture is an honest doorway (#289/#368). It writes
-// nothing to the status line: the reveal decorates the sweep and must never stall it.
+// (RR11b keeps every place card dead here); nests inside the instrument panel between
+// the bar and the journal (ruled 2026-08-22), inheriting the panel's hidden teardowns on
+// purpose. The plate is a blob <img>, never inline <svg> (the cross-chart url(#) id
+// rule), and it is a LINK to the full Prospect page, so the picture is an honest doorway
+// (#289/#368). It writes nothing to the status line: the reveal decorates the sweep and
+// must never stall it.
 import { latestBeatAt, type StoryBeat } from "./beats.ts";
 
 export interface PlateResult {
