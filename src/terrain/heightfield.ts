@@ -87,6 +87,7 @@ const COAST_SEED_SALT_Y = 0x1b56c4e9;
 const COAST_WARP_SCALE = 4.0;
 const COAST_WARP_OCTAVES = 5;
 const BASE_FBM_OCTAVES = 6;
+export const MAX_DETAIL = OCTAVE_OFFSETS.length - BASE_FBM_OCTAVES;
 
 /** Elevation is a pure function of world-space (u, v) and the seed, so a finer grid over the same recipe samples the identical landscape. */
 export function buildHeightfield(params: TerrainParams): Field {
@@ -97,9 +98,8 @@ export function buildHeightfield(params: TerrainParams): Field {
   const ridgedWeight = params.ridgedWeight ?? shape.ridgedWeight;
   const coastWarp = params.coastWarp ?? shape.coastWarp;
   const detail = params.detail ?? 0;
-  const maxDetail = OCTAVE_OFFSETS.length - BASE_FBM_OCTAVES;
-  if (!Number.isInteger(detail) || detail < 0 || detail > maxDetail) {
-    throw new RangeError(`detail must be an integer in [0, ${maxDetail}], got ${detail}`);
+  if (!Number.isInteger(detail) || detail < 0 || detail > MAX_DETAIL) {
+    throw new RangeError(`detail must be an integer in [0, ${MAX_DETAIL}], got ${detail}`);
   }
   const aspect = params.worldAspect ?? (gridW - 1) / (gridH - 1);
   const win = params.window ?? { u0: 0, v0: 0, u1: 1, v1: 1 };

@@ -49,7 +49,8 @@ ctx.onmessage = (e) => {
         title,
       });
       // Stamp the window so a downloaded region redraws from seed + window (#168); worldGridW is the PARENT grid, taken explicitly (not the 320 coincidence).
-      const regionRecipe = { window: msg.window, worldGridW: world.recipe.gridW };
+      // detail 0 because this path draws the unchained field; #400 raises it to the detail the sheet is ACTUALLY drawn at when it wires the chain, never to what the window would imply.
+      const regionRecipe = { window: msg.window, worldGridW: world.recipe.gridW, detail: 0 };
       ctx.postMessage({
         id: msg.id,
         ok: true,
