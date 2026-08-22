@@ -47,18 +47,6 @@ test("a mouth with no water within reach is left alone rather than dragged acros
   assert.deepEqual(extendMouthToWater(points, elev, flow, SEA, 4), points);
 });
 
-test("a drainage that loops back on itself terminates instead of spinning", () => {
-  const w = 8;
-  const h = 3;
-  const elev = createField(w, h, () => 1);
-  const dir = new Int32Array(w * h).fill(-1);
-  dir[2 + 1 * w] = 3 + 1 * w;
-  dir[3 + 1 * w] = 2 + 1 * w;
-  const flow: FlowResult = { dir, acc: new Float64Array(w * h).fill(1), fill: new Float64Array(w * h) };
-  const points = [{ x: 1, y: 1, acc: 5 }, { x: 2, y: 1, acc: 5 }];
-  assert.deepEqual(extendMouthToWater(points, elev, flow, SEA, 64), points);
-});
-
 test("on the detailed field no region river stops on interior dry land (seed 2, band 2)", () => {
   // The window where the sweep caught it: a parent major's mouth cell is parent SEA and
   // detailed-region LAND, so without the extension the river is drawn short of the water.

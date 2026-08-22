@@ -27,12 +27,14 @@ test("a settlement a few fine cells inside a crenellated bay finds its shore", (
 });
 
 test("the snap takes the nearest land, not the first cell it scans", () => {
+  // The far cell is up and left of centre, so a raster scan in EITHER loop nesting reaches it
+  // first; only a distance-ordered search returns the near one.
   const elev = createField(32, 32, (x, y) => {
-    if (x === 24 && y === 16) return 1; // 8 away
-    if (x === 16 && y === 13) return 1; // 3 away
+    if (x === 8 && y === 8) return 1; // 8 away, first in raster order
+    if (x === 17 && y === 18) return 1; // 2 away
     return -1;
   });
-  assert.deepEqual(snapToLand(elev, SEA, 16, 16, 8), { x: 16, y: 13 });
+  assert.deepEqual(snapToLand(elev, SEA, 16, 16, 8), { x: 17, y: 18 });
 });
 
 test("a cell already on land does not move", () => {

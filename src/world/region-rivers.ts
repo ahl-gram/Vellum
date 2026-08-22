@@ -94,11 +94,9 @@ export function extendMouthToWater(
   if ((elev.data[cell] as number) <= seaLevel) return points;
 
   const walked: RiverPoint[] = [];
-  const seen = new Set<number>([cell]);
   for (let step = 0; step < maxSteps; step++) {
     const next = flow.dir[cell] as number;
-    if (next < 0 || seen.has(next)) break;
-    seen.add(next);
+    if (next < 0) break;
     cell = next;
     walked.push({ x: cell % w, y: (cell / w) | 0, acc: last.acc });
     if ((elev.data[cell] as number) <= seaLevel) return [...points, ...walked];
