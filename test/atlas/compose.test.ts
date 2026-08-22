@@ -115,7 +115,7 @@ test("#412 the prospect opens at the atlas plate width, not its intrinsic 520", 
   assert.ok(composed.includes('height="1107.7"'), "height keeps the 520:384 aspect");
   assert.ok(composed.includes('viewBox="0 0 520 384"'), "the drawing space is untouched");
 
-  const narrow = root(prospectPlates(world, "antique", 750)[0]!.svg);
+  const narrow = root(composeAtlas(world, { width: 750 }).prospects[0]!.svg);
   assert.ok(narrow.includes('width="750"'), "the plate follows the composition width");
   assert.ok(narrow.includes('height="553.8"'), `aspect held at 750 wide, got ${narrow}`);
 });
