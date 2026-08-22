@@ -184,6 +184,12 @@ being wrong is not a bad number, it is a confident recommendation built on sand.
   guideline had disappeared (it is in `.claude/rules/coding-style.md`, not this file) and its count
   of 7 `window.__vellum*` hooks (there are 12). Both would otherwise have shipped into a planning
   document as fact.
+- **A claim about your own work is a claim like any other.** "Delivered", "one line", "that will
+  be fast" are predictions, and they are the ones no command ever gets run against. Before
+  reporting a feature done, name the command whose green output says so; before sizing a fix, make
+  the edit or read the call sites. When you must state something you have not run, prefix it
+  UNVERIFIED, which is you saying you did not check, not spec-recon's UNVERIFIABLE, which is no
+  command being able to settle it.
 
 ## Read the issue before you build
 
