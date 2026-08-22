@@ -6,6 +6,8 @@ import { renderMap } from "../../src/render/map-renderer.ts";
 import { FONT_SIZE, REGION_FONT_SIZE } from "../../src/render/layers/settlements.ts";
 import { BIOMES } from "../../src/climate/biomes.ts";
 import { createRng } from "../../src/core/rng.ts";
+import { createField } from "../../src/core/grid.ts";
+import { lodWindowFor } from "../../src/world/lod.ts";
 import { EDGE_MARGIN } from "../../src/society/sites.ts";
 import {
   HAMLET_LATTICE_WORLD_CELLS,
@@ -325,4 +327,30 @@ test("the legend keys a Hamlet row only on sheets that contain hamlets", () => {
   });
   const without = renderMap(shallow, { style: "antique", legend: true });
   assert.ok(!without.includes(">Hamlet<"), "a shallower survey keys no hamlet row");
+});
+
+test("hamlets snap on the band's radius too, not the old 8-neighbour scan (#399)", () => {
+  const world = generateWorld(defaultRecipe(2));
+  const window = lodWindowFor(0.5625, 0.4375, 0.125);
+  const candidates = hamletCandidates(world, window);
+  assert.ok(candidates.length >= 4, "the fixture window carries hamlet candidates");
+
+  const du = window.u1 - window.u0;
+  const dv = window.v1 - window.v0;
+  const OFFSET = 5; // beyond the old 8-neighbour reach, inside the band's radius of 8
+  const shore = new Set(
+    candidates.map((c) => {
+      const gx = Math.round(((c.u - window.u0) / du) * 319);
+      const gy = Math.round(((c.v - window.v0) / dv) * 239);
+      return Math.min(gx + OFFSET, 319) + gy * 320;
+    }),
+  );
+  // Every candidate lands in water with its only land OFFSET cells east: the old scan drops them all.
+  const elev = createField(320, 240, (x, y) => (shore.has(x + y * 320) ? 1 : -1));
+
+  const placed = placeHamlets(world, window, elev, 0);
+  assert.equal(placed.length, candidates.length, "no candidate is lost to the receded shore");
+  for (const h of placed) {
+    assert.ok((elev.data[h.x + h.y * 320] as number) > 0, `${h.name} stands on land`);
+  }
 });

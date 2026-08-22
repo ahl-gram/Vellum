@@ -2,8 +2,8 @@ import { createRng, type Rng } from "../core/rng.ts";
 import { NEIGHBORS_8, type Field } from "../core/grid.ts";
 import { BIOMES } from "../climate/biomes.ts";
 import { slopeField } from "../terrain/slope.ts";
-import { clamp } from "../core/math.ts";
 import type { UvWindow } from "../terrain/heightfield.ts";
+import { landSnapRadius, snapToLand } from "../world/snap-to-land.ts";
 import type { FeatureNames, NamedSettlement, World } from "../world/types.ts";
 import { BIOME_APPEAL, EDGE_MARGIN } from "./sites.ts";
 import { createNamer, type Culture } from "./names.ts";
@@ -171,27 +171,17 @@ export function placeHamlets(
   const du = window.u1 - window.u0;
   const dv = window.v1 - window.v0;
 
+  const radius = landSnapRadius(gridW, window, world.recipe.gridW);
+
   const out: NamedSettlement[] = [];
   for (const c of candidates) {
-    let gx = Math.round(((c.u - window.u0) / du) * (gridW - 1));
-    let gy = Math.round(((c.v - window.v0) / dv) * (gridH - 1));
-    if ((elev.data[gx + gy * gridW] as number) <= seaLevel) {
-      let snapped = false;
-      for (const [dx, dy] of NEIGHBORS_8) {
-        const nx = clamp(gx + dx, 0, gridW - 1);
-        const ny = clamp(gy + dy, 0, gridH - 1);
-        if ((elev.data[nx + ny * gridW] as number) > seaLevel) {
-          gx = nx;
-          gy = ny;
-          snapped = true;
-          break;
-        }
-      }
-      if (!snapped) continue;
-    }
+    const gx = Math.round(((c.u - window.u0) / du) * (gridW - 1));
+    const gy = Math.round(((c.v - window.v0) / dv) * (gridH - 1));
+    const cell = snapToLand(elev, seaLevel, gx, gy, radius);
+    if (cell === null) continue;
     out.push({
-      x: gx,
-      y: gy,
+      x: cell.x,
+      y: cell.y,
       kind: "hamlet",
       harbor: c.harbor,
       onRiver: c.onRiver,

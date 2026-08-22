@@ -1,6 +1,5 @@
 import { bfsDistance } from "../core/bfs-distance.ts";
 import { clamp } from "../core/math.ts";
-import { NEIGHBORS_8 } from "../core/grid.ts";
 import { computeClimate } from "../climate/climate.ts";
 import { classifyBiomes } from "../climate/biomes.ts";
 import { computeFlow } from "../hydrology/flow.ts";
@@ -8,6 +7,8 @@ import { buildHeightfield, type UvWindow } from "../terrain/heightfield.ts";
 import { buildRoads } from "../society/roads.ts";
 import { placeHamlets } from "../society/hamlets.ts";
 import { anchorRegionRivers } from "./region-rivers.ts";
+import { buildChainedField } from "./detail-chain.ts";
+import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
 import { mapChainsToWindow, mapRingsToWindow, realmBorderChains, realmCarryRings } from "./realm-carry.ts";
 import { seaMask } from "../hydrology/sea-mask.ts";
 import { LOD_BANDS } from "./lod.ts";
@@ -18,6 +19,8 @@ export type RegionSpec = {
   readonly gridW: number;
   readonly gridH: number;
   readonly title: string;
+  /** Draw the terrain from the chained detail field (#396-#398) instead of the bare heightfield. Dark by default: #400 is what turns it on for the Glass. */
+  readonly detail?: boolean;
 };
 
 export function generateRegionWorld(world: World, spec: RegionSpec): World {
@@ -25,15 +28,25 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   const { window, gridW, gridH } = spec;
   const worldAspect = (recipe.gridW - 1) / (recipe.gridH - 1);
 
-  const elev = buildHeightfield({
-    seed: recipe.seed,
-    gridW,
-    gridH,
-    mapType: recipe.mapType,
-    window,
-    worldAspect,
-  });
   const seaLevel = world.seaLevel; // absolute — same waterline as the world chart
+  const elev = spec.detail === true
+    ? buildChainedField({
+        seed: recipe.seed,
+        mapType: recipe.mapType,
+        window,
+        gridW,
+        gridH,
+        worldAspect,
+        seaLevel,
+      })
+    : buildHeightfield({
+        seed: recipe.seed,
+        gridW,
+        gridH,
+        mapType: recipe.mapType,
+        window,
+        worldAspect,
+      });
 
   let worldMax = -Infinity;
   for (const v of world.elev.data) worldMax = Math.max(worldMax, v as number);
@@ -69,8 +82,10 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   const du = window.u1 - window.u0;
   const dv = window.v1 - window.v0;
   const inset = 0.02;
+  const snapRadius = landSnapRadius(gridW, window, recipe.gridW);
   const settlements: NamedSettlement[] = [];
   const regionIdxOf = new Map<number, number>();
+  const drowned: string[] = [];
   world.settlements.forEach((s, worldIdx) => {
     const u = s.x / (recipe.gridW - 1);
     const v = s.y / (recipe.gridH - 1);
@@ -80,25 +95,21 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     ) {
       return;
     }
-    let gx = Math.round(((u - window.u0) / du) * (gridW - 1));
-    let gy = Math.round(((v - window.v0) / dv) * (gridH - 1));
-    if ((elev.data[gx + gy * gridW] as number) <= seaLevel) {
-      let snapped = false;
-      for (const [dx, dy] of NEIGHBORS_8) {
-        const nx = clamp(gx + dx, 0, gridW - 1);
-        const ny = clamp(gy + dy, 0, gridH - 1);
-        if ((elev.data[nx + ny * gridW] as number) > seaLevel) {
-          gx = nx;
-          gy = ny;
-          snapped = true;
-          break;
-        }
-      }
-      if (!snapped) return;
+    const gx = Math.round(((u - window.u0) / du) * (gridW - 1));
+    const gy = Math.round(((v - window.v0) / dv) * (gridH - 1));
+    const cell = snapToLand(elev, seaLevel, gx, gy, snapRadius);
+    if (cell === null) {
+      drowned.push(s.name);
+      return;
     }
     regionIdxOf.set(worldIdx, settlements.length);
-    settlements.push({ ...s, x: gx, y: gy });
+    settlements.push({ ...s, x: cell.x, y: cell.y });
   });
+  if (drowned.length > 0) {
+    console.warn(
+      `[region] ${spec.title}: ${drowned.length} settlement(s) found no shore within ${snapRadius} cell(s) and were dropped: ${drowned.join(", ")}`,
+    );
+  }
 
   const seats = world.realms.seats.map((wi) => regionIdxOf.get(wi) ?? -1);
 
