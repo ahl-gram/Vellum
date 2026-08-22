@@ -2,6 +2,7 @@
 name: vellum-guard-prover
 description: Proves that a new or strengthened test actually bites, by deleting or inverting the exact behavior it claims to guard and confirming that test goes red. Use after tests are written and green, before opening a PR, and whenever someone says "this test now guards X". Also use to check that a guard covers the bug's whole class, not just the one reported instance.
 tools: Bash, Read, Edit, Glob, Grep
+model: sonnet[1m]
 color: red
 ---
 
