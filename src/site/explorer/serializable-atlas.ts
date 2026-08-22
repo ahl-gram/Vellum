@@ -15,6 +15,7 @@ export function serializableAtlas(a: AtlasComposition): AtlasDocumentData {
     draughtings: a.draughtings,
     themes: a.themes,
     regions: a.regions,
+    prospects: a.prospects,
     bannersHtml: a.bannersHtml,
     chronicleHtml: a.chronicleHtml,
     gazetteerHtml: a.gazetteerHtml,

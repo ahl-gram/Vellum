@@ -99,6 +99,7 @@ function renderBoundAtlas(atlas: AtlasDocumentData): void {
   const draughtings = atlas.draughtings.map((p) => plate(p)).join("\n");
   const themes = atlas.themes.map((p) => plate(p)).join("\n");
   const regions = atlas.regions.map((p) => plate(p)).join("\n");
+  const prospects = atlas.prospects.map((p) => plate(p)).join("\n");
   atlasDiv.innerHTML = `<header class="atlas-head print-only">
   <h1>${escapeXml(atlas.title)}</h1>
   <p class="subtitle">${escapeXml(atlas.subtitle)}</p>
@@ -108,6 +109,7 @@ ${hero}
 <section><h2>Other Draughtings</h2><div class="styles">${draughtings}</div></section>
 <section><h2>Thematic Surveys</h2><div class="themes">${themes}</div></section>
 ${regions ? `<section><h2>Regional Surveys</h2>${regions}</section>` : ""}
+${prospects ? `<section><h2>The Prospect of the Capital</h2>${prospects}</section>` : ""}
 ${atlas.bannersHtml}
 ${atlas.chronicleHtml}
 ${atlas.gazetteerHtml}`;

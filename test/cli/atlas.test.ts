@@ -80,6 +80,26 @@ test("the atlas carries a Chronicle of the world's dated events", async () => {
   }
 });
 
+test("#412 the atlas carries the capital's prospect plate", async () => {
+  const seed = 42;
+  const dir = "out/test-atlas-prospect";
+  await rm(dir, { recursive: true, force: true });
+  try {
+    await buildAtlas(seed, { out: dir });
+    const html = await readFile(join(dir, "index.html"), "utf8");
+    assert.match(html, /<h2>The Prospect of the Capital<\/h2>/);
+    assert.match(
+      html,
+      /<figure><a href="prospect-capital\.svg"><img src="prospect-capital\.svg"/,
+      "the plate anchors to its own image, like every other plate",
+    );
+    const svg = await readFile(join(dir, "prospect-capital.svg"), "utf8");
+    assert.match(svg, /^<svg/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("the atlas joins the motion folio: links /motion.css and its figures lift under the hand (#130)", async () => {
   const seed = 42;
   const dir = "out/test-atlas-motion";

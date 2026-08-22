@@ -50,6 +50,7 @@ const atlasCss = (): string => {
         draughtings: [],
         themes: [],
         regions: [],
+        prospects: [],
         bannersHtml: "",
         chronicleHtml: "",
         gazetteerHtml: "",

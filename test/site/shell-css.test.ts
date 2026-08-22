@@ -130,7 +130,7 @@ test("the composers dress from the same palette (#269 review follow-up)", async 
   const plate = { key: "antique", title: "hero", svg: "<svg></svg>" };
   const fixture = {
     title: "T", subtitle: "s", seed: 7,
-    hero: plate, draughtings: [], themes: [], regions: [],
+    hero: plate, draughtings: [], themes: [], regions: [], prospects: [],
     bannersHtml: "", chronicleHtml: "", gazetteerHtml: "",
   };
   for (const [label, opts] of [
@@ -321,7 +321,7 @@ const atlasStyleBlocks = async (): Promise<string> => {
   const html = atlasDocument(
     {
       title: "T", subtitle: "s", seed: 7,
-      hero: plate, draughtings: [], themes: [], regions: [],
+      hero: plate, draughtings: [], themes: [], regions: [], prospects: [],
       bannersHtml: "", chronicleHtml: "", gazetteerHtml: "",
     },
     (p, s) => atlasPlateFilename(p, s),

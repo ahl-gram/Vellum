@@ -55,7 +55,8 @@ test("generateShowcases writes the atlas and gallery a deploy expects", { timeou
   assert.ok(atlasHtml.includes('href="/fonts.css"'), "atlas links the root-absolute fonts.css it hard-depends on");
   assert.ok(atlasHtml.includes('href="/motion.css"'), "atlas links the root-absolute motion.css it hard-depends on");
   const atlasSvgs = readdirSync(join(tmp, "atlas")).filter((f) => f.endsWith(".svg"));
-  assert.equal(atlasSvgs.length, 10, "atlas should hold 10 SVGs");
+  assert.equal(atlasSvgs.length, 11, "atlas should hold 11 SVGs (hero + 3 draughtings + 4 themes + 2 regions + the capital's prospect, #412)");
+  assert.ok(atlasSvgs.includes("prospect-capital.svg"), "the capital's prospect plate is written (#412)");
   // Identity pin, green from the start by design: counts alone would pass a wrong-seed showcase; the title carries seed-42's deterministic name.
   assert.ok(
     atlasHtml.includes("The Isle of Rahai: a Vellum atlas"),

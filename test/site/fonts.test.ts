@@ -101,6 +101,7 @@ test("atlasDocument: the deployed page joins the Case; the offline download fall
     draughtings: [{ key: "ink", title: "Pen & ink", svg: "<svg></svg>" }],
     themes: [{ key: "theme-vegetation", title: "Vegetation", svg: "<svg></svg>" }],
     regions: [{ key: "region-1", title: "Environs", svg: "<svg></svg>" }],
+    prospects: [{ key: "prospect-capital", title: "The Prospect of Café", svg: "<svg></svg>" }],
     bannersHtml: "<section></section>",
     chronicleHtml: "<section></section>",
     gazetteerHtml: "<section></section>",

@@ -6,7 +6,7 @@ import { paletteRootCss } from "./palette.ts";
 import type { AtlasPlate } from "./compose.ts";
 
 // Drives the filename scheme and the page layout.
-export type PlateSection = "hero" | "draughting" | "theme" | "region";
+export type PlateSection = "hero" | "draughting" | "theme" | "region" | "prospect";
 
 // Exactly the shape `serializableAtlas` in `src/site/explorer/serializable-atlas.ts`
 // produces. No `world` on purpose: the worker strips it (Fields are not
@@ -19,6 +19,7 @@ export type AtlasDocumentData = {
   readonly draughtings: ReadonlyArray<AtlasPlate>;
   readonly themes: ReadonlyArray<AtlasPlate>;
   readonly regions: ReadonlyArray<AtlasPlate>;
+  readonly prospects: ReadonlyArray<AtlasPlate>;
   readonly bannersHtml: string;
   readonly chronicleHtml: string;
   readonly gazetteerHtml: string;
@@ -183,6 +184,16 @@ export function atlasDocument(
   const draughtings = data.draughtings.map((p) => fig(p, "draughting")).join("\n");
   const themes = data.themes.map((p) => fig(p, "theme")).join("\n");
   const regions = data.regions.map((p) => fig(p, "region")).join("\n");
+  const prospects = data.prospects.map((p) => fig(p, "prospect")).join("\n");
+  const prospectSection =
+    data.prospects.length === 0
+      ? ""
+      : `<section>
+<h2>The Prospect of the Capital</h2>
+${prospects}
+</section>
+
+`;
 
   return `<!doctype html>
 <html lang="en">
@@ -223,7 +234,7 @@ ${themes}
 ${regions}
 </section>
 
-${data.bannersHtml}
+${prospectSection}${data.bannersHtml}
 
 ${data.chronicleHtml}
 

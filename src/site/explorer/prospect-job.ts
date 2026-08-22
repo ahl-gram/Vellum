@@ -1,16 +1,14 @@
 // The prospect job's engine glue (#242), shared by ./worker.ts and runInline in
 // ./worker-client.ts (the serializable-atlas.ts pattern) so the two transports cannot
 // drift apart.
+import { type ProspectDress, plateDressFor } from "../../prospect/dress/context.ts";
 import { prospectPlate } from "../../prospect/finished.ts";
-import { STYLES, type StyleName } from "../../render/style.ts";
+import { STYLES } from "../../render/style.ts";
 import type { World } from "../../world/types.ts";
 
 /** The two engraved dresses a prospect renders in (the #237 contract). */
-export type PlateDress = "antique" | "ink";
-
-export function plateDressFor(style: StyleName): PlateDress {
-  return style === "ink" ? "ink" : "antique";
-}
+export type PlateDress = ProspectDress;
+export { plateDressFor };
 
 export function resolveProspectIndex(world: World, index: number | null): number {
   if (index != null && Number.isInteger(index) && index >= 0 && index < world.settlements.length) {
