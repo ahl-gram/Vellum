@@ -11,7 +11,7 @@ import {
   parentSurfaceOnWindow,
   rejectBridges,
 } from "../../src/terrain/detail-guarantees.ts";
-import { cellSegmentEdgePairs, fusingSaddles } from "./saddle-probe.ts";
+import { cellSegmentEdgePairs, fusingSaddles } from "../../test-support/saddle-probe.ts";
 
 const FULL = { u0: 0, v0: 0, u1: 1, v1: 1 } as const;
 const CW = 96;

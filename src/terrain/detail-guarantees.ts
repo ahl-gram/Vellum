@@ -7,7 +7,7 @@ export const BRIDGE_REJECT_EPS = 1e-6;
 
 const COVER_TOL = 1e-9;
 
-/** The parent's elevation surface resampled onto a child window's grid, bilinearly so protected ground keeps the parent's gradient (#397; the naive per-cell clamp and nearest-neighbour sampling both draw staircase coasts at depth). Child cells outside the parent window come back NaN. */
+/** Nearest-neighbour sampling and the naive per-cell clamp both draw the shore as rectangular staircases at depth, which no test can pin (#397). */
 export function parentSurfaceOnWindow(
   parent: Field,
   parentWindow: UvWindow,
@@ -40,7 +40,6 @@ export function parentSurfaceOnWindow(
   });
 }
 
-/** Floors the fine field with the parent surface, cell by cell. Raising is the only move it has, so coarse land cannot sink by construction; NaN surface cells (outside the parent window) leave the fine value alone. */
 export function floorToParent(fine: Field, parentSurface: Field): Field {
   if (fine.w !== parentSurface.w || fine.h !== parentSurface.h) {
     throw new RangeError(
@@ -56,7 +55,7 @@ export function floorToParent(fine: Field, parentSurface: Field): Field {
   return fieldFrom(fine.w, fine.h, data);
 }
 
-/** Labels the land gained over the coarse field and rejects every gained component that touches two or more coarse landmasses, sending its cells back just under the waterline. Zero touches is a new islet and one is a spur, both kept; 4-connectivity throughout, matching labelLandmasses and the gained components, which is what makes the anti-merge guarantee structural: any new-land path joining two landmasses is one gained component touching both. */
+/** 4-connectivity throughout, matching labelLandmasses, is what makes anti-merge structural: any new-land path joining two landmasses is one gained component touching both. */
 export function rejectBridges(coarse: Field, fine: Field, seaLevel: number): Field {
   if (coarse.w !== fine.w || coarse.h !== fine.h) {
     throw new RangeError(
@@ -68,7 +67,8 @@ export function rejectBridges(coarse: Field, fine: Field, seaLevel: number): Fie
   const { ids: coarseIds } = labelLandmasses(coarse, seaLevel);
   const gained = new Uint8Array(n);
   for (let i = 0; i < n; i++) {
-    if ((coarse.data[i] as number) <= seaLevel && (fine.data[i] as number) > seaLevel) {
+    // Negated rather than <=, so a NaN coarse cell counts as not-land and its fine land joins the gained mask; labelLandmasses reads NaN as sea the same way.
+    if (!((coarse.data[i] as number) > seaLevel) && (fine.data[i] as number) > seaLevel) {
       gained[i] = 1;
     }
   }

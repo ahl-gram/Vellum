@@ -9,7 +9,7 @@ import {
   rejectBridges,
 } from "../../src/terrain/detail-guarantees.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
-import { cellSegmentEdgePairs } from "./saddle-probe.ts";
+import { cellSegmentEdgePairs } from "../../test-support/saddle-probe.ts";
 
 const SEA = 0;
 const FULL = { u0: 0, v0: 0, u1: 1, v1: 1 } as const;
@@ -156,6 +156,18 @@ test("rejectBridges rejects the whole bridging component, spur and neck alike (#
   assert.equal(landmassCount(out, SEA), 2);
 });
 
+test("land gained over an uncovered coarse cell is still gained land (#397)", () => {
+  // parentSurfaceOnWindow returns NaN outside the parent window and is exactly what feeds coarse here, so a NaN cell must read as not-land: NaN <= seaLevel is false, which would hide a whole uncovered strip from the gained mask and let two shores fuse through it with nothing rejected.
+  const coarse = fieldFrom(5, 1, Float64Array.from([0.5, -0.5, NaN, -0.5, 0.5]));
+  const fine = fieldFrom(5, 1, Float64Array.from([0.5, 0.4, 0.4, 0.4, 0.5]));
+  const out = rejectBridges(coarse, fine, SEA);
+  assert.equal(landmassCount(coarse, SEA), 2, "the uncovered cell reads as sea to labelLandmasses, so the shores start apart");
+  assert.equal(landmassCount(out, SEA), 2, "a bridge running through an uncovered cell must still be rejected");
+  for (const x of [1, 2, 3]) {
+    assert.ok(out.at(x, 0) < SEA, `bridge cell ${x},0 must go back to sea even where the parent surface is NaN`);
+  }
+});
+
 test("rejectBridges leaves coarse land untouched and never mutates its inputs (#397)", () => {
   const coarse = fieldFromRows([
     ".....",
@@ -174,7 +186,6 @@ test("rejectBridges leaves coarse land untouched and never mutates its inputs (#
 });
 
 test("a saddle the drawn coast bridges can still split in the landmass array (#397)", () => {
-  // The load-bearing divergence: marching squares resolves cases 5 and 10 by cell-center average (contours.ts) while labelLandmasses floods 4-connected, so a bridged saddle joins in the picture what the array keeps apart; the world-window saddle guard leans on this pin.
   const bridged = fieldFrom(2, 2, Float64Array.from([0.5, -0.1, -0.1, 0.5]));
   assert.equal(landmassCount(bridged, SEA), 2, "diagonal land corners are two landmasses under 4-connectivity");
   assert.deepEqual(

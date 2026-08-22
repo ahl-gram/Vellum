@@ -1,6 +1,6 @@
-import type { Field } from "../../src/core/grid.ts";
-import type { Contour } from "../../src/terrain/contours.ts";
-import { labelLandmasses } from "../../src/world/landmass.ts";
+import type { Field } from "../src/core/grid.ts";
+import type { Contour } from "../src/terrain/contours.ts";
+import { labelLandmasses } from "../src/world/landmass.ts";
 
 export type FusingSaddle = {
   readonly x: number;
