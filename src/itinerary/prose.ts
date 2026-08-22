@@ -29,12 +29,12 @@ export function eventCaption(e: RibbonEvent, rng: Rng): string {
       return e.name;
     case "crossing":
       return e.name === null
-        ? rng.fork(`ford-${Math.round(e.dist)}`).pick(UNNAMED_CROSSINGS)
-        : rng.fork(`bridge-${Math.round(e.dist)}`).pick(NAMED_CROSSINGS)(e.name);
+        ? rng.fork(`ford-${e.k}`).pick(UNNAMED_CROSSINGS)
+        : rng.fork(`bridge-${e.k}`).pick(NAMED_CROSSINGS)(e.name);
     case "branch":
       return `to ${e.toName}`;
     case "summit":
-      return rng.fork(`summit-${Math.round(e.dist)}`).pick(SUMMITS);
+      return rng.fork(`summit-${e.k}`).pick(SUMMITS);
   }
 }
 
