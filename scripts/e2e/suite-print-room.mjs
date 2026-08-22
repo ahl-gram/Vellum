@@ -252,10 +252,11 @@ export async function run(ctx) {
   );
 
   const prospectAt = bound ? bound.heads.indexOf("The Prospect of the Capital") : -1;
+  const regionAt = bound ? bound.heads.indexOf("Regional Surveys") : -1;
   check(
     "PR20c the bound preview shelves the capital's prospect between the surveys and the banners (#412)",
-    !!bound && bound.prospectPlate === true && prospectAt > bound.heads.indexOf("Regional Surveys") &&
-      prospectAt >= 0 && prospectAt < bound.heads.indexOf("Banners of the Realms"),
+    !!bound && bound.prospectPlate === true && regionAt >= 0 && prospectAt > regionAt &&
+      prospectAt < bound.heads.indexOf("Banners of the Realms"),
     JSON.stringify(bound && { heads: bound.heads, prospectPlate: bound.prospectPlate }),
   );
 

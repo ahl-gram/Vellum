@@ -7,6 +7,8 @@ import {
   svgToDataUri,
   type AtlasDocumentData,
 } from "../../src/atlas/document.ts";
+import { prospectPlates } from "../../src/atlas/compose.ts";
+import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
 // A minimal, deterministic stand-in for a composed atlas: one plate per section
 // plus the three HTML fragments. Section membership (hero/draughting/theme/region)
@@ -39,6 +41,18 @@ test("atlasPlateFilename: style plates get the world- prefix, themes/regions use
   assert.equal(atlasPlateFilename({ key: "theme-vegetation" }, "theme"), "theme-vegetation.svg");
   assert.equal(atlasPlateFilename({ key: "region-1" }, "region"), "region-1.svg");
   assert.equal(atlasPlateFilename({ key: "prospect-capital" }, "prospect"), "prospect-capital.svg");
+});
+
+test("#412 the waiting frame reads the real prospect root's dims, not a child rect's", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const data = { ...fixture(), prospects: prospectPlates(world, "antique", 1500) };
+  const html = atlasDocument(data, (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
+  const img = html.match(/<img src="prospect-capital\.svg"([^>]*)>/);
+  assert.ok(img, "prospect figure present");
+  assert.ok(
+    img![1]!.includes(' width="1500" height="1108" '),
+    `the frame must carry the root's integer dims, got${img![1]}`,
+  );
 });
 
 test("svgToDataUri: a base64 SVG data URI that round-trips Unicode", () => {

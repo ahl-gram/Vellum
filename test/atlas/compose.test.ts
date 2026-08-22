@@ -112,12 +112,12 @@ test("#412 the prospect opens at the atlas plate width, not its intrinsic 520", 
 
   const composed = root(composeAtlas(world).prospects[0]!.svg);
   assert.ok(composed.includes('width="1500"'), `default atlas width, got ${composed}`);
-  assert.ok(composed.includes('height="1107.7"'), "height keeps the 520:384 aspect");
+  assert.ok(composed.includes('height="1108"'), "height keeps the 520:384 aspect, integer for the #329 frame");
   assert.ok(composed.includes('viewBox="0 0 520 384"'), "the drawing space is untouched");
 
   const narrow = root(composeAtlas(world, { width: 750 }).prospects[0]!.svg);
   assert.ok(narrow.includes('width="750"'), "the plate follows the composition width");
-  assert.ok(narrow.includes('height="553.8"'), `aspect held at 750 wide, got ${narrow}`);
+  assert.ok(narrow.includes('height="554"'), `aspect held at 750 wide, got ${narrow}`);
 });
 
 // The composed plate is year-insensitive within an era (a hardcoded same-era year renders byte-identically), so this pins the year on a world where it visibly matters: present 400 predates the founding, baring the ground.

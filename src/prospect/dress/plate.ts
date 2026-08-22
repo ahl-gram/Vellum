@@ -189,8 +189,8 @@ export function renderProspect(
     {
       xmlns: "http://www.w3.org/2000/svg",
       viewBox: `0 0 ${PLATE_W} ${PLATE_H}`,
-      width: r1(opts.widthPx ?? PLATE_W),
-      height: r1(((opts.widthPx ?? PLATE_W) * PLATE_H) / PLATE_W),
+      width: Math.round(opts.widthPx ?? PLATE_W),
+      height: Math.round(((opts.widthPx ?? PLATE_W) * PLATE_H) / PLATE_W),
       role: "img",
       "aria-label": opts.ariaLabel ?? `An engraved prospect, plate ${r1(g.index)} of seed ${r1(g.seed)}`,
     },
