@@ -50,6 +50,36 @@ test("seed 42, Laukuwelua to Homaitani: a side road signed for Lamahai, and a su
   assert.ok(summits[0]!.rel > 0.05, "and it stands above the ends of the road");
 });
 
+test("a road that never rises above its ends is given no summit at all", () => {
+  // Seed 2, Vunsvyov to Dru: 6.7 leagues, 3 events, and measurably flat. Without this the summit
+  // height gate is untestable, because a journey that HAS a summit still has exactly one when the
+  // gate is deleted, and every other fixture here has one.
+  const world = generateWorld(defaultRecipe(2));
+  const from = world.settlements.findIndex((s) => s.name === "Vunsvyov");
+  const to = world.settlements.findIndex((s) => s.name === "Dru");
+  assert.ok(from >= 0 && to >= 0, "seed 2 still names both ends");
+  const input = buildRibbonInput(world, from, to);
+  assert.ok(input, "and still joins them by road");
+  assert.ok(input.events.length >= 3, "the journey does find other events, so the sweep is live");
+  assert.equal(
+    input.events.filter((e) => e.kind === "summit").length,
+    0,
+    "a road that stays level earns no 'here the road climbs'",
+  );
+});
+
+test("an unnamed crossing is a real case in the world, not just a fixture", () => {
+  // The ford branch of eventCaption only fires when a crossing has no river name. If no generated
+  // world produced one, that branch would be dead code and its fork key would not matter.
+  const world = generateWorld(defaultRecipe(2));
+  const from = world.settlements.findIndex((s) => s.name === "Vunsvyov");
+  const to = world.settlements.findIndex((s) => s.name === "Zakvigrad");
+  const input = buildRibbonInput(world, from, to);
+  assert.ok(input, "seed 2 joins Vunsvyov to Zakvigrad by road");
+  const fords = input.events.filter((e) => e.kind === "crossing" && e.name === null);
+  assert.ok(fords.length > 0, "and the road fords an unnamed stream on the way");
+});
+
 test("a branch's caption names its town, with no fork to drift", () => {
   const { input, rng } = journey(42, "Homaitani");
   const lamahai = only(input, "branch").find((b) => b.toName === "Lamahai")!;

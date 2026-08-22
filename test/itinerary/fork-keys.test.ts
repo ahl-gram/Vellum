@@ -59,32 +59,55 @@ function inputWith(
   };
 }
 
-test("a crossing one double below a .5 boundary presses the same scroll (the ford/bridge and tilt forks)", () => {
-  const lower = justBelow(12.5);
-  assert.equal(Math.round(12.5), 13, "the boundary is real: 12.5 rounds up");
-  assert.equal(Math.round(lower), 12, "and the double below it rounds down");
-  const at = (dist: number): RibbonInput =>
-    inputWith([{ kind: "crossing", k: 12, dist, name: "Aln", major: true }], 40, BIOMES.grassland);
-  const drawn = ribbonSvgFor(at(12.5), "antique");
-  assert.ok(drawn.includes("Aln"), "the fixture actually draws the crossing it is about to compare");
-  assert.equal(
-    drawn,
-    ribbonSvgFor(at(lower), "antique"),
-    "one double of accumulated float must not repaint the river band or reword the crossing",
-  );
+// Each caption fork picks from a three-entry list, so two different keys land on the same phrase
+// about a third of the time. A single fixture is therefore a coin flip on whether it can see the
+// regression at all, and 12.5 (the first value tried here) is one of the blind ones. These are the
+// boundaries measured to discriminate for BOTH the bridge and the ford list, spread across strips.
+const BOUNDARIES = [3.5, 10.5, 13.5, 21.5, 25.5];
+
+test("a named crossing one double below a .5 boundary presses the same scroll (the bridge and tilt forks)", () => {
+  for (const boundary of BOUNDARIES) {
+    const lower = justBelow(boundary);
+    assert.equal(Math.round(boundary), boundary + 0.5, `${boundary} rounds up`);
+    assert.equal(Math.round(lower), boundary - 0.5, "and the double below it rounds down");
+    const at = (dist: number): RibbonInput =>
+      inputWith([{ kind: "crossing", k: 7, dist, name: "Aln", major: true }], 40, BIOMES.grassland);
+    const drawn = ribbonSvgFor(at(boundary), "antique");
+    assert.ok(drawn.includes("Aln"), `the fixture at ${boundary} actually draws its crossing`);
+    assert.equal(
+      drawn,
+      ribbonSvgFor(at(lower), "antique"),
+      `one double of accumulated float must not repaint the river band or reword the crossing at ${boundary}`,
+    );
+  }
+});
+
+test("an unnamed crossing keeps its ford, which no other fixture here reaches", () => {
+  for (const boundary of BOUNDARIES) {
+    const at = (dist: number): RibbonInput =>
+      inputWith([{ kind: "crossing", k: 7, dist, name: null, major: false }], 40, BIOMES.grassland);
+    const drawn = ribbonSvgFor(at(boundary), "antique");
+    assert.notEqual(
+      drawn,
+      ribbonSvgFor(inputWith([], 40, BIOMES.grassland), "antique"),
+      `the fixture at ${boundary} actually draws its ford`,
+    );
+    assert.equal(drawn, ribbonSvgFor(at(justBelow(boundary)), "antique"), `the ford holds at ${boundary}`);
+  }
 });
 
 test("a summit one double below a .5 boundary keeps its caption", () => {
-  const lower = justBelow(12.5);
-  const at = (dist: number): RibbonInput =>
-    inputWith([{ kind: "summit", k: 12, dist, rel: 0.7 }], 40, BIOMES.grassland);
-  const drawn = ribbonSvgFor(at(12.5), "antique");
-  assert.notEqual(
-    drawn,
-    ribbonSvgFor(inputWith([], 40, BIOMES.grassland), "antique"),
-    "the fixture actually draws the summit it is about to compare",
-  );
-  assert.equal(drawn, ribbonSvgFor(at(lower), "antique"));
+  for (const boundary of BOUNDARIES) {
+    const at = (dist: number): RibbonInput =>
+      inputWith([{ kind: "summit", k: 7, dist, rel: 0.7 }], 40, BIOMES.grassland);
+    const drawn = ribbonSvgFor(at(boundary), "antique");
+    assert.notEqual(
+      drawn,
+      ribbonSvgFor(inputWith([], 40, BIOMES.grassland), "antique"),
+      `the fixture at ${boundary} actually draws its summit`,
+    );
+    assert.equal(drawn, ribbonSvgFor(at(justBelow(boundary)), "antique"), `the summit holds at ${boundary}`);
+  }
 });
 
 test("a strip boundary one double below .5 keeps its flanking decor (the decor fork)", () => {

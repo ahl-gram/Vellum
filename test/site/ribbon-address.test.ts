@@ -45,6 +45,10 @@ test("parseRibbonAddress: invalid values are ignored, not guessed at", () => {
   assert.equal(parseRibbonAddress("#a=abc").from, null);
   assert.equal(parseRibbonAddress("#b=2.5").to, null, "a settlement index is a whole number");
   assert.equal(parseRibbonAddress("#seed=-3").seed, null);
+  // land and coast go through a different helper from the whole-number keys, and it is the only
+  // one that can be handed a NaN: Math.min/max propagate it silently into the engine's range.
+  assert.equal(parseRibbonAddress("#land=abc").land, null, "a non-numeric land is refused, not passed as NaN");
+  assert.equal(parseRibbonAddress("#coast=abc").coast, null);
 });
 
 test("parseRibbonAddress: land and coast decode with the Explorer's encodings and clamp to the engine's range", () => {

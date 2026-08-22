@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import { buildRibbonInput } from "../../src/itinerary/input.ts";
 import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
-import { roadMask, roadReachable } from "../../src/itinerary/route.ts";
+import { roadMask, roadReachable, roadWalk } from "../../src/itinerary/route.ts";
 import { ribbonResultFor } from "../../src/site/explorer/ribbon-job.ts";
 import type { World } from "../../src/world/types.ts";
 
@@ -48,6 +48,28 @@ test("a `to` that no road reaches falls back to the farthest road, not to an err
   assert.ok(reachable.includes(res.toIdx), "the fallback is somewhere a road actually goes");
   const dflt = ribbonResultFor(world, { from: capital, to: null, dress: "antique" });
   assert.equal(res.toIdx, dflt.toIdx, "and it is the same farthest road an absent `to` picks");
+});
+
+test("the fallback is the FARTHEST reachable road, not merely a reachable one", () => {
+  const walks = reachable
+    .map((i) => ({ i, len: roadWalk(world, mask, capital, i)?.length ?? -1 }))
+    .sort((a, b) => b.len - a.len);
+  const longest = walks[0]!;
+  assert.ok(longest.len > walks[walks.length - 1]!.len, "the journeys genuinely differ in length");
+  assert.equal(
+    ribbonResultFor(world, { from: capital, to: null, dress: "antique" }).toIdx,
+    longest.i,
+    `an absent 'to' unrolls the longest road (${world.settlements[longest.i]!.name}, ${longest.len} cells)`,
+  );
+});
+
+test("a `from` that no road leaves falls back to the capital", () => {
+  // A stranded settlement is a valid index, so validIndex passes it through; only the second
+  // fallback in ribbonResultFor rescues it, and nothing else here exercises that branch.
+  assert.ok(stranded >= 0, "seed 42 strands a settlement off the network");
+  const res = ribbonResultFor(world, { from: stranded, to: null, dress: "antique" });
+  assert.equal(res.fromIdx, capital, "the survey sets out from the capital instead");
+  assert.notEqual(res.toIdx, stranded);
 });
 
 test("a reachable `to` is honored, and `to` equal to `from` falls back instead of drawing nothing", () => {
