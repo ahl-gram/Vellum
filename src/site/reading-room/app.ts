@@ -11,12 +11,13 @@ import { createTourOrder } from "../explorer/tour-order.ts";
 import { createRoomArm } from "./arm.ts";
 import { createProspectStage } from "./prospect-stage.ts";
 import { storyBeats, type StoryBeat } from "./beats.ts";
+import { armsBearing, plateForTold, plateSpecsFor, surveyPlateRows, type PlateSpec } from "./told-plate.ts";
 import { plateDressFor } from "../explorer/prospect-job.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { parseLive, emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
 import { createReadingFrame } from "../reading-frame/index.ts";
 import { createColophon } from "./colophon.ts";
-import { createLivingChart, type AgesPos, type LivingChart } from "../living-chart/index.ts";
+import { createLivingChart, type AgesPos, type LivingChart, type ToldEntry } from "../living-chart/index.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
@@ -43,8 +44,8 @@ const warning = document.getElementById("rr-warning") as HTMLElement;
 // Roughly 3x the slowest matrix measured on CI (2.1s), against the Explorer's 20s: the instrument IS this surface, so a dead worker must not hold the unfurl back for twenty seconds, and a timeout costs a main-thread block, never a different itinerary (voyage-session.ts orderItinerary computes the SAME order inline).
 const ROOM_TOUR_TIMEOUT_MS = 6000;
 
-// onPark is #192's seam: Play's parks are the one rest no input event announces; onAgesYear is #402's, the story's year for the prospect stage.
-const frame = createReadingFrame(mount, { onPark: () => syncHash(), onAgesYear: (y) => stage.onYear(y) });
+// onPark is #192's seam: Play's parks are the one rest no input event announces; onAgesTold is #402's, widened at #442 to the entry the story is telling in EITHER half.
+const frame = createReadingFrame(mount, { onPark: () => syncHash(), onAgesTold: (t) => onTold(t) });
 const tourOrder = createTourOrder({ runJob, timeoutMs: ROOM_TOUR_TIMEOUT_MS });
 const lc = createLivingChart({ ...frame.host, tourOrder });
 // #402 the stage nests INSIDE the panel between the bar and the journal (ruled 2026-08-22: the scrubber and the plate share a screen), inheriting the panel's hidden teardowns on purpose; #318's colophon stays the panel's SIBLING because it must stand through them.
@@ -109,8 +110,8 @@ function applyHash(): void {
   pendingLive = parseLive(p);
 }
 
-// #402 the beat's way in: canonical recipe keys (the room owns this writer, no verbatim rule) plus the beat's own settlement and year, so the page opens on exactly the engraving shown.
-function prospectHrefFor(forSeed: number, b: StoryBeat): string {
+// #402 the plate's way in: canonical recipe keys (the room owns this writer, no verbatim rule) plus the plate's own settlement and year, so the page opens on exactly the engraving shown.
+function prospectHrefFor(forSeed: number, b: PlateSpec): string {
   const p = new URLSearchParams();
   p.set("seed", String(forSeed));
   p.set("style", style);
@@ -140,6 +141,41 @@ function syncHash(): void {
   // ages is unconditionally true: the room's instrument is always armed, the page equivalent of the Explorer's ticked checkbox.
   emitLive(p, liveNow({ ages: true, chamber: a?.chamber ?? null, year: a?.year, pending: pendingLive }));
   history.replaceState(null, "", "#" + finalizeHash(p));
+}
+
+// #442 the plate's world, bound in lockstep with lastRes. hasArms is the capital-or-seat
+// test finished.ts draws by, and PlaceMark carries the two halves separately: realm seats
+// are indices, so a kind-only read would miss every one of them.
+interface RoomPlates {
+  readonly beats: ReadonlyArray<StoryBeat>;
+  readonly hasArms: (index: number) => boolean;
+  readonly presentYear: number;
+}
+let plates: RoomPlates | null = null;
+// The survey half's per-row plates, memoized: they need the TRAVEL order, which exists only once the instrument has armed.
+let surveyRows: ReadonlyArray<PlateSpec | null> | null = null;
+// #442 ruled 2026-08-22: a plain visit opens with NO plate. A deep link of either kind is the reader asking for a moment, so it arms on arrival; otherwise Play or a slider move does.
+let plateArmed = false;
+
+// voyageLog() is the engine's own row list, in travel order, already on the 34-name surface: nothing here recomputes an itinerary the engine has already decided.
+function rowsForSurvey(): ReadonlyArray<PlateSpec | null> {
+  if (surveyRows) return surveyRows;
+  if (!plates) return [];
+  const log = lc.voyageLog();
+  if (!log) return [];
+  surveyRows = surveyPlateRows(log.entries.map((e) => e.idx), plates.hasArms, plates.presentYear);
+  return surveyRows;
+}
+
+// The ONE told handler: the live row mirrors every entry, the plate waits for the gesture.
+function onTold(told: ToldEntry | null): void {
+  frame.setTold(told);
+  stage.show(plateArmed && plates ? plateForTold(told, plates.beats, rowsForSurvey()) : null);
+}
+
+// A reader's own gesture arms the plate; the paint it triggers is what reveals one.
+function armPlate(): void {
+  plateArmed = true;
 }
 
 let drawGen = 0;
@@ -193,6 +229,9 @@ function armRoom(res: DrawResult, forSeed: number, rest: AgesPos | undefined): v
 
 function draw(): void {
   const myGen = ++drawGen;
+  // #418: every draw is a fresh ARRIVAL, so the plate goes back to bare until this world is asked for one. Held, because a draw that FAILS leaves the previous world on screen and its plate state must come back with it.
+  const wasArmed = plateArmed;
+  plateArmed = false;
   // pauseScrub rather than a bare raf cancel: a sweep interrupted by a read is PARKED (playing flag, Play label) even if the draw then fails, and it never fires onPark, so nothing writes the address mid-draft.
   lc.pauseScrub();
   lc.cancelVoyageRaf();
@@ -216,17 +255,24 @@ function draw(): void {
       lastTitle = res.title;
       shownSeed = seed;
       const rest = restFor(pendingLive);
+      // #442: a deep link of either kind (year=N, or a bare survey parking at the return to the capital) is a reader asking for that moment, so it shows its plate on arrival; a plain visit asked for nothing in particular and opens bare.
+      const armedByLink = pendingLive !== null;
       pendingLive = null;
       lastRes = res;
       const forSeed = seed;
       // #402: the stage's world binds in lockstep with lastRes, so the failure path's re-arm can never paint one world's plate over another's chart; fetches are on demand, prefetch is the arm's step.
       const dress = plateDressFor(style);
+      plates = {
+        beats: storyBeats(res.manifest.events),
+        hasArms: armsBearing(res.manifest.places),
+        presentYear: res.manifest.presentYear,
+      };
+      surveyRows = null;
       stage.setWorld(
-        storyBeats(res.manifest.events),
-        (b) =>
-          runJob({ kind: "prospect", seed: forSeed, overrides, index: b.index, dress, year: b.year })
+        (s) =>
+          runJob({ kind: "prospect", seed: forSeed, overrides, index: s.index, dress, year: s.year })
             .then((r) => ({ svg: r.svg, name: r.name })),
-        (b) => prospectHrefFor(forSeed, b),
+        (s) => prospectHrefFor(forSeed, s),
       );
       // #318/#418: every draw is a fresh ARRIVAL, so the prior session is dropped in the task that swaps the chart, never with the deferred arm (e2e RR22 pins the drop, RR25 the timing).
       lc.clearAges();
@@ -234,8 +280,10 @@ function draw(): void {
       roomArm.schedule({
         prime: () => tourOrder.prime(res.manifest, res.survey, forSeed),
         arm: () => {
-          stage.prefetch();
+          plateArmed = armedByLink;
           armRoom(res, forSeed, rest);
+          // #442: AFTER the arm, since the survey half's plates are keyed by the travel order the arm decides. Every plate either half can reach is pulled in one step, so no reveal can stall the sweep (#311).
+          stage.prefetch(plateSpecsFor(plates!.beats, rowsForSurvey()));
           frame.host.statusEl.textContent = "";
         },
       });
@@ -246,6 +294,8 @@ function draw(): void {
       seed = shownSeed;
       colophon.seedInput.value = String(shownSeed);
       // #418: a read that supersedes an arm still WAITING drops that arm, so a superseding draw that then fails would leave a chart with no instrument at all and no way back (the hash is read once, at boot). Re-arm the world actually on screen, so #221's "arrival is at rest on every path" survives this path too; already armed, this is a no-op.
+      // #442: the plate state converges onto the surviving world too. draw() disarmed it at the top for the world that never arrived, and this path keeps the PREVIOUS one on screen, so leaving it false would let a plate the reader asked for sit there until the next paint silently pulled it. It was armed for this world or it was not; that is what wasArmed holds.
+      plateArmed = wasArmed;
       if (!lc.agesState() && lastRes) armRoom(lastRes, shownSeed, undefined);
       frame.host.statusEl.textContent = "The cartographer spilled the ink: " + err.message;
     });
@@ -259,8 +309,9 @@ function readSeed(): void {
   draw();
 }
 
-frame.host.scrubber.playBtn.addEventListener("click", lc.togglePlay);
-frame.host.scrubber.range.addEventListener("input", lc.onManualScrub);
+// #442: Play and a slider move are the two gestures that ask for a picture; the paint each one triggers is what reveals it, so nothing here forces a show.
+frame.host.scrubber.playBtn.addEventListener("click", () => { armPlate(); lc.togglePlay(); });
+frame.host.scrubber.range.addEventListener("input", () => { armPlate(); lc.onManualScrub(); });
 frame.host.scrubber.range.addEventListener("change", syncHash);
 frame.host.scrubber.range.addEventListener("pointerdown", lc.agesDragStart);
 frame.host.scrubber.range.addEventListener("pointerup", lc.agesDragEnd);

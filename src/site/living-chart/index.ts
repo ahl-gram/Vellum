@@ -17,9 +17,10 @@ import type { AgesPos } from "../../render/ages-track.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
 import type { CardBox } from "../../render/place-card.ts";
+import type { ToldEntry } from "./told.ts";
 
 export type { BuildPlaceOverlayOpts, RestingTrackSink, TourOrderSource };
-export type { AgesPos };
+export type { AgesPos, ToldEntry };
 
 /** The fused instrument's elements (#319); createReadingFrame's returned host is the full shape. */
 export interface ScrubberRefs {
@@ -31,8 +32,8 @@ export interface ScrubberRefs {
   strip: HTMLElement;
   /** #192: invoked when Play parks, the one rest no input event announces. Optional. */
   onPark?: () => void;
-  /** #402: invoked on every instrument paint with the ages year, null off the ages chamber and on teardown. Optional. */
-  onAgesYear?: (year: number | null) => void;
+  /** #402/#442: invoked on every instrument paint with the entry the story is telling, a survey day row or a chronicle annal, null when nothing is told yet and on teardown. ONE signal for both chambers, never two channels: a host holding two would have to decide which to trust. Optional. */
+  onAgesTold?: (told: ToldEntry | null) => void;
 }
 
 export interface LivingChartHost {
@@ -85,7 +86,7 @@ export function createLivingChart(host: LivingChartHost) {
         readout: bar.year,
         strip: bar.strip,
         onPark: bar.onPark,
-        onAgesYear: bar.onAgesYear,
+        onAgesTold: bar.onAgesTold,
         overlay: { data: () => overlay.data() },
         chronicle,
         voyage,

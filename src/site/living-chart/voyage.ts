@@ -2,7 +2,7 @@
 // chart animating the survey that drew it. The honest geometry is prepared in
 // voyage-session.ts and the deterministic math lives in src/render/; this file is only
 // frame paint, the rAF clock, and the arm/step/paint/reset API. Host-agnostic since #191.
-import { frameAt, logEntryCount, type VoyageFrame } from "../../render/voyage.ts";
+import { frameAt, logEntryCount, toldRow, type VoyageFrame } from "../../render/voyage.ts";
 import {
   pointAtDistance,
   headingAt,
@@ -13,7 +13,8 @@ import {
   type MarkGlyph,
 } from "../../render/voyage-geometry.ts";
 import { createSessionBuilder, type Session, type TourOrderSource } from "./voyage-session.ts";
-import type { VoyageLogPanel } from "./voyage-log-panel.ts";
+import { journalText, type VoyageLogPanel } from "./voyage-log-panel.ts";
+import type { ToldEntry } from "./told.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
 import type { Pt } from "../../core/rdp.ts";
@@ -296,6 +297,15 @@ export function createVoyage(deps: VoyageDeps) {
       if (voyage) voyage.svg.style.display = visible ? "" : "none";
     },
     clearRestingTrack: (): void => restingTrackSink?.clear(),
+    // #442: the day row the survey has reached, read from the same shownArrived count revealLog brightens against, so the live row and the ink can never disagree. Positional like revealLog, since the homecoming row shares the capital's idx.
+    toldEntry: (): ToldEntry | null => {
+      if (!voyage) return null;
+      const entries = voyage.log.entries;
+      const row = toldRow(voyage.shownArrived, entries.length);
+      if (row < 0) return null;
+      const e = entries[row]!;
+      return { chamber: "survey", row, index: e.idx, day: e.day, text: journalText(e.text) };
+    },
   };
 
   return {

@@ -20,6 +20,11 @@ export interface VoyageLogHost {
   strip: HTMLElement;
 }
 
+/** #312: the day rows drop the "Year N. " opener, since the survey's one year lives in the attribution line. Shared so the live row's mirror cannot drift from the journal's own text. */
+export function journalText(text: string): string {
+  return text.replace(/^Year \d+\. /, "");
+}
+
 export function createVoyageLogPanel(host: VoyageLogHost) {
   /**
    * Build the log and render the margin panel: every port a row up front (dimmed), the
@@ -47,7 +52,7 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
       year.textContent = `day ${e.day}`;
       const text = document.createElement("span");
       text.className = "cr-text";
-      const body = e.text.replace(/^Year \d+\. /, "");
+      const body = journalText(e.text);
       if (i === 0 && body.length > 0) {
         // #312: the surveyor's hand opens with an initial (the manuscript dressing).
         const dc = document.createElement("span");

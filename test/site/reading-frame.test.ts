@@ -25,6 +25,47 @@ function shape(li: El): unknown {
 
 const el = () => new El("div") as unknown as HTMLElement;
 
+/** What a narrow-viewport rule is allowed to touch: the sticky strip and nothing else. The journal's own columns are `.cr-*` and the strip borrows them, so the arm must be strip-scoped, not merely mention a `.cr-` class. */
+const STRIP_SCOPED = /^\.rf-told\b|^\.rf-instrument(-strip)?\b/;
+
+/** Selector arms of every narrow-viewport rule in the sheet, flattened and split on commas, so a rule cannot hide behind a selector list. */
+function narrowSelectors(css: string): string[] {
+  return mediaBlocks(css)
+    .flatMap((body) => [...body.matchAll(/([^{}]+)\{/g)].map((m) => m[1]!))
+    .flatMap((list) => list.split(","))
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
+/** Declaration blocks whose selector LIST contains `selector`, joined; membership beats a literal anchor, which a comma after the class defeats. */
+function declarationsFor(css: string, selector: string): string {
+  const src = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const out: string[] = [];
+  for (const m of src.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const arms = m[1]!.split(",").map((s) => s.trim());
+    if (arms.includes(selector)) out.push(m[2]!);
+  }
+  return out.join("\n");
+}
+
+/** The BODY of every @media block, brace-balanced: a regex cannot balance nested braces, so a compact one-line rule hides from one. Blind spot, argued: a brace inside a string or comment would miscount, which this sheet has none of and which costs a false alarm rather than a miss. */
+function mediaBlocks(css: string): string[] {
+  const src = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const out: string[] = [];
+  for (let at = src.indexOf("@media"); at >= 0; at = src.indexOf("@media", at + 1)) {
+    const open = src.indexOf("{", at);
+    if (open < 0) break;
+    let depth = 0;
+    let i = open;
+    for (; i < src.length; i++) {
+      if (src[i] === "{") depth++;
+      else if (src[i] === "}" && --depth === 0) break;
+    }
+    out.push(src.slice(open + 1, i));
+  }
+  return out;
+}
+
 test("the frame mounts and hands the engine a complete host (#219, the first non-Explorer host)", async () => {
   const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
   const mount = new El("div");
@@ -59,13 +100,146 @@ test("the frame mounts and hands the engine a complete host (#219, the first non
   }
 });
 
-test("#402 the frame forwards onAgesYear to the scrubber host beside onPark", async () => {
+test("#402/#442 the frame forwards onAgesTold to the scrubber host beside onPark", async () => {
   const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
-  const onAgesYear = (_y: number | null): void => {};
+  const onAgesTold = (): void => {};
   const onPark = (): void => {};
-  const frame = createReadingFrame(new El("div") as unknown as HTMLElement, { onPark, onAgesYear });
-  assert.equal(frame.host.scrubber.onAgesYear, onAgesYear, "the year signal reaches the engine's deps");
+  const frame = createReadingFrame(new El("div") as unknown as HTMLElement, { onPark, onAgesTold });
+  assert.equal(frame.host.scrubber.onAgesTold, onAgesTold, "the told signal reaches the engine's deps");
   assert.equal(frame.host.scrubber.onPark, onPark, "onPark still rides beside it");
+});
+
+test("#442 the bar and the live row share ONE wrapper, inside the panel, above the journal", async () => {
+  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
+  const panel = frame.host.scrubber.panel as unknown as El;
+  const strip = frame.strip as unknown as El;
+
+  assert.equal(strip.className, "rf-instrument-strip");
+  assert.ok(walk(panel).includes(strip), "the strip nests inside the panel the engine hides, so a teardown takes it too");
+  assert.deepEqual(
+    strip.children.map((c) => c.className),
+    ["rf-instrument", "rf-told"],
+    "the wrapper holds the bar and the live row, in that order",
+  );
+  assert.deepEqual(
+    panel.children.map((c) => c.className),
+    ["rf-instrument-strip", "rf-log"],
+    "and the wrapper sits above the one journal",
+  );
+  assert.equal((frame.told as unknown as El).hidden, true, "the live row rests hidden: a plain arrival tells nothing yet");
+  assert.equal(
+    (frame.told as unknown as El).getAttribute("aria-hidden"),
+    "true",
+    "it mirrors a row already in the document, so it is not announced twice",
+  );
+});
+
+test("#442 setTold mirrors either half's row, and clears rather than lingering", async () => {
+  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
+  const told = frame.told as unknown as El;
+  const parts = () => told.children.map((s) => ({ cls: s.className, text: s.textContent }));
+
+  frame.setTold({ chamber: "survey", row: 3, index: 7, day: 61, text: "we came to Theril." });
+  assert.equal(told.hidden, false);
+  assert.deepEqual(parts(), [
+    { cls: "cr-year", text: "day 61" },
+    { cls: "cr-text", text: "we came to Theril." },
+  ], "the survey half counts days, the gutter the prologue rows already use");
+
+  frame.setTold({ chamber: "ages", year: 900, text: "Gamma fell to ruin." });
+  assert.deepEqual(parts(), [
+    { cls: "cr-year", text: "900" },
+    { cls: "cr-text", text: "Gamma fell to ruin." },
+  ], "the chronicle half carries the annal's year");
+
+  frame.setTold(null);
+  assert.equal(told.hidden, true, "nothing told, nothing shown");
+  assert.deepEqual(parts(), [
+    { cls: "cr-year", text: "" },
+    { cls: "cr-text", text: "" },
+  ], "and the prose is cleared, so a hidden row holds no stale world's line");
+});
+
+test("#442 the live row is a MIRROR: it never writes into the journal the engine owns", async () => {
+  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
+  const strip = frame.host.scrubber.strip as unknown as El;
+  frame.log.render([{ year: 214, text: "Aldmarch is founded." }]);
+  const before = strip.children.map((li) => ({ cls: li.className, text: li.textContent }));
+
+  frame.setTold({ chamber: "ages", year: 214, text: "Aldmarch is founded." });
+  frame.setTold({ chamber: "survey", row: 0, index: 0, day: 1, text: "set out from Aldmarch." });
+  frame.setTold(null);
+
+  assert.deepEqual(
+    strip.children.map((li) => ({ cls: li.className, text: li.textContent })),
+    before,
+    "the journal strip is byte-identical after three told paints: the mirror owns its own element",
+  );
+  assert.equal(
+    walk(strip).includes(frame.told as unknown as El),
+    false,
+    "and the live row is not inside the journal at all",
+  );
+});
+
+test("#442 the WRAPPER sticks and the bar keeps the unfurl: a transform on the sticky element unsticks it", () => {
+  const css = read("public/reading-frame.css");
+  const sticky = declarationsFor(css, ".rf-instrument-strip");
+  assert.ok(sticky, "the wrapper carries a rule of its own");
+  assert.match(sticky, /position:\s*sticky/, "it sticks");
+  assert.match(sticky, /top:\s*0/, "to the viewport top; nothing above it is fixed, so there is no offset to clear");
+  assert.doesNotMatch(sticky, /transform|animation/, "and it is never transformed: that would slide the stuck strip out of register");
+
+  // The polarity a presence check cannot see: the arrival animation must stay on the INNER bar. Both halves, so moving it onto the wrapper fails here rather than at a rendered probe.
+  assert.match(
+    css,
+    /\.rf-arrival \.rf-instrument\s*\{[^}]*animation:\s*paperUnfurl/,
+    "the unfurl still transforms .rf-instrument",
+  );
+  assert.doesNotMatch(
+    css,
+    /\.rf-arrival \.rf-instrument-strip\b/,
+    "and never the sticky wrapper itself",
+  );
+});
+
+test("#442 the mirror takes its SOURCE's voice: roman for an annal, the surveyor's italic for a day row", async () => {
+  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
+  const told = frame.told as unknown as El;
+
+  frame.setTold({ chamber: "survey", row: 3, index: 7, day: 61, text: "we came to Theril." });
+  assert.equal(told.classes.has("prologue"), true, "a day row is the surveyor's hand, the class the journal uses");
+  frame.setTold({ chamber: "ages", year: 900, text: "Gamma fell to ruin." });
+  assert.equal(told.classes.has("prologue"), false, "an annal is the chronicler's, and must not inherit the survey voice");
+  frame.setTold(null);
+
+  // The style half too, or the markup could carry a voice the sheet never dresses; a structural test cannot see the rendered mismatch, so this pins the pair.
+  const css = read("public/reading-frame.css");
+  const toldText = css.match(/\.rf-told \.cr-text\s*\{[^}]*\}/)?.[0] ?? "";
+  assert.ok(toldText, "the mirror dresses its text column");
+  assert.doesNotMatch(toldText, /font-style:\s*italic/, "the UNQUALIFIED mirror is roman, like the annals it copies");
+  assert.match(
+    css,
+    /\.rf-told\.prologue \.cr-text\s*\{[^}]*font-style:\s*italic/,
+    "and only the prologue-voiced mirror is italic, like the day rows it copies",
+  );
+  const journalAnnal = css.match(/\.rf-log-strip li\.prologue \.cr-text\s*\{[^}]*\}/)?.[0] ?? "";
+  assert.match(journalAnnal, /font-style:\s*italic/, "the source it is matching is still italic in the journal");
+});
+
+test("#442 the live row takes the shared gutter idiom and refuses the drop cap", () => {
+  const css = read("public/reading-frame.css");
+  const told = declarationsFor(css, ".rf-told");
+  assert.ok(told, "the live row carries a rule of its own");
+  assert.match(told, /background:\s*var\(--parchment-panel\)/, "the stuck row is opaque: the journal must not read through it");
+  assert.ok(declarationsFor(css, ".rf-told .cr-year"), "it dresses the shared gutter column");
+  assert.match(declarationsFor(css, ".rf-told[hidden]"), /display:\s*none/, "hidden means gone, not merely transparent");
+  assert.doesNotMatch(css, /\.rf-told[^{]*\.cr-dc/, "the 2.1em initial never reaches the strip");
+  assert.doesNotMatch(told, /max-height|overflow/, "the live row is one row, never a scroller of its own");
 });
 
 test("the instrument panel starts hidden and the ONE journal nests inside it (#219, fused at #220)", async () => {
@@ -238,7 +412,32 @@ test("the frame's log never nests a scroller, at any width (#219 acceptance, dec
     /max-height/,
     "no max-height cap: the log is bounded by construction (14 events + ~24 legs), not by a scrollbar",
   );
-  assert.doesNotMatch(css, /@media[^{]*max-width/, "no narrow-viewport special case: one layout, ratified 2026-07-27");
+  // #219's ratification is about the JOURNAL, and #442 kept it: the one narrow-viewport
+  // rule this file now carries (ruled 2026-08-23) drops the sticky strip's live row on a
+  // phone. An ALLOWLIST, not a search for journal selectors: the strip dresses the very
+  // same .cr-year / .cr-text columns the journal rows use, so rejecting only `.rf-log`
+  // waves through `@media (max-width: 40rem) { .cr-text { display: none } }` and reshapes
+  // the reading unseen. Anything a narrow rule touches must be scoped to the strip.
+  for (const sel of narrowSelectors(css)) {
+    assert.ok(
+      STRIP_SCOPED.test(sel),
+      `a narrow-viewport rule reaches beyond the sticky strip (${sel}); the journal reads the same at every width`,
+    );
+  }
+  // Non-vacuity WITHOUT requiring the rule to exist: deleting the narrow rule restores the
+  // ratified pre-#442 state and must stay green, so the scan proves itself on a planted
+  // one instead. Both directions, since a scan that finds nothing proves nothing.
+  const planted = css + "\n@media (max-width: 40rem) { .cr-text { display: none; } }\n";
+  assert.ok(
+    narrowSelectors(planted).some((s) => !STRIP_SCOPED.test(s)),
+    "the scan can see a journal-reshaping narrow rule; if this fails the loop above is decorative",
+  );
+  assert.deepEqual(
+    narrowSelectors(css + "\n@media (max-width: 40rem) { .rf-told { display: none } }\n")
+      .filter((s) => !STRIP_SCOPED.test(s)),
+    [],
+    "and it does not cry wolf over a second strip-scoped rule",
+  );
 
   // Measured over CDP at a REAL 320px viewport (Brave's --window-size does not shrink the layout viewport): a flex item's min-width:auto refuses to shrink and a range input's intrinsic width is ~129px, so the row overflowed to scrollWidth 355. Both halves are load-bearing.
   assert.match(css, /\.rf-instrument\s*\{[^}]*flex-wrap:\s*wrap/, "the instrument wraps instead of overflowing");

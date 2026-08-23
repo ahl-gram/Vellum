@@ -6,6 +6,7 @@ import {
   buildVoyagePlan,
   frameAt,
   logEntryCount,
+  toldRow,
   reorderPlanByTravel,
 } from "../../src/render/voyage.ts";
 
@@ -256,6 +257,34 @@ test("reorderPlanByTravel: empty and one-port plans come back unchanged", () => 
   assert.deepEqual(reorderPlanByTravel(empty, straitD), empty);
   const solo = buildVoyagePlan([capital], 1059);
   assert.deepEqual(reorderPlanByTravel(solo, straitD), solo);
+});
+
+test("#442 toldRow is the LAST row revealLog inks, which is arrived - 1 at every position", () => {
+  // Tied to revealLog's own contract (voyage-log-panel.ts): it brightens [0, arrived), so
+  // the row the story is ON is the last of those. Swept across the whole sweep rather than
+  // sampled at the ends, because at t=1 arrived reaches the row COUNT and the clamp makes
+  // an off-by-one read the same last row either way (guard-prover flagged this unproven).
+  const plan = buildVoyagePlan(lineWorld, 1059);
+  const legCount = plan.legs.length;
+  const rows = logEntryCount(plan);
+  for (let step = 0; step <= 20; step++) {
+    const arrived = frameAt(legCount, step / 20).arrived;
+    const inked = Array.from({ length: rows }, (_, i) => i < arrived);
+    const lastInked = inked.lastIndexOf(true);
+    assert.equal(
+      toldRow(arrived, rows),
+      lastInked,
+      `at arrived=${arrived} the told row must be the last inked one`,
+    );
+  }
+});
+
+test("#442 toldRow clamps at both ends, so no row index can fall off the journal", () => {
+  assert.equal(toldRow(0, 25), 0, "before the first arrival the story is on row 0, never -1");
+  assert.equal(toldRow(1, 25), 0, "the departure IS row 0");
+  assert.equal(toldRow(25, 25), 24, "the homecoming is the last row");
+  assert.equal(toldRow(99, 25), 24, "an over-count clamps rather than indexing past the end");
+  assert.equal(toldRow(3, 0), -1, "an empty journal has no told row at all");
 });
 
 test("logEntryCount: one departure plus one entry per leg, so a round trip logs a homecoming", () => {
