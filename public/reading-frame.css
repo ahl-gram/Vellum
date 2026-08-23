@@ -67,9 +67,7 @@
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-size: 2.1em; line-height: 0.8; margin: 0.08em 0.12em 0 0; }
 
-/* #442 ruled 2026-08-23: on a phone the CONTROLS stick and the live row does not. This
-   is the one narrow-viewport case in this file and it is scoped to the new strip; the
-   JOURNAL still flows identically at every width (#219, ratified 2026-07-27). */
+/* #442 ruled 2026-08-23: on a phone the CONTROLS stick and the live row does not. This is the one narrow-viewport case in this file and it is scoped to the new strip; the JOURNAL still flows identically at every width (#219, ratified 2026-07-27). Measured strip heights either side of this line (plate-reader 2026-08-23, seed 42, worst-case row of both halves): 1440 -> 100, 900 -> 100 to 126, 768 -> 126, 700 -> 126, then 640 -> 59, 560 -> 59, 390 -> 98 where the bar itself wraps. */
 @media (max-width: 40rem) { .rf-told { display: none; } }
 
 /* "day 105" runs wider than a bare year, so the gutter grew from 3rem at #312. */

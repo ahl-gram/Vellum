@@ -120,13 +120,44 @@ export async function run(ctx) {
     JSON.stringify({ rest: deskRest, stuck: afterScroll, room }),
   );
   // #442: the strip is what the reader gives up to keep the scrubber and the told row on
-  // screen, so its height is pinned against a measured constant, never a relative read.
-  // Measured 2026-08-23 at 1440x900 on seed 42: 100px in the chronicle half (a one-line
-  // bar of 52 plus a two-line live row), against the ~104 the ruling budgeted.
+  // screen, so its height is pinned against measured constants, never a relative read.
+  // Measured 2026-08-23 (plate-reader, seed 42, worst-case row in BOTH halves): 1440 -> 100,
+  // 900 -> 100 chronicle / 126 survey, 768 -> 126, 700 -> 126, then the live row is dropped
+  // at 40rem so 640 -> 59, 560 -> 59, 390 -> 98 (the bar itself wraps there). The ruling
+  // budgeted ~104 against a 1440x900 viewport and that holds exactly; between 640 and 900
+  // the told row takes a second line and the strip runs to 126. Both numbers are pinned so
+  // neither can grow unnoticed, and the 126 is flagged on the PR as a miss against the
+  // quoted figure rather than smoothed over.
+  const GOVERNING_BUDGET = 104;
+  const WIDE_WORST = 130;
   check(
-    "RR35 the strip costs no more than the 104px the ruling budgeted (#442)",
-    !!deskRest && deskRest.h > 0 && deskRest.h <= 104,
-    JSON.stringify({ stripHeight: deskRest && deskRest.h, budget: 104 }),
+    `RR35 at the governing 1440x900 the strip costs no more than the ${GOVERNING_BUDGET}px the ruling budgeted (#442)`,
+    !!deskRest && deskRest.h > 0 && deskRest.h <= GOVERNING_BUDGET,
+    JSON.stringify({ stripHeight: deskRest && deskRest.h, budget: GOVERNING_BUDGET }),
+  );
+  // The SURVEY half carries the long prose (its day rows run to ~153 chars against an
+  // annal's ~105), so the bar is driven there first: measuring the chronicle half's short
+  // last annal reports 100 at every width and the envelope passes vacuously.
+  await evaluate(`(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));return null;})()`);
+  await sleep(120);
+  const byWidth = [];
+  for (const w of [900, 768]) {
+    await send("Emulation.setDeviceMetricsOverride", { width: w, height: 900, deviceScaleFactor: 1, mobile: false });
+    await sleep(250);
+    const s = await evaluate(stripRead);
+    byWidth.push({ w, h: s && s.h, told: s && s.toldDisplay, gutter: s && s.gutter });
+  }
+  await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+  await sleep(200);
+  check(
+    `RR37 and it stays within the measured ${WIDE_WORST}px envelope at the widths where the told row wraps (#442)`,
+    byWidth.length === 2 &&
+      byWidth.every((r) => r.h > 0 && r.h <= WIDE_WORST && r.told === "flex") &&
+      // The witness, without which this bounds nothing: at least one width must actually
+      // WRAP past the governing budget, or the sweep never reached the case it claims to
+      // cover and the envelope should be re-derived rather than left standing.
+      byWidth.some((r) => r.h > GOVERNING_BUDGET),
+    JSON.stringify({ byWidth, envelope: WIDE_WORST, budget: GOVERNING_BUDGET }),
   );
   // The chart does not shrink: the constraint set alongside the layout ruling. Pinned as
   // the COLUMN plus the source aspect rather than a height constant, because the rect is
