@@ -11,7 +11,7 @@ import { createTourOrder } from "../explorer/tour-order.ts";
 import { createRoomArm } from "./arm.ts";
 import { createProspectStage } from "./prospect-stage.ts";
 import { storyBeats, type StoryBeat } from "./beats.ts";
-import { plateForTold, plateSpecsFor, surveyPlateRows, type PlateSpec } from "./told-plate.ts";
+import { armsBearing, plateForTold, plateSpecsFor, surveyPlateRows, type PlateSpec } from "./told-plate.ts";
 import { plateDressFor } from "../explorer/prospect-job.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { parseLive, emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
@@ -261,12 +261,9 @@ function draw(): void {
       const forSeed = seed;
       // #402: the stage's world binds in lockstep with lastRes, so the failure path's re-arm can never paint one world's plate over another's chart; fetches are on demand, prefetch is the arm's step.
       const dress = plateDressFor(style);
-      const armed = new Set(
-        res.manifest.places.filter((p) => p.kind === "capital" || p.seat).map((p) => p.idx),
-      );
       plates = {
         beats: storyBeats(res.manifest.events),
-        hasArms: (index: number) => armed.has(index),
+        hasArms: armsBearing(res.manifest.places),
         presentYear: res.manifest.presentYear,
       };
       surveyRows = null;

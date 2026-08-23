@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  armsBearing,
   surveyPlateRows,
   plateForTold,
   plateSpecsFor,
@@ -124,20 +125,33 @@ test("#442 a real survey route swaps the plate at a seat whose KIND is only a to
   const seats = route.filter((i) => byIdx.get(i)!.seat && byIdx.get(i)!.kind !== "capital");
   assert.ok(seats.length > 0, "seed 1's route carries a non-capital seat, so this guard can bite");
 
-  const armsOf = (i: number): boolean => {
-    const p = byIdx.get(i)!;
-    return p.kind === "capital" || p.seat;
-  };
-  const rows = surveyPlateRows(route, armsOf, manifest.presentYear);
+  // armsBearing is the SHIPPED predicate, called here rather than copied: the first cut of
+  // this test hand-rolled `kind === "capital" || seat` and diffed it against a hand-rolled
+  // kind-only closure, which proved surveyPlateRows reads its argument and proved nothing
+  // about the rule. A kind-only mutation of the real wiring walked through it clean
+  // (guard-prover, 2026-08-23), so the guard and app.ts now share ONE definition.
+  const rows = surveyPlateRows(route, armsBearing(manifest.places), manifest.presentYear);
   const seatRow = route.indexOf(seats[0]!);
   assert.equal(rows[seatRow]?.index, seats[0], "the seat takes the picture on arrival");
   assert.notEqual(byIdx.get(seats[0]!)!.kind, "capital", "and its kind alone would have missed it");
-
-  // Reading kind alone is the mutation this guard exists to catch: it never swaps there.
-  const kindOnly = surveyPlateRows(route, (i) => byIdx.get(i)!.kind === "capital", manifest.presentYear);
   assert.notEqual(
-    kindOnly[seatRow]?.index,
     rows[seatRow]?.index,
-    "reading kind alone holds the capital where the arms rule swaps",
+    rows[seatRow - 1]?.index,
+    "the picture actually CHANGES at the seat: reading kind alone would have held the capital here",
   );
+});
+
+test("#442 armsBearing reads the seat FLAG, not the settlement kind", () => {
+  const world = generateWorld(defaultRecipe(1));
+  const manifest = buildPlaceManifest(world, 1500);
+  const armed = armsBearing(manifest.places);
+  const seatTowns = manifest.places.filter((p) => p.seat && p.kind !== "capital");
+  assert.ok(seatTowns.length > 0, "seed 1 has non-capital seats, so this can bite");
+  for (const p of seatTowns) {
+    assert.equal(armed(p.idx), true, `${p.name} is a realm seat of kind ${p.kind} and hangs arms`);
+  }
+  const capital = manifest.places.find((p) => p.kind === "capital")!;
+  assert.equal(armed(capital.idx), true, "the capital hangs arms too");
+  const plain = manifest.places.find((p) => !p.seat && p.kind !== "capital")!;
+  assert.equal(armed(plain.idx), false, `${plain.name} hangs none, so the picture holds through it`);
 });

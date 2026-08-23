@@ -25,6 +25,31 @@ function shape(li: El): unknown {
 
 const el = () => new El("div") as unknown as HTMLElement;
 
+/**
+ * The BODY of every @media block, brace-balanced. A regex cannot balance nested braces:
+ * the first cut of this scan ended its match at the first `\n}`, so a compact one-line
+ * `@media (max-width: 40rem) { .rf-log-strip li { display: none; } }` never matched at
+ * all and the per-selector check below never ran (guard-prover, 2026-08-23). Blind spot,
+ * argued: a brace inside a string or a comment would miscount, which this stylesheet has
+ * none of and which would cost a false alarm rather than a miss.
+ */
+function mediaBlocks(css: string): string[] {
+  const src = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const out: string[] = [];
+  for (let at = src.indexOf("@media"); at >= 0; at = src.indexOf("@media", at + 1)) {
+    const open = src.indexOf("{", at);
+    if (open < 0) break;
+    let depth = 0;
+    let i = open;
+    for (; i < src.length; i++) {
+      if (src[i] === "{") depth++;
+      else if (src[i] === "}" && --depth === 0) break;
+    }
+    out.push(src.slice(open + 1, i));
+  }
+  return out;
+}
+
 test("the frame mounts and hands the engine a complete host (#219, the first non-Explorer host)", async () => {
   const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
   const mount = new El("div");
@@ -348,8 +373,10 @@ test("the frame's log never nests a scroller, at any width (#219 acceptance, dec
   // rule this file now carries (ruled 2026-08-23) drops the sticky strip's live row on a
   // phone and touches no journal selector, so the reading itself still does not differ by
   // width. Every @media block is read and its selectors checked, not merely counted.
-  for (const block of css.matchAll(/@media[^{]*max-width[^{]*\{([\s\S]*?)\n\}/g)) {
-    for (const sel of block[1]!.matchAll(/([^{}]+)\{/g)) {
+  const blocks = mediaBlocks(css);
+  assert.ok(blocks.length > 0, "the scan found the narrow-viewport block it is here to police");
+  for (const body of blocks) {
+    for (const sel of body.matchAll(/([^{}]+)\{/g)) {
       assert.doesNotMatch(
         sel[1]!,
         /\.rf-log/,
