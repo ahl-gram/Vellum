@@ -8,10 +8,17 @@ import { marchingSquares } from "../../src/terrain/contours.ts";
 import type { Field } from "../../src/core/grid.ts";
 import {
   floorToParent,
+  gateToParentLand,
+  parentCellsOnWindow,
   parentSurfaceOnWindow,
   rejectBridges,
 } from "../../src/terrain/detail-guarantees.ts";
 import { cellSegmentEdgePairs, fusingSaddles } from "../../test-support/saddle-probe.ts";
+import {
+  parentFusion,
+  parentMassesLost,
+  parentPartitionOnWindow,
+} from "../../test-support/parent-partition.ts";
 
 const FULL = { u0: 0, v0: 0, u1: 1, v1: 1 } as const;
 const CW = 96;
@@ -35,9 +42,12 @@ type WorldCtx = {
 
 type WindowCase = {
   readonly surface: Field;
+  readonly cells: Field;
   readonly fine: Field;
+  readonly ungated: Field;
   readonly floored: Field;
   readonly adjusted: Field;
+  readonly partition: Int32Array;
   readonly sea: number;
 };
 
@@ -74,36 +84,35 @@ function caseFor(seed: number, cx: number, cy: number): WindowCase {
       detail: DETAIL,
     });
     const surface = parentSurfaceOnWindow(c.parent, FULL, win, CW, CH);
-    const floored = floorToParent(fine, surface);
-    const adjusted = rejectBridges(surface, floored, c.sea);
-    wc = { surface, fine, floored, adjusted, sea: c.sea };
+    const cells = parentCellsOnWindow(c.parent, FULL, win, CW, CH);
+    const ungated = floorToParent(fine, surface);
+    const floored = floorToParent(fine, gateToParentLand(surface, cells, c.sea));
+    const adjusted = rejectBridges(cells, cells, floored, c.sea);
+    wc = {
+      surface,
+      cells,
+      fine,
+      ungated,
+      floored,
+      adjusted,
+      partition: parentPartitionOnWindow(c.parent, FULL, win, CW, CH, c.sea),
+      sea: c.sea,
+    };
     cases.set(key, wc);
   }
   return wc;
 }
 
 function parentLandAt(wc: WindowCase, i: number): boolean {
-  const pv = wc.surface.data[i] as number;
-  return Number.isFinite(pv) && pv > wc.sea;
+  return (wc.partition[i] as number) >= 0;
 }
 
 function fusedCells(wc: WindowCase, field: Field): number {
-  const { ids: sIds } = labelLandmasses(wc.surface, wc.sea);
-  const { ids: cIds } = labelLandmasses(field, wc.sea);
-  const owner = new Map<number, number>();
-  let fused = 0;
-  for (let i = 0; i < sIds.length; i++) {
-    const sid = sIds[i] as number;
-    const cid = cIds[i] as number;
-    if (sid === -1 || cid === -1) continue;
-    const prev = owner.get(cid);
-    if (prev === undefined) owner.set(cid, sid);
-    else if (prev !== sid) fused++;
-  }
-  return fused;
+  return parentFusion(field, wc.partition, wc.sea).strayCells;
 }
 
-test("monotone floor: parent land never sinks in the adjusted child, and the guard is not vacuous (#397)", () => {
+// Narrowed by #443. The floor covers a cell where the parent's OWN cell is land AND its interpolated surface still stands above the waterline; where only the interpolation rises, the parent charts water and the child may draw water. The landmass guard below is what bounds that narrowing.
+test("monotone floor: parent land never sinks in the adjusted child, and the guard is not vacuous (#397, narrowed by #443)", () => {
   for (const seed of SWEEP_SEEDS) {
     let drownedNoFloor = 0;
     let parentLandCells = 0;
@@ -112,6 +121,7 @@ test("monotone floor: parent land never sinks in the adjusted child, and the gua
         const wc = caseFor(seed, cx, cy);
         for (let i = 0; i < CW * CH; i++) {
           if (!parentLandAt(wc, i)) continue;
+          if (!((wc.surface.data[i] as number) > wc.sea)) continue;
           parentLandCells++;
           if ((wc.fine.data[i] as number) <= wc.sea) drownedNoFloor++;
           assert.ok(
@@ -121,12 +131,32 @@ test("monotone floor: parent land never sinks in the adjusted child, and the gua
         }
       }
     }
-    // Measured on this exact fixture 2026-08-22: seed 42 drowns 478 of 59855 parent-land cells without the floor, seed 23 drowns 381 of 43318; floors sit far below so cross-platform float drift cannot flip them.
+    // Re-measured on this fixture 2026-08-23, after #443 changed what counts as parent land: seed 42 drowns 333 of 59189 parent-land cells without the floor, seed 23 drowns 255 of 42779. Was 478 of 59855 and 381 of 43318 against the blurred surface.
     assert.ok(parentLandCells > 20000, `seed ${seed}: only ${parentLandCells} parent-land cells checked`);
     assert.ok(
       drownedNoFloor >= 150,
       `seed ${seed}: only ${drownedNoFloor} cells drown without the floor, the monotone guard is near-vacuous`,
     );
+  }
+});
+
+// NOT the general case, which `node scripts/region-detail-partition.ts` measures and #443 records: some window-edge slivers do go, on every arm.
+test("no landmass the parent charts inside these windows loses all its land (#443)", () => {
+  for (const seed of SWEEP_SEEDS) {
+    let masses = 0;
+    for (const cy of LATTICE) {
+      for (const cx of LATTICE) {
+        const wc = caseFor(seed, cx, cy);
+        masses += new Set(Array.from(wc.partition).filter((id) => id >= 0)).size;
+        assert.deepEqual(
+          parentMassesLost(wc.adjusted, wc.partition, wc.sea),
+          [],
+          `seed ${seed} window ${cx},${cy}: a parent landmass lost every one of its cells`,
+        );
+      }
+    }
+    // Measured 2026-08-23: seed 42 carries 26 parent landmasses across its 16 windows, seed 23 carries 61.
+    assert.ok(masses > 20, `seed ${seed}: only ${masses} parent landmasses reach these windows`);
   }
 });
 
@@ -145,30 +175,39 @@ test("anti-merge: no two parent landmasses share a landmass in the adjusted chil
   }
 });
 
-test("bridge rejection does real work on real terrain: pinned merging windows come back unmerged (#397)", () => {
+test("the gate and the rejection each do real work on real terrain, and neither leaves a merge standing (#397, re-measured for #443)", () => {
+  let ungatedFusions = 0;
+  let gatedFusions = 0;
+  let rejectedCells = 0;
+  let gateFootprint = 0;
+  let gateFloored = 0;
+  let sunkByGate = 0;
   for (const [seed, cx, cy] of BRIDGE_WINDOWS) {
     const wc = caseFor(seed, cx, cy);
-    // Measured fused cells in the floored field on 2026-08-22: seed 42 window carries 170, seed 2 carries 1203, seed 15 carries 8, seed 23 carries 7; rejected cells 5, 7, 20, 19.
-    assert.ok(
-      fusedCells(wc, wc.floored) >= 1,
-      `seed ${seed} window ${cx},${cy}: the floored field no longer merges, this fixture is vacuous`,
-    );
-    let rejected = 0;
+    ungatedFusions += fusedCells(wc, wc.ungated);
+    gatedFusions += fusedCells(wc, wc.floored);
     for (let i = 0; i < CW * CH; i++) {
-      if (wc.floored.data[i] !== wc.adjusted.data[i]) rejected++;
+      if (wc.floored.data[i] !== wc.adjusted.data[i]) rejectedCells++;
+      if ((wc.cells.data[i] as number) > wc.sea) continue;
+      if (!((wc.surface.data[i] as number) > wc.sea)) continue;
+      gateFootprint++;
+      if (wc.floored.data[i] !== wc.fine.data[i]) gateFloored++;
+      if ((wc.ungated.data[i] as number) > wc.sea && (wc.floored.data[i] as number) <= wc.sea) sunkByGate++;
     }
-    assert.ok(rejected >= 1, `seed ${seed} window ${cx},${cy}: rejection touched no cell`);
     assert.equal(
       fusedCells(wc, wc.adjusted),
       0,
-      `seed ${seed} window ${cx},${cy}: rejection left a merge standing`,
+      `seed ${seed} window ${cx},${cy}: a merge of two parent landmasses survived`,
     );
-    for (let i = 0; i < CW * CH; i++) {
-      if (parentLandAt(wc, i)) {
-        assert.ok((wc.adjusted.data[i] as number) > wc.sea, `seed ${seed}: rejection sank parent land at ${i}`);
-      }
-    }
   }
+  assert.equal(gateFloored, 0, `the floor reached ${gateFloored} cells the parent's own cell charts as water`);
+  // Measured 2026-08-23 across the four pinned windows: footprint 327, waterline moved at 75, fusions 1173 ungated against 1173 gated, 55 cells rejected. The gate un-merges nothing here, which is why gateFloored is asserted directly.
+  assert.ok(gateFootprint >= 200, `only ${gateFootprint} cells in the gate's footprint, this guard is near-vacuous`);
+  assert.ok(sunkByGate >= 40, `the gate moved the waterline at only ${sunkByGate} cells, so it is doing nothing here`);
+
+  assert.ok(ungatedFusions >= 100, `the ungated floor barely merges (${ungatedFusions}), the fixture is vacuous`);
+  assert.ok(gatedFusions >= 100, `the gated floor barely merges (${gatedFusions}), rejection has nothing to do`);
+  assert.ok(rejectedCells >= 10, `rejection touched only ${rejectedCells} cells across the whole fixture`);
 });
 
 test("saddle census: the seed-42 world chart's three hairline picture-fuses, drawn-bridged in the real contours (#397)", () => {
@@ -215,9 +254,9 @@ test("saddle census: hairline picture-fuses in adjusted band-3 windows stay with
       }
     }
   }
-  // Measured on this exact fixture 2026-08-22: 17 fusing saddles across the two 16-window sweeps (10 + 7), 3 of them with both corners on parent land; the bands leave room for single-cell float drift but trip on growth.
-  assert.ok(fusingTotal >= 8 && fusingTotal <= 26, `fusing saddle census moved: ${fusingTotal}, measured 17`);
-  assert.ok(bothParent <= 5, `both-parent hairline fuses grew: ${bothParent}, measured 3`);
+  // Measured on this exact fixture 2026-08-23: 19 fusing saddles across the two 16-window sweeps, 11 of them with both corners on parent land; the bands leave room for single-cell float drift but trip on growth. Was 17 and 3 on 2026-08-22. The 3 to 11 is the ORACLE, not the terrain: counted against the blurred parent surface this same field still reads 3, and the parent's own cells simply call more cells land.
+  assert.ok(fusingTotal >= 8 && fusingTotal <= 26, `fusing saddle census moved: ${fusingTotal}, measured 19`);
+  assert.ok(bothParent <= 16, `both-parent hairline fuses grew: ${bothParent}, measured 11`);
 });
 
 test("saddle census: the two known genuine two-landmass fuses are present and pinned (#397)", () => {

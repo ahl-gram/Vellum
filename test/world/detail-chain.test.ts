@@ -16,7 +16,7 @@ import { buildHeightfield, MAX_DETAIL, type UvWindow } from "../../src/terrain/h
 import { pickSeaLevel } from "../../src/terrain/sealevel.ts";
 import { defaultRecipe } from "../../src/world/generate.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
-import { floorToParent, parentSurfaceOnWindow, rejectBridges } from "../../src/terrain/detail-guarantees.ts";
+import { floorToParent, parentCellsOnWindow, parentSurfaceOnWindow, rejectBridges } from "../../src/terrain/detail-guarantees.ts";
 
 const SEED = 42;
 const recipe = defaultRecipe(SEED);
@@ -214,7 +214,7 @@ test("two zoom routes to the same window produce a byte-identical field (#398)",
     fa.w,
     fa.h,
   );
-  const routedField = rejectBridges(routedSurface, floorToParent(bare, routedSurface), SEA);
+  const routedField = rejectBridges(routedSurface, routedSurface, floorToParent(bare, routedSurface), SEA);
   let differing = 0;
   for (let i = 0; i < routedField.data.length; i++) {
     if (routedField.data[i] !== fa.data[i]) differing++;
@@ -242,10 +242,12 @@ test("the atlas window chains, at the depth its own size implies (#398)", () => 
 
   const field = buildChainedField(specFor(atlas));
   const fromWorld = parentSurfaceOnWindow(world, FULL_WINDOW, atlas, field.w, field.h);
+  const worldCells = parentCellsOnWindow(world, FULL_WINDOW, atlas, field.w, field.h);
   let land = 0;
   for (let i = 0; i < fromWorld.data.length; i++) {
     const pv = fromWorld.data[i] as number;
     if (!Number.isFinite(pv) || pv <= SEA) continue;
+    if (!((worldCells.data[i] as number) > SEA)) continue;
     land++;
     assert.ok((field.data[i] as number) > SEA, `world-chart land sank on the atlas window at cell ${i}`);
   }
@@ -269,7 +271,7 @@ test("the detail level never exceeds what buildHeightfield accepts (#398)", () =
   );
 });
 
-test("the chain protects every link: no land sinks, band to band and end to end (#398)", () => {
+test("the chain protects every link: no land sinks, band to band and end to end (#398, narrowed by #443)", () => {
   const cache = createChainCache();
   const target = lodWindowFor(0.5, 0.4375, 0.125);
   const chain = [target, ...ancestorWindows(target)];
@@ -283,10 +285,12 @@ test("the chain protects every link: no land sinks, band to band and end to end 
     const child = buildChainedField(specFor(childWindow), cache);
     const parent = buildChainedField(specFor(parentWindow), cache);
     const surface = parentSurfaceOnWindow(parent, parentWindow, childWindow, child.w, child.h);
+    const parentCells = parentCellsOnWindow(parent, parentWindow, childWindow, child.w, child.h);
     const bare = bareFieldFor(childWindow, child.w, child.h);
     for (let i = 0; i < surface.data.length; i++) {
       const pv = surface.data[i] as number;
       if (!Number.isFinite(pv) || pv <= SEA) continue;
+      if (!((parentCells.data[i] as number) > SEA)) continue;
       checkedLinks++;
       if ((bare.data[i] as number) <= SEA) sinkableSeen++;
       assert.ok(
@@ -300,10 +304,12 @@ test("the chain protects every link: no land sinks, band to band and end to end 
 
   const deep = buildChainedField(specFor(target), cache);
   const fromWorld = parentSurfaceOnWindow(world, FULL_WINDOW, target, deep.w, deep.h);
+  const worldCells = parentCellsOnWindow(world, FULL_WINDOW, target, deep.w, deep.h);
   let transitive = 0;
   for (let i = 0; i < fromWorld.data.length; i++) {
     const pv = fromWorld.data[i] as number;
     if (!Number.isFinite(pv) || pv <= SEA) continue;
+    if (!((worldCells.data[i] as number) > SEA)) continue;
     transitive++;
     assert.ok((deep.data[i] as number) > SEA, `world-chart land sank by band 3 at cell ${i}`);
   }
@@ -311,7 +317,7 @@ test("the chain protects every link: no land sinks, band to band and end to end 
 });
 
 test("the chain never fuses two landmasses of its own coarse reference (#398)", () => {
-  // The reference is the ancestor floor the chain actually rejects against, which is what rejectBridges can enforce. It is NOT the world chart: resampling cannot hold a one-cell strait, so a coarse field redrawn finer can close a channel and join two islands before any of this runs. That defect and its measurements are #443; the guarantee below is the one this construction really makes.
+  // The UNGATED max, which the chain no longer floors against nor partitions by since #443: kept as #398's weaker historical claim, with the world chart's own partition guarded in detail-chain-world.test.ts.
   const seed = 2;
   const archipelago = defaultRecipe(seed);
   const parentWorld = buildHeightfield({ seed, gridW: 320, gridH: 240, mapType: archipelago.mapType });
