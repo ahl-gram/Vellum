@@ -20,6 +20,16 @@ const SAME_TOWN_TODAY: PlateSpec = { index: 0, year: 1218 };
 
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
+/** Declaration blocks whose selector LIST contains `selector`, joined; see the twin in reading-frame.test.ts for why membership beats a literal anchor. */
+function declarationsFor(css: string, selector: string): string {
+  const src = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const out: string[] = [];
+  for (const m of src.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    if (m[1]!.split(",").map((s) => s.trim()).includes(selector)) out.push(m[2]!);
+  }
+  return out.join("\n");
+}
+
 function harness() {
   const fetched: PlateSpec[] = [];
   const revoked: string[] = [];
@@ -174,7 +184,10 @@ test("#402 a late fetch from a superseded world is dropped, not painted", async 
 
 test("#442 the unfurl uses a BACKWARDS fill, so the plate's hover lift survives the reveal", () => {
   const css = readFileSync(resolve(REPO, "public/reading-room/index.css"), "utf8");
-  const rule = css.match(/\.rr-prospect img\s*\{[^}]*\}/)?.[0];
+  // Selector-list membership, not a literal `\.rr-prospect img\s*\{` anchor: a comma after
+  // the selector defeats the anchor and the assertions below silently stop checking
+  // (guard-prover found exactly that shape on .rf-told, 2026-08-23).
+  const rule = declarationsFor(css, ".rr-prospect img");
   assert.ok(rule, "the plate carries an image rule");
   const anim = rule.match(/animation:[^;]*;/)?.[0];
   assert.ok(anim, "and an entrance animation");
@@ -189,11 +202,13 @@ test("#442 the unfurl uses a BACKWARDS fill, so the plate's hover lift survives 
   const keyframes = css.match(new RegExp(`@keyframes ${name}\\s*\\{(?:[^{}]|\\{[^{}]*\\})*\\}`))?.[0];
   assert.ok(keyframes, `the reveal's keyframes (${name}) are here`);
   assert.match(keyframes, /to\s*\{[^}]*transform:\s*none/, "the resting keyframe releases the transform");
-  assert.match(
-    keyframes,
-    /rotateX\(/,
-    "and it UNFURLS: the sheet drops open from its edge rather than sliding in (ruled 2026-08-22)",
-  );
+  // Presence of `rotateX(` is not enough: `rotateX(0deg)` in the opening frame satisfies a
+  // presence check while producing a plain fade, which is the ruling's "snapping in" all
+  // over again. The OPENING angle has to be non-zero for the sheet to drop open at all.
+  const from = keyframes.match(/from\s*\{[^}]*\}/)?.[0] ?? "";
+  const openingAngle = Number(/rotateX\((-?[\d.]+)deg\)/.exec(from)?.[1] ?? "0");
+  assert.notEqual(openingAngle, 0, `the unfurl opens at a real angle, not a fade dressed as one (got ${openingAngle}deg)`);
+  assert.ok(Math.abs(openingAngle) > 20, `and an angle you can see, not a token one (got ${openingAngle}deg)`);
   assert.match(rule, /transform-origin:\s*top center/, "anchored at the top edge, the way paperUnfurl's consumers are");
   assert.match(css, /\.rr-prospect a:hover img[^{]*\{[^}]*transform:/, "and the hover lift is a transform that must win");
 });

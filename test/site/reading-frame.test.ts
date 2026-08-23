@@ -33,6 +33,26 @@ const el = () => new El("div") as unknown as HTMLElement;
  * argued: a brace inside a string or a comment would miscount, which this stylesheet has
  * none of and which would cost a false alarm rather than a miss.
  */
+/**
+ * Every declaration block whose selector LIST contains `selector`, joined. A literal
+ * `\.rf-told\s*\{` anchor stops matching the moment a comma follows the class, so
+ * rewriting the rule as `.rf-told, .anything { max-height: 3rem }` slid a scroller past
+ * the check while it still reported red for an unrelated reason in the same test
+ * (guard-prover, 2026-08-23). Membership in the split list cannot be dodged that way.
+ * Blind spot, argued: it reads top-level rules only, so a declaration nested inside an
+ * at-rule is invisible here; that costs a miss on a nested rule, never a false alarm, and
+ * the whole-file scroller scan above covers the nesting case from the other side.
+ */
+function declarationsFor(css: string, selector: string): string {
+  const src = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const out: string[] = [];
+  for (const m of src.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const arms = m[1]!.split(",").map((s) => s.trim());
+    if (arms.includes(selector)) out.push(m[2]!);
+  }
+  return out.join("\n");
+}
+
 function mediaBlocks(css: string): string[] {
   const src = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const out: string[] = [];
@@ -171,7 +191,7 @@ test("#442 the live row is a MIRROR: it never writes into the journal the engine
 
 test("#442 the WRAPPER sticks and the bar keeps the unfurl: a transform on the sticky element unsticks it", () => {
   const css = read("public/reading-frame.css");
-  const sticky = css.match(/\.rf-instrument-strip\s*\{[^}]*\}/)?.[0];
+  const sticky = declarationsFor(css, ".rf-instrument-strip");
   assert.ok(sticky, "the wrapper carries a rule of its own");
   assert.match(sticky, /position:\s*sticky/, "it sticks");
   assert.match(sticky, /top:\s*0/, "to the viewport top; nothing above it is fixed, so there is no offset to clear");
@@ -220,11 +240,13 @@ test("#442 the mirror takes its SOURCE's voice: roman for an annal, the surveyor
 
 test("#442 the live row takes the shared gutter idiom and refuses the drop cap", () => {
   const css = read("public/reading-frame.css");
-  assert.match(css, /\.rf-told\s*\{[^}]*background:\s*var\(--parchment-panel\)/, "the stuck row is opaque: the journal must not read through it");
-  assert.match(css, /\.rf-told\s*\.cr-year\s*\{/, "it dresses the shared gutter column");
-  assert.match(css, /\.rf-told\[hidden\]\s*\{\s*display:\s*none/, "hidden means gone, not merely transparent");
+  const told = declarationsFor(css, ".rf-told");
+  assert.ok(told, "the live row carries a rule of its own");
+  assert.match(told, /background:\s*var\(--parchment-panel\)/, "the stuck row is opaque: the journal must not read through it");
+  assert.ok(declarationsFor(css, ".rf-told .cr-year"), "it dresses the shared gutter column");
+  assert.match(declarationsFor(css, ".rf-told[hidden]"), /display:\s*none/, "hidden means gone, not merely transparent");
   assert.doesNotMatch(css, /\.rf-told[^{]*\.cr-dc/, "the 2.1em initial never reaches the strip");
-  assert.doesNotMatch(css, /\.rf-told\s*\{[^}]*(max-height|overflow)/, "the live row is one row, never a scroller of its own");
+  assert.doesNotMatch(told, /max-height|overflow/, "the live row is one row, never a scroller of its own");
 });
 
 test("the instrument panel starts hidden and the ONE journal nests inside it (#219, fused at #220)", async () => {
