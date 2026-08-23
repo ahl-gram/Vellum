@@ -10,13 +10,12 @@ const stage = homeStage();
   path="/"
   tagline="an atelier of imaginary cartography"
 >
-<section class="landfall" aria-label="The chart of the Isle of Rahai, pannable and zoomable">
+<section class="landfall" aria-label={`The chart of ${stage.title}, pannable and zoomable`}>
   <div
     class="stage"
     id="lf-stage"
     tabindex="0"
-    role="application"
-    aria-label={`The chart of ${stage.title}. Drag to pan, scroll to zoom, keys plus, minus, and zero.`}
+    aria-label="Pan and zoom the chart: drag, scroll, or keys plus, minus, and zero"
     data-capital-name={stage.capital.name}
     data-capital-nx={String(stage.capital.nx)}
     data-capital-ny={String(stage.capital.ny)}

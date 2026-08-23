@@ -2,15 +2,14 @@ export type StageInputHandlers = {
   readonly pan: (dx: number, dy: number) => void;
   readonly press: () => void;
   readonly release: () => void;
-  readonly wheelZoom: (px: number, py: number, deltaY: number) => void;
+  /** Returns whether the zoom moved; an unconsumed wheel is left to the page scroll. */
+  readonly wheelZoom: (px: number, py: number, deltaY: number) => boolean;
   readonly pinch: (px: number, py: number, ratio: number) => void;
   readonly dive: (px: number, py: number) => void;
   readonly key: (key: string) => boolean;
 };
 
-// Touch policy for the interim page (#455): one finger scrolls the document
-// (touch-action: pan-y leaves it to the browser), two fingers drive the map,
-// any mouse button pans. Wheel always zooms at the cursor, the map convention.
+// Touch policy (#455): one finger scrolls the page (touch-action: pan-y), two fingers drive the map, any mouse button pans.
 export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void {
   const pointers = new Map<number, { x: number; y: number }>();
   let last: { x: number; y: number } | null = null;
@@ -63,9 +62,8 @@ export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void
   stage.addEventListener(
     "wheel",
     (e) => {
-      e.preventDefault();
       const p = local(e);
-      on.wheelZoom(p.x, p.y, e.deltaY);
+      if (on.wheelZoom(p.x, p.y, e.deltaY)) e.preventDefault();
     },
     { passive: false },
   );

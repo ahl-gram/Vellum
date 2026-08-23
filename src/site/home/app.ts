@@ -8,11 +8,13 @@ import {
   clampCam,
   closeIn,
   fitScale,
+  zoomTarget,
 } from "./camera.ts";
 import { bearingLine, type Capital } from "./coords.ts";
 import { bindStageInput } from "./input.ts";
 
-const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+const reduced = () => reducedQuery.matches;
 
 const stage = document.getElementById("lf-stage");
 const sheetEl = document.getElementById("lf-sheet");
@@ -20,11 +22,12 @@ const coordsEl = document.getElementById("lf-coords");
 const controlsEl = document.getElementById("lf-controls");
 
 if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
-  const capital: Capital = {
-    name: stage.dataset.capitalName ?? "",
-    nx: Number(stage.dataset.capitalNx),
-    ny: Number(stage.dataset.capitalNy),
-  };
+  const nx = Number(stage.dataset.capitalNx);
+  const ny = Number(stage.dataset.capitalNy);
+  const capital: Capital | null =
+    Number.isFinite(nx) && Number.isFinite(ny) && stage.dataset.capitalName !== undefined
+      ? { name: stage.dataset.capitalName, nx, ny }
+      : null;
   const aspect = SHEET.h / SHEET.w;
 
   const view = (): Box => {
@@ -33,8 +36,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
   };
   let fit = fitScale(view(), SHEET);
 
-  // The one mutable holder: it is gsap's tween target. All camera MATH stays in
-  // the pure module; this object only ever receives its results.
+  // gsap's tween target; the pure module owns all camera math, this only receives results.
   const cam = { x: 0, y: 0, s: 1 };
   const assign = (c: Cam) => {
     cam.x = c.x;
@@ -46,7 +48,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     sheetEl.style.transform = `translate(${cam.x}px, ${cam.y}px) scale(${cam.s})`;
     sheetEl.style.setProperty("--inv", String(1 / cam.s));
     stage.classList.toggle("close-in", closeIn(cam.s, fit));
-    if (coordsEl !== null) {
+    if (coordsEl !== null && capital !== null) {
       const c = centerFraction(cam, view(), SHEET);
       coordsEl.textContent = bearingLine(c.fx, c.fy, capital, aspect);
     }
@@ -59,7 +61,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
 
   const flyTo = (target: Cam, duration: number) => {
     gsap.killTweensOf(cam);
-    if (REDUCED || duration === 0) {
+    if (reduced() || duration === 0) {
       assign(clampCam(target, view(), SHEET, fit));
       apply();
       return;
@@ -67,12 +69,13 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     gsap.to(cam, { x: target.x, y: target.y, s: target.s, duration, ease: "power3.inOut", onUpdate: settle });
   };
 
-  const zoomBy = (factor: number, px?: number, py?: number, duration = 0.6) => {
+  const zoomBy = (factor: number, px?: number, py?: number, duration = 0.6): boolean => {
     const v = view();
     const at = { x: px ?? v.w / 2, y: py ?? v.h / 2 };
-    const fx = (at.x - cam.x) / (SHEET.w * cam.s);
-    const fy = (at.y - cam.y) / (SHEET.h * cam.s);
-    flyTo(camForCenter(fx, fy, cam.s * factor, v, SHEET, at), duration);
+    const target = zoomTarget(cam, factor, at, v, SHEET, fit);
+    const consumed = Math.abs(target.s - cam.s) > 1e-12;
+    if (consumed) flyTo(target, duration);
+    return consumed;
   };
 
   bindStageInput(stage, {
@@ -91,7 +94,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     key: (key) => {
       if (key === "+" || key === "=") return (zoomBy(1.5), true);
       if (key === "-") return (zoomBy(1 / 1.5), true);
-      if (key === "0") return (flyTo(camForCenter(0.5, 0.5, fit, view(), SHEET), REDUCED ? 0 : 1.2), true);
+      if (key === "0") return (flyTo(camForCenter(0.5, 0.5, fit, view(), SHEET), reduced() ? 0 : 1.2), true);
       return false;
     },
   });
@@ -100,7 +103,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
   document.getElementById("lf-out")?.addEventListener("click", () => zoomBy(1 / 1.5));
   document
     .getElementById("lf-home")
-    ?.addEventListener("click", () => flyTo(camForCenter(0.5, 0.5, fit, view(), SHEET), REDUCED ? 0 : 1.2));
+    ?.addEventListener("click", () => flyTo(camForCenter(0.5, 0.5, fit, view(), SHEET), reduced() ? 0 : 1.2));
 
   new ResizeObserver(() => {
     fit = fitScale(view(), SHEET);

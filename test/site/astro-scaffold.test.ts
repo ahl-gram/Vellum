@@ -547,7 +547,6 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
     const html = page(p.route);
     if (p.inlineScript !== undefined) {
       const scripts = [...html.matchAll(/<script\b/g)];
-      // Home since #455: the stage's module twin PLUS the #289 inline intercept, and nothing else.
       const expected = p.scriptSrc === undefined ? 1 : 2;
       assert.equal(scripts.length, expected, `${p.route} carries exactly ${expected} script(s)`);
       assert.ok(html.includes(p.inlineScript), `${p.route} script targets ${p.inlineScript}`);
@@ -579,9 +578,8 @@ test("the cartouche hero: frame, hook, seed form, chart plate, fused caption, in
     "drawn in the antique manner",
     "stroke for stroke",
   ];
-  // Search resumes after each marker: the landfall stage (#455) embeds the hero chart's
-  // src a first time above the cartouche, and the pin is the HERO's order, not first use.
-  let at = -1;
+  // Anchored at the cartouche and resuming after each marker: the stage above legitimately embeds the hero chart's src first (#455).
+  let at = html.indexOf('class="cartouche"') - 1;
   for (const marker of order) {
     const next = html.indexOf(marker, at + 1);
     assert.ok(next > at, `home hero keeps its order at ${marker}`);

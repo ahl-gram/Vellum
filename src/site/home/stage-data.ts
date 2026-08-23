@@ -17,8 +17,7 @@ export type StageData = {
   readonly dots: ReadonlyArray<StageDot>;
 };
 
-// Build-time only (the .astro frontmatter): app.ts must never import this module,
-// or the whole engine graph rides into the home bundle.
+// Build-time only, imported by the .astro frontmatter; the import-boundary guard in landfall-stage.test.ts keeps it out of the client bundle.
 const SHEET_W = 1500;
 
 let cached: StageData | undefined;

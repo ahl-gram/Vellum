@@ -12,14 +12,13 @@ import {
   clampCam,
   centerFraction,
   closeIn,
+  zoomTarget,
 } from "../../src/site/home/camera.ts";
 import { bearingLine, LEAGUES_PER_SHEET } from "../../src/site/home/coords.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 
-// Landfall Sub 1 (#455): the stage and the camera. The marks are SERVER-RENDERED from the
-// engine's own place manifest, never a checked-in dump, and the camera is pure math over
-// a cam {x, y, s} so every clamp and flight target is unit-testable without a browser.
+// Landfall Sub 1 (#455): the stage, the marks derived from the place manifest, and the pure camera.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
@@ -102,6 +101,44 @@ test("bearingLine speaks leagues and sixteen winds from the capital (#455)", () 
   assert.equal(north, "10 leagues N of Laukuwelua");
   const nearby = bearingLine(0.512, 0.41, capital, aspect);
   assert.equal(nearby, "at Laukuwelua, the capital", "inside the harbor rounds to home");
+});
+
+test("zoomTarget clamps the scale BEFORE anchoring, so the cursor point never drifts at the limits (#456 skeptic finding 1)", () => {
+  const view = { w: 1280, h: 800 };
+  const fit = fitScale(view, SHEET);
+  const at = { x: 640, y: 400 };
+  const under = (cam: { x: number; y: number; s: number }) => ({
+    fx: (at.x - cam.x) / (SHEET.w * cam.s),
+    fy: (at.y - cam.y) / (SHEET.h * cam.s),
+  });
+
+  const ceiling = { x: 640 - 0.5 * SHEET.w * MAX_SCALE, y: 400 - 0.5 * SHEET.h * MAX_SCALE, s: MAX_SCALE };
+  const pastCeiling = zoomTarget(ceiling, 1.5, at, view, SHEET, fit);
+  assert.equal(pastCeiling.s, MAX_SCALE, "scale holds at the ceiling");
+  assert.ok(Math.abs(pastCeiling.x - ceiling.x) < 1e-9, "x holds at the ceiling: no walk under a motionless cursor");
+  assert.ok(Math.abs(pastCeiling.y - ceiling.y) < 1e-9, "y holds at the ceiling");
+
+  const nearCeiling = { ...camForCenter(0.5, 0.5, MAX_SCALE / 1.2, view, SHEET) };
+  const clamped = zoomTarget(nearCeiling, 2, at, view, SHEET, fit);
+  assert.equal(clamped.s, MAX_SCALE, "the notch that crosses the ceiling clamps");
+  const before = under(nearCeiling);
+  const after = under(clamped);
+  assert.ok(Math.abs(after.fx - before.fx) < 1e-9, "the sheet fraction under the cursor is unchanged through the clamp");
+  assert.ok(Math.abs(after.fy - before.fy) < 1e-9, "same for fy");
+
+  const floor = { ...camForCenter(0.5, 0.5, fit * MIN_FIT_FACTOR, view, SHEET) };
+  const pastFloor = zoomTarget(floor, 0.5, at, view, SHEET, fit);
+  assert.ok(Math.abs(pastFloor.s - fit * MIN_FIT_FACTOR) < 1e-12, "scale holds at the floor");
+  assert.ok(Math.abs(pastFloor.x - floor.x) < 1e-9, "x holds at the floor: repeated wheel events cannot walk the sheet");
+  assert.ok(Math.abs(pastFloor.y - floor.y) < 1e-9, "y holds at the floor");
+});
+
+test("the client bundle never imports the engine: stage-data stays build-time only (#456 skeptic finding 8)", () => {
+  for (const mod of ["app.ts", "camera.ts", "coords.ts", "input.ts"]) {
+    const src = read(`src/site/home/${mod}`);
+    assert.ok(!src.includes("stage-data"), `src/site/home/${mod} must not import stage-data (the engine graph rides in with it)`);
+    assert.ok(!src.includes("world/generate"), `src/site/home/${mod} must not import the engine directly`);
+  }
 });
 
 test("home mounts the stage, maps the manifest marks, and loads its bundle twin (#455)", () => {
