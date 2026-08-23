@@ -142,7 +142,8 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   position: absolute; left: 0; top: 0;
   width: 1500px; height: 1157.931px;
   transform-origin: 0 0; will-change: transform;
-  box-shadow: var(--sheet-shadow);
+  /* The house ink shadow is invisible dark-on-dark, so the deep adds a lamplight bloom (Alex's pick from measured candidates, PR #456; provisional like all dark-ground feel). */
+  box-shadow: var(--sheet-shadow), 0 0 90px 14px rgb(from var(--parchment) r g b / 0.5);
 }
 .landfall .stage.cam .lf-chart { position: static; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; }
 .lf-marks { position: absolute; inset: 0; }
