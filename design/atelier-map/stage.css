@@ -1,0 +1,354 @@
+/* Atelier Map concept — stage: the sheet, the marks, the floating chrome, the card. */
+
+.stage {
+  position: fixed; inset: 0; z-index: 1;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+.stage.dragging { cursor: grabbing; }
+
+.sheet {
+  position: absolute; left: 0; top: 0;
+  width: 1500px; height: 1157.93px;
+  transform-origin: 0 0;
+  will-change: transform;
+  filter: drop-shadow(0 18px 60px rgb(from var(--chart-ink) r g b / 0.55));
+}
+.sheet .chart {
+  display: block; width: 100%; height: 100%;
+  user-select: none; -webkit-user-drag: none;
+}
+
+/* ---- Marks: settlements and stations ---- */
+
+.marks { position: absolute; inset: 0; }
+
+.mark {
+  position: absolute;
+  transform: translate(-50%, -50%) scale(var(--inv, 1));
+  transform-origin: center;
+}
+
+.dot {
+  pointer-events: none;
+  width: 7px; height: 7px;
+  opacity: 0; transition: opacity 0.5s ease;
+}
+.stage.close-in .dot { opacity: 1; }
+.dot .dot-glyph {
+  position: absolute; inset: 0;
+  border: 1px solid var(--chart-ink); border-radius: 50%;
+  background: rgb(from var(--parchment-bright) r g b / 0.85);
+  box-shadow: 0 1px 3px rgb(from var(--chart-ink) r g b / 0.4);
+}
+.dot.ruined .dot-glyph { background: transparent; border-style: dashed; }
+.dot .dot-name {
+  position: absolute; top: 100%; left: 50%;
+  transform: translateX(-50%); margin-top: 2px;
+  font-family: var(--font-display); font-size: 8.5px; letter-spacing: 0.08em;
+  color: var(--chart-ink); white-space: nowrap;
+  text-shadow: 0 0 4px var(--chart-paper), 0 0 8px var(--chart-paper);
+}
+
+.station {
+  appearance: none; border: 0; background: none;
+  font: inherit; cursor: pointer;
+  width: 34px; height: 34px;
+}
+.station .station-glyph {
+  position: absolute; inset: 0; margin: auto;
+  width: 15px; height: 15px;
+  background: var(--ink-dark);
+  border: 1.5px solid var(--chart-paper);
+  outline: 1px solid var(--ink-dark);
+  transform: rotate(45deg);
+  box-shadow: 0 2px 6px rgb(from var(--chart-ink) r g b / 0.5);
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.station .station-slip {
+  position: absolute; top: calc(50% + 13px); left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  pointer-events: none;
+}
+.station .station-name {
+  font-family: var(--font-display); font-size: 13px; letter-spacing: 0.1em;
+  color: var(--chart-ink);
+  background: rgb(from var(--chart-paper) r g b / 0.88);
+  border: 1px solid var(--line-tan);
+  padding: 2px 8px 1px;
+  box-shadow: 0 1px 4px rgb(from var(--chart-ink) r g b / 0.3);
+  white-space: nowrap;
+}
+.station .station-verb {
+  font-family: var(--font-flourish); font-style: italic;
+  font-size: 10.5px; color: var(--ink-brown);
+  background: rgb(from var(--chart-paper) r g b / 0.75);
+  padding: 0 6px; white-space: nowrap;
+}
+.station:hover .station-glyph, .station:focus-visible .station-glyph {
+  background: var(--parchment-bright); transform: rotate(45deg) scale(1.25);
+}
+.station:hover .station-name, .station:focus-visible .station-name {
+  background: var(--parchment-bright);
+}
+.station.at-sea .station-glyph { border-radius: 50%; transform: none; }
+.station.at-sea:hover .station-glyph, .station.at-sea:focus-visible .station-glyph {
+  transform: scale(1.25);
+}
+.station .pulse {
+  position: absolute; inset: 0; margin: auto;
+  width: 15px; height: 15px;
+  border: 1px solid var(--ink-dark); transform: rotate(45deg);
+  animation: station-pulse 3.2s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes station-pulse {
+  0% { opacity: 0.7; scale: 1; }
+  70%, 100% { opacity: 0; scale: 2.6; }
+}
+
+/* ---- Notice stamp on the deep ---- */
+
+.notice-stamp {
+  position: fixed; left: 2rem; top: 46%; z-index: 2;
+  transform: rotate(-5deg);
+  border: 1px solid rgb(from var(--line-tan) r g b / 0.5);
+  outline: 3px double rgb(from var(--line-tan) r g b / 0.35);
+  outline-offset: 4px;
+  padding: 0.7rem 1rem;
+  opacity: 0.5;
+  pointer-events: none;
+  max-width: 15rem;
+}
+.stamp-head {
+  font-family: var(--font-display); font-size: 0.72rem;
+  letter-spacing: 0.28em; color: var(--line-tan);
+}
+.stamp-body {
+  font-family: var(--font-flourish); font-style: italic;
+  font-size: 0.8rem; color: var(--ink-faded); margin-top: 0.35rem; line-height: 1.5;
+}
+
+/* ---- Floating chrome ---- */
+
+/* Edge vignettes keep the parchment chrome legible when the pale chart fills the frame. */
+body::before, body::after {
+  content: ""; position: fixed; left: 0; right: 0; height: 11rem;
+  pointer-events: none; z-index: 5;
+}
+body::before { top: 0; background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.62), transparent); }
+body::after { bottom: 0; background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.62), transparent); }
+
+.chrome { position: fixed; z-index: 10; }
+.corner.tl { left: 1.6rem; top: 1.4rem; }
+.corner.tr { right: 1.6rem; top: 1.4rem; text-align: right; }
+.corner.bl { left: 1.6rem; bottom: 1.4rem; }
+.corner.br { right: 1.6rem; bottom: 1.4rem; }
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 2.1rem; letter-spacing: 0.12em; line-height: 1.15;
+}
+.wordmark a { color: var(--parchment-bright); text-decoration: none; }
+.tagline {
+  font-family: var(--font-flourish); font-style: italic;
+  font-size: 0.92rem; color: var(--line-tan);
+}
+.rooms {
+  margin-top: 0.55rem;
+  font-family: var(--font-display);
+  font-size: 0.72rem; letter-spacing: 0.14em;
+  color: var(--ink-faded);
+}
+.rooms span { margin: 0 0.35em; opacity: 0.7; }
+.rooms a {
+  display: inline-block;
+  color: var(--parchment); text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.rooms a:hover, .rooms a:focus-visible { color: var(--parchment-bright); transform: translateY(-2px); }
+
+.seedrow { max-width: 17rem; }
+.seed-hook {
+  display: block;
+  font-family: var(--font-flourish); font-style: italic;
+  font-size: 1.02rem; line-height: 1.45; color: var(--parchment);
+}
+.seed-controls {
+  display: flex; gap: 0.5rem; justify-content: flex-end;
+  margin-top: 0.55rem;
+}
+.seed-controls .control {
+  width: 6.2rem;
+  font-family: var(--font-body); font-size: 1rem;
+  color: var(--parchment-bright);
+  background: rgb(from var(--chart-ink) r g b / 0.45);
+  border: 1px solid var(--line-tan);
+  padding: 0.32rem 0.6rem;
+  text-align: center;
+}
+.seed-controls .control:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 1px; }
+.seed-controls .primary {
+  font-family: var(--font-display); font-size: 0.82rem; letter-spacing: 0.14em;
+  color: var(--ink-dark);
+  background: var(--control-gold);
+  border: 1px solid var(--line-tan);
+  padding: 0.32rem 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.seed-controls .primary:hover, .seed-controls .primary:focus-visible { background: var(--parchment-bright); }
+.seed-gloss {
+  margin-top: 0.4rem;
+  font-family: var(--font-flourish); font-style: italic;
+  font-size: 0.76rem; color: var(--ink-faded);
+}
+
+.folio-title {
+  font-family: var(--font-display);
+  font-size: 0.92rem; letter-spacing: 0.16em; color: var(--parchment);
+}
+.folio-sub {
+  font-family: var(--font-flourish); font-style: italic;
+  font-size: 0.8rem; color: var(--ink-faded); margin-top: 0.15rem;
+}
+.folio-coords {
+  font-family: var(--font-body); font-variant-caps: small-caps;
+  font-size: 0.85rem; letter-spacing: 0.06em; color: var(--line-tan);
+  margin-top: 0.35rem; min-height: 1.2em;
+}
+
+.zoomery { display: flex; flex-direction: column; gap: 0.4rem; }
+.zoom-btn {
+  width: 2.3rem; height: 2.3rem;
+  font-family: var(--font-body); font-size: 1.15rem; line-height: 1;
+  color: var(--parchment);
+  background: rgb(from var(--chart-ink) r g b / 0.5);
+  border: 1px solid var(--line-tan);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.zoom-btn:hover, .zoom-btn:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
+
+.legend {
+  left: 50%; bottom: 1.4rem; transform: translateX(-50%);
+  text-align: center;
+}
+.legend-head {
+  font-family: var(--font-flourish); font-style: italic;
+  font-size: 0.82rem; color: var(--ink-faded); margin-bottom: 0.45rem;
+}
+.legend-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+.legend-btn {
+  appearance: none; cursor: pointer;
+  background: rgb(from var(--chart-ink) r g b / 0.5);
+  border: 1px solid var(--line-tan);
+  padding: 0.4rem 0.9rem 0.35rem;
+  text-align: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.legend-btn:hover, .legend-btn:focus-visible { background: var(--ink-dark); transform: translateY(-2px); }
+.legend-btn .verb {
+  display: block;
+  font-family: var(--font-flourish); font-style: italic;
+  font-size: 0.78rem; color: var(--line-tan);
+}
+.legend-btn .room {
+  display: block;
+  font-family: var(--font-display); font-size: 0.86rem; letter-spacing: 0.12em;
+  color: var(--parchment);
+}
+
+button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--parchment-bright); outline-offset: 2px;
+}
+
+/* ---- The station card: a survey slip laid on the deep ---- */
+
+.card-slip {
+  position: fixed; z-index: 20;
+  right: 2rem; top: 50%; transform: translateY(-50%);
+  width: 22rem;
+  background: var(--parchment-panel);
+  color: var(--ink-dark);
+  border: 1px solid var(--line-tan);
+  outline: 3px double var(--line-faint);
+  outline-offset: 6px;
+  box-shadow: var(--sheet-shadow);
+  padding: 1.5rem 1.6rem 1.4rem;
+}
+.card-close {
+  position: absolute; right: 0.5rem; top: 0.4rem;
+  appearance: none; border: 0; background: none; cursor: pointer;
+  font-family: var(--font-body); font-size: 1.1rem; color: var(--ink-faded);
+  padding: 0.2rem 0.4rem;
+}
+.card-close:hover { color: var(--ink-dark); }
+.card-verb {
+  font-family: var(--font-flourish); font-style: italic;
+  font-size: 0.92rem; color: var(--ink-brown);
+}
+.card-title {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 1.6rem; letter-spacing: 0.06em; line-height: 1.2;
+  margin-top: 0.1rem;
+}
+.card-where {
+  font-family: var(--font-body); font-variant-caps: small-caps;
+  font-size: 0.82rem; letter-spacing: 0.08em; color: var(--ink-faded);
+  border-bottom: 1px solid var(--line-faint);
+  padding-bottom: 0.55rem; margin-top: 0.25rem;
+}
+.card-prose {
+  font-size: 1rem; line-height: 1.6; margin-top: 0.7rem;
+}
+.card-arms { display: flex; gap: 0.7rem; justify-content: center; margin-top: 0.8rem; }
+.card-arms[hidden] { display: none; }
+.card-arms img { width: 52px; height: auto; }
+.card-enter {
+  display: inline-block; margin-top: 1rem;
+  font-family: var(--font-display); font-size: 0.88rem; letter-spacing: 0.14em;
+  color: var(--chart-paper); background: var(--ink-dark);
+  border: 1px solid var(--chart-ink);
+  padding: 0.45rem 1rem;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+.card-enter:hover, .card-enter:focus-visible { background: var(--chart-ink); }
+
+/* ---- Narrow sheets ---- */
+
+@media (max-width: 900px) {
+  .notice-stamp { display: none; }
+  .rooms { display: none; }
+  .corner.tl { left: 1rem; top: 0.9rem; }
+  .corner.tr { right: 1rem; top: 0.9rem; }
+  .corner.bl { display: none; }
+  .corner.br { right: 1rem; bottom: 10rem; }
+  .wordmark { font-size: 1.5rem; }
+  .tagline { font-size: 0.78rem; }
+  .seedrow { max-width: 12rem; }
+  .seed-hook { font-size: 0.85rem; }
+  .seed-gloss { display: none; }
+  .seed-controls .control { width: 4.6rem; }
+  .legend { width: 100%; bottom: 0; padding: 0.6rem 0.8rem 0.8rem;
+    background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.85), transparent); }
+  .legend-head { font-size: 0.74rem; margin-bottom: 0.3rem; }
+  .legend-row { gap: 0.4rem; }
+  .legend-btn { padding: 0.3rem 0.6rem 0.25rem; }
+  .legend-btn .verb { font-size: 0.7rem; }
+  .legend-btn .room { font-size: 0.74rem; }
+  .card-slip {
+    right: 0; left: 0; top: auto; bottom: 0; transform: none;
+    width: 100%; outline-offset: -8px;
+    padding: 1.2rem 1.3rem 1.1rem;
+  }
+  .card-arms img { width: 42px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .station .pulse { animation: none; opacity: 0; }
+  .rooms a, .legend-btn, .station .station-glyph { transition: none; }
+}

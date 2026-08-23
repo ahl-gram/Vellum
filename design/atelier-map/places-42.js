@@ -1,0 +1,246 @@
+window.PLACES_42 = {
+ "title": {
+  "title": "The Isle of Rahai",
+  "subtitle": "Being a true & faithful chart of these waters, as surveyed by Taiki the Wayfarer in the year 1059 of the Cedar Age",
+  "year": 1059
+ },
+ "presentYear": 1059,
+ "widthPx": 1200,
+ "heightPx": 926.1442006269592,
+ "places": [
+  {
+   "name": "Laukuwelua",
+   "kind": "capital",
+   "founded": 451,
+   "ruined": false,
+   "seat": true,
+   "nx": 0.51,
+   "ny": 0.4094
+  },
+  {
+   "name": "Paukilua",
+   "kind": "town",
+   "founded": 689,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.4216,
+   "ny": 0.6867
+  },
+  {
+   "name": "Weki",
+   "kind": "town",
+   "founded": 658,
+   "ruined": false,
+   "seat": true,
+   "nx": 0.3103,
+   "ny": 0.5906
+  },
+  {
+   "name": "Naukoa",
+   "kind": "town",
+   "founded": 676,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.7325,
+   "ny": 0.3836
+  },
+  {
+   "name": "Nailo",
+   "kind": "town",
+   "founded": 552,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.2903,
+   "ny": 0.4686
+  },
+  {
+   "name": "Loatunui",
+   "kind": "town",
+   "founded": 623,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.5642,
+   "ny": 0.439
+  },
+  {
+   "name": "Lamahai",
+   "kind": "town",
+   "founded": 597,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.5528,
+   "ny": 0.694
+  },
+  {
+   "name": "Noloatatani",
+   "kind": "town",
+   "founded": 710,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.5242,
+   "ny": 0.6571
+  },
+  {
+   "name": "Toatauhe",
+   "kind": "town",
+   "founded": 642,
+   "ruined": false,
+   "seat": true,
+   "nx": 0.5727,
+   "ny": 0.731
+  },
+  {
+   "name": "Waun",
+   "kind": "town",
+   "founded": 602,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.6441,
+   "ny": 0.2764
+  },
+  {
+   "name": "Lokai",
+   "kind": "village",
+   "founded": 885,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.5813,
+   "ny": 0.4279
+  },
+  {
+   "name": "Rauhelunui",
+   "kind": "village",
+   "founded": 826,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.3132,
+   "ny": 0.6719
+  },
+  {
+   "name": "Kai",
+   "kind": "village",
+   "founded": 767,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.5157,
+   "ny": 0.184
+  },
+  {
+   "name": "Pong",
+   "kind": "village",
+   "founded": 842,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.4615,
+   "ny": 0.2912
+  },
+  {
+   "name": "Nanawotani",
+   "kind": "village",
+   "founded": 820,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.4301,
+   "ny": 0.5055
+  },
+  {
+   "name": "Poalo",
+   "kind": "village",
+   "founded": 851,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.239,
+   "ny": 0.3799
+  },
+  {
+   "name": "Pelo",
+   "kind": "village",
+   "founded": 854,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.7097,
+   "ny": 0.2838
+  },
+  {
+   "name": "Won",
+   "kind": "village",
+   "founded": 854,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.7182,
+   "ny": 0.6534
+  },
+  {
+   "name": "Nurunui",
+   "kind": "village",
+   "founded": 807,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.3074,
+   "ny": 0.2542
+  },
+  {
+   "name": "Laihoanui",
+   "kind": "village",
+   "founded": 920,
+   "ruined": true,
+   "seat": false,
+   "nx": 0.7439,
+   "ny": 0.2912
+  },
+  {
+   "name": "Kehenainui",
+   "kind": "village",
+   "founded": 848,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.4244,
+   "ny": 0.1544
+  },
+  {
+   "name": "Pale",
+   "kind": "village",
+   "founded": 824,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.5699,
+   "ny": 0.1877
+  },
+  {
+   "name": "Homaitani",
+   "kind": "village",
+   "founded": 931,
+   "ruined": true,
+   "seat": false,
+   "nx": 0.7724,
+   "ny": 0.5869
+  },
+  {
+   "name": "Wuwatau",
+   "kind": "village",
+   "founded": 914,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.5357,
+   "ny": 0.4021
+  },
+  {
+   "name": "Tewetulua",
+   "kind": "village",
+   "founded": 750,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.1021,
+   "ny": 0.4205
+  },
+  {
+   "name": "Haireno",
+   "kind": "village",
+   "founded": 860,
+   "ruined": false,
+   "seat": false,
+   "nx": 0.4387,
+   "ny": 0.4094
+  }
+ ]
+};
