@@ -112,7 +112,7 @@ function fusedCells(wc: WindowCase, field: Field): number {
   return parentFusion(field, wc.partition, wc.sea).cells;
 }
 
-// Narrowed by #443. The floor covers a cell where the parent's OWN cell is land AND its interpolated surface still stands above the waterline; where only the interpolation rises, the parent charts water and the child may draw water. The landmass guard below is what keeps that narrowing honest: a shore may move inside its own parent cell, it may not disappear.
+// Narrowed by #443. The floor covers a cell where the parent's OWN cell is land AND its interpolated surface still stands above the waterline; where only the interpolation rises, the parent charts water and the child may draw water. The landmass guard below is what bounds that narrowing.
 test("monotone floor: parent land never sinks in the adjusted child, and the guard is not vacuous (#397, narrowed by #443)", () => {
   for (const seed of SWEEP_SEEDS) {
     let drownedNoFloor = 0;
@@ -132,7 +132,7 @@ test("monotone floor: parent land never sinks in the adjusted child, and the gua
         }
       }
     }
-    // Measured on this exact fixture 2026-08-22: seed 42 drowns 478 of 59855 parent-land cells without the floor, seed 23 drowns 381 of 43318; floors sit far below so cross-platform float drift cannot flip them.
+    // Re-measured on this fixture 2026-08-23, after #443 changed what counts as parent land: seed 42 drowns 333 of 59189 parent-land cells without the floor, seed 23 drowns 255 of 42779. Was 478 of 59855 and 381 of 43318 against the blurred surface.
     assert.ok(parentLandCells > 20000, `seed ${seed}: only ${parentLandCells} parent-land cells checked`);
     assert.ok(
       drownedNoFloor >= 150,
@@ -141,7 +141,8 @@ test("monotone floor: parent land never sinks in the adjusted child, and the gua
   }
 });
 
-test("no landmass the parent charts inside the window loses all its land (#443)", () => {
+// NOT an unconditional promise, and the sweep is the authority on how far it reaches: `node scripts/region-detail-partition.ts` measures 3 world landmasses losing every cell at band 1 and 2 at band 3 on the detail arm, against 1 and 4 on the bare arm, every one of them a sliver of 4 to 24 region cells out of 76800 clipped at a window edge. What holds without exception, and what this guard pins, is the fixture below.
+test("no landmass the parent charts inside these windows loses all its land (#443)", () => {
   for (const seed of SWEEP_SEEDS) {
     let masses = 0;
     for (const cy of LATTICE) {
@@ -188,7 +189,7 @@ test("the gate and the rejection each do real work on real terrain, and neither 
     gatedFusions += fusedCells(wc, wc.floored);
     for (let i = 0; i < CW * CH; i++) {
       if (wc.floored.data[i] !== wc.adjusted.data[i]) rejectedCells++;
-      // The gate's own footprint: the parent charts water here and its interpolated surface still stands above the waterline, which is the exact set #443 says must take no floor. The fused-cell totals below cannot see this set at all.
+      // The gate's own footprint: the parent charts water and its interpolated surface still stands above the waterline, the exact set #443 says must take no floor.
       if ((wc.cells.data[i] as number) > wc.sea) continue;
       if (!((wc.surface.data[i] as number) > wc.sea)) continue;
       gateFootprint++;
@@ -202,10 +203,10 @@ test("the gate and the rejection each do real work on real terrain, and neither 
     );
   }
   assert.equal(gateFloored, 0, `the floor reached ${gateFloored} cells the parent's own cell charts as water`);
-  // Measured 2026-08-23 across the four pinned windows: 327 cells sit in the gate's footprint and it moves the waterline at 75 of them. The ungated floor fuses 1173 cells and the gated floor still fuses 1173, so on these fixtures the gate is not what un-merges them, rejection is, and it takes 55 cells to do it. That is exactly why gateFloored is asserted directly: the fusion totals cannot see the gate at all.
+  // Measured 2026-08-23 across the four pinned windows: 327 cells in the gate's footprint, waterline moved at 75, ungated fusions 1173 against gated 1173 (so rejection un-merges these, not the gate, which is why gateFloored is asserted directly) and 55 cells rejected.
   assert.ok(gateFootprint >= 200, `only ${gateFootprint} cells in the gate's footprint, this guard is near-vacuous`);
   assert.ok(sunkByGate >= 40, `the gate moved the waterline at only ${sunkByGate} cells, so it is doing nothing here`);
-  
+
   assert.ok(ungatedFusions >= 100, `the ungated floor barely merges (${ungatedFusions}), the fixture is vacuous`);
   assert.ok(gatedFusions >= 100, `the gated floor barely merges (${gatedFusions}), rejection has nothing to do`);
   assert.ok(rejectedCells >= 10, `rejection touched only ${rejectedCells} cells across the whole fixture`);

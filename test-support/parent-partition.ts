@@ -2,7 +2,8 @@ import type { Field } from "../src/core/grid.ts";
 import type { UvWindow } from "../src/terrain/heightfield.ts";
 import { labelLandmasses } from "../src/world/landmass.ts";
 
-/** The parent's own landmass id under each child cell, -1 where the parent is sea or does not cover the cell. Labelled on the parent's WHOLE grid, so one landmass entering the window twice stays one landmass, and resampled by rounding rather than by anything the construction under test also uses: a guard measured against a resampled reference shares its oracle with the defect, which is why 1428 green tests could not see #443. */
+// Independent of the INTERPOLATION, which is #443's defect class, and NOT of the nearest-cell choice: the land and water verdict is bit-identical to parentCellsOnWindow and has to be, since there is one right answer to which parent cell lies under a child cell (the rounding itself is pinned by hand against the parent grid in detail-guarantees.test.ts).
+/** The parent's own landmass id under each child cell, -1 where the parent is sea or does not cover the cell, labelled on the parent's WHOLE grid so one landmass entering the window twice stays one. */
 export function parentPartitionOnWindow(
   parent: Field,
   parentWindow: UvWindow,

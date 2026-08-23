@@ -106,7 +106,7 @@ export function createChainCache(capacity: number = CACHE_CAPACITY): ChainCache 
   };
 }
 
-/** The chain's coarse reference: what it floors against and what rejectBridges partitions. NaN means a cell no ancestor covers, so it must not win the max and must stay NaN when every ancestor abstains. */
+/** The chain's coarse reference: what it floors against. Since #443 it is NOT what rejectBridges partitions, which is each ancestor's own cells. NaN means a cell no ancestor covers, so it must not win the max and must stay NaN when every ancestor abstains. */
 export function maxOfSurfaces(surfaces: ReadonlyArray<Field>, w: number, h: number): Field {
   const data = new Float64Array(w * h).fill(NaN);
   for (const s of surfaces) {
@@ -158,7 +158,6 @@ export function buildChainedField(spec: ChainSpec, cache: ChainCache = createCha
     );
     const floors = surfaces.map((s, i) => gateToParentLand(s, cells[i] as Field, spec.seaLevel));
     const coarse = maxOfSurfaces(floors, spec.gridW, spec.gridH);
-    // ancestorWindows ends at the full window, so the last entry IS the world chart, and its land is the one thing rejection may never take.
     const worldCells = cells[cells.length - 1] as Field;
     out = floorToParent(bare, coarse);
     for (const nn of cells) out = rejectBridges(nn, worldCells, out, spec.seaLevel);

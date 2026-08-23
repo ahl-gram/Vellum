@@ -97,6 +97,35 @@ export function floorToParent(fine: Field, parentSurface: Field): Field {
   return fieldFrom(fine.w, fine.h, data);
 }
 
+function shoresTouched(
+  gainIds: Int32Array,
+  coarseIds: Int32Array,
+  w: number,
+  h: number,
+): Map<number, Set<number>> {
+  const touched = new Map<number, Set<number>>();
+  for (let i = 0; i < w * h; i++) {
+    const gid = gainIds[i] as number;
+    if (gid === -1) continue;
+    const x = i % w;
+    const y = (i / w) | 0;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
+      const cid = coarseIds[nx + ny * w] as number;
+      if (cid === -1) continue;
+      let set = touched.get(gid);
+      if (!set) {
+        set = new Set();
+        touched.set(gid, set);
+      }
+      set.add(cid);
+    }
+  }
+  return touched;
+}
+
 /** 4-connectivity throughout, matching labelLandmasses, is what makes anti-merge structural: any new-land path joining two landmasses is one gained component touching both. */
 export function rejectBridges(
   coarse: Field,
@@ -109,7 +138,6 @@ export function rejectBridges(
       `rejectBridges: field sizes differ (${coarse.w}x${coarse.h} vs ${fine.w}x${fine.h})`,
     );
   }
-  // A short immovable field reads as undefined, then NaN, then not-land, and every protected cell silently becomes rejectable.
   if (immovable.w !== fine.w || immovable.h !== fine.h) {
     throw new RangeError(
       `rejectBridges: immovable size differs (${immovable.w}x${immovable.h} vs ${fine.w}x${fine.h})`,
@@ -130,26 +158,7 @@ export function rejectBridges(
     }
   }
   const gainIds = labelComponents(gained, w, h, 4);
-  const touched = new Map<number, Set<number>>();
-  for (let i = 0; i < n; i++) {
-    const gid = gainIds[i] as number;
-    if (gid === -1) continue;
-    const x = i % w;
-    const y = (i / w) | 0;
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
-      const nx = x + dx;
-      const ny = y + dy;
-      if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
-      const cid = coarseIds[nx + ny * w] as number;
-      if (cid === -1) continue;
-      let set = touched.get(gid);
-      if (!set) {
-        set = new Set();
-        touched.set(gid, set);
-      }
-      set.add(cid);
-    }
-  }
+  const touched = shoresTouched(gainIds, coarseIds, w, h);
   const data = Float64Array.from(fine.data);
   for (let i = 0; i < n; i++) {
     const gid = gainIds[i] as number;

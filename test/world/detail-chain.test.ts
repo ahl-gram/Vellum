@@ -16,17 +16,7 @@ import { buildHeightfield, MAX_DETAIL, type UvWindow } from "../../src/terrain/h
 import { pickSeaLevel } from "../../src/terrain/sealevel.ts";
 import { defaultRecipe } from "../../src/world/generate.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
-import {
-  floorToParent,
-  parentCellsOnWindow,
-  parentSurfaceOnWindow,
-  rejectBridges,
-} from "../../src/terrain/detail-guarantees.ts";
-import {
-  parentFusion,
-  parentMassesLost,
-  parentPartitionOnWindow,
-} from "../../test-support/parent-partition.ts";
+import { floorToParent, parentCellsOnWindow, parentSurfaceOnWindow, rejectBridges } from "../../src/terrain/detail-guarantees.ts";
 
 const SEED = 42;
 const recipe = defaultRecipe(SEED);
@@ -328,7 +318,7 @@ test("the chain protects every link: no land sinks, band to band and end to end 
 });
 
 test("the chain never fuses two landmasses of its own coarse reference (#398)", () => {
-  // The reference is the ancestor floor the chain actually rejects against, which is what rejectBridges can enforce. It is NOT the world chart: resampling cannot hold a one-cell strait, so a coarse field redrawn finer can close a channel and join two islands before any of this runs. That defect and its measurements are #443; the guarantee below is the one this construction really makes.
+  // The reference here is the UNGATED max of ancestor surfaces, which is what #398 shipped and what this guard has always measured. Since #443 the chain neither floors against it (the surfaces are gated first) nor partitions against it (rejection reads each ancestor's own cells), so it is kept as the weaker historical claim: the world chart's own partition is guarded separately in test/world/detail-chain-world.test.ts and holds at zero.
   const seed = 2;
   const archipelago = defaultRecipe(seed);
   const parentWorld = buildHeightfield({ seed, gridW: 320, gridH: 240, mapType: archipelago.mapType });
@@ -370,113 +360,6 @@ test("the chain never fuses two landmasses of its own coarse reference (#398)", 
     controlFusions > 100,
     `without bridge rejection this fixture barely fuses, so the guard proves nothing: ${controlFusions}`,
   );
-});
-
-// One pinned band-3 window per seed where the world chart's own partition is at stake, from the census on #443: seed 42 (an island map) carries no strait at all, which is why the epic ran this far without seeing it.
-const WORLD_FUSION_WINDOWS: ReadonlyArray<readonly [number, number, number]> = [
-  [2, 0.75, 0.25],
-  [15, 0.375, 0.375],
-  [23, 0.5, 0.25],
-];
-
-type WorldCase = {
-  readonly window: UvWindow;
-  readonly partition: Int32Array;
-  readonly chained: Field;
-  readonly bare: Field;
-  readonly sea: number;
-};
-
-function worldCase(seed: number, cx: number, cy: number): WorldCase {
-  const r = defaultRecipe(seed);
-  const chart = buildHeightfield({ seed, gridW: 320, gridH: 240, mapType: r.mapType });
-  const sea = pickSeaLevel(chart, r.landFraction);
-  const window = lodWindowFor(cx, cy, 0.125);
-  const spec: ChainSpec = {
-    seed,
-    mapType: r.mapType,
-    window,
-    gridW: 320,
-    gridH: 240,
-    worldAspect: WORLD_ASPECT,
-    seaLevel: sea,
-  };
-  return {
-    window,
-    partition: parentPartitionOnWindow(chart, FULL_WINDOW, window, 320, 240, sea),
-    chained: buildChainedField(spec),
-    bare: buildHeightfield({
-      seed,
-      gridW: 320,
-      gridH: 240,
-      mapType: r.mapType,
-      window,
-      worldAspect: WORLD_ASPECT,
-      detail: detailForWindow(window),
-    }),
-    sea,
-  };
-}
-
-test("the chain never fuses two landmasses of the WORLD CHART, not merely of its own blurred reference (#443)", () => {
-  let controlPairs = 0;
-  for (const [seed, cx, cy] of WORLD_FUSION_WINDOWS) {
-    const c = worldCase(seed, cx, cy);
-    // The bare survey of the same window is the control: it is free to bridge, and it does, so a zero on the chained arm is a result rather than a fixture with nothing to join.
-    controlPairs += parentFusion(c.bare, c.partition, c.sea).pairs;
-    const fused = parentFusion(c.chained, c.partition, c.sea);
-    assert.equal(
-      fused.pairs,
-      0,
-      `seed ${seed} window ${cx},${cy}: the chain joined world landmasses ${JSON.stringify(fused.groups)}`,
-    );
-  }
-  // Measured 2026-08-22 on these three windows: the bare arm bridges 4, 5 and 3 pairs.
-  assert.ok(controlPairs >= 6, `the bare control barely bridges here (${controlPairs}), so the guard proves nothing`);
-});
-
-test("no landmass the world chart draws inside the window vanishes as the Glass descends (#443)", () => {
-  for (const [seed, cx, cy] of WORLD_FUSION_WINDOWS) {
-    const c = worldCase(seed, cx, cy);
-    const present = new Set(Array.from(c.partition).filter((id) => id >= 0));
-    assert.ok(present.size >= 3, `seed ${seed}: only ${present.size} world landmasses reach this window`);
-    assert.deepEqual(
-      parentMassesLost(c.chained, c.partition, c.sea),
-      [],
-      `seed ${seed} window ${cx},${cy}: a world landmass lost every one of its cells`,
-    );
-  }
-});
-
-// The lift that stranded five river mouths on #443 came from an ancestor's resampled SURFACE, not from any cell of any ancestor. Cells over an ancestor's own land are excluded: a nearer band is entitled to hold land the world chart does not, and passing it down is the epic's whole point.
-test("the chain raises no cell that every ancestor and the survey alike draw as water (#443)", () => {
-  for (const [seed, cx, cy] of WORLD_FUSION_WINDOWS) {
-    const r = defaultRecipe(seed);
-    const c = worldCase(seed, cx, cy);
-    const cache = createChainCache();
-    const ancestorCells = ancestorWindows(c.window).map((aw) =>
-      parentCellsOnWindow(
-        buildChainedField(
-          { seed, mapType: r.mapType, window: aw, gridW: 320, gridH: 240, worldAspect: WORLD_ASPECT, seaLevel: c.sea },
-          cache,
-        ),
-        aw,
-        c.window,
-        320,
-        240,
-      ),
-    );
-    let candidates = 0;
-    let raised = 0;
-    for (let i = 0; i < c.chained.data.length; i++) {
-      if ((c.bare.data[i] as number) > c.sea) continue;
-      if (ancestorCells.some((f) => (f.data[i] as number) > c.sea)) continue;
-      candidates++;
-      if ((c.chained.data[i] as number) > c.sea) raised++;
-    }
-    assert.ok(candidates > 10000, `seed ${seed}: only ${candidates} all-water cells checked`);
-    assert.equal(raised, 0, `seed ${seed} window ${cx},${cy}: the chain raised ${raised} cells no ancestor charts as land`);
-  }
 });
 
 test("the cache serves siblings and never confuses two detail levels (#398)", () => {
