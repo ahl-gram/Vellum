@@ -28,8 +28,8 @@ export function wideView(view: Box, sheet: Box, fit: number): Cam {
   return camForCenter(0.5, 0.5, fit * WIDE_FACTOR, view, sheet);
 }
 
-export function landfallView(view: Box, sheet: Box, fit: number): Cam {
-  const scale = fit * (view.w < NARROW_VIEW_W ? NARROW_SCALE : WIDE_SCALE);
+export function landfallView(view: Box, sheet: Box, fit: number, viewportW: number): Cam {
+  const scale = fit * (viewportW < NARROW_VIEW_W ? NARROW_SCALE : WIDE_SCALE);
   return camForCenter(LANDFALL_FX, LANDFALL_FY, scale, view, sheet);
 }
 
@@ -45,6 +45,6 @@ export function markArrival(getStorage: () => Storage): void {
   try {
     getStorage().setItem(ARRIVED_KEY, "1");
   } catch {
-    // Ratified on #457: a blocked storage simply gets the ceremony each arrival.
+    /* unwritable storage: play every arrival */
   }
 }

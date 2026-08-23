@@ -27,37 +27,41 @@ export function veilMarkup(): string {
   </div>`;
 }
 
-export type CeremonyOptions = {
-  readonly doc: Document;
-  readonly chart: HTMLImageElement | null;
-  /** Carries the camera to the settled landfall view; 0 seconds means instantly. */
-  readonly land: (seconds: number) => void;
-  readonly random?: () => number;
-};
+function injectVeil(doc: Document): { root: HTMLElement; status: Element | null } {
+  const root = doc.createElement("div");
+  root.className = "veil";
+  root.id = "lf-veil";
+  root.innerHTML = veilMarkup();
+  doc.body.appendChild(root);
+  return { root, status: root.querySelector(".veil-status") };
+}
 
-export function playCeremony(opts: CeremonyOptions): void {
-  const { doc } = opts;
-  const roll = opts.random ?? Math.random;
-
-  const veil = doc.createElement("div");
-  veil.className = "veil";
-  veil.id = "lf-veil";
-  veil.innerHTML = veilMarkup();
-  doc.body.appendChild(veil);
-  const status = veil.querySelector(".veil-status");
-
+function startSounding(status: Element | null, roll: () => number): () => void {
   let fathoms = 0;
-  let over = false;
-  let holdTimer: ReturnType<typeof setTimeout> | undefined;
-  let gateTimer: ReturnType<typeof setTimeout> | undefined;
-  const began = performance.now();
-
   const ticker = setInterval(() => {
     if (fathoms < TARGET_FATHOMS && status !== null) {
       fathoms = nextSounding(fathoms, roll());
       status.textContent = soundingLabel(fathoms);
     }
   }, SOUNDING_TICK_MS);
+  return () => clearInterval(ticker);
+}
+
+export type CeremonyOptions = {
+  readonly doc: Document;
+  readonly chart: HTMLImageElement | null;
+  readonly land: (seconds: number) => void;
+  readonly random?: () => number;
+};
+
+export function playCeremony(opts: CeremonyOptions): void {
+  const { doc } = opts;
+  const veil = injectVeil(doc);
+  const stopSounding = startSounding(veil.status, opts.random ?? Math.random);
+  const began = performance.now();
+  let over = false;
+  let holdTimer: ReturnType<typeof setTimeout> | undefined;
+  let gateTimer: ReturnType<typeof setTimeout> | undefined;
 
   const unlisten = () => {
     doc.removeEventListener("pointerdown", skip, true);
@@ -66,11 +70,11 @@ export function playCeremony(opts: CeremonyOptions): void {
 
   const skip = () => {
     over = true;
-    clearInterval(ticker);
+    stopSounding();
     clearTimeout(holdTimer);
     clearTimeout(gateTimer);
     unlisten();
-    veil.remove();
+    veil.root.remove();
     opts.land(0);
   };
   doc.addEventListener("pointerdown", skip, true);
@@ -78,27 +82,24 @@ export function playCeremony(opts: CeremonyOptions): void {
 
   const lift = () => {
     if (over) return;
-    veil.classList.add("lifting");
-    veil.setAttribute("aria-hidden", "true");
-    veil.addEventListener(
-      "animationend",
-      () => {
-        unlisten();
-        veil.remove();
-      },
-      { once: true },
-    );
+    veil.root.classList.add("lifting");
+    veil.root.setAttribute("aria-hidden", "true");
+    // animationend bubbles up from the rose's own keyframes, and a slow first paint can put needle-settle's end after the hold, so only veil-lift may end the veil.
+    veil.root.addEventListener("animationend", (e) => {
+      if (e.animationName !== "veil-lift") return;
+      unlisten();
+      veil.root.remove();
+    });
     opts.land(FLIGHT_SECONDS);
   };
 
   const arrive = () => {
     if (over) return;
-    clearInterval(ticker);
-    if (status !== null) status.textContent = LANDFALL_LABEL;
+    stopSounding();
+    if (veil.status !== null) veil.status.textContent = LANDFALL_LABEL;
     holdTimer = setTimeout(lift, LANDFALL_HOLD_MS);
   };
 
-  // The lift waits on BOTH the chart's decode and the minimum hold, as the mockup's runCeremony does.
   const decoded = opts.chart?.decode !== undefined ? opts.chart.decode().catch(() => {}) : Promise.resolve();
   void decoded.then(() => {
     if (over) return;

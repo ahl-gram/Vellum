@@ -21,9 +21,7 @@ import {
 } from "../../src/site/home/ceremony.ts";
 import { veilMarkup } from "../../src/site/home/veil.ts";
 
-// Landfall Sub 2 (#457): the ceremony. The spec is the archived mockup (design/atelier-map,
-// PR #466), its runCeremony and its veil keyframes; the frequency, skip, and coverage
-// decisions are the 2026-08-23 ratified comment on #457.
+// Landfall Sub 2 (#457): the ceremony; the spec is the archived mockup (design/atelier-map, PR #466) and the 2026-08-23 ratified comment on #457.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
@@ -37,7 +35,7 @@ test("the ceremony keeps the mockup's clock and the chart's own number (#457)", 
   assert.equal(WIDE_FACTOR, 0.78, "the anchorage stands off at the mockup's 0.78 of fit");
 });
 
-test("the sounding counter climbs one to four fathoms a cast and never past 42 (#457)", () => {
+test("the sounding counter climbs by the cast, up to four fathoms and never past 42 (#457)", () => {
   assert.equal(nextSounding(0, 0.99), 4, "a high cast gains four fathoms");
   assert.equal(nextSounding(0, 0.01), 1, "a low cast still gains one");
   assert.equal(nextSounding(10, 0.5), 12, "a middle cast gains its ceil");
@@ -64,21 +62,20 @@ test("the wide anchorage and the landfall view frame the isle as the mockup's ca
   const wc = centerFraction(wide, view, SHEET);
   assert.ok(Math.abs(wc.fx - 0.5) < 1e-9 && Math.abs(wc.fy - 0.5) < 1e-9, "the anchorage centers the sheet");
 
-  const land = landfallView(view, SHEET, fit);
+  const land = landfallView(view, SHEET, fit, 1280);
   assert.ok(Math.abs(land.s - fit * 1.72) < 1e-12, "the wide landfall closes to 1.72 of fit");
   const lc = centerFraction(land, view, SHEET);
   assert.ok(Math.abs(lc.fx - 0.51) < 1e-9, "landfall centers the capital's water, fx 0.51");
   assert.ok(Math.abs(lc.fy - 0.485) < 1e-9, "landfall centers the capital's water, fy 0.485");
 
-  const narrow = landfallView({ w: 899, h: 800 }, SHEET, fitScale({ w: 899, h: 800 }, SHEET));
+  const narrow = landfallView(view, SHEET, fit, 899);
+  assert.ok(Math.abs(narrow.s - fit * 1.6) < 1e-12, "under a 900px viewport the landfall stands further off, 1.6 of fit");
+  const at900 = landfallView(view, SHEET, fit, 900);
+  assert.ok(Math.abs(at900.s - fit * 1.72) < 1e-12, "a 900px viewport takes the wide framing, as the mockup's v.w < 900 does");
+  const boxedWide = landfallView({ w: 880, h: 800 }, SHEET, fitScale({ w: 880, h: 800 }, SHEET), 928);
   assert.ok(
-    Math.abs(narrow.s - fitScale({ w: 899, h: 800 }, SHEET) * 1.6) < 1e-12,
-    "under 900px the landfall stands further off, 1.6 of fit",
-  );
-  const at900 = landfallView({ w: 900, h: 800 }, SHEET, fitScale({ w: 900, h: 800 }, SHEET));
-  assert.ok(
-    Math.abs(at900.s - fitScale({ w: 900, h: 800 }, SHEET) * 1.72) < 1e-12,
-    "900px itself takes the wide framing, as the mockup's v.w < 900 does",
+    Math.abs(boxedWide.s - fitScale({ w: 880, h: 800 }, SHEET) * 1.72) < 1e-12,
+    "the breakpoint reads the VIEWPORT, not the stage box: a 928px viewport whose boxed stage is 880 still frames wide (the mockup decides on window.innerWidth; PR #467 skeptic finding 1)",
   );
 });
 

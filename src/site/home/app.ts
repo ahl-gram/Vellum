@@ -126,10 +126,10 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     playCeremony({
       doc: document,
       chart: chart instanceof HTMLImageElement ? chart : null,
-      land: (seconds) => flyTo(landfallView(view(), SHEET, fit), seconds),
+      land: (seconds) => flyTo(landfallView(view(), SHEET, fit, window.innerWidth), seconds),
     });
   } else {
-    assign(landfallView(view(), SHEET, fit));
+    assign(landfallView(view(), SHEET, fit, window.innerWidth));
     settle();
   }
 }

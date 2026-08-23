@@ -1,4 +1,4 @@
-// Cartouche hero e2e (H0-H6, #289) plus the ceremony (H7-H11, #457): the homepage frame at desktop and a real 390px viewport, the hook, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), and the veil's arrival, skip, sitting memory, and reduced-motion story; self-contained with scoped deltas.
+// Cartouche hero e2e (H0-H6, #289) plus the ceremony (H7-H12, #457): the homepage frame at desktop and a real 390px viewport, the hook, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), and the veil's arrival, skips in both phases, sitting memory, reduced-motion and narrow-viewport stories; self-contained with scoped deltas.
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
 
@@ -6,16 +6,18 @@ export async function run(ctx) {
     await send("Input.dispatchKeyEvent", { type: "keyDown", key, code, windowsVirtualKeyCode: vk });
     await send("Input.dispatchKeyEvent", { type: "keyUp", key, code, windowsVirtualKeyCode: vk });
   };
-  // The settled landfall view, measured against the same stage box and constants the camera uses; null while the veil is up so pollers can wait it out.
-  const readLandfall = `(() => {
-    if (document.getElementById("lf-veil")) return { veil: true };
+  // The camera's state measured against the same stage box and constants it uses; the landfall breakpoint reads the VIEWPORT, as the mockup's v.w < 900 does (skeptic finding 1 on PR #467: the stage box is narrower than the viewport, so keying on it fired the narrow framing up to 947px).
+  const readCam = `(() => {
     const stage = document.getElementById("lf-stage");
     const sheet = document.getElementById("lf-sheet");
     if (!stage || !sheet) return null;
     const r = stage.getBoundingClientRect();
     const fit = Math.min(r.width / 1500, r.height / 1157.931) * 0.92;
     const m = new DOMMatrixReadOnly(getComputedStyle(sheet).transform);
-    return { veil: false, scale: m.a, expected: fit * (r.width < 900 ? 1.6 : 1.72) };
+    const v = document.getElementById("lf-veil");
+    return { veil: !!v, lifting: !!v && v.classList.contains("lifting"),
+      status: v ? (v.querySelector(".veil-status")?.textContent ?? null) : null,
+      scale: m.a, fit, expected: fit * (window.innerWidth < 900 ? 1.6 : 1.72) };
   })()`;
   const atLandfall = (s) => !!s && !s.veil && Math.abs(s.scale - s.expected) < 1e-3;
 
@@ -233,7 +235,7 @@ export async function run(ctx) {
 
   let landed7 = null;
   for (let i = 0; i < 160; i++) {
-    try { landed7 = await evaluate(readLandfall); } catch {}
+    try { landed7 = await evaluate(readCam); } catch {}
     if (atLandfall(landed7)) break;
     await sleep(75);
   }
@@ -244,25 +246,47 @@ export async function run(ctx) {
   );
   await shoot("home-landfall.png");
 
+  // H8's teeth: before the key the camera provably sits at the wide anchorage (0.78 of fit), so the jump to the landfall scale can only come from the skip's land(0).
   await evaluate(`sessionStorage.clear()`);
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
-  let up8 = false;
+  let before8 = null;
   for (let i = 0; i < 100; i++) {
-    try { up8 = await evaluate(`!!document.getElementById("lf-veil")`); } catch {}
-    if (up8) break;
+    try { before8 = await evaluate(readCam); } catch {}
+    if (before8 !== null && before8.veil) break;
     await sleep(60);
   }
+  const anchored8 = before8 !== null && before8.veil && Math.abs(before8.scale - before8.fit * 0.78) < 1e-3;
   await pressKey("Escape", "Escape", 27);
-  await sleep(150);
+  await sleep(120);
   let skipped = null;
-  try { skipped = await evaluate(readLandfall); } catch {}
-  await sleep(250);
-  let still = null;
-  try { still = await evaluate(readLandfall); } catch {}
+  try { skipped = await evaluate(readCam); } catch {}
   check(
-    "H8 a real key skips: the veil is gone at once and the camera sits at its destination, not mid-flight",
-    up8 && atLandfall(skipped) && still !== null && !still.veil && Math.abs(still.scale - skipped.scale) < 1e-9,
-    JSON.stringify({ up8, skipped, still }),
+    "H8 a real key skips the sounding: the veil is gone at once and the camera jumps from the anchorage to its destination",
+    anchored8 && atLandfall(skipped),
+    JSON.stringify({ before8, skipped }),
+  );
+
+  // The other half of the ratified class: a skip AFTER the sounding, while Landfall is read (the hold or the lift), must also land settled, not mid-flight.
+  await evaluate(`sessionStorage.clear()`);
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  let at8b = null;
+  for (let i = 0; i < 400; i++) {
+    try { at8b = await evaluate(readCam); } catch {}
+    if (at8b !== null && at8b.veil && at8b.status === "Landfall") break;
+    await sleep(25);
+  }
+  const held8b = at8b !== null && at8b.veil && at8b.status === "Landfall";
+  await pressKey("Escape", "Escape", 27);
+  await sleep(120);
+  let after8b = null;
+  try { after8b = await evaluate(readCam); } catch {}
+  await sleep(250);
+  let still8b = null;
+  try { still8b = await evaluate(readCam); } catch {}
+  check(
+    "H8b a real key during Landfall (hold or lift) also jumps straight to the settled view, never mid-flight",
+    held8b && atLandfall(after8b) && still8b !== null && !still8b.veil && Math.abs(still8b.scale - after8b.scale) < 1e-9,
+    JSON.stringify({ at8b, after8b, still8b }),
   );
 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
@@ -275,7 +299,7 @@ export async function run(ctx) {
   }
   await sleep(250);
   let returning = null;
-  try { returning = await evaluate(readLandfall); } catch {}
+  try { returning = await evaluate(readCam); } catch {}
   check(
     "H9 within a sitting the ceremony stands down: no veil, the camera opens settled on the isle",
     ready9 && atLandfall(returning),
@@ -294,13 +318,52 @@ export async function run(ctx) {
   }
   await sleep(250);
   let reduced10 = null;
-  try { reduced10 = await evaluate(readLandfall); } catch {}
+  try { reduced10 = await evaluate(readCam); } catch {}
   await send("Emulation.setEmulatedMedia", { features: [] });
   check(
     "H10 reduced motion asks for no ceremony at all: no veil, instant settled landfall (#457)",
     ready10 && atLandfall(reduced10),
     JSON.stringify(reduced10),
   );
+
+  // The veil at a REAL narrow viewport (skeptic finding 7 on PR #467): full coverage, no sideways scroll under it, and the narrow landfall after a real-key skip.
+  await setMobileViewport(390, 844);
+  await evaluate(`sessionStorage.clear()`);
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  let narrow12 = null;
+  for (let i = 0; i < 100; i++) {
+    try {
+      narrow12 = await evaluate(`(() => {
+        const v = document.getElementById("lf-veil");
+        if (!v) return null;
+        const r = v.getBoundingClientRect();
+        const corners = [[1, 1], [389, 1], [1, 843], [389, 843], [195, 422]]
+          .every(([x, y]) => { const el = document.elementFromPoint(x, y); return el !== null && v.contains(el); });
+        return { w: r.width, h: r.height, x: r.x, y: r.y, corners,
+          innerWidth: window.innerWidth, scrollW: document.documentElement.scrollWidth };
+      })()`);
+      if (narrow12 !== null) break;
+    } catch {}
+    await sleep(60);
+  }
+  check(
+    "H12a at 390px the veil covers the whole viewport, corners included, and nothing scrolls sideways beneath it",
+    narrow12 !== null && narrow12.corners && narrow12.x === 0 && narrow12.y === 0
+      && Math.abs(narrow12.w - 390) < 0.5 && Math.abs(narrow12.h - 844) < 0.5
+      && narrow12.innerWidth === 390 && narrow12.scrollW === 390,
+    JSON.stringify(narrow12),
+  );
+  await shoot("home-veil-390.png");
+  await pressKey("Escape", "Escape", 27);
+  await sleep(120);
+  let narrowLand = null;
+  try { narrowLand = await evaluate(readCam); } catch {}
+  check(
+    "H12b the narrow skip lands at the narrow landfall framing (1.6 of fit under a 900px viewport)",
+    atLandfall(narrowLand) && narrowLand.expected < narrowLand.fit * 1.65,
+    JSON.stringify(narrowLand),
+  );
+  await clearMobile();
 
   const errDelta2 = consoleErrors.slice(errBase2).filter((e) => !e.includes("AbortError: Transition was skipped"));
   const httpDelta2 = http4xx.slice(httpBase2).filter((u) => !/favicon/i.test(u));
