@@ -4,13 +4,14 @@
 import { renderMap } from "../../render/map-renderer.ts";
 import { buildPlaceManifest } from "../../render/place-manifest.ts";
 import { buildSurvey } from "../../render/survey.ts";
-import { generateRegionWorld, regionTitle } from "../../world/region.ts";
+import { generateRegionWorld, regionDetailLevel, regionTitle } from "../../world/region.ts";
 import { composeAtlas } from "../../atlas/compose.ts";
 import { serializableAtlas } from "./serializable-atlas.ts";
 import { prospectResultFor } from "./prospect-job.ts";
 import { ribbonResultFor } from "./ribbon-job.ts";
 import { tourOrderFor } from "./tour-job.ts";
 import { worldFor } from "./world-cache.ts";
+import { regionChainCache } from "./region-chain-cache.ts";
 import type { WorkerRequest, WorkerResponse } from "./worker-client.ts";
 
 // The project tsconfig lib is DOM (no WebWorker lib), so `self` types as Window here; cast once to the minimal worker-global surface. The message shapes are the shared wire contract in worker-client.ts (imported type-only, so no runtime cycle).
@@ -42,15 +43,17 @@ ctx.onmessage = (e) => {
       const { world, cached } = worldFor(msg.seed, msg.overrides);
       // #169: the title derives from (world, window) so the live redraft and a downloaded sheet's redraw agree byte-for-byte; msg.title, if given, is honored for back-compat (Z15/Z16 pass one).
       const title = msg.title ?? regionTitle(world, msg.window);
-      const region = generateRegionWorld(world, {
+      const spec = {
         window: msg.window,
         gridW: msg.gridW,
         gridH: msg.gridH,
         title,
-      });
+        detail: true,
+        chainCache: regionChainCache,
+      };
+      const region = generateRegionWorld(world, spec);
       // Stamp the window so a downloaded region redraws from seed + window (#168); worldGridW is the PARENT grid, taken explicitly (not the 320 coincidence).
-      // detail 0: this path draws the unchained field. #400 raises it to what is DRAWN, never to what the window implies.
-      const regionRecipe = { window: msg.window, worldGridW: world.recipe.gridW, detail: 0 };
+      const regionRecipe = { window: msg.window, worldGridW: world.recipe.gridW, detail: regionDetailLevel(spec) };
       ctx.postMessage({
         id: msg.id,
         ok: true,

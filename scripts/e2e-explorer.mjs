@@ -37,6 +37,7 @@ import { run as runRoomVoyage } from "./e2e/suite-room-voyage.mjs";
 import { run as runRoomAddress } from "./e2e/suite-room-address.mjs";
 import { run as runRoomVoyageRoute } from "./e2e/suite-room-voyage-route.mjs";
 import { run as runRunningHead } from "./e2e/suite-runninghead.mjs";
+import { run as runRegionDetail } from "./e2e/suite-region-detail.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url)); // scripts/
 const REPO = resolve(HERE, "..");
@@ -105,6 +106,7 @@ const SUITES = {
   "room-voyage-route": runRoomVoyageRoute,
   "room-address": runRoomAddress,
   "runninghead": runRunningHead,
+  "region-detail": runRegionDetail,
 };
 
 const missing = E2E_SUITE_ORDER.filter((name) => !SUITES[name]);

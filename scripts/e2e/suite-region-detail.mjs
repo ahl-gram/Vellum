@@ -1,0 +1,169 @@
+// The Glass sees it e2e (RD, #400): the detail the epic added arrives at the bands the Explorer already has.
+// Every check reads the COMMITTED inset the user is looking at, never a job result standing in for it.
+// Byte comparisons are same-environment only (one page, one JS engine), which is the only kind lod.ts's
+// byte-identity contract can be checked by; a cross-environment SVG compare is barred project-wide.
+export async function run(ctx) {
+  const { evaluate, check, shoot, sleep, waitSettled, waitReady, PORT } = ctx;
+
+  const SEED = 2; // an archipelago seed: seed 42 is an island map with no straits, so it hides coastline defects (#376)
+  const LINK = `http://127.0.0.1:${PORT}/explorer/#seed=${SEED}&style=antique&legend=1&arms=0&beasts=0&cx=0.5625&cy=0.4375&k=8`;
+
+  const rgn = () => evaluate(`window.__vellumRegion()`);
+  const enterAt = (k, cu, cv) =>
+    evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
+  const waitRedraft = async (prev) => {
+    for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
+    return await rgn();
+  };
+  const waitInset = async () => {
+    for (let i = 0; i < 375; i++) {
+      if (await evaluate(`document.querySelectorAll("#map .region-inset").length === 1`)) return;
+      await sleep(40);
+    }
+  };
+  // A region sheet is ~500KB, far past what a CDP evaluate should carry back; the digest is the byte
+  // comparison in a form that fits in a check message, and it is computed IN the page so both sides
+  // of every compare are hashed by the same engine.
+  // The LAST inset, never the first: during a crossing the outgoing sheet is still mounted, so a
+  // plain querySelector can read the sheet that is on its way off screen.
+  const LAST_INSET = `[...document.querySelectorAll("#map .region-inset svg")].pop()`;
+  const insetDigest = () =>
+    evaluate(
+      `(()=>{const s=${LAST_INSET};if(!s)return null;const x=s.outerHTML;` +
+        `let h=2166136261;for(let i=0;i<x.length;i++){h^=x.charCodeAt(i);h=Math.imul(h,16777619);}` +
+        `return{digest:(h>>>0).toString(16)+"/"+x.length,detail:s.getAttribute("data-vellum-region-detail"),` +
+        `u0:+s.getAttribute("data-vellum-region-u0"),v0:+s.getAttribute("data-vellum-region-v0"),` +
+        `u1:+s.getAttribute("data-vellum-region-u1"),v1:+s.getAttribute("data-vellum-region-v1")};})()`,
+    );
+  const captionMs = () =>
+    evaluate(`(()=>{const m=(document.getElementById("caption").textContent||"").match(/drawn in (\\d+)ms/);return m?+m[1]:-1;})()`);
+
+  await evaluate(
+    `(()=>{const c=document.getElementById("ages");if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}` +
+      `document.getElementById("seed").value="${SEED}";document.getElementById("style").value="antique";` +
+      `document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`,
+  );
+  await waitSettled("region-detail-base");
+  // #169: a fresh page defaults the semantic redraft ON, but a suite that ran earlier in this lane
+  // may have left it off (glass-ceremony's tail does). Without it no inset ever commits and every
+  // check here reads band 0, so it is set explicitly rather than inherited.
+  await evaluate(`window.__vellumSetRedraftEnabled(true)`);
+
+  const worldSheet = await evaluate(
+    `(()=>{const s=document.querySelector("#map > svg");return{present:!!s,stamped:!!s&&s.hasAttribute("data-vellum-region-detail")};})()`,
+  );
+  check(
+    "RD0 band 0 is untouched: the world sheet carries no region stamp, so it can carry no detail level (#400 AC1)",
+    worldSheet.present && worldSheet.stamped === false,
+    JSON.stringify(worldSheet),
+  );
+
+  // RD1: the ladder. Each band's committed inset must stamp the level its own window implies.
+  const ladder = [];
+  let redrafts = (await rgn()).redrafts;
+  for (const [band, k] of [[1, 2], [2, 4], [3, 8]]) {
+    await enterAt(k, 0.5625, 0.4375);
+    const settled = await waitRedraft(redrafts);
+    await waitInset();
+    redrafts = settled.redrafts;
+    const seen = await insetDigest();
+    ladder.push({ band, reported: settled.band, ...seen, ms: await captionMs() });
+    await shoot(`explorer-region-detail-band${band}.png`); // manual: the coast at each rung of the ladder
+  }
+  check(
+    "RD1 the band ladder stamps the detail it drew: bands 1, 2, 3 read 1, 2, 3 on the committed inset (#400 AC1, AC2)",
+    ladder.every((r) => r.reported === r.band && r.detail === String(r.band)),
+    JSON.stringify(ladder.map((r) => ({ band: r.reported, detail: r.detail, ms: r.ms }))),
+  );
+
+  const deepest = ladder[ladder.length - 1];
+
+  // RD2: the payoff, measured on the sheet the page is SHOWING. Shore LENGTH alone rises when a
+  // coast turns into a staircase (#376), so the drawn ring count carries the claim and length only
+  // corroborates it. Both arms are rendered by this page's own engine and counted the same way as
+  // the live coast, so the comparison is like for like and the drawn sheet has to match one of them.
+  const gained = await evaluate(
+    `(async()=>{const win={u0:${deepest.u0},v0:${deepest.v0},u1:${deepest.u1},v1:${deepest.v1}};` +
+      `const {defaultRecipe,generateWorld}=await import("./engine/world/generate.js");` +
+      `const {generateRegionWorld,regionTitle}=await import("./engine/world/region.js");` +
+      `const {renderMap}=await import("./engine/render/map-renderer.js");` +
+      `const {closedIsoRings}=await import("./engine/terrain/contours.js");` +
+      `const world=generateWorld(defaultRecipe(${SEED}));` +
+      `const arm=(detail)=>generateRegionWorld(world,{window:win,gridW:320,gridH:240,title:regionTitle(world,win),detail});` +
+      `const ringsIn=(d)=>((d||"").match(/M/g)||[]).length;` +
+      `const rendered=(r)=>{const svg=renderMap(r,{style:"antique",widthPx:1500,legend:true});` +
+      `const m=svg.match(/<g id="layer-land"><path d="([^"]*)"/);return ringsIn(m&&m[1]);};` +
+      `const shoreLen=(r)=>{let len=0;for(const{points:p}of closedIsoRings(r.elev,r.seaLevel))` +
+      `for(let i=1;i<p.length;i++)len+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);return Math.round(len);};` +
+      `const b=arm(false),d=arm(true);const live=${LAST_INSET};` +
+      `const liveCoast=live?live.querySelector("#layer-land path"):null;` +
+      `return{drawn:liveCoast?ringsIn(liveCoast.getAttribute("d")):-1,` +
+      `bare:rendered(b),detail:rendered(d),bareLen:shoreLen(b),detailLen:shoreLen(d)};})()`,
+    true,
+  );
+  check(
+    "RD2 the coast gains real detail: the band-3 sheet on screen draws the detail arm's shore rings, not the bare field's (#400 AC1)",
+    gained.drawn === gained.detail && gained.detail > gained.bare && gained.bare > 0,
+    `drawn ${gained.drawn} rings; bare ${gained.bare} -> detail ${gained.detail}; shore length ${gained.bareLen} -> ${gained.detailLen}`,
+  );
+
+  // RD3: path independence at the site level. Two camera routes to one window must commit the same
+  // bytes. The reload is load-bearing and not ceremony: zoom-reset never drops the worker, so the
+  // held chain cache would hand the second descent the FIRST one's own field and the check could
+  // not fail. A fresh page rebuilds the ancestry from nothing.
+  await ctx.send("Page.navigate", { url: "about:blank" });
+  await ctx.send("Page.navigate", { url: LINK.replace(/&cx=[^&]*&cy=[^&]*&k=[^&]*$/, "") });
+  await waitReady();
+  await evaluate(`window.__vellumSetRedraftEnabled(true)`);
+  await waitSettled("region-detail-direct");
+  redrafts = (await rgn()).redrafts;
+  await enterAt(8, 0.5625, 0.4375); // straight in, skipping the intermediate bands the ladder walked
+  await waitRedraft(redrafts);
+  await waitInset();
+  const direct = await insetDigest();
+  check(
+    "RD3 the window fixes the draw, not the route: a cold direct descent commits the bytes the stepped one did (lod.ts byte-identity)",
+    direct !== null && direct.digest === deepest.digest && direct.detail === deepest.detail,
+    `stepped=${deepest.digest} direct=${direct && direct.digest}`,
+  );
+  const directMs = await captionMs();
+
+  // RD4: a pan at the deepest band, which is what the held chain cache exists for. Cost is reported, never asserted.
+  redrafts = (await rgn()).redrafts;
+  await enterAt(8, 0.5625 - 0.015625, 0.4375);
+  const panned = await waitRedraft(redrafts);
+  await waitInset();
+  const neighbour = await insetDigest();
+  const panMs = await captionMs();
+  check(
+    "RD4 a pan at the deepest band commits its own detailed survey (cost reported, not asserted: it is machine-bound)",
+    panned.band === 3 && neighbour !== null && neighbour.detail === "3" && neighbour.digest !== direct.digest,
+    `first descent ${directMs}ms, pan ${panMs}ms, ladder ${ladder.map((r) => r.ms).join("/")}ms`,
+  );
+
+  // RD5: the link. A shared #cx&cy&k reopens the page cold and must land on the same detailed sheet.
+  const linked = [];
+  for (let visit = 0; visit < 2; visit++) {
+    await ctx.send("Page.navigate", { url: "about:blank" });
+    await ctx.send("Page.navigate", { url: LINK });
+    await waitReady();
+    await waitSettled(`region-detail-link-${visit}`);
+    await waitInset();
+    linked.push(await insetDigest());
+  }
+  check(
+    "RD5 a shared link round-trips to a byte-identical detailed draw across a cold reload (#400 AC2)",
+    linked[0] !== null && linked[1] !== null && linked[0].digest === linked[1].digest && linked[0].detail === "3",
+    JSON.stringify(linked),
+  );
+  await shoot("explorer-region-detail-shared-link.png"); // manual: what the link opens on
+
+  await evaluate(`window.__vellumSetRedraftEnabled(false)`);
+  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+  await evaluate(
+    `(()=>{const c=document.getElementById("ages");if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}` +
+      `document.getElementById("seed").value="42";document.getElementById("style").value="antique";` +
+      `document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`,
+  );
+  await waitSettled("region-detail-restore");
+}

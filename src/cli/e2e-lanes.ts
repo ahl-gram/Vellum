@@ -44,6 +44,7 @@ export const E2E_LANES: readonly E2eLane[] = [
       "room-voyage-route",
       "room-address",
       "runninghead",
+      "region-detail",
     ],
     port: DEFAULT_E2E_PORT + 1,
     dport: DEFAULT_E2E_DPORT + 1,

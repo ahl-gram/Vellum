@@ -29,7 +29,9 @@ export async function run(ctx) {
   const enterAt = (k, cu, cv) =>
     evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
   const waitRedraft = async (prev) => {
-    for (let i = 0; i < 100; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
+    // 15s, not the old 4s: see the same note in suite-zoom.mjs. #400's detailed draw outran the
+    // old budget on CI, so the waiter returned before the redraft landed and G6 read band 2.
+    for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
     return await rgn();
   };
 
@@ -246,6 +248,16 @@ export async function run(ctx) {
   );
 
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  // G8's voiced glide home passes THROUGH band 2, and its settle debounce can dispatch a survey on
+  // the way. Since #400 that draw is slow enough to still be in flight here, and it commits after
+  // before6 is sampled, so waitRedraft returns on it and G6 reads band 2. Wait for the region state
+  // to go quiet first: two reads a debounce apart with the same count, and nothing on screen.
+  for (let i = 0; i < 100; i++) {
+    const a = await rgn();
+    await sleep(300);
+    const b = await rgn();
+    if (a.redrafts === b.redrafts && b.band === 0) break;
+  }
   const before6 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const s6 = await waitRedraft(before6);

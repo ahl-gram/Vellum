@@ -6,13 +6,14 @@
 import { renderMap, type RenderOptions } from "../../render/map-renderer.ts";
 import { buildPlaceManifest, type PlaceManifest } from "../../render/place-manifest.ts";
 import { buildSurvey, type Survey } from "../../render/survey.ts";
-import { generateRegionWorld, regionTitle } from "../../world/region.ts";
+import { generateRegionWorld, regionDetailLevel, regionTitle } from "../../world/region.ts";
 import { composeAtlas } from "../../atlas/compose.ts";
 import { serializableAtlas } from "./serializable-atlas.ts";
 import { prospectResultFor, type PlateDress, type ProspectPlateResult } from "./prospect-job.ts";
 import { ribbonResultFor, type RibbonPlateData } from "./ribbon-job.ts";
 import { tourOrderFor } from "./tour-job.ts";
 import { worldFor } from "./world-cache.ts";
+import { regionChainCache } from "./region-chain-cache.ts";
 import type { Site } from "../../render/voyage-route.ts";
 import type { AtlasDocumentData } from "../../atlas/document.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
@@ -177,14 +178,16 @@ export function runInline(msg: RenderJob): JobResult {
     const { world, cached } = worldFor(msg.seed, msg.overrides);
     // #169: the title derives from (world, window), mirroring ./worker.ts exactly so the inline fallback stays byte-identical; msg.title (if given) is honored for back-compat.
     const title = msg.title ?? regionTitle(world, msg.window);
-    const region = generateRegionWorld(world, {
+    const spec = {
       window: msg.window,
       gridW: msg.gridW,
       gridH: msg.gridH,
       title,
-    });
-    // detail 0: this path draws the unchained field. #400 raises it to what is DRAWN, never to what the window implies.
-    const regionRecipe = { window: msg.window, worldGridW: world.recipe.gridW, detail: 0 };
+      detail: true,
+      chainCache: regionChainCache,
+    };
+    const region = generateRegionWorld(world, spec);
+    const regionRecipe = { window: msg.window, worldGridW: world.recipe.gridW, detail: regionDetailLevel(spec) };
     return {
       ok: true,
       svg: renderMap(region, { ...msg.render, regionRecipe }),
