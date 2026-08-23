@@ -190,6 +190,34 @@ test("#442 the WRAPPER sticks and the bar keeps the unfurl: a transform on the s
   );
 });
 
+test("#442 the mirror takes its SOURCE's voice: roman for an annal, the surveyor's italic for a day row", async () => {
+  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
+  const told = frame.told as unknown as El;
+
+  frame.setTold({ chamber: "survey", row: 3, index: 7, day: 61, text: "we came to Theril." });
+  assert.equal(told.classes.has("prologue"), true, "a day row is the surveyor's hand, the class the journal uses");
+  frame.setTold({ chamber: "ages", year: 900, text: "Gamma fell to ruin." });
+  assert.equal(told.classes.has("prologue"), false, "an annal is the chronicler's, and must not inherit the survey voice");
+  frame.setTold(null);
+
+  // The style half, keyed on the same class, or the markup could carry a voice the sheet
+  // never dresses. Set unconditionally italic the strip rendered the SAME sentence italic
+  // above and roman below in the journal (plate-reader, 2026-08-23), which reads as a typo
+  // rather than as a cursor; a structural test could not see it, so this pins the pair.
+  const css = read("public/reading-frame.css");
+  const toldText = css.match(/\.rf-told \.cr-text\s*\{[^}]*\}/)?.[0] ?? "";
+  assert.ok(toldText, "the mirror dresses its text column");
+  assert.doesNotMatch(toldText, /font-style:\s*italic/, "the UNQUALIFIED mirror is roman, like the annals it copies");
+  assert.match(
+    css,
+    /\.rf-told\.prologue \.cr-text\s*\{[^}]*font-style:\s*italic/,
+    "and only the prologue-voiced mirror is italic, like the day rows it copies",
+  );
+  const journalAnnal = css.match(/\.rf-log-strip li\.prologue \.cr-text\s*\{[^}]*\}/)?.[0] ?? "";
+  assert.match(journalAnnal, /font-style:\s*italic/, "the source it is matching is still italic in the journal");
+});
+
 test("#442 the live row takes the shared gutter idiom and refuses the drop cap", () => {
   const css = read("public/reading-frame.css");
   assert.match(css, /\.rf-told\s*\{[^}]*background:\s*var\(--parchment-panel\)/, "the stuck row is opaque: the journal must not read through it");

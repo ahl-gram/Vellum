@@ -107,6 +107,8 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
       toldText.textContent = "";
       return;
     }
+    // The journal dresses the surveyor's prologue rows in his own hand; the mirror carries the same class so a mirrored row reads in the voice its source is written in.
+    told.classList.toggle("prologue", t.chamber === "survey");
     toldGutter.textContent = t.chamber === "survey" ? `day ${t.day}` : String(t.year);
     toldText.textContent = t.text;
     told.hidden = false;

@@ -28,9 +28,13 @@
   border: 1px solid var(--line-tan); border-top: 0;
   border-bottom: 1px solid var(--line-faint); }
 .rf-told[hidden] { display: none; }
+/* A mirror mirrors the VOICE too. The chronicler's annals are roman, so the strip's copy of one is roman: set italic unconditionally it rendered the same sentence italic in the strip and roman four inches below in the journal, which reads as inconsistent styling rather than as a cursor (plate-reader, 2026-08-23). */
 .rf-told .cr-year { flex: 0 0 3.6rem; text-align: right;
   font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
-.rf-told .cr-text { color: var(--ink-annals); font-style: italic; }
+.rf-told .cr-text { color: var(--ink-annals); }
+/* The survey half's day rows ARE italic in the journal (the surveyor's hand, #220's Overture), so the mirror takes that voice there and matches again. */
+.rf-told.prologue .cr-text { font-style: italic; color: var(--ink-surveyor); }
+.rf-told.prologue .cr-year { font-weight: 400; font-style: italic; color: var(--ink-surveyor-faded); }
 
 /* Measured at a real 320px viewport: a flex item's default min-width:auto plus a range input's ~129px intrinsic width pushed the whole PAGE to a 355px scrollWidth, so the row wraps AND the slider may shrink (min-width: 0); both halves are load-bearing. */
 .rf-instrument { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
