@@ -375,4 +375,39 @@ export async function run(ctx) {
     errDelta2.length === 0 && httpDelta2.length === 0,
     [...errDelta2, ...httpDelta2].join(" | ") || "clean",
   );
+
+  // H13 runs AFTER the clean check on purpose: blocking the bundle logs an expected load error. It proves the pre-paint story (#457, the incognito flash): the inline script dresses first paint without the module, and an unadopted veil releases itself rather than trapping the page.
+  await send("Network.setBlockedURLs", { urls: ["*app.bundle.js*"] });
+  await evaluate(`sessionStorage.clear()`);
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  let preModule = null;
+  for (let i = 0; i < 100; i++) {
+    try {
+      preModule = await evaluate(`(() => {
+        const v = document.getElementById("lf-veil");
+        if (!v) return null;
+        return { veil: true, adopted: v.dataset.adopted !== undefined, seedForm: !!document.getElementById("seed-form") };
+      })()`);
+      if (preModule !== null && preModule.seedForm) break;
+    } catch {}
+    await sleep(60);
+  }
+  check(
+    "H13a with the bundle unreachable the pre-paint veil still stands, unadopted, over an intact page",
+    preModule !== null && preModule.seedForm && !preModule.adopted,
+    JSON.stringify(preModule),
+  );
+  let released = null;
+  for (let i = 0; i < 200; i++) {
+    try { released = await evaluate(`({ veil: !!document.getElementById("lf-veil"), seedForm: !!document.getElementById("seed-form") })`); } catch {}
+    if (released !== null && !released.veil) break;
+    await sleep(100);
+  }
+  await send("Network.setBlockedURLs", { urls: [] });
+  check(
+    "H13b the safety release lifts an unadopted veil: a failed bundle never traps the page",
+    released !== null && !released.veil && released.seedForm,
+    JSON.stringify(released),
+  );
 }

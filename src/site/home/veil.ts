@@ -27,12 +27,16 @@ export function veilMarkup(): string {
   </div>`;
 }
 
-function injectVeil(doc: Document): { root: HTMLElement; status: Element | null } {
-  const root = doc.createElement("div");
-  root.className = "veil";
-  root.id = "lf-veil";
-  root.innerHTML = veilMarkup();
-  doc.body.appendChild(root);
+function acquireVeil(doc: Document): { root: HTMLElement; status: Element | null } {
+  const existing = doc.getElementById("lf-veil");
+  const root = existing instanceof HTMLElement ? existing : doc.createElement("div");
+  if (root !== existing) {
+    root.className = "veil";
+    root.id = "lf-veil";
+    root.innerHTML = veilMarkup();
+    doc.body.appendChild(root);
+  }
+  root.dataset.adopted = "1";
   return { root, status: root.querySelector(".veil-status") };
 }
 
@@ -56,7 +60,7 @@ export type CeremonyOptions = {
 
 export function playCeremony(opts: CeremonyOptions): void {
   const { doc } = opts;
-  const veil = injectVeil(doc);
+  const veil = acquireVeil(doc);
   const stopSounding = startSounding(veil.status, opts.random ?? Math.random);
   const began = performance.now();
   let over = false;

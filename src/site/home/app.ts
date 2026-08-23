@@ -129,6 +129,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
       land: (seconds) => flyTo(landfallView(view(), SHEET, fit, window.innerWidth), seconds),
     });
   } else {
+    document.getElementById("lf-veil")?.remove();
     assign(landfallView(view(), SHEET, fit, window.innerWidth));
     settle();
   }

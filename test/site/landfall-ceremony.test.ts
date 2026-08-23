@@ -116,9 +116,22 @@ test("the veil is the mockup's: wordmark, flourish tagline, self-drawing rose, s
   assert.ok(html.includes(soundingLabel(0)), "the line opens at 0 fathom");
 });
 
-test("the veil is JS-injected: the page itself ships none of it (#457, the no-JS trap)", () => {
+test("the veil ships as no static element yet dresses first paint: a pre-paint inline script injects it (#457, the incognito flash)", () => {
   const astro = read("src/pages/index.astro");
-  assert.ok(!/veil/i.test(astro), "index.astro carries no veil markup; without JS there is nothing to trap behind");
+  const markup = astro.replace(/<script[\s\S]*?<\/script>/g, "");
+  assert.ok(
+    !/veil-wordmark|class="veil"|id="lf-veil"/.test(markup),
+    "no veil ELEMENT in the page markup; without JS there is nothing to trap behind",
+  );
+  assert.match(astro, /veilMarkup\(\)/, "the inline script's markup is the one veilMarkup() source, interpolated at build");
+  assert.match(astro, /ARRIVED_KEY/, "the inline predicate reads the same sessionStorage key the module marks");
+  assert.match(astro, /prefers-reduced-motion/, "the inline predicate gives reduced motion no veil at all");
+  const scriptAt = astro.indexOf("define:vars");
+  assert.ok(scriptAt > -1 && scriptAt < astro.indexOf('class="landfall"'), "the veil script parses BEFORE the stage, so first paint already wears the deep");
+  assert.match(astro, /dataset\.adopted/, "an unadopted veil releases itself: a failed bundle can never trap the page");
+  const veil = read("src/site/home/veil.ts");
+  assert.match(veil, /getElementById\("lf-veil"\)/, "playCeremony adopts the pre-paint veil instead of injecting a twin");
+  assert.match(veil, /dataset\.adopted/, "adoption is marked, standing the safety release down");
 });
 
 test("app.ts sails the ceremony: anchorage on a first arrival, straight to landfall otherwise (#457)", () => {
