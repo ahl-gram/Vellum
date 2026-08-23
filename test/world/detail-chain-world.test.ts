@@ -19,11 +19,10 @@ import {
   parentPartitionOnWindow,
 } from "../../test-support/parent-partition.ts";
 
-/** #443's half of the chain's guarantees, measured against the WORLD CHART's own partition rather than against the chain's blurred reference, which is what detail-chain.test.ts pins. Split from that file at #443 to keep both under the 400-line guideline. */
+/** #443's half of the chain's guarantees: measured against the WORLD CHART's own partition, where detail-chain.test.ts measures against the chain's blurred reference. */
 
 const WORLD_ASPECT = 319 / 239;
 
-// One pinned band-3 window per seed where the world chart's own partition is at stake, from the census on #443: seed 42 (an island map) carries no strait at all, which is why the epic ran this far without seeing it.
 const WORLD_FUSION_WINDOWS: ReadonlyArray<readonly [number, number, number]> = [
   [2, 0.75, 0.25],
   [15, 0.375, 0.375],
@@ -73,11 +72,10 @@ test("the chain never fuses two landmasses of the WORLD CHART, not merely of its
   let controlPairs = 0;
   for (const [seed, cx, cy] of WORLD_FUSION_WINDOWS) {
     const c = worldCase(seed, cx, cy);
-    // The bare survey of the same window is the control: it is free to bridge, and it does, so a zero on the chained arm is a result rather than a fixture with nothing to join.
-    controlPairs += parentFusion(c.bare, c.partition, c.sea).pairs;
+    controlPairs += parentFusion(c.bare, c.partition, c.sea).excessLinks;
     const fused = parentFusion(c.chained, c.partition, c.sea);
     assert.equal(
-      fused.pairs,
+      fused.excessLinks,
       0,
       `seed ${seed} window ${cx},${cy}: the chain joined world landmasses ${JSON.stringify(fused.groups)}`,
     );
@@ -86,7 +84,7 @@ test("the chain never fuses two landmasses of the WORLD CHART, not merely of its
   assert.ok(controlPairs >= 6, `the bare control barely bridges here (${controlPairs}), so the guard proves nothing`);
 });
 
-// NOT an unconditional promise: `node scripts/region-detail-partition.ts` measures 3 world landmasses losing every cell at band 1 and 2 at band 3 on the detail arm, against 1 and 4 on the bare arm, every one a sliver of 4 to 24 region cells out of 76800 clipped at a window edge. What this guard pins is that no landmass with a real footprint in these windows goes.
+// NOT the general case, which `node scripts/region-detail-partition.ts` measures and #443 records: some window-edge slivers do go, on every arm.
 test("no landmass the world chart draws inside these windows loses all its land (#443)", () => {
   for (const [seed, cx, cy] of WORLD_FUSION_WINDOWS) {
     const c = worldCase(seed, cx, cy);
@@ -100,7 +98,7 @@ test("no landmass the world chart draws inside these windows loses all its land 
   }
 });
 
-// The lift that stranded five river mouths on #443 came from an ancestor's resampled SURFACE, not from any cell of any ancestor. Cells over an ancestor's own land are excluded: a nearer band is entitled to hold land the world chart does not, and passing it down is the epic's whole point.
+// Cells over an ancestor's own land are excluded because a nearer band is entitled to hold land the world chart does not; what stranded five river mouths came from an ancestor's resampled SURFACE instead, which no cell of any ancestor backs.
 test("the chain raises no cell that every ancestor and the survey alike draw as water (#443)", () => {
   for (const [seed, cx, cy] of WORLD_FUSION_WINDOWS) {
     const r = defaultRecipe(seed);

@@ -3,7 +3,7 @@ import type { UvWindow } from "../src/terrain/heightfield.ts";
 import { labelLandmasses } from "../src/world/landmass.ts";
 
 // Independent of the INTERPOLATION, which is #443's defect class, and NOT of the nearest-cell choice: the land and water verdict is bit-identical to parentCellsOnWindow and has to be, since there is one right answer to which parent cell lies under a child cell (the rounding itself is pinned by hand against the parent grid in detail-guarantees.test.ts).
-/** The parent's own landmass id under each child cell, -1 where the parent is sea or does not cover the cell, labelled on the parent's WHOLE grid so one landmass entering the window twice stays one. */
+/** Labelled on the parent's WHOLE grid, so one landmass entering the window twice stays one. */
 export function parentPartitionOnWindow(
   parent: Field,
   parentWindow: UvWindow,
@@ -32,10 +32,8 @@ export function parentPartitionOnWindow(
 }
 
 export type FusionReport = {
-  /** Excess links: a child landmass covering k parent landmasses contributes k-1. */
-  readonly pairs: number;
-  /** Cells assigned to a parent landmass other than the first one seen in their child landmass. */
-  readonly cells: number;
+  readonly excessLinks: number;
+  readonly strayCells: number;
   readonly groups: ReadonlyArray<ReadonlyArray<number>>;
 };
 
@@ -58,17 +56,16 @@ export function parentFusion(child: Field, partition: Int32Array, seaLevel: numb
     if (seen === undefined) first.set(cid, pid);
     else if (seen !== pid) cells++;
   }
-  let pairs = 0;
+  let excessLinks = 0;
   const groups: number[][] = [];
   for (const [, s] of owner) {
     if (s.size < 2) continue;
-    pairs += s.size - 1;
+    excessLinks += s.size - 1;
     groups.push([...s].sort((a, b) => a - b));
   }
-  return { pairs, cells, groups };
+  return { excessLinks, strayCells: cells, groups };
 }
 
-/** Parent landmasses that reach into the window and hold no land at all in the child: the promise that a shore does not simply vanish as the Glass descends. */
 export function parentMassesLost(child: Field, partition: Int32Array, seaLevel: number): number[] {
   const present = new Set<number>();
   const survives = new Set<number>();

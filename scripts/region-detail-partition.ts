@@ -14,11 +14,7 @@ import {
 import { LOD_BANDS, lodWindowFor, type LodBand } from "../src/world/lod.ts";
 import type { World } from "../src/world/types.ts";
 
-/** #443's measurement half: the world chart's OWN partition, before and after the fix, so the anti-merge claim and the vanishing-landmass census both reproduce from one command. Committed rather than left in a worktree's out/, because this epic has lost its evidence twice, once with #376's prototype scratchpad and once with #443's own probes, and both had to be re-earned.
- *
- * `before` rebuilds the construction #397 and #398 shipped: an UNGATED bilinear floor rejected against that same blurred max. That is expressible with today's exports, so no revert is needed to reproduce the comparison.
- *
- * Costs minutes. Not in `npm test`; the unit-scale versions of these claims are in test/world/detail-chain-world.test.ts. */
+/** #443's measurement half: the world chart's OWN partition across three arms, so the anti-merge claim and the vanishing-landmass census reproduce from one command. Committed, not left in out/, because this epic has lost its evidence twice. `before` rebuilds what #397 and #398 shipped, an UNGATED bilinear floor rejected against that same blurred max, so no revert is needed. Costs minutes; the unit-scale claims are in test/world/detail-chain-world.test.ts. */
 
 
 function gridForWindow(win: UvWindow): { gridW: number; gridH: number } {

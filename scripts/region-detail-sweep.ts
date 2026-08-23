@@ -201,7 +201,6 @@ function measure(
   const du = window.u1 - window.u0;
   const dv = window.v1 - window.v0;
   const Ww = world.recipe.gridW;
-  // #443's headline claim: the world chart's own partition, never its resampled surface. Labelled on the whole chart, so one landmass entering the window twice stays one.
   const worldIds = labelLandmasses(world.elev, world.seaLevel).ids;
   const regionIds = labelLandmasses(region.elev, sea).ids;
   const coveredBy = new Map<number, Set<number>>();

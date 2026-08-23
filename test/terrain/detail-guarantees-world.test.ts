@@ -44,7 +44,6 @@ type WindowCase = {
   readonly surface: Field;
   readonly cells: Field;
   readonly fine: Field;
-  /** What #397 shipped: the bilinear floor with no gate, kept as the control that shows what the gate removes. */
   readonly ungated: Field;
   readonly floored: Field;
   readonly adjusted: Field;
@@ -109,7 +108,7 @@ function parentLandAt(wc: WindowCase, i: number): boolean {
 }
 
 function fusedCells(wc: WindowCase, field: Field): number {
-  return parentFusion(field, wc.partition, wc.sea).cells;
+  return parentFusion(field, wc.partition, wc.sea).strayCells;
 }
 
 // Narrowed by #443. The floor covers a cell where the parent's OWN cell is land AND its interpolated surface still stands above the waterline; where only the interpolation rises, the parent charts water and the child may draw water. The landmass guard below is what bounds that narrowing.
@@ -141,7 +140,7 @@ test("monotone floor: parent land never sinks in the adjusted child, and the gua
   }
 });
 
-// NOT an unconditional promise, and the sweep is the authority on how far it reaches: `node scripts/region-detail-partition.ts` measures 3 world landmasses losing every cell at band 1 and 2 at band 3 on the detail arm, against 1 and 4 on the bare arm, every one of them a sliver of 4 to 24 region cells out of 76800 clipped at a window edge. What holds without exception, and what this guard pins, is the fixture below.
+// NOT the general case, which `node scripts/region-detail-partition.ts` measures and #443 records: some window-edge slivers do go, on every arm.
 test("no landmass the parent charts inside these windows loses all its land (#443)", () => {
   for (const seed of SWEEP_SEEDS) {
     let masses = 0;
@@ -189,7 +188,6 @@ test("the gate and the rejection each do real work on real terrain, and neither 
     gatedFusions += fusedCells(wc, wc.floored);
     for (let i = 0; i < CW * CH; i++) {
       if (wc.floored.data[i] !== wc.adjusted.data[i]) rejectedCells++;
-      // The gate's own footprint: the parent charts water and its interpolated surface still stands above the waterline, the exact set #443 says must take no floor.
       if ((wc.cells.data[i] as number) > wc.sea) continue;
       if (!((wc.surface.data[i] as number) > wc.sea)) continue;
       gateFootprint++;
@@ -203,7 +201,7 @@ test("the gate and the rejection each do real work on real terrain, and neither 
     );
   }
   assert.equal(gateFloored, 0, `the floor reached ${gateFloored} cells the parent's own cell charts as water`);
-  // Measured 2026-08-23 across the four pinned windows: 327 cells in the gate's footprint, waterline moved at 75, ungated fusions 1173 against gated 1173 (so rejection un-merges these, not the gate, which is why gateFloored is asserted directly) and 55 cells rejected.
+  // Measured 2026-08-23 across the four pinned windows: footprint 327, waterline moved at 75, fusions 1173 ungated against 1173 gated, 55 cells rejected. The gate un-merges nothing here, which is why gateFloored is asserted directly.
   assert.ok(gateFootprint >= 200, `only ${gateFootprint} cells in the gate's footprint, this guard is near-vacuous`);
   assert.ok(sunkByGate >= 40, `the gate moved the waterline at only ${sunkByGate} cells, so it is doing nothing here`);
 

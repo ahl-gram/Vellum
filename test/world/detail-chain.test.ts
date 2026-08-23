@@ -271,7 +271,6 @@ test("the detail level never exceeds what buildHeightfield accepts (#398)", () =
   );
 });
 
-// The floor covers a cell only where the parent's OWN cell is land: where only the interpolated surface rises above the waterline, the parent charts water and the child is free to draw water (#443). Both halves are required here, so the guard still bites on a cell the parent really holds.
 test("the chain protects every link: no land sinks, band to band and end to end (#398, narrowed by #443)", () => {
   const cache = createChainCache();
   const target = lodWindowFor(0.5, 0.4375, 0.125);
@@ -318,7 +317,7 @@ test("the chain protects every link: no land sinks, band to band and end to end 
 });
 
 test("the chain never fuses two landmasses of its own coarse reference (#398)", () => {
-  // The reference here is the UNGATED max of ancestor surfaces, which is what #398 shipped and what this guard has always measured. Since #443 the chain neither floors against it (the surfaces are gated first) nor partitions against it (rejection reads each ancestor's own cells), so it is kept as the weaker historical claim: the world chart's own partition is guarded separately in test/world/detail-chain-world.test.ts and holds at zero.
+  // The UNGATED max, which the chain no longer floors against nor partitions by since #443: kept as #398's weaker historical claim, with the world chart's own partition guarded in detail-chain-world.test.ts.
   const seed = 2;
   const archipelago = defaultRecipe(seed);
   const parentWorld = buildHeightfield({ seed, gridW: 320, gridH: 240, mapType: archipelago.mapType });
