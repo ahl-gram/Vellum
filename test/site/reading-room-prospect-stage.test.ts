@@ -182,6 +182,38 @@ test("#402 a late fetch from a superseded world is dropped, not painted", async 
   assert.deepEqual(revoked, ["url:svg-old"], "its blob is revoked instead of leaking");
 });
 
+test("#442 the journal keeps its top edge when the plate stands between it and the strip", () => {
+  // The frame drops the journal's top border because it is drawn ABUTTING the instrument,
+  // whose own bottom border serves as the divider (#220). The room breaks that adjacency:
+  // the stage sits between them, so with a plate showing the journal floats as its own
+  // panel with an open top. The room created the gap, so the room closes it.
+  const frame = readFileSync(resolve(REPO, "public/reading-frame.css"), "utf8");
+  assert.match(
+    declarationsFor(frame, ".rf-ages .rf-log"),
+    /border-top:\s*0/,
+    "the frame still suppresses the top border for the abutting case",
+  );
+
+  const css = readFileSync(resolve(REPO, "public/reading-room/index.css"), "utf8");
+  const restored = declarationsFor(css, ".rr-prospect:not([hidden]) + .rf-log");
+  assert.ok(restored, "the room restores the journal's edge when the stage stands between");
+  assert.match(restored, /border-top:\s*1px solid/, "the top edge comes back");
+  assert.match(restored, /border-radius:\s*6px/, "and it is a whole panel again, not a bottom-rounded one");
+
+  // Polarity, since a rule keyed on the wrong state would restore the border at the very
+  // moment the journal IS abutting: the hidden stage must leave the frame's rule standing.
+  assert.doesNotMatch(
+    restored,
+    /border-top:\s*0/,
+    "the restoring rule must not itself remove the border it exists to add",
+  );
+  assert.equal(
+    declarationsFor(css, ".rr-prospect[hidden] + .rf-log"),
+    "",
+    "and nothing dresses the abutting case from here; that is the frame's rule",
+  );
+});
+
 test("#442 the unfurl uses a BACKWARDS fill, so the plate's hover lift survives the reveal", () => {
   const css = readFileSync(resolve(REPO, "public/reading-room/index.css"), "utf8");
   // Selector-list membership, not a literal anchor: a comma after the selector defeats an anchor and the assertions below then silently stop checking.
