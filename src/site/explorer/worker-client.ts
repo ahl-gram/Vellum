@@ -178,7 +178,6 @@ export function runInline(msg: RenderJob): JobResult {
     const { world, cached } = worldFor(msg.seed, msg.overrides);
     // #169: the title derives from (world, window), mirroring ./worker.ts exactly so the inline fallback stays byte-identical; msg.title (if given) is honored for back-compat.
     const title = msg.title ?? regionTitle(world, msg.window);
-    // #400: mirrors ./worker.ts exactly, chain cache included, so the fallback's bytes stay the worker's bytes.
     const spec = {
       window: msg.window,
       gridW: msg.gridW,

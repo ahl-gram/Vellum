@@ -43,7 +43,6 @@ ctx.onmessage = (e) => {
       const { world, cached } = worldFor(msg.seed, msg.overrides);
       // #169: the title derives from (world, window) so the live redraft and a downloaded sheet's redraw agree byte-for-byte; msg.title, if given, is honored for back-compat (Z15/Z16 pass one).
       const title = msg.title ?? regionTitle(world, msg.window);
-      // #400: every band the Glass surveys is a region band, so a region job always draws the chained field; band 0 never comes here.
       const spec = {
         window: msg.window,
         gridW: msg.gridW,

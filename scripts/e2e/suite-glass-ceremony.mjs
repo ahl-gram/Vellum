@@ -29,7 +29,9 @@ export async function run(ctx) {
   const enterAt = (k, cu, cv) =>
     evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
   const waitRedraft = async (prev) => {
-    for (let i = 0; i < 100; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
+    // 15s, not the old 4s: see the same note in suite-zoom.mjs. #400's detailed draw outran the
+    // old budget on CI, so the waiter returned before the redraft landed and G6 read band 2.
+    for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
     return await rgn();
   };
 

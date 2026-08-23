@@ -323,7 +323,11 @@ export async function run(ctx) {
   const enterAt = (k, cu, cv) =>
     evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
   const waitRedraft = async (prev) => {
-    for (let i = 0; i < 100; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
+    // 15s, not the old 4s: #400 made a cold band-3 draw cost 1084ms measured locally, and a CI
+    // runner is several times slower than this laptop, so 4s returned BEFORE the redraft landed
+    // and every band downstream read one step off. Long enough for the draw, short enough that a
+    // real hang still fails rather than hanging the lane.
+    for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
     return await rgn();
   };
   const captionMs = () => evaluate(`(()=>{const m=(document.getElementById("caption").textContent||"").match(/drawn in (\\d+)ms/);return m?+m[1]:-1;})()`);
@@ -345,11 +349,14 @@ export async function run(ctx) {
   await enterAt(2, 0.5, 0.5);
   const s17 = await waitRedraft(before17);
   const drawMs17 = await captionMs();
-  // waitRedraft returns at the COMMIT, and the outgoing sheet is torn down on the incoming's
-  // transitionend with a 700ms fallback, so a fast enough draw lands the check mid-crossfade with
-  // two insets mounted. #400's held chain cache took this band-1 draw to ~294ms and did exactly
-  // that. Settle first, as Z21 already does; a pair left mounted for good still fails here.
-  let view17 = await insetView();
+  // The CAMERA is read at the commit, which is what this check is named for: a settle must not
+  // move it. The inset geometry cannot be, because insetView reads the FIRST .region-inset and
+  // during a crossing that is the OUTGOING sheet; #400's held chain cache took this band-1 draw
+  // to ~300ms, fast enough to land here mid-crossfade, and the outgoing sheet is only torn down
+  // on the incoming's transitionend with a 700ms fallback. So geometry is read once the pair has
+  // resolved, and a pair left mounted for good still fails on the count.
+  const atCommit = await insetView();
+  let view17 = atCommit;
   for (let i = 0; i < 50 && view17.insets !== 1; i++) { await sleep(40); view17 = await insetView(); }
   const W17 = await evaluate(`document.getElementById("map-viewport").clientWidth`);
   check(
@@ -358,9 +365,9 @@ export async function run(ctx) {
       s17.redrafts === before17 + 1 && view17.worldMounted && view17.insets === 1 && view17.stamped &&
       Math.abs(view17.insetLeft - 25) < 0.01 && Math.abs(view17.insetW - 50) < 0.01 &&
       view17.hits > 0 && /drawn in \d+ms/.test(view17.caption) &&
-      view17.zk === 2 && Math.abs(view17.zx - -W17 / 2) < 0.5,
-    `${JSON.stringify(s17)} inset=${view17.insets}@${view17.insetLeft}%/${view17.insetW}% stamped=${view17.stamped} world=${view17.worldMounted} ` +
-      `hits=${view17.hits} camera k=${view17.zk} x=${view17.zx} (expected ${-W17 / 2}) settle->sheet=${drawMs17}ms (AC3 target ~400ms desktop)`,
+      atCommit.zk === 2 && Math.abs(atCommit.zx - -W17 / 2) < 0.5,
+    `${JSON.stringify(s17)} inset=${view17.insets}(at commit ${atCommit.insets})@${view17.insetLeft}%/${view17.insetW}% stamped=${view17.stamped} world=${view17.worldMounted} ` +
+      `hits=${view17.hits} camera k=${atCommit.zk} x=${atCommit.zx} (expected ${-W17 / 2}) settle->sheet=${drawMs17}ms (AC3 target ~400ms desktop)`,
   );
   await sleep(400); // let the crossfade land so the artifact shows the committed (opaque) inset
   await shoot("explorer-sub8-region-band1.png"); // manual: a finer survey pasted over its window

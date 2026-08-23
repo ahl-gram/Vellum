@@ -25,7 +25,6 @@ export type RegionSpec = {
   readonly chainCache?: ChainCache;
 };
 
-/** The level a sheet is STAMPED with: what buildChainedField drew from this window, or 0 when the bare field was drawn. */
 export function regionDetailLevel(spec: RegionSpec): number {
   return spec.detail === true ? detailForWindow(spec.window) : 0;
 }

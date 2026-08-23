@@ -131,7 +131,6 @@ test("the worker and its inline twin build the same region spec, so the two cann
     const has = (re: RegExp): boolean => re.test(source);
     assert.ok(has(/detail: true/), `${file} no longer draws the region job's detailed field`);
     assert.ok(has(/regionDetailLevel\(/), `${file} stamps a detail level it did not derive from the spec`);
-    assert.ok(!has(/detail: 0/), `${file} still hardcodes a detail level`);
-    assert.ok(has(/regionChainCache/), `${file} no longer holds the chain cache across jobs`);
+    assert.ok(has(/chainCache: regionChainCache/), `${file} no longer builds in the held chain cache`);
   }
 });

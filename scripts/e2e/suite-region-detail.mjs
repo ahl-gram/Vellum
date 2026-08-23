@@ -12,11 +12,11 @@ export async function run(ctx) {
   const enterAt = (k, cu, cv) =>
     evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
   const waitRedraft = async (prev) => {
-    for (let i = 0; i < 150; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
+    for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
     return await rgn();
   };
   const waitInset = async () => {
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < 375; i++) {
       if (await evaluate(`document.querySelectorAll("#map .region-inset").length === 1`)) return;
       await sleep(40);
     }
@@ -44,6 +44,10 @@ export async function run(ctx) {
       `document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`,
   );
   await waitSettled("region-detail-base");
+  // #169: a fresh page defaults the semantic redraft ON, but a suite that ran earlier in this lane
+  // may have left it off (glass-ceremony's tail does). Without it no inset ever commits and every
+  // check here reads band 0, so it is set explicitly rather than inherited.
+  await evaluate(`window.__vellumSetRedraftEnabled(true)`);
 
   const worldSheet = await evaluate(
     `(()=>{const s=document.querySelector("#map > svg");return{present:!!s,stamped:!!s&&s.hasAttribute("data-vellum-region-detail")};})()`,
@@ -103,16 +107,22 @@ export async function run(ctx) {
     `drawn ${gained.drawn} rings; bare ${gained.bare} -> detail ${gained.detail}; shore length ${gained.bareLen} -> ${gained.detailLen}`,
   );
 
-  // RD3: path independence at the site level. Two camera routes to one window must commit the same bytes.
-  await evaluate(`document.getElementById("zoom-reset").click()`);
-  await sleep(200);
+  // RD3: path independence at the site level. Two camera routes to one window must commit the same
+  // bytes. The reload is load-bearing and not ceremony: zoom-reset never drops the worker, so the
+  // held chain cache would hand the second descent the FIRST one's own field and the check could
+  // not fail. A fresh page rebuilds the ancestry from nothing.
+  await ctx.send("Page.navigate", { url: "about:blank" });
+  await ctx.send("Page.navigate", { url: LINK.replace(/&cx=[^&]*&cy=[^&]*&k=[^&]*$/, "") });
+  await waitReady();
+  await evaluate(`window.__vellumSetRedraftEnabled(true)`);
+  await waitSettled("region-detail-direct");
   redrafts = (await rgn()).redrafts;
   await enterAt(8, 0.5625, 0.4375); // straight in, skipping the intermediate bands the ladder walked
   await waitRedraft(redrafts);
   await waitInset();
   const direct = await insetDigest();
   check(
-    "RD3 the window fixes the draw, not the route: a direct descent commits the same bytes as the stepped one (lod.ts byte-identity)",
+    "RD3 the window fixes the draw, not the route: a cold direct descent commits the bytes the stepped one did (lod.ts byte-identity)",
     direct !== null && direct.digest === deepest.digest && direct.detail === deepest.detail,
     `stepped=${deepest.digest} direct=${direct && direct.digest}`,
   );
@@ -132,7 +142,6 @@ export async function run(ctx) {
   );
 
   // RD5: the link. A shared #cx&cy&k reopens the page cold and must land on the same detailed sheet.
-  await evaluate(`window.__vellumSetRedraftEnabled(false)`);
   const linked = [];
   for (let visit = 0; visit < 2; visit++) {
     await ctx.send("Page.navigate", { url: "about:blank" });

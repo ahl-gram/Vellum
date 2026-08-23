@@ -47,7 +47,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "motion": 2.4,
   "room-ink": 2.4,
   "fallback": 2.2,
-  "region-detail": 14.3, // measured 2026-08-23, local single-suite run (#400)
+  "region-detail": 15.4, // measured 2026-08-23, local run (#400)
   "health": 0.0,
 };
 
