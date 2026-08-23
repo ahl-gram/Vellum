@@ -580,7 +580,7 @@ export async function run(ctx) {
       `const {defaultRecipe,generateWorld}=await import("/explorer/engine/world/generate.js");` +
       `const {generateRegionWorld}=await import("/explorer/engine/world/region.js");` +
       `const world=generateWorld(defaultRecipe(42,{gridW:320,gridH:240}));` +
-      `const region=generateRegionWorld(world,{window:win,gridW:320,gridH:240,title:"parity"});` +
+      `const region=generateRegionWorld(world,{window:win,gridW:320,gridH:240,title:"parity",detail:true});` + // #400: the Glass draws every region band detailed, so the parity arm must too
       `const engine=region.settlements.filter(s=>s.kind==="hamlet").map(s=>s.name);` +
       `const names=new Set(engine);` +
       `return {hamlets:domNames.length,expected:engine.length,ordered,outside,` +

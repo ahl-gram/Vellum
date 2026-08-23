@@ -25,6 +25,7 @@ export const E2E_SUITE_ORDER = [
   "room-voyage-route",
   "room-address",
   "runninghead",
+  "region-detail",
 ] as const;
 
 export type E2eSuiteName = (typeof E2E_SUITE_ORDER)[number];

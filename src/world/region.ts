@@ -7,7 +7,7 @@ import { buildHeightfield, type UvWindow } from "../terrain/heightfield.ts";
 import { buildRoads } from "../society/roads.ts";
 import { placeHamlets } from "../society/hamlets.ts";
 import { anchorRegionRivers } from "./region-rivers.ts";
-import { buildChainedField } from "./detail-chain.ts";
+import { buildChainedField, detailForWindow, type ChainCache } from "./detail-chain.ts";
 import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
 import { mapChainsToWindow, mapRingsToWindow, realmBorderChains, realmCarryRings } from "./realm-carry.ts";
 import { seaMask } from "../hydrology/sea-mask.ts";
@@ -19,9 +19,16 @@ export type RegionSpec = {
   readonly gridW: number;
   readonly gridH: number;
   readonly title: string;
-  /** Draw the terrain from the chained detail field (#396-#398) instead of the bare heightfield. Dark by default: #400 is what turns it on for the Glass. */
+  /** Draw the terrain from the chained detail field (#396-#398) instead of the bare heightfield. Dark by default: #400 turns it on for the Glass and leaves the atlas plates bare. */
   readonly detail?: boolean;
+  /** A chain cache to build the ancestry in, so a caller drawing many windows of one world shares their parents (#400). Omitted, each call builds its own and shares nothing. */
+  readonly chainCache?: ChainCache;
 };
+
+/** The level a sheet is STAMPED with: what buildChainedField drew from this window, or 0 when the bare field was drawn. */
+export function regionDetailLevel(spec: RegionSpec): number {
+  return spec.detail === true ? detailForWindow(spec.window) : 0;
+}
 
 export function generateRegionWorld(world: World, spec: RegionSpec): World {
   const { recipe } = world;
@@ -30,15 +37,18 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
 
   const seaLevel = world.seaLevel; // absolute — same waterline as the world chart
   const elev = spec.detail === true
-    ? buildChainedField({
-        seed: recipe.seed,
-        mapType: recipe.mapType,
-        window,
-        gridW,
-        gridH,
-        worldAspect,
-        seaLevel,
-      })
+    ? buildChainedField(
+        {
+          seed: recipe.seed,
+          mapType: recipe.mapType,
+          window,
+          gridW,
+          gridH,
+          worldAspect,
+          seaLevel,
+        },
+        spec.chainCache,
+      )
     : buildHeightfield({
         seed: recipe.seed,
         gridW,

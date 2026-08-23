@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { ENGINE_VERSION, recipeFromSvg } from "../../src/render/recipe-meta.ts";
-import { generateRegionWorld, windowAround, regionTitle } from "../../src/world/region.ts";
+import { generateRegionWorld, regionDetailLevel, windowAround, regionTitle } from "../../src/world/region.ts";
+import { lodWindowFor } from "../../src/world/lod.ts";
 
 test("a chart embeds its full recipe", () => {
   const world = generateWorld(defaultRecipe(42));
@@ -160,6 +161,39 @@ test("a stamped region redraws byte-for-byte with a title RE-DERIVED from the wi
   });
   const redrawn = renderMap(reregion, { style: parsed.style, regionRecipe: parsed.region });
   assert.equal(redrawn, svg, "the recovered window + re-derived title redraw byte-for-byte");
+});
+
+test("a DETAILED region sheet needs its stamped level to redraw, and reproduces exactly once it has it (#400)", () => {
+  const world = generateWorld(defaultRecipe(2));
+  const window = lodWindowFor(0.5625, 0.4375, 0.125);
+  const spec = { window, gridW: 320, gridH: 240, title: regionTitle(world, window), detail: true };
+  const rr = { window, worldGridW: world.recipe.gridW, detail: regionDetailLevel(spec) };
+  const svg = renderMap(generateRegionWorld(world, spec), { style: "antique", regionRecipe: rr });
+  assert.equal(rr.detail, 3, "a band-3 window is stamped at its own level, not at a flag");
+
+  const parsed = recipeFromSvg(svg);
+  assert.ok(parsed);
+  const region = parsed.region;
+  assert.ok(region);
+  const reworld = generateWorld(parsed.recipe);
+  const redraw = (detail: boolean) =>
+    renderMap(
+      generateRegionWorld(reworld, {
+        window: region.window,
+        gridW: parsed.recipe.gridW,
+        gridH: parsed.recipe.gridH,
+        title: regionTitle(reworld, region.window),
+        detail,
+      }),
+      { style: parsed.style, regionRecipe: region },
+    );
+
+  assert.equal(redraw(region.detail > 0), svg, "the stamped level is enough to redraw byte-for-byte");
+  assert.notEqual(
+    redraw(false).length,
+    svg.length,
+    "and reading the stamp as the bare field draws a different sheet, so the level is load-bearing",
+  );
 });
 
 test("a world chart carries NO region stamp, so recipeFromSvg has no region key (#168)", () => {

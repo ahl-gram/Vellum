@@ -24,6 +24,7 @@ export const E2E_LANES: readonly E2eLane[] = [
       "health",
       "fallback",
       "survey",
+      "region-detail",
     ],
     port: DEFAULT_E2E_PORT,
     dport: DEFAULT_E2E_DPORT,
