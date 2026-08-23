@@ -89,6 +89,7 @@ test("closeIn opens the settlement dots past the ratified factor (#455)", () => 
   const fit = 0.6;
   assert.equal(closeIn(fit * 1.54, fit), false, "just under stays closed");
   assert.equal(closeIn(fit * 1.56, fit), true, "just past opens");
+  assert.equal(closeIn(fit * 1.55, fit), true, "the ratified factor itself opens, not just past it");
 });
 
 test("bearingLine speaks leagues and sixteen winds from the capital (#455)", () => {
