@@ -2,7 +2,7 @@
 // chart animating the survey that drew it. The honest geometry is prepared in
 // voyage-session.ts and the deterministic math lives in src/render/; this file is only
 // frame paint, the rAF clock, and the arm/step/paint/reset API. Host-agnostic since #191.
-import { frameAt, logEntryCount, type VoyageFrame } from "../../render/voyage.ts";
+import { frameAt, logEntryCount, toldRow, type VoyageFrame } from "../../render/voyage.ts";
 import {
   pointAtDistance,
   headingAt,
@@ -301,8 +301,8 @@ export function createVoyage(deps: VoyageDeps) {
     toldEntry: (): ToldEntry | null => {
       if (!voyage) return null;
       const entries = voyage.log.entries;
-      if (entries.length === 0) return null;
-      const row = Math.min(Math.max(voyage.shownArrived - 1, 0), entries.length - 1);
+      const row = toldRow(voyage.shownArrived, entries.length);
+      if (row < 0) return null;
       const e = entries[row]!;
       return { chamber: "survey", row, index: e.idx, day: e.day, text: journalText(e.text) };
     },
