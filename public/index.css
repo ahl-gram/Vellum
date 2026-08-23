@@ -121,7 +121,8 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 /* Landfall Sub 1 (#455): the survey window. The deep wears existing tokens in inverted roles (ratified provisional on #454); full-bleed and the floating chrome arrive with the ceremony subs. */
 .landfall { margin: 2.5rem 0 0; }
 .landfall .stage {
-  position: relative; height: 82vh; min-height: 420px;
+  /* 82vh alone put the stage's own chrome below the fold on every viewport under 1159px tall (plate-reader, PR #456): the calc term reserves the running head's ~250px so the coords line and controls stay on screen. */
+  position: relative; height: clamp(420px, calc(100vh - 300px), 82vh);
   overflow: hidden; cursor: grab; touch-action: pan-y;
   display: grid; place-items: center;
   border: 1px solid var(--line-tan);
