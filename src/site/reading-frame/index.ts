@@ -7,13 +7,13 @@
 // rows on screen. #220 collapsed the frame's two dated-log instances into this ONE
 // document, one arrived-class (`inked`), one dressing rule.
 import { createDatedLog } from "./dated-log.ts";
-import type { LivingChartHost, ScrubberRefs } from "../living-chart/index.ts";
+import type { LivingChartHost, ScrubberRefs, ToldEntry } from "../living-chart/index.ts";
 
 export interface ReadingFrameOpts {
   /** #192: forwarded to the chronicle's park seam, so a host with an address writer can record the rest Play's programmatic slider writes announce no event for. Optional. */
   readonly onPark?: () => void;
-  /** #402: forwarded to the instrument's year signal, so a host can decorate the story's beats. Optional. */
-  readonly onAgesYear?: (year: number | null) => void;
+  /** #402/#442: forwarded to the instrument's one told signal, so a host can decorate the entry the story is on. Optional. */
+  readonly onAgesTold?: (told: ToldEntry | null) => void;
 }
 
 export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = {}) {
@@ -57,10 +57,28 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   year.className = "rf-year";
   year.setAttribute("aria-hidden", "true");
 
+  // #442: the bar and the live row travel together, and the WRAPPER is what sticks. The
+  // arrival unfurl transforms .rf-instrument, and a transform on the sticky element
+  // itself slides the stuck strip out of register with the viewport top.
+  const strip = document.createElement("div");
+  strip.className = "rf-instrument-strip";
+
+  // aria-hidden: this MIRRORS a journal row that is itself in the document below, and the bar's readout already announces the position; a live region here would read the story twice.
+  const told = document.createElement("p");
+  told.className = "rf-told";
+  told.hidden = true;
+  told.setAttribute("aria-hidden", "true");
+  const toldGutter = document.createElement("span");
+  toldGutter.className = "cr-year";
+  const toldText = document.createElement("span");
+  toldText.className = "cr-text";
+  told.append(toldGutter, toldText);
+
   const log = createDatedLog({ label: "The ages" });
 
   instrument.append(playBtn, range, year);
-  agesPanel.append(instrument, log.panel);
+  strip.append(instrument, told);
+  agesPanel.append(strip, log.panel);
   reading.append(agesPanel);
   root.append(chart, status, reading);
   mount.appendChild(root);
@@ -77,9 +95,22 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
       sig: log.sig,
       strip: log.strip,
       onPark: opts.onPark,
-      onAgesYear: opts.onAgesYear,
+      onAgesTold: opts.onAgesTold,
     },
   };
+
+  /** #442: the live row is a MIRROR of the row the story is on, never a second writer over the journal; it renders from the told payload and touches no li the engine owns. */
+  function setTold(t: ToldEntry | null): void {
+    if (t === null) {
+      told.hidden = true;
+      toldGutter.textContent = "";
+      toldText.textContent = "";
+      return;
+    }
+    toldGutter.textContent = t.chamber === "survey" ? `day ${t.day}` : String(t.year);
+    toldText.textContent = t.text;
+    told.hidden = false;
+  }
 
   /** Unmount: a page host that leaves takes its DOM with it; the engine's own destroy() is the host's to call. */
   function destroy(): void {
@@ -88,7 +119,7 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   }
 
   // The host's furniture mount (#318): only ever append SIBLINGS of the panel here; anything nested inside the panel inherits the engine's hidden teardowns.
-  return { root, host, log, reading, destroy };
+  return { root, host, log, reading, strip, told, setTold, destroy };
 }
 
 export type ReadingFrame = ReturnType<typeof createReadingFrame>;

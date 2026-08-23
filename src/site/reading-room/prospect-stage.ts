@@ -1,12 +1,15 @@
-// The prospect stage (#402): the room's engraved plate for the story's beats, revealed
-// when the chronicle crosses a founding or a ruin. Its own element, never the card path
-// (RR11b keeps every place card dead here); nests inside the instrument panel between
-// the bar and the journal (ruled 2026-08-22), inheriting the panel's hidden teardowns on
-// purpose. The plate is a blob <img>, never inline <svg> (the cross-chart url(#) id
-// rule), and it is a LINK to the full Prospect page, so the picture is an honest doorway
-// (#289/#368). It writes nothing to the status line: the reveal decorates the sweep and
-// must never stall it.
-import { latestBeatAt, type StoryBeat } from "./beats.ts";
+// The prospect stage (#402, widened at #442): the room's engraved plate for whatever
+// the story is telling, a chronicle beat or the port the survey is visiting. Its own
+// element, never the card path (RR11b keeps every place card dead here); nests inside
+// the instrument panel between the strip and the journal (ruled 2026-08-22), inheriting
+// the panel's hidden teardowns on purpose. The plate is a blob <img>, never inline <svg>
+// (the cross-chart url(#) id rule), and it is a LINK to the full Prospect page, so the
+// picture is an honest doorway (#289/#368). It writes nothing to the status line: the
+// reveal decorates the sweep and must never stall it.
+//
+// #442 made the stage plate-shaped rather than beat-shaped: it is handed a PlateSpec and
+// draws it, and WHICH plate a told row means is told-plate.ts's rule, not the stage's.
+import { plateKeyOf, type PlateSpec } from "./told-plate.ts";
 
 export interface PlateResult {
   readonly svg: string;
@@ -25,10 +28,9 @@ interface BoundPlate {
 }
 
 interface WorldPlates {
-  readonly beats: ReadonlyArray<StoryBeat>;
-  readonly fetchPlate: (beat: StoryBeat) => Promise<PlateResult>;
-  readonly hrefFor: (beat: StoryBeat) => string;
-  readonly cache: Map<StoryBeat, Promise<BoundPlate>>;
+  readonly fetchPlate: (spec: PlateSpec) => Promise<PlateResult>;
+  readonly hrefFor: (spec: PlateSpec) => string;
+  readonly cache: Map<string, Promise<BoundPlate>>;
 }
 
 export function createProspectStage(opts: ProspectStageOpts = {}) {
@@ -47,17 +49,18 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
   root.appendChild(link);
 
   let world: WorldPlates | null = null;
-  let shown: StoryBeat | null = null;
+  let shown: string | null = null;
 
   function hide(): void {
     shown = null;
     root.hidden = true;
   }
 
-  function plateFor(w: WorldPlates, beat: StoryBeat): Promise<BoundPlate> {
-    const held = w.cache.get(beat);
+  function plateFor(w: WorldPlates, spec: PlateSpec): Promise<BoundPlate> {
+    const key = plateKeyOf(spec);
+    const held = w.cache.get(key);
     if (held) return held;
-    const bound = w.fetchPlate(beat).then((r) => {
+    const bound = w.fetchPlate(spec).then((r) => {
       const url = toUrl(r.svg);
       if (world !== w) {
         revokeUrl(url);
@@ -66,17 +69,16 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
       return { url, name: r.name };
     });
     bound.catch(() => {});
-    w.cache.set(beat, bound);
+    w.cache.set(key, bound);
     return bound;
   }
 
   function setWorld(
-    beats: ReadonlyArray<StoryBeat>,
-    fetchPlate: (beat: StoryBeat) => Promise<PlateResult>,
-    hrefFor: (beat: StoryBeat) => string,
+    fetchPlate: (spec: PlateSpec) => Promise<PlateResult>,
+    hrefFor: (spec: PlateSpec) => string,
   ): void {
     const prior = world;
-    world = { beats, fetchPlate, hrefFor, cache: new Map() };
+    world = { fetchPlate, hrefFor, cache: new Map() };
     hide();
     if (prior) {
       for (const bound of prior.cache.values()) {
@@ -85,39 +87,36 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
     }
   }
 
-  /** Pull every beat's plate ahead of the sweep; the host calls this once the travel order is primed, so the fetches queue off the settle path. */
-  function prefetch(): void {
+  /** Pull every plate the story can reach, ahead of the sweep; the host calls this once the instrument is armed, so the fetches queue off the settle path (#311 forbids a stall). */
+  function prefetch(specs: ReadonlyArray<PlateSpec>): void {
     if (world === null) return;
-    for (const b of world.beats) plateFor(world, b);
+    for (const s of specs) plateFor(world, s);
   }
 
-  function onYear(year: number | null): void {
-    if (world === null || year === null) {
+  /** null is a real state, not an absence: a plain visit opens with no plate at all (ruled 2026-08-22), and a teardown must clear one. */
+  function show(spec: PlateSpec | null): void {
+    if (world === null || spec === null) {
       hide();
       return;
     }
     const w = world;
-    const beat = latestBeatAt(w.beats, year);
-    if (beat === null) {
-      hide();
-      return;
-    }
-    if (beat === shown) return;
-    shown = beat;
-    plateFor(w, beat)
+    const key = plateKeyOf(spec);
+    if (key === shown) return;
+    shown = key;
+    plateFor(w, spec)
       .then((p) => {
-        if (world !== w || shown !== beat) return;
+        if (world !== w || shown !== key) return;
         img.src = p.url;
-        img.alt = `The prospect of ${p.name} in the year ${beat.year}`;
-        link.href = w.hrefFor(beat);
+        img.alt = `The prospect of ${p.name} in the year ${spec.year}`;
+        link.href = w.hrefFor(spec);
         root.hidden = false;
       })
       .catch(() => {
-        if (world === w && shown === beat) hide();
+        if (world === w && shown === key) hide();
       });
   }
 
-  return { root, link, img, setWorld, prefetch, onYear };
+  return { root, link, img, setWorld, prefetch, show };
 }
 
 export type ProspectStage = ReturnType<typeof createProspectStage>;

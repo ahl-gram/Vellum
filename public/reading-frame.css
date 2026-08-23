@@ -19,6 +19,19 @@
 .rf-arrival .rf-instrument { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) both; }
 .rf-arrival .rf-log { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) var(--paper-quick) both; }
 
+/* #442 the sticky instrument: once the reader has scrolled past it the bar rides the viewport top, carrying the one row being inked, so the scrubber and the story's current line share a screen with the chart or the plate. The WRAPPER sticks and .rf-instrument keeps the arrival unfurl: a transform on the sticky element itself makes the stuck strip slide out of register with the top. Nothing above it is fixed (there is no site header), so top:0 needs no offset. */
+.rf-instrument-strip { position: sticky; top: 0; z-index: 3; }
+
+/* #442 the live row MIRRORS the journal row the story is on; the journal itself is untouched and still flows (#219). It takes the shared gutter idiom but never the drop cap, which is 2.1em and would double the strip. */
+.rf-told { display: flex; gap: 0.9rem; margin: 0;
+  padding: 0.4rem 1rem 0.5rem; background: var(--parchment-panel);
+  border: 1px solid var(--line-tan); border-top: 0;
+  border-bottom: 1px solid var(--line-faint); }
+.rf-told[hidden] { display: none; }
+.rf-told .cr-year { flex: 0 0 3.6rem; text-align: right;
+  font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
+.rf-told .cr-text { color: var(--ink-annals); font-style: italic; }
+
 /* Measured at a real 320px viewport: a flex item's default min-width:auto plus a range input's ~129px intrinsic width pushed the whole PAGE to a 355px scrollWidth, so the row wraps AND the slider may shrink (min-width: 0); both halves are load-bearing. */
 .rf-instrument { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
   padding: 0.7rem 1rem; background: var(--parchment-panel);
@@ -53,6 +66,11 @@
 .rf-log-strip .cr-dc { float: left; font-style: normal; color: var(--ink-dark);
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-size: 2.1em; line-height: 0.8; margin: 0.08em 0.12em 0 0; }
+
+/* #442 ruled 2026-08-23: on a phone the CONTROLS stick and the live row does not. This
+   is the one narrow-viewport case in this file and it is scoped to the new strip; the
+   JOURNAL still flows identically at every width (#219, ratified 2026-07-27). */
+@media (max-width: 40rem) { .rf-told { display: none; } }
 
 /* "day 105" runs wider than a bare year, so the gutter grew from 3rem at #312. */
 .rf-log-strip .cr-year { flex: 0 0 3.6rem; text-align: right;

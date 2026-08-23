@@ -363,7 +363,7 @@ test("no hover or active rule states a lift as a px literal: the raise is a toke
 test("#402 the prospect reveal releases its transform: fill backwards, never both/forwards", () => {
   const css = read("public/reading-room/index.css");
   const rule = rulesIn(css).find((r) => /\.rr-prospect img\b/.test(r.selector) && /animation\s*:/.test(r.body));
-  assert.ok(rule, ".rr-prospect img carries the prospectReveal animation");
+  assert.ok(rule, ".rr-prospect img carries the plate's entrance animation");
   const anim = /animation\s*:\s*([^;]+)/.exec(rule.body)?.[1] ?? "";
   assert.ok(
     /\bbackwards\b/.test(anim) && !/\b(both|forwards)\b/.test(anim),

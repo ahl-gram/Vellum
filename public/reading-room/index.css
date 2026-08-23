@@ -29,15 +29,21 @@ footer { margin-top: 3.5rem; }
 .rr-colophon label { font-size: 0.85rem; letter-spacing: 0.05em; color: var(--ink-brown); }
 .rr-colophon input { width: 8.5rem; min-width: 0; font-variant-numeric: tabular-nums; }
 
-/* #402 the prospect stage, between the bar and the journal inside .rf-ages (ruled 2026-08-22). hidden toggles display, so prospectReveal restarts on every showing (the #321 display-restart behavior, the mechanism here rather than the bug); a beat-to-beat swap while visible deliberately does not replay it. */
+/* #402 the prospect stage, between the sticky strip and the journal inside .rf-ages (ruled 2026-08-22). hidden toggles display, so prospectUnfurl restarts on every showing (the #321 display-restart behavior, the mechanism here rather than the bug); a plate-to-plate swap while visible deliberately does not replay it. */
 .rr-prospect { margin: 1rem auto 1.2rem; max-width: 34rem; }
 .rr-prospect a { display: block; }
+/* #442 the plate UNFURLS rather than snapping in: the sheet drops open from its top edge, the house paperUnfurl gesture at the plate's own scale. The fill stays BACKWARDS and the resting keyframe releases the transform, or the final frame would pin at animation-cascade priority and silently kill the hover lift below (measured 2026-08-22, the #402 control probe). */
 .rr-prospect img { width: 100%; height: auto; display: block;
+  transform-origin: top center;
   border: 1px solid var(--line-tan);
   box-shadow: 0 4px 14px rgb(from var(--chart-ink) r g b / 0.12);
-  animation: prospectReveal 600ms var(--ease-paper) backwards;
+  animation: prospectUnfurl var(--unfurl) var(--ease-unfurl) backwards;
   transition: transform 0.26s var(--ease-paper), box-shadow 0.26s var(--ease-paper); }
 .rr-prospect a:hover img, .rr-prospect a:focus-visible img {
   transform: translateY(var(--raise)) rotate(-0.5deg);
   box-shadow: var(--raise-shadow); }
-@keyframes prospectReveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes prospectUnfurl {
+  from { opacity: 0; transform: perspective(900px) rotateX(-58deg); }
+  72%  { opacity: 1; transform: perspective(900px) rotateX(6deg); }
+  to   { opacity: 1; transform: none; }
+}

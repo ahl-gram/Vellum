@@ -35,10 +35,12 @@ import type { OverlayData } from "./place-overlay.ts";
 import type { HistoricalEvent } from "../../society/history.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
+import type { ToldEntry } from "./told.ts";
 
 interface AnnalRow {
   li: HTMLLIElement;
   year: number;
+  text: string;
 }
 
 interface AgesSession {
@@ -68,8 +70,8 @@ export interface AgesDeps {
   strip: HTMLElement;
   /** #192: invoked when Play parks, the one rest no input event announces. */
   onPark?: () => void;
-  /** #402: invoked on every instrument paint with the ages year, null off the ages chamber and on teardown. */
-  onAgesYear?: (year: number | null) => void;
+  /** #402/#442: invoked on every instrument paint with the entry the story is telling, a survey day row or a chronicle annal; null when nothing is told yet and on teardown. */
+  onAgesTold?: (told: ToldEntry | null) => void;
   /** The place overlay's data (events + presentYear for the annals and the plan). */
   overlay: { data(): OverlayData | null };
   chronicle: Chronicle;
@@ -81,7 +83,7 @@ function prefersReduce(): boolean {
 }
 
 export function createAges(deps: AgesDeps) {
-  const { panel, playBtn, range: rangeEl, readout: readoutEl, strip: stripEl, onPark, onAgesYear, overlay, chronicle, voyage } = deps;
+  const { panel, playBtn, range: rangeEl, readout: readoutEl, strip: stripEl, onPark, onAgesTold, overlay, chronicle, voyage } = deps;
 
   let ages: AgesSession | null = null;
 
@@ -143,7 +145,7 @@ export function createAges(deps: AgesDeps) {
       }
       li.append(year, text);
       stripEl.appendChild(li);
-      rows.push({ li, year: e.year });
+      rows.push({ li, year: e.year, text: e.text });
     }
     return rows;
   }
@@ -153,6 +155,14 @@ export function createAges(deps: AgesDeps) {
     if (!ages) return;
     if (ages.pos.chamber === "survey") voyage.syncRestingTrack();
     else voyage.internals.clearRestingTrack();
+  }
+
+  // #442: the entry the story is telling AT this position, read AFTER the chamber painted so the survey half sees the arrival the paint just landed. The ages half is the last annal already inked, and nothing at all before the first one.
+  function toldAt(pos: AgesPos): ToldEntry | null {
+    if (pos.chamber === "survey") return voyage.internals.toldEntry();
+    let last: AnnalRow | null = null;
+    for (const r of ages!.annals) if (eventIsPast(r.year, pos.year)) last = r;
+    return last === null ? null : { chamber: "ages", year: last.year, text: last.text };
   }
 
   // The one paint primitive: land the instrument on a chamber position. A chamber CROSSING settles the chamber being left exactly once, never per frame. Writes NO sink (rest sites call syncSinkAtRest themselves, #174).
@@ -179,7 +189,7 @@ export function createAges(deps: AgesDeps) {
       for (const r of ages.annals) r.li.classList.toggle("inked", eventIsPast(r.year, pos.year));
     }
     ages.pos = pos;
-    onAgesYear?.(pos.chamber === "ages" ? pos.year : null);
+    onAgesTold?.(toldAt(pos));
     rangeEl.value = String(Math.round(uFor(pos, range) * ages.barMax));
     const text = readoutFor(pos);
     // aria-valuetext, NOT a live region: a keyboard step announces once per press, programmatic Play frames stay silent.
@@ -241,7 +251,7 @@ export function createAges(deps: AgesDeps) {
     panel.hidden = true;
     rangeEl.removeAttribute("aria-valuetext");
     ages = null;
-    onAgesYear?.(null);
+    onAgesTold?.(null);
   }
 
   // Drop the session after a redraw with the toggle off (the host's innerHTML swap already replaced the baked layers; the journal is a sibling and hides explicitly).
@@ -251,7 +261,7 @@ export function createAges(deps: AgesDeps) {
     voyage.clearVoyage();
     panel.hidden = true;
     ages = null;
-    onAgesYear?.(null);
+    onAgesTold?.(null);
   }
 
   // A pointer drag rides the detent; a keyboard step crosses freely (a discrete press is already deliberate). Manual input pauses a running Play, the house idiom.
