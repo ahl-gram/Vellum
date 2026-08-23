@@ -275,18 +275,22 @@ export async function run(ctx) {
     if (at8b !== null && at8b.veil && at8b.status === "Landfall") break;
     await sleep(25);
   }
-  const held8b = at8b !== null && at8b.veil && at8b.status === "Landfall";
+  const held8b = at8b !== null && at8b.veil && at8b.status === "Landfall" && !at8b.lifting;
   await pressKey("Escape", "Escape", 27);
   await sleep(120);
   let after8b = null;
   try { after8b = await evaluate(readCam); } catch {}
-  await sleep(250);
-  let still8b = null;
-  try { still8b = await evaluate(readCam); } catch {}
+  // The skip must CANCEL the armed hold timer, not just close the veil: move the camera with a real "+" zoom, then prove no phantom lift flies it back (guard-prover round 2: land(0)'s deletion went red here, but an uncancelled holdTimer escaped, because its stray flight targets the destination the camera already holds and only a moved camera can see it).
+  await evaluate(`document.getElementById("lf-stage").focus()`);
+  await pressKey("+", "Equal", 187);
+  await sleep(1400);
+  let zoomed8b = null;
+  try { zoomed8b = await evaluate(readCam); } catch {}
+  const zoomHeld = zoomed8b !== null && !zoomed8b.veil && Math.abs(zoomed8b.scale - zoomed8b.expected * 1.5) < 1e-3;
   check(
-    "H8b a real key during Landfall (hold or lift) also jumps straight to the settled view, never mid-flight",
-    held8b && atLandfall(after8b) && still8b !== null && !still8b.veil && Math.abs(still8b.scale - after8b.scale) < 1e-9,
-    JSON.stringify({ at8b, after8b, still8b }),
+    "H8b a real key during the Landfall hold jumps straight to the settled view, and the cancelled ceremony never steals the camera back from a later gesture",
+    held8b && atLandfall(after8b) && zoomHeld,
+    JSON.stringify({ at8b, after8b, zoomed8b }),
   );
 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
