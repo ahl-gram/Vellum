@@ -96,6 +96,50 @@ test("#442 prefetch pulls every spec ahead of the sweep, and a 60fps repaint fet
   assert.equal((stage.img as { src?: string }).src, "url:svg-0-451");
 });
 
+test("#442 crossing the seam SWAPS the source with no gap: the plate is never hidden between two plates", async () => {
+  const { stage, fetchPlate, hrefFor } = harness();
+  const seen: boolean[] = [];
+  stage.setWorld(fetchPlate, hrefFor);
+  stage.prefetch([BEAT, LATER]);
+  stage.show(BEAT);
+  await tick();
+  assert.equal(stage.root.hidden, false);
+
+  // Sampled around the swap, since a hide-then-show would flash exactly here.
+  seen.push(stage.root.hidden);
+  stage.show(LATER);
+  seen.push(stage.root.hidden);
+  await tick();
+  seen.push(stage.root.hidden);
+
+  assert.deepEqual(seen, [false, false, false], "a plate-to-plate swap never passes through hidden");
+  assert.equal((stage.img as { src?: string }).src, "url:svg-5-620", "and it lands on the new plate");
+});
+
+test("#311 the stage stalls nothing and moves nothing: no status write, no scroll, in either module", () => {
+  for (const path of [
+    "src/site/reading-room/prospect-stage.ts",
+    "src/site/reading-room/told-plate.ts",
+    "src/site/reading-room/app.ts",
+    "src/site/reading-frame/index.ts",
+  ]) {
+    const src = readFileSync(resolve(REPO, path), "utf8");
+    // #442 decision 4 (ruled 2026-08-22): Play does not move the reading position, under
+    // reduced motion or otherwise. The sticky row is what follows the story, not a scroll.
+    assert.doesNotMatch(
+      src,
+      /scrollIntoView|window\.scrollTo|\.scrollTop\s*=/,
+      `${path} moves the reading position; the strip follows the story instead (ruled 2026-08-22)`,
+    );
+  }
+  const stage = readFileSync(resolve(REPO, "src/site/reading-room/prospect-stage.ts"), "utf8");
+  assert.doesNotMatch(
+    stage,
+    /statusEl|#status/,
+    "the stage writes nothing to the polite status line: the settle signal is the host's",
+  );
+});
+
 test("#402 a new world's plate can never paint over it: the prior cache is revoked", async () => {
   const { stage, revoked, fetchPlate, hrefFor } = harness();
   stage.setWorld(fetchPlate, hrefFor);

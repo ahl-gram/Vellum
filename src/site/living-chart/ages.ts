@@ -35,7 +35,7 @@ import type { OverlayData } from "./place-overlay.ts";
 import type { HistoricalEvent } from "../../society/history.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
-import type { ToldEntry } from "./told.ts";
+import { toldAnnal, type ToldEntry } from "./told.ts";
 
 interface AnnalRow {
   li: HTMLLIElement;
@@ -157,14 +157,6 @@ export function createAges(deps: AgesDeps) {
     else voyage.internals.clearRestingTrack();
   }
 
-  // #442: the entry the story is telling AT this position, read AFTER the chamber painted so the survey half sees the arrival the paint just landed. The ages half is the last annal already inked, and nothing at all before the first one.
-  function toldAt(pos: AgesPos): ToldEntry | null {
-    if (pos.chamber === "survey") return voyage.internals.toldEntry();
-    let last: AnnalRow | null = null;
-    for (const r of ages!.annals) if (eventIsPast(r.year, pos.year)) last = r;
-    return last === null ? null : { chamber: "ages", year: last.year, text: last.text };
-  }
-
   // The one paint primitive: land the instrument on a chamber position. A chamber CROSSING settles the chamber being left exactly once, never per frame. Writes NO sink (rest sites call syncSinkAtRest themselves, #174).
   function paintPos(pos: AgesPos, opts: { silent?: boolean; postLog?: boolean } = {}): void {
     if (!ages) return;
@@ -189,7 +181,8 @@ export function createAges(deps: AgesDeps) {
       for (const r of ages.annals) r.li.classList.toggle("inked", eventIsPast(r.year, pos.year));
     }
     ages.pos = pos;
-    onAgesTold?.(toldAt(pos));
+    // #442: read AFTER the chamber painted, so the survey half reports the arrival this paint just landed.
+    onAgesTold?.(pos.chamber === "survey" ? voyage.internals.toldEntry() : toldAnnal(ages.annals, pos.year));
     rangeEl.value = String(Math.round(uFor(pos, range) * ages.barMax));
     const text = readoutFor(pos);
     // aria-valuetext, NOT a live region: a keyboard step announces once per press, programmatic Play frames stay silent.
