@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { runInline } from "../../src/site/explorer/worker-client.ts";
+import { regionChainCache } from "../../src/site/explorer/region-chain-cache.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, regionDetailLevel, regionTitle } from "../../src/world/region.ts";
 import { renderMap, type RenderOptions } from "../../src/render/map-renderer.ts";
@@ -82,6 +83,30 @@ test("band 0 has no region job at all: the world sheet is what it always was", (
   const svg = runInline({ kind: "draw", seed: SEED, overrides: {}, render: RENDER }).svg;
   assert.equal(digest(svg), digest(renderMap(world, RENDER)), "the world draw path is untouched by this sub");
   assert.doesNotMatch(svg, /data-vellum-region-/, "and carries no region stamp to acquire a detail level");
+});
+
+test("the region job actually builds in the HELD cache, which no byte comparison can see", () => {
+  // The cache is transparent by construction (the key is the whole spec, so a hit returns what a
+  // miss would have built), so every digest here passes with it silently dropped. Guard-prover
+  // proved exactly that: deleting the chainCache argument killed nothing. This asks the cache.
+  const deepest = REGION_BANDS[REGION_BANDS.length - 1] as LodBand;
+  const touches = (): number => regionChainCache.hits + regionChainCache.misses;
+  const before = touches();
+  runInline(jobFor(deepest));
+  assert.ok(touches() > before, "a region job builds its ancestry IN the held cache, not in one of its own");
+  const served = regionChainCache.hits;
+  runInline(jobFor(deepest));
+  assert.ok(regionChainCache.hits > served, "and a redraw of that window is served back out of it");
+});
+
+test("the stamp follows the WINDOW, not the band index the job happened to carry", () => {
+  // At every real band the two agree, so a job that stamped msg.band would look correct to every
+  // other test here. This is the one fixture where they diverge: a deepest-band window carried by
+  // a job announcing band 1, which is what a stale hysteresis step would send.
+  const deepest = REGION_BANDS[REGION_BANDS.length - 1] as LodBand;
+  const svg = runInline({ ...jobFor(deepest), band: 1 }).svg;
+  assert.equal(recipeFromSvg(svg)?.region?.detail, deepest.index, "the window implies the level");
+  assert.notEqual(deepest.index, 1, "and the two really do disagree, or this fixture proves nothing");
 });
 
 test("a chain cache held across jobs cannot move a byte: the same window redraws identically after another", () => {
