@@ -24,9 +24,12 @@ export async function run(ctx) {
   // A region sheet is ~500KB, far past what a CDP evaluate should carry back; the digest is the byte
   // comparison in a form that fits in a check message, and it is computed IN the page so both sides
   // of every compare are hashed by the same engine.
+  // The LAST inset, never the first: during a crossing the outgoing sheet is still mounted, so a
+  // plain querySelector can read the sheet that is on its way off screen.
+  const LAST_INSET = `[...document.querySelectorAll("#map .region-inset svg")].pop()`;
   const insetDigest = () =>
     evaluate(
-      `(()=>{const s=document.querySelector("#map .region-inset svg");if(!s)return null;const x=s.outerHTML;` +
+      `(()=>{const s=${LAST_INSET};if(!s)return null;const x=s.outerHTML;` +
         `let h=2166136261;for(let i=0;i<x.length;i++){h^=x.charCodeAt(i);h=Math.imul(h,16777619);}` +
         `return{digest:(h>>>0).toString(16)+"/"+x.length,detail:s.getAttribute("data-vellum-region-detail"),` +
         `u0:+s.getAttribute("data-vellum-region-u0"),v0:+s.getAttribute("data-vellum-region-v0"),` +
@@ -71,26 +74,32 @@ export async function run(ctx) {
 
   const deepest = ladder[ladder.length - 1];
 
-  // RD2: the payoff, measured on the window the page actually committed. Shore LENGTH alone rises
-  // when a coast turns into a staircase (#376), so ring count carries the claim and length only
-  // corroborates it. Both arms go through one function in this page's own engine.
+  // RD2: the payoff, measured on the sheet the page is SHOWING. Shore LENGTH alone rises when a
+  // coast turns into a staircase (#376), so the drawn ring count carries the claim and length only
+  // corroborates it. Both arms are rendered by this page's own engine and counted the same way as
+  // the live coast, so the comparison is like for like and the drawn sheet has to match one of them.
   const gained = await evaluate(
     `(async()=>{const win={u0:${deepest.u0},v0:${deepest.v0},u1:${deepest.u1},v1:${deepest.v1}};` +
       `const {defaultRecipe,generateWorld}=await import("./engine/world/generate.js");` +
       `const {generateRegionWorld,regionTitle}=await import("./engine/world/region.js");` +
+      `const {renderMap}=await import("./engine/render/map-renderer.js");` +
       `const {closedIsoRings}=await import("./engine/terrain/contours.js");` +
       `const world=generateWorld(defaultRecipe(${SEED}));` +
       `const arm=(detail)=>generateRegionWorld(world,{window:win,gridW:320,gridH:240,title:regionTitle(world,win),detail});` +
-      `const shore=(r)=>{const rings=closedIsoRings(r.elev,r.seaLevel);let len=0;` +
-      `for(const{points:p}of rings)for(let i=1;i<p.length;i++)len+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);` +
-      `return{rings:rings.length,len:Math.round(len)};};` +
-      `return{bare:shore(arm(false)),detail:shore(arm(true))};})()`,
+      `const ringsIn=(d)=>((d||"").match(/M/g)||[]).length;` +
+      `const rendered=(r)=>{const svg=renderMap(r,{style:"antique",widthPx:1500,legend:true});` +
+      `const m=svg.match(/<g id="layer-land"><path d="([^"]*)"/);return ringsIn(m&&m[1]);};` +
+      `const shoreLen=(r)=>{let len=0;for(const{points:p}of closedIsoRings(r.elev,r.seaLevel))` +
+      `for(let i=1;i<p.length;i++)len+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);return Math.round(len);};` +
+      `const b=arm(false),d=arm(true);const live=${LAST_INSET};` +
+      `return{drawn:ringsIn(live&&live.querySelector("#layer-land path").getAttribute("d")),` +
+      `bare:rendered(b),detail:rendered(d),bareLen:shoreLen(b),detailLen:shoreLen(d)};})()`,
     true,
   );
   check(
-    "RD2 the coast gains real detail: the band-3 window the page committed carries more closed shore rings than the bare field (#400 AC1)",
-    gained.detail.rings > gained.bare.rings && gained.bare.rings > 0,
-    `rings ${gained.bare.rings} -> ${gained.detail.rings}, shore length ${gained.bare.len} -> ${gained.detail.len}`,
+    "RD2 the coast gains real detail: the band-3 sheet on screen draws the detail arm's shore rings, not the bare field's (#400 AC1)",
+    gained.drawn === gained.detail && gained.detail > gained.bare && gained.bare > 0,
+    `drawn ${gained.drawn} rings; bare ${gained.bare} -> detail ${gained.detail}; shore length ${gained.bareLen} -> ${gained.detailLen}`,
   );
 
   // RD3: path independence at the site level. Two camera routes to one window must commit the same bytes.
