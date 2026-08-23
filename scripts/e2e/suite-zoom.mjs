@@ -345,7 +345,12 @@ export async function run(ctx) {
   await enterAt(2, 0.5, 0.5);
   const s17 = await waitRedraft(before17);
   const drawMs17 = await captionMs();
-  const view17 = await insetView();
+  // waitRedraft returns at the COMMIT, and the outgoing sheet is torn down on the incoming's
+  // transitionend with a 700ms fallback, so a fast enough draw lands the check mid-crossfade with
+  // two insets mounted. #400's held chain cache took this band-1 draw to ~294ms and did exactly
+  // that. Settle first, as Z21 already does; a pair left mounted for good still fails here.
+  let view17 = await insetView();
+  for (let i = 0; i < 50 && view17.insets !== 1; i++) { await sleep(40); view17 = await insetView(); }
   const W17 = await evaluate(`document.getElementById("map-viewport").clientWidth`);
   check(
     "Z17 a settle redrafts one finer survey as an inset; the camera does not move at the commit (AC1)",

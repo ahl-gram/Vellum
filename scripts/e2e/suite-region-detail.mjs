@@ -92,7 +92,8 @@ export async function run(ctx) {
       `const shoreLen=(r)=>{let len=0;for(const{points:p}of closedIsoRings(r.elev,r.seaLevel))` +
       `for(let i=1;i<p.length;i++)len+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);return Math.round(len);};` +
       `const b=arm(false),d=arm(true);const live=${LAST_INSET};` +
-      `return{drawn:ringsIn(live&&live.querySelector("#layer-land path").getAttribute("d")),` +
+      `const liveCoast=live?live.querySelector("#layer-land path"):null;` +
+      `return{drawn:liveCoast?ringsIn(liveCoast.getAttribute("d")):-1,` +
       `bare:rendered(b),detail:rendered(d),bareLen:shoreLen(b),detailLen:shoreLen(d)};})()`,
     true,
   );
