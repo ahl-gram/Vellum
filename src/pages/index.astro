@@ -1,5 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { homeStage } from "../site/home/stage-data.ts";
+
+const stage = homeStage();
 ---
 
 <BaseLayout
@@ -7,6 +10,40 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   path="/"
   tagline="an atelier of imaginary cartography"
 >
+<section class="landfall" aria-label={`The chart of ${stage.title}, pannable and zoomable`}>
+  <div
+    class="stage"
+    id="lf-stage"
+    tabindex="0"
+    aria-label="Pan and zoom the chart: drag, scroll, or keys plus, minus, and zero"
+    data-capital-name={stage.capital.name}
+    data-capital-nx={String(stage.capital.nx)}
+    data-capital-ny={String(stage.capital.ny)}
+  >
+    <div class="sheet" id="lf-sheet">
+      <img class="lf-chart" src="charts/chart-42-antique.svg" width="1500" height="1158"
+        alt={`${stage.title}, antique chart, seed 42`} loading="eager" draggable="false">
+      <div class="lf-marks" aria-hidden="true">
+        {stage.dots.map((d) => (
+          <div
+            class={`lf-dot${d.ruined ? " ruined" : ""}${d.capital ? " capital" : ""}`}
+            style={`left:${(d.nx * 100).toFixed(2)}%;top:${(d.ny * 100).toFixed(2)}%`}
+          >
+            <span class="lf-pip"></span>
+            <span class="lf-name">{d.name}{d.ruined ? " (ruined)" : ""}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+    <div class="lf-controls" id="lf-controls" role="group" aria-label="Camera">
+      <button type="button" class="lf-btn" id="lf-in" aria-label="Draw nearer">+</button>
+      <button type="button" class="lf-btn" id="lf-out" aria-label="Stand off">&minus;</button>
+      <button type="button" class="lf-btn" id="lf-home" aria-label="The whole sheet">&#8962;</button>
+    </div>
+    <p class="lf-coords" id="lf-coords" aria-hidden="true"></p>
+  </div>
+</section>
+
 <section class="cartouche" aria-label="Draw a world by its seed">
   <div class="rule">
     <svg class="flourish tl" viewBox="0 0 15 15" aria-hidden="true"><path d="M14.9 0.9Q0.9 0.9 0.9 14.9" fill="none"/></svg>
@@ -130,6 +167,7 @@ full <a href="https://en.wikipedia.org/wiki/Random_seed">reproducibility</a>.</p
 <a href="https://github.com/ahl-gram/Vellum#readme">README</a>.</p>
 </section>
 
+<script type="module" src="app.bundle.js" is:inline></script>
 <script is:inline>
 // Inline by stated exception (#289, pipeline rule #260): one form intercept does not earn a bundle twin.
 // The Explorer reads the HASH; the no-JS GET fallback lands on ?seed=N, which it ignores, degrading to today's world.

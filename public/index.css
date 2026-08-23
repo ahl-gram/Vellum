@@ -117,3 +117,73 @@ code { background: var(--parchment-deep); padding: 0.1em 0.4em; border-radius: 3
   font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
 /* Home's grander footer, pinned above the shell rule for the same cascade reason as the masthead (e2e RH4). */
 main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
+
+/* Landfall Sub 1 (#455): the survey window. The deep wears existing tokens in inverted roles (ratified provisional on #454); full-bleed and the floating chrome arrive with the ceremony subs. */
+.landfall { margin: 2.5rem 0 0; }
+.landfall .stage {
+  /* 82vh alone put the stage's own chrome below the fold on every viewport under 1159px tall (plate-reader, PR #456): the calc term reserves the running head's ~250px so the coords line and controls stay on screen. */
+  position: relative; height: clamp(420px, calc(100vh - 300px), 82vh);
+  overflow: hidden; cursor: grab; touch-action: pan-y;
+  display: grid; place-items: center;
+  border: 1px solid var(--line-tan);
+  outline: 3px double var(--line-faint);
+  outline-offset: 6px;
+  /* The prototype's deep: lighter at center so the ink shadow has ground to darken (token-derived mix, no raw hex). */
+  background:
+    radial-gradient(80% 70% at 30% 20%, color-mix(in srgb, var(--ink-dark) 90%, var(--parchment) 10%) 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+}
+.landfall .stage.dragging { cursor: grabbing; }
+.landfall .stage:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 2px; }
+/* No-JS containment is by construction against the sheet's definite box, never a viewport formula (the 106vh form cropped, #456 finding 2); abspos+margin:auto because a percentage max-height dies inside an auto grid track. */
+.landfall .sheet { position: relative; width: 100%; height: 100%; }
+.lf-chart { position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%; width: auto; height: auto; user-select: none; -webkit-user-drag: none; }
+.landfall .stage.cam .sheet {
+  display: block;
+  position: absolute; left: 0; top: 0;
+  width: 1500px; height: 1157.931px;
+  transform-origin: 0 0; will-change: transform;
+  /* The prototype's dress (out/atelier-map): the enlarged ink shadow over the lighter-centered deep; the lamplight bloom washed the chart out (Alex, PR #456). */
+  box-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);
+}
+.landfall .stage.cam .lf-chart { position: static; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; }
+.lf-marks { position: absolute; inset: 0; }
+.lf-dot {
+  position: absolute; width: 7px; height: 7px;
+  transform: translate(-50%, -50%) scale(var(--inv, 1));
+  opacity: 0; transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.landfall .stage.close-in .lf-dot { opacity: 1; }
+.lf-pip {
+  position: absolute; inset: 0;
+  border: 1px solid var(--chart-ink); border-radius: 50%;
+  background: rgb(from var(--parchment-bright) r g b / 0.85);
+  box-shadow: 0 1px 3px rgb(from var(--chart-ink) r g b / 0.4);
+}
+.lf-dot.ruined .lf-pip { background: transparent; border-style: dashed; }
+.lf-dot.capital .lf-pip { border-width: 2px; }
+.lf-name {
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 8.5px; letter-spacing: 0.08em; color: var(--chart-ink); white-space: nowrap;
+  text-shadow: 0 0 4px var(--chart-paper), 0 0 8px var(--chart-paper);
+}
+.lf-controls { display: none; position: absolute; right: 0.9rem; bottom: 0.9rem; flex-direction: column; gap: 0.4rem; }
+.lf-controls.on { display: flex; }
+.lf-btn {
+  width: 2.2rem; height: 2.2rem;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 1.1rem; line-height: 1;
+  color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.5);
+  border: 1px solid var(--line-tan); cursor: pointer;
+}
+.lf-btn:hover, .lf-btn:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
+.lf-coords {
+  display: none; position: absolute; left: 1rem; bottom: 0.7rem; margin: 0;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-variant-caps: small-caps; letter-spacing: 0.06em;
+  font-size: 0.85rem; color: var(--line-tan);
+}
+.lf-coords.on { display: block; }
+@media (prefers-reduced-motion: reduce) { .lf-dot { transition: none; } }
+@media (max-width: 720px) { .landfall .stage { height: min(64vh, 86vw); min-height: 300px; } }

@@ -54,9 +54,11 @@ test("the smoke tier covers every page that ships its own bundle", () => {
     "reading-room": ["reading-room"],
     "prospect": ["prospect"],
     "ribbon": ["ribbon"],
+    "home": ["home"],
   };
   for (const { twin } of BUNDLE_ENTRIES) {
-    const surface = twin.replace(/\/app\.bundle\.js$/, "");
+    // The home twin sits at the public root (#455), so its surface has no directory prefix.
+    const surface = twin === "app.bundle.js" ? "home" : twin.replace(/\/app\.bundle\.js$/, "");
     const suites = covers[surface];
     assert.ok(suites, `bundle ${surface} has no smoke suite mapped, so it ships uncovered`);
     assert.ok(

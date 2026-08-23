@@ -51,6 +51,8 @@ const PAGES: readonly PageSpec[] = [
     tagline: "an atelier of imaginary cartography",
     // Occurs ONLY inside the script (the form tag's own id would match anywhere): proves the intercept exists, not merely the form.
     inlineScript: 'getElementById("seed-form")',
+    // Landfall Sub 1 (#455): home is an app surface now (the stage camera) AND keeps the #289 intercept exception.
+    scriptSrc: "app.bundle.js",
   },
   {
     route: "faq/index.html",
@@ -545,11 +547,14 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
     const html = page(p.route);
     if (p.inlineScript !== undefined) {
       const scripts = [...html.matchAll(/<script\b/g)];
-      assert.equal(scripts.length, 1, `${p.route} carries exactly one script, the seed-form intercept`);
-      assert.ok(!html.includes('type="module"'), `${p.route} ships no module bundle, only the inline intercept`);
+      const expected = p.scriptSrc === undefined ? 1 : 2;
+      assert.equal(scripts.length, expected, `${p.route} carries exactly ${expected} script(s)`);
       assert.ok(html.includes(p.inlineScript), `${p.route} script targets ${p.inlineScript}`);
       assert.ok(html.indexOf("<script") < html.indexOf("<footer>"), `${p.route} script renders inside <main>, before the footer`);
-      continue;
+      if (p.scriptSrc === undefined) {
+        assert.ok(!html.includes('type="module"'), `${p.route} ships no module bundle, only the inline intercept`);
+        continue;
+      }
     }
     assert.ok(html.includes(tag), `${p.route} should load its bundle twin via ${tag}`);
     assert.ok(html.indexOf(tag) < html.indexOf("<footer>"), `${p.route} script renders inside <main>, before the footer`);
@@ -573,9 +578,10 @@ test("the cartouche hero: frame, hook, seed form, chart plate, fused caption, in
     "drawn in the antique manner",
     "stroke for stroke",
   ];
-  let at = -1;
+  // Anchored at the cartouche and resuming after each marker: the stage above legitimately embeds the hero chart's src first (#455).
+  let at = html.indexOf('class="cartouche"') - 1;
   for (const marker of order) {
-    const next = html.indexOf(marker);
+    const next = html.indexOf(marker, at + 1);
     assert.ok(next > at, `home hero keeps its order at ${marker}`);
     at = next;
   }
@@ -614,6 +620,7 @@ test("every internal link and embed on the rendered pages resolves", () => {
     "/seed-of-the-day/app.bundle.js",
     "/reading-room/app.bundle.js",
     "/prospect/app.bundle.js",
+    "/app.bundle.js",
   ];
   const routes = new Set<string>(PAGES.map((p) => p.dir));
   for (const p of PAGES) {
