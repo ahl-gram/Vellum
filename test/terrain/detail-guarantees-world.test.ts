@@ -241,7 +241,7 @@ test("saddle census: hairline picture-fuses in adjusted band-3 windows stay with
     }
   }
   // Measured on this exact fixture 2026-08-23: 19 fusing saddles across the two 16-window sweeps, 11 of them with both corners on parent land; the bands leave room for single-cell float drift but trip on growth. Was 17 and 3 on 2026-08-22. The 3 to 11 is the ORACLE, not the terrain: counted against the blurred parent surface this same field still reads 3, and the parent's own cells simply call more cells land.
-  assert.ok(fusingTotal >= 8 && fusingTotal <= 28, `fusing saddle census moved: ${fusingTotal}, measured 19`);
+  assert.ok(fusingTotal >= 8 && fusingTotal <= 26, `fusing saddle census moved: ${fusingTotal}, measured 19`);
   assert.ok(bothParent <= 16, `both-parent hairline fuses grew: ${bothParent}, measured 11`);
 });
 

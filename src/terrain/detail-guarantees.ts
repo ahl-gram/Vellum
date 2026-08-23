@@ -109,6 +109,12 @@ export function rejectBridges(
       `rejectBridges: field sizes differ (${coarse.w}x${coarse.h} vs ${fine.w}x${fine.h})`,
     );
   }
+  // A short immovable field reads as undefined, then NaN, then not-land, and every protected cell silently becomes rejectable.
+  if (immovable.w !== fine.w || immovable.h !== fine.h) {
+    throw new RangeError(
+      `rejectBridges: immovable size differs (${immovable.w}x${immovable.h} vs ${fine.w}x${fine.h})`,
+    );
+  }
   const { w, h } = coarse;
   const n = w * h;
   const { ids: coarseIds } = labelLandmasses(coarse, seaLevel);

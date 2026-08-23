@@ -185,6 +185,7 @@ test("rejectBridges leaves coarse land untouched and never mutates its inputs (#
   assert.ok(out.at(3, 1) > SEA, "a spur must be kept");
   assert.deepEqual(Array.from(fine.data), fineCopy, "rejectBridges must not mutate its input");
   assert.throws(() => rejectBridges(coarse, coarse, createField(4, 3, () => 0), SEA), RangeError);
+  assert.throws(() => rejectBridges(coarse, createField(4, 3, () => 0), fine, SEA), RangeError);
 });
 
 test("a saddle the drawn coast bridges can still split in the landmass array (#397)", () => {
