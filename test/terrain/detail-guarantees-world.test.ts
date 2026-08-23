@@ -42,6 +42,7 @@ type WorldCtx = {
 
 type WindowCase = {
   readonly surface: Field;
+  readonly cells: Field;
   readonly fine: Field;
   /** What #397 shipped: the bilinear floor with no gate, kept as the control that shows what the gate removes. */
   readonly ungated: Field;
@@ -90,6 +91,7 @@ function caseFor(seed: number, cx: number, cy: number): WindowCase {
     const adjusted = rejectBridges(cells, cells, floored, c.sea);
     wc = {
       surface,
+      cells,
       fine,
       ungated,
       floored,
@@ -177,12 +179,21 @@ test("the gate and the rejection each do real work on real terrain, and neither 
   let ungatedFusions = 0;
   let gatedFusions = 0;
   let rejectedCells = 0;
+  let gateFootprint = 0;
+  let gateFloored = 0;
+  let sunkByGate = 0;
   for (const [seed, cx, cy] of BRIDGE_WINDOWS) {
     const wc = caseFor(seed, cx, cy);
     ungatedFusions += fusedCells(wc, wc.ungated);
     gatedFusions += fusedCells(wc, wc.floored);
     for (let i = 0; i < CW * CH; i++) {
       if (wc.floored.data[i] !== wc.adjusted.data[i]) rejectedCells++;
+      // The gate's own footprint: the parent charts water here and its interpolated surface still stands above the waterline, which is the exact set #443 says must take no floor. The fused-cell totals below cannot see this set at all.
+      if ((wc.cells.data[i] as number) > wc.sea) continue;
+      if (!((wc.surface.data[i] as number) > wc.sea)) continue;
+      gateFootprint++;
+      if (wc.floored.data[i] !== wc.fine.data[i]) gateFloored++;
+      if ((wc.ungated.data[i] as number) > wc.sea && (wc.floored.data[i] as number) <= wc.sea) sunkByGate++;
     }
     assert.equal(
       fusedCells(wc, wc.adjusted),
@@ -190,7 +201,11 @@ test("the gate and the rejection each do real work on real terrain, and neither 
       `seed ${seed} window ${cx},${cy}: a merge of two parent landmasses survived`,
     );
   }
-  // Measured 2026-08-23 across the four pinned windows: the ungated floor fuses 1173 cells and the gated floor still fuses 1173, so on these fixtures the gate is not what un-merges them; rejection is, and it takes 55 cells to do it.
+  assert.equal(gateFloored, 0, `the floor reached ${gateFloored} cells the parent's own cell charts as water`);
+  // Measured 2026-08-23 across the four pinned windows: 327 cells sit in the gate's footprint and it moves the waterline at 75 of them. The ungated floor fuses 1173 cells and the gated floor still fuses 1173, so on these fixtures the gate is not what un-merges them, rejection is, and it takes 55 cells to do it. That is exactly why gateFloored is asserted directly: the fusion totals cannot see the gate at all.
+  assert.ok(gateFootprint >= 200, `only ${gateFootprint} cells in the gate's footprint, this guard is near-vacuous`);
+  assert.ok(sunkByGate >= 40, `the gate moved the waterline at only ${sunkByGate} cells, so it is doing nothing here`);
+  
   assert.ok(ungatedFusions >= 100, `the ungated floor barely merges (${ungatedFusions}), the fixture is vacuous`);
   assert.ok(gatedFusions >= 100, `the gated floor barely merges (${gatedFusions}), rejection has nothing to do`);
   assert.ok(rejectedCells >= 10, `rejection touched only ${rejectedCells} cells across the whole fixture`);
