@@ -80,10 +80,21 @@ export async function run(ctx) {
     for (let i = 0; i < 200; i++) {
       let ok = null;
       try { ok = await evaluate(`document.readyState === "complete" && !!document.querySelector(".wordmark")`); } catch {}
-      if (ok) return true;
+      if (ok) break;
       await sleep(75);
+      if (i === 199) return false;
     }
-    return false;
+    if (route !== "/") return true;
+    // Home's first arrival raises the ceremony veil (#457); settle it with a real key so the head plate shows the head.
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+    for (let i = 0; i < 40; i++) {
+      let up = true;
+      try { up = await evaluate(`!!document.getElementById("lf-veil")`); } catch {}
+      if (!up) break;
+      await sleep(50);
+    }
+    return true;
   };
 
   const heads = {};
