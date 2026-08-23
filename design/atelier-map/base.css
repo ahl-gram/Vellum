@@ -1,0 +1,148 @@
+/* Atelier Map concept — base: fonts, tokens, the deep, the fog, the veil.
+   Palette and faces are Vellum's own (BaseLayout tokens, Punchcutter case);
+   this concept inverts their roles: parchment lettering on the walnut deep. */
+
+@font-face {
+  font-family: 'IM Fell English SC'; font-style: normal; font-weight: 400;
+  font-display: swap; src: url('fonts/im-fell-english-sc-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IM Fell English'; font-style: italic; font-weight: 400;
+  font-display: swap; src: url('fonts/im-fell-english-latin-400-italic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'EB Garamond'; font-style: normal; font-weight: 400;
+  font-display: swap; src: url('fonts/eb-garamond-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'EB Garamond'; font-style: italic; font-weight: 400;
+  font-display: swap; src: url('fonts/eb-garamond-latin-400-italic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'EB Garamond'; font-style: normal; font-weight: 600;
+  font-display: swap; src: url('fonts/eb-garamond-latin-600-normal.woff2') format('woff2');
+}
+
+:root {
+  --ink-dark: #4a3826;
+  --ink-brown: #6b5a40;
+  --ink-faded: #857257;
+  --line-tan: #b9a77f;
+  --line-faint: #cdbd97;
+  --parchment: #efe6cf;
+  --parchment-panel: #f4ecd8;
+  --parchment-bright: #fff7e4;
+  --parchment-deep: #e6d9b8;
+  --control-gold: #f0e3bd;
+  --chart-paper: #f2e8cf;
+  --chart-ink: #3d2f1f;
+  --sheet-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);
+
+  --font-serif-fallback: 'Iowan Old Style', 'Palatino', Georgia, serif;
+  --font-display: 'IM Fell English SC', var(--font-serif-fallback);
+  --font-flourish: 'IM Fell English', var(--font-serif-fallback);
+  --font-body: 'EB Garamond', var(--font-serif-fallback);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--parchment);
+  background:
+    radial-gradient(120% 90% at 50% 30%, rgb(from var(--ink-dark) r g b / 0.0) 40%, rgb(from var(--chart-ink) r g b / 0.55) 100%),
+    radial-gradient(80% 70% at 30% 20%, #55402a 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+  background-color: var(--chart-ink);
+}
+
+/* ---- The unsurveyed deep: drifting fog ---- */
+
+.fog {
+  position: fixed; inset: -30%;
+  pointer-events: none; z-index: 3;
+  opacity: 0.4;
+}
+.fog.a {
+  background: radial-gradient(45% 30% at 30% 60%, rgb(from var(--parchment) r g b / 0.10), transparent 70%);
+  animation: fog-drift-a 90s ease-in-out infinite alternate;
+}
+.fog.b {
+  background: radial-gradient(40% 28% at 70% 30%, rgb(from var(--line-tan) r g b / 0.09), transparent 70%);
+  animation: fog-drift-b 70s ease-in-out infinite alternate;
+}
+@keyframes fog-drift-a { from { transform: translate(-4%, 2%); } to { transform: translate(5%, -3%); } }
+@keyframes fog-drift-b { from { transform: translate(3%, -2%); } to { transform: translate(-5%, 3%); } }
+
+/* ---- The loading ceremony ---- */
+
+.veil {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center;
+  background:
+    radial-gradient(90% 80% at 50% 40%, #55402a 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+}
+.veil-inner { text-align: center; }
+
+.veil-wordmark {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 8vw, 4.6rem);
+  letter-spacing: 0.14em;
+  color: var(--parchment-bright);
+  line-height: 1.1;
+}
+.veil-tagline {
+  font-family: var(--font-flourish); font-style: italic;
+  font-size: 1.05rem; color: var(--line-tan);
+  margin-top: 0.3rem;
+}
+
+.veil-rose { width: 132px; height: 132px; margin: 2rem auto 1.5rem; display: block; }
+.veil-rose .rose-ring {
+  fill: none; stroke: var(--line-tan); stroke-width: 1;
+  stroke-dasharray: 277; stroke-dashoffset: 277;
+  animation: rose-draw 1.6s ease-out forwards;
+}
+.veil-rose .rose-ring.inner {
+  stroke-dasharray: 214; stroke-dashoffset: 214;
+  stroke-width: 0.6;
+  animation: rose-draw 1.6s 0.25s ease-out forwards;
+}
+.veil-rose .rose-rays path {
+  stroke: var(--line-tan); stroke-width: 0.6; opacity: 0;
+  animation: rose-fade 0.8s 1.1s ease-out forwards;
+}
+.veil-rose .rose-needle {
+  fill: var(--parchment); opacity: 0;
+  transform-origin: 60px 60px;
+  animation: needle-settle 1.4s 1.3s cubic-bezier(.2,1.4,.4,1) forwards;
+}
+.veil-rose .rose-pin { fill: var(--line-tan); }
+@keyframes rose-draw { to { stroke-dashoffset: 0; } }
+@keyframes rose-fade { to { opacity: 0.75; } }
+@keyframes needle-settle {
+  0% { opacity: 0; transform: rotate(-160deg); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: rotate(16deg); }
+}
+
+.veil-status {
+  font-family: var(--font-display);
+  font-size: 0.78rem; letter-spacing: 0.3em;
+  color: var(--line-tan);
+  text-transform: lowercase;
+}
+
+.veil.lifting { animation: veil-lift 1.1s ease-in forwards; }
+@keyframes veil-lift {
+  to { opacity: 0; transform: scale(1.06); visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fog.a, .fog.b { animation: none; }
+  .veil-rose .rose-ring, .veil-rose .rose-ring.inner { animation: none; stroke-dashoffset: 0; }
+  .veil-rose .rose-rays path { animation: none; opacity: 0.75; }
+  .veil-rose .rose-needle { animation: none; opacity: 1; transform: rotate(16deg); }
+  .veil.lifting { animation: veil-lift 0.2s ease-out forwards; }
+}
