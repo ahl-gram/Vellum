@@ -293,41 +293,40 @@ export async function run(ctx) {
     JSON.stringify({ at8b, after8b, zoomed8b }),
   );
 
+  // H9/H10 poll for the settled state rather than reading once after a fixed sleep (a one-shot read caught a still-loading page on a busy CI lane and saw transform none), and their teeth move to the invariant that NO sample ever sees the veil. The about:blank bounce (the suite-zoom Z13 idiom) keeps the first samples off the previous page, which already sits at the landfall scale.
+  await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
-  let ready9 = false;
-  for (let i = 0; i < 100; i++) {
-    let ok = null;
-    try { ok = await evaluate(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
-    if (ok) { ready9 = true; break; }
+  let returning = null;
+  let sawVeil9 = false;
+  for (let i = 0; i < 200; i++) {
+    try { returning = await evaluate(readCam); } catch {}
+    if (returning !== null && returning.veil) sawVeil9 = true;
+    if (atLandfall(returning)) break;
     await sleep(75);
   }
-  await sleep(250);
-  let returning = null;
-  try { returning = await evaluate(readCam); } catch {}
   check(
-    "H9 within a sitting the ceremony stands down: no veil, the camera opens settled on the isle",
-    ready9 && atLandfall(returning),
-    JSON.stringify(returning),
+    "H9 within a sitting the ceremony stands down: no sample ever sees a veil and the camera settles straight on the isle",
+    atLandfall(returning) && !sawVeil9,
+    JSON.stringify({ returning, sawVeil9 }),
   );
 
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await evaluate(`sessionStorage.clear()`);
+  await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
-  let ready10 = false;
-  for (let i = 0; i < 100; i++) {
-    let ok = null;
-    try { ok = await evaluate(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
-    if (ok) { ready10 = true; break; }
+  let reduced10 = null;
+  let sawVeil10 = false;
+  for (let i = 0; i < 200; i++) {
+    try { reduced10 = await evaluate(readCam); } catch {}
+    if (reduced10 !== null && reduced10.veil) sawVeil10 = true;
+    if (atLandfall(reduced10)) break;
     await sleep(75);
   }
-  await sleep(250);
-  let reduced10 = null;
-  try { reduced10 = await evaluate(readCam); } catch {}
   await send("Emulation.setEmulatedMedia", { features: [] });
   check(
-    "H10 reduced motion asks for no ceremony at all: no veil, instant settled landfall (#457)",
-    ready10 && atLandfall(reduced10),
-    JSON.stringify(reduced10),
+    "H10 reduced motion asks for no ceremony at all: no sample ever sees a veil, the camera settles straight on the isle (#457)",
+    atLandfall(reduced10) && !sawVeil10,
+    JSON.stringify({ reduced10, sawVeil10 }),
   );
 
   // The veil at a REAL narrow viewport (skeptic finding 7 on PR #467): full coverage, no sideways scroll under it, and the narrow landfall after a real-key skip.
