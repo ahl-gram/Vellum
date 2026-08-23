@@ -38,11 +38,18 @@ export async function run(ctx) {
   // #442 the NEGATIVE half of the arrival rule, and it needs its own dwell: a test that
   // only waits for a plate to appear cannot see one appearing when it should not, so this
   // holds for the same window plateShown polls and fails on the first frame it is shown.
+  // Returns null ONLY when the stage stood there hidden for the whole window. A missing
+  // .rr-prospect is reported as a failure, not as quiet success: stageRead yields null for
+  // an absent element, so treating null as "stayed hidden" would pass with the stage
+  // deleted outright, which is the shape a negative check has to refuse.
   const plateStaysHidden = async (ms = 2500) => {
+    let saw = 0;
     for (let i = 0; i < ms / 50; i++) {
       let s = null;
       try { s = await evaluate(stageRead); } catch {}
-      if (s && (s.hidden === false || (s.src || "").startsWith("blob:"))) return s;
+      if (s === null) return { missing: true, sampled: saw };
+      saw++;
+      if (s.hidden === false || (s.src || "").startsWith("blob:")) return s;
       await sleep(50);
     }
     return null;
@@ -130,10 +137,22 @@ export async function run(ctx) {
   // quoted figure rather than smoothed over.
   const GOVERNING_BUDGET = 104;
   const WIDE_WORST = 130;
+  // BOTH halves at the governing width. deskRest alone is the chronicle half's short last
+  // annal, which reads 100 at every width and would pin the budget against the case that
+  // cannot exceed it; the survey half carries the long prose and is the one that can.
+  await evaluate(`(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));return null;})()`);
+  await sleep(150);
+  const deskSurvey = await evaluate(stripRead);
+  await evaluate(`(()=>{const r=document.querySelector(".rf-range");r.value=r.max;r.dispatchEvent(new Event("input",{bubbles:true}));return null;})()`);
+  await sleep(150);
+  const deskChron = await evaluate(stripRead);
   check(
-    `RR35 at the governing 1440x900 the strip costs no more than the ${GOVERNING_BUDGET}px the ruling budgeted (#442)`,
-    !!deskRest && deskRest.h > 0 && deskRest.h <= GOVERNING_BUDGET,
-    JSON.stringify({ stripHeight: deskRest && deskRest.h, budget: GOVERNING_BUDGET }),
+    `RR35 at the governing 1440x900 the strip costs no more than the ${GOVERNING_BUDGET}px the ruling budgeted, in EITHER half (#442)`,
+    !!deskSurvey && !!deskChron &&
+      deskSurvey.h > 0 && deskSurvey.h <= GOVERNING_BUDGET &&
+      deskChron.h > 0 && deskChron.h <= GOVERNING_BUDGET &&
+      /^day \d+$/.test(deskSurvey.gutter || "") && /^\d+$/.test(deskChron.gutter || ""),
+    JSON.stringify({ survey: deskSurvey, chronicle: deskChron, budget: GOVERNING_BUDGET, rest: deskRest }),
   );
   // The SURVEY half carries the long prose (its day rows run to ~153 chars against an
   // annal's ~105), so the bar is driven there first: measuring the chronicle half's short
@@ -307,6 +326,18 @@ export async function run(ctx) {
     restaged === null,
     restaged === null ? "stayed hidden" : JSON.stringify(restaged),
   );
+  // The positive control this negative needs: without it RR28 also passes on a room where
+  // the plate can no longer appear at all. Play asks, a plate arrives for the NEW world.
+  await evaluate(`(()=>{document.querySelector(".rf-play").click();return null;})()`);
+  const restagedByPlay = await plateShown();
+  check(
+    "RR28b and the control: Play on the counter-drawn world does bring one, so RR28 is a choice and not a corpse (#442)",
+    !!restagedByPlay && restagedByPlay.belowBar === true && /(^|#|&)seed=42(&|$)/.test(restagedByPlay.href || ""),
+    JSON.stringify(restagedByPlay),
+  );
+  // Back to the present park so RR18/RR19 below read the rest this draw actually landed at.
+  await evaluate(`(()=>{const p=document.querySelector(".rf-play");if(p.textContent==="Pause")p.click();const r=document.querySelector(".rf-range");r.value=r.max;r.dispatchEvent(new Event("input",{bubbles:true}));r.dispatchEvent(new Event("change",{bubbles:true}));return null;})()`);
+  await sleep(150);
 
   const after = await evaluate(`(()=>{const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const panel=document.querySelector(".rf-ages");const rows=[...document.querySelectorAll(".rf-log-strip li")];const entries=rows.filter(r=>!r.classList.contains("annals-head"));return{ages:a,play:p?p.textContent:null,panelHidden:panel?panel.hidden:null,hash:location.hash,entries:entries.length,inked:entries.filter(r=>r.classList.contains("inked")).length};})()`);
   check(
@@ -509,11 +540,17 @@ export async function run(ctx) {
     mobileSettled && mobile.w === 390,
     JSON.stringify(mobile),
   );
+  // The compact form MEASURED, not merely observed to exist: at 390 the bar itself wraps
+  // to two lines, so the strip is 98 there even with the live row gone (plate-reader
+  // 2026-08-23). Collecting the height and never asserting it is how the criterion's
+  // "measured at that width" gets gathered and discarded.
+  const PHONE_STRIP_MAX = 104;
   check(
-    "RR34 at 390px the live row is dropped and the controls still stick (#442, ruled 2026-08-23)",
+    "RR34 at 390px the live row is dropped, the controls still stick, and the strip is measured (#442, ruled 2026-08-23)",
     !!mobileStrip && mobileStrip.toldDisplay === "none" &&
+      mobileStrip.h > 0 && mobileStrip.h <= PHONE_STRIP_MAX &&
       !!mobileStuck && mobileStuck.top === 0 && mobileStuck.position === "sticky",
-    JSON.stringify({ rest: mobileStrip, stuck: mobileStuck }),
+    JSON.stringify({ rest: mobileStrip, stuck: mobileStuck, phoneMax: PHONE_STRIP_MAX }),
   );
 
   // #124: the room builds the same overlay the Explorer does, so it LOOKS like it should card.

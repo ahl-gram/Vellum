@@ -86,7 +86,7 @@ export function logEntryCount(plan: VoyagePlan): number {
   return plan.ports.length === 0 ? 0 : plan.legs.length + 1;
 }
 
-/** #442: the journal row the survey has REACHED. revealLog inks [0, arrived), so the told row is the LAST inked one, arrived - 1; pure and here rather than inline at the seam so the off-by-one has somewhere to be caught (it hides behind the clamp at t=1, where both readings land on the last row). */
+/** #442: the journal row the survey has REACHED; revealLog inks [0, arrived), so the told row is the last inked one. Pure rather than inline at the seam because the off-by-one hides behind the clamp at t=1, where both readings land on the last row. */
 export function toldRow(arrived: number, rows: number): number {
   if (rows <= 0) return -1;
   return Math.min(Math.max(arrived - 1, 0), rows - 1);

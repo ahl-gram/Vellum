@@ -87,13 +87,12 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
     }
   }
 
-  /** Pull every plate the story can reach, ahead of the sweep; the host calls this once the instrument is armed, so the fetches queue off the settle path (#311 forbids a stall). */
+  /** The host calls this once the instrument is armed, so the fetches queue off the settle path (#311 forbids a stall). */
   function prefetch(specs: ReadonlyArray<PlateSpec>): void {
     if (world === null) return;
     for (const s of specs) plateFor(world, s);
   }
 
-  /** null is a real state, not an absence: a plain visit opens with no plate at all (ruled 2026-08-22), and a teardown must clear one. */
   function show(spec: PlateSpec | null): void {
     if (world === null || spec === null) {
       hide();

@@ -229,7 +229,8 @@ function armRoom(res: DrawResult, forSeed: number, rest: AgesPos | undefined): v
 
 function draw(): void {
   const myGen = ++drawGen;
-  // #418: every draw is a fresh ARRIVAL, so the plate goes back to bare until this world is asked for one.
+  // #418: every draw is a fresh ARRIVAL, so the plate goes back to bare until this world is asked for one. Held, because a draw that FAILS leaves the previous world on screen and its plate state must come back with it.
+  const wasArmed = plateArmed;
   plateArmed = false;
   // pauseScrub rather than a bare raf cancel: a sweep interrupted by a read is PARKED (playing flag, Play label) even if the draw then fails, and it never fires onPark, so nothing writes the address mid-draft.
   lc.pauseScrub();
@@ -293,6 +294,8 @@ function draw(): void {
       seed = shownSeed;
       colophon.seedInput.value = String(shownSeed);
       // #418: a read that supersedes an arm still WAITING drops that arm, so a superseding draw that then fails would leave a chart with no instrument at all and no way back (the hash is read once, at boot). Re-arm the world actually on screen, so #221's "arrival is at rest on every path" survives this path too; already armed, this is a no-op.
+      // #442: the plate state converges onto the surviving world too. draw() disarmed it at the top for the world that never arrived, and this path keeps the PREVIOUS one on screen, so leaving it false would let a plate the reader asked for sit there until the next paint silently pulled it. It was armed for this world or it was not; that is what wasArmed holds.
+      plateArmed = wasArmed;
       if (!lc.agesState() && lastRes) armRoom(lastRes, shownSeed, undefined);
       frame.host.statusEl.textContent = "The cartographer spilled the ink: " + err.message;
     });

@@ -20,7 +20,7 @@ export interface VoyageLogHost {
   strip: HTMLElement;
 }
 
-/** #312: the journal's day rows drop the "Year N. " opener, since the survey's one year lives in the attribution line. #442's live row mirrors a row, so it strips through here rather than repeating the pattern. */
+/** #312: the day rows drop the "Year N. " opener, since the survey's one year lives in the attribution line. Shared so the live row's mirror cannot drift from the journal's own text. */
 export function journalText(text: string): string {
   return text.replace(/^Year \d+\. /, "");
 }

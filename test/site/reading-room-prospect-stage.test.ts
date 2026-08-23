@@ -184,9 +184,7 @@ test("#402 a late fetch from a superseded world is dropped, not painted", async 
 
 test("#442 the unfurl uses a BACKWARDS fill, so the plate's hover lift survives the reveal", () => {
   const css = readFileSync(resolve(REPO, "public/reading-room/index.css"), "utf8");
-  // Selector-list membership, not a literal `\.rr-prospect img\s*\{` anchor: a comma after
-  // the selector defeats the anchor and the assertions below silently stop checking
-  // (guard-prover found exactly that shape on .rf-told, 2026-08-23).
+  // Selector-list membership, not a literal anchor: a comma after the selector defeats an anchor and the assertions below then silently stop checking.
   const rule = declarationsFor(css, ".rr-prospect img");
   assert.ok(rule, "the plate carries an image rule");
   const anim = rule.match(/animation:[^;]*;/)?.[0];

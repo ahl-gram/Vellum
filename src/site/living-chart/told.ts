@@ -7,7 +7,6 @@ import { eventIsPast } from "../../render/chronicle-scrubber.ts";
 export type ToldEntry =
   | {
       readonly chamber: "survey";
-      /** The row's position in the journal; a scrub BACK resolves through it to the same plate a forward sweep held. */
       readonly row: number;
       readonly index: number;
       readonly day: number;

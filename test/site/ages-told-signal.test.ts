@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { El, installShim } from "../../test-support/element-shim.ts";
 import type { Chronicle } from "../../src/site/living-chart/chronicle.ts";
 import type { Voyage } from "../../src/site/living-chart/voyage.ts";
-import type { ToldEntry } from "../../src/site/living-chart/told.ts";
+import { toldAnnal, type ToldEntry } from "../../src/site/living-chart/told.ts";
 
 // #402 gave the instrument a year signal so a host could decorate the story's beats.
 // #442 WIDENED that one signal rather than adding a second: it now announces whatever
@@ -132,12 +132,26 @@ test("#442 a deep-link year rest announces on the arming paint itself", () => {
   assert.deepEqual(seen, [{ chamber: "ages", year: 900, text: "Gamma fell to ruin." }]);
 });
 
-test("#442 a year before the first annal tells nothing, rather than telling a stale one", () => {
+test("#442 the earliest year in range tells the FIRST annal, not a later one", () => {
   const seen: (ToldEntry | null)[] = [];
   const ages = instrument((t) => seen.push(t));
   ages.armAges(null, null, 42, "sub", { rest: { chamber: "ages", year: 900 } });
   ages.scrubToYear(451);
   assert.deepEqual(seen[seen.length - 1], { chamber: "ages", year: 451, text: "Alpha was founded." });
+});
+
+// The `last === null` branch, which nothing reached before: the chronicle's range starts
+// at the first event, so no year the bar can reach falls before it and only a world whose
+// annals all postdate the position exercises it. Pure, so it is provable here even though
+// the seam cannot produce it (a cold review flagged the branch as unbacked prose).
+test("#442 a position before EVERY annal tells nothing at all, rather than the earliest", () => {
+  assert.equal(toldAnnal([{ year: 900, text: "late" }], 800), null, "nothing is told yet");
+  assert.equal(toldAnnal([], 800), null, "and an empty chronicle tells nothing either");
+  assert.deepEqual(
+    toldAnnal([{ year: 900, text: "late" }], 900),
+    { chamber: "ages", year: 900, text: "late" },
+    "the polarity: one year later the same annal IS told, so the null is a boundary and not a dead return",
+  );
 });
 
 test("#442 clearAges and exitAges announce null so a stale row cannot outlive its world", () => {

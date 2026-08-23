@@ -125,11 +125,7 @@ test("#442 a real survey route swaps the plate at a seat whose KIND is only a to
   const seats = route.filter((i) => byIdx.get(i)!.seat && byIdx.get(i)!.kind !== "capital");
   assert.ok(seats.length > 0, "seed 1's route carries a non-capital seat, so this guard can bite");
 
-  // armsBearing is the SHIPPED predicate, called here rather than copied: the first cut of
-  // this test hand-rolled `kind === "capital" || seat` and diffed it against a hand-rolled
-  // kind-only closure, which proved surveyPlateRows reads its argument and proved nothing
-  // about the rule. A kind-only mutation of the real wiring walked through it clean
-  // (guard-prover, 2026-08-23), so the guard and app.ts now share ONE definition.
+  // armsBearing is the SHIPPED predicate, called rather than copied: a hand-rolled twin would prove surveyPlateRows reads its argument and nothing about the rule.
   const rows = surveyPlateRows(route, armsBearing(manifest.places), manifest.presentYear);
   const seatRow = route.indexOf(seats[0]!);
   assert.equal(rows[seatRow]?.index, seats[0], "the seat takes the picture on arrival");

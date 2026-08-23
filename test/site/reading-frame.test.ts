@@ -25,24 +25,19 @@ function shape(li: El): unknown {
 
 const el = () => new El("div") as unknown as HTMLElement;
 
-/**
- * The BODY of every @media block, brace-balanced. A regex cannot balance nested braces:
- * the first cut of this scan ended its match at the first `\n}`, so a compact one-line
- * `@media (max-width: 40rem) { .rf-log-strip li { display: none; } }` never matched at
- * all and the per-selector check below never ran (guard-prover, 2026-08-23). Blind spot,
- * argued: a brace inside a string or a comment would miscount, which this stylesheet has
- * none of and which would cost a false alarm rather than a miss.
- */
-/**
- * Every declaration block whose selector LIST contains `selector`, joined. A literal
- * `\.rf-told\s*\{` anchor stops matching the moment a comma follows the class, so
- * rewriting the rule as `.rf-told, .anything { max-height: 3rem }` slid a scroller past
- * the check while it still reported red for an unrelated reason in the same test
- * (guard-prover, 2026-08-23). Membership in the split list cannot be dodged that way.
- * Blind spot, argued: it reads top-level rules only, so a declaration nested inside an
- * at-rule is invisible here; that costs a miss on a nested rule, never a false alarm, and
- * the whole-file scroller scan above covers the nesting case from the other side.
- */
+/** What a narrow-viewport rule is allowed to touch: the sticky strip and nothing else. The journal's own columns are `.cr-*` and the strip borrows them, so the arm must be strip-scoped, not merely mention a `.cr-` class. */
+const STRIP_SCOPED = /^\.rf-told\b|^\.rf-instrument(-strip)?\b/;
+
+/** Selector arms of every narrow-viewport rule in the sheet, flattened and split on commas, so a rule cannot hide behind a selector list. */
+function narrowSelectors(css: string): string[] {
+  return mediaBlocks(css)
+    .flatMap((body) => [...body.matchAll(/([^{}]+)\{/g)].map((m) => m[1]!))
+    .flatMap((list) => list.split(","))
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
+/** Declaration blocks whose selector LIST contains `selector`, joined; membership beats a literal anchor, which a comma after the class defeats. */
 function declarationsFor(css: string, selector: string): string {
   const src = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const out: string[] = [];
@@ -53,6 +48,7 @@ function declarationsFor(css: string, selector: string): string {
   return out.join("\n");
 }
 
+/** The BODY of every @media block, brace-balanced: a regex cannot balance nested braces, so a compact one-line rule hides from one. Blind spot, argued: a brace inside a string or comment would miscount, which this sheet has none of and which costs a false alarm rather than a miss. */
 function mediaBlocks(css: string): string[] {
   const src = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const out: string[] = [];
@@ -221,10 +217,7 @@ test("#442 the mirror takes its SOURCE's voice: roman for an annal, the surveyor
   assert.equal(told.classes.has("prologue"), false, "an annal is the chronicler's, and must not inherit the survey voice");
   frame.setTold(null);
 
-  // The style half, keyed on the same class, or the markup could carry a voice the sheet
-  // never dresses. Set unconditionally italic the strip rendered the SAME sentence italic
-  // above and roman below in the journal (plate-reader, 2026-08-23), which reads as a typo
-  // rather than as a cursor; a structural test could not see it, so this pins the pair.
+  // The style half too, or the markup could carry a voice the sheet never dresses; a structural test cannot see the rendered mismatch, so this pins the pair.
   const css = read("public/reading-frame.css");
   const toldText = css.match(/\.rf-told \.cr-text\s*\{[^}]*\}/)?.[0] ?? "";
   assert.ok(toldText, "the mirror dresses its text column");
@@ -421,19 +414,30 @@ test("the frame's log never nests a scroller, at any width (#219 acceptance, dec
   );
   // #219's ratification is about the JOURNAL, and #442 kept it: the one narrow-viewport
   // rule this file now carries (ruled 2026-08-23) drops the sticky strip's live row on a
-  // phone and touches no journal selector, so the reading itself still does not differ by
-  // width. Every @media block is read and its selectors checked, not merely counted.
-  const blocks = mediaBlocks(css);
-  assert.ok(blocks.length > 0, "the scan found the narrow-viewport block it is here to police");
-  for (const body of blocks) {
-    for (const sel of body.matchAll(/([^{}]+)\{/g)) {
-      assert.doesNotMatch(
-        sel[1]!,
-        /\.rf-log/,
-        `a narrow-viewport rule reaches the journal (${sel[1]!.trim()}); the log reads the same at every width`,
-      );
-    }
+  // phone. An ALLOWLIST, not a search for journal selectors: the strip dresses the very
+  // same .cr-year / .cr-text columns the journal rows use, so rejecting only `.rf-log`
+  // waves through `@media (max-width: 40rem) { .cr-text { display: none } }` and reshapes
+  // the reading unseen. Anything a narrow rule touches must be scoped to the strip.
+  for (const sel of narrowSelectors(css)) {
+    assert.ok(
+      STRIP_SCOPED.test(sel),
+      `a narrow-viewport rule reaches beyond the sticky strip (${sel}); the journal reads the same at every width`,
+    );
   }
+  // Non-vacuity WITHOUT requiring the rule to exist: deleting the narrow rule restores the
+  // ratified pre-#442 state and must stay green, so the scan proves itself on a planted
+  // one instead. Both directions, since a scan that finds nothing proves nothing.
+  const planted = css + "\n@media (max-width: 40rem) { .cr-text { display: none; } }\n";
+  assert.ok(
+    narrowSelectors(planted).some((s) => !STRIP_SCOPED.test(s)),
+    "the scan can see a journal-reshaping narrow rule; if this fails the loop above is decorative",
+  );
+  assert.deepEqual(
+    narrowSelectors(css + "\n@media (max-width: 40rem) { .rf-told { display: none } }\n")
+      .filter((s) => !STRIP_SCOPED.test(s)),
+    [],
+    "and it does not cry wolf over a second strip-scoped rule",
+  );
 
   // Measured over CDP at a REAL 320px viewport (Brave's --window-size does not shrink the layout viewport): a flex item's min-width:auto refuses to shrink and a range input's intrinsic width is ~129px, so the row overflowed to scrollWidth 355. Both halves are load-bearing.
   assert.match(css, /\.rf-instrument\s*\{[^}]*flex-wrap:\s*wrap/, "the instrument wraps instead of overflowing");
