@@ -5,7 +5,13 @@ import {
   type MapType,
   type UvWindow,
 } from "../terrain/heightfield.ts";
-import { floorToParent, parentSurfaceOnWindow, rejectBridges } from "../terrain/detail-guarantees.ts";
+import {
+  floorToParent,
+  gateToParentLand,
+  parentCellsOnWindow,
+  parentSurfaceOnWindow,
+  rejectBridges,
+} from "../terrain/detail-guarantees.ts";
 import { FULL_WINDOW, LOD_BANDS, lodWindowFor, quantizeCenter, type LodBand } from "./lod.ts";
 
 /** No band index: the window alone fixes the ancestry, its depth and every detail level, so a caller cannot pass a band that disagrees with its window. */
@@ -141,17 +147,21 @@ export function buildChainedField(spec: ChainSpec, cache: ChainCache = createCha
   const ancestors = ancestorWindows(spec.window);
   let out = bare;
   if (ancestors.length > 0) {
-    const surfaces = ancestors.map((w) =>
-      parentSurfaceOnWindow(
-        buildChainedField({ ...spec, window: w, ...gridForWindow(w) }, cache),
-        w,
-        spec.window,
-        spec.gridW,
-        spec.gridH,
-      ),
+    const fields = ancestors.map((w) =>
+      buildChainedField({ ...spec, window: w, ...gridForWindow(w) }, cache),
     );
-    const coarse = maxOfSurfaces(surfaces, spec.gridW, spec.gridH);
-    out = rejectBridges(coarse, floorToParent(bare, coarse), spec.seaLevel);
+    const surfaces = fields.map((f, i) =>
+      parentSurfaceOnWindow(f, ancestors[i] as UvWindow, spec.window, spec.gridW, spec.gridH),
+    );
+    const cells = fields.map((f, i) =>
+      parentCellsOnWindow(f, ancestors[i] as UvWindow, spec.window, spec.gridW, spec.gridH),
+    );
+    const floors = surfaces.map((s, i) => gateToParentLand(s, cells[i] as Field, spec.seaLevel));
+    const coarse = maxOfSurfaces(floors, spec.gridW, spec.gridH);
+    // ancestorWindows ends at the full window, so the last entry IS the world chart, and its land is the one thing rejection may never take.
+    const worldCells = cells[cells.length - 1] as Field;
+    out = floorToParent(bare, coarse);
+    for (const nn of cells) out = rejectBridges(nn, worldCells, out, spec.seaLevel);
   }
 
   cache.set(key, out);

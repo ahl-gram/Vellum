@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
 import { generateRegionWorld } from "../src/world/region.ts";
 import { landSnapRadius } from "../src/world/snap-to-land.ts";
+import { labelLandmasses } from "../src/world/landmass.ts";
 import { hamletCandidates } from "../src/society/hamlets.ts";
 import { LOD_BANDS, lodWindowFor, type LodBand } from "../src/world/lod.ts";
 import { BIOMES } from "../src/climate/biomes.ts";
@@ -42,6 +43,9 @@ type WindowResult = {
   readonly landOverParentSea: number;
   readonly parentLandDrownedInRegion: number;
   readonly parentLandCells: number;
+  readonly worldFusedPairs: number;
+  readonly worldMassesLost: number;
+  readonly worldMassesInWindow: number;
   readonly regionMaxElev: number;
 };
 
@@ -197,6 +201,12 @@ function measure(
   const du = window.u1 - window.u0;
   const dv = window.v1 - window.v0;
   const Ww = world.recipe.gridW;
+  // #443's headline claim: the world chart's own partition, never its resampled surface. Labelled on the whole chart, so one landmass entering the window twice stays one.
+  const worldIds = labelLandmasses(world.elev, world.seaLevel).ids;
+  const regionIds = labelLandmasses(region.elev, sea).ids;
+  const coveredBy = new Map<number, Set<number>>();
+  const worldMassesPresent = new Set<number>();
+  const worldMassesAlive = new Set<number>();
   let landCells = 0;
   let sharedLandCells = 0;
   let biomeMismatch = 0;
@@ -214,6 +224,20 @@ function measure(
       const v = window.v0 + (gy / (gridH - 1)) * dv;
       const wi = Math.round(u * (Ww - 1)) + Math.round(v * (world.recipe.gridH - 1)) * Ww;
       const parentIsLand = (world.elev.data[wi] as number) > world.seaLevel;
+      const wid = worldIds[wi] as number;
+      const rid = regionIds[i] as number;
+      if (wid >= 0) {
+        worldMassesPresent.add(wid);
+        if (rid >= 0) {
+          worldMassesAlive.add(wid);
+          let s = coveredBy.get(rid);
+          if (s === undefined) {
+            s = new Set();
+            coveredBy.set(rid, s);
+          }
+          s.add(wid);
+        }
+      }
       if (parentIsLand) {
         parentLand++;
         const pb = world.biomes[wi] as number;
@@ -289,6 +313,9 @@ function measure(
     landOverParentSea,
     parentLandDrownedInRegion: parentLandDrowned,
     parentLandCells: parentLand,
+    worldFusedPairs: [...coveredBy.values()].reduce((a, s) => a + Math.max(0, s.size - 1), 0),
+    worldMassesLost: worldMassesPresent.size - worldMassesAlive.size,
+    worldMassesInWindow: worldMassesPresent.size,
     regionMaxElev: region.elev.data.reduce<number>((a, v) => Math.max(a, v as number), -Infinity),
   };
 }
@@ -300,7 +327,7 @@ function report(rows: ReadonlyArray<WindowResult>): string {
   const lines: string[] = [];
   const arms = [false, true];
   lines.push("hamlets are placed only on band-3-sized windows, so bands 1 and 2 print candidates against 0 placed by design");
-  lines.push("band  detail  windows  settl exp/placed/dropped  seatsLost  hamlets cand/placed/onWater  rivers/endingOnLand  roads/cellsOnWater  land  biomeMismatch/sharedLand  snowAlpine region vs parent  realmless over parentLand/parentSea  landOverParentSea  parentLandDrowned/parentLand  maxElev");
+  lines.push("band  detail  windows  settl exp/placed/dropped  seatsLost  hamlets cand/placed/onWater  rivers/endingOnLand  roads/cellsOnWater  land  biomeMismatch/sharedLand  snowAlpine region vs parent  realmless over parentLand/parentSea  landOverParentSea  parentLandDrowned/parentLand  worldFused/lost/masses  maxElev");
   for (const band of [1, 2, 3]) {
     for (const detail of arms) {
       const rs = rows.filter((r) => r.band === band && r.detail === detail);
@@ -328,6 +355,7 @@ function report(rows: ReadonlyArray<WindowResult>): string {
           `${sum(rs, (r) => r.realmlessOverParentLand)}/${sum(rs, (r) => r.realmlessOverParentSea)}`.padStart(36),
           `${sum(rs, (r) => r.landOverParentSea)} (${land === 0 ? "0" : ((sum(rs, (r) => r.landOverParentSea) / land) * 100).toFixed(2)}%)`.padStart(20),
           `${sum(rs, (r) => r.parentLandDrownedInRegion)}/${sum(rs, (r) => r.parentLandCells)}`.padStart(29),
+          `${sum(rs, (r) => r.worldFusedPairs)}/${sum(rs, (r) => r.worldMassesLost)}/${sum(rs, (r) => r.worldMassesInWindow)}`.padStart(23),
           (sum(rs, (r) => r.regionMaxElev) / rs.length).toFixed(4).padStart(9),
         ].join(""),
       );
