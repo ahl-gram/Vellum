@@ -19,7 +19,7 @@ Rules already exist for this (`feedback_guard_the_class_not_the_bug`, and CLAUDE
 
 ## Your sandbox
 
-Do NOT set up isolation through the harness. This repo's `worktree.baseRef` is `fresh`, so harness worktree isolation would branch from `origin/main`, and you would mutate and test the wrong code. Build your own worktree from the current HEAD instead. This recipe is verified working in this repo:
+Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. Build your own worktree from the current HEAD instead, which is what you want whatever that setting later becomes. This recipe is verified working in this repo:
 
 ```bash
 cd /Users/ahl/CodeProjects/Vellum
