@@ -188,8 +188,8 @@ being wrong is not a bad number, it is a confident recommendation built on sand.
   be fast" are predictions, and they are the ones no command ever gets run against. Before
   reporting a feature done, name the command whose green output says so; before sizing a fix, make
   the edit or read the call sites. When you must state something you have not run, prefix it
-  UNVERIFIED, which is you saying you did not check, not spec-recon's UNVERIFIABLE, which is no
-  command being able to settle it.
+  UNVERIFIABLE, the word `vellum-spec-recon` already uses for a claim with no command behind it.
+  Do not coin a second token for it: one vocabulary, used the way the agent that owns it uses it.
 
 ## Read the issue before you build
 
@@ -233,15 +233,17 @@ audit built from scratch.
 A bound taken from one run is a bound that fits one machine. Neither rule here is new practice; they
 are written down because nothing said so, and a session that reinvents them reinvents them smaller.
 
-- **A threshold is measured over the space, not taken from a run.** Sweep the seeds, record the
-  worst case actually observed, and set the bound above it with the headroom named. Do not fix a
-  sample size in advance, and treat any handful of local runs as the shape that passes on a Mac and
-  flakes on linux CI: the chord bound in `test/render/voyage-route.test.ts` is pinned against a
-  worst case measured over seeds 1..40, and the fixture in
-  `test/terrain/heightfield-detail.test.ts` swept seeds 1-120 to find its single witness.
+- **Derive the bound, then sweep to corroborate it.** Where a principle gives the number, the
+  principle IS the bound and the sweep only confirms it holds: `BOUND = RDP_EPSILON + 0.5` in
+  `test/render/voyage-route.test.ts` is half-cell geometry, and the worst case over seeds 1..40 is
+  what shows the geometry was right, not what the bound was fitted to. Where no principle exists,
+  sweep first and set the bound above the worst case with the headroom named. Either way do not fix
+  a sample size in advance, and treat a handful of local runs as the shape that passes on a Mac and
+  flakes on linux CI. A bound fitted to 40 samples with nothing behind it breaks on the 41st.
 - **The provenance goes in ONE line at the constant**, dated, naming the range swept and the worst
-  case. This is the "no test can practically pin it" carve-out of the comment rule below, not an
-  exemption from it: a wrapped block listing individual runs is the exact tell that rule names.
+  case: `test/prospect/input.test.ts` carries the form, "measured 2026-08-09: 305/307 settlements,
+  seeds 1-12". This is the "no test can practically pin it" carve-out of the comment rule below,
+  not an exemption from it: a wrapped block listing individual runs is the exact tell that names.
 - **A guard proves it can fail; a scanner proves which way it errs.** A guard that could pass
   vacuously carries the witness that makes it bite, named at the test (`heightfield-detail.test.ts`
   keeps the one seed of 120 that does). A scanner cannot enumerate its own blind spots, so it names
@@ -264,7 +266,9 @@ are written down because nothing said so, and a session that reinvents them rein
   mutates one behavior at a time in its own throwaway worktree and reports which single test went
   red. A green suite is not evidence: #73's fork mutant escaped all 340 tests, #141's gate mutation
   escaped all 409, and #140 shipped three guards that were deletable. Zero red is a hole, not a pass.
-  A guard you cannot make bite is not a weak guard, it is an absent one: delete it rather than ship it.
+  A guard PROVED unable to bite is absent rather than weak, so delete it instead of shipping it. A
+  mutation you merely did not reach inside the budget is unproven, not dead: name it in the report,
+  the way that agent already asks, and never read a timed-out run as a licence to drop coverage.
 - **Run the `vellum-pr-skeptic` subagent on every PR after it is pushed, before asking Alex to review.**
   Dispatch it COLD: the prompt is the PR number or branch name and NOTHING else, no summary of the
   work and no claims about it. It is agnostic (a fresh context that reconstructs the spec from the
@@ -290,9 +294,10 @@ NOT ignored, and the throwaway recipe's `ln -s ../../../node_modules` depth in
 worktree costs when both go wrong.
 
 - **EnterWorktree is the normal way in.** It branches from `origin/main` rather than local HEAD, so
-  the tree is current without a pull. Two things need fixing by hand: the branch arrives named
-  `worktree-<name>`, and a `/` in the name becomes `+` in the directory. Rename the branch before
-  the first commit, or the PR carries the harness's name instead of yours.
+  the tree is current without a pull. One thing needs fixing by hand: any `/` in the name becomes
+  `+`, in the branch AND the directory, and the branch takes a `worktree-` prefix on top. Asking
+  for `chore/x` here gave the directory `chore+x` and the branch `worktree-chore+x`. Rename the
+  branch before the first commit, or the PR carries the harness's name instead of yours.
 - **`vellum-guard-prover` is the documented exception.** It must mutate the code under review, which
   is HEAD and not `origin/main`, so it builds its own detached worktree by the recipe in its agent
   file. Do not point it at harness isolation.
