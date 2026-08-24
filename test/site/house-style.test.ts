@@ -114,8 +114,6 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
   wears("src/pages/index.astro", /<button[^>]*class="[^"]*primary/, "Draw it joins the primary idiom");
   wears("src/pages/index.astro", /<input id="seed-input" class="control"/,
     "the seed input opts into the idiom (type=text for the iOS numeric keypad, so the attribute selector cannot see it)");
-  wears("src/pages/index.astro", /class="notice-head archivist-head"/,
-    "the Notice to Mariners head is a standing head (the audit's missed block; candidate C, 2026-07-30)");
   wears("src/pages/gallery/index.astro", /class="sub intro"/, "the gallery sub is an intro");
   wears("src/pages/seed-of-the-day/index.astro", /class="[^"]*hunt-intro intro/, "the hunt intro is an intro");
   wears("src/pages/seed-of-the-day/index.astro", /class="[^"]*dateline archivist-head/, "the dateline is a standing head");
@@ -128,18 +126,13 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
   wears("src/pages/glossary/index.astro", /<strong class="archivist-label">/, "the TOC heading is an inline label");
 });
 
-test("the Notice to Mariners folds into the families (#324 follow-up, candidate C)", () => {
-  // Alex chose the full fold from the rendered candidates (2026-07-30): the panel family, the archivist standing head, the flourish body.
+test("home's flourish family survives the prose move (#324, reshaped at #459)", () => {
   const css = read("public/index.css");
-  assert.match(css, /\.notice[^{]*\{[^}]*border-radius:\s*6px/, ".notice wears the panel radius");
-  assert.ok(
-    !/\.notice-head[^{]*\{[^}]*(font-size|letter-spacing|color)/.test(css),
-    ".notice-head's voice belongs to .archivist-head now",
-  );
+  assert.ok(!css.includes(".notice-body"), "the notice panel left home with its section (#459)");
   assert.match(
     css,
-    /figcaption, \.card p, \.underhood, \.notice-body \{/,
-    ".notice-body joins home's flourish asides",
+    /figcaption, \.underhood \{/,
+    "figcaption and the underhood keep the flourish voice",
   );
 });
 
@@ -169,7 +162,7 @@ test("no token value smuggled past the guards in rgb() form (#324)", async () =>
     "public/glossary/index.css", "public/print-room/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
     "public/reading-frame.css", "public/living-chart.css", "public/motion.css",
-    "public/house.css", "src/layouts/BaseLayout.astro",
+    "public/house.css", "src/layouts/BaseLayout.astro", "src/pages/index.astro",
     "src/atlas/document.ts", "src/cli/gallery.ts",
   ];
   for (const [name, hex] of Object.entries(SITE_PALETTE)) {

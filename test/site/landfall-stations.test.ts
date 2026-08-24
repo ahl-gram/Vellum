@@ -97,22 +97,20 @@ test("the station slips speak the mockup's words (#458)", () => {
   assert.equal(byId.get("gallery")?.where, "in open water, beyond the survey");
 });
 
-test("the card copy is the Go Deeper copy, verbatim (#458)", () => {
-  assert.ok(stations.length >= 3, "an empty roster would pass this sweep vacuously");
-  const astro = read("src/pages/index.astro");
-  const deeper = astro.slice(astro.indexOf("<h2>Go Deeper</h2>"));
+test("the slips are the sole home of the encounter copy, pinned verbatim (#459, was the Go Deeper diff)", () => {
+  const copy: Record<string, string> = {
+    explorer:
+      "Draw your own: type a seed, pick a style and climate, and the world is drafted live in your browser. Nothing is uploaded.",
+    "reading-room":
+      "Sit with a world and watch it happen: the founding voyage sails its survey, then the years turn and settlements rise, prosper, and fall to ruin.",
+    atlas:
+      "A bound volume: the world chart in three styles, two regional close-up surveys of the same terrain, and a gazetteer of every settlement with travelers' notes.",
+    gallery:
+      "Twelve worlds from twelve seeds: archipelagos, islands, and continents, each with its own name, realms, and coastline.",
+  };
+  assert.deepEqual(Object.keys(copy).sort(), stations.map((s) => s.id).slice().sort(), "every station's copy is pinned");
   for (const s of stations) {
-    const card = deeper.match(new RegExp(`<a class="card" href="${s.href}">([\\s\\S]*?)</a>`));
-    assert.ok(card, `Go Deeper still holds the ${s.id} card this sub copies from`);
-    const prose = card[1].match(/<p>([\s\S]*?)<\/p>/);
-    assert.ok(prose, `the ${s.id} card carries prose`);
-    assert.equal(normalize(s.prose), normalize(prose[1]), `${s.id}: the slip's prose is the card's, word for word`);
-    const title = card[1].match(/<h3>([\s\S]*?)<\/h3>/);
-    assert.ok(title, `the ${s.id} card carries a title`);
-    assert.equal(s.name, normalize(title[1]).replace(/\s*→$/, ""), `${s.id}: the slip's title is the card's`);
-    const verb = card[1].match(/<span class="card-verb">([\s\S]*?)<\/span>/);
-    assert.ok(verb, `the ${s.id} card opens with its verb`);
-    assert.equal(s.verb, normalize(verb[1]), `${s.id}: the slip's verb is the card's`);
+    assert.equal(normalize(s.prose), copy[s.id], `${s.id}: the slip speaks the ratified copy, word for word`);
   }
 });
 

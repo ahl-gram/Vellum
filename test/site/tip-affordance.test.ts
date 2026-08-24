@@ -7,7 +7,7 @@ import { GALLERY_PAGE_CSS } from "../../src/cli/gallery.ts";
 import { atlasDocument } from "../../src/atlas/document.ts";
 
 // Two contracts over every authored sheet the site has, public/ and src/ alike (#289, #356, #358, #360): what tips must go somewhere or be a ratified chart instrument, and an inline-block link must pin its bullet or be recorded as living outside a marker-bearing list.
-// A tip is defined by the shape `rotate(`, so a hover lift written as translate alone is not swept: motion.css's .card and .topnav a both lift with translateY and no rotate. Neither is a false affordance today (both are anchors), and widening the definition is a #289 question.
+// A tip is defined by the shape `rotate(`, so a hover lift written as translate alone is not swept: motion.css's .topnav a lifts with translateY and no rotate. It is not a false affordance today (an anchor), and widening the definition is a #289 question.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
@@ -63,6 +63,7 @@ const atlasCss = (): string => {
 /** Authored css outside public/ (#360), each paired with a way to get its css as a string. Keys keep the whole src/ path, so they cannot collide with the public/ side, which strips its prefix. */
 const SRC_CSS: ReadonlyArray<readonly [string, () => string]> = [
   ["src/layouts/BaseLayout.astro", () => styleBlocksIn(read("src/layouts/BaseLayout.astro"))],
+  ["src/pages/index.astro", () => styleBlocksIn(read("src/pages/index.astro"))],
   ["src/cli/gallery.ts", () => GALLERY_PAGE_CSS],
   ["src/atlas/document.ts", atlasCss],
 ];

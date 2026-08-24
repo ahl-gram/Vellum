@@ -498,11 +498,11 @@ export async function run(ctx) {
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let card = null;
   for (let i = 0; i < 120; i++) {
-    try { card = await evaluate(`(()=>{const a=document.querySelector('a.card[href="reading-room/"]');if(!a)return null;const v=a.querySelector(".card-verb");return{verb:v?v.textContent:null};})()`); } catch {}
+    try { card = await evaluate(`(()=>{const a=document.getElementById("lf-card-reading-room");if(!a)return null;const v=a.querySelector(".lf-card-verb");const e=a.querySelector(".lf-card-enter");return{verb:v?v.textContent:null,enter:e?e.getAttribute("href"):null};})()`); } catch {}
     if (card) break;
     await sleep(50);
   }
-  check("RR10a the home Go Deeper card invites Watch one into the room", !!card && card.verb === "Watch one", JSON.stringify(card));
+  check("RR10a the home station slip invites Watch one into the room (#459: the Go Deeper card retired)", !!card && card.verb === "Watch one" && card.enter === "reading-room/", JSON.stringify(card));
   const linkBefore = seedForDate(new Date());
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/seed-of-the-day/` });
   let watch = null;

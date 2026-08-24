@@ -338,6 +338,7 @@ test("no hover or active rule states a lift as a px literal: the raise is a toke
     ["public/motion.css", read("public/motion.css")],
     ["public/fonts.css", read("public/fonts.css")],
     ["BaseLayout <style is:global>", layoutStyle()],
+    ["src/pages/index.astro <style>", [...read("src/pages/index.astro").matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n")],
     ["src/cli/gallery.ts", GALLERY_PAGE_CSS],
     ["src/atlas/document.ts", await atlasStyleBlocks()],
   ];
@@ -376,8 +377,6 @@ test("#402 the prospect reveal releases its transform: fill backwards, never bot
 const TOKEN_CONSUMERS: ReadonlyArray<{ file: string; arm: string; lift: string; shadow?: string }> = [
   { file: "public/motion.css", arm: "button:not(.lf-station):not(.place-hit):hover", lift: "--raise", shadow: "--raise-shadow" },
   { file: "public/motion.css", arm: "button:not(.lf-station):not(.place-hit):active", lift: "--press", shadow: "--press-shadow" },
-  { file: "public/motion.css", arm: ".card:hover", lift: "--raise-grand" },
-  { file: "public/motion.css", arm: ".card:active", lift: "--press" },
   { file: "public/motion.css", arm: ".topnav a:hover", lift: "--raise" },
   { file: "public/motion.css", arm: "body:has(.room-name) .wordmark a:hover", lift: "--raise" },
   { file: "public/living-chart.css", arm: ".pc-prospect:hover", lift: "--raise" },

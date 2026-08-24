@@ -2,12 +2,13 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { ARRIVED_KEY } from "../site/home/ceremony.ts";
 import { homeStage } from "../site/home/stage-data.ts";
-import { homeStations, unclaimedDots } from "../site/home/stations.ts";
+import { homeStations, howStation, unclaimedDots } from "../site/home/stations.ts";
 import { veilMarkup } from "../site/home/veil.ts";
 
 const stage = homeStage();
 const stations = homeStations();
 const dots = unclaimedDots(stage.dots, stations);
+const how = howStation();
 ---
 
 <BaseLayout
@@ -74,8 +75,28 @@ const dots = unclaimedDots(stage.dots, stations);
             </span>
           </button>
         ))}
+        <button
+          type="button"
+          class="lf-station at-sea"
+          style={`left:${(how.nx * 100).toFixed(2)}%;top:${(how.ny * 100).toFixed(2)}%`}
+          data-station="how"
+          data-nx={String(how.nx)}
+          data-ny={String(how.ny)}
+          aria-label={`${how.name}. ${how.verb}.`}
+        >
+          <span class="lf-pulse" aria-hidden="true"></span>
+          <span class="lf-station-glyph" aria-hidden="true"></span>
+          <span class="lf-station-slip" aria-hidden="true">
+            <span class="lf-station-name">{how.name}</span>
+            <span class="lf-station-verb">{how.verb}</span>
+          </span>
+        </button>
       </div>
     </div>
+    <aside class="notice-stamp" aria-hidden="true">
+      <p class="stamp-head">Notice to Mariners</p>
+      <p class="stamp-body">No feature on this chart exists.<br>Soundings are imaginary.</p>
+    </aside>
     <div class="lf-controls" id="lf-controls" role="group" aria-label="Camera">
       <button type="button" class="lf-btn" id="lf-in" aria-label="Draw nearer">+</button>
       <button type="button" class="lf-btn" id="lf-out" aria-label="Stand off">&minus;</button>
@@ -111,6 +132,57 @@ const dots = unclaimedDots(stage.dots, stations);
       </aside>
     ))}
   </div>
+  <aside class="lf-card lf-card-how" id="lf-card-how" hidden tabindex="-1" aria-label="How Vellum works">
+    <button type="button" class="lf-card-close" aria-label="Set the slip aside">&times;</button>
+    <p class="lf-card-verb">{how.verb}</p>
+    <h3 class="lf-card-title">{how.name}</h3>
+    <p class="lf-card-where">{how.where}</p>
+    <div class="lf-card-scroll" tabindex="0" role="region" aria-label="How It Works, the full text">
+      <p class="how">Vellum surveys worlds that don't exist and drafts them as atlas
+      charts. Give it a number, called a <em>seed</em>, and it builds an entire world
+      from scratch.</p>
+      <p class="how">First it raises land out of noise: noise layered at several
+      scales, then pushed and pulled out of shape so the features wander and swirl
+      instead of repeating in a regular pattern. That distortion is what gives
+      coastlines their ragged, believable look instead of round, featureless blobs.
+      Next it runs water downhill until every river finds its way to the sea.
+      A simple climate of temperature and rainfall decides where forests, deserts, and
+      tundra grow.</p>
+      <p class="how">Towns settle where any founder would, near sheltered harbors,
+      river mouths, and good soil, and roads thread between them by the easiest route,
+      sharing corridors. Borders follow the lay of the land, tracing ridgelines and
+      rivers, and carve it into quarrelsome realms. Place names are drawn from ten
+      invented languages, one per culture.</p>
+      <p class="how">Then Vellum sits down at the drafting table and draws the maps:
+      parchment texture, hatched mountain ranges, a compass rose, a sea serpent, a
+      title cartouche. All of it is reproducible: the same seed always draws exactly
+      the same world, identical SVG, right down to the last coastline.</p>
+      <p class="underhood">Under the hood: a zero-dependency TypeScript engine, using
+      domain-warped <a href="https://en.wikipedia.org/wiki/Perlin_noise">gradient
+      noise</a> for terrain, <a href="https://arxiv.org/abs/1511.04463">priority-flood</a>
+      hydrology so every river drains to the sea, a
+      <a href="https://en.wikipedia.org/wiki/Biome">Whittaker-style climate model</a>,
+      <a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm">Dijkstra
+      least-cost roads</a>, and a single seed feeding fork-labeled random streams for
+      full <a href="https://en.wikipedia.org/wiki/Random_seed">reproducibility</a>.</p>
+      <p class="how">Draw your own: read the
+      <a href="https://github.com/ahl-gram/Vellum#readme">README</a>.</p>
+    </div>
+  </aside>
+  <noscript>
+    <style>
+      #lf-card-how[hidden] { display: block; position: static; width: auto; max-width: 46rem; max-height: none; margin: 2rem auto 0; }
+      #lf-card-how .lf-card-close { display: none; }
+      #lf-card-how .lf-card-scroll { overflow-y: visible; }
+    </style>
+    <nav class="lf-noscript-rooms" aria-label="Modes of encounter">
+      <p>The chart's stations, by way of plain doors:
+      <a href="explorer/">The Explorer</a> ·
+      <a href="reading-room/">The Reading Room</a> ·
+      <a href="atlas/">The Atlas of Rahai</a> ·
+      <a href="gallery/">A Gallery of Worlds</a></p>
+    </nav>
+  </noscript>
 </section>
 
 <section class="cartouche" aria-label="Draw a world by its seed">
@@ -163,77 +235,6 @@ const dots = unclaimedDots(stage.dots, stations);
     src="charts/chart-42-nautical.svg" alt="Nautical style" class="plate"></a>
     <figcaption>Nautical chart, with fathom soundings</figcaption></figure>
 </div>
-</section>
-
-<section>
-<h2>Go Deeper</h2>
-<p class="cards-gloss">Every seed is a world entire. Choose your first encounter.</p>
-<div class="cards">
-  <a class="card" href="explorer/">
-    <span class="card-verb">Make one</span>
-    <h3>The Explorer →</h3>
-    <p>Draw your own: type a seed, pick a style and climate, and the
-    world is drafted live in your browser. Nothing is uploaded.</p>
-  </a>
-  <a class="card" href="reading-room/">
-    <span class="card-verb">Watch one</span>
-    <h3>The Reading Room →</h3>
-    <p>Sit with a world and watch it happen: the founding voyage sails
-    its survey, then the years turn and settlements rise, prosper, and
-    fall to ruin.</p>
-  </a>
-  <a class="card" href="atlas/">
-    <span class="card-verb">Read one</span>
-    <h3>The Atlas of Rahai →</h3>
-    <p>A bound volume: the world chart in three styles, two regional
-    close-up surveys of the same terrain, and a gazetteer of every
-    settlement with travelers' notes.</p>
-  </a>
-  <a class="card" href="gallery/">
-    <span class="card-verb">Browse many</span>
-    <h3>A Gallery of Worlds →</h3>
-    <p>Twelve worlds from twelve seeds: archipelagos, islands, and
-    continents, each with its own name, realms, and coastline.</p>
-  </a>
-</div>
-</section>
-
-<section>
-<h2>How It Works</h2>
-<aside class="notice">
-<p class="notice-head archivist-head">NOTICE TO MARINERS</p>
-<p class="notice-body">No feature on this chart exists. Soundings are imaginary.
-Navigation of these waters is undertaken entirely in the imagination.</p>
-</aside>
-<p class="how">Vellum surveys worlds that don't exist and drafts them as atlas
-charts. Give it a number, called a <em>seed</em>, and it builds an entire world
-from scratch.</p>
-<p class="how">First it raises land out of noise: noise layered at several
-scales, then pushed and pulled out of shape so the features wander and swirl
-instead of repeating in a regular pattern. That distortion is what gives
-coastlines their ragged, believable look instead of round, featureless blobs.
-Next it runs water downhill until every river finds its way to the sea.
-A simple climate of temperature and rainfall decides where forests, deserts, and
-tundra grow.</p>
-<p class="how">Towns settle where any founder would, near sheltered harbors,
-river mouths, and good soil, and roads thread between them by the easiest route,
-sharing corridors. Borders follow the lay of the land, tracing ridgelines and
-rivers, and carve it into quarrelsome realms. Place names are drawn from ten
-invented languages, one per culture.</p>
-<p class="how">Then Vellum sits down at the drafting table and draws the maps:
-parchment texture, hatched mountain ranges, a compass rose, a sea serpent, a
-title cartouche. All of it is reproducible: the same seed always draws exactly
-the same world, identical SVG, right down to the last coastline.</p>
-<p class="underhood">Under the hood: a zero-dependency TypeScript engine, using
-domain-warped <a href="https://en.wikipedia.org/wiki/Perlin_noise">gradient
-noise</a> for terrain, <a href="https://arxiv.org/abs/1511.04463">priority-flood</a>
-hydrology so every river drains to the sea, a
-<a href="https://en.wikipedia.org/wiki/Biome">Whittaker-style climate model</a>,
-<a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm">Dijkstra
-least-cost roads</a>, and a single seed feeding fork-labeled random streams for
-full <a href="https://en.wikipedia.org/wiki/Random_seed">reproducibility</a>.</p>
-<p class="how">Draw your own: read the
-<a href="https://github.com/ahl-gram/Vellum#readme">README</a>.</p>
 </section>
 
 <script type="module" src="app.bundle.js" is:inline></script>

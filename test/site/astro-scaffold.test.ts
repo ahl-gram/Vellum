@@ -601,12 +601,13 @@ test("the cartouche hero: frame, hook, seed form, chart plate, fused caption, in
   assert.equal(flourishes.length, 4, "the cartouche keeps its four corner flourishes");
 });
 
-test("How It Works opens with the Notice to Mariners and the merged lede; the count is ten (#289)", () => {
+test("the Notice stamps the deep before the panel's prose; the count is ten (#289, reshaped at #459)", () => {
   // normalize: prose markers must not break on source-line reflow.
   const html = normalize(decode(page("index.html")));
   const order = [
-    "NOTICE TO MARINERS",
+    "Notice to Mariners",
     "No feature on this chart exists.",
+    "Soundings are imaginary.",
     "Vellum surveys worlds that don't exist",
     "ten invented languages, one per culture",
     "Under the hood",
@@ -614,7 +615,7 @@ test("How It Works opens with the Notice to Mariners and the merged lede; the co
   let at = -1;
   for (const marker of order) {
     const next = html.indexOf(marker);
-    assert.ok(next > at, `How It Works keeps its order at ${marker}`);
+    assert.ok(next > at, `home keeps its prose order at ${marker}`);
     at = next;
   }
   assert.ok(html.includes("quarrelsome realms"), "the lede's realms survive the merge into the borders sentence");
