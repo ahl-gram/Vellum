@@ -102,9 +102,15 @@ test("the panel is a card slip carrying the prose, hidden in the HTML so it stay
   const noscript = astro.match(/<noscript>[\s\S]*?<\/noscript>/);
   assert.ok(noscript, "a no-JS visitor still reads the prose (skeptic finding 4: the pip and panel only exist under .cam)");
   assert.match(noscript[0], /#lf-card-how\[hidden\]\s*\{[^}]*display:\s*block/, "the no-JS reveal targets the hidden attribute itself, flowing the panel statically");
+  for (const room of ["explorer/", "reading-room/", "atlas/", "gallery/"]) {
+    assert.ok(
+      noscript[0].includes(`href="${room}"`),
+      `the noscript carries a visible door to ${room}: retiring Go Deeper removed the last human-visible room links, and the Atlas is out of the nav by ratified #202, so without this a no-JS visitor cannot reach it at all (skeptic round 5 finding 1)`,
+    );
+  }
 });
 
-test("gestures never act through a card slip, wherever the slip lives (#459 skeptic rounds 1 and 2)", () => {
+test("pointer and wheel gestures never act through a card slip, wherever the slip lives (#459 skeptic rounds 1 and 2; one-finger touch on the fixed sheets is #460's recorded non-provable arm)", () => {
   // Source pin only; the real-input arms are recorded on #460 for Sub 5's suite.
   const input = read("src/site/home/input.ts");
   const cards = read("src/site/home/cards.ts");
@@ -122,6 +128,11 @@ test("gestures never act through a card slip, wherever the slip lives (#459 skep
     assert.match(handlerOf(input, gesture), /if \(onCard\(e\)\) return;/, `${gesture} stands down inside a card slip`);
   }
   assert.match(handlerOf(input, "wheel"), /if \(onCard\(e\)\) return;/, "the stage never zooms through a slip it contains");
+  assert.match(
+    cards,
+    /for \(const slip of slips\(doc\)\) \{\s*slip\.addEventListener\(\s*"wheel"/,
+    "the wheel listener binds on EVERY slip from slips(doc): the binding target sits above the handler slice, and narrowing the collection would silently unguard the station cards (skeptic round 5 finding 3)",
+  );
   const wheel = handlerOf(cards, "wheel");
   const wheelBody = wheel.slice(wheel.indexOf("{", wheel.indexOf("=>")) + 1);
   assert.match(
@@ -151,8 +162,8 @@ test("the opened slip receives focus once visible, into its scroller when it has
   const cards = read("src/site/home/cards.ts");
   assert.match(
     cards,
-    /onStart:/,
-    "focus waits for the open tween to start: autoAlpha's from-state is visibility:hidden, so a same-tick focus silently fails and the keyboard lands on the page instead of the prose",
+    /onStart: \(\) => \{\s*gsap\.set\(card, \{ visibility: "inherit" \}\);\s*focusInto\(card\);\s*\},/,
+    "the onStart body is pinned whole: autoAlpha's from-state is visibility:hidden, so focus must fire inside onStart after visibility is restored, and a focusInto moved back to the open tick leaves the bare onStart token green (skeptic round 5 finding 2)",
   );
   assert.match(cards, /querySelector[^;]*\.lf-card-scroll/, "the focus target prefers the slip's scroller, so arrow keys scroll the prose");
   assert.match(cards, /\(scroller \?\? card\)\.focus/, "scroller first, card as the fallback: the reversed coalesce always picks the card and no presence pin sees it");
@@ -197,6 +208,15 @@ test("the Notice to Mariners is the mockup's stamp on the deep, and only the sta
   assert.match(rule[1], /rotate\(-5deg\)/, "the stamp tilts as the mockup stamps it");
   assert.match(rule[1], /3px double/, "the stamp wears the mockup's double rule");
   assert.match(rule[1], /pointer-events:\s*none/, "the stamp is decoration, never a control");
+  // The voice the #324 re-ratification comment names (2026-08-24): the mockup's own, not archivist-head.
+  const head = css.match(/\.stamp-head \{([^}]*)\}/);
+  assert.ok(head, ".stamp-head dresses in index.css");
+  assert.match(head[1], /font-size:\s*0\.72rem/, "the head keeps the mockup's 0.72rem");
+  assert.match(head[1], /letter-spacing:\s*0\.28em/, "and its 0.28em tracking");
+  assert.match(head[1], /color:\s*var\(--line-tan\)/, "and line-tan on the deep");
+  assert.ok(!head[1].includes("text-transform"), "title case as written: no transform, the mockup has none");
+  const body = css.match(/\.stamp-body \{([^}]*)\}/);
+  assert.ok(body && /font-style:\s*italic/.test(body[1]) && /var\(--ink-faded\)/.test(body[1]), "the body keeps the mockup's flourish italic in ink-faded");
   const narrow = css.match(/@media \(max-width: 900px\) \{([\s\S]*?)\n\}/);
   assert.ok(
     narrow && /\.notice-stamp[^{]*\{[^}]*display:\s*none/.test(narrow[1]),
