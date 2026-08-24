@@ -86,29 +86,66 @@ test("the panel is a card slip carrying the prose, hidden in the HTML so it stay
   assert.match(noscript[0], /#lf-card-how\[hidden\]\s*\{[^}]*display:\s*block/, "the no-JS reveal targets the hidden attribute itself, flowing the panel statically");
 });
 
-test("stage gestures never act through an open card slip (#459 plate-reader: wheel over the panel zoomed the chart under it)", () => {
-  // Source-level pin only: the real-input e2e guard belongs to Sub 5's suite; the behavioral spec (control and expected arms) is recorded on #460.
+test("gestures never act through a card slip, wherever the slip lives (#459 skeptic rounds 1 and 2)", () => {
+  // Round 2's lesson: the panel is OUTSIDE #lf-stage, so a stage-bound wheel guard was dead code for it and the panel's head band scrolled the page 120px a tick. The wheel policy binds on each slip in cards.ts; the stage keeps never-zoom-through plus the pointer guards for the slips it still contains. Source pin only; the real-input arms are recorded on #460 for Sub 5's suite.
   const input = read("src/site/home/input.ts");
+  const cards = read("src/site/home/cards.ts");
   const onCard = input.match(/const onCard = [^;]*\.closest\("\.lf-card"\)[^;]*;/);
   assert.ok(onCard, "input.ts carries an onCard guard keyed on .lf-card");
   // Slice each handler to the NEXT addEventListener registration: an indexOf("});") terminator overshoots the multi-arg wheel listener and reads the following handler's guard as its own (pr-skeptic finding 1 on PR #469).
-  const handlerOf = (gesture: string): string => {
-    const at = input.indexOf(`"${gesture}"`);
+  const handlerOf = (source: string, gesture: string): string => {
+    const at = source.indexOf(`"${gesture}"`);
     assert.ok(at >= 0, `the ${gesture} binding exists`);
-    const next = input.indexOf("addEventListener", at);
-    return next === -1 ? input.slice(at) : input.slice(at, next);
+    const next = source.indexOf("addEventListener", at);
+    return next === -1 ? source.slice(at) : source.slice(at, next);
   };
   for (const gesture of ["pointerdown", "dblclick"]) {
-    assert.match(handlerOf(gesture), /if \(onCard\(e\)\) return;/, `${gesture} stands down inside a card slip`);
+    assert.match(handlerOf(input, gesture), /if \(onCard\(e\)\) return;/, `${gesture} stands down inside a card slip`);
   }
-  const wheel = handlerOf("wheel");
-  assert.match(wheel, /onCard\(e\)/, "the wheel handler consults the card guard");
+  assert.match(handlerOf(input, "wheel"), /if \(onCard\(e\)\) return;/, "the stage never zooms through a slip it contains");
+  const wheel = handlerOf(cards, "wheel");
+  const wheelBody = wheel.slice(wheel.indexOf("{", wheel.indexOf("=>")) + 1);
+  assert.match(
+    wheelBody.trimStart(),
+    /^const scroller =/,
+    "the handler's FIRST statement is the scroller lookup: an unconditional bail above it would leave every check below as dead text these pins still match (guard-prover round 4 hole)",
+  );
   assert.match(
     wheel,
     /\.closest\("\.lf-card-scroll"\)/,
-    "a wheel over a slip reaches native scroll only over a live scroller; anywhere else on the slip it is swallowed, so it neither zooms the chart under the slip nor scrolls the page out from under it (skeptic finding 3)",
+    "a wheel over a slip reaches native scroll only over a live scroller under the cursor",
   );
-  assert.match(wheel, /e\.preventDefault\(\);\s*return;/, "the swallowed arm prevents the default page scroll before standing down");
+  assert.match(wheel, /scrollHeight > \w+\.clientHeight/, "and only while that scroller actually overflows");
+  assert.match(
+    wheel,
+    /e\.preventDefault\(\);/,
+    "anywhere else on the slip the wheel is swallowed: no zoom-through, and no page scrolling the slip out from under the cursor",
+  );
+  assert.match(handlerOf(cards, "wheel") + cards.slice(cards.indexOf('"wheel"')), /passive: false/, "the slip's wheel listener is non-passive or its preventDefault is ignored");
+});
+
+test("the opened slip receives focus once visible, into its scroller when it has one (#459 skeptic rounds, #460 measurement)", () => {
+  const cards = read("src/site/home/cards.ts");
+  assert.match(
+    cards,
+    /onStart:/,
+    "focus waits for the open tween to start: autoAlpha's from-state is visibility:hidden, so a same-tick focus silently fails and the keyboard lands on the page instead of the prose",
+  );
+  assert.match(cards, /querySelector[^;]*\.lf-card-scroll/, "the focus target prefers the slip's scroller, so arrow keys scroll the prose");
+  const astro2 = read("src/pages/index.astro");
+  assert.match(astro2, /class="lf-card-scroll"[^>]*tabindex="0"/, "the scroller is keyboard-reachable on its own (a scrollable region needs tab access)");
+});
+
+test("the panel's positioning box is the stage's (#459 skeptic round 2 finding 6)", () => {
+  assert.match(css, /\.landfall \{[^}]*position:\s*relative/, ".landfall is the out-of-stage panel's containing block");
+  const sectionAt = astro.indexOf('<section class="landfall"');
+  const section = astro.slice(sectionAt, astro.indexOf("</section>", sectionAt));
+  const children = [...section.matchAll(/^  <([a-z]+)/gm)].map((m) => m[1]);
+  assert.deepEqual(
+    children,
+    ["div", "aside", "noscript"],
+    "the stage stays .landfall's lone in-flow box: the panel's top:0/bottom:0/max-height resolve against .landfall, which coincides with the stage only while nothing else flows in the section",
+  );
 });
 
 test("the Notice to Mariners is the mockup's stamp on the deep, and only the stamp (#459)", () => {

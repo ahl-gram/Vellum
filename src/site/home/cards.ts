@@ -17,6 +17,11 @@ export type StationBindings = {
 
 const slips = (doc: Document): HTMLElement[] => [...doc.querySelectorAll<HTMLElement>(".lf-card")];
 
+const focusInto = (card: HTMLElement): void => {
+  const scroller = card.querySelector<HTMLElement>(".lf-card-scroll");
+  (scroller ?? card).focus({ preventScroll: true });
+};
+
 function openCard(doc: Document, id: string, reduced: boolean): void {
   for (const slip of slips(doc)) {
     if (slip.id === `lf-card-${id}`) continue;
@@ -29,14 +34,25 @@ function openCard(doc: Document, id: string, reduced: boolean): void {
   card.hidden = false;
   if (reduced) {
     gsap.set(card, { autoAlpha: 1, y: 0, rotate: 0 });
+    focusInto(card);
   } else {
     gsap.fromTo(
       card,
       { autoAlpha: 0, y: RISE_PX, rotate: 0.5 },
-      { autoAlpha: 1, y: 0, rotate: 0, duration: OPEN_SECONDS, ease: "power2.out", delay: OPEN_DELAY_SECONDS },
+      {
+        autoAlpha: 1,
+        y: 0,
+        rotate: 0,
+        duration: OPEN_SECONDS,
+        ease: "power2.out",
+        delay: OPEN_DELAY_SECONDS,
+        onStart: () => {
+          gsap.set(card, { visibility: "inherit" });
+          focusInto(card);
+        },
+      },
     );
   }
-  card.focus({ preventScroll: true });
 }
 
 function closeCard(doc: Document, reduced: boolean): boolean {
@@ -88,6 +104,17 @@ export function bindStations(on: StationBindings): void {
   }
   for (const btn of doc.querySelectorAll(".lf-card-close")) {
     btn.addEventListener("click", () => close(true));
+  }
+  for (const slip of slips(doc)) {
+    slip.addEventListener(
+      "wheel",
+      (e) => {
+        const scroller = e.target instanceof Element ? e.target.closest(".lf-card-scroll") : null;
+        if (scroller !== null && scroller.scrollHeight > scroller.clientHeight) return;
+        e.preventDefault();
+      },
+      { passive: false },
+    );
   }
   doc.addEventListener("keydown", (e) => {
     if (e.key === "Escape") close(true);

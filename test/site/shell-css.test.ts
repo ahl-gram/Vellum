@@ -338,6 +338,7 @@ test("no hover or active rule states a lift as a px literal: the raise is a toke
     ["public/motion.css", read("public/motion.css")],
     ["public/fonts.css", read("public/fonts.css")],
     ["BaseLayout <style is:global>", layoutStyle()],
+    ["src/pages/index.astro <style>", (read("src/pages/index.astro").match(/<style>([\s\S]*?)<\/style>/) ?? ["", ""])[1]],
     ["src/cli/gallery.ts", GALLERY_PAGE_CSS],
     ["src/atlas/document.ts", await atlasStyleBlocks()],
   ];

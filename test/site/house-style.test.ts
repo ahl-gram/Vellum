@@ -162,7 +162,7 @@ test("no token value smuggled past the guards in rgb() form (#324)", async () =>
     "public/glossary/index.css", "public/print-room/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
     "public/reading-frame.css", "public/living-chart.css", "public/motion.css",
-    "public/house.css", "src/layouts/BaseLayout.astro",
+    "public/house.css", "src/layouts/BaseLayout.astro", "src/pages/index.astro",
     "src/atlas/document.ts", "src/cli/gallery.ts",
   ];
   for (const [name, hex] of Object.entries(SITE_PALETTE)) {
