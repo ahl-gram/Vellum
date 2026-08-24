@@ -134,10 +134,11 @@ test("zoomTarget clamps the scale BEFORE anchoring, so the cursor point never dr
 });
 
 test("the client bundle never imports the engine: stage-data stays build-time only (#456 skeptic finding 8)", () => {
-  for (const mod of ["app.ts", "camera.ts", "ceremony.ts", "coords.ts", "input.ts", "veil.ts"]) {
+  for (const mod of ["app.ts", "camera.ts", "cards.ts", "ceremony.ts", "coords.ts", "drift.ts", "input.ts", "station-flight.ts", "veil.ts"]) {
     const src = read(`src/site/home/${mod}`);
     assert.ok(!src.includes("stage-data"), `src/site/home/${mod} must not import stage-data (the engine graph rides in with it)`);
     assert.ok(!src.includes("world/generate"), `src/site/home/${mod} must not import the engine directly`);
+    assert.ok(!src.includes("./stations.ts"), `src/site/home/${mod} must not import the station roster (stage-data rides in with it, #458)`);
   }
 });
 
@@ -145,7 +146,11 @@ test("home mounts the stage, maps the manifest marks, and loads its bundle twin 
   const astro = read("src/pages/index.astro");
   assert.match(astro, /homeStage/, "the frontmatter computes the stage at build");
   assert.match(astro, /class="landfall"/, "the stage section mounts");
-  assert.match(astro, /stage\.dots\.map/, "marks render server-side from the manifest");
+  assert.match(
+    astro,
+    /unclaimedDots\(stage\.dots, stations\)/,
+    "marks render server-side from the manifest, less the spots the stations claim (#458)",
+  );
   assert.match(
     astro,
     /<script type="module" src="app\.bundle\.js" is:inline><\/script>/,

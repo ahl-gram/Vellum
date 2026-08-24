@@ -72,21 +72,21 @@
   to   { opacity: 0; transform: scale(1); }
 }
 
-/* .place-hit MUST stay excluded: it is a <button> whose idle transparent/borderless reset is load-bearing (suite-cards P2/P2c), and the lift and shadow would otherwise reach it. */
-button:not(.place-hit),
+/* .place-hit and .lf-station MUST stay excluded: each is a <button> living on its own load-bearing transform (the place card's invisible hit target, suite-cards P2/P2c; the home stage's counter-scaled station anchor, #458), so the house lift would replace that transform and the house transition would lag the counter-scale a beat behind every zoom. */
+button:not(.lf-station):not(.place-hit),
 .card,
 .actions a,
 .action-link {
   transition: transform var(--paper-quick) var(--ease-paper),
               box-shadow var(--paper-quick) var(--ease-paper);
 }
-button:not(.place-hit):hover,
+button:not(.lf-station):not(.place-hit):hover,
 .actions a:hover,
 .action-link:hover {
   transform: translateY(var(--raise));
   box-shadow: var(--raise-shadow);
 }
-button:not(.place-hit):active,
+button:not(.lf-station):not(.place-hit):active,
 .actions a:active,
 .action-link:active {
   transform: translateY(var(--press));

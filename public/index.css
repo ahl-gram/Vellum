@@ -187,6 +187,188 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 .lf-coords.on { display: block; }
 @media (max-width: 720px) { .landfall .stage { height: min(64vh, 86vw); min-height: 300px; } }
 
+/* Landfall Sub 3 (#458): the stations, their cards, and the legend; the dress is the mockup's (design/atelier-map/stage.css) with lf- prefixes and tokens. */
+.lf-stations { display: none; position: absolute; inset: 0; }
+.landfall .stage.cam .lf-stations { display: block; }
+.lf-station {
+  position: absolute; width: 34px; height: 34px; padding: 0;
+  transform: translate(-50%, -50%) scale(var(--inv, 1));
+  appearance: none; border: 0; background: none; font: inherit; cursor: pointer;
+}
+.lf-station-glyph {
+  position: absolute; inset: 0; margin: auto;
+  width: 15px; height: 15px;
+  background: var(--ink-dark);
+  border: 1.5px solid var(--chart-paper);
+  outline: 1px solid var(--ink-dark);
+  transform: rotate(45deg);
+  box-shadow: 0 2px 6px rgb(from var(--chart-ink) r g b / 0.5);
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.lf-station-slip {
+  position: absolute; top: calc(50% + 13px); left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  pointer-events: none;
+}
+.lf-station-name {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 13px; letter-spacing: 0.1em;
+  color: var(--chart-ink);
+  background: rgb(from var(--chart-paper) r g b / 0.88);
+  border: 1px solid var(--line-tan);
+  padding: 2px 8px 1px;
+  box-shadow: 0 1px 4px rgb(from var(--chart-ink) r g b / 0.3);
+  white-space: nowrap;
+}
+.lf-station-verb {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 10.5px; color: var(--ink-brown);
+  background: rgb(from var(--chart-paper) r g b / 0.75);
+  padding: 0 6px; white-space: nowrap;
+}
+/* The mockup's exact hover, ratified as a CHART INSTRUMENT gesture (Alex 2026-08-24): a pip's grow promises its slip opening in place, not #289's navigation; the ruling lives at CHART_INSTRUMENTS in tip-affordance.test.ts. */
+.lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph {
+  background: var(--parchment-bright); transform: rotate(45deg) scale(1.25);
+}
+.lf-station:hover .lf-station-name, .lf-station:focus-visible .lf-station-name {
+  background: var(--parchment-bright);
+}
+.lf-station.at-sea .lf-station-glyph { border-radius: 50%; transform: none; }
+.lf-station.at-sea:hover .lf-station-glyph, .lf-station.at-sea:focus-visible .lf-station-glyph {
+  transform: scale(1.25);
+}
+.lf-pulse {
+  position: absolute; inset: 0; margin: auto;
+  width: 15px; height: 15px;
+  border: 1px solid var(--ink-dark); transform: rotate(45deg);
+  animation: lf-station-pulse 3.2s ease-out infinite;
+  pointer-events: none;
+}
+.lf-station.at-sea .lf-pulse { border-radius: 50%; transform: none; }
+@keyframes lf-station-pulse {
+  0% { opacity: 0.7; scale: 1; }
+  70%, 100% { opacity: 0; scale: 2.6; }
+}
+.lf-legend {
+  display: none; position: absolute; left: 50%; bottom: 0.9rem;
+  /* max-content: the shrink-to-fit at left 50% capped the row at half the stage and wrapped the Gallery entry into the Reading Room slip (plate-reader, this sub). */
+  width: max-content; max-width: calc(100% - 2rem);
+  transform: translateX(-50%); text-align: center; z-index: 2;
+  /* The mockup's narrow footing generalized: in the boxed stage the landfall chart reaches the stage foot, so without its own ground the legend reads as text on parchment and a south-shore slip blends straight into it. */
+  padding: 0.5rem 1.1rem 0.6rem;
+  background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.45) 72%, transparent);
+  pointer-events: none;
+}
+.landfall .stage.cam .lf-legend { display: block; }
+.lf-legend-head {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.82rem; color: var(--ink-faded); margin: 0 0 0.45rem;
+}
+.lf-legend-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+.lf-legend-btn {
+  appearance: none; cursor: pointer; pointer-events: auto;
+  background: rgb(from var(--chart-ink) r g b / 0.5);
+  border: 1px solid var(--line-tan);
+  padding: 0.4rem 0.9rem 0.35rem;
+  text-align: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.lf-legend-btn:hover, .lf-legend-btn:focus-visible { background: var(--ink-dark); }
+.lf-legend-verb {
+  display: block;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.78rem; color: var(--line-tan);
+}
+.lf-legend-room {
+  display: block;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.86rem; letter-spacing: 0.12em;
+  color: var(--parchment);
+}
+.lf-card {
+  position: absolute; z-index: 3;
+  /* Centered by abspos + margin auto, never translateY(-50%): the open tween writes the card's transform. border-box is the mockup's own global reset, which the site shell lacks. right 4rem keeps the slip clear of the zoom-controls column on short viewports. */
+  box-sizing: border-box;
+  right: 4rem; top: 0; bottom: 0; margin: auto 0; height: fit-content;
+  width: min(22rem, calc(100% - 8rem));
+  background: var(--parchment-panel);
+  color: var(--ink-dark);
+  border: 1px solid var(--line-tan);
+  outline: 3px double var(--line-faint);
+  outline-offset: 6px;
+  box-shadow: var(--sheet-shadow);
+  padding: 1.5rem 1.6rem 1.4rem;
+}
+.lf-card[hidden] { display: none; }
+.lf-card-close {
+  position: absolute; right: 0.5rem; top: 0.4rem;
+  appearance: none; border: 0; background: none; cursor: pointer;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 1.1rem; color: var(--ink-faded);
+  padding: 0.2rem 0.4rem;
+}
+.lf-card-close:hover { color: var(--ink-dark); }
+.lf-card-verb {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.92rem; color: var(--ink-brown); margin: 0;
+}
+.lf-card-title {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-weight: 400;
+  font-size: 1.6rem; letter-spacing: 0.06em; line-height: 1.2;
+  margin: 0.1rem 0 0; border: 0; padding: 0;
+}
+.lf-card-where {
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-variant-caps: small-caps;
+  /* ink-brown, not the mockup's ink-faded: 13px small caps measured 3.93:1 on the panel, under the 4.5:1 small-text floor (plate-reader, this sub). */
+  font-size: 0.82rem; letter-spacing: 0.08em; color: var(--ink-brown);
+  border-bottom: 1px solid var(--line-faint);
+  padding-bottom: 0.55rem; margin: 0.25rem 0 0;
+}
+.lf-card-prose { font-size: 1rem; line-height: 1.6; margin: 0.7rem 0 0; }
+.lf-card-arms { display: flex; gap: 0.7rem; justify-content: center; margin-top: 0.8rem; }
+.lf-card-arms img { width: 52px; height: auto; }
+.lf-card-enter {
+  display: inline-block; vertical-align: top; margin-top: 1rem;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.88rem; letter-spacing: 0.14em;
+  color: var(--chart-paper); background: var(--ink-dark);
+  border: 1px solid var(--chart-ink);
+  padding: 0.45rem 1rem;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+.lf-card-enter:hover, .lf-card-enter:focus-visible { background: var(--chart-ink); }
+@media (max-width: 900px) {
+  /* The compressed stage lands three of the four slips in the legend band (Alex, PR #468 live review); the legend below names every room, so the tags stand down until Sub 6's full-bleed restores the mockup's spacing. */
+  .lf-station-slip { display: none; }
+  .lf-legend {
+    width: 100%; left: 0; bottom: 0; transform: none;
+    padding: 0.5rem 0.6rem 0.6rem;
+    background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.85), transparent);
+  }
+  .lf-legend-head { font-size: 0.74rem; margin-bottom: 0.3rem; }
+  .lf-legend-row { gap: 0.4rem; }
+  .lf-legend-btn { padding: 0.3rem 0.6rem 0.25rem; }
+  .lf-legend-verb { font-size: 0.7rem; }
+  .lf-legend-room { font-size: 0.74rem; }
+  .lf-card {
+    /* The mockup's bottom sheet is FIXED to the viewport; inside the boxed stage the sheet was taller than the stage itself and buried the chart whole (skeptic finding 1). z-index stays under the veil's 50. */
+    position: fixed; right: 0; left: 0; top: auto; bottom: 0; margin: 0;
+    width: 100%; outline-offset: -8px; z-index: 40;
+    padding: 1.2rem 1.3rem 1.1rem;
+  }
+  .lf-card-arms img { width: 42px; }
+  .lf-controls { bottom: 6.5rem; }
+  .lf-coords.on { display: none; }
+}
+
 /* Landfall Sub 2 (#457): the loading ceremony. JS-injected (a no-JS visitor never traps behind it); the dress is the mockup's veil (design/atelier-map/base.css) with its raw hexes as token derivations. */
 .veil {
   position: fixed; inset: 0; z-index: 50;
@@ -250,6 +432,8 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 }
 @media (prefers-reduced-motion: reduce) {
   .lf-dot { transition: none; }
+  .lf-pulse { animation: none; opacity: 0; }
+  .lf-station-glyph, .lf-legend-btn, .lf-card-enter { transition: none; }
   .veil-rose .rose-ring, .veil-rose .rose-ring.inner { animation: none; stroke-dashoffset: 0; }
   .veil-rose .rose-rays path { animation: none; opacity: 0.75; }
   .veil-rose .rose-needle { animation: none; opacity: 1; transform: rotate(16deg); }
