@@ -472,10 +472,20 @@ export async function run(ctx) {
         const cs = getComputedStyle(card);
         const anchorX = Number(btn.dataset.nx) * 1500 * m.a + m.e;
         const anchorY = Number(btn.dataset.ny) * 1157.931 * m.a + m.f;
+        const cr = card.getBoundingClientRect();
+        const reach = (sel) => {
+          const el = card.querySelector(sel);
+          if (!el) return false;
+          const b = el.getBoundingClientRect();
+          const hit = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
+          return hit !== null && (hit === el || el.contains(hit));
+        };
         return {
           scale: m.a, fit,
           anchorX, anchorY, stageW: r.width, stageH: r.height,
           open: !card.hidden && cs.visibility !== "hidden" && Number(cs.opacity) > 0.95,
+          contained: cr.top >= r.top - 0.5 && cr.bottom <= r.bottom + 0.5 && cr.left >= r.left - 0.5 && cr.right <= r.right + 0.5,
+          enterReach: reach(".lf-card-enter"), closeReach: reach(".lf-card-close"),
           title: card.querySelector(".lf-card-title")?.textContent ?? null,
           enter: card.querySelector(".lf-card-enter")?.getAttribute("href") ?? null,
           arms: card.querySelectorAll(".lf-card-arms img").length,
@@ -486,9 +496,10 @@ export async function run(ctx) {
     await sleep(75);
   }
   check(
-    "H14a a real click on the Atlas station flies the camera to 2.6 of fit, the anchor clear of the card at 0.4 of the stage, and unfurls the slip with its three arms",
+    "H14a a real click on the Atlas station flies the camera to 2.6 of fit, the anchor clear of the card at 0.4 of the stage, and unfurls the slip with its three arms, whole inside the stage with its enter and close under the hand",
     visited !== null && visited.open && Math.abs(visited.scale - visited.fit * 2.6) < 1e-3
       && Math.abs(visited.anchorX - visited.stageW * 0.4) < 2 && Math.abs(visited.anchorY - visited.stageH / 2) < 2
+      && visited.contained && visited.enterReach && visited.closeReach
       && visited.title === "The Atlas of Rahai" && visited.enter === "atlas/" && visited.arms === 3,
     JSON.stringify({ settled14: !!settled14, atlasPt, visited }),
   );
@@ -596,6 +607,44 @@ export async function run(ctx) {
     atLandfall(settled16) && calm1 !== null && calm1 === calm2,
     JSON.stringify({ calm1, calm2 }),
   );
+
+  // The bottom-sheet card at a real 390 viewport: whole within the stage's clip, close under the hand (the content-box overflow shipped the close button 10px past the clip and elementFromPoint could not reach it; plate-reader, this sub).
+  await setMobileViewport(390, 844);
+  const settled16b = await settleHome();
+  const sheetPt = await evaluate(buttonPoint('.lf-legend-btn[data-station="atlas"]'));
+  if (sheetPt !== null) await clickAt(Math.round(sheetPt.x), Math.round(sheetPt.y));
+  let sheet16 = null;
+  for (let i = 0; i < 80; i++) {
+    try {
+      sheet16 = await evaluate(`(() => {
+        const stage = document.getElementById("lf-stage");
+        const card = document.getElementById("lf-card-atlas");
+        if (!stage || !card) return null;
+        const cs = getComputedStyle(card);
+        const sr = stage.getBoundingClientRect();
+        const cr = card.getBoundingClientRect();
+        const close = card.querySelector(".lf-card-close");
+        const cb = close.getBoundingClientRect();
+        const hit = document.elementFromPoint(cb.x + cb.width / 2, cb.y + cb.height / 2);
+        return {
+          open: !card.hidden && cs.visibility !== "hidden" && Number(cs.opacity) > 0.95,
+          fits: cr.left >= sr.left - 0.5 && cr.right <= sr.right + 0.5 && cr.bottom <= sr.bottom + 0.5,
+          closeReach: hit !== null && (hit === close || close.contains(hit)),
+          scrollW: document.documentElement.scrollWidth,
+        };
+      })()`);
+      if (sheet16 !== null && sheet16.open) break;
+    } catch {}
+    await sleep(75);
+  }
+  check(
+    "H16b at 390 the slip lies as a bottom sheet whole within the stage, its close reachable, nothing scrolling sideways",
+    sheet16 !== null && sheet16.open && sheet16.fits && sheet16.closeReach && sheet16.scrollW === 390,
+    JSON.stringify({ settled16b: !!settled16b, sheetPt, sheet16 }),
+  );
+  await shoot("home-station-card-390.png");
+  await pressKey("Escape", "Escape", 27);
+  await clearMobile();
 
   const errDelta3 = consoleErrors.slice(errBase3).filter((e) => !e.includes("AbortError: Transition was skipped"));
   const httpDelta3 = http4xx.slice(httpBase3).filter((u) => !/favicon/i.test(u));

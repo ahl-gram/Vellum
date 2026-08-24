@@ -252,6 +252,8 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 }
 .lf-legend {
   display: none; position: absolute; left: 50%; bottom: 0.9rem;
+  /* max-content: the shrink-to-fit at left 50% capped the row at half the stage and wrapped the Gallery entry into the Reading Room slip (plate-reader, this sub). */
+  width: max-content; max-width: calc(100% - 2rem);
   transform: translateX(-50%); text-align: center; z-index: 2;
 }
 .landfall .stage.cam .lf-legend { display: block; }
@@ -284,7 +286,9 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 }
 .lf-card {
   position: absolute; z-index: 3;
-  right: 1.4rem; top: 50%; transform: translateY(-50%);
+  /* Centered by abspos + margin auto, never translateY(-50%): the open tween writes the card's transform and clobbered the centering, hanging the tall Atlas slip 90px past the stage (plate-reader, this sub). border-box is the mockup's own global reset, which the site shell lacks. */
+  box-sizing: border-box;
+  right: 1.4rem; top: 0; bottom: 0; margin: auto 0; height: fit-content;
   width: min(22rem, calc(100% - 2.8rem));
   background: var(--parchment-panel);
   color: var(--ink-dark);
@@ -317,7 +321,8 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 .lf-card-where {
   font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-variant-caps: small-caps;
-  font-size: 0.82rem; letter-spacing: 0.08em; color: var(--ink-faded);
+  /* ink-brown, not the mockup's ink-faded: 13px small caps measured 3.93:1 on the panel, under the 4.5:1 small-text floor (plate-reader, this sub). */
+  font-size: 0.82rem; letter-spacing: 0.08em; color: var(--ink-brown);
   border-bottom: 1px solid var(--line-faint);
   padding-bottom: 0.55rem; margin: 0.25rem 0 0;
 }
@@ -347,7 +352,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   .lf-legend-verb { font-size: 0.7rem; }
   .lf-legend-room { font-size: 0.74rem; }
   .lf-card {
-    right: 0; left: 0; top: auto; bottom: 0; transform: none;
+    right: 0; left: 0; top: auto; bottom: 0; margin: 0;
     width: 100%; outline-offset: -8px; z-index: 4;
     padding: 1.2rem 1.3rem 1.1rem;
   }
