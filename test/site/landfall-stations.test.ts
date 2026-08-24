@@ -24,6 +24,8 @@ import {
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const normalize = (s: string) => s.replace(/\s+/g, " ").trim();
+// A commented-out rule still matches a raw-text regex (guard-prover 2026-08-24: the .lf-card[hidden] escape), so the css sweeps read the sheet stripped.
+const liveCss = (p: string): string => read(p).replace(/\/\*[\s\S]*?\*\//g, "");
 
 const stage = homeStage();
 const stations = homeStations();
@@ -207,12 +209,12 @@ test("home mounts the stations outside the dot layer's aria shroud, with the leg
 });
 
 test("the hidden attribute is re-asserted where the slips could lose it (#458, the Sub 1 inert-hidden lesson)", () => {
-  const css = read("public/index.css");
+  const css = liveCss("public/index.css");
   assert.match(css, /\.lf-card\[hidden\]\s*\{\s*display:\s*none/, "a hidden slip stays hidden whatever .lf-card declares");
 });
 
 test("the station dress is the mockup's: pulse, diamond glyph, at-sea round, reduced-motion still (#458)", () => {
-  const css = read("public/index.css");
+  const css = liveCss("public/index.css");
   assert.match(css, /\.lf-station\b/, "the station wears its own dress");
   assert.match(css, /@keyframes lf-station-pulse/, "the pulse ring breathes");
   assert.match(css, /\.lf-station\.at-sea/, "the at-sea station drops the diamond");
