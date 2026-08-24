@@ -525,7 +525,10 @@ export async function run(ctx) {
     return { cx: b.x + b.width / 2, cy: b.y + b.height / 2, w: b.width, glyphW: g.width,
       btnBg: getComputedStyle(btn).backgroundColor };
   })()`;
-  // The Escape above refocused its opener, so the glyph legitimately sits grown under :focus-visible; the hover claim needs a bare rest state.
+  // A real 0 flies the camera home first so the pip sits at a deterministic on-screen spot: one CI lane caught the camera slid to its left clamp edge here (x-only, cause unrecorded), and a hover dispatched at an off-viewport pip proves nothing. The Escape above also refocused its opener, so the hover claim needs a bare rest state.
+  await evaluate(`document.getElementById("lf-stage").focus()`);
+  await pressKey("0", "Digit0", 48);
+  await sleep(1700);
   await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 20, y: 20, button: "none" });
   await sleep(450);
