@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { ARRIVED_KEY } from "../site/home/ceremony.ts";
 import { homeStage } from "../site/home/stage-data.ts";
+import { veilMarkup } from "../site/home/veil.ts";
 
 const stage = homeStage();
 ---
@@ -10,6 +12,22 @@ const stage = homeStage();
   path="/"
   tagline="an atelier of imaginary cartography"
 >
+<script is:inline define:vars={{ veilHtml: veilMarkup(), key: ARRIVED_KEY }}>
+// #457 pre-paint exception, third script by re-ratification of the #289/#455 rule (PR #467): the bundle is deferred and fetched, so only a synchronous inline script can dress first paint, and without it every fresh sitting flashed the undressed page. Same predicate as the module; an unadopted veil releases itself so a failed bundle never traps the page.
+(() => {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let first = true;
+  try { first = sessionStorage.getItem(key) === null; } catch { first = true; }
+  if (!first) return;
+  const v = document.createElement("div");
+  v.className = "veil";
+  v.id = "lf-veil";
+  v.innerHTML = veilHtml;
+  document.body.appendChild(v);
+  setTimeout(() => { if (v.dataset.adopted === undefined) v.remove(); }, 10000);
+})();
+</script>
+
 <section class="landfall" aria-label={`The chart of ${stage.title}, pannable and zoomable`}>
   <div
     class="stage"

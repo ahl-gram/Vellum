@@ -134,7 +134,7 @@ test("zoomTarget clamps the scale BEFORE anchoring, so the cursor point never dr
 });
 
 test("the client bundle never imports the engine: stage-data stays build-time only (#456 skeptic finding 8)", () => {
-  for (const mod of ["app.ts", "camera.ts", "coords.ts", "input.ts"]) {
+  for (const mod of ["app.ts", "camera.ts", "ceremony.ts", "coords.ts", "input.ts", "veil.ts"]) {
     const src = read(`src/site/home/${mod}`);
     assert.ok(!src.includes("stage-data"), `src/site/home/${mod} must not import stage-data (the engine graph rides in with it)`);
     assert.ok(!src.includes("world/generate"), `src/site/home/${mod} must not import the engine directly`);

@@ -10,8 +10,10 @@ import {
   fitScale,
   zoomTarget,
 } from "./camera.ts";
+import { firstArrival, landfallView, markArrival, wideView } from "./ceremony.ts";
 import { bearingLine, type Capital } from "./coords.ts";
 import { bindStageInput } from "./input.ts";
+import { playCeremony } from "./veil.ts";
 
 const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 const reduced = () => reducedQuery.matches;
@@ -113,6 +115,22 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
   stage.classList.add("cam");
   controlsEl?.classList.add("on");
   coordsEl?.classList.add("on");
-  assign(camForCenter(0.5, 0.5, fit, view(), SHEET));
-  settle();
+
+  const storage = () => window.sessionStorage;
+  const chart = sheetEl.querySelector("img.lf-chart");
+  const arriving = !reduced() && firstArrival(storage);
+  markArrival(storage);
+  if (arriving) {
+    assign(wideView(view(), SHEET, fit));
+    settle();
+    playCeremony({
+      doc: document,
+      chart: chart instanceof HTMLImageElement ? chart : null,
+      land: (seconds) => flyTo(landfallView(view(), SHEET, fit, window.innerWidth), seconds),
+    });
+  } else {
+    document.getElementById("lf-veil")?.remove();
+    assign(landfallView(view(), SHEET, fit, window.innerWidth));
+    settle();
+  }
 }

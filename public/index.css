@@ -185,5 +185,73 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   font-size: 0.85rem; color: var(--line-tan);
 }
 .lf-coords.on { display: block; }
-@media (prefers-reduced-motion: reduce) { .lf-dot { transition: none; } }
 @media (max-width: 720px) { .landfall .stage { height: min(64vh, 86vw); min-height: 300px; } }
+
+/* Landfall Sub 2 (#457): the loading ceremony. JS-injected (a no-JS visitor never traps behind it); the dress is the mockup's veil (design/atelier-map/base.css) with its raw hexes as token derivations. */
+.veil {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center;
+  background:
+    radial-gradient(90% 80% at 50% 40%, color-mix(in srgb, var(--ink-dark) 90%, var(--parchment) 10%) 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+}
+.veil-inner { text-align: center; }
+.veil-wordmark {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: clamp(3rem, 8vw, 4.6rem);
+  letter-spacing: 0.14em;
+  color: var(--parchment-bright);
+  line-height: 1.1;
+  margin: 0;
+}
+.veil-tagline {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 1.05rem; color: var(--line-tan);
+  margin: 0.3rem 0 0;
+}
+.veil-rose { width: 132px; height: 132px; margin: 2rem auto 1.5rem; display: block; }
+.veil-rose .rose-ring {
+  fill: none; stroke: var(--line-tan); stroke-width: 1;
+  stroke-dasharray: 277; stroke-dashoffset: 277;
+  animation: rose-draw 1.6s ease-out forwards;
+}
+.veil-rose .rose-ring.inner {
+  stroke-dasharray: 214; stroke-dashoffset: 214;
+  stroke-width: 0.6;
+  animation: rose-draw 1.6s 0.25s ease-out forwards;
+}
+.veil-rose .rose-rays path {
+  stroke: var(--line-tan); stroke-width: 0.6; opacity: 0;
+  animation: rose-fade 0.8s 1.1s ease-out forwards;
+}
+.veil-rose .rose-needle {
+  fill: var(--parchment); opacity: 0;
+  transform-origin: 60px 60px;
+  animation: needle-settle 1.4s 1.3s cubic-bezier(.2,1.4,.4,1) forwards;
+}
+.veil-rose .rose-pin { fill: var(--line-tan); }
+@keyframes rose-draw { to { stroke-dashoffset: 0; } }
+@keyframes rose-fade { to { opacity: 0.75; } }
+@keyframes needle-settle {
+  0% { opacity: 0; transform: rotate(-160deg); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: rotate(16deg); }
+}
+.veil-status {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.78rem; letter-spacing: 0.3em;
+  color: var(--line-tan);
+  text-transform: lowercase;
+  margin: 0;
+}
+.veil.lifting { animation: veil-lift 1.1s ease-in forwards; }
+@keyframes veil-lift {
+  to { opacity: 0; transform: scale(1.06); visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lf-dot { transition: none; }
+  .veil-rose .rose-ring, .veil-rose .rose-ring.inner { animation: none; stroke-dashoffset: 0; }
+  .veil-rose .rose-rays path { animation: none; opacity: 0.75; }
+  .veil-rose .rose-needle { animation: none; opacity: 1; transform: rotate(16deg); }
+  .veil.lifting { animation: veil-lift 0.2s ease-out forwards; }
+}

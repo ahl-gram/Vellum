@@ -38,6 +38,8 @@ type PageSpec = {
   scriptSrc?: string;
   /** The one stated content-page script exception (#289): home's seed-form intercept marker. */
   inlineScript?: string;
+  /** #457's pre-paint veil script, home's re-ratified THIRD script (PR #467): must parse before the stage. */
+  prePaintScript?: string;
 };
 
 const PAGES: readonly PageSpec[] = [
@@ -53,6 +55,8 @@ const PAGES: readonly PageSpec[] = [
     inlineScript: 'getElementById("seed-form")',
     // Landfall Sub 1 (#455): home is an app surface now (the stage camera) AND keeps the #289 intercept exception.
     scriptSrc: "app.bundle.js",
+    // Landfall Sub 2 (#457): the ceremony veil must dress FIRST PAINT, which no deferred module can; ratified at PR #467 after the incognito flash.
+    prePaintScript: 'v.id = "lf-veil"',
   },
   {
     route: "faq/index.html",
@@ -547,9 +551,16 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
     const html = page(p.route);
     if (p.inlineScript !== undefined) {
       const scripts = [...html.matchAll(/<script\b/g)];
-      const expected = p.scriptSrc === undefined ? 1 : 2;
+      const expected = (p.scriptSrc === undefined ? 1 : 2) + (p.prePaintScript === undefined ? 0 : 1);
       assert.equal(scripts.length, expected, `${p.route} carries exactly ${expected} script(s)`);
       assert.ok(html.includes(p.inlineScript), `${p.route} script targets ${p.inlineScript}`);
+      if (p.prePaintScript !== undefined) {
+        assert.ok(html.includes(p.prePaintScript), `${p.route} carries the pre-paint veil script (${p.prePaintScript})`);
+        assert.ok(
+          html.indexOf(p.prePaintScript) < html.indexOf('class="landfall"'),
+          `${p.route}'s pre-paint script parses before the stage, so first paint wears the veil`,
+        );
+      }
       assert.ok(html.indexOf("<script") < html.indexOf("<footer>"), `${p.route} script renders inside <main>, before the footer`);
       if (p.scriptSrc === undefined) {
         assert.ok(!html.includes('type="module"'), `${p.route} ships no module bundle, only the inline intercept`);
