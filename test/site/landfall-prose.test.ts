@@ -36,7 +36,12 @@ test("the How It Works pip moors at the title cartouche, chart only, never the l
   const layerAt = astro.indexOf('class="lf-stations"');
   assert.ok(layerAt >= 0, "the station layer mounts");
   const layer = astro.slice(layerAt, astro.indexOf("</div>", layerAt));
-  assert.ok(layer.includes('data-station="how"'), "the pip stands in the station layer, so the card machinery binds it unchanged");
+  const pipStation = layer.match(/data-station="(\w+)"/);
+  assert.ok(pipStation && pipStation[1] === "how", "the pip stands in the station layer, so the card machinery binds it unchanged");
+  assert.ok(
+    astro.includes(`id="lf-card-${pipStation[1]}"`),
+    "the panel's id is lf-card-<the pip's data-station>: cards.ts wires them by that concatenation, and a rename on either side dies silently (skeptic round 3 finding 2)",
+  );
   const pipAt = layer.indexOf('data-station="how"');
   const pip = layer.slice(layer.lastIndexOf("<button", pipAt), layer.indexOf("</button>", pipAt));
   assert.match(pip, /class="lf-station\b/, "the pip wears the station dress: the motion/house button exclusions come with it");
@@ -76,10 +81,23 @@ test("the panel is a card slip carrying the prose, hidden in the HTML so it stay
   const rule = css.match(/\.lf-card-how \{([^}]*)\}/);
   assert.ok(rule, ".lf-card-how sizes the long prose");
   assert.match(rule[1], /max-height/, "the slip caps its height against the stage");
+  assert.ok(
+    !rule[1].includes("width"),
+    "the panel keeps the slips' 22rem width: the station flight's framing clears the anchor only at that width (skeptic round 3: a 30rem panel covered the cartouche from 901 to 1034px)",
+  );
   const scroll = css.match(/\.lf-card-scroll \{([^}]*)\}/);
   assert.ok(scroll, ".lf-card-scroll dresses the scroll region");
   assert.match(scroll[1], /overflow-y:\s*auto/, "the prose scrolls inside the slip, never burying the stage");
   assert.match(scroll[1], /overscroll-behavior:\s*contain/, "an exhausted scroll never chains to the page under the slip");
+
+  const narrowBlock = css.match(/@media \(max-width: 900px\) \{([\s\S]*?)\n\}/);
+  const narrowHow = narrowBlock && narrowBlock[1].match(/\.lf-card-how\s*\{[^}]*max-height:\s*([\d.]+vh)/);
+  assert.ok(narrowHow, "the narrow bottom sheet caps its own height inside the media query");
+  assert.equal(
+    narrowHow[1],
+    "45vh",
+    "the narrow cap is the measured value, not merely present: at 62vh the sheet rose past the flight's 0.36 anchor line and buried the cartouche it had just centered (skeptic round 3, sweep at 390x844)",
+  );
 
   const noscript = astro.match(/<noscript>[\s\S]*?<\/noscript>/);
   assert.ok(noscript, "a no-JS visitor still reads the prose (skeptic finding 4: the pip and panel only exist under .cam)");
@@ -87,7 +105,7 @@ test("the panel is a card slip carrying the prose, hidden in the HTML so it stay
 });
 
 test("gestures never act through a card slip, wherever the slip lives (#459 skeptic rounds 1 and 2)", () => {
-  // Round 2's lesson: the panel is OUTSIDE #lf-stage, so a stage-bound wheel guard was dead code for it and the panel's head band scrolled the page 120px a tick. The wheel policy binds on each slip in cards.ts; the stage keeps never-zoom-through plus the pointer guards for the slips it still contains. Source pin only; the real-input arms are recorded on #460 for Sub 5's suite.
+  // Source pin only; the real-input arms are recorded on #460 for Sub 5's suite.
   const input = read("src/site/home/input.ts");
   const cards = read("src/site/home/cards.ts");
   const onCard = input.match(/const onCard = [^;]*\.closest\("\.lf-card"\)[^;]*;/);
@@ -121,7 +139,7 @@ test("gestures never act through a card slip, wherever the slip lives (#459 skep
     /e\.preventDefault\(\);/,
     "anywhere else on the slip the wheel is swallowed: no zoom-through, and no page scrolling the slip out from under the cursor",
   );
-  assert.match(handlerOf(cards, "wheel") + cards.slice(cards.indexOf('"wheel"')), /passive: false/, "the slip's wheel listener is non-passive or its preventDefault is ignored");
+  assert.match(wheel, /passive: false/, "the slip's wheel listener is non-passive or its preventDefault is ignored");
 });
 
 test("the opened slip receives focus once visible, into its scroller when it has one (#459 skeptic rounds, #460 measurement)", () => {
@@ -134,6 +152,11 @@ test("the opened slip receives focus once visible, into its scroller when it has
   assert.match(cards, /querySelector[^;]*\.lf-card-scroll/, "the focus target prefers the slip's scroller, so arrow keys scroll the prose");
   const astro2 = read("src/pages/index.astro");
   assert.match(astro2, /class="lf-card-scroll"[^>]*tabindex="0"/, "the scroller is keyboard-reachable on its own (a scrollable region needs tab access)");
+  assert.match(
+    astro2,
+    /class="lf-card-scroll"[^>]*role="region"/,
+    "the focus target carries a real role: aria-label is not permitted on a bare div's generic role, so the opened panel would announce nothing (skeptic round 3, AX-tree measurement)",
+  );
 });
 
 test("the panel's positioning box is the stage's (#459 skeptic round 2 finding 6)", () => {
