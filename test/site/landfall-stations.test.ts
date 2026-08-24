@@ -251,6 +251,11 @@ test("the station dress is the mockup's: pulse, diamond glyph, at-sea round, red
     /button:not\(\.lf-station\):not\(\.place-hit\):hover/,
     "house.css's button hover wash must exclude .lf-station too: it painted the 34px button square bright around the diamond (Alex, PR #468 live review)",
   );
+  const narrow = css.match(/@media \(max-width: 900px\) \{([\s\S]*?)\n\}/);
+  assert.ok(
+    narrow && /\.lf-station-slip[^{]*\{[^}]*display:\s*none/.test(narrow[1]),
+    "under 900px the station name slips stand down (ratified 2026-08-24: the compressed stage lands three slips in the legend band, and the legend below already names every room); the diamonds stay",
+  );
 });
 
 test("app.ts flies the stations and breathes the drift; the pure modules stay clean of the DOM (#458)", () => {

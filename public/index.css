@@ -346,6 +346,8 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 }
 .lf-card-enter:hover, .lf-card-enter:focus-visible { background: var(--chart-ink); }
 @media (max-width: 900px) {
+  /* The compressed stage lands three of the four slips in the legend band (Alex, PR #468 live review); the legend below names every room, so the tags stand down until Sub 6's full-bleed restores the mockup's spacing. */
+  .lf-station-slip { display: none; }
   .lf-legend {
     width: 100%; left: 0; bottom: 0; transform: none;
     padding: 0.5rem 0.6rem 0.6rem;
