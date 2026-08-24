@@ -374,8 +374,8 @@ test("#402 the prospect reveal releases its transform: fill backwards, never bot
 
 // #405 identity, not presence: the sweep proves a lift is SOME token; this pins WHICH one each consumer uses. broadside's a.fn and the faq/glossary .toc tips are pinned by tip-affordance's re-pins.
 const TOKEN_CONSUMERS: ReadonlyArray<{ file: string; arm: string; lift: string; shadow?: string }> = [
-  { file: "public/motion.css", arm: "button:not(.place-hit):hover", lift: "--raise", shadow: "--raise-shadow" },
-  { file: "public/motion.css", arm: "button:not(.place-hit):active", lift: "--press", shadow: "--press-shadow" },
+  { file: "public/motion.css", arm: "button:not(.lf-station):not(.place-hit):hover", lift: "--raise", shadow: "--raise-shadow" },
+  { file: "public/motion.css", arm: "button:not(.lf-station):not(.place-hit):active", lift: "--press", shadow: "--press-shadow" },
   { file: "public/motion.css", arm: ".card:hover", lift: "--raise-grand" },
   { file: "public/motion.css", arm: ".card:active", lift: "--press" },
   { file: "public/motion.css", arm: ".topnav a:hover", lift: "--raise" },

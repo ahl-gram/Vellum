@@ -118,7 +118,8 @@ const TIPPING_LINKS = new Set([
 /** A tip whose surface does not navigate, held on the record until Alex rules: kept apart from TIPPING_LINKS so that set stays true when it says a surface goes somewhere. */
 // Explicitly Set<string>: while the set is empty an inferred Set<never> reds every `.has(key)` below rather than accepting a parked line.
 const TIPS_AWAITING_A_RULING = new Set<string>([
-  // Empty on purpose: #368 (2026-08-12) made all three hosts of the atlas plate lift navigate, so its only occupant graduated to TIPPING_LINKS on the merits. Park a line here only with the measurement written under it.
+  // #458 (2026-08-24): the station glyph wears the mockup's hover gesture verbatim (Alex's live-review call after the rotate-free form misrendered, drifting the glyph 11.7px and shrinking it). The surface is a BUTTON that flies the camera and unfurls a slip whose Enter link navigates; whether that earns #289's navigation promise is Alex's at the Sub 5 gate (#460), which is why it is parked here and not in TIPPING_LINKS.
+  "index.css :: .lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph",
 ]);
 
 /** A flat matcher over `rotate(` hover rules, not a css parser: fine while tips live in top-level rules. */

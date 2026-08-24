@@ -237,6 +237,14 @@ test("the station dress is the mockup's: pulse, diamond glyph, at-sea round, red
   assert.ok(legendBtn && /pointer-events:\s*auto/.test(legendBtn[1]), "the legend's buttons take their clicks back");
   const reduced = css.match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/g)?.join("\n") ?? "";
   assert.match(reduced, /\.lf-pulse[^{]*\{[^}]*animation:\s*none/, "reduced motion stills the pulse");
+  const motion = read("public/motion.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  for (const state of ["", ":hover", ":active"]) {
+    assert.match(
+      motion,
+      new RegExp(`button:not\\(\\.lf-station\\):not\\(\\.place-hit\\)${state.replace(":", "\\:")}`),
+      `motion.css's button${state} dress must exclude .lf-station like .place-hit: the house lift replaces the anchor transform (17px drift, counter-scale lost), and the house transition lags the counter-scale a beat behind every zoom`,
+    );
+  }
 });
 
 test("app.ts flies the stations and breathes the drift; the pure modules stay clean of the DOM (#458)", () => {
