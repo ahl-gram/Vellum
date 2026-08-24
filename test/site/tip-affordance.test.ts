@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { GALLERY_PAGE_CSS } from "../../src/cli/gallery.ts";
 import { atlasDocument } from "../../src/atlas/document.ts";
 
-// Two contracts over every authored sheet the site has, public/ and src/ alike (#289, #356, #358, #360): what tips must go somewhere, and an inline-block link must pin its bullet or be recorded as living outside a marker-bearing list.
+// Two contracts over every authored sheet the site has, public/ and src/ alike (#289, #356, #358, #360): what tips must go somewhere or be a ratified chart instrument, and an inline-block link must pin its bullet or be recorded as living outside a marker-bearing list.
 // A tip is defined by the shape `rotate(`, so a hover lift written as translate alone is not swept: motion.css's .card and .topnav a both lift with translateY and no rotate. Neither is a false affordance today (both are anchors), and widening the definition is a #289 question.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
@@ -115,11 +115,15 @@ const TIPPING_LINKS = new Set([
   "reading-room/index.css :: .rr-prospect a:hover img, .rr-prospect a:focus-visible img",
 ]);
 
+/** Chart instruments, ratified by Alex 2026-08-24 (in session, PR #468 live review): the lift-or-grow gesture still promises navigation everywhere else, but a station pip is a different thing altogether with its own rule. A pip is the chart's own instrument, and its grow promises "this opens the station's slip in place"; the slip's Enter link is what leaves the page. Kept apart from TIPPING_LINKS so that set stays true when it says a surface goes somewhere. */
+const CHART_INSTRUMENTS = new Set<string>([
+  "index.css :: .lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph",
+]);
+
 /** A tip whose surface does not navigate, held on the record until Alex rules: kept apart from TIPPING_LINKS so that set stays true when it says a surface goes somewhere. */
 // Explicitly Set<string>: while the set is empty an inferred Set<never> reds every `.has(key)` below rather than accepting a parked line.
 const TIPS_AWAITING_A_RULING = new Set<string>([
-  // #458 (2026-08-24): the station glyph wears the mockup's hover gesture verbatim (Alex's live-review call after the rotate-free form misrendered, drifting the glyph 11.7px and shrinking it). The surface is a BUTTON that flies the camera and unfurls a slip whose Enter link navigates; whether that earns #289's navigation promise is Alex's at the Sub 5 gate (#460), which is why it is parked here and not in TIPPING_LINKS.
-  "index.css :: .lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph",
+  // Empty again on purpose: the station glyph parked here 2026-08-24 and graduated the same day to CHART_INSTRUMENTS on Alex's ruling. Park a line here only with the measurement written under it.
 ]);
 
 /** A flat matcher over `rotate(` hover rules, not a css parser: fine while tips live in top-level rules. */
@@ -291,7 +295,7 @@ test("every tip allowlisted or parked still names a live tip (#360)", () => {
   const swept = new Set(
     authoredSheets().flatMap(([key, css]) => hoverTipsIn(css).map((s) => `${key} :: ${s}`)),
   );
-  for (const key of [...TIPPING_LINKS, ...TIPS_AWAITING_A_RULING]) {
+  for (const key of [...TIPPING_LINKS, ...CHART_INSTRUMENTS, ...TIPS_AWAITING_A_RULING]) {
     assert.ok(
       swept.has(key),
       `${key} is on a tip list but is no longer a tip the sweep finds; delete the ` +
@@ -304,11 +308,12 @@ test("every hover tip belongs to a surface that goes somewhere (#289; #324 feel 
   for (const [file, css] of authoredSheets()) {
     for (const selector of hoverTipsIn(css)) {
       const key = `${file} :: ${selector}`;
-      if (TIPS_AWAITING_A_RULING.has(key)) continue;
+      if (CHART_INSTRUMENTS.has(key) || TIPS_AWAITING_A_RULING.has(key)) continue;
       assert.ok(
         TIPPING_LINKS.has(key),
         `${key} tips on hover but is not a navigating surface; ` +
-          `the tip gesture promises "goes somewhere" (#289)`,
+          `the tip gesture promises "goes somewhere" (#289), and only a ratified ` +
+          `CHART_INSTRUMENTS entry carries a different rule`,
       );
     }
   }
