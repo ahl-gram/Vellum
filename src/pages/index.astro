@@ -2,9 +2,12 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { ARRIVED_KEY } from "../site/home/ceremony.ts";
 import { homeStage } from "../site/home/stage-data.ts";
+import { homeStations, unclaimedDots } from "../site/home/stations.ts";
 import { veilMarkup } from "../site/home/veil.ts";
 
 const stage = homeStage();
+const stations = homeStations();
+const dots = unclaimedDots(stage.dots, stations);
 ---
 
 <BaseLayout
@@ -42,7 +45,7 @@ const stage = homeStage();
       <img class="lf-chart" src="charts/chart-42-antique.svg" width="1500" height="1158"
         alt={`${stage.title}, antique chart, seed 42`} loading="eager" draggable="false">
       <div class="lf-marks" aria-hidden="true">
-        {stage.dots.map((d) => (
+        {dots.map((d) => (
           <div
             class={`lf-dot${d.ruined ? " ruined" : ""}${d.capital ? " capital" : ""}`}
             style={`left:${(d.nx * 100).toFixed(2)}%;top:${(d.ny * 100).toFixed(2)}%`}
@@ -52,6 +55,26 @@ const stage = homeStage();
           </div>
         ))}
       </div>
+      <div class="lf-stations">
+        {stations.map((s) => (
+          <button
+            type="button"
+            class={`lf-station${s.sea ? " at-sea" : ""}`}
+            style={`left:${(s.nx * 100).toFixed(2)}%;top:${(s.ny * 100).toFixed(2)}%`}
+            data-station={s.id}
+            data-nx={String(s.nx)}
+            data-ny={String(s.ny)}
+            aria-label={`${s.name}. ${s.verb}.`}
+          >
+            <span class="lf-pulse" aria-hidden="true"></span>
+            <span class="lf-station-glyph" aria-hidden="true"></span>
+            <span class="lf-station-slip" aria-hidden="true">
+              <span class="lf-station-name">{s.name}</span>
+              <span class="lf-station-verb">{s.verb}</span>
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
     <div class="lf-controls" id="lf-controls" role="group" aria-label="Camera">
       <button type="button" class="lf-btn" id="lf-in" aria-label="Draw nearer">+</button>
@@ -59,6 +82,34 @@ const stage = homeStage();
       <button type="button" class="lf-btn" id="lf-home" aria-label="The whole sheet">&#8962;</button>
     </div>
     <p class="lf-coords" id="lf-coords" aria-hidden="true"></p>
+    <nav class="lf-legend" id="lf-legend" aria-label="Modes of encounter">
+      <p class="lf-legend-head">Every seed is a world entire · choose your first encounter</p>
+      <div class="lf-legend-row">
+        {stations.map((s) => (
+          <button type="button" class="lf-legend-btn" data-station={s.id}>
+            <span class="lf-legend-verb">{s.verb}</span>
+            <span class="lf-legend-room">{s.legendName}</span>
+          </button>
+        ))}
+      </div>
+    </nav>
+    {stations.map((s) => (
+      <aside class="lf-card" id={`lf-card-${s.id}`} hidden tabindex="-1" aria-label="About this room">
+        <button type="button" class="lf-card-close" aria-label="Set the slip aside">&times;</button>
+        <p class="lf-card-verb">{s.verb}</p>
+        <h3 class="lf-card-title">{s.name}</h3>
+        <p class="lf-card-where">{s.where}</p>
+        <p class="lf-card-prose">{s.prose}</p>
+        {s.arms && (
+          <div class="lf-card-arms">
+            <img loading="lazy" src="charts/arms-42-0.svg" alt="Arms of The Chiefdom of Rekekoa">
+            <img loading="lazy" src="charts/arms-42-1.svg" alt="Arms of The Hauwaiwa Atolls">
+            <img loading="lazy" src="charts/arms-42-2.svg" alt="Arms of The Ratoa Atolls">
+          </div>
+        )}
+        <a class="lf-card-enter" href={s.href}>Enter the room →</a>
+      </aside>
+    ))}
   </div>
 </section>
 

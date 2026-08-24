@@ -12,7 +12,10 @@ import {
 } from "./camera.ts";
 import { firstArrival, landfallView, markArrival, wideView } from "./ceremony.ts";
 import { bearingLine, type Capital } from "./coords.ts";
+import { bindStations } from "./cards.ts";
+import { DRIFT_SECONDS, IDLE_DELAY_MS, driftTarget } from "./drift.ts";
 import { bindStageInput } from "./input.ts";
+import { STATION_FLIGHT_SECONDS, stationFlightView } from "./station-flight.ts";
 import { playCeremony } from "./veil.ts";
 
 const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -61,7 +64,34 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     apply();
   };
 
+  // The idle drift (#458): the mockup's armDrift/stopDrift pair; stopping always re-arms.
+  let driftTween: gsap.core.Tween | null = null;
+  let idleTimer: ReturnType<typeof setTimeout> | undefined;
+  const armDrift = () => {
+    if (reduced()) return;
+    idleTimer = setTimeout(() => {
+      const t = driftTarget(cam);
+      driftTween = gsap.to(cam, {
+        x: t.x,
+        y: t.y,
+        s: t.s,
+        duration: DRIFT_SECONDS,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+        onUpdate: settle,
+      });
+    }, IDLE_DELAY_MS);
+  };
+  const stopDrift = () => {
+    driftTween?.kill();
+    driftTween = null;
+    clearTimeout(idleTimer);
+    armDrift();
+  };
+
   const flyTo = (target: Cam, duration: number) => {
+    stopDrift();
     gsap.killTweensOf(cam);
     if (reduced() || duration === 0) {
       assign(clampCam(target, view(), SHEET, fit));
@@ -82,6 +112,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
 
   bindStageInput(stage, {
     press: () => {
+      stopDrift();
       gsap.killTweensOf(cam);
       stage.classList.add("dragging");
     },
@@ -90,22 +121,32 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
       assign({ x: cam.x + dx, y: cam.y + dy, s: cam.s });
       settle();
     },
-    wheelZoom: (px, py, deltaY) => zoomBy(Math.exp(-deltaY * 0.0016), px, py, 0),
+    wheelZoom: (px, py, deltaY) => {
+      stopDrift();
+      return zoomBy(Math.exp(-deltaY * 0.0016), px, py, 0);
+    },
     pinch: (px, py, ratio) => zoomBy(ratio, px, py, 0),
     dive: (px, py) => zoomBy(1.6, px, py),
     key: (key) => {
-      if (key === "+" || key === "=") return (zoomBy(1.5), true);
-      if (key === "-") return (zoomBy(1 / 1.5), true);
+      if (key === "+" || key === "=") return (stopDrift(), zoomBy(1.5), true);
+      if (key === "-") return (stopDrift(), zoomBy(1 / 1.5), true);
       if (key === "0") return (flyTo(camForCenter(0.5, 0.5, fit, view(), SHEET), reduced() ? 0 : 1.2), true);
       return false;
     },
   });
 
-  document.getElementById("lf-in")?.addEventListener("click", () => zoomBy(1.5));
-  document.getElementById("lf-out")?.addEventListener("click", () => zoomBy(1 / 1.5));
+  document.getElementById("lf-in")?.addEventListener("click", () => (stopDrift(), zoomBy(1.5)));
+  document.getElementById("lf-out")?.addEventListener("click", () => (stopDrift(), zoomBy(1 / 1.5)));
   document
     .getElementById("lf-home")
     ?.addEventListener("click", () => flyTo(camForCenter(0.5, 0.5, fit, view(), SHEET), reduced() ? 0 : 1.2));
+
+  bindStations({
+    doc: document,
+    reduced,
+    fly: (visit) =>
+      flyTo(stationFlightView(cam, fit, visit, view(), SHEET, window.innerWidth), reduced() ? 0 : STATION_FLIGHT_SECONDS),
+  });
 
   new ResizeObserver(() => {
     fit = fitScale(view(), SHEET);
@@ -133,4 +174,5 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     assign(landfallView(view(), SHEET, fit, window.innerWidth));
     settle();
   }
+  armDrift();
 }

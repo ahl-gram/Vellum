@@ -1,4 +1,4 @@
-// Cartouche hero e2e (H0-H6, #289) plus the ceremony (H7-H12, #457): the homepage frame at desktop and a real 390px viewport, the hook, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), and the veil's arrival, skips in both phases, sitting memory, reduced-motion and narrow-viewport stories; self-contained with scoped deltas.
+// Cartouche hero e2e (H0-H6, #289), the ceremony (H7-H13, #457), and the stations, cards, and idle drift (H14-H17, #458): the homepage frame at desktop and a real 390px viewport, the hook, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion and narrow-viewport stories, and the station flights driven by REAL dispatched input; self-contained with scoped deltas.
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
 
@@ -419,5 +419,189 @@ export async function run(ctx) {
     "H13b the safety release lifts an unadopted veil: a failed bundle never traps the page",
     released !== null && !released.veil && released.seedForm,
     JSON.stringify(released),
+  );
+
+  // Stations, cards, and the drift (#458). Every gesture is REAL dispatched input (#460): pointer capture retargets clicks, so synthetic .click() proves nothing here.
+  const errBase3 = consoleErrors.length;
+  const httpBase3 = http4xx.length;
+  const clickAt = async (x, y) => {
+    await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+  };
+  const readXform = `(() => { const s = document.getElementById("lf-sheet"); return s ? getComputedStyle(s).transform : null; })()`;
+  const buttonPoint = (selector) => `(() => {
+    document.getElementById("lf-stage").scrollIntoView({ block: "center" });
+    const b = document.querySelector('${selector}');
+    if (!b) return null;
+    const r = b.getBoundingClientRect();
+    return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+  })()`;
+  const settleHome = async () => {
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+    for (let i = 0; i < 60; i++) {
+      let up = null;
+      try { up = await evaluate(`!!document.getElementById("lf-veil") || !document.querySelector(".lf-stations .lf-station")`); } catch { up = true; }
+      if (!up) break;
+      await pressKey("Escape", "Escape", 27);
+      await sleep(150);
+    }
+    let cam = null;
+    for (let i = 0; i < 80; i++) {
+      try { cam = await evaluate(readCam); } catch {}
+      if (atLandfall(cam)) break;
+      await sleep(75);
+    }
+    return cam;
+  };
+
+  const settled14 = await settleHome();
+  const atlasPt = await evaluate(buttonPoint('.lf-station[data-station="atlas"]'));
+  if (atlasPt !== null) await clickAt(Math.round(atlasPt.x), Math.round(atlasPt.y));
+  let visited = null;
+  for (let i = 0; i < 80; i++) {
+    try {
+      visited = await evaluate(`(() => {
+        const stage = document.getElementById("lf-stage");
+        const sheet = document.getElementById("lf-sheet");
+        const btn = document.querySelector('.lf-station[data-station="atlas"]');
+        const card = document.getElementById("lf-card-atlas");
+        if (!stage || !sheet || !btn || !card) return null;
+        const r = stage.getBoundingClientRect();
+        const fit = Math.min(r.width / 1500, r.height / 1157.931) * 0.92;
+        const m = new DOMMatrixReadOnly(getComputedStyle(sheet).transform);
+        const cs = getComputedStyle(card);
+        const anchorX = Number(btn.dataset.nx) * 1500 * m.a + m.e;
+        const anchorY = Number(btn.dataset.ny) * 1157.931 * m.a + m.f;
+        return {
+          scale: m.a, fit,
+          anchorX, anchorY, stageW: r.width, stageH: r.height,
+          open: !card.hidden && cs.visibility !== "hidden" && Number(cs.opacity) > 0.95,
+          title: card.querySelector(".lf-card-title")?.textContent ?? null,
+          enter: card.querySelector(".lf-card-enter")?.getAttribute("href") ?? null,
+          arms: card.querySelectorAll(".lf-card-arms img").length,
+        };
+      })()`);
+      if (visited !== null && visited.open && Math.abs(visited.scale - visited.fit * 2.6) < 1e-3) break;
+    } catch {}
+    await sleep(75);
+  }
+  check(
+    "H14a a real click on the Atlas station flies the camera to 2.6 of fit, the anchor clear of the card at 0.4 of the stage, and unfurls the slip with its three arms",
+    visited !== null && visited.open && Math.abs(visited.scale - visited.fit * 2.6) < 1e-3
+      && Math.abs(visited.anchorX - visited.stageW * 0.4) < 2 && Math.abs(visited.anchorY - visited.stageH / 2) < 2
+      && visited.title === "The Atlas of Rahai" && visited.enter === "atlas/" && visited.arms === 3,
+    JSON.stringify({ settled14: !!settled14, atlasPt, visited }),
+  );
+  await shoot("home-station-card.png");
+
+  await pressKey("Escape", "Escape", 27);
+  let closed14 = null;
+  for (let i = 0; i < 30; i++) {
+    try { closed14 = await evaluate(`document.getElementById("lf-card-atlas").hidden`); } catch {}
+    if (closed14 === true) break;
+    await sleep(75);
+  }
+  check("H14b a real Escape sets the slip aside", closed14 === true, `hidden=${closed14}`);
+
+  const legendPt = await evaluate(buttonPoint('.lf-legend-btn[data-station="reading-room"]'));
+  if (legendPt !== null) await clickAt(Math.round(legendPt.x), Math.round(legendPt.y));
+  let legendCard = null;
+  for (let i = 0; i < 80; i++) {
+    try {
+      legendCard = await evaluate(`(() => {
+        const card = document.getElementById("lf-card-reading-room");
+        if (!card) return null;
+        const cs = getComputedStyle(card);
+        return { open: !card.hidden && cs.visibility !== "hidden" && Number(cs.opacity) > 0.95,
+          title: card.querySelector(".lf-card-title")?.textContent ?? null };
+      })()`);
+      if (legendCard !== null && legendCard.open) break;
+    } catch {}
+    await sleep(75);
+  }
+  check(
+    "H14c the legend strip is a real alternative: a real click on its Reading Room entry unfurls that slip",
+    legendCard !== null && legendCard.open && legendCard.title === "The Reading Room",
+    JSON.stringify({ legendPt, legendCard }),
+  );
+  await pressKey("Escape", "Escape", 27);
+  await sleep(500);
+
+  // The drift (#458 AC): nine still seconds, then the sheet breathes; the clamp holds while it does.
+  await sleep(9600);
+  const drift1 = await evaluate(readXform);
+  await sleep(900);
+  const drift2 = await evaluate(readXform);
+  const clampHeld = await evaluate(`(() => {
+    const stage = document.getElementById("lf-stage");
+    const sheet = document.getElementById("lf-sheet");
+    const r = stage.getBoundingClientRect();
+    const fit = Math.min(r.width / 1500, r.height / 1157.931) * 0.92;
+    const m = new DOMMatrixReadOnly(getComputedStyle(sheet).transform);
+    const cx = m.e + (1500 * m.a) / 2, cy = m.f + (1157.931 * m.a) / 2;
+    return m.a >= fit * 0.65 - 1e-6 && m.a <= 7 + 1e-6 && cx >= -1 && cx <= r.width + 1 && cy >= -1 && cy <= r.height + 1;
+  })()`);
+  check(
+    "H15a left alone after landfall the sheet breathes: the transform moves between two samples nine-plus seconds in, and the clamp still holds",
+    drift1 !== null && drift2 !== null && drift1 !== drift2 && clampHeld === true,
+    JSON.stringify({ drift1, drift2, clampHeld }),
+  );
+
+  const stagePt = await evaluate(`(() => { const r = document.getElementById("lf-stage").getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+  await send("Input.dispatchMouseEvent", { type: "mouseWheel", x: Math.round(stagePt.x), y: Math.round(stagePt.y), deltaX: 0, deltaY: -120 });
+  await sleep(400);
+  const still1 = await evaluate(readXform);
+  await sleep(900);
+  const still2 = await evaluate(readXform);
+  await sleep(900);
+  const still3 = await evaluate(readXform);
+  check(
+    "H15b a real wheel stops the drift at once: the zoom lands and the transform holds still through three samples",
+    still1 !== null && still1 === still2 && still2 === still3,
+    JSON.stringify({ still1, still2, still3 }),
+  );
+
+  await sleep(9600);
+  const rearm1 = await evaluate(readXform);
+  await sleep(900);
+  const rearm2 = await evaluate(readXform);
+  check(
+    "H15c the stop re-armed the idle timer: nine-plus still seconds later the sheet breathes again",
+    rearm1 !== null && rearm2 !== null && rearm1 !== rearm2,
+    JSON.stringify({ rearm1, rearm2 }),
+  );
+
+  const explorerPt = await evaluate(buttonPoint('.lf-station[data-station="explorer"]'));
+  if (explorerPt !== null) await clickAt(Math.round(explorerPt.x), Math.round(explorerPt.y));
+  await sleep(2200);
+  const flight1 = await evaluate(readXform);
+  await sleep(900);
+  const flight2 = await evaluate(readXform);
+  check(
+    "H15d this sub's own station flight stops the drift too: after the flight settles the transform holds still",
+    flight1 !== null && flight1 === flight2,
+    JSON.stringify({ flight1, flight2 }),
+  );
+  await pressKey("Escape", "Escape", 27);
+
+  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  const settled16 = await settleHome();
+  await sleep(9800);
+  const calm1 = await evaluate(readXform);
+  await sleep(900);
+  const calm2 = await evaluate(readXform);
+  await send("Emulation.setEmulatedMedia", { features: [] });
+  check(
+    "H16 reduced motion gets no drift at all: nine-plus seconds of stillness stay still",
+    atLandfall(settled16) && calm1 !== null && calm1 === calm2,
+    JSON.stringify({ calm1, calm2 }),
+  );
+
+  const errDelta3 = consoleErrors.slice(errBase3).filter((e) => !e.includes("AbortError: Transition was skipped"));
+  const httpDelta3 = http4xx.slice(httpBase3).filter((u) => !/favicon/i.test(u));
+  check(
+    "H17 the station and drift flow is clean (no console errors, no new 4xx)",
+    errDelta3.length === 0 && httpDelta3.length === 0,
+    [...errDelta3, ...httpDelta3].join(" | ") || "clean",
   );
 }
