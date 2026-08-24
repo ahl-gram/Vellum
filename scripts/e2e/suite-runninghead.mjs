@@ -85,14 +85,14 @@ export async function run(ctx) {
       if (i === 199) return false;
     }
     if (route !== "/") return true;
-    // Home's first arrival raises the ceremony veil (#457); settle it with a real key so the head plate shows the head.
-    await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
-    await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+    // Home's first arrival raises the ceremony veil (#457); a key before the module arms the skip hits nothing, so press until the veil goes and the head plate shows the head.
     for (let i = 0; i < 40; i++) {
+      await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+      await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+      await sleep(150);
       let up = true;
       try { up = await evaluate(`!!document.getElementById("lf-veil")`); } catch {}
       if (!up) break;
-      await sleep(50);
     }
     return true;
   };

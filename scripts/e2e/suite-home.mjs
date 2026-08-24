@@ -34,14 +34,14 @@ export async function run(ctx) {
   }
   check("H0 the homepage loads with the seed form present", ready, "readyState complete + #seed-form");
 
-  // First arrival raises the veil (H7 proves it); settle it with a REAL key so H1-H5 and their plates measure the page. Synthetic .click() dispatches no pointerdown and would leave the veil standing.
+  // First arrival raises the veil (H7 proves it); settle it with a REAL key so H1-H5 and their plates measure the page. Synthetic .click() dispatches no pointerdown, and a key thrown before the module arms the skip hits nothing, so press until it lands.
   if (ready) {
-    await pressKey("Escape", "Escape", 27);
     for (let i = 0; i < 40; i++) {
+      await pressKey("Escape", "Escape", 27);
+      await sleep(150);
       let up = true;
       try { up = await evaluate(`!!document.getElementById("lf-veil")`); } catch {}
       if (!up) break;
-      await sleep(50);
     }
   }
 
@@ -246,16 +246,17 @@ export async function run(ctx) {
   );
   await shoot("home-landfall.png");
 
-  // H8's teeth: before the key the camera provably sits at the wide anchorage (0.78 of fit), so the jump to the landfall scale can only come from the skip's land(0).
+  // H8's teeth: before the key the camera provably sits at the wide anchorage (0.78 of fit), so the jump to the landfall scale can only come from the skip's land(0). The poll waits for the ANCHORAGE, not merely the veil: the pre-paint veil stands before the module boots, and a key in that window has no skip listener to hit (CI caught exactly that).
   await evaluate(`sessionStorage.clear()`);
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  const anchored = (s) => s !== null && s.veil && Math.abs(s.scale - s.fit * 0.78) < 1e-3;
   let before8 = null;
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 150; i++) {
     try { before8 = await evaluate(readCam); } catch {}
-    if (before8 !== null && before8.veil) break;
+    if (anchored(before8)) break;
     await sleep(60);
   }
-  const anchored8 = before8 !== null && before8.veil && Math.abs(before8.scale - before8.fit * 0.78) < 1e-3;
+  const anchored8 = anchored(before8);
   await pressKey("Escape", "Escape", 27);
   await sleep(120);
   let skipped = null;
@@ -357,14 +358,23 @@ export async function run(ctx) {
     JSON.stringify(narrow12),
   );
   await shoot("home-veil-390.png");
+  let armed12 = null;
+  for (let i = 0; i < 150; i++) {
+    try { armed12 = await evaluate(readCam); } catch {}
+    if (anchored(armed12)) break;
+    await sleep(60);
+  }
   await pressKey("Escape", "Escape", 27);
-  await sleep(120);
   let narrowLand = null;
-  try { narrowLand = await evaluate(readCam); } catch {}
+  for (let i = 0; i < 40; i++) {
+    try { narrowLand = await evaluate(readCam); } catch {}
+    if (atLandfall(narrowLand)) break;
+    await sleep(60);
+  }
   check(
     "H12b the narrow skip lands at the narrow landfall framing (1.6 of fit under a 900px viewport)",
-    atLandfall(narrowLand) && narrowLand.expected < narrowLand.fit * 1.65,
-    JSON.stringify(narrowLand),
+    anchored(armed12) && atLandfall(narrowLand) && narrowLand.expected < narrowLand.fit * 1.65,
+    JSON.stringify({ armed12, narrowLand }),
   );
   await clearMobile();
 
