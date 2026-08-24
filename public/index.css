@@ -228,7 +228,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   background: rgb(from var(--chart-paper) r g b / 0.75);
   padding: 0 6px; white-space: nowrap;
 }
-/* The mockup's exact hover (Alex, PR #468 live review: the scale-property form drifted the glyph 11.7px down-right and shrank it); its #289 tip status is parked in TIPS_AWAITING_A_RULING for the Sub 5 gate. */
+/* The mockup's exact hover, ratified as a CHART INSTRUMENT gesture (Alex 2026-08-24): a pip's grow promises its slip opening in place, not #289's navigation; the ruling lives at CHART_INSTRUMENTS in tip-affordance.test.ts. */
 .lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph {
   background: var(--parchment-bright); transform: rotate(45deg) scale(1.25);
 }
