@@ -178,12 +178,25 @@ test("the idle drift breathes at the mockup's numbers and never mutates the came
   assert.equal(DRIFT_DX, 14);
   assert.equal(DRIFT_DY, -10);
   assert.equal(DRIFT_SCALE, 1.015);
+  const fit = 1;
   const cam = { x: 100, y: 200, s: 2 };
-  const target = driftTarget(cam);
+  const target = driftTarget(cam, fit);
   assert.equal(target.x, 114, "the drift leans east by the mockup's 14px");
   assert.equal(target.y, 190, "and north by its 10px");
   assert.ok(Math.abs(target.s - 2.03) < 1e-12, "and swells by 1.015");
   assert.deepEqual(cam, { x: 100, y: 200, s: 2 }, "driftTarget returns a new cam, never mutates");
+});
+
+test("the drift never breathes the marks layer open: a camera parked under the close-in threshold keeps its scale (#458 skeptic finding 11)", () => {
+  const fit = 1;
+  const justUnder = { x: 0, y: 0, s: fit * 1.55 * 0.995 };
+  const held = driftTarget(justUnder, fit);
+  assert.equal(held.s, justUnder.s, "a breath that would cross 1.55 of fit pans without swelling, so the dots never pulse in and out");
+  assert.equal(held.x, 14, "the pan half of the breath survives");
+  const clear = { x: 0, y: 0, s: fit * 1.55 * 0.9 };
+  assert.ok(Math.abs(driftTarget(clear, fit).s - clear.s * 1.015) < 1e-12, "a camera clear of the threshold still swells");
+  const above = { x: 0, y: 0, s: fit * 1.6 };
+  assert.ok(Math.abs(driftTarget(above, fit).s - above.s * 1.015) < 1e-12, "a camera already close-in swells too: 1.015 up cannot cross back down");
 });
 
 test("home mounts the stations outside the dot layer's aria shroud, with the legend and four slips (#458)", () => {

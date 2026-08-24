@@ -113,8 +113,6 @@ const TIPPING_LINKS = new Set([
   "living-chart.css :: .pc-prospect:hover, .pc-prospect:focus-visible",
   // #402: the Reading Room's beat plate links to /prospect/, so it carries the atlas plates' lift.
   "reading-room/index.css :: .rr-prospect a:hover img, .rr-prospect a:focus-visible img",
-  // #458 body ruling: "Stations navigate, so they may tip". A station is a button whose click flies to the room's mooring and unfurls the slip whose Enter link goes through; the hover rotate restates the diamond's structural 45deg, joined consciously here. Spec-recon 2026-08-24 disputes whether a button qualifies as navigation; re-judge at the Sub 5 gate (#460).
-  "index.css :: .lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph",
 ]);
 
 /** A tip whose surface does not navigate, held on the record until Alex rules: kept apart from TIPPING_LINKS so that set stays true when it says a surface goes somewhere. */

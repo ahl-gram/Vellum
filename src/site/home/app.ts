@@ -64,13 +64,13 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     apply();
   };
 
-  // The idle drift (#458): the mockup's armDrift/stopDrift pair; stopping always re-arms.
+  // The idle drift (#458): the mockup's armDrift/stopDrift pair.
   let driftTween: gsap.core.Tween | null = null;
   let idleTimer: ReturnType<typeof setTimeout> | undefined;
   const armDrift = () => {
     if (reduced()) return;
     idleTimer = setTimeout(() => {
-      const t = driftTarget(cam);
+      const t = driftTarget(cam, fit);
       driftTween = gsap.to(cam, {
         x: t.x,
         y: t.y,
@@ -102,6 +102,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
   };
 
   const zoomBy = (factor: number, px?: number, py?: number, duration = 0.6): boolean => {
+    stopDrift();
     const v = view();
     const at = { x: px ?? v.w / 2, y: py ?? v.h / 2 };
     const target = zoomTarget(cam, factor, at, v, SHEET, fit);
@@ -121,22 +122,19 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
       assign({ x: cam.x + dx, y: cam.y + dy, s: cam.s });
       settle();
     },
-    wheelZoom: (px, py, deltaY) => {
-      stopDrift();
-      return zoomBy(Math.exp(-deltaY * 0.0016), px, py, 0);
-    },
+    wheelZoom: (px, py, deltaY) => zoomBy(Math.exp(-deltaY * 0.0016), px, py, 0),
     pinch: (px, py, ratio) => zoomBy(ratio, px, py, 0),
     dive: (px, py) => zoomBy(1.6, px, py),
     key: (key) => {
-      if (key === "+" || key === "=") return (stopDrift(), zoomBy(1.5), true);
-      if (key === "-") return (stopDrift(), zoomBy(1 / 1.5), true);
+      if (key === "+" || key === "=") return (zoomBy(1.5), true);
+      if (key === "-") return (zoomBy(1 / 1.5), true);
       if (key === "0") return (flyTo(camForCenter(0.5, 0.5, fit, view(), SHEET), reduced() ? 0 : 1.2), true);
       return false;
     },
   });
 
-  document.getElementById("lf-in")?.addEventListener("click", () => (stopDrift(), zoomBy(1.5)));
-  document.getElementById("lf-out")?.addEventListener("click", () => (stopDrift(), zoomBy(1 / 1.5)));
+  document.getElementById("lf-in")?.addEventListener("click", () => zoomBy(1.5));
+  document.getElementById("lf-out")?.addEventListener("click", () => zoomBy(1 / 1.5));
   document
     .getElementById("lf-home")
     ?.addEventListener("click", () => flyTo(camForCenter(0.5, 0.5, fit, view(), SHEET), reduced() ? 0 : 1.2));

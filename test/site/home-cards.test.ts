@@ -42,7 +42,7 @@ test("the page css dresses the gloss and the kicker", () => {
   assert.ok(pageCss.includes(".card-verb"), "public/index.css must style .card-verb");
 });
 
-// Sub 3 (#458) moves the card copy onto the stations' slips; the criterion keeps its #314 shape there (verb kicker before every title, grounded, glossed), asserted on the one rendered template since the slips map from the roster. Go Deeper itself stays until Alex rules who removes it (spec-recon 2026-08-24, open decision 3).
+// Go Deeper stays alongside the slips until Alex rules who removes it (spec-recon 2026-08-24, open decision 3).
 
 test("the station slip keeps the card criterion: verb kicker before the title, grounded and glossed (#458)", () => {
   const slipStart = homeSource.indexOf('class="lf-card"');

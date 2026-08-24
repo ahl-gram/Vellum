@@ -203,7 +203,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   outline: 1px solid var(--ink-dark);
   transform: rotate(45deg);
   box-shadow: 0 2px 6px rgb(from var(--chart-ink) r g b / 0.5);
-  transition: background 0.25s ease, transform 0.25s ease;
+  transition: background 0.25s ease, scale 0.25s ease;
 }
 .lf-station-slip {
   position: absolute; top: calc(50% + 13px); left: 50%;
@@ -228,16 +228,14 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   background: rgb(from var(--chart-paper) r g b / 0.75);
   padding: 0 6px; white-space: nowrap;
 }
+/* The hover grows via the scale PROPERTY over the structural base transform, so land and sea share one gesture; whether a camera-flying button earns the house tip is the #289 widening question, left to Alex (spec-recon and the PR skeptic both disputed the earlier rotate-bearing form). */
 .lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph {
-  background: var(--parchment-bright); transform: rotate(45deg) scale(1.25);
+  background: var(--parchment-bright); scale: 1.25;
 }
 .lf-station:hover .lf-station-name, .lf-station:focus-visible .lf-station-name {
   background: var(--parchment-bright);
 }
 .lf-station.at-sea .lf-station-glyph { border-radius: 50%; transform: none; }
-.lf-station.at-sea:hover .lf-station-glyph, .lf-station.at-sea:focus-visible .lf-station-glyph {
-  transform: scale(1.25);
-}
 .lf-pulse {
   position: absolute; inset: 0; margin: auto;
   width: 15px; height: 15px;
@@ -255,7 +253,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   /* max-content: the shrink-to-fit at left 50% capped the row at half the stage and wrapped the Gallery entry into the Reading Room slip (plate-reader, this sub). */
   width: max-content; max-width: calc(100% - 2rem);
   transform: translateX(-50%); text-align: center; z-index: 2;
-  /* The mockup's narrow footing generalized: in the boxed stage the landfall chart reaches the stage foot, so without its own ground the legend reads as text on parchment and a south-shore slip blends straight into it. Chrome passes clicks through (the head swallowed the Reading Room icon's click; plate-reader, this sub); the buttons take theirs back. */
+  /* The mockup's narrow footing generalized: in the boxed stage the landfall chart reaches the stage foot, so without its own ground the legend reads as text on parchment and a south-shore slip blends straight into it. */
   padding: 0.5rem 1.1rem 0.6rem;
   background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.45) 72%, transparent);
   pointer-events: none;
@@ -275,7 +273,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   text-align: center;
   transition: background 0.2s ease, transform 0.2s ease;
 }
-.lf-legend-btn:hover, .lf-legend-btn:focus-visible { background: var(--ink-dark); transform: translateY(var(--raise)); }
+.lf-legend-btn:hover, .lf-legend-btn:focus-visible { background: var(--ink-dark); }
 .lf-legend-verb {
   display: block;
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
@@ -290,10 +288,10 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 }
 .lf-card {
   position: absolute; z-index: 3;
-  /* Centered by abspos + margin auto, never translateY(-50%): the open tween writes the card's transform and clobbered the centering, hanging the tall Atlas slip 90px past the stage (plate-reader, this sub). border-box is the mockup's own global reset, which the site shell lacks. */
+  /* Centered by abspos + margin auto, never translateY(-50%): the open tween writes the card's transform. border-box is the mockup's own global reset, which the site shell lacks. right 4rem keeps the slip clear of the zoom-controls column on short viewports. */
   box-sizing: border-box;
-  right: 1.4rem; top: 0; bottom: 0; margin: auto 0; height: fit-content;
-  width: min(22rem, calc(100% - 2.8rem));
+  right: 4rem; top: 0; bottom: 0; margin: auto 0; height: fit-content;
+  width: min(22rem, calc(100% - 8rem));
   background: var(--parchment-panel);
   color: var(--ink-dark);
   border: 1px solid var(--line-tan);
@@ -356,8 +354,9 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   .lf-legend-verb { font-size: 0.7rem; }
   .lf-legend-room { font-size: 0.74rem; }
   .lf-card {
-    right: 0; left: 0; top: auto; bottom: 0; margin: 0;
-    width: 100%; outline-offset: -8px; z-index: 4;
+    /* The mockup's bottom sheet is FIXED to the viewport; inside the boxed stage the sheet was taller than the stage itself and buried the chart whole (skeptic finding 1). z-index stays under the veil's 50. */
+    position: fixed; right: 0; left: 0; top: auto; bottom: 0; margin: 0;
+    width: 100%; outline-offset: -8px; z-index: 40;
     padding: 1.2rem 1.3rem 1.1rem;
   }
   .lf-card-arms img { width: 42px; }

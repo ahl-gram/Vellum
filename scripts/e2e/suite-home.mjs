@@ -421,9 +421,10 @@ export async function run(ctx) {
     JSON.stringify(released),
   );
 
-  // Stations, cards, and the drift (#458). Every gesture is REAL dispatched input (#460): pointer capture retargets clicks, so synthetic .click() proves nothing here.
+  // Stations, cards, and the drift (#458) at the ratified 1280x800 (the harness's tall default hides the short-viewport collisions the plate-reader measured). Every gesture is REAL dispatched input (#460): pointer capture retargets clicks, so synthetic .click() proves nothing here.
   const errBase3 = consoleErrors.length;
   const httpBase3 = http4xx.length;
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   const clickAt = async (x, y) => {
     await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
     await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
@@ -473,19 +474,21 @@ export async function run(ctx) {
         const anchorX = Number(btn.dataset.nx) * 1500 * m.a + m.e;
         const anchorY = Number(btn.dataset.ny) * 1157.931 * m.a + m.f;
         const cr = card.getBoundingClientRect();
-        const reach = (sel) => {
-          const el = card.querySelector(sel);
+        const reach = (el) => {
           if (!el) return false;
           const b = el.getBoundingClientRect();
           const hit = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
           return hit !== null && (hit === el || el.contains(hit));
         };
+        const anchorVX = r.left + anchorX, anchorVY = r.top + anchorY;
         return {
           scale: m.a, fit,
           anchorX, anchorY, stageW: r.width, stageH: r.height,
           open: !card.hidden && cs.visibility !== "hidden" && Number(cs.opacity) > 0.95,
           contained: cr.top >= r.top - 0.5 && cr.bottom <= r.bottom + 0.5 && cr.left >= r.left - 0.5 && cr.right <= r.right + 0.5,
-          enterReach: reach(".lf-card-enter"), closeReach: reach(".lf-card-close"),
+          anchorClear: !(anchorVX >= cr.left && anchorVX <= cr.right && anchorVY >= cr.top && anchorVY <= cr.bottom),
+          enterReach: reach(card.querySelector(".lf-card-enter")), closeReach: reach(card.querySelector(".lf-card-close")),
+          controlsReach: reach(document.getElementById("lf-in")) && reach(document.getElementById("lf-out")),
           title: card.querySelector(".lf-card-title")?.textContent ?? null,
           enter: card.querySelector(".lf-card-enter")?.getAttribute("href") ?? null,
           arms: card.querySelectorAll(".lf-card-arms img").length,
@@ -496,10 +499,10 @@ export async function run(ctx) {
     await sleep(75);
   }
   check(
-    "H14a a real click on the Atlas station flies the camera to 2.6 of fit, the anchor clear of the card at 0.4 of the stage, and unfurls the slip with its three arms, whole inside the stage with its enter and close under the hand",
+    "H14a a real click on the Atlas station flies the camera to 2.6 of fit, the anchor at 0.4 of the stage clear of the slip, the slip whole inside the stage with its enter, close, and the zoom controls all under the hand, arms aboard",
     visited !== null && visited.open && Math.abs(visited.scale - visited.fit * 2.6) < 1e-3
       && Math.abs(visited.anchorX - visited.stageW * 0.4) < 2 && Math.abs(visited.anchorY - visited.stageH / 2) < 2
-      && visited.contained && visited.enterReach && visited.closeReach
+      && visited.contained && visited.anchorClear && visited.enterReach && visited.closeReach && visited.controlsReach
       && visited.title === "The Atlas of Rahai" && visited.enter === "atlas/" && visited.arms === 3,
     JSON.stringify({ settled14: !!settled14, atlasPt, visited }),
   );
@@ -538,7 +541,6 @@ export async function run(ctx) {
   await pressKey("Escape", "Escape", 27);
   await sleep(500);
 
-  // The drift (#458 AC): nine still seconds, then the sheet breathes; the clamp holds while it does.
   await sleep(9600);
   const drift1 = await evaluate(readXform);
   await sleep(900);
@@ -582,16 +584,17 @@ export async function run(ctx) {
     JSON.stringify({ rearm1, rearm2 }),
   );
 
-  const explorerPt = await evaluate(buttonPoint('.lf-station[data-station="explorer"]'));
-  if (explorerPt !== null) await clickAt(Math.round(explorerPt.x), Math.round(explorerPt.y));
+  // The Reading Room station, not the Explorer: H14c framed it at 0.4 of the stage and the wheel zoomed at center, so it is the one icon this history provably keeps inside the 800-tall stage clip.
+  const flightPt = await evaluate(buttonPoint('.lf-station[data-station="reading-room"]'));
+  if (flightPt !== null) await clickAt(Math.round(flightPt.x), Math.round(flightPt.y));
   await sleep(2200);
   const flight1 = await evaluate(readXform);
   await sleep(900);
   const flight2 = await evaluate(readXform);
   check(
     "H15d this sub's own station flight stops the drift too: after the flight settles the transform holds still",
-    flight1 !== null && flight1 === flight2,
-    JSON.stringify({ flight1, flight2 }),
+    flightPt !== null && flight1 !== null && flight1 === flight2,
+    JSON.stringify({ flightPt, flight1, flight2 }),
   );
   await pressKey("Escape", "Escape", 27);
 
@@ -608,38 +611,55 @@ export async function run(ctx) {
     JSON.stringify({ calm1, calm2 }),
   );
 
-  // The bottom-sheet card at a real 390 viewport: whole within the stage's clip, close under the hand (the content-box overflow shipped the close button 10px past the clip and elementFromPoint could not reach it; plate-reader, this sub).
   await setMobileViewport(390, 844);
   const settled16b = await settleHome();
   const sheetPt = await evaluate(buttonPoint('.lf-legend-btn[data-station="atlas"]'));
   if (sheetPt !== null) await clickAt(Math.round(sheetPt.x), Math.round(sheetPt.y));
-  let sheet16 = null;
+  let opened16 = false;
   for (let i = 0; i < 80; i++) {
     try {
-      sheet16 = await evaluate(`(() => {
-        const stage = document.getElementById("lf-stage");
+      opened16 = await evaluate(`(() => {
         const card = document.getElementById("lf-card-atlas");
-        if (!stage || !card) return null;
+        if (!card || card.hidden) return false;
         const cs = getComputedStyle(card);
-        const sr = stage.getBoundingClientRect();
-        const cr = card.getBoundingClientRect();
-        const close = card.querySelector(".lf-card-close");
-        const cb = close.getBoundingClientRect();
-        const hit = document.elementFromPoint(cb.x + cb.width / 2, cb.y + cb.height / 2);
-        return {
-          open: !card.hidden && cs.visibility !== "hidden" && Number(cs.opacity) > 0.95,
-          fits: cr.left >= sr.left - 0.5 && cr.right <= sr.right + 0.5 && cr.bottom <= sr.bottom + 0.5,
-          closeReach: hit !== null && (hit === close || close.contains(hit)),
-          scrollW: document.documentElement.scrollWidth,
-        };
+        return cs.visibility !== "hidden" && Number(cs.opacity) > 0.95;
       })()`);
-      if (sheet16 !== null && sheet16.open) break;
     } catch {}
+    if (opened16 === true) break;
     await sleep(75);
   }
+  // The open tween ends on rotate 0 / y 0; a mid-tween rect leans past the viewport edge by design, so the geometry is read after it settles.
+  await sleep(700);
+  let sheet16 = null;
+  try {
+    sheet16 = await evaluate(`(() => {
+      const stage = document.getElementById("lf-stage");
+      const sheet = document.getElementById("lf-sheet");
+      const btn = document.querySelector('.lf-station[data-station="atlas"]');
+      const card = document.getElementById("lf-card-atlas");
+      if (!stage || !sheet || !btn || !card) return null;
+      const cs = getComputedStyle(card);
+      const cr = card.getBoundingClientRect();
+      const sr = stage.getBoundingClientRect();
+      const m = new DOMMatrixReadOnly(getComputedStyle(sheet).transform);
+      const anchorVX = sr.left + Number(btn.dataset.nx) * 1500 * m.a + m.e;
+      const anchorVY = sr.top + Number(btn.dataset.ny) * 1157.931 * m.a + m.f;
+      const close = card.querySelector(".lf-card-close");
+      const cb = close.getBoundingClientRect();
+      const hit = document.elementFromPoint(cb.x + cb.width / 2, cb.y + cb.height / 2);
+      return {
+        open: !card.hidden && cs.visibility !== "hidden" && Number(cs.opacity) > 0.95,
+        inViewport: cr.left >= -0.5 && cr.right <= 390.5 && cr.top >= -0.5 && cr.bottom <= 844.5,
+        cardRect: [cr.left, cr.top, cr.right, cr.bottom].map((v) => Math.round(v * 10) / 10),
+        anchorClear: !(anchorVX >= cr.left && anchorVX <= cr.right && anchorVY >= cr.top && anchorVY <= cr.bottom),
+        closeReach: hit !== null && (hit === close || close.contains(hit)),
+        scrollW: document.documentElement.scrollWidth,
+      };
+    })()`);
+  } catch {}
   check(
-    "H16b at 390 the slip lies as a bottom sheet whole within the stage, its close reachable, nothing scrolling sideways",
-    sheet16 !== null && sheet16.open && sheet16.fits && sheet16.closeReach && sheet16.scrollW === 390,
+    "H16b at 390 the slip lies as a bottom sheet fixed whole within the viewport, every edge, the flown-to anchor clear above it, its close reachable, nothing scrolling sideways",
+    sheet16 !== null && sheet16.open && sheet16.inViewport && sheet16.anchorClear && sheet16.closeReach && sheet16.scrollW === 390,
     JSON.stringify({ settled16b: !!settled16b, sheetPt, sheet16 }),
   );
   await shoot("home-station-card-390.png");
