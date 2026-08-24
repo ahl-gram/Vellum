@@ -218,6 +218,10 @@ test("the station dress is the mockup's: pulse, diamond glyph, at-sea round, red
   assert.match(css, /\.lf-station\b/, "the station wears its own dress");
   assert.match(css, /@keyframes lf-station-pulse/, "the pulse ring breathes");
   assert.match(css, /\.lf-station\.at-sea/, "the at-sea station drops the diamond");
+  const legend = css.match(/\.lf-legend \{([^}]*)\}/);
+  assert.ok(legend && /pointer-events:\s*none/.test(legend[1]), "the legend chrome passes clicks through to the station beneath (plate-reader: the head swallowed the Reading Room icon's click)");
+  const legendBtn = css.match(/\.lf-legend-btn \{([^}]*)\}/);
+  assert.ok(legendBtn && /pointer-events:\s*auto/.test(legendBtn[1]), "the legend's buttons take their clicks back");
   const reduced = css.match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/g)?.join("\n") ?? "";
   assert.match(reduced, /\.lf-pulse[^{]*\{[^}]*animation:\s*none/, "reduced motion stills the pulse");
 });

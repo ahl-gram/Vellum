@@ -255,6 +255,10 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   /* max-content: the shrink-to-fit at left 50% capped the row at half the stage and wrapped the Gallery entry into the Reading Room slip (plate-reader, this sub). */
   width: max-content; max-width: calc(100% - 2rem);
   transform: translateX(-50%); text-align: center; z-index: 2;
+  /* The mockup's narrow footing generalized: in the boxed stage the landfall chart reaches the stage foot, so without its own ground the legend reads as text on parchment and a south-shore slip blends straight into it. Chrome passes clicks through (the head swallowed the Reading Room icon's click; plate-reader, this sub); the buttons take theirs back. */
+  padding: 0.5rem 1.1rem 0.6rem;
+  background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.45) 72%, transparent);
+  pointer-events: none;
 }
 .landfall .stage.cam .lf-legend { display: block; }
 .lf-legend-head {
@@ -264,7 +268,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 }
 .lf-legend-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
 .lf-legend-btn {
-  appearance: none; cursor: pointer;
+  appearance: none; cursor: pointer; pointer-events: auto;
   background: rgb(from var(--chart-ink) r g b / 0.5);
   border: 1px solid var(--line-tan);
   padding: 0.4rem 0.9rem 0.35rem;
