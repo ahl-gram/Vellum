@@ -1,10 +1,10 @@
 body {
   padding: 3rem 1.5rem 5rem;
 }
-h2, .card h3 {
+h2 {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
-figcaption, .card p, .underhood, .notice-body {
+figcaption, .underhood {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
 main { max-width: 1080px; }
@@ -91,24 +91,6 @@ figcaption { text-align: center; font-style: italic; color: var(--ink-brown); pa
 .banner figcaption { font-style: italic; color: var(--ink-brown); padding-top: 0.55rem; letter-spacing: 0.03em; }
 .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.4rem; }
 @media (max-width: 720px) { .grid3 { grid-template-columns: 1fr; } }
-.cards-gloss { margin: 0.5rem 0 0; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; color: var(--ink-faded); }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.4rem; margin-top: 1.2rem; }
-.card-verb { display: block; margin-bottom: 0.35rem; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.8rem; letter-spacing: 0.14em; color: var(--ink-faded); }
-@media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
-.card { display: block; border: 1.5px solid var(--ink-dark); border-radius: 4px;
-  padding: 1.4rem 1.6rem; background: var(--parchment-panel); text-decoration: none; color: inherit;
-  box-shadow: 0 6px 18px rgb(from var(--chart-ink) r g b / 0.12); }
-.card:hover { background: var(--control-cream); }
-.card h3 { margin: 0 0 0.4rem; letter-spacing: 0.05em; }
-.card p { margin: 0; font-style: italic; color: var(--ink-brown); line-height: 1.5; }
-.notice {
-  max-width: 46rem; margin: 1.2rem 0 1.6rem;
-  border: 1px solid var(--line-tan); background: var(--parchment-panel);
-  border-radius: 6px;
-  padding: 0.9rem 1.2rem;
-}
-.notice-head { margin: 0; }
-.notice-body { margin: 0.35rem 0 0; font-style: italic; color: var(--ink-brown); line-height: 1.55; }
 .how { line-height: 1.65; }
 .underhood { font-style: italic; color: var(--ink-brown); font-size: 0.92rem;
   line-height: 1.6; margin-top: 0.5rem; }
@@ -345,6 +327,39 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   transition: background 0.2s ease;
 }
 .lf-card-enter:hover, .lf-card-enter:focus-visible { background: var(--chart-ink); }
+
+/* Landfall Sub 4 (#459): the How It Works panel and the Notice stamp; the dress is the mockup's (design/atelier-map/stage.css) with tokens. */
+.lf-card-how {
+  width: min(30rem, calc(100% - 8rem));
+  max-height: calc(100% - 3rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.lf-card-how .how { font-size: 0.95rem; line-height: 1.55; margin: 0.8rem 0 0; }
+.lf-card-how .underhood { margin: 0.8rem 0 0; }
+.notice-stamp {
+  position: absolute; left: 2rem; top: 46%; z-index: 2;
+  transform: rotate(-5deg);
+  border: 1px solid rgb(from var(--line-tan) r g b / 0.5);
+  outline: 3px double rgb(from var(--line-tan) r g b / 0.35);
+  outline-offset: 4px;
+  padding: 0.7rem 1rem;
+  opacity: 0.5;
+  pointer-events: none;
+  max-width: 15rem;
+}
+.stamp-head {
+  margin: 0;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.72rem; letter-spacing: 0.28em;
+  color: var(--line-tan);
+}
+.stamp-body {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.8rem; color: var(--ink-faded); line-height: 1.5;
+}
 @media (max-width: 900px) {
   /* The compressed stage lands three of the four slips in the legend band (Alex, PR #468 live review); the legend below names every room, so the tags stand down until Sub 6's full-bleed restores the mockup's spacing. */
   .lf-station-slip { display: none; }
@@ -365,8 +380,10 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
     padding: 1.2rem 1.3rem 1.1rem;
   }
   .lf-card-arms img { width: 42px; }
+  .lf-card-how { width: 100%; max-height: 62vh; }
   .lf-controls { bottom: 6.5rem; }
   .lf-coords.on { display: none; }
+  .notice-stamp { display: none; }
 }
 
 /* Landfall Sub 2 (#457): the loading ceremony. JS-injected (a no-JS visitor never traps behind it); the dress is the mockup's veil (design/atelier-map/base.css) with its raw hexes as token derivations. */

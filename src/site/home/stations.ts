@@ -58,6 +58,19 @@ export function homeStations(): ReadonlyArray<Station> {
   ];
 }
 
+export type HowStation = {
+  readonly id: "how";
+  readonly name: string;
+  readonly verb: string;
+  readonly where: string;
+  readonly nx: number;
+  readonly ny: number;
+};
+
+export function howStation(): HowStation {
+  return { id: "how", name: "How It Works", verb: "See how", where: "at the title cartouche", nx: 0.7847, ny: 0.1779 };
+}
+
 const spotKey = (nx: number, ny: number): string => `${nx},${ny}`;
 
 export function stationSpots(stations: ReadonlyArray<Station>): ReadonlySet<string> {
