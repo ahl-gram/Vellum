@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-// The card criterion (#314, ratified 2026-07-29 as a comment on #202) lives on in the station slips: a verb kicker before every title, grounded and glossed. The Go Deeper section itself retired at #459 (ratified 2026-08-24); its copy is pinned verbatim in landfall-stations.test.ts.
+// The card criterion (#314, ratified 2026-07-29 as a comment on #202) lives on in the station slips: a verb kicker before every title, grounded and glossed.
 
 const homeSource = readFileSync(
   fileURLToPath(new URL("../../src/pages/index.astro", import.meta.url)),

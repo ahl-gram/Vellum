@@ -127,7 +127,6 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
 });
 
 test("home's flourish family survives the prose move (#324, reshaped at #459)", () => {
-  // The #324 notice-panel fold retired with the panel itself: the Notice is the stage's stamp now, guarded in landfall-prose.test.ts alongside the deep's other dress.
   const css = read("public/index.css");
   assert.ok(!css.includes(".notice-body"), "the notice panel left home with its section (#459)");
   assert.match(

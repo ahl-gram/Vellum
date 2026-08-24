@@ -131,11 +131,13 @@ const how = howStation();
         <a class="lf-card-enter" href={s.href}>Enter the room →</a>
       </aside>
     ))}
-    <aside class="lf-card lf-card-how" id="lf-card-how" hidden tabindex="-1" aria-label="How Vellum works">
-      <button type="button" class="lf-card-close" aria-label="Set the slip aside">&times;</button>
-      <p class="lf-card-verb">{how.verb}</p>
-      <h3 class="lf-card-title">{how.name}</h3>
-      <p class="lf-card-where">{how.where}</p>
+  </div>
+  <aside class="lf-card lf-card-how" id="lf-card-how" hidden tabindex="-1" aria-label="How Vellum works">
+    <button type="button" class="lf-card-close" aria-label="Set the slip aside">&times;</button>
+    <p class="lf-card-verb">{how.verb}</p>
+    <h3 class="lf-card-title">{how.name}</h3>
+    <p class="lf-card-where">{how.where}</p>
+    <div class="lf-card-scroll">
       <p class="how">Vellum surveys worlds that don't exist and drafts them as atlas
       charts. Give it a number, called a <em>seed</em>, and it builds an entire world
       from scratch.</p>
@@ -165,8 +167,15 @@ const how = howStation();
       full <a href="https://en.wikipedia.org/wiki/Random_seed">reproducibility</a>.</p>
       <p class="how">Draw your own: read the
       <a href="https://github.com/ahl-gram/Vellum#readme">README</a>.</p>
-    </aside>
-  </div>
+    </div>
+  </aside>
+  <noscript>
+    <style>
+      #lf-card-how[hidden] { display: block; position: static; width: auto; max-width: 46rem; max-height: none; margin: 2rem auto 0; }
+      #lf-card-how .lf-card-close { display: none; }
+      #lf-card-how .lf-card-scroll { overflow-y: visible; }
+    </style>
+  </noscript>
 </section>
 
 <section class="cartouche" aria-label="Draw a world by its seed">

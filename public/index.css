@@ -91,7 +91,6 @@ figcaption { text-align: center; font-style: italic; color: var(--ink-brown); pa
 .banner figcaption { font-style: italic; color: var(--ink-brown); padding-top: 0.55rem; letter-spacing: 0.03em; }
 .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.4rem; }
 @media (max-width: 720px) { .grid3 { grid-template-columns: 1fr; } }
-.how { line-height: 1.65; }
 .underhood { font-style: italic; color: var(--ink-brown); font-size: 0.92rem;
   line-height: 1.6; margin-top: 0.5rem; }
 .underhood a { color: var(--ink-brown); }
@@ -101,7 +100,7 @@ code { background: var(--parchment-deep); padding: 0.1em 0.4em; border-radius: 3
 main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 
 /* Landfall Sub 1 (#455): the survey window. The deep wears existing tokens in inverted roles (ratified provisional on #454); full-bleed and the floating chrome arrive with the ceremony subs. */
-.landfall { margin: 2.5rem 0 0; }
+.landfall { margin: 2.5rem 0 0; position: relative; }
 .landfall .stage {
   /* 82vh alone put the stage's own chrome below the fold on every viewport under 1159px tall (plate-reader, PR #456): the calc term reserves the running head's ~250px so the coords line and controls stay on screen. */
   position: relative; height: clamp(420px, calc(100vh - 300px), 82vh);
@@ -332,9 +331,9 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 .lf-card-how {
   width: min(30rem, calc(100% - 8rem));
   max-height: calc(100% - 3rem);
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  display: flex; flex-direction: column;
 }
+.lf-card-scroll { overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
 .lf-card-how .how { font-size: 0.95rem; line-height: 1.55; margin: 0.8rem 0 0; }
 .lf-card-how .underhood { margin: 0.8rem 0 0; }
 .notice-stamp {

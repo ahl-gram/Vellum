@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { SHEET } from "../../src/site/home/camera.ts";
 import { homeStations, howStation } from "../../src/site/home/stations.ts";
 
-// Landfall Sub 4 (#459): the prose finds a home. Ratified on #459's comments (2026-08-24): the How It Works prose and underhood links live in a panel opened from a dedicated pip on the chart, never the legend; the text ships hidden but indexable; the Notice to Mariners is the mockup's decorative stamp on the deep, stamp only.
+// Landfall Sub 4 (#459): the prose finds a home. Ratified in the 2026-08-24 decision-2 comment on #454 (restated on #459): the How It Works prose and underhood links live in a panel opened from a dedicated pip on the chart, never the legend; the text ships hidden but indexable; the Notice to Mariners is the mockup's decorative stamp on the deep, stamp only.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
@@ -67,23 +67,48 @@ test("the panel is a card slip carrying the prose, hidden in the HTML so it stay
   assert.ok(!panel.includes("lf-card-enter"), "the panel is not a room: no door");
   assert.ok(!astro.includes("<h2>How It Works</h2>"), "the old section is gone; the panel is the prose's one home");
 
+  const closeAt = panel.indexOf('class="lf-card-close"');
+  const scrollAt = panel.indexOf('class="lf-card-scroll"');
+  assert.ok(scrollAt >= 0, "the prose rides an inner scroll region");
+  assert.ok(closeAt >= 0 && closeAt < scrollAt, "the close button stands OUTSIDE the scroller, so it can never scroll away with the prose (skeptic finding 2)");
+  assert.ok(panel.indexOf('class="lf-card-where"') < scrollAt, "the head (verb, title, where) stays put above the scroller");
+
   const rule = css.match(/\.lf-card-how \{([^}]*)\}/);
   assert.ok(rule, ".lf-card-how sizes the long prose");
-  assert.match(rule[1], /overflow-y:\s*auto/, "the prose scrolls inside the slip, never burying the stage");
   assert.match(rule[1], /max-height/, "the slip caps its height against the stage");
+  const scroll = css.match(/\.lf-card-scroll \{([^}]*)\}/);
+  assert.ok(scroll, ".lf-card-scroll dresses the scroll region");
+  assert.match(scroll[1], /overflow-y:\s*auto/, "the prose scrolls inside the slip, never burying the stage");
+  assert.match(scroll[1], /overscroll-behavior:\s*contain/, "an exhausted scroll never chains to the page under the slip");
+
+  const noscript = astro.match(/<noscript>[\s\S]*?<\/noscript>/);
+  assert.ok(noscript, "a no-JS visitor still reads the prose (skeptic finding 4: the pip and panel only exist under .cam)");
+  assert.match(noscript[0], /#lf-card-how\[hidden\]\s*\{[^}]*display:\s*block/, "the no-JS reveal targets the hidden attribute itself, flowing the panel statically");
 });
 
 test("stage gestures never act through an open card slip (#459 plate-reader: wheel over the panel zoomed the chart under it)", () => {
-  // Source-level pin only: the real-input e2e guard belongs to Sub 5's suite (#460), specced by out/459/wheel-target-probe.mjs.
+  // Source-level pin only: the real-input e2e guard belongs to Sub 5's suite; the behavioral spec (control and expected arms) is recorded on #460.
   const input = read("src/site/home/input.ts");
   const onCard = input.match(/const onCard = [^;]*\.closest\("\.lf-card"\)[^;]*;/);
   assert.ok(onCard, "input.ts carries an onCard guard keyed on .lf-card");
-  for (const gesture of ["wheel", "pointerdown", "dblclick"]) {
+  // Slice each handler to the NEXT addEventListener registration: an indexOf("});") terminator overshoots the multi-arg wheel listener and reads the following handler's guard as its own (pr-skeptic finding 1 on PR #469).
+  const handlerOf = (gesture: string): string => {
     const at = input.indexOf(`"${gesture}"`);
     assert.ok(at >= 0, `the ${gesture} binding exists`);
-    const handler = input.slice(at, input.indexOf("});", at));
-    assert.match(handler, /if \(onCard\(e\)\) return;/, `${gesture} stands down inside a card slip`);
+    const next = input.indexOf("addEventListener", at);
+    return next === -1 ? input.slice(at) : input.slice(at, next);
+  };
+  for (const gesture of ["pointerdown", "dblclick"]) {
+    assert.match(handlerOf(gesture), /if \(onCard\(e\)\) return;/, `${gesture} stands down inside a card slip`);
   }
+  const wheel = handlerOf("wheel");
+  assert.match(wheel, /onCard\(e\)/, "the wheel handler consults the card guard");
+  assert.match(
+    wheel,
+    /\.closest\("\.lf-card-scroll"\)/,
+    "a wheel over a slip reaches native scroll only over a live scroller; anywhere else on the slip it is swallowed, so it neither zooms the chart under the slip nor scrolls the page out from under it (skeptic finding 3)",
+  );
+  assert.match(wheel, /e\.preventDefault\(\);\s*return;/, "the swallowed arm prevents the default page scroll before standing down");
 });
 
 test("the Notice to Mariners is the mockup's stamp on the deep, and only the stamp (#459)", () => {

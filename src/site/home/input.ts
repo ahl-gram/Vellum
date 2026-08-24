@@ -69,7 +69,12 @@ export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void
   stage.addEventListener(
     "wheel",
     (e) => {
-      if (onCard(e)) return;
+      if (onCard(e)) {
+        const scroller = e.target instanceof Element ? e.target.closest(".lf-card-scroll") : null;
+        if (scroller !== null && scroller.scrollHeight > scroller.clientHeight) return;
+        e.preventDefault();
+        return;
+      }
       const p = local(e);
       if (on.wheelZoom(p.x, p.y, e.deltaY)) e.preventDefault();
     },
