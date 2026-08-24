@@ -44,7 +44,7 @@ test("the How It Works pip moors at the title cartouche, chart only, never the l
   );
   const pipAt = layer.indexOf('data-station="how"');
   const pip = layer.slice(layer.lastIndexOf("<button", pipAt), layer.indexOf("</button>", pipAt));
-  assert.match(pip, /class="lf-station\b/, "the pip wears the station dress: the motion/house button exclusions come with it");
+  assert.match(pip, /class="lf-station at-sea"/, "the pip wears the at-sea round, not the land diamond: the cartouche is placed over open water by construction, planCartouche picks the least-land corner (skeptic round 4, elev -0.0048 against seaLevel 0.4389 at the anchor)");
   assert.ok(pip.includes("data-nx={String(how.nx)}"), "the anchor rides at full precision, never the styled percent");
   assert.ok(pip.includes("lf-station-slip"), "the pip names itself on hover like every station");
 });
@@ -110,6 +110,7 @@ test("gestures never act through a card slip, wherever the slip lives (#459 skep
   const cards = read("src/site/home/cards.ts");
   const onCard = input.match(/const onCard = [^;]*\.closest\("\.lf-card"\)[^;]*;/);
   assert.ok(onCard, "input.ts carries an onCard guard keyed on .lf-card");
+  assert.match(onCard[0], /!== null;$/, "and its polarity is on-the-card, not off it: a flipped comparison passes every presence pin (skeptic round 4 mutant C)");
   // Slice each handler to the NEXT addEventListener registration: an indexOf("});") terminator overshoots the multi-arg wheel listener and reads the following handler's guard as its own (pr-skeptic finding 1 on PR #469).
   const handlerOf = (source: string, gesture: string): string => {
     const at = source.indexOf(`"${gesture}"`);
@@ -133,7 +134,11 @@ test("gestures never act through a card slip, wherever the slip lives (#459 skep
     /\.closest\("\.lf-card-scroll"\)/,
     "a wheel over a slip reaches native scroll only over a live scroller under the cursor",
   );
-  assert.match(wheel, /scrollHeight > \w+\.clientHeight/, "and only while that scroller actually overflows");
+  assert.match(
+    wheel,
+    /if \(scroller !== null && scroller\.scrollHeight > scroller\.clientHeight\) return;/,
+    "the native-bypass statement is pinned whole, polarity and return included: dropping the return or flipping either comparison re-introduces a blocking regression while every presence pin stays green (skeptic round 4 mutants A and B)",
+  );
   assert.match(
     wheel,
     /e\.preventDefault\(\);/,
@@ -150,6 +155,7 @@ test("the opened slip receives focus once visible, into its scroller when it has
     "focus waits for the open tween to start: autoAlpha's from-state is visibility:hidden, so a same-tick focus silently fails and the keyboard lands on the page instead of the prose",
   );
   assert.match(cards, /querySelector[^;]*\.lf-card-scroll/, "the focus target prefers the slip's scroller, so arrow keys scroll the prose");
+  assert.match(cards, /\(scroller \?\? card\)\.focus/, "scroller first, card as the fallback: the reversed coalesce always picks the card and no presence pin sees it");
   const astro2 = read("src/pages/index.astro");
   assert.match(astro2, /class="lf-card-scroll"[^>]*tabindex="0"/, "the scroller is keyboard-reachable on its own (a scrollable region needs tab access)");
   assert.match(

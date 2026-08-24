@@ -328,7 +328,6 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 .lf-card-enter:hover, .lf-card-enter:focus-visible { background: var(--chart-ink); }
 
 /* Landfall Sub 4 (#459): the How It Works panel and the Notice stamp; the dress is the mockup's (design/atelier-map/stage.css) with tokens. */
-/* No width override: the slips' 22rem is what keeps the flight's framed anchor clear of the card (skeptic round 3: at 30rem the panel covered the cartouche from 901 to 1034px and at 390). */
 .lf-card-how {
   max-height: calc(100% - 3rem);
   display: flex; flex-direction: column;
