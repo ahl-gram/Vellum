@@ -519,9 +519,11 @@ export async function run(ctx) {
 
   // The house button lift must never reach a station (its anchor transform IS its position and counter-scale): a real hover once shifted the pip 17px and shrank it to the raw camera scale.
   const pipBox = `(() => {
-    const b = document.querySelector('.lf-station[data-station="atlas"]').getBoundingClientRect();
-    const g = document.querySelector('.lf-station[data-station="atlas"] .lf-station-glyph').getBoundingClientRect();
-    return { cx: b.x + b.width / 2, cy: b.y + b.height / 2, w: b.width, glyphW: g.width };
+    const btn = document.querySelector('.lf-station[data-station="atlas"]');
+    const b = btn.getBoundingClientRect();
+    const g = btn.querySelector(".lf-station-glyph").getBoundingClientRect();
+    return { cx: b.x + b.width / 2, cy: b.y + b.height / 2, w: b.width, glyphW: g.width,
+      btnBg: getComputedStyle(btn).backgroundColor };
   })()`;
   // The Escape above refocused its opener, so the glyph legitimately sits grown under :focus-visible; the hover claim needs a bare rest state.
   await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
@@ -534,11 +536,12 @@ export async function run(ctx) {
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 20, y: 20, button: "none" });
   await sleep(450);
   check(
-    "H14d a real hover keeps the pip on its anchor at its size while the glyph grows the mockup's quarter",
+    "H14d a real hover keeps the pip on its anchor at its size, its button square unpainted, while the glyph grows the mockup's quarter",
     pipRest !== null && pipHover !== null
       && Math.abs(pipHover.cx - pipRest.cx) < 0.5 && Math.abs(pipHover.cy - pipRest.cy) < 0.5
       && Math.abs(pipHover.w - pipRest.w) < 0.5 && Math.abs(pipRest.w - 34) < 0.5
-      && Math.abs(pipHover.glyphW / pipRest.glyphW - 1.25) < 0.02,
+      && Math.abs(pipHover.glyphW / pipRest.glyphW - 1.25) < 0.02
+      && pipHover.btnBg === "rgba(0, 0, 0, 0)",
     JSON.stringify({ pipRest, pipHover }),
   );
 

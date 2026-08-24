@@ -53,7 +53,8 @@ input[type="number"], select, button, input.control {
   padding: 0.4rem 0.6rem;
 }
 button { cursor: pointer; }
-button:not(.place-hit):hover { background: var(--parchment-bright); }
+/* .lf-station excluded like .place-hit: the wash painted the station button's square bright around its diamond glyph (#458). */
+button:not(.lf-station):not(.place-hit):hover { background: var(--parchment-bright); }
 button.primary {
   background: var(--ink-dark);
   color: var(--chart-paper);

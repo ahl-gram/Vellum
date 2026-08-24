@@ -245,6 +245,12 @@ test("the station dress is the mockup's: pulse, diamond glyph, at-sea round, red
       `motion.css's button${state} dress must exclude .lf-station like .place-hit: the house lift replaces the anchor transform (17px drift, counter-scale lost), and the house transition lags the counter-scale a beat behind every zoom`,
     );
   }
+  const house = read("public/house.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  assert.match(
+    house,
+    /button:not\(\.lf-station\):not\(\.place-hit\):hover/,
+    "house.css's button hover wash must exclude .lf-station too: it painted the 34px button square bright around the diamond (Alex, PR #468 live review)",
+  );
 });
 
 test("app.ts flies the stations and breathes the drift; the pure modules stay clean of the DOM (#458)", () => {
