@@ -71,7 +71,12 @@ test("the wide anchorage and the landfall view frame the isle as the mockup's ca
   const narrow = landfallView(view, SHEET, fit, 899);
   assert.ok(Math.abs(narrow.s - fit * 1.6) < 1e-12, "under a 900px viewport the landfall stands further off, 1.6 of fit");
   const at900 = landfallView(view, SHEET, fit, 900);
-  assert.ok(Math.abs(at900.s - fit * 1.72) < 1e-12, "a 900px viewport takes the wide framing, as the mockup's v.w < 900 does");
+  assert.ok(
+    Math.abs(at900.s - fit * 1.6) < 1e-12,
+    "a 900px viewport takes the NARROW framing: the boundary agrees with the station flight's <= 900 and the CSS max-width: 900px, settled by #476 (the mockup disagrees with itself here, < in one site and <= in the other)",
+  );
+  const at901 = landfallView(view, SHEET, fit, 901);
+  assert.ok(Math.abs(at901.s - fit * 1.72) < 1e-12, "901 frames wide: the cut sits between 900 and 901 on every carrier");
   const boxedWide = landfallView({ w: 880, h: 800 }, SHEET, fitScale({ w: 880, h: 800 }, SHEET), 928);
   assert.ok(
     Math.abs(boxedWide.s - fitScale({ w: 880, h: 800 }, SHEET) * 1.72) < 1e-12,
