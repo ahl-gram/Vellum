@@ -495,12 +495,15 @@ export async function run(ctx) {
   );
   // Mark the H13d page before leaving: without the marker the first samples race the navigation and read the OLD page's legitimately visible doors as a flash.
   await evaluate(`window.__h13d = 1`);
+  // Throttle so the pre-.cam window is seconds wide: on an unthrottled localhost the module boots within a frame and a 75ms sampler proves nothing about a flash (skeptic round 3).
+  await send("Network.emulateNetworkConditions", { offline: false, latency: 200, downloadThroughput: 120000, uploadThroughput: 120000 });
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let prmFlash = false;
   let prmCam = false;
   let fresh = false;
-  for (let i = 0; i < 60; i++) {
+  let afterCam = 0;
+  for (let i = 0; i < 120; i++) {
     try {
       const s = await evaluate(`({ old: window.__h13d === 1, ready: !!document.getElementById("seed-form"), door: ${doorShown}, cam: !!document.querySelector("#lf-stage.cam") })`);
       if (fresh) {
@@ -510,13 +513,39 @@ export async function run(ctx) {
         fresh = !s.old && s.ready;
       }
     } catch {}
+    if (prmCam && ++afterCam > 4) break;
     await sleep(75);
   }
-  await send("Emulation.setEmulatedMedia", { features: [] });
+  await send("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
   check(
-    "H13e and never shows them on a healthy load: no prm sample across three seconds ever sees a door, while the bundle provably boots",
+    "H13e and never shows them on a healthy THROTTLED load: the pre-.cam window is seconds wide and no prm sample ever sees a door before the bundle provably boots",
     prmCam && !prmFlash,
     JSON.stringify({ prmCam, prmFlash }),
+  );
+
+  // The round-2 blocker's live proof: script execution OFF plus reduced motion is the one visitor class where the noscript stand-down must out-cascade the prm exemption (both !important, specificity tied, document order decides).
+  await send("Emulation.setScriptExecutionDisabled", { value: true });
+  let nojs = null;
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  for (let i = 0; i < 90; i++) {
+    try {
+      nojs = await evaluate(`(() => {
+        const nav = document.querySelector(".lf-noscript-rooms");
+        const how = document.getElementById("lf-card-how");
+        if (nav === null || how === null) return null;
+        return { navShown: nav.offsetParent !== null, howShown: how.offsetParent !== null && getComputedStyle(how).visibility === "visible", door: ${doorShown} };
+      })()`);
+    } catch {}
+    if (nojs !== null && nojs.door) break;
+    await sleep(150);
+  }
+  await send("Emulation.setScriptExecutionDisabled", { value: false });
+  await send("Emulation.setEmulatedMedia", { features: [] });
+  check(
+    "H13f script-off plus reduced motion keeps the noscript doors alone past the 10s mark: the plain nav and the how prose stand, and no slip ever doubles them",
+    nojs !== null && nojs.navShown && nojs.howShown && !nojs.door,
+    JSON.stringify(nojs),
   );
 
   // Stations, cards, and the drift (#458) at the ratified 1280x800 (the harness's tall default hides the short-viewport collisions the plate-reader measured). Every gesture is REAL dispatched input (#460): pointer capture retargets clicks, so synthetic .click() proves nothing here.

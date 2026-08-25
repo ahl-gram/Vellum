@@ -311,7 +311,6 @@ test("--raise-grand is retired: no declaration, no consumer (#470 ratified 2026-
   }
 });
 
-// Moved from homepage-plates.test.ts when #470 retired that file: .plate's motion.css dress outlives home's plates (print-room's four poster buttons wear it), so the flat-rest and hover-tip pins survive the move too.
 test("the plate dress rests flat and tips on hover (#130, the consumer is now print-room)", () => {
   const css = read("public/motion.css");
   const base = css.match(/\.plate\s*\{([^}]*)\}/);

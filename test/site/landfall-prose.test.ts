@@ -232,6 +232,10 @@ test("the slips' positioning box is the stage's (#459 skeptic round 2 finding 6;
   assert.ok(seed && /position:\s*absolute/.test(seed[1]), "the seed form floats out of flow, so it never stretches .landfall past the stage");
   const card = css.match(/\.lf-card \{([^}]*)\}/);
   assert.ok(card && /position:\s*absolute/.test(card[1]), "the slips float out of flow for the same reason (the failed-bundle reveal is the one pinned exception, and it holds only while nothing JS-dependent is on screen)");
+  assert.ok(
+    card && card[1].includes("max-height: calc(100% - 2rem)") && card[1].includes("overflow: hidden"),
+    "the desktop cap replaces the containment the stage's own overflow used to give an over-tall slip: without it a slip escapes the stage box (plate control: 3000px of injected content clamps to landfall minus 2rem with the Enter door still reachable); the narrow block lifts it, pinned in landfall-doors",
+  );
 });
 
 test("the corner chrome passes clicks through and keeps its text on its own ground (#470 plate-reader findings)", () => {
