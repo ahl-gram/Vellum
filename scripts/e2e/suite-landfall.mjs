@@ -382,8 +382,10 @@ export async function run(ctx) {
     const sheet = document.getElementById("lf-sheet");
     const scaleOf = (t) => { const m = /scale\\(([-\\d.e]+)\\)/.exec(t ?? ""); return m === null ? null : Number(m[1]); };
     window.__lfMinScale = scaleOf(sheet?.style.transform) ?? Infinity;
+    window.__lfScaleWrites = 0;
     window.__lfScaleObs?.disconnect();
     window.__lfScaleObs = new MutationObserver((recs) => {
+      window.__lfScaleWrites += recs.length;
       for (const r of recs) { const s = scaleOf(r.oldValue); if (s !== null && s < window.__lfMinScale) window.__lfMinScale = s; }
       const now = scaleOf(sheet?.style.transform); if (now !== null && now < window.__lfMinScale) window.__lfMinScale = now;
     });
@@ -392,15 +394,18 @@ export async function run(ctx) {
   const maxBefore = await camNow();
   if (stagePt9 !== null && dir9d !== null) await twoFingerDrag(stagePt9, dir9d.sx, dir9d.sy);
   const minScale9d = await evaluate(`(window.__lfScaleObs?.disconnect(), window.__lfMinScale)`);
+  // A drag at the clamp writes the transform at least once (the pan half alone), so zero observed writes means the instrument never engaged, not a quiet gesture (guard-prover round 3).
+  const writes9d = await evaluate(`window.__lfScaleWrites`);
   const maxAfter = await camNow();
   check(
     "L9d at the close-in clamp a two-finger drag still pans into PROVEN headroom, signed, and never collapses the zoom EVEN MID-GESTURE (PR #474 measured scale 7 falling to 4.53 here; a dip that saturates back by gesture end hides from before/after reads)",
     top9 !== null && Math.abs(top9.scale - 7) < 1e-6 && dir9d !== null && maxBefore !== null && maxAfter !== null
       && Math.abs(maxAfter.scale - 7) < 1e-6
       && typeof minScale9d === "number" && minScale9d > 7 - 1e-6
+      && typeof writes9d === "number" && writes9d > 0
       && (maxAfter.x - maxBefore.x) * dir9d.sx > 25 && (maxAfter.x - maxBefore.x) * dir9d.sx < 55
       && (maxAfter.y - maxBefore.y) * dir9d.sy > 18 && (maxAfter.y - maxBefore.y) * dir9d.sy < 42,
-    JSON.stringify({ room9d, dir9d, maxBefore, maxAfter, minScale9d }),
+    JSON.stringify({ room9d, dir9d, maxBefore, maxAfter, minScale9d, writes9d }),
   );
 
   // The from-start ratio's own contract: a clamped pinch-in owes its debt, so returning to the starting spread lands back on the clamp exactly (a per-frame relative ratio forgets the clamped half and undershoots).
