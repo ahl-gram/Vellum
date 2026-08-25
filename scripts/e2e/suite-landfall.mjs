@@ -110,7 +110,7 @@ export async function run(ctx) {
           focused: document.activeElement === scroller,
           scrollTop: scroller.scrollTop, max: scroller.scrollHeight - scroller.clientHeight };
       })()`);
-      if (how !== null && how.open && how.focused) break;
+      if (how !== null && how.open && how.focused && how.max > 0) break;
     } catch {}
     await sleep(75);
   }
@@ -540,7 +540,8 @@ export async function run(ctx) {
   for (let i = 0; i < 120 && drawPt !== null; i++) {
     try {
       nojs = await evaluate(`({ path: location.pathname, search: location.search, hash: location.hash, h1: document.querySelector("h1")?.textContent ?? null })`);
-      if (nojs.path === "/explorer/") break;
+      // The break must demand everything the check asserts: navigation COMMITS before the document parses, so a path-only break snapshots h1 null on a slow machine (CI 2026-08-25, locally unreproducible).
+      if (nojs.path === "/explorer/" && (nojs.h1 ?? "").includes("Explorer")) break;
     } catch {}
     await sleep(100);
   }
