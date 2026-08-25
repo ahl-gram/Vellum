@@ -25,7 +25,6 @@ export async function run(ctx) {
 
   const stagePoint = `(() => { const s = document.getElementById("lf-stage"); if (!s) return null; const r = s.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`;
 
-  // #456's visual-review checklist item 2 is the spec here: at the limits the wheel hands scrolling back to the page.
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   const settled1 = await settleHome();
   await armWheelLog();
@@ -193,7 +192,6 @@ export async function run(ctx) {
   await pressKey("Escape", "Escape", 27);
   await sleep(500);
 
-  // Each station card in turn via its legend chip, so one loop pays for both the wheel-swallow arm and the touch-target sweep.
   const measureEnters = async (label) => {
     const boxes = [];
     let swallowed = null;
@@ -228,7 +226,7 @@ export async function run(ctx) {
   const enters = desktop8.boxes;
   const swallowed4 = desktop8.swallowed;
   check(
-    "L4 (arm 3) wheel over an open station card is swallowed: no page scroll, no zoom step (before the fix this gesture stepped the zoom)",
+    "L4 (arm 3) wheel over an open station card is swallowed: no page scroll, no zoom step",
     swallowed4 !== null && swallowed4.y === swallowed4.yA
       && swallowed4.sA !== null && swallowed4.scale !== null && Math.abs(swallowed4.scale / swallowed4.sA - 1) < 0.005,
     JSON.stringify({ swallowed4 }),
@@ -273,7 +271,6 @@ export async function run(ctx) {
   await pressKey("Escape", "Escape", 27);
   await sleep(500);
 
-  // The 390 sweep runs BEFORE any real touch (mouse clicks only), keeping the one-emulation-set rule whole; the narrow media block already trims a sibling control's padding, so the touch-target ruling is pinned on the one viewport where it binds.
   const narrow8 = await measureEnters("narrow");
   check(
     "L8b at 390 the touch targets hold: every Enter link is still 44px under the narrow media rules",
@@ -285,7 +282,8 @@ export async function run(ctx) {
   const stillCam = (a, b) =>
     a !== null && b !== null && Math.abs(b.scale - a.scale) < 1e-9 && Math.abs(b.x - a.x) < 1e-9 && Math.abs(b.y - a.y) < 1e-9;
   const touchAction9 = await evaluate(`(() => { const s = document.getElementById("lf-stage"); return s ? getComputedStyle(s).touchAction : null; })()`);
-  // The drag heads INTO clamp headroom (+x,+y), and a mouse drag with the same delta is the witness: guard-prover round 2 proved the original (-x,-y) gesture aimed at the corner the camera was already parked on, so the stillness assertion held with every gate deleted.
+  // The drag heads INTO clamp headroom (+x,+y): the original (-x,-y) gesture aimed at the corner the camera was already parked on, so stillness held with every gate deleted (guard-prover round 2).
+  const noOverflow390 = await evaluate(`document.documentElement.scrollHeight <= window.innerHeight`);
   const oneBefore = await camNow();
   if (stagePt9 !== null) {
     await touch("touchStart", [{ x: stagePt9.x, y: stagePt9.y, id: 0 }]);
@@ -302,10 +300,10 @@ export async function run(ctx) {
   await sleep(300);
   const mouseWitness = await camNow();
   check(
-    "L9a one finger never drives the map, and the fixture can prove it: the touch drag leaves the whole camera untouched while the SAME drag by mouse carries the sheet, and the stage declares pan-y so the page keeps the gesture (#455 touch policy)",
-    stagePt9 !== null && stillCam(oneBefore, oneAfter) && touchAction9 === "pan-y"
+    "L9a one finger never drives the map, and the fixture can prove it: the touch drag leaves the whole camera untouched while the SAME drag by mouse carries the sheet, the stage declares pan-y, and the 390 document really has no overflow (the premise the one-finger page-scroll residue rests on; a Sub 6 full-bleed that adds overflow reds here and re-opens that arm)",
+    stagePt9 !== null && stillCam(oneBefore, oneAfter) && touchAction9 === "pan-y" && noOverflow390 === true
       && mouseWitness !== null && oneAfter !== null && Math.abs(mouseWitness.x - oneAfter.x) > 30,
-    JSON.stringify({ touchAction9, oneBefore, oneAfter, mouseWitness }),
+    JSON.stringify({ touchAction9, noOverflow390, oneBefore, oneAfter, mouseWitness }),
   );
 
   const twoBefore = await camNow();
@@ -318,7 +316,7 @@ export async function run(ctx) {
     JSON.stringify({ twoBefore, twoAfter }),
   );
 
-  // Two-finger PAN works, measured against the derivation that said it could not: touch points arrive as sequential per-finger pointer moves, so each intermediate ratio is not 1 and the out-then-in about moving midpoints nets to a translate while the spread-constant scale multiplies back exactly. The mockup's fixed start anchor genuinely no-ops; the shipped incremental form pans, the better half of "#455 two fingers drive the map", pinned here as live behavior.
+  // Touch points arrive as sequential per-finger pointer moves, so the spread-constant drag nets to a translate while the scale multiplies back exactly.
   const panBefore = await camNow();
   if (stagePt9 !== null) {
     await touch("touchStart", [{ x: stagePt9.x - 40, y: stagePt9.y, id: 0 }, { x: stagePt9.x + 40, y: stagePt9.y, id: 1 }]);
