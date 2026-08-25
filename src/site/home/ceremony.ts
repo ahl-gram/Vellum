@@ -29,7 +29,7 @@ export function wideView(view: Box, sheet: Box, fit: number): Cam {
 }
 
 export function landfallView(view: Box, sheet: Box, fit: number, viewportW: number): Cam {
-  const scale = fit * (viewportW < NARROW_VIEW_W ? NARROW_SCALE : WIDE_SCALE);
+  const scale = fit * (viewportW <= NARROW_VIEW_W ? NARROW_SCALE : WIDE_SCALE);
   return camForCenter(LANDFALL_FX, LANDFALL_FY, scale, view, sheet);
 }
 

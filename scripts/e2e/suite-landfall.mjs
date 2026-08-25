@@ -316,21 +316,199 @@ export async function run(ctx) {
     JSON.stringify({ twoBefore, twoAfter }),
   );
 
-  // Touch points arrive as sequential per-finger pointer moves, so the spread-constant drag nets to a translate while the scale multiplies back exactly.
+  // L9c-L9g: the real two-finger contract (#475). Every pan read pins its fixture's clamp headroom first: the old L9c went green off a clamp-parked fixture (PR #474 skeptic finding 3), so an unproven fixture is the bug these arms exist to never repeat.
+  const headroom = () => evaluate(`(() => {
+    const stage = document.getElementById("lf-stage");
+    const sheet = document.getElementById("lf-sheet");
+    if (!stage || !sheet) return null;
+    const r = stage.getBoundingClientRect();
+    const m = new DOMMatrixReadOnly(getComputedStyle(sheet).transform);
+    return { cx: m.e + (1500 * m.a) / 2, cy: m.f + (1157.931 * m.a) / 2, w: r.width, h: r.height };
+  })()`);
+  const roomy = (hr) => hr !== null && hr.cx > 50 && hr.cx < hr.w - 50 && hr.cy > 50 && hr.cy < hr.h - 50;
+  // Ruling 3 on #475: at a limit the arm picks the drag direction FROM measured headroom and proves the room exists, instead of assuming an unparked centre.
+  const roomDir = (hr) => {
+    if (hr === null) return null;
+    const sx = hr.w - hr.cx >= hr.cx ? 1 : -1;
+    const sy = hr.h - hr.cy >= hr.cy ? 1 : -1;
+    const roomX = sx > 0 ? hr.w - hr.cx : hr.cx;
+    const roomY = sy > 0 ? hr.h - hr.cy : hr.cy;
+    return roomX > 100 && roomY > 60 ? { sx, sy } : null;
+  };
+  const twoFingerDrag = async (p, sx = 1, sy = 1) => {
+    await touch("touchStart", [{ x: p.x - 40, y: p.y, id: 0 }, { x: p.x + 40, y: p.y, id: 1 }]);
+    await touch("touchMove", [{ x: p.x - 40 + sx * 40, y: p.y + sy * 30, id: 0 }, { x: p.x + 40 + sx * 40, y: p.y + sy * 30, id: 1 }]);
+    await touch("touchEnd", []);
+    await sleep(300);
+  };
+  const recenter = async () => {
+    await evaluate(`document.getElementById("lf-stage")?.focus()`);
+    await pressKey("0", "Digit0", 48);
+    await sleep(1600);
+  };
+
+  await recenter();
+  const room9c = await headroom();
+  const startClear9c = stagePt9 === null ? null : await evaluate(`(() => {
+    const hit = (x, y) => document.elementFromPoint(x, y)?.closest("button, a, input, select") ?? null;
+    return hit(${stagePt9.x - 40}, ${stagePt9.y}) === null && hit(${stagePt9.x + 40}, ${stagePt9.y}) === null;
+  })()`);
   const panBefore = await camNow();
+  if (stagePt9 !== null) await twoFingerDrag(stagePt9);
+  const panAfter = await camNow();
+  const panDelta = panBefore !== null && panAfter !== null
+    ? { dx: panAfter.x - panBefore.x, dy: panAfter.y - panBefore.y, sRatio: panAfter.scale / panBefore.scale } : null;
+  check(
+    "L9c two fingers PAN the map: at a proven off-clamp fixture whose finger points are PROVEN off every control, the sheet follows the midpoint, right direction and near-full magnitude, the scale exactly held",
+    stagePt9 !== null && roomy(room9c) && startClear9c === true && panDelta !== null
+      && panDelta.dx > 25 && panDelta.dx < 55 && panDelta.dy > 18 && panDelta.dy < 42
+      && Math.abs(panDelta.sRatio - 1) < 1e-6,
+    JSON.stringify({ room9c, startClear9c, panBefore, panAfter, panDelta }),
+  );
+
+  // Saturate to the close-in clamp by real pinches alone (no mouse mixing inside the touch block).
+  let top9 = await camNow();
+  for (let i = 0; i < 12 && stagePt9 !== null; i++) {
+    await pinch(stagePt9.x, stagePt9.y, 60, 180);
+    await sleep(200);
+    const next = await camNow();
+    if (next !== null && top9 !== null && Math.abs(next.scale - top9.scale) < 1e-9) { top9 = next; break; }
+    top9 = next;
+  }
+  const room9d = await headroom();
+  const dir9d = roomDir(room9d);
+  // Before/after sampling is blind to a mid-gesture dip that saturates back to the ceiling (guard-prover round 2), so the arm watches every synchronous transform write and keeps the minimum.
+  await evaluate(`(() => {
+    const sheet = document.getElementById("lf-sheet");
+    const scaleOf = (t) => { const m = /scale\\(([-\\d.e]+)\\)/.exec(t ?? ""); return m === null ? null : Number(m[1]); };
+    window.__lfMinScale = scaleOf(sheet?.style.transform) ?? Infinity;
+    window.__lfScaleWrites = 0;
+    window.__lfScaleObs?.disconnect();
+    window.__lfScaleObs = new MutationObserver((recs) => {
+      window.__lfScaleWrites += recs.length;
+      for (const r of recs) { const s = scaleOf(r.oldValue); if (s !== null && s < window.__lfMinScale) window.__lfMinScale = s; }
+      const now = scaleOf(sheet?.style.transform); if (now !== null && now < window.__lfMinScale) window.__lfMinScale = now;
+    });
+    if (sheet) window.__lfScaleObs.observe(sheet, { attributes: true, attributeFilter: ["style"], attributeOldValue: true });
+  })()`);
+  const maxBefore = await camNow();
+  if (stagePt9 !== null && dir9d !== null) await twoFingerDrag(stagePt9, dir9d.sx, dir9d.sy);
+  const minScale9d = await evaluate(`(window.__lfScaleObs?.disconnect(), window.__lfMinScale)`);
+  // A drag at the clamp writes the transform at least once (the pan half alone), so zero observed writes means the instrument never engaged, not a quiet gesture (guard-prover round 3).
+  const writes9d = await evaluate(`window.__lfScaleWrites`);
+  const maxAfter = await camNow();
+  check(
+    "L9d at the close-in clamp a two-finger drag still pans into PROVEN headroom, signed, and never collapses the zoom EVEN MID-GESTURE (PR #474 measured scale 7 falling to 4.53 here; a dip that saturates back by gesture end hides from before/after reads)",
+    top9 !== null && Math.abs(top9.scale - 7) < 1e-6 && dir9d !== null && maxBefore !== null && maxAfter !== null
+      && Math.abs(maxAfter.scale - 7) < 1e-6
+      && typeof minScale9d === "number" && minScale9d > 7 - 1e-6
+      && typeof writes9d === "number" && writes9d > 0
+      && (maxAfter.x - maxBefore.x) * dir9d.sx > 25 && (maxAfter.x - maxBefore.x) * dir9d.sx < 55
+      && (maxAfter.y - maxBefore.y) * dir9d.sy > 18 && (maxAfter.y - maxBefore.y) * dir9d.sy < 42,
+    JSON.stringify({ room9d, dir9d, maxBefore, maxAfter, minScale9d, writes9d }),
+  );
+
+  // The from-start ratio's own contract: a clamped pinch-in owes its debt, so returning to the starting spread lands back on the clamp exactly (a per-frame relative ratio forgets the clamped half and undershoots).
+  const debtBefore = await camNow();
   if (stagePt9 !== null) {
     await touch("touchStart", [{ x: stagePt9.x - 40, y: stagePt9.y, id: 0 }, { x: stagePt9.x + 40, y: stagePt9.y, id: 1 }]);
-    await touch("touchMove", [{ x: stagePt9.x, y: stagePt9.y + 30, id: 0 }, { x: stagePt9.x + 80, y: stagePt9.y + 30, id: 1 }]);
+    await touch("touchMove", [{ x: stagePt9.x - 80, y: stagePt9.y, id: 0 }, { x: stagePt9.x + 80, y: stagePt9.y, id: 1 }]);
+    await sleep(120);
+    await touch("touchMove", [{ x: stagePt9.x - 40, y: stagePt9.y, id: 0 }, { x: stagePt9.x + 40, y: stagePt9.y, id: 1 }]);
+    await sleep(120);
     await touch("touchEnd", []);
   }
   await sleep(300);
-  const panAfter = await camNow();
+  const debtAfter = await camNow();
   check(
-    "L9c a two-finger drag carries the sheet: the translate follows the fingers while the spread-constant gesture leaves the scale exactly where it stood",
-    stagePt9 !== null && panBefore !== null && panAfter !== null
-      && Math.abs(panAfter.x - panBefore.x) > 10 && Math.abs(panAfter.y - panBefore.y) > 10
-      && Math.abs(panAfter.scale / panBefore.scale - 1) < 1e-6,
-    JSON.stringify({ panBefore, panAfter }),
+    "L9d2 the pinch owes its debt at the ceiling: one gesture that pinches in past the clamp and returns to its starting spread lands exactly back on 7",
+    debtBefore !== null && debtAfter !== null && Math.abs(debtBefore.scale - 7) < 1e-6 && Math.abs(debtAfter.scale - 7) < 1e-6,
+    JSON.stringify({ debtBefore, debtAfter }),
+  );
+
+  // Down to the stand-off clamp the same way.
+  let floor9 = await camNow();
+  for (let i = 0; i < 14 && stagePt9 !== null; i++) {
+    await pinch(stagePt9.x, stagePt9.y, 180, 60);
+    await sleep(200);
+    const next = await camNow();
+    if (next !== null && floor9 !== null && Math.abs(next.scale - floor9.scale) < 1e-9) { floor9 = next; break; }
+    floor9 = next;
+  }
+  const room9e = await headroom();
+  const dir9e = roomDir(room9e);
+  const minBefore = await camNow();
+  if (stagePt9 !== null && dir9e !== null) await twoFingerDrag(stagePt9, dir9e.sx, dir9e.sy);
+  const minAfter = await camNow();
+  check(
+    "L9e at the stand-off clamp a two-finger drag holds the scale on its floor (PR #474 measured a 1.6x zoom-IN here) and pans into PROVEN headroom, signed",
+    floor9 !== null && dir9e !== null && minBefore !== null && minAfter !== null
+      && Math.abs(minBefore.scale - minBefore.fit * 0.65) < 1e-6
+      && Math.abs(minAfter.scale - minBefore.scale) < 1e-9
+      && (minAfter.x - minBefore.x) * dir9e.sx > 25 && (minAfter.x - minBefore.x) * dir9e.sx < 55
+      && (minAfter.y - minBefore.y) * dir9e.sy > 18 && (minAfter.y - minBefore.y) * dir9e.sy < 42,
+    JSON.stringify({ room9e, dir9e, minBefore, minAfter }),
+  );
+
+  // A gesture may BEGIN on a pip (PR #474 finding 2: the mouse-only capture rationale had gated all pointer types, deadening 47% of start points), and a plain touch TAP on that same pip must still open its card.
+  await recenter();
+  const pipPt9 = await evaluate(buttonPoint('.lf-station[data-station="how"]'));
+  const room9f = await headroom();
+  const onPipBefore = await camNow();
+  // The second finger sits LEFT of the pip and the move stays horizontal: at 390 the pip rides near the stage's right and lower edges, and a finger dispatched off the stage never registers (touch pointers are uncaptured), which faked this arm's first red.
+  if (pipPt9 !== null) {
+    await touch("touchStart", [{ x: Math.round(pipPt9.x), y: Math.round(pipPt9.y), id: 0 }, { x: Math.round(pipPt9.x) - 80, y: Math.round(pipPt9.y), id: 1 }]);
+    await touch("touchMove", [{ x: Math.round(pipPt9.x) + 40, y: Math.round(pipPt9.y), id: 0 }, { x: Math.round(pipPt9.x) - 40, y: Math.round(pipPt9.y), id: 1 }]);
+    await touch("touchEnd", []);
+  }
+  await sleep(300);
+  const onPipAfter = await camNow();
+  const cardStayed = await evaluate(`(() => { const c = document.getElementById("lf-card-how"); return c !== null && c.hidden; })()`);
+  check(
+    "L9f a two-finger gesture that begins on a pip still drives the map, and the drag never reads as a tap (the slip stays shut)",
+    pipPt9 !== null && roomy(room9f) && onPipBefore !== null && onPipAfter !== null
+      && onPipAfter.x - onPipBefore.x > 25 && onPipAfter.x - onPipBefore.x < 55 && cardStayed === true,
+    JSON.stringify({ pipPt9, room9f, onPipBefore, onPipAfter, cardStayed }),
+  );
+
+  const tapPt = await evaluate(buttonPoint('.lf-station[data-station="how"]'));
+  if (tapPt !== null) {
+    await touch("touchStart", [{ x: Math.round(tapPt.x), y: Math.round(tapPt.y), id: 0 }]);
+    await touch("touchEnd", []);
+  }
+  let tapped = false;
+  for (let i = 0; i < 60; i++) {
+    try {
+      tapped = await evaluate(`(() => { const c = document.getElementById("lf-card-how"); if (!c || c.hidden) return false; const cs = getComputedStyle(c); return cs.visibility !== "hidden" && Number(cs.opacity) > 0.95; })()`);
+    } catch {}
+    if (tapped === true) break;
+    await sleep(75);
+  }
+  check(
+    "L9g a plain touch tap on the pip still opens its slip: loosening the control guard for gestures never costs the tap",
+    tapPt !== null && tapped === true,
+    JSON.stringify({ tapPt, tapped }),
+  );
+  await pressKey("Escape", "Escape", 27);
+  await sleep(400);
+
+  await recenter();
+  const inPt = await evaluate(buttonPoint("#lf-in"));
+  const inBefore = await camNow();
+  if (inPt !== null) {
+    await touch("touchStart", [{ x: Math.round(inPt.x), y: Math.round(inPt.y), id: 0 }]);
+    await touch("touchEnd", []);
+  }
+  let inAfter = null;
+  for (let i = 0; i < 30; i++) {
+    const c = await camNow();
+    if (c !== null && inBefore !== null && c.scale > inBefore.scale * 1.4) { inAfter = c; break; }
+    await sleep(100);
+  }
+  check(
+    "L9h a one-finger touch tap on a camera button still zooms: the loosened control guard covers the controls, not just the pips (#475 ruling 2)",
+    inPt !== null && inBefore !== null && inAfter !== null && inAfter.scale > inBefore.scale * 1.4,
+    JSON.stringify({ inPt, inBefore, inAfter }),
   );
   await clearMobile();
 

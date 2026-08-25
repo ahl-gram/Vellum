@@ -133,6 +133,8 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   transform: translate(-50%, -50%) scale(var(--inv, 1));
   appearance: none; border: 0; background: none; font: inherit; cursor: pointer;
 }
+/* Real hardware reads the TOUCHED element's touch-action, so a control defaulting to auto lets the browser claim a gesture starting there; CDP emulation cannot see this line (control-run 2026-08-25, #475), it is pinned only by the phone pass at the gate. */
+.lf-station, .lf-legend-btn, .lf-controls button { touch-action: pan-y; }
 .lf-station-glyph {
   position: absolute; inset: 0; margin: auto;
   width: 15px; height: 15px;
