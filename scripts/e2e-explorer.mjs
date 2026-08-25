@@ -28,6 +28,7 @@ import { run as runPrintRoom } from "./e2e/suite-print-room.mjs";
 import { run as runProspect } from "./e2e/suite-prospect.mjs";
 import { run as runRibbon } from "./e2e/suite-ribbon.mjs";
 import { run as runHome } from "./e2e/suite-home.mjs";
+import { run as runLandfall } from "./e2e/suite-landfall.mjs";
 import { run as runSurvey } from "./e2e/suite-survey.mjs";
 import { run as runBroadside } from "./e2e/suite-broadside.mjs";
 import { run as runReadingRoom } from "./e2e/suite-reading-room.mjs";
@@ -97,6 +98,7 @@ const SUITES = {
   "prospect": runProspect,
   "ribbon": runRibbon,
   "home": runHome,
+  "landfall": runLandfall,
   "survey": runSurvey,
   "broadside": runBroadside,
   "reading-room": runReadingRoom,

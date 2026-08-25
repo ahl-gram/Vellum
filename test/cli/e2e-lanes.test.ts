@@ -42,7 +42,8 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "hunt": 3.4,
   "room-voyage": 3.3,
   "zoom-gestures": 3.1,
-  "home": 3.1,
+  "home": 99.5, // re-measured 2026-08-25, local run (#460): Subs 3-4a tripled the suite since the 2026-08-14 3.1s
+  "landfall": 16.7, // measured 2026-08-25, local single-suite run (#460)
   "cards": 2.9,
   "motion": 2.4,
   "room-ink": 2.4,
