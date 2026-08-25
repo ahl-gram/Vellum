@@ -127,7 +127,7 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
 });
 
 test("home's flourish family survives the section removals (#324, reshaped at #459 then #470)", () => {
-  const css = read("public/index.css");
+  const css = read("public/index.css").replace(/\/\*[\s\S]*?\*\//g, "");
   assert.ok(!css.includes(".notice-body"), "the notice panel left home with its section (#459)");
   assert.ok(!css.includes("figcaption"), "no figcaption remains on home (#470 removed the last figures), so the flourish selector sheds its dead arm");
   assert.match(

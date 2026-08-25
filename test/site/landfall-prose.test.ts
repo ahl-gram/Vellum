@@ -55,7 +55,6 @@ test("the How It Works pip moors at the title cartouche, chart only, never the l
 });
 
 test("the at-sea dress is earned from the terrain, not asserted by hand (#470 deferred small)", () => {
-  // The anchor guard above re-derives how.nx/ny from the committed chart's cartouche frame; this half re-derives WATER at that anchor, so a regen that moves the cartouche ashore reds here and forces the dress question instead of leaving it silently wrong.
   const how = howStation();
   const world = generateWorld(defaultRecipe(42));
   const proj = createProjection(world.recipe.gridW, world.recipe.gridH, SHEET.w, marginFor(SHEET.w));
@@ -131,7 +130,7 @@ test("the panel is a card slip carrying the prose, hidden in the HTML so it stay
 });
 
 test("stage gestures cannot begin on a slip because no slip lives in the stage; the wheel policy rides each slip (#459 skeptic rounds 1 and 2, reshaped at #470; one-finger touch on the fixed sheets is #460's recorded non-provable arm)", () => {
-  // Source pin only; the real-input arms are recorded on #460 for Sub 5's suite. The old input.ts onCard guards retired WITH the in-stage slips (#470): landfall-doors.test.ts pins every slip outside #lf-stage, so a stage listener can never see one, and a guard proved unable to bite is absent rather than weak.
+  // Source pin only; the real-input arms are recorded on #460 for Sub 5's suite.
   const input = read("src/site/home/input.ts");
   const cards = read("src/site/home/cards.ts");
   assert.ok(!input.includes("lf-card"), "input.ts carries no card guard: the slips left the stage, and dead code that LOOKS like a guard is worse than none");
@@ -194,7 +193,6 @@ test("the slips' positioning box is the stage's (#459 skeptic round 2 finding 6;
   assert.match(css, /\.landfall \{[^}]*position:\s*relative/, ".landfall is the slips' containing block");
   const sectionAt = astro.indexOf('<section class="landfall"');
   const section = astro.slice(sectionAt, astro.indexOf("</section>", sectionAt));
-  // Scan container tags by depth (the old 2-space regex red on a cosmetic reindent and missed any sibling at another indent, #470 deferred small); the stage div's subtree is skipped by finding its matching close first.
   const stageClass = section.indexOf('class="stage"');
   const stageOpen = section.lastIndexOf("<div", stageClass);
   let divDepth = 0;

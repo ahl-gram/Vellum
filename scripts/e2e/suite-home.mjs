@@ -465,6 +465,52 @@ export async function run(ctx) {
   );
   await shoot("home-failed-bundle-doors.png");
 
+  // Reduced motion crosses the doors both ways (#470 skeptic round 1: motion.css's prm blanket zeroed the 10s delay, so prm visitors got the failure doors on every HEALTHY load).
+  // Both halves matter: a display:none card still computes visibility:visible, and a pre-reveal card is display:block with visibility:hidden.
+  const doorShown = `(() => { const c = document.getElementById("lf-card-explorer"); return c !== null && c.offsetParent !== null && getComputedStyle(c).visibility === "visible"; })()`;
+  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  await send("Network.setBlockedURLs", { urls: ["*app.bundle.js*"] });
+  await evaluate(`sessionStorage.clear()`);
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  let prmDoors = false;
+  for (let i = 0; i < 90; i++) {
+    try { prmDoors = await evaluate(doorShown); } catch {}
+    if (prmDoors === true) break;
+    await sleep(150);
+  }
+  await send("Network.setBlockedURLs", { urls: [] });
+  check(
+    "H13d reduced motion keeps its doors on a dead bundle: the reveal is a timer, not motion the prm blanket may still",
+    prmDoors === true,
+    `doors shown=${prmDoors}`,
+  );
+  // Mark the H13d page before leaving: without the marker the first samples race the navigation and read the OLD page's legitimately visible doors as a flash.
+  await evaluate(`window.__h13d = 1`);
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  let prmFlash = false;
+  let prmCam = false;
+  let fresh = false;
+  for (let i = 0; i < 60; i++) {
+    try {
+      const s = await evaluate(`({ old: window.__h13d === 1, ready: !!document.getElementById("seed-form"), door: ${doorShown}, cam: !!document.querySelector("#lf-stage.cam") })`);
+      if (fresh) {
+        if (s.door) prmFlash = true;
+        if (s.cam) prmCam = true;
+      } else {
+        fresh = !s.old && s.ready;
+      }
+    } catch {}
+    await sleep(75);
+  }
+  await send("Emulation.setEmulatedMedia", { features: [] });
+  check(
+    "H13e and never shows them on a healthy load: no prm sample across three seconds ever sees a door, while the bundle provably boots",
+    prmCam && !prmFlash,
+    JSON.stringify({ prmCam, prmFlash }),
+  );
+
   // Stations, cards, and the drift (#458) at the ratified 1280x800 (the harness's tall default hides the short-viewport collisions the plate-reader measured). Every gesture is REAL dispatched input (#460): pointer capture retargets clicks, so synthetic .click() proves nothing here.
   const errBase3 = consoleErrors.length;
   const httpBase3 = http4xx.length;

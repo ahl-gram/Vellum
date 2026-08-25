@@ -20,7 +20,7 @@ export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   };
 
-  // Capturing the pointer at the stage retargets the CLICK to the stage, so a gesture must never begin on a control or the buttons go dead under a real mouse (synthetic .click() bypasses capture, which is why probes missed it). The card slips live outside the stage (#470), so no card guard is needed here.
+  // Capturing the pointer at the stage retargets the CLICK to the stage, so a gesture must never begin on a control or the buttons go dead under a real mouse (synthetic .click() bypasses capture, which is why probes missed it).
   const onControl = (e: Event) =>
     e.target instanceof Element && e.target.closest("button, a, input, select") !== null;
 

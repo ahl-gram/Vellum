@@ -82,14 +82,12 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 .lf-coords.on { display: block; }
 @media (max-width: 720px) { .landfall .stage { height: min(64vh, 86vw); min-height: 300px; } }
 
-/* Landfall Sub 4a (#470): the seed form is the mockup's top-right corner chrome (design/atelier-map/stage.css), a sub early by ratification 2026-08-24. It floats OUTSIDE #lf-stage so no gesture can begin on it, and it is NEVER .cam-gated: the form stays live when the bundle fails (#455). */
+/* Landfall Sub 4a (#470): the seed form is the mockup's top-right corner chrome (design/atelier-map/stage.css), a sub early by ratification 2026-08-24; never .cam-gated (#455: live even when the bundle fails). Wash, colors and pointer policy are pinned in landfall-prose.test.ts. */
 .lf-seed {
   position: absolute; right: 1.6rem; top: 1.4rem; z-index: 4;
   margin: 0; max-width: 17rem; text-align: right;
-  /* The legend's footing generalized to the corner, held at 0.72 ink rather than fading out: past the fade the gloss measured 1.46:1 over bare chart, and no permitted ground under ~0.7 ink clears the 4.5:1 small-text floor (plate-reader, this sub). */
   padding: 0.7rem 0.9rem 0.8rem;
   background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72));
-  /* The legend's pointer pattern: the chrome's text and wash pass clicks through to the chart beneath (at 390px the corner covered the how pip's whole hit box, plate-reader), and the controls take their clicks back. */
   pointer-events: none;
 }
 .seed-hook {
@@ -122,7 +120,6 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 .seed-gloss {
   margin: 0.4rem 0 0;
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  /* parchment, not the mockup's ink-faded: 0.76rem italic measured 1.46:1 on the corner wash, and ink-faded cannot clear the 4.5:1 floor on ANY ground this design permits (the #459 lf-card-where precedent); the hierarchy rides size and italic instead. */
   font-style: italic;
   font-size: 0.76rem; color: var(--parchment);
 }
@@ -349,14 +346,13 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   .seed-gloss { display: none; }
 }
 
-/* Landfall Sub 4a (#470), ratified 2026-08-24: with JS on but the bundle dead, the four station slips reveal as plain static doors. app.ts adds .cam synchronously at boot, so :not(.cam) IS "the bundle never arrived", and a late .cam unmatches the selector, undoing the reveal. The base flips display at once (an animation never starts on a display:none element) while zeroed height, padding and border keep the pre-boot layout unchanged; the 0s/forwards animation is a discrete jump at the delay. */
+/* Landfall Sub 4a (#470): the failed-bundle doors, pinned whole in landfall-doors.test.ts. */
 .landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] {
   display: block; position: static;
   width: auto; max-width: 46rem; height: auto;
-  margin: 2rem auto 0;
+  margin: 0 auto;
   visibility: hidden; overflow: hidden;
   max-height: 0; padding: 0; border-width: 0; outline-width: 0;
-  /* 10s is the unadopted veil's own self-release window (index.astro); landfall-doors.test.ts holds the two equal. */
   animation: lf-doors-reveal 0s linear 10s forwards;
 }
 .landfall .stage:not(.cam) ~ .lf-card .lf-card-close { display: none; }
@@ -364,9 +360,22 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   to {
     visibility: visible;
     max-height: 100rem;
+    margin-top: 2rem;
     padding: 1.5rem 1.6rem 1.4rem;
     border-width: 1px;
     outline-width: 3px;
+  }
+}
+@media (max-width: 900px) {
+  @keyframes lf-doors-reveal {
+    to {
+      visibility: visible;
+      max-height: 100rem;
+      margin-top: 2rem;
+      padding: 1.2rem 1.3rem 1.1rem;
+      border-width: 1px;
+      outline-width: 3px;
+    }
   }
 }
 
@@ -432,6 +441,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   to { opacity: 0; transform: scale(1.06); visibility: hidden; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] { animation: lf-doors-reveal 0s linear 10s forwards !important; }
   .lf-dot { transition: none; }
   .lf-pulse { animation: none; opacity: 0; }
   .lf-station-glyph, .lf-legend-btn, .lf-card-enter { transition: none; }

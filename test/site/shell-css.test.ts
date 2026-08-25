@@ -311,6 +311,19 @@ test("--raise-grand is retired: no declaration, no consumer (#470 ratified 2026-
   }
 });
 
+// Moved from homepage-plates.test.ts when #470 retired that file: .plate's motion.css dress outlives home's plates (print-room's four poster buttons wear it), so the flat-rest and hover-tip pins survive the move too.
+test("the plate dress rests flat and tips on hover (#130, the consumer is now print-room)", () => {
+  const css = read("public/motion.css");
+  const base = css.match(/\.plate\s*\{([^}]*)\}/);
+  assert.ok(base, ".plate base rule exists in motion.css");
+  assert.ok(!/rotate\(/.test(base[1]), ".plate rests flat (no resting rotate)");
+  const hover = css.match(/\.plate:hover\s*\{([^}]*)\}/);
+  assert.ok(
+    hover && /rotate\(/.test(hover[1]) && /translateY\(/.test(hover[1]),
+    ".plate tips (rotate) and lifts (translateY) under the hand",
+  );
+});
+
 // The #289 ratified call, moved here from homepage-plates.test.ts when #470 retired that file with home's plates: the guard is about motion.css's scoping, not the plates.
 test("the wordmark tips under the hand on room pages, and stays still on home (#289)", () => {
   const css = read("public/motion.css");
