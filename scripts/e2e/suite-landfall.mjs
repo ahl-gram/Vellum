@@ -285,18 +285,27 @@ export async function run(ctx) {
   const stillCam = (a, b) =>
     a !== null && b !== null && Math.abs(b.scale - a.scale) < 1e-9 && Math.abs(b.x - a.x) < 1e-9 && Math.abs(b.y - a.y) < 1e-9;
   const touchAction9 = await evaluate(`(() => { const s = document.getElementById("lf-stage"); return s ? getComputedStyle(s).touchAction : null; })()`);
+  // The drag heads INTO clamp headroom (+x,+y), and a mouse drag with the same delta is the witness: guard-prover round 2 proved the original (-x,-y) gesture aimed at the corner the camera was already parked on, so the stillness assertion held with every gate deleted.
   const oneBefore = await camNow();
   if (stagePt9 !== null) {
     await touch("touchStart", [{ x: stagePt9.x, y: stagePt9.y, id: 0 }]);
-    await touch("touchMove", [{ x: stagePt9.x - 60, y: stagePt9.y - 90, id: 0 }]);
+    await touch("touchMove", [{ x: stagePt9.x + 60, y: stagePt9.y + 90, id: 0 }]);
     await touch("touchEnd", []);
   }
   await sleep(300);
   const oneAfter = await camNow();
+  if (stagePt9 !== null) {
+    await send("Input.dispatchMouseEvent", { type: "mousePressed", x: stagePt9.x, y: stagePt9.y, button: "left", buttons: 1, clickCount: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: stagePt9.x + 60, y: stagePt9.y + 90, button: "left", buttons: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: stagePt9.x + 60, y: stagePt9.y + 90, button: "left", clickCount: 1 });
+  }
+  await sleep(300);
+  const mouseWitness = await camNow();
   check(
-    "L9a one finger never drives the map: a real touch drag leaves the whole camera untouched, scale and translate, and the stage still declares pan-y so the page keeps the gesture (#455 touch policy)",
-    stagePt9 !== null && stillCam(oneBefore, oneAfter) && touchAction9 === "pan-y",
-    JSON.stringify({ touchAction9, oneBefore, oneAfter }),
+    "L9a one finger never drives the map, and the fixture can prove it: the touch drag leaves the whole camera untouched while the SAME drag by mouse carries the sheet, and the stage declares pan-y so the page keeps the gesture (#455 touch policy)",
+    stagePt9 !== null && stillCam(oneBefore, oneAfter) && touchAction9 === "pan-y"
+      && mouseWitness !== null && oneAfter !== null && Math.abs(mouseWitness.x - oneAfter.x) > 30,
+    JSON.stringify({ touchAction9, oneBefore, oneAfter, mouseWitness }),
   );
 
   const twoBefore = await camNow();
