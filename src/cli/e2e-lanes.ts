@@ -23,6 +23,9 @@ export const E2E_LANES: readonly E2eLane[] = [
       "cards",
       "health",
       "fallback",
+      "hunt",
+      "print-room",
+      "landfall",
       "survey",
     ],
     port: DEFAULT_E2E_PORT,
@@ -31,8 +34,6 @@ export const E2E_LANES: readonly E2eLane[] = [
   {
     name: "B",
     suites: [
-      "hunt",
-      "print-room",
       "prospect",
       "ribbon",
       "home",

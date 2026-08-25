@@ -21,8 +21,8 @@ import {
 import type { E2eSuiteName } from "../../src/cli/e2e-suites.ts";
 import { E2E_PORT_VAR, E2E_DPORT_VAR, e2eOutSubdir } from "../../src/cli/e2e-ports.ts";
 
-// Seconds per suite, from the runner's own timing table (16-core Mac, 2026-08-14); refresh it from
-// that same output when the split is revisited.
+// Seconds per suite, from the runner's own timing table on a 16-core Mac (entries carry their own
+// dates; the undated bulk is 2026-08-14); refresh from that same output when the split is revisited.
 const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "survey": 51.4,
   "zoom": 45.8,
@@ -42,7 +42,8 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "hunt": 3.4,
   "room-voyage": 3.3,
   "zoom-gestures": 3.1,
-  "home": 3.1,
+  "home": 99.5, // re-measured 2026-08-25, local run (#460): Subs 3-4a tripled the suite since the 2026-08-14 3.1s
+  "landfall": 23.3, // measured 2026-08-25, local single-suite run (#460)
   "cards": 2.9,
   "motion": 2.4,
   "room-ink": 2.4,
