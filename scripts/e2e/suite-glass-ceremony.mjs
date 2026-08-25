@@ -28,10 +28,13 @@ export async function run(ctx) {
   const rgn = () => evaluate(`window.__vellumRegion()`);
   const enterAt = (k, cu, cv) =>
     evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
-  const waitRedraft = async (prev) => {
+  const waitRedraft = async (prev, wantBand) => {
     // 15s, not the old 4s: see the same note in suite-zoom.mjs. #400's detailed draw outran the
     // old budget on CI, so the waiter returned before the redraft landed and G6 read band 2.
-    for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
+    // The waiter also demands the band its caller asserts: a stale in-flight survey (G8's glide
+    // debounce) can commit FIRST and increment redrafts at the wrong band (CI 2026-08-25), so an
+    // any-redraft return hands the check a state its own gesture never requested.
+    for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev && s.band === wantBand) return s; await sleep(40); }
     return await rgn();
   };
 
@@ -150,7 +153,7 @@ export async function run(ctx) {
 
   const before4 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
-  const s4 = await waitRedraft(before4);
+  const s4 = await waitRedraft(before4, 1);
   const g4 = await evaluate(`(()=>{
     const worldTexts=new Set([...document.querySelectorAll("#map > svg g.settlement text")].map(t=>t.textContent));
     const inset=document.querySelector("#map .region-inset");
@@ -218,7 +221,7 @@ export async function run(ctx) {
 
   const before7 = (await rgn()).redrafts;
   await enterAt(3.6, 0.5, 0.5);
-  const s7 = await waitRedraft(before7);
+  const s7 = await waitRedraft(before7, 2);
   const g7 = await evaluate(`(()=>{
     const insets=[...document.querySelectorAll("#map .region-inset")];
     const svg=insets.length?insets[insets.length-1].querySelector("svg"):null;
@@ -260,7 +263,7 @@ export async function run(ctx) {
   }
   const before6 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
-  const s6 = await waitRedraft(before6);
+  const s6 = await waitRedraft(before6, 1);
   const g6 = await evaluate(`(()=>{
     const svg=document.querySelector("#map .region-inset svg");
     if(!svg)return{svg:false};

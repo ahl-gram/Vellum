@@ -96,6 +96,7 @@ test("astro dev serves the app surfaces at their canonical directory URLs (dev p
       ["/reading-room/", "app.bundle.js"],
       ["/seed-of-the-day/", "app.bundle.js"],
       ["/prospect/", "app.bundle.js"],
+      ["/", "app.bundle.js"],
     ] as const) {
       const res = await fetch(at(path));
       assert.equal(res.status, 200, `${path} should serve the app page in dev, not Astro's 404`);

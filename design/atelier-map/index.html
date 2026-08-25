@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vellum · an atelier of imaginary cartography</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="stage.css">
+</head>
+<body>
+
+<!-- The loading ceremony -->
+<div class="veil" id="veil" aria-hidden="false">
+  <div class="veil-inner">
+    <p class="veil-wordmark">Vellum</p>
+    <p class="veil-tagline">an atelier of imaginary cartography</p>
+    <svg class="veil-rose" viewBox="0 0 120 120" aria-hidden="true">
+      <circle class="rose-ring" cx="60" cy="60" r="44"/>
+      <circle class="rose-ring inner" cx="60" cy="60" r="34"/>
+      <g class="rose-rays">
+        <path d="M60 8 L60 112"/><path d="M8 60 L112 60"/>
+        <path d="M24 24 L96 96"/><path d="M96 24 L24 96"/>
+      </g>
+      <path class="rose-needle" d="M60 18 L66 60 L60 102 L54 60 Z"/>
+      <circle class="rose-pin" cx="60" cy="60" r="3.4"/>
+    </svg>
+    <p class="veil-status" id="veil-status" role="status">Sounding&thinsp;&middot;&thinsp;0 fathom</p>
+  </div>
+</div>
+
+<!-- The stage: the deep, the fog, the chart -->
+<main class="stage" id="stage" aria-label="The chart of the Isle of Rahai">
+  <div class="fog a" aria-hidden="true"></div>
+  <div class="fog b" aria-hidden="true"></div>
+
+  <div class="sheet" id="sheet">
+    <img class="chart" src="chart-42-antique.svg" id="chart" draggable="false"
+      alt="Antique chart of the Isle of Rahai, seed 42">
+    <div class="marks" id="marks"></div>
+  </div>
+
+  <aside class="notice-stamp" aria-hidden="true">
+    <p class="stamp-head">Notice to Mariners</p>
+    <p class="stamp-body">No feature on this chart exists.<br>Soundings are imaginary.</p>
+  </aside>
+</main>
+
+<!-- Floating chrome -->
+<header class="chrome corner tl">
+  <p class="wordmark"><a href="https://www.vellumworlds.com/">Vellum</a></p>
+  <p class="tagline">an atelier of imaginary cartography</p>
+  <nav class="rooms" aria-label="The rooms">
+    <a href="https://www.vellumworlds.com/seed-of-the-day/">Today</a><span aria-hidden="true">&middot;</span>
+    <a href="https://www.vellumworlds.com/explorer/">Explorer</a><span aria-hidden="true">&middot;</span>
+    <a href="https://www.vellumworlds.com/reading-room/">Reading&nbsp;Room</a><span aria-hidden="true">&middot;</span>
+    <a href="https://www.vellumworlds.com/print-room/">Print&nbsp;Room</a><span aria-hidden="true">&middot;</span>
+    <a href="https://www.vellumworlds.com/gallery/">Gallery</a><span aria-hidden="true">&middot;</span>
+    <a href="https://www.vellumworlds.com/faq/">Q&nbsp;&amp;&nbsp;A</a><span aria-hidden="true">&middot;</span>
+    <a href="https://www.vellumworlds.com/glossary/">Glossary</a>
+  </nav>
+</header>
+
+<form class="chrome corner tr seedrow" id="seed-form" aria-label="Draw a world by its seed">
+  <label class="seed-hook" for="seed-input">Give Vellum a number.<br>It gives you back a world.</label>
+  <div class="seed-controls">
+    <input id="seed-input" class="control" inputmode="numeric" pattern="[0-9]*"
+      title="digits only" value="42" aria-label="Seed">
+    <button type="submit" class="primary">Draw it</button>
+  </div>
+  <p class="seed-gloss">every chart is reproducible from the number in its margin</p>
+</form>
+
+<div class="chrome corner bl folio">
+  <p class="folio-title">The Isle of Rahai&thinsp;&middot;&thinsp;Chart &numero;&thinsp;42</p>
+  <p class="folio-sub">surveyed in the year 1059 of the Cedar Age</p>
+  <p class="folio-coords" id="coords" aria-live="off">at Laukuwelua, the capital</p>
+</div>
+
+<div class="chrome corner br zoomery" role="group" aria-label="Camera">
+  <button class="zoom-btn" id="zoom-in" aria-label="Draw nearer">+</button>
+  <button class="zoom-btn" id="zoom-out" aria-label="Stand off">&minus;</button>
+  <button class="zoom-btn home" id="zoom-home" aria-label="The whole sheet">&#8962;</button>
+</div>
+
+<nav class="chrome legend" id="legend" aria-label="Modes of encounter">
+  <p class="legend-head">Every seed is a world entire&thinsp;&middot;&thinsp;choose your first encounter</p>
+  <div class="legend-row" id="legend-row"></div>
+</nav>
+
+<!-- The station card -->
+<aside class="card-slip" id="card" hidden aria-label="About this room">
+  <button class="card-close" id="card-close" aria-label="Set the slip aside">&times;</button>
+  <p class="card-verb" id="card-verb"></p>
+  <h2 class="card-title" id="card-title"></h2>
+  <p class="card-where" id="card-where"></p>
+  <p class="card-prose" id="card-prose"></p>
+  <div class="card-arms" id="card-arms" hidden>
+    <img src="arms-42-0.svg" alt="Arms of the Chiefdom of Rekekoa">
+    <img src="arms-42-1.svg" alt="Arms of the Hauwaiwa Atolls">
+    <img src="arms-42-2.svg" alt="Arms of the Ratoa Atolls">
+  </div>
+  <a class="card-enter" id="card-enter" href="#">Enter the room &rarr;</a>
+</aside>
+
+<script src="gsap.min.js"></script>
+<script src="places-42.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

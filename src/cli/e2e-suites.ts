@@ -16,6 +16,7 @@ export const E2E_SUITE_ORDER = [
   "prospect",
   "ribbon",
   "home",
+  "landfall",
   "survey",
   "broadside",
   "reading-room",

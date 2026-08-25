@@ -286,7 +286,6 @@ test("the chart marker is real: the renderer stamps it on every committed chart 
 const RAISE_TOKENS = [
   ["--raise", "-2px"],
   ["--press", "1px"],
-  ["--raise-grand", "-3px"],
   ["--raise-shadow", "0 6px 16px rgb(from var(--chart-ink) r g b / 0.2)"],
   ["--press-shadow", "0 1px 3px rgb(from var(--chart-ink) r g b / 0.14)"],
 ] as const;
@@ -303,6 +302,41 @@ test("motion.css declares each raise/press token once, at its ratified value (#4
       `${name} should have exactly one declaration in motion.css`,
     );
   }
+});
+
+test("--raise-grand is retired: no declaration, no consumer (#470 ratified 2026-08-24, the #405 table update)", () => {
+  // Its last consumer, Go Deeper's .card:hover, left at #459; Act II re-ratifies a grand lift if its dark-room cards want one.
+  for (const sheet of [...AUTHORED_CSS, "public/motion.css", "public/house.css"]) {
+    assert.ok(!read(sheet).includes("--raise-grand"), `${sheet} must not declare or consume the retired --raise-grand`);
+  }
+});
+
+test("the plate dress rests flat and tips on hover (#130, the consumer is now print-room)", () => {
+  const css = read("public/motion.css");
+  const base = css.match(/\.plate\s*\{([^}]*)\}/);
+  assert.ok(base, ".plate base rule exists in motion.css");
+  assert.ok(!/rotate\(/.test(base[1]), ".plate rests flat (no resting rotate)");
+  const hover = css.match(/\.plate:hover\s*\{([^}]*)\}/);
+  assert.ok(
+    hover && /rotate\(/.test(hover[1]) && /translateY\(/.test(hover[1]),
+    ".plate tips (rotate) and lifts (translateY) under the hand",
+  );
+});
+
+// The #289 ratified call, moved here from homepage-plates.test.ts when #470 retired that file with home's plates: the guard is about motion.css's scoping, not the plates.
+test("the wordmark tips under the hand on room pages, and stays still on home (#289)", () => {
+  const css = read("public/motion.css");
+  // Keyed on .wordmark, not h1 (#288): on a room page the h1 is the room name with no link to tip, so keying on h1 would silently select nothing.
+  const hover = css.match(/body:has\(\.room-name\) \.wordmark a:hover\s*\{([^}]*)\}/);
+  assert.ok(hover, "the room-scoped wordmark hover rule should exist in motion.css");
+  assert.ok(
+    /rotate\(/.test(hover[1]) && /translateY\(/.test(hover[1]),
+    "the wordmark should tip (rotate) and lift (translateY) under the hand",
+  );
+  assert.ok(
+    !/(?<!\(\.room-name\) )\.wordmark a:hover/.test(css.replace(/body:has\(\.room-name\) \.wordmark a:hover/g, "")),
+    "no unscoped .wordmark a:hover may leak the tip onto home",
+  );
 });
 
 // The grander plate, gallery and atlas scales are a question #405 left standing, so each literal is sanctioned at its exact selector and value, and every comma arm of a literal-bearing rule must be individually sanctioned: a new surface cannot borrow an exception.
@@ -338,6 +372,7 @@ test("no hover or active rule states a lift as a px literal: the raise is a toke
     ["public/motion.css", read("public/motion.css")],
     ["public/fonts.css", read("public/fonts.css")],
     ["BaseLayout <style is:global>", layoutStyle()],
+    ["src/pages/index.astro <style>", [...read("src/pages/index.astro").matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n")],
     ["src/cli/gallery.ts", GALLERY_PAGE_CSS],
     ["src/atlas/document.ts", await atlasStyleBlocks()],
   ];
@@ -353,7 +388,7 @@ test("no hover or active rule states a lift as a px literal: the raise is a toke
         assert.ok(
           sanctioned,
           `${name}: "${selector}" lifts by the literal ${arg}; ` +
-            `the house lift is translateY(var(--raise)) (or --press, --raise-grand)`,
+            `the house lift is translateY(var(--raise)) (or --press)`,
         );
       }
     }
@@ -374,10 +409,8 @@ test("#402 the prospect reveal releases its transform: fill backwards, never bot
 
 // #405 identity, not presence: the sweep proves a lift is SOME token; this pins WHICH one each consumer uses. broadside's a.fn and the faq/glossary .toc tips are pinned by tip-affordance's re-pins.
 const TOKEN_CONSUMERS: ReadonlyArray<{ file: string; arm: string; lift: string; shadow?: string }> = [
-  { file: "public/motion.css", arm: "button:not(.place-hit):hover", lift: "--raise", shadow: "--raise-shadow" },
-  { file: "public/motion.css", arm: "button:not(.place-hit):active", lift: "--press", shadow: "--press-shadow" },
-  { file: "public/motion.css", arm: ".card:hover", lift: "--raise-grand" },
-  { file: "public/motion.css", arm: ".card:active", lift: "--press" },
+  { file: "public/motion.css", arm: "button:not(.lf-station):not(.place-hit):hover", lift: "--raise", shadow: "--raise-shadow" },
+  { file: "public/motion.css", arm: "button:not(.lf-station):not(.place-hit):active", lift: "--press", shadow: "--press-shadow" },
   { file: "public/motion.css", arm: ".topnav a:hover", lift: "--raise" },
   { file: "public/motion.css", arm: "body:has(.room-name) .wordmark a:hover", lift: "--raise" },
   { file: "public/living-chart.css", arm: ".pc-prospect:hover", lift: "--raise" },

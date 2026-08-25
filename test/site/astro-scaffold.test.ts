@@ -38,6 +38,8 @@ type PageSpec = {
   scriptSrc?: string;
   /** The one stated content-page script exception (#289): home's seed-form intercept marker. */
   inlineScript?: string;
+  /** #457's pre-paint veil script, home's re-ratified THIRD script (PR #467): must parse before the stage. */
+  prePaintScript?: string;
 };
 
 const PAGES: readonly PageSpec[] = [
@@ -51,6 +53,10 @@ const PAGES: readonly PageSpec[] = [
     tagline: "an atelier of imaginary cartography",
     // Occurs ONLY inside the script (the form tag's own id would match anywhere): proves the intercept exists, not merely the form.
     inlineScript: 'getElementById("seed-form")',
+    // Landfall Sub 1 (#455): home is an app surface now (the stage camera) AND keeps the #289 intercept exception.
+    scriptSrc: "app.bundle.js",
+    // Landfall Sub 2 (#457): the ceremony veil must dress FIRST PAINT, which no deferred module can; ratified at PR #467 after the incognito flash.
+    prePaintScript: 'v.id = "lf-veil"',
   },
   {
     route: "faq/index.html",
@@ -448,8 +454,8 @@ test("the running head: uniform wordmark link, room name + tagline, double rule,
     assert.ok(next > at, `home header keeps its order at ${marker}`);
     at = next;
   }
-  for (const gone of ['class="lede"', 'class="seedline"']) {
-    assert.ok(!page("index.html").includes(gone), `home retired its ${gone} banner (#289 cartouche hero)`);
+  for (const gone of ['class="lede"', 'class="seedline"', 'class="cartouche"', 'class="banners"', 'class="grid3"', 'class="plate"']) {
+    assert.ok(!page("index.html").includes(gone), `home retired its ${gone} section (#289 hero, then the #470 below-stage removals)`);
   }
 });
 
@@ -545,11 +551,21 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
     const html = page(p.route);
     if (p.inlineScript !== undefined) {
       const scripts = [...html.matchAll(/<script\b/g)];
-      assert.equal(scripts.length, 1, `${p.route} carries exactly one script, the seed-form intercept`);
-      assert.ok(!html.includes('type="module"'), `${p.route} ships no module bundle, only the inline intercept`);
+      const expected = (p.scriptSrc === undefined ? 1 : 2) + (p.prePaintScript === undefined ? 0 : 1);
+      assert.equal(scripts.length, expected, `${p.route} carries exactly ${expected} script(s)`);
       assert.ok(html.includes(p.inlineScript), `${p.route} script targets ${p.inlineScript}`);
+      if (p.prePaintScript !== undefined) {
+        assert.ok(html.includes(p.prePaintScript), `${p.route} carries the pre-paint veil script (${p.prePaintScript})`);
+        assert.ok(
+          html.indexOf(p.prePaintScript) < html.indexOf('class="landfall"'),
+          `${p.route}'s pre-paint script parses before the stage, so first paint wears the veil`,
+        );
+      }
       assert.ok(html.indexOf("<script") < html.indexOf("<footer>"), `${p.route} script renders inside <main>, before the footer`);
-      continue;
+      if (p.scriptSrc === undefined) {
+        assert.ok(!html.includes('type="module"'), `${p.route} ships no module bundle, only the inline intercept`);
+        continue;
+      }
     }
     assert.ok(html.includes(tag), `${p.route} should load its bundle twin via ${tag}`);
     assert.ok(html.indexOf(tag) < html.indexOf("<footer>"), `${p.route} script renders inside <main>, before the footer`);
@@ -557,39 +573,41 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
   }
 });
 
-test("the cartouche hero: frame, hook, seed form, chart plate, fused caption, in order (#289)", () => {
+test("the seed form floats on the stage as the mockup's corner chrome, its ratified semantics whole (#470, was the #289 cartouche hero)", () => {
   // normalize: prose markers must not break on source-line reflow.
   const html = normalize(decode(page("index.html")));
   const order = [
-    'class="cartouche"',
+    'class="landfall"',
+    'id="seed-form"',
     "Give Vellum a number.",
     "It gives you back a world.",
-    'class="divider"',
-    'id="seed-form"',
+    'id="seed-input"',
     'value="42"',
     "Draw it",
-    "Every chart is reproducible from the number in its margin",
-    "chart-42-antique.svg",
-    "drawn in the antique manner",
-    "stroke for stroke",
+    "every chart is reproducible from the number in its margin",
   ];
-  let at = -1;
+  let at = html.indexOf('class="landfall"') - 1;
   for (const marker of order) {
-    const next = html.indexOf(marker);
-    assert.ok(next > at, `home hero keeps its order at ${marker}`);
+    const next = html.indexOf(marker, at + 1);
+    assert.ok(next > at, `the floating seed form keeps its order at ${marker}`);
     at = next;
   }
-  // The frame carries all four corner flourishes (D6: at every width).
-  const flourishes = [...html.matchAll(/class="flourish/g)];
-  assert.equal(flourishes.length, 4, "the cartouche keeps its four corner flourishes");
+  assert.ok(at < html.indexOf("</section>", html.indexOf('class="landfall"')), "the form rides the landfall section: the map is the page now");
+  // The ratified semantics (#455, restated at #470): digits pattern, GET fallback, the intercept's marker; the PAGES table pins the intercept script itself.
+  const form = html.slice(html.indexOf("<form"), html.indexOf("</form>"));
+  assert.ok(form.includes('action="explorer/"') && form.includes('method="get"'), "the no-JS GET fallback survives the move");
+  assert.ok(form.includes('name="seed"'), "the fallback still names its query");
+  assert.ok(form.includes('pattern="[0-9]*"') && form.includes('inputmode="numeric"'), "the digits-only pattern and keypad survive the move");
+  assert.ok(!html.includes('class="flourish'), "the cartouche frame retired with its section: the corner chrome is the mockup's, unframed");
 });
 
-test("How It Works opens with the Notice to Mariners and the merged lede; the count is ten (#289)", () => {
+test("the Notice stamps the deep before the panel's prose; the count is ten (#289, reshaped at #459)", () => {
   // normalize: prose markers must not break on source-line reflow.
   const html = normalize(decode(page("index.html")));
   const order = [
-    "NOTICE TO MARINERS",
+    "Notice to Mariners",
     "No feature on this chart exists.",
+    "Soundings are imaginary.",
     "Vellum surveys worlds that don't exist",
     "ten invented languages, one per culture",
     "Under the hood",
@@ -597,7 +615,7 @@ test("How It Works opens with the Notice to Mariners and the merged lede; the co
   let at = -1;
   for (const marker of order) {
     const next = html.indexOf(marker);
-    assert.ok(next > at, `How It Works keeps its order at ${marker}`);
+    assert.ok(next > at, `home keeps its prose order at ${marker}`);
     at = next;
   }
   assert.ok(html.includes("quarrelsome realms"), "the lede's realms survive the merge into the borders sentence");
@@ -614,6 +632,7 @@ test("every internal link and embed on the rendered pages resolves", () => {
     "/seed-of-the-day/app.bundle.js",
     "/reading-room/app.bundle.js",
     "/prospect/app.bundle.js",
+    "/app.bundle.js",
   ];
   const routes = new Set<string>(PAGES.map((p) => p.dir));
   for (const p of PAGES) {
@@ -659,9 +678,9 @@ test("the deploy artifact serves no raw app source, no .d.ts, and no engine emit
   assert.deepEqual(offenders, [], "no raw .js source or .d.ts may reach the artifact");
 });
 
-test("the hero charts and arms the home page embeds all resolve in public/charts", () => {
+test("the charts and arms the home page embeds all resolve in public/charts", () => {
   const embeds = [...page("index.html").matchAll(/src="(charts\/[^"]+)"/g)].map(([, u]) => u);
-  assert.equal(new Set(embeds).size, 7, "home embeds the 7 committed goldens (4 charts + 3 arms)");
+  assert.equal(new Set(embeds).size, 4, "home embeds 4 committed goldens (the stage chart + 3 arms): the style grid's three left with its section (#470)");
   for (const embed of embeds) {
     assert.ok(existsSync(root(`public/${embed}`)), `public/${embed} should exist`);
   }

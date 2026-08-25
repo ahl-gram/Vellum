@@ -1,119 +1,456 @@
 body {
   padding: 3rem 1.5rem 5rem;
 }
-h2, .card h3 {
-  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
-}
-figcaption, .card p, .underhood, .notice-body {
-  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
-}
 main { max-width: 1080px; }
 header { margin-bottom: 2.5rem; }
 /* Home's deliberate wordmark deviation, keyed on .wordmark not h1 (#288): a bare header h1 at (0,0,2) LOSES to the shell's .wordmark class and home would silently drop to the room-page 1.75rem; pinned by e2e RH3. */
 header .wordmark { font-size: 2.7rem; }
-h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
-  padding-bottom: 0.3rem; margin-top: 3.5rem; }
-/* #289: the chart cartouche mirrored BY HAND from src/render/layers/cartouche.ts at a held k=1.5 (CSS borders plus fixed corner SVGs, so the frame reflows without distortion); if the renderer's cartouche ever changes shape, this is the copy to redraw. */
-.cartouche {
-  --k: 1.5;
-  margin: 2.5rem auto 0;
-  border: calc(var(--k) * 2.2px) solid var(--ink-dark);
-  border-radius: calc(var(--k) * 3px);
-  background: rgb(from var(--chart-paper) r g b / 0.94);
-  font-family: 'Iowan Old Style', 'Palatino', 'Georgia', serif;
-  text-align: center;
-}
-.cartouche .rule {
-  border: calc(var(--k) * 0.8px) solid var(--ink-dark);
-  margin: calc(var(--k) * 5px);
-  padding: calc(var(--k) * 16px) calc(var(--k) * 20px) calc(var(--k) * 14px);
-  position: relative;
-}
-.cartouche .flourish {
-  position: absolute; overflow: visible;
-  width: calc(var(--k) * 15px); height: calc(var(--k) * 15px);
-}
-.cartouche .flourish path { stroke: var(--ink-dark); stroke-width: 1.8; }
-.cartouche .flourish.tl { top: 0; left: 0; }
-.cartouche .flourish.tr { top: 0; right: 0; transform: scaleX(-1); }
-.cartouche .flourish.bl { bottom: 0; left: 0; transform: scaleY(-1); }
-.cartouche .flourish.br { bottom: 0; right: 0; transform: scale(-1, -1); }
-.cartouche .hook {
-  /* the vw cap fits the hook's longer line on one line down to ~360px, the way the renderer's titleFs shrinks to fit */
-  font-size: min(calc(var(--k) * 24px), 5vw);
-  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  letter-spacing: calc(var(--k) * 1.4px);
-  line-height: 1.35; margin: 0;
-}
-.cartouche .divider {
-  position: relative; height: calc(var(--k) * 7.2px);
-  margin: calc(var(--k) * 11px) auto calc(var(--k) * 13px);
-  /* the renderer spans 60% of the OUTER rect; this box is inset 28k per side (2.2+5+0.8+20), so add back 0.6 x 56k to keep the chart's proportion */
-  width: calc(60% + var(--k) * 33.6px);
-}
-.cartouche .divider::before {
-  content: ""; position: absolute; left: 0; right: 0; top: 50%;
-  border-top: calc(var(--k) * 0.9px) solid var(--ink-dark); transform: translateY(-50%);
-}
-.cartouche .divider svg {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  width: calc(var(--k) * 7.2px); height: calc(var(--k) * 7.2px);
-}
-.cartouche .divider path { fill: var(--ink-dark); }
-.cartouche .seedrow {
-  display: flex; gap: calc(var(--k) * 8px);
-  justify-content: center; align-items: center; margin: 0;
-}
-.cartouche .seedrow input {
-  /* 16px floor: a smaller input font makes iOS Safari zoom the page on focus */
-  font-size: 16px;
-  width: calc(var(--k) * 90px); text-align: center;
-  padding: calc(var(--k) * 4px) calc(var(--k) * 6px);
-}
-.cartouche .seedrow button.primary {
-  font-size: calc(var(--k) * 11px);
-  padding: calc(var(--k) * 6.5px) calc(var(--k) * 12px);
-}
-.cartouche-seedline {
-  font-size: calc(var(--k) * 10.5px);
-  font-style: italic; color: var(--ink-faded);
-  margin: calc(var(--k) * 13px) 0 0; line-height: 1.6;
-}
-@media (max-width: 520px) { .cartouche { --k: 1.1; } }
-figure { margin: 1.5rem 0; }
-figure img { width: 100%; height: auto; display: block;
-  border: 1px solid var(--line-tan); box-shadow: var(--sheet-shadow); }
-figcaption { text-align: center; font-style: italic; color: var(--ink-brown); padding-top: 0.55rem; }
-.banners { display: flex; flex-wrap: wrap; gap: 2.2rem; justify-content: center; margin-top: 1.8rem; }
-.banner { width: 150px; text-align: center; }
-.banner img { width: 100%; height: auto; border: 0; box-shadow: none;
-  filter: drop-shadow(0 6px 14px rgb(from var(--chart-ink) r g b / 0.22)); }
-.banner figcaption { font-style: italic; color: var(--ink-brown); padding-top: 0.55rem; letter-spacing: 0.03em; }
-.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.4rem; }
-@media (max-width: 720px) { .grid3 { grid-template-columns: 1fr; } }
-.cards-gloss { margin: 0.5rem 0 0; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; color: var(--ink-faded); }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.4rem; margin-top: 1.2rem; }
-.card-verb { display: block; margin-bottom: 0.35rem; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.8rem; letter-spacing: 0.14em; color: var(--ink-faded); }
-@media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
-.card { display: block; border: 1.5px solid var(--ink-dark); border-radius: 4px;
-  padding: 1.4rem 1.6rem; background: var(--parchment-panel); text-decoration: none; color: inherit;
-  box-shadow: 0 6px 18px rgb(from var(--chart-ink) r g b / 0.12); }
-.card:hover { background: var(--control-cream); }
-.card h3 { margin: 0 0 0.4rem; letter-spacing: 0.05em; }
-.card p { margin: 0; font-style: italic; color: var(--ink-brown); line-height: 1.5; }
-.notice {
-  max-width: 46rem; margin: 1.2rem 0 1.6rem;
-  border: 1px solid var(--line-tan); background: var(--parchment-panel);
-  border-radius: 6px;
-  padding: 0.9rem 1.2rem;
-}
-.notice-head { margin: 0; }
-.notice-body { margin: 0.35rem 0 0; font-style: italic; color: var(--ink-brown); line-height: 1.55; }
-.how { line-height: 1.65; }
-.underhood { font-style: italic; color: var(--ink-brown); font-size: 0.92rem;
+.underhood {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; color: var(--ink-brown); font-size: 0.92rem;
   line-height: 1.6; margin-top: 0.5rem; }
 .underhood a { color: var(--ink-brown); }
-code { background: var(--parchment-deep); padding: 0.1em 0.4em; border-radius: 3px;
-  font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
 /* Home's grander footer, pinned above the shell rule for the same cascade reason as the masthead (e2e RH4). */
 main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
+
+/* Landfall Sub 1 (#455): the survey window. The deep wears existing tokens in inverted roles (ratified provisional on #454); full-bleed and the floating chrome arrive with the ceremony subs. */
+.landfall { margin: 2.5rem 0 0; position: relative; }
+.landfall .stage {
+  /* 82vh alone put the stage's own chrome below the fold on every viewport under 1159px tall (plate-reader, PR #456): the calc term reserves the running head's ~250px so the coords line and controls stay on screen. */
+  position: relative; height: clamp(420px, calc(100vh - 300px), 82vh);
+  overflow: hidden; cursor: grab; touch-action: pan-y;
+  display: grid; place-items: center;
+  border: 1px solid var(--line-tan);
+  outline: 3px double var(--line-faint);
+  outline-offset: 6px;
+  /* The prototype's deep: lighter at center so the ink shadow has ground to darken (token-derived mix, no raw hex). */
+  background:
+    radial-gradient(80% 70% at 30% 20%, color-mix(in srgb, var(--ink-dark) 90%, var(--parchment) 10%) 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+}
+.landfall .stage.dragging { cursor: grabbing; }
+.landfall .stage:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 2px; }
+/* No-JS containment is by construction against the sheet's definite box, never a viewport formula (the 106vh form cropped, #456 finding 2); abspos+margin:auto because a percentage max-height dies inside an auto grid track. */
+.landfall .sheet { position: relative; width: 100%; height: 100%; }
+.lf-chart { position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%; width: auto; height: auto; user-select: none; -webkit-user-drag: none; }
+.landfall .stage.cam .sheet {
+  display: block;
+  position: absolute; left: 0; top: 0;
+  width: 1500px; height: 1157.931px;
+  transform-origin: 0 0; will-change: transform;
+  /* The prototype's dress (out/atelier-map): the enlarged ink shadow over the lighter-centered deep; the lamplight bloom washed the chart out (Alex, PR #456). */
+  box-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);
+}
+.landfall .stage.cam .lf-chart { position: static; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; }
+.lf-marks { position: absolute; inset: 0; }
+.lf-dot {
+  position: absolute; width: 7px; height: 7px;
+  transform: translate(-50%, -50%) scale(var(--inv, 1));
+  opacity: 0; transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.landfall .stage.close-in .lf-dot { opacity: 1; }
+.lf-pip {
+  position: absolute; inset: 0;
+  border: 1px solid var(--chart-ink); border-radius: 50%;
+  background: rgb(from var(--parchment-bright) r g b / 0.85);
+  box-shadow: 0 1px 3px rgb(from var(--chart-ink) r g b / 0.4);
+}
+.lf-dot.ruined .lf-pip { background: transparent; border-style: dashed; }
+.lf-dot.capital .lf-pip { border-width: 2px; }
+.lf-name {
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 8.5px; letter-spacing: 0.08em; color: var(--chart-ink); white-space: nowrap;
+  text-shadow: 0 0 4px var(--chart-paper), 0 0 8px var(--chart-paper);
+}
+.lf-controls { display: none; position: absolute; right: 0.9rem; bottom: 0.9rem; flex-direction: column; gap: 0.4rem; }
+.lf-controls.on { display: flex; }
+.lf-btn {
+  width: 2.2rem; height: 2.2rem;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 1.1rem; line-height: 1;
+  color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.5);
+  border: 1px solid var(--line-tan); cursor: pointer;
+}
+.lf-btn:hover, .lf-btn:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
+.lf-coords {
+  display: none; position: absolute; left: 1rem; bottom: 0.7rem; margin: 0;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-variant-caps: small-caps; letter-spacing: 0.06em;
+  font-size: 0.85rem; color: var(--line-tan);
+}
+.lf-coords.on { display: block; }
+@media (max-width: 720px) { .landfall .stage { height: min(64vh, 86vw); min-height: 300px; } }
+
+/* Landfall Sub 4a (#470): the seed form is the mockup's top-right corner chrome (design/atelier-map/stage.css), a sub early by ratification 2026-08-24; never .cam-gated (#455: live even when the bundle fails). */
+.lf-seed {
+  position: absolute; right: 1.6rem; top: 1.4rem; z-index: 4;
+  margin: 0; max-width: 17rem; text-align: right;
+  padding: 0.7rem 0.9rem 0.8rem;
+  background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72));
+  pointer-events: none;
+}
+.seed-hook {
+  display: block;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 1.02rem; line-height: 1.45; color: var(--parchment);
+}
+.seed-controls { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.55rem; pointer-events: auto; }
+.lf-seed .control {
+  width: 6.2rem; min-width: 0;
+  /* 16px floor: a smaller input font makes iOS Safari zoom the page on focus */
+  font-size: 16px;
+  color: var(--parchment-bright);
+  background: rgb(from var(--chart-ink) r g b / 0.45);
+  border: 1px solid var(--line-tan);
+  padding: 0.32rem 0.6rem;
+  text-align: center;
+}
+.lf-seed .control:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 1px; }
+.lf-seed .primary {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.82rem; letter-spacing: 0.14em;
+  color: var(--ink-dark);
+  background: var(--control-gold);
+  border: 1px solid var(--line-tan);
+  padding: 0.32rem 0.9rem;
+  white-space: nowrap;
+}
+.lf-seed .primary:hover, .lf-seed .primary:focus-visible { background: var(--parchment-bright); }
+.seed-gloss {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.76rem; color: var(--parchment);
+}
+
+/* Landfall Sub 3 (#458): the stations, their cards, and the legend; the dress is the mockup's (design/atelier-map/stage.css) with lf- prefixes and tokens. */
+.lf-stations { display: none; position: absolute; inset: 0; }
+.landfall .stage.cam .lf-stations { display: block; }
+.lf-station {
+  position: absolute; width: 34px; height: 34px; padding: 0;
+  transform: translate(-50%, -50%) scale(var(--inv, 1));
+  appearance: none; border: 0; background: none; font: inherit; cursor: pointer;
+}
+/* Real hardware reads the TOUCHED element's touch-action, so a control defaulting to auto lets the browser claim a gesture starting there; CDP emulation cannot see this line (control-run 2026-08-25, #475), it is pinned only by the phone pass at the gate. */
+.lf-station, .lf-legend-btn, .lf-controls button { touch-action: pan-y; }
+.lf-station-glyph {
+  position: absolute; inset: 0; margin: auto;
+  width: 15px; height: 15px;
+  background: var(--ink-dark);
+  border: 1.5px solid var(--chart-paper);
+  outline: 1px solid var(--ink-dark);
+  transform: rotate(45deg);
+  box-shadow: 0 2px 6px rgb(from var(--chart-ink) r g b / 0.5);
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.lf-station-slip {
+  position: absolute; top: calc(50% + 13px); left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  pointer-events: none;
+}
+.lf-station-name {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 13px; letter-spacing: 0.1em;
+  color: var(--chart-ink);
+  background: rgb(from var(--chart-paper) r g b / 0.88);
+  border: 1px solid var(--line-tan);
+  padding: 2px 8px 1px;
+  box-shadow: 0 1px 4px rgb(from var(--chart-ink) r g b / 0.3);
+  white-space: nowrap;
+}
+.lf-station-verb {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 10.5px; color: var(--ink-brown);
+  background: rgb(from var(--chart-paper) r g b / 0.75);
+  padding: 0 6px; white-space: nowrap;
+}
+/* The mockup's exact hover, ratified as a CHART INSTRUMENT gesture (Alex 2026-08-24): a pip's grow promises its slip opening in place, not #289's navigation; the ruling lives at CHART_INSTRUMENTS in tip-affordance.test.ts. */
+.lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph {
+  background: var(--parchment-bright); transform: rotate(45deg) scale(1.25);
+}
+.lf-station:hover .lf-station-name, .lf-station:focus-visible .lf-station-name {
+  background: var(--parchment-bright);
+}
+.lf-station.at-sea .lf-station-glyph { border-radius: 50%; transform: none; }
+.lf-station.at-sea:hover .lf-station-glyph, .lf-station.at-sea:focus-visible .lf-station-glyph {
+  transform: scale(1.25);
+}
+.lf-pulse {
+  position: absolute; inset: 0; margin: auto;
+  width: 15px; height: 15px;
+  border: 1px solid var(--ink-dark); transform: rotate(45deg);
+  animation: lf-station-pulse 3.2s ease-out infinite;
+  pointer-events: none;
+}
+.lf-station.at-sea .lf-pulse { border-radius: 50%; transform: none; }
+@keyframes lf-station-pulse {
+  0% { opacity: 0.7; scale: 1; }
+  70%, 100% { opacity: 0; scale: 2.6; }
+}
+.lf-legend {
+  display: none; position: absolute; left: 50%; bottom: 0.9rem;
+  /* max-content: the shrink-to-fit at left 50% capped the row at half the stage and wrapped the Gallery entry into the Reading Room slip (plate-reader, this sub). */
+  width: max-content; max-width: calc(100% - 2rem);
+  transform: translateX(-50%); text-align: center; z-index: 2;
+  /* The mockup's narrow footing generalized: in the boxed stage the landfall chart reaches the stage foot, so without its own ground the legend reads as text on parchment and a south-shore slip blends straight into it. */
+  padding: 0.5rem 1.1rem 0.6rem;
+  background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.45) 72%, transparent);
+  pointer-events: none;
+}
+.landfall .stage.cam .lf-legend { display: block; }
+.lf-legend-head {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.82rem; color: var(--ink-faded); margin: 0 0 0.45rem;
+}
+.lf-legend-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+.lf-legend-btn {
+  appearance: none; cursor: pointer; pointer-events: auto;
+  background: rgb(from var(--chart-ink) r g b / 0.5);
+  border: 1px solid var(--line-tan);
+  padding: 0.4rem 0.9rem 0.35rem;
+  text-align: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.lf-legend-btn:hover, .lf-legend-btn:focus-visible { background: var(--ink-dark); }
+.lf-legend-verb {
+  display: block;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.78rem; color: var(--line-tan);
+}
+.lf-legend-room {
+  display: block;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.86rem; letter-spacing: 0.12em;
+  color: var(--parchment);
+}
+.lf-card {
+  /* Above the corner chrome's 4, as the mockup layers its slip over its chrome (stage.css: chrome 10, slip 20); the seed form covered the open slip's close button at z 3. */
+  position: absolute; z-index: 5;
+  /* Centered by abspos + margin auto, never translateY(-50%): the open tween writes the card's transform. border-box is the mockup's own global reset, which the site shell lacks. right 4rem keeps the slip clear of the zoom-controls column on short viewports. */
+  box-sizing: border-box;
+  right: 4rem; top: 0; bottom: 0; margin: auto 0; height: fit-content;
+  /* Desktop only: the narrow block lifts the cap, where the % would resolve against the viewport instead of .landfall and the clip would land on the sheet's Enter door. */
+  max-height: calc(100% - 2rem); overflow: hidden;
+  width: min(22rem, calc(100% - 8rem));
+  background: var(--parchment-panel);
+  color: var(--ink-dark);
+  border: 1px solid var(--line-tan);
+  outline: 3px double var(--line-faint);
+  outline-offset: 6px;
+  box-shadow: var(--sheet-shadow);
+  padding: 1.5rem 1.6rem 1.4rem;
+}
+.lf-card[hidden] { display: none; }
+.lf-card-close {
+  position: absolute; right: 0.5rem; top: 0.4rem;
+  appearance: none; border: 0; background: none; cursor: pointer;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 1.1rem; color: var(--ink-faded);
+  padding: 0.2rem 0.4rem;
+}
+.lf-card-close:hover { color: var(--ink-dark); }
+.lf-card-verb {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.92rem; color: var(--ink-brown); margin: 0;
+}
+.lf-card-title {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-weight: 400;
+  font-size: 1.6rem; letter-spacing: 0.06em; line-height: 1.2;
+  margin: 0.1rem 0 0; border: 0; padding: 0;
+}
+.lf-card-where {
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-variant-caps: small-caps;
+  /* ink-brown, not the mockup's ink-faded: 13px small caps measured 3.93:1 on the panel, under the 4.5:1 small-text floor (plate-reader, this sub). */
+  font-size: 0.82rem; letter-spacing: 0.08em; color: var(--ink-brown);
+  border-bottom: 1px solid var(--line-faint);
+  padding-bottom: 0.55rem; margin: 0.25rem 0 0;
+}
+.lf-card-prose { font-size: 1rem; line-height: 1.6; margin: 0.7rem 0 0; }
+.lf-card-arms { display: flex; gap: 0.7rem; justify-content: center; margin-top: 0.8rem; }
+.lf-card-arms img { width: 52px; height: auto; }
+.lf-card-enter {
+  display: inline-block; vertical-align: top; margin-top: 1rem;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.88rem; letter-spacing: 0.14em;
+  color: var(--chart-paper); background: var(--ink-dark);
+  border: 1px solid var(--chart-ink);
+  /* 0.85rem, not the mockup's 0.45rem: the 44px touch-target ruling (#460, 2026-08-25) is a stated deviation. */
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+.lf-card-enter:hover, .lf-card-enter:focus-visible { background: var(--chart-ink); }
+
+/* Landfall Sub 4 (#459): the How It Works panel and the Notice stamp; the dress is the mockup's (design/atelier-map/stage.css) with tokens. */
+.lf-card-how {
+  max-height: calc(100% - 3rem);
+  display: flex; flex-direction: column;
+}
+.lf-card-scroll { overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
+.lf-card-how .how { font-size: 0.95rem; line-height: 1.55; margin: 0.8rem 0 0; }
+.lf-card-how .underhood { margin: 0.8rem 0 0; }
+.notice-stamp {
+  position: absolute; left: 2rem; top: 46%; z-index: 2;
+  transform: rotate(-5deg);
+  border: 1px solid rgb(from var(--line-tan) r g b / 0.5);
+  outline: 3px double rgb(from var(--line-tan) r g b / 0.35);
+  outline-offset: 4px;
+  padding: 0.7rem 1rem;
+  opacity: 0.5;
+  pointer-events: none;
+  max-width: 15rem;
+}
+.stamp-head {
+  margin: 0;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.72rem; letter-spacing: 0.28em;
+  color: var(--line-tan);
+}
+.stamp-body {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.8rem; color: var(--ink-faded); line-height: 1.5;
+}
+@media (max-width: 900px) {
+  /* The compressed stage lands three of the four slips in the legend band (Alex, PR #468 live review); the legend below names every room, so the tags stand down until Sub 6's full-bleed restores the mockup's spacing. */
+  .lf-station-slip { display: none; }
+  .lf-legend {
+    width: 100%; left: 0; bottom: 0; transform: none;
+    padding: 0.5rem 0.6rem 0.6rem;
+    background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.85), transparent);
+  }
+  .lf-legend-head { font-size: 0.74rem; margin-bottom: 0.3rem; }
+  .lf-legend-row { gap: 0.4rem; }
+  .lf-legend-btn { padding: 0.3rem 0.6rem 0.25rem; }
+  .lf-legend-verb { font-size: 0.7rem; }
+  .lf-legend-room { font-size: 0.74rem; }
+  .lf-card {
+    /* The mockup's bottom sheet is FIXED to the viewport; inside the boxed stage the sheet was taller than the stage itself and buried the chart whole (skeptic finding 1). z-index stays under the veil's 50. */
+    position: fixed; right: 0; left: 0; top: auto; bottom: 0; margin: 0;
+    width: 100%; outline-offset: -8px; z-index: 40;
+    padding: 1.2rem 1.3rem 1.1rem;
+    max-height: none; overflow: visible;
+  }
+  .lf-card-arms img { width: 42px; }
+  .lf-card-how { max-height: 45vh; }
+  .lf-controls { bottom: 6.5rem; }
+  .lf-coords.on { display: none; }
+  .notice-stamp { display: none; }
+  .lf-seed { right: 1rem; top: 0.9rem; max-width: 12rem; }
+  .seed-hook { font-size: 0.85rem; }
+  .seed-gloss { display: none; }
+}
+
+.landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] {
+  display: block; position: static;
+  width: auto; max-width: 46rem; height: auto;
+  margin: 0 auto;
+  visibility: hidden; overflow: hidden;
+  max-height: 0; padding: 0; border-width: 0; outline-width: 0;
+  animation: lf-doors-reveal 0s linear 10s forwards;
+}
+.landfall .stage:not(.cam) ~ .lf-card .lf-card-close { display: none; }
+@keyframes lf-doors-reveal {
+  to {
+    visibility: visible;
+    max-height: 100rem;
+    margin-top: 2rem;
+    padding: 1.5rem 1.6rem 1.4rem;
+    border-width: 1px;
+    outline-width: 3px;
+  }
+}
+@media (max-width: 900px) {
+  @keyframes lf-doors-reveal {
+    to {
+      visibility: visible;
+      max-height: 100rem;
+      margin-top: 2rem;
+      padding: 1.2rem 1.3rem 1.1rem;
+      border-width: 1px;
+      outline-width: 3px;
+    }
+  }
+}
+
+/* Landfall Sub 2 (#457): the loading ceremony. JS-injected (a no-JS visitor never traps behind it); the dress is the mockup's veil (design/atelier-map/base.css) with its raw hexes as token derivations. */
+.veil {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center;
+  background:
+    radial-gradient(90% 80% at 50% 40%, color-mix(in srgb, var(--ink-dark) 90%, var(--parchment) 10%) 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+}
+.veil-inner { text-align: center; }
+.veil-wordmark {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: clamp(3rem, 8vw, 4.6rem);
+  letter-spacing: 0.14em;
+  color: var(--parchment-bright);
+  line-height: 1.1;
+  margin: 0;
+}
+.veil-tagline {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 1.05rem; color: var(--line-tan);
+  margin: 0.3rem 0 0;
+}
+.veil-rose { width: 132px; height: 132px; margin: 2rem auto 1.5rem; display: block; }
+.veil-rose .rose-ring {
+  fill: none; stroke: var(--line-tan); stroke-width: 1;
+  stroke-dasharray: 277; stroke-dashoffset: 277;
+  animation: rose-draw 1.6s ease-out forwards;
+}
+.veil-rose .rose-ring.inner {
+  stroke-dasharray: 214; stroke-dashoffset: 214;
+  stroke-width: 0.6;
+  animation: rose-draw 1.6s 0.25s ease-out forwards;
+}
+.veil-rose .rose-rays path {
+  stroke: var(--line-tan); stroke-width: 0.6; opacity: 0;
+  animation: rose-fade 0.8s 1.1s ease-out forwards;
+}
+.veil-rose .rose-needle {
+  fill: var(--parchment); opacity: 0;
+  transform-origin: 60px 60px;
+  animation: needle-settle 1.4s 1.3s cubic-bezier(.2,1.4,.4,1) forwards;
+}
+.veil-rose .rose-pin { fill: var(--line-tan); }
+@keyframes rose-draw { to { stroke-dashoffset: 0; } }
+@keyframes rose-fade { to { opacity: 0.75; } }
+@keyframes needle-settle {
+  0% { opacity: 0; transform: rotate(-160deg); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: rotate(16deg); }
+}
+.veil-status {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.78rem; letter-spacing: 0.3em;
+  color: var(--line-tan);
+  text-transform: lowercase;
+  margin: 0;
+}
+.veil.lifting { animation: veil-lift 1.1s ease-in forwards; }
+@keyframes veil-lift {
+  to { opacity: 0; transform: scale(1.06); visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] { animation: lf-doors-reveal 0s linear 10s forwards !important; }
+  .lf-dot { transition: none; }
+  .lf-pulse { animation: none; opacity: 0; }
+  .lf-station-glyph, .lf-legend-btn, .lf-card-enter { transition: none; }
+  .veil-rose .rose-ring, .veil-rose .rose-ring.inner { animation: none; stroke-dashoffset: 0; }
+  .veil-rose .rose-rays path { animation: none; opacity: 0.75; }
+  .veil-rose .rose-needle { animation: none; opacity: 1; transform: rotate(16deg); }
+  .veil.lifting { animation: veil-lift 0.2s ease-out forwards; }
+}
