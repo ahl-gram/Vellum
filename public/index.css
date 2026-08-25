@@ -86,9 +86,11 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 .lf-seed {
   position: absolute; right: 1.6rem; top: 1.4rem; z-index: 4;
   margin: 0; max-width: 17rem; text-align: right;
-  /* The legend's footing generalized to the corner: the mockup's edge vignette scoped to the chrome's own box, so the parchment text stays legible when the pale chart reaches the frame's top. */
+  /* The legend's footing generalized to the corner, held at 0.72 ink rather than fading out: past the fade the gloss measured 1.46:1 over bare chart, and no permitted ground under ~0.7 ink clears the 4.5:1 small-text floor (plate-reader, this sub). */
   padding: 0.7rem 0.9rem 0.8rem;
-  background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.55) 78%, transparent);
+  background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72));
+  /* The legend's pointer pattern: the chrome's text and wash pass clicks through to the chart beneath (at 390px the corner covered the how pip's whole hit box, plate-reader), and the controls take their clicks back. */
+  pointer-events: none;
 }
 .seed-hook {
   display: block;
@@ -96,7 +98,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   font-style: italic;
   font-size: 1.02rem; line-height: 1.45; color: var(--parchment);
 }
-.seed-controls { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.55rem; }
+.seed-controls { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.55rem; pointer-events: auto; }
 .lf-seed .control {
   width: 6.2rem;
   /* 16px floor: a smaller input font makes iOS Safari zoom the page on focus */
@@ -120,8 +122,9 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 .seed-gloss {
   margin: 0.4rem 0 0;
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  /* parchment, not the mockup's ink-faded: 0.76rem italic measured 1.46:1 on the corner wash, and ink-faded cannot clear the 4.5:1 floor on ANY ground this design permits (the #459 lf-card-where precedent); the hierarchy rides size and italic instead. */
   font-style: italic;
-  font-size: 0.76rem; color: var(--ink-faded);
+  font-size: 0.76rem; color: var(--parchment);
 }
 
 /* Landfall Sub 3 (#458): the stations, their cards, and the legend; the dress is the mockup's (design/atelier-map/stage.css) with lf- prefixes and tokens. */

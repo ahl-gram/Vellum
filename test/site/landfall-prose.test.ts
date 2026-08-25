@@ -229,6 +229,23 @@ test("the slips' positioning box is the stage's (#459 skeptic round 2 finding 6;
   assert.ok(card && /position:\s*absolute/.test(card[1]), "the slips float out of flow for the same reason (the failed-bundle reveal is the one pinned exception, and it holds only while nothing JS-dependent is on screen)");
 });
 
+test("the corner chrome passes clicks through and keeps its text on its own ground (#470 plate-reader findings)", () => {
+  const seed = css.match(/\.lf-seed \{([^}]*)\}/);
+  assert.ok(seed, ".lf-seed dresses in index.css");
+  assert.match(seed[1], /pointer-events:\s*none/, "the chrome's text and wash pass clicks through: at 390px the corner covered the how pip's entire 34px hit box and the pip has no legend fallback (measured 2026-08-24, all 5 sample points)");
+  const controls = css.match(/\.seed-controls \{([^}]*)\}/);
+  assert.ok(controls && /pointer-events:\s*auto/.test(controls[1]), "the seed input and Draw it take their clicks back, the legend's exact pattern");
+  assert.match(
+    seed[1],
+    /background: linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\);/,
+    "the wash is pinned whole, both alphas: past a fade-to-transparent the gloss measured 1.46:1 over bare chart, and under ~0.7 ink no permitted text color clears the 4.5:1 small-text floor (plate-reader 2026-08-24)",
+  );
+  const gloss = css.match(/\.seed-gloss \{([^}]*)\}/);
+  assert.ok(gloss && /color:\s*var\(--parchment\)/.test(gloss[1]), "the gloss wears parchment, not the mockup's ink-faded: 3.72:1 on --parchment, 4.33:1 even on --parchment-bright, so ink-faded cannot clear the floor on ANY ground this design permits (the #459 lf-card-where precedent)");
+  const hook = css.match(/\.seed-hook \{([^}]*)\}/);
+  assert.ok(hook && /color:\s*var\(--parchment\)/.test(hook[1]), "the hook keeps parchment on the wash (measured 5.66:1)");
+});
+
 test("the Notice to Mariners is the mockup's stamp on the deep, and only the stamp (#459)", () => {
   const stampAt = astro.indexOf('class="notice-stamp"');
   assert.ok(stampAt >= 0, "the stamp mounts");
