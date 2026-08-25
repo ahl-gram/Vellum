@@ -20,13 +20,11 @@ export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   };
 
-  // Capturing the pointer at the stage retargets the CLICK to the stage, so a gesture must never begin on a control or the buttons go dead under a real mouse (synthetic .click() bypasses capture, which is why probes missed it).
+  // Capturing the pointer at the stage retargets the CLICK to the stage, so a gesture must never begin on a control or the buttons go dead under a real mouse (synthetic .click() bypasses capture, which is why probes missed it). The card slips live outside the stage (#470), so no card guard is needed here.
   const onControl = (e: Event) =>
     e.target instanceof Element && e.target.closest("button, a, input, select") !== null;
-  const onCard = (e: Event) => e.target instanceof Element && e.target.closest(".lf-card") !== null;
 
   stage.addEventListener("pointerdown", (e) => {
-    if (onCard(e)) return;
     if (onControl(e)) return;
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (e.pointerType === "mouse") {
@@ -69,7 +67,6 @@ export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void
   stage.addEventListener(
     "wheel",
     (e) => {
-      if (onCard(e)) return;
       const p = local(e);
       if (on.wheelZoom(p.x, p.y, e.deltaY)) e.preventDefault();
     },
@@ -77,7 +74,6 @@ export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void
   );
 
   stage.addEventListener("dblclick", (e) => {
-    if (onCard(e)) return;
     if (onControl(e)) return;
     const p = local(e);
     on.dive(p.x, p.y);

@@ -57,7 +57,7 @@ const how = howStation();
         ))}
       </div>
       <div class="lf-stations">
-        {stations.map((s) => (
+        {[...stations, how].map((s) => (
           <button
             type="button"
             class={`lf-station${s.sea ? " at-sea" : ""}`}
@@ -75,22 +75,6 @@ const how = howStation();
             </span>
           </button>
         ))}
-        <button
-          type="button"
-          class="lf-station at-sea"
-          style={`left:${(how.nx * 100).toFixed(2)}%;top:${(how.ny * 100).toFixed(2)}%`}
-          data-station="how"
-          data-nx={String(how.nx)}
-          data-ny={String(how.ny)}
-          aria-label={`${how.name}. ${how.verb}.`}
-        >
-          <span class="lf-pulse" aria-hidden="true"></span>
-          <span class="lf-station-glyph" aria-hidden="true"></span>
-          <span class="lf-station-slip" aria-hidden="true">
-            <span class="lf-station-name">{how.name}</span>
-            <span class="lf-station-verb">{how.verb}</span>
-          </span>
-        </button>
       </div>
     </div>
     <aside class="notice-stamp" aria-hidden="true">
@@ -114,24 +98,32 @@ const how = howStation();
         ))}
       </div>
     </nav>
-    {stations.map((s) => (
-      <aside class="lf-card" id={`lf-card-${s.id}`} hidden tabindex="-1" aria-label="About this room">
-        <button type="button" class="lf-card-close" aria-label="Set the slip aside">&times;</button>
-        <p class="lf-card-verb">{s.verb}</p>
-        <h3 class="lf-card-title">{s.name}</h3>
-        <p class="lf-card-where">{s.where}</p>
-        <p class="lf-card-prose">{s.prose}</p>
-        {s.arms && (
-          <div class="lf-card-arms">
-            <img loading="lazy" src="charts/arms-42-0.svg" alt="Arms of The Chiefdom of Rekekoa">
-            <img loading="lazy" src="charts/arms-42-1.svg" alt="Arms of The Hauwaiwa Atolls">
-            <img loading="lazy" src="charts/arms-42-2.svg" alt="Arms of The Ratoa Atolls">
-          </div>
-        )}
-        <a class="lf-card-enter" href={s.href}>Enter the room →</a>
-      </aside>
-    ))}
   </div>
+  <form id="seed-form" class="lf-seed" action="explorer/" method="get" aria-label="Draw a world by its seed">
+    <label class="seed-hook" for="seed-input">Give Vellum a number.<br>It gives you back a world.</label>
+    <div class="seed-controls">
+      <input id="seed-input" class="control" name="seed" inputmode="numeric" pattern="[0-9]*" title="digits only" value="42" aria-label="Seed">
+      <button type="submit" class="primary">Draw it</button>
+    </div>
+    <p class="seed-gloss">every chart is reproducible from the number in its margin</p>
+  </form>
+  {stations.map((s) => (
+    <aside class="lf-card" id={`lf-card-${s.id}`} hidden tabindex="-1" aria-label="About this room">
+      <button type="button" class="lf-card-close" aria-label="Set the slip aside">&times;</button>
+      <p class="lf-card-verb">{s.verb}</p>
+      <h3 class="lf-card-title">{s.name}</h3>
+      <p class="lf-card-where">{s.where}</p>
+      <p class="lf-card-prose">{s.prose}</p>
+      {s.arms && (
+        <div class="lf-card-arms">
+          <img loading="lazy" src="charts/arms-42-0.svg" alt="Arms of The Chiefdom of Rekekoa">
+          <img loading="lazy" src="charts/arms-42-1.svg" alt="Arms of The Hauwaiwa Atolls">
+          <img loading="lazy" src="charts/arms-42-2.svg" alt="Arms of The Ratoa Atolls">
+        </div>
+      )}
+      <a class="lf-card-enter" href={s.href}>Enter the room →</a>
+    </aside>
+  ))}
   <aside class="lf-card lf-card-how" id="lf-card-how" hidden tabindex="-1" aria-label="How Vellum works">
     <button type="button" class="lf-card-close" aria-label="Set the slip aside">&times;</button>
     <p class="lf-card-verb">{how.verb}</p>
@@ -183,58 +175,6 @@ const how = howStation();
       <a href="gallery/">A Gallery of Worlds</a></p>
     </nav>
   </noscript>
-</section>
-
-<section class="cartouche" aria-label="Draw a world by its seed">
-  <div class="rule">
-    <svg class="flourish tl" viewBox="0 0 15 15" aria-hidden="true"><path d="M14.9 0.9Q0.9 0.9 0.9 14.9" fill="none"/></svg>
-    <svg class="flourish tr" viewBox="0 0 15 15" aria-hidden="true"><path d="M14.9 0.9Q0.9 0.9 0.9 14.9" fill="none"/></svg>
-    <svg class="flourish bl" viewBox="0 0 15 15" aria-hidden="true"><path d="M14.9 0.9Q0.9 0.9 0.9 14.9" fill="none"/></svg>
-    <svg class="flourish br" viewBox="0 0 15 15" aria-hidden="true"><path d="M14.9 0.9Q0.9 0.9 0.9 14.9" fill="none"/></svg>
-    <p class="hook">Give Vellum a number.<br>It gives you back a world.</p>
-    <div class="divider" aria-hidden="true"><svg viewBox="0 0 7.2 7.2"><path d="M3.6 0L7.2 3.6L3.6 7.2L0 3.6Z"/></svg></div>
-    <form id="seed-form" class="seedrow" action="explorer/" method="get">
-      <input id="seed-input" class="control" name="seed" inputmode="numeric" pattern="[0-9]*" title="digits only" value="42" aria-label="Seed">
-      <button type="submit" class="primary">Draw it</button>
-    </form>
-    <p class="cartouche-seedline">Every chart is reproducible from the number in its margin</p>
-  </div>
-</section>
-
-<figure>
-  <a href="charts/chart-42-antique.svg"><img src="charts/chart-42-antique.svg"
-    alt="The Isle of Rahai, antique chart" loading="eager" class="plate"></a>
-  <figcaption>The Isle of Rahai, drawn in the antique manner · seed 42.<br>
-  The same number always draws the same island, stroke for stroke.</figcaption>
-</figure>
-
-<section>
-<h2>Arms of the Realms</h2>
-<div class="banners">
-  <figure class="banner"><img loading="lazy" src="charts/arms-42-0.svg"
-    alt="Arms of The Chiefdom of Rekekoa"><figcaption>The Chiefdom of Rekekoa</figcaption></figure>
-  <figure class="banner"><img loading="lazy" src="charts/arms-42-1.svg"
-    alt="Arms of The Hauwaiwa Atolls"><figcaption>The Hauwaiwa Atolls</figcaption></figure>
-  <figure class="banner"><img loading="lazy" src="charts/arms-42-2.svg"
-    alt="Arms of The Ratoa Atolls"><figcaption>The Ratoa Atolls</figcaption></figure>
-</div>
-</section>
-
-<section>
-<h2>One World, Many Charts</h2>
-{/* fetchpriority=low (#329): these megabyte plates must not outrank a clicked
-    room's HTML while they stream on a cold load. The eager hero keeps its rank. */}
-<div class="grid3">
-  <figure><a href="charts/chart-42-topographic.svg"><img loading="lazy" fetchpriority="low"
-    src="charts/chart-42-topographic.svg" alt="Topographic style" class="plate"></a>
-    <figcaption>Topographic survey</figcaption></figure>
-  <figure><a href="charts/chart-42-ink.svg"><img loading="lazy" fetchpriority="low"
-    src="charts/chart-42-ink.svg" alt="Pen and ink style" class="plate"></a>
-    <figcaption>Pen &amp; ink</figcaption></figure>
-  <figure><a href="charts/chart-42-nautical.svg"><img loading="lazy" fetchpriority="low"
-    src="charts/chart-42-nautical.svg" alt="Nautical style" class="plate"></a>
-    <figcaption>Nautical chart, with fathom soundings</figcaption></figure>
-</div>
 </section>
 
 <script type="module" src="app.bundle.js" is:inline></script>

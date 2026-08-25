@@ -4,6 +4,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { SHEET } from "../../src/site/home/camera.ts";
 import { homeStations, howStation } from "../../src/site/home/stations.ts";
+import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import { createProjection, marginFor } from "../../src/render/transform.ts";
 
 // Landfall Sub 4 (#459): the prose finds a home. Ratified in the 2026-08-24 decision-2 comment on #454 (restated on #459): the How It Works prose and underhood links live in a panel opened from a dedicated pip on the chart, never the legend; the text ships hidden but indexable; the Notice to Mariners is the mockup's decorative stamp on the deep, stamp only.
 
@@ -36,17 +38,35 @@ test("the How It Works pip moors at the title cartouche, chart only, never the l
   const layerAt = astro.indexOf('class="lf-stations"');
   assert.ok(layerAt >= 0, "the station layer mounts");
   const layer = astro.slice(layerAt, astro.indexOf("</div>", layerAt));
-  const pipStation = layer.match(/data-station="(\w+)"/);
-  assert.ok(pipStation && pipStation[1] === "how", "the pip stands in the station layer, so the card machinery binds it unchanged");
   assert.ok(
-    astro.includes(`id="lf-card-${pipStation[1]}"`),
+    layer.includes("{[...stations, how].map("),
+    "the pip rides the one station template, folded into the map (#470): the hand-copied fifth block drifted from stations.map by construction",
+  );
+  assert.ok(
+    layer.includes("class={`lf-station${s.sea ? \" at-sea\" : \"\"}`}"),
+    "the template derives the at-sea dress from s.sea for every pip, the how pip included: no hand-written at-sea class remains to go silently wrong",
+  );
+  assert.ok(!astro.includes('class="lf-station at-sea"'), "the literal at-sea twin is gone with the fold");
+  assert.equal(howStation().sea, true, "the how pip declares the at-sea round; the terrain test below is what earns it");
+  assert.ok(
+    astro.includes('id="lf-card-how"'),
     "the panel's id is lf-card-<the pip's data-station>: cards.ts wires them by that concatenation, and a rename on either side dies silently (skeptic round 3 finding 2)",
   );
-  const pipAt = layer.indexOf('data-station="how"');
-  const pip = layer.slice(layer.lastIndexOf("<button", pipAt), layer.indexOf("</button>", pipAt));
-  assert.match(pip, /class="lf-station at-sea"/, "the pip wears the at-sea round, not the land diamond: the cartouche is placed over open water by construction, planCartouche picks the least-land corner (skeptic round 4, elev -0.0048 against seaLevel 0.4389 at the anchor)");
-  assert.ok(pip.includes("data-nx={String(how.nx)}"), "the anchor rides at full precision, never the styled percent");
-  assert.ok(pip.includes("lf-station-slip"), "the pip names itself on hover like every station");
+});
+
+test("the at-sea dress is earned from the terrain, not asserted by hand (#470 deferred small)", () => {
+  // The anchor guard above re-derives how.nx/ny from the committed chart's cartouche frame; this half re-derives WATER at that anchor, so a regen that moves the cartouche ashore reds here and forces the dress question instead of leaving it silently wrong.
+  const how = howStation();
+  const world = generateWorld(defaultRecipe(42));
+  const proj = createProjection(world.recipe.gridW, world.recipe.gridH, SHEET.w, marginFor(SHEET.w));
+  const gx = Math.round((how.nx * SHEET.w - proj.margin) / proj.scale);
+  const gy = Math.round((how.ny * proj.heightPx - proj.margin) / proj.scale);
+  assert.ok(world.elev.inBounds(gx, gy), "the anchor projects back inside the grid");
+  const elev = world.elev.at(gx, gy);
+  assert.ok(
+    elev < world.seaLevel,
+    `the how pip's anchor lies over open water, so sea: true is the terrain's own verdict (measured 2026-08-24: elev ${elev.toFixed(4)} against seaLevel ${world.seaLevel.toFixed(4)}); if this reds after a cartouche regen, the pip's dress must be re-decided, not the assertion loosened`,
+  );
 });
 
 test("the panel is a card slip carrying the prose, hidden in the HTML so it stays indexable (#459)", () => {
@@ -110,13 +130,11 @@ test("the panel is a card slip carrying the prose, hidden in the HTML so it stay
   }
 });
 
-test("pointer and wheel gestures never act through a card slip, wherever the slip lives (#459 skeptic rounds 1 and 2; one-finger touch on the fixed sheets is #460's recorded non-provable arm)", () => {
-  // Source pin only; the real-input arms are recorded on #460 for Sub 5's suite.
+test("stage gestures cannot begin on a slip because no slip lives in the stage; the wheel policy rides each slip (#459 skeptic rounds 1 and 2, reshaped at #470; one-finger touch on the fixed sheets is #460's recorded non-provable arm)", () => {
+  // Source pin only; the real-input arms are recorded on #460 for Sub 5's suite. The old input.ts onCard guards retired WITH the in-stage slips (#470): landfall-doors.test.ts pins every slip outside #lf-stage, so a stage listener can never see one, and a guard proved unable to bite is absent rather than weak.
   const input = read("src/site/home/input.ts");
   const cards = read("src/site/home/cards.ts");
-  const onCard = input.match(/const onCard = [^;]*\.closest\("\.lf-card"\)[^;]*;/);
-  assert.ok(onCard, "input.ts carries an onCard guard keyed on .lf-card");
-  assert.match(onCard[0], /!== null;$/, "and its polarity is on-the-card, not off it: a flipped comparison passes every presence pin (skeptic round 4 mutant C)");
+  assert.ok(!input.includes("lf-card"), "input.ts carries no card guard: the slips left the stage, and dead code that LOOKS like a guard is worse than none");
   // Slice each handler to the NEXT addEventListener registration: an indexOf("});") terminator overshoots the multi-arg wheel listener and reads the following handler's guard as its own (pr-skeptic finding 1 on PR #469).
   const handlerOf = (source: string, gesture: string): string => {
     const at = source.indexOf(`"${gesture}"`);
@@ -124,10 +142,6 @@ test("pointer and wheel gestures never act through a card slip, wherever the sli
     const next = source.indexOf("addEventListener", at);
     return next === -1 ? source.slice(at) : source.slice(at, next);
   };
-  for (const gesture of ["pointerdown", "dblclick"]) {
-    assert.match(handlerOf(input, gesture), /if \(onCard\(e\)\) return;/, `${gesture} stands down inside a card slip`);
-  }
-  assert.match(handlerOf(input, "wheel"), /if \(onCard\(e\)\) return;/, "the stage never zooms through a slip it contains");
   assert.match(
     cards,
     /for \(const slip of slips\(doc\)\) \{\s*slip\.addEventListener\(\s*"wheel"/,
@@ -176,16 +190,43 @@ test("the opened slip receives focus once visible, into its scroller when it has
   );
 });
 
-test("the panel's positioning box is the stage's (#459 skeptic round 2 finding 6)", () => {
-  assert.match(css, /\.landfall \{[^}]*position:\s*relative/, ".landfall is the out-of-stage panel's containing block");
+test("the slips' positioning box is the stage's (#459 skeptic round 2 finding 6; depth-scanned, not indentation-keyed, at #470)", () => {
+  assert.match(css, /\.landfall \{[^}]*position:\s*relative/, ".landfall is the slips' containing block");
   const sectionAt = astro.indexOf('<section class="landfall"');
   const section = astro.slice(sectionAt, astro.indexOf("</section>", sectionAt));
-  const children = [...section.matchAll(/^  <([a-z]+)/gm)].map((m) => m[1]);
+  // Scan container tags by depth (the old 2-space regex red on a cosmetic reindent and missed any sibling at another indent, #470 deferred small); the stage div's subtree is skipped by finding its matching close first.
+  const stageClass = section.indexOf('class="stage"');
+  const stageOpen = section.lastIndexOf("<div", stageClass);
+  let divDepth = 0;
+  let stageClose = -1;
+  for (const m of section.matchAll(/<(\/?)div\b/g)) {
+    if (m.index === undefined || m.index < stageOpen) continue;
+    divDepth += m[1] === "/" ? -1 : 1;
+    if (divDepth === 0) {
+      stageClose = m.index;
+      break;
+    }
+  }
+  assert.ok(stageClose > 0, "the stage div closes");
+  const after = section.slice(stageClose + "</div>".length);
+  let depth = 0;
+  const siblings: string[] = [];
+  for (const m of after.matchAll(/<(\/?)(div|aside|form|nav|noscript|section|figure)\b/g)) {
+    if (m[1] === "/") depth--;
+    else {
+      if (depth === 0) siblings.push(m[2]);
+      depth++;
+    }
+  }
   assert.deepEqual(
-    children,
-    ["div", "aside", "noscript"],
-    "the stage stays .landfall's lone in-flow box: the panel's top:0/bottom:0/max-height resolve against .landfall, which coincides with the stage only while nothing else flows in the section",
+    siblings,
+    ["form", "aside", "aside", "noscript"],
+    "after the stage: the floating seed form, the mapped station slips, the how panel, and the noscript doors, nothing else; the slips' top:0/bottom:0/max-height resolve against .landfall, which coincides with the stage only while nothing else FLOWS in the section",
   );
+  const seed = css.match(/\.lf-seed \{([^}]*)\}/);
+  assert.ok(seed && /position:\s*absolute/.test(seed[1]), "the seed form floats out of flow, so it never stretches .landfall past the stage");
+  const card = css.match(/\.lf-card \{([^}]*)\}/);
+  assert.ok(card && /position:\s*absolute/.test(card[1]), "the slips float out of flow for the same reason (the failed-bundle reveal is the one pinned exception, and it holds only while nothing JS-dependent is on screen)");
 });
 
 test("the Notice to Mariners is the mockup's stamp on the deep, and only the stamp (#459)", () => {

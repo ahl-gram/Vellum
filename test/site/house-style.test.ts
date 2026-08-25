@@ -126,13 +126,14 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
   wears("src/pages/glossary/index.astro", /<strong class="archivist-label">/, "the TOC heading is an inline label");
 });
 
-test("home's flourish family survives the prose move (#324, reshaped at #459)", () => {
+test("home's flourish family survives the section removals (#324, reshaped at #459 then #470)", () => {
   const css = read("public/index.css");
   assert.ok(!css.includes(".notice-body"), "the notice panel left home with its section (#459)");
+  assert.ok(!css.includes("figcaption"), "no figcaption remains on home (#470 removed the last figures), so the flourish selector sheds its dead arm");
   assert.match(
     css,
-    /figcaption, \.underhood \{/,
-    "figcaption and the underhood keep the flourish voice",
+    /\.underhood \{[^}]*font-family: var\(--font-flourish/,
+    "the underhood keeps the flourish voice in its one surviving rule",
   );
 });
 
