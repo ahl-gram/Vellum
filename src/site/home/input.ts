@@ -45,17 +45,25 @@ export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void
     }
   });
 
+  // The gesture applies once per frame from a COMPLETE pair: per-event processing reads one moved finger against one stale one, and that half-pair state dipped the clamped scale to 4.375 mid-gesture (guard-prover round 2, arm L9d).
+  let frame = 0;
+  const step = () => {
+    frame = 0;
+    if (pointers.size !== 2 || mid === null) return;
+    const [a, b] = [...pointers.values()];
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    const m = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    on.pan(m.x - mid.x, m.y - mid.y);
+    const p = local({ clientX: m.x, clientY: m.y });
+    if (pinchStart > 0 && d > 0) on.pinch(p.x, p.y, d / pinchStart);
+    mid = m;
+  };
+
   stage.addEventListener("pointermove", (e) => {
     if (!pointers.has(e.pointerId)) return;
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.size === 2) {
-      const [a, b] = [...pointers.values()];
-      const d = Math.hypot(a.x - b.x, a.y - b.y);
-      const m = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-      if (mid !== null) on.pan(m.x - mid.x, m.y - mid.y);
-      const p = local({ clientX: m.x, clientY: m.y });
-      if (pinchStart > 0 && d > 0) on.pinch(p.x, p.y, d / pinchStart);
-      mid = m;
+      if (frame === 0) frame = requestAnimationFrame(step);
     } else if (last !== null && e.pointerType === "mouse") {
       on.pan(e.clientX - last.x, e.clientY - last.y);
       last = { x: e.clientX, y: e.clientY };

@@ -349,17 +349,21 @@ export async function run(ctx) {
 
   await recenter();
   const room9c = await headroom();
+  const startClear9c = stagePt9 === null ? null : await evaluate(`(() => {
+    const hit = (x, y) => document.elementFromPoint(x, y)?.closest("button, a, input, select") ?? null;
+    return hit(${stagePt9.x - 40}, ${stagePt9.y}) === null && hit(${stagePt9.x + 40}, ${stagePt9.y}) === null;
+  })()`);
   const panBefore = await camNow();
   if (stagePt9 !== null) await twoFingerDrag(stagePt9);
   const panAfter = await camNow();
   const panDelta = panBefore !== null && panAfter !== null
     ? { dx: panAfter.x - panBefore.x, dy: panAfter.y - panBefore.y, sRatio: panAfter.scale / panBefore.scale } : null;
   check(
-    "L9c two fingers PAN the map: at a proven off-clamp fixture the sheet follows the midpoint, right direction and near-full magnitude, the scale exactly held",
-    stagePt9 !== null && roomy(room9c) && panDelta !== null
+    "L9c two fingers PAN the map: at a proven off-clamp fixture whose finger points are PROVEN off every control, the sheet follows the midpoint, right direction and near-full magnitude, the scale exactly held",
+    stagePt9 !== null && roomy(room9c) && startClear9c === true && panDelta !== null
       && panDelta.dx > 25 && panDelta.dx < 55 && panDelta.dy > 18 && panDelta.dy < 42
       && Math.abs(panDelta.sRatio - 1) < 1e-6,
-    JSON.stringify({ room9c, panBefore, panAfter, panDelta }),
+    JSON.stringify({ room9c, startClear9c, panBefore, panAfter, panDelta }),
   );
 
   // Saturate to the close-in clamp by real pinches alone (no mouse mixing inside the touch block).
@@ -373,16 +377,48 @@ export async function run(ctx) {
   }
   const room9d = await headroom();
   const dir9d = roomDir(room9d);
+  // Before/after sampling is blind to a mid-gesture dip that saturates back to the ceiling (guard-prover round 2), so the arm watches every synchronous transform write and keeps the minimum.
+  await evaluate(`(() => {
+    const sheet = document.getElementById("lf-sheet");
+    const scaleOf = (t) => { const m = /scale\\(([-\\d.e]+)\\)/.exec(t ?? ""); return m === null ? null : Number(m[1]); };
+    window.__lfMinScale = scaleOf(sheet?.style.transform) ?? Infinity;
+    window.__lfScaleObs?.disconnect();
+    window.__lfScaleObs = new MutationObserver((recs) => {
+      for (const r of recs) { const s = scaleOf(r.oldValue); if (s !== null && s < window.__lfMinScale) window.__lfMinScale = s; }
+      const now = scaleOf(sheet?.style.transform); if (now !== null && now < window.__lfMinScale) window.__lfMinScale = now;
+    });
+    if (sheet) window.__lfScaleObs.observe(sheet, { attributes: true, attributeFilter: ["style"], attributeOldValue: true });
+  })()`);
   const maxBefore = await camNow();
   if (stagePt9 !== null && dir9d !== null) await twoFingerDrag(stagePt9, dir9d.sx, dir9d.sy);
+  const minScale9d = await evaluate(`(window.__lfScaleObs?.disconnect(), window.__lfMinScale)`);
   const maxAfter = await camNow();
   check(
-    "L9d at the close-in clamp a two-finger drag still pans into PROVEN headroom, signed, and never collapses the zoom (PR #474 measured scale 7 falling to 4.53 here)",
+    "L9d at the close-in clamp a two-finger drag still pans into PROVEN headroom, signed, and never collapses the zoom EVEN MID-GESTURE (PR #474 measured scale 7 falling to 4.53 here; a dip that saturates back by gesture end hides from before/after reads)",
     top9 !== null && Math.abs(top9.scale - 7) < 1e-6 && dir9d !== null && maxBefore !== null && maxAfter !== null
       && Math.abs(maxAfter.scale - 7) < 1e-6
+      && typeof minScale9d === "number" && minScale9d > 7 - 1e-6
       && (maxAfter.x - maxBefore.x) * dir9d.sx > 25 && (maxAfter.x - maxBefore.x) * dir9d.sx < 55
       && (maxAfter.y - maxBefore.y) * dir9d.sy > 18 && (maxAfter.y - maxBefore.y) * dir9d.sy < 42,
-    JSON.stringify({ room9d, dir9d, maxBefore, maxAfter }),
+    JSON.stringify({ room9d, dir9d, maxBefore, maxAfter, minScale9d }),
+  );
+
+  // The from-start ratio's own contract: a clamped pinch-in owes its debt, so returning to the starting spread lands back on the clamp exactly (a per-frame relative ratio forgets the clamped half and undershoots).
+  const debtBefore = await camNow();
+  if (stagePt9 !== null) {
+    await touch("touchStart", [{ x: stagePt9.x - 40, y: stagePt9.y, id: 0 }, { x: stagePt9.x + 40, y: stagePt9.y, id: 1 }]);
+    await touch("touchMove", [{ x: stagePt9.x - 80, y: stagePt9.y, id: 0 }, { x: stagePt9.x + 80, y: stagePt9.y, id: 1 }]);
+    await sleep(120);
+    await touch("touchMove", [{ x: stagePt9.x - 40, y: stagePt9.y, id: 0 }, { x: stagePt9.x + 40, y: stagePt9.y, id: 1 }]);
+    await sleep(120);
+    await touch("touchEnd", []);
+  }
+  await sleep(300);
+  const debtAfter = await camNow();
+  check(
+    "L9d2 the pinch owes its debt at the ceiling: one gesture that pinches in past the clamp and returns to its starting spread lands exactly back on 7",
+    debtBefore !== null && debtAfter !== null && Math.abs(debtBefore.scale - 7) < 1e-6 && Math.abs(debtAfter.scale - 7) < 1e-6,
+    JSON.stringify({ debtBefore, debtAfter }),
   );
 
   // Down to the stand-off clamp the same way.
