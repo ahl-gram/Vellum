@@ -26,7 +26,6 @@
   /* #405 the house lift and press */
   --raise: -2px;
   --press: 1px;
-  --raise-grand: -3px;
   --raise-shadow: 0 6px 16px rgb(from var(--chart-ink) r g b / 0.2);
   --press-shadow: 0 1px 3px rgb(from var(--chart-ink) r g b / 0.14);
 }

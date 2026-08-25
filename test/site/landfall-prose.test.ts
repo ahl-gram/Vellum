@@ -4,6 +4,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { SHEET } from "../../src/site/home/camera.ts";
 import { homeStations, howStation } from "../../src/site/home/stations.ts";
+import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import { createProjection, marginFor } from "../../src/render/transform.ts";
 
 // Landfall Sub 4 (#459): the prose finds a home. Ratified in the 2026-08-24 decision-2 comment on #454 (restated on #459): the How It Works prose and underhood links live in a panel opened from a dedicated pip on the chart, never the legend; the text ships hidden but indexable; the Notice to Mariners is the mockup's decorative stamp on the deep, stamp only.
 
@@ -36,17 +38,36 @@ test("the How It Works pip moors at the title cartouche, chart only, never the l
   const layerAt = astro.indexOf('class="lf-stations"');
   assert.ok(layerAt >= 0, "the station layer mounts");
   const layer = astro.slice(layerAt, astro.indexOf("</div>", layerAt));
-  const pipStation = layer.match(/data-station="(\w+)"/);
-  assert.ok(pipStation && pipStation[1] === "how", "the pip stands in the station layer, so the card machinery binds it unchanged");
   assert.ok(
-    astro.includes(`id="lf-card-${pipStation[1]}"`),
+    layer.includes("{[...stations, how].map("),
+    "the pip rides the one station template, folded into the map (#470): the hand-copied fifth block drifted from stations.map by construction",
+  );
+  assert.ok(
+    layer.includes("class={`lf-station${s.sea ? \" at-sea\" : \"\"}`}"),
+    "the template derives the at-sea dress from s.sea for every pip, the how pip included: no hand-written at-sea class remains to go silently wrong",
+  );
+  assert.ok(!astro.includes('class="lf-station at-sea"'), "the literal at-sea twin is gone with the fold");
+  assert.equal(howStation().sea, true, "the how pip declares the at-sea round; the terrain test below is what earns it");
+  assert.ok(
+    astro.includes('id="lf-card-how"'),
     "the panel's id is lf-card-<the pip's data-station>: cards.ts wires them by that concatenation, and a rename on either side dies silently (skeptic round 3 finding 2)",
   );
-  const pipAt = layer.indexOf('data-station="how"');
-  const pip = layer.slice(layer.lastIndexOf("<button", pipAt), layer.indexOf("</button>", pipAt));
-  assert.match(pip, /class="lf-station at-sea"/, "the pip wears the at-sea round, not the land diamond: the cartouche is placed over open water by construction, planCartouche picks the least-land corner (skeptic round 4, elev -0.0048 against seaLevel 0.4389 at the anchor)");
-  assert.ok(pip.includes("data-nx={String(how.nx)}"), "the anchor rides at full precision, never the styled percent");
-  assert.ok(pip.includes("lf-station-slip"), "the pip names itself on hover like every station");
+});
+
+test("every pip's at-sea dress is earned from the terrain, not asserted by hand (#470 deferred small; swept class-wide at skeptic round 2)", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const proj = createProjection(world.recipe.gridW, world.recipe.gridH, SHEET.w, marginFor(SHEET.w));
+  for (const s of [...homeStations(), howStation()]) {
+    const gx = Math.round((s.nx * SHEET.w - proj.margin) / proj.scale);
+    const gy = Math.round((s.ny * proj.heightPx - proj.margin) / proj.scale);
+    assert.ok(world.elev.inBounds(gx, gy), `${s.id}: the anchor projects back inside the grid`);
+    const elev = world.elev.at(gx, gy);
+    assert.equal(
+      elev < world.seaLevel,
+      s.sea,
+      `${s.id}: the sea flag is the terrain's own verdict (measured 2026-08-24: elev ${elev.toFixed(4)} against seaLevel ${world.seaLevel.toFixed(4)}; gallery -0.1389 and how -0.0048 are the two at sea); if this reds after a regen or re-anchor, the dress must be re-decided, not the assertion loosened`,
+    );
+  }
 });
 
 test("the panel is a card slip carrying the prose, hidden in the HTML so it stays indexable (#459)", () => {
@@ -110,13 +131,11 @@ test("the panel is a card slip carrying the prose, hidden in the HTML so it stay
   }
 });
 
-test("pointer and wheel gestures never act through a card slip, wherever the slip lives (#459 skeptic rounds 1 and 2; one-finger touch on the fixed sheets is #460's recorded non-provable arm)", () => {
+test("stage gestures cannot begin on a slip because no slip lives in the stage; the wheel policy rides each slip (#459 skeptic rounds 1 and 2, reshaped at #470; one-finger touch on the fixed sheets is #460's recorded non-provable arm)", () => {
   // Source pin only; the real-input arms are recorded on #460 for Sub 5's suite.
   const input = read("src/site/home/input.ts");
   const cards = read("src/site/home/cards.ts");
-  const onCard = input.match(/const onCard = [^;]*\.closest\("\.lf-card"\)[^;]*;/);
-  assert.ok(onCard, "input.ts carries an onCard guard keyed on .lf-card");
-  assert.match(onCard[0], /!== null;$/, "and its polarity is on-the-card, not off it: a flipped comparison passes every presence pin (skeptic round 4 mutant C)");
+  assert.ok(!input.includes("lf-card"), "input.ts carries no card guard: the slips left the stage, and dead code that LOOKS like a guard is worse than none");
   // Slice each handler to the NEXT addEventListener registration: an indexOf("});") terminator overshoots the multi-arg wheel listener and reads the following handler's guard as its own (pr-skeptic finding 1 on PR #469).
   const handlerOf = (source: string, gesture: string): string => {
     const at = source.indexOf(`"${gesture}"`);
@@ -124,10 +143,6 @@ test("pointer and wheel gestures never act through a card slip, wherever the sli
     const next = source.indexOf("addEventListener", at);
     return next === -1 ? source.slice(at) : source.slice(at, next);
   };
-  for (const gesture of ["pointerdown", "dblclick"]) {
-    assert.match(handlerOf(input, gesture), /if \(onCard\(e\)\) return;/, `${gesture} stands down inside a card slip`);
-  }
-  assert.match(handlerOf(input, "wheel"), /if \(onCard\(e\)\) return;/, "the stage never zooms through a slip it contains");
   assert.match(
     cards,
     /for \(const slip of slips\(doc\)\) \{\s*slip\.addEventListener\(\s*"wheel"/,
@@ -156,6 +171,11 @@ test("pointer and wheel gestures never act through a card slip, wherever the sli
     "anywhere else on the slip the wheel is swallowed: no zoom-through, and no page scrolling the slip out from under the cursor",
   );
   assert.match(wheel, /passive: false/, "the slip's wheel listener is non-passive or its preventDefault is ignored");
+  assert.match(
+    cards,
+    /if \(e\.target instanceof Element && e\.target\.closest\("button, a"\) !== null\) return;/,
+    "the stage's tap-to-close guard is pinned whole: buttons and links inside the stage must not close the open slip, and its old .lf-card arm retired with the in-stage slips (skeptic round 2: this line changed unpinned)",
+  );
 });
 
 test("the opened slip receives focus once visible, into its scroller when it has one (#459 skeptic rounds, #460 measurement)", () => {
@@ -176,15 +196,72 @@ test("the opened slip receives focus once visible, into its scroller when it has
   );
 });
 
-test("the panel's positioning box is the stage's (#459 skeptic round 2 finding 6)", () => {
-  assert.match(css, /\.landfall \{[^}]*position:\s*relative/, ".landfall is the out-of-stage panel's containing block");
+test("the slips' positioning box is the stage's (#459 skeptic round 2 finding 6; depth-scanned, not indentation-keyed, at #470)", () => {
+  assert.match(css, /\.landfall \{[^}]*position:\s*relative/, ".landfall is the slips' containing block");
   const sectionAt = astro.indexOf('<section class="landfall"');
   const section = astro.slice(sectionAt, astro.indexOf("</section>", sectionAt));
-  const children = [...section.matchAll(/^  <([a-z]+)/gm)].map((m) => m[1]);
+  const stageClass = section.indexOf('class="stage"');
+  const stageOpen = section.lastIndexOf("<div", stageClass);
+  let divDepth = 0;
+  let stageClose = -1;
+  for (const m of section.matchAll(/<(\/?)div\b/g)) {
+    if (m.index === undefined || m.index < stageOpen) continue;
+    divDepth += m[1] === "/" ? -1 : 1;
+    if (divDepth === 0) {
+      stageClose = m.index;
+      break;
+    }
+  }
+  assert.ok(stageClose > 0, "the stage div closes");
+  const after = section.slice(stageClose + "</div>".length);
+  let depth = 0;
+  const siblings: string[] = [];
+  for (const m of after.matchAll(/<(\/?)(div|aside|form|nav|noscript|section|figure)\b/g)) {
+    if (m[1] === "/") depth--;
+    else {
+      if (depth === 0) siblings.push(m[2]);
+      depth++;
+    }
+  }
   assert.deepEqual(
-    children,
-    ["div", "aside", "noscript"],
-    "the stage stays .landfall's lone in-flow box: the panel's top:0/bottom:0/max-height resolve against .landfall, which coincides with the stage only while nothing else flows in the section",
+    siblings,
+    ["form", "aside", "aside", "noscript"],
+    "after the stage: the floating seed form, the mapped station slips, the how panel, and the noscript doors, nothing else; the slips' top:0/bottom:0/max-height resolve against .landfall, which coincides with the stage only while nothing else FLOWS in the section",
+  );
+  const seed = css.match(/\.lf-seed \{([^}]*)\}/);
+  assert.ok(seed && /position:\s*absolute/.test(seed[1]), "the seed form floats out of flow, so it never stretches .landfall past the stage");
+  const card = css.match(/\.lf-card \{([^}]*)\}/);
+  assert.ok(card && /position:\s*absolute/.test(card[1]), "the slips float out of flow for the same reason (the failed-bundle reveal is the one pinned exception, and it holds only while nothing JS-dependent is on screen)");
+  assert.ok(
+    card && card[1].includes("max-height: calc(100% - 2rem)") && card[1].includes("overflow: hidden"),
+    "the desktop cap replaces the containment the stage's own overflow used to give an over-tall slip: without it a slip escapes the stage box (plate control: 3000px of injected content clamps to landfall minus 2rem with the Enter door still reachable); the narrow block lifts it, pinned in landfall-doors",
+  );
+});
+
+test("the corner chrome passes clicks through and keeps its text on its own ground (#470 plate-reader findings)", () => {
+  const seed = css.match(/\.lf-seed \{([^}]*)\}/);
+  assert.ok(seed, ".lf-seed dresses in index.css");
+  assert.match(seed[1], /pointer-events:\s*none/, "the chrome's text and wash pass clicks through: at 390px the corner covered the how pip's entire 34px hit box and the pip has no legend fallback (measured 2026-08-24, all 5 sample points)");
+  const controls = css.match(/\.seed-controls \{([^}]*)\}/);
+  assert.ok(controls && /pointer-events:\s*auto/.test(controls[1]), "the seed input and Draw it take their clicks back, the legend's exact pattern");
+  assert.match(
+    seed[1],
+    /background: linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\);/,
+    "the wash is pinned whole, both alphas: past a fade-to-transparent the gloss measured 1.46:1 over bare chart, and under ~0.7 ink no permitted text color clears the 4.5:1 small-text floor (plate-reader 2026-08-24)",
+  );
+  const gloss = css.match(/\.seed-gloss \{([^}]*)\}/);
+  assert.ok(gloss && /color:\s*var\(--parchment\)/.test(gloss[1]), "the gloss wears parchment, not the mockup's ink-faded: 3.72:1 on --parchment, 4.33:1 even on --parchment-bright, so ink-faded cannot clear the floor on ANY ground this design permits (the #459 lf-card-where precedent)");
+  const hook = css.match(/\.seed-hook \{([^}]*)\}/);
+  assert.ok(hook && /color:\s*var\(--parchment\)/.test(hook[1]), "the hook keeps parchment on the wash (measured 5.66:1)");
+  const primary = css.match(/\.lf-seed \.primary \{([^}]*)\}/);
+  assert.ok(
+    primary && /white-space:\s*nowrap/.test(primary[1]),
+    "Draw it never wraps: inside the 12rem narrow corner the flex fit broke the phrase across two lines, and nowrap makes the input the flex member that yields (skeptic round 2, visible in the 390 plates)",
+  );
+  const control = css.match(/\.lf-seed \.control \{([^}]*)\}/);
+  assert.ok(
+    control && /min-width:\s*0/.test(control[1]),
+    "and the input CAN yield: flex refuses to shrink an input below its default min-width, so with nowrap alone the row overflowed the panel's left edge by 9.67px at 390 and painted the input over raw map (plate round 3); e2e H3 measures the containment live",
   );
 });
 

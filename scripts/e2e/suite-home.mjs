@@ -1,4 +1,4 @@
-// Cartouche hero e2e (H0-H6, #289), the ceremony (H7-H13, #457), and the stations, cards, and idle drift (H14-H17, #458): the homepage frame at desktop and a real 390px viewport, the hook, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion and narrow-viewport stories, and the station flights driven by REAL dispatched input; self-contained with scoped deltas.
+// The floating seed chrome (H0-H6, #289 semantics relanded at #470), the ceremony (H7-H13, #457), the failed-bundle doors (H13c, #470), and the stations, cards, and idle drift (H14-H17, #458): the homepage frame at desktop and a real 390px viewport, the corner form, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion and narrow-viewport stories, and the station flights driven by REAL dispatched input; self-contained with scoped deltas.
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
 
@@ -45,43 +45,50 @@ export async function run(ctx) {
     }
   }
 
-  const frame = ready ? await evaluate(`(() => {
-    const c = document.querySelector(".cartouche");
-    if (!c) return null;
-    const cs = getComputedStyle(c);
-    const fl = [...c.querySelectorAll(".flourish")].map((f) => { const b = f.getBoundingClientRect(); return [b.width, b.height]; });
-    return { border: cs.borderTopWidth, bg: cs.backgroundColor, radius: cs.borderTopLeftRadius, flourishes: fl };
-  })()`) : null;
-  const flourishesShown = (fl, min) =>
-    !!fl && fl.length === 4 && fl.every(([w, h]) => w > min && Math.abs(w - fl[0][0]) < 0.01 && Math.abs(h - w) < 0.01);
-  // Compared NUMERICALLY: Chromium serializes rgb(from var(...) r g b / a) as color(srgb ...) rather than rgba(), so the channels, not the spelling, are under test (#324).
-  const chartPaper = (bg) => {
+  // Gold compared NUMERICALLY: Chromium serializes var() colors as rgb()/color(srgb ...), so the channels, not the spelling, are under test (#324).
+  const controlGold = (bg) => {
     if (!bg) return false;
-    let m = bg.match(/^rgba\((\d+), (\d+), (\d+), ([0-9.]+)\)$/);
-    if (m) return +m[1] === 242 && +m[2] === 232 && +m[3] === 207 && Math.abs(+m[4] - 0.94) < 0.005;
-    m = bg.match(/^color\(srgb ([0-9.]+) ([0-9.]+) ([0-9.]+) \/ ([0-9.]+)\)$/);
-    return !!m && Math.round(m[1] * 255) === 242 && Math.round(m[2] * 255) === 232
-      && Math.round(m[3] * 255) === 207 && Math.abs(+m[4] - 0.94) < 0.005;
+    let m = bg.match(/^rgb\((\d+), (\d+), (\d+)\)$/);
+    if (m) return +m[1] === 240 && +m[2] === 227 && +m[3] === 189;
+    m = bg.match(/^color\(srgb ([0-9.]+) ([0-9.]+) ([0-9.]+)\)$/);
+    return !!m && Math.round(m[1] * 255) === 240 && Math.round(m[2] * 255) === 227 && Math.round(m[3] * 255) === 189;
   };
+  const frame = ready ? await evaluate(`(() => {
+    const form = document.getElementById("seed-form");
+    const stage = document.getElementById("lf-stage");
+    if (!form || !stage) return null;
+    const f = form.getBoundingClientRect();
+    const s = stage.getBoundingClientRect();
+    const cs = getComputedStyle(form);
+    const btn = form.querySelector("button.primary");
+    return { pos: cs.position, right: s.right - f.right, top: f.top - s.top,
+      inside: f.left > s.left && f.right < s.right + 1 && f.top > s.top && f.bottom < s.bottom,
+      gold: btn ? getComputedStyle(btn).backgroundColor : null,
+      doorsHidden: ["explorer", "reading-room", "atlas", "gallery"].every((id) => {
+        const c = document.getElementById("lf-card-" + id);
+        return c !== null && c.offsetParent === null;
+      }) };
+  })()`) : null;
   check(
-    "H1 the cartouche frame holds the chart's geometry (border 2.2k, chart paper, four visible equal flourishes)",
-    !!frame && Math.abs(parseFloat(frame.border) - 3.3) < 0.35 && chartPaper(frame.bg) && flourishesShown(frame.flourishes, 15),
+    "H1 the seed form floats as the mockup's corner chrome: absolute in the stage's top-right, the gold Draw it, and no door slip showing on a healthy load",
+    !!frame && frame.pos === "absolute" && frame.inside && frame.right > 10 && frame.right < 60
+      && frame.top > 10 && frame.top < 60 && controlGold(frame.gold) && frame.doorsHidden,
     JSON.stringify(frame),
   );
 
   const hero = ready ? await evaluate(`(() => {
-    const hook = document.querySelector(".cartouche .hook");
+    const hook = document.querySelector(".lf-seed .seed-hook");
     const input = document.getElementById("seed-input");
-    const line = document.querySelector(".cartouche-seedline");
+    const line = document.querySelector(".lf-seed .seed-gloss");
     return { hook: hook ? hook.innerText : null, seed: input ? input.value : null,
       lineStyle: line ? getComputedStyle(line).fontStyle : null };
   })()`) : null;
   check(
-    "H2 the hook reads as ratified, the seed input is prefilled 42, the seedline is italic",
+    "H2 the hook reads as ratified, the seed input is prefilled 42, the gloss is italic",
     !!hero && /Give Vellum a number\./.test(hero.hook) && /It gives you back a world\./.test(hero.hook) && hero.seed === "42" && hero.lineStyle === "italic",
     JSON.stringify(hero),
   );
-  await shoot("home-cartouche.png");
+  await shoot("home-seed-chrome.png");
 
   await setMobileViewport(390, 900);
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
@@ -93,15 +100,27 @@ export async function run(ctx) {
     await sleep(75);
   }
   const mobile = mobileReady ? await evaluate(`(() => {
-    const fl = [...document.querySelectorAll(".cartouche .flourish")].map((f) => { const b = f.getBoundingClientRect(); return [b.width, b.height]; });
-    return { innerWidth: window.innerWidth, scrollW: document.documentElement.scrollWidth, flourishes: fl };
+    const form = document.getElementById("seed-form");
+    const gloss = document.querySelector(".lf-seed .seed-gloss");
+    const input = document.getElementById("seed-input");
+    const btn = form ? form.querySelector("button.primary") : null;
+    if (!form || !gloss || !input || !btn) return null;
+    const f = form.getBoundingClientRect();
+    const i = input.getBoundingClientRect();
+    const r = new Range();
+    r.selectNodeContents(btn);
+    return { innerWidth: window.innerWidth, scrollW: document.documentElement.scrollWidth,
+      inViewport: f.left >= 0 && f.right <= 390.5, glossShown: getComputedStyle(gloss).display,
+      inputInsidePanel: i.left >= f.left - 0.5 && i.right <= f.right + 0.5,
+      drawItLines: r.getClientRects().length };
   })()`) : null;
   check(
-    "H3 at 390px the flourishes stay (D6) and nothing scrolls sideways",
-    !!mobile && mobile.innerWidth === 390 && mobile.scrollW === 390 && flourishesShown(mobile.flourishes, 10),
+    "H3 at 390px the corner form stays whole in the viewport, its controls whole inside the panel, Draw it on one line, the gloss stood down, nothing scrolling sideways",
+    !!mobile && mobile.innerWidth === 390 && mobile.scrollW === 390 && mobile.inViewport
+      && mobile.inputInsidePanel && mobile.drawItLines === 1 && mobile.glossShown === "none",
     JSON.stringify(mobile),
   );
-  await shoot("home-cartouche-390.png");
+  await shoot("home-seed-chrome-390.png");
   await clearMobile();
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   ready = false;
@@ -397,15 +416,16 @@ export async function run(ctx) {
       preModule = await evaluate(`(() => {
         const v = document.getElementById("lf-veil");
         if (!v) return null;
-        return { veil: true, adopted: v.dataset.adopted !== undefined, seedForm: !!document.getElementById("seed-form") };
+        return { veil: true, adopted: v.dataset.adopted !== undefined, seedForm: !!document.getElementById("seed-form"),
+          doorsYet: getComputedStyle(document.getElementById("lf-card-explorer")).visibility === "visible" };
       })()`);
       if (preModule !== null && preModule.seedForm) break;
     } catch {}
     await sleep(60);
   }
   check(
-    "H13a with the bundle unreachable the pre-paint veil still stands, unadopted, over an intact page",
-    preModule !== null && preModule.seedForm && !preModule.adopted,
+    "H13a with the bundle unreachable the pre-paint veil still stands, unadopted, over an intact page, the doors not yet shown",
+    preModule !== null && preModule.seedForm && !preModule.adopted && preModule.doorsYet === false,
     JSON.stringify(preModule),
   );
   let released = null;
@@ -414,11 +434,118 @@ export async function run(ctx) {
     if (released !== null && !released.veil) break;
     await sleep(100);
   }
-  await send("Network.setBlockedURLs", { urls: [] });
   check(
     "H13b the safety release lifts an unadopted veil: a failed bundle never traps the page",
     released !== null && !released.veil && released.seedForm,
     JSON.stringify(released),
+  );
+  // The doors share the veil's 10s window (#470, ratified 2026-08-24), so after H13b's release they are due at once; the poll absorbs animation-fill timing, and the bundle stays blocked until the doors are read.
+  let doors = null;
+  for (let i = 0; i < 80; i++) {
+    try {
+      doors = await evaluate(`(() => {
+        const ids = ["explorer", "reading-room", "atlas", "gallery"];
+        const cards = ids.map((id) => document.getElementById("lf-card-" + id));
+        if (cards.some((c) => c === null)) return null;
+        const shown = cards.map((c) => {
+          const cs = getComputedStyle(c);
+          const r = c.getBoundingClientRect();
+          return cs.visibility === "visible" && cs.position === "static" && r.height > 40;
+        });
+        const hrefs = cards.map((c) => c.querySelector(".lf-card-enter")?.getAttribute("href") ?? null);
+        const how = document.getElementById("lf-card-how");
+        return { shown, hrefs,
+          closesHidden: cards.every((c) => getComputedStyle(c.querySelector(".lf-card-close")).display === "none"),
+          howHidden: how !== null && how.offsetParent === null,
+          scrollW: document.documentElement.scrollWidth, innerWidth: window.innerWidth };
+      })()`);
+      if (doors !== null && doors.shown.every(Boolean)) break;
+    } catch {}
+    await sleep(150);
+  }
+  await send("Network.setBlockedURLs", { urls: [] });
+  check(
+    "H13c a dead bundle reveals the four slips as plain static doors: each visible in flow with its room's own door, the dead close controls hidden, the how panel and the sideways scroll unmoved",
+    doors !== null && doors.shown.every(Boolean)
+      && JSON.stringify(doors.hrefs) === JSON.stringify(["explorer/", "reading-room/", "atlas/", "gallery/"])
+      && doors.closesHidden && doors.howHidden && doors.scrollW === doors.innerWidth,
+    JSON.stringify(doors),
+  );
+  await shoot("home-failed-bundle-doors.png");
+
+  // Reduced motion crosses the doors both ways (#470 skeptic round 1: motion.css's prm blanket zeroed the 10s delay, so prm visitors got the failure doors on every HEALTHY load).
+  // Both halves matter: a display:none card still computes visibility:visible, and a pre-reveal card is display:block with visibility:hidden.
+  const doorShown = `(() => { const c = document.getElementById("lf-card-explorer"); return c !== null && c.offsetParent !== null && getComputedStyle(c).visibility === "visible"; })()`;
+  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  await send("Network.setBlockedURLs", { urls: ["*app.bundle.js*"] });
+  await evaluate(`sessionStorage.clear()`);
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  let prmDoors = false;
+  for (let i = 0; i < 90; i++) {
+    try { prmDoors = await evaluate(doorShown); } catch {}
+    if (prmDoors === true) break;
+    await sleep(150);
+  }
+  await send("Network.setBlockedURLs", { urls: [] });
+  check(
+    "H13d reduced motion keeps its doors on a dead bundle: the reveal is a timer, not motion the prm blanket may still",
+    prmDoors === true,
+    `doors shown=${prmDoors}`,
+  );
+  // Mark the H13d page before leaving: without the marker the first samples race the navigation and read the OLD page's legitimately visible doors as a flash.
+  await evaluate(`window.__h13d = 1`);
+  // Throttle so the pre-.cam window is seconds wide: on an unthrottled localhost the module boots within a frame and a 75ms sampler proves nothing about a flash (skeptic round 3).
+  await send("Network.emulateNetworkConditions", { offline: false, latency: 200, downloadThroughput: 120000, uploadThroughput: 120000 });
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  let prmFlash = false;
+  let prmCam = false;
+  let fresh = false;
+  let afterCam = 0;
+  for (let i = 0; i < 120; i++) {
+    try {
+      const s = await evaluate(`({ old: window.__h13d === 1, ready: !!document.getElementById("seed-form"), door: ${doorShown}, cam: !!document.querySelector("#lf-stage.cam") })`);
+      if (fresh) {
+        if (s.door) prmFlash = true;
+        if (s.cam) prmCam = true;
+      } else {
+        fresh = !s.old && s.ready;
+      }
+    } catch {}
+    if (prmCam && ++afterCam > 4) break;
+    await sleep(75);
+  }
+  await send("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
+  check(
+    "H13e and never shows them on a healthy THROTTLED load: the pre-.cam window is seconds wide and no prm sample ever sees a door before the bundle provably boots",
+    prmCam && !prmFlash,
+    JSON.stringify({ prmCam, prmFlash }),
+  );
+
+  // The round-2 blocker's live proof: script execution OFF plus reduced motion is the one visitor class where the noscript stand-down must out-cascade the prm exemption (both !important, specificity tied, document order decides).
+  await send("Emulation.setScriptExecutionDisabled", { value: true });
+  let nojs = null;
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  for (let i = 0; i < 90; i++) {
+    try {
+      nojs = await evaluate(`(() => {
+        const nav = document.querySelector(".lf-noscript-rooms");
+        const how = document.getElementById("lf-card-how");
+        if (nav === null || how === null) return null;
+        return { navShown: nav.offsetParent !== null, howShown: how.offsetParent !== null && getComputedStyle(how).visibility === "visible", door: ${doorShown} };
+      })()`);
+    } catch {}
+    if (nojs !== null && nojs.door) break;
+    await sleep(150);
+  }
+  await send("Emulation.setScriptExecutionDisabled", { value: false });
+  await send("Emulation.setEmulatedMedia", { features: [] });
+  check(
+    "H13f script-off plus reduced motion keeps the noscript doors alone past the 10s mark: the plain nav and the how prose stand, and no slip ever doubles them",
+    nojs !== null && nojs.navShown && nojs.howShown && !nojs.door,
+    JSON.stringify(nojs),
   );
 
   // Stations, cards, and the drift (#458) at the ratified 1280x800 (the harness's tall default hides the short-viewport collisions the plate-reader measured). Every gesture is REAL dispatched input (#460): pointer capture retargets clicks, so synthetic .click() proves nothing here.

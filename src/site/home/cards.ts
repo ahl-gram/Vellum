@@ -126,7 +126,7 @@ export function bindStations(on: StationBindings): void {
     downAt = { x: e.clientX, y: e.clientY };
   });
   stage?.addEventListener("click", (e) => {
-    if (e.target instanceof Element && e.target.closest("button, a, .lf-card") !== null) return;
+    if (e.target instanceof Element && e.target.closest("button, a") !== null) return;
     const moved = downAt === null ? 0 : Math.abs(e.clientX - downAt.x) + Math.abs(e.clientY - downAt.y);
     if (moved < TAP_SLOP_PX) close(false);
   });
