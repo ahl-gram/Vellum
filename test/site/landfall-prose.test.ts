@@ -54,18 +54,20 @@ test("the How It Works pip moors at the title cartouche, chart only, never the l
   );
 });
 
-test("the at-sea dress is earned from the terrain, not asserted by hand (#470 deferred small)", () => {
-  const how = howStation();
+test("every pip's at-sea dress is earned from the terrain, not asserted by hand (#470 deferred small; swept class-wide at skeptic round 2)", () => {
   const world = generateWorld(defaultRecipe(42));
   const proj = createProjection(world.recipe.gridW, world.recipe.gridH, SHEET.w, marginFor(SHEET.w));
-  const gx = Math.round((how.nx * SHEET.w - proj.margin) / proj.scale);
-  const gy = Math.round((how.ny * proj.heightPx - proj.margin) / proj.scale);
-  assert.ok(world.elev.inBounds(gx, gy), "the anchor projects back inside the grid");
-  const elev = world.elev.at(gx, gy);
-  assert.ok(
-    elev < world.seaLevel,
-    `the how pip's anchor lies over open water, so sea: true is the terrain's own verdict (measured 2026-08-24: elev ${elev.toFixed(4)} against seaLevel ${world.seaLevel.toFixed(4)}); if this reds after a cartouche regen, the pip's dress must be re-decided, not the assertion loosened`,
-  );
+  for (const s of [...homeStations(), howStation()]) {
+    const gx = Math.round((s.nx * SHEET.w - proj.margin) / proj.scale);
+    const gy = Math.round((s.ny * proj.heightPx - proj.margin) / proj.scale);
+    assert.ok(world.elev.inBounds(gx, gy), `${s.id}: the anchor projects back inside the grid`);
+    const elev = world.elev.at(gx, gy);
+    assert.equal(
+      elev < world.seaLevel,
+      s.sea,
+      `${s.id}: the sea flag is the terrain's own verdict (measured 2026-08-24: elev ${elev.toFixed(4)} against seaLevel ${world.seaLevel.toFixed(4)}; gallery -0.1389 and how -0.0048 are the two at sea); if this reds after a regen or re-anchor, the dress must be re-decided, not the assertion loosened`,
+    );
+  }
 });
 
 test("the panel is a card slip carrying the prose, hidden in the HTML so it stays indexable (#459)", () => {
@@ -169,6 +171,11 @@ test("stage gestures cannot begin on a slip because no slip lives in the stage; 
     "anywhere else on the slip the wheel is swallowed: no zoom-through, and no page scrolling the slip out from under the cursor",
   );
   assert.match(wheel, /passive: false/, "the slip's wheel listener is non-passive or its preventDefault is ignored");
+  assert.match(
+    cards,
+    /if \(e\.target instanceof Element && e\.target\.closest\("button, a"\) !== null\) return;/,
+    "the stage's tap-to-close guard is pinned whole: buttons and links inside the stage must not close the open slip, and its old .lf-card arm retired with the in-stage slips (skeptic round 2: this line changed unpinned)",
+  );
 });
 
 test("the opened slip receives focus once visible, into its scroller when it has one (#459 skeptic rounds, #460 measurement)", () => {
@@ -242,6 +249,16 @@ test("the corner chrome passes clicks through and keeps its text on its own grou
   assert.ok(gloss && /color:\s*var\(--parchment\)/.test(gloss[1]), "the gloss wears parchment, not the mockup's ink-faded: 3.72:1 on --parchment, 4.33:1 even on --parchment-bright, so ink-faded cannot clear the floor on ANY ground this design permits (the #459 lf-card-where precedent)");
   const hook = css.match(/\.seed-hook \{([^}]*)\}/);
   assert.ok(hook && /color:\s*var\(--parchment\)/.test(hook[1]), "the hook keeps parchment on the wash (measured 5.66:1)");
+  const primary = css.match(/\.lf-seed \.primary \{([^}]*)\}/);
+  assert.ok(
+    primary && /white-space:\s*nowrap/.test(primary[1]),
+    "Draw it never wraps: inside the 12rem narrow corner the flex fit broke the phrase across two lines, and nowrap makes the input the flex member that yields (skeptic round 2, visible in the 390 plates)",
+  );
+  const control = css.match(/\.lf-seed \.control \{([^}]*)\}/);
+  assert.ok(
+    control && /min-width:\s*0/.test(control[1]),
+    "and the input CAN yield: flex refuses to shrink an input below its default min-width, so with nowrap alone the row overflowed the panel's left edge by 9.67px at 390 and painted the input over raw map (plate round 3); e2e H3 measures the containment live",
+  );
 });
 
 test("the Notice to Mariners is the mockup's stamp on the deep, and only the stamp (#459)", () => {

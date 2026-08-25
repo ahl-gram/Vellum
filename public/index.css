@@ -82,7 +82,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 .lf-coords.on { display: block; }
 @media (max-width: 720px) { .landfall .stage { height: min(64vh, 86vw); min-height: 300px; } }
 
-/* Landfall Sub 4a (#470): the seed form is the mockup's top-right corner chrome (design/atelier-map/stage.css), a sub early by ratification 2026-08-24; never .cam-gated (#455: live even when the bundle fails). Wash, colors and pointer policy are pinned in landfall-prose.test.ts. */
+/* Landfall Sub 4a (#470): the seed form is the mockup's top-right corner chrome (design/atelier-map/stage.css), a sub early by ratification 2026-08-24; never .cam-gated (#455: live even when the bundle fails). */
 .lf-seed {
   position: absolute; right: 1.6rem; top: 1.4rem; z-index: 4;
   margin: 0; max-width: 17rem; text-align: right;
@@ -98,7 +98,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 }
 .seed-controls { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.55rem; pointer-events: auto; }
 .lf-seed .control {
-  width: 6.2rem;
+  width: 6.2rem; min-width: 0;
   /* 16px floor: a smaller input font makes iOS Safari zoom the page on focus */
   font-size: 16px;
   color: var(--parchment-bright);
@@ -115,6 +115,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   background: var(--control-gold);
   border: 1px solid var(--line-tan);
   padding: 0.32rem 0.9rem;
+  white-space: nowrap;
 }
 .lf-seed .primary:hover, .lf-seed .primary:focus-visible { background: var(--parchment-bright); }
 .seed-gloss {
@@ -232,7 +233,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   /* Centered by abspos + margin auto, never translateY(-50%): the open tween writes the card's transform. border-box is the mockup's own global reset, which the site shell lacks. right 4rem keeps the slip clear of the zoom-controls column on short viewports. */
   box-sizing: border-box;
   right: 4rem; top: 0; bottom: 0; margin: auto 0; height: fit-content;
-  /* The slips live outside #lf-stage (#470), so the stage's overflow no longer clips an over-tall slip; the cap reproduces that containment against .landfall. */
+  /* Desktop only: the narrow block lifts the cap, where the % would resolve against the viewport instead of .landfall and the clip would land on the sheet's Enter door. */
   max-height: calc(100% - 2rem); overflow: hidden;
   width: min(22rem, calc(100% - 8rem));
   background: var(--parchment-panel);
@@ -335,6 +336,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
     position: fixed; right: 0; left: 0; top: auto; bottom: 0; margin: 0;
     width: 100%; outline-offset: -8px; z-index: 40;
     padding: 1.2rem 1.3rem 1.1rem;
+    max-height: none; overflow: visible;
   }
   .lf-card-arms img { width: 42px; }
   .lf-card-how { max-height: 45vh; }
@@ -346,7 +348,6 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   .seed-gloss { display: none; }
 }
 
-/* Landfall Sub 4a (#470): the failed-bundle doors, pinned whole in landfall-doors.test.ts. */
 .landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] {
   display: block; position: static;
   width: auto; max-width: 46rem; height: auto;

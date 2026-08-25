@@ -63,6 +63,12 @@ test("the reveal's to-frame restores exactly what the base zeroed, and the dead 
     narrow && narrow[1].includes("padding: 1.2rem 1.3rem 1.1rem") && narrow[1].includes("visibility: visible"),
     "the narrow override redefines the keyframes AFTER the base (a definition before it in file order never wins), so revealed doors under 900px wear the narrow padding",
   );
+  const narrowCard = css.match(/@media \(max-width: 900px\) \{([\s\S]*?)\n\}/);
+  const fixedSheet = narrowCard && narrowCard[1].match(/\.lf-card\s*\{([^}]*)\}/);
+  assert.ok(
+    fixedSheet && fixedSheet[1].includes("max-height: none") && fixedSheet[1].includes("overflow: visible"),
+    "the narrow fixed sheets lift the desktop cap: position:fixed makes the % resolve against the VIEWPORT, and on a landscape phone the clip would land exactly on the sheet's Enter door, its only action (skeptic round 2)",
+  );
   assert.match(
     css,
     /\.landfall \.stage:not\(\.cam\) ~ \.lf-card \.lf-card-close \{ display: none; \}/,
@@ -79,7 +85,6 @@ test("the 10s window is the veil's own, derived not duplicated by hand (#470)", 
 });
 
 test("reduced motion keeps the 10s window: the house prm blanket is out-specified, not obeyed (#470 skeptic round 1)", () => {
-  // The bug this pins: motion.css's `* { animation-delay: 0s !important }` prm blanket zeroed the reveal's delay, so every reduced-motion visitor got the four failure doors on every HEALTHY load until .cam arrived (measured: 8.7s of false doors on a throttled load).
   const motion = liveCss("public/motion.css");
   const blanket = motion.match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/);
   assert.ok(
@@ -99,7 +104,7 @@ test("a no-JS visitor keeps the noscript doors alone: the reveal stands down ins
   const noscript = astro.match(/<noscript>[\s\S]*?<\/noscript>/);
   assert.ok(noscript, "the noscript block exists");
   assert.ok(
-    noscript[0].includes(".landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] { animation: none; }"),
-    "script-off never reaches .cam, so without this the slips would reveal at 10s on top of the noscript nav's own plain doors; the same-specificity rule wins by order because a noscript <style> parses after the linked sheet",
+    noscript[0].includes(".landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] { animation: none !important; }"),
+    "script-off never reaches .cam, so without this the slips would reveal at 10s on top of the noscript nav's own plain doors; the !important is load-bearing (skeptic round 2): the prm exemption in index.css is !important, author-important beats author-normal before order is ever consulted, so only an important noscript rule reaches the specificity tie that lets document order decide in its favour",
   );
 });

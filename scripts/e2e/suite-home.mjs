@@ -102,14 +102,22 @@ export async function run(ctx) {
   const mobile = mobileReady ? await evaluate(`(() => {
     const form = document.getElementById("seed-form");
     const gloss = document.querySelector(".lf-seed .seed-gloss");
-    if (!form || !gloss) return null;
+    const input = document.getElementById("seed-input");
+    const btn = form ? form.querySelector("button.primary") : null;
+    if (!form || !gloss || !input || !btn) return null;
     const f = form.getBoundingClientRect();
+    const i = input.getBoundingClientRect();
+    const r = new Range();
+    r.selectNodeContents(btn);
     return { innerWidth: window.innerWidth, scrollW: document.documentElement.scrollWidth,
-      inViewport: f.left >= 0 && f.right <= 390.5, glossShown: getComputedStyle(gloss).display };
+      inViewport: f.left >= 0 && f.right <= 390.5, glossShown: getComputedStyle(gloss).display,
+      inputInsidePanel: i.left >= f.left - 0.5 && i.right <= f.right + 0.5,
+      drawItLines: r.getClientRects().length };
   })()`) : null;
   check(
-    "H3 at 390px the corner form stays whole in the viewport, the gloss stands down as the mockup does, and nothing scrolls sideways",
-    !!mobile && mobile.innerWidth === 390 && mobile.scrollW === 390 && mobile.inViewport && mobile.glossShown === "none",
+    "H3 at 390px the corner form stays whole in the viewport, its controls whole inside the panel, Draw it on one line, the gloss stood down, nothing scrolling sideways",
+    !!mobile && mobile.innerWidth === 390 && mobile.scrollW === 390 && mobile.inViewport
+      && mobile.inputInsidePanel && mobile.drawItLines === 1 && mobile.glossShown === "none",
     JSON.stringify(mobile),
   );
   await shoot("home-seed-chrome-390.png");

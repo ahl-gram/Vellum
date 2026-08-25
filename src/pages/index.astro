@@ -100,7 +100,7 @@ const how = howStation();
     </nav>
   </div>
   <form id="seed-form" class="lf-seed" action="explorer/" method="get" aria-label="Draw a world by its seed">
-    <label class="seed-hook" for="seed-input">Give Vellum a number.<br>It gives you back a world.</label>
+    <p class="seed-hook">Give Vellum a number.<br>It gives you back a world.</p>
     <div class="seed-controls">
       <input id="seed-input" class="control" name="seed" inputmode="numeric" pattern="[0-9]*" title="digits only" value="42" aria-label="Seed">
       <button type="submit" class="primary">Draw it</button>
@@ -166,7 +166,7 @@ const how = howStation();
       #lf-card-how[hidden] { display: block; position: static; width: auto; max-width: 46rem; max-height: none; margin: 2rem auto 0; }
       #lf-card-how .lf-card-close { display: none; }
       #lf-card-how .lf-card-scroll { overflow-y: visible; }
-      .landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] { animation: none; }
+      .landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] { animation: none !important; }
     </style>
     <nav class="lf-noscript-rooms" aria-label="Modes of encounter">
       <p>The chart's stations, by way of plain doors:
