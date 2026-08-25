@@ -11,7 +11,7 @@ export const readCam = `(() => {
   const v = document.getElementById("lf-veil");
   return { veil: !!v, lifting: !!v && v.classList.contains("lifting"),
     status: v ? (v.querySelector(".veil-status")?.textContent ?? null) : null,
-    scale: m.a, fit, expected: fit * (window.innerWidth < 900 ? 1.6 : 1.72) };
+    scale: m.a, x: m.e, y: m.f, fit, expected: fit * (window.innerWidth < 900 ? 1.6 : 1.72) };
 })()`;
 
 export const atLandfall = (s) => !!s && !s.veil && Math.abs(s.scale - s.expected) < 1e-3;

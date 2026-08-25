@@ -12,17 +12,26 @@ export async function run(ctx) {
     evaluate(`(window.__lfWheel = [], window.addEventListener("wheel", (e) => window.__lfWheel.push(e.defaultPrevented), { passive: true }), true)`);
   const lastWheel = () => evaluate(`window.__lfWheel[window.__lfWheel.length - 1] ?? null`);
   const camNow = () => evaluate(readCam);
+  const camScale = async () => { const c = await camNow(); return c === null ? null : c.scale; };
   const scrollY = () => evaluate(`window.scrollY`);
+  // Every element probe returns null instead of throwing, and every dispatch is gated on it: an unguarded deref here turns a product regression into a HARNESS ERROR that prints zero checks (skeptic round 1, proven against an empty site dir), which the lane driver reserves for the browser never coming up.
+  const centerOf = (selector) => evaluate(`(() => {
+    const el = document.querySelector('${selector}');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) };
+  })()`);
+  const wheelAt = async (p, dy) => { if (p !== null) await wheel(p.x, p.y, dy); };
 
-  const stagePoint = `(() => { const r = document.getElementById("lf-stage").getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`;
+  const stagePoint = `(() => { const s = document.getElementById("lf-stage"); if (!s) return null; const r = s.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`;
 
-  // L1: the wheel consumed-vs-released contract (#456 checklist item 2: at the limits the wheel hands scrolling back to the page).
+  // #456's visual-review checklist item 2 is the spec here: at the limits the wheel hands scrolling back to the page.
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   const settled1 = await settleHome();
   await armWheelLog();
   const pt = await evaluate(stagePoint);
 
-  await wheel(pt.x, pt.y, -120);
+  await wheelAt(pt, -120);
   await sleep(150);
   const mid = { prevented: await lastWheel(), cam: await camNow() };
   check(
@@ -32,15 +41,15 @@ export async function run(ctx) {
   );
 
   let sat = await camNow();
-  for (let i = 0; i < 24; i++) {
-    await wheel(pt.x, pt.y, -480);
+  for (let i = 0; i < 24 && pt !== null; i++) {
+    await wheelAt(pt, -480);
     await sleep(90);
     const next = await camNow();
     if (next !== null && sat !== null && Math.abs(next.scale - sat.scale) < 1e-9) { sat = next; break; }
     sat = next;
   }
   await evaluate(`window.__lfWheel = []`);
-  await wheel(pt.x, pt.y, -120);
+  await wheelAt(pt, -120);
   await sleep(150);
   const atMax = { prevented: await lastWheel(), cam: await camNow(), y: await scrollY() };
   check(
@@ -49,7 +58,7 @@ export async function run(ctx) {
     JSON.stringify({ sat, atMax }),
   );
 
-  await wheel(pt.x, pt.y, 120);
+  await wheelAt(pt, 120);
   await sleep(150);
   const backOff = await camNow();
   check(
@@ -59,31 +68,34 @@ export async function run(ctx) {
   );
 
   let floor = await camNow();
-  for (let i = 0; i < 24; i++) {
-    await wheel(pt.x, pt.y, 480);
+  for (let i = 0; i < 24 && pt !== null; i++) {
+    await wheelAt(pt, 480);
     await sleep(90);
     const next = await camNow();
     if (next !== null && floor !== null && Math.abs(next.scale - floor.scale) < 1e-9) { floor = next; break; }
     floor = next;
   }
-  // The saturation loop's released wheels already scrolled the page to its floor, so the probe resets to top (and re-reads the stage point at that scroll) or it proves nothing.
-  await evaluate(`window.scrollTo(0, 0)`);
-  await sleep(120);
+  // The saturation loop's released wheels already scrolled the page to its floor, so the probe POLLS its way back to top (a one-shot reset raced still-in-flight wheels and certified L1d from 44px, skeptic round 1) and re-reads the stage point at that scroll, or it proves nothing.
+  for (let i = 0; i < 30; i++) {
+    await evaluate(`window.scrollTo(0, 0)`);
+    await sleep(120);
+    if ((await scrollY()) === 0) break;
+  }
   const pt2 = await evaluate(stagePoint);
   await evaluate(`window.__lfWheel = []`);
   const yBefore = await scrollY();
-  await wheel(pt2.x, pt2.y, 120);
+  await wheelAt(pt2, 120);
   await sleep(250);
   const atMin = { prevented: await lastWheel(), cam: await camNow(), y: await scrollY() };
   check(
-    "L1d at the stand-off clamp (0.65 of fit) a further wheel-out is released and the page genuinely scrolls: the wheel is handed back, not trapped",
+    "L1d at the stand-off clamp (0.65 of fit) a further wheel-out is released and the page genuinely scrolls from a proven top: the wheel is handed back, not trapped",
     floor !== null && Math.abs(floor.scale - floor.fit * 0.65) < 1e-6 && atMin.prevented === false
-      && Math.abs(atMin.cam.scale - floor.scale) < 1e-9 && atMin.y > yBefore,
+      && yBefore === 0 && Math.abs(atMin.cam.scale - floor.scale) < 1e-9 && atMin.y > yBefore,
     JSON.stringify({ floor, yBefore, atMin }),
   );
   await evaluate(`window.scrollTo(0, 0)`);
 
-  // L2-L7: the six panel arms (the 2026-08-24T18:53 superseding spec + the 19:26 sixth arm). Fresh settle so the camera is at landfall, then a real click on the how pip; the flight stops the idle drift and re-arms its 9s timer, and every scale read below brackets its own gesture tightly, tolerating only sub-step drift (a wheel step is ~19%, the drift tween 1.5% over 14s).
+  // The how flight stops the idle drift and re-arms its 9s timer, so every scale read below brackets its own gesture tightly, tolerating only sub-step drift (a wheel step is ~19%, the drift tween 1.5% over 14s).
   const settled2 = await settleHome();
   const howPt = await evaluate(buttonPoint('.lf-station[data-station="how"]'));
   if (howPt !== null) await clickAt(Math.round(howPt.x), Math.round(howPt.y));
@@ -118,45 +130,46 @@ export async function run(ctx) {
   const y5 = await scrollY();
   await pressKey("ArrowDown", "ArrowDown", 40);
   await sleep(200);
-  const arrowed = await evaluate(`document.querySelector("#lf-card-how .lf-card-scroll").scrollTop`);
+  const arrowed = await evaluate(`document.querySelector("#lf-card-how .lf-card-scroll")?.scrollTop ?? null`);
   check(
     "L5b ArrowDown scrolls the prose at once, the page unmoved",
-    how !== null && arrowed > how.scrollTop && (await scrollY()) === y5,
+    how !== null && arrowed !== null && arrowed > how.scrollTop && (await scrollY()) === y5,
     JSON.stringify({ from: how?.scrollTop, arrowed }),
   );
 
-  const proseBox = await evaluate(`(() => { const r = document.querySelector("#lf-card-how .lf-card-scroll").getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
-  const closeBox0 = await evaluate(`(() => { const r = document.querySelector("#lf-card-how .lf-card-close").getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; })()`);
-  const scale2a = (await camNow()).scale;
+  const proseBox = await centerOf("#lf-card-how .lf-card-scroll");
+  const closeBox0 = await evaluate(`(() => { const el = document.querySelector("#lf-card-how .lf-card-close"); if (!el) return null; const r = el.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; })()`);
+  const scale2a = await camScale();
   let prose = null;
-  for (let i = 0; i < 30; i++) {
-    await wheel(proseBox.x, proseBox.y, 240);
+  for (let i = 0; i < 30 && proseBox !== null; i++) {
+    await wheelAt(proseBox, 240);
     await sleep(90);
-    prose = await evaluate(`(() => { const s = document.querySelector("#lf-card-how .lf-card-scroll"); return { top: s.scrollTop, max: s.scrollHeight - s.clientHeight }; })()`);
-    if (prose.top >= prose.max - 0.5) break;
+    prose = await evaluate(`(() => { const s = document.querySelector("#lf-card-how .lf-card-scroll"); if (!s) return null; return { top: s.scrollTop, max: s.scrollHeight - s.clientHeight }; })()`);
+    if (prose === null || prose.top >= prose.max - 0.5) break;
   }
-  const after2 = { scale: (await camNow()).scale, y: await scrollY() };
+  const after2 = { scale: await camScale(), y: await scrollY() };
   check(
     "L2 (arm 1) wheel over the prose scrolls it to its end: no zoom step, no page scroll",
-    prose !== null && prose.top >= prose.max - 0.5 && after2.y === y5 && Math.abs(after2.scale / scale2a - 1) < 0.005,
+    prose !== null && prose.top >= prose.max - 0.5 && after2.y === y5
+      && scale2a !== null && after2.scale !== null && Math.abs(after2.scale / scale2a - 1) < 0.005,
     JSON.stringify({ prose, scale2a, after2 }),
   );
 
-  const closeBox1 = await evaluate(`(() => { const r = document.querySelector("#lf-card-how .lf-card-close").getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; })()`);
+  const closeBox1 = await evaluate(`(() => { const el = document.querySelector("#lf-card-how .lf-card-close"); if (!el) return null; const r = el.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; })()`);
   check(
     "L6 (arm 5) the head never scrolls away: the close button's box is unchanged after the prose reaches its end, overscroll contained",
-    closeBox0 !== null && JSON.stringify(closeBox0) === JSON.stringify(closeBox1) && (await scrollY()) === y5,
+    closeBox0 !== null && closeBox1 !== null && JSON.stringify(closeBox0) === JSON.stringify(closeBox1) && (await scrollY()) === y5,
     JSON.stringify({ closeBox0, closeBox1 }),
   );
 
-  const headBox = await evaluate(`(() => { const r = document.querySelector("#lf-card-how .lf-card-title").getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
-  const scale3a = (await camNow()).scale;
-  await wheel(headBox.x, headBox.y, 120);
+  const headBox = await centerOf("#lf-card-how .lf-card-title");
+  const scale3a = await camScale();
+  await wheelAt(headBox, 120);
   await sleep(200);
-  const after3 = { scale: (await camNow()).scale, y: await scrollY() };
+  const after3 = { scale: await camScale(), y: await scrollY() };
   check(
     "L3 (arm 2) wheel over the panel's non-scrolling head is swallowed whole: no page scroll, no zoom step (the round-2 regression scrolled 120px a tick here)",
-    after3.y === y5 && Math.abs(after3.scale / scale3a - 1) < 0.005,
+    headBox !== null && after3.y === y5 && scale3a !== null && after3.scale !== null && Math.abs(after3.scale / scale3a - 1) < 0.005,
     JSON.stringify({ scale3a, after3 }),
   );
 
@@ -180,37 +193,44 @@ export async function run(ctx) {
   await pressKey("Escape", "Escape", 27);
   await sleep(500);
 
-  // L4 (arm 3) + L8: each station card in turn via its legend chip; the wheel is swallowed over the open slip, and every Enter link is a 44px touch target (#460 ratification 2, RED until the padding bump).
-  const enters = [];
-  let swallowed4 = null;
-  for (const id of ["atlas", "explorer", "reading-room", "gallery"]) {
-    const chipPt = await evaluate(buttonPoint(`.lf-legend-btn[data-station="${id}"]`));
-    if (chipPt !== null) await clickAt(Math.round(chipPt.x), Math.round(chipPt.y));
-    let open = false;
-    for (let i = 0; i < 80; i++) {
-      try {
-        open = await evaluate(`(() => { const c = document.getElementById("lf-card-${id}"); if (!c || c.hidden) return false; const cs = getComputedStyle(c); return cs.visibility !== "hidden" && Number(cs.opacity) > 0.95; })()`);
-      } catch {}
-      if (open === true) break;
-      await sleep(75);
+  // Each station card in turn via its legend chip, so one loop pays for both the wheel-swallow arm and the touch-target sweep.
+  const measureEnters = async (label) => {
+    const boxes = [];
+    let swallowed = null;
+    for (const id of ["atlas", "explorer", "reading-room", "gallery"]) {
+      const chipPt = await evaluate(buttonPoint(`.lf-legend-btn[data-station="${id}"]`));
+      if (chipPt !== null) await clickAt(Math.round(chipPt.x), Math.round(chipPt.y));
+      let open = false;
+      for (let i = 0; i < 80; i++) {
+        try {
+          open = await evaluate(`(() => { const c = document.getElementById("lf-card-${id}"); if (!c || c.hidden) return false; const cs = getComputedStyle(c); return cs.visibility !== "hidden" && Number(cs.opacity) > 0.95; })()`);
+        } catch {}
+        if (open === true) break;
+        await sleep(75);
+      }
+      await sleep(400);
+      const box = await evaluate(`(() => { const a = document.querySelector("#lf-card-${id} .lf-card-enter"); if (!a) return null; const r = a.getBoundingClientRect(); return { id: "${id}", open: ${open}, w: r.width, h: r.height }; })()`);
+      boxes.push(box);
+      if (id === "atlas" && label === "desktop") {
+        const cardPt = await centerOf("#lf-card-atlas .lf-card-prose");
+        const yA = await scrollY();
+        const sA = await camScale();
+        await wheelAt(cardPt, 120);
+        await sleep(200);
+        swallowed = { yA, sA, y: await scrollY(), scale: await camScale() };
+      }
+      await pressKey("Escape", "Escape", 27);
+      await sleep(400);
     }
-    await sleep(400);
-    const box = await evaluate(`(() => { const a = document.querySelector("#lf-card-${id} .lf-card-enter"); if (!a) return null; const r = a.getBoundingClientRect(); return { id: "${id}", open: ${open}, w: r.width, h: r.height }; })()`);
-    enters.push(box);
-    if (id === "atlas") {
-      const cardPt = await evaluate(`(() => { const r = document.querySelector("#lf-card-atlas .lf-card-prose").getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
-      const yA = await scrollY();
-      const sA = (await camNow()).scale;
-      await wheel(cardPt.x, cardPt.y, 120);
-      await sleep(200);
-      swallowed4 = { yA, sA, y: await scrollY(), scale: (await camNow()).scale };
-    }
-    await pressKey("Escape", "Escape", 27);
-    await sleep(400);
-  }
+    return { boxes, swallowed };
+  };
+  const desktop8 = await measureEnters("desktop");
+  const enters = desktop8.boxes;
+  const swallowed4 = desktop8.swallowed;
   check(
     "L4 (arm 3) wheel over an open station card is swallowed: no page scroll, no zoom step (before the fix this gesture stepped the zoom)",
-    swallowed4 !== null && swallowed4.y === swallowed4.yA && Math.abs(swallowed4.scale / swallowed4.sA - 1) < 0.005,
+    swallowed4 !== null && swallowed4.y === swallowed4.yA
+      && swallowed4.sA !== null && swallowed4.scale !== null && Math.abs(swallowed4.scale / swallowed4.sA - 1) < 0.005,
     JSON.stringify({ swallowed4 }),
   );
   check(
@@ -253,27 +273,57 @@ export async function run(ctx) {
   await pressKey("Escape", "Escape", 27);
   await sleep(500);
 
+  // The 390 sweep runs BEFORE any real touch (mouse clicks only), keeping the one-emulation-set rule whole; the narrow media block already trims a sibling control's padding, so the touch-target ruling is pinned on the one viewport where it binds.
+  const narrow8 = await measureEnters("narrow");
+  check(
+    "L8b at 390 the touch targets hold: every Enter link is still 44px under the narrow media rules",
+    narrow8.boxes.length === 4 && narrow8.boxes.every((b) => b !== null && b.open && b.h >= 44 && b.w >= 44),
+    JSON.stringify({ enters390: narrow8.boxes }),
+  );
+
   const stagePt9 = await evaluate(stagePoint);
+  const stillCam = (a, b) =>
+    a !== null && b !== null && Math.abs(b.scale - a.scale) < 1e-9 && Math.abs(b.x - a.x) < 1e-9 && Math.abs(b.y - a.y) < 1e-9;
+  const touchAction9 = await evaluate(`(() => { const s = document.getElementById("lf-stage"); return s ? getComputedStyle(s).touchAction : null; })()`);
   const oneBefore = await camNow();
-  await touch("touchStart", [{ x: stagePt9.x, y: stagePt9.y, id: 0 }]);
-  await touch("touchMove", [{ x: stagePt9.x - 60, y: stagePt9.y - 90, id: 0 }]);
-  await touch("touchEnd", []);
+  if (stagePt9 !== null) {
+    await touch("touchStart", [{ x: stagePt9.x, y: stagePt9.y, id: 0 }]);
+    await touch("touchMove", [{ x: stagePt9.x - 60, y: stagePt9.y - 90, id: 0 }]);
+    await touch("touchEnd", []);
+  }
   await sleep(300);
   const oneAfter = await camNow();
   check(
-    "L9a one finger never drives the map: a real touch drag leaves the sheet's camera untouched (#455 touch policy, touch-action: pan-y)",
-    oneBefore !== null && oneAfter !== null && Math.abs(oneAfter.scale - oneBefore.scale) < 1e-9,
-    JSON.stringify({ oneBefore, oneAfter }),
+    "L9a one finger never drives the map: a real touch drag leaves the whole camera untouched, scale and translate, and the stage still declares pan-y so the page keeps the gesture (#455 touch policy)",
+    stagePt9 !== null && stillCam(oneBefore, oneAfter) && touchAction9 === "pan-y",
+    JSON.stringify({ touchAction9, oneBefore, oneAfter }),
   );
 
   const twoBefore = await camNow();
-  await pinch(stagePt9.x, stagePt9.y, 60, 180);
+  if (stagePt9 !== null) await pinch(stagePt9.x, stagePt9.y, 60, 180);
   await sleep(300);
   const twoAfter = await camNow();
   check(
     "L9b two fingers drive the map: a real pinch-out zooms the sheet in",
     twoBefore !== null && twoAfter !== null && twoAfter.scale > twoBefore.scale * 1.3,
     JSON.stringify({ twoBefore, twoAfter }),
+  );
+
+  // Two-finger PAN works, measured against the derivation that said it could not: touch points arrive as sequential per-finger pointer moves, so each intermediate ratio is not 1 and the out-then-in about moving midpoints nets to a translate while the spread-constant scale multiplies back exactly. The mockup's fixed start anchor genuinely no-ops; the shipped incremental form pans, the better half of "#455 two fingers drive the map", pinned here as live behavior.
+  const panBefore = await camNow();
+  if (stagePt9 !== null) {
+    await touch("touchStart", [{ x: stagePt9.x - 40, y: stagePt9.y, id: 0 }, { x: stagePt9.x + 40, y: stagePt9.y, id: 1 }]);
+    await touch("touchMove", [{ x: stagePt9.x, y: stagePt9.y + 30, id: 0 }, { x: stagePt9.x + 80, y: stagePt9.y + 30, id: 1 }]);
+    await touch("touchEnd", []);
+  }
+  await sleep(300);
+  const panAfter = await camNow();
+  check(
+    "L9c a two-finger drag carries the sheet: the translate follows the fingers while the spread-constant gesture leaves the scale exactly where it stood",
+    stagePt9 !== null && panBefore !== null && panAfter !== null
+      && Math.abs(panAfter.x - panBefore.x) > 10 && Math.abs(panAfter.y - panBefore.y) > 10
+      && Math.abs(panAfter.scale / panBefore.scale - 1) < 1e-6,
+    JSON.stringify({ panBefore, panAfter }),
   );
   await clearMobile();
 
@@ -295,11 +345,14 @@ export async function run(ctx) {
     if (formReady === true) break;
     await sleep(150);
   }
-  await evaluate(`document.getElementById("seed-input").value = "777"`);
-  const drawPt = await evaluate(`(() => { const b = document.querySelector("#seed-form button.primary"); const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
-  await clickAt(drawPt.x, drawPt.y);
+  let drawPt = null;
+  if (formReady === true) {
+    await evaluate(`(() => { const i2 = document.getElementById("seed-input"); if (i2) i2.value = "777"; })()`);
+    drawPt = await centerOf("#seed-form button.primary");
+    if (drawPt !== null) await clickAt(drawPt.x, drawPt.y);
+  }
   let nojs = null;
-  for (let i = 0; i < 120; i++) {
+  for (let i = 0; i < 120 && drawPt !== null; i++) {
     try {
       nojs = await evaluate(`({ path: location.pathname, search: location.search, hash: location.hash, h1: document.querySelector("h1")?.textContent ?? null })`);
       if (nojs.path === "/explorer/") break;
