@@ -111,8 +111,10 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     return consumed;
   };
 
+  let gestureScale = 1;
   bindStageInput(stage, {
     press: () => {
+      gestureScale = cam.s;
       stopDrift();
       gsap.killTweensOf(cam);
       stage.classList.add("dragging");
@@ -123,7 +125,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
       settle();
     },
     wheelZoom: (px, py, deltaY) => zoomBy(Math.exp(-deltaY * 0.0016), px, py, 0),
-    pinch: (px, py, ratio) => zoomBy(ratio, px, py, 0),
+    pinch: (px, py, ratio) => zoomBy((gestureScale * ratio) / cam.s, px, py, 0),
     dive: (px, py) => zoomBy(1.6, px, py),
     key: (key) => {
       if (key === "+" || key === "=") return (zoomBy(1.5), true);
