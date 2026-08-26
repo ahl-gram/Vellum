@@ -204,6 +204,20 @@ test("the interim desk panel: an unconverted room's main stands on parchment, no
   assert.match(panel[1], /box-shadow:\s*var\(--sheet-shadow\)/, "the panel rests at the house depth");
 });
 
+test("the chrome passes the hand through: drags over the fixed cluster reach the chart, links stay live (#461, skeptic finding 2)", () => {
+  // A 485x79 dead drag zone under the cluster on home; the mockup's own idiom (stage.css uses it five times) is none-on-container, auto-on-interactive.
+  const css = layoutStyle();
+  const chrome = css.match(/header\.chrome\s*\{([\s\S]*?)\}/);
+  assert.ok(chrome && /pointer-events:\s*none/.test(chrome[1]), "the chrome container passes pointer events through");
+  assert.match(css, /header\.chrome a,\s*header\.chrome \.rooms-reveal\s*\{[^}]*pointer-events:\s*auto/, "the links and the phone reveal take the hand back");
+});
+
+test("print is paper all the way down: the dark ground resets with the chrome it carried (#454 open decision 4, skeptic finding 5)", () => {
+  const print = layoutStyle().match(/@media print\s*\{([\s\S]*?)\n\}/);
+  assert.ok(print, "the layout style carries the print block");
+  assert.match(print[1], /body\s*\{[^}]*background:\s*none/, "the body's walnut ground must not print (near-black pages with background graphics on)");
+});
+
 test("the deep's focus ring: the chrome on the walnut brightens the ring, paper keeps ink-dark (#324 decision 6, re-ratified at #461)", () => {
   // Guard-prover round 1 (2026-08-26) proved this override unguarded: reverting it ships an invisible ink-dark ring on the deep and nothing reds. house-style.test.ts keeps pinning the paper side.
   const ring = layoutStyle().match(/header\.chrome a:focus-visible,\s*footer a:focus-visible\s*\{([\s\S]*?)\}/);

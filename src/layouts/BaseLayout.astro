@@ -165,7 +165,9 @@ main { margin-inline: auto; }
 header.chrome {
   position: fixed; left: 1.6rem; top: 1.4rem; z-index: 10;
   line-height: normal; text-align: left;
+  pointer-events: none;
 }
+header.chrome a, header.chrome .rooms-reveal { pointer-events: auto; }
 /* Both weight pins survive #288's tag swap: the wordmark is h1 on home and p on rooms,
    whose UA weights differ while the display face has no bold cut; unpinned, home's
    wordmark arrives as synthetic bold. The cluster sets 400 (the mockup's own weight). */
@@ -179,15 +181,9 @@ header.chrome {
 .rooms .sep { margin: 0 0.35em; opacity: 0.7; }
 .rooms a { color: var(--parchment); text-decoration: none; }
 .rooms a:hover, .rooms a:focus-visible { color: var(--parchment-bright); }
-/* Ink-dark reads as void on the deep: the cluster's ring brightens (the stage's #455
-   precedent); house.css keeps ink-dark everywhere on paper. */
 header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--parchment-bright); }
-/* The you-are-here marker never relies on color alone (#268): brightened AND underlined.
-   Inline-block beside motion.css's inline-block links so a multi-word label cannot wrap mid-label. */
 .rooms [aria-current="page"] { display: inline-block; vertical-align: top; color: var(--parchment-bright);
   text-decoration: underline; text-underline-offset: 0.45em; text-decoration-thickness: 1px; }
-/* The band (#461 ruling 5): a full-viewport fixed box whose ::before paints the SAME deep
-   layer clipped to the band, so the reserved ground is pixel-identical to the page ground. */
 .band { position: fixed; inset: 0; z-index: 9; pointer-events: none; }
 .band::before {
   content: ""; position: absolute; inset: 0;
@@ -199,9 +195,6 @@ header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--par
   content: ""; position: absolute; left: 0; right: 0; top: var(--band-h); height: 14px;
   background: linear-gradient(rgb(from var(--chart-ink) r g b / 0.45), transparent);
 }
-/* The room head (#461 ruling 1, keeping #288): the room name is the page's h1, standing
-   on the sheet (or the interim desk panel). Pages place it via RoomHead.astro. */
-/* Pinned leading: page css sets body line-height per page (1.6 on prose, normal on app rooms) and the room head must not inherit that variance (#268's lesson, re-pinned for the cluster era). */
 .room-head { text-align: center; margin: 0 0 1.4rem; line-height: 1.6; }
 .room-name { font-size: 1.65rem; font-weight: 400; letter-spacing: 0.14em; margin: 0; }
 .room-tagline {
@@ -250,6 +243,7 @@ footer a { color: inherit; }
    at Sub 9): the fixed dark chrome must not stamp itself onto every printed page. */
 @media print {
   .band, header.chrome { display: none; }
+  body { background: none; }
   body::before { display: none; }
   body.room { padding: 0; }
   main.desk-panel { background: none; border: none; box-shadow: none; }
@@ -267,6 +261,8 @@ footer a { color: inherit; }
     ? <p class="wordmark"><a href="/">Vellum</a></p>
     : <h1 class="wordmark"><a href="/">Vellum</a></h1>}
   <p class="tagline">{SITE_TAGLINE}</p>
+  {/* The phone reveal (#461, 2026-08-26 call): under 900px home stands the nav down and this native checkbox burger reveals it, no bundle required; a room page's nav never stands down, so no reveal. Styled and shown by public/index.css alone. */}
+  {!room && <input type="checkbox" class="rooms-reveal" aria-label="Reveal the rooms nav" />}
   <nav class="rooms" aria-label="The rooms">
     {NAV_ITEMS.map((item, i) => (
       <Fragment>{i > 0 ? <span class="sep" aria-hidden="true">·</span> : ""}{item.href === path ? (

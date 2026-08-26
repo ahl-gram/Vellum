@@ -65,6 +65,7 @@ const HEAD_READ = `(() => {
     roomName: read("main .room-name"), roomTagline: read("main .room-tagline"),
     footer: read("body > footer"),
     chromePosition: read("header.chrome")?.position ?? null,
+    chromeBottom: document.querySelector("header.chrome")?.getBoundingClientRect().bottom ?? null,
     bandClip: band ? getComputedStyle(band, "::before").clipPath : null,
     h1s: [...document.querySelectorAll("h1")].map((h) => ({ classes: [...h.classList], inHeader: !!h.closest("header"), inMain: !!h.closest("main") })),
     bodyLineHeight: getComputedStyle(document.body).lineHeight,
@@ -157,15 +158,19 @@ export async function run(ctx) {
     offenders.join(" | ") || `${SHELLED.length * MEMBERS.length - 2} members pinned across ${SHELLED.length} pages`,
   );
 
-  // The band clips the deep at --band-h (121.6px at desktop); home has no band, nothing scrolls beneath its cluster.
+  // The band clips the deep at --band-h (121.6px at desktop); home has no band, nothing scrolls
+  // beneath its cluster. The invariant is band >= cluster (ruling 5's "never beneath bare
+  // lettering"), not just the literal clip: nav growth that overflows the band must red here.
   const unfixed = bad((h, r) =>
     h.chromePosition === "fixed" &&
-    (r === "/" ? h.bandClip === null : typeof h.bandClip === "string" && h.bandClip.includes("121.6px")));
+    (r === "/" ? h.bandClip === null
+               : typeof h.bandClip === "string" && h.bandClip.includes("121.6px") &&
+                 typeof h.chromeBottom === "number" && h.chromeBottom <= 121.6));
   check(
-    "RH3 the cluster is fixed on every page, over the reserved band on rooms and bandless on home (#461 rulings 1+5)",
+    "RH3 the cluster is fixed on every page, inside the reserved band on rooms and bandless on home (#461 rulings 1+5)",
     unfixed.length === 0,
-    unfixed.map((r) => `${r}: chrome=${heads[r]?.chromePosition} band=${heads[r]?.bandClip}`).join(" | ") ||
-      `chrome fixed x${SHELLED.length}, band 121.6px x${SHELLED.length - 1}, home bandless`,
+    unfixed.map((r) => `${r}: chrome=${heads[r]?.chromePosition} bottom=${heads[r]?.chromeBottom} band=${heads[r]?.bandClip}`).join(" | ") ||
+      `chrome fixed x${SHELLED.length}, cluster inside the 121.6px band x${SHELLED.length - 1}, home bandless`,
   );
 
   const home = heads["/"];

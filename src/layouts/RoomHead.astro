@@ -1,11 +1,7 @@
 ---
-// Sub 6 (#461, ruling 1): the room name is the page's h1, standing ON the sheet (or the
-// interim desk panel), no longer in the shell header. Pages own its placement; this
-// component keeps the markup one shape. The shell's global style dresses it.
+// Sub 6 (#461, ruling 1): the room's h1 stands in the page, not the shell header; pages own its placement, this component keeps the markup one shape.
 interface Props {
-  /** Must match the room passed to BaseLayout (astro-scaffold pins the pair). */
   room: string;
-  /** The flourish line under the room name (was BaseLayout's tagline prop). */
   tagline: string;
 }
 const { room, tagline } = Astro.props;

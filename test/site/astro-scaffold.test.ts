@@ -408,6 +408,35 @@ test("the layout ships the cluster's ratified pins: leading, weight, the aria-cu
   }
 });
 
+test("the phone doors: home alone renders the rooms reveal ahead of its nav (#461, Alex's 2026-08-26 call on skeptic finding 1)", () => {
+  // The mockup's under-900px nav stand-down stranded four rooms (the legend carries four doors, not seven); the ruled replacement is a no-JS checkbox burger revealing the same nav. Home only: a room page's nav never stands down, so it needs no reveal.
+  for (const p of PAGES) {
+    const html = page(p.route);
+    const reveal = html.indexOf('class="rooms-reveal"');
+    if (p.route === "index.html") {
+      assert.ok(reveal > -1, "home renders the rooms reveal");
+      assert.match(html, /<input type="checkbox"[^>]*class="rooms-reveal"[^>]*aria-label/, "the reveal is a labelled native checkbox (keyboard-operable with no bundle)");
+      assert.ok(reveal < html.indexOf('<nav class="rooms"'), "the reveal precedes the nav it reveals (the ~ combinator needs the order)");
+    } else {
+      assert.equal(reveal, -1, `${p.route} carries no reveal (its nav never stands down)`);
+    }
+  }
+});
+
+test("a page whose markup carries the survey sheet passes desk open (#461, the interim rule's converse)", () => {
+  // The layout throws on desk without room, but nothing stopped a converted page from forgetting desk="open" and shipping a desk panel wrapped around a full-bleed sheet (skeptic finding 9).
+  // The survey sheet is the BARE <div class="sheet">; the Explorer's chart mount is class="sheet" id="sheet", a different animal (sheet-frame.test.ts keys the same way).
+  for (const p of PAGES) {
+    if (p.route === "index.html") continue;
+    const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
+    if (source.includes('<div class="sheet">')) {
+      assert.match(source, /desk="open"/, `${p.route} carries the survey sheet, so its layout call must open the desk`);
+    } else {
+      assert.ok(!source.includes('desk="open"'), `${p.route} has no survey sheet, so it keeps the interim desk panel`);
+    }
+  }
+});
+
 test("the head cluster: wordmark, the atelier tagline, then the rooms nav, fixed on the deep (#461 ruling 1)", () => {
   // Astro entity-encodes text expressions: & and apostrophes arrive escaped.
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#39;");

@@ -197,7 +197,15 @@ export async function run(ctx) {
     const boxes = [];
     let swallowed = null;
     for (const id of ["atlas", "explorer", "reading-room", "gallery"]) {
-      const chipPt = await evaluate(buttonPoint(`.lf-legend-btn[data-station="${id}"]`));
+      // The legend stands down under 900px (#461 phone doors): narrow enters by the station pip, desktop keeps the legend chip it is really testing. The whole-sheet reset first, a real click, so every pip is on screen whatever camera the earlier flights left.
+      if (label === "narrow") {
+        const homePt = await evaluate(buttonPoint("#lf-home"));
+        if (homePt !== null) await clickAt(Math.round(homePt.x), Math.round(homePt.y));
+        await sleep(700);
+      }
+      const chipPt = await evaluate(buttonPoint(
+        label === "narrow" ? `.lf-station[data-station="${id}"]` : `.lf-legend-btn[data-station="${id}"]`,
+      ));
       if (chipPt !== null) await clickAt(Math.round(chipPt.x), Math.round(chipPt.y));
       let open = false;
       for (let i = 0; i < 80; i++) {

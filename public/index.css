@@ -79,6 +79,8 @@ header.chrome::before {
     rgb(from var(--chart-ink) r g b / 0.5) 68%,
     rgb(from var(--chart-ink) r g b / 0) 100%);
 }
+/* The phone reveal renders on home at every width; only under 900px does it earn a face (the media block below). */
+.rooms-reveal { display: none; }
 /* Landfall Sub 4a (#470): the seed form is the mockup's top-right corner chrome (design/atelier-map/stage.css), a sub early by ratification 2026-08-24; never .cam-gated (#455: live even when the bundle fails). */
 .lf-seed {
   position: absolute; right: 1.6rem; top: 1.4rem; z-index: 4;
@@ -319,20 +321,22 @@ header.chrome::before {
   font-size: 0.8rem; color: var(--ink-faded); line-height: 1.5;
 }
 @media (max-width: 900px) {
-  /* Full bleed restored the mockup's spacing, so the boxed-era slip stand-down retired
-     with the box (#461); the mockup stands the rooms nav down on home alone (the legend
-     and stations carry every door), and lifts the camera column above the legend band. */
+  /* The phone doors (#461, Alex's 2026-08-26 call on skeptic finding 1): the mockup's bare
+     stand-down stranded four rooms (the legend carries four doors, not seven), so the nav
+     AND the legend stand down together and the burger reveals the full nav. A native
+     checkbox, keyboard-operable, no bundle: the doors survive scripts-off. */
   .chrome .rooms { display: none; }
-  .lf-legend {
-    width: 100%; left: 0; bottom: 0; transform: none;
-    padding: 0.5rem 0.6rem 0.6rem;
-    background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.85), transparent);
+  .rooms-reveal:checked ~ .rooms { display: block; max-width: calc(100vw - 2rem); }
+  .rooms-reveal {
+    display: inline-block; vertical-align: top; appearance: none; -webkit-appearance: none;
+    width: 1.7rem; height: 1rem; margin: 0.6rem 0 0; padding: 0; border: 0;
+    cursor: pointer;
+    background: repeating-linear-gradient(var(--parchment) 0, var(--parchment) 2px, transparent 2px, transparent 7px);
   }
-  .lf-legend-head { font-size: 0.74rem; margin-bottom: 0.3rem; }
-  .lf-legend-row { gap: 0.4rem; }
-  .lf-legend-btn { padding: 0.3rem 0.6rem 0.25rem; }
-  .lf-legend-verb { font-size: 0.7rem; }
-  .lf-legend-room { font-size: 0.74rem; }
+  .rooms-reveal:checked { background: repeating-linear-gradient(var(--parchment-bright) 0, var(--parchment-bright) 2px, transparent 2px, transparent 7px); }
+  .rooms-reveal:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 4px; }
+  /* Both legend selectors, or the unconditional .cam show-rule (0,4,0) beats this hide at every width with scripts on (round-3 plate finding; e2e H16c pins the resolved display). */
+  .lf-legend, .landfall .stage.cam .lf-legend { display: none; }
   .lf-card {
     /* The mockup's bottom sheet is FIXED to the viewport; inside the boxed stage the sheet was taller than the stage itself and buried the chart whole (skeptic finding 1). z-index stays under the veil's 50. */
     position: fixed; right: 0; left: 0; top: auto; bottom: 0; margin: 0;
@@ -342,7 +346,8 @@ header.chrome::before {
   }
   .lf-card-arms img { width: 42px; }
   .lf-card-how { max-height: 45vh; }
-  .lf-controls { bottom: 10rem; }
+  /* The legend band retired with the phone doors, so the camera column returns to the shore. */
+  .lf-controls { bottom: 1.4rem; }
   .lf-coords.on { display: none; }
   .notice-stamp { display: none; }
   .lf-seed { right: 1rem; top: 0.9rem; max-width: 12rem; }

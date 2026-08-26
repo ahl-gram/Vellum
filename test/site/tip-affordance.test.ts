@@ -7,7 +7,7 @@ import { GALLERY_PAGE_CSS } from "../../src/cli/gallery.ts";
 import { atlasDocument } from "../../src/atlas/document.ts";
 
 // Two contracts over every authored sheet the site has, public/ and src/ alike (#289, #356, #358, #360): what tips must go somewhere or be a ratified chart instrument, and an inline-block link must pin its bullet or be recorded as living outside a marker-bearing list.
-// A tip is defined by the shape `rotate(`, so a hover lift written as translate alone is not swept: motion.css's .topnav a lifts with translateY and no rotate. It is not a false affordance today (an anchor), and widening the definition is a #289 question.
+// A tip is defined by the shape `rotate(`, so a hover lift written as translate alone is not swept: motion.css's .rooms a lifts with translateY and no rotate (#461's addendum). It is not a false affordance today (an anchor), and widening the definition is a #289 question; so is the bare `rotate:` individual-transform property, which this fingerprint cannot see (guard-prover round 3, 2026-08-26).
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");

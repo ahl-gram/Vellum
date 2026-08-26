@@ -726,7 +726,8 @@ export async function run(ctx) {
 
   await setMobileViewport(390, 844);
   const settled16b = await settleHome();
-  const sheetPt = await evaluate(buttonPoint('.lf-legend-btn[data-station="atlas"]'));
+  // The legend stands down under 900px (#461 phone doors), so the narrow entry is the station pip itself, the same door desktop flights use.
+  const sheetPt = await evaluate(buttonPoint('.lf-station[data-station="atlas"]'));
   if (sheetPt !== null) await clickAt(Math.round(sheetPt.x), Math.round(sheetPt.y));
   let opened16 = false;
   for (let i = 0; i < 80; i++) {
@@ -779,6 +780,27 @@ export async function run(ctx) {
   );
   await shoot("home-station-card-390.png");
   await pressKey("Escape", "Escape", 27);
+  await sleep(500);
+  // Round-3 plate finding: the unconditional .landfall .stage.cam .lf-legend show-rule (0,4,0) beat the media-scoped hide (0,1,0), so scripts-on phones kept the legend AND it sat on two of the three camera buttons. Resolved computed styles only, the #288 lesson.
+  let doors16c = null;
+  try {
+    doors16c = await evaluate(`(() => {
+      const legend = document.querySelector(".lf-legend");
+      const cam = !!document.querySelector(".stage.cam");
+      const hits = [...document.querySelectorAll(".lf-controls button")].map((b) => {
+        const r = b.getBoundingClientRect();
+        const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+        return hit === b || b.contains(hit);
+      });
+      return { cam, legendDisplay: legend ? getComputedStyle(legend).display : null, hits };
+    })()`);
+  } catch {}
+  check(
+    "H16c at 390 with the camera armed the legend stands down and every camera button answers its own tap (#461 phone doors, the specificity flip the round-3 plate caught)",
+    doors16c !== null && doors16c.cam && doors16c.legendDisplay === "none" &&
+      doors16c.hits.length > 0 && doors16c.hits.every(Boolean),
+    JSON.stringify({ doors16c }),
+  );
   await clearMobile();
 
   const errDelta3 = consoleErrors.slice(errBase3).filter((e) => !e.includes("AbortError: Transition was skipped"));
