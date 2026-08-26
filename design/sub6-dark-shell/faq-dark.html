@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Vellum FAQ, dark broadside</title>
+<style>
+@font-face { font-family: 'IM Fell English SC'; src: url('../atelier-map/fonts/im-fell-english-sc-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IM Fell English'; font-style: italic; src: url('../atelier-map/fonts/im-fell-english-latin-400-italic.woff2') format('woff2'); }
+@font-face { font-family: 'EB Garamond'; font-weight: 400; src: url('../atelier-map/fonts/eb-garamond-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'EB Garamond'; font-style: italic; font-weight: 400; src: url('../atelier-map/fonts/eb-garamond-latin-400-italic.woff2') format('woff2'); }
+@font-face { font-family: 'EB Garamond'; font-weight: 600; src: url('../atelier-map/fonts/eb-garamond-latin-600-normal.woff2') format('woff2'); }
+:root {
+  --ink-dark: #4a3826; --ink-brown: #6b5a40; --ink-faded: #857257;
+  --line-tan: #b9a77f; --line-faint: #cdbd97;
+  --parchment: #efe6cf; --parchment-panel: #f4ecd8; --parchment-bright: #fff7e4; --parchment-deep: #e6d9b8;
+  --chart-ink: #3d2f1f;
+  --font-serif-fallback: 'Iowan Old Style', 'Palatino', Georgia, serif;
+  --font-display: 'IM Fell English SC', var(--font-serif-fallback);
+  --font-flourish: 'IM Fell English', var(--font-serif-fallback);
+  --font-body: 'EB Garamond', var(--font-serif-fallback);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body); color: var(--ink-dark); line-height: 1.6;
+  background:
+    radial-gradient(120% 90% at 50% 30%, rgb(from var(--ink-dark) r g b / 0.0) 40%, rgb(from var(--chart-ink) r g b / 0.55) 100%),
+    radial-gradient(80% 70% at 30% 20%, #55402a 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+  background-color: var(--chart-ink); background-attachment: fixed;
+}
+.band {
+  position: fixed; inset: 0 0 auto 0; height: 7.6rem; z-index: 9;
+  background:
+    radial-gradient(120% 90% at 50% 30%, rgb(from var(--ink-dark) r g b / 0.0) 40%, rgb(from var(--chart-ink) r g b / 0.55) 100%),
+    radial-gradient(80% 70% at 30% 20%, #55402a 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+  background-color: var(--chart-ink); background-attachment: fixed;
+}
+.band::after { content: ""; position: absolute; inset: auto 0 -14px 0; height: 14px;
+  background: linear-gradient(rgb(from var(--chart-ink) r g b / 0.45), transparent); }
+.chrome { position: fixed; z-index: 10; left: 1.6rem; top: 1.4rem; line-height: normal; }
+
+@keyframes sheet-land {
+  from { opacity: 0; transform: translateY(10px) scale(1.004);
+    box-shadow: 0 30px 80px rgb(from var(--chart-ink) r g b / 0.75); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes ink-in { from { opacity: 0; } }
+.sheet { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+.chrome, footer { animation: ink-in 0.5s 0.18s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .sheet, .chrome, footer { animation: none; } }
+.wordmark { font-family: var(--font-display); font-size: 2.1rem; letter-spacing: 0.12em; line-height: 1.15; }
+.wordmark a { color: var(--parchment-bright); text-decoration: none; display: inline-block;
+  transition: transform 180ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+.wordmark a:hover, .wordmark a:focus-visible { transform: translateY(-2px) rotate(-0.6deg); }
+.tagline { font-family: var(--font-flourish); font-style: italic; font-size: 0.92rem; color: var(--line-tan); }
+.rooms { margin-top: 0.55rem; font-family: var(--font-display); font-size: 0.72rem; letter-spacing: 0.14em; color: var(--ink-faded); }
+.rooms span { margin: 0 0.35em; opacity: 0.7; }
+.rooms a { color: var(--parchment); text-decoration: none; display: inline-block;
+  transition: color 0.2s ease, transform 180ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+.rooms a:hover, .rooms a:focus-visible { color: var(--parchment-bright); transform: translateY(-2px); }
+.rooms a[aria-current="page"] { color: var(--parchment-bright); text-decoration: underline 1px; text-underline-offset: 0.45em; }
+
+main { padding: 8.4rem 2.2rem 1.6rem; }
+.sheet {
+  background: var(--parchment-panel);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgb(255 252 240 / 0.55), transparent 70%),
+    radial-gradient(ellipse at 90% 100%, rgb(110 85 45 / 0.14), transparent 60%);
+  border: 1px solid var(--line-tan);
+  outline: 3px double var(--line-tan); outline-offset: 6px;
+  padding: 2.6rem clamp(1.5rem, 4vw, 4rem) 3.2rem;
+  box-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);
+  position: relative;
+}
+.sheet::before, .sheet::after { content: ""; position: absolute; width: 26px; height: 26px; border: 1px solid var(--line-tan); pointer-events: none; }
+.sheet::before { top: 14px; left: 14px; border-right: none; border-bottom: none; }
+.sheet::after { bottom: 14px; right: 14px; border-left: none; border-top: none; }
+
+.room-head { text-align: center; margin-bottom: 1.4rem; }
+.room-head h1 { font-family: var(--font-display); font-size: 1.65rem; font-weight: 400; letter-spacing: 0.14em; }
+.room-head p { font-family: var(--font-flourish); font-style: italic; color: var(--ink-brown); }
+
+.toc { column-span: all; border-top: 1px solid var(--line-tan); border-bottom: 1px solid var(--line-tan); padding: 0.55rem 0; margin: 0 0 2.2rem; text-align: center; }
+.toc strong { display: inline; font-family: var(--font-display); font-weight: 400; font-size: 0.78rem; letter-spacing: 0.14em; color: var(--ink-faded); margin-right: 0.9em; }
+.toc ul { display: inline; list-style: none; }
+.toc li { display: inline; }
+.toc li + li::before { content: "\00b7"; margin: 0 0.7em; color: var(--ink-faded); }
+.toc a { font-family: var(--font-display); font-size: 0.82rem; letter-spacing: 0.1em; color: var(--ink-dark); text-decoration: none; }
+
+.columns { column-width: 26rem; column-gap: 3.6rem; column-rule: 1px solid var(--line-faint); }
+h2 { column-span: all; font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; letter-spacing: 0.09em; border-bottom: 1px solid var(--line-tan); padding-bottom: 0.3rem; margin: 2.4rem 0 1.1rem; }
+.columns > h2:first-child { margin-top: 0; }
+h3 { font-family: var(--font-body); font-weight: 600; font-size: 1.02rem; margin: 1.1rem 0 0.25rem; break-after: avoid; }
+p { margin: 0 0 0.6rem; }
+a { color: var(--ink-dark); }
+em, i { font-family: var(--font-flourish); }
+code { background: var(--parchment-deep); padding: 0 0.3em; font-size: 0.92em; }
+
+footer { text-align: center; font-family: var(--font-display); font-size: 0.72rem; letter-spacing: 0.22em; color: var(--line-tan); padding: 1.4rem 0 1.8rem; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style></head>
+<body>
+<div class="band" aria-hidden="true"></div>
+<div class="chrome">
+  <p class="wordmark"><a href="/">Vellum</a></p>
+  <p class="tagline">an atelier of imaginary cartography</p>
+  <nav class="rooms" aria-label="The rooms">
+    <a href="/seed-of-the-day/">Today</a><span>&middot;</span>
+    <a href="/explorer/">Explorer</a><span>&middot;</span>
+    <a href="/reading-room/">Reading Room</a><span>&middot;</span>
+    <a href="/print-room/">Print Room</a><span>&middot;</span>
+    <a href="/gallery/">Gallery</a><span>&middot;</span>
+    <a href="/faq/" aria-current="page">Q &amp; A</a><span>&middot;</span>
+    <a href="/glossary/">Glossary</a>
+  </nav>
+</div>
+<main>
+<div class="sheet">
+<div class="room-head"><h1>Questions &amp; Answers</h1><p>how the worlds are made</p></div><div class="columns">
+<div class="toc">
+  <strong class="archivist-label">On this page</strong>
+  <ul>
+    <li><a href="#about">About Vellum</a></li>
+    <li><a href="#how">How a world is built</a></li>
+    <li><a href="#names">Names &amp; invented languages</a></li>
+    <li><a href="#climate">Climate, styles &amp; map types</a></li>
+    <li><a href="#making">Making &amp; reproducing maps</a></li>
+  </ul>
+</div>
+
+<h2 id="about">About Vellum</h2>
+
+<p class="q">What is Vellum?</p>
+<p class="a">Vellum is a procedural cartography engine. Give it a number, a
+"seed," and it invents an entire world (terrain, rivers, forests, towns, and
+their names) and draws it as an old-fashioned atlas chart.</p>
+
+<p class="q">Is this AI image generation?</p>
+<p class="a">No. There is no machine learning or image model involved. Vellum
+follows a fixed set of rules (layered noise, a water-flow simulation, and name
+grammars), so it draws crisp, infinitely scalable SVG maps, and the same seed
+always produces exactly the same one.</p>
+
+<p class="q">What is a "seed"?</p>
+<p class="a">A seed is a number that serves as a world's identity. Seed 42 always
+draws the same island; change the number for a different world. It is printed
+in every chart's margin, so you can always find your way back to a map you
+liked.</p>
+
+<p class="q">Do I need to install anything to try it?</p>
+<p class="a">No. The <a href="../explorer/">Explorer</a> runs the whole engine
+in your browser. Type a seed and draw; nothing is uploaded. To generate files
+on your own machine, clone the repo (see the
+<a href="https://github.com/ahl-gram/Vellum#readme">README</a>).</p>
+
+<p class="q">Can I use the maps I make?</p>
+<p class="a">Yes, freely. Maps you generate with Vellum are yours to use for
+anything, including commercial work, with no restrictions and no attribution
+required (they are dedicated to the public domain). The Vellum source code
+itself is released under the MIT license, so you are welcome to build on the
+engine too.</p>
+
+<p class="q">Why "Vellum"?</p>
+<p class="a">Vellum is the prepared animal skin that real medieval maps and
+manuscripts were drawn on, a fitting surface for charts of places that were
+never real.</p>
+
+<h2 id="how">How a world is built</h2>
+
+<p class="q">How is the land shaped?</p>
+<p class="a">Layered "noise" produces a field of elevations. A sea level is then
+chosen so that the intended fraction of the map is land, and everything above
+the waterline becomes the coastline, hills, and mountains.</p>
+
+<p class="q">How do the rivers and lakes form?</p>
+<p class="a">Vellum simulates water. Rainfall runs downhill along the steepest
+path, and the algorithm guarantees every drop can reach the sea, so rivers
+always connect and flow the right way, widening toward their mouths. Where
+water collects below sea level inland, you get a lake.</p>
+
+<p class="q">Where do the towns, roads, and borders come from?</p>
+<p class="a">Towns are scored by good harbors, river mouths, and flat, fertile
+land. Roads are the cheapest paths between them, and they reuse one another, so
+shared trunk roads emerge naturally. Realms are formed by giving each capital
+the land nearest to it, with borders that prefer to follow rivers and
+ridgelines.</p>
+
+<p class="q">Do the settlements have a history?</p>
+<p class="a">Yes. After the world is built, Vellum simulates a rough history:
+towns receive founding dates, and some villages fall into ruin before the survey
+is drawn. Ruins appear on the map as a broken-tower glyph with a dimmed label.
+The atlas adds a Chronicle section, a dated record of founding events and
+collapses, and the gazetteer notes cite dates where relevant
+(<em>"founded in the year 312; fell to ruin by 581"</em>).</p>
+
+<p class="q">Where do the coats of arms come from?</p>
+<p class="a">Every realm is given its own coat of arms, generated from the same
+seed and obeying the heraldic rule of tincture: no colour on colour, no metal on
+metal. The three banners on the homepage are the arms of the Isle of Rahai's
+realms.</p>
+
+<p class="q">Is every map really repeatable?</p>
+<p class="a">Yes. Every random choice descends from the seed, so the same seed
+with the same options always draws an identical map.</p>
+
+<h2 id="names">Names &amp; invented languages</h2>
+
+<p class="q">Where do the names come from?</p>
+<p class="a">Every world picks one of ten invented cultures, each with its own
+sound, and uses it for everything: towns, rivers, peaks, seas, and realms.
+Because a single map keeps to one culture, its names share a family resemblance,
+the way place names within one country do. Nothing is taken from a real word
+list; every name is built from scratch.</p>
+
+<p class="q">How does the name "grammar" work?</p>
+<p class="a">In two steps. First Vellum builds a bare stem by stringing together a
+culture's sound pieces: beginnings like "mar" or "dr," vowels like "a" or "ai,"
+and endings like "nd" or "mor," following that culture's syllable patterns. Then
+it wraps the stem in a template to fit the feature, for example "The Sea of
+___," "Mount ___," or a town ending such as "haven." A few tidy-up rules keep
+each name short and pronounceable, and no two names on one map repeat.</p>
+
+<p class="q">What are the ten cultures?</p>
+<p class="a">Each is a different sound-world, loosely echoing a real one: a soft
+seafaring tongue, a hard northern one, a desert tongue rich in "sh" and "kh," an
+airy woodland one, an open island one heavy with vowels, a harsh mountain one
+full of clusters, a spare tongue of open syllables and river mouths, a birchwood
+one of "-grad" and "-ov," a stone-temple one of "-tlan" and "-pec," and a steppe
+tongue of khans and kurgans. The chart's title page even credits an invented
+surveyor whose name comes from the same culture.</p>
+
+<p class="q">Do these names fill the gazetteer too?</p>
+<p class="a">Yes. The gazetteer, the atlas's directory of every town, lists them
+by these same invented names, grouped by realm, with a line or two of travelers'
+notes written in the same spirit. The labels on the map and the entries in the
+gazetteer come from one and the same source.</p>
+
+<h2 id="climate">Climate, styles &amp; map types</h2>
+
+<p class="q">How does climate change the look?</p>
+<p class="a">Climate sets temperature, which sets the biomes, and biomes change
+the map's <em>symbols</em>, not its base color. A polar world shows pine woods
+and open tundra, with the snow line low on the hills. A tropical world shows
+palms, deserts marked with dunes, and snow only on the highest peaks. Temperate
+sits between, with broadleaf woods. The coastline of a given seed is identical
+in every climate.</p>
+
+<p class="q">So is a polar map white?</p>
+<p class="a">No, and that surprises people. The land is the same parchment (or
+elevation tint) in every climate; "cold" shows through the tree types, the
+beaches, the snow line, and the gazetteer's notes, not a change of palette.</p>
+
+<p class="q">What are the four styles?</p>
+<p class="a"><em>Antique</em>: parchment, hatched mountains, sea monsters.
+<em>Topographic</em>: elevation tints and contour lines.
+<em>Ink</em>: pen-and-ink monochrome.
+<em>Nautical</em>: a sea chart with depth soundings, prevailing-wind arrows, and
+ocean-current streamlines.
+(The nautical style draws no land symbols, so climate is most muted there.)</p>
+
+<p class="q">How do I read the symbols and labels?</p>
+<p class="a">Most charts carry a small key in one corner that names the symbols
+actually on that map: the settlement marks, the terrain glyphs, rivers, and on
+sea charts the depth soundings and wind arrows. The lettering is a code too. Bold
+capitals mark a capital city, plain type a town or village, faded spaced capitals
+name a realm, and italics name water (seas, rivers, and lakes) and forests. Every atlas page carries a key, and you can turn one on for any chart you
+draw in the Explorer or generate locally.</p>
+
+<p class="q">What do the colors on an antique chart mean?</p>
+<p class="a">Less than you might expect, because an antique chart shows most
+things by drawing rather than by color. The land is a single even parchment, the
+same cream at every elevation and in every climate; mountains are drawn as brown
+hatched ranges and forests as little tree marks, not painted on. The sea is a
+pale sage green, ringed by slightly darker "waterlines" that echo each coast in
+the old engraved manner. A dark brown line is the shoreline, thin blue lines are
+rivers, and faint brown lines are roads. The one place color really carries
+meaning is the soft washes of red, green, gold, blue, and mauve: each marks a
+realm, one tint apiece, so you can tell neighboring territories apart. Those are
+political regions, not terrain, so a single-realm island shows almost none while
+a continent of several realms shows them clearly. (Topographic charts are the
+exception: there the land color itself maps to elevation.)</p>
+
+<p class="q">What are the map types?</p>
+<p class="a"><em>Island</em> (one landmass), <em>archipelago</em> (scattered
+isles), <em>continent</em> (a large landmass), and <em>city-state</em> (one
+dominant free city and its hinterland). Leave it unset and the seed chooses.</p>
+
+<h2 id="making">Making &amp; reproducing maps</h2>
+
+<p class="q">How do I make a map on my own machine?</p>
+<p class="a">Download the source from
+<a href="https://github.com/ahl-gram/Vellum">GitHub</a> and follow the
+setup instructions in the
+<a href="https://github.com/ahl-gram/Vellum#readme">README</a>. Charts are
+generated as SVG files you can open in any browser.</p>
+
+<p class="q">I found a map I love. How do I get it back?</p>
+<p class="a">Note its seed (printed in the margin) and enter it again. One catch:
+if you chose a specific type, climate, or land amount, those aren't saved on the
+chart itself, so you'll need to set them the same way again alongside the seed.</p>
+
+<p class="q">Can I make a high-resolution print?</p>
+<p class="a">Yes. The <a href="../print-room/">Print Room</a> renders any seed at
+poster size (up to about 14 inches at 300 dpi) and downloads it as an SVG or PNG,
+ready to print as wall art. No install needed: it all runs in your browser.</p>
+
+<p class="q">What is the Seed of the Day?</p>
+<p class="a">The <a href="../seed-of-the-day/">Seed of the Day</a> page draws a
+new world each day automatically. The seed is today's date in UTC read as a
+number (for example, June 22 2026 becomes seed 20260622), so everyone in the
+world sees the same chart on the same day. No reload needed: the page renders
+fresh in your browser each time you visit.</p>
+
+<p class="q">What is the atlas?</p>
+<p class="a">The atlas binds one world into a small book: the chart in several
+styles, four thematic data plates (vegetation, temperature, rainfall, and
+population), two regional close-ups that zoom in on busy areas, a coat-of-arms
+plate for every realm, a Chronicle of the world's founding events and ruins, and
+a gazetteer of every town with travelers' notes. Explore a seed in the
+<a href="../explorer/">Explorer</a>, then take it to the
+<a href="../print-room/">Print Room</a> to bind the atlas, print it to PDF, or
+download it as a single file.</p>
+
+<p class="q">What is the gallery?</p>
+<p class="a">The <a href="../gallery/">gallery</a> is a contact sheet of many
+worlds at once, useful for browsing seeds until one catches your eye.</p>
+</div>
+</div></main>
+<footer>Vellum &middot; an atelier of imaginary cartography</footer>
+</body></html>
