@@ -53,11 +53,13 @@ const HEAD_READ = `(() => {
       tag: el.tagName, weight: cs.fontWeight, size: parseFloat(cs.fontSize),
       family: cs.fontFamily, tracking: cs.letterSpacing, lineHeight: cs.lineHeight,
       ratio: parseFloat(cs.lineHeight) / parseFloat(cs.fontSize),
-      position: cs.position,
+      position: cs.position, color: cs.color,
     };
   };
   const band = document.querySelector(".band");
+  const chrome = document.querySelector("header.chrome");
   return JSON.stringify({
+    chromeWash: chrome ? getComputedStyle(chrome, "::before").backgroundImage : null,
     wordmark: read("header.chrome .wordmark"), tagline: read("header.chrome .tagline"),
     rooms: read("header.chrome nav.rooms"),
     roomName: read("main .room-name"), roomTagline: read("main .room-tagline"),
@@ -227,6 +229,26 @@ export async function run(ctx) {
     "RH7 the Print Room's bound-atlas title resolves to the display face (unreachable by any screenshot), and the producer still emits that markup",
     producerShape && !!atlas && DISPLAY_FACE.test(atlas.family) && near(atlas.size, 35.2) && atlas.hidden,
     `producer emits header.atlas-head > h1: ${producerShape}; injected twin: ${JSON.stringify(atlas)}`,
+  );
+
+  // The lightest-adjacent-ground measurements behind both pins are the 2026-08-26 plate read
+  // (out/461-plate/contrast-v2.json): line-tan on the deep 4.03 < 4.5, and home's bandless
+  // cluster at 1280x800 over the close-in chart as low as 1.17. Alex's calls same day on #461.
+  const PARCHMENT = "rgb(239, 230, 207)";
+  const dimTaglines = bad((h) => h.tagline?.color === PARCHMENT);
+  check(
+    "RH9a the tagline resolves parchment sitewide: line-tan measured 4.03 on the deep, under the 4.5 bar (#461, 2026-08-26 call)",
+    dimTaglines.length === 0,
+    dimTaglines.map((r) => `${r} tagline ${heads[r]?.tagline?.color}`).join(" | ") || `tagline parchment x${SHELLED.length}`,
+  );
+
+  const washWrong = bad((h, r) =>
+    r === "/" ? typeof h.chromeWash === "string" && h.chromeWash.includes("radial-gradient")
+              : h.chromeWash === "none");
+  check(
+    "RH9b home's chrome carries its wash and a room's carries none, the band being its ground (#461, 2026-08-26 call)",
+    washWrong.length === 0,
+    washWrong.map((r) => `${r} wash ${JSON.stringify(heads[r]?.chromeWash)}`).join(" | ") || "wash on home alone",
   );
 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });

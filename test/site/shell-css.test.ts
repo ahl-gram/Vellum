@@ -204,6 +204,13 @@ test("the interim desk panel: an unconverted room's main stands on parchment, no
   assert.match(panel[1], /box-shadow:\s*var\(--sheet-shadow\)/, "the panel rests at the house depth");
 });
 
+test("the deep's focus ring: the chrome on the walnut brightens the ring, paper keeps ink-dark (#324 decision 6, re-ratified at #461)", () => {
+  // Guard-prover round 1 (2026-08-26) proved this override unguarded: reverting it ships an invisible ink-dark ring on the deep and nothing reds. house-style.test.ts keeps pinning the paper side.
+  const ring = layoutStyle().match(/header\.chrome a:focus-visible,\s*footer a:focus-visible\s*\{([\s\S]*?)\}/);
+  assert.ok(ring, "the layout style should carry the deep-chrome focus override");
+  assert.match(ring[1], /outline-color:\s*var\(--parchment-bright\)/, "the ring on the deep is parchment-bright (#455's precedent for controls on the walnut)");
+});
+
 // #367: the sheet's lift is ONE token now. Ratified at 0.4 (Alex, 2026-08-12): the armed Explorer's two coincident 0.2 shadows measured as a single 0.385, rounded to a value a stylesheet can own.
 const SHEET_SHADOW_GEOMETRY = "0 12px 34px";
 

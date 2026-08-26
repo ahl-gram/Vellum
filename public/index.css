@@ -70,6 +70,15 @@ body:has(.stage.cam) { overflow: hidden; }
   font-size: 0.85rem; color: var(--line-tan);
 }
 .lf-coords.on { display: block; }
+/* The cluster's wash (#461, Alex's 2026-08-26 call on the plate finding): home is bandless and the close-in camera can leave the full-bleed chart with no letterbox at short desktop heights, so the corner carries its own deep for the lettering; e2e RH9 pins it to home alone. */
+header.chrome::before {
+  content: ""; position: fixed; left: 0; top: 0;
+  width: 46rem; height: 17rem; z-index: -1; pointer-events: none;
+  background: radial-gradient(150% 140% at 0% 0%,
+    rgb(from var(--chart-ink) r g b / 0.9) 42%,
+    rgb(from var(--chart-ink) r g b / 0.5) 68%,
+    rgb(from var(--chart-ink) r g b / 0) 100%);
+}
 /* Landfall Sub 4a (#470): the seed form is the mockup's top-right corner chrome (design/atelier-map/stage.css), a sub early by ratification 2026-08-24; never .cam-gated (#455: live even when the bundle fails). */
 .lf-seed {
   position: absolute; right: 1.6rem; top: 1.4rem; z-index: 4;
