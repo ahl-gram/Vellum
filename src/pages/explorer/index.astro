@@ -1,14 +1,18 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import RoomHead from "../../layouts/RoomHead.astro";
+
+const room = "The Explorer";
+const tagline = "every seed is a world, draw one";
 ---
 
 <BaseLayout
-  room="The Explorer"
+  room={room}
   description="Generate procedural fantasy maps in your browser. Every seed is a world."
   path="/explorer/"
-  tagline="every seed is a world, draw one"
   extraCss={["/living-chart.css", "/explorer/broadside.css"]}
 >
+<RoomHead room={room} tagline={tagline} />
 
 <!-- #270 The Broadside: the controls composed as one sheet, grouped by what they do
      to the WORLD rather than by widget kind. The Land reshapes the geography (seed,

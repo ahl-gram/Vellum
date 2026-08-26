@@ -1,14 +1,18 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import RoomHead from "../../layouts/RoomHead.astro";
 import { RIBBON_W, RIBBON_H } from "../../itinerary/finished.ts";
+
+const room = "The Wayfarer's Ribbon";
+const tagline = "the road, unrolled";
 ---
 
 <BaseLayout
-  room="The Wayfarer's Ribbon"
+  room={room}
   description="Any road journey unrolled as an itinerary strip chart: the way drawn league by league up the scroll, with a compass turning to keep true north."
   path="/ribbon/"
-  tagline="the road, unrolled"
 >
+<RoomHead room={room} tagline={tagline} />
 
 <p class="intro">A chart shows the whole country at once; a wayfarer only ever needs the
 road ahead. The old road-books solved this with the itinerary strip chart: the journey cut

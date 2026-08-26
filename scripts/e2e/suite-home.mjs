@@ -763,7 +763,7 @@ export async function run(ctx) {
       const slip = getComputedStyle(btn.querySelector(".lf-station-slip"));
       return {
         open: !card.hidden && cs.visibility !== "hidden" && Number(cs.opacity) > 0.95,
-        slipDown: slip.display === "none",
+        slipUp: slip.display !== "none",
         inViewport: cr.left >= -0.5 && cr.right <= 390.5 && cr.top >= -0.5 && cr.bottom <= 844.5,
         cardRect: [cr.left, cr.top, cr.right, cr.bottom].map((v) => Math.round(v * 10) / 10),
         anchorClear: !(anchorVX >= cr.left && anchorVX <= cr.right && anchorVY >= cr.top && anchorVY <= cr.bottom),
@@ -773,8 +773,8 @@ export async function run(ctx) {
     })()`);
   } catch {}
   check(
-    "H16b at 390 the slip lies as a bottom sheet fixed whole within the viewport, every edge, the flown-to anchor clear above it, its close reachable, the station name tags stood down, nothing scrolling sideways",
-    sheet16 !== null && sheet16.open && sheet16.slipDown && sheet16.inViewport && sheet16.anchorClear && sheet16.closeReach && sheet16.scrollW === 390,
+    "H16b at 390 the slip lies as a bottom sheet fixed whole within the viewport, every edge, the flown-to anchor clear above it, its close reachable, the station name tags STANDING (the boxed-era stand-down retired with the full bleed, #461), nothing scrolling sideways",
+    sheet16 !== null && sheet16.open && sheet16.slipUp && sheet16.inViewport && sheet16.anchorClear && sheet16.closeReach && sheet16.scrollW === 390,
     JSON.stringify({ settled16b: !!settled16b, sheetPt, sheet16 }),
   );
   await shoot("home-station-card-390.png");

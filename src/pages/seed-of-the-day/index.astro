@@ -1,14 +1,18 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import RoomHead from "../../layouts/RoomHead.astro";
+
+const room = "The Seed of the Day";
+const tagline = "today's date is the seed";
 ---
 
 <BaseLayout
-  room="The Seed of the Day"
+  room={room}
   description="A new procedural world every day: today's date is the seed, drawn as an antique chart with a line from its gazetteer. Same day, same world, everywhere."
   ogDescription="A new procedural world every day: today's date is the seed, drawn as an antique chart with a line from its gazetteer."
   path="/seed-of-the-day/"
-  tagline="today's date is the seed"
 >
+<RoomHead room={room} tagline={tagline} />
 
 <p class="dateline archivist-head" id="dateline"></p>
 <p class="status" id="status">Drafting today's world&hellip;</p>

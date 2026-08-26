@@ -90,27 +90,18 @@ button:not(.lf-station):not(.place-hit):active,
   transform: translateY(var(--press));
   box-shadow: var(--press-shadow);
 }
-.topnav a {
+/* Sub 6 (#461 addendum 1): the head cluster's rooms nav takes the mockup's lift on the
+   house timing: a raise, not a tip (no rotate: the color shift + underline carry the
+   you-are-here language; the iron-red scaleX underline retired with the folio band). */
+.rooms a {
   display: inline-block;
-  position: relative;
+  vertical-align: top;
   text-decoration: none;
-  transition: transform var(--paper-quick) var(--ease-paper);
+  transition: color 0.2s ease, transform var(--paper-quick) var(--ease-paper);
 }
-.topnav a::after {
-  content: "";
-  position: absolute;
-  left: 0; right: 0; bottom: -2px;
-  height: 1px;
-  background: var(--iron-red);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform var(--paper-quick) var(--ease-paper);
-}
-.topnav a:hover              { transform: translateY(var(--raise)); }
-.topnav a:active             { transform: translateY(0); }
-.topnav a:hover::after,
-.topnav a:focus-visible::after,
-.topnav a:active::after      { transform: scaleX(1); }
+.rooms a:hover,
+.rooms a:focus-visible { transform: translateY(var(--raise)); }
+.rooms a:active        { transform: translateY(0); }
 
 .plate {
   transition: transform var(--paper) var(--ease-paper),
@@ -122,12 +113,13 @@ button:not(.lf-station):not(.place-hit):active,
 }
 .plate:active { transform: translateY(-1px) rotate(0deg); }
 
-/* Keyed on .wordmark, not h1 (#288): on a room page the wordmark is a <p> and the h1 holds no link, so an h1-keyed rule would select nothing and the gesture would vanish silently; home's wordmark stays still via the :has scope. */
+/* Keyed on .wordmark, not h1 (#288): on a room page the wordmark is a <p> and the h1 holds no link, so an h1-keyed rule would select nothing and the gesture would vanish silently; home's wordmark stays still via the :has scope (the room name stands in main since #461, and :has reads the whole body, so the scope survives the move). Focus-visible joined at #461 addendum 1. */
 .wordmark a {
   display: inline-block;
   transition: transform var(--paper) var(--ease-paper);
 }
-body:has(.room-name) .wordmark a:hover { transform: translateY(var(--raise)) rotate(-0.6deg); }
+body:has(.room-name) .wordmark a:hover,
+body:has(.room-name) .wordmark a:focus-visible { transform: translateY(var(--raise)) rotate(-0.6deg); }
 body:has(.room-name) .wordmark a:active { transform: translateY(0); }
 
 /* #130 folio: cross-document view transitions; their pseudo-elements live on their own tree, out of reach of the universal * reduced-motion collapse, so the nested @view-transition {navigation:none} below is what turns the folio off. */

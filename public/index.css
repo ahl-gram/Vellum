@@ -1,31 +1,21 @@
-body {
-  padding: 3rem 1.5rem 5rem;
-}
-main { max-width: 1080px; }
-header { margin-bottom: 2.5rem; }
-/* Home's deliberate wordmark deviation, keyed on .wordmark not h1 (#288): a bare header h1 at (0,0,2) LOSES to the shell's .wordmark class and home would silently drop to the room-page 1.75rem; pinned by e2e RH3. */
-header .wordmark { font-size: 2.7rem; }
+/* Sub 6 (#461 ruling 1): home goes full bleed; the head cluster is the shell's, the
+   folio-era grander wordmark and footer retired with the folio bar (e2e RH3/RH4 reshaped). */
 .underhood {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-style: italic; color: var(--ink-brown); font-size: 0.92rem;
   line-height: 1.6; margin-top: 0.5rem; }
 .underhood a { color: var(--ink-brown); }
-/* Home's grander footer, pinned above the shell rule for the same cascade reason as the masthead (e2e RH4). */
-main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
-
 /* Landfall Sub 1 (#455): the survey window. The deep wears existing tokens in inverted roles (ratified provisional on #454); full-bleed and the floating chrome arrive with the ceremony subs. */
-.landfall { margin: 2.5rem 0 0; position: relative; }
+.landfall { margin: 0; position: relative; }
+/* While the camera drives, the page holds still (the mockup's overflow:hidden); without
+   the bundle the stage keeps its height and the no-JS doors reveal below on scroll. */
+body:has(.stage.cam) { overflow: hidden; }
 .landfall .stage {
-  /* 82vh alone put the stage's own chrome below the fold on every viewport under 1159px tall (plate-reader, PR #456): the calc term reserves the running head's ~250px so the coords line and controls stay on screen. */
-  position: relative; height: clamp(420px, calc(100vh - 300px), 82vh);
+  /* Full bleed (#461 ruling 1): the stage IS the viewport; the boxed frame and its own
+     deep retired (the shell's fixed body::before paints the same ground beneath). */
+  position: relative; height: 100vh; height: 100dvh;
   overflow: hidden; cursor: grab; touch-action: pan-y;
   display: grid; place-items: center;
-  border: 1px solid var(--line-tan);
-  outline: 3px double var(--line-faint);
-  outline-offset: 6px;
-  /* The prototype's deep: lighter at center so the ink shadow has ground to darken (token-derived mix, no raw hex). */
-  background:
-    radial-gradient(80% 70% at 30% 20%, color-mix(in srgb, var(--ink-dark) 90%, var(--parchment) 10%) 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
 }
 .landfall .stage.dragging { cursor: grabbing; }
 .landfall .stage:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 2px; }
@@ -63,7 +53,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   font-size: 8.5px; letter-spacing: 0.08em; color: var(--chart-ink); white-space: nowrap;
   text-shadow: 0 0 4px var(--chart-paper), 0 0 8px var(--chart-paper);
 }
-.lf-controls { display: none; position: absolute; right: 0.9rem; bottom: 0.9rem; flex-direction: column; gap: 0.4rem; }
+.lf-controls { display: none; position: absolute; right: 1.6rem; bottom: 1.4rem; flex-direction: column; gap: 0.4rem; }
 .lf-controls.on { display: flex; }
 .lf-btn {
   width: 2.2rem; height: 2.2rem;
@@ -74,14 +64,12 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
 }
 .lf-btn:hover, .lf-btn:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
 .lf-coords {
-  display: none; position: absolute; left: 1rem; bottom: 0.7rem; margin: 0;
+  display: none; position: absolute; left: 1.6rem; bottom: 1.4rem; margin: 0;
   font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-variant-caps: small-caps; letter-spacing: 0.06em;
   font-size: 0.85rem; color: var(--line-tan);
 }
 .lf-coords.on { display: block; }
-@media (max-width: 720px) { .landfall .stage { height: min(64vh, 86vw); min-height: 300px; } }
-
 /* Landfall Sub 4a (#470): the seed form is the mockup's top-right corner chrome (design/atelier-map/stage.css), a sub early by ratification 2026-08-24; never .cam-gated (#455: live even when the bundle fails). */
 .lf-seed {
   position: absolute; right: 1.6rem; top: 1.4rem; z-index: 4;
@@ -322,8 +310,10 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   font-size: 0.8rem; color: var(--ink-faded); line-height: 1.5;
 }
 @media (max-width: 900px) {
-  /* The compressed stage lands three of the four slips in the legend band (Alex, PR #468 live review); the legend below names every room, so the tags stand down until Sub 6's full-bleed restores the mockup's spacing. */
-  .lf-station-slip { display: none; }
+  /* Full bleed restored the mockup's spacing, so the boxed-era slip stand-down retired
+     with the box (#461); the mockup stands the rooms nav down on home alone (the legend
+     and stations carry every door), and lifts the camera column above the legend band. */
+  .chrome .rooms { display: none; }
   .lf-legend {
     width: 100%; left: 0; bottom: 0; transform: none;
     padding: 0.5rem 0.6rem 0.6rem;
@@ -343,7 +333,7 @@ main footer { font-size: 0.75rem; margin-top: 4.5rem; letter-spacing: 0.25em; }
   }
   .lf-card-arms img { width: 42px; }
   .lf-card-how { max-height: 45vh; }
-  .lf-controls { bottom: 6.5rem; }
+  .lf-controls { bottom: 10rem; }
   .lf-coords.on { display: none; }
   .notice-stamp { display: none; }
   .lf-seed { right: 1rem; top: 0.9rem; max-width: 12rem; }

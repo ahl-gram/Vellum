@@ -1,15 +1,21 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import RoomHead from "../../layouts/RoomHead.astro";
+
+const room = "Questions & Answers";
+const tagline = "how the worlds are made";
 ---
 
 <BaseLayout
-  room="Questions & Answers"
+  room={room}
   ogRoom="Questions and Answers"
   description="How Vellum works: seeds, determinism, terrain and rivers, climate and styles, and how to make and reproduce your own maps."
   path="/faq/"
-  tagline="how the worlds are made"
+  desk="open"
 >
 <div class="sheet">
+<RoomHead room={room} tagline={tagline} />
+<div class="columns">
 <div class="toc">
   <strong class="archivist-label">On this page</strong>
   <ul>
@@ -217,5 +223,6 @@ download it as a single file.</p>
 <p class="q">What is the gallery?</p>
 <p class="a">The <a href="../gallery/">gallery</a> is a contact sheet of many
 worlds at once, useful for browsing seeds until one catches your eye.</p>
+</div>
 </div>
 </BaseLayout>

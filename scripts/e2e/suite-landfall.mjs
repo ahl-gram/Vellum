@@ -86,11 +86,12 @@ export async function run(ctx) {
   await wheelAt(pt2, 120);
   await sleep(250);
   const atMin = { prevented: await lastWheel(), cam: await camNow(), y: await scrollY() };
+  const bodyLocked1d = await evaluate(`getComputedStyle(document.body).overflow`);
   check(
-    "L1d at the stand-off clamp (0.65 of fit) a further wheel-out is released and the page genuinely scrolls from a proven top: the wheel is handed back, not trapped",
+    "L1d at the stand-off clamp (0.65 of fit) a further wheel-out is released, not trapped, and the full-bleed page provably holds: the body is scroll-locked while the camera drives (#461; Sub 6a's release valve re-opens the scroll consequence)",
     floor !== null && Math.abs(floor.scale - floor.fit * 0.65) < 1e-6 && atMin.prevented === false
-      && yBefore === 0 && Math.abs(atMin.cam.scale - floor.scale) < 1e-9 && atMin.y > yBefore,
-    JSON.stringify({ floor, yBefore, atMin }),
+      && yBefore === 0 && Math.abs(atMin.cam.scale - floor.scale) < 1e-9 && atMin.y === 0 && bodyLocked1d === "hidden",
+    JSON.stringify({ floor, yBefore, atMin, bodyLocked1d }),
   );
   await evaluate(`window.scrollTo(0, 0)`);
 
@@ -283,7 +284,7 @@ export async function run(ctx) {
     a !== null && b !== null && Math.abs(b.scale - a.scale) < 1e-9 && Math.abs(b.x - a.x) < 1e-9 && Math.abs(b.y - a.y) < 1e-9;
   const touchAction9 = await evaluate(`(() => { const s = document.getElementById("lf-stage"); return s ? getComputedStyle(s).touchAction : null; })()`);
   // The drag heads INTO clamp headroom (+x,+y): the original (-x,-y) gesture aimed at the corner the camera was already parked on, so stillness held with every gate deleted (guard-prover round 2).
-  const noOverflow390 = await evaluate(`document.documentElement.scrollHeight <= window.innerHeight`);
+  const bodyLocked390 = await evaluate(`getComputedStyle(document.body).overflow`);
   const oneBefore = await camNow();
   if (stagePt9 !== null) {
     await touch("touchStart", [{ x: stagePt9.x, y: stagePt9.y, id: 0 }]);
@@ -300,10 +301,10 @@ export async function run(ctx) {
   await sleep(300);
   const mouseWitness = await camNow();
   check(
-    "L9a one finger never drives the map, and the fixture can prove it: the touch drag leaves the whole camera untouched while the SAME drag by mouse carries the sheet, the stage declares pan-y, and the 390 document really has no overflow (the premise the one-finger page-scroll residue rests on; a Sub 6 full-bleed that adds overflow reds here and re-opens that arm)",
-    stagePt9 !== null && stillCam(oneBefore, oneAfter) && touchAction9 === "pan-y" && noOverflow390 === true
+    "L9a one finger never drives the map, and the fixture can prove it: the touch drag leaves the whole camera untouched while the SAME drag by mouse carries the sheet, the stage declares pan-y, and the full-bleed 390 body is scroll-locked while the camera drives (the one-finger page-scroll residue now rests on the lock, not on document height; Sub 6a re-opens this arm with the release valve)",
+    stagePt9 !== null && stillCam(oneBefore, oneAfter) && touchAction9 === "pan-y" && bodyLocked390 === "hidden"
       && mouseWitness !== null && oneAfter !== null && Math.abs(mouseWitness.x - oneAfter.x) > 30,
-    JSON.stringify({ touchAction9, noOverflow390, oneBefore, oneAfter, mouseWitness }),
+    JSON.stringify({ touchAction9, bodyLocked390, oneBefore, oneAfter, mouseWitness }),
   );
 
   const twoBefore = await camNow();

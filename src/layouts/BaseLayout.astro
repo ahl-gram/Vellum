@@ -4,8 +4,12 @@ import { NAV_ITEMS } from "./nav.ts";
 // The one shared shell (#203, ratified in the Sub 1 decision doc comment on #202): head
 // meta with the prop fan-out, the canonical nav, the constant footer. The Running Head
 // (#268) computes <title> from `room`, so title drift across pages is structurally impossible.
+// Sub 6 (#461, rulings 2026-08-25): the shell wears the atelier-map idiom: the walnut
+// deep as the sitewide ground, the fixed head cluster (wordmark, flourish tagline,
+// dot-separated rooms nav) upper left over a reserved band, the room's h1 standing in the
+// page (RoomHead.astro), and a landing ceremony for the rooms.
 interface Props {
-  /** The running head's right side and the computed <title> ("The Print Room · Vellum"); absent on home ALONE, whose title stays the atelier's own line. */
+  /** Names the room for the computed <title> ("The Print Room · Vellum"); absent on home ALONE, whose title stays the atelier's own line. The page renders the matching <RoomHead>. */
   room?: string;
   /** The og twins' punctuation-normalized room, only when it differs from `room`: og:title AND twitter:title take `${ogRoom} · Vellum`. */
   ogRoom?: string;
@@ -15,13 +19,13 @@ interface Props {
   ogDescription?: string;
   /** Root-absolute trailing-slash route ("/", "/faq/"): og:url + aria-current. */
   path: string;
-  /** The flourish line under the room name (under the wordmark alone on home). */
-  tagline: string;
+  /** Sub 6 interim (#461): a room's <main> wears the desk panel until its own conversion sub (7-9) dresses the page for the deep; a page whose markup carries the full-bleed survey sheet passes "open" to stand bare on the deep. */
+  desk?: "open";
   /** Extra root-absolute hrefs for SHARED sheets a page opts into; linked after the global sheets and before the page's own relative index.css, so page rules keep the last word. */
   extraCss?: readonly string[];
 }
 
-const { room, ogRoom, description, ogDescription, path, tagline, extraCss = [] } = Astro.props;
+const { room, ogRoom, description, ogDescription, path, desk, extraCss = [] } = Astro.props;
 
 for (const href of extraCss) {
   if (!href.startsWith("/")) {
@@ -40,8 +44,12 @@ if (isHome === (room !== undefined)) {
       : `every room page must name its room (got none for "${path}")`,
   );
 }
+if (desk !== undefined && room === undefined) {
+  throw new Error('desk="open" is a room-page choice; home has no desk panel to open');
+}
 
 const HOME_TITLE = "Vellum · an atelier of imaginary cartography";
+const SITE_TAGLINE = "an atelier of imaginary cartography";
 const title = room ? `${room} · Vellum` : HOME_TITLE;
 const ogTitle = ogRoom ? `${ogRoom} · Vellum` : title;
 const ogUrl = new URL(path, Astro.site).href;
@@ -92,7 +100,7 @@ const cardDescription = ogDescription ?? description;
   --ink-brown: #6b5a40;        /* flourish brown: taglines, captions, asides */
   --ink-faded: #857257;        /* faded ink: nav, footer, small labels */
   --line-tan: #b9a77f;         /* pale tan hairline: rules and frame borders */
-  --parchment: #efe6cf;        /* the page ground every sheet rests on */
+  --parchment: #efe6cf;        /* the sheet ground (the body ground until Sub 6 sank it) */
   --parchment-panel: #f4ecd8;  /* raised panels, cards, and pinned slips */
   --parchment-bright: #fff7e4; /* the lit cream: hovers and the reveal */
   --parchment-deep: #e6d9b8;   /* the pressed tan: code chips */
@@ -116,89 +124,153 @@ const cardDescription = ogDescription ?? description;
      site-side home (shell-css pins this declaration); shadows consume it via rgb(from ...). */
   --chart-paper: #f2e8cf;      /* the antique chart's paper: primary lettering, cartouche ground */
   --chart-ink: #3d2f1f;        /* the chart's lettering ink: every site shadow */
+  /* Sub 6 (#461 ruling 2): the walnut deep, the atelier-map mockup's own body ground and
+     the daylight wash's dark successor. The lighter walnut center is the SAME token-derived
+     mix Act I ratified for the stage (design/atelier-map's #55402a; nothing invented, no
+     new token, so the paper-light atlas download stays untouched). Declared once; the body
+     ground and the running band consume it so their paint can never drift apart. */
+  --the-deep:
+    radial-gradient(120% 90% at 50% 30%, rgb(from var(--ink-dark) r g b / 0) 40%, rgb(from var(--chart-ink) r g b / 0.55) 100%),
+    radial-gradient(80% 70% at 30% 20%, color-mix(in srgb, var(--ink-dark) 90%, var(--parchment) 10%) 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+  /* #461 ruling 5: the reserved walnut band the head cluster stands on; the sheet scrolls
+     beneath the band, never beneath bare lettering. */
+  --band-h: 7.6rem;
 }
 /* The shell dresses once (#263), part A: the rules every page shell shares; per-page
-   values stay in the page files. Since #268 the header is the Running Head, identical on
-   every page (home's grander footer is pinned in public/index.css, whose link renders
-   before this inline style and so sits above it in the cascade). */
+   values stay in the page files (the layout's inline style renders AFTER the page css
+   link, so an equal-specificity page rule silently loses, so page deviations need higher
+   specificity). A palette inversion, not a dark mode (#454): form controls stay light. */
 :root { color-scheme: light; }
 body {
   margin: 0;
-  background: var(--parchment); color: var(--ink-dark);
-  /* The daylight wash (Alex's call at the #289 review): lit from above, dimming at the
-     foot, sized to the whole DOCUMENT. Alpha washes over --parchment, deliberately not
-     palette tokens (shell-css.test.ts, the daylight-wash test). */
-  background-image:
-    radial-gradient(ellipse at 20% 10%, rgb(255 250 235 / 0.5), transparent 60%),
-    radial-gradient(ellipse at 85% 90%, rgb(120 95 50 / 0.18), transparent 55%);
+  background: var(--chart-ink); color: var(--ink-dark);
   font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
+/* The deep paints on a fixed full-viewport layer, not background-attachment (iOS treats
+   fixed attachment as scroll); the band clips the IDENTICAL layer, so the two can never
+   misalign by construction. */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1;
+  background: var(--the-deep);
+  background-color: var(--chart-ink);
+}
 main { margin-inline: auto; }
-header { text-align: center; }
-/* Punchcutter's Case (#228) roles on the shell members: display for wordmark, room name, nav band, footer; flourish for the tagline. */
-.wordmark, .room-name, .topnav, footer {
+/* Punchcutter's Case (#228) roles on the shell members: display for wordmark, room name, rooms nav, footer; flourish for the taglines. */
+.wordmark, .room-name, .rooms, footer {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
-/* The Running Head (#268): a folio page header. The wordmark is the one place tracking
-   opens up (Fell falls apart tracked out at text sizes); the room name baseline-aligns
-   so Fell's irregular x-height cannot float it; beneath both, the ledger's double rule. */
-.running-head { display: flex; justify-content: space-between; align-items: baseline;
-  gap: 0.5rem 2rem; text-align: left; }
-/* Head members pin line-height 1.6 (here and on .topnav): page css sets body line-height
-   per page, and the head must not inherit that variance or its geometry differs page to page. */
-/* Both head members pin font-weight: #288 swapped which tag carries which text, and h1/p
-   carry OPPOSITE UA weight defaults while the display face has no bold cut, so unpinned
-   the room name arrives as very visible synthetic bold. Do not "simplify" these away. */
-.wordmark { font-size: 1.75rem; letter-spacing: 0.3em; margin: 0; line-height: 1.6; font-weight: 700; }
-.wordmark a { color: inherit; text-decoration: none; }
-.room { text-align: right; }
-.room-name { font-size: 1rem; letter-spacing: 0.07em; margin: 0; line-height: 1.6; font-weight: 400; }
+/* The head cluster (#461 ruling 1, re-ratifying #268: one masthead, one nav): fixed upper
+   left, directly on the deep. It pins its own leading (second addendum on #461): page css
+   sets body line-height for READING and the cluster must not inherit that inflation. */
+header.chrome {
+  position: fixed; left: 1.6rem; top: 1.4rem; z-index: 10;
+  line-height: normal; text-align: left;
+}
+/* Both weight pins survive #288's tag swap: the wordmark is h1 on home and p on rooms,
+   whose UA weights differ while the display face has no bold cut; unpinned, home's
+   wordmark arrives as synthetic bold. The cluster sets 400 (the mockup's own weight). */
+.wordmark { font-size: 2.1rem; letter-spacing: 0.12em; line-height: 1.15; font-weight: 400; margin: 0; }
+.wordmark a { color: var(--parchment-bright); text-decoration: none; }
 .tagline {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  font-style: italic; color: var(--ink-brown); margin: 0.15rem 0 0; line-height: 1.6;
+  font-style: italic; font-size: 0.92rem; color: var(--line-tan); margin: 0;
 }
-.head-rule { height: 3px; border-top: 1px solid var(--ink-dark);
-  border-bottom: 1px solid var(--ink-dark); margin: 0.7rem 0 0; }
-@media (max-width: 480px) {
-  /* Longer room names collide with the wordmark on a narrow sheet: stack the head
-     centered; the negative margin recenters the wordmark over its trailing letter-space. */
-  .running-head { flex-direction: column; align-items: center; gap: 0.2rem; text-align: center; }
-  .wordmark { margin-right: -0.3em; }
-  .room { text-align: center; }
-}
-.topnav { font-size: 0.82rem; letter-spacing: 0.12em; color: var(--ink-faded); margin: 0.9rem 0 0; line-height: 1.6; }
-/* motion.css makes nav LINKS inline-block so a multi-word label never wraps mid-label;
-   the current page renders as a span, so it takes the same rule here. Ink-dark +
-   manicule + underline: the you-are-here marker never relies on color alone (#268). */
-.topnav [aria-current="page"] { display: inline-block; color: var(--ink-dark);
+.rooms { font-size: 0.72rem; letter-spacing: 0.14em; color: var(--ink-faded); margin: 0.55rem 0 0; }
+.rooms .sep { margin: 0 0.35em; opacity: 0.7; }
+.rooms a { color: var(--parchment); text-decoration: none; }
+.rooms a:hover, .rooms a:focus-visible { color: var(--parchment-bright); }
+/* Ink-dark reads as void on the deep: the cluster's ring brightens (the stage's #455
+   precedent); house.css keeps ink-dark everywhere on paper. */
+header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--parchment-bright); }
+/* The you-are-here marker never relies on color alone (#268): brightened AND underlined.
+   Inline-block beside motion.css's inline-block links so a multi-word label cannot wrap mid-label. */
+.rooms [aria-current="page"] { display: inline-block; vertical-align: top; color: var(--parchment-bright);
   text-decoration: underline; text-underline-offset: 0.45em; text-decoration-thickness: 1px; }
-.topnav a { color: inherit; }
-/* The manicule's glyph coverage is inconsistent across the Fell fallback stack: pin the plain serif stack and let the system substitute, never the display role. */
-.manicule { font-family: 'Iowan Old Style', 'Palatino', Georgia, serif; }
-footer { text-align: center; font-size: 0.72rem; letter-spacing: 0.22em; color: var(--ink-faded); }
+/* The band (#461 ruling 5): a full-viewport fixed box whose ::before paints the SAME deep
+   layer clipped to the band, so the reserved ground is pixel-identical to the page ground. */
+.band { position: fixed; inset: 0; z-index: 9; pointer-events: none; }
+.band::before {
+  content: ""; position: absolute; inset: 0;
+  background: var(--the-deep);
+  background-color: var(--chart-ink);
+  clip-path: inset(0 0 calc(100% - var(--band-h)) 0);
+}
+.band::after {
+  content: ""; position: absolute; left: 0; right: 0; top: var(--band-h); height: 14px;
+  background: linear-gradient(rgb(from var(--chart-ink) r g b / 0.45), transparent);
+}
+/* The room head (#461 ruling 1, keeping #288): the room name is the page's h1, standing
+   on the sheet (or the interim desk panel). Pages place it via RoomHead.astro. */
+/* Pinned leading: page css sets body line-height per page (1.6 on prose, normal on app rooms) and the room head must not inherit that variance (#268's lesson, re-pinned for the cluster era). */
+.room-head { text-align: center; margin: 0 0 1.4rem; line-height: 1.6; }
+.room-name { font-size: 1.65rem; font-weight: 400; letter-spacing: 0.14em; margin: 0; }
+.room-tagline {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; color: var(--ink-brown); margin: 0;
+}
+/* The rooms stand clear of the band; the survey pages' 2.2rem margins are ruling 3's. */
+body.room { padding: 8.4rem 2.2rem 1.6rem; }
+/* Sub 6 interim: until a room's own conversion sub (7-9) dresses its page for the deep,
+   its <main> wears a plain desk panel so nothing ships ink-on-walnut unreadable. A page
+   passes desk="open" once its markup carries the full-bleed sheet; the class then simply
+   stops being rendered, so this rule retires itself room by room. */
+main.desk-panel {
+  background: var(--parchment);
+  border: 1px solid var(--line-tan);
+  box-shadow: var(--sheet-shadow);
+  padding: 1.8rem clamp(1.25rem, 3vw, 2.75rem) 2.75rem;
+}
+/* The landing ceremony (#461 ruling 6): the sheet settles onto the desk and the chrome
+   inks in just after. Plays every arrival (build-time call recorded on #461: it is one
+   0.55s CSS settle, and gating would cost the rooms a third sitewide script; #465's
+   post-use review re-rules if it grates). motion.css's reduced-motion blanket collapses
+   both to an instant swap. Home keeps its own ceremony (#457). */
+@keyframes sheet-land {
+  from { opacity: 0; transform: translateY(10px) scale(1.004); }
+}
+@keyframes ink-in { from { opacity: 0; } }
+body.room main { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+body.room header.chrome, body.room footer { animation: ink-in 0.5s 0.18s ease-out both; }
+footer {
+  text-align: center; font-size: 0.72rem; letter-spacing: 0.22em; color: var(--line-tan);
+  padding: 1.4rem 0 1.8rem; margin: 0; line-height: normal;
+}
 footer a { color: inherit; }
+@media (max-width: 720px) {
+  :root { --band-h: 6.4rem; }
+  header.chrome { left: 1rem; top: 0.9rem; }
+  .wordmark { font-size: 1.5rem; }
+  .tagline { font-size: 0.78rem; }
+  /* The nav stays on room pages at narrow (a room page has no other door); home alone
+     stands its rooms down under 900px, the mockup's own call (public/index.css). */
+  .rooms { max-width: calc(100vw - 2rem); }
+  body.room { padding: 7rem 1rem 1.2rem; }
+}
+/* Print is paper (#454 open decision 4, executed for the page chrome here, the artifacts
+   at Sub 9): the fixed dark chrome must not stamp itself onto every printed page. */
+@media print {
+  .band, header.chrome { display: none; }
+  body::before { display: none; }
+  body.room { padding: 0; }
+  main.desk-panel { background: none; border: none; box-shadow: none; }
+}
 </style>
 </head>
-<body>
-<main>
-<header>
-  <div class="running-head">
-    {/* #288: the room is the page's h1, so the heading outline a screen reader walks
-        names the room rather than repeating VELLUM; home is roomless, so the wordmark
-        stays its h1. Exactly one h1 either way, and the masthead still links home. */}
-    {room
-      ? <p class="wordmark"><a href="/">VELLUM</a></p>
-      : <h1 class="wordmark"><a href="/">VELLUM</a></h1>}
-    <div class="room">
-      {room && <h1 class="room-name">{room}</h1>}
-      <p class="tagline">{tagline}</p>
-    </div>
-  </div>
-  <div class="head-rule"></div>
-  <nav class="topnav">
+<body class={room ? "room" : undefined}>
+{room && <div class="band" aria-hidden="true"></div>}
+<header class="chrome">
+  {/* #288: the room's h1 stands in the page (RoomHead.astro), so home alone keeps the
+      wordmark as its h1 (roomless, there is nothing else its h1 could be). Exactly one
+      h1 either way, and the masthead still links home. Fell SC sets the small caps, so
+      the wordmark stays a mixed-case string. */}
+  {room
+    ? <p class="wordmark"><a href="/">Vellum</a></p>
+    : <h1 class="wordmark"><a href="/">Vellum</a></h1>}
+  <p class="tagline">{SITE_TAGLINE}</p>
+  <nav class="rooms" aria-label="The rooms">
     {NAV_ITEMS.map((item, i) => (
-      <Fragment>{i > 0 ? " · " : ""}{item.href === path ? (
-        <span aria-current="page"><span class="manicule" aria-hidden="true">☞&nbsp;</span>{item.label}</span>
+      <Fragment>{i > 0 ? <span class="sep" aria-hidden="true">·</span> : ""}{item.href === path ? (
+        <span aria-current="page">{item.label}</span>
       ) : (
         <a href={item.href}>{item.label}</a>
       )}</Fragment>
@@ -206,12 +278,13 @@ footer a { color: inherit; }
   </nav>
   <slot name="header-extra" />
 </header>
+<main class:list={[room && desk !== "open" && "desk-panel"]}>
 
 <slot />
 
-<footer>
-  VELLUM · AN ATELIER OF IMAGINARY CARTOGRAPHY
-</footer>
 </main>
+<footer>
+  Vellum · an atelier of imaginary cartography
+</footer>
 </body>
 </html>
