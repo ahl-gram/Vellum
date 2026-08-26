@@ -249,10 +249,9 @@ test("the station dress is the mockup's: pulse, diamond glyph, at-sea round, red
     /button:not\(\.lf-station\):not\(\.place-hit\):hover/,
     "house.css's button hover wash must exclude .lf-station too: it painted the 34px button square bright around the diamond (Alex, PR #468 live review)",
   );
-  const narrow = css.match(/@media \(max-width: 900px\) \{([\s\S]*?)\n\}/);
   assert.ok(
-    narrow && /\.lf-station-slip[^{]*\{[^}]*display:\s*none/.test(narrow[1]),
-    "under 900px the station name slips stand down (ratified 2026-08-24: the compressed stage lands three slips in the legend band, and the legend below already names every room); the diamonds stay",
+    !/\.lf-station-slip[^{]*\{[^}]*display:\s*none/.test(css.replace(/\/\*[\s\S]*?\*\//g, "")),
+    "the station name slips stay at every width: the boxed-era narrow stand-down retired when Sub 6's full bleed restored the mockup's spacing (#461 ruling 1; the 2026-08-24 stand-down was scoped to the compressed stage)",
   );
 });
 

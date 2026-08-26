@@ -1,14 +1,18 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import RoomHead from "../../layouts/RoomHead.astro";
 import { PLATE_W, PLATE_H } from "../../prospect/geometry.ts";
+
+const room = "The Prospect";
+const tagline = "the second camera";
 ---
 
 <BaseLayout
-  room="The Prospect"
+  room={room}
   description="Any settlement's engraved townscape plate: the second camera beside the chart, drawn side-on from the place's own ground."
   path="/prospect/"
-  tagline="the second camera"
 >
+<RoomHead room={room} tagline={tagline} />
 
 <p class="intro">The chart is one camera: the world seen from directly above. A prospect
 is the other one the old ateliers sold beside it, a settlement drawn side-on from its own

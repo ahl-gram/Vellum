@@ -1,10 +1,14 @@
-// Running Head e2e (RH0-RH8, #295): the shell's masthead asserted by RESOLVED computed styles, because a rule that is present but LOSES the cascade passes every source-text test (#288); self-contained, restores the Explorer base.
+// Running Head e2e (RH0-RH8, #295; reshaped for the Sub 6 head cluster, #461): the shell's
+// masthead asserted by RESOLVED computed styles, because a rule that is present but LOSES
+// the cascade passes every source-text test (#288); self-contained, restores the Explorer base.
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 
-// LITERAL on purpose: home is not a nav item, and a page dropping out of the nav must not silently drop out of this guard; /atlas/ is generated and carries no shell.
-const SHELLED = ["/", "/explorer/", "/print-room/", "/reading-room/", "/gallery/", "/faq/", "/glossary/", "/seed-of-the-day/", "/prospect/"];
+// LITERAL on purpose: home is not a nav item, /ribbon/ and /prospect/ are shelled rooms outside
+// the nav, and a page dropping out of the nav must not silently drop out of this guard; /atlas/
+// is generated and carries no shell.
+const SHELLED = ["/", "/explorer/", "/print-room/", "/reading-room/", "/gallery/", "/faq/", "/glossary/", "/seed-of-the-day/", "/prospect/", "/ribbon/"];
 
 // MEASURED split: /, /explorer/, /gallery/ leave body leading normal, every other page sets 1.6; RH6 needs PROSE and APP to differ in body leading or it proves nothing.
 const PROSE = "/faq/";
@@ -14,24 +18,31 @@ const APP = "/explorer/";
 const DISPLAY_FACE = /^"IM Fell English SC",/;
 const FLOURISH_FACE = /^"IM Fell English",/;
 
-// Every constant MEASURED against the built dist/ (out/probe-runninghead.mjs), never derived; tracking null means the browser reported "normal" and is asserted as such.
+// Every constant MEASURED against the built dist/ (out/probe-cluster.mjs, 2026-08-26), never
+// derived; tracking null means the browser reported "normal" and is asserted as such. The
+// cluster is ONE dress on every page (#461 ruling 1): home differs only in the wordmark's tag
+// (h1, #288) and in having no room head to measure.
 const ROOM_HEAD = {
-  wordmark: { tag: "P", weight: "700", size: 28, tracking: 8.4, face: DISPLAY_FACE },
-  roomName: { tag: "H1", weight: "400", size: 16, tracking: 1.12, face: DISPLAY_FACE },
-  tagline: { tag: "P", weight: "400", size: 16, tracking: null, face: FLOURISH_FACE },
-  topnav: { tag: "NAV", weight: "400", size: 13.12, tracking: 1.5744, face: DISPLAY_FACE },
+  wordmark: { tag: "P", weight: "400", size: 33.6, tracking: 4.032, face: DISPLAY_FACE },
+  tagline: { tag: "P", weight: "400", size: 14.72, tracking: null, face: FLOURISH_FACE },
+  rooms: { tag: "NAV", weight: "400", size: 11.52, tracking: 1.6128, face: DISPLAY_FACE },
+  roomName: { tag: "H1", weight: "400", size: 26.4, tracking: 3.696, face: DISPLAY_FACE },
+  roomTagline: { tag: "P", weight: "400", size: 16, tracking: null, face: FLOURISH_FACE },
   footer: { tag: "FOOTER", weight: "400", size: 11.52, tracking: 2.5344, face: DISPLAY_FACE },
 };
 const HOME_HEAD = {
   ...ROOM_HEAD,
-  wordmark: { tag: "H1", weight: "700", size: 43.2, tracking: 12.96, face: DISPLAY_FACE },
+  wordmark: { ...ROOM_HEAD.wordmark, tag: "H1" },
   roomName: null,
-  footer: { tag: "FOOTER", weight: "400", size: 12, tracking: 3, face: DISPLAY_FACE },
+  roomTagline: null,
 };
 const expectedHead = (route) => (route === "/" ? HOME_HEAD : ROOM_HEAD);
-const MEMBERS = ["wordmark", "roomName", "tagline", "topnav", "footer"];
-// The footer is a shell member but not a head member: it does not pin 1.6, so it is deliberately absent from the leading guard.
-const HEAD_MEMBERS = ["wordmark", "roomName", "tagline", "topnav"];
+const MEMBERS = ["wordmark", "tagline", "rooms", "roomName", "roomTagline", "footer"];
+// The second addendum on #461: the cluster pins its OWN leading (wordmark 1.15, the rest normal)
+// and must never inherit the page's reading 1.6; the room head pins 1.6 and must never inherit
+// an app page's normal. Both polarities are asserted per page in RH5.
+const CLUSTER_NORMAL = ["tagline", "rooms", "footer"];
+const HEAD_LEADED = ["roomName", "roomTagline"];
 
 const HEAD_READ = `(() => {
   const read = (sel) => {
@@ -40,14 +51,23 @@ const HEAD_READ = `(() => {
     const cs = getComputedStyle(el);
     return {
       tag: el.tagName, weight: cs.fontWeight, size: parseFloat(cs.fontSize),
-      family: cs.fontFamily, tracking: cs.letterSpacing,
+      family: cs.fontFamily, tracking: cs.letterSpacing, lineHeight: cs.lineHeight,
       ratio: parseFloat(cs.lineHeight) / parseFloat(cs.fontSize),
+      position: cs.position, color: cs.color,
     };
   };
+  const band = document.querySelector(".band");
+  const chrome = document.querySelector("header.chrome");
   return JSON.stringify({
-    wordmark: read(".wordmark"), roomName: read(".room-name"),
-    tagline: read(".tagline"), topnav: read(".topnav"), footer: read("footer"),
-    h1s: [...document.querySelectorAll("h1")].map((h) => ({ classes: [...h.classList], inHeader: !!h.closest("header") })),
+    chromeWash: chrome ? getComputedStyle(chrome, "::before").backgroundImage : null,
+    wordmark: read("header.chrome .wordmark"), tagline: read("header.chrome .tagline"),
+    rooms: read("header.chrome nav.rooms"),
+    roomName: read("main .room-name"), roomTagline: read("main .room-tagline"),
+    footer: read("body > footer"),
+    chromePosition: read("header.chrome")?.position ?? null,
+    chromeBottom: document.querySelector("header.chrome")?.getBoundingClientRect().bottom ?? null,
+    bandClip: band ? getComputedStyle(band, "::before").clipPath : null,
+    h1s: [...document.querySelectorAll("h1")].map((h) => ({ classes: [...h.classList], inHeader: !!h.closest("header"), inMain: !!h.closest("main") })),
     bodyLineHeight: getComputedStyle(document.body).lineHeight,
   });
 })()`;
@@ -60,7 +80,6 @@ const matches = (m, want) => {
     want.face.test(m.family) &&
     (want.tracking === null ? m.tracking === "normal" : near(parseFloat(m.tracking), want.tracking));
 };
-const leaded = (m) => !!m && Math.abs(m.ratio - 1.6) < 0.005;
 
 // Reading the producer's own template couples the injected twin to it: rename the class or demote the heading in renderBoundAtlas and RH7 reds instead of drifting.
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
@@ -85,7 +104,7 @@ export async function run(ctx) {
       if (i === 199) return false;
     }
     if (route !== "/") return true;
-    // Home's first arrival raises the ceremony veil (#457); a key before the module arms the skip hits nothing, so press until the veil goes and the head plate shows the head.
+    // Home's first arrival raises the ceremony veil (#457); a key before the module arms the skip hits nothing, so press until the veil goes and the cluster shows on the stage.
     for (let i = 0; i < 40; i++) {
       await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
       await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
@@ -108,13 +127,13 @@ export async function run(ctx) {
 
   const bad = (pred) => SHELLED.filter((r) => !heads[r] || !pred(heads[r], r));
 
-  const manyH1 = bad((h) => h.h1s.length === 1 && h.h1s[0].inHeader);
+  const manyH1 = bad((h, r) => h.h1s.length === 1 && (r === "/" ? h.h1s[0].inHeader : h.h1s[0].inMain));
   check(
-    "RH0 every shelled page delivers exactly one h1, inside the running head",
+    "RH0 every shelled page delivers exactly one h1: home's in the cluster, a room's standing in the page (#461 ruling 1)",
     unreachable.length === 0 && manyH1.length === 0,
     unreachable.length
       ? `unreachable: ${unreachable.join(", ")}`
-      : manyH1.map((r) => `${r}: ${JSON.stringify(heads[r]?.h1s)}`).join(" | ") || `${SHELLED.length}/${SHELLED.length} pages, one h1 each`,
+      : manyH1.map((r) => `${r}: ${JSON.stringify(heads[r]?.h1s)}`).join(" | ") || `${SHELLED.length}/${SHELLED.length} pages, one h1 each, placed right`,
   );
 
   const wrongH1 = bad((h, r) => h.h1s.length === 1 && h.h1s[0].classes.includes(r === "/" ? "wordmark" : "room-name"));
@@ -136,35 +155,57 @@ export async function run(ctx) {
   check(
     "RH2 every head member resolves its measured tag, weight, size, tracking and face, on every shelled page",
     offenders.length === 0,
-    offenders.join(" | ") || `${SHELLED.length * MEMBERS.length - 1} members pinned across ${SHELLED.length} pages`,
+    offenders.join(" | ") || `${SHELLED.length * MEMBERS.length - 2} members pinned across ${SHELLED.length} pages`,
+  );
+
+  // The band clips the deep at --band-h (121.6px at desktop); home has no band, nothing scrolls
+  // beneath its cluster. The invariant is band >= cluster (ruling 5's "never beneath bare
+  // lettering"), not just the literal clip: nav growth that overflows the band must red here.
+  const unfixed = bad((h, r) =>
+    h.chromePosition === "fixed" &&
+    (r === "/" ? h.bandClip === null
+               : typeof h.bandClip === "string" && h.bandClip.includes("121.6px") &&
+                 typeof h.chromeBottom === "number" && h.chromeBottom <= 121.6));
+  check(
+    "RH3 the cluster is fixed on every page, inside the reserved band on rooms and bandless on home (#461 rulings 1+5)",
+    unfixed.length === 0,
+    unfixed.map((r) => `${r}: chrome=${heads[r]?.chromePosition} bottom=${heads[r]?.chromeBottom} band=${heads[r]?.bandClip}`).join(" | ") ||
+      `chrome fixed x${SHELLED.length}, cluster inside the 121.6px band x${SHELLED.length - 1}, home bandless`,
   );
 
   const home = heads["/"];
   const prose = heads[PROSE];
   check(
-    "RH3 home's wordmark stays grander than a room page's (43.2px/0.3em against 28px/0.3em), and home has no room name",
-    matches(home?.wordmark, HOME_HEAD.wordmark) && matches(prose?.wordmark, ROOM_HEAD.wordmark) &&
-      home?.wordmark.size > prose?.wordmark.size && home?.roomName === null,
+    "RH4 the cluster is ONE dress: home's wordmark and footer resolve identical to a room's (the folio's grander-home literals retired, #461)",
+    !!home && !!prose &&
+      near(home.wordmark?.size, prose.wordmark?.size) && home.wordmark?.tracking === prose.wordmark?.tracking &&
+      near(home.footer?.size, prose.footer?.size) && home.footer?.tracking === prose.footer?.tracking &&
+      home.wordmark?.tag === "H1" && prose.wordmark?.tag === "P",
     home && prose
-      ? `home=${home.wordmark?.tag}/${home.wordmark?.size}px/${home.wordmark?.tracking} ${PROSE}=${prose.wordmark?.tag}/${prose.wordmark?.size}px/${prose.wordmark?.tracking}, roomName=${JSON.stringify(home.roomName)}`
+      ? `wordmark home=${home.wordmark?.tag}/${home.wordmark?.size} ${PROSE}=${prose.wordmark?.tag}/${prose.wordmark?.size}; footer ${home.footer?.size} vs ${prose.footer?.size}`
       : "a page was unreachable",
   );
 
+  // Both polarities of the leading addendum (#461): the cluster never inherits the page's 1.6, the room head never inherits an app page's normal.
+  const misleaded = SHELLED.flatMap((r) => {
+    const h = heads[r];
+    if (!h) return [`${r}: unreachable`];
+    const out = [];
+    if (!h.wordmark || Math.abs(h.wordmark.ratio - 1.15) > 0.005) out.push(`${r} wordmark ratio ${h.wordmark?.ratio}`);
+    for (const m of CLUSTER_NORMAL) {
+      if (h[m]?.lineHeight !== "normal") out.push(`${r} ${m} leading ${h[m]?.lineHeight}`);
+    }
+    if (r !== "/") {
+      for (const m of HEAD_LEADED) {
+        if (!h[m] || Math.abs(h[m].ratio - 1.6) > 0.005) out.push(`${r} ${m} ratio ${h[m]?.ratio}`);
+      }
+    }
+    return out;
+  });
   check(
-    "RH4 home's footer stays grander than a room page's (12px/0.25em against 11.52px/0.22em)",
-    matches(home?.footer, HOME_HEAD.footer) && matches(prose?.footer, ROOM_HEAD.footer) &&
-      home?.footer.size > prose?.footer.size,
-    home && prose ? `home=${home.footer?.size}px/${home.footer?.tracking} ${PROSE}=${prose.footer?.size}px/${prose.footer?.tracking}` : "a page was unreachable",
-  );
-
-  const unleaded = SHELLED.flatMap((r) =>
-    HEAD_MEMBERS
-      .filter((m) => (r === "/" && m === "roomName" ? false : !leaded(heads[r]?.[m])))
-      .map((m) => `${r} ${m}`));
-  check(
-    "RH5 every head member resolves line-height 1.6 on every shelled page",
-    unleaded.length === 0,
-    unleaded.join(", ") || `${SHELLED.length * HEAD_MEMBERS.length - 1}/${SHELLED.length * HEAD_MEMBERS.length - 1} members at 1.6`,
+    "RH5 the cluster pins its own leading (wordmark 1.15, the rest normal) and the room head pins 1.6, on every shelled page",
+    misleaded.length === 0,
+    misleaded.join(", ") || `cluster + room head leading pinned across ${SHELLED.length} pages`,
   );
 
   const app = heads[APP];
@@ -195,10 +236,30 @@ export async function run(ctx) {
     `producer emits header.atlas-head > h1: ${producerShape}; injected twin: ${JSON.stringify(atlas)}`,
   );
 
+  // The lightest-adjacent-ground measurements behind both pins are the 2026-08-26 plate read
+  // (out/461-plate/contrast-v2.json): line-tan on the deep 4.03 < 4.5, and home's bandless
+  // cluster at 1280x800 over the close-in chart as low as 1.17. Alex's calls same day on #461.
+  const PARCHMENT = "rgb(239, 230, 207)";
+  const dimTaglines = bad((h) => h.tagline?.color === PARCHMENT);
+  check(
+    "RH9a the tagline resolves parchment sitewide: line-tan measured 4.03 on the deep, under the 4.5 bar (#461, 2026-08-26 call)",
+    dimTaglines.length === 0,
+    dimTaglines.map((r) => `${r} tagline ${heads[r]?.tagline?.color}`).join(" | ") || `tagline parchment x${SHELLED.length}`,
+  );
+
+  const washWrong = bad((h, r) =>
+    r === "/" ? typeof h.chromeWash === "string" && h.chromeWash.includes("radial-gradient")
+              : h.chromeWash === "none");
+  check(
+    "RH9b home's chrome carries its wash and a room's carries none, the band being its ground (#461, 2026-08-26 call)",
+    washWrong.length === 0,
+    washWrong.map((r) => `${r} wash ${JSON.stringify(heads[r]?.chromeWash)}`).join(" | ") || "wash on home alone",
+  );
+
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
   const restored = await waitReady();
 
-  // "AbortError: Transition was skipped" is the cross-document view-transition's expected cancellation when navigations chain fast, not an app error; this suite is the sole visitor to /gallery/, /glossary/ and /faq/.
+  // "AbortError: Transition was skipped" is the cross-document view-transition's expected cancellation when navigations chain fast, not an app error; this suite is the sole visitor to /gallery/, /glossary/, /faq/ and /ribbon/.
   const errDelta = consoleErrors.slice(errBase).filter((e) => !e.includes("AbortError: Transition was skipped"));
   const httpDelta = http4xx.slice(httpBase).filter((u) => !/favicon/i.test(u));
   check(

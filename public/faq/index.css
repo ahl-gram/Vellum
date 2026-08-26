@@ -1,12 +1,13 @@
 body {
-  padding: 2.5rem 1.5rem 5rem;
   line-height: 1.6;
 }
 h2 {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
-main { max-width: 760px; }
-/* The survey sheet (#289): the page CONTENT lies on the desk as one bounded sheet; the running head, nav, and footer stay OFF it, so the frame lives on .sheet, never main. Twin rule in glossary/index.css; guarded by test/site/sheet-frame.test.ts. */
+/* The survey sheet at full bleed (#461 ruling 3): parchment panel edge to edge (the shell's
+   2.2rem body margins), border plus double outline, the 26px corner L brackets, the
+   chart-ink shadow; the running head, nav, and footer stay OFF the sheet on the deep.
+   Twin rule in glossary/index.css; guarded by test/site/sheet-frame.test.ts. */
 .sheet {
   background: var(--parchment-panel);
   background-image:
@@ -15,9 +16,8 @@ main { max-width: 760px; }
   border: 1px solid var(--line-tan);
   outline: 3px double var(--line-tan);
   outline-offset: 6px;
-  margin-top: 1.6rem;
-  padding: 2.2rem clamp(1.25rem, 5vw, 3.5rem) 3rem;
-  box-shadow: 0 18px 50px rgb(from var(--chart-ink) r g b / 0.28);
+  padding: 2.6rem clamp(1.5rem, 4vw, 4rem) 3.2rem;
+  box-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);
   position: relative;
 }
 .sheet::before, .sheet::after {
@@ -27,22 +27,37 @@ main { max-width: 760px; }
 .sheet::before { top: 14px; left: 14px; border-right: none; border-bottom: none; }
 .sheet::after { bottom: 14px; right: 14px; border-left: none; border-top: none; }
 @media (max-width: 600px) { .sheet { outline-offset: 4px; } }
-header { margin-bottom: 1rem; }
-h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan);
-  padding-bottom: 0.3rem; margin-top: 2.8rem; }
-.toc { background: var(--parchment-panel); border: 1.5px solid var(--line-tan); border-radius: 4px;
-  padding: 1rem 1.4rem; margin: 2rem 0 1rem; }
-.toc strong { display: block; margin-bottom: 0.4rem; }
-.toc ul { margin: 0; padding-left: 1.1rem; }
-.toc a { color: var(--ink-dark); }
-/* vertical-align pins the marker to the FIRST line (#356): an inline-block baselines from its LAST line box, dropping a wrapped entry's bullet 26px down (at 320-330px this is the steady state, not a first-paint flash). Do not revert to display:inline: the tip transform needs a block box (#358's sweep in tip-affordance.test.ts holds this line). */
+/* The sheet's half of the landing ceremony (#461 ruling 6): the shadow tightens as the
+   shell settles main; no transform here, or the two rises would compound. */
+@keyframes sheet-settle {
+  from { box-shadow: 0 30px 80px rgb(from var(--chart-ink) r g b / 0.75); }
+}
+body.room .sheet { animation: sheet-settle 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+/* The broadside (#461 ruling 4): full width is earned by columns; heads span, the column
+   rule is the softer hairline. Columns, never a grid: they rebalance at any prose length. */
+.columns { column-width: 26rem; column-gap: 3.6rem; column-rule: 1px solid var(--line-faint); }
+h2 { column-span: all; font-size: 1.25rem; letter-spacing: 0.09em; border-bottom: 1px solid var(--line-tan);
+  padding-bottom: 0.3rem; margin: 2.4rem 0 1.1rem; }
+/* The TOC as a spanning dot-row (#461 ruling 4): one centered rule-bound line, entries
+   dotted apart; the display face on the head is the broadside's ruled exception to the
+   archivist tier (re-ratification comment on #324, 2026-08-26). */
+.toc { column-span: all; border-top: 1px solid var(--line-tan); border-bottom: 1px solid var(--line-tan);
+  padding: 0.55rem 0; margin: 0 0 2.2rem; text-align: center; }
+.toc strong { display: inline; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-weight: 400; font-size: 0.78rem; letter-spacing: 0.14em; margin-right: 0.9em; }
+.toc ul { display: inline; margin: 0; padding: 0; list-style: none; }
+.toc li { display: inline; }
+.toc li + li::before { content: "\00b7"; margin: 0 0.7em; color: var(--ink-faded); }
+.toc a { color: var(--ink-dark); font-size: 0.95rem; }
+/* vertical-align pins the tip's inline-block box (#356/#358 sweep in tip-affordance.test.ts);
+   the dot-row never wraps an entry mid-label, but the pin is the class rule, not the layout. */
 .toc a { display: inline-block; vertical-align: top; transition: transform var(--paper-quick) var(--ease-paper); }
 .toc a:hover { transform: translateY(var(--raise)) rotate(-0.6deg); }
 .toc a:active { transform: translateY(0); }
 .q { font-weight: 600; color: var(--ink-dark); margin: 1.6rem 0 0.3rem;
-  font-size: 1.08rem; }
-.a { margin: 0; }
-a { color: var(--ink-brown); }
+  font-size: 1.08rem; break-after: avoid; }
+.q:first-of-type, h2 + .q { margin-top: 0; }
+.a { margin: 0 0 0.6rem; }
+a { color: var(--ink-dark); }
 code { background: var(--parchment-deep); padding: 0.1em 0.4em; border-radius: 3px;
   font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
-footer { margin-top: 4rem; }

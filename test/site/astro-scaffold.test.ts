@@ -141,6 +141,17 @@ const PAGES: readonly PageSpec[] = [
     scriptSrc: "./app.bundle.js",
   },
   {
+    route: "ribbon/index.html",
+    dir: "/ribbon/",
+    room: "The Wayfarer's Ribbon",
+    title: "The Wayfarer's Ribbon · Vellum",
+    ogTitle: "The Wayfarer's Ribbon · Vellum",
+    description:
+      "Any road journey unrolled as an itinerary strip chart: the way drawn league by league up the scroll, with a compass turning to keep true north.",
+    tagline: "the road, unrolled",
+    scriptSrc: "./app.bundle.js",
+  },
+  {
     route: "gallery/index.html",
     dir: "/gallery/",
     current: "Gallery",
@@ -216,7 +227,7 @@ test("BaseLayout prefetches the room shells so a first click commits instantly (
 
 test("the shell is authored exactly once: pages carry no header/nav/footer/meta boilerplate", () => {
   const layout = readFileSync(root("src/layouts/BaseLayout.astro"), "utf8");
-  for (const marker of ["<footer>", 'class="topnav"', 'property="og:title"', 'name="twitter:card"', "<title>"]) {
+  for (const marker of ["<footer>", 'class="rooms"', 'property="og:title"', 'name="twitter:card"', "<title>"]) {
     assert.ok(layout.includes(marker), `BaseLayout.astro should own the shell marker ${marker}`);
   }
   assert.ok(layout.includes("NAV_ITEMS"), "the layout should render the typed nav data, not hand-authored items");
@@ -224,7 +235,7 @@ test("the shell is authored exactly once: pages carry no header/nav/footer/meta 
   for (const p of PAGES) {
     const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
     // Meta-attribute forms: a bare "og:" false-positives on prose ("log:").
-    for (const marker of ["<footer", "topnav", 'property="og:', 'name="twitter:', "<title", "<header", "<html", "<head"]) {
+    for (const marker of ["<footer", 'class="rooms"', 'property="og:', 'name="twitter:', "<title", "<header", "<html", "<head"]) {
       assert.ok(!source.includes(marker), `${p.route} source should not duplicate the shell (found ${marker})`);
     }
   }
@@ -302,7 +313,7 @@ test("no head member arrives beyond the canonical set (nothing injected, nothing
   }
 });
 
-test("the canonical nav renders the typed items flat, root-absolute, one manicule-marked aria-current", () => {
+test("the canonical nav renders the typed items flat, root-absolute, one aria-current span (#461 ruling 1)", () => {
   assert.deepEqual(
     NAV_ITEMS.map((i) => i.label),
     ["Today", "Explorer", "Reading Room", "Print Room", "Gallery", "Q & A", "Glossary"],
@@ -318,13 +329,13 @@ test("the canonical nav renders the typed items flat, root-absolute, one manicul
   }
   for (const p of PAGES) {
     const html = page(p.route);
-    const navs = [...html.matchAll(/<nav class="topnav">([\s\S]*?)<\/nav>/g)];
-    assert.equal(navs.length, 1, `${p.route} should have exactly one topnav (semantic <nav>)`);
+    const navs = [...html.matchAll(/<nav class="rooms" aria-label="The rooms">([\s\S]*?)<\/nav>/g)];
+    assert.equal(navs.length, 1, `${p.route} should have exactly one rooms nav (semantic <nav>)`);
     const nav = navs[0][1];
 
     const parts = [
       ...nav.matchAll(
-        /<a href="([^"]+)">([^<]+)<\/a>|<span aria-current="page"><span class="manicule" aria-hidden="true">[^<]+<\/span>([^<]+)<\/span>/g,
+        /<a href="([^"]+)">([^<]+)<\/a>|<span aria-current="page">([^<]+)<\/span>/g,
       ),
     ];
     assert.deepEqual(
@@ -343,116 +354,134 @@ test("the canonical nav renders the typed items flat, root-absolute, one manicul
       currents.map((m) => decode(m[3])),
       p.current ? [p.current] : [],
       p.current
-        ? `${p.route} marks exactly its own page aria-current, as an unlinked manicule span`
-        : `${p.route} is home: no nav item, so no aria-current`,
+        ? `${p.route} marks exactly its own page aria-current, as an unlinked span (brightened AND underlined, never color alone)`
+        : `${p.route} is not a nav item, so no aria-current`,
     );
-    const manicules = nav.split('class="manicule"').length - 1;
-    assert.equal(manicules, p.current ? 1 : 0, `${p.route} carries exactly one manicule, on the current page alone`);
-    assert.equal(nav.split(" · ").length, NAV_ITEMS.length, `${p.route} items are separated by the middle dot`);
+    assert.ok(!nav.includes("manicule"), `${p.route}: the manicule retired with the folio band (#461 ruling 1)`);
+    const seps = nav.split('<span class="sep" aria-hidden="true">').length - 1;
+    assert.equal(seps, NAV_ITEMS.length - 1, `${p.route} items are dotted apart by hidden separator spans`);
   }
 });
 
-test("the layout ships the two ratified shell rules: 0.82rem unification + aria-current inline-block", () => {
+test("the layout ships the cluster's ratified pins: leading, weight, the aria-current span (#461)", () => {
   for (const p of PAGES) {
     const head = headOf(page(p.route));
     const style = head.match(/<style[^>]*>([\s\S]*?)<\/style>/);
     assert.ok(style, `${p.route} should inline the shell <style>`);
-    // The inlined shell CSS arrives minified, so tolerate .82rem and bare attr values.
+    // The inlined shell CSS arrives minified, so tolerate .72rem and bare attr values.
     const css = style[1];
     assert.match(
       css,
-      /\.topnav\s*\{[^}]*font-size:\s*0?\.82rem/,
-      "one nav font size everywhere (FAQ/glossary's 0.8rem was drift, unified by ratified decision B)",
+      /\.rooms\s*\{[^}]*font-size:\s*0?\.72rem/,
+      "one nav font size everywhere (the mockup's 0.72rem cluster nav)",
     );
     assert.match(
       css,
-      /\.topnav\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*display:\s*inline-block/,
+      /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*display:\s*inline-block/,
       "the current label joins motion.css's inline-block rule so a multi-word label cannot wrap mid-label",
     );
-    // With the manicule, the you-are-here marker never relies on color alone (#268).
+    // The you-are-here marker never relies on color alone (#268, re-ratified at #461): brightened AND underlined.
     assert.match(
       css,
-      /\.topnav\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*color:\s*var\(--ink-dark\)/,
-      "the current label darkens to the shell's ink",
+      /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*color:\s*var\(--parchment-bright\)/,
+      "the current label brightens against the deep",
     );
     assert.match(
       css,
-      /\.topnav\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*text-decoration(?:-line)?:\s*underline/,
+      /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*text-decoration(?:-line)?:\s*underline/,
       "the current label is underlined",
     );
+    // The second addendum on #461: the cluster must NOT inherit the page's reading line-height; page css sets body leading per page and the cluster pins its own.
     assert.match(
       css,
-      /\.head-rule\s*\{[^}]*border-top:\s*1px solid var\(--ink-dark\)/,
-      "the head rule draws its top hairline",
+      /(?:header\.chrome|\.chrome)\s*\{[^}]*line-height:\s*normal/,
+      "the cluster pins line-height normal so the page's 1.6 cannot inflate its gaps",
     );
-    assert.match(
-      css,
-      /\.head-rule\s*\{[^}]*border-bottom:\s*1px solid var\(--ink-dark\)/,
-      "the head rule draws its bottom hairline",
-    );
-    // Fell's manicule glyph coverage is inconsistent, so the manicule pins the plain serif stack.
-    assert.match(
-      css,
-      /\.manicule\s*\{[^}]*font-family:\s*['"]?Iowan Old Style/,
-      "the manicule never trusts the Fell font for its glyph",
-    );
-    assert.match(css, /\.wordmark\s*\{[^}]*letter-spacing:\s*0?\.3em/, "the wordmark alone is tracked out");
-    // #288 swapped tags whose UA-default weights are the opposite of what renders (h1 bold, p normal); both pins keep the swap pixel-identical.
-    assert.match(css, /\.wordmark\s*\{[^}]*font-weight:\s*700/, "the wordmark keeps the weight its h1 gave it");
-    assert.match(css, /\.room-name\s*\{[^}]*font-weight:\s*400/, "the room name keeps the weight its p gave it");
-    // Page css varies body line-height (1.6 on prose pages, unset elsewhere); the head pins the ratified 1.6 so its geometry matches on every page.
-    for (const [label, sel] of [
-      [".wordmark", "\\.wordmark"],
-      [".room-name", "\\.room-name"],
-      [".tagline", "\\.tagline"],
-      [".topnav", "\\.topnav"],
-    ] as const) {
-      assert.match(
-        css,
-        new RegExp(`${sel}\\s*\\{[^}]*line-height:\\s*1\\.6`),
-        `${label} pins line-height 1.6 so the head is identical on every page`,
-      );
+    assert.match(css, /\.wordmark\s*\{[^}]*line-height:\s*1\.15/, "the wordmark pins the mockup's 1.15");
+    assert.match(css, /\.wordmark\s*\{[^}]*letter-spacing:\s*0?\.12em/, "the wordmark wears the mockup's tracking");
+    // #288's tag swap still means the wordmark is h1 on home and p on rooms, opposite UA weights, no bold cut in the face: both weights stay pinned.
+    assert.match(css, /\.wordmark\s*\{[^}]*font-weight:\s*400/, "the wordmark pins the cluster's 400 against the h1 UA bold");
+    assert.match(css, /\.room-name\s*\{[^}]*font-weight:\s*400/, "the room name pins 400 against its h1's UA bold");
+    assert.ok(!css.includes(".head-rule"), "the folio's double rule retired with the band (#461 ruling 1)");
+    assert.ok(!css.includes(".manicule"), "the manicule retired with the folio nav (#461 ruling 1)");
+    assert.ok(!css.includes(".topnav"), "the folio topnav retired; the cluster's .rooms nav replaced it");
+  }
+});
+
+test("the phone doors: home alone renders the rooms reveal ahead of its nav (#461, Alex's 2026-08-26 call on skeptic finding 1)", () => {
+  // The mockup's under-900px nav stand-down stranded four rooms (the legend carries four doors, not seven); the ruled replacement is a no-JS checkbox burger revealing the same nav. Home only: a room page's nav never stands down, so it needs no reveal.
+  for (const p of PAGES) {
+    const html = page(p.route);
+    const reveal = html.indexOf('class="rooms-reveal"');
+    if (p.route === "index.html") {
+      assert.ok(reveal > -1, "home renders the rooms reveal");
+      assert.match(html, /<input type="checkbox"[^>]*class="rooms-reveal"[^>]*aria-label/, "the reveal is a labelled native checkbox (keyboard-operable with no bundle)");
+      assert.ok(reveal < html.indexOf('<nav class="rooms"'), "the reveal precedes the nav it reveals (the ~ combinator needs the order)");
+    } else {
+      assert.equal(reveal, -1, `${p.route} carries no reveal (its nav never stands down)`);
     }
   }
 });
 
-test("the running head: uniform wordmark link, room name + tagline, double rule, then the nav band (#268)", () => {
+test("a page whose markup carries the survey sheet passes desk open (#461, the interim rule's converse)", () => {
+  // The layout throws on desk without room, but nothing stopped a converted page from forgetting desk="open" and shipping a desk panel wrapped around a full-bleed sheet (skeptic finding 9).
+  // The survey sheet is the BARE <div class="sheet">; the Explorer's chart mount is class="sheet" id="sheet", a different animal (sheet-frame.test.ts keys the same way).
+  for (const p of PAGES) {
+    if (p.route === "index.html") continue;
+    const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
+    if (source.includes('<div class="sheet">')) {
+      assert.match(source, /desk="open"/, `${p.route} carries the survey sheet, so its layout call must open the desk`);
+    } else {
+      assert.ok(!source.includes('desk="open"'), `${p.route} has no survey sheet, so it keeps the interim desk panel`);
+    }
+  }
+});
+
+test("the head cluster: wordmark, the atelier tagline, then the rooms nav, fixed on the deep (#461 ruling 1)", () => {
   // Astro entity-encodes text expressions: & and apostrophes arrive escaped.
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#39;");
   for (const p of PAGES) {
     const html = page(p.route);
     assert.ok(
-      html.includes('<a href="/">VELLUM</a>'),
-      `${p.route} wordmark must be the home link on every page, home included`,
+      html.includes('<a href="/">Vellum</a>'),
+      `${p.route} wordmark must be the home link on every page, home included (mixed case: Fell SC sets the small caps)`,
     );
     if (p.room) {
       assert.ok(
         html.includes(`<h1 class="room-name">${esc(p.room)}</h1>`),
-        `${p.route} names its room on the running head, as the page's h1 (#288)`,
+        `${p.route} names its room as the page's h1, standing in the page (#288, re-ratified at #461)`,
+      );
+      assert.ok(
+        html.includes(`<p class="room-tagline">${esc(p.tagline)}</p>`),
+        `${p.route} keeps its flourish line under the room name`,
+      );
+      assert.ok(
+        html.includes('<div class="band" aria-hidden="true">'),
+        `${p.route} reserves the walnut band the cluster stands on (#461 ruling 5)`,
       );
     } else {
       // Match the markup form, not the bare class: the shell css mentions .room-name on every page.
       assert.ok(
         !html.includes('<h1 class="room-name">'),
-        `${p.route} is home: the atelier is not a room, the tagline stands alone`,
+        `${p.route} is home: the atelier is not a room`,
+      );
+      assert.ok(
+        !html.includes('class="band"'),
+        `${p.route} is home: the full-bleed stage needs no band (nothing scrolls beneath the cluster)`,
       );
     }
-    assert.ok(html.includes(`<p class="tagline">${esc(p.tagline)}</p>`), `${p.route} keeps its tagline`);
-
-    const [head, rule, nav] = ['class="running-head"', 'class="head-rule"', 'class="topnav"'].map((m) =>
+    // The cluster's tagline is the SITE line on every page; the per-page flourish moved under the room name.
+    assert.ok(
+      html.includes('<p class="tagline">an atelier of imaginary cartography</p>'),
+      `${p.route} carries the atelier tagline in the cluster`,
+    );
+    const [head, tag, nav] = ['<header class="chrome">', 'class="tagline"', '<nav class="rooms"'].map((m) =>
       html.indexOf(m),
     );
-    assert.ok(head > -1 && head < rule && rule < nav, `${p.route} keeps the order: running head, double rule, nav band`);
-  }
-
-  const homeHeader = page("index.html").match(/<header>([\s\S]*?)<\/header>/);
-  assert.ok(homeHeader, "home should have a header");
-  const order = ['class="wordmark"', 'class="tagline"', '<nav class="topnav">'];
-  let at = -1;
-  for (const marker of order) {
-    const next = homeHeader[1].indexOf(marker);
-    assert.ok(next > at, `home header keeps its order at ${marker}`);
-    at = next;
+    assert.ok(head > -1 && head < tag && tag < nav, `${p.route} keeps the cluster order: wordmark head, tagline, rooms nav`);
+    for (const gone of ['class="running-head"', 'class="head-rule"', 'class="topnav"']) {
+      assert.ok(!html.includes(gone), `${p.route}: the folio ${gone} retired with the cluster (#461)`);
+    }
   }
   for (const gone of ['class="lede"', 'class="seedline"', 'class="cartouche"', 'class="banners"', 'class="grid3"', 'class="plate"']) {
     assert.ok(!page("index.html").includes(gone), `home retired its ${gone} section (#289 hero, then the #470 below-stage removals)`);
@@ -467,24 +496,33 @@ test("every page's h1 names the page: the room on room pages, the wordmark on ho
     assert.equal(h1s.length, 1, `${p.route} has exactly one h1`);
     assert.equal(
       normalize(decodeAll(h1s[0][1])),
-      p.room ?? "VELLUM",
+      p.room ?? "Vellum",
       `${p.route} h1 must name the page itself, not the masthead`,
     );
 
     const firstHeading = html.search(/<h[1-6]\b/);
     assert.equal(firstHeading, html.search(/<h1\b/), `${p.route} h1 is the first heading on the page`);
-    const [headOpen, headClose] = [html.indexOf("<header>"), html.indexOf("</header>")];
-    assert.ok(
-      headOpen > -1 && firstHeading > headOpen && firstHeading < headClose,
-      `${p.route} keeps its h1 inside the running head`,
-    );
+    if (p.room) {
+      // #461 ruling 1 keeps #288 in the new form: the room name is the h1, standing in the page (on the sheet or the desk panel), not in the fixed cluster.
+      const [mainOpen, mainClose] = [html.search(/<main\b/), html.indexOf("</main>")];
+      assert.ok(
+        mainOpen > -1 && firstHeading > mainOpen && firstHeading < mainClose,
+        `${p.route} keeps its h1 standing in the page (inside <main>)`,
+      );
+    } else {
+      const [headOpen, headClose] = [html.indexOf('<header class="chrome">'), html.indexOf("</header>")];
+      assert.ok(
+        headOpen > -1 && firstHeading > headOpen && firstHeading < headClose,
+        `${p.route} is home: the wordmark h1 lives in the cluster`,
+      );
+    }
   }
 
   for (const p of PAGES) {
     const html = page(p.route);
     const tag = p.room ? "p" : "h1";
     assert.ok(
-      html.includes(`<${tag} class="wordmark"><a href="/">VELLUM</a></${tag}>`),
+      html.includes(`<${tag} class="wordmark"><a href="/">Vellum</a></${tag}>`),
       `${p.route} carries the wordmark as a <${tag} class="wordmark">`,
     );
   }
@@ -506,7 +544,11 @@ test("titles are computed in the layout from the room, never hand-set (#268)", (
       assert.ok(!open[1].includes(gone), `${p.route} must not hand-set ${gone.slice(0, -1)} (the layout computes it)`);
     }
     if (p.room) {
-      assert.ok(open[1].includes(`room="${p.room}"`), `${p.route} passes its room to the layout`);
+      // The page hoists the room to a const and hands the SAME value to the layout (the title) and to RoomHead (the h1), so the two cannot drift.
+      assert.ok(source.includes(`const room = "${p.room}"`), `${p.route} hoists its room to a const`);
+      assert.ok(open[1].includes("room={room}"), `${p.route} passes the const to the layout`);
+      assert.ok(source.includes(`const tagline = "${p.tagline}"`), `${p.route} hoists its tagline to a const`);
+      assert.ok(source.includes("<RoomHead room={room} tagline={tagline} />"), `${p.route} stands its RoomHead in the page`);
     } else {
       assert.ok(!open[1].includes("room="), `${p.route} is home and passes no room`);
     }
@@ -523,19 +565,27 @@ test("the footer is constant and appears exactly once per page", () => {
   for (const p of PAGES) {
     const footers = [...page(p.route).matchAll(/<footer>([\s\S]*?)<\/footer>/g)];
     assert.equal(footers.length, 1, `${p.route} has exactly one footer`);
-    assert.equal(normalize(footers[0][1]), "VELLUM · AN ATELIER OF IMAGINARY CARTOGRAPHY");
+    assert.equal(normalize(footers[0][1]), "Vellum · an atelier of imaginary cartography");
   }
 });
 
 // A guard, green from the start: <main> is load-bearing (page CSS centers via it) and the end-anchored close means nothing can be injected after the footer unseen.
-test("the body skeleton pins the load-bearing <main> wrapper at both ends", () => {
+test("the body skeleton pins the shell order: band, cluster, main, footer on the deep (#461)", () => {
   for (const p of PAGES) {
     const html = page(p.route);
-    assert.match(html, /<body>\s*<main>\s*<header>/, `${p.route} body must open body > main > header`);
+    if (p.room) {
+      assert.match(
+        html,
+        /<body class="room">\s*<div class="band" aria-hidden="true"><\/div>\s*<header class="chrome">/,
+        `${p.route} body must open body.room > band > cluster`,
+      );
+    } else {
+      assert.match(html, /<body>\s*<header class="chrome">/, `${p.route} is home: no band, the cluster floats on the stage`);
+    }
     assert.match(
       html,
-      /<\/footer>\s*<\/main>\s*<\/body>\s*<\/html>\s*$/,
-      `${p.route} must close footer, main, body, html with nothing after`,
+      /<\/main>\s*<footer>[\s\S]*?<\/footer>\s*<\/body>\s*<\/html>\s*$/,
+      `${p.route} must close main, then the footer on the deep, then body and html with nothing after`,
     );
   }
 });
@@ -632,6 +682,7 @@ test("every internal link and embed on the rendered pages resolves", () => {
     "/seed-of-the-day/app.bundle.js",
     "/reading-room/app.bundle.js",
     "/prospect/app.bundle.js",
+    "/ribbon/app.bundle.js",
     "/app.bundle.js",
   ];
   const routes = new Set<string>(PAGES.map((p) => p.dir));

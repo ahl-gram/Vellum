@@ -1,14 +1,20 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import RoomHead from "../../layouts/RoomHead.astro";
+
+const room = "The Glossary";
+const tagline = "the words on the charts";
 ---
 
 <BaseLayout
-  room="The Glossary"
+  room={room}
   description="A glossary of the cartography, heraldry, seamanship, and geography vocabulary printed on Vellum's charts, in its gazetteer, its voyage journal, and across its realm names."
   path="/glossary/"
-  tagline="the words on the charts"
+  desk="open"
 >
 <div class="sheet">
+<RoomHead room={room} tagline={tagline} />
+<div class="columns">
 <p class="intro">Vellum's charts, gazetteer, voyage journal, and realm names
 borrow real cartography, heraldry, seamanship, and geography vocabulary, some
 of it centuries old. Here's what it all means.</p>
@@ -712,5 +718,6 @@ Caesar.</p>
 <p class="term">Voivodeship</p>
 <p class="def">The province of a voivode, a Slavic warlord turned provincial
 governor. Poland still calls its provinces voivodeships.</p>
+</div>
 </div>
 </BaseLayout>

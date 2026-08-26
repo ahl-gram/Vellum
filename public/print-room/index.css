@@ -84,7 +84,8 @@ footer { margin-top: 3rem; }
 
 /* Print-to-PDF replaces the deleted CLI --pdf (#136); scoped to body.has-atlas so a plain Ctrl+P before binding still prints the normal page, not a blank sheet. */
 @media print {
-  body.has-atlas > main > header,
+  body.has-atlas > header,
+  body.has-atlas .room-head,
   body.has-atlas .intro,
   body.has-atlas .counter,
   body.has-atlas .warning,
@@ -92,7 +93,7 @@ footer { margin-top: 3rem; }
   body.has-atlas .order-desk,
   body.has-atlas #pr-preview,
   body.has-atlas #pr-caption,
-  body.has-atlas > main > footer { display: none !important; }
+  body.has-atlas > footer { display: none !important; }
   body.has-atlas { padding: 0; }
   body.has-atlas main { max-width: none; }
   body.has-atlas #pr-atlas { max-width: none; margin: 0; }

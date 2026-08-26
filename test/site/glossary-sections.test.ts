@@ -141,25 +141,29 @@ test("terms stay alphabetical inside their section (#353)", () => {
   }
 });
 
-test("the grown TOC reads in two columns, and stacks on mobile (#353)", () => {
+test("the TOC is the broadside's spanning dot-row (#461 ruling 4, superseding the #353 columns)", () => {
   const css = readFileSync(
     fileURLToPath(new URL("../../public/glossary/index.css", import.meta.url)),
     "utf8",
   );
   assert.match(
     css,
-    /\.toc ul\s*\{[^}]*columns:\s*2/,
-    "the glossary TOC should read in two columns once the sheet is wide enough",
+    /\.toc\s*\{[^}]*column-span:\s*all/,
+    "the TOC spans the broadside's columns as one row",
   );
   assert.match(
     css,
-    /@media\s*\(max-width:\s*720px\)\s*\{[^}]*\.toc ul\s*\{[^}]*columns:\s*1/,
-    "the TOC should stack to one column on mobile, at the 720px boundary public/index.css uses",
+    /\.toc li\s*\{[^}]*display:\s*inline/,
+    "TOC entries read inline along the row",
   );
   assert.match(
     css,
-    /\.toc li\s*\{[^}]*break-inside:\s*avoid/,
-    "a wrapped TOC entry should not split across the column break",
+    /\.toc li \+ li::before\s*\{[^}]*content:\s*"\\00b7"/,
+    "entries are dotted apart (the rooms nav's own separator language)",
+  );
+  assert.ok(
+    !/\.toc ul\s*\{[^}]*columns:/.test(css),
+    "the #353 two-column TOC box retired with the dot-row; columns on the ul would fight the inline row",
   );
 });
 

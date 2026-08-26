@@ -1,14 +1,18 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import RoomHead from "../../layouts/RoomHead.astro";
+
+const room = "The Reading Room";
+const tagline = "watch a world live";
 ---
 
 <BaseLayout
-  room="The Reading Room"
+  room={room}
   description="The atelier's reading room: sit with any seed's world and watch its founding voyage flow into its recorded ages on one continuous timeline."
   path="/reading-room/"
-  tagline="watch a world live"
   extraCss={["/living-chart.css", "/reading-frame.css"]}
 >
+<RoomHead room={room} tagline={tagline} />
 
 <p class="intro">This is the atelier's reading room, where a chart is watched rather
 than worked. The room opens on a world at rest, its whole story already told in the

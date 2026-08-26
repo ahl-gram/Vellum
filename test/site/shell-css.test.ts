@@ -174,16 +174,55 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
   }
 });
 
-test("the daylight wash: every sheet is lit from the top and dims as it runs on (#289)", () => {
-  // Alex's #289 review call: two radial washes over --parchment so a long page darkens as it scrolls; the light ellipse paints above the dark one.
+test("the walnut deep: one declaration, the vignette over the lit walnut, consumed by ground and band alike (#461 ruling 2)", () => {
+  // The daylight wash's dark successor (ruled 2026-08-25): the atelier-map mockup's own body deep, token-derived (the #55402a center is the SAME color-mix Act I ratified for the stage), declared ONCE as --the-deep so the fixed ground layer and the running band can never drift apart.
   const css = layoutStyle();
-  const body = css.match(/body\s*\{([\s\S]*?)\}/);
-  assert.ok(body, "the layout style should carry the body rule");
-  const light = body[1].search(/radial-gradient\(ellipse at \d+% 1?\d%,\s*rgb\(255 250 235/);
-  const dark = body[1].search(/radial-gradient\(ellipse at \d+% 9\d%,\s*rgb\(120 95 50/);
-  assert.ok(light > -1, "the body wash lights the top of the sheet");
-  assert.ok(dark > -1, "the body wash dims the foot of the sheet");
-  assert.ok(light < dark, "the light wash paints above the dark one");
+  const deep = css.match(/--the-deep:\s*([\s\S]*?);/);
+  assert.ok(deep, "the layout style should declare --the-deep once");
+  const vignette = deep[1].search(/radial-gradient\(120% 90% at 50% 30%,\s*rgb\(from var\(--ink-dark\) r g b \/ 0\)/);
+  const walnut = deep[1].search(/radial-gradient\(80% 70% at 30% 20%,\s*color-mix\(in srgb, var\(--ink-dark\) 90%, var\(--parchment\) 10%\) 0%,\s*var\(--ink-dark\) 55%,\s*var\(--chart-ink\) 100%\)/);
+  assert.ok(vignette > -1, "the deep's darkening vignette is present");
+  assert.ok(walnut > -1, "the deep's lit-walnut radial is present, token-derived (no raw #55402a)");
+  assert.ok(vignette < walnut, "the vignette paints above the walnut");
+  assert.equal(css.split("--the-deep:").length - 1, 1, "--the-deep is declared exactly once");
+  const before = css.match(/body::before\s*\{([\s\S]*?)\}/);
+  assert.ok(before && /background:\s*var\(--the-deep\)/.test(before[1]), "the fixed ground layer consumes var(--the-deep)");
+  assert.ok(before && /position:\s*fixed/.test(before[1]), "the ground layer is fixed (iOS treats background-attachment: fixed as scroll)");
+  const band = css.match(/\.band::before\s*\{([\s\S]*?)\}/);
+  assert.ok(band && /background:\s*var\(--the-deep\)/.test(band[1]), "the band clips the SAME deep, via the token");
+  assert.ok(band && /clip-path:\s*inset\(0 0 calc\(100% - var\(--band-h\)\) 0\)/.test(band[1]), "the band is the deep clipped to --band-h, so the reserved ground cannot misalign");
+  const daylight = css.search(/rgb\(255 250 235/);
+  assert.equal(daylight, -1, "the light wash retired with the ground (#461 ruling 2)");
+});
+
+test("the interim desk panel: an unconverted room's main stands on parchment, not the deep (#461)", () => {
+  // Scaffolding with a stated retirement path: a page passes desk="open" once its own conversion sub (7-9) dresses it for the deep, and the class stops rendering.
+  const css = layoutStyle();
+  const panel = css.match(/main\.desk-panel\s*\{([\s\S]*?)\}/);
+  assert.ok(panel, "the layout style should carry main.desk-panel");
+  assert.match(panel[1], /background:\s*var\(--parchment\)/, "the panel is the parchment the page css was tuned on");
+  assert.match(panel[1], /box-shadow:\s*var\(--sheet-shadow\)/, "the panel rests at the house depth");
+});
+
+test("the chrome passes the hand through: drags over the fixed cluster reach the chart, links stay live (#461, skeptic finding 2)", () => {
+  // A 485x79 dead drag zone under the cluster on home; the mockup's own idiom (stage.css uses it five times) is none-on-container, auto-on-interactive.
+  const css = layoutStyle();
+  const chrome = css.match(/header\.chrome\s*\{([\s\S]*?)\}/);
+  assert.ok(chrome && /pointer-events:\s*none/.test(chrome[1]), "the chrome container passes pointer events through");
+  assert.match(css, /header\.chrome a,\s*header\.chrome \.rooms-reveal\s*\{[^}]*pointer-events:\s*auto/, "the links and the phone reveal take the hand back");
+});
+
+test("print is paper all the way down: the dark ground resets with the chrome it carried (#454 open decision 4, skeptic finding 5)", () => {
+  const print = layoutStyle().match(/@media print\s*\{([\s\S]*?)\n\}/);
+  assert.ok(print, "the layout style carries the print block");
+  assert.match(print[1], /body\s*\{[^}]*background:\s*none/, "the body's walnut ground must not print (near-black pages with background graphics on)");
+});
+
+test("the deep's focus ring: the chrome on the walnut brightens the ring, paper keeps ink-dark (#324 decision 6, re-ratified at #461)", () => {
+  // Guard-prover round 1 (2026-08-26) proved this override unguarded: reverting it ships an invisible ink-dark ring on the deep and nothing reds. house-style.test.ts keeps pinning the paper side.
+  const ring = layoutStyle().match(/header\.chrome a:focus-visible,\s*footer a:focus-visible\s*\{([\s\S]*?)\}/);
+  assert.ok(ring, "the layout style should carry the deep-chrome focus override");
+  assert.match(ring[1], /outline-color:\s*var\(--parchment-bright\)/, "the ring on the deep is parchment-bright (#455's precedent for controls on the walnut)");
 });
 
 // #367: the sheet's lift is ONE token now. Ratified at 0.4 (Alex, 2026-08-12): the armed Explorer's two coincident 0.2 shadows measured as a single 0.385, rounded to a value a stylesheet can own.
@@ -327,7 +366,7 @@ test("the plate dress rests flat and tips on hover (#130, the consumer is now pr
 test("the wordmark tips under the hand on room pages, and stays still on home (#289)", () => {
   const css = read("public/motion.css");
   // Keyed on .wordmark, not h1 (#288): on a room page the h1 is the room name with no link to tip, so keying on h1 would silently select nothing.
-  const hover = css.match(/body:has\(\.room-name\) \.wordmark a:hover\s*\{([^}]*)\}/);
+  const hover = css.match(/body:has\(\.room-name\) \.wordmark a:hover,\s*body:has\(\.room-name\) \.wordmark a:focus-visible\s*\{([^}]*)\}/);
   assert.ok(hover, "the room-scoped wordmark hover rule should exist in motion.css");
   assert.ok(
     /rotate\(/.test(hover[1]) && /translateY\(/.test(hover[1]),
@@ -411,7 +450,7 @@ test("#402 the prospect reveal releases its transform: fill backwards, never bot
 const TOKEN_CONSUMERS: ReadonlyArray<{ file: string; arm: string; lift: string; shadow?: string }> = [
   { file: "public/motion.css", arm: "button:not(.lf-station):not(.place-hit):hover", lift: "--raise", shadow: "--raise-shadow" },
   { file: "public/motion.css", arm: "button:not(.lf-station):not(.place-hit):active", lift: "--press", shadow: "--press-shadow" },
-  { file: "public/motion.css", arm: ".topnav a:hover", lift: "--raise" },
+  { file: "public/motion.css", arm: ".rooms a:hover", lift: "--raise" },
   { file: "public/motion.css", arm: "body:has(.room-name) .wordmark a:hover", lift: "--raise" },
   { file: "public/living-chart.css", arm: ".pc-prospect:hover", lift: "--raise" },
 ];

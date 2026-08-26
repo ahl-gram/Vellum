@@ -7,7 +7,7 @@ import { GALLERY_PAGE_CSS } from "../../src/cli/gallery.ts";
 import { atlasDocument } from "../../src/atlas/document.ts";
 
 // Two contracts over every authored sheet the site has, public/ and src/ alike (#289, #356, #358, #360): what tips must go somewhere or be a ratified chart instrument, and an inline-block link must pin its bullet or be recorded as living outside a marker-bearing list.
-// A tip is defined by the shape `rotate(`, so a hover lift written as translate alone is not swept: motion.css's .topnav a lifts with translateY and no rotate. It is not a false affordance today (an anchor), and widening the definition is a #289 question.
+// A tip is defined by the shape `rotate(`, so a hover lift written as translate alone is not swept: motion.css's .rooms a lifts with translateY and no rotate (#461's addendum). It is not a false affordance today (an anchor), and widening the definition is a #289 question; so is the bare `rotate:` individual-transform property, which this fingerprint cannot see (guard-prover round 3, 2026-08-26).
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
@@ -101,7 +101,7 @@ const cssBearingSources = (): string[] =>
 /** The surfaces that tip AND navigate (each is a link or wraps one). */
 const TIPPING_LINKS = new Set([
   "motion.css :: .plate:hover",
-  "motion.css :: body:has(.room-name) .wordmark a:hover",
+  "motion.css :: body:has(.room-name) .wordmark a:hover, body:has(.room-name) .wordmark a:focus-visible",
   "faq/index.css :: .toc a:hover",
   "glossary/index.css :: .toc a:hover",
   // #270 ruling 7: the footnote marks follow through to /glossary/ anchors, so the ruling extended the tipping surface to them.
@@ -209,14 +209,10 @@ const settled = (css: string, selector: string): Readonly<Record<string, string>
 const INLINE_BLOCKS_OUTSIDE_MARKER_LISTS = new Set([
   // <div class="actions"> on the seed page (src/pages/seed-of-the-day/index.astro:51).
   "house.css :: a.control",
-  // Direct children of <nav class="topnav">, separated by a middot, no list at all.
-  "motion.css :: .topnav a",
-  // Inside <p class="wordmark"> or <h1 class="wordmark"> (BaseLayout.astro:235).
+  // Inside <p class="wordmark"> or <h1 class="wordmark"> in BaseLayout's head cluster (#461; the rooms nav pins vertical-align itself).
   "motion.css :: .wordmark a",
   // A period mark inline in a control's label (#270), not a list item.
   "explorer/broadside.css :: a.fn",
-  // #360, measured 2026-08-12: the you-are-here span is another direct child of the same middot-separated topnav, an inline-block only so a multi-word label cannot wrap mid-label.
-  'src/layouts/BaseLayout.astro :: .topnav [aria-current="page"]',
 ]);
 
 /** Every inline-block BOX, not every inline-block link: a link is not identifiable from css, and the same defect wearing a class on an anchor would escape a narrower sweep. */
