@@ -780,7 +780,13 @@ export async function run(ctx) {
   );
   await shoot("home-station-card-390.png");
   await pressKey("Escape", "Escape", 27);
-  await sleep(500);
+  // The card must be fully CLOSED before the hit-tests below, or a mid-close sheet intercepts them on a slow CI runner (the poll-break class): poll hidden, never a timed sleep.
+  for (let i = 0; i < 80; i++) {
+    let anyOpen = true;
+    try { anyOpen = await evaluate(`[...document.querySelectorAll(".lf-card")].some((c) => !c.hidden)`); } catch {}
+    if (anyOpen === false) break;
+    await sleep(75);
+  }
   // Round-3 plate finding: the unconditional .landfall .stage.cam .lf-legend show-rule (0,4,0) beat the media-scoped hide (0,1,0), so scripts-on phones kept the legend AND it sat on two of the three camera buttons. Resolved computed styles only, the #288 lesson.
   let doors16c = null;
   try {

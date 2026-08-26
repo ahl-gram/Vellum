@@ -197,11 +197,31 @@ export async function run(ctx) {
     const boxes = [];
     let swallowed = null;
     for (const id of ["atlas", "explorer", "reading-room", "gallery"]) {
-      // The legend stands down under 900px (#461 phone doors): narrow enters by the station pip, desktop keeps the legend chip it is really testing. The whole-sheet reset first, a real click, so every pip is on screen whatever camera the earlier flights left.
+      // The legend stands down under 900px (#461 phone doors): narrow enters by the station pip, desktop keeps the legend chip it is really testing. At 390 the open card is a full-width fixed bottom sheet over the pips and controls, so each entry first Escapes any open card and polls it CLOSED, then resets the camera and polls until the hit-test actually reaches the pip (a timed sleep here is the CI-red poll-break class: the break must demand what the click needs).
       if (label === "narrow") {
+        await pressKey("Escape", "Escape", 27);
+        for (let i = 0; i < 80; i++) {
+          const anyOpen = await evaluate(`[...document.querySelectorAll(".lf-card")].some((c) => !c.hidden)`);
+          if (anyOpen === false) break;
+          await sleep(75);
+        }
         const homePt = await evaluate(buttonPoint("#lf-home"));
         if (homePt !== null) await clickAt(Math.round(homePt.x), Math.round(homePt.y));
-        await sleep(700);
+        let reachable = false;
+        for (let i = 0; i < 80; i++) {
+          try {
+            reachable = await evaluate(`(() => {
+              const btn = document.querySelector('.lf-station[data-station="${id}"]');
+              if (!btn) return false;
+              const r = btn.getBoundingClientRect();
+              if (r.width === 0 || r.left < 0 || r.right > innerWidth || r.top < 0 || r.bottom > innerHeight) return false;
+              const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+              return hit === btn || btn.contains(hit);
+            })()`);
+          } catch {}
+          if (reachable === true) break;
+          await sleep(75);
+        }
       }
       const chipPt = await evaluate(buttonPoint(
         label === "narrow" ? `.lf-station[data-station="${id}"]` : `.lf-legend-btn[data-station="${id}"]`,
