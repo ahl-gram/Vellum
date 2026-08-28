@@ -66,14 +66,23 @@ test("the shelf is plain flow: no hidden attribute, no noscript wrapper, no .cam
   }
 });
 
-test("no authored sheet locks the document's scroll (#472 retired the #461 body lock; the class, not the instance)", () => {
-  for (const sheet of ["public/index.css", "public/house.css", "public/motion.css"]) {
-    for (const rule of liveCss(sheet).split("}")) {
+test("nothing home loads locks the document's scroll (#472 retired the #461 body lock; the class, not the instance: every sheet home links, plus the inline style blocks)", () => {
+  const inline = (p: string): string =>
+    [...read(p).matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n").replace(/\/\*[\s\S]*?\*\//g, "");
+  const sources: ReadonlyArray<readonly [string, string]> = [
+    ...["public/index.css", "public/house.css", "public/motion.css", "public/fonts.css"].map(
+      (p) => [p, liveCss(p)] as const,
+    ),
+    ["src/pages/index.astro inline styles", inline("src/pages/index.astro")] as const,
+    ["src/layouts/BaseLayout.astro inline styles", inline("src/layouts/BaseLayout.astro")] as const,
+  ];
+  for (const [name, cssText] of sources) {
+    for (const rule of cssText.split("}")) {
       const [selector, decls] = rule.split("{");
       if (decls === undefined || !/(^|[^-\w])(body|html)(?![-\w])/.test(selector)) continue;
       assert.ok(
         !/overflow(?:-[xy])?\s*:\s*(?:hidden|clip)/.test(decls),
-        `${sheet} locks scroll at the document level: ${rule.trim().slice(0, 80)}`,
+        `${name} locks scroll at the document level: ${rule.trim().slice(0, 80)}`,
       );
     }
   }

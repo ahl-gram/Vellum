@@ -75,3 +75,9 @@ test("a gap of exactly the break is a fresh gesture", () => {
   assert.equal(valve(0, 120, 200, zoomMoves), false);
   assert.equal(valve(GESTURE_BREAK_MS, 120, 0, zoomMoves), true);
 });
+
+test("a gap one tick under the break is the same gesture: the boundary is pinned from below, not just above (guard-prover round 1: breakMs/2 escaped)", () => {
+  const valve = createValve();
+  assert.equal(valve(0, 120, 0, zoomMoves), true);
+  assert.equal(valve(GESTURE_BREAK_MS - 1, 120, 0, zoomClamped), true);
+});
