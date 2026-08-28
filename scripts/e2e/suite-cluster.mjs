@@ -13,8 +13,10 @@ const DRAWER_READ = `(() => {
   const burger = document.querySelector(".rooms-reveal");
   const b = burger.getBoundingClientRect();
   const atBurger = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
-  const scrim = getComputedStyle(document.body, "::after");
-  return { innerW: innerWidth, scrollW: document.documentElement.scrollWidth,
+  const scrim = getComputedStyle(document.querySelector(".landfall"), "::before");
+  const inkRight = Math.max(...[".wordmark a", ".tagline"].map((sel) => { const rg = new Range(); rg.selectNodeContents(document.querySelector("header.chrome " + sel)); return rg.getBoundingClientRect().right; }));
+  return { innerW: innerWidth, scrollW: document.documentElement.scrollWidth, inkRight, scrollY: window.scrollY,
+    chromeZ: getComputedStyle(document.querySelector("header.chrome")).zIndex, stageInert: document.getElementById("lf-stage").inert, seedInert: document.getElementById("seed-form").inert,
     checked: burger.checked, burger: r(".rooms-reveal"), burgerReachable: atBurger === burger,
     cluster: r("header.chrome"), tagline: r("header.chrome .tagline"), seed: r(".lf-seed"),
     seedOpacity: getComputedStyle(seed).opacity, seedPointer: getComputedStyle(seed).pointerEvents,
@@ -26,13 +28,14 @@ const DRAWER_READ = `(() => {
 
 const stacked = (doors) => doors.length === 7 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1].bottom - 0.5 && Math.abs(d.x - doors[0].x) < 0.5));
 const offLeft = (nav) => nav.visibility === "hidden" && nav.rect !== null && nav.rect.right <= 0.5;
-const clear = (s) => s.cluster !== null && s.seed !== null && s.cluster.right + 4 <= s.seed.x;
+// The INK, not the cluster's capped box: an overflowing wordmark sits outside the box the cap sizes (skeptic finding 3 on PR #482).
+const clear = (s) => s.seed !== null && Number.isFinite(s.inkRight) && s.inkRight + 4 <= s.seed.x;
 // The glyph run of one door, by its label: a strip through its middle reads parchment when the door shows and chart ink when the cap covers it.
 const glyphRun = (label) => `(() => { const a = [...document.querySelectorAll("header.chrome nav.rooms a, header.chrome nav.rooms [aria-current]")].find((e) => e.textContent === ${JSON.stringify(label)}); if (!a) return null; const r = new Range(); r.selectNodeContents(a); const b = r.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; })()`;
 const brightest = (strip) => Math.max(...strip.map(luminance));
 
 export async function run(ctx) {
-  const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, waitReady, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
   const { pressKey, clickAt, settleHome } = makeStage(ctx);
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
@@ -87,7 +90,7 @@ export async function run(ctx) {
     "CL3 at 390 closed: the cluster ends clear of the seed panel (the tagline wraps, the input is the mockup's 4.6rem), the drawer waits invisible off the left edge, nothing scrolls sideways (#480 screenshot 1; the baseline tagline ran 19px onto the panel)",
     !!phoneCam && !!closed && closed.scrollW === 390 && clear(closed) && !closed.checked && offLeft(closed.nav)
       && closed.nav.position === "absolute" && Math.abs(closed.inputWidth - 4.6 * REM) < 0.05
-      && closed.seedOpacity === "1" && closed.scrim.content === "none",
+      && closed.seedOpacity === "1" && closed.scrim.content === "none" && !closed.stageInert && closed.chromeZ === "10",
     JSON.stringify({ phoneCam: !!phoneCam, closed }),
   );
 
@@ -96,14 +99,18 @@ export async function run(ctx) {
   await sleep(600);
   const open = await evaluate(DRAWER_READ);
   const firstDoor = open?.doors[0] ?? null;
+  await evaluate(`[...document.querySelectorAll("header.chrome nav.rooms a")].pop().focus()`);
+  await pressKey("Tab", "Tab", 9);
+  const tabbedOut = await evaluate(`(() => { const a = document.activeElement; return { inMain: !!(a && a.closest("main")), tag: a ? a.tagName + (a.id ? "#" + a.id : "") : null }; })()`);
   check(
-    "CL4 a real tap on the burger slides the drawer home: anchored to the viewport corner, full height, seven doors stacked one per row at 44px or taller below the cluster and each one hit-testable (the first sticky cap sat over three of them), the burger still on top, the seed panel faded and untappable, the scrim fixed beneath the chrome, nothing scrolling sideways (#480 screenshot 2)",
+    "CL4 a real tap on the burger slides the drawer home: anchored to the viewport corner, full height, seven doors stacked one per row at 44px or taller below the cluster and each one hit-testable (the first sticky cap sat over three of them), the burger still on top, the seed panel faded and untappable, the scrim riding in the survey section with the chrome raised above the cards, the stage and the seed form inert so Tab past the last door never lands in main (skeptic findings 5 and 8), nothing scrolling sideways (#480 screenshot 2)",
     !!open && open.checked && open.scrollW === 390 && open.nav.visibility === "visible" && open.nav.transform === "none" && open.nav.pointer === "auto"
       && open.nav.rect.x === 0 && open.nav.rect.y === 0 && open.nav.rect.h >= 800 && open.nav.rect.w <= 16 * REM + 0.5
       && stacked(open.doors) && open.doors.every((d) => d.h >= 44 && d.tappable) && firstDoor !== null && open.burger !== null && firstDoor.y >= open.burger.bottom + 8
       && open.burgerReachable && open.seedOpacity === "0" && open.seedPointer === "none"
-      && open.scrim.position === "fixed" && open.scrim.pointer === "auto" && Number(open.scrim.z) < 10 && /transform/.test(open.nav.transition),
-    JSON.stringify({ open }),
+      && open.scrim.position === "absolute" && open.scrim.pointer === "auto" && Number(open.scrim.z) === 41 && open.chromeZ === "45"
+      && open.stageInert && open.seedInert && !tabbedOut.inMain && /transform/.test(open.nav.transition),
+    JSON.stringify({ open, tabbedOut }),
   );
   await shoot("cluster-drawer-open-390.png");
 
@@ -124,20 +131,51 @@ export async function run(ctx) {
     JSON.stringify({ afterEscape: afterEscape && { checked: afterEscape.checked, nav: afterEscape.nav }, reopened: reopened && reopened.checked, afterScrim: afterScrim && { checked: afterScrim.checked, nav: afterScrim.nav } }),
   );
 
-  await setMobileViewport(360, 780);
-  const cam360 = await settleHome();
-  const narrow = await evaluate(DRAWER_READ);
+  if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
+  await sleep(600);
+  const openAgain = await evaluate(DRAWER_READ);
+  await touch("touchStart", [{ x: 330, y: 600, id: 0 }]);
+  for (let i = 1; i <= 6; i++) await touch("touchMove", [{ x: 330, y: 600 - 60 * i, id: 0 }]);
+  await touch("touchEnd", []);
+  await sleep(600);
+  const swiped = await evaluate(DRAWER_READ);
+  for (let i = 0; i < 20; i++) { await evaluate(`window.scrollTo(0, 0)`); await sleep(150); if ((await evaluate(`window.scrollY`)) === 0) break; }
+  const burgerBack = await evaluate(rectOf(".rooms-reveal"));
+  if (burgerBack) await clickAt(burgerBack.x + burgerBack.w / 2, burgerBack.y + burgerBack.h / 2);
+  await sleep(600);
+  const closedAfterSwipe = await evaluate(DRAWER_READ);
   check(
-    "CL6 at 360 (the common Android width) the cluster still ends clear of the seed panel and nothing scrolls sideways (#480 screenshot 1)",
-    !!cam360 && !!narrow && narrow.scrollW === 360 && clear(narrow),
-    JSON.stringify({ cam360: !!cam360, cluster: narrow?.cluster, seed: narrow?.seed, scrollW: narrow?.scrollW }),
+    "CL8 a real swipe on the scrim scrolls the page WITH the open drawer, its burger and its scrim riding away together (a fixed scrim stayed behind and stranded the no-script reader, skeptic finding 4); back at the top the burger still closes it",
+    !!openAgain && openAgain.checked && !!swiped && swiped.checked && swiped.scrollY > 100
+      && Math.abs(swiped.nav.rect.y + swiped.scrollY) < 1 && Math.abs(swiped.burger.y + swiped.scrollY - openAgain.burger.y) < 1
+      && !!closedAfterSwipe && !closedAfterSwipe.checked && closedAfterSwipe.scrollY === 0,
+    JSON.stringify({ openAgain: openAgain && { checked: openAgain.checked, burgerY: openAgain.burger?.y }, swiped: swiped && { checked: swiped.checked, scrollY: swiped.scrollY, navY: swiped.nav.rect?.y, burgerY: swiped.burger?.y }, closedAfterSwipe: closedAfterSwipe && { checked: closedAfterSwipe.checked, scrollY: closedAfterSwipe.scrollY } }),
+  );
+
+  const narrows = [];
+  for (const w of [360, 320]) {
+    await setMobileViewport(w, 780);
+    const cam = await settleHome();
+    const s = await evaluate(DRAWER_READ);
+    narrows.push({ w, cam: !!cam, scrollW: s?.scrollW, inkRight: s?.inkRight, seedX: s?.seed?.x, ok: !!cam && !!s && s.scrollW === w && clear(s) });
+  }
+  check(
+    "CL6 at 360 (the common Android width) and 320 (the 2016 SE) the cluster's INK ends clear of the seed panel and nothing scrolls sideways: the wordmark steps down at 340 (#480 screenshot 1; skeptic findings 3 and 6 on PR #482)",
+    narrows.every((n) => n.ok),
+    JSON.stringify(narrows),
   );
 
   await setMobileViewport(844, 390);
   const camWide = await settleHome();
   const wideClosed = await evaluate(DRAWER_READ);
+  const pip = await evaluate(`(() => { const b = document.querySelector('.lf-station[data-station="explorer"]'); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
+  if (pip) { await touch("touchStart", [{ x: pip.x, y: pip.y, id: 0 }]); await touch("touchEnd", []); }
+  let cardOpen = false;
+  for (let i = 0; i < 40 && !cardOpen; i++) { await sleep(100); cardOpen = await evaluate(`(() => { const c = document.getElementById("lf-card-explorer"); return !!c && !c.hidden; })()`); }
   if (wideClosed?.burger) await clickAt(wideClosed.burger.x + wideClosed.burger.w / 2, wideClosed.burger.y + wideClosed.burger.h / 2);
   await sleep(600);
+  const overCard = await evaluate(DRAWER_READ);
+  const cardInert = await evaluate(`document.getElementById("lf-card-explorer").inert`);
   const shownRun = await evaluate(glyphRun("Explorer"));
   const shownStrip = shownRun ? await sampleRow(send, Math.round(shownRun.x + shownRun.w / 2), Math.round(shownRun.y + shownRun.h / 2), 12) : [];
   const scrollBefore = await evaluate(`window.scrollY`);
@@ -151,16 +189,20 @@ export async function run(ctx) {
     const doors = [...nav.querySelectorAll("a, [aria-current]")].map((a) => a.getBoundingClientRect());
     const last = doors[doors.length - 1];
     const probe = document.elementFromPoint(cluster.left + 20, cluster.bottom + 12);
-    return { overflow: nav.scrollHeight - nav.clientHeight, scrollTop: nav.scrollTop, lastBottom: last.bottom, clientH: nav.clientHeight,
+    const lastEl = [...nav.querySelectorAll("a, [aria-current]")].pop();
+    const lastHit = document.elementFromPoint(last.x + 20, last.y + last.height / 2);
+    return { overflow: nav.scrollHeight - nav.clientHeight, scrollTop: nav.scrollTop, lastBottom: last.bottom, clientH: nav.clientHeight, lastTappable: lastHit === lastEl,
       firstTop: doors[0].top, clusterBottom: cluster.bottom, pageScrollY: window.scrollY,
       capHit: probe === nav, hitTag: probe ? probe.tagName : null };
   })()`);
   check(
-    "CL7 landscape 844x390: the drawer overflows its box, a real wheel scrolls it to the last door with the page unmoved, and the doors scrolled up under the cluster are hidden beneath the sticky cap, never showing through the lettering: the cap wins the hit-test AND a pixel strip through a scrolled door's glyphs reads chart ink where the same strip read parchment unscrolled (plate finding G on PR #482; the pixel half closes prover round 2's A4, a transparent cap that still won the hit-test)",
-    !!camWide && !!landscape && landscape.overflow > 0 && landscape.scrollTop > 0 && landscape.lastBottom <= landscape.clientH + 0.5
+    "CL7 landscape 844x390: the drawer overflows its box, a real wheel scrolls it to the last door with the page unmoved, with a station card OPEN beneath it every door in view is still hit-testable, the last one once scrolled to, and the card inert (the card's z 40 outranked the drawer, skeptic finding 5), and the doors scrolled up under the cluster are hidden beneath the sticky cap, never showing through the lettering: the cap wins the hit-test AND a pixel strip through a scrolled door's glyphs reads chart ink where the same strip read parchment unscrolled (plate finding G on PR #482; the pixel half closes prover round 2's A4, a transparent cap that still won the hit-test)",
+    !!camWide && cardOpen && !!overCard && overCard.checked && cardInert === true
+      && overCard.doors.filter((d) => d.bottom <= 390).length >= 5 && overCard.doors.filter((d) => d.bottom <= 390).every((d) => d.tappable)
+      && !!landscape && landscape.overflow > 0 && landscape.lastTappable && landscape.scrollTop > 0 && landscape.lastBottom <= landscape.clientH + 0.5
       && landscape.pageScrollY === scrollBefore && landscape.firstTop < landscape.clusterBottom && landscape.capHit
       && shownStrip.length === 12 && brightest(shownStrip) > 150 && cappedStrip.length === 12 && brightest(cappedStrip) < 100,
-    JSON.stringify({ camWide: !!camWide, scrollBefore, landscape, shownRun, shownBrightest: shownStrip.length ? brightest(shownStrip) : null, cappedRun, cappedBrightest: cappedStrip.length ? brightest(cappedStrip) : null }),
+    JSON.stringify({ camWide: !!camWide, cardOpen, cardInert, doorsTappable: overCard?.doors.map((d) => d.tappable), scrollBefore, landscape, shownRun, shownBrightest: shownStrip.length ? brightest(shownStrip) : null, cappedRun, cappedBrightest: cappedStrip.length ? brightest(cappedStrip) : null }),
   );
   await shoot("cluster-drawer-landscape-scrolled.png");
 

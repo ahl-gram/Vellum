@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// Landfall Sub 6b (#480): the head cluster's cleanup on home. SPEC: the four screenshots on #480 and their captions; the measured baseline is on the PR.
+// Landfall Sub 6b (#480): the head cluster's cleanup on home. SPEC: the four screenshots on #480 and their captions; the measured baseline and every number cited below are on PR #482.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
@@ -42,7 +42,7 @@ const narrow = mediaBodies(css, "(max-width: 900px)");
 const topLevel = css.replace(/@media[^{]*\{[\s\S]*?\n\}/g, "");
 
 test("the stage never yields its lettering to a drag: user-select none on the whole stage, so a pip drag selects nothing (#480, screenshot 4)", () => {
-  // Measured 2026-08-28 (out/480/base-report.json): a mouse drag from a station name selected every place name on the sheet; the chart image alone was opted out.
+  // Measured 2026-08-28 (PR #482): a mouse drag from a station name selected every place name on the sheet; the chart image alone was opted out.
   const stage = rule(topLevel, ".landfall .stage");
   assert.match(stage, /user-select:\s*none/, "the stage opts its lettering out of selection");
   assert.match(stage, /-webkit-user-select:\s*none/, "iOS Safari reads the prefixed form");
@@ -101,15 +101,20 @@ test("while the drawer is open the seed panel steps aside and a scrim stands beh
   const aside = rule(narrow, "body:has(.rooms-reveal:checked) .lf-seed");
   assert.match(aside, /opacity:\s*0/, "the corner panel fades rather than sharing the corner with the doors");
   assert.match(aside, /pointer-events:\s*none/, "and cannot be tapped blind");
-  const scrim = rule(narrow, "body:has(.rooms-reveal:checked)::after");
-  assert.match(scrim, /position:\s*fixed;\s*inset:\s*0/, "the scrim covers the viewport, sized by fixed inset (100vw counts a classic scrollbar and overflows by its width)");
+  const scrim = rule(narrow, "body:has(.rooms-reveal:checked) .landfall::before");
+  assert.match(scrim, /position:\s*absolute;\s*inset:\s*0/, "the scrim is the survey section's own overlay: it rides the page with the drawer and the burger (a fixed scrim stayed behind when a swipe scrolled them away, skeptic finding 4) and is sized by the section, never 100vw");
   const z = scrim.match(/z-index:\s*(\d+)/);
-  assert.ok(z && Number(z[1]) < 10, "it sits beneath the chrome (z 10), so the burger and the drawer stay reachable");
+  assert.ok(z && Number(z[1]) > 40 && Number(z[1]) < 45, "it covers an open station card (z 40) and sits under the raised chrome (skeptic finding 5)");
   assert.match(scrim, /pointer-events:\s*auto/, "the stage beneath is not live while the drawer is");
+  const raised = rule(narrow, "body:has(.rooms-reveal:checked) > header.chrome");
+  assert.match(raised, /z-index:\s*45/, "the chrome rises above the cards (40) and the scrim while the drawer is open, under the veil (50)");
+  assert.doesNotMatch(narrow, /body:has\(\.rooms-reveal:checked\)::after/, "no fixed body scrim remains");
 });
 
 test("the cluster yields the seed panel its corner under 900: the mockup's phone input and a cluster width cap (#480, screenshot 1)", () => {
   // Measured 2026-08-28 at 390: the tagline ended at x=172.5 and the panel began at x=153.2; a 360 Android is 30px narrower again.
   assert.match(rule(narrow, ".seed-controls .control"), /width:\s*4\.6rem/, "the mockup's own phone input width (design/atelier-map/stage.css), which Act I dropped");
   assert.match(rule(narrow, "body > header.chrome"), /max-width:\s*calc\(100vw - 15rem\)/, "the cluster wraps its tagline before it can reach the panel");
+  const tiny = mediaBodies(css, "(max-width: 340px)");
+  assert.match(rule(tiny, ".chrome .wordmark"), /font-size:\s*1\.3rem/, "at 320 the 1.5rem wordmark cannot wrap inside an 80px cap and its ink overran the panel by 4.69px (skeptic finding 6); .chrome-qualified so it outranks the layout's later 1.5rem");
 });

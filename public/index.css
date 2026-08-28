@@ -91,7 +91,7 @@
 }
 /* On home the cluster rides the page (#472, Alex's 2026-08-28 call): the chart and its chrome scroll away together, so nothing fixed can ever collide with the shelf; e2e L1i pins the ride, RH9 pins the wash to home alone. body-child specificity because the layout's inline global sheet renders AFTER the page css. */
 body > header.chrome { position: absolute; }
-/* The cluster's wash (#461, Alex's 2026-08-26 call on the plate finding): home is bandless and the close-in camera can leave the full-bleed chart with no letterbox at short desktop heights, so the corner carries its own deep for the lettering. Since #480 a blurred pool sized by the cluster itself (e2e CL1 measures its reach): the fixed 46rem gradient box ran 14rem past the nav and showed both clipped edges. */
+/* The cluster's wash (#461, Alex's 2026-08-26 call on the plate finding): home is bandless and the close-in camera can leave the full-bleed chart with no letterbox at short desktop heights, so the corner carries its own deep for the lettering; a blurred pool sized by the cluster since #480. */
 header.chrome::before {
   content: ""; position: absolute; inset: -4rem -2.2rem -1.8rem -4rem; z-index: -1; pointer-events: none;
   background: rgb(from var(--chart-ink) r g b / 0.86);
@@ -366,7 +366,7 @@ header.chrome::before {
      stand-down stranded four rooms (the legend carries four doors, not seven), so the nav
      AND the legend stand down together and the burger reveals the full nav. A native
      checkbox, keyboard-operable, no bundle: the doors survive scripts-off. */
-  /* #480: the revealed nav used to flow inline under the burger and wrap beneath the seed panel; now a drawer that slides in from the left beneath the cluster, its doors stacked (e2e CL3-CL6 measure it). It rides the page with the cluster (#472). */
+  /* #480: the phone drawer (e2e CL3-CL8); src/site/home/drawer.ts adds Escape, the scrim tap, and inert behind it. */
   .chrome .rooms {
     display: block; position: absolute; left: calc(-1 * var(--chrome-x)); top: calc(-1 * var(--chrome-y));
     box-sizing: border-box; width: min(16rem, 100vw); height: 100vh; height: 100dvh;
@@ -379,7 +379,7 @@ header.chrome::before {
     transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s linear 0.32s;
     z-index: -1;
   }
-  /* The cap is the drawer's top reserve (the band the cluster stands on) and sticks over the doors when a short viewport scrolls them, so none rides up beneath the lettering (plate finding G, e2e CL7); it is the spacer itself, not a pulled-up margin, since a sticky box is clamped inside its containing block and a negative margin lands it over the first doors. */
+  /* The sticky cap is the drawer's top reserve and covers the doors a short viewport scrolls up (plate finding G on PR #482, e2e CL7). */
   .chrome .rooms::before {
     content: ""; display: block; position: sticky; top: 0; z-index: 1;
     height: calc(var(--band-h) + 1rem);
@@ -395,14 +395,13 @@ header.chrome::before {
     font-size: 0.95rem; letter-spacing: 0.16em;
   }
   .chrome .rooms [aria-current="page"] { text-underline-offset: 0.3em; }
-  /* The seed panel steps aside for the drawer (the two shared the corner in #480's first screenshot), and a scrim holds the stage still beneath the chrome; the burger, above both, closes it without a script, and src/site/home/drawer.ts adds Escape and the scrim tap. */
   body:has(.rooms-reveal:checked) .lf-seed { opacity: 0; pointer-events: none; }
   .lf-seed { transition: opacity 0.32s ease; }
-  body:has(.rooms-reveal:checked)::after {
-    content: ""; position: fixed; inset: 0; z-index: 9; pointer-events: auto;
+  body:has(.rooms-reveal:checked) .landfall::before {
+    content: ""; position: absolute; inset: 0; z-index: 41; pointer-events: auto;
     background: rgb(from var(--chart-ink) r g b / 0.45);
   }
-  /* The cluster yields the seed panel its corner: the tagline wraps before it can reach the panel (measured 19px of overlap at 390), and the input takes the mockup's own phone width (design/atelier-map/stage.css). */
+  body:has(.rooms-reveal:checked) > header.chrome { z-index: 45; }
   body > header.chrome { max-width: calc(100vw - 15rem); }
   .seed-controls .control { width: 4.6rem; }
   .rooms-reveal {
@@ -428,7 +427,7 @@ header.chrome::before {
   .lf-controls { bottom: 1.4rem; }
   .lf-coords.on { display: none; }
   .notice-stamp { display: none; }
-  /* The panel's floor is its controls row (input + gap + button, measured 190.5px at #480); trimmed here so the row plus the wrapped cluster clear each other by 8px at 360 (e2e CL3/CL6). */
+  /* The panel's floor is its controls row, trimmed so it clears the wrapped cluster (e2e CL3/CL6). */
   .lf-seed { right: 1rem; top: 0.9rem; max-width: 12rem; padding: 0.7rem 0.7rem 0.75rem; }
   .seed-controls { gap: 0.35rem; }
   .lf-seed .control { padding: 0.32rem 0.45rem; }
@@ -439,6 +438,9 @@ header.chrome::before {
   .lf-shelf-grid { grid-template-columns: 1fr; gap: 2.6rem; }
   /* The legend band it clears on desktop stands down here. */
   .lf-more { bottom: 1.2rem; }
+}
+@media (max-width: 340px) {
+  .chrome .wordmark { font-size: 1.3rem; }
 }
 
 .landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] {

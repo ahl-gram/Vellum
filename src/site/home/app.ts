@@ -201,4 +201,10 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
 }
 
 const reveal = document.querySelector(".rooms-reveal");
-if (reveal instanceof HTMLInputElement) bindDrawer(reveal, document, document.body);
+const scrim = document.querySelector(".landfall");
+if (reveal instanceof HTMLInputElement && scrim !== null) {
+  bindDrawer(reveal, document, {
+    scrim,
+    inert: [...document.querySelectorAll<HTMLElement>(".landfall > *, .lf-shelf, body > footer")],
+  });
+}

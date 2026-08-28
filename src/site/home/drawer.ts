@@ -1,16 +1,33 @@
-export interface Reveal {
-  checked: boolean;
-}
-
 export interface Listens {
   addEventListener(type: string, listener: (e: Event) => void): void;
 }
 
-export function bindDrawer(reveal: Reveal, doc: Listens, body: object): void {
+export interface Reveal extends Listens {
+  checked: boolean;
+}
+
+export interface Inertable {
+  inert: boolean;
+}
+
+export interface DrawerHost {
+  readonly scrim: object;
+  readonly inert: readonly Inertable[];
+}
+
+export function bindDrawer(reveal: Reveal, doc: Listens, host: DrawerHost): void {
+  const apply = () => {
+    for (const el of host.inert) el.inert = reveal.checked;
+  };
+  const close = () => {
+    reveal.checked = false;
+    apply();
+  };
+  reveal.addEventListener("change", apply);
   doc.addEventListener("keydown", (e) => {
-    if ((e as KeyboardEvent).key === "Escape" && reveal.checked) reveal.checked = false;
+    if ((e as KeyboardEvent).key === "Escape" && reveal.checked) close();
   });
   doc.addEventListener("click", (e) => {
-    if (reveal.checked && e.target === body) reveal.checked = false;
+    if (reveal.checked && e.target === host.scrim) close();
   });
 }

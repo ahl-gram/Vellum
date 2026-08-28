@@ -247,7 +247,6 @@ export async function run(ctx) {
     dimTaglines.map((r) => `${r} tagline ${heads[r]?.tagline?.color}`).join(" | ") || `tagline parchment x${SHELLED.length}`,
   );
 
-  // Since #480 the wash is a blurred pool of the chart ink (e2e CL1 measures its reach); a room's chrome has no ::before at all.
   const poolAlpha = (color) => Number((String(color).match(/\/\s*([\d.]+)\)/) || String(color).match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "0");
   const washWrong = bad((h, r) =>
     r === "/" ? !!h.chromeWash && h.chromeWash.content !== "none" && /blur\(/.test(h.chromeWash.filter) && poolAlpha(h.chromeWash.backgroundColor) >= 0.8
