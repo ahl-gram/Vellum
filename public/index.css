@@ -13,6 +13,7 @@
   position: relative; height: 100vh; height: 100dvh;
   overflow: hidden; cursor: grab; touch-action: pan-y;
   display: grid; place-items: center;
+  user-select: none; -webkit-user-select: none;
 }
 .landfall .stage.dragging { cursor: grabbing; }
 .landfall .stage:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 2px; }
@@ -90,15 +91,11 @@
 }
 /* On home the cluster rides the page (#472, Alex's 2026-08-28 call): the chart and its chrome scroll away together, so nothing fixed can ever collide with the shelf; e2e L1i pins the ride, RH9 pins the wash to home alone. body-child specificity because the layout's inline global sheet renders AFTER the page css. */
 body > header.chrome { position: absolute; }
-/* The cluster's wash (#461, Alex's 2026-08-26 call on the plate finding): home is bandless and the close-in camera can leave the full-bleed chart with no letterbox at short desktop heights, so the corner carries its own deep for the lettering; anchored to the cluster's corner since #472, so it leaves with it. */
+/* The cluster's wash (#461, Alex's 2026-08-26 call on the plate finding): home is bandless and the close-in camera can leave the full-bleed chart with no letterbox at short desktop heights, so the corner carries its own deep for the lettering. Since #480 a blurred pool sized by the cluster itself (e2e CL1 measures its reach): the fixed 46rem gradient box ran 14rem past the nav and showed both clipped edges. */
 header.chrome::before {
-  content: ""; position: absolute; left: -1.6rem; top: -1.4rem;
-  /* min(...): riding along, the box is real document overflow, and a box past the viewport edge makes phone Chrome widen the layout viewport itself to fit it (e2e H3/H12a measured 736px; root overflow-x clip does not stop the sizing). */
-  width: min(46rem, 100vw); height: 17rem; z-index: -1; pointer-events: none;
-  background: radial-gradient(150% 140% at 0% 0%,
-    rgb(from var(--chart-ink) r g b / 0.9) 42%,
-    rgb(from var(--chart-ink) r g b / 0.5) 68%,
-    rgb(from var(--chart-ink) r g b / 0) 100%);
+  content: ""; position: absolute; inset: -4rem -2.2rem -1.8rem -4rem; z-index: -1; pointer-events: none;
+  background: rgb(from var(--chart-ink) r g b / 0.86);
+  filter: blur(22px);
 }
 /* The phone reveal renders on home at every width; only under 900px does it earn a face (the media block below). */
 .rooms-reveal { display: none; }
@@ -369,8 +366,39 @@ header.chrome::before {
      stand-down stranded four rooms (the legend carries four doors, not seven), so the nav
      AND the legend stand down together and the burger reveals the full nav. A native
      checkbox, keyboard-operable, no bundle: the doors survive scripts-off. */
-  .chrome .rooms { display: none; }
-  .rooms-reveal:checked ~ .rooms { display: block; max-width: calc(100vw - 2rem); }
+  /* #480: the revealed nav used to flow inline under the burger and wrap beneath the seed panel; now a drawer that slides in from the left beneath the cluster, its doors stacked (e2e CL3-CL6 measure it). It rides the page with the cluster (#472). */
+  .chrome .rooms {
+    display: block; position: absolute; left: calc(-1 * var(--chrome-x)); top: calc(-1 * var(--chrome-y));
+    box-sizing: border-box; width: min(16rem, 100vw); height: 100vh; height: 100dvh;
+    margin: 0; padding: calc(var(--band-h) + 1rem) 1.5rem 2rem var(--chrome-x);
+    overflow-y: auto; overscroll-behavior: contain;
+    background: var(--chart-ink);
+    border-right: 1px solid rgb(from var(--line-tan) r g b / 0.3);
+    box-shadow: 0 0 40px rgb(from var(--chart-ink) r g b / 0.6);
+    transform: translateX(-100%); visibility: hidden;
+    transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s linear 0.32s;
+    z-index: -1;
+  }
+  .rooms-reveal:checked ~ .rooms {
+    transform: none; visibility: visible; pointer-events: auto;
+    transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s;
+  }
+  .chrome .rooms .sep { display: none; }
+  .chrome .rooms a, .chrome .rooms [aria-current="page"] {
+    display: block; padding: 0.85rem 0;
+    font-size: 0.95rem; letter-spacing: 0.16em;
+  }
+  .chrome .rooms [aria-current="page"] { text-underline-offset: 0.3em; }
+  /* The seed panel steps aside for the drawer (the two shared the corner in #480's first screenshot), and a scrim holds the stage still beneath the chrome; the burger, above both, closes it without a script, and src/site/home/drawer.ts adds Escape and the scrim tap. */
+  body:has(.rooms-reveal:checked) .lf-seed { opacity: 0; pointer-events: none; }
+  .lf-seed { transition: opacity 0.32s ease; }
+  body:has(.rooms-reveal:checked)::after {
+    content: ""; position: fixed; inset: 0; z-index: 9; pointer-events: auto;
+    background: rgb(from var(--chart-ink) r g b / 0.45);
+  }
+  /* The cluster yields the seed panel its corner: the tagline wraps before it can reach the panel (measured 19px of overlap at 390), and the input takes the mockup's own phone width (design/atelier-map/stage.css). */
+  body > header.chrome { max-width: calc(100vw - 15rem); }
+  .seed-controls .control { width: 4.6rem; }
   .rooms-reveal {
     display: inline-block; vertical-align: top; appearance: none; -webkit-appearance: none;
     width: 1.7rem; height: 1rem; margin: 0.6rem 0 0; padding: 0; border: 0;
@@ -394,13 +422,15 @@ header.chrome::before {
   .lf-controls { bottom: 1.4rem; }
   .lf-coords.on { display: none; }
   .notice-stamp { display: none; }
-  .lf-seed { right: 1rem; top: 0.9rem; max-width: 12rem; }
+  /* The panel's floor is its controls row (input + gap + button, measured 190.5px at #480); trimmed here so the row plus the wrapped cluster clear each other by 8px at 360 (e2e CL3/CL6). */
+  .lf-seed { right: 1rem; top: 0.9rem; max-width: 12rem; padding: 0.7rem 0.7rem 0.75rem; }
+  .seed-controls { gap: 0.35rem; }
+  .lf-seed .control { padding: 0.32rem 0.45rem; }
+  .lf-seed .primary { padding: 0.32rem 0.7rem; }
   .seed-hook { font-size: 0.85rem; }
   .seed-gloss { display: none; }
   .lf-shelf { padding: 3rem 1.2rem 3.5rem; }
   .lf-shelf-grid { grid-template-columns: 1fr; gap: 2.6rem; }
-  /* The narrow shell insets the cluster to 1rem/0.9rem (BaseLayout); the wash's corner anchor follows. */
-  header.chrome::before { left: -1rem; top: -0.9rem; }
   /* The legend band it clears on desktop stands down here. */
   .lf-more { bottom: 1.2rem; }
 }
