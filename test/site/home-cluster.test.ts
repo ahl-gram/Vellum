@@ -90,7 +90,7 @@ test("under 900 the rooms nav is a drawer: it slides in from the left beneath th
   assert.match(open, /transform:\s*none/, "checked, it slides home");
   assert.match(open, /visibility:\s*visible/, "checked, its doors are live");
   assert.match(open, /pointer-events:\s*auto/, "checked, its ground takes the hand (the chrome passes it through otherwise)");
-  assert.doesNotMatch(open, /display:\s*block|max-width/, "the old inline reveal (display flip, viewport max-width) is gone");
+  assert.doesNotMatch(open, /display:\s*block|max-width/, "the checked rule no longer flips display or caps width the way the inline reveal did");
   assert.match(rule(narrow, ".chrome .rooms .sep"), /display:\s*none/, "the separators stand down in the stack");
   const doors = rule(narrow, '.chrome .rooms a, .chrome .rooms [aria-current="page"]');
   assert.match(doors, /display:\s*block/, "every door is its own row");
@@ -109,6 +109,9 @@ test("while the drawer is open the seed panel steps aside and a scrim stands beh
   const raised = rule(narrow, "body:has(.rooms-reveal:checked) > header.chrome");
   assert.match(raised, /z-index:\s*45/, "the chrome rises above the cards (40) and the scrim while the drawer is open, under the veil (50)");
   assert.doesNotMatch(narrow, /body:has\(\.rooms-reveal:checked\)::after/, "no fixed body scrim remains");
+  const print = mediaBodies(css, "print");
+  assert.match(rule(print, "body:has(.rooms-reveal:checked) .landfall::before"), /content:\s*none/, "print never stamps the scrim: paper widths match the narrow query and :checked is state (skeptic round 2, finding 3)");
+  assert.match(rule(print, "body:has(.rooms-reveal:checked) .lf-seed"), /opacity:\s*1/, "and the seed panel prints whether or not the drawer was open");
 });
 
 test("the cluster yields the seed panel its corner under 900: the mockup's phone input and a cluster width cap (#480, screenshot 1)", () => {

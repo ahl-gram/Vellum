@@ -6,6 +6,7 @@ const REM = 16;
 const rectOf = (sel) => `(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom }; })()`;
 
 const DRAWER_READ = `(() => {
+  if (!document.querySelector(".landfall")) return { page: location.href, scrollW: -1 };
   const r = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
   const nav = document.querySelector("header.chrome nav.rooms");
   const cs = getComputedStyle(nav);
@@ -17,6 +18,8 @@ const DRAWER_READ = `(() => {
   const inkRight = Math.max(...[".wordmark a", ".tagline"].map((sel) => { const rg = new Range(); rg.selectNodeContents(document.querySelector("header.chrome " + sel)); return rg.getBoundingClientRect().right; }));
   return { innerW: innerWidth, scrollW: document.documentElement.scrollWidth, inkRight, scrollY: window.scrollY,
     chromeZ: getComputedStyle(document.querySelector("header.chrome")).zIndex, stageInert: document.getElementById("lf-stage").inert, seedInert: document.getElementById("seed-form").inert,
+    shelfInert: document.querySelector(".lf-shelf").inert, footerInert: document.querySelector("body > footer").inert, chromeInert: document.querySelector("header.chrome").inert,
+    scrimHitAt400: (() => { const e = document.elementFromPoint(330, 400); return e ? e.tagName + "." + String(e.className).split(" ")[0] : null; })(),
     checked: burger.checked, burger: r(".rooms-reveal"), burgerReachable: atBurger === burger,
     cluster: r("header.chrome"), tagline: r("header.chrome .tagline"), seed: r(".lf-seed"),
     seedOpacity: getComputedStyle(seed).opacity, seedPointer: getComputedStyle(seed).pointerEvents,
@@ -101,19 +104,25 @@ export async function run(ctx) {
   const firstDoor = open?.doors[0] ?? null;
   await evaluate(`[...document.querySelectorAll("header.chrome nav.rooms a")].pop().focus()`);
   await pressKey("Tab", "Tab", 9);
-  const tabbedOut = await evaluate(`(() => { const a = document.activeElement; return { inMain: !!(a && a.closest("main")), tag: a ? a.tagName + (a.id ? "#" + a.id : "") : null }; })()`);
+  await sleep(400);
+  const tabbedOut = await evaluate(`(() => { const a = document.activeElement; return { inMain: !!(a && a.closest(".landfall")), tag: a ? a.tagName + (a.id ? "#" + a.id : "") : null, checked: document.querySelector(".rooms-reveal").checked, scrollY: window.scrollY }; })()`);
+  for (let i = 0; i < 20; i++) { await evaluate(`window.scrollTo(0, 0)`); await sleep(150); if ((await evaluate(`window.scrollY`)) === 0) break; }
   check(
-    "CL4 a real tap on the burger slides the drawer home: anchored to the viewport corner, full height, seven doors stacked one per row at 44px or taller below the cluster and each one hit-testable (the first sticky cap sat over three of them), the burger still on top, the seed panel faded and untappable, the scrim riding in the survey section with the chrome raised above the cards, the stage and the seed form inert so Tab past the last door never lands in main (skeptic findings 5 and 8), nothing scrolling sideways (#480 screenshot 2)",
+    "CL4 a real tap on the burger slides the drawer home: anchored to the viewport corner, full height, seven doors stacked one per row at 44px or taller below the cluster and each one hit-testable (the first sticky cap sat over three of them), the burger still on top, the seed panel faded and untappable, the scrim riding in the survey section with the chrome raised above the cards, the stage and the seed form inert (never the chrome, and never the shelf or footer the scrim does not cover) so Tab past the last door never lands in the survey section but on the shelf below, and the scroll that brings the shelf into view closes the drawer (skeptic findings 5 and 8, round 2 finding 2), nothing scrolling sideways (#480 screenshot 2)",
     !!open && open.checked && open.scrollW === 390 && open.nav.visibility === "visible" && open.nav.transform === "none" && open.nav.pointer === "auto"
       && open.nav.rect.x === 0 && open.nav.rect.y === 0 && open.nav.rect.h >= 800 && open.nav.rect.w <= 16 * REM + 0.5
       && stacked(open.doors) && open.doors.every((d) => d.h >= 44 && d.tappable) && firstDoor !== null && open.burger !== null && firstDoor.y >= open.burger.bottom + 8
       && open.burgerReachable && open.seedOpacity === "0" && open.seedPointer === "none"
       && open.scrim.position === "absolute" && open.scrim.pointer === "auto" && Number(open.scrim.z) === 41 && open.chromeZ === "45"
-      && open.stageInert && open.seedInert && !tabbedOut.inMain && /transform/.test(open.nav.transition),
+      && open.stageInert && open.seedInert && !open.shelfInert && !open.footerInert && !open.chromeInert
+      && !tabbedOut.inMain && !tabbedOut.checked && tabbedOut.scrollY > 0 && /transform/.test(open.nav.transition),
     JSON.stringify({ open, tabbedOut }),
   );
   await shoot("cluster-drawer-open-390.png");
 
+  if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
+  await sleep(600);
+  const openForEscape = await evaluate(DRAWER_READ);
   await pressKey("Escape", "Escape", 27);
   await sleep(600);
   const afterEscape = await evaluate(DRAWER_READ);
@@ -124,11 +133,12 @@ export async function run(ctx) {
   await sleep(600);
   const afterScrim = await evaluate(DRAWER_READ);
   check(
-    "CL5 Escape closes the drawer, the burger reopens it, and a real tap on the scrim closes it again: each close is a slide back off the left edge, doors hidden (#480)",
-    !!afterEscape && !afterEscape.checked && offLeft(afterEscape.nav) && afterEscape.seedOpacity === "1"
-      && !!reopened && reopened.checked && reopened.nav.visibility === "visible"
-      && !!afterScrim && !afterScrim.checked && offLeft(afterScrim.nav),
-    JSON.stringify({ afterEscape: afterEscape && { checked: afterEscape.checked, nav: afterEscape.nav }, reopened: reopened && reopened.checked, afterScrim: afterScrim && { checked: afterScrim.checked, nav: afterScrim.nav } }),
+    "CL5 Escape closes the drawer, the burger reopens it, and a real tap on the scrim closes it again: each close is a slide back off the left edge, doors hidden, and each script close releases the page from inert (prover round 3, C6) (#480)",
+    !!openForEscape && openForEscape.checked && openForEscape.scrollY === 0
+      && !!afterEscape && !afterEscape.checked && offLeft(afterEscape.nav) && afterEscape.seedOpacity === "1" && !afterEscape.stageInert
+      && !!reopened && reopened.checked && reopened.nav.visibility === "visible" && reopened.stageInert
+      && !!afterScrim && !afterScrim.checked && offLeft(afterScrim.nav) && !afterScrim.stageInert,
+    JSON.stringify({ openForEscape: openForEscape && { checked: openForEscape.checked, scrollY: openForEscape.scrollY }, afterEscape: afterEscape && { checked: afterEscape.checked, nav: afterEscape.nav }, reopened: reopened && reopened.checked, afterScrim: afterScrim && { checked: afterScrim.checked, nav: afterScrim.nav } }),
   );
 
   if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
@@ -143,13 +153,15 @@ export async function run(ctx) {
   const burgerBack = await evaluate(rectOf(".rooms-reveal"));
   if (burgerBack) await clickAt(burgerBack.x + burgerBack.w / 2, burgerBack.y + burgerBack.h / 2);
   await sleep(600);
-  const closedAfterSwipe = await evaluate(DRAWER_READ);
+  const reopenedAtTop = await evaluate(DRAWER_READ);
+  await pressKey("Escape", "Escape", 27);
+  await sleep(400);
   check(
-    "CL8 a real swipe on the scrim scrolls the page WITH the open drawer, its burger and its scrim riding away together (a fixed scrim stayed behind and stranded the no-script reader, skeptic finding 4); back at the top the burger still closes it",
-    !!openAgain && openAgain.checked && !!swiped && swiped.checked && swiped.scrollY > 100
-      && Math.abs(swiped.nav.rect.y + swiped.scrollY) < 1 && Math.abs(swiped.burger.y + swiped.scrollY - openAgain.burger.y) < 1
-      && !!closedAfterSwipe && !closedAfterSwipe.checked && closedAfterSwipe.scrollY === 0,
-    JSON.stringify({ openAgain: openAgain && { checked: openAgain.checked, burgerY: openAgain.burger?.y }, swiped: swiped && { checked: swiped.checked, scrollY: swiped.scrollY, navY: swiped.nav.rect?.y, burgerY: swiped.burger?.y }, closedAfterSwipe: closedAfterSwipe && { checked: closedAfterSwipe.checked, scrollY: closedAfterSwipe.scrollY } }),
+    "CL8 a real swipe on the scrim scrolls the page and the scroll CLOSES the drawer: no open drawer, burger or scrim ever rides off-screen as an orphaned state (plate round 2 C, skeptic findings 4 and round 2 finding 2), the point that hit the scrim before the swipe hits the live shelf after it, the page is released, and back at the top the burger opens it again",
+    !!openAgain && openAgain.checked && openAgain.scrimHitAt400 === "SECTION.landfall"
+      && !!swiped && !swiped.checked && swiped.scrollY > 100 && swiped.scrimHitAt400 !== "SECTION.landfall" && !swiped.stageInert && !swiped.shelfInert && offLeft(swiped.nav)
+      && !!reopenedAtTop && reopenedAtTop.checked && reopenedAtTop.scrollY === 0,
+    JSON.stringify({ openAgain: openAgain && { checked: openAgain.checked, hit: openAgain.scrimHitAt400 }, swiped: swiped && { checked: swiped.checked, scrollY: swiped.scrollY, hit: swiped.scrimHitAt400, stageInert: swiped.stageInert, shelfInert: swiped.shelfInert, navVisibility: swiped.nav.visibility }, reopenedAtTop: reopenedAtTop && { checked: reopenedAtTop.checked, scrollY: reopenedAtTop.scrollY } }),
   );
 
   const narrows = [];
@@ -189,18 +201,21 @@ export async function run(ctx) {
     const doors = [...nav.querySelectorAll("a, [aria-current]")].map((a) => a.getBoundingClientRect());
     const last = doors[doors.length - 1];
     const probe = document.elementFromPoint(cluster.left + 20, cluster.bottom + 12);
+    const runEl = [...nav.querySelectorAll("a, [aria-current]")].find((a) => a.textContent === "Explorer");
+    const rg = new Range(); rg.selectNodeContents(runEl); const rb = rg.getBoundingClientRect();
+    const stripHit = document.elementFromPoint(Math.round(rb.x + rb.width / 2) + 6, Math.round(rb.y + rb.height / 2));
     const lastEl = [...nav.querySelectorAll("a, [aria-current]")].pop();
     const lastHit = document.elementFromPoint(last.x + 20, last.y + last.height / 2);
     return { overflow: nav.scrollHeight - nav.clientHeight, scrollTop: nav.scrollTop, lastBottom: last.bottom, clientH: nav.clientHeight, lastTappable: lastHit === lastEl,
       firstTop: doors[0].top, clusterBottom: cluster.bottom, pageScrollY: window.scrollY,
-      capHit: probe === nav, hitTag: probe ? probe.tagName : null };
+      capHit: probe === nav, hitTag: probe ? probe.tagName : null, stripOnCap: stripHit === nav };
   })()`);
   check(
-    "CL7 landscape 844x390: the drawer overflows its box, a real wheel scrolls it to the last door with the page unmoved, with a station card OPEN beneath it every door in view is still hit-testable, the last one once scrolled to, and the card inert (the card's z 40 outranked the drawer, skeptic finding 5), and the doors scrolled up under the cluster are hidden beneath the sticky cap, never showing through the lettering: the cap wins the hit-test AND a pixel strip through a scrolled door's glyphs reads chart ink where the same strip read parchment unscrolled (plate finding G on PR #482; the pixel half closes prover round 2's A4, a transparent cap that still won the hit-test)",
+    "CL7 landscape 844x390: the drawer overflows its box, a real wheel scrolls it to the last door with the page unmoved, with a station card OPEN beneath it every door in view is still hit-testable, the last one once scrolled to, and the card inert (the card's z 40 outranked the drawer, skeptic finding 5), and the doors scrolled up under the cluster are hidden beneath the sticky cap, never showing through the lettering: the cap wins the hit-test AND a pixel strip through a scrolled door's glyphs, sampled at page scroll 0 so viewport and clip coordinates agree and hit-tested onto the cap, reads chart ink where the same strip read parchment unscrolled (plate finding G on PR #482; the pixel half closes prover round 2's A4, a transparent cap that still won the hit-test)",
     !!camWide && cardOpen && !!overCard && overCard.checked && cardInert === true
       && overCard.doors.filter((d) => d.bottom <= 390).length >= 5 && overCard.doors.filter((d) => d.bottom <= 390).every((d) => d.tappable)
       && !!landscape && landscape.overflow > 0 && landscape.lastTappable && landscape.scrollTop > 0 && landscape.lastBottom <= landscape.clientH + 0.5
-      && landscape.pageScrollY === scrollBefore && landscape.firstTop < landscape.clusterBottom && landscape.capHit
+      && scrollBefore === 0 && landscape.pageScrollY === 0 && landscape.firstTop < landscape.clusterBottom && landscape.capHit && landscape.stripOnCap
       && shownStrip.length === 12 && brightest(shownStrip) > 150 && cappedStrip.length === 12 && brightest(cappedStrip) < 100,
     JSON.stringify({ camWide: !!camWide, cardOpen, cardInert, doorsTappable: overCard?.doors.map((d) => d.tappable), scrollBefore, landscape, shownRun, shownBrightest: shownStrip.length ? brightest(shownStrip) : null, cappedRun, cappedBrightest: cappedStrip.length ? brightest(cappedStrip) : null }),
   );

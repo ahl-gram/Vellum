@@ -366,9 +366,9 @@ header.chrome::before {
      stand-down stranded four rooms (the legend carries four doors, not seven), so the nav
      AND the legend stand down together and the burger reveals the full nav. A native
      checkbox, keyboard-operable, no bundle: the doors survive scripts-off. */
-  /* #480: the phone drawer (e2e CL3-CL8); src/site/home/drawer.ts adds Escape, the scrim tap, and inert behind it. */
   .chrome .rooms {
     display: block; position: absolute; left: calc(-1 * var(--chrome-x)); top: calc(-1 * var(--chrome-y));
+    /* min(...): a box past the viewport edge makes phone Chrome widen the layout viewport itself to fit it (e2e H3/H12a measured 736px; root overflow-x clip does not stop the sizing). */
     box-sizing: border-box; width: min(16rem, 100vw); height: 100vh; height: 100dvh;
     margin: 0; padding: 0 1.5rem 2rem var(--chrome-x);
     overflow-y: auto; overscroll-behavior: contain;
@@ -379,7 +379,6 @@ header.chrome::before {
     transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s linear 0.32s;
     z-index: -1;
   }
-  /* The sticky cap is the drawer's top reserve and covers the doors a short viewport scrolls up (plate finding G on PR #482, e2e CL7). */
   .chrome .rooms::before {
     content: ""; display: block; position: sticky; top: 0; z-index: 1;
     height: calc(var(--band-h) + 1rem);
@@ -427,7 +426,6 @@ header.chrome::before {
   .lf-controls { bottom: 1.4rem; }
   .lf-coords.on { display: none; }
   .notice-stamp { display: none; }
-  /* The panel's floor is its controls row, trimmed so it clears the wrapped cluster (e2e CL3/CL6). */
   .lf-seed { right: 1rem; top: 0.9rem; max-width: 12rem; padding: 0.7rem 0.7rem 0.75rem; }
   .seed-controls { gap: 0.35rem; }
   .lf-seed .control { padding: 0.32rem 0.45rem; }
@@ -441,6 +439,11 @@ header.chrome::before {
 }
 @media (max-width: 340px) {
   .chrome .wordmark { font-size: 1.3rem; }
+}
+/* Print is paper (#454 open decision 4): the layout hides the chrome and the drawer with it, but :checked is state and paper widths match the narrow query, so the open state's scrim and the faded panel need their own stand-down. */
+@media print {
+  body:has(.rooms-reveal:checked) .landfall::before { content: none; }
+  body:has(.rooms-reveal:checked) .lf-seed { opacity: 1; }
 }
 
 .landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] {
