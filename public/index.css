@@ -375,6 +375,13 @@ header.chrome::before {
   .seed-gloss { display: none; }
   .lf-shelf { padding: 3rem 1.2rem 3.5rem; }
   .lf-shelf-grid { grid-template-columns: 1fr; gap: 2.6rem; }
+  /* The cluster's ground once the page scrolls beneath it (#472 plate finding A): only under 900px does the stacked shelf outgrow the viewport enough for its heading to ride into the cluster, so the corner ellipse becomes a full-width fade that holds the deep behind the lettering and ends in transparency, never at a box edge. */
+  header.chrome::before {
+    width: 100%; height: 15rem;
+    background: linear-gradient(to bottom,
+      var(--chart-ink) 5.5rem,
+      rgb(from var(--chart-ink) r g b / 0) 100%);
+  }
 }
 
 .landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] {
@@ -386,6 +393,9 @@ header.chrome::before {
   animation: lf-doors-reveal 0s linear 10s forwards;
 }
 .landfall .stage:not(.cam) ~ .lf-card .lf-card-close { display: none; }
+/* The no-JS doors' plain nav still wore the light-era ink after #461 inverted the ground (measured 1.06:1 at the #472 plate pass). */
+.lf-noscript-rooms { color: var(--parchment); }
+.lf-noscript-rooms a { color: var(--parchment-bright); }
 @keyframes lf-doors-reveal {
   to {
     visibility: visible;
