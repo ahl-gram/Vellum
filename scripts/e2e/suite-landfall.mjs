@@ -154,6 +154,45 @@ export async function run(ctx) {
     JSON.stringify({ hintOn, hintOff }),
   );
 
+  // L1k acts on REAL clicks at scrolled-viewport coordinates: the instruments' remnant is exactly what a reader can reach down there.
+  const scrollToFloor = async () => {
+    for (let i = 0; i < 20; i++) {
+      await evaluate(`window.scrollTo(0, document.body.scrollHeight)`);
+      await sleep(100);
+      if ((await scrollY()) > 0) break;
+    }
+  };
+  await scrollToFloor();
+  const surfCamBefore = await camNow();
+  // centerOf, never buttonPoint: buttonPoint scrollIntoViews the stage first, which un-scrolls the page and dissolves the very trap this arm exists to pin (the instruments' remnant is reachable down there).
+  const zoomInPt = await centerOf("#lf-in");
+  if (zoomInPt !== null) await clickAt(zoomInPt.x, zoomInPt.y);
+  let surfaced = null;
+  for (let i = 0; i < 25; i++) {
+    await sleep(100);
+    const y = await scrollY();
+    const cam = await camNow();
+    if (y === 0 && surfCamBefore !== null && cam !== null && cam.scale > surfCamBefore.scale * 1.05) { surfaced = { y, cam }; break; }
+  }
+  await scrollToFloor();
+  const legendPt = await centerOf(String.raw`.lf-legend-btn[data-station="gallery"]`);
+  if (legendPt !== null) await clickAt(legendPt.x, legendPt.y);
+  let surfacedCard = null;
+  for (let i = 0; i < 25; i++) {
+    await sleep(100);
+    const y = await scrollY();
+    const open = await evaluate(`(() => { const c = document.getElementById("lf-card-gallery"); return c ? !c.hidden : null; })()`);
+    if (y === 0 && open === true) { surfacedCard = { y, open }; break; }
+  }
+  await pressKey("Escape", "Escape", 27);
+  await sleep(300);
+  check(
+    "L1k a map action taken from down the page glides the reader back up to watch it (#472, 2026-08-28 ruling): the zoom control surfaces and zooms, the legend button surfaces and opens its card",
+    zoomInPt !== null && legendPt !== null && surfaced !== null && surfacedCard !== null,
+    JSON.stringify({ zoomInPt, legendPt, surfCamBefore, surfaced, surfacedCard }),
+  );
+  await scrollToTop();
+
   await scrollToTop();
   await evaluate(`window.scrollTo(0, 240)`);
   await sleep(200);
@@ -175,8 +214,9 @@ export async function run(ctx) {
   const topZoom = await camNow();
   check(
     "L1f over the scrolled page a wheel-up scrolls the page and never zooms; back at the top, a fresh wheel-up is the camera's again",
+    // 1% stillness, not 1e-9: by this point the idle drift wanders the scale ~0.1% between reads, and a wheel step is 21% (the suite's own added seconds crossed the 9s idle delay; the timing-budget class).
     yMid > 0 && backUp !== null && backUp.prevented === false && midCamBefore !== null
-      && Math.abs(backUp.cam.scale - midCamBefore.scale) < 1e-9 && backUp.y < yMid
+      && Math.abs(backUp.cam.scale / midCamBefore.scale - 1) < 0.01 && backUp.y < yMid
       && topCamBefore !== null && topZoom !== null && topZoom.scale > topCamBefore.scale * 1.05,
     JSON.stringify({ yMid, backUp, topCamBefore, topZoom }),
   );
@@ -217,7 +257,7 @@ export async function run(ctx) {
   check(
     "L1g the keyboard CLASS on the focused stage stays native, never intercepted, whatever the camera state: Space, PgDn, End, Home, and ArrowDown all scroll and the camera never moves (#472 contract; #481 skeptic finding 5)",
     keyRuns.every((r) => r.ok) && keyCamBefore !== null && keyCam !== null
-      && Math.abs(keyCam.scale - keyCamBefore.scale) < 1e-9,
+      && Math.abs(keyCam.scale / keyCamBefore.scale - 1) < 0.01,
     JSON.stringify({ keyRuns, keyCamBefore, keyCam }),
   );
   await scrollToTop();

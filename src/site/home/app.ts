@@ -96,7 +96,14 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     armDrift();
   };
 
+  // Any deliberate camera action summons the reader back to watch it (#472, 2026-08-28 ruling; e2e L1k). The browser's own scrollTo, never re-implemented physics: the contract forbids intercepting scroll INPUT, and this is the anchor-link class it protects.
+  const surface = () => {
+    if (window.scrollY === 0) return;
+    window.scrollTo({ top: 0, behavior: reduced() ? "auto" : "smooth" });
+  };
+
   const flyTo = (target: Cam, duration: number) => {
+    surface();
     stopDrift();
     gsap.killTweensOf(cam);
     if (reduced() || duration === 0) {
