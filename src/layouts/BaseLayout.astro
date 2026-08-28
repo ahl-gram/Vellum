@@ -135,6 +135,7 @@ const cardDescription = ogDescription ?? description;
   /* #461 ruling 5: the reserved walnut band the head cluster stands on; the sheet scrolls
      beneath the band, never beneath bare lettering. */
   --band-h: 7.6rem;
+  --chrome-x: 1.6rem; --chrome-y: 1.4rem;
 }
 /* The shell dresses once (#263), part A: the rules every page shell shares; per-page
    values stay in the page files (the layout's inline style renders AFTER the page css
@@ -163,7 +164,7 @@ main { margin-inline: auto; }
    left, directly on the deep. It pins its own leading (second addendum on #461): page css
    sets body line-height for READING and the cluster must not inherit that inflation. */
 header.chrome {
-  position: fixed; left: 1.6rem; top: 1.4rem; z-index: 10;
+  position: fixed; left: var(--chrome-x); top: var(--chrome-y); z-index: 10;
   line-height: normal; text-align: left;
   pointer-events: none;
 }
@@ -230,12 +231,11 @@ footer {
 }
 footer a { color: inherit; }
 @media (max-width: 720px) {
-  :root { --band-h: 6.4rem; }
-  header.chrome { left: 1rem; top: 0.9rem; }
+  :root { --band-h: 6.4rem; --chrome-x: 1rem; --chrome-y: 0.9rem; }
   .wordmark { font-size: 1.5rem; }
   .tagline { font-size: 0.78rem; }
   /* The nav stays on room pages at narrow (a room page has no other door); home alone
-     stands its rooms down under 900px, the mockup's own call (public/index.css). */
+     folds its rooms into the drawer under 900px (public/index.css). */
   .rooms { max-width: calc(100vw - 2rem); }
   body.room { padding: 7rem 1rem 1.2rem; }
 }

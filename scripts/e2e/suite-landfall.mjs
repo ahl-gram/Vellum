@@ -530,8 +530,9 @@ export async function run(ctx) {
   );
 
   const stagePt9 = await evaluate(stagePoint);
+  // Drift-sized stillness: on slow CI the fixture has crossed IDLE_DELAY_MS by here and the ambient ±1.5% drift moved the camera 3e-6 between reads (PR #482 CI); a one-finger pan that drove the map would move it 60px.
   const stillCam = (a, b) =>
-    a !== null && b !== null && Math.abs(b.scale - a.scale) < 1e-9 && Math.abs(b.x - a.x) < 1e-9 && Math.abs(b.y - a.y) < 1e-9;
+    a !== null && b !== null && Math.abs(b.scale - a.scale) < a.scale * 0.02 && Math.abs(b.x - a.x) < 8 && Math.abs(b.y - a.y) < 8;
   const touchAction9 = await evaluate(`(() => { const s = document.getElementById("lf-stage"); return s ? getComputedStyle(s).touchAction : null; })()`);
   // The drag heads INTO clamp headroom (+x,+y): the original (-x,-y) gesture aimed at the corner the camera was already parked on, so stillness held with every gate deleted (guard-prover round 2).
   const bodyLocked390 = await evaluate(`getComputedStyle(document.body).overflow`);

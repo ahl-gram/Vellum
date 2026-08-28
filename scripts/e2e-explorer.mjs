@@ -38,6 +38,7 @@ import { run as runRoomVoyage } from "./e2e/suite-room-voyage.mjs";
 import { run as runRoomAddress } from "./e2e/suite-room-address.mjs";
 import { run as runRoomVoyageRoute } from "./e2e/suite-room-voyage-route.mjs";
 import { run as runRunningHead } from "./e2e/suite-runninghead.mjs";
+import { run as runCluster } from "./e2e/suite-cluster.mjs";
 import { run as runRegionDetail } from "./e2e/suite-region-detail.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url)); // scripts/
@@ -108,6 +109,7 @@ const SUITES = {
   "room-voyage-route": runRoomVoyageRoute,
   "room-address": runRoomAddress,
   "runninghead": runRunningHead,
+  "cluster": runCluster,
   "region-detail": runRegionDetail,
 };
 

@@ -59,7 +59,7 @@ const HEAD_READ = `(() => {
   const band = document.querySelector(".band");
   const chrome = document.querySelector("header.chrome");
   return JSON.stringify({
-    chromeWash: chrome ? getComputedStyle(chrome, "::before").backgroundImage : null,
+    chromeWash: chrome ? (({ content, backgroundColor, filter }) => ({ content, backgroundColor, filter }))(getComputedStyle(chrome, "::before")) : null,
     wordmark: read("header.chrome .wordmark"), tagline: read("header.chrome .tagline"),
     rooms: read("header.chrome nav.rooms"),
     roomName: read("main .room-name"), roomTagline: read("main .room-tagline"),
@@ -247,11 +247,12 @@ export async function run(ctx) {
     dimTaglines.map((r) => `${r} tagline ${heads[r]?.tagline?.color}`).join(" | ") || `tagline parchment x${SHELLED.length}`,
   );
 
+  const poolAlpha = (color) => Number((String(color).match(/\/\s*([\d.]+)\)/) || String(color).match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "0");
   const washWrong = bad((h, r) =>
-    r === "/" ? typeof h.chromeWash === "string" && h.chromeWash.includes("radial-gradient")
-              : h.chromeWash === "none");
+    r === "/" ? !!h.chromeWash && h.chromeWash.content !== "none" && /blur\(/.test(h.chromeWash.filter) && poolAlpha(h.chromeWash.backgroundColor) >= 0.8
+              : !!h.chromeWash && h.chromeWash.content === "none");
   check(
-    "RH9b home's chrome carries its wash and a room's carries none, the band being its ground (#461, 2026-08-26 call)",
+    "RH9b home's chrome carries its wash, a blurred pool of the chart ink since #480, and a room's carries none, the band being its ground (#461, 2026-08-26 call)",
     washWrong.length === 0,
     washWrong.map((r) => `${r} wash ${JSON.stringify(heads[r]?.chromeWash)}`).join(" | ") || "wash on home alone",
   );
