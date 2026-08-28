@@ -66,6 +66,23 @@ test("the shelf is plain flow: no hidden attribute, no noscript wrapper, no .cam
   }
 });
 
+test("the scroll hint pulses only at full pull-back (#472, 2026-08-28 ruling): inside the stage, decorative, parchment-tier, and gated on BOTH the bundle and the stood-off camera", () => {
+  const stageAt = astro.indexOf('id="lf-stage"');
+  const legendAt = astro.indexOf('class="lf-legend"');
+  const hintAt = astro.indexOf('class="lf-more"');
+  assert.ok(stageAt >= 0 && hintAt > stageAt && hintAt < legendAt, "the hint lives inside the stage, so it rides the page and never joins the landfall-prose sibling ledger");
+  const hintTag = astro.slice(astro.lastIndexOf("<", hintAt), astro.indexOf(">", hintAt) + 1);
+  assert.match(hintTag, /aria-hidden="true"/, "the hint is decorative: the shelf is plain flow for a screen reader already");
+  const base = css.match(/\.lf-more \{([^}]*)\}/);
+  assert.ok(base !== null && /opacity:\s*0/.test(base[1]), "the hint rests invisible");
+  assert.match(base[1], /color: var\(--parchment\)/, "parchment tier: line-tan measured 4.03 on the deep (RH9a), under the 4.5 bar");
+  assert.match(
+    css,
+    /\.landfall \.stage\.cam\.stood-off \.lf-more \{[^}]*opacity:\s*1/,
+    "the show rule demands the bundle (.cam) AND the stood-off camera, so a dead bundle or a closer camera never shows it",
+  );
+});
+
 test("nothing home loads locks the document's scroll (#472 retired the #461 body lock; the class, not the instance: every sheet home links, plus the inline style blocks)", () => {
   const inline = (p: string): string =>
     [...read(p).matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n").replace(/\/\*[\s\S]*?\*\//g, "");

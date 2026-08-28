@@ -121,10 +121,37 @@ export async function run(ctx) {
     }
   }
   check(
-    "L1e the flick that reaches the outer clamp is used up: a clamp-parked wheel in the same stream stays consumed and the page holds (#472 feel ruling 1)",
+    "L1e the flick that reaches the outer clamp is absorbed: a clamp-parked wheel in the same stream, inside the absorb window, stays consumed and the page holds (#472, 2026-08-28 ruling)",
     usedUp !== null && usedUp.log[0].p === true && usedUp.log[1].p === true && usedUp.y === 0
       && floor !== null && usedUp.cam !== null && Math.abs(usedUp.cam.scale - floor.scale) < 1e-9,
     JSON.stringify({ usedUp }),
+  );
+
+  const readHint = () => evaluate(`(() => {
+    const m = document.querySelector(".lf-more");
+    const s = document.getElementById("lf-stage");
+    if (!m || !s) return null;
+    return { op: getComputedStyle(m).opacity, stood: s.classList.contains("stood-off") };
+  })()`);
+  let hintOn = null;
+  for (let i = 0; i < 20; i++) {
+    hintOn = await readHint();
+    if (hintOn !== null && hintOn.op === "1") break;
+    await sleep(100);
+  }
+  await freshGesture();
+  await wheelAt(await evaluate(stagePoint), -240);
+  let hintOff = null;
+  for (let i = 0; i < 20; i++) {
+    await sleep(100);
+    hintOff = await readHint();
+    if (hintOff !== null && hintOff.op === "0") break;
+  }
+  check(
+    "L1j the scroll hint pulses at full pull-back and stands down the moment the camera draws nearer (#472, 2026-08-28 ruling)",
+    hintOn !== null && hintOn.op === "1" && hintOn.stood === true
+      && hintOff !== null && hintOff.op === "0" && hintOff.stood === false,
+    JSON.stringify({ hintOn, hintOff }),
   );
 
   await scrollToTop();
