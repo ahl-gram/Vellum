@@ -67,10 +67,12 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
 
   // The idle drift (#458): the mockup's armDrift/stopDrift pair.
   let driftTween: gsap.core.Tween | null = null;
+  let driftBase: Cam | null = null;
   let idleTimer: ReturnType<typeof setTimeout> | undefined;
   const armDrift = () => {
     if (reduced()) return;
     idleTimer = setTimeout(() => {
+      driftBase = { x: cam.x, y: cam.y, s: cam.s };
       const t = driftTarget(cam, fit);
       driftTween = gsap.to(cam, {
         x: t.x,
@@ -87,6 +89,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
   const stopDrift = () => {
     driftTween?.kill();
     driftTween = null;
+    driftBase = null;
     clearTimeout(idleTimer);
     armDrift();
   };
@@ -127,7 +130,14 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
       settle();
     },
     wheelZoom: (px, py, deltaY) =>
-      valve(performance.now(), deltaY, window.scrollY, () => zoomBy(Math.exp(-deltaY * 0.0016), px, py, 0)),
+      valve(performance.now(), deltaY, window.scrollY, () => {
+        // The drift's ±1.5% wander is ambient, not the user's zoom: measured from the drifted scale, a clamp-parked camera reads the snap-back as consumed and eats the release flick (#481 skeptic finding 1; e2e L1h).
+        if (driftBase !== null) {
+          assign(driftBase);
+          settle();
+        }
+        return zoomBy(Math.exp(-deltaY * 0.0016), px, py, 0);
+      }),
     pinch: (px, py, ratio) => zoomBy((gestureScale * ratio) / cam.s, px, py, 0),
     dive: (px, py) => zoomBy(1.6, px, py),
     key: (key) => {

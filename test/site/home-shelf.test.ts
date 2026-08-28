@@ -46,7 +46,7 @@ test("the plates keep their streaming manners (#329, revived with the markup it 
   const imgs = [...shelf.matchAll(/<img\b[^>]*>/g)].map((m) => m[0]);
   assert.equal(imgs.length, 3, "three plate images");
   for (const img of imgs) {
-    assert.match(img, /loading="lazy"/, "a megabyte plate below the fold never loads eagerly");
+    assert.match(img, /loading="lazy"/, "the #329 lazy attribute rides the markup (Chrome's lazy threshold still fetches just-below-fold plates, so this pins the contract, not a deferral)");
     assert.match(img, /fetchpriority="low"/, "a plate must not outrank a clicked room's HTML while it streams");
     assert.match(img, /class="plate"/, "the plate wears motion.css's lift, the tip-affordance KNOWN entry");
     assert.match(img, /width="1500" height="1158"/, "intrinsic size holds the shelf's layout while a lazy plate streams");
@@ -69,6 +69,8 @@ test("the shelf is plain flow: no hidden attribute, no noscript wrapper, no .cam
 test("nothing home loads locks the document's scroll (#472 retired the #461 body lock; the class, not the instance: every sheet home links, plus the inline style blocks)", () => {
   const inline = (p: string): string =>
     [...read(p).matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n").replace(/\/\*[\s\S]*?\*\//g, "");
+  // At-rule preludes are stripped first: split("}") alone hands an @media-first rule the prelude as its selector, and the sweep goes blind to it (#481 skeptic finding 4).
+  const flatten = (cssText: string): string => cssText.replace(/@[^{}]*\{/g, "");
   const sources: ReadonlyArray<readonly [string, string]> = [
     ...["public/index.css", "public/house.css", "public/motion.css", "public/fonts.css"].map(
       (p) => [p, liveCss(p)] as const,
@@ -77,9 +79,9 @@ test("nothing home loads locks the document's scroll (#472 retired the #461 body
     ["src/layouts/BaseLayout.astro inline styles", inline("src/layouts/BaseLayout.astro")] as const,
   ];
   for (const [name, cssText] of sources) {
-    for (const rule of cssText.split("}")) {
+    for (const rule of flatten(cssText).split("}")) {
       const [selector, decls] = rule.split("{");
-      if (decls === undefined || !/(^|[^-\w])(body|html)(?![-\w])/.test(selector)) continue;
+      if (decls === undefined || !/(^|[^-\w])(body|html|:root)(?![-\w])/.test(selector)) continue;
       assert.ok(
         !/overflow(?:-[xy])?\s*:\s*(?:hidden|clip)/.test(decls),
         `${name} locks scroll at the document level: ${rule.trim().slice(0, 80)}`,

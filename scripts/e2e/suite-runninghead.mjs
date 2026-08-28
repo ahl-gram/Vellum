@@ -162,12 +162,12 @@ export async function run(ctx) {
   // beneath its cluster. The invariant is band >= cluster (ruling 5's "never beneath bare
   // lettering"), not just the literal clip: nav growth that overflows the band must red here.
   const unfixed = bad((h, r) =>
-    h.chromePosition === "fixed" &&
-    (r === "/" ? h.bandClip === null
-               : typeof h.bandClip === "string" && h.bandClip.includes("121.6px") &&
+    (r === "/" ? h.chromePosition === "absolute" && h.bandClip === null
+               : h.chromePosition === "fixed" &&
+                 typeof h.bandClip === "string" && h.bandClip.includes("121.6px") &&
                  typeof h.chromeBottom === "number" && h.chromeBottom <= 121.6));
   check(
-    "RH3 the cluster is fixed on every page, inside the reserved band on rooms and bandless on home (#461 rulings 1+5)",
+    "RH3 the cluster is fixed inside the reserved band on rooms; on home it is bandless and RIDES the page (#461 rulings 1+5; the ride is #472's 2026-08-28 ruling)",
     unfixed.length === 0,
     unfixed.map((r) => `${r}: chrome=${heads[r]?.chromePosition} bottom=${heads[r]?.chromeBottom} band=${heads[r]?.bandClip}`).join(" | ") ||
       `chrome fixed x${SHELLED.length}, cluster inside the 121.6px band x${SHELLED.length - 1}, home bandless`,

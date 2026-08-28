@@ -127,7 +127,6 @@ export async function run(ctx) {
     JSON.stringify({ usedUp }),
   );
 
-  // L1f the way back up: over the scrolled page the wheel is the page's in BOTH directions, and the camera takes only a fresh gesture at the top (#472 feel ruling 3).
   await scrollToTop();
   await evaluate(`window.scrollTo(0, 240)`);
   await sleep(200);
@@ -155,24 +154,89 @@ export async function run(ctx) {
     JSON.stringify({ yMid, backUp, topCamBefore, topZoom }),
   );
 
-  // L1g the scrolljacking contract's keyboard line: Space on the focused stage is native scroll, never intercepted, whatever the camera state.
   await freshGesture();
   await evaluate(`document.getElementById("lf-stage")?.focus()`);
-  const spaceCamBefore = await camNow();
-  // text: " " is what makes CDP's keyDown char-producing; without it the browser never runs Space's native scroll default.
-  await send("Input.dispatchKeyEvent", { type: "keyDown", key: " ", code: "Space", windowsVirtualKeyCode: 32, text: " " });
-  await send("Input.dispatchKeyEvent", { type: "keyUp", key: " ", code: "Space", windowsVirtualKeyCode: 32 });
-  let spaceY = 0;
+  const keyCamBefore = await camNow();
+  // text: " " is what makes CDP's keyDown char-producing; without it the browser never runs Space's native scroll default. The navigation keys carry only their codes.
+  const pressNav = async (key, code, vk, text) => {
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key, code, windowsVirtualKeyCode: vk, ...(text === undefined ? {} : { text }) });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", key, code, windowsVirtualKeyCode: vk });
+  };
+  const keyRuns = [];
+  // Every down-key starts from the top or it can find itself already parked on the page floor (End certified nothing from y=610, round 5).
+  const keyScroll = async (label, setupY, fire, moved) => {
+    for (let i = 0; i < 20; i++) {
+      await evaluate(`window.scrollTo(0, ${setupY})`);
+      await sleep(100);
+      const s = await scrollY();
+      if (setupY === 0 ? s === 0 : s > 0) break;
+    }
+    const y0 = await scrollY();
+    await fire();
+    for (let i = 0; i < 20; i++) {
+      await sleep(100);
+      const y = await scrollY();
+      if (moved(y, y0)) { keyRuns.push({ label, y0, y, ok: true }); return; }
+    }
+    keyRuns.push({ label, y0, y: await scrollY(), ok: false });
+  };
+  const down = (y, y0) => y > y0;
+  await keyScroll("Space", 0, () => pressNav(" ", "Space", 32, " "), down);
+  await keyScroll("PageDown", 0, () => pressNav("PageDown", "PageDown", 34), down);
+  await keyScroll("End", 0, () => pressNav("End", "End", 35), down);
+  await keyScroll("Home", 300, () => pressNav("Home", "Home", 36), (y, y0) => y < y0 && y === 0);
+  await keyScroll("ArrowDown", 0, () => pressNav("ArrowDown", "ArrowDown", 40), down);
+  const keyCam = await camNow();
+  check(
+    "L1g the keyboard CLASS on the focused stage stays native, never intercepted, whatever the camera state: Space, PgDn, End, Home, and ArrowDown all scroll and the camera never moves (#472 contract; #481 skeptic finding 5)",
+    keyRuns.every((r) => r.ok) && keyCamBefore !== null && keyCam !== null
+      && Math.abs(keyCam.scale - keyCamBefore.scale) < 1e-9,
+    JSON.stringify({ keyRuns, keyCamBefore, keyCam }),
+  );
+  await scrollToTop();
+
+  // L1h's fixture PROVES the drift wandered before flicking, or it certifies nothing (a reduced-motion lane never drifts).
+  let floor2 = await camNow();
+  for (let i = 0; i < 24 && pt !== null; i++) {
+    await wheelAt(pt, 480);
+    await sleep(90);
+    const next = await camNow();
+    if (next !== null && floor2 !== null && Math.abs(next.scale - floor2.scale) < 1e-9) { floor2 = next; break; }
+    floor2 = next;
+  }
+  await scrollToTop();
+  // IDLE_DELAY_MS is 9000 (src/site/home/drift.ts); the wander poll allows the tween its slow sine-in start.
+  let drifted = null;
+  for (let i = 0; i < 56; i++) {
+    await sleep(250);
+    const c = await camNow();
+    if (c !== null && floor2 !== null && Math.abs(c.scale - floor2.scale) > 1e-5) { drifted = c; break; }
+  }
+  await evaluate(`window.__lfWheel = []`);
+  await wheelAt(await evaluate(stagePoint), 240);
+  let afterDrift = null;
   for (let i = 0; i < 20; i++) {
     await sleep(100);
-    spaceY = await scrollY();
-    if (spaceY > 0) break;
+    const y = await scrollY();
+    if (y > 0) { afterDrift = { prevented: await lastWheel(), y }; break; }
   }
-  const spaceCam = await camNow();
   check(
-    "L1g Space on the focused stage scrolls the page natively and leaves the camera alone (#472 contract: keyboard scrolling is never intercepted)",
-    spaceY > 0 && spaceCamBefore !== null && spaceCam !== null && Math.abs(spaceCam.scale - spaceCamBefore.scale) < 1e-9,
-    JSON.stringify({ spaceY, spaceCamBefore, spaceCam }),
+    "L1h a fresh flick at the stand-off clamp still releases after the idle drift has wandered: the ±1.5% snap-back is ambient, not a consumed zoom (#481 skeptic finding 1)",
+    floor2 !== null && drifted !== null && afterDrift !== null && afterDrift.prevented === false && afterDrift.y > 0,
+    JSON.stringify({ floor2, drifted, afterDrift }),
+  );
+
+  await evaluate(`window.scrollTo(0, document.body.scrollHeight)`);
+  await sleep(300);
+  const cluster = await evaluate(`(() => {
+    const h = document.querySelector("header.chrome");
+    if (!h) return null;
+    return { pos: getComputedStyle(h).position, washPos: getComputedStyle(h, "::before").position, bottom: h.getBoundingClientRect().bottom };
+  })()`);
+  check(
+    "L1i on home the cluster rides the page (#472, the 2026-08-28 ruling): scrolled to the shelf, the wordmark has left the viewport with the stage, and the wash is anchored to the cluster, not the viewport",
+    cluster !== null && cluster.pos === "absolute" && cluster.washPos === "absolute" && cluster.bottom < 0,
+    JSON.stringify({ cluster }),
   );
   await scrollToTop();
 
