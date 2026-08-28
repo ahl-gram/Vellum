@@ -1,5 +1,5 @@
 // The head cluster on home (CL1-CL7, #480 Landfall Sub 6b): the wash sized to the cluster, the stage's lettering opted out of selection, and the phone drawer; every geometry MEASURED against the rendered page, since the #480 screenshots were all things source-scan tests could not see.
-import { makeStage } from "./home-support.mjs";
+import { makeStage, readCam, atLandfall } from "./home-support.mjs";
 import { sampleRow, luminance } from "./pixel-support.mjs";
 
 const REM = 16;
@@ -63,7 +63,6 @@ export async function run(ctx) {
       && wash.box.left <= -2 * REM && wash.box.top <= -2 * REM,
     JSON.stringify({ cam: !!cam, wash, alpha }),
   );
-  await shoot("cluster-wash-1280.png");
 
   const dragAcross = async (from, dx, dy) => {
     await send("Input.dispatchMouseEvent", { type: "mousePressed", x: from.x, y: from.y, button: "left", buttons: 1, clickCount: 1 });
@@ -71,9 +70,14 @@ export async function run(ctx) {
     await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: from.x + dx, y: from.y + dy, button: "left", clickCount: 1 });
     await sleep(150);
   };
+  // The rect is read only once the camera is at landfall (CI once pressed on the wordmark from a stale rect), and the press point must hit-test into the stage (the name slip itself is pointer-events: none, so the press lands on the sheet beneath it, which is the baseline's own path): a drag that begins outside the stage proves nothing about it.
+  let settled = null;
+  for (let i = 0; i < 80 && !atLandfall(settled); i++) { settled = await evaluate(readCam); if (!atLandfall(settled)) await sleep(75); }
   await evaluate(`getSelection().removeAllRanges()`);
   const slip = await evaluate(rectOf('.lf-station[data-station="explorer"] .lf-station-name'));
-  if (slip) await dragAcross({ x: slip.x + 4, y: slip.y + slip.h / 2 }, 200, 160);
+  const pressAt = slip ? { x: slip.x + 4, y: slip.y + slip.h / 2 } : null;
+  const startsOnStage = pressAt ? await evaluate(`(() => { const e = document.elementFromPoint(${pressAt.x}, ${pressAt.y}); return !!e && !!e.closest("#lf-stage"); })()`) : false;
+  if (pressAt) await dragAcross(pressAt, 200, 160);
   const pipSelection = await evaluate(`getSelection().toString()`);
   await evaluate(`getSelection().removeAllRanges(); document.querySelector(".lf-shelf-grid figcaption").scrollIntoView({ block: "center" })`);
   await sleep(200);
@@ -82,9 +86,10 @@ export async function run(ctx) {
   const controlSelection = await evaluate(`getSelection().toString()`);
   check(
     "CL2 a mouse drag that begins on a station name selects nothing, while the SAME drag across a shelf caption still selects its text, so the probe can select and the stage alone opts out (#480 screenshot 4; the baseline drag selected every place name)",
-    slip !== null && caption !== null && pipSelection === "" && controlSelection.length > 0,
-    JSON.stringify({ slip: !!slip, caption: !!caption, pipSelection: pipSelection.slice(0, 60), controlSelection }),
+    atLandfall(settled) && startsOnStage && caption !== null && pipSelection === "" && controlSelection.length > 0,
+    JSON.stringify({ settled: atLandfall(settled), startsOnStage, slip, caption: !!caption, pipSelection: pipSelection.slice(0, 60), controlSelection }),
   );
+  await shoot("cluster-wash-1280.png");
 
   await setMobileViewport(390, 844);
   const phoneCam = await settleHome();
@@ -149,7 +154,9 @@ export async function run(ctx) {
   await touch("touchEnd", []);
   await sleep(600);
   const swiped = await evaluate(DRAWER_READ);
-  for (let i = 0; i < 20; i++) { await evaluate(`window.scrollTo(0, 0)`); await sleep(150); if ((await evaluate(`window.scrollY`)) === 0) break; }
+  // The fling keeps scrolling after the read; hold the top until two reads agree it is still.
+  await sleep(900);
+  for (let i = 0, still = 0; i < 30 && still < 2; i++) { await evaluate(`window.scrollTo(0, 0)`); await sleep(150); still = (await evaluate(`window.scrollY`)) === 0 ? still + 1 : 0; }
   const burgerBack = await evaluate(rectOf(".rooms-reveal"));
   if (burgerBack) await clickAt(burgerBack.x + burgerBack.w / 2, burgerBack.y + burgerBack.h / 2);
   await sleep(600);
