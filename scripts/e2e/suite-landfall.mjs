@@ -74,26 +74,107 @@ export async function run(ctx) {
     if (next !== null && floor !== null && Math.abs(next.scale - floor.scale) < 1e-9) { floor = next; break; }
     floor = next;
   }
-  // The saturation loop's released wheels already scrolled the page to its floor, so the probe POLLS its way back to top (a one-shot reset raced still-in-flight wheels and certified L1d from 44px, skeptic round 1) and re-reads the stage point at that scroll, or it proves nothing.
-  for (let i = 0; i < 30; i++) {
-    await evaluate(`window.scrollTo(0, 0)`);
-    await sleep(120);
-    if ((await scrollY()) === 0) break;
-  }
+  // Any released wheel above already scrolled the page, so the probe POLLS its way back to top (a one-shot reset raced still-in-flight wheels and certified the old L1d from 44px, skeptic round 1) and re-reads the stage point at that scroll, or it proves nothing.
+  const scrollToTop = async () => {
+    for (let i = 0; i < 30; i++) {
+      await evaluate(`window.scrollTo(0, 0)`);
+      await sleep(120);
+      if ((await scrollY()) === 0) break;
+    }
+  };
+  // 450ms outwaits GESTURE_BREAK_MS (300, src/site/home/valve.ts) so the next wheel opens a FRESH gesture.
+  const freshGesture = async () => { await scrollToTop(); await sleep(450); };
+  await freshGesture();
   const pt2 = await evaluate(stagePoint);
   await evaluate(`window.__lfWheel = []`);
   const yBefore = await scrollY();
   await wheelAt(pt2, 120);
-  await sleep(250);
-  const atMin = { prevented: await lastWheel(), cam: await camNow(), y: await scrollY() };
+  let atMin = null;
+  for (let i = 0; i < 20; i++) {
+    await sleep(100);
+    const y = await scrollY();
+    if (y > 0) { atMin = { prevented: await lastWheel(), cam: await camNow(), y }; break; }
+  }
   const bodyLocked1d = await evaluate(`getComputedStyle(document.body).overflow`);
   check(
-    "L1d at the stand-off clamp (0.65 of fit) a further wheel-out is released, not trapped, and the full-bleed page provably holds: the body is scroll-locked while the camera drives (#461; Sub 6a's release valve re-opens the scroll consequence)",
-    floor !== null && Math.abs(floor.scale - floor.fit * 0.65) < 1e-6 && atMin.prevented === false
-      && yBefore === 0 && Math.abs(atMin.cam.scale - floor.scale) < 1e-9 && atMin.y === 0 && bodyLocked1d === "hidden",
+    "L1d at the stand-off clamp (0.65 of fit) a fresh wheel-out is released to the page: the wheel is not prevented, the camera holds, and the shelf scrolls into view (#472; the #461 body lock is retired)",
+    floor !== null && Math.abs(floor.scale - floor.fit * 0.65) < 1e-6 && yBefore === 0 && atMin !== null
+      && atMin.prevented === false && Math.abs(atMin.cam.scale - floor.scale) < 1e-9 && atMin.y > 0
+      && bodyLocked1d !== "hidden",
     JSON.stringify({ floor, yBefore, atMin, bodyLocked1d }),
   );
-  await evaluate(`window.scrollTo(0, 0)`);
+
+  // L1e retries until one CDP round trip lands both wheels inside one stream (timeStamp-proven), so a slow lane re-attempts instead of certifying a broken fixture.
+  await evaluate(`(window.__lfW2 = [], window.addEventListener("wheel", (e) => window.__lfW2.push({ p: e.defaultPrevented, t: e.timeStamp }), { passive: true }), true)`);
+  let usedUp = null;
+  for (let i = 0; i < 5 && pt !== null && usedUp === null; i++) {
+    await freshGesture();
+    await wheelAt(pt, -240);
+    await sleep(400);
+    await evaluate(`window.__lfW2 = []`);
+    await wheelAt(pt, 4000);
+    await wheelAt(pt, 480);
+    await sleep(250);
+    const log = await evaluate(`window.__lfW2`);
+    if (log !== null && log.length === 2 && log[1].t - log[0].t < 280) {
+      usedUp = { log, y: await scrollY(), cam: await camNow() };
+    }
+  }
+  check(
+    "L1e the flick that reaches the outer clamp is used up: a clamp-parked wheel in the same stream stays consumed and the page holds (#472 feel ruling 1)",
+    usedUp !== null && usedUp.log[0].p === true && usedUp.log[1].p === true && usedUp.y === 0
+      && floor !== null && usedUp.cam !== null && Math.abs(usedUp.cam.scale - floor.scale) < 1e-9,
+    JSON.stringify({ usedUp }),
+  );
+
+  // L1f the way back up: over the scrolled page the wheel is the page's in BOTH directions, and the camera takes only a fresh gesture at the top (#472 feel ruling 3).
+  await scrollToTop();
+  await evaluate(`window.scrollTo(0, 240)`);
+  await sleep(200);
+  const yMid = await scrollY();
+  await evaluate(`window.__lfWheel = []`);
+  const midCamBefore = await camNow();
+  const ptScrolled = await evaluate(stagePoint);
+  await wheelAt(ptScrolled, -120);
+  let backUp = null;
+  for (let i = 0; i < 20; i++) {
+    await sleep(100);
+    const y = await scrollY();
+    if (y < yMid) { backUp = { prevented: await lastWheel(), cam: await camNow(), y }; break; }
+  }
+  await freshGesture();
+  const topCamBefore = await camNow();
+  await wheelAt(await evaluate(stagePoint), -120);
+  await sleep(200);
+  const topZoom = await camNow();
+  check(
+    "L1f over the scrolled page a wheel-up scrolls the page and never zooms; back at the top, a fresh wheel-up is the camera's again",
+    yMid > 0 && backUp !== null && backUp.prevented === false && midCamBefore !== null
+      && Math.abs(backUp.cam.scale - midCamBefore.scale) < 1e-9 && backUp.y < yMid
+      && topCamBefore !== null && topZoom !== null && topZoom.scale > topCamBefore.scale * 1.05,
+    JSON.stringify({ yMid, backUp, topCamBefore, topZoom }),
+  );
+
+  // L1g the scrolljacking contract's keyboard line: Space on the focused stage is native scroll, never intercepted, whatever the camera state.
+  await freshGesture();
+  await evaluate(`document.getElementById("lf-stage")?.focus()`);
+  const spaceCamBefore = await camNow();
+  // text: " " is what makes CDP's keyDown char-producing; without it the browser never runs Space's native scroll default.
+  await send("Input.dispatchKeyEvent", { type: "keyDown", key: " ", code: "Space", windowsVirtualKeyCode: 32, text: " " });
+  await send("Input.dispatchKeyEvent", { type: "keyUp", key: " ", code: "Space", windowsVirtualKeyCode: 32 });
+  let spaceY = 0;
+  for (let i = 0; i < 20; i++) {
+    await sleep(100);
+    spaceY = await scrollY();
+    if (spaceY > 0) break;
+  }
+  const spaceCam = await camNow();
+  check(
+    "L1g Space on the focused stage scrolls the page natively and leaves the camera alone (#472 contract: keyboard scrolling is never intercepted)",
+    spaceY > 0 && spaceCamBefore !== null && spaceCam !== null && Math.abs(spaceCam.scale - spaceCamBefore.scale) < 1e-9,
+    JSON.stringify({ spaceY, spaceCamBefore, spaceCam }),
+  );
+  await scrollToTop();
 
   // The how flight stops the idle drift and re-arms its 9s timer, so every scale read below brackets its own gesture tightly, tolerating only sub-step drift (a wheel step is ~19%, the drift tween 1.5% over 14s).
   const settled2 = await settleHome();
@@ -313,6 +394,7 @@ export async function run(ctx) {
   const touchAction9 = await evaluate(`(() => { const s = document.getElementById("lf-stage"); return s ? getComputedStyle(s).touchAction : null; })()`);
   // The drag heads INTO clamp headroom (+x,+y): the original (-x,-y) gesture aimed at the corner the camera was already parked on, so stillness held with every gate deleted (guard-prover round 2).
   const bodyLocked390 = await evaluate(`getComputedStyle(document.body).overflow`);
+  const belowFold390 = await evaluate(`document.scrollingElement.scrollHeight - window.innerHeight`);
   const oneBefore = await camNow();
   if (stagePt9 !== null) {
     await touch("touchStart", [{ x: stagePt9.x, y: stagePt9.y, id: 0 }]);
@@ -329,10 +411,10 @@ export async function run(ctx) {
   await sleep(300);
   const mouseWitness = await camNow();
   check(
-    "L9a one finger never drives the map, and the fixture can prove it: the touch drag leaves the whole camera untouched while the SAME drag by mouse carries the sheet, the stage declares pan-y, and the full-bleed 390 body is scroll-locked while the camera drives (the one-finger page-scroll residue now rests on the lock, not on document height; Sub 6a re-opens this arm with the release valve)",
-    stagePt9 !== null && stillCam(oneBefore, oneAfter) && touchAction9 === "pan-y" && bodyLocked390 === "hidden"
-      && mouseWitness !== null && oneAfter !== null && Math.abs(mouseWitness.x - oneAfter.x) > 30,
-    JSON.stringify({ touchAction9, bodyLocked390, oneBefore, oneAfter, mouseWitness }),
+    "L9a one finger never drives the map, and the fixture can prove it: the touch drag leaves the whole camera untouched while the SAME drag by mouse carries the sheet, the stage declares pan-y, and the 390 body is unlocked with the shelf below the fold to scroll to (#472 retired the #461 lock; that the one-finger swipe then MOVES the page is CDP-blind, phone-owed like the pan-y line itself)",
+    stagePt9 !== null && stillCam(oneBefore, oneAfter) && touchAction9 === "pan-y" && bodyLocked390 !== "hidden"
+      && belowFold390 > 0 && mouseWitness !== null && oneAfter !== null && Math.abs(mouseWitness.x - oneAfter.x) > 30,
+    JSON.stringify({ touchAction9, bodyLocked390, belowFold390, oneBefore, oneAfter, mouseWitness }),
   );
 
   const twoBefore = await camNow();

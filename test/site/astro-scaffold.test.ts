@@ -483,7 +483,8 @@ test("the head cluster: wordmark, the atelier tagline, then the rooms nav, fixed
       assert.ok(!html.includes(gone), `${p.route}: the folio ${gone} retired with the cluster (#461)`);
     }
   }
-  for (const gone of ['class="lede"', 'class="seedline"', 'class="cartouche"', 'class="banners"', 'class="grid3"', 'class="plate"']) {
+  // .plate left this list at #472: the shelf revived the survey plates (as .lf-shelf-grid, so grid3 stays a tombstone).
+  for (const gone of ['class="lede"', 'class="seedline"', 'class="cartouche"', 'class="banners"', 'class="grid3"']) {
     assert.ok(!page("index.html").includes(gone), `home retired its ${gone} section (#289 hero, then the #470 below-stage removals)`);
   }
 });
@@ -731,7 +732,7 @@ test("the deploy artifact serves no raw app source, no .d.ts, and no engine emit
 
 test("the charts and arms the home page embeds all resolve in public/charts", () => {
   const embeds = [...page("index.html").matchAll(/src="(charts\/[^"]+)"/g)].map(([, u]) => u);
-  assert.equal(new Set(embeds).size, 4, "home embeds 4 committed goldens (the stage chart + 3 arms): the style grid's three left with its section (#470)");
+  assert.equal(new Set(embeds).size, 7, "home embeds 7 committed goldens (the stage chart + 3 arms + the shelf's 3 plates, revived at #472)");
   for (const embed of embeds) {
     assert.ok(existsSync(root(`public/${embed}`)), `public/${embed} should exist`);
   }

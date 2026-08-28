@@ -16,6 +16,7 @@ import { bindStations } from "./cards.ts";
 import { DRIFT_SECONDS, IDLE_DELAY_MS, driftTarget } from "./drift.ts";
 import { bindStageInput } from "./input.ts";
 import { STATION_FLIGHT_SECONDS, stationFlightView } from "./station-flight.ts";
+import { createValve } from "./valve.ts";
 import { playCeremony } from "./veil.ts";
 
 const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -112,6 +113,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
   };
 
   let gestureScale = 1;
+  const valve = createValve();
   bindStageInput(stage, {
     press: () => {
       gestureScale = cam.s;
@@ -124,7 +126,8 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
       assign({ x: cam.x + dx, y: cam.y + dy, s: cam.s });
       settle();
     },
-    wheelZoom: (px, py, deltaY) => zoomBy(Math.exp(-deltaY * 0.0016), px, py, 0),
+    wheelZoom: (px, py, deltaY) =>
+      valve(performance.now(), deltaY, window.scrollY, () => zoomBy(Math.exp(-deltaY * 0.0016), px, py, 0)),
     pinch: (px, py, ratio) => zoomBy((gestureScale * ratio) / cam.s, px, py, 0),
     dive: (px, py) => zoomBy(1.6, px, py),
     key: (key) => {
