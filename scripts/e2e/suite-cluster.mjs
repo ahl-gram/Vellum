@@ -1,5 +1,6 @@
 // The head cluster on home (CL1-CL7, #480 Landfall Sub 6b): the wash sized to the cluster, the stage's lettering opted out of selection, and the phone drawer; every geometry MEASURED against the rendered page, since the #480 screenshots were all things source-scan tests could not see.
 import { makeStage } from "./home-support.mjs";
+import { sampleRow, luminance } from "./pixel-support.mjs";
 
 const REM = 16;
 const rectOf = (sel) => `(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom }; })()`;
@@ -26,9 +27,12 @@ const DRAWER_READ = `(() => {
 const stacked = (doors) => doors.length === 7 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1].bottom - 0.5 && Math.abs(d.x - doors[0].x) < 0.5));
 const offLeft = (nav) => nav.visibility === "hidden" && nav.rect !== null && nav.rect.right <= 0.5;
 const clear = (s) => s.cluster !== null && s.seed !== null && s.cluster.right + 4 <= s.seed.x;
+// The glyph run of one door, by its label: a strip through its middle reads parchment when the door shows and chart ink when the cap covers it.
+const glyphRun = (label) => `(() => { const a = [...document.querySelectorAll("header.chrome nav.rooms a, header.chrome nav.rooms [aria-current]")].find((e) => e.textContent === ${JSON.stringify(label)}); if (!a) return null; const r = new Range(); r.selectNodeContents(a); const b = r.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; })()`;
+const brightest = (strip) => Math.max(...strip.map(luminance));
 
 export async function run(ctx) {
-  const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, waitReady, PORT } = ctx;
   const { pressKey, clickAt, settleHome } = makeStage(ctx);
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
@@ -134,9 +138,13 @@ export async function run(ctx) {
   const wideClosed = await evaluate(DRAWER_READ);
   if (wideClosed?.burger) await clickAt(wideClosed.burger.x + wideClosed.burger.w / 2, wideClosed.burger.y + wideClosed.burger.h / 2);
   await sleep(600);
+  const shownRun = await evaluate(glyphRun("Explorer"));
+  const shownStrip = shownRun ? await sampleRow(send, Math.round(shownRun.x + shownRun.w / 2), Math.round(shownRun.y + shownRun.h / 2), 12) : [];
   const scrollBefore = await evaluate(`window.scrollY`);
   for (let i = 0; i < 8; i++) await send("Input.dispatchMouseEvent", { type: "mouseWheel", x: 120, y: 250, deltaX: 0, deltaY: 200 });
   await sleep(400);
+  const cappedRun = await evaluate(glyphRun("Explorer"));
+  const cappedStrip = cappedRun ? await sampleRow(send, Math.round(cappedRun.x + cappedRun.w / 2), Math.round(cappedRun.y + cappedRun.h / 2), 12) : [];
   const landscape = await evaluate(`(() => {
     const nav = document.querySelector("header.chrome nav.rooms");
     const cluster = document.querySelector("header.chrome").getBoundingClientRect();
@@ -148,14 +156,17 @@ export async function run(ctx) {
       capHit: probe === nav, hitTag: probe ? probe.tagName : null };
   })()`);
   check(
-    "CL7 landscape 844x390: the drawer overflows its box, a real wheel scrolls it to the last door with the page unmoved, and the doors scrolled up under the cluster are hidden beneath the sticky cap, never showing through the lettering (plate finding G on PR #482)",
+    "CL7 landscape 844x390: the drawer overflows its box, a real wheel scrolls it to the last door with the page unmoved, and the doors scrolled up under the cluster are hidden beneath the sticky cap, never showing through the lettering: the cap wins the hit-test AND a pixel strip through a scrolled door's glyphs reads chart ink where the same strip read parchment unscrolled (plate finding G on PR #482; the pixel half closes prover round 2's A4, a transparent cap that still won the hit-test)",
     !!camWide && !!landscape && landscape.overflow > 0 && landscape.scrollTop > 0 && landscape.lastBottom <= landscape.clientH + 0.5
-      && landscape.pageScrollY === scrollBefore && landscape.firstTop < landscape.clusterBottom && landscape.capHit,
-    JSON.stringify({ camWide: !!camWide, scrollBefore, landscape }),
+      && landscape.pageScrollY === scrollBefore && landscape.firstTop < landscape.clusterBottom && landscape.capHit
+      && shownStrip.length === 12 && brightest(shownStrip) > 150 && cappedStrip.length === 12 && brightest(cappedStrip) < 100,
+    JSON.stringify({ camWide: !!camWide, scrollBefore, landscape, shownRun, shownBrightest: shownStrip.length ? brightest(shownStrip) : null, cappedRun, cappedBrightest: cappedStrip.length ? brightest(cappedStrip) : null }),
   );
   await shoot("cluster-drawer-landscape-scrolled.png");
 
   await clearMobile();
   await send("Emulation.clearDeviceMetricsOverride");
+  // The next suite in the lane starts on whatever page is current: hand it a SETTLED Explorer, or region-detail's stepped descent races the boot draw (RD2/RD3 red on PR #482 CI).
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
+  await waitReady();
 }
