@@ -370,7 +370,7 @@ header.chrome::before {
   .chrome .rooms {
     display: block; position: absolute; left: calc(-1 * var(--chrome-x)); top: calc(-1 * var(--chrome-y));
     box-sizing: border-box; width: min(16rem, 100vw); height: 100vh; height: 100dvh;
-    margin: 0; padding: calc(var(--band-h) + 1rem) 1.5rem 2rem var(--chrome-x);
+    margin: 0; padding: 0 1.5rem 2rem var(--chrome-x);
     overflow-y: auto; overscroll-behavior: contain;
     background: var(--chart-ink);
     border-right: 1px solid rgb(from var(--line-tan) r g b / 0.3);
@@ -378,6 +378,12 @@ header.chrome::before {
     transform: translateX(-100%); visibility: hidden;
     transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s linear 0.32s;
     z-index: -1;
+  }
+  /* The cap is the drawer's top reserve (the band the cluster stands on) and sticks over the doors when a short viewport scrolls them, so none rides up beneath the lettering (plate finding G, e2e CL7); it is the spacer itself, not a pulled-up margin, since a sticky box is clamped inside its containing block and a negative margin lands it over the first doors. */
+  .chrome .rooms::before {
+    content: ""; display: block; position: sticky; top: 0; z-index: 1;
+    height: calc(var(--band-h) + 1rem);
+    background: var(--chart-ink);
   }
   .rooms-reveal:checked ~ .rooms {
     transform: none; visibility: visible; pointer-events: auto;

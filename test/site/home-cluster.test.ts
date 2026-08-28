@@ -80,7 +80,12 @@ test("under 900 the rooms nav is a drawer: it slides in from the left beneath th
   assert.match(drawer, /transition:[^;]*transform/, "the slide is a transform transition");
   assert.match(drawer, /z-index:\s*-1/, "it paints beneath the cluster's own lettering and burger");
   assert.match(drawer, /width:\s*min\(16rem, 100vw\)/, "capped at the viewport: a box wider than the phone widens the layout viewport itself (the 736px incident)");
-  assert.match(drawer, /padding:\s*calc\(var\(--band-h\) \+ 1rem\)/, "the doors start below the band the cluster stands on");
+  assert.match(drawer, /padding:\s*0 1\.5rem 2rem var\(--chrome-x\)/, "no padding-top: the sticky cap is the reserve (a padding the cap was pulled into by a negative margin put the cap over the first doors)");
+  const cap = rule(narrow, ".chrome .rooms::before");
+  assert.match(cap, /position:\s*sticky;\s*top:\s*0;\s*z-index:\s*1/, "a sticky cap rides the drawer's scroll above the doors");
+  assert.match(cap, /height:\s*calc\(var\(--band-h\) \+ 1rem\);/, "the cap is exactly the reserved band the cluster stands on, plus a breath");
+  assert.doesNotMatch(cap, /margin/, "and never a negative margin: sticky clamps the box inside its containing block, which slid the cap down over the first three doors");
+  assert.match(cap, /background:\s*var\(--chart-ink\)/, "opaque, so a scrolled door cannot show through beneath the lettering (plate finding G)");
   const open = rule(narrow, ".rooms-reveal:checked ~ .rooms");
   assert.match(open, /transform:\s*none/, "checked, it slides home");
   assert.match(open, /visibility:\s*visible/, "checked, its doors are live");

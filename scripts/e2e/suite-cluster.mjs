@@ -20,7 +20,7 @@ const DRAWER_READ = `(() => {
     input: r("#seed-input"), inputWidth: parseFloat(getComputedStyle(document.getElementById("seed-input")).width),
     nav: { rect: r("header.chrome nav.rooms"), visibility: cs.visibility, transform: cs.transform, position: cs.position, transition: cs.transitionProperty, pointer: cs.pointerEvents },
     scrim: { position: scrim.position, pointer: scrim.pointerEvents, z: scrim.zIndex, content: scrim.content },
-    doors: [...nav.querySelectorAll("a, [aria-current]")].map((a) => { const d = a.getBoundingClientRect(); return { t: a.textContent, x: d.x, y: d.y, h: d.height, right: d.right, bottom: d.bottom }; }) };
+    doors: [...nav.querySelectorAll("a, [aria-current]")].map((a) => { const d = a.getBoundingClientRect(); const hit = document.elementFromPoint(d.x + 20, d.y + d.height / 2); return { t: a.textContent, x: d.x, y: d.y, h: d.height, right: d.right, bottom: d.bottom, tappable: hit === a }; }) };
 })()`;
 
 const stacked = (doors) => doors.length === 7 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1].bottom - 0.5 && Math.abs(d.x - doors[0].x) < 0.5));
@@ -93,10 +93,10 @@ export async function run(ctx) {
   const open = await evaluate(DRAWER_READ);
   const firstDoor = open?.doors[0] ?? null;
   check(
-    "CL4 a real tap on the burger slides the drawer home: anchored to the viewport corner, full height, seven doors stacked one per row at 44px or taller below the cluster, the burger still on top, the seed panel faded and untappable, the scrim fixed beneath the chrome, nothing scrolling sideways (#480 screenshot 2)",
+    "CL4 a real tap on the burger slides the drawer home: anchored to the viewport corner, full height, seven doors stacked one per row at 44px or taller below the cluster and each one hit-testable (the first sticky cap sat over three of them), the burger still on top, the seed panel faded and untappable, the scrim fixed beneath the chrome, nothing scrolling sideways (#480 screenshot 2)",
     !!open && open.checked && open.scrollW === 390 && open.nav.visibility === "visible" && open.nav.transform === "none" && open.nav.pointer === "auto"
       && open.nav.rect.x === 0 && open.nav.rect.y === 0 && open.nav.rect.h >= 800 && open.nav.rect.w <= 16 * REM + 0.5
-      && stacked(open.doors) && open.doors.every((d) => d.h >= 44) && firstDoor !== null && open.burger !== null && firstDoor.y >= open.burger.bottom + 8
+      && stacked(open.doors) && open.doors.every((d) => d.h >= 44 && d.tappable) && firstDoor !== null && open.burger !== null && firstDoor.y >= open.burger.bottom + 8
       && open.burgerReachable && open.seedOpacity === "0" && open.seedPointer === "none"
       && open.scrim.position === "fixed" && open.scrim.pointer === "auto" && Number(open.scrim.z) < 10 && /transform/.test(open.nav.transition),
     JSON.stringify({ open }),
@@ -128,6 +128,32 @@ export async function run(ctx) {
     !!cam360 && !!narrow && narrow.scrollW === 360 && clear(narrow),
     JSON.stringify({ cam360: !!cam360, cluster: narrow?.cluster, seed: narrow?.seed, scrollW: narrow?.scrollW }),
   );
+
+  await setMobileViewport(844, 390);
+  const camWide = await settleHome();
+  const wideClosed = await evaluate(DRAWER_READ);
+  if (wideClosed?.burger) await clickAt(wideClosed.burger.x + wideClosed.burger.w / 2, wideClosed.burger.y + wideClosed.burger.h / 2);
+  await sleep(600);
+  const scrollBefore = await evaluate(`window.scrollY`);
+  for (let i = 0; i < 8; i++) await send("Input.dispatchMouseEvent", { type: "mouseWheel", x: 120, y: 250, deltaX: 0, deltaY: 200 });
+  await sleep(400);
+  const landscape = await evaluate(`(() => {
+    const nav = document.querySelector("header.chrome nav.rooms");
+    const cluster = document.querySelector("header.chrome").getBoundingClientRect();
+    const doors = [...nav.querySelectorAll("a, [aria-current]")].map((a) => a.getBoundingClientRect());
+    const last = doors[doors.length - 1];
+    const probe = document.elementFromPoint(cluster.left + 20, cluster.bottom + 12);
+    return { overflow: nav.scrollHeight - nav.clientHeight, scrollTop: nav.scrollTop, lastBottom: last.bottom, clientH: nav.clientHeight,
+      firstTop: doors[0].top, clusterBottom: cluster.bottom, pageScrollY: window.scrollY,
+      capHit: probe === nav, hitTag: probe ? probe.tagName : null };
+  })()`);
+  check(
+    "CL7 landscape 844x390: the drawer overflows its box, a real wheel scrolls it to the last door with the page unmoved, and the doors scrolled up under the cluster are hidden beneath the sticky cap, never showing through the lettering (plate finding G on PR #482)",
+    !!camWide && !!landscape && landscape.overflow > 0 && landscape.scrollTop > 0 && landscape.lastBottom <= landscape.clientH + 0.5
+      && landscape.pageScrollY === scrollBefore && landscape.firstTop < landscape.clusterBottom && landscape.capHit,
+    JSON.stringify({ camWide: !!camWide, scrollBefore, landscape }),
+  );
+  await shoot("cluster-drawer-landscape-scrolled.png");
 
   await clearMobile();
   await send("Emulation.clearDeviceMetricsOverride");
