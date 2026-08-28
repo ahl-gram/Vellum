@@ -1,5 +1,6 @@
 import { gsap } from "gsap";
 import {
+  MIN_FIT_FACTOR,
   SHEET,
   type Box,
   type Cam,
@@ -16,6 +17,7 @@ import { bindStations } from "./cards.ts";
 import { DRIFT_SECONDS, IDLE_DELAY_MS, driftTarget } from "./drift.ts";
 import { bindStageInput } from "./input.ts";
 import { STATION_FLIGHT_SECONDS, stationFlightView } from "./station-flight.ts";
+import { createValve } from "./valve.ts";
 import { playCeremony } from "./veil.ts";
 
 const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -53,6 +55,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     sheetEl.style.transform = `translate(${cam.x}px, ${cam.y}px) scale(${cam.s})`;
     sheetEl.style.setProperty("--inv", String(1 / cam.s));
     stage.classList.toggle("close-in", closeIn(cam.s, fit));
+    stage.classList.toggle("stood-off", cam.s <= fit * MIN_FIT_FACTOR + 1e-9);
     if (coordsEl !== null && capital !== null) {
       const c = centerFraction(cam, view(), SHEET);
       coordsEl.textContent = bearingLine(c.fx, c.fy, capital, aspect);
@@ -66,10 +69,12 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
 
   // The idle drift (#458): the mockup's armDrift/stopDrift pair.
   let driftTween: gsap.core.Tween | null = null;
+  let driftBase: Cam | null = null;
   let idleTimer: ReturnType<typeof setTimeout> | undefined;
   const armDrift = () => {
     if (reduced()) return;
     idleTimer = setTimeout(() => {
+      driftBase = { x: cam.x, y: cam.y, s: cam.s };
       const t = driftTarget(cam, fit);
       driftTween = gsap.to(cam, {
         x: t.x,
@@ -86,11 +91,19 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
   const stopDrift = () => {
     driftTween?.kill();
     driftTween = null;
+    driftBase = null;
     clearTimeout(idleTimer);
     armDrift();
   };
 
+  // Any deliberate camera action summons the reader back to watch it (#472, 2026-08-28 ruling; e2e L1k). The browser's own scrollTo, never re-implemented physics: the contract forbids intercepting scroll INPUT, and this is the anchor-link class it protects.
+  const surface = () => {
+    if (window.scrollY === 0) return;
+    window.scrollTo({ top: 0, behavior: reduced() ? "auto" : "smooth" });
+  };
+
   const flyTo = (target: Cam, duration: number) => {
+    surface();
     stopDrift();
     gsap.killTweensOf(cam);
     if (reduced() || duration === 0) {
@@ -112,6 +125,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
   };
 
   let gestureScale = 1;
+  const valve = createValve();
   bindStageInput(stage, {
     press: () => {
       gestureScale = cam.s;
@@ -124,7 +138,15 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
       assign({ x: cam.x + dx, y: cam.y + dy, s: cam.s });
       settle();
     },
-    wheelZoom: (px, py, deltaY) => zoomBy(Math.exp(-deltaY * 0.0016), px, py, 0),
+    wheelZoom: (px, py, deltaY) =>
+      valve(performance.now(), deltaY, window.scrollY, () => {
+        // The drift's ±1.5% wander is ambient, not the user's zoom: measured from the drifted scale, a clamp-parked camera reads the snap-back as consumed and eats the release flick (#481 skeptic finding 1; e2e L1h).
+        if (driftBase !== null) {
+          assign(driftBase);
+          settle();
+        }
+        return zoomBy(Math.exp(-deltaY * 0.0016), px, py, 0);
+      }),
     pinch: (px, py, ratio) => zoomBy((gestureScale * ratio) / cam.s, px, py, 0),
     dive: (px, py) => zoomBy(1.6, px, py),
     key: (key) => {

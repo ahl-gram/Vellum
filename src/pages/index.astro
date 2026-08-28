@@ -86,6 +86,7 @@ const how = howStation();
       <button type="button" class="lf-btn" id="lf-home" aria-label="The whole sheet">&#8962;</button>
     </div>
     <p class="lf-coords" id="lf-coords" aria-hidden="true"></p>
+    <p class="lf-more" aria-hidden="true"><span class="lf-more-pulse"></span>scroll on for more</p>
     <nav class="lf-legend" id="lf-legend" aria-label="Modes of encounter">
       <p class="lf-legend-head">Every seed is a world entire · choose your first encounter</p>
       <div class="lf-legend-row">
@@ -175,6 +176,21 @@ const how = howStation();
       <a href="gallery/">A Gallery of Worlds</a></p>
     </nav>
   </noscript>
+</section>
+
+<section class="lf-shelf" aria-labelledby="lf-shelf-head">
+  <h2 class="lf-shelf-head" id="lf-shelf-head">One World, Many Charts</h2>
+  <div class="lf-shelf-grid">
+    <figure><a href="charts/chart-42-topographic.svg"><img loading="lazy" fetchpriority="low"
+      src="charts/chart-42-topographic.svg" alt="Topographic style" class="plate" width="1500" height="1158"></a>
+      <figcaption>Topographic survey</figcaption></figure>
+    <figure><a href="charts/chart-42-ink.svg"><img loading="lazy" fetchpriority="low"
+      src="charts/chart-42-ink.svg" alt="Pen and ink style" class="plate" width="1500" height="1158"></a>
+      <figcaption>Pen &amp; ink</figcaption></figure>
+    <figure><a href="charts/chart-42-nautical.svg"><img loading="lazy" fetchpriority="low"
+      src="charts/chart-42-nautical.svg" alt="Nautical style" class="plate" width="1500" height="1158"></a>
+      <figcaption>Nautical chart, with fathom soundings</figcaption></figure>
+  </div>
 </section>
 
 <script type="module" src="app.bundle.js" is:inline></script>
