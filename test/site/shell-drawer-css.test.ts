@@ -62,7 +62,9 @@ test("the drawer's dress is the shell's, so a room wears the same drawer as home
   const doors = rule(narrow, '.chrome .rooms a, .chrome .rooms [aria-current="page"]');
   assert.match(doors, /display:\s*block/, "the doors stack one per row, the current room's among them");
   assert.match(doors, /padding:\s*0\.85rem 0/, "each row is a 44px touch target at the drawer's face size (0.95rem face plus 0.85rem above and below measured 45px, e2e CL4)");
-  assert.match(rule(narrow, '.chrome .rooms [aria-current="page"]'), /text-underline-offset:\s*0\.3em/, "the current room's door keeps its underline clear of its own descenders at the drawer's face size");
+  // Measured 2026-08-28 at 390 on /faq/: in IM Fell English SC no lowercase descends, but the CAPITAL Q carries a drawn flourish, and "Q & A" is the one nav label that has one. At the drawer's 0.95rem face it descends 4.22px, so the drawer's own 0.3em override (4.56px) left 0.34px and the tail touched the stroke at device resolution. The shell keeps ONE offset instead.
+  assert.ok(!narrow.includes("text-underline-offset"), "the drawer declares no offset of its own: the shell's single 0.45em clears the Q by 2.62px at the drawer's face size");
+  assert.match(rule(topLevel, '.rooms [aria-current="page"]'), /text-underline-offset:\s*0\.45em/, "and that one offset is the shell's");
   assert.match(rule(narrow, "body:has(.rooms-reveal:checked) > header.chrome"), /z-index:\s*45/, "the chrome rises above the scrim (41) and anything a page paints beneath it while the drawer is open, under the veil (50)");
 });
 
@@ -79,8 +81,7 @@ test("the burger is a native checkbox, hidden until the nav folds down, so the d
   );
 });
 
-test("a room's scrim is fixed with the chrome that is fixed, and covers exactly what goes inert (#483; #482 skeptic round 2 findings 2 and 4)", () => {
-  // Finding 4 banned a FIXED body scrim because home's drawer and burger scroll away from one. A room's chrome is fixed (RH3), so the drawer cannot ride away and the mirror defect is an ABSOLUTE scrim there. The ban is home's, and it still holds on home.
+test("a room's scrim is fixed with the chrome that is fixed, and starts below the band so the cluster stays lit (#483; Alex's 2026-08-28 call lifting #482 finding 4 for a room)", () => {
   const scrim = rule(narrow, "body.room:has(.rooms-reveal:checked)::after");
   assert.match(scrim, /content:\s*""/);
   assert.match(scrim, /position:\s*fixed/, "fixed with the drawer it dims behind");

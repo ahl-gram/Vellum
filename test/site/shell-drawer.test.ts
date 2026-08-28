@@ -100,19 +100,17 @@ test("a host that does not close on scroll never listens for one, so a room's fi
 });
 
 test("the scrim host and the inert set are chosen together per page kind, and the room's scroll-close is off (#483)", () => {
-  // The two are one decision: a click over an inert subtree retargets to its nearest live ancestor and never to the scrim, so an inert region the scrim does not cover is dead with no way out (#482 skeptic round 2, finding 2).
   assert.equal(wiringFor(false), HOME_WIRING, "home is the roomless page");
   assert.equal(wiringFor(true), ROOM_WIRING, "every other shelled page is a room");
   assert.equal(HOME_WIRING.scrim, ".landfall", "home's scrim is the survey section's own overlay, so it rides with the drawer and the burger (#482 finding 4)");
   assert.equal(HOME_WIRING.inert, ".landfall > *", "exactly the survey section's children, which is exactly what that scrim covers; the shelf and footer stay live");
   assert.equal(HOME_WIRING.closesOnScroll, true, "home's chrome rides the page (RH3), so an open drawer would ride away");
   assert.equal(ROOM_WIRING.scrim, "body", "a room's scrim is body's own fixed overlay, and a click on it reports body as the target");
-  assert.equal(ROOM_WIRING.inert, "body.room > main, body.room > footer", "exactly what a viewport-wide fixed scrim covers on a room: everything the shell renders below the chrome");
+  assert.equal(ROOM_WIRING.inert, "body.room > main, body.room > footer", "everything the shell renders below the chrome; unlike home's these need not match the wash extent, since body IS the scrim host every retarget lands on");
   assert.equal(ROOM_WIRING.closesOnScroll, false, "a room's chrome is FIXED (RH3), so nothing rides away and a scroll is not a close");
 });
 
 test("the shell's entry queries the wiring it was handed, and home's bundle no longer binds the drawer (#483)", () => {
-  // The binder is generic; this pins the WIRING app.ts hands it, which no fake host can see.
   const app = read("src/site/shell/app.ts");
   assert.match(app, /wiringFor\(document\.body\.classList\.contains\("room"\)\)/, "the page kind is read from the class the layout renders, not guessed from a path");
   assert.match(app, /querySelector\(wiring\.scrim\)/, "the scrim comes from the wiring, not a restrung copy");

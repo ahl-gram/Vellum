@@ -237,10 +237,7 @@ footer a { color: inherit; }
   .tagline { font-size: 0.78rem; }
   body.room { padding: 7rem 1rem 1.2rem; }
 }
-/* The phone doors (#461, Alex's 2026-08-26 call on skeptic finding 1), sitewide at Sub 6c
-   (#483 ruling, option 1): under 900px the nav folds into a drawer and a native checkbox
-   burger reveals it, on every shelled page. Keyboard-operable and no bundle, so the doors
-   survive scripts off; src/site/shell/app.ts adds the manners on top. */
+/* The phone doors (#461, sitewide at #483): the nav folds into a drawer a native checkbox burger reveals, with no bundle, so the doors survive scripts off; src/site/shell/app.ts adds the manners on top. */
 @media (max-width: 900px) {
   .chrome .rooms {
     display: block; position: absolute; left: calc(-1 * var(--chrome-x)); top: calc(-1 * var(--chrome-y));
@@ -269,7 +266,6 @@ footer a { color: inherit; }
     display: block; padding: 0.85rem 0;
     font-size: 0.95rem; letter-spacing: 0.16em;
   }
-  .chrome .rooms [aria-current="page"] { text-underline-offset: 0.3em; }
   body:has(.rooms-reveal:checked) > header.chrome { z-index: 45; }
   .rooms-reveal {
     display: inline-block; vertical-align: top; appearance: none; -webkit-appearance: none;
@@ -279,7 +275,7 @@ footer a { color: inherit; }
   }
   .rooms-reveal:checked { background: repeating-linear-gradient(var(--parchment-bright) 0, var(--parchment-bright) 2px, transparent 2px, transparent 7px); }
   .rooms-reveal:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 4px; }
-  /* A room's chrome is FIXED (RH3), so its drawer cannot ride away from a fixed scrim the way home's does; #482 finding 4's ban on a fixed body scrim is home's, and the mirror defect on a room would be an ABSOLUTE one. It starts below the band so the lit cluster is never dimmed, and it covers exactly what src/site/shell/wiring.ts sends inert. */
+  /* Fixed by Alex's 2026-08-28 call lifting #482 finding 4's ban for a room: that ban is home's, whose chrome RIDES the page, and on a room the chrome is fixed so the mirror defect would be an ABSOLUTE scrim. */
   body.room:has(.rooms-reveal:checked)::after {
     content: ""; position: fixed; inset: var(--band-h) 0 0; z-index: 41; pointer-events: auto;
     background: rgb(from var(--chart-ink) r g b / 0.45);
@@ -308,7 +304,7 @@ footer a { color: inherit; }
     ? <p class="wordmark"><a href="/">Vellum</a></p>
     : <h1 class="wordmark"><a href="/">Vellum</a></h1>}
   <p class="tagline">{SITE_TAGLINE}</p>
-  {/* The phone reveal (#461, 2026-08-26 call; sitewide at #483): under 900px every shelled page stands its nav down and this native checkbox burger reveals it, no bundle required. It precedes the nav because the ~ combinator that opens the drawer needs the order. */}
+  {/* The phone reveal (#461, sitewide at #483): the burger that opens the drawer, on every shelled page. */}
   <input type="checkbox" class="rooms-reveal" aria-label="Reveal the rooms nav" />
   <nav class="rooms" aria-label="The rooms">
     {NAV_ITEMS.map((item, i) => (
@@ -329,11 +325,7 @@ footer a { color: inherit; }
 <footer>
   Vellum · an atelier of imaginary cartography
 </footer>
-{/* The shell's one script (#483 ruling, option 1): the drawer's manners on every shelled
-    page. Astro-processed rather than is:inline BY MEASUREMENT, which is what the ruling's
-    "if the pipeline allows importing it from the layout" asked for: the chunk is 905 bytes
-    against Vite's 4096 inline limit, so Astro inlines it into each page's html and emits no
-    file, and the scaffold's "no raw app source" guard reds loudly if it ever crosses. */}
+{/* Astro-processed, not is:inline, so it can import the binder: measured 2026-08-28 at 905 bytes against Vite's 4096 inline limit, so Astro writes it into the html and emits no file (#483). */}
 <script>
 import "../site/shell/app.ts";
 </script>

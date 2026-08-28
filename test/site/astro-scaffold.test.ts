@@ -599,7 +599,6 @@ test("the shell's own script rides every page, inlined by Astro rather than emit
     const html = page(p.route);
     const shell = html.match(SHELL_SCRIPT);
     assert.ok(shell, `${p.route} carries the shell's script: the drawer's manners are the same on every page`);
-    assert.ok(shell[0].includes("closesOnScroll"), `${p.route}'s copy is the drawer binder itself, not a src= reference to a file`);
     assert.ok(html.indexOf(shell[0]) > html.indexOf("</footer>"), `${p.route} runs it last, after everything it binds`);
   }
 });

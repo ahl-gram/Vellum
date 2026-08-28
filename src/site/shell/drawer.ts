@@ -18,7 +18,6 @@ export interface DrawerHost {
   readonly scrim: object;
   readonly inert: readonly Inertable[];
   readonly narrow: Narrow;
-  /** Home alone: its chrome rides the page (RH3), so an open drawer would ride off-screen with its burger and scrim. A room's chrome is fixed and nothing rides away. */
   readonly closesOnScroll: boolean;
 }
 

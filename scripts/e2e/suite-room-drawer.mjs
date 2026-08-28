@@ -1,4 +1,4 @@
-// The drawer on a ROOM (DR1-DR7, #483 Landfall Sub 6c): the cluster suite covers home, whose chrome rides the page; a room's chrome is fixed, which changes what the scrim must be and whether a scroll closes anything. Every geometry is MEASURED and every door HIT-TESTED, since the sticky cap once sat over three doors with every rect green.
+// The drawer on a ROOM (#483 Landfall Sub 6c): the cluster suite covers home, whose chrome rides the page; a room's chrome is fixed, which changes what the scrim must be and whether a scroll closes anything. Every geometry is MEASURED and every door HIT-TESTED, since the sticky cap once sat over three doors with every rect green.
 import { scopedHealth } from "./room-support.mjs";
 
 const DOCUMENT_ROOM = "/faq/";
@@ -118,10 +118,10 @@ export async function run(ctx) {
   await tapBurger();
   const app = await evaluate(READ);
   check(
-    "DR6 an app room wears the same drawer as a document room: every door hit-testable over a page that paints its own furniture, its main inert beneath the scrim, and nothing scrolling sideways (#483)",
+    "DR6 an app room wears the same drawer as a document room: every door hit-testable over a page that paints its own furniture, its main inert beneath the scrim with a point over that furniture landing on the scrim's host and not on the live page, and nothing scrolling sideways (#483)",
     app.checked && app.doors.every((d) => d.tappable) && app.mainInert && !app.chromeInert &&
-      app.scrim.position === "fixed" && app.scrollW <= app.innerW,
-    `doors ${app.doors.filter((d) => d.tappable).length}/${app.doors.length} tappable, main inert ${app.mainInert}, scrim ${app.scrim.position} z ${app.scrim.z}, scrollW ${app.scrollW}/${app.innerW}`,
+      app.scrim.position === "fixed" && app.hitMidPage === "BODY.room" && app.scrollW <= app.innerW,
+    `doors ${app.doors.filter((d) => d.tappable).length}/${app.doors.length} tappable, main inert ${app.mainInert}, scrim ${app.scrim.position} z ${app.scrim.z}, a point over the app room's own furniture hits ${app.hitMidPage}, scrollW ${app.scrollW}/${app.innerW}`,
   );
 
   await setMobileViewport(844, 390);
@@ -142,16 +142,34 @@ export async function run(ctx) {
     `nav scrolled=${scrolledDoor.navScrolled}, last door reached=${scrolledDoor.lastReached}, page scrollY=${scrolledDoor.pageScrollY}, scrollW ${land.scrollW}/${land.innerW}`,
   );
 
+  // The acceptance floor, and the one no sheet-text assertion can see: the resolved cascade across house.css, motion.css, the page sheet and the layout sheet, with the binder gone.
+  await setMobileViewport(390, 844);
+  await send("Emulation.setScriptExecutionDisabled", { value: true });
+  await goto("/glossary/");
+  const noJsShut = await evaluate(READ);
+  await tapBurger();
+  const noJsOpen = await evaluate(READ);
+  await tapBurger();
+  const noJsShutAgain = await evaluate(READ);
+  await send("Emulation.setScriptExecutionDisabled", { value: false });
+  check(
+    "DR8 with SCRIPT EXECUTION DISABLED the burger alone still opens and closes a room's drawer, doors reachable both times: the checkbox is the no-JS path and the manners are the only thing the bundle adds (#483 ruling item 3)",
+    !noJsShut.checked && offLeft(noJsShut.nav) &&
+      noJsOpen.checked && noJsOpen.nav.visibility === "visible" && noJsOpen.doors.every((d) => d.tappable) &&
+      !noJsShutAgain.checked && offLeft(noJsShutAgain.nav) && noJsOpen.scrollW <= noJsOpen.innerW,
+    `closed ${noJsShut.checked}/${noJsShut.nav.visibility}, opened ${noJsOpen.checked} with ${noJsOpen.doors.filter((d) => d.tappable).length}/${noJsOpen.doors.length} doors reachable, closed again ${noJsShutAgain.checked}/${noJsShutAgain.nav.visibility}`,
+  );
+
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   const wide = await evaluate(READ);
   check(
-    "DR8 back at desktop width the burger is gone and the nav is the dot-separated cluster row again, with no drawer state left behind (#483)",
+    "DR9 back at desktop width the burger is gone and the nav is the dot-separated cluster row again, with no drawer state left behind (#483)",
     wide.burgerDisplay === "none" && wide.nav.visibility === "visible" && !wide.mainInert && !wide.footerInert,
     `burger ${wide.burgerDisplay}, nav ${wide.nav.visibility}, inert main/footer ${wide.mainInert}/${wide.footerInert}`,
   );
 
-  gate.check("DR9 the room drawer suite drove the shell with no console error and no 4xx");
+  gate.check("DR10 the room drawer suite drove the shell with no console error and no 4xx");
   // A suite's LAST navigation must waitReady: the next suite in the lane starts on whatever page is current.
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
   await waitReady();

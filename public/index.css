@@ -97,7 +97,6 @@ header.chrome::before {
   background: rgb(from var(--chart-ink) r g b / 0.86);
   filter: blur(22px);
 }
-/* The phone reveal renders on home at every width; only under 900px does it earn a face (the media block below). */
 /* Landfall Sub 4a (#470): the seed form is the mockup's top-right corner chrome (design/atelier-map/stage.css), a sub early by ratification 2026-08-24; never .cam-gated (#455: live even when the bundle fails). */
 .lf-seed {
   position: absolute; right: 1.6rem; top: 1.4rem; z-index: 4;
@@ -361,10 +360,7 @@ header.chrome::before {
 }
 
 @media (max-width: 900px) {
-  /* The phone doors' HOME half (#461, then #483): the drawer, its cap and the burger's face
-     are the shell's, declared once in BaseLayout. What stays here is what clears home's own
-     furniture: the legend stands down with the nav, the seed panel steps aside, and the scrim
-     is the survey section's own overlay so it rides the page with the drawer. */
+  /* The phone doors' HOME half: the drawer's dress is the shell's (#483); what stays is what clears home's own furniture. */
   body:has(.rooms-reveal:checked) .lf-seed { opacity: 0; pointer-events: none; }
   .lf-seed { transition: opacity 0.32s ease; }
   body:has(.rooms-reveal:checked) .landfall::before {
