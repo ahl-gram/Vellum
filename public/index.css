@@ -98,7 +98,6 @@ header.chrome::before {
   filter: blur(22px);
 }
 /* The phone reveal renders on home at every width; only under 900px does it earn a face (the media block below). */
-.rooms-reveal { display: none; }
 /* Landfall Sub 4a (#470): the seed form is the mockup's top-right corner chrome (design/atelier-map/stage.css), a sub early by ratification 2026-08-24; never .cam-gated (#455: live even when the bundle fails). */
 .lf-seed {
   position: absolute; right: 1.6rem; top: 1.4rem; z-index: 4;
@@ -362,55 +361,18 @@ header.chrome::before {
 }
 
 @media (max-width: 900px) {
-  /* The phone doors (#461, Alex's 2026-08-26 call on skeptic finding 1): the mockup's bare
-     stand-down stranded four rooms (the legend carries four doors, not seven), so the nav
-     AND the legend stand down together and the burger reveals the full nav. A native
-     checkbox, keyboard-operable, no bundle: the doors survive scripts-off. */
-  .chrome .rooms {
-    display: block; position: absolute; left: calc(-1 * var(--chrome-x)); top: calc(-1 * var(--chrome-y));
-    /* min(...): a box past the viewport edge makes phone Chrome widen the layout viewport itself to fit it (e2e H3/H12a measured 736px; root overflow-x clip does not stop the sizing). */
-    box-sizing: border-box; width: min(16rem, 100vw); height: 100vh; height: 100dvh;
-    margin: 0; padding: 0 1.5rem 2rem var(--chrome-x);
-    overflow-y: auto; overscroll-behavior: contain;
-    background: var(--chart-ink);
-    border-right: 1px solid rgb(from var(--line-tan) r g b / 0.3);
-    box-shadow: 0 0 40px rgb(from var(--chart-ink) r g b / 0.6);
-    transform: translateX(-100%); visibility: hidden;
-    transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s linear 0.32s;
-    z-index: -1;
-  }
-  .chrome .rooms::before {
-    content: ""; display: block; position: sticky; top: 0; z-index: 1;
-    height: calc(var(--band-h) + 1rem);
-    background: var(--chart-ink);
-  }
-  .rooms-reveal:checked ~ .rooms {
-    transform: none; visibility: visible; pointer-events: auto;
-    transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s;
-  }
-  .chrome .rooms .sep { display: none; }
-  .chrome .rooms a, .chrome .rooms [aria-current="page"] {
-    display: block; padding: 0.85rem 0;
-    font-size: 0.95rem; letter-spacing: 0.16em;
-  }
-  .chrome .rooms [aria-current="page"] { text-underline-offset: 0.3em; }
+  /* The phone doors' HOME half (#461, then #483): the drawer, its cap and the burger's face
+     are the shell's, declared once in BaseLayout. What stays here is what clears home's own
+     furniture: the legend stands down with the nav, the seed panel steps aside, and the scrim
+     is the survey section's own overlay so it rides the page with the drawer. */
   body:has(.rooms-reveal:checked) .lf-seed { opacity: 0; pointer-events: none; }
   .lf-seed { transition: opacity 0.32s ease; }
   body:has(.rooms-reveal:checked) .landfall::before {
     content: ""; position: absolute; inset: 0; z-index: 41; pointer-events: auto;
     background: rgb(from var(--chart-ink) r g b / 0.45);
   }
-  body:has(.rooms-reveal:checked) > header.chrome { z-index: 45; }
   body > header.chrome { max-width: calc(100vw - 15rem); }
   .seed-controls .control { width: 4.6rem; }
-  .rooms-reveal {
-    display: inline-block; vertical-align: top; appearance: none; -webkit-appearance: none;
-    width: 1.7rem; height: 1rem; margin: 0.6rem 0 0; padding: 0; border: 0;
-    cursor: pointer;
-    background: repeating-linear-gradient(var(--parchment) 0, var(--parchment) 2px, transparent 2px, transparent 7px);
-  }
-  .rooms-reveal:checked { background: repeating-linear-gradient(var(--parchment-bright) 0, var(--parchment-bright) 2px, transparent 2px, transparent 7px); }
-  .rooms-reveal:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 4px; }
   /* Both legend selectors, or the unconditional .cam show-rule (0,4,0) beats this hide at every width with scripts on (round-3 plate finding; e2e H16c pins the resolved display). */
   .lf-legend, .landfall .stage.cam .lf-legend { display: none; }
   .lf-card {
