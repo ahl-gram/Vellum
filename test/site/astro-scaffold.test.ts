@@ -40,6 +40,12 @@ type PageSpec = {
   inlineScript?: string;
   /** #457's pre-paint veil script, home's re-ratified THIRD script (PR #467): must parse before the stage. */
   prePaintScript?: string;
+  /** Sub 7 (#462, chart-room rulings 7 and 9): a chart room renders no band and no footer; the chart is the room. */
+  chartRoom?: true;
+  /** Sub 7 (#462): the room's h1 stands in the RoomFolio corner (top right), not on the sheet's RoomHead. */
+  folio?: true;
+  /** Sub 7 (#462): a document room's index script, an Astro-processed component script inlined into the page (the #483 shape); the marker must occur only inside it, and it is a pattern because the minifier picks the quote style. */
+  pageScript?: RegExp;
 };
 
 /** The shell's binder, inlined into every page by Astro (#483); stripped before a page's OWN scripts are counted. */
@@ -71,6 +77,8 @@ const PAGES: readonly PageSpec[] = [
     description:
       "How Vellum works: seeds, determinism, terrain and rivers, climate and styles, and how to make and reproduce your own maps.",
     tagline: "how the worlds are made",
+    folio: true,
+    pageScript: /classList\.toggle\([`"']inked[`"']/,
   },
   {
     route: "glossary/index.html",
@@ -82,6 +90,8 @@ const PAGES: readonly PageSpec[] = [
     description:
       "A glossary of the cartography, heraldry, seamanship, and geography vocabulary printed on Vellum's charts, in its gazetteer, its voyage journal, and across its realm names.",
     tagline: "the words on the charts",
+    folio: true,
+    pageScript: /classList\.toggle\([`"']inked[`"']/,
   },
   {
     route: "explorer/index.html",
@@ -131,6 +141,8 @@ const PAGES: readonly PageSpec[] = [
       "A new procedural world every day: today's date is the seed, drawn as an antique chart with a line from its gazetteer.",
     tagline: "today's date is the seed",
     scriptSrc: "app.bundle.js",
+    chartRoom: true,
+    folio: true,
   },
   {
     route: "prospect/index.html",
@@ -457,9 +469,12 @@ test("the head cluster: wordmark, the atelier tagline, then the rooms nav, fixed
         html.includes(`<p class="room-tagline">${esc(p.tagline)}</p>`),
         `${p.route} keeps its flourish line under the room name`,
       );
-      assert.ok(
+      assert.equal(
         html.includes('<div class="band" aria-hidden="true">'),
-        `${p.route} reserves the walnut band the cluster stands on (#461 ruling 5)`,
+        p.chartRoom !== true,
+        p.chartRoom
+          ? `${p.route} is a chart room: the chart runs under the cluster with no band (#462 ruling 7)`
+          : `${p.route} reserves the walnut band the cluster stands on (#461 ruling 5)`,
       );
     } else {
       // Match the markup form, not the bare class: the shell css mentions .room-name on every page.
@@ -551,7 +566,9 @@ test("titles are computed in the layout from the room, never hand-set (#268)", (
       assert.ok(source.includes(`const room = "${p.room}"`), `${p.route} hoists its room to a const`);
       assert.ok(open[1].includes("room={room}"), `${p.route} passes the const to the layout`);
       assert.ok(source.includes(`const tagline = "${p.tagline}"`), `${p.route} hoists its tagline to a const`);
-      assert.ok(source.includes("<RoomHead room={room} tagline={tagline} />"), `${p.route} stands its RoomHead in the page`);
+      // #462: a converted room stands its name in the RoomFolio corner; the rest keep the RoomHead on the sheet.
+      const head = p.folio ? "<RoomFolio room={room} tagline={tagline}>" : "<RoomHead room={room} tagline={tagline} />";
+      assert.ok(source.includes(head), `${p.route} stands its ${p.folio ? "RoomFolio" : "RoomHead"} in the page`);
     } else {
       assert.ok(!open[1].includes("room="), `${p.route} is home and passes no room`);
     }
@@ -564,9 +581,13 @@ test("titles are computed in the layout from the room, never hand-set (#268)", (
   }
 });
 
-test("the footer is constant and appears exactly once per page", () => {
+test("the footer is constant and appears exactly once per page; a chart room alone has none (#462 ruling 9)", () => {
   for (const p of PAGES) {
     const footers = [...page(p.route).matchAll(/<footer>([\s\S]*?)<\/footer>/g)];
+    if (p.chartRoom) {
+      assert.equal(footers.length, 0, `${p.route} is a chart room: the bottom band is the legend row's`);
+      continue;
+    }
     assert.equal(footers.length, 1, `${p.route} has exactly one footer`);
     assert.equal(normalize(footers[0][1]), "Vellum · an atelier of imaginary cartography");
   }
@@ -576,6 +597,15 @@ test("the footer is constant and appears exactly once per page", () => {
 test("the body skeleton pins the shell order: band, cluster, main, footer on the deep (#461)", () => {
   for (const p of PAGES) {
     const html = page(p.route);
+    if (p.chartRoom) {
+      assert.match(html, /<body class="room chart-room">\s*<header class="chrome">/, `${p.route} is a chart room: no band, the cluster floats over the chart`);
+      assert.match(
+        html,
+        /<\/main>\s*<script type="module">[\s\S]*?<\/script>\s*<\/body>\s*<\/html>\s*$/,
+        `${p.route} must close main, then the shell's own script, then body and html with nothing after: no footer on a chart room`,
+      );
+      continue;
+    }
     if (p.room) {
       assert.match(
         html,
@@ -599,7 +629,7 @@ test("the shell's own script rides every page, inlined by Astro rather than emit
     const html = page(p.route);
     const shell = html.match(SHELL_SCRIPT);
     assert.ok(shell, `${p.route} carries the shell's script: the drawer's manners are the same on every page`);
-    assert.ok(html.indexOf(shell[0]) > html.indexOf("</footer>"), `${p.route} runs it last, after everything it binds`);
+    assert.ok(html.indexOf(shell[0]) > html.indexOf(p.chartRoom ? "</main>" : "</footer>"), `${p.route} runs it last, after everything it binds`);
   }
 });
 
@@ -607,6 +637,15 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
   // The app entry stays the Vite-pressed twin; a module script is deferred by spec, so rendering inside <main> is behavior-identical to the old after-main position. The shell's script is every page's and is taken out first, so these counts stay the page's OWN.
   for (const p of PAGES) {
     const tag = `<script type="module" src="${p.scriptSrc}"></script>`;
+    if (p.pageScript !== undefined) {
+      // Inlined, never a file: an emitted _astro/*.js would be raw app source in the artifact (the "no raw app source" audit below is the cliff).
+      const html = ownScripts(p.route);
+      const scripts = [...html.matchAll(/<script\b[^>]*>/g)].map((m) => m[0]);
+      assert.deepEqual(scripts, ['<script type="module">'], `${p.route} carries exactly one script of its own, inlined by Astro`);
+      assert.match(html, p.pageScript, `${p.route}'s script binds the index`);
+      assert.ok(html.indexOf("<script") < html.indexOf("<footer>"), `${p.route} script renders inside <main>, before the footer`);
+      continue;
+    }
     if (p.scriptSrc === undefined && p.inlineScript === undefined) {
       assert.ok(!ownScripts(p.route).includes("<script"), `${p.route} is a content page and ships no script of its own`);
       continue;
@@ -631,7 +670,7 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
       }
     }
     assert.ok(html.includes(tag), `${p.route} should load its bundle twin via ${tag}`);
-    assert.ok(html.indexOf(tag) < html.indexOf("<footer>"), `${p.route} script renders inside <main>, before the footer`);
+    assert.ok(html.indexOf(tag) < html.indexOf(p.chartRoom ? "</main>" : "<footer>"), `${p.route} script renders inside <main>`);
     assert.doesNotMatch(html, /src="(\.\/)?app\.js"/, `${p.route} must not load the raw ESM entry`);
   }
 });

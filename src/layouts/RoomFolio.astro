@@ -1,0 +1,13 @@
+---
+// Sub 7 (#462, chart-room ruling 2 and document-room ruling 6): the room's h1 and tagline stand top right in the corner chrome, the mockup's seed-row corner, with the room's ONE control under them (the slot). It replaces RoomHead room by room; the page owns what stands under the name, this component keeps the markup one shape.
+interface Props {
+  room: string;
+  tagline: string;
+}
+const { room, tagline } = Astro.props;
+---
+<div class="chrome corner tr folio-room">
+  <h1 class="room-name">{room}</h1>
+  <p class="room-tagline">{tagline}</p>
+  <slot />
+</div>

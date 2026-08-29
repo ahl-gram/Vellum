@@ -212,16 +212,18 @@ export async function run(ctx) {
   );
 
   // The MISS tap frames the CAPITAL, never a viewport corner: classifyClick snaps to the nearest settlement with no distance cap, and the old farthest-corner scan was a per-day lottery that solved the hunt on linux CI (#304). Do not bring it back.
+  // Since #462 the sheet is fitted inside the stage (letterboxed by the chrome's reserves), so the point is read off the svg's OWN rect at home and centred from there, never as a fraction of the viewport.
   const framePoint = (k, fx, fy) => evaluate(`(()=>{
     const vp=document.getElementById("map-viewport"),W=vp.clientWidth,H=vp.clientHeight,k=${k};
-    window.__vellumZoomTo({k,x:W*(0.5-k*${fx}),y:H*(0.5-k*${fy})});
-    const svg=document.querySelector("#map svg"),sr=svg.getBoundingClientRect(),vr=vp.getBoundingClientRect();
+    window.__vellumZoomTo({k:1,x:0,y:0});
+    const svg=document.querySelector("#map svg"),home=svg.getBoundingClientRect(),vr=vp.getBoundingClientRect();
+    const px0=home.left-vr.left+${fx}*home.width,py0=home.top-vr.top+${fy}*home.height;
+    window.__vellumZoomTo({k,x:W/2-k*px0,y:H/2-k*py0});
+    const sr=svg.getBoundingClientRect();
     return{px:Math.round(sr.left+${fx}*sr.width),py:Math.round(sr.top+${fy}*sr.height),
       cx:Math.round(vr.left+vr.width/2),cy:Math.round(vr.top+vr.height/2),state:window.__vellumZoomState()};
   })()`);
 
-  await evaluate(`document.getElementById("map-viewport").scrollIntoView({block:"center"})`);
-  await sleep(60);
   const fr = await framePoint(2, tgt.miss.fx, tgt.miss.fy);
 
   await mouseTap(fr.px, fr.py);

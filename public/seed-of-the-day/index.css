@@ -1,28 +1,104 @@
-body {
-  padding: 2.5rem 1.5rem 5rem;
-  line-height: 1.6;
-}
-/* figcaption is the world's NAME shown large, not an italic caption, so it takes the display face like a title. */
-.hunt h2, figcaption {
-  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
-}
-.survey {
-  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
-}
-main { max-width: 1080px; }
-header { margin-bottom: 1.4rem; }
-.dateline { text-align: center; margin: 0.4rem 0 1.4rem; }
-figure { margin: 0; }
-/* #167 Glass: overflow clips only while .zoomed so the idle page (ceremony and shadow overflow) stays byte-identical; touch-action:none via .zoomable is REQUIRED, d3-zoom does not set it and native pan/pinch would preempt the gesture. */
-#map-viewport { position: relative; }
+/* Sub 7 (#462): Today is the first chart room. The chart IS the room, full bleed on the deep under the head cluster with no band and no footer (rulings 7 and 9); the room's folio top right, the Daily Hunt on the slip, the chart's own folio bottom left, the roads out as the legend row, the Glass at the chart's corner. The dress is design/sub7-chart-rooms/shared.css in tokens; the shared furniture (the slip, the folio corner, the fog) is /atelier.css's. */
+html, body { height: 100%; overflow: hidden; }
+body { line-height: 1.45; }
+
+/* The stage is the viewport; the fog drifts over the chart at its mockup depth. */
+.stage { position: fixed; inset: 0; z-index: 1; overflow: hidden; }
+.fog { z-index: 3; }
+.stage .status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 0 1rem;
+  color: var(--parchment); z-index: 2; pointer-events: none; }
+.stage noscript .status { pointer-events: auto; max-width: 30rem; }
+.stage .status a { color: var(--parchment-bright); }
+#map-viewport { position: absolute; inset: 0; cursor: grab; }
+#map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
+/* #167 Glass: overflow clips only while .zoomed so the idle stage stays as laid out; touch-action:none via .zoomable is REQUIRED, d3-zoom does not set it and native pan/pinch would preempt the gesture. */
 #map-viewport.zoomed { overflow: hidden; }
 #map-viewport.zoomable { touch-action: none; }
-/* transform-origin 0 0 matches d3-zoom's screen-space math so gestures land true and the star and soundings stay pixel-aligned with their marks. */
-#map { position: relative; transform-origin: 0 0; }
-#map svg { width: 100%; height: auto; display: block;
-  border: 1px solid var(--line-tan);
-  box-shadow: var(--sheet-shadow); }
+/* transform-origin 0 0 matches d3-zoom's screen-space math; the reserves (room.ts measures them off the chrome) are padding on the transform target, so the fitted sheet centres in what the chrome leaves and d3's clamp still covers the stage. */
+#map { position: absolute; inset: 0; transform-origin: 0 0; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
+#sheet { position: relative; flex: none; width: 0; height: 0;
+  /* The atelier-map dress (design/atelier-map/stage.css): the enlarged ink shadow over the lighter-centred deep, home's own (#456). */
+  box-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55); }
+#sheet svg { display: block; width: 100%; height: 100%; user-select: none; }
 #map:not(.solved) svg { cursor: crosshair; }
+/* Edge vignettes keep the parchment chrome legible when the pale chart fills the frame (the mockup). */
+.vignette { position: fixed; left: 0; right: 0; height: 11rem; pointer-events: none; z-index: 5; }
+.vignette.top { top: 0; background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.62), transparent); }
+.vignette.bottom { bottom: 0; background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.62), transparent); }
+
+/* The chart's folio, lower left (the mockup): title, survey line, the chart number, the capital's line. */
+.folio { max-width: 24rem; }
+.folio p { margin: 0; }
+.folio-title { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.92rem; letter-spacing: 0.16em; color: var(--parchment); }
+.folio-sub { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.8rem; color: var(--line-tan); margin-top: 0.15rem; line-height: 1.4; }
+.folio-coords { font-variant-caps: small-caps; font-size: 0.85rem; letter-spacing: 0.06em; color: var(--line-tan); margin-top: 0.35rem; min-height: 1.2em; }
+.folio-note { font-size: 0.86rem; color: var(--parchment); margin-top: 0.4rem; line-height: 1.45; max-width: 22rem; }
+
+/* The Surveyor's Glass, lower right: it hugs the chart's corner, so an open slip pushes it left. */
+.zoomery { display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-end; transition: right 0.32s cubic-bezier(0.2, 0.7, 0.3, 1); }
+.corner.br.zoomery { right: calc(var(--slip-w) + 2rem + 1.4rem); }
+body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); }
+.zoom-btn { width: 2.3rem; height: 2.3rem; display: flex; align-items: center; justify-content: center; padding: 0;
+  color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); border-radius: 0;
+  transition: background 0.2s ease, color 0.2s ease; }
+/* Four classes deep on purpose: the house sheets dress every button, and their hover wash outranks a plain .zoom-btn:hover. */
+.zoomery.corner .zoom-btn:hover, .zoomery.corner .zoom-btn:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
+.zoom-keys { margin-top: 0.1rem; padding: 0.28rem 0.5rem; text-align: right; white-space: nowrap;
+  background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan);
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.62rem; line-height: 1.5; letter-spacing: 0.04em; color: var(--line-tan); }
+.zoom-keys span { display: block; }
+.zoom-keys kbd { font-family: inherit; font-style: normal; color: var(--parchment); }
+/* The keys slip needs a band wide enough for folio + roads + Glass beside a slip: measured colliding at 1280 (a stated deviation on #462). */
+@media (max-width: 1440px) { .zoom-keys { display: none; } }
+
+/* The legend row, bottom centre: the room's roads out, centred on the chart beside an open slip. */
+.legend { position: fixed; left: calc((100% - var(--slip-w) - 2rem) / 2); bottom: var(--chrome-y); transform: translateX(-50%); z-index: 10; text-align: center;
+  transition: left 0.32s cubic-bezier(0.2, 0.7, 0.3, 1); }
+body:has(.slip.folded) .legend { left: 50%; }
+.legend-head { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.82rem; color: var(--ink-faded); margin: 0 0 0.45rem; }
+.legend-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+.legend-btn { display: block; text-decoration: none; background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan);
+  padding: 0.4rem 0.9rem 0.35rem; text-align: center; transition: background 0.2s ease, transform var(--paper-quick) var(--ease-paper); }
+.legend-btn:hover, .legend-btn:focus-visible { background: var(--ink-dark); transform: translateY(var(--raise)); }
+.legend-btn:focus-visible { outline-color: var(--parchment-bright); }
+.legend-btn .verb { display: block; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.78rem; color: var(--line-tan); }
+.legend-btn .room { display: block; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.86rem; letter-spacing: 0.12em; color: var(--parchment); }
+.legend.in-slip { display: none; }
+
+/* The Daily Hunt on the slip: the clue slips, the warmth line, the reveal, the presses. */
+.clues { margin: 0.7rem 0 0; padding-left: 1.3rem; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; color: var(--ink-dark); line-height: 1.5; }
+.clues li { margin: 0.28rem 0; padding-left: 0.15rem; animation: dryingInk var(--paper) var(--ease-paper) both; animation-delay: calc(var(--i, 0) * 60ms); }
+.clues li::marker { font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: normal; color: var(--ink-faded); font-size: 0.85em; }
+.hunt-status { text-align: center; min-height: 1.4rem; font-weight: 600; letter-spacing: 0.03em; color: var(--iron-red); margin: 0.9rem 0 0; }
+.hunt-status.wet { animation: inkWet var(--paper) var(--ease-paper) both; }
+@keyframes inkWet {
+  from { filter: blur(2.5px); opacity: 0.45; }
+  to   { filter: blur(0); opacity: 1; }
+}
+.reveal { margin-top: 1rem; padding: 1rem 1.2rem; border-radius: 4px; background: var(--parchment-bright); border: 1px solid var(--line-faint); }
+.reveal strong { display: block; font-size: 1.05rem; margin-bottom: 0.4rem; }
+.reveal p { margin: 0; font-style: italic; color: var(--ink-dark); }
+.reveal.unfurl { transform-origin: top center; animation: paperUnfurl var(--unfurl) var(--ease-unfurl) both; }
+.hunt-actions { display: flex; gap: 0.7rem; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 0.9rem; }
+/* No fill on purpose: a forwards fill would pin the transform and block the shared button hover lift (the #146 forwards-fill gotcha). */
+#share.rise { animation: shareRise var(--paper-settle) var(--ease-paper); }
+@keyframes shareRise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.streak { font-size: 0.86rem; color: var(--ink-brown); font-style: italic; }
+.streak.stamp { animation: inkStamp var(--paper) var(--ease-paper) both; }
+
+/* The chart's arrival and the hunt's marks on the sheet. */
+#sheet svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
+#sheet svg.arriving #layer-land path {
+  animation: inkDraw var(--ink-draw) var(--ease-paper) both,
+             washDry var(--ink-dry) var(--ease-paper) 400ms both;
+}
+#sheet svg.arriving #layer-waterlines { animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both; }
+.drying { animation: dryingInk var(--ink-dry) var(--ease-paper) var(--dry-delay, 0ms) both; }
 /* .stamp is added only on a LIVE solve; a solved-day reload places the star without it so the animation never replays (#129), and --pos keeps the centering under the entry keyframe's scale+rotate. */
 .hunt-star { position: absolute; --pos: translate(-50%, -50%); transform: var(--pos);
   color: var(--iron-red); font-size: 1.7rem; line-height: 1; pointer-events: none;
@@ -32,96 +108,52 @@ figure { margin: 0; }
   from { opacity: 0; transform: var(--pos) scale(0.2) rotate(-40deg); }
   to { opacity: 1; transform: var(--pos) scale(1) rotate(0); }
 }
-
-#map svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
-#map svg.arriving #layer-land path {
-  animation: inkDraw var(--ink-draw) var(--ease-paper) both,
-             washDry var(--ink-dry) var(--ease-paper) 400ms both;
-}
-#map svg.arriving #layer-waterlines {
-  animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
-}
-
-.drying { animation: dryingInk var(--ink-dry) var(--ease-paper) var(--dry-delay, 0ms) both; }
-
-.clues li { animation: dryingInk var(--paper) var(--ease-paper) both;
-  animation-delay: calc(var(--i, 0) * 60ms); }
-
 /* Soundings are pointer-transparent (a lingering dot must never eat the next click) and self-remove on animationend; centered by margin, not transform, so the ripple's own scale keeps the transform to itself. */
 .sounding-ring, .sounding-dot { position: absolute; pointer-events: none; }
-.sounding-ring { width: 44px; height: 44px; margin: -22px 0 0 -22px;
-  border-radius: 50%; border: 2px solid var(--iron-red);
+.sounding-ring { width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; border: 2px solid var(--iron-red);
   animation: inkRipple 700ms var(--ease-paper) both; }
-.sounding-dot { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
-  border-radius: 50%; background: var(--ink-brown);
-  box-shadow: 0 0 0 1px rgb(247 247 228 / 0.55);
-  animation: soundingFade 2600ms var(--ease-paper) both; }
+.sounding-dot { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--ink-brown);
+  box-shadow: 0 0 0 1px rgb(247 247 228 / 0.55); animation: soundingFade 2600ms var(--ease-paper) both; }
 @keyframes soundingFade {
   0% { opacity: 0; } 8% { opacity: 0.9; } 68% { opacity: 0.9; } 100% { opacity: 0; }
 }
 
-.hunt-status.wet { animation: inkWet var(--paper) var(--ease-paper) both; }
-@keyframes inkWet {
-  from { filter: blur(2.5px); opacity: 0.45; }
-  to   { filter: blur(0); opacity: 1; }
-}
+/* The landing (#461 ruling 6, the chart room's half): the stage settles onto the deep, the chrome inks in after; motion.css's reduced-motion blanket collapses both. */
+.stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+.legend { animation: ink-in 0.5s 0.18s ease-out both; }
 
-.reveal.unfurl { transform-origin: top center;
-  animation: paperUnfurl var(--unfurl) var(--ease-unfurl) both; }
-
-/* No fill on purpose: a forwards fill would pin the transform and block the shared button hover lift (the #146 forwards-fill gotcha). */
-#share.rise { animation: shareRise var(--paper-settle) var(--ease-paper); }
-@keyframes shareRise {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.streak.stamp { animation: inkStamp var(--paper) var(--ease-paper) both; }
-
-/* The sticky bar mirrors #hunt-status, already an aria-live region, so it stays aria-hidden to avoid duplicate screen-reader announcements; .rise is added only on the first hidden-to-shown transition. */
+/* The phone's feedback bar mirrors the warmth line above the collapsed sheet (the panel line stays the aria-live region). */
+.hunt-sticky { display: none; }
 .hunt-sticky.rise { animation: stickyRise var(--paper-settle) var(--ease-paper); }
 @keyframes stickyRise {
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
 }
-figcaption { text-align: center; font-size: 1.3rem; letter-spacing: 0.04em;
-  margin-top: 1rem; }
-.survey { text-align: center; font-style: italic; color: var(--ink-brown); margin: 0.3rem 0 0; }
-.blurb { max-width: 44rem; margin: 1.2rem auto 0; }
-.actions { text-align: center; margin-top: 1.6rem; }
-/* #88: map and hunt stay visible together; wide screens sit them side by side with a sticky panel, narrow screens stack and the fixed .hunt-sticky mirrors the latest feedback. */
-.stage { display: flex; flex-direction: column; gap: 1.5rem; }
-.stage > figure { margin: 0; }
-@media (min-width: 760px) {
-  .stage { flex-direction: row; align-items: flex-start; }
-  .stage > figure { flex: 1.6 1 0; min-width: 0; }
-  .stage > .hunt { flex: 1 1 0; margin: 0; max-width: none; position: sticky; top: 1rem; }
-}
-.hunt-sticky { display: none; }
-@media (max-width: 759px) {
+@media (max-width: 900px) {
+  .vignette { height: 8rem; }
+  .corner.bl { display: none; }
+  .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); bottom: calc(var(--sheet-h, 6rem) + 1rem); }
+  .zoom-keys { display: none; }
+  .legend { display: none; }
+  .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.2rem; animation: none; }
+  .legend.in-slip .legend-btn { background: var(--ink-dark); }
   .hunt-sticky.active {
-    display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    display: block; position: fixed; left: 0; right: 0; bottom: var(--sheet-h, 0px); z-index: 20;
     background: var(--ink-dark); color: var(--parchment-panel); text-align: center;
     padding: 0.7rem 1rem; font-weight: 700; letter-spacing: 0.03em;
     box-shadow: 0 -4px 16px rgb(from var(--chart-ink) r g b / 0.32);
   }
+  body:has(.slip.open) .hunt-sticky.active { display: none; }
+  /* The drawer's wash covers the whole stage on a chart room: there is no band for it to start under. */
+  body.room.chart-room:has(.rooms-reveal:checked)::after { inset: 0; }
 }
-.hunt { max-width: 44rem; margin: 2rem auto 0; padding: 1.4rem 1.6rem;
-  border: 1px solid var(--line-tan); border-radius: 6px; background: var(--parchment-panel); }
-.hunt h2 { text-align: center; font-size: 1.2rem; letter-spacing: 0.06em;
-  margin: 0 0 0.4rem; }
-.hunt-intro { font-size: 0.92rem; margin: 0 0 1rem; }
-.clues { margin: 0 auto; padding-left: 1.4rem; max-width: 36rem;
-  font-style: italic; color: var(--ink-dark); }
-.clues li { margin: 0.3rem 0; }
-.hunt-status { text-align: center; min-height: 1.4rem; font-weight: 700;
-  letter-spacing: 0.03em; color: var(--iron-red); margin: 1rem 0 0; }
-.reveal { margin-top: 1rem; padding: 1rem 1.2rem; border-radius: 4px;
-  background: var(--parchment-bright); border: 1px solid var(--line-faint); }
-.reveal strong { display: block; font-size: 1.1rem; margin-bottom: 0.4rem; }
-.reveal p { margin: 0; font-style: italic; color: var(--ink-dark); }
-.hunt-actions { text-align: center; margin-top: 1.2rem; display: flex;
-  gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap; }
-.streak { font-size: 0.9rem; color: var(--ink-brown); }
-.note { text-align: center; color: var(--ink-faded); font-size: 0.85rem; margin-top: 1rem; }
-footer { margin-top: 4rem; }
+/* Print is paper (ruling 10): the chrome, the slip and the bar print as nothing; the chart prints on the page, unzoomed. */
+@media print {
+  html, body { height: auto; overflow: visible; }
+  .stage { position: static; animation: none; }
+  .vignette, .legend, .hunt-sticky, .zoomery, .folio { display: none !important; }
+  #map-viewport { position: static; }
+  #map { position: static; padding: 0 !important; transform: none !important; display: block; }
+  #sheet { width: auto !important; height: auto !important; box-shadow: none; }
+  #sheet svg { width: 100%; height: auto; }
+}

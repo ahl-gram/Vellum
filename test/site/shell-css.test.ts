@@ -23,8 +23,8 @@ const PAGE_CSS = [
 // Host-agnostic sheets (#219 reading frame, #302 living-chart engine dressing): linked by whichever page mounts them, and answering to the same palette discipline.
 const SHARED_CSS = ["public/reading-frame.css", "public/living-chart.css"] as const;
 
-// house.css (#324) is linked by BaseLayout on every page; its role specs are pinned in test/site/house-style.test.ts.
-const ROOT_CSS = ["public/house.css"] as const;
+// house.css (#324) and atelier.css (#487, the room furniture) are linked by BaseLayout on every page; the role specs are pinned in test/site/house-style.test.ts.
+const ROOT_CSS = ["public/house.css", "public/atelier.css"] as const;
 
 const AUTHORED_CSS = [...PAGE_CSS, ...SHARED_CSS, ...ROOT_CSS] as const;
 

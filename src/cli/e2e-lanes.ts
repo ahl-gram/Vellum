@@ -47,6 +47,7 @@ export const E2E_LANES: readonly E2eLane[] = [
       "runninghead",
       "cluster",
       "room-drawer",
+      "document-rooms",
       "region-detail",
     ],
     port: DEFAULT_E2E_PORT + 1,

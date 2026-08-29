@@ -115,17 +115,11 @@ test("no headword is defined twice: homographs run their senses together (#353)"
   }
 });
 
-test("the table of contents lists every section, and no section it lacks (#353)", () => {
-  const tocBlock = source.slice(source.indexOf('class="toc"'), source.indexOf("</div>", source.indexOf('class="toc"')));
-  const linked = [...tocBlock.matchAll(/href="#([^"]+)"/g)].map((m) => m[1]);
-  const ids = [...source.matchAll(/<h2 id="([^"]+)"/g)].map((m) => m[1]);
-  assert.ok(ids.length > 0, "the glossary should carry id'd h2 sections");
-  for (const id of ids) {
-    assert.ok(linked.includes(id), `the TOC does not link the "${id}" section`);
-  }
-  for (const href of linked) {
-    assert.ok(ids.includes(href), `the TOC links "#${href}", which is not a section on the page`);
-  }
+test("the index slip replaced the hand-authored TOC: the sections are read from the page itself (#353, then #462 ruling 1)", () => {
+  // The old guard existed because the TOC was hand-authored while the sections were not; room-sections.test.ts now pins that every h2 and every term reaches the index.
+  assert.ok(!source.includes('class="toc"'), "the dot-row TOC is gone");
+  assert.ok(source.includes('<IndexSlip sections={sections} kind="terms" />'), "the index slip stands in its place, fed from the page's own sections");
+  assert.match(source, /roomSections\(readFileSync\(fileURLToPath\(import\.meta\.url\), "utf8"\), "term"\)/, "the sections are parsed from THIS file at build");
 });
 
 test("terms stay alphabetical inside their section (#353)", () => {
@@ -141,30 +135,15 @@ test("terms stay alphabetical inside their section (#353)", () => {
   }
 });
 
-test("the TOC is the broadside's spanning dot-row (#461 ruling 4, superseding the #353 columns)", () => {
-  const css = readFileSync(
-    fileURLToPath(new URL("../../public/glossary/index.css", import.meta.url)),
-    "utf8",
-  );
-  assert.match(
-    css,
-    /\.toc\s*\{[^}]*column-span:\s*all/,
-    "the TOC spans the broadside's columns as one row",
-  );
-  assert.match(
-    css,
-    /\.toc li\s*\{[^}]*display:\s*inline/,
-    "TOC entries read inline along the row",
-  );
-  assert.match(
-    css,
-    /\.toc li \+ li::before\s*\{[^}]*content:\s*"\\00b7"/,
-    "entries are dotted apart (the rooms nav's own separator language)",
-  );
-  assert.ok(
-    !/\.toc ul\s*\{[^}]*columns:/.test(css),
-    "the #353 two-column TOC box retired with the dot-row; columns on the ul would fight the inline row",
-  );
+test("the broadside stands beside the index at 22rem columns, and no TOC dress survives (#462 rulings 1 and 3, superseding #461 ruling 4's dot-row and ~26rem)", () => {
+  for (const page of ["faq", "glossary"]) {
+    const css = readFileSync(fileURLToPath(new URL(`../../public/${page}/index.css`, import.meta.url)), "utf8");
+    assert.match(css, /\.columns\s*\{[^}]*column-width:\s*22rem/, `${page}: 22rem columns beside the open index (26rem left one 800px line at 1280)`);
+    assert.ok(!/\.toc\b/.test(css), `${page}: the dot-row TOC's dress retired with it`);
+    assert.ok(!/columns:\s*2/.test(css), `${page}: the #353 two-column TOC box stays retired`);
+    assert.match(css, /body\.room:has\(\.slip\.folded\) main\s*\{[^}]*margin-right:\s*0/, `${page}: folding the index hands the sheet the width (ruling 2)`);
+    assert.match(css, /body\.room main\s*\{[^}]*transition:\s*margin-right/, `${page}: in one settle, not a jump`);
+  }
 });
 
 // The wrapped-slip bullet rule moved at #358: one sweep in test/site/tip-affordance.test.ts now holds every authored sheet, this one included.

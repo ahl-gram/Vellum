@@ -21,11 +21,13 @@ interface Props {
   path: string;
   /** Sub 6 interim (#461): a room's <main> wears the desk panel until its own conversion sub (7-9) dresses the page for the deep; a page whose markup carries the full-bleed survey sheet passes "open" to stand bare on the deep. */
   desk?: "open";
+  /** Sub 7 (#462, chart-room rulings 7 and 9): a CHART room. The chart is the room, full bleed on the deep under the head cluster, so the page renders no band and no footer (the legend row owns the bottom band); main stands bare (no desk panel) and hosts the stage and the room's fixed furniture. */
+  chartRoom?: true;
   /** Extra root-absolute hrefs for SHARED sheets a page opts into; linked after the global sheets and before the page's own relative index.css, so page rules keep the last word. */
   extraCss?: readonly string[];
 }
 
-const { room, ogRoom, description, ogDescription, path, desk, extraCss = [] } = Astro.props;
+const { room, ogRoom, description, ogDescription, path, desk: deskProp, chartRoom, extraCss = [] } = Astro.props;
 
 for (const href of extraCss) {
   if (!href.startsWith("/")) {
@@ -44,9 +46,16 @@ if (isHome === (room !== undefined)) {
       : `every room page must name its room (got none for "${path}")`,
   );
 }
-if (desk !== undefined && room === undefined) {
+if (deskProp !== undefined && room === undefined) {
   throw new Error('desk="open" is a room-page choice; home has no desk panel to open');
 }
+if (chartRoom && room === undefined) {
+  throw new Error("a chart room is a room: name it");
+}
+if (chartRoom && deskProp !== undefined) {
+  throw new Error('a chart room has no desk to open: pass chartRoom or desk="open", not both');
+}
+const desk = chartRoom ? "open" : deskProp;
 
 const HOME_TITLE = "Vellum · an atelier of imaginary cartography";
 const SITE_TAGLINE = "an atelier of imaginary cartography";
@@ -83,6 +92,7 @@ const cardDescription = ogDescription ?? description;
 <link rel="stylesheet" href="/fonts.css">
 <link rel="stylesheet" href="/motion.css">
 <link rel="stylesheet" href="/house.css">
+<link rel="stylesheet" href="/atelier.css">
 {extraCss.map((href) => <link rel="stylesheet" href={href} />)}
 <link rel="stylesheet" href="index.css">
 {/* #329: prefetch the sibling shells so a first click commits instantly even while this
@@ -205,6 +215,8 @@ header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--par
 }
 /* The rooms stand clear of the band; the survey pages' 2.2rem margins are ruling 3's. */
 body.room { padding: 8.4rem 2.2rem 1.6rem; }
+/* Sub 7 (#462): a chart room has no band to clear; its stage is the viewport and its page sheet owns the rest. */
+body.room.chart-room { padding: 0; }
 /* Sub 6 interim: until a room's own conversion sub (7-9) dresses its page for the deep,
    its <main> wears a plain desk panel so nothing ships ink-on-walnut unreadable. A page
    passes desk="open" once its markup carries the full-bleed sheet; the class then simply
@@ -224,7 +236,8 @@ main.desk-panel {
   from { opacity: 0; transform: translateY(10px) scale(1.004); }
 }
 @keyframes ink-in { from { opacity: 0; } }
-body.room main { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+/* The settle rides the interim desk panel; a converted room lands its own sheet or stage from its page css (#462), because a transform on main would re-anchor the fixed furniture main now hosts (the folio, the slip) for the length of the animation. */
+body.room main.desk-panel { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 body.room header.chrome, body.room footer { animation: ink-in 0.5s 0.18s ease-out both; }
 footer {
   text-align: center; font-size: 0.72rem; letter-spacing: 0.22em; color: var(--line-tan);
@@ -236,6 +249,7 @@ footer a { color: inherit; }
   .wordmark { font-size: 1.5rem; }
   .tagline { font-size: 0.78rem; }
   body.room { padding: 7rem 1rem 1.2rem; }
+  body.room.chart-room { padding: 0; }
 }
 /* The phone doors (#461, sitewide at #483): the nav folds into a drawer a native checkbox burger reveals, with no bundle, so the doors survive scripts off; src/site/shell/app.ts adds the manners on top. */
 @media (max-width: 900px) {
@@ -295,8 +309,8 @@ footer a { color: inherit; }
 }
 </style>
 </head>
-<body class={room ? "room" : undefined}>
-{room && <div class="band" aria-hidden="true"></div>}
+<body class={room ? (chartRoom ? "room chart-room" : "room") : undefined}>
+{room && !chartRoom && <div class="band" aria-hidden="true"></div>}
 <header class="chrome">
   {/* #288: the room's h1 stands in the page (RoomHead.astro), so home alone keeps the
       wordmark as its h1 (roomless, there is nothing else its h1 could be). Exactly one
@@ -324,9 +338,9 @@ footer a { color: inherit; }
 <slot />
 
 </main>
-<footer>
+{!chartRoom && <footer>
   Vellum · an atelier of imaginary cartography
-</footer>
+</footer>}
 {/* Astro-processed, not is:inline, so it can import the binder: measured 2026-08-28 at 905 bytes against Vite's 4096 inline limit, so Astro writes it into the html and emits no file (#483). */}
 <script>
 import "../site/shell/app.ts";

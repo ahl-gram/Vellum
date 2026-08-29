@@ -25,36 +25,38 @@ h2, h3 {
 .sheet::before { top: 14px; left: 14px; border-right: none; border-bottom: none; }
 .sheet::after { bottom: 14px; right: 14px; border-left: none; border-top: none; }
 @media (max-width: 600px) { .sheet { outline-offset: 4px; } }
-/* The sheet's half of the landing ceremony (#461 ruling 6): shadow only, no transform,
-   or the shell's settle on main would compound with it. */
 @keyframes sheet-settle {
   from { box-shadow: 0 30px 80px rgb(from var(--chart-ink) r g b / 0.75); }
 }
-body.room .sheet { animation: sheet-settle 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
-/* The broadside (#461 ruling 4): columns rebalance at any term count (the #353 grid
-   lesson); section heads span, culture heads flow in-column. */
-.columns { column-width: 26rem; column-gap: 3.6rem; column-rule: 1px solid var(--line-faint); }
+/* The document room's layout beside the index slip (#462 document-room rulings 1 to 3): the sheet is the room, 22rem columns beside the open index, and the sheet takes the width in one settle when the index folds. */
+:root { --slip-w: 16rem; }
+body.room main { margin: 0 calc(var(--slip-w) + 2.4rem) 0 0; position: relative; transition: margin-right 0.5s cubic-bezier(0.2, 0.7, 0.3, 1); }
+body.room:has(.slip.folded) main { margin-right: 0; }
+/* The landing (#461 ruling 6): the layout's settle rides the desk panel, and this room hosts fixed furniture in main, so the sheet lands itself and its shadow tightens as it does. */
+body.room .sheet { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both, sheet-settle 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+/* The broadside (#461 ruling 4) beside a slip: 22rem columns, the ruled deviation from 26rem (two at 1280 with the index open, three folded). */
+.columns { column-width: 22rem; column-gap: 3.4rem; column-rule: 1px solid var(--line-faint); }
 h2 { column-span: all; font-size: 1.25rem; letter-spacing: 0.09em; border-bottom: 1px solid var(--line-tan);
-  padding-bottom: 0.3rem; margin: 2.4rem 0 1.1rem; }
+  padding-bottom: 0.3rem; margin: 2.4rem 0 1.1rem; scroll-margin-top: calc(var(--band-h) + 1rem); }
+.columns > h2:first-child { margin-top: 0; }
+@media (max-width: 900px) {
+  body.room main { margin: 0 0 4.2rem; }
+  .columns { column-width: auto; column-count: 1; }
+  .slip .card-where { display: none; }
+}
+@media print {
+  body.room main { margin: 0; }
+  .sheet { background: none; border: 0; outline: 0; box-shadow: none; animation: none; }
+  .sheet::before, .sheet::after { display: none; }
+  .columns { column-width: auto; column-count: 1; }
+}
 h3 { font-size: 0.95rem; letter-spacing: 0.08em; color: var(--ink-faded);
   text-transform: uppercase; margin: 2rem 0 0; break-after: avoid; }
 .intro { margin: 1.2rem 0; column-span: all; }
-/* The TOC as a spanning dot-row (#461 ruling 4), the FAQ's twin; the display face on the
-   head is the broadside's ruled exception (re-ratification comment on #324, 2026-08-26). */
-.toc { column-span: all; border-top: 1px solid var(--line-tan); border-bottom: 1px solid var(--line-tan);
-  padding: 0.55rem 0; margin: 0 0 2.2rem; text-align: center; }
-.toc strong { display: inline; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  font-weight: 400; font-size: 0.78rem; letter-spacing: 0.14em; margin-right: 0.9em; }
-.toc ul { display: inline; margin: 0; padding: 0; list-style: none; }
-.toc li { display: inline; }
-.toc li + li::before { content: "\00b7"; margin: 0 0.7em; color: var(--ink-faded); }
-.toc a { color: var(--ink-dark); font-size: 0.95rem; }
-/* vertical-align pins the tip's inline-block box (#356/#358 sweep in tip-affordance.test.ts). */
-.toc a { display: inline-block; vertical-align: top; transition: transform var(--paper-quick) var(--ease-paper); }
-.toc a:hover { transform: translateY(var(--raise)) rotate(-0.6deg); }
-.toc a:active { transform: translateY(0); }
+/* The find box (ruling 4): the room's one control, under the name. */
+.find .control { width: 11rem; text-align: left; }
 .term { font-weight: 600; color: var(--ink-dark); margin: 1.6rem 0 0.3rem;
-  font-size: 1.08rem; break-after: avoid; }
+  font-size: 1.08rem; break-after: avoid; scroll-margin-top: calc(var(--band-h) + 1rem); }
 .term:first-of-type, h3 + .term { margin-top: 0.8rem; }
 /* Terms do not tip: the tip gesture promises "goes somewhere" (#289) and a term navigates nowhere; tip-affordance.test.ts guards the promise. */
 .def { margin: 0 0 0.6rem; }

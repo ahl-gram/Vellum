@@ -36,7 +36,17 @@ const HOME_HEAD = {
   roomName: null,
   roomTagline: null,
 };
-const expectedHead = (route) => (route === "/" ? HOME_HEAD : ROOM_HEAD);
+// Sub 7 (#462): a converted room stands its name in the RoomFolio corner (1.32rem, the corner's own leading), measured 2026-08-29 against the built dist; a CHART room renders no footer (ruling 9).
+const FOLIO = ["/seed-of-the-day/", "/faq/", "/glossary/"];
+const CHART = ["/seed-of-the-day/"];
+const FOLIO_HEAD = {
+  ...ROOM_HEAD,
+  roomName: { tag: "H1", weight: "400", size: 21.12, tracking: 2.9568, face: DISPLAY_FACE },
+  roomTagline: { tag: "P", weight: "400", size: 14.72, tracking: null, face: FLOURISH_FACE },
+};
+const CHART_HEAD = { ...FOLIO_HEAD, footer: null };
+const expectedHead = (route) =>
+  route === "/" ? HOME_HEAD : CHART.includes(route) ? CHART_HEAD : FOLIO.includes(route) ? FOLIO_HEAD : ROOM_HEAD;
 const MEMBERS = ["wordmark", "tagline", "rooms", "roomName", "roomTagline", "footer"];
 // The second addendum on #461: the cluster pins its OWN leading (wordmark 1.15, the rest normal)
 // and must never inherit the page's reading 1.6; the room head pins 1.6 and must never inherit
@@ -163,14 +173,15 @@ export async function run(ctx) {
   // lettering"), not just the literal clip: nav growth that overflows the band must red here.
   const unfixed = bad((h, r) =>
     (r === "/" ? h.chromePosition === "absolute" && h.bandClip === null
+               : CHART.includes(r) ? h.chromePosition === "fixed" && h.bandClip === null
                : h.chromePosition === "fixed" &&
                  typeof h.bandClip === "string" && h.bandClip.includes("121.6px") &&
                  typeof h.chromeBottom === "number" && h.chromeBottom <= 121.6));
   check(
-    "RH3 the cluster is fixed inside the reserved band on rooms; on home it is bandless and RIDES the page (#461 rulings 1+5; the ride is #472's 2026-08-28 ruling)",
+    "RH3 the cluster is fixed inside the reserved band on rooms; on home it is bandless and RIDES the page; a chart room is bandless too, the chart running under a fixed cluster (#461 rulings 1+5; #472's ride; #462 ruling 7)",
     unfixed.length === 0,
     unfixed.map((r) => `${r}: chrome=${heads[r]?.chromePosition} bottom=${heads[r]?.chromeBottom} band=${heads[r]?.bandClip}`).join(" | ") ||
-      `chrome fixed x${SHELLED.length}, cluster inside the 121.6px band x${SHELLED.length - 1}, home bandless`,
+      `chrome fixed x${SHELLED.length - 1}, cluster inside the 121.6px band x${SHELLED.length - 1 - CHART.length}, home and the chart room bandless`,
   );
 
   const home = heads["/"];
@@ -193,9 +204,14 @@ export async function run(ctx) {
     const out = [];
     if (!h.wordmark || Math.abs(h.wordmark.ratio - 1.15) > 0.005) out.push(`${r} wordmark ratio ${h.wordmark?.ratio}`);
     for (const m of CLUSTER_NORMAL) {
+      if (expectedHead(r)[m] === null) continue;
       if (h[m]?.lineHeight !== "normal") out.push(`${r} ${m} leading ${h[m]?.lineHeight}`);
     }
-    if (r !== "/") {
+    if (FOLIO.includes(r)) {
+      // The folio corner is chrome: its name pins the mockup's 1.2 and its tagline the corner's normal, so neither inherits the page's reading leading.
+      if (!h.roomName || Math.abs(h.roomName.ratio - 1.2) > 0.005) out.push(`${r} roomName ratio ${h.roomName?.ratio}`);
+      if (h.roomTagline?.lineHeight !== "normal") out.push(`${r} roomTagline leading ${h.roomTagline?.lineHeight}`);
+    } else if (r !== "/") {
       for (const m of HEAD_LEADED) {
         if (!h[m] || Math.abs(h[m].ratio - 1.6) > 0.005) out.push(`${r} ${m} ratio ${h[m]?.ratio}`);
       }
@@ -203,7 +219,7 @@ export async function run(ctx) {
     return out;
   });
   check(
-    "RH5 the cluster pins its own leading (wordmark 1.15, the rest normal) and the room head pins 1.6, on every shelled page",
+    "RH5 the cluster pins its own leading (wordmark 1.15, the rest normal) and the room head pins its own: 1.6 on the sheet, the corner's 1.2 and normal in a folio (#461 addendum; #462)",
     misleaded.length === 0,
     misleaded.join(", ") || `cluster + room head leading pinned across ${SHELLED.length} pages`,
   );
