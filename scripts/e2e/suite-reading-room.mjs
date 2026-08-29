@@ -507,7 +507,7 @@ export async function run(ctx) {
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/seed-of-the-day/` });
   let watch = null;
   for (let i = 0; i < 160; i++) {
-    try { watch = await evaluate(`(()=>{const a=document.getElementById("watch");return a&&/#seed=\\d+/.test(a.getAttribute("href"))?{href:a.getAttribute("href")}:null;})()`); } catch {}
+    try { watch = await evaluate(`(()=>{const a=document.querySelector('a[data-road="reading-room"]');return a&&/#seed=\\d+/.test(a.getAttribute("href"))?{href:a.getAttribute("href")}:null;})()`); } catch {}
     if (watch) break;
     await sleep(50);
   }
