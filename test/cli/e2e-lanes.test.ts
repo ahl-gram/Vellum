@@ -39,7 +39,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "turn": 6.5,
   "runninghead": 3.9,
   "cluster": 4.7, // measured 2026-08-28, local single-suite run (#480)
-  "room-drawer": 53.9, // measured 2026-08-28, local single-suite run with the scripts-off check (#483)
+  "room-drawer": 7.3, // measured 2026-08-28, local single-suite run (#483)
   "broadside": 3.8,
   "hunt": 3.4,
   "room-voyage": 3.3,

@@ -103,11 +103,17 @@ test("the scrim host and the inert set are chosen together per page kind, and th
   assert.equal(wiringFor(false), HOME_WIRING, "home is the roomless page");
   assert.equal(wiringFor(true), ROOM_WIRING, "every other shelled page is a room");
   assert.equal(HOME_WIRING.scrim, ".landfall", "home's scrim is the survey section's own overlay, so it rides with the drawer and the burger (#482 finding 4)");
-  assert.equal(HOME_WIRING.inert, ".landfall > *", "exactly the survey section's children, which is exactly what that scrim covers; the shelf and footer stay live");
+  assert.equal(HOME_WIRING.inert, ".landfall > *", "the survey section's children, every one inside the scrim host's subtree so its clicks retarget to the host; the shelf and footer are outside .landfall, which is exactly why they must stay live");
   assert.equal(HOME_WIRING.closesOnScroll, true, "home's chrome rides the page (RH3), so an open drawer would ride away");
   assert.equal(ROOM_WIRING.scrim, "body", "a room's scrim is body's own fixed overlay, and a click on it reports body as the target");
-  assert.equal(ROOM_WIRING.inert, "body.room > main, body.room > footer", "everything the shell renders below the chrome; unlike home's these need not match the wash extent, since body IS the scrim host every retarget lands on");
+  assert.equal(ROOM_WIRING.inert, "body.room > main, body.room > footer", "everything the shell renders below the chrome, and both inside body, which is the scrim host here, so every click over them retargets to it");
   assert.equal(ROOM_WIRING.closesOnScroll, false, "a room's chrome is FIXED (RH3), so nothing rides away and a scroll is not a close");
+  for (const w of [HOME_WIRING, ROOM_WIRING]) {
+    assert.ok(
+      w.inert.split(",").every((part) => part.trim().startsWith(w.scrim === "body" ? "body" : w.scrim)),
+      `every member of "${w.inert}" sits inside the subtree of "${w.scrim}", so its clicks retarget to the scrim's own host rather than to something that is not the scrim`,
+    );
+  }
 });
 
 test("the shell's entry queries the wiring it was handed, and home's bundle no longer binds the drawer (#483)", () => {

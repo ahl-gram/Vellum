@@ -280,6 +280,8 @@ footer a { color: inherit; }
     content: ""; position: fixed; inset: var(--band-h) 0 0; z-index: 41; pointer-events: auto;
     background: rgb(from var(--chart-ink) r g b / 0.45);
   }
+  /* The top layer outranks every z-index, so no wash can dim a shown popover: measured 2026-08-28, an Explorer footnote stayed lit and opaque over the dimmed page while inert inside main. It stands down with the drawer instead. */
+  body.room:has(.rooms-reveal:checked) [popover]:popover-open { display: none; }
 }
 /* Print is paper (#454 open decision 4, executed for the page chrome here, the artifacts
    at Sub 9): the fixed dark chrome must not stamp itself onto every printed page. */

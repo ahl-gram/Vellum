@@ -34,10 +34,15 @@ export async function run(ctx) {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
   const gate = scopedHealth(ctx);
 
+  // waitReady() keys on the Explorer's own members, which no room renders, so awaiting it here spends the full 15s budget and returns false: a room's readiness is its own shell (the siblings navigate to rooms bare for the same reason). waitReady is kept for the final /explorer/ restore, where it means something.
   const goto = async (path) => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${path}` });
-    await waitReady();
+    for (let i = 0; i < 200; i++) {
+      const up = await evaluate(`document.readyState === "complete" && !!document.querySelector(".rooms-reveal") && !!document.querySelector("header.chrome nav.rooms")`).catch(() => false);
+      if (up) break;
+      await sleep(25);
+    }
     await sleep(250);
   };
   // A REAL tap, never burger.click(): the checkbox is the no-JS path and a synthetic click would not prove the target is reachable.
@@ -67,10 +72,10 @@ export async function run(ctx) {
   const open = await evaluate(READ);
   const current = open.doors.find((d) => d.current);
   check(
-    "DR2 a real tap on a room's burger slides the drawer home: every door stacked one per row at 44px or taller and hit-testable, the current room's door among them as a block with its underline clear, main and footer inert while the chrome stays live, and nothing scrolling sideways (#483)",
+    "DR2 a real tap on a room's burger slides the drawer home: every door stacked one per row at 44px or taller and hit-testable, the current room's door among them as a block whose underline clears the deepest descender the nav has (the capital Q's flourish, measured 4.22px at this face), main and footer inert while the chrome stays live, and nothing scrolling sideways (#483)",
     open.checked && open.nav.visibility === "visible" && stacked(open.doors) &&
       open.doors.every((d) => d.tappable && d.h >= 44) &&
-      !!current && current.display === "block" &&
+      !!current && current.display === "block" && parseFloat(current.offset) > 4.22 &&
       open.mainInert && open.footerInert && !open.chromeInert && open.scrollW <= open.innerW,
     `checked=${open.checked} doors ${open.doors.filter((d) => d.tappable).length}/${open.doors.length} tappable, min h ${Math.min(...open.doors.map((d) => d.h)).toFixed(1)}, current=${current ? current.t + " " + current.display + " " + current.offset : "MISSING"}, inert main/footer/chrome ${open.mainInert}/${open.footerInert}/${open.chromeInert}, scrollW ${open.scrollW}/${open.innerW}`,
   );
@@ -153,11 +158,12 @@ export async function run(ctx) {
   const noJsShutAgain = await evaluate(READ);
   await send("Emulation.setScriptExecutionDisabled", { value: false });
   check(
-    "DR8 with SCRIPT EXECUTION DISABLED the burger alone still opens and closes a room's drawer, doors reachable both times: the checkbox is the no-JS path and the manners are the only thing the bundle adds (#483 ruling item 3)",
+    "DR8 with SCRIPT EXECUTION DISABLED the burger alone still opens and closes a room's drawer, doors reachable both times, and the page behind it does NOT go inert: that last one is the control, since every other term here is equally true with scripts on and would pass a flag that silently did nothing (#483 ruling item 3)",
     !noJsShut.checked && offLeft(noJsShut.nav) &&
       noJsOpen.checked && noJsOpen.nav.visibility === "visible" && noJsOpen.doors.every((d) => d.tappable) &&
+      !noJsOpen.mainInert && !noJsOpen.footerInert &&
       !noJsShutAgain.checked && offLeft(noJsShutAgain.nav) && noJsOpen.scrollW <= noJsOpen.innerW,
-    `closed ${noJsShut.checked}/${noJsShut.nav.visibility}, opened ${noJsOpen.checked} with ${noJsOpen.doors.filter((d) => d.tappable).length}/${noJsOpen.doors.length} doors reachable, closed again ${noJsShutAgain.checked}/${noJsShutAgain.nav.visibility}`,
+    `closed ${noJsShut.checked}/${noJsShut.nav.visibility}, opened ${noJsOpen.checked} with ${noJsOpen.doors.filter((d) => d.tappable).length}/${noJsOpen.doors.length} doors reachable, main inert ${noJsOpen.mainInert} (the CONTROL: the binder sets it true, so false is what says script really was off), closed again ${noJsShutAgain.checked}/${noJsShutAgain.nav.visibility}`,
   );
 
   await clearMobile();

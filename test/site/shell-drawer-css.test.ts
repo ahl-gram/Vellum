@@ -86,7 +86,8 @@ test("a room's scrim is fixed with the chrome that is fixed, and starts below th
   assert.match(scrim, /content:\s*""/);
   assert.match(scrim, /position:\s*fixed/, "fixed with the drawer it dims behind");
   assert.match(scrim, /inset:\s*var\(--band-h\) 0 0/, "it starts below the reserved band, so the cluster it belongs to is never dimmed, and it is sized by inset and never by 100vw (a scrollbar overflows that)");
-  assert.match(scrim, /z-index:\s*41/, "above anything a room paints (the highest measured is 20) and under the raised chrome");
+  assert.match(scrim, /z-index:\s*41/, "above anything a room paints with a z-index (the highest measured is 20) and under the raised chrome");
+  assert.match(rule(narrow, "body.room:has(.rooms-reveal:checked) [popover]:popover-open"), /display:\s*none/, "and the one thing no z-index can reach: a shown popover renders in the TOP LAYER, above the wash, so a room's footnotes stand down with the drawer rather than sitting lit and opaque over a dimmed page while inert inside main");
   assert.match(scrim, /background:\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.45\)/, "the same wash home's scrim carries");
   assert.match(scrim, /pointer-events:\s*auto/, "the page beneath is not live while the drawer is");
   assert.doesNotMatch(narrow, /body:has\(\.rooms-reveal:checked\)::after/, "never an unqualified body scrim: home's would be the fixed one finding 4 rejected");
