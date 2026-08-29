@@ -76,7 +76,8 @@ button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; ba
 .index .sec { display: block; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.8rem; letter-spacing: 0.1em; color: var(--ink-dark); text-decoration: none; }
 .index > li.inked .sec { text-decoration: underline; text-underline-offset: 0.3em; text-decoration-thickness: 1px; text-decoration-color: var(--line-tan); }
 .index .sec:hover { color: var(--ink-press); }
-.index .count { font-variant-caps: small-caps; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--ink-faded); float: right; }
+/* ink-brown, not the mockup's ink-faded: 11.5px small caps measured 3.93:1 on the panel (plate read 2026-08-29), the #458 card-where miss again. */
+.index .count { font-variant-caps: small-caps; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--ink-brown); float: right; }
 .index .entries { margin: 0.2rem 0 0; padding: 0; list-style: none; font-size: 0.8rem; line-height: 1.45; }
 .index .entries li { padding: 0.1rem 0 0.1rem 0.6rem; border-left: 2px solid transparent; }
 .index .entries li.now { border-left-color: var(--line-tan); }
