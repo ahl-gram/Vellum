@@ -28,6 +28,7 @@ export const E2E_SUITE_ORDER = [
   "runninghead",
   "cluster",
   "room-drawer",
+  "document-rooms",
   "region-detail",
 ] as const;
 

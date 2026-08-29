@@ -9,15 +9,19 @@ import { resolve } from "node:path";
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
-test("HZ1 the Hunt wraps #map in a stable #map-viewport clip/gesture box (#167)", () => {
+test("HZ1 the Hunt wraps #map in a stable #map-viewport clip/gesture box, the chart's own sheet inside (#167, re-seated at #462)", () => {
   const html = read("src/pages/seed-of-the-day/index.astro");
-  // #map-viewport is the box d3-zoom binds to; #map is the transform target, like the Explorer's #164 wrapper.
+  // #map-viewport is the stage and the box d3-zoom binds to; #map is the transform target; #sheet is the chart's fitted box, so the star and the soundings ride the chart and not the stage.
   assert.match(
     html,
-    /<div id="map-viewport">\s*<div id="map">\s*<\/div>\s*<\/div>/,
-    "the page should wrap #map inside #map-viewport",
+    /<div id="map-viewport"[^>]*>\s*<div id="map">\s*<div id="sheet" class="sheet">\s*<\/div>\s*<\/div>\s*<\/div>/,
+    "the page should wrap #sheet inside #map inside #map-viewport",
   );
-  assert.match(html, /<\/div>\s*<figcaption id="caption">/, "figcaption stays outside the zoom frame");
+  assert.match(html, /<div id="map-viewport"[^>]*tabindex="0"[^>]*role="application"/, "the stage is the keyboard's Glass, the Explorer's shape");
+  assert.ok(!html.includes('id="caption"'), "the world's name left the zoom frame for the chart folio");
+  const folio = html.indexOf('class="chrome corner bl folio"');
+  assert.ok(folio > html.indexOf("</div>", html.indexOf('id="map-viewport"')), "the chart folio stands outside the stage");
+  assert.match(html.slice(folio), /id="folio-title"/, "the chart folio carries the world's name");
 });
 
 test("HZ2 app.js adopts the shared zoom controller, bound to #map-viewport / #map (#167)", () => {
@@ -53,6 +57,10 @@ test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)
 
 test("HZ5 index.css gives #map-viewport the clip + touch-action wiring and #map a top-left pivot (#167)", () => {
   const css = read("public/seed-of-the-day/index.css");
+  // #462: the stage is the viewport and #map covers it, so d3's clamp (the viewport extent) keeps the padded, fitted sheet on the stage.
+  assert.match(css, /\.stage\s*\{[^}]*position:\s*fixed;\s*inset:\s*0/, "the stage is the viewport");
+  assert.match(css, /#map\s*\{[^}]*inset:\s*0/, "#map covers the stage, so the clamp's extent is the stage");
+  assert.match(css, /#map\s*\{[^}]*padding:\s*var\(--reserve-top/, "#map reserves the chrome's edges as padding, measured by room.ts");
   // Clip ONLY while zoomed, so the idle DOM (arrival ceremony overflow, drop shadow) stays byte-identical at home (k=1).
   assert.match(css, /#map-viewport\.zoomed\s*\{[^}]*overflow:\s*hidden/s, "#map-viewport.zoomed should clip");
   // touch-action:none (added via .zoomable by the controller) is REQUIRED for pinch/drag.

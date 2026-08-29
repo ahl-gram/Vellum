@@ -16,6 +16,7 @@ const read = (p: string) => readFileSync(root(p), "utf8");
 const GENERATED_CSS = [["public/gallery/", "src/cli/gallery.ts"]] as const;
 
 const AUTHORED_CSS = [
+  "public/atelier.css",
   "public/explorer/broadside.css",
   "public/explorer/index.css",
   "public/faq/index.css",
@@ -102,8 +103,6 @@ const cssBearingSources = (): string[] =>
 const TIPPING_LINKS = new Set([
   "motion.css :: .plate:hover",
   "motion.css :: body:has(.room-name) .wordmark a:hover, body:has(.room-name) .wordmark a:focus-visible",
-  "faq/index.css :: .toc a:hover",
-  "glossary/index.css :: .toc a:hover",
   // #270 ruling 7: the footnote marks follow through to /glossary/ anchors, so the ruling extended the tipping surface to them.
   "explorer/broadside.css :: a.fn:hover",
   // #360, measured 2026-08-12: `cardFigureHtml` in `src/cli/gallery.ts` wraps every contact-sheet plate in a link to its full-size SVG.
@@ -137,17 +136,6 @@ const hoverTipsIn = (css: string): string[] => {
   }
   return tips;
 };
-
-test("the TOC slips tip with the wordmark's text-scale gesture (#324 feel review)", () => {
-  for (const file of ["public/faq/index.css", "public/glossary/index.css"]) {
-    const css = read(file);
-    assert.match(
-      css,
-      /\.toc a:hover\s*\{\s*transform:\s*translateY\(var\(--raise\)\)\s+rotate\(-0\.6deg\)/,
-      `${file}: the TOC entries go somewhere, so they tip, at the wordmark's numbers`,
-    );
-  }
-});
 
 test("the footnote marks go to the glossary, so they tip, at the wordmark's numbers (#270 ruling 7)", () => {
   assert.match(
@@ -204,10 +192,10 @@ const settled = (css: string, selector: string): Readonly<Record<string, string>
   return out;
 };
 
-// Hand-measured (#356, #353): an inline-block takes its baseline from its LAST line box, so a wrapped tipping slip drops its bullet 26.00px to line two (3 of the FAQ's 5 entries wrap at 320 to 330px, 5 of the glossary's 15 in the font-fallback paint of every cold load), and vertical-align: top pins it back. Nothing overflows and a ::marker is not reachable from the DOM, so the bullet's position exists only in paint: no structural test can see it, which is why the rule is guarded as text.
+// Hand-measured (#356, #353): an inline-block takes its baseline from its LAST line box, so a wrapped tipping slip drops its bullet 26.00px to line two (measured on the FAQ and glossary TOCs, retired at #462; the class outlives its first instances), and vertical-align: top pins it back. Nothing overflows and a ::marker is not reachable from the DOM, so the bullet's position exists only in paint: no structural test can see it, which is why the rule is guarded as text.
 /** Each entry is a MEASUREMENT of the markup taken 2026-08-12, not a rule: it says these boxes are not list items on the pages that use them today, so re-take it when you touch one. */
 const INLINE_BLOCKS_OUTSIDE_MARKER_LISTS = new Set([
-  // <div class="actions"> on the seed page (src/pages/seed-of-the-day/index.astro:51).
+  // <div class="actions"> on the prospect and ribbon pages (src/pages/prospect/index.astro, src/pages/ribbon/index.astro; Today's left at #462).
   "house.css :: a.control",
   // Inside <p class="wordmark"> or <h1 class="wordmark"> in BaseLayout's head cluster (#461; the rooms nav pins vertical-align itself).
   "motion.css :: .wordmark a",
@@ -234,11 +222,6 @@ const sweptBoxes = (): Set<string> =>
       inlineBlocksIn(css).map((selector) => `${key} :: ${selector}`),
     ),
   );
-
-const PINNED_MARKER_LIST_LINKS = [
-  ["public/faq/index.css", ".toc a"],
-  ["public/glossary/index.css", ".toc a"],
-] as const;
 
 test("an inline-block in a marker-bearing list keeps its bullet on line one (#358)", () => {
   for (const [file, css] of authoredSheets()) {
@@ -276,16 +259,6 @@ test("the sweep's selector reader survives the house's :is() and :not() forms (#
   assert.equal(subjectOf(":is(.toc, .gazetteer) a"), "a", "a functional pseudo-class is not a combinator");
   assert.equal(subjectOf(".toc li:first-child a"), "a", "the subject is the element the rule lands on");
   assert.equal(subjectOf(".broadside .seal::before"), ".seal::before", "a pseudo-element IS the subject");
-});
-
-test("both TOC slips still enter the bullet sweep (#358, the guard's premise)", () => {
-  for (const [file, selector] of PINNED_MARKER_LIST_LINKS) {
-    assert.ok(
-      inlineBlocksIn(read(file)).includes(selector),
-      `${file}: ${selector} is no longer an inline-block, so the bullet sweep no ` +
-        `longer covers it; re-check the premise before deleting this line`,
-    );
-  }
 });
 
 test("every tip allowlisted or parked still names a live tip (#360)", () => {

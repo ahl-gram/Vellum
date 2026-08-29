@@ -38,6 +38,7 @@ test("no page sheet re-binds the intro voice (#324)", () => {
     "public/faq/index.css",
     "public/glossary/index.css", "public/print-room/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
+    "public/atelier.css",
   ]) {
     const css = read(page);
     assert.ok(
@@ -116,14 +117,16 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
     "the seed input opts into the idiom (type=text for the iOS numeric keypad, so the attribute selector cannot see it)");
   wears("src/pages/gallery/index.astro", /class="sub intro"/, "the gallery sub is an intro");
   wears("src/pages/seed-of-the-day/index.astro", /class="[^"]*hunt-intro intro/, "the hunt intro is an intro");
-  wears("src/pages/seed-of-the-day/index.astro", /class="[^"]*dateline archivist-head/, "the dateline is a standing head");
-  wears("src/pages/seed-of-the-day/index.astro", /<a[^>]*class="[^"]*control/, "the actions link wears the idiom");
+  // #462: the dateline stands in the room folio's corner in its small caps, and the roads out are the legend row; the archivist head and the a.control idiom left Today with the desk.
+  wears("src/pages/seed-of-the-day/index.astro", /<p class="dateline" id="dateline">/, "the dateline is the folio corner's line");
+  wears("src/pages/seed-of-the-day/index.astro", /<a class="legend-btn" data-road=/, "the roads out are legend buttons");
   wears("src/pages/print-room/index.astro", /class="[^"]*desk-head archivist-head/, "the desk head is a standing head");
   wears("src/pages/print-room/index.astro", /class="[^"]*offering-field archivist-label/, "the offering field is an inline label");
   // #270 promoted the Explorer's group heads from the inline tier to the standing tier, the print-room desk-head precedent.
   wears("src/pages/explorer/index.astro", /class="panel-head archivist-head"/, "the Broadside group heads are standing heads");
-  wears("src/pages/faq/index.astro", /<strong class="archivist-label">/, "the TOC heading is an inline label");
-  wears("src/pages/glossary/index.astro", /<strong class="archivist-label">/, "the TOC heading is an inline label");
+  // #462: the TOC (and the #324 2026-08-26 archivist-label exception it carried) retired for the index slip; the room's one control stands in the folio corner.
+  wears("src/pages/faq/index.astro", /<p class="dateline">\{count\}<\/p>/, "the question count is the folio corner's line");
+  wears("src/pages/glossary/index.astro", /<input class="control" type="search"/, "the find box opts into the control idiom");
 });
 
 test("home's flourish family survives the section removals (#324, reshaped at #459 then #470)", () => {
@@ -167,7 +170,7 @@ test("no token value smuggled past the guards in rgb() form (#324)", async () =>
     "public/glossary/index.css", "public/print-room/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
     "public/reading-frame.css", "public/living-chart.css", "public/motion.css",
-    "public/house.css", "src/layouts/BaseLayout.astro", "src/pages/index.astro",
+    "public/house.css", "public/atelier.css", "src/layouts/BaseLayout.astro", "src/pages/index.astro",
     "src/atlas/document.ts", "src/cli/gallery.ts",
   ];
   for (const [name, hex] of Object.entries(SITE_PALETTE)) {

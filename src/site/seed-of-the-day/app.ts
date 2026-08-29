@@ -19,6 +19,7 @@ import { createProjection, type Projection } from "../../render/transform.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
 import { createZoomController } from "../shared/zoom-controller.ts";
 import type { ZoomState } from "../shared/zoom-controller.ts";
+import { bindRoom } from "./room.ts";
 import type { World } from "../../world/types.ts";
 
 declare global {
@@ -43,9 +44,15 @@ const dateLabel = new Intl.DateTimeFormat("en-GB", {
 }).format(now);
 
 $("dateline").textContent = `${dateLabel} · seed ${seed}`;
-$<HTMLAnchorElement>("explore").href = `../explorer/#seed=${seed}&style=antique&legend=1`;
-// #221: the cross-link carries the seed explicitly, so it keeps opening THIS page's world even after UTC midnight rolls the bare-visit default to a new day.
-$<HTMLAnchorElement>("watch").href = `../reading-room/#seed=${seed}`;
+// #221: the roads out carry the seed explicitly, so they keep opening THIS page's world even after UTC midnight rolls the bare-visit default to a new day; the row and the phone's copy inside the slip both take it (#462).
+const ROADS: Record<string, string> = {
+  explorer: `../explorer/#seed=${seed}&style=antique&legend=1`,
+  "reading-room": `../reading-room/#seed=${seed}`,
+};
+for (const a of document.querySelectorAll<HTMLAnchorElement>("a[data-road]")) {
+  const href = ROADS[a.dataset.road ?? ""];
+  if (href !== undefined) a.href = href;
+}
 
 // #167: the SAME shared zoom controller as the Explorer, bound to the STABLE #map-viewport (never wiped by the deferred render) with its live transform landing on #map.
 // Deliberately NO onSettle: the Hunt is a FIXED world (#161); a semantic redraft would reveal new places and change clue difficulty, so the magnify stays purely geometric.
@@ -54,8 +61,11 @@ const zoomController = createZoomController({
   viewportEl: $("map-viewport"),
   targetEl: $("map"),
   scaleExtent: [1, 8],
+  glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
 });
 zoomController.attach();
+// #462: the chart room around the controller; the sheet is fitted once the chart is drawn.
+const room = bindRoom({ viewport: $("map-viewport"), map: $("map"), sheet: $("sheet"), zoom: zoomController });
 // Deterministic zoom hooks for the e2e, mirroring the Explorer's.
 window.__vellumZoomTo = (t) => zoomController.zoomTo(t);
 window.__vellumZoomState = () => zoomController.getState();
@@ -79,22 +89,26 @@ function dryIn(el: HTMLElement | null, delay: string): void {
 setTimeout(() => {
   try {
     const world = generateWorld(defaultRecipe(seed));
-    $("map").innerHTML = renderMap(world, { style: "antique", legend: true });
-    startArrival($("map").querySelector("svg"));
+    $("sheet").innerHTML = renderMap(world, { style: "antique", legend: true });
+    startArrival($("sheet").querySelector("svg"));
 
-    dryIn($("caption"), "120ms");
-    $("caption").textContent = world.title.title;
-    dryIn($("survey"), "260ms");
-    $("survey").textContent = world.title.subtitle;
+    dryIn($("folio-title"), "120ms");
+    $("folio-title").textContent = world.title.title;
+    dryIn($("folio-sub"), "260ms");
+    $("folio-sub").textContent = world.title.subtitle;
+    dryIn($("folio-coords"), "320ms");
+    $("folio-coords").textContent = `Chart № ${seed} · ${world.recipe.mapType === "archipelago" ? "an" : "a"} ${world.recipe.mapType}, ${world.recipe.band}`;
 
     const capital =
       world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0];
     if (capital) {
       const lore = createLoreWriter(world, createRng(seed).fork("seed-of-the-day"));
-      dryIn($("blurb"), "400ms");
-      $("blurb").textContent = capitalBlurb(capital, lore.settlementNote(capital));
+      dryIn($("folio-note"), "400ms");
+      $("folio-note").textContent = capitalBlurb(capital, lore.settlementNote(capital));
     }
     $("status").textContent = "";
+    // Fitted only now: the folio's lines are chrome the fit measures, and an empty folio reserves nothing.
+    room.layout();
     setupHunt(world);
   } catch (err) {
     $("status").textContent = "The cartographer spilled the ink: " + (err as Error).message;
@@ -198,7 +212,7 @@ function setHuntStatus(text: string): void {
 
 function setupHunt(world: World): void {
   const hunt = $("hunt");
-  const svg = $("map").querySelector("svg");
+  const svg = $("sheet").querySelector("svg");
   if (!hunt || !svg) return;
 
   const proj = createProjection(world.elev.w, world.elev.h, 1500, MARGIN);
@@ -239,7 +253,6 @@ function setupHunt(world: World): void {
     li.style.setProperty("--i", String(i));
     list.appendChild(li);
   });
-  hunt.hidden = false;
 
   let guesses = 0;
   const missRoute: { gx: number; gy: number }[] = []; // #123: each miss as {gx,gy} in GRID space, re-projected at draft time
@@ -248,13 +261,13 @@ function setupHunt(world: World): void {
 
   // #129: a LIVE solve stamps the star in (.stamp); a solved-day reload places it still, so the win never replays its animation on reload.
   const placeStar = (ceremony: boolean) => {
-    if ($("map").querySelector(".hunt-star")) return;
+    if ($("sheet").querySelector(".hunt-star")) return;
     const star = document.createElement("div");
     star.className = ceremony ? "hunt-star stamp" : "hunt-star";
     star.textContent = "★";
     star.style.left = `${(proj.px(quarry.settlement.x) / proj.widthPx) * 100}%`;
     star.style.top = `${(proj.py(quarry.settlement.y) / proj.heightPx) * 100}%`;
-    $("map").appendChild(star);
+    $("sheet").appendChild(star);
   };
 
   const showReveal = (ceremony: boolean) => {
@@ -389,8 +402,8 @@ function setupHunt(world: World): void {
   $("share").hidden = true;
   updateStreak();
 
-  // #129: a sounding at the click point (a spreading ring + a lingering pencil dot). Overlay divs on #map only; the SVG is never touched, and both are pointer-transparent + self-removing.
-  const mapEl = $("map");
+  // #129: a sounding at the click point (a spreading ring + a lingering pencil dot). Overlay divs on the sheet only; the SVG is never touched, and both are pointer-transparent + self-removing.
+  const mapEl = $("sheet");
   const spawnSounding = (clientX: number, clientY: number) => {
     const r = mapEl.getBoundingClientRect();
     if (!r.width || !r.height) return;

@@ -1,0 +1,127 @@
+/* The Atelier Kit (#487): the room furniture the Sub 7 mockups standardized (design/sub7-chart-rooms/shared.css, doc.css), lifted here at its second use during #462 and worn as markup classes; page css keeps layout only (#324's rule). Linked by BaseLayout after house.css and before the page sheets, so a page keeps the last word. */
+
+:root { --slip-w: 22rem; }
+
+/* The deep's fog: the mockup's parchment breath drifting over the walnut. */
+.fog { position: fixed; inset: -30%; pointer-events: none; z-index: 0; opacity: 0.4; }
+.fog.a { background: radial-gradient(45% 30% at 30% 60%, rgb(from var(--parchment) r g b / 0.1), transparent 70%); animation: fog-drift-a 90s ease-in-out infinite alternate; }
+.fog.b { background: radial-gradient(40% 28% at 70% 30%, rgb(from var(--line-tan) r g b / 0.09), transparent 70%); animation: fog-drift-b 70s ease-in-out infinite alternate; }
+@keyframes fog-drift-a { from { transform: translate(-4%, 2%); } to { transform: translate(5%, -3%); } }
+@keyframes fog-drift-b { from { transform: translate(3%, -2%); } to { transform: translate(-5%, 3%); } }
+
+/* Corner chrome: the mockup's floating corners on the head cluster's own idiom, none on the container and auto on what the hand can take. */
+.corner { position: fixed; z-index: 10; line-height: normal; pointer-events: none; }
+.corner :is(a, button, input, select, label) { pointer-events: auto; }
+.corner.tr { right: var(--chrome-x); top: var(--chrome-y); text-align: right; }
+.corner.bl { left: var(--chrome-x); bottom: var(--chrome-y); }
+.corner.br { right: var(--chrome-x); bottom: var(--chrome-y); }
+.corner :is(a, button, input, select):focus-visible { outline-color: var(--parchment-bright); }
+
+/* The room folio, top right: the h1 stands here (#288, re-ratified at #462), the tagline under it, then the room's one control. */
+.folio-room { max-width: 19rem; }
+.folio-room .room-name { font-size: 1.32rem; letter-spacing: 0.14em; line-height: 1.2; color: var(--parchment-bright); }
+.folio-room .room-tagline { font-size: 0.92rem; line-height: normal; color: var(--parchment); margin: 0.1rem 0 0; }
+/* parchment, not the mockup's line-tan and ink-faded: line-tan measured 4.03:1 on the deep at #461 (RH9a), under the 4.5 floor for small text, and ink-faded is darker still. */
+.folio-room .dateline { margin: 0.55rem 0 0; font-variant-caps: small-caps; font-size: 0.85rem; letter-spacing: 0.08em; color: var(--parchment); }
+.folio-room .gloss { margin: 0.4rem 0 0; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.76rem; color: var(--parchment); }
+.folio-controls { display: flex; gap: 0.5rem; justify-content: flex-end; margin: 0.55rem 0 0; }
+/* The corner's dark dress over the house control idiom; 16px floor because a smaller input font makes iOS Safari zoom the page on focus (home's seed input). */
+.folio-controls .control { width: 7.4rem; min-width: 0; font-size: 16px; color: var(--parchment-bright);
+  background: rgb(from var(--chart-ink) r g b / 0.45); border: 1px solid var(--line-tan); border-radius: 0;
+  padding: 0.32rem 0.6rem; text-align: center; font-variant-numeric: tabular-nums; }
+.folio-controls .control::placeholder { color: var(--line-tan); }
+.folio-controls .control:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 1px; }
+
+/* The slip: the room's working panel, the mockup's station card grown into a desk. */
+.slip { position: fixed; z-index: 20; right: 2rem; top: 9rem; width: var(--slip-w); max-height: calc(100vh - 11rem);
+  box-sizing: border-box; display: flex; flex-direction: column;
+  background: var(--parchment-panel); color: var(--ink-dark);
+  border: 1px solid var(--line-tan); outline: 3px double var(--line-faint); outline-offset: 6px;
+  box-shadow: var(--sheet-shadow);
+  transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), opacity 0.32s, visibility 0s; }
+.slip.folded { transform: translateX(calc(100% + 2.6rem)); opacity: 0; visibility: hidden;
+  transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), opacity 0.32s, visibility 0s linear 0.32s; }
+.slip-head { padding: 1.3rem 1.6rem 0.75rem; position: relative; flex: none; }
+.slip-body { padding: 0 1.6rem 1.3rem; overflow-y: auto; overscroll-behavior: contain; flex: 1 1 auto; min-height: 0; }
+.slip-foot { flex: none; padding: 0.8rem 1.6rem 1rem; border-top: 1px solid var(--line-faint); }
+.slip .card-verb { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.92rem; color: var(--ink-brown); margin: 0; }
+.slip .card-title { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-weight: 400; font-size: 1.45rem; letter-spacing: 0.06em; line-height: 1.2; margin: 0.1rem 0 0; }
+/* ink-brown, not the mockup's ink-faded: 13px small caps measured 3.93:1 on the panel at #458 (home's card, the same dress). */
+.slip .card-where { font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); font-variant-caps: small-caps; font-size: 0.82rem; letter-spacing: 0.08em; color: var(--ink-brown);
+  border-bottom: 1px solid var(--line-faint); padding-bottom: 0.55rem; margin: 0.25rem 0 0; }
+.slip .intro { text-align: left; font-size: 0.95rem; line-height: 1.5; margin: 0.7rem 0 0; }
+.slip .note { font-size: 0.82rem; color: var(--ink-faded); line-height: 1.45; margin: 0; text-align: left; }
+.slip a { color: var(--ink-dark); }
+.slip-handle { display: none; }
+.slip-fold { position: absolute; right: 0.5rem; top: 0.45rem; appearance: none; border: 0; border-radius: 0; background: none; cursor: pointer;
+  font-size: 1.05rem; line-height: 1; color: var(--ink-faded); padding: 0.2rem 0.4rem; }
+/* Four classes deep on purpose: the house sheets dress every button, and their hover wash outranks a plain .slip-fold:hover. */
+.slip .slip-head .slip-fold:hover, .slip .slip-head .slip-fold:focus-visible { color: var(--ink-dark); background: none; }
+/* The tab that brings a folded slip back: a bookmark riding the right edge. */
+/* Placed by the individual translate and rotate properties, not transform: the house lift on a button (motion.css) writes transform, and would otherwise replace the tab's seat. */
+.slip-tab { position: fixed; right: 0; top: 50%; translate: 0 -50%; rotate: 180deg; z-index: 19;
+  writing-mode: vertical-rl; padding: 0.9rem 0.45rem; cursor: pointer; appearance: none; border-radius: 0;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.72rem; letter-spacing: 0.16em; color: var(--parchment);
+  background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); border-left: 0;
+  opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.25s 0.2s, visibility 0s linear 0.45s; }
+.slip-tab.shown { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.25s 0.2s, visibility 0s; }
+button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; background: var(--ink-dark); color: var(--parchment-bright); }
+
+/* The chrome's half of the landing (#461 ruling 6): the corners and the slip ink in after the sheet or the stage lands; motion.css's reduced-motion blanket collapses it. */
+.corner, .slip { animation: ink-in 0.5s 0.18s ease-out both; }
+
+/* The index (document-room ruling 1): every section with its questions or its terms, the one being read inked. */
+.index { list-style: none; margin: 0.4rem 0 0; padding: 0; }
+.index > li { padding: 0.45rem 0; border-bottom: 1px solid var(--line-faint); opacity: 0.55; transition: opacity 0.2s; }
+.index > li.inked { opacity: 1; }
+.index .sec { display: block; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.8rem; letter-spacing: 0.1em; color: var(--ink-dark); text-decoration: none; }
+.index > li.inked .sec { text-decoration: underline; text-underline-offset: 0.3em; text-decoration-thickness: 1px; text-decoration-color: var(--line-tan); }
+.index .sec:hover { color: var(--ink-press); }
+/* ink-brown, not the mockup's ink-faded: 11.5px small caps measured 3.93:1 on the panel (plate read 2026-08-29), the #458 card-where miss again. */
+.index .count { font-variant-caps: small-caps; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--ink-brown); float: right; }
+.index .entries { margin: 0.2rem 0 0; padding: 0; list-style: none; font-size: 0.8rem; line-height: 1.45; }
+.index .entries li { padding: 0.1rem 0 0.1rem 0.6rem; border-left: 2px solid transparent; }
+.index .entries li.now { border-left-color: var(--line-tan); }
+.index .entries a { color: var(--ink-brown); text-decoration: none; }
+.index .entries a:hover { color: var(--ink-dark); text-decoration: underline; text-underline-offset: 0.2em; }
+.index .terms { margin: 0.2rem 0 0; font-size: 0.78rem; line-height: 1.5; color: var(--ink-brown); }
+.index .terms a { color: inherit; text-decoration: none; white-space: nowrap; }
+.index .terms a:hover { color: var(--ink-dark); text-decoration: underline; text-underline-offset: 0.2em; }
+.index .terms a:not(.miss) ~ a:not(.miss)::before { content: "\00b7"; margin: 0 0.35em 0 0.1em; color: var(--ink-faded); }
+.index .terms a.now { color: var(--ink-dark); text-decoration: underline; text-underline-offset: 0.2em; text-decoration-color: var(--line-tan); }
+.index .terms a.hit { color: var(--ink-dark); background: var(--parchment-bright); }
+.index .terms a.miss { display: none; }
+.index > li.empty { display: none; }
+
+/* Narrow sheets: the slip becomes the bottom sheet (the mockup's own card-slip rule), collapsed to its head with a handle, opened on a tap; the tab stands down. */
+@media (max-width: 900px) {
+  .folio-room { max-width: 12.5rem; }
+  .folio-room .room-name { font-size: 0.98rem; }
+  .folio-room .room-tagline { display: none; }
+  .folio-room .dateline { font-size: 0.72rem; margin-top: 0.3rem; }
+  .folio-room .gloss { display: none; }
+  .folio-controls .control { width: 6.2rem; padding: 0.3rem 0.4rem; }
+  .slip-tab { display: none; }
+  .slip { right: 0; left: 0; top: auto; bottom: 0; width: 100%; max-height: 72vh; outline-offset: -8px; transition: none; }
+  .slip.folded { opacity: 1; visibility: visible; transform: none; }
+  .slip:not(.open) .slip-body, .slip:not(.open) .slip-foot { display: none; }
+  .slip-head { padding: calc(0.75rem + 3px + 0.55rem) 1.3rem 0.5rem; }
+  /* The handle is a real button covering the head (a keyboard needs a toggle too, PR #488 finding 3); four classes deep against the house button dress, and no lift: it is invisible. */
+  .slip-handle { display: block; position: absolute; inset: 0; z-index: 1; appearance: none; border: 0; border-radius: 0; background: none; padding: 0; cursor: pointer; }
+  .slip .slip-head .slip-handle:is(:hover, :focus-visible, :active) { background: none; transform: none; box-shadow: none; }
+  .slip-handle::before { content: ""; display: block; width: 2.6rem; height: 3px; margin: 0.75rem auto 0; background: var(--line-tan); border-radius: 2px; }
+  .slip.open .slip-handle::before { background: var(--ink-faded); }
+  .slip .card-title { font-size: 1.15rem; }
+  .slip-fold { display: none; }
+  .slip-body { padding: 0 1.3rem 1rem; }
+  .slip-foot { padding: 0.7rem 1.3rem 0.9rem; }
+}
+
+/* Print is paper (#462 chart-room ruling 10, the document-room stand-down): the fog, the corners and the slip print as nothing. */
+@media print {
+  .fog, .corner, .slip, .slip-tab { display: none !important; }
+  /* The room's name is the page's h1 (#288): it prints in flow at the top, the rest of the corner as nothing. */
+  .corner.folio-room { display: block !important; position: static; text-align: left; margin: 0 0 1rem; }
+  .folio-room .room-name, .folio-room .room-tagline { color: var(--ink-dark); }
+  .folio-room .dateline, .folio-room .gloss, .folio-controls { display: none; }
+}
