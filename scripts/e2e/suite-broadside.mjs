@@ -163,13 +163,13 @@ export async function run(ctx) {
   const br7 = await evaluate(`(()=>{
     const ids=["seeds-choice","coast-warp","survey","verso"].map((id)=>[id,!!document.getElementById(id)]);
     const section=document.getElementById("drafting-table");
-    const toc=!!document.querySelector('.toc a[href="#drafting-table"]');
+    const indexed=!!document.querySelector('#index .index a.sec[href="#drafting-table"]');
     return{missing:ids.filter(([,ok])=>!ok).map(([id])=>id),
-      head:section?section.textContent:null,toc};
+      head:section?section.textContent:null,indexed};
   })()`);
   check(
-    "BR7 every mark's glossary anchor exists and the drafting-table section presides over the control terms",
-    br7.missing.length === 0 && br7.head === "At the drafting table" && br7.toc,
+    "BR7 every mark's glossary anchor exists, the drafting-table section presides over the control terms, and the index slip lists it (the TOC's successor, #462)",
+    br7.missing.length === 0 && br7.head === "At the drafting table" && br7.indexed,
     JSON.stringify(br7),
   );
 
