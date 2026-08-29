@@ -1,52 +1,27 @@
-body {
-  padding: 2rem 1.5rem 4rem;
-}
-.caption {
-  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
-}
-main { max-width: 1100px; }
-header { margin-bottom: 1.4rem; }
-.status { margin-bottom: 0.8rem; }
-/* #164: transform-origin 0 0 matches d3-zoom's screen-space math; overflow clips only while .zoomed so the idle page (ceremony and shadow overflow the frame) stays byte-identical. */
-#map-viewport { max-width: 1100px; margin-inline: auto; position: relative; }
-#map-viewport.zoomed { overflow: hidden; }
+/* #463 (Landfall Sub 8): the Explorer is a chart room on the #462 pattern. The room furniture is /atelier.css's; this sheet keeps the stage's own layout, the Glass's clip, the region inset, the turn and the verso. */
+/* The Broadside's five-column ledger needs the wider slip: a stated deviation on #462. */
+:root { --slip-w: 24rem; }
+
+/* The stage centres the fitted sheet in what the chrome leaves; room.ts measures the reserves off the chrome rects. */
+.stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
+#sheet { position: relative; flex: none; width: 0; height: 0; box-shadow: var(--stage-shadow); }
+.sheet-inner { position: relative; width: 100%; height: 100%; }
+/* #164: the Glass's gesture box IS the sheet, so d3's extent, the camera's cx/cy and the region survey's window all read sheet fractions; transform-origin 0 0 matches d3-zoom's screen-space math. A magnified sheet spills past the box (the mockup's look); the stage clips it. */
+#map-viewport { position: absolute; inset: 0; cursor: grab; }
+#map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
 /* #164: d3-zoom does NOT set touch-action; without none the browser's native pan/pinch preempts the gesture. */
 #map-viewport.zoomable { touch-action: none; }
-#map-viewport:focus-visible { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
-.zoom-controls {
-  position: absolute; top: 10px; right: 10px; z-index: 2;
-  display: flex; flex-direction: column; gap: 4px;
-  /* #170: keeps the buttons hugging the corner instead of stretching to the wider keys legend. */
-  align-items: flex-end;
-}
-.zoom-controls button {
-  width: 2rem; height: 2rem; padding: 0; line-height: 1; font-size: 1.15rem;
-  display: flex; align-items: center; justify-content: center;
-  background: rgb(247 237 207 / 0.92); border: 1px solid var(--line-tan); color: var(--ink-dark);
-}
-.zoom-controls button:hover { background: var(--parchment-bright); }
-.zoom-keys {
-  margin-top: 2px; padding: 0.28rem 0.45rem;
-  background: rgb(247 237 207 / 0.92); border: 1px solid var(--line-tan); border-radius: 3px;
-  display: flex; flex-direction: column; gap: 0.1rem;
-  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  font-size: 0.58rem; font-style: italic; line-height: 1.45;
-  letter-spacing: 0.04em; color: var(--ink-brown); text-align: right; white-space: nowrap;
-}
-.zoom-keys kbd { font-family: inherit; font-style: normal; font-weight: 600; color: var(--ink-dark); }
-/* A bare (hover: none) over-matches pointerless environments (linux headless CI reports hover:none with pointer:none), hiding the legend where a keyboard user could use it; pinned by e2e G1. */
-@media (hover: none) and (pointer: coarse), (max-width: 560px) { .zoom-keys { display: none; } }
-#map { position: relative; transform-origin: 0 0; }
-/* #367: [data-vellum-style] scopes this to renderer-stamped charts; unqualified it also dressed the survey-track svg, striking border+shadow twice in exact register (22.5 luminance units deeper at the sheet edge). */
-#map svg[data-vellum-style] { width: 100%; height: auto; display: block;
-  border: 1px solid var(--line-tan); box-shadow: var(--sheet-shadow); }
+#map { position: absolute; inset: 0; transform-origin: 0 0; }
+/* #367: [data-vellum-style] scopes this to renderer-stamped charts; unqualified it also sized the survey-track svg. The sheet carries the depth; the chart fills its fitted box. */
+#map svg[data-vellum-style] { width: 100%; height: 100%; display: block; }
 
 .region-inset {
   position: absolute; pointer-events: none;
   opacity: 0; transition: opacity var(--fade, 200ms) ease;
 }
 .region-inset.in { opacity: 1; }
-/* width/height 100% (not auto) pin the inset svg to its computed box so no rounding gap opens at the window edge; border 0 undoes the #map svg rule above. */
+/* width/height 100% (not auto) pin the inset svg to its computed box so no rounding gap opens at the window edge. */
 #map .region-inset svg {
   width: 100%; height: 100%;
   border: 0; box-shadow: 0 2px 9px rgb(from var(--chart-ink) r g b / 0.35);
@@ -84,17 +59,15 @@ header { margin-bottom: 1.4rem; }
 }
 
 /* #131 style turn: the 3D context is inert at rest (byte-parity between turns, verified by CDP spike); the turn is WAAPI, so its reduced-motion twin is the shouldTurn() JS gate, nothing here for /motion.css to reach. */
-.sheet-inner { position: relative; }
 .sheet.turning { perspective: 2200px; }
 .sheet-inner.turning { transform-style: preserve-3d; }
 /* #164: backface-visibility must sit on #map-viewport (the direct preserve-3d child); #map renders flattened into it, so it is the viewport's facing that flips out of view. */
 .sheet-inner.turning #map-viewport { backface-visibility: hidden; }
 .sheet-back {
-  position: absolute; inset: 0 0 auto 0;
+  position: absolute; inset: 0;
   backface-visibility: hidden; transform: rotateY(180deg);
 }
-.sheet-back img { width: 100%; height: auto; display: block;
-  border: 1px solid var(--line-tan); box-shadow: var(--sheet-shadow); }
+.sheet-back img { width: 100%; height: 100%; display: block; }
 
 /* #116 Verso: .flip3d lights the 3D context, .versoed holds the rotateY(-180deg) target; the transition is scoped off while .turning so the WAAPI turn and this transition never drive #sheet-inner at once. */
 .sheet:not(.turning) .sheet-inner {
@@ -105,17 +78,16 @@ header { margin-bottom: 1.4rem; }
 .sheet.flip3d #map-viewport { backface-visibility: hidden; } /* #164: retargeted from #map, see the turn rule above */
 .sheet.versoed .sheet-inner { transform: rotateY(-180deg); }
 
-/* Sized by its ghost image; hidden at rest with visibility (not a 3D trick) so the 3D context can stay off between flips. */
+/* Sized to the sheet's box; hidden at rest with visibility (not a 3D trick) so the 3D context can stay off between flips. */
 #verso {
-  position: absolute; inset: 0 0 auto 0;
+  position: absolute; inset: 0;
   visibility: hidden;
   backface-visibility: hidden; transform: rotateY(180deg);
   background: var(--parchment-deep); color: var(--ink-dark);
-  border: 1px solid var(--line-tan); box-shadow: var(--sheet-shadow);
   overflow: hidden;
 }
 .sheet.flip3d #verso { visibility: visible; }
-.verso-ghost { display: block; width: 100%; height: auto;
+.verso-ghost { display: block; width: 100%; height: 100%;
   transform: scaleX(-1); opacity: 0.1; filter: blur(1.2px); }
 /* #174: this layer must share the ghost's box and its scaleX(-1) centre or the bleed-through track misregisters with the coastline; struck at 0.26 because a 3px dotted stroke at the ghost's 0.1 simply disappears. */
 .verso-track-layer { position: absolute; inset: 0; width: 100%; height: 100%;
@@ -144,6 +116,17 @@ header { margin-bottom: 1.4rem; }
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
-.caption { text-align: center; font-style: italic; color: var(--ink-brown);
-  padding-top: 0.6rem; }
-footer { margin-top: 3rem; }
+/* The verso's footnote mark rides the legend row beside Turn the sheet. */
+.legend-row a.fn { color: var(--line-tan); align-self: flex-start; margin-left: -0.45rem; }
+.legend-row a.fn:hover, .legend-row a.fn:focus-visible { color: var(--parchment-bright); }
+
+/* Print is paper (#462 ruling 10): the chart prints on the page, unzoomed, its recto only. */
+@media print {
+  .stage { position: static; padding: 0 !important; display: block; }
+  #sheet { width: auto !important; height: auto !important; box-shadow: none; }
+  .sheet-inner { height: auto; }
+  #map-viewport { position: static; }
+  #map { position: static; transform: none !important; }
+  #map svg[data-vellum-style] { height: auto; }
+  #verso { display: none; }
+}

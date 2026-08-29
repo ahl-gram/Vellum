@@ -22,7 +22,8 @@ const READ = `(() => {
     cluster: r("header.chrome"),
     nav: { rect: r("header.chrome nav.rooms"), visibility: cs.visibility, position: cs.position },
     scrim: { position: scrim.position, top: scrim.top, z: scrim.zIndex, content: scrim.content, background: scrim.backgroundColor },
-    mainInert: main.inert, footerInert: footer.inert, chromeInert: document.querySelector("header.chrome").inert,
+    // #463: a chart room renders no footer (#462 ruling 9), so its inert set is main alone.
+    mainInert: main.inert, footerInert: footer ? footer.inert : null, chromeInert: document.querySelector("header.chrome").inert,
     hitMidPage: (() => { const e = document.elementFromPoint(Math.round(innerWidth * 0.8), Math.round(innerHeight * 0.65)); return e ? e.tagName + "." + String(e.className).split(" ")[0] : null; })(),
     doors: [...nav.querySelectorAll("a, [aria-current]")].map((a) => { const d = a.getBoundingClientRect(); const hit = document.elementFromPoint(d.x + 20, d.y + d.height / 2); return { t: a.textContent, x: d.x, y: d.y, h: d.height, bottom: d.bottom, current: a.hasAttribute("aria-current"), display: getComputedStyle(a).display, offset: getComputedStyle(a).textUnderlineOffset, tappable: hit === a }; }) };
 })()`;

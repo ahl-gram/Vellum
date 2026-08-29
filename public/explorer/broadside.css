@@ -1,10 +1,7 @@
-/* #270 The Broadside: the Explorer's control sheet (The Land / The Hand / The Press); the voice is /house.css's, only the sheet's geometry and its own dressings live here. */
+/* #270 The Broadside: the Explorer's control sheet (The Land / The Hand), on the slip since #463; the voice is /house.css's, the slip's dress /atelier.css's, only the ledger's geometry and its own dressings live here. */
 
-/* Spacing runs tight throughout: the plate-reader measured the ledger form ~190px taller than the old strip at 1280, and the chart still fights the controls for the viewport. */
-.controls.broadside { display: grid; grid-template-columns: 1.12fr 1fr; gap: 0 2rem;
-  margin: 0.9rem auto; max-width: 960px; }
-.broadside .panel { padding: 0.15rem 0 0.55rem; min-width: 0; }
-.broadside .panel + .panel { border-left: 1px solid var(--line-tan); padding-left: 2rem; }
+.broadside .panel { padding: 0.35rem 0 0.55rem; min-width: 0; }
+.broadside .panel + .panel { border-top: 1px solid var(--line-tan); margin-top: 0.5rem; padding-top: 0.9rem; }
 .broadside .panel-head { margin: 0; }
 .broadside .panel-gloss {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
@@ -35,7 +32,7 @@
 .broadside .seals { flex-wrap: wrap; }
 .broadside label.check.seal { display: inline-flex; align-items: center; gap: 0.35rem;
   cursor: pointer; user-select: none;
-  font-size: 0.85rem; letter-spacing: 0.05em; /* the label voice the old .controls label rule carried */
+  font-size: 0.85rem; letter-spacing: 0.05em;
   border: 1.5px solid var(--ink-brown); border-radius: 4px; padding: 0.28rem 0.6rem;
   background: var(--control-cream); color: var(--ink-brown); }
 .broadside label.check.seal:hover { background: var(--parchment-bright); }
@@ -48,23 +45,6 @@
   border-color: var(--ink-press); }
 .broadside .seal:has(input:checked)::before { content: "\2713"; }
 .broadside .seal:has(input:focus-visible) { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
-
-.broadside .press { grid-column: 1 / -1; border-top: 1px solid var(--line-tan);
-  margin-top: 0.25rem; padding-top: 0.65rem;
-  display: grid; grid-template-columns: auto 1fr; gap: 0.55rem 0.85rem; align-items: center; }
-.broadside .press .panel-head { grid-column: 1; }
-.broadside .press-line { grid-column: 2; display: flex; align-items: center;
-  gap: 0.85rem; flex-wrap: wrap; }
-
-/* CAUTION: this display declaration makes the hidden ATTRIBUTE inert on these links (an author display beats the UA [hidden] rule), so el.hidden=true silently no-ops; hide via style.display (found by the #270 guard-prover). */
-.action-link { display: inline-flex; align-items: center; gap: 0.45rem;
-  font-family: inherit; font-size: 0.95rem; letter-spacing: 0.04em; color: var(--ink-dark);
-  background: var(--control-gold); border: 1.5px solid var(--ink-dark); border-radius: 4px;
-  padding: 0.4rem 0.75rem; text-decoration: none; }
-.action-link:hover { background: var(--control-gold-lit); color: var(--ink-dark); }
-.order-glyph { width: 1.2em; height: 1.2em; flex: none; fill: none; stroke: currentColor;
-  stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.order-glyph circle { fill: currentColor; stroke: none; } /* the handle knob */
 
 a.fn { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
   text-decoration: none; color: var(--ink-brown);
@@ -84,18 +64,10 @@ a.fn:hover { transform: translateY(var(--raise)) rotate(-0.6deg); }
 .fn-note > a { display: block; margin-top: 0.3rem; font-style: italic;
   font-size: 0.78rem; color: var(--ink-brown); } /* >= 12px rendered: the back-matter link must stay legible */
 
-@media (max-width: 700px) {
-  .controls.broadside { grid-template-columns: 1fr; gap: 0; }
-  .broadside .panel + .panel { border-left: 0; border-top: 1px solid var(--line-tan);
-    padding-left: 0; padding-top: 0.9rem; margin-top: 0.5rem; }
-}
 @media (max-width: 560px) {
   /* Re-deals to three columns: empty word columns would each still cost a grid gap and unflush the track's left edge. */
   .broadside .ledger .land-end { display: none; }
   .broadside .ledger { grid-template-columns: auto 1fr auto; }
   .broadside .ledger > input[type="range"] { grid-column: 2; }
   .broadside .ledger > .land-readout { grid-column: 3; }
-  .broadside .press { grid-template-columns: 1fr; }
-  .broadside .press .panel-head, .broadside .press-line { grid-column: 1; }
-  .broadside .press-line .action-link { flex: 1 1 100%; justify-content: center; }
 }

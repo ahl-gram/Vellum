@@ -32,17 +32,18 @@ export async function run(ctx) {
   await goto(EXP + "#seed=42&style=antique", "broadside-base");
   const br1 = await evaluate(`(()=>{
     const groupOf=(id)=>{const el=document.getElementById(id);const g=el&&el.closest('[role="group"]');
-      return g?g.getAttribute("aria-labelledby"):null;};
-    const want={seed:"grp-land",random:"grp-land",type:"grp-land",band:"grp-land",land:"grp-land",coast:"grp-land",
+      return g?(g.getAttribute("aria-labelledby")||g.getAttribute("aria-label")):null;};
+    // #463: the seed row stands in the folio (#462 ruling 8), the rest of the Press is the legend row (ruling 4).
+    const want={seed:"The seed",random:"The seed",draw:"The seed",type:"grp-land",band:"grp-land",land:"grp-land",coast:"grp-land",
       style:"grp-hand",theme:"grp-hand",legend:"grp-hand",arms:"grp-hand",ages:"grp-hand",
-      draw:"grp-press","verso-turn":"grp-press","order-plates":"grp-press","journal-link":"grp-press"};
+      "verso-turn":"grp-press","order-plates":"grp-press","journal-link":"grp-press"};
     const wrong=Object.entries(want).filter(([id,g])=>groupOf(id)!==g).map(([id])=>id+":"+groupOf(id));
     const heads=["grp-land","grp-hand","grp-press"].map((id)=>(document.getElementById(id)||{}).textContent);
     return{wrong,heads};
   })()`);
   check(
-    "BR1 every control sits in its wiring-truth group under the Land/Hand/Press heads",
-    br1.wrong.length === 0 && br1.heads.join("|") === "The Land|The Hand|The Press",
+    "BR1 every control sits in its wiring-truth group: the seed row in the folio, Land and Hand on the slip, the Press as the legend row",
+    br1.wrong.length === 0 && br1.heads.join("|").startsWith("The Land|The Hand|The Press"),
     JSON.stringify(br1),
   );
 
@@ -62,7 +63,7 @@ export async function run(ctx) {
   const at = `((el)=>({shown:el.getClientRects().length>0,top:Math.round(el.getBoundingClientRect().top)}))`;
   const before = await evaluate(`(()=>{
     const j=document.getElementById("journal-link"),o=document.getElementById("order-plates");const at=${at};
-    return{j:at(j),o:at(o),cls:j.className===o.className&&j.classList.contains("action-link")};
+    return{j:at(j),o:at(o),cls:j.className===o.className&&j.classList.contains("legend-btn")};
   })()`);
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await waitInked("br2-survey-ink");
@@ -132,6 +133,10 @@ export async function run(ctx) {
   // REAL CDP taps fire the full compat sequence a synthetic .click() skips (which once hid an off-by-one here); device metrics + touch emulation is what actually flips the hover/pointer media in this browser, setEmulatedMedia's feature overrides are a no-op.
   await setMobileViewport(390, 700);
   const emulated = await evaluate(`window.matchMedia("(hover: none)").matches`);
+  // #463: on a phone the Broadside is the bottom sheet, collapsed to its head; the mark lives in its body, so open it first (the handle is the sheet's toggle).
+  await sleep(120);
+  await evaluate(`(()=>{const h=document.querySelector("#broadside .slip-handle");if(h&&!document.getElementById("broadside").classList.contains("open"))h.click();})()`);
+  await sleep(120);
   // The post-tap sleep lets a pending anchor navigation COMMIT before a fresh evaluate reads the path: a same-evaluate read cannot see it (the guard-prover proved a dropped preventDefault survived that shape).
   const tapAt = async () => {
     const p = await evaluate(`(()=>{const m=document.querySelector('a.fn[data-note="note-survey"]');

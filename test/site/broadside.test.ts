@@ -2,71 +2,85 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-// #270 The Broadside: controls grouped by what they do to the WORLD (The Land = generation, The Hand = dressing, The Press = actions). Moving one across the hairline is a re-ratification, not a tidy.
+// #270 The Broadside: controls grouped by what they do to the WORLD (The Land = generation, The Hand = dressing). Since #463 the Broadside rides the slip; the seed row stands in the room's folio (#462 ruling 8) and the rest of the Press is the legend row (ruling 4). Moving a control across a hairline is a re-ratification, not a tidy.
 const here = (p: string): string => readFileSync(new URL(p, import.meta.url), { encoding: "utf8" });
 const page = here("../../src/pages/explorer/index.astro");
 const glossary = here("../../src/pages/glossary/index.astro");
 const app = here("../../src/site/explorer/app.ts");
 
-// Each group is a role="group" region labelled by its head id; slice the page into the three blocks in reading order.
-function groupBlock(headId: string, nextHeadId: string | null): string {
-  const start = page.indexOf(`aria-labelledby="${headId}"`);
-  assert.ok(start >= 0, `the page is missing the ${headId} group`);
-  const end = nextHeadId ? page.indexOf(`aria-labelledby="${nextHeadId}"`) : page.length;
-  assert.ok(end > start, `${headId} does not precede ${nextHeadId} in the page`);
+// Each group is a role="group" region labelled by its head id; slice the page into its blocks in reading order.
+function block(from: string, to: string): string {
+  const start = page.indexOf(from);
+  assert.ok(start >= 0, `the page is missing ${from}`);
+  const end = page.indexOf(to, start);
+  assert.ok(end > start, `${from} does not precede ${to} in the page`);
   return page.slice(start, end);
 }
 
-const LAND = ['id="seed"', 'id="random"', 'id="type"', 'id="band"', 'id="land"', 'id="coast"'];
+const SEED = ['id="seed"', 'id="random"', 'id="draw"'];
+const LAND = ['id="type"', 'id="band"', 'id="land"', 'id="coast"'];
 const HAND = ['id="style"', 'id="theme"', 'id="legend"', 'id="arms"', 'id="beasts"', 'id="ages"'];
-const PRESS = ['id="draw"', 'id="verso-turn"', 'id="order-plates"', 'id="journal-link"'];
+const PRESS = ['id="verso-turn"', 'id="order-plates"', 'id="journal-link"'];
 
-test("the Broadside groups exist in reading order: Land, Hand, Press (#270)", () => {
+test("the Broadside groups exist in reading order: the seed row in the folio, then Land and Hand on the slip, then the Press as the legend row (#270, #463)", () => {
+  const seed = page.indexOf('aria-label="The seed"');
   const land = page.indexOf('aria-labelledby="grp-land"');
   const hand = page.indexOf('aria-labelledby="grp-hand"');
   const press = page.indexOf('aria-labelledby="grp-press"');
-  assert.ok(land >= 0, "the page is missing The Land group");
+  assert.ok(seed >= 0, "the page is missing the seed group");
+  assert.ok(land > seed, "The Land does not follow the seed row");
   assert.ok(hand > land, "The Hand does not follow The Land");
   assert.ok(press > hand, "The Press does not follow The Hand");
 });
 
-test("The Land holds every generation control and no dressing control (#270)", () => {
-  const block = groupBlock("grp-land", "grp-hand");
-  for (const id of LAND) {
-    assert.ok(block.includes(id), `The Land lost ${id}, a control that reshapes the geography`);
+test("the seed row holds the seed, the dice and Draw, and nothing else (#462 ruling 8)", () => {
+  const row = block('aria-label="The seed"', "</RoomFolio>");
+  for (const id of SEED) {
+    assert.ok(row.includes(id), `the seed row lost ${id}`);
   }
-  for (const id of [...HAND, ...PRESS]) {
-    assert.ok(!block.includes(id), `${id} sits under The Land but does not reshape the geography`);
+  for (const id of [...LAND, ...HAND, ...PRESS]) {
+    assert.ok(!row.includes(id), `${id} sits in the seed row but is not the seed`);
+  }
+  assert.match(row, /<button id="draw" class="primary">/, "Draw is no longer the room's sole primary button");
+});
+
+test("The Land holds every generation control and no dressing control (#270)", () => {
+  const land = block('aria-labelledby="grp-land"', 'aria-labelledby="grp-hand"');
+  for (const id of LAND) {
+    assert.ok(land.includes(id), `The Land lost ${id}, a control that reshapes the geography`);
+  }
+  for (const id of [...SEED, ...HAND, ...PRESS]) {
+    assert.ok(!land.includes(id), `${id} sits under The Land but does not reshape the geography there`);
   }
 });
 
 test("The Hand holds every dressing control and no generation control (#270)", () => {
-  const block = groupBlock("grp-hand", "grp-press");
+  const hand = block('aria-labelledby="grp-hand"', 'class="fn-note"');
   for (const id of HAND) {
-    assert.ok(block.includes(id), `The Hand lost ${id}, a control that dresses the same world`);
+    assert.ok(hand.includes(id), `The Hand lost ${id}, a control that dresses the same world`);
   }
-  for (const id of [...LAND, ...PRESS]) {
-    assert.ok(!block.includes(id), `${id} sits under The Hand but reshapes the world or presses it`);
+  for (const id of [...SEED, ...LAND, ...PRESS]) {
+    assert.ok(!hand.includes(id), `${id} sits under The Hand but reshapes the world or presses it`);
   }
 });
 
-test("The Press holds the actions; Draw stays the sole primary; the Print Room stays a link (#270)", () => {
-  const block = groupBlock("grp-press", null);
+test("The Press is the legend row: Turn the sheet, then the Print Room and the journal as gold roads (#462 ruling 4)", () => {
+  const press = block('aria-labelledby="grp-press"', "</nav>");
   for (const id of PRESS) {
-    assert.ok(block.includes(id), `The Press lost ${id}`);
+    assert.ok(press.includes(id), `The Press lost ${id}`);
   }
-  for (const id of [...LAND, ...HAND]) {
-    assert.ok(!block.includes(id), `${id} sits under The Press but is not an action`);
+  for (const id of [...SEED, ...LAND, ...HAND]) {
+    assert.ok(!press.includes(id), `${id} sits under The Press but is not an action`);
   }
-  assert.match(block, /<button id="draw" class="primary">/, "Draw is no longer the sole primary button");
-  assert.match(block, /<a id="order-plates" class="action-link"/, "the Print Room link stopped being the action-link <a>");
+  assert.match(press, /<button id="verso-turn" class="legend-btn" type="button">/, "Turn the sheet is the row's one button");
+  assert.match(press, /<a id="order-plates" class="legend-btn gold"/, "the Print Room road stopped being the gold legend <a>");
+  assert.match(press, /<a id="journal-link" class="legend-btn gold"/, "the journal road stopped being the gold legend <a>");
 });
 
-// The journal pointer (ratified 2026-08-11, decision 2 on #270): always-visible gold action-link, consciously updating #321 decision 3's hidden caption; the old wrapper must be GONE, not hidden.
-test("the journal pointer is the always-visible action-link button, not the old caption (#270)", () => {
-  assert.match(page, /<a id="journal-link" class="action-link"/, "the journal pointer is not the gold action-link button");
+// The journal pointer (ratified 2026-08-11, decision 2 on #270): always visible, the print road's gold peer; the old caption wrapper must be GONE, not hidden.
+test("the journal pointer is the always-visible gold road, not the old caption (#270)", () => {
   assert.ok(!page.includes('id="journal-line"'), "the old #journal-line caption wrapper survived the move");
-  assert.ok(page.includes("Read the Journal in the Reading Room"), "the ratified button copy is missing");
+  assert.ok(page.includes('<span class="verb">Read the journal in</span><span class="room">The Reading Room</span>'), "the road's verb and room lines are missing");
   assert.ok(!app.includes("journalLine"), "app.ts still gates a caption wrapper that no longer exists");
 });
 

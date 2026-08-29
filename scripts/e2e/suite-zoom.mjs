@@ -282,6 +282,22 @@ export async function run(ctx) {
   );
   await shoot("explorer-zoom-deeplink-k4.png"); // manual: opened straight into a 4x framing from the link
 
+  // #463: the chart room fits the sheet to the viewport, so a resize refits the box the camera is clamped against; the room holds the FRAMING (cx/cy/k) across the refit, never the raw transform, or a resize walks the camera and the settle re-drafts a different region (the G7 class, found by the harness's own screenshot resize).
+  const sheetBefore = await evaluate(`document.getElementById("sheet").getBoundingClientRect().width`);
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 600, deviceScaleFactor: 1, mobile: false });
+  await sleep(400); // past the resize layout and the 250ms settle debounce
+  const z13b = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));const s=window.__vellumZoomState();return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sk:s.k,sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`);
+  await send("Emulation.clearDeviceMetricsOverride");
+  await sleep(400);
+  const z13c = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`);
+  check(
+    "Z13b a resize refits the sheet but holds the camera's framing: cx/cy/k unchanged across a short viewport (height-bound fit) and back (#463)",
+    z13b.sheet !== sheetBefore && Math.abs(z13c.sheet - sheetBefore) < 1 &&
+      z13b.cx === "0.5000" && z13b.cy === "0.5000" && z13b.k === "4.0000" && z13b.sk === 4 &&
+      z13c.cx === "0.5000" && z13c.cy === "0.5000" && z13c.k === "4.0000",
+    JSON.stringify({ sheetBefore, z13b, z13c }),
+  );
+
   // The crop is proven by projected-settlement COUNT: integer counts are immune to the cross-engine float drift that bars an SVG byte compare here.
   const z15 = await evaluate(
     `(async()=>{const win={u0:0.375,v0:0.375,u1:0.625,v1:0.625};` +

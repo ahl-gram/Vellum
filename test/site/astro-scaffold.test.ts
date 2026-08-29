@@ -103,6 +103,8 @@ const PAGES: readonly PageSpec[] = [
     description: "Generate procedural fantasy maps in your browser. Every seed is a world.",
     tagline: "every seed is a world, draw one",
     scriptSrc: "./app.bundle.js",
+    chartRoom: true,
+    folio: true,
   },
   {
     route: "print-room/index.html",
