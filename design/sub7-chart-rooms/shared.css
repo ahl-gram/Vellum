@@ -1,0 +1,244 @@
+/* Sub 7/8 chart-room mockups: the atelier-map dress (design/atelier-map/base.css + stage.css) worn by a ROOM. Every value is the mockup's or a shell token; deviations are named in the reply. */
+:root {
+  --ink-dark: #4a3826; --ink-brown: #6b5a40; --ink-faded: #857257;
+  --line-tan: #b9a77f; --line-faint: #cdbd97;
+  --parchment: #efe6cf; --parchment-panel: #f4ecd8; --parchment-bright: #fff7e4; --parchment-deep: #e6d9b8;
+  --control-cream: #f8f1e0; --control-gold: #f0e3bd; --control-gold-lit: #f7edcd;
+  --ink-press: #5d4831; --ink-annals: #3f3122; --ink-surveyor: #7a5f38; --ink-surveyor-faded: #99855f;
+  --chart-paper: #f2e8cf; --chart-ink: #3d2f1f; --iron-red: #7a1f12;
+  --sheet-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);
+  --font-serif-fallback: 'Iowan Old Style', 'Palatino', Georgia, serif;
+  --font-display: 'IM Fell English SC', var(--font-serif-fallback);
+  --font-flourish: 'IM Fell English', var(--font-serif-fallback);
+  --font-body: 'EB Garamond', var(--font-serif-fallback);
+  --chrome-x: 1.6rem; --chrome-y: 1.4rem;
+  --slip-w: 22rem;
+  --foot-h: 6.6rem;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; margin: 0; }
+body {
+  font-family: var(--font-body); font-size: 16px; line-height: 1.45;
+  color: var(--parchment);
+  background:
+    radial-gradient(120% 90% at 50% 30%, rgb(from var(--ink-dark) r g b / 0.0) 40%, rgb(from var(--chart-ink) r g b / 0.55) 100%),
+    radial-gradient(80% 70% at 30% 20%, #55402a 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+  background-color: var(--chart-ink);
+}
+h1, h2, h3, p, ol, ul, figure { margin: 0; }
+button, input, select { font: inherit; }
+
+/* ---- the deep's fog (mockup) ---- */
+.fog { position: fixed; inset: -30%; pointer-events: none; z-index: 3; opacity: 0.4; }
+.fog.a { background: radial-gradient(45% 30% at 30% 60%, rgb(from var(--parchment) r g b / 0.10), transparent 70%); animation: fog-drift-a 90s ease-in-out infinite alternate; }
+.fog.b { background: radial-gradient(40% 28% at 70% 30%, rgb(from var(--line-tan) r g b / 0.09), transparent 70%); animation: fog-drift-b 70s ease-in-out infinite alternate; }
+@keyframes fog-drift-a { from { transform: translate(-4%, 2%); } to { transform: translate(5%, -3%); } }
+@keyframes fog-drift-b { from { transform: translate(3%, -2%); } to { transform: translate(-5%, 3%); } }
+
+/* ---- the stage and the sheet (mockup) ---- */
+.stage { position: fixed; inset: 0; z-index: 1; overflow: hidden; cursor: grab; touch-action: none; }
+.stage.dragging { cursor: grabbing; }
+.sheet { position: absolute; left: 0; top: 0; width: 1500px; height: 1157.93px; transform-origin: 0 0; will-change: transform;
+  filter: drop-shadow(0 18px 60px rgb(from var(--chart-ink) r g b / 0.55)); }
+.sheet .chart { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+.sheet .overlay { position: absolute; inset: 0; pointer-events: none; }
+
+/* the landing: the sheet settles onto the desk, the chrome inks in after (#461 ruling 6) */
+@keyframes sheet-land { from { opacity: 0; transform: translateY(10px) scale(1.004); } }
+@keyframes ink-in { from { opacity: 0; } }
+.stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+.chrome, .slip, .legend, .strip { animation: ink-in 0.5s 0.18s ease-out both; }
+
+/* edge vignettes keep the parchment chrome legible when the pale chart fills the frame (mockup) */
+.vignette { position: fixed; left: 0; right: 0; height: 11rem; pointer-events: none; z-index: 5; }
+.vignette.top { top: 0; background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.62), transparent); }
+.vignette.bottom { bottom: 0; background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.62), transparent); }
+
+/* ---- floating chrome (mockup) ---- */
+.chrome { position: fixed; z-index: 10; line-height: normal; }
+.corner.tl { left: var(--chrome-x); top: var(--chrome-y); }
+.corner.tr { right: var(--chrome-x); top: var(--chrome-y); text-align: right; }
+.corner.bl { left: var(--chrome-x); bottom: var(--chrome-y); }
+.corner.br { right: var(--chrome-x); bottom: var(--chrome-y); }
+
+.wordmark { font-family: var(--font-display); font-size: 2.1rem; letter-spacing: 0.12em; line-height: 1.15; font-weight: 400; }
+.wordmark a { color: var(--parchment-bright); text-decoration: none; display: inline-block; transition: transform 180ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+.wordmark a:hover, .wordmark a:focus-visible { transform: translateY(-2px) rotate(-0.6deg); }
+.tagline { font-family: var(--font-flourish); font-style: italic; font-size: 0.92rem; color: var(--parchment); }
+.rooms { margin-top: 0.55rem; font-family: var(--font-display); font-size: 0.72rem; letter-spacing: 0.14em; color: var(--ink-faded); }
+.rooms .sep { margin: 0 0.35em; opacity: 0.7; }
+.rooms a { display: inline-block; color: var(--parchment); text-decoration: none; transition: color 0.2s ease, transform 180ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+.rooms a:hover, .rooms a:focus-visible { color: var(--parchment-bright); transform: translateY(-2px); }
+.rooms [aria-current="page"] { display: inline-block; vertical-align: top; color: var(--parchment-bright); text-decoration: underline; text-underline-offset: 0.45em; text-decoration-thickness: 1px; }
+.rooms-reveal { display: none; }
+
+/* the room's own folio, upper right: the h1 stands here (#288), then the room's one primary control */
+.folio-room { max-width: 19rem; }
+.folio-room h1 { font-family: var(--font-display); font-weight: 400; font-size: 1.32rem; letter-spacing: 0.14em; line-height: 1.2; color: var(--parchment-bright); }
+.folio-room .room-tagline { font-family: var(--font-flourish); font-style: italic; font-size: 0.92rem; color: var(--parchment); margin-top: 0.1rem; }
+.folio-room .dateline { margin-top: 0.55rem; font-family: var(--font-body); font-variant-caps: small-caps; font-size: 0.85rem; letter-spacing: 0.08em; color: var(--line-tan); }
+.seed-controls { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.55rem; }
+.seed-controls .control { width: 7.4rem; font-family: var(--font-body); font-size: 1rem; color: var(--parchment-bright);
+  background: rgb(from var(--chart-ink) r g b / 0.45); border: 1px solid var(--line-tan); padding: 0.32rem 0.6rem; text-align: center; font-variant-numeric: tabular-nums; }
+.seed-controls .control:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 1px; }
+.seed-controls .primary { white-space: nowrap; font-family: var(--font-display); font-size: 0.82rem; letter-spacing: 0.14em; color: var(--ink-dark);
+  background: var(--control-gold); border: 1px solid var(--line-tan); padding: 0.32rem 0.9rem; cursor: pointer; transition: background 0.2s ease; }
+.seed-controls .primary:hover, .seed-controls .primary:focus-visible { background: var(--parchment-bright); }
+.seed-controls .dice { width: 2.4rem; padding: 0.32rem 0; font-family: var(--font-body); font-size: 1rem; color: var(--parchment); cursor: pointer;
+  background: rgb(from var(--chart-ink) r g b / 0.45); border: 1px solid var(--line-tan); transition: background 0.2s ease; }
+.seed-controls .dice:hover { background: var(--ink-dark); color: var(--parchment-bright); }
+.seed-gloss { margin-top: 0.4rem; font-family: var(--font-flourish); font-style: italic; font-size: 0.76rem; color: var(--ink-faded); }
+
+/* the chart's folio, lower left (mockup) */
+.folio { max-width: 24rem; }
+.folio-title { font-family: var(--font-display); font-size: 0.92rem; letter-spacing: 0.16em; color: var(--parchment); }
+.folio-sub { font-family: var(--font-flourish); font-style: italic; font-size: 0.8rem; color: var(--ink-faded); margin-top: 0.15rem; line-height: 1.4; }
+.folio-coords { font-family: var(--font-body); font-variant-caps: small-caps; font-size: 0.85rem; letter-spacing: 0.06em; color: var(--line-tan); margin-top: 0.35rem; min-height: 1.2em; }
+.folio-note { font-family: var(--font-body); font-size: 0.86rem; color: var(--parchment); margin-top: 0.4rem; line-height: 1.45; max-width: 22rem; }
+
+/* the Surveyor's Glass, lower right (mockup's zoomery): it hugs the chart's corner, so an open slip pushes it left */
+.zoomery { display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-end; transition: right 0.32s cubic-bezier(0.2, 0.7, 0.3, 1); }
+.corner.br.zoomery { right: calc(var(--slip-w) + 2rem + 1.4rem); }
+body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); }
+.zoom-btn { width: 2.3rem; height: 2.3rem; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-body); font-size: 1.15rem; line-height: 1; color: var(--parchment);
+  background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease; }
+.zoom-btn:hover, .zoom-btn:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
+.zoom-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.zoom-keys { margin-top: 0.1rem; padding: 0.28rem 0.5rem; text-align: right; white-space: nowrap;
+  background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan);
+  font-family: var(--font-flourish); font-style: italic; font-size: 0.62rem; line-height: 1.5; letter-spacing: 0.04em; color: var(--line-tan); }
+.zoom-keys span { display: block; }
+.zoom-keys kbd { font-family: inherit; font-style: normal; color: var(--parchment); }
+
+/* the legend row, bottom centre (mockup): the room's roads out */
+.legend { position: fixed; left: calc((100vw - var(--slip-w) - 2rem) / 2); bottom: var(--chrome-y); transform: translateX(-50%); z-index: 10; text-align: center; transition: left 0.32s cubic-bezier(0.2, 0.7, 0.3, 1); }
+body:has(.slip.folded) .legend { left: 50%; }
+.legend-head { font-family: var(--font-flourish); font-style: italic; font-size: 0.82rem; color: var(--ink-faded); margin-bottom: 0.45rem; }
+.legend-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+.legend-btn { appearance: none; cursor: pointer; text-decoration: none; display: block;
+  background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan);
+  padding: 0.4rem 0.9rem 0.35rem; text-align: center; transition: background 0.2s ease, transform 0.2s ease; }
+.legend-btn:hover, .legend-btn:focus-visible { background: var(--ink-dark); transform: translateY(-2px); }
+.legend-btn .verb { display: block; font-family: var(--font-flourish); font-style: italic; font-size: 0.78rem; color: var(--line-tan); }
+.legend-btn .room { display: block; font-family: var(--font-display); font-size: 0.86rem; letter-spacing: 0.12em; color: var(--parchment); }
+.legend-btn.gold { background: var(--control-gold); border-color: var(--line-tan); }
+.legend-btn.gold .verb { color: var(--ink-brown); }
+.legend-btn.gold .room { color: var(--ink-dark); }
+.legend-btn.gold:hover { background: var(--parchment-bright); }
+
+/* ---- the slip: the room's working panel, the mockup's station card grown into a desk ---- */
+.slip { position: fixed; z-index: 20; right: 2rem; top: 9rem;
+  width: var(--slip-w); max-height: calc(100vh - 11rem);
+  display: flex; flex-direction: column;
+  background: var(--parchment-panel); color: var(--ink-dark);
+  border: 1px solid var(--line-tan); outline: 3px double var(--line-faint); outline-offset: 6px;
+  box-shadow: var(--sheet-shadow);
+  transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), opacity 0.32s; }
+.slip.folded { transform: translateX(calc(100% + 2.6rem)); opacity: 0; }
+.slip-head { padding: 1.3rem 1.6rem 0.75rem; position: relative; flex: none; }
+.slip-body { padding: 0 1.6rem 1.3rem; overflow-y: auto; overscroll-behavior: contain; flex: 1 1 auto; min-height: 0; }
+.slip-foot { flex: none; padding: 0.8rem 1.6rem 1rem; border-top: 1px solid var(--line-faint); }
+.slip .card-verb { font-family: var(--font-flourish); font-style: italic; font-size: 0.92rem; color: var(--ink-brown); }
+.slip .card-title { font-family: var(--font-display); font-weight: 400; font-size: 1.45rem; letter-spacing: 0.06em; line-height: 1.2; margin-top: 0.1rem; }
+.slip .card-where { font-family: var(--font-body); font-variant-caps: small-caps; font-size: 0.82rem; letter-spacing: 0.08em; color: var(--ink-faded);
+  border-bottom: 1px solid var(--line-faint); padding-bottom: 0.55rem; margin-top: 0.25rem; }
+.slip .card-prose { font-size: 0.98rem; line-height: 1.55; margin-top: 0.7rem; }
+.slip .intro { font-family: var(--font-flourish); font-style: italic; color: var(--ink-brown); font-size: 0.95rem; line-height: 1.5; }
+.slip .note { font-size: 0.82rem; color: var(--ink-faded); line-height: 1.45; }
+.slip a { color: var(--ink-dark); }
+.slip-fold { position: absolute; right: 0.5rem; top: 0.45rem; appearance: none; border: 0; background: none; cursor: pointer;
+  font-family: var(--font-body); font-size: 1.05rem; color: var(--ink-faded); padding: 0.2rem 0.4rem; }
+.slip-fold:hover { color: var(--ink-dark); }
+/* the tab that brings a folded slip back: rides the right edge like a bookmark */
+.slip-tab { position: fixed; right: 0; top: 50%; transform: translateY(-50%) rotate(180deg); z-index: 19;
+  writing-mode: vertical-rl; padding: 0.9rem 0.45rem; cursor: pointer;
+  font-family: var(--font-display); font-size: 0.72rem; letter-spacing: 0.16em; color: var(--parchment);
+  background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); border-left: 0;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s 0.2s; }
+.slip-tab.shown { opacity: 1; pointer-events: auto; }
+.slip-tab:hover { background: var(--ink-dark); }
+
+/* archivist labels (house.css roles) */
+.archivist-label { font-size: 0.72rem; letter-spacing: 0.1em; font-weight: 400; text-transform: uppercase; color: var(--ink-faded); }
+.archivist-head { font-family: var(--font-body); font-size: 0.82rem; letter-spacing: 0.18em; font-weight: 600; text-transform: uppercase; color: var(--ink-faded); }
+.panel-gloss { font-family: var(--font-flourish); font-style: italic; font-size: 0.85rem; color: var(--ink-brown); margin: 0.1rem 0 0.55rem; }
+
+/* the control idiom inside a slip (house.css) */
+.slip input[type="number"], .slip select, .slip button, .slip input.control { font-family: inherit; font-size: 0.95rem; color: var(--ink-dark);
+  background: var(--control-cream); border: 1.5px solid var(--ink-dark); border-radius: 4px; padding: 0.4rem 0.6rem; }
+.slip button { cursor: pointer; }
+.slip button:hover { background: var(--parchment-bright); }
+.slip button.primary { background: var(--ink-dark); color: var(--chart-paper); letter-spacing: 0.08em; }
+.slip button.primary:hover { background: var(--ink-press); }
+.slip a.control { display: inline-block; font-size: 0.95rem; color: var(--ink-dark); background: var(--control-cream); border: 1.5px solid var(--ink-dark);
+  border-radius: 4px; padding: 0.4rem 0.6rem; text-decoration: none; letter-spacing: 0.04em; }
+
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 2px; }
+.slip :is(button, a, input, select):focus-visible { outline-color: var(--ink-dark); }
+
+/* ---- the notice stamp on the deep (mockup) stays home's; rooms carry none ---- */
+
+/* ---- narrow sheets (mockup + the shell's drawer) ---- */
+@media (max-width: 900px) {
+  :root { --chrome-x: 1rem; --chrome-y: 0.9rem; }
+  .wordmark { font-size: 1.5rem; }
+  .tagline { font-size: 0.78rem; }
+  .vignette { height: 8rem; }
+  /* the shell's drawer, as shipped at #483 */
+  .rooms { display: block; position: absolute; left: calc(-1 * var(--chrome-x)); top: calc(-1 * var(--chrome-y));
+    box-sizing: border-box; width: min(16rem, 100vw); height: 100vh; height: 100dvh; margin: 0; padding: 0 1.5rem 2rem var(--chrome-x);
+    overflow-y: auto; background: var(--chart-ink); border-right: 1px solid rgb(from var(--line-tan) r g b / 0.3);
+    box-shadow: 0 0 40px rgb(from var(--chart-ink) r g b / 0.6); transform: translateX(-100%); visibility: hidden;
+    transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s linear 0.32s; z-index: -1; }
+  .rooms::before { content: ""; display: block; position: sticky; top: 0; z-index: 1; height: 6.2rem; background: var(--chart-ink); }
+  .rooms-reveal:checked ~ .rooms { transform: none; visibility: visible; transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s; }
+  .rooms .sep { display: none; }
+  .rooms a, .rooms [aria-current="page"] { display: block; padding: 0.85rem 0; font-size: 0.95rem; letter-spacing: 0.16em; }
+  .rooms-reveal { display: inline-block; vertical-align: top; appearance: none; -webkit-appearance: none; width: 1.7rem; height: 1rem; margin: 0.6rem 0 0; padding: 0; border: 0; cursor: pointer;
+    background: repeating-linear-gradient(var(--parchment) 0, var(--parchment) 2px, transparent 2px, transparent 7px); }
+  .rooms-reveal:checked { background: repeating-linear-gradient(var(--parchment-bright) 0, var(--parchment-bright) 2px, transparent 2px, transparent 7px); }
+  body:has(.rooms-reveal:checked) .corner.tl { z-index: 45; }
+  .scrim { display: none; }
+  body:has(.rooms-reveal:checked) .scrim { display: block; position: fixed; inset: 0; z-index: 41; background: rgb(from var(--chart-ink) r g b / 0.45); }
+
+  .folio-room { max-width: 12.5rem; }
+  .folio-room h1 { font-size: 0.98rem; }
+  .folio-room .room-tagline { display: none; }
+  .folio-room .dateline { font-size: 0.72rem; margin-top: 0.3rem; }
+  .seed-controls .control { width: 6.2rem; padding: 0.3rem 0.4rem; }
+  .seed-controls .primary { padding: 0.3rem 0.7rem; }
+  .seed-controls .dice { display: none; }
+  .seed-gloss { display: none; }
+  .corner.bl { display: none; }
+  .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { right: 1rem; top: auto; transform: none; bottom: calc(var(--sheet-h, 6rem) + 1rem); }
+  .zoom-keys { display: none; }
+  .slip-tab { display: none; }
+
+  /* the slip becomes the bottom sheet: the mockup's own card-slip rule, with a handle so the chart stays whole underneath */
+  .slip { right: 0; left: 0; top: auto !important; bottom: 0; transform: none; width: 100%; max-height: 72vh !important;
+    outline-offset: -8px; transition: none; }
+  .slip.folded { opacity: 1; transform: none; }
+  .slip:not(.open) .slip-body, .slip:not(.open) .slip-foot { display: none; }
+  .slip.open .slip-head::before { background: var(--ink-faded); }
+  .slip-head { padding: 0.75rem 1.3rem 0.5rem 1.3rem; cursor: pointer; }
+  .slip-head::before { content: ""; display: block; width: 2.6rem; height: 3px; margin: 0 auto 0.55rem; background: var(--line-tan); border-radius: 2px; }
+  .slip .card-title { font-size: 1.15rem; }
+  .slip-fold { display: none; }
+  .slip-body { padding: 0 1.3rem 1rem; }
+  .slip-foot { padding: 0.7rem 1.3rem 0.9rem; }
+  .legend { display: none; }
+  .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.2rem; }
+  .legend.in-slip .legend-btn { background: var(--ink-dark); }
+  .legend.in-slip .legend-btn.gold { background: var(--control-gold); }
+}
+@media (min-width: 901px) { .legend.in-slip { display: none; } .scrim { display: none; } }
+/* the keys slip needs a band wide enough for folio + roads + Glass beside a slip; measured colliding at 1280 with the 24rem broadside */
+@media (max-width: 1440px) { .zoom-keys { display: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .fog.a, .fog.b { animation: none; }
+  .stage, .chrome, .slip, .legend, .strip { animation: none; }
+  .rooms a, .legend-btn, .slip, .slip-tab, .wordmark a { transition: none; }
+}

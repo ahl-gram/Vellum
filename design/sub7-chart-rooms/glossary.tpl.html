@@ -1,0 +1,42 @@
+<title>Vellum · The Glossary</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@1&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+{{CSS}}
+{{DOCCSS}}
+</style>
+<body class="room">
+<div class="fog a"></div><div class="fog b"></div>
+<div class="band" aria-hidden="true"></div>
+{{NAV}}
+<aside class="chrome corner tr folio-room">
+  <h1>The Glossary</h1>
+  <p class="room-tagline">the words on the charts</p>
+  <form class="seed-controls find" onsubmit="return false">
+    <input class="control" type="search" placeholder="find a term" aria-label="Find a term">
+  </form>
+  <p class="seed-gloss">{{GLOSSARY_COUNT}}</p>
+</aside>
+
+<main>
+<div class="sheet">
+<div class="columns">
+{{CONTENT}}
+</div>
+</div>
+</main>
+<footer>Vellum · an atelier of imaginary cartography</footer>
+
+<aside class="slip" id="slip" aria-labelledby="index-title">
+  <div class="slip-head">
+    <button class="slip-fold" aria-label="Fold the index away">&times;</button>
+    <p class="card-verb">Find your way</p>
+    <h2 class="card-title" id="index-title">On this page</h2>
+    <p class="card-where">the section you are reading is inked</p>
+  </div>
+  <div class="slip-body">
+    <ol class="index">{{INDEX}}</ol>
+  </div>
+</aside>
+<button class="slip-tab" type="button">On this page</button>
+<script>{{DOCJS}}</script>

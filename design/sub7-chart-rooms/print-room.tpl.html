@@ -1,0 +1,124 @@
+<title>Vellum · The Print Room</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@1&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+{{CSS}}
+.folio-room { max-width: 23rem; }
+.seed-controls .control { width: 5.6rem; }
+.seed-controls select.control { width: 7.4rem; appearance: none; -webkit-appearance: none; text-align: left; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--line-tan) 50%), linear-gradient(135deg, var(--line-tan) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 55%, calc(100% - 9px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+/* the bound atlas's contents: the journal's row idiom, dim until the atlas is bound */
+.contents { list-style: none; margin: 0.9rem 0 0; padding: 0; }
+.contents li { display: flex; gap: 0.8rem; padding: 0.3rem 0; border-bottom: 1px solid var(--line-faint); opacity: 0.45; font-size: 0.92rem; line-height: 1.4; }
+.contents li.inked { opacity: 1; }
+.contents .cr-num { flex: 0 0 2.4rem; text-align: right; font-family: var(--font-body); font-variant-caps: small-caps; letter-spacing: 0.06em; color: var(--ink-faded); }
+.contents .cr-text { color: var(--ink-annals); }
+.contents .cr-text em { font-family: var(--font-flourish); font-style: italic; color: var(--ink-brown); }
+.contents-head { font-family: var(--font-display); letter-spacing: 0.05em; color: var(--ink-brown); margin-top: 1rem; font-size: 0.95rem; }
+.bind-row { display: flex; align-items: center; gap: 0.7rem; margin-top: 0.9rem; flex-wrap: wrap; }
+.atlas-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.slip button:disabled { opacity: 0.45; cursor: default; }
+.slip button:disabled:hover { background: var(--control-cream); }
+.slip .caveat { font-size: 0.78rem; font-style: italic; color: var(--ink-faded); line-height: 1.45; margin-top: 0.7rem; }
+/* the legend row is the plate row: the poster sizes as the room's roads out */
+.legend-head .pressed { display: inline-flex; align-items: center; gap: 0.5rem; }
+.legend-head select { appearance: none; -webkit-appearance: none; cursor: pointer; font-family: var(--font-body); font-size: 0.86rem; color: var(--parchment-bright);
+  background: rgb(from var(--chart-ink) r g b / 0.45); border: 1px solid var(--line-tan); padding: 0.2rem 1.6rem 0.2rem 0.55rem;
+  background-image: linear-gradient(45deg, transparent 50%, var(--line-tan) 50%), linear-gradient(135deg, var(--line-tan) 50%, transparent 50%);
+  background-position: calc(100% - 12px) 55%, calc(100% - 7px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+.legend-btn .verb.dim { font-family: var(--font-body); font-variant-caps: small-caps; font-style: normal; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+@media (max-width: 900px) {
+  .folio-room { max-width: 13rem; }
+  .seed-controls { flex-wrap: wrap; }
+  .seed-controls select.control { display: none; }
+  .legend.in-slip .legend-row { gap: 0.4rem; }
+  .legend.in-slip .legend-btn { flex: 1 1 40%; }
+}
+</style>
+<script>window.ROOM_CAM = { top: 60, bottom: 104, bottomNarrow: 58 };</script>
+
+<div class="fog a"></div><div class="fog b"></div>
+<div class="stage" id="stage">
+  <div class="sheet" id="sheet">
+    <img class="chart" src="{{CHART_42}}" alt="The proof: The Isle of Rahai, chart 42, antique style">
+  </div>
+</div>
+<div class="vignette top"></div><div class="vignette bottom"></div>
+
+{{NAV}}
+
+<aside class="chrome corner tr folio-room">
+  <h1>The Print Room</h1>
+  <p class="room-tagline">take a world home</p>
+  <form class="seed-controls" onsubmit="return false">
+    <input class="control" type="text" inputmode="numeric" pattern="[0-9]*" value="42" aria-label="seed">
+    <select class="control" aria-label="style"><option selected>antique</option><option>topographic</option><option>ink</option><option>nautical</option></select>
+    <button class="primary" type="submit">Pull a proof</button>
+  </form>
+  <p class="seed-gloss">bring a chart in from the Explorer, or call one up by number</p>
+</aside>
+
+<aside class="slip" id="slip" aria-labelledby="atlas-title">
+  <div class="slip-head">
+    <button class="slip-fold" aria-label="Fold the order desk away">&times;</button>
+    <p class="card-verb">Take home</p>
+    <h2 class="card-title" id="atlas-title">The Bound Atlas</h2>
+    <p class="card-where">the whole atlas on one sheet</p>
+  </div>
+  <div class="slip-body">
+    <p class="intro">Every draughting, the thematic and regional surveys, the banners, the chronicle, and the gazetteer, bound from the proof on the desk.</p>
+    <div class="bind-row">
+      <button class="primary" type="button">Bind the atlas</button>
+      <span class="note">about a minute to draw</span>
+    </div>
+    <p class="contents-head">Contents of the atlas</p>
+    <ol class="contents">
+      <li class="inked"><span class="cr-num">i</span><span class="cr-text">The chart, <em>antique</em>, as proofed</span></li>
+      <li><span class="cr-num">ii</span><span class="cr-text">Other draughtings: <em>topographic, ink, nautical</em></span></li>
+      <li><span class="cr-num">iii</span><span class="cr-text">Thematic surveys: <em>vegetation, temperature, rainfall, population</em></span></li>
+      <li><span class="cr-num">iv</span><span class="cr-text">Regional surveys, two close-ins</span></li>
+      <li><span class="cr-num">v</span><span class="cr-text">The prospect of the capital</span></li>
+      <li><span class="cr-num">vi</span><span class="cr-text">The banners of every realm</span></li>
+      <li><span class="cr-num">vii</span><span class="cr-text">The chronicle</span></li>
+      <li><span class="cr-num">viii</span><span class="cr-text">The gazetteer</span></li>
+    </ol>
+    <nav class="legend in-slip" aria-label="A poster plate">
+      <p class="legend-head">A poster plate, pressed as the engraving (SVG)</p>
+      <div class="legend-row">
+        <a class="legend-btn" href="#"><span class="verb dim">1500 px</span><span class="room">Chart</span></a>
+        <a class="legend-btn" href="#"><span class="verb dim">2400 px</span><span class="room">Desk</span></a>
+        <a class="legend-btn" href="#"><span class="verb dim">3300 px</span><span class="room">Wall</span></a>
+        <a class="legend-btn" href="#"><span class="verb dim">4200 px</span><span class="room">Grand</span></a>
+      </div>
+    </nav>
+  </div>
+  <div class="slip-foot">
+    <div class="atlas-actions" role="group" aria-label="Bound atlas">
+      <button type="button" disabled>Print</button>
+      <button type="button" disabled>Download</button>
+      <button type="button" disabled>Hide</button>
+    </div>
+    <p class="caveat">Print opens your browser's Save as PDF, one plate per page. The single file is about 20 MB and opens offline.</p>
+  </div>
+</aside>
+<button class="slip-tab" type="button">The Bound Atlas</button>
+
+<div class="chrome corner bl folio">
+  <p class="folio-title">The Isle of Rahai · Chart № 42</p>
+  <p class="folio-sub">surveyed in the year 1059 of the Cedar Age</p>
+  <p class="folio-coords status" role="status">proof pulled in 412ms · antique</p>
+</div>
+
+<nav class="legend" aria-label="A poster plate">
+  <p class="legend-head"><span class="pressed">A poster plate, pressed as <select aria-label="Pressed as"><option selected>The engraving itself (SVG)</option><option>An impression (PNG)</option><option>A finer impression (PNG ×2)</option></select></span></p>
+  <div class="legend-row">
+    <a class="legend-btn" href="#"><span class="verb dim">1500 px</span><span class="room">Chart</span></a>
+    <a class="legend-btn" href="#"><span class="verb dim">2400 px</span><span class="room">Desk</span></a>
+    <a class="legend-btn" href="#"><span class="verb dim">3300 px</span><span class="room">Wall</span></a>
+    <a class="legend-btn" href="#"><span class="verb dim">4200 px</span><span class="room">Grand</span></a>
+  </div>
+</nav>
+
+{{GLASS}}
+<script>{{JS}}</script>

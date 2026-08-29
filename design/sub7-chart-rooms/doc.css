@@ -1,0 +1,108 @@
+/* ---- document rooms: the sheet is the room ---- */
+html, body { height: auto; overflow: auto; }
+body { color: var(--ink-dark); }
+body.room { padding: 8.4rem 2.2rem 1.6rem; margin: 0; }
+/* the deep on a fixed layer (BaseLayout), the reserved band the head stands on (#461 ruling 5, kept on the rooms that scroll) */
+body::before { content: ""; position: fixed; inset: 0; z-index: -1;
+  background: radial-gradient(120% 90% at 50% 30%, rgb(from var(--ink-dark) r g b / 0.0) 40%, rgb(from var(--chart-ink) r g b / 0.55) 100%),
+    radial-gradient(80% 70% at 30% 20%, #55402a 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+  background-color: var(--chart-ink); }
+.band { position: fixed; inset: 0; z-index: 9; pointer-events: none; }
+.band::before { content: ""; position: absolute; inset: 0;
+  background: radial-gradient(120% 90% at 50% 30%, rgb(from var(--ink-dark) r g b / 0.0) 40%, rgb(from var(--chart-ink) r g b / 0.55) 100%),
+    radial-gradient(80% 70% at 30% 20%, #55402a 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+  background-color: var(--chart-ink); clip-path: inset(0 0 calc(100% - var(--band-h)) 0); }
+.band::after { content: ""; position: absolute; left: 0; right: 0; top: var(--band-h); height: 14px;
+  background: linear-gradient(rgb(from var(--chart-ink) r g b / 0.45), transparent); }
+:root { --band-h: 7.6rem; --slip-w: 16rem; }
+.vignette, .stage, .zoomery { display: none; }
+.fog { z-index: 0; }
+
+/* the sheet leaves the slip its column; the room's h1 stands top-right on the band (pattern point 2) */
+/* the index opens with the room; folding it hands the sheet the width in one settle, and showing it again takes the width back the same way (Alex, 2026-08-28) */
+main { margin: 0 calc(var(--slip-w) + 2.4rem) 0 0; position: relative; z-index: 1; transition: margin-right 0.5s cubic-bezier(0.2, 0.7, 0.3, 1); }
+body:has(.slip.folded) main { margin-right: 0; }
+@media (prefers-reduced-motion: reduce) { main { transition: none; } }
+/* the document sheet is a block in flow, not the stage's 1500px chart sheet */
+.sheet { width: auto; height: auto; left: auto; top: auto; transform: none; filter: none; will-change: auto; }
+.roads.legend { position: static; transform: none; left: auto; bottom: auto; }
+.sheet {
+  background: var(--parchment-panel);
+  background-image: radial-gradient(ellipse at 50% 0%, rgb(255 252 240 / 0.55), transparent 70%), radial-gradient(ellipse at 90% 100%, rgb(110 85 45 / 0.14), transparent 60%);
+  border: 1px solid var(--line-tan); outline: 3px double var(--line-tan); outline-offset: 6px;
+  padding: 2.4rem clamp(1.5rem, 4vw, 3.4rem) 3rem;
+  box-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55); position: relative;
+  line-height: 1.6; }
+.sheet::before, .sheet::after { content: ""; position: absolute; width: 26px; height: 26px; border: 1px solid var(--line-tan); pointer-events: none; }
+.sheet::before { top: 14px; left: 14px; border-right: none; border-bottom: none; }
+.sheet::after { bottom: 14px; right: 14px; border-left: none; border-top: none; }
+@keyframes sheet-settle { from { box-shadow: 0 30px 80px rgb(from var(--chart-ink) r g b / 0.75); } }
+.sheet { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both, sheet-settle 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+/* the broadside (#461 ruling 4) beside a slip: 22rem columns, stated deviation from the ruled ~26rem */
+.columns { column-width: 22rem; column-gap: 3.4rem; column-rule: 1px solid var(--line-faint); }
+.sheet h2 { column-span: all; font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; letter-spacing: 0.09em;
+  border-bottom: 1px solid var(--line-tan); padding-bottom: 0.3rem; margin: 2.4rem 0 1.1rem; scroll-margin-top: calc(var(--band-h) + 1rem); }
+.columns > h2:first-child, .sheet > h2:first-child { margin-top: 0; }
+.sheet h3 { font-family: var(--font-display); font-weight: 400; font-size: 0.95rem; letter-spacing: 0.08em; color: var(--ink-faded); text-transform: uppercase; margin: 2rem 0 0; break-after: avoid; }
+.sheet .intro { margin: 0 0 1.4rem; column-span: all; text-align: left; max-width: 46rem; }
+.sheet p { margin: 0 0 0.6rem; }
+.q, .term { font-weight: 600; color: var(--ink-dark); margin: 1.6rem 0 0.3rem; font-size: 1.08rem; break-after: avoid; scroll-margin-top: calc(var(--band-h) + 1rem); }
+.q:first-of-type, h2 + .q, .term:first-of-type, h3 + .term { margin-top: 0; }
+.a, .def { margin: 0 0 0.6rem; }
+.sheet a { color: var(--ink-dark); }
+.sheet code { background: var(--parchment-deep); padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.9em; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
+.sheet em { font-family: var(--font-flourish); font-style: italic; }
+.toc { display: none; }
+
+/* the roads out stand at the sheet's foot, on the deep, then the footer */
+.roads { margin: 2.2rem 0 0.4rem; text-align: center; }
+.roads .legend-head { margin-bottom: 0.5rem; }
+footer { text-align: center; font-family: var(--font-display); font-size: 0.72rem; letter-spacing: 0.22em; color: var(--line-tan); padding: 1.6rem 0 1.2rem; }
+footer a { color: inherit; }
+
+/* the slip is the index: fixed under the band, scrolling inside, the section being read inked */
+.slip { top: calc(var(--band-h) + 1rem); max-height: calc(100vh - var(--band-h) - 2.6rem); right: 2.2rem; }
+.slip .card-title { font-size: 1.2rem; }
+.index { list-style: none; margin: 0.4rem 0 0; padding: 0; }
+.index > li { padding: 0.45rem 0; border-bottom: 1px solid var(--line-faint); opacity: 0.55; transition: opacity 0.2s; }
+.index > li.inked { opacity: 1; }
+.index .sec { display: block; font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 0.1em; color: var(--ink-dark); text-decoration: none; }
+.index > li.inked .sec { text-decoration: underline; text-underline-offset: 0.3em; text-decoration-thickness: 1px; text-decoration-color: var(--line-tan); }
+.index .sec:hover { color: var(--ink-press); }
+.index .entries { margin: 0.2rem 0 0; padding: 0; list-style: none; font-size: 0.8rem; line-height: 1.45; }
+.index .entries li { padding: 0.1rem 0 0.1rem 0.6rem; border-left: 2px solid transparent; }
+.index .entries li.now { border-left-color: var(--line-tan); }
+.index .entries a { color: var(--ink-brown); text-decoration: none; }
+.index .entries a:hover { color: var(--ink-dark); text-decoration: underline; text-underline-offset: 0.2em; }
+.index .terms { margin: 0.2rem 0 0; font-size: 0.78rem; line-height: 1.5; color: var(--ink-brown); }
+.index .terms a { color: inherit; text-decoration: none; white-space: nowrap; }
+.index .terms a:hover { color: var(--ink-dark); text-decoration: underline; text-underline-offset: 0.2em; }
+.index .terms a + a::before { content: "\00b7"; margin: 0 0.35em 0 0.1em; color: var(--ink-faded); }
+.index .terms a.hit { color: var(--ink-dark); background: var(--parchment-bright); }
+.index .terms a.miss { display: none; }
+.index > li.empty { display: none; }
+.index .count { font-family: var(--font-body); font-variant-caps: small-caps; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--ink-faded); float: right; }
+.find { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.55rem; }
+.find .control { width: 11rem; text-align: left; }
+.slip-tab { top: 40%; }
+
+@media (max-width: 900px) {
+  :root { --band-h: 6.4rem; }
+  body.room { padding: 7rem 1rem 1.2rem; }
+  main { margin: 0 0 4.2rem; }
+  .columns { column-width: auto; column-count: 1; }
+  .slip { top: auto !important; max-height: 72vh !important; }
+  .slip .card-where { display: none; }
+  .find .control { width: 8rem; }
+  .folio-room h1 { font-size: 0.98rem; }
+  body:has(.rooms-reveal:checked) main { pointer-events: none; }
+}
+@media print {
+  .band, .chrome, .slip, .slip-tab, .fog, .roads, footer { display: none !important; }
+  body::before { display: none; }
+  body.room { padding: 0; }
+  main { margin: 0; }
+  .sheet { background: none; border: 0; outline: 0; box-shadow: none; animation: none; }
+  .sheet::before, .sheet::after { display: none; }
+  .columns { column-width: auto; column-count: 1; }
+}
