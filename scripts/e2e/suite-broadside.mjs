@@ -59,6 +59,29 @@ export async function run(ctx) {
     JSON.stringify(br1b),
   );
 
+  // #463 plate read: the legend row overlapped the slip's corner at 1280 and the chart folio after a resize (a mid-transition rect read the old seat). The row is placed by measurement now; both widths and the resize are the class.
+  const legendRoom = `(()=>{const r=(sel)=>{const el=document.querySelector(sel);if(!el)return null;const b=el.getBoundingClientRect();return{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)};};
+    const lg=r(".legend"),bl=r(".corner.bl"),sl=r("#broadside"),gl=r(".corner.br"),sh=r("#sheet");
+    const range=document.createRange();let text=0;for(const p of document.querySelectorAll(".corner.bl p")){if(!p.textContent)continue;range.selectNodeContents(p);text=Math.max(text,range.getBoundingClientRect().right);}
+    return{lg,bl,sl,gl,sh,folioText:Math.round(text),w:innerWidth,h:innerHeight};})()`;
+  const legendClear = (m) => !!m.lg && m.lg.l >= m.folioText + 16 && m.lg.r <= m.sl.l - 8 && m.lg.r <= m.gl.l - 8 &&
+    m.sh.r <= m.gl.l - 8 && m.sh.b <= Math.min(m.bl.t, m.lg.t) - 8;
+  await sleep(400); // the row's left transitions 0.32s to its measured seat; a read mid-flight is the old seat
+  const at1280 = await evaluate(legendRoom);
+  await send("Emulation.setDeviceMetricsOverride", { width: 1680, height: 900, deviceScaleFactor: 1, mobile: false });
+  await sleep(600);
+  const at1680 = await evaluate(legendRoom);
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  await sleep(600);
+  const back = await evaluate(legendRoom);
+  await send("Emulation.clearDeviceMetricsOverride");
+  await sleep(600);
+  check(
+    "BR1c the legend row and the sheet clear the chart folio, the Glass and the open slip at 1280, at 1680 after a resize, and back again (#463)",
+    legendClear(at1280) && legendClear(at1680) && legendClear(back),
+    JSON.stringify({ at1280, at1680, back }),
+  );
+
   // Tick, wait-for-ink, and untick are three separate turns (#300): inside ONE evaluate the yield cancels the arm before it builds, so `during` would be measured on a never-armed sheet.
   const at = `((el)=>({shown:el.getClientRects().length>0,top:Math.round(el.getBoundingClientRect().top)}))`;
   const before = await evaluate(`(()=>{

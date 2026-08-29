@@ -82,10 +82,11 @@ body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); }
 .legend { position: fixed; left: calc((100% - var(--slip-w) - 2rem) / 2); bottom: var(--chrome-y); transform: translateX(-50%); z-index: 10; text-align: center;
   transition: left 0.32s cubic-bezier(0.2, 0.7, 0.3, 1); }
 body:has(.slip.folded) .legend { left: 50%; }
-.legend-head { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.82rem; color: var(--ink-faded); margin: 0 0 0.45rem; }
+/* parchment, not the mockup's ink-faded: 13px italic measured 2.78:1 on the deep (plate read 2026-08-29), the RH9a miss again. */
+.legend-head { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.82rem; color: var(--parchment); margin: 0 0 0.45rem; }
 .legend-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
 /* A road out is an <a>; a press on the sheet itself (the Explorer's Turn) is a <button> in the same dress, so the button's house skin is overwritten property by property. */
-.legend-btn { display: block; appearance: none; cursor: pointer; text-decoration: none; font: inherit; line-height: normal; color: inherit;
+.legend-btn { display: block; appearance: none; cursor: pointer; text-decoration: none; font: inherit; line-height: 1.45; color: inherit;
   background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); border-radius: 0;
   padding: 0.4rem 0.9rem 0.35rem; text-align: center; transition: background 0.2s ease, transform var(--paper-quick) var(--ease-paper); }
 /* Four classes deep on purpose: the house button hover wash is (0,3,1). */
@@ -135,6 +136,10 @@ body:has(.slip.folded) .legend { left: 50%; }
 .slip-tab.shown { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.25s 0.2s, visibility 0s; }
 button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; background: var(--ink-dark); color: var(--parchment-bright); }
 
+/* Magnified, the sheet spills under the chrome (the mockup's look) and parchment on paper measured 1.1:1 (plate read 2026-08-29): while the Glass is zoomed the cluster, the corners and the legend row stand on home's pool, the #480 blurred box that follows its cluster. At rest they stand on the deep and carry none (RH9b). */
+body:has(#map-viewport.zoomed) :is(header.chrome, .corner, .legend)::before { content: ""; position: absolute; inset: -1.1rem -1.4rem; z-index: -1; pointer-events: none;
+  background: rgb(from var(--chart-ink) r g b / 0.86); filter: blur(16px); }
+
 /* The landing (#461 ruling 6, the chart room's half): the stage settles onto the deep, the corners, the slip and the legend ink in after; motion.css's reduced-motion blanket collapses both. */
 .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 .corner, .slip, .legend { animation: ink-in 0.5s 0.18s ease-out both; }
@@ -177,7 +182,8 @@ button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; ba
   .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); bottom: calc(var(--sheet-h, 6rem) + 1rem); }
   .zoom-keys { display: none; }
   .legend { display: none; }
-  .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; }
+  .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; max-width: none !important; }
+  .legend.in-slip .legend-head { display: none; }
   .legend.in-slip .legend-btn { background: var(--ink-dark); }
   .legend.in-slip .legend-btn.gold { background: var(--control-gold); }
   .slip-tab { display: none; }
@@ -207,4 +213,7 @@ button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; ba
   .folio-room .dateline, .folio-room .gloss, .folio-controls { display: none; }
   html:has(body.chart-room), body.chart-room { height: auto; overflow: visible; }
   .stage { position: static; animation: none; }
+  /* The markup seats the stage before the folio; on paper the name leads. */
+  body.chart-room main { display: flex; flex-direction: column; }
+  body.chart-room .corner.folio-room { order: -1; }
 }

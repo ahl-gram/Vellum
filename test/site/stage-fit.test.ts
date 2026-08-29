@@ -7,6 +7,15 @@ import { SLIP_CLEARANCE, fitStage } from "../../src/site/shared/stage-fit.ts";
 const ASPECT = 1500 / 1157.931;
 const base = { view: { w: 1280, h: 800 }, aspect: ASPECT, gap: 14, narrow: false };
 
+// #463 plate read: at 1680 the keys slip (123px wide, right-aligned under the Glass) ran 17px under the centred sheet, because the reserve knew only the slip. The Glass's left edge bounds the sheet whenever it is handed in.
+test("chrome standing at the right edge (the Glass) widens the reserve past the slip's clearance when it reaches further in", () => {
+  const withGlass = fitStage({ ...base, above: [100], below: [700], beside: 384, right: [790] });
+  assert.equal(withGlass.reserve.right, 1280 - 790 + 14, "the Glass's left edge plus the gap, since that reaches further in than the slip's clearance");
+  const glassClear = fitStage({ ...base, above: [100], below: [700], beside: 384, right: [1100] });
+  assert.equal(glassClear.reserve.right, 384 + SLIP_CLEARANCE, "a Glass inside the clearance changes nothing");
+  assert.equal(fitStage({ ...base, above: [100], below: [700], beside: 0, right: [] }).reserve.right, 0, "no slip, no Glass beside it: no reserve");
+});
+
 test("the reserves are the chrome's own edges plus the gap: the lowest bottom above, the highest top below", () => {
   const fit = fitStage({ ...base, above: [79, 108], below: [690, 720], beside: 0 });
   assert.equal(fit.reserve.top, 108 + 14, "the room folio, lower than the cluster, bounds the top");

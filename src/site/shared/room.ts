@@ -7,6 +7,7 @@ const PHONE_GAP = 8;
 const SLIP_TOP_GAP = 16;
 const SLIP_FLOOR = 22;
 const LEGEND_CLEAR = 32;
+const LEGEND_GAP = 16;
 const NARROW = "(max-width: 900px)";
 const FALLBACK_ASPECT = 1500 / 1157.931;
 
@@ -91,15 +92,29 @@ export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room 
     dockLegend<HTMLElement>({ legend, dock: legendDock, stage: legendStage, next: legendNext }, legendSeat({ narrow: narrow(), hasSlip: slip !== null }));
   };
 
-  // The legend row centres on the chart, but never over the chart's folio.
-  const clearLegend = () => {
-    if (legend === null || narrow()) return;
-    legend.style.left = "";
-    const a = legend.getBoundingClientRect();
-    const bl = rect(q(".corner.bl"));
-    if (bl !== null && a.left < bl.right + LEGEND_CLEAR) {
-      legend.style.left = `${a.left + a.width / 2 + (bl.right + LEGEND_CLEAR - a.left)}px`;
+  // The right edge of a corner's written lines (a wrapped line reads as the box), so a short survey line leaves the legend more room than the box's max-width would.
+  const textRight = (el: Element | null): number | null => {
+    if (el === null) return null;
+    const range = document.createRange();
+    let right: number | null = null;
+    for (const p of el.querySelectorAll("p")) {
+      if (!p.textContent) continue;
+      range.selectNodeContents(p);
+      const r = range.getBoundingClientRect();
+      if (r.width > 0) right = Math.max(right ?? 0, r.right);
     }
+    return right;
+  };
+
+  // The legend row centres in the room the chart folio, the Glass and an open slip leave it, and wraps its buttons when that room is short; computed, never read back off the row, because its left transitions and a mid-transition rect reads the old seat (plate read 2026-08-29: a resize left the row over the folio).
+  const placeLegend = (slipOpen: boolean, slipRect: DOMRect | null) => {
+    if (legend === null || narrow()) return;
+    const chromeX = rect(q("header.chrome"))?.left ?? 0;
+    const left = (textRight(q(".corner.bl")) ?? chromeX) + LEGEND_CLEAR;
+    const bounds = [window.innerWidth - chromeX, rect(q(".corner.br"))?.left ?? Infinity, slipOpen && slipRect !== null ? slipRect.left : Infinity];
+    const space = Math.max(0, Math.min(...bounds) - LEGEND_GAP - left);
+    legend.style.maxWidth = `${space}px`;
+    legend.style.left = `${left + space / 2}px`;
   };
 
   const aspect = () => {
@@ -121,6 +136,7 @@ export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room 
       above: [rect(q("header.chrome")), phone ? null : rect(folio)].flatMap((r) => (r === null ? [] : [r.bottom])),
       below: [...tops([q(".corner.bl"), q(".legend:not(.in-slip)"), q(".strip")]), ...(phone && slipRect !== null ? [slipRect.top] : [])],
       beside: slipOpen && slipRect !== null ? slipRect.width : 0,
+      right: slipOpen ? [rect(q(".corner.br"))].flatMap((r) => (r === null ? [] : [r.left])) : [],
       gap: phone ? PHONE_GAP : CHROME_GAP,
       narrow: phone,
     });
@@ -131,7 +147,7 @@ export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room 
     sheet.style.height = `${fit.sheet.h}px`;
     if (phone && slipRect !== null) document.body.style.setProperty("--sheet-h", `${window.innerHeight - slipRect.top}px`);
     else document.body.style.removeProperty("--sheet-h");
-    clearLegend();
+    placeLegend(slipOpen, slipRect);
     camera.restore(held);
   };
 

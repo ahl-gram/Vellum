@@ -96,9 +96,11 @@ const glass = createGlass({
 const room = bindRoom({ frame: stageEl, sheet: sheetEl, camera: { hold: () => glass.cameraNow(), restore: (cam) => glass.applyCamera(cam) } });
 
 // The chart's folio, lower left: the world's name and number, its survey line, then the caption the suites and the region survey write.
+// The mockup's survey line is the subtitle's tail ("surveyed in the year 1059 of the Cedar Age"), not the cartouche's whole sentence: the folio stays short and leaves the legend row its room.
 function writeFolio(res: { title: string; subtitle: string }, seed: number): void {
   folioTitle.textContent = `${res.title} · Chart № ${seed}`;
-  folioSub.textContent = res.subtitle;
+  const year = /in the year .+$/.exec(res.subtitle);
+  folioSub.textContent = year ? `surveyed ${year[0]}` : res.subtitle;
 }
 
 // opts.quiet suppresses the arrival ceremony, used only by the sea-level drag's throttled mid-drag redraws.
