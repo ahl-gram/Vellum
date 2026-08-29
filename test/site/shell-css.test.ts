@@ -18,6 +18,7 @@ const PAGE_CSS = [
   "public/reading-room/index.css",
   "public/seed-of-the-day/index.css",
   "public/prospect/index.css",
+  "public/ribbon/index.css",
 ] as const;
 
 // Host-agnostic sheets (#219 reading frame, #302 living-chart engine dressing): linked by whichever page mounts them, and answering to the same palette discipline.
