@@ -1,0 +1,127 @@
+<title>Vellum · The Explorer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@1&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+{{CSS}}
+:root { --slip-w: 24rem; }
+/* The Broadside on a slip: the #270 ledger, one column per panel */
+.panel + .panel { border-top: 1px solid var(--line-tan); margin-top: 0.9rem; padding-top: 0.9rem; }
+.ledger { display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 0.6rem; align-items: center; }
+.l-label { grid-column: 1; text-align: right; white-space: nowrap; }
+.l-label label { font-size: 0.85rem; letter-spacing: 0.05em; color: var(--ink-brown); }
+.l-ctl { grid-column: 2; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.l-ctl > select, .l-ctl > input[type="number"] { flex: 1; min-width: 0; }
+.slider { grid-column: 2; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.45rem; }
+.slider input[type="range"] { width: 100%; min-width: 4rem; accent-color: var(--ink-dark); margin: 0; }
+.land-end { font-size: 0.72rem; font-style: italic; color: var(--ink-faded); white-space: nowrap; }
+.land-readout { grid-column: 2; font-style: italic; color: var(--ink-brown); font-size: 0.82rem; font-variant-numeric: tabular-nums; text-align: right; margin-top: -0.3rem; }
+.l-ctl.seals { grid-column: 1 / -1; flex-wrap: wrap; }
+label.seal { display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer; user-select: none; font-size: 0.85rem; letter-spacing: 0.05em;
+  border: 1.5px solid var(--ink-brown); border-radius: 4px; padding: 0.28rem 0.6rem; background: var(--control-cream); color: var(--ink-brown); }
+label.seal:hover { background: var(--parchment-bright); }
+.seal input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.seal::before { content: ""; width: 0.72em; display: inline-block; }
+.seal:has(input:checked) { background: var(--ink-dark); border-color: var(--ink-dark); color: var(--chart-paper); }
+.seal:has(input:checked)::before { content: "\2713"; }
+a.fn { font-family: var(--font-flourish); text-decoration: none; color: var(--ink-brown); font-size: 0.95em; vertical-align: super; line-height: 0; padding: 0 0.15em; display: inline-block; position: relative; }
+a.fn:hover { color: var(--ink-dark); transform: translateY(-2px) rotate(-0.6deg); }
+.fn-note { display: none; position: absolute; left: -7rem; bottom: 1.4rem; z-index: 5; width: 15.5rem; transform: rotate(-0.4deg);
+  background: var(--parchment-panel); border: 1px solid var(--line-tan); box-shadow: 0 4px 14px rgb(from var(--chart-ink) r g b / 0.18);
+  padding: 0.6rem 0.75rem 0.65rem; font-size: 0.8rem; line-height: 1.45; color: var(--ink-dark); text-align: left; font-style: normal; vertical-align: baseline; }
+a.fn:hover .fn-note, a.fn:focus-visible .fn-note { display: block; }
+.fn-note .fn-head { display: block; font-variant: small-caps; letter-spacing: 0.08em; color: var(--ink-faded); font-size: 0.82rem; font-weight: 400; margin-bottom: 0.2rem; }
+.fn-note em { font-family: var(--font-flourish); font-style: italic; color: var(--ink-brown); display: block; margin-top: 0.3rem; font-size: 0.78rem; }
+.status { font-style: italic; color: var(--line-tan); }
+</style>
+<script>window.ROOM_CAM = { top: 60, bottom: 104, bottomNarrow: 58 };</script>
+
+<div class="fog a"></div><div class="fog b"></div>
+<div class="stage" id="stage">
+  <div class="sheet" id="sheet">
+    <img class="chart" src="{{CHART_42}}" alt="The Isle of Rahai, chart 42, antique style">
+  </div>
+</div>
+<div class="vignette top"></div><div class="vignette bottom"></div>
+
+{{NAV}}
+
+<aside class="chrome corner tr folio-room">
+  <h1>The Explorer</h1>
+  <p class="room-tagline">every seed is a world, draw one</p>
+  <form class="seed-controls" onsubmit="return false">
+    <input class="control" type="text" inputmode="numeric" pattern="[0-9]*" value="42" aria-label="seed">
+    <button class="dice" type="button" aria-label="Random seed" title="random seed">&#9860;</button>
+    <button class="primary" type="submit">Draw</button>
+  </form>
+  <p class="seed-gloss">every chart is reproducible from the number in its margin</p>
+</aside>
+
+<aside class="slip" id="slip" aria-labelledby="broadside-title">
+  <div class="slip-head">
+    <button class="slip-fold" aria-label="Fold the broadside away">&times;</button>
+    <p class="card-verb">Make one</p>
+    <h2 class="card-title" id="broadside-title">The Broadside</h2>
+    <p class="card-where">the land, and the hand that dresses it</p>
+  </div>
+  <div class="slip-body">
+    <div class="panel" role="group" aria-labelledby="grp-land">
+      <p class="archivist-head" id="grp-land">The Land</p>
+      <p class="panel-gloss">these shape the world itself</p>
+      <div class="ledger">
+        <span class="l-label"><label for="type">type</label><a class="fn" href="https://www.vellumworlds.com/glossary/#seeds-choice" aria-label="note on the seed's choice">&dagger;<span class="fn-note"><strong class="fn-head">of the seed's choice</strong>Left alone, each world decides its own shape and weather from its seed. Pick a value to overrule it.<em>read more in the glossary</em></span></a></span>
+        <span class="l-ctl"><select id="type"><option selected>seed's choice</option><option>island</option><option>archipelago</option><option>continent</option><option>city-state</option></select></span>
+        <span class="l-label"><label for="band">climate</label></span>
+        <span class="l-ctl"><select id="band"><option selected>seed's choice</option><option>temperate</option><option>tropical</option><option>polar</option></select></span>
+        <span class="l-label"><label for="land">sea level</label></span>
+        <span class="slider"><span class="land-end">more sea</span><input id="land" type="range" min="100" max="700" step="2" value="320"><span class="land-end">more land</span></span>
+        <span class="land-readout">34% land</span>
+        <span class="l-label"><label for="coast">coast</label><a class="fn" href="https://www.vellumworlds.com/glossary/#coast-warp" aria-label="note on the coast warp">&Dagger;<span class="fn-note"><strong class="fn-head">of the coast warp</strong>How much the coastline wanders: calm keeps the shore plain, lobed lets bays and headlands cut deeper.<em>read more in the glossary</em></span></a></span>
+        <span class="slider"><span class="land-end">calm</span><input id="coast" type="range" min="0" max="100" step="5" value="55"><span class="land-end">lobed</span></span>
+        <span class="land-readout">warp 0.55</span>
+      </div>
+    </div>
+    <div class="panel" role="group" aria-labelledby="grp-hand">
+      <p class="archivist-head" id="grp-hand">The Hand</p>
+      <p class="panel-gloss">these dress the same world</p>
+      <div class="ledger">
+        <span class="l-label"><label for="style">style</label></span>
+        <span class="l-ctl"><select id="style"><option selected>antique</option><option>topographic</option><option>ink</option><option>nautical</option></select></span>
+        <span class="l-label"><label for="theme">theme</label></span>
+        <span class="l-ctl"><select id="theme"><option selected>none</option><option>vegetation</option><option>temperature</option><option>rainfall</option><option>population</option></select></span>
+        <span class="l-label"></span>
+        <span class="l-ctl seals">
+          <label class="seal">legend <input type="checkbox" checked></label>
+          <label class="seal">arms <input type="checkbox"></label>
+          <label class="seal">beasts <input type="checkbox"></label>
+          <label class="seal">survey <input type="checkbox"></label><a class="fn" href="https://www.vellumworlds.com/glossary/#survey" aria-label="note on the survey">*<span class="fn-note"><strong class="fn-head">of the survey</strong>Inks the expedition's completed track onto the sheet, with the ship's daily stations. Its day-by-day journal is kept in the Reading Room.<em>read more in the glossary</em></span></a>
+        </span>
+      </div>
+    </div>
+    <nav class="legend in-slip" aria-label="The Press">
+      <div class="legend-row">
+        <a class="legend-btn" href="#"><span class="verb">Turn</span><span class="room">The Sheet</span></a>
+        <a class="legend-btn gold" href="https://www.vellumworlds.com/print-room/"><span class="verb">Take to</span><span class="room">The Print Room</span></a>
+        <a class="legend-btn gold" href="https://www.vellumworlds.com/reading-room/"><span class="verb">Read the journal in</span><span class="room">The Reading Room</span></a>
+      </div>
+    </nav>
+  </div>
+</aside>
+<button class="slip-tab" type="button">The Broadside</button>
+
+<div class="chrome corner bl folio">
+  <p class="folio-title">The Isle of Rahai · Chart № 42</p>
+  <p class="folio-sub">surveyed in the year 1059 of the Cedar Age</p>
+  <p class="folio-coords status" role="status">drawn in 412ms</p>
+</div>
+
+<nav class="legend" aria-label="The Press">
+  <p class="legend-head">The Press · what the sheet can do next</p>
+  <div class="legend-row">
+    <a class="legend-btn" href="#"><span class="verb">Turn</span><span class="room">The Sheet</span></a>
+    <a class="legend-btn gold" href="https://www.vellumworlds.com/print-room/"><span class="verb">Take to</span><span class="room">The Print Room</span></a>
+    <a class="legend-btn gold" href="https://www.vellumworlds.com/reading-room/"><span class="verb">Read the journal in</span><span class="room">The Reading Room</span></a>
+  </div>
+</nav>
+
+{{GLASS}}
+<script>{{JS}}</script>

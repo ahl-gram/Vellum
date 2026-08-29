@@ -1,0 +1,200 @@
+{
+ "title": {
+  "title": "The Scattered Isles of Zvorded",
+  "subtitle": "Being a true & faithful chart of these waters, as surveyed by Reknin the Wayfarer in the year 876 of the Cedar Age",
+  "year": 876
+ },
+ "capital": "Gru",
+ "blurb": "Gru, the capital. Banners of every vassal hang in its council hall. Guildhalls crowd the square below the citadel. Its founding is set down in the year 435.",
+ "quarry": {
+  "name": "Punda",
+  "kind": "village"
+ },
+ "reveal": {
+  "name": "Punda",
+  "founded": 774,
+  "line": "The people of Punda drifted away, leaving only stones to the wind."
+ },
+ "clues": [
+  {
+   "kind": "framing",
+   "text": "Today's survey hides one small place, set down on the chart but left unnamed in these notes. Read the lines, then find it."
+  },
+  {
+   "kind": "ns",
+   "subject": "south",
+   "text": "It lies in the southern part of the chart."
+  },
+  {
+   "kind": "road",
+   "subject": "road",
+   "text": "A made road comes to its gate."
+  },
+  {
+   "kind": "terrain",
+   "subject": "forest",
+   "text": "Deep woods stand close about it."
+  },
+  {
+   "kind": "onriver",
+   "text": "A river runs through its bounds."
+  }
+ ],
+ "events": [
+  {
+   "year": 435,
+   "kind": "founding",
+   "text": "Gru grew from a lone anchorage to a seat of some note."
+  },
+  {
+   "year": 438,
+   "kind": "rise",
+   "text": "The standard of The Mak Balka was carried to the borders it holds yet."
+  },
+  {
+   "year": 456,
+   "kind": "founding",
+   "text": "Settlers raised the first walls of Vlukkror."
+  },
+  {
+   "year": 458,
+   "kind": "founding",
+   "text": "Zodkre was founded in a year the chronicles set down with care."
+  },
+  {
+   "year": 480,
+   "kind": "rise",
+   "text": "The Gygid Voivodeship rose to claim the country between the waters."
+  },
+  {
+   "year": 755,
+   "kind": "war",
+   "text": "The Gygid Voivodeship and The Mak Balka fell to war over the border marches."
+  },
+  {
+   "year": 793,
+   "kind": "war",
+   "text": "The Gygid Voivodeship marched against The Tsardom of Sid; the chronicle does not record who prevailed."
+  },
+  {
+   "year": 808,
+   "kind": "ruin",
+   "text": "Plague and poor harvests emptied Rudugrad; its roofs have since fallen."
+  },
+  {
+   "year": 843,
+   "kind": "ruin",
+   "text": "The people of Punda drifted away, leaving only stones to the wind."
+  }
+ ],
+ "log": {
+  "attribution": "Being a true & faithful chart of these waters, as surveyed by Reknin the Wayfarer in the year 876 of the Cedar Age",
+  "summary": "The survey is charted: 6 ports set down in the surveyor's hand.",
+  "entries": [
+   {
+    "idx": 0,
+    "year": 843,
+    "day": 1,
+    "text": "Year 843. We set out from Gru, seat of this survey, its walls raised in the year 435. The glass stood fair, and the tide served at dawn."
+   },
+   {
+    "idx": 1,
+    "year": 843,
+    "day": 6,
+    "text": "Year 843. We made sail for Tridzva, a town standing since 469. A fair wind and a following sea carried us in by the forenoon watch."
+   },
+   {
+    "idx": 2,
+    "year": 843,
+    "day": 12,
+    "text": "Year 843. We rode on to Bud, a town standing since 510. A cold rain met us on the last mile, and we were glad of its hearths."
+   },
+   {
+    "idx": 3,
+    "year": 843,
+    "day": 19,
+    "text": "Year 843. We made sail for Svi, a town standing since 522. A stiff breeze served us, and we made the roads before the light failed."
+   },
+   {
+    "idx": 4,
+    "year": 843,
+    "day": 29,
+    "text": "Year 843. We rode on to Tridkran, a town standing since 581. The hedges were white with may, and the air sweet the whole way down."
+   },
+   {
+    "idx": 5,
+    "year": 843,
+    "day": 40,
+    "text": "Year 843. We made sail for Likzvyl, a town standing since 567. We stood in past the shoals on a slack tide, the pilot wary of the reef."
+   },
+   {
+    "idx": 0,
+    "year": 843,
+    "day": 44,
+    "text": "Year 843. We made sail for Gru again, whence we set out, and handed the last of our sail in water we knew by heart."
+   }
+  ]
+ },
+ "settlements": [
+  {
+   "name": "Gru",
+   "kind": "capital",
+   "ruined": false
+  },
+  {
+   "name": "Tridzva",
+   "kind": "town",
+   "ruined": false
+  },
+  {
+   "name": "Bud",
+   "kind": "town",
+   "ruined": false
+  },
+  {
+   "name": "Svi",
+   "kind": "town",
+   "ruined": false
+  },
+  {
+   "name": "Tridkran",
+   "kind": "town",
+   "ruined": false
+  },
+  {
+   "name": "Likzvyl",
+   "kind": "town",
+   "ruined": false
+  },
+  {
+   "name": "Tralitsa",
+   "kind": "town",
+   "ruined": false
+  },
+  {
+   "name": "Vlukkror",
+   "kind": "town",
+   "ruined": false
+  },
+  {
+   "name": "Por",
+   "kind": "town",
+   "ruined": false
+  },
+  {
+   "name": "Zodkre",
+   "kind": "town",
+   "ruined": false
+  },
+  {
+   "name": "Rudugrad",
+   "kind": "village",
+   "ruined": true
+  },
+  {
+   "name": "Guktre",
+   "kind": "village",
+   "ruined": false
+  }
+ ]
+}

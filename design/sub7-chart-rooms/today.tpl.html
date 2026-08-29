@@ -1,0 +1,87 @@
+<title>Vellum · Today</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@1&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+{{CSS}}
+/* Today's own dressings */
+.hunt-status { text-align: center; min-height: 1.4rem; font-weight: 600; letter-spacing: 0.03em; color: var(--iron-red); margin: 0.9rem 0 0; }
+.clues { margin: 0.7rem 0 0; padding-left: 1.3rem; font-style: italic; color: var(--ink-dark); font-family: var(--font-flourish); font-size: 1rem; line-height: 1.5; }
+.clues li { margin: 0.28rem 0; padding-left: 0.15rem; }
+.clues li::marker { font-family: var(--font-body); font-style: normal; color: var(--ink-faded); font-size: 0.85em; }
+.streak { font-size: 0.86rem; color: var(--ink-brown); font-style: italic; }
+.hunt-actions { display: flex; gap: 0.7rem; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 0.9rem; }
+.sounding-ring { position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; border: 2px solid var(--iron-red); opacity: 0.35; }
+.sounding-dot { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--ink-brown); box-shadow: 0 0 0 1px rgb(247 247 228 / 0.55); }
+</style>
+<script>window.ROOM_CAM = { top: 60, bottom: 104, bottomNarrow: 58 };</script>
+
+<div class="fog a"></div><div class="fog b"></div>
+<div class="stage" id="stage">
+  <div class="sheet" id="sheet">
+    <img class="chart" src="{{CHART_TODAY}}" alt="Today's chart: The Scattered Isles of Zvorded, seed 20260829">
+    <div class="overlay" aria-hidden="true">
+      <div class="sounding-ring" style="left:38.6%; top:61.5%"></div>
+      <div class="sounding-dot" style="left:38.6%; top:61.5%"></div>
+    </div>
+  </div>
+</div>
+<div class="vignette top"></div><div class="vignette bottom"></div>
+
+{{NAV}}
+
+<aside class="chrome corner tr folio-room">
+  <h1>The Seed of the Day</h1>
+  <p class="room-tagline">today's date is the seed</p>
+  <p class="dateline">Saturday, 29 August 2026 · seed 20260829</p>
+</aside>
+
+<aside class="slip" id="slip" aria-labelledby="hunt-title">
+  <div class="slip-head">
+    <button class="slip-fold" aria-label="Fold the hunt away">&times;</button>
+    <p class="card-verb">Find one</p>
+    <h2 class="card-title" id="hunt-title">The Daily Hunt</h2>
+    <p class="card-where">one forgotten place on today's chart</p>
+  </div>
+  <div class="slip-body">
+    <p class="intro">Read the survey notes, then click the map to find it. Everyone hunting today's seed is looking for the same place.</p>
+    <ol class="clues">
+      <li>Today's survey hides one small place, set down on the chart but left unnamed in these notes. Read the lines, then find it.</li>
+      <li>It lies in the southern part of the chart.</li>
+      <li>A made road comes to its gate.</li>
+      <li>Deep woods stand close about it.</li>
+      <li>A river runs through its bounds.</li>
+    </ol>
+    <p class="hunt-status" aria-live="polite">Warmer. The place lies near.</p>
+    <div class="hunt-actions">
+      <span class="streak">Three days running.</span>
+    </div>
+    <nav class="legend in-slip" aria-label="Today's roads out">
+      <div class="legend-row">
+        <a class="legend-btn" href="https://www.vellumworlds.com/explorer/#seed=20260829&style=antique&legend=1"><span class="verb">Open today's seed in</span><span class="room">The Explorer</span></a>
+        <a class="legend-btn" href="https://www.vellumworlds.com/reading-room/#seed=20260829"><span class="verb">Watch today's world in</span><span class="room">The Reading Room</span></a>
+      </div>
+    </nav>
+  </div>
+  <div class="slip-foot">
+    <p class="note">The seed is today's date in UTC (YYYYMMDD), so everyone sees the same world on the same day. Your streak is kept on this device only: no account, no backend.</p>
+  </div>
+</aside>
+<button class="slip-tab" type="button">The Daily Hunt</button>
+
+<div class="chrome corner bl folio">
+  <p class="folio-title">The Scattered Isles of Zvorded</p>
+  <p class="folio-sub">Being a true &amp; faithful chart of these waters, as surveyed by Reknin the Wayfarer in the year 876 of the Cedar Age</p>
+  <p class="folio-coords">Chart № 20260829 · an archipelago, temperate</p>
+  <p class="folio-note">Gru, the capital. Banners of every vassal hang in its council hall. Guildhalls crowd the square below the citadel. Its founding is set down in the year 435.</p>
+</div>
+
+<nav class="legend" aria-label="Today's roads out">
+  <p class="legend-head">Same day, same world, everywhere · come back tomorrow for a new one</p>
+  <div class="legend-row">
+    <a class="legend-btn" href="https://www.vellumworlds.com/explorer/#seed=20260829&style=antique&legend=1"><span class="verb">Open today's seed in</span><span class="room">The Explorer</span></a>
+    <a class="legend-btn" href="https://www.vellumworlds.com/reading-room/#seed=20260829"><span class="verb">Watch today's world in</span><span class="room">The Reading Room</span></a>
+  </div>
+</nav>
+
+{{GLASS}}
+<script>{{JS}}</script>

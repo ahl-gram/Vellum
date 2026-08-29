@@ -1,0 +1,166 @@
+<title>Vellum · The Reading Room</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@1&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+{{CSS}}
+:root { --foot-h: 8.2rem; }
+.corner.br.zoomery { bottom: 7.6rem; }
+/* the journal on the slip: the reading frame's own row idiom (reading-frame.css) */
+.rf-log-sig { font-family: var(--font-flourish); font-style: italic; color: var(--ink-brown); font-size: 0.9rem; border-bottom: 1px solid var(--line-faint); padding-bottom: 0.5rem; margin-bottom: 0.3rem; }
+.rf-log-strip { list-style: none; margin: 0; padding: 0; }
+.rf-log-strip li { display: flex; gap: 0.8rem; padding: 0.28rem 0; border-bottom: 1px solid var(--line-faint); opacity: 0.4; font-size: 0.92rem; line-height: 1.45; }
+.rf-log-strip li.inked { opacity: 1; }
+.rf-log-strip li.prologue { border-left: 3px solid var(--line-tan); padding-left: 0.6rem; }
+.rf-log-strip li.prologue .cr-text { font-family: var(--font-flourish); font-style: italic; color: var(--ink-surveyor); }
+.rf-log-strip li.prologue .cr-year { font-weight: 400; font-style: italic; color: var(--ink-surveyor-faded); font-family: var(--font-flourish); }
+.rf-log-strip li.annals-head { display: block; opacity: 1; font-family: var(--font-display); letter-spacing: 0.05em; color: var(--ink-brown); padding: 0.6rem 0 0.35rem; border-bottom: 0; }
+.rf-log-strip li.now { background: rgb(from var(--parchment-bright) r g b / 0.9); margin: 0 -0.5rem; padding-left: 0.5rem; padding-right: 0.5rem; }
+.rf-log-strip li.now.prologue { padding-left: 0.6rem; margin-left: 0; }
+.cr-year { flex: 0 0 3.2rem; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
+.cr-text { color: var(--ink-annals); }
+.cr-dc { float: left; font-style: normal; color: var(--ink-dark); font-family: var(--font-display); font-size: 2.1em; line-height: 0.8; margin: 0.08em 0.12em 0 0; }
+
+/* the instrument strip: the one dated log's scrubber laid along the bottom edge, the survey's days first and the annals' years after */
+.strip { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; padding: 0.55rem var(--chrome-x) 0.9rem;
+  background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.9), rgb(from var(--chart-ink) r g b / 0.6) 60%, transparent); }
+.told { display: flex; gap: 0.8rem; align-items: baseline; margin: 0 0 0.5rem 6.4rem; font-size: 0.98rem; line-height: 1.4; }
+.told .cr-year { flex: 0 0 3.6rem; font-family: var(--font-flourish); font-style: italic; font-weight: 400; color: var(--line-tan); }
+.told .cr-text { font-family: var(--font-flourish); font-style: italic; color: var(--parchment-bright); }
+.instrument { display: flex; align-items: flex-start; gap: 1.1rem; }
+.play { flex: none; width: 5.2rem; height: 2.4rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; cursor: pointer;
+  font-family: var(--font-display); font-size: 0.82rem; letter-spacing: 0.14em; color: var(--parchment);
+  background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); transition: background 0.2s ease; }
+.play:hover { background: var(--ink-dark); color: var(--parchment-bright); }
+.play svg { width: 10px; height: 10px; fill: currentColor; }
+.scale { position: relative; flex: 1 1 auto; height: 2.5rem; margin-top: 0.15rem; border-top: 1px solid var(--line-tan); cursor: pointer; }
+.scale .survey-span { position: absolute; left: 0; top: -1px; height: 1px; background: var(--parchment); opacity: 0.9; }
+.tick { position: absolute; top: 0; width: 1px; height: 6px; background: var(--line-tan); transform: translateX(-0.5px); }
+.tick.major { height: 11px; }
+.tick.century { height: 9px; }
+.tick.survey { background: var(--parchment); }
+.tick .lbl { position: absolute; top: 12px; left: 0; transform: translateX(-50%); white-space: nowrap;
+  font-family: var(--font-body); font-variant-caps: small-caps; font-variant-numeric: tabular-nums; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--line-tan); }
+.tick.survey .lbl { font-family: var(--font-flourish); font-style: italic; font-variant-caps: normal; color: var(--parchment); }
+.seam { position: absolute; top: -9px; transform: translateX(-50%); width: 18px; height: 18px; }
+.seam svg { width: 18px; height: 18px; fill: var(--parchment); stroke: var(--chart-ink); stroke-width: 0.6; }
+.chamber { position: absolute; top: -1.15rem; font-family: var(--font-flourish); font-style: italic; font-size: 0.72rem; color: var(--ink-faded); white-space: nowrap; }
+.chamber.annals { right: 0; }
+.needle { position: absolute; top: -7px; width: 2px; height: 22px; background: var(--parchment-bright); transform: translateX(-1px); box-shadow: 0 0 6px rgb(from var(--parchment-bright) r g b / 0.8); }
+.needle::before { content: ""; position: absolute; left: -4px; top: -6px; border: 5px solid transparent; border-top: 6px solid var(--parchment-bright); }
+.year { flex: none; min-width: 5.4rem; text-align: right; margin-top: 0.45rem; font-family: var(--font-body); font-variant-caps: small-caps; font-variant-numeric: tabular-nums; font-size: 1rem; letter-spacing: 0.06em; color: var(--parchment-bright); }
+.speed { flex: none; display: flex; gap: 0.3rem; margin-top: 0.4rem; }
+.speed button { width: 1.9rem; height: 1.6rem; font-family: var(--font-display); font-size: 0.66rem; letter-spacing: 0.08em; color: var(--line-tan);
+  background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); cursor: pointer; }
+.speed button[aria-pressed="true"] { color: var(--ink-dark); background: var(--parchment); }
+.warning { display: none; }
+@media (max-width: 900px) {
+  .told { display: none; }
+  .strip { padding: 0.4rem 0.8rem 0.6rem; }
+  .instrument { gap: 0.6rem; }
+  .tick .lbl { display: none; }
+  .year { min-width: 4.4rem; font-size: 0.85rem; }
+  .speed { display: none; }
+  .play { width: 4.2rem; }
+  .slip { bottom: 4.6rem; }
+  .chamber { display: none; }
+}
+</style>
+<script>window.ROOM_CAM = { top: 60, bottom: 128, bottomNarrow: 132 };</script>
+
+<div class="fog a"></div><div class="fog b"></div>
+<div class="stage" id="stage">
+  <div class="sheet" id="sheet">
+    <img class="chart" src="{{CHART_TODAY}}" alt="The Scattered Isles of Zvorded, seed 20260829, at rest">
+  </div>
+</div>
+<div class="vignette top"></div><div class="vignette bottom"></div>
+
+{{NAV}}
+
+<aside class="chrome corner tr folio-room">
+  <h1>The Reading Room</h1>
+  <p class="room-tagline">watch a world live</p>
+  <form class="seed-controls" onsubmit="return false">
+    <input class="control" type="text" inputmode="numeric" pattern="[0-9]*" value="20260829" aria-label="seed">
+    <button class="dice" type="button" aria-label="Random seed" title="random seed">&#9860;</button>
+    <button class="primary" type="submit">Read</button>
+  </form>
+  <p class="seed-gloss">read another: type its seed, or throw the dice</p>
+</aside>
+
+<aside class="slip" id="slip" aria-labelledby="journal-title">
+  <div class="slip-head">
+    <button class="slip-fold" aria-label="Fold the journal away">&times;</button>
+    <p class="card-verb">Watch one</p>
+    <h2 class="card-title" id="journal-title">The Journal</h2>
+    <p class="card-where">the survey sails first, and the history follows</p>
+  </div>
+  <div class="slip-body" role="region" aria-label="The surveyor's log">
+    <p class="rf-log-sig">Being a true &amp; faithful chart of these waters, as surveyed by Reknin the Wayfarer in the year 876 of the Cedar Age</p>
+    <ol class="rf-log-strip">
+      <li class="prologue inked"><span class="cr-year">day 1</span><span class="cr-text">Year 843. We set out from Gru, seat of this survey, its walls raised in the year 435. The glass stood fair, and the tide served at dawn.</span></li>
+      <li class="prologue inked"><span class="cr-year">day 6</span><span class="cr-text">Year 843. We made sail for Tridzva, a town standing since 469. A fair wind and a following sea carried us in by the forenoon watch.</span></li>
+      <li class="prologue inked now"><span class="cr-year">day 12</span><span class="cr-text">Year 843. We rode on to Bud, a town standing since 510. A cold rain met us on the last mile, and we were glad of its hearths.</span></li>
+      <li class="prologue"><span class="cr-year">day 19</span><span class="cr-text">Year 843. We made sail for Svi, a town standing since 522. A stiff breeze served us, and we made the roads before the light failed.</span></li>
+      <li class="prologue"><span class="cr-year">day 29</span><span class="cr-text">Year 843. We rode on to Tridkran, a town standing since 581. The hedges were white with may, and the air sweet the whole way down.</span></li>
+      <li class="prologue"><span class="cr-year">day 40</span><span class="cr-text">Year 843. We made sail for Likzvyl, a town standing since 567. We stood in past the shoals on a slack tide, the pilot wary of the reef.</span></li>
+      <li class="prologue"><span class="cr-year">day 44</span><span class="cr-text">Year 843. We made sail for Gru again, whence we set out, and handed the last of our sail in water we knew by heart.</span></li>
+      <li class="annals-head">Here follow the annals of these waters</li>
+      <li><span class="cr-year">435</span><span class="cr-text"><span class="cr-dc">G</span>ru grew from a lone anchorage to a seat of some note.</span></li>
+      <li><span class="cr-year">438</span><span class="cr-text">The standard of The Mak Balka was carried to the borders it holds yet.</span></li>
+      <li><span class="cr-year">456</span><span class="cr-text">Settlers raised the first walls of Vlukkror.</span></li>
+      <li><span class="cr-year">458</span><span class="cr-text">Zodkre was founded in a year the chronicles set down with care.</span></li>
+      <li><span class="cr-year">480</span><span class="cr-text">The Gygid Voivodeship rose to claim the country between the waters.</span></li>
+      <li><span class="cr-year">{{EV5Y}}</span><span class="cr-text">{{EV5}}</span></li>
+      <li><span class="cr-year">{{EV6Y}}</span><span class="cr-text">{{EV6}}</span></li>
+      <li><span class="cr-year">{{EV7Y}}</span><span class="cr-text">{{EV7}}</span></li>
+      <li><span class="cr-year">{{EV8Y}}</span><span class="cr-text">{{EV8}}</span></li>
+    </ol>
+  </div>
+</aside>
+<button class="slip-tab" type="button">The Journal</button>
+
+<div class="chrome corner bl folio" style="bottom: 8.6rem">
+  <p class="folio-title">The Scattered Isles of Zvorded · Chart № 20260829</p>
+  <p class="folio-sub">Being a true &amp; faithful chart of these waters, as surveyed by Reknin the Wayfarer in the year 876 of the Cedar Age</p>
+</div>
+
+<div class="strip" role="group" aria-label="The instrument">
+  <p class="told" aria-live="polite"><span class="cr-year">day 12</span><span class="cr-text">We rode on to Bud, a town standing since 510. A cold rain met us on the last mile, and we were glad of its hearths.</span></p>
+  <div class="instrument">
+    <button class="play" type="button"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 0.5l8 4.5-8 4.5z"/></svg>Play</button>
+    <div class="scale" id="scale" role="slider" aria-label="The one dated log" aria-valuemin="0" aria-valuemax="100" aria-valuenow="12" tabindex="0"></div>
+    <span class="year" id="year">day 12</span>
+    <div class="speed" role="group" aria-label="pace"><button aria-pressed="true">1×</button><button>2×</button><button>4×</button></div>
+  </div>
+</div>
+
+{{GLASS}}
+<script>{{JS}}</script>
+<script>
+(function () {
+  const scale = document.getElementById('scale'), yearEl = document.getElementById('year');
+  const days = [1, 6, 12, 19, 29, 40, 44], years = [435, 438, 456, 458, 480, {{EV5Y}}, {{EV6Y}}, {{EV7Y}}, {{EV8Y}}, 876];
+  const SURVEY_W = 0.3, y0 = years[0], y1 = years[years.length - 1];
+  const px = (p) => (p * 100).toFixed(3) + '%';
+  const add = (cls, p, label) => {
+    const t = document.createElement('span'); t.className = 'tick ' + cls; t.style.left = px(p);
+    if (label !== undefined) { const l = document.createElement('span'); l.className = 'lbl'; l.textContent = label; t.appendChild(l); }
+    scale.appendChild(t); };
+  const span = document.createElement('span'); span.className = 'survey-span'; span.style.width = px(SURVEY_W); scale.appendChild(span);
+  const yp = (y) => SURVEY_W + (1 - SURVEY_W) * (y - y0) / (y1 - y0);
+  days.forEach((d, i) => add('survey major', SURVEY_W * (d - 1) / 43, (i === 0 || i === 2 || i === 4) ? 'day ' + d : undefined));
+  for (let y = 440; y < y1; y += 20) add(y % 100 === 0 ? 'minor century' : 'minor', yp(y), y % 100 === 0 ? String(y) : undefined);
+  years.forEach((y, i) => add('major', yp(y), i === years.length - 1 ? String(y) : undefined));
+  const seam = document.createElement('span'); seam.className = 'seam'; seam.style.left = px(SURVEY_W);
+  seam.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1l1.8 7.2L19 10l-7.2 1.8L10 19l-1.8-7.2L1 10l7.2-1.8z"/><path d="M10 5.5l.9 3.6 3.6.9-3.6.9-.9 3.6-.9-3.6L5.5 10l3.6-.9z" fill="#3d2f1f" stroke="none"/></svg>';
+  scale.appendChild(seam);
+  const needle = document.createElement('span'); needle.className = 'needle'; needle.style.left = px(SURVEY_W * (12 - 1) / 43); scale.appendChild(needle);
+  scale.addEventListener('click', (e) => {
+    const r = scale.getBoundingClientRect(), p = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    needle.style.left = px(p);
+    if (p <= SURVEY_W) yearEl.textContent = 'day ' + Math.max(1, Math.round(1 + 43 * p / SURVEY_W));
+    else yearEl.textContent = 'year ' + Math.round(y0 + (y1 - y0) * (p - SURVEY_W) / (1 - SURVEY_W));
+  });
+})();
+</script>
