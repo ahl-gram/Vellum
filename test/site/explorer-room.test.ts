@@ -83,9 +83,14 @@ test("ER6 the page css fits the sheet to what the chrome leaves and stands print
   assert.match(print[1], /#map\s*\{[^}]*transform:\s*none\s*!important/, "the chart prints unzoomed");
 });
 
-test("ER7 app.ts fits the room after the chart lands and writes the folio's lines", () => {
+test("ER7 app.ts fits the room after the chart lands on BOTH draw paths and writes the folio's lines", () => {
   assert.match(app, /import\s*\{\s*bindRoom\s*\}\s*from\s*"\.\.\/shared\/room\.ts"/, "app.ts binds the shared room");
-  assert.match(app, /room\.layout\(\)/, "the fit runs after a draw (the folio's lines are chrome the fit measures)");
+  // The turn lands the chart in runTurn's then; a settle writes #map directly. Each path must refit once the chart is in the DOM, or the room fits an empty sheet on that path (guard-prover hole A: one call satisfied a whole-file grep).
+  const turnPath = app.slice(app.indexOf("runTurn({"), app.indexOf("} else {", app.indexOf("runTurn({")));
+  const settlePath = app.slice(app.indexOf("mapDiv.innerHTML = res.svg;"), app.indexOf("if (pendingCamera)"));
+  assert.ok(turnPath.includes("room.layout()"), "the turn path refits once the leaf lands");
+  assert.ok(settlePath.includes("room.layout()"), "the settle path refits once #map holds the chart");
+  assert.ok(settlePath.indexOf("room.layout()") > settlePath.indexOf("lc.buildPlaceOverlay(res.manifest)"), "the settle refits after the overlay is built, so the fit measures the chart as drawn");
   for (const id of ["folioTitle", "folioSub"]) {
     assert.ok(app.includes(id), `app.ts writes ${id}`);
   }

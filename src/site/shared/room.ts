@@ -35,6 +35,29 @@ export function legendSeat(at: { narrow: boolean; hasSlip: boolean }): LegendSea
   return at.narrow && at.hasSlip ? "slip" : "stage";
 }
 
+export interface Seatable {
+  readonly parentElement: object | null;
+  readonly classList: { toggle(c: string, force: boolean): boolean };
+}
+
+export interface LegendHome<T extends Seatable = Seatable> {
+  /** The legend row itself. */
+  readonly legend: T;
+  /** The slip's dock, where the row sits on a phone. */
+  readonly dock: { appendChild(el: T): unknown };
+  /** The row's place on the stage: its original parent and the sibling it stood before. */
+  readonly stage: { insertBefore(el: T, before: object | null): unknown };
+  readonly next: object | null;
+}
+
+/** Move the one legend row to its seat, idempotently; the in-slip class follows it so the sheet dresses it in place. */
+export function dockLegend<T extends Seatable>(home: LegendHome<T>, seat: LegendSeat): void {
+  const docked = home.legend.parentElement === home.dock;
+  if (seat === "slip" && !docked) home.dock.appendChild(home.legend);
+  else if (seat === "stage" && docked) home.stage.insertBefore(home.legend, home.next);
+  home.legend.classList.toggle("in-slip", seat === "slip");
+}
+
 export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room {
   const narrowQuery = window.matchMedia(NARROW);
   const narrow = () => narrowQuery.matches;
@@ -65,11 +88,7 @@ export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room 
 
   const seatLegend = () => {
     if (legend === null || legendStage === null || legendDock === null) return;
-    const seat = legendSeat({ narrow: narrow(), hasSlip: slip !== null });
-    const docked = legend.parentElement === legendDock;
-    if (seat === "slip" && !docked) legendDock.appendChild(legend);
-    else if (seat === "stage" && docked) legendStage.insertBefore(legend, legendNext);
-    legend.classList.toggle("in-slip", seat === "slip");
+    dockLegend<HTMLElement>({ legend, dock: legendDock, stage: legendStage, next: legendNext }, legendSeat({ narrow: narrow(), hasSlip: slip !== null }));
   };
 
   // The legend row centres on the chart, but never over the chart's folio.

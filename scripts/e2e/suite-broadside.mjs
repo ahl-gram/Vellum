@@ -152,6 +152,13 @@ export async function run(ctx) {
   const probe = () => evaluate(`(()=>{const n=document.getElementById("note-survey");
     return{stayed:location.pathname==="/explorer/",open:!!n&&n.matches(":popover-open"),
       hasLink:!!document.querySelector('#note-survey a[href="/glossary/#survey"]')};})()`);
+  // #463: the roads out dock INSIDE the phone sheet (room.ts seats the one legend row; the stage copy would be display:none at 390), so the Press is reachable from the opened Broadside. The class this guards: a seat decided but never applied leaves a phone with no way to the Print Room or the journal.
+  const br6a = await evaluate(`(()=>{const dock=document.querySelector("#broadside .legend.in-slip");const ids=["verso-turn","order-plates","journal-link"].map((id)=>{const el=document.getElementById(id);return{id,inSheet:!!(dock&&dock.contains(el)),shown:!!el&&el.getClientRects().length>0};});return{docked:!!dock,onStage:!!document.querySelector("main > .legend"),ids};})()`);
+  check(
+    "BR6a on a phone the Press docks inside the opened Broadside: Turn and both roads in the sheet and hit-testable, none left on the stage",
+    br6a.docked && !br6a.onStage && br6a.ids.every((i) => i.inSheet && i.shown),
+    JSON.stringify(br6a),
+  );
   const tapped1 = await tapAt();
   const afterTap1 = await probe();
   const tapped2 = await tapAt();
