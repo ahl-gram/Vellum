@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { FOLD_SETTLE_MS, bindSlip, type Listens } from "../../src/site/shared/slip.ts";
 
-// #462 chart-room ruling 3: the slip folds to a bookmark tab and comes back from it; on a phone its head is the bottom sheet's handle.
+// #462 chart-room ruling 3: the slip folds to a bookmark tab and comes back from it; on a phone a button covering its head is the bottom sheet's handle (skeptic finding 3, PR #488: a keyboard needs a toggle too).
 
 type Handler = (e: Event) => void;
 const listener = () => {
@@ -28,25 +28,26 @@ const classed = () => {
   };
 };
 
-const fixture = (narrow: boolean) => {
+const fixture = () => {
   const slip = classed();
   const tabEvents = listener();
   const tab = { ...classed(), ...tabEvents.on };
   const fold = listener();
-  const head = listener();
+  const handleEvents = listener();
+  const attrs: Record<string, string> = {};
+  const handle = { ...handleEvents.on, setAttribute: (n: string, v: string) => { attrs[n] = v; } };
   const layouts: number[] = [];
   const pending: Array<{ run: () => void; ms: number }> = [];
   bindSlip({
-    slip, fold: fold.on, tab, head: head.on,
-    narrow: () => narrow,
+    slip, fold: fold.on, tab, handle,
     onLayout: () => { layouts.push(Date.now()); },
     after: (run, ms) => { pending.push({ run, ms }); },
   });
-  return { slip, tab, tabEvents, fold, head, layouts, pending };
+  return { slip, tab, tabEvents, fold, handle: handleEvents, attrs, layouts, pending };
 };
 
 test("the fold button folds the slip away and shows the tab; the tab brings it back and hides itself", () => {
-  const f = fixture(false);
+  const f = fixture();
   f.fold.fire("click");
   assert.ok(f.slip.has("folded") && f.tab.has("shown"), "folded, tab shown");
   f.tabEvents.fire("click");
@@ -54,7 +55,7 @@ test("the fold button folds the slip away and shows the tab; the tab brings it b
 });
 
 test("a fold relays the room's layout only after the transition has settled", () => {
-  const f = fixture(false);
+  const f = fixture();
   f.fold.fire("click");
   assert.equal(f.layouts.length, 0, "nothing measured mid-transition (the slip is still where it was)");
   assert.equal(f.pending.length, 1);
@@ -63,20 +64,13 @@ test("a fold relays the room's layout only after the transition has settled", ()
   assert.equal(f.layouts.length, 1, "then the room re-measures once");
 });
 
-test("on a phone a tap on the head opens and closes the sheet at once; on a wide sheet the head is inert", () => {
-  const phone = fixture(true);
-  phone.head.fire("click", { closest: () => null });
-  assert.ok(phone.slip.has("open"), "opened");
-  assert.equal(phone.layouts.length, 1, "the room re-measures at once (no transition on the sheet)");
-  phone.head.fire("click", { closest: () => null });
-  assert.ok(!phone.slip.has("open"), "closed again");
-  const wide = fixture(false);
-  wide.head.fire("click", { closest: () => null });
-  assert.ok(!wide.slip.has("open"), "a wide sheet's head does nothing");
-});
-
-test("a tap on a control inside the head is that control's, never the sheet's", () => {
-  const f = fixture(true);
-  f.head.fire("click", { closest: () => ({}) });
-  assert.ok(!f.slip.has("open"), "the fold button's own tap does not also open the sheet");
+test("the handle opens and closes the sheet at once and says so to assistive tech", () => {
+  const f = fixture();
+  f.handle.fire("click");
+  assert.ok(f.slip.has("open"), "opened");
+  assert.equal(f.attrs["aria-expanded"], "true");
+  assert.equal(f.layouts.length, 1, "the room re-measures at once (no transition on the sheet)");
+  f.handle.fire("click");
+  assert.ok(!f.slip.has("open"), "closed again");
+  assert.equal(f.attrs["aria-expanded"], "false");
 });

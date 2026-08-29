@@ -7,7 +7,7 @@ body { line-height: 1.45; }
 .fog { z-index: 3; }
 .stage .status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 0 1rem;
   color: var(--parchment); z-index: 2; pointer-events: none; }
-.stage noscript .status { pointer-events: auto; max-width: 30rem; }
+.stage noscript .status { top: calc(50% + 2.8rem); pointer-events: auto; max-width: 30rem; }
 .stage .status a { color: var(--parchment-bright); }
 #map-viewport { position: absolute; inset: 0; cursor: grab; }
 #map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }

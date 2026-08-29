@@ -1,7 +1,6 @@
 ---
-// Sub 7 (#462, chart-room ruling 3 and document-room ruling 1; the Atelier Kit, #487): the room's working panel, the mockup's station card grown into a desk. Verb / title / where head, a scrolling body, an optional foot; it folds to a bookmark tab on the right edge, and on a phone it is the bottom sheet collapsed to its title. The behaviour is src/site/shared/slip.ts, bound by whichever script the page runs.
+// Sub 7 (#462, chart-room ruling 3 and document-room ruling 1; the Atelier Kit, #487): the room's working panel, the mockup's station card grown into a desk; the behaviour is src/site/shared/slip.ts, bound by whichever script the page runs.
 interface Props {
-  /** The panel's id; its title takes `${id}-title` for aria-labelledby. */
   id: string;
   verb: string;
   title: string;
@@ -14,6 +13,7 @@ const titleId = `${id}-title`;
 ---
 <aside class="slip" id={id} aria-labelledby={titleId}>
   <div class="slip-head">
+    <button class="slip-handle" type="button" aria-expanded="false" aria-controls={id} aria-label={`Open ${title}`}></button>
     <button class="slip-fold" type="button" aria-label={fold}>&times;</button>
     <p class="card-verb">{verb}</p>
     <h2 class="card-title" id={titleId}>{title}</h2>

@@ -36,7 +36,7 @@ body.room main { margin: 0 calc(var(--slip-w) + 2.4rem) 0 0; position: relative;
 body.room:has(.slip.folded) main { margin-right: 0; }
 /* The landing (#461 ruling 6): the layout's settle rides the desk panel, and this room hosts fixed furniture in main, so the sheet lands itself and its shadow tightens as it does. */
 body.room .sheet { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both, sheet-settle 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
-/* The broadside (#461 ruling 4) beside a slip: 22rem columns, the ruled deviation from 26rem (two at 1280 with the index open, three folded). */
+/* The broadside (#461 ruling 4) beside a slip: 22rem columns, the ruled deviation from 26rem; two columns at 1280 open and folded alike (the mockup's own still, re-ruled 2026-08-29), three from about 1350px wide. */
 .columns { column-width: 22rem; column-gap: 3.4rem; column-rule: 1px solid var(--line-faint); }
 h2 { column-span: all; font-size: 1.25rem; letter-spacing: 0.09em; border-bottom: 1px solid var(--line-tan);
   padding-bottom: 0.3rem; margin: 2.4rem 0 1.1rem; scroll-margin-top: calc(var(--band-h) + 1rem); }

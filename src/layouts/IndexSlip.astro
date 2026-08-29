@@ -23,8 +23,8 @@ const { sections, kind } = Astro.props;
 </Slip>
 <script>
   import { bindSlip } from "../site/shared/slip.ts";
-  import { bindIndexInk } from "../site/shared/index-ink.ts";
-  import { findMarks, sectionEmpty } from "../site/shared/term-find.ts";
+  import { indexInk } from "../site/shared/index-ink.ts";
+  import { findMarks, sectionEmpty } from "../site/glossary/term-find.ts";
 
   const slip = document.getElementById("index");
   const narrowQuery = window.matchMedia("(max-width: 900px)");
@@ -50,14 +50,13 @@ const { sections, kind } = Astro.props;
       slip,
       fold: slip.querySelector(".slip-fold"),
       tab: document.querySelector(".slip-tab"),
-      head: slip.querySelector(".slip-head") ?? slip,
-      narrow,
+      handle: slip.querySelector(".slip-handle"),
       onLayout: place,
       after: (run, ms) => { window.setTimeout(run, ms); },
     });
     const byData = (sel: string, key: string) =>
       new Map([...slip.querySelectorAll<HTMLElement>(sel)].map((el) => [el.dataset[key] ?? "", el]));
-    const ink = bindIndexInk({
+    const ink = indexInk({
       heads: [...document.querySelectorAll(".sheet h2[id]")],
       entries: [...document.querySelectorAll(".sheet :is(.q, .term)[id]")],
       rows: byData(".index > li[data-sec]", "sec"),
@@ -72,7 +71,11 @@ const { sections, kind } = Astro.props;
     place();
     ink();
     for (const a of slip.querySelectorAll("a")) {
-      a.addEventListener("click", () => { if (narrow()) slip.classList.remove("open"); });
+      a.addEventListener("click", () => {
+        if (!narrow()) return;
+        slip.classList.remove("open");
+        slip.querySelector(".slip-handle")?.setAttribute("aria-expanded", "false");
+      });
     }
     const find = document.querySelector<HTMLInputElement>(".find input");
     find?.addEventListener("input", () => {

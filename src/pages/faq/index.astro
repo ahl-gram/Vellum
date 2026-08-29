@@ -24,6 +24,7 @@ const count = `${indexCount(sections)} questions in ${sections.length} sections`
 <RoomFolio room={room} tagline={tagline}>
   <p class="dateline">{count}</p>
 </RoomFolio>
+<IndexSlip sections={sections} kind="questions" />
 <div class="sheet">
 <div class="columns">
 <h2 id="about">About Vellum</h2>
@@ -224,5 +225,4 @@ download it as a single file.</p>
 worlds at once, useful for browsing seeds until one catches your eye.</p>
 </div>
 </div>
-<IndexSlip sections={sections} kind="questions" />
 </BaseLayout>

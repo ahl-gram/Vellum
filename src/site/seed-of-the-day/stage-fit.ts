@@ -5,17 +5,14 @@ export interface Box {
 
 export interface StageInput {
   readonly view: Box;
-  /** The chart's width over its height. */
   readonly aspect: number;
-  /** The bottoms of the chrome standing above the chart (the head cluster, the room folio). */
+  /** Bottoms of the chrome above the chart. */
   readonly above: readonly number[];
-  /** The tops of the chrome standing below it (the chart folio, the legend row, a phone's bottom sheet). */
+  /** Tops of the chrome below it. */
   readonly below: readonly number[];
-  /** The width of a slip standing open beside the chart, 0 when folded or a bottom sheet. */
+  /** An open slip's width, 0 when folded or a bottom sheet. */
   readonly beside: number;
-  /** The clear between the chart and the chrome on every side. */
   readonly gap: number;
-  /** A narrow sheet fits the chart to the viewport's width at least, so the reader pans rather than squints. */
   readonly narrow: boolean;
 }
 

@@ -1,4 +1,4 @@
-// The document rooms' index (#462 ruling 1): the section being read is inked, the entry being read is marked, as the page scrolls. The choice is pure; the binder reads rects and writes classes.
+// The document rooms' index (#462 ruling 1): the section being read is inked and the entry being read is marked as the page scrolls.
 
 export interface Placed {
   readonly id: string;
@@ -6,7 +6,6 @@ export interface Placed {
   readonly top: number;
 }
 
-/** The last head at or above the reading line, else the first: a page scrolled past every head still reads its last section, and one above the first head is on the first. */
 export function readingAt(heads: readonly Placed[], line: number): string | null {
   if (heads.length === 0) return null;
   let current = heads[0];
@@ -14,7 +13,6 @@ export function readingAt(heads: readonly Placed[], line: number): string | null
   return current.id;
 }
 
-/** The entry nearest the line from above, within the section being read (at or below its head), or none: at a head no entry is read yet, never one from the section above, and of two entries level across the broadside's columns the earlier one. */
 export function entryAt(entries: readonly Placed[], line: number, sectionTop: number): string | null {
   let current: Placed | null = null;
   for (const e of entries) {
@@ -34,7 +32,8 @@ interface InkParts {
   readonly keepInView: () => HTMLElement | null;
 }
 
-export function bindIndexInk(p: InkParts): () => void {
+/** Builds the ink pass; the caller wires it to scroll and resize. */
+export function indexInk(p: InkParts): () => void {
   const placed = (els: readonly Element[]): Placed[] =>
     els.flatMap((el) => (el.id ? [{ id: el.id, top: el.getBoundingClientRect().top }] : []));
   const ink = () => {

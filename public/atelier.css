@@ -52,6 +52,7 @@
 .slip .intro { text-align: left; font-size: 0.95rem; line-height: 1.5; margin: 0.7rem 0 0; }
 .slip .note { font-size: 0.82rem; color: var(--ink-faded); line-height: 1.45; margin: 0; text-align: left; }
 .slip a { color: var(--ink-dark); }
+.slip-handle { display: none; }
 .slip-fold { position: absolute; right: 0.5rem; top: 0.45rem; appearance: none; border: 0; border-radius: 0; background: none; cursor: pointer;
   font-size: 1.05rem; line-height: 1; color: var(--ink-faded); padding: 0.2rem 0.4rem; }
 /* Four classes deep on purpose: the house sheets dress every button, and their hover wash outranks a plain .slip-fold:hover. */
@@ -86,7 +87,7 @@ button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; ba
 .index .terms { margin: 0.2rem 0 0; font-size: 0.78rem; line-height: 1.5; color: var(--ink-brown); }
 .index .terms a { color: inherit; text-decoration: none; white-space: nowrap; }
 .index .terms a:hover { color: var(--ink-dark); text-decoration: underline; text-underline-offset: 0.2em; }
-.index .terms a + a::before { content: "\00b7"; margin: 0 0.35em 0 0.1em; color: var(--ink-faded); }
+.index .terms a:not(.miss) ~ a:not(.miss)::before { content: "\00b7"; margin: 0 0.35em 0 0.1em; color: var(--ink-faded); }
 .index .terms a.now { color: var(--ink-dark); text-decoration: underline; text-underline-offset: 0.2em; text-decoration-color: var(--line-tan); }
 .index .terms a.hit { color: var(--ink-dark); background: var(--parchment-bright); }
 .index .terms a.miss { display: none; }
@@ -104,9 +105,12 @@ button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; ba
   .slip { right: 0; left: 0; top: auto; bottom: 0; width: 100%; max-height: 72vh; outline-offset: -8px; transition: none; }
   .slip.folded { opacity: 1; visibility: visible; transform: none; }
   .slip:not(.open) .slip-body, .slip:not(.open) .slip-foot { display: none; }
-  .slip-head { padding: 0.75rem 1.3rem 0.5rem; cursor: pointer; }
-  .slip-head::before { content: ""; display: block; width: 2.6rem; height: 3px; margin: 0 auto 0.55rem; background: var(--line-tan); border-radius: 2px; }
-  .slip.open .slip-head::before { background: var(--ink-faded); }
+  .slip-head { padding: calc(0.75rem + 3px + 0.55rem) 1.3rem 0.5rem; }
+  /* The handle is a real button covering the head (a keyboard needs a toggle too, PR #488 finding 3); four classes deep against the house button dress, and no lift: it is invisible. */
+  .slip-handle { display: block; position: absolute; inset: 0; z-index: 1; appearance: none; border: 0; border-radius: 0; background: none; padding: 0; cursor: pointer; }
+  .slip .slip-head .slip-handle:is(:hover, :focus-visible, :active) { background: none; transform: none; box-shadow: none; }
+  .slip-handle::before { content: ""; display: block; width: 2.6rem; height: 3px; margin: 0.75rem auto 0; background: var(--line-tan); border-radius: 2px; }
+  .slip.open .slip-handle::before { background: var(--ink-faded); }
   .slip .card-title { font-size: 1.15rem; }
   .slip-fold { display: none; }
   .slip-body { padding: 0 1.3rem 1rem; }
@@ -116,4 +120,8 @@ button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; ba
 /* Print is paper (#462 chart-room ruling 10, the document-room stand-down): the fog, the corners and the slip print as nothing. */
 @media print {
   .fog, .corner, .slip, .slip-tab { display: none !important; }
+  /* The room's name is the page's h1 (#288): it prints in flow at the top, the rest of the corner as nothing. */
+  .corner.folio-room { display: block !important; position: static; text-align: left; margin: 0 0 1rem; }
+  .folio-room .room-name, .folio-room .room-tagline { color: var(--ink-dark); }
+  .folio-room .dateline, .folio-room .gloss, .folio-controls { display: none; }
 }

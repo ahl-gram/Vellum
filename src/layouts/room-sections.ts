@@ -16,21 +16,27 @@ export type EntryClass = "q" | "term";
 const decode = (s: string): string =>
   s.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, " ").trim();
 
-/** Every `<h2 id>` with the entries under it; an entry without an id throws, because the index needs an anchor for each one. */
+const attr = (attrs: string, name: string): string | undefined =>
+  new RegExp(`(?:^|\\s)${name}="([^"]*)"`).exec(attrs)?.[1];
+
+// Attributes in any order (the #462 body's own gotcha: a tag matched exactly goes blind when attributes arrive).
 export function roomSections(source: string, entryClass: EntryClass): readonly IndexSection[] {
   const sections: IndexSection[] = [];
-  const heads = [...source.matchAll(/<h2 id="([^"]+)">([\s\S]*?)<\/h2>/g)];
-  const entryRe = new RegExp(`<p class="${entryClass}"([^>]*)>([\\s\\S]*?)</p>`, "g");
+  const heads = [...source.matchAll(/<h2(\s[^>]*)?>([\s\S]*?)<\/h2>/g)];
   for (const [i, head] of heads.entries()) {
+    const id = attr(head[1] ?? "", "id");
+    if (id === undefined) throw new Error(`the section "${decode(head[2])}" has no id for the index`);
     const start = head.index + head[0].length;
     const end = i + 1 < heads.length ? heads[i + 1].index : source.length;
     const body = source.slice(start, end);
-    const entries = [...body.matchAll(entryRe)].map(([, attrs, text]) => {
-      const id = /\sid="([^"]+)"/.exec(attrs)?.[1];
-      if (id === undefined) throw new Error(`the ${entryClass} "${decode(text)}" under "${decode(head[2])}" has no id for the index`);
-      return { id, text: decode(text) };
-    });
-    sections.push({ id: head[1], title: decode(head[2]), entries });
+    const entries = [...body.matchAll(/<p(\s[^>]*)>([\s\S]*?)<\/p>/g)]
+      .filter(([, attrs]) => attr(attrs, "class")?.split(/\s+/).includes(entryClass))
+      .map(([, attrs, text]) => {
+        const entryId = attr(attrs, "id");
+        if (entryId === undefined) throw new Error(`the ${entryClass} "${decode(text)}" under "${decode(head[2])}" has no id for the index`);
+        return { id: entryId, text: decode(text) };
+      });
+    sections.push({ id, title: decode(head[2]), entries });
   }
   return sections;
 }

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { findMarks, sectionEmpty } from "../../src/site/shared/term-find.ts";
+import { findMarks, sectionEmpty } from "../../src/site/glossary/term-find.ts";
 
 // #462 document-room ruling 4: the find box narrows the index by term NAME, case-folded, and never by definition.
 

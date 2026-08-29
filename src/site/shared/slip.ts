@@ -6,23 +6,22 @@ export interface Listens {
   addEventListener(type: string, listener: (e: Event) => void): void;
 }
 
+export interface Expands extends Listens {
+  setAttribute(name: string, value: string): void;
+}
+
 export interface SlipParts {
   readonly slip: Classed;
   readonly fold: Listens | null;
   readonly tab: (Classed & Listens) | null;
-  readonly head: Listens;
-  readonly narrow: () => boolean;
-  /** Runs once the fold has settled, and at once when a phone sheet opens or closes. */
+  /** The phone sheet's toggle, a button covering the head. */
+  readonly handle: Expands | null;
   readonly onLayout: () => void;
   readonly after: (run: () => void, ms: number) => void;
 }
 
 /** The slip's fold transition in atelier.css, plus a beat. */
 export const FOLD_SETTLE_MS = 340;
-
-const onControl = (e: Event): boolean =>
-  typeof (e.target as { closest?: unknown } | null)?.closest === "function" &&
-  (e.target as Element).closest("button, a, input, select") !== null;
 
 export function bindSlip(p: SlipParts): void {
   const settle = () => p.after(p.onLayout, FOLD_SETTLE_MS);
@@ -36,10 +35,9 @@ export function bindSlip(p: SlipParts): void {
     p.tab?.classList.remove("shown");
     settle();
   });
-  // A phone's sheet opens on a tap of its head; a tap on a control inside the head is that control's.
-  p.head.addEventListener("click", (e) => {
-    if (!p.narrow() || onControl(e)) return;
-    p.slip.classList.toggle("open");
+  p.handle?.addEventListener("click", () => {
+    const open = p.slip.classList.toggle("open");
+    p.handle?.setAttribute("aria-expanded", String(open));
     p.onLayout();
   });
 }

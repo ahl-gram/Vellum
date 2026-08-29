@@ -1,5 +1,5 @@
 // The chart room's furniture (#462): the stage fitted to what the chrome leaves, the slip's fold, the Glass's keys and buttons. app.ts keeps the hunt and the controller; this file keeps the room.
-import { fitStage } from "../shared/stage-fit.ts";
+import { fitStage } from "./stage-fit.ts";
 import { bindSlip } from "../shared/slip.ts";
 import type { ZoomController } from "../shared/zoom-controller.ts";
 
@@ -81,7 +81,9 @@ export function bindRoom({ viewport, map, sheet, zoom }: RoomParts): Room {
       gap: phone ? PHONE_GAP : CHROME_GAP,
       narrow: phone,
     });
-    map.style.padding = `${fit.reserve.top}px ${fit.reserve.right}px ${fit.reserve.bottom}px 0`;
+    map.style.setProperty("--reserve-top", `${fit.reserve.top}px`);
+    map.style.setProperty("--reserve-right", `${fit.reserve.right}px`);
+    map.style.setProperty("--reserve-bottom", `${fit.reserve.bottom}px`);
     sheet.style.width = `${fit.sheet.w}px`;
     sheet.style.height = `${fit.sheet.h}px`;
     if (phone && slipRect !== null) document.body.style.setProperty("--sheet-h", `${window.innerHeight - slipRect.top}px`);
@@ -96,8 +98,7 @@ export function bindRoom({ viewport, map, sheet, zoom }: RoomParts): Room {
       slip,
       fold: slip.querySelector(".slip-fold"),
       tab: q(".slip-tab"),
-      head: slip.querySelector(".slip-head") ?? slip,
-      narrow,
+      handle: slip.querySelector(".slip-handle"),
       onLayout: layout,
       after: (run, ms) => { window.setTimeout(run, ms); },
     });
