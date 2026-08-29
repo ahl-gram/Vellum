@@ -27,6 +27,7 @@ export const E2E_SUITE_ORDER = [
   "room-address",
   "runninghead",
   "cluster",
+  "room-drawer",
   "region-detail",
 ] as const;
 

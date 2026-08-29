@@ -15,7 +15,6 @@ import { firstArrival, landfallView, markArrival, wideView } from "./ceremony.ts
 import { bearingLine, type Capital } from "./coords.ts";
 import { bindStations } from "./cards.ts";
 import { DRIFT_SECONDS, IDLE_DELAY_MS, driftTarget } from "./drift.ts";
-import { INERT_BEHIND, bindDrawer } from "./drawer.ts";
 import { bindStageInput } from "./input.ts";
 import { STATION_FLIGHT_SECONDS, stationFlightView } from "./station-flight.ts";
 import { createValve } from "./valve.ts";
@@ -198,14 +197,4 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     settle();
   }
   armDrift();
-}
-
-const reveal = document.querySelector(".rooms-reveal");
-const scrim = document.querySelector(".landfall");
-if (reveal instanceof HTMLInputElement && scrim !== null) {
-  bindDrawer(reveal, document, {
-    scrim,
-    inert: [...document.querySelectorAll<HTMLElement>(INERT_BEHIND)],
-    narrow: window.matchMedia("(max-width: 900px)"),
-  });
 }

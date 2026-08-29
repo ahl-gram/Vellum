@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// Landfall Sub 6b (#480): the head cluster's cleanup on home. SPEC: the four screenshots on #480 and their captions; the measured baseline and every number cited below are on PR #482.
+// Landfall Sub 6b (#480): the head cluster's cleanup on home. SPEC: the four screenshots on #480 and their captions; the measured baseline and every number cited below are on PR #482. The drawer's own dress became the shell's at Sub 6c (#483) and is pinned against the layout in test/site/shell-drawer-css.test.ts; what stays here is what clears home's own furniture.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
@@ -71,32 +71,6 @@ test("the chrome's corner offsets are tokens the wash and drawer can follow (#48
   assert.doesNotMatch(phone, /header\.chrome\s*\{[^}]*left:/, "no literal left/top override survives under 720");
 });
 
-test("under 900 the rooms nav is a drawer: it slides in from the left beneath the cluster, and its doors stack (#480, screenshots 1 and 2)", () => {
-  const drawer = rule(narrow, ".chrome .rooms");
-  assert.match(drawer, /position:\s*absolute/, "the drawer rides the page with the cluster (#472's ruling: nothing fixed collides with the shelf)");
-  assert.match(drawer, /left:\s*calc\(-1 \* var\(--chrome-x\)\);\s*top:\s*calc\(-1 \* var\(--chrome-y\)\)/, "it is anchored to the viewport corner through the tokens");
-  assert.match(drawer, /transform:\s*translateX\(-100%\)/, "closed, it waits off the left edge");
-  assert.match(drawer, /visibility:\s*hidden/, "closed, its doors are neither visible nor tabbable");
-  assert.match(drawer, /transition:[^;]*transform/, "the slide is a transform transition");
-  assert.match(drawer, /z-index:\s*-1/, "it paints beneath the cluster's own lettering and burger");
-  assert.match(drawer, /width:\s*min\(16rem, 100vw\)/, "capped at the viewport: a box wider than the phone widens the layout viewport itself (the 736px incident)");
-  assert.match(drawer, /padding:\s*0 1\.5rem 2rem var\(--chrome-x\)/, "no padding-top: the sticky cap is the reserve (a padding the cap was pulled into by a negative margin put the cap over the first doors)");
-  const cap = rule(narrow, ".chrome .rooms::before");
-  assert.match(cap, /position:\s*sticky;\s*top:\s*0;\s*z-index:\s*1/, "a sticky cap rides the drawer's scroll above the doors");
-  assert.match(cap, /height:\s*calc\(var\(--band-h\) \+ 1rem\);/, "the cap is exactly the reserved band the cluster stands on, plus a breath");
-  assert.doesNotMatch(cap, /margin/, "and never a negative margin: sticky clamps the box inside its containing block, which slid the cap down over the first three doors");
-  assert.match(cap, /background:\s*var\(--chart-ink\)/, "opaque, so a scrolled door cannot show through beneath the lettering (plate finding G)");
-  const open = rule(narrow, ".rooms-reveal:checked ~ .rooms");
-  assert.match(open, /transform:\s*none/, "checked, it slides home");
-  assert.match(open, /visibility:\s*visible/, "checked, its doors are live");
-  assert.match(open, /pointer-events:\s*auto/, "checked, its ground takes the hand (the chrome passes it through otherwise)");
-  assert.doesNotMatch(open, /display:\s*block|max-width/, "the checked rule no longer flips display or caps width the way the inline reveal did");
-  assert.match(rule(narrow, ".chrome .rooms .sep"), /display:\s*none/, "the separators stand down in the stack");
-  const doors = rule(narrow, '.chrome .rooms a, .chrome .rooms [aria-current="page"]');
-  assert.match(doors, /display:\s*block/, "every door is its own row");
-  assert.match(doors, /padding:\s*0\.85rem 0/, "each row is a 44px touch target at the drawer's face size (0.95rem face plus 0.85rem above and below measured 45px, e2e CL4)");
-});
-
 test("while the drawer is open the seed panel steps aside and a scrim stands behind the drawer (#480, screenshot 1)", () => {
   const aside = rule(narrow, "body:has(.rooms-reveal:checked) .lf-seed");
   assert.match(aside, /opacity:\s*0/, "the corner panel fades rather than sharing the corner with the doors");
@@ -106,8 +80,6 @@ test("while the drawer is open the seed panel steps aside and a scrim stands beh
   const z = scrim.match(/z-index:\s*(\d+)/);
   assert.ok(z && Number(z[1]) > 40 && Number(z[1]) < 45, "it covers an open station card (z 40) and sits under the raised chrome (skeptic finding 5)");
   assert.match(scrim, /pointer-events:\s*auto/, "the stage beneath is not live while the drawer is");
-  const raised = rule(narrow, "body:has(.rooms-reveal:checked) > header.chrome");
-  assert.match(raised, /z-index:\s*45/, "the chrome rises above the cards (40) and the scrim while the drawer is open, under the veil (50)");
   assert.doesNotMatch(narrow, /body:has\(\.rooms-reveal:checked\)::after/, "no fixed body scrim remains");
   const print = mediaBodies(css, "print");
   assert.match(rule(print, "body:has(.rooms-reveal:checked) .landfall::before"), /content:\s*none/, "print never stamps the scrim: paper widths match the narrow query and :checked is state (skeptic round 2, finding 3)");

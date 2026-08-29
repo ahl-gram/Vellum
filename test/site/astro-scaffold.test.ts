@@ -42,6 +42,9 @@ type PageSpec = {
   prePaintScript?: string;
 };
 
+/** The shell's binder, inlined into every page by Astro (#483); stripped before a page's OWN scripts are counted. */
+const SHELL_SCRIPT = /<script type="module">(?:(?!<\/script>)[\s\S])*closesOnScroll(?:(?!<\/script>)[\s\S])*<\/script>/;
+
 const PAGES: readonly PageSpec[] = [
   {
     route: "index.html",
@@ -186,6 +189,9 @@ const page = (route: string) => {
   assert.ok(html, `${route} should have been rendered by astro build`);
   return html;
 };
+
+/** A page with the shell's sitewide binder taken out, so a count is of the page's OWN scripts (#483). */
+const ownScripts = (route: string) => page(route).replace(SHELL_SCRIPT, "");
 
 const headOf = (html: string) => {
   const m = html.match(/<head>([\s\S]*?)<\/head>/);
@@ -408,18 +414,14 @@ test("the layout ships the cluster's ratified pins: leading, weight, the aria-cu
   }
 });
 
-test("the phone doors: home alone renders the rooms reveal ahead of its nav (#461, Alex's 2026-08-26 call on skeptic finding 1)", () => {
-  // The mockup's under-900px nav stand-down stranded four rooms (the legend carries four doors, not seven); the ruled replacement is a no-JS checkbox burger revealing the same nav. Home only: a room page's nav never stands down, so it needs no reveal.
+test("the phone doors: EVERY shelled page renders the rooms reveal ahead of its nav (#461, then #483's option-1 ruling)", () => {
+  // The mockup's under-900px nav stand-down stranded four rooms (the legend carries four doors, not seven); the ruled replacement is a no-JS checkbox burger revealing the same nav. Home-only until Sub 6c, when the drawer became the shell's and every room's nav folds down the same way.
   for (const p of PAGES) {
     const html = page(p.route);
     const reveal = html.indexOf('class="rooms-reveal"');
-    if (p.route === "index.html") {
-      assert.ok(reveal > -1, "home renders the rooms reveal");
-      assert.match(html, /<input type="checkbox"[^>]*class="rooms-reveal"[^>]*aria-label/, "the reveal is a labelled native checkbox (keyboard-operable with no bundle)");
-      assert.ok(reveal < html.indexOf('<nav class="rooms"'), "the reveal precedes the nav it reveals (the ~ combinator needs the order)");
-    } else {
-      assert.equal(reveal, -1, `${p.route} carries no reveal (its nav never stands down)`);
-    }
+    assert.ok(reveal > -1, `${p.route} renders the rooms reveal: one drawer, the same on every page`);
+    assert.match(html, /<input type="checkbox"[^>]*class="rooms-reveal"[^>]*aria-label/, `${p.route}'s reveal is a labelled native checkbox (keyboard-operable with no bundle)`);
+    assert.ok(reveal < html.indexOf('<nav class="rooms"'), `${p.route}'s reveal precedes the nav it reveals (the ~ combinator needs the order)`);
   }
 });
 
@@ -585,21 +587,31 @@ test("the body skeleton pins the shell order: band, cluster, main, footer on the
     }
     assert.match(
       html,
-      /<\/main>\s*<footer>[\s\S]*?<\/footer>\s*<\/body>\s*<\/html>\s*$/,
-      `${p.route} must close main, then the footer on the deep, then body and html with nothing after`,
+      /<\/main>\s*<footer>[\s\S]*?<\/footer>\s*<script type="module">[\s\S]*?<\/script>\s*<\/body>\s*<\/html>\s*$/,
+      `${p.route} must close main, then the footer on the deep, then the shell's own script, then body and html with nothing after`,
     );
   }
 });
 
+test("the shell's own script rides every page, inlined by Astro rather than emitted as a file (#483 ruling, option 1)", () => {
+  // The ruling's preferred form, taken by measurement: the chunk is under Vite's 4096-byte inline limit, so Astro writes it into the html and emits nothing. "the deploy artifact serves no raw app source" below is what reds if it ever crosses.
+  for (const p of PAGES) {
+    const html = page(p.route);
+    const shell = html.match(SHELL_SCRIPT);
+    assert.ok(shell, `${p.route} carries the shell's script: the drawer's manners are the same on every page`);
+    assert.ok(html.indexOf(shell[0]) > html.indexOf("</footer>"), `${p.route} runs it last, after everything it binds`);
+  }
+});
+
 test("each app page keeps its bundle-twin module script, rendered verbatim inside <main>", () => {
-  // The app entry stays the Vite-pressed twin; a module script is deferred by spec, so rendering inside <main> is behavior-identical to the old after-main position.
+  // The app entry stays the Vite-pressed twin; a module script is deferred by spec, so rendering inside <main> is behavior-identical to the old after-main position. The shell's script is every page's and is taken out first, so these counts stay the page's OWN.
   for (const p of PAGES) {
     const tag = `<script type="module" src="${p.scriptSrc}"></script>`;
     if (p.scriptSrc === undefined && p.inlineScript === undefined) {
-      assert.ok(!page(p.route).includes("<script"), `${p.route} is a content page and ships no script`);
+      assert.ok(!ownScripts(p.route).includes("<script"), `${p.route} is a content page and ships no script of its own`);
       continue;
     }
-    const html = page(p.route);
+    const html = ownScripts(p.route);
     if (p.inlineScript !== undefined) {
       const scripts = [...html.matchAll(/<script\b/g)];
       const expected = (p.scriptSrc === undefined ? 1 : 2) + (p.prePaintScript === undefined ? 0 : 1);
