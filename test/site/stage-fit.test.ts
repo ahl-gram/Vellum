@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { SLIP_CLEARANCE, fitStage } from "../../src/site/seed-of-the-day/stage-fit.ts";
+import { SLIP_CLEARANCE, fitStage } from "../../src/site/shared/stage-fit.ts";
 
 // #462 chart-room ruling 1: the chart is fitted to the space the chrome leaves, measured off the chrome rects, never guessed.
 

@@ -57,8 +57,8 @@ test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)
 
 test("HZ5 index.css gives #map-viewport the clip + touch-action wiring and #map a top-left pivot (#167)", () => {
   const css = read("public/seed-of-the-day/index.css");
-  // #462: the stage is the viewport and #map covers it, so d3's clamp (the viewport extent) keeps the padded, fitted sheet on the stage.
-  assert.match(css, /\.stage\s*\{[^}]*position:\s*fixed;\s*inset:\s*0/, "the stage is the viewport");
+  // #462: the stage is the viewport and #map covers it, so d3's clamp (the viewport extent) keeps the padded, fitted sheet on the stage; the stage rule is the kit's since #463.
+  assert.match(read("public/atelier.css"), /\.stage\s*\{[^}]*position:\s*fixed;\s*inset:\s*0/, "the stage is the viewport");
   assert.match(css, /#map\s*\{[^}]*inset:\s*0/, "#map covers the stage, so the clamp's extent is the stage");
   assert.match(css, /#map\s*\{[^}]*padding:\s*var\(--reserve-top/, "#map reserves the chrome's edges as padding, measured by room.ts");
   // Clip ONLY while zoomed, so the idle DOM (arrival ceremony overflow, drop shadow) stays byte-identical at home (k=1).

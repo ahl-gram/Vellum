@@ -19,7 +19,8 @@ import { createProjection, type Projection } from "../../render/transform.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
 import { createZoomController } from "../shared/zoom-controller.ts";
 import type { ZoomState } from "../shared/zoom-controller.ts";
-import { bindRoom } from "./room.ts";
+import { bindRoom } from "../shared/room.ts";
+import { bindGlassKeys } from "../shared/glass-keys.ts";
 import type { World } from "../../world/types.ts";
 
 declare global {
@@ -65,7 +66,8 @@ const zoomController = createZoomController({
 });
 zoomController.attach();
 // #462: the chart room around the controller; the sheet is fitted once the chart is drawn.
-const room = bindRoom({ viewport: $("map-viewport"), map: $("map"), sheet: $("sheet"), zoom: zoomController });
+const room = bindRoom({ frame: $("map"), sheet: $("sheet"), camera: { hold: () => zoomController.getState(), restore: (state) => zoomController.zoomTo(state) } });
+bindGlassKeys($("map-viewport"), zoomController);
 // Deterministic zoom hooks for the e2e, mirroring the Explorer's.
 window.__vellumZoomTo = (t) => zoomController.zoomTo(t);
 window.__vellumZoomState = () => zoomController.getState();

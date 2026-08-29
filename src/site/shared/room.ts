@@ -1,23 +1,27 @@
-// The chart room's furniture (#462): the stage fitted to what the chrome leaves, the slip's fold, the Glass's keys and buttons. app.ts keeps the hunt and the controller; this file keeps the room.
+// The chart room (#462, lifted into the Atelier Kit at its second use, #463/#487): the sheet fitted to what the chrome leaves, the slip's fold and the phone sheet, the legend row's seat. The Glass's keys and buttons are the page's own (glass-keys.ts for a plain controller, the Explorer's glass.ts for the LOD camera).
 import { fitStage } from "./stage-fit.ts";
-import { bindSlip } from "../shared/slip.ts";
-import type { ZoomController } from "../shared/zoom-controller.ts";
+import { bindSlip } from "./slip.ts";
 
-// The Explorer's own steps (src/site/explorer/glass.ts), not imported: that module carries the LOD schedule the Hunt must never bundle (#161).
-const ZOOM_STEP = 1.4;
-const PAN_FRACTION = 0.15;
 const CHROME_GAP = 14;
 const PHONE_GAP = 8;
 const SLIP_TOP_GAP = 16;
 const SLIP_FLOOR = 22;
+const LEGEND_CLEAR = 32;
 const NARROW = "(max-width: 900px)";
 const FALLBACK_ASPECT = 1500 / 1157.931;
 
-interface RoomParts {
-  readonly viewport: HTMLElement;
-  readonly map: HTMLElement;
+/** The camera's framing, held across a refit: the fit changes the box the camera is clamped against, so re-applying a raw transform against the new box would move the framing (and on the Explorer, re-draft a different region on the settle). */
+export interface RoomCamera<Held> {
+  readonly hold: () => Held;
+  readonly restore: (held: Held) => void;
+}
+
+interface RoomParts<Held> {
+  /** The element that reserves the chrome's edges as padding (Today: #map, the transform target; the Explorer: the stage round its sheet). */
+  readonly frame: HTMLElement;
+  /** The chart's fitted box. */
   readonly sheet: HTMLElement;
-  readonly zoom: ZoomController;
+  readonly camera: RoomCamera<Held>;
 }
 
 export interface Room {
@@ -25,7 +29,13 @@ export interface Room {
   readonly layout: () => void;
 }
 
-export function bindRoom({ viewport, map, sheet, zoom }: RoomParts): Room {
+export type LegendSeat = "stage" | "slip";
+
+export function legendSeat(at: { narrow: boolean; hasSlip: boolean }): LegendSeat {
+  return at.narrow && at.hasSlip ? "slip" : "stage";
+}
+
+export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room {
   const narrowQuery = window.matchMedia(NARROW);
   const narrow = () => narrowQuery.matches;
   const q = <T extends HTMLElement = HTMLElement>(sel: string): T | null => document.querySelector<T>(sel);
@@ -36,6 +46,10 @@ export function bindRoom({ viewport, map, sheet, zoom }: RoomParts): Room {
   };
   const slip = q(".slip");
   const folio = q(".corner.tr");
+  const legend = q(".legend");
+  const legendStage = legend?.parentElement ?? null;
+  const legendNext = legend?.nextSibling ?? null;
+  const legendDock = slip?.querySelector(".legend-dock") ?? null;
 
   const placeSlip = () => {
     if (slip === null) return;
@@ -49,24 +63,34 @@ export function bindRoom({ viewport, map, sheet, zoom }: RoomParts): Room {
     slip.style.maxHeight = `${window.innerHeight - top - SLIP_FLOOR}px`;
   };
 
+  const seatLegend = () => {
+    if (legend === null || legendStage === null || legendDock === null) return;
+    const seat = legendSeat({ narrow: narrow(), hasSlip: slip !== null });
+    const docked = legend.parentElement === legendDock;
+    if (seat === "slip" && !docked) legendDock.appendChild(legend);
+    else if (seat === "stage" && docked) legendStage.insertBefore(legend, legendNext);
+    legend.classList.toggle("in-slip", seat === "slip");
+  };
+
   // The legend row centres on the chart, but never over the chart's folio.
   const clearLegend = () => {
-    const legend = q(".legend:not(.in-slip)");
     if (legend === null || narrow()) return;
     legend.style.left = "";
     const a = legend.getBoundingClientRect();
     const bl = rect(q(".corner.bl"));
-    if (bl !== null && a.left < bl.right + 32) {
-      legend.style.left = `${a.left + a.width / 2 + (bl.right + 32 - a.left)}px`;
+    if (bl !== null && a.left < bl.right + LEGEND_CLEAR) {
+      legend.style.left = `${a.left + a.width / 2 + (bl.right + LEGEND_CLEAR - a.left)}px`;
     }
   };
 
   const aspect = () => {
-    const vb = sheet.querySelector("svg")?.viewBox.baseVal;
+    const vb = (sheet.querySelector<SVGSVGElement>("svg[data-vellum-style]") ?? sheet.querySelector<SVGSVGElement>("svg"))?.viewBox.baseVal;
     return vb !== undefined && vb.width > 0 && vb.height > 0 ? vb.width / vb.height : FALLBACK_ASPECT;
   };
 
   const layout = () => {
+    const held = camera.hold();
+    seatLegend();
     placeSlip();
     const phone = narrow();
     const slipRect = slip !== null ? slip.getBoundingClientRect() : null;
@@ -76,21 +100,20 @@ export function bindRoom({ viewport, map, sheet, zoom }: RoomParts): Room {
       view: { w: window.innerWidth, h: window.innerHeight },
       aspect: aspect(),
       above: [rect(q("header.chrome")), phone ? null : rect(folio)].flatMap((r) => (r === null ? [] : [r.bottom])),
-      below: [...tops([q(".corner.bl"), q(".legend:not(.in-slip)")]), ...(phone && slipRect !== null ? [slipRect.top] : [])],
+      below: [...tops([q(".corner.bl"), q(".legend:not(.in-slip)"), q(".strip")]), ...(phone && slipRect !== null ? [slipRect.top] : [])],
       beside: slipOpen && slipRect !== null ? slipRect.width : 0,
       gap: phone ? PHONE_GAP : CHROME_GAP,
       narrow: phone,
     });
-    map.style.setProperty("--reserve-top", `${fit.reserve.top}px`);
-    map.style.setProperty("--reserve-right", `${fit.reserve.right}px`);
-    map.style.setProperty("--reserve-bottom", `${fit.reserve.bottom}px`);
+    frame.style.setProperty("--reserve-top", `${fit.reserve.top}px`);
+    frame.style.setProperty("--reserve-right", `${fit.reserve.right}px`);
+    frame.style.setProperty("--reserve-bottom", `${fit.reserve.bottom}px`);
     sheet.style.width = `${fit.sheet.w}px`;
     sheet.style.height = `${fit.sheet.h}px`;
     if (phone && slipRect !== null) document.body.style.setProperty("--sheet-h", `${window.innerHeight - slipRect.top}px`);
     else document.body.style.removeProperty("--sheet-h");
     clearLegend();
-    // A resize or a fold changes the stage d3 clamps against; re-clamping the standing transform keeps the sheet on the stage.
-    zoom.zoomTo(zoom.getState());
+    camera.restore(held);
   };
 
   if (slip !== null) {
@@ -101,32 +124,6 @@ export function bindRoom({ viewport, map, sheet, zoom }: RoomParts): Room {
       handle: slip.querySelector(".slip-handle"),
       onLayout: layout,
       after: (run, ms) => { window.setTimeout(run, ms); },
-    });
-  }
-
-  // #165/#170: keys and buttons enter d3-zoom's own pipeline through the controller, the Explorer's wiring.
-  viewport.addEventListener("keydown", (e) => {
-    if (e.altKey || e.ctrlKey || e.metaKey) return;
-    const W = viewport.clientWidth;
-    const H = viewport.clientHeight;
-    switch (e.key) {
-      case "+": case "=": zoom.glideBy(ZOOM_STEP); break;
-      case "-": case "_": zoom.glideBy(1 / ZOOM_STEP); break;
-      case "ArrowLeft": zoom.panBy(W * PAN_FRACTION, 0); break;
-      case "ArrowRight": zoom.panBy(-W * PAN_FRACTION, 0); break;
-      case "ArrowUp": zoom.panBy(0, H * PAN_FRACTION); break;
-      case "ArrowDown": zoom.panBy(0, -H * PAN_FRACTION); break;
-      case "0": zoom.glideHome(); break;
-      default: return;
-    }
-    e.preventDefault();
-  });
-  for (const button of document.querySelectorAll<HTMLElement>("[data-zoom]")) {
-    const step = button.dataset.zoom;
-    button.addEventListener("click", () => {
-      if (step === "in") zoom.glideBy(ZOOM_STEP);
-      else if (step === "out") zoom.glideBy(1 / ZOOM_STEP);
-      else zoom.glideHome();
     });
   }
 
