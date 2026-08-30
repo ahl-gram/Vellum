@@ -32,13 +32,17 @@ body:not(.seat-d) .contents li.on { background: none; margin: 0; padding-left: 0
 body:not(.seat-d) .contents a.turn, body:not(.seat-d) .contents li.on a.turn.here { border-bottom: 0; font-weight: 400; color: inherit; pointer-events: none; }
 body:not(.seat-d) .contents li.on .cr-num { color: var(--ink-faded); }
 body:not(.seat-d) .turn-gloss { display: none; }
-/* seat b, the plates in the slip's scrolling body: a two-up gallery under each contents row */
+/* the plates in the slip's scrolling body (seat b, and the RULED seat d): a two-up gallery under each contents row; in seat d a thumbnail is a turn too, and the plate on the sheet wears the ink */
 .plates { display: none; }
-body.seat-b .plates { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; margin: 0.45rem 0 0.3rem 3.2rem; flex: 1 1 100%; }
-body.seat-b .contents li { flex-wrap: wrap; }
-body.seat-b .contents .cr-text { flex: 1 1 0; min-width: 0; }
+body:is(.seat-b, .seat-d) .plates { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; margin: 0.45rem 0 0.3rem 3.2rem; flex: 1 1 100%; }
+body:is(.seat-b, .seat-d) .contents li { flex-wrap: wrap; }
+body:is(.seat-b, .seat-d) .contents .cr-text { flex: 1 1 0; min-width: 0; }
+body.seat-d .plates figure { cursor: pointer; }
+body.seat-d .plates figure:hover img { transform: translateY(-2px); box-shadow: 0 6px 14px rgb(from var(--chart-ink) r g b / 0.35); }
+body.seat-d .plates figure.here img { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
+body.seat-d .plates figure.here figcaption { color: var(--ink-dark); font-weight: 600; }
 .plates figure { margin: 0; }
-.plates img { display: block; width: 100%; height: auto; border: 1px solid var(--line-tan); box-shadow: 0 3px 10px rgb(from var(--chart-ink) r g b / 0.25); }
+.plates img { display: block; width: 100%; height: auto; border: 1px solid var(--line-tan); box-shadow: 0 3px 10px rgb(from var(--chart-ink) r g b / 0.25); transition: transform 0.2s ease, box-shadow 0.2s ease; }
 .plates figcaption { font-family: var(--font-flourish); font-style: italic; font-size: 0.72rem; color: var(--ink-faded); margin-top: 0.2rem; line-height: 1.3; }
 /* seats a and b keep the proof on the sheet: the turned plate is seat d's alone */
 body:not(.seat-d) #plate-turned { display: none; }
@@ -59,7 +63,7 @@ body:not(.seat-d) .folio .plate-line { display: none; }
   .seed-controls select.control { display: none; }
   .legend.in-slip .legend-row { gap: 0.4rem; }
   .legend.in-slip .legend-btn { flex: 1 1 40%; }
-  body.seat-b .plates { margin-left: 0; }
+  body:is(.seat-b, .seat-d) .plates { margin-left: 0; }
 }
 </style>
 <script>window.ROOM_CAM = { top: 60, bottom: 104, bottomNarrow: 58 };
@@ -100,9 +104,12 @@ addEventListener('DOMContentLoaded', () => document.body.classList.add('seat-' +
       <span class="stamp">bound in 48s · about 20 MB</span>
       <a class="again" href="#">bind it again</a>
     </div>
-    <p class="contents-head"><span>Contents of the atlas</span><span class="gloss turn-gloss">a plate turns the sheet</span></p>
+    <p class="contents-head"><span>Contents of the atlas</span><span class="gloss turn-gloss">a thumbnail turns the sheet</span></p>
     <ol class="contents">
-      <li><span class="cr-num">i</span><span class="cr-text"><a class="turn" href="#">The chart, <em>antique</em>, as proofed</a></span></li>
+      <li><span class="cr-num">i</span><span class="cr-text"><a class="turn" href="#">The chart, <em>antique</em>, as proofed</a></span>
+        <div class="plates">
+          <figure><img src="{{THUMB:antique}}" alt=""><figcaption>Antique, as proofed</figcaption></figure>
+        </div></li>
       <li><span class="cr-num">ii</span><span class="cr-text">Other draughtings: <a class="turn" href="#"><em>topographic</em></a>, <a class="turn" href="#"><em>pen &amp; ink</em></a>, <a class="turn" href="#"><em>nautical</em></a></span>
         <div class="plates">
           <figure><img src="{{THUMB:topographic}}" alt=""><figcaption>Topographic</figcaption></figure>
@@ -111,7 +118,7 @@ addEventListener('DOMContentLoaded', () => document.body.classList.add('seat-' +
         </div></li>
       <li class="on"><span class="cr-num">iii</span><span class="cr-text">Thematic surveys: <a class="turn here" href="#"><em>vegetation</em></a>, <a class="turn" href="#"><em>temperature</em></a>, <a class="turn" href="#"><em>rainfall</em></a>, <a class="turn" href="#"><em>population</em></a></span>
         <div class="plates">
-          <figure><img src="{{THUMB:theme-vegetation}}" alt=""><figcaption>Vegetation</figcaption></figure>
+          <figure class="here"><img src="{{THUMB:theme-vegetation}}" alt=""><figcaption>Vegetation</figcaption></figure>
           <figure><img src="{{THUMB:theme-climate}}" alt=""><figcaption>Temperature</figcaption></figure>
           <figure><img src="{{THUMB:theme-moisture}}" alt=""><figcaption>Rainfall</figcaption></figure>
           <figure><img src="{{THUMB:theme-population}}" alt=""><figcaption>Population</figcaption></figure>
