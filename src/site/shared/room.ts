@@ -19,6 +19,8 @@ interface RoomParts<Held> {
   readonly frame: HTMLElement;
   readonly sheet: HTMLElement;
   readonly camera: RoomCamera<Held>;
+  /** The sheet's aspect when the page knows it better than the svg scan (a turned plate is an <img>, the Print Room); null defers to the scan. */
+  readonly aspect?: () => number | null;
 }
 
 export interface Room {
@@ -85,7 +87,8 @@ function fitRoom({ frame, sheet, aspect, phone, slipRect, slipW, glassL }: FitPa
 const tops = (els: Array<Element | null>) => els.map(rectOf).flatMap((r) => (r === null ? [] : [r.top]));
 const bottoms = (els: Array<Element | null>) => els.map(rectOf).flatMap((r) => (r === null ? [] : [r.bottom]));
 
-export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room {
+export function bindRoom<Held>(parts: RoomParts<Held>): Room {
+  const { frame, sheet, camera } = parts;
   const narrowQuery = window.matchMedia(NARROW);
   const slip = q(".slip");
   const legend = q(".legend");
@@ -94,10 +97,11 @@ export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room 
     ? { legend, dock, stage: legend.parentElement, next: legend.nextSibling }
     : null;
 
-  const aspect = () => {
+  const svgAspect = () => {
     const vb = (sheet.querySelector<SVGSVGElement>("svg[data-vellum-style]") ?? sheet.querySelector<SVGSVGElement>("svg"))?.viewBox.baseVal;
     return vb !== undefined && vb.width > 0 && vb.height > 0 ? vb.width / vb.height : FALLBACK_ASPECT;
   };
+  const aspect = () => parts.aspect?.() ?? svgAspect();
 
   const layout = () => {
     const held = camera.hold();
@@ -110,8 +114,9 @@ export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room 
     const slipOpen = slip !== null && !slip.classList.contains("folded") && !phone;
     const slipW = slipOpen ? slipWidth(slipRect) : 0;
     const glassL = glassLeft(q(".corner.br"), slipOpen, slipW);
-    fitRoom({ frame, sheet, aspect: aspect(), phone, slipRect, slipW, glassL });
+    // The row is seated BEFORE the fit: its width follows the folio's text extent, a narrower row wraps taller, and the fit reads the row's top (plate read 2026-08-30: the Print Room's sheet sat 48px over a row that had just wrapped, until the next layout).
     if (legend !== null && !phone) placeLegendRow(legend, { folio: q(".corner.bl"), chrome: q("header.chrome"), glass: glassL, slip: slipOpen ? slipRect : null });
+    fitRoom({ frame, sheet, aspect: aspect(), phone, slipRect, slipW, glassL });
     camera.restore(held);
   };
 

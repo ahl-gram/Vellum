@@ -1,9 +1,12 @@
-// The Print Room's bound atlas (#136, epic #132 Sub 4): composes the full atlas of the proof on the desk off-thread, lays it out as a print-first sheet, and delivers it by browser Save-as-PDF or self-contained single-file download.
+// The Print Room's bound atlas (#136, epic #132 Sub 4; a chart room since #463): composes the full atlas of the proof on the desk off-thread, lays it out as the hidden document Print and Download deliver, turns its plates onto the sheet and lists them on the slip (the #494 ruling).
 import { runJob } from "../explorer/worker-client.ts";
 import { plateFigure } from "./plate-markup.ts";
+import { contentsRows, plateCounts, plateLine, type PlateRef } from "./contents-markup.ts";
+import { plateAspect } from "./plate-aspect.ts";
+import type { Plate } from "./seats.ts";
 import { escapeXml } from "../../render/svg.ts";
 import { ATLAS_SHEET_CSS, atlasDocument, svgToDataUri } from "../../atlas/document.ts";
-import type { AtlasDocumentData } from "../../atlas/document.ts";
+import type { AtlasDocumentData, PlateSection } from "../../atlas/document.ts";
 import type { AtlasPlate } from "../../atlas/compose.ts";
 import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
@@ -19,6 +22,12 @@ export type PosterBasis = {
   theme: ThemeName | undefined;
 };
 
+/** The sheet's two faces, wired by app.ts: the proof, or a bound plate turned onto it. */
+export interface SheetFace {
+  readonly showProof: () => void;
+  readonly showPlate: (plate: Plate) => void;
+}
+
 declare global {
   interface Window {
     __vellumBoundAtlas?: { seed: number; title: string; figures: number };
@@ -31,6 +40,7 @@ declare global {
       title: string;
     };
     __vellumPrintAtlas?: () => void;
+    __vellumTurnTo?: (key: string) => void;
   }
 }
 
@@ -48,12 +58,29 @@ const downloadBtn = $("pr-download") as HTMLButtonElement;
 const hideBtn = $("pr-hide") as HTMLButtonElement;
 const atlasDiv = $("pr-atlas") as HTMLElement;
 const status = $("pr-bound-status") as HTMLElement;
+const contents = $("pr-contents") as HTMLElement;
+const stamp = $("pr-stamp") as HTMLElement;
+const STAMP_UNBOUND = stamp.textContent ?? "";
+
+interface Bound {
+  readonly plate: PlateRef;
+  readonly section: PlateSection;
+  readonly aspect: number | null;
+}
 
 let getBasis: () => PosterBasis | null = () => null;
+let face: SheetFace = { showProof: () => {}, showPlate: () => {} };
 let atlasUrls: string[] = [];
 let lastAtlas: AtlasDocumentData | null = null;
+let plates = new Map<string, Bound>();
+let here: string | null = null;
 let bindGen = 0;
 let binding = false;
+
+/** The sheet's aspect for the room's fit: the turned plate's own, or null so the fit reads the proof's svg. */
+export function sheetAspect(): number | null {
+  return here === null ? null : plates.get(here)?.aspect ?? null;
+}
 
 function setDeliveryEnabled(on: boolean): void {
   printBtn.disabled = !on;
@@ -61,15 +88,38 @@ function setDeliveryEnabled(on: boolean): void {
   hideBtn.disabled = !on;
 }
 
+function renderContents(): void {
+  if (lastAtlas === null) {
+    contents.innerHTML = contentsRows(null);
+    return;
+  }
+  const refs = (ps: ReadonlyArray<AtlasPlate>): PlateRef[] => ps.flatMap((p) => { const b = plates.get(p.key); return b ? [b.plate] : []; });
+  contents.innerHTML = contentsRows({
+    hero: plates.get(lastAtlas.hero.key)!.plate,
+    draughtings: refs(lastAtlas.draughtings),
+    themes: refs(lastAtlas.themes),
+    regions: refs(lastAtlas.regions),
+    prospects: refs(lastAtlas.prospects),
+    counts: plateCounts(lastAtlas),
+    here,
+  });
+}
+
 function resetBoundAtlas(): void {
   bindGen++;
   for (const url of atlasUrls) URL.revokeObjectURL(url);
   atlasUrls = [];
   lastAtlas = null;
+  plates = new Map();
+  here = null;
   atlasDiv.innerHTML = "";
   setDeliveryEnabled(false);
   document.body.classList.remove("has-atlas");
   status.textContent = "";
+  stamp.textContent = STAMP_UNBOUND;
+  bindBtn.textContent = "Bind the atlas";
+  renderContents();
+  face.showProof();
 }
 
 export function clearBoundAtlas(): void {
@@ -86,33 +136,44 @@ export function enableBind(): void {
   bindBtn.disabled = false;
 }
 
-function plateUrl(svg: string): string {
-  const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
-  atlasUrls.push(url);
-  return url;
+function mint(p: AtlasPlate, section: PlateSection): Bound {
+  const href = URL.createObjectURL(new Blob([p.svg], { type: "image/svg+xml" }));
+  atlasUrls.push(href);
+  return { plate: { key: p.key, title: p.title, href }, section, aspect: plateAspect(p.svg) };
 }
 
 // innerHTML takes trusted input only: every recipe param is validated against a fixed allowlist by `applyHash` in `src/site/print-room/app.ts` before any worker job runs, and the rest is escaped or engine-composed.
 function renderBoundAtlas(atlas: AtlasDocumentData): void {
-  const plate = (p: AtlasPlate, cls = ""): string => plateFigure(plateUrl(p.svg), p.title, cls);
-  const hero = plate(atlas.hero, "hero-plate print-only");
-  const draughtings = atlas.draughtings.map((p) => plate(p)).join("\n");
-  const themes = atlas.themes.map((p) => plate(p)).join("\n");
-  const regions = atlas.regions.map((p) => plate(p)).join("\n");
-  const prospects = atlas.prospects.map((p) => plate(p)).join("\n");
+  const hero = mint(atlas.hero, "hero");
+  const draughtings = atlas.draughtings.map((p) => mint(p, "draughting"));
+  const themes = atlas.themes.map((p) => mint(p, "theme"));
+  const regions = atlas.regions.map((p) => mint(p, "region"));
+  const prospects = atlas.prospects.map((p) => mint(p, "prospect"));
+  plates = new Map([hero, ...draughtings, ...themes, ...regions, ...prospects].map((b) => [b.plate.key, b]));
+  const fig = (b: Bound, cls = ""): string => plateFigure(b.plate.href, b.plate.title, cls);
+  const figs = (bs: Bound[]): string => bs.map((b) => fig(b)).join("\n");
   atlasDiv.innerHTML = `<header class="atlas-head print-only">
   <h1>${escapeXml(atlas.title)}</h1>
   <p class="subtitle">${escapeXml(atlas.subtitle)}</p>
   <p class="chartno">VELLUM · CHART № ${atlas.seed}</p>
 </header>
-${hero}
-<section><h2>Other Draughtings</h2><div class="styles">${draughtings}</div></section>
-<section><h2>Thematic Surveys</h2><div class="themes">${themes}</div></section>
-${regions ? `<section><h2>Regional Surveys</h2>${regions}</section>` : ""}
-${prospects ? `<section><h2>The Prospect of the Capital</h2>${prospects}</section>` : ""}
+${fig(hero, "hero-plate print-only")}
+<section><h2>Other Draughtings</h2><div class="styles">${figs(draughtings)}</div></section>
+<section><h2>Thematic Surveys</h2><div class="themes">${figs(themes)}</div></section>
+${regions.length > 0 ? `<section><h2>Regional Surveys</h2>${figs(regions)}</section>` : ""}
+${prospects.length > 0 ? `<section><h2>The Prospect of the Capital</h2>${figs(prospects)}</section>` : ""}
 ${atlas.bannersHtml}
 ${atlas.chronicleHtml}
 ${atlas.gazetteerHtml}`;
+}
+
+/** Turn a bound plate onto the sheet (the #494 ruling): the plate takes the sheet, its entry and thumbnail are inked, nothing scrolls. */
+export function turnTo(key: string): void {
+  const b = plates.get(key);
+  if (!b) return;
+  here = key;
+  renderContents();
+  face.showPlate({ href: b.plate.href, title: b.plate.title, line: plateLine(b.section, b.plate.title) });
 }
 
 function bindAtlas(): void {
@@ -125,6 +186,7 @@ function bindAtlas(): void {
   for (const url of atlasUrls) URL.revokeObjectURL(url);
   atlasUrls = [];
   status.textContent = "Binding the atlas…";
+  const started = performance.now();
   runJob({
     kind: "atlas",
     seed: basis.seed,
@@ -138,10 +200,11 @@ function bindAtlas(): void {
       renderBoundAtlas(res.atlas);
       setDeliveryEnabled(true);
       document.body.classList.add("has-atlas");
-      // A scripted scroll is outside motion.css's reduced-motion collapse, so this reads the query itself.
-      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      atlasDiv.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
-      status.textContent = `The atlas of ${res.atlas.title} is bound: print it, take the single file, or hide it.`;
+      const seconds = Math.max(1, Math.round((performance.now() - started) / 1000));
+      stamp.textContent = `bound in ${seconds}s · ${plates.size} plates`;
+      bindBtn.textContent = "Bind it again";
+      status.innerHTML = `The atlas of <strong>${escapeXml(res.atlas.title)}</strong> is bound: ${plates.size} plates, the chronicle and the gazetteer, from the proof on the desk.`;
+      turnTo(res.atlas.hero.key);
       window.__vellumBoundAtlas = { seed: res.atlas.seed, title: res.atlas.title, figures: atlasDiv.querySelectorAll("figure").length };
     })
     .catch((err) => {
@@ -169,7 +232,7 @@ function downloadAtlas(): void {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(a.href);
-  status.textContent = `The bound atlas is yours: ${filename}. It opens offline in any browser.`;
+  status.textContent = `The bound atlas is yours: ${filename} (${Math.max(1, Math.round(blob.size / 1048576))} MB). It opens offline in any browser.`;
   window.__vellumLastAtlasDownload = {
     filename,
     size: blob.size,
@@ -180,11 +243,17 @@ function downloadAtlas(): void {
   };
 }
 
-export function initBoundAtlas(getBasisFn: () => PosterBasis | null): void {
+export function initBoundAtlas(getBasisFn: () => PosterBasis | null, sheetFace: SheetFace): void {
   getBasis = getBasisFn;
+  face = sheetFace;
   bindBtn.addEventListener("click", bindAtlas);
   printBtn.addEventListener("click", printAtlas);
   downloadBtn.addEventListener("click", downloadAtlas);
   hideBtn.addEventListener("click", hideAtlas);
+  contents.addEventListener("click", (e) => {
+    const key = (e.target as Element).closest<HTMLElement>("[data-plate]")?.dataset.plate;
+    if (key) turnTo(key);
+  });
   window.__vellumPrintAtlas = printAtlas;
+  window.__vellumTurnTo = turnTo;
 }

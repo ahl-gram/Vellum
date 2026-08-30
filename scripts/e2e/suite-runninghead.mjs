@@ -37,8 +37,8 @@ const HOME_HEAD = {
   roomTagline: null,
 };
 // Sub 7 (#462): a converted room stands its name in the RoomFolio corner (1.32rem, the corner's own leading), measured 2026-08-29 against the built dist; a CHART room renders no footer (ruling 9).
-const FOLIO = ["/seed-of-the-day/", "/faq/", "/glossary/", "/explorer/", "/reading-room/"];
-const CHART = ["/seed-of-the-day/", "/explorer/", "/reading-room/"];
+const FOLIO = ["/seed-of-the-day/", "/faq/", "/glossary/", "/explorer/", "/reading-room/", "/print-room/"];
+const CHART = ["/seed-of-the-day/", "/explorer/", "/reading-room/", "/print-room/"];
 const FOLIO_HEAD = {
   ...ROOM_HEAD,
   roomName: { tag: "H1", weight: "400", size: 21.12, tracking: 2.9568, face: DISPLAY_FACE },

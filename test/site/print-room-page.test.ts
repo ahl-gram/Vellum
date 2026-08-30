@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-// #217 Part 1: the order desk speaks in the period voice (ratified 2026-07-29 on #217); source-text assertions here, the behavior is proven in the print-room e2e.
+// #217 Part 1: the order desk speaks in the period voice (ratified 2026-07-29 on #217); source-text assertions here, the behavior is proven in the print-room e2e. Since #463 the desk is the legend row and the slip.
 const page = readFileSync(new URL("../../src/pages/print-room/index.astro", import.meta.url), "utf8");
 
 // The option VALUES are the contract app.ts keys on (svg/png1/png2): the labels may move, the values may not.
@@ -12,8 +12,8 @@ test("the Pressed as options carry the period labels over the stable values", ()
   assert.match(page, /<option value="png2">A finer impression \(PNG &times;2\)<\/option>/);
 });
 
-test("the caveat teaches engraving vs impression in the same register", () => {
-  assert.ok(page.includes("The engraving is exact at any size; an impression is pressed with your"));
+test("the caveat teaches engraving vs impression in the same register, one line under the legend's head (ruled 2026-08-30)", () => {
+  assert.match(page, /<p class="legend-note">The engraving is exact at any size; an impression is pressed with your/);
   assert.ok(page.includes("The chart is pulled only as the engraving."));
 });
 
@@ -23,5 +23,5 @@ test("the chart joins the plate row at 1500 px, ahead of the posters", () => {
   assert.ok(chart !== -1, "no chart plate button");
   assert.ok(desk !== -1, "no desk plate button");
   assert.ok(chart < desk, "the chart button belongs ahead of the posters (ascending width)");
-  assert.match(page, /data-poster="chart"[^>]*>Chart<span class="plate-dim">1500 px<\/span>/);
+  assert.match(page, /data-poster="chart"[^>]*><span class="verb dim">1500 px<\/span><span class="room">Chart<\/span>/);
 });

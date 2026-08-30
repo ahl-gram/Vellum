@@ -59,3 +59,11 @@ test("a seat already held moves nothing (a resize storm must not churn the row)"
   dockLegend(h, "slip");
   assert.deepEqual(h.moves, ["dock"], "docked once, then left alone");
 });
+
+// The legend row's width follows the folio's text extent (placeLegendRow), and a narrower row wraps taller; the fit bounds the sheet by the row's top, so the row is seated first or the fit reads a row that is about to grow (plate read 2026-08-30 on #463: the Print Room's sheet over a freshly wrapped row until the next layout).
+test("bindRoom seats the legend row before it fits the sheet", () => {
+  const room = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/shared/room.ts"), "utf8");
+  const layout = room.slice(room.indexOf("const layout = () => {"), room.indexOf("camera.restore(held);"));
+  assert.ok(layout.includes("placeLegendRow(") && layout.includes("fitRoom("), "the layout both seats the row and fits the sheet");
+  assert.ok(layout.indexOf("placeLegendRow(") < layout.indexOf("fitRoom("), "the row is seated before the fit reads its top");
+});

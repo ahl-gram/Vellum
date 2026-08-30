@@ -66,6 +66,13 @@ export async function run(ctx) {
   const hash = await evaluate(`location.hash`);
   check("PR5 a manual draw round-trips the world into the hash", /(^|&|#)seed=100(&|$)/.test(hash) && /style=antique/.test(hash), hash);
 
+  const roadHref = await evaluate(`(()=>{const a=document.getElementById("pr-explorer");return a?a.getAttribute("href"):null;})()`);
+  check(
+    "PR30 the road back to the Explorer carries the world on the desk (the legend row's gold road, ruled 2026-08-30)",
+    !!roadHref && /^\.\.\/explorer\/#/.test(roadHref) && /seed=100/.test(roadHref) && /style=antique/.test(roadHref),
+    String(roadHref),
+  );
+
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/#seed=42&style=antique&type=archipelago&band=tropical&theme=vegetation&arms=1&beasts=1&legend=0&land=350` });
   let carried = null;
   for (let i = 0; i < 160; i++) {
@@ -238,16 +245,18 @@ export async function run(ctx) {
   for (let i = 0; i < 300; i++) {
     let s = null;
     try {
-      s = await evaluate(`(()=>{const b=window.__vellumBoundAtlas;if(!b)return null;const imgs=[...document.querySelectorAll("#pr-atlas img")];const hero=document.querySelector("#pr-atlas .hero-plate");return{seed:b.seed,title:b.title,figs:b.figures,plates:document.querySelectorAll("#pr-atlas figure:not(.banner)").length,print:!document.getElementById("pr-print").disabled,dl:!document.getElementById("pr-download").disabled,hide:!document.getElementById("pr-hide").disabled,hasAtlas:document.body.classList.contains("has-atlas"),imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),heroHiddenOnScreen:hero?getComputedStyle(hero).display==="none":false,heads:[...document.querySelectorAll("#pr-atlas h2")].map(h=>h.textContent),prospectPlate:[...document.querySelectorAll("#pr-atlas figcaption")].some(f=>f.textContent.startsWith("The Prospect of "))};})()`);
+      s = await evaluate(`(()=>{const b=window.__vellumBoundAtlas;if(!b)return null;const imgs=[...document.querySelectorAll("#pr-atlas img")];const hero=document.querySelector("#pr-atlas .hero-plate");return{seed:b.seed,title:b.title,figs:b.figures,plates:document.querySelectorAll("#pr-atlas figure:not(.banner)").length,print:!document.getElementById("pr-print").disabled,dl:!document.getElementById("pr-download").disabled,hide:!document.getElementById("pr-hide").disabled,hasAtlas:document.body.classList.contains("has-atlas"),imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),heroHiddenOnScreen:hero?getComputedStyle(hero).display==="none":false,heads:[...document.querySelectorAll("#pr-atlas h2")].map(h=>h.textContent),prospectPlate:[...document.querySelectorAll("#pr-atlas figcaption")].some(f=>f.textContent.startsWith("The Prospect of ")),atlasHidden:getComputedStyle(document.getElementById("pr-atlas")).display==="none",turned:(()=>{const t=document.getElementById("pr-turned");return !t.hidden&&/^blob:/.test(t.src);})(),proofHidden:document.getElementById("pr-preview").hidden,thumbs:document.querySelectorAll("#pr-contents .plates figure").length,inked:(document.querySelector("#pr-contents li.on .turn.here")||{dataset:{}}).dataset.plate||null,plateLine:document.getElementById("pr-plate-line").textContent,stamp:document.getElementById("pr-stamp").textContent};})()`);
     } catch {}
     if (s && s.loaded) { bound = s; break; }
     await sleep(50);
   }
   check(
-    "PR20 Bind composes the full atlas inline: all plates load, delivery enabled, hero hidden on screen",
+    "PR20 Bind composes the atlas into the hidden document (every plate loads, off screen) and turns it onto the sheet: the hero on the sheet, a thumbnail per plate, delivery enabled (the #494 ruling)",
     !!bound && bound.seed === 42 && bound.title === "The Isle of Rahai" && bound.plates >= 8 &&
       bound.print === true && bound.dl === true && bound.hide === true && bound.hasAtlas === true &&
-      bound.loaded === true && bound.heroHiddenOnScreen === true,
+      bound.loaded === true && bound.heroHiddenOnScreen === true && bound.atlasHidden === true &&
+      bound.turned === true && bound.proofHidden === true && bound.thumbs === bound.plates &&
+      bound.inked === "antique" && /^plate i of the bound atlas/.test(bound.plateLine) && /^bound in \d+s · \d+ plates$/.test(bound.stamp),
     JSON.stringify(bound),
   );
 
@@ -258,6 +267,20 @@ export async function run(ctx) {
     !!bound && bound.prospectPlate === true && regionAt >= 0 && prospectAt > regionAt &&
       prospectAt < bound.heads.indexOf("Banners of the Realms"),
     JSON.stringify(bound && { heads: bound.heads, prospectPlate: bound.prospectPlate }),
+  );
+
+  const turned = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .plates figure[data-plate="prospect-capital"] .thumb');if(!b)return null;b.click();const s=document.getElementById("sheet").getBoundingClientRect();const t=document.getElementById("pr-turned");return{ratio:s.width/s.height,src:t.src.slice(0,5),hidden:t.hidden,on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,proofHidden:document.getElementById("pr-preview").hidden};})()`);
+  check(
+    "PR31 a thumbnail turns the sheet: the prospect plate takes it at its own 520x384 aspect, its row and thumbnail inked (the #494 ruling; the fit cannot read an <img>'s viewBox)",
+    !!turned && Math.abs(turned.ratio - 520 / 384) < 0.01 && turned.src === "blob:" && turned.hidden === false && turned.proofHidden === true &&
+      turned.on === "v" && turned.here === "prospect-capital" && /^plate v of the bound atlas · the prospect of /.test(turned.line),
+    JSON.stringify(turned),
+  );
+  const back = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="theme-vegetation"]');if(!b)return null;b.click();const s=document.getElementById("sheet").getBoundingClientRect();return{ratio:s.width/s.height,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,zoomed:document.getElementById("map-viewport").classList.contains("zoomed"),scrollY:window.scrollY};})()`);
+  check(
+    "PR31b an entry turns too: the vegetation survey at the chart's aspect, the camera at rest, the page unscrolled",
+    !!back && Math.abs(back.ratio - 1500 / 1157.931) < 0.01 && back.here === "theme-vegetation" && /^plate iii of the bound atlas · a thematic survey of vegetation$/.test(back.line) && back.zoomed === false && back.scrollY === 0,
+    JSON.stringify(back),
   );
 
   await shoot("print-room-bound.png");
@@ -287,12 +310,11 @@ export async function run(ctx) {
   );
 
   await send("Emulation.setEmulatedMedia", { media: "print" });
-  const printView = await evaluate(`(()=>{const disp=(sel)=>{const el=document.querySelector(sel);return el?getComputedStyle(el).display:"absent";};const f=document.querySelector("#pr-atlas figure:not(.banner)");return{counter:disp(".counter"),preview:disp("#pr-preview"),desk:disp(".order-desk"),caption:disp("#pr-caption"),atlas:disp("#pr-atlas"),hero:disp("#pr-atlas .hero-plate"),breakAfter:f?getComputedStyle(f).breakAfter:"absent"};})()`);
+  const printView = await evaluate(`(()=>{const disp=(sel)=>{const el=document.querySelector(sel);return el?getComputedStyle(el).display:"absent";};const f=document.querySelector("#pr-atlas figure:not(.banner)");return{stage:disp(".stage"),slip:disp(".slip"),legend:disp(".legend"),folioRoom:disp(".corner.folio-room"),glass:disp(".zoomery"),atlas:disp("#pr-atlas"),hero:disp("#pr-atlas .hero-plate"),breakAfter:f?getComputedStyle(f).breakAfter:"absent"};})()`);
   check(
-    "PR21 print stylesheet hides chrome, keeps the atlas + hero, breaks one plate per page",
-    printView.counter === "none" && printView.preview === "none" && printView.desk === "none" &&
-      printView.caption === "none" && printView.atlas !== "none" && printView.hero !== "none" &&
-      printView.breakAfter === "page",
+    "PR21 bound, print is the atlas: the stage, the slip, the legend row, the Glass and the room's name print as nothing, the document and its hero print, one plate per page (ruled 2026-08-30)",
+    printView.stage === "none" && printView.slip === "none" && printView.legend === "none" && printView.folioRoom === "none" && printView.glass === "none" &&
+      printView.atlas !== "none" && printView.hero !== "none" && printView.breakAfter === "page",
     JSON.stringify(printView),
   );
 
@@ -363,13 +385,23 @@ export async function run(ctx) {
     if (ok) { reboundForHide = true; break; }
     await sleep(50);
   }
-  const hidden = await evaluate(`(()=>{document.getElementById("pr-hide").click();return{atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas"),bindEnabled:!document.getElementById("pr-bind").disabled,printDisabled:document.getElementById("pr-print").disabled,hideDisabled:document.getElementById("pr-hide").disabled};})()`);
+  const hidden = await evaluate(`(()=>{document.getElementById("pr-hide").click();return{atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas"),bindEnabled:!document.getElementById("pr-bind").disabled,printDisabled:document.getElementById("pr-print").disabled,hideDisabled:document.getElementById("pr-hide").disabled,proofBack:!document.getElementById("pr-preview").hidden&&document.getElementById("pr-turned").hidden,thumbs:document.querySelectorAll("#pr-contents .plates").length,plateLine:document.getElementById("pr-plate-line").textContent};})()`);
   check(
-    "PR25 Hide dismisses the bound atlas and re-enables Bind (proof unchanged)",
+    "PR25 Hide dismisses the bound atlas and re-enables Bind: the proof back on the sheet, the contents unbound, the plate line cleared",
     reboundForHide && hidden.atlasEmpty === true && hidden.hasAtlas === false &&
-      hidden.bindEnabled === true && hidden.printDisabled === true && hidden.hideDisabled === true,
+      hidden.bindEnabled === true && hidden.printDisabled === true && hidden.hideDisabled === true &&
+      hidden.proofBack === true && hidden.thumbs === 0 && hidden.plateLine === "",
     JSON.stringify({ reboundForHide, hidden }),
   );
+
+  await send("Emulation.setEmulatedMedia", { media: "print" });
+  const printProof = await evaluate(`(()=>{const cs=(sel)=>getComputedStyle(document.querySelector(sel));return{stage:cs(".stage").display,stagePos:cs(".stage").position,map:cs("#map").transform,svg:!!document.querySelector("#pr-preview svg"),atlasEmpty:document.getElementById("pr-atlas").children.length===0,slip:cs(".slip").display};})()`);
+  check(
+    "PR21b unbound, print is the proof: the stage prints in flow, unzoomed, the slip as nothing, the document empty (ruled 2026-08-30)",
+    printProof.stage !== "none" && printProof.stagePos === "static" && printProof.map === "none" && printProof.svg === true && printProof.atlasEmpty === true && printProof.slip === "none",
+    JSON.stringify(printProof),
+  );
+  await send("Emulation.setEmulatedMedia", { media: "" });
 
   await shoot("print-room.png");
 
