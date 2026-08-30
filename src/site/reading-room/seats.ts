@@ -64,9 +64,5 @@ export function writeFolio(f: RoomFurniture, res: DrawResult, forSeed: number): 
 // Drawn once the instrument is armed, since the days come from the travel order.
 export function drawScale(lc: LivingChart, scale: HTMLElement): void {
   const a = lc.agesState();
-  const entries = lc.voyageLog()?.entries ?? [];
-  renderScale(scale, scaleTicks({
-    days: entries.length > 0 ? { first: entries[0].day, last: entries[entries.length - 1].day } : null,
-    years: a ? { min: a.min, max: a.max } : null,
-  }));
+  renderScale(scale, scaleTicks({ days: lc.voyageDays(), years: a ? { min: a.min, max: a.max } : null }));
 }

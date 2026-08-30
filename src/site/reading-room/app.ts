@@ -15,7 +15,7 @@ import { storyBeats, type StoryBeat } from "./beats.ts";
 import { armsBearing, plateForTold, plateSpecsFor, surveyPlateRows, type PlateSpec } from "./told-plate.ts";
 import { plateDressFor } from "../explorer/prospect-job.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
-import { parseLive, emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
+import { parseLive, emitLive, finalizeHash, liveNow, seedFromHash, type Live } from "../explorer/address.ts";
 import { createReadingFrame } from "../reading-frame/index.ts";
 import { bindReadingRoom, drawScale, seatFrame, writeFolio } from "./seats.ts";
 import { createLivingChart, type AgesPos, type LivingChart, type ToldEntry } from "../living-chart/index.ts";
@@ -87,11 +87,8 @@ const carried: {
 
 function applyHash(): void {
   const p = new URLSearchParams(location.hash.slice(1));
-  const seedRaw = p.get("seed");
-  const s = Number(seedRaw);
-  // Gate on PRESENCE, not just validity: Number(null) === 0 would pass the integer guard and silently pin every bare visit to seed 0.
-  if (seedRaw !== null && Number.isInteger(s) && s >= 0) seed = s >>> 0;
-  else seed = seedForDate(new Date());
+  const s = seedFromHash(p.get("seed"));
+  seed = s !== null ? s >>> 0 : seedForDate(new Date());
   const st = p.get("style");
   if (st !== null && STYLES.includes(st)) style = st as StyleName;
   const type = p.get("type");

@@ -144,6 +144,7 @@ export function createLivingChart(host: LivingChartHost) {
     voyagePaintAt: voyage.voyagePaintAt,
     voyagePlan: voyage.voyagePlan,
     voyageLog: voyage.voyageLog,
+    voyageDays: voyage.voyageDays,
     voyageLegGeometry: voyage.voyageLegGeometry,
     // #220: chamber-aware while the instrument is armed (an ages-chamber rest shows no recto track for the verso to bleed through, #174); disarmed or bar-less takes the raw voyage sync.
     syncRestingTrack: () => (ages.isActive() ? ages.syncSinkAtRest() : voyage.syncRestingTrack()),

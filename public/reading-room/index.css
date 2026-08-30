@@ -68,7 +68,7 @@
 
 @media (max-width: 900px) {
   .strip { padding: 0.4rem 0.8rem 0.6rem; }
-  .tick .lbl, .seam { display: none; }
+  .tick .lbl { display: none; }
   .rf-year { min-width: 4.4rem; font-size: 0.85rem; }
   .rf-play { width: 4.2rem; }
   /* The bottom sheet sits above the strip; the Glass above the sheet. */

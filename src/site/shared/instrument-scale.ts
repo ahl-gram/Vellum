@@ -15,6 +15,8 @@ export interface ScaleInput {
 
 const SEAM = SEAM_U;
 const CENTURY = 100;
+/** The room a label needs beside the seam's star or the present's label, in u: ~41px on a 1440 viewport's 1168px scale, over a ~19px label (skeptic on PR #492: seed 90's "900" printed on "901"). */
+export const LABEL_GAP_U = 0.035;
 
 export function scaleTicks({ days, years }: ScaleInput): ScaleTick[] {
   const ticks: ScaleTick[] = [];
@@ -27,7 +29,9 @@ export function scaleTicks({ days, years }: ScaleInput): ScaleTick[] {
     const span = Math.max(1, years.max - years.min);
     const at = (y: number) => SEAM + (1 - SEAM) * (y - years.min) / span;
     for (let y = Math.ceil((years.min + 1) / CENTURY) * CENTURY; y < years.max; y += CENTURY) {
-      ticks.push({ kind: "year", u: at(y), label: String(y) });
+      const u = at(y);
+      const crowded = u - SEAM < LABEL_GAP_U || 1 - u < LABEL_GAP_U;
+      ticks.push(crowded ? { kind: "year", u } : { kind: "year", u, label: String(y) });
     }
     ticks.push({ kind: "year", u: 1, label: String(years.max) });
   }

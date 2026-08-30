@@ -82,6 +82,15 @@ export async function run(ctx) {
     JSON.stringify(rest),
   );
 
+  // #463 (skeptic on PR #492, round 3): the scale and the folio are DRAWN from the world, not merely present in the markup.
+  const drawn = await evaluate(`(()=>{const sc=document.querySelector(".scale");const t=(sel)=>(document.querySelector(sel)||{}).textContent||"";const lbl=[...sc.querySelectorAll(".tick .lbl")].map((l)=>l.textContent);return{days:sc.querySelectorAll(".tick.day").length,years:sc.querySelectorAll(".tick.year").length,seam:sc.querySelectorAll(".seam").length,labels:lbl,folioTitle:t("#folio-title"),folioSub:t("#folio-sub")};})()`);
+  check(
+    "RR4b the strip's scale is drawn from the world (two day ticks, the star, the centuries and the present) and the chart folio carries the world's name and survey line (#463)",
+    !!drawn && drawn.days === 2 && drawn.seam === 1 && drawn.years >= 2 && drawn.labels.includes("day 1") && drawn.labels.some((l) => /^\d{3,4}$/.test(l)) &&
+      drawn.labels.length === new Set(drawn.labels).size && /Chart № 42/.test(drawn.folioTitle) && drawn.folioSub.length > 20,
+    JSON.stringify(drawn),
+  );
+
   const journal = await evaluate(`(()=>{const rows=[...document.querySelectorAll(".rf-log-strip li")];const entries=rows.filter(r=>!r.classList.contains("annals-head"));return{rows:rows.length,entries:entries.length,inked:entries.filter(r=>r.classList.contains("inked")).length};})()`);
   check(
     "RR5 the journal is fully told at the present park (all entries inked)",
@@ -525,24 +534,27 @@ export async function run(ctx) {
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
   // #463 (skeptic on PR #492): between the boot and the arm the engine's panel is hidden and the slip inside it has no rect; a fit that read its zero top reserved the whole viewport and seated the Glass above it. Sampled through the boot, before the arm lands.
-  let glassOff = 0, glassSamples = 0;
+  let glassOff = 0, glassSamples = 0, preArm = 0;
   for (let i = 0; i < 160; i++) {
     let s = null;
     try { s = await evaluate(`(()=>{const g=document.querySelector(".corner.br.zoomery");const a=typeof window.__vellumReadingRoomAges==="function"?window.__vellumReadingRoomAges():null;if(!g)return null;const r=g.getBoundingClientRect();return{armed:!!a,bottom:r.bottom,top:r.top,vh:innerHeight,sheetH:getComputedStyle(document.body).getPropertyValue("--sheet-h")};})()`); } catch {}
-    if (s) { glassSamples++; if (s.bottom > s.vh + 1 || s.top < 0 || parseFloat(s.sheetH || "0") > s.vh) glassOff++; if (s.armed) break; }
+    if (s) { glassSamples++; if (!s.armed) preArm++; if (s.bottom > s.vh + 1 || s.top < 0 || parseFloat(s.sheetH || "0") > s.vh) glassOff++; if (s.armed) break; }
     await sleep(50);
   }
   const mobileSettled = (await boot()) && (await settled());
   await sleep(1600);
   check(
     "RR34b through the phone's boot, before the arm, the Glass stays on the viewport and --sheet-h never exceeds it (a slip hidden with the panel reads as absent to the fit)",
-    glassSamples > 0 && glassOff === 0,
-    JSON.stringify({ glassSamples, glassOff }),
+    // The witness: at least one sample from BEFORE the arm, or the probe read only the settled room.
+    glassSamples > 0 && preArm > 0 && glassOff === 0,
+    JSON.stringify({ glassSamples, preArm, glassOff }),
   );
   const mobile = await evaluate(`({w:document.body.scrollWidth,vw:window.innerWidth})`);
   // #442 ruled 2026-08-23: on a phone the CONTROLS stick and the live row does not, so the
   // strip stays the bar's own height. Read after the same dwell, at the same viewport.
   const mobileStrip = await evaluate(stripRead);
+  // #462 ruling 6's phone half: the scale loses its LABELS, not its star.
+  const mobileScale = await evaluate(`(()=>{const sc=document.querySelector(".scale");const lbl=[...sc.querySelectorAll(".tick .lbl")];const seam=sc.querySelector(".seam");return{labelsHidden:lbl.length>0&&lbl.every((l)=>getComputedStyle(l).display==="none"),seamShown:!!seam&&seam.getBoundingClientRect().width>0};})()`);
   await evaluate(`(()=>{window.scrollTo(0,900);return null;})()`);
   await sleep(120);
   const mobileStuck = await evaluate(stripRead);
@@ -561,10 +573,10 @@ export async function run(ctx) {
   const PHONE_STRIP_MAX = 72; // measured 63 at 390 (2026-08-29): the bar, its scale under it, no told row
   check(
     "RR34 at 390px the live row is dropped, the strip stays fixed on the bottom edge, and its height is measured (#442, ruled 2026-08-23; the bottom strip since #463)",
-    !!mobileStrip && mobileStrip.toldDisplay === "none" &&
+    !!mobileStrip && mobileStrip.toldDisplay === "none" && mobileScale.labelsHidden && mobileScale.seamShown &&
       mobileStrip.h > 0 && mobileStrip.h <= PHONE_STRIP_MAX &&
       !!mobileStuck && mobileStuck.bottom === 0 && mobileStuck.position === "fixed",
-    JSON.stringify({ rest: mobileStrip, stuck: mobileStuck, phoneMax: PHONE_STRIP_MAX }),
+    JSON.stringify({ rest: mobileStrip, stuck: mobileStuck, scale: mobileScale, phoneMax: PHONE_STRIP_MAX }),
   );
 
   // #124: the room builds the same overlay the Explorer does, so it LOOKS like it should card.
