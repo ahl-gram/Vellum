@@ -1,17 +1,12 @@
-/* The reading frame (#219): one chart over one dated log; host-agnostic like the module it dresses, linked by whatever page mounts the frame. */
-
-.rf { max-width: 1100px; margin-inline: auto; }
+/* The reading frame (#219): one chart over one dated log; host-agnostic like the module it dresses, linked by whatever page mounts the frame. Since #463 the host seats the frame's parts (the chart in a stage, the instrument on a strip, the log in a slip: the #462 rulings 5 and 6); this sheet dresses each part wherever it sits. */
 
 .rf-chart { position: relative; }
-/* #367: [data-vellum-style] scopes this to renderer-stamped charts; unqualified it also dressed the survey-track overlay svg, doubling the hairline and shadow in exact register. */
-.rf-chart svg[data-vellum-style] { display: block; width: 100%; height: auto;
-  border: 1px solid var(--line-tan);
-  box-shadow: var(--sheet-shadow); }
+/* #367: [data-vellum-style] scopes this to renderer-stamped charts, never the survey-track overlay svg; the host's box carries the sheet's depth. */
+.rf-chart svg[data-vellum-style] { display: block; width: 100%; height: 100%; }
 
 /* Voice from /house.css's .status role (#324); it reserves its height so the column never jumps when the voyage posts and clears its summary. */
 .rf-status { margin: 0.6rem 0 0; }
 
-.rf-reading { margin-top: 0.8rem; }
 .rf-ages[hidden], .rf-log[hidden] { display: none; }
 
 /* #321 arrival: keyed on the HOST-applied .rf-arrival, never [hidden]. The engine toggles hidden on every counter read, and display:none terminates an animation while restoring display starts it AFRESH, so a [hidden]-gated rule would replay the unfurl as a flash; the conductor adds the class on the first settle only and removes it when the journal lands. */
@@ -19,41 +14,38 @@
 .rf-arrival .rf-instrument { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) both; }
 .rf-arrival .rf-log { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) var(--paper-quick) both; }
 
-/* #442 the sticky instrument: once the reader has scrolled past it the bar rides the viewport top, carrying the one row being inked, so the scrubber and the story's current line share a screen with the chart or the plate. The WRAPPER sticks and .rf-instrument keeps the arrival unfurl: a transform on the sticky element itself makes the stuck strip slide out of register with the top. Nothing above it is fixed (there is no site header), so top:0 needs no offset. */
-.rf-instrument-strip { position: sticky; top: 0; z-index: 3; }
+/* #463 (#462 ruling 6): the wrapper is the strip's column, the row being told above the bar; where the strip stands is the host's. */
+.rf-instrument-strip { display: flex; flex-direction: column-reverse; }
 
-/* #442 the live row MIRRORS the journal row the story is on; the journal itself is untouched and still flows (#219). It takes the shared gutter idiom but never the drop cap, which is 2.1em and would double the strip. */
-.rf-told { display: flex; gap: 0.9rem; margin: 0;
-  padding: 0.4rem 1rem 0.5rem; background: var(--parchment-panel);
-  border: 1px solid var(--line-tan); border-top: 0;
-  border-bottom: 1px solid var(--line-faint); }
+/* #442 the live row MIRRORS the journal row the story is on; the journal itself is untouched. It takes the shared gutter idiom but never the drop cap, which is 2.1em and would double the strip. */
+.rf-told { display: flex; gap: 0.8rem; align-items: baseline; margin: 0 0 0.5rem 6.4rem; font-size: 0.98rem; line-height: 1.4; }
 .rf-told[hidden] { display: none; }
-/* A mirror mirrors the VOICE too. The chronicler's annals are roman, so the strip's copy of one is roman: set italic unconditionally it rendered the same sentence italic in the strip and roman four inches below in the journal, which reads as inconsistent styling rather than as a cursor (plate-reader, 2026-08-23). */
+/* A mirror mirrors the VOICE too. The chronicler's annals are roman, so the strip's copy of one is roman (plate-reader, 2026-08-23). */
 .rf-told .cr-year { flex: 0 0 3.6rem; text-align: right;
-  font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-faded); }
-.rf-told .cr-text { color: var(--ink-annals); }
+  font-variant-numeric: tabular-nums; font-weight: 600; color: var(--line-tan); }
+.rf-told .cr-text { color: var(--parchment-bright); }
 /* The survey half's day rows ARE italic in the journal (the surveyor's hand, #220's Overture), so the mirror takes that voice there and matches again. */
-.rf-told.prologue .cr-text { font-style: italic; color: var(--ink-surveyor); }
-.rf-told.prologue .cr-year { font-weight: 400; font-style: italic; color: var(--ink-surveyor-faded); }
+.rf-told.prologue .cr-text { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; color: var(--parchment); }
+.rf-told.prologue .cr-year { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-weight: 400; font-style: italic; }
 
-/* Measured at a real 320px viewport: a flex item's default min-width:auto plus a range input's ~129px intrinsic width pushed the whole PAGE to a 355px scrollWidth, so the row wraps AND the slider may shrink (min-width: 0); both halves are load-bearing. */
-.rf-instrument { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
-  padding: 0.7rem 1rem; background: var(--parchment-panel);
-  border: 1px solid var(--line-tan); border-radius: 6px 6px 0 0; }
-.rf-play { min-width: 5.2rem; }
+/* The bar's row: Play, the bar (living-chart.css's .ages-range paints the instrument itself), the readout. */
+.rf-instrument { display: flex; align-items: flex-start; gap: 1.1rem; }
+.rf-play { flex: none; width: 5.2rem; height: 2.4rem; display: flex; align-items: center; justify-content: center; padding: 0;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.82rem; letter-spacing: 0.14em; color: var(--parchment);
+  background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); border-radius: 0; transition: background 0.2s ease, color 0.2s ease; }
+/* Four classes deep on purpose: the house sheets dress every button, and their hover wash outranks a plain .rf-play:hover. */
+.rf-instrument-strip .rf-instrument .rf-play:hover, .rf-instrument-strip .rf-instrument .rf-play:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
 .rf-range { flex: 1 1 8rem; min-width: 0; accent-color: var(--ink-brown); }
-.rf-year { font-style: italic; color: var(--ink-brown);
-  font-variant-numeric: tabular-nums; min-width: 5rem; text-align: right; }
+.rf-year { flex: none; min-width: 5.4rem; text-align: right; margin-top: 0.45rem;
+  font-variant-caps: small-caps; font-variant-numeric: tabular-nums; font-size: 1rem; letter-spacing: 0.06em; color: var(--parchment-bright); }
 
-.rf-log { background: var(--parchment-panel); border: 1px solid var(--line-tan);
-  border-radius: 6px; padding: 0.8rem 1rem; }
-.rf-ages .rf-log { border-top: 0; border-radius: 0 0 6px 6px; }
-
+/* The one journal, in the slip's own paper since #463: the panel dress left with the desk. */
+.rf-log { padding: 0; }
 .rf-log-sig { margin: 0 0 0.5rem; font-style: italic; color: var(--ink-brown);
   border-bottom: 1px solid var(--line-faint); padding-bottom: 0.5rem; }
 .rf-log-sig:empty { display: none; }
 
-/* The strip FLOWS at every width (ratified 2026-07-27): bounded by construction, not a scrollbar (14 chronicle events max, 19-24 measured voyage legs, ~35 rows tops), and deliberately no breakpoint, since the reading must not differ by viewport width. */
+/* The strip FLOWS at every width (ratified 2026-07-27): bounded by construction, not a scrollbar (14 chronicle events max, 19-24 measured voyage legs, ~35 rows tops), and deliberately no breakpoint, since the reading must not differ by viewport width. The slip it rides in since #463 is what scrolls (#462 ruling 5). */
 .rf-log-strip { list-style: none; margin: 0; padding: 0; }
 .rf-log-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
   border-bottom: 1px solid var(--line-faint); opacity: 0.4;
@@ -71,8 +63,8 @@
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-size: 2.1em; line-height: 0.8; margin: 0.08em 0.12em 0 0; }
 
-/* #442 ruled 2026-08-23 (the ruling comment on the issue carries the reasoning and the measurements): on a phone the CONTROLS stick and the live row does not. This is the one narrow-viewport case in this file and it is scoped to the new strip; the JOURNAL still flows identically at every width (#219, ratified 2026-07-27), which the frame suite pins by allowlist. Inclusive: the row is dropped AT 640, not only below it. */
-@media (max-width: 40rem) { .rf-told { display: none; } }
+/* #462 ruling 6: on a phone the told row drops and the bar keeps its labels to the host. Scoped to the strip: the JOURNAL still flows identically at every width (#219, ratified 2026-07-27), which the frame suite pins by allowlist. */
+@media (max-width: 900px) { .rf-told { display: none; } .rf-instrument { gap: 0.6rem; } }
 
 /* "day 105" runs wider than a bare year, so the gutter grew from 3rem at #312. */
 .rf-log-strip .cr-year { flex: 0 0 3.6rem; text-align: right;

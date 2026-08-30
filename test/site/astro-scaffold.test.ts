@@ -129,6 +129,8 @@ const PAGES: readonly PageSpec[] = [
       "The atelier's reading room: sit with any seed's world and watch its founding voyage flow into its recorded ages on one continuous timeline.",
     tagline: "watch a world live",
     scriptSrc: "./app.bundle.js",
+    chartRoom: true,
+    folio: true,
   },
   {
     route: "seed-of-the-day/index.html",

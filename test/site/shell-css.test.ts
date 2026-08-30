@@ -294,7 +294,7 @@ const CHART_MARKER = "[data-vellum-style]";
 /** Every chart mount that dresses a sheet; a NEW host that mounts the engine must join this list or it reintroduces the doubling. */
 const CHART_MOUNTS = [
   { host: "Explorer", file: "public/explorer/index.css", mount: "#map", rule: "#sheet", token: "--stage-shadow" },
-  { host: "Reading Room", file: "public/reading-frame.css", mount: ".rf-chart", rule: `.rf-chart svg${CHART_MARKER}`, token: "--sheet-shadow" },
+  { host: "Reading Room", file: "public/reading-room/index.css", mount: ".rf-chart", rule: "#sheet", token: "--stage-shadow" },
 ] as const;
 const DEPTH_TOKENS = /box-shadow:\s*var\(--(?:sheet|stage)-shadow\)/;
 

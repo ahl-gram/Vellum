@@ -185,13 +185,13 @@ test("#442 the live row is a MIRROR: it never writes into the journal the engine
   );
 });
 
-test("#442 the WRAPPER sticks and the bar keeps the unfurl: a transform on the sticky element unsticks it", () => {
+test("#463 (#462 ruling 6) the wrapper is the strip's column with the told row above the bar, seated by the host; the bar keeps the unfurl", () => {
   const css = read("public/reading-frame.css");
-  const sticky = declarationsFor(css, ".rf-instrument-strip");
-  assert.ok(sticky, "the wrapper carries a rule of its own");
-  assert.match(sticky, /position:\s*sticky/, "it sticks");
-  assert.match(sticky, /top:\s*0/, "to the viewport top; nothing above it is fixed, so there is no offset to clear");
-  assert.doesNotMatch(sticky, /transform|animation/, "and it is never transformed: that would slide the stuck strip out of register");
+  const wrapper = declarationsFor(css, ".rf-instrument-strip");
+  assert.ok(wrapper, "the wrapper carries a rule of its own");
+  assert.match(wrapper, /flex-direction:\s*column-reverse/, "the row being told stands above the bar (the frame builds them bar-first)");
+  assert.doesNotMatch(wrapper, /position:\s*(sticky|fixed)/, "where the strip stands is the host's (the #442 sticky shape retired)");
+  assert.doesNotMatch(wrapper, /transform|animation/, "and it is never transformed");
 
   // The polarity a presence check cannot see: the arrival animation must stay on the INNER bar. Both halves, so moving it onto the wrapper fails here rather than at a rendered probe.
   assert.match(
@@ -235,7 +235,7 @@ test("#442 the live row takes the shared gutter idiom and refuses the drop cap",
   const css = read("public/reading-frame.css");
   const told = declarationsFor(css, ".rf-told");
   assert.ok(told, "the live row carries a rule of its own");
-  assert.match(told, /background:\s*var\(--parchment-panel\)/, "the stuck row is opaque: the journal must not read through it");
+  assert.match(declarationsFor(css, ".rf-told .cr-text"), /color:\s*var\(--parchment-bright\)/, "the row is written in the strip's ink: it stands on the deep since #463, not on a panel");
   assert.ok(declarationsFor(css, ".rf-told .cr-year"), "it dresses the shared gutter column");
   assert.match(declarationsFor(css, ".rf-told[hidden]"), /display:\s*none/, "hidden means gone, not merely transparent");
   assert.doesNotMatch(css, /\.rf-told[^{]*\.cr-dc/, "the 2.1em initial never reaches the strip");
@@ -440,7 +440,8 @@ test("the frame's log never nests a scroller, at any width (#219 acceptance, dec
   );
 
   // Measured over CDP at a REAL 320px viewport (Brave's --window-size does not shrink the layout viewport): a flex item's min-width:auto refuses to shrink and a range input's intrinsic width is ~129px, so the row overflowed to scrollWidth 355. Both halves are load-bearing.
-  assert.match(css, /\.rf-instrument\s*\{[^}]*flex-wrap:\s*wrap/, "the instrument wraps instead of overflowing");
+  // #463: the row no longer wraps (the bar keeps Play and the readout beside it on the strip at every width, #462 ruling 6); what still guards the 320px case is the bar shrinking and its neighbours never stretching.
+  assert.match(css, /\.rf-play\s*\{[^}]*flex:\s*none/, "Play keeps its own width and never stretches the row");
   assert.match(css, /\.rf-range\s*\{[^}]*min-width:\s*0/, "the slider may shrink below its intrinsic width");
 
   // The Explorer's ONE journal adopted the same flow at #220: the cap is gone, not raised.
