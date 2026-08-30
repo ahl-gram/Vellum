@@ -16,7 +16,7 @@ export const API = [
   "scrubSnapToPresent", "scrubState",
   "applyVoyage", "rearmVoyage", "exitVoyage", "clearVoyage", "cancelVoyageRaf",
   "voyageSnapToRest", "voyageStepTo", "voyagePaintAt",
-  "voyagePlan", "voyageLog", "voyageLegGeometry", "syncRestingTrack",
+  "voyagePlan", "voyageLog", "voyageDays", "voyageLegGeometry", "syncRestingTrack",
   "destroy",
 ] as const;
 

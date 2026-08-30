@@ -25,7 +25,7 @@ export async function run(ctx) {
   };
   const agesRead = `(()=>{const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const panel=document.querySelector(".rf-ages");return{ages:a,play:p?p.textContent:null,panelHidden:panel?panel.hidden:null,hash:location.hash};})()`;
   // #402 the prospect stage: href read raw (getAttribute), src as the browser's absolute blob URL. Placement ruled 2026-08-22: inside the panel, below the sticky strip (#442 wrapped the bar in one), above the journal.
-  const stageRead = `(()=>{const f=document.querySelector(".rr-prospect");if(!f)return null;const img=f.querySelector("img");const a=f.querySelector("a");const panel=document.querySelector(".rf-ages");const prev=f.previousElementSibling;const next=f.nextElementSibling;return{hidden:f.hidden,src:img?String(img.src||""):null,alt:img?img.alt:null,href:a?a.getAttribute("href"):null,belowBar:!!(panel&&panel.contains(f)&&prev&&prev.classList.contains("rf-instrument-strip")&&next&&next.classList.contains("rf-log"))};})()`;
+  const stageRead = `(()=>{const f=document.querySelector(".rr-prospect");if(!f)return null;const img=f.querySelector("img");const a=f.querySelector("a");const panel=document.querySelector(".rf-ages");const prev=f.previousElementSibling;const next=f.nextElementSibling;return{hidden:f.hidden,src:img?String(img.src||""):null,alt:img?img.alt:null,href:a?a.getAttribute("href"):null,inSlip:!!f.closest("#journal .journal-dock"),aboveLog:!!(next&&next.classList.contains("rf-log")),belowBar:!!(panel&&panel.contains(f)&&prev&&prev.classList.contains("rf-instrument-strip")&&next&&next.classList.contains("rf-log"))};})()`;
   const plateShown = async (hrefTail) => {
     for (let i = 0; i < 160; i++) {
       let s = null;
@@ -55,7 +55,8 @@ export async function run(ctx) {
     return null;
   };
   // #442 the sticky strip and the live row it carries.
-  const stripRead = `(()=>{const s=document.querySelector(".rf-instrument-strip");const t=document.querySelector(".rf-told");if(!s||!t)return null;const cs=getComputedStyle(s);const r=s.getBoundingClientRect();return{position:cs.position,top:Math.round(r.top),h:s.offsetHeight,toldHidden:t.hidden,toldDisplay:getComputedStyle(t).display,gutter:(t.querySelector(".cr-year")||{}).textContent,text:(t.querySelector(".cr-text")||{}).textContent};})()`;
+  // #463 (#462 ruling 6): the strip is fixed along the bottom; the frame's wrapper inside it stacks the told row ABOVE the bar.
+  const stripRead = `(()=>{const w=document.querySelector(".rf-instrument-strip");const s=w&&w.closest(".strip");const t=document.querySelector(".rf-told");const b=document.querySelector(".rf-instrument");if(!s||!t||!b)return null;const cs=getComputedStyle(s);const r=s.getBoundingClientRect();const tr=t.getBoundingClientRect();const br=b.getBoundingClientRect();return{position:cs.position,top:Math.round(r.top),bottom:Math.round(innerHeight-r.bottom),h:s.offsetHeight,toldAbove:t.hidden||getComputedStyle(t).display==="none"?null:tr.bottom<=br.top+1,toldHidden:t.hidden,toldDisplay:getComputedStyle(t).display,gutter:(t.querySelector(".cr-year")||{}).textContent,text:(t.querySelector(".cr-text")||{}).textContent};})()`
 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
   const rrErrBase = consoleErrors.length;
@@ -81,6 +82,15 @@ export async function run(ctx) {
     JSON.stringify(rest),
   );
 
+  // #463 (skeptic on PR #492, round 3): the scale and the folio are DRAWN from the world, not merely present in the markup.
+  const drawn = await evaluate(`(()=>{const sc=document.querySelector(".scale");const t=(sel)=>(document.querySelector(sel)||{}).textContent||"";const lbl=[...sc.querySelectorAll(".tick .lbl")].map((l)=>l.textContent);return{days:sc.querySelectorAll(".tick.day").length,years:sc.querySelectorAll(".tick.year").length,seam:sc.querySelectorAll(".seam").length,labels:lbl,folioTitle:t("#folio-title"),folioSub:t("#folio-sub")};})()`);
+  check(
+    "RR4b the strip's scale is drawn from the world (two day ticks, the star, the centuries and the present) and the chart folio carries the world's name and survey line (#463)",
+    !!drawn && drawn.days === 2 && drawn.seam === 1 && drawn.years >= 2 && drawn.labels.includes("day 1") && drawn.labels.some((l) => /^\d{3,4}$/.test(l)) &&
+      drawn.labels.length === new Set(drawn.labels).size && /Chart № 42/.test(drawn.folioTitle) && drawn.folioSub.length > 20,
+    JSON.stringify(drawn),
+  );
+
   const journal = await evaluate(`(()=>{const rows=[...document.querySelectorAll(".rf-log-strip li")];const entries=rows.filter(r=>!r.classList.contains("annals-head"));return{rows:rows.length,entries:entries.length,inked:entries.filter(r=>r.classList.contains("inked")).length};})()`);
   check(
     "RR5 the journal is fully told at the present park (all entries inked)",
@@ -102,8 +112,8 @@ export async function run(ctx) {
   const strip = await evaluate(stripRead);
   const lastAnnal = await evaluate(`(()=>{const rows=[...document.querySelectorAll(".rf-log-strip li")].filter(r=>!r.classList.contains("annals-head")&&r.classList.contains("inked"));const li=rows[rows.length-1];return li?{year:li.querySelector(".cr-year").textContent,text:li.querySelector(".cr-text").textContent}:null;})()`);
   check(
-    "RR30 the sticky strip carries the annal being told, mirroring the journal's own row (#442)",
-    !!strip && strip.position === "sticky" && strip.toldHidden === false &&
+    "RR30 the bottom strip carries the annal being told above the bar, mirroring the journal's own row (#442; fixed at the bottom since #463)",
+    !!strip && strip.position === "fixed" && strip.toldHidden === false && strip.toldAbove === true &&
       !!lastAnnal && strip.gutter === lastAnnal.year && strip.text === lastAnnal.text,
     JSON.stringify({ strip, lastAnnal }),
   );
@@ -116,14 +126,14 @@ export async function run(ctx) {
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
   await sleep(200);
   const deskRest = await evaluate(stripRead);
-  const room = await evaluate(`(()=>{const s=document.querySelector(".rf-chart svg[data-vellum-style]");const r=s?s.getBoundingClientRect():{width:0,height:0};return{page:document.documentElement.scrollHeight,vh:window.innerHeight,chartW:Math.round(r.width),chartH:Math.round(r.height),ratio:r.width?r.height/r.width:0,col:Math.round(document.querySelector(".rf").getBoundingClientRect().width)};})()`);
+  const room = await evaluate(`(()=>{const s=document.querySelector(".rf-chart svg[data-vellum-style]");const r=s?s.getBoundingClientRect():{width:0,height:0,top:0,bottom:0};const b=document.getElementById("sheet").getBoundingClientRect();const strip=document.querySelector(".strip").getBoundingClientRect();const tr=document.querySelector(".corner.tr").getBoundingClientRect();return{page:document.documentElement.scrollHeight,vh:window.innerHeight,chartW:Math.round(r.width),chartH:Math.round(r.height),ratio:r.width?r.height/r.width:0,fillsSheet:Math.abs(r.width-b.width)<1&&Math.abs(r.height-b.height)<1,topClear:Math.round(r.top-tr.bottom),bottomClear:Math.round(strip.top-r.bottom)};})()`);
   await evaluate(`(()=>{window.scrollTo(0,document.documentElement.scrollHeight);return null;})()`);
   await sleep(200);
   const afterScroll = await evaluate(stripRead);
   check(
-    "RR31 at 1440x900, scrolled past, the strip RIDES the viewport top rather than leaving with the chart (#442)",
-    !!afterScroll && afterScroll.top === 0 && afterScroll.position === "sticky" &&
-      !!room && room.page > room.vh,
+    "RR31 at 1440x900 the strip stands on the viewport's bottom edge and a chart room has no page scroll to leave it by (#463, ruling 6)",
+    !!afterScroll && afterScroll.bottom === 0 && afterScroll.position === "fixed" &&
+      !!room && room.page <= room.vh,
     JSON.stringify({ rest: deskRest, stuck: afterScroll, room }),
   );
   // #442: the strip is what the reader gives up to keep the scrubber and the told row on
@@ -135,8 +145,9 @@ export async function run(ctx) {
   // the told row takes a second line and the strip runs to 126. Both numbers are pinned so
   // neither can grow unnoticed, and the 126 is flagged on the PR as a miss against the
   // quoted figure rather than smoothed over.
-  const GOVERNING_BUDGET = 104;
-  const WIDE_WORST = 130;
+  // #463 re-measured for the bottom strip (the told row above the bar, the scale under it; seed 42, 2026-08-29), pinned with headroom.
+  const GOVERNING_BUDGET = 120;
+  const WIDE_WORST = 135;
   // BOTH halves at the governing width. deskRest alone is the chronicle half's short last
   // annal, which reads 100 at every width and would pin the budget against the case that
   // cannot exceed it; the survey half carries the long prose and is the one that can.
@@ -147,7 +158,7 @@ export async function run(ctx) {
   await sleep(150);
   const deskChron = await evaluate(stripRead);
   check(
-    `RR35 at the governing 1440x900 the strip costs no more than the ${GOVERNING_BUDGET}px the ruling budgeted, in EITHER half (#442)`,
+    `RR35 at the governing 1440x900 the strip costs no more than ${GOVERNING_BUDGET}px, in EITHER half (#442, re-pinned for the bottom strip at #463)`,
     !!deskSurvey && !!deskChron &&
       deskSurvey.h > 0 && deskSurvey.h <= GOVERNING_BUDGET &&
       deskChron.h > 0 && deskChron.h <= GOVERNING_BUDGET &&
@@ -160,7 +171,7 @@ export async function run(ctx) {
   await evaluate(`(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));return null;})()`);
   await sleep(120);
   const byWidth = [];
-  for (const w of [900, 768]) {
+  for (const w of [1024, 900, 768]) {
     await send("Emulation.setDeviceMetricsOverride", { width: w, height: 900, deviceScaleFactor: 1, mobile: false });
     await sleep(250);
     const s = await evaluate(stripRead);
@@ -169,13 +180,12 @@ export async function run(ctx) {
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
   await sleep(200);
   check(
-    `RR37 and it stays within the measured ${WIDE_WORST}px envelope at the widths where the told row wraps (#442)`,
-    byWidth.length === 2 &&
-      byWidth.every((r) => r.h > 0 && r.h <= WIDE_WORST && r.told === "flex") &&
-      // The witness, without which this bounds nothing: at least one width must actually
-      // WRAP past the governing budget, or the sweep never reached the case it claims to
-      // cover and the envelope should be re-derived rather than left standing.
-      byWidth.some((r) => r.h > GOVERNING_BUDGET),
+    `RR37 and it stays within the ${WIDE_WORST}px envelope across the widths: the told row stands at 1024 and drops at 900 and below (#462 ruling 6, the phone rule is inclusive at 900)`,
+    byWidth.length === 3 &&
+      byWidth.every((r) => r.h > 0 && r.h <= WIDE_WORST) &&
+      byWidth[0].told === "flex" && byWidth[1].told === "none" && byWidth[2].told === "none" &&
+      // The witness, same half: the survey row wrapped at 1024 must cost more than it did on one line at 1440, or the envelope bounds nothing.
+      byWidth[0].h > deskSurvey.h,
     JSON.stringify({ byWidth, envelope: WIDE_WORST, budget: GOVERNING_BUDGET }),
   );
   // The chart does not shrink: the constraint set alongside the layout ruling. Pinned as
@@ -185,8 +195,8 @@ export async function run(ctx) {
   // scaled the chart moves one of these two; the hairline moves neither.
   const SOURCE_RATIO = 1158 / 1500;
   check(
-    "RR36 the chart still fills the room's 1100px column at its source aspect, unshrunk (#442)",
-    !!room && room.col === 1100 && Math.abs(room.chartW - 1100) <= 2 &&
+    "RR36 the chart fills its fitted sheet at its source aspect and clears the folio above and the strip below by room.ts's 14px (#442; the chart room's fit since #463)",
+    !!room && room.fillsSheet && room.topClear >= 14 && room.bottomClear >= 14 &&
       Math.abs(room.ratio - SOURCE_RATIO) < 0.005,
     JSON.stringify({ ...room, sourceRatio: SOURCE_RATIO }),
   );
@@ -198,8 +208,8 @@ export async function run(ctx) {
   await evaluate(`(()=>{document.querySelector(".rf-play").click();return null;})()`);
   const played = await plateShown();
   check(
-    "RR29 pressing Play asks for the picture, and one arrives (#442)",
-    !!played && played.belowBar === true,
+    "RR29 pressing Play asks for the picture, and one arrives on the slip above the journal (#442; #463)",
+    !!played && played.inSlip === true && played.aboveLog === true,
     JSON.stringify(played),
   );
   await evaluate(`(()=>{const p=document.querySelector(".rf-play");if(p.textContent==="Pause")p.click();return null;})()`);
@@ -291,10 +301,10 @@ export async function run(ctx) {
     JSON.stringify({ ...bare, todayBefore, todayAfter }),
   );
 
-  const colo = await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");if(!c)return null;const panel=document.querySelector(".rf-ages");const reading=document.querySelector(".rf-reading");return{input:!!c.querySelector("input[type=number]"),dice:!!c.querySelector(".rr-dice"),read:!!c.querySelector(".rr-read"),inPanel:panel?panel.contains(c):null,sibling:!!(panel&&c.parentElement===panel.parentElement),inReading:!!(reading&&reading.contains(c)),shown:!c.hidden&&getComputedStyle(c).display!=="none"};})()`);
+  const colo = await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");if(!c)return null;const panel=document.querySelector(".rf-ages");return{input:!!c.querySelector("input[type=number]"),dice:!!c.querySelector(".rr-dice"),read:!!c.querySelector(".rr-read"),inPanel:panel?panel.contains(c):null,inFolio:!!c.closest(".corner.tr"),shown:!c.hidden&&getComputedStyle(c).display!=="none"};})()`);
   check(
-    "RR16 the colophon dice sits at the journal's foot: input, dice, Read, the panel's sibling, visible",
-    !!colo && colo.input && colo.dice && colo.read && colo.inPanel === false && colo.sibling && colo.inReading && colo.shown,
+    "RR16 the colophon dice is the room's one control, top right in the folio: input, dice, Read, outside the panel, visible (#318, re-seated by #462 ruling 2)",
+    !!colo && colo.input && colo.dice && colo.read && colo.inPanel === false && colo.inFolio && colo.shown,
     JSON.stringify(colo),
   );
 
@@ -332,7 +342,7 @@ export async function run(ctx) {
   const restagedByPlay = await plateShown();
   check(
     "RR28b and the control: Play on the counter-drawn world does bring one, so RR28 is a choice and not a corpse (#442)",
-    !!restagedByPlay && restagedByPlay.belowBar === true && /(^|#|&)seed=42(&|$)/.test(restagedByPlay.href || ""),
+    !!restagedByPlay && restagedByPlay.inSlip === true && /(^|#|&)seed=42(&|$)/.test(restagedByPlay.href || ""),
     JSON.stringify(restagedByPlay),
   );
   // Back to the present park so RR18/RR19 below read the rest this draw actually landed at.
@@ -523,12 +533,28 @@ export async function run(ctx) {
   await ctx.setMobileViewport(390, 844);
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
+  // #463 (skeptic on PR #492): between the boot and the arm the engine's panel is hidden and the slip inside it has no rect; a fit that read its zero top reserved the whole viewport and seated the Glass above it. Sampled through the boot, before the arm lands.
+  let glassOff = 0, glassSamples = 0, preArm = 0;
+  for (let i = 0; i < 160; i++) {
+    let s = null;
+    try { s = await evaluate(`(()=>{const g=document.querySelector(".corner.br.zoomery");const a=typeof window.__vellumReadingRoomAges==="function"?window.__vellumReadingRoomAges():null;if(!g)return null;const r=g.getBoundingClientRect();return{armed:!!a,bottom:r.bottom,top:r.top,vh:innerHeight,sheetH:getComputedStyle(document.body).getPropertyValue("--sheet-h")};})()`); } catch {}
+    if (s) { glassSamples++; if (!s.armed) preArm++; if (s.bottom > s.vh + 1 || s.top < 0 || parseFloat(s.sheetH || "0") > s.vh) glassOff++; if (s.armed) break; }
+    await sleep(50);
+  }
   const mobileSettled = (await boot()) && (await settled());
   await sleep(1600);
+  check(
+    "RR34b through the phone's boot, before the arm, the Glass stays on the viewport and --sheet-h never exceeds it (a slip hidden with the panel reads as absent to the fit)",
+    // The witness: at least one sample from BEFORE the arm, or the probe read only the settled room.
+    glassSamples > 0 && preArm > 0 && glassOff === 0,
+    JSON.stringify({ glassSamples, preArm, glassOff }),
+  );
   const mobile = await evaluate(`({w:document.body.scrollWidth,vw:window.innerWidth})`);
   // #442 ruled 2026-08-23: on a phone the CONTROLS stick and the live row does not, so the
   // strip stays the bar's own height. Read after the same dwell, at the same viewport.
   const mobileStrip = await evaluate(stripRead);
+  // #462 ruling 6's phone half: the scale loses its LABELS, not its star.
+  const mobileScale = await evaluate(`(()=>{const sc=document.querySelector(".scale");const lbl=[...sc.querySelectorAll(".tick .lbl")];const seam=sc.querySelector(".seam");return{labelsHidden:lbl.length>0&&lbl.every((l)=>getComputedStyle(l).display==="none"),seamShown:!!seam&&seam.getBoundingClientRect().width>0};})()`);
   await evaluate(`(()=>{window.scrollTo(0,900);return null;})()`);
   await sleep(120);
   const mobileStuck = await evaluate(stripRead);
@@ -544,13 +570,13 @@ export async function run(ctx) {
   // to two lines, so the strip is 98 there even with the live row gone (plate-reader
   // 2026-08-23). Collecting the height and never asserting it is how the criterion's
   // "measured at that width" gets gathered and discarded.
-  const PHONE_STRIP_MAX = 104;
+  const PHONE_STRIP_MAX = 72; // measured 63 at 390 (2026-08-29): the bar, its scale under it, no told row
   check(
-    "RR34 at 390px the live row is dropped, the controls still stick, and the strip is measured (#442, ruled 2026-08-23)",
-    !!mobileStrip && mobileStrip.toldDisplay === "none" &&
+    "RR34 at 390px the live row is dropped, the strip stays fixed on the bottom edge, and its height is measured (#442, ruled 2026-08-23; the bottom strip since #463)",
+    !!mobileStrip && mobileStrip.toldDisplay === "none" && mobileScale.labelsHidden && mobileScale.seamShown &&
       mobileStrip.h > 0 && mobileStrip.h <= PHONE_STRIP_MAX &&
-      !!mobileStuck && mobileStuck.top === 0 && mobileStuck.position === "sticky",
-    JSON.stringify({ rest: mobileStrip, stuck: mobileStuck, phoneMax: PHONE_STRIP_MAX }),
+      !!mobileStuck && mobileStuck.bottom === 0 && mobileStuck.position === "fixed",
+    JSON.stringify({ rest: mobileStrip, stuck: mobileStuck, scale: mobileScale, phoneMax: PHONE_STRIP_MAX }),
   );
 
   // #124: the room builds the same overlay the Explorer does, so it LOOKS like it should card.

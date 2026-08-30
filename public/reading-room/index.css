@@ -1,15 +1,16 @@
-/* Reading Room (#221) page dressing only: the frame's layout is the shared /reading-frame.css and the engine's dressing is /living-chart.css; this file owes them nothing but the page around them. */
-body {
-  padding: 2.5rem 1.5rem 5rem;
-  line-height: 1.6;
-}
-main { max-width: 1100px; }
-header { margin-bottom: 2rem; }
-footer { margin-top: 3.5rem; }
+/* #463 (Landfall Sub 8): the Reading Room is a chart room on the #462 pattern. The room furniture is /atelier.css's, the frame's own dress /reading-frame.css's and the engine's /living-chart.css's; this sheet seats the frame's parts: the chart in the stage, the instrument on the bottom strip, the journal in the slip. */
 
-.intro { max-width: 46rem; margin: 0 auto 1.6rem; }
-
-.warning { max-width: 46rem; margin: 0 auto 1.2rem; }
+/* The stage centres the fitted sheet in what the chrome leaves; room.ts measures the reserves off the chrome rects, the strip among them. */
+.stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
+#sheet { position: relative; flex: none; width: 0; height: 0; box-shadow: var(--stage-shadow); }
+/* #164: the Glass's gesture box is the sheet; the frame's chart mount is the transform target, so the engine's overlays ride one frame. transform-origin 0 0 matches d3-zoom's screen-space math. */
+#map-viewport { position: absolute; inset: 0; cursor: grab; }
+#map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
+#map-viewport.zoomable { touch-action: none; }
+#map-viewport .rf-chart { position: absolute; inset: 0; transform-origin: 0 0; }
+.stage .warning { position: absolute; left: 50%; top: calc(50% + 2.8rem); transform: translateX(-50%); max-width: 30rem; z-index: 2; margin: 0; }
+.stage .warning[hidden] { display: none; }
 
 /* Without these mount-scoped rules the #127 arrival ceremony never plays AND startArrival's inline stroke-dasharray is never cleaned off the live coastline. */
 .rf-chart svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
@@ -21,19 +22,33 @@ footer { margin-top: 3.5rem; }
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
-/* #318 colophon: a SIBLING of .rf-ages (the engine hides the panel through every teardown, so furniture inside it would vanish on each counter draw); the row wraps and the input may shrink (the #220 min-width:auto lesson). */
-.rr-colophon { display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem;
-  margin-top: 1.2rem; padding: 0.75rem 0.2rem 0;
-  border-top: 1px solid var(--line-tan); }
-.rr-colophon-invite { font-style: italic; color: var(--ink-brown); }
-.rr-colophon label { font-size: 0.85rem; letter-spacing: 0.05em; color: var(--ink-brown); }
-.rr-colophon input { width: 8.5rem; min-width: 0; font-variant-numeric: tabular-nums; }
+/* The chart's folio and the Glass stand above the strip (app.ts measures --strip-h). */
+.corner.bl.folio { bottom: calc(var(--strip-h, 7.6rem) + 1rem); }
+.corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { bottom: calc(var(--strip-h, 7.6rem) + 1rem); }
 
-/* #402 the prospect stage, between the sticky strip and the journal inside .rf-ages (ruled 2026-08-22). hidden toggles display, so prospectUnfurl restarts on every showing (the #321 display-restart behavior, the mechanism here rather than the bug); a plate-to-plate swap while visible deliberately does not replay it. */
-/* #442: the frame drops the journal's top border because it is drawn abutting the instrument, whose bottom border is then the shared divider (#220). The stage standing between them breaks that adjacency, so with a plate showing the journal is its own panel and needs its own edge back. Keyed on the stage being SHOWN: hidden, it is not rendered, the two abut again and the frame's rule is right. */
-.rr-prospect:not([hidden]) + .rf-log { border-top: 1px solid var(--line-tan); border-radius: 6px; }
+/* The instrument strip (#462 ruling 6), along the bottom edge on the deep's own gradient. */
+.strip { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; padding: 0.55rem var(--chrome-x) 0.9rem;
+  background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.9), rgb(from var(--chart-ink) r g b / 0.6) 60%, transparent);
+  animation: ink-in 0.5s 0.18s ease-out both; }
+/* The scale lies under the bar: the survey's days on the left in the surveyor's italic, the annals' years on the right in small caps, the compass star at the seam (the bar's midpoint, ages.ts). */
+.scale-well { position: relative; flex: 1 1 8rem; min-width: 0; display: flex; flex-direction: column; margin-top: 0.15rem; }
+/* flex: none, because the well is a column: the row rule's 8rem basis would become the bar's HEIGHT (measured 151px strips, e2e RR34). */
+.scale-well .rf-range { flex: none; width: 100%; }
+/* Inset by the thumb's radius (the 16px thumb, living-chart.css; ages.ts's detentEscapeU(width - 16)), so u=0 and u=1 stand under the thumb's centre at its ends. */
+.scale { position: relative; height: 1.3rem; margin: 0 8px; }
+.tick { position: absolute; top: 0; width: 1px; height: 6px; background: var(--line-tan); transform: translateX(-0.5px); }
+.tick.day { background: var(--parchment); }
+.tick .lbl { position: absolute; top: 7px; left: 0; transform: translateX(-50%); white-space: nowrap;
+  font-variant-caps: small-caps; font-variant-numeric: tabular-nums; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--line-tan); }
+.tick.day .lbl { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-variant-caps: normal; color: var(--parchment); }
+.tick.day.first .lbl { transform: none; }
+.tick.day.last .lbl { transform: translateX(calc(-100% - 14px)); }
+.tick.year.last .lbl { transform: translateX(-100%); }
+.seam { position: absolute; top: -0.4rem; transform: translateX(-50%); width: 18px; height: 18px; }
+.seam svg { width: 18px; height: 18px; fill: var(--parchment); stroke: var(--chart-ink); stroke-width: 0.6; }
 
-.rr-prospect { margin: 1rem auto 1.2rem; max-width: 34rem; }
+/* #402/#442 the prospect stage, on the slip above the journal since #463 (it keeps the panel's teardowns). hidden toggles display, so prospectUnfurl restarts on every showing; a plate-to-plate swap while visible deliberately does not replay it. */
+.rr-prospect { margin: 0.7rem 0 0.9rem; }
 .rr-prospect a { display: block; }
 /* #442 the plate UNFURLS rather than snapping in: the sheet drops open from its top edge, the house paperUnfurl gesture at the plate's own scale. The fill stays BACKWARDS and the resting keyframe releases the transform, or the final frame would pin at animation-cascade priority and silently kill the hover lift below (measured 2026-08-22, the #402 control probe). */
 .rr-prospect img { width: 100%; height: auto; display: block;
@@ -49,4 +64,24 @@ footer { margin-top: 3.5rem; }
   from { opacity: 0; transform: perspective(900px) rotateX(-58deg); }
   72%  { opacity: 1; transform: perspective(900px) rotateX(6deg); }
   to   { opacity: 1; transform: none; }
+}
+
+@media (max-width: 900px) {
+  .strip { padding: 0.4rem 0.8rem 0.6rem; }
+  .tick .lbl { display: none; }
+  .rf-year { min-width: 4.4rem; font-size: 0.85rem; }
+  .rf-play { width: 4.2rem; }
+  /* The bottom sheet sits above the strip; the Glass above the sheet. */
+  .slip { bottom: var(--strip-h, 4.6rem); }
+  .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { bottom: calc(var(--sheet-h, 6rem) + 1rem); }
+}
+
+/* Print is paper (#462 ruling 10): the strip prints as nothing; the chart prints on the page, unzoomed. */
+@media print {
+  .strip { display: none !important; }
+  .stage { position: static; padding: 0 !important; display: block; }
+  #sheet { width: auto !important; height: auto !important; box-shadow: none; }
+  #map-viewport { position: static; }
+  #map-viewport .rf-chart { position: static; transform: none !important; }
+  .rf-chart svg[data-vellum-style] { height: auto; }
 }

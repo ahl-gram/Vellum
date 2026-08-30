@@ -3,6 +3,7 @@
 // reading frame (#219) driving the fused ages instrument (#220). The room is ALWAYS
 // armed, and arrival is at rest on every path (ratified 2026-07-29 on #221); since #418
 // that arrival COMPLETES one travel order later than the chart on an uncached world.
+// #463: a chart room on the #462 pattern; seats.ts seats the frame's parts.
 import { runJob, runInline, usesWorker, initWorker, type DrawResult } from "../explorer/worker-client.ts";
 import { installHostHooks } from "../shared/host-hooks.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
@@ -14,9 +15,9 @@ import { storyBeats, type StoryBeat } from "./beats.ts";
 import { armsBearing, plateForTold, plateSpecsFor, surveyPlateRows, type PlateSpec } from "./told-plate.ts";
 import { plateDressFor } from "../explorer/prospect-job.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
-import { parseLive, emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
+import { parseLive, emitLive, finalizeHash, liveNow, seedFromHash, type Live } from "../explorer/address.ts";
 import { createReadingFrame } from "../reading-frame/index.ts";
-import { createColophon } from "./colophon.ts";
+import { bindReadingRoom, drawScale, seatFrame, writeFolio } from "./seats.ts";
 import { createLivingChart, type AgesPos, type LivingChart, type ToldEntry } from "../living-chart/index.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
@@ -38,8 +39,17 @@ const TYPES = ["island", "archipelago", "continent", "citystate"];
 const BANDS = ["temperate", "tropical", "polar"];
 const THEMES = ["vegetation", "climate", "moisture", "population"];
 
-const mount = document.getElementById("rr-mount") as HTMLElement;
-const warning = document.getElementById("rr-warning") as HTMLElement;
+const $ = (id: string): HTMLElement => document.getElementById(id) as HTMLElement;
+const q = <T extends HTMLElement = HTMLElement>(sel: string): T => document.querySelector<T>(sel) as T;
+const mount = $("rr-mount");
+const warning = $("rr-warning");
+const seedInput = q<HTMLInputElement>(".rr-colophon input");
+const diceBtn = q<HTMLButtonElement>(".rr-dice");
+const readBtn = q<HTMLButtonElement>(".rr-read");
+const furniture = {
+  stage: q(".stage"), sheet: $("sheet"), viewport: $("map-viewport"), strip: q(".strip"), scale: q(".scale"),
+  slip: $("journal"), tab: q(".slip-tab"), journalDock: q(".journal-dock"), folioTitle: $("folio-title"), folioSub: $("folio-sub"),
+};
 
 // Roughly 3x the slowest matrix measured on CI (2.1s), against the Explorer's 20s: the instrument IS this surface, so a dead worker must not hold the unfurl back for twenty seconds, and a timeout costs a main-thread block, never a different itinerary (voyage-session.ts orderItinerary computes the SAME order inline).
 const ROOM_TOUR_TIMEOUT_MS = 6000;
@@ -48,11 +58,10 @@ const ROOM_TOUR_TIMEOUT_MS = 6000;
 const frame = createReadingFrame(mount, { onPark: () => syncHash(), onAgesTold: (t) => onTold(t) });
 const tourOrder = createTourOrder({ runJob, timeoutMs: ROOM_TOUR_TIMEOUT_MS });
 const lc = createLivingChart({ ...frame.host, tourOrder });
-// #402 the stage nests INSIDE the panel between the bar and the journal (ruled 2026-08-22: the scrubber and the plate share a screen), inheriting the panel's hidden teardowns on purpose; #318's colophon stays the panel's SIBLING because it must stand through them.
+// #402 the plate stage and the frame's log are seated on the journal's slip by seats.ts, inside the panel the engine hides (its teardowns reach them on purpose); the #318 colophon is the folio's markup since #463.
 const stage = createProspectStage();
-frame.host.scrubber.panel.insertBefore(stage.root, frame.log.panel);
-const colophon = createColophon();
-frame.reading.appendChild(colophon.root);
+seatFrame(frame, stage, furniture);
+const { room, rebase } = bindReadingRoom(frame, furniture);
 
 let seed = 0;
 // The seed of the world actually ON SCREEN, advanced only by a successful settle: the rollback target when a counter draw fails.
@@ -78,11 +87,8 @@ const carried: {
 
 function applyHash(): void {
   const p = new URLSearchParams(location.hash.slice(1));
-  const seedRaw = p.get("seed");
-  const s = Number(seedRaw);
-  // Gate on PRESENCE, not just validity: Number(null) === 0 would pass the integer guard and silently pin every bare visit to seed 0.
-  if (seedRaw !== null && Number.isInteger(s) && s >= 0) seed = s >>> 0;
-  else seed = seedForDate(new Date());
+  const s = seedFromHash(p.get("seed"));
+  seed = s !== null ? s >>> 0 : seedForDate(new Date());
   const st = p.get("style");
   if (st !== null && STYLES.includes(st)) style = st as StyleName;
   const type = p.get("type");
@@ -218,6 +224,8 @@ function restFor(live: Live | null): AgesPos | undefined {
 // It does NOT write the status line: the settle path clears it after this returns and the failure path reports an error instead, so the one signal the suites gate on stays with the caller that knows which happened.
 function armRoom(res: DrawResult, forSeed: number, rest: AgesPos | undefined): void {
   lc.rearmAges(res.manifest, res.survey, forSeed, res.subtitle, { rest });
+  drawScale(lc, furniture.scale);
+  room.layout();
   // #321: added AFTER the arm so the panel is visible when the animation starts (see the flag's comment above).
   if (!arrived) {
     arrived = true;
@@ -237,7 +245,9 @@ function draw(): void {
   lc.cancelVoyageRaf();
   // #321: a read supersedes the arrival ceremony and must retire the class HERE, deterministically (see retireArrival above for the Chrome gap).
   frame.root.classList.remove("rf-arrival");
-  colophon.seedInput.value = String(seed);
+  seedInput.value = String(seed);
+  // #165: rebase, not reset: the chart under the camera is being replaced.
+  rebase();
   frame.host.statusEl.textContent = "Drafting…";
   const overrides = recipeOverrides();
   runJob({
@@ -251,6 +261,8 @@ function draw(): void {
       // res.svg is engine-rendered markup, not user content: the only inputs are the uint32 seed and allowlisted recipe params, the same trusted-string injection the Explorer and Print Room do.
       frame.host.mapEl.innerHTML = res.svg;
       lc.buildPlaceOverlay(res.manifest);
+      writeFolio(furniture, res, seed);
+      room.layout();
       startArrival(frame.host.mapEl.querySelector("svg"));
       lastTitle = res.title;
       shownSeed = seed;
@@ -292,7 +304,7 @@ function draw(): void {
       if (myGen !== drawGen) return;
       // The previous world is still on screen: converge the module state back onto it, or the next park would serialize the failed seed into a shareable wrong address.
       seed = shownSeed;
-      colophon.seedInput.value = String(shownSeed);
+      seedInput.value = String(shownSeed);
       // #418: a read that supersedes an arm still WAITING drops that arm, so a superseding draw that then fails would leave a chart with no instrument at all and no way back (the hash is read once, at boot). Re-arm the world actually on screen, so #221's "arrival is at rest on every path" survives this path too; already armed, this is a no-op.
       // #442: the plate state converges onto the surviving world too. draw() disarmed it at the top for the world that never arrived, and this path keeps the PREVIOUS one on screen, so leaving it false would let a plate the reader asked for sit there until the next paint silently pulled it. It was armed for this world or it was not; that is what wasArmed holds.
       plateArmed = wasArmed;
@@ -305,7 +317,7 @@ function draw(): void {
 function readSeed(): void {
   // A counter gesture retires any unconsumed deep-link key: boot-only means boot-only (e2e RR23 pins the race).
   pendingLive = null;
-  seed = Number(colophon.seedInput.value) >>> 0;
+  seed = Number(seedInput.value) >>> 0;
   draw();
 }
 
@@ -331,9 +343,9 @@ applyHash();
 shownSeed = seed; // a boot failure rolls back to the boot world itself
 draw();
 // Wired after the first draw() so a click can never reach a worker still shaking hands.
-colophon.readBtn.addEventListener("click", readSeed);
-colophon.seedInput.addEventListener("keydown", (e) => { if (e.key === "Enter") readSeed(); });
-colophon.diceBtn.addEventListener("click", () => {
-  colophon.seedInput.value = String(Math.floor(Math.random() * 0xffffffff));
+readBtn.addEventListener("click", readSeed);
+seedInput.addEventListener("keydown", (e) => { if (e.key === "Enter") readSeed(); });
+diceBtn.addEventListener("click", () => {
+  seedInput.value = String(Math.floor(Math.random() * 0xffffffff));
   readSeed();
 });

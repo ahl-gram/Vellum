@@ -268,6 +268,13 @@ export function createVoyage(deps: VoyageDeps) {
     };
   }
 
+  /** The survey's first and last days, for a host's own instrument (#463: the strip's scale); null before the arm. */
+  function voyageDays(): { first: number; last: number } | null {
+    if (!voyage || voyage.log.entries.length === 0) return null;
+    const entries = voyage.log.entries;
+    return { first: entries[0].day, last: entries[entries.length - 1].day };
+  }
+
   // #121 e2e read hook: the margin-log snapshot, assembled by voyage-log-panel.ts.
   function voyageLog() {
     if (!voyage) return null;
@@ -319,6 +326,7 @@ export function createVoyage(deps: VoyageDeps) {
     voyagePaintAt,
     voyagePlan,
     voyageLog,
+    voyageDays,
     voyageLegGeometry,
     syncRestingTrack,
     internals,
