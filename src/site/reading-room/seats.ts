@@ -21,7 +21,7 @@ export interface RoomFurniture {
   readonly folioSub: HTMLElement;
 }
 
-// The strip, the slip and its tab go INTO the panel (the engine hides it on every teardown, #220), the plate and the log into the slip, the chart and the status into the stage; the frame's root stays where it is, the arrival ceremony's host (RS26).
+// The frame's root stays where it is, the arrival ceremony's host (RS26).
 export function seatFrame(frame: ReadingFrame, plate: ProspectStage, f: RoomFurniture): void {
   f.viewport.appendChild(frame.host.mapEl);
   f.stage.appendChild(frame.host.statusEl);

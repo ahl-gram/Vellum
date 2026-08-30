@@ -3,10 +3,7 @@
 // reading frame (#219) driving the fused ages instrument (#220). The room is ALWAYS
 // armed, and arrival is at rest on every path (ratified 2026-07-29 on #221); since #418
 // that arrival COMPLETES one travel order later than the chart on an uncached world.
-// #463: a chart room on the #462 pattern. The frame still builds its parts; seatFrame
-// moves the chart into the stage's fitted sheet (the Glass's gesture box), the instrument
-// onto the bottom strip and the journal into the slip, the last two INSIDE the panel the
-// engine hides, so #220's teardown reaches them unchanged.
+// #463: a chart room on the #462 pattern; seats.ts seats the frame's parts.
 import { runJob, runInline, usesWorker, initWorker, type DrawResult } from "../explorer/worker-client.ts";
 import { installHostHooks } from "../shared/host-hooks.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
@@ -46,7 +43,6 @@ const $ = (id: string): HTMLElement => document.getElementById(id) as HTMLElemen
 const q = <T extends HTMLElement = HTMLElement>(sel: string): T => document.querySelector<T>(sel) as T;
 const mount = $("rr-mount");
 const warning = $("rr-warning");
-// #318's colophon, re-seated as the folio's one control (#462 ruling 2): the page carries the row, the classes stay the suites' handles.
 const seedInput = q<HTMLInputElement>(".rr-colophon input");
 const diceBtn = q<HTMLButtonElement>(".rr-dice");
 const readBtn = q<HTMLButtonElement>(".rr-read");
@@ -62,7 +58,7 @@ const ROOM_TOUR_TIMEOUT_MS = 6000;
 const frame = createReadingFrame(mount, { onPark: () => syncHash(), onAgesTold: (t) => onTold(t) });
 const tourOrder = createTourOrder({ runJob, timeoutMs: ROOM_TOUR_TIMEOUT_MS });
 const lc = createLivingChart({ ...frame.host, tourOrder });
-// #402 the stage nests INSIDE the panel between the bar and the journal (ruled 2026-08-22: the scrubber and the plate share a screen), inheriting the panel's hidden teardowns on purpose; #318's colophon stays the panel's SIBLING because it must stand through them.
+// #402 the plate stage and the frame's log are seated on the journal's slip by seats.ts, inside the panel the engine hides (its teardowns reach them on purpose); the #318 colophon is the folio's markup since #463.
 const stage = createProspectStage();
 seatFrame(frame, stage, furniture);
 const { room, rebase } = bindReadingRoom(frame, furniture);

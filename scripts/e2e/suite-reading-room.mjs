@@ -175,8 +175,8 @@ export async function run(ctx) {
     byWidth.length === 3 &&
       byWidth.every((r) => r.h > 0 && r.h <= WIDE_WORST) &&
       byWidth[0].told === "flex" && byWidth[1].told === "none" && byWidth[2].told === "none" &&
-      // The witness: the wrapped told row at 1024 must cost more than the one-line strip at 1440, or the envelope bounds nothing.
-      byWidth[0].h > deskChron.h,
+      // The witness, same half: the survey row wrapped at 1024 must cost more than it did on one line at 1440, or the envelope bounds nothing.
+      byWidth[0].h > deskSurvey.h,
     JSON.stringify({ byWidth, envelope: WIDE_WORST, budget: GOVERNING_BUDGET }),
   );
   // The chart does not shrink: the constraint set alongside the layout ruling. Pinned as
@@ -524,8 +524,21 @@ export async function run(ctx) {
   await ctx.setMobileViewport(390, 844);
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
+  // #463 (skeptic on PR #492): between the boot and the arm the engine's panel is hidden and the slip inside it has no rect; a fit that read its zero top reserved the whole viewport and seated the Glass above it. Sampled through the boot, before the arm lands.
+  let glassOff = 0, glassSamples = 0;
+  for (let i = 0; i < 160; i++) {
+    let s = null;
+    try { s = await evaluate(`(()=>{const g=document.querySelector(".corner.br.zoomery");const a=typeof window.__vellumReadingRoomAges==="function"?window.__vellumReadingRoomAges():null;if(!g)return null;const r=g.getBoundingClientRect();return{armed:!!a,bottom:r.bottom,top:r.top,vh:innerHeight,sheetH:getComputedStyle(document.body).getPropertyValue("--sheet-h")};})()`); } catch {}
+    if (s) { glassSamples++; if (s.bottom > s.vh + 1 || s.top < 0 || parseFloat(s.sheetH || "0") > s.vh) glassOff++; if (s.armed) break; }
+    await sleep(50);
+  }
   const mobileSettled = (await boot()) && (await settled());
   await sleep(1600);
+  check(
+    "RR34b through the phone's boot, before the arm, the Glass stays on the viewport and --sheet-h never exceeds it (a slip hidden with the panel reads as absent to the fit)",
+    glassSamples > 0 && glassOff === 0,
+    JSON.stringify({ glassSamples, glassOff }),
+  );
   const mobile = await evaluate(`({w:document.body.scrollWidth,vw:window.innerWidth})`);
   // #442 ruled 2026-08-23: on a phone the CONTROLS stick and the live row does not, so the
   // strip stays the bar's own height. Read after the same dwell, at the same viewport.

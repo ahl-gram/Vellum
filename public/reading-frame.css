@@ -30,9 +30,11 @@
 
 /* The bar's row: Play, the bar (living-chart.css's .ages-range paints the instrument itself), the readout. */
 .rf-instrument { display: flex; align-items: flex-start; gap: 1.1rem; }
-.rf-play { flex: none; width: 5.2rem; height: 2.4rem; display: flex; align-items: center; justify-content: center; padding: 0;
+.rf-play { flex: none; width: 5.2rem; height: 2.4rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0;
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.82rem; letter-spacing: 0.14em; color: var(--parchment);
   background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); border-radius: 0; transition: background 0.2s ease, color 0.2s ease; }
+/* The mockup's play triangle, drawn rather than markup: the engine writes the label with textContent (Play / Pause) and would wipe a child. */
+.rf-play::before { content: ""; width: 10px; height: 10px; background: currentColor; clip-path: polygon(10% 5%, 90% 50%, 10% 95%); }
 /* Four classes deep on purpose: the house sheets dress every button, and their hover wash outranks a plain .rf-play:hover. */
 .rf-instrument-strip .rf-instrument .rf-play:hover, .rf-instrument-strip .rf-instrument .rf-play:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
 .rf-range { flex: 1 1 8rem; min-width: 0; accent-color: var(--ink-brown); }
