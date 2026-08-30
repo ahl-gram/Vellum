@@ -29,3 +29,20 @@ test("a world with no survey marks no days, and a one-year span still yields the
   const years = t.filter((k) => k.kind === "year");
   assert.deepEqual(years.map((y) => [y.label, y.u]), [["900", 1]]);
 });
+
+// The DOM half (guard-prover, 2026-08-29: the .last hook had no test that ran renderScale): the ticks land by style.left, the first day hugs the left end, the last day stands on the seam and wears .last, the seam is the star, the present wears .last too.
+test("renderScale lays the ticks with their hooks: first and last days, the seam, the present", async () => {
+  const { installShim, El } = await import("../../test-support/element-shim.ts");
+  const { renderScale } = await import("../../src/site/shared/instrument-scale.ts");
+  installShim();
+  const el = new El("div") as unknown as HTMLElement;
+  renderScale(el, scaleTicks({ days: { first: 1, last: 44 }, years: { min: 435, max: 876 } }));
+  const kids = (el as unknown as El).children;
+  const byClass = (c: string) => kids.filter((k) => k.classes.has(c));
+  assert.deepEqual(byClass("day").map((k) => [k.style.left, k.classes.has("first"), k.classes.has("last")]), [["0.000%", true, false], ["50.000%", false, true]], "the first day hugs the left end, the last day stands on the seam and wears .last");
+  assert.equal(byClass("seam").length, 1, "one star at the seam");
+  assert.equal(byClass("seam")[0].style.left, "50.000%");
+  const years = byClass("year");
+  assert.ok(years.length >= 2 && years[years.length - 1].classes.has("last") && years[years.length - 1].style.left === "100.000%", "the present stands at the right end and wears .last");
+  assert.ok(years.slice(0, -1).every((k) => !k.classes.has("last")), "no century wears .last");
+});
