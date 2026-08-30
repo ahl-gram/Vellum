@@ -60,7 +60,6 @@ const furniture: RoomFurniture = {
   folioSub: $("folio-sub"),
   plateLine: $("pr-plate-line"),
 };
-// #463: the chart room round the Glass; the sheet is refitted once each proof lands (the folio's lines are chrome the fit measures) and once a plate is turned (its own aspect).
 const sheet = bindPrintRoom(furniture, sheetAspect);
 const posterStatus = $("pr-poster-status");
 const plateButtons = [...document.querySelectorAll<HTMLButtonElement>("[data-poster]")];

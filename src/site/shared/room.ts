@@ -19,7 +19,6 @@ interface RoomParts<Held> {
   readonly frame: HTMLElement;
   readonly sheet: HTMLElement;
   readonly camera: RoomCamera<Held>;
-  /** The sheet's aspect when the page knows it better than the svg scan (a turned plate is an <img>, the Print Room); null defers to the scan. */
   readonly aspect?: () => number | null;
 }
 
@@ -114,7 +113,6 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
     const slipOpen = slip !== null && !slip.classList.contains("folded") && !phone;
     const slipW = slipOpen ? slipWidth(slipRect) : 0;
     const glassL = glassLeft(q(".corner.br"), slipOpen, slipW);
-    // The row is seated BEFORE the fit: its width follows the folio's text extent, a narrower row wraps taller, and the fit reads the row's top (plate read 2026-08-30: the Print Room's sheet sat 48px over a row that had just wrapped, until the next layout).
     if (legend !== null && !phone) placeLegendRow(legend, { folio: q(".corner.bl"), chrome: q("header.chrome"), glass: glassL, slip: slipOpen ? slipRect : null });
     fitRoom({ frame, sheet, aspect: aspect(), phone, slipRect, slipW, glassL });
     camera.restore(held);

@@ -21,7 +21,6 @@ export interface ContentsData {
   readonly regions: readonly PlateRef[];
   readonly prospects: readonly PlateRef[];
   readonly counts: ContentsCounts;
-  /** The key of the plate on the sheet, or null when the proof is. */
   readonly here: string | null;
 }
 
@@ -71,7 +70,6 @@ export function contentsRows(atlas: ContentsData | null): string {
   ].join("\n");
 }
 
-/** The counts the last three rows carry, read off the atlas's own html (compose.ts's shapes). */
 export function plateCounts(html: { readonly bannersHtml: string; readonly chronicleHtml: string; readonly gazetteerHtml: string }): ContentsCounts {
   const n = (s: string, re: RegExp): number => (s.match(re) ?? []).length;
   return {
@@ -84,7 +82,6 @@ export function plateCounts(html: { readonly bannersHtml: string; readonly chron
 /** "The Environs of X" reads "the environs of X" mid-line; a name that does not open that way is left alone. */
 const lowerNoun = (title: string): string => title.replace(/^The (\w+) of /, (_, noun: string) => `the ${noun.toLowerCase()} of `);
 
-/** The chart folio's line naming the plate on the sheet: "plate iii of the bound atlas · a thematic survey of vegetation". */
 export function plateLine(section: PlateSection, title: string): string {
   const what: Record<PlateSection, string> = {
     hero: "the world chart, drawn in the antique manner",

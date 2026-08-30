@@ -59,6 +59,7 @@ test("PRR3 the Bound Atlas is the slip: Bind and the contents in its body, Print
     assert.ok(!body.includes(id), `${id} is not also in the body`);
   }
   assert.ok(!page.includes("about 20 MB"), "no unmeasured size in the copy (the download reports its own)");
+  assert.match(css, /body\.has-atlas \.slip \.intro\s*\{[^}]*display:\s*none/, "bound, the bound line replaces the intro (the mockup)");
   assert.ok(page.indexOf("</Slip>") < page.indexOf('<div class="chrome corner bl folio">'), "the slip precedes the chart's folio in the page");
 });
 
@@ -75,6 +76,10 @@ test("PRR4 the legend row is the poster plates plus a road back (ruled 2026-08-3
   assert.match(row, /<button class="legend-btn" type="button" data-poster="chart" disabled><span class="verb dim">1500 px<\/span><span class="room">Chart<\/span><\/button>/, "a plate is a legend button, its width the verb, closed until a proof");
   assert.match(row, /<a id="pr-explorer" class="legend-btn gold" href="\.\.\/explorer\/"><span class="verb">Back to<\/span><span class="room">The Explorer<\/span><\/a>/, "the road back to the Explorer is gold");
   assert.ok(row.indexOf('id="pr-explorer"') > at("grand"), "the road stands last");
+  assert.match(legend, /<div class="legend-row" role="group" aria-label="A poster plate">/, "the row names itself; a labelledby on the head would absorb the select's option text");
+  assert.match(legend, /<\/div>\s*<p class="legend-status" id="pr-poster-status" role="status" aria-live="polite"><\/p>\s*$/, "the poster order reports under the row, which a phone docks into its sheet");
+  const phoneCss = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
+  assert.match(phoneCss, /\.legend\.in-slip \.legend-status\s*\{[^}]*display:\s*block/, "and the status line shows in the docked legend");
   assert.ok(!page.includes('class="plate-row"') && !page.includes('class="plate-dim"'), "the desk's plate row retires");
   const phone = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
   assert.match(phone, /\.legend\.in-slip \.legend-head\s*\{[^}]*display:\s*block/, "docked in the phone sheet the head stays, since it carries the Pressed-as choice (the kit hides it)");
@@ -97,7 +102,7 @@ test("PRR5 the stage holds the fitted sheet with the proof and the turned plate 
   assert.match(folio, /<p class="folio-title" id="folio-title">/, "the chart's folio carries the world's name");
   assert.match(folio, /<p class="folio-sub plate-line" id="pr-plate-line">/, "and the line naming the plate on the sheet");
   assert.match(folio, /<p class="folio-sub" id="folio-sub">/, "and its survey line");
-  assert.match(folio, /<p class="folio-coords" id="pr-poster-status" role="status" aria-live="polite">/, "the poster order reports on the folio's coords line");
+  assert.ok(!folio.includes("pr-poster-status"), "the poster order does not report in the chart's folio: the kit hides that corner on a phone, where the plates are still tappable (skeptic on PR #496)");
   assert.match(page, /<div id="pr-atlas" class="atlas-sheet"><\/div>/, "the hidden document stays the Print / Download source");
   assert.ok(page.indexOf('id="pr-atlas"') > page.indexOf('class="chrome corner br zoomery"'), "the document follows the furniture");
 });
@@ -117,6 +122,9 @@ test("PRR6 seats.ts binds the Glass and the room with the turned plate's own asp
     assert.doesNotMatch(src, /scrollIntoView|window\.scrollTo|\.scrollTop\s*=/, `${name} moves the page; the atlas turns on the stage instead (ruled 2026-08-30 on #494)`);
   }
   assert.match(atlas, /turnTo\(/, "the atlas turns a plate onto the sheet");
+  const bind = atlas.slice(atlas.indexOf("function bindAtlas"), atlas.indexOf("function printAtlas"));
+  assert.ok(bind.indexOf("revokeObjectURL") > bind.indexOf("renderBoundAtlas(res.atlas)"), "a re-bind revokes the previous plates only after the new ones are on the page (a click mid-bind turned a revoked blob, skeptic on PR #496)");
+  assert.match(bind, /if \(lastAtlas !== null\) setDeliveryEnabled\(true\)/, "a failed re-bind leaves the previous atlas deliverable");
 });
 
 test("PRR7 the css: the sheet fitted to what the chrome leaves, the hidden document off screen, print fixed in this sub (ruled 2026-08-30): the atlas one plate per page when bound, the proof otherwise", () => {

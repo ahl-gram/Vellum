@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { contentsRows, plateCounts, plateLine, type ContentsData } from "../../src/site/print-room/contents-markup.ts";
 import { plateAspect } from "../../src/site/print-room/plate-aspect.ts";
+import { composeAtlas } from "../../src/atlas/compose.ts";
+import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 
 // #463 part 3/4: the slip's contents, string in and string out like plate-markup.ts, so the rows unit-test in Node and the page and the runtime render one shape.
 const ref = (key: string, title: string) => ({ key, title, href: `blob:http://127.0.0.1:4173/${key}` });
@@ -65,6 +67,14 @@ test("the counts read the atlas's own html: banner figures, chronicle entries, g
     gazetteerHtml: `<table><thead><tr><th>Place</th></tr></thead><tbody><tr><td>A</td></tr><tr><td>B</td></tr></tbody></table>`,
   });
   assert.deepEqual(counts, { arms: 2, entries: 3, places: 2 });
+});
+
+// The hand fixtures above are written to the regexes; this one reads the producer, so a changed <li> or <tr> in compose.ts reds here instead of printing "0 entries" (skeptic on PR #496).
+test("the counts match the world the atlas was composed from (seed 42): its arms, its chronicle's events, its settlements", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const atlas = composeAtlas(world, { width: 400 });
+  assert.deepEqual(plateCounts(atlas), { arms: world.arms.length, entries: world.history.events.length, places: world.settlements.length });
+  assert.ok(world.arms.length > 0 && world.history.events.length > 0 && world.settlements.length > 0, "the witness world has all three");
 });
 
 test("a plate's aspect reads its viewBox, then its width and height, and is null with neither (the prospect plate is 520x384, not the chart's 1500x1157.931)", () => {

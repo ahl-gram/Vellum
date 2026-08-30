@@ -22,7 +22,6 @@ export type PosterBasis = {
   theme: ThemeName | undefined;
 };
 
-/** The sheet's two faces, wired by app.ts: the proof, or a bound plate turned onto it. */
 export interface SheetFace {
   readonly showProof: () => void;
   readonly showPlate: (plate: Plate) => void;
@@ -40,7 +39,6 @@ declare global {
       title: string;
     };
     __vellumPrintAtlas?: () => void;
-    __vellumTurnTo?: (key: string) => void;
   }
 }
 
@@ -167,7 +165,6 @@ ${atlas.chronicleHtml}
 ${atlas.gazetteerHtml}`;
 }
 
-/** Turn a bound plate onto the sheet (the #494 ruling): the plate takes the sheet, its entry and thumbnail are inked, nothing scrolls. */
 export function turnTo(key: string): void {
   const b = plates.get(key);
   if (!b) return;
@@ -183,8 +180,6 @@ function bindAtlas(): void {
   binding = true;
   bindBtn.disabled = true;
   setDeliveryEnabled(false);
-  for (const url of atlasUrls) URL.revokeObjectURL(url);
-  atlasUrls = [];
   status.textContent = "Binding the atlas…";
   const started = performance.now();
   runJob({
@@ -196,12 +191,16 @@ function bindAtlas(): void {
   })
     .then((res) => {
       if (myGen !== bindGen) return;
+      // The previous binding stays turnable until this one is on the page: its URLs are revoked only after the swap (skeptic on PR #496: a click during a re-bind blanked the sheet against revoked blobs).
+      const stale = atlasUrls;
+      atlasUrls = [];
       lastAtlas = res.atlas;
       renderBoundAtlas(res.atlas);
+      for (const url of stale) URL.revokeObjectURL(url);
       setDeliveryEnabled(true);
       document.body.classList.add("has-atlas");
       const seconds = Math.max(1, Math.round((performance.now() - started) / 1000));
-      stamp.textContent = `bound in ${seconds}s · ${plates.size} plates`;
+      stamp.textContent = `bound in ${seconds}s`;
       bindBtn.textContent = "Bind it again";
       status.innerHTML = `The atlas of <strong>${escapeXml(res.atlas.title)}</strong> is bound: ${plates.size} plates, the chronicle and the gazetteer, from the proof on the desk.`;
       turnTo(res.atlas.hero.key);
@@ -210,6 +209,7 @@ function bindAtlas(): void {
     .catch((err) => {
       if (myGen !== bindGen) return;
       status.textContent = "The bindery faltered: " + err.message;
+      if (lastAtlas !== null) setDeliveryEnabled(true);
     })
     .finally(() => {
       binding = false;
@@ -255,5 +255,4 @@ export function initBoundAtlas(getBasisFn: () => PosterBasis | null, sheetFace: 
     if (key) turnTo(key);
   });
   window.__vellumPrintAtlas = printAtlas;
-  window.__vellumTurnTo = turnTo;
 }

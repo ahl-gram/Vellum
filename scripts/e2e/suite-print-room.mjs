@@ -256,7 +256,7 @@ export async function run(ctx) {
       bound.print === true && bound.dl === true && bound.hide === true && bound.hasAtlas === true &&
       bound.loaded === true && bound.heroHiddenOnScreen === true && bound.atlasHidden === true &&
       bound.turned === true && bound.proofHidden === true && bound.thumbs === bound.plates &&
-      bound.inked === "antique" && /^plate i of the bound atlas/.test(bound.plateLine) && /^bound in \d+s · \d+ plates$/.test(bound.stamp),
+      bound.inked === "antique" && /^plate i of the bound atlas/.test(bound.plateLine) && /^bound in \d+s$/.test(bound.stamp),
     JSON.stringify(bound),
   );
 
@@ -377,7 +377,30 @@ export async function run(ctx) {
     JSON.stringify({ btd, btdSettled, btdAtlas }),
   );
 
+  // A click on the previous binding's thumbnail DURING a re-bind: the old plates stay turnable until the new ones land (skeptic on PR #496: revoked up front, the sheet and the index blanked).
   await evaluate(`document.getElementById("pr-bind").click()`);
+  let boundOnce = false;
+  for (let i = 0; i < 300; i++) {
+    let ok = null;
+    try { ok = await evaluate(`(()=>{const imgs=[...document.querySelectorAll("#pr-contents .plates img")];return !!window.__vellumBoundAtlas && imgs.length>0 && imgs.every(im=>im.complete&&im.naturalWidth>0) && !document.getElementById("pr-bind").disabled;})()`); } catch {}
+    if (ok) { boundOnce = true; break; }
+    await sleep(50);
+  }
+  const midRebind = await evaluate(`(()=>{document.getElementById("pr-bind").click();const b=document.querySelector('#pr-contents .plates figure[data-plate="theme-climate"] .thumb');if(!b)return null;b.click();const t=document.getElementById("pr-turned");return{binding:document.getElementById("pr-bind").disabled,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,src:t.src.slice(0,5),stillBound:document.body.classList.contains("has-atlas")};})()`);
+  let rebound = null;
+  for (let i = 0; i < 300; i++) {
+    let s = null;
+    try { s = await evaluate(`(()=>{if(document.getElementById("pr-bind").disabled)return null;const imgs=[...document.querySelectorAll("#pr-contents .plates img")];const t=document.getElementById("pr-turned");return{imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),turnedLoaded:!t.hidden&&t.complete&&t.naturalWidth>0,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,print:!document.getElementById("pr-print").disabled};})()`); } catch {}
+    if (s) { rebound = s; break; }
+    await sleep(50);
+  }
+  check(
+    "PR24c a turn during a re-bind stays on a live plate, and the new binding lands with every thumbnail and the sheet decoded",
+    boundOnce && !!midRebind && midRebind.binding === true && midRebind.here === "theme-climate" && midRebind.src === "blob:" && midRebind.stillBound === true &&
+      !!rebound && rebound.loaded === true && rebound.turnedLoaded === true && rebound.here === "antique" && rebound.print === true,
+    JSON.stringify({ boundOnce, midRebind, rebound }),
+  );
+
   let reboundForHide = false;
   for (let i = 0; i < 260; i++) {
     let ok = null;
@@ -401,6 +424,15 @@ export async function run(ctx) {
     printProof.stage !== "none" && printProof.stagePos === "static" && printProof.map === "none" && printProof.svg === true && printProof.atlasEmpty === true && printProof.slip === "none",
     JSON.stringify(printProof),
   );
+  // Paper is narrower than the 900px phone query: at a Letter-wide layout the kit's narrow block reaches the folio (clamped, tagline hidden) and its print block must take both back.
+  await send("Emulation.setDeviceMetricsOverride", { width: 816, height: 1056, deviceScaleFactor: 1, mobile: false });
+  const paper = await evaluate(`(()=>{const cs=(sel)=>getComputedStyle(document.querySelector(sel));return{w:window.innerWidth,tagline:cs(".folio-room .room-tagline").display,name:cs(".folio-room .room-name").display,folioMax:cs(".corner.folio-room").maxWidth,stagePos:cs(".stage").position,corner:cs(".corner.bl").display};})()`);
+  check(
+    "PR21c at paper width (816px, print media) the room's name and tagline print and the corner is unclamped; the chart's folio prints as nothing",
+    paper.w === 816 && paper.tagline === "block" && paper.name === "block" && paper.folioMax === "none" && paper.stagePos === "static" && paper.corner === "none",
+    JSON.stringify(paper),
+  );
+  await send("Emulation.clearDeviceMetricsOverride");
   await send("Emulation.setEmulatedMedia", { media: "" });
 
   await shoot("print-room.png");

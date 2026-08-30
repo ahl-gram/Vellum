@@ -73,7 +73,6 @@ const contents = contentsRows(null);
   <p class="folio-title" id="folio-title"></p>
   <p class="folio-sub plate-line" id="pr-plate-line"></p>
   <p class="folio-sub" id="folio-sub"></p>
-  <p class="folio-coords" id="pr-poster-status" role="status" aria-live="polite"></p>
 </div>
 
 <!-- The legend row is the poster plates (#462 addendum) plus the road back (ruled 2026-08-30 on #463); the road's href is kept current beside every hash write (app.ts). -->
@@ -87,13 +86,14 @@ const contents = contentsRows(null);
   <p class="legend-note">The engraving is exact at any size; an impression is pressed with your
   device's fonts, and a large one is fitted to what your browser can hold.
   The chart is pulled only as the engraving.</p>
-  <div class="legend-row" role="group" aria-labelledby="grp-plates">
+  <div class="legend-row" role="group" aria-label="A poster plate">
     <button class="legend-btn" type="button" data-poster="chart" disabled><span class="verb dim">1500 px</span><span class="room">Chart</span></button>
     <button class="legend-btn" type="button" data-poster="desk" disabled><span class="verb dim">2400 px</span><span class="room">Desk</span></button>
     <button class="legend-btn" type="button" data-poster="wall" disabled><span class="verb dim">3300 px</span><span class="room">Wall</span></button>
     <button class="legend-btn" type="button" data-poster="grand" disabled><span class="verb dim">4200 px</span><span class="room">Grand</span></button>
     <a id="pr-explorer" class="legend-btn gold" href="../explorer/"><span class="verb">Back to</span><span class="room">The Explorer</span></a>
   </div>
+  <p class="legend-status" id="pr-poster-status" role="status" aria-live="polite"></p>
 </nav>
 
 <div class="chrome corner br zoomery" role="group" aria-label="The Surveyor's Glass">
