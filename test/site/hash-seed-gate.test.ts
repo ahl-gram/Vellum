@@ -2,8 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { seedFromHash } from "../../src/site/explorer/address.ts";
 
-// The gate readHash seeds the Explorer through: a bare visit keeps its seed-of-the-day unless the hash carries a real seed. An empty `seed=` is present and is not a seed (it passed as 0 once: #463, CI R0b).
-test("absent, empty, fractional and negative keys are no seed; a uint32 is", () => {
+test("only a run of digits is a seed: absent, empty, blank, signed, fractional, hex and exponent keys are none", () => {
+  for (const notASeed of [" ", "\t", "+", "-0", "0x10", "1e3", "12.0", "42 ", " 42"]) assert.equal(seedFromHash(notASeed), null, JSON.stringify(notASeed));
   assert.equal(seedFromHash(null), null);
   assert.equal(seedFromHash(""), null);
   assert.equal(seedFromHash("1.5"), null);

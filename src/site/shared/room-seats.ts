@@ -44,7 +44,6 @@ export function slipWidth(r: DOMRect | null): number {
 // atelier.css seats the Glass beside an open slip at right: --slip-w + 2rem + 1.4rem; computed here rather than read, because the Glass's right transitions with the fold and a rect read at the settle timer was 12px short (e2e Z13c).
 export const GLASS_GAP_REM = 3.4;
 
-/** The Glass's left edge: beside an open slip by the sheet's own arithmetic, else where it stands. */
 export function glassLeft(glass: HTMLElement | null, slipOpen: boolean, slipW: number): number | null {
   if (glass === null) return null;
   if (!slipOpen) return rectOf(glass)?.left ?? null;
@@ -55,9 +54,7 @@ export function glassLeft(glass: HTMLElement | null, slipOpen: boolean, slipW: n
 export interface LegendRoom {
   readonly folio: Element | null;
   readonly chrome: Element | null;
-  /** The Glass's left edge (glassLeft), null with no Glass. */
   readonly glass: number | null;
-  /** The open slip's rect, null when folded or a bottom sheet. */
   readonly slip: DOMRect | null;
 }
 

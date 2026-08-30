@@ -56,6 +56,8 @@ interface Deps {
   runJob: (msg: RegionJobMessage) => Promise<RegionJobResult>;
   buildPlaceOverlay: (manifest: PlaceManifest, opts?: { preservePinByName?: boolean; box?: SheetRect }) => void;
   setCaption: (text: string) => void;
+  /** Where a failed survey is reported; the caption when the host gives none. */
+  setError?: (text: string) => void;
   /** current world zoom, to counter-scale the pencil border */
   getZoomK: () => number;
   prefersReduce: () => boolean;
@@ -216,7 +218,7 @@ export function createLodController(deps: Deps) {
       .catch((err) => {
         if (myGen !== regionGen) return;
         hidePencil();
-        setCaption("The cartographer spilled the ink: " + (err && err.message ? err.message : String(err)));
+        (deps.setError ?? setCaption)("The cartographer spilled the ink: " + (err && err.message ? err.message : String(err)));
       });
   }
 

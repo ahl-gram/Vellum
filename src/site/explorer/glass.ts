@@ -22,6 +22,7 @@ interface GlassDeps {
   /** #387/#388: re-measure an open card against the camera as it now stands. */
   reclampCard: () => void;
   setCaption: (text: string) => void;
+  setError: (text: string) => void;
   prefersReduce: () => boolean;
   /** #169: whether a settle should redraft (style, chronicle/voyage/verso, test seam). */
   regionEligible: () => boolean;
@@ -73,6 +74,7 @@ export function createGlass(deps: GlassDeps) {
       setCardZoom(zoomController.getState().k);
     },
     setCaption: deps.setCaption,
+    setError: deps.setError,
     getZoomK: () => zoomController.getState().k,
     prefersReduce: deps.prefersReduce,
   });

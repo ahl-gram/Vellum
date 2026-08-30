@@ -105,7 +105,8 @@ export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room 
     if (home !== null) dockLegend<HTMLElement>(home, legendSeat({ narrow: phone, hasSlip: true }));
     if (slip !== null && !phone) placeSlip(slip, q(".corner.tr"), q(".strip"));
     else if (slip !== null) slip.style.top = slip.style.maxHeight = "";
-    const slipRect = slip !== null ? slip.getBoundingClientRect() : null;
+    // A slip hidden with the engine's panel (the Reading Room's, between reads) has an all-zero rect: read as absent, or a phone reserves the whole viewport for a sheet that is not there (skeptic on PR #492).
+    const slipRect = slip !== null ? rectOf(slip) : null;
     const slipOpen = slip !== null && !slip.classList.contains("folded") && !phone;
     const slipW = slipOpen ? slipWidth(slipRect) : 0;
     const glassL = glassLeft(q(".corner.br"), slipOpen, slipW);

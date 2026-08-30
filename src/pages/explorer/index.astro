@@ -16,8 +16,7 @@ const tagline = "every seed is a world, draw one";
 >
 <div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>
 <div class="stage">
-  <!-- #463 the chart room (#462 ruling 1): the stage is the viewport and #sheet is the chart's fitted box, sized by src/site/shared/room.ts to what the chrome leaves. The sheet stays the Glass's gesture box (#164: #map-viewport wraps #map, the transform target), so a bookmark's cx/cy stay fractions of the SHEET and the region survey (#169) reads the same camera it always did; a magnified sheet spills past its box toward the stage's edges, the mockup's own look.
-       #131: a style change turns this leaf over (sheet-turn.ts) to land the same world re-dressed; the 3D context is inert until .turning is set. Never restructure INSIDE #map: draw() wipes it with innerHTML and re-appends the overlay right after. #116: #verso is the recto's back face, a permanent sibling of #map-viewport filled by verso.ts, hidden at rest (visibility gated on .flip3d). -->
+  <!-- The sheet stays the Glass's gesture box (#164), so a bookmark's cx/cy stay SHEET fractions and the region survey (#169) reads the camera it always did. Never restructure INSIDE #map: draw() wipes it with innerHTML and re-appends the overlay (#131 turns the leaf; #116's verso is #map-viewport's sibling). -->
   <div class="sheet" id="sheet"><div class="sheet-inner" id="sheet-inner">
   <div id="map-viewport" tabindex="0" role="application" aria-label="Interactive map. Arrow keys pan, plus and minus keys zoom, 0 resets."><div id="map" class="living-chart"></div></div>
   <div id="verso" aria-hidden="true"></div>
@@ -30,7 +29,6 @@ const tagline = "every seed is a world, draw one";
 </div>
 <div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>
 
-<!-- #462 ruling 8: Draw lives top right beside the seed, the room's one control under its name. -->
 <RoomFolio room={room} tagline={tagline}>
   <div class="folio-controls" role="group" aria-label="The seed">
     <input id="seed" class="control" type="number" min="0" max="4294967295" step="1" aria-label="seed">
@@ -136,7 +134,7 @@ const tagline = "every seed is a world, draw one";
   <p class="folio-coords" id="caption"></p>
 </div>
 
-<!-- #462 rulings 4 and 8: the rest of The Press is the legend row. Turn the sheet presses on the sheet itself; the two roads out are gold (#199's featured take-home, #270 ruling 2's always-visible journal pointer). Both hrefs are kept current beside every hash write (app.ts). -->
+<!-- Both roads' hrefs are kept current beside every hash write (app.ts). -->
 <nav class="legend" aria-label="The Press">
   <p class="legend-head" id="grp-press">The Press &middot; what the sheet can do next</p>
   <div class="legend-row" role="group" aria-labelledby="grp-press">

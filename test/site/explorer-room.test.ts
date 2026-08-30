@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// #463 (Landfall Sub 8): the Explorer is a chart room on the #462 pattern. The chart full-bleed on the deep, the room's name and its ONE control (the seed row with Draw, ruling 8) top right, the Broadside on the right-hand slip, the rest of the Press as the legend row (ruling 4), the Glass at the chart's corner, no band and no footer (rulings 7 and 9), print standing down (ruling 10).
+// #463: the Explorer as a chart room on the #462 pattern (rulings 1 to 10).
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const page = read("src/pages/explorer/index.astro");

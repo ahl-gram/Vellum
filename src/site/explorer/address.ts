@@ -54,9 +54,7 @@ export function liveNow(state: {
   return state.pending;
 }
 
-/** The seed a hash carries, or null: absent, empty, fractional or negative keys are no seed, so a bare visit keeps its seed-of-the-day (an empty `seed=` passed the presence gate as 0 once: #463, CI R0b). */
+/** The seed a hash carries: a run of digits and nothing else, or null (Number() reads "", " ", "0x10", "1e3" and "-0" as seeds; an empty key landed a bare visit on seed 0 once, #463 CI R0b). */
 export function seedFromHash(raw: string | null): number | null {
-  if (raw === null || raw === "") return null;
-  const seed = Number(raw);
-  return Number.isInteger(seed) && seed >= 0 ? seed : null;
+  return raw !== null && /^\d+$/.test(raw) ? Number(raw) : null;
 }
