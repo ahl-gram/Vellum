@@ -14,7 +14,6 @@ test("a room with no slip keeps its legend on the stage at every width", () => {
   assert.equal(legendSeat({ narrow: false, hasSlip: false }), "stage");
 });
 
-// The seat is only a decision until the row moves: a fake stage, dock and row prove the move itself, both ways, and that a second call in the same seat moves nothing.
 function home(): LegendHome & { readonly moves: string[]; readonly legend: { parentElement: object | null; classList: { toggle(c: string, f: boolean): boolean }; inSlip: boolean } } {
   const moves: string[] = [];
   const stageNode = {} as { insertBefore(el: object, before: object | null): void };

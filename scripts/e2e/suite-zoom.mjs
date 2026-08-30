@@ -290,6 +290,18 @@ export async function run(ctx) {
   await send("Emulation.clearDeviceMetricsOverride");
   await sleep(400);
   const z13c = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`);
+  await evaluate(`document.querySelector("#broadside .slip-fold").click()`);
+  await sleep(700); // the fold's 340ms settle, then the layout and the 250ms settle debounce
+  const z13d = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width,folded:document.getElementById("broadside").classList.contains("folded")};})()`);
+  await evaluate(`document.querySelector(".slip-tab").click()`);
+  await sleep(700);
+  const z13e = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width,folded:document.getElementById("broadside").classList.contains("folded")};})()`);
+  check(
+    "Z13c a fold and an unfold refit the sheet and hold the framing too: the class, not the resize alone (#463)",
+    z13d.folded && z13d.sheet > sheetBefore && z13d.cx === "0.5000" && z13d.cy === "0.5000" && z13d.k === "4.0000" &&
+      !z13e.folded && Math.abs(z13e.sheet - sheetBefore) < 1 && z13e.cx === "0.5000" && z13e.cy === "0.5000" && z13e.k === "4.0000",
+    JSON.stringify({ sheetBefore, z13d, z13e }),
+  );
   check(
     "Z13b a resize refits the sheet but holds the camera's framing: cx/cy/k unchanged across a short viewport (height-bound fit) and back (#463)",
     z13b.sheet !== sheetBefore && Math.abs(z13c.sheet - sheetBefore) < 1 &&

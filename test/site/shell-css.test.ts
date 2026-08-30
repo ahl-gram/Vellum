@@ -228,7 +228,6 @@ test("the deep's focus ring: the chrome on the walnut brightens the ring, paper 
 
 // #367: the sheet's lift is ONE token now. Ratified at 0.4 (Alex, 2026-08-12): the armed Explorer's two coincident 0.2 shadows measured as a single 0.385, rounded to a value a stylesheet can own.
 const SHEET_SHADOW_GEOMETRY = "0 12px 34px";
-// #463: the chart-room depth (the atelier-map mockup's own dress) is the second token, --stage-shadow; home's stage, the survey sheets and the chart rooms consume it.
 const STAGE_SHADOW_GEOMETRY = "0 18px 60px";
 
 test("BaseLayout declares --sheet-shadow, the one depth every sheet rests at (#367)", () => {

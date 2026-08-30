@@ -1,13 +1,10 @@
 // The chart room (#462, lifted into the Atelier Kit at its second use, #463/#487): the sheet fitted to what the chrome leaves, the slip's fold and the phone sheet, the legend row's seat. The Glass's keys and buttons are the page's own (glass-keys.ts for a plain controller, the Explorer's glass.ts for the LOD camera).
 import { fitStage } from "./stage-fit.ts";
 import { bindSlip } from "./slip.ts";
+import { glassLeft, placeLegendRow, placeSlip, rectOf, slipWidth } from "./room-seats.ts";
 
 const CHROME_GAP = 14;
 const PHONE_GAP = 8;
-const SLIP_TOP_GAP = 16;
-const SLIP_FLOOR = 22;
-const LEGEND_CLEAR = 32;
-const LEGEND_GAP = 16;
 const NARROW = "(max-width: 900px)";
 const FALLBACK_ASPECT = 1500 / 1157.931;
 
@@ -20,7 +17,6 @@ export interface RoomCamera<Held> {
 interface RoomParts<Held> {
   /** The element that reserves the chrome's edges as padding (Today: #map, the transform target; the Explorer: the stage round its sheet). */
   readonly frame: HTMLElement;
-  /** The chart's fitted box. */
   readonly sheet: HTMLElement;
   readonly camera: RoomCamera<Held>;
 }
@@ -42,16 +38,13 @@ export interface Seatable {
 }
 
 export interface LegendHome<T extends Seatable = Seatable> {
-  /** The legend row itself. */
   readonly legend: T;
-  /** The slip's dock, where the row sits on a phone. */
   readonly dock: { appendChild(el: T): unknown };
   /** The row's place on the stage: its original parent and the sibling it stood before. */
   readonly stage: { insertBefore(el: T, before: object | null): unknown };
   readonly next: object | null;
 }
 
-/** Move the one legend row to its seat, idempotently; the in-slip class follows it so the sheet dresses it in place. */
 export function dockLegend<T extends Seatable>(home: LegendHome<T>, seat: LegendSeat): void {
   const docked = home.legend.parentElement === home.dock;
   if (seat === "slip" && !docked) home.dock.appendChild(home.legend);
@@ -59,63 +52,18 @@ export function dockLegend<T extends Seatable>(home: LegendHome<T>, seat: Legend
   home.legend.classList.toggle("in-slip", seat === "slip");
 }
 
+const q = <T extends HTMLElement = HTMLElement>(sel: string): T | null => document.querySelector<T>(sel);
+const tops = (els: Array<Element | null>) => els.map(rectOf).flatMap((r) => (r === null ? [] : [r.top]));
+const bottoms = (els: Array<Element | null>) => els.map(rectOf).flatMap((r) => (r === null ? [] : [r.bottom]));
+
 export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room {
   const narrowQuery = window.matchMedia(NARROW);
-  const narrow = () => narrowQuery.matches;
-  const q = <T extends HTMLElement = HTMLElement>(sel: string): T | null => document.querySelector<T>(sel);
-  const rect = (el: Element | null): DOMRect | null => {
-    if (el === null) return null;
-    const r = el.getBoundingClientRect();
-    return r.height > 0 ? r : null;
-  };
   const slip = q(".slip");
-  const folio = q(".corner.tr");
   const legend = q(".legend");
-  const legendStage = legend?.parentElement ?? null;
-  const legendNext = legend?.nextSibling ?? null;
-  const legendDock = slip?.querySelector(".legend-dock") ?? null;
-
-  const placeSlip = () => {
-    if (slip === null) return;
-    if (narrow()) {
-      slip.style.top = "";
-      slip.style.maxHeight = "";
-      return;
-    }
-    const top = (rect(folio)?.bottom ?? 0) + SLIP_TOP_GAP;
-    slip.style.top = `${top}px`;
-    slip.style.maxHeight = `${window.innerHeight - top - SLIP_FLOOR}px`;
-  };
-
-  const seatLegend = () => {
-    if (legend === null || legendStage === null || legendDock === null) return;
-    dockLegend<HTMLElement>({ legend, dock: legendDock, stage: legendStage, next: legendNext }, legendSeat({ narrow: narrow(), hasSlip: slip !== null }));
-  };
-
-  // The right edge of a corner's written lines (a wrapped line reads as the box), so a short survey line leaves the legend more room than the box's max-width would.
-  const textRight = (el: Element | null): number | null => {
-    if (el === null) return null;
-    const range = document.createRange();
-    let right: number | null = null;
-    for (const p of el.querySelectorAll("p")) {
-      if (!p.textContent) continue;
-      range.selectNodeContents(p);
-      const r = range.getBoundingClientRect();
-      if (r.width > 0) right = Math.max(right ?? 0, r.right);
-    }
-    return right;
-  };
-
-  // The legend row centres in the room the chart folio, the Glass and an open slip leave it, and wraps its buttons when that room is short; computed, never read back off the row, because its left transitions and a mid-transition rect reads the old seat (plate read 2026-08-29: a resize left the row over the folio).
-  const placeLegend = (slipOpen: boolean, slipRect: DOMRect | null) => {
-    if (legend === null || narrow()) return;
-    const chromeX = rect(q("header.chrome"))?.left ?? 0;
-    const left = (textRight(q(".corner.bl")) ?? chromeX) + LEGEND_CLEAR;
-    const bounds = [window.innerWidth - chromeX, rect(q(".corner.br"))?.left ?? Infinity, slipOpen && slipRect !== null ? slipRect.left : Infinity];
-    const space = Math.max(0, Math.min(...bounds) - LEGEND_GAP - left);
-    legend.style.maxWidth = `${space}px`;
-    legend.style.left = `${left + space / 2}px`;
-  };
+  const dock = slip?.querySelector<HTMLElement>(".legend-dock") ?? null;
+  const home = legend !== null && dock !== null && legend.parentElement !== null
+    ? { legend, dock, stage: legend.parentElement, next: legend.nextSibling }
+    : null;
 
   const aspect = () => {
     const vb = (sheet.querySelector<SVGSVGElement>("svg[data-vellum-style]") ?? sheet.querySelector<SVGSVGElement>("svg"))?.viewBox.baseVal;
@@ -124,19 +72,21 @@ export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room 
 
   const layout = () => {
     const held = camera.hold();
-    seatLegend();
-    placeSlip();
-    const phone = narrow();
+    const phone = narrowQuery.matches;
+    if (home !== null) dockLegend<HTMLElement>(home, legendSeat({ narrow: phone, hasSlip: true }));
+    if (slip !== null && !phone) placeSlip(slip, q(".corner.tr"), q(".strip"));
+    else if (slip !== null) slip.style.top = slip.style.maxHeight = "";
     const slipRect = slip !== null ? slip.getBoundingClientRect() : null;
     const slipOpen = slip !== null && !slip.classList.contains("folded") && !phone;
-    const tops = (els: Array<Element | null>) => els.map(rect).flatMap((r) => (r === null ? [] : [r.top]));
+    const slipW = slipOpen ? slipWidth(slipRect) : 0;
+    const glassL = glassLeft(q(".corner.br"), slipOpen, slipW);
     const fit = fitStage({
       view: { w: window.innerWidth, h: window.innerHeight },
       aspect: aspect(),
-      above: [rect(q("header.chrome")), phone ? null : rect(folio)].flatMap((r) => (r === null ? [] : [r.bottom])),
+      above: bottoms([q("header.chrome"), phone ? null : q(".corner.tr")]),
       below: [...tops([q(".corner.bl"), q(".legend:not(.in-slip)"), q(".strip")]), ...(phone && slipRect !== null ? [slipRect.top] : [])],
-      beside: slipOpen && slipRect !== null ? slipRect.width : 0,
-      right: slipOpen ? [rect(q(".corner.br"))].flatMap((r) => (r === null ? [] : [r.left])) : [],
+      beside: slipW,
+      right: slipOpen && glassL !== null ? [glassL] : [],
       gap: phone ? PHONE_GAP : CHROME_GAP,
       narrow: phone,
     });
@@ -147,7 +97,7 @@ export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room 
     sheet.style.height = `${fit.sheet.h}px`;
     if (phone && slipRect !== null) document.body.style.setProperty("--sheet-h", `${window.innerHeight - slipRect.top}px`);
     else document.body.style.removeProperty("--sheet-h");
-    placeLegend(slipOpen, slipRect);
+    if (legend !== null && !phone) placeLegendRow(legend, { folio: q(".corner.bl"), chrome: q("header.chrome"), glass: glassL, slip: slipOpen ? slipRect : null });
     camera.restore(held);
   };
 
@@ -161,7 +111,6 @@ export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room 
       after: (run, ms) => { window.setTimeout(run, ms); },
     });
   }
-
   window.addEventListener("resize", layout);
   narrowQuery.addEventListener("change", layout);
   document.fonts?.ready.then(layout);

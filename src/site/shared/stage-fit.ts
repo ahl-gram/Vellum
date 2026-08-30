@@ -12,7 +12,6 @@ export interface StageInput {
   readonly below: readonly number[];
   /** An open slip's width, 0 when folded or a bottom sheet. */
   readonly beside: number;
-  /** Lefts of the chrome standing at the right edge beside an open slip (the Glass with its keys): the reserve grows so the sheet never runs under it. */
   readonly right?: readonly number[];
   readonly gap: number;
   readonly narrow: boolean;

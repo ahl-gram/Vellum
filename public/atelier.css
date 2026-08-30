@@ -10,14 +10,14 @@ body.chart-room .fog { z-index: 3; }
 @keyframes fog-drift-a { from { transform: translate(-4%, 2%); } to { transform: translate(5%, -3%); } }
 @keyframes fog-drift-b { from { transform: translate(3%, -2%); } to { transform: translate(-5%, 3%); } }
 
-/* The chart room's stage (#462 ruling 1): the viewport, the chart fitted inside it to what the chrome leaves; the page css seats its own sheet and transform target in it. */
+/* The chart room's stage (#462 ruling 1): the viewport, the chart fitted inside it to what the chrome leaves; the page css seats its own sheet and transform target in it. Scoped to the chart room: home's landfall stage wears the same class (skeptic on PR #491: the unscoped landing scaled #lf-stage 1.004 under the camera and CI went red). */
 html:has(body.chart-room), body.chart-room { height: 100%; overflow: hidden; }
-.stage { position: fixed; inset: 0; z-index: 1; overflow: hidden; }
-.stage .status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 0.3rem 0.9rem;
+body.chart-room .stage { position: fixed; inset: 0; z-index: 1; overflow: hidden; }
+body.chart-room .stage .status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 0.3rem 0.9rem;
   color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.55); z-index: 2; pointer-events: none; }
-.stage .status:empty { display: none; }
-.stage noscript .status { top: calc(50% + 2.8rem); pointer-events: auto; max-width: 30rem; }
-.stage .status a { color: var(--parchment-bright); }
+body.chart-room .stage .status:empty { display: none; }
+body.chart-room .stage noscript .status { top: calc(50% + 2.8rem); pointer-events: auto; max-width: 30rem; }
+body.chart-room .stage .status a { color: var(--parchment-bright); }
 /* Edge vignettes keep the parchment chrome legible when the pale chart fills the frame (the mockup). */
 .vignette { position: fixed; left: 0; right: 0; height: 11rem; pointer-events: none; z-index: 5; }
 .vignette.top { top: 0; background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.62), transparent); }
@@ -76,7 +76,7 @@ body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); }
 .zoom-keys span { display: block; }
 .zoom-keys kbd { font-family: inherit; font-style: normal; color: var(--parchment); }
 /* The keys slip needs a band wide enough for folio + roads + Glass beside a slip: measured colliding at 1280 (a stated deviation on #462). A bare (hover: none) over-matches pointerless environments (linux headless CI reports hover:none with pointer:none), hiding the legend where a keyboard user could use it; pinned by e2e G1. */
-@media (hover: none) and (pointer: coarse), (max-width: 1440px) { .zoom-keys { display: none; } }
+@media (hover: none) and (pointer: coarse), (max-width: 1439px) { .zoom-keys { display: none; } }
 
 /* The legend row, bottom centre (#462 ruling 4): the room's roads out, centred on the chart beside an open slip. */
 .legend { position: fixed; left: calc((100% - var(--slip-w) - 2rem) / 2); bottom: var(--chrome-y); transform: translateX(-50%); z-index: 10; text-align: center;
@@ -85,7 +85,7 @@ body:has(.slip.folded) .legend { left: 50%; }
 /* parchment, not the mockup's ink-faded: 13px italic measured 2.78:1 on the deep (plate read 2026-08-29), the RH9a miss again. */
 .legend-head { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.82rem; color: var(--parchment); margin: 0 0 0.45rem; }
 .legend-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
-/* A road out is an <a>; a press on the sheet itself (the Explorer's Turn) is a <button> in the same dress, so the button's house skin is overwritten property by property. */
+/* A road out is an <a>; a press on the sheet itself (the Explorer's Turn) is a <button> in the same dress, so the button's house skin is overwritten property by property. CAUTION: this display declaration makes the hidden ATTRIBUTE inert on these (an author display beats the UA [hidden] rule), so el.hidden = true silently no-ops; hide via style.display (the #270 guard-prover's find). */
 .legend-btn { display: block; appearance: none; cursor: pointer; text-decoration: none; font: inherit; line-height: 1.45; color: inherit;
   background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); border-radius: 0;
   padding: 0.4rem 0.9rem 0.35rem; text-align: center; transition: background 0.2s ease, transform var(--paper-quick) var(--ease-paper); }
@@ -137,11 +137,11 @@ body:has(.slip.folded) .legend { left: 50%; }
 button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; background: var(--ink-dark); color: var(--parchment-bright); }
 
 /* Magnified, the sheet spills under the chrome (the mockup's look) and parchment on paper measured 1.1:1 (plate read 2026-08-29): while the Glass is zoomed the cluster, the corners and the legend row stand on home's pool, the #480 blurred box that follows its cluster. At rest they stand on the deep and carry none (RH9b). */
-body:has(#map-viewport.zoomed) :is(header.chrome, .corner, .legend)::before { content: ""; position: absolute; inset: -1.1rem -1.4rem; z-index: -1; pointer-events: none;
-  background: rgb(from var(--chart-ink) r g b / 0.86); filter: blur(16px); }
+body:has(#map-viewport.zoomed) :is(header.chrome, .corner, .legend, .strip)::before { content: ""; position: absolute; inset: -1.3rem -1.6rem; z-index: -1; pointer-events: none;
+  background: rgb(from var(--chart-ink) r g b / 0.92); filter: blur(16px); }
 
 /* The landing (#461 ruling 6, the chart room's half): the stage settles onto the deep, the corners, the slip and the legend ink in after; motion.css's reduced-motion blanket collapses both. */
-.stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 .corner, .slip, .legend { animation: ink-in 0.5s 0.18s ease-out both; }
 
 /* The index (document-room ruling 1): every section with its questions or its terms, the one being read inked. */
@@ -212,7 +212,7 @@ body:has(#map-viewport.zoomed) :is(header.chrome, .corner, .legend)::before { co
   .folio-room .room-name, .folio-room .room-tagline { color: var(--ink-dark); }
   .folio-room .dateline, .folio-room .gloss, .folio-controls { display: none; }
   html:has(body.chart-room), body.chart-room { height: auto; overflow: visible; }
-  .stage { position: static; animation: none; }
+  body.chart-room .stage { position: static; animation: none; }
   /* The markup seats the stage before the folio; on paper the name leads. */
   body.chart-room main { display: flex; flex-direction: column; }
   body.chart-room .corner.folio-room { order: -1; }

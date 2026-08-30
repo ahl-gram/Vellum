@@ -23,6 +23,10 @@ const tagline = "every seed is a world, draw one";
   <div id="verso" aria-hidden="true"></div>
   </div></div>
   <p class="status" id="status" role="status" aria-live="polite"></p>
+  <noscript>
+    <p class="status">Every world is drawn in your browser, so the Explorer needs
+    JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
+  </noscript>
 </div>
 <div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>
 
@@ -38,7 +42,7 @@ const tagline = "every seed is a world, draw one";
 
 <!-- #270 The Broadside, on the slip since #463 (#462 ruling 3): the controls composed as one sheet, grouped by what they do to the WORLD. The Land reshapes the geography (type, climate, the two sliders); The Hand dresses the same world (style turns the sheet, theme/legend/arms redraw the same land, survey inks the resting track). Every input keeps its id, events, and redraw semantics exactly as app.ts/controls.ts wire them. The #270 rulings stand: the ledger alignment (a label column per panel, equal-width controls), the countersigned seals, the four footnote marks. -->
 <Slip id="broadside" verb="Make one" title="The Broadside" where="the land, and the hand that dresses it" fold="Fold the broadside away">
-  <div class="controls broadside">
+  <div class="broadside">
     <div class="panel" role="group" aria-labelledby="grp-land">
       <p class="panel-head archivist-head" id="grp-land">The Land</p>
       <p class="panel-gloss">these shape the world itself</p>

@@ -43,7 +43,7 @@ export async function run(ctx) {
   })()`);
   check(
     "BR1 every control sits in its wiring-truth group: the seed row in the folio, Land and Hand on the slip, the Press as the legend row",
-    br1.wrong.length === 0 && br1.heads.join("|").startsWith("The Land|The Hand|The Press"),
+    br1.wrong.length === 0 && br1.heads[0] === "The Land" && br1.heads[1] === "The Hand" && /^The Press\b/.test(br1.heads[2] || ""),
     JSON.stringify(br1),
   );
 
