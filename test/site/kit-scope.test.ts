@@ -15,25 +15,27 @@ const rulesIn = (css: string): string[] =>
 
 const SCOPED = /(^|\s)body\.(?:chart-room|room)\b/;
 
+// An arm reaches home only when EVERY class it names is one home wears: .folio-controls .control cannot match a page with no .folio-controls, but a bare .stage matches home's.
+const offendersIn = (css: string, home: Set<string>): string[] =>
+  rulesIn(css).flatMap((selector) => selector.split(",").map((s) => s.trim())).filter((arm) => {
+    const classes = [...arm.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1]);
+    return classes.length > 0 && classes.every((c) => home.has(c)) && !SCOPED.test(arm);
+  });
+
+/** #487 allows the kit to split ("or a few: slip, legend, chrome"): every atelier*.css on disk is a kit sheet and is swept. */
+const kitSheets = (): string[] => readdirSync(resolve(REPO, "public")).filter((f) => /^atelier.*\.css$/.test(f)).map((f) => `public/${f}`);
+
 test("every kit rule on a class home authors is scoped to a room (#487, the #302 inverse)", () => {
   const home = classesIn(read("src/pages/index.astro"));
-  const kit = read("public/atelier.css");
-  const offenders: string[] = [];
-  for (const selector of rulesIn(kit)) {
-    for (const arm of selector.split(",").map((s) => s.trim())) {
-      const classes = [...arm.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1]);
-      // An arm reaches home only when EVERY class it names is one home wears: .folio-controls .control cannot match a page with no .folio-controls, but a bare .stage matches home's.
-      if (classes.length > 0 && classes.every((c) => home.has(c)) && !SCOPED.test(arm)) offenders.push(arm);
-    }
+  const sheets = kitSheets();
+  assert.ok(sheets.includes("public/atelier.css"), "the kit's sheet is on disk");
+  for (const sheet of sheets) {
+    assert.deepEqual(offendersIn(read(sheet), home), [], `${sheet}: a kit rule reaches a class home wears; scope it to body.chart-room (or body.room)`);
   }
-  assert.deepEqual(offenders, [], "a kit rule reaches a class home wears; scope it to body.chart-room (or body.room)");
 });
 
-test("the guard can see an unscoped collision (a planted .stage rule), and every kit sheet on disk is swept", () => {
+test("the guard can see an unscoped collision: the offender loop itself reads a planted .stage rule, and not its scoped twin", () => {
   const home = classesIn(read("src/pages/index.astro"));
   assert.ok(home.has("stage"), "home's landfall stage still wears the class the collision was found on");
-  const planted = rulesIn(".stage { position: fixed; }");
-  assert.ok(planted.some((s) => !SCOPED.test(s) && /\.stage\b/.test(s)), "the scan reads a bare .stage rule as unscoped");
-  const sheets = readdirSync(resolve(REPO, "public")).filter((f) => f === "atelier.css");
-  assert.deepEqual(sheets, ["atelier.css"], "the kit is one sheet; a split kit joins this sweep");
+  assert.deepEqual(offendersIn(".stage { position: fixed; } body.chart-room .stage { inset: 0; } .folio-controls .control { width: 1px; }", home), [".stage"]);
 });

@@ -4,7 +4,7 @@
 // reports whether the link carried a value, and writeHash takes the gate as an argument.
 import { landToSlider, sliderToLand, updateLandReadout } from "./sea-level.ts";
 import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.ts";
-import { parseLive, emitLive, finalizeHash, type Live } from "./address.ts";
+import { parseLive, emitLive, finalizeHash, seedFromHash, type Live } from "./address.ts";
 import type { Camera } from "./camera.ts";
 
 export interface Controls {
@@ -29,10 +29,8 @@ export function readHash(controls: Controls): {
 } {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider } = controls;
   const params = new URLSearchParams(location.hash.slice(1));
-  // Gate on PRESENCE, not just validity: Number(null) === 0 would pass the integer guard and clobber a bare visit's seed-of-the-day default down to seed 0.
-  const seedRaw = params.get("seed");
-  const seed = Number(seedRaw);
-  if (seedRaw !== null && Number.isInteger(seed) && seed >= 0) seedInput.value = String(seed);
+  const seed = seedFromHash(params.get("seed"));
+  if (seed !== null) seedInput.value = String(seed);
   const style = params.get("style");
   if (style && [...styleSel.options].some((o) => o.value === style)) {
     styleSel.value = style;

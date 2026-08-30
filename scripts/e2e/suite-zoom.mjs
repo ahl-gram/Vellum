@@ -296,6 +296,18 @@ export async function run(ctx) {
   await evaluate(`document.querySelector(".slip-tab").click()`);
   await sleep(700);
   const z13e = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width,folded:document.getElementById("broadside").classList.contains("folded")};})()`);
+  // A refit is camera-side-effect-free: no settle, so no hash write (skeptic on PR #491: the fonts.ready refit before the boot wrote an empty seed and CI's bare visit landed on seed 0). The seed input is the tell: a hash write would carry its new value.
+  await evaluate(`document.getElementById("seed").value = "777"`);
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 600, deviceScaleFactor: 1, mobile: false });
+  await sleep(500);
+  await send("Emulation.clearDeviceMetricsOverride");
+  await sleep(500);
+  const z13f = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));document.getElementById("seed").value="42";return{seed:p.get("seed"),k:p.get("k")};})()`);
+  check(
+    "Z13d a refit writes no hash: the seed input changed under a resize and the address kept the drawn seed and its camera (#463)",
+    z13f.seed === "42" && z13f.k === "4.0000",
+    JSON.stringify(z13f),
+  );
   check(
     "Z13c a fold and an unfold refit the sheet and hold the framing too: the class, not the resize alone (#463)",
     z13d.folded && z13d.sheet > sheetBefore && z13d.cx === "0.5000" && z13d.cy === "0.5000" && z13d.k === "4.0000" &&

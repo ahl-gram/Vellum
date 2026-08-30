@@ -71,7 +71,7 @@ zoomController.attach();
 const viewportBox = () => ({ W: $("map-viewport").clientWidth || 1, H: $("map-viewport").clientHeight || 1 });
 const room = bindRoom({ frame: $("map"), sheet: $("sheet"), camera: {
   hold: () => { const { W, H } = viewportBox(); return cameraFromTransform(zoomController.getState(), W, H); },
-  restore: (cam) => { const { W, H } = viewportBox(); zoomController.zoomTo(transformFromCamera(cam, W, H)); },
+  restore: (cam) => { const { W, H } = viewportBox(); zoomController.refit(transformFromCamera(cam, W, H)); },
 } });
 bindGlassKeys($("map-viewport"), zoomController);
 // Deterministic zoom hooks for the e2e, mirroring the Explorer's.

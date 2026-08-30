@@ -61,6 +61,8 @@ export interface ZoomController {
   reset(): void;
   rebase(): void;
   zoomTo(next: ZoomState): void;
+  /** Re-seat the camera against a refitted viewport with no zoom event: no settle, no hash write, no redraft, and a glide in flight is left to land (#463: a refit before the boot wrote an empty seed into the hash, CI R0b). */
+  refit(next: ZoomState): void;
   glideBy(factor: number): void;
   glideHome(onDone?: () => void): void;
   panBy(dxScreen: number, dyScreen: number): void;
@@ -186,6 +188,11 @@ export function createZoomController({
     zoomTo(next: ZoomState) {
       const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), scaleExtent);
       sel().call(behavior.transform, zoomIdentity.translate(c.x, c.y).scale(c.k));
+    },
+    refit(next: ZoomState) {
+      const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), scaleExtent);
+      (viewportEl as ZoomStoredElement).__zoom = zoomIdentity.translate(c.x, c.y).scale(c.k);
+      apply((viewportEl as ZoomStoredElement).__zoom as ZoomTransform);
     },
     /** #170: magnify by `factor` about the viewport centre as a d3 transition through the same zoom pipeline; reduced motion collapses to the instant scaleBy. */
     glideBy(factor: number) {

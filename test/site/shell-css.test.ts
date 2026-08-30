@@ -292,7 +292,6 @@ const optOutsFor = (css: string, cls: string) =>
 const CHART_MARKER = "[data-vellum-style]";
 
 /** Every chart mount that dresses a sheet; a NEW host that mounts the engine must join this list or it reintroduces the doubling. */
-// #463: a chart room rests its fitted sheet box at the chart-room depth (--stage-shadow) and its chart rule carries no shadow at all; a page host still dresses the marked svg at the house depth.
 const CHART_MOUNTS = [
   { host: "Explorer", file: "public/explorer/index.css", mount: "#map", rule: "#sheet", token: "--stage-shadow" },
   { host: "Reading Room", file: "public/reading-frame.css", mount: ".rf-chart", rule: `.rf-chart svg${CHART_MARKER}`, token: "--sheet-shadow" },

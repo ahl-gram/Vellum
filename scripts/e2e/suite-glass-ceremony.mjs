@@ -68,7 +68,7 @@ export async function run(ctx) {
       hideRules,hoverHideRules,coarseScopedHideRules,
       hoverNone:matchMedia("(hover: none)").matches,pointerCoarse:matchMedia("(pointer: coarse)").matches,
       // #463: the keys slip stands down below 1440px too (a stated deviation on #462: it collided with the legend row beside the 24rem Broadside at 1280), so the legend is owed only on a wide, mouse-driven sheet.
-      wide:innerWidth>1440};
+      wide:innerWidth>=1440};
   })()`);
   const touchPrimary = g1.hoverNone && g1.pointerCoarse;
   const legendOwed = !touchPrimary && g1.wide;

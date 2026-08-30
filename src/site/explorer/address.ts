@@ -53,3 +53,10 @@ export function liveNow(state: {
   if (state.chamber === "ages" && state.year != null) return { kind: "year", year: state.year };
   return state.pending;
 }
+
+/** The seed a hash carries, or null: absent, empty, fractional or negative keys are no seed, so a bare visit keeps its seed-of-the-day (an empty `seed=` passed the presence gate as 0 once: #463, CI R0b). */
+export function seedFromHash(raw: string | null): number | null {
+  if (raw === null || raw === "") return null;
+  const seed = Number(raw);
+  return Number.isInteger(seed) && seed >= 0 ? seed : null;
+}

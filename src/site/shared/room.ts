@@ -22,7 +22,6 @@ interface RoomParts<Held> {
 }
 
 export interface Room {
-  /** Re-measure the chrome and refit the sheet; call after the chart is drawn and whenever the furniture moves. */
   readonly layout: () => void;
 }
 
@@ -53,6 +52,36 @@ export function dockLegend<T extends Seatable>(home: LegendHome<T>, seat: Legend
 }
 
 const q = <T extends HTMLElement = HTMLElement>(sel: string): T | null => document.querySelector<T>(sel);
+
+interface FitParts {
+  readonly frame: HTMLElement;
+  readonly sheet: HTMLElement;
+  readonly aspect: number;
+  readonly phone: boolean;
+  readonly slipRect: DOMRect | null;
+  readonly slipW: number;
+  readonly glassL: number | null;
+}
+
+function fitRoom({ frame, sheet, aspect, phone, slipRect, slipW, glassL }: FitParts): void {
+  const fit = fitStage({
+    view: { w: window.innerWidth, h: window.innerHeight },
+    aspect,
+    above: bottoms([q("header.chrome"), phone ? null : q(".corner.tr")]),
+    below: [...tops([q(".corner.bl"), q(".legend:not(.in-slip)"), q(".strip")]), ...(phone && slipRect !== null ? [slipRect.top] : [])],
+    beside: slipW,
+    right: slipW > 0 && glassL !== null ? [glassL] : [],
+    gap: phone ? PHONE_GAP : CHROME_GAP,
+    narrow: phone,
+  });
+  frame.style.setProperty("--reserve-top", `${fit.reserve.top}px`);
+  frame.style.setProperty("--reserve-right", `${fit.reserve.right}px`);
+  frame.style.setProperty("--reserve-bottom", `${fit.reserve.bottom}px`);
+  sheet.style.width = `${fit.sheet.w}px`;
+  sheet.style.height = `${fit.sheet.h}px`;
+  if (phone && slipRect !== null) document.body.style.setProperty("--sheet-h", `${window.innerHeight - slipRect.top}px`);
+  else document.body.style.removeProperty("--sheet-h");
+}
 const tops = (els: Array<Element | null>) => els.map(rectOf).flatMap((r) => (r === null ? [] : [r.top]));
 const bottoms = (els: Array<Element | null>) => els.map(rectOf).flatMap((r) => (r === null ? [] : [r.bottom]));
 
@@ -80,23 +109,7 @@ export function bindRoom<Held>({ frame, sheet, camera }: RoomParts<Held>): Room 
     const slipOpen = slip !== null && !slip.classList.contains("folded") && !phone;
     const slipW = slipOpen ? slipWidth(slipRect) : 0;
     const glassL = glassLeft(q(".corner.br"), slipOpen, slipW);
-    const fit = fitStage({
-      view: { w: window.innerWidth, h: window.innerHeight },
-      aspect: aspect(),
-      above: bottoms([q("header.chrome"), phone ? null : q(".corner.tr")]),
-      below: [...tops([q(".corner.bl"), q(".legend:not(.in-slip)"), q(".strip")]), ...(phone && slipRect !== null ? [slipRect.top] : [])],
-      beside: slipW,
-      right: slipOpen && glassL !== null ? [glassL] : [],
-      gap: phone ? PHONE_GAP : CHROME_GAP,
-      narrow: phone,
-    });
-    frame.style.setProperty("--reserve-top", `${fit.reserve.top}px`);
-    frame.style.setProperty("--reserve-right", `${fit.reserve.right}px`);
-    frame.style.setProperty("--reserve-bottom", `${fit.reserve.bottom}px`);
-    sheet.style.width = `${fit.sheet.w}px`;
-    sheet.style.height = `${fit.sheet.h}px`;
-    if (phone && slipRect !== null) document.body.style.setProperty("--sheet-h", `${window.innerHeight - slipRect.top}px`);
-    else document.body.style.removeProperty("--sheet-h");
+    fitRoom({ frame, sheet, aspect: aspect(), phone, slipRect, slipW, glassL });
     if (legend !== null && !phone) placeLegendRow(legend, { folio: q(".corner.bl"), chrome: q("header.chrome"), glass: glassL, slip: slipOpen ? slipRect : null });
     camera.restore(held);
   };

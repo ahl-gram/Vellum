@@ -93,7 +93,7 @@ const glass = createGlass({
 });
 
 // #463: the chart room round the Glass; the sheet is refitted once each chart lands (the folio's lines are chrome the fit measures) and re-clamped against the refitted stage.
-const room = bindRoom({ frame: stageEl, sheet: sheetEl, camera: { hold: () => glass.cameraNow(), restore: (cam) => glass.applyCamera(cam) } });
+const room = bindRoom({ frame: stageEl, sheet: sheetEl, camera: { hold: () => glass.cameraNow(), restore: (cam) => glass.refitCamera(cam) } });
 
 // The chart's folio, lower left: the world's name and number, its survey line, then the caption the suites and the region survey write.
 // The mockup's survey line is the subtitle's tail ("surveyed in the year 1059 of the Cedar Age"), not the cartouche's whole sentence: the folio stays short and leaves the legend row its room.
@@ -221,8 +221,7 @@ versoBtn.addEventListener("click", () => {
   glass.reset();
   syncHash();
   const flipped = toggleFlip(sheetEl);
-  const face = versoBtn.querySelector(".room");
-  if (face) face.textContent = flipped ? "Back" : "The Sheet";
+  (versoBtn.querySelector(".room") ?? versoBtn).textContent = flipped ? "Back" : "The Sheet";
 });
 
 // #300/#366: survey-arm.ts owns the box's wiring AND the one slot every arm goes through; rearmVoyage, never applyVoyage (the settle discipline).

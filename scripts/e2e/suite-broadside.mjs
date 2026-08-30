@@ -33,7 +33,6 @@ export async function run(ctx) {
   const br1 = await evaluate(`(()=>{
     const groupOf=(id)=>{const el=document.getElementById(id);const g=el&&el.closest('[role="group"]');
       return g?(g.getAttribute("aria-labelledby")||g.getAttribute("aria-label")):null;};
-    // #463: the seed row stands in the folio (#462 ruling 8), the rest of the Press is the legend row (ruling 4).
     const want={seed:"The seed",random:"The seed",draw:"The seed",type:"grp-land",band:"grp-land",land:"grp-land",coast:"grp-land",
       style:"grp-hand",theme:"grp-hand",legend:"grp-hand",arms:"grp-hand",ages:"grp-hand",
       "verso-turn":"grp-press","order-plates":"grp-press","journal-link":"grp-press"};

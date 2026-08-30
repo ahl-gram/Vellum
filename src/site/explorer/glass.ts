@@ -99,6 +99,9 @@ export function createGlass(deps: GlassDeps) {
   function applyCamera(cam: Camera): void {
     zoomController.zoomTo(transformFromCamera(cam, mapViewport.clientWidth, mapViewport.clientHeight));
   }
+  function refitCamera(cam: Camera): void {
+    zoomController.refit(transformFromCamera(cam, mapViewport.clientWidth, mapViewport.clientHeight));
+  }
 
   // #170: the voiced home (full-sheet button, the 0 key); the hash writes at the landing (glideHome's onDone), never mid-flight. The programmatic homes (verso, chronicle, voyage, draw) keep their INSTANT homeToWorld() + reset() + explicit syncHash in the conductor.
   function goHomeVoiced(): void {
@@ -137,6 +140,7 @@ export function createGlass(deps: GlassDeps) {
     cameraNow,
     syncZoom,
     applyCamera,
+    refitCamera,
     rebase: () => zoomController.rebase(),
     reset: () => zoomController.reset(),
     zoomTo: (t: ZoomState) => zoomController.zoomTo(t),
