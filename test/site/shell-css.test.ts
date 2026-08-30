@@ -294,7 +294,7 @@ const CHART_MARKER = "[data-vellum-style]";
 /** Every chart mount that dresses a sheet; a NEW host that mounts the engine must join this list or it reintroduces the doubling. */
 const CHART_MOUNTS = [
   { host: "Explorer", file: "public/explorer/index.css", mount: "#map", rule: "#sheet", token: "--stage-shadow" },
-  { host: "Reading Room", file: "public/reading-room/index.css", mount: ".rf-chart", rule: "#sheet", token: "--stage-shadow" },
+  { host: "Reading Room", file: "public/reading-room/index.css", mount: ".rf-chart", rule: "#sheet", token: "--stage-shadow", sweep: ["public/reading-frame.css"] },
 ] as const;
 const DEPTH_TOKENS = /box-shadow:\s*var\(--(?:sheet|stage)-shadow\)/;
 
@@ -326,8 +326,9 @@ test("each mount dresses its sheet at the house depth, via the token (#367)", ()
 
 test("no mount dresses a BARE svg: the engine's overlays are not sheets (#367)", () => {
   // Scoped to mount rules only: other rules legitimately rest at sheet depth but hold no engine overlays; the defect is a mount-scoped rule reaching an svg it did not mean to dress.
-  for (const { host, file, mount } of CHART_MOUNTS) {
-    for (const { selector, body } of rulesIn(read(file))) {
+  for (const { host, file, mount, ...rest } of CHART_MOUNTS) {
+    const sweep = "sweep" in rest ? rest.sweep : [];
+    for (const { selector, body } of [file, ...sweep].flatMap((f) => rulesIn(read(f)))) {
       if (!DEPTH_TOKENS.test(body)) continue;
       for (const arm of selector.split(",").map((s) => s.trim())) {
         if (!arm.startsWith(mount) || !/\bsvg\b/.test(arm)) continue;

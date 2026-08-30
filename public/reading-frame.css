@@ -4,7 +4,7 @@
 /* #367: [data-vellum-style] scopes this to renderer-stamped charts, never the survey-track overlay svg; the host's box carries the sheet's depth. */
 .rf-chart svg[data-vellum-style] { display: block; width: 100%; height: 100%; }
 
-/* Voice from /house.css's .status role (#324); it reserves its height so the column never jumps when the voyage posts and clears its summary. */
+/* Voice from /house.css's .status role (#324); a chart room seats it on the stage (atelier.css). */
 .rf-status { margin: 0.6rem 0 0; }
 
 .rf-ages[hidden], .rf-log[hidden] { display: none; }

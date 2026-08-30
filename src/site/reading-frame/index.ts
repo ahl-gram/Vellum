@@ -57,9 +57,7 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   year.className = "rf-year";
   year.setAttribute("aria-hidden", "true");
 
-  // #442: the bar and the live row travel together, and the WRAPPER is what sticks. The
-  // arrival unfurl transforms .rf-instrument, and a transform on the sticky element
-  // itself slides the stuck strip out of register with the viewport top.
+  // #442: the bar and the live row travel together in one wrapper; where the wrapper stands is the host's (a bottom strip since #463), and the arrival unfurl transforms .rf-instrument, never the wrapper.
   const strip = document.createElement("div");
   strip.className = "rf-instrument-strip";
 
@@ -120,7 +118,7 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
     root.remove();
   }
 
-  // The host's furniture mount (#318): only ever append SIBLINGS of the panel here; anything nested inside the panel inherits the engine's hidden teardowns.
+  // The reading column (#318): furniture appended here stands through the engine's hidden teardowns; a host that seats its parts elsewhere (#463) leaves it empty.
   return { root, host, log, reading, strip, told, setTold, destroy };
 }
 

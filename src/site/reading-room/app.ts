@@ -20,10 +20,7 @@ import { plateDressFor } from "../explorer/prospect-job.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { parseLive, emitLive, finalizeHash, liveNow, type Live } from "../explorer/address.ts";
 import { createReadingFrame } from "../reading-frame/index.ts";
-import { createZoomController } from "../shared/zoom-controller.ts";
-import { bindGlassKeys } from "../shared/glass-keys.ts";
-import { bindRoom } from "../shared/room.ts";
-import { renderScale, scaleTicks } from "../shared/instrument-scale.ts";
+import { bindReadingRoom, drawScale, seatFrame, writeFolio } from "./seats.ts";
 import { createLivingChart, type AgesPos, type LivingChart, type ToldEntry } from "../living-chart/index.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
@@ -53,15 +50,10 @@ const warning = $("rr-warning");
 const seedInput = q<HTMLInputElement>(".rr-colophon input");
 const diceBtn = q<HTMLButtonElement>(".rr-dice");
 const readBtn = q<HTMLButtonElement>(".rr-read");
-const stageEl = q(".stage");
-const sheetEl = $("sheet");
-const viewport = $("map-viewport");
-const stripEl = q(".strip");
-const scaleEl = q(".scale");
-const slipEl = $("journal");
-const journalDock = q(".journal-dock");
-const folioTitle = $("folio-title");
-const folioSub = $("folio-sub");
+const furniture = {
+  stage: q(".stage"), sheet: $("sheet"), viewport: $("map-viewport"), strip: q(".strip"), scale: q(".scale"),
+  slip: $("journal"), tab: q(".slip-tab"), journalDock: q(".journal-dock"), folioTitle: $("folio-title"), folioSub: $("folio-sub"),
+};
 
 // Roughly 3x the slowest matrix measured on CI (2.1s), against the Explorer's 20s: the instrument IS this surface, so a dead worker must not hold the unfurl back for twenty seconds, and a timeout costs a main-thread block, never a different itinerary (voyage-session.ts orderItinerary computes the SAME order inline).
 const ROOM_TOUR_TIMEOUT_MS = 6000;
@@ -72,57 +64,8 @@ const tourOrder = createTourOrder({ runJob, timeoutMs: ROOM_TOUR_TIMEOUT_MS });
 const lc = createLivingChart({ ...frame.host, tourOrder });
 // #402 the stage nests INSIDE the panel between the bar and the journal (ruled 2026-08-22: the scrubber and the plate share a screen), inheriting the panel's hidden teardowns on purpose; #318's colophon stays the panel's SIBLING because it must stand through them.
 const stage = createProspectStage();
-
-// #463 the chart room's seats. The strip and the slip go INTO the panel (the engine hides it on every teardown, #220), the plate and the log into the slip, the chart and the status into the stage; the frame's root stays where it is, the arrival ceremony's host (RS26).
-function seatFrame(): void {
-  viewport.appendChild(frame.host.mapEl);
-  stageEl.appendChild(frame.host.statusEl);
-  const well = document.createElement("div");
-  well.className = "scale-well";
-  frame.host.scrubber.range.replaceWith(well);
-  well.append(frame.host.scrubber.range, scaleEl);
-  stripEl.appendChild(frame.strip);
-  journalDock.append(stage.root, frame.log.panel);
-  frame.host.scrubber.panel.append(stripEl, slipEl);
-}
-seatFrame();
-
-// #167 the Glass, geometric only (no card to counter-scale: every hit is inert here, RR11b), with the kit's keys and buttons.
-const zoom = createZoomController({
-  viewportEl: viewport,
-  targetEl: frame.host.mapEl,
-  scaleExtent: [1, 8],
-  glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
-});
-zoom.attach();
-bindGlassKeys(viewport, zoom);
-const room = bindRoom({ frame: stageEl, sheet: sheetEl, camera: { hold: () => zoom.getState(), restore: (state) => zoom.zoomTo(state) } });
-
-// The strip's height seats the chart folio and the Glass above it (the page css reads --strip-h) and bounds the fit; hidden (0) while the panel is down, it keeps its last value.
-let stripH = 0;
-new ResizeObserver(() => {
-  const h = stripEl.offsetHeight;
-  if (h === 0 || h === stripH) return;
-  stripH = h;
-  document.body.style.setProperty("--strip-h", `${h}px`);
-  room.layout();
-}).observe(stripEl);
-
-function writeFolio(res: DrawResult, forSeed: number): void {
-  folioTitle.textContent = `${res.title} · Chart № ${forSeed}`;
-  folioSub.textContent = res.subtitle;
-}
-
-// The scale under the bar: the survey's first and last days, the centuries and the present; drawn once the instrument is armed, since the days come from the travel order.
-function drawScale(): void {
-  const a = lc.agesState();
-  const log = lc.voyageLog();
-  const entries = log?.entries ?? [];
-  renderScale(scaleEl, scaleTicks({
-    days: entries.length > 0 ? { first: entries[0].day, last: entries[entries.length - 1].day } : null,
-    years: a ? { min: a.min, max: a.max } : null,
-  }));
-}
+seatFrame(frame, stage, furniture);
+const { room, rebase } = bindReadingRoom(frame, furniture);
 
 let seed = 0;
 // The seed of the world actually ON SCREEN, advanced only by a successful settle: the rollback target when a counter draw fails.
@@ -288,7 +231,7 @@ function restFor(live: Live | null): AgesPos | undefined {
 // It does NOT write the status line: the settle path clears it after this returns and the failure path reports an error instead, so the one signal the suites gate on stays with the caller that knows which happened.
 function armRoom(res: DrawResult, forSeed: number, rest: AgesPos | undefined): void {
   lc.rearmAges(res.manifest, res.survey, forSeed, res.subtitle, { rest });
-  drawScale();
+  drawScale(lc, furniture.scale);
   room.layout();
   // #321: added AFTER the arm so the panel is visible when the animation starts (see the flag's comment above).
   if (!arrived) {
@@ -311,7 +254,7 @@ function draw(): void {
   frame.root.classList.remove("rf-arrival");
   seedInput.value = String(seed);
   // #165: rebase, not reset: the chart under the camera is being replaced.
-  zoom.rebase();
+  rebase();
   frame.host.statusEl.textContent = "Drafting…";
   const overrides = recipeOverrides();
   runJob({
@@ -325,7 +268,7 @@ function draw(): void {
       // res.svg is engine-rendered markup, not user content: the only inputs are the uint32 seed and allowlisted recipe params, the same trusted-string injection the Explorer and Print Room do.
       frame.host.mapEl.innerHTML = res.svg;
       lc.buildPlaceOverlay(res.manifest);
-      writeFolio(res, seed);
+      writeFolio(furniture, res, seed);
       room.layout();
       startArrival(frame.host.mapEl.querySelector("svg"));
       lastTitle = res.title;

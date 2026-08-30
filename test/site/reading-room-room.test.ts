@@ -10,6 +10,7 @@ const page = read("src/pages/reading-room/index.astro");
 const css = read("public/reading-room/index.css");
 const frameCss = read("public/reading-frame.css");
 const app = read("src/site/reading-room/app.ts");
+const seats = read("src/site/reading-room/seats.ts");
 
 const between = (from: string, to: string): string => {
   const a = page.indexOf(from);
@@ -61,25 +62,29 @@ test("RR-room 4 the stage holds the fitted sheet and the gesture box the frame's
   assert.match(folio, /id="folio-sub"/, "and its survey line");
 });
 
-test("RR-room 5 app.ts seats the frame's parts: chart and status in the stage, strip and slip inside the panel the engine hides, log and plate in the slip; the Glass and the room bound", () => {
-  assert.match(app, /import\s*\{\s*bindRoom\s*\}\s*from\s*"\.\.\/shared\/room\.ts"/, "app.ts binds the shared room");
-  assert.match(app, /import\s*\{\s*createZoomController\s*\}\s*from\s*"\.\.\/shared\/zoom-controller\.ts"/, "the Glass is the shared controller");
-  assert.match(app, /import\s*\{\s*bindGlassKeys\s*\}\s*from\s*"\.\.\/shared\/glass-keys\.ts"/, "its keys and buttons are the kit's");
-  assert.match(app, /seatFrame\(/, "the frame's parts are seated by one function");
-  // Both nodes in the ONE append, and neither appended anywhere else: a slip seated outside the panel would stand through every teardown (guard-prover, 2026-08-29: a bare call-name grep let `document.body.append(slipEl)` through).
-  assert.match(app, /scrubber\.panel\.append\(stripEl, slipEl\)/, "the strip and the slip move INTO the panel together, so the engine's teardown still takes them");
-  for (const node of ["stripEl", "slipEl"]) {
-    const seats = [...app.matchAll(new RegExp(String.raw`\.(?:append|appendChild|insertBefore|prepend)\([^)]*\b${node}\b`, "g"))];
-    assert.equal(seats.length, 1, `${node} is seated exactly once, in the panel (found ${seats.length})`);
+test("RR-room 5 seats.ts seats the frame's parts: chart and status in the stage; strip, slip AND its tab inside the panel the engine hides; log and plate in the slip; the Glass and the room bound", () => {
+  assert.match(seats, /import\s*\{\s*bindRoom, type Room\s*\}\s*from\s*"\.\.\/shared\/room\.ts"/, "the shared room");
+  assert.match(seats, /import\s*\{\s*createZoomController\s*\}\s*from\s*"\.\.\/shared\/zoom-controller\.ts"/, "the Glass is the shared controller");
+  assert.match(seats, /import\s*\{\s*bindGlassKeys\s*\}\s*from\s*"\.\.\/shared\/glass-keys\.ts"/, "its keys and buttons are the kit's");
+  assert.match(app, /seatFrame\(frame, stage, furniture\)/, "app.ts seats the frame once, before binding the room");
+  // All three slip-side nodes in the ONE append, and none appended anywhere else: a part seated outside the panel stands through every teardown (guard-prover: `document.body.append(slipEl)`; skeptic: the tab).
+  assert.match(seats, /scrubber\.panel\.append\(f\.strip, f\.slip, f\.tab\)/, "the strip, the slip and its tab move INTO the panel together");
+  for (const node of ["f.strip", "f.slip", "f.tab"]) {
+    const found = [...seats.matchAll(new RegExp(String.raw`\.(?:append|appendChild|insertBefore|prepend)\([^)]*${node.replace(".", "\\.")}\b`, "g"))];
+    assert.equal(found.length, 1, `${node} is seated exactly once, in the panel (found ${found.length})`);
   }
+  assert.match(seats, /restore: \(state\) => zoom\.refit\(state\)/, "the room's refit is the silent one (no settle, no hash)");
   assert.match(app, /room\.layout\(\)/, "the room refits once the chart lands");
-  assert.match(app, /renderScale\(|scaleTicks\(/, "the scale is drawn from the world's days and years");
+  assert.match(seats, /renderScale\(|scaleTicks\(/, "the scale is drawn from the world's days and years");
 });
 
 test("RR-room 6 the css: the strip fixed at the bottom, the sheet at the chart-room depth, the frame's sticky shape retired, print standing down", () => {
   assert.match(css, /\.strip\s*\{[^}]*position:\s*fixed;[^}]*bottom:\s*0/, "the strip is fixed at the bottom");
   assert.match(css, /#sheet\s*\{[^}]*box-shadow:\s*var\(--stage-shadow\)/, "the sheet rests at the chart-room depth, via the token");
   assert.match(css, /\.stage\s*\{[^}]*padding:\s*var\(--reserve-top/, "the stage reserves the chrome's edges as padding, measured by room.ts");
+  // #219's 320px scar, on the rule that now carries it: the bar's well is the shrinking flex item (the range inside it is flex: none).
+  assert.match(css, /\.scale-well\s*\{[^}]*flex:\s*1 1[^}]*min-width:\s*0/, "the scale well may shrink below the bar's intrinsic width");
+  assert.match(css, /\.scale\s*\{[^}]*margin:\s*0 8px/, "the scale runs the thumb's travel (8px in from each end)");
   assert.doesNotMatch(frameCss, /position:\s*sticky/, "the #442 sticky wrapper retires (ruling 6)");
   assert.match(frameCss, /\.rf-instrument-strip\s*\{[^}]*flex-direction:\s*column-reverse/, "the told row stands above the bar");
   assert.doesNotMatch(frameCss, /\.rf-chart svg\[data-vellum-style\]\s*\{[^}]*box-shadow/, "the frame no longer dresses the sheet: the host's box carries the depth");

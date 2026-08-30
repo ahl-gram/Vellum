@@ -34,13 +34,15 @@
 .scale-well { position: relative; flex: 1 1 8rem; min-width: 0; display: flex; flex-direction: column; margin-top: 0.15rem; }
 /* flex: none, because the well is a column: the row rule's 8rem basis would become the bar's HEIGHT (measured 151px strips, e2e RR34). */
 .scale-well .rf-range { flex: none; width: 100%; }
-.scale { position: relative; height: 1.3rem; }
+/* Inset by the thumb's radius (the 16px thumb, living-chart.css; ages.ts's detentEscapeU(width - 16)), so u=0 and u=1 stand under the thumb's centre at its ends. */
+.scale { position: relative; height: 1.3rem; margin: 0 8px; }
 .tick { position: absolute; top: 0; width: 1px; height: 6px; background: var(--line-tan); transform: translateX(-0.5px); }
 .tick.day { background: var(--parchment); }
 .tick .lbl { position: absolute; top: 7px; left: 0; transform: translateX(-50%); white-space: nowrap;
   font-variant-caps: small-caps; font-variant-numeric: tabular-nums; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--line-tan); }
 .tick.day .lbl { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-variant-caps: normal; color: var(--parchment); }
 .tick.day.first .lbl { transform: none; }
+.tick.day.last .lbl { transform: translateX(calc(-100% - 14px)); }
 .tick.year.last .lbl { transform: translateX(-100%); }
 .seam { position: absolute; top: -0.4rem; transform: translateX(-50%); width: 18px; height: 18px; }
 .seam svg { width: 18px; height: 18px; fill: var(--parchment); stroke: var(--chart-ink); stroke-width: 0.6; }

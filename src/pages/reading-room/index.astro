@@ -16,17 +16,16 @@ const tagline = "watch a world live";
 >
 <div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>
 <div class="stage">
-  <!-- #463 the chart room (#462 ruling 1): the reading frame (#219) builds its chart into #rr-mount below and app.ts seats it here, inside the fitted sheet; #map-viewport is the Glass's gesture box (the shared zoom-controller), the frame's .rf-chart the transform target, so the engine's overlays ride one frame. -->
+  <!-- The frame's chart is seated here at boot (seats.ts): #map-viewport is the Glass's gesture box, the frame's .rf-chart the transform target. -->
   <div class="sheet" id="sheet"><div id="map-viewport" tabindex="0" role="application" aria-label="The chart. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."></div></div>
   <p id="rr-warning" class="warning" hidden>Your browser could not start the render
   worker, so the chart is drawn on the main thread. The page may pause for a moment.</p>
 </div>
 <div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>
 
-<!-- The reading frame mounts here and builds its own DOM (#219); its root stays the arrival ceremony's host while app.ts seats the chart in the stage, the instrument in the strip and the journal in the slip, both of the latter INSIDE the panel the engine hides (#220's teardown, unchanged). -->
+<!-- The reading frame (#219) mounts here; its root stays the arrival ceremony's host (RS26) after seats.ts moves its parts. -->
 <div id="rr-mount"></div>
 
-<!-- #462 ruling 2: the room's one control, seed + Read, top right; the #318 colophon re-seated (its classes stay the suites' handles). -->
 <RoomFolio room={room} tagline={tagline}>
   <div class="folio-controls rr-colophon" role="group" aria-label="Read another world">
     <input class="control" type="number" min="0" max="4294967295" step="1" aria-label="seed">
@@ -36,7 +35,6 @@ const tagline = "watch a world live";
   <p class="gloss">read another: type its seed, or throw the dice</p>
 </RoomFolio>
 
-<!-- #462 ruling 5: the journal scrolls inside its slip (superseding the 2026-07-27 no-scrollbar ratification for this room); the frame's log and the #402 plate move into the dock at boot. -->
 <Slip id="journal" verb="Watch one" title="The Journal" where="the survey sails first, and the history follows" fold="Fold the journal away">
   <div class="journal-dock" role="region" aria-label="The surveyor's log"></div>
 </Slip>
@@ -46,12 +44,10 @@ const tagline = "watch a world live";
   <p class="folio-sub" id="folio-sub"></p>
 </div>
 
-<!-- #462 ruling 6: the one dated log's instrument is a bottom strip: Play, the bar with the survey's days on the left and the annals' years on the right and a star at the seam, the row being told above it, the readout at the right (superseding the #220/#442 sticky shape). The frame's instrument moves in at boot; the scale layer is laid under its bar. -->
 <div class="strip" role="group" aria-label="The instrument">
   <div class="scale" aria-hidden="true"></div>
 </div>
 
-<!-- The Surveyor's Glass at the chart's corner (#462 ruling 2), the Explorer's cluster (#165/#170) in the mockup's dress; the shared keys binding reads data-zoom. -->
 <div class="chrome corner br zoomery" role="group" aria-label="The Surveyor's Glass">
   <button id="zoom-in" class="zoom-btn" type="button" data-zoom="in" aria-label="Lean closer (zoom in)" title="Lean closer"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"/><path d="M9.9 9.9l3.7 3.7"/><path d="M6.8 4.9v3.8M4.9 6.8h3.8"/></svg></button>
   <button id="zoom-reset" class="zoom-btn" type="button" data-zoom="fit" aria-label="The full sheet (reset the view)" title="The full sheet"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6h6.6l2.6 2.6v8.2H3.4z"/><path d="M10 2.6v2.6h2.6"/><path d="M5.3 9.7c1-.9 1.9.5 2.9-.3.8-.7 1.5-.2 2.2-.7"/></svg></button>

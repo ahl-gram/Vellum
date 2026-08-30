@@ -117,7 +117,7 @@ export async function run(ctx) {
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
   await sleep(200);
   const deskRest = await evaluate(stripRead);
-  const room = await evaluate(`(()=>{const s=document.querySelector(".rf-chart svg[data-vellum-style]");const r=s?s.getBoundingClientRect():{width:0,height:0};return{page:document.documentElement.scrollHeight,vh:window.innerHeight,chartW:Math.round(r.width),chartH:Math.round(r.height),ratio:r.width?r.height/r.width:0,col:Math.round(document.querySelector(".rf").getBoundingClientRect().width)};})()`);
+  const room = await evaluate(`(()=>{const s=document.querySelector(".rf-chart svg[data-vellum-style]");const r=s?s.getBoundingClientRect():{width:0,height:0,top:0,bottom:0};const b=document.getElementById("sheet").getBoundingClientRect();const strip=document.querySelector(".strip").getBoundingClientRect();const tr=document.querySelector(".corner.tr").getBoundingClientRect();return{page:document.documentElement.scrollHeight,vh:window.innerHeight,chartW:Math.round(r.width),chartH:Math.round(r.height),ratio:r.width?r.height/r.width:0,fillsSheet:Math.abs(r.width-b.width)<1&&Math.abs(r.height-b.height)<1,topClear:Math.round(r.top-tr.bottom),bottomClear:Math.round(strip.top-r.bottom)};})()`);
   await evaluate(`(()=>{window.scrollTo(0,document.documentElement.scrollHeight);return null;})()`);
   await sleep(200);
   const afterScroll = await evaluate(stripRead);
@@ -138,7 +138,7 @@ export async function run(ctx) {
   // quoted figure rather than smoothed over.
   // #463 re-measured for the bottom strip (the told row above the bar, the scale under it; seed 42, 2026-08-29), pinned with headroom.
   const GOVERNING_BUDGET = 120;
-  const WIDE_WORST = 150;
+  const WIDE_WORST = 135;
   // BOTH halves at the governing width. deskRest alone is the chronicle half's short last
   // annal, which reads 100 at every width and would pin the budget against the case that
   // cannot exceed it; the survey half carries the long prose and is the one that can.
@@ -174,7 +174,9 @@ export async function run(ctx) {
     `RR37 and it stays within the ${WIDE_WORST}px envelope across the widths: the told row stands at 1024 and drops at 900 and below (#462 ruling 6, the phone rule is inclusive at 900)`,
     byWidth.length === 3 &&
       byWidth.every((r) => r.h > 0 && r.h <= WIDE_WORST) &&
-      byWidth[0].told === "flex" && byWidth[1].told === "none" && byWidth[2].told === "none",
+      byWidth[0].told === "flex" && byWidth[1].told === "none" && byWidth[2].told === "none" &&
+      // The witness: the wrapped told row at 1024 must cost more than the one-line strip at 1440, or the envelope bounds nothing.
+      byWidth[0].h > deskChron.h,
     JSON.stringify({ byWidth, envelope: WIDE_WORST, budget: GOVERNING_BUDGET }),
   );
   // The chart does not shrink: the constraint set alongside the layout ruling. Pinned as
@@ -184,8 +186,8 @@ export async function run(ctx) {
   // scaled the chart moves one of these two; the hairline moves neither.
   const SOURCE_RATIO = 1158 / 1500;
   check(
-    "RR36 the chart is fitted to the stage at its source aspect, never cropped or squashed (#442; the chart room's fit since #463)",
-    !!room && room.chartW > 0 && room.chartH <= room.vh &&
+    "RR36 the chart fills its fitted sheet at its source aspect and clears the folio above and the strip below by room.ts's 14px (#442; the chart room's fit since #463)",
+    !!room && room.fillsSheet && room.topClear >= 14 && room.bottomClear >= 14 &&
       Math.abs(room.ratio - SOURCE_RATIO) < 0.005,
     JSON.stringify({ ...room, sourceRatio: SOURCE_RATIO }),
   );
@@ -290,7 +292,7 @@ export async function run(ctx) {
     JSON.stringify({ ...bare, todayBefore, todayAfter }),
   );
 
-  const colo = await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");if(!c)return null;const panel=document.querySelector(".rf-ages");const reading=document.querySelector(".rf-reading");return{input:!!c.querySelector("input[type=number]"),dice:!!c.querySelector(".rr-dice"),read:!!c.querySelector(".rr-read"),inPanel:panel?panel.contains(c):null,inFolio:!!c.closest(".corner.tr"),shown:!c.hidden&&getComputedStyle(c).display!=="none"};})()`);
+  const colo = await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");if(!c)return null;const panel=document.querySelector(".rf-ages");return{input:!!c.querySelector("input[type=number]"),dice:!!c.querySelector(".rr-dice"),read:!!c.querySelector(".rr-read"),inPanel:panel?panel.contains(c):null,inFolio:!!c.closest(".corner.tr"),shown:!c.hidden&&getComputedStyle(c).display!=="none"};})()`);
   check(
     "RR16 the colophon dice is the room's one control, top right in the folio: input, dice, Read, outside the panel, visible (#318, re-seated by #462 ruling 2)",
     !!colo && colo.input && colo.dice && colo.read && colo.inPanel === false && colo.inFolio && colo.shown,
@@ -543,7 +545,7 @@ export async function run(ctx) {
   // to two lines, so the strip is 98 there even with the live row gone (plate-reader
   // 2026-08-23). Collecting the height and never asserting it is how the criterion's
   // "measured at that width" gets gathered and discarded.
-  const PHONE_STRIP_MAX = 104;
+  const PHONE_STRIP_MAX = 72; // measured 63 at 390 (2026-08-29): the bar, its scale under it, no told row
   check(
     "RR34 at 390px the live row is dropped, the strip stays fixed on the bottom edge, and its height is measured (#442, ruled 2026-08-23; the bottom strip since #463)",
     !!mobileStrip && mobileStrip.toldDisplay === "none" &&
