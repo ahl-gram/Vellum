@@ -1,6 +1,6 @@
 (function () {
   const stage = document.getElementById('stage'), sheet = document.getElementById('sheet');
-  const W = 1500, H = 1157.93, cfg = window.ROOM_CAM || {};
+  const cfg = window.ROOM_CAM || {}, W = cfg.w || 1500, H = cfg.h || 1157.93;
   const slip = document.querySelector('.slip'), tab = document.querySelector('.slip-tab');
   let s = 1, tx = 0, ty = 0;
   const narrow = () => innerWidth <= 900;
@@ -64,9 +64,11 @@
   function clearLegend() {
     const lg = document.querySelector('.legend:not(.in-slip)'), bl = rect('.corner.bl');
     if (!lg || narrow()) return;
-    lg.style.left = '';
+    // measured with the transition off: a rect read mid-transition lies (the real build's room-seats.ts computes the seat instead)
+    lg.style.transition = 'none'; lg.style.left = '';
     const a = lg.getBoundingClientRect();
     if (bl && a.left < bl.right + 32) lg.style.left = (a.left + a.width / 2 + (bl.right + 32 - a.left)) + 'px';
+    void lg.offsetWidth; lg.style.transition = '';
   }
   function layout() {
     fit(); clearLegend();

@@ -1,0 +1,236 @@
+{
+ "title": {
+  "title": "The Isle of Rahai",
+  "subtitle": "Being a true & faithful chart of these waters, as surveyed by Taiki the Wayfarer in the year 1059 of the Cedar Age",
+  "year": 1059
+ },
+ "capital": {
+  "name": "Laukuwelua",
+  "note": "Laukuwelua, the capital. Once called Haitani. Envoys wait weeks in its antechambers for a single audience. Petitioners throng its steps on court days. Its founding is set down in the year 451."
+ },
+ "prospect": {
+  "caption": {
+   "title": "THE PROSPECT OF LAUKUWELUA",
+   "yearLine": "FOUNDED AN. 451",
+   "epithet": "chief port of the Chiefdom of Rekekoa",
+   "footer": "VELLUM · CHART № 42"
+  },
+  "key": [
+   {
+    "letter": "A",
+    "label": "The Keep"
+   },
+   {
+    "letter": "B",
+    "label": "The Quay"
+   },
+   {
+    "letter": "C",
+    "label": "The Mole"
+   }
+  ],
+  "era": "standing",
+  "kind": "capital",
+  "founded": 451
+ },
+ "ribbon": {
+  "from": "Laukuwelua",
+  "to": "Homaitani",
+  "leagues": 82.60914335008081,
+  "year": 1059,
+  "realm": "The Hauwaiwa Atolls",
+  "heading": {
+   "title": "The ROAD from LAUKUWELUA to HOMAITANI",
+   "subtitle": [
+    "in The Hauwaiwa Atolls · containing 83 leagues",
+    "as it was measured by the wayfarers' chain in the year 1059"
+   ]
+  },
+  "events": [
+   {
+    "kind": "waypoint",
+    "leagues": 0,
+    "text": "Laukuwelua",
+    "tier": "capital"
+   },
+   {
+    "kind": "branch",
+    "leagues": 1.0973698010786794,
+    "text": "to Wuwatau"
+   },
+   {
+    "kind": "waypoint",
+    "leagues": 31.584218806472073,
+    "text": "Noloatatani",
+    "tier": "town"
+   },
+   {
+    "kind": "branch",
+    "leagues": 38.54499539691968,
+    "text": "to Lamahai"
+   },
+   {
+    "kind": "branch",
+    "leagues": 44.56437752742844,
+    "text": "to Loatunui"
+   },
+   {
+    "kind": "summit",
+    "leagues": 62.40194147611903,
+    "text": "here the road climbs"
+   },
+   {
+    "kind": "waypoint",
+    "leagues": 69.22012329430085,
+    "text": "Won",
+    "tier": "village"
+   },
+   {
+    "kind": "waypoint",
+    "leagues": 82.15459789553535,
+    "text": "Homaitani",
+    "tier": "village"
+   }
+  ],
+  "options": [
+   {
+    "name": "Laukuwelua",
+    "kind": "capital"
+   },
+   {
+    "name": "Paukilua",
+    "kind": "town"
+   },
+   {
+    "name": "Weki",
+    "kind": "town"
+   },
+   {
+    "name": "Naukoa",
+    "kind": "town"
+   },
+   {
+    "name": "Nailo",
+    "kind": "town"
+   },
+   {
+    "name": "Loatunui",
+    "kind": "town"
+   },
+   {
+    "name": "Lamahai",
+    "kind": "town"
+   },
+   {
+    "name": "Noloatatani",
+    "kind": "town"
+   },
+   {
+    "name": "Toatauhe",
+    "kind": "town"
+   },
+   {
+    "name": "Waun",
+    "kind": "town"
+   },
+   {
+    "name": "Lokai",
+    "kind": "village"
+   },
+   {
+    "name": "Rauhelunui",
+    "kind": "village"
+   },
+   {
+    "name": "Kai",
+    "kind": "village"
+   },
+   {
+    "name": "Pong",
+    "kind": "village"
+   },
+   {
+    "name": "Nanawotani",
+    "kind": "village"
+   },
+   {
+    "name": "Poalo",
+    "kind": "village"
+   },
+   {
+    "name": "Pelo",
+    "kind": "village"
+   },
+   {
+    "name": "Won",
+    "kind": "village"
+   },
+   {
+    "name": "Nurunui",
+    "kind": "village"
+   },
+   {
+    "name": "Laihoanui",
+    "kind": "village"
+   },
+   {
+    "name": "Kehenainui",
+    "kind": "village"
+   },
+   {
+    "name": "Pale",
+    "kind": "village"
+   },
+   {
+    "name": "Homaitani",
+    "kind": "village"
+   },
+   {
+    "name": "Wuwatau",
+    "kind": "village"
+   },
+   {
+    "name": "Haireno",
+    "kind": "village"
+   }
+  ]
+ },
+ "atlas": {
+  "hero": "The world chart, drawn in the antique manner",
+  "draughtings": [
+   "Topographic",
+   "Pen & ink",
+   "Nautical"
+  ],
+  "themes": [
+   "Vegetation",
+   "Temperature",
+   "Rainfall",
+   "Population"
+  ],
+  "regions": [
+   "The Environs of Laukuwelua",
+   "The Environs of Toatauhe"
+  ],
+  "prospects": [
+   "The Prospect of Laukuwelua"
+  ],
+  "plateKeys": [
+   "antique",
+   "topographic",
+   "ink",
+   "nautical",
+   "theme-vegetation",
+   "theme-climate",
+   "theme-moisture",
+   "theme-population",
+   "region-1",
+   "region-2",
+   "prospect-capital"
+  ],
+  "figures": 14,
+  "banners": 3,
+  "chronicleEntries": 8,
+  "gazetteerRows": 26
+ }
+}

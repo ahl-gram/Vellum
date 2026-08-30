@@ -1,0 +1,86 @@
+<title>Vellum · The Prospect</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@1&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+{{CSS}}
+/* the plate is the sheet: the prospect's own 520 x 384 proportion at twice its size */
+.sheet { width: 1040px; height: 768px; }
+.folio-room { max-width: 22rem; }
+.seed-controls .control { width: 5.2rem; }
+.seed-controls .year-label { font-family: var(--font-flourish); font-style: italic; font-size: 0.82rem; color: var(--line-tan); align-self: center; white-space: nowrap; }
+/* the engraver's note: the place's lore, then the plate's lettered key in the journal's row idiom */
+.slip .note-prose { font-size: 0.98rem; line-height: 1.55; margin-top: 0.7rem; color: var(--ink-annals); }
+.key-head { font-family: var(--font-display); letter-spacing: 0.05em; color: var(--ink-brown); margin-top: 1rem; font-size: 0.95rem; }
+.plate-key { list-style: none; margin: 0.5rem 0 0; padding: 0; }
+.plate-key li { display: flex; gap: 0.8rem; padding: 0.3rem 0; border-bottom: 1px solid var(--line-faint); font-size: 0.92rem; line-height: 1.4; color: var(--ink-annals); }
+.plate-key .kl { flex: 0 0 1.6rem; text-align: right; font-family: var(--font-flourish); font-style: italic; color: var(--ink-brown); }
+.era { margin-top: 1rem; font-family: var(--font-body); font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.82rem; color: var(--ink-faded); }
+.era-gloss { font-family: var(--font-flourish); font-style: italic; font-size: 0.85rem; color: var(--ink-brown); line-height: 1.45; margin-top: 0.2rem; }
+.status { font-style: italic; color: var(--line-tan); }
+@media (max-width: 900px) {
+  .folio-room { max-width: 13rem; }
+  .seed-controls .year-label { display: none; }
+}
+</style>
+<script>window.ROOM_CAM = { top: 60, bottom: 104, bottomNarrow: 58, w: 1040, h: 768 };</script>
+
+<div class="fog a"></div><div class="fog b"></div>
+<div class="stage" id="stage">
+  <div class="sheet" id="sheet">
+    <img class="chart" src="{{PROSPECT_42}}" alt="The prospect of {{CAPITAL}}, chart 42">
+  </div>
+</div>
+<div class="vignette top"></div><div class="vignette bottom"></div>
+
+{{NAV}}
+
+<aside class="chrome corner tr folio-room">
+  <h1>The Prospect</h1>
+  <p class="room-tagline">the second camera</p>
+  <form class="seed-controls" onsubmit="return false">
+    <span class="year-label">viewed in the year</span>
+    <input class="control" type="text" inputmode="numeric" pattern="[0-9]*" value="{{YEAR}}" aria-label="year">
+    <button class="primary" type="submit">Engrave</button>
+  </form>
+  <p class="seed-gloss">turn the year back, even to the ground before it rose</p>
+</aside>
+
+<aside class="slip" id="slip" aria-labelledby="note-title">
+  <div class="slip-head">
+    <button class="slip-fold" aria-label="Fold the engraver's note away">&times;</button>
+    <p class="card-verb">The engraver's note</p>
+    <h2 class="card-title" id="note-title">{{CAPITAL}}</h2>
+    <p class="card-where">{{PROSPECT_EPITHET}} · founded An. {{PROSPECT_FOUNDED}}</p>
+  </div>
+  <div class="slip-body">
+    <p class="note-prose">{{CAPITAL_NOTE}}</p>
+    <p class="key-head">The key to the plate</p>
+    <ol class="plate-key">{{PROSPECT_KEY}}</ol>
+    <p class="era">Standing · An. {{YEAR}}</p>
+    <p class="era-gloss">The same place, chart and year always press the same plate. Open another settlement's prospect from its card in the Explorer.</p>
+    <nav class="legend in-slip" aria-label="The roads out">
+      <div class="legend-row">
+        <a class="legend-btn gold" href="https://www.vellumworlds.com/explorer/"><span class="verb">Return to</span><span class="room">The Explorer</span></a>
+        <a class="legend-btn" href="https://www.vellumworlds.com/ribbon/"><span class="verb">Take the road from {{CAPITAL}} in</span><span class="room">The Ribbon</span></a>
+      </div>
+    </nav>
+  </div>
+</aside>
+<button class="slip-tab" type="button">The Engraver's Note</button>
+
+<div class="chrome corner bl folio">
+  <p class="folio-title">The Prospect of {{CAPITAL}} · Chart № 42</p>
+  <p class="folio-sub">{{WORLD}} · drawn side-on from the town's own ground</p>
+  <p class="folio-coords status" role="status">pressed in 212ms · antique</p>
+</div>
+
+<nav class="legend" aria-label="The roads out">
+  <p class="legend-head">The roads out</p>
+  <div class="legend-row">
+    <a class="legend-btn gold" href="https://www.vellumworlds.com/explorer/"><span class="verb">Return to</span><span class="room">The Explorer</span></a>
+    <a class="legend-btn" href="https://www.vellumworlds.com/ribbon/"><span class="verb">Take the road from {{CAPITAL}} in</span><span class="room">The Wayfarer's Ribbon</span></a>
+  </div>
+</nav>
+
+{{GLASS}}
+<script>{{JS}}</script>

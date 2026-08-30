@@ -1,0 +1,110 @@
+<title>Vellum · The Wayfarer's Ribbon</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@1&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+{{CSS}}
+/* the scroll is the sheet: the ribbon's own 1060 x 740 proportion */
+.sheet { width: 1060px; height: 740px; }
+.folio-room { max-width: 30rem; }
+/* the journey row: where you set out, where you are bound, and the turn about */
+.seed-controls select.control { width: 9.2rem; appearance: none; -webkit-appearance: none; text-align: left; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--line-tan) 50%), linear-gradient(135deg, var(--line-tan) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 55%, calc(100% - 9px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+.seed-controls .jl { font-family: var(--font-flourish); font-style: italic; font-size: 0.82rem; color: var(--line-tan); align-self: center; white-space: nowrap; }
+/* the itinerary: the road league by league, the instrument's dated-row idiom (the league at the left in small caps) */
+.itinerary { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+.itinerary li { display: flex; gap: 0.8rem; padding: 0.32rem 0; border-bottom: 1px solid var(--line-faint); font-size: 0.92rem; line-height: 1.4; color: var(--ink-annals); cursor: pointer; }
+.itinerary li:hover { background: linear-gradient(to right, var(--control-gold), transparent 70%); margin: 0 -0.6rem; padding-left: 0.6rem; padding-right: 0.6rem; }
+.itinerary .lg { flex: 0 0 2.2rem; text-align: right; font-family: var(--font-body); font-variant-numeric: tabular-nums; font-variant-caps: small-caps; letter-spacing: 0.06em; color: var(--ink-faded); }
+.itinerary .lg::after { content: " lg"; font-size: 0.8em; }
+.itinerary .ev em { font-family: var(--font-flourish); font-style: italic; color: var(--ink-brown); }
+.itinerary .ev strong { font-weight: 600; letter-spacing: 0.02em; }
+.itinerary li.waypoint .lg { color: var(--ink-dark); }
+.itinerary li.summit .ev em::before { content: "\25B3\00a0"; font-style: normal; color: var(--ink-faded); }
+.itinerary li.branch .ev { color: var(--ink-faded); }
+.itinerary-head { font-family: var(--font-display); letter-spacing: 0.05em; color: var(--ink-brown); margin-top: 0.9rem; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: baseline; }
+.itinerary-head .gloss { font-family: var(--font-flourish); font-style: italic; letter-spacing: 0; font-size: 0.8rem; color: var(--ink-faded); }
+.slip .intro { margin-top: 0.7rem; }
+.row-gloss { font-family: var(--font-flourish); font-style: italic; font-size: 0.85rem; color: var(--ink-brown); line-height: 1.45; margin-top: 0.7rem; }
+/* the phone carries the journey row inside the sheet */
+.journey.in-slip { display: none; }
+.status { font-style: italic; color: var(--line-tan); }
+@media (max-width: 900px) {
+  .folio-room { max-width: 13rem; }
+  .seed-controls .jl, .seed-controls select.control { display: none; }
+  .journey.in-slip { display: grid; grid-template-columns: auto 1fr; gap: 0.45rem 0.6rem; align-items: center; margin-top: 0.7rem; }
+  .journey.in-slip label { font-family: var(--font-flourish); font-style: italic; font-size: 0.85rem; color: var(--ink-brown); text-align: right; }
+  .journey.in-slip select { width: 100%; }
+  .journey.in-slip button { grid-column: 2; justify-self: start; }
+}
+</style>
+<script>window.ROOM_CAM = { top: 60, bottom: 104, bottomNarrow: 58, w: 1060, h: 740 };</script>
+
+<div class="fog a"></div><div class="fog b"></div>
+<div class="stage" id="stage">
+  <div class="sheet" id="sheet">
+    <img class="chart" src="{{RIBBON_42}}" alt="The road from {{ROAD_FROM}} to {{ROAD_TO}}, chart 42">
+  </div>
+</div>
+<div class="vignette top"></div><div class="vignette bottom"></div>
+
+{{NAV}}
+
+<aside class="chrome corner tr folio-room">
+  <h1>The Wayfarer's Ribbon</h1>
+  <p class="room-tagline">the road, unrolled</p>
+  <form class="seed-controls" onsubmit="return false">
+    <span class="jl">setting out from</span>
+    <select class="control" aria-label="setting out from">{{ROAD_FROM_OPTIONS}}</select>
+    <span class="jl">bound for</span>
+    <select class="control" aria-label="bound for">{{ROAD_TO_OPTIONS}}</select>
+    <button class="primary" type="button">Turn about</button>
+  </form>
+  <p class="seed-gloss">choose where you set out and where you are bound; the surveyor unrolls the way between</p>
+</aside>
+
+<aside class="slip" id="slip" aria-labelledby="itin-title">
+  <div class="slip-head">
+    <button class="slip-fold" aria-label="Fold the itinerary away">&times;</button>
+    <p class="card-verb">The itinerary</p>
+    <h2 class="card-title" id="itin-title">{{ROAD_FROM}} to {{ROAD_TO}}</h2>
+    <p class="card-where">{{ROAD_LEAGUES}} leagues · in {{ROAD_REALM}} · An. {{YEAR}}</p>
+  </div>
+  <div class="slip-body">
+    <div class="journey in-slip" role="group" aria-label="The journey">
+      <label>setting out from</label><select class="control" aria-label="setting out from">{{ROAD_FROM_OPTIONS}}</select>
+      <label>bound for</label><select class="control" aria-label="bound for">{{ROAD_TO_OPTIONS}}</select>
+      <button type="button">Turn about</button>
+    </div>
+    <p class="intro">Every bridge and ford, every wayside village, every fork signed for the town it leaves for, as the wayfarers' chain measured them.</p>
+    <p class="itinerary-head"><span>The way, league by league</span></p>
+    <ol class="itinerary">
+{{ROAD_ROWS}}
+    </ol>
+    <p class="row-gloss">A row leans the Glass on that stretch of the road.</p>
+    <nav class="legend in-slip" aria-label="The roads out">
+      <div class="legend-row">
+        <a class="legend-btn gold" href="https://www.vellumworlds.com/explorer/"><span class="verb">Return to</span><span class="room">The Explorer</span></a>
+        <a class="legend-btn" href="https://www.vellumworlds.com/prospect/"><span class="verb">See {{ROAD_TO}} in</span><span class="room">The Prospect</span></a>
+      </div>
+    </nav>
+  </div>
+</aside>
+<button class="slip-tab" type="button">The Itinerary</button>
+
+<div class="chrome corner bl folio">
+  <p class="folio-title">{{ROAD_FROM}} to {{ROAD_TO}} · Chart № 42</p>
+  <p class="folio-sub">{{WORLD}} · the road as the wayfarers' chain measured it, An. {{YEAR}}</p>
+  <p class="folio-coords status" role="status">unrolled in 380ms · {{ROAD_LEAGUES}} leagues · antique</p>
+</div>
+
+<nav class="legend" aria-label="The roads out">
+  <p class="legend-head">The roads out</p>
+  <div class="legend-row">
+    <a class="legend-btn gold" href="https://www.vellumworlds.com/explorer/"><span class="verb">Return to</span><span class="room">The Explorer</span></a>
+    <a class="legend-btn" href="https://www.vellumworlds.com/prospect/"><span class="verb">See {{ROAD_TO}} in</span><span class="room">The Prospect</span></a>
+  </div>
+</nav>
+
+{{GLASS}}
+<script>{{JS}}</script>
