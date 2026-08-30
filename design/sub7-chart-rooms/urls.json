@@ -4,5 +4,8 @@
  "reading-room": "https://claude.ai/code/artifact/126572b4-d7fd-47c7-9d1e-005c658ed4bc",
  "print-room": "https://claude.ai/code/artifact/ef53ec0b-5c9b-4ac0-a2d7-254032314246",
  "faq": "https://claude.ai/code/artifact/ff940c1b-4966-40bb-af5a-17b9bb6f67b6",
- "glossary": "https://claude.ai/code/artifact/6c311451-35ba-4d77-ab71-41a687f497e9"
+ "glossary": "https://claude.ai/code/artifact/6c311451-35ba-4d77-ab71-41a687f497e9",
+ "print-room-bound": "https://claude.ai/code/artifact/deb3b026-031a-4aa2-8b25-d9abe9576357",
+ "prospect": "https://claude.ai/code/artifact/1b875deb-1a0f-4440-8dd7-08fcb9692050",
+ "ribbon": "https://claude.ai/code/artifact/07badc8e-1acb-4aa3-9a13-97da188305af"
 }

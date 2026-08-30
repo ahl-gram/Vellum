@@ -1,4 +1,4 @@
-# The Sub 7 / Sub 8 room mockups (#462, #463)
+# The Sub 7 / Sub 8 room mockups (#462, #463, #494)
 
 The visual SPEC for Landfall Act II's rooms, built and ruled 2026-08-28. Six pages in the
 atelier-map dress worn by a room: the four **chart rooms** (Today, Explorer, Reading Room,
@@ -32,6 +32,41 @@ does not set the layout viewport (a 390 shot must LAY OUT at 390). `dump.ts` reg
 `stills/` holds the ruled renders, palette-quantized to 256 colours for the repo (the
 originals are in the session's `out/462-mockups/`): every room at 1280, the Explorer at 1680,
 the Q & A scrolled and folded, and true-390 phone renders with the sheet closed and open.
+
+## The #494 round (Sub 8 parts 3/4 and 4/4), built 2026-08-30
+
+Three more pages in the same dress, from chart 42's own plates (`dump-plates.ts` writes the
+prospect of the capital, the road unrolled from it, `plates.json` and the atlas's eleven plates
+to `out/494-plates/`; `shoot.mjs` rasterizes those into `plates-42/` for the slip's thumbnails):
+
+- **`print-room-bound.tpl.html`**, the Print Room with the atlas BOUND. One page, three candidate
+  seats for the bound atlas, chosen by `?seat=`: **d** (the default, and RULED 2026-08-30 in Alex's
+  words: "same as d, but still display the thumbnails inside the panel; clicking one swaps it out
+  for the one on the stage"): the atlas turns on the stage, the plates stay as thumbnails under
+  their contents rows, a thumbnail or an entry is a turn, and the plate on the sheet is inked;
+  **b**: the plates in the slip's body with the proof kept on the stage (not chosen); **a**: nothing
+  on screen, the contents ink in and Print / Download work from the hidden document (not chosen). Seat c (a
+  scrolling document below the stage) is not mocked: it is the page as it stands today, and a
+  chart room does not scroll (chart-room rulings 1, 7 and 9).
+- **`prospect.tpl.html`**, the Prospect as a chart room: the engraving full-bleed at twice its
+  plate size, the year as the room's one control (the page's own `year` address key, which has
+  no control today), the engraver's note on the slip (the place's lore, the plate's lettered key).
+- **`ribbon.tpl.html`**, the Wayfarer's Ribbon as a chart room: the scroll full-bleed, the journey
+  (setting out from, bound for, Turn about) as the top-right row, the itinerary league by league
+  on the slip in the instrument's dated-row idiom. On a phone the journey row moves into the sheet.
+
+Stills: `print-room-bound-{a,b,d}-1280`, `print-room-bound-d-1280-turned` (the panel scrolled to the
+inked entry), `print-room-bound-d-390` (closed and `-open`), `prospect-1280`,
+`prospect-1280-folded`, `prospect-390` (closed and `-open`), `ribbon-1280`, `ribbon-1280-leaned` (the Glass at
+2.6x on the first strip), `ribbon-390` (closed and `-open`). The seat switch is a query string, not a hash: a
+hash-only change is a same-document navigation and the shooter's second job would inherit the
+first job's body class.
+
+```
+node design/sub7-chart-rooms/dump-plates.ts   # the engine content (writes SVGs beside this README and to out/494-plates/)
+node design/sub7-chart-rooms/build.mjs
+node design/sub7-chart-rooms/shoot.mjs "file://$PWD/design/sub7-chart-rooms/print-room-bound.html?seat=b|1280|800|0|out/bound-b.png"
+```
 
 ## Known demo-only shortcuts
 

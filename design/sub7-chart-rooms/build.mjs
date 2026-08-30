@@ -5,10 +5,39 @@ const urls = existsSync(new URL('urls.json', import.meta.url)) ? JSON.parse(read
 const today = JSON.parse(read('today.json'));
 const ev = today.events;
 const css = read('shared.css'), js = read('shared.js'), glass = read('glass.html'), nav = read('nav.html');
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const CHART_TODAY = dataUri('chart-20260829-antique.svg');
 const CHART_42 = dataUri('../atelier-map/chart-42-antique.svg');
+// the #494 round: the Print Room bound, the Prospect and the Ribbon, from chart 42's own plates (dump-plates.ts, thumbs by shoot.mjs)
+const plates = JSON.parse(read('plates.json'));
+const PROSPECT_42 = dataUri('prospect-42-antique.svg'), RIBBON_42 = dataUri('ribbon-42-antique.svg'), PLATE_VEGETATION = dataUri('theme-vegetation-42.svg');
+const thumb = (k) => 'data:image/png;base64,' + readFileSync(new URL(`plates-42/${k}.png`, import.meta.url)).toString('base64');
+const roman = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii'];
+const leagueRow = (e) => {
+  const tier = e.tier ? { capital: 'the capital', town: 'a fair town', village: 'a village', hamlet: 'a hamlet' }[e.tier] : null;
+  const text = e.kind === 'waypoint' ? `<strong>${esc(e.text)}</strong>, ${tier}` : e.kind === 'branch' ? `a fork, <em>${esc(e.text)}</em>` : `<em>${esc(e.text)}</em>`;
+  return `<li class="${e.kind}"><span class="lg">${Math.round(e.leagues)}</span><span class="ev">${text}</span></li>`;
+};
+const opt = (o, sel) => `<option${o.name === sel ? ' selected' : ''}>${esc(o.name)}</option>`;
+const fill494 = (html) => html
+  .replaceAll('{{PROSPECT_42}}', PROSPECT_42).replaceAll('{{RIBBON_42}}', RIBBON_42).replaceAll('{{PLATE_VEGETATION}}', PLATE_VEGETATION)
+  .replace(/{{THUMB:([a-z0-9-]+)}}/g, (_, k) => thumb(k))
+  .replaceAll('{{CAPITAL}}', esc(plates.capital.name)).replaceAll('{{CAPITAL_NOTE}}', esc(plates.capital.note))
+  .replaceAll('{{PROSPECT_EPITHET}}', esc(plates.prospect.caption.epithet)).replaceAll('{{PROSPECT_FOUNDED}}', String(plates.prospect.founded))
+  .replaceAll('{{PROSPECT_KEY}}', plates.prospect.key.map((k) => `<li><span class="kl">${k.letter}</span>${esc(k.label)}</li>`).join(''))
+  .replaceAll('{{WORLD}}', esc(plates.title.title)).replaceAll('{{YEAR}}', String(plates.title.year))
+  .replaceAll('{{ROAD_FROM}}', esc(plates.ribbon.from)).replaceAll('{{ROAD_TO}}', esc(plates.ribbon.to)).replaceAll('{{ROAD_LEAGUES}}', String(Math.round(plates.ribbon.leagues)))
+  .replaceAll('{{ROAD_REALM}}', esc(plates.ribbon.realm ?? plates.title.title))
+  .replaceAll('{{ROAD_ROWS}}', plates.ribbon.events.map(leagueRow).join('\n'))
+  .replaceAll('{{ROAD_FROM_OPTIONS}}', plates.ribbon.options.map((o) => opt(o, plates.ribbon.from)).join(''))
+  .replaceAll('{{ROAD_TO_OPTIONS}}', plates.ribbon.options.filter((o) => o.name !== plates.ribbon.from).map((o) => opt(o, plates.ribbon.to)).join(''))
+  .replaceAll('{{REGION_1}}', esc(plates.atlas.regions[0])).replaceAll('{{REGION_2}}', esc(plates.atlas.regions[1]))
+  .replaceAll('{{ATLAS_FIGURES}}', String(plates.atlas.figures)).replaceAll('{{ATLAS_BANNERS}}', String(plates.atlas.banners))
+  .replaceAll('{{CHRONICLE_N}}', String(plates.atlas.chronicleEntries)).replaceAll('{{GAZETTEER_N}}', String(plates.atlas.gazetteerRows));
 const rooms = { today: 'Today', explorer: 'Explorer', 'reading-room': 'Reading Room', 'print-room': 'Print Room', faq: 'Q &amp; A', glossary: 'Glossary' };
 const DOC = new Set(['faq', 'glossary']);
+const PAGES = { ...rooms, 'print-room-bound': 'Print Room', prospect: 'The Prospect', ribbon: 'The Wayfarer\'s Ribbon' };
+const navKey = (key) => key === 'print-room-bound' ? 'print-room' : key;
 const docCss = read('doc.css'), docJs = read('doc.js');
 const slug = (t) => t.toLowerCase().replace(/&amp;|&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const absLinks = (h) => h.replace(/href="\.\.\//g, 'href="https://www.vellumworlds.com/').replace(/href="\/(?!\/)/g, 'href="https://www.vellumworlds.com/');
@@ -41,10 +70,10 @@ function docIndex(key, body) {
 const link = (key, current) => key === current
   ? `<span aria-current="page">${rooms[key]}</span>`
   : `<a href="${urls[key] ?? '#'}">${rooms[key]}</a>`;
-const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-for (const key of Object.keys(rooms)) {
-  let html = read(`${key}.tpl.html`);
-  const navHtml = nav.replace('{{NAV_TODAY}}', link('today', key)).replace('{{NAV_EXPLORER}}', link('explorer', key)).replace('{{NAV_READING}}', link('reading-room', key)).replace('{{NAV_PRINT}}', link('print-room', key)).replace('{{NAV_FAQ}}', link('faq', key)).replace('{{NAV_GLOSSARY}}', link('glossary', key));
+for (const key of Object.keys(PAGES)) {
+  let html = fill494(read(`${key}.tpl.html`));
+  const cur = navKey(key);
+  const navHtml = nav.replace('{{NAV_TODAY}}', link('today', cur)).replace('{{NAV_EXPLORER}}', link('explorer', cur)).replace('{{NAV_READING}}', link('reading-room', cur)).replace('{{NAV_PRINT}}', link('print-room', cur)).replace('{{NAV_FAQ}}', link('faq', cur)).replace('{{NAV_GLOSSARY}}', link('glossary', cur));
   if (DOC.has(key)) {
     const body = docContent(key), idx = docIndex(key, body);
     html = html.replace('{{DOCCSS}}', docCss).replace('{{DOCJS}}', docJs).replace('{{CONTENT}}', body).replace('{{INDEX}}', idx.html)

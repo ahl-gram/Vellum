@@ -1,0 +1,178 @@
+<title>Vellum · The Print Room, the atlas bound</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@1&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+{{CSS}}
+.folio-room { max-width: 23rem; }
+.seed-controls .control { width: 5.6rem; }
+.seed-controls select.control { width: 7.4rem; appearance: none; -webkit-appearance: none; text-align: left; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--line-tan) 50%), linear-gradient(135deg, var(--line-tan) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 55%, calc(100% - 9px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+/* the bound state: the contents ink in, the bind row becomes the binding's record */
+.bound-line { font-family: var(--font-flourish); font-style: italic; color: var(--ink-brown); font-size: 0.95rem; line-height: 1.5; }
+.bound-line strong { font-family: var(--font-display); font-style: normal; font-weight: 400; letter-spacing: 0.04em; color: var(--ink-dark); }
+.bind-row { display: flex; align-items: center; gap: 0.7rem; margin-top: 0.7rem; flex-wrap: wrap; }
+.bind-row .stamp { font-family: var(--font-body); font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.85rem; color: var(--ink-faded); }
+.bind-row .again { font-size: 0.85rem; color: var(--ink-brown); }
+.contents-head { font-family: var(--font-display); letter-spacing: 0.05em; color: var(--ink-brown); margin-top: 1rem; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: baseline; }
+.contents-head .gloss { font-family: var(--font-flourish); font-style: italic; letter-spacing: 0; font-size: 0.8rem; color: var(--ink-faded); }
+.contents { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+.contents li { display: flex; gap: 0.8rem; padding: 0.3rem 0; border-bottom: 1px solid var(--line-faint); font-size: 0.92rem; line-height: 1.4; }
+.contents .cr-num { flex: 0 0 2.4rem; text-align: right; font-family: var(--font-body); font-variant-caps: small-caps; letter-spacing: 0.06em; color: var(--ink-faded); }
+.contents .cr-text { color: var(--ink-annals); }
+.contents .cr-text em { font-family: var(--font-flourish); font-style: italic; color: var(--ink-brown); }
+.contents .cr-text .n { font-variant-caps: small-caps; letter-spacing: 0.06em; color: var(--ink-faded); font-size: 0.85em; }
+/* seat d, the atlas turns on the stage: every plate is a turn, the one on the sheet is inked with the index slip's rule */
+.contents a.turn { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--line-tan); }
+.contents a.turn:hover { color: var(--ink-dark); border-bottom-color: var(--ink-dark); }
+.contents li.on { background: linear-gradient(to right, var(--control-gold), transparent 70%); margin: 0 -0.6rem; padding-left: 0.6rem; padding-right: 0.6rem; border-bottom-color: var(--line-tan); }
+.contents li.on .cr-num { color: var(--ink-dark); }
+.contents li.on a.turn.here { border-bottom: 2px solid var(--ink-dark); font-weight: 600; color: var(--ink-dark); }
+body:not(.seat-d) .contents li.on { background: none; margin: 0; padding-left: 0; padding-right: 0; }
+body:not(.seat-d) .contents a.turn, body:not(.seat-d) .contents li.on a.turn.here { border-bottom: 0; font-weight: 400; color: inherit; pointer-events: none; }
+body:not(.seat-d) .contents li.on .cr-num { color: var(--ink-faded); }
+body:not(.seat-d) .turn-gloss { display: none; }
+/* the plates in the slip's scrolling body (seat b, and the RULED seat d): a two-up gallery under each contents row; in seat d a thumbnail is a turn too, and the plate on the sheet wears the ink */
+.plates { display: none; }
+body:is(.seat-b, .seat-d) .plates { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; margin: 0.45rem 0 0.3rem 3.2rem; flex: 1 1 100%; }
+body:is(.seat-b, .seat-d) .contents li { flex-wrap: wrap; }
+body:is(.seat-b, .seat-d) .contents .cr-text { flex: 1 1 0; min-width: 0; }
+body.seat-d .plates figure { cursor: pointer; }
+body.seat-d .plates figure:hover img { transform: translateY(-2px); box-shadow: 0 6px 14px rgb(from var(--chart-ink) r g b / 0.35); }
+body.seat-d .plates figure.here img { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
+body.seat-d .plates figure.here figcaption { color: var(--ink-dark); font-weight: 600; }
+.plates figure { margin: 0; }
+.plates img { display: block; width: 100%; height: auto; border: 1px solid var(--line-tan); box-shadow: 0 3px 10px rgb(from var(--chart-ink) r g b / 0.25); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.plates figcaption { font-family: var(--font-flourish); font-style: italic; font-size: 0.72rem; color: var(--ink-faded); margin-top: 0.2rem; line-height: 1.3; }
+/* seats a and b keep the proof on the sheet: the turned plate is seat d's alone */
+body:not(.seat-d) #plate-turned { display: none; }
+body.seat-d #plate-proof { display: none; }
+body:not(.seat-d) .folio .plate-line { display: none; }
+.atlas-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.slip button:disabled { opacity: 0.45; cursor: default; }
+.slip .caveat { font-size: 0.78rem; font-style: italic; color: var(--ink-faded); line-height: 1.45; margin-top: 0.7rem; }
+.legend-head .pressed { display: inline-flex; align-items: center; gap: 0.5rem; }
+.legend-head select { appearance: none; -webkit-appearance: none; cursor: pointer; font-family: var(--font-body); font-size: 0.86rem; color: var(--parchment-bright);
+  background: rgb(from var(--chart-ink) r g b / 0.45); border: 1px solid var(--line-tan); padding: 0.2rem 1.6rem 0.2rem 0.55rem;
+  background-image: linear-gradient(45deg, transparent 50%, var(--line-tan) 50%), linear-gradient(135deg, var(--line-tan) 50%, transparent 50%);
+  background-position: calc(100% - 12px) 55%, calc(100% - 7px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+.legend-btn .verb.dim { font-family: var(--font-body); font-variant-caps: small-caps; font-style: normal; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+@media (max-width: 900px) {
+  .folio-room { max-width: 13rem; }
+  .seed-controls { flex-wrap: wrap; }
+  .seed-controls select.control { display: none; }
+  .legend.in-slip .legend-row { gap: 0.4rem; }
+  .legend.in-slip .legend-btn { flex: 1 1 40%; }
+  body:is(.seat-b, .seat-d) .plates { margin-left: 0; }
+}
+</style>
+<script>window.ROOM_CAM = { top: 60, bottom: 104, bottomNarrow: 58 };
+addEventListener('DOMContentLoaded', () => document.body.classList.add('seat-' + (new URLSearchParams(location.search).get('seat') || 'd')));</script>
+
+<div class="fog a"></div><div class="fog b"></div>
+<div class="stage" id="stage">
+  <div class="sheet" id="sheet">
+    <img class="chart" id="plate-proof" src="{{CHART_42}}" alt="The proof: {{WORLD}}, chart 42, antique style">
+    <img class="chart" id="plate-turned" src="{{PLATE_VEGETATION}}" alt="Plate iii of the bound atlas: the vegetation of {{WORLD}}">
+  </div>
+</div>
+<div class="vignette top"></div><div class="vignette bottom"></div>
+
+{{NAV}}
+
+<aside class="chrome corner tr folio-room">
+  <h1>The Print Room</h1>
+  <p class="room-tagline">take a world home</p>
+  <form class="seed-controls" onsubmit="return false">
+    <input class="control" type="text" inputmode="numeric" pattern="[0-9]*" value="42" aria-label="seed">
+    <select class="control" aria-label="style"><option selected>antique</option><option>topographic</option><option>ink</option><option>nautical</option></select>
+    <button class="primary" type="submit">Pull a proof</button>
+  </form>
+  <p class="seed-gloss">bring a chart in from the Explorer, or call one up by number</p>
+</aside>
+
+<aside class="slip" id="slip" aria-labelledby="atlas-title">
+  <div class="slip-head">
+    <button class="slip-fold" aria-label="Fold the order desk away">&times;</button>
+    <p class="card-verb">Take home</p>
+    <h2 class="card-title" id="atlas-title">The Bound Atlas</h2>
+    <p class="card-where">the whole atlas on one sheet</p>
+  </div>
+  <div class="slip-body">
+    <p class="bound-line" role="status">The atlas of <strong>{{WORLD}}</strong> is bound: {{ATLAS_FIGURES}} plates, the chronicle and the gazetteer, from the proof on the desk.</p>
+    <div class="bind-row">
+      <span class="stamp">bound in 48s · about 20 MB</span>
+      <a class="again" href="#">bind it again</a>
+    </div>
+    <p class="contents-head"><span>Contents of the atlas</span><span class="gloss turn-gloss">a thumbnail turns the sheet</span></p>
+    <ol class="contents">
+      <li><span class="cr-num">i</span><span class="cr-text"><a class="turn" href="#">The chart, <em>antique</em>, as proofed</a></span>
+        <div class="plates">
+          <figure><img src="{{THUMB:antique}}" alt=""><figcaption>Antique, as proofed</figcaption></figure>
+        </div></li>
+      <li><span class="cr-num">ii</span><span class="cr-text">Other draughtings: <a class="turn" href="#"><em>topographic</em></a>, <a class="turn" href="#"><em>pen &amp; ink</em></a>, <a class="turn" href="#"><em>nautical</em></a></span>
+        <div class="plates">
+          <figure><img src="{{THUMB:topographic}}" alt=""><figcaption>Topographic</figcaption></figure>
+          <figure><img src="{{THUMB:ink}}" alt=""><figcaption>Pen &amp; ink</figcaption></figure>
+          <figure><img src="{{THUMB:nautical}}" alt=""><figcaption>Nautical</figcaption></figure>
+        </div></li>
+      <li class="on"><span class="cr-num">iii</span><span class="cr-text">Thematic surveys: <a class="turn here" href="#"><em>vegetation</em></a>, <a class="turn" href="#"><em>temperature</em></a>, <a class="turn" href="#"><em>rainfall</em></a>, <a class="turn" href="#"><em>population</em></a></span>
+        <div class="plates">
+          <figure class="here"><img src="{{THUMB:theme-vegetation}}" alt=""><figcaption>Vegetation</figcaption></figure>
+          <figure><img src="{{THUMB:theme-climate}}" alt=""><figcaption>Temperature</figcaption></figure>
+          <figure><img src="{{THUMB:theme-moisture}}" alt=""><figcaption>Rainfall</figcaption></figure>
+          <figure><img src="{{THUMB:theme-population}}" alt=""><figcaption>Population</figcaption></figure>
+        </div></li>
+      <li><span class="cr-num">iv</span><span class="cr-text">Regional surveys: <a class="turn" href="#"><em>{{REGION_1}}</em></a>, <a class="turn" href="#"><em>{{REGION_2}}</em></a></span>
+        <div class="plates">
+          <figure><img src="{{THUMB:region-1}}" alt=""><figcaption>{{REGION_1}}</figcaption></figure>
+          <figure><img src="{{THUMB:region-2}}" alt=""><figcaption>{{REGION_2}}</figcaption></figure>
+        </div></li>
+      <li><span class="cr-num">v</span><span class="cr-text"><a class="turn" href="#">The prospect of {{CAPITAL}}</a></span>
+        <div class="plates">
+          <figure><img src="{{THUMB:prospect-capital}}" alt=""><figcaption>The Prospect of {{CAPITAL}}</figcaption></figure>
+        </div></li>
+      <li><span class="cr-num">vi</span><span class="cr-text">The banners of every realm <span class="n">· {{ATLAS_BANNERS}} arms</span></span></li>
+      <li><span class="cr-num">vii</span><span class="cr-text">The chronicle <span class="n">· {{CHRONICLE_N}} entries</span></span></li>
+      <li><span class="cr-num">viii</span><span class="cr-text">The gazetteer <span class="n">· {{GAZETTEER_N}} places</span></span></li>
+    </ol>
+    <nav class="legend in-slip" aria-label="A poster plate">
+      <p class="legend-head">A poster plate, pressed as the engraving (SVG)</p>
+      <div class="legend-row">
+        <a class="legend-btn" href="#"><span class="verb dim">1500 px</span><span class="room">Chart</span></a>
+        <a class="legend-btn" href="#"><span class="verb dim">2400 px</span><span class="room">Desk</span></a>
+        <a class="legend-btn" href="#"><span class="verb dim">3300 px</span><span class="room">Wall</span></a>
+        <a class="legend-btn" href="#"><span class="verb dim">4200 px</span><span class="room">Grand</span></a>
+      </div>
+    </nav>
+  </div>
+  <div class="slip-foot">
+    <div class="atlas-actions" role="group" aria-label="Bound atlas">
+      <button type="button" class="primary">Print</button>
+      <button type="button">Download</button>
+      <button type="button">Hide</button>
+    </div>
+    <p class="caveat">Print opens your browser's Save as PDF, one plate per page. The single file is about 20 MB and opens offline.</p>
+  </div>
+</aside>
+<button class="slip-tab" type="button">The Bound Atlas</button>
+
+<div class="chrome corner bl folio">
+  <p class="folio-title">{{WORLD}} · Chart № 42</p>
+  <p class="folio-sub plate-line">plate iii of the bound atlas · a thematic survey of the vegetation</p>
+  <p class="folio-sub">surveyed in the year {{YEAR}} of the Cedar Age</p>
+  <p class="folio-coords status" role="status">atlas bound in 48s · antique</p>
+</div>
+
+<nav class="legend" aria-label="A poster plate">
+  <p class="legend-head"><span class="pressed">A poster plate, pressed as <select aria-label="Pressed as"><option selected>The engraving itself (SVG)</option><option>An impression (PNG)</option><option>A finer impression (PNG ×2)</option></select></span></p>
+  <div class="legend-row">
+    <a class="legend-btn" href="#"><span class="verb dim">1500 px</span><span class="room">Chart</span></a>
+    <a class="legend-btn" href="#"><span class="verb dim">2400 px</span><span class="room">Desk</span></a>
+    <a class="legend-btn" href="#"><span class="verb dim">3300 px</span><span class="room">Wall</span></a>
+    <a class="legend-btn" href="#"><span class="verb dim">4200 px</span><span class="room">Grand</span></a>
+  </div>
+</nav>
+
+{{GLASS}}
+<script>{{JS}}</script>
