@@ -282,6 +282,46 @@ export async function run(ctx) {
   );
   await shoot("explorer-zoom-deeplink-k4.png"); // manual: opened straight into a 4x framing from the link
 
+  // #463: the chart room fits the sheet to the viewport, so a resize refits the box the camera is clamped against; the room holds the FRAMING (cx/cy/k) across the refit, never the raw transform, or a resize walks the camera and the settle re-drafts a different region (the G7 class, found by the harness's own screenshot resize).
+  const sheetBefore = await evaluate(`document.getElementById("sheet").getBoundingClientRect().width`);
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 600, deviceScaleFactor: 1, mobile: false });
+  await sleep(400); // past the resize layout and the 250ms settle debounce
+  const z13b = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));const s=window.__vellumZoomState();return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sk:s.k,sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`);
+  await send("Emulation.clearDeviceMetricsOverride");
+  await sleep(400);
+  const z13c = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`);
+  await evaluate(`document.querySelector("#broadside .slip-fold").click()`);
+  await sleep(700); // the fold's 340ms settle, then the layout and the 250ms settle debounce
+  const z13d = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width,folded:document.getElementById("broadside").classList.contains("folded")};})()`);
+  await evaluate(`document.querySelector(".slip-tab").click()`);
+  await sleep(700);
+  const z13e = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width,folded:document.getElementById("broadside").classList.contains("folded")};})()`);
+  // A refit is camera-side-effect-free: no settle, so no hash write (skeptic on PR #491: the fonts.ready refit before the boot wrote an empty seed and CI's bare visit landed on seed 0). The seed input is the tell: a hash write would carry its new value.
+  await evaluate(`document.getElementById("seed").value = "777"`);
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 600, deviceScaleFactor: 1, mobile: false });
+  await sleep(500);
+  await send("Emulation.clearDeviceMetricsOverride");
+  await sleep(500);
+  const z13f = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));document.getElementById("seed").value="42";return{seed:p.get("seed"),k:p.get("k")};})()`);
+  check(
+    "Z13d a refit writes no hash: the seed input changed under a resize and the address kept the drawn seed and its camera (#463)",
+    z13f.seed === "42" && z13f.k === "4.0000",
+    JSON.stringify(z13f),
+  );
+  check(
+    "Z13c a fold and an unfold refit the sheet and hold the framing too: the class, not the resize alone (#463)",
+    z13d.folded && z13d.sheet > sheetBefore && z13d.cx === "0.5000" && z13d.cy === "0.5000" && z13d.k === "4.0000" &&
+      !z13e.folded && Math.abs(z13e.sheet - sheetBefore) < 1 && z13e.cx === "0.5000" && z13e.cy === "0.5000" && z13e.k === "4.0000",
+    JSON.stringify({ sheetBefore, z13d, z13e }),
+  );
+  check(
+    "Z13b a resize refits the sheet but holds the camera's framing: cx/cy/k unchanged across a short viewport (height-bound fit) and back (#463)",
+    z13b.sheet !== sheetBefore && Math.abs(z13c.sheet - sheetBefore) < 1 &&
+      z13b.cx === "0.5000" && z13b.cy === "0.5000" && z13b.k === "4.0000" && z13b.sk === 4 &&
+      z13c.cx === "0.5000" && z13c.cy === "0.5000" && z13c.k === "4.0000",
+    JSON.stringify({ sheetBefore, z13b, z13c }),
+  );
+
   // The crop is proven by projected-settlement COUNT: integer counts are immune to the cross-engine float drift that bars an SVG byte compare here.
   const z15 = await evaluate(
     `(async()=>{const win={u0:0.375,v0:0.375,u1:0.625,v1:0.625};` +

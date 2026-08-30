@@ -5,7 +5,7 @@ import Slip from "../../layouts/Slip.astro";
 
 const room = "The Seed of the Day";
 const tagline = "today's date is the seed";
-// The roads out (#462 chart-room ruling 4): the legend row on a wide sheet, inside the slip on a phone; app.ts stamps today's seed onto every copy.
+// The roads out (#462 chart-room ruling 4): the legend row on a wide sheet, docked inside the slip on a phone (room.ts); app.ts stamps today's seed onto them.
 const roads = [
   { road: "explorer", verb: "Open today's seed in", room: "The Explorer", href: "../explorer/" },
   { road: "reading-room", verb: "Watch today's world in", room: "The Reading Room", href: "../reading-room/" },
@@ -21,7 +21,7 @@ const roads = [
 >
 <div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>
 <div class="stage">
-  <!-- #167 The Surveyor's Glass, re-seated as the chart room (#462): #map-viewport is the whole stage and the gesture box the shared zoom-controller binds to; the live transform lands on #map, sized to the viewport with the chrome's reserves as padding, so d3's clamp keeps it covering the stage; #sheet inside is the chart's own box (fitted by src/site/seed-of-the-day/room.ts), and the hunt star and the miss soundings ride it. -->
+  <!-- #167 The Surveyor's Glass, re-seated as the chart room (#462): #map-viewport is the whole stage and the gesture box the shared zoom-controller binds to; the live transform lands on #map, sized to the viewport with the chrome's reserves as padding, so d3's clamp keeps it covering the stage; #sheet inside is the chart's own box (fitted by src/site/shared/room.ts), and the hunt star and the miss soundings ride it. -->
   <div id="map-viewport" tabindex="0" role="application" aria-label="Today's chart. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."><div id="map"><div id="sheet" class="sheet"></div></div></div>
   <p class="status" id="status">Drafting today's world&hellip;</p>
   <noscript>
@@ -48,11 +48,7 @@ const roads = [
     <button type="button" id="dispatch" hidden>Draft dispatch</button>
     <span class="streak" id="streak"></span>
   </div>
-  <nav class="legend in-slip" aria-label="Today's roads out">
-    <div class="legend-row">
-      {roads.map((r) => <a class="legend-btn" data-road={r.road} href={r.href}><span class="verb">{r.verb}</span><span class="room">{r.room}</span></a>)}
-    </div>
-  </nav>
+  <div class="legend-dock"></div>
   <p class="note" slot="foot">The seed is today's date in UTC (YYYYMMDD), so everyone
   sees the same world on the same day. Your streak is kept on this device only: no
   account, no backend.</p>

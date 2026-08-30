@@ -15,7 +15,7 @@ h2, h3 {
   outline: 3px double var(--line-tan);
   outline-offset: 6px;
   padding: 2.6rem clamp(1.5rem, 4vw, 4rem) 3.2rem;
-  box-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);
+  box-shadow: var(--stage-shadow);
   position: relative;
 }
 .sheet::before, .sheet::after {

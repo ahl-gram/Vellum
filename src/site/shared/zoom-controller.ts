@@ -61,6 +61,8 @@ export interface ZoomController {
   reset(): void;
   rebase(): void;
   zoomTo(next: ZoomState): void;
+  /** Re-seat the camera against a refitted viewport with no zoom event: no settle, no hash write, no redraft, and a glide in flight is left to land (#463: a refit before the boot wrote an empty seed into the hash, CI R0b). */
+  refit(next: ZoomState): void;
   glideBy(factor: number): void;
   glideHome(onDone?: () => void): void;
   panBy(dxScreen: number, dyScreen: number): void;
@@ -149,6 +151,18 @@ export function createZoomController({
 
   const sel = () => select(viewportEl);
 
+  function glideTo(k: number): void {
+    glideTargetK = k;
+    const myGlide = ++glideSeq;
+    sel()
+      .transition()
+      .duration(glideMsNow())
+      .call(behavior.scaleTo, k)
+      .on("end interrupt", () => {
+        if (myGlide === glideSeq) glideTargetK = null;
+      });
+  }
+
   function getState(): ZoomState {
     const t = (viewportEl as ZoomStoredElement).__zoom || zoomIdentity;
     return { x: t.x, y: t.y, k: t.k };
@@ -187,6 +201,16 @@ export function createZoomController({
       const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), scaleExtent);
       sel().call(behavior.transform, zoomIdentity.translate(c.x, c.y).scale(c.k));
     },
+    refit(next: ZoomState) {
+      const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), scaleExtent);
+      const t = zoomIdentity.translate(c.x, c.y).scale(c.k);
+      // A glide in flight tweens from the transform it captured at its start and rewrites __zoom every frame (d3-zoom's schedule), so a framing written under it is gone on the next frame: stop the glide, seat the framing, restart the glide toward its pending target against the refitted box (skeptic on PR #491, round 3).
+      const pending = glideTargetK;
+      if (pending !== null) sel().interrupt();
+      (viewportEl as ZoomStoredElement).__zoom = t;
+      apply(t);
+      if (pending !== null) glideTo(pending);
+    },
     /** #170: magnify by `factor` about the viewport centre as a d3 transition through the same zoom pipeline; reduced motion collapses to the instant scaleBy. */
     glideBy(factor: number) {
       if (prefersReduced()) {
@@ -194,15 +218,7 @@ export function createZoomController({
         return;
       }
       const base = glideTargetK != null ? glideTargetK : getState().k;
-      glideTargetK = nextGlideTarget(base, factor, scaleExtent);
-      const myGlide = ++glideSeq;
-      sel()
-        .transition()
-        .duration(glideMsNow())
-        .call(behavior.scaleTo, glideTargetK)
-        .on("end interrupt", () => {
-          if (myGlide === glideSeq) glideTargetK = null;
-        });
+      glideTo(nextGlideTarget(base, factor, scaleExtent));
     },
     /** #170: glide the camera to k=1; onDone fires at the landing and is skipped on interrupt (the interrupting action owns the camera and the hash). */
     glideHome(onDone?: () => void) {

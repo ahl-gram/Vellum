@@ -32,17 +32,17 @@ export async function run(ctx) {
   await goto(EXP + "#seed=42&style=antique", "broadside-base");
   const br1 = await evaluate(`(()=>{
     const groupOf=(id)=>{const el=document.getElementById(id);const g=el&&el.closest('[role="group"]');
-      return g?g.getAttribute("aria-labelledby"):null;};
-    const want={seed:"grp-land",random:"grp-land",type:"grp-land",band:"grp-land",land:"grp-land",coast:"grp-land",
+      return g?(g.getAttribute("aria-labelledby")||g.getAttribute("aria-label")):null;};
+    const want={seed:"The seed",random:"The seed",draw:"The seed",type:"grp-land",band:"grp-land",land:"grp-land",coast:"grp-land",
       style:"grp-hand",theme:"grp-hand",legend:"grp-hand",arms:"grp-hand",ages:"grp-hand",
-      draw:"grp-press","verso-turn":"grp-press","order-plates":"grp-press","journal-link":"grp-press"};
+      "verso-turn":"grp-press","order-plates":"grp-press","journal-link":"grp-press"};
     const wrong=Object.entries(want).filter(([id,g])=>groupOf(id)!==g).map(([id])=>id+":"+groupOf(id));
     const heads=["grp-land","grp-hand","grp-press"].map((id)=>(document.getElementById(id)||{}).textContent);
     return{wrong,heads};
   })()`);
   check(
-    "BR1 every control sits in its wiring-truth group under the Land/Hand/Press heads",
-    br1.wrong.length === 0 && br1.heads.join("|") === "The Land|The Hand|The Press",
+    "BR1 every control sits in its wiring-truth group: the seed row in the folio, Land and Hand on the slip, the Press as the legend row",
+    br1.wrong.length === 0 && br1.heads[0] === "The Land" && br1.heads[1] === "The Hand" && /^The Press\b/.test(br1.heads[2] || ""),
     JSON.stringify(br1),
   );
 
@@ -58,11 +58,34 @@ export async function run(ctx) {
     JSON.stringify(br1b),
   );
 
+  // #463 plate read: the legend row overlapped the slip's corner at 1280 and the chart folio after a resize (a mid-transition rect read the old seat). The row is placed by measurement now; both widths and the resize are the class.
+  const legendRoom = `(()=>{const r=(sel)=>{const el=document.querySelector(sel);if(!el)return null;const b=el.getBoundingClientRect();return{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)};};
+    const lg=r(".legend"),bl=r(".corner.bl"),sl=r("#broadside"),gl=r(".corner.br"),sh=r("#sheet");
+    const range=document.createRange();let text=0;for(const p of document.querySelectorAll(".corner.bl p")){if(!p.textContent)continue;range.selectNodeContents(p);text=Math.max(text,range.getBoundingClientRect().right);}
+    return{lg,bl,sl,gl,sh,folioText:Math.round(text),w:innerWidth,h:innerHeight};})()`;
+  const legendClear = (m) => !!m.lg && m.lg.l >= m.folioText + 16 && m.lg.r <= m.sl.l - 8 && m.lg.r <= m.gl.l - 8 &&
+    m.sh.r <= m.gl.l - 8 && m.sh.b <= Math.min(m.bl.t, m.lg.t) - 8;
+  await sleep(400); // the row's left transitions 0.32s to its measured seat; a read mid-flight is the old seat
+  const at1280 = await evaluate(legendRoom);
+  await send("Emulation.setDeviceMetricsOverride", { width: 1680, height: 900, deviceScaleFactor: 1, mobile: false });
+  await sleep(600);
+  const at1680 = await evaluate(legendRoom);
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  await sleep(600);
+  const back = await evaluate(legendRoom);
+  await send("Emulation.clearDeviceMetricsOverride");
+  await sleep(600);
+  check(
+    "BR1c the legend row and the sheet clear the chart folio, the Glass and the open slip at 1280, at 1680 after a resize, and back again (#463)",
+    legendClear(at1280) && legendClear(at1680) && legendClear(back),
+    JSON.stringify({ at1280, at1680, back }),
+  );
+
   // Tick, wait-for-ink, and untick are three separate turns (#300): inside ONE evaluate the yield cancels the arm before it builds, so `during` would be measured on a never-armed sheet.
   const at = `((el)=>({shown:el.getClientRects().length>0,top:Math.round(el.getBoundingClientRect().top)}))`;
   const before = await evaluate(`(()=>{
     const j=document.getElementById("journal-link"),o=document.getElementById("order-plates");const at=${at};
-    return{j:at(j),o:at(o),cls:j.className===o.className&&j.classList.contains("action-link")};
+    return{j:at(j),o:at(o),cls:j.className===o.className&&j.classList.contains("legend-btn")};
   })()`);
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await waitInked("br2-survey-ink");
@@ -132,6 +155,10 @@ export async function run(ctx) {
   // REAL CDP taps fire the full compat sequence a synthetic .click() skips (which once hid an off-by-one here); device metrics + touch emulation is what actually flips the hover/pointer media in this browser, setEmulatedMedia's feature overrides are a no-op.
   await setMobileViewport(390, 700);
   const emulated = await evaluate(`window.matchMedia("(hover: none)").matches`);
+  // #463: on a phone the Broadside is the bottom sheet, collapsed to its head; the mark lives in its body, so open it first (the handle is the sheet's toggle).
+  await sleep(120);
+  await evaluate(`(()=>{const h=document.querySelector("#broadside .slip-handle");if(h&&!document.getElementById("broadside").classList.contains("open"))h.click();})()`);
+  await sleep(120);
   // The post-tap sleep lets a pending anchor navigation COMMIT before a fresh evaluate reads the path: a same-evaluate read cannot see it (the guard-prover proved a dropped preventDefault survived that shape).
   const tapAt = async () => {
     const p = await evaluate(`(()=>{const m=document.querySelector('a.fn[data-note="note-survey"]');
@@ -147,6 +174,13 @@ export async function run(ctx) {
   const probe = () => evaluate(`(()=>{const n=document.getElementById("note-survey");
     return{stayed:location.pathname==="/explorer/",open:!!n&&n.matches(":popover-open"),
       hasLink:!!document.querySelector('#note-survey a[href="/glossary/#survey"]')};})()`);
+  // #463: the roads out dock INSIDE the phone sheet (room.ts seats the one legend row; the stage copy would be display:none at 390), so the Press is reachable from the opened Broadside. The class this guards: a seat decided but never applied leaves a phone with no way to the Print Room or the journal.
+  const br6a = await evaluate(`(()=>{const dock=document.querySelector("#broadside .legend.in-slip");const ids=["verso-turn","order-plates","journal-link"].map((id)=>{const el=document.getElementById(id);return{id,inSheet:!!(dock&&dock.contains(el)),shown:!!el&&el.getClientRects().length>0};});return{docked:!!dock,onStage:!!document.querySelector("main > .legend"),ids};})()`);
+  check(
+    "BR6a on a phone the Press docks inside the opened Broadside: Turn and both roads in the sheet and hit-testable, none left on the stage",
+    br6a.docked && !br6a.onStage && br6a.ids.every((i) => i.inSheet && i.shown),
+    JSON.stringify(br6a),
+  );
   const tapped1 = await tapAt();
   const afterTap1 = await probe();
   const tapped2 = await tapAt();

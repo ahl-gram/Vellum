@@ -18,6 +18,7 @@ const PAGE_CSS = [
   "public/reading-room/index.css",
   "public/seed-of-the-day/index.css",
   "public/prospect/index.css",
+  "public/ribbon/index.css",
 ] as const;
 
 // Host-agnostic sheets (#219 reading frame, #302 living-chart engine dressing): linked by whichever page mounts them, and answering to the same palette discipline.
@@ -227,6 +228,7 @@ test("the deep's focus ring: the chrome on the walnut brightens the ring, paper 
 
 // #367: the sheet's lift is ONE token now. Ratified at 0.4 (Alex, 2026-08-12): the armed Explorer's two coincident 0.2 shadows measured as a single 0.385, rounded to a value a stylesheet can own.
 const SHEET_SHADOW_GEOMETRY = "0 12px 34px";
+const STAGE_SHADOW_GEOMETRY = "0 18px 60px";
 
 test("BaseLayout declares --sheet-shadow, the one depth every sheet rests at (#367)", () => {
   assert.match(
@@ -248,6 +250,21 @@ test("the sheet shadow is declared once and consumed as a var: no raw geometry s
     1,
     "the layout should carry the sheet-shadow geometry exactly once (the token declaration)",
   );
+});
+
+test("the stage shadow is declared once and consumed as a var: the chart-room depth has one home too (#463)", () => {
+  for (const page of AUTHORED_CSS) {
+    assert.ok(
+      !read(page).includes(STAGE_SHADOW_GEOMETRY),
+      `${page} still writes the stage shadow out longhand; it should consume var(--stage-shadow)`,
+    );
+  }
+  assert.equal(
+    layoutStyle().split(STAGE_SHADOW_GEOMETRY).length - 1,
+    1,
+    "the layout should carry the stage-shadow geometry exactly once (the token declaration)",
+  );
+  assert.match(layoutStyle(), /--stage-shadow:\s*0 18px 60px rgb\(from var\(--chart-ink\) r g b \/ 0\.55\);/, "the token is the mockup's own dress");
 });
 
 // The #367 defect: a mount's blanket svg rule dresses the engine's overlays too, doubling the shadow. The opt-out has to WIN, so each rule below is checked for specificity, not text.
@@ -276,18 +293,33 @@ const CHART_MARKER = "[data-vellum-style]";
 
 /** Every chart mount that dresses a sheet; a NEW host that mounts the engine must join this list or it reintroduces the doubling. */
 const CHART_MOUNTS = [
-  { host: "Explorer", file: "public/explorer/index.css", mount: "#map", rule: `#map svg${CHART_MARKER}` },
-  { host: "Reading Room", file: "public/reading-frame.css", mount: ".rf-chart", rule: `.rf-chart svg${CHART_MARKER}` },
+  { host: "Explorer", file: "public/explorer/index.css", mount: "#map", rule: "#sheet", token: "--stage-shadow" },
+  { host: "Reading Room", file: "public/reading-frame.css", mount: ".rf-chart", rule: `.rf-chart svg${CHART_MARKER}`, token: "--sheet-shadow" },
+] as const;
+const DEPTH_TOKENS = /box-shadow:\s*var\(--(?:sheet|stage)-shadow\)/;
+
+// The qualifier itself (#463 body: "the chart mounts' svg[data-vellum-style] qualifier stays or the #367 shadow doubling returns"), pinned as a presence beside the BARE-svg sweep below.
+const QUALIFIED_CHART_RULES = [
+  ["public/explorer/index.css", `#map svg${CHART_MARKER}`],
+  ["public/reading-frame.css", `.rf-chart svg${CHART_MARKER}`],
 ] as const;
 
+test("each chart mount keeps its qualified chart rule (#367, #463)", () => {
+  for (const [file, selector] of QUALIFIED_CHART_RULES) {
+    const found = findRule(read(file), selector);
+    assert.ok(found, `${file} should still carry ${selector}`);
+    assert.match(found.body, /width:\s*100%/, `${selector} sizes the chart to its box`);
+  }
+});
+
 test("each mount dresses its sheet at the house depth, via the token (#367)", () => {
-  for (const { host, file, rule } of CHART_MOUNTS) {
+  for (const { host, file, rule, token } of CHART_MOUNTS) {
     const found = findRule(read(file), rule);
     assert.ok(found, `${host}: ${file} should carry the mount rule ${rule}`);
     assert.match(
       found.body,
-      /box-shadow:\s*var\(--sheet-shadow\)/,
-      `${host}: ${rule} should rest at the house depth, via the token`,
+      new RegExp(`box-shadow:\\s*var\\(${token}\\)`),
+      `${host}: ${rule} should rest at its depth, via ${token}`,
     );
   }
 });
@@ -296,7 +328,7 @@ test("no mount dresses a BARE svg: the engine's overlays are not sheets (#367)",
   // Scoped to mount rules only: other rules legitimately rest at sheet depth but hold no engine overlays; the defect is a mount-scoped rule reaching an svg it did not mean to dress.
   for (const { host, file, mount } of CHART_MOUNTS) {
     for (const { selector, body } of rulesIn(read(file))) {
-      if (!/box-shadow:\s*var\(--sheet-shadow\)/.test(body)) continue;
+      if (!DEPTH_TOKENS.test(body)) continue;
       for (const arm of selector.split(",").map((s) => s.trim())) {
         if (!arm.startsWith(mount) || !/\bsvg\b/.test(arm)) continue;
         assert.ok(

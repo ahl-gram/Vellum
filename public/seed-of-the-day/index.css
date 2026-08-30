@@ -1,14 +1,6 @@
-/* Sub 7 (#462): Today is the first chart room. The chart IS the room, full bleed on the deep under the head cluster with no band and no footer (rulings 7 and 9); the room's folio top right, the Daily Hunt on the slip, the chart's own folio bottom left, the roads out as the legend row, the Glass at the chart's corner. The dress is design/sub7-chart-rooms/shared.css in tokens; the shared furniture (the slip, the folio corner, the fog) is /atelier.css's. */
-html, body { height: 100%; overflow: hidden; }
+/* Sub 7 (#462): Today is the first chart room. The chart IS the room, full bleed on the deep under the head cluster with no band and no footer (rulings 7 and 9); the room's folio top right, the Daily Hunt on the slip, the chart's own folio bottom left, the roads out as the legend row, the Glass at the chart's corner. The room furniture (the stage, the corners, the slip, the legend, the Glass, the vignettes) is /atelier.css's since #463; this sheet keeps the hunt and the stage's own layout. */
 body { line-height: 1.45; }
 
-/* The stage is the viewport; the fog drifts over the chart at its mockup depth. */
-.stage { position: fixed; inset: 0; z-index: 1; overflow: hidden; }
-.fog { z-index: 3; }
-.stage .status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 0 1rem;
-  color: var(--parchment); z-index: 2; pointer-events: none; }
-.stage noscript .status { top: calc(50% + 2.8rem); pointer-events: auto; max-width: 30rem; }
-.stage .status a { color: var(--parchment-bright); }
 #map-viewport { position: absolute; inset: 0; cursor: grab; }
 #map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
 /* #167 Glass: overflow clips only while .zoomed so the idle stage stays as laid out; touch-action:none via .zoomable is REQUIRED, d3-zoom does not set it and native pan/pinch would preempt the gesture. */
@@ -18,54 +10,9 @@ body { line-height: 1.45; }
 #map { position: absolute; inset: 0; transform-origin: 0 0; box-sizing: border-box;
   display: flex; align-items: center; justify-content: center;
   padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
-#sheet { position: relative; flex: none; width: 0; height: 0;
-  /* The atelier-map dress (design/atelier-map/stage.css): the enlarged ink shadow over the lighter-centred deep, home's own (#456). */
-  box-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55); }
+#sheet { position: relative; flex: none; width: 0; height: 0; box-shadow: var(--stage-shadow); }
 #sheet svg { display: block; width: 100%; height: 100%; user-select: none; }
 #map:not(.solved) svg { cursor: crosshair; }
-/* Edge vignettes keep the parchment chrome legible when the pale chart fills the frame (the mockup). */
-.vignette { position: fixed; left: 0; right: 0; height: 11rem; pointer-events: none; z-index: 5; }
-.vignette.top { top: 0; background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.62), transparent); }
-.vignette.bottom { bottom: 0; background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.62), transparent); }
-
-/* The chart's folio, lower left (the mockup): title, survey line, the chart number, the capital's line. */
-.folio { max-width: 24rem; }
-.folio p { margin: 0; }
-.folio-title { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.92rem; letter-spacing: 0.16em; color: var(--parchment); }
-.folio-sub { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.8rem; color: var(--line-tan); margin-top: 0.15rem; line-height: 1.4; }
-.folio-coords { font-variant-caps: small-caps; font-size: 0.85rem; letter-spacing: 0.06em; color: var(--line-tan); margin-top: 0.35rem; min-height: 1.2em; }
-.folio-note { font-size: 0.86rem; color: var(--parchment); margin-top: 0.4rem; line-height: 1.45; max-width: 22rem; }
-
-/* The Surveyor's Glass, lower right: it hugs the chart's corner, so an open slip pushes it left. */
-.zoomery { display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-end; transition: right 0.32s cubic-bezier(0.2, 0.7, 0.3, 1); }
-.corner.br.zoomery { right: calc(var(--slip-w) + 2rem + 1.4rem); }
-body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); }
-.zoom-btn { width: 2.3rem; height: 2.3rem; display: flex; align-items: center; justify-content: center; padding: 0;
-  color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); border-radius: 0;
-  transition: background 0.2s ease, color 0.2s ease; }
-/* Four classes deep on purpose: the house sheets dress every button, and their hover wash outranks a plain .zoom-btn:hover. */
-.zoomery.corner .zoom-btn:hover, .zoomery.corner .zoom-btn:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
-.zoom-keys { margin-top: 0.1rem; padding: 0.28rem 0.5rem; text-align: right; white-space: nowrap;
-  background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan);
-  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.62rem; line-height: 1.5; letter-spacing: 0.04em; color: var(--line-tan); }
-.zoom-keys span { display: block; }
-.zoom-keys kbd { font-family: inherit; font-style: normal; color: var(--parchment); }
-/* The keys slip needs a band wide enough for folio + roads + Glass beside a slip: measured colliding at 1280 (a stated deviation on #462). */
-@media (max-width: 1440px) { .zoom-keys { display: none; } }
-
-/* The legend row, bottom centre: the room's roads out, centred on the chart beside an open slip. */
-.legend { position: fixed; left: calc((100% - var(--slip-w) - 2rem) / 2); bottom: var(--chrome-y); transform: translateX(-50%); z-index: 10; text-align: center;
-  transition: left 0.32s cubic-bezier(0.2, 0.7, 0.3, 1); }
-body:has(.slip.folded) .legend { left: 50%; }
-.legend-head { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.82rem; color: var(--ink-faded); margin: 0 0 0.45rem; }
-.legend-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
-.legend-btn { display: block; text-decoration: none; background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan);
-  padding: 0.4rem 0.9rem 0.35rem; text-align: center; transition: background 0.2s ease, transform var(--paper-quick) var(--ease-paper); }
-.legend-btn:hover, .legend-btn:focus-visible { background: var(--ink-dark); transform: translateY(var(--raise)); }
-.legend-btn:focus-visible { outline-color: var(--parchment-bright); }
-.legend-btn .verb { display: block; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.78rem; color: var(--line-tan); }
-.legend-btn .room { display: block; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.86rem; letter-spacing: 0.12em; color: var(--parchment); }
-.legend.in-slip { display: none; }
 
 /* The Daily Hunt on the slip: the clue slips, the warmth line, the reveal, the presses. */
 .clues { margin: 0.7rem 0 0; padding-left: 1.3rem; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; color: var(--ink-dark); line-height: 1.5; }
@@ -118,10 +65,6 @@ body:has(.slip.folded) .legend { left: 50%; }
   0% { opacity: 0; } 8% { opacity: 0.9; } 68% { opacity: 0.9; } 100% { opacity: 0; }
 }
 
-/* The landing (#461 ruling 6, the chart room's half): the stage settles onto the deep, the chrome inks in after; motion.css's reduced-motion blanket collapses both. */
-.stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
-.legend { animation: ink-in 0.5s 0.18s ease-out both; }
-
 /* The phone's feedback bar mirrors the warmth line above the collapsed sheet (the panel line stays the aria-live region). */
 .hunt-sticky { display: none; }
 .hunt-sticky.rise { animation: stickyRise var(--paper-settle) var(--ease-paper); }
@@ -130,13 +73,6 @@ body:has(.slip.folded) .legend { left: 50%; }
   to   { transform: translateY(0); }
 }
 @media (max-width: 900px) {
-  .vignette { height: 8rem; }
-  .corner.bl { display: none; }
-  .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); bottom: calc(var(--sheet-h, 6rem) + 1rem); }
-  .zoom-keys { display: none; }
-  .legend { display: none; }
-  .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.2rem; animation: none; }
-  .legend.in-slip .legend-btn { background: var(--ink-dark); }
   .hunt-sticky.active {
     display: block; position: fixed; left: 0; right: 0; bottom: var(--sheet-h, 0px); z-index: 20;
     background: var(--ink-dark); color: var(--parchment-panel); text-align: center;
@@ -144,14 +80,10 @@ body:has(.slip.folded) .legend { left: 50%; }
     box-shadow: 0 -4px 16px rgb(from var(--chart-ink) r g b / 0.32);
   }
   body:has(.slip.open) .hunt-sticky.active { display: none; }
-  /* The drawer's wash covers the whole stage on a chart room: there is no band for it to start under. */
-  body.room.chart-room:has(.rooms-reveal:checked)::after { inset: 0; }
 }
-/* Print is paper (ruling 10): the chrome, the slip and the bar print as nothing; the chart prints on the page, unzoomed. */
+/* Print is paper (ruling 10): the bar prints as nothing; the chart prints on the page, unzoomed. */
 @media print {
-  html, body { height: auto; overflow: visible; }
-  .stage { position: static; animation: none; }
-  .vignette, .legend, .hunt-sticky, .zoomery, .folio { display: none !important; }
+  .hunt-sticky { display: none !important; }
   #map-viewport { position: static; }
   #map { position: static; padding: 0 !important; transform: none !important; display: block; }
   #sheet { width: auto !important; height: auto !important; box-shadow: none; }

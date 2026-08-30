@@ -66,19 +66,28 @@ export async function run(ctx) {
       legend:!!legend,legendVisible,legendAriaHidden:legend?legend.getAttribute("aria-hidden"):null,
       legendText:legend?(legend.textContent||"").replace(/\\s+/g," ").trim():"",
       hideRules,hoverHideRules,coarseScopedHideRules,
-      hoverNone:matchMedia("(hover: none)").matches,pointerCoarse:matchMedia("(pointer: coarse)").matches};
+      hoverNone:matchMedia("(hover: none)").matches,pointerCoarse:matchMedia("(pointer: coarse)").matches,
+      // #463: the keys slip stands down below 1440px too (a stated deviation on #462: it collided with the legend row beside the 24rem Broadside at 1280), so the legend is owed only on a wide, mouse-driven sheet.
+      wide:innerWidth>=1440};
   })()`);
   const touchPrimary = g1.hoverNone && g1.pointerCoarse;
+  const legendOwed = !touchPrimary && g1.wide;
+  // The other polarity: at 1680 a mouse-driven sheet is owed the keys slip (skeptic on PR #491: the harness is 1280 wide, so the first read alone asserts only the hidden arm).
+  await send("Emulation.setDeviceMetricsOverride", { width: 1680, height: 1050, deviceScaleFactor: 1, mobile: false });
+  await sleep(300);
+  const g1wide = await evaluate(`(()=>{const l=document.querySelector("#zoom-controls .zoom-keys");return{shown:!!l&&l.offsetWidth>0&&l.offsetHeight>0,w:innerWidth};})()`);
+  await send("Emulation.clearDeviceMetricsOverride");
+  await sleep(300);
   check(
     "G1 the cluster speaks in the antique voice and the keys legend is visible by it (#170 voice + Sub 4 handoff)",
     g1.grpAria === "The Surveyor's Glass" &&
       g1.zin.title === "Lean closer" && /zoom in/i.test(g1.zin.aria || "") && g1.zin.svg && g1.zin.text === "" &&
       g1.zout.title === "Stand back" && /zoom out/i.test(g1.zout.aria || "") && g1.zout.svg && g1.zout.text === "" &&
       g1.zreset.title === "The full sheet" && /reset/i.test(g1.zreset.aria || "") && g1.zreset.svg &&
-      g1.legend && (touchPrimary || g1.legendVisible) && g1.legendAriaHidden === "true" &&
+      g1.legend && g1.legendVisible === legendOwed && (touchPrimary || (g1wide.w === 1680 && g1wide.shown)) && g1.legendAriaHidden === "true" &&
       /0/.test(g1.legendText) && /pan/i.test(g1.legendText) &&
       g1.hideRules > 0 && g1.hoverHideRules === g1.coarseScopedHideRules,
-    JSON.stringify(g1),
+    JSON.stringify({ ...g1, g1wide }),
   );
 
   const g2aNow = await evaluate(`(()=>{document.getElementById("zoom-in").click();return window.__vellumZoomState().k;})()`);

@@ -24,8 +24,8 @@ export async function run(ctx) {
 
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(80);
-  const v1 = await evaluate(`(()=>{const sh=document.getElementById("sheet");const g=document.querySelector("#verso .verso-ghost");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d"),ghost:!!g,ghostBlob:!!(g&&/^blob:/.test(g.src)),docket:(document.querySelector("#verso .verso-docket")||{}).textContent||"",survey:((document.querySelector("#verso .verso-survey")||{}).textContent||"").length,stamp:!!document.querySelector("#verso .verso-stamp"),vis:getComputedStyle(document.getElementById("verso")).visibility,label:document.getElementById("verso-turn").textContent};})()`);
-  check("V1 Turn the sheet flips to the verso (.versoed + .flip3d, #verso visible, ghost/docket/survey/stamp present)", v1.versoed && v1.flip3d && v1.ghost && v1.ghostBlob && v1.stamp && v1.survey > 0 && v1.vis === "visible" && v1.label === "Turn back", JSON.stringify({ ...v1, docket: v1.docket.slice(0, 40) }));
+  const v1 = await evaluate(`(()=>{const sh=document.getElementById("sheet");const g=document.querySelector("#verso .verso-ghost");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d"),ghost:!!g,ghostBlob:!!(g&&/^blob:/.test(g.src)),docket:(document.querySelector("#verso .verso-docket")||{}).textContent||"",survey:((document.querySelector("#verso .verso-survey")||{}).textContent||"").length,stamp:!!document.querySelector("#verso .verso-stamp"),vis:getComputedStyle(document.getElementById("verso")).visibility,label:document.querySelector("#verso-turn .room").textContent};})()`);
+  check("V1 Turn the sheet flips to the verso (.versoed + .flip3d, #verso visible, ghost/docket/survey/stamp present)", v1.versoed && v1.flip3d && v1.ghost && v1.ghostBlob && v1.stamp && v1.survey > 0 && v1.vis === "visible" && v1.label === "Back", JSON.stringify({ ...v1, docket: v1.docket.slice(0, 40) }));
   check("V1b the docket reads the drawn chart number and title", v1.docket.startsWith("CHART № 42 · ") && v1.docket.includes(vTitle) && v1.docket.includes("Year"), JSON.stringify({ docket: v1.docket }));
   check("V1c the docket names the capital's former name (#49)", v1.docket.includes("Laukuwelua (once Haitani)"), JSON.stringify({ docket: v1.docket }));
   await sleep(1300); // let the 1.2s flip land before the screenshot
@@ -51,8 +51,8 @@ export async function run(ctx) {
   check("V4 clicking Turn again leaves the verso immediately (.versoed dropped)", v4immediate === false);
   await waitFlip3dGone("verso-flip-back");
   await sleep(60);
-  const v4 = await evaluate(`(()=>{const sh=document.getElementById("sheet");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d"),perspective:getComputedStyle(sh).perspective,map:!!document.querySelector("#map svg"),hits:document.querySelectorAll("#map .place-hit").length,vVis:getComputedStyle(document.getElementById("verso")).visibility,label:document.getElementById("verso-turn").textContent};})()`);
-  check("V4b flip-back restores recto byte-parity: 3D context torn down (perspective:none), overlay intact, verso hidden", !v4.versoed && !v4.flip3d && v4.perspective === "none" && v4.map && v4.hits > 0 && v4.vVis === "hidden" && v4.label === "Turn the sheet", JSON.stringify(v4));
+  const v4 = await evaluate(`(()=>{const sh=document.getElementById("sheet");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d"),perspective:getComputedStyle(sh).perspective,map:!!document.querySelector("#map svg"),hits:document.querySelectorAll("#map .place-hit").length,vVis:getComputedStyle(document.getElementById("verso")).visibility,label:document.querySelector("#verso-turn .room").textContent};})()`);
+  check("V4b flip-back restores recto byte-parity: 3D context torn down (perspective:none), overlay intact, verso hidden", !v4.versoed && !v4.flip3d && v4.perspective === "none" && v4.map && v4.hits > 0 && v4.vVis === "hidden" && v4.label === "The Sheet", JSON.stringify(v4));
 
   await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("draw").click();})()`);
   await waitSettled("v5-base");

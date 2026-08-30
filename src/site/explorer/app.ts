@@ -15,6 +15,7 @@ import { installExplorerHooks } from "./hooks.ts";
 import { wireSurveyToggle, armOnLanding, deferLandingArm } from "./survey-arm.ts";
 import { createTourOrder } from "./tour-order.ts";
 import { createLivingChart } from "../living-chart/index.ts";
+import { bindRoom } from "../shared/room.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
@@ -25,8 +26,8 @@ import type { ThemeName } from "../../render/layers/field.ts";
 import type { Camera } from "./camera.ts";
 import {
   $, seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider,
-  coastSlider, status, mapDiv, mapViewport, sheetEl, innerEl, caption, versoEl, versoBtn,
-  agesChk, orderLink, journalLink, hashControls,
+  coastSlider, status, mapDiv, mapViewport, sheetEl, innerEl, caption, folioTitle, folioSub, stageEl,
+  versoEl, versoBtn, agesChk, orderLink, journalLink, hashControls,
 } from "./elements.ts";
 
 let lastSvg = "";
@@ -85,11 +86,24 @@ const glass = createGlass({
   buildPlaceOverlay: lc.buildPlaceOverlay,
   reclampCard: lc.reclampCard,
   setCaption: (t) => { caption.textContent = t; },
+  // The chart folio stands down on a phone (the mockup), so a failed survey reports on the status pill, the page's one error channel at every width.
+  setError: (t) => { status.textContent = t; },
   prefersReduce,
   regionEligible,
   syncHash,
   buttons: { zoomIn: $("zoom-in"), zoomOut: $("zoom-out"), reset: $("zoom-reset"), cluster: $("zoom-controls") },
 });
+
+// #463: the chart room round the Glass; the sheet is refitted once each chart lands (the folio's lines are chrome the fit measures) and re-clamped against the refitted stage.
+const room = bindRoom({ frame: stageEl, sheet: sheetEl, camera: { hold: () => glass.cameraNow(), restore: (cam) => glass.refitCamera(cam) } });
+
+// The chart's folio, lower left: the world's name and number, its survey line, then the caption the suites and the region survey write.
+// The mockup's survey line is the subtitle's tail ("surveyed in the year 1059 of the Cedar Age"), not the cartouche's whole sentence: the folio stays short and leaves the legend row its room.
+function writeFolio(res: { title: string; subtitle: string }, seed: number): void {
+  folioTitle.textContent = `${res.title} · Chart № ${seed}`;
+  const year = /in the year .+$/.exec(res.subtitle);
+  folioSub.textContent = year ? `surveyed ${year[0]}` : res.subtitle;
+}
 
 // opts.quiet suppresses the arrival ceremony, used only by the sea-level drag's throttled mid-drag redraws.
 function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
@@ -143,7 +157,8 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       lastSurvey = res.survey;
       const ms = (performance.now() - t0).toFixed(0);
       status.textContent = "";
-      caption.textContent = `${res.title} · ${res.mapType} · ${res.band} · drawn in ${ms}ms`;
+      writeFolio(res, seed);
+      caption.textContent = `${res.mapType} · ${res.band} · drawn in ${ms}ms`;
       const flipped = isFlipped(sheetEl);
       const deferArm = deferLandingArm(quiet, flipped); // #366: survey-arm.ts carries the why
       if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, flipped })) {
@@ -151,6 +166,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => {
           if (myGen !== drawGen) return;
           lc.buildPlaceOverlay(res.manifest);
+          room.layout();
           armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
             rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
           glass.syncZoom();
@@ -161,6 +177,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         // Settle (#127): when flipped this updates the hidden recto beneath the verso; rebuildVerso refreshes the visible face.
         mapDiv.innerHTML = res.svg;
         lc.buildPlaceOverlay(res.manifest);
+        room.layout();
         if (!quiet) startArrival(mapDiv.querySelector("svg"));
         // #120: re-arm from THIS draw's survey, never lastSurvey; a sea-level drag moved the waterline the router walks.
         armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
@@ -206,7 +223,7 @@ versoBtn.addEventListener("click", () => {
   glass.reset();
   syncHash();
   const flipped = toggleFlip(sheetEl);
-  versoBtn.textContent = flipped ? "Turn back" : "Turn the sheet";
+  (versoBtn.querySelector(".room") ?? versoBtn).textContent = flipped ? "Back" : "The Sheet";
 });
 
 // #300/#366: survey-arm.ts owns the box's wiring AND the one slot every arm goes through; rearmVoyage, never applyVoyage (the settle discipline).

@@ -12,6 +12,7 @@ export interface StageInput {
   readonly below: readonly number[];
   /** An open slip's width, 0 when folded or a bottom sheet. */
   readonly beside: number;
+  readonly right?: readonly number[];
   readonly gap: number;
   readonly narrow: boolean;
 }
@@ -35,7 +36,7 @@ export function fitStage(input: StageInput): StageFit {
   const top = Math.max(0, ...input.above) + gap;
   const floor = Math.min(view.h, ...input.below);
   const bottom = view.h - floor + gap;
-  const right = input.beside > 0 ? input.beside + SLIP_CLEARANCE : 0;
+  const right = Math.max(input.beside > 0 ? input.beside + SLIP_CLEARANCE : 0, ...(input.right ?? []).map((left) => view.w - left + gap));
   const free = { w: Math.max(0, view.w - right), h: Math.max(0, view.h - top - bottom) };
   let w = Math.min(free.w, free.h * aspect);
   if (input.narrow) w = Math.max(w, view.w);

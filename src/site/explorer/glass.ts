@@ -22,6 +22,7 @@ interface GlassDeps {
   /** #387/#388: re-measure an open card against the camera as it now stands. */
   reclampCard: () => void;
   setCaption: (text: string) => void;
+  setError: (text: string) => void;
   prefersReduce: () => boolean;
   /** #169: whether a settle should redraft (style, chronicle/voyage/verso, test seam). */
   regionEligible: () => boolean;
@@ -73,6 +74,7 @@ export function createGlass(deps: GlassDeps) {
       setCardZoom(zoomController.getState().k);
     },
     setCaption: deps.setCaption,
+    setError: deps.setError,
     getZoomK: () => zoomController.getState().k,
     prefersReduce: deps.prefersReduce,
   });
@@ -98,6 +100,9 @@ export function createGlass(deps: GlassDeps) {
 
   function applyCamera(cam: Camera): void {
     zoomController.zoomTo(transformFromCamera(cam, mapViewport.clientWidth, mapViewport.clientHeight));
+  }
+  function refitCamera(cam: Camera): void {
+    zoomController.refit(transformFromCamera(cam, mapViewport.clientWidth, mapViewport.clientHeight));
   }
 
   // #170: the voiced home (full-sheet button, the 0 key); the hash writes at the landing (glideHome's onDone), never mid-flight. The programmatic homes (verso, chronicle, voyage, draw) keep their INSTANT homeToWorld() + reset() + explicit syncHash in the conductor.
@@ -137,6 +142,7 @@ export function createGlass(deps: GlassDeps) {
     cameraNow,
     syncZoom,
     applyCamera,
+    refitCamera,
     rebase: () => zoomController.rebase(),
     reset: () => zoomController.reset(),
     zoomTo: (t: ZoomState) => zoomController.zoomTo(t),

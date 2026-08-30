@@ -53,3 +53,8 @@ export function liveNow(state: {
   if (state.chamber === "ages" && state.year != null) return { kind: "year", year: state.year };
   return state.pending;
 }
+
+/** The seed a hash carries: a run of digits and nothing else, or null (Number() reads "", " ", "0x10", "1e3" and "-0" as seeds; an empty key landed a bare visit on seed 0 once, #463 CI R0b). */
+export function seedFromHash(raw: string | null): number | null {
+  return raw !== null && /^\d+$/.test(raw) ? Number(raw) : null;
+}
