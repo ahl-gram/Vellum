@@ -214,9 +214,9 @@ export async function run(ctx) {
   const topZoom = await camNow();
   check(
     "L1f over the scrolled page a wheel-up scrolls the page and never zooms; back at the top, a fresh wheel-up is the camera's again",
-    // 1% stillness, not 1e-9: by this point the idle drift wanders the scale ~0.1% between reads, and a wheel step is 21% (the suite's own added seconds crossed the 9s idle delay; the timing-budget class).
+    // Drift-sized stillness (2%, L9a's), not 1%: the idle drift breathes the scale +-1.5% and the reads straddle a wheel-scroll poll of up to 2s, while a wheel step is 21%; lane A's length moved this fixture against the 9s idle delay again at #463 (CI red twice, green locally).
     yMid > 0 && backUp !== null && backUp.prevented === false && midCamBefore !== null
-      && Math.abs(backUp.cam.scale / midCamBefore.scale - 1) < 0.01 && backUp.y < yMid
+      && Math.abs(backUp.cam.scale / midCamBefore.scale - 1) < 0.02 && backUp.y < yMid
       && topCamBefore !== null && topZoom !== null && topZoom.scale > topCamBefore.scale * 1.05,
     JSON.stringify({ yMid, backUp, topCamBefore, topZoom }),
   );
