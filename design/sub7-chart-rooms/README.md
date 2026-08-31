@@ -82,3 +82,17 @@ This is an archived design artifact, not shipping code, which is the stated reas
 `.js`/`.mjs` outside `src/` (the workspace one-pipeline rule). Nothing here is served, bundled,
 or swept by the site's CSS guards. Do not edit this folder to match the site; the fidelity arrow
 points the other way.
+
+## The #497 round (Sub 8a: the back matter's screen seat)
+
+- **`print-room-backmatter.tpl.html`**, the bound atlas's back matter (the banners, the chronicle,
+  the gazetteer) as turns on rows vi to viii, with seed 42's own sections baked from `composeAtlas`
+  into `backmatter-42.json`. Two candidate seats by `?seat=`: **p** (the default, and RULED
+  2026-08-31 on #497): the section set as a page of the atlas and turned onto the stage like a
+  plate, fitted by the room, the Glass leaning in; **s** (not chosen): the section unfolding inside
+  the slip under its row, where the gazetteer's four columns squeeze hard in the 22rem panel.
+- Stills: `print-room-backmatter-p-1280-gazetteer` (and `-leaned`, `-banners`, `-chronicle`),
+  `print-room-backmatter-p-390`, and the unchosen `print-room-backmatter-s-1280-gazetteer`,
+  `-s-1280-banners`, `-s-390-open`.
+- Mock-only notes: the pages run doctype-less (quirks mode), so the table colour is explicit; the
+  fit and turning are the mock's own script, not the kit's.
