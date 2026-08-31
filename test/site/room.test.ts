@@ -59,3 +59,23 @@ test("a seat already held moves nothing (a resize storm must not churn the row)"
   dockLegend(h, "slip");
   assert.deepEqual(h.moves, ["dock"], "docked once, then left alone");
 });
+
+// The legend row's width follows the folio's text extent (placeLegendRow), and a narrower row wraps taller; the fit bounds the sheet by the row's top, so the row is seated first or the fit reads a row that is about to grow (plate read 2026-08-30 on #463: the Print Room's sheet over a freshly wrapped row until the next layout).
+// Paper is narrower than the 900px phone query, so the kit's narrow block (the folio clamped to 12.5rem, the tagline hidden) reaches every printed chart room; the print block, later in the sheet, takes both back (skeptic on PR #496).
+test("the kit's print block restores the room folio's tagline and width after the phone block has hidden and clamped them", () => {
+  const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8");
+  const narrow = css.indexOf("@media (max-width: 900px)");
+  const print = css.indexOf("@media print");
+  assert.ok(narrow >= 0 && print > narrow, "the print block follows the phone block, so its equal-specificity rules win");
+  const block = css.slice(print);
+  assert.match(block, /\.folio-room \.room-name, \.folio-room \.room-tagline\s*\{[^}]*display:\s*block/, "the tagline prints");
+  assert.match(block, /\.corner\.folio-room\s*\{[^}]*max-width:\s*none/, "the corner unclamps on paper");
+  assert.match(block, /\.folio-room \.room-name\s*\{[^}]*font-size:\s*1\.32rem/, "and the name prints at the corner's own size, not the phone's");
+});
+
+test("bindRoom seats the legend row before it fits the sheet", () => {
+  const room = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/shared/room.ts"), "utf8");
+  const layout = room.slice(room.indexOf("const layout = () => {"), room.indexOf("camera.restore(held);"));
+  assert.ok(layout.includes("placeLegendRow(") && layout.includes("fitRoom("), "the layout both seats the row and fits the sheet");
+  assert.ok(layout.indexOf("placeLegendRow(") < layout.indexOf("fitRoom("), "the row is seated before the fit reads its top");
+});

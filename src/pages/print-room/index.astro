@@ -1,95 +1,111 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import RoomHead from "../../layouts/RoomHead.astro";
+import RoomFolio from "../../layouts/RoomFolio.astro";
+import Slip from "../../layouts/Slip.astro";
+import { contentsRows } from "../../site/print-room/contents-markup.ts";
 
 const room = "The Print Room";
 const tagline = "take a world home";
+const contents = contentsRows(null);
 ---
 
 <BaseLayout
   room={room}
   description="The atelier's print room: bring a world in from the Explorer or call up a seed by number, pull a proof, and take the chart home."
   path="/print-room/"
+  chartRoom
 >
-<RoomHead room={room} tagline={tagline} />
+<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>
+<div class="stage">
+  <div class="sheet" id="sheet"><div id="map-viewport" tabindex="0" role="application" aria-label="The proof. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."><div id="map">
+    <div id="pr-preview" class="preview"></div>
+    <img id="pr-turned" class="turned" alt="" hidden>
+  </div></div></div>
+  <p class="status" id="pr-status" role="status" aria-live="polite"></p>
+  <p id="pr-warning" class="warning" hidden>Your browser could not start the render
+  worker, so proofs are drawn on the main thread. A large plate may pause the page for
+  a moment.</p>
+  <noscript>
+    <p class="status">Every proof is pulled in your browser, so the Print Room needs
+    JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
+  </noscript>
+</div>
+<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>
 
-<p class="intro">This is the atelier's print room, where a world leaves the screen
-for the page. Bring a chart in from the Explorer, or call up a seed by number, and
-pull a proof to see how it sits on paper.</p>
-
-<div class="counter" role="group" aria-label="Choose a world">
-  <label>seed <input id="pr-seed" type="number" min="0" max="4294967295" step="1"></label>
-  <button id="pr-random" title="random seed" aria-label="Random seed">🎲</button>
-  <label>style
-    <select id="pr-style">
+<RoomFolio room={room} tagline={tagline}>
+  <div class="folio-controls" role="group" aria-label="Choose a world">
+    <input id="pr-seed" class="control" type="number" min="0" max="4294967295" step="1" aria-label="seed">
+    <button id="pr-random" class="dice" type="button" title="random seed" aria-label="Random seed">&#9860;</button>
+    <select id="pr-style" class="control" aria-label="style">
       <option value="antique" selected>antique</option>
       <option value="topographic">topographic</option>
       <option value="ink">ink</option>
       <option value="nautical">nautical</option>
     </select>
-  </label>
-  <button id="pr-draw" class="primary">Pull a proof</button>
+    <button id="pr-draw" class="primary" type="button">Pull a proof</button>
+  </div>
+  <p class="gloss">bring a chart in from the Explorer, or call one up by number</p>
+</RoomFolio>
+
+<Slip id="atlas" verb="Take home" title="The Bound Atlas" where="the whole atlas on one sheet" fold="Fold the atlas away">
+  <p class="intro">Every draughting, the thematic and regional surveys, the banners, the
+  chronicle, and the gazetteer, bound from the proof on the desk.</p>
+  <p class="bound-line" id="pr-bound-status" role="status" aria-live="polite"></p>
+  <div class="bind-row">
+    <button id="pr-bind" class="primary" type="button" disabled>Bind the atlas</button>
+    <span class="stamp" id="pr-stamp">a few seconds to draw</span>
+  </div>
+  <p class="contents-head"><span>Contents of the atlas</span><span class="gloss turn-gloss">a thumbnail turns the sheet</span></p>
+  <ol class="contents" id="pr-contents" set:html={contents}></ol>
+  <div class="legend-dock"></div>
+  <Fragment slot="foot">
+    <div class="atlas-actions" role="group" aria-label="Bound atlas">
+      <button id="pr-print" class="primary" type="button" disabled>Print</button>
+      <button id="pr-download" type="button" disabled>Download</button>
+      <button id="pr-hide" type="button" disabled>Hide</button>
+    </div>
+    <p class="note">Print opens your browser's Save as PDF, one plate per page. The single
+    file opens offline in any browser.</p>
+  </Fragment>
+</Slip>
+
+<div class="chrome corner bl folio">
+  <p class="folio-title" id="folio-title"></p>
+  <p class="folio-sub plate-line" id="pr-plate-line"></p>
+  <p class="folio-sub" id="folio-sub"></p>
 </div>
 
-<p id="pr-warning" class="warning" hidden>Your browser could not start the render
-worker, so proofs are drawn on the main thread. A large plate may pause the page for
-a moment.</p>
-
-<!-- The order desk sits ABOVE the proof (#136 redesign): all the deciding happens here in
-     two side-by-side offerings; everything below the desk is pure output, the proof and, once
-     bound, the atlas. -->
-<section class="order-desk" aria-labelledby="pr-desk-head">
-  <h2 class="desk-head archivist-head" id="pr-desk-head">Take this world home</h2>
-  <div class="offerings">
-    <div class="offering" aria-labelledby="pr-plate-head">
-      <h3 class="offering-head" id="pr-plate-head">A poster plate</h3>
-      <p class="offering-intro">One chart, pulled at its own width or poster-wide, and handed to you to send to a printer.</p>
-      <div class="offering-controls">
-        <label class="offering-field archivist-label" for="pr-format">Pressed as
-          <select id="pr-format">
-            <option value="svg" selected>The engraving itself (SVG)</option>
-            <option value="png1">An impression (PNG)</option>
-            <option value="png2">A finer impression (PNG &times;2)</option>
-          </select>
-        </label>
-        <div class="plate-row" role="group" aria-label="Plate size">
-          <button class="plate" data-poster="chart" disabled>Chart<span class="plate-dim">1500 px</span></button>
-          <button class="plate" data-poster="desk" disabled>Desk<span class="plate-dim">2400 px</span></button>
-          <button class="plate" data-poster="wall" disabled>Wall<span class="plate-dim">3300 px</span></button>
-          <button class="plate" data-poster="grand" disabled>Grand<span class="plate-dim">4200 px</span></button>
-        </div>
-      </div>
-      <p class="offering-caveat">The engraving is exact at any size; an impression is pressed with your
-      device's fonts, and a large one is fitted to what your browser can hold.
-      The chart is pulled only as the engraving.</p>
-      <p class="status" id="pr-poster-status" role="status" aria-live="polite"></p>
-    </div>
-
-    <div class="offering" aria-labelledby="pr-atlas-head">
-      <h3 class="offering-head" id="pr-atlas-head">The bound atlas</h3>
-      <p class="offering-intro">The whole atlas on one sheet: every draughting, the thematic and
-      regional surveys, the banners, the chronicle, and the gazetteer.</p>
-      <div class="offering-controls">
-        <button id="pr-bind" class="primary" disabled>Bind the atlas</button>
-        <div class="atlas-actions" role="group" aria-label="Bound atlas">
-          <button id="pr-print" disabled>Print</button>
-          <button id="pr-download" disabled>Download</button>
-          <button id="pr-hide" disabled>Hide</button>
-        </div>
-      </div>
-      <p class="offering-caveat">Print opens your browser's Save as PDF, one plate per page. The
-      single file is about 20 MB and opens offline.</p>
-      <p class="status" id="pr-bound-status" role="status" aria-live="polite"></p>
-    </div>
+<nav class="legend" aria-label="A poster plate">
+  <p class="legend-head"><span class="pressed">A poster plate, pressed as
+    <select id="pr-format" aria-label="Pressed as">
+      <option value="svg" selected>The engraving itself (SVG)</option>
+      <option value="png1">An impression (PNG)</option>
+      <option value="png2">A finer impression (PNG &times;2)</option>
+    </select></span></p>
+  <p class="legend-note">The engraving is exact at any size; an impression is pressed with your
+  device's fonts, and a large one is fitted to what your browser can hold.
+  The chart is pulled only as the engraving.</p>
+  <div class="legend-row" role="group" aria-label="A poster plate">
+    <button class="legend-btn" type="button" data-poster="chart" disabled><span class="verb dim">1500 px</span><span class="room">Chart</span></button>
+    <button class="legend-btn" type="button" data-poster="desk" disabled><span class="verb dim">2400 px</span><span class="room">Desk</span></button>
+    <button class="legend-btn" type="button" data-poster="wall" disabled><span class="verb dim">3300 px</span><span class="room">Wall</span></button>
+    <button class="legend-btn" type="button" data-poster="grand" disabled><span class="verb dim">4200 px</span><span class="room">Grand</span></button>
+    <a id="pr-explorer" class="legend-btn gold" href="../explorer/"><span class="verb">Back to</span><span class="room">The Explorer</span></a>
   </div>
-</section>
+  <p class="legend-status" id="pr-poster-status" role="status" aria-live="polite"></p>
+</nav>
 
-<p class="status" id="pr-status" role="status" aria-live="polite"></p>
-<div id="pr-preview" class="preview"></div>
-<p class="caption" id="pr-caption"></p>
+<div class="chrome corner br zoomery" role="group" aria-label="The Surveyor's Glass">
+  <button id="zoom-in" class="zoom-btn" type="button" data-zoom="in" aria-label="Lean closer (zoom in)" title="Lean closer"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"/><path d="M9.9 9.9l3.7 3.7"/><path d="M6.8 4.9v3.8M4.9 6.8h3.8"/></svg></button>
+  <button id="zoom-reset" class="zoom-btn" type="button" data-zoom="fit" aria-label="The full sheet (reset the view)" title="The full sheet"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6h6.6l2.6 2.6v8.2H3.4z"/><path d="M10 2.6v2.6h2.6"/><path d="M5.3 9.7c1-.9 1.9.5 2.9-.3.8-.7 1.5-.2 2.2-.7"/></svg></button>
+  <button id="zoom-out" class="zoom-btn" type="button" data-zoom="out" aria-label="Stand back (zoom out)" title="Stand back"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"/><path d="M9.9 9.9l3.7 3.7"/><path d="M4.9 6.8h3.8"/></svg></button>
+  <div class="zoom-keys" aria-hidden="true">
+    <span><kbd>+</kbd> <kbd>&#8722;</kbd> lean closer, stand back</span>
+    <span><kbd>&#8592;&#8593;&#8594;&#8595;</kbd> pan the sheet</span>
+    <span><kbd>0</kbd> the full sheet</span>
+  </div>
+</div>
 
-<!-- The bound atlas populates here, below the proof. On screen it omits the header + hero
-     (already shown as the proof above); print + download restore the full atlas. -->
 <div id="pr-atlas" class="atlas-sheet"></div>
 
 <script type="module" src="./app.bundle.js" is:inline></script>

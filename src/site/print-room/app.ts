@@ -7,7 +7,8 @@ import { startArrival } from "../explorer/draw-ceremony.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { POSTER_PRESETS, CHART_PRESET, clampPosterWidth, posterFilename, posterPngFilename, chartFilename, type PosterPreset } from "./poster-presets.ts";
 import { rasterizeSvg } from "../lib/rasterize.ts";
-import { initBoundAtlas, clearBoundAtlas, enableBind, type PosterBasis } from "./bound-atlas.ts";
+import { initBoundAtlas, clearBoundAtlas, enableBind, sheetAspect, type PosterBasis } from "./bound-atlas.ts";
+import { bindPrintRoom, showPlate, showProof, writeFolio, type RoomFurniture } from "./seats.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
@@ -46,8 +47,20 @@ const seedInput = $<HTMLInputElement>("pr-seed");
 const styleSel = $<HTMLSelectElement>("pr-style");
 const status = $("pr-status");
 const preview = $("pr-preview");
-const caption = $("pr-caption");
 const warning = $("pr-warning");
+const road = $<HTMLAnchorElement>("pr-explorer");
+const furniture: RoomFurniture = {
+  stage: document.querySelector<HTMLElement>(".stage")!,
+  sheet: $("sheet"),
+  viewport: $("map-viewport"),
+  map: $("map"),
+  preview,
+  turned: $<HTMLImageElement>("pr-turned"),
+  folioTitle: $("folio-title"),
+  folioSub: $("folio-sub"),
+  plateLine: $("pr-plate-line"),
+};
+const sheet = bindPrintRoom(furniture, sheetAspect);
 const posterStatus = $("pr-poster-status");
 const plateButtons = [...document.querySelectorAll<HTMLButtonElement>("[data-poster]")];
 const formatSel = $<HTMLSelectElement>("pr-format"); // the "Pressed as" select (#135); greyed out during a draw (#212)
@@ -137,6 +150,7 @@ function writeHash(seed: number, style: string): void {
   if (carried.land != null) p.set("land", String(Math.round(carried.land * 1000)));
   if (carried.coast != null) p.set("coast", String(Math.round(carried.coast * 100)));
   history.replaceState(null, "", "#" + p.toString());
+  road.href = "../explorer/#" + p.toString();
 }
 
 function draw(): void {
@@ -145,7 +159,6 @@ function draw(): void {
   const myGen = ++drawGen;
   drawing = true;
   status.textContent = "Pulling a proof…";
-  caption.textContent = "";
   // #212/#136: a fresh proof supersedes any bound atlas AND any pending poster order; close the whole order surface SYNCHRONOUSLY before the async render, or a plate clicked mid-redraw presses the previous world's poster.
   clearBoundAtlas();
   refreshOrderControls();
@@ -165,10 +178,13 @@ function draw(): void {
       if (myGen !== drawGen) return;
       // res.svg is engine-rendered markup from the uint32 seed and allowlisted params: no user string reaches the SVG, the same trusted-string injection the Explorer does.
       preview.innerHTML = res.svg;
+      showProof(furniture);
+      sheet.rebase();
       startArrival(preview.querySelector("svg"));
       writeHash(seed, style);
       status.textContent = "";
-      caption.textContent = `${res.title} · seed ${seed}`;
+      writeFolio(furniture, res, seed);
+      sheet.room.layout();
       lastSeed = seed;
       lastTitle = res.title;
       // overrides is built fresh per draw and never mutated, so holding the reference is safe.
@@ -288,7 +304,10 @@ for (const b of plateButtons) b.addEventListener("click", () => orderPoster(b.da
 
 await initWorker();
 // #136: getBasis reads the LIVE posterBasis at click time, the same snapshot the poster order uses.
-initBoundAtlas(() => posterBasis);
+initBoundAtlas(() => posterBasis, {
+  showProof: () => { showProof(furniture); sheet.rebase(); sheet.room.layout(); },
+  showPlate: (plate) => { showPlate(furniture, plate); sheet.rebase(); sheet.room.layout(); },
+});
 window.__vellumPrintRoomUsesWorker = usesWorker;
 window.__vellumPrintRoomState = () => ({ seed: lastSeed, title: lastTitle });
 window.__vellumClampPosterWidth = clampPosterWidth; // e2e: the tab-killing-width guard

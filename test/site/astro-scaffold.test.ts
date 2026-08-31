@@ -117,6 +117,8 @@ const PAGES: readonly PageSpec[] = [
       "The atelier's print room: bring a world in from the Explorer or call up a seed by number, pull a proof, and take the chart home.",
     tagline: "take a world home",
     scriptSrc: "./app.bundle.js",
+    chartRoom: true,
+    folio: true,
   },
   {
     route: "reading-room/index.html",
