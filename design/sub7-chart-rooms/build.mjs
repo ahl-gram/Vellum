@@ -10,6 +10,7 @@ const CHART_TODAY = dataUri('chart-20260829-antique.svg');
 const CHART_42 = dataUri('../atelier-map/chart-42-antique.svg');
 // the #494 round: the Print Room bound, the Prospect and the Ribbon, from chart 42's own plates (dump-plates.ts, thumbs by shoot.mjs)
 const plates = JSON.parse(read('plates.json'));
+const backmatter = JSON.parse(read('backmatter-42.json')); // #497: the bound atlas's back matter for seed 42 (composeAtlas's own html)
 const PROSPECT_42 = dataUri('prospect-42-antique.svg'), RIBBON_42 = dataUri('ribbon-42-antique.svg'), PLATE_VEGETATION = dataUri('theme-vegetation-42.svg');
 const thumb = (k) => 'data:image/png;base64,' + readFileSync(new URL(`plates-42/${k}.png`, import.meta.url)).toString('base64');
 const roman = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii'];
@@ -33,11 +34,12 @@ const fill494 = (html) => html
   .replaceAll('{{ROAD_TO_OPTIONS}}', plates.ribbon.options.filter((o) => o.name !== plates.ribbon.from).map((o) => opt(o, plates.ribbon.to)).join(''))
   .replaceAll('{{REGION_1}}', esc(plates.atlas.regions[0])).replaceAll('{{REGION_2}}', esc(plates.atlas.regions[1]))
   .replaceAll('{{ATLAS_FIGURES}}', String(plates.atlas.figures)).replaceAll('{{ATLAS_BANNERS}}', String(plates.atlas.banners))
-  .replaceAll('{{CHRONICLE_N}}', String(plates.atlas.chronicleEntries)).replaceAll('{{GAZETTEER_N}}', String(plates.atlas.gazetteerRows));
+  .replaceAll('{{CHRONICLE_N}}', String(plates.atlas.chronicleEntries)).replaceAll('{{GAZETTEER_N}}', String(plates.atlas.gazetteerRows))
+  .replace('{{BANNERS_HTML}}', () => backmatter.bannersHtml).replace('{{CHRONICLE_HTML}}', () => backmatter.chronicleHtml).replace('{{GAZETTEER_HTML}}', () => backmatter.gazetteerHtml);
 const rooms = { today: 'Today', explorer: 'Explorer', 'reading-room': 'Reading Room', 'print-room': 'Print Room', faq: 'Q &amp; A', glossary: 'Glossary' };
 const DOC = new Set(['faq', 'glossary']);
-const PAGES = { ...rooms, 'print-room-bound': 'Print Room', prospect: 'The Prospect', ribbon: 'The Wayfarer\'s Ribbon' };
-const navKey = (key) => key === 'print-room-bound' ? 'print-room' : key;
+const PAGES = { ...rooms, 'print-room-bound': 'Print Room', 'print-room-backmatter': 'Print Room', prospect: 'The Prospect', ribbon: 'The Wayfarer\'s Ribbon' };
+const navKey = (key) => key.startsWith('print-room') ? 'print-room' : key;
 const docCss = read('doc.css'), docJs = read('doc.js');
 const slug = (t) => t.toLowerCase().replace(/&amp;|&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const absLinks = (h) => h.replace(/href="\.\.\//g, 'href="https://www.vellumworlds.com/').replace(/href="\/(?!\/)/g, 'href="https://www.vellumworlds.com/');

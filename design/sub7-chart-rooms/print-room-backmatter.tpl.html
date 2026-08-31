@@ -1,0 +1,253 @@
+<title>Vellum · The Print Room, the back matter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@1&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+{{CSS}}
+.folio-room { max-width: 23rem; }
+.seed-controls .control { width: 5.6rem; }
+.seed-controls select.control { width: 7.4rem; appearance: none; -webkit-appearance: none; text-align: left; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--line-tan) 50%), linear-gradient(135deg, var(--line-tan) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 55%, calc(100% - 9px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+.bound-line { font-family: var(--font-flourish); font-style: italic; color: var(--ink-brown); font-size: 0.95rem; line-height: 1.5; }
+.bound-line strong { font-family: var(--font-display); font-style: normal; font-weight: 400; letter-spacing: 0.04em; color: var(--ink-dark); }
+.bind-row { display: flex; align-items: center; gap: 0.7rem; margin-top: 0.7rem; flex-wrap: wrap; }
+.bind-row .stamp { font-family: var(--font-body); font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.85rem; color: var(--ink-brown); }
+.contents-head { font-family: var(--font-display); letter-spacing: 0.05em; color: var(--ink-brown); margin-top: 1rem; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: baseline; }
+.contents-head .gloss { font-family: var(--font-flourish); font-style: italic; letter-spacing: 0; font-size: 0.8rem; color: var(--ink-brown); }
+.contents { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+.contents li { display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem; padding: 0.3rem 0; border-bottom: 1px solid var(--line-faint); font-size: 0.92rem; line-height: 1.4; }
+.contents .cr-num { flex: 0 0 2.4rem; text-align: right; font-family: var(--font-body); font-variant-caps: small-caps; letter-spacing: 0.06em; color: var(--ink-brown); }
+.contents .cr-text { flex: 1 1 0; min-width: 0; color: var(--ink-annals); }
+.contents .cr-text em { font-family: var(--font-flourish); font-style: italic; color: var(--ink-brown); }
+.contents .cr-text .n { font-variant-caps: small-caps; letter-spacing: 0.06em; color: var(--ink-brown); font-size: 0.85em; }
+.contents a.turn { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--line-tan); }
+.contents a.turn:hover { color: var(--ink-dark); border-bottom-color: var(--ink-dark); }
+.contents li.on { background: linear-gradient(to right, var(--control-gold), transparent 70%); margin: 0 -0.6rem; padding-left: 0.6rem; padding-right: 0.6rem; border-bottom-color: var(--line-tan); }
+.contents li.on .cr-num { color: var(--ink-dark); }
+.contents li.on a.turn.here, .contents li.open a.turn.here { border-bottom: 2px solid var(--ink-dark); font-weight: 600; color: var(--ink-dark); }
+.plates { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; margin: 0.45rem 0 0.3rem 3.2rem; flex: 1 1 100%; }
+.plates figure { margin: 0; cursor: pointer; }
+.plates img { display: block; width: 100%; height: auto; border: 1px solid var(--line-tan); box-shadow: 0 3px 10px rgb(from var(--chart-ink) r g b / 0.25); }
+.plates figure.here img { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
+.plates figcaption { font-family: var(--font-flourish); font-style: italic; font-size: 0.72rem; color: var(--ink-brown); margin-top: 0.2rem; line-height: 1.3; }
+.atlas-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.slip .caveat { font-size: 0.78rem; font-style: italic; color: var(--ink-faded); line-height: 1.45; margin-top: 0.7rem; }
+.legend-head .pressed { display: inline-flex; align-items: center; gap: 0.5rem; }
+.legend-head select { appearance: none; -webkit-appearance: none; cursor: pointer; font-family: var(--font-body); font-size: 0.86rem; color: var(--parchment-bright);
+  background: rgb(from var(--chart-ink) r g b / 0.45); border: 1px solid var(--line-tan); padding: 0.2rem 1.6rem 0.2rem 0.55rem;
+  background-image: linear-gradient(45deg, transparent 50%, var(--line-tan) 50%), linear-gradient(135deg, var(--line-tan) 50%, transparent 50%);
+  background-position: calc(100% - 12px) 55%, calc(100% - 7px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+.legend-note { font-family: var(--font-flourish); font-style: italic; font-size: 0.74rem; line-height: 1.4; color: var(--parchment); margin: 0 auto 0.5rem; max-width: 46rem; }
+.legend-btn .verb.dim { font-family: var(--font-body); font-variant-caps: small-caps; font-style: normal; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+.legend:not(.in-slip) { max-width: 34rem; }
+
+/* THE MOCK'S QUESTION (#497): where does the back matter open? seat p = a page turned onto the stage; seat s = the section unfolds inside the slip under its row. */
+/* the back matter set as a page of the atlas, in the document dress */
+.matter-body h2 { font-family: var(--font-display); font-weight: 400; letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan); padding-bottom: 0.3rem; margin: 0 0 0.8rem; color: var(--ink-dark); }
+.matter-body .realms, .matter-body .chronicle-intro { font-family: var(--font-flourish); font-style: italic; color: var(--ink-brown); margin: 0 0 0.8rem; }
+.matter-body .banners { display: flex; flex-wrap: wrap; gap: 1.1rem; justify-content: center; }
+.matter-body .banner { width: 120px; text-align: center; margin: 0; }
+.matter-body .banner svg { width: 100%; height: auto; }
+.matter-body .banner figcaption { font-family: var(--font-flourish); font-style: italic; color: var(--ink-brown); font-size: 0.85rem; padding-top: 0.35rem; }
+.matter-body ol.chronicle { list-style: none; padding: 0; margin: 0; }
+.matter-body ol.chronicle li { padding: 0.4rem 0; border-bottom: 1px solid var(--line-faint); display: flex; gap: 0.9rem; }
+.matter-body ol.chronicle .year { flex: 0 0 3.2rem; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-brown); }
+/* explicit, not inherited: the mock pages have no doctype, and a quirks-mode table takes the document's colour (the deep's parchment), not its ancestors' ink */
+.matter-body table { width: 100%; border-collapse: collapse; font-size: 0.95rem; color: var(--ink-dark); }
+.matter-body th { text-align: left; border-bottom: 2px solid var(--ink-dark); padding: 0.45rem 0.6rem; }
+.matter-body td { border-bottom: 1px solid var(--line-faint); padding: 0.45rem 0.6rem; vertical-align: top; }
+.matter-body td.name { font-weight: 600; white-space: nowrap; }
+.matter-body td.name.capital { text-transform: uppercase; letter-spacing: 0.06em; }
+.matter-body td.name .former { display: block; white-space: normal; font-weight: 400; font-size: 0.86em; color: var(--ink-brown); text-transform: none; letter-spacing: normal; }
+.matter-body td.note { font-style: italic; color: var(--ink-brown); }
+
+/* seat p: the page on the stage */
+.doc-page { display: none; position: fixed; z-index: 1; overflow: hidden; background: var(--parchment-bright);
+  border: 1px solid var(--line-tan); box-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55); }
+.doc-page .page-inner { width: 900px; transform-origin: 0 0; padding: 56px 64px; box-sizing: border-box; color: var(--ink-dark); }
+.doc-page .page-head { text-align: center; font-family: var(--font-body); font-variant-caps: small-caps; letter-spacing: 0.3em; font-size: 0.8rem; color: var(--ink-faded); margin: 0 0 1.2rem; }
+body.seat-p .doc-page { display: block; }
+body.seat-p .sheet { display: none; }
+/* seat s: the section unfolds in the slip under its row */
+.contents li .matter { display: none; }
+body.seat-s .contents li.open .matter { display: block; flex: 1 1 100%; margin: 0.45rem 0 0.4rem 0; font-size: 0.8rem; }
+body.seat-s .contents li.open { border-left: 2px solid var(--line-tan); padding-left: 0.45rem; }
+body.seat-s .matter .matter-body h2 { display: none; }
+body.seat-s .matter .matter-body table { font-size: 0.78rem; }
+body.seat-s .matter .matter-body th, body.seat-s .matter .matter-body td { padding: 0.3rem 0.35rem; }
+body.seat-s .matter .matter-body .banner { width: 88px; }
+body.seat-s .matter .matter-body ol.chronicle li { gap: 0.6rem; padding: 0.3rem 0; }
+body.seat-s .matter .matter-body ol.chronicle .year { flex-basis: 2.6rem; }
+
+@media (max-width: 900px) {
+  .folio-room { max-width: 13rem; }
+  .seed-controls { flex-wrap: wrap; }
+  .legend.in-slip .legend-row { gap: 0.4rem; }
+  .legend.in-slip .legend-btn { flex: 1 1 40%; }
+  .plates { margin-left: 0; }
+}
+</style>
+<script>window.ROOM_CAM = { top: 60, bottom: 104, bottomNarrow: 58 };
+addEventListener('DOMContentLoaded', () => document.body.classList.add('seat-' + (new URLSearchParams(location.search).get('seat') || 'p')));</script>
+
+<div class="fog a"></div><div class="fog b"></div>
+<div class="stage" id="stage">
+  <div class="sheet" id="sheet">
+    <img class="chart" id="plate-turned" src="{{PLATE_VEGETATION}}" alt="Plate iii of the bound atlas: the vegetation of {{WORLD}}">
+  </div>
+</div>
+<div class="doc-page" aria-label="A page of the bound atlas"><div class="page-inner"><p class="page-head">VELLUM · THE BOUND ATLAS OF {{WORLD}} · CHART № 42</p><div class="matter-body" id="page-matter"></div></div></div>
+<div class="vignette top"></div><div class="vignette bottom"></div>
+
+{{NAV}}
+
+<aside class="chrome corner tr folio-room">
+  <h1>The Print Room</h1>
+  <p class="room-tagline">take a world home</p>
+  <form class="seed-controls" onsubmit="return false">
+    <input class="control" type="text" inputmode="numeric" pattern="[0-9]*" value="42" aria-label="seed">
+    <select class="control" aria-label="style"><option selected>antique</option><option>topographic</option><option>ink</option><option>nautical</option></select>
+    <button class="primary" type="submit">Pull a proof</button>
+  </form>
+  <p class="seed-gloss">bring a chart in from the Explorer, or call one up by number</p>
+</aside>
+
+<aside class="slip" id="slip" aria-labelledby="atlas-title">
+  <div class="slip-head">
+    <button class="slip-fold" aria-label="Fold the atlas away">&times;</button>
+    <p class="card-verb">Take home</p>
+    <h2 class="card-title" id="atlas-title">The Bound Atlas</h2>
+    <p class="card-where">the whole atlas on one sheet</p>
+  </div>
+  <div class="slip-body">
+    <p class="bound-line" role="status">The atlas of <strong>{{WORLD}}</strong> is bound: {{ATLAS_FIGURES}} plates, the chronicle and the gazetteer, from the proof on the desk.</p>
+    <div class="bind-row">
+      <button class="primary" type="button">Bind it again</button>
+      <span class="stamp">bound in 12s</span>
+    </div>
+    <p class="contents-head"><span>Contents of the atlas</span><span class="gloss turn-gloss">a thumbnail turns the sheet</span></p>
+    <ol class="contents" id="contents">
+      <li><span class="cr-num">i</span><span class="cr-text"><a class="turn" href="#">The chart, drawn in the <em>antique</em> manner</a></span>
+        <div class="plates">
+          <figure><img src="{{THUMB:antique}}" alt=""><figcaption>The world chart, drawn in the antique manner</figcaption></figure>
+        </div></li>
+      <li><span class="cr-num">ii</span><span class="cr-text">Other draughtings: <a class="turn" href="#"><em>topographic</em></a>, <a class="turn" href="#"><em>pen &amp; ink</em></a>, <a class="turn" href="#"><em>nautical</em></a></span></li>
+      <li class="on" id="row-veg"><span class="cr-num">iii</span><span class="cr-text">Thematic surveys: <a class="turn here" href="#"><em>vegetation</em></a>, <a class="turn" href="#"><em>temperature</em></a>, <a class="turn" href="#"><em>rainfall</em></a>, <a class="turn" href="#"><em>population</em></a></span>
+        <div class="plates">
+          <figure class="here"><img src="{{THUMB:theme-vegetation}}" alt=""><figcaption>Vegetation</figcaption></figure>
+          <figure><img src="{{THUMB:theme-climate}}" alt=""><figcaption>Temperature</figcaption></figure>
+        </div></li>
+      <li><span class="cr-num">iv</span><span class="cr-text">Regional surveys: <a class="turn" href="#"><em>{{REGION_1}}</em></a>, <a class="turn" href="#"><em>{{REGION_2}}</em></a></span></li>
+      <li><span class="cr-num">v</span><span class="cr-text"><a class="turn" href="#">The prospect of <em>{{CAPITAL}}</em></a></span></li>
+      <li data-matter="banners"><span class="cr-num">vi</span><span class="cr-text"><a class="turn" href="#">The banners of every realm</a> <span class="n">· {{ATLAS_BANNERS}} arms</span></span>
+        <div class="matter"><div class="matter-body"></div></div></li>
+      <li data-matter="chronicle"><span class="cr-num">vii</span><span class="cr-text"><a class="turn" href="#">The chronicle</a> <span class="n">· {{CHRONICLE_N}} entries</span></span>
+        <div class="matter"><div class="matter-body"></div></div></li>
+      <li data-matter="gazetteer"><span class="cr-num">viii</span><span class="cr-text"><a class="turn" href="#">The gazetteer</a> <span class="n">· {{GAZETTEER_N}} places</span></span>
+        <div class="matter"><div class="matter-body"></div></div></li>
+    </ol>
+    <nav class="legend in-slip" aria-label="A poster plate">
+      <p class="legend-head">A poster plate, pressed as the engraving (SVG)</p>
+      <div class="legend-row">
+        <a class="legend-btn" href="#"><span class="verb dim">1500 px</span><span class="room">Chart</span></a>
+        <a class="legend-btn" href="#"><span class="verb dim">2400 px</span><span class="room">Desk</span></a>
+        <a class="legend-btn" href="#"><span class="verb dim">3300 px</span><span class="room">Wall</span></a>
+        <a class="legend-btn" href="#"><span class="verb dim">4200 px</span><span class="room">Grand</span></a>
+        <a class="legend-btn gold" href="#"><span class="verb">Back to</span><span class="room">The Explorer</span></a>
+      </div>
+    </nav>
+  </div>
+  <div class="slip-foot">
+    <div class="atlas-actions" role="group" aria-label="Bound atlas">
+      <button type="button" class="primary">Print</button>
+      <button type="button">Download</button>
+      <button type="button">Hide</button>
+    </div>
+    <p class="caveat">Print opens your browser's Save as PDF, one plate per page. The single file opens offline in any browser.</p>
+  </div>
+</aside>
+<button class="slip-tab" type="button">The Bound Atlas</button>
+
+<div class="chrome corner bl folio">
+  <p class="folio-title">{{WORLD}} · Chart № 42</p>
+  <p class="folio-sub plate-line" id="plate-line">plate viii of the bound atlas · the gazetteer</p>
+  <p class="folio-sub">surveyed in the year {{YEAR}} of the Cedar Age</p>
+</div>
+
+<nav class="legend" aria-label="A poster plate">
+  <p class="legend-head"><span class="pressed">A poster plate, pressed as <select aria-label="Pressed as"><option selected>The engraving itself (SVG)</option><option>An impression (PNG)</option><option>A finer impression (PNG ×2)</option></select></span></p>
+  <p class="legend-note">The engraving is exact at any size; an impression is pressed with your device's fonts, and a large one is fitted to what your browser can hold. The chart is pulled only as the engraving.</p>
+  <div class="legend-row">
+    <a class="legend-btn" href="#"><span class="verb dim">1500 px</span><span class="room">Chart</span></a>
+    <a class="legend-btn" href="#"><span class="verb dim">2400 px</span><span class="room">Desk</span></a>
+    <a class="legend-btn" href="#"><span class="verb dim">3300 px</span><span class="room">Wall</span></a>
+    <a class="legend-btn" href="#"><span class="verb dim">4200 px</span><span class="room">Grand</span></a>
+    <a class="legend-btn gold" href="#"><span class="verb">Back to</span><span class="room">The Explorer</span></a>
+  </div>
+</nav>
+
+<template id="tpl-banners">{{BANNERS_HTML}}</template>
+<template id="tpl-chronicle">{{CHRONICLE_HTML}}</template>
+<template id="tpl-gazetteer">{{GAZETTEER_HTML}}</template>
+
+{{GLASS}}
+<script>{{JS}}</script>
+<script>
+(function () {
+  const LINE = { banners: 'plate vi of the bound atlas · the banners of every realm', chronicle: 'plate vii of the bound atlas · the chronicle', gazetteer: 'plate viii of the bound atlas · the gazetteer' };
+  const html = (key) => document.getElementById('tpl-' + key).innerHTML;
+  const seatP = () => document.body.classList.contains('seat-p');
+  let lean = 1;
+  function fitDoc() {
+    const page = document.querySelector('.doc-page');
+    if (!page || !seatP()) return;
+    const r = (sel) => { const el = document.querySelector(sel); if (!el) return null; const b = el.getBoundingClientRect(); return b.height > 0 ? b : null; };
+    const narrow = innerWidth <= 900;
+    const tl = r('.corner.tl'), tr = r('.corner.tr');
+    const top = Math.max(tl ? tl.bottom : 0, tr ? tr.bottom : 0) + (narrow ? 8 : 14);
+    let floor = innerHeight;
+    const slip = document.querySelector('.slip');
+    for (const b of [r('.corner.bl'), r('.legend:not(.in-slip)'), narrow && slip ? slip.getBoundingClientRect() : null]) if (b) floor = Math.min(floor, b.top);
+    const folded = !slip || slip.classList.contains('folded') || narrow;
+    const right = folded ? 0 : slip.getBoundingClientRect().width + 56;
+    const availW = innerWidth - right, availH = floor - (narrow ? 8 : 14) - top;
+    const inner = page.querySelector('.page-inner');
+    inner.style.transform = '';
+    const W = 900, H = Math.max(1100, inner.offsetHeight);
+    const s = Math.min(availW / W, availH / H) * lean;
+    page.style.width = Math.min(availW, W * s) + 'px'; page.style.height = Math.min(availH, H * s) + 'px';
+    page.style.left = (availW - Math.min(availW, W * s)) / 2 + 'px'; page.style.top = top + (availH - Math.min(availH, H * s)) / 2 + 'px';
+    page.style.overflow = lean > 1 ? 'auto' : 'hidden';
+    inner.style.transform = 'scale(' + s + ')';
+  }
+  function show(key) {
+    const rows = document.querySelectorAll('#contents li[data-matter]');
+    if (seatP()) {
+      document.getElementById('page-matter').innerHTML = html(key);
+      document.getElementById('plate-line').textContent = LINE[key];
+      document.getElementById('row-veg').classList.remove('on');
+      document.querySelector('#row-veg .turn').classList.remove('here');
+      rows.forEach((li) => { const on = li.dataset.matter === key; li.classList.toggle('on', on); li.querySelector('.turn').classList.toggle('here', on); });
+      fitDoc();
+    } else {
+      rows.forEach((li) => {
+        const open = li.dataset.matter === key && !li.classList.contains('open');
+        li.classList.toggle('open', open);
+        li.querySelector('.turn').classList.toggle('here', open);
+        li.querySelector('.matter .matter-body').innerHTML = open ? html(key) : '';
+      });
+    }
+  }
+  addEventListener('DOMContentLoaded', () => {
+    const page = document.querySelector('.doc-page');
+    page.addEventListener('wheel', (e) => { if (!seatP()) return; e.preventDefault(); e.stopPropagation(); lean = Math.min(4, Math.max(1, lean * Math.exp(-e.deltaY * 0.0015))); fitDoc(); }, { passive: false });
+    addEventListener('keydown', (e) => { if (!seatP() || e.target.matches('input, select')) return; if (e.key === '+' || e.key === '=') { lean = Math.min(4, lean * 1.3); fitDoc(); } else if (e.key === '-') { lean = Math.max(1, lean / 1.3); fitDoc(); } else if (e.key === '0') { lean = 1; fitDoc(); } });
+    document.querySelectorAll('#contents li[data-matter] a.turn').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); show(a.closest('li').dataset.matter); }));
+    show('gazetteer');
+    addEventListener('resize', fitDoc);
+    document.fonts && document.fonts.ready.then(fitDoc);
+    setTimeout(fitDoc, 900);
+  });
+  window.__matter = show;
+})();
+</script>
