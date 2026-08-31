@@ -424,16 +424,25 @@ export async function run(ctx) {
     printProof.stage !== "none" && printProof.stagePos === "static" && printProof.map === "none" && printProof.svg === true && printProof.atlasEmpty === true && printProof.slip === "none",
     JSON.stringify(printProof),
   );
-  // Paper is narrower than the 900px phone query: at a Letter-wide layout the kit's narrow block reaches the folio (clamped, tagline hidden) and its print block must take both back.
+  // Paper lays out under the 900px query (test/site/room.test.ts pins the taking-back).
   await send("Emulation.setDeviceMetricsOverride", { width: 816, height: 1056, deviceScaleFactor: 1, mobile: false });
-  const paper = await evaluate(`(()=>{const cs=(sel)=>getComputedStyle(document.querySelector(sel));return{w:window.innerWidth,tagline:cs(".folio-room .room-tagline").display,name:cs(".folio-room .room-name").display,folioMax:cs(".corner.folio-room").maxWidth,stagePos:cs(".stage").position,corner:cs(".corner.bl").display};})()`);
+  const paper = await evaluate(`(()=>{const cs=(sel)=>getComputedStyle(document.querySelector(sel));return{w:window.innerWidth,tagline:cs(".folio-room .room-tagline").display,name:cs(".folio-room .room-name").display,nameSize:cs(".folio-room .room-name").fontSize,folioMax:cs(".corner.folio-room").maxWidth,stagePos:cs(".stage").position,corner:cs(".corner.bl").display};})()`);
   check(
-    "PR21c at paper width (816px, print media) the room's name and tagline print and the corner is unclamped; the chart's folio prints as nothing",
-    paper.w === 816 && paper.tagline === "block" && paper.name === "block" && paper.folioMax === "none" && paper.stagePos === "static" && paper.corner === "none",
+    "PR21c at paper width (816px, print media) the room's name and tagline print at their own size and the corner is unclamped; the chart's folio prints as nothing",
+    paper.w === 816 && paper.tagline === "block" && paper.name === "block" && paper.nameSize === "21.12px" && paper.folioMax === "none" && paper.stagePos === "static" && paper.corner === "none",
     JSON.stringify(paper),
   );
   await send("Emulation.clearDeviceMetricsOverride");
   await send("Emulation.setEmulatedMedia", { media: "" });
+
+  await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
+  const phone390 = await evaluate(`(()=>{const cs=(s)=>getComputedStyle(document.querySelector(s));const style=document.getElementById("pr-style");const shown=cs("#pr-style").display!=="none";const glassClosed=cs(".zoomery").display;document.querySelector(".slip-handle").click();const glassOpen=cs(".zoomery").display;const r=style.getBoundingClientRect();const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);const hitOk=hit===style||style.contains(hit);document.querySelector(".slip-handle").click();return{shown,glassClosed,glassOpen,hitOk,glassBack:cs(".zoomery").display};})()`);
+  check(
+    "PR32 at 390 the style picker shows and takes its own tap; the Glass stands down while the sheet is open and returns when it folds (ruled 2026-08-30; skeptic round 2's stolen-tap collision)",
+    !!phone390 && phone390.shown === true && phone390.glassClosed === "flex" && phone390.glassOpen === "none" && phone390.hitOk === true && phone390.glassBack === "flex",
+    JSON.stringify(phone390),
+  );
+  await send("Emulation.clearDeviceMetricsOverride");
 
   await shoot("print-room.png");
 

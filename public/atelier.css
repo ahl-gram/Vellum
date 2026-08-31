@@ -217,8 +217,8 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .fog, .corner, .slip, .slip-tab, .vignette, .legend, .zoomery, .folio { display: none !important; }
   /* The room's name is the page's h1 (#288): it prints in flow at the top, the rest of the corner as nothing. */
   .corner.folio-room { display: block !important; position: static; text-align: left; margin: 0 0 1rem; max-width: none; }
-  /* Paper is narrower than 900px, so the phone block above reaches it: the tagline comes back and the corner unclamps (skeptic on PR #496). */
   .folio-room .room-name, .folio-room .room-tagline { color: var(--ink-dark); display: block; }
+  .folio-room .room-name { font-size: 1.32rem; }
   .folio-room .dateline, .folio-room .gloss, .folio-controls { display: none; }
   html:has(body.chart-room), body.chart-room { height: auto; overflow: visible; }
   body.chart-room .stage { position: static; animation: none; }

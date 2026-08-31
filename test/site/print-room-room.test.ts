@@ -46,7 +46,7 @@ test("PRR2 the corner is the mockup plus the dice (ruled 2026-08-30): seed, dice
 });
 
 test("PRR3 the Bound Atlas is the slip: Bind and the contents in its body, Print / Download / Hide in its foot, the legend's phone dock inside it", () => {
-  assert.match(page, /<Slip id="atlas" verb="Take home" title="The Bound Atlas" where="the whole atlas on one sheet"/, "the slip carries the mockup's head");
+  assert.match(page, /<Slip id="atlas" verb="Take home" title="The Bound Atlas" where="the whole atlas on one sheet" fold="Fold the atlas away">/, "the slip carries the mockup's head; the fold names the atlas, not the retired desk");
   const slip = between("<Slip", "</Slip>");
   const foot = slip.slice(slip.indexOf('slot="foot"'));
   assert.ok(foot.length > 0, "the slip has a foot");
@@ -86,6 +86,7 @@ test("PRR4 the legend row is the poster plates plus a road back (ruled 2026-08-3
   assert.match(phone, /\.legend\.in-slip \.legend-head\s*\{[^}]*display:\s*block/, "docked in the phone sheet the head stays, since it carries the Pressed-as choice (the kit hides it)");
   assert.match(phone, /\.legend\.in-slip \.legend-note\s*\{[^}]*display:\s*none/, "the note stands down there");
   assert.match(phone, /\.folio-controls\s*\{[^}]*flex-wrap:\s*wrap/, "the corner's row wraps on a phone (the mockup's seed-controls)");
+  assert.match(phone, /body:has\(\.slip\.open\) \.corner\.br\.zoomery\s*\{[^}]*display:\s*none/, "the Glass stands down while the sheet is open: climbing above it, it sat under the corner's rows and stole their taps (skeptic round 2)");
 });
 
 test("PRR5 the stage holds the fitted sheet with the proof and the turned plate in one gesture box; the status pill, the Glass, the chart's folio and the hidden document keep their ids", () => {
@@ -126,6 +127,7 @@ test("PRR6 seats.ts binds the Glass and the room with the turned plate's own asp
   const bind = atlas.slice(atlas.indexOf("function bindAtlas"), atlas.indexOf("function printAtlas"));
   assert.ok(bind.indexOf("revokeObjectURL") > bind.indexOf("renderBoundAtlas(res.atlas)"), "a re-bind revokes the previous plates only after the new ones are on the page (a click mid-bind turned a revoked blob, skeptic on PR #496)");
   assert.match(bind, /if \(lastAtlas !== null\) setDeliveryEnabled\(true\)/, "a failed re-bind leaves the previous atlas deliverable");
+  assert.match(atlas, /\.focus\(\{ preventScroll: true \}\)/, "a turn re-renders the index, so its successor control takes the focus back without moving the page");
 });
 
 test("PRR7 the css: the sheet fitted to what the chrome leaves, the hidden document off screen, print fixed in this sub (ruled 2026-08-30): the atlas one plate per page when bound, the proof otherwise", () => {

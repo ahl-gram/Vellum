@@ -70,6 +70,7 @@ test("the kit's print block restores the room folio's tagline and width after th
   const block = css.slice(print);
   assert.match(block, /\.folio-room \.room-name, \.folio-room \.room-tagline\s*\{[^}]*display:\s*block/, "the tagline prints");
   assert.match(block, /\.corner\.folio-room\s*\{[^}]*max-width:\s*none/, "the corner unclamps on paper");
+  assert.match(block, /\.folio-room \.room-name\s*\{[^}]*font-size:\s*1\.32rem/, "and the name prints at the corner's own size, not the phone's");
 });
 
 test("bindRoom seats the legend row before it fits the sheet", () => {

@@ -88,6 +88,8 @@ body.has-atlas .slip .intro { display: none; }
   /* Docked in the sheet the head stays (the mockup shows it): it carries the Pressed-as choice, which the kit's hidden head would take with it; the select takes the house dress on the panel's parchment; the note stands down. */
   .legend.in-slip .legend-head { display: block; color: var(--ink-brown); }
   .legend.in-slip .legend-status { display: block; color: var(--ink-brown); }
+  /* The open sheet covers the chart, and the Glass climbing above it lands under the corner's three rows (a tap on the style caret zoomed the sheet, skeptic round 2 on PR #496). */
+  body:has(.slip.open) .corner.br.zoomery { display: none; }
   .legend.in-slip .legend-head select { color: var(--ink-dark); background-color: var(--control-cream); border-color: var(--ink-dark); }
   .legend.in-slip .legend-note { display: none; }
   .plates { margin-left: 0; }

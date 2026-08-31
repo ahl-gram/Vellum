@@ -47,7 +47,7 @@ const contents = contentsRows(null);
   <p class="gloss">bring a chart in from the Explorer, or call one up by number</p>
 </RoomFolio>
 
-<Slip id="atlas" verb="Take home" title="The Bound Atlas" where="the whole atlas on one sheet" fold="Fold the order desk away">
+<Slip id="atlas" verb="Take home" title="The Bound Atlas" where="the whole atlas on one sheet" fold="Fold the atlas away">
   <p class="intro">Every draughting, the thematic and regional surveys, the banners, the
   chronicle, and the gazetteer, bound from the proof on the desk.</p>
   <p class="bound-line" id="pr-bound-status" role="status" aria-live="polite"></p>
@@ -75,9 +75,8 @@ const contents = contentsRows(null);
   <p class="folio-sub" id="folio-sub"></p>
 </div>
 
-<!-- The legend row is the poster plates (#462 addendum) plus the road back (ruled 2026-08-30 on #463); the road's href is kept current beside every hash write (app.ts). -->
 <nav class="legend" aria-label="A poster plate">
-  <p class="legend-head" id="grp-plates"><span class="pressed">A poster plate, pressed as
+  <p class="legend-head"><span class="pressed">A poster plate, pressed as
     <select id="pr-format" aria-label="Pressed as">
       <option value="svg" selected>The engraving itself (SVG)</option>
       <option value="png1">An impression (PNG)</option>
@@ -107,7 +106,6 @@ const contents = contentsRows(null);
   </div>
 </div>
 
-<!-- The hidden document (the #494 ruling): off screen, it is what Print and Download deliver once the atlas is bound. -->
 <div id="pr-atlas" class="atlas-sheet"></div>
 
 <script type="module" src="./app.bundle.js" is:inline></script>

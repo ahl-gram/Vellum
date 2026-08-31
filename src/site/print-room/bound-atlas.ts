@@ -75,7 +75,6 @@ let here: string | null = null;
 let bindGen = 0;
 let binding = false;
 
-/** The sheet's aspect for the room's fit: the turned plate's own, or null so the fit reads the proof's svg. */
 export function sheetAspect(): number | null {
   return here === null ? null : plates.get(here)?.aspect ?? null;
 }
@@ -165,7 +164,7 @@ ${atlas.chronicleHtml}
 ${atlas.gazetteerHtml}`;
 }
 
-export function turnTo(key: string): void {
+function turnTo(key: string): void {
   const b = plates.get(key);
   if (!b) return;
   here = key;
@@ -191,7 +190,6 @@ function bindAtlas(): void {
   })
     .then((res) => {
       if (myGen !== bindGen) return;
-      // The previous binding stays turnable until this one is on the page: its URLs are revoked only after the swap (skeptic on PR #496: a click during a re-bind blanked the sheet against revoked blobs).
       const stale = atlasUrls;
       atlasUrls = [];
       lastAtlas = res.atlas;
@@ -251,8 +249,13 @@ export function initBoundAtlas(getBasisFn: () => PosterBasis | null, sheetFace: 
   downloadBtn.addEventListener("click", downloadAtlas);
   hideBtn.addEventListener("click", hideAtlas);
   contents.addEventListener("click", (e) => {
-    const key = (e.target as Element).closest<HTMLElement>("[data-plate]")?.dataset.plate;
-    if (key) turnTo(key);
+    const hit = (e.target as Element).closest<HTMLElement>("[data-plate]");
+    const key = hit?.dataset.plate;
+    if (!hit || !key) return;
+    const kind = hit.classList.contains("thumb") ? ".thumb" : ".turn";
+    turnTo(key);
+    // The re-render dropped the activated button; its successor takes the focus back (preventScroll: the page never moves).
+    contents.querySelector<HTMLElement>(`${kind}[data-plate="${CSS.escape(key)}"]`)?.focus({ preventScroll: true });
   });
   window.__vellumPrintAtlas = printAtlas;
 }

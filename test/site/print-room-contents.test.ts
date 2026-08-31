@@ -24,8 +24,8 @@ test("unbound, the eight rows stand in the mockup's words with no plates and no 
   const li = rows(html);
   assert.equal(li.length, 8, "eight rows, i to viii");
   assert.deepEqual(li.map((r) => /<span class="cr-num">([ivx]+)<\/span>/.exec(r)?.[1]), ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii"]);
-  assert.match(li[0], /^<li class="on">/, "the proof is on the sheet");
-  assert.match(li[0], /The chart, as proofed/);
+  assert.match(li[0], /^<li>/, "nothing of the atlas is on the sheet yet");
+  assert.match(li[0], /The chart, drawn in the <em>antique<\/em> manner/, "the atlas's first plate is the antique chart by construction, never 'as proofed' (the proof may be another style, skeptic round 2)");
   assert.match(li[3], /Regional surveys, two close-ins/);
   assert.match(li[4], /The prospect of the capital/);
   assert.doesNotMatch(html, /class="plates"|class="turn"|data-plate=/, "nothing to turn to yet");
@@ -35,7 +35,7 @@ test("bound, every plate is a turn and a thumbnail, the regions and the prospect
   const html = contentsRows(DATA);
   const li = rows(html);
   assert.equal(li.length, 8);
-  assert.match(li[0], /<button class="turn" type="button" data-plate="antique">The chart, <em>antique<\/em>, as proofed<\/button>/);
+  assert.match(li[0], /<button class="turn" type="button" data-plate="antique">The chart, drawn in the <em>antique<\/em> manner<\/button>/);
   assert.match(li[1], /Other draughtings: <button class="turn" type="button" data-plate="topographic"><em>topographic<\/em><\/button>, <button class="turn" type="button" data-plate="ink"><em>pen &amp; ink<\/em><\/button>, <button class="turn" type="button" data-plate="nautical"><em>nautical<\/em><\/button>/);
   assert.match(li[2], /Thematic surveys: .*<em>vegetation<\/em>.*<em>temperature<\/em>.*<em>rainfall<\/em>.*<em>population<\/em>/);
   assert.match(li[3], /Regional surveys: <button class="turn" type="button" data-plate="region-1"><em>The Environs of Laukuwelua<\/em><\/button>, <button[^>]*data-plate="region-2"><em>The Environs of Toatauhe<\/em><\/button>/);
@@ -85,7 +85,7 @@ test("a plate's aspect reads its viewBox, then its width and height, and is null
   assert.equal(plateAspect(`<svg>`), null);
 });
 
-test("the folio's plate line names the plate by its section's numeral and reads the title mid-sentence (the mockup's 'plate iii of the bound atlas · a thematic survey of the vegetation')", () => {
+test("the folio's plate line names the plate by its section's numeral and reads the title mid-sentence ('plate iii of the bound atlas · a thematic survey of vegetation')", () => {
   assert.equal(plateLine("hero", "The world chart, drawn in the antique manner"), "plate i of the bound atlas · the world chart, drawn in the antique manner");
   assert.equal(plateLine("draughting", "Pen & ink"), "plate ii of the bound atlas · drawn in the pen & ink manner");
   assert.equal(plateLine("theme", "Vegetation"), "plate iii of the bound atlas · a thematic survey of vegetation");

@@ -46,7 +46,7 @@ const capitalOf = (p: PlateRef): string => p.title.replace(/^The Prospect of /, 
 export function contentsRows(atlas: ContentsData | null): string {
   if (atlas === null) {
     return [
-      row(0, true, "The chart, as proofed"),
+      row(0, false, "The chart, drawn in the <em>antique</em> manner"),
       row(1, false, "Other draughtings: <em>topographic, pen &amp; ink, nautical</em>"),
       row(2, false, "Thematic surveys: <em>vegetation, temperature, rainfall, population</em>"),
       row(3, false, "Regional surveys, two close-ins"),
@@ -59,7 +59,7 @@ export function contentsRows(atlas: ContentsData | null): string {
   const { here } = atlas;
   const on = (ps: readonly PlateRef[]): boolean => ps.some((p) => p.key === here);
   return [
-    row(0, on([atlas.hero]), turn(atlas.hero, here, "The chart, <em>antique</em>, as proofed"), plates([atlas.hero], here)),
+    row(0, on([atlas.hero]), turn(atlas.hero, here, "The chart, drawn in the <em>antique</em> manner"), plates([atlas.hero], here)),
     row(1, on(atlas.draughtings), `Other draughtings: ${named(atlas.draughtings, here, lower)}`, plates(atlas.draughtings, here)),
     row(2, on(atlas.themes), `Thematic surveys: ${named(atlas.themes, here, lower)}`, plates(atlas.themes, here)),
     row(3, on(atlas.regions), atlas.regions.length > 0 ? `Regional surveys: ${named(atlas.regions, here, (p) => p.title)}` : "Regional surveys: none for this world", plates(atlas.regions, here)),
@@ -79,7 +79,6 @@ export function plateCounts(html: { readonly bannersHtml: string; readonly chron
   };
 }
 
-/** "The Environs of X" reads "the environs of X" mid-line; a name that does not open that way is left alone. */
 const lowerNoun = (title: string): string => title.replace(/^The (\w+) of /, (_, noun: string) => `the ${noun.toLowerCase()} of `);
 
 export function plateLine(section: PlateSection, title: string): string {
