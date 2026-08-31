@@ -83,9 +83,8 @@ body.has-atlas .slip .intro { display: none; }
 #pr-atlas .atlas-head .chartno { letter-spacing: 0.3em; font-size: 0.8rem; color: var(--ink-faded); margin: 0.5rem 0 0; }
 
 @media (max-width: 900px) {
-  /* The mockup's phone corner: the row wraps, Pull a proof under the seed (the label is wider than the Explorer's Draw and ran into the header's tagline at 390, plate read 2026-08-30). */
+  /* The mockup's phone corner, except the style picker STAYS (ruled 2026-08-30 on #463: no feature lost at any width; the mockup hid it unruled): the row wraps, seed, then style, then Pull a proof. */
   .folio-controls { flex-wrap: wrap; }
-  .folio-controls select.control { display: none; }
   /* Docked in the sheet the head stays (the mockup shows it): it carries the Pressed-as choice, which the kit's hidden head would take with it; the select takes the house dress on the panel's parchment; the note stands down. */
   .legend.in-slip .legend-head { display: block; color: var(--ink-brown); }
   .legend.in-slip .legend-status { display: block; color: var(--ink-brown); }

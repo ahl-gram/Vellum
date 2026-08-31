@@ -82,6 +82,7 @@ test("PRR4 the legend row is the poster plates plus a road back (ruled 2026-08-3
   assert.match(phoneCss, /\.legend\.in-slip \.legend-status\s*\{[^}]*display:\s*block/, "and the status line shows in the docked legend");
   assert.ok(!page.includes('class="plate-row"') && !page.includes('class="plate-dim"'), "the desk's plate row retires");
   const phone = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
+  assert.ok(!phone.includes("select.control"), "the style picker stays on a phone (ruled 2026-08-30: no feature lost at any width; the wrap makes room)");
   assert.match(phone, /\.legend\.in-slip \.legend-head\s*\{[^}]*display:\s*block/, "docked in the phone sheet the head stays, since it carries the Pressed-as choice (the kit hides it)");
   assert.match(phone, /\.legend\.in-slip \.legend-note\s*\{[^}]*display:\s*none/, "the note stands down there");
   assert.match(phone, /\.folio-controls\s*\{[^}]*flex-wrap:\s*wrap/, "the corner's row wraps on a phone (the mockup's seed-controls)");
