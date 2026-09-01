@@ -3,7 +3,7 @@ import { runJob } from "../explorer/worker-client.ts";
 import { plateFigure } from "./plate-markup.ts";
 import { contentsRows, plateCounts, plateLine, type PlateRef } from "./contents-markup.ts";
 import { plateAspect } from "./plate-aspect.ts";
-import { isMatterKey, matterLine, matterPage } from "./matter-markup.ts";
+import { isMatterKey, matterLine, matterPage, matterTitle } from "./matter-markup.ts";
 import type { Matter, Plate } from "./seats.ts";
 import { escapeXml } from "../../render/svg.ts";
 import { ATLAS_SHEET_CSS, atlasDocument, svgToDataUri } from "../../atlas/document.ts";
@@ -173,7 +173,7 @@ function turnTo(key: string): void {
     if (html === "") return;
     here = key;
     renderContents();
-    face.showMatter({ html, line: matterLine(key) });
+    face.showMatter({ html, line: matterLine(key), title: matterTitle(key) });
     return;
   }
   const b = plates.get(key);

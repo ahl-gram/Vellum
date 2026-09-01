@@ -24,11 +24,10 @@
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
-/* The back matter's page face (#497, seat p): the section set as a page of the bound atlas, turned onto the stage and fitted by the room. The inner's base font rides the container width (16px at the 900px reference the measure box uses), so the measured height is the displayed geometry and the page fills the fitted sheet edge to edge. */
-#pr-page { position: absolute; inset: 0; container-type: size; overflow: hidden; background: var(--parchment-bright); }
+/* The back matter's page face (#497, seat p), fitted by the room at the measured aspect. */
+#pr-page { position: absolute; inset: 0; overflow: hidden; background: var(--parchment-bright); }
 #pr-page[hidden] { display: none; }
-#pr-page .matter-page { font-size: 1.7778cqw; }
-#pr-page .page-inner { width: 100%; min-height: 100%; }
+#pr-page .page-inner { width: 900px; font-size: 16px; transform-origin: 0 0; }
 #pr-page-measure { position: absolute; left: -10000px; top: 0; width: 900px; font-size: 16px; visibility: hidden; }
 .matter-page { box-sizing: border-box; padding: 3.5em 4em; color: var(--ink-dark); font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); line-height: 1.5; }
 .matter-page .page-head { text-align: center; font-variant-caps: small-caps; letter-spacing: 0.3em; font-size: 0.8em; color: var(--ink-faded); margin: 0 0 1.5em; }

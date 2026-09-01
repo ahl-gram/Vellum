@@ -53,6 +53,8 @@ test("the narrow width floor is a landscape rule: a portrait page fits the free 
   assert.ok(page.sheet.w < 390, "narrower than the viewport is the price of fitting");
   const chart = fitStage({ ...base, view: { w: 844, h: 390 }, above: [60], below: [300], beside: 0, narrow: true });
   assert.equal(chart.sheet.w, 844, "the landscape chart keeps the pan rule");
+  const square = fitStage({ ...base, aspect: 1, view: { w: 390, h: 844 }, above: [84], below: [738], gap: 8, beside: 0, narrow: true });
+  assert.equal(square.sheet.w, 390, "a square sheet keeps the floor: the boundary is landscape-inclusive");
 });
 
 test("no chrome at all leaves the gap alone, and a chrome past the viewport cannot push the floor below it", () => {

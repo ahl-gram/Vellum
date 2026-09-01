@@ -3,7 +3,7 @@ import { createZoomController } from "../shared/zoom-controller.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";
 import { bindRoom, type Room } from "../shared/room.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
-import { pageAspect } from "./matter-markup.ts";
+import { PAGE_MEASURE_WIDTH, pageAspect } from "./matter-markup.ts";
 
 export interface RoomFurniture {
   readonly stage: HTMLElement;
@@ -31,7 +31,17 @@ export interface Plate {
   readonly line: string;
 }
 
+// The inner lays out ONCE at the 900px/16px measure reference and scales as a unit, so the measured height IS the displayed geometry; re-laying out at the sheet's own font drifted 19px of line rounding at 390 (skeptic round 1 finding 2, measured).
+function bindPageScale(f: RoomFurniture): void {
+  const fit = () => {
+    const s = f.page.clientWidth / PAGE_MEASURE_WIDTH;
+    if (s > 0) f.pageInner.style.transform = `scale(${s})`;
+  };
+  new ResizeObserver(fit).observe(f.page);
+}
+
 export function bindPrintRoom(f: RoomFurniture, aspect: () => number | null): Sheet {
+  bindPageScale(f);
   const zoom = createZoomController({
     viewportEl: f.viewport,
     targetEl: f.map,
@@ -57,6 +67,7 @@ export function writeFolio(f: RoomFurniture, res: { title: string; subtitle: str
 export interface Matter {
   readonly html: string;
   readonly line: string;
+  readonly title: string;
 }
 
 export function showProof(f: RoomFurniture): void {
@@ -67,6 +78,7 @@ export function showProof(f: RoomFurniture): void {
   f.pageInner.innerHTML = "";
   f.preview.hidden = false;
   f.plateLine.textContent = "";
+  restoreLabel(f);
 }
 
 export function showPlate(f: RoomFurniture, plate: Plate): void {
@@ -77,8 +89,10 @@ export function showPlate(f: RoomFurniture, plate: Plate): void {
   f.pageInner.innerHTML = "";
   f.preview.hidden = true;
   f.plateLine.textContent = plate.line;
+  restoreLabel(f);
 }
 
+// innerHTML takes trusted input only: matter.html is matterPage's engine-composed section with every value escaped, the bound-atlas.ts invariant's second sink.
 export function showMatter(f: RoomFurniture, matter: Matter): void {
   f.measure.innerHTML = matter.html;
   f.page.dataset.aspect = String(pageAspect(f.measure.offsetHeight));
@@ -90,6 +104,13 @@ export function showMatter(f: RoomFurniture, matter: Matter): void {
   f.turned.alt = "";
   f.preview.hidden = true;
   f.plateLine.textContent = matter.line;
+  f.viewport.dataset.baseLabel ??= f.viewport.getAttribute("aria-label") ?? "";
+  f.viewport.setAttribute("aria-label", `A page of the bound atlas: ${matter.title}. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.`);
+}
+
+function restoreLabel(f: RoomFurniture): void {
+  const base = f.viewport.dataset.baseLabel;
+  if (base) f.viewport.setAttribute("aria-label", base);
 }
 
 export function matterAspect(f: RoomFurniture): number | null {
