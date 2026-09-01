@@ -478,6 +478,22 @@ export async function run(ctx) {
     !!phone390 && phone390.shown === true && phone390.glassClosed === "flex" && phone390.glassOpen === "none" && phone390.hitOk === true && phone390.glassBack === "flex",
     JSON.stringify(phone390),
   );
+
+  // #497 plate read round 1: the narrow width floor shoved the portrait gazetteer 63px under the header and the bottom sheet; the floor is a landscape rule now (stage-fit.test.ts).
+  await evaluate(`document.getElementById("pr-bind").click()`);
+  let phoneBound = false;
+  for (let i = 0; i < 300; i++) {
+    if (await evaluate(`document.body.classList.contains("has-atlas")`)) { phoneBound = true; break; }
+    await sleep(50);
+  }
+  const phonePage = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="gazetteer"]');if(!b)return null;b.click();const s=document.getElementById("sheet").getBoundingClientRect();const head=document.querySelector("header.chrome").getBoundingClientRect();const slip=document.querySelector(".slip").getBoundingClientRect();const aspect=Number(document.getElementById("pr-page").dataset.aspect);return{ratio:s.width/s.height,aspect,w:s.width,top:s.top,bottom:s.bottom,headBottom:head.bottom,slipTop:slip.top,pageUp:!document.getElementById("pr-page").hidden};})()`);
+  check(
+    "PR33c at 390 the gazetteer page fits the phone stage: clear of the fixed header above and the bottom sheet below, narrower than the viewport at its own aspect",
+    phoneBound && !!phonePage && phonePage.pageUp === true && Math.abs(phonePage.ratio - phonePage.aspect) < 0.01 &&
+      phonePage.w < 390 && phonePage.top >= phonePage.headBottom - 0.5 && phonePage.bottom <= phonePage.slipTop + 0.5,
+    JSON.stringify(phonePage),
+  );
+  await evaluate(`document.getElementById("pr-hide").click()`);
   await send("Emulation.clearDeviceMetricsOverride");
 
   await shoot("print-room.png");
