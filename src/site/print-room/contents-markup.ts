@@ -1,5 +1,6 @@
 // The Print Room's slip contents (#463 part 3/4): the atlas's index, string in and string out like plate-markup.ts. The host mints the blob URLs and hands the refs in; a null atlas is the unbound state.
 import { escapeXml } from "../../render/svg.ts";
+import { matterTitle, type MatterKey } from "./matter-markup.ts";
 import type { PlateSection } from "../../atlas/document.ts";
 
 export interface PlateRef {
@@ -58,15 +59,21 @@ export function contentsRows(atlas: ContentsData | null): string {
   }
   const { here } = atlas;
   const on = (ps: readonly PlateRef[]): boolean => ps.some((p) => p.key === here);
+  const matter = (i: number, key: MatterKey, n: number, noun: string, has: boolean): string => {
+    const text = has
+      ? `<button class="turn${key === here ? " here" : ""}" type="button" data-plate="${key}">${matterTitle(key)}</button> ${count(n, noun)}`
+      : `${matterTitle(key)} ${count(n, noun)}`;
+    return row(i, key === here, text);
+  };
   return [
     row(0, on([atlas.hero]), turn(atlas.hero, here, "The chart, drawn in the <em>antique</em> manner"), plates([atlas.hero], here)),
     row(1, on(atlas.draughtings), `Other draughtings: ${named(atlas.draughtings, here, lower)}`, plates(atlas.draughtings, here)),
     row(2, on(atlas.themes), `Thematic surveys: ${named(atlas.themes, here, lower)}`, plates(atlas.themes, here)),
     row(3, on(atlas.regions), atlas.regions.length > 0 ? `Regional surveys: ${named(atlas.regions, here, (p) => p.title)}` : "Regional surveys: none for this world", plates(atlas.regions, here)),
     row(4, on(atlas.prospects), atlas.prospects.length > 0 ? atlas.prospects.map((p) => turn(p, here, `The prospect of <em>${escapeXml(capitalOf(p))}</em>`)).join(", ") : "The prospect of the capital: none for this world", plates(atlas.prospects, here)),
-    row(5, false, `The banners of every realm ${count(atlas.counts.arms, "arms")}`),
-    row(6, false, `The chronicle ${count(atlas.counts.entries, "entries")}`),
-    row(7, false, `The gazetteer ${count(atlas.counts.places, "places")}`),
+    matter(5, "banners", atlas.counts.arms, "arms", atlas.counts.arms > 0),
+    matter(6, "chronicle", atlas.counts.entries, "entries", atlas.counts.entries > 0),
+    matter(7, "gazetteer", atlas.counts.places, "places", true),
   ].join("\n");
 }
 

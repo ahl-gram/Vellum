@@ -40,9 +40,9 @@ test("bound, every plate is a turn and a thumbnail, the regions and the prospect
   assert.match(li[2], /Thematic surveys: .*<em>vegetation<\/em>.*<em>temperature<\/em>.*<em>rainfall<\/em>.*<em>population<\/em>/);
   assert.match(li[3], /Regional surveys: <button class="turn" type="button" data-plate="region-1"><em>The Environs of Laukuwelua<\/em><\/button>, <button[^>]*data-plate="region-2"><em>The Environs of Toatauhe<\/em><\/button>/);
   assert.match(li[4], /<button class="turn" type="button" data-plate="prospect-capital">The prospect of <em>Laukuwelua<\/em><\/button>/);
-  assert.match(li[5], /The banners of every realm <span class="n">&middot; 6 arms<\/span>/);
-  assert.match(li[6], /The chronicle <span class="n">&middot; 41 entries<\/span>/);
-  assert.match(li[7], /The gazetteer <span class="n">&middot; 30 places<\/span>/);
+  assert.match(li[5], /<button class="turn" type="button" data-plate="banners">The banners of every realm<\/button> <span class="n">&middot; 6 arms<\/span>/);
+  assert.match(li[6], /<button class="turn" type="button" data-plate="chronicle">The chronicle<\/button> <span class="n">&middot; 41 entries<\/span>/);
+  assert.match(li[7], /<button class="turn" type="button" data-plate="gazetteer">The gazetteer<\/button> <span class="n">&middot; 30 places<\/span>/);
   const figures = [...html.matchAll(/<figure[^>]*data-plate="([^"]+)"/g)].map((m) => m[1]);
   assert.deepEqual(figures, ["antique", "topographic", "ink", "nautical", "theme-vegetation", "theme-climate", "theme-moisture", "theme-population", "region-1", "region-2", "prospect-capital"], "eleven thumbnails under their rows");
   assert.match(html, /<figure data-plate="theme-vegetation" class="here"><button class="thumb" type="button" data-plate="theme-vegetation" aria-label="Turn to Vegetation"><img src="blob:http:\/\/127\.0\.0\.1:4173\/theme-vegetation" alt=""><\/button><figcaption>Vegetation<\/figcaption><\/figure>/, "a thumbnail is a button on the plate's own blob");
@@ -50,6 +50,27 @@ test("bound, every plate is a turn and a thumbnail, the regions and the prospect
   assert.match(li[2], /^<li class="on">/, "and its row is on");
   assert.match(li[0], /^<li>/, "the proof's row is not");
   assert.match(li[2], /<button class="turn here" type="button" data-plate="theme-vegetation">/);
+});
+
+test("the back matter rows turn (#497): the page on the stage inks its row alone, and no thumbnail rides the last three rows", () => {
+  const html = contentsRows({ ...DATA, here: "gazetteer" });
+  const li = rows(html);
+  assert.match(li[7], /^<li class="on">/, "the gazetteer's row is on while its page is on the sheet");
+  assert.match(li[7], /<button class="turn here" type="button" data-plate="gazetteer">The gazetteer<\/button>/);
+  assert.equal((html.match(/class="turn here"/g) ?? []).length, 1, "one inked turn");
+  assert.equal((html.match(/class="here"/g) ?? []).length, 0, "no thumbnail to ink (the #497 ruling)");
+  assert.match(li[5], /^<li>/, "the other matter rows are not on");
+  assert.doesNotMatch(li[5] + li[6] + li[7], /class="plates"|class="thumb"/);
+});
+
+test("a matter section without content offers no turn: no arms and no history leave rows vi and vii as counts alone; the gazetteer always turns", () => {
+  const html = contentsRows({ ...DATA, counts: { arms: 0, entries: 0, places: 0 }, here: null });
+  const li = rows(html);
+  assert.doesNotMatch(li[5], /<button/);
+  assert.doesNotMatch(li[6], /<button/);
+  assert.match(li[5], /The banners of every realm <span class="n">&middot; 0 arms<\/span>/);
+  assert.match(li[6], /The chronicle <span class="n">&middot; 0 entries<\/span>/);
+  assert.match(li[7], /<button class="turn" type="button" data-plate="gazetteer">The gazetteer<\/button> <span class="n">&middot; 0 places<\/span>/, "the gazetteer's table stands even with nothing in it");
 });
 
 test("every value the host hands in is escaped: a title with markup stays text, an href stays inside its attribute", () => {

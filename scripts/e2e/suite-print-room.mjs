@@ -283,6 +283,42 @@ export async function run(ctx) {
     JSON.stringify(back),
   );
 
+  const matter = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="gazetteer"]');if(!b)return null;b.click();const s=document.getElementById("sheet").getBoundingClientRect();const page=document.getElementById("pr-page");const inner=document.getElementById("pr-page-inner");return{ratio:s.width/s.height,aspect:Number(page.dataset.aspect),pageHidden:page.hidden,turnedHidden:document.getElementById("pr-turned").hidden,proofHidden:document.getElementById("pr-preview").hidden,on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,head:(inner.querySelector(".page-head")||{textContent:""}).textContent,places:inner.querySelectorAll("tbody tr").length,measureEmpty:document.getElementById("pr-page-measure").children.length===0,scrollY:window.scrollY};})()`);
+  check(
+    "PR33 the gazetteer turns onto the stage as a page of the atlas (#497 seat p): the page face up at its measured portrait aspect, the folio's plate line, row viii inked, the page unscrolled",
+    !!matter && matter.pageHidden === false && matter.turnedHidden === true && matter.proofHidden === true &&
+      matter.aspect > 0 && matter.aspect <= 0.75 && Math.abs(matter.ratio - matter.aspect) < 0.01 &&
+      matter.on === "viii" && matter.here === "gazetteer" && /^plate viii of the bound atlas · the gazetteer$/.test(matter.line) &&
+      /^VELLUM · THE BOUND ATLAS OF The Isle of Rahai · CHART № 42$/.test(matter.head) &&
+      matter.places > 0 && matter.measureEmpty === true && matter.scrollY === 0,
+    JSON.stringify(matter),
+  );
+
+  await shoot("print-room-backmatter.png");
+
+  const banners = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="banners"]');if(!b)return null;b.click();const inner=document.getElementById("pr-page-inner");return{on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,line:document.getElementById("pr-plate-line").textContent,arms:inner.querySelectorAll(".banner").length,counted:(document.querySelector('#pr-contents li.on .n')||{textContent:""}).textContent};})()`);
+  check(
+    "PR33b the banners turn too: the page carries every realm's arms and its row's count agrees",
+    !!banners && banners.on === "vi" && /^plate vi of the bound atlas · the banners of every realm$/.test(banners.line) &&
+      banners.arms > 0 && banners.counted.includes(banners.arms + " arms"),
+    JSON.stringify(banners),
+  );
+
+  // #496 round 3 residue 5: the zoom-then-turn term. A turn while leaned must put the camera back to rest (sheet.rebase() in the face path); without it the next face arrives mid-zoom.
+  await evaluate(`document.getElementById("zoom-in").click()`);
+  let leaned = false;
+  for (let i = 0; i < 60; i++) {
+    if (await evaluate(`document.getElementById("map-viewport").classList.contains("zoomed")`)) { leaned = true; break; }
+    await sleep(50);
+  }
+  const unleaned = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .plates figure[data-plate="theme-vegetation"] .thumb');if(!b)return null;b.click();const s=document.getElementById("sheet").getBoundingClientRect();return{zoomed:document.getElementById("map-viewport").classList.contains("zoomed"),pageHidden:document.getElementById("pr-page").hidden,turnedHidden:document.getElementById("pr-turned").hidden,ratio:s.width/s.height};})()`);
+  check(
+    "PR34 a turn while leaned rests the camera and puts the page away: zoom in on the gazetteer, turn to the vegetation survey, the sheet back at the chart's aspect and k=1",
+    leaned === true && !!unleaned && unleaned.zoomed === false && unleaned.pageHidden === true &&
+      unleaned.turnedHidden === false && Math.abs(unleaned.ratio - 1500 / 1157.931) < 0.01,
+    JSON.stringify({ leaned, unleaned }),
+  );
+
   await shoot("print-room-bound.png");
 
   // e2e cannot emulate :hover, so PR20b reads the lift out of the CSSOM beside the plate's resting computed style. It is a MARKUP assertion otherwise: href, target and rel, never a click, so nothing here measures the navigation itself. Runs on screen media, before PR21 emulates print.

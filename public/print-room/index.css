@@ -24,6 +24,31 @@
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
+/* The back matter's page face (#497, seat p): the section set as a page of the bound atlas, turned onto the stage and fitted by the room. The inner's base font rides the container width (16px at the 900px reference the measure box uses), so the measured height is the displayed geometry and the page fills the fitted sheet edge to edge. */
+#pr-page { position: absolute; inset: 0; container-type: size; overflow: hidden; background: var(--parchment-bright); }
+#pr-page[hidden] { display: none; }
+#pr-page .matter-page { font-size: 1.7778cqw; }
+#pr-page .page-inner { width: 100%; min-height: 100%; }
+#pr-page-measure { position: absolute; left: -10000px; top: 0; width: 900px; font-size: 16px; visibility: hidden; }
+.matter-page { box-sizing: border-box; padding: 3.5em 4em; color: var(--ink-dark); font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); line-height: 1.5; }
+.matter-page .page-head { text-align: center; font-variant-caps: small-caps; letter-spacing: 0.3em; font-size: 0.8em; color: var(--ink-faded); margin: 0 0 1.5em; }
+.matter-page section > h2 { font-size: 1.4em; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-weight: 400; letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan); padding-bottom: 0.3em; margin: 0 0 0.8em; }
+.matter-page .realms, .matter-page .chronicle-intro { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; color: var(--ink-brown); margin: 0 0 0.8em; }
+.matter-page .banners { display: flex; flex-wrap: wrap; gap: 1.1em; justify-content: center; }
+.matter-page .banner { width: 7.5em; text-align: center; margin: 0; }
+.matter-page .banner svg { width: 100%; height: auto; }
+.matter-page .banner figcaption { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; color: var(--ink-brown); font-size: 0.85em; padding-top: 0.35em; }
+.matter-page ol.chronicle { list-style: none; padding: 0; margin: 0; }
+.matter-page ol.chronicle li { padding: 0.4em 0; border-bottom: 1px solid var(--line-faint); display: flex; gap: 0.9em; }
+.matter-page ol.chronicle .year { flex: 0 0 3.2em; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink-brown); }
+.matter-page table { width: 100%; border-collapse: collapse; font-size: 0.95em; }
+.matter-page th { text-align: left; border-bottom: 2px solid var(--ink-dark); padding: 0.45em 0.6em; }
+.matter-page td { border-bottom: 1px solid var(--line-faint); padding: 0.45em 0.6em; vertical-align: top; }
+.matter-page td.name { font-weight: 600; white-space: nowrap; }
+.matter-page td.name.capital { text-transform: uppercase; letter-spacing: 0.06em; }
+.matter-page td.name .former { display: block; white-space: normal; font-weight: 400; font-size: 0.86em; color: var(--ink-brown); text-transform: none; letter-spacing: normal; }
+.matter-page td.note { font-style: italic; color: var(--ink-brown); }
+
 /* The corner's four controls (ruled 2026-08-30: the mockup plus the dice): the seed narrower, the style picker in the corner's dark dress. */
 /* Wide sheets only: an unscoped 25rem beat the kit's 12.5rem phone clamp and the corner never wrapped (plate read 2026-08-30, round 2). */
 @media (min-width: 901px) { .folio-room { max-width: 25rem; } }

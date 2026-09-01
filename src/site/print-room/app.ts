@@ -8,7 +8,7 @@ import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { POSTER_PRESETS, CHART_PRESET, clampPosterWidth, posterFilename, posterPngFilename, chartFilename, type PosterPreset } from "./poster-presets.ts";
 import { rasterizeSvg } from "../lib/rasterize.ts";
 import { initBoundAtlas, clearBoundAtlas, enableBind, sheetAspect, type PosterBasis } from "./bound-atlas.ts";
-import { bindPrintRoom, showPlate, showProof, writeFolio, type RoomFurniture } from "./seats.ts";
+import { bindPrintRoom, matterAspect, showMatter, showPlate, showProof, writeFolio, type RoomFurniture } from "./seats.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
@@ -56,11 +56,14 @@ const furniture: RoomFurniture = {
   map: $("map"),
   preview,
   turned: $<HTMLImageElement>("pr-turned"),
+  page: $("pr-page"),
+  pageInner: $("pr-page-inner"),
+  measure: $("pr-page-measure"),
   folioTitle: $("folio-title"),
   folioSub: $("folio-sub"),
   plateLine: $("pr-plate-line"),
 };
-const sheet = bindPrintRoom(furniture, sheetAspect);
+const sheet = bindPrintRoom(furniture, () => matterAspect(furniture) ?? sheetAspect());
 const posterStatus = $("pr-poster-status");
 const plateButtons = [...document.querySelectorAll<HTMLButtonElement>("[data-poster]")];
 const formatSel = $<HTMLSelectElement>("pr-format"); // the "Pressed as" select (#135); greyed out during a draw (#212)
@@ -307,6 +310,7 @@ await initWorker();
 initBoundAtlas(() => posterBasis, {
   showProof: () => { showProof(furniture); sheet.rebase(); sheet.room.layout(); },
   showPlate: (plate) => { showPlate(furniture, plate); sheet.rebase(); sheet.room.layout(); },
+  showMatter: (matter) => { showMatter(furniture, matter); sheet.rebase(); sheet.room.layout(); },
 });
 window.__vellumPrintRoomUsesWorker = usesWorker;
 window.__vellumPrintRoomState = () => ({ seed: lastSeed, title: lastTitle });

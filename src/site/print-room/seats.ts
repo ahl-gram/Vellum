@@ -3,6 +3,7 @@ import { createZoomController } from "../shared/zoom-controller.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";
 import { bindRoom, type Room } from "../shared/room.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
+import { pageAspect } from "./matter-markup.ts";
 
 export interface RoomFurniture {
   readonly stage: HTMLElement;
@@ -11,6 +12,9 @@ export interface RoomFurniture {
   readonly map: HTMLElement;
   readonly preview: HTMLElement;
   readonly turned: HTMLImageElement;
+  readonly page: HTMLElement;
+  readonly pageInner: HTMLElement;
+  readonly measure: HTMLElement;
   readonly folioTitle: HTMLElement;
   readonly folioSub: HTMLElement;
   readonly plateLine: HTMLElement;
@@ -50,10 +54,17 @@ export function writeFolio(f: RoomFurniture, res: { title: string; subtitle: str
   f.folioSub.textContent = year ? `surveyed ${year[0]}` : res.subtitle;
 }
 
+export interface Matter {
+  readonly html: string;
+  readonly line: string;
+}
+
 export function showProof(f: RoomFurniture): void {
   f.turned.hidden = true;
   f.turned.removeAttribute("src");
   f.turned.alt = "";
+  f.page.hidden = true;
+  f.pageInner.innerHTML = "";
   f.preview.hidden = false;
   f.plateLine.textContent = "";
 }
@@ -62,6 +73,27 @@ export function showPlate(f: RoomFurniture, plate: Plate): void {
   f.turned.src = plate.href;
   f.turned.alt = plate.title;
   f.turned.hidden = false;
+  f.page.hidden = true;
+  f.pageInner.innerHTML = "";
   f.preview.hidden = true;
   f.plateLine.textContent = plate.line;
+}
+
+export function showMatter(f: RoomFurniture, matter: Matter): void {
+  f.measure.innerHTML = matter.html;
+  f.page.dataset.aspect = String(pageAspect(f.measure.offsetHeight));
+  f.measure.innerHTML = "";
+  f.pageInner.innerHTML = matter.html;
+  f.page.hidden = false;
+  f.turned.hidden = true;
+  f.turned.removeAttribute("src");
+  f.turned.alt = "";
+  f.preview.hidden = true;
+  f.plateLine.textContent = matter.line;
+}
+
+export function matterAspect(f: RoomFurniture): number | null {
+  if (f.page.hidden) return null;
+  const a = Number(f.page.dataset.aspect);
+  return Number.isFinite(a) && a > 0 ? a : null;
 }
