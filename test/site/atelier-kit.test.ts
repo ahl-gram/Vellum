@@ -62,6 +62,11 @@ test("AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom
   assert.match(road, /<a id=\{id\} class=\{gold \? "legend-btn gold" : "legend-btn"\} data-road=\{road\} href=\{href\}><span class="verb" id=\{verbId\}>\{verb\}<\/span><span class="room">\{room\}<\/span><\/a>/, "a road is an <a> in the legend dress, gold when it is the room's featured road");
 });
 
+test("AK6 the Explorer binds its Glass by id from its own glass.ts and never imports glass-keys.ts, whose [data-zoom] binding is document-wide: a second binding would double every press", () => {
+  for (const p of globSync("src/site/explorer/*.ts", { cwd: REPO })) assert.ok(!read(p).includes("glass-keys"), `${p} must not bind the kit's keys`);
+  assert.match(read("src/site/shared/glass-keys.ts"), /querySelectorAll<HTMLElement>\("\[data-zoom\]"\)/, "the kit's binding reads every data-zoom press on the page");
+});
+
 test("AK5 the stage is lifted where the skeleton is one shape (the Print Room, the Prospect, the Ribbon); the three unique skeletons stay in their pages", () => {
   for (const r of ["print-room", "prospect", "ribbon"]) {
     assert.match(read(`src/pages/${r}/index.astro`), /<ChartStage label="[^"]+">/, `${r} takes the stage from the kit`);

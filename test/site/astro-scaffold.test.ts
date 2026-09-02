@@ -675,7 +675,7 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
   }
 });
 
-// #487 (the Atelier Kit's one PR before #465): the five shapes the rooms pasted are components, and the BUILT html carries each as one shape. Measured 2026-09-02 against the #464 tree's build: home, the FAQ, the Gallery, the Glossary and the atlas byte-identical; the Print Room, the Reading Room and Today identical after collapsing whitespace between tags; the Prospect and the Ribbon the same plus one apostrophe entity each (Astro escapes a prop's text); the Explorer the same plus data-zoom on its three presses, which nothing on that page reads (its glass.ts binds by id).
+// #487 (the Atelier Kit's one PR before #465): the six shapes the rooms pasted are components, and the BUILT html carries each as one shape. Measured 2026-09-02 against the #464 tree's build: home, the FAQ, the Gallery, the Glossary and the atlas byte-identical; the Print Room, the Reading Room and Today identical after collapsing whitespace between tags; the Prospect and the Ribbon the same plus one apostrophe entity each (Astro escapes a prop's text); the Explorer the same plus data-zoom on its three presses, which nothing on that page reads (its glass.ts binds by id).
 const KIT_FOG = '<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>';
 const KIT_VIGNETTES = '<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>';
 const KIT_GLASS = (id: string) => `<div class="chrome corner br zoomery"${id} role="group" aria-label="The Surveyor's Glass">
@@ -688,13 +688,29 @@ const KIT_GLASS = (id: string) => `<div class="chrome corner br zoomery"${id} ro
     <span><kbd>0</kbd> the full sheet</span>
   </div>
 </div>`;
-const ROAD = /<a( id="[\w-]+")? class="legend-btn( gold)?"( data-road="[\w-]+")? href="[^"]+"><span class="verb"( id="[\w-]+")?>[^<]+<\/span><span class="room">[^<]+<\/span><\/a>/;
+const KIT_STAGE = (label: string) => `<div class="stage">\n  <div class="sheet" id="sheet"><div id="map-viewport" tabindex="0" role="application" aria-label="${label}"><div id="map">`;
+const STAGES: ReadonlyArray<readonly [string, string]> = [
+  ["print-room/index.html", "The proof. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
+  ["prospect/index.html", "The plate. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
+  ["ribbon/index.html", "The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
+];
+type Road = { id?: string; gold?: true; road?: string; href: string; verbId?: string };
+/** Every road out on the site, by page and in order, LITERAL: the id, the gold, the data-road stamp and the verb's id are what the pages' scripts and the suites read, and a roster taken from the source it is compared against would be circular (skeptic on PR #502). A page absent here renders no road. */
+const ROADS: Record<string, ReadonlyArray<Road>> = {
+  "explorer/index.html": [{ id: "order-plates", gold: true, href: "../print-room/" }, { id: "journal-link", gold: true, href: "/reading-room/" }],
+  "print-room/index.html": [{ id: "pr-explorer", gold: true, href: "../explorer/" }],
+  "prospect/index.html": [{ id: "pp-chart-link", gold: true, href: "/explorer/" }, { id: "pp-ribbon-link", href: "/ribbon/", verbId: "pp-ribbon-verb" }],
+  "ribbon/index.html": [{ id: "rb-chart-link", gold: true, href: "/explorer/" }, { id: "rb-prospect-link", href: "/prospect/", verbId: "rb-prospect-verb" }],
+  "seed-of-the-day/index.html": [{ road: "explorer", href: "../explorer/" }, { road: "reading-room", href: "../reading-room/" }],
+  "gallery/index.html": [{ gold: true, href: "/explorer/" }],
+};
+const roadOpening = (r: Road): string =>
+  `<a${r.id ? ` id="${r.id}"` : ""} class="legend-btn${r.gold ? " gold" : ""}"${r.road ? ` data-road="${r.road}"` : ""} href="${r.href}"><span class="verb"${r.verbId ? ` id="${r.verbId}"` : ""}>`;
 
-test("the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, a road out (#487)", () => {
+test("the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)", () => {
   const chartRooms = PAGES.filter((p) => p.chartRoom && p.dir !== "/gallery/");
   for (const p of PAGES.filter((q) => q.room)) {
-    const html = page(p.route);
-    assert.equal(html.split(KIT_FOG).length - 1, 1, `${p.route} wears the fog pair once`);
+    assert.equal(page(p.route).split(KIT_FOG).length - 1, 1, `${p.route} wears the fog pair once`);
   }
   for (const p of chartRooms) {
     assert.equal(page(p.route).split(KIT_VIGNETTES).length - 1, 1, `${p.route} wears the vignette pair once`);
@@ -711,17 +727,17 @@ test("the kit's lifted shapes render one shape on every page that wears them: th
     assert.match(lines, /^<p class="folio-title" id="folio-title"><\/p>/, `${p.route}'s folio leads with the world's name`);
   }
   assert.ok(!page("index.html").includes(KIT_FOG) && !page("index.html").includes('class="zoomery'), "home keeps its own stage dress (#461)");
-  for (const p of PAGES) {
-    const html = page(p.route);
-    for (const [road] of html.matchAll(/<a[^>]*class="legend-btn[^>]*>[\s\S]*?<\/a>/g)) {
-      assert.match(road, ROAD, `${p.route}: a road out is the kit's shape: ${road}`);
-    }
-    // The gold variant reaches the build (guard-prover, 2026-09-02): every road the page marks gold renders gold, and no other does.
-    const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
-    const goldTags = [...source.matchAll(/<LegendButton [^>]*\bgold\b/g)].length;
-    assert.equal(html.split('class="legend-btn gold"').length - 1, goldTags, `${p.route} renders exactly the gold roads its source marks`);
+  for (const [route, label] of STAGES) {
+    const html = page(route);
+    assert.ok(html.includes(KIT_STAGE(label)), `${route} carries the kit's stage: sheet > a keyboard-reachable gesture box > the transform target, named for the room`);
+    const stage = html.slice(html.indexOf('<div class="stage">'), html.indexOf('<div class="vignette top"'));
+    assert.ok(stage.indexOf("</div></div></div>") < stage.indexOf('<p class="status"'), `${route}'s status pill follows the sheet inside the stage`);
+    assert.ok(stage.includes("<noscript>"), `${route}'s scripts-off notice stands inside the stage`);
   }
-  assert.ok(page("prospect/index.html").includes('class="legend-btn gold"'), "the Prospect's road back to the Explorer is gold (a known gold call site, so the count above is not vacuous)");
+  for (const p of PAGES) {
+    const got = [...page(p.route).matchAll(/<a[^>]*class="legend-btn[^"]*"[^>]*><span class="verb"[^>]*>/g)].map((m) => m[0]);
+    assert.deepEqual(got, (ROADS[p.route] ?? []).map(roadOpening), `${p.route}'s roads out, in order, as the kit renders them`);
+  }
 });
 
 test("the seed form floats on the stage as the mockup's corner chrome, its ratified semantics whole (#470, was the #289 cartouche hero)", () => {

@@ -19,7 +19,6 @@ const between = (from: string, to: string): string => {
   return page.slice(a, b);
 };
 
-/** #487: the chart folio is the kit's, its lines named as [class, id] pairs on the page. */
 const folioLines = (): string[][] => {
   const m = page.match(/<ChartFolio lines=\{(\[[^\n]*\])\} \/>/);
   assert.ok(m, "the page stands the kit's chart folio");
