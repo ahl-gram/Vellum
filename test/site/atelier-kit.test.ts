@@ -25,9 +25,10 @@ test("AK1 no page carries a pasted copy of a lifted shape: the fog pair, the vig
   }
 });
 
-test("AK2 every room wears the fog through the kit; every chart room and the Gallery wear the vignettes", () => {
+test("AK2 every room wears the fog through the kit; every stage room wears the vignettes, the Gallery none (its captions scroll, #464)", () => {
   for (const p of rooms) assert.ok(read(p).includes("<Fog />"), `${p} wears <Fog />`);
-  for (const p of [...CHART_ROOMS, "src/pages/gallery/index.astro"]) assert.ok(read(p).includes("<Vignettes />"), `${p} wears <Vignettes />`);
+  for (const p of CHART_ROOMS) assert.ok(read(p).includes("<Vignettes />"), `${p} wears <Vignettes />`);
+  assert.ok(!read("src/pages/gallery/index.astro").includes("<Vignettes"), "the Gallery wears no vignettes: a fixed darkening band over scrolling captions");
   assert.ok(!read("src/pages/index.astro").includes("<Fog"), "home keeps its own stage dress (#461)");
 });
 

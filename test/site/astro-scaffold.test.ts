@@ -696,9 +696,10 @@ test("the kit's lifted shapes render one shape on every page that wears them: th
     const html = page(p.route);
     assert.equal(html.split(KIT_FOG).length - 1, 1, `${p.route} wears the fog pair once`);
   }
-  for (const p of [...chartRooms, PAGES.find((q) => q.dir === "/gallery/")!]) {
+  for (const p of chartRooms) {
     assert.equal(page(p.route).split(KIT_VIGNETTES).length - 1, 1, `${p.route} wears the vignette pair once`);
   }
+  assert.ok(!page("gallery/index.html").includes('class="vignette'), "the Gallery wears no vignettes (#464: its captions scroll through a fixed band)");
   for (const p of chartRooms) {
     const html = page(p.route);
     const glass = KIT_GLASS(p.dir === "/explorer/" ? ' id="zoom-controls"' : "");
