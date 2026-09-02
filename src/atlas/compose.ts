@@ -54,11 +54,6 @@ function gazetteerNotes(world: World, lore: ReturnType<typeof createLoreWriter>)
   return new Map(gazetteerOrder(world).map((i) => [i, lore.settlementNote(world.settlements[i]!)]));
 }
 
-export function gazetteerNoteFor(world: World, index: number): string {
-  if (world.settlements[index] === undefined) throw new RangeError(`no settlement ${index}`);
-  return gazetteerNotes(world, gazetteerWriter(world)).get(index)!;
-}
-
 function gazetteerHtml(world: World): string {
   const lore = gazetteerWriter(world);
   const notes = gazetteerNotes(world, lore);

@@ -67,7 +67,7 @@ let drawGen = 0;
 window.__vellumProspectUsesWorker = usesWorker;
 window.__vellumProspectState = () => last;
 
-// The Ribbon's road stands only where a road leaves the town: its fallback would otherwise unroll the capital's road under this town's name (skeptic on PR #500). display, since the kit's .legend-btn display makes the hidden attribute inert.
+// display, since the kit's .legend-btn display makes the hidden attribute inert.
 function writeRoads(res: { readonly index: number; readonly name: string; readonly roads: boolean }): void {
   chartLink.href = chartTarget(location.hash);
   ribbonLink.href = ribbonTarget(location.hash, res.index);

@@ -62,7 +62,7 @@ const overrides: Partial<WorldRecipe> = {
 };
 
 chartLink.href = chartTarget(location.hash);
-// The road's end is known only once the scroll is drawn; until then the road out stands down (display, since the kit's .legend-btn display makes the hidden attribute inert).
+// display, since the kit's .legend-btn display makes the hidden attribute inert.
 prospectLink.style.display = "none";
 
 let last: ReturnType<NonNullable<Window["__vellumRibbonState"]>> = null;
@@ -71,7 +71,6 @@ let drawGen = 0;
 window.__vellumRibbonUsesWorker = usesWorker;
 window.__vellumRibbonState = () => last;
 
-// Both selects offer only what a road joins (#494): a departure some road leaves, a destination the departure's roads reach.
 function fillSelect(sel: HTMLSelectElement, res: RibbonResult, end: "from" | "to"): void {
   sel.replaceChildren(
     ...res.options

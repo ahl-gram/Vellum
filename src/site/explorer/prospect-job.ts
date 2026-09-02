@@ -3,7 +3,8 @@
 // drift apart.
 import { type ProspectDress, plateDressFor } from "../../prospect/dress/context.ts";
 import { engravedProspectPlate } from "../../prospect/finished.ts";
-import { gazetteerNoteFor } from "../../atlas/compose.ts";
+import { createRng } from "../../core/rng.ts";
+import { createLoreWriter } from "../../society/lore.ts";
 import { roadMask, roadReachable } from "../../itinerary/route.ts";
 import type { PlateEra } from "../../prospect/caption.ts";
 import { STYLES } from "../../render/style.ts";
@@ -45,9 +46,12 @@ export interface ProspectPlateResult {
   readonly founded: number;
   readonly key: ReadonlyArray<PlateKeyRow>;
   readonly note: string;
-  /** Whether any road leaves the place: the Ribbon's fallback would otherwise unroll the capital's road under this town's name. */
   readonly roads: boolean;
 }
+
+// Today's card's writer and fork (src/site/seed-of-the-day/app.ts), the prose the #494 mockup was ruled on; a writer's prose depends on call order, so a first call on a fresh writer is what both rooms read.
+const settlementNote = (world: World, index: number): string =>
+  createLoreWriter(world, createRng(world.recipe.seed).fork("seed-of-the-day")).settlementNote(world.settlements[index]!);
 
 export function prospectResultFor(world: World, spec: ProspectSpec): ProspectPlateResult {
   const index = resolveProspectIndex(world, spec.index);
@@ -66,7 +70,7 @@ export function prospectResultFor(world: World, spec: ProspectSpec): ProspectPla
     epithet: plate.caption.epithet,
     founded: s.founded,
     key: plate.key.map(({ letter, label }) => ({ letter, label })),
-    note: gazetteerNoteFor(world, index),
+    note: settlementNote(world, index),
     roads: roadReachable(world, roadMask(world), index).length > 0,
   };
 }

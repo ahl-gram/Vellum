@@ -34,7 +34,7 @@ test("PPR2 the corner is the year control (#494 ruling 2): viewed in the year, t
   const folio = between("<RoomFolio", "</RoomFolio>");
   assert.match(folio, /<form class="folio-controls" id="pp-year-form" aria-label="[^"]+">/, "the control row is a form, so Enter engraves");
   assert.match(folio, /<label class="year-label" for="pp-year">viewed in the year<\/label>/, "the label names the control");
-  assert.match(folio, /<input id="pp-year" class="control" type="text" inputmode="numeric" pattern="\[0-9\]\*"/, "text with a numeric keypad and a digits pattern (home's seed input, the iOS precedent)");
+  assert.match(folio, /<input id="pp-year" class="control" type="text" inputmode="numeric" pattern="\[0-9\]\*" autocomplete="off">/, "text with a numeric keypad and a digits pattern (home's seed input, the iOS precedent); no aria-label, so the visible label IS the accessible name (WCAG 2.5.3; a display:none label still names its control)");
   assert.match(folio, /<button id="pp-engrave" class="primary" type="submit">Engrave<\/button>/, "Engrave is the room's primary");
   assert.ok(folio.indexOf('for="pp-year"') < folio.indexOf('id="pp-year"') && folio.indexOf('id="pp-year"') < folio.indexOf('id="pp-engrave"'), "label, year, Engrave");
   assert.match(folio, /<p class="gloss">turn the year back, even to the ground before it rose<\/p>/, "the corner's gloss");
@@ -91,7 +91,7 @@ test("PPR6 seats.ts binds the Glass and the room at the plate's own aspect; app.
   assert.match(app, /yearHash\(location\.hash, /, "an Engrave writes the year into the address");
   assert.match(app, /ribbonTarget\(location\.hash, /, "the road to the Ribbon carries the world and the town");
   assert.match(app, /chartTarget\(location\.hash\)/, "the road back sheds the page's own keys (PB7b)");
-  assert.match(app, /parseYear\(/, "the control reads the year through the address grammar, not Number()");
+  assert.match(app, /parseYear\(/, "the control reads the year through parseYear, the one grammar the address reads year= with");
   assert.match(app, /ribbonLink\.style\.display = res\.roads \? "" : "none"/, "the Ribbon's road stands only where a road leaves the town, by display (the kit's .legend-btn display makes hidden inert)");
   assert.match(app.slice(0, app.indexOf("await initWorker()")), /ribbonLink\.style\.display = "none"/, "and stands down until the first plate resolves the town");
   assert.match(app, /addEventListener\("submit"/, "Engrave is the form's submit");

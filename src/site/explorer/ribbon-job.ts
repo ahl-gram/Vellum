@@ -22,7 +22,6 @@ export interface RibbonOption {
   readonly i: number;
   readonly name: string;
   readonly kind: string;
-  /** Whether any road leaves the place: only such a place can be set out from. */
   readonly roads: boolean;
 }
 

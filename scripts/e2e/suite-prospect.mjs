@@ -53,7 +53,7 @@ export async function run(ctx) {
     }
     await send("Page.navigate", { url: page(hash) });
   };
-  const STATE = `(()=>{const st=window.__vellumProspectState&&window.__vellumProspectState();const img=document.getElementById("pp-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");return{seed:st.seed,index:st.index,year:st.year,presentYear:st.presentYear,name:st.name,dress:st.dress,era:st.era,keyRows:st.keyRows,roads:st.roads,svgLength:st.svgLength,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#pp-status"),title:q("#folio-title"),sub:q("#folio-sub"),pressed:q("#pp-pressed"),chart:a("pp-chart-link"),ribbon:a("pp-ribbon-link"),ribbonVerb:q("#pp-ribbon-verb"),ribbonShown:getComputedStyle(document.getElementById("pp-ribbon-link")).display!=="none",yearField:document.getElementById("pp-year").value,eraLine:q("#pp-era"),noteTitle:q("#note-title"),where:q("#note .card-where"),note:q("#pp-note"),keyLis:document.querySelectorAll("#pp-key li").length,keyHeadHidden:document.getElementById("pp-key-head").hidden,hash:location.hash};})()`;
+  const STATE = `(()=>{const st=window.__vellumProspectState&&window.__vellumProspectState();const img=document.getElementById("pp-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");return{seed:st.seed,index:st.index,year:st.year,presentYear:st.presentYear,name:st.name,dress:st.dress,era:st.era,keyRows:st.keyRows,roads:st.roads,svgLength:st.svgLength,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#pp-status"),title:q("#folio-title"),sub:q("#folio-sub"),pressed:q("#pp-pressed"),chart:a("pp-chart-link"),ribbon:a("pp-ribbon-link"),ribbonVerb:q("#pp-ribbon-verb"),ribbonShown:getComputedStyle(document.getElementById("pp-ribbon-link")).display!=="none",yearField:document.getElementById("pp-year").value,eraLine:q("#pp-era"),noteTitle:q("#note-title"),where:q("#note .card-where"),note:q("#pp-note"),keyLis:document.querySelectorAll("#pp-key li").length,keyHeadHidden:getComputedStyle(document.getElementById("pp-key-head")).display==="none",hash:location.hash};})()`;
   const state = () => evaluate(STATE);
   const opened = async (label) => {
     for (let i = 0; i < 200; i++) {
@@ -80,7 +80,7 @@ export async function run(ctx) {
   );
   check("PB3b the folio names what the place was once called (#49)", /once called Haitani/.test(cap.sub), cap.sub);
   check(
-    "PB3c the engraver's note is filled: the place as the slip's title, its epithet and founding, the gazetteer's note, the plate's lettered key, the era line (#494 ruling 4)",
+    "PB3c the engraver's note is filled: the place as the slip's title, its epithet and founding, Today's card's note for the town, the plate's lettered key, the era line (#494 ruling 4)",
     cap.noteTitle === "Laukuwelua" && /^chief port of .+ · founded An\. \d+$/.test(cap.where) && cap.note.length > 20 && cap.keyLis === cap.keyRows && cap.keyRows > 0 && !cap.keyHeadHidden && /^Standing · An\. \d+$/.test(cap.eraLine),
     JSON.stringify({ noteTitle: cap.noteTitle, where: cap.where, noteLen: cap.note.length, keyLis: cap.keyLis, keyRows: cap.keyRows, eraLine: cap.eraLine }),
   );
@@ -137,8 +137,8 @@ export async function run(ctx) {
   );
   check(
     "PB7b a viewed year reads in the year control and the era line, the bare ground has no key, and the Explorer link sheds the page's own keys",
-    early.yearField === "300" && early.eraLine === "Before the founding · An. 300" && early.era === "before-founding" && early.keyRows === 0 && early.keyHeadHidden && early.chart === "/explorer/#seed=42",
-    JSON.stringify({ yearField: early.yearField, eraLine: early.eraLine, keyRows: early.keyRows, keyHeadHidden: early.keyHeadHidden, chart: early.chart }),
+    early.yearField === "300" && early.eraLine === "Before the founding · An. 300" && early.era === "before-founding" && early.keyRows === 0 && early.keyHeadHidden && /will rise · An\. 300$/.test(early.where) && !/founded/.test(early.where) && early.chart === "/explorer/#seed=42",
+    JSON.stringify({ yearField: early.yearField, eraLine: early.eraLine, keyRows: early.keyRows, keyHeadHidden: early.keyHeadHidden, where: early.where, chart: early.chart }),
   );
 
   await evaluate(`(()=>{document.getElementById("pp-year").value=${JSON.stringify(String(early.presentYear))};document.getElementById("pp-year-form").requestSubmit();})()`);
@@ -168,7 +168,7 @@ export async function run(ctx) {
     JSON.stringify({ garbageValid: garbage, refused: refused && { yearField: refused.yearField, year: refused.year }, emptied: emptied && { yearField: emptied.yearField, year: emptied.year } }),
   );
 
-  // Tewetulua (24) is seed 42's one settlement no road leaves (measured 2026-09-01): the Ribbon's fallback would unroll the capital's road under its name, so the road out stands down.
+  // Tewetulua (24) is seed 42's one settlement no road leaves (measured 2026-09-01).
   await goto("#seed=42&i=24");
   const orphan = await opened("the road-orphan");
   check(

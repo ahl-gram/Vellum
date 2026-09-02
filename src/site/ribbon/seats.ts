@@ -4,7 +4,7 @@ import { bindGlassKeys } from "../shared/glass-keys.ts";
 import { bindRoom, dockLegend, legendSeat, type Room } from "../shared/room.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
 import { RIBBON_W, RIBBON_H } from "../../itinerary/finished.ts";
-import { tierTag } from "../../itinerary/prose.ts";
+import { rowText } from "./row-text.ts";
 import type { RibbonPlateData, RibbonRow } from "../explorer/ribbon-job.ts";
 import type { PlateDress } from "../explorer/prospect-job.ts";
 
@@ -45,15 +45,16 @@ export function bindRibbonRoom(f: RoomFurniture): Sheet {
   zoom.attach();
   bindGlassKeys(f.viewport, zoom);
   const box = () => ({ W: f.viewport.clientWidth || 1, H: f.viewport.clientHeight || 1 });
-  const room = bindRoom({ frame: f.stage, sheet: f.sheet, aspect: () => RIBBON_W / RIBBON_H, camera: {
-    hold: () => { const { W, H } = box(); return cameraFromTransform(zoom.getState(), W, H); },
-    restore: (cam) => { const { W, H } = box(); zoom.refit(transformFromCamera(cam, W, H)); },
-  } });
+  // Seated BEFORE bindRoom registers its own listener on the same query, so on a live 900px crossing the journey docks first and the kit's layout then measures the corner it left (listeners fire in registration order).
   const narrow = window.matchMedia(NARROW);
   const home = { legend: f.journey, dock: f.journeyDock, stage: f.corner, next: f.swap };
   const seatJourney = () => dockLegend<HTMLElement>(home, legendSeat({ narrow: narrow.matches, hasSlip: true }));
   seatJourney();
   narrow.addEventListener("change", seatJourney);
+  const room = bindRoom({ frame: f.stage, sheet: f.sheet, aspect: () => RIBBON_W / RIBBON_H, camera: {
+    hold: () => { const { W, H } = box(); return cameraFromTransform(zoom.getState(), W, H); },
+    restore: (cam) => { const { W, H } = box(); zoom.refit(transformFromCamera(cam, W, H)); },
+  } });
   return {
     room,
     rebase: () => zoom.rebase(),
@@ -62,10 +63,6 @@ export function bindRibbonRoom(f: RoomFurniture): Sheet {
 }
 
 type Facts = Omit<RibbonPlateData, "svg" | "options" | "reachable">;
-
-export function rowText(r: RibbonRow): { readonly strong: string | null; readonly em: string } {
-  return r.kind === "waypoint" ? { strong: r.text, em: r.tier === undefined ? "" : tierTag(r.tier) } : { strong: null, em: r.text };
-}
 
 export function showPlate(f: RoomFurniture, res: Pick<Facts, "fromName" | "toName">, seed: number, url: string): void {
   f.plate.src = url;

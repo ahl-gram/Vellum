@@ -4,6 +4,7 @@ import { bindGlassKeys } from "../shared/glass-keys.ts";
 import { bindRoom, type Room } from "../shared/room.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
 import { PLATE_W, PLATE_H } from "../../prospect/geometry.ts";
+import { eraLine, subLine, whereLine } from "./note-lines.ts";
 import type { PlateDress, ProspectPlateResult } from "../explorer/prospect-job.ts";
 
 export interface RoomFurniture {
@@ -46,20 +47,6 @@ export function bindProspectRoom(f: RoomFurniture): Sheet {
 }
 
 type Facts = Omit<ProspectPlateResult, "svg">;
-
-const ERA_WORD = { "before-founding": "Before the founding", standing: "Standing", ruined: "Ruined" } as const;
-
-export function eraLine(r: Pick<Facts, "era" | "year">): string {
-  return `${ERA_WORD[r.era]} · An. ${r.year}`;
-}
-
-export function whereLine(r: Pick<Facts, "era" | "epithet" | "founded">): string {
-  return r.era === "before-founding" ? r.epithet : `${r.epithet} · founded An. ${r.founded}`;
-}
-
-export function subLine(r: Pick<Facts, "title" | "formerName">): string {
-  return r.formerName ? `${r.title} · once called ${r.formerName}` : `${r.title} · drawn side-on from the town's own ground`;
-}
 
 export function showPlate(f: RoomFurniture, res: Pick<Facts, "name">, seed: number, url: string): void {
   f.plate.src = url;

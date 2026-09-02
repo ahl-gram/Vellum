@@ -95,6 +95,8 @@ test("RBR6 seats.ts binds the Glass and the room at the scroll's own aspect, doc
   assert.match(seats, /restore: \(cam\) =>[\s\S]*?\.refit\(/, "the room's refit is the silent one (no settle, no hash)");
   assert.match(seats, /dockLegend(?:<[^>]*>)?\([^)]*legendSeat\(/, "the journey docks by the legend's seat rule: the slip on a phone, the corner on a wide sheet");
   assert.match(seats, /legendSeat\(\{ narrow: narrow\.matches, hasSlip: true \}\)/, "with the slip as its seat, since the itinerary IS the slip (hasSlip: false pins the journey to the corner forever; guard-prover round 2)");
+  assert.ok(seats.indexOf('narrow.addEventListener("change", seatJourney)') > 0 && seats.indexOf('narrow.addEventListener("change", seatJourney)') < seats.indexOf("const room = bindRoom("), "the journey's listener is registered BEFORE bindRoom's on the same query, so a live 900px crossing docks first and the kit then measures the corner it left (skeptic round 3)");
+  assert.match(read("src/site/ribbon/row-text.ts"), /export function rowText\(/, "the row's text is a DOM-free module a unit test runs (skeptic round 3: regexed source is not a run)");
   assert.match(seats, /export const LEAN_K = 2\.6;/, "the lean's depth is the mockup's 2.6x, one constant");
   assert.match(seats, /lean: \(nx, ny\) => \{[\s\S]*?zoomTo\(transformFromCamera\(\{ cx: nx, cy: ny, k: LEAN_K \}/, "a lean centres the Glass on the row's seat at LEAN_K, through the camera bridge, cx from nx and cy from ny (a swap shipped green past a shape-only regex; skeptic round 2)");
   assert.match(seats, /li\.dataset\.nx = String\(r\.nx\);\s*li\.dataset\.ny = String\(r\.ny\);/, "each row carries its seat, so the suite can check where the Glass landed");
