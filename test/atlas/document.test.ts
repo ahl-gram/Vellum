@@ -273,6 +273,9 @@ test("#464 the served page takes the deep with its sections on parchment sheets;
   assert.match(page, /<header>\s*<h1>/, "its own header stands");
   assert.match(page, /<footer>DRAWN BY VELLUM/, "its own footer stands");
   const screen = page.slice(page.indexOf("--the-deep:"), page.indexOf("</style>"));
+  // The base rule is pinned OUTSIDE the print block: a print-only override would keep the selector's string alive while the deep was never painted (guard-prover, 2026-09-02).
+  const base = screen.slice(0, screen.indexOf("@media print"));
+  assert.match(base, /body::before\s*\{[^}]*position:\s*fixed;[^}]*background:\s*var\(--the-deep\)/, "the deep is painted by the fixed body::before layer, the layout's own mechanism");
   assert.match(screen, /@media print\s*\{[^]*body::before\s*\{[^}]*display:\s*none/, "print is paper: the deep stands down on paper");
 });
 
