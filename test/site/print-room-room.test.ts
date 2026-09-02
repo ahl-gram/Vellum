@@ -92,8 +92,8 @@ test("PRR4 the legend row is the poster plates plus a road back (ruled 2026-08-3
 test("PRR5 the stage holds the fitted sheet with the proof and the turned plate in one gesture box; the status pill, the Glass, the chart's folio and the hidden document keep their ids", () => {
   assert.match(
     page,
-    /<div class="stage">\s*<div class="sheet" id="sheet"><div id="map-viewport"[^>]*tabindex="0"[^>]*role="application"[^>]*><div id="map">\s*<div id="pr-preview"[^>]*><\/div>\s*<img id="pr-turned"[^>]*hidden>\s*<\/div><\/div><\/div>/,
-    "the sheet's gesture box holds the transform target, which holds the proof and the turned plate",
+    /<div class="stage">\s*<div class="sheet" id="sheet"><div id="map-viewport"[^>]*tabindex="0"[^>]*role="application"[^>]*><div id="map">\s*<div id="pr-preview"[^>]*><\/div>\s*<img id="pr-turned"[^>]*hidden>\s*<div id="pr-page"[^>]*hidden[^>]*>[\s\S]*?<\/div>\s*<\/div><\/div><\/div>/,
+    "the sheet's gesture box holds the transform target, which holds the proof, the turned plate and the back matter's page (#497)",
   );
   const stage = between('<div class="stage">', '<div class="vignette');
   assert.match(stage, /<p class="status" id="pr-status" role="status" aria-live="polite"><\/p>/, "the status line keeps its id (the suite's settle probe) and is the stage's pill");
@@ -146,6 +146,45 @@ test("PRR7 the css: the sheet fitted to what the chrome leaves, the hidden docum
   assert.match(print[1], /body\.has-atlas \.corner\.folio-room\s*\{[^}]*display:\s*none\s*!important/, "the atlas's own head leads, not the room's name");
   assert.match(print[1], /break-after:\s*page/, "one plate per page");
   assert.doesNotMatch(print[1], /> header|\.room-head|> footer|\.order-desk|\.counter/, "no rule targets furniture a chart room no longer has");
+});
+
+test("PRR9 the back matter is the sheet's third face (#497, seat p): seats.ts turns and measures the page, the other faces put it away, app.ts asks the page for the aspect first, bound-atlas routes the matter keys", () => {
+  assert.match(page, /<div id="pr-page" class="page" hidden>\s*<div id="pr-page-inner" class="page-inner matter-page"><\/div>\s*<\/div>/, "the page face and its inner, dressed by the shared matter class");
+  assert.match(page, /<div id="pr-page-measure" class="page-measure matter-page" aria-hidden="true"><\/div>/, "the hidden measure box wears the same dress, so the measured height is the displayed height");
+  assert.match(seats, /export function showMatter\(/, "seats.ts turns the page onto the stage");
+  assert.match(seats, /export function matterAspect\(/, "and serves the measured aspect while the page is up");
+  const proof = seats.slice(seats.indexOf("export function showProof"), seats.indexOf("export function showPlate"));
+  const plate = seats.slice(seats.indexOf("export function showPlate"), seats.indexOf("export function showMatter"));
+  for (const [name, src] of [["showProof", proof], ["showPlate", plate]] as const) {
+    assert.match(src, /\.page\.hidden = true/, `${name} puts the page away`);
+    assert.match(src, /restoreLabel\(f\)/, `${name} restores the gesture box's own label`);
+  }
+  assert.match(seats, /A page of the bound atlas: \$\{matter\.title\}/, "the page face names itself to the gesture box (the proof's label is stale for a table)");
+  assert.match(app, /matterAspect\(furniture\) \?\? sheetAspect\(\)/, "the room's aspect asks the page first, then the turned plate");
+  assert.match(atlas, /isMatterKey\(/, "turnTo routes the matter keys");
+  assert.match(atlas, /showMatter\(/, "to the page face");
+  assert.match(atlas, /matterLine\(/, "with the folio's line");
+});
+
+test("PRR10 the page's dress: the inner lays out once at the measure's own 900px/16px reference and scales as a unit, the measure box laid out but invisible and out of flow", () => {
+  const inner = css.match(/#pr-page \.page-inner\s*\{([^}]*)\}/);
+  assert.ok(inner, "the inner has its rule");
+  assert.match(inner[1], /width:\s*900px/, "the inner is the measure box's own layout");
+  assert.match(inner[1], /font-size:\s*16px/, "at the measure's base, so the measured height is the displayed geometry (re-laying out at the sheet's font drifted 19px of line rounding at 390)");
+  assert.match(inner[1], /transform-origin:\s*0 0/, "scaled from the corner");
+  assert.match(seats, /new ResizeObserver\(/, "seats.ts tracks the page's fitted size");
+  assert.match(seats, /clientWidth \/ PAGE_MEASURE_WIDTH/, "and scales the inner by the one reference width");
+  const measure = css.match(/#pr-page-measure\s*\{([^}]*)\}/);
+  assert.ok(measure, "the measure box has its seat");
+  assert.match(measure[1], /width:\s*900px/);
+  assert.match(measure[1], /font-size:\s*16px/);
+  assert.match(measure[1], /visibility:\s*hidden/, "invisible but laid out; display:none would measure nothing");
+  assert.doesNotMatch(measure[1], /display:\s*none/);
+  assert.match(measure[1], /position:\s*absolute/, "the 900px box is out of flow, or a phone scrolls sideways (#219's class)");
+  assert.match(measure[1], /left:\s*-\d+px/, "and off screen");
+  assert.match(css, /\.matter-page\s*\{[^}]*box-sizing:\s*border-box/, "the shared dress carries the page's own padding, so the measure includes it");
+  assert.match(css, /#pr-page\[hidden\]\s*\{[^}]*display:\s*none/, "the hidden page face is gone, like its siblings");
+  assert.match(css, /#pr-page\s*\{[^}]*overflow:\s*hidden/, "the page clips its own slack");
 });
 
 test("PRR8 the contents row is the kit's (#487, second use of the dated-row idiom): atelier.css dresses .contents / .cr-num / .cr-text, the page css keeps the turning", () => {

@@ -3,7 +3,8 @@ import { runJob } from "../explorer/worker-client.ts";
 import { plateFigure } from "./plate-markup.ts";
 import { contentsRows, plateCounts, plateLine, type PlateRef } from "./contents-markup.ts";
 import { plateAspect } from "./plate-aspect.ts";
-import type { Plate } from "./seats.ts";
+import { isMatterKey, matterLine, matterPage, matterTitle } from "./matter-markup.ts";
+import type { Matter, Plate } from "./seats.ts";
 import { escapeXml } from "../../render/svg.ts";
 import { ATLAS_SHEET_CSS, atlasDocument, svgToDataUri } from "../../atlas/document.ts";
 import type { AtlasDocumentData, PlateSection } from "../../atlas/document.ts";
@@ -25,6 +26,7 @@ export type PosterBasis = {
 export interface SheetFace {
   readonly showProof: () => void;
   readonly showPlate: (plate: Plate) => void;
+  readonly showMatter: (matter: Matter) => void;
 }
 
 declare global {
@@ -67,7 +69,7 @@ interface Bound {
 }
 
 let getBasis: () => PosterBasis | null = () => null;
-let face: SheetFace = { showProof: () => {}, showPlate: () => {} };
+let face: SheetFace = { showProof: () => {}, showPlate: () => {}, showMatter: () => {} };
 let atlasUrls: string[] = [];
 let lastAtlas: AtlasDocumentData | null = null;
 let plates = new Map<string, Bound>();
@@ -165,6 +167,15 @@ ${atlas.gazetteerHtml}`;
 }
 
 function turnTo(key: string): void {
+  if (isMatterKey(key)) {
+    if (lastAtlas === null) return;
+    const html = matterPage(key, lastAtlas);
+    if (html === "") return;
+    here = key;
+    renderContents();
+    face.showMatter({ html, line: matterLine(key), title: matterTitle(key) });
+    return;
+  }
   const b = plates.get(key);
   if (!b) return;
   here = key;

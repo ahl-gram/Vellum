@@ -283,6 +283,53 @@ export async function run(ctx) {
     JSON.stringify(back),
   );
 
+  const MATTER_STATE = `(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const page=document.getElementById("pr-page");const inner=document.getElementById("pr-page-inner");return{ratio:s.width/s.height,aspect:Number(page.dataset.aspect),pageHidden:page.hidden,turnedHidden:document.getElementById("pr-turned").hidden,proofHidden:document.getElementById("pr-preview").hidden,on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,head:(inner.querySelector(".page-head")||{textContent:""}).textContent,places:inner.querySelectorAll("tbody tr").length,measureEmpty:document.getElementById("pr-page-measure").children.length===0,scrollY:window.scrollY,fits:page.getBoundingClientRect().bottom-inner.getBoundingClientRect().bottom,innerW:Math.abs(inner.getBoundingClientRect().width-page.clientWidth),noX:document.documentElement.scrollWidth<=document.documentElement.clientWidth,label:document.getElementById("map-viewport").getAttribute("aria-label")};})()`;
+  await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="gazetteer"]');if(b)b.click();})()`);
+  let matter = null;
+  for (let i = 0; i < 40; i++) {
+    let m = null;
+    try { m = await evaluate(MATTER_STATE); } catch {}
+    matter = m;
+    if (m && m.fits >= -0.5 && m.fits <= 2) break;
+    await sleep(50);
+  }
+
+  check(
+    "PR33 the gazetteer turns onto the stage as a page of the atlas (#497 seat p): the page face up at its measured portrait aspect, the folio's plate line, row viii inked, the page unscrolled",
+    !!matter && matter.pageHidden === false && matter.turnedHidden === true && matter.proofHidden === true &&
+      matter.aspect > 0 && matter.aspect <= 0.75 && Math.abs(matter.ratio - matter.aspect) < 0.01 &&
+      matter.on === "viii" && matter.here === "gazetteer" && /^plate viii of the bound atlas · the gazetteer$/.test(matter.line) &&
+      /^VELLUM · THE BOUND ATLAS OF The Isle of Rahai · CHART № 42$/.test(matter.head) &&
+      matter.places > 0 && matter.measureEmpty === true && matter.scrollY === 0 &&
+      matter.fits >= -0.5 && matter.fits <= 2 && matter.innerW < 1 && matter.noX === true && /^A page of the bound atlas: The gazetteer\./.test(matter.label),
+    JSON.stringify(matter),
+  );
+
+  await shoot("print-room-backmatter.png");
+
+  const banners = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="banners"]');if(!b)return null;b.click();const inner=document.getElementById("pr-page-inner");return{on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,line:document.getElementById("pr-plate-line").textContent,arms:inner.querySelectorAll(".banner").length,counted:(document.querySelector('#pr-contents li.on .n')||{textContent:""}).textContent};})()`);
+  check(
+    "PR33b the banners turn too: the page carries every realm's arms and its row's count agrees",
+    !!banners && banners.on === "vi" && /^plate vi of the bound atlas · the banners of every realm$/.test(banners.line) &&
+      banners.arms > 0 && banners.counted.includes(banners.arms + " arms"),
+    JSON.stringify(banners),
+  );
+
+  await evaluate(`document.getElementById("zoom-in").click()`);
+  let leaned = false;
+  for (let i = 0; i < 60; i++) {
+    if (await evaluate(`document.getElementById("map-viewport").classList.contains("zoomed")`)) { leaned = true; break; }
+    await sleep(50);
+  }
+  const unleaned = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .plates figure[data-plate="theme-vegetation"] .thumb');if(!b)return null;b.click();const s=document.getElementById("sheet").getBoundingClientRect();return{zoomed:document.getElementById("map-viewport").classList.contains("zoomed"),pageHidden:document.getElementById("pr-page").hidden,turnedHidden:document.getElementById("pr-turned").hidden,ratio:s.width/s.height,label:document.getElementById("map-viewport").getAttribute("aria-label")};})()`);
+  check(
+    "PR34 a turn while leaned rests the camera and puts the page away: zoom in on the gazetteer, turn to the vegetation survey, the sheet back at the chart's aspect and k=1",
+    leaned === true && !!unleaned && unleaned.zoomed === false && unleaned.pageHidden === true &&
+      unleaned.turnedHidden === false && Math.abs(unleaned.ratio - 1500 / 1157.931) < 0.01 &&
+      /^The proof\./.test(unleaned.label),
+    JSON.stringify({ leaned, unleaned }),
+  );
+
   await shoot("print-room-bound.png");
 
   // e2e cannot emulate :hover, so PR20b reads the lift out of the CSSOM beside the plate's resting computed style. It is a MARKUP assertion otherwise: href, target and rel, never a click, so nothing here measures the navigation itself. Runs on screen media, before PR21 emulates print.
@@ -408,12 +455,12 @@ export async function run(ctx) {
     if (ok) { reboundForHide = true; break; }
     await sleep(50);
   }
-  const hidden = await evaluate(`(()=>{document.getElementById("pr-hide").click();return{atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas"),bindEnabled:!document.getElementById("pr-bind").disabled,printDisabled:document.getElementById("pr-print").disabled,hideDisabled:document.getElementById("pr-hide").disabled,proofBack:!document.getElementById("pr-preview").hidden&&document.getElementById("pr-turned").hidden,thumbs:document.querySelectorAll("#pr-contents .plates").length,plateLine:document.getElementById("pr-plate-line").textContent};})()`);
+  const hidden = await evaluate(`(()=>{document.getElementById("pr-hide").click();return{atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas"),bindEnabled:!document.getElementById("pr-bind").disabled,printDisabled:document.getElementById("pr-print").disabled,hideDisabled:document.getElementById("pr-hide").disabled,proofBack:!document.getElementById("pr-preview").hidden&&document.getElementById("pr-turned").hidden,pageAway:document.getElementById("pr-page").hidden,label:document.getElementById("map-viewport").getAttribute("aria-label"),thumbs:document.querySelectorAll("#pr-contents .plates").length,plateLine:document.getElementById("pr-plate-line").textContent};})()`);
   check(
     "PR25 Hide dismisses the bound atlas and re-enables Bind: the proof back on the sheet, the contents unbound, the plate line cleared",
     reboundForHide && hidden.atlasEmpty === true && hidden.hasAtlas === false &&
       hidden.bindEnabled === true && hidden.printDisabled === true && hidden.hideDisabled === true &&
-      hidden.proofBack === true && hidden.thumbs === 0 && hidden.plateLine === "",
+      hidden.proofBack === true && hidden.pageAway === true && /^The proof\./.test(hidden.label) && hidden.thumbs === 0 && hidden.plateLine === "",
     JSON.stringify({ reboundForHide, hidden }),
   );
 
@@ -442,6 +489,30 @@ export async function run(ctx) {
     !!phone390 && phone390.shown === true && phone390.glassClosed === "flex" && phone390.glassOpen === "none" && phone390.hitOk === true && phone390.glassBack === "flex",
     JSON.stringify(phone390),
   );
+
+  await evaluate(`document.getElementById("pr-bind").click()`);
+  let phoneBound = false;
+  for (let i = 0; i < 300; i++) {
+    if (await evaluate(`document.body.classList.contains("has-atlas")`)) { phoneBound = true; break; }
+    await sleep(50);
+  }
+  await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="gazetteer"]');if(b)b.click();})()`);
+  let phonePage = null;
+  for (let i = 0; i < 40; i++) {
+    let m = null;
+    try { m = await evaluate(`(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const head=document.querySelector("header.chrome").getBoundingClientRect();const slip=document.querySelector(".slip").getBoundingClientRect();const page=document.getElementById("pr-page");const inner=document.getElementById("pr-page-inner");return{ratio:s.width/s.height,aspect:Number(page.dataset.aspect),w:s.width,top:s.top,bottom:s.bottom,headBottom:head.bottom,slipTop:slip.top,pageUp:!page.hidden,fits:page.getBoundingClientRect().bottom-inner.getBoundingClientRect().bottom,innerW:Math.abs(inner.getBoundingClientRect().width-page.clientWidth),noX:document.documentElement.scrollWidth<=document.documentElement.clientWidth};})()`); } catch {}
+    phonePage = m;
+    if (m && m.fits >= -0.5 && m.fits <= 2) break;
+    await sleep(50);
+  }
+  check(
+    "PR33c at 390 the gazetteer page fits the phone stage: clear of the fixed header above and the bottom sheet below, narrower than the viewport at its own aspect",
+    phoneBound && !!phonePage && phonePage.pageUp === true && Math.abs(phonePage.ratio - phonePage.aspect) < 0.01 &&
+      phonePage.w < 390 && phonePage.w > 200 && phonePage.top >= phonePage.headBottom - 0.5 && phonePage.bottom <= phonePage.slipTop + 0.5 &&
+      phonePage.fits >= -0.5 && phonePage.fits <= 2 && phonePage.innerW < 1 && phonePage.noX === true,
+    JSON.stringify(phonePage),
+  );
+  await evaluate(`document.getElementById("pr-hide").click()`);
   await send("Emulation.clearDeviceMetricsOverride");
 
   await shoot("print-room.png");

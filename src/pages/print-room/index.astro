@@ -20,6 +20,9 @@ const contents = contentsRows(null);
   <div class="sheet" id="sheet"><div id="map-viewport" tabindex="0" role="application" aria-label="The proof. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."><div id="map">
     <div id="pr-preview" class="preview"></div>
     <img id="pr-turned" class="turned" alt="" hidden>
+    <div id="pr-page" class="page" hidden>
+      <div id="pr-page-inner" class="page-inner matter-page"></div>
+    </div>
   </div></div></div>
   <p class="status" id="pr-status" role="status" aria-live="polite"></p>
   <p id="pr-warning" class="warning" hidden>Your browser could not start the render
@@ -107,6 +110,7 @@ const contents = contentsRows(null);
 </div>
 
 <div id="pr-atlas" class="atlas-sheet"></div>
+<div id="pr-page-measure" class="page-measure matter-page" aria-hidden="true"></div>
 
 <script type="module" src="./app.bundle.js" is:inline></script>
 </BaseLayout>
