@@ -711,10 +711,16 @@ test("the kit's lifted shapes render one shape on every page that wears them: th
   }
   assert.ok(!page("index.html").includes(KIT_FOG) && !page("index.html").includes('class="zoomery'), "home keeps its own stage dress (#461)");
   for (const p of PAGES) {
-    for (const [road] of page(p.route).matchAll(/<a[^>]*class="legend-btn[^>]*>[\s\S]*?<\/a>/g)) {
+    const html = page(p.route);
+    for (const [road] of html.matchAll(/<a[^>]*class="legend-btn[^>]*>[\s\S]*?<\/a>/g)) {
       assert.match(road, ROAD, `${p.route}: a road out is the kit's shape: ${road}`);
     }
+    // The gold variant reaches the build (guard-prover, 2026-09-02): every road the page marks gold renders gold, and no other does.
+    const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
+    const goldTags = [...source.matchAll(/<LegendButton [^>]*\bgold\b/g)].length;
+    assert.equal(html.split('class="legend-btn gold"').length - 1, goldTags, `${p.route} renders exactly the gold roads its source marks`);
   }
+  assert.ok(page("prospect/index.html").includes('class="legend-btn gold"'), "the Prospect's road back to the Explorer is gold (a known gold call site, so the count above is not vacuous)");
 });
 
 test("the seed form floats on the stage as the mockup's corner chrome, its ratified semantics whole (#470, was the #289 cartouche hero)", () => {
