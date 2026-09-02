@@ -121,6 +121,8 @@ h1 { font-weight: 400; color: var(--parchment-bright); }
   outline: 3px double var(--line-faint); outline-offset: 6px; box-shadow: var(--sheet-shadow);
   padding: 1.8rem clamp(1.25rem, 3vw, 2.75rem) 2.4rem; margin: 2.8rem 0; }
 .atlas-sheet > section > h2 { margin-top: 0; }
+/* The gazetteer's table has a min-content floor (td.name is nowrap) wider than a phone's sheet, measured 364px against a 390 viewport (plate read 2026-09-02): its sheet scrolls the table inside rather than the page sideways. */
+.atlas-sheet > section:has(> table) { overflow-x: auto; }
 footer { color: var(--line-tan); }
 @media print {
   body { background: none; }

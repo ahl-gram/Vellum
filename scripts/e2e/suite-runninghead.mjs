@@ -264,13 +264,15 @@ export async function run(ctx) {
   );
 
   const poolAlpha = (color) => Number((String(color).match(/\/\s*([\d.]+)\)/) || String(color).match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "0");
+  // #464: the Gallery joins home, the two pages whose content scrolls or rides under the cluster (a pale plate measured the tagline at 2.26:1 without the pool).
+  const POOLED = ["/", "/gallery/"];
   const washWrong = bad((h, r) =>
-    r === "/" ? !!h.chromeWash && h.chromeWash.content !== "none" && /blur\(/.test(h.chromeWash.filter) && poolAlpha(h.chromeWash.backgroundColor) >= 0.8
+    POOLED.includes(r) ? !!h.chromeWash && h.chromeWash.content !== "none" && /blur\(/.test(h.chromeWash.filter) && poolAlpha(h.chromeWash.backgroundColor) >= 0.8
               : !!h.chromeWash && h.chromeWash.content === "none");
   check(
-    "RH9b home's chrome carries its wash, a blurred pool of the chart ink since #480, and a room's carries none, the band being its ground (#461, 2026-08-26 call)",
+    "RH9b home's chrome carries its wash, a blurred pool of the chart ink since #480, the Gallery's too since #464 (its plates scroll under the cluster), and every other room's carries none, the band or the fitted stage being its ground (#461, 2026-08-26 call)",
     washWrong.length === 0,
-    washWrong.map((r) => `${r} wash ${JSON.stringify(heads[r]?.chromeWash)}`).join(" | ") || "wash on home alone",
+    washWrong.map((r) => `${r} wash ${JSON.stringify(heads[r]?.chromeWash)}`).join(" | ") || "wash on home and the Gallery alone",
   );
 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });

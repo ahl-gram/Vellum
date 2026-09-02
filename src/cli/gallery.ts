@@ -87,6 +87,9 @@ figcaption span { font-variant-caps: small-caps; font-size: 0.8rem; letter-spaci
 .grid a::before { content: "Drafting…"; position: absolute; inset: 0; z-index: -1;
   display: grid; place-items: center; background: var(--parchment-panel);
   font-style: italic; color: var(--ink-faded); }
+/* The one chart room whose content SCROLLS under the chrome: a pale plate beneath the cluster measured the tagline at 2.26:1 and the rooms nav at 2.0:1 (plate read 2026-09-02), so the cluster keeps the #480 pool at all times, home's precedent (its cluster rides the chart). */
+header.chrome::before { content: ""; position: absolute; inset: -1.3rem -1.6rem; z-index: -1; pointer-events: none;
+  background: rgb(from var(--chart-ink) r g b / 0.92); filter: blur(16px); }
 /* No slip to stand beside: the legend row is centred (the kit seats it beside an open slip). */
 .legend { left: 50%; }
 @media (max-width: 900px) {

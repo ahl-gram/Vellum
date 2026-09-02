@@ -71,6 +71,7 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   const screen = css.slice(0, css.indexOf("@media print"));
   assert.doesNotMatch(screen, /figcaption[^{]*\{[^}]*var\(--ink-(dark|brown|faded)\)/, "no ink lettering on the deep outside print");
   assert.match(css, /(^|\n)\.legend\s*\{\s*left:\s*50%;\s*\}/, "no slip to stand beside: the legend row is centred (placement is the page's, the dress the kit's)");
+  assert.match(css, /(^|\n)header\.chrome::before\s*\{[^}]*background:\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.92\);[^}]*filter:\s*blur\(16px\)/, "the cluster keeps the #480 pool: the plates scroll under it (tagline 2.26:1, rooms 2.0:1 over a pale plate without it, plate read 2026-09-02)");
   const phone = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
   assert.match(phone, /\.legend\s*\{[^}]*display:\s*block/, "the kit hides the row for a slip to dock it; the Gallery has no slip and no script, so the row stays");
   assert.doesNotMatch(css, /(^|\n)\s*(header|footer|p\.sub|main\.desk-panel)\s*[{,]/, "no rule targets furniture a chart room no longer has");

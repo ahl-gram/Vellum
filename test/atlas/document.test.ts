@@ -272,6 +272,7 @@ test("#464 the served page takes the deep with its sections on parchment sheets;
   assert.doesNotMatch(page, /class="chrome"|class="rooms"|atelier\.css|house\.css/, "the atlas keeps its own small header and footer: no head cluster, out of the nav (#202)");
   assert.match(page, /<header>\s*<h1>/, "its own header stands");
   assert.match(page, /<footer>DRAWN BY VELLUM/, "its own footer stands");
+  assert.match(page, /\.atlas-sheet > section:has\(> table\)\s*\{[^}]*overflow-x:\s*auto/, "the gazetteer's sheet scrolls its table inside: its min-content floor measured 364px against a 390 viewport (plate read 2026-09-02)");
   const screen = page.slice(page.indexOf("--the-deep:"), page.indexOf("</style>"));
   // The base rule is pinned OUTSIDE the print block: a print-only override would keep the selector's string alive while the deep was never painted (guard-prover, 2026-09-02).
   const base = screen.slice(0, screen.indexOf("@media print"));
