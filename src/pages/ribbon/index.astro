@@ -1,6 +1,12 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import RoomFolio from "../../layouts/RoomFolio.astro";
+import Fog from "../../layouts/Fog.astro";
+import Vignettes from "../../layouts/Vignettes.astro";
+import ChartStage from "../../layouts/ChartStage.astro";
+import Glass from "../../layouts/Glass.astro";
+import ChartFolio from "../../layouts/ChartFolio.astro";
+import LegendButton from "../../layouts/LegendButton.astro";
 import Slip from "../../layouts/Slip.astro";
 
 const room = "The Wayfarer's Ribbon";
@@ -13,20 +19,20 @@ const tagline = "the road, unrolled";
   path="/ribbon/"
   chartRoom
 >
-<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>
-<div class="stage">
-  <div class="sheet" id="sheet"><div id="map-viewport" tabindex="0" role="application" aria-label="The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."><div id="map">
-    <img id="rb-plate" class="plate" alt="" hidden>
-  </div></div></div>
-  <p class="status" id="rb-status" role="status" aria-live="polite"></p>
-  <p id="rb-warning" class="warning" hidden>Your browser could not start the render worker,
-  so the scroll is drawn on the main thread. It may pause the page for a moment.</p>
-  <noscript>
-    <p class="status">Every scroll is unrolled in your browser, so the Ribbon needs
-    JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
-  </noscript>
-</div>
-<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>
+<Fog />
+<ChartStage label="The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.">
+  <img id="rb-plate" class="plate" alt="" hidden>
+  <Fragment slot="after">
+    <p class="status" id="rb-status" role="status" aria-live="polite"></p>
+    <p id="rb-warning" class="warning" hidden>Your browser could not start the render worker,
+    so the scroll is drawn on the main thread. It may pause the page for a moment.</p>
+    <noscript>
+      <p class="status">Every scroll is unrolled in your browser, so the Ribbon needs
+      JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
+    </noscript>
+  </Fragment>
+</ChartStage>
+<Vignettes />
 
 <RoomFolio room={room} tagline={tagline}>
   <div class="folio-controls" role="group" aria-label="The journey">
@@ -50,30 +56,17 @@ const tagline = "the road, unrolled";
   <div class="legend-dock"></div>
 </Slip>
 
-<div class="chrome corner bl folio">
-  <p class="folio-title" id="folio-title"></p>
-  <p class="folio-sub" id="folio-sub"></p>
-  <p class="folio-coords" id="rb-unrolled"></p>
-</div>
+<ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "rb-unrolled"]]} />
 
 <nav class="legend" aria-label="The roads out">
   <p class="legend-head">The roads out</p>
   <div class="legend-row">
-    <a id="rb-chart-link" class="legend-btn gold" href="/explorer/"><span class="verb">Return to</span><span class="room">The Explorer</span></a>
-    <a id="rb-prospect-link" class="legend-btn" href="/prospect/"><span class="verb" id="rb-prospect-verb">See the road's end in</span><span class="room">The Prospect</span></a>
+    <LegendButton id="rb-chart-link" gold href="/explorer/" verb="Return to" room="The Explorer" />
+    <LegendButton id="rb-prospect-link" href="/prospect/" verbId="rb-prospect-verb" verb="See the road's end in" room="The Prospect" />
   </div>
 </nav>
 
-<div class="chrome corner br zoomery" role="group" aria-label="The Surveyor's Glass">
-  <button id="zoom-in" class="zoom-btn" type="button" data-zoom="in" aria-label="Lean closer (zoom in)" title="Lean closer"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"/><path d="M9.9 9.9l3.7 3.7"/><path d="M6.8 4.9v3.8M4.9 6.8h3.8"/></svg></button>
-  <button id="zoom-reset" class="zoom-btn" type="button" data-zoom="fit" aria-label="The full sheet (reset the view)" title="The full sheet"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6h6.6l2.6 2.6v8.2H3.4z"/><path d="M10 2.6v2.6h2.6"/><path d="M5.3 9.7c1-.9 1.9.5 2.9-.3.8-.7 1.5-.2 2.2-.7"/></svg></button>
-  <button id="zoom-out" class="zoom-btn" type="button" data-zoom="out" aria-label="Stand back (zoom out)" title="Stand back"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"/><path d="M9.9 9.9l3.7 3.7"/><path d="M4.9 6.8h3.8"/></svg></button>
-  <div class="zoom-keys" aria-hidden="true">
-    <span><kbd>+</kbd> <kbd>&#8722;</kbd> lean closer, stand back</span>
-    <span><kbd>&#8592;&#8593;&#8594;&#8595;</kbd> pan the sheet</span>
-    <span><kbd>0</kbd> the full sheet</span>
-  </div>
-</div>
+<Glass />
 
 <script type="module" src="./app.bundle.js" is:inline></script>
 </BaseLayout>

@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import RoomFolio from "../../layouts/RoomFolio.astro";
+import Fog from "../../layouts/Fog.astro";
+import LegendButton from "../../layouts/LegendButton.astro";
 import { GALLERY_COUNT, GALLERY_SEED, cardFigureHtml, galleryCards } from "../../cli/gallery.ts";
 
 // Composed at build time from the same deterministic composer generate-showcases renders
@@ -18,7 +20,7 @@ const dateline = `${GALLERY_COUNT} charts, from seed ${GALLERY_SEED}`;
   path="/gallery/"
   chartRoom
 >
-<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>
+<Fog />
 <div class="grid" set:html={figures}></div>
 
 <RoomFolio room={room} tagline={tagline}>
@@ -28,7 +30,7 @@ const dateline = `${GALLERY_COUNT} charts, from seed ${GALLERY_SEED}`;
 <nav class="legend" aria-label="The road out">
   <p class="legend-head">every plate is a road into its own world</p>
   <div class="legend-row">
-    <a class="legend-btn gold" href="/explorer/"><span class="verb">Return to</span><span class="room">The Explorer</span></a>
+    <LegendButton gold href="/explorer/" verb="Return to" room="The Explorer" />
   </div>
 </nav>
 </BaseLayout>

@@ -22,6 +22,13 @@ const between = (from: string, to: string): string => {
   return page.slice(a, b);
 };
 
+/** #487: the chart folio is the kit's, its lines named as [class, id] pairs on the page. */
+const folioLines = (): string[][] => {
+  const m = page.match(/<ChartFolio lines=\{(\[[^\n]*\])\} \/>/);
+  assert.ok(m, "the page stands the kit's chart folio");
+  return JSON.parse(m![1]!) as string[][];
+};
+
 test("PRR1 the Print Room is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead, the order desk retired", () => {
   const open = page.match(/<BaseLayout([\s\S]*?)>/);
   assert.ok(open, "the page renders through BaseLayout");
@@ -60,7 +67,7 @@ test("PRR3 the Bound Atlas is the slip: Bind and the contents in its body, Print
   }
   assert.ok(!page.includes("about 20 MB"), "no unmeasured size in the copy (the download reports its own)");
   assert.match(css, /body\.has-atlas \.slip \.intro\s*\{[^}]*display:\s*none/, "bound, the bound line replaces the intro (the mockup)");
-  assert.ok(page.indexOf("</Slip>") < page.indexOf('<div class="chrome corner bl folio">'), "the slip precedes the chart's folio in the page");
+  assert.ok(page.indexOf("</Slip>") < page.indexOf("<ChartFolio"), "the slip precedes the chart's folio in the page");
 });
 
 test("PRR4 the legend row is the poster plates plus a road back (ruled 2026-08-30): Pressed-as in the head, the caveat one line under it, the four sizes ascending, the gold road to the Explorer last", () => {
@@ -74,7 +81,7 @@ test("PRR4 the legend row is the poster plates plus a road back (ruled 2026-08-3
   const at = (key: string) => row.indexOf(`data-poster="${key}"`);
   assert.ok(at("chart") >= 0 && at("chart") < at("desk") && at("desk") < at("wall") && at("wall") < at("grand"), "chart, desk, wall, grand: ascending width");
   assert.match(row, /<button class="legend-btn" type="button" data-poster="chart" disabled><span class="verb dim">1500 px<\/span><span class="room">Chart<\/span><\/button>/, "a plate is a legend button, its width the verb, closed until a proof");
-  assert.match(row, /<a id="pr-explorer" class="legend-btn gold" href="\.\.\/explorer\/"><span class="verb">Back to<\/span><span class="room">The Explorer<\/span><\/a>/, "the road back to the Explorer is gold");
+  assert.match(row, /<LegendButton id="pr-explorer" gold href="\.\.\/explorer\/" verb="Back to" room="The Explorer" \/>/, "the road back to the Explorer is gold (the kit's, #487)");
   assert.ok(row.indexOf('id="pr-explorer"') > at("grand"), "the road stands last");
   assert.match(legend, /<div class="legend-row" role="group" aria-label="A poster plate">/, "the row names itself; a labelledby on the head would absorb the select's option text");
   assert.match(legend, /<\/div>\s*<p class="legend-status" id="pr-poster-status" role="status" aria-live="polite"><\/p>\s*$/, "the poster order reports under the row, which a phone docks into its sheet");
@@ -92,21 +99,18 @@ test("PRR4 the legend row is the poster plates plus a road back (ruled 2026-08-3
 test("PRR5 the stage holds the fitted sheet with the proof and the turned plate in one gesture box; the status pill, the Glass, the chart's folio and the hidden document keep their ids", () => {
   assert.match(
     page,
-    /<div class="stage">\s*<div class="sheet" id="sheet"><div id="map-viewport"[^>]*tabindex="0"[^>]*role="application"[^>]*><div id="map">\s*<div id="pr-preview"[^>]*><\/div>\s*<img id="pr-turned"[^>]*hidden>\s*<div id="pr-page"[^>]*hidden[^>]*>[\s\S]*?<\/div>\s*<\/div><\/div><\/div>/,
-    "the sheet's gesture box holds the transform target, which holds the proof, the turned plate and the back matter's page (#497)",
+    /<ChartStage label="The proof\. [^"]+">\s*<div id="pr-preview"[^>]*><\/div>\s*<img id="pr-turned"[^>]*hidden>\s*<div id="pr-page"[^>]*hidden[^>]*>[\s\S]*?<\/div>\s*<Fragment slot="after">/,
+    "the kit's stage (#487): its gesture box's transform target holds the proof, the turned plate and the back matter's page (#497)",
   );
-  const stage = between('<div class="stage">', '<div class="vignette');
+  const stage = between("<ChartStage", "<Vignettes />");
   assert.match(stage, /<p class="status" id="pr-status" role="status" aria-live="polite"><\/p>/, "the status line keeps its id (the suite's settle probe) and is the stage's pill");
   assert.match(stage, /<p id="pr-warning" class="warning" hidden>/, "the inline-fallback warning stands in the stage");
-  assert.match(page, /<div class="chrome corner br zoomery" role="group" aria-label="The Surveyor's Glass">/, "the Glass is the corner cluster");
-  assert.match(page, /data-zoom="in"/, "the Glass buttons carry data-zoom for the shared keys binding");
-  const folio = between('<div class="chrome corner bl folio">', "</div>");
-  assert.match(folio, /<p class="folio-title" id="folio-title">/, "the chart's folio carries the world's name");
-  assert.match(folio, /<p class="folio-sub plate-line" id="pr-plate-line">/, "and the line naming the plate on the sheet");
-  assert.match(folio, /<p class="folio-sub" id="folio-sub">/, "and its survey line");
-  assert.ok(!folio.includes("pr-poster-status"), "the poster order does not report in the chart's folio: the kit hides that corner on a phone, where the plates are still tappable (skeptic on PR #496)");
+  assert.ok(page.includes("<Glass />"), "the Glass is the kit's corner cluster (#487; its presses carry data-zoom for the shared keys binding, atelier-kit.test.ts)");
+  const lines = folioLines();
+  assert.deepEqual(lines, [["folio-title", "folio-title"], ["folio-sub plate-line", "pr-plate-line"], ["folio-sub", "folio-sub"]], "the chart's folio: the world's name, the line naming the plate on the sheet, the survey line");
+  assert.ok(!lines.some(([, id]) => id === "pr-poster-status"), "the poster order does not report in the chart's folio: the kit hides that corner on a phone, where the plates are still tappable (skeptic on PR #496)");
   assert.match(page, /<div id="pr-atlas" class="atlas-sheet"><\/div>/, "the hidden document stays the Print / Download source");
-  assert.ok(page.indexOf('id="pr-atlas"') > page.indexOf('class="chrome corner br zoomery"'), "the document follows the furniture");
+  assert.ok(page.indexOf('id="pr-atlas"') > page.indexOf("<Glass />"), "the document follows the furniture");
 });
 
 test("PRR6 seats.ts binds the Glass and the room with the turned plate's own aspect; app.ts refits once the folio is written; nothing scrolls the page (the #494 ruling)", () => {

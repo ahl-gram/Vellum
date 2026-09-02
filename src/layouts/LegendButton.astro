@@ -1,0 +1,14 @@
+---
+// A road out of the room (#462 chart-room ruling 4; the Atelier Kit, #487): an <a> in the legend dress, gold when it is the room's featured road; a press on the sheet itself (the Explorer's Turn, the Print Room's plates) is a <button> the page writes in the same classes. verbId lets a page rewrite the verb at the draw; road is Today's data-road stamp.
+interface Props {
+  href: string;
+  verb: string;
+  room: string;
+  id?: string;
+  gold?: boolean;
+  road?: string;
+  verbId?: string;
+}
+const { href, verb, room, id, gold = false, road, verbId } = Astro.props;
+---
+<a id={id} class={gold ? "legend-btn gold" : "legend-btn"} data-road={road} href={href}><span class="verb" id={verbId}>{verb}</span><span class="room">{room}</span></a>

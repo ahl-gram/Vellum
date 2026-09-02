@@ -19,9 +19,9 @@ test("HZ1 the Hunt wraps #map in a stable #map-viewport clip/gesture box, the ch
   );
   assert.match(html, /<div id="map-viewport"[^>]*tabindex="0"[^>]*role="application"/, "the stage is the keyboard's Glass, the Explorer's shape");
   assert.ok(!html.includes('id="caption"'), "the world's name left the zoom frame for the chart folio");
-  const folio = html.indexOf('class="chrome corner bl folio"');
+  const folio = html.indexOf("<ChartFolio");
   assert.ok(folio > html.indexOf("</div>", html.indexOf('id="map-viewport"')), "the chart folio stands outside the stage");
-  assert.match(html.slice(folio), /id="folio-title"/, "the chart folio carries the world's name");
+  assert.match(html.slice(folio), /\["folio-title", "folio-title"\]/, "the chart folio carries the world's name (the kit's ChartFolio, #487)");
 });
 
 test("HZ2 app.js adopts the shared zoom controller, bound to #map-viewport / #map (#167)", () => {

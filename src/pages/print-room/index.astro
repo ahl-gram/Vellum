@@ -1,6 +1,12 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import RoomFolio from "../../layouts/RoomFolio.astro";
+import Fog from "../../layouts/Fog.astro";
+import Vignettes from "../../layouts/Vignettes.astro";
+import ChartStage from "../../layouts/ChartStage.astro";
+import Glass from "../../layouts/Glass.astro";
+import ChartFolio from "../../layouts/ChartFolio.astro";
+import LegendButton from "../../layouts/LegendButton.astro";
 import Slip from "../../layouts/Slip.astro";
 import { contentsRows } from "../../site/print-room/contents-markup.ts";
 
@@ -15,25 +21,25 @@ const contents = contentsRows(null);
   path="/print-room/"
   chartRoom
 >
-<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>
-<div class="stage">
-  <div class="sheet" id="sheet"><div id="map-viewport" tabindex="0" role="application" aria-label="The proof. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."><div id="map">
-    <div id="pr-preview" class="preview"></div>
-    <img id="pr-turned" class="turned" alt="" hidden>
-    <div id="pr-page" class="page" hidden>
-      <div id="pr-page-inner" class="page-inner matter-page"></div>
-    </div>
-  </div></div></div>
-  <p class="status" id="pr-status" role="status" aria-live="polite"></p>
-  <p id="pr-warning" class="warning" hidden>Your browser could not start the render
-  worker, so proofs are drawn on the main thread. A large plate may pause the page for
-  a moment.</p>
-  <noscript>
-    <p class="status">Every proof is pulled in your browser, so the Print Room needs
-    JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
-  </noscript>
-</div>
-<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>
+<Fog />
+<ChartStage label="The proof. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.">
+  <div id="pr-preview" class="preview"></div>
+  <img id="pr-turned" class="turned" alt="" hidden>
+  <div id="pr-page" class="page" hidden>
+    <div id="pr-page-inner" class="page-inner matter-page"></div>
+  </div>
+  <Fragment slot="after">
+    <p class="status" id="pr-status" role="status" aria-live="polite"></p>
+    <p id="pr-warning" class="warning" hidden>Your browser could not start the render
+    worker, so proofs are drawn on the main thread. A large plate may pause the page for
+    a moment.</p>
+    <noscript>
+      <p class="status">Every proof is pulled in your browser, so the Print Room needs
+      JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
+    </noscript>
+  </Fragment>
+</ChartStage>
+<Vignettes />
 
 <RoomFolio room={room} tagline={tagline}>
   <div class="folio-controls" role="group" aria-label="Choose a world">
@@ -72,11 +78,7 @@ const contents = contentsRows(null);
   </Fragment>
 </Slip>
 
-<div class="chrome corner bl folio">
-  <p class="folio-title" id="folio-title"></p>
-  <p class="folio-sub plate-line" id="pr-plate-line"></p>
-  <p class="folio-sub" id="folio-sub"></p>
-</div>
+<ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub plate-line", "pr-plate-line"], ["folio-sub", "folio-sub"]]} />
 
 <nav class="legend" aria-label="A poster plate">
   <p class="legend-head"><span class="pressed">A poster plate, pressed as
@@ -93,21 +95,12 @@ const contents = contentsRows(null);
     <button class="legend-btn" type="button" data-poster="desk" disabled><span class="verb dim">2400 px</span><span class="room">Desk</span></button>
     <button class="legend-btn" type="button" data-poster="wall" disabled><span class="verb dim">3300 px</span><span class="room">Wall</span></button>
     <button class="legend-btn" type="button" data-poster="grand" disabled><span class="verb dim">4200 px</span><span class="room">Grand</span></button>
-    <a id="pr-explorer" class="legend-btn gold" href="../explorer/"><span class="verb">Back to</span><span class="room">The Explorer</span></a>
+    <LegendButton id="pr-explorer" gold href="../explorer/" verb="Back to" room="The Explorer" />
   </div>
   <p class="legend-status" id="pr-poster-status" role="status" aria-live="polite"></p>
 </nav>
 
-<div class="chrome corner br zoomery" role="group" aria-label="The Surveyor's Glass">
-  <button id="zoom-in" class="zoom-btn" type="button" data-zoom="in" aria-label="Lean closer (zoom in)" title="Lean closer"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"/><path d="M9.9 9.9l3.7 3.7"/><path d="M6.8 4.9v3.8M4.9 6.8h3.8"/></svg></button>
-  <button id="zoom-reset" class="zoom-btn" type="button" data-zoom="fit" aria-label="The full sheet (reset the view)" title="The full sheet"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6h6.6l2.6 2.6v8.2H3.4z"/><path d="M10 2.6v2.6h2.6"/><path d="M5.3 9.7c1-.9 1.9.5 2.9-.3.8-.7 1.5-.2 2.2-.7"/></svg></button>
-  <button id="zoom-out" class="zoom-btn" type="button" data-zoom="out" aria-label="Stand back (zoom out)" title="Stand back"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"/><path d="M9.9 9.9l3.7 3.7"/><path d="M4.9 6.8h3.8"/></svg></button>
-  <div class="zoom-keys" aria-hidden="true">
-    <span><kbd>+</kbd> <kbd>&#8722;</kbd> lean closer, stand back</span>
-    <span><kbd>&#8592;&#8593;&#8594;&#8595;</kbd> pan the sheet</span>
-    <span><kbd>0</kbd> the full sheet</span>
-  </div>
-</div>
+<Glass />
 
 <div id="pr-atlas" class="atlas-sheet"></div>
 <div id="pr-page-measure" class="page-measure matter-page" aria-hidden="true"></div>

@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import RoomFolio from "../../layouts/RoomFolio.astro";
+import Fog from "../../layouts/Fog.astro";
 import IndexSlip from "../../layouts/IndexSlip.astro";
 import { indexCount, roomSections } from "../../layouts/room-sections.ts";
 
@@ -20,7 +21,7 @@ const count = `${indexCount(sections)} questions in ${sections.length} sections`
   path="/faq/"
   desk="open"
 >
-<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>
+<Fog />
 <RoomFolio room={room} tagline={tagline}>
   <p class="dateline">{count}</p>
 </RoomFolio>

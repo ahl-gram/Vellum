@@ -1,0 +1,13 @@
+---
+// The chart room's stage (#462 ruling 1; the Atelier Kit, #487): the viewport, the fitted sheet, the gesture box the Glass binds to, and the transform target that holds the page's face; the status pill and the scripts-off notice follow the sheet in the after slot. The Explorer (a leaf inside the sheet), the Reading Room (no target until the frame's chart moves in) and Today (the sheet inside the target) keep their own skeletons.
+interface Props {
+  label: string;
+}
+const { label } = Astro.props;
+---
+<div class="stage">
+  <div class="sheet" id="sheet"><div id="map-viewport" tabindex="0" role="application" aria-label={label}><div id="map">
+    <slot />
+  </div></div></div>
+  <slot name="after" />
+</div>

@@ -675,6 +675,48 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
   }
 });
 
+// #487 (the Atelier Kit's one PR before #465): the five shapes the rooms pasted are components, and the BUILT html carries each as one shape. Measured 2026-09-02 against the #464 tree's build: home, the FAQ, the Gallery, the Glossary and the atlas byte-identical; the Print Room, the Reading Room and Today identical after collapsing whitespace between tags; the Prospect and the Ribbon the same plus one apostrophe entity each (Astro escapes a prop's text); the Explorer the same plus data-zoom on its three presses, which nothing on that page reads (its glass.ts binds by id).
+const KIT_FOG = '<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>';
+const KIT_VIGNETTES = '<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>';
+const KIT_GLASS = (id: string) => `<div class="chrome corner br zoomery"${id} role="group" aria-label="The Surveyor's Glass">
+  <button id="zoom-in" class="zoom-btn" type="button" data-zoom="in" aria-label="Lean closer (zoom in)" title="Lean closer"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"></circle><path d="M9.9 9.9l3.7 3.7"></path><path d="M6.8 4.9v3.8M4.9 6.8h3.8"></path></svg></button>
+  <button id="zoom-reset" class="zoom-btn" type="button" data-zoom="fit" aria-label="The full sheet (reset the view)" title="The full sheet"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6h6.6l2.6 2.6v8.2H3.4z"></path><path d="M10 2.6v2.6h2.6"></path><path d="M5.3 9.7c1-.9 1.9.5 2.9-.3.8-.7 1.5-.2 2.2-.7"></path></svg></button>
+  <button id="zoom-out" class="zoom-btn" type="button" data-zoom="out" aria-label="Stand back (zoom out)" title="Stand back"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"></circle><path d="M9.9 9.9l3.7 3.7"></path><path d="M4.9 6.8h3.8"></path></svg></button>
+  <div class="zoom-keys" aria-hidden="true">
+    <span><kbd>+</kbd> <kbd>&#8722;</kbd> lean closer, stand back</span>
+    <span><kbd>&#8592;&#8593;&#8594;&#8595;</kbd> pan the sheet</span>
+    <span><kbd>0</kbd> the full sheet</span>
+  </div>
+</div>`;
+const ROAD = /<a( id="[\w-]+")? class="legend-btn( gold)?"( data-road="[\w-]+")? href="[^"]+"><span class="verb"( id="[\w-]+")?>[^<]+<\/span><span class="room">[^<]+<\/span><\/a>/;
+
+test("the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, a road out (#487)", () => {
+  const chartRooms = PAGES.filter((p) => p.chartRoom && p.dir !== "/gallery/");
+  for (const p of PAGES.filter((q) => q.room)) {
+    const html = page(p.route);
+    assert.equal(html.split(KIT_FOG).length - 1, 1, `${p.route} wears the fog pair once`);
+  }
+  for (const p of [...chartRooms, PAGES.find((q) => q.dir === "/gallery/")!]) {
+    assert.equal(page(p.route).split(KIT_VIGNETTES).length - 1, 1, `${p.route} wears the vignette pair once`);
+  }
+  for (const p of chartRooms) {
+    const html = page(p.route);
+    const glass = KIT_GLASS(p.dir === "/explorer/" ? ' id="zoom-controls"' : "");
+    assert.ok(html.includes(glass), `${p.route} carries the Glass as the kit renders it`);
+    const folio = html.match(/<div class="chrome corner bl folio">([\s\S]*?)<\/div>/);
+    assert.ok(folio, `${p.route} carries the chart folio`);
+    const lines = folio![1]!.trim();
+    assert.match(lines, /^(<p class="[\w -]+" id="[\w-]+"><\/p>)+$/, `${p.route}'s folio holds nothing but its lines: ${lines}`);
+    assert.match(lines, /^<p class="folio-title" id="folio-title"><\/p>/, `${p.route}'s folio leads with the world's name`);
+  }
+  assert.ok(!page("index.html").includes(KIT_FOG) && !page("index.html").includes('class="zoomery'), "home keeps its own stage dress (#461)");
+  for (const p of PAGES) {
+    for (const [road] of page(p.route).matchAll(/<a[^>]*class="legend-btn[^>]*>[\s\S]*?<\/a>/g)) {
+      assert.match(road, ROAD, `${p.route}: a road out is the kit's shape: ${road}`);
+    }
+  }
+});
+
 test("the seed form floats on the stage as the mockup's corner chrome, its ratified semantics whole (#470, was the #289 cartouche hero)", () => {
   // normalize: prose markers must not break on source-line reflow.
   const html = normalize(decode(page("index.html")));
