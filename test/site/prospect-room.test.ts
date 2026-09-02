@@ -92,6 +92,8 @@ test("PPR6 seats.ts binds the Glass and the room at the plate's own aspect; app.
   assert.match(app, /ribbonTarget\(location\.hash, /, "the road to the Ribbon carries the world and the town");
   assert.match(app, /chartTarget\(location\.hash\)/, "the road back sheds the page's own keys (PB7b)");
   assert.match(app, /parseYear\(/, "the control reads the year through the address grammar, not Number()");
+  assert.match(app, /ribbonLink\.style\.display = res\.roads \? "" : "none"/, "the Ribbon's road stands only where a road leaves the town, by display (the kit's .legend-btn display makes hidden inert)");
+  assert.match(app.slice(0, app.indexOf("await initWorker()")), /ribbonLink\.style\.display = "none"/, "and stands down until the first plate resolves the town");
   assert.match(app, /addEventListener\("submit"/, "Engrave is the form's submit");
   const settle = app.slice(app.indexOf("showPlate("), app.indexOf("last = {"));
   assert.ok(settle.includes("writeFolio(") && settle.includes("room.layout()"), "the settle path writes the folio and refits");

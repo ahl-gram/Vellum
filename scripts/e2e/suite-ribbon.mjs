@@ -18,7 +18,7 @@ export async function run(ctx) {
     }
     await send("Page.navigate", { url: page(hash) });
   };
-  const STATE = `(()=>{const st=window.__vellumRibbonState&&window.__vellumRibbonState();const img=document.getElementById("rb-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");const to=document.getElementById("rb-to");return{seed:st.seed,from:st.from,to:st.to,leagues:st.leagues,dress:st.dress,stRows:st.rows,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#rb-status"),title:q("#folio-title"),sub:q("#folio-sub"),unrolled:q("#rb-unrolled"),chart:a("rb-chart-link"),prospect:a("rb-prospect-link"),prospectVerb:q("#rb-prospect-verb"),slipTitle:q("#itinerary-title"),where:q("#itinerary .card-where"),rows:document.querySelectorAll("#rb-itinerary li").length,toName:to.selectedOptions[0]?to.selectedOptions[0].textContent:null,hash:location.hash};})()`;
+  const STATE = `(()=>{const st=window.__vellumRibbonState&&window.__vellumRibbonState();const img=document.getElementById("rb-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");const to=document.getElementById("rb-to");return{seed:st.seed,from:st.from,to:st.to,leagues:st.leagues,dress:st.dress,stRows:st.rows,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#rb-status"),title:q("#folio-title"),sub:q("#folio-sub"),unrolled:q("#rb-unrolled"),chart:a("rb-chart-link"),prospect:a("rb-prospect-link"),prospectVerb:q("#rb-prospect-verb"),slipTitle:q("#itinerary-title"),where:q("#itinerary .card-where"),rows:document.querySelectorAll("#rb-itinerary li").length,toName:to.selectedOptions[0]?to.selectedOptions[0].textContent:null,fromOptions:[...document.getElementById("rb-from").options].map((o)=>Number(o.value)),prospectShown:getComputedStyle(document.getElementById("rb-prospect-link")).display!=="none",hash:location.hash};})()`;
   const state = () => evaluate(STATE);
   const opened = async (label) => {
     for (let i = 0; i < 200; i++) {
@@ -61,16 +61,21 @@ export async function run(ctx) {
     first.rows === first.stRows && first.rows >= 4 && rows.first && rows.first.cls === "waypoint" && rows.first.num === "0" && rows.first.strong === "Laukuwelua" && rows.first.em === "the capital" && rows.last && rows.last.cls === "waypoint" && rows.last.strong === first.toName && rows.buttons && first.slipTitle === `Laukuwelua to ${first.toName}` && /^\d+ leagues · in .+ · An\. \d+$/.test(first.where),
     JSON.stringify({ rows: first.rows, stRows: first.stRows, first: rows.first, last: rows.last, slipTitle: first.slipTitle, where: first.where, toName: first.toName }),
   );
+  check(
+    "RB5e setting out from offers only places a road leaves: seed 42's orphan Tewetulua (24) is not among them (#494)",
+    first.fromOptions.length === 25 && !first.fromOptions.includes(24) && first.fromOptions.includes(0),
+    JSON.stringify({ count: first.fromOptions.length, has24: first.fromOptions.includes(24) }),
+  );
   await evaluate(`document.querySelectorAll("#rb-itinerary li .lean")[2].click()`);
   let leaned = null;
   for (let i = 0; i < 60; i++) {
-    try { leaned = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const t=getComputedStyle(document.getElementById("map")).transform;const m=/matrix\\(([^,]+),/.exec(t);const on=[...document.querySelectorAll("#rb-itinerary li")].findIndex((li)=>li.classList.contains("on"));return{zoomed:vp.classList.contains("zoomed"),k:m?Number(m[1]):1,on};})()`); } catch {}
+    try { leaned = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;const t=getComputedStyle(document.getElementById("map")).transform;const m=/matrix\\(([^,]+),[^,]+,[^,]+,[^,]+,([^,]+),([^)]+)\\)/.exec(t);const k=m?Number(m[1]):1,x=m?Number(m[2]):0,y=m?Number(m[3]):0;const lis=[...document.querySelectorAll("#rb-itinerary li")];const on=lis.findIndex((li)=>li.classList.contains("on"));const row=lis[2];return{zoomed:vp.classList.contains("zoomed"),k,on,cx:(W/2-x)/(k*W),cy:(H/2-y)/(k*H),nx:Number(row.dataset.nx),ny:Number(row.dataset.ny)};})()`); } catch {}
     if (leaned && leaned.zoomed && Math.abs(leaned.k - 2.6) < 0.02) break;
     await sleep(50);
   }
   check(
-    "RB5c a row leans the Glass on its stretch: the sheet magnifies to the mockup's 2.6x and the row is marked",
-    !!leaned && leaned.zoomed && Math.abs(leaned.k - 2.6) < 0.02 && leaned.on === 2,
+    "RB5c a row leans the Glass on its stretch: the sheet magnifies to the mockup's 2.6x, centred on the row's own seat, and the row is marked",
+    !!leaned && leaned.zoomed && Math.abs(leaned.k - 2.6) < 0.02 && leaned.on === 2 && Math.abs(leaned.cx - leaned.nx) < 1e-3 && Math.abs(leaned.cy - leaned.ny) < 1e-3,
     JSON.stringify(leaned),
   );
   await evaluate(`document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`);
@@ -82,8 +87,8 @@ export async function run(ctx) {
   }
   check(
     "RB5d the roads out: the Explorer sheds the journey's keys, the Prospect takes the same world with the road's end as its town (#494 ruling 3)",
-    first.chart === "/explorer/#seed=42" && first.prospect === `/prospect/#seed=42&i=${first.to}` && first.prospectVerb === `See ${first.toName} in`,
-    JSON.stringify({ chart: first.chart, prospect: first.prospect, verb: first.prospectVerb }),
+    first.chart === "/explorer/#seed=42" && first.prospect === `/prospect/#seed=42&i=${first.to}` && first.prospectVerb === `See ${first.toName} in` && first.prospectShown,
+    JSON.stringify({ chart: first.chart, prospect: first.prospect, verb: first.prospectVerb, shown: first.prospectShown }),
   );
 
   const picked = await evaluate(`(()=>{const sel=document.getElementById("rb-to");const cur=sel.value;const opt=[...sel.options].find(o=>o.value!==cur);if(!opt)return null;sel.value=opt.value;sel.dispatchEvent(new Event("change"));return Number(opt.value);})()`);

@@ -4,6 +4,7 @@
 import { type ProspectDress, plateDressFor } from "../../prospect/dress/context.ts";
 import { engravedProspectPlate } from "../../prospect/finished.ts";
 import { gazetteerNoteFor } from "../../atlas/compose.ts";
+import { roadMask, roadReachable } from "../../itinerary/route.ts";
 import type { PlateEra } from "../../prospect/caption.ts";
 import { STYLES } from "../../render/style.ts";
 import type { World } from "../../world/types.ts";
@@ -44,6 +45,8 @@ export interface ProspectPlateResult {
   readonly founded: number;
   readonly key: ReadonlyArray<PlateKeyRow>;
   readonly note: string;
+  /** Whether any road leaves the place: the Ribbon's fallback would otherwise unroll the capital's road under this town's name. */
+  readonly roads: boolean;
 }
 
 export function prospectResultFor(world: World, spec: ProspectSpec): ProspectPlateResult {
@@ -64,5 +67,6 @@ export function prospectResultFor(world: World, spec: ProspectSpec): ProspectPla
     founded: s.founded,
     key: plate.key.map(({ letter, label }) => ({ letter, label })),
     note: gazetteerNoteFor(world, index),
+    roads: roadReachable(world, roadMask(world), index).length > 0,
   };
 }

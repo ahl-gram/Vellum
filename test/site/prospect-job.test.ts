@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import { engravedProspectPlate, prospectPlate } from "../../src/prospect/finished.ts";
 import { gazetteerNoteFor } from "../../src/atlas/compose.ts";
+import { roadMask, roadReachable } from "../../src/itinerary/route.ts";
 import { STYLES, type StyleName } from "../../src/render/style.ts";
 import type { World } from "../../src/world/types.ts";
 import {
@@ -85,4 +86,14 @@ test("prospectResultFor carries the engraver's note: the era, the epithet, the f
   const early = prospectResultFor(world, { index: 1, dress: "antique", year: 300 });
   assert.equal(early.era, "before-founding");
   assert.deepEqual(early.key, [], "the bare ground has nothing to letter");
+});
+
+// The Ribbon's road out stands only where a road leaves the town; the Ribbon's own fallback would unroll the capital's road under this town's name (skeptic on PR #500).
+test("prospectResultFor says whether a road leaves the place: yes for a roaded town, no for seed 42's orphan", () => {
+  const mask = roadMask(world);
+  const orphan = world.settlements.findIndex((_, i) => roadReachable(world, mask, i).length === 0);
+  assert.ok(orphan >= 0, "premise: seed 42 has a settlement no road leaves");
+  assert.equal(prospectResultFor(world, { index: 1, dress: "antique", year: null }).roads, true);
+  assert.equal(prospectResultFor(world, { index: orphan, dress: "antique", year: null }).roads, false);
+  assert.equal(prospectResultFor(world, { index: capital, dress: "antique", year: null }).roads, true, "the capital is the road network's root");
 });

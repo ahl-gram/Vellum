@@ -18,6 +18,7 @@ declare global {
       dress: PlateDress;
       era: string;
       keyRows: number;
+      roads: boolean;
       svgLength: number;
     } | null;
   }
@@ -66,9 +67,12 @@ let drawGen = 0;
 window.__vellumProspectUsesWorker = usesWorker;
 window.__vellumProspectState = () => last;
 
-function writeRoads(index: number): void {
+// The Ribbon's road stands only where a road leaves the town: its fallback would otherwise unroll the capital's road under this town's name (skeptic on PR #500). display, since the kit's .legend-btn display makes the hidden attribute inert.
+function writeRoads(res: { readonly index: number; readonly name: string; readonly roads: boolean }): void {
   chartLink.href = chartTarget(location.hash);
-  ribbonLink.href = ribbonTarget(location.hash, index);
+  ribbonLink.href = ribbonTarget(location.hash, res.index);
+  ribbonVerb.textContent = `Take the road from ${res.name} in`;
+  ribbonLink.style.display = res.roads ? "" : "none";
 }
 
 function draw(year: number | null, writeAddress: boolean): void {
@@ -83,8 +87,7 @@ function draw(year: number | null, writeAddress: boolean): void {
       showPlate(furniture, res, seed, lastUrl);
       sheet.rebase();
       if (writeAddress) history.replaceState(null, "", yearHash(location.hash, res.year));
-      writeRoads(res.index);
-      ribbonVerb.textContent = `Take the road from ${res.name} in`;
+      writeRoads(res);
       yearInput.value = String(res.year);
       writeFolio(furniture, res, seed, dress, Math.round(performance.now() - t0));
       writeNote(furniture, res);
@@ -99,6 +102,7 @@ function draw(year: number | null, writeAddress: boolean): void {
         dress,
         era: res.era,
         keyRows: res.key.length,
+        roads: res.roads,
         svgLength: res.svg.length,
       };
     })
@@ -120,6 +124,7 @@ yearForm.addEventListener("submit", (e) => {
 });
 
 chartLink.href = chartTarget(location.hash);
+ribbonLink.style.display = "none";
 await initWorker();
 if (!usesWorker()) warning.hidden = false;
 draw(addr.year, false);

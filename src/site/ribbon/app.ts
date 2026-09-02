@@ -62,6 +62,8 @@ const overrides: Partial<WorldRecipe> = {
 };
 
 chartLink.href = chartTarget(location.hash);
+// The road's end is known only once the scroll is drawn; until then the road out stands down (display, since the kit's .legend-btn display makes the hidden attribute inert).
+prospectLink.style.display = "none";
 
 let last: ReturnType<NonNullable<Window["__vellumRibbonState"]>> = null;
 let lastUrl: string | null = null;
@@ -69,10 +71,11 @@ let drawGen = 0;
 window.__vellumRibbonUsesWorker = usesWorker;
 window.__vellumRibbonState = () => last;
 
-function fillSelect(sel: HTMLSelectElement, res: RibbonResult, toOnly: boolean): void {
+// Both selects offer only what a road joins (#494): a departure some road leaves, a destination the departure's roads reach.
+function fillSelect(sel: HTMLSelectElement, res: RibbonResult, end: "from" | "to"): void {
   sel.replaceChildren(
     ...res.options
-      .filter((o) => (toOnly ? o.i === res.toIdx || res.reachable.includes(o.i) : true))
+      .filter((o) => (end === "to" ? o.i === res.toIdx || res.reachable.includes(o.i) : o.roads))
       .map((o) => {
         const opt = document.createElement("option");
         opt.value = String(o.i);
@@ -93,14 +96,15 @@ function draw(from: number | null, to: number | null): void {
       lastUrl = URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" }));
       showPlate(furniture, res, seed, lastUrl);
       sheet.rebase();
-      fillSelect(fromSel, res, false);
-      fillSelect(toSel, res, true);
+      fillSelect(fromSel, res, "from");
+      fillSelect(toSel, res, "to");
       fromSel.value = String(res.fromIdx);
       toSel.value = String(res.toIdx);
       history.replaceState(null, "", journeyHash(location.hash, res.fromIdx, res.toIdx));
       chartLink.href = chartTarget(location.hash);
       prospectLink.href = prospectTarget(location.hash, res.toIdx);
       prospectVerb.textContent = `See ${res.toName} in`;
+      prospectLink.style.display = "";
       writeFolio(furniture, res, seed, dress, Math.round(performance.now() - t0));
       writeItinerary(furniture, res, (row, li) => { sheet.lean(row.nx, row.ny); markLeaned(furniture, li); });
       status.textContent = "";

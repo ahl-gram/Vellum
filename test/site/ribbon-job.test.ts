@@ -30,8 +30,19 @@ test("ribbonResultFor renders through ribbonSvgFor byte-for-byte and reports the
   assert.equal(res.fromName, world.settlements[capital]!.name);
   assert.equal(res.leagues, input.totalLeagues);
   assert.equal(res.title, world.title.title);
-  assert.equal(res.options.length, world.settlements.length, "every settlement is offered");
+  assert.equal(res.options.length, world.settlements.length, "every settlement is listed");
   assert.deepEqual(res.reachable, reachable);
+});
+
+// A departure no road leaves is offered nowhere: picking it would fall back to the capital's road under the wrong name (skeptic on PR #500; #494: "the two selects filled from the road-reachable places").
+test("every option says whether a road leaves it, and seed 42's one road-orphan says no", () => {
+  const res = ribbonResultFor(world, { from: capital, to: null, dress: "antique" });
+  assert.ok(stranded >= 0, "premise: seed 42 strands a settlement off the network");
+  for (const o of res.options) {
+    assert.equal(o.roads, roadReachable(world, mask, o.i).length > 0, `${o.name} (${o.i})`);
+  }
+  assert.equal(res.options[stranded]!.roads, false);
+  assert.equal(res.options.filter((o) => !o.roads).length, 1, "measured 2026-09-01: Tewetulua (24) is the one orphan of seed 42, so a from-select of every settlement offers exactly one lie");
 });
 
 test("an invalid `from` falls back to the capital rather than refusing the page", () => {

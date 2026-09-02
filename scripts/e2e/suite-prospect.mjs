@@ -53,7 +53,7 @@ export async function run(ctx) {
     }
     await send("Page.navigate", { url: page(hash) });
   };
-  const STATE = `(()=>{const st=window.__vellumProspectState&&window.__vellumProspectState();const img=document.getElementById("pp-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");return{seed:st.seed,index:st.index,year:st.year,presentYear:st.presentYear,name:st.name,dress:st.dress,era:st.era,keyRows:st.keyRows,svgLength:st.svgLength,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#pp-status"),title:q("#folio-title"),sub:q("#folio-sub"),pressed:q("#pp-pressed"),chart:a("pp-chart-link"),ribbon:a("pp-ribbon-link"),ribbonVerb:q("#pp-ribbon-verb"),yearField:document.getElementById("pp-year").value,eraLine:q("#pp-era"),noteTitle:q("#note-title"),where:q("#note .card-where"),note:q("#pp-note"),keyLis:document.querySelectorAll("#pp-key li").length,keyHeadHidden:document.getElementById("pp-key-head").hidden,hash:location.hash};})()`;
+  const STATE = `(()=>{const st=window.__vellumProspectState&&window.__vellumProspectState();const img=document.getElementById("pp-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");return{seed:st.seed,index:st.index,year:st.year,presentYear:st.presentYear,name:st.name,dress:st.dress,era:st.era,keyRows:st.keyRows,roads:st.roads,svgLength:st.svgLength,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#pp-status"),title:q("#folio-title"),sub:q("#folio-sub"),pressed:q("#pp-pressed"),chart:a("pp-chart-link"),ribbon:a("pp-ribbon-link"),ribbonVerb:q("#pp-ribbon-verb"),ribbonShown:getComputedStyle(document.getElementById("pp-ribbon-link")).display!=="none",yearField:document.getElementById("pp-year").value,eraLine:q("#pp-era"),noteTitle:q("#note-title"),where:q("#note .card-where"),note:q("#pp-note"),keyLis:document.querySelectorAll("#pp-key li").length,keyHeadHidden:document.getElementById("pp-key-head").hidden,hash:location.hash};})()`;
   const state = () => evaluate(STATE);
   const opened = async (label) => {
     for (let i = 0; i < 200; i++) {
@@ -86,8 +86,8 @@ export async function run(ctx) {
   );
   check(
     "PB3d the roads out: the Explorer keeps the world's keys and sheds the page's own; the Ribbon takes the same world with this town as its departure (#494 ruling 3)",
-    cap.chart.startsWith("/explorer/#seed=42") && !/(^|&)i=/.test(cap.chart.slice(cap.chart.indexOf("#") + 1)) && cap.ribbon === "/ribbon/#" + cap.chart.slice("/explorer/#".length) + "&a=0" && /^Take the road from Laukuwelua in$/.test(cap.ribbonVerb),
-    JSON.stringify({ chart: cap.chart, ribbon: cap.ribbon, verb: cap.ribbonVerb }),
+    cap.chart.startsWith("/explorer/#seed=42") && !/(^|&)i=/.test(cap.chart.slice(cap.chart.indexOf("#") + 1)) && cap.ribbon === "/ribbon/#" + cap.chart.slice("/explorer/#".length) + "&a=0" && /^Take the road from Laukuwelua in$/.test(cap.ribbonVerb) && cap.roads === true && cap.ribbonShown,
+    JSON.stringify({ chart: cap.chart, ribbon: cap.ribbon, verb: cap.ribbonVerb, roads: cap.roads, shown: cap.ribbonShown }),
   );
   const room = await evaluate(`(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const p=document.getElementById("pp-plate").getBoundingClientRect();return{chartRoom:document.body.classList.contains("chart-room"),footer:!!document.querySelector("footer"),band:!!document.querySelector(".band"),w:s.width,h:s.height,pw:p.width,ph:p.height,aspect:s.width/s.height};})()`);
   check(
@@ -155,7 +155,7 @@ export async function run(ctx) {
     !!engraved && reEngraved === standing && engraved.era === "standing" && engraved.keyRows > 0 && new RegExp(`(^|&)year=${early.presentYear}(&|$)`).test(engraved.hash.slice(1)) && /(^|&)i=1(&|$)/.test(engraved.hash.slice(1)) && engraved.index === 1,
     JSON.stringify(engraved && { year: engraved.year, era: engraved.era, keyRows: engraved.keyRows, hash: engraved.hash, same: reEngraved === standing }),
   );
-  // Garbage is refused IN PLACE by the control's own digits pattern (home's seed-input precedent): the browser never fires submit, so nothing is re-engraved; an emptied field DOES submit, and the grammar hands it back the plate's year.
+  // Garbage is refused IN PLACE by the control's own digits pattern (home's seed-input precedent): the browser never fires submit.
   const garbage = await evaluate(`(()=>{const y=document.getElementById("pp-year");y.value="abc";const valid=y.checkValidity();document.getElementById("pp-year-form").requestSubmit();return valid;})()`);
   await sleep(300);
   const refused = await state();
@@ -166,6 +166,15 @@ export async function run(ctx) {
     "PB7d a year that is not a year is refused: garbage fails the control's pattern and nothing is re-engraved; an emptied field returns to the plate's year",
     garbage === false && !!refused && refused.year === early.presentYear && refused.status === "" && refused.svgLength === engraved.svgLength && !!emptied && emptied.yearField === String(early.presentYear) && emptied.year === early.presentYear,
     JSON.stringify({ garbageValid: garbage, refused: refused && { yearField: refused.yearField, year: refused.year }, emptied: emptied && { yearField: emptied.yearField, year: emptied.year } }),
+  );
+
+  // Tewetulua (24) is seed 42's one settlement no road leaves (measured 2026-09-01): the Ribbon's fallback would unroll the capital's road under its name, so the road out stands down.
+  await goto("#seed=42&i=24");
+  const orphan = await opened("the road-orphan");
+  check(
+    "PB7e a town no road leaves offers no road in the Ribbon: the plate and the note stand, the road out stands down, the Explorer road stays",
+    orphan.name === "Tewetulua" && orphan.roads === false && !orphan.ribbonShown && orphan.shown && orphan.noteTitle === "Tewetulua" && orphan.chart === "/explorer/#seed=42",
+    JSON.stringify({ name: orphan.name, roads: orphan.roads, shown: orphan.ribbonShown, chart: orphan.chart }),
   );
 
   await goto("#seed=42&style=nautical&i=0");

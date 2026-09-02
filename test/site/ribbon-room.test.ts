@@ -96,8 +96,11 @@ test("RBR6 seats.ts binds the Glass and the room at the scroll's own aspect, doc
   assert.match(seats, /dockLegend(?:<[^>]*>)?\([^)]*legendSeat\(/, "the journey docks by the legend's seat rule: the slip on a phone, the corner on a wide sheet");
   assert.match(seats, /legendSeat\(\{ narrow: narrow\.matches, hasSlip: true \}\)/, "with the slip as its seat, since the itinerary IS the slip (hasSlip: false pins the journey to the corner forever; guard-prover round 2)");
   assert.match(seats, /export const LEAN_K = 2\.6;/, "the lean's depth is the mockup's 2.6x, one constant");
-  assert.match(seats, /zoomTo\(transformFromCamera\(\{ cx: [^,]+, cy: [^,]+, k: LEAN_K \}/, "a lean centres the Glass on the row's seat at LEAN_K, through the camera bridge");
+  assert.match(seats, /lean: \(nx, ny\) => \{[\s\S]*?zoomTo\(transformFromCamera\(\{ cx: nx, cy: ny, k: LEAN_K \}/, "a lean centres the Glass on the row's seat at LEAN_K, through the camera bridge, cx from nx and cy from ny (a swap shipped green past a shape-only regex; skeptic round 2)");
+  assert.match(seats, /li\.dataset\.nx = String\(r\.nx\);\s*li\.dataset\.ny = String\(r\.ny\);/, "each row carries its seat, so the suite can check where the Glass landed");
   assert.match(app, /prospectTarget\(location\.hash, /, "the road to the Prospect carries the world and the destination");
+  assert.match(app, /end === "to" \? o\.i === res\.toIdx \|\| res\.reachable\.includes\(o\.i\) : o\.roads/, "both selects offer only what a road joins: a departure some road leaves, a destination the departure reaches (#494)");
+  assert.match(app.slice(0, app.indexOf("await initWorker()")), /prospectLink\.style\.display = "none"/, "the Prospect road stands down until the scroll resolves its end");
   assert.match(app, /chartTarget\(location\.hash\)/, "the road back sheds the journey's keys");
   assert.match(app, /journeyHash\(location\.hash, /, "a journey still writes the address");
   const settle = app.slice(app.indexOf("showPlate("), app.indexOf("last = {"));
@@ -135,6 +138,7 @@ test("RBR8 the corner's select dress is the kit's at its second use (#487): atel
   assert.match(kit, /\.folio-controls select\.control\s*\{[^}]*appearance:\s*none/, "the kit dresses the corner's select");
   assert.match(kit, /\.folio-controls select\.control option\s*\{/, "and its options on the panel");
   assert.doesNotMatch(printCss, /\.folio-controls select\.control\s*\{[^}]*appearance/, "the Print Room's copy moved into the kit");
+  assert.match(printCss, /\.folio-controls select\.control\s*\{\s*width:\s*7\.4rem;\s*\}/, "but the Print Room keeps its picker's width at (0,2,1), or the kit's phone clamp narrows the ratified picker (skeptic round 2)");
   const wide = css.slice(0, css.indexOf("@media (max-width: 900px)"));
   const selectRules = [...wide.matchAll(/\.folio-controls select\.control\s*\{([^}]*)\}/g)].map((m) => m[1]!);
   assert.ok(selectRules.length >= 1, "the Ribbon sizes its selects");

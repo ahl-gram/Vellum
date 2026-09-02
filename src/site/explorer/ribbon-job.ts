@@ -22,6 +22,8 @@ export interface RibbonOption {
   readonly i: number;
   readonly name: string;
   readonly kind: string;
+  /** Whether any road leaves the place: only such a place can be set out from. */
+  readonly roads: boolean;
 }
 
 export interface RibbonRow {
@@ -49,7 +51,6 @@ export interface RibbonPlateData {
   readonly reachable: ReadonlyArray<number>;
 }
 
-// The captions come off the plate's own fork (finished.ts's `ribbon-${from}-${to}`): a fork derives from its label, never from stream position. An event with no seat is one the plate never drew and gets no row.
 function itineraryRows(input: RibbonInput): ReadonlyArray<RibbonRow> {
   const rng = createRng(input.seed).fork(`ribbon-${input.fromIdx}-${input.toIdx}`);
   const layout = layoutRibbon(input);
@@ -115,7 +116,7 @@ export function ribbonResultFor(world: World, spec: RibbonSpec): RibbonPlateData
     year: input.year,
     realm: input.realmName,
     events: itineraryRows(input),
-    options: world.settlements.map((s, i) => ({ i, name: s.name, kind: s.kind })),
+    options: world.settlements.map((s, i) => ({ i, name: s.name, kind: s.kind, roads: roadReachable(world, mask, i).length > 0 })),
     reachable,
   };
 }

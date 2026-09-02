@@ -48,10 +48,11 @@
 .matter-page td.name .former { display: block; white-space: normal; font-weight: 400; font-size: 0.86em; color: var(--ink-brown); text-transform: none; letter-spacing: normal; }
 .matter-page td.note { font-style: italic; color: var(--ink-brown); }
 
-/* The corner's four controls (ruled 2026-08-30: the mockup plus the dice): the seed narrower; the style picker's dress is the kit's (lifted at #463 part 4/4, the Ribbon its second use). */
+/* The corner's four controls (ruled 2026-08-30: the mockup plus the dice): the seed narrower; the style picker's dress is the kit's (lifted at #463 part 4/4, the Ribbon its second use) and its width stays this room's at every width, since the kit's phone clamp would leave "topographic" 4.6rem of box beside the chevron. */
 /* Wide sheets only: an unscoped 25rem beat the kit's 12.5rem phone clamp and the corner never wrapped (plate read 2026-08-30, round 2). */
 @media (min-width: 901px) { .folio-room { max-width: 25rem; } }
 .folio-controls input.control { width: 5.6rem; }
+.folio-controls select.control { width: 7.4rem; }
 
 .slip .bound-line { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; color: var(--ink-brown); font-size: 0.95rem; line-height: 1.5; margin: 0.7rem 0 0; }
 .slip .bound-line:empty { display: none; }

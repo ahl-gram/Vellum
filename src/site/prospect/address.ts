@@ -68,7 +68,7 @@ export function ribbonTarget(hash: string, index: number): string {
 
 export function parseYear(raw: string): number | null {
   const s = raw.trim();
-  return /^\d+$/.test(s) && Number(s) > 0 ? Number(s) : null;
+  return /^\d{1,9}$/.test(s) && Number(s) > 0 ? Number(s) : null;
 }
 
 export function yearHash(hash: string, year: number): string {

@@ -68,6 +68,8 @@ test("parseYear reads a typed year: digits making a positive whole number, or no
   assert.equal(parseYear("1"), 1);
   for (const bad of ["", "0", "-5", "8.5", "abc", "12a", "1e3"]) assert.equal(parseYear(bad), null, `${JSON.stringify(bad)} is not a year`);
   assert.equal(parseYear("0300"), 300, "leading zeros read as the number");
+  assert.equal(parseYear("999999999"), 999999999, "nine digits is the ceiling");
+  assert.equal(parseYear("1000000000000000000000"), null, "past it the number would write itself as 1e+21, which the address cannot read back (skeptic on PR #500)");
 });
 
 test("yearHash replaces or adds the year and keeps every other key, i included, untouched", () => {

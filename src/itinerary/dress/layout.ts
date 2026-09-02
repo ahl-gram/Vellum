@@ -57,7 +57,6 @@ export function stripPos(strip: StripLayout, dist: number): { sx: number; sy: nu
   return { sx: lo.sx, sy: lo.sy };
 }
 
-// [d0, d1) is the strips' own event filter (strip.ts eventNodes), so a distance no strip holds, a crossing at the road's very end past the arrival, is one the plate does not draw and has no seat.
 export function stripFor(layout: RibbonLayout, dist: number): StripLayout | null {
   return layout.strips.find((s) => dist >= s.d0 && dist < s.d1) ?? null;
 }

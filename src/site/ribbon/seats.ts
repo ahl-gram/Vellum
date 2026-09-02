@@ -82,6 +82,8 @@ export function writeFolio(f: RoomFurniture, res: Facts, seed: number, dress: Pl
 function rowNode(r: RibbonRow, onLean: (row: RibbonRow, li: HTMLLIElement) => void): HTMLLIElement {
   const li = document.createElement("li");
   li.className = r.kind;
+  li.dataset.nx = String(r.nx);
+  li.dataset.ny = String(r.ny);
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "lean";
