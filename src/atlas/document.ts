@@ -123,6 +123,9 @@ h1 { font-weight: 400; color: var(--parchment-bright); }
 .atlas-sheet > section > h2 { margin-top: 0; }
 /* The gazetteer's table has a min-content floor (td.name is nowrap) wider than a phone's sheet, measured 364px against a 390 viewport (plate read 2026-09-02): its sheet scrolls the table inside rather than the page sideways. */
 .atlas-sheet > section:has(> table) { overflow-x: auto; }
+/* The plate grids' column floors (280px, 360px) exceed a phone's sheet the same way (the themes measured 405px against 390): capped to the container, so a column never outgrows its sheet. */
+.atlas-sheet .styles { grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); }
+.atlas-sheet .themes { grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); }
 footer { color: var(--line-tan); }
 @media print {
   body { background: none; }

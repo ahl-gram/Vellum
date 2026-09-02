@@ -273,6 +273,9 @@ test("#464 the served page takes the deep with its sections on parchment sheets;
   assert.match(page, /<header>\s*<h1>/, "its own header stands");
   assert.match(page, /<footer>DRAWN BY VELLUM/, "its own footer stands");
   assert.match(page, /\.atlas-sheet > section:has\(> table\)\s*\{[^}]*overflow-x:\s*auto/, "the gazetteer's sheet scrolls its table inside: its min-content floor measured 364px against a 390 viewport (plate read 2026-09-02)");
+  const screenDress = page.slice(page.indexOf("--the-deep:"));
+  assert.match(screenDress, /\.atlas-sheet \.styles\s*\{\s*grid-template-columns:\s*repeat\(auto-fit, minmax\(min\(280px, 100%\), 1fr\)\)/, "the draughtings' column floor is capped to the sheet");
+  assert.match(screenDress, /\.atlas-sheet \.themes\s*\{\s*grid-template-columns:\s*repeat\(auto-fit, minmax\(min\(360px, 100%\), 1fr\)\)/, "the themes' column floor is capped to the sheet: it measured 405px against a 390 viewport (plate read 2026-09-02, round 2)");
   const screen = page.slice(page.indexOf("--the-deep:"), page.indexOf("</style>"));
   // The base rule is pinned OUTSIDE the print block: a print-only override would keep the selector's string alive while the deep was never painted (guard-prover, 2026-09-02).
   const base = screen.slice(0, screen.indexOf("@media print"));
