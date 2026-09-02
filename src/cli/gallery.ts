@@ -57,47 +57,36 @@ export function galleryCards(startSeed: number, count: number): readonly Gallery
 
 export function cardFigureHtml(card: GalleryCard): string {
   return `<figure>
-  <a href="/explorer/#seed=${card.seed}"><img src="${card.file}" width="${card.width}" height="${card.height}" loading="lazy" decoding="async" alt="${escapeXml(card.title)}"></a>
+  <a href="/explorer/#seed=${card.seed}&amp;style=antique&amp;legend=0"><img src="${card.file}" width="${card.width}" height="${card.height}" loading="lazy" decoding="async" alt="${escapeXml(card.title)}"></a>
   <figcaption><strong>${escapeXml(card.title)}</strong><br>
   <span>seed ${card.seed} · ${card.mapType} · ${card.band}</span></figcaption>
 </figure>`;
 }
 
-/* Sub 9 (#464): the Gallery hangs its twelve plates on the deep, a chart room without a stage. The furniture (the fog, the corners, the legend row, the vignettes) is /atelier.css's; this sheet keeps the plates' layout and their dress as twelve sheets. */
-export const GALLERY_PAGE_CSS = `/* The kit locks a chart room's scroll for its stage (atelier.css); the Gallery's plates scroll in flow, so the lock stands down here. */
-html:has(body.chart-room), body.chart-room { height: auto; overflow: visible; }
+/* Sub 9 (#464): the Gallery hangs its twelve plates on the deep, a chart room without a stage; the furniture is /atelier.css's, this sheet keeps the plates' layout. Shipped verbatim as public/gallery/index.css: no process prose here (test/site/gallery-room.test.ts carries the measurements). */
+export const GALLERY_PAGE_CSS = `html:has(body.chart-room), body.chart-room { height: auto; overflow: visible; }
 main { max-width: 1500px; box-sizing: border-box; padding: calc(var(--band-h) + 1.2rem) 2.2rem 9.5rem; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 2.4rem 2rem;
   animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 figure { margin: 0; }
-/* Twelve sheets at the house depth; each tips like a loose plate picked up from a corner (the tip promises its road, #289). Timing and easing from /motion.css; its reduced-motion collapse snaps the tip to its end state. */
 figure img { width: 100%; height: auto; display: block; border: 1px solid var(--line-tan);
   box-shadow: var(--sheet-shadow); transform-origin: bottom left;
   transition: transform var(--paper) var(--ease-paper),
               box-shadow var(--paper) var(--ease-paper); }
-figure img:hover { transform: translateY(-4px) rotate(-1.4deg);
-  box-shadow: 0 22px 48px rgb(from var(--chart-ink) r g b / 0.6); }
+figure img:hover { transform: translateY(-4px) rotate(-1.4deg); box-shadow: var(--stage-shadow); }
 figure img:active { transform: translateY(-1px) rotate(0deg); box-shadow: var(--sheet-shadow); }
-/* Captions letter in parchment on the deep: line-tan measured 4.03:1 there (#461, RH9a), under the 4.5 floor for small text. */
 figcaption { text-align: center; padding-top: 0.6rem; line-height: 1.45; color: var(--parchment); }
 figcaption strong { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-weight: 400; font-size: 0.92rem; letter-spacing: 0.08em; color: var(--parchment-bright); }
 figcaption span { font-variant-caps: small-caps; font-size: 0.8rem; letter-spacing: 0.08em; }
 .grid a { color: inherit; text-decoration: none; display: block; position: relative; }
-/* The waiting frame (#329): the img reserves its box via width/height attributes, and this label sits BEHIND it (negative z-index, so the opaque plate paints over it the moment it lands). Until then the empty frame reads as a sheet still on the press, in the drafting voice the Explorer's status already speaks. */
 .grid a::before { content: "Drafting…"; position: absolute; inset: 0; z-index: -1;
   display: grid; place-items: center; background: var(--parchment-panel);
   font-style: italic; color: var(--ink-faded); }
-/* The one chart room whose content SCROLLS under the chrome: a pale plate beneath the cluster measured the tagline at 2.26:1 and the rooms nav at 2.0:1 (plate read 2026-09-02), so the cluster keeps the #480 pool at all times, home's precedent (its cluster rides the chart). */
-header.chrome::before { content: ""; position: absolute; inset: -1.3rem -1.6rem; z-index: -1; pointer-events: none;
-  background: rgb(from var(--chart-ink) r g b / 0.92); filter: blur(16px); }
-/* No slip to stand beside: the legend row is centred (the kit seats it beside an open slip). */
 .legend { left: 50%; }
 @media (max-width: 900px) {
   main { padding: calc(var(--band-h) + 0.8rem) 1rem 8rem; }
-  /* The kit hides the row for a slip to dock it (room.ts); the Gallery has no slip and no script, so the row stays on the deep. */
   .legend { display: block; }
 }
-/* Print is paper (#454 decision 4): the plates in flow, no depth, the captions in ink. */
 @media print {
   main { padding: 0; max-width: none; }
   .grid { animation: none; }

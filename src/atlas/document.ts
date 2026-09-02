@@ -101,11 +101,7 @@ footer { margin-top: 4rem; text-align: center; letter-spacing: 0.25em;
   font-size: 0.75rem; color: var(--ink-faded); }
 a { color: inherit; }`;
 
-// The served /atlas/ page's screen dress (Sub 9, #464): the walnut deep as the ground, the header and
-// footer lettered in parchment, the hero and every section a parchment sheet. Emitted with `motion` only
-// (the page the site serves); the self-contained download keeps its paper chrome to the byte (print is
-// paper, #454 decision 4; test/atlas/document.test.ts pins the digest). The deep and the sheet depth
-// mirror BaseLayout's declarations, pinned equal by the same test: the page links no shell sheet.
+// The served /atlas/ page's screen dress (#464), emitted with `motion` only; the download keeps its paper chrome (print is paper, #454 decision 4). Shipped as page bytes: no process prose here.
 const SCREEN_DRESS_CSS = `:root {
   --the-deep:
     radial-gradient(120% 90% at 50% 30%, rgb(from var(--ink-dark) r g b / 0) 40%, rgb(from var(--chart-ink) r g b / 0.55) 100%),
@@ -121,9 +117,7 @@ h1 { font-weight: 400; color: var(--parchment-bright); }
   outline: 3px double var(--line-faint); outline-offset: 6px; box-shadow: var(--sheet-shadow);
   padding: 1.8rem clamp(1.25rem, 3vw, 2.75rem) 2.4rem; margin: 2.8rem 0; }
 .atlas-sheet > section > h2 { margin-top: 0; }
-/* The gazetteer's table has a min-content floor (td.name is nowrap) wider than a phone's sheet, measured 364px against a 390 viewport (plate read 2026-09-02): its sheet scrolls the table inside rather than the page sideways. */
 .atlas-sheet > section:has(> table) { overflow-x: auto; }
-/* The plate grids' column floors (280px, 360px) exceed a phone's sheet the same way (the themes measured 405px against 390): capped to the container, so a column never outgrows its sheet. */
 .atlas-sheet .styles { grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); }
 .atlas-sheet .themes { grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); }
 footer { color: var(--line-tan); }

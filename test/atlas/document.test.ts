@@ -253,7 +253,7 @@ test("file-ref mode carries no plate-linking script: its anchors are already rea
   );
 });
 
-// #464 (Landfall Sub 9): print is paper (#454 decision 4), so the self-contained download keeps its paper chrome to the byte while the served /atlas/ page takes the deep. The digest was taken over this file's own fixture at main bc7c405, before the screen dress existed.
+// Taken over this file's own fixture at main bc7c405, before the screen dress existed (#464).
 const DOWNLOAD_SHA256 = "0757e8c441fce51fc310af358a3f7295f03c17a00c966d8cbf95375eb37d82f3";
 const served = () => atlasDocument(fixture(), (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
 const download = () => atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });

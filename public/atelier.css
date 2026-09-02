@@ -142,7 +142,8 @@ body:has(.slip.folded) .legend { left: 50%; }
 button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; background: var(--ink-dark); color: var(--parchment-bright); }
 
 /* Magnified, the sheet spills under the chrome (the mockup's look) and parchment on paper measured 1.1:1 (plate read 2026-08-29): while the Glass is zoomed the cluster, the corners and the legend row stand on home's pool, the #480 blurred box that follows its cluster. At rest they stand on the deep and carry none (RH9b). */
-body:has(#map-viewport.zoomed) :is(header.chrome, .corner, .legend, .strip)::before { content: ""; position: absolute; inset: -1.3rem -1.6rem; z-index: -1; pointer-events: none;
+/* A chart room without a stage (the Gallery, #464) scrolls its sheets under the chrome at every position, so its cluster, corners and legend keep the pool at all times. */
+body:has(#map-viewport.zoomed) :is(header.chrome, .corner, .legend, .strip)::before, body.chart-room:not(:has(.stage)) :is(header.chrome, .corner, .legend)::before { content: ""; position: absolute; inset: -1.3rem -1.6rem; z-index: -1; pointer-events: none;
   background: rgb(from var(--chart-ink) r g b / 0.92); filter: blur(16px); }
 
 /* The landing (#461 ruling 6, the chart room's half): the stage settles onto the deep, the corners, the slip and the legend ink in after; motion.css's reduced-motion blanket collapses both. */
