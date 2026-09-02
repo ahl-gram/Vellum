@@ -1,5 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import {
   ATLAS_SHEET_CSS,
   atlasDocument,
@@ -249,4 +251,40 @@ test("file-ref mode carries no plate-linking script: its anchors are already rea
     /<script>/,
     "the CLI page's plates are anchored server-side, so a script here would be dead weight",
   );
+});
+
+// #464 (Landfall Sub 9): print is paper (#454 decision 4), so the self-contained download keeps its paper chrome to the byte while the served /atlas/ page takes the deep. The digest was taken over this file's own fixture at main bc7c405, before the screen dress existed.
+const DOWNLOAD_SHA256 = "0757e8c441fce51fc310af358a3f7295f03c17a00c966d8cbf95375eb37d82f3";
+const served = () => atlasDocument(fixture(), (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
+const download = () => atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
+
+test("#464 the download is byte-identical to the paper artifact it was before the screen dress (pinned digest)", () => {
+  assert.equal(createHash("sha256").update(download()).digest("hex"), DOWNLOAD_SHA256, "the download changed by a byte: the screen dress may only reach the served page");
+});
+
+test("#464 the served page takes the deep with its sections on parchment sheets; the download carries none of that dress", () => {
+  const page = served();
+  const file = download();
+  for (const mark of ["--the-deep:", "body::before", ".atlas-sheet > figure, .atlas-sheet > section", "--sheet-shadow:"]) {
+    assert.ok(page.includes(mark), `the served page carries ${mark}`);
+    assert.ok(!file.includes(mark), `the download carries no ${mark}`);
+  }
+  assert.doesNotMatch(page, /class="chrome"|class="rooms"|atelier\.css|house\.css/, "the atlas keeps its own small header and footer: no head cluster, out of the nav (#202)");
+  assert.match(page, /<header>\s*<h1>/, "its own header stands");
+  assert.match(page, /<footer>DRAWN BY VELLUM/, "its own footer stands");
+  const screen = page.slice(page.indexOf("--the-deep:"), page.indexOf("</style>"));
+  assert.match(screen, /@media print\s*\{[^]*body::before\s*\{[^}]*display:\s*none/, "print is paper: the deep stands down on paper");
+});
+
+test("#464 the served atlas declares the deep and the sheet depth exactly as BaseLayout does (the three-place join's shape: one value, pinned equal)", () => {
+  const layout = readFileSync(new URL("../../src/layouts/BaseLayout.astro", import.meta.url), "utf8");
+  const page = served();
+  const norm = (s: string) => s.replace(/\s+/g, " ").trim();
+  for (const token of ["--the-deep", "--sheet-shadow"]) {
+    const re = new RegExp(`${token}:\\s*([\\s\\S]*?);`);
+    const a = layout.match(re);
+    const b = page.match(re);
+    assert.ok(a && b, `${token} declared in both`);
+    assert.equal(norm(b![1]!), norm(a![1]!), `${token} on the served atlas mirrors the layout's`);
+  }
 });

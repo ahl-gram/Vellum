@@ -42,8 +42,6 @@ type PageSpec = {
   prePaintScript?: string;
   /** Sub 7 (#462, chart-room rulings 7 and 9): a chart room renders no band and no footer; the chart is the room. */
   chartRoom?: true;
-  /** Sub 7 (#462): the room's h1 stands in the RoomFolio corner (top right), not on the sheet's RoomHead. */
-  folio?: true;
   /** Sub 7 (#462): a document room's index script, an Astro-processed component script inlined into the page (the #483 shape); the marker must occur only inside it, and it is a pattern because the minifier picks the quote style. */
   pageScript?: RegExp;
 };
@@ -77,7 +75,6 @@ const PAGES: readonly PageSpec[] = [
     description:
       "How Vellum works: seeds, determinism, terrain and rivers, climate and styles, and how to make and reproduce your own maps.",
     tagline: "how the worlds are made",
-    folio: true,
     pageScript: /classList\.toggle\([`"']inked[`"']/,
   },
   {
@@ -90,7 +87,6 @@ const PAGES: readonly PageSpec[] = [
     description:
       "A glossary of the cartography, heraldry, seamanship, and geography vocabulary printed on Vellum's charts, in its gazetteer, its voyage journal, and across its realm names.",
     tagline: "the words on the charts",
-    folio: true,
     pageScript: /classList\.toggle\([`"']inked[`"']/,
   },
   {
@@ -104,7 +100,6 @@ const PAGES: readonly PageSpec[] = [
     tagline: "every seed is a world, draw one",
     scriptSrc: "./app.bundle.js",
     chartRoom: true,
-    folio: true,
   },
   {
     route: "print-room/index.html",
@@ -118,7 +113,6 @@ const PAGES: readonly PageSpec[] = [
     tagline: "take a world home",
     scriptSrc: "./app.bundle.js",
     chartRoom: true,
-    folio: true,
   },
   {
     route: "reading-room/index.html",
@@ -132,7 +126,6 @@ const PAGES: readonly PageSpec[] = [
     tagline: "watch a world live",
     scriptSrc: "./app.bundle.js",
     chartRoom: true,
-    folio: true,
   },
   {
     route: "seed-of-the-day/index.html",
@@ -148,7 +141,6 @@ const PAGES: readonly PageSpec[] = [
     tagline: "today's date is the seed",
     scriptSrc: "app.bundle.js",
     chartRoom: true,
-    folio: true,
   },
   {
     route: "prospect/index.html",
@@ -161,7 +153,6 @@ const PAGES: readonly PageSpec[] = [
     tagline: "the second camera",
     scriptSrc: "./app.bundle.js",
     chartRoom: true,
-    folio: true,
   },
   {
     route: "ribbon/index.html",
@@ -174,7 +165,6 @@ const PAGES: readonly PageSpec[] = [
     tagline: "the road, unrolled",
     scriptSrc: "./app.bundle.js",
     chartRoom: true,
-    folio: true,
   },
   {
     route: "gallery/index.html",
@@ -186,6 +176,7 @@ const PAGES: readonly PageSpec[] = [
     description:
       "A contact sheet of twelve imaginary worlds, drawn by Vellum as antique charts and hung for viewing.",
     tagline: "a dozen worlds, hung for viewing",
+    chartRoom: true,
   },
 ];
 
@@ -572,13 +563,12 @@ test("titles are computed in the layout from the room, never hand-set (#268)", (
       assert.ok(!open[1].includes(gone), `${p.route} must not hand-set ${gone.slice(0, -1)} (the layout computes it)`);
     }
     if (p.room) {
-      // The page hoists the room to a const and hands the SAME value to the layout (the title) and to RoomHead (the h1), so the two cannot drift.
+      // The page hoists the room to a const and hands the SAME value to the layout (the title) and to RoomFolio (the h1), so the two cannot drift.
       assert.ok(source.includes(`const room = "${p.room}"`), `${p.route} hoists its room to a const`);
       assert.ok(open[1].includes("room={room}"), `${p.route} passes the const to the layout`);
       assert.ok(source.includes(`const tagline = "${p.tagline}"`), `${p.route} hoists its tagline to a const`);
-      // #462: a converted room stands its name in the RoomFolio corner; the rest keep the RoomHead on the sheet.
-      const head = p.folio ? "<RoomFolio room={room} tagline={tagline}>" : "<RoomHead room={room} tagline={tagline} />";
-      assert.ok(source.includes(head), `${p.route} stands its ${p.folio ? "RoomFolio" : "RoomHead"} in the page`);
+      // #462: a converted room stands its name in the RoomFolio corner; the RoomHead on the sheet retired with the last conversion (#464).
+      assert.ok(source.includes("<RoomFolio room={room} tagline={tagline}>"), `${p.route} stands its RoomFolio in the page`);
     } else {
       assert.ok(!open[1].includes("room="), `${p.route} is home and passes no room`);
     }

@@ -116,7 +116,8 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
   wears("src/pages/index.astro", /<button[^>]*class="[^"]*primary/, "Draw it joins the primary idiom");
   wears("src/pages/index.astro", /<input id="seed-input" class="control"/,
     "the seed input opts into the idiom (type=text for the iOS numeric keypad, so the attribute selector cannot see it)");
-  wears("src/pages/gallery/index.astro", /class="sub intro"/, "the gallery sub is an intro");
+  // #464: the intro line retired with the desk; the plate count is the folio corner's dateline.
+  wears("src/pages/gallery/index.astro", /<p class="dateline">\{dateline\}<\/p>/, "the gallery's count is the folio corner's line");
   wears("src/pages/seed-of-the-day/index.astro", /class="[^"]*hunt-intro intro/, "the hunt intro is an intro");
   // #462: the dateline stands in the room folio's corner in its small caps, and the roads out are the legend row; the archivist head and the a.control idiom left Today with the desk.
   wears("src/pages/seed-of-the-day/index.astro", /<p class="dateline" id="dateline">/, "the dateline is the folio corner's line");
