@@ -1,7 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
-import { prospectPlate } from "../../src/prospect/finished.ts";
+import { engravedProspectPlate, prospectPlate } from "../../src/prospect/finished.ts";
+import { createRng } from "../../src/core/rng.ts";
+import { createLoreWriter } from "../../src/society/lore.ts";
+import { roadMask, roadReachable } from "../../src/itinerary/route.ts";
 import { STYLES, type StyleName } from "../../src/render/style.ts";
 import type { World } from "../../src/world/types.ts";
 import {
@@ -70,4 +73,31 @@ test("prospectResultFor carries the former name through to the page (#49)", () =
   const plain = prospectResultFor(world, { index: j, dress: "antique", year: null });
   assert.equal(plain.formerName, undefined);
   assert.ok(!("formerName" in plain), "an absent former name should not leave the key behind");
+});
+
+// The note is Today's card's (#494 ruling 4 was made on a preview carrying it): a fresh writer on the seed-of-the-day fork, one call. It is NOT the bound atlas's gazetteer note for the same town, which the same writer only reaches after walking the rows before it (the place-card.ts warning); skeptic round 3 on PR #500 held the ruling to its preview.
+test("prospectResultFor carries the engraver's note: the era, the epithet, the founding, the lettered key and Today's card's note for the town", () => {
+  const res = prospectResultFor(world, { index: 1, dress: "ink", year: null });
+  const e = engravedProspectPlate(world, 1, STYLES.ink, world.title.year);
+  assert.equal(res.era, e.era);
+  assert.equal(res.epithet, e.caption.epithet);
+  assert.equal(res.founded, world.settlements[1]!.founded);
+  assert.deepEqual(res.key, e.key.map((k) => ({ letter: k.letter, label: k.label })), "the key rows, letter and label only (the plate keeps the coordinates)");
+  assert.ok(res.key.length > 0, "premise: the plate has a key to list");
+  const todays = (i: number) => createLoreWriter(world, createRng(42).fork("seed-of-the-day")).settlementNote(world.settlements[i]!);
+  assert.equal(res.note, todays(1));
+  assert.equal(prospectResultFor(world, { index: capital, dress: "antique", year: null }).note, todays(capital), "the capital's note is the line Today's card shows for this seed");
+  assert.notEqual(res.note, todays(capital), "premise: the fork is not handing every town one note");
+  const early = prospectResultFor(world, { index: 1, dress: "antique", year: 300 });
+  assert.equal(early.era, "before-founding");
+  assert.deepEqual(early.key, [], "the bare ground has nothing to letter");
+});
+
+test("prospectResultFor says whether a road leaves the place: yes for a roaded town, no for seed 42's orphan", () => {
+  const mask = roadMask(world);
+  const orphan = world.settlements.findIndex((_, i) => roadReachable(world, mask, i).length === 0);
+  assert.ok(orphan >= 0, "premise: seed 42 has a settlement no road leaves");
+  assert.equal(prospectResultFor(world, { index: 1, dress: "antique", year: null }).roads, true);
+  assert.equal(prospectResultFor(world, { index: orphan, dress: "antique", year: null }).roads, false);
+  assert.equal(prospectResultFor(world, { index: capital, dress: "antique", year: null }).roads, true, "the capital is the road network's root");
 });

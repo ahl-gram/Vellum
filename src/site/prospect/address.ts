@@ -40,8 +40,7 @@ export function parseProspectAddress(hash: string): ProspectAddress {
     return Number.isFinite(f) ? Math.min(hi, Math.max(lo, f)) : null;
   };
   const yearRaw = p.get("year");
-  const yearNum = Number(yearRaw);
-  const year = yearRaw !== null && yearRaw !== "" && Number.isInteger(yearNum) && yearNum > 0 ? yearNum : null;
+  const year = yearRaw === null ? null : parseYear(yearRaw);
   return {
     seed: nat("seed"),
     style: allowed<StyleName>("style", STYLES),
@@ -54,8 +53,24 @@ export function parseProspectAddress(hash: string): ProspectAddress {
   };
 }
 
+const kept = (hash: string, drop: RegExp): string[] =>
+  (hash.startsWith("#") ? hash.slice(1) : hash).split("&").filter((kv) => kv !== "" && !drop.test(kv));
+
 export function chartTarget(hash: string): string {
-  const raw = hash.startsWith("#") ? hash.slice(1) : hash;
-  const kept = raw.split("&").filter((kv) => kv !== "" && !/^(i|year)(=|$)/.test(kv));
-  return "/explorer/" + (kept.length ? "#" + kept.join("&") : "");
+  const keys = kept(hash, /^(i|year)(=|$)/);
+  return "/explorer/" + (keys.length ? "#" + keys.join("&") : "");
+}
+
+export function ribbonTarget(hash: string, index: number): string {
+  return "/ribbon/#" + [...kept(hash, /^(i|year|a|b)(=|$)/), `a=${index}`].join("&");
+}
+
+/** The one year grammar, the address's and the control's: digits making a positive whole number of at most nine places. */
+export function parseYear(raw: string): number | null {
+  const s = raw.trim();
+  return /^\d{1,9}$/.test(s) && Number(s) > 0 ? Number(s) : null;
+}
+
+export function yearHash(hash: string, year: number): string {
+  return "#" + [...kept(hash, /^year(=|$)/), `year=${year}`].join("&");
 }

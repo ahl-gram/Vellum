@@ -5,6 +5,10 @@ import { buildRibbonInput } from "../../src/itinerary/input.ts";
 import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
 import { roadMask, roadReachable, roadWalk } from "../../src/itinerary/route.ts";
 import { ribbonResultFor } from "../../src/site/explorer/ribbon-job.ts";
+import { createRng } from "../../src/core/rng.ts";
+import { eventCaption } from "../../src/itinerary/prose.ts";
+import { eventSeat, layoutRibbon, RIBBON_H, RIBBON_W } from "../../src/itinerary/dress/layout.ts";
+import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
 import type { World } from "../../src/world/types.ts";
 
 // A hash a visitor can type is the untrusted boundary here: every way of asking for a journey that
@@ -26,8 +30,19 @@ test("ribbonResultFor renders through ribbonSvgFor byte-for-byte and reports the
   assert.equal(res.fromName, world.settlements[capital]!.name);
   assert.equal(res.leagues, input.totalLeagues);
   assert.equal(res.title, world.title.title);
-  assert.equal(res.options.length, world.settlements.length, "every settlement is offered");
+  assert.equal(res.options.length, world.settlements.length, "every settlement is listed");
   assert.deepEqual(res.reachable, reachable);
+});
+
+// A departure no road leaves is offered nowhere: picking it would fall back to the capital's road under the wrong name (skeptic on PR #500; #494: "the two selects filled from the road-reachable places").
+test("every option says whether a road leaves it, and seed 42's one road-orphan says no", () => {
+  const res = ribbonResultFor(world, { from: capital, to: null, dress: "antique" });
+  assert.ok(stranded >= 0, "premise: seed 42 strands a settlement off the network");
+  for (const o of res.options) {
+    assert.equal(o.roads, roadReachable(world, mask, o.i).length > 0, `${o.name} (${o.i})`);
+  }
+  assert.equal(res.options[stranded]!.roads, false);
+  assert.equal(res.options.filter((o) => !o.roads).length, 1, "measured 2026-09-01: Tewetulua (24) is the one orphan of seed 42, so a from-select of every settlement offers exactly one lie");
 });
 
 test("an invalid `from` falls back to the capital rather than refusing the page", () => {
@@ -87,4 +102,55 @@ test("a world with no roads says so in the wayfarer's voice", () => {
 test("ribbonResultFor is deterministic: the same ask presses the same scroll", () => {
   const spec = { from: capital, to: reachable[2]!, dress: "ink" } as const;
   assert.equal(ribbonResultFor(world, spec).svg, ribbonResultFor(world, spec).svg);
+});
+
+test("ribbonResultFor carries the itinerary: every drawn event with its league mark, the plate's caption, its tier and index for a waypoint, and its seat on the scroll", () => {
+  const res = ribbonResultFor(world, { from: capital, to: reachable[0]!, dress: "antique" });
+  const input = buildRibbonInput(world, capital, reachable[0]!)!;
+  const rng = createRng(input.seed).fork(`ribbon-${input.fromIdx}-${input.toIdx}`);
+  const layout = layoutRibbon(input);
+  assert.equal(res.year, input.year);
+  assert.equal(res.realm, input.realmName);
+  const drawn = input.events.filter((e) => eventSeat(layout, e.dist) !== null);
+  assert.equal(drawn.length, input.events.length, "premise: this road draws every event, so the rows are the events");
+  assert.equal(res.events.length, input.events.length, "one row per drawn event");
+  assert.ok(res.events.length >= 4, "premise: the road has events");
+  input.events.forEach((e, i) => {
+    const row = res.events[i]!;
+    const seat = eventSeat(layout, e.dist)!;
+    assert.equal(row.kind, e.kind);
+    assert.ok(Math.abs(row.leagues - e.dist / CELLS_PER_LEAGUE) < 1e-9, "the league mark");
+    assert.equal(row.text, eventCaption(e, rng), "the plate's own caption, from the plate's own fork");
+    if (e.kind === "waypoint") {
+      assert.equal(row.tier, e.tier);
+      assert.equal(row.index, e.index);
+    } else {
+      assert.ok(!("tier" in row) && !("index" in row), "only a waypoint names a place");
+    }
+    assert.ok(Math.abs(row.nx - seat.sx / RIBBON_W) < 1e-9 && Math.abs(row.ny - seat.sy / RIBBON_H) < 1e-9, `row ${i} is seated where the plate drew it`);
+    assert.ok(row.nx > 0 && row.nx < 1 && row.ny > 0 && row.ny < 1, "a seat is a fraction of the plate");
+  });
+  const seats = new Set(res.events.map((r) => `${r.nx.toFixed(4)},${r.ny.toFixed(4)}`));
+  assert.ok(seats.size > 1, "the rows do not all lean on one spot");
+});
+
+// A crossing can fall at the road's very end, past the arrival waypoint; the plate's strip filter drops it, so the slip must too, or it lists a bridge the scroll never drew (skeptic on PR #500: 53 of 902 roads over seeds 1 to 40). The oracle is the SVG's own text, not the seat function.
+test("the itinerary lists only what the scroll drew: every row's caption words stand in the plate's text, and an undrawn end-of-road crossing gets no row", () => {
+  const res = ribbonResultFor(world, { from: 0, to: 2, dress: "antique" });
+  const input = buildRibbonInput(world, 0, 2)!;
+  const layout = layoutRibbon(input);
+  const lastEnd = layout.strips[layout.strips.length - 1]!.d1;
+  const undrawn = input.events.filter((e) => e.dist >= lastEnd);
+  assert.equal(undrawn.length, 1, "premise: seed 42's road from 0 to 2 ends on an event past the last strip");
+  assert.equal(undrawn[0]!.kind, "crossing", "premise: it is the end-of-road crossing the skeptic found");
+  assert.equal(res.events.length, input.events.length - 1, "the undrawn event gets no row");
+  // Waypoint names are set in capitals on the plate, so the comparison is case-blind.
+  const text = [...res.svg.matchAll(/>([^<]+)</g)].map((m) => m[1]).join(" ").toUpperCase();
+  for (const row of res.events) {
+    for (const word of row.text.split(/\s+/).filter((w) => /^[A-Za-z]{4,}$/.test(w))) {
+      assert.ok(text.includes(word.toUpperCase()), `the scroll prints "${word}" from the row "${row.text}"`);
+    }
+  }
+  const dropped = undrawn[0]!;
+  assert.ok(dropped.kind === "crossing" && dropped.name !== null && !text.includes(dropped.name.toUpperCase()), `premise: the scroll does not print the dropped crossing's river, ${String(dropped.name)}`);
 });

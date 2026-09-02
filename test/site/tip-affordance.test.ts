@@ -195,8 +195,6 @@ const settled = (css: string, selector: string): Readonly<Record<string, string>
 // Hand-measured (#356, #353): an inline-block takes its baseline from its LAST line box, so a wrapped tipping slip drops its bullet 26.00px to line two (measured on the FAQ and glossary TOCs, retired at #462; the class outlives its first instances), and vertical-align: top pins it back. Nothing overflows and a ::marker is not reachable from the DOM, so the bullet's position exists only in paint: no structural test can see it, which is why the rule is guarded as text.
 /** Each entry is a MEASUREMENT of the markup taken 2026-08-12, not a rule: it says these boxes are not list items on the pages that use them today, so re-take it when you touch one. */
 const INLINE_BLOCKS_OUTSIDE_MARKER_LISTS = new Set([
-  // <div class="actions"> on the prospect and ribbon pages (src/pages/prospect/index.astro, src/pages/ribbon/index.astro; Today's left at #462).
-  "house.css :: a.control",
   // Inside <p class="wordmark"> or <h1 class="wordmark"> in BaseLayout's head cluster (#461; the rooms nav pins vertical-align itself).
   "motion.css :: .wordmark a",
   // A period mark inline in a control's label (#270), not a list item.

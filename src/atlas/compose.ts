@@ -37,22 +37,36 @@ const KIND_LABEL: Record<string, string> = {
   hamlet: "Hamlet",
 };
 
-function gazetteerHtml(world: World): string {
-  const lore = createLoreWriter(world, createRng(world.recipe.seed).fork("lore"));
-  // hamlet is unreachable (the gazetteer reads the BASE world); listed to keep the kind index total.
-  const order = { capital: 0, town: 1, village: 2, hamlet: 3 };
-  const sorted = [...world.settlements].sort(
-    (a, b) => order[a.kind] - order[b.kind] || a.name.localeCompare(b.name),
-  );
+const gazetteerWriter = (world: World) => createLoreWriter(world, createRng(world.recipe.seed).fork("lore"));
 
-  const rows = sorted
-    .map((s) => {
+// hamlet is unreachable (the gazetteer reads the BASE world); listed to keep the kind index total.
+const KIND_ORDER = { capital: 0, town: 1, village: 2, hamlet: 3 };
+
+function gazetteerOrder(world: World): number[] {
+  return world.settlements
+    .map((s, i) => ({ s, i }))
+    .sort((a, b) => KIND_ORDER[a.s.kind] - KIND_ORDER[b.s.kind] || a.s.name.localeCompare(b.s.name))
+    .map(({ i }) => i);
+}
+
+/** The travellers' notes in the gazetteer's own walk, keyed by settlement index: the writer's prose depends on call order, so the note a settlement gets exists only along this walk. */
+function gazetteerNotes(world: World, lore: ReturnType<typeof createLoreWriter>): Map<number, string> {
+  return new Map(gazetteerOrder(world).map((i) => [i, lore.settlementNote(world.settlements[i]!)]));
+}
+
+function gazetteerHtml(world: World): string {
+  const lore = gazetteerWriter(world);
+  const notes = gazetteerNotes(world, lore);
+
+  const rows = gazetteerOrder(world)
+    .map((i) => {
+      const s = world.settlements[i]!;
       const realmId = world.realms.labels[s.x + s.y * world.elev.w] as number;
       const realm =
         realmId >= 0 && world.names.realms.length > 0
           ? (world.names.realms[realmId] ?? "—")
           : "—";
-      const note = lore.settlementNote(s);
+      const note = notes.get(i)!;
       const former = s.formerName
         ? `<span class="former">Once called ${escapeXml(s.formerName)}.</span>`
         : "";

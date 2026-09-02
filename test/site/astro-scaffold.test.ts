@@ -160,6 +160,8 @@ const PAGES: readonly PageSpec[] = [
       "Any settlement's engraved townscape plate: the second camera beside the chart, drawn side-on from the place's own ground.",
     tagline: "the second camera",
     scriptSrc: "./app.bundle.js",
+    chartRoom: true,
+    folio: true,
   },
   {
     route: "ribbon/index.html",
@@ -171,6 +173,8 @@ const PAGES: readonly PageSpec[] = [
       "Any road journey unrolled as an itinerary strip chart: the way drawn league by league up the scroll, with a compass turning to keep true north.",
     tagline: "the road, unrolled",
     scriptSrc: "./app.bundle.js",
+    chartRoom: true,
+    folio: true,
   },
   {
     route: "gallery/index.html",

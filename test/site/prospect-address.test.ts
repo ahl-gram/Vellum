@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseProspectAddress, chartTarget } from "../../src/site/prospect/address.ts";
+import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } from "../../src/site/prospect/address.ts";
 
 test("parseProspectAddress reads the Explorer's world keys plus i and year", () => {
   const a = parseProspectAddress("#seed=42&style=ink&type=citystate&band=polar&land=350&coast=55&i=3&year=814");
@@ -30,6 +30,8 @@ test("parseProspectAddress: invalid values are ignored, not guessed at", () => {
   assert.equal(parseProspectAddress("#year=0").year, null, "year 0 is invalid, matching the room's grammar");
   assert.equal(parseProspectAddress("#year=-5").year, null);
   assert.equal(parseProspectAddress("#year=8.5").year, null);
+  assert.equal(parseProspectAddress("#year=1e3").year, null, "the address and the year control share ONE grammar, digits only: a Number() reading here let 1e21 into a field the control could never resubmit (skeptic round 3 on PR #500)");
+  assert.equal(parseProspectAddress("#year=0300").year, 300);
   assert.equal(parseProspectAddress("#i=-1").index, null);
   assert.equal(parseProspectAddress("#i=abc").index, null);
   assert.equal(parseProspectAddress("#seed=-3").seed, null);
@@ -49,4 +51,32 @@ test("chartTarget keeps the world's keys byte-for-byte and drops only i and year
   );
   assert.equal(chartTarget("#i=4"), "/explorer/");
   assert.equal(chartTarget(""), "/explorer/");
+});
+
+test("ribbonTarget offers the road from this town: the world's keys verbatim, the page's own i and year dropped, a= the town", () => {
+  assert.equal(
+    ribbonTarget("#seed=7&style=antique&band=temperate&cx=0.5100&i=4&year=300", 4),
+    "/ribbon/#seed=7&style=antique&band=temperate&cx=0.5100&a=4",
+  );
+  assert.equal(ribbonTarget("#i=2", 2), "/ribbon/#a=2");
+  assert.equal(ribbonTarget("", 0), "/ribbon/#a=0", "a bare visit still names the town");
+  assert.equal(ribbonTarget("#band=polar&i=1", 1), "/ribbon/#band=polar&a=1", "band survives, not being the journey's b");
+  assert.equal(ribbonTarget("#seed=42&a=5&b=3&i=1", 1), "/ribbon/#seed=42&a=1", "a hand-shared hash already carrying the Ribbon's keys loses them, or the first a= wins on parse (skeptic on PR #500)");
+});
+
+test("parseYear reads a typed year: digits making a positive whole number, or nothing", () => {
+  assert.equal(parseYear("812"), 812);
+  assert.equal(parseYear(" 1059 "), 1059, "surrounding space is the typist's, not the year's");
+  assert.equal(parseYear("1"), 1);
+  for (const bad of ["", "0", "-5", "8.5", "abc", "12a", "1e3"]) assert.equal(parseYear(bad), null, `${JSON.stringify(bad)} is not a year`);
+  assert.equal(parseYear("0300"), 300, "leading zeros read as the number");
+  assert.equal(parseYear("999999999"), 999999999, "nine digits is the ceiling");
+  assert.equal(parseYear("1000000000000000000000"), null, "past it the number would write itself as 1e+21, which the address cannot read back (skeptic on PR #500)");
+});
+
+test("yearHash replaces or adds the year and keeps every other key, i included, untouched", () => {
+  assert.equal(yearHash("#seed=7&i=4&year=300", 812), "#seed=7&i=4&year=812");
+  assert.equal(yearHash("#seed=7&i=4", 812), "#seed=7&i=4&year=812");
+  assert.equal(yearHash("", 5), "#year=5");
+  assert.equal(yearHash("#note=a%20b&flag&year=1", 2), "#note=a%20b&flag&year=2", "a valueless key and an encoded value survive verbatim");
 });

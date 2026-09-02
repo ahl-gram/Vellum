@@ -150,6 +150,23 @@ test("composeAtlas is deterministic for a seed", () => {
   assert.equal(a.chronicleHtml, b.chronicleHtml);
 });
 
+const unescape = (s: string): string =>
+  s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+
+// The walk the notes are written in IS the printed order (a writer's prose depends on call order), so the order is what keeps the bound atlas's gazetteer byte-stable; the expectation is derived here with the test's own rank map, never read back from the composer (guard-prover on #463 part 4/4).
+test("the gazetteer's rows run capital, then the towns, then the villages, each rank alphabetical", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const html = composeAtlas(world).gazetteerHtml;
+  const rows = [...html.matchAll(/<td class="name (\w+)">([^<]*)/g)].map((m) => ({ kind: m[1]!, name: unescape(m[2]!) }));
+  const RANK: Record<string, number> = { capital: 0, town: 1, village: 2, hamlet: 3 };
+  const expected = world.settlements
+    .map((s) => ({ kind: s.kind as string, name: s.name }))
+    .sort((a, b) => RANK[a.kind]! - RANK[b.kind]! || a.name.localeCompare(b.name));
+  assert.ok(rows.some((r) => r.kind === "town") && rows.some((r) => r.kind === "village"), "premise: seed 42 has more than one rank to order");
+  assert.notDeepEqual(rows.map((r) => r.name), world.settlements.map((s) => s.name), "premise: the index order differs from the rank order, or this pin proves nothing");
+  assert.deepEqual(rows, expected);
+});
+
 test("a single-realm world (city-state) still composes a banner and a survey", () => {
   const world = generateWorld(defaultRecipe(777, { mapType: "citystate" }));
   const atlas = composeAtlas(world);

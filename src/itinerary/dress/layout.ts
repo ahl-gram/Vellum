@@ -57,6 +57,15 @@ export function stripPos(strip: StripLayout, dist: number): { sx: number; sy: nu
   return { sx: lo.sx, sy: lo.sy };
 }
 
+export function stripFor(layout: RibbonLayout, dist: number): StripLayout | null {
+  return layout.strips.find((s) => dist >= s.d0 && dist < s.d1) ?? null;
+}
+
+export function eventSeat(layout: RibbonLayout, dist: number): { sx: number; sy: number } | null {
+  const strip = stripFor(layout, dist);
+  return strip === null ? null : stripPos(strip, dist);
+}
+
 export function layoutRibbon(input: RibbonInput): RibbonLayout {
   const total = input.totalCells;
   const n = Math.min(7, Math.max(3, Math.ceil(input.totalLeagues / LEAGUES_PER_STRIP)));
