@@ -283,7 +283,7 @@ export async function run(ctx) {
     JSON.stringify(back),
   );
 
-  const MATTER_STATE = `(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const page=document.getElementById("pr-page");const inner=document.getElementById("pr-page-inner");return{ratio:s.width/s.height,aspect:Number(page.dataset.aspect),pageHidden:page.hidden,turnedHidden:document.getElementById("pr-turned").hidden,proofHidden:document.getElementById("pr-preview").hidden,on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,head:(inner.querySelector(".page-head")||{textContent:""}).textContent,places:inner.querySelectorAll("tbody tr").length,measureEmpty:document.getElementById("pr-page-measure").children.length===0,scrollY:window.scrollY,fits:page.getBoundingClientRect().bottom-inner.getBoundingClientRect().bottom,noX:document.documentElement.scrollWidth<=document.documentElement.clientWidth,label:document.getElementById("map-viewport").getAttribute("aria-label")};})()`;
+  const MATTER_STATE = `(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const page=document.getElementById("pr-page");const inner=document.getElementById("pr-page-inner");return{ratio:s.width/s.height,aspect:Number(page.dataset.aspect),pageHidden:page.hidden,turnedHidden:document.getElementById("pr-turned").hidden,proofHidden:document.getElementById("pr-preview").hidden,on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,head:(inner.querySelector(".page-head")||{textContent:""}).textContent,places:inner.querySelectorAll("tbody tr").length,measureEmpty:document.getElementById("pr-page-measure").children.length===0,scrollY:window.scrollY,fits:page.getBoundingClientRect().bottom-inner.getBoundingClientRect().bottom,innerW:Math.abs(inner.getBoundingClientRect().width-page.clientWidth),noX:document.documentElement.scrollWidth<=document.documentElement.clientWidth,label:document.getElementById("map-viewport").getAttribute("aria-label")};})()`;
   await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="gazetteer"]');if(b)b.click();})()`);
   let matter = null;
   for (let i = 0; i < 40; i++) {
@@ -301,7 +301,7 @@ export async function run(ctx) {
       matter.on === "viii" && matter.here === "gazetteer" && /^plate viii of the bound atlas · the gazetteer$/.test(matter.line) &&
       /^VELLUM · THE BOUND ATLAS OF The Isle of Rahai · CHART № 42$/.test(matter.head) &&
       matter.places > 0 && matter.measureEmpty === true && matter.scrollY === 0 &&
-      matter.fits >= -0.5 && matter.fits <= 2 && matter.noX === true && /^A page of the bound atlas: The gazetteer\./.test(matter.label),
+      matter.fits >= -0.5 && matter.fits <= 2 && matter.innerW < 1 && matter.noX === true && /^A page of the bound atlas: The gazetteer\./.test(matter.label),
     JSON.stringify(matter),
   );
 
@@ -455,12 +455,12 @@ export async function run(ctx) {
     if (ok) { reboundForHide = true; break; }
     await sleep(50);
   }
-  const hidden = await evaluate(`(()=>{document.getElementById("pr-hide").click();return{atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas"),bindEnabled:!document.getElementById("pr-bind").disabled,printDisabled:document.getElementById("pr-print").disabled,hideDisabled:document.getElementById("pr-hide").disabled,proofBack:!document.getElementById("pr-preview").hidden&&document.getElementById("pr-turned").hidden,thumbs:document.querySelectorAll("#pr-contents .plates").length,plateLine:document.getElementById("pr-plate-line").textContent};})()`);
+  const hidden = await evaluate(`(()=>{document.getElementById("pr-hide").click();return{atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas"),bindEnabled:!document.getElementById("pr-bind").disabled,printDisabled:document.getElementById("pr-print").disabled,hideDisabled:document.getElementById("pr-hide").disabled,proofBack:!document.getElementById("pr-preview").hidden&&document.getElementById("pr-turned").hidden,pageAway:document.getElementById("pr-page").hidden,label:document.getElementById("map-viewport").getAttribute("aria-label"),thumbs:document.querySelectorAll("#pr-contents .plates").length,plateLine:document.getElementById("pr-plate-line").textContent};})()`);
   check(
     "PR25 Hide dismisses the bound atlas and re-enables Bind: the proof back on the sheet, the contents unbound, the plate line cleared",
     reboundForHide && hidden.atlasEmpty === true && hidden.hasAtlas === false &&
       hidden.bindEnabled === true && hidden.printDisabled === true && hidden.hideDisabled === true &&
-      hidden.proofBack === true && hidden.thumbs === 0 && hidden.plateLine === "",
+      hidden.proofBack === true && hidden.pageAway === true && /^The proof\./.test(hidden.label) && hidden.thumbs === 0 && hidden.plateLine === "",
     JSON.stringify({ reboundForHide, hidden }),
   );
 
@@ -500,7 +500,7 @@ export async function run(ctx) {
   let phonePage = null;
   for (let i = 0; i < 40; i++) {
     let m = null;
-    try { m = await evaluate(`(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const head=document.querySelector("header.chrome").getBoundingClientRect();const slip=document.querySelector(".slip").getBoundingClientRect();const page=document.getElementById("pr-page");const inner=document.getElementById("pr-page-inner");return{ratio:s.width/s.height,aspect:Number(page.dataset.aspect),w:s.width,top:s.top,bottom:s.bottom,headBottom:head.bottom,slipTop:slip.top,pageUp:!page.hidden,fits:page.getBoundingClientRect().bottom-inner.getBoundingClientRect().bottom,noX:document.documentElement.scrollWidth<=document.documentElement.clientWidth};})()`); } catch {}
+    try { m = await evaluate(`(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const head=document.querySelector("header.chrome").getBoundingClientRect();const slip=document.querySelector(".slip").getBoundingClientRect();const page=document.getElementById("pr-page");const inner=document.getElementById("pr-page-inner");return{ratio:s.width/s.height,aspect:Number(page.dataset.aspect),w:s.width,top:s.top,bottom:s.bottom,headBottom:head.bottom,slipTop:slip.top,pageUp:!page.hidden,fits:page.getBoundingClientRect().bottom-inner.getBoundingClientRect().bottom,innerW:Math.abs(inner.getBoundingClientRect().width-page.clientWidth),noX:document.documentElement.scrollWidth<=document.documentElement.clientWidth};})()`); } catch {}
     phonePage = m;
     if (m && m.fits >= -0.5 && m.fits <= 2) break;
     await sleep(50);
@@ -508,8 +508,8 @@ export async function run(ctx) {
   check(
     "PR33c at 390 the gazetteer page fits the phone stage: clear of the fixed header above and the bottom sheet below, narrower than the viewport at its own aspect",
     phoneBound && !!phonePage && phonePage.pageUp === true && Math.abs(phonePage.ratio - phonePage.aspect) < 0.01 &&
-      phonePage.w < 390 && phonePage.top >= phonePage.headBottom - 0.5 && phonePage.bottom <= phonePage.slipTop + 0.5 &&
-      phonePage.fits >= -0.5 && phonePage.fits <= 2 && phonePage.noX === true,
+      phonePage.w < 390 && phonePage.w > 200 && phonePage.top >= phonePage.headBottom - 0.5 && phonePage.bottom <= phonePage.slipTop + 0.5 &&
+      phonePage.fits >= -0.5 && phonePage.fits <= 2 && phonePage.innerW < 1 && phonePage.noX === true,
     JSON.stringify(phonePage),
   );
   await evaluate(`document.getElementById("pr-hide").click()`);

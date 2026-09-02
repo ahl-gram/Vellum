@@ -31,7 +31,7 @@ export interface Plate {
   readonly line: string;
 }
 
-// The inner lays out ONCE at the 900px/16px measure reference and scales as a unit, so the measured height IS the displayed geometry; re-laying out at the sheet's own font drifted 19px of line rounding at 390 (skeptic round 1 finding 2, measured).
+// Re-laying the page out at the sheet's own font drifted 19px of per-line rounding at 390 (measured 2026-09-01), so the inner scales as a unit instead.
 function bindPageScale(f: RoomFurniture): void {
   const fit = () => {
     const s = f.page.clientWidth / PAGE_MEASURE_WIDTH;

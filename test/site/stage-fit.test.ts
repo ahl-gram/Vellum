@@ -45,7 +45,6 @@ test("a narrow sheet fits the viewport's width at least, so a landscape phone pa
   assert.ok(still.sheet.w < 844, "the same box on a wide sheet keeps the fit");
 });
 
-// #497 plate read: the floor shoved the portrait gazetteer page 63px under the fixed header and the bottom sheet at 390; the ruled seat-p mock fitted the page inside the free box instead.
 test("the narrow width floor is a landscape rule: a portrait page fits the free height instead of running under the fixed chrome", () => {
   const page = fitStage({ ...base, aspect: 0.5, view: { w: 390, h: 844 }, above: [84], below: [738], gap: 8, beside: 0, narrow: true });
   assert.ok(Math.abs(page.sheet.w / page.sheet.h - 0.5) < 1e-9, "aspect held");

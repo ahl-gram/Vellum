@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { MATTER_KEYS, PAGE_MEASURE_WIDTH, PAGE_MIN_HEIGHT, isMatterKey, matterLine, matterPage, matterTitle, pageAspect, type MatterSource } from "../../src/site/print-room/matter-markup.ts";
 
-// #497 (Landfall Sub 8a, seat p ruled 2026-08-31): the back matter set as a page of the bound atlas, pure strings like plate-markup.ts, so the page face unit-tests in Node.
 const ATLAS: MatterSource = {
   title: "Weship & Sons",
   seed: 42,
