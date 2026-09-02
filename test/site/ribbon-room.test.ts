@@ -94,6 +94,7 @@ test("RBR6 seats.ts binds the Glass and the room at the scroll's own aspect, doc
   assert.match(seats, /bindRoom\(\{[^}]*aspect: \(\) => RIBBON_W \/ RIBBON_H/, "the fit takes the scroll's aspect explicitly: an img gives the svg scan nothing, and the chart's fallback mis-fits the scroll by 10.6%");
   assert.match(seats, /restore: \(cam\) =>[\s\S]*?\.refit\(/, "the room's refit is the silent one (no settle, no hash)");
   assert.match(seats, /dockLegend(?:<[^>]*>)?\([^)]*legendSeat\(/, "the journey docks by the legend's seat rule: the slip on a phone, the corner on a wide sheet");
+  assert.match(seats, /legendSeat\(\{ narrow: narrow\.matches, hasSlip: true \}\)/, "with the slip as its seat, since the itinerary IS the slip (hasSlip: false pins the journey to the corner forever; guard-prover round 2)");
   assert.match(seats, /export const LEAN_K = 2\.6;/, "the lean's depth is the mockup's 2.6x, one constant");
   assert.match(seats, /zoomTo\(transformFromCamera\(\{ cx: [^,]+, cy: [^,]+, k: LEAN_K \}/, "a lean centres the Glass on the row's seat at LEAN_K, through the camera bridge");
   assert.match(app, /prospectTarget\(location\.hash, /, "the road to the Prospect carries the world and the destination");
