@@ -1,26 +1,41 @@
-/* The Prospect (#242): page layout only; the type roles come from /house.css. */
-body {
-  padding: 2rem 1.5rem 4rem;
-  line-height: 1.6;
+/* #463 (Landfall Sub 8, 4/4): the Prospect is a chart room on the #462 pattern, ruled on #494 (2026-08-30): the engraving full-bleed at the plate's own aspect, the year as the room's one control, the engraver's note on the slip, the Ribbon as a road out. The room furniture is /atelier.css's; this sheet seats the plate in the fitted sheet and dresses the note. */
+
+/* The stage centres the fitted sheet in what the chrome leaves; room.ts measures the reserves off the chrome rects. */
+.stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
+#sheet { position: relative; flex: none; width: 0; height: 0; box-shadow: var(--stage-shadow); }
+/* The Glass's gesture box is the sheet; #map is the transform target, the plate its one face. transform-origin 0 0 matches d3-zoom's screen-space math. */
+#map-viewport { position: absolute; inset: 0; cursor: grab; }
+#map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
+#map-viewport.zoomable { touch-action: none; }
+#map { position: absolute; inset: 0; transform-origin: 0 0; }
+#pp-plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#pp-plate[hidden] { display: none; }
+.stage .warning { position: absolute; left: 50%; top: calc(50% + 2.8rem); transform: translateX(-50%); max-width: 30rem; z-index: 2; margin: 0; }
+.stage .warning[hidden] { display: none; }
+
+/* The corner: the year as the room's one control (#494 ruling 2). parchment, not the mockup's line-tan: 4.03:1 on the deep (RH9a). */
+@media (min-width: 901px) { .folio-room { max-width: 22rem; } }
+.folio-controls { align-items: center; }
+.folio-controls .control { width: 5.2rem; }
+.year-label { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.82rem; color: var(--parchment); white-space: nowrap; }
+
+/* The engraver's note (#494 ruling 4): the gazetteer's note for the town, the plate's lettered key in the kit's contents row, the era line. ink-brown, not the mockup's ink-faded, the #458 small-caps miss. */
+.slip .note-prose { font-size: 0.98rem; line-height: 1.55; margin: 0.7rem 0 0; color: var(--ink-annals); text-align: left; }
+.key-head { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); letter-spacing: 0.05em; color: var(--ink-brown); margin: 1rem 0 0; font-size: 0.95rem; }
+.era { margin: 1rem 0 0; font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.82rem; color: var(--ink-brown); }
+.era-gloss { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.85rem; color: var(--ink-brown); line-height: 1.45; margin: 0.2rem 0 0; text-align: left; }
+
+@media (max-width: 900px) {
+  /* The mockup's phone corner: the label stands down, the input keeps its aria-label. */
+  .year-label { display: none; }
 }
-.caption {
-  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+
+/* Print is paper (#462 ruling 10): the corners, the slip and the Glass print as nothing (the kit); the plate prints in flow, unzoomed, at its own proportion. */
+@media print {
+  .stage { position: static; padding: 0 !important; display: block; }
+  #sheet { width: auto !important; height: auto !important; box-shadow: none; }
+  #map-viewport { position: static; }
+  #map { position: static; transform: none !important; }
+  #pp-plate { position: static; width: 100%; height: auto; }
 }
-main { max-width: 1000px; }
-header { margin-bottom: 1.2rem; }
-.intro { max-width: 640px; margin: 1.4rem auto; text-align: center; }
-
-.warning { max-width: 640px; margin: 0 auto 0.4rem; }
-.warning[hidden] { display: none; }
-
-.status { margin-bottom: 0.8rem; }
-
-.plate-figure { margin: 1.6rem auto 0; text-align: center; }
-#pp-plate { display: block; width: min(100%, 56rem); height: auto; margin: 0 auto;
-  border: 1px solid var(--line-tan);
-  box-shadow: var(--sheet-shadow); }
-.plate-figure .caption { margin-top: 0.9rem; }
-
-.actions { text-align: center; margin-top: 1.2rem; }
-
-footer { margin-top: 3rem; }

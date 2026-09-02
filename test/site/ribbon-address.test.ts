@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseRibbonAddress, chartTarget, journeyHash } from "../../src/site/ribbon/address.ts";
+import { parseRibbonAddress, chartTarget, journeyHash, prospectTarget } from "../../src/site/ribbon/address.ts";
 
 test("parseRibbonAddress reads the Explorer's world keys plus a and b", () => {
   const a = parseRibbonAddress("#seed=42&style=ink&type=citystate&band=polar&land=350&coast=55&a=3&b=9");
@@ -81,4 +81,14 @@ test("journeyHash replaces a and b and keeps every other key untouched", () => {
     "#note=a%20b&flag&a=1&b=2",
     "a valueless key and an encoded value survive verbatim",
   );
+});
+
+// #463 part 4/4: the road's end has a prospect; the link carries the world's keys verbatim and only the town's index.
+test("prospectTarget sees the road's end in the Prospect: a and b dropped, i= the destination, band kept", () => {
+  assert.equal(
+    prospectTarget("#seed=7&style=antique&band=temperate&a=1&b=9", 9),
+    "/prospect/#seed=7&style=antique&band=temperate&i=9",
+  );
+  assert.equal(prospectTarget("", 3), "/prospect/#i=3");
+  assert.equal(prospectTarget("#a=1&band=polar&b=2", 2), "/prospect/#band=polar&i=2");
 });

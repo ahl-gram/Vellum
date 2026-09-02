@@ -57,6 +57,16 @@ export function stripPos(strip: StripLayout, dist: number): { sx: number; sy: nu
   return { sx: lo.sx, sy: lo.sy };
 }
 
+/** The strip whose span holds a distance, [d0, d1) like the strips' own event filter, the last strip closed so the road's end has a seat. */
+export function stripFor(layout: RibbonLayout, dist: number): StripLayout {
+  const strips = layout.strips;
+  return strips.find((s) => dist >= s.d0 && dist < s.d1) ?? (strips[strips.length - 1] as StripLayout);
+}
+
+export function eventSeat(layout: RibbonLayout, dist: number): { sx: number; sy: number } {
+  return stripPos(stripFor(layout, dist), dist);
+}
+
 export function layoutRibbon(input: RibbonInput): RibbonLayout {
   const total = input.totalCells;
   const n = Math.min(7, Math.max(3, Math.ceil(input.totalLeagues / LEAGUES_PER_STRIP)));

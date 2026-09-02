@@ -54,8 +54,26 @@ export function parseProspectAddress(hash: string): ProspectAddress {
   };
 }
 
+const kept = (hash: string, drop: RegExp): string[] =>
+  (hash.startsWith("#") ? hash.slice(1) : hash).split("&").filter((kv) => kv !== "" && !drop.test(kv));
+
 export function chartTarget(hash: string): string {
-  const raw = hash.startsWith("#") ? hash.slice(1) : hash;
-  const kept = raw.split("&").filter((kv) => kv !== "" && !/^(i|year)(=|$)/.test(kv));
-  return "/explorer/" + (kept.length ? "#" + kept.join("&") : "");
+  const keys = kept(hash, /^(i|year)(=|$)/);
+  return "/explorer/" + (keys.length ? "#" + keys.join("&") : "");
+}
+
+/** The road out to the Ribbon: the world's keys verbatim, the town as its `a` (setting out from). */
+export function ribbonTarget(hash: string, index: number): string {
+  return "/ribbon/#" + [...kept(hash, /^(i|year)(=|$)/), `a=${index}`].join("&");
+}
+
+/** The year control's reading of what was typed: the address grammar's year (a positive whole number), or null. */
+export function parseYear(raw: string): number | null {
+  const s = raw.trim();
+  return /^\d+$/.test(s) && Number(s) > 0 ? Number(s) : null;
+}
+
+/** The year control's address: `year` replaced or added, everything else (i included) verbatim. */
+export function yearHash(hash: string, year: number): string {
+  return "#" + [...kept(hash, /^year(=|$)/), `year=${year}`].join("&");
 }

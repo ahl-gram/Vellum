@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import RoomHead from "../../layouts/RoomHead.astro";
-import { RIBBON_W, RIBBON_H } from "../../itinerary/finished.ts";
+import RoomFolio from "../../layouts/RoomFolio.astro";
+import Slip from "../../layouts/Slip.astro";
 
 const room = "The Wayfarer's Ribbon";
 const tagline = "the road, unrolled";
@@ -11,35 +11,69 @@ const tagline = "the road, unrolled";
   room={room}
   description="Any road journey unrolled as an itinerary strip chart: the way drawn league by league up the scroll, with a compass turning to keep true north."
   path="/ribbon/"
+  chartRoom
 >
-<RoomHead room={room} tagline={tagline} />
+<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>
+<div class="stage">
+  <div class="sheet" id="sheet"><div id="map-viewport" tabindex="0" role="application" aria-label="The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."><div id="map">
+    <img id="rb-plate" class="plate" alt="" hidden>
+  </div></div></div>
+  <p class="status" id="rb-status" role="status" aria-live="polite"></p>
+  <p id="rb-warning" class="warning" hidden>Your browser could not start the render worker,
+  so the scroll is drawn on the main thread. It may pause the page for a moment.</p>
+  <noscript>
+    <p class="status">Every scroll is unrolled in your browser, so the Ribbon needs
+    JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
+  </noscript>
+</div>
+<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>
 
-<p class="intro">A chart shows the whole country at once; a wayfarer only ever needs the
-road ahead. The old road-books solved this with the itinerary strip chart: the journey cut
-into ribbons that read up the scroll, the road always climbing the strip while a little
-compass turns beside it to confess where north really lies. Choose where you set out and
-where you are bound, and the surveyor unrolls the way between: every bridge and ford,
-every wayside village, every fork signed for the town it leaves for.</p>
+<RoomFolio room={room} tagline={tagline}>
+  <div class="folio-controls" role="group" aria-label="The journey">
+    <div class="journey" id="rb-journey">
+      <label class="jl" for="rb-from">setting out from</label>
+      <select id="rb-from" class="control" aria-label="setting out from"></select>
+      <label class="jl" for="rb-to">bound for</label>
+      <select id="rb-to" class="control" aria-label="bound for"></select>
+    </div>
+    <button id="rb-swap" class="primary" type="button">Turn about</button>
+  </div>
+  <p class="gloss">choose where you set out and where you are bound; the surveyor unrolls the way between</p>
+</RoomFolio>
 
-<p id="rb-warning" class="warning" hidden>Your browser could not start the render worker,
-so the scroll is drawn on the main thread. It may pause the page for a moment.</p>
+<Slip id="itinerary" verb="The itinerary" title="The Itinerary" where="league by league, as the wayfarers' chain measured it" fold="Fold the itinerary away">
+  <div class="journey-dock"></div>
+  <p class="intro">Every bridge and ford, every wayside village, every fork signed for the town it leaves for, as the wayfarers' chain measured them.</p>
+  <p class="itinerary-head"><span>The way, league by league</span></p>
+  <ol class="contents itinerary" id="rb-itinerary"></ol>
+  <p class="row-gloss">A row leans the Glass on that stretch of the road.</p>
+  <div class="legend-dock"></div>
+</Slip>
 
-<div class="journey">
-  <label for="rb-from">Setting out from</label>
-  <select id="rb-from" class="control"></select>
-  <label for="rb-to">bound for</label>
-  <select id="rb-to" class="control"></select>
-  <button id="rb-swap" class="control" type="button">Turn about</button>
+<div class="chrome corner bl folio">
+  <p class="folio-title" id="folio-title"></p>
+  <p class="folio-sub" id="folio-sub"></p>
+  <p class="folio-coords" id="rb-unrolled"></p>
 </div>
 
-<p class="status" id="rb-status" role="status" aria-live="polite"></p>
+<nav class="legend" aria-label="The roads out">
+  <p class="legend-head">The roads out</p>
+  <div class="legend-row">
+    <a id="rb-chart-link" class="legend-btn gold" href="/explorer/"><span class="verb">Return to</span><span class="room">The Explorer</span></a>
+    <a id="rb-prospect-link" class="legend-btn" href="/prospect/"><span class="verb" id="rb-prospect-verb">See the road's end in</span><span class="room">The Prospect</span></a>
+  </div>
+</nav>
 
-<figure class="plate-figure">
-  <img id="rb-plate" width={RIBBON_W} height={RIBBON_H} alt="" hidden>
-  <figcaption class="caption" id="rb-caption"></figcaption>
-</figure>
-
-<div class="actions"><a id="rb-chart-link" class="control" href="/explorer/">Return to the Explorer</a></div>
+<div class="chrome corner br zoomery" role="group" aria-label="The Surveyor's Glass">
+  <button id="zoom-in" class="zoom-btn" type="button" data-zoom="in" aria-label="Lean closer (zoom in)" title="Lean closer"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"/><path d="M9.9 9.9l3.7 3.7"/><path d="M6.8 4.9v3.8M4.9 6.8h3.8"/></svg></button>
+  <button id="zoom-reset" class="zoom-btn" type="button" data-zoom="fit" aria-label="The full sheet (reset the view)" title="The full sheet"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6h6.6l2.6 2.6v8.2H3.4z"/><path d="M10 2.6v2.6h2.6"/><path d="M5.3 9.7c1-.9 1.9.5 2.9-.3.8-.7 1.5-.2 2.2-.7"/></svg></button>
+  <button id="zoom-out" class="zoom-btn" type="button" data-zoom="out" aria-label="Stand back (zoom out)" title="Stand back"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"/><path d="M9.9 9.9l3.7 3.7"/><path d="M4.9 6.8h3.8"/></svg></button>
+  <div class="zoom-keys" aria-hidden="true">
+    <span><kbd>+</kbd> <kbd>&#8722;</kbd> lean closer, stand back</span>
+    <span><kbd>&#8592;&#8593;&#8594;&#8595;</kbd> pan the sheet</span>
+    <span><kbd>0</kbd> the full sheet</span>
+  </div>
+</div>
 
 <script type="module" src="./app.bundle.js" is:inline></script>
 </BaseLayout>

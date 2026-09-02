@@ -45,6 +45,11 @@ body.chart-room .stage .status a { color: var(--parchment-bright); }
   padding: 0.32rem 0.6rem; text-align: center; font-variant-numeric: tabular-nums; }
 .folio-controls .control::placeholder { color: var(--line-tan); }
 .folio-controls .control:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 1px; }
+/* The corner's select (the Print Room's style picker, the Ribbon's journey; lifted at the second use, #487): the dark dress with a drawn chevron, its options on the panel's parchment. */
+.folio-controls select.control { appearance: none; -webkit-appearance: none; text-align: left; cursor: pointer; padding-right: 1.6rem;
+  background-image: linear-gradient(45deg, transparent 50%, var(--line-tan) 50%), linear-gradient(135deg, var(--line-tan) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 55%, calc(100% - 9px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+.folio-controls select.control option { color: var(--ink-dark); background: var(--parchment-panel); }
 /* The seed row (the mockup's seed-controls; the Explorer at #463): the dice in the corner's dark dress, the primary in the control gold. Four classes deep against the house button dress. */
 .folio-controls .dice { width: 2.4rem; padding: 0.32rem 0; font-size: 1rem; line-height: 1; color: var(--parchment);
   background: rgb(from var(--chart-ink) r g b / 0.45); border: 1px solid var(--line-tan); border-radius: 0; transition: background 0.2s ease, color 0.2s ease; }

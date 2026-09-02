@@ -50,14 +50,19 @@ export function parseRibbonAddress(hash: string): RibbonAddress {
   };
 }
 
+const worldKeys = (hash: string): string[] =>
+  (hash.startsWith("#") ? hash.slice(1) : hash).split("&").filter((kv) => kv !== "" && !/^(a|b)(=|$)/.test(kv));
+
 export function chartTarget(hash: string): string {
-  const raw = hash.startsWith("#") ? hash.slice(1) : hash;
-  const kept = raw.split("&").filter((kv) => kv !== "" && !/^(a|b)(=|$)/.test(kv));
+  const kept = worldKeys(hash);
   return "/explorer/" + (kept.length ? "#" + kept.join("&") : "");
 }
 
+/** The road out to the Prospect of a place on this road: the world's keys verbatim, the town as its `i`. */
+export function prospectTarget(hash: string, index: number): string {
+  return "/prospect/#" + [...worldKeys(hash), `i=${index}`].join("&");
+}
+
 export function journeyHash(hash: string, from: number, to: number): string {
-  const raw = hash.startsWith("#") ? hash.slice(1) : hash;
-  const kept = raw.split("&").filter((kv) => kv !== "" && !/^(a|b)(=|$)/.test(kv));
-  return "#" + [...kept, `a=${from}`, `b=${to}`].join("&");
+  return "#" + [...worldKeys(hash), `a=${from}`, `b=${to}`].join("&");
 }

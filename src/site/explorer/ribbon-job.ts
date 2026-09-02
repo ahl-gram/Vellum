@@ -1,8 +1,14 @@
 // The ribbon job's engine glue, shared by ./worker.ts and runInline in ./worker-client.ts
 // (the prospect-job.ts pattern) so the two transports cannot drift apart.
-import { buildRibbonInput } from "../../itinerary/input.ts";
+import { createRng } from "../../core/rng.ts";
+import { buildRibbonInput, type RibbonInput } from "../../itinerary/input.ts";
 import { ribbonSvgFor } from "../../itinerary/finished.ts";
+import { eventCaption } from "../../itinerary/prose.ts";
+import { eventSeat, layoutRibbon, RIBBON_H, RIBBON_W } from "../../itinerary/dress/layout.ts";
 import { roadMask, roadReachable, roadWalk } from "../../itinerary/route.ts";
+import { CELLS_PER_LEAGUE } from "../../render/layers/scalebar.ts";
+import type { RibbonEvent } from "../../itinerary/events.ts";
+import type { SettlementKind } from "../../society/sites.ts";
 import type { PlateDress } from "./prospect-job.ts";
 import type { World } from "../../world/types.ts";
 
@@ -18,6 +24,17 @@ export interface RibbonOption {
   readonly kind: string;
 }
 
+/** One row of the itinerary: the event's league mark, the plate's own caption for it, and its seat on the scroll as fractions of the plate (the Glass leans there). */
+export interface RibbonRow {
+  readonly kind: RibbonEvent["kind"];
+  readonly leagues: number;
+  readonly text: string;
+  readonly tier?: SettlementKind;
+  readonly index?: number;
+  readonly nx: number;
+  readonly ny: number;
+}
+
 export interface RibbonPlateData {
   readonly svg: string;
   readonly fromIdx: number;
@@ -26,8 +43,28 @@ export interface RibbonPlateData {
   readonly toName: string;
   readonly leagues: number;
   readonly title: string;
+  readonly year: number;
+  readonly realm: string | null;
+  readonly events: ReadonlyArray<RibbonRow>;
   readonly options: ReadonlyArray<RibbonOption>;
   readonly reachable: ReadonlyArray<number>;
+}
+
+// The captions come off the plate's own fork (finished.ts's `ribbon-${from}-${to}`): a fork derives from its label, never from stream position, so the rows read exactly what the scroll printed.
+function itineraryRows(input: RibbonInput): ReadonlyArray<RibbonRow> {
+  const rng = createRng(input.seed).fork(`ribbon-${input.fromIdx}-${input.toIdx}`);
+  const layout = layoutRibbon(input);
+  return input.events.map((e) => {
+    const seat = eventSeat(layout, e.dist);
+    return {
+      kind: e.kind,
+      leagues: e.dist / CELLS_PER_LEAGUE,
+      text: eventCaption(e, rng),
+      ...(e.kind === "waypoint" ? { tier: e.tier, index: e.index } : {}),
+      nx: seat.sx / RIBBON_W,
+      ny: seat.sy / RIBBON_H,
+    };
+  });
 }
 
 function validIndex(world: World, i: number | null): number | null {
@@ -75,6 +112,9 @@ export function ribbonResultFor(world: World, spec: RibbonSpec): RibbonPlateData
     toName: input.toName,
     leagues: input.totalLeagues,
     title: world.title.title,
+    year: input.year,
+    realm: input.realmName,
+    events: itineraryRows(input),
     options: world.settlements.map((s, i) => ({ i, name: s.name, kind: s.kind })),
     reachable,
   };

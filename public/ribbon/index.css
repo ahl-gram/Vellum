@@ -1,35 +1,53 @@
-/* The Wayfarer's Ribbon: page layout only; the type roles come from /house.css. */
-body {
-  padding: 2rem 1.5rem 4rem;
-  line-height: 1.6;
+/* #463 (Landfall Sub 8, 4/4): the Wayfarer's Ribbon is a chart room on the #462 pattern, ruled on #494 (2026-08-30): the scroll full-bleed at its own aspect, the journey row as the corner's control, the itinerary league by league on the slip, the prospect of the road's end as a road out. The room furniture is /atelier.css's; this sheet seats the scroll in the fitted sheet, the journey in the corner and the phone sheet, and dresses the itinerary. */
+
+/* The stage centres the fitted sheet in what the chrome leaves; room.ts measures the reserves off the chrome rects. */
+.stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
+#sheet { position: relative; flex: none; width: 0; height: 0; box-shadow: var(--stage-shadow); }
+/* The Glass's gesture box is the sheet; #map is the transform target, the scroll its one face. transform-origin 0 0 matches d3-zoom's screen-space math. */
+#map-viewport { position: absolute; inset: 0; cursor: grab; }
+#map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
+#map-viewport.zoomable { touch-action: none; }
+#map { position: absolute; inset: 0; transform-origin: 0 0; }
+#rb-plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#rb-plate[hidden] { display: none; }
+.stage .warning { position: absolute; left: 50%; top: calc(50% + 2.8rem); transform: translateX(-50%); max-width: 30rem; z-index: 2; margin: 0; }
+.stage .warning[hidden] { display: none; }
+
+/* The corner: the journey row (the mockup). Two labelled selects and the turn about are wider than the corner, so the row wraps; in the corner the group's children take their own places in it. parchment, not the mockup's line-tan (RH9a). */
+@media (min-width: 901px) { .folio-room { max-width: 30rem; } }
+.folio-controls { flex-wrap: wrap; align-items: center; }
+.journey { display: contents; }
+.jl { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.82rem; color: var(--parchment); white-space: nowrap; }
+.folio-controls select.control { width: 9.2rem; }
+
+/* The itinerary (the mockup): the road's events in the kit's contents row, each a button in the text's own dress that leans the Glass on its stretch; waypoints in the dark ink, forks dimmed (ink-brown, not the mockup's ink-faded, the #458 miss), the summit with its triangle. */
+.itinerary-head { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); letter-spacing: 0.05em; color: var(--ink-brown); margin: 0.9rem 0 0; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: baseline; }
+.itinerary li { padding: 0; }
+.itinerary li .lean { display: flex; gap: 0.8rem; width: 100%; box-sizing: border-box; appearance: none; background: none; border: 0; border-radius: 0; padding: 0.32rem 0; margin: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; line-height: 1.4; }
+/* Four classes deep against the house button skin (0,3,1), and no lift: the row is text. */
+.slip .itinerary li .lean:is(:hover, :focus-visible, :active), .slip .itinerary li.on .lean { background: linear-gradient(to right, var(--control-gold), transparent 70%); margin: 0 -0.6rem; padding-left: 0.6rem; padding-right: 0.6rem; width: calc(100% + 1.2rem); transform: none; box-shadow: none; }
+.itinerary .cr-num { font-variant-numeric: tabular-nums; }
+.itinerary .cr-num::after { content: " lg"; font-size: 0.8em; }
+.itinerary li.waypoint .cr-num { color: var(--ink-dark); }
+.itinerary .cr-text strong { font-weight: 600; letter-spacing: 0.02em; }
+.itinerary li.summit .cr-text em::before { content: "\25B3\00a0"; font-style: normal; color: var(--ink-brown); }
+.itinerary li.branch .cr-text { color: var(--ink-brown); }
+.row-gloss { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.85rem; color: var(--ink-brown); line-height: 1.45; margin: 0.7rem 0 0; text-align: left; }
+.journey-dock:empty { display: none; }
+
+@media (max-width: 900px) {
+  /* The phone carries the journey inside the sheet (the mockup, and #494's prose): the selects dock as a labelled grid on the panel in the house control dress, Turn about alone stays in the corner. */
+  .journey.in-slip { display: grid; grid-template-columns: auto 1fr; gap: 0.45rem 0.6rem; align-items: center; margin-top: 0.7rem; }
+  .journey.in-slip .jl { font-size: 0.85rem; color: var(--ink-brown); text-align: right; }
+  .journey.in-slip select.control { width: 100%; min-width: 0; }
 }
-.caption {
-  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+
+/* Print is paper (#462 ruling 10): the corners, the slip and the Glass print as nothing (the kit); the scroll prints in flow, unzoomed, at its own proportion. */
+@media print {
+  .stage { position: static; padding: 0 !important; display: block; }
+  #sheet { width: auto !important; height: auto !important; box-shadow: none; }
+  #map-viewport { position: static; }
+  #map { position: static; transform: none !important; }
+  #rb-plate { position: static; width: 100%; height: auto; }
 }
-main { max-width: 1100px; }
-header { margin-bottom: 1.2rem; }
-.intro { max-width: 640px; margin: 1.4rem auto; text-align: center; }
-
-.warning { max-width: 640px; margin: 0 auto 0.4rem; }
-.warning[hidden] { display: none; }
-
-.journey {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  margin: 1.2rem auto 0;
-}
-
-.status { margin-bottom: 0.8rem; }
-
-.plate-figure { margin: 1.6rem auto 0; text-align: center; }
-#rb-plate { display: block; box-sizing: border-box; width: min(100%, 66rem); height: auto; margin: 0 auto;
-  border: 1px solid var(--line-tan);
-  box-shadow: var(--sheet-shadow); }
-.plate-figure .caption { margin-top: 0.9rem; }
-
-.actions { text-align: center; margin-top: 1.2rem; }
-
-footer { margin-top: 3rem; }

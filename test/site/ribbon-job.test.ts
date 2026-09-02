@@ -5,6 +5,10 @@ import { buildRibbonInput } from "../../src/itinerary/input.ts";
 import { ribbonSvgFor } from "../../src/itinerary/finished.ts";
 import { roadMask, roadReachable, roadWalk } from "../../src/itinerary/route.ts";
 import { ribbonResultFor } from "../../src/site/explorer/ribbon-job.ts";
+import { createRng } from "../../src/core/rng.ts";
+import { eventCaption } from "../../src/itinerary/prose.ts";
+import { eventSeat, layoutRibbon, RIBBON_H, RIBBON_W } from "../../src/itinerary/dress/layout.ts";
+import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
 import type { World } from "../../src/world/types.ts";
 
 // A hash a visitor can type is the untrusted boundary here: every way of asking for a journey that
@@ -87,4 +91,33 @@ test("a world with no roads says so in the wayfarer's voice", () => {
 test("ribbonResultFor is deterministic: the same ask presses the same scroll", () => {
   const spec = { from: capital, to: reachable[2]!, dress: "ink" } as const;
   assert.equal(ribbonResultFor(world, spec).svg, ribbonResultFor(world, spec).svg);
+});
+
+// #463 part 4/4: the slip's itinerary is the plate's own events with the plate's own captions, each seated on the scroll for the Glass.
+test("ribbonResultFor carries the itinerary: every event with its league mark, the plate's caption, its tier and index for a waypoint, and its seat on the scroll", () => {
+  const res = ribbonResultFor(world, { from: capital, to: reachable[0]!, dress: "antique" });
+  const input = buildRibbonInput(world, capital, reachable[0]!)!;
+  const rng = createRng(input.seed).fork(`ribbon-${input.fromIdx}-${input.toIdx}`);
+  const layout = layoutRibbon(input);
+  assert.equal(res.year, input.year);
+  assert.equal(res.realm, input.realmName);
+  assert.equal(res.events.length, input.events.length, "one row per event");
+  assert.ok(res.events.length >= 4, "premise: the road has events");
+  input.events.forEach((e, i) => {
+    const row = res.events[i]!;
+    const seat = eventSeat(layout, e.dist);
+    assert.equal(row.kind, e.kind);
+    assert.ok(Math.abs(row.leagues - e.dist / CELLS_PER_LEAGUE) < 1e-9, "the league mark");
+    assert.equal(row.text, eventCaption(e, rng), "the plate's own caption, from the plate's own fork");
+    if (e.kind === "waypoint") {
+      assert.equal(row.tier, e.tier);
+      assert.equal(row.index, e.index);
+    } else {
+      assert.ok(!("tier" in row) && !("index" in row), "only a waypoint names a place");
+    }
+    assert.ok(Math.abs(row.nx - seat.sx / RIBBON_W) < 1e-9 && Math.abs(row.ny - seat.sy / RIBBON_H) < 1e-9, `row ${i} is seated where the plate drew it`);
+    assert.ok(row.nx > 0 && row.nx < 1 && row.ny > 0 && row.ny < 1, "a seat is a fraction of the plate");
+  });
+  const seats = new Set(res.events.map((r) => `${r.nx.toFixed(4)},${r.ny.toFixed(4)}`));
+  assert.ok(seats.size > 1, "the rows do not all lean on one spot");
 });

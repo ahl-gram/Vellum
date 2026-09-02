@@ -1,4 +1,4 @@
-// Prospect e2e (PB1-PB11, #242): the Explorer card's way in, the destination page, the two-dress fallback, year-awareness, and same-address byte determinism; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
+// Prospect e2e (PB1-PB16, #242; the chart room since #463 part 4/4): the Explorer card's way in, the room's plate on the fitted sheet, the engraver's note on the slip, the year control engraving in place and writing the address, the roads out, the two-dress fallback, year-awareness, and same-address byte determinism; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 export async function run(ctx) {
   const { evaluate, send, check, sleep, consoleErrors, http4xx, PORT } = ctx;
 
@@ -41,7 +41,7 @@ export async function run(ctx) {
   const httpBase = http4xx.length;
 
   const page = (hash) => `http://127.0.0.1:${PORT}/prospect/${hash}`;
-  // The page draws ONCE per visit, and a hash-to-hash Page.navigate on one path is a SAME-DOCUMENT navigation that never re-boots it, so every fresh address must arrive through a real cross-path hop (the Print Room precedent).
+  // The page reads its address ONCE at boot (the year control re-engraves the same place), and a hash-to-hash Page.navigate on one path is a SAME-DOCUMENT navigation that never re-boots it, so every fresh address must arrive through a real cross-path hop (the Print Room precedent).
   const goto = async (hash) => {
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/faq/` });
     // Poll for the hop COMMITTING, never a fixed sleep: until the prospect DOM is gone, a poll below could read the OLD document's settled state.
@@ -53,12 +53,12 @@ export async function run(ctx) {
     }
     await send("Page.navigate", { url: page(hash) });
   };
+  const STATE = `(()=>{const st=window.__vellumProspectState&&window.__vellumProspectState();const img=document.getElementById("pp-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");return{seed:st.seed,index:st.index,year:st.year,presentYear:st.presentYear,name:st.name,dress:st.dress,era:st.era,keyRows:st.keyRows,svgLength:st.svgLength,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#pp-status"),title:q("#folio-title"),sub:q("#folio-sub"),pressed:q("#pp-pressed"),chart:a("pp-chart-link"),ribbon:a("pp-ribbon-link"),ribbonVerb:q("#pp-ribbon-verb"),yearField:document.getElementById("pp-year").value,eraLine:q("#pp-era"),noteTitle:q("#note-title"),where:q("#note .card-where"),note:q("#pp-note"),keyLis:document.querySelectorAll("#pp-key li").length,keyHeadHidden:document.getElementById("pp-key-head").hidden,hash:location.hash};})()`;
+  const state = () => evaluate(STATE);
   const opened = async (label) => {
     for (let i = 0; i < 200; i++) {
       let s = null;
-      try {
-        s = await evaluate(`(()=>{const st=window.__vellumProspectState&&window.__vellumProspectState();const img=document.getElementById("pp-plate");return st?{seed:st.seed,index:st.index,year:st.year,presentYear:st.presentYear,name:st.name,dress:st.dress,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:document.getElementById("pp-status").textContent,caption:document.getElementById("pp-caption").textContent,chart:document.getElementById("pp-chart-link").getAttribute("href")}:null;})()`);
-      } catch {}
+      try { s = await state(); } catch {}
       if (s && s.blob && s.status === "") return s;
       await sleep(75);
     }
@@ -73,8 +73,43 @@ export async function run(ctx) {
     cap.seed === 42 && cap.index === 0 && cap.name === "Laukuwelua" && cap.shown,
     JSON.stringify({ seed: cap.seed, index: cap.index, name: cap.name }),
   );
-  check("PB3 the caption names the place and its world", /Laukuwelua/.test(cap.caption) && /The Isle of Rahai/.test(cap.caption), cap.caption);
-  check("PB3b the caption names what the place was once called (#49)", /once called Haitani/.test(cap.caption), cap.caption);
+  check(
+    "PB3 the chart's folio names the place, the chart and its world",
+    /^The Prospect of Laukuwelua · Chart № 42$/.test(cap.title) && /The Isle of Rahai/.test(cap.sub) && /^pressed in \d+ms · antique$/.test(cap.pressed),
+    JSON.stringify({ title: cap.title, sub: cap.sub, pressed: cap.pressed }),
+  );
+  check("PB3b the folio names what the place was once called (#49)", /once called Haitani/.test(cap.sub), cap.sub);
+  check(
+    "PB3c the engraver's note is filled: the place as the slip's title, its epithet and founding, the gazetteer's note, the plate's lettered key, the era line (#494 ruling 4)",
+    cap.noteTitle === "Laukuwelua" && /^chief port of .+ · founded An\. \d+$/.test(cap.where) && cap.note.length > 20 && cap.keyLis === cap.keyRows && cap.keyRows > 0 && !cap.keyHeadHidden && /^Standing · An\. \d+$/.test(cap.eraLine),
+    JSON.stringify({ noteTitle: cap.noteTitle, where: cap.where, noteLen: cap.note.length, keyLis: cap.keyLis, keyRows: cap.keyRows, eraLine: cap.eraLine }),
+  );
+  check(
+    "PB3d the roads out: the Explorer keeps the world's keys and sheds the page's own; the Ribbon takes the same world with this town as its departure (#494 ruling 3)",
+    cap.chart.startsWith("/explorer/#seed=42") && !/(^|&)i=/.test(cap.chart.slice(cap.chart.indexOf("#") + 1)) && cap.ribbon === "/ribbon/#" + cap.chart.slice("/explorer/#".length) + "&a=0" && /^Take the road from Laukuwelua in$/.test(cap.ribbonVerb),
+    JSON.stringify({ chart: cap.chart, ribbon: cap.ribbon, verb: cap.ribbonVerb }),
+  );
+  const room = await evaluate(`(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const p=document.getElementById("pp-plate").getBoundingClientRect();return{chartRoom:document.body.classList.contains("chart-room"),footer:!!document.querySelector("footer"),band:!!document.querySelector(".band"),w:s.width,h:s.height,pw:p.width,ph:p.height,aspect:s.width/s.height};})()`);
+  check(
+    "PB3e the room: chart-room body, no band, no footer, the sheet fitted at the plate's own 520:384 and the plate filling it",
+    room.chartRoom && !room.footer && !room.band && room.w > 200 && Math.abs(room.aspect - 520 / 384) < 0.01 && Math.abs(room.pw - room.w) < 1 && Math.abs(room.ph - room.h) < 1,
+    JSON.stringify(room),
+  );
+  await evaluate(`(()=>{const vp=document.getElementById("map-viewport");vp.focus();vp.dispatchEvent(new KeyboardEvent("keydown",{key:"+",bubbles:true}));})()`);
+  let leaned = null;
+  for (let i = 0; i < 60; i++) {
+    try { leaned = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const t=getComputedStyle(document.getElementById("map")).transform;const m=/matrix\\(([^,]+),/.exec(t);return{zoomed:vp.classList.contains("zoomed"),k:m?Number(m[1]):1};})()`); } catch {}
+    if (leaned && leaned.zoomed && leaned.k > 1.3) break;
+    await sleep(50);
+  }
+  check("PB3f the Glass leans on the plate (+ magnifies the sheet, the kit's keys)", !!leaned && leaned.zoomed && leaned.k > 1.3, JSON.stringify(leaned));
+  await evaluate(`document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`);
+  for (let i = 0; i < 60; i++) {
+    let home = null;
+    try { home = await evaluate(`!document.getElementById("map-viewport").classList.contains("zoomed")`); } catch {}
+    if (home) break;
+    await sleep(50);
+  }
   check("PB4 the render worker serves the page (no silent inline fallback)", await evaluate(`window.__vellumProspectUsesWorker() === true`));
 
   const first = await svgOf();
@@ -90,7 +125,7 @@ export async function run(ctx) {
   check("PB6 the same address presses a byte-identical plate", first === second, `first ${String(first).length}b, second ${String(second).length}b`);
 
   await goto("#seed=42&i=1");
-  await opened("the standing town");
+  const present = await opened("the standing town");
   const standing = await svgOf();
   await goto("#seed=42&i=1&year=300");
   const early = await opened("the year 300");
@@ -101,9 +136,37 @@ export async function run(ctx) {
     JSON.stringify({ year: early.year, presentYear: early.presentYear }),
   );
   check(
-    "PB7b a viewed year reads in the caption, and the Explorer link sheds the page's own keys",
-    /viewed in the year 300/.test(early.caption) && early.chart === "/explorer/#seed=42",
-    JSON.stringify({ caption: early.caption, chart: early.chart }),
+    "PB7b a viewed year reads in the year control and the era line, the bare ground has no key, and the Explorer link sheds the page's own keys",
+    early.yearField === "300" && early.eraLine === "Before the founding · An. 300" && early.era === "before-founding" && early.keyRows === 0 && early.keyHeadHidden && early.chart === "/explorer/#seed=42",
+    JSON.stringify({ yearField: early.yearField, eraLine: early.eraLine, keyRows: early.keyRows, keyHeadHidden: early.keyHeadHidden, chart: early.chart }),
+  );
+
+  // Engrave in place (#494 ruling 2): the year control re-engraves the same place at the typed year and writes it into the address.
+  await evaluate(`(()=>{document.getElementById("pp-year").value=${JSON.stringify(String(early.presentYear))};document.getElementById("pp-year-form").requestSubmit();})()`);
+  let engraved = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try { s = await state(); } catch {}
+    if (s && s.year === early.presentYear && s.status === "") { engraved = s; break; }
+    await sleep(75);
+  }
+  const reEngraved = engraved ? await svgOf() : null;
+  check(
+    "PB7c Engrave re-engraves in place: the present year's plate is byte-identical to a fresh visit's, the era and key return, the address gains year= and keeps i=",
+    !!engraved && reEngraved === standing && engraved.era === "standing" && engraved.keyRows > 0 && new RegExp(`(^|&)year=${early.presentYear}(&|$)`).test(engraved.hash.slice(1)) && /(^|&)i=1(&|$)/.test(engraved.hash.slice(1)) && engraved.index === 1,
+    JSON.stringify(engraved && { year: engraved.year, era: engraved.era, keyRows: engraved.keyRows, hash: engraved.hash, same: reEngraved === standing }),
+  );
+  // Garbage is refused IN PLACE by the control's own digits pattern (home's seed-input precedent): the browser never fires submit, so nothing is re-engraved; an emptied field DOES submit, and the grammar hands it back the plate's year.
+  const garbage = await evaluate(`(()=>{const y=document.getElementById("pp-year");y.value="abc";const valid=y.checkValidity();document.getElementById("pp-year-form").requestSubmit();return valid;})()`);
+  await sleep(300);
+  const refused = await state();
+  await evaluate(`(()=>{document.getElementById("pp-year").value="";document.getElementById("pp-year-form").requestSubmit();})()`);
+  await sleep(300);
+  const emptied = await state();
+  check(
+    "PB7d a year that is not a year is refused: garbage fails the control's pattern and nothing is re-engraved; an emptied field returns to the plate's year",
+    garbage === false && !!refused && refused.year === early.presentYear && refused.status === "" && refused.svgLength === engraved.svgLength && !!emptied && emptied.yearField === String(early.presentYear) && emptied.year === early.presentYear,
+    JSON.stringify({ garbageValid: garbage, refused: refused && { yearField: refused.yearField, year: refused.year }, emptied: emptied && { yearField: emptied.yearField, year: emptied.year } }),
   );
 
   await goto("#seed=42&style=nautical&i=0");

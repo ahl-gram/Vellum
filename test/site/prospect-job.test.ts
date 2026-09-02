@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
-import { prospectPlate } from "../../src/prospect/finished.ts";
+import { engravedProspectPlate, prospectPlate } from "../../src/prospect/finished.ts";
+import { gazetteerNoteFor } from "../../src/atlas/compose.ts";
 import { STYLES, type StyleName } from "../../src/render/style.ts";
 import type { World } from "../../src/world/types.ts";
 import {
@@ -70,4 +71,19 @@ test("prospectResultFor carries the former name through to the page (#49)", () =
   const plain = prospectResultFor(world, { index: j, dress: "antique", year: null });
   assert.equal(plain.formerName, undefined);
   assert.ok(!("formerName" in plain), "an absent former name should not leave the key behind");
+});
+
+// #463 part 4/4: the slip's engraver's note reads the plate's own key, era and epithet, the founding year, and the gazetteer's note for the town.
+test("prospectResultFor carries the engraver's note: the era, the epithet, the founding, the lettered key and the gazetteer's note", () => {
+  const res = prospectResultFor(world, { index: 1, dress: "ink", year: null });
+  const e = engravedProspectPlate(world, 1, STYLES.ink, world.title.year);
+  assert.equal(res.era, e.era);
+  assert.equal(res.epithet, e.caption.epithet);
+  assert.equal(res.founded, world.settlements[1]!.founded);
+  assert.deepEqual(res.key, e.key.map((k) => ({ letter: k.letter, label: k.label })), "the key rows, letter and label only (the plate keeps the coordinates)");
+  assert.ok(res.key.length > 0, "premise: the plate has a key to list");
+  assert.equal(res.note, gazetteerNoteFor(world, 1));
+  const early = prospectResultFor(world, { index: 1, dress: "antique", year: 300 });
+  assert.equal(early.era, "before-founding");
+  assert.deepEqual(early.key, [], "the bare ground has nothing to letter");
 });

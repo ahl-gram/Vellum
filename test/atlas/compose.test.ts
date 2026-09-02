@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { composeAtlas, prospectPlates } from "../../src/atlas/compose.ts";
+import { composeAtlas, gazetteerNoteFor, prospectPlates } from "../../src/atlas/compose.ts";
 import { prospectPlate } from "../../src/prospect/finished.ts";
 import { STYLES } from "../../src/render/style.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
@@ -148,6 +148,28 @@ test("composeAtlas is deterministic for a seed", () => {
   assert.equal(a.gazetteerHtml, b.gazetteerHtml);
   assert.equal(a.bannersHtml, b.bannersHtml);
   assert.equal(a.chronicleHtml, b.chronicleHtml);
+});
+
+// #463 part 4/4: the Prospect room's engraver's note is the gazetteer's travellers' note for that town, so the two must agree for EVERY settlement, not only the one the writer happens to meet first (a fresh writer's prose depends on call order; the place-card.ts warning).
+test("gazetteerNoteFor hands back the very note the bound atlas's gazetteer prints for that settlement", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const html = composeAtlas(world).gazetteerHtml;
+  const unescape = (s: string): string =>
+    s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+  const printed = new Map<string, string>();
+  for (const m of html.matchAll(/<td class="name [^"]*">([^<]*)(?:<span class="former">[^<]*<\/span>)?<\/td>\s*<td>[^<]*<\/td>\s*<td>[^<]*<\/td>\s*<td class="note">([^<]*)<\/td>/g)) {
+    printed.set(unescape(m[1]!), unescape(m[2]!));
+  }
+  assert.equal(printed.size, world.settlements.length, "premise: every settlement has a gazetteer row");
+  const capital = world.settlements.findIndex((s) => s.kind === "capital");
+  const lastRow = [...printed.keys()].at(-1)!;
+  const lastIdx = world.settlements.findIndex((s) => s.name === lastRow);
+  assert.notEqual(lastIdx, capital, "premise: the gazetteer's last row is not the capital, so a fresh writer would meet it in a different order");
+  assert.equal(gazetteerNoteFor(world, lastIdx), printed.get(lastRow), `the note for ${lastRow}, the gazetteer's last row`);
+  world.settlements.forEach((s, i) => {
+    assert.equal(gazetteerNoteFor(world, i), printed.get(s.name), `the note for ${s.name}`);
+  });
+  assert.throws(() => gazetteerNoteFor(world, world.settlements.length), RangeError);
 });
 
 test("a single-realm world (city-state) still composes a banner and a survey", () => {
