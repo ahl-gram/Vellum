@@ -150,12 +150,27 @@ test("composeAtlas is deterministic for a seed", () => {
   assert.equal(a.chronicleHtml, b.chronicleHtml);
 });
 
+const unescape = (s: string): string =>
+  s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+
+// The walk the notes are written in IS the printed order, so the order is load-bearing for gazetteerNoteFor (a note-agreement test alone is a self-consistent oracle: both sides walk the same order function; guard-prover on #463 part 4/4). The expectation is derived here with the test's own rank map, never read back from the composer.
+test("the gazetteer's rows run capital, then the towns, then the villages, each rank alphabetical", () => {
+  const world = generateWorld(defaultRecipe(42));
+  const html = composeAtlas(world).gazetteerHtml;
+  const rows = [...html.matchAll(/<td class="name (\w+)">([^<]*)/g)].map((m) => ({ kind: m[1]!, name: unescape(m[2]!) }));
+  const RANK: Record<string, number> = { capital: 0, town: 1, village: 2, hamlet: 3 };
+  const expected = world.settlements
+    .map((s) => ({ kind: s.kind as string, name: s.name }))
+    .sort((a, b) => RANK[a.kind]! - RANK[b.kind]! || a.name.localeCompare(b.name));
+  assert.ok(rows.some((r) => r.kind === "town") && rows.some((r) => r.kind === "village"), "premise: seed 42 has more than one rank to order");
+  assert.notDeepEqual(rows.map((r) => r.name), world.settlements.map((s) => s.name), "premise: the index order differs from the rank order, or this pin proves nothing");
+  assert.deepEqual(rows, expected);
+});
+
 // #463 part 4/4: the Prospect room's engraver's note is the gazetteer's travellers' note for that town, so the two must agree for EVERY settlement, not only the one the writer happens to meet first (a fresh writer's prose depends on call order; the place-card.ts warning).
 test("gazetteerNoteFor hands back the very note the bound atlas's gazetteer prints for that settlement", () => {
   const world = generateWorld(defaultRecipe(42));
   const html = composeAtlas(world).gazetteerHtml;
-  const unescape = (s: string): string =>
-    s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
   const printed = new Map<string, string>();
   for (const m of html.matchAll(/<td class="name [^"]*">([^<]*)(?:<span class="former">[^<]*<\/span>)?<\/td>\s*<td>[^<]*<\/td>\s*<td>[^<]*<\/td>\s*<td class="note">([^<]*)<\/td>/g)) {
     printed.set(unescape(m[1]!), unescape(m[2]!));
