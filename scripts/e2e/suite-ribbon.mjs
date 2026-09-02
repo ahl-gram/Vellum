@@ -1,9 +1,4 @@
-// Ribbon e2e (RB1-RB14; the chart room since #463 part 4/4): the strip-chart page boots from the
-// shared worker, defaults to the capital's farthest road, the itinerary fills the slip and a row
-// leans the Glass, a picked journey redraws in place and writes the address and the roads out,
-// the phone docks the journey into the sheet, and the same address presses byte-identical
-// scrolls; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and
-// console-error deltas).
+// Ribbon e2e (the RB checks; the chart room since #463 part 4/4): the strip-chart page boots from the shared worker, defaults to the capital's farthest road, the itinerary fills the slip and a row leans the Glass, a picked journey redraws in place and writes the address and the roads out, the phone docks the journey into the sheet, and the same address presses byte-identical scrolls; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 export async function run(ctx) {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
   const errBase = consoleErrors.length;
@@ -119,7 +114,6 @@ export async function run(ctx) {
   const inked = await opened("the ink dress");
   check("RB8 an ink chart unrolls an ink scroll (the two-dress fallback)", inked.dress === "ink", inked.dress);
 
-  // The phone (the mockup, and #494's prose): the journey's selects dock into the sheet, Turn about alone stays in the corner, the ids stay single.
   await setMobileViewport(390, 844);
   await goto("#seed=42");
   await opened("the phone");

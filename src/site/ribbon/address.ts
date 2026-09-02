@@ -58,9 +58,9 @@ export function chartTarget(hash: string): string {
   return "/explorer/" + (kept.length ? "#" + kept.join("&") : "");
 }
 
-/** The road out to the Prospect of a place on this road: the world's keys verbatim, the town as its `i`. */
 export function prospectTarget(hash: string, index: number): string {
-  return "/prospect/#" + [...worldKeys(hash), `i=${index}`].join("&");
+  const kept = worldKeys(hash).filter((kv) => !/^(i|year)(=|$)/.test(kv));
+  return "/prospect/#" + [...kept, `i=${index}`].join("&");
 }
 
 export function journeyHash(hash: string, from: number, to: number): string {

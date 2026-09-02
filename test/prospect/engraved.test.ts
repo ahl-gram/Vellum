@@ -8,8 +8,6 @@ import { eraFor, plateCaption } from "../../src/prospect/caption.ts";
 import { plateKey } from "../../src/prospect/key.ts";
 import { engravedProspectPlate, prospectPlate } from "../../src/prospect/finished.ts";
 
-// #463 part 4/4: the Prospect room's slip reads the plate's own key, era and epithet, so the engraving hands them back beside the svg from the ONE composition the plate was drawn from.
-
 const w42 = generateWorld(defaultRecipe(42));
 const present = w42.title.year;
 

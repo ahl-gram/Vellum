@@ -51,7 +51,6 @@ test("chartTarget keeps the world's keys byte-for-byte and drops only i and year
   assert.equal(chartTarget(""), "/explorer/");
 });
 
-// #463 part 4/4: the room's roads out and its year control write the address, never re-serializing the world's keys (#321).
 test("ribbonTarget offers the road from this town: the world's keys verbatim, the page's own i and year dropped, a= the town", () => {
   assert.equal(
     ribbonTarget("#seed=7&style=antique&band=temperate&cx=0.5100&i=4&year=300", 4),
@@ -60,9 +59,10 @@ test("ribbonTarget offers the road from this town: the world's keys verbatim, th
   assert.equal(ribbonTarget("#i=2", 2), "/ribbon/#a=2");
   assert.equal(ribbonTarget("", 0), "/ribbon/#a=0", "a bare visit still names the town");
   assert.equal(ribbonTarget("#band=polar&i=1", 1), "/ribbon/#band=polar&a=1", "band survives, not being the journey's b");
+  assert.equal(ribbonTarget("#seed=42&a=5&b=3&i=1", 1), "/ribbon/#seed=42&a=1", "a hand-shared hash already carrying the Ribbon's keys loses them, or the first a= wins on parse (skeptic on PR #500)");
 });
 
-test("parseYear reads the control the way the address reads year=: a positive whole number, or nothing", () => {
+test("parseYear reads a typed year: digits making a positive whole number, or nothing", () => {
   assert.equal(parseYear("812"), 812);
   assert.equal(parseYear(" 1059 "), 1059, "surrounding space is the typist's, not the year's");
   assert.equal(parseYear("1"), 1);

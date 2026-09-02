@@ -119,7 +119,7 @@ yearForm.addEventListener("submit", (e) => {
   draw(year, true);
 });
 
-writeRoads(addr.index ?? 0);
+chartLink.href = chartTarget(location.hash);
 await initWorker();
 if (!usesWorker()) warning.hidden = false;
 draw(addr.year, false);

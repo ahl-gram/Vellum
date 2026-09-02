@@ -54,7 +54,6 @@ export function finishProspect(
   return engrave(input, style, year, opts).node;
 }
 
-/** The plate with the key, the era and the caption it was engraved from (the Prospect room's slip reads them), all from the ONE composition. */
 export type EngravedProspect = {
   readonly svg: string;
   readonly era: PlateEra;

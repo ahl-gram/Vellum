@@ -57,14 +57,14 @@ export function stripPos(strip: StripLayout, dist: number): { sx: number; sy: nu
   return { sx: lo.sx, sy: lo.sy };
 }
 
-/** The strip whose span holds a distance, [d0, d1) like the strips' own event filter, the last strip closed so the road's end has a seat. */
-export function stripFor(layout: RibbonLayout, dist: number): StripLayout {
-  const strips = layout.strips;
-  return strips.find((s) => dist >= s.d0 && dist < s.d1) ?? (strips[strips.length - 1] as StripLayout);
+// [d0, d1) is the strips' own event filter (strip.ts eventNodes), so a distance no strip holds, a crossing at the road's very end past the arrival, is one the plate does not draw and has no seat.
+export function stripFor(layout: RibbonLayout, dist: number): StripLayout | null {
+  return layout.strips.find((s) => dist >= s.d0 && dist < s.d1) ?? null;
 }
 
-export function eventSeat(layout: RibbonLayout, dist: number): { sx: number; sy: number } {
-  return stripPos(stripFor(layout, dist), dist);
+export function eventSeat(layout: RibbonLayout, dist: number): { sx: number; sy: number } | null {
+  const strip = stripFor(layout, dist);
+  return strip === null ? null : stripPos(strip, dist);
 }
 
 export function layoutRibbon(input: RibbonInput): RibbonLayout {

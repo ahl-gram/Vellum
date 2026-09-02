@@ -73,7 +73,6 @@ test("prospectResultFor carries the former name through to the page (#49)", () =
   assert.ok(!("formerName" in plain), "an absent former name should not leave the key behind");
 });
 
-// #463 part 4/4: the slip's engraver's note reads the plate's own key, era and epithet, the founding year, and the gazetteer's note for the town.
 test("prospectResultFor carries the engraver's note: the era, the epithet, the founding, the lettered key and the gazetteer's note", () => {
   const res = prospectResultFor(world, { index: 1, dress: "ink", year: null });
   const e = engravedProspectPlate(world, 1, STYLES.ink, world.title.year);

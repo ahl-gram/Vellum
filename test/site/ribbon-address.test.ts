@@ -83,7 +83,6 @@ test("journeyHash replaces a and b and keeps every other key untouched", () => {
   );
 });
 
-// #463 part 4/4: the road's end has a prospect; the link carries the world's keys verbatim and only the town's index.
 test("prospectTarget sees the road's end in the Prospect: a and b dropped, i= the destination, band kept", () => {
   assert.equal(
     prospectTarget("#seed=7&style=antique&band=temperate&a=1&b=9", 9),
@@ -91,4 +90,5 @@ test("prospectTarget sees the road's end in the Prospect: a and b dropped, i= th
   );
   assert.equal(prospectTarget("", 3), "/prospect/#i=3");
   assert.equal(prospectTarget("#a=1&band=polar&b=2", 2), "/prospect/#band=polar&i=2");
+  assert.equal(prospectTarget("#seed=42&i=9&year=300&a=1&b=2", 2), "/prospect/#seed=42&i=2", "a hand-shared hash already carrying the Prospect's keys loses them, or the first i= wins on parse (skeptic on PR #500)");
 });

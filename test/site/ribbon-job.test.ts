@@ -93,19 +93,20 @@ test("ribbonResultFor is deterministic: the same ask presses the same scroll", (
   assert.equal(ribbonResultFor(world, spec).svg, ribbonResultFor(world, spec).svg);
 });
 
-// #463 part 4/4: the slip's itinerary is the plate's own events with the plate's own captions, each seated on the scroll for the Glass.
-test("ribbonResultFor carries the itinerary: every event with its league mark, the plate's caption, its tier and index for a waypoint, and its seat on the scroll", () => {
+test("ribbonResultFor carries the itinerary: every drawn event with its league mark, the plate's caption, its tier and index for a waypoint, and its seat on the scroll", () => {
   const res = ribbonResultFor(world, { from: capital, to: reachable[0]!, dress: "antique" });
   const input = buildRibbonInput(world, capital, reachable[0]!)!;
   const rng = createRng(input.seed).fork(`ribbon-${input.fromIdx}-${input.toIdx}`);
   const layout = layoutRibbon(input);
   assert.equal(res.year, input.year);
   assert.equal(res.realm, input.realmName);
-  assert.equal(res.events.length, input.events.length, "one row per event");
+  const drawn = input.events.filter((e) => eventSeat(layout, e.dist) !== null);
+  assert.equal(drawn.length, input.events.length, "premise: this road draws every event, so the rows are the events");
+  assert.equal(res.events.length, input.events.length, "one row per drawn event");
   assert.ok(res.events.length >= 4, "premise: the road has events");
   input.events.forEach((e, i) => {
     const row = res.events[i]!;
-    const seat = eventSeat(layout, e.dist);
+    const seat = eventSeat(layout, e.dist)!;
     assert.equal(row.kind, e.kind);
     assert.ok(Math.abs(row.leagues - e.dist / CELLS_PER_LEAGUE) < 1e-9, "the league mark");
     assert.equal(row.text, eventCaption(e, rng), "the plate's own caption, from the plate's own fork");
@@ -120,4 +121,25 @@ test("ribbonResultFor carries the itinerary: every event with its league mark, t
   });
   const seats = new Set(res.events.map((r) => `${r.nx.toFixed(4)},${r.ny.toFixed(4)}`));
   assert.ok(seats.size > 1, "the rows do not all lean on one spot");
+});
+
+// A crossing can fall at the road's very end, past the arrival waypoint; the plate's strip filter drops it, so the slip must too, or it lists a bridge the scroll never drew (skeptic on PR #500: 53 of 902 roads over seeds 1 to 40). The oracle is the SVG's own text, not the seat function.
+test("the itinerary lists only what the scroll drew: every row's caption words stand in the plate's text, and an undrawn end-of-road crossing gets no row", () => {
+  const res = ribbonResultFor(world, { from: 0, to: 2, dress: "antique" });
+  const input = buildRibbonInput(world, 0, 2)!;
+  const layout = layoutRibbon(input);
+  const lastEnd = layout.strips[layout.strips.length - 1]!.d1;
+  const undrawn = input.events.filter((e) => e.dist >= lastEnd);
+  assert.equal(undrawn.length, 1, "premise: seed 42's road from 0 to 2 ends on an event past the last strip");
+  assert.equal(undrawn[0]!.kind, "crossing", "premise: it is the end-of-road crossing the skeptic found");
+  assert.equal(res.events.length, input.events.length - 1, "the undrawn event gets no row");
+  // Waypoint names are set in capitals on the plate, so the comparison is case-blind.
+  const text = [...res.svg.matchAll(/>([^<]+)</g)].map((m) => m[1]).join(" ").toUpperCase();
+  for (const row of res.events) {
+    for (const word of row.text.split(/\s+/).filter((w) => /^[A-Za-z]{4,}$/.test(w))) {
+      assert.ok(text.includes(word.toUpperCase()), `the scroll prints "${word}" from the row "${row.text}"`);
+    }
+  }
+  const dropped = undrawn[0]!;
+  assert.ok(dropped.kind === "crossing" && dropped.name !== null && !text.includes(dropped.name.toUpperCase()), `premise: the scroll does not print the dropped crossing's river, ${String(dropped.name)}`);
 });

@@ -64,6 +64,7 @@ button.primary:hover { background: var(--ink-press); }
 
 a.control {
   display: inline-block;
+  vertical-align: top;
   font-size: 0.95rem;
   color: var(--ink-dark);
   background: var(--control-cream);

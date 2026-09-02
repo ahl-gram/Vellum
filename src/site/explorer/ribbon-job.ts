@@ -24,7 +24,6 @@ export interface RibbonOption {
   readonly kind: string;
 }
 
-/** One row of the itinerary: the event's league mark, the plate's own caption for it, and its seat on the scroll as fractions of the plate (the Glass leans there). */
 export interface RibbonRow {
   readonly kind: RibbonEvent["kind"];
   readonly leagues: number;
@@ -50,20 +49,21 @@ export interface RibbonPlateData {
   readonly reachable: ReadonlyArray<number>;
 }
 
-// The captions come off the plate's own fork (finished.ts's `ribbon-${from}-${to}`): a fork derives from its label, never from stream position, so the rows read exactly what the scroll printed.
+// The captions come off the plate's own fork (finished.ts's `ribbon-${from}-${to}`): a fork derives from its label, never from stream position. An event with no seat is one the plate never drew and gets no row.
 function itineraryRows(input: RibbonInput): ReadonlyArray<RibbonRow> {
   const rng = createRng(input.seed).fork(`ribbon-${input.fromIdx}-${input.toIdx}`);
   const layout = layoutRibbon(input);
-  return input.events.map((e) => {
+  return input.events.flatMap((e) => {
     const seat = eventSeat(layout, e.dist);
-    return {
+    if (seat === null) return [];
+    return [{
       kind: e.kind,
       leagues: e.dist / CELLS_PER_LEAGUE,
       text: eventCaption(e, rng),
       ...(e.kind === "waypoint" ? { tier: e.tier, index: e.index } : {}),
       nx: seat.sx / RIBBON_W,
       ny: seat.sy / RIBBON_H,
-    };
+    }];
   });
 }
 
