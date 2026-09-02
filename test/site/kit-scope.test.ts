@@ -33,7 +33,7 @@ test("every kit rule on a class an unconverted page wears is scoped to a room (#
   const sheets = kitSheets();
   const pages = unconvertedPages();
   assert.ok(sheets.includes("public/atelier.css"), "the kit's sheet is on disk");
-  assert.ok(pages.includes("src/pages/index.astro"), "home is swept (it wears .stage)");
+  assert.deepEqual(pages, ["src/pages/index.astro"], "since #464 every room wears the kit, so home alone is swept (it wears .stage)");
   for (const page of pages) {
     const worn = classesIn(read(page));
     for (const sheet of sheets) {

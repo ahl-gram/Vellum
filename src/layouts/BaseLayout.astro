@@ -7,9 +7,9 @@ import { NAV_ITEMS } from "./nav.ts";
 // Sub 6 (#461, rulings 2026-08-25): the shell wears the atelier-map idiom: the walnut
 // deep as the sitewide ground, the fixed head cluster (wordmark, flourish tagline,
 // dot-separated rooms nav) upper left over a reserved band, the room's h1 standing in the
-// page (RoomHead.astro), and a landing ceremony for the rooms.
+// page (RoomFolio.astro since #462; the RoomHead on the sheet retired at #464), and a landing ceremony for the rooms.
 interface Props {
-  /** Names the room for the computed <title> ("The Print Room · Vellum"); absent on home ALONE, whose title stays the atelier's own line. The page renders the matching <RoomHead>. */
+  /** Names the room for the computed <title> ("The Print Room · Vellum"); absent on home ALONE, whose title stays the atelier's own line. The page renders the matching <RoomFolio>. */
   room?: string;
   /** The og twins' punctuation-normalized room, only when it differs from `room`: og:title AND twitter:title take `${ogRoom} · Vellum`. */
   ogRoom?: string;
@@ -209,7 +209,6 @@ header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--par
   content: ""; position: absolute; left: 0; right: 0; top: var(--band-h); height: 14px;
   background: linear-gradient(rgb(from var(--chart-ink) r g b / 0.45), transparent);
 }
-.room-head { text-align: center; margin: 0 0 1.4rem; line-height: 1.6; }
 .room-name { font-size: 1.65rem; font-weight: 400; letter-spacing: 0.14em; margin: 0; }
 .room-tagline {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
@@ -314,7 +313,7 @@ footer a { color: inherit; }
 <body class={room ? (chartRoom ? "room chart-room" : "room") : undefined}>
 {room && !chartRoom && <div class="band" aria-hidden="true"></div>}
 <header class="chrome">
-  {/* #288: the room's h1 stands in the page (RoomHead.astro), so home alone keeps the
+  {/* #288: the room's h1 stands in the page (RoomFolio.astro), so home alone keeps the
       wordmark as its h1 (roomless, there is nothing else its h1 could be). Exactly one
       h1 either way, and the masthead still links home. Fell SC sets the small caps, so
       the wordmark stays a mixed-case string. */}

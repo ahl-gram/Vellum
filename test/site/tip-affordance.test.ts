@@ -38,27 +38,23 @@ const AUTHORED_CSS = [
 const styleBlocksIn = (source: string): string =>
   [...source.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n");
 
-/** Built rather than importing the two css constants, so this sweeps what the DOCUMENT ships: a refactor that dropped one from the <style> stops the sweep instead of leaving it to report coverage that had gone fictional. The fixture is empty because the data never reaches the css (measured: a fully populated fixture yields a byte-identical style block). */
+/** Built rather than importing the css constants, so this sweeps what the DOCUMENT ships: a refactor that dropped one from the <style> stops the sweep instead of leaving it to report coverage that had gone fictional. Both dresses since #464, the download's (the default) and the served page's (motion). The fixture is empty because the data never reaches the css (measured: a fully populated fixture yields a byte-identical style block). */
 const atlasCss = (): string => {
   const plate = { key: "x", title: "x", svg: "<svg></svg>" };
-  return styleBlocksIn(
-    atlasDocument(
-      {
-        title: "",
-        subtitle: "",
-        seed: 0,
-        hero: plate,
-        draughtings: [],
-        themes: [],
-        regions: [],
-        prospects: [],
-        bannersHtml: "",
-        chronicleHtml: "",
-        gazetteerHtml: "",
-      },
-      () => "",
-    ),
-  );
+  const data = {
+    title: "",
+    subtitle: "",
+    seed: 0,
+    hero: plate,
+    draughtings: [],
+    themes: [],
+    regions: [],
+    prospects: [],
+    bannersHtml: "",
+    chronicleHtml: "",
+    gazetteerHtml: "",
+  };
+  return [styleBlocksIn(atlasDocument(data, () => "")), styleBlocksIn(atlasDocument(data, () => "", { anchor: true, motion: true }))].join("\n");
 };
 
 /** Authored css outside public/ (#360), each paired with a way to get its css as a string. Keys keep the whole src/ path, so they cannot collide with the public/ side, which strips its prefix. */
@@ -105,7 +101,7 @@ const TIPPING_LINKS = new Set([
   "motion.css :: body:has(.room-name) .wordmark a:hover, body:has(.room-name) .wordmark a:focus-visible",
   // #270 ruling 7: the footnote marks follow through to /glossary/ anchors, so the ruling extended the tipping surface to them.
   "explorer/broadside.css :: a.fn:hover",
-  // #360, measured 2026-08-12: `cardFigureHtml` in `src/cli/gallery.ts` wraps every contact-sheet plate in a link to its full-size SVG.
+  // #360, measured 2026-08-12: `cardFigureHtml` in `src/cli/gallery.ts` wraps every contact-sheet plate in a link; since #464 the link is the Explorer at the plate's seed (gallery-room.test.ts GR5 pins it).
   "src/cli/gallery.ts :: figure img:hover",
   // #368, ruled 2026-08-12 and measured after: the lift is scoped to `figure a img`, and all three hosts of ATLAS_SHEET_CSS anchor their plates, so where no link is made no lift applies.
   "src/atlas/document.ts :: .atlas-sheet figure a img:hover",

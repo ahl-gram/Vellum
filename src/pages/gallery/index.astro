@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import RoomHead from "../../layouts/RoomHead.astro";
+import RoomFolio from "../../layouts/RoomFolio.astro";
 import { GALLERY_COUNT, GALLERY_SEED, cardFigureHtml, galleryCards } from "../../cli/gallery.ts";
 
 // Composed at build time from the same deterministic composer generate-showcases renders
@@ -9,14 +9,26 @@ const figures = galleryCards(GALLERY_SEED, GALLERY_COUNT).map(cardFigureHtml).jo
 
 const room = "The Gallery";
 const tagline = "a dozen worlds, hung for viewing";
+const dateline = `${GALLERY_COUNT} charts, from seed ${GALLERY_SEED}`;
 ---
 
 <BaseLayout
   room={room}
   description="A contact sheet of twelve imaginary worlds, drawn by Vellum as antique charts and hung for viewing."
   path="/gallery/"
+  chartRoom
 >
-<RoomHead room={room} tagline={tagline} />
-<p class="sub intro">{GALLERY_COUNT} charts drawn by Vellum, beginning at seed {GALLERY_SEED}</p>
+<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>
 <div class="grid" set:html={figures}></div>
+
+<RoomFolio room={room} tagline={tagline}>
+  <p class="dateline">{dateline}</p>
+</RoomFolio>
+
+<nav class="legend" aria-label="The road out">
+  <p class="legend-head">every plate is a road into its own world</p>
+  <div class="legend-row">
+    <a class="legend-btn gold" href="/explorer/"><span class="verb">Return to</span><span class="room">The Explorer</span></a>
+  </div>
+</nav>
 </BaseLayout>

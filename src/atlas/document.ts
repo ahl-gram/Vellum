@@ -101,6 +101,35 @@ footer { margin-top: 4rem; text-align: center; letter-spacing: 0.25em;
   font-size: 0.75rem; color: var(--ink-faded); }
 a { color: inherit; }`;
 
+// The served /atlas/ page's screen dress (#464), emitted with `motion` only; the download keeps its paper chrome (print is paper, #454 decision 4). Shipped as page bytes: no process prose here.
+const SCREEN_DRESS_CSS = `:root {
+  --the-deep:
+    radial-gradient(120% 90% at 50% 30%, rgb(from var(--ink-dark) r g b / 0) 40%, rgb(from var(--chart-ink) r g b / 0.55) 100%),
+    radial-gradient(80% 70% at 30% 20%, color-mix(in srgb, var(--ink-dark) 90%, var(--parchment) 10%) 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+  --sheet-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.4);
+}
+body { background: var(--chart-ink); }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; background: var(--the-deep); background-color: var(--chart-ink); }
+header { margin-bottom: 2.8rem; }
+h1 { font-weight: 400; color: var(--parchment-bright); }
+.subtitle, .chartno { color: var(--parchment); }
+.atlas-sheet > figure, .atlas-sheet > section { background: var(--parchment-panel); border: 1px solid var(--line-tan);
+  outline: 3px double var(--line-faint); outline-offset: 6px; box-shadow: var(--sheet-shadow);
+  padding: 1.8rem clamp(1.25rem, 3vw, 2.75rem) 2.4rem; margin: 2.8rem 0; }
+.atlas-sheet > section > h2 { margin-top: 0; }
+.atlas-sheet > section:has(> table) { overflow-x: auto; }
+.atlas-sheet .styles { grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); }
+.atlas-sheet .themes { grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); }
+footer { color: var(--line-tan); }
+@media print {
+  body { background: none; }
+  body::before { display: none; }
+  h1, .subtitle, .chartno { color: var(--ink-dark); }
+  .atlas-sheet > figure, .atlas-sheet > section { background: none; border: 0; outline: 0; box-shadow: none; padding: 0; margin: 1.5rem 0; }
+  .atlas-sheet > section > h2 { margin-top: 3rem; }
+  footer { color: var(--ink-faded); }
+}`;
+
 // Style plates carry the world- prefix the CLI has always written; theme/region keys
 // already read theme-* / region-*, so they stand alone.
 export function atlasPlateFilename(plate: { key: string }, section: PlateSection): string {
@@ -169,8 +198,8 @@ function plateFigure(
 
 /**
  * `plateSrc` decides how a plate is embedded: a filename (CLI, with anchor:true) or a data
- * URI (download, anchor:false). `motion` links /fonts.css and /motion.css; the offline
- * download omits both and relies on the CSS fallbacks above.
+ * URI (download, anchor:false). `motion` links /fonts.css and /motion.css and wears the screen
+ * dress (#464); the offline download omits all three and relies on the CSS fallbacks above.
  */
 export function atlasDocument(
   data: AtlasDocumentData,
@@ -203,7 +232,7 @@ ${prospects}
 <title>${escapeXml(data.title)}: a Vellum atlas</title>
 ${motion ? '<link rel="stylesheet" href="/fonts.css">\n<link rel="stylesheet" href="/motion.css">\n' : ""}<style>
 ${PAGE_CHROME_CSS}
-${ATLAS_SHEET_CSS}
+${ATLAS_SHEET_CSS}${motion ? `\n${SCREEN_DRESS_CSS}` : ""}
 </style>
 </head>
 <body class="atlas-sheet">
