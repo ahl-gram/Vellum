@@ -214,7 +214,7 @@ header.chrome::before {
 .lf-legend-head {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-style: italic;
-  font-size: 0.82rem; color: var(--ink-faded); margin: 0 0 0.45rem;
+  font-size: 0.82rem; color: var(--parchment); margin: 0 0 0.45rem;
 }
 .lf-legend-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
 .lf-legend-btn {

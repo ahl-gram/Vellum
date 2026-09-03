@@ -199,6 +199,7 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .vignette { height: 8rem; }
   .corner.bl { display: none; }
   .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); bottom: calc(var(--sheet-h, 6rem) + 1rem); }
+  body:has(.slip.open) .corner.br.zoomery { display: none; }
   .corner.tr::before { inset: -0.7rem -0.7rem -0.75rem; }
   .legend { display: none; }
   .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; max-width: none !important; }

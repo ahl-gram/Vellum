@@ -263,6 +263,8 @@ test("the corner chrome passes clicks through and keeps its text on its own grou
     control && /min-width:\s*0/.test(control[1]),
     "and the input CAN yield: flex refuses to shrink an input below its default min-width, so with nowrap alone the row overflowed the panel's left edge by 9.67px at 390 and painted the input over raw map (plate round 3); e2e H3 measures the containment live",
   );
+  const legendHead = css.match(/\.lf-legend-head \{([^}]*)\}/);
+  assert.ok(legendHead && /color:\s*var\(--parchment\)/.test(legendHead[1]), "the legend's head line wears parchment, the one face with the rooms' legend-head: ink-faded measured 2.78:1 on the deep (plate read 2026-08-29; the sitting's ruling 11, 2026-09-03 on #454)");
 });
 
 test("the Notice to Mariners is the mockup's stamp on the deep, and only the stamp (#459)", () => {
