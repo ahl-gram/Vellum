@@ -51,16 +51,10 @@
   font-size: 8.5px; letter-spacing: 0.08em; color: var(--chart-ink); white-space: nowrap;
   text-shadow: 0 0 4px var(--chart-paper), 0 0 8px var(--chart-paper);
 }
-.lf-controls { display: none; position: absolute; right: 1.6rem; bottom: 1.4rem; flex-direction: column; gap: 0.4rem; }
-.lf-controls.on { display: flex; }
-.lf-btn {
-  width: 2.2rem; height: 2.2rem;
-  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  font-size: 1.1rem; line-height: 1;
-  color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.5);
-  border: 1px solid var(--line-tan); cursor: pointer;
-}
-.lf-btn:hover, .lf-btn:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
+/* #505: the camera is the kit's Glass; home seats it (placement is the page's). Literal offsets, not the chrome vars: BaseLayout narrows those under 900px and home's camera never moved there. What the kit's corner sets beyond dress is stood down here, and kit-scope.test.ts pins that list. */
+#lf-controls { display: none; position: absolute; right: 1.6rem; bottom: 1.4rem; z-index: auto; animation: none; pointer-events: auto; }
+#lf-controls.on { display: flex; }
+#lf-controls button:focus-visible { outline-color: var(--ink-dark); }
 .lf-coords {
   display: none; position: absolute; left: 1.6rem; bottom: 1.4rem; margin: 0;
   font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
@@ -149,7 +143,7 @@ header.chrome::before {
   appearance: none; border: 0; background: none; font: inherit; cursor: pointer;
 }
 /* Real hardware reads the TOUCHED element's touch-action, so a control defaulting to auto lets the browser claim a gesture starting there; CDP emulation cannot see this line (control-run 2026-08-25, #475), it is pinned only by the phone pass at the gate. */
-.lf-station, .lf-legend-btn, .lf-controls button { touch-action: pan-y; }
+.lf-station, .lf-legend-btn, #lf-controls button { touch-action: pan-y; }
 .lf-station-glyph {
   position: absolute; inset: 0; margin: auto;
   width: 15px; height: 15px;
@@ -380,8 +374,6 @@ header.chrome::before {
   }
   .lf-card-arms img { width: 42px; }
   .lf-card-how { max-height: 45vh; }
-  /* The legend band retired with the phone doors, so the camera column returns to the shore. */
-  .lf-controls { bottom: 1.4rem; }
   .lf-coords.on { display: none; }
   .notice-stamp { display: none; }
   .lf-seed { right: 1rem; top: 0.9rem; max-width: 12rem; padding: 0.7rem 0.7rem 0.75rem; }

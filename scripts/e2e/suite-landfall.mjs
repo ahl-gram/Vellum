@@ -165,7 +165,7 @@ export async function run(ctx) {
   await scrollToFloor();
   const surfCamBefore = await camNow();
   // centerOf, never buttonPoint: buttonPoint scrollIntoViews the stage first, which un-scrolls the page and dissolves the very trap this arm exists to pin (the instruments' remnant is reachable down there).
-  const zoomInPt = await centerOf("#lf-in");
+  const zoomInPt = await centerOf("#zoom-in");
   if (zoomInPt !== null) await clickAt(zoomInPt.x, zoomInPt.y);
   let surfaced = null;
   for (let i = 0; i < 25; i++) {
@@ -426,7 +426,7 @@ export async function run(ctx) {
             await sleep(75);
             if ((await scrollY()) === 0) break;
           }
-          const homePt = await evaluate(buttonPoint("#lf-home"));
+          const homePt = await evaluate(buttonPoint("#zoom-reset"));
           if (homePt !== null) await clickAt(Math.round(homePt.x), Math.round(homePt.y));
           let reachable = false;
           for (let i = 0; i < 80; i++) {
@@ -746,7 +746,7 @@ export async function run(ctx) {
   await sleep(400);
 
   await recenter();
-  const inPt = await evaluate(buttonPoint("#lf-in"));
+  const inPt = await evaluate(buttonPoint("#zoom-in"));
   const inBefore = await camNow();
   if (inPt !== null) {
     await touch("touchStart", [{ x: Math.round(inPt.x), y: Math.round(inPt.y), id: 0 }]);

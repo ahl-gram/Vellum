@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Glass from "../layouts/Glass.astro";
 import { ARRIVED_KEY } from "../site/home/ceremony.ts";
 import { homeStage } from "../site/home/stage-data.ts";
 import { homeStations, howStation, unclaimedDots } from "../site/home/stations.ts";
@@ -80,11 +81,7 @@ const how = howStation();
       <p class="stamp-head">Notice to Mariners</p>
       <p class="stamp-body">No feature on this chart exists.<br>Soundings are imaginary.</p>
     </aside>
-    <div class="lf-controls" id="lf-controls" role="group" aria-label="Camera">
-      <button type="button" class="lf-btn" id="lf-in" aria-label="Draw nearer">+</button>
-      <button type="button" class="lf-btn" id="lf-out" aria-label="Stand off">&minus;</button>
-      <button type="button" class="lf-btn" id="lf-home" aria-label="The whole sheet">&#8962;</button>
-    </div>
+    <Glass id="lf-controls" />
     <p class="lf-coords" id="lf-coords" aria-hidden="true"></p>
     <p class="lf-more" aria-hidden="true"><span class="lf-more-pulse"></span>scroll on for more</p>
     <nav class="lf-legend" id="lf-legend" aria-label="Modes of encounter">

@@ -38,56 +38,15 @@ export async function run(ctx) {
     return await rgn();
   };
 
-  const g1 = await evaluate(`(()=>{
-    const grp=document.getElementById("zoom-controls");
-    const btn=(id)=>{const b=document.getElementById(id);return{title:b.getAttribute("title"),aria:b.getAttribute("aria-label"),svg:!!b.querySelector("svg"),text:(b.textContent||"").trim()};};
-    const legend=grp?grp.querySelector(".zoom-keys"):null;
-    const legendVisible=!!legend&&legend.offsetWidth>0&&legend.offsetHeight>0;
-    let hideRules=0, hoverHideRules=0, coarseScopedHideRules=0;
-    for(const ss of document.styleSheets){
-      let rules;try{rules=ss.cssRules;}catch(e){continue;}
-      if(!rules)continue;
-      for(const r of rules){
-        if(r.constructor.name!=="CSSMediaRule")continue;
-        const cond=r.conditionText||(r.media&&r.media.mediaText)||"";
-        for(const n of r.cssRules){
-          if(!n.selectorText||!n.selectorText.includes(".zoom-keys"))continue;
-          if((n.style&&n.style.display)!=="none")continue;
-          hideRules++;
-          if(/hover:\\s*none/.test(cond)){
-            hoverHideRules++;
-            if(/pointer:\\s*coarse/.test(cond))coarseScopedHideRules++;
-          }
-        }
-      }
-    }
-    return{grpAria:grp?grp.getAttribute("aria-label"):null,
-      zin:btn("zoom-in"),zout:btn("zoom-out"),zreset:btn("zoom-reset"),
-      legend:!!legend,legendVisible,legendAriaHidden:legend?legend.getAttribute("aria-hidden"):null,
-      legendText:legend?(legend.textContent||"").replace(/\\s+/g," ").trim():"",
-      hideRules,hoverHideRules,coarseScopedHideRules,
-      hoverNone:matchMedia("(hover: none)").matches,pointerCoarse:matchMedia("(pointer: coarse)").matches,
-      // #463: the keys slip stands down below 1440px too (a stated deviation on #462: it collided with the legend row beside the 24rem Broadside at 1280), so the legend is owed only on a wide, mouse-driven sheet.
-      wide:innerWidth>=1440};
-  })()`);
-  const touchPrimary = g1.hoverNone && g1.pointerCoarse;
-  const legendOwed = !touchPrimary && g1.wide;
-  // The other polarity: at 1680 a mouse-driven sheet is owed the keys slip (skeptic on PR #491: the harness is 1280 wide, so the first read alone asserts only the hidden arm).
-  await send("Emulation.setDeviceMetricsOverride", { width: 1680, height: 1050, deviceScaleFactor: 1, mobile: false });
-  await sleep(300);
-  const g1wide = await evaluate(`(()=>{const l=document.querySelector("#zoom-controls .zoom-keys");return{shown:!!l&&l.offsetWidth>0&&l.offsetHeight>0,w:innerWidth};})()`);
-  await send("Emulation.clearDeviceMetricsOverride");
-  await sleep(300);
+  const g1 = await evaluate(`(()=>{const grp=document.getElementById("zoom-controls");const btn=(id)=>{const b=document.getElementById(id);return{title:b.getAttribute("title"),aria:b.getAttribute("aria-label"),svg:!!b.querySelector("svg"),text:(b.textContent||"").trim()};};const zin=document.getElementById("zoom-in");return{grpAria:grp.getAttribute("aria-label"),order:[...grp.querySelectorAll("button")].map((b)=>b.id).join(","),zin:btn("zoom-in"),zout:btn("zoom-out"),zreset:btn("zoom-reset"),keys:!!grp.querySelector(".zoom-keys"),radius:getComputedStyle(zin).borderRadius,size:zin.getBoundingClientRect().width};})()`);
   check(
-    "G1 the cluster speaks in the antique voice and the keys legend is visible by it (#170 voice + Sub 4 handoff)",
-    g1.grpAria === "The Surveyor's Glass" &&
-      g1.zin.title === "Lean closer" && /zoom in/i.test(g1.zin.aria || "") && g1.zin.svg && g1.zin.text === "" &&
-      g1.zout.title === "Stand back" && /zoom out/i.test(g1.zout.aria || "") && g1.zout.svg && g1.zout.text === "" &&
-      g1.zreset.title === "The full sheet" && /reset/i.test(g1.zreset.aria || "") && g1.zreset.svg &&
-      g1.legend && g1.legendVisible === legendOwed && (touchPrimary || (g1wide.w === 1680 && g1wide.shown)) && g1.legendAriaHidden === "true" &&
-      /0/.test(g1.legendText) && /pan/i.test(g1.legendText) &&
-      g1.hideRules > 0 && g1.hoverHideRules === g1.coarseScopedHideRules,
-    JSON.stringify({ ...g1, g1wide }),
+    "G1 the cluster is home's camera (#505, ruled 2026-09-02): Camera; in, out, the whole sheet as text glyphs in home's voice; no tooltips, no engraved glyphs, no keys slip; the house's rounding at 2.2rem",
+    g1.grpAria === "Camera" && g1.order === "zoom-in,zoom-out,zoom-reset" &&
+      g1.zin.aria === "Draw nearer" && g1.zin.text === "+" && !g1.zin.svg && g1.zin.title === null &&
+      g1.zout.aria === "Stand off" && g1.zout.text === "\u2212" && !g1.zout.svg &&
+      g1.zreset.aria === "The whole sheet" && g1.zreset.text === "\u2302" && !g1.zreset.svg &&
+      !g1.keys && g1.radius === "4px" && Math.abs(g1.size - 35.2) < 0.5,
+    JSON.stringify(g1),
   );
 
   const g2aNow = await evaluate(`(()=>{document.getElementById("zoom-in").click();return window.__vellumZoomState().k;})()`);
@@ -253,7 +212,7 @@ export async function run(ctx) {
     await sleep(40);
   }
   check(
-    "G8 the full sheet returns on one voiced press: glide home, inset faded off, hash clean, world overlay back (#170)",
+    "G8 the whole sheet returns on one press: glide home, inset faded off, hash clean, world overlay back (#170; home's voice since #505)",
     g8cam.k === 1 && g8cam.x === 0 && g8cam.y === 0 && g8.band === 0 && g8.committed === false &&
       g8.insets === 0 && g8.hits > 0 && g8.cx === null,
     `cam=${JSON.stringify(g8cam)} ${JSON.stringify(g8)}`,

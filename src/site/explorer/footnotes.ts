@@ -39,7 +39,7 @@ function place(mark: HTMLElement, note: HTMLElement): void {
 export function wireFootnotes(): void {
   // A pre-popover engine keeps working marks: they stay plain glossary links.
   if (!("showPopover" in HTMLElement.prototype)) return;
-  // Touch-primary means hover:none AND pointer:coarse: a bare (hover: none) over-matches environments with NO pointer at all (linux headless CI reports hover:none with pointer:none), muting the focus path exactly where a keyboard user needs it (e2e BR4/BR5; the zoom-keys css rule hit the same trap, G1).
+  // Touch-primary means hover:none AND pointer:coarse: a bare (hover: none) over-matches environments with NO pointer at all (linux headless CI reports hover:none with pointer:none), muting the focus path exactly where a keyboard user needs it (e2e BR4/BR5; the Glass's keys slip hit the same trap before it retired at #505).
   // Queried at event time, not captured at wire time, so a device-mode flip (or the e2e's emulation) is honored without a reload.
   const touchPrimary = (): boolean => window.matchMedia("(hover: none) and (pointer: coarse)").matches;
   for (const { mark, note } of pairs()) {

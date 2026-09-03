@@ -380,7 +380,24 @@ export async function run(ctx) {
     anchored(armed12) && atLandfall(narrowLand) && narrowLand.expected < narrowLand.fit * 1.65,
     JSON.stringify({ armed12, narrowLand }),
   );
+  // #505: the camera's seat is home's own (ruled 2026-09-02), read against the stage at 390 here and at the wide sheet after the viewport clears.
+  const camSeat = () => evaluate(`(() => { const c = document.getElementById("lf-controls"); const s = document.getElementById("lf-stage"); if (!c || !s || !c.classList.contains("on")) return null; const r = c.getBoundingClientRect(), sr = s.getBoundingClientRect(); const cs = getComputedStyle(c); return { pos: cs.position, z: cs.zIndex, right: sr.right - r.right, bottom: sr.bottom - r.bottom, pe: cs.pointerEvents, anim: cs.animationName, top: r.top, vw: innerWidth }; })()`);
+  const seatOk = (s) => !!s && s.pos === "absolute" && s.z === "auto" && s.anim === "none" && s.pe === "auto" && Math.abs(s.right - 25.6) < 0.6 && Math.abs(s.bottom - 22.4) < 0.6;
+  const seat390 = await camSeat();
   await clearMobile();
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  let seatWide = null;
+  for (let i = 0; i < 120; i++) { try { seatWide = await camSeat(); } catch {} if (seatWide) break; await sleep(50); }
+  await evaluate(`window.scrollTo(0, 600)`);
+  await sleep(80);
+  const camScrolled = await evaluate(`(() => { const r = document.getElementById("lf-controls").getBoundingClientRect(); return { top: r.top, y: scrollY }; })()`);
+  await evaluate(`window.scrollTo(0, 0)`);
+  check(
+    "H18 the camera's seat is home's own (#505): absolute in the stage, 1.6rem from its right edge and 1.4rem up at the wide sheet and at 390, no depth, no ink-in, the container taking the pointer, and it scrolls away with the stage",
+    seatOk(seatWide) && seatOk(seat390) && seatWide.vw >= 1024 && seat390.vw === 390 && !!camScrolled && camScrolled.y > 0 && Math.abs((seatWide.top - camScrolled.top) - camScrolled.y) < 2,
+    JSON.stringify({ seatWide, seat390, camScrolled }),
+  );
 
   const errDelta2 = consoleErrors.slice(errBase2).filter((e) => !e.includes("AbortError: Transition was skipped"));
   const httpDelta2 = http4xx.slice(httpBase2).filter((u) => !/favicon/i.test(u));
@@ -570,7 +587,7 @@ export async function run(ctx) {
           contained: cr.top >= r.top - 0.5 && cr.bottom <= r.bottom + 0.5 && cr.left >= r.left - 0.5 && cr.right <= r.right + 0.5,
           anchorClear: !(anchorVX >= cr.left && anchorVX <= cr.right && anchorVY >= cr.top && anchorVY <= cr.bottom),
           enterReach: reach(card.querySelector(".lf-card-enter")), closeReach: reach(card.querySelector(".lf-card-close")),
-          controlsReach: reach(document.getElementById("lf-in")) && reach(document.getElementById("lf-out")),
+          controlsReach: reach(document.getElementById("zoom-in")) && reach(document.getElementById("zoom-out")),
           title: card.querySelector(".lf-card-title")?.textContent ?? null,
           enter: card.querySelector(".lf-card-enter")?.getAttribute("href") ?? null,
           arms: card.querySelectorAll(".lf-card-arms img").length,
@@ -793,7 +810,7 @@ export async function run(ctx) {
     doors16c = await evaluate(`(() => {
       const legend = document.querySelector(".lf-legend");
       const cam = !!document.querySelector(".stage.cam");
-      const hits = [...document.querySelectorAll(".lf-controls button")].map((b) => {
+      const hits = [...document.querySelectorAll("#lf-controls button")].map((b) => {
         const r = b.getBoundingClientRect();
         const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
         return hit === b || b.contains(hit);

@@ -157,10 +157,10 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     },
   });
 
-  document.getElementById("lf-in")?.addEventListener("click", () => zoomBy(1.5));
-  document.getElementById("lf-out")?.addEventListener("click", () => zoomBy(1 / 1.5));
+  document.getElementById("zoom-in")?.addEventListener("click", () => zoomBy(1.5));
+  document.getElementById("zoom-out")?.addEventListener("click", () => zoomBy(1 / 1.5));
   document
-    .getElementById("lf-home")
+    .getElementById("zoom-reset")
     ?.addEventListener("click", () => flyTo(camForCenter(0.5, 0.5, fit, view(), SHEET), reduced() ? 0 : 1.2));
 
   bindStations({
