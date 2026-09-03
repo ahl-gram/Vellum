@@ -126,8 +126,8 @@ export async function run(ctx) {
   );
   const footing = await brightest(Math.round(leaned.legend.x + leaned.legend.w / 2) - 4, Math.round(leaned.legend.bottom) + 3);
   check(
-    "SB5c leaned, the legend row stands on home's footing, a gradient box darkest at its foot drawn as the row's own ::before, not the blurred pool: the gradient resolves, its foot band reads dark over the chart, and at rest the row carried no ground",
-    !!leaned && leaned.legendGroundOn === '""' && /linear-gradient/.test(leaned.legendGround) && footing < 120 && rest.legendGroundOn === "none",
+    "SB5c leaned, the legend row stands on home's footing, the seed box's crisp panel (a top-to-bottom gradient, no fade) drawn as the row's own ::before, not the blurred pool: the panel resolves, its foot band reads dark over the chart, and at rest the row carried no ground (the fade left at the 2026-09-03 sitting, ruling 23)",
+    !!leaned && leaned.legendGroundOn === '""' && /^linear-gradient\((?!to top)/.test(leaned.legendGround) && footing < 120 && rest.legendGroundOn === "none",
     JSON.stringify({ leaned: leaned.legendGround.slice(0, 40), footing, rest: rest.legendGroundOn }),
   );
 

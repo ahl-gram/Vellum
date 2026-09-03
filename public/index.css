@@ -207,7 +207,7 @@ header.chrome::before {
   transform: translateX(-50%); text-align: center; z-index: 2;
   /* The mockup's narrow footing generalized: in the boxed stage the landfall chart reaches the stage foot, so without its own ground the legend reads as text on parchment and a south-shore slip blends straight into it. */
   padding: 0.5rem 1.1rem 0.6rem;
-  background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.45) 72%, transparent);
+  background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72));
   pointer-events: none;
 }
 .landfall .stage.cam .lf-legend { display: block; }
@@ -230,7 +230,7 @@ header.chrome::before {
   display: block;
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-style: italic;
-  font-size: 0.78rem; color: var(--line-tan);
+  font-size: 0.78rem; color: var(--parchment);
 }
 .lf-legend-room {
   display: block;
