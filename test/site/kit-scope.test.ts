@@ -47,3 +47,10 @@ test("the guard can see an unscoped collision: the offender loop itself reads a 
   assert.ok(home.has("stage"), "home's landfall stage still wears the class the collision was found on");
   assert.deepEqual(offendersIn(".stage { position: fixed; } body.chart-room .stage { inset: 0; } .folio-controls .control { width: 1px; } .stage .sheet { color: red; }", home), [".stage", ".stage .sheet"], "a bare rule and a compound of home classes both red; a compound with a kit-only class does not");
 });
+
+test("home wears the kit's camera through the component alone (#505): one <Glass> in index.astro and none of its classes literal, so a pasted copy would put the corner's arms into the sweep above", () => {
+  const src = read("src/pages/index.astro");
+  assert.equal((src.match(/<Glass /g) ?? []).length, 1);
+  const worn = classesIn(src);
+  for (const c of ["chrome", "corner", "br", "zoomery", "zoom-btn"]) assert.ok(!worn.has(c), `home does not author .${c} itself`);
+});

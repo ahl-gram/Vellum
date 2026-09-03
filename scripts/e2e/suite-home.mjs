@@ -570,7 +570,7 @@ export async function run(ctx) {
           contained: cr.top >= r.top - 0.5 && cr.bottom <= r.bottom + 0.5 && cr.left >= r.left - 0.5 && cr.right <= r.right + 0.5,
           anchorClear: !(anchorVX >= cr.left && anchorVX <= cr.right && anchorVY >= cr.top && anchorVY <= cr.bottom),
           enterReach: reach(card.querySelector(".lf-card-enter")), closeReach: reach(card.querySelector(".lf-card-close")),
-          controlsReach: reach(document.getElementById("lf-in")) && reach(document.getElementById("lf-out")),
+          controlsReach: reach(document.getElementById("zoom-in")) && reach(document.getElementById("zoom-out")),
           title: card.querySelector(".lf-card-title")?.textContent ?? null,
           enter: card.querySelector(".lf-card-enter")?.getAttribute("href") ?? null,
           arms: card.querySelectorAll(".lf-card-arms img").length,
@@ -793,7 +793,7 @@ export async function run(ctx) {
     doors16c = await evaluate(`(() => {
       const legend = document.querySelector(".lf-legend");
       const cam = !!document.querySelector(".stage.cam");
-      const hits = [...document.querySelectorAll(".lf-controls button")].map((b) => {
+      const hits = [...document.querySelectorAll("#lf-controls button")].map((b) => {
         const r = b.getBoundingClientRect();
         const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
         return hit === b || b.contains(hit);

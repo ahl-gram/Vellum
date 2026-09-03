@@ -66,22 +66,14 @@ body.chart-room .stage .status a { color: var(--parchment-bright); }
 .folio-coords { font-variant-caps: small-caps; font-size: 0.85rem; letter-spacing: 0.06em; color: var(--line-tan); margin-top: 0.35rem; min-height: 1.2em; }
 .folio-note { font-size: 0.86rem; color: var(--parchment); margin-top: 0.4rem; line-height: 1.45; max-width: 22rem; }
 
-/* The Surveyor's Glass, lower right (#462 ruling 2): it hugs the chart's corner, so an open slip pushes it left. */
+/* The camera, lower right (#462 ruling 2): it hugs the chart's corner, so an open slip pushes it left. Home's shape since #505 (the atelier-map mockup's); the house's rounding stays, ruled 2026-09-02. */
 .zoomery { display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-end; transition: right 0.32s cubic-bezier(0.2, 0.7, 0.3, 1); }
 .corner.br.zoomery { right: calc(var(--slip-w) + 2rem + 1.4rem); }
 body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); }
-.zoom-btn { width: 2.3rem; height: 2.3rem; display: flex; align-items: center; justify-content: center; padding: 0;
-  color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); border-radius: 0;
-  transition: background 0.2s ease, color 0.2s ease; }
-/* Four classes deep on purpose: the house sheets dress every button, and their hover wash outranks a plain .zoom-btn:hover. */
+.zoom-btn { width: 2.2rem; height: 2.2rem; font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 1.1rem; line-height: 1;
+  color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); cursor: pointer; transition: background 0.2s ease, color 0.2s ease; }
+/* Four classes deep on purpose: the house sheets dress every button, and their hover wash outranks a plain .zoom-btn:hover (it outranked home's, the hover #505 repairs). */
 .zoomery.corner .zoom-btn:hover, .zoomery.corner .zoom-btn:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
-.zoom-keys { margin-top: 0.1rem; padding: 0.28rem 0.5rem; text-align: right; white-space: nowrap;
-  background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan);
-  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.62rem; line-height: 1.5; letter-spacing: 0.04em; color: var(--line-tan); }
-.zoom-keys span { display: block; }
-.zoom-keys kbd { font-family: inherit; font-style: normal; color: var(--parchment); }
-/* The keys slip needs a band wide enough for folio + roads + Glass beside a slip: measured colliding at 1280 (a stated deviation on #462). A bare (hover: none) over-matches pointerless environments (linux headless CI reports hover:none with pointer:none), hiding the legend where a keyboard user could use it; pinned by e2e G1. */
-@media (hover: none) and (pointer: coarse), (max-width: 1439px) { .zoom-keys { display: none; } }
 
 /* The legend row, bottom centre (#462 ruling 4): the room's roads out, centred on the chart beside an open slip. */
 .legend { position: fixed; left: calc((100% - var(--slip-w) - 2rem) / 2); bottom: var(--chrome-y); transform: translateX(-50%); z-index: 10; text-align: center;
@@ -194,7 +186,6 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .vignette { height: 8rem; }
   .corner.bl { display: none; }
   .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); bottom: calc(var(--sheet-h, 6rem) + 1rem); }
-  .zoom-keys { display: none; }
   .legend { display: none; }
   .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; max-width: none !important; }
   .legend.in-slip .legend-head { display: none; }
