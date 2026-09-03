@@ -40,11 +40,10 @@
 .rf-range { flex: 1 1 8rem; min-width: 0; accent-color: var(--ink-brown); }
 .rf-year { flex: none; min-width: 5.4rem; text-align: right; margin-top: 0.45rem;
   font-variant-caps: small-caps; font-variant-numeric: tabular-nums; font-size: 1rem; letter-spacing: 0.06em; color: var(--parchment-bright); }
-/* The pace (#493; #462 ruling 6, "the readout and pace at the right"): the mockup's three presses in the strip's dark dress, the chosen one on parchment. */
+/* The pace (#493), the mockup's .speed group. */
 .rf-pace { flex: none; display: flex; gap: 0.3rem; margin-top: 0.4rem; }
 .rf-pace button { width: 1.9rem; height: 1.6rem; padding: 0; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.66rem; letter-spacing: 0.08em; color: var(--line-tan);
   background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); border-radius: 0; transition: background 0.2s ease, color 0.2s ease; }
-/* Four classes deep, as Play; the pressed rule follows the hover so a hovered chosen press stays chosen. */
 .rf-instrument-strip .rf-instrument .rf-pace button:hover, .rf-instrument-strip .rf-instrument .rf-pace button:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
 .rf-instrument-strip .rf-instrument .rf-pace button[aria-pressed="true"] { color: var(--ink-dark); background: var(--parchment); }
 

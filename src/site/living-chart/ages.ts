@@ -29,7 +29,7 @@ import {
   type YearRange,
 } from "../../render/chronicle-scrubber.ts";
 import { tAtElapsed, elapsedAtT } from "../../render/voyage-geometry.ts";
-import { DEFAULT_PACE, anchorFor, storyElapsed, type Pace } from "./pace.ts";
+import { DEFAULT_PACE, anchorAt, repaced, storyAt, type Pace, type SweepAnchor } from "./pace.ts";
 import type { Chronicle } from "./chronicle.ts";
 import type { Voyage } from "./voyage.ts";
 import type { OverlayData } from "./place-overlay.ts";
@@ -51,8 +51,7 @@ interface AgesSession {
   dragEscapeU: number;
   playing: boolean;
   rafId: number;
-  /** The wall-clock anchor of the running sweep (pace.ts); 0 at rest. */
-  begin: number;
+  anchor: SweepAnchor;
   annals: AnnalRow[];
   /** Which chamber's paint currently holds the chart, so a crossing repaints the other chamber's rest exactly once, never per frame. */
   chamberShown: Chamber;
@@ -223,7 +222,7 @@ export function createAges(deps: AgesDeps) {
       dragEscapeU: 0,
       playing: false,
       rafId: 0,
-      begin: 0,
+      anchor: { begin: 0, floor: 0 },
       annals: buildAnnals(overlay.data()!.events),
       chamberShown: "survey",
       barMax,
@@ -311,13 +310,12 @@ export function createAges(deps: AgesDeps) {
     const elapsed0 =
       pos.chamber === "survey" ? elapsedAtT(cumMs, pos.t) : surveyMs + sweepElapsedAt(range, pos.year);
     const totalMs = surveyMs + SWEEP_MS;
-    ages.begin = anchorFor(performance.now(), elapsed0, pace);
+    ages.anchor = anchorAt(performance.now(), elapsed0, pace);
     ages.playing = true;
     setPlayLabel(true);
     const tick = (now: number) => {
       if (!ages || !ages.playing) return;
-      // Clamped below the resume point: a vsync-aligned rAF timestamp can PRECEDE the performance.now() that anchored `begin`, and an unclamped first frame can step the year BACKWARD across a rounding boundary (a one-frame flicker; CI's slower VM caught it in e2e S9).
-      const elapsed = Math.max(storyElapsed(now, ages.begin, pace), elapsed0);
+      const elapsed = storyAt(ages.anchor, now, pace);
       if (elapsed >= totalMs) {
         paintPos({ chamber: "ages", year: range.max }, { postLog: true });
         pause(); // auto-park at the present, button back to "Play"
@@ -335,12 +333,8 @@ export function createAges(deps: AgesDeps) {
     ages.rafId = requestAnimationFrame(tick);
   }
 
-  /** The pace for this Play and every later one; a change mid-sweep keeps the story where it stands. */
   function setPace(k: Pace): void {
-    if (ages && ages.playing) {
-      const now = performance.now();
-      ages.begin = anchorFor(now, storyElapsed(now, ages.begin, pace), k);
-    }
+    if (ages && ages.playing) ages.anchor = repaced(ages.anchor, performance.now(), pace, k);
     pace = k;
   }
 

@@ -559,7 +559,6 @@ export async function run(ctx) {
   await sleep(120);
   const mobileStuck = await evaluate(stripRead);
   await evaluate(`(()=>{window.scrollTo(0,0);return null;})()`);
-  // #493: the pace group drops on a phone (the mockup's rule), by a strip-scoped rule.
   const mobilePace = await evaluate(`(()=>{const g=document.querySelector(".rf-instrument .rf-pace");return g?getComputedStyle(g).display:"(no-el)";})()`);
   await shoot("reading-room-390.png");
   await ctx.clearMobile();

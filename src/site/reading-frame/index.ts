@@ -75,7 +75,7 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
 
   const log = createDatedLog({ label: "The ages" });
 
-  // #493 (#462 ruling 6, "the readout and pace at the right"): three presses, the chosen one aria-pressed; the room wires them, the engine never sees them.
+  // #493: the room wires the presses; the engine never sees them.
   const pace = document.createElement("div");
   pace.className = "rf-pace";
   pace.setAttribute("role", "group");
@@ -135,7 +135,6 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   }
 
   // The reading column (#318): furniture appended here stands through the engine's hidden teardowns; a host that seats its parts elsewhere (#463) leaves it empty.
-  /** Moves the press to `k`; the engine holds the pace itself (setPace), this is the strip's face of it. */
   function markPace(k: Pace): void {
     for (const [p, b] of paceButtons) b.setAttribute("aria-pressed", String(p === k));
   }

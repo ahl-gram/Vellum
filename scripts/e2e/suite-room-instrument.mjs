@@ -300,8 +300,7 @@ export async function run(ctx) {
     JSON.stringify({ arrivedAgain, rs28armed, rs28 }),
   );
 
-  // #493 the pace. At rest the default 1x is pressed and the engine reports it; a press moves the mark and reaches the engine; a park after it writes no pace key (ruled 2026-09-02).
-  // The facts of the world ON SCREEN: RS23 and the counter reads above drew seed 9, and seed 42's years would clamp the bar to the present (a Play from the present reopens the whole story in the survey chamber, where the year is null by contract).
+  // #493. The facts of the world ON SCREEN: RS23 and the counter reads above drew seed 9, and seed 42's years would clamp the bar to the present (a Play from the present reopens the whole story in the survey chamber, where the year is null by contract).
   const smNow = await scrubFacts(evaluate, await evaluate(`window.__vellumReadingRoomState().seed`));
   await setYear(smNow.present);
   const rs29 = await evaluate(`(()=>{const g=document.querySelector(".rf-instrument .rf-pace");const b=g?[...g.querySelectorAll("button")]:[];const read=()=>({pressed:b.map((x)=>x.getAttribute("aria-pressed")),pace:window.__vellumAgesState().pace});const rest=read();if(b[2])b[2].click();const after=read();return{role:g&&g.getAttribute("role"),label:g&&g.getAttribute("aria-label"),labels:b.map((x)=>x.textContent),shown:!!g&&getComputedStyle(g).display!=="none",rest,after};})()`);
@@ -320,7 +319,6 @@ export async function run(ctx) {
     JSON.stringify({ rs29, rs29hash }),
   );
 
-  // The pace is a clock, not a jump: the years a 1x window covers, then a press to 4x mid-sweep that keeps the year (a re-anchor; without it the story would leap by three times what had elapsed) and covers more in the same window.
   await evaluate(`document.querySelector('.rf-pace button[data-pace="1"]').click()`);
   await setYear(smNow.minFounded);
   await clickPlay();
@@ -338,8 +336,8 @@ export async function run(ctx) {
   await evaluate(`document.querySelector('.rf-pace button[data-pace="1"]').click()`);
   const slow = y1 - y0, fast = y2 - yAt;
   check(
-    "RS30 a press to 4x mid-sweep keeps the year and the sweep then covers more than twice what the 1x window did (#493: the clock re-anchors, both halves scale)",
-    slow > 0 && yAt >= y1 && yAt - y1 < 60 && fast > slow * 2 && rs30lbl === "Pause",
+    "RS30 a press to 4x mid-sweep keeps the year and the sweep then covers at least three times what the 1x window did (#493: the clock re-anchors, both halves scale)",
+    slow > 0 && yAt >= y1 && yAt - y1 < 60 && fast >= slow * 3 && rs30lbl === "Pause",
     JSON.stringify({ y0, y1, yAt, y2, slow, fast, rs30lbl }),
   );
 

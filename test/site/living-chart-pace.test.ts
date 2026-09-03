@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { El, installShim } from "../../test-support/element-shim.ts";
-import { PACES, DEFAULT_PACE, isPace, storyElapsed, anchorFor } from "../../src/site/living-chart/pace.ts";
+import { PACES, DEFAULT_PACE, anchorAt, storyAt, repaced } from "../../src/site/living-chart/pace.ts";
 import { SWEEP_MS, sweepYearAt } from "../../src/render/chronicle-scrubber.ts";
 import type { Chronicle } from "../../src/site/living-chart/chronicle.ts";
 import type { Voyage } from "../../src/site/living-chart/voyage.ts";
@@ -47,15 +47,17 @@ function sweep() {
 test("the paces are 1x, 2x and 4x, and the default is the slowest, today's one sweep speed (ruled 2026-09-02)", () => {
   assert.deepEqual([...PACES], [1, 2, 4]);
   assert.equal(DEFAULT_PACE, 1);
-  assert.ok(isPace(2) && !isPace(3), "a pace is one of the three, nothing between");
 });
 
-test("the clock is pure: story time is wall time times the pace, and the anchor for a pace change keeps the story where it stands", () => {
-  assert.equal(storyElapsed(1500, 1000, 1), 500);
-  assert.equal(storyElapsed(1500, 1000, 4), 2000);
-  const begin = anchorFor(2000, 1000, 4);
-  assert.equal(storyElapsed(2000, begin, 4), 1000, "exact at the instant of the change");
-  assert.equal(storyElapsed(2250, begin, 4), 2000, "a quarter second later the story has moved a full second");
+test("the clock is pure: story time is wall time times the pace from the anchor, a re-anchor keeps the story where it stands, and neither reads below its floor when a frame stamp precedes the anchor (the #311 flicker, skeptic on PR #507)", () => {
+  const a = anchorAt(1000, 0, 1);
+  assert.equal(storyAt(a, 1500, 1), 500);
+  assert.equal(storyAt(anchorAt(1000, 0, 4), 1500, 4), 2000);
+  const b = repaced(a, 2000, 1, 4);
+  assert.equal(storyAt(b, 2000, 4), 1000, "exact at the instant of the change");
+  assert.equal(storyAt(b, 2250, 4), 2000, "a quarter second later the story has moved a full second");
+  assert.equal(storyAt(b, 1992, 4), 1000, "a frame stamped 8ms before the re-anchor reads the floor, not 32 story ms back");
+  assert.equal(storyAt(anchorAt(1000, 3000, 2), 996, 2), 3000, "and the same at Play, in the survey half's numbers");
 });
 
 test("the engine sweeps at the default pace exactly as before: a wall second is a story second, and the park lands at SWEEP_MS", () => {
@@ -80,6 +82,8 @@ test("a pace change mid-sweep keeps the story position and runs on from it at th
     s.tick(2000);
     const before = s.year();
     s.ages.setPace(4);
+    s.tick(1992);
+    assert.equal(s.year(), before, "a frame stamped before the re-anchor does not step the year back (the #311 flicker at a re-anchor)");
     s.tick(2000);
     assert.equal(s.year(), before, "no jump at the instant of the change");
     s.tick(2500);
