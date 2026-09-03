@@ -25,7 +25,7 @@ const READ = `(() => {
     chartFolioText: (() => { const f = document.querySelector(".corner.bl"); if (!f) return null; const range = document.createRange(); let right = null; for (const p of f.querySelectorAll("p")) { if (!p.textContent) continue; range.selectNodeContents(p); const b = range.getBoundingClientRect(); if (b.width > 0) right = Math.max(right ?? 0, b.right); } return right; })(),
     glass: r(".corner.br"), glassDisp: cs(".zoomery", "display"),
     glassOverFolio: (() => { const g = document.querySelector(".corner.br"), f = document.querySelector(".corner.tr"); if (!g || !f) return null; const a = g.getBoundingClientRect(), b = f.getBoundingClientRect(); const w = Math.min(a.right, b.right) - Math.max(a.x, b.x), h = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y); return w > 0 && h > 0 ? [Math.round(w), Math.round(h)] : null; })(),
-    legend: r(".legend"), legendDisp: cs(".legend", "display"), legendInSlip: !!legend && legend.classList.contains("in-slip"), legendDocked: !!legend && !!legend.parentElement && legend.parentElement.classList.contains("legend-dock"),
+    legend: r(".legend"), legendDisp: cs(".legend", "display"), legendGround: cs(".legend", "backgroundImage"), legendInSlip: !!legend && legend.classList.contains("in-slip"), legendDocked: !!legend && !!legend.parentElement && legend.parentElement.classList.contains("legend-dock"),
     pool: cs(".corner.tr", "content", "::before"), poolChrome: cs("header.chrome", "content", "::before"),
     pillDisp: cs("#sb-status", "display"), pillText: (document.getElementById("sb-status") || { textContent: null }).textContent,
     folioLines: [...document.querySelectorAll(".corner.bl p")].map((p) => p.textContent.length > 0),
@@ -94,21 +94,27 @@ export async function run(ctx) {
   await sleep(900);
   const leaned = await read();
   check(
-    "SB5 leaned, through the Glass's own controller: the slip is back from its tab, the gesture box is zoomed, the sheet spills under every corner, and the corners and the cluster stand on the pool",
+    "SB5 leaned, through the Glass's own controller: the slip is back from its tab, the gesture box is zoomed, the sheet spills under the top and the left corners (the slip holds the right), and the corners and the cluster stand on the pool",
     !!leaned && leaned.st.zoomed && !leaned.st.folded && leaned.slipVis === "visible" && leaned.pool === '""' && leaned.poolChrome === '""' &&
-      leaned.map.x < 0 && leaned.map.y < 0 && leaned.map.right > 1280 && leaned.map.bottom > 800,
+      leaned.map.x < 0 && leaned.map.y < 0 && leaned.map.bottom > 800,
     JSON.stringify(leaned && { st: leaned.st, slip: leaned.slipVis, pool: leaned.pool, poolChrome: leaned.poolChrome, map: leaned.map }),
   );
   // The pool must reach past the viewport edge, or its blur fades right on the edge and the chart bleeds through at the corner (Alex's 2026-09-03 call on the Explorer's top-left; home runs its pool 4rem out). Sampled, since no computed style sees a blurred edge.
   const brightest = async (x, y) => Math.round(Math.max(...(await sampleRow(send, x, y, 8)).map(luminance)));
   const interior = await brightest(200, 24);
   const corners = [];
-  // The three corners a pooled piece occupies with the slip open, plus the bottom edge under the Glass and under the legend row; the bottom-right corner is bare chart under the slip's foot, legitimately.
-  for (const [x, y, name] of [[0, 2, "top-left"], [1272, 2, "top-right"], [0, 797, "bottom-left"], [Math.round(leaned.glass.x) + 2, 797, "under the Glass"], [Math.round(leaned.legend.x + leaned.legend.w / 2) - 4, 797, "under the legend"]]) corners.push({ name, max: await brightest(x, y) });
+  // The edges the spilled chart reaches under a pooled piece: the two left corners and the bottom under the Glass; the right side is the slip's, and the legend row carries home's footing, not the pool (SB5c).
+  for (const [x, y, name] of [[0, 2, "top-left"], [0, 797, "bottom-left"], [Math.round(leaned.glass.x) + 2, 797, "under the Glass"]]) corners.push({ name, max: await brightest(x, y) });
   check(
     "SB5b leaned, every viewport edge under a pooled piece is as dark as the pool's interior: no chart paper bleeds through the pool's fade at the edge (eight edge pixels at each place within 15 of the cluster's interior, which the old inset failed at 97 against 60)",
     corners.every((c) => c.max <= interior + 15),
     JSON.stringify({ interior, corners }),
+  );
+  const footing = await brightest(Math.round(leaned.legend.x + leaned.legend.w / 2) - 4, Math.round(leaned.legend.bottom) - 4);
+  check(
+    "SB5c leaned, the legend row stands on home's footing, a gradient box darkest at its foot, not the blurred pool: the gradient resolves on the row, its foot band reads dark over the chart, and at rest the row carried no ground",
+    !!leaned && /linear-gradient/.test(leaned.legendGround) && footing < 120 && rest.legendGround === "none",
+    JSON.stringify({ leaned: leaned.legendGround.slice(0, 40), footing, rest: rest.legendGround }),
   );
 
   await setState("rest");
