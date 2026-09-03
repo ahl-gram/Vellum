@@ -73,6 +73,7 @@
 
 /* #462 ruling 6: on a phone the told row drops and the bar keeps its labels to the host. Scoped to the strip: the JOURNAL still flows identically at every width (#219, ratified 2026-07-27), which the frame suite pins by allowlist. */
 @media (max-width: 900px) { .rf-told { display: none; } .rf-instrument { gap: 0.6rem; } .rf-instrument .rf-pace { display: none; } }
+@media (prefers-reduced-motion: reduce) { .rf-instrument .rf-pace { display: none; } }
 
 /* "day 105" runs wider than a bare year, so the gutter grew from 3rem at #312. */
 .rf-log-strip .cr-year { flex: 0 0 3.6rem; text-align: right;
