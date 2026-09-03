@@ -496,3 +496,35 @@ test("the brighten is a transition, so motion.css's universal collapse reaches i
     "the universal collapse this frame relies on is still there",
   );
 });
+
+test("#493 the pace stands at the readout's right: three presses 1x 2x 4x in one group, the slowest pressed at rest, and the frame moves the press", async () => {
+  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const frame = createReadingFrame(el());
+  const instrument = (frame.strip as unknown as El).children[0]!;
+  assert.deepEqual(instrument.children.map((c) => c.className), ["rf-play", "rf-range ages-range", "rf-year", "rf-pace"], "Play, the bar, the readout, the pace");
+  const pace = instrument.children[3]!;
+  assert.equal(pace.getAttribute("role"), "group");
+  assert.equal(pace.getAttribute("aria-label"), "The pace");
+  assert.deepEqual(
+    pace.children.map((b) => [b.tagName, b.textContent, b.dataset.pace, b.getAttribute("aria-pressed")]),
+    [["BUTTON", "1×", "1", "true"], ["BUTTON", "2×", "2", "false"], ["BUTTON", "4×", "4", "false"]],
+    "the mockup's three presses, the default (1x, ruled 2026-09-02) pressed",
+  );
+  assert.deepEqual([...frame.paceButtons.keys()], [1, 2, 4], "the room reaches each press by its pace");
+  frame.markPace(4);
+  assert.deepEqual(pace.children.map((b) => b.getAttribute("aria-pressed")), ["false", "false", "true"]);
+  frame.markPace(1);
+  assert.deepEqual(pace.children.map((b) => b.getAttribute("aria-pressed")), ["true", "false", "false"], "and back");
+});
+
+test("#493 the pace's dress: the strip's dark presses in the mockup's measure, the chosen one on parchment, and the group drops on a phone by a strip-scoped rule", () => {
+  const css = read("public/reading-frame.css");
+  assert.match(css, /\.rf-pace\s*\{[^}]*flex:\s*none/, "the group keeps its width beside the shrinking bar");
+  assert.match(css, /\.rf-pace button\s*\{[^}]*width:\s*1\.9rem;[^}]*height:\s*1\.6rem;/, "the mockup's press");
+  assert.match(css, /\.rf-instrument-strip \.rf-instrument \.rf-pace button:hover, \.rf-instrument-strip \.rf-instrument \.rf-pace button:focus-visible\s*\{/, "four classes deep against the house hover wash, as Play is");
+  const pressed = declarationsFor(css, '.rf-instrument-strip .rf-instrument .rf-pace button[aria-pressed="true"]');
+  assert.match(pressed, /background:\s*var\(--parchment\)/, "the chosen pace stands on parchment");
+  assert.ok(css.indexOf('.rf-pace button[aria-pressed="true"]') > css.indexOf(".rf-pace button:hover"), "written after the hover so a hovered chosen press stays chosen");
+  assert.ok(narrowSelectors(css).includes(".rf-instrument .rf-pace"), "hidden under 900px (the mockup's phone rule), scoped to the strip so the journal allowlist above still holds");
+  assert.match(declarationsFor(css, ".rf-instrument .rf-pace"), /display:\s*none/);
+});

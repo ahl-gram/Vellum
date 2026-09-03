@@ -41,6 +41,7 @@ export function barlessAges(deps: BarlessDeps): Ages {
     cancelRaf: silent,
     pause: silent,
     togglePlay: silent,
+    setPace: silent,
     onBarInput: silent,
     dragStart: silent,
     dragEnd: silent,

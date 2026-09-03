@@ -26,6 +26,7 @@ test("the bar-less instrument surface is silent no-ops, and never throws (#319)"
   noThrow("agesDragStart", () => lc.agesDragStart());
   noThrow("agesDragEnd", () => lc.agesDragEnd());
   noThrow("togglePlay", () => lc.togglePlay());
+  noThrow("setPace", () => lc.setPace(2));
   noThrow("onManualScrub", () => lc.onManualScrub());
   noThrow("cancelScrubRaf", () => lc.cancelScrubRaf());
   noThrow("pauseScrub", () => lc.pauseScrub());
@@ -89,6 +90,7 @@ test("the bar-less ages driver delegates EXACTLY the two chart-side teardowns (#
     ["snapToRest", (a: ReturnType<typeof barlessAges>) => a.snapToRest()],
     ["scrubToYear", (a: ReturnType<typeof barlessAges>) => a.scrubToYear(1200)],
     ["togglePlay", (a: ReturnType<typeof barlessAges>) => a.togglePlay()],
+    ["setPace", (a: ReturnType<typeof barlessAges>) => a.setPace(2)],
     ["onBarInput", (a: ReturnType<typeof barlessAges>) => a.onBarInput()],
     ["pause", (a: ReturnType<typeof barlessAges>) => a.pause()],
     ["cancelRaf", (a: ReturnType<typeof barlessAges>) => a.cancelRaf()],

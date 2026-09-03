@@ -40,6 +40,12 @@
 .rf-range { flex: 1 1 8rem; min-width: 0; accent-color: var(--ink-brown); }
 .rf-year { flex: none; min-width: 5.4rem; text-align: right; margin-top: 0.45rem;
   font-variant-caps: small-caps; font-variant-numeric: tabular-nums; font-size: 1rem; letter-spacing: 0.06em; color: var(--parchment-bright); }
+/* The pace (#493), the mockup's .speed group. */
+.rf-pace { flex: none; display: flex; gap: 0.3rem; margin-top: 0.4rem; }
+.rf-pace button { width: 1.9rem; height: 1.6rem; padding: 0; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.66rem; letter-spacing: 0.08em; color: var(--line-tan);
+  background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); border-radius: 0; transition: background 0.2s ease, color 0.2s ease; }
+.rf-instrument-strip .rf-instrument .rf-pace button:hover, .rf-instrument-strip .rf-instrument .rf-pace button:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
+.rf-instrument-strip .rf-instrument .rf-pace button[aria-pressed="true"] { color: var(--ink-dark); background: var(--parchment); }
 
 /* The one journal, in the slip's own paper since #463: the panel dress left with the desk. */
 .rf-log { padding: 0; }
@@ -66,7 +72,7 @@
   font-size: 2.1em; line-height: 0.8; margin: 0.08em 0.12em 0 0; }
 
 /* #462 ruling 6: on a phone the told row drops and the bar keeps its labels to the host. Scoped to the strip: the JOURNAL still flows identically at every width (#219, ratified 2026-07-27), which the frame suite pins by allowlist. */
-@media (max-width: 900px) { .rf-told { display: none; } .rf-instrument { gap: 0.6rem; } }
+@media (max-width: 900px) { .rf-told { display: none; } .rf-instrument { gap: 0.6rem; } .rf-instrument .rf-pace { display: none; } }
 
 /* "day 105" runs wider than a bare year, so the gutter grew from 3rem at #312. */
 .rf-log-strip .cr-year { flex: 0 0 3.6rem; text-align: right;
