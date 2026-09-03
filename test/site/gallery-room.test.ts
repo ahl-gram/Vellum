@@ -39,9 +39,9 @@ test("GR2 the corner carries the name and its dateline, no control (ruling 2)", 
 });
 
 test("GR3 the plates hang on the deep: the fog, the grid of figures, then the corner and the legend; no vignettes (a fixed darkening band over scrolling captions washed them to 2.86:1 at its edge, skeptic on PR #501), no stage, no Glass, no slip, no chart folio", () => {
-  const order = ['<div class="fog a"', '<div class="fog b"', '<div class="grid" set:html={figures}></div>', "<RoomFolio", '<nav class="legend"'].map((m) => page.indexOf(m));
+  const order = ["<Fog />", '<div class="grid" set:html={figures}></div>', "<RoomFolio", '<nav class="legend"'].map((m) => page.indexOf(m));
   assert.ok(order.every((i, n) => i >= 0 && (n === 0 || i > order[n - 1]!)), `fog, grid, folio, legend: ${order.join(",")}`);
-  for (const gone of ['class="vignette', 'class="stage"', 'id="map-viewport"', "zoomery", "<Slip", 'class="chrome corner bl folio"', "legend-dock"]) {
+  for (const gone of ["<Vignettes", 'class="vignette', 'class="stage"', "<ChartStage", 'id="map-viewport"', "<Glass", "<Slip", "<ChartFolio", "legend-dock"]) {
     assert.ok(!page.includes(gone), `${gone} belongs to a stage room, not the Gallery`);
   }
 });
@@ -50,8 +50,8 @@ test("GR4 the legend row is one gold road back to the Explorer (ruling 2)", () =
   const legend = between('<nav class="legend"', "</nav>");
   assert.match(legend, /<nav class="legend" aria-label="The road out">/);
   assert.match(legend, /<p class="legend-head">[^<]+<\/p>/, "the row keeps its flourish line");
-  assert.equal([...legend.matchAll(/class="legend-btn/g)].length, 1, "one road, no more");
-  assert.match(legend, /<a class="legend-btn gold" href="\/explorer\/"><span class="verb">Return to<\/span><span class="room">The Explorer<\/span><\/a>/, "the gold road home, as the other rooms carry it");
+  assert.equal([...legend.matchAll(/<LegendButton /g)].length, 1, "one road, no more");
+  assert.match(legend, /<LegendButton gold href="\/explorer\/" verb="Return to" room="The Explorer" \/>/, "the gold road home, as the other rooms carry it (the kit's, #487)");
 });
 
 test("GR5 every plate is a road into its own world: the Explorer at the plate's seed, drawing the plate's own dress (antique, no legend), so the tip rides a real link (#289) and the plate opens the plate", () => {

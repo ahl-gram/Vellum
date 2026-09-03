@@ -1,0 +1,10 @@
+---
+// The chart's folio, lower left (the mockup; the Atelier Kit, #487): the lines a room's script fills at the draw.
+interface Props {
+  lines: ReadonlyArray<readonly [cls: string, id: string]>;
+}
+const { lines } = Astro.props;
+---
+<div class="chrome corner bl folio">
+  {lines.map(([cls, id]) => <p class={cls} id={id}></p>)}
+</div>

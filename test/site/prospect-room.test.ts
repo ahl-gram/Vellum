@@ -19,6 +19,12 @@ const between = (from: string, to: string): string => {
   return page.slice(a, b);
 };
 
+const folioLines = (): string[][] => {
+  const m = page.match(/<ChartFolio lines=\{(\[[^\n]*\])\} \/>/);
+  assert.ok(m, "the page stands the kit's chart folio");
+  return JSON.parse(m![1]!) as string[][];
+};
+
 test("PPR1 the Prospect is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead, the figure and its caption retired", () => {
   const open = page.match(/<BaseLayout([\s\S]*?)>/);
   assert.ok(open, "the page renders through BaseLayout");
@@ -51,34 +57,30 @@ test("PPR3 the engraver's note is the slip (#494 ruling 4): the gazetteer's note
   assert.ok(slip.includes('class="legend-dock"'), "the slip body carries the dock the legend row moves into on a phone");
   const order = ['id="pp-note"', 'id="pp-key-head"', 'id="pp-key"', 'id="pp-era"', 'class="era-gloss"', 'class="legend-dock"'].map((m) => slip.indexOf(m));
   assert.ok(order.every((i, n) => i >= 0 && (n === 0 || i > order[n - 1]!)), "note, key head, key, era, gloss, dock");
-  assert.ok(page.indexOf("</Slip>") < page.indexOf('<div class="chrome corner bl folio">'), "the slip precedes the chart's folio in the page");
+  assert.ok(page.indexOf("</Slip>") < page.indexOf("<ChartFolio"), "the slip precedes the chart's folio in the page");
 });
 
 test("PPR4 the legend row is the roads out (#494 ruling 3): the Explorer in gold, then the road from this town in the Ribbon", () => {
   const legend = between('<nav class="legend"', "</nav>");
   assert.match(legend, /<nav class="legend" aria-label="The roads out">/);
   assert.match(legend, /<p class="legend-head">The roads out<\/p>/);
-  assert.match(legend, /<a id="pp-chart-link" class="legend-btn gold" href="\/explorer\/"><span class="verb">Return to<\/span><span class="room">The Explorer<\/span><\/a>/, "the road back keeps the id the suite reads, in gold");
-  assert.match(legend, /<a id="pp-ribbon-link" class="legend-btn" href="\/ribbon\/"><span class="verb" id="pp-ribbon-verb">[^<]*<\/span><span class="room">The Wayfarer's Ribbon<\/span><\/a>/, "the road out to the Ribbon, its verb naming the town at the draw");
+  assert.match(legend, /<LegendButton id="pp-chart-link" gold href="\/explorer\/" verb="Return to" room="The Explorer" \/>/, "the road back keeps the id the suite reads, in gold (the kit's, #487)");
+  assert.match(legend, /<LegendButton id="pp-ribbon-link" href="\/ribbon\/" verbId="pp-ribbon-verb" verb="[^"]*" room="The Wayfarer's Ribbon" \/>/, "the road out to the Ribbon, its verb naming the town at the draw");
   assert.ok(legend.indexOf('id="pp-chart-link"') < legend.indexOf('id="pp-ribbon-link"'), "the gold road first");
 });
 
 test("PPR5 the stage holds the fitted sheet with the plate as the one face in the gesture box; the status pill, the Glass and the chart's folio keep their ids", () => {
   assert.match(
     page,
-    /<div class="stage">\s*<div class="sheet" id="sheet"><div id="map-viewport"[^>]*tabindex="0"[^>]*role="application"[^>]*><div id="map">\s*<img id="pp-plate" class="plate" alt="" hidden>\s*<\/div><\/div><\/div>/,
-    "the sheet's gesture box holds the transform target, which holds the plate (a blob img, never inline svg)",
+    /<ChartStage label="The plate\. [^"]+">\s*<img id="pp-plate" class="plate" alt="" hidden>\s*<Fragment slot="after">/,
+    "the kit's stage (#487): its gesture box's transform target holds the plate (a blob img, never inline svg)",
   );
-  const stage = between('<div class="stage">', '<div class="vignette');
+  const stage = between("<ChartStage", "<Vignettes />");
   assert.match(stage, /<p class="status" id="pp-status" role="status" aria-live="polite"><\/p>/, "the status line keeps its id (the suite's settle probe) and is the stage's pill");
   assert.match(stage, /<p id="pp-warning" class="warning" hidden>/, "the inline-fallback warning stands in the stage");
   assert.match(stage, /<noscript>/, "scripts off is said in the stage");
-  assert.match(page, /<div class="chrome corner br zoomery" role="group" aria-label="The Surveyor's Glass">/, "the Glass is the corner cluster");
-  assert.match(page, /data-zoom="in"/, "the Glass buttons carry data-zoom for the shared keys binding");
-  const folio = between('<div class="chrome corner bl folio">', "</div>");
-  assert.match(folio, /<p class="folio-title" id="folio-title"><\/p>/, "the plate's title line");
-  assert.match(folio, /<p class="folio-sub" id="folio-sub"><\/p>/, "the world's line");
-  assert.match(folio, /<p class="folio-coords" id="pp-pressed"><\/p>/, "the pressing's line");
+  assert.ok(page.includes("<Glass />"), "the Glass is the kit's corner cluster (#487; its presses carry data-zoom for the shared keys binding, atelier-kit.test.ts)");
+  assert.deepEqual(folioLines(), [["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "pp-pressed"]], "the plate's title line, the world's line, the pressing's line");
 });
 
 test("PPR6 seats.ts binds the Glass and the room at the plate's own aspect; app.ts redraws in place for the year, writes the address and the roads, refits after the folio, and never scrolls the page", () => {

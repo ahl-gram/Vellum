@@ -120,7 +120,7 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
   wears("src/pages/seed-of-the-day/index.astro", /class="[^"]*hunt-intro intro/, "the hunt intro is an intro");
   // #462: the dateline stands in the room folio's corner in its small caps, and the roads out are the legend row; the archivist head and the a.control idiom left Today with the desk.
   wears("src/pages/seed-of-the-day/index.astro", /<p class="dateline" id="dateline">/, "the dateline is the folio corner's line");
-  wears("src/pages/seed-of-the-day/index.astro", /<a class="legend-btn" data-road=/, "the roads out are legend buttons");
+  wears("src/pages/seed-of-the-day/index.astro", /<LegendButton road=\{r\.road\}/, "the roads out are legend buttons (the kit's, #487)");
   // #463: the desk left with the conversion; the plates are legend buttons and Pull a proof is the folio corner's primary.
   wears("src/pages/print-room/index.astro", /<button class="legend-btn" type="button" data-poster=/, "the poster plates are legend buttons");
   wears("src/pages/print-room/index.astro", /<button id="pr-draw" class="primary"/, "Pull a proof is the room's primary");

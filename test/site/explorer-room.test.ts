@@ -18,6 +18,12 @@ const between = (from: string, to: string): string => {
   return page.slice(a, b);
 };
 
+const folioLines = (): string[][] => {
+  const m = page.match(/<ChartFolio lines=\{(\[[^\n]*\])\} \/>/);
+  assert.ok(m, "the page stands the kit's chart folio");
+  return JSON.parse(m![1]!) as string[][];
+};
+
 test("ER1 the Explorer is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead", () => {
   const open = page.match(/<BaseLayout([\s\S]*?)>/);
   assert.ok(open, "the page renders through BaseLayout");
@@ -48,8 +54,8 @@ test("ER3 the Broadside is the slip: The Land and The Hand ride it, the Press do
 test("ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (#462 ruling 4)", () => {
   const legend = between('<nav class="legend"', "</nav>");
   assert.match(legend, /<button id="verso-turn" class="legend-btn"/, "Turn the sheet is a legend button");
-  assert.match(legend, /<a id="order-plates" class="legend-btn gold"/, "the Print Room road is gold");
-  assert.match(legend, /<a id="journal-link" class="legend-btn gold"/, "the Reading Room road is gold");
+  assert.match(legend, /<LegendButton id="order-plates" gold href="\.\.\/print-room\/" verb="Take to" room="The Print Room" \/>/, "the Print Room road is gold (the kit's, #487)");
+  assert.match(legend, /<LegendButton id="journal-link" gold href="\/reading-room\/" verb="Read the journal in" room="The Reading Room" \/>/, "the Reading Room road is gold");
   assert.ok(legend.indexOf('id="verso-turn"') < legend.indexOf('id="order-plates"'), "Turn the sheet leads the row");
   assert.ok(!page.includes("action-link"), "the #270 action-link dress retires with the Press strip");
   assert.match(legend, /<p class="legend-head" id="grp-press">/, "the Press keeps its head, now the legend's");
@@ -63,11 +69,11 @@ test("ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sh
   );
   const viewport = between('<div id="map-viewport"', 'id="verso"');
   assert.ok(!viewport.includes("zoom-controls"), "the Glass no longer sits inside the viewport");
-  assert.match(page, /<div class="chrome corner br zoomery" id="zoom-controls" role="group" aria-label="The Surveyor's Glass">/, "the Glass is the corner cluster, its id kept for glass.ts and the suites");
+  assert.ok(page.includes('<Glass id="zoom-controls" />'), "the Glass is the kit's corner cluster (#487), its id kept for glass.ts and the suites");
   assert.match(page, /<p class="status" id="status" role="status" aria-live="polite"><\/p>/, "the status line keeps its id (the suites' settle probe)");
-  const folio = between('<div class="chrome corner bl folio">', "</div>");
-  assert.match(folio, /id="folio-title"/, "the chart's folio carries the world's name");
-  assert.match(folio, /<p class="folio-coords" id="caption">/, "the caption is the folio's coords line (the suites read #caption)");
+  const lines = folioLines();
+  assert.deepEqual(lines[0], ["folio-title", "folio-title"], "the chart's folio carries the world's name");
+  assert.deepEqual(lines[2], ["folio-coords", "caption"], "the caption is the folio's coords line (the suites read #caption)");
 });
 
 test("ER6 the page css fits the sheet to what the chrome leaves and stands print down (#462 rulings 1 and 10)", () => {

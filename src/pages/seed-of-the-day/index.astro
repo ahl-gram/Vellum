@@ -1,6 +1,11 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import RoomFolio from "../../layouts/RoomFolio.astro";
+import Fog from "../../layouts/Fog.astro";
+import Vignettes from "../../layouts/Vignettes.astro";
+import Glass from "../../layouts/Glass.astro";
+import ChartFolio from "../../layouts/ChartFolio.astro";
+import LegendButton from "../../layouts/LegendButton.astro";
 import Slip from "../../layouts/Slip.astro";
 
 const room = "The Seed of the Day";
@@ -19,7 +24,7 @@ const roads = [
   path="/seed-of-the-day/"
   chartRoom
 >
-<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>
+<Fog />
 <div class="stage">
   <!-- #167 The Surveyor's Glass, re-seated as the chart room (#462): #map-viewport is the whole stage and the gesture box the shared zoom-controller binds to; the live transform lands on #map, sized to the viewport with the chrome's reserves as padding, so d3's clamp keeps it covering the stage; #sheet inside is the chart's own box (fitted by src/site/shared/room.ts), and the hunt star and the miss soundings ride it. -->
   <div id="map-viewport" tabindex="0" role="application" aria-label="Today's chart. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."><div id="map"><div id="sheet" class="sheet"></div></div></div>
@@ -30,7 +35,7 @@ const roads = [
     Explorer</a> or browse the <a href="../gallery/">gallery</a>.</p>
   </noscript>
 </div>
-<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>
+<Vignettes />
 
 <RoomFolio room={room} tagline={tagline}>
   <p class="dateline" id="dateline"></p>
@@ -56,31 +61,16 @@ const roads = [
 
 <div id="hunt-sticky" class="hunt-sticky" aria-hidden="true" hidden></div>
 
-<div class="chrome corner bl folio">
-  <p class="folio-title" id="folio-title"></p>
-  <p class="folio-sub" id="folio-sub"></p>
-  <p class="folio-coords" id="folio-coords"></p>
-  <p class="folio-note" id="folio-note"></p>
-</div>
+<ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "folio-coords"], ["folio-note", "folio-note"]]} />
 
 <nav class="legend" aria-label="Today's roads out">
   <p class="legend-head">Same day, same world, everywhere &middot; come back tomorrow for a new one</p>
   <div class="legend-row">
-    {roads.map((r) => <a class="legend-btn" data-road={r.road} href={r.href}><span class="verb">{r.verb}</span><span class="room">{r.room}</span></a>)}
+    {roads.map((r) => <LegendButton road={r.road} href={r.href} verb={r.verb} room={r.room} />)}
   </div>
 </nav>
 
-<!-- The Surveyor's Glass at the chart's corner (#462 chart-room ruling 2), the Explorer's own cluster (#165/#170) in the mockup's dress; it stands left of an open slip. -->
-<div class="chrome corner br zoomery" role="group" aria-label="The Surveyor's Glass">
-  <button id="zoom-in" class="zoom-btn" type="button" data-zoom="in" aria-label="Lean closer (zoom in)" title="Lean closer"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"/><path d="M9.9 9.9l3.7 3.7"/><path d="M6.8 4.9v3.8M4.9 6.8h3.8"/></svg></button>
-  <button id="zoom-reset" class="zoom-btn" type="button" data-zoom="fit" aria-label="The full sheet (reset the view)" title="The full sheet"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6h6.6l2.6 2.6v8.2H3.4z"/><path d="M10 2.6v2.6h2.6"/><path d="M5.3 9.7c1-.9 1.9.5 2.9-.3.8-.7 1.5-.2 2.2-.7"/></svg></button>
-  <button id="zoom-out" class="zoom-btn" type="button" data-zoom="out" aria-label="Stand back (zoom out)" title="Stand back"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"/><path d="M9.9 9.9l3.7 3.7"/><path d="M4.9 6.8h3.8"/></svg></button>
-  <div class="zoom-keys" aria-hidden="true">
-    <span><kbd>+</kbd> <kbd>&#8722;</kbd> lean closer, stand back</span>
-    <span><kbd>&#8592;&#8593;&#8594;&#8595;</kbd> pan the sheet</span>
-    <span><kbd>0</kbd> the full sheet</span>
-  </div>
-</div>
+<Glass />
 
 <script type="module" src="app.bundle.js" is:inline></script>
 </BaseLayout>

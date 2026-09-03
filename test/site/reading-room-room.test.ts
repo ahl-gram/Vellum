@@ -20,6 +20,12 @@ const between = (from: string, to: string): string => {
   return page.slice(a, b);
 };
 
+const folioLines = (): string[][] => {
+  const m = page.match(/<ChartFolio lines=\{(\[[^\n]*\])\} \/>/);
+  assert.ok(m, "the page stands the kit's chart folio");
+  return JSON.parse(m![1]!) as string[][];
+};
+
 test("RR-room 1 the Reading Room is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead, no legend row", () => {
   const open = page.match(/<BaseLayout([\s\S]*?)>/);
   assert.ok(open, "the page renders through BaseLayout");
@@ -55,11 +61,8 @@ test("RR-room 4 the stage holds the fitted sheet and the gesture box the frame's
     "the stage holds the fitted sheet, whose gesture box is empty until the frame's chart moves in",
   );
   assert.match(page, /<div id="rr-mount"><\/div>/, "the frame still mounts on the page (its root stays the arrival's host)");
-  assert.match(page, /<div class="chrome corner br zoomery" role="group" aria-label="The Surveyor's Glass">/, "the Glass is the corner cluster");
-  assert.match(page, /data-zoom="in"/, "the Glass buttons carry data-zoom for the shared keys binding");
-  const folio = between('<div class="chrome corner bl folio">', "</div>");
-  assert.match(folio, /id="folio-title"/, "the chart's folio carries the world's name");
-  assert.match(folio, /id="folio-sub"/, "and its survey line");
+  assert.ok(page.includes("<Glass />"), "the Glass is the kit's corner cluster (#487; its presses carry data-zoom for the shared keys binding, atelier-kit.test.ts)");
+  assert.deepEqual(folioLines(), [["folio-title", "folio-title"], ["folio-sub", "folio-sub"]], "the chart's folio carries the world's name and its survey line");
 });
 
 test("RR-room 5 seats.ts seats the frame's parts: chart and status in the stage; strip, slip AND its tab inside the panel the engine hides; log and plate in the slip; the Glass and the room bound", () => {

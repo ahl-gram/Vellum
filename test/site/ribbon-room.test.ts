@@ -20,6 +20,12 @@ const between = (from: string, to: string): string => {
   assert.ok(b > a, `${to} does not follow ${from}`);
   return page.slice(a, b);
 };
+
+const folioLines = (): string[][] => {
+  const m = page.match(/<ChartFolio lines=\{(\[[^\n]*\])\} \/>/);
+  assert.ok(m, "the page stands the kit's chart folio");
+  return JSON.parse(m![1]!) as string[][];
+};
 const count = (s: string, needle: string): number => s.split(needle).length - 1;
 
 test("RBR1 the Ribbon is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead, the figure and its caption retired", () => {
@@ -57,33 +63,29 @@ test("RBR3 the itinerary is the slip: the journey's phone dock first, the intro,
   assert.ok(slip.includes('class="legend-dock"'), "the slip body carries the dock the legend row moves into on a phone");
   const order = ['class="journey-dock"', 'class="intro"', 'class="itinerary-head"', 'id="rb-itinerary"', 'class="row-gloss"', 'class="legend-dock"'].map((m) => slip.indexOf(m));
   assert.ok(order.every((i, n) => i >= 0 && (n === 0 || i > order[n - 1]!)), "dock, intro, head, rows, gloss, legend dock");
-  assert.ok(page.indexOf("</Slip>") < page.indexOf('<div class="chrome corner bl folio">'), "the slip precedes the chart's folio in the page");
+  assert.ok(page.indexOf("</Slip>") < page.indexOf("<ChartFolio"), "the slip precedes the chart's folio in the page");
 });
 
 test("RBR4 the legend row is the roads out (#494 ruling 3): the Explorer in gold, then the prospect of the road's end", () => {
   const legend = between('<nav class="legend"', "</nav>");
   assert.match(legend, /<nav class="legend" aria-label="The roads out">/);
-  assert.match(legend, /<a id="rb-chart-link" class="legend-btn gold" href="\/explorer\/"><span class="verb">Return to<\/span><span class="room">The Explorer<\/span><\/a>/, "the road back keeps the id the suite reads, in gold");
-  assert.match(legend, /<a id="rb-prospect-link" class="legend-btn" href="\/prospect\/"><span class="verb" id="rb-prospect-verb">[^<]*<\/span><span class="room">The Prospect<\/span><\/a>/, "the road out to the Prospect, its verb naming the destination at the draw");
+  assert.match(legend, /<LegendButton id="rb-chart-link" gold href="\/explorer\/" verb="Return to" room="The Explorer" \/>/, "the road back keeps the id the suite reads, in gold (the kit's, #487)");
+  assert.match(legend, /<LegendButton id="rb-prospect-link" href="\/prospect\/" verbId="rb-prospect-verb" verb="[^"]*" room="The Prospect" \/>/, "the road out to the Prospect, its verb naming the destination at the draw");
   assert.ok(legend.indexOf('id="rb-chart-link"') < legend.indexOf('id="rb-prospect-link"'), "the gold road first");
 });
 
 test("RBR5 the stage holds the fitted sheet with the scroll as the one face in the gesture box; the status pill, the Glass and the chart's folio keep their ids", () => {
   assert.match(
     page,
-    /<div class="stage">\s*<div class="sheet" id="sheet"><div id="map-viewport"[^>]*tabindex="0"[^>]*role="application"[^>]*><div id="map">\s*<img id="rb-plate" class="plate" alt="" hidden>\s*<\/div><\/div><\/div>/,
-    "the sheet's gesture box holds the transform target, which holds the scroll (a blob img, never inline svg)",
+    /<ChartStage label="The scroll\. [^"]+">\s*<img id="rb-plate" class="plate" alt="" hidden>\s*<Fragment slot="after">/,
+    "the kit's stage (#487): its gesture box's transform target holds the scroll (a blob img, never inline svg)",
   );
-  const stage = between('<div class="stage">', '<div class="vignette');
+  const stage = between("<ChartStage", "<Vignettes />");
   assert.match(stage, /<p class="status" id="rb-status" role="status" aria-live="polite"><\/p>/, "the status line keeps its id and is the stage's pill");
   assert.match(stage, /<p id="rb-warning" class="warning" hidden>/, "the inline-fallback warning stands in the stage");
   assert.match(stage, /<noscript>/, "scripts off is said in the stage");
-  assert.match(page, /<div class="chrome corner br zoomery" role="group" aria-label="The Surveyor's Glass">/, "the Glass is the corner cluster");
-  assert.match(page, /data-zoom="in"/, "the Glass buttons carry data-zoom for the shared keys binding");
-  const folio = between('<div class="chrome corner bl folio">', "</div>");
-  assert.match(folio, /<p class="folio-title" id="folio-title"><\/p>/);
-  assert.match(folio, /<p class="folio-sub" id="folio-sub"><\/p>/);
-  assert.match(folio, /<p class="folio-coords" id="rb-unrolled"><\/p>/, "the unrolling's line");
+  assert.ok(page.includes("<Glass />"), "the Glass is the kit's corner cluster (#487; its presses carry data-zoom for the shared keys binding, atelier-kit.test.ts)");
+  assert.deepEqual(folioLines(), [["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "rb-unrolled"]], "the title, the survey line, the unrolling's line");
 });
 
 test("RBR6 seats.ts binds the Glass and the room at the scroll's own aspect, docks the journey with the legend's own mechanism, and leans the Glass on a row; app.ts writes the roads and never scrolls the page", () => {

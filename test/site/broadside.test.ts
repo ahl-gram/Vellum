@@ -73,14 +73,15 @@ test("The Press is the legend row: Turn the sheet, then the Print Room and the j
     assert.ok(!press.includes(id), `${id} sits under The Press but is not an action`);
   }
   assert.match(press, /<button id="verso-turn" class="legend-btn" type="button">/, "Turn the sheet is the row's one button");
-  assert.match(press, /<a id="order-plates" class="legend-btn gold"/, "the Print Room road stopped being the gold legend <a>");
-  assert.match(press, /<a id="journal-link" class="legend-btn gold"/, "the journal road stopped being the gold legend <a>");
+  // #487: a road out is the kit's LegendButton; the rendered <a class="legend-btn gold"> is pinned in astro-scaffold.test.ts.
+  assert.match(press, /<LegendButton id="order-plates" gold /, "the Print Room road stopped being the gold legend road");
+  assert.match(press, /<LegendButton id="journal-link" gold /, "the journal road stopped being the gold legend road");
 });
 
 // The journal pointer (ratified 2026-08-11, decision 2 on #270): always visible, the print road's gold peer; the old caption wrapper must be GONE, not hidden.
 test("the journal pointer is the always-visible gold road, not the old caption (#270)", () => {
   assert.ok(!page.includes('id="journal-line"'), "the old #journal-line caption wrapper survived the move");
-  assert.ok(page.includes('<span class="verb">Read the journal in</span><span class="room">The Reading Room</span>'), "the road's verb and room lines are missing");
+  assert.ok(page.includes('verb="Read the journal in" room="The Reading Room"'), "the road's verb and room lines are missing");
   assert.ok(!app.includes("journalLine"), "app.ts still gates a caption wrapper that no longer exists");
 });
 

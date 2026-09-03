@@ -1,6 +1,11 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import RoomFolio from "../../layouts/RoomFolio.astro";
+import Fog from "../../layouts/Fog.astro";
+import Vignettes from "../../layouts/Vignettes.astro";
+import Glass from "../../layouts/Glass.astro";
+import ChartFolio from "../../layouts/ChartFolio.astro";
+import LegendButton from "../../layouts/LegendButton.astro";
 import Slip from "../../layouts/Slip.astro";
 
 const room = "The Explorer";
@@ -14,7 +19,7 @@ const tagline = "every seed is a world, draw one";
   extraCss={["/living-chart.css", "/explorer/broadside.css"]}
   chartRoom
 >
-<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>
+<Fog />
 <div class="stage">
   <!-- The sheet stays the Glass's gesture box (#164), so a bookmark's cx/cy stay SHEET fractions and the region survey (#169) reads the camera it always did. Never restructure INSIDE #map: draw() wipes it with innerHTML and re-appends the overlay (#131 turns the leaf; #116's verso is #map-viewport's sibling). -->
   <div class="sheet" id="sheet"><div class="sheet-inner" id="sheet-inner">
@@ -27,7 +32,7 @@ const tagline = "every seed is a world, draw one";
     JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
   </noscript>
 </div>
-<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>
+<Vignettes />
 
 <RoomFolio room={room} tagline={tagline}>
   <div class="folio-controls" role="group" aria-label="The seed">
@@ -128,33 +133,19 @@ const tagline = "every seed is a world, draw one";
   <div class="legend-dock"></div>
 </Slip>
 
-<div class="chrome corner bl folio">
-  <p class="folio-title" id="folio-title"></p>
-  <p class="folio-sub" id="folio-sub"></p>
-  <p class="folio-coords" id="caption"></p>
-</div>
+<ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "caption"]]} />
 
 <!-- Both roads' hrefs are kept current beside every hash write (app.ts). -->
 <nav class="legend" aria-label="The Press">
   <p class="legend-head" id="grp-press">The Press &middot; what the sheet can do next</p>
   <div class="legend-row" role="group" aria-labelledby="grp-press">
     <button id="verso-turn" class="legend-btn" type="button"><span class="verb">Turn</span><span class="room">The Sheet</span></button><a class="fn" href="/glossary/#verso" data-note="note-verso" aria-describedby="note-verso" aria-label="note on the verso">&sect;</a>
-    <a id="order-plates" class="legend-btn gold" href="../print-room/"><span class="verb">Take to</span><span class="room">The Print Room</span></a>
-    <a id="journal-link" class="legend-btn gold" href="/reading-room/"><span class="verb">Read the journal in</span><span class="room">The Reading Room</span></a>
+    <LegendButton id="order-plates" gold href="../print-room/" verb="Take to" room="The Print Room" />
+    <LegendButton id="journal-link" gold href="/reading-room/" verb="Read the journal in" room="The Reading Room" />
   </div>
 </nav>
 
-<!-- #165 The Surveyor's Glass at the chart's corner (#462 chart-room ruling 2), voiced in #170 (Lean closer / The full sheet / Stand back, each aria-label keeping the plain function in parentheses). A SIBLING of the stage, so it never rides #map's live zoom transform; the id stays for glass.ts and the suites. The keys legend is Sub 4's handoff resolved (a small visible slip, the only form a sighted mouse user can discover without hover), aria-hidden because the viewport's aria-label already announces the same keys. -->
-<div class="chrome corner br zoomery" id="zoom-controls" role="group" aria-label="The Surveyor's Glass">
-  <button id="zoom-in" class="zoom-btn" type="button" aria-label="Lean closer (zoom in)" title="Lean closer"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"/><path d="M9.9 9.9l3.7 3.7"/><path d="M6.8 4.9v3.8M4.9 6.8h3.8"/></svg></button>
-  <button id="zoom-reset" class="zoom-btn" type="button" aria-label="The full sheet (reset the view)" title="The full sheet"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 2.6h6.6l2.6 2.6v8.2H3.4z"/><path d="M10 2.6v2.6h2.6"/><path d="M5.3 9.7c1-.9 1.9.5 2.9-.3.8-.7 1.5-.2 2.2-.7"/></svg></button>
-  <button id="zoom-out" class="zoom-btn" type="button" aria-label="Stand back (zoom out)" title="Stand back"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.8" cy="6.8" r="4.2"/><path d="M9.9 9.9l3.7 3.7"/><path d="M4.9 6.8h3.8"/></svg></button>
-  <div class="zoom-keys" aria-hidden="true">
-    <span><kbd>+</kbd> <kbd>&#8722;</kbd> lean closer, stand back</span>
-    <span><kbd>&#8592;&#8593;&#8594;&#8595;</kbd> pan the sheet</span>
-    <span><kbd>0</kbd> the full sheet</span>
-  </div>
-</div>
+<Glass id="zoom-controls" />
 
 <script type="module" src="./app.bundle.js" is:inline></script>
 </BaseLayout>
