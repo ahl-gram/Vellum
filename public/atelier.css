@@ -199,7 +199,8 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   /* The handle is a real button covering the head (a keyboard needs a toggle too, PR #488 finding 3); four classes deep against the house button dress, and no lift: it is invisible. */
   .slip-handle { display: block; position: absolute; inset: 0; z-index: 1; appearance: none; border: 0; border-radius: 0; background: none; padding: 0; cursor: pointer; }
   .slip .slip-head .slip-handle:is(:hover, :focus-visible, :active) { background: none; transform: none; box-shadow: none; }
-  .slip-handle::before { content: ""; display: block; width: 2.6rem; height: 3px; margin: 0.75rem auto 0; background: var(--line-tan); border-radius: 2px; }
+  /* Pinned to the head's top, not centred in the button (a button centres its content, which put the bar on the title line; plate read 2026-09-03 on the Specimen Book). The head's top padding reserves its room. */
+  .slip-handle::before { content: ""; position: absolute; top: 0.75rem; left: 50%; translate: -50% 0; width: 2.6rem; height: 3px; background: var(--line-tan); border-radius: 2px; }
   .slip.open .slip-handle::before { background: var(--ink-faded); }
   .slip .card-title { font-size: 1.15rem; }
   .slip-fold { display: none; }

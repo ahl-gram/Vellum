@@ -283,6 +283,13 @@ export async function run(ctx) {
     JSON.stringify(back),
   );
 
+  const second = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="theme-climate"]');if(!b)return null;b.click();return{on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent};})()`);
+  check(
+    "PR31c a later survey turns under its OWN numeral (#465 ruling 7): temperature is row iv and the folio's line says so, never the first survey's iii",
+    !!second && second.on === "iv" && second.here === "theme-climate" && second.line === "plate iv of the bound atlas · a thematic survey of temperature",
+    JSON.stringify(second),
+  );
+
   const MATTER_STATE = `(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const page=document.getElementById("pr-page");const inner=document.getElementById("pr-page-inner");return{ratio:s.width/s.height,aspect:Number(page.dataset.aspect),pageHidden:page.hidden,turnedHidden:document.getElementById("pr-turned").hidden,proofHidden:document.getElementById("pr-preview").hidden,on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,head:(inner.querySelector(".page-head")||{textContent:""}).textContent,places:inner.querySelectorAll("tbody tr").length,measureEmpty:document.getElementById("pr-page-measure").children.length===0,scrollY:window.scrollY,fits:page.getBoundingClientRect().bottom-inner.getBoundingClientRect().bottom,innerW:Math.abs(inner.getBoundingClientRect().width-page.clientWidth),noX:document.documentElement.scrollWidth<=document.documentElement.clientWidth,label:document.getElementById("map-viewport").getAttribute("aria-label")};})()`;
   await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="gazetteer"]');if(b)b.click();})()`);
   let matter = null;

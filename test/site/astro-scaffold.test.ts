@@ -44,7 +44,6 @@ type PageSpec = {
   chartRoom?: true;
   /** Sub 7 (#462): a document room's index script, an Astro-processed component script inlined into the page (the #483 shape); the marker must occur only inside it, and it is a pattern because the minifier picks the quote style. */
   pageScript?: RegExp;
-  /** #465: a page kept out of search (the Specimen Book) carries the one extra head member, a robots noindex meta. */
   noindex?: true;
 };
 

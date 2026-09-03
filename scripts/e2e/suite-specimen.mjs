@@ -15,7 +15,7 @@ const READ = `(() => {
   return {
     st: window.__vellumSpecimenState ? window.__vellumSpecimenState() : null,
     innerW: innerWidth, innerH: innerHeight, rem: parseFloat(root.fontSize), chromeX: parseFloat(root.getPropertyValue("--chrome-x")),
-    plateLoaded: !!plate && plate.complete && plate.naturalWidth > 0,
+    plateLoaded: !!plate && plate.complete && plate.naturalWidth > 0, plateAspect: plate && plate.naturalWidth > 0 ? plate.naturalWidth / plate.naturalHeight : null,
     sheet: r("#sheet"),
     slip: r(".slip"), slipVis: cs(".slip", "visibility"), slipDisp: cs(".slip", "display"), slipPos: cs(".slip", "position"), slipBody: cs(".slip-body", "display"),
     tabVis: cs(".slip-tab", "visibility"), tabDisp: cs(".slip-tab", "display"),
@@ -23,6 +23,7 @@ const READ = `(() => {
     // room-seats.ts places the legend from the folio's wrapped TEXT, not its box (a short line leaves the row more room).
     chartFolioText: (() => { const f = document.querySelector(".corner.bl"); if (!f) return null; const range = document.createRange(); let right = null; for (const p of f.querySelectorAll("p")) { if (!p.textContent) continue; range.selectNodeContents(p); const b = range.getBoundingClientRect(); if (b.width > 0) right = Math.max(right ?? 0, b.right); } return right; })(),
     glass: r(".corner.br"), glassDisp: cs(".zoomery", "display"),
+    glassOverFolio: (() => { const g = document.querySelector(".corner.br"), f = document.querySelector(".corner.tr"); if (!g || !f) return null; const a = g.getBoundingClientRect(), b = f.getBoundingClientRect(); const w = Math.min(a.right, b.right) - Math.max(a.x, b.x), h = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y); return w > 0 && h > 0 ? [Math.round(w), Math.round(h)] : null; })(),
     legend: r(".legend"), legendDisp: cs(".legend", "display"), legendInSlip: !!legend && legend.classList.contains("in-slip"), legendDocked: !!legend && !!legend.parentElement && legend.parentElement.classList.contains("legend-dock"),
     pool: cs(".corner.tr", "content", "::before"), poolChrome: cs("header.chrome", "content", "::before"),
     pillDisp: cs("#sb-status", "display"), pillText: (document.getElementById("sb-status") || { textContent: null }).textContent,
@@ -59,9 +60,9 @@ export async function run(ctx) {
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   const rest = await goto();
   check(
-    "SB1 the Specimen Book boots as a chart room: the conductor answers, the Gallery's plate is on the sheet, the sheet is fitted at the chart's aspect",
-    !!rest && rest.st.state === "rest" && rest.plateLoaded && Math.abs(rest.sheet.w / rest.sheet.h - CHART_ASPECT) < 0.01 && rest.noX,
-    JSON.stringify(rest && { st: rest.st, plate: rest.plateLoaded, sheet: rest.sheet }),
+    "SB1 the Specimen Book boots as a chart room: the conductor answers, the Gallery's plate is on the sheet, the sheet is fitted at the PLATE's own aspect (read off the img, not the kit's fallback)",
+    !!rest && rest.st.state === "rest" && rest.plateLoaded && Math.abs(rest.sheet.w / rest.sheet.h - rest.plateAspect) < 0.003 && Math.abs(rest.plateAspect - CHART_ASPECT) > 0.0001 && rest.noX,
+    JSON.stringify(rest && { st: rest.st, plate: rest.plateLoaded, plateAspect: rest.plateAspect, sheet: rest.sheet }),
   );
   check(
     "SB2 at rest, at 1280: the slip hangs below the room's folio at the right edge, the Glass stands clear of it, the legend row sits between the chart folio and the Glass, the tab is hidden, the pill shows, the chart folio's four lines are written, no pool",
@@ -123,9 +124,9 @@ export async function run(ctx) {
   await sleep(300);
   const open = await read();
   check(
-    "SB8 the handle opens the sheet: its body shows, the handle reports expanded, the docked legend row is in it, the Glass stands down under the open sheet (the Print Room's rule is the kit's here too, or the Glass keeps its seat above the sheet)",
-    !!open && open.st && open.slipBody !== "none" && open.handleExpanded === "true" && open.legendDocked && open.slip.y < phone.slip.y && open.noX,
-    JSON.stringify(open && { body: open.slipBody, expanded: open.handleExpanded, slip: open.slip, glass: open.glass, glassDisp: open.glassDisp }),
+    "SB8 the handle opens the sheet: its body shows, the handle reports expanded, the docked legend row is in it, and the kit seats the Glass ABOVE the open sheet, where it climbs into the corner's row (the overlap is in the detail, for the sitting: the Print Room alone hides its Glass there)",
+    !!open && open.st && open.slipBody !== "none" && open.handleExpanded === "true" && open.legendDocked && open.slip.y < phone.slip.y && open.glassDisp !== "none" && open.glass.bottom <= open.slip.y && open.noX,
+    JSON.stringify(open && { body: open.slipBody, expanded: open.handleExpanded, slip: open.slip, glass: open.glass, glassOverFolio: open.glassOverFolio }),
   );
   await shoot("specimen-390-open.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });
 

@@ -18,6 +18,7 @@ const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getEl
 const viewport = $("map-viewport");
 const map = $("map");
 const slip = document.querySelector<HTMLElement>(".slip")!;
+const plate = $<HTMLImageElement>("sb-plate");
 const stateSel = $<HTMLSelectElement>("sb-state");
 const pill = $("sb-status");
 const PILL_TEXT = pill.textContent ?? "";
@@ -31,7 +32,7 @@ const zoom = createZoomController({
 zoom.attach();
 bindGlassKeys(viewport, zoom);
 const box = () => ({ W: viewport.clientWidth || 1, H: viewport.clientHeight || 1 });
-const room = bindRoom({ frame: document.querySelector<HTMLElement>(".stage")!, sheet: $("sheet"), camera: {
+const room = bindRoom({ frame: document.querySelector<HTMLElement>(".stage")!, sheet: $("sheet"), aspect: () => (plate.naturalWidth > 0 ? plate.naturalWidth / plate.naturalHeight : null), camera: {
   hold: () => { const { W, H } = box(); return cameraFromTransform(zoom.getState(), W, H); },
   restore: (cam) => { const { W, H } = box(); zoom.refit(transformFromCamera(cam, W, H)); },
 } });
@@ -42,6 +43,7 @@ $("folio-sub").textContent = "the chart folio: the title line above, this survey
 $("folio-coords").textContent = "the folio's small-caps line";
 $("folio-note").textContent = "The folio's note, a sentence or two a room writes at the draw.";
 room.layout();
+plate.addEventListener("load", room.layout);
 
 const folded = (): boolean => slip.classList.contains("folded");
 const press = (sel: string): void => document.querySelector<HTMLElement>(sel)?.click();

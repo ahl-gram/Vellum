@@ -99,23 +99,29 @@ test("the component-worn sweep can see a leak: a planted seat and a planted ring
   assert.deepEqual(leaksIn(".corner { position: fixed; }", worn, new Set(["position"])), [], "and a stood-down property passes");
 });
 
-// #487 item 5 (the #302 precedent, cut at #465): a page SEATS a component, dresses its OWN elements inside one, and inks a row under its OWN state; a bare kit selector sets no dress. The kit's classes are what atelier.css dresses and no house sheet or the shell dresses too; the strip is the Reading Room's own instrument, which the kit's pool rule only reaches.
+// #487 item 5 (the #302 precedent, cut at #465): the kit's classes are what atelier.css dresses and no house sheet or the shell dresses too, plus the road's .room (the shell's .room is the body's); the strip is the Reading Room's own instrument, which the kit's pool rule only reaches.
 const strip = (css: string): string => css.replace(/\/\*[\s\S]*?\*\//g, "");
 const classesNamed = (css: string): Set<string> => new Set([...strip(css).matchAll(/([^{}]+)\{/g)].flatMap((m) => [...m[1]!.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((x) => x[1]!)));
 const kitClasses = (): Set<string> => {
   const others = new Set([read("public/house.css"), read("public/motion.css"), read("src/layouts/BaseLayout.astro").match(/<style is:global>([\s\S]*?)<\/style>/)?.[1] ?? ""].flatMap((css) => [...classesNamed(css)]));
-  return new Set([...kitSheets().flatMap((s) => [...classesNamed(read(s))])].filter((c) => !others.has(c) && c !== "strip"));
+  return new Set([...kitSheets().flatMap((s) => [...classesNamed(read(s))])].filter((c) => !others.has(c) && c !== "strip")).add("room");
 };
+/** The ids the kit's components render; a page's own id exempts an arm, the kit's does not. */
+const KIT_IDS = new Set(["sheet", "map-viewport", "map", "zoom-in", "zoom-out", "zoom-reset"]);
+/** The one bare-element subject a page may dress inside a kit container: its own form control (the Print Room's select in the legend head); the kit's own h2, p, a, button and span are not the page's to re-ink. */
+const OWN_ELEMENT = /^(select|input|option|optgroup|textarea|label)\b/;
 const REDRESS = /^(color|background(-color|-image)?|border(-[a-z]+)?|outline(-color)?|box-shadow|font(-[a-z]+)?|letter-spacing|text-decoration|text-transform|opacity)$/;
 
 const redressesIn = (css: string, kit: Set<string>): string[] =>
   [...strip(css).matchAll(/([^{}]+)\{([^{}]*)\}/g)].flatMap((m) =>
     splitArms(m[1]!).flatMap((arm) => {
-      if (arm.startsWith("@") || /#[\w-]+/.test(arm)) return [];
+      if (arm.startsWith("@")) return [];
+      const ids = [...arm.matchAll(/#([\w-]+)/g)].map((x) => x[1]!);
+      if (ids.some((id) => !KIT_IDS.has(id))) return [];
       const classes = [...arm.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((x) => x[1]!);
       if (classes.length === 0 || !classes.every((c) => kit.has(c))) return [];
       const subject = arm.split(/\s+|>|\+|~/).filter(Boolean).at(-1) ?? "";
-      if (/^[a-z]/.test(subject)) return [];
+      if (OWN_ELEMENT.test(subject)) return [];
       return [...m[2]!.matchAll(/([a-z-]+)\s*:/g)].map((x) => x[1]!).filter((p) => REDRESS.test(p)).map((p) => `${arm.replace(/\s+/g, " ")} { ${p} }`);
     }));
 
@@ -125,15 +131,15 @@ const pageSheets = (): Array<readonly [string, string]> => [
   ...globSync("src/pages/**/index.astro", { cwd: REPO }).map((p) => [p, [...read(p).matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n")] as const),
 ];
 
-test("no page sheet re-dresses a kit class (#487 item 5, the #302 precedent): a seat, a page's own element inside a component, and a row inked under the page's own state pass; a bare kit selector sets no dress", () => {
+test("no page sheet re-dresses a kit class (#487 item 5, the #302 precedent): a seat, a page's own form control inside a component, and a row inked under the page's own state pass; a bare kit selector sets no dress", () => {
   const kit = kitClasses();
-  for (const c of ["slip", "legend-head", "cr-num", "zoom-btn", "in-slip", "folded"]) assert.ok(kit.has(c), `.${c} is the kit's`);
+  for (const c of ["slip", "legend-head", "cr-num", "zoom-btn", "in-slip", "folded", "room"]) assert.ok(kit.has(c), `.${c} is the kit's`);
   for (const c of ["control", "primary", "intro", "status", "chrome", "strip"]) assert.ok(!kit.has(c), `.${c} is not the kit's alone`);
   for (const [name, css] of pageSheets()) assert.deepEqual(redressesIn(css, kit), [], `${name} re-dresses the kit; move the dress onto the page's own element or state, or into atelier.css`);
 });
 
-test("the re-dress sweep can see a leak: a planted colour on the docked legend's head reds, a seat on the slip, a colour on the page's own select inside the head and a row inked under the page's state do not", () => {
-  const kit = new Set(["legend", "in-slip", "legend-head", "slip", "cr-num", "contents"]);
-  assert.deepEqual(redressesIn(".legend.in-slip .legend-head { display: block; color: red; } .slip { top: 9rem; bottom: 4rem; } .legend-head select { color: red; } .contents li.on .cr-num { color: red; } #pr-page .cr-num { color: red; }", kit), [".legend.in-slip .legend-head { color }"]);
+test("the re-dress sweep can see a leak: a planted colour on the docked legend's head, on the kit's own h2, on the road's room line and under the kit's own #sheet all red; a seat on the slip, a colour on the page's own select inside the head, a row inked under the page's state and a page's own id do not", () => {
+  const kit = new Set(["legend", "in-slip", "legend-head", "slip", "slip-head", "legend-btn", "room", "cr-num", "contents"]);
+  assert.deepEqual(redressesIn(".legend.in-slip .legend-head { display: block; color: red; } .slip { top: 9rem; bottom: 4rem; } .legend-head select { color: red; } .contents li.on .cr-num { color: red; } #pr-page .cr-num { color: red; } .slip-head h2 { color: red; } .legend-btn .room { color: red; } #sheet .legend-head { color: red; }", kit), [".legend.in-slip .legend-head { color }", ".slip-head h2 { color }", ".legend-btn .room { color }", "#sheet .legend-head { color }"]);
   assert.deepEqual(redressesIn(".legend-head, .slip .cr-num { font-style: italic; }", kit), [".legend-head { font-style }", ".slip .cr-num { font-style }"], "every arm of a list is read on its own");
 });

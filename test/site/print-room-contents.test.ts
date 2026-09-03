@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { contentsRows, plateCounts, plateLine, type ContentsData } from "../../src/site/print-room/contents-markup.ts";
+import { NUMERALS, numeralOf } from "../../src/site/print-room/plate-numbers.ts";
 import { plateAspect } from "../../src/site/print-room/plate-aspect.ts";
 import { composeAtlas } from "../../src/atlas/compose.ts";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
@@ -118,4 +119,5 @@ test("the folio's plate line names the plate by its row's numeral and reads the 
   assert.equal(plateLine("theme", "Population", 3), "plate vi of the bound atlas · a thematic survey of population");
   assert.equal(plateLine("region", "The Environs of Laukuwelua"), "plate vii of the bound atlas · a regional survey, the environs of Laukuwelua");
   assert.equal(plateLine("prospect", "The Prospect of Laukuwelua"), "plate viii of the bound atlas · the prospect of Laukuwelua");
+  assert.throws(() => numeralOf(NUMERALS.length), RangeError, "a row past the table throws rather than printing an arabic numeral among the romans");
 });
