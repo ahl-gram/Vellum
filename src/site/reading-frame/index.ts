@@ -7,6 +7,7 @@
 // rows on screen. #220 collapsed the frame's two dated-log instances into this ONE
 // document, one arrived-class (`inked`), one dressing rule.
 import { createDatedLog } from "./dated-log.ts";
+import { DEFAULT_PACE, PACES, type Pace } from "../living-chart/pace.ts";
 import type { LivingChartHost, ScrubberRefs, ToldEntry } from "../living-chart/index.ts";
 
 export interface ReadingFrameOpts {
@@ -74,7 +75,22 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
 
   const log = createDatedLog({ label: "The ages" });
 
-  instrument.append(playBtn, range, year);
+  // #493 (#462 ruling 6, "the readout and pace at the right"): three presses, the chosen one aria-pressed; the room wires them, the engine never sees them.
+  const pace = document.createElement("div");
+  pace.className = "rf-pace";
+  pace.setAttribute("role", "group");
+  pace.setAttribute("aria-label", "The pace");
+  const paceButtons = new Map<Pace, HTMLButtonElement>(PACES.map((k) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.dataset.pace = String(k);
+    b.textContent = `${k}\u00d7`;
+    b.setAttribute("aria-pressed", String(k === DEFAULT_PACE));
+    return [k, b];
+  }));
+  pace.append(...paceButtons.values());
+
+  instrument.append(playBtn, range, year, pace);
   strip.append(instrument, told);
   agesPanel.append(strip, log.panel);
   reading.append(agesPanel);
@@ -119,7 +135,12 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   }
 
   // The reading column (#318): furniture appended here stands through the engine's hidden teardowns; a host that seats its parts elsewhere (#463) leaves it empty.
-  return { root, host, log, reading, strip, told, setTold, destroy };
+  /** Moves the press to `k`; the engine holds the pace itself (setPace), this is the strip's face of it. */
+  function markPace(k: Pace): void {
+    for (const [p, b] of paceButtons) b.setAttribute("aria-pressed", String(p === k));
+  }
+
+  return { root, host, log, reading, strip, told, paceButtons, setTold, markPace, destroy };
 }
 
 export type ReadingFrame = ReturnType<typeof createReadingFrame>;

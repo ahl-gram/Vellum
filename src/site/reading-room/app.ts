@@ -323,6 +323,8 @@ function readSeed(): void {
 
 // #442: Play and a slider move are the two gestures that ask for a picture; the paint each one triggers is what reveals it, so nothing here forces a show.
 frame.host.scrubber.playBtn.addEventListener("click", () => { armPlate(); lc.togglePlay(); });
+// #493: a pace press is not a story gesture (no plate, no hash); the engine takes it first, then the strip shows it.
+for (const [k, btn] of frame.paceButtons) btn.addEventListener("click", () => { lc.setPace(k); frame.markPace(k); });
 frame.host.scrubber.range.addEventListener("input", () => { armPlate(); lc.onManualScrub(); });
 frame.host.scrubber.range.addEventListener("change", syncHash);
 frame.host.scrubber.range.addEventListener("pointerdown", lc.agesDragStart);

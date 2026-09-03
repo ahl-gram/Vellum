@@ -5,7 +5,7 @@ import { HOST_HOOK_NAMES } from "../../src/site/shared/host-hooks.ts";
 export async function run(ctx) {
   const { evaluate, check, sleep } = ctx;
   const room = makeRoom(ctx);
-  const { setYear, yearNow, groupVis, roadsDisp, visibleGroups, clickPlay } = makeBar(ctx);
+  const { setYear, yearNow, groupVis, roadsDisp, visibleGroups, clickPlay, playLabel } = makeBar(ctx);
   const gate = scopedHealth(ctx);
 
   const booted = await room.goto("#seed=42&style=antique&legend=1");
@@ -298,6 +298,49 @@ export async function run(ctx) {
     "RS28 a counter read mid-ceremony cancels it cleanly: the class retires on cancel, no replay on the re-arm",
     arrivedAgain && rs28armed && !!rs28 && rs28.cls === false && rs28.anim === "none",
     JSON.stringify({ arrivedAgain, rs28armed, rs28 }),
+  );
+
+  // #493 the pace. At rest the default 1x is pressed and the engine reports it; a press moves the mark and reaches the engine; a park after it writes no pace key (ruled 2026-09-02).
+  // The facts of the world ON SCREEN: RS23 and the counter reads above drew seed 9, and seed 42's years would clamp the bar to the present (a Play from the present reopens the whole story in the survey chamber, where the year is null by contract).
+  const smNow = await scrubFacts(evaluate, await evaluate(`window.__vellumReadingRoomState().seed`));
+  await setYear(smNow.present);
+  const rs29 = await evaluate(`(()=>{const g=document.querySelector(".rf-instrument .rf-pace");const b=g?[...g.querySelectorAll("button")]:[];const read=()=>({pressed:b.map((x)=>x.getAttribute("aria-pressed")),pace:window.__vellumAgesState().pace});const rest=read();if(b[2])b[2].click();const after=read();return{role:g&&g.getAttribute("role"),label:g&&g.getAttribute("aria-label"),labels:b.map((x)=>x.textContent),shown:!!g&&getComputedStyle(g).display!=="none",rest,after};})()`);
+  await clickPlay();
+  await sleep(150);
+  await clickPlay();
+  await sleep(80);
+  const rs29hash = await evaluate(`location.hash`);
+  check(
+    "RS29 the pace group stands at the readout's right with 1x pressed and reported, a press moves the mark and reaches the engine, and the address never carries it (#493, ruled 2026-09-02)",
+    !!rs29 && rs29.role === "group" && rs29.label === "The pace" && rs29.shown &&
+      JSON.stringify(rs29.labels) === JSON.stringify(["1\u00d7", "2\u00d7", "4\u00d7"]) &&
+      JSON.stringify(rs29.rest.pressed) === JSON.stringify(["true", "false", "false"]) && rs29.rest.pace === 1 &&
+      JSON.stringify(rs29.after.pressed) === JSON.stringify(["false", "false", "true"]) && rs29.after.pace === 4 &&
+      rs29hash.includes("seed=") && !/pace/.test(rs29hash),
+    JSON.stringify({ rs29, rs29hash }),
+  );
+
+  // The pace is a clock, not a jump: the years a 1x window covers, then a press to 4x mid-sweep that keeps the year (a re-anchor; without it the story would leap by three times what had elapsed) and covers more in the same window.
+  await evaluate(`document.querySelector('.rf-pace button[data-pace="1"]').click()`);
+  await setYear(smNow.minFounded);
+  await clickPlay();
+  await sleep(200);
+  const y0 = await yearNow();
+  await sleep(400);
+  const y1 = await yearNow();
+  await evaluate(`document.querySelector('.rf-pace button[data-pace="4"]').click()`);
+  await sleep(40);
+  const yAt = await yearNow();
+  await sleep(400);
+  const y2 = await yearNow();
+  const rs30lbl = await playLabel();
+  await clickPlay();
+  await evaluate(`document.querySelector('.rf-pace button[data-pace="1"]').click()`);
+  const slow = y1 - y0, fast = y2 - yAt;
+  check(
+    "RS30 a press to 4x mid-sweep keeps the year and the sweep then covers more than twice what the 1x window did (#493: the clock re-anchors, both halves scale)",
+    slow > 0 && yAt >= y1 && yAt - y1 < 60 && fast > slow * 2 && rs30lbl === "Pause",
+    JSON.stringify({ y0, y1, yAt, y2, slow, fast, rs30lbl }),
   );
 
   gate.check("RS24 the room instrument run is clean (no console errors, no new 4xx)");

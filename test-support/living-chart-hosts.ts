@@ -12,7 +12,7 @@ export const API = [
   "applyAges", "rearmAges", "exitAges", "clearAges",
   "agesSnapToRest", "agesState", "agesDragStart", "agesDragEnd",
   "applyScrub", "exitScrub", "clearScrub", "cancelScrubRaf",
-  "pauseScrub", "togglePlay", "onManualScrub", "scrubTo",
+  "pauseScrub", "togglePlay", "setPace", "onManualScrub", "scrubTo",
   "scrubSnapToPresent", "scrubState",
   "applyVoyage", "rearmVoyage", "exitVoyage", "clearVoyage", "cancelVoyageRaf",
   "voyageSnapToRest", "voyageStepTo", "voyagePaintAt",

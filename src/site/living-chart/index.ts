@@ -127,6 +127,7 @@ export function createLivingChart(host: LivingChartHost) {
     cancelScrubRaf: ages.cancelRaf,
     pauseScrub: ages.pause,
     togglePlay: ages.togglePlay,
+    setPace: ages.setPace,
     onManualScrub: ages.onBarInput,
     scrubTo: (year: number) => (ages.isActive() ? ages.scrubToYear(year) : chronicle.scrubTo(year)),
     scrubSnapToPresent: chronicle.scrubSnapToPresent,

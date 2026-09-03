@@ -96,3 +96,9 @@ test("RR-room 6 the css: the strip fixed at the bottom, the sheet at the chart-r
   assert.match(print[1], /\.strip\s*\{[^}]*display:\s*none/, "the strip prints as nothing");
   assert.match(print[1], /\.stage\s*\{[^}]*position:\s*static/, "the chart prints in flow");
 });
+
+test("RR-room 7 the pace is the room's to wire (#493): app.ts binds each of the frame's presses to the engine's setPace and the frame's mark, and the address never carries it (ruled 2026-09-02)", () => {
+  assert.match(app, /for \(const \[k, btn\] of frame\.paceButtons\) btn\.addEventListener\("click", \(\) => \{ lc\.setPace\(k\); frame\.markPace\(k\); \}\);/, "one listener per press, the engine first, then the strip's face");
+  assert.doesNotMatch(app, /"pace"/, "no hash key: a reload or a shared address plays at the default");
+  assert.doesNotMatch(read("src/site/explorer/address.ts"), /pace/i, "the live-address grammar (#192) knows no pace");
+});
