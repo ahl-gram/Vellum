@@ -77,7 +77,6 @@ body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); }
 
 /* The legend row, bottom centre (#462 ruling 4): the room's roads out, centred on the chart beside an open slip. */
 .legend { position: fixed; left: calc((100% - var(--slip-w) - 2rem) / 2); bottom: var(--chrome-y); transform: translateX(-50%); z-index: 10; text-align: center;
-  box-sizing: border-box; padding: 0.5rem 1.1rem 0.6rem;
   transition: left 0.32s cubic-bezier(0.2, 0.7, 0.3, 1); }
 body:has(.slip.folded) .legend { left: 50%; }
 /* parchment, not the mockup's ink-faded: 13px italic measured 2.78:1 on the deep (plate read 2026-08-29), the RH9a miss again. */
@@ -145,9 +144,10 @@ body.chart-room .corner.tr { --pool-top: -4rem; --pool-right: -4rem; }
 body.chart-room .corner.bl { --pool-bottom: -4rem; --pool-left: -4rem; }
 body.chart-room .strip { --pool-bottom: -4rem; --pool-left: -4rem; --pool-right: -4rem; }
 
-/* The legend row's footing is home's own (public/index.css .lf-legend; Alex's 2026-09-03 call from the Specimen Book beside home): a padded box, chart ink at the foot fading up, not the blurred pool; it paints under the same conditions the pool does, and the padding stands at rest so the row does not jump. */
-body:has(#map-viewport.zoomed) .legend, body.chart-room:not(:has(.stage)) .legend { background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.45) 72%, transparent); }
-.legend.in-slip { padding: 0; background: none; }
+/* The legend row's footing is home's own (public/index.css .lf-legend, its 0.5rem 1.1rem 0.6rem padding; Alex's 2026-09-03 call from the Specimen Book beside home): the box with chart ink at the foot fading up, not the blurred pool. Drawn as the row's own ::before at the padding's insets, so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, e2e BR2); it paints under the same conditions the pool does. */
+body:has(#map-viewport.zoomed) .legend::before, body.chart-room:not(:has(.stage)) .legend::before { content: ""; position: absolute; inset: -0.5rem -1.1rem -0.6rem; z-index: -1; pointer-events: none;
+  background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.45) 72%, transparent); }
+.legend.in-slip::before { content: none; }
 
 /* The landing (#461 ruling 6, the chart room's half): the stage settles onto the deep, the corners, the slip and the legend ink in after; motion.css's reduced-motion blanket collapses both. */
 body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }

@@ -25,7 +25,7 @@ const READ = `(() => {
     chartFolioText: (() => { const f = document.querySelector(".corner.bl"); if (!f) return null; const range = document.createRange(); let right = null; for (const p of f.querySelectorAll("p")) { if (!p.textContent) continue; range.selectNodeContents(p); const b = range.getBoundingClientRect(); if (b.width > 0) right = Math.max(right ?? 0, b.right); } return right; })(),
     glass: r(".corner.br"), glassDisp: cs(".zoomery", "display"),
     glassOverFolio: (() => { const g = document.querySelector(".corner.br"), f = document.querySelector(".corner.tr"); if (!g || !f) return null; const a = g.getBoundingClientRect(), b = f.getBoundingClientRect(); const w = Math.min(a.right, b.right) - Math.max(a.x, b.x), h = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y); return w > 0 && h > 0 ? [Math.round(w), Math.round(h)] : null; })(),
-    legend: r(".legend"), legendDisp: cs(".legend", "display"), legendGround: cs(".legend", "backgroundImage"), legendInSlip: !!legend && legend.classList.contains("in-slip"), legendDocked: !!legend && !!legend.parentElement && legend.parentElement.classList.contains("legend-dock"),
+    legend: r(".legend"), legendDisp: cs(".legend", "display"), legendGround: cs(".legend", "backgroundImage", "::before"), legendGroundOn: cs(".legend", "content", "::before"), legendInSlip: !!legend && legend.classList.contains("in-slip"), legendDocked: !!legend && !!legend.parentElement && legend.parentElement.classList.contains("legend-dock"),
     pool: cs(".corner.tr", "content", "::before"), poolChrome: cs("header.chrome", "content", "::before"), poolGlass: cs(".corner.br", "content", "::before"),
     pillDisp: cs("#sb-status", "display"), pillText: (document.getElementById("sb-status") || { textContent: null }).textContent,
     folioLines: [...document.querySelectorAll(".corner.bl p")].map((p) => p.textContent.length > 0),
@@ -116,11 +116,12 @@ export async function run(ctx) {
     !!leaned && leaned.poolGlass === "none" && underGlass > interior + 30,
     JSON.stringify({ poolGlass: leaned.poolGlass, underGlass, interior }),
   );
-  const footing = await brightest(Math.round(leaned.legend.x + leaned.legend.w / 2) - 4, Math.round(leaned.legend.bottom) - 4);
+  // Just below the row's box, inside the footing's 0.6rem foot band: the row's own centre is the gold road (227).
+  const footing = await brightest(Math.round(leaned.legend.x + leaned.legend.w / 2) - 4, Math.round(leaned.legend.bottom) + 3);
   check(
-    "SB5c leaned, the legend row stands on home's footing, a gradient box darkest at its foot, not the blurred pool: the gradient resolves on the row, its foot band reads dark over the chart, and at rest the row carried no ground",
-    !!leaned && /linear-gradient/.test(leaned.legendGround) && footing < 120 && rest.legendGround === "none",
-    JSON.stringify({ leaned: leaned.legendGround.slice(0, 40), footing, rest: rest.legendGround }),
+    "SB5c leaned, the legend row stands on home's footing, a gradient box darkest at its foot drawn as the row's own ::before, not the blurred pool: the gradient resolves, its foot band reads dark over the chart, and at rest the row carried no ground",
+    !!leaned && leaned.legendGroundOn === '""' && /linear-gradient/.test(leaned.legendGround) && footing < 120 && rest.legendGroundOn === "none",
+    JSON.stringify({ leaned: leaned.legendGround.slice(0, 40), footing, rest: rest.legendGroundOn }),
   );
 
   await setState("rest");
