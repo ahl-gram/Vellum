@@ -92,7 +92,7 @@ test("PRR4 the legend row is the poster plates plus a road back (ruled 2026-08-3
   assert.match(phone, /\.legend\.in-slip \.legend-head\s*\{[^}]*display:\s*block/, "docked in the phone sheet the head stays, since it carries the Pressed-as choice (the kit hides it)");
   assert.match(phone, /\.legend\.in-slip \.legend-note\s*\{[^}]*display:\s*none/, "the note stands down there");
   assert.match(phone, /\.folio-controls\s*\{[^}]*flex-wrap:\s*wrap/, "the corner's row wraps on a phone (the mockup's seed-controls)");
-  assert.match(phone, /body:has\(\.slip\.open\) \.corner\.br\.zoomery\s*\{[^}]*display:\s*none/, "the Glass stands down while the sheet is open: climbing above it, it sat under the corner's rows and stole their taps (skeptic round 2)");
+  assert.doesNotMatch(phone, /slip\.open\)[^{]*\.zoomery/, "the Glass standing down under the open sheet is the kit's rule since the 2026-09-03 sitting (room.test.ts pins it); the page keeps no copy");
 });
 
 test("PRR5 the stage holds the fitted sheet with the proof and the turned plate in one gesture box; the status pill, the Glass, the chart's folio and the hidden document keep their ids", () => {

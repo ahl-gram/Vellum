@@ -106,3 +106,21 @@ test("AK8 home seats the kit's camera itself (#505, ruled 2026-09-02: home keeps
   for (const id of ["zoom-in", "zoom-out", "zoom-reset"]) assert.ok(app.includes(`getElementById("${id}")`), `app.ts binds ${id}`);
   assert.ok(app.includes('getElementById("lf-controls")'), "and reveals the cluster by the id it passes the component");
 });
+
+test("AK7 the legend row is ONE face on home and in the kit: the seed box's crisp panel under both rows, parchment on both verb lines (the 2026-09-03 sitting, rulings 23 and 24 on #454; the fade's clear top measured 1.0:1 and 1.76:1 under the head, line-tan 4.09:1 under the verb)", () => {
+  const home = read("public/index.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  const kit = read("public/atelier.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  const panel = "linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72))";
+  const wearers: Array<[string, RegExpMatchArray | null]> = [
+    ["home's seed box .lf-seed", home.match(/\.lf-seed \{([^}]*)\}/)],
+    ["home's legend row .lf-legend", home.match(/\.lf-legend \{([^}]*)\}/)],
+    ["the kit's room folio .corner.tr::before", kit.match(/\.corner\.tr::before[^{]*\{([^}]*)\}/)],
+    ["the kit's legend row .legend::before", kit.match(/\.legend::before[^{]*\{([^}]*)\}/)],
+  ];
+  for (const [name, m] of wearers) assert.ok(m && m[1].includes(`background: ${panel};`), `${name} stands on the one panel`);
+  const homeVerb = home.match(/\.lf-legend-verb \{([^}]*)\}/);
+  const kitVerb = kit.match(/\.legend-btn \.verb \{([^}]*)\}/);
+  assert.ok(homeVerb && /color:\s*var\(--parchment\)/.test(homeVerb[1]), "home's verb wears parchment");
+  assert.ok(kitVerb && /color:\s*var\(--parchment\)/.test(kitVerb[1]), "the kit's verb wears parchment");
+  assert.match(kit, /\.legend-btn\.gold \.verb \{[^}]*color:\s*var\(--ink-brown\)/, "the gold road's verb keeps ink-brown on its gold ground");
+});

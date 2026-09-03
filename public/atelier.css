@@ -89,7 +89,7 @@ body:has(.slip.folded) .legend { left: 50%; }
 /* Four classes deep on purpose: the house button hover wash is (0,3,1). */
 .legend .legend-row .legend-btn:hover, .legend .legend-row .legend-btn:focus-visible { background: var(--ink-dark); transform: translateY(var(--raise)); }
 .legend .legend-row .legend-btn:focus-visible { outline-color: var(--parchment-bright); }
-.legend-btn .verb { display: block; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.78rem; color: var(--line-tan); }
+.legend-btn .verb { display: block; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.78rem; color: var(--parchment); }
 .legend-btn .room { display: block; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.86rem; letter-spacing: 0.12em; color: var(--parchment); }
 .legend-btn.gold { background: var(--control-gold); }
 .legend-btn.gold .verb { color: var(--ink-brown); }
@@ -143,9 +143,9 @@ body.chart-room header.chrome { --pool-top: -4rem; --pool-left: -4rem; }
 body.chart-room .corner.bl { --pool-bottom: -4rem; --pool-left: -4rem; }
 body.chart-room .strip { --pool-bottom: -4rem; --pool-left: -4rem; --pool-right: -4rem; }
 
-/* The legend row's footing is home's own (public/index.css .lf-legend, its 0.5rem 1.1rem 0.6rem padding; Alex's 2026-09-03 call from the Specimen Book beside home): the box with chart ink at the foot fading up, not the blurred pool. Drawn as the row's own ::before at the padding's insets, so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, e2e BR2); it paints under the same conditions the pool does. */
+/* The legend row's footing is home's own (public/index.css .lf-legend, its 0.5rem 1.1rem 0.6rem padding; Alex's 2026-09-03 call from the Specimen Book beside home): the seed box's crisp panel (chart ink 0.85 to 0.72, top to bottom; the fade left at the 2026-09-03 sitting, ruling 23), not the blurred pool. Drawn as the row's own ::before at the padding's insets, so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, e2e BR2); it paints under the same conditions the pool does. */
 body:has(#map-viewport.zoomed) .legend::before, body.chart-room:not(:has(.stage)) .legend::before { content: ""; position: absolute; inset: -0.5rem -1.1rem -0.6rem; z-index: -1; pointer-events: none;
-  background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.45) 72%, transparent); }
+  background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
 .legend.in-slip::before { content: none; }
 /* The room folio's ground is home's seed box (public/index.css .lf-seed, its 0.7rem 0.9rem 0.8rem padding; Alex's 2026-09-03 call): a crisp panel, chart ink 0.85 to 0.72 top to bottom, no blur, drawn as the corner's own ::before at the padding's insets so the corner's box, which the slip's seat reads, never changes; it paints under the pool's conditions. */
 body:has(#map-viewport.zoomed) .corner.tr::before, body.chart-room:not(:has(.stage)) .corner.tr::before { content: ""; position: absolute; inset: -0.7rem -0.9rem -0.8rem; z-index: -1; pointer-events: none;
@@ -199,6 +199,7 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .vignette { height: 8rem; }
   .corner.bl { display: none; }
   .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); bottom: calc(var(--sheet-h, 6rem) + 1rem); }
+  body:has(.slip.open) .corner.br.zoomery { display: none; }
   .corner.tr::before { inset: -0.7rem -0.7rem -0.75rem; }
   .legend { display: none; }
   .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; max-width: none !important; }

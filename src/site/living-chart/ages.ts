@@ -37,12 +37,7 @@ import type { HistoricalEvent } from "../../society/history.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
 import { toldAnnal, type ToldEntry } from "./told.ts";
-
-interface AnnalRow {
-  li: HTMLLIElement;
-  year: number;
-  text: string;
-}
+import { buildAnnals, type AnnalRow } from "./annals.ts";
 
 interface AgesSession {
   pos: AgesPos;
@@ -122,37 +117,6 @@ export function createAges(deps: AgesDeps) {
     setPlayLabel(false);
   }
 
-  // The chronicler's block of the one journal, appended AFTER the prologue rows in the same strip; #312: it opens with the chronicler's heading and its first line takes an initial.
-  function buildAnnals(events: ReadonlyArray<HistoricalEvent>): AnnalRow[] {
-    const rows: AnnalRow[] = [];
-    if (events.length > 0) {
-      const head = document.createElement("li");
-      head.className = "annals-head";
-      head.textContent = "Here follow the annals of these waters";
-      stripEl.appendChild(head);
-    }
-    for (const [i, e] of events.entries()) {
-      const li = document.createElement("li");
-      const year = document.createElement("span");
-      year.className = "cr-year";
-      year.textContent = String(e.year);
-      const text = document.createElement("span");
-      text.className = "cr-text";
-      if (i === 0 && e.text.length > 0) {
-        const dc = document.createElement("span");
-        dc.className = "cr-dc";
-        dc.textContent = e.text[0]!;
-        text.append(dc, document.createTextNode(e.text.slice(1)));
-      } else {
-        text.textContent = e.text; // textContent: event prose is plain text
-      }
-      li.append(year, text);
-      stripEl.appendChild(li);
-      rows.push({ li, year: e.year, text: e.text });
-    }
-    return rows;
-  }
-
   // #174: the sink is rest-only. A survey-chamber rest mirrors the recto track; an ages-chamber rest shows no track, so the sink clears rather than bleeding ink the recto does not carry.
   function syncSinkAtRest(): void {
     if (!ages) return;
@@ -223,7 +187,7 @@ export function createAges(deps: AgesDeps) {
       playing: false,
       rafId: 0,
       anchor: { begin: 0, floor: 0 },
-      annals: buildAnnals(overlay.data()!.events),
+      annals: buildAnnals(stripEl, overlay.data()!.events),
       chamberShown: "survey",
       barMax,
     };

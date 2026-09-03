@@ -126,8 +126,8 @@ export async function run(ctx) {
   );
   const footing = await brightest(Math.round(leaned.legend.x + leaned.legend.w / 2) - 4, Math.round(leaned.legend.bottom) + 3);
   check(
-    "SB5c leaned, the legend row stands on home's footing, a gradient box darkest at its foot drawn as the row's own ::before, not the blurred pool: the gradient resolves, its foot band reads dark over the chart, and at rest the row carried no ground",
-    !!leaned && leaned.legendGroundOn === '""' && /linear-gradient/.test(leaned.legendGround) && footing < 120 && rest.legendGroundOn === "none",
+    "SB5c leaned, the legend row stands on home's footing, the seed box's crisp panel (a top-to-bottom gradient, no fade) drawn as the row's own ::before, not the blurred pool: the panel resolves, its foot band reads dark over the chart, and at rest the row carried no ground (the fade left at the 2026-09-03 sitting, ruling 23)",
+    !!leaned && leaned.legendGroundOn === '""' && /^linear-gradient\((?!to top)/.test(leaned.legendGround) && footing < 120 && rest.legendGroundOn === "none",
     JSON.stringify({ leaned: leaned.legendGround.slice(0, 40), footing, rest: rest.legendGroundOn }),
   );
 
@@ -157,8 +157,8 @@ export async function run(ctx) {
   await sleep(300);
   const open = await read();
   check(
-    "SB8 the handle opens the sheet: its body shows, the handle reports expanded, the docked legend row is in it, and the kit seats the Glass ABOVE the open sheet, where it climbs into the corner's row (the overlap is in the detail, for the sitting: the Print Room alone hides its Glass there)",
-    !!open && open.st && open.slipBody !== "none" && open.handleExpanded === "true" && open.legendDocked && open.slip.y < phone.slip.y && open.glassDisp !== "none" && open.glass.bottom <= open.slip.y && open.noX,
+    "SB8 the handle opens the sheet: its body shows, the handle reports expanded, the docked legend row is in it, and the Glass stands down while the sheet is open (the kit's rule since the 2026-09-03 sitting, ruling 1; above the sheet it climbed into the corner's row, 35x85 at 390)",
+    !!open && open.st && open.slipBody !== "none" && open.handleExpanded === "true" && open.legendDocked && open.slip.y < phone.slip.y && open.glassDisp === "none" && open.glassOverFolio === null && open.noX,
     JSON.stringify(open && { body: open.slipBody, expanded: open.handleExpanded, slip: open.slip, glass: open.glass, glassOverFolio: open.glassOverFolio }),
   );
   await shoot("specimen-390-open.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });

@@ -93,7 +93,7 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   const footing = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.legend::before[^{]*)\{([^}]*)\}/);
   assert.ok(footing, "the kit gives a stage-less room's legend row home's footing");
   assert.match(footing![1]!, /body:has\(#map-viewport\.zoomed\) \.legend::before/, "the same rule serves the zoomed rooms' row");
-  assert.match(footing![2]!, /inset:\s*-0\.5rem -1\.1rem -0\.6rem;[^}]*linear-gradient\(to top, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.45\) 72%, transparent\)/, "home's own footing: its padding as the insets, chart ink at the foot fading up (public/index.css .lf-legend)");
+  assert.match(footing![2]!, /inset:\s*-0\.5rem -1\.1rem -0\.6rem;[^}]*linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\)/, "home's own footing: its padding as the insets, the seed box's crisp panel (public/index.css .lf-legend; the fade left at the 2026-09-03 sitting, ruling 23)");
   assert.doesNotMatch(css, /\/\*/, "the shipped sheet carries no prose (public/gallery/index.css ships it verbatim)");
   const phone = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
   assert.match(phone, /\.legend\s*\{[^}]*display:\s*block/, "the kit hides the row for a slip to dock it; the Gallery has no slip and no script, so the row stays");

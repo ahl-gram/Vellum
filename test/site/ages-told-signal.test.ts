@@ -66,13 +66,14 @@ const DAY_ROW: ToldEntry = {
 function instrument(
   onAgesTold?: (told: ToldEntry | null) => void,
   told: ToldEntry | null = DAY_ROW,
+  strip: El = new El("ul"),
 ) {
   const deps = {
     panel: new El("div"),
     playBtn: new El("button"),
     range: new El("input"),
     readout: new El("span"),
-    strip: new El("ul"),
+    strip,
     overlay: { data: () => ({ events: EVENTS }) },
     chronicle: chronicleStub,
     voyage: voyageStub(told).stub,
@@ -169,4 +170,17 @@ test("#442 the signal is optional: an instrument without it still paints", () =>
   ages.armAges(null, null, 42, "sub", { rest: { chamber: "ages", year: 700 } });
   ages.scrubToYear(900);
   assert.equal(ages.agesState()?.year, 900);
+});
+
+test("buildAnnals writes the chronicler's block INTO the strip it is given: the head row first, then one row per event in order, the first row's initial cut (the 2026-09-03 lift made the strip a parameter; guard-prover found no unit guard on the append)", () => {
+  const strip = new El("ul");
+  const ages = instrument(undefined, DAY_ROW, strip);
+  ages.armAges(null, null, 42, "sub");
+  assert.equal(strip.children.length, EVENTS.length + 1, "the head and one row per event, in the strip handed over");
+  assert.equal(strip.children[0].className, "annals-head");
+  assert.equal(strip.children[0].textContent, "Here follow the annals of these waters");
+  assert.deepEqual(strip.children.slice(1).map((li) => li.children[0].textContent), EVENTS.map((e) => String(e.year)), "the year spans in the events' order");
+  assert.equal(strip.children[1].children[1].children[0].className, "cr-dc", "the first row's text opens with its initial");
+  assert.equal(strip.children[1].children[1].textContent, EVENTS[0].text, "and reads whole");
+  assert.equal(strip.children[2].children[1].textContent, EVENTS[1].text, "a later row is plain text");
 });

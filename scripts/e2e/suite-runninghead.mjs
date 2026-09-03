@@ -4,6 +4,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
+import { luminance, sampleRow } from "./pixel-support.mjs";
 
 // LITERAL on purpose: home is not a nav item, /ribbon/ and /prospect/ are shelled rooms outside
 // the nav, and a page dropping out of the nav must not silently drop out of this guard; /atlas/
@@ -276,6 +277,28 @@ export async function run(ctx) {
     washWrong.length === 0,
     washWrong.map((r) => `${r} wash ${JSON.stringify(heads[r]?.chromeWash)}`).join(" | ") || "wash on home and the Gallery alone",
   );
+
+  // The harness window is tall, so this check pins its own viewport; the Gallery is the one chart room that scrolls and this suite its sole visitor.
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  await send("Page.navigate", { url: "about:blank" });
+  const galleryUp = await visit("/gallery/");
+  let scrolled = null;
+  for (let i = 0; i < 100 && galleryUp; i++) {
+    scrolled = JSON.parse(await evaluate(`(() => { const sh = document.documentElement.scrollHeight; window.scrollTo(0, Math.min(1200, sh - innerHeight)); const imgs = [...document.querySelectorAll(".grid img")]; const b = imgs.map((el) => el.getBoundingClientRect()).find((r) => r.top > 100 && r.bottom < innerHeight - 20 && r.width > 100); return JSON.stringify({ sh, y: scrollY, plate: b ? { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) } : null, loaded: imgs.length > 0 && imgs.every((el) => el.complete && el.naturalWidth > 0) }); })()`));
+    if (scrolled.plate && scrolled.loaded) break;
+    await sleep(100);
+  }
+  await sleep(300);
+  const plateRow = scrolled && scrolled.plate ? await sampleRow(send, scrolled.plate.x, scrolled.plate.y, 8) : [];
+  const cornerRow = scrolled ? await sampleRow(send, 8, 8, 8) : [];
+  const plateLum = plateRow.length ? Math.round(Math.max(...plateRow.map(luminance))) : -1;
+  const cornerLum = cornerRow.length ? Math.round(Math.max(...cornerRow.map(luminance))) : -1;
+  check(
+    "RH10 the pixel helper reads the Gallery scrolled past a screen: a plate's centre bright (49 on the unfixed clip, 210 fixed) and the corner dark (the pool or the deep, either far from a plate) at one scroll state, which no blank frame is (the sitting's ruling 6, 2026-09-03)",
+    !!scrolled && scrolled.y >= 800 && plateLum > 120 && cornerLum > 15 && cornerLum < 90,
+    JSON.stringify({ y: scrolled && scrolled.y, sh: scrolled && scrolled.sh, plate: scrolled && scrolled.plate, plateLum, cornerLum }),
+  );
+  await send("Emulation.clearDeviceMetricsOverride");
 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
   const restored = await waitReady();

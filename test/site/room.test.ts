@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { dockLegend, legendSeat, type LegendHome } from "../../src/site/shared/room.ts";
 import { GLASS_GAP_REM } from "../../src/site/shared/room-seats.ts";
@@ -78,4 +78,16 @@ test("bindRoom seats the legend row before it fits the sheet", () => {
   const layout = room.slice(room.indexOf("const layout = () => {"), room.indexOf("camera.restore(held);"));
   assert.ok(layout.includes("placeLegendRow(") && layout.includes("fitRoom("), "the layout both seats the row and fits the sheet");
   assert.ok(layout.indexOf("placeLegendRow(") < layout.indexOf("fitRoom("), "the row is seated before the fit reads its top");
+});
+
+test("the phone Glass stands down while the sheet is open as a KIT rule, in every chart room, and no page sheet carries its own copy (the sitting's ruling 1, 2026-09-03 on #454; was the Print Room's alone since PR #496)", () => {
+  const REPO = resolve(import.meta.dirname, "..", "..");
+  const css = readFileSync(resolve(REPO, "public/atelier.css"), "utf8");
+  const narrow = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
+  assert.match(narrow, /body:has\(\.slip\.open\) \.corner\.br\.zoomery\s*\{[^}]*display:\s*none/, "the kit's narrow block hides the Glass under an open sheet");
+  const sheets = [...globSync("public/**/*.css", { cwd: REPO }), ...globSync("src/**/*.astro", { cwd: REPO }), ...globSync("src/cli/*.ts", { cwd: REPO })].filter((p) => p !== "public/atelier.css").sort();
+  for (const must of ["public/reading-frame.css", "public/explorer/broadside.css", "src/cli/gallery.ts", "src/layouts/BaseLayout.astro", "src/pages/index.astro"]) assert.ok(sheets.includes(must), `the sweep reaches ${must} (the prover found the first glob missed reading-frame.css; the skeptic that the Gallery's sheet is generated from gallery.ts and the .astro files carry <style> blocks)`);
+  for (const p of sheets) {
+    assert.doesNotMatch(readFileSync(resolve(REPO, p), "utf8"), /slip\.open\)[^{]*\.zoomery/, `${p} carries its own copy of the kit's rule`);
+  }
 });
