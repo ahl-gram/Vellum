@@ -269,15 +269,16 @@ async function clearMobile() {
   await setTouch(false);
 }
 
-async function shoot(file) {
+// The default clip is the harness's 1280 width down the whole document, captured beyond the viewport; a suite that passes its own clip is shot INSIDE the viewport, because captureBeyondViewport drops a chart room's left-anchored fixed furniture (the chart folio, the legend row) from the frame (measured 2026-09-03 on /specimen/ at 1280x800: AE 505 between the two modes at the same instant, the right-anchored corners and the slip untouched).
+async function shoot(file, clip) {
   const h = await evaluate(`Math.min(16000, Math.ceil(document.body.scrollHeight))`);
   const r = await send("Page.captureScreenshot", {
     format: "png",
-    captureBeyondViewport: true,
-    clip: { x: 0, y: 0, width: 1280, height: h, scale: 1 },
+    captureBeyondViewport: clip === undefined,
+    clip: clip ?? { x: 0, y: 0, width: 1280, height: h, scale: 1 },
   });
   writeFileSync(join(OUT_DIR, file), Buffer.from(r.data, "base64"));
-  console.log(`  shot -> ${join(OUT_DIR, file)} (${h}px tall)`);
+  console.log(`  shot -> ${join(OUT_DIR, file)} (${clip ? `${clip.width}x${clip.height}` : `${h}px tall`})`);
 }
 
 // A cold Chrome on CI intermittently comes up but never binds the debugging port (a transient dbus/crashpad hiccup; the process stays alive), so retry with a fresh profile; a genuine break still fails after the last attempt with the captured output.

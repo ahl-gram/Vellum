@@ -18,6 +18,7 @@ const PAGE_CSS = [
   "public/reading-room/index.css",
   "public/seed-of-the-day/index.css",
   "public/prospect/index.css",
+  "public/specimen/index.css",
   "public/ribbon/index.css",
 ] as const;
 

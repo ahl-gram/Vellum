@@ -1,0 +1,102 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import RoomFolio from "../../layouts/RoomFolio.astro";
+import Fog from "../../layouts/Fog.astro";
+import Vignettes from "../../layouts/Vignettes.astro";
+import ChartStage from "../../layouts/ChartStage.astro";
+import Glass from "../../layouts/Glass.astro";
+import ChartFolio from "../../layouts/ChartFolio.astro";
+import LegendButton from "../../layouts/LegendButton.astro";
+import Slip from "../../layouts/Slip.astro";
+import { contentsRowHtml } from "../../site/shared/contents-row.ts";
+import { GALLERY_SEED } from "../../cli/gallery.ts";
+
+// The Specimen Book (#487 item 4, cut at #465 ruling 6): every piece of the Atelier Kit at its real seat, in every state the dress can take, on one chart room. Off the nav, off the sitemap, unindexed: the closing review's screenshot oracle and the live sitting's bench. The sheet is the Gallery's first plate; the corner's select is the room's one live control and names the state.
+const room = "The Specimen Book";
+const tagline = "the kit, every piece in every state";
+const plate = `/gallery/chart-${GALLERY_SEED}.svg`;
+const contents = [
+  contentsRowHtml("i", "The chart, drawn in the <em>antique</em> manner"),
+  contentsRowHtml("ii", 'A row with its count <span class="n">&middot; 30 places</span>'),
+  contentsRowHtml("iii", "A row whose text runs to a second line, so the numeral column and the text column can be seen to hold"),
+].map((row) => `<li>${row}</li>`).join("\n");
+---
+
+<BaseLayout
+  room={room}
+  description="The Atelier Kit's specimen book: every piece of the room furniture at its seat, in every state, for the closing review's eye."
+  path="/specimen/"
+  chartRoom
+  noindex
+>
+<Fog />
+<ChartStage label="The specimen sheet. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.">
+  <img id="sb-plate" src={plate} alt={`The chart of seed ${GALLERY_SEED}, the Gallery's first plate, as the specimen sheet`}>
+  <Fragment slot="after">
+    <p class="status" id="sb-status" role="status" aria-live="polite">the status pill, as a room reports a draw</p>
+    <noscript>
+      <p class="status">The Specimen Book fits its sheet and binds its slip in your browser, so its
+      states need JavaScript; the dress stands without it.</p>
+    </noscript>
+  </Fragment>
+</ChartStage>
+<Vignettes />
+
+<RoomFolio room={room} tagline={tagline}>
+  <p class="dateline">the dateline, in the corner's small caps</p>
+  <div class="folio-controls" role="group" aria-label="The specimen's state">
+    <input id="sb-seed" class="control" type="number" value={GALLERY_SEED} aria-label="seed" readonly>
+    <button id="sb-random" class="dice" type="button" title="a state at random" aria-label="A state at random">&#9860;</button>
+    <select id="sb-state" class="control" aria-label="state">
+      <option value="rest" selected>at rest</option>
+      <option value="folded">folded</option>
+      <option value="leaned">leaned</option>
+    </select>
+    <button id="sb-rest" class="primary" type="button">At rest</button>
+  </div>
+  <p class="gloss">the seed row as the corner dresses it: the select names the state, the dice rolls one, the primary rests the room</p>
+</RoomFolio>
+
+<Slip id="specimen" verb="The kit" title="The Specimen Book" where="every piece, at its seat" fold="Fold the specimen away">
+  <p class="intro">The room furniture /atelier.css dresses, standing where a room stands it: this
+  slip, the contents row and the index inside it, the roads out, the Glass, both folios, the fog
+  and the vignettes, the status pill on the stage.</p>
+  <ol class="contents" set:html={contents}></ol>
+  <ol class="index">
+    <li class="inked">
+      <a class="sec" href="#specimen-title">A section being read<span class="count">3</span></a>
+      <ol class="entries">
+        <li><a href="#sb-status">an entry</a></li>
+        <li class="now"><a href="#folio-title">the entry at the reading line</a></li>
+        <li><a href="#sb-plate">another entry</a></li>
+      </ol>
+    </li>
+    <li>
+      <a class="sec" href="#specimen-title">A section of terms<span class="count">4</span></a>
+      <p class="terms"><a href="#zoom-in">a term</a> <a href="#zoom-out" class="now">the term at the reading line</a> <a href="#zoom-reset" class="hit">a find</a> <a href="#sb-seed" class="miss">a miss, hidden</a></p>
+    </li>
+  </ol>
+  <p class="note">The note voice, for a line the reader may skip.</p>
+  <div class="legend-dock"></div>
+  <Fragment slot="foot">
+    <button id="sb-report" class="primary" type="button">Empty the pill</button>
+    <p class="note">The foot stands under its rule, for a room's actions and their note; this one
+    empties the status pill and fills it again.</p>
+  </Fragment>
+</Slip>
+
+<ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "folio-coords"], ["folio-note", "folio-note"]]} />
+
+<nav class="legend" aria-label="The roads out">
+  <p class="legend-head">the legend row: a road, the featured road, a press</p>
+  <div class="legend-row">
+    <LegendButton href="/explorer/" verb="A road to" room="The Explorer" />
+    <LegendButton gold href="/gallery/" verb="The featured road to" room="The Gallery" />
+    <button class="legend-btn" type="button" disabled><span class="verb">a press, disabled</span><span class="room">A Plate</span></button>
+  </div>
+</nav>
+
+<Glass />
+
+<script type="module" src="./app.bundle.js" is:inline></script>
+</BaseLayout>

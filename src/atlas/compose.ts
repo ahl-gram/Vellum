@@ -3,9 +3,9 @@ import { plateDressFor } from "../prospect/dress/context.ts";
 import { prospectPlate } from "../prospect/finished.ts";
 import { renderMap } from "../render/map-renderer.ts";
 import { armsSvgDocument, paletteForStyle } from "../render/layers/heraldry.ts";
-import type { ThemeName } from "../render/layers/field.ts";
 import { STYLES, type StyleName } from "../render/style.ts";
 import { escapeXml } from "../render/svg.ts";
+import { THEMATIC } from "./thematic.ts";
 import { createLoreWriter } from "../society/lore.ts";
 import { generateRegionWorld, windowAround } from "../world/region.ts";
 import type { World } from "../world/types.ts";
@@ -184,14 +184,6 @@ export function prospectPlates(world: World, bannerStyle: StyleName, width: numb
     },
   ];
 }
-
-/** The curated theme-to-style pairing the bound atlas shows; the Explorer still crosses every style with every theme. */
-const THEMATIC: ReadonlyArray<{ theme: ThemeName; title: string; style: StyleName }> = [
-  { theme: "vegetation", title: "Vegetation", style: "antique" },
-  { theme: "climate", title: "Temperature", style: "topographic" },
-  { theme: "moisture", title: "Rainfall", style: "nautical" },
-  { theme: "population", title: "Population", style: "ink" },
-];
 
 export function composeAtlas(
   world: World,

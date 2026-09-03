@@ -19,9 +19,9 @@ test("the three matter keys are the contents' last three rows in order, and no p
 });
 
 test("the folio's plate line names the matter by its row's numeral, mid-sentence like the plates' lines", () => {
-  assert.equal(matterLine("banners"), "plate vi of the bound atlas · the banners of every realm");
-  assert.equal(matterLine("chronicle"), "plate vii of the bound atlas · the chronicle");
-  assert.equal(matterLine("gazetteer"), "plate viii of the bound atlas · the gazetteer");
+  assert.equal(matterLine("banners"), "plate ix of the bound atlas · the banners of every realm");
+  assert.equal(matterLine("chronicle"), "plate x of the bound atlas · the chronicle");
+  assert.equal(matterLine("gazetteer"), "plate xi of the bound atlas · the gazetteer");
 });
 
 test("the matter titles are the contents rows' words", () => {

@@ -42,6 +42,7 @@ import { run as runCluster } from "./e2e/suite-cluster.mjs";
 import { run as runRoomDrawer } from "./e2e/suite-room-drawer.mjs";
 import { run as runDocumentRooms } from "./e2e/suite-document-rooms.mjs";
 import { run as runRegionDetail } from "./e2e/suite-region-detail.mjs";
+import { run as runSpecimen } from "./e2e/suite-specimen.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url)); // scripts/
 const REPO = resolve(HERE, "..");
@@ -115,6 +116,7 @@ const SUITES = {
   "room-drawer": runRoomDrawer,
   "document-rooms": runDocumentRooms,
   "region-detail": runRegionDetail,
+  "specimen": runSpecimen,
 };
 
 const missing = E2E_SUITE_ORDER.filter((name) => !SUITES[name]);

@@ -273,7 +273,7 @@ export async function run(ctx) {
   check(
     "PR31 a thumbnail turns the sheet: the prospect plate takes it at its own 520x384 aspect, its row and thumbnail inked (the #494 ruling; the fit cannot read an <img>'s viewBox)",
     !!turned && Math.abs(turned.ratio - 520 / 384) < 0.01 && turned.src === "blob:" && turned.hidden === false && turned.proofHidden === true &&
-      turned.on === "v" && turned.here === "prospect-capital" && /^plate v of the bound atlas · the prospect of /.test(turned.line),
+      turned.on === "viii" && turned.here === "prospect-capital" && /^plate viii of the bound atlas · the prospect of /.test(turned.line),
     JSON.stringify(turned),
   );
   const back = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="theme-vegetation"]');if(!b)return null;b.click();const s=document.getElementById("sheet").getBoundingClientRect();return{ratio:s.width/s.height,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,zoomed:document.getElementById("map-viewport").classList.contains("zoomed"),scrollY:window.scrollY};})()`);
@@ -281,6 +281,13 @@ export async function run(ctx) {
     "PR31b an entry turns too: the vegetation survey at the chart's aspect, the camera at rest, the page unscrolled",
     !!back && Math.abs(back.ratio - 1500 / 1157.931) < 0.01 && back.here === "theme-vegetation" && /^plate iii of the bound atlas · a thematic survey of vegetation$/.test(back.line) && back.zoomed === false && back.scrollY === 0,
     JSON.stringify(back),
+  );
+
+  const second = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="theme-climate"]');if(!b)return null;b.click();return{on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent};})()`);
+  check(
+    "PR31c a later survey turns under its OWN numeral (#465 ruling 7): temperature is row iv and the folio's line says so, never the first survey's iii",
+    !!second && second.on === "iv" && second.here === "theme-climate" && second.line === "plate iv of the bound atlas · a thematic survey of temperature",
+    JSON.stringify(second),
   );
 
   const MATTER_STATE = `(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const page=document.getElementById("pr-page");const inner=document.getElementById("pr-page-inner");return{ratio:s.width/s.height,aspect:Number(page.dataset.aspect),pageHidden:page.hidden,turnedHidden:document.getElementById("pr-turned").hidden,proofHidden:document.getElementById("pr-preview").hidden,on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,head:(inner.querySelector(".page-head")||{textContent:""}).textContent,places:inner.querySelectorAll("tbody tr").length,measureEmpty:document.getElementById("pr-page-measure").children.length===0,scrollY:window.scrollY,fits:page.getBoundingClientRect().bottom-inner.getBoundingClientRect().bottom,innerW:Math.abs(inner.getBoundingClientRect().width-page.clientWidth),noX:document.documentElement.scrollWidth<=document.documentElement.clientWidth,label:document.getElementById("map-viewport").getAttribute("aria-label")};})()`;
@@ -295,10 +302,10 @@ export async function run(ctx) {
   }
 
   check(
-    "PR33 the gazetteer turns onto the stage as a page of the atlas (#497 seat p): the page face up at its measured portrait aspect, the folio's plate line, row viii inked, the page unscrolled",
+    "PR33 the gazetteer turns onto the stage as a page of the atlas (#497 seat p): the page face up at its measured portrait aspect, the folio's plate line, row xi inked (#465 ruling 7), the page unscrolled",
     !!matter && matter.pageHidden === false && matter.turnedHidden === true && matter.proofHidden === true &&
       matter.aspect > 0 && matter.aspect <= 0.75 && Math.abs(matter.ratio - matter.aspect) < 0.01 &&
-      matter.on === "viii" && matter.here === "gazetteer" && /^plate viii of the bound atlas · the gazetteer$/.test(matter.line) &&
+      matter.on === "xi" && matter.here === "gazetteer" && /^plate xi of the bound atlas · the gazetteer$/.test(matter.line) &&
       /^VELLUM · THE BOUND ATLAS OF The Isle of Rahai · CHART № 42$/.test(matter.head) &&
       matter.places > 0 && matter.measureEmpty === true && matter.scrollY === 0 &&
       matter.fits >= -0.5 && matter.fits <= 2 && matter.innerW < 1 && matter.noX === true && /^A page of the bound atlas: The gazetteer\./.test(matter.label),
@@ -310,7 +317,7 @@ export async function run(ctx) {
   const banners = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="banners"]');if(!b)return null;b.click();const inner=document.getElementById("pr-page-inner");return{on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,line:document.getElementById("pr-plate-line").textContent,arms:inner.querySelectorAll(".banner").length,counted:(document.querySelector('#pr-contents li.on .n')||{textContent:""}).textContent};})()`);
   check(
     "PR33b the banners turn too: the page carries every realm's arms and its row's count agrees",
-    !!banners && banners.on === "vi" && /^plate vi of the bound atlas · the banners of every realm$/.test(banners.line) &&
+    !!banners && banners.on === "ix" && /^plate ix of the bound atlas · the banners of every realm$/.test(banners.line) &&
       banners.arms > 0 && banners.counted.includes(banners.arms + " arms"),
     JSON.stringify(banners),
   );
@@ -332,29 +339,7 @@ export async function run(ctx) {
 
   await shoot("print-room-bound.png");
 
-  // e2e cannot emulate :hover, so PR20b reads the lift out of the CSSOM beside the plate's resting computed style. It is a MARKUP assertion otherwise: href, target and rel, never a click, so nothing here measures the navigation itself. Runs on screen media, before PR21 emulates print.
-  const hover = await evaluate(`(()=>{
-    const img=document.querySelector("#pr-atlas figure img");
-    if(!img)return{img:false};
-    const a=img.closest("a");
-    const cs=getComputedStyle(img);
-    let hoverLift=false;
-    for(const ss of document.styleSheets){let rules;try{rules=ss.cssRules;}catch(e){continue;}
-      if(!rules)continue;
-      for(const r of rules){
-        if(r.selectorText&&r.selectorText.includes(".atlas-sheet figure a img:hover")&&r.style&&r.style.transform&&r.style.transform!=="none"&&img.matches(".atlas-sheet figure a img")){hoverLift=true;}
-      }
-    }
-    return{img:true,dur:cs.transitionDuration,prop:cs.transitionProperty,tform:cs.transform,hoverLift,
-      linked:!!a,href:a?a.href.slice(0,5):null,target:a?a.target:null,rel:a?a.rel:null};
-  })()`);
-  check(
-    "PR20b bound plates go somewhere AND carry the shared hover-lift (#368: the lift is scoped to anchored plates)",
-    hover.img && hover.dur.includes("0.26s") && hover.prop.includes("transform") &&
-      (hover.tform === "none" || hover.tform === "matrix(1, 0, 0, 1, 0, 0)") && hover.hoverLift === true &&
-      hover.linked === true && hover.href === "blob:" && hover.target === "_blank" && hover.rel === "noopener",
-    JSON.stringify(hover),
-  );
+  // PR20b (the plates' links and hover-lift) retired at #465 ruling 1: the hidden document's plates link nowhere since seat d put the copy off screen; the download's own script links its plates (test/atlas/document.test.ts).
 
   await send("Emulation.setEmulatedMedia", { media: "print" });
   const printView = await evaluate(`(()=>{const disp=(sel)=>{const el=document.querySelector(sel);return el?getComputedStyle(el).display:"absent";};const f=document.querySelector("#pr-atlas figure:not(.banner)");return{stage:disp(".stage"),slip:disp(".slip"),legend:disp(".legend"),folioRoom:disp(".corner.folio-room"),glass:disp(".zoomery"),atlas:disp("#pr-atlas"),hero:disp("#pr-atlas .hero-plate"),breakAfter:f?getComputedStyle(f).breakAfter:"absent"};})()`);

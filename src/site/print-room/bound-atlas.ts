@@ -65,6 +65,7 @@ const STAMP_UNBOUND = stamp.textContent ?? "";
 interface Bound {
   readonly plate: PlateRef;
   readonly section: PlateSection;
+  readonly ordinal: number;
   readonly aspect: number | null;
 }
 
@@ -135,19 +136,19 @@ export function enableBind(): void {
   bindBtn.disabled = false;
 }
 
-function mint(p: AtlasPlate, section: PlateSection): Bound {
+function mint(p: AtlasPlate, section: PlateSection, ordinal: number): Bound {
   const href = URL.createObjectURL(new Blob([p.svg], { type: "image/svg+xml" }));
   atlasUrls.push(href);
-  return { plate: { key: p.key, title: p.title, href }, section, aspect: plateAspect(p.svg) };
+  return { plate: { key: p.key, title: p.title, href }, section, ordinal, aspect: plateAspect(p.svg) };
 }
 
 // innerHTML takes trusted input only: every recipe param is validated against a fixed allowlist by `applyHash` in `src/site/print-room/app.ts` before any worker job runs, and the rest is escaped or engine-composed.
 function renderBoundAtlas(atlas: AtlasDocumentData): void {
-  const hero = mint(atlas.hero, "hero");
-  const draughtings = atlas.draughtings.map((p) => mint(p, "draughting"));
-  const themes = atlas.themes.map((p) => mint(p, "theme"));
-  const regions = atlas.regions.map((p) => mint(p, "region"));
-  const prospects = atlas.prospects.map((p) => mint(p, "prospect"));
+  const hero = mint(atlas.hero, "hero", 0);
+  const draughtings = atlas.draughtings.map((p) => mint(p, "draughting", 0));
+  const themes = atlas.themes.map((p, i) => mint(p, "theme", i));
+  const regions = atlas.regions.map((p) => mint(p, "region", 0));
+  const prospects = atlas.prospects.map((p) => mint(p, "prospect", 0));
   plates = new Map([hero, ...draughtings, ...themes, ...regions, ...prospects].map((b) => [b.plate.key, b]));
   const fig = (b: Bound, cls = ""): string => plateFigure(b.plate.href, b.plate.title, cls);
   const figs = (bs: Bound[]): string => bs.map((b) => fig(b)).join("\n");
@@ -180,7 +181,7 @@ function turnTo(key: string): void {
   if (!b) return;
   here = key;
   renderContents();
-  face.showPlate({ href: b.plate.href, title: b.plate.title, line: plateLine(b.section, b.plate.title) });
+  face.showPlate({ href: b.plate.href, title: b.plate.title, line: plateLine(b.section, b.plate.title, b.ordinal) });
 }
 
 function bindAtlas(): void {

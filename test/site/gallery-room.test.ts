@@ -79,12 +79,21 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   const screen = css.slice(0, css.indexOf("@media print"));
   assert.doesNotMatch(screen, /figcaption[^{]*\{[^}]*var\(--ink-(dark|brown|faded)\)/, "no ink lettering on the deep outside print");
   assert.match(css, /(^|\n)\.legend\s*\{\s*left:\s*50%;\s*\}/, "no slip to stand beside: the legend row is centred (placement is the page's, the dress the kit's)");
-  // The pool is the kit's, for the class (a chart room without a stage), not the page's for the cluster alone: the folio corner and the legend row sit over the same pale plates (tagline 2.26:1, rooms 2.0:1 measured under the cluster, plate read 2026-09-02; skeptic on PR #501).
+  // The pool is the kit's, for the class (a chart room without a stage), not the page's for the cluster alone: the folio corner and the legend row sit over the same pale plates (tagline 2.26:1, rooms 2.0:1 measured under the cluster, plate read 2026-09-02; skeptic on PR #501). Since the 2026-09-03 rulings (#465) the legend row takes home's gradient footing instead and the Glass no pool at all.
   assert.doesNotMatch(css, /header\.chrome/, "the page does not pool its own cluster");
-  const pool = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) :is\(header\.chrome, \.corner, \.legend\)::before[^{]*)\{([^}]*)\}/);
-  assert.ok(pool, "the kit pools every chrome of a stage-less chart room");
+  const pool = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) :is\(header\.chrome, \.corner\.bl\)::before[^{]*)\{([^}]*)\}/);
+  assert.ok(pool, "the kit pools the cluster and the chart folio of a stage-less chart room");
   assert.match(pool![2]!, /background:\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.92\);[^}]*filter:\s*blur\(16px\)/, "the #480 pool, the zoomed chart rooms' own");
-  assert.match(pool![1]!, /body:has\(#map-viewport\.zoomed\) :is\(header\.chrome, \.corner, \.legend, \.strip\)::before/, "one rule with the zoomed rooms' pool, so the two cannot drift");
+  assert.match(pool![1]!, /body:has\(#map-viewport\.zoomed\) :is\(header\.chrome, \.corner\.bl, \.strip\)::before/, "one rule with the zoomed rooms' pool, so the two cannot drift");
+  const panel = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.corner\.tr::before[^{]*)\{([^}]*)\}/);
+  assert.ok(panel, "the kit gives a stage-less room's folio home's seed box");
+  assert.match(panel![1]!, /body:has\(#map-viewport\.zoomed\) \.corner\.tr::before/, "the same rule serves the zoomed rooms' folio");
+  assert.match(panel![2]!, /inset:\s*-0\.7rem -0\.9rem -0\.8rem;[^}]*linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\)/, "home's own box: its padding as the insets, chart ink 0.85 to 0.72, no blur (public/index.css .lf-seed)");
+  assert.doesNotMatch(panel![2]!, /filter/, "a crisp panel, not the pool");
+  const footing = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.legend::before[^{]*)\{([^}]*)\}/);
+  assert.ok(footing, "the kit gives a stage-less room's legend row home's footing");
+  assert.match(footing![1]!, /body:has\(#map-viewport\.zoomed\) \.legend::before/, "the same rule serves the zoomed rooms' row");
+  assert.match(footing![2]!, /inset:\s*-0\.5rem -1\.1rem -0\.6rem;[^}]*linear-gradient\(to top, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.45\) 72%, transparent\)/, "home's own footing: its padding as the insets, chart ink at the foot fading up (public/index.css .lf-legend)");
   assert.doesNotMatch(css, /\/\*/, "the shipped sheet carries no prose (public/gallery/index.css ships it verbatim)");
   const phone = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
   assert.match(phone, /\.legend\s*\{[^}]*display:\s*block/, "the kit hides the row for a slip to dock it; the Gallery has no slip and no script, so the row stays");

@@ -28,6 +28,7 @@ const AUTHORED_CSS = [
   "public/motion.css",
   "public/print-room/index.css",
   "public/prospect/index.css",
+  "public/specimen/index.css",
   "public/ribbon/index.css",
   "public/reading-frame.css",
   "public/reading-room/index.css",
@@ -103,7 +104,7 @@ const TIPPING_LINKS = new Set([
   "explorer/broadside.css :: a.fn:hover",
   // #360, measured 2026-08-12: `cardFigureHtml` in `src/cli/gallery.ts` wraps every contact-sheet plate in a link; since #464 the link is the Explorer at the plate's seed (gallery-room.test.ts GR5 pins it).
   "src/cli/gallery.ts :: figure img:hover",
-  // #368, ruled 2026-08-12 and measured after: the lift is scoped to `figure a img`, and all three hosts of ATLAS_SHEET_CSS anchor their plates, so where no link is made no lift applies.
+  // #368, ruled 2026-08-12 and measured after: the lift is scoped to `figure a img`, so where no link is made no lift applies; two hosts of ATLAS_SHEET_CSS anchor their plates (the CLI page, the download's own script), and the Print Room's hidden copy carries no link since #465 ruling 1.
   "src/atlas/document.ts :: .atlas-sheet figure a img:hover",
   // #242: the place card's "View the prospect" slip navigates to /prospect/, so it tips (#289's promise).
   "living-chart.css :: .pc-prospect:hover, .pc-prospect:focus-visible",

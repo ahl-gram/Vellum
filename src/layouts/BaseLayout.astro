@@ -25,9 +25,11 @@ interface Props {
   chartRoom?: true;
   /** Extra root-absolute hrefs for SHARED sheets a page opts into; linked after the global sheets and before the page's own relative index.css, so page rules keep the last word. */
   extraCss?: readonly string[];
+  /** A robots noindex meta (#465, the Specimen Book). */
+  noindex?: true;
 }
 
-const { room, ogRoom, description, ogDescription, path, desk: deskProp, chartRoom, extraCss = [] } = Astro.props;
+const { room, ogRoom, description, ogDescription, path, desk: deskProp, chartRoom, extraCss = [], noindex } = Astro.props;
 
 for (const href of extraCss) {
   if (!href.startsWith("/")) {
@@ -74,6 +76,7 @@ const cardDescription = ogDescription ?? description;
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <meta name="description" content={description}>
+{noindex && <meta name="robots" content="noindex">}
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Vellum">

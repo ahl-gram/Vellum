@@ -38,7 +38,7 @@ test("no page sheet re-binds the intro voice (#324)", () => {
     "public/faq/index.css",
     "public/glossary/index.css", "public/print-room/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
-    "public/prospect/index.css", "public/ribbon/index.css",
+    "public/prospect/index.css", "public/ribbon/index.css", "public/specimen/index.css",
     "public/atelier.css",
   ]) {
     const css = read(page);
@@ -155,7 +155,7 @@ test("the old page-local skins are gone (#324)", () => {
     "public/explorer/index.css", "public/explorer/broadside.css",
     "public/print-room/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
-    "public/prospect/index.css", "public/ribbon/index.css",
+    "public/prospect/index.css", "public/ribbon/index.css", "public/specimen/index.css",
   ]) {
     assert.ok(
       !/select,\s*button[^{]*\{[^}]*background/.test(read(page)),
@@ -172,7 +172,7 @@ test("no token value smuggled past the guards in rgb() form (#324)", async () =>
     "public/faq/index.css",
     "public/glossary/index.css", "public/print-room/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
-    "public/prospect/index.css", "public/ribbon/index.css",
+    "public/prospect/index.css", "public/ribbon/index.css", "public/specimen/index.css",
     "public/reading-frame.css", "public/living-chart.css", "public/motion.css",
     "public/house.css", "public/atelier.css", "src/layouts/BaseLayout.astro", "src/pages/index.astro",
     "src/atlas/document.ts", "src/cli/gallery.ts",

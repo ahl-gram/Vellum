@@ -5,11 +5,6 @@ import assert from "node:assert/strict";
 
 const MODULE = "../../src/site/print-room/plate-markup.ts";
 const HREF = "blob:http://127.0.0.1:4173/8b1f2c3d-0000-4a5b-9c1d-2e3f4a5b6c7d";
-const anchorOf = (html: string): string => {
-  const m = html.match(/<a\b[^>]*>[\s\S]*?<\/a>/);
-  assert.ok(m, "the plate carries no anchor at all: a reader can look at it but not open it");
-  return m[0];
-};
 
 test("#379 the plate markup builder imports into a Node with no DOM", async () => {
   assert.equal(typeof (globalThis as { document?: unknown }).document, "undefined", "no DOM is installed here");
@@ -17,15 +12,13 @@ test("#379 the plate markup builder imports into a Node with no DOM", async () =
   assert.equal(typeof mod.plateFigure, "function", "the pure half is exported");
 });
 
-test("#379 a bound plate is an anchor on the plate itself, opening in a new tab (#368)", async () => {
+test("#465 ruling 1: a plate of the hidden document is a bare figure, the img and its caption, with no link on it (since seat d no visitor reaches the copy on screen, and the download is composed without links)", async () => {
   const { plateFigure } = await import(MODULE);
 
-  const anchor = anchorOf(plateFigure(HREF, "The Isle of Rahai"));
+  const html = plateFigure(HREF, "The Isle of Rahai");
 
-  assert.ok(anchor.includes(`href="${HREF}"`), "the anchor does not point at the plate it was given");
-  assert.match(anchor, /target="_blank"/, "navigating in place tears down the page and revokes the blob the link points at");
-  assert.match(anchor, /rel="noopener"/, "a target=_blank link without rel=noopener hands the opened tab a window.opener handle");
-  assert.ok(anchor.includes(`<img src="${HREF}"`), "the plate the reader clicks and the plate they see are different files");
+  assert.equal(html, `<figure><img src="${HREF}" alt="The Isle of Rahai"><figcaption>The Isle of Rahai</figcaption></figure>`);
+  assert.doesNotMatch(html, /<a\b|target=|rel=/, "the plate links nowhere: the anchors retired with e2e PR20b");
 });
 
 test("#379 a bound plate never lazy-loads: a below-fold lazy plate prints blank", async () => {
