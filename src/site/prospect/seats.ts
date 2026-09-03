@@ -2,6 +2,7 @@
 import { createZoomController } from "../shared/zoom-controller.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";
 import { bindRoom, type Room } from "../shared/room.ts";
+import { contentsRow } from "../shared/contents-row.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
 import { PLATE_W, PLATE_H } from "../../prospect/geometry.ts";
 import { eraLine, subLine, whereLine } from "./note-lines.ts";
@@ -62,13 +63,7 @@ export function writeFolio(f: RoomFurniture, res: Facts, seed: number, dress: Pl
 
 const row = (num: string, text: string): HTMLLIElement => {
   const li = document.createElement("li");
-  const n = document.createElement("span");
-  n.className = "cr-num";
-  n.textContent = num;
-  const t = document.createElement("span");
-  t.className = "cr-text";
-  t.textContent = text;
-  li.append(n, t);
+  li.append(...contentsRow(num, [text]));
   return li;
 };
 

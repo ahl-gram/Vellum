@@ -2,6 +2,7 @@
 import { createZoomController } from "../shared/zoom-controller.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";
 import { bindRoom, dockLegend, legendSeat, type Room } from "../shared/room.ts";
+import { contentsRow, type RowPart } from "../shared/contents-row.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
 import { RIBBON_W, RIBBON_H } from "../../itinerary/finished.ts";
 import { rowText } from "./row-text.ts";
@@ -76,6 +77,12 @@ export function writeFolio(f: RoomFurniture, res: Facts, seed: number, dress: Pl
   f.unrolled.textContent = `unrolled in ${ms}ms · ${Math.round(res.leagues)} leagues · ${dress}`;
 }
 
+const inline = (tag: "strong" | "em", text: string): HTMLElement => {
+  const el = document.createElement(tag);
+  el.textContent = text;
+  return el;
+};
+
 function rowNode(r: RibbonRow, onLean: (row: RibbonRow, li: HTMLLIElement) => void): HTMLLIElement {
   const li = document.createElement("li");
   li.className = r.kind;
@@ -85,23 +92,9 @@ function rowNode(r: RibbonRow, onLean: (row: RibbonRow, li: HTMLLIElement) => vo
   btn.type = "button";
   btn.className = "lean";
   btn.title = "Lean the Glass on this stretch";
-  const num = document.createElement("span");
-  num.className = "cr-num";
-  num.textContent = String(Math.round(r.leagues));
-  const text = document.createElement("span");
-  text.className = "cr-text";
   const { strong, em } = rowText(r);
-  if (strong !== null) {
-    const s = document.createElement("strong");
-    s.textContent = strong;
-    text.append(s, " ");
-  }
-  if (em !== "") {
-    const e = document.createElement("em");
-    e.textContent = em;
-    text.append(e);
-  }
-  btn.append(num, text);
+  const parts: RowPart[] = [...(strong !== null ? [inline("strong", strong), " "] : []), ...(em !== "" ? [inline("em", em)] : [])];
+  btn.append(...contentsRow(String(Math.round(r.leagues)), parts));
   btn.addEventListener("click", () => onLean(r, li));
   li.append(btn);
   return li;
