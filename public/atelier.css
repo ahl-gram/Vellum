@@ -135,12 +135,11 @@ button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; ba
 
 /* Magnified, the sheet spills under the chrome (the mockup's look) and parchment on paper measured 1.1:1 (plate read 2026-08-29): while the Glass is zoomed the cluster, the corners and the legend row stand on home's pool, the #480 blurred box that follows its cluster. At rest they stand on the deep and carry none (RH9b). */
 /* A chart room without a stage (the Gallery, #464) scrolls its sheets under the chrome at every position, so its cluster, corners and legend keep the pool at all times. */
-body:has(#map-viewport.zoomed) :is(header.chrome, .corner:not(.zoomery), .strip)::before, body.chart-room:not(:has(.stage)) :is(header.chrome, .corner:not(.zoomery))::before { content: ""; position: absolute; z-index: -1; pointer-events: none;
+body:has(#map-viewport.zoomed) :is(header.chrome, .corner.bl, .strip)::before, body.chart-room:not(:has(.stage)) :is(header.chrome, .corner.bl)::before { content: ""; position: absolute; z-index: -1; pointer-events: none;
   inset: var(--pool-top, -1.3rem) var(--pool-right, -1.6rem) var(--pool-bottom, -1.3rem) var(--pool-left, -1.6rem);
   background: rgb(from var(--chart-ink) r g b / 0.92); filter: blur(16px); }
-/* A piece's edge-facing sides run 4rem out, home's own inset (public/index.css), so the blur's fade lies past the viewport edge and no chart bleeds through at a corner (Alex's 2026-09-03 call on the Explorer's top-left; measured 97 against a 60 interior at the edge). The Glass carries no pool: its presses stand on the chart with their own half-ink fill, as home's do (the same call, the Glass beside home's). */
+/* A piece's edge-facing sides run 4rem out, home's own inset (public/index.css), so the blur's fade lies past the viewport edge and no chart bleeds through at a corner (Alex's 2026-09-03 call on the Explorer's top-left; measured 97 against a 60 interior at the edge). The Glass carries no pool: its presses stand on the chart with their own half-ink fill, as home's do; the room folio takes home's seed box instead (below); both the same call, each beside home's. */
 body.chart-room header.chrome { --pool-top: -4rem; --pool-left: -4rem; }
-body.chart-room .corner.tr { --pool-top: -4rem; --pool-right: -4rem; }
 body.chart-room .corner.bl { --pool-bottom: -4rem; --pool-left: -4rem; }
 body.chart-room .strip { --pool-bottom: -4rem; --pool-left: -4rem; --pool-right: -4rem; }
 
@@ -148,6 +147,9 @@ body.chart-room .strip { --pool-bottom: -4rem; --pool-left: -4rem; --pool-right:
 body:has(#map-viewport.zoomed) .legend::before, body.chart-room:not(:has(.stage)) .legend::before { content: ""; position: absolute; inset: -0.5rem -1.1rem -0.6rem; z-index: -1; pointer-events: none;
   background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.45) 72%, transparent); }
 .legend.in-slip::before { content: none; }
+/* The room folio's ground is home's seed box (public/index.css .lf-seed, its 0.7rem 0.9rem 0.8rem padding; Alex's 2026-09-03 call): a crisp panel, chart ink 0.85 to 0.72 top to bottom, no blur, drawn as the corner's own ::before at the padding's insets so the corner's box, which the slip's seat reads, never changes; it paints under the pool's conditions. */
+body:has(#map-viewport.zoomed) .corner.tr::before, body.chart-room:not(:has(.stage)) .corner.tr::before { content: ""; position: absolute; inset: -0.7rem -0.9rem -0.8rem; z-index: -1; pointer-events: none;
+  background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
 
 /* The landing (#461 ruling 6, the chart room's half): the stage settles onto the deep, the corners, the slip and the legend ink in after; motion.css's reduced-motion blanket collapses both. */
 body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
@@ -197,6 +199,7 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .vignette { height: 8rem; }
   .corner.bl { display: none; }
   .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); bottom: calc(var(--sheet-h, 6rem) + 1rem); }
+  .corner.tr::before { inset: -0.7rem -0.7rem -0.75rem; }
   .legend { display: none; }
   .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; max-width: none !important; }
   .legend.in-slip .legend-head { display: none; }
