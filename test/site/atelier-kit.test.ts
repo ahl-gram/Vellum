@@ -93,8 +93,14 @@ test("AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02):
 
 test("AK8 home seats the kit's camera itself (#505, ruled 2026-09-02: home keeps its own seat) and binds it by id, never through glass-keys", () => {
   const css = read("public/index.css");
-  assert.match(css, /#lf-controls\s*\{[^}]*display:\s*none;[^}]*position:\s*absolute;[^}]*right:\s*1\.6rem;[^}]*bottom:\s*1\.4rem;[^}]*z-index:\s*auto;[^}]*animation:\s*none;/, "inside the stage as before, scrolling away with it; the kit's fixed corner, depth and ink-in stood down");
+  const seats = [...css.matchAll(/#lf-controls\s*\{([^}]*)\}/g)];
+  assert.equal(seats.length, 1, "one seat rule, at every width (the phone twin was dead: the id already outranks the kit's 900px seat)");
+  const declared = new Set(seats[0]![1]!.split(";").map((d) => d.trim()).filter(Boolean));
+  for (const d of ["display: none", "position: absolute", "right: var(--chrome-x)", "bottom: var(--chrome-y)", "z-index: auto", "animation: none", "pointer-events: auto"]) {
+    assert.ok(declared.has(d), `the seat declares ${d} (inside the stage as before, scrolling away with it; the kit's fixed corner, depth, ink-in and pointer policy stood down)`);
+  }
   assert.match(css, /#lf-controls\.on\s*\{\s*display:\s*flex;/, "shown once the camera arms");
+  assert.match(css, /#lf-controls button:focus-visible\s*\{\s*outline-color:\s*var\(--ink-dark\);/, "the house's ring on home's presses, not the kit's corner ring (the camera stands on chart paper once zoomed; skeptic on PR #508)");
   assert.match(css, /#lf-controls button \{ touch-action: pan-y; \}/, "the touch-action line the presses carried (#475) stays");
   const app = read("src/site/home/app.ts");
   for (const id of ["zoom-in", "zoom-out", "zoom-reset"]) assert.ok(app.includes(`getElementById("${id}")`), `app.ts binds ${id}`);

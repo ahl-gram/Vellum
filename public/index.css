@@ -51,9 +51,10 @@
   font-size: 8.5px; letter-spacing: 0.08em; color: var(--chart-ink); white-space: nowrap;
   text-shadow: 0 0 4px var(--chart-paper), 0 0 8px var(--chart-paper);
 }
-/* #505: the camera is the kit's Glass, seated by home (placement is the page's, the dress the kit's): inside the stage as before, scrolling away with it, shown once the camera arms; the kit's fixed corner, depth and ink-in stood down. */
-#lf-controls { display: none; position: absolute; right: 1.6rem; bottom: 1.4rem; z-index: auto; animation: none; }
+/* #505: the camera is the kit's Glass; home seats it (placement is the page's). What the kit's corner sets beyond dress is stood down here, and kit-scope.test.ts pins that list. */
+#lf-controls { display: none; position: absolute; right: var(--chrome-x); bottom: var(--chrome-y); z-index: auto; animation: none; pointer-events: auto; }
 #lf-controls.on { display: flex; }
+#lf-controls button:focus-visible { outline-color: var(--ink-dark); }
 .lf-coords {
   display: none; position: absolute; left: 1.6rem; bottom: 1.4rem; margin: 0;
   font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
@@ -373,8 +374,6 @@ header.chrome::before {
   }
   .lf-card-arms img { width: 42px; }
   .lf-card-how { max-height: 45vh; }
-  /* The legend band retired with the phone doors, so the camera column returns to the shore. */
-  #lf-controls { bottom: 1.4rem; }
   .lf-coords.on { display: none; }
   .notice-stamp { display: none; }
   .lf-seed { right: 1rem; top: 0.9rem; max-width: 12rem; padding: 0.7rem 0.7rem 0.75rem; }

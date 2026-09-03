@@ -28,7 +28,7 @@ interface GlassDeps {
   regionEligible: () => boolean;
   /** #165/#169: the conductor's ONE hash writer; settles funnel through it. */
   syncHash: () => void;
-  /** The on-screen stand-back / full-sheet / lean-closer cluster (#165, voiced in #170). */
+  /** The on-screen camera, draw nearer / stand off / the whole sheet (#165; voiced at #170, home's voice since #505). */
   buttons: { zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement; cluster: HTMLElement };
 }
 

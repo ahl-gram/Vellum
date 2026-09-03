@@ -212,7 +212,7 @@ export async function run(ctx) {
     await sleep(40);
   }
   check(
-    "G8 the full sheet returns on one voiced press: glide home, inset faded off, hash clean, world overlay back (#170)",
+    "G8 the whole sheet returns on one press: glide home, inset faded off, hash clean, world overlay back (#170; home's voice since #505)",
     g8cam.k === 1 && g8cam.x === 0 && g8cam.y === 0 && g8.band === 0 && g8.committed === false &&
       g8.insets === 0 && g8.hits > 0 && g8.cx === null,
     `cam=${JSON.stringify(g8cam)} ${JSON.stringify(g8)}`,

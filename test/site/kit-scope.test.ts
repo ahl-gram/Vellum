@@ -48,9 +48,53 @@ test("the guard can see an unscoped collision: the offender loop itself reads a 
   assert.deepEqual(offendersIn(".stage { position: fixed; } body.chart-room .stage { inset: 0; } .folio-controls .control { width: 1px; } .stage .sheet { color: red; }", home), [".stage", ".stage .sheet"], "a bare rule and a compound of home classes both red; a compound with a kit-only class does not");
 });
 
-test("home wears the kit's camera through the component alone (#505): one <Glass> in index.astro and none of its classes literal, so a pasted copy would put the corner's arms into the sweep above", () => {
+/** The classes a page wears THROUGH the kit components it renders: the components' own literal classes. */
+const componentWorn = (astro: string): Set<string> =>
+  new Set([...astro.matchAll(/<(Fog|Vignettes|Glass|ChartFolio|ChartStage|LegendButton|Slip|RoomFolio)\b/g)].flatMap((m) => [...classesIn(read(`src/layouts/${m[1]}.astro`))]));
+
+// What a kit arm may set on a class a page wears through a component: dress, which is why the page renders it. A seat, a depth, a ceremony, a pointer policy or a ring must be stood down by the page's own rule for that component, or it is a leak the literal sweep above cannot see (#505, skeptic on PR #508).
+const DRESS = new Set(["display", "flex-direction", "gap", "align-items", "transition", "line-height", "width", "height", "font-family", "font-size", "color", "background", "border", "cursor", "text-align"]);
+
+/** Top-level commas only: a comma inside :is() or :where() does not start a new arm. */
+const splitArms = (list: string): string[] => {
+  const arms: string[] = [];
+  let depth = 0, start = 0;
+  for (let i = 0; i < list.length; i++) {
+    const ch = list[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    else if (ch === "," && depth === 0) { arms.push(list.slice(start, i).trim()); start = i + 1; }
+  }
+  return [...arms, list.slice(start).trim()];
+};
+
+const leaksIn = (css: string, worn: Set<string>, stoodDown: Set<string>): string[] =>
+  [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)].flatMap((m) =>
+    splitArms(m[1]!).flatMap((arm) => {
+      if (arm.startsWith("@") || SCOPED.test(arm) || arm.includes("body:has") || /(^|\s)[a-z]+\./.test(arm)) return [];
+      const classes = [...arm.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((x) => x[1]!);
+      if (classes.length === 0 || !classes.every((c) => worn.has(c))) return [];
+      return [...m[2]!.matchAll(/([a-z-]+)\s*:/g)].map((x) => x[1]!).filter((p) => !DRESS.has(p) && !stoodDown.has(p)).map((p) => `${arm} { ${p} }`);
+    }));
+
+test("home wears the kit's camera through the component alone (#505), and every non-dress property the kit's arms set on those classes is stood down by home's own seat", () => {
   const src = read("src/pages/index.astro");
   assert.equal((src.match(/<Glass /g) ?? []).length, 1);
-  const worn = classesIn(src);
-  for (const c of ["chrome", "corner", "br", "zoomery", "zoom-btn"]) assert.ok(!worn.has(c), `home does not author .${c} itself`);
+  const worn = componentWorn(src);
+  const literal = classesIn(src);
+  for (const c of ["chrome", "corner", "br", "zoomery", "zoom-btn"]) {
+    assert.ok(worn.has(c), `home wears .${c} through the Glass`);
+    assert.ok(!literal.has(c), `home does not author .${c} itself (a pasted copy would put the corner's arms into the sweep above)`);
+  }
+  const home = read("public/index.css");
+  const seat = home.match(/#lf-controls\s*\{([^}]*)\}/)?.[1] ?? "";
+  const stoodDown = new Set([...seat.matchAll(/([a-z-]+)\s*:/g)].map((m) => m[1]!));
+  if (/#lf-controls button:focus-visible\s*\{[^}]*outline-color:/.test(home)) stoodDown.add("outline-color");
+  for (const sheet of kitSheets()) assert.deepEqual(leaksIn(read(sheet), worn, stoodDown), [], `${sheet} reaches home's camera with a property home neither wears as dress nor stands down`);
+});
+
+test("the component-worn sweep can see a leak: a planted seat and a planted ring on .corner both red, a dress rule does not", () => {
+  const worn = new Set(["corner", "zoomery", "zoom-btn"]);
+  assert.deepEqual(leaksIn(".corner { top: 0; } .corner :is(a, button):focus-visible { outline-color: red; } .zoom-btn { color: red; } body.chart-room .corner { top: 1px; } header.chrome { top: 2px; }", worn, new Set(["position"])), [".corner { top }", ".corner :is(a, button):focus-visible { outline-color }"]);
+  assert.deepEqual(leaksIn(".corner { position: fixed; }", worn, new Set(["position"])), [], "and a stood-down property passes");
 });
