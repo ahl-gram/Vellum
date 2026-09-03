@@ -26,7 +26,7 @@ const READ = `(() => {
     glass: r(".corner.br"), glassDisp: cs(".zoomery", "display"),
     glassOverFolio: (() => { const g = document.querySelector(".corner.br"), f = document.querySelector(".corner.tr"); if (!g || !f) return null; const a = g.getBoundingClientRect(), b = f.getBoundingClientRect(); const w = Math.min(a.right, b.right) - Math.max(a.x, b.x), h = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y); return w > 0 && h > 0 ? [Math.round(w), Math.round(h)] : null; })(),
     legend: r(".legend"), legendDisp: cs(".legend", "display"), legendGround: cs(".legend", "backgroundImage"), legendInSlip: !!legend && legend.classList.contains("in-slip"), legendDocked: !!legend && !!legend.parentElement && legend.parentElement.classList.contains("legend-dock"),
-    pool: cs(".corner.tr", "content", "::before"), poolChrome: cs("header.chrome", "content", "::before"),
+    pool: cs(".corner.tr", "content", "::before"), poolChrome: cs("header.chrome", "content", "::before"), poolGlass: cs(".corner.br", "content", "::before"),
     pillDisp: cs("#sb-status", "display"), pillText: (document.getElementById("sb-status") || { textContent: null }).textContent,
     folioLines: [...document.querySelectorAll(".corner.bl p")].map((p) => p.textContent.length > 0),
     crNum: cs(".contents .cr-num", "color"), inked: cs(".index li.inked", "opacity"), unInked: cs(".index > li:not(.inked)", "opacity"),
@@ -103,12 +103,18 @@ export async function run(ctx) {
   const brightest = async (x, y) => Math.round(Math.max(...(await sampleRow(send, x, y, 8)).map(luminance)));
   const interior = await brightest(200, 24);
   const corners = [];
-  // The edges the spilled chart reaches under a pooled piece: the two left corners and the bottom under the Glass; the right side is the slip's, and the legend row carries home's footing, not the pool (SB5c).
-  for (const [x, y, name] of [[0, 2, "top-left"], [0, 797, "bottom-left"], [Math.round(leaned.glass.x) + 2, 797, "under the Glass"]]) corners.push({ name, max: await brightest(x, y) });
+  // The edges the spilled chart reaches under a pooled piece: the two left corners; the right side is the slip's, the legend row carries home's footing (SB5c) and the Glass no pool at all (SB5d).
+  for (const [x, y, name] of [[0, 2, "top-left"], [0, 797, "bottom-left"]]) corners.push({ name, max: await brightest(x, y) });
   check(
     "SB5b leaned, every viewport edge under a pooled piece is as dark as the pool's interior: no chart paper bleeds through the pool's fade at the edge (eight edge pixels at each place within 15 of the cluster's interior, which the old inset failed at 97 against 60)",
     corners.every((c) => c.max <= interior + 15),
     JSON.stringify({ interior, corners }),
+  );
+  const underGlass = await brightest(Math.round(leaned.glass.x) + 2, 797);
+  check(
+    "SB5d leaned, the Glass stands bare on the chart as home's does: no pool behind its presses, and the chart shows through beside them (the edge just below the Glass reads well above the pooled interior)",
+    !!leaned && leaned.poolGlass === "none" && underGlass > interior + 30,
+    JSON.stringify({ poolGlass: leaned.poolGlass, underGlass, interior }),
   );
   const footing = await brightest(Math.round(leaned.legend.x + leaned.legend.w / 2) - 4, Math.round(leaned.legend.bottom) - 4);
   check(
