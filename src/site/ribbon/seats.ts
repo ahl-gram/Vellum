@@ -93,7 +93,9 @@ function rowNode(r: RibbonRow, onLean: (row: RibbonRow, li: HTMLLIElement) => vo
   btn.className = "lean";
   btn.title = "Lean the Glass on this stretch";
   const { strong, em } = rowText(r);
-  const parts: RowPart[] = [...(strong !== null ? [inline("strong", strong), " "] : []), ...(em !== "" ? [inline("em", em)] : [])];
+  const parts: RowPart[] = [];
+  if (strong !== null) parts.push(inline("strong", strong), " ");
+  if (em !== "") parts.push(inline("em", em));
   btn.append(...contentsRow(String(Math.round(r.leagues)), parts));
   btn.addEventListener("click", () => onLean(r, li));
   li.append(btn);
