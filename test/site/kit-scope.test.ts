@@ -98,3 +98,42 @@ test("the component-worn sweep can see a leak: a planted seat and a planted ring
   assert.deepEqual(leaksIn(".corner { top: 0; } .corner :is(a, button):focus-visible { outline-color: red; } .zoom-btn { color: red; } body.chart-room .corner { top: 1px; } header.chrome { top: 2px; }", worn, new Set(["position"])), [".corner { top }", ".corner :is(a, button):focus-visible { outline-color }"]);
   assert.deepEqual(leaksIn(".corner { position: fixed; }", worn, new Set(["position"])), [], "and a stood-down property passes");
 });
+
+// #487 item 5 (the #302 precedent, cut at #465): a page SEATS a component, dresses its OWN elements inside one, and inks a row under its OWN state; a bare kit selector sets no dress. The kit's classes are what atelier.css dresses and no house sheet or the shell dresses too; the strip is the Reading Room's own instrument, which the kit's pool rule only reaches.
+const strip = (css: string): string => css.replace(/\/\*[\s\S]*?\*\//g, "");
+const classesNamed = (css: string): Set<string> => new Set([...strip(css).matchAll(/([^{}]+)\{/g)].flatMap((m) => [...m[1]!.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((x) => x[1]!)));
+const kitClasses = (): Set<string> => {
+  const others = new Set([read("public/house.css"), read("public/motion.css"), read("src/layouts/BaseLayout.astro").match(/<style is:global>([\s\S]*?)<\/style>/)?.[1] ?? ""].flatMap((css) => [...classesNamed(css)]));
+  return new Set([...kitSheets().flatMap((s) => [...classesNamed(read(s))])].filter((c) => !others.has(c) && c !== "strip"));
+};
+const REDRESS = /^(color|background(-color|-image)?|border(-[a-z]+)?|outline(-color)?|box-shadow|font(-[a-z]+)?|letter-spacing|text-decoration|text-transform|opacity)$/;
+
+const redressesIn = (css: string, kit: Set<string>): string[] =>
+  [...strip(css).matchAll(/([^{}]+)\{([^{}]*)\}/g)].flatMap((m) =>
+    splitArms(m[1]!).flatMap((arm) => {
+      if (arm.startsWith("@") || /#[\w-]+/.test(arm)) return [];
+      const classes = [...arm.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((x) => x[1]!);
+      if (classes.length === 0 || !classes.every((c) => kit.has(c))) return [];
+      const subject = arm.split(/\s+|>|\+|~/).filter(Boolean).at(-1) ?? "";
+      if (/^[a-z]/.test(subject)) return [];
+      return [...m[2]!.matchAll(/([a-z-]+)\s*:/g)].map((x) => x[1]!).filter((p) => REDRESS.test(p)).map((p) => `${arm.replace(/\s+/g, " ")} { ${p} }`);
+    }));
+
+const pageSheets = (): Array<readonly [string, string]> => [
+  ...globSync("public/**/index.css", { cwd: REPO }).map((p) => [p, read(p)] as const),
+  ...["public/living-chart.css", "public/reading-frame.css"].map((p) => [p, read(p)] as const),
+  ...globSync("src/pages/**/index.astro", { cwd: REPO }).map((p) => [p, [...read(p).matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n")] as const),
+];
+
+test("no page sheet re-dresses a kit class (#487 item 5, the #302 precedent): a seat, a page's own element inside a component, and a row inked under the page's own state pass; a bare kit selector sets no dress", () => {
+  const kit = kitClasses();
+  for (const c of ["slip", "legend-head", "cr-num", "zoom-btn", "in-slip", "folded"]) assert.ok(kit.has(c), `.${c} is the kit's`);
+  for (const c of ["control", "primary", "intro", "status", "chrome", "strip"]) assert.ok(!kit.has(c), `.${c} is not the kit's alone`);
+  for (const [name, css] of pageSheets()) assert.deepEqual(redressesIn(css, kit), [], `${name} re-dresses the kit; move the dress onto the page's own element or state, or into atelier.css`);
+});
+
+test("the re-dress sweep can see a leak: a planted colour on the docked legend's head reds, a seat on the slip, a colour on the page's own select inside the head and a row inked under the page's state do not", () => {
+  const kit = new Set(["legend", "in-slip", "legend-head", "slip", "cr-num", "contents"]);
+  assert.deepEqual(redressesIn(".legend.in-slip .legend-head { display: block; color: red; } .slip { top: 9rem; bottom: 4rem; } .legend-head select { color: red; } .contents li.on .cr-num { color: red; } #pr-page .cr-num { color: red; }", kit), [".legend.in-slip .legend-head { color }"]);
+  assert.deepEqual(redressesIn(".legend-head, .slip .cr-num { font-style: italic; }", kit), [".legend-head { font-style }", ".slip .cr-num { font-style }"], "every arm of a list is read on its own");
+});

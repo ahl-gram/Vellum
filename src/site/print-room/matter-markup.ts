@@ -1,5 +1,6 @@
 // The bound atlas's back matter as a page of the atlas (#497, seat p): pure strings like plate-markup.ts. The host measures the page at the 900px/16px reference and the room fits the sheet to pageAspect.
 import { escapeXml } from "../../render/svg.ts";
+import { MATTER_ROW, numeralOf } from "./plate-numbers.ts";
 
 export type MatterKey = "banners" | "chronicle" | "gazetteer";
 export const MATTER_KEYS: readonly MatterKey[] = ["banners", "chronicle", "gazetteer"];
@@ -14,7 +15,6 @@ export interface MatterSource {
   readonly gazetteerHtml: string;
 }
 
-const NUMERAL: Record<MatterKey, string> = { banners: "vi", chronicle: "vii", gazetteer: "viii" };
 const TITLE: Record<MatterKey, string> = {
   banners: "The banners of every realm",
   chronicle: "The chronicle",
@@ -31,7 +31,7 @@ export function matterTitle(key: MatterKey): string {
 
 export function matterLine(key: MatterKey): string {
   const what = key === "banners" ? "the banners of every realm" : `the ${key}`;
-  return `plate ${NUMERAL[key]} of the bound atlas · ${what}`;
+  return `plate ${numeralOf(MATTER_ROW[key])} of the bound atlas · ${what}`;
 }
 
 export function pageAspect(measuredHeight: number): number {

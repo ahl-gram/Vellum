@@ -44,6 +44,8 @@ type PageSpec = {
   chartRoom?: true;
   /** Sub 7 (#462): a document room's index script, an Astro-processed component script inlined into the page (the #483 shape); the marker must occur only inside it, and it is a pattern because the minifier picks the quote style. */
   pageScript?: RegExp;
+  /** #465: a page kept out of search (the Specimen Book) carries the one extra head member, a robots noindex meta. */
+  noindex?: true;
 };
 
 /** The shell's binder, inlined into every page by Astro (#483); stripped before a page's OWN scripts are counted. */
@@ -177,6 +179,18 @@ const PAGES: readonly PageSpec[] = [
       "A contact sheet of twelve imaginary worlds, drawn by Vellum as antique charts and hung for viewing.",
     tagline: "a dozen worlds, hung for viewing",
     chartRoom: true,
+  },
+  {
+    route: "specimen/index.html",
+    dir: "/specimen/",
+    room: "The Specimen Book",
+    title: "The Specimen Book · Vellum",
+    ogTitle: "The Specimen Book · Vellum",
+    description: "The Atelier Kit's specimen book: every piece of the room furniture at its seat, in every state, for the closing review's eye.",
+    tagline: "the kit, every piece in every state",
+    scriptSrc: "./app.bundle.js",
+    chartRoom: true,
+    noindex: true,
   },
 ];
 
@@ -325,8 +339,9 @@ test("no head member arrives beyond the canonical set (nothing injected, nothing
       const m = attrs.match(/(name|property)="([^"]+)"/);
       return m ? `${m[1]}:${m[2]}` : `unrecognized: ${attrs}`;
     });
-    assert.deepEqual(new Set(seen), expectedMeta, `${p.route} meta set should be exactly the canonical one`);
-    assert.equal(seen.length, expectedMeta.size, `${p.route} should carry no duplicate meta`);
+    const expected = new Set([...expectedMeta, ...(p.noindex ? ["name:robots"] : [])]);
+    assert.deepEqual(new Set(seen), expected, `${p.route} meta set should be exactly the canonical one${p.noindex ? " plus robots noindex (#465)" : ""}`);
+    assert.equal(seen.length, expected.size, `${p.route} should carry no duplicate meta`);
     assert.ok(!/<link(?![^>]*(?:rel="icon"|rel="stylesheet"|rel="prefetch"))/.test(head), `${p.route} has only icon/stylesheet/prefetch links`);
     assert.ok(!head.includes("canonical"), "no canonical tags exist today and the layout must not invent them");
   }
@@ -688,6 +703,7 @@ const STAGES: ReadonlyArray<readonly [string, string]> = [
   ["print-room/index.html", "The proof. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
   ["prospect/index.html", "The plate. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
   ["ribbon/index.html", "The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
+  ["specimen/index.html", "The specimen sheet. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
 ];
 type Road = { id?: string; gold?: true; road?: string; href: string; verbId?: string };
 /** Every road out on the site, by page and in order, LITERAL: the id, the gold, the data-road stamp and the verb's id are what the pages' scripts and the suites read, and a roster taken from the source it is compared against would be circular (skeptic on PR #502). A page absent here renders no road. */
@@ -698,6 +714,7 @@ const ROADS: Record<string, ReadonlyArray<Road>> = {
   "ribbon/index.html": [{ id: "rb-chart-link", gold: true, href: "/explorer/" }, { id: "rb-prospect-link", href: "/prospect/", verbId: "rb-prospect-verb" }],
   "seed-of-the-day/index.html": [{ road: "explorer", href: "../explorer/" }, { road: "reading-room", href: "../reading-room/" }],
   "gallery/index.html": [{ gold: true, href: "/explorer/" }],
+  "specimen/index.html": [{ href: "/explorer/" }, { gold: true, href: "/gallery/" }],
 };
 const roadOpening = (r: Road): string =>
   `<a${r.id ? ` id="${r.id}"` : ""} class="legend-btn${r.gold ? " gold" : ""}"${r.road ? ` data-road="${r.road}"` : ""} href="${r.href}"><span class="verb"${r.verbId ? ` id="${r.verbId}"` : ""}>`;
@@ -796,6 +813,7 @@ test("every internal link and embed on the rendered pages resolves", () => {
     "/reading-room/app.bundle.js",
     "/prospect/app.bundle.js",
     "/ribbon/app.bundle.js",
+    "/specimen/app.bundle.js",
     "/app.bundle.js",
   ];
   const routes = new Set<string>(PAGES.map((p) => p.dir));

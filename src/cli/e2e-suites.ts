@@ -30,6 +30,7 @@ export const E2E_SUITE_ORDER = [
   "room-drawer",
   "document-rooms",
   "region-detail",
+  "specimen",
 ] as const;
 
 export type E2eSuiteName = (typeof E2E_SUITE_ORDER)[number];
@@ -45,6 +46,7 @@ export const SMOKE_SUITES: readonly E2eSuiteName[] = [
   "ribbon",
   "home",
   "reading-room",
+  "specimen",
 ];
 
 export type E2eTier = "full" | "smoke" | "custom";

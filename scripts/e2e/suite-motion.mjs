@@ -15,7 +15,7 @@ export async function run(ctx) {
   await waitSettled("draft-drag-release");
   const d3rel = await evaluate(`document.querySelector("#map svg").classList.contains("arriving")`);
   check("D3 drag input is quiet (no ceremony), release restores it", d3drag === false && d3rel === true, `dragArriving=${d3drag} releaseArriving=${d3rel}`);
-  // D4/D5 retired at #199 and their numbers left as a gap: the plate hover-lift half is still live and its guard is PR20b in suite-print-room.
+  // D4/D5 retired at #199 and their numbers left as a gap; the plate hover-lift's guard was PR20b in suite-print-room until #465 ruling 1 retired the on-screen plates' links, so the lift's one guard is the download's own document test (test/atlas/document.test.ts).
   // A view transition cannot be seen by e2e, so F1/F2 read the DECLARATION out of the CSSOM; motion.css is same-origin, so cssRules reads rather than throwing.
   const folio = await evaluate(`(()=>{
     const hasVT = (r, nav) => /@view-transition/.test(r.cssText || "") && new RegExp("navigation:\\\\s*" + nav).test(r.cssText || "");

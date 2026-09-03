@@ -65,6 +65,8 @@ const STAMP_UNBOUND = stamp.textContent ?? "";
 interface Bound {
   readonly plate: PlateRef;
   readonly section: PlateSection;
+  /** The plate's place within its section: the themes number one by one (#465 ruling 7). */
+  readonly ordinal: number;
   readonly aspect: number | null;
 }
 
@@ -135,17 +137,17 @@ export function enableBind(): void {
   bindBtn.disabled = false;
 }
 
-function mint(p: AtlasPlate, section: PlateSection): Bound {
+function mint(p: AtlasPlate, section: PlateSection, ordinal = 0): Bound {
   const href = URL.createObjectURL(new Blob([p.svg], { type: "image/svg+xml" }));
   atlasUrls.push(href);
-  return { plate: { key: p.key, title: p.title, href }, section, aspect: plateAspect(p.svg) };
+  return { plate: { key: p.key, title: p.title, href }, section, ordinal, aspect: plateAspect(p.svg) };
 }
 
 // innerHTML takes trusted input only: every recipe param is validated against a fixed allowlist by `applyHash` in `src/site/print-room/app.ts` before any worker job runs, and the rest is escaped or engine-composed.
 function renderBoundAtlas(atlas: AtlasDocumentData): void {
   const hero = mint(atlas.hero, "hero");
   const draughtings = atlas.draughtings.map((p) => mint(p, "draughting"));
-  const themes = atlas.themes.map((p) => mint(p, "theme"));
+  const themes = atlas.themes.map((p, i) => mint(p, "theme", i));
   const regions = atlas.regions.map((p) => mint(p, "region"));
   const prospects = atlas.prospects.map((p) => mint(p, "prospect"));
   plates = new Map([hero, ...draughtings, ...themes, ...regions, ...prospects].map((b) => [b.plate.key, b]));
@@ -180,7 +182,7 @@ function turnTo(key: string): void {
   if (!b) return;
   here = key;
   renderContents();
-  face.showPlate({ href: b.plate.href, title: b.plate.title, line: plateLine(b.section, b.plate.title) });
+  face.showPlate({ href: b.plate.href, title: b.plate.title, line: plateLine(b.section, b.plate.title, b.ordinal) });
 }
 
 function bindAtlas(): void {

@@ -154,18 +154,20 @@ export async function run(ctx) {
   );
 
   const offenders = [];
+  let pinned = 0;
   for (const route of SHELLED) {
     const h = heads[route];
     if (!h) { offenders.push(`${route}: unreachable`); continue; }
     for (const m of MEMBERS) {
       const want = expectedHead(route)[m];
+      if (want !== null) pinned++;
       if (!matches(h[m], want)) offenders.push(`${route} ${m}: ${JSON.stringify(h[m])}`);
     }
   }
   check(
     "RH2 every head member resolves its measured tag, weight, size, tracking and face, on every shelled page",
     offenders.length === 0,
-    offenders.join(" | ") || `${SHELLED.length * MEMBERS.length - 2} members pinned across ${SHELLED.length} pages`,
+    offenders.join(" | ") || `${pinned} members pinned across ${SHELLED.length} pages`,
   );
 
   // The band clips the deep at --band-h (121.6px at desktop); home has no band, nothing scrolls

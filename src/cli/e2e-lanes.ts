@@ -49,6 +49,7 @@ export const E2E_LANES: readonly E2eLane[] = [
       "room-drawer",
       "document-rooms",
       "region-detail",
+      "specimen",
     ],
     port: DEFAULT_E2E_PORT + 1,
     dport: DEFAULT_E2E_DPORT + 1,

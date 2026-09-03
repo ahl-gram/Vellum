@@ -8,7 +8,7 @@ const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const pages = globSync("src/pages/**/index.astro", { cwd: REPO }).sort();
 const rooms = pages.filter((p) => p !== "src/pages/index.astro");
-const CHART_ROOMS = ["explorer", "print-room", "prospect", "reading-room", "ribbon", "seed-of-the-day"].map((r) => `src/pages/${r}/index.astro`);
+const CHART_ROOMS = ["explorer", "print-room", "prospect", "reading-room", "ribbon", "seed-of-the-day", "specimen"].map((r) => `src/pages/${r}/index.astro`);
 
 test("AK1 no page carries a pasted copy of a lifted shape: the fog pair, the vignette pair, the Glass, the chart folio, a road out", () => {
   for (const p of rooms) {

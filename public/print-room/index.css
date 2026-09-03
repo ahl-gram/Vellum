@@ -106,8 +106,9 @@ body.has-atlas .slip .intro { display: none; }
 @media (max-width: 900px) {
   /* The mockup's phone corner, except the style picker STAYS (ruled 2026-08-30 on #463: no feature lost at any width; the mockup hid it unruled): the row wraps, seed, then style, then Pull a proof. */
   .folio-controls { flex-wrap: wrap; }
-  /* Docked in the sheet the head stays (the mockup shows it): it carries the Pressed-as choice, which the kit's hidden head would take with it; the select takes the house dress on the panel's parchment; the note stands down. */
-  .legend.in-slip .legend-head { display: block; color: var(--ink-brown); }
+  /* Docked in the sheet the head stays (the mockup shows it): it carries the Pressed-as choice, which the kit's hidden head would take with it; the select takes the house dress on the panel's parchment; the note stands down. The ink rides the page's own span, not the kit's head (#487 item 5). */
+  .legend.in-slip .legend-head { display: block; }
+  .legend.in-slip .pressed { color: var(--ink-brown); }
   .legend.in-slip .legend-status { display: block; color: var(--ink-brown); }
   /* The open sheet covers the chart, and the Glass climbing above it lands under the corner's three rows (a tap on the style caret zoomed the sheet, skeptic round 2 on PR #496). */
   body:has(.slip.open) .corner.br.zoomery { display: none; }
