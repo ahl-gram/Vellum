@@ -263,12 +263,6 @@ test("the corner chrome passes clicks through and keeps its text on its own grou
     control && /min-width:\s*0/.test(control[1]),
     "and the input CAN yield: flex refuses to shrink an input below its default min-width, so with nowrap alone the row overflowed the panel's left edge by 9.67px at 390 and painted the input over raw map (plate round 3); e2e H3 measures the containment live",
   );
-  const legendRow = css.match(/\.lf-legend \{([^}]*)\}/);
-  assert.ok(legendRow && legendRow[1].includes("background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72));"), "the legend row stands on the seed box's crisp panel, not the fade: the head line at the fade's clear top measured 1.0:1 in ink-faded and 1.76:1 in parchment over the chart, 6.04:1 on the panel (plate read 2026-09-03; the sitting's ruling 23 on #454)");
-  const legendVerb = css.match(/\.lf-legend-verb \{([^}]*)\}/);
-  assert.ok(legendVerb && /color:\s*var\(--parchment\)/.test(legendVerb[1]), "the verb line wears parchment: line-tan at 12.48px measured 4.09:1 on the panel, the dateline's own reason (the sitting's ruling 24 on #454)");
-  const legendHead = css.match(/\.lf-legend-head \{([^}]*)\}/);
-  assert.ok(legendHead && /color:\s*var\(--parchment\)/.test(legendHead[1]), "the legend's head line wears parchment, the one face with the rooms' legend-head: ink-faded measured 2.78:1 on the deep (plate read 2026-08-29; the sitting's ruling 11, 2026-09-03 on #454)");
 });
 
 test("the Notice to Mariners is the mockup's stamp on the deep, and only the stamp (#459)", () => {
@@ -305,4 +299,13 @@ test("the Notice to Mariners is the mockup's stamp on the deep, and only the sta
     narrow && /\.notice-stamp[^{]*\{[^}]*display:\s*none/.test(narrow[1]),
     "the narrow sheet stands the stamp down, as the mockup does",
   );
+});
+
+test("the legend row's ground and faces: the seed box's crisp panel under it, parchment on the head and the verb (the 2026-09-03 sitting, rulings 11, 23 and 24 on #454)", () => {
+  const legendRow = css.match(/\.lf-legend \{([^}]*)\}/);
+  assert.ok(legendRow && legendRow[1].includes("background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72));"), "the legend row stands on the seed box's crisp panel, not the fade: the head line at the fade's clear top measured 1.0:1 in ink-faded and 1.76:1 in parchment over the chart, 6.04:1 on the panel (plate read 2026-09-03; the sitting's ruling 23 on #454)");
+  const legendVerb = css.match(/\.lf-legend-verb \{([^}]*)\}/);
+  assert.ok(legendVerb && /color:\s*var\(--parchment\)/.test(legendVerb[1]), "the verb line wears parchment: line-tan at 12.48px measured 4.09:1 on the panel, the dateline's own reason (the sitting's ruling 24 on #454)");
+  const legendHead = css.match(/\.lf-legend-head \{([^}]*)\}/);
+  assert.ok(legendHead && /color:\s*var\(--parchment\)/.test(legendHead[1]), "the legend's head line wears parchment, the one face with the rooms' legend-head: ink-faded measured 2.78:1 on the deep (plate read 2026-08-29; the sitting's ruling 11, 2026-09-03 on #454)");
 });

@@ -278,7 +278,7 @@ export async function run(ctx) {
     washWrong.map((r) => `${r} wash ${JSON.stringify(heads[r]?.chromeWash)}`).join(" | ") || "wash on home and the Gallery alone",
   );
 
-  // The sitting's ruling 6 (2026-09-03, #454): sampleRow reads a SCROLLED page. The Gallery is the one chart room that scrolls and this suite its sole visitor; scrolled past a screen, a plate's centre reads bright and the pooled corner dark at ONE scroll state, which no uniform blank frame satisfies (a viewport-relative clip read blank past ~800px, plate read on PR #501). The harness window is tall, so the check pins its own viewport.
+  // The harness window is tall, so this check pins its own viewport; the Gallery is the one chart room that scrolls and this suite its sole visitor.
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await send("Page.navigate", { url: "about:blank" });
   const galleryUp = await visit("/gallery/");
@@ -294,7 +294,7 @@ export async function run(ctx) {
   const plateLum = plateRow.length ? Math.round(Math.max(...plateRow.map(luminance))) : -1;
   const cornerLum = cornerRow.length ? Math.round(Math.max(...cornerRow.map(luminance))) : -1;
   check(
-    "RH10 the pixel helper reads the Gallery scrolled past a screen: a plate's centre bright and the pooled corner dark at one scroll state, which no blank frame is (the sitting's ruling 6, 2026-09-03)",
+    "RH10 the pixel helper reads the Gallery scrolled past a screen: a plate's centre bright (49 on the unfixed clip, 210 fixed) and the corner dark (the pool or the deep, either far from a plate) at one scroll state, which no blank frame is (the sitting's ruling 6, 2026-09-03)",
     !!scrolled && scrolled.y >= 800 && plateLum > 120 && cornerLum > 15 && cornerLum < 90,
     JSON.stringify({ y: scrolled && scrolled.y, sh: scrolled && scrolled.sh, plate: scrolled && scrolled.plate, plateLum, cornerLum }),
   );

@@ -143,7 +143,7 @@ body.chart-room header.chrome { --pool-top: -4rem; --pool-left: -4rem; }
 body.chart-room .corner.bl { --pool-bottom: -4rem; --pool-left: -4rem; }
 body.chart-room .strip { --pool-bottom: -4rem; --pool-left: -4rem; --pool-right: -4rem; }
 
-/* The legend row's footing is home's own (public/index.css .lf-legend, its 0.5rem 1.1rem 0.6rem padding; Alex's 2026-09-03 call from the Specimen Book beside home): the box with chart ink at the foot fading up, not the blurred pool. Drawn as the row's own ::before at the padding's insets, so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, e2e BR2); it paints under the same conditions the pool does. */
+/* The legend row's footing is home's own (public/index.css .lf-legend, its 0.5rem 1.1rem 0.6rem padding; Alex's 2026-09-03 call from the Specimen Book beside home): the seed box's crisp panel (chart ink 0.85 to 0.72, top to bottom; the fade left at the 2026-09-03 sitting, ruling 23), not the blurred pool. Drawn as the row's own ::before at the padding's insets, so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, e2e BR2); it paints under the same conditions the pool does. */
 body:has(#map-viewport.zoomed) .legend::before, body.chart-room:not(:has(.stage)) .legend::before { content: ""; position: absolute; inset: -0.5rem -1.1rem -0.6rem; z-index: -1; pointer-events: none;
   background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
 .legend.in-slip::before { content: none; }

@@ -38,10 +38,13 @@ export function decodeFirstRow(png) {
   return Array.from({ length: width }, (_, i) => [px(i, 0), px(i, 1), px(i, 2)]);
 }
 
-// x and y are VIEWPORT coordinates (a rect's); the clip the browser wants is the page's, so the scroll is added here (a scrolled page read blank frames until the 2026-09-03 sitting, ruling 6).
+// The clip the browser wants is the page's, not the viewport's, so the scroll is added here (a scrolled page read blank frames until the 2026-09-03 sitting, ruling 6).
 export async function sampleRow(send, x, y, width) {
   const s = await send("Runtime.evaluate", { expression: "[window.scrollX, window.scrollY]", returnByValue: true });
-  const [sx, sy] = (s && s.result && s.result.value) || [0, 0];
+  const v = s && s.result ? s.result.value : undefined;
+  if (s && s.exceptionDetails) throw new Error(`sampleRow could not read the page's scroll: ${s.exceptionDetails.text || "exception"}`);
+  if (!Array.isArray(v) || v.length !== 2 || !v.every(Number.isFinite)) throw new Error(`sampleRow could not read the page's scroll: ${JSON.stringify(v)}`);
+  const [sx, sy] = v;
   const r = await send("Page.captureScreenshot", { format: "png", clip: { x: x + sx, y: y + sy, width, height: 1, scale: 1 } });
   return decodeFirstRow(Buffer.from(r.data, "base64"));
 }

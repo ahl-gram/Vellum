@@ -111,10 +111,13 @@ test("AK7 the legend row is ONE face on home and in the kit: the seed box's cris
   const home = read("public/index.css").replace(/\/\*[\s\S]*?\*\//g, "");
   const kit = read("public/atelier.css").replace(/\/\*[\s\S]*?\*\//g, "");
   const panel = "linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72))";
-  const homeRow = home.match(/\.lf-legend \{([^}]*)\}/);
-  const kitRow = kit.match(/\.legend::before[^{]*\{([^}]*)\}/);
-  assert.ok(homeRow && homeRow[1].includes(`background: ${panel};`), "home's row stands on the panel");
-  assert.ok(kitRow && kitRow[1].includes(`background: ${panel};`), "the kit's row stands on the same panel");
+  const wearers: Array<[string, RegExpMatchArray | null]> = [
+    ["home's seed box .lf-seed", home.match(/\.lf-seed \{([^}]*)\}/)],
+    ["home's legend row .lf-legend", home.match(/\.lf-legend \{([^}]*)\}/)],
+    ["the kit's room folio .corner.tr::before", kit.match(/\.corner\.tr::before[^{]*\{([^}]*)\}/)],
+    ["the kit's legend row .legend::before", kit.match(/\.legend::before[^{]*\{([^}]*)\}/)],
+  ];
+  for (const [name, m] of wearers) assert.ok(m && m[1].includes(`background: ${panel};`), `${name} stands on the one panel`);
   const homeVerb = home.match(/\.lf-legend-verb \{([^}]*)\}/);
   const kitVerb = kit.match(/\.legend-btn \.verb \{([^}]*)\}/);
   assert.ok(homeVerb && /color:\s*var\(--parchment\)/.test(homeVerb[1]), "home's verb wears parchment");
