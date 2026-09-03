@@ -85,7 +85,9 @@ test("the phone Glass stands down while the sheet is open as a KIT rule, in ever
   const css = readFileSync(resolve(REPO, "public/atelier.css"), "utf8");
   const narrow = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
   assert.match(narrow, /body:has\(\.slip\.open\) \.corner\.br\.zoomery\s*\{[^}]*display:\s*none/, "the kit's narrow block hides the Glass under an open sheet");
-  for (const p of globSync("public/*/index.css", { cwd: REPO }).sort()) {
+  const sheets = globSync("public/**/*.css", { cwd: REPO }).filter((p) => p !== "public/atelier.css").sort();
+  assert.ok(sheets.some((p) => p === "public/reading-frame.css") && sheets.some((p) => p === "public/explorer/broadside.css"), "the sweep reaches the page sheets outside public/*/index.css (guard-prover found the glob missed them)");
+  for (const p of sheets) {
     assert.doesNotMatch(readFileSync(resolve(REPO, p), "utf8"), /slip\.open\)[^{]*\.zoomery/, `${p} carries its own copy of the kit's rule`);
   }
 });
