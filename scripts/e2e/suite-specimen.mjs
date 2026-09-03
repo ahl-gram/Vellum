@@ -1,5 +1,6 @@
 // The Specimen Book (#487 item 4, cut at #465 ruling 6): every kit piece at its seat, in every state, on one page; MEASURED at 1280x800 and a true 390x844, and shot at both as the closing review's pair (specimen-1280.png, specimen-390.png, specimen-390-open.png in the e2e out dir). Every state is reached through the kit's own binders (the fold, the tab, the handle, the Glass), never by planting a class.
 import { scopedHealth } from "./room-support.mjs";
+import { luminance, sampleRow } from "./pixel-support.mjs";
 
 const PAGE = "/specimen/";
 const CHART_ASPECT = 1500 / 1157.931;
@@ -16,7 +17,7 @@ const READ = `(() => {
     st: window.__vellumSpecimenState ? window.__vellumSpecimenState() : null,
     innerW: innerWidth, innerH: innerHeight, rem: parseFloat(root.fontSize), chromeX: parseFloat(root.getPropertyValue("--chrome-x")),
     plateLoaded: !!plate && plate.complete && plate.naturalWidth > 0, plateAspect: plate && plate.naturalWidth > 0 ? plate.naturalWidth / plate.naturalHeight : null,
-    sheet: r("#sheet"),
+    sheet: r("#sheet"), map: r("#map"),
     slip: r(".slip"), slipVis: cs(".slip", "visibility"), slipDisp: cs(".slip", "display"), slipPos: cs(".slip", "position"), slipBody: cs(".slip-body", "display"),
     tabVis: cs(".slip-tab", "visibility"), tabDisp: cs(".slip-tab", "display"),
     folio: r(".corner.tr"), chartFolio: r(".corner.bl"), chartFolioDisp: cs(".corner.bl", "display"), folioRoomPos: cs(".corner.folio-room", "position"),
@@ -90,12 +91,24 @@ export async function run(ctx) {
   );
 
   await setState("leaned");
-  await sleep(700);
+  await sleep(900);
   const leaned = await read();
   check(
-    "SB5 leaned, through the Glass's own controller: the slip is back from its tab, the gesture box is zoomed, and the corners and the cluster stand on the pool",
-    !!leaned && leaned.st.zoomed && !leaned.st.folded && leaned.slipVis === "visible" && leaned.pool === '""' && leaned.poolChrome === '""',
-    JSON.stringify(leaned && { st: leaned.st, slip: leaned.slipVis, pool: leaned.pool, poolChrome: leaned.poolChrome }),
+    "SB5 leaned, through the Glass's own controller: the slip is back from its tab, the gesture box is zoomed, the sheet spills under every corner, and the corners and the cluster stand on the pool",
+    !!leaned && leaned.st.zoomed && !leaned.st.folded && leaned.slipVis === "visible" && leaned.pool === '""' && leaned.poolChrome === '""' &&
+      leaned.map.x < 0 && leaned.map.y < 0 && leaned.map.right > 1280 && leaned.map.bottom > 800,
+    JSON.stringify(leaned && { st: leaned.st, slip: leaned.slipVis, pool: leaned.pool, poolChrome: leaned.poolChrome, map: leaned.map }),
+  );
+  // The pool must reach past the viewport edge, or its blur fades right on the edge and the chart bleeds through at the corner (Alex's 2026-09-03 call on the Explorer's top-left; home runs its pool 4rem out). Sampled, since no computed style sees a blurred edge.
+  const brightest = async (x, y) => Math.round(Math.max(...(await sampleRow(send, x, y, 8)).map(luminance)));
+  const interior = await brightest(200, 24);
+  const corners = [];
+  // The three corners a pooled piece occupies with the slip open, plus the bottom edge under the Glass and under the legend row; the bottom-right corner is bare chart under the slip's foot, legitimately.
+  for (const [x, y, name] of [[0, 2, "top-left"], [1272, 2, "top-right"], [0, 797, "bottom-left"], [Math.round(leaned.glass.x) + 2, 797, "under the Glass"], [Math.round(leaned.legend.x + leaned.legend.w / 2) - 4, 797, "under the legend"]]) corners.push({ name, max: await brightest(x, y) });
+  check(
+    "SB5b leaned, every viewport edge under a pooled piece is as dark as the pool's interior: no chart paper bleeds through the pool's fade at the edge (eight edge pixels at each place within 15 of the cluster's interior, which the old inset failed at 97 against 60)",
+    corners.every((c) => c.max <= interior + 15),
+    JSON.stringify({ interior, corners }),
   );
 
   await setState("rest");

@@ -11,6 +11,8 @@ declare global {
 }
 
 const STEP = 1.4;
+// Leaned in, the sheet spills under every corner (the mockup's magnified look, the state the pool exists for): three of the Glass's steps at 1280x800.
+const LEAN = STEP ** 3;
 const STATES = ["rest", "folded", "leaned"] as const;
 type State = (typeof STATES)[number];
 
@@ -51,7 +53,7 @@ function setState(s: State): void {
   stateSel.value = s;
   if (s === "folded" && !folded()) press(".slip-fold");
   if (s !== "folded" && folded()) press(".slip-tab");
-  if (s === "leaned") zoom.glideBy(STEP);
+  if (s === "leaned") zoom.glideBy(LEAN);
   else zoom.glideHome();
 }
 stateSel.addEventListener("change", () => setState(stateSel.value as State));
