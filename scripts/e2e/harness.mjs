@@ -269,12 +269,12 @@ async function clearMobile() {
   await setTouch(false);
 }
 
-// The default clip is the harness's 1280 width down the whole document; a suite on other device metrics passes its own (the Specimen Book's 390 pair).
+// The default clip is the harness's 1280 width down the whole document, captured beyond the viewport; a suite that passes its own clip is shot INSIDE the viewport, because captureBeyondViewport drops a chart room's left-anchored fixed furniture (the chart folio, the legend row) from the frame (measured 2026-09-03 on /specimen/ at 1280x800: AE 505 between the two modes at the same instant, the right-anchored corners and the slip untouched).
 async function shoot(file, clip) {
   const h = await evaluate(`Math.min(16000, Math.ceil(document.body.scrollHeight))`);
   const r = await send("Page.captureScreenshot", {
     format: "png",
-    captureBeyondViewport: true,
+    captureBeyondViewport: clip === undefined,
     clip: clip ?? { x: 0, y: 0, width: 1280, height: h, scale: 1 },
   });
   writeFileSync(join(OUT_DIR, file), Buffer.from(r.data, "base64"));

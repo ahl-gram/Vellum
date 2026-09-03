@@ -76,7 +76,7 @@ export async function run(ctx) {
     !!rest && rest.crNum === INK_BROWN && rest.inked === "1" && rest.unInked === "0.55" && rest.gold === CONTROL_GOLD && rest.disabled === "0.45" && rest.missDisp === "none",
     JSON.stringify(rest && { crNum: rest.crNum, inked: rest.inked, unInked: rest.unInked, gold: rest.gold, disabled: rest.disabled, miss: rest.missDisp }),
   );
-  await shoot("specimen-1280.png");
+  await shoot("specimen-1280.png", { x: 0, y: 0, width: 1280, height: 800, scale: 1 });
 
   await setState("folded");
   await sleep(500);
