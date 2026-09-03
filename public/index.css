@@ -51,8 +51,8 @@
   font-size: 8.5px; letter-spacing: 0.08em; color: var(--chart-ink); white-space: nowrap;
   text-shadow: 0 0 4px var(--chart-paper), 0 0 8px var(--chart-paper);
 }
-/* #505: the camera is the kit's Glass; home seats it (placement is the page's). What the kit's corner sets beyond dress is stood down here, and kit-scope.test.ts pins that list. */
-#lf-controls { display: none; position: absolute; right: var(--chrome-x); bottom: var(--chrome-y); z-index: auto; animation: none; pointer-events: auto; }
+/* #505: the camera is the kit's Glass; home seats it (placement is the page's). Literal offsets, not the chrome vars: BaseLayout narrows those under 900px and home's camera never moved there. What the kit's corner sets beyond dress is stood down here, and kit-scope.test.ts pins that list. */
+#lf-controls { display: none; position: absolute; right: 1.6rem; bottom: 1.4rem; z-index: auto; animation: none; pointer-events: auto; }
 #lf-controls.on { display: flex; }
 #lf-controls button:focus-visible { outline-color: var(--ink-dark); }
 .lf-coords {

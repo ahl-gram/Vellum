@@ -96,7 +96,7 @@ test("AK8 home seats the kit's camera itself (#505, ruled 2026-09-02: home keeps
   const seats = [...css.matchAll(/#lf-controls\s*\{([^}]*)\}/g)];
   assert.equal(seats.length, 1, "one seat rule, at every width (the phone twin was dead: the id already outranks the kit's 900px seat)");
   const declared = new Set(seats[0]![1]!.split(";").map((d) => d.trim()).filter(Boolean));
-  for (const d of ["display: none", "position: absolute", "right: var(--chrome-x)", "bottom: var(--chrome-y)", "z-index: auto", "animation: none", "pointer-events: auto"]) {
+  for (const d of ["display: none", "position: absolute", "right: 1.6rem", "bottom: 1.4rem", "z-index: auto", "animation: none", "pointer-events: auto"]) {
     assert.ok(declared.has(d), `the seat declares ${d} (inside the stage as before, scrolling away with it; the kit's fixed corner, depth, ink-in and pointer policy stood down)`);
   }
   assert.match(css, /#lf-controls\.on\s*\{\s*display:\s*flex;/, "shown once the camera arms");
