@@ -85,3 +85,6 @@
   #map-viewport .rf-chart { position: static; transform: none !important; }
   .rf-chart svg[data-vellum-style] { height: auto; }
 }
+
+/* #493, ruled 2026-09-02: under reduced motion the engine's Play is a still frame (ages.ts), so there is no pace to choose. The room's rule, not the frame's: reading-frame.css carries no reduced-motion block of its own (motion.css owns the collapse). */
+@media (prefers-reduced-motion: reduce) { .rf-instrument .rf-pace { display: none; } }

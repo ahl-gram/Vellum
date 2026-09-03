@@ -102,3 +102,8 @@ test("RR-room 7 the pace is the room's to wire (#493): app.ts binds each of the 
   assert.doesNotMatch(app, /"pace"/, "no hash key: a reload or a shared address plays at the default");
   assert.doesNotMatch(read("src/site/explorer/address.ts"), /pace/i, "the live-address grammar (#192) knows no pace");
 });
+
+test("RR-room 8 under reduced motion the pace group hides (#493, ruled 2026-09-02): the engine's Play is a still frame there; the rule is the room's, since the frame's sheet carries no reduced-motion block of its own", () => {
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.rf-instrument \.rf-pace \{ display: none; \}\s*\}/);
+  assert.doesNotMatch(frameCss, /prefers-reduced-motion/, "and not the frame's (motion.css owns the collapse)");
+});
