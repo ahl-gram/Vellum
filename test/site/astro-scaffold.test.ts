@@ -304,6 +304,10 @@ test("each rendered head carries the canonical meta with the ratified prop fan-o
       head.includes('<link rel="icon" type="image/svg+xml" href="/favicon.svg">'),
       `${p.route} should keep the favicon link`,
     );
+    assert.ok(
+      head.includes('<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">'),
+      `${p.route} should carry the touch icon link (#489)`,
+    );
     const fonts = head.indexOf('<link rel="stylesheet" href="/fonts.css">');
     const motion = head.indexOf('<link rel="stylesheet" href="/motion.css">');
     const pageCss = head.indexOf('<link rel="stylesheet" href="index.css">');
@@ -341,7 +345,7 @@ test("no head member arrives beyond the canonical set (nothing injected, nothing
     const expected = new Set([...expectedMeta, ...(p.noindex ? ["name:robots"] : [])]);
     assert.deepEqual(new Set(seen), expected, `${p.route} meta set should be exactly the canonical one${p.noindex ? " plus robots noindex (#465)" : ""}`);
     assert.equal(seen.length, expected.size, `${p.route} should carry no duplicate meta`);
-    assert.ok(!/<link(?![^>]*(?:rel="icon"|rel="stylesheet"|rel="prefetch"))/.test(head), `${p.route} has only icon/stylesheet/prefetch links`);
+    assert.ok(!/<link(?![^>]*(?:rel="icon"|rel="apple-touch-icon"|rel="stylesheet"|rel="prefetch"))/.test(head), `${p.route} has only icon/apple-touch-icon/stylesheet/prefetch links`);
     assert.ok(!head.includes("canonical"), "no canonical tags exist today and the layout must not invent them");
   }
 });
@@ -836,7 +840,7 @@ test("every internal link and embed on the rendered pages resolves", () => {
 
 test("the support set the pages depend on is committed in public/", () => {
   // og:image and the fonts.css url()s are references the link-resolver test cannot see, so pin their existence here.
-  for (const file of ["motion.css", "fonts.css", "favicon.svg", "og.png", "index.css"]) {
+  for (const file of ["motion.css", "fonts.css", "favicon.svg", "apple-touch-icon.png", "og.png", "index.css"]) {
     assert.ok(existsSync(root(`public/${file}`)), `public/${file} should exist`);
   }
 });

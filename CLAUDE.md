@@ -108,7 +108,7 @@ propose it plainly with its tradeoffs and let Alex decide.
 New code is **TypeScript under `src/`**, covered by `npm run check`, and reaches the browser
 only through the existing build (the Vite press bundles `src/site/` + engine; Node runs the
 engine/CLI/scripts natively). Do NOT add `.js` files outside `src/`: `public/` is static
-assets only (goldens, fonts, CSS, favicon), and a hand-authored script anywhere else needs a
+assets only (goldens, fonts, CSS, the icons), and a hand-authored script anywhere else needs a
 very good, stated reason (record it in the issue or a comment at the file head). The one
 grandfathered corner is the e2e harness and suites (`scripts/e2e/*.mjs`); new suites may match
 their siblings, but that convention does not extend anywhere else.
@@ -116,7 +116,9 @@ their siblings, but that convention does not extend anywhere else.
 ## Charts, goldens, and regens
 
 `public/charts/chart-42-*.svg`, `public/charts/arms-42-*.svg` and `public/og.png` are
-**committed** content (the homepage embeds them). Everything else generated (`public/atlas/`,
+**committed** content (the homepage embeds them), as are `public/favicon.svg` and
+`public/apple-touch-icon.png` (#489; `npm run icons` is their single writer, and a test pins
+the SVG to the Fell SC woff2). Everything else generated (`public/atlas/`,
 `public/gallery/`, the bundle twins + chunks) is gitignored and rebuilt per deploy. (docs/
 retired at Sub 5 #206; the tsc engine emit retired at Sub 9 #260, its clean-list entry is a
 tombstone; app source is TypeScript in src/site/.)

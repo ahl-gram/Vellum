@@ -56,6 +56,7 @@ export async function rasterizeSvg(
   }
 }
 
-export const NO_BROWSER_HINT =
+export const NO_BROWSER =
   "no Chromium-family browser found for PNG export: install Brave/Chrome, " +
-  "or point VELLUM_BROWSER at a browser binary; the SVG was still written";
+  "or point VELLUM_BROWSER at a browser binary";
+export const NO_BROWSER_HINT = `${NO_BROWSER}; the SVG was still written`;
