@@ -4,13 +4,13 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
+import { SITE_PALETTE } from "../../src/atlas/palette.ts";
 import { veilMarkup } from "../../src/site/home/veil.ts";
 import {
   buildOgCard,
   fontFaceCss,
   OG_FONT_FACES,
   OG_HEIGHT,
-  OG_HOOK,
   OG_HOOK_LINES,
   OG_TAGLINE,
   OG_WIDTH,
@@ -20,7 +20,6 @@ import {
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
 
-// The fixture renders the hero the way scripts/build-og.ts ships it.
 const chart = renderMap(generateWorld(defaultRecipe(42)), { style: "antique", legend: false });
 const card = buildOgCard(chart);
 
@@ -32,6 +31,8 @@ const LEGIBLE_ROWS = 8;
 // measured 2026-09-03 (canvas measureText actualBoundingBoxAscent at 100px from the embedded woff2, headless Brave): italic x 0.4453; SC small caps m 0.4512, n 0.4385, z 0.4443; rounded down so the floor errs strict
 const FELL_ITALIC_X_HEIGHT = 0.44;
 const FELL_SC_SMALL_CAP = 0.44;
+
+const token = (name: string): string => SITE_PALETTE[`--${name}` as keyof typeof SITE_PALETTE];
 
 function attr(tag: string, name: string): string | undefined {
   return new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1];
@@ -58,7 +59,7 @@ function nestedSvgTag(svg: string, marker: string): string {
 }
 
 function roseMarkup(svg: string): string {
-  const open = nestedSvgTag(svg, 'viewBox="0 0 120 120"');
+  const open = nestedSvgTag(svg, 'class="veil-rose"');
   const start = svg.indexOf(open);
   return svg.slice(start, svg.indexOf("</svg>", start) + "</svg>".length);
 }
@@ -67,11 +68,6 @@ function veilRose(): string {
   const veil = veilMarkup();
   const start = veil.indexOf("<svg");
   return veil.slice(start, veil.indexOf("</svg>", start));
-}
-
-function tokens(): Map<string, string> {
-  const layout = read("src/layouts/BaseLayout.astro");
-  return new Map([...layout.matchAll(/--([a-z-]+):\s*(#[0-9a-f]{6})/g)].map((m) => [m[1], m[2]]));
 }
 
 function mix(a: string, b: string, wa: number): string {
@@ -109,43 +105,41 @@ test("the OG card is a 1200x630 SVG document", () => {
   assert.ok(card.trimEnd().endsWith("</svg>"));
 });
 
-test("the ground is the veil's walnut deep, painted first, its hexes the shell's tokens", () => {
-  const t = tokens();
+test("the ground is the veil's walnut deep, painted first, its hexes the site palette's", () => {
   const firstRect = /<rect\b[^>]*>/.exec(card)?.[0] ?? "";
   assert.equal(attr(firstRect, "width"), "1200");
   assert.equal(attr(firstRect, "height"), "630");
   assert.equal(attr(firstRect, "fill"), "url(#veil-deep)");
-  assert.ok(!card.includes(`<rect width="1200" height="630" fill="${t.get("parchment")}"`), "the parchment sheet is no longer the ground");
+  assert.ok(!card.includes(`<rect width="1200" height="630" fill="${token("parchment")}"`), "the parchment sheet is no longer the ground");
   const gradient = /<radialGradient\b[^>]*id="veil-deep"[^>]*>([\s\S]*?)<\/radialGradient>/.exec(card);
   assert.ok(gradient, "the deep is a radial gradient");
   const stops = [...gradient[1].matchAll(/stop-color="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(stops, [mix(t.get("ink-dark")!, t.get("parchment")!, 0.9), t.get("ink-dark"), t.get("chart-ink")]);
+  assert.deepEqual(stops, [mix(token("ink-dark"), token("parchment"), 0.9), token("ink-dark"), token("chart-ink")]);
 });
 
-test("the wordmark is typed Vellum, centred, in IM Fell English SC (the face sets the small caps)", () => {
+test("the wordmark is typed Vellum, centred, in IM Fell English SC alone (a failed face load must look wrong, not plausible)", () => {
   assert.equal(OG_WORDMARK, "Vellum");
   assert.ok(veilMarkup().includes(">Vellum<"), "the veil types it the same way");
   assert.ok(!card.includes(">VELLUM<"), "no uppercased wordmark: in an SC face that is full caps");
   const tag = textTag(card, "Vellum");
   assert.equal(attr(tag, "x"), "600");
   assert.equal(attr(tag, "text-anchor"), "middle");
-  assert.ok(attr(tag, "font-family")!.startsWith(SC_FACE), `the wordmark wears ${SC_FACE}`);
-  const size = num(tag, "font-size");
-  assert.ok(Math.abs(num(tag, "letter-spacing") / size - 0.14) < 0.005, "letter-spacing is the veil's 0.14em");
+  assert.equal(attr(tag, "font-family"), SC_FACE, "the SC face with no fallback stack behind it");
+  assert.equal(attr(tag, "letter-spacing"), (num(tag, "font-size") * 0.14).toFixed(2), "letter-spacing is the veil's 0.14em, two decimals");
 });
 
-test("the tagline sits beneath the wordmark in IM Fell English italic", () => {
+test("the tagline sits beneath the wordmark in IM Fell English italic alone", () => {
   assert.ok(veilMarkup().includes(OG_TAGLINE), "the tagline is the veil's own line");
   const tag = textTag(card, OG_TAGLINE);
   assert.equal(attr(tag, "x"), "600");
   assert.equal(attr(tag, "text-anchor"), "middle");
   assert.equal(attr(tag, "font-style"), "italic");
-  assert.ok(attr(tag, "font-family")!.startsWith(ITALIC_FACE + ","), `the tagline wears ${ITALIC_FACE}, not the SC face`);
+  assert.equal(attr(tag, "font-family"), ITALIC_FACE, "the italic face, not the SC one, with no fallback stack");
   assert.ok(num(tag, "y") > num(textTag(card, "Vellum"), "y"), "the tagline is below the wordmark");
 });
 
-test("the rose is the veil's own markup, settled: rings drawn, rays faded in, needle at 16deg", () => {
-  const t = tokens();
+test("the rose is the veil's own markup, once, settled: rings drawn, rays faded in, needle at 16deg", () => {
+  assert.equal((card.match(/class="veil-rose"/g) ?? []).length, 1, "exactly one rose");
   const rose = roseMarkup(card);
   const source = veilRose();
   for (const d of [...source.matchAll(/d="([^"]+)"/g)].map((m) => m[1])) {
@@ -157,11 +151,12 @@ test("the rose is the veil's own markup, settled: rings drawn, rays faded in, ne
   assert.ok(!rose.includes("stroke-dashoffset") && !rose.includes("stroke-dasharray"), "settled: the rings are fully drawn");
   const needle = /<path\b[^>]*d="M60 18 L66 60 L60 102 L54 60 Z"[^>]*>/.exec(rose)?.[0] ?? "";
   assert.equal(attr(needle, "transform"), "rotate(16 60 60)", "the needle rests where needle-settle ends");
-  assert.equal(attr(needle, "fill"), t.get("parchment"));
+  assert.equal(attr(needle, "fill"), token("parchment"));
   const rays = /<g\b[^>]*opacity="([^"]+)"[^>]*>/.exec(rose);
   assert.equal(rays?.[1], "0.75", "the rays sit at rose-fade's end");
-  assert.ok(rose.includes(`stroke="${t.get("line-tan")}"`), "rings and rays are line-tan");
-  const open = nestedSvgTag(card, 'viewBox="0 0 120 120"');
+  assert.ok(rose.includes(`stroke="${token("line-tan")}"`), "rings and rays are line-tan");
+  const open = nestedSvgTag(card, 'class="veil-rose"');
+  assert.equal(attr(open, "viewBox"), "0 0 120 120");
   assert.equal(num(open, "x") + num(open, "width") / 2, 600, "the rose is centred");
   const tagline = textTag(card, OG_TAGLINE);
   const hook = textTag(card, OG_HOOK_LINES[0]);
@@ -169,7 +164,8 @@ test("the rose is the veil's own markup, settled: rings drawn, rays faded in, ne
   assert.ok(num(open, "y") + num(open, "height") < num(hook, "y"), "the rose is above the hook");
 });
 
-test("the seed-42 chart is ghosted full-bleed behind the lettering", () => {
+test("the seed-42 chart is ghosted full-bleed behind the lettering, once", () => {
+  assert.equal((card.match(/data-vellum-seed=/g) ?? []).length, 1, "exactly one chart");
   const ghost = nestedSvgTag(card, 'data-vellum-seed="42"');
   const opacity = num(ghost, "opacity");
   assert.ok(opacity > 0 && opacity < 1, `ghosted: opacity ${opacity} is below 1`);
@@ -187,42 +183,38 @@ test("the seed-42 chart is ghosted full-bleed behind the lettering", () => {
 });
 
 test("the foot line is the homepage hook, as written, in spaced small caps, broken where the page breaks it", () => {
-  assert.equal(OG_HOOK, "Give Vellum a number. It gives you back a world.");
   assert.deepEqual(OG_HOOK_LINES, ["Give Vellum a number.", "It gives you back a world."]);
-  assert.equal(OG_HOOK_LINES.join(" "), OG_HOOK);
   assert.ok(read("src/pages/index.astro").includes(OG_HOOK_LINES.join("<br>")), "the card breaks the hook where the homepage does, and its words are the page's");
   assert.ok(!card.includes("GIVE VELLUM"), "the hook is not uppercased: the SC face sets the small caps");
   const lines = OG_HOOK_LINES.map((l) => textTag(card, l));
   for (const tag of lines) {
     assert.equal(attr(tag, "x"), "600");
     assert.equal(attr(tag, "text-anchor"), "middle");
-    assert.ok(attr(tag, "font-family")!.startsWith(SC_FACE), "the hook wears the SC face");
-    assert.ok(Math.abs(num(tag, "letter-spacing") / num(tag, "font-size") - 0.3) < 0.005, "spaced: the veil-status 0.3em");
+    assert.equal(attr(tag, "font-family"), SC_FACE, "the hook wears the SC face alone");
+    assert.equal(attr(tag, "letter-spacing"), (num(tag, "font-size") * 0.3).toFixed(2), "spaced: the veil-status 0.3em, two decimals");
   }
   assert.ok(num(lines[1], "y") > num(lines[0], "y"), "the second line sits below the first");
 });
 
 test("the ratified sizes and inks (#490 round 2): wordmark 100 parchment-bright, tagline 50 parchment, hook 48 parchment, rose 132", () => {
-  const t = tokens();
   const wordmark = textTag(card, OG_WORDMARK);
   assert.equal(attr(wordmark, "font-size"), "100");
-  assert.equal(attr(wordmark, "fill"), t.get("parchment-bright"));
+  assert.equal(attr(wordmark, "fill"), token("parchment-bright"));
   const tagline = textTag(card, OG_TAGLINE);
   assert.equal(attr(tagline, "font-size"), "50");
-  assert.equal(attr(tagline, "fill"), t.get("parchment"));
+  assert.equal(attr(tagline, "fill"), token("parchment"));
   for (const line of OG_HOOK_LINES) {
     const tag = textTag(card, line);
     assert.equal(attr(tag, "font-size"), "48");
-    assert.equal(attr(tag, "fill"), t.get("parchment"));
+    assert.equal(attr(tag, "fill"), token("parchment"));
   }
-  assert.equal(attr(nestedSvgTag(card, 'viewBox="0 0 120 120"'), "width"), "132");
+  assert.equal(attr(nestedSvgTag(card, 'class="veil-rose"'), "width"), "132");
 });
 
 test("every line clears WCAG against the deep's lightest stop, with and without the ghost's wash (#490 round 2)", () => {
-  const t = tokens();
   const stop = lightestStop(card);
   assert.match(stop, /^#[0-9a-f]{6}$/, "the deep's first stop is a hex");
-  const washed = mix(t.get("chart-paper")!, stop, num(nestedSvgTag(card, 'data-vellum-seed="42"'), "opacity"));
+  const washed = mix(token("chart-paper"), stop, num(nestedSvgTag(card, 'data-vellum-seed="42"'), "opacity"));
   const floors: ReadonlyArray<readonly [string, number]> = [[OG_WORDMARK, 3], [OG_TAGLINE, 4.5], ...OG_HOOK_LINES.map((l) => [l, 4.5] as const)];
   for (const [content, floor] of floors) {
     const ink = attr(textTag(card, content), "fill")!;

@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
 import { renderMap } from "../src/render/map-renderer.ts";
 import { buildOgCard, fontFaceCss, OG_FONT_FACES } from "../src/render/og-card.ts";
+import { cardStamp, stampPng } from "../src/render/og-stamp.ts";
 import { findBrowser, rasterizeSvg, NO_BROWSER_HINT } from "../src/cli/raster.ts";
 
 /** npm run og: regenerates the committed public/og.png from the hero world; committed because the Pages deploy CI has no browser to rasterize. Needs a Chromium-family browser locally. */
@@ -35,8 +36,10 @@ async function main(): Promise<void> {
     console.error(NO_BROWSER_HINT);
     return;
   }
-  await rasterizeSvg(browser, cardPath, resolve("public/og.png"), 1);
-  console.log("public/og.png (1200x630)");
+  const pngPath = resolve("public/og.png");
+  await rasterizeSvg(browser, cardPath, pngPath, 1);
+  await writeFile(pngPath, stampPng(await readFile(pngPath), cardStamp(card)));
+  console.log("public/og.png (1200x630, stamped vellum-card)");
 }
 
 main().catch((err: unknown) => {

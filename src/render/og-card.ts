@@ -1,3 +1,4 @@
+import { SITE_PALETTE } from "../atlas/palette.ts";
 import { escapeXml } from "./svg.ts";
 
 /** A plain template string, not el()/renderSvg(): the nested chart is already-rendered markup that must NOT be re-escaped. */
@@ -8,7 +9,6 @@ export const OG_HEIGHT = 630;
 export const OG_WORDMARK = "Vellum";
 export const OG_TAGLINE = "an atelier of imaginary cartography";
 export const OG_HOOK_LINES: readonly string[] = ["Give Vellum a number.", "It gives you back a world."];
-export const OG_HOOK = OG_HOOK_LINES.join(" ");
 
 export type OgFontFace = {
   readonly family: string;
@@ -28,16 +28,15 @@ const FELL_ITALIC: OgFontFace = {
 };
 export const OG_FONT_FACES: readonly OgFontFace[] = [FELL_SC, FELL_ITALIC];
 
-const INK_DARK = "#4a3826";
-const CHART_INK = "#3d2f1f";
-const PARCHMENT = "#efe6cf";
-const PARCHMENT_BRIGHT = "#fff7e4";
-const LINE_TAN = "#b9a77f";
+const INK_DARK = SITE_PALETTE["--ink-dark"];
+const CHART_INK = SITE_PALETTE["--chart-ink"];
+const PARCHMENT = SITE_PALETTE["--parchment"];
+const PARCHMENT_BRIGHT = SITE_PALETTE["--parchment-bright"];
+const LINE_TAN = SITE_PALETTE["--line-tan"];
 const WALNUT_LIT = "#5b4937";
 
-const SERIF_FALLBACK = "'Iowan Old Style', 'Palatino', Georgia, serif";
-const FONT_DISPLAY = `'${FELL_SC.family}', ${SERIF_FALLBACK}`;
-const FONT_FLOURISH = `'${FELL_ITALIC.family}', ${SERIF_FALLBACK}`;
+const FONT_DISPLAY = `'${FELL_SC.family}'`;
+const FONT_FLOURISH = `'${FELL_ITALIC.family}'`;
 
 const CX = OG_WIDTH / 2;
 const WORDMARK = { y: 170, size: 100, track: 0.14 };
@@ -103,7 +102,7 @@ function ghostChart(chartSvg: string): string {
 
 function settledRose(): string {
   return (
-    `<svg x="${CX - ROSE.size / 2}" y="${ROSE.y}" width="${ROSE.size}" height="${ROSE.size}" ` +
+    `<svg class="veil-rose" x="${CX - ROSE.size / 2}" y="${ROSE.y}" width="${ROSE.size}" height="${ROSE.size}" ` +
     `viewBox="0 0 120 120" aria-hidden="true">` +
     `<circle cx="60" cy="60" r="44" fill="none" stroke="${LINE_TAN}" stroke-width="1"/>` +
     `<circle cx="60" cy="60" r="34" fill="none" stroke="${LINE_TAN}" stroke-width="0.6"/>` +
@@ -126,7 +125,7 @@ function line(content: string, y: number, size: number, family: string, fill: st
 
 function hookLine(text: string, index: number): string {
   const y = Math.round(HOOK.y + index * HOOK.size * HOOK.leading);
-  return line(text, y, HOOK.size, FONT_DISPLAY, PARCHMENT, ` letter-spacing="${HOOK.size * HOOK.track}"`);
+  return line(text, y, HOOK.size, FONT_DISPLAY, PARCHMENT, ` letter-spacing="${(HOOK.size * HOOK.track).toFixed(2)}"`);
 }
 
 export function buildOgCard(chartSvg: string, opts: OgCardOptions = {}): string {
@@ -141,7 +140,7 @@ export function buildOgCard(chartSvg: string, opts: OgCardOptions = {}): string 
     `<defs>${faces}${deepGradient()}</defs>` +
     `<rect width="${OG_WIDTH}" height="${OG_HEIGHT}" fill="url(#veil-deep)"/>` +
     ghostChart(chartSvg) +
-    line(wordmark, WORDMARK.y, WORDMARK.size, FONT_DISPLAY, PARCHMENT_BRIGHT, ` letter-spacing="${WORDMARK.size * WORDMARK.track}"`) +
+    line(wordmark, WORDMARK.y, WORDMARK.size, FONT_DISPLAY, PARCHMENT_BRIGHT, ` letter-spacing="${(WORDMARK.size * WORDMARK.track).toFixed(2)}"`) +
     line(tagline, TAGLINE.y, TAGLINE.size, FONT_FLOURISH, PARCHMENT, ` font-style="italic"`) +
     settledRose() +
     hook.map((text, i) => hookLine(text, i)).join("") +
