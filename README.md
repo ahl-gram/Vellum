@@ -174,8 +174,9 @@ site that serves it.
   imports. One bundler, Vite, compiles the app and engine graph together into
   the four app entries and the shared render worker, which is where the
   runtime deps (`d3-selection`, `d3-transition`, `d3-zoom`) ship. `public/`
-  holds only static assets (goldens, fonts, per-page CSS, favicon). Dev deps:
-  `astro`, `typescript`, `@types/node`, `@types/d3-*`, `vite`.
+  holds only static assets (goldens, fonts, per-page CSS, the icons). Dev deps:
+  `astro`, `typescript`, `@types/node`, `@types/d3-*`, `vite`, and `fontkit`
+  (with `@types/fontkit`), which reads the shipped Fell face for `npm run icons`.
 - **The build** (`npm run build`): `astro:generate` first writes the generated
   trees into `public/` (the Vite app bundles, the atlas and gallery
   showcases), then `astro build` assembles `dist/`, which GitHub Actions
@@ -196,5 +197,9 @@ card (`public/og.png`, 1200x630, rebuilt by `npm run og` with an installed
 browser) are committed rather than generated at deploy time, because CI has no
 browser and the homepage pins its heroes. `npm run charts:regen` is their only
 writer; land a regen alone, with the label moves named in the PR.
-`public/favicon.svg` is the hand-drawn compass-rose mark, linked from every
-page.
+`public/favicon.svg` and `public/apple-touch-icon.png` (180x180) are the
+Punchcutter's Mark, the Fell SC small-cap v cut from the shipped
+`public/fonts/im-fell-english-sc-latin-400-normal.woff2` and linked from every
+page; `npm run icons` is their only writer (the PNG needs an installed browser),
+and a test pins the committed SVG to the font byte for byte, so any change to
+that file re-runs it.
