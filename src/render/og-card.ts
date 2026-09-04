@@ -7,7 +7,8 @@ export const OG_HEIGHT = 630;
 
 export const OG_WORDMARK = "Vellum";
 export const OG_TAGLINE = "an atelier of imaginary cartography";
-export const OG_HOOK = "Give Vellum a number. It gives you back a world.";
+export const OG_HOOK_LINES: readonly string[] = ["Give Vellum a number.", "It gives you back a world."];
+export const OG_HOOK = OG_HOOK_LINES.join(" ");
 
 export type OgFontFace = {
   readonly family: string;
@@ -39,17 +40,17 @@ const FONT_DISPLAY = `'${FELL_SC.family}', ${SERIF_FALLBACK}`;
 const FONT_FLOURISH = `'${FELL_ITALIC.family}', ${SERIF_FALLBACK}`;
 
 const CX = OG_WIDTH / 2;
-const WORDMARK = { y: 232, size: 100, track: 0.14 };
-const TAGLINE = { y: 282, size: 28 };
-const ROSE = { y: 345, size: 132 };
-const HOOK = { y: 520, size: 22, track: 0.3 };
+const WORDMARK = { y: 170, size: 100, track: 0.14 };
+const TAGLINE = { y: 236, size: 50 };
+const ROSE = { y: 280, size: 132 };
+const HOOK = { y: 468, size: 48, track: 0.3, leading: 1.4 };
 const GHOST_OPACITY = 0.1;
 const DEEP = { cx: 0.5, cy: 0.4, rx: 0.9, ry: 0.8, mid: 0.55 };
 
 export type OgCardOptions = {
   readonly wordmark?: string;
   readonly tagline?: string;
-  readonly footnote?: string;
+  readonly footnote?: readonly string[];
   readonly fontCss?: string;
 };
 
@@ -123,10 +124,15 @@ function line(content: string, y: number, size: number, family: string, fill: st
   );
 }
 
+function hookLine(text: string, index: number): string {
+  const y = Math.round(HOOK.y + index * HOOK.size * HOOK.leading);
+  return line(text, y, HOOK.size, FONT_DISPLAY, PARCHMENT, ` letter-spacing="${HOOK.size * HOOK.track}"`);
+}
+
 export function buildOgCard(chartSvg: string, opts: OgCardOptions = {}): string {
   const wordmark = opts.wordmark ?? OG_WORDMARK;
   const tagline = opts.tagline ?? OG_TAGLINE;
-  const hook = opts.footnote ?? OG_HOOK;
+  const hook = opts.footnote ?? OG_HOOK_LINES;
   const faces = opts.fontCss ? `<style>${opts.fontCss}</style>` : "";
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_WIDTH}" height="${OG_HEIGHT}" ` +
@@ -136,9 +142,9 @@ export function buildOgCard(chartSvg: string, opts: OgCardOptions = {}): string 
     `<rect width="${OG_WIDTH}" height="${OG_HEIGHT}" fill="url(#veil-deep)"/>` +
     ghostChart(chartSvg) +
     line(wordmark, WORDMARK.y, WORDMARK.size, FONT_DISPLAY, PARCHMENT_BRIGHT, ` letter-spacing="${WORDMARK.size * WORDMARK.track}"`) +
-    line(tagline, TAGLINE.y, TAGLINE.size, FONT_FLOURISH, LINE_TAN, ` font-style="italic"`) +
+    line(tagline, TAGLINE.y, TAGLINE.size, FONT_FLOURISH, PARCHMENT, ` font-style="italic"`) +
     settledRose() +
-    line(hook, HOOK.y, HOOK.size, FONT_DISPLAY, LINE_TAN, ` letter-spacing="${HOOK.size * HOOK.track}"`) +
+    hook.map((text, i) => hookLine(text, i)).join("") +
     `</svg>`
   );
 }

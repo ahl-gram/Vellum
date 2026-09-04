@@ -11,6 +11,7 @@ import {
   OG_FONT_FACES,
   OG_HEIGHT,
   OG_HOOK,
+  OG_HOOK_LINES,
   OG_TAGLINE,
   OG_WIDTH,
   OG_WORDMARK,
@@ -25,6 +26,12 @@ const card = buildOgCard(chart);
 
 const SC_FACE = "'IM Fell English SC'";
 const ITALIC_FACE = "'IM Fell English'";
+
+const FEED_WIDTH = 500;
+const LEGIBLE_ROWS = 8;
+// measured 2026-09-03 (canvas measureText actualBoundingBoxAscent at 100px from the embedded woff2, headless Brave): italic x 0.4453; SC small caps m 0.4512, n 0.4385, z 0.4443; rounded down so the floor errs strict
+const FELL_ITALIC_X_HEIGHT = 0.44;
+const FELL_SC_SMALL_CAP = 0.44;
 
 function attr(tag: string, name: string): string | undefined {
   return new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1];
@@ -72,6 +79,24 @@ function mix(a: string, b: string, wa: number): string {
   return "#" + [1, 3, 5].map((i) => Math.round(ch(a, i) * wa + ch(b, i) * (1 - wa)).toString(16).padStart(2, "0")).join("");
 }
 
+function luminance(hex: string): number {
+  const channel = (i: number) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5);
+}
+
+function contrast(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((p, q) => q - p);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+const lightestStop = (svg: string): string =>
+  /<radialGradient\b[^>]*id="veil-deep"[^>]*>\s*<stop offset="0" stop-color="([^"]+)"/.exec(svg)?.[1] ?? "";
+
+const atFeed = (size: number, ratio: number): number => (size * ratio * FEED_WIDTH) / OG_WIDTH;
+
 test("the OG card is a 1200x630 SVG document", () => {
   assert.equal(OG_WIDTH, 1200);
   assert.equal(OG_HEIGHT, 630);
@@ -105,7 +130,6 @@ test("the wordmark is typed Vellum, centred, in IM Fell English SC (the face set
   assert.equal(attr(tag, "x"), "600");
   assert.equal(attr(tag, "text-anchor"), "middle");
   assert.ok(attr(tag, "font-family")!.startsWith(SC_FACE), `the wordmark wears ${SC_FACE}`);
-  assert.equal(attr(tag, "fill"), tokens().get("parchment-bright"));
   const size = num(tag, "font-size");
   assert.ok(Math.abs(num(tag, "letter-spacing") / size - 0.14) < 0.005, "letter-spacing is the veil's 0.14em");
 });
@@ -117,7 +141,6 @@ test("the tagline sits beneath the wordmark in IM Fell English italic", () => {
   assert.equal(attr(tag, "text-anchor"), "middle");
   assert.equal(attr(tag, "font-style"), "italic");
   assert.ok(attr(tag, "font-family")!.startsWith(ITALIC_FACE + ","), `the tagline wears ${ITALIC_FACE}, not the SC face`);
-  assert.equal(attr(tag, "fill"), tokens().get("line-tan"));
   assert.ok(num(tag, "y") > num(textTag(card, "Vellum"), "y"), "the tagline is below the wordmark");
 });
 
@@ -141,7 +164,7 @@ test("the rose is the veil's own markup, settled: rings drawn, rays faded in, ne
   const open = nestedSvgTag(card, 'viewBox="0 0 120 120"');
   assert.equal(num(open, "x") + num(open, "width") / 2, 600, "the rose is centred");
   const tagline = textTag(card, OG_TAGLINE);
-  const hook = textTag(card, OG_HOOK);
+  const hook = textTag(card, OG_HOOK_LINES[0]);
   assert.ok(num(open, "y") > num(tagline, "y"), "the rose is below the tagline");
   assert.ok(num(open, "y") + num(open, "height") < num(hook, "y"), "the rose is above the hook");
 });
@@ -163,19 +186,60 @@ test("the seed-42 chart is ghosted full-bleed behind the lettering", () => {
   assert.ok(card.indexOf(ghost) > card.indexOf("url(#veil-deep)"), "the chart is painted over the deep");
 });
 
-test("the foot line is the homepage hook, as written, in spaced small caps", () => {
+test("the foot line is the homepage hook, as written, in spaced small caps, broken where the page breaks it", () => {
   assert.equal(OG_HOOK, "Give Vellum a number. It gives you back a world.");
-  const home = read("src/pages/index.astro");
-  for (const sentence of ["Give Vellum a number.", "It gives you back a world."]) {
-    assert.ok(home.includes(sentence), `the card's hook stays in step with the homepage: ${sentence}`);
-  }
+  assert.deepEqual(OG_HOOK_LINES, ["Give Vellum a number.", "It gives you back a world."]);
+  assert.equal(OG_HOOK_LINES.join(" "), OG_HOOK);
+  assert.ok(read("src/pages/index.astro").includes(OG_HOOK_LINES.join("<br>")), "the card breaks the hook where the homepage does, and its words are the page's");
   assert.ok(!card.includes("GIVE VELLUM"), "the hook is not uppercased: the SC face sets the small caps");
-  const tag = textTag(card, OG_HOOK);
-  assert.equal(attr(tag, "x"), "600");
-  assert.equal(attr(tag, "text-anchor"), "middle");
-  assert.ok(attr(tag, "font-family")!.startsWith(SC_FACE), "the hook wears the SC face");
-  assert.equal(attr(tag, "fill"), tokens().get("line-tan"));
-  assert.ok(num(tag, "letter-spacing") / num(tag, "font-size") >= 0.25, "spaced: the veil-status tracking");
+  const lines = OG_HOOK_LINES.map((l) => textTag(card, l));
+  for (const tag of lines) {
+    assert.equal(attr(tag, "x"), "600");
+    assert.equal(attr(tag, "text-anchor"), "middle");
+    assert.ok(attr(tag, "font-family")!.startsWith(SC_FACE), "the hook wears the SC face");
+    assert.ok(Math.abs(num(tag, "letter-spacing") / num(tag, "font-size") - 0.3) < 0.005, "spaced: the veil-status 0.3em");
+  }
+  assert.ok(num(lines[1], "y") > num(lines[0], "y"), "the second line sits below the first");
+});
+
+test("the ratified sizes and inks (#490 round 2): wordmark 100 parchment-bright, tagline 50 parchment, hook 48 parchment, rose 132", () => {
+  const t = tokens();
+  const wordmark = textTag(card, OG_WORDMARK);
+  assert.equal(attr(wordmark, "font-size"), "100");
+  assert.equal(attr(wordmark, "fill"), t.get("parchment-bright"));
+  const tagline = textTag(card, OG_TAGLINE);
+  assert.equal(attr(tagline, "font-size"), "50");
+  assert.equal(attr(tagline, "fill"), t.get("parchment"));
+  for (const line of OG_HOOK_LINES) {
+    const tag = textTag(card, line);
+    assert.equal(attr(tag, "font-size"), "48");
+    assert.equal(attr(tag, "fill"), t.get("parchment"));
+  }
+  assert.equal(attr(nestedSvgTag(card, 'viewBox="0 0 120 120"'), "width"), "132");
+});
+
+test("every line clears WCAG against the deep's lightest stop, with and without the ghost's wash (#490 round 2)", () => {
+  const t = tokens();
+  const stop = lightestStop(card);
+  assert.match(stop, /^#[0-9a-f]{6}$/, "the deep's first stop is a hex");
+  const washed = mix(t.get("chart-paper")!, stop, num(nestedSvgTag(card, 'data-vellum-seed="42"'), "opacity"));
+  const floors: ReadonlyArray<readonly [string, number]> = [[OG_WORDMARK, 3], [OG_TAGLINE, 4.5], ...OG_HOOK_LINES.map((l) => [l, 4.5] as const)];
+  for (const [content, floor] of floors) {
+    const ink = attr(textTag(card, content), "fill")!;
+    for (const ground of [stop, washed]) {
+      const ratio = contrast(ink, ground);
+      assert.ok(ratio >= floor, `"${content}" in ${ink} on ${ground}: ${ratio.toFixed(2)}:1, floor ${floor}:1`);
+    }
+  }
+});
+
+test("legible at feed width: the tagline's x-height and the hook's small caps clear 8 rows at 500 wide (#490 round 2)", () => {
+  const tagline = atFeed(num(textTag(card, OG_TAGLINE), "font-size"), FELL_ITALIC_X_HEIGHT);
+  assert.ok(tagline >= LEGIBLE_ROWS, `tagline x-height at ${FEED_WIDTH} wide: ${tagline.toFixed(2)}px, floor ${LEGIBLE_ROWS}px`);
+  for (const line of OG_HOOK_LINES) {
+    const caps = atFeed(num(textTag(card, line), "font-size"), FELL_SC_SMALL_CAP);
+    assert.ok(caps >= LEGIBLE_ROWS, `hook small caps at ${FEED_WIDTH} wide: ${caps.toFixed(2)}px, floor ${LEGIBLE_ROWS}px`);
+  }
 });
 
 test("the two Fell faces travel inside the card as data: @font-face rules, no Garamond", () => {
@@ -205,7 +269,7 @@ test("the two Fell faces travel inside the card as data: @font-face rules, no Ga
 
 test("the card copy contains no em-dash (published-copy rule)", () => {
   assert.ok(!card.includes("—"), "OG card copy must not contain em-dashes");
-  const custom = buildOgCard(chart, { tagline: "a tagline", footnote: "a footnote" });
-  assert.ok(custom.includes(">a tagline<") && custom.includes(">a footnote<"), "the copy options still override");
+  const custom = buildOgCard(chart, { tagline: "a tagline", footnote: ["a footnote", "a second"] });
+  assert.ok(custom.includes(">a tagline<") && custom.includes(">a footnote<") && custom.includes(">a second<"), "the copy options still override");
   assert.ok(!custom.includes("—"));
 });
