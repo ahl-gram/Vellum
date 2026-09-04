@@ -15,8 +15,7 @@ import {
   type GlyphOutline,
 } from "../../src/render/favicon.ts";
 import { readGlyphOutline, FELL_SC_WOFF2, SMALL_CAP_V } from "../../scripts/glyph-outline.ts";
-
-// The Punchcutter's Mark (#489): the Fell SC small-cap v in parchment on the walnut deep, in a rounded tile with a tan keyline, cut from the shipped woff2 by npm run icons. Rulings 2026-09-03: no favicon.ico, the regen stays manual, fontkit as the reader.
+import { decodePng, hexOf } from "../../test-support/png-decode.ts";
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 
@@ -25,7 +24,6 @@ const TAN = SITE_PALETTE["--line-tan"];
 const PARCHMENT = SITE_PALETTE["--parchment"];
 const CAP_V = 0x56;
 
-// A stand-in outline in font units whose placement is checkable by hand.
 const SQUARE: GlyphOutline = {
   path: "M0 0L1000 0L1000 1000L0 1000Z",
   bbox: { minX: 0, minY: 0, maxX: 1000, maxY: 1000 },
@@ -50,8 +48,9 @@ test("the favicon root is 32 square and the touch icon 180 square, integer width
   assert.equal(TOUCH_ICON_SIZE, 180);
 });
 
-test("the ratified tile geometry, as literals (a changed number regenerates a green drift guard, so the numbers are pinned here)", () => {
+test("the ratified tile geometry and the mark's name, as literals (a changed value regenerates a green drift guard, so both are pinned here)", () => {
   assert.deepEqual(PUNCHCUTTER_TILE, { keyline: 1.5, radius: 6.4, letterWidth: 22.2, hairline: 0.3 });
+  assert.equal(MARK_NAME, "Vellum, the Punchcutter's Mark");
 });
 
 test("the tile is one rounded rect in the walnut deep with the tan keyline, standing inside the viewBox", () => {
@@ -161,4 +160,31 @@ test("public/apple-touch-icon.png is a committed 180x180 PNG", () => {
   assert.equal(bytes.subarray(12, 16).toString("latin1"), "IHDR");
   assert.equal(bytes.readUInt32BE(16), TOUCH_ICON_SIZE);
   assert.equal(bytes.readUInt32BE(20), TOUCH_ICON_SIZE);
+});
+
+// measured 2026-09-03 through Brave at 1x: palette coverage 0.948 of the 180x180 pixels (walnut 0.654, parchment 0.146, tan 0.149); the rest is antialiasing along the letter and the keyline.
+const PALETTE_COVERAGE_FLOOR = 0.9;
+const PARCHMENT_SHARE_FLOOR = 0.1;
+const TAN_SHARE_FLOOR = 0.08;
+
+test("public/apple-touch-icon.png is the committed SVG's mark: walnut corners, the three inks covering the tile", () => {
+  const png = decodePng(readFileSync(root("public/apple-touch-icon.png")));
+  assert.equal(png.width, TOUCH_ICON_SIZE);
+  assert.equal(png.height, TOUCH_ICON_SIZE);
+  const last = TOUCH_ICON_SIZE - 1;
+  for (const [x, y] of [[0, 0], [last, 0], [0, last], [last, last]]) {
+    assert.equal(hexOf(png.pixel(x, y)), WALNUT, `corner (${x}, ${y}) is the full-bleed ground`);
+  }
+  const counts = new Map<string, number>();
+  for (let y = 0; y < png.height; y++) {
+    for (let x = 0; x < png.width; x++) {
+      const hex = hexOf(png.pixel(x, y));
+      counts.set(hex, (counts.get(hex) ?? 0) + 1);
+    }
+  }
+  const share = (hex: string) => (counts.get(hex) ?? 0) / (png.width * png.height);
+  const coverage = share(WALNUT) + share(PARCHMENT) + share(TAN);
+  assert.ok(coverage >= PALETTE_COVERAGE_FLOOR, `palette coverage ${coverage.toFixed(3)} is below ${PALETTE_COVERAGE_FLOOR}`);
+  assert.ok(share(PARCHMENT) >= PARCHMENT_SHARE_FLOOR, `the letter's parchment covers ${share(PARCHMENT).toFixed(3)}`);
+  assert.ok(share(TAN) >= TAN_SHARE_FLOOR, `the keyline's tan covers ${share(TAN).toFixed(3)}`);
 });

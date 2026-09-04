@@ -14,7 +14,7 @@ export type GlyphOutline = {
   readonly bbox: GlyphBox;
 };
 
-/** The tile in viewBox units (32 across): the keyline's stroke, the corner radius, the glyph bbox's width, and the hairline that fattens the thin stroke at 16px. */
+/** In viewBox units, 32 across; the hairline fattens the thin stroke so it survives 16px. */
 export type TileGeometry = {
   readonly keyline: number;
   readonly radius: number;
