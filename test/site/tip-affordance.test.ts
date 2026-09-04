@@ -5,6 +5,7 @@ import { sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { GALLERY_PAGE_CSS } from "../../src/cli/gallery.ts";
 import { atlasDocument } from "../../src/atlas/document.ts";
+import { OG_FONT_FACES, fontFaceCss } from "../../src/render/og-card.ts";
 
 // Two contracts over every authored sheet the site has, public/ and src/ alike (#289, #356, #358, #360): what tips must go somewhere or be a ratified chart instrument, and an inline-block link must pin its bullet or be recorded as living outside a marker-bearing list.
 // A tip is defined by the shape `rotate(`, so a hover lift written as translate alone is not swept: motion.css's .rooms a lifts with translateY and no rotate (#461's addendum). It is not a false affordance today (an anchor), and widening the definition is a #289 question; so is the bare `rotate:` individual-transform property, which this fingerprint cannot see (guard-prover round 3, 2026-08-26).
@@ -64,6 +65,7 @@ const SRC_CSS: ReadonlyArray<readonly [string, () => string]> = [
   ["src/pages/index.astro", () => styleBlocksIn(read("src/pages/index.astro"))],
   ["src/cli/gallery.ts", () => GALLERY_PAGE_CSS],
   ["src/atlas/document.ts", atlasCss],
+  ["src/render/og-card.ts", () => OG_FONT_FACES.map((face) => fontFaceCss(face, "")).join("\n")],
 ];
 
 const authoredSheets = (): ReadonlyArray<readonly [string, string]> => [

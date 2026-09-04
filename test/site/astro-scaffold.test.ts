@@ -292,10 +292,10 @@ test("each rendered head carries the canonical meta with the ratified prop fan-o
       ["property", "og:image", "https://www.vellumworlds.com/og.png"],
       ["property", "og:image:width", "1200"],
       ["property", "og:image:height", "630"],
-      ["property", "og:image:alt", "A Vellum antique chart beside the Vellum wordmark."],
+      ["property", "og:image:alt", "The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind."],
       ["name", "twitter:card", "summary_large_image"],
       ["name", "twitter:image", "https://www.vellumworlds.com/og.png"],
-      ["name", "twitter:image:alt", "A Vellum antique chart beside the Vellum wordmark."],
+      ["name", "twitter:image:alt", "The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind."],
     ] as const) {
       assert.equal(metaContent(head, attr, key), want, `${p.route} ${attr}=${key}`);
     }
