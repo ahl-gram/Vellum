@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/ahl-gram/Vellum/actions/workflows/ci.yml/badge.svg)](https://github.com/ahl-gram/Vellum/actions/workflows/ci.yml)
 
-![The seed-42 hero chart, drawn in the antique style, beside the Vellum wordmark](public/og.png)
+![The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind](public/og.png)
 
 **Vellum lives at <https://www.vellumworlds.com/>.** No install, no account:
 the whole engine runs client-side in your browser.
