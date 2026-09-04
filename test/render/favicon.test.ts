@@ -50,6 +50,10 @@ test("the favicon root is 32 square and the touch icon 180 square, integer width
   assert.equal(TOUCH_ICON_SIZE, 180);
 });
 
+test("the ratified tile geometry, as literals (a changed number regenerates a green drift guard, so the numbers are pinned here)", () => {
+  assert.deepEqual(PUNCHCUTTER_TILE, { keyline: 1.5, radius: 6.4, letterWidth: 22.2, hairline: 0.3 });
+});
+
 test("the tile is one rounded rect in the walnut deep with the tan keyline, standing inside the viewBox", () => {
   const rects = tags(buildFavicon(SQUARE), "rect");
   assert.equal(rects.length, 1, "the favicon has the tile and no other rect");
