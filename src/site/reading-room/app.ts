@@ -128,7 +128,7 @@ function prospectHrefFor(forSeed: number, b: PlateSpec): string {
   if (carried.band) p.set("band", carried.band);
   if (carried.land != null) p.set("land", String(Math.round(carried.land * 1000)));
   if (carried.coast != null) p.set("coast", String(Math.round(carried.coast * 100)));
-  if (carried.table) p.set(TABLE_KEY, carried.table);
+  if (carried.table !== null) p.set(TABLE_KEY, carried.table);
   p.set("i", String(b.index));
   p.set("year", String(b.year));
   return "/prospect/#" + p.toString();
@@ -147,7 +147,7 @@ function syncHash(): void {
   p.set("beasts", carried.beasts ? "1" : "0");
   if (carried.land != null) p.set("land", String(Math.round(carried.land * 1000)));
   if (carried.coast != null) p.set("coast", String(Math.round(carried.coast * 100)));
-  if (carried.table) p.set(TABLE_KEY, carried.table);
+  if (carried.table !== null) p.set(TABLE_KEY, carried.table);
   const a = lc.agesState();
   // ages is unconditionally true: the room's instrument is always armed, the page equivalent of the Explorer's ticked checkbox.
   emitLive(p, liveNow({ ages: true, chamber: a?.chamber ?? null, year: a?.year, pending: pendingLive }));
