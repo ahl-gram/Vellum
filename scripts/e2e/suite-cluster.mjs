@@ -1,6 +1,7 @@
 // The head cluster on home (CL1-CL7, #480 Landfall Sub 6b): the wash sized to the cluster, the stage's lettering opted out of selection, and the phone drawer; every geometry MEASURED against the rendered page, since the #480 screenshots were all things source-scan tests could not see.
 import { makeStage, readCam, atLandfall } from "./home-support.mjs";
 import { sampleRow, luminance } from "./pixel-support.mjs";
+import { makeSettle } from "./settle-support.mjs";
 
 const REM = 16;
 const rectOf = (sel) => `(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom }; })()`;
@@ -31,8 +32,8 @@ const DRAWER_READ = `(() => {
 
 const stacked = (doors) => doors.length === 7 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1].bottom - 0.5 && Math.abs(d.x - doors[0].x) < 0.5));
 const offLeft = (nav) => nav.visibility === "hidden" && nav.rect !== null && nav.rect.right <= 0.5;
-const atOpen = (d) => d.nav.transform === "none" && d.nav.rect !== null && d.nav.rect.x === 0 && d.nav.visibility === "visible" && d.seedOpacity === "0";
-const atClosed = (d) => offLeft(d.nav) && d.seedOpacity === "1";
+const atOpen = (d) => d.scrollW !== -1 && d.nav.transform === "none" && d.nav.rect !== null && d.nav.rect.x === 0 && d.nav.visibility === "visible" && d.seedOpacity === "0";
+const atClosed = (d) => d.scrollW !== -1 && offLeft(d.nav) && d.seedOpacity === "1";
 // The INK, not the cluster's capped box: an overflowing wordmark sits outside the box the cap sizes (skeptic finding 3 on PR #482).
 const clear = (s) => s.seed !== null && Number.isFinite(s.inkRight) && s.inkRight + 4 <= s.seed.x;
 // The glyph run of one door, by its label: a strip through its middle reads parchment when the door shows and chart ink when the cap covers it.
@@ -41,15 +42,7 @@ const brightest = (strip) => Math.max(...strip.map(luminance));
 
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
-  // #529: the nav's transform and the seed panel's opacity transition over 0.32s and visibility flips on a 0.32s delay behind them (BaseLayout.astro), so a blind sleep samples the slide whenever the runner stalls before it starts, however generous the sleep: CL4 read transform matrix(1,0,0,1,-0.762884,0) with seed opacity 0.00754649 after 600ms, nearly twice the transition.
-  const drawerRest = async (settled, label) => {
-    for (let i = 0; i < 120; i++) {
-      const d = await evaluate(DRAWER_READ);
-      if (d && d.scrollW !== -1 && settled(d)) return d;
-      await sleep(50);
-    }
-    throw new Error("drawerRest timeout " + label);
-  };
+  const settle = makeSettle(ctx);
   const { pressKey, clickAt, settleHome } = makeStage(ctx);
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
@@ -115,7 +108,7 @@ export async function run(ctx) {
 
   const burger = closed?.burger ?? null;
   if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
-  const open = await drawerRest(atOpen, "open");
+  const open = await settle(DRAWER_READ, atOpen, "open");
   const firstDoor = open?.doors[0] ?? null;
   await evaluate(`[...document.querySelectorAll("header.chrome nav.rooms a")].pop().focus()`);
   await pressKey("Tab", "Tab", 9);
@@ -136,13 +129,13 @@ export async function run(ctx) {
   await shoot("cluster-drawer-open-390.png");
 
   if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
-  const openForEscape = await drawerRest(atOpen, "openForEscape");
+  const openForEscape = await settle(DRAWER_READ, atOpen, "openForEscape");
   await pressKey("Escape", "Escape", 27);
-  const afterEscape = await drawerRest(atClosed, "afterEscape");
+  const afterEscape = await settle(DRAWER_READ, atClosed, "afterEscape");
   if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
-  const reopened = await drawerRest(atOpen, "reopened");
+  const reopened = await settle(DRAWER_READ, atOpen, "reopened");
   await clickAt(370, 500);
-  const afterScrim = await drawerRest(atClosed, "afterScrim");
+  const afterScrim = await settle(DRAWER_READ, atClosed, "afterScrim");
   check(
     "CL5 Escape closes the drawer, the burger reopens it, and a real tap on the scrim closes it again: each close is a slide back off the left edge, doors hidden, and each script close releases the page from inert (prover round 3, C6) (#480)",
     !!openForEscape && openForEscape.checked && openForEscape.scrollY === 0
@@ -153,17 +146,17 @@ export async function run(ctx) {
   );
 
   if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
-  const openAgain = await drawerRest(atOpen, "openAgain");
+  const openAgain = await settle(DRAWER_READ, atOpen, "openAgain");
   await touch("touchStart", [{ x: 330, y: 600, id: 0 }]);
   for (let i = 1; i <= 6; i++) await touch("touchMove", [{ x: 330, y: 600 - 60 * i, id: 0 }]);
   await touch("touchEnd", []);
-  const swiped = await drawerRest((d) => atClosed(d) && d.scrollY > 100, "swiped");
+  const swiped = await settle(DRAWER_READ, atClosed, "swiped");
   // The fling keeps scrolling after the read; hold the top until two reads agree it is still.
   await sleep(900);
   for (let i = 0, still = 0; i < 30 && still < 2; i++) { await evaluate(`window.scrollTo(0, 0)`); await sleep(150); still = (await evaluate(`window.scrollY`)) === 0 ? still + 1 : 0; }
   const burgerBack = await evaluate(rectOf(".rooms-reveal"));
   if (burgerBack) await clickAt(burgerBack.x + burgerBack.w / 2, burgerBack.y + burgerBack.h / 2);
-  const reopenedAtTop = await drawerRest(atOpen, "reopenedAtTop");
+  const reopenedAtTop = await settle(DRAWER_READ, atOpen, "reopenedAtTop");
   await pressKey("Escape", "Escape", 27);
   await sleep(400);
   check(
@@ -195,7 +188,7 @@ export async function run(ctx) {
   let cardOpen = false;
   for (let i = 0; i < 40 && !cardOpen; i++) { await sleep(100); cardOpen = await evaluate(`(() => { const c = document.getElementById("lf-card-explorer"); return !!c && !c.hidden; })()`); }
   if (wideClosed?.burger) await clickAt(wideClosed.burger.x + wideClosed.burger.w / 2, wideClosed.burger.y + wideClosed.burger.h / 2);
-  const overCard = await drawerRest(atOpen, "overCard");
+  const overCard = await settle(DRAWER_READ, atOpen, "overCard");
   const cardInert = await evaluate(`document.getElementById("lf-card-explorer").inert`);
   const shownRun = await evaluate(glyphRun("Explorer"));
   const shownStrip = shownRun ? await sampleRow(send, Math.round(shownRun.x + shownRun.w / 2), Math.round(shownRun.y + shownRun.h / 2), 12) : [];

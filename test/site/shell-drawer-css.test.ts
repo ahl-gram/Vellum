@@ -49,7 +49,7 @@ test("the drawer's dress is the shell's, so a room wears the same drawer as home
   assert.match(drawer, /left:\s*calc\(-1 \* var\(--chrome-x\)\);\s*top:\s*calc\(-1 \* var\(--chrome-y\)\)/, "anchored to the corner through the tokens");
   assert.match(drawer, /transform:\s*translateX\(-100%\)/, "closed, it waits off the left edge");
   assert.match(drawer, /visibility:\s*hidden/, "closed, its doors are neither visible nor tabbable");
-  assert.match(drawer, /transition:[^;]*transform/, "the slide is a transform transition");
+  assert.match(drawer, /transition:\s*transform 0\.32s/, "the slide is a transform transition, and its DURATION is pinned here because nothing else can see it: the e2e settles poll the drawer to its rest, so they wait out a slow one and stay green (#529, proved by tripling this to 3s)");
   assert.match(drawer, /z-index:\s*-1/, "it paints beneath the cluster's own lettering and burger");
   assert.match(drawer, /width:\s*min\(16rem, 100vw\)/, "capped at the viewport: a box wider than the phone widens the layout viewport itself (the 736px incident)");
   assert.match(drawer, /padding:\s*0 1\.5rem 2rem var\(--chrome-x\)/, "no padding-top: the sticky cap is the reserve (a padding the cap was pulled into by a negative margin put the cap over the first doors)");
@@ -58,6 +58,7 @@ test("the drawer's dress is the shell's, so a room wears the same drawer as home
   assert.match(cap, /height:\s*calc\(var\(--band-h\) \+ 1rem\)/, "sized off the band token, so it clears the cluster at every width");
   const open = rule(narrow, ".rooms-reveal:checked ~ .rooms");
   assert.match(open, /transform:\s*none/, "checked, it slides home");
+  assert.match(open, /transition:\s*transform 0\.32s/, "the same duration home as away, so the drawer cannot slow in one direction alone");
   assert.match(open, /visibility:\s*visible/, "and its doors become tabbable");
   const doors = rule(narrow, '.chrome .rooms a, .chrome .rooms [aria-current="page"]');
   assert.match(doors, /display:\s*block/, "the doors stack one per row, the current room's among them");

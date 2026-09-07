@@ -1,11 +1,13 @@
 // The Specimen Book (#487 item 4, cut at #465 ruling 6): every kit piece at its seat, in every state, on one page; MEASURED at 1280x800 and a true 390x844, and shot at both as the closing review's pair (specimen-1280.png, specimen-390.png, specimen-390-open.png, specimen-390-open-leaned.png in the e2e out dir). Every state is reached through the kit's own binders (the fold, the tab, the handle, the Glass), never by planting a class.
 import { scopedHealth } from "./room-support.mjs";
 import { luminance, sampleRow } from "./pixel-support.mjs";
+import { makeSettle } from "./settle-support.mjs";
 
 const PAGE = "/specimen/";
 const CHART_ASPECT = 1500 / 1157.931;
 const INK_BROWN = "rgb(107, 90, 64)";
 const CONTROL_GOLD = "rgb(240, 227, 189)";
+const atFolded = (d, p) => d.slipVis === "hidden" && d.tabVis === "visible" && !!p && d.legend.x === p.legend.x && d.glass.right === p.glass.right;
 
 const READ = `(() => {
   const r = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
@@ -40,6 +42,7 @@ const READ = `(() => {
 
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, PORT } = ctx;
+  const settle = makeSettle(ctx);
   const gate = scopedHealth(ctx);
   const read = () => evaluate(READ);
   const setState = (s) => evaluate(`(()=>{const sel=document.getElementById("sb-state");sel.value=${JSON.stringify(s)};sel.dispatchEvent(new Event("change",{bubbles:true}));return sel.value;})()`);
@@ -81,8 +84,7 @@ export async function run(ctx) {
   await shoot("specimen-1280.png", { x: 0, y: 0, width: 1280, height: 800, scale: 1 });
 
   await setState("folded");
-  await sleep(500);
-  const folded = await read();
+  const folded = await settle(READ, atFolded, "specimen-folded");
   check(
     "SB4 folded, through the slip's own fold: the slip is gone and its tab shown, the Glass moves out to the chrome's inset, the legend row re-centres rightward",
     !!folded && folded.st.folded && folded.slipVis === "hidden" && folded.tabVis === "visible" &&
