@@ -1,0 +1,330 @@
+/* The Explorer's page sheets at 74da88b: explorer/index.css + explorer/broadside.css + living-chart.css. */
+/* #463 (Landfall Sub 8): the Explorer is a chart room on the #462 pattern. The room furniture is /atelier.css's; this sheet keeps the stage's own layout, the Glass's clip, the region inset, the turn and the verso. */
+/* The Broadside's five-column ledger needs the wider slip: a stated deviation on #462. */
+:root { --slip-w: 24rem; }
+
+/* The stage centres the fitted sheet in what the chrome leaves; room.ts measures the reserves off the chrome rects. */
+body.chart-room .stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
+#sheet { position: relative; flex: none; width: 0; height: 0; box-shadow: var(--stage-shadow); }
+.sheet-inner { position: relative; width: 100%; height: 100%; }
+/* #164: the Glass's gesture box IS the sheet, so d3's extent, the camera's cx/cy and the region survey's window all read sheet fractions; transform-origin 0 0 matches d3-zoom's screen-space math. A magnified sheet spills past the box (the mockup's look); the stage clips it. */
+#map-viewport { position: absolute; inset: 0; cursor: grab; }
+#map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
+/* #164: d3-zoom does NOT set touch-action; without none the browser's native pan/pinch preempts the gesture. */
+#map-viewport.zoomable { touch-action: none; }
+#map { position: absolute; inset: 0; transform-origin: 0 0; }
+/* #367: [data-vellum-style] scopes this to renderer-stamped charts; unqualified it also sized the survey-track svg. The sheet carries the depth; the chart fills its fitted box. */
+#map svg[data-vellum-style] { width: 100%; height: 100%; display: block; }
+
+.region-inset {
+  position: absolute; pointer-events: none;
+  opacity: 0; transition: opacity var(--fade, 200ms) ease;
+}
+.region-inset.in { opacity: 1; }
+/* width/height 100% (not auto) pin the inset svg to its computed box so no rounding gap opens at the window edge. */
+#map .region-inset svg {
+  width: 100%; height: 100%;
+  border: 0; box-shadow: 0 2px 9px rgb(from var(--chart-ink) r g b / 0.35);
+}
+@media (prefers-reduced-motion: reduce) { .region-inset { transition-duration: 0ms; } }
+
+.survey-pencil {
+  position: absolute; pointer-events: none;
+  border: 2px dashed rgb(from var(--ink-dark) r g b / 0.55);
+  background: rgb(from var(--ink-dark) r g b / 0.04);
+  animation: survey-pencil-breathe 1.2s ease-in-out infinite;
+}
+@keyframes survey-pencil-breathe {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) { .survey-pencil { animation: none; } }
+
+#map .region-inset svg.redrafting #layer-land path {
+  animation: inkDraw var(--redraft-draw, 600ms) var(--ease-paper) both,
+             washDry var(--redraft-dry, 450ms) var(--ease-paper) 200ms both;
+}
+#map .region-inset svg.redrafting #layer-waterlines {
+  animation: dryingInk var(--redraft-dry, 450ms) var(--ease-paper) 150ms both;
+}
+#map .region-inset svg.redrafting g.settlement.dry-in text {
+  animation: dryingInk var(--redraft-dry, 450ms) var(--ease-paper) var(--redraft-dry-wait, 260ms) both;
+}
+/* The tier-stagger delays sit past the inset's 200ms crossfade so a name never dries onto a still-translucent sheet. */
+#map .region-inset svg.redrafting g.settlement.dry-in[data-tier="village"] text {
+  animation-delay: var(--redraft-dry-wait-village, 500ms);
+}
+#map .region-inset svg.redrafting g.settlement.dry-in[data-tier="hamlet"] text {
+  animation-delay: var(--redraft-dry-wait-hamlet, 740ms);
+}
+
+/* #131 style turn: the 3D context is inert at rest (byte-parity between turns, verified by CDP spike); the turn is WAAPI, so its reduced-motion twin is the shouldTurn() JS gate, nothing here for /motion.css to reach. */
+.sheet.turning { perspective: 2200px; }
+.sheet-inner.turning { transform-style: preserve-3d; }
+/* #164: backface-visibility must sit on #map-viewport (the direct preserve-3d child); #map renders flattened into it, so it is the viewport's facing that flips out of view. */
+.sheet-inner.turning #map-viewport { backface-visibility: hidden; }
+.sheet-back {
+  position: absolute; inset: 0;
+  backface-visibility: hidden; transform: rotateY(180deg);
+}
+.sheet-back img { width: 100%; height: 100%; display: block; }
+
+/* #116 Verso: .flip3d lights the 3D context, .versoed holds the rotateY(-180deg) target; the transition is scoped off while .turning so the WAAPI turn and this transition never drive #sheet-inner at once. */
+.sheet:not(.turning) .sheet-inner {
+  transition: transform var(--verso-turn, 1200ms) var(--ease-turn, ease-in-out);
+}
+.sheet.flip3d { perspective: 2200px; }
+.sheet.flip3d .sheet-inner { transform-style: preserve-3d; }
+.sheet.flip3d #map-viewport { backface-visibility: hidden; } /* #164: retargeted from #map, see the turn rule above */
+.sheet.versoed .sheet-inner { transform: rotateY(-180deg); }
+
+/* Sized to the sheet's box; hidden at rest with visibility (not a 3D trick) so the 3D context can stay off between flips. */
+#verso {
+  position: absolute; inset: 0;
+  visibility: hidden;
+  backface-visibility: hidden; transform: rotateY(180deg);
+  background: var(--parchment-deep); color: var(--ink-dark);
+  overflow: hidden;
+}
+.sheet.flip3d #verso { visibility: visible; }
+.verso-ghost { display: block; width: 100%; height: 100%;
+  transform: scaleX(-1); opacity: 0.1; filter: blur(1.2px); }
+/* #174: this layer must share the ghost's box and its scaleX(-1) centre or the bleed-through track misregisters with the coastline; struck at 0.26 because a 3px dotted stroke at the ghost's 0.1 simply disappears. */
+.verso-track-layer { position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; transform: scaleX(-1);
+  opacity: 0.26; filter: blur(1.1px); overflow: visible; }
+.verso-track { fill: none; stroke: var(--ink-dark); stroke-width: 3;
+  stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke; }
+.verso-docket, .verso-survey { position: absolute; left: 8%; right: 8%;
+  text-align: center; }
+.verso-docket { top: 9%; text-transform: uppercase; letter-spacing: 0.18em;
+  font-size: clamp(0.6rem, 1.4vw, 0.92rem); color: var(--ink-brown);
+  font-variant-numeric: tabular-nums; }
+.verso-survey { top: 17%; font-style: italic; line-height: 1.5;
+  font-size: clamp(0.62rem, 1.5vw, 1rem); color: var(--ink-brown); }
+.verso-stamp { position: absolute; right: 11%; bottom: 12%;
+  width: clamp(90px, 17%, 190px); height: auto; opacity: 0.5;
+  transform: rotate(-8deg); }
+
+#map svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
+#map svg.arriving #layer-land path {
+  animation: inkDraw var(--ink-draw) var(--ease-paper) both,
+             washDry var(--ink-dry) var(--ease-paper) 400ms both;
+}
+#map svg.arriving #layer-waterlines {
+  animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
+}
+
+/* The verso's footnote mark rides the legend row beside Turn the sheet. */
+.legend-row a.fn { color: var(--line-tan); align-self: flex-start; margin-left: -0.45rem; }
+.legend-row a.fn:hover, .legend-row a.fn:focus-visible { color: var(--parchment-bright); }
+
+/* Print is paper (#462 ruling 10): the chart prints on the page, unzoomed, its recto only. */
+@media print {
+  .stage { position: static; padding: 0 !important; display: block; }
+  #sheet { width: auto !important; height: auto !important; box-shadow: none; }
+  .sheet-inner { height: auto; }
+  #map-viewport { position: static; }
+  #map { position: static; transform: none !important; }
+  #map svg[data-vellum-style] { height: auto; }
+  #verso { display: none; }
+}
+/* #270 The Broadside: the Explorer's control sheet (The Land / The Hand), on the slip since #463; the voice is /house.css's, the slip's dress /atelier.css's, only the ledger's geometry and its own dressings live here. */
+
+.broadside .panel { padding: 0.35rem 0 0.55rem; min-width: 0; }
+.broadside .panel + .panel { border-top: 1px solid var(--line-tan); margin-top: 0.5rem; padding-top: 0.9rem; }
+.broadside .panel-head { margin: 0; }
+.broadside .panel-gloss {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; font-size: 0.85rem; color: var(--ink-brown);
+  margin: 0.1rem 0 0.55rem;
+}
+
+/* Five columns: label | endpoint word | track | endpoint word | readout. Ordinary controls span the last four (.l-ctl); slider rows sit directly on the grid so BOTH tracks share the one track column and land twin-length (pinned by e2e BR1b). */
+.broadside .ledger { display: grid; grid-template-columns: auto auto 1fr auto auto;
+  gap: 0.5rem 0.6rem; align-items: center; }
+.broadside .l-label { grid-column: 1; text-align: right; white-space: nowrap; }
+.broadside .l-label label { font-size: 0.85rem; letter-spacing: 0.05em; color: var(--ink-brown); }
+.broadside .l-ctl { grid-column: 2 / -1; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.broadside .l-ctl > select,
+.broadside .l-ctl > input[type="number"] { flex: 1; min-width: 0; }
+/* Columns pinned explicitly: auto-placement would re-deal the row when the endpoint words drop out at the 560px tier. */
+.broadside .ledger > .land-end-min { grid-column: 2; justify-self: end; }
+.broadside .ledger > input[type="range"] { grid-column: 3; width: 100%; min-width: 4rem;
+  accent-color: var(--ink-dark); margin: 0; }
+.broadside .ledger > .land-end-max { grid-column: 4; }
+.broadside .ledger > .land-readout { grid-column: 5; }
+.land-end { font-size: 0.72rem; font-style: italic; color: var(--ink-faded); white-space: nowrap; }
+/* Reserved readout slot: "34% land" / "warp 0.55" must never push their neighbors as values change length. */
+.land-readout { font-style: italic; color: var(--ink-brown); font-size: 0.85rem;
+  font-variant-numeric: tabular-nums; min-width: 4.6rem; text-align: right; }
+
+/* Seals: the checkbox hides by opacity, not display, so assistive tech still reaches it; the check mark fills a reserved ::before slot so state reads by shape as well as fill. */
+.broadside .seals { flex-wrap: wrap; }
+.broadside label.check.seal { display: inline-flex; align-items: center; gap: 0.35rem;
+  cursor: pointer; user-select: none;
+  font-size: 0.85rem; letter-spacing: 0.05em;
+  border: 1.5px solid var(--ink-brown); border-radius: 4px; padding: 0.28rem 0.6rem;
+  background: var(--control-cream); color: var(--ink-brown); }
+.broadside label.check.seal:hover { background: var(--parchment-bright); }
+.broadside .seal input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.broadside .seal::before { content: ""; width: 0.72em; display: inline-block; }
+.broadside .seal:has(input:checked) { background: var(--ink-dark);
+  border-color: var(--ink-dark); color: var(--chart-paper); }
+/* Without this the unchecked hover's bright cream would beat the dark fill (specificity) and wash the label out light-on-light, exactly in the state right after the click. */
+.broadside label.check.seal:has(input:checked):hover { background: var(--ink-press);
+  border-color: var(--ink-press); }
+.broadside .seal:has(input:checked)::before { content: "\2713"; }
+.broadside .seal:has(input:focus-visible) { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
+
+a.fn { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  text-decoration: none; color: var(--ink-brown);
+  font-size: 0.95em; vertical-align: super; line-height: 0; padding: 0 0.15em;
+  display: inline-block; } /* a transformable box, for the tip below */
+a.fn:hover, a.fn:focus-visible { color: var(--ink-dark); }
+a.fn:hover { transform: translateY(var(--raise)) rotate(-0.6deg); }
+/* Native popover (the UA [popover] rule keeps it display:none until shown); fixed-position because static CSS cannot place a top-layer box relative to an anchor, so footnotes.ts anchors it at show time. */
+.fn-note { position: fixed; margin: 0; inset: auto; width: 15.5rem;
+  transform: rotate(-0.4deg);
+  background: var(--parchment-panel); border: 1px solid var(--line-tan);
+  box-shadow: 0 4px 14px rgb(from var(--chart-ink) r g b / 0.18);
+  padding: 0.6rem 0.75rem 0.65rem;
+  font-size: 0.8rem; line-height: 1.45; color: var(--ink-dark); }
+.fn-note .fn-head { display: block; font-variant: small-caps; letter-spacing: 0.08em;
+  color: var(--ink-faded); font-size: 0.82rem; font-weight: 400; margin-bottom: 0.2rem; }
+.fn-note > a { display: block; margin-top: 0.3rem; font-style: italic;
+  font-size: 0.78rem; color: var(--ink-brown); } /* >= 12px rendered: the back-matter link must stay legible */
+
+@media (max-width: 560px) {
+  /* Re-deals to three columns: empty word columns would each still cost a grid gap and unflush the track's left edge. */
+  .broadside .ledger .land-end { display: none; }
+  .broadside .ledger { grid-template-columns: auto 1fr auto; }
+  .broadside .ledger > input[type="range"] { grid-column: 2; }
+  .broadside .ledger > .land-readout { grid-column: 3; }
+}
+/* Living-chart engine overlay dressing (#302), host-agnostic. HOST CONTRACT, both halves or the overlays render undressed: link /living-chart.css AND put class="living-chart" on the chart mount handed to the engine. */
+
+/* The .place-hit reset is load-bearing: a host's own button styling would otherwise paint opaque boxes over each map glyph, breaking idle parity. */
+.place-overlay { position: absolute; inset: 0; pointer-events: none; }
+.place-hit {
+  position: absolute;
+  /* #331: the WHOLE hit divides by --zoom-k (published on .place-overlay, never the mount, the #164 jiggle rule) so the target holds its designed 26px at every depth; the (,1) fallback keeps non-zooming hosts untouched. */
+  transform: translate(-50%, -50%) scale(calc(1 / var(--zoom-k, 1)));
+  width: 26px; height: 26px; box-sizing: border-box;
+  background: transparent; border: 0; border-radius: 0; padding: 0;
+  pointer-events: auto; cursor: pointer;
+}
+/* The ring rides ::after (the scrub dot is ::before) so the .place-hit ELEMENT keeps the zero-transition reset e2e P2/P2c guard and idle parity holds. */
+.place-hit::after {
+  content: ""; position: absolute; inset: 0; margin: auto;
+  width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box;
+  border: 2px solid var(--ink-dark); pointer-events: none;
+  opacity: 0; transform: scale(0.85);
+  transition: opacity var(--paper-quick) var(--ease-paper),
+              transform var(--paper-quick) var(--ease-paper);
+}
+/* The ring needs NO zoom division of its own: its element carries it (#331), and a second division would shrink the ring k-fold below its 20px design. */
+.place-hit:hover::after, .place-hit:focus-visible::after {
+  opacity: 1; transform: scale(1);
+}
+/* #164: --zoom-k is published on THIS card element, never the mount (that would re-rasterize the baked labels every frame and jiggle); the origin sits on whichever corner the card is ANCHORED by, which #124 moved to the right edge for the flipped variants, so the gap at the mark holds a constant screen distance at every depth. */
+/* #387/#388: the clamp rides INSIDE the counter-scaled translate. The mount carries the Glass's own scale(k), so a nudge placed ahead of scale(1/k) composes as k times itself, which no unit test can catch because it is exactly right at k=1. */
+#place-card {
+  position: absolute; z-index: 5; max-width: 16rem; pointer-events: none;
+  left: calc(var(--pc-nx, 0) * 100%); top: calc(var(--pc-ny, 0) * 100%);
+  transform-origin: 0 0;
+  transform: scale(calc(1 / var(--zoom-k, 1)))
+    translate(calc(10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)));
+}
+/* id+attr specificity beats the id-only rule above, so [hidden] really hides. */
+#place-card[hidden] { display: none; }
+/* #124: a flipped card is anchored on the side it flips TOWARD, so shrink-to-fit measures the room it will actually occupy. Anchored on the mark's side, a town at nx 0.72 got a column as wide as the 28% gap it was flipping away from, and the derivation fell into a 97px ribbon 478px tall inside a 266px chart. */
+#place-card.flip-h { left: auto; right: calc(100% - var(--pc-nx, 0) * 100%);
+  transform-origin: 100% 0;
+  transform: scale(calc(1 / var(--zoom-k, 1)))
+    translate(calc(-10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px))); }
+#place-card.flip-v { transform: scale(calc(1 / var(--zoom-k, 1)))
+  translate(calc(10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px))); }
+#place-card.flip-h.flip-v { transform-origin: 100% 0;
+  transform: scale(calc(1 / var(--zoom-k, 1)))
+    translate(calc(-10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px))); }
+.pc-inner {
+  background: var(--control-cream); color: var(--ink-dark);
+  border: 1px solid var(--ink-dark); border-radius: 4px;
+  box-shadow: 0 8px 22px rgb(from var(--chart-ink) r g b / 0.28);
+  padding: 0.6rem 0.75rem; font-size: 0.9rem; line-height: 1.35;
+  transform-origin: top center;
+  animation: paperUnfurl var(--unfurl-quick) var(--ease-unfurl) both;
+}
+#place-card.flip-v .pc-inner { transform-origin: bottom center; }
+#place-card.pinned .pc-inner { animation-duration: var(--unfurl); }
+.pc-name { display: block; font-size: 1rem; letter-spacing: 0.02em; }
+.pc-rank { display: block; font-style: italic; color: var(--ink-brown); font-size: 0.82rem;
+  letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.1rem; }
+.pc-founded { display: block; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
+.pc-former { display: block; margin-top: 0.15rem; font-size: 0.9em; color: var(--ink-brown); }
+.pc-tale { margin: 0.4rem 0 0; font-style: italic; color: var(--ink-tale); }
+/* #242: the card's way in to the prospect page, in the featured action-link gold; pointer-events restored because the card box is pointer-events: none. */
+.pc-prospect { display: inline-block; vertical-align: top; margin-top: 0.45rem;
+  padding: 0.16rem 0.55rem; pointer-events: auto;
+  font-size: 0.82rem; letter-spacing: 0.03em; text-decoration: none;
+  color: var(--ink-dark); background: var(--control-gold);
+  border: 1px solid var(--line-tan); border-radius: 4px;
+  transition: transform 160ms ease, border-color 160ms ease; }
+.pc-prospect:hover, .pc-prospect:focus-visible { border-color: var(--ink-brown);
+  transform: translateY(var(--raise)) rotate(-0.6deg); }
+.pc-tongue { display: block; margin: 0.45rem 0 0; padding-top: 0.4rem;
+  border-top: 1px solid rgb(from var(--ink-dark) r g b / 0.22);
+  font-size: 0.8rem; color: var(--ink-brown); }
+.pc-roots { margin: 0.15rem 0 0; font-size: 0.78rem; line-height: 1.3;
+  font-style: italic; color: var(--ink-tale); }
+
+.place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
+/* #155 ink-in: animations ride the CHILDREN, never the group (its box spans halo+glyph+label, so scaling the group drags the name with the mark); the origin is per-element data written inline by chronicle.ts because a PROFILE glyph stands ON its point while a PLAN glyph centres on it (e2e S26 measures the town point staying fixed). */
+.living-chart g.settlement[data-ink="founding"] > :not(text) {
+  animation: inkStamp var(--paper) var(--ease-paper) both;
+}
+.living-chart g.settlement[data-ink="ruin"] > :not(text) {
+  animation: dryingInk var(--paper) var(--ease-paper) both;
+}
+.living-chart g.settlement[data-ink] > text {
+  animation: dryingInk var(--paper-quick) var(--ease-paper) var(--paper-quick) both;
+}
+
+/* #119 voyage overlay: a SIBLING svg, never inside the chart (Download stays byte-identical); the rAF sweep's reduced-motion twin is the prefersReduce() gate in voyage.ts, nothing here for /motion.css to collapse. */
+/* #367: deliberately says nothing about a shadow; the double-shadow fix lives in the hosts' qualified mount rules, and an opt-out here would lose every cascade it entered (bare .voyage-overlay is 0,1,0 against 1,0,1). */
+.voyage-overlay { position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 3; overflow: visible; }
+.voyage-track { fill: none; stroke: var(--ink-dark); stroke-width: 3;
+  stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke; opacity: 0.95; }
+.voyage-ship path, .voyage-rider path { fill: var(--parchment-panel); stroke: var(--ink-dark); stroke-width: 1.5;
+  stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.voyage-ship .rig { fill: none; stroke: var(--ink-dark); stroke-width: 1.1;
+  vector-effect: non-scaling-stroke; }
+.voyage-ship .detail, .voyage-rider .detail, .voyage-rider .tail { fill: none;
+  stroke: var(--ink-dark); stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.voyage-ship .detail, .voyage-rider .detail { stroke-width: 0.8; }
+.voyage-rider .tail { stroke-width: 1.4; }
+.voyage-rider .leg { fill: none; stroke: var(--ink-dark); stroke-width: 1.2;
+  stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.voyage-ship .ink, .voyage-rider .ink { fill: var(--ink-dark); stroke: none; }
+
+/* #220 ages bar: the background layers paint the instrument (threshold post, its two caps, hatched survey half, plain ages half) on a 24px box whose middle 10px band is the track; appearance:none so both hosts render the same instrument. */
+.ages-range { appearance: none; -webkit-appearance: none; height: 24px;
+  margin: 0; background:
+    linear-gradient(var(--ink-dark), var(--ink-dark)) 50% 0 / 6px 2px no-repeat,
+    linear-gradient(var(--ink-dark), var(--ink-dark)) 50% 100% / 6px 2px no-repeat,
+    linear-gradient(var(--ink-dark), var(--ink-dark)) 50% 50% / 2px 24px no-repeat,
+    repeating-linear-gradient(45deg, var(--parchment-deep) 0 4px,
+      rgb(from var(--line-tan) r g b / 0.45) 4px 6px) 0 50% / 50% 10px no-repeat,
+    linear-gradient(var(--parchment-deep), var(--parchment-deep)) 100% 50% / 50% 10px no-repeat; }
+.ages-range:focus-visible { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
+.ages-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px; border-radius: 50%; background: var(--ink-dark);
+  border: 2px solid var(--parchment-bright); box-shadow: 0 0 0 1px var(--ink-dark); }
+.ages-range::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%;
+  background: var(--ink-dark); border: 2px solid var(--parchment-bright);
+  box-shadow: 0 0 0 1px var(--ink-dark); }

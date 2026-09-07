@@ -1,0 +1,145 @@
+<title>Vellum · The Explorer, with the Chart Table</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@1&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+{{SHELL}}
+{{KIT}}
+{{PAGE}}
+{{MOCK}}
+:root { --slip-w: 24rem; }
+</style>
+<script>window.ROOM_CAM = { w: 1500, h: 1157.93 };</script>
+
+<div class="fog a"></div><div class="fog b"></div>
+<div class="stage" id="stage" data-window="{{WIN}}" data-k="4">
+  <img class="world" src="{{WORLD}}" alt="">
+  <div class="sheet" id="sheet">
+    <div id="map-viewport" class="zoomed"><img class="chart" src="{{STAGE_SVG}}" alt="The Environs of Laukuwelua, a regional survey at band 2, antique"></div>
+    <button class="handle legend-btn gold" type="button"><span class="verb lay">Lay on</span><span class="verb full">No room on</span><span class="room">The Table</span></button>
+    <button class="dogear" type="button" aria-label="Lay this survey on the table"></button>
+    <p class="dogear-label"><span class="lay"><strong class="fn-head">the corner, turned</strong>lay this survey on the table</span><span class="full"><strong class="fn-head">the corner, turned</strong>the table is full: six sheets lie on it</span></p>
+  </div>
+</div>
+<div class="vignette top"></div><div class="vignette bottom"></div>
+
+{{NAV}}
+
+<div class="chrome corner tr folio-room">
+  <h1 class="room-name">The Explorer</h1>
+  <p class="room-tagline">every seed is a world, draw one</p>
+  <div class="folio-controls" role="group" aria-label="The seed">
+    <input class="control" type="text" inputmode="numeric" pattern="[0-9]*" value="42" aria-label="seed">
+    <button class="dice" type="button" title="random seed" aria-label="Random seed">&#9860;</button>
+    <button class="primary" type="button">Draw</button>
+  </div>
+  <p class="gloss">every chart is reproducible from the number in its margin</p>
+</div>
+
+<aside class="slip" id="broadside" aria-labelledby="broadside-title">
+  <div class="slip-head">
+    <button class="slip-handle" type="button" aria-expanded="false" aria-controls="broadside" aria-label="Open The Broadside"></button>
+    <button class="slip-fold" type="button" aria-label="Fold the broadside away">&times;</button>
+    <p class="card-verb">Make one</p>
+    <h2 class="card-title" id="broadside-title">The Broadside</h2>
+    <p class="card-where">the land, and the hand that dresses it</p>
+    <div class="sheet-tabs" role="tablist" aria-label="The sheet's leaves"><button type="button" role="tab" data-leaf="broadside" aria-selected="true">The Broadside</button><button type="button" role="tab" data-leaf="table" aria-selected="false">The Table &middot; <span data-count-num>3</span></button></div>
+  </div>
+  <div class="slip-body">
+    <div class="broadside">
+      <div class="panel" role="group" aria-labelledby="grp-land">
+        <p class="panel-head archivist-head" id="grp-land">The Land</p>
+        <p class="panel-gloss">these shape the world itself</p>
+        <div class="ledger">
+          <span class="l-label"><label for="type">type</label><a class="fn" href="#" aria-label="note on the seed's choice">&dagger;</a></span>
+          <span class="l-ctl"><select id="type"><option selected>seed's choice</option><option>island</option><option>archipelago</option><option>continent</option><option>city-state</option></select></span>
+          <span class="l-label"><label for="band">climate</label></span>
+          <span class="l-ctl"><select id="band"><option selected>seed's choice</option><option>temperate</option><option>tropical</option><option>polar</option></select></span>
+          <span class="l-label"><label for="land">sea level</label></span>
+          <span class="land-end land-end-min">more sea</span>
+          <input id="land" type="range" min="100" max="700" step="2" value="320">
+          <span class="land-end land-end-max">more land</span>
+          <span class="land-readout">34% land</span>
+          <span class="l-label"><label for="coast">coast</label><a class="fn" href="#" aria-label="note on the coast warp">&Dagger;</a></span>
+          <span class="land-end land-end-min">calm</span>
+          <input id="coast" type="range" min="0" max="100" step="5" value="55">
+          <span class="land-end land-end-max">lobed</span>
+          <span class="land-readout">warp 0.55</span>
+        </div>
+      </div>
+      <div class="panel" role="group" aria-labelledby="grp-hand">
+        <p class="panel-head archivist-head" id="grp-hand">The Hand</p>
+        <p class="panel-gloss">these dress the same world</p>
+        <div class="ledger">
+          <span class="l-label"><label for="style">style</label></span>
+          <span class="l-ctl"><select id="style"><option selected>antique</option><option>topographic</option><option>ink</option><option>nautical</option></select></span>
+          <span class="l-label"><label for="theme">theme</label></span>
+          <span class="l-ctl"><select id="theme"><option selected>none</option><option>vegetation</option><option>temperature</option><option>rainfall</option><option>population</option></select></span>
+          <span class="l-label"></span>
+          <span class="l-ctl seals">
+            <label class="check seal">legend <input type="checkbox" checked></label>
+            <label class="check seal">arms <input type="checkbox"></label>
+            <label class="check seal">beasts <input type="checkbox"></label>
+            <label class="check seal">survey <input type="checkbox"></label><a class="fn" href="#" aria-label="note on the survey">*</a>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="table-leaf">
+      <ol class="cuttings">{{CUTTINGS}}</ol>
+      <p class="count"><span class="three">three sheets laid &middot; room for three more</span><span class="six">six sheets laid &middot; the table is full</span><span class="empty">the table is bare: turn the corner of a survey to lay it here</span></p>
+    </div>
+    <nav class="legend in-slip" aria-label="The Press">
+      <div class="legend-row">
+        <button class="legend-btn not-table" type="button"><span class="verb">Turn</span><span class="room">The Sheet</span></button>
+        <a class="legend-btn gold not-table" href="#"><span class="verb">Take to</span><span class="room">The Print Room</span></a>
+        <a class="legend-btn gold not-table" href="#"><span class="verb">Read the journal in</span><span class="room">The Reading Room</span></a>
+        <a class="legend-btn gold road-table" href="#"><span class="verb"><span class="three">three sheets &middot; take the table to</span><span class="six">six sheets &middot; take the table to</span><span class="empty">the table is bare</span></span><span class="room">The Print Room</span></a>
+      </div>
+    </nav>
+  </div>
+</aside>
+<button class="slip-tab" type="button" aria-controls="broadside">The Broadside</button>
+
+<div class="chrome corner bl folio">
+  <p class="folio-title">The Isle of Rahai &middot; Chart &numero; 42</p>
+  <p class="folio-sub">surveyed in the year 1059 of the Cedar Age</p>
+  <p class="folio-coords">The Environs of Laukuwelua &middot; regional survey &middot; band 2 &middot; drawn in 907ms</p>
+</div>
+
+<nav class="legend" aria-label="The Press">
+  <p class="legend-head">The Press &middot; what the sheet can do next</p>
+  <div class="legend-row">
+    <button class="legend-btn" type="button"><span class="verb">Turn</span><span class="room">The Sheet</span></button><a class="fn" href="#" aria-label="note on the verso">&sect;</a>
+    <a class="legend-btn gold" href="#"><span class="verb">Take to</span><span class="room">The Print Room</span></a>
+    <a class="legend-btn gold" href="#"><span class="verb">Read the journal in</span><span class="room">The Reading Room</span></a>
+  </div>
+  <p class="legend-status road-table"><span class="three">three sheets on the table &middot; </span><span class="six">six sheets on the table, and it is full &middot; </span><span class="empty">the table is bare: lay a survey on it from the Glass</span><a href="#">take the table to the Print Room</a></p>
+</nav>
+
+<!-- A. the tray -->
+<div class="strip table" role="region" aria-label="The Chart Table">
+  <div class="strip-head"><span class="name">The Chart Table</span><span class="count" data-count-word>three sheets laid</span><span class="full">the table is full</span></div>
+  <ol class="laid">{{LAID}}</ol>
+  <div class="strip-road"><a class="legend-btn gold" href="#"><span class="verb">Take the table to</span><span class="room">The Print Room</span></a></div>
+</div>
+<!-- C. the pigeonholes -->
+<div class="rack" role="region" aria-label="The Pigeonholes">
+  <p class="rack-head">The Pigeonholes</p>
+  <ol class="holes">{{HOLES}}</ol>
+  <a class="legend-btn gold rack-road" href="#"><span class="verb">Take the sheaf to</span><span class="room">The Print Room</span></a>
+</div>
+<!-- D. the drawer -->
+<button class="drawer-tab" type="button">The Drawer <span class="three">&middot; three sheets</span><span class="six">&middot; six sheets</span></button>
+<div class="drawer" role="region" aria-label="The Chart Table">
+  <div class="drawer-head">
+    <p class="card-verb">Gathered from the Glass</p>
+    <h2 class="card-title">The Chart Table</h2>
+    <p class="count"><span class="three">three sheets laid &middot; room for three more</span><span class="six">six sheets laid &middot; the table is full</span><span class="empty">the table is bare</span></p>
+    <button class="legend-btn shut" type="button"><span class="verb">Shut</span><span class="room">The Drawer</span></button>
+  </div>
+  <ol class="cuttings">{{CUTTINGS}}</ol>
+  <div class="drawer-road"><p class="full">no room for more</p><a class="legend-btn gold" href="#"><span class="verb">Take the table to</span><span class="room">The Print Room</span></a></div>
+</div>
+
+{{GLASS}}
+<script>{{JS}}</script>
