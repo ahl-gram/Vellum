@@ -8,6 +8,7 @@ import {
   parseTable,
   emitTable,
   latticeFromCentre,
+  latticeFromSettle,
   tableWindow,
   groupByWorld,
   type Rung,
@@ -338,8 +339,11 @@ test("chartTarget carries the table home from the Prospect page (#401 ruling 7 d
   assert.deepEqual(parseTable(chartTarget(hash).replace("/explorer/", "")), [survey]);
 });
 
-// Sub 2 (#520) carried finding 4: the address encodes the window as (rung, lattice centre) and there is no honest way back from the window, so the SETTLE has to hand its centre over. Swept over EVERY seat rather than a chosen camera: an earlier version of this guard pinned three cameras and the window-midpoint shortcut passed all three, because at rung 1 lodWindowFor clamps hard enough that neighbouring seats share a window byte for byte.
+// Sub 2 (#520) carried finding 4: the address encodes the window as (rung, lattice centre) and there is no honest way back from the window, so the seat has to be taken at the settle. This sweeps the function the controller actually calls, from the SHEET camera the Glass reports, so the space conversion is inside what is under test rather than assembled here.
+// Swept over every seat rather than a chosen camera: an earlier version pinned three cameras and the window-midpoint shortcut passed all three, because at rung 1 lodWindowFor clamps hard enough that neighbouring seats share a window byte for byte.
 test("every lattice seat round-trips through the settle it came from (#520)", () => {
+  const m = { mx: 0.045, my: 0.045 };
+  const toSheet = (plot: number, margin: number): number => plot * (1 - 2 * margin) + margin;
   const dress = { kind: "survey", seed: 42, overrides: {}, style: "antique", legend: true, arms: false, beasts: false, theme: null } as const;
   for (const rung of [1, 2, 3] as const) {
     const band = LOD_BANDS[rung] as LodBand;
@@ -348,16 +352,25 @@ test("every lattice seat round-trips through the settle it came from (#520)", ()
     let checked = 0;
     for (let lx = 0; lx <= max; lx++) {
       for (let ly = 0; ly <= max; ly++) {
-        const decision = decideSettle({ camera: { cx: lx * step, cy: ly * step, k: band.k }, currentWindow: FULL_WINDOW, currentBand: 0 });
+        const cam = { cx: toSheet(lx * step, m.mx), cy: toSheet(ly * step, m.my), k: band.k };
+        const seat = latticeFromSettle(cam, m, rung);
+        assert.deepEqual(seat, { lx, ly }, `rung ${rung} seat (${lx},${ly}): the settle must name the seat it landed on`);
+        const decision = decideSettle({ camera: plotUvFromSheet(cam, m), currentWindow: FULL_WINDOW, currentBand: 0 });
         assert.equal(decision.action, "region");
-        assert.equal(decision.band, rung);
-        const seat = latticeFromCentre(decision.centre.cx, decision.centre.cy, rung);
-        assert.deepEqual(seat, { lx, ly }, `rung ${rung} seat (${lx},${ly}): the settle must hand back the seat it landed on`);
         assert.deepEqual(tableWindow({ ...dress, rung, lx, ly }), decision.window, `rung ${rung} seat (${lx},${ly}): the address must rebuild the settle's own window`);
         checked++;
       }
     }
     assert.equal(checked, (max + 1) ** 2, `rung ${rung}: the sweep must reach every seat`);
+  }
+});
+
+// The control: the raw sheet-fraction camera is the wrong space, and the seat it names must differ, or the sweep above proves nothing about the conversion latticeFromSettle owns. Measured 2026-09-07 at every rung.
+test("the sheet-fraction camera names a different seat, which is why the conversion is not the caller's (#520)", () => {
+  const m = { mx: 0.045, my: 0.045 };
+  for (const [rung, c] of [[1, 0.220], [2, 0.200], [3, 0.200]] as const) {
+    const cam = { cx: c, cy: c, k: (LOD_BANDS[rung] as LodBand).k };
+    assert.notDeepEqual(latticeFromSettle(cam, m, rung), latticeFromCentre(cam.cx, cam.cy, rung), `rung ${rung}: the two spaces must disagree at ${c}`);
   }
 });
 

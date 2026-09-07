@@ -110,7 +110,7 @@ function windowsEqual(a: UvWindow, b: UvWindow): boolean {
 export type SettleDecision =
   | { readonly action: "noop" }
   | { readonly action: "world" }
-  | { readonly action: "region"; readonly band: number; readonly window: UvWindow; readonly centre: { readonly cx: number; readonly cy: number } };
+  | { readonly action: "region"; readonly band: number; readonly window: UvWindow };
 
 /** The camera is world-relative at every band: a committed region only mounts an inset, never rebases. */
 export function decideSettle(state: {
@@ -128,5 +128,5 @@ export function decideSettle(state: {
   if (band === state.currentBand && windowsEqual(window, state.currentWindow)) {
     return { action: "noop" }; // same survey already on screen: skip the redraft
   }
-  return { action: "region", band, window, centre: { cx, cy } };
+  return { action: "region", band, window };
 }

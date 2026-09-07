@@ -109,14 +109,15 @@ test("RR-room 8 under reduced motion the pace group hides (#493, ruled 2026-09-0
 });
 
 // #520, ruled 2026-09-07 (option B on the Reading Room clobber): the room's writers each build a FRESH URLSearchParams and finalize it, so any key they do not know dies on a copied link. The Chart Table rides in on every road in and must ride out again.
-// Pointed at the WRITER as a class, not at one key spelling: every function in the room's app that builds a params bag AND serializes it must SET the carried key. Serializing is the discriminator, not the constructor's argument: applyHash builds a bag from the incoming hash and only reads it. Both shapes are swept, `function f()` and `const f = () =>`, because an arrow writer is the likelier refactor and the first version of this guard could not see one. Its blind spot, named and argued: a writer that assembles the hash by string concatenation instead of URLSearchParams is not swept, which costs a false PASS at worst, where matching any "#" string would false-FAIL on every href in the file. Behavioural survival, which the ruling also asks for, is part 2's e2e: this file cannot run the room.
+// Two structural sweeps, because the first version of this guard filtered writers by the literal text `.toString()` or `finalizeHash(`, and a writer serializing through `String(p)` left the census entirely without ever reaching the per-writer assertion. A FRESH bag is the writer's structural mark (a reader builds one from the incoming hash), and every place a hash is actually emitted must sit inside a known writer, which is what catches a writer that never builds a bag at all.
+// The blind spot that remains, named and its direction argued: a writer that emits through a helper this file cannot see, or that spells the emission in a shape the second sweep's pattern misses. That costs a false PASS at worst. Behavioural survival, which the ruling also asks for, is part 2's e2e: this file cannot run the room.
 test("every hash writer in the Reading Room carries the Chart Table through (#520 ruling B)", () => {
   const src = read("src/site/reading-room/app.ts");
   const decls = [
     ...src.matchAll(/function (\w+)\([^)]*\)[^{]*\{([\s\S]*?)\n\}/g),
     ...src.matchAll(/const (\w+)\s*=\s*(?:async\s*)?\([^)]*\)[^=]*=>\s*\{([\s\S]*?)\n\};/g),
   ];
-  const writers = decls.filter(([, , body]) => /new URLSearchParams\(/.test(body!) && /\.toString\(\)|finalizeHash\(/.test(body!));
+  const writers = decls.filter(([, , body]) => /new URLSearchParams\(\s*(?:""|'')?\s*\)/.test(body!));
   assert.deepEqual(
     writers.map(([, name]) => name).sort(),
     ["prospectHrefFor", "syncHash"],
@@ -126,4 +127,13 @@ test("every hash writer in the Reading Room carries the Chart Table through (#52
     assert.match(body!, /p\.set\(TABLE_KEY, carried\.table\)/, `${name} builds a fresh params bag and must SET the table key, or a copied link loses the gathering`);
   }
   assert.match(src, /carried\.table = p\.get\(TABLE_KEY\)/, "and the key must be read off the incoming hash at load");
+
+  const spans = writers.map((m) => [m.index!, m.index! + m[0].length] as const);
+  for (const hit of src.matchAll(/history\.replaceState\(|#["']\s*\+|#\$\{/g)) {
+    const at = hit.index!;
+    assert.ok(
+      spans.some(([a, b]) => at >= a && at < b),
+      `a hash is emitted at index ${at} (${JSON.stringify(src.slice(at, at + 40))}) outside every writer this guard knows, so nothing checks that it carries the table`,
+    );
+  }
 });

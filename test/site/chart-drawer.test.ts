@@ -28,6 +28,7 @@ test("the table holds six and refuses the seventh, leaving the six it has (#520,
   assert.equal(after.refused, true);
   assert.equal(after.items.length, TABLE_CAP, "a refusal never grows the table");
   assert.deepEqual(after.items, full, "a refusal never reorders it either");
+  assert.equal(after.items, full, "and hands back the same array, not a copy of it");
 });
 
 test("a cutting comes off by its seat, and only that one (#520)", () => {
@@ -42,12 +43,15 @@ test("taking off a seat the table does not have leaves it whole (#520)", () => {
   const three = fill(3);
   assert.deepEqual(takeOffTable(three, 7), three);
   assert.deepEqual(takeOffTable(three, -1), three);
+  assert.deepEqual(takeOffTable(three, 1.5), three, "a seat is a whole number or it is no seat");
+  assert.deepEqual(takeOffTable(three, NaN), three);
 });
 
 test("the room left is what the drawer's head counts down (#520)", () => {
   assert.equal(roomOnTable([]), TABLE_CAP);
   assert.equal(roomOnTable(fill(3)), 3);
   assert.equal(roomOnTable(fill(TABLE_CAP)), 0);
+  assert.equal(roomOnTable(fill(TABLE_CAP + 2)), 0, "an over-full table reports no room, never a negative one");
 });
 
 // The writer's half of ruling 1 (#520, 2026-09-07): an EMPTY table writes no key at all, rather than growing `table=` onto every link the Explorer hands out forever. emitLive is the named precedent; writeHash's unconditional params.set for seed/style/legend is the idiom this must not follow.
@@ -64,4 +68,8 @@ test("an empty table writes no key, and a laid one writes the grammar's (#520 ru
   const laid = new URLSearchParams("seed=42");
   emitTableKey(laid, fill(2));
   assert.equal(laid.get(TABLE_KEY), emitTable(fill(2)), "a laid table writes exactly what the grammar emits");
+
+  const one = new URLSearchParams("seed=42");
+  emitTableKey(one, fill(1));
+  assert.equal(one.get(TABLE_KEY), emitTable(fill(1)), "ONE sheet is the commonest table and is written like any other: the emptiness gate is exactly zero");
 });

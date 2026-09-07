@@ -20,6 +20,7 @@ import type { RenderOptions } from "../../render/map-renderer.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import { startRedraft } from "./draw-ceremony.ts";
 import { dryInNames } from "./redraft-plan.ts";
+import { latticeFromSettle } from "../shared/table-address.ts";
 
 const pct = (f: number) => `${(f * 100).toFixed(4)}%`;
 
@@ -74,7 +75,7 @@ export function createLodController(deps: Deps) {
   let world: WorldContext | null = null;
 
   // The committed inset (for the DOM teardown and the e2e's lodState), or null at the bare world sheet.
-  let inset: { el: HTMLDivElement; svg: string; band: number; window: UvWindow; title: string; centre: { cx: number; cy: number } } | null = null;
+  let inset: { el: HTMLDivElement; svg: string; band: number; window: UvWindow; title: string; seat: { lx: number; ly: number } | null } | null = null;
 
   // The drafting indicator: a dashed outline over the window being surveyed, up between dispatch and commit; one element, repositioned per dispatch.
   let pencil: HTMLDivElement | null = null;
@@ -143,7 +144,7 @@ export function createLodController(deps: Deps) {
   }
 
   // Commit: mount the inset aligned over its window and fade it in OVER what it replaces. State, overlay and caption update synchronously at the mount; the outgoing inset is torn down only once the incoming is fully opaque, so the reader never sees a gap frame (the #131 discipline).
-  function commitInset(band: number, window: UvWindow, centre: { cx: number; cy: number }, res: RegionJobResult, ms: string): void {
+  function commitInset(band: number, window: UvWindow, seat: { lx: number; ly: number } | null, res: RegionJobResult, ms: string): void {
     const rect = insetSheetRect(window, margins());
     // #170: capture the outgoing composition's labeled names BEFORE the sheets change hands.
     const reduce = prefersReduce();
@@ -157,7 +158,7 @@ export function createLodController(deps: Deps) {
     el.innerHTML = res.svg;
     const old = inset ? inset.el : null;
     mapDiv.appendChild(el);
-    inset = { el, svg: res.svg, band, window, title: res.title, centre };
+    inset = { el, svg: res.svg, band, window, title: res.title, seat };
     currentBand = band;
     currentWindow = window;
     hidePencil();
@@ -193,7 +194,7 @@ export function createLodController(deps: Deps) {
     }
   }
 
-  function dispatchRegion(band: number, window: UvWindow, centre: { cx: number; cy: number }): void {
+  function dispatchRegion(band: number, window: UvWindow, seat: { lx: number; ly: number } | null): void {
     if (!world) return;
     const myGen = ++regionGen;
     showPencil(window);
@@ -213,7 +214,7 @@ export function createLodController(deps: Deps) {
       .then((res) => {
         if (myGen !== regionGen) return;
         const ms = (performance.now() - t0).toFixed(0);
-        commitInset(band, window, centre, res, ms);
+        commitInset(band, window, seat, res, ms);
       })
       .catch((err) => {
         if (myGen !== regionGen) return;
@@ -259,7 +260,7 @@ export function createLodController(deps: Deps) {
       });
       if (decision.action === "noop") return;
       if (decision.action === "world") return revertToWorld();
-      dispatchRegion(decision.band, decision.window, decision.centre);
+      dispatchRegion(decision.band, decision.window, latticeFromSettle(cam, margins(), decision.band));
     },
 
     /** Record the world sheet just drawn and reset to band 0; the DOM cleanup here is belt-and-suspenders for elements that survived outside the draw's own wipes. */
@@ -308,9 +309,9 @@ export function createLodController(deps: Deps) {
     },
 
     /** The committed survey as the table's grammar states it, snapshotted so a settle mid-gesture cannot swap the sheet under the reader's hand. Null at the bare world sheet. The centre is the settle's own. */
-    committedSurvey(): { seed: number; overrides: Partial<WorldRecipe> | undefined; render: RenderOptions; band: number; centre: { cx: number; cy: number }; title: string; svg: string } | null {
+    committedSurvey(): { seed: number; overrides: Partial<WorldRecipe> | undefined; render: RenderOptions; band: number; seat: { lx: number; ly: number } | null; title: string; svg: string } | null {
       if (!inset || !world) return null;
-      return { seed: world.seed, overrides: world.overrides, render: world.render, band: inset.band, centre: inset.centre, title: inset.title, svg: inset.svg };
+      return { seed: world.seed, overrides: world.overrides, render: world.render, band: inset.band, seat: inset.seat, title: inset.title, svg: inset.svg };
     },
 
     /** Observable state for the e2e (band, window, title, redraft count). */
