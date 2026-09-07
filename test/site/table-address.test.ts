@@ -16,7 +16,7 @@ import {
   type TableItem,
 } from "../../src/site/shared/table-address.ts";
 import { chartTarget } from "../../src/site/prospect/address.ts";
-import { LATTICE_DIVISIONS, LOD_BANDS, decideSettle, lodWindowFor, type LodBand } from "../../src/world/lod.ts";
+import { LATTICE_DIVISIONS, LOD_BANDS, decideSettle, lodWindowFor, plotUvFromSheet, FULL_WINDOW, type LodBand } from "../../src/world/lod.ts";
 import { finalizeHash } from "../../src/site/explorer/address.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -336,4 +336,27 @@ test("chartTarget carries the table home from the Prospect page (#401 ruling 7 d
   const hash = `#seed=42&style=antique&${TABLE_KEY}=${SURVEY}&i=4&year=300`;
   assert.ok(chartTarget(hash).includes(`${TABLE_KEY}=${SURVEY}`), "chartTarget drops only i and year, so the table comes home");
   assert.deepEqual(parseTable(chartTarget(hash).replace("/explorer/", "")), [survey]);
+});
+
+// Sub 2 (#520) carried finding 4: the address encodes the window as (rung, lattice centre) and there is no honest way back from the window, so the SETTLE has to hand its centre over. The space is the whole hazard: `decideSettle` quantizes `plotUvFromSheet(cam, margins())`, and the sheet-fraction camera the Glass reports is a different number that still rounds to a plausible lattice index.
+test("the settle hands over the centre it quantized, so the address rebuilds its OWN window (#520)", () => {
+  const m = { mx: 0.045, my: 0.045 };
+  const dress = { kind: "survey", seed: 42, overrides: {}, style: "antique", legend: true, arms: false, beasts: false, theme: null } as const;
+  // Measured 2026-09-07: these sheet centres land on a different lattice index in sheet fractions than in plot uv, so a settle that hands over the wrong space fails here rather than passing by luck. Rung 1 at 0.220 reads lattice 4 sheet-side and 3 plot-side; 0.200 discriminates at rungs 2 and 3.
+  for (const [rung, c] of [[1, 0.220], [2, 0.200], [3, 0.200]] as const) {
+    const sheetCam = { cx: c, cy: c, k: (LOD_BANDS[rung] as LodBand).k };
+    const decision = decideSettle({ camera: plotUvFromSheet(sheetCam, m), currentWindow: FULL_WINDOW, currentBand: 0 });
+    assert.equal(decision.action, "region", `rung ${rung} must commit a region`);
+    assert.equal(decision.band, rung, `rung ${rung} camera must land on band ${rung}`);
+    const lat = latticeFromCentre(decision.centre.cx, decision.centre.cy, decision.band);
+    assert.ok(lat, `rung ${rung}: the settle's centre must be a real lattice seat`);
+    assert.deepEqual(
+      tableWindow({ ...dress, rung, lx: lat.lx, ly: lat.ly }),
+      decision.window,
+      `rung ${rung}: the address must rebuild the exact window the settle committed`,
+    );
+    // The control: the sheet-fraction centre is the wrong space, and it must NOT agree, or this test proves nothing.
+    const wrong = latticeFromCentre(sheetCam.cx, sheetCam.cy, rung);
+    assert.notDeepEqual({ lx: wrong?.lx, ly: wrong?.ly }, { lx: lat.lx, ly: lat.ly }, `rung ${rung}: the two spaces must differ here`);
+  }
 });
