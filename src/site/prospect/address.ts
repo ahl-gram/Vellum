@@ -5,6 +5,9 @@
 import type { StyleName } from "../../render/style.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
+import { parseYear } from "../shared/year.ts";
+
+export { parseYear };
 
 // Boundary discipline: allowlists mirrored from the Explorer's <select> values (the Print Room's exact idiom).
 const STYLES = ["antique", "topographic", "ink", "nautical"];
@@ -63,12 +66,6 @@ export function chartTarget(hash: string): string {
 
 export function ribbonTarget(hash: string, index: number): string {
   return "/ribbon/#" + [...kept(hash, /^(i|year|a|b)(=|$)/), `a=${index}`].join("&");
-}
-
-/** The one year grammar, the address's and the control's: digits making a positive whole number of at most nine places. */
-export function parseYear(raw: string): number | null {
-  const s = raw.trim();
-  return /^\d{1,9}$/.test(s) && Number(s) > 0 ? Number(s) : null;
 }
 
 export function yearHash(hash: string, year: number): string {
