@@ -215,7 +215,11 @@ const emitItem = (item: TableItem): string =>
     ...dressFields(item),
   ].join(FIELDS);
 
-/** The key's VALUE, in one canonical field order, capped. The caller writes it under TABLE_KEY. */
+/**
+ * The key's VALUE, in one canonical field order, capped. The caller writes it under TABLE_KEY, and
+ * writes NO key at all when this is empty (ruled 2026-09-07): an empty table must not grow an
+ * `table=` onto every link forever. `emitLive` is the precedent for omit-when-empty.
+ */
 export function emitTable(items: ReadonlyArray<TableItem>): string {
   return items.slice(0, TABLE_CAP).map(emitItem).join(ITEMS);
 }

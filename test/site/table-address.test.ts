@@ -141,16 +141,19 @@ test("the cap refuses the seventh sheet in both directions; the wording belongs 
 });
 
 test("a malformed item is dropped on its own; the rest of the folio survives", () => {
-  const parsed = parseTable(hashOf(`${SURVEY}_nonsense_${PROSPECT}`)) as ReadonlyArray<TableItem>;
-  assert.deepEqual(parsed, [survey, prospect], "the neighbours are not punished for it");
+  for (const folio of [`${SURVEY}_nonsense_${PROSPECT}`, `nonsense_${SURVEY}_${PROSPECT}`, `${SURVEY}_${PROSPECT}_nonsense`]) {
+    assert.deepEqual(parseTable(hashOf(folio)), [survey, prospect], `the neighbours are not punished for it: ${folio}`);
+  }
   for (const bad of [
-    "seed-42.style-antique.rung-2.lx-1.ly-1.legend-1.arms-0", // no kind
+    "seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1", // no kind, and NOTHING else missing
     "k-x.seed-42.style-antique", // an unknown kind
+    "k-s.-junk.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1", // a field with an empty key
     "k-s.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1", // no seed
     "k-s.seed-4.2.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1", // a seed that is not digits
     "k-s.seed-42.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1", // no style
     "k-s.seed-42.style-antique.legend-1.arms-0.lx-1.ly-1", // no rung
-    "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.ly-1", // half a centre
+    "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.ly-1", // half a centre, the lx half
+    "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1", // and the ly half
     "k-s.seed-42.style-antique.arms-0.beasts-0.rung-2.lx-1.ly-1", // a seal left unstated: the dress must be whole
     "k-s.seed-42.style-antique.legend-1.beasts-0.rung-2.lx-1.ly-1",
     "k-s.seed-42.style-antique.legend-1.arms-0.rung-2.lx-1.ly-1",
@@ -219,8 +222,10 @@ test("a lattice index off the lattice drops the item (the centre must name a rea
   for (const rung of [1, 2, 3]) {
     const size = (LOD_BANDS[rung] as LodBand).sizeUV;
     const max = LATTICE_DIVISIONS / size;
-    assert.deepEqual(parseTable(hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.lx-${max + 1}.ly-1`)), []);
-    assert.deepEqual(parseTable(hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.lx--1.ly-1`)), []);
+    // Both axes, both directions: a guard that only watches lx is half a guard.
+    for (const off of [`lx-${max + 1}.ly-1`, `lx--1.ly-1`, `lx-1.ly-${max + 1}`, `lx-1.ly--1`]) {
+      assert.deepEqual(parseTable(hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.${off}`)), [], off);
+    }
     const edge = parseTable(hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.lx-${max}.ly-0`)) as [SurveyItem];
     assert.equal(edge[0].lx, max, `index ${max} is the last real lattice step at rung ${rung}`);
   }
@@ -230,13 +235,22 @@ test("THE LATTICE CONTRACT: a filed survey redraws the very window the Glass com
   // The reason centres never ride as floats. Sweep every camera decideSettle can settle at every
   // rung, file it through the grammar, and the window that comes back out must be the same object
   // the redraft was drawn from; anything else and a shared folio quietly draws a different corner.
+  // The cameras are swept BETWEEN lattice points as well as on them. On a lattice point
+  // Math.round and Math.floor agree, so an aligned-only sweep cannot see the rounding this test
+  // exists to pin; the offset is 0.7 of a cell, in the half where the two disagree (0.3 would
+  // round down and prove nothing), and stops one step short of the edge, where a camera offset
+  // upward is off the sheet and the grammar is right to refuse it.
   let checked = 0;
+  let offGrid = 0;
   for (const band of LOD_BANDS) {
     if (!band.isRegion) continue;
     const step = band.sizeUV / LATTICE_DIVISIONS;
-    for (let i = 0; i <= LATTICE_DIVISIONS / band.sizeUV; i += 3) {
-      for (let j = 0; j <= LATTICE_DIVISIONS / band.sizeUV; j += 5) {
-        const camera = { cx: i * step, cy: j * step, k: band.k };
+    const max = LATTICE_DIVISIONS / band.sizeUV;
+    for (let i = 0; i <= max; i += 3) {
+      for (let j = 0; j <= max; j += 5) {
+        for (const nudge of i < max && j < max ? [0, 0.7] : [0]) {
+        const camera = { cx: (i + nudge) * step, cy: (j + nudge) * step, k: band.k };
+        if (nudge !== 0) offGrid++;
         const decided = decideSettle({ camera, currentWindow: lodWindowFor(0.5, 0.5, 1), currentBand: 0 });
         assert.equal(decided.action, "region", "the sweep must stay inside the region bands");
         const lattice = latticeFromCentre(camera.cx, camera.cy, band.index);
@@ -250,10 +264,12 @@ test("THE LATTICE CONTRACT: a filed survey redraws the very window the Glass com
           `rung ${band.index}, lattice ${lattice!.lx},${lattice!.ly}: the redraw window drifted from the committed one`,
         );
         checked++;
+        }
       }
     }
   }
   assert.ok(checked > 100, `the sweep must actually sweep; it checked ${checked}`);
+  assert.ok(offGrid > 100, `and it must sweep BETWEEN the lattice points, where the rounding shows; it checked ${offGrid}`);
 });
 
 test("latticeFromCentre refuses a centre that is not a settle, and a rung that is not the Glass's", () => {
