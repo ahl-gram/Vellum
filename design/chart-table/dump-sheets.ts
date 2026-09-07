@@ -11,6 +11,8 @@ import { plateDressFor } from "../../src/prospect/dress/context.ts";
 import { buildProspectInput } from "../../src/prospect/input.ts";
 import { composeProspect } from "../../src/prospect/compose.ts";
 import { eraFor, plateCaption } from "../../src/prospect/caption.ts";
+import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
+import { composePlaceCard } from "../../src/render/place-card.ts";
 
 const seed = 42;
 const out = new URL("sheets-42/", import.meta.url);
@@ -55,8 +57,8 @@ const sheets = [
   survey("stage-band2-capital-antique", capital.s, 2, "antique"),
   survey("band1-capital-antique", capital.s, 1, "antique"),
   survey("band3-village-antique", village.s, 3, "antique"),
-  survey("band2-town-ink", town1.s, 2, "ink"),
-  survey("band2-town-nautical", town2.s, 2, "nautical"),
+  // every collectible survey is antique: the redraft is gated on the antique dress (regionEligible), so no ink or nautical survey can reach the table
+  survey("band2-town-antique", town1.s, 2, "antique"),
   prospect("prospect-town-ink", town1.i, "ink"),
   prospect("prospect-capital-antique", capital.i, "antique"),
   // ruling 4 on #401 (different worlds allowed, drafted grouped by world) needs a second world on the folio page: seed 15, #511's own second seed.
@@ -67,7 +69,9 @@ for (const s of [...sheets, { key: "world-antique", w: 1500, h: 1157.93 }]) {
   const data = "data:image/svg+xml;base64," + Buffer.from(await import("node:fs").then((m) => m.readFileSync(svg))).toString("base64");
   writeFileSync(new URL(`${s.key}.thumb.html`, out), `<!doctype html><meta charset="utf-8"><style>html,body{margin:0;background:#3d2f1f}img{display:block;width:420px;height:auto}</style><img src="${data}">`);
 }
+const manifest = buildPlaceManifest(world, 1500);
+const capitalMark = manifest.places.find((p) => p.idx === capital.i);
 writeFileSync(new URL("sheets.json", import.meta.url), JSON.stringify({
-  title: world.title, title15: world15.title, capital: { name: capital.s.name, idx: capital.i }, town: { name: town1.s.name, idx: town1.i }, sheets,
+  title: world.title, title15: world15.title, capital: { name: capital.s.name, idx: capital.i, mark: capitalMark, card: composePlaceCard(capitalMark!, manifest.events, manifest.cultureId) }, town: { name: town1.s.name, idx: town1.i }, sheets,
 }, null, 1));
 console.log("wrote", sheets.length, "sheets to sheets-42/;", sheets.map((s) => `${s.key}: ${s.title}`).join("; "));

@@ -9,12 +9,12 @@ const byKey = Object.fromEntries(data.sheets.map((s) => [s.key, s]));
 const titleCase = (s) => s.toLowerCase().replace(/\b(\w)/g, (c) => c.toUpperCase()).replace(/\bOf\b/g, 'of');
 const dressWord = { antique: 'antique', ink: 'pen & ink', nautical: 'nautical', topographic: 'topographic' };
 
-// The six as laid, in the order they were laid; the first three are the three-sheet state (two surveys and the ink prospect, per #518).
+// The six as laid, in the order they were laid; the first three are the three-sheet state (two surveys and the ink prospect, per #518). Every survey is antique: the redraft is gated on the antique dress (regionEligible), so no other survey can reach the table.
 const SIX = [
   { key: 'band1-capital-antique', tilt: -1.2 },
   { key: 'band3-village-antique', tilt: 0.9 },
   { key: 'prospect-town-ink', tilt: -0.7 },
-  { key: 'band2-town-nautical', tilt: 1.4 },
+  { key: 'band2-town-antique', tilt: 1.4 },
   { key: 'band2-capital15-antique', tilt: -1.0 },
   { key: 'prospect-capital-antique', tilt: 0.8 },
 ].map((x, i) => ({ ...x, n: i + 1, ...byKey[x.key] }));
@@ -31,7 +31,7 @@ const cuttings = SIX.map((s) => `<li data-n="${s.n}" class="${cls(s)}" style="--
 
 // The folio page: the same six grouped by world (#401 ruling 4), two still drafting (#329's reserved frame), the Nurunui survey on the stage.
 const ON_STAGE = 'band3-village-antique';
-const DRAFTING = new Set(['band2-town-nautical', 'prospect-capital-antique']);
+const DRAFTING = new Set(['band2-town-antique', 'prospect-capital-antique']);
 const grouped = [...SIX.filter((s) => s.seed === 42), ...SIX.filter((s) => s.seed !== 42)].map((s, i) => ({ ...s, num: roman[i] }));
 const row = (s) => {
   const on = s.key === ON_STAGE, drafting = DRAFTING.has(s.key);
@@ -59,8 +59,11 @@ const navFor = (cur) => nav
 const common = (html, page, cur) => html.replace('{{SHELL}}', () => shell).replace('{{KIT}}', () => kit).replace('{{PAGE}}', () => read(page)).replace('{{MOCK}}', () => mock)
   .replace('{{NAV}}', () => navFor(cur)).replace('{{GLASS}}', () => glass).replace('{{JS}}', () => js);
 const stage = byKey['stage-band2-capital-antique'];
+const card = data.capital.card, mark = data.capital.mark;
 const explorer = common(read('explorer.tpl.html'), 'explorer-page.css', 'explorer')
-  .replace('{{WORLD}}', () => svgUri('world-antique')).replace('{{STAGE_SVG}}', () => svgUri(stage.key)).replace('{{WIN}}', `${stage.window.u0},${stage.window.v0}`)
+  .replaceAll('{{WORLD}}', () => svgUri('world-antique'))
+  .replace('{{CARD_NX}}', String(mark.nx)).replace('{{CARD_NY}}', String(mark.ny))
+  .replace('{{CARD_NAME}}', esc(card.name)).replace('{{CARD_RANK}}', esc(card.rank)).replace('{{CARD_FOUNDED}}', esc(card.foundedLine)).replace('{{CARD_FORMER}}', esc(card.formerLine ?? '')).replace('{{CARD_TONGUE}}', esc(card.tongueLine)).replace('{{CARD_ROOTS}}', esc(card.derivationLine)).replace('{{STAGE_SVG}}', () => svgUri(stage.key)).replace('{{WIN}}', `${stage.window.u0},${stage.window.v0}`)
   .replace('{{LAID}}', () => laid).replace('{{HOLES}}', () => holes).replaceAll('{{CUTTINGS}}', () => cuttings);
 const folio = common(read('folio.tpl.html'), 'folio-page.css', 'print-room')
   .replace('{{FOLIO_STAGE_SVG}}', () => svgUri(ON_STAGE)).replace('{{PILE}}', () => pile).replace('{{MAT}}', () => mat).replace('{{ROWS_42}}', () => rows42).replace('{{ROWS_15}}', () => rows15);

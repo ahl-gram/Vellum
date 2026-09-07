@@ -19,11 +19,19 @@ kit's as it stood at main `74da88b`.
 Every direction shares the same stage (the Explorer with the survey of the environs of Laukuwelua
 committed at band 2, the world sheet magnified behind it as the live page shows it) and the same
 six sheets, laid in this order: the environs of Laukuwelua at band 1, the environs of Nurunui at
-band 3, the prospect of Paukilua in pen and ink, the environs of Weki at band 2 in the nautical
-dress, the environs of Stanbyl at band 2 from chart 15, and the prospect of Laukuwelua in antique.
+band 3, the prospect of Paukilua in pen and ink, the environs of Paukilua at band 2, the environs
+of Stanbyl at band 2 from chart 15, and the prospect of Laukuwelua in antique. Every survey is
+antique because every collectible survey is: the redraft is gated on the antique dress
+(`regionEligible`), so the only other dress that can reach the table is a prospect's pen and ink.
 The first three are the "three sheets filed" state #518 asks for (two surveys and an ink prospect);
 the sixth sheet fills the cap. The chart-15 sheet is there so the folio page can show ruling 4
 (different worlds, drafted grouped by world), which the issue as written never exercised.
+
+**The place card's capture press** is common to every direction and drawn at `?stage=world`
+(`explorer-1280-card`, `explorer-390-card`): the world sheet at band 0 with the capital's card pinned,
+and beside "View the prospect" a second press in the same gold, "Lay the prospect on the table",
+which dims to "No room on the table" at the cap. The thumbnail it produces is the ink prospect on
+every table here.
 
 **The handle on the inset** is common to A, B and C: a small gold press in the kit's two-line road
 dress, clipped to the survey's top-right corner, reading "Lay on / The Table"; at the cap it dims
@@ -92,9 +100,10 @@ the Ribbon's from and to). `sheaf` is the period alternative if a plainer word i
 full-colour originals are in the session's `out/518-mock/final/`). Per direction `x`:
 `x-explorer-1280` (three sheets), `x-explorer-1280-six` (the cap, the handle refusing),
 `x-folio-1280`, `x-explorer-390` (the sheet closed) and `x-explorer-390-open` (the sheet open,
-scrolled to its docked legend; D on the table leaf), `x-folio-390-open` (A, B, C). Plus
-`d-explorer-1280-shut` (the drawer at rest, the tab on the edge), `a-explorer-1280-empty` (the bare
-table), `a-folio-390` (the folio page's phone at rest) and `d-folio-390` (the mat two across).
+scrolled to its docked legend; D on the table leaf), `x-folio-390` (the folio page's phone at rest)
+and `x-folio-390-open` (A, B, C; D has no sheet to open). Plus `d-explorer-1280-shut` (the drawer at
+rest, the tab on the edge), `a-explorer-1280-empty` (the bare table), and `explorer-1280-card` with
+`explorer-390-card` (the world sheet with the place card's capture press, direction independent).
 
 ## Regenerating and looking
 
@@ -108,7 +117,7 @@ node design/chart-table/stills.mjs        # every still to out/518-mock/final/, 
 
 The built pages open from `file://`; direction and state are query strings (`explorer.html?dir=c&state=six`,
 `folio.html?dir=d`, `explorer.html?dir=d&drawer=0` for the drawer shut, `&leaf=table` on a phone
-for D's table leaf), never the hash, for the reason the sub7 README gives. `shoot.mjs` is the sub7
+for D's table leaf, `&stage=world` for the band-0 sheet with the place card), never the hash, for the reason the sub7 README gives. `shoot.mjs` is the sub7
 shooter copied here so the archive stands alone; `--window-size` does not lay out at 390, only
 device metrics do. `kit.css`, `shell.css`, `explorer-page.css` and `folio-page.css` are copies of
 the live sheets at `74da88b` (the shell's tokens and head cluster from BaseLayout, motion, house,
@@ -125,9 +134,13 @@ atelier; the Explorer's and the Print Room's page sheets) so the mock wears the 
   address module.
 - When Sub 3 makes the folio page real, it joins `CHART_ROOMS` in `test/site/atelier-kit.test.ts`
   and the AK sweeps at once.
-- The place card's own press for a prospect ("Lay the prospect on the table" beside "View the
-  prospect") is not drawn; it is a one-line addition to the card, and the thumbnail it produces is
-  the ink prospect on every table here.
+- **A live kit defect, filed as #525 from this round**: on a phone with the camera zoomed and the
+  sheet open, the zoomed footing's `::before` outranks `.legend.in-slip`'s `content: none` and paints
+  the walnut pool over the parchment sheet (measured on the built site at 74da88b, the slip's ground
+  reading `srgb(103,91,74)`). The Explorer shows it at any width up to 900px once a survey is
+  committed; the Gallery shows it with no zoom at all; Sub 3's page would inherit it. The mock
+  neutralizes it (one rule at the top of `mock.css`) so the phone stills show the sheet as the kit
+  intends, and the rulings are not made from a defect.
 
 ## Known demo-only shortcuts
 
@@ -135,8 +148,12 @@ atelier; the Explorer's and the Print Room's page sheets) so the mock wears the 
   and shuts, but the handle, the presses and Draw do nothing.
 - The mock seats the sheet and the world behind it with its own script (`shared.js`); the real
   build's fit is `room.ts`'s and the world-behind is the Glass's own transform.
-- The legend row is clamped between the chart's folio and the Glass by the mock's script; the real
-  build's `legendSeat` does the same.
+- The legend row's seat is the mock script's copy of `placeLegendRow` (`src/site/shared/room-seats.ts`):
+  from the chart folio's text edge, capped by the chrome inset, the Glass and the open slip, its
+  width capped to the space left, and seated before the fit. At 1280 with the Broadside open the
+  Explorer's three roads already fill that space, so the row wraps where the live page's does.
+- The phone stills carry the #525 override above; the live page at those widths does not, until #525
+  lands.
 
 This is an archived design artifact, not shipping code, which is the stated reason it holds
 `.js`/`.mjs` outside `src/` (the workspace one-pipeline rule). Nothing here is served, bundled,

@@ -17,6 +17,21 @@ body.chart-room .stage { display: block; padding: 0; cursor: grab; }
 body.folio-page #sheet { box-shadow: var(--stage-shadow); }
 body.folio-page #sheet img.chart { box-shadow: none; }
 
+/* The kit defect #525 (found by this round, confirmed on the live build): the zoomed footing's ::before beats .legend.in-slip's content: none and paints over the phone sheet. Neutralized here so the phone stills show the sheet as the kit intends. */
+body:has(#map-viewport.zoomed) .legend.in-slip::before, body.chart-room:not(:has(.stage)) .legend.in-slip::before { content: none; }
+
+/* ---- the world sheet at band 0 with a pinned place card (?stage=world): the card's own capture press beside "View the prospect" (ruling 7), the Glass at rest so no pool ---- */
+#sheet img.chart.world-sheet, .card-demo, .only-world { display: none; }
+body.stage-world .stage img.world, body.stage-world #map-viewport > img.chart:not(.world-sheet), body.stage-world .handle, body.stage-world .dogear, body.stage-world .dogear-label, body.stage-world .not-world { display: none; }
+body.stage-world #sheet img.chart.world-sheet { display: block; }
+body.stage-world .card-demo { display: block; }
+body.stage-world .only-world { display: inline; }
+body.stage-world #sheet { box-shadow: var(--stage-shadow); }
+#place-card .pc-inner a.pc-prospect + a.pc-prospect { margin-left: 0.35rem; }
+.pc-table .full, body.state-six .pc-table .lay { display: none; }
+body.state-six .pc-table .full { display: inline; }
+body.state-six .pc-table { opacity: 0.55; }
+
 /* ---- the handle on the inset: a gold press clipped to the survey's corner, the kit's two-line road in miniature ---- */
 .handle { position: absolute; right: -0.9rem; top: -1.1rem; z-index: 6; rotate: 2deg; padding: 0.3rem 0.7rem 0.25rem;
   box-shadow: 0 6px 16px rgb(from var(--chart-ink) r g b / 0.4); transition: rotate 0.2s var(--ease-paper), translate 0.2s var(--ease-paper); }

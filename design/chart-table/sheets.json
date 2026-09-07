@@ -11,7 +11,29 @@
  },
  "capital": {
   "name": "Laukuwelua",
-  "idx": 0
+  "idx": 0,
+  "mark": {
+   "idx": 0,
+   "name": "Laukuwelua",
+   "formerName": "Haitani",
+   "kind": "capital",
+   "founded": 451,
+   "ruined": false,
+   "seat": true,
+   "nx": 0.5099770114942529,
+   "ny": 0.4095294818344252,
+   "gx": 163,
+   "gy": 95
+  },
+  "card": {
+   "name": "Laukuwelua",
+   "rank": "Capital",
+   "founded": 451,
+   "foundedLine": "Founded in the year 451.",
+   "formerLine": "Once called Haitani.",
+   "tongueLine": "A word of the Oromi speech: Lau·ku·we·lua",
+   "derivationLine": "l, leaf, green things; k, sea, salt; w, water, current; -lua, a sheltered mooring. So the lexicographers of the age would have it."
+  }
  },
  "town": {
   "name": "Paukilua",
@@ -73,9 +95,9 @@
    "h": 1157.93
   },
   {
-   "key": "band2-town-ink",
+   "key": "band2-town-antique",
    "kind": "survey",
-   "dress": "ink",
+   "dress": "antique",
    "band": 2,
    "title": "The Environs of Paukilua",
    "window": {
@@ -83,24 +105,6 @@
     "v0": 0.59375,
     "u1": 0.53125,
     "v1": 0.84375
-   },
-   "seed": 42,
-   "chart": "The Isle of Rahai",
-   "year": 1059,
-   "w": 1500,
-   "h": 1157.93
-  },
-  {
-   "key": "band2-town-nautical",
-   "kind": "survey",
-   "dress": "nautical",
-   "band": 2,
-   "title": "The Environs of Weki",
-   "window": {
-    "u0": 0.15625,
-    "v0": 0.46875,
-    "u1": 0.40625,
-    "v1": 0.71875
    },
    "seed": 42,
    "chart": "The Isle of Rahai",

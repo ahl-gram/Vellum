@@ -5,6 +5,7 @@
   document.body.classList.add('dir-' + dir, 'state-' + state);
   if (q.get('drawer') !== '0' && document.querySelector('.drawer')) document.body.classList.add('drawer-open');
   if (q.get('leaf') === 'table') document.body.classList.add('leaf-table');
+  if (q.get('stage') === 'world') { document.body.classList.add('stage-world'); const v = document.getElementById('map-viewport'); v && v.classList.remove('zoomed'); }
   const count = { three: 3, six: 6, empty: 0 }[state];
   document.querySelectorAll('[data-n]').forEach((el) => el.classList.toggle('laid-in', +el.dataset.n <= count));
   const words = { three: 'three sheets laid', six: 'six sheets laid', empty: 'the table is bare' };
@@ -45,7 +46,7 @@
   function apply() {
     if (!sheet) return;
     sheet.style.left = tx + 'px'; sheet.style.top = ty + 'px'; sheet.style.width = (W * s) + 'px'; sheet.style.height = (H * s) + 'px';
-    if (world) {
+    if (world && shown(world)) {
       // The world behind at the band's magnification (k = 4 at band 2), placed so its window lands under the fitted survey: the inset's plot origin is the world's plot point (u0, v0).
       const win = (stage.dataset.window || '0.375,0.28125').split(',').map(Number);
       const k = +(stage.dataset.k || 4), w = W * s, h = H * s;
@@ -76,22 +77,27 @@
     if (!slip.classList.contains('open')) { slip.classList.add('open'); handle && handle.setAttribute('aria-expanded', 'true'); }
     layout();
   }));
-  // the legend row centres on the chart, but never over the chart's folio (the sub7 mock's clearLegend)
+  // The legend row's seat is placeLegendRow's (src/site/shared/room-seats.ts): from the chart folio's text edge plus 32, capped by the viewport's chrome inset, the Glass and the open slip less 16, then centred in what is left with that width as its max, and seated BEFORE the fit (bindRoom's order).
   function clearLegend() {
-    const lg = document.querySelector('.legend:not(.in-slip)'), bl = rect('.corner.bl');
+    const lg = document.querySelector('.legend:not(.in-slip)');
     if (!lg || narrow()) return;
-    lg.style.transition = 'none'; lg.style.left = '';
-    const a = lg.getBoundingClientRect(), glass = rect('.corner.br.zoomery');
-    // seated between the chart's folio and the Glass when both press on it (room.ts's legendSeat does the same in the real build)
-    const lo = bl ? bl.right + 32 : 0, hi = glass ? glass.left - 16 : innerWidth;
-    if (a.left < lo || a.right > hi) lg.style.left = (a.width <= hi - lo ? (lo + hi) / 2 : lo + a.width / 2) + 'px';
-    void lg.offsetWidth; lg.style.transition = '';
+    const chromeX = (rect('header.chrome') || { left: 25.6 }).left;
+    const bl = document.querySelector('.corner.bl'); let textRight = null;
+    if (bl && shown(bl)) { const r = document.createRange(); for (const p of bl.querySelectorAll('p')) { if (!p.textContent) continue; r.selectNodeContents(p); const rr = r.getBoundingClientRect(); if (rr.width) textRight = Math.max(textRight ?? 0, rr.right); } }
+    const left = (textRight ?? chromeX) + 32;
+    const glass = document.querySelector('.corner.br.zoomery');
+    const slipOpen = !!(slip && shown(slip) && !slip.classList.contains('folded'));
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const glassLeft = glass ? (slipOpen ? innerWidth - slip.getBoundingClientRect().width - 3.4 * rem - glass.offsetWidth : glass.getBoundingClientRect().left) : Infinity;
+    const bounds = [innerWidth - chromeX, glassLeft, slipOpen ? slip.getBoundingClientRect().left : Infinity];
+    const space = Math.max(0, Math.min(...bounds) - 16 - left);
+    lg.style.transition = 'none'; lg.style.maxWidth = space + 'px'; lg.style.left = (left + space / 2) + 'px'; void lg.offsetWidth; lg.style.transition = '';
   }
   function layout() {
     const strip = rect('.strip.table');
     document.body.style.setProperty('--strip-h', strip ? strip.height + 'px' : '0px');
     if (narrow() && slip && shown(slip)) document.body.style.setProperty('--sheet-h', (innerHeight - slip.getBoundingClientRect().top) + 'px');
-    fit(); clearLegend();
+    clearLegend(); fit();
   }
   addEventListener('resize', layout);
   layout();

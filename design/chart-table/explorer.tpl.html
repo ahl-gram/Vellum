@@ -14,7 +14,16 @@
 <div class="stage" id="stage" data-window="{{WIN}}" data-k="4">
   <img class="world" src="{{WORLD}}" alt="">
   <div class="sheet" id="sheet">
-    <div id="map-viewport" class="zoomed"><img class="chart" src="{{STAGE_SVG}}" alt="The Environs of Laukuwelua, a regional survey at band 2, antique"></div>
+    <div id="map-viewport" class="zoomed"><img class="chart" src="{{STAGE_SVG}}" alt="The Environs of Laukuwelua, a regional survey at band 2, antique">
+      <img class="chart world-sheet" src="{{WORLD}}" alt="The Isle of Rahai, chart 42, antique">
+      <div class="place-overlay card-demo">
+        <div id="place-card" class="pinned" role="tooltip" style="--pc-nx:{{CARD_NX}};--pc-ny:{{CARD_NY}};--pc-dy:-48px"><div class="pc-inner">
+          <strong class="pc-name">{{CARD_NAME}}</strong><span class="pc-rank">{{CARD_RANK}}</span><span class="pc-founded">{{CARD_FOUNDED}}</span><span class="pc-former">{{CARD_FORMER}}</span>
+          <a class="pc-prospect" href="#">View the prospect</a> <a class="pc-prospect pc-table" href="#"><span class="lay">Lay the prospect on the table</span><span class="full">No room on the table</span></a>
+          <p class="pc-tongue">{{CARD_TONGUE}}</p><p class="pc-roots">{{CARD_ROOTS}}</p>
+        </div></div>
+      </div>
+    </div>
     <button class="handle legend-btn gold" type="button"><span class="verb lay">Lay on</span><span class="verb full">No room on</span><span class="room">The Table</span></button>
     <button class="dogear" type="button" aria-label="Lay this survey on the table"></button>
     <p class="dogear-label"><span class="lay"><strong class="fn-head">the corner, turned</strong>lay this survey on the table</span><span class="full"><strong class="fn-head">the corner, turned</strong>the table is full: six sheets lie on it</span></p>
@@ -103,7 +112,7 @@
 <div class="chrome corner bl folio">
   <p class="folio-title">The Isle of Rahai &middot; Chart &numero; 42</p>
   <p class="folio-sub">surveyed in the year 1059 of the Cedar Age</p>
-  <p class="folio-coords">The Environs of Laukuwelua &middot; regional survey &middot; band 2 &middot; drawn in 907ms</p>
+  <p class="folio-coords"><span class="not-world">The Environs of Laukuwelua &middot; regional survey &middot; band 2 &middot; drawn in 907ms</span><span class="only-world">drawn in 412ms</span></p>
 </div>
 
 <nav class="legend" aria-label="The Press">
