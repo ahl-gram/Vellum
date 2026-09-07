@@ -30,9 +30,20 @@ const READ = `(() => {
 
 const stacked = (doors) => doors.length > 1 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1].bottom - 0.5 && Math.abs(d.x - doors[0].x) < 0.5));
 const offLeft = (nav) => nav.visibility === "hidden" && nav.rect !== null && nav.rect.right <= 0.5;
+const atOpen = (d) => d.nav.visibility === "visible" && d.nav.rect !== null && d.nav.rect.x === 0;
+const atClosed = (d) => offLeft(d.nav);
 
 export async function run(ctx) {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
+  // #529: the same 0.32s slide the cluster suite settles for, read here through visibility (which flips on a 0.32s delay behind it) and the nav's own rect; the 450ms these gestures slept is only 1.4x the transition, tighter than the 600ms that already sampled it mid-flight on CI.
+  const drawerRest = async (settled, label) => {
+    for (let i = 0; i < 120; i++) {
+      const d = await evaluate(READ);
+      if (d && d.nav && settled(d)) return d;
+      await sleep(50);
+    }
+    throw new Error("drawerRest timeout " + label);
+  };
   const gate = scopedHealth(ctx);
 
   // waitReady() keys on the Explorer's own members, which no room renders, so awaiting it here spends the full 15s budget and returns false: a room's readiness is its own shell (the siblings navigate to rooms bare for the same reason). waitReady is kept for the final /explorer/ restore, where it means something.
@@ -47,16 +58,16 @@ export async function run(ctx) {
     await sleep(250);
   };
   // A REAL tap, never burger.click(): the checkbox is the no-JS path and a synthetic click would not prove the target is reachable.
-  const tapBurger = async () => {
+  const tapBurger = async (settled, label) => {
     const b = await evaluate(`(() => { const r = document.querySelector(".rooms-reveal").getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
     await touch("touchStart", [{ x: b.x, y: b.y }]);
     await touch("touchEnd", []);
-    await sleep(450);
+    await drawerRest(settled, label);
   };
-  const tapAt = async (x, y) => {
+  const tapAt = async (x, y, settled, label) => {
     await touch("touchStart", [{ x, y }]);
     await touch("touchEnd", []);
-    await sleep(450);
+    await drawerRest(settled, label);
   };
 
   await setMobileViewport(390, 844);
@@ -69,7 +80,7 @@ export async function run(ctx) {
     `nav ${closed.nav.visibility} right=${closed.nav.rect && closed.nav.rect.right.toFixed(1)}, burger ${closed.burgerDisplay} reachable=${closed.burgerReachable}, cluster bottom ${closed.cluster.bottom.toFixed(1)} vs band ${closed.bandH.toFixed(1)}, scrollW ${closed.scrollW}/${closed.innerW}`,
   );
 
-  await tapBurger();
+  await tapBurger(atOpen, "open");
   const open = await evaluate(READ);
   const current = open.doors.find((d) => d.current);
   check(
@@ -90,11 +101,10 @@ export async function run(ctx) {
 
   await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
   await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
-  await sleep(450);
-  const escaped = await evaluate(READ);
-  await tapBurger();
+  const escaped = await drawerRest(atClosed, "escaped");
+  await tapBurger(atOpen, "reopened");
   const reopened = await evaluate(READ);
-  await tapAt(Math.round(reopened.innerW * 0.8), Math.round(reopened.innerH * 0.65));
+  await tapAt(Math.round(reopened.innerW * 0.8), Math.round(reopened.innerH * 0.65), atClosed, "tappedOut");
   const tappedOut = await evaluate(READ);
   check(
     "DR4 Escape closes a room's drawer and releases the page, the burger reopens it, and a real tap on the scrim closes it again: each close slides the doors back off the left edge and takes main and footer out of inert (#483)",
@@ -104,7 +114,7 @@ export async function run(ctx) {
     `escape checked=${escaped.checked} inert=${escaped.mainInert}, reopen checked=${reopened.checked}, scrim tap checked=${tappedOut.checked} inert=${tappedOut.mainInert}`,
   );
 
-  await tapBurger();
+  await tapBurger(atOpen, "beforeSwipe");
   const beforeSwipe = await evaluate(READ);
   await touch("touchStart", [{ x: 300, y: 700 }]);
   for (const y of [640, 560, 470, 380, 320]) await touch("touchMove", [{ x: 300, y }]);
@@ -121,7 +131,7 @@ export async function run(ctx) {
   );
 
   await goto(APP_ROOM);
-  await tapBurger();
+  await tapBurger(atOpen, "app");
   const app = await evaluate(READ);
   check(
     "DR6 an app room wears the same drawer as a document room: every door hit-testable over a page that paints its own furniture, its main inert beneath the scrim with a point over that furniture landing on the scrim's host and not on the live page, and nothing scrolling sideways (#483)",
@@ -132,7 +142,7 @@ export async function run(ctx) {
 
   await setMobileViewport(844, 390);
   await goto(DOCUMENT_ROOM);
-  await tapBurger();
+  await tapBurger(atOpen, "land");
   const land = await evaluate(READ);
   const scrolledDoor = await evaluate(`(() => {
     const nav = document.querySelector("header.chrome nav.rooms");
@@ -153,9 +163,9 @@ export async function run(ctx) {
   await send("Emulation.setScriptExecutionDisabled", { value: true });
   await goto("/glossary/");
   const noJsShut = await evaluate(READ);
-  await tapBurger();
+  await tapBurger(atOpen, "noJsOpen");
   const noJsOpen = await evaluate(READ);
-  await tapBurger();
+  await tapBurger(atClosed, "noJsShutAgain");
   const noJsShutAgain = await evaluate(READ);
   await send("Emulation.setScriptExecutionDisabled", { value: false });
   check(
