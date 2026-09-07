@@ -112,7 +112,7 @@ export async function run(ctx) {
     JSON.stringify({ same: p0 === p1, anims: sv2b.anims, len: (p0 || "").length }),
   );
 
-  // #373 rewrote what these two measure. The matrix runs in the render worker now, so __armMs (a rAF-then-task hop) collapses to one frame whether the order is cached or not (5.4 and 149.4ms here, against 1120 and 144 before), and the ratio it used to carry moved to the wall clock from tick to ink. Measured 2026-08-17: 1150ms first / 170ms re-inked here, 2082 / 204 on the CI runner under the #381 lanes. The 800ms cap is sized to that 204, the same 2 to 4x headroom the 800ms arm cap it replaces was sized to, NOT to the tick-to-ink of a cold world.
+  // #373 rewrote what these two measure: the matrix runs in the render worker now, so __armMs (a rAF-then-task hop) collapses to one frame whether the order is cached or not, and the ratio it used to carry moved to the wall clock from tick to ink. #529 dropped the 800ms absolute cap that rode beside the ratio, because it measured runner tail rather than the cache and is what failed CI at 810ms while the ratio passed at 810/3097; mutation-checked 2026-09-07 by deleting prime()'s cache-hit test in tour-order.ts, which reads 1187/1171 (ratio 1.01) against 157/1189 (0.13) healthy, so the ratio alone separates the two populations at any runner speed.
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   const reInkT0 = Date.now();
   await tick(true, "__armMs2");
@@ -121,7 +121,7 @@ export async function run(ctx) {
   const sv2c = await evaluate(`({first:window.__armMs,again:window.__armMs2})`);
   check(
     "SV2c re-arming the same world is effectively instant: the travel matrix cache still holds (#300/#373)",
-    reInkMs < 800 && reInkMs < firstInkMs / 2,
+    reInkMs < firstInkMs / 2,
     JSON.stringify({ ...sv2c, firstInkMs, reInkMs }),
   );
 

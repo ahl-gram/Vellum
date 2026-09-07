@@ -1,8 +1,11 @@
 // The document rooms' index slip (#462 Landfall Sub 7, document-room rulings 1 to 4): the index is server-rendered from the page's own sections, inks the section being read, folds to hand the sheet the width, is the bottom sheet on a phone, and on the Glossary narrows to the term names typed. Every geometry is MEASURED; the scripts-off arm carries its control.
 import { scopedHealth } from "./room-support.mjs";
+import { makeSettle } from "./settle-support.mjs";
 
 const FAQ = "/faq/";
 const GLOSSARY = "/glossary/";
+const atFolded = (d, p) => d.slipVisibility === "hidden" && d.tabVisibility === "visible" && !!p && d.main.right === p.main.right;
+const atUnfolded = (d, p) => d.slipVisibility === "visible" && d.tabVisibility === "hidden" && !!p && d.main.right === p.main.right;
 
 const READ = `(() => {
   const r = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
@@ -32,6 +35,7 @@ const READ = `(() => {
 
 export async function run(ctx) {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
+  const settle = makeSettle(ctx);
   const gate = scopedHealth(ctx);
 
   // A room's readiness is its own shell (waitReady keys on the Explorer's members); the index script runs at parse, so the slip's inline top is the boot signal.
@@ -81,11 +85,9 @@ export async function run(ctx) {
   );
 
   await evaluate(`document.querySelector("#index .slip-fold").click()`);
-  await sleep(900);
-  const folded = await evaluate(READ);
+  const folded = await settle(READ, atFolded, "index-folded");
   await evaluate(`document.querySelector(".slip-tab").click()`);
-  await sleep(900);
-  const back = await evaluate(READ);
+  const back = await settle(READ, atUnfolded, "index-unfolded");
   check(
     "IX3 folding the index hands the sheet the width in one settle and stands the bookmark tab on the right edge; the tab brings the index back and the sheet shrinks the same way (#462 ruling 2, Alex's own wording)",
     folded.folded && folded.slipVisibility === "hidden" && folded.tabVisibility === "visible" && folded.tab.right >= folded.innerW - 1 &&
