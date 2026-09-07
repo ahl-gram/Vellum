@@ -119,6 +119,9 @@ body.chart-room .stage { display: flex; align-items: center; justify-content: ce
 /* The verso's footnote mark rides the legend row beside Turn the sheet. */
 .legend-row a.fn { color: var(--line-tan); align-self: flex-start; margin-left: -0.45rem; }
 .legend-row a.fn:hover, .legend-row a.fn:focus-visible { color: var(--parchment-bright); }
+/* #532: docked, the mark stands on the sheet's parchment, where line-tan reads 2.00:1 and the cream 1.10:1 (the pool that carried both was #525's defect). It takes ink there, brightening DOWNWARD into ink-dark the way the floating mark brightens upward into cream. Scoped on .in-slip alone and not in a media query: the docked row only ever renders at narrow, so this wins the cascade outright rather than fighting a body:has() arm the way #531's inset does. */
+.legend.in-slip .legend-row a.fn { color: var(--ink-brown); }
+.legend.in-slip .legend-row a.fn:hover, .legend.in-slip .legend-row a.fn:focus-visible { color: var(--ink-dark); }
 
 /* Print is paper (#462 ruling 10): the chart prints on the page, unzoomed, its recto only. */
 @media print {

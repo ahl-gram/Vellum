@@ -209,12 +209,47 @@ export async function run(ctx) {
   // The MEDIAN of a wide run: the defect is a full-area wash, so the median moves with it, while a max passes on one bright press under the sample and a min fails on one hairline crossing it.
   const lums = br6b.slipY === null ? null : (await sampleRow(send, 20, br6b.slipY + 120, 16)).map(luminance).sort((a, b) => a - b);
   const br6bGround = lums === null ? null : Math.round(lums[Math.floor(lums.length / 2)]);
+  // #532: the footnote mark's contrast is a COMPUTED-STYLE claim and can only be read as one. The declaration that fails here is PRESENT in the stylesheet and simply loses the cascade, so a text match over the CSS passes on the broken code; only a resolved colour sees it. Its three states are read through CSS.forcePseudoState rather than a real pointer, so the focus arm is covered too (a link whose focus ring is its colour change).
+  const doc532 = await send("DOM.getDocument", { depth: -1 });
+  await send("CSS.enable");
+  const fnNode = (await send("DOM.querySelector", { nodeId: doc532.root.nodeId, selector: "#broadside .legend.in-slip .legend-row a.fn" })).nodeId;
+  const readMark = async (states) => {
+    if (!fnNode) return null;
+    await send("CSS.forcePseudoState", { nodeId: fnNode, forcedPseudoClasses: states });
+    return evaluate(`(()=>{const m=document.querySelector("#broadside .legend.in-slip .legend-row a.fn");if(!m)return null;
+      const lin=(c)=>{c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);};
+      const parse=(s)=>s.slice(s.indexOf("(")+1,s.lastIndexOf(")")).split(",").map(parseFloat);
+      const lum=(p)=>0.2126*lin(p[0])+0.7152*lin(p[1])+0.0722*lin(p[2]);
+      const opaque=(el)=>{for(let n=el;n;n=n.parentElement){const q=parse(getComputedStyle(n).backgroundColor);if(q.length>=3&&(q.length<4||q[3]>0.99))return q.slice(0,3);}return [255,255,255];};
+      const c=parse(getComputedStyle(m).color).slice(0,3),g=opaque(m);
+      const [hi,lo]=[lum(c),lum(g)].sort((a,b)=>b-a);
+      return{color:getComputedStyle(m).color,ground:"rgb("+g.join(", ")+")",ratio:Math.round(((hi+0.05)/(lo+0.05))*100)/100};})()`);
+  };
+  const fnRest = await readMark([]);
+  const fnHover = await readMark(["hover"]);
+  const fnFocus = await readMark(["focus", "focus-visible"]);
+  await readMark([]);
+  // The house's text floor. The mark is a link, so 3:1 (a non-text component) is not the bar it answers to.
+  const FN_FLOOR = 4.5;
   await clearMobile();
+  // The other side of the same claim: undocked the row still paints its own dark footing, where line-tan is what reads, so the repair has to be a DOCKED arm. Without this, changing the base rule globally passes the three reads above and quietly breaks the floating mark.
+  await sleep(200);
+  const fnFloat = await evaluate(`(()=>{const m=document.querySelector(".legend:not(.in-slip) .legend-row a.fn");
+    return m?{color:getComputedStyle(m).color,footing:getComputedStyle(m.closest(".legend"),"::before").content}:null;})()`);
   check(
     "BR6b on a phone with a committed survey's camera, the opened Broadside carries NO footing behind its docked Press: the sheet's ground reads parchment where the pool used to paint (#525)",
     br6b.docked && br6b.open && br6b.zoomed && br6b.groundOn === "none" && br6bGround > 200,
     JSON.stringify({ ...br6b, ground: br6bGround }),
   );
+
+  check(
+    "BR6c the docked mark reads on the parchment it now stands on, at rest and under hover and focus (#532): every state clears the 4.5:1 text floor, where line-tan measured 2.00:1 and the cream hover 1.10:1 once #525 took the pool away, and the FLOATING mark keeps line-tan on the footing it still has",
+    !!fnRest && !!fnHover && !!fnFocus &&
+      fnRest.ratio >= FN_FLOOR && fnHover.ratio >= FN_FLOOR && fnFocus.ratio >= FN_FLOOR &&
+      !!fnFloat && fnFloat.color === "rgb(185, 167, 127)" && fnFloat.footing !== "none",
+    JSON.stringify({ rest: fnRest, hover: fnHover, focus: fnFocus, floating: fnFloat, floor: FN_FLOOR }),
+  );
+
 
   await gotoPlain(`http://127.0.0.1:${PORT}/glossary/`, "broadside-glossary");
   const br7 = await evaluate(`(()=>{
