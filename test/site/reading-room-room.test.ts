@@ -107,3 +107,21 @@ test("RR-room 8 under reduced motion the pace group hides (#493, ruled 2026-09-0
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.rf-instrument \.rf-pace \{ display: none; \}\s*\}/);
   assert.doesNotMatch(frameCss, /prefers-reduced-motion/, "and not the frame's (motion.css owns the collapse)");
 });
+
+// #520, ruled 2026-09-07 (option B on the Reading Room clobber): the room's writers each build a FRESH URLSearchParams and finalize it, so any key they do not know dies on a copied link. The Chart Table rides in on every road in (journalLink and forwardTarget both carry the hash verbatim) and must ride out again.
+// This is pointed at the WRITER as a class, not at one key spelling: every function in the room's app that builds a fresh params bag and emits a hash from it must re-set the carried key. Its blind spot, named and argued: a future writer that assembles the hash by string concatenation instead of URLSearchParams is not swept. That direction costs a false PASS, so a third road out owes this test a look; the alternative, matching on any "#" string, would false-FAIL on every href in the file.
+test("every hash writer in the Reading Room carries the Chart Table through (#520 ruling B)", () => {
+  const src = read("src/site/reading-room/app.ts");
+  const writers = [...src.matchAll(/function (\w+)\([^)]*\)[^{]*\{([\s\S]*?)\n\}/g)]
+    .filter(([, , body]) => /new URLSearchParams\(\)/.test(body!));
+  assert.ok(writers.length >= 2, `expected the room's two known writers, found ${writers.length}`);
+  assert.deepEqual(
+    writers.map(([, name]) => name).sort(),
+    ["prospectHrefFor", "syncHash"],
+    "the writers this guard knows; a new one must be added here deliberately, having carried the key",
+  );
+  for (const [, name, body] of writers) {
+    assert.match(body!, /TABLE_KEY/, `${name} builds a fresh params bag and must re-set the table key, or a copied link loses the gathering`);
+  }
+  assert.match(src, /carried\.table = p\.get\(TABLE_KEY\)/, "and the key must be read off the incoming hash at load");
+});

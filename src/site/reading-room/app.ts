@@ -15,6 +15,7 @@ import { storyBeats, type StoryBeat } from "./beats.ts";
 import { armsBearing, plateForTold, plateSpecsFor, surveyPlateRows, type PlateSpec } from "./told-plate.ts";
 import { plateDressFor } from "../explorer/prospect-job.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
+import { TABLE_KEY } from "../shared/table-address.ts";
 import { parseLive, emitLive, finalizeHash, liveNow, seedFromHash, type Live } from "../explorer/address.ts";
 import { createReadingFrame } from "../reading-frame/index.ts";
 import { bindReadingRoom, drawScale, seatFrame, writeFolio } from "./seats.ts";
@@ -83,7 +84,8 @@ const carried: {
   beasts: boolean;
   land: number | null;
   coast: number | null;
-} = { type: "", band: "", theme: "", legend: true, arms: false, beasts: false, land: null, coast: null };
+  table: string | null;
+} = { type: "", band: "", theme: "", legend: true, arms: false, beasts: false, land: null, coast: null, table: null };
 
 function applyHash(): void {
   const p = new URLSearchParams(location.hash.slice(1));
@@ -113,6 +115,7 @@ function applyHash(): void {
     const w = Number(coast) / 100;
     if (Number.isFinite(w)) carried.coast = Math.min(1, Math.max(0, w));
   }
+  carried.table = p.get(TABLE_KEY);
   pendingLive = parseLive(p);
 }
 
@@ -125,6 +128,7 @@ function prospectHrefFor(forSeed: number, b: PlateSpec): string {
   if (carried.band) p.set("band", carried.band);
   if (carried.land != null) p.set("land", String(Math.round(carried.land * 1000)));
   if (carried.coast != null) p.set("coast", String(Math.round(carried.coast * 100)));
+  if (carried.table) p.set(TABLE_KEY, carried.table);
   p.set("i", String(b.index));
   p.set("year", String(b.year));
   return "/prospect/#" + p.toString();
@@ -143,6 +147,7 @@ function syncHash(): void {
   p.set("beasts", carried.beasts ? "1" : "0");
   if (carried.land != null) p.set("land", String(Math.round(carried.land * 1000)));
   if (carried.coast != null) p.set("coast", String(Math.round(carried.coast * 100)));
+  if (carried.table) p.set(TABLE_KEY, carried.table);
   const a = lc.agesState();
   // ages is unconditionally true: the room's instrument is always armed, the page equivalent of the Explorer's ticked checkbox.
   emitLive(p, liveNow({ ages: true, chamber: a?.chamber ?? null, year: a?.year, pending: pendingLive }));
