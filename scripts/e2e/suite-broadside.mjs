@@ -209,8 +209,8 @@ export async function run(ctx) {
   // The MEDIAN of a wide run: the defect is a full-area wash, so the median moves with it, while a max passes on one bright press under the sample and a min fails on one hairline crossing it.
   const lums = br6b.slipY === null ? null : (await sampleRow(send, 20, br6b.slipY + 120, 16)).map(luminance).sort((a, b) => a - b);
   const br6bGround = lums === null ? null : Math.round(lums[Math.floor(lums.length / 2)]);
-  // #532: the footnote mark's contrast is a COMPUTED-STYLE claim and can only be read as one. The declaration that fails here is PRESENT in the stylesheet and simply loses the cascade, so a text match over the CSS passes on the broken code; only a resolved colour sees it. Its three states are read through CSS.forcePseudoState rather than a real pointer, so the focus arm is covered too (a link whose focus ring is its colour change).
-  const doc532 = await send("DOM.getDocument", { depth: -1 });
+  // #532: the mark's contrast is a COMPUTED-STYLE claim and can only be read as one. The declaration that fails here is PRESENT in the stylesheet and simply loses the cascade, so a text match over the CSS passes on the broken code. The three states go through CSS.forcePseudoState, and each asserts its own resolved COLOUR: a floor alone passes when the hover arm is deleted and hover falls back to the resting ink, which still clears it (skeptic on PR #535).
+  const doc532 = await send("DOM.getDocument", { depth: 1 });
   await send("CSS.enable");
   const fnNode = (await send("DOM.querySelector", { nodeId: doc532.root.nodeId, selector: "#broadside .legend.in-slip .legend-row a.fn" })).nodeId;
   const readMark = async (states) => {
@@ -229,6 +229,7 @@ export async function run(ctx) {
   const fnHover = await readMark(["hover"]);
   const fnFocus = await readMark(["focus", "focus-visible"]);
   await readMark([]);
+  await send("CSS.disable");
   // #532 (Alex's call, 2026-09-07): the docked gold road keeps its cream fill, which is what marks it as the road OUT, and its hairline takes ink so the button's box reads against the sheet. Two-sided: the fill must STILL be the gold, so "make it dark like its siblings" fails this as surely as leaving the tan hairline does.
   const goldBox = await evaluate(`(()=>{const b=document.querySelector("#broadside .legend.in-slip .legend-row .legend-btn.gold");if(!b)return null;
     const lin=(c)=>{c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);};
@@ -244,11 +245,20 @@ export async function run(ctx) {
   const GOLD_FILL = "rgb(240, 227, 189)";
   // The house's text floor. The mark is a link, so 3:1 (a non-text component) is not the bar it answers to.
   const FN_FLOOR = 4.5;
+  const INK_BROWN = "rgb(107, 90, 64)", INK_DARK = "rgb(74, 56, 38)", LINE_TAN = "rgb(185, 167, 127)";
+  // Asserted, not just used as the divisor: opaque() walks parent backgrounds and is blind to a ::before overlay, which is exactly how #525's pool painted, so a returned pool would leave the ratio reading against a ground that no longer paints.
+  const SHEET = "rgb(244, 236, 216)";
   await clearMobile();
   // The other side of the same claim: undocked the row still paints its own dark footing, where line-tan is what reads, so the repair has to be a DOCKED arm. Without this, changing the base rule globally passes the three reads above and quietly breaks the floating mark.
-  await sleep(200);
-  const fnFloat = await evaluate(`(()=>{const m=document.querySelector(".legend:not(.in-slip) .legend-row a.fn");
-    return m?{color:getComputedStyle(m).color,footing:getComputedStyle(m.closest(".legend"),"::before").content}:null;})()`);
+  const readFloat = `(()=>{const m=document.querySelector(".legend:not(.in-slip) .legend-row a.fn");
+    return m?{color:getComputedStyle(m).color,footing:getComputedStyle(m.closest(".legend"),"::before").content}:null;})()`;
+  let fnFloat = null;
+  // The undocked read waits for the resize-driven relayout to seat the row back on the stage; a blind sleep here is #529's CL4 shape and would go red for reasons unrelated to colour.
+  for (let i = 0; i < 100; i++) {
+    fnFloat = await evaluate(readFloat);
+    if (fnFloat) break;
+    await sleep(50);
+  }
   check(
     "BR6b on a phone with a committed survey's camera, the opened Broadside carries NO footing behind its docked Press: the sheet's ground reads parchment where the pool used to paint (#525)",
     br6b.docked && br6b.open && br6b.zoomed && br6b.groundOn === "none" && br6bGround > 200,
@@ -259,7 +269,9 @@ export async function run(ctx) {
     "BR6c the docked mark reads on the parchment it now stands on, at rest and under hover and focus (#532): every state clears the 4.5:1 text floor, where line-tan measured 2.00:1 and the cream hover 1.10:1 once #525 took the pool away, and the FLOATING mark keeps line-tan on the footing it still has",
     !!fnRest && !!fnHover && !!fnFocus &&
       fnRest.ratio >= FN_FLOOR && fnHover.ratio >= FN_FLOOR && fnFocus.ratio >= FN_FLOOR &&
-      !!fnFloat && fnFloat.color === "rgb(185, 167, 127)" && fnFloat.footing !== "none",
+      fnRest.color === INK_BROWN && fnHover.color === INK_DARK && fnFocus.color === INK_DARK &&
+      fnRest.ground === SHEET && fnHover.ground === SHEET && fnFocus.ground === SHEET &&
+      !!fnFloat && fnFloat.color === LINE_TAN && fnFloat.footing !== "none",
     JSON.stringify({ rest: fnRest, hover: fnHover, focus: fnFocus, floating: fnFloat, floor: FN_FLOOR }),
   );
 
@@ -268,7 +280,6 @@ export async function run(ctx) {
     !!goldBox && goldBox.fill === GOLD_FILL && goldBox.edgeOnGround >= EDGE_FLOOR && goldBox.edgeOnFill >= EDGE_FLOOR,
     JSON.stringify({ ...goldBox, floor: EDGE_FLOOR, wantFill: GOLD_FILL }),
   );
-
 
 
   await gotoPlain(`http://127.0.0.1:${PORT}/glossary/`, "broadside-glossary");
