@@ -1,0 +1,164 @@
+{
+ "title": {
+  "title": "The Isle of Rahai",
+  "subtitle": "Being a true & faithful chart of these waters, as surveyed by Taiki the Wayfarer in the year 1059 of the Cedar Age",
+  "year": 1059
+ },
+ "title15": {
+  "title": "The Quiet Isles of Tri",
+  "subtitle": "Being a true & faithful chart of these waters, as surveyed by Granla the Wayfarer in the year 575 of the Lantern Age",
+  "year": 575
+ },
+ "capital": {
+  "name": "Laukuwelua",
+  "idx": 0,
+  "mark": {
+   "idx": 0,
+   "name": "Laukuwelua",
+   "formerName": "Haitani",
+   "kind": "capital",
+   "founded": 451,
+   "ruined": false,
+   "seat": true,
+   "nx": 0.5099770114942529,
+   "ny": 0.4095294818344252,
+   "gx": 163,
+   "gy": 95
+  },
+  "card": {
+   "name": "Laukuwelua",
+   "rank": "Capital",
+   "founded": 451,
+   "foundedLine": "Founded in the year 451.",
+   "formerLine": "Once called Haitani.",
+   "tongueLine": "A word of the Oromi speech: Lau·ku·we·lua",
+   "derivationLine": "l, leaf, green things; k, sea, salt; w, water, current; -lua, a sheltered mooring. So the lexicographers of the age would have it."
+  }
+ },
+ "town": {
+  "name": "Paukilua",
+  "idx": 1
+ },
+ "sheets": [
+  {
+   "key": "stage-band2-capital-antique",
+   "kind": "survey",
+   "dress": "antique",
+   "band": 2,
+   "title": "The Environs of Laukuwelua",
+   "window": {
+    "u0": 0.375,
+    "v0": 0.28125,
+    "u1": 0.625,
+    "v1": 0.53125
+   },
+   "seed": 42,
+   "chart": "The Isle of Rahai",
+   "year": 1059,
+   "w": 1500,
+   "h": 1157.93
+  },
+  {
+   "key": "band1-capital-antique",
+   "kind": "survey",
+   "dress": "antique",
+   "band": 1,
+   "title": "The Environs of Laukuwelua",
+   "window": {
+    "u0": 0.25,
+    "v0": 0.125,
+    "u1": 0.75,
+    "v1": 0.625
+   },
+   "seed": 42,
+   "chart": "The Isle of Rahai",
+   "year": 1059,
+   "w": 1500,
+   "h": 1157.93
+  },
+  {
+   "key": "band3-village-antique",
+   "kind": "survey",
+   "dress": "antique",
+   "band": 3,
+   "title": "The Environs of Nurunui",
+   "window": {
+    "u0": 0.21875,
+    "v0": 0.15625,
+    "u1": 0.34375,
+    "v1": 0.28125
+   },
+   "seed": 42,
+   "chart": "The Isle of Rahai",
+   "year": 1059,
+   "w": 1500,
+   "h": 1157.93
+  },
+  {
+   "key": "band2-town-antique",
+   "kind": "survey",
+   "dress": "antique",
+   "band": 2,
+   "title": "The Environs of Paukilua",
+   "window": {
+    "u0": 0.28125,
+    "v0": 0.59375,
+    "u1": 0.53125,
+    "v1": 0.84375
+   },
+   "seed": 42,
+   "chart": "The Isle of Rahai",
+   "year": 1059,
+   "w": 1500,
+   "h": 1157.93
+  },
+  {
+   "key": "prospect-town-ink",
+   "kind": "prospect",
+   "dress": "ink",
+   "idx": 1,
+   "title": "THE PROSPECT OF PAUKILUA",
+   "epithet": "a harbour town upon the Great Woaku",
+   "yearLine": "FOUNDED AN. 689",
+   "name": "Paukilua",
+   "seed": 42,
+   "chart": "The Isle of Rahai",
+   "year": 1059,
+   "w": 520,
+   "h": 384
+  },
+  {
+   "key": "prospect-capital-antique",
+   "kind": "prospect",
+   "dress": "antique",
+   "idx": 0,
+   "title": "THE PROSPECT OF LAUKUWELUA",
+   "epithet": "chief port of the Chiefdom of Rekekoa",
+   "yearLine": "FOUNDED AN. 451",
+   "name": "Laukuwelua",
+   "seed": 42,
+   "chart": "The Isle of Rahai",
+   "year": 1059,
+   "w": 520,
+   "h": 384
+  },
+  {
+   "key": "band2-capital15-antique",
+   "kind": "survey",
+   "dress": "antique",
+   "band": 2,
+   "title": "The Environs of Stanbyl",
+   "window": {
+    "u0": 0.28125,
+    "v0": 0.21875,
+    "u1": 0.53125,
+    "v1": 0.46875
+   },
+   "seed": 15,
+   "chart": "The Quiet Isles of Tri",
+   "year": 575,
+   "w": 1500,
+   "h": 1157.93
+  }
+ ]
+}
