@@ -10,6 +10,7 @@ import {
   latticeFromCentre,
   tableWindow,
   groupByWorld,
+  type Rung,
   type SurveyItem,
   type ProspectItem,
   type TableItem,
@@ -103,8 +104,6 @@ test("round trip, parse(emit(items)) deep-equals items", () => {
 });
 
 test("the separators survive URLSearchParams and finalizeHash untouched, which is why they are _ . and -", () => {
-  // Measured, not assumed: the urlencoded serializer leaves only A-Za-z0-9 * - . _ alone, so the
-  // epic body's proposed `~` would have ridden as %7E and broken the round trip on the first write.
   const value = emitTable([survey, prospect]);
   const params = new URLSearchParams();
   params.set("seed", "42");
@@ -187,9 +186,6 @@ test("land and coast clamp to the engine's range, the way every other host clamp
 });
 
 test("the selects' own empty option is spelled by leaving the field out, never by an empty value", () => {
-  // The Explorer's type, band and theme selects each offer value="" (seed's choice / none) and
-  // writeHash omits the key for it. A keyed item does the same; a stated-but-empty field is a
-  // crafted address, not seed's choice, so it drops the item rather than quietly picking a world.
   const seedsChoice = "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1";
   const [item] = parseTable(hashOf(seedsChoice)) as [SurveyItem];
   assert.deepEqual(item.overrides, {}, "no type and no band is the seed's own world");
@@ -232,44 +228,50 @@ test("a lattice index off the lattice drops the item (the centre must name a rea
 });
 
 test("THE LATTICE CONTRACT: a filed survey redraws the very window the Glass committed", () => {
-  // The reason centres never ride as floats. Sweep every camera decideSettle can settle at every
-  // rung, file it through the grammar, and the window that comes back out must be the same object
-  // the redraft was drawn from; anything else and a shared folio quietly draws a different corner.
-  // The cameras are swept BETWEEN lattice points as well as on them. On a lattice point
-  // Math.round and Math.floor agree, so an aligned-only sweep cannot see the rounding this test
-  // exists to pin; the offset is 0.7 of a cell, in the half where the two disagree (0.3 would
-  // round down and prove nothing), and stops one step short of the edge, where a camera offset
-  // upward is off the sheet and the grammar is right to refuse it.
+  // On a lattice point Math.round and Math.floor agree, so the nudge is 0.7 of a cell, in the half where they disagree: 0.3 would round down and prove nothing.
+  // A stride that never lands on max leaves the top index unswept, which is exactly where
+  // lodWindowFor's upper clamp is active, so every stride ends at max explicitly.
+  const steps = (max: number, by: number): number[] => {
+    const out: number[] = [];
+    for (let i = 0; i <= max; i += by) out.push(i);
+    if (out[out.length - 1] !== max) out.push(max);
+    return out;
+  };
   let checked = 0;
   let offGrid = 0;
+  let atEdge = 0;
   for (const band of LOD_BANDS) {
     if (!band.isRegion) continue;
     const step = band.sizeUV / LATTICE_DIVISIONS;
     const max = LATTICE_DIVISIONS / band.sizeUV;
-    for (let i = 0; i <= max; i += 3) {
-      for (let j = 0; j <= max; j += 5) {
-        for (const nudge of i < max && j < max ? [0, 0.7] : [0]) {
-        const camera = { cx: (i + nudge) * step, cy: (j + nudge) * step, k: band.k };
-        if (nudge !== 0) offGrid++;
-        const decided = decideSettle({ camera, currentWindow: lodWindowFor(0.5, 0.5, 1), currentBand: 0 });
-        assert.equal(decided.action, "region", "the sweep must stay inside the region bands");
-        const lattice = latticeFromCentre(camera.cx, camera.cy, band.index);
-        assert.notEqual(lattice, null, `the Glass settled at ${camera.cx},${camera.cy} but the grammar refused it`);
-        const filed = parseTable(
-          hashOf(emitTable([{ ...survey, overrides: {}, rung: band.index, lx: lattice!.lx, ly: lattice!.ly }])),
-        ) as [SurveyItem];
-        assert.deepEqual(
-          tableWindow(filed[0]),
-          (decided as { window: unknown }).window,
-          `rung ${band.index}, lattice ${lattice!.lx},${lattice!.ly}: the redraw window drifted from the committed one`,
-        );
-        checked++;
+    for (const i of steps(max, 3)) {
+      for (const j of steps(max, 5)) {
+        // At the top index a camera nudged upward is off the sheet, which the grammar is right to refuse, so only the aligned centre is swept there.
+        const edge = i === max || j === max;
+        if (edge) atEdge++;
+        for (const nudge of edge ? [0] : [0, 0.7]) {
+          const camera = { cx: (i + nudge) * step, cy: (j + nudge) * step, k: band.k };
+          if (nudge !== 0) offGrid++;
+          const decided = decideSettle({ camera, currentWindow: lodWindowFor(0.5, 0.5, 1), currentBand: 0 });
+          assert.equal(decided.action, "region", "the sweep must stay inside the region bands");
+          const lattice = latticeFromCentre(camera.cx, camera.cy, band.index);
+          assert.notEqual(lattice, null, `the Glass settled at ${camera.cx},${camera.cy} but the grammar refused it`);
+          const filed = parseTable(
+            hashOf(emitTable([{ ...survey, overrides: {}, rung: band.index as Rung, lx: lattice!.lx, ly: lattice!.ly }])),
+          ) as [SurveyItem];
+          assert.deepEqual(
+            tableWindow(filed[0]),
+            (decided as { window: unknown }).window,
+            `rung ${band.index}, lattice ${lattice!.lx},${lattice!.ly}: the redraw window drifted from the committed one`,
+          );
+          checked++;
         }
       }
     }
   }
   assert.ok(checked > 100, `the sweep must actually sweep; it checked ${checked}`);
   assert.ok(offGrid > 100, `and it must sweep BETWEEN the lattice points, where the rounding shows; it checked ${offGrid}`);
+  assert.ok(atEdge > 0 && offGrid < checked, `and it must reach the top lattice index, where the window clamps; ${atEdge} edge cameras of ${checked}`);
 });
 
 test("latticeFromCentre refuses a centre that is not a settle, and a rung that is not the Glass's", () => {
@@ -288,11 +290,10 @@ test("groupByWorld orders for Sub 3's drafting: one run per world, worlds in fir
   assert.equal(groups.length, 2, "two worlds, not three");
   assert.deepEqual(groups.map((g) => g.entries.map((e) => e.at)), [[0, 2], [1]], "seed 1 first, and it keeps both its sheets");
   assert.deepEqual(groups[0]!.entries.map((e) => e.item), [a, c]);
+  assert.deepEqual(groups.map((g) => [g.seed, g.overrides]), [[1, {}], [2, {}]], "each group names its own world, so Sub 3 calls worldFor without reaching into an entry");
 });
 
 test("groupByWorld groups on the world the address states, so a key order cannot split one world in two", () => {
-  // JSON.stringify would: {mapType, band} and {band, mapType} are the same world and different strings,
-  // and splitting them regenerates the parent twice through the single-entry worldFor cache.
   const one = { ...survey, overrides: { mapType: "citystate", band: "polar" } } as SurveyItem;
   const two = { ...survey, overrides: { band: "polar", mapType: "citystate" }, lx: 4 } as SurveyItem;
   assert.equal(groupByWorld([one, two]).length, 1, "the same world, however the caller built the object");
@@ -331,7 +332,7 @@ test("legend and arms ride as the Explorer writes them, 1 or 0, and nothing else
   assert.deepEqual(parseTable(hashOf("k-s.seed-42.style-antique.legend-yes.arms-0.beasts-0.rung-2.lx-1.ly-1")), [], "a stated but unreadable seal drops the item");
 });
 
-test("the table rides through the Prospect page and back (#401 ruling 7 depends on it)", () => {
+test("chartTarget carries the table home from the Prospect page (#401 ruling 7 depends on it; the Explorer's writer is Sub 2's half)", () => {
   const hash = `#seed=42&style=antique&${TABLE_KEY}=${SURVEY}&i=4&year=300`;
   assert.ok(chartTarget(hash).includes(`${TABLE_KEY}=${SURVEY}`), "chartTarget drops only i and year, so the table comes home");
   assert.deepEqual(parseTable(chartTarget(hash).replace("/explorer/", "")), [survey]);

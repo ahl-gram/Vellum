@@ -5,7 +5,7 @@
 // three bundles import it. The key is `table` (ruled at #518's sitting, 2026-09-07; `plates` is
 // taken by the Explorer's order button and the poster/atlas plates).
 import { LATTICE_DIVISIONS, LOD_BANDS, lodWindowFor, type LodBand } from "../../world/lod.ts";
-import { parseYear } from "../prospect/address.ts";
+import { parseYear } from "./year.ts";
 import type { UvWindow, MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
@@ -15,15 +15,12 @@ export const TABLE_KEY = "table";
 /** #401 ruling 5. The refusal wording is the hosts', not the grammar's. */
 export const TABLE_CAP = 6;
 
-// Separators chosen by measurement: the urlencoded serializer leaves only A-Za-z0-9 and * - . _
-// alone, so the epic body's `~` would have ridden as %7E and broken the round trip on the first
-// write. This is also why a centre encodes as an integer lattice index and never as a decimal.
+// The urlencoded serializer leaves only A-Za-z0-9 and * - . _ alone, so the epic body's `~` would have ridden as %7E; this is also why a centre encodes as an integer index and never as a decimal.
 const ITEMS = "_";
 const FIELDS = ".";
 const PAIR = "-";
 
-// Boundary discipline: allowlists mirrored from the Explorer's <select> values, the Print Room's
-// idiom. Pinned against the page's own options in test/site/table-address.test.ts.
+// Boundary discipline: allowlists mirrored from the Explorer's <select> values (the Print Room's exact idiom).
 const STYLES = ["antique", "topographic", "ink", "nautical"];
 const TYPES = ["island", "archipelago", "continent", "citystate"];
 const BANDS = ["temperate", "tropical", "polar"];
@@ -42,17 +39,13 @@ export interface TableWorld {
   readonly overrides: TableOverrides;
 }
 
-/**
- * A committed redraft: the RegionJob tuple with `window` replaced by (rung, lattice centre) and
- * `render` decomposed into the dress; gridW/gridH/widthPx the page derives.
- * `rung` is the Glass's LOD band (1 to 3, `LodBand.index`), deliberately not called `band`, which
- * every host key name already spends on the climate band. The title is never encoded: the worker
- * derives it from (world, window), which is what lets a live redraft and a later redraw agree
- * byte for byte (#169).
- */
+/** A committed redraft: the RegionJob tuple with `window` as (rung, lattice centre) and `render` decomposed. `rung` is the Glass's LOD band, NOT called `band`, which every host key name already spends on the climate band. */
+/** The Glass's region bands. Narrow on purpose: `tableWindow` indexes LOD_BANDS with it. */
+export type Rung = 1 | 2 | 3;
+
 export interface SurveyItem extends TableWorld {
   readonly kind: "survey";
-  readonly rung: number;
+  readonly rung: Rung;
   readonly lx: number;
   readonly ly: number;
   readonly style: StyleName;
@@ -72,21 +65,16 @@ export interface ProspectItem extends TableWorld {
 
 export type TableItem = SurveyItem | ProspectItem;
 
+/** One world's run of sheets. `seed` and `overrides` are the group's own, so Sub 3 calls `worldFor(group.seed, group.overrides)` without reaching into an entry. */
 export interface TableGroup {
-  readonly world: string;
+  readonly seed: number;
+  readonly overrides: TableOverrides;
   readonly entries: ReadonlyArray<{ readonly at: number; readonly item: TableItem }>;
 }
 
-// `beasts` is in the dress although #519 and #401 both list only (style, legend, arms, theme).
-// It cannot change a region sheet today: `generateRegionWorld` sets `beasts: []`, so `beastsLayer`
-// returns null on every survey and seaDecor's serpent flag never flips (measured: a band-1 seed-42
-// region renders byte-identical either way). It is encoded for the reason #519 gives for encoding
-// the style while the redraft is antique-only, so a later expansion cannot change the grammar.
+// `beasts` rides though #519 lists a four-field dress: it cannot change a survey today (`generateRegionWorld` sets `beasts: []`, measured byte-identical either way), and is encoded for the reason #519 gives for encoding the style while the redraft is antique-only.
 
-// A stated field reads three ways: absent (undefined), stated and readable, or stated and not
-// (null). A stated-but-unreadable field drops the whole ITEM: a folio sheet either describes
-// itself exactly or is not on the table, because silently drafting a different world would be a
-// lie the reader cannot see. Continuous values clamp instead, the way every other host clamps them.
+// undefined = not stated; null = stated and unreadable, which drops the whole ITEM rather than quietly drafting a different world. Continuous values clamp instead.
 type Field<T> = T | null | undefined;
 
 const allowed = <T extends string>(raw: string | undefined, list: readonly string[]): Field<T> =>
@@ -153,13 +141,14 @@ function readItem(chunk: string): TableItem | null {
     const theme = allowed<ThemeName>(fields.get("theme"), THEMES);
     const rung = nat(fields.get("rung"));
     if (legend == null || arms == null || beasts == null || theme === null || rung == null) return null;
-    const band = regionBand(rung);
-    if (!band) return null;
+    const seat = regionBand(rung) ? (rung as Rung) : null;
+    const band = seat === null ? null : LOD_BANDS[seat];
+    if (!band || seat === null) return null;
     const lx = nat(fields.get("lx"));
     const ly = nat(fields.get("ly"));
     const max = latticeMax(band);
     if (lx == null || ly == null || lx > max || ly > max) return null;
-    return { kind: "survey", ...world, style, legend, arms, beasts, theme: theme ?? null, rung, lx, ly };
+    return { kind: "survey", ...world, style, legend, arms, beasts, theme: theme ?? null, rung: seat, lx, ly };
   }
   if (kind === "p") {
     const index = nat(fields.get("i"));
@@ -215,21 +204,13 @@ const emitItem = (item: TableItem): string =>
     ...dressFields(item),
   ].join(FIELDS);
 
-/**
- * The key's VALUE, in one canonical field order, capped. The caller writes it under TABLE_KEY, and
- * writes NO key at all when this is empty (ruled 2026-09-07): an empty table must not grow an
- * `table=` onto every link forever. `emitLive` is the precedent for omit-when-empty.
- */
+/** The key's VALUE, in one canonical field order, capped. The host writes NO key at all when this is empty (ruled 2026-09-07), the way `emitLive` omits its own. */
 export function emitTable(items: ReadonlyArray<TableItem>): string {
   return items.slice(0, TABLE_CAP).map(emitItem).join(ITEMS);
 }
 
-/**
- * The encode half of the lattice: the Glass's settled centre as the integer index the address
- * carries. The same operands `quantizeCenter` uses, so the two agree bit for bit. There is
- * deliberately no window-to-lattice twin: `lodWindowFor` clamps at the sheet edge, so that
- * direction is lossy, and the caller has the camera anyway.
- */
+// There is deliberately no window-to-lattice twin: `lodWindowFor` clamps at the sheet edge, so that direction is lossy (1200 of 4225 band-3 windows rebuild differently from their own midpoint), and every caller has the camera anyway.
+/** The Glass's settled centre as the integer index the address carries, on `quantizeCenter`'s own operands so the two agree bit for bit. */
 export function latticeFromCentre(
   cx: number,
   cy: number,
@@ -247,27 +228,23 @@ export function latticeFromCentre(
 
 /** The decode half: the window the redraft must be drawn from, exactly the one `decideSettle` committed. */
 export function tableWindow(item: SurveyItem): UvWindow {
-  const band = regionBand(item.rung) as LodBand;
+  const band = LOD_BANDS[item.rung] as LodBand;
   const step = latticeStep(band);
   return lodWindowFor(item.lx * step, item.ly * step, band.sizeUV);
 }
 
-/**
- * Sub 3's drafting order: one run per world, worlds in first-seen order. Grouped on the world the
- * ADDRESS states, never on a stringified overrides object, whose key order would split one world
- * into two runs and regenerate the parent twice through the single-entry `worldFor` cache.
- */
+/** Sub 3's drafting order: one run per world, first-seen. Keyed on the world the ADDRESS states, never a stringified overrides object, whose key order would split one world in two and regenerate the parent twice through the single-entry `worldFor` cache. */
 export function groupByWorld(items: ReadonlyArray<TableItem>): ReadonlyArray<TableGroup> {
   const order: string[] = [];
-  const runs = new Map<string, Array<{ at: number; item: TableItem }>>();
+  const runs = new Map<string, TableGroup>();
   items.forEach((item, at) => {
-    const world = [`seed${PAIR}${item.seed}`, ...worldFields(item.overrides)].join(FIELDS);
-    const run = runs.get(world);
-    if (run) run.push({ at, item });
+    const key = [`seed${PAIR}${item.seed}`, ...worldFields(item.overrides)].join(FIELDS);
+    const run = runs.get(key);
+    if (run) (run.entries as Array<{ at: number; item: TableItem }>).push({ at, item });
     else {
-      order.push(world);
-      runs.set(world, [{ at, item }]);
+      order.push(key);
+      runs.set(key, { seed: item.seed, overrides: item.overrides, entries: [{ at, item }] });
     }
   });
-  return order.map((world) => ({ world, entries: runs.get(world) as ReadonlyArray<{ at: number; item: TableItem }> }));
+  return order.map((key) => runs.get(key) as TableGroup);
 }
