@@ -5,14 +5,23 @@ the atelier's current dress, for the sitting that rules the five decisions #401'
 here (where the table sits and its posture; full table or count-and-button; the phone; the names
 and the address key; the folio page's presentation). Precedents: the atelier-map mockup (#454),
 the room mockups (#462 and #494, `design/sub7-chart-rooms/`), the ribbon mockups (#511,
-`design/ribbon-limner/`). **The rulings land as a dated comment on #518 and a ledger on #401**;
-until then nothing here is ruled.
+`design/ribbon-limner/`). **The rulings are the dated comment on #518 (2026-09-07) and the ledger on #401.**
 
 The guide beyond the kit was a collage artist's desk (davesocozy.com, "a table to cut your own"):
 a working mat in the middle, a tray of clippings beside it, six labelled folders along the near
 edge, loose paper at slight angles. Each direction lifts one piece of that desk into the atelier's
 own furniture and nothing else; the deep, the faces, the slip, the legend row and the Glass are the
 kit's as it stood at main `74da88b`.
+
+## Ruled 2026-09-07 (the sitting on #518)
+
+**D, the drawer, is the table; C, the pile, is the page, titled The Portfolio at
+`/print-room/portfolio/`; the address key is `table`.** The spec is these stills: `d-explorer-1280`,
+`d-explorer-1280-shut`, `d-explorer-1280-six`, `d-explorer-390`, `d-explorer-390-open`,
+`c-folio-1280`, `c-folio-390`, `c-folio-390-open`, `explorer-1280-card` and `explorer-390-card`.
+The house rule since Landfall applies: be faithful to them, deviate only where something genuinely
+clashes with Vellum's look and feel, and say why in the PR. A, B and the other presentations were
+passed on and stay here as the record of what was not chosen.
 
 ## The four directions
 
