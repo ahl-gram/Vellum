@@ -298,8 +298,10 @@ export async function run(ctx) {
     !!scrolled && scrolled.y >= 800 && plateLum > 120 && cornerLum > 15 && cornerLum < 90,
     JSON.stringify({ y: scrolled && scrolled.y, sh: scrolled && scrolled.sh, plate: scrolled && scrolled.plate, plateLum, cornerLum }),
   );
-  // #531: the OTHER painting arm. SB8e covers body:has(#map-viewport.zoomed) on the Specimen Book; a stage-less chart room takes the same panel through body.chart-room:not(:has(.stage)), so a repair carrying only one arm leaves this page on the wide inset at 390 and SB8e alone would not see it. This suite is the Gallery's sole visitor.
+  // #531: the OTHER painting arm, body.chart-room:not(:has(.stage)), which SB8e's page never matches.
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+  // The Z13 bounce: /gallery/ is already loaded, and visit()'s probe (readyState complete plus a .wordmark) is satisfied by the STALE document, so a same-URL navigate can return before the new one commits.
+  await send("Page.navigate", { url: "about:blank" });
   const galleryNarrow = await visit("/gallery/");
   const gFolio = galleryNarrow ? await evaluate(`(()=>{const e=document.querySelector(".corner.tr");if(!e)return null;const c=getComputedStyle(e,"::before");
     return{content:c.content,inset:[c.top,c.right,c.bottom,c.left],rem:parseFloat(getComputedStyle(document.documentElement).fontSize)};})()`) : null;
