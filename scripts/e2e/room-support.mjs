@@ -51,6 +51,15 @@ export const makeBar = (ctx) => {
       evaluate(`(()=>{const r=document.querySelector('.rf-chart #layer-roads');return r?getComputedStyle(r).display:"(no-el)";})()`),
     visibleGroups: () =>
       evaluate(`[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length`),
+    // #526: the sweep's own frame clock. The year is read synchronously inside the rAF callback so every sample carries the SAME pairing lag, which a rate fit cancels as an offset; a year read on a wall-clock timer instead carries a frame of quantization at each end, and that is what made the old RS30 read 2.76 to 4.31 on unchanged code.
+    startSweepSamples: () =>
+      evaluate(`(()=>{window.__sweep={s:[],stop:false};
+        const step=(t)=>{const a=window.__vellumAgesState();
+          if(a&&a.year!==null)window.__sweep.s.push({t,year:a.year,pace:a.pace});
+          if(!window.__sweep.stop)requestAnimationFrame(step);};
+        requestAnimationFrame(step);return true;})()`),
+    stopSweepSamples: () =>
+      evaluate(`(()=>{window.__sweep.stop=true;return window.__sweep.s;})()`),
     playLabel: () => evaluate(`document.querySelector(".rf-play").textContent`),
     clickPlay: () => evaluate(`document.querySelector(".rf-play").click()`),
   };

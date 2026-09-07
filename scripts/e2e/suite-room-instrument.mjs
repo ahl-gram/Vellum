@@ -1,11 +1,12 @@
 // Room instrument e2e (RS*, #320 Sub 3): the S-suite's live-animation coverage re-hosted against .rf-* selectors and the room's own hooks; the Explorer-hosted S* originals stay green beside these until Sub 4 retires them by name.
 import { makeRoom, makeBar, scrubFacts, scopedHealth } from "./room-support.mjs";
 import { HOST_HOOK_NAMES } from "../../src/site/shared/host-hooks.ts";
+import { readPaceSweep, PACE_LEG_MS } from "../../src/cli/e2e-pace.ts";
 
 export async function run(ctx) {
   const { evaluate, check, sleep } = ctx;
   const room = makeRoom(ctx);
-  const { setYear, yearNow, groupVis, roadsDisp, visibleGroups, clickPlay, playLabel } = makeBar(ctx);
+  const { setYear, yearNow, groupVis, roadsDisp, visibleGroups, clickPlay, playLabel, startSweepSamples, stopSweepSamples } = makeBar(ctx);
   const gate = scopedHealth(ctx);
 
   const booted = await room.goto("#seed=42&style=antique&legend=1");
@@ -319,26 +320,25 @@ export async function run(ctx) {
     JSON.stringify({ rs29, rs29hash }),
   );
 
+  // #526: the RATE, off the page's own frame clock. storyAt anchors the sweep to the wall clock, so years per page millisecond is a property of the engine that no runner speed can move, while two years a wall window apart can only be read to a frame of quantization at each end.
   await evaluate(`document.querySelector('.rf-pace button[data-pace="1"]').click()`);
   await setYear(smNow.minFounded);
   await clickPlay();
   await sleep(200);
-  const y0 = await yearNow();
-  await sleep(400);
-  const y1 = await yearNow();
+  await startSweepSamples();
+  await sleep(PACE_LEG_MS);
   await evaluate(`document.querySelector('.rf-pace button[data-pace="4"]').click()`);
-  await sleep(40);
-  const yAt = await yearNow();
-  await sleep(400);
-  const y2 = await yearNow();
+  await sleep(PACE_LEG_MS);
+  const rs30samples = await stopSweepSamples();
   const rs30lbl = await playLabel();
+  const rs30range = await evaluate(`(()=>{const a=window.__vellumAgesState();return{min:a.min,max:a.max};})()`);
   await clickPlay();
   await evaluate(`document.querySelector('.rf-pace button[data-pace="1"]').click()`);
-  const slow = y1 - y0, fast = y2 - yAt;
+  const rs30 = readPaceSweep(rs30samples, { range: rs30range, paces: [1, 4] });
   check(
-    "RS30 a press to 4x mid-sweep keeps the year and the sweep then covers at least three times what the 1x window did (#493: the clock re-anchors, both halves scale)",
-    slow > 0 && yAt >= y1 && yAt - y1 < 60 && fast >= slow * 3 && rs30lbl === "Pause",
-    JSON.stringify({ y0, y1, yAt, y2, slow, fast, rs30lbl }),
+    "RS30 the sweep runs at the pace it is set to: each leg fits the rate SWEEP_MS names for it, the press neither jumps the story nor steps the year back, and the sweep is still running (#493 the clock re-anchors; #526 read off the frame clock)",
+    rs30.ok && rs30lbl === "Pause",
+    `${rs30.detail} label=${rs30lbl}`,
   );
 
   gate.check("RS24 the room instrument run is clean (no console errors, no new 4xx)");
