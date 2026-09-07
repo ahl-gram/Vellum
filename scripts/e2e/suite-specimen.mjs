@@ -188,6 +188,15 @@ export async function run(ctx) {
     JSON.stringify(ring),
   );
   await send("Emulation.setFocusEmulationEnabled", { enabled: false });
+  const off = await evaluate(`(()=>{const b=document.querySelector(".legend.in-slip .legend-row .legend-btn:disabled");if(!b)return null;
+    const cs=getComputedStyle(b);const root=getComputedStyle(document.documentElement);
+    return{bg:cs.backgroundColor,opacity:cs.opacity,faded:root.getPropertyValue("--ink-faded").trim()};})()`);
+  const fadedRgb = off && `rgb(${[1, 3, 5].map((i) => parseInt(off.faded.replace("#", "").slice(i - 1, i + 1), 16)).join(", ")})`;
+  check(
+    "SB8d the docked row's disabled press keeps a SOLID ground: on parchment the see-through wash read 1.5:1 and the press all but vanished, so docked it takes the faded ink at full opacity and reads the same whatever is behind it (#525)",
+    !!off && off.bg === fadedRgb && off.opacity === "1",
+    JSON.stringify({ ...off, expected: fadedRgb }),
+  );
   await setState("rest");
   await sleep(400);
 

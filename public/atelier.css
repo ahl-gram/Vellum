@@ -206,6 +206,8 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .legend.in-slip .legend-head { display: none; }
   .legend.in-slip .legend-btn { background: var(--ink-dark); }
   .legend.in-slip .legend-btn.gold { background: var(--control-gold); }
+  /* #525: a docked row stands on parchment, where the disabled wash (a 0.5 ink over a 0.45 element) reads 1.5:1 and the button all but disappears. Docked, it takes a SOLID faded ink instead, so it reads the same whatever is behind it: 3.93:1 as a box against the sheet, a clear step down from the enabled 9.46:1. */
+  .legend.in-slip .legend-row .legend-btn:disabled { background: var(--ink-faded); opacity: 1; }
   .slip-tab { display: none; }
   .slip { right: 0; left: 0; top: auto; bottom: 0; width: 100%; max-height: 72vh; outline-offset: -8px; transition: none; }
   .slip.folded { opacity: 1; visibility: visible; transform: none; }
