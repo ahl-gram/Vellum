@@ -200,7 +200,8 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .corner.bl { display: none; }
   .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); bottom: calc(var(--sheet-h, 6rem) + 1rem); }
   body:has(.slip.open) .corner.br.zoomery { display: none; }
-  .corner.tr::before { inset: -0.7rem -0.7rem -0.75rem; }
+  /* Both painting arms, or the rule that gives this pseudo its inset beats the override at every width: a media query adds no specificity. Born dead in a6521c8; the same cascade defect #525 fixed on the legend row, and the one public/index.css:366 already carries for .lf-legend. The value is home's seed box at narrow (.lf-seed padding 0.7rem 0.7rem 0.75rem) as the base inset is its base padding. */
+  body:has(#map-viewport.zoomed) .corner.tr::before, body.chart-room:not(:has(.stage)) .corner.tr::before { inset: -0.7rem -0.7rem -0.75rem; }
   .legend { display: none; }
   .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; max-width: none !important; }
   .legend.in-slip .legend-head { display: none; }

@@ -28,6 +28,7 @@ const READ = `(() => {
     glass: r(".corner.br"), glassDisp: cs(".zoomery", "display"),
     glassOverFolio: (() => { const g = document.querySelector(".corner.br"), f = document.querySelector(".corner.tr"); if (!g || !f) return null; const a = g.getBoundingClientRect(), b = f.getBoundingClientRect(); const w = Math.min(a.right, b.right) - Math.max(a.x, b.x), h = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y); return w > 0 && h > 0 ? [Math.round(w), Math.round(h)] : null; })(),
     legend: r(".legend"), legendDisp: cs(".legend", "display"), legendGround: cs(".legend", "backgroundImage", "::before"), legendGroundOn: cs(".legend", "content", "::before"), legendInSlip: !!legend && legend.classList.contains("in-slip"), legendDocked: !!legend && !!legend.parentElement && legend.parentElement.classList.contains("legend-dock"),
+folioInset: (() => { const e = document.querySelector(".corner.tr"); if (!e) return null; const c = getComputedStyle(e, "::before"); return [c.top, c.right, c.bottom, c.left]; })(),
     pool: cs(".corner.tr", "content", "::before"), poolChrome: cs("header.chrome", "content", "::before"), poolGlass: cs(".corner.br", "content", "::before"), folioPanel: cs(".corner.tr", "backgroundImage", "::before"), folioFilter: cs(".corner.tr", "filter", "::before"),
     pillDisp: cs("#sb-status", "display"), pillText: (document.getElementById("sb-status") || { textContent: null }).textContent,
     folioLines: [...document.querySelectorAll(".corner.bl p")].map((p) => p.textContent.length > 0),
@@ -179,6 +180,17 @@ export async function run(ctx) {
     JSON.stringify({ zoomed: leanedOpen.st && leanedOpen.st.zoomed, docked: [leanedOpen.legendInSlip, leanedOpen.legendDocked], groundOn: leanedOpen.legendGroundOn, slipGround, slip: leanedOpen.slip }),
   );
   await shoot("specimen-390-open-leaned.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });
+  // #531: the resolved inset, not the declaration. The narrow value was PRESENT in the stylesheet for four days and inert, so a text match over the CSS passes on the broken code; only a computed read tells the two apart. Two-sided on purpose: the desktop arm must keep home's base padding, so hoisting the narrow value out of the media query fails this.
+  const rem531 = leanedOpen.rem;
+  const px531 = (v) => `${Math.round(v * rem531 * 100) / 100}px`;
+  const insetNarrow = [px531(-0.7), px531(-0.7), px531(-0.75), px531(-0.7)];
+  const insetWide = [px531(-0.7), px531(-0.9), px531(-0.8), px531(-0.9)];
+  const same = (a, b) => !!a && !!b && a.length === b.length && a.every((v, i) => v === b[i]);
+  check(
+    "SB8e the folio's panel takes the NARROW insets at 390 and home's base padding at 1280 (#531): the override is carried on BOTH painting arms, since a media query adds no specificity and the rule that gives the pseudo its inset outranks a bare .corner.tr::before at every width; the value mirrors home's seed box at each width (.lf-seed, public/index.css)",
+    same(leanedOpen.folioInset, insetNarrow) && same(leaned.folioInset, insetWide),
+    JSON.stringify({ rem: rem531, at390: leanedOpen.folioInset, want390: insetNarrow, at1280: leaned.folioInset, want1280: insetWide }),
+  );
   await send("Emulation.setFocusEmulationEnabled", { enabled: true });
   const ring = await evaluate(`(()=>{const b=document.querySelector(".legend.in-slip .legend-row .legend-btn");if(!b)return null;b.focus();
     const cs=getComputedStyle(b);const root=getComputedStyle(document.documentElement);
