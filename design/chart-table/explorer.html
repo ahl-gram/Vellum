@@ -1157,8 +1157,11 @@ body.state-six .drawer-road .full { display: block; }
 .drawer .count .three, .drawer .count .six, .drawer .count .empty, .drawer-tab .three, .drawer-tab .six { display: none; }
 body.state-three :is(.drawer .count, .drawer-tab) .three, body.state-six :is(.drawer .count, .drawer-tab) .six, body.state-empty .drawer .count .empty { display: inline; }
 
-/* the road out of the table docks in the phone sheet's legend (every direction) */
-.legend.in-slip .road-table { display: none; }
+/* the road out of the table docks in the phone sheet's legend (every direction), and so does the handle: the inset with its press stands above the open sheet, off the screen, so the press rides the sheet's legend while it is open */
+.legend.in-slip .road-table, .legend.in-slip .lay-table { display: none; }
+.lay-table .full, body.state-six .lay-table .lay { display: none; }
+body.state-six .lay-table .full { display: block; }
+body.state-six .legend.in-slip .lay-table { opacity: 0.45; }
 .table-leaf { display: none; }
 .sheet-tabs { display: none; }
 
@@ -1223,6 +1226,7 @@ body.folio-page.dir-d #sheet, body.folio-page.dir-d .slip, body.folio-page.dir-d
   .strip-road { display: none; }
   body.dir-a .slip { bottom: var(--strip-h, 4.6rem); }
   body.dir-a .legend.in-slip .road-table, body.dir-b .legend.in-slip .road-table { display: block; }
+  body:not(.stage-world) .legend.in-slip .lay-table { display: block; }
   /* C: the rack lies along the bottom edge above the sheet, six holes across, numerals only */
   .rack { left: 0.8rem; right: 0.8rem; top: auto; bottom: calc(var(--sheet-h, 6rem) + 0.7rem); translate: none; width: auto; }
   .rack-head, .rack-road, .hole .cap, .hole.laid-in .cap, .hole .empty { display: none; }
@@ -1368,6 +1372,7 @@ body.folio-page.dir-d #sheet, body.folio-page.dir-d .slip, body.folio-page.dir-d
         <button class="legend-btn not-table" type="button"><span class="verb">Turn</span><span class="room">The Sheet</span></button>
         <a class="legend-btn gold not-table" href="#"><span class="verb">Take to</span><span class="room">The Print Room</span></a>
         <a class="legend-btn gold not-table" href="#"><span class="verb">Read the journal in</span><span class="room">The Reading Room</span></a>
+        <button class="legend-btn lay-table" type="button"><span class="verb"><span class="lay">Lay this survey on</span><span class="full">No room on</span></span><span class="room">The Table</span></button>
         <a class="legend-btn gold road-table" href="#"><span class="verb"><span class="three">three sheets &middot; take the table to</span><span class="six">six sheets &middot; take the table to</span><span class="empty">the table is bare</span></span><span class="room">The Print Room</span></a>
       </div>
     </nav>
@@ -1485,6 +1490,9 @@ body.folio-page.dir-d #sheet, body.folio-page.dir-d .slip, body.folio-page.dir-d
   function apply() {
     if (!sheet) return;
     sheet.style.left = tx + 'px'; sheet.style.top = ty + 'px'; sheet.style.width = (W * s) + 'px'; sheet.style.height = (H * s) + 'px';
+    // the pinned card is clamped inside the sheet the way place-overlay.ts's clampBox does: on a phone the sheet is barely taller than the card, so it hangs from the sheet's top edge
+    const card = document.getElementById('place-card');
+    if (card && shown(card)) { const cs = getComputedStyle(card), ny = parseFloat(cs.getPropertyValue('--pc-ny')) || 0, nx = parseFloat(cs.getPropertyValue('--pc-nx')) || 0; card.style.setProperty('--pc-dy', narrow() ? (8 - ny * H * s) + 'px' : '-48px'); card.style.setProperty('--pc-dx', Math.min(0, W * s - (nx * W * s + 10 + card.offsetWidth + 8)) + 'px'); }
     if (world && shown(world)) {
       // The world behind at the band's magnification (k = 4 at band 2), placed so its window lands under the fitted survey: the inset's plot origin is the world's plot point (u0, v0).
       const win = (stage.dataset.window || '0.375,0.28125').split(',').map(Number);

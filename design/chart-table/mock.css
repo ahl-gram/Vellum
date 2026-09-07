@@ -147,8 +147,11 @@ body.state-six .drawer-road .full { display: block; }
 .drawer .count .three, .drawer .count .six, .drawer .count .empty, .drawer-tab .three, .drawer-tab .six { display: none; }
 body.state-three :is(.drawer .count, .drawer-tab) .three, body.state-six :is(.drawer .count, .drawer-tab) .six, body.state-empty .drawer .count .empty { display: inline; }
 
-/* the road out of the table docks in the phone sheet's legend (every direction) */
-.legend.in-slip .road-table { display: none; }
+/* the road out of the table docks in the phone sheet's legend (every direction), and so does the handle: the inset with its press stands above the open sheet, off the screen, so the press rides the sheet's legend while it is open */
+.legend.in-slip .road-table, .legend.in-slip .lay-table { display: none; }
+.lay-table .full, body.state-six .lay-table .lay { display: none; }
+body.state-six .lay-table .full { display: block; }
+body.state-six .legend.in-slip .lay-table { opacity: 0.45; }
 .table-leaf { display: none; }
 .sheet-tabs { display: none; }
 
@@ -213,6 +216,7 @@ body.folio-page.dir-d #sheet, body.folio-page.dir-d .slip, body.folio-page.dir-d
   .strip-road { display: none; }
   body.dir-a .slip { bottom: var(--strip-h, 4.6rem); }
   body.dir-a .legend.in-slip .road-table, body.dir-b .legend.in-slip .road-table { display: block; }
+  body:not(.stage-world) .legend.in-slip .lay-table { display: block; }
   /* C: the rack lies along the bottom edge above the sheet, six holes across, numerals only */
   .rack { left: 0.8rem; right: 0.8rem; top: auto; bottom: calc(var(--sheet-h, 6rem) + 0.7rem); translate: none; width: auto; }
   .rack-head, .rack-road, .hole .cap, .hole.laid-in .cap, .hole .empty { display: none; }

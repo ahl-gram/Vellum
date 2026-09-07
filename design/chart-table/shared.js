@@ -46,6 +46,9 @@
   function apply() {
     if (!sheet) return;
     sheet.style.left = tx + 'px'; sheet.style.top = ty + 'px'; sheet.style.width = (W * s) + 'px'; sheet.style.height = (H * s) + 'px';
+    // the pinned card is clamped inside the sheet the way place-overlay.ts's clampBox does: on a phone the sheet is barely taller than the card, so it hangs from the sheet's top edge
+    const card = document.getElementById('place-card');
+    if (card && shown(card)) { const cs = getComputedStyle(card), ny = parseFloat(cs.getPropertyValue('--pc-ny')) || 0, nx = parseFloat(cs.getPropertyValue('--pc-nx')) || 0; card.style.setProperty('--pc-dy', narrow() ? (8 - ny * H * s) + 'px' : '-48px'); card.style.setProperty('--pc-dx', Math.min(0, W * s - (nx * W * s + 10 + card.offsetWidth + 8)) + 'px'); }
     if (world && shown(world)) {
       // The world behind at the band's magnification (k = 4 at band 2), placed so its window lands under the fitted survey: the inset's plot origin is the world's plot point (u0, v0).
       const win = (stage.dataset.window || '0.375,0.28125').split(',').map(Number);

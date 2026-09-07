@@ -33,6 +33,10 @@ and beside "View the prospect" a second press in the same gold, "Lay the prospec
 which dims to "No room on the table" at the cap. The thumbnail it produces is the ink prospect on
 every table here.
 
+**On a phone the handle also docks**: the inset stands above the open sheet, off the screen, so while
+the sheet is open the same press rides the sheet's legend ("Lay this survey on / The Table", drawn in
+every `x-explorer-390-open` still beside the table's road), in every direction.
+
 **The handle on the inset** is common to A, B and C: a small gold press in the kit's two-line road
 dress, clipped to the survey's top-right corner, reading "Lay on / The Table"; at the cap it dims
 and reads "No room on / The Table". D replaces it with a dog-ear.
