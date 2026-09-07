@@ -195,11 +195,7 @@ export async function run(ctx) {
     JSON.stringify({ emulated, tapped1, tapped2, afterTap1, afterTap2 }),
   );
 
-  // #525: the state a reader reaches without trying. A committed survey boots the Explorer zoomed,
-  // and the camera survives the sheet opening, so the docked Press sits under a live footing rule
-  // whose ::before resolves against the fixed slip and pools over the sheet. The camera arrives by
-  // hash rather than by gesture: the Glass is display:none under an open sheet (2026-09-03 ruling 1),
-  // so there is nothing to press, and a hash camera needs none of the CDP touch apparatus.
+  // #525: the camera arrives by HASH, not by gesture: the Glass is display:none under an open sheet at narrow (the 2026-09-03 ruling 1), so there is nothing to press, and a hash camera needs none of the CDP touch apparatus.
   await setMobileViewport(390, 844);
   await goto(EXP + "#seed=42&style=antique&cx=0.52&cy=0.45&k=4", "broadside-390-zoomed");
   await evaluate(`(()=>{const h=document.querySelector("#broadside .slip-handle");if(h&&!document.getElementById("broadside").classList.contains("open"))h.click();})()`);
@@ -210,10 +206,12 @@ export async function run(ctx) {
       zoomed:!!document.querySelector("#map-viewport.zoomed"),
       groundOn:l?getComputedStyle(l,"::before").content:null,
       slipY:b?Math.round(b.y):null};})()`);
-  const br6bGround = br6b.slipY === null ? null : Math.round(Math.max(...(await sampleRow(send, 20, br6b.slipY + 120, 8)).map(luminance)));
+  // The MEDIAN of a wide run: the defect is a full-area wash, so the median moves with it, while a max passes on one bright press under the sample and a min fails on one hairline crossing it.
+  const lums = br6b.slipY === null ? null : (await sampleRow(send, 20, br6b.slipY + 120, 16)).map(luminance).sort((a, b) => a - b);
+  const br6bGround = lums === null ? null : Math.round(lums[Math.floor(lums.length / 2)]);
   await clearMobile();
   check(
-    "BR6b on a phone with a committed survey's camera, the opened Broadside carries NO footing behind its docked Press: the sheet's own parchment shows through where the pool used to paint (#525)",
+    "BR6b on a phone with a committed survey's camera, the opened Broadside carries NO footing behind its docked Press: the sheet's ground reads parchment where the pool used to paint (#525)",
     br6b.docked && br6b.open && br6b.zoomed && br6b.groundOn === "none" && br6bGround > 200,
     JSON.stringify({ ...br6b, ground: br6bGround }),
   );

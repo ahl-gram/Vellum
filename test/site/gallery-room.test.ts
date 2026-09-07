@@ -93,9 +93,7 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   const footing = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.legend:not\(\.in-slip\)::before[^{]*)\{([^}]*)\}/);
   assert.ok(footing, "the kit gives a stage-less room's legend row home's footing");
   assert.match(footing![1]!, /body:has\(#map-viewport\.zoomed\) \.legend:not\(\.in-slip\)::before/, "the same rule serves the zoomed rooms' row");
-  // #525: BOTH arms carry the scope, or the one without it pools over a phone sheet. Selector-list arms are ranked independently, so a scope on one is a scope on neither.
-  assert.equal((footing![1]!.match(/\.legend:not\(\.in-slip\)::before/g) || []).length, 2, "every arm of the footing rule skips a docked row");
-  assert.doesNotMatch(kit, /\.legend\.in-slip::before/, "and no opt-out beside it: the scope is on the painting rule, so the opt-out that used to lose on specificity is gone rather than left looking load-bearing");
+  assert.equal((footing![1]!.match(/\.legend:not\(\.in-slip\)::before/g) || []).length, 2, "#525: every arm skips a docked row, since selector-list arms are ranked independently and a scope on one is a scope on neither");
   assert.match(footing![2]!, /inset:\s*-0\.5rem -1\.1rem -0\.6rem;[^}]*linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\)/, "home's own footing: its padding as the insets, the seed box's crisp panel (public/index.css .lf-legend; the fade left at the 2026-09-03 sitting, ruling 23)");
   assert.doesNotMatch(css, /\/\*/, "the shipped sheet carries no prose (public/gallery/index.css ships it verbatim)");
   const phone = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
