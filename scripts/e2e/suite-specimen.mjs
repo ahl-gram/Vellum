@@ -177,6 +177,17 @@ export async function run(ctx) {
     JSON.stringify({ zoomed: leanedOpen.st && leanedOpen.st.zoomed, docked: [leanedOpen.legendInSlip, leanedOpen.legendDocked], groundOn: leanedOpen.legendGroundOn, slipGround, slip: leanedOpen.slip }),
   );
   await shoot("specimen-390-open-leaned.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });
+  await send("Emulation.setFocusEmulationEnabled", { enabled: true });
+  const ring = await evaluate(`(()=>{const b=document.querySelector(".legend.in-slip .legend-row .legend-btn");if(!b)return null;b.focus();
+    const cs=getComputedStyle(b);const root=getComputedStyle(document.documentElement);
+    return{color:cs.outlineColor,offset:cs.outlineOffset,inkDark:root.getPropertyValue("--ink-dark").trim(),bright:root.getPropertyValue("--parchment-bright").trim(),focused:document.activeElement===b};})()`);
+  const asRgb = (hex) => { const h = hex.replace("#", ""); return `rgb(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)})`; };
+  check(
+    "SB8c the docked row's focus ring is the house's ink-dark, not the cream one meant for a row standing on its own footing: the ring is drawn OUTSIDE the button, onto the sheet's parchment, where cream reads about 1:1 (#525)",
+    !!ring && ring.focused && ring.color === asRgb(ring.inkDark) && ring.color !== asRgb(ring.bright),
+    JSON.stringify(ring),
+  );
+  await send("Emulation.setFocusEmulationEnabled", { enabled: false });
   await setState("rest");
   await sleep(400);
 

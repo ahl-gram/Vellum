@@ -88,7 +88,8 @@ body:has(.slip.folded) .legend { left: 50%; }
   padding: 0.4rem 0.9rem 0.35rem; text-align: center; transition: background 0.2s ease, transform var(--paper-quick) var(--ease-paper); }
 /* Four classes deep on purpose: the house button hover wash is (0,3,1). */
 .legend .legend-row .legend-btn:hover, .legend .legend-row .legend-btn:focus-visible { background: var(--ink-dark); transform: translateY(var(--raise)); }
-.legend .legend-row .legend-btn:focus-visible { outline-color: var(--parchment-bright); }
+/* #525: the cream ring is for a row standing on its own dark footing; a DOCKED row stands on the sheet's parchment, where cream reads 1.0:1, so it falls back to the house's ink-dark ring. Anything whose contrast leans on the footing is scoped with the footing. */
+.legend:not(.in-slip) .legend-row .legend-btn:focus-visible { outline-color: var(--parchment-bright); }
 .legend-btn .verb { display: block; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.78rem; color: var(--parchment); }
 .legend-btn .room { display: block; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.86rem; letter-spacing: 0.12em; color: var(--parchment); }
 .legend-btn.gold { background: var(--control-gold); }
