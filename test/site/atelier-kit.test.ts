@@ -115,7 +115,7 @@ test("AK7 the legend row is ONE face on home and in the kit: the seed box's cris
     ["home's seed box .lf-seed", home.match(/\.lf-seed \{([^}]*)\}/)],
     ["home's legend row .lf-legend", home.match(/\.lf-legend \{([^}]*)\}/)],
     ["the kit's room folio .corner.tr::before", kit.match(/\.corner\.tr::before[^{]*\{([^}]*)\}/)],
-    ["the kit's legend row .legend::before", kit.match(/\.legend::before[^{]*\{([^}]*)\}/)],
+    ["the kit's legend row .legend:not(.in-slip)::before", kit.match(/\.legend:not\(\.in-slip\)::before[^{]*\{([^}]*)\}/)],
   ];
   for (const [name, m] of wearers) assert.ok(m && m[1].includes(`background: ${panel};`), `${name} stands on the one panel`);
   const homeVerb = home.match(/\.lf-legend-verb \{([^}]*)\}/);

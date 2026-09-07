@@ -88,7 +88,8 @@ body:has(.slip.folded) .legend { left: 50%; }
   padding: 0.4rem 0.9rem 0.35rem; text-align: center; transition: background 0.2s ease, transform var(--paper-quick) var(--ease-paper); }
 /* Four classes deep on purpose: the house button hover wash is (0,3,1). */
 .legend .legend-row .legend-btn:hover, .legend .legend-row .legend-btn:focus-visible { background: var(--ink-dark); transform: translateY(var(--raise)); }
-.legend .legend-row .legend-btn:focus-visible { outline-color: var(--parchment-bright); }
+/* #525: the cream ring is for a row standing on its own dark footing; a DOCKED row stands on the sheet's parchment, where cream reads 1.0:1, so it falls back to the house's ink-dark ring. Anything whose contrast leans on the footing is scoped with the footing. */
+.legend:not(.in-slip) .legend-row .legend-btn:focus-visible { outline-color: var(--parchment-bright); }
 .legend-btn .verb { display: block; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.78rem; color: var(--parchment); }
 .legend-btn .room { display: block; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.86rem; letter-spacing: 0.12em; color: var(--parchment); }
 .legend-btn.gold { background: var(--control-gold); }
@@ -143,10 +144,9 @@ body.chart-room header.chrome { --pool-top: -4rem; --pool-left: -4rem; }
 body.chart-room .corner.bl { --pool-bottom: -4rem; --pool-left: -4rem; }
 body.chart-room .strip { --pool-bottom: -4rem; --pool-left: -4rem; --pool-right: -4rem; }
 
-/* The legend row's footing is home's own (public/index.css .lf-legend, its 0.5rem 1.1rem 0.6rem padding; Alex's 2026-09-03 call from the Specimen Book beside home): the seed box's crisp panel (chart ink 0.85 to 0.72, top to bottom; the fade left at the 2026-09-03 sitting, ruling 23), not the blurred pool. Drawn as the row's own ::before at the padding's insets, so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, e2e BR2); it paints under the same conditions the pool does. */
-body:has(#map-viewport.zoomed) .legend::before, body.chart-room:not(:has(.stage)) .legend::before { content: ""; position: absolute; inset: -0.5rem -1.1rem -0.6rem; z-index: -1; pointer-events: none;
+/* The legend row's footing is home's own (public/index.css .lf-legend, its 0.5rem 1.1rem 0.6rem padding; Alex's 2026-09-03 call from the Specimen Book beside home): the seed box's crisp panel (chart ink 0.85 to 0.72, top to bottom; the fade left at the 2026-09-03 sitting, ruling 23), not the blurred pool. Drawn as the row's own ::before at the padding's insets, so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, e2e BR2); it paints under the same conditions the pool does. #525: the scope is on the PAINTING rule because a docked row goes position:static, so its ::before resolves against the fixed slip and its insets span the whole sheet. */
+body:has(#map-viewport.zoomed) .legend:not(.in-slip)::before, body.chart-room:not(:has(.stage)) .legend:not(.in-slip)::before { content: ""; position: absolute; inset: -0.5rem -1.1rem -0.6rem; z-index: -1; pointer-events: none;
   background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
-.legend.in-slip::before { content: none; }
 /* The room folio's ground is home's seed box (public/index.css .lf-seed, its 0.7rem 0.9rem 0.8rem padding; Alex's 2026-09-03 call): a crisp panel, chart ink 0.85 to 0.72 top to bottom, no blur, drawn as the corner's own ::before at the padding's insets so the corner's box, which the slip's seat reads, never changes; it paints under the pool's conditions. */
 body:has(#map-viewport.zoomed) .corner.tr::before, body.chart-room:not(:has(.stage)) .corner.tr::before { content: ""; position: absolute; inset: -0.7rem -0.9rem -0.8rem; z-index: -1; pointer-events: none;
   background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
@@ -206,6 +206,8 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .legend.in-slip .legend-head { display: none; }
   .legend.in-slip .legend-btn { background: var(--ink-dark); }
   .legend.in-slip .legend-btn.gold { background: var(--control-gold); }
+  /* #525: a docked row stands on parchment, where the disabled wash (a 0.5 ink over a 0.45 element) reads 1.5:1 and the button all but disappears. Docked, it takes a SOLID faded ink instead, so it reads the same whatever is behind it: 3.93:1 as a box against the sheet, a clear step down from the enabled 9.46:1. */
+  .legend.in-slip .legend-row .legend-btn:disabled { background: var(--ink-faded); opacity: 1; }
   .slip-tab { display: none; }
   .slip { right: 0; left: 0; top: auto; bottom: 0; width: 100%; max-height: 72vh; outline-offset: -8px; transition: none; }
   .slip.folded { opacity: 1; visibility: visible; transform: none; }

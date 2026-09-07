@@ -1,4 +1,4 @@
-// The Specimen Book (#487 item 4, cut at #465 ruling 6): every kit piece at its seat, in every state, on one page; MEASURED at 1280x800 and a true 390x844, and shot at both as the closing review's pair (specimen-1280.png, specimen-390.png, specimen-390-open.png in the e2e out dir). Every state is reached through the kit's own binders (the fold, the tab, the handle, the Glass), never by planting a class.
+// The Specimen Book (#487 item 4, cut at #465 ruling 6): every kit piece at its seat, in every state, on one page; MEASURED at 1280x800 and a true 390x844, and shot at both as the closing review's pair (specimen-1280.png, specimen-390.png, specimen-390-open.png, specimen-390-open-leaned.png in the e2e out dir). Every state is reached through the kit's own binders (the fold, the tab, the handle, the Glass), never by planting a class.
 import { scopedHealth } from "./room-support.mjs";
 import { luminance, sampleRow } from "./pixel-support.mjs";
 
@@ -101,6 +101,8 @@ export async function run(ctx) {
   );
   // The pool must reach past the viewport edge, or its blur fades right on the edge and the chart bleeds through at the corner (Alex's 2026-09-03 call on the Explorer's top-left; home runs its pool 4rem out). Sampled, since no computed style sees a blurred edge.
   const brightest = async (x, y) => Math.round(Math.max(...(await sampleRow(send, x, y, 8)).map(luminance)));
+  // The MEDIAN of a wide run: the defect is a full-area wash, so the median moves with it, while a max passes on one bright press sitting under the sample and a min fails on one hairline crossing it.
+  const groundOf = async (x, y) => { const l = (await sampleRow(send, x, y, 16)).map(luminance).sort((a, b) => a - b); return Math.round(l[Math.floor(l.length / 2)]); };
   const interior = await brightest(200, 24);
   const corners = [];
   // The edges the spilled chart reaches under a pooled piece: the two left corners; the right side is the slip's, the legend row carries home's footing (SB5c) and the Glass no pool at all (SB5d).
@@ -162,6 +164,41 @@ export async function run(ctx) {
     JSON.stringify(open && { body: open.slipBody, expanded: open.handleExpanded, slip: open.slip, glass: open.glass, glassOverFolio: open.glassOverFolio }),
   );
   await shoot("specimen-390-open.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });
+
+  // #525: a docked row goes position:static, so under a live footing rule its ::before resolves against the fixed slip and pools over the sheet's own parchment; the ground reading is the half that proves a reader can still read it.
+  await setState("leaned");
+  await sleep(900);
+  const leanedOpen = await read();
+  const slipGround = await groundOf(20, Math.round(leanedOpen.slip.y) + 120);
+  check(
+    "SB8b zoomed with the sheet open, the docked row carries NO footing: the row is still in the slip, the camera still leaned, and the sheet's ground reads parchment where the pool used to paint (#525; SB5c is the control that the sampler reads the pool dark where it legitimately paints)",
+    !!leanedOpen && leanedOpen.st && leanedOpen.st.zoomed && leanedOpen.legendInSlip && leanedOpen.legendDocked &&
+      leanedOpen.slipBody !== "none" && leanedOpen.legendGroundOn === "none" && slipGround > 200,
+    JSON.stringify({ zoomed: leanedOpen.st && leanedOpen.st.zoomed, docked: [leanedOpen.legendInSlip, leanedOpen.legendDocked], groundOn: leanedOpen.legendGroundOn, slipGround, slip: leanedOpen.slip }),
+  );
+  await shoot("specimen-390-open-leaned.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });
+  await send("Emulation.setFocusEmulationEnabled", { enabled: true });
+  const ring = await evaluate(`(()=>{const b=document.querySelector(".legend.in-slip .legend-row .legend-btn");if(!b)return null;b.focus();
+    const cs=getComputedStyle(b);const root=getComputedStyle(document.documentElement);
+    return{color:cs.outlineColor,offset:cs.outlineOffset,inkDark:root.getPropertyValue("--ink-dark").trim(),bright:root.getPropertyValue("--parchment-bright").trim(),focused:document.activeElement===b};})()`);
+  const asRgb = (hex) => { const h = hex.replace("#", ""); return `rgb(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)})`; };
+  check(
+    "SB8c the docked row's focus ring is the house's ink-dark, not the cream one meant for a row standing on its own footing: the ring is drawn OUTSIDE the button, onto the sheet's parchment, where cream reads about 1:1 (#525)",
+    !!ring && ring.focused && ring.color === asRgb(ring.inkDark) && ring.color !== asRgb(ring.bright),
+    JSON.stringify(ring),
+  );
+  await send("Emulation.setFocusEmulationEnabled", { enabled: false });
+  const off = await evaluate(`(()=>{const b=document.querySelector(".legend.in-slip .legend-row .legend-btn:disabled");if(!b)return null;
+    const cs=getComputedStyle(b);const root=getComputedStyle(document.documentElement);
+    return{bg:cs.backgroundColor,opacity:cs.opacity,faded:root.getPropertyValue("--ink-faded").trim()};})()`);
+  const fadedRgb = off && `rgb(${[1, 3, 5].map((i) => parseInt(off.faded.replace("#", "").slice(i - 1, i + 1), 16)).join(", ")})`;
+  check(
+    "SB8d the docked row's disabled press keeps a SOLID ground: on parchment the see-through wash read 1.5:1 and the press all but vanished, so docked it takes the faded ink at full opacity and reads the same whatever is behind it (#525)",
+    !!off && off.bg === fadedRgb && off.opacity === "1",
+    JSON.stringify({ ...off, expected: fadedRgb }),
+  );
+  await setState("rest");
+  await sleep(400);
 
   await send("Emulation.setEmulatedMedia", { media: "print" });
   const printed = await read();

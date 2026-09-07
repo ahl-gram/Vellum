@@ -90,9 +90,10 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   assert.match(panel![1]!, /body:has\(#map-viewport\.zoomed\) \.corner\.tr::before/, "the same rule serves the zoomed rooms' folio");
   assert.match(panel![2]!, /inset:\s*-0\.7rem -0\.9rem -0\.8rem;[^}]*linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\)/, "home's own box: its padding as the insets, chart ink 0.85 to 0.72, no blur (public/index.css .lf-seed)");
   assert.doesNotMatch(panel![2]!, /filter/, "a crisp panel, not the pool");
-  const footing = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.legend::before[^{]*)\{([^}]*)\}/);
+  const footing = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.legend:not\(\.in-slip\)::before[^{]*)\{([^}]*)\}/);
   assert.ok(footing, "the kit gives a stage-less room's legend row home's footing");
-  assert.match(footing![1]!, /body:has\(#map-viewport\.zoomed\) \.legend::before/, "the same rule serves the zoomed rooms' row");
+  assert.match(footing![1]!, /body:has\(#map-viewport\.zoomed\) \.legend:not\(\.in-slip\)::before/, "the same rule serves the zoomed rooms' row");
+  assert.equal((footing![1]!.match(/\.legend:not\(\.in-slip\)::before/g) || []).length, 2, "#525: every arm skips a docked row, since selector-list arms are ranked independently and a scope on one is a scope on neither");
   assert.match(footing![2]!, /inset:\s*-0\.5rem -1\.1rem -0\.6rem;[^}]*linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\)/, "home's own footing: its padding as the insets, the seed box's crisp panel (public/index.css .lf-legend; the fade left at the 2026-09-03 sitting, ruling 23)");
   assert.doesNotMatch(css, /\/\*/, "the shipped sheet carries no prose (public/gallery/index.css ships it verbatim)");
   const phone = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
