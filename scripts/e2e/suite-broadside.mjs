@@ -229,6 +229,19 @@ export async function run(ctx) {
   const fnHover = await readMark(["hover"]);
   const fnFocus = await readMark(["focus", "focus-visible"]);
   await readMark([]);
+  // #532 (Alex's call, 2026-09-07): the docked gold road keeps its cream fill, which is what marks it as the road OUT, and its hairline takes ink so the button's box reads against the sheet. Two-sided: the fill must STILL be the gold, so "make it dark like its siblings" fails this as surely as leaving the tan hairline does.
+  const goldBox = await evaluate(`(()=>{const b=document.querySelector("#broadside .legend.in-slip .legend-row .legend-btn.gold");if(!b)return null;
+    const lin=(c)=>{c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);};
+    const parse=(s)=>s.slice(s.indexOf("(")+1,s.lastIndexOf(")")).split(",").map(parseFloat);
+    const lum=(p)=>0.2126*lin(p[0])+0.7152*lin(p[1])+0.0722*lin(p[2]);
+    const ratio=(x,y)=>{const[hi,lo]=[lum(x),lum(y)].sort((a,b)=>b-a);return Math.round(((hi+0.05)/(lo+0.05))*100)/100;};
+    const opaque=(el)=>{for(let n=el.parentElement;n;n=n.parentElement){const q=parse(getComputedStyle(n).backgroundColor);if(q.length>=3&&(q.length<4||q[3]>0.99))return q.slice(0,3);}return [255,255,255];};
+    const cs=getComputedStyle(b);const fill=parse(cs.backgroundColor).slice(0,3),edge=parse(cs.borderTopColor).slice(0,3),ground=opaque(b);
+    return{fill:cs.backgroundColor,edge:cs.borderTopColor,ground:"rgb("+ground.join(", ")+")",
+      edgeOnGround:ratio(edge,ground),edgeOnFill:ratio(edge,fill),fillOnGround:ratio(fill,ground),width:cs.borderTopWidth};})()`);
+  // WCAG 1.4.11: a button's boundary is a non-text component, so 3:1 is the bar it answers to, not the 4.5:1 its label does.
+  const EDGE_FLOOR = 3;
+  const GOLD_FILL = "rgb(240, 227, 189)";
   // The house's text floor. The mark is a link, so 3:1 (a non-text component) is not the bar it answers to.
   const FN_FLOOR = 4.5;
   await clearMobile();
@@ -249,6 +262,13 @@ export async function run(ctx) {
       !!fnFloat && fnFloat.color === "rgb(185, 167, 127)" && fnFloat.footing !== "none",
     JSON.stringify({ rest: fnRest, hover: fnHover, focus: fnFocus, floating: fnFloat, floor: FN_FLOOR }),
   );
+
+  check(
+    "BR6d the docked gold road keeps its cream fill and takes an inked hairline (#532, Alex's 2026-09-07 call): the fill still marks it as the road OUT, and the edge clears the 3:1 component floor against BOTH the sheet and the fill, where the tan hairline read 2.00:1 and the fill itself 1.09:1",
+    !!goldBox && goldBox.fill === GOLD_FILL && goldBox.edgeOnGround >= EDGE_FLOOR && goldBox.edgeOnFill >= EDGE_FLOOR,
+    JSON.stringify({ ...goldBox, floor: EDGE_FLOOR, wantFill: GOLD_FILL }),
+  );
+
 
 
   await gotoPlain(`http://127.0.0.1:${PORT}/glossary/`, "broadside-glossary");
