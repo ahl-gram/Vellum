@@ -163,6 +163,25 @@ export async function run(ctx) {
   );
   await shoot("specimen-390-open.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });
 
+  // #525: the one state that never had a check, and the one a reader actually hits. The lean
+  // survives the sheet opening (room.ts brackets the fit with camera.hold/restore), so a docked
+  // row can be under a LIVE footing rule, whose ::before then resolves against the fixed slip and
+  // paints the pool over the sheet's own parchment. The ground reading is the half that proves a
+  // reader can still read it: sampled 2026-09-07, the pool read luminance 82 here and 116 on the Explorer, the parchment 236 on both.
+  await setState("leaned");
+  await sleep(700);
+  const leanedOpen = await read();
+  const slipGround = await brightest(20, Math.round(leanedOpen.slip.y) + 120);
+  check(
+    "SB8b zoomed with the sheet open, the docked row carries NO footing: the row is still in the slip, the camera still leaned, and the sheet's own parchment shows through where the pool used to paint (#525)",
+    !!leanedOpen && leanedOpen.st && leanedOpen.st.zoomed && leanedOpen.legendInSlip && leanedOpen.legendDocked &&
+      leanedOpen.slipBody !== "none" && leanedOpen.legendGroundOn === "none" && slipGround > 200,
+    JSON.stringify({ zoomed: leanedOpen.st && leanedOpen.st.zoomed, docked: [leanedOpen.legendInSlip, leanedOpen.legendDocked], groundOn: leanedOpen.legendGroundOn, slipGround, slip: leanedOpen.slip }),
+  );
+  await shoot("specimen-390-open-leaned.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });
+  await setState("rest");
+  await sleep(400);
+
   await send("Emulation.setEmulatedMedia", { media: "print" });
   const printed = await read();
   check(

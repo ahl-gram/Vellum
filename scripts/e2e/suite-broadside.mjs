@@ -1,4 +1,6 @@
 // Broadside e2e (BR1-BR8, #270): the regrouped controls, seals, journal button, and footnote apparatus on the built running page (the unit pins in test/site/broadside.test.ts hold the SOURCE to this shape); self-contained with scoped deltas.
+import { luminance, sampleRow } from "./pixel-support.mjs";
+
 export async function run(ctx) {
   const { evaluate, send, check, sleep, waitSettled, waitReady, touch, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
 
@@ -191,6 +193,29 @@ export async function run(ctx) {
     emulated && tapped1 && tapped2 && afterTap1.open && afterTap1.stayed && afterTap1.hasLink &&
       !afterTap2.open && afterTap2.stayed,
     JSON.stringify({ emulated, tapped1, tapped2, afterTap1, afterTap2 }),
+  );
+
+  // #525: the state a reader reaches without trying. A committed survey boots the Explorer zoomed,
+  // and the camera survives the sheet opening, so the docked Press sits under a live footing rule
+  // whose ::before resolves against the fixed slip and pools over the sheet. The camera arrives by
+  // hash rather than by gesture: the Glass is display:none under an open sheet (2026-09-03 ruling 1),
+  // so there is nothing to press, and a hash camera needs none of the CDP touch apparatus.
+  await setMobileViewport(390, 844);
+  await goto(EXP + "#seed=42&style=antique&cx=0.52&cy=0.45&k=4", "broadside-390-zoomed");
+  await evaluate(`(()=>{const h=document.querySelector("#broadside .slip-handle");if(h&&!document.getElementById("broadside").classList.contains("open"))h.click();})()`);
+  await sleep(400);
+  const br6b = await evaluate(`(()=>{const l=document.querySelector("#broadside .legend.in-slip");const s=document.getElementById("broadside");
+    const b=s?s.getBoundingClientRect():null;
+    return{docked:!!l,open:!!s&&s.classList.contains("open"),
+      zoomed:!!document.querySelector("#map-viewport.zoomed"),
+      groundOn:l?getComputedStyle(l,"::before").content:null,
+      slipY:b?Math.round(b.y):null};})()`);
+  const br6bGround = br6b.slipY === null ? null : Math.round(Math.max(...(await sampleRow(send, 20, br6b.slipY + 120, 8)).map(luminance)));
+  await clearMobile();
+  check(
+    "BR6b on a phone with a committed survey's camera, the opened Broadside carries NO footing behind its docked Press: the sheet's own parchment shows through where the pool used to paint (#525)",
+    br6b.docked && br6b.open && br6b.zoomed && br6b.groundOn === "none" && br6bGround > 200,
+    JSON.stringify({ ...br6b, ground: br6bGround }),
   );
 
   await gotoPlain(`http://127.0.0.1:${PORT}/glossary/`, "broadside-glossary");
