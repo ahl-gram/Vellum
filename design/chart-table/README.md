@@ -151,7 +151,8 @@ atelier; the Explorer's and the Print Room's page sheets) so the mock wears the 
   sheet open, the zoomed footing's `::before` outranks `.legend.in-slip`'s `content: none` and paints
   the walnut pool over the parchment sheet (measured on the built site at 74da88b, the slip's ground
   reading `srgb(103,91,74)`). The Explorer shows it at any width up to 900px once a survey is
-  committed; the Gallery shows it with no zoom at all; Sub 3's page would inherit it. The mock
+  committed (the Gallery does not: it has no slip, so its row is never docked); Sub 3's page would
+  inherit it. The mock
   neutralizes it (one rule at the top of `mock.css`) so the phone stills show the sheet as the kit
   intends, and the rulings are not made from a defect.
 
