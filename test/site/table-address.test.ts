@@ -338,25 +338,46 @@ test("chartTarget carries the table home from the Prospect page (#401 ruling 7 d
   assert.deepEqual(parseTable(chartTarget(hash).replace("/explorer/", "")), [survey]);
 });
 
-// Sub 2 (#520) carried finding 4: the address encodes the window as (rung, lattice centre) and there is no honest way back from the window, so the SETTLE has to hand its centre over. The space is the whole hazard: `decideSettle` quantizes `plotUvFromSheet(cam, margins())`, and the sheet-fraction camera the Glass reports is a different number that still rounds to a plausible lattice index.
-test("the settle hands over the centre it quantized, so the address rebuilds its OWN window (#520)", () => {
-  const m = { mx: 0.045, my: 0.045 };
+// Sub 2 (#520) carried finding 4: the address encodes the window as (rung, lattice centre) and there is no honest way back from the window, so the SETTLE has to hand its centre over. Swept over EVERY seat rather than a chosen camera: an earlier version of this guard pinned three cameras and the window-midpoint shortcut passed all three, because at rung 1 lodWindowFor clamps hard enough that neighbouring seats share a window byte for byte.
+test("every lattice seat round-trips through the settle it came from (#520)", () => {
   const dress = { kind: "survey", seed: 42, overrides: {}, style: "antique", legend: true, arms: false, beasts: false, theme: null } as const;
-  // Measured 2026-09-07: these sheet centres land on a different lattice index in sheet fractions than in plot uv, so a settle that hands over the wrong space fails here rather than passing by luck. Rung 1 at 0.220 reads lattice 4 sheet-side and 3 plot-side; 0.200 discriminates at rungs 2 and 3.
-  for (const [rung, c] of [[1, 0.220], [2, 0.200], [3, 0.200]] as const) {
-    const sheetCam = { cx: c, cy: c, k: (LOD_BANDS[rung] as LodBand).k };
-    const decision = decideSettle({ camera: plotUvFromSheet(sheetCam, m), currentWindow: FULL_WINDOW, currentBand: 0 });
-    assert.equal(decision.action, "region", `rung ${rung} must commit a region`);
-    assert.equal(decision.band, rung, `rung ${rung} camera must land on band ${rung}`);
-    const lat = latticeFromCentre(decision.centre.cx, decision.centre.cy, decision.band);
-    assert.ok(lat, `rung ${rung}: the settle's centre must be a real lattice seat`);
-    assert.deepEqual(
-      tableWindow({ ...dress, rung, lx: lat.lx, ly: lat.ly }),
-      decision.window,
-      `rung ${rung}: the address must rebuild the exact window the settle committed`,
-    );
-    // The control: the sheet-fraction centre is the wrong space, and it must NOT agree, or this test proves nothing.
-    const wrong = latticeFromCentre(sheetCam.cx, sheetCam.cy, rung);
-    assert.notDeepEqual({ lx: wrong?.lx, ly: wrong?.ly }, { lx: lat.lx, ly: lat.ly }, `rung ${rung}: the two spaces must differ here`);
+  for (const rung of [1, 2, 3] as const) {
+    const band = LOD_BANDS[rung] as LodBand;
+    const step = band.sizeUV / LATTICE_DIVISIONS;
+    const max = Math.round(LATTICE_DIVISIONS / band.sizeUV);
+    let checked = 0;
+    for (let lx = 0; lx <= max; lx++) {
+      for (let ly = 0; ly <= max; ly++) {
+        const decision = decideSettle({ camera: { cx: lx * step, cy: ly * step, k: band.k }, currentWindow: FULL_WINDOW, currentBand: 0 });
+        assert.equal(decision.action, "region");
+        assert.equal(decision.band, rung);
+        const seat = latticeFromCentre(decision.centre.cx, decision.centre.cy, rung);
+        assert.deepEqual(seat, { lx, ly }, `rung ${rung} seat (${lx},${ly}): the settle must hand back the seat it landed on`);
+        assert.deepEqual(tableWindow({ ...dress, rung, lx, ly }), decision.window, `rung ${rung} seat (${lx},${ly}): the address must rebuild the settle's own window`);
+        checked++;
+      }
+    }
+    assert.equal(checked, (max + 1) ** 2, `rung ${rung}: the sweep must reach every seat`);
   }
+});
+
+// The witness that makes the guard above bite, and the whole reason the centre is handed over rather than re-derived. Measured 2026-09-07: at rung 3, 1200 of 4225 seats rebuild a DIFFERENT window from their own window's midpoint, which is the count Sub 1 recorded; rungs 1 and 2 have none, so a guard that samples only those two cannot see the hazard at all.
+test("the window's own midpoint is NOT a way back to its seat (#520, the 1200 of 4225)", () => {
+  const dress = { kind: "survey", seed: 42, overrides: {}, style: "antique", legend: true, arms: false, beasts: false, theme: null } as const;
+  const band = LOD_BANDS[3] as LodBand;
+  const max = Math.round(LATTICE_DIVISIONS / band.sizeUV);
+  let lossy = 0;
+  for (let lx = 0; lx <= max; lx++) {
+    for (let ly = 0; ly <= max; ly++) {
+      const w = tableWindow({ ...dress, rung: 3, lx, ly });
+      const mid = latticeFromCentre((w.u0 + w.u1) / 2, (w.v0 + w.v1) / 2, 3);
+      const rebuilt = mid ? tableWindow({ ...dress, rung: 3, lx: mid.lx, ly: mid.ly }) : null;
+      if (!rebuilt || JSON.stringify(rebuilt) !== JSON.stringify(w)) lossy++;
+    }
+  }
+  assert.equal(lossy, 1200, "the lossy count Sub 1 measured; if this moves, the grammar or the clamp moved with it");
+  // The named witness, so the count above is not the only thing standing between this and a vacuous pass.
+  const edge = tableWindow({ ...dress, rung: 3, lx: 0, ly: 0 });
+  const midSeat = latticeFromCentre((edge.u0 + edge.u1) / 2, (edge.v0 + edge.v1) / 2, 3);
+  assert.notDeepEqual(midSeat, { lx: 0, ly: 0 }, "band 3 seat (0,0) is the clamped edge case: its midpoint names a different seat");
 });
