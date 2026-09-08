@@ -1,0 +1,75 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { layOnTable, takeOffTable, roomOnTable } from "../../src/site/explorer/chart-drawer.ts";
+import { TABLE_CAP, TABLE_KEY, emitTable, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
+import { emitTableKey } from "../../src/site/explorer/address.ts";
+
+// The Chart Table's state (#520 Sub 2), pure and apart from the DOM: what the drawer draws and what the address carries are both this array. The surface is `chart-drawer` and never `drawer`, which src/site/shell/drawer.ts already spends on the site's phone nav (#520 ruling 2).
+const survey = (lx: number): SurveyItem => ({
+  kind: "survey", seed: 42, overrides: {}, rung: 2, lx, ly: 3,
+  style: "antique", legend: true, arms: false, beasts: false, theme: null,
+});
+const fill = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => survey(i));
+
+test("a survey lays on the table, and the table it came from is untouched (#520)", () => {
+  const before = fill(2);
+  const after = layOnTable(before, survey(9));
+  assert.equal(after.refused, false);
+  assert.equal(after.items.length, 3);
+  assert.equal(before.length, 2, "the caller's array is never mutated");
+  assert.notEqual(after.items, before);
+  assert.deepEqual(after.items[2], survey(9), "the newest sheet lies on top of the pile, last");
+});
+
+test("the table holds six and refuses the seventh, leaving the six it has (#520, #401 ruling: cap six)", () => {
+  const full = fill(TABLE_CAP);
+  assert.equal(full.length, 6, "TABLE_CAP is the grammar's own six");
+  const after = layOnTable(full, survey(99));
+  assert.equal(after.refused, true);
+  assert.equal(after.items.length, TABLE_CAP, "a refusal never grows the table");
+  assert.deepEqual(after.items, full, "a refusal never reorders it either");
+  assert.equal(after.items, full, "and hands back the same array, not a copy of it");
+});
+
+test("a cutting comes off by its seat, and only that one (#520)", () => {
+  const three = fill(3);
+  const after = takeOffTable(three, 1);
+  assert.equal(after.length, 2);
+  assert.deepEqual(after.map((i) => (i as SurveyItem).lx), [0, 2]);
+  assert.equal(three.length, 3, "the caller's array is never mutated");
+});
+
+test("taking off a seat the table does not have leaves it whole (#520)", () => {
+  const three = fill(3);
+  assert.deepEqual(takeOffTable(three, 7), three);
+  assert.deepEqual(takeOffTable(three, -1), three);
+  assert.deepEqual(takeOffTable(three, 1.5), three, "a seat is a whole number or it is no seat");
+  assert.deepEqual(takeOffTable(three, NaN), three);
+});
+
+test("the room left is what the drawer's head counts down (#520)", () => {
+  assert.equal(roomOnTable([]), TABLE_CAP);
+  assert.equal(roomOnTable(fill(3)), 3);
+  assert.equal(roomOnTable(fill(TABLE_CAP)), 0);
+  assert.equal(roomOnTable(fill(TABLE_CAP + 2)), 0, "an over-full table reports no room, never a negative one");
+});
+
+// The writer's half of ruling 1 (#520, 2026-09-07): an EMPTY table writes no key at all, rather than growing `table=` onto every link the Explorer hands out forever. emitLive is the named precedent; writeHash's unconditional params.set for seed/style/legend is the idiom this must not follow.
+test("an empty table writes no key, and a laid one writes the grammar's (#520 ruling 1)", () => {
+  const bare = new URLSearchParams("seed=42");
+  emitTableKey(bare, []);
+  assert.equal(bare.has(TABLE_KEY), false, "nothing on the table means no key");
+  assert.equal(bare.toString(), "seed=42", "and nothing else moves either");
+
+  const none = new URLSearchParams("seed=42");
+  emitTableKey(none, null);
+  assert.equal(none.has(TABLE_KEY), false, "no table at all is the same silence");
+
+  const laid = new URLSearchParams("seed=42");
+  emitTableKey(laid, fill(2));
+  assert.equal(laid.get(TABLE_KEY), emitTable(fill(2)), "a laid table writes exactly what the grammar emits");
+
+  const one = new URLSearchParams("seed=42");
+  emitTableKey(one, fill(1));
+  assert.equal(one.get(TABLE_KEY), emitTable(fill(1)), "ONE sheet is the commonest table and is written like any other: the emptiness gate is exactly zero");
+});

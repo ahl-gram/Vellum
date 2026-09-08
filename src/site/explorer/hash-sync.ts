@@ -4,7 +4,8 @@
 // reports whether the link carried a value, and writeHash takes the gate as an argument.
 import { landToSlider, sliderToLand, updateLandReadout } from "./sea-level.ts";
 import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.ts";
-import { parseLive, emitLive, finalizeHash, seedFromHash, type Live } from "./address.ts";
+import { parseLive, emitLive, emitTableKey, finalizeHash, seedFromHash, type Live } from "./address.ts";
+import { parseTable, type TableItem } from "../shared/table-address.ts";
 import type { Camera } from "./camera.ts";
 
 export interface Controls {
@@ -26,6 +27,7 @@ export function readHash(controls: Controls): {
   coast: boolean;
   camera: Camera | null;
   live: Live | null;
+  table: ReadonlyArray<TableItem> | null;
 } {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider } = controls;
   const params = new URLSearchParams(location.hash.slice(1));
@@ -79,7 +81,7 @@ export function readHash(controls: Controls): {
     const k = Number(kRaw);
     if ([cx, cy, k].every(Number.isFinite) && k >= 1 && k <= 8) camera = { cx, cy, k };
   }
-  return { land: landTouched, coast: coastTouched, camera, live: parseLive(params) };
+  return { land: landTouched, coast: coastTouched, camera, live: parseLive(params), table: parseTable(location.hash) };
 }
 
 /** Mirror the control values into location.hash via replaceState (no history push). land=/coast= are written only once their gates are touched; the camera is quantized to 4dp and written only when NOT home, and the live key emits only when an instrument is armed, so a plain chart links byte-identical to today's. */
@@ -89,6 +91,7 @@ export function writeHash(
   coastTouched: boolean,
   camera?: Camera,
   live?: Live | null,
+  table?: ReadonlyArray<TableItem> | null,
 ): void {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider } = controls;
   const params = new URLSearchParams();
@@ -110,6 +113,7 @@ export function writeHash(
     params.set("cy", camera.cy.toFixed(4));
     params.set("k", camera.k.toFixed(4));
   }
+  emitTableKey(params, table);
   // finalizeHash, not params.toString(): it respells `survey=` to the ratified bare flag.
   history.replaceState(null, "", "#" + finalizeHash(params));
 }

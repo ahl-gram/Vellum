@@ -124,3 +124,14 @@ test("AK7 the legend row is ONE face on home and in the kit: the seed box's cris
   assert.ok(kitVerb && /color:\s*var\(--parchment\)/.test(kitVerb[1]), "the kit's verb wears parchment");
   assert.match(kit, /\.legend-btn\.gold \.verb \{[^}]*color:\s*var\(--ink-brown\)/, "the gold road's verb keeps ink-brown on its gold ground");
 });
+
+test("AK7c the narrow folio panel carries BOTH painting arms (#531): a media query adds no specificity, so a bare .corner.tr::before loses to each arm of the rule that gives the pseudo its inset, and the override paints nowhere", () => {
+  const kit = read("public/atelier.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  const narrow = kit.slice(kit.indexOf("@media (max-width: 900px)"), kit.indexOf("@media print"));
+  const rule = narrow.match(/([^\n]*\.corner\.tr::before[^{]*)\{([^}]*)\}/);
+  assert.ok(rule, "the narrow block still overrides the folio panel's inset");
+  assert.equal((rule![1]!.match(/\.corner\.tr::before/g) || []).length, 2, "#531: both arms, since selector-list arms are ranked independently and an override on one is an override on neither");
+  // home's .lf-seed at narrow, the box this panel IS (e2e SB8e and RH10b pin the resolved px).
+  assert.match(rule![2]!, /inset:\s*-0\.7rem -0\.7rem -0\.75rem/);
+  assert.match(read("public/index.css"), /\.lf-seed \{[^}]*padding:\s*0\.7rem 0\.7rem 0\.75rem/, "and it still mirrors home's seed box at narrow");
+});

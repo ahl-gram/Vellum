@@ -107,3 +107,35 @@ test("RR-room 8 under reduced motion the pace group hides (#493, ruled 2026-09-0
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.rf-instrument \.rf-pace \{ display: none; \}\s*\}/);
   assert.doesNotMatch(frameCss, /prefers-reduced-motion/, "and not the frame's (motion.css owns the collapse)");
 });
+
+// #520, ruled 2026-09-07 (option B on the Reading Room clobber): the room's writers each build a FRESH URLSearchParams and finalize it, so any key they do not know dies on a copied link. The Chart Table rides in on every road in and must ride out again.
+// Two structural sweeps, because the first version of this guard filtered writers by the literal text `.toString()` or `finalizeHash(`, and a writer serializing through `String(p)` left the census entirely without ever reaching the per-writer assertion. A FRESH bag is the writer's structural mark (a reader builds one from the incoming hash), and every place a hash is actually emitted must sit inside a known writer, which is what catches a writer that never builds a bag at all.
+// The second sweep is every string literal carrying a '#', which this file affords because it has exactly two and both are the writers' own; a room that grows a '#id' selector would need it on the exemption list, and that is the deliberate cost. The blind spot that remains, named and its direction argued: a writer that emits through a helper in another module. That costs a false PASS at worst, where sweeping across modules would false-FAIL on every unrelated href in the site. Behavioural survival, which the ruling also asks for, is part 2's e2e: this file cannot run the room.
+test("every hash writer in the Reading Room carries the Chart Table through (#520 ruling B)", () => {
+  const src = read("src/site/reading-room/app.ts");
+  const decls = [
+    ...src.matchAll(/function (\w+)\([^)]*\)[^{]*\{([\s\S]*?)\n\}/g),
+    ...src.matchAll(/const (\w+)\s*=\s*(?:async\s*)?\([^)]*\)[^=]*=>\s*\{([\s\S]*?)\n\};/g),
+  ];
+  const writers = decls.filter(([, , body]) => /new URLSearchParams\(\s*(?:""|'')?\s*\)/.test(body!));
+  assert.deepEqual(
+    writers.map(([, name]) => name).sort(),
+    ["prospectHrefFor", "syncHash"],
+    "the writers this guard knows; a new one must be added here deliberately, having carried the key",
+  );
+  for (const [, name, body] of writers) {
+    assert.match(body!, /p\.set\(TABLE_KEY, carried\.table\)/, `${name} builds a fresh params bag and must SET the table key, or a copied link loses the gathering`);
+  }
+  assert.match(src, /carried\.table = p\.get\(TABLE_KEY\)/, "and the key must be read off the incoming hash at load");
+
+  // Comments are blanked rather than cut, so every index still lines up with the source: prose apostrophes and a '#' inside a comment would otherwise read as string literals.
+  const code = src.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, (c) => " ".repeat(c.length));
+  const spans = writers.map((m) => [m.index!, m.index! + m[0].length] as const);
+  for (const hit of code.matchAll(/history\.replaceState\(|["`][^"`\n]*#[^"`\n]*["`]/g)) {
+    const at = hit.index!;
+    assert.ok(
+      spans.some(([a, b]) => at >= a && at < b),
+      `a hash is built at index ${at} (${JSON.stringify(code.slice(at, at + 44))}) outside every writer this guard knows, so nothing checks that it carries the table`,
+    );
+  }
+});

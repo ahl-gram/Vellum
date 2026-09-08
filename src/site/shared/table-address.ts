@@ -4,7 +4,7 @@
 // Pure and DOM-free like its siblings in src/site/{explorer,prospect,ribbon}/address.ts, because
 // three bundles import it. The key is `table` (ruled at #518's sitting, 2026-09-07; `plates` is
 // taken by the Explorer's order button and the poster/atlas plates).
-import { LATTICE_DIVISIONS, LOD_BANDS, lodWindowFor, type LodBand } from "../../world/lod.ts";
+import { LATTICE_DIVISIONS, LOD_BANDS, lodWindowFor, plotUvFromSheet, type LodBand, type SheetMargins, type UvCamera } from "../../world/lod.ts";
 import { parseYear } from "./year.ts";
 import type { UvWindow, MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
@@ -224,6 +224,16 @@ export function latticeFromCentre(
   const ly = Math.round(cy / step);
   if (!Number.isFinite(lx) || !Number.isFinite(ly)) return null;
   return lx < 0 || ly < 0 || lx > max || ly > max ? null : { lx, ly };
+}
+
+/** The seat a settle landed on, from the camera the Glass reports. The conversion lives HERE and not at the call site because the two spaces are the whole hazard: `decideSettle` quantizes `plotUvFromSheet(cam, margins())`, and the raw sheet-fraction camera is a different number that still rounds to a plausible seat. A caller that never touches plot uv cannot pass the wrong one. */
+export function latticeFromSettle(
+  cam: UvCamera,
+  m: SheetMargins,
+  rung: number,
+): { readonly lx: number; readonly ly: number } | null {
+  const plot = plotUvFromSheet(cam, m);
+  return latticeFromCentre(plot.cx, plot.cy, rung);
 }
 
 /** The decode half: the window the redraft must be drawn from, exactly the one `decideSettle` committed. */
