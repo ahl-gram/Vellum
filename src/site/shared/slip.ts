@@ -23,21 +23,25 @@ export interface SlipParts {
 /** The slip's fold transition in atelier.css, plus a beat. */
 export const FOLD_SETTLE_MS = 340;
 
-export function bindSlip(p: SlipParts): void {
+/** The fold, as something another surface can drive: the Chart Table folds the Broadside when it opens (#543, ruled 2026-09-08). */
+export interface SlipFold {
+  readonly folded: () => boolean;
+  readonly setFolded: (folded: boolean) => void;
+}
+
+export function bindSlip(p: SlipParts): SlipFold {
   const settle = () => p.after(p.onLayout, FOLD_SETTLE_MS);
-  p.fold?.addEventListener("click", () => {
-    p.slip.classList.add("folded");
-    p.tab?.classList.add("shown");
+  const setFolded = (folded: boolean): void => {
+    p.slip.classList[folded ? "add" : "remove"]("folded");
+    p.tab?.classList[folded ? "add" : "remove"]("shown");
     settle();
-  });
-  p.tab?.addEventListener("click", () => {
-    p.slip.classList.remove("folded");
-    p.tab?.classList.remove("shown");
-    settle();
-  });
+  };
+  p.fold?.addEventListener("click", () => setFolded(true));
+  p.tab?.addEventListener("click", () => setFolded(false));
   p.handle?.addEventListener("click", () => {
     const open = p.slip.classList.toggle("open");
     p.handle?.setAttribute("aria-expanded", String(open));
     p.onLayout();
   });
+  return { folded: () => p.slip.classList.contains("folded"), setFolded };
 }

@@ -3,7 +3,7 @@
 /* Seated at 74% where the Broadside's own tab sits at 50% (atelier.css), so the two never share the edge when the Broadside is folded. Placed by translate and rotate, not transform: the house lift on a button writes transform and would otherwise replace the tab's seat. */
 .chart-drawer-tab {
   position: fixed; right: 0; bottom: 1.5rem; rotate: 180deg; z-index: 19;
-  writing-mode: vertical-rl; max-height: 11rem; overflow: hidden; padding: 0.9rem 0.45rem; cursor: pointer; appearance: none; border-radius: 0;
+  writing-mode: vertical-rl; width: var(--chart-drawer-tab-w); box-sizing: border-box; max-height: 11rem; overflow: hidden; padding: 0.9rem 0.45rem; cursor: pointer; appearance: none; border-radius: 0;
   font-family: var(--font-display); font-size: 0.72rem; letter-spacing: 0.16em;
   color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.5);
   border: 1px solid var(--line-tan); border-left: 0;
@@ -11,7 +11,7 @@
 body:has(.chart-drawer.open) .chart-drawer-tab { display: none; }
 button.chart-drawer-tab:is(:hover, :focus-visible) { background: var(--ink-dark); color: var(--parchment-bright); box-shadow: none; transform: none; }
 
-:root { --chart-drawer-h: 15.5rem; --chart-drawer-head: 12.5rem; --chart-drawer-gap: 1.6rem; }
+:root { --chart-drawer-h: 15.5rem; --chart-drawer-head: 12.5rem; --chart-drawer-gap: 1.6rem; --chart-drawer-tab-w: 2.8rem; }
 
 .chart-drawer {
   display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 18;
@@ -24,21 +24,19 @@ button.chart-drawer-tab:is(:hover, :focus-visible) { background: var(--ink-dark)
 @keyframes chart-drawer-up { from { transform: translateY(100%); } }
 .chart-drawer.open { display: flex; }
 
-/* The chart keeps its fit (#518 ruling 1), so nothing here resizes the stage; only the furniture standing on the foot of it lifts above the open drawer. */
-body:has(.chart-drawer.open) .corner.bl.folio,
-body:has(.chart-drawer.open) .corner.br.zoomery { bottom: calc(var(--chart-drawer-h) + 1rem); }
-body:has(.chart-drawer.open) .legend:not(.in-slip) { bottom: calc(var(--chart-drawer-h) + var(--chrome-y)); }
+/* Ruled 2026-09-08 (#543): the drawer covers the chart's furniture where it stands, and it folds the Broadside as it opens, because covering the caption and the roads out while leaving the side panel standing made no sense to the reader. Nothing is lifted onto the chart, which is where the lift used to put both of them, and the Broadside's tab goes with it: while the table is open there is no way back onto the edge, and the Shut press is the way out. chart-drawer.ts owns the fold and gives the Broadside back to the reader who had it open. */
+body:has(.chart-drawer.open) .slip-tab { display: none; }
+
+/* An open Broadside holds the camera 26rem clear of the edge, so the tab never meets it; folded, the camera comes home to --chrome-x where the tab is already standing, and the tab's z-19 over the corner's z-10 left each zoom press answering a real pointer over 44% of its face (#543, Alex 2026-09-08). The camera stands inboard of the tab whenever the Broadside is folded, INCLUDING while the drawer is open and the tab is hidden: a seat that moved with the drawer would be one more thing jumping as it opens, which is the complaint #543 was filed about. Not below 901, where the tab is stood down and atelier.css's own narrow seat rules. */
+@media (min-width: 901px) {
+  body:has(.slip.folded) .corner.br.zoomery { right: calc(var(--chrome-x) + var(--chart-drawer-tab-w) + 0.6rem); }
+}
 
 .chart-drawer-head { flex: 0 0 var(--chart-drawer-head); display: flex; flex-direction: column; }
 .chart-drawer-head .card-verb { font-family: var(--font-flourish); font-style: italic; color: var(--parchment); font-size: 0.9rem; }
 .chart-drawer-head .card-title { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; letter-spacing: 0.08em; line-height: 1.2; color: var(--parchment-bright); margin-top: 0.1rem; }
 .chart-drawer-head .count { font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.82rem; color: var(--parchment); margin-top: 0.4rem; }
 .chart-drawer-head .shut { margin-top: auto; align-self: flex-start; }
-
-/* The Broadside is fixed at z-index 20 against this drawer's 18 and reaches into its band, so a cutting laid under its footprint has its remove press eclipsed by the form behind: three of six were unreachable, hit-testing to a LABEL and a SELECT. The cuttings stand clear of it; the head and the road keep the seats the still gives them, and the road is already below the Broadside's own foot. */
-body:has(.slip:not(.folded)) .cuttings {
-  max-width: calc(100vw - var(--slip-w) - 2rem - var(--chart-drawer-head) - var(--chart-drawer-gap) - var(--chrome-x));
-}
 .cuttings { list-style: none; margin: 0; padding: 0.7rem 0 0; flex: 1 1 auto; min-width: 0; display: flex; gap: 0.4rem; align-items: flex-start; }
 .cuttings li { position: relative; flex: 0 1 10.6rem; min-width: 0; rotate: var(--tilt, 0deg); margin-right: -0.5rem; transition: rotate 0.2s var(--ease-paper), translate 0.2s var(--ease-paper); }
 .cuttings li:is(:hover, :focus-within) { rotate: 0deg; translate: 0 -4px; z-index: 2; }

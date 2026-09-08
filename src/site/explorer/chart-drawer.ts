@@ -1,6 +1,7 @@
 // The Chart Table's state (#520 Sub 2 of #401): what the drawer draws and what the Explorer's address carries are the same array, so this half is pure and holds no DOM. `chart-drawer`, never `drawer`: src/site/shell/drawer.ts is the site's phone nav (#520 ruling 2).
 import { TABLE_CAP, emitTable, tableWindow, type TableItem, type SurveyItem, type Rung } from "../shared/table-address.ts";
 import { LOD_BANDS, type LodBand } from "../../world/lod.ts";
+import type { SlipFold } from "../shared/slip.ts";
 import type { UvWindow } from "../../terrain/heightfield.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 import type { RenderOptions } from "../../render/map-renderer.ts";
@@ -125,6 +126,8 @@ export interface ChartDrawerDeps {
   readonly onChange: (items: ReadonlyArray<TableItem>) => void;
   /** Draw one recovered sheet's thumbnail, deferred to the first opening (ruled 2026-09-07). */
   readonly drawThumb?: (item: TableItem) => Promise<{ url: string; title: string } | null>;
+  /** The Broadside's fold. Read late: the room is bound after the table (#543, ruled 2026-09-08). */
+  readonly broadside?: () => SlipFold | null;
 }
 
 export function bindChartDrawer(deps: ChartDrawerDeps) {
@@ -133,6 +136,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
   const art = new Map<string, string>();
   const names = new Map<string, string>();
   let drawing = false;
+  let broadsideWasOpen = false;
 
   const keyOf = (item: TableItem): string => emitTable([item]);
   const titleOf = (item: TableItem): string => names.get(keyOf(item)) ?? placeholderTitle(item);
@@ -204,6 +208,15 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
   };
 
   const setOpen = (open: boolean, moveFocus = false): void => {
+    // Ruled 2026-09-08: the two never stand open together. Covering the chart's caption and the roads out while leaving the
+    // Broadside standing made no sense to the reader, and every collision #543 measured (the tab under the slip's outline,
+    // the road's stamp behind it, a sixth cutting overhanging it, a row too narrow to hold a sheet) is that pair, not the
+    // drawer. The reader who had the Broadside open gets it back when the table shuts; the one who folded it keeps it folded.
+    if (open !== deps.root.classList.contains("open")) {
+      const broadside = deps.broadside?.() ?? null;
+      if (open) broadsideWasOpen = broadside !== null && !broadside.folded();
+      if (open || broadsideWasOpen) broadside?.setFolded(open);
+    }
     deps.root.classList.toggle("open", open);
     // Both presses hide themselves: the tab is display:none while open and the shut press goes with the drawer, so focus would fall to <body> and a keyboard reader would be returned to the top of the document twice per visit. Each hands focus to the control that replaces it. aria-expanded rides the SHUT press too, since the tab carrying it is the one being hidden.
     deps.tab.setAttribute("aria-expanded", String(open));

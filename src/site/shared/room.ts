@@ -1,6 +1,6 @@
 // The chart room (#462, lifted into the Atelier Kit at its second use, #463/#487): the sheet fitted to what the chrome leaves, the slip's fold and the phone sheet, the legend row's seat. The Glass's keys and buttons are the page's own (glass-keys.ts for a plain controller, the Explorer's glass.ts for the LOD camera).
 import { fitStage } from "./stage-fit.ts";
-import { bindSlip } from "./slip.ts";
+import { bindSlip, type SlipFold } from "./slip.ts";
 import { glassLeft, placeLegendRow, placeSlip, rectOf, slipWidth } from "./room-seats.ts";
 
 const CHROME_GAP = 14;
@@ -24,6 +24,8 @@ interface RoomParts<Held> {
 
 export interface Room {
   readonly layout: () => void;
+  /** Null on a page with no slip. The Explorer's Chart Table folds the Broadside when it opens (#543). */
+  readonly broadside: SlipFold | null;
 }
 
 export type LegendSeat = "stage" | "slip";
@@ -118,8 +120,9 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
     camera.restore(held);
   };
 
+  let broadside: SlipFold | null = null;
   if (slip !== null) {
-    bindSlip({
+    broadside = bindSlip({
       slip,
       fold: slip.querySelector(".slip-fold"),
       tab: q(".slip-tab"),
@@ -131,5 +134,5 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
   window.addEventListener("resize", layout);
   narrowQuery.addEventListener("change", layout);
   document.fonts?.ready.then(layout);
-  return { layout };
+  return { layout, broadside };
 }

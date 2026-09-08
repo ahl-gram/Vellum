@@ -180,6 +180,119 @@ export async function run(ctx) {
     JSON.stringify({ ear: home.ear, insetSvgs: home.insetSvgs, cuttings: home.cuttings }),
   );
 
+  // CD9 / CD11 / CD12 (#543 Sub 2b, ruled by Alex 2026-09-08): the Broadside and the Chart Table are never open together,
+  // and nothing is lifted onto the chart. The ruling was one sentence: the drawer covers the chart's caption and the roads
+  // out, and it makes no sense to cover those and leave the side panel standing. Everything #543 measured follows from it,
+  // because two surfaces that are never open together cannot fight for the edge, the band or the reader's eye.
+  const SURFACES = `(() => {
+    const slip = document.querySelector(".slip");
+    const tab = document.querySelector(".slip-tab");
+    const sheet = document.querySelector("#map svg").getBoundingClientRect();
+    const onSheet = (b) =>
+      Math.max(0, Math.min(b.right, sheet.right) - Math.max(b.left, sheet.left)) *
+      Math.max(0, Math.min(b.bottom, sheet.bottom) - Math.max(b.top, sheet.top)) > 0;
+    const name = (e) => (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\s+/).join("."));
+    const lifted = [...document.querySelectorAll(".corner.bl.folio, .corner.br.zoomery, .legend:not(.in-slip)")]
+      .filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0.5 && b.height > 0.5 && onSheet(b); })
+      .map(name);
+    // The seat itself, as a distance up from the foot of the window: the lift wrote a bottom offset, and the room's fit follows
+    // the furniture, so a lifted piece can end up clear of a chart that shrank to accommodate it. The seat cannot lie.
+    const seats = Object.fromEntries([...document.querySelectorAll(".corner.bl.folio, .legend:not(.in-slip)")]
+      .map((e) => [name(e), +(window.innerHeight - e.getBoundingClientRect().bottom).toFixed(1)]));
+    return {
+      open: document.getElementById("chart-drawer").classList.contains("open"),
+      folded: slip.classList.contains("folded"),
+      tabShown: !!tab && getComputedStyle(tab).display !== "none",
+      lifted, seats,
+    };
+  })()`;
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  await go(`${DRESS}&table=${SIX}`);
+  const beforeOpen = await evaluate(SURFACES);
+  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+  await sleep(900);
+  const withOpen = await evaluate(SURFACES);
+  await evaluate(`document.getElementById("chart-drawer-shut").click()`);
+  await sleep(900);
+  const afterShut = await evaluate(SURFACES);
+  // The reader who folded the Broadside themselves gets it back folded, not opened for them.
+  await go(`${DRESS}&table=${SIX}`);
+  await evaluate(`document.querySelector(".slip-fold").click()`);
+  await sleep(600);
+  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+  await sleep(900);
+  await evaluate(`document.getElementById("chart-drawer-shut").click()`);
+  await sleep(900);
+  const afterShutFolded = await evaluate(SURFACES);
+
+  check(
+    "CD9 opening the Chart Table folds the Broadside and takes its tab off the edge: the two are never open together, which is what stops them fighting for the right edge, the drawer's band and the chart's foot (#543, ruled 2026-09-08)",
+    !beforeOpen.folded && withOpen.open && withOpen.folded && !withOpen.tabShown,
+    JSON.stringify({ before: beforeOpen, open: withOpen }),
+  );
+  check(
+    "CD11 shutting the Chart Table gives the Broadside back to the reader who had it, and leaves it folded for the reader who did not",
+    !afterShut.open && !afterShut.folded && !afterShutFolded.open && afterShutFolded.folded,
+    JSON.stringify({ hadItOpen: afterShut, hadItFolded: afterShutFolded }),
+  );
+  // Both readings are taken with the Broadside ALREADY folded, so the drawer's own fold is a no-op and the only thing
+  // that could move the furniture is the drawer.
+  await go(`${DRESS}&table=${SIX}`);
+  await evaluate(`document.querySelector(".slip-fold").click()`);
+  await sleep(600);
+  const seatsShut = (await evaluate(SURFACES)).seats;
+  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+  await sleep(900);
+  const seatsOpen = (await evaluate(SURFACES)).seats;
+  const names = Object.keys(seatsShut);
+  check(
+    "CD12 opening the drawer does not move the chart's furniture: the caption and the roads out keep the seat they had and the drawer covers them, rather than being lifted onto the sheet where they cannot be read (#543 Fault 1, ruled 2026-09-08)",
+    names.length === 2 && names.every((k) => Math.abs(seatsOpen[k] - seatsShut[k]) < 1) && withOpen.lifted.length === 0,
+    JSON.stringify({ shut: seatsShut, open: seatsOpen, lifted: withOpen.lifted }),
+  );
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+
+  // CD13 (#543, Alex 2026-09-08): the tab and the camera share the right edge once the Broadside is folded.
+  // The Broadside used to hold the camera 26rem clear of the edge, so the tab never met it; folded, the camera comes
+  // home to --chrome-x and the tab is the thing already standing there. z-19 over the corner's z-10 means the tab wins
+  // the pointer, so this is a reachability check and not a tidiness one.
+  const EDGE = `(() => {
+    const tab = document.getElementById("chart-drawer-tab");
+    const zoom = document.querySelector(".corner.br.zoomery");
+    const tb = tab.getBoundingClientRect(), zb = zoom.getBoundingClientRect();
+    const overlap =
+      Math.max(0, Math.min(tb.right, zb.right) - Math.max(tb.left, zb.left)) *
+      Math.max(0, Math.min(tb.bottom, zb.bottom) - Math.max(tb.top, zb.top));
+    const reach = (el) => {
+      const b = el.getBoundingClientRect();
+      let ok = 0, all = 0;
+      for (let i = 1; i < 10; i++) for (let j = 1; j < 10; j++) {
+        const h = document.elementFromPoint(Math.round(b.x + b.width * i / 10), Math.round(b.y + b.height * j / 10));
+        all++; if (h === el || el.contains(h)) ok++;
+      }
+      return Math.round(100 * ok / all);
+    };
+    return { folded: document.querySelector(".slip").classList.contains("folded"),
+      tabShown: getComputedStyle(tab).display !== "none",
+      overlap: +overlap.toFixed(0),
+      buttons: [...zoom.querySelectorAll(".zoom-btn")].map((b) => reach(b)) };
+  })()`;
+  const edge = {};
+  for (const [w, h] of [[1520, 872], [1280, 800], [901, 800]]) {
+    await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+    await go(DRESS);
+    await evaluate(`document.querySelector(".slip-fold").click()`);
+    await sleep(800);
+    edge[`${w}x${h}`] = await evaluate(EDGE);
+  }
+  const edges = Object.keys(edge);
+  check(
+    "CD13 with the Broadside folded the drawer's tab does not stand on the camera: the tab is z-19 over the corner's z-10, so an overlap is not untidiness, it is the + and the home press answering the tab instead (#543, Alex 2026-09-08)",
+    edges.every((k) => edge[k].folded && edge[k].tabShown && edge[k].overlap === 0 && edge[k].buttons.length === 3 && edge[k].buttons.every((r) => r === 100)),
+    JSON.stringify(edge),
+  );
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+
   // CD6: the phone stands the drawer down until Sub 2a (#540).
   await setMobileViewport(390, 844);
   await go(`${DRESS}&table=${carried}`);

@@ -92,6 +92,7 @@ const relabelEar = (): void => {
 const chartTable = bindChartDrawer({
   root: chartDrawer, tab: chartDrawerTab, shut: chartDrawerShut, count: chartDrawerCount,
   cuttings, full: chartDrawerFull, road: tableRoad,
+  broadside: () => room.broadside,
   say: (line) => { status.textContent = line; },
   // Deferred to the first opening, never to load (ruled 2026-09-07): a recovered link opens at the page's usual pace and nothing competes with the chart the reader came for.
   drawThumb: async (item) => {
