@@ -11,9 +11,11 @@
 body:has(.chart-drawer.open) .chart-drawer-tab { display: none; }
 button.chart-drawer-tab:is(:hover, :focus-visible) { background: var(--ink-dark); color: var(--parchment-bright); box-shadow: none; transform: none; }
 
+:root { --chart-drawer-h: 15.5rem; }
+
 .chart-drawer {
   display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 18;
-  box-sizing: border-box; height: 15.5rem; padding: 0.9rem var(--chrome-x); gap: 1.6rem; align-items: stretch;
+  box-sizing: border-box; height: var(--chart-drawer-h); padding: 0.9rem var(--chrome-x); gap: 1.6rem; align-items: stretch;
   background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.97), rgb(from var(--chart-ink) r g b / 0.88));
   border-top: 1px solid var(--line-tan);
   box-shadow: 0 -18px 50px rgb(from var(--chart-ink) r g b / 0.55);
@@ -24,8 +26,8 @@ button.chart-drawer-tab:is(:hover, :focus-visible) { background: var(--ink-dark)
 
 /* The chart keeps its fit (#518 ruling 1), so nothing here resizes the stage; only the furniture standing on the foot of it lifts above the open drawer. */
 body:has(.chart-drawer.open) .corner.bl.folio,
-body:has(.chart-drawer.open) .corner.br.zoomery { bottom: calc(15.5rem + 1rem); }
-body:has(.chart-drawer.open) .legend:not(.in-slip) { bottom: calc(15.5rem + var(--chrome-y)); }
+body:has(.chart-drawer.open) .corner.br.zoomery { bottom: calc(var(--chart-drawer-h) + 1rem); }
+body:has(.chart-drawer.open) .legend:not(.in-slip) { bottom: calc(var(--chart-drawer-h) + var(--chrome-y)); }
 
 .chart-drawer-head { flex: 0 0 12.5rem; display: flex; flex-direction: column; }
 .chart-drawer-head .card-verb { font-family: var(--font-flourish); font-style: italic; color: var(--parchment); font-size: 0.9rem; }
@@ -61,9 +63,10 @@ body:has(.chart-drawer.open) .legend:not(.in-slip) { bottom: calc(15.5rem + var(
 }
 
 /* The dog-ear (#518 ruling 3): the committed survey's own top-right corner turned back. Drawn with a clip-path and a gradient, carrying no element of its own inside, because suite-region-detail reads the survey as [...querySelectorAll("#map .region-inset svg")].pop() and anything with an svg in it would become that element. It sits INSIDE the inset's box and changes none of it, since the place overlay positions by the same rect. */
-.region-inset { position: absolute; }
 .dog-ear {
   position: absolute; top: 0; right: 0; padding: 0; border: 0; cursor: pointer;
+  /* Restored because the inset box is pointer-events: none (explorer/index.css), the same reason .pc-prospect restores it on the place card. Without this the handle is reachable by keyboard alone: a real click lands on the chart underneath. */
+  pointer-events: auto;
   width: calc(3.4rem / var(--zoom-k, 1)); height: calc(3.4rem / var(--zoom-k, 1));
   appearance: none; border-radius: 0; z-index: 3;
   clip-path: polygon(100% 0, 0 0, 100% 100%);

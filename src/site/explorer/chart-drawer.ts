@@ -5,7 +5,7 @@ import type { UvWindow } from "../../terrain/heightfield.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 import type { RenderOptions } from "../../render/map-renderer.ts";
 
-// Two sheets are the same when every field the address carries agrees, which is exactly when they would draw the same picture: the grammar's own fields, compared on the item the grammar emits rather than on a stringified object whose key order would split one sheet in two.
+// Compared on the emitted spelling, not a stringified object, whose key order would split one sheet in two.
 const sameSheet = (a: TableItem, b: TableItem): boolean => emitTable([a]) === emitTable([b]);
 
 export type Refusal = "full" | "already";
@@ -56,7 +56,6 @@ export function subOf(item: TableItem): string {
   return `band ${item.rung}, ${dressOf(item.style)}`;
 }
 
-/** The committed survey as the address states it, or null when the controller has nothing committed. */
 export function surveyItemFrom(c: {
   readonly seed: number;
   readonly overrides: Partial<WorldRecipe> | undefined;
@@ -95,8 +94,10 @@ export function thumbJobFor(item: TableItem): {
 }
 
 /** The dog-ear: the survey's own top-right corner turned back (#518 ruling 3). Drawn in CSS and carrying NO inline svg of its own, because suite-region-detail reads the inset's survey as [...querySelectorAll("#map .region-inset svg")].pop() and a handle with an icon inside would become that element. */
-export function makeDogEar(label: string, onLay: () => void): HTMLButtonElement {
+export function makeDogEar(label: string, k: number, onLay: () => void): HTMLButtonElement {
   const b = document.createElement("button");
+  // Set HERE and not left to the next zoom publish: the outgoing inset is still mounted at commit and carries its own ear, so a querySelector that takes the first one hands the counter-scale to the sheet on its way out and leaves this one 3x oversized until the reader zooms again.
+  if (k !== 1) b.style.setProperty("--zoom-k", String(k));
   b.type = "button";
   b.className = "dog-ear";
   b.setAttribute("aria-label", label);
@@ -188,7 +189,6 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
     deps.onChange(items);
   };
 
-  /** Deferred to the first opening rather than to page load, so a recovered link opens at the page's usual pace (ruled 2026-09-07). */
   const fill = async (): Promise<void> => {
     if (drawing || !deps.drawThumb) return;
     drawing = true;
@@ -203,9 +203,12 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
     }
   };
 
-  const setOpen = (open: boolean): void => {
+  const setOpen = (open: boolean, moveFocus = false): void => {
     deps.root.classList.toggle("open", open);
+    // Both presses hide themselves: the tab is display:none while open and the shut press goes with the drawer, so focus would fall to <body> and a keyboard reader would be returned to the top of the document twice per visit. Each hands focus to the control that replaces it. aria-expanded rides the SHUT press too, since the tab carrying it is the one being hidden.
     deps.tab.setAttribute("aria-expanded", String(open));
+    deps.shut.setAttribute("aria-expanded", String(open));
+    if (moveFocus) (open ? deps.shut : deps.tab).focus();
     if (open) void fill();
   };
 
@@ -213,17 +216,18 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
     const going = items[seat];
     const next = takeOffTable(items, seat);
     if (next === items) return;
+    // Read the name BEFORE forget() drops it, or the announcement falls back to the chart number while the label beside it still said the drawn title.
+    const said = going ? titleOf(going) : null;
     if (going) forget(going);
     commit(next);
     // Taking a cutting off moves the count and the tab silently otherwise: the press that did it is gone from the page by the time focus lands, so the room is announced rather than left to be discovered.
-    deps.say(going ? `${titleOf(going)} is off the table · ${countLine(next)}` : countLine(next));
+    deps.say(said ? `${said} is off the table · ${countLine(next)}` : countLine(next));
   };
 
-  deps.tab.addEventListener("click", () => setOpen(true));
-  deps.shut.addEventListener("click", () => setOpen(false));
+  deps.tab.addEventListener("click", () => setOpen(true, true));
+  deps.shut.addEventListener("click", () => setOpen(false, true));
 
   return {
-    /** Lay a survey on the table. Filing always ends with the drawer OPEN (ruled 2026-09-07). */
     lay(item: TableItem, svg: string | null, title?: string): boolean {
       const laid = layOnTable(items, item);
       if (laid.refused) {
@@ -238,9 +242,11 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
       deps.say(`${titleOf(item)} lies on the table · ${countLine(laid.items)}`);
       return true;
     },
-    /** The address is the only memory, so a load hands the table straight back in. */
     restore(next: ReadonlyArray<TableItem>): void {
-      items = next;
+      // Through the same gate a filing takes: a hand-typed or shared link can carry one sheet twice, and parseTable does not dedupe. Two twins would also share ONE blob url, keyed by the item, so removing either would revoke the survivor's picture.
+      let kept: ReadonlyArray<TableItem> = [];
+      for (const item of next) kept = layOnTable(kept, item).items;
+      items = kept;
       render();
     },
     state: (): ReadonlyArray<TableItem> => items,

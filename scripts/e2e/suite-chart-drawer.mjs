@@ -1,5 +1,6 @@
 // The Chart Table's drawer (#520 Sub 2 of #401, direction D ruled at the #518 sitting): the dog-ear on the committed survey, the drawer it fills, the cap, and the address that is the table's only memory. `chart-drawer` and never `drawer`: suite-room-drawer is the site's phone nav (#520 ruling 2).
 import { makeSettle } from "./settle-support.mjs";
+import { makeStage } from "./home-support.mjs";
 
 const SEED = 42;
 // A camera settled deep enough to commit a band-3 inset, the same descent suite-region-detail drives.
@@ -40,6 +41,13 @@ const READ = `(() => {
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, PORT } = ctx;
   const settle = makeSettle(ctx);
+  // A REAL press and release at the handle's own coordinates, never element.click(): a synthetic click dispatches straight at the node and ignores pointer-events, so it files a handle no reader could reach. The inset box is pointer-events: none, and that is exactly the defect this drives.
+  const { clickAt } = makeStage(ctx);
+  const clickEar = async () => {
+    const r = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
+    if (r) await clickAt(r.x, r.y);
+    return r;
+  };
   const go = async (hash) => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#${hash}` });
@@ -71,7 +79,7 @@ export async function run(ctx) {
   );
 
   // CD2: a click lays it, opens the drawer and leaves it open (ruled 2026-09-07), and the address carries it.
-  await evaluate(`document.querySelector("#map .region-inset .dog-ear").click()`);
+  const earAt = await clickEar();
   const laid = await settle(READ, (d) => d.open && d.cuttings === 1, "chart-drawer-laid");
   check(
     "CD2 a click on the dog-ear lays the survey and ENDS with the drawer open (ruled 2026-09-07): one cutting with its own remove press, the count in period voice, the road present but disabled until Sub 3, and the table written into the address",
@@ -83,9 +91,32 @@ export async function run(ctx) {
   );
   await shoot("chart-drawer-1280-open.png");
 
+  check(
+    "CD2b the handle answers a REAL pointer: the inset box is pointer-events: none, so the corner must restore it or the survey files for a synthetic click and for nobody else (#520 goal: with a click or a tap, everywhere)",
+    !!earAt && (await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return "no-ear"; const b = e.getBoundingClientRect(); const hit = document.elementFromPoint(Math.round(b.x + b.width * 0.72), Math.round(b.y + b.height * 0.28)); return hit === e ? "ear" : (hit ? hit.tagName + "." + String(hit.className.baseVal ?? hit.className).split(" ")[0] : "none"); })()`)) === "ear",
+    JSON.stringify({ clickedAt: earAt }),
+  );
+
+  // #520 build item 2 names this one: Z10b pins it for the zoom cluster ONLY, so the handle owes the same check.
+  const beforeDbl = await evaluate(`(() => ({ k: window.__vellumZoomState().k, band: window.__vellumRegion ? window.__vellumRegion().band : null }))()`);
+  const dblAt = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
+  if (dblAt) {
+    for (const clickCount of [1, 2]) {
+      await send("Input.dispatchMouseEvent", { type: "mousePressed", x: dblAt.x, y: dblAt.y, button: "left", clickCount });
+      await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: dblAt.x, y: dblAt.y, button: "left", clickCount });
+    }
+  }
+  await sleep(900);
+  const afterDbl = await evaluate(`(() => ({ k: window.__vellumZoomState().k, band: window.__vellumRegion ? window.__vellumRegion().band : null }))()`);
+  check(
+    "CD2c a rapid double click on the handle does not become d3's double-click-to-zoom, the same rule Z10b pins for the zoom cluster (#520 build item 2)",
+    !!dblAt && afterDbl.k === beforeDbl.k && afterDbl.band === beforeDbl.band,
+    JSON.stringify({ before: beforeDbl, after: afterDbl }),
+  );
+
   // CD3: the same survey twice is refused in its own voice, and the table is unmoved (ruled 2026-09-07).
   await evaluate(`document.getElementById("chart-drawer-shut").click()`);
-  await evaluate(`document.querySelector("#map .region-inset .dog-ear").click()`);
+  await clickEar();
   const twice = await settle(READ, (d) => d.open, "chart-drawer-twice");
   check(
     "CD3 the same survey is refused a second time, in the drawer's own voice, and the table is unmoved (ruled 2026-09-07)",
@@ -114,6 +145,30 @@ export async function run(ctx) {
     bare.cuttings === 0 && bare.count === "the table is bare" && bare.hashTable === null && bare.rawHash.indexOf("table=") === -1 &&
       /is off the table/.test(bare.status),
     JSON.stringify({ cuttings: bare.cuttings, count: bare.count, hashTable: bare.hashTable, status: bare.status }),
+  );
+
+  // #520 Process names both of these: "the cap refuses" and "home and the verso flip drop the handle".
+  const SIX = ["rung-1.lx-4.ly-4", "rung-1.lx-3.ly-3", "rung-2.lx-5.ly-5", "rung-2.lx-6.ly-6", "rung-3.lx-11.ly-11", "rung-3.lx-12.ly-12"]
+    .map((seat) => `k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.${seat}`).join("_");
+  await go(`${DRESS}&${DEEP}&table=${SIX}`);
+  const atSix = await settle(READ, atInset, "chart-drawer-six");
+  await clickEar();
+  await sleep(700);
+  const refused = await evaluate(READ);
+  check(
+    "CD7 at the cap the handle refuses in the voice #518 ruling 3 wrote, lays nothing, and says so where the reader is told everything else (#520 build item 5)",
+    atSix.cuttings === 6 && !!atSix.ear && atSix.ear.label === "the table is full: six sheets lie on it" &&
+      refused.cuttings === 6 && refused.status === "the table is full: six sheets lie on it" && refused.fullShown,
+    JSON.stringify({ before: atSix.cuttings, label: atSix.ear && atSix.ear.label, after: refused.cuttings, status: refused.status, full: refused.fullShown }),
+  );
+
+  // Home drops the inset, and the handle must go with it rather than outliving the sheet it belongs to.
+  await evaluate(`window.__vellumZoomTo({ x: 0, y: 0, k: 1 })`);
+  const home = await settle(READ, (d) => !d.ear, "chart-drawer-home");
+  check(
+    "CD8 going home drops the inset and the dog-ear with it: the handle never outlives the survey it belongs to, and the table it filled is untouched (#520 build item 2)",
+    home.ear === null && home.insetSvgs === 0 && home.cuttings === 6,
+    JSON.stringify({ ear: home.ear, insetSvgs: home.insetSvgs, cuttings: home.cuttings }),
   );
 
   // CD6: the phone stands the drawer down until Sub 2a (#540).

@@ -76,6 +76,19 @@ function regionEligible(): boolean {
   return redraftEnabled && styleSel.value === "antique" && !agesChk.checked && !isFlipped(sheetEl) && !!lastSvg;
 }
 // #520: the Chart Table rides in the address and in no browser storage (ruled 2026-09-05), so the drawer holds it between writes and hands it to the one writer.
+// What the handle SAYS depends on the table, which changes under it, so the label is recomputed rather than baked once at the commit.
+const earLabel = (item: TableItem): string =>
+  chartTable.holds(item) ? refusalLine("already") : chartTable.isFull() ? refusalLine("full") : "lay this survey on the table";
+const relabelEar = (): void => {
+  const ear = document.querySelector<HTMLButtonElement>("#map .region-inset .dog-ear");
+  const committed = glass.committedSurvey();
+  const item = committed ? surveyItemFrom(committed) : null;
+  if (!ear || !item) return;
+  const label = earLabel(item);
+  ear.setAttribute("aria-label", label);
+  ear.title = label;
+};
+
 const chartTable = bindChartDrawer({
   root: chartDrawer, tab: chartDrawerTab, shut: chartDrawerShut, count: chartDrawerCount,
   cuttings, full: chartDrawerFull, road: tableRoad,
@@ -88,7 +101,7 @@ const chartTable = bindChartDrawer({
     if (!res) return null;
     return { url: URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" })), title: res.title };
   },
-  onChange: () => syncHash(),
+  onChange: () => { syncHash(); relabelEar(); },
 });
 // #165/#169/#192: the ONE hash writer, every trigger funnels through here; #321: the box IS the flag and the Explorer never authors year=.
 function syncHash(): void {
@@ -114,8 +127,7 @@ const glass = createGlass({
     const committed = glass.committedSurvey();
     const item = committed ? surveyItemFrom(committed) : null;
     if (!item) return;
-    const full = chartTable.isFull() && !chartTable.holds(item);
-    el.appendChild(makeDogEar(full ? refusalLine("full") : "lay this survey on the table",
+    el.appendChild(makeDogEar(earLabel(item), glass.cameraNow().k,
       () => { chartTable.lay(item, committed?.svg ?? null, committed?.title); }));
   },
   buttons: { zoomIn: $("zoom-in"), zoomOut: $("zoom-out"), reset: $("zoom-reset"), cluster: $("zoom-controls") },

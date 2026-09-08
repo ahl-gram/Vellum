@@ -47,9 +47,9 @@ export function createGlass(deps: GlassDeps) {
   function setCardZoom(k: number): void {
     const card = document.getElementById("place-card");
     const overlay = mapDiv.querySelector<HTMLElement>(".place-overlay");
-    // #520: the dog-ear is a leaf sibling of the inset's survey svg and would otherwise be scaled by the live transform with it, reading 435px at k=8 for a handle that asks for 54.
-    const ear = mapDiv.querySelector<HTMLElement>(".dog-ear");
-    for (const el of [card, overlay, ear]) {
+        // ALL of them: an outgoing inset stays mounted until its fade ends, up to 700ms, so a singular query hands the counter-scale to the sheet leaving and not the one arriving.
+    const ears = [...mapDiv.querySelectorAll<HTMLElement>(".dog-ear")];
+    for (const el of [card, overlay, ...ears]) {
       if (!el) continue;
       if (k === 1) el.style.removeProperty("--zoom-k");
       else el.style.setProperty("--zoom-k", String(k));
@@ -155,8 +155,8 @@ export function createGlass(deps: GlassDeps) {
     cancelRedraft: () => lodController.cancel(),
     setWorld: (ctx: Parameters<typeof lodController.setWorld>[0]) => lodController.setWorld(ctx),
     homeToWorld: () => lodController.homeToWorld(),
-
-    committedSurvey: () => lodController.committedSurvey(),    lodState: () => lodController.state(),
+    committedSurvey: () => lodController.committedSurvey(),
+    lodState: () => lodController.state(),
   };
 }
 
