@@ -40,7 +40,7 @@ const READ = `(() => {
 })()`;
 
 export async function run(ctx) {
-  const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, PORT } = ctx;
   const settle = makeSettle(ctx);
   // A REAL press and release at the handle's own coordinates, never element.click(): a synthetic click dispatches straight at the node and ignores pointer-events, so it files a handle no reader could reach. The inset box is pointer-events: none, and that is exactly the defect this drives.
   const { clickAt } = makeStage(ctx);
@@ -293,15 +293,24 @@ export async function run(ctx) {
   );
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
-  // CD6: the phone stands the drawer down until Sub 2a (#540).
+  // CD6 (#540 Sub 2a): the phone's own door into the table. The desktop drawer must never paint at 390, and the check
+  // has to try the door that opens it: `lay()` calls setOpen(true) on both its branches with no width term, so reading
+  // the SHUT state at 390 (which this check used to do) says nothing about whether the drawer can appear. It could, and
+  // it did: `.chart-drawer.open` is (0,2,0) against the stand-down's (0,1,0), and specificity resolves before source
+  // order, so once .open landed the drawer displayed at 390 over a reader who could not shut it again.
   await setMobileViewport(390, 844);
-  await go(`${DRESS}&table=${carried}`);
+  await go(`${DRESS}&${DEEP}`);
+  const phoneArmed = await settle(READ, atInset, "chart-drawer-phone-inset", DRAWN);
+  const phoneEar = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
+  if (phoneEar) { await touch("touchStart", [{ x: phoneEar.x, y: phoneEar.y, id: 0 }]); await touch("touchEnd", []); }
+  await sleep(1600);
   const phone = await evaluate(READ);
+  const phoneDrawer = await evaluate(`getComputedStyle(document.getElementById("chart-drawer")).display`);
+  const phoneShut = await evaluate(`(() => { const b = document.getElementById("chart-drawer-shut"); const r = b.getBoundingClientRect(); if (r.width < 1) return "no-box"; const h = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2)); return h === b || b.contains(h) ? "reachable" : "eclipsed"; })()`);
   check(
-    "CD6 at 390 the drawer and its tab stand DOWN until Sub 2a (#540) builds the sheet's second leaf: nothing of the desktop drawer paints over the chart, and nothing scrolls sideways",
-    !phone.tabShown && phone.scrollW === phone.innerW &&
-      (await evaluate(`getComputedStyle(document.getElementById("chart-drawer")).display`)) === "none",
-    JSON.stringify({ tabShown: phone.tabShown, scrollW: phone.scrollW, innerW: phone.innerW }),
+    "CD6 at 390 the desktop drawer never paints, not even after a real tap on the dog-ear: the handle is the phone's own door into the table and it opens the drawer with no width term, so the stand-down has to cover the OPEN state and not just the resting one (#540)",
+    !!phoneEar && !phoneArmed.open && phoneDrawer === "none" && phone.scrollW === phone.innerW && !phone.tabShown,
+    JSON.stringify({ tapped: phoneEar, drawerDisplay: phoneDrawer, open: phone.open, shutPress: phoneShut, scrollW: phone.scrollW, innerW: phone.innerW }),
   );
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
