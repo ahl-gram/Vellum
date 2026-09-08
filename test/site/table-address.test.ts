@@ -8,6 +8,7 @@ import {
   parseTable,
   emitTable,
   latticeFromCentre,
+  latticeFromSettle,
   tableWindow,
   groupByWorld,
   type Rung,
@@ -16,7 +17,7 @@ import {
   type TableItem,
 } from "../../src/site/shared/table-address.ts";
 import { chartTarget } from "../../src/site/prospect/address.ts";
-import { LATTICE_DIVISIONS, LOD_BANDS, decideSettle, lodWindowFor, type LodBand } from "../../src/world/lod.ts";
+import { LATTICE_DIVISIONS, LOD_BANDS, decideSettle, lodWindowFor, plotUvFromSheet, FULL_WINDOW, type LodBand } from "../../src/world/lod.ts";
 import { finalizeHash } from "../../src/site/explorer/address.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -336,4 +337,60 @@ test("chartTarget carries the table home from the Prospect page (#401 ruling 7 d
   const hash = `#seed=42&style=antique&${TABLE_KEY}=${SURVEY}&i=4&year=300`;
   assert.ok(chartTarget(hash).includes(`${TABLE_KEY}=${SURVEY}`), "chartTarget drops only i and year, so the table comes home");
   assert.deepEqual(parseTable(chartTarget(hash).replace("/explorer/", "")), [survey]);
+});
+
+// Sub 2 (#520) carried finding 4: the address encodes the window as (rung, lattice centre) and there is no honest way back from the window, so the seat has to be taken at the settle. This sweeps the function the controller actually calls, from the SHEET camera the Glass reports, so the space conversion is inside what is under test rather than assembled here.
+// Swept over every seat rather than a chosen camera: an earlier version pinned three cameras and the window-midpoint shortcut passed all three, because at rung 1 lodWindowFor clamps hard enough that neighbouring seats share a window byte for byte.
+test("every lattice seat round-trips through the settle it came from (#520)", () => {
+  const m = { mx: 0.045, my: 0.045 };
+  const toSheet = (plot: number, margin: number): number => plot * (1 - 2 * margin) + margin;
+  const dress = { kind: "survey", seed: 42, overrides: {}, style: "antique", legend: true, arms: false, beasts: false, theme: null } as const;
+  for (const rung of [1, 2, 3] as const) {
+    const band = LOD_BANDS[rung] as LodBand;
+    const step = band.sizeUV / LATTICE_DIVISIONS;
+    const max = Math.round(LATTICE_DIVISIONS / band.sizeUV);
+    let checked = 0;
+    for (let lx = 0; lx <= max; lx++) {
+      for (let ly = 0; ly <= max; ly++) {
+        const cam = { cx: toSheet(lx * step, m.mx), cy: toSheet(ly * step, m.my), k: band.k };
+        const seat = latticeFromSettle(cam, m, rung);
+        assert.deepEqual(seat, { lx, ly }, `rung ${rung} seat (${lx},${ly}): the settle must name the seat it landed on`);
+        const decision = decideSettle({ camera: plotUvFromSheet(cam, m), currentWindow: FULL_WINDOW, currentBand: 0 });
+        assert.equal(decision.action, "region");
+        assert.deepEqual(tableWindow({ ...dress, rung, lx, ly }), decision.window, `rung ${rung} seat (${lx},${ly}): the address must rebuild the settle's own window`);
+        checked++;
+      }
+    }
+    assert.equal(checked, (max + 1) ** 2, `rung ${rung}: the sweep must reach every seat`);
+  }
+});
+
+// The control: the raw sheet-fraction camera is the wrong space, and the seat it names must differ, or the sweep above proves nothing about the conversion latticeFromSettle owns. Measured 2026-09-07 at every rung.
+test("the sheet-fraction camera names a different seat, which is why the conversion is not the caller's (#520)", () => {
+  const m = { mx: 0.045, my: 0.045 };
+  for (const [rung, c] of [[1, 0.220], [2, 0.200], [3, 0.200]] as const) {
+    const cam = { cx: c, cy: c, k: (LOD_BANDS[rung] as LodBand).k };
+    assert.notDeepEqual(latticeFromSettle(cam, m, rung), latticeFromCentre(cam.cx, cam.cy, rung), `rung ${rung}: the two spaces must disagree at ${c}`);
+  }
+});
+
+// The witness that makes the guard above bite, and the whole reason the centre is handed over rather than re-derived. Measured 2026-09-07: at rung 3, 1200 of 4225 seats rebuild a DIFFERENT window from their own window's midpoint, which is the count Sub 1 recorded; rungs 1 and 2 have none, so a guard that samples only those two cannot see the hazard at all.
+test("the window's own midpoint is NOT a way back to its seat (#520, the 1200 of 4225)", () => {
+  const dress = { kind: "survey", seed: 42, overrides: {}, style: "antique", legend: true, arms: false, beasts: false, theme: null } as const;
+  const band = LOD_BANDS[3] as LodBand;
+  const max = Math.round(LATTICE_DIVISIONS / band.sizeUV);
+  let lossy = 0;
+  for (let lx = 0; lx <= max; lx++) {
+    for (let ly = 0; ly <= max; ly++) {
+      const w = tableWindow({ ...dress, rung: 3, lx, ly });
+      const mid = latticeFromCentre((w.u0 + w.u1) / 2, (w.v0 + w.v1) / 2, 3);
+      const rebuilt = mid ? tableWindow({ ...dress, rung: 3, lx: mid.lx, ly: mid.ly }) : null;
+      if (!rebuilt || JSON.stringify(rebuilt) !== JSON.stringify(w)) lossy++;
+    }
+  }
+  assert.equal(lossy, 1200, "the lossy count Sub 1 measured; if this moves, the grammar or the clamp moved with it");
+  // The named witness, so the count above is not the only thing standing between this and a vacuous pass.
+  const edge = tableWindow({ ...dress, rung: 3, lx: 0, ly: 0 });
+  const midSeat = latticeFromCentre((edge.u0 + edge.u1) / 2, (edge.v0 + edge.v1) / 2, 3);
+  assert.notDeepEqual(midSeat, { lx: 0, ly: 0 }, "band 3 seat (0,0) is the clamped edge case: its midpoint names a different seat");
 });

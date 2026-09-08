@@ -3,6 +3,8 @@
 // Ratified vocabulary (the 2026-07-26 comment on #192): two MUTUALLY EXCLUSIVE keys, a
 // bare `survey` flag and `year=N`; the writer emits exactly one of them or neither, and
 // there is no sentinel year. `survey=<t>` is reserved for mid-sweep addresses and deliberately not built.
+import { TABLE_KEY, emitTable, type TableItem } from "../shared/table-address.ts";
+
 export type Live = { kind: "survey" } | { kind: "year"; year: number };
 
 // Presence-gated like the seed key (Number(null) === 0 is the trap); a year must be a positive integer and is NOT clamped here (`scrubTo` in `src/site/living-chart/chronicle.ts` parks out-of-range at the boundary). Both keys at once is nonsensical and ignored WHOLE; the survey gate is presence-only, so survey=<anything> reads as the bare flag (the writer self-heals the spelling).
@@ -21,6 +23,12 @@ export function emitLive(params: URLSearchParams, live: Live | null | undefined)
   if (!live) return;
   if (live.kind === "survey") params.set("survey", "");
   else params.set("year", String(live.year));
+}
+
+// #520 ruling 1: an EMPTY table writes no key, rather than growing `table=` onto every link the Explorer hands out forever. emitLive above is the precedent; writeHash's unconditional params.set for seed/style/legend is the idiom this deliberately does not follow.
+export function emitTableKey(params: URLSearchParams, items: ReadonlyArray<TableItem> | null | undefined): void {
+  if (!items || items.length === 0) return;
+  params.set(TABLE_KEY, emitTable(items));
 }
 
 export function finalizeHash(params: URLSearchParams): string {
