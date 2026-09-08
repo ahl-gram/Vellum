@@ -85,9 +85,9 @@ export async function run(ctx) {
   const earAt = await clickEar();
   const laid = await settle(READ, (d) => d.open && d.cuttings === 1, "chart-drawer-laid");
   check(
-    "CD2 a click on the dog-ear lays the survey and ENDS with the drawer open (ruled 2026-09-07): one cutting with its own remove press, the count in period voice, the road present but disabled until Sub 3, and the table written into the address",
+    "CD2 a click on the dog-ear lays the survey and ENDS with the drawer open (ruled 2026-09-07): one cutting with its own remove press, the count in period voice, the road to the Portfolio LIVE from the first sheet (it shipped disabled at #520 and #521 bound it), and the table written into the address",
     laid.open && laid.cuttings === 1 && laid.offs === 1 && laid.imgs === 1 &&
-      laid.count === "one sheet laid · room for five more" && laid.roadDisabled && !laid.fullShown &&
+      laid.count === "one sheet laid · room for five more" && !laid.roadDisabled && !laid.fullShown &&
       typeof laid.hashTable === "string" && laid.hashTable.startsWith("k-s.seed-42") &&
       /lies on the table/.test(laid.status) && laid.scrollW === laid.innerW,
     JSON.stringify({ open: laid.open, cuttings: laid.cuttings, count: laid.count, road: laid.roadDisabled, hash: laid.hashTable, status: laid.status }),
