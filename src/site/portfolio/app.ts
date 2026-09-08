@@ -57,7 +57,7 @@ const showTop = (): void => {
   if (!sheet) return;
   sheetBox.innerHTML = sheet.svg ?? "";
   room.layout();
-  folioTitle.textContent = sheets.length > 0 ? sheetLine(sheet.title, top + 1, sheets.length) : "";
+  folioTitle.textContent = sheetLine(sheet.title, top + 1, sheets.length);
   folioSub.textContent = sheet.item.kind === "survey"
     ? `a regional survey at band ${sheet.item.rung}, ${sheet.item.style} · from ${sheet.worldTitle || `chart № ${sheet.item.seed}`}, chart № ${sheet.item.seed}`
     : `a prospect · from chart № ${sheet.item.seed}`;
@@ -69,6 +69,9 @@ const showTop = (): void => {
 
 const bringUp = (at: number): void => {
   if (at < 0 || at >= sheets.length) return;
+  // A prospect keeps its seat in the index and never drafts (ruling 3), so it can never BE the top sheet: putting one
+  // there would blank the stage with nothing to say for it.
+  if (isAwaited(sheets[at]!.item)) return;
   top = at;
   showTop();
   const sheet = sheets[top];
@@ -92,7 +95,7 @@ const takeHome = (sheet: Drawn): void => {
 
 const rowFor = (sheet: Drawn, at: number): HTMLLIElement => {
   const li = document.createElement("li");
-  li.className = "row";
+  li.className = at === top ? "row up" : "row";
   li.dataset["at"] = String(at);
   const numeral = document.createElement("span");
   numeral.className = "numeral";
@@ -184,7 +187,8 @@ const draft = async (): Promise<void> => {
         sheet.svg = res.svg;
         sheet.title = res.title;
         sheet.worldTitle = res.worldTitle;
-        sheet.url = URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" }));
+        if (sheet.url) URL.revokeObjectURL(sheet.url);
+      sheet.url = URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" }));
       } catch {
         sheet.title = `Chart № ${sheet.item.seed}`;
       }
@@ -208,7 +212,6 @@ zoomController.attach();
 bindGlassKeys($("map-viewport"), zoomController);
 
 // #462's chart room: the sheet is fitted to what the chrome leaves, or it fills the viewport and runs under the nav, the room's name and the slip. A page that draws a chart and never binds the room has no fit at all.
-const viewportBox = () => ({ W: $("map-viewport").clientWidth || 1, H: $("map-viewport").clientHeight || 1 });
 const room = bindRoom({
   frame: document.querySelector(".stage") as HTMLElement,
   sheet: document.getElementById("sheet") as HTMLElement,
@@ -229,7 +232,13 @@ const start = async (): Promise<void> => {
     say("");
     return;
   }
-  next.addEventListener("click", () => bringUp((top + 1) % sheets.length));
+  // The next DRAWABLE sheet, so the cycle never lands on a reserved prospect and stalls there.
+  next.addEventListener("click", () => {
+    for (let i = 1; i <= sheets.length; i++) {
+      const at = (top + i) % sheets.length;
+      if (!isAwaited(sheets[at]!.item)) { bringUp(at); return; }
+    }
+  });
   download.addEventListener("click", () => { const sheet = sheets[top]; if (sheet) takeHome(sheet); });
   await initWorker();
   await draft();

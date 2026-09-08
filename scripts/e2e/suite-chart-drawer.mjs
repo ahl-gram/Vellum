@@ -351,6 +351,22 @@ export async function run(ctx) {
     !!empty.bound && /table is laid at the Explorer/.test(empty.bound) && empty.explorer && !empty.next && !empty.download,
     JSON.stringify(empty),
   );
+  // CD21 (#521): the Portfolio is a chart room, so the kit renders its Glass and the stage's label promises the keys.
+  // Both halves are the claim. d3-zoom does NOT set touch-action, so a bound controller with no `touch-action: none`
+  // is still dead to a real thumb: the browser's native pan takes the gesture first (#164).
+  const glass = await evaluate(`(() => {
+    const v = document.getElementById("map-viewport");
+    const before = document.getElementById("map").style.transform;
+    document.querySelector('[data-zoom="in"]').click();
+    return { zoomable: v.classList.contains("zoomable"), touch: getComputedStyle(v).touchAction, before };
+  })()`);
+  await sleep(700);
+  const glassAfter = await evaluate(`document.getElementById("map").style.transform`);
+  check(
+    "CD21 the Portfolio's Glass is bound AND reachable by a thumb: a zoom press moves the camera, and the viewport takes touch-action none, without which d3 never sees the gesture and three corner presses are decoration (#164, #521)",
+    glass.zoomable && glass.touch === "none" && glassAfter !== glass.before && glassAfter !== "",
+    JSON.stringify({ ...glass, after: glassAfter }),
+  );
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
   // CD6 (#540 Sub 2a): the phone's own door into the table. The desktop drawer must never paint at 390, and the check

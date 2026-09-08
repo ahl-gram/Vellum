@@ -56,7 +56,6 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
 
 .chart-drawer-road { flex: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; gap: 0.5rem; padding-bottom: 0.3rem; }
 .chart-drawer-road .full { font-variant-caps: small-caps; font-size: 0.78rem; letter-spacing: 0.06em; color: var(--parchment); }
-.chart-drawer-road .stamp { font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.78rem; color: var(--line-tan); }
 .chart-drawer-road .legend-btn:disabled { opacity: 0.45; cursor: default; box-shadow: none; transform: none; }
 
 /* Two vertical tabs on one edge: the Broadside's is centred and this one is seated from the bottom, so on a short window they close on each other. Measured 2026-09-07 at 1280 wide with the Broadside folded: they touched at 500px tall before this block and clear by 27px after it; the gap crosses zero just under 440, so the edge carries both down to about 445 and no further. */
@@ -102,7 +101,7 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
   body:not(.leaf-table) #table-road-band { display: none; }
   body.leaf-table .legend-dock .legend { display: none; }
   .legend-dock #table-road-band { display: flex; flex-direction: column; align-items: stretch; gap: 0.45rem; margin-top: 0.9rem; padding: 0; }
-  .legend-dock #table-road-band .stamp, .legend-dock #table-road-band .full { color: var(--ink-brown); text-align: center; }
+  .legend-dock #table-road-band .full { color: var(--ink-brown); text-align: center; }
   .legend-dock #table-road-band .legend-btn.gold { background: var(--control-gold); border-color: var(--ink-brown); }
   .legend-dock #table-road-band .legend-btn:disabled { background: var(--ink-faded); opacity: 1; }
 }

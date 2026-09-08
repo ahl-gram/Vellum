@@ -26,6 +26,10 @@ test("PF3 the drafting stamp counts in the mockup's own form, 'four of six draft
   assert.equal(draftedLine(6, 6), "Six sheets drafted");
   assert.equal(draftedLine(1, 1), "One sheet drafted");
   assert.equal(draftedLine(0, 0), "");
+  // The LOAD state, which is the first thing the page renders since retitle() runs before draft(): word(0) is "no", so
+  // the naive form reads "no of six drafted".
+  assert.equal(draftedLine(0, 6), "none of six drafted · a moment more");
+  assert.equal(draftedLine(0, 1), "none of one drafted · a moment more");
 });
 
 test("PF4 a sheet names its place in the pile in the mockup's lower-case numerals, and falls back to the figure past the cap", () => {
