@@ -7,7 +7,7 @@ const PAGE = "/specimen/";
 const CHART_ASPECT = 1500 / 1157.931;
 const INK_BROWN = "rgb(107, 90, 64)";
 const CONTROL_GOLD = "rgb(240, 227, 189)";
-const atFolded = (d, p) => d.slipVis === "hidden" && d.tabVis === "visible" && !!p && d.legend.x === p.legend.x && d.glass.right === p.glass.right;
+const atFolded = (from) => (d, p) => d.slipVis === "hidden" && d.tabVis === "visible" && d.legend.x !== from.legend.x && !!p && d.legend.x === p.legend.x && d.glass.right === p.glass.right;
 
 const READ = `(() => {
   const r = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
@@ -84,7 +84,7 @@ export async function run(ctx) {
   await shoot("specimen-1280.png", { x: 0, y: 0, width: 1280, height: 800, scale: 1 });
 
   await setState("folded");
-  const folded = await settle(READ, atFolded, "specimen-folded");
+  const folded = await settle(READ, atFolded(rest), "specimen-folded");
   check(
     "SB4 folded, through the slip's own fold: the slip is gone and its tab shown, the Glass moves out to the chrome's inset, the legend row re-centres rightward",
     !!folded && folded.st.folded && folded.slipVis === "hidden" && folded.tabVis === "visible" &&

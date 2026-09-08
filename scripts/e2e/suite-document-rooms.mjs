@@ -4,8 +4,8 @@ import { makeSettle } from "./settle-support.mjs";
 
 const FAQ = "/faq/";
 const GLOSSARY = "/glossary/";
-const atFolded = (d, p) => d.slipVisibility === "hidden" && d.tabVisibility === "visible" && !!p && d.main.right === p.main.right;
-const atUnfolded = (d, p) => d.slipVisibility === "visible" && d.tabVisibility === "hidden" && !!p && d.main.right === p.main.right;
+const atFolded = (from) => (d, p) => d.slipVisibility === "hidden" && d.tabVisibility === "visible" && d.main.right !== from.main.right && !!p && d.main.right === p.main.right;
+const atUnfolded = (from) => (d, p) => d.slipVisibility === "visible" && d.tabVisibility === "hidden" && d.main.right !== from.main.right && !!p && d.main.right === p.main.right;
 
 const READ = `(() => {
   const r = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
@@ -85,9 +85,9 @@ export async function run(ctx) {
   );
 
   await evaluate(`document.querySelector("#index .slip-fold").click()`);
-  const folded = await settle(READ, atFolded, "index-folded");
+  const folded = await settle(READ, atFolded(faq), "index-folded");
   await evaluate(`document.querySelector(".slip-tab").click()`);
-  const back = await settle(READ, atUnfolded, "index-unfolded");
+  const back = await settle(READ, atUnfolded(folded), "index-unfolded");
   check(
     "IX3 folding the index hands the sheet the width in one settle and stands the bookmark tab on the right edge; the tab brings the index back and the sheet shrinks the same way (#462 ruling 2, Alex's own wording)",
     folded.folded && folded.slipVisibility === "hidden" && folded.tabVisibility === "visible" && folded.tab.right >= folded.innerW - 1 &&
