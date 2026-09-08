@@ -8,6 +8,7 @@ import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-war
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
 import { type TableItem } from "../shared/table-address.ts";
+import { bindChartDrawer } from "./chart-drawer.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
 import { wireControls } from "./controls.ts";
@@ -28,6 +29,7 @@ import type { Camera } from "./camera.ts";
 import {
   $, seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider,
   coastSlider, status, mapDiv, mapViewport, sheetEl, innerEl, caption, folioTitle, folioSub, stageEl,
+  chartDrawer, chartDrawerTab, chartDrawerShut, chartDrawerCount, chartDrawerFull, cuttings, tableRoad,
   versoEl, versoBtn, agesChk, orderLink, journalLink, hashControls,
 } from "./elements.ts";
 
@@ -73,12 +75,17 @@ let redraftEnabled = true;
 function regionEligible(): boolean {
   return redraftEnabled && styleSel.value === "antique" && !agesChk.checked && !isFlipped(sheetEl) && !!lastSvg;
 }
-// #520: the Chart Table rides in the address and in no browser storage (ruled 2026-09-05), so the conductor holds it between writes and hands it to the one writer.
-let table: ReadonlyArray<TableItem> = [];
+// #520: the Chart Table rides in the address and in no browser storage (ruled 2026-09-05), so the drawer holds it between writes and hands it to the one writer.
+const chartTable = bindChartDrawer({
+  root: chartDrawer, tab: chartDrawerTab, shut: chartDrawerShut, count: chartDrawerCount,
+  cuttings, full: chartDrawerFull, road: tableRoad,
+  say: (line) => { status.textContent = line; },
+  onChange: () => syncHash(),
+});
 // #165/#169/#192: the ONE hash writer, every trigger funnels through here; #321: the box IS the flag and the Explorer never authors year=.
 function syncHash(): void {
   writeHash(hashControls, touched.land, touched.coast, glass.cameraNow(),
-    agesChk.checked ? { kind: "survey" } : null, table);
+    agesChk.checked ? { kind: "survey" } : null, chartTable.state());
   journalLink.href = "/reading-room/" + (location.hash || "");
 }
 
@@ -256,7 +263,7 @@ if (fwd) {
   if (hashed.land) touched.land = true;
   if (hashed.coast) touched.coast = true;
   pendingCamera = hashed.camera;
-  table = hashed.table ?? [];
+  chartTable.restore(hashed.table ?? []);
   if (hashed.live) agesChk.checked = true;
   draw();
 }
