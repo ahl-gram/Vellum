@@ -326,7 +326,9 @@ export async function run(ctx) {
   check(
     "CD19 the Portfolio drafts every gathered sheet from its own number, groups the index by world under the parent world's NAME, and stands one sheet on the stage (#518 ruling 5)",
     !!pf && pf.items === 6 && pf.drawn === 6 && pf.rows === 6 && pf.groups >= 1 && pf.onStage &&
-      pf.heads.every((h) => /^From .+ · chart № \d+$/.test(h)) && !/chart № 42, chart/.test(pf.heads[0] || ""),
+      // The LITERAL world, not a shape: seed 42's parent is deterministic (measured 2026-09-08), and a shape check passes on
+      // the "this world" fallback the page uses before worldTitle arrives, which is the whole thing this pins.
+      pf.heads.length === 1 && pf.heads[0] === "From The Isle of Rahai · chart № 42",
     JSON.stringify(pf),
   );
   await send("Page.navigate", { url: "about:blank" });
