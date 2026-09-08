@@ -116,6 +116,18 @@ const PAGES: readonly PageSpec[] = [
     chartRoom: true,
   },
   {
+    route: "print-room/portfolio/index.html",
+    dir: "/print-room/portfolio/",
+    room: "The Portfolio",
+    title: "The Portfolio · Vellum",
+    ogTitle: "The Portfolio · Vellum",
+    description:
+      "The atelier's portfolio: the regional surveys you gathered at the Chart Table, drafted again from the numbers in their margins and taken home one engraving at a time.",
+    tagline: "the sheets you laid on the table, taken home",
+    scriptSrc: "./app.bundle.js",
+    chartRoom: true,
+  },
+  {
     route: "reading-room/index.html",
     dir: "/reading-room/",
     current: "Reading Room",
@@ -713,6 +725,8 @@ type Road = { id?: string; gold?: true; road?: string; href: string; verbId?: st
 const ROADS: Record<string, ReadonlyArray<Road>> = {
   "explorer/index.html": [{ id: "order-plates", gold: true, href: "../print-room/" }, { id: "journal-link", gold: true, href: "/reading-room/" }],
   "print-room/index.html": [{ id: "pr-explorer", gold: true, href: "../explorer/" }],
+  // #521 ruling 1: C's picture with A's words. Download / Bring up / Back to, and NO road to the Print Room; the way in is the Bound Atlas slip (ruling 2).
+  "print-room/portfolio/index.html": [{ id: "pf-download", gold: true, href: "#" }, { id: "pf-next" }, { id: "pf-explorer", gold: true, href: "/explorer/" }],
   "prospect/index.html": [{ id: "pp-chart-link", gold: true, href: "/explorer/" }, { id: "pp-ribbon-link", href: "/ribbon/", verbId: "pp-ribbon-verb" }],
   "ribbon/index.html": [{ id: "rb-chart-link", gold: true, href: "/explorer/" }, { id: "rb-prospect-link", href: "/prospect/", verbId: "rb-prospect-verb" }],
   "seed-of-the-day/index.html": [{ road: "explorer", href: "../explorer/" }, { road: "reading-room", href: "../reading-room/" }],

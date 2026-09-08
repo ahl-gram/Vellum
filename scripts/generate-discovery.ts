@@ -12,6 +12,7 @@ export const ATLAS_ROUTE = "/atlas/";
 export const PROSPECT_ROUTE = "/prospect/";
 /** The Wayfarer's Ribbon: itinerary strip charts, a deep-link surface like the prospect, never in the nav. */
 export const RIBBON_ROUTE = "/ribbon/";
+export const PORTFOLIO_ROUTE = "/print-room/portfolio/";
 
 // Deliberately NOT grouped by NavItem.kind: nav.ts declares kind a placeholder nothing may depend on, so these files stay flat.
 export const DISCOVERY_ROUTES: readonly string[] = [
@@ -20,6 +21,7 @@ export const DISCOVERY_ROUTES: readonly string[] = [
   ATLAS_ROUTE,
   PROSPECT_ROUTE,
   RIBBON_ROUTE,
+  PORTFOLIO_ROUTE,
 ];
 
 export interface RouteEntry {
@@ -68,6 +70,10 @@ export const ROUTE_ENTRIES: Readonly<Record<string, RouteEntry | undefined>> = {
   [PROSPECT_ROUTE]: {
     title: "The Prospect",
     blurb: "Any settlement's engraved townscape plate, opened from its place card in the Explorer and addressed by chart, place, and year.",
+  },
+  [PORTFOLIO_ROUTE]: {
+    title: "The Portfolio",
+    blurb: "The regional surveys you gathered at the Chart Table, drafted again here from their own chart numbers, each one downloading as its engraving.",
   },
   [RIBBON_ROUTE]: {
     title: "The Wayfarer's Ribbon",
