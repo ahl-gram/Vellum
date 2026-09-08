@@ -331,7 +331,10 @@ export async function run(ctx) {
       cuttings: document.querySelectorAll("#cuttings li").length,
       columns: (() => { const c = document.getElementById("cuttings"); return c ? getComputedStyle(c).gridTemplateColumns.split(" ").filter(Boolean).length : 0; })(),
       countText: (() => { const c = document.getElementById("chart-drawer-count"); return c && c.offsetParent !== null ? c.textContent : null; })(),
-      roadInSlip: (() => { const r = document.getElementById("table-road"); const d = document.querySelector(".slip .legend-dock, .slip .legend.in-slip"); return !!r && !!d && d.contains(r); })(),
+      roadInSlip: (() => { const r = document.getElementById("table-road"); const d = document.querySelector(".slip .legend-dock"); return !!r && !!d && d.contains(r); })(),
+      roadPress: (() => { const r = document.getElementById("table-road"); if (!r) return null; const b = r.getBoundingClientRect(); if (b.width < 1) return "no-box";
+        const h = document.elementFromPoint(Math.round(b.x + b.width / 2), Math.round(b.y + b.height / 2)); return h === r || r.contains(h) ? "self" : (h ? (h.id || String(h.className)) : "none"); })(),
+      otherRoads: [...document.querySelectorAll(".slip .legend-dock .legend .legend-btn")].filter((b) => getComputedStyle(b).display !== "none" && b.id !== "table-road").length,
     };
   })()`;
   await setMobileViewport(390, 844);
@@ -360,6 +363,11 @@ export async function run(ctx) {
   if (broadsideTab) { await touch("touchStart", [{ x: broadsideTab.x, y: broadsideTab.y, id: 0 }]); await touch("touchEnd", []); }
   await sleep(700);
   const backToForm = await evaluate(LEAF);
+  check(
+    "CD17 with the table leaf up the road out is the TABLE's road, docked in the sheet's legend where every other road out lives, and it answers a real thumb (#518 ruling 4)",
+    leafOpen.roadInSlip && leafOpen.roadPress === "self" && leafOpen.otherRoads === 0,
+    JSON.stringify({ inSlip: leafOpen.roadInSlip, press: leafOpen.roadPress, others: leafOpen.otherRoads }),
+  );
   check(
     "CD16 the leaf turns back: pressing The Broadside returns the form and puts the table away, so the reader is never one-way into either leaf",
     backToForm.tabs.length === 2 && backToForm.formShown && !backToForm.leafShown && backToForm.tabs[0].selected === "true" && backToForm.tabs[1].selected === "false",
