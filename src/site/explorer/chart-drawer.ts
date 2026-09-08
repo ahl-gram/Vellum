@@ -215,6 +215,8 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
     if (next === items) return;
     if (going) forget(going);
     commit(next);
+    // Taking a cutting off moves the count and the tab silently otherwise: the press that did it is gone from the page by the time focus lands, so the room is announced rather than left to be discovered.
+    deps.say(going ? `${titleOf(going)} is off the table · ${countLine(next)}` : countLine(next));
   };
 
   deps.tab.addEventListener("click", () => setOpen(true));

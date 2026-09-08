@@ -108,9 +108,10 @@ export async function run(ctx) {
   await evaluate(`document.querySelector("#cuttings .off").click()`);
   const bare = await settle(READ, (d) => d.cuttings === 0, "chart-drawer-bare");
   check(
-    "CD5 a cutting comes off by its own press, and an EMPTY table writes no key at all rather than growing table= onto every link forever (#520 ruling 1)",
-    bare.cuttings === 0 && bare.count === "the table is bare" && bare.hashTable === null && bare.rawHash.indexOf("table=") === -1,
-    JSON.stringify({ cuttings: bare.cuttings, count: bare.count, hashTable: bare.hashTable }),
+    "CD5 a cutting comes off by its own press and the room is ANNOUNCED, since the press that did it leaves the page with it, and an EMPTY table writes no key at all rather than growing table= onto every link forever (#520 ruling 1)",
+    bare.cuttings === 0 && bare.count === "the table is bare" && bare.hashTable === null && bare.rawHash.indexOf("table=") === -1 &&
+      /is off the table/.test(bare.status),
+    JSON.stringify({ cuttings: bare.cuttings, count: bare.count, hashTable: bare.hashTable, status: bare.status }),
   );
 
   // CD6: the phone stands the drawer down until Sub 2a (#540).
