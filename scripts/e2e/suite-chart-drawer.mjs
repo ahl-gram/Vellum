@@ -180,42 +180,61 @@ export async function run(ctx) {
     JSON.stringify({ ear: home.ear, insetSvgs: home.insetSvgs, cuttings: home.cuttings }),
   );
 
-  // CD9 (#543 Sub 2b): the drawer's band stands clear of the open Broadside.
-  // The Broadside is fixed at z-20 over this drawer's z-18 and reaches down into its band, so anything of the drawer's laid under
-  // its footprint is painted over. #520 clamped the CUTTINGS clear of it and reasoned the road was already below the slip's foot;
-  // that holds for the road's button and not for the stamp line above it. This guards the CLASS: no part of the drawer's band,
-  // at any width the drawer is not stood down at, may lie under the Broadside.
-  const BAND = `(() => {
+  // CD9 / CD11 / CD12 (#543 Sub 2b, ruled by Alex 2026-09-08): the Broadside and the Chart Table are never open together,
+  // and nothing is lifted onto the chart. The ruling was one sentence: the drawer covers the chart's caption and the roads
+  // out, and it makes no sense to cover those and leave the side panel standing. Everything #543 measured follows from it,
+  // because two surfaces that are never open together cannot fight for the edge, the band or the reader's eye.
+  const SURFACES = `(() => {
     const slip = document.querySelector(".slip");
-    if (!slip) return { err: "no slip" };
-    const sb = slip.getBoundingClientRect();
-    const overlap = (b) =>
-      Math.max(0, Math.min(b.right, sb.right) - Math.max(b.left, sb.left)) *
-      Math.max(0, Math.min(b.bottom, sb.bottom) - Math.max(b.top, sb.top));
+    const tab = document.querySelector(".slip-tab");
+    const sheet = document.querySelector("#map svg").getBoundingClientRect();
+    const onSheet = (b) =>
+      Math.max(0, Math.min(b.right, sheet.right) - Math.max(b.left, sheet.left)) *
+      Math.max(0, Math.min(b.bottom, sheet.bottom) - Math.max(b.top, sheet.top)) > 0;
     const name = (e) => (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\s+/).join("."));
-    const parts = [...document.querySelectorAll("#chart-drawer .chart-drawer-head, #chart-drawer .chart-drawer-head > *, #cuttings, #cuttings > li, .chart-drawer-road, .chart-drawer-road > *")];
-    const fouled = parts.filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0.5 && b.height > 0.5 && overlap(b) > 0; }).map(name);
-    const row = document.getElementById("cuttings").getBoundingClientRect();
-    return { folded: slip.classList.contains("folded"), open: document.getElementById("chart-drawer").classList.contains("open"),
-      fouled, rowW: +row.width.toFixed(1), cuttings: document.querySelectorAll("#cuttings li").length, vw: window.innerWidth };
+    const lifted = [...document.querySelectorAll(".corner.bl.folio, .corner.br.zoomery, .legend:not(.in-slip)")]
+      .filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0.5 && b.height > 0.5 && onSheet(b); })
+      .map(name);
+    return {
+      open: document.getElementById("chart-drawer").classList.contains("open"),
+      folded: slip.classList.contains("folded"),
+      tabShown: !!tab && getComputedStyle(tab).display !== "none",
+      lifted,
+    };
   })()`;
-  const band = {};
-  for (const [w, h, fold] of [[1280, 800, false], [1520, 872, false], [1024, 800, false], [901, 800, false], [901, 800, true]]) {
-    await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
-    await go(`${DRESS}&table=${SIX}`);
-    if (fold) { await evaluate(`document.querySelector(".slip-fold").click()`); await sleep(500); }
-    await evaluate(`document.getElementById("chart-drawer-tab").click()`);
-    await sleep(700);
-    band[`${w}x${h}${fold ? " folded" : ""}`] = await evaluate(BAND);
-  }
-  const widths = Object.keys(band);
-  // 901 and the folded arm are here for CD9's sake, not a floor's: an open Broadside takes 26rem whatever the window is,
-  // so below about 1280 the row this leaves is narrower than one cutting. No floor is asserted, because none can be kept
-  // without ruling what the band does when there is no room for it (#543).
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  await go(`${DRESS}&table=${SIX}`);
+  const beforeOpen = await evaluate(SURFACES);
+  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+  await sleep(900);
+  const withOpen = await evaluate(SURFACES);
+  await evaluate(`document.getElementById("chart-drawer-shut").click()`);
+  await sleep(900);
+  const afterShut = await evaluate(SURFACES);
+  // The reader who folded the Broadside themselves gets it back folded, not opened for them.
+  await go(`${DRESS}&table=${SIX}`);
+  await evaluate(`document.querySelector(".slip-fold").click()`);
+  await sleep(600);
+  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+  await sleep(900);
+  await evaluate(`document.getElementById("chart-drawer-shut").click()`);
+  await sleep(900);
+  const afterShutFolded = await evaluate(SURFACES);
+
   check(
-    "CD9 with the Broadside open, no part of the drawer's band lies under it: #520 clamped the cuttings clear and read the road as already below the slip's foot, which is true of its button and not of the stamp line above it (#543 Fault 3)",
-    widths.filter((k) => !k.endsWith("folded")).every((k) => band[k].open && !band[k].folded && band[k].fouled.length === 0),
-    JSON.stringify(Object.fromEntries(widths.map((k) => [k, band[k].fouled]))),
+    "CD9 opening the Chart Table folds the Broadside and takes its tab off the edge: the two are never open together, which is what stops them fighting for the right edge, the drawer's band and the chart's foot (#543, ruled 2026-09-08)",
+    !beforeOpen.folded && withOpen.open && withOpen.folded && !withOpen.tabShown,
+    JSON.stringify({ before: beforeOpen, open: withOpen }),
+  );
+  check(
+    "CD11 shutting the Chart Table gives the Broadside back to the reader who had it, and leaves it folded for the reader who did not",
+    !afterShut.open && !afterShut.folded && !afterShutFolded.open && afterShutFolded.folded,
+    JSON.stringify({ hadItOpen: afterShut, hadItFolded: afterShutFolded }),
+  );
+  check(
+    "CD12 with the drawer open NOTHING of the chart's furniture is lifted onto the chart: the caption and the roads out keep their seats and are covered, rather than being moved onto the sheet where they cannot be read (#543 Fault 1, ruled 2026-09-08)",
+    withOpen.lifted.length === 0,
+    JSON.stringify({ lifted: withOpen.lifted }),
   );
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
