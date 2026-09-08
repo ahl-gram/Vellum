@@ -110,3 +110,45 @@ test("the cap refuses for want of room, which reads differently from a duplicate
   assert.notEqual(refusalLine("full"), refusalLine("already"), "the two refusals are not the same sentence");
   assert.match(refusalLine("full"), /six/, "the cap's refusal names the six, as #518 ruling 3 wrote it");
 });
+
+// The fixtures above vary only lx, so a sameSheet comparing the SEAT alone passes all of them: two different worlds settling on one lattice seat would be wrongly refused. Every field the address carries gets a one-field-changed twin here, and each must lay.
+test("a sheet differing in ANY field the address carries is a different sheet (#520)", () => {
+  const base = survey(4);
+  const twins: ReadonlyArray<readonly [string, TableItem]> = [
+    ["seed", { ...base, seed: 43 }],
+    ["rung", { ...base, rung: 3 }],
+    ["lx", { ...base, lx: 5 }],
+    ["ly", { ...base, ly: 9 }],
+    ["style", { ...base, style: "ink" }],
+    ["legend", { ...base, legend: false }],
+    ["arms", { ...base, arms: true }],
+    ["beasts", { ...base, beasts: true }],
+    ["theme", { ...base, theme: "moisture" }],
+    ["overrides", { ...base, overrides: { landFraction: 0.4 } }],
+  ];
+  for (const [field, twin] of twins) {
+    const laid = layOnTable([base], twin);
+    assert.equal(laid.refused, false, `a sheet differing only in ${field} must lay`);
+    assert.equal(laid.items.length, 2, field);
+  }
+  assert.equal(layOnTable([base], { ...base }).refused, true, "and an identical sheet still does not");
+});
+
+test("a prospect is told from a survey, and from another prospect (#520)", () => {
+  const p1: TableItem = { kind: "prospect", seed: 42, overrides: {}, style: "ink", index: 3, year: 1059 };
+  assert.equal(layOnTable([survey(4)], p1).refused, false, "a prospect is never the survey beside it");
+  assert.equal(layOnTable([p1], p1).refused, true, "the same prospect twice is refused");
+  assert.equal(layOnTable([p1], { ...p1, index: 4 }).refused, false, "a different plate is a different prospect");
+  assert.equal(layOnTable([p1], { ...p1, year: 900 }).refused, false, "so is the same plate in another year");
+});
+
+// Nothing else makes a table both FULL and holding the item, so swapping the two guards in layOnTable was invisible at both layers.
+test("a full table refusing a sheet it ALREADY holds says so, not that it is full (#520)", () => {
+  const target = survey(0);
+  const full = fill(TABLE_CAP);
+  assert.equal(full.length, TABLE_CAP);
+  assert.deepEqual(full[0], target, "the target is on the full table");
+  const again = layOnTable(full, target);
+  assert.equal(again.refused, true);
+  assert.equal(again.reason, "already", "the more useful of the two true things");
+});
