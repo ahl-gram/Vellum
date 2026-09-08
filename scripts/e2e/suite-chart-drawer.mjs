@@ -293,6 +293,57 @@ export async function run(ctx) {
   );
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
+  // CD18 / CD19 / CD20 (#521 Sub 3): the road the table has carried disabled since #520 turns on, and the Portfolio
+  // drafts what it carries. The page reads the table from its OWN address once at load and never rewrites it.
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  await go(`${DRESS}&table=${SIX}`);
+  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+  await sleep(600);
+  const roadOn = await evaluate(`(() => { const b = document.getElementById("table-road"); return { disabled: b.disabled, stamp: (document.getElementById("table-road-stamp") || {}).textContent || null }; })()`);
+  check(
+    "CD18 with sheets on the table the road to the Portfolio turns on: #520 shipped it disabled with the stamp saying the portfolio is not yet bound, and this sub is what binds it (#521)",
+    roadOn.disabled === false,
+    JSON.stringify(roadOn),
+  );
+  const roadBefore = await evaluate(`document.getElementById("table-road").disabled`);
+  await evaluate(`document.getElementById("table-road").click()`);
+  for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate(`location.pathname.indexOf("/portfolio/") !== -1`)) break; }
+  const arrived = await evaluate(`({ path: location.pathname, table: new URLSearchParams(location.hash.slice(1)).get("table") })`);
+  check(
+    "CD18b the road carries the WHOLE gathering in the Portfolio's own address, which is the epic's core insight: the folio is a link, so the page it lands on can draft the same six sheets for anyone",
+    arrived.path.indexOf("/print-room/portfolio/") !== -1 && typeof arrived.table === "string" && arrived.table.split("_").length === 6,
+    JSON.stringify({ ...arrived, roadBefore }),
+  );
+  const PF = `(() => { const s = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return s ? { ...s,
+    rows: document.querySelectorAll("#pf-contents .row").length,
+    groups: document.querySelectorAll("#pf-contents .group-head").length,
+    heads: [...document.querySelectorAll("#pf-contents .group-head span:first-child")].map((e) => e.textContent),
+    onStage: !!document.querySelector("#pf-sheet svg"),
+    folio: (document.getElementById("folio-title") || {}).textContent || null,
+    bound: (document.getElementById("pf-bound") || {}).textContent || null } : null; })()`;
+  let pf = await evaluate(PF);
+  for (let i = 0; i < DRAWN && (!pf || pf.drawn < 6); i++) { await sleep(50); pf = await evaluate(PF); }
+  check(
+    "CD19 the Portfolio drafts every gathered sheet from its own number, groups the index by world under the parent world's NAME, and stands one sheet on the stage (#518 ruling 5)",
+    !!pf && pf.items === 6 && pf.drawn === 6 && pf.rows === 6 && pf.groups >= 1 && pf.onStage &&
+      pf.heads.every((h) => /^From .+ · chart № \d+$/.test(h)) && !/chart № 42, chart/.test(pf.heads[0] || ""),
+    JSON.stringify(pf),
+  );
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/portfolio/` });
+  for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate(`!!window.__vellumPortfolio`)) break; }
+  await sleep(400);
+  const empty = await evaluate(`(() => ({ bound: (document.getElementById("pf-bound") || {}).textContent || null,
+    explorer: !!document.getElementById("pf-explorer"),
+    next: (() => { const b = document.getElementById("pf-next"); return !!b && !b.hidden; })(),
+    download: (() => { const b = document.getElementById("pf-download"); return !!b && !b.hidden; })() }))()`);
+  check(
+    "CD20 a Portfolio reached with nothing gathered says so in the room's own voice and keeps only the road that has somewhere to go (ruled 2026-09-08): the two sheet presses have nothing to act on and stand down",
+    !!empty.bound && /table is laid at the Explorer/.test(empty.bound) && empty.explorer && !empty.next && !empty.download,
+    JSON.stringify(empty),
+  );
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+
   // CD6 (#540 Sub 2a): the phone's own door into the table. The desktop drawer must never paint at 390, and the check
   // has to try the door that opens it: `lay()` calls setOpen(true) on both its branches with no width term, so reading
   // the SHUT state at 390 (which this check used to do) says nothing about whether the drawer can appear. It could, and
