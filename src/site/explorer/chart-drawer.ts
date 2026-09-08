@@ -1,5 +1,7 @@
 // The Chart Table's state (#520 Sub 2 of #401): what the drawer draws and what the Explorer's address carries are the same array, so this half is pure and holds no DOM. `chart-drawer`, never `drawer`: src/site/shell/drawer.ts is the site's phone nav (#520 ruling 2).
-import { TABLE_CAP, emitTable, type TableItem, type SurveyItem, type Rung } from "../shared/table-address.ts";
+import { TABLE_CAP, emitTable, tableWindow, type TableItem, type SurveyItem, type Rung } from "../shared/table-address.ts";
+import { LOD_BANDS, type LodBand } from "../../world/lod.ts";
+import type { UvWindow } from "../../terrain/heightfield.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 import type { RenderOptions } from "../../render/map-renderer.ts";
 
@@ -75,6 +77,20 @@ export function surveyItemFrom(c: {
     style: c.render.style,
     legend: c.render.legend !== false, arms: c.render.arms === true, beasts: c.render.beasts === true,
     theme: c.render.theme ?? null,
+  };
+}
+
+/** The region job that redraws one filed survey, so a recovered table can fill its frames. Built from the ADDRESS alone, since that is all a recovered sheet has: `tableWindow` rebuilds the exact window the settle committed. A prospect is Sub 4's to draw and keeps its reserved frame (ruled 2026-09-07). */
+export function thumbJobFor(item: TableItem): {
+  kind: "region"; seed: number; overrides: Partial<WorldRecipe> | undefined; window: UvWindow;
+  gridW: number; gridH: number; band: number; render: RenderOptions;
+} | null {
+  if (item.kind !== "survey") return null;
+  const band = LOD_BANDS[item.rung] as LodBand;
+  return {
+    kind: "region", seed: item.seed, overrides: item.overrides as Partial<WorldRecipe>,
+    window: tableWindow(item), gridW: band.gridW, gridH: band.gridH, band: item.rung,
+    render: { style: item.style, widthPx: 1500, legend: item.legend, arms: item.arms, beasts: item.beasts, theme: item.theme ?? undefined },
   };
 }
 

@@ -8,7 +8,7 @@ import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-war
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
 import { type TableItem } from "../shared/table-address.ts";
-import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine } from "./chart-drawer.ts";
+import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor } from "./chart-drawer.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
 import { wireControls } from "./controls.ts";
@@ -80,6 +80,14 @@ const chartTable = bindChartDrawer({
   root: chartDrawer, tab: chartDrawerTab, shut: chartDrawerShut, count: chartDrawerCount,
   cuttings, full: chartDrawerFull, road: tableRoad,
   say: (line) => { status.textContent = line; },
+  // Deferred to the first opening, never to load (ruled 2026-09-07): a recovered link opens at the page's usual pace and nothing competes with the chart the reader came for.
+  drawThumb: async (item) => {
+    const job = thumbJobFor(item);
+    if (!job) return null;
+    const res = await runJob(job).catch(() => null);
+    if (!res) return null;
+    return { url: URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" })), title: res.title };
+  },
   onChange: () => syncHash(),
 });
 // #165/#169/#192: the ONE hash writer, every trigger funnels through here; #321: the box IS the flag and the Explorer never authors year=.
