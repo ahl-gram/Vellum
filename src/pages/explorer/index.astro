@@ -16,7 +16,7 @@ const tagline = "every seed is a world, draw one";
   room={room}
   description="Generate procedural fantasy maps in your browser. Every seed is a world."
   path="/explorer/"
-  extraCss={["/living-chart.css", "/explorer/broadside.css"]}
+  extraCss={["/living-chart.css", "/explorer/broadside.css", "/explorer/chart-drawer.css"]}
   chartRoom
 >
 <Fog />
@@ -144,6 +144,23 @@ const tagline = "every seed is a world, draw one";
     <LegendButton id="journal-link" gold href="/reading-room/" verb="Read the journal in" room="The Reading Room" />
   </div>
 </nav>
+
+<!-- #520 Sub 2, direction D ruled at the #518 sitting: the tab stands on the right edge while the drawer is shut, and the drawer slides up over the foot of the stage. Authored here, bound by chart-drawer.ts; the cuttings are rendered from the address, which is the table's only memory (#401: no browser storage). -->
+<button id="chart-drawer-tab" class="chart-drawer-tab" type="button" aria-expanded="false" aria-controls="chart-drawer">The Drawer &middot; the table is bare</button>
+<div id="chart-drawer" class="chart-drawer" role="region" aria-label="The Chart Table">
+  <div class="chart-drawer-head">
+    <p class="card-verb">Gathered from the Glass</p>
+    <h2 class="card-title">The Chart Table</h2>
+    <p class="count" id="chart-drawer-count">the table is bare</p>
+    <button id="chart-drawer-shut" class="legend-btn shut" type="button"><span class="verb">Shut</span><span class="room">The Drawer</span></button>
+  </div>
+  <ol class="cuttings" id="cuttings"></ol>
+  <div class="chart-drawer-road">
+    <p class="full" id="chart-drawer-full" hidden>no room for more</p>
+    <span class="stamp" id="table-road-stamp">the portfolio is not yet bound</span>
+    <button id="table-road" class="legend-btn gold" type="button" disabled><span class="verb">Take the table to</span><span class="room">The Print Room</span></button>
+  </div>
+</div>
 
 <Glass id="zoom-controls" />
 
