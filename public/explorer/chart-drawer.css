@@ -72,3 +72,8 @@ body:has(.chart-drawer.open) .legend:not(.in-slip) { bottom: calc(15.5rem + var(
 }
 .dog-ear:is(:hover, :focus-visible) { width: 4.1rem; height: 4.1rem; }
 .dog-ear:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -2px; }
+
+/* The phone is Sub 2a (#540), where the drawer becomes the bottom sheet's second leaf as #518 ruling 4 ruled it. Until that lands the desktop drawer stands DOWN here rather than shipping broken: measured at a true 390, its rigid head and road leave the cuttings row 4.34px wide, push the road 64px past the edge into body's overflow:hidden where nothing can reach or scroll to it, and paint the translucent walnut over the bottom third of the chart while the Broadside's own sheet paints back over the road. The table is unreachable on a phone in the interval, which is a stopgap and not the ruled design. */
+@media (max-width: 900px) {
+  .chart-drawer, .chart-drawer-tab { display: none; }
+}
