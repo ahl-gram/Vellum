@@ -40,8 +40,11 @@
 .contents .row-title:is(:hover, :focus-visible) { text-decoration: underline; }
 .contents .row.up .row-title { font-weight: 600; text-decoration: underline; }
 .contents .row-band { grid-area: band; font-family: var(--font-flourish); font-size: 0.82rem; color: var(--ink-brown); }
-.contents .row-download { grid-area: dl; font-variant-caps: small-caps; letter-spacing: 0.06em; font-size: 0.76rem; color: var(--ink-brown); }
-.contents .row-download[aria-disabled="true"] { color: var(--ink-faded); pointer-events: none; }
+/* A press, not a link: an <a href="#"> kept its tab stop while disabled, and Enter on it replaced the hash that IS the folio. Four classes deep because the house sheets dress every button, and the mockup reads this as a quiet line and not a box. */
+.contents .row .row-download { grid-area: dl; justify-self: start; appearance: none; background: none; border: 0; border-radius: 0; padding: 0; box-shadow: none;
+  font-variant-caps: small-caps; letter-spacing: 0.06em; font-size: 0.76rem; color: var(--ink-brown); cursor: pointer; text-decoration: underline; }
+.contents .row .row-download:is(:hover, :focus-visible) { color: var(--ink-dark); background: none; transform: none; box-shadow: none; }
+.contents .row .row-download:disabled { color: var(--ink-faded); cursor: default; text-decoration: none; }
 
 @media (max-width: 900px) {
   .contents .row { grid-template-columns: 1.4rem 3.8rem 1fr; }
