@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { layOnTable, takeOffTable, roomOnTable } from "../../src/site/explorer/chart-drawer.ts";
+import { layOnTable, takeOffTable, roomOnTable, countLine, tabLine, refusalLine } from "../../src/site/explorer/chart-drawer.ts";
 import { TABLE_CAP, TABLE_KEY, emitTable, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 import { emitTableKey } from "../../src/site/explorer/address.ts";
 
@@ -72,4 +72,83 @@ test("an empty table writes no key, and a laid one writes the grammar's (#520 ru
   const one = new URLSearchParams("seed=42");
   emitTableKey(one, fill(1));
   assert.equal(one.get(TABLE_KEY), emitTable(fill(1)), "ONE sheet is the commonest table and is written like any other: the emptiness gate is exactly zero");
+});
+
+// The drawer's own voice (#518 ruling 6, period voice; the wordings are provisional and ride Sub 5's post-use re-review). Numbers are spelled, as every count in the mock is.
+test("the head counts the table in words, and says when it is bare and when it is full (#520)", () => {
+  assert.equal(countLine([]), "the table is bare");
+  assert.equal(countLine(fill(1)), "one sheet laid · room for five more");
+  assert.equal(countLine(fill(3)), "three sheets laid · room for three more");
+  assert.equal(countLine(fill(5)), "five sheets laid · room for one more");
+  assert.equal(countLine(fill(TABLE_CAP)), "six sheets laid · the table is full");
+});
+
+test("the tab counts the drawer it is shut over (#520)", () => {
+  assert.equal(tabLine([]), "The Drawer · the table is bare");
+  assert.equal(tabLine(fill(1)), "The Drawer · one sheet");
+  assert.equal(tabLine(fill(3)), "The Drawer · three sheets");
+});
+
+// Ruled 2026-09-07: a survey already on the table is refused and the drawer says so, rather than spending two of the six seats on one sheet or ignoring the click in silence.
+test("the same survey is refused a second time, and the table is unmoved (#520, ruled)", () => {
+  const one = layOnTable([], survey(4)).items;
+  const again = layOnTable(one, survey(4));
+  assert.equal(again.refused, true);
+  assert.equal(again.reason, "already", "refused for being a duplicate, not for want of room");
+  assert.equal(again.items, one, "and the table is handed back untouched");
+
+  const other = layOnTable(one, survey(5));
+  assert.equal(other.refused, false, "a different seat on the same world is a different survey");
+  assert.equal(other.items.length, 2);
+});
+
+test("the cap refuses for want of room, which reads differently from a duplicate (#520)", () => {
+  const full = layOnTable(fill(TABLE_CAP - 1), survey(98)).items;
+  const seventh = layOnTable(full, survey(99));
+  assert.equal(seventh.refused, true);
+  assert.equal(seventh.reason, "full");
+  assert.notEqual(refusalLine("full"), refusalLine("already"), "the two refusals are not the same sentence");
+  assert.match(refusalLine("full"), /six/, "the cap's refusal names the six, as #518 ruling 3 wrote it");
+});
+
+// The fixtures above vary only lx, so a sameSheet comparing the SEAT alone passes all of them: two different worlds settling on one lattice seat would be wrongly refused. Every field the address carries gets a one-field-changed twin here, and each must lay.
+test("a sheet differing in ANY field the address carries is a different sheet (#520)", () => {
+  const base = survey(4);
+  const twins: ReadonlyArray<readonly [string, TableItem]> = [
+    ["seed", { ...base, seed: 43 }],
+    ["rung", { ...base, rung: 3 }],
+    ["lx", { ...base, lx: 5 }],
+    ["ly", { ...base, ly: 9 }],
+    ["style", { ...base, style: "ink" }],
+    ["legend", { ...base, legend: false }],
+    ["arms", { ...base, arms: true }],
+    ["beasts", { ...base, beasts: true }],
+    ["theme", { ...base, theme: "moisture" }],
+    ["overrides", { ...base, overrides: { landFraction: 0.4 } }],
+  ];
+  for (const [field, twin] of twins) {
+    const laid = layOnTable([base], twin);
+    assert.equal(laid.refused, false, `a sheet differing only in ${field} must lay`);
+    assert.equal(laid.items.length, 2, field);
+  }
+  assert.equal(layOnTable([base], { ...base }).refused, true, "and an identical sheet still does not");
+});
+
+test("a prospect is told from a survey, and from another prospect (#520)", () => {
+  const p1: TableItem = { kind: "prospect", seed: 42, overrides: {}, style: "ink", index: 3, year: 1059 };
+  assert.equal(layOnTable([survey(4)], p1).refused, false, "a prospect is never the survey beside it");
+  assert.equal(layOnTable([p1], p1).refused, true, "the same prospect twice is refused");
+  assert.equal(layOnTable([p1], { ...p1, index: 4 }).refused, false, "a different plate is a different prospect");
+  assert.equal(layOnTable([p1], { ...p1, year: 900 }).refused, false, "so is the same plate in another year");
+});
+
+// Nothing else makes a table both FULL and holding the item, so swapping the two guards in layOnTable was invisible at both layers.
+test("a full table refusing a sheet it ALREADY holds says so, not that it is full (#520)", () => {
+  const target = survey(0);
+  const full = fill(TABLE_CAP);
+  assert.equal(full.length, TABLE_CAP);
+  assert.deepEqual(full[0], target, "the target is on the full table");
+  const again = layOnTable(full, target);
+  assert.equal(again.refused, true);
+  assert.equal(again.reason, "already", "the more useful of the two true things");
 });

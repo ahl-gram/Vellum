@@ -62,6 +62,8 @@ interface Deps {
   /** current world zoom, to counter-scale the pencil border */
   getZoomK: () => number;
   prefersReduce: () => boolean;
+  /** #520: the dog-ear rides the committed inset and dies with it, so it is mounted here rather than as a sibling that would outlive the sheet it belongs to. */
+  decorateInset?: (el: HTMLElement) => void;
 }
 
 export function createLodController(deps: Deps) {
@@ -159,6 +161,8 @@ export function createLodController(deps: Deps) {
     const old = inset ? inset.el : null;
     mapDiv.appendChild(el);
     inset = { el, svg: res.svg, band, window, title: res.title, seat };
+    // AFTER the assignment: the hook asks the controller what is committed, and before it this still named the outgoing sheet.
+    deps.decorateInset?.(el);
     currentBand = band;
     currentWindow = window;
     hidePencil();

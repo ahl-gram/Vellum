@@ -125,9 +125,9 @@ const redressesIn = (css: string, kit: Set<string>): string[] =>
       return [...m[2]!.matchAll(/([a-z-]+)\s*:/g)].map((x) => x[1]!).filter((p) => REDRESS.test(p)).map((p) => `${arm.replace(/\s+/g, " ")} { ${p} }`);
     }));
 
+const KIT_SHEETS = /^public\/(atelier.*|house|motion|fonts)\.css$/;
 const pageSheets = (): Array<readonly [string, string]> => [
-  ...globSync("public/**/index.css", { cwd: REPO }).map((p) => [p, read(p)] as const),
-  ...["public/living-chart.css", "public/reading-frame.css"].map((p) => [p, read(p)] as const),
+  ...globSync("public/**/*.css", { cwd: REPO }).filter((p) => !KIT_SHEETS.test(p)).map((p) => [p, read(p)] as const),
   ...globSync("src/pages/**/index.astro", { cwd: REPO }).map((p) => [p, [...read(p).matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n")] as const),
 ];
 

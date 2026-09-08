@@ -28,6 +28,8 @@ interface GlassDeps {
   regionEligible: () => boolean;
   /** #165/#169: the conductor's ONE hash writer; settles funnel through it. */
   syncHash: () => void;
+  /** #520: the dog-ear rides the committed inset, so the conductor hangs it here rather than on a sibling that would outlive the sheet. */
+  decorateInset?: (el: HTMLElement) => void;
   /** The on-screen camera, draw nearer / stand off / the whole sheet (#165; voiced at #170, home's voice since #505). */
   buttons: { zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement; cluster: HTMLElement };
 }
@@ -45,7 +47,9 @@ export function createGlass(deps: GlassDeps) {
   function setCardZoom(k: number): void {
     const card = document.getElementById("place-card");
     const overlay = mapDiv.querySelector<HTMLElement>(".place-overlay");
-    for (const el of [card, overlay]) {
+        // ALL of them: an outgoing inset stays mounted until its fade ends, up to 700ms, so a singular query hands the counter-scale to the sheet leaving and not the one arriving.
+    const ears = [...mapDiv.querySelectorAll<HTMLElement>(".dog-ear")];
+    for (const el of [card, overlay, ...ears]) {
       if (!el) continue;
       if (k === 1) el.style.removeProperty("--zoom-k");
       else el.style.setProperty("--zoom-k", String(k));
@@ -77,6 +81,7 @@ export function createGlass(deps: GlassDeps) {
     setError: deps.setError,
     getZoomK: () => zoomController.getState().k,
     prefersReduce: deps.prefersReduce,
+    decorateInset: deps.decorateInset,
   });
 
   // #165/#169: sheet fractions of the WORLD sheet at every band (the inset design never rebases), read from the STABLE viewport; guard a zero-size box (before first layout) so the division is finite.
@@ -150,6 +155,7 @@ export function createGlass(deps: GlassDeps) {
     cancelRedraft: () => lodController.cancel(),
     setWorld: (ctx: Parameters<typeof lodController.setWorld>[0]) => lodController.setWorld(ctx),
     homeToWorld: () => lodController.homeToWorld(),
+    committedSurvey: () => lodController.committedSurvey(),
     lodState: () => lodController.state(),
   };
 }

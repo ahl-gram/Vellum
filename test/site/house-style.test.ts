@@ -34,7 +34,7 @@ test("the intro role: flourish italic, ink-brown, centered (#324 decision 1)", (
 
 test("no page sheet re-binds the intro voice (#324)", () => {
   for (const page of [
-    "public/index.css", "public/explorer/index.css", "public/explorer/broadside.css",
+    "public/index.css", "public/explorer/index.css", "public/explorer/broadside.css", "public/explorer/chart-drawer.css",
     "public/faq/index.css",
     "public/glossary/index.css", "public/print-room/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
@@ -152,7 +152,7 @@ test("the old page-local skins are gone (#324)", () => {
     "the seedrow's 2px corners joined the idiom",
   );
   for (const page of [
-    "public/explorer/index.css", "public/explorer/broadside.css",
+    "public/explorer/index.css", "public/explorer/broadside.css", "public/explorer/chart-drawer.css",
     "public/print-room/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
     "public/prospect/index.css", "public/ribbon/index.css", "public/specimen/index.css",
@@ -168,7 +168,7 @@ test("no token value smuggled past the guards in rgb() form (#324)", async () =>
   // rgb(74 56 38 / a) IS --ink-dark with alpha, invisible to the hex guard; alpha over a token is written rgb(from var(--token) r g b / a) so the quotation stays attached to its name.
   const { SITE_PALETTE } = await import("../../src/atlas/palette.ts");
   const sources = [
-    "public/index.css", "public/explorer/index.css", "public/explorer/broadside.css",
+    "public/index.css", "public/explorer/index.css", "public/explorer/broadside.css", "public/explorer/chart-drawer.css",
     "public/faq/index.css",
     "public/glossary/index.css", "public/print-room/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",

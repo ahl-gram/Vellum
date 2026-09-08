@@ -8,6 +8,7 @@ import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-war
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
 import { type TableItem } from "../shared/table-address.ts";
+import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor } from "./chart-drawer.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
 import { wireControls } from "./controls.ts";
@@ -28,6 +29,7 @@ import type { Camera } from "./camera.ts";
 import {
   $, seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider,
   coastSlider, status, mapDiv, mapViewport, sheetEl, innerEl, caption, folioTitle, folioSub, stageEl,
+  chartDrawer, chartDrawerTab, chartDrawerShut, chartDrawerCount, chartDrawerFull, cuttings, tableRoad,
   versoEl, versoBtn, agesChk, orderLink, journalLink, hashControls,
 } from "./elements.ts";
 
@@ -73,12 +75,38 @@ let redraftEnabled = true;
 function regionEligible(): boolean {
   return redraftEnabled && styleSel.value === "antique" && !agesChk.checked && !isFlipped(sheetEl) && !!lastSvg;
 }
-// #520: the Chart Table rides in the address and in no browser storage (ruled 2026-09-05), so the conductor holds it between writes and hands it to the one writer.
-let table: ReadonlyArray<TableItem> = [];
+// #520: the Chart Table rides in the address and in no browser storage (ruled 2026-09-05), so the drawer holds it between writes and hands it to the one writer.
+// What the handle SAYS depends on the table, which changes under it, so the label is recomputed rather than baked once at the commit.
+const earLabel = (item: TableItem): string =>
+  chartTable.holds(item) ? refusalLine("already") : chartTable.isFull() ? refusalLine("full") : "lay this survey on the table";
+const relabelEar = (): void => {
+  const ear = document.querySelector<HTMLButtonElement>("#map .region-inset .dog-ear");
+  const committed = glass.committedSurvey();
+  const item = committed ? surveyItemFrom(committed) : null;
+  if (!ear || !item) return;
+  const label = earLabel(item);
+  ear.setAttribute("aria-label", label);
+  ear.title = label;
+};
+
+const chartTable = bindChartDrawer({
+  root: chartDrawer, tab: chartDrawerTab, shut: chartDrawerShut, count: chartDrawerCount,
+  cuttings, full: chartDrawerFull, road: tableRoad,
+  say: (line) => { status.textContent = line; },
+  // Deferred to the first opening, never to load (ruled 2026-09-07): a recovered link opens at the page's usual pace and nothing competes with the chart the reader came for.
+  drawThumb: async (item) => {
+    const job = thumbJobFor(item);
+    if (!job) return null;
+    const res = await runJob(job).catch(() => null);
+    if (!res) return null;
+    return { url: URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" })), title: res.title };
+  },
+  onChange: () => { syncHash(); relabelEar(); },
+});
 // #165/#169/#192: the ONE hash writer, every trigger funnels through here; #321: the box IS the flag and the Explorer never authors year=.
 function syncHash(): void {
   writeHash(hashControls, touched.land, touched.coast, glass.cameraNow(),
-    agesChk.checked ? { kind: "survey" } : null, table);
+    agesChk.checked ? { kind: "survey" } : null, chartTable.state());
   journalLink.href = "/reading-room/" + (location.hash || "");
 }
 
@@ -94,6 +122,14 @@ const glass = createGlass({
   prefersReduce,
   regionEligible,
   syncHash,
+  // #520: the dog-ear rides the committed inset. Rebuilt at each commit because draw() wipes #map and the controller unmounts insets on cancel, home and the verso flip, so a handle mounted anywhere else would outlive its sheet.
+  decorateInset: (el: HTMLElement) => {
+    const committed = glass.committedSurvey();
+    const item = committed ? surveyItemFrom(committed) : null;
+    if (!item) return;
+    el.appendChild(makeDogEar(earLabel(item), glass.cameraNow().k,
+      () => { chartTable.lay(item, committed?.svg ?? null, committed?.title); }));
+  },
   buttons: { zoomIn: $("zoom-in"), zoomOut: $("zoom-out"), reset: $("zoom-reset"), cluster: $("zoom-controls") },
 });
 
@@ -256,7 +292,7 @@ if (fwd) {
   if (hashed.land) touched.land = true;
   if (hashed.coast) touched.coast = true;
   pendingCamera = hashed.camera;
-  table = hashed.table ?? [];
+  chartTable.restore(hashed.table ?? []);
   if (hashed.live) agesChk.checked = true;
   draw();
 }

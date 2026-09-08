@@ -19,6 +19,7 @@ const GENERATED_CSS = [["public/gallery/", "src/cli/gallery.ts"]] as const;
 const AUTHORED_CSS = [
   "public/atelier.css",
   "public/explorer/broadside.css",
+  "public/explorer/chart-drawer.css",
   "public/explorer/index.css",
   "public/faq/index.css",
   "public/fonts.css",
