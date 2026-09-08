@@ -195,11 +195,15 @@ export async function run(ctx) {
     const lifted = [...document.querySelectorAll(".corner.bl.folio, .corner.br.zoomery, .legend:not(.in-slip)")]
       .filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0.5 && b.height > 0.5 && onSheet(b); })
       .map(name);
+    // The seat itself, as a distance up from the foot of the window: the lift wrote a bottom offset, and the room's fit follows
+    // the furniture, so a lifted piece can end up clear of a chart that shrank to accommodate it. The seat cannot lie.
+    const seats = Object.fromEntries([...document.querySelectorAll(".corner.bl.folio, .legend:not(.in-slip)")]
+      .map((e) => [name(e), +(window.innerHeight - e.getBoundingClientRect().bottom).toFixed(1)]));
     return {
       open: document.getElementById("chart-drawer").classList.contains("open"),
       folded: slip.classList.contains("folded"),
       tabShown: !!tab && getComputedStyle(tab).display !== "none",
-      lifted,
+      lifted, seats,
     };
   })()`;
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
@@ -231,10 +235,20 @@ export async function run(ctx) {
     !afterShut.open && !afterShut.folded && !afterShutFolded.open && afterShutFolded.folded,
     JSON.stringify({ hadItOpen: afterShut, hadItFolded: afterShutFolded }),
   );
+  // Both readings are taken with the Broadside ALREADY folded, so the drawer's own fold is a no-op and the only thing
+  // that could move the furniture is the drawer.
+  await go(`${DRESS}&table=${SIX}`);
+  await evaluate(`document.querySelector(".slip-fold").click()`);
+  await sleep(600);
+  const seatsShut = (await evaluate(SURFACES)).seats;
+  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+  await sleep(900);
+  const seatsOpen = (await evaluate(SURFACES)).seats;
+  const names = Object.keys(seatsShut);
   check(
-    "CD12 with the drawer open NOTHING of the chart's furniture is lifted onto the chart: the caption and the roads out keep their seats and are covered, rather than being moved onto the sheet where they cannot be read (#543 Fault 1, ruled 2026-09-08)",
-    withOpen.lifted.length === 0,
-    JSON.stringify({ lifted: withOpen.lifted }),
+    "CD12 opening the drawer does not move the chart's furniture: the caption and the roads out keep the seat they had and the drawer covers them, rather than being lifted onto the sheet where they cannot be read (#543 Fault 1, ruled 2026-09-08)",
+    names.length === 2 && names.every((k) => Math.abs(seatsOpen[k] - seatsShut[k]) < 1) && withOpen.lifted.length === 0,
+    JSON.stringify({ shut: seatsShut, open: seatsOpen, lifted: withOpen.lifted }),
   );
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
