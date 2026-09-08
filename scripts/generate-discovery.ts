@@ -12,6 +12,7 @@ export const ATLAS_ROUTE = "/atlas/";
 export const PROSPECT_ROUTE = "/prospect/";
 /** The Wayfarer's Ribbon: itinerary strip charts, a deep-link surface like the prospect, never in the nav. */
 export const RIBBON_ROUTE = "/ribbon/";
+// Omitted from the nav like its three siblings: the Portfolio is reached from a gathered table or from the Print Room's Bound Atlas slip, never as a standing room (#521).
 export const PORTFOLIO_ROUTE = "/print-room/portfolio/";
 
 // Deliberately NOT grouped by NavItem.kind: nav.ts declares kind a placeholder nothing may depend on, so these files stay flat.

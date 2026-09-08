@@ -130,7 +130,6 @@ export interface ChartDrawerDeps {
   readonly broadside?: () => SlipFold | null;
   /** The phone leaf's tab carries its own tally (#540); the drawer's tab and the leaf's are different sentences. */
   readonly relabelLeaf?: (count: number) => void;
-  /** Where the road goes; the page supplies it so the module stays free of the site's shape (#521). */
   readonly folioHref?: string;
 }
 
@@ -147,7 +146,6 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
 
   const render = (): void => {
     deps.count.textContent = countLine(items);
-    // #521: the road was born disabled with a stamp saying the portfolio was not yet bound. It is bound now, so the press turns on the moment a sheet is laid and the stamp's reason goes with it.
     deps.road.disabled = items.length === 0;
     deps.tab.textContent = tabLine(items);
     deps.relabelLeaf?.(items.length);
@@ -246,7 +244,6 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
 
   deps.tab.addEventListener("click", () => setOpen(true, true));
   deps.shut.addEventListener("click", () => setOpen(false, true));
-  // The gathering rides in the Portfolio's own address and nowhere else (#401's address doctrine), so the road is a navigation and not a handoff.
   deps.road.addEventListener("click", () => {
     if (items.length === 0) return;
     window.location.href = `${deps.folioHref ?? "../print-room/portfolio/"}#${TABLE_KEY}=${emitTable(items)}`;

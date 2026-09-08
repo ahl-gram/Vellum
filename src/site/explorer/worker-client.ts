@@ -99,7 +99,6 @@ export interface RegionResult {
   /** The LOD band index the job carried, echoed for the next hysteresis step. */
   readonly band: number;
   readonly title: string;
-  /** The PARENT world's own title, which the region's title does not carry: the Portfolio heads each group with it (#521). */
   readonly worldTitle: string;
   readonly cached: boolean;
 }

@@ -67,7 +67,6 @@ const showTop = (): void => {
   for (const row of contents.querySelectorAll(".row")) row.classList.toggle("up", Number((row as HTMLElement).dataset["at"]) === top);
 };
 
-/** A title brings its sheet to the top (#518 ruling 5). */
 const bringUp = (at: number): void => {
   if (at < 0 || at >= sheets.length) return;
   top = at;
@@ -91,6 +90,42 @@ const takeHome = (sheet: Drawn): void => {
   URL.revokeObjectURL(a.href);
 };
 
+const rowFor = (sheet: Drawn, at: number): HTMLLIElement => {
+  const li = document.createElement("li");
+  li.className = "row";
+  li.dataset["at"] = String(at);
+  const numeral = document.createElement("span");
+  numeral.className = "numeral";
+  numeral.textContent = roman(at + 1);
+  const thumb = document.createElement("span");
+  thumb.className = "thumb";
+  if (sheet.url) {
+    const img = document.createElement("img");
+    img.src = sheet.url;
+    img.alt = "";
+    thumb.append(img);
+  } else {
+    thumb.classList.add("awaited");
+    thumb.textContent = isAwaited(sheet.item) ? "a prospect" : "drafting…";
+  }
+  const title = document.createElement("button");
+  title.type = "button";
+  title.className = "row-title";
+  title.textContent = sheet.title;
+  title.addEventListener("click", () => bringUp(at));
+  const band = document.createElement("i");
+  band.className = "row-band";
+  band.textContent = sheet.item.kind === "survey" ? `band ${sheet.item.rung}, ${sheet.item.style}` : "a prospect, awaiting its page";
+  const own = document.createElement("button");
+  own.type = "button";
+  own.className = "row-download";
+  own.textContent = "the engraving (SVG)";
+  own.disabled = sheet.svg === null;
+  own.addEventListener("click", () => takeHome(sheet));
+  li.append(numeral, thumb, title, band, own);
+  return li;
+};
+
 const rows = (): void => {
   const groups = groupByWorld(items);
   contents.replaceChildren();
@@ -98,53 +133,20 @@ const rows = (): void => {
     const head = document.createElement("p");
     head.className = "group-head";
     const name = document.createElement("span");
-    const first = sheets[group.entries[0]?.at ?? 0];
-    name.textContent = `From ${first?.worldTitle || "this world"} · chart № ${group.seed}`;
+    // The first entry may be a prospect, which never drafts and so never learns the world's name; the first DRAFTED one does.
+    const named = group.entries.map((e) => sheets[e.at]).find((sheet) => !!sheet?.worldTitle);
+    name.textContent = `From ${named?.worldTitle || "this world"} · chart № ${group.seed}`;
     head.append(name);
     const gloss = document.createElement("span");
     gloss.className = "gloss";
     gloss.textContent = "a title brings it to the top";
     head.append(gloss);
     contents.append(head);
-
     const list = document.createElement("ol");
     list.className = "contents";
     for (const { at } of group.entries) {
       const sheet = sheets[at];
-      if (!sheet) continue;
-      const li = document.createElement("li");
-      li.className = "row";
-      li.dataset["at"] = String(at);
-      const numeral = document.createElement("span");
-      numeral.className = "numeral";
-      numeral.textContent = roman(at + 1);
-      const thumb = document.createElement("span");
-      thumb.className = "thumb";
-      if (sheet.url) {
-        const img = document.createElement("img");
-        img.src = sheet.url;
-        img.alt = "";
-        thumb.append(img);
-      } else {
-        thumb.classList.add("awaited");
-        thumb.textContent = isAwaited(sheet.item) ? "a prospect" : "drafting…";
-      }
-      const title = document.createElement("button");
-      title.type = "button";
-      title.className = "row-title";
-      title.textContent = sheet.title;
-      title.addEventListener("click", () => bringUp(at));
-      const band = document.createElement("i");
-      band.className = "row-band";
-      band.textContent = sheet.item.kind === "survey" ? `band ${sheet.item.rung}, ${sheet.item.style}` : "a prospect, awaiting its page";
-      const own = document.createElement("button");
-      own.type = "button";
-      own.className = "row-download";
-      own.textContent = "the engraving (SVG)";
-      own.disabled = sheet.svg === null;
-      own.addEventListener("click", () => takeHome(sheet));
-      li.append(numeral, thumb, title, band, own);
-      list.append(li);
+      if (sheet) list.append(rowFor(sheet, at));
     }
     contents.append(list);
   }
@@ -152,9 +154,20 @@ const rows = (): void => {
 
 const retitle = (): void => {
   const groups = groupByWorld(items);
+  bound.replaceChildren();
   bound.textContent = items.length === 0
     ? BARE_LINE
-    : `${boundLine(groups.map((g) => ({ name: sheets[g.entries[0]?.at ?? 0]?.worldTitle || `chart № ${g.seed}`, count: g.entries.length })))} ${draftedLine(drawnCount(), drawable().length)}`;
+    : boundLine(groups.map((g) => ({
+        name: g.entries.map((e) => sheets[e.at]).find((sheet) => !!sheet?.worldTitle)?.worldTitle || `chart № ${g.seed}`,
+        count: g.entries.length,
+      })));
+  const stamp = draftedLine(drawnCount(), drawable().length);
+  if (items.length > 0 && stamp) {
+    const el = document.createElement("span");
+    el.className = "stamp";
+    el.textContent = stamp;
+    bound.append(el);
+  }
 };
 
 /** One job per survey, grouped by world: worldFor is a single-entry cache, so interleaving seeds regenerates the parent every time. */
