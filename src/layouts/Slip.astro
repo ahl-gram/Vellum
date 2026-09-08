@@ -18,6 +18,7 @@ const titleId = `${id}-title`;
     <p class="card-verb">{verb}</p>
     <h2 class="card-title" id={titleId}>{title}</h2>
     <p class="card-where">{where}</p>
+    {Astro.slots.has("tabs") && <div class="sheet-tabs"><slot name="tabs" /></div>}
   </div>
   <div class="slip-body"><slot /></div>
   {Astro.slots.has("foot") && <div class="slip-foot"><slot name="foot" /></div>}

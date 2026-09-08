@@ -128,6 +128,8 @@ export interface ChartDrawerDeps {
   readonly drawThumb?: (item: TableItem) => Promise<{ url: string; title: string } | null>;
   /** The Broadside's fold. Read late: the room is bound after the table (#543, ruled 2026-09-08). */
   readonly broadside?: () => SlipFold | null;
+  /** The phone leaf's tab carries its own tally (#540); the drawer's tab and the leaf's are different sentences. */
+  readonly relabelLeaf?: (count: number) => void;
 }
 
 export function bindChartDrawer(deps: ChartDrawerDeps) {
@@ -144,6 +146,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
   const render = (): void => {
     deps.count.textContent = countLine(items);
     deps.tab.textContent = tabLine(items);
+    deps.relabelLeaf?.(items.length);
     deps.full.hidden = roomOnTable(items) > 0;
     deps.cuttings.replaceChildren(...items.map((item, seat) => {
       const li = document.createElement("li");

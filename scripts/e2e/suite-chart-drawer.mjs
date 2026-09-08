@@ -40,7 +40,7 @@ const READ = `(() => {
 })()`;
 
 export async function run(ctx) {
-  const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, PORT } = ctx;
   const settle = makeSettle(ctx);
   // A REAL press and release at the handle's own coordinates, never element.click(): a synthetic click dispatches straight at the node and ignores pointer-events, so it files a handle no reader could reach. The inset box is pointer-events: none, and that is exactly the defect this drives.
   const { clickAt } = makeStage(ctx);
@@ -191,7 +191,7 @@ export async function run(ctx) {
     const onSheet = (b) =>
       Math.max(0, Math.min(b.right, sheet.right) - Math.max(b.left, sheet.left)) *
       Math.max(0, Math.min(b.bottom, sheet.bottom) - Math.max(b.top, sheet.top)) > 0;
-    const name = (e) => (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\s+/).join("."));
+    const name = (e) => (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\\s+/).join("."));
     const lifted = [...document.querySelectorAll(".corner.bl.folio, .corner.br.zoomery, .legend:not(.in-slip)")]
       .filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0.5 && b.height > 0.5 && onSheet(b); })
       .map(name);
@@ -293,15 +293,90 @@ export async function run(ctx) {
   );
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
-  // CD6: the phone stands the drawer down until Sub 2a (#540).
+  // CD6 (#540 Sub 2a): the phone's own door into the table. The desktop drawer must never paint at 390, and the check
+  // has to try the door that opens it: `lay()` calls setOpen(true) on both its branches with no width term, so reading
+  // the SHUT state at 390 (which this check used to do) says nothing about whether the drawer can appear. It could, and
+  // it did: `.chart-drawer.open` is (0,2,0) against the stand-down's (0,1,0), and specificity resolves before source
+  // order, so once .open landed the drawer displayed at 390 over a reader who could not shut it again.
   await setMobileViewport(390, 844);
-  await go(`${DRESS}&table=${carried}`);
+  await go(`${DRESS}&${DEEP}`);
+  const phoneArmed = await settle(READ, atInset, "chart-drawer-phone-inset", DRAWN);
+  const phoneEar = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
+  if (phoneEar) { await touch("touchStart", [{ x: phoneEar.x, y: phoneEar.y, id: 0 }]); await touch("touchEnd", []); }
+  await sleep(1600);
   const phone = await evaluate(READ);
+  const phoneDrawer = await evaluate(`getComputedStyle(document.getElementById("chart-drawer")).display`);
+  const phoneShut = await evaluate(`(() => { const b = document.getElementById("chart-drawer-shut"); const r = b.getBoundingClientRect(); if (r.width < 1) return "no-box"; const h = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2)); return h === b || b.contains(h) ? "reachable" : "eclipsed"; })()`);
   check(
-    "CD6 at 390 the drawer and its tab stand DOWN until Sub 2a (#540) builds the sheet's second leaf: nothing of the desktop drawer paints over the chart, and nothing scrolls sideways",
-    !phone.tabShown && phone.scrollW === phone.innerW &&
-      (await evaluate(`getComputedStyle(document.getElementById("chart-drawer")).display`)) === "none",
-    JSON.stringify({ tabShown: phone.tabShown, scrollW: phone.scrollW, innerW: phone.innerW }),
+    "CD6 at 390 the desktop drawer never paints, not even after a real tap on the dog-ear: the handle is the phone's own door into the table and it opens the drawer with no width term, so the stand-down has to cover the OPEN state and not just the resting one (#540)",
+    !!phoneEar && !phoneArmed.open && phoneDrawer === "none" && phone.scrollW === phone.innerW && !phone.tabShown,
+    JSON.stringify({ tapped: phoneEar, drawerDisplay: phoneDrawer, open: phone.open, shutPress: phoneShut, scrollW: phone.scrollW, innerW: phone.innerW }),
+  );
+
+  // CD14 / CD15 / CD16 (#540, #518 ruling 4): the phone's table is the sheet's second leaf, chosen by two tabs in its head.
+  const LEAF = `(() => {
+    const tabs = [...document.querySelectorAll(".slip-head .sheet-tabs button")];
+    const name = (e) => (e ? (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\\s+/).join(".")) : null);
+    const press = (b) => { const r = b.getBoundingClientRect(); if (r.width < 1 || r.height < 1) return "no-box";
+      const h = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2));
+      return h === b || b.contains(h) ? "self" : name(h); };
+    const leaf = document.getElementById("table-leaf");
+    const cut = document.getElementById("cuttings");
+    return {
+      tabs: tabs.map((b) => ({ text: (b.textContent || "").replace(/\\s+/g, " ").trim(), selected: b.getAttribute("aria-selected"), press: press(b) })),
+      leafShown: !!leaf && getComputedStyle(leaf).display !== "none",
+      formShown: (() => { const f = document.querySelector(".slip-body .broadside"); return !!f && getComputedStyle(f).display !== "none"; })(),
+      cuttingsInLeaf: !!leaf && !!cut && leaf.contains(cut),
+      cuttingsShown: !!cut && getComputedStyle(cut).display !== "none",
+      cuttings: document.querySelectorAll("#cuttings li").length,
+      columns: (() => { const c = document.getElementById("cuttings"); return c ? getComputedStyle(c).gridTemplateColumns.split(" ").filter(Boolean).length : 0; })(),
+      countText: (() => { const c = document.getElementById("chart-drawer-count"); return c && c.offsetParent !== null ? c.textContent : null; })(),
+      roadInSlip: (() => { const r = document.getElementById("table-road"); const d = document.querySelector(".slip .legend-dock"); return !!r && !!d && d.contains(r); })(),
+      // The sheet's body scrolls, so a road below the fold hit-tests to nothing; bring it into view first, or the check
+      // measures the viewport rather than the control. And an element inside a display:none parent still computes its OWN
+      // display, so "is it shown" has to be read off the rect, not off getComputedStyle.
+      roadPress: (() => { const r = document.getElementById("table-road"); if (!r) return null;
+        r.scrollIntoView({ block: "center" });
+        const b = r.getBoundingClientRect(); if (b.width < 1) return "no-box";
+        const h = document.elementFromPoint(Math.round(b.x + b.width / 2), Math.round(b.y + b.height / 2)); return h === r || r.contains(h) ? "self" : (h ? (h.id || String(h.className)) : "none"); })(),
+      otherRoads: [...document.querySelectorAll(".slip .legend-dock .legend .legend-btn")].filter((b) => b.getBoundingClientRect().width > 0.5 && b.id !== "table-road").length,
+    };
+  })()`;
+  await setMobileViewport(390, 844);
+  await go(`${DRESS}&table=${SIX}`);
+  await evaluate(`document.querySelector(".slip-handle").click()`);
+  await sleep(500);
+  const leafShut = await evaluate(LEAF);
+  const tableTab = await evaluate(`(() => { const b = [...document.querySelectorAll(".slip-head .sheet-tabs button")].find((x) => /table/i.test(x.textContent || "")); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
+  if (tableTab) { await touch("touchStart", [{ x: tableTab.x, y: tableTab.y, id: 0 }]); await touch("touchEnd", []); }
+  // A bounded wait that RETURNS its last reading rather than throwing: a settle that gives up kills the lane instead of
+  // failing a named check (#534), and these three checks are the record of what the leaf does, not the wait.
+  let leafOpen = await evaluate(LEAF);
+  for (let i = 0; i < DRAWN && !(leafOpen.leafShown && leafOpen.cuttings === 6); i++) { await sleep(50); leafOpen = await evaluate(LEAF); }
+  check(
+    "CD14 the sheet's head carries the two leaf tabs and BOTH answer a real thumb: at narrow .slip-handle is inset:0 over the whole head, so a tab authored there is dead unless it takes its own layer (mock.css 230), and a tab nobody can press is the #520 dog-ear again",
+    leafShut.tabs.length === 2 && leafShut.tabs.every((t) => t.press === "self") &&
+      /broadside/i.test(leafShut.tabs[0].text) && /^the table( · \d+)?$/i.test(leafShut.tabs[1].text),
+    JSON.stringify({ tabs: leafShut.tabs }),
+  );
+  check(
+    "CD15 pressing The Table turns the sheet to its second leaf: the Broadside's form goes, the gathered sheets come up two across on the sheet's own parchment, and the count comes with them (#518 ruling 4)",
+    leafOpen.leafShown && !leafOpen.formShown && leafOpen.cuttingsInLeaf && leafOpen.cuttings === 6 && leafOpen.columns === 2 && !!leafOpen.countText,
+    JSON.stringify({ leaf: leafOpen.leafShown, form: leafOpen.formShown, inLeaf: leafOpen.cuttingsInLeaf, cuttings: leafOpen.cuttings, columns: leafOpen.columns, count: leafOpen.countText }),
+  );
+  const broadsideTab = await evaluate(`(() => { const b = [...document.querySelectorAll(".slip-head .sheet-tabs button")].find((x) => /broadside/i.test(x.textContent || "")); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
+  if (broadsideTab) { await touch("touchStart", [{ x: broadsideTab.x, y: broadsideTab.y, id: 0 }]); await touch("touchEnd", []); }
+  await sleep(700);
+  const backToForm = await evaluate(LEAF);
+  check(
+    "CD17 with the table leaf up the road out is the TABLE's road, docked in the sheet's legend where every other road out lives, and it answers a real thumb (#518 ruling 4)",
+    leafOpen.roadInSlip && leafOpen.roadPress === "self" && leafOpen.otherRoads === 0,
+    JSON.stringify({ inSlip: leafOpen.roadInSlip, press: leafOpen.roadPress, others: leafOpen.otherRoads }),
+  );
+  check(
+    "CD16 the leaf turns back: pressing The Broadside returns the form and puts the table away, so the reader is never one-way into either leaf",
+    backToForm.tabs.length === 2 && backToForm.formShown && !backToForm.leafShown && backToForm.tabs[0].selected === "true" && backToForm.tabs[1].selected === "false",
+    JSON.stringify({ form: backToForm.formShown, leaf: backToForm.leafShown, selected: backToForm.tabs.map((t) => t.selected) }),
   );
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });

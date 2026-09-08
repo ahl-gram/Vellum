@@ -201,13 +201,20 @@ export async function run(ctx) {
   await evaluate(`(()=>{const h=document.querySelector("#broadside .slip-handle");if(h&&!document.getElementById("broadside").classList.contains("open"))h.click();})()`);
   await sleep(400);
   const br6b = await evaluate(`(()=>{const l=document.querySelector("#broadside .legend.in-slip");const s=document.getElementById("broadside");
+    if(l)l.scrollIntoView({block:"center"});
     const b=s?s.getBoundingClientRect():null;
     return{docked:!!l,open:!!s&&s.classList.contains("open"),
       zoomed:!!document.querySelector("#map-viewport.zoomed"),
       groundOn:l?getComputedStyle(l,"::before").content:null,
-      slipY:b?Math.round(b.y):null};})()`);
+      slipY:b?Math.round(b.y):null,
+      rowY:l?Math.round(l.getBoundingClientRect().top+l.getBoundingClientRect().height/2):null};})()`);
   // The MEDIAN of a wide run: the defect is a full-area wash, so the median moves with it, while a max passes on one bright press under the sample and a min fails on one hairline crossing it.
-  const lums = br6b.slipY === null ? null : (await sampleRow(send, 20, br6b.slipY + 120, 16)).map(luminance).sort((a, b) => a - b);
+  // The row is read at the DOCKED PRESS's own middle, scrolled into view first because the sheet's body scrolls and the row
+  // sits below the fold at 390 (measured 882 in an 844-tall viewport, which sampled the dark outside the page). A fixed
+  // offset from the sheet's top was the old proxy for this place, and #540 put the leaf tabs in the head at exactly that
+  // offset: the selected tab is ink-dark, so the proxy read 59 against a sheet that had not changed. A contrast number
+  // taken beside the ink is about somewhere else.
+  const lums = br6b.rowY === null ? null : (await sampleRow(send, 20, br6b.rowY, 16)).map(luminance).sort((a, b) => a - b);
   const br6bGround = lums === null ? null : Math.round(lums[Math.floor(lums.length / 2)]);
   // #532: the mark's contrast is a COMPUTED-STYLE claim and can only be read as one. The declaration that fails here is PRESENT in the stylesheet and simply loses the cascade, so a text match over the CSS passes on the broken code. The three states go through CSS.forcePseudoState, and each asserts its own resolved COLOUR: a floor alone passes when the hover arm is deleted and hover falls back to the resting ink, which still clears it (skeptic on PR #535).
   const doc532 = await send("DOM.getDocument", { depth: 1 });
