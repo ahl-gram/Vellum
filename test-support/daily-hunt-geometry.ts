@@ -76,18 +76,10 @@ export function expectedNS(world: World, y: number): "north" | "south" | "centra
   return y < c ? "north" : "south";
 }
 
-/** Re-derived from raw geometry: how far off the midpoint each axis sits, as a fraction of that axis's extent, so the two are comparable on a non-square grid. */
-export function axisOffCenter(world: World, x: number, y: number): { ew: number; ns: number } {
-  const { w, h } = world.elev;
-  return {
-    ew: Math.abs(x - (w - 1) / 2) / (w - 1),
-    ns: Math.abs(y - (h - 1) / 2) / (h - 1),
-  };
-}
-
-/** The axis a survey should lead with, or null when the two are equally decisive and the seeded coin decides. */
 export function expectedLeadAxis(world: World, x: number, y: number): "ew" | "ns" | null {
-  const { ew, ns } = axisOffCenter(world, x, y);
+  const { w, h } = world.elev;
+  const ew = Math.abs(x - (w - 1) / 2) / (w - 1);
+  const ns = Math.abs(y - (h - 1) / 2) / (h - 1);
   return ew === ns ? null : ew > ns ? "ew" : "ns";
 }
 

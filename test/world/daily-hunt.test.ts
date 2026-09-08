@@ -401,7 +401,7 @@ test("a quarry near (not exactly at) the chart's center reads central, not west/
 });
 
 test("the survey leads with the axis the quarry is furthest off-center on", () => {
-  // Live play 2026-09-08 (seed 20260908): Diggai at grid (208, 28) on 320x240 read "the eastern reach" while sitting 0.15 of the width off-center east and 0.38 of the height off-center north. Both bands are true; the coin flip announced the weaker one and sent the hunt sideways.
+  // Live play, seed 20260908 (#539): Diggai at grid (208, 28) on 320x240 read "the eastern reach" while sitting 0.15 of the width east of center and 0.38 of the height north of it.
   const world = generateWorld(defaultRecipe(20260908));
   const q = mustQuarry(world);
   assert.equal(q.settlement.name, "Diggai", "the reported quarry");
@@ -441,12 +441,20 @@ test("the leading compass line is never the strictly less decisive axis (#333's 
   const leadFor = (x: number, y: number): string =>
     buildClues(flat, at(x, y)).filter((c) => c.kind === "ew" || c.kind === "ns")[0]!.kind;
 
-  // Midpoint (159.5, 119.5); off-center fractions are of 319 and 239 respectively.
   assert.equal(leadFor(208, 28), "ns", "0.15 east against 0.38 north: north leads");
   assert.equal(leadFor(300, 100), "ew", "0.44 east against 0.08 south: east leads");
-  // A directional band always beats a central one, whichever axis it falls on.
-  assert.equal(leadFor(159, 10), "ns", "central east/west, far north");
-  assert.equal(leadFor(10, 119), "ew", "far west, central north/south");
+  assert.equal(leadFor(159, 10), "ns", "central east/west against far north");
+  assert.equal(leadFor(10, 119), "ew", "far west against central north/south");
+
+  // The straddle that only the shared normalization survives: x=120 is 39.5 cells off a 319-wide
+  // axis (0.1238, central) and y=89 is 30.5 off a 239-tall one (0.1276, north). Comparing raw
+  // cells makes the CENTRAL axis win, so a directional band would lose to a central one.
+  assert.equal(leadFor(120, 89), "ns", "a directional band never loses to a central one");
+
+  assert.equal(expectedLeadAxis(flat, 0, 0), null, "a corner ties the two axes exactly");
+  const tied = leadFor(0, 0);
+  assert.ok(tied === "ew" || tied === "ns", "a tie still yields one compass bearing");
+  assert.equal(tied, leadFor(0, 0), "and the coin that breaks it is seeded, not arbitrary");
 
   SWEEP.forEach((world, wi) => {
     const q = mustQuarry(world);
@@ -462,9 +470,7 @@ test("the leading compass line is never the strictly less decisive axis (#333's 
 });
 
 test("days the decisive axis already led are untouched: the coin is still drawn", () => {
-  // The seeded coin must be consumed whether or not it decides, or shuffled(features) and the
-  // line target read a shifted stream and EVERY day's list moves. Measured against the pre-fix
-  // build (64-seed old-vs-new replay, 2026-09-07): these three days did not move.
+  // Measured against the pre-fix build (64-seed replay, 2026-09-07): these three days did not move.
   const sig = (world: World): string =>
     buildClues(world, mustQuarry(world))
       .slice(1)
