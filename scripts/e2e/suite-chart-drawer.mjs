@@ -202,7 +202,7 @@ export async function run(ctx) {
   // One cutting is 10.6rem; a row narrower than that cannot show a single gathered sheet whatever the cap says.
   const CUTTING = 169.6;
   const band = {};
-  for (const [w, h, fold] of [[1280, 800, false], [1520, 872, false], [901, 800, false], [901, 800, true]]) {
+  for (const [w, h, fold] of [[1280, 800, false], [1520, 872, false], [1024, 800, false], [901, 800, false], [901, 800, true]]) {
     await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
     await go(`${DRESS}&table=${SIX}`);
     if (fold) { await evaluate(`document.querySelector(".slip-fold").click()`); await sleep(500); }
