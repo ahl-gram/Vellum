@@ -306,13 +306,18 @@ export async function run(ctx) {
     JSON.stringify(roadOn),
   );
   const roadBefore = await evaluate(`document.getElementById("table-road").disabled`);
-  await evaluate(`document.getElementById("table-road").click()`);
+  const roadAt = await evaluate(`(() => { const b = document.getElementById("table-road"); const r = b.getBoundingClientRect();
+    const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2);
+    const h = document.elementFromPoint(x, y);
+    return { x, y, reachable: h === b || b.contains(h) }; })()`);
+  if (roadAt) await clickAt(roadAt.x, roadAt.y);
   for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate(`location.pathname.indexOf("/portfolio/") !== -1`)) break; }
   const arrived = await evaluate(`({ path: location.pathname, table: new URLSearchParams(location.hash.slice(1)).get("table") })`);
   check(
-    "CD18b the road carries the WHOLE gathering in the Portfolio's own address, which is the epic's core insight: the folio is a link, so the page it lands on can draft the same six sheets for anyone",
-    arrived.path.indexOf("/print-room/portfolio/") !== -1 && typeof arrived.table === "string" && arrived.table.split("_").length === 6,
-    JSON.stringify({ ...arrived, roadBefore }),
+    "CD18b the road answers a REAL press and carries the WHOLE gathering in the Portfolio's own address, which is the epic's core insight: the folio is a link, so the page it lands on can draft the same six sheets for anyone",
+    arrived.path.indexOf("/print-room/portfolio/") !== -1 && typeof arrived.table === "string" && arrived.table.split("_").length === 6 &&
+      !!roadAt && roadAt.reachable,
+    JSON.stringify({ ...arrived, roadBefore, roadAt }),
   );
   const PF = `(() => { const s = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return s ? { ...s,
     rows: document.querySelectorAll("#pf-contents .row").length,
@@ -337,8 +342,10 @@ export async function run(ctx) {
   await sleep(400);
   const empty = await evaluate(`(() => ({ bound: (document.getElementById("pf-bound") || {}).textContent || null,
     explorer: !!document.getElementById("pf-explorer"),
-    next: (() => { const b = document.getElementById("pf-next"); return !!b && !b.hidden; })(),
-    download: (() => { const b = document.getElementById("pf-download"); return !!b && !b.hidden; })() }))()`);
+    // The RECT, never .hidden: atelier.css sets an author display on .legend-btn, which beats the UA [hidden] rule, so
+    // el.hidden = true silently no-ops and a check on that property is a check on its own input (#270's guard-prover find).
+    next: (() => { const b = document.getElementById("pf-next"); return !!b && b.getBoundingClientRect().width > 0.5; })(),
+    download: (() => { const b = document.getElementById("pf-download"); return !!b && b.getBoundingClientRect().width > 0.5; })() }))()`);
   check(
     "CD20 a Portfolio reached with nothing gathered says so in the room's own voice and keeps only the road that has somewhere to go (ruled 2026-09-08): the two sheet presses have nothing to act on and stand down",
     !!empty.bound && /table is laid at the Explorer/.test(empty.bound) && empty.explorer && !empty.next && !empty.download,

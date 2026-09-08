@@ -15,6 +15,7 @@ const PAGE_CSS = [
   "public/faq/index.css",
   "public/glossary/index.css",
   "public/print-room/index.css",
+  "public/print-room/portfolio/index.css",
   "public/reading-room/index.css",
   "public/seed-of-the-day/index.css",
   "public/prospect/index.css",

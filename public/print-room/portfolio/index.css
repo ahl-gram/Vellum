@@ -11,7 +11,7 @@
 /* The pile: papers behind the top sheet, offset a little each, so the stack reads as depth and not as a border. */
 .pile { position: absolute; inset: 0; pointer-events: none; }
 .pile .leaf {
-  position: absolute; inset: 0;
+  position: absolute; inset: 0; --depth: 1;
   translate: calc(var(--depth) * -0.7%) calc(var(--depth) * 0.9%);
   rotate: calc(var(--depth) * -0.35deg);
   background: var(--chart-paper); border: 1px solid var(--line-tan);

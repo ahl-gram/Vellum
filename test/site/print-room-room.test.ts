@@ -200,7 +200,7 @@ test("PRR8 the contents row is the kit's (#487, second use of the dated-row idio
 });
 
 // #521 ruling 2: the Portfolio's way in is the Bound Atlas slip, NOT the legend row. Both halves are the claim, so both are asserted: a link that drifted into the row would pass a bare "the link exists" check while breaking the ruled shape PRR4 pins.
-test("PRR7 the way to the Portfolio stands in the Bound Atlas slip and not in the room's legend row (#521 ruling 2)", () => {
+test("PRR11 the way to the Portfolio stands in the Bound Atlas slip and not in the room's legend row (#521 ruling 2)", () => {
   const html = page;
   const slip = html.slice(html.indexOf('id="atlas"'), html.indexOf("</aside>", html.indexOf('id="atlas"')));
   assert.match(slip, /<a id="pr-portfolio" href="\.\/portfolio\/">The Portfolio<\/a>/, "the Bound Atlas slip carries the way in");

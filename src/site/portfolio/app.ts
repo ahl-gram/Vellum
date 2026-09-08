@@ -4,6 +4,9 @@
 // sheets arrive progressively into a pile whose top sheet stands on the stage.
 import { initWorker, runJob } from "../explorer/worker-client.ts";
 import { bindRoom } from "../shared/room.ts";
+import { bindGlassKeys } from "../shared/glass-keys.ts";
+import { createZoomController } from "../shared/zoom-controller.ts";
+import { chartFilename } from "../print-room/poster-presets.ts";
 import { thumbJobFor } from "../explorer/chart-drawer.ts";
 import { parseTable, groupByWorld, TABLE_KEY, type TableItem } from "../shared/table-address.ts";
 import { BARE_LINE, boundLine, draftedLine, isAwaited, roman, sheetLine } from "./folio-lines.ts";
@@ -14,7 +17,7 @@ const bound = $("pf-bound");
 const contents = $("pf-contents");
 const sheetBox = $("pf-sheet");
 const pile = $("pf-pile");
-const download = $<HTMLAnchorElement>("pf-download");
+const download = $<HTMLButtonElement>("pf-download");
 const next = $<HTMLButtonElement>("pf-next");
 const folioTitle = $("folio-title");
 const folioSub = $("folio-sub");
@@ -60,8 +63,7 @@ const showTop = (): void => {
     : `a prospect · from chart № ${sheet.item.seed}`;
   const beneath = sheets.length - 1 - top;
   folioCoords.textContent = beneath > 0 ? `${beneath} beneath it` : "the last of them";
-  download.href = sheet.url ?? "#";
-  if (sheet.url) download.setAttribute("download", `${sheet.title.replace(/[^\w -]/g, "")}.svg`);
+  download.disabled = sheet.svg === null;
   for (const row of contents.querySelectorAll(".row")) row.classList.toggle("up", Number((row as HTMLElement).dataset["at"]) === top);
 };
 
@@ -72,6 +74,21 @@ const bringUp = (at: number): void => {
   showTop();
   const sheet = sheets[top];
   if (sheet) say(`${sheet.title} is on top`);
+};
+
+// #217's contract, the same function the Print Room's plates are named by: vellum-<seed>-<style>-<slug>.svg, so a sheet
+// on disk can be traced back to the world that drew it.
+const nameOf = (sheet: Drawn): string =>
+  chartFilename(sheet.item.seed, sheet.item.kind === "survey" ? sheet.item.style : "prospect", sheet.title);
+
+// #134's rule: the svg goes STRAIGHT to a blob download and is never injected anywhere to be downloaded.
+const takeHome = (sheet: Drawn): void => {
+  if (!sheet.svg) return;
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([sheet.svg], { type: "image/svg+xml" }));
+  a.download = nameOf(sheet);
+  a.click();
+  URL.revokeObjectURL(a.href);
 };
 
 const rows = (): void => {
@@ -120,12 +137,12 @@ const rows = (): void => {
       const band = document.createElement("i");
       band.className = "row-band";
       band.textContent = sheet.item.kind === "survey" ? `band ${sheet.item.rung}, ${sheet.item.style}` : "a prospect, awaiting its page";
-      const own = document.createElement("a");
+      const own = document.createElement("button");
+      own.type = "button";
       own.className = "row-download";
       own.textContent = "the engraving (SVG)";
-      own.href = sheet.url ?? "#";
-      if (sheet.url) own.setAttribute("download", `${sheet.title.replace(/[^\w -]/g, "")}.svg`);
-      else own.setAttribute("aria-disabled", "true");
+      own.disabled = sheet.svg === null;
+      own.addEventListener("click", () => takeHome(sheet));
       li.append(numeral, thumb, title, band, own);
       list.append(li);
     }
@@ -160,18 +177,29 @@ const draft = async (): Promise<void> => {
       }
       rows();
       retitle();
-      if (at === top || drawnCount() === 1) { top = at === top ? top : top; showTop(); }
+      if (at === top || drawnCount() === 1) { if (sheets[top]?.svg === null) top = at; showTop(); }
       say(draftedLine(drawnCount(), drawable().length));
     }
   }
   say("");
 };
 
+// The kit renders the Glass on every chart room and the stage's label promises its keys, so the page owes the binding: three corner presses and six keys that do nothing are the #520 scar, a control nobody can use.
+const zoomController = createZoomController({
+  viewportEl: $("map-viewport"),
+  targetEl: $("map"),
+  scaleExtent: [1, 8],
+  glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
+});
+zoomController.attach();
+bindGlassKeys($("map-viewport"), zoomController);
+
 // #462's chart room: the sheet is fitted to what the chrome leaves, or it fills the viewport and runs under the nav, the room's name and the slip. A page that draws a chart and never binds the room has no fit at all.
+const viewportBox = () => ({ W: $("map-viewport").clientWidth || 1, H: $("map-viewport").clientHeight || 1 });
 const room = bindRoom({
   frame: document.querySelector(".stage") as HTMLElement,
   sheet: document.getElementById("sheet") as HTMLElement,
-  camera: { hold: () => null, restore: () => {} },
+  camera: { hold: () => zoomController.getState(), restore: (t) => zoomController.refit(t) },
   aspect: () => { const svg = sheetBox.querySelector("svg"); const vb = svg?.viewBox.baseVal; return vb && vb.width > 0 && vb.height > 0 ? vb.width / vb.height : null; },
 });
 
@@ -181,12 +209,15 @@ const start = async (): Promise<void> => {
   retitle();
   showTop();
   if (items.length === 0) {
-    next.hidden = true;
-    download.hidden = true;
+    // hidden is inert on these: atelier.css sets an author display on .legend-btn, which beats the UA [hidden] rule, so
+    // el.hidden = true silently no-ops (the #270 guard-prover's find). The Prospect and the Ribbon hide the same way.
+    next.style.display = "none";
+    download.style.display = "none";
     say("");
     return;
   }
   next.addEventListener("click", () => bringUp((top + 1) % sheets.length));
+  download.addEventListener("click", () => { const sheet = sheets[top]; if (sheet) takeHome(sheet); });
   await initWorker();
   await draft();
 };
