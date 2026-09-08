@@ -36,6 +36,15 @@ export function sheetLine(title: string, at: number, of: number): string {
   return `${title} · Sheet ${roman(at)} of ${roman(of)}`;
 }
 
+export function beneathLine(beneath: number): string {
+  return beneath > 0 ? `${word(beneath)} beneath it` : "the last of them";
+}
+
+/** The slip's where-line, which the mockup writes with the tally: "six sheets gathered at the Explorer". */
+export function gatheredLine(count: number): string {
+  return `${sheets(count)} gathered at the Explorer`;
+}
+
 export function isAwaited(item: TableItem): boolean {
   return item.kind === "prospect";
 }

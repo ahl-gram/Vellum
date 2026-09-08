@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { BARE_LINE, boundLine, draftedLine, isAwaited, roman, sheetLine } from "../../src/site/portfolio/folio-lines.ts";
+import { BARE_LINE, beneathLine, boundLine, draftedLine, gatheredLine, isAwaited, roman, sheetLine } from "../../src/site/portfolio/folio-lines.ts";
 import type { TableItem } from "../../src/site/shared/table-address.ts";
 
 const survey = (seed: number): TableItem => ({ kind: "survey", seed, overrides: {}, rung: 1, lx: 4, ly: 4, style: "antique", legend: true, arms: false, beasts: false, theme: null });
@@ -46,4 +46,15 @@ test("PF5 a prospect is awaited and a survey is not: Sub 4 (#522) builds the pro
 
 test("PF6 the bare line sends the reader where sheets are gathered, since neither sheet press has anything to act on (ruled 2026-09-08)", () => {
   assert.match(BARE_LINE, /table is laid at the Explorer/);
+});
+
+test("PF7 the pile's depth is spelled as a word, the way the mockup writes it, and the bottom sheet says so plainly (ruled 2026-09-08: C's line, in C's words)", () => {
+  assert.equal(beneathLine(5), "five beneath it");
+  assert.equal(beneathLine(1), "one beneath it");
+  assert.equal(beneathLine(0), "the last of them");
+});
+
+test("PF8 the slip's where-line carries the tally the mockup gives it, and follows the folio rather than standing at six (ruled 2026-09-08)", () => {
+  assert.equal(gatheredLine(6), "six sheets gathered at the Explorer");
+  assert.equal(gatheredLine(1), "one sheet gathered at the Explorer");
 });

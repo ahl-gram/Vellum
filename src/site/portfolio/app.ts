@@ -9,7 +9,7 @@ import { createZoomController } from "../shared/zoom-controller.ts";
 import { chartFilename } from "../print-room/poster-presets.ts";
 import { thumbJobFor } from "../explorer/chart-drawer.ts";
 import { parseTable, groupByWorld, TABLE_KEY, type TableItem } from "../shared/table-address.ts";
-import { BARE_LINE, boundLine, draftedLine, isAwaited, roman, sheetLine } from "./folio-lines.ts";
+import { BARE_LINE, beneathLine, boundLine, draftedLine, gatheredLine, isAwaited, roman, sheetLine } from "./folio-lines.ts";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 const status = $("pf-status");
@@ -20,6 +20,7 @@ const pile = $("pf-pile");
 const download = $<HTMLButtonElement>("pf-download");
 const next = $<HTMLButtonElement>("pf-next");
 const folioTitle = $("folio-title");
+const whereLine = document.querySelector<HTMLElement>("#portfolio .card-where");
 const folioSub = $("folio-sub");
 const folioCoords = $("folio-coords");
 
@@ -61,8 +62,7 @@ const showTop = (): void => {
   folioSub.textContent = sheet.item.kind === "survey"
     ? `a regional survey at band ${sheet.item.rung}, ${sheet.item.style} · from ${sheet.worldTitle || `chart № ${sheet.item.seed}`}, chart № ${sheet.item.seed}`
     : `a prospect · from chart № ${sheet.item.seed}`;
-  const beneath = sheets.length - 1 - top;
-  folioCoords.textContent = beneath > 0 ? `${beneath} beneath it` : "the last of them";
+  folioCoords.textContent = beneathLine(sheets.length - 1 - top);
   download.disabled = sheet.svg === null;
   for (const row of contents.querySelectorAll(".row")) row.classList.toggle("up", Number((row as HTMLElement).dataset["at"]) === top);
 };
@@ -220,6 +220,7 @@ const room = bindRoom({
 });
 
 const start = async (): Promise<void> => {
+  if (whereLine && items.length > 0) whereLine.textContent = gatheredLine(items.length);
   layPile();
   rows();
   retitle();
