@@ -160,8 +160,9 @@ export function createLodController(deps: Deps) {
     el.innerHTML = res.svg;
     const old = inset ? inset.el : null;
     mapDiv.appendChild(el);
-    deps.decorateInset?.(el);
     inset = { el, svg: res.svg, band, window, title: res.title, seat };
+    // AFTER the assignment: the hook asks the controller what is committed, and before it this still named the outgoing sheet.
+    deps.decorateInset?.(el);
     currentBand = band;
     currentWindow = window;
     hidePencil();
