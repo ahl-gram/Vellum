@@ -9,6 +9,7 @@ import {
   ATLAS_ROUTE,
   PROSPECT_ROUTE,
   RIBBON_ROUTE,
+  PORTFOLIO_ROUTE,
   DISCOVERY_ROUTES,
   HOME_ROUTE,
   ROUTE_ENTRIES,
@@ -30,8 +31,8 @@ const abs = (route: string) => new URL(route, TEST_SITE).href;
 test("the route set is NAV_ITEMS plus the five routes the nav omits: home, the atlas, the prospect, the ribbon, and the Portfolio", () => {
   assert.deepEqual(
     [...DISCOVERY_ROUTES],
-    [HOME_ROUTE, ...NAV_ITEMS.map((i) => i.href), ATLAS_ROUTE, PROSPECT_ROUTE, RIBBON_ROUTE],
-    "the routes are derived, never restated: home, the nav in its order, then the atlas, the prospect, and the ribbon",
+    [HOME_ROUTE, ...NAV_ITEMS.map((i) => i.href), ATLAS_ROUTE, PROSPECT_ROUTE, RIBBON_ROUTE, PORTFOLIO_ROUTE],
+    "the routes are derived, never restated: home, the nav in its order, then the atlas, the prospect, the ribbon, and the Portfolio",
   );
   assert.equal(DISCOVERY_ROUTES.length, NAV_ITEMS.length + 5, "seven nav items plus home, the atlas, the prospect, the ribbon, and the Portfolio");
   assert.equal(new Set(DISCOVERY_ROUTES).size, DISCOVERY_ROUTES.length, "no route may be listed twice");

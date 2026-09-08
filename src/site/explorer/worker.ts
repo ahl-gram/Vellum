@@ -63,6 +63,8 @@ ctx.onmessage = (e) => {
         // NB: the LOD band INDEX (0..3), echoed for the client's next hysteresis step, NOT the climate band a draw returns. Same key, different meaning across kinds.
         band: msg.band,
         title,
+        // The PARENT world's own title, which the region's title does not carry; the same line stands in the inline path so the two stay identical (#169's rule, #521's need).
+        worldTitle: world.title.title,
         cached, // whether worldFor skipped generateWorld this call (the cache-timing AC's flag)
       });
     } else if (msg.kind === "atlas") {

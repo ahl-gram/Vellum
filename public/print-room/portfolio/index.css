@@ -1,0 +1,42 @@
+/* The Portfolio (#521 Sub 3 of #401): the pile, and the index that reads it. Direction C's picture with direction A's words (ruled 2026-09-08), so the room's own sheet dresses the stack, the contents rows and the bare state; the room furniture is the Atelier Kit's. */
+
+/* The pile: papers behind the top sheet, offset a little each, so the stack reads as depth and not as a border. */
+.pile { position: absolute; inset: 0; pointer-events: none; }
+.pile .leaf {
+  position: absolute; inset: 0;
+  translate: calc(var(--depth) * -0.7%) calc(var(--depth) * 0.9%);
+  rotate: calc(var(--depth) * -0.35deg);
+  background: var(--chart-paper); border: 1px solid var(--line-tan);
+  box-shadow: 0 6px 18px rgb(from var(--chart-ink) r g b / 0.35);
+  z-index: -1;
+}
+.pf-sheet { position: absolute; inset: 0; }
+.pf-sheet svg { width: 100%; height: 100%; display: block; }
+
+.bound-line { font-size: 0.95rem; line-height: 1.5; margin: 0.7rem 0 0; }
+.bound-line .stamp { display: block; font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.82rem; color: var(--ink-brown); margin-top: 0.4rem; }
+
+.group-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin: 1.2rem 0 0.2rem;
+  font-family: var(--font-display); font-size: 0.86rem; letter-spacing: 0.06em; color: var(--ink-dark); }
+.group-head .gloss { font-family: var(--font-flourish); font-style: italic; letter-spacing: 0; font-size: 0.78rem; color: var(--ink-faded); text-align: right; }
+
+.contents { list-style: none; margin: 0; padding: 0; }
+.contents .row { display: grid; grid-template-columns: 1.6rem 4.6rem 1fr; grid-template-areas: "num thumb title" "num thumb band" "num thumb dl"; gap: 0.1rem 0.7rem; align-items: start; padding: 0.55rem 0; border-bottom: 1px solid var(--line-faint); }
+.contents .row:last-child { border-bottom: 0; }
+.contents .numeral { grid-area: num; font-variant-caps: small-caps; letter-spacing: 0.06em; color: var(--ink-faded); font-size: 0.82rem; }
+.contents .thumb { grid-area: thumb; display: block; border: 1px solid var(--line-tan); background: var(--chart-paper); }
+.contents .thumb img { display: block; width: 100%; height: auto; }
+.contents .thumb.awaited { display: grid; place-items: center; aspect-ratio: 4 / 3; border-style: dashed; font-family: var(--font-flourish); font-style: italic; font-size: 0.66rem; color: var(--ink-brown); text-align: center; }
+.contents .row-title { grid-area: title; appearance: none; border: 0; background: none; padding: 0; text-align: left; cursor: pointer;
+  font-family: var(--font-body); font-size: 0.95rem; color: var(--ink-dark); }
+.contents .row-title:is(:hover, :focus-visible) { text-decoration: underline; }
+.contents .row.up .row-title { font-weight: 600; text-decoration: underline; }
+.contents .row-band { grid-area: band; font-family: var(--font-flourish); font-size: 0.82rem; color: var(--ink-brown); }
+.contents .row-download { grid-area: dl; font-variant-caps: small-caps; letter-spacing: 0.06em; font-size: 0.76rem; color: var(--ink-brown); }
+.contents .row-download[aria-disabled="true"] { color: var(--ink-faded); pointer-events: none; }
+
+@media (max-width: 900px) {
+  .contents .row { grid-template-columns: 1.4rem 3.8rem 1fr; }
+  .group-head { flex-direction: column; align-items: flex-start; gap: 0.1rem; }
+  .group-head .gloss { text-align: left; }
+}

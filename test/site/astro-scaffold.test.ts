@@ -719,14 +719,15 @@ const STAGES: ReadonlyArray<readonly [string, string]> = [
   ["prospect/index.html", "The plate. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
   ["ribbon/index.html", "The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
   ["specimen/index.html", "The specimen sheet. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
+  ["print-room/portfolio/index.html", "The sheet on top. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
 ];
 type Road = { id?: string; gold?: true; road?: string; href: string; verbId?: string };
 /** Every road out on the site, by page and in order, LITERAL: the id, the gold, the data-road stamp and the verb's id are what the pages' scripts and the suites read, and a roster taken from the source it is compared against would be circular (skeptic on PR #502). A page absent here renders no road. */
 const ROADS: Record<string, ReadonlyArray<Road>> = {
   "explorer/index.html": [{ id: "order-plates", gold: true, href: "../print-room/" }, { id: "journal-link", gold: true, href: "/reading-room/" }],
   "print-room/index.html": [{ id: "pr-explorer", gold: true, href: "../explorer/" }],
-  // #521 ruling 1: C's picture with A's words. Download / Bring up / Back to, and NO road to the Print Room; the way in is the Bound Atlas slip (ruling 2).
-  "print-room/portfolio/index.html": [{ id: "pf-download", gold: true, href: "#" }, { id: "pf-next" }, { id: "pf-explorer", gold: true, href: "/explorer/" }],
+  // #521 ruling 1: C's picture with A's words. Two of the row's three are BUTTONS acting on this page and not roads out: Download goes through a blob the way the Print Room's does, and Bring up turns the pile. The way in from the Print Room is the Bound Atlas slip (ruling 2), not a road back.
+  "print-room/portfolio/index.html": [{ id: "pf-explorer", gold: true, href: "../../explorer/" }],
   "prospect/index.html": [{ id: "pp-chart-link", gold: true, href: "/explorer/" }, { id: "pp-ribbon-link", href: "/ribbon/", verbId: "pp-ribbon-verb" }],
   "ribbon/index.html": [{ id: "rb-chart-link", gold: true, href: "/explorer/" }, { id: "rb-prospect-link", href: "/prospect/", verbId: "rb-prospect-verb" }],
   "seed-of-the-day/index.html": [{ road: "explorer", href: "../explorer/" }, { road: "reading-room", href: "../reading-room/" }],
@@ -826,6 +827,7 @@ test("every internal link and embed on the rendered pages resolves", () => {
     "/gallery/index.css",
     "/explorer/app.bundle.js",
     "/print-room/app.bundle.js",
+    "/print-room/portfolio/app.bundle.js",
     "/seed-of-the-day/app.bundle.js",
     "/reading-room/app.bundle.js",
     "/prospect/app.bundle.js",
