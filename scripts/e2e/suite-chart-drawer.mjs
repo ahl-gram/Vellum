@@ -191,7 +191,7 @@ export async function run(ctx) {
     const onSheet = (b) =>
       Math.max(0, Math.min(b.right, sheet.right) - Math.max(b.left, sheet.left)) *
       Math.max(0, Math.min(b.bottom, sheet.bottom) - Math.max(b.top, sheet.top)) > 0;
-    const name = (e) => (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\s+/).join("."));
+    const name = (e) => (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\\s+/).join("."));
     const lifted = [...document.querySelectorAll(".corner.bl.folio, .corner.br.zoomery, .legend:not(.in-slip)")]
       .filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0.5 && b.height > 0.5 && onSheet(b); })
       .map(name);
@@ -316,14 +316,14 @@ export async function run(ctx) {
   // CD14 / CD15 / CD16 (#540, #518 ruling 4): the phone's table is the sheet's second leaf, chosen by two tabs in its head.
   const LEAF = `(() => {
     const tabs = [...document.querySelectorAll(".slip-head .sheet-tabs button")];
-    const name = (e) => (e ? (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\s+/).join(".")) : null);
+    const name = (e) => (e ? (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\\s+/).join(".")) : null);
     const press = (b) => { const r = b.getBoundingClientRect(); if (r.width < 1 || r.height < 1) return "no-box";
       const h = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2));
       return h === b || b.contains(h) ? "self" : name(h); };
     const leaf = document.getElementById("table-leaf");
     const cut = document.getElementById("cuttings");
     return {
-      tabs: tabs.map((b) => ({ text: (b.textContent || "").replace(/\s+/g, " ").trim(), selected: b.getAttribute("aria-selected"), press: press(b) })),
+      tabs: tabs.map((b) => ({ text: (b.textContent || "").replace(/\\s+/g, " ").trim(), selected: b.getAttribute("aria-selected"), press: press(b) })),
       leafShown: !!leaf && getComputedStyle(leaf).display !== "none",
       formShown: (() => { const f = document.querySelector(".slip-body .broadside"); return !!f && getComputedStyle(f).display !== "none"; })(),
       cuttingsInLeaf: !!leaf && !!cut && leaf.contains(cut),
@@ -348,7 +348,7 @@ export async function run(ctx) {
   check(
     "CD14 the sheet's head carries the two leaf tabs and BOTH answer a real thumb: at narrow .slip-handle is inset:0 over the whole head, so a tab authored there is dead unless it takes its own layer (mock.css 230), and a tab nobody can press is the #520 dog-ear again",
     leafShut.tabs.length === 2 && leafShut.tabs.every((t) => t.press === "self") &&
-      /broadside/i.test(leafShut.tabs[0].text) && /^the table( · six)?/i.test(leafShut.tabs[1].text),
+      /broadside/i.test(leafShut.tabs[0].text) && /^the table( · \d+)?$/i.test(leafShut.tabs[1].text),
     JSON.stringify({ tabs: leafShut.tabs }),
   );
   check(

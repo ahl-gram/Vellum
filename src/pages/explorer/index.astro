@@ -45,6 +45,10 @@ const tagline = "every seed is a world, draw one";
 
 <!-- #270 The Broadside, on the slip since #463 (#462 ruling 3): the controls composed as one sheet, grouped by what they do to the WORLD. The Land reshapes the geography (type, climate, the two sliders); The Hand dresses the same world (style turns the sheet, theme/legend/arms redraw the same land, survey inks the resting track). Every input keeps its id, events, and redraw semantics exactly as app.ts/controls.ts wire them. The #270 rulings stand: the ledger alignment (a label column per panel, equal-width controls), the countersigned seals, the four footnote marks. -->
 <Slip id="broadside" verb="Make one" title="The Broadside" where="the land, and the hand that dresses it" fold="Fold the broadside away">
+  <Fragment slot="tabs">
+    <button id="leaf-broadside" type="button" aria-selected="true">The Broadside</button>
+    <button id="leaf-table" type="button" aria-selected="false">The Table</button>
+  </Fragment>
   <div class="broadside">
     <div class="panel" role="group" aria-labelledby="grp-land">
       <p class="panel-head archivist-head" id="grp-land">The Land</p>
@@ -130,6 +134,8 @@ const tagline = "every seed is a world, draw one";
       <a href="/glossary/#verso">read more in the glossary</a>
     </div>
   </div>
+  <!-- #540 Sub 2a, #518 ruling 4: the phone's Chart Table is this sheet's second leaf. The gathered sheets are DOCKED here from the drawer at narrow, on dockLegend's precedent, so one set of elements has two homes and neither is a copy. -->
+  <div class="table-leaf" id="table-leaf"></div>
   <div class="legend-dock"></div>
 </Slip>
 

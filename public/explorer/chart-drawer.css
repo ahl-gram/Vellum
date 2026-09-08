@@ -82,4 +82,19 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
 /* The phone is Sub 2a (#540), where the drawer becomes the bottom sheet's second leaf as #518 ruling 4 ruled it. Until that lands the desktop drawer stands DOWN here rather than shipping broken: measured at a true 390, its rigid head and road leave the cuttings row 4.34px wide, push the road 64px past the edge into body's overflow:hidden where nothing can reach or scroll to it, and paint the translucent walnut over the bottom third of the chart while the Broadside's own sheet paints back over the road. The table is unreachable on a phone in the interval, which is a stopgap and not the ruled design. */
 @media (max-width: 900px) {
   .chart-drawer, .chart-drawer.open, .chart-drawer-tab { display: none; }
+
+  /* #518 ruling 4, built at #540: two tabs in the sheet's head choose which leaf it is open to. z-index 2 is load-bearing and not tidiness: .slip-handle is position:absolute inset:0 over the whole head at narrow (atelier.css), so a tab authored here without its own layer is dead to a real thumb (design/chart-table/mock.css line 230; CD14 pins it). */
+  .sheet-tabs { display: flex; gap: 0.4rem; margin: 0.55rem 0 0; position: relative; z-index: 2; }
+  .sheet-tabs button { flex: 1 1 0; font-family: var(--font-display); font-size: 0.82rem; letter-spacing: 0.05em; padding: 0.35rem 0.5rem; border: 1.5px solid var(--ink-brown); border-radius: 4px; background: var(--control-cream); color: var(--ink-brown); cursor: pointer; }
+  .sheet-tabs button[aria-selected="true"] { background: var(--ink-dark); border-color: var(--ink-dark); color: var(--chart-paper); }
+  .slip .slip-head .sheet-tabs button:is(:hover, :focus-visible) { transform: none; box-shadow: none; }
+
+  body.leaf-table .slip .card-where, body.leaf-table .slip-body .broadside { display: none; }
+  body:not(.leaf-table) .table-leaf { display: none; }
+  /* The sheets lie on the sheet's own parchment here, two across and square to it, not tilted on the drawer's walnut. */
+  .table-leaf .cuttings { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem 0.9rem; padding: 0.9rem 0 0.4rem; max-width: none; }
+  .table-leaf .cuttings li { rotate: 0deg; margin: 0; flex: none; }
+  .table-leaf .cuttings .label { position: static; rotate: 0deg; max-width: none; box-shadow: none; border: 0; background: none; padding: 0.25rem 0 0; font-size: 0.74rem; }
+  .table-leaf .cuttings .off { right: -0.3rem; top: -0.3rem; }
+  .table-leaf .count { font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.8rem; color: var(--ink-brown); margin: 0.7rem 0 0; }
 }

@@ -9,6 +9,7 @@ import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
 import { type TableItem } from "../shared/table-address.ts";
 import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor } from "./chart-drawer.ts";
+import { bindTableLeaf } from "./table-leaf.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
 import { wireControls } from "./controls.ts";
@@ -30,6 +31,7 @@ import {
   $, seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider,
   coastSlider, status, mapDiv, mapViewport, sheetEl, innerEl, caption, folioTitle, folioSub, stageEl,
   chartDrawer, chartDrawerTab, chartDrawerShut, chartDrawerCount, chartDrawerFull, cuttings, tableRoad,
+  tableLeaf, leafBroadsideTab, leafTableTab, broadsideSlip,
   versoEl, versoBtn, agesChk, orderLink, journalLink, hashControls,
 } from "./elements.ts";
 
@@ -93,6 +95,7 @@ const chartTable = bindChartDrawer({
   root: chartDrawer, tab: chartDrawerTab, shut: chartDrawerShut, count: chartDrawerCount,
   cuttings, full: chartDrawerFull, road: tableRoad,
   broadside: () => room.broadside,
+  relabelLeaf: (count) => leaf.relabel(count),
   say: (line) => { status.textContent = line; },
   // Deferred to the first opening, never to load (ruled 2026-09-07): a recovered link opens at the page's usual pace and nothing competes with the chart the reader came for.
   drawThumb: async (item) => {
@@ -136,6 +139,14 @@ const glass = createGlass({
 
 // #463: the chart room round the Glass; the sheet is refitted once each chart lands (the folio's lines are chrome the fit measures) and re-clamped against the refitted stage.
 const room = bindRoom({ frame: stageEl, sheet: sheetEl, camera: { hold: () => glass.cameraNow(), restore: (cam) => glass.refitCamera(cam) } });
+
+// #540 Sub 2a: on a phone the table is the sheet's second leaf, so the cuttings and their count dock out of the drawer and into it.
+const leaf = bindTableLeaf({
+  leaf: tableLeaf, cuttings, count: chartDrawerCount,
+  broadsideTab: leafBroadsideTab, tableTab: leafTableTab, slip: broadsideSlip,
+  narrow: window.matchMedia("(max-width: 900px)"),
+  onLayout: () => room.layout(),
+});
 
 // The chart's folio, lower left: the world's name and number, its survey line, then the caption the suites and the region survey write.
 // The mockup's survey line is the subtitle's tail ("surveyed in the year 1059 of the Cedar Age"), not the cartouche's whole sentence: the folio stays short and leaves the legend row its room.
