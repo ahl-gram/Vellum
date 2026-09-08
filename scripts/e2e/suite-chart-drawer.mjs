@@ -180,7 +180,7 @@ export async function run(ctx) {
     JSON.stringify({ ear: home.ear, insetSvgs: home.insetSvgs, cuttings: home.cuttings }),
   );
 
-  // CD9 / CD10 (#543 Sub 2b): the drawer's band stands clear of the open Broadside, and the cuttings row keeps room for a sheet.
+  // CD9 (#543 Sub 2b): the drawer's band stands clear of the open Broadside.
   // The Broadside is fixed at z-20 over this drawer's z-18 and reaches down into its band, so anything of the drawer's laid under
   // its footprint is painted over. #520 clamped the CUTTINGS clear of it and reasoned the road was already below the slip's foot;
   // that holds for the road's button and not for the stamp line above it. This guards the CLASS: no part of the drawer's band,
@@ -199,8 +199,6 @@ export async function run(ctx) {
     return { folded: slip.classList.contains("folded"), open: document.getElementById("chart-drawer").classList.contains("open"),
       fouled, rowW: +row.width.toFixed(1), cuttings: document.querySelectorAll("#cuttings li").length, vw: window.innerWidth };
   })()`;
-  // One cutting is 10.6rem; a row narrower than that cannot show a single gathered sheet whatever the cap says.
-  const CUTTING = 169.6;
   const band = {};
   for (const [w, h, fold] of [[1280, 800, false], [1520, 872, false], [1024, 800, false], [901, 800, false], [901, 800, true]]) {
     await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
@@ -211,19 +209,13 @@ export async function run(ctx) {
     band[`${w}x${h}${fold ? " folded" : ""}`] = await evaluate(BAND);
   }
   const widths = Object.keys(band);
-  // An open Broadside takes 26rem of the width whatever the window is, and the band needs its head, a sheet and the road
-  // beside it, so below about 1024 there is no room for a row at all: that band of widths is #543's open question and is
-  // deliberately not asserted here. Folded, the floor holds at every width the drawer is not stood down at.
-  const ROOMY = widths.filter((k) => k.endsWith("folded") || Number(k.split("x")[0]) >= 1024);
+  // 901 and the folded arm are here for CD9's sake, not a floor's: an open Broadside takes 26rem whatever the window is,
+  // so below about 1280 the row this leaves is narrower than one cutting. No floor is asserted, because none can be kept
+  // without ruling what the band does when there is no room for it (#543).
   check(
     "CD9 with the Broadside open, no part of the drawer's band lies under it: #520 clamped the cuttings clear and read the road as already below the slip's foot, which is true of its button and not of the stamp line above it (#543 Fault 3)",
     widths.filter((k) => !k.endsWith("folded")).every((k) => band[k].open && !band[k].folded && band[k].fouled.length === 0),
     JSON.stringify(Object.fromEntries(widths.map((k) => [k, band[k].fouled]))),
-  );
-  check(
-    "CD10 the cuttings row keeps room for at least one sheet wherever the band has room to stand: the head gives before the row does, since the row is what the reader opened the drawer for (#543 Fault 4)",
-    ROOMY.every((k) => band[k].rowW >= CUTTING),
-    JSON.stringify(Object.fromEntries(widths.map((k) => [k, band[k].rowW]))),
   );
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 

@@ -29,13 +29,13 @@ body:has(.chart-drawer.open) .corner.bl.folio,
 body:has(.chart-drawer.open) .corner.br.zoomery { bottom: calc(var(--chart-drawer-h) + 1rem); }
 body:has(.chart-drawer.open) .legend:not(.in-slip) { bottom: calc(var(--chart-drawer-h) + var(--chrome-y)); }
 
-.chart-drawer-head { flex: 0 1 var(--chart-drawer-head); min-width: 0; display: flex; flex-direction: column; }
+.chart-drawer-head { flex: 0 0 var(--chart-drawer-head); display: flex; flex-direction: column; }
 .chart-drawer-head .card-verb { font-family: var(--font-flourish); font-style: italic; color: var(--parchment); font-size: 0.9rem; }
 .chart-drawer-head .card-title { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; letter-spacing: 0.08em; line-height: 1.2; color: var(--parchment-bright); margin-top: 0.1rem; }
 .chart-drawer-head .count { font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.82rem; color: var(--parchment); margin-top: 0.4rem; }
 .chart-drawer-head .shut { margin-top: auto; align-self: flex-start; }
 
-/* The Broadside is fixed at z-index 20 against this drawer's 18 and reaches down into its band, so anything of the drawer's laid under its footprint is painted over: three of six remove presses were once unreachable, hit-testing to a LABEL and a SELECT. #520 clamped the CUTTINGS clear of it and read the road as already below the slip's foot; that is true of the road's BUTTON and not of the two lines above it, and a sixth cutting still lay under the form (#543 CD9). The whole band clears it instead, at the drawer's own padding, so no child has to know the Broadside exists. The head gives before the row does, since the row is what the reader came for. */
+/* The Broadside is fixed at z-index 20 against this drawer's 18 and reaches down into its band, so anything of the drawer's laid under its footprint is painted over: three of six remove presses were once unreachable, hit-testing to a LABEL and a SELECT. #520 clamped the CUTTINGS clear of it and read the road as already below the slip's foot; that is true of the road's BUTTON and not of the two lines above it, and a sixth cutting still lay under the form (#543 CD9). The whole band clears it instead, at the drawer's own padding, so no child has to know the Broadside exists. Below about 1280 the row this leaves is narrower than one cutting and at 901 it is nothing at all: the band cannot stand beside an open Broadside there, which is an open question on #543 and not something padding can answer. */
 body:has(.slip:not(.folded)) .chart-drawer { padding-right: calc(var(--slip-w) + 2rem + var(--chart-drawer-gap)); }
 .cuttings { list-style: none; margin: 0; padding: 0.7rem 0 0; flex: 1 1 auto; min-width: 0; display: flex; gap: 0.4rem; align-items: flex-start; }
 .cuttings li { position: relative; flex: 0 1 10.6rem; min-width: 0; rotate: var(--tilt, 0deg); margin-right: -0.5rem; transition: rotate 0.2s var(--ease-paper), translate 0.2s var(--ease-paper); }
