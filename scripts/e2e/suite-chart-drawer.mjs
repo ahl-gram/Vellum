@@ -312,6 +312,59 @@ export async function run(ctx) {
     !!phoneEar && !phoneArmed.open && phoneDrawer === "none" && phone.scrollW === phone.innerW && !phone.tabShown,
     JSON.stringify({ tapped: phoneEar, drawerDisplay: phoneDrawer, open: phone.open, shutPress: phoneShut, scrollW: phone.scrollW, innerW: phone.innerW }),
   );
+
+  // CD14 / CD15 / CD16 (#540, #518 ruling 4): the phone's table is the sheet's second leaf, chosen by two tabs in its head.
+  const LEAF = `(() => {
+    const tabs = [...document.querySelectorAll(".slip-head .sheet-tabs button")];
+    const name = (e) => (e ? (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\s+/).join(".")) : null);
+    const press = (b) => { const r = b.getBoundingClientRect(); if (r.width < 1 || r.height < 1) return "no-box";
+      const h = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2));
+      return h === b || b.contains(h) ? "self" : name(h); };
+    const leaf = document.getElementById("table-leaf");
+    const cut = document.getElementById("cuttings");
+    return {
+      tabs: tabs.map((b) => ({ text: (b.textContent || "").replace(/\s+/g, " ").trim(), selected: b.getAttribute("aria-selected"), press: press(b) })),
+      leafShown: !!leaf && getComputedStyle(leaf).display !== "none",
+      formShown: (() => { const f = document.querySelector(".slip-body .broadside"); return !!f && getComputedStyle(f).display !== "none"; })(),
+      cuttingsInLeaf: !!leaf && !!cut && leaf.contains(cut),
+      cuttingsShown: !!cut && getComputedStyle(cut).display !== "none",
+      cuttings: document.querySelectorAll("#cuttings li").length,
+      columns: (() => { const c = document.getElementById("cuttings"); return c ? getComputedStyle(c).gridTemplateColumns.split(" ").filter(Boolean).length : 0; })(),
+      countText: (() => { const c = document.getElementById("chart-drawer-count"); return c && c.offsetParent !== null ? c.textContent : null; })(),
+      roadInSlip: (() => { const r = document.getElementById("table-road"); const d = document.querySelector(".slip .legend-dock, .slip .legend.in-slip"); return !!r && !!d && d.contains(r); })(),
+    };
+  })()`;
+  await setMobileViewport(390, 844);
+  await go(`${DRESS}&table=${SIX}`);
+  await evaluate(`document.querySelector(".slip-handle").click()`);
+  await sleep(500);
+  const leafShut = await evaluate(LEAF);
+  const tableTab = await evaluate(`(() => { const b = [...document.querySelectorAll(".slip-head .sheet-tabs button")].find((x) => /table/i.test(x.textContent || "")); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
+  if (tableTab) { await touch("touchStart", [{ x: tableTab.x, y: tableTab.y, id: 0 }]); await touch("touchEnd", []); }
+  // A bounded wait that RETURNS its last reading rather than throwing: a settle that gives up kills the lane instead of
+  // failing a named check (#534), and these three checks are the record of what the leaf does, not the wait.
+  let leafOpen = await evaluate(LEAF);
+  for (let i = 0; i < DRAWN && !(leafOpen.leafShown && leafOpen.cuttings === 6); i++) { await sleep(50); leafOpen = await evaluate(LEAF); }
+  check(
+    "CD14 the sheet's head carries the two leaf tabs and BOTH answer a real thumb: at narrow .slip-handle is inset:0 over the whole head, so a tab authored there is dead unless it takes its own layer (mock.css 230), and a tab nobody can press is the #520 dog-ear again",
+    leafShut.tabs.length === 2 && leafShut.tabs.every((t) => t.press === "self") &&
+      /broadside/i.test(leafShut.tabs[0].text) && /^the table( · six)?/i.test(leafShut.tabs[1].text),
+    JSON.stringify({ tabs: leafShut.tabs }),
+  );
+  check(
+    "CD15 pressing The Table turns the sheet to its second leaf: the Broadside's form goes, the gathered sheets come up two across on the sheet's own parchment, and the count comes with them (#518 ruling 4)",
+    leafOpen.leafShown && !leafOpen.formShown && leafOpen.cuttingsInLeaf && leafOpen.cuttings === 6 && leafOpen.columns === 2 && !!leafOpen.countText,
+    JSON.stringify({ leaf: leafOpen.leafShown, form: leafOpen.formShown, inLeaf: leafOpen.cuttingsInLeaf, cuttings: leafOpen.cuttings, columns: leafOpen.columns, count: leafOpen.countText }),
+  );
+  const broadsideTab = await evaluate(`(() => { const b = [...document.querySelectorAll(".slip-head .sheet-tabs button")].find((x) => /broadside/i.test(x.textContent || "")); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
+  if (broadsideTab) { await touch("touchStart", [{ x: broadsideTab.x, y: broadsideTab.y, id: 0 }]); await touch("touchEnd", []); }
+  await sleep(700);
+  const backToForm = await evaluate(LEAF);
+  check(
+    "CD16 the leaf turns back: pressing The Broadside returns the form and puts the table away, so the reader is never one-way into either leaf",
+    backToForm.tabs.length === 2 && backToForm.formShown && !backToForm.leafShown && backToForm.tabs[0].selected === "true" && backToForm.tabs[1].selected === "false",
+    JSON.stringify({ form: backToForm.formShown, leaf: backToForm.leafShown, selected: backToForm.tabs.map((t) => t.selected) }),
+  );
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 }
