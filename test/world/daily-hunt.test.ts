@@ -24,6 +24,7 @@ import {
   clueHoldsAt,
   expectedClueText,
   expectedEW,
+  expectedLeadAxis,
   expectedNS,
   glyphGate,
   labelGate,
@@ -397,6 +398,85 @@ test("a quarry near (not exactly at) the chart's center reads central, not west/
   assert.deepEqual(subjects(120, 90), { ew: "central", ns: "central" });
   assert.deepEqual(subjects(118, 88), { ew: "west", ns: "north" });
   assert.deepEqual(subjects(201, 152), { ew: "east", ns: "south" });
+});
+
+test("the survey leads with the axis the quarry is furthest off-center on", () => {
+  // Live play 2026-09-08 (seed 20260908): Diggai at grid (208, 28) on 320x240 read "the eastern reach" while sitting 0.15 of the width off-center east and 0.38 of the height off-center north. Both bands are true; the coin flip announced the weaker one and sent the hunt sideways.
+  const world = generateWorld(defaultRecipe(20260908));
+  const q = mustQuarry(world);
+  assert.equal(q.settlement.name, "Diggai", "the reported quarry");
+  const clues = buildClues(world, q);
+  assert.equal(clues[1]!.kind, "ns", "the survey's first bearing is north/south");
+  assert.equal(clues[1]!.subject, "north");
+});
+
+test("the leading compass line is never the strictly less decisive axis (#333's class)", () => {
+  const w = 320;
+  const h = 240;
+  const flat = {
+    recipe: { seed: 20260908 },
+    elev: { w, h, data: new Float64Array(w * h) },
+    seaLevel: -1,
+    biomes: new Uint8Array(w * h),
+    rivers: [],
+    roads: [],
+    settlements: [],
+    realms: { labels: new Int16Array(w * h), seats: [] },
+    names: { rivers: new Map(), lakes: [], realms: [] },
+  } as unknown as World;
+  const at = (x: number, y: number): Quarry => ({
+    idx: 0,
+    settlement: {
+      x,
+      y,
+      kind: "village",
+      harbor: false,
+      onRiver: false,
+      score: 0,
+      name: "Midmark",
+      founded: 500,
+      ruined: false,
+    },
+  });
+  const leadFor = (x: number, y: number): string =>
+    buildClues(flat, at(x, y)).filter((c) => c.kind === "ew" || c.kind === "ns")[0]!.kind;
+
+  // Midpoint (159.5, 119.5); off-center fractions are of 319 and 239 respectively.
+  assert.equal(leadFor(208, 28), "ns", "0.15 east against 0.38 north: north leads");
+  assert.equal(leadFor(300, 100), "ew", "0.44 east against 0.08 south: east leads");
+  // A directional band always beats a central one, whichever axis it falls on.
+  assert.equal(leadFor(159, 10), "ns", "central east/west, far north");
+  assert.equal(leadFor(10, 119), "ew", "far west, central north/south");
+
+  SWEEP.forEach((world, wi) => {
+    const q = mustQuarry(world);
+    const gates = gatesFor(world, q, SWEEP_SVGS[wi]!);
+    const lead = buildClues(world, q, gates).filter(
+      (c) => c.kind === "ew" || c.kind === "ns",
+    )[0]!;
+    const want = expectedLeadAxis(world, q.settlement.x, q.settlement.y);
+    if (want !== null) {
+      assert.equal(lead.kind, want, `seed ${world.recipe.seed} leads with the decisive axis`);
+    }
+  });
+});
+
+test("days the decisive axis already led are untouched: the coin is still drawn", () => {
+  // The seeded coin must be consumed whether or not it decides, or shuffled(features) and the
+  // line target read a shifted stream and EVERY day's list moves. Measured against the pre-fix
+  // build (64-seed old-vs-new replay, 2026-09-07): these three days did not move.
+  const sig = (world: World): string =>
+    buildClues(world, mustQuarry(world))
+      .slice(1)
+      .map((c) => `${c.kind}:${c.subject ?? ""}`)
+      .join(" | ");
+
+  assert.equal(sig(DAILY[0]!), "ew:east | onriver: | near:Sahi | road:track | terrain:forest");
+  assert.equal(sig(DAILY[3]!), "ew:west | near:Nepai | road:track | realm:Greater Hoaro");
+  assert.equal(
+    sig(DAILY[5]!),
+    "ns:south | near:Tseyama | road:track | realm:The Shogunate of Gaicha | terrain:forest",
+  );
 });
 
 test("classifyDistanceBand is monotonic and a direct hit is never cold", () => {

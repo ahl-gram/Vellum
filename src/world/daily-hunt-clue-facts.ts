@@ -48,6 +48,8 @@ export type ClueFindability = {
 
 export type ClueFacts = {
   readonly compass: ReadonlyArray<ClueCandidate>;
+  /** The axis the quarry is furthest off-center on, or null when the two tie and the seeded coin decides. */
+  readonly lead: ClueCandidate | null;
   readonly features: ReadonlyArray<ClueCandidate>;
   readonly pool: ReadonlyArray<PoolEntry>;
 };
@@ -63,7 +65,10 @@ export function buildClueFacts(
   const labeled = findable.isLabeled ?? (() => true);
   const glyphNear = findable.hasGlyphNear ?? (() => true);
 
-  const compass = [ewCandidate(world, x), nsCandidate(world, y)];
+  const ew = ewCandidate(world, x);
+  const ns = nsCandidate(world, y);
+  const compass = [ew, ns];
+  const lead = leadCandidate(world, x, y, ew, ns);
   const features: ClueCandidate[] = [];
 
   const river = nearestNamedRiver(world, x, y);
@@ -117,7 +122,25 @@ export function buildClueFacts(
   const near = nearCandidate(world, quarry);
   if (near && labeled(near.clue.subject as string)) features.push(near);
 
-  return { compass, features, pool };
+  return { compass, lead, features, pool };
+}
+
+/** Off the midpoint as a fraction of that axis's extent, the same normalization CENTRAL_BAND uses, so the two cannot drift apart on a non-square grid. */
+function offCenter(extent: number, v: number): number {
+  return Math.abs(v - (extent - 1) / 2) / (extent - 1);
+}
+
+/** #333's lesson on the other axis: both bands can be true at once, so lead with the one that actually places the quarry. */
+function leadCandidate(
+  world: World,
+  x: number,
+  y: number,
+  ew: ClueCandidate,
+  ns: ClueCandidate,
+): ClueCandidate | null {
+  const dx = offCenter(world.elev.w, x);
+  const dy = offCenter(world.elev.h, y);
+  return dx === dy ? null : dx > dy ? ew : ns;
 }
 
 function ewBandOf(world: World, x: number): "east" | "west" | "central" {

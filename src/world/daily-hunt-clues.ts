@@ -50,7 +50,8 @@ export function buildClues(
   const facts = buildClueFacts(world, quarry, findable);
   const rng = createRng(world.recipe.seed).fork("daily-hunt-clues");
 
-  const first = rng.pick(facts.compass);
+  const coin = rng.pick(facts.compass);
+  const first = facts.lead ?? coin;
   const other = facts.compass.find((c) => c !== first);
   const pool = [...rng.shuffled(facts.features), ...(other ? [other] : [])];
   const target = rng.pick(TARGET_LINES);
