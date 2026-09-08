@@ -44,6 +44,8 @@ export async function run(ctx) {
   const settle = makeSettle(ctx);
   // A REAL press and release at the handle's own coordinates, never element.click(): a synthetic click dispatches straight at the node and ignores pointer-events, so it files a handle no reader could reach. The inset box is pointer-events: none, and that is exactly the defect this drives.
   const { clickAt } = makeStage(ctx);
+  // A settle that waits on a REGION JOB is not waiting on a transition: the worker draws a whole survey, which is real work that scales with the runner. The default 120 tries is 6s, sized on a laptop, and CI ran this lane 2.7x slower than local on the run that timed out. 400 tries is 20s, the same order as TOUR_TIMEOUT_MS, which is itself sized at roughly 10x the slowest matrix measured on CI.
+  const DRAWN = 400;
   const clickEar = async () => {
     const r = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
     if (r) await clickAt(r.x, r.y);
@@ -61,7 +63,7 @@ export async function run(ctx) {
 
   // CD1: the handle rides the committed survey, inside its box, and leaves the inset's own svg the last one.
   await go(`${DRESS}&${DEEP}`);
-  const armed = await settle(READ, atInset, "chart-drawer-inset");
+  const armed = await settle(READ, atInset, "chart-drawer-inset", DRAWN);
   const why = {
     ear: !!armed.ear, label: armed.ear && armed.ear.label === "lay this survey on the table",
     svgs: armed.insetSvgs === 1, isSurvey: armed.lastSvgIsSurvey, rect: !!armed.insetRect,
@@ -130,7 +132,7 @@ export async function run(ctx) {
   await go(`${DRESS}&table=${carried}`);
   const cold = await evaluate(READ);
   await evaluate(`document.getElementById("chart-drawer-tab").click()`);
-  const filled = await settle(READ, (d) => d.imgs >= 1 && d.decoded.every(Boolean), "chart-drawer-filled");
+  const filled = await settle(READ, (d) => d.imgs >= 1 && d.decoded.every(Boolean), "chart-drawer-filled", DRAWN);
   check(
     "CD4 a reload restores the table from the address alone, showing a reserved frame named from the chart number, and the picture is drawn when the drawer is OPENED rather than on load (ruled 2026-09-07)",
     cold.cuttings === 1 && cold.imgs === 0 && cold.frames === 1 && cold.titles[0] === "Chart № 42" && !cold.open &&
@@ -152,7 +154,7 @@ export async function run(ctx) {
   const SIX = ["rung-1.lx-4.ly-4", "rung-1.lx-3.ly-3", "rung-2.lx-5.ly-5", "rung-2.lx-6.ly-6", "rung-3.lx-11.ly-11", "rung-3.lx-12.ly-12"]
     .map((seat) => `k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.${seat}`).join("_");
   await go(`${DRESS}&${DEEP}&table=${SIX}`);
-  const atSix = await settle(READ, atInset, "chart-drawer-six");
+  const atSix = await settle(READ, atInset, "chart-drawer-six", DRAWN);
   await clickEar();
   await sleep(700);
   const refused = await evaluate(READ);
