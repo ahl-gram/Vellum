@@ -31,7 +31,7 @@ import {
   $, seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider,
   coastSlider, status, mapDiv, mapViewport, sheetEl, innerEl, caption, folioTitle, folioSub, stageEl,
   chartDrawer, chartDrawerTab, chartDrawerShut, chartDrawerCount, chartDrawerFull, cuttings, tableRoad,
-  tableLeaf, leafBroadsideTab, leafTableTab, broadsideSlip,
+  tableLeaf, leafBroadsideTab, leafTableTab, broadsideSlip, legendDock, tableRoadBand,
   versoEl, versoBtn, agesChk, orderLink, journalLink, hashControls,
 } from "./elements.ts";
 
@@ -142,7 +142,7 @@ const room = bindRoom({ frame: stageEl, sheet: sheetEl, camera: { hold: () => gl
 
 // #540 Sub 2a: on a phone the table is the sheet's second leaf, so the cuttings and their count dock out of the drawer and into it.
 const leaf = bindTableLeaf({
-  leaf: tableLeaf, cuttings, count: chartDrawerCount,
+  leaf: tableLeaf, cuttings, count: chartDrawerCount, road: tableRoadBand, dock: legendDock,
   broadsideTab: leafBroadsideTab, tableTab: leafTableTab, slip: broadsideSlip,
   narrow: window.matchMedia("(max-width: 900px)"),
   onLayout: () => room.layout(),

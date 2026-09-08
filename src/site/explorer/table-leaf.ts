@@ -29,6 +29,9 @@ export interface TableLeafDeps {
   readonly leaf: HTMLElement;
   readonly cuttings: HTMLElement;
   readonly count: HTMLElement;
+  /** The table's road out, which docks where every other road out stands on a phone (#518 ruling 4). */
+  readonly road: HTMLElement;
+  readonly dock: HTMLElement;
   readonly broadsideTab: HTMLButtonElement;
   readonly tableTab: HTMLButtonElement;
   readonly slip: HTMLElement;
@@ -38,17 +41,20 @@ export interface TableLeafDeps {
 
 export function bindTableLeaf(deps: TableLeafDeps): { readonly relabel: (count: number) => void } {
   const homes = new Map<HTMLElement, Home>();
-  for (const el of [deps.cuttings, deps.count]) {
+  for (const el of [deps.cuttings, deps.count, deps.road]) {
     if (el.parentNode) homes.set(el, { parent: el.parentNode, before: el.nextSibling });
   }
 
+  // The sheets go into the leaf; the road goes into the legend dock, beside the sheet's other roads out, because that is
+  // where a phone reader already looks for a way out of the room (#518 ruling 4).
   const seat = (where: LeafSeat): void => {
-    for (const el of [deps.cuttings, deps.count]) {
+    for (const el of [deps.cuttings, deps.count, deps.road]) {
       const home = homes.get(el);
       if (!home) continue;
-      const want = where === "leaf" ? deps.leaf : home.parent;
+      const to = el === deps.road ? deps.dock : deps.leaf;
+      const want = where === "leaf" ? to : home.parent;
       if (el.parentNode === want) continue;
-      if (where === "leaf") deps.leaf.appendChild(el);
+      if (where === "leaf") to.appendChild(el);
       else home.parent.insertBefore(el, home.before);
     }
   };

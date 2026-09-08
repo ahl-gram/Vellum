@@ -97,4 +97,12 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
   .table-leaf .cuttings .label { position: static; rotate: 0deg; max-width: none; box-shadow: none; border: 0; background: none; padding: 0.25rem 0 0; font-size: 0.74rem; }
   .table-leaf .cuttings .off { right: -0.3rem; top: -0.3rem; }
   .table-leaf .count { font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.8rem; color: var(--ink-brown); margin: 0.7rem 0 0; }
+
+  /* The table's road stands in the dock beside the sheet's own roads out, and only one set is up at a time: with the table leaf turned to, the sheet's roads stand down and the table's takes their place (#518 ruling 4). Docked, it stands on parchment rather than the drawer's walnut, so its two lines take ink the way #525 and #532 dressed the docked legend row. */
+  body:not(.leaf-table) #table-road-band { display: none; }
+  body.leaf-table .legend-dock .legend { display: none; }
+  .legend-dock #table-road-band { display: flex; flex-direction: column; align-items: stretch; gap: 0.45rem; margin-top: 0.9rem; padding: 0; }
+  .legend-dock #table-road-band .stamp, .legend-dock #table-road-band .full { color: var(--ink-brown); text-align: center; }
+  .legend-dock #table-road-band .legend-btn.gold { background: var(--control-gold); border-color: var(--ink-brown); }
+  .legend-dock #table-road-band .legend-btn:disabled { background: var(--ink-faded); opacity: 1; }
 }

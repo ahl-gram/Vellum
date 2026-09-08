@@ -332,9 +332,14 @@ export async function run(ctx) {
       columns: (() => { const c = document.getElementById("cuttings"); return c ? getComputedStyle(c).gridTemplateColumns.split(" ").filter(Boolean).length : 0; })(),
       countText: (() => { const c = document.getElementById("chart-drawer-count"); return c && c.offsetParent !== null ? c.textContent : null; })(),
       roadInSlip: (() => { const r = document.getElementById("table-road"); const d = document.querySelector(".slip .legend-dock"); return !!r && !!d && d.contains(r); })(),
-      roadPress: (() => { const r = document.getElementById("table-road"); if (!r) return null; const b = r.getBoundingClientRect(); if (b.width < 1) return "no-box";
+      // The sheet's body scrolls, so a road below the fold hit-tests to nothing; bring it into view first, or the check
+      // measures the viewport rather than the control. And an element inside a display:none parent still computes its OWN
+      // display, so "is it shown" has to be read off the rect, not off getComputedStyle.
+      roadPress: (() => { const r = document.getElementById("table-road"); if (!r) return null;
+        r.scrollIntoView({ block: "center" });
+        const b = r.getBoundingClientRect(); if (b.width < 1) return "no-box";
         const h = document.elementFromPoint(Math.round(b.x + b.width / 2), Math.round(b.y + b.height / 2)); return h === r || r.contains(h) ? "self" : (h ? (h.id || String(h.className)) : "none"); })(),
-      otherRoads: [...document.querySelectorAll(".slip .legend-dock .legend .legend-btn")].filter((b) => getComputedStyle(b).display !== "none" && b.id !== "table-road").length,
+      otherRoads: [...document.querySelectorAll(".slip .legend-dock .legend .legend-btn")].filter((b) => b.getBoundingClientRect().width > 0.5 && b.id !== "table-road").length,
     };
   })()`;
   await setMobileViewport(390, 844);
