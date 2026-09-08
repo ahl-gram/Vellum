@@ -8,7 +8,7 @@ import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-war
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
 import { type TableItem } from "../shared/table-address.ts";
-import { bindChartDrawer } from "./chart-drawer.ts";
+import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine } from "./chart-drawer.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
 import { wireControls } from "./controls.ts";
@@ -101,6 +101,15 @@ const glass = createGlass({
   prefersReduce,
   regionEligible,
   syncHash,
+  // #520: the dog-ear rides the committed inset. Rebuilt at each commit because draw() wipes #map and the controller unmounts insets on cancel, home and the verso flip, so a handle mounted anywhere else would outlive its sheet.
+  decorateInset: (el: HTMLElement) => {
+    const committed = glass.committedSurvey();
+    const item = committed ? surveyItemFrom(committed) : null;
+    if (!item) return;
+    const full = chartTable.isFull() && !chartTable.holds(item);
+    el.appendChild(makeDogEar(full ? refusalLine("full") : "lay this survey on the table",
+      () => { chartTable.lay(item, committed?.svg ?? null, committed?.title); }));
+  },
   buttons: { zoomIn: $("zoom-in"), zoomOut: $("zoom-out"), reset: $("zoom-reset"), cluster: $("zoom-controls") },
 });
 

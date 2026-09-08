@@ -1,5 +1,7 @@
 // The Chart Table's state (#520 Sub 2 of #401): what the drawer draws and what the Explorer's address carries are the same array, so this half is pure and holds no DOM. `chart-drawer`, never `drawer`: src/site/shell/drawer.ts is the site's phone nav (#520 ruling 2).
-import { TABLE_CAP, emitTable, type TableItem } from "../shared/table-address.ts";
+import { TABLE_CAP, emitTable, type TableItem, type SurveyItem, type Rung } from "../shared/table-address.ts";
+import type { WorldRecipe } from "../../world/types.ts";
+import type { RenderOptions } from "../../render/map-renderer.ts";
 
 // Two sheets are the same when every field the address carries agrees, which is exactly when they would draw the same picture: the grammar's own fields, compared on the item the grammar emits rather than on a stringified object whose key order would split one sheet in two.
 const sameSheet = (a: TableItem, b: TableItem): boolean => emitTable([a]) === emitTable([b]);
@@ -50,6 +52,45 @@ export const placeholderTitle = (item: TableItem): string => `Chart \u2116 ${ite
 export function subOf(item: TableItem): string {
   if (item.kind === "prospect") return item.year === null ? `a prospect, ${dressOf(item.style)}` : `a prospect, ${dressOf(item.style)}, ${item.year}`;
   return `band ${item.rung}, ${dressOf(item.style)}`;
+}
+
+/** The committed survey as the address states it, or null when the controller has nothing committed. */
+export function surveyItemFrom(c: {
+  readonly seed: number;
+  readonly overrides: Partial<WorldRecipe> | undefined;
+  readonly render: RenderOptions;
+  readonly band: number;
+  readonly seat: { readonly lx: number; readonly ly: number } | null;
+}): SurveyItem | null {
+  if (!c.seat || c.band < 1 || c.band > 3 || !c.render.style) return null;
+  const o = c.overrides ?? {};
+  return {
+    kind: "survey", seed: c.seed, rung: c.band as Rung, lx: c.seat.lx, ly: c.seat.ly,
+    overrides: {
+      ...(o.mapType ? { mapType: o.mapType } : {}),
+      ...(o.band ? { band: o.band } : {}),
+      ...(typeof o.landFraction === "number" ? { landFraction: o.landFraction } : {}),
+      ...(typeof o.coastWarp === "number" ? { coastWarp: o.coastWarp } : {}),
+    },
+    style: c.render.style,
+    legend: c.render.legend !== false, arms: c.render.arms === true, beasts: c.render.beasts === true,
+    theme: c.render.theme ?? null,
+  };
+}
+
+/** The dog-ear: the survey's own top-right corner turned back (#518 ruling 3). Drawn in CSS and carrying NO inline svg of its own, because suite-region-detail reads the inset's survey as [...querySelectorAll("#map .region-inset svg")].pop() and a handle with an icon inside would become that element. */
+export function makeDogEar(label: string, onLay: () => void): HTMLButtonElement {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "dog-ear";
+  b.setAttribute("aria-label", label);
+  b.title = label;
+  // The same four d3 gestures createGlass stops for the zoom cluster, so a rapid double click on the corner never becomes the chart's double-click-to-zoom.
+  for (const ev of ["mousedown", "dblclick", "wheel", "touchstart"]) {
+    b.addEventListener(ev, (e) => e.stopPropagation());
+  }
+  b.addEventListener("click", (e) => { e.preventDefault(); onLay(); });
+  return b;
 }
 
 /** The DOM half. The pure state above is what the address carries; this only draws it. */

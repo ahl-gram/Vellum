@@ -62,6 +62,8 @@ interface Deps {
   /** current world zoom, to counter-scale the pencil border */
   getZoomK: () => number;
   prefersReduce: () => boolean;
+  /** #520: the dog-ear rides the committed inset and dies with it, so it is mounted here rather than as a sibling that would outlive the sheet it belongs to. */
+  decorateInset?: (el: HTMLElement) => void;
 }
 
 export function createLodController(deps: Deps) {
@@ -158,6 +160,7 @@ export function createLodController(deps: Deps) {
     el.innerHTML = res.svg;
     const old = inset ? inset.el : null;
     mapDiv.appendChild(el);
+    deps.decorateInset?.(el);
     inset = { el, svg: res.svg, band, window, title: res.title, seat };
     currentBand = band;
     currentWindow = window;

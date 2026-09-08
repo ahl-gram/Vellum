@@ -28,6 +28,8 @@ interface GlassDeps {
   regionEligible: () => boolean;
   /** #165/#169: the conductor's ONE hash writer; settles funnel through it. */
   syncHash: () => void;
+  /** #520: the dog-ear rides the committed inset, so the conductor hangs it here rather than on a sibling that would outlive the sheet. */
+  decorateInset?: (el: HTMLElement) => void;
   /** The on-screen camera, draw nearer / stand off / the whole sheet (#165; voiced at #170, home's voice since #505). */
   buttons: { zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement; cluster: HTMLElement };
 }
@@ -77,6 +79,7 @@ export function createGlass(deps: GlassDeps) {
     setError: deps.setError,
     getZoomK: () => zoomController.getState().k,
     prefersReduce: deps.prefersReduce,
+    decorateInset: deps.decorateInset,
   });
 
   // #165/#169: sheet fractions of the WORLD sheet at every band (the inset design never rebases), read from the STABLE viewport; guard a zero-size box (before first layout) so the division is finite.
@@ -150,7 +153,8 @@ export function createGlass(deps: GlassDeps) {
     cancelRedraft: () => lodController.cancel(),
     setWorld: (ctx: Parameters<typeof lodController.setWorld>[0]) => lodController.setWorld(ctx),
     homeToWorld: () => lodController.homeToWorld(),
-    lodState: () => lodController.state(),
+
+    committedSurvey: () => lodController.committedSurvey(),    lodState: () => lodController.state(),
   };
 }
 
