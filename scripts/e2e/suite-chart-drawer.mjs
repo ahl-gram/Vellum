@@ -23,6 +23,7 @@ const READ = `(() => {
     titles: [...document.querySelectorAll("#cuttings .label b")].map((b) => b.textContent),
     decoded: [...document.querySelectorAll("#cuttings img")].map((i) => i.naturalWidth > 0),
     offs: document.querySelectorAll("#cuttings .off").length,
+    offsReachable: [...document.querySelectorAll("#cuttings .off")].filter((b) => { const r = b.getBoundingClientRect(); return document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2)) === b; }).length,
     fullShown: (() => { const f = document.getElementById("chart-drawer-full"); return !!f && !f.hidden; })(),
     roadDisabled: (() => { const b = document.getElementById("table-road"); return !!b && b.disabled; })(),
     ear: ear ? { label: ear.getAttribute("aria-label"), rect: r("#map .region-inset .dog-ear") } : null,
@@ -160,6 +161,12 @@ export async function run(ctx) {
     atSix.cuttings === 6 && !!atSix.ear && atSix.ear.label === "the table is full: six sheets lie on it" &&
       refused.cuttings === 6 && refused.status === "the table is full: six sheets lie on it" && refused.fullShown,
     JSON.stringify({ before: atSix.cuttings, label: atSix.ear && atSix.ear.label, after: refused.cuttings, status: refused.status, full: refused.fullShown }),
+  );
+
+  check(
+    "CD7b with the drawer open at a FULL table every remove press answers a real pointer: the Broadside is fixed above this drawer and reaches into its band, and the cuttings overlap each other by design, so three of six once hit-tested to the form behind them and to a neighbour's paper label",
+    refused.cuttings === 6 && refused.offs === 6 && refused.offsReachable === 6,
+    JSON.stringify({ cuttings: refused.cuttings, offs: refused.offs, reachable: refused.offsReachable, open: refused.open }),
   );
 
   // Home drops the inset, and the handle must go with it rather than outliving the sheet it belongs to.
