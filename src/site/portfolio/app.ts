@@ -3,6 +3,7 @@
 // per gathered survey, dispatched grouped by world because worldFor is a single-entry cache, and the
 // sheets arrive progressively into a pile whose top sheet stands on the stage.
 import { initWorker, runJob } from "../explorer/worker-client.ts";
+import { bindRoom } from "../shared/room.ts";
 import { thumbJobFor } from "../explorer/chart-drawer.ts";
 import { parseTable, groupByWorld, TABLE_KEY, type TableItem } from "../shared/table-address.ts";
 import { BARE_LINE, boundLine, draftedLine, isAwaited, roman, sheetLine } from "./folio-lines.ts";
@@ -52,6 +53,7 @@ const showTop = (): void => {
   const sheet = sheets[top];
   if (!sheet) return;
   sheetBox.innerHTML = sheet.svg ?? "";
+  room.layout();
   folioTitle.textContent = sheets.length > 0 ? sheetLine(sheet.title, top + 1, sheets.length) : "";
   folioSub.textContent = sheet.item.kind === "survey"
     ? `a regional survey at band ${sheet.item.rung}, ${sheet.item.style} · from ${sheet.worldTitle || `chart № ${sheet.item.seed}`}, chart № ${sheet.item.seed}`
@@ -164,6 +166,14 @@ const draft = async (): Promise<void> => {
   }
   say("");
 };
+
+// #462's chart room: the sheet is fitted to what the chrome leaves, or it fills the viewport and runs under the nav, the room's name and the slip. A page that draws a chart and never binds the room has no fit at all.
+const room = bindRoom({
+  frame: document.querySelector(".stage") as HTMLElement,
+  sheet: document.getElementById("sheet") as HTMLElement,
+  camera: { hold: () => null, restore: () => {} },
+  aspect: () => { const svg = sheetBox.querySelector("svg"); const vb = svg?.viewBox.baseVal; return vb && vb.width > 0 && vb.height > 0 ? vb.width / vb.height : null; },
+});
 
 const start = async (): Promise<void> => {
   layPile();

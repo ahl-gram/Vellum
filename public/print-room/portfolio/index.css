@@ -1,5 +1,13 @@
 /* The Portfolio (#521 Sub 3 of #401): the pile, and the index that reads it. Direction C's picture with direction A's words (ruled 2026-09-08), so the room's own sheet dresses the stack, the contents rows and the bare state; the room furniture is the Atelier Kit's. */
 
+/* The stage centres the fitted sheet in what the chrome leaves; room.ts measures the reserves off the chrome rects. Every chart room carries this block in its OWN sheet (the kit's atelier.css fixes the stage and stops there), and a page that omits it draws its chart at the full viewport, under the nav and under the slip. */
+.stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
+#sheet { position: relative; flex: none; width: 0; height: 0; box-shadow: var(--stage-shadow); }
+#map-viewport { position: absolute; inset: 0; cursor: grab; }
+#map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
+#map { position: absolute; inset: 0; transform-origin: 0 0; }
+
 /* The pile: papers behind the top sheet, offset a little each, so the stack reads as depth and not as a border. */
 .pile { position: absolute; inset: 0; pointer-events: none; }
 .pile .leaf {
