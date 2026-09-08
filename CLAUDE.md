@@ -310,6 +310,31 @@ worktree costs when both go wrong.
   shared across every worktree in the repo and a parallel session can pop yours. Set work aside with
   a WIP commit instead.
 
+## The e2e harness leaves a browser profile behind if you do not let it finish
+
+Every local run mints a throwaway Brave profile under `tmpdir()` (`mkdtemp` in `scripts/e2e/harness.mjs`)
+and `cleanup()` removes it. Two things defeat that, and both are invisible until the machine is full:
+
+- **`cleanup()` is synchronous**, so it must delete synchronously. It called the PROMISE `rm` without
+  awaiting until 2026-09-08, and every caller exits immediately after it, so no run ever deleted its
+  own profile. Measured that day: **446 leaked profiles, 20GB**.
+- **An ad-hoc script that drives the harness owes the same discipline.** `cleanup(); process.exit(0)`
+  is the shape every probe in this repo uses, and it only works while cleanup stays synchronous. If
+  you add async teardown, await it before exiting, and never `pkill` a run you intend to repeat.
+
+**The tell is a lane that STALLS rather than fails**: a suite you did not touch stops writing to the
+log, the process stays alive, and there is no failing check to read. That is a starved machine, not a
+bad diff. Before hunting the diff:
+
+```
+ls -d /var/folders/*/*/T/vellum-e2e-* | wc -l          # should be 0 or 1, not hundreds
+ps aux | grep '[r]emote-debugging-port'                 # orphaned browsers from killed runs
+find /var/folders/*/T -maxdepth 1 -name 'vellum-e2e-*' -type d -mmin +30 -print0 | xargs -0 rm -rf
+```
+
+CI never sees this: the runner is thrown away each time, so the leak is local-only and accrues across
+a long session of many runs.
+
 ## Write visual samples to out/
 
 Any chart, diagnostic overlay, before/after image, or other visual artifact you write to the
