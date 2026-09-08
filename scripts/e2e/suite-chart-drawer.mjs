@@ -180,6 +180,48 @@ export async function run(ctx) {
     JSON.stringify({ ear: home.ear, insetSvgs: home.insetSvgs, cuttings: home.cuttings }),
   );
 
+  // CD9 / CD10 (#543 Sub 2b): the drawer's band stands clear of the open Broadside, and the cuttings row keeps room for a sheet.
+  // The Broadside is fixed at z-20 over this drawer's z-18 and reaches down into its band, so anything of the drawer's laid under
+  // its footprint is painted over. #520 clamped the CUTTINGS clear of it and reasoned the road was already below the slip's foot;
+  // that holds for the road's button and not for the stamp line above it. This guards the CLASS: no part of the drawer's band,
+  // at any width the drawer is not stood down at, may lie under the Broadside.
+  const BAND = `(() => {
+    const slip = document.querySelector(".slip");
+    if (!slip) return { err: "no slip" };
+    const sb = slip.getBoundingClientRect();
+    const overlap = (b) =>
+      Math.max(0, Math.min(b.right, sb.right) - Math.max(b.left, sb.left)) *
+      Math.max(0, Math.min(b.bottom, sb.bottom) - Math.max(b.top, sb.top));
+    const name = (e) => (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\s+/).join("."));
+    const parts = [...document.querySelectorAll("#chart-drawer .chart-drawer-head, #chart-drawer .chart-drawer-head > *, #cuttings, #cuttings > li, .chart-drawer-road, .chart-drawer-road > *")];
+    const fouled = parts.filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0.5 && b.height > 0.5 && overlap(b) > 0; }).map(name);
+    const row = document.getElementById("cuttings").getBoundingClientRect();
+    return { folded: slip.classList.contains("folded"), open: document.getElementById("chart-drawer").classList.contains("open"),
+      fouled, rowW: +row.width.toFixed(1), cuttings: document.querySelectorAll("#cuttings li").length, vw: window.innerWidth };
+  })()`;
+  // One cutting is 10.6rem; a row narrower than that cannot show a single gathered sheet whatever the cap says.
+  const CUTTING = 169.6;
+  const band = {};
+  for (const [w, h] of [[1280, 800], [1520, 872], [901, 800]]) {
+    await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+    await go(`${DRESS}&table=${SIX}`);
+    await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+    await sleep(700);
+    band[`${w}x${h}`] = await evaluate(BAND);
+  }
+  const widths = Object.keys(band);
+  check(
+    "CD9 with the Broadside open, no part of the drawer's band lies under it: #520 clamped the cuttings clear and read the road as already below the slip's foot, which is true of its button and not of the stamp line above it (#543 Fault 3)",
+    widths.every((k) => band[k].open && !band[k].folded && band[k].fouled.length === 0),
+    JSON.stringify(Object.fromEntries(widths.map((k) => [k, band[k].fouled]))),
+  );
+  check(
+    "CD10 the cuttings row keeps room for at least one sheet at every width the drawer is not stood down at: the head and the road are rigid, so the row is the only column that gives, and its clamp has no floor (#543 Fault 4)",
+    widths.every((k) => band[k].rowW >= CUTTING),
+    JSON.stringify(Object.fromEntries(widths.map((k) => [k, band[k].rowW]))),
+  );
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+
   // CD6: the phone stands the drawer down until Sub 2a (#540).
   await setMobileViewport(390, 844);
   await go(`${DRESS}&table=${carried}`);
