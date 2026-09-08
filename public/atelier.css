@@ -206,7 +206,8 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; max-width: none !important; }
   .legend.in-slip .legend-head { display: none; }
   .legend.in-slip .legend-btn { background: var(--ink-dark); }
-  .legend.in-slip .legend-btn.gold { background: var(--control-gold); }
+  /* #532 (Alex's call, 2026-09-07): the cream fill STAYS, since it is what marks this the road out, but on the sheet's parchment it reads 1.09:1 and the tan hairline 2.00:1, so the box dissolved into the page. Docked, the hairline takes ink-brown: 5.64:1 on the sheet and 5.20:1 against the fill, so the button has an edge again while keeping the gold it was given. */
+  .legend.in-slip .legend-btn.gold { background: var(--control-gold); border-color: var(--ink-brown); }
   /* #525: a docked row stands on parchment, where the disabled wash (a 0.5 ink over a 0.45 element) reads 1.5:1 and the button all but disappears. Docked, it takes a SOLID faded ink instead, so it reads the same whatever is behind it: 3.93:1 as a box against the sheet, a clear step down from the enabled 9.46:1. */
   .legend.in-slip .legend-row .legend-btn:disabled { background: var(--ink-faded); opacity: 1; }
   .slip-tab { display: none; }

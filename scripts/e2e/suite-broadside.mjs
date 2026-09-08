@@ -209,12 +209,78 @@ export async function run(ctx) {
   // The MEDIAN of a wide run: the defect is a full-area wash, so the median moves with it, while a max passes on one bright press under the sample and a min fails on one hairline crossing it.
   const lums = br6b.slipY === null ? null : (await sampleRow(send, 20, br6b.slipY + 120, 16)).map(luminance).sort((a, b) => a - b);
   const br6bGround = lums === null ? null : Math.round(lums[Math.floor(lums.length / 2)]);
+  // #532: the mark's contrast is a COMPUTED-STYLE claim and can only be read as one. The declaration that fails here is PRESENT in the stylesheet and simply loses the cascade, so a text match over the CSS passes on the broken code. The three states go through CSS.forcePseudoState, and each asserts its own resolved COLOUR: a floor alone passes when the hover arm is deleted and hover falls back to the resting ink, which still clears it (skeptic on PR #535).
+  const doc532 = await send("DOM.getDocument", { depth: 1 });
+  await send("CSS.enable");
+  const fnNode = (await send("DOM.querySelector", { nodeId: doc532.root.nodeId, selector: "#broadside .legend.in-slip .legend-row a.fn" })).nodeId;
+  const readMark = async (states) => {
+    if (!fnNode) return null;
+    await send("CSS.forcePseudoState", { nodeId: fnNode, forcedPseudoClasses: states });
+    return evaluate(`(()=>{const m=document.querySelector("#broadside .legend.in-slip .legend-row a.fn");if(!m)return null;
+      const lin=(c)=>{c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);};
+      const parse=(s)=>s.slice(s.indexOf("(")+1,s.lastIndexOf(")")).split(",").map(parseFloat);
+      const lum=(p)=>0.2126*lin(p[0])+0.7152*lin(p[1])+0.0722*lin(p[2]);
+      const opaque=(el)=>{for(let n=el;n;n=n.parentElement){const q=parse(getComputedStyle(n).backgroundColor);if(q.length>=3&&(q.length<4||q[3]>0.99))return q.slice(0,3);}return [255,255,255];};
+      const c=parse(getComputedStyle(m).color).slice(0,3),g=opaque(m);
+      const [hi,lo]=[lum(c),lum(g)].sort((a,b)=>b-a);
+      return{color:getComputedStyle(m).color,ground:"rgb("+g.join(", ")+")",ratio:Math.round(((hi+0.05)/(lo+0.05))*100)/100};})()`);
+  };
+  const fnRest = await readMark([]);
+  const fnHover = await readMark(["hover"]);
+  const fnFocus = await readMark(["focus", "focus-visible"]);
+  await readMark([]);
+  await send("CSS.disable");
+  // #532 (Alex's call, 2026-09-07): the docked gold road keeps its cream fill, which is what marks it as the road OUT, and its hairline takes ink so the button's box reads against the sheet. Two-sided: the fill must STILL be the gold, so "make it dark like its siblings" fails this as surely as leaving the tan hairline does.
+  const goldBox = await evaluate(`(()=>{const b=document.querySelector("#broadside .legend.in-slip .legend-row .legend-btn.gold");if(!b)return null;
+    const lin=(c)=>{c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);};
+    const parse=(s)=>s.slice(s.indexOf("(")+1,s.lastIndexOf(")")).split(",").map(parseFloat);
+    const lum=(p)=>0.2126*lin(p[0])+0.7152*lin(p[1])+0.0722*lin(p[2]);
+    const ratio=(x,y)=>{const[hi,lo]=[lum(x),lum(y)].sort((a,b)=>b-a);return Math.round(((hi+0.05)/(lo+0.05))*100)/100;};
+    const opaque=(el)=>{for(let n=el.parentElement;n;n=n.parentElement){const q=parse(getComputedStyle(n).backgroundColor);if(q.length>=3&&(q.length<4||q[3]>0.99))return q.slice(0,3);}return [255,255,255];};
+    const cs=getComputedStyle(b);const fill=parse(cs.backgroundColor).slice(0,3),edge=parse(cs.borderTopColor).slice(0,3),ground=opaque(b);
+    return{fill:cs.backgroundColor,edge:cs.borderTopColor,ground:"rgb("+ground.join(", ")+")",
+      edgeOnGround:ratio(edge,ground),edgeOnFill:ratio(edge,fill),fillOnGround:ratio(fill,ground),width:cs.borderTopWidth};})()`);
+  // WCAG 1.4.11: a button's boundary is a non-text component, so 3:1 is the bar it answers to, not the 4.5:1 its label does.
+  const EDGE_FLOOR = 3;
+  const GOLD_FILL = "rgb(240, 227, 189)";
+  // The house's text floor. The mark is a link, so 3:1 (a non-text component) is not the bar it answers to.
+  const FN_FLOOR = 4.5;
+  const INK_BROWN = "rgb(107, 90, 64)", INK_DARK = "rgb(74, 56, 38)", LINE_TAN = "rgb(185, 167, 127)";
+  // Asserted, not just used as the divisor: opaque() walks parent backgrounds and is blind to a ::before overlay, which is exactly how #525's pool painted, so a returned pool would leave the ratio reading against a ground that no longer paints.
+  const SHEET = "rgb(244, 236, 216)";
   await clearMobile();
+  // The other side of the same claim: undocked the row still paints its own dark footing, where line-tan is what reads, so the repair has to be a DOCKED arm. Without this, changing the base rule globally passes the three reads above and quietly breaks the floating mark.
+  const readFloat = `(()=>{const m=document.querySelector(".legend:not(.in-slip) .legend-row a.fn");
+    return m?{color:getComputedStyle(m).color,footing:getComputedStyle(m.closest(".legend"),"::before").content}:null;})()`;
+  let fnFloat = null;
+  // The undocked read waits for the resize-driven relayout to seat the row back on the stage; a blind sleep here is #529's CL4 shape and would go red for reasons unrelated to colour.
+  for (let i = 0; i < 100; i++) {
+    fnFloat = await evaluate(readFloat);
+    if (fnFloat) break;
+    await sleep(50);
+  }
   check(
     "BR6b on a phone with a committed survey's camera, the opened Broadside carries NO footing behind its docked Press: the sheet's ground reads parchment where the pool used to paint (#525)",
     br6b.docked && br6b.open && br6b.zoomed && br6b.groundOn === "none" && br6bGround > 200,
     JSON.stringify({ ...br6b, ground: br6bGround }),
   );
+
+  check(
+    "BR6c the docked mark reads on the parchment it now stands on, at rest and under hover and focus (#532): every state clears the 4.5:1 text floor, where line-tan measured 2.00:1 and the cream hover 1.10:1 once #525 took the pool away, and the FLOATING mark keeps line-tan on the footing it still has",
+    !!fnRest && !!fnHover && !!fnFocus &&
+      fnRest.ratio >= FN_FLOOR && fnHover.ratio >= FN_FLOOR && fnFocus.ratio >= FN_FLOOR &&
+      fnRest.color === INK_BROWN && fnHover.color === INK_DARK && fnFocus.color === INK_DARK &&
+      fnRest.ground === SHEET && fnHover.ground === SHEET && fnFocus.ground === SHEET &&
+      !!fnFloat && fnFloat.color === LINE_TAN && fnFloat.footing !== "none",
+    JSON.stringify({ rest: fnRest, hover: fnHover, focus: fnFocus, floating: fnFloat, floor: FN_FLOOR }),
+  );
+
+  check(
+    "BR6d the docked gold road keeps its cream fill and takes an inked hairline (#532, Alex's 2026-09-07 call): the fill still marks it as the road OUT, and the edge clears the 3:1 component floor against BOTH the sheet and the fill, where the tan hairline read 2.00:1 and the fill itself 1.09:1",
+    !!goldBox && goldBox.fill === GOLD_FILL && goldBox.edgeOnGround >= EDGE_FLOOR && goldBox.edgeOnFill >= EDGE_FLOOR,
+    JSON.stringify({ ...goldBox, floor: EDGE_FLOOR, wantFill: GOLD_FILL }),
+  );
+
 
   await gotoPlain(`http://127.0.0.1:${PORT}/glossary/`, "broadside-glossary");
   const br7 = await evaluate(`(()=>{
