@@ -47,7 +47,9 @@ export function createGlass(deps: GlassDeps) {
   function setCardZoom(k: number): void {
     const card = document.getElementById("place-card");
     const overlay = mapDiv.querySelector<HTMLElement>(".place-overlay");
-    for (const el of [card, overlay]) {
+    // #520: the dog-ear is a leaf sibling of the inset's survey svg and would otherwise be scaled by the live transform with it, reading 435px at k=8 for a handle that asks for 54.
+    const ear = mapDiv.querySelector<HTMLElement>(".dog-ear");
+    for (const el of [card, overlay, ear]) {
       if (!el) continue;
       if (k === 1) el.style.removeProperty("--zoom-k");
       else el.style.setProperty("--zoom-k", String(k));

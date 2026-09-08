@@ -63,14 +63,15 @@ body:has(.chart-drawer.open) .legend:not(.in-slip) { bottom: calc(15.5rem + var(
 /* The dog-ear (#518 ruling 3): the committed survey's own top-right corner turned back. Drawn with a clip-path and a gradient, carrying no element of its own inside, because suite-region-detail reads the survey as [...querySelectorAll("#map .region-inset svg")].pop() and anything with an svg in it would become that element. It sits INSIDE the inset's box and changes none of it, since the place overlay positions by the same rect. */
 .region-inset { position: absolute; }
 .dog-ear {
-  position: absolute; top: 0; right: 0; width: 3.4rem; height: 3.4rem; padding: 0; border: 0; cursor: pointer;
+  position: absolute; top: 0; right: 0; padding: 0; border: 0; cursor: pointer;
+  width: calc(3.4rem / var(--zoom-k, 1)); height: calc(3.4rem / var(--zoom-k, 1));
   appearance: none; border-radius: 0; z-index: 3;
   clip-path: polygon(100% 0, 0 0, 100% 100%);
   background: linear-gradient(225deg, var(--parchment-panel) 0%, var(--parchment) 46%, var(--chart-ink) 47%, var(--ink-dark) 100%);
   box-shadow: none;
   transition: width 0.18s var(--ease-paper), height 0.18s var(--ease-paper);
 }
-.dog-ear:is(:hover, :focus-visible) { width: 4.1rem; height: 4.1rem; }
+.dog-ear:is(:hover, :focus-visible) { width: calc(4.1rem / var(--zoom-k, 1)); height: calc(4.1rem / var(--zoom-k, 1)); }
 .dog-ear:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -2px; }
 
 /* The phone is Sub 2a (#540), where the drawer becomes the bottom sheet's second leaf as #518 ruling 4 ruled it. Until that lands the desktop drawer stands DOWN here rather than shipping broken: measured at a true 390, its rigid head and road leave the cuttings row 4.34px wide, push the road 64px past the edge into body's overflow:hidden where nothing can reach or scroll to it, and paint the translucent walnut over the bottom third of the chart while the Broadside's own sheet paints back over the road. The table is unreachable on a phone in the interval, which is a stopgap and not the ruled design. */

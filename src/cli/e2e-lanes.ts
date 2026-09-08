@@ -47,6 +47,7 @@ export const E2E_LANES: readonly E2eLane[] = [
       "runninghead",
       "cluster",
       "room-drawer",
+      "chart-drawer",
       "document-rooms",
       "region-detail",
       "specimen",
