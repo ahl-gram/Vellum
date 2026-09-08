@@ -252,6 +252,47 @@ export async function run(ctx) {
   );
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
+  // CD13 (#543, Alex 2026-09-08): the tab and the camera share the right edge once the Broadside is folded.
+  // The Broadside used to hold the camera 26rem clear of the edge, so the tab never met it; folded, the camera comes
+  // home to --chrome-x and the tab is the thing already standing there. z-19 over the corner's z-10 means the tab wins
+  // the pointer, so this is a reachability check and not a tidiness one.
+  const EDGE = `(() => {
+    const tab = document.getElementById("chart-drawer-tab");
+    const zoom = document.querySelector(".corner.br.zoomery");
+    const tb = tab.getBoundingClientRect(), zb = zoom.getBoundingClientRect();
+    const overlap =
+      Math.max(0, Math.min(tb.right, zb.right) - Math.max(tb.left, zb.left)) *
+      Math.max(0, Math.min(tb.bottom, zb.bottom) - Math.max(tb.top, zb.top));
+    const reach = (el) => {
+      const b = el.getBoundingClientRect();
+      let ok = 0, all = 0;
+      for (let i = 1; i < 10; i++) for (let j = 1; j < 10; j++) {
+        const h = document.elementFromPoint(Math.round(b.x + b.width * i / 10), Math.round(b.y + b.height * j / 10));
+        all++; if (h === el || el.contains(h)) ok++;
+      }
+      return Math.round(100 * ok / all);
+    };
+    return { folded: document.querySelector(".slip").classList.contains("folded"),
+      tabShown: getComputedStyle(tab).display !== "none",
+      overlap: +overlap.toFixed(0),
+      buttons: [...zoom.querySelectorAll(".zoom-btn")].map((b) => reach(b)) };
+  })()`;
+  const edge = {};
+  for (const [w, h] of [[1520, 872], [1280, 800], [901, 800]]) {
+    await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+    await go(DRESS);
+    await evaluate(`document.querySelector(".slip-fold").click()`);
+    await sleep(800);
+    edge[`${w}x${h}`] = await evaluate(EDGE);
+  }
+  const edges = Object.keys(edge);
+  check(
+    "CD13 with the Broadside folded the drawer's tab does not stand on the camera: the tab is z-19 over the corner's z-10, so an overlap is not untidiness, it is the + and the home press answering the tab instead (#543, Alex 2026-09-08)",
+    edges.every((k) => edge[k].folded && edge[k].tabShown && edge[k].overlap === 0 && edge[k].buttons.length === 3 && edge[k].buttons.every((r) => r === 100)),
+    JSON.stringify(edge),
+  );
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+
   // CD6: the phone stands the drawer down until Sub 2a (#540).
   await setMobileViewport(390, 844);
   await go(`${DRESS}&table=${carried}`);
