@@ -3,8 +3,14 @@
     "target": "ES2023",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "types": ["node"],
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "node"
+    ],
     "strict": true,
     "verbatimModuleSyntax": true,
     "erasableSyntaxOnly": true,
@@ -15,5 +21,10 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "scripts/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "scripts/**/*.ts",
+    ".claude/skills/**/*.ts"
+  ]
 }

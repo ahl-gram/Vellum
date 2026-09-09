@@ -1,4 +1,4 @@
-# footgun-gate.py
+# footgun-gate.ts
 
 A PreToolUse hook that puts the skill's gates in front of the model at the moment it edits a test,
 a browser-driving script, or a stylesheet, creates a file that joins a roster, or pushes; and refuses
@@ -37,7 +37,7 @@ is ever removed.
 ## How it is wired
 
 The block lives in `.claude/settings.json` (shared, committed); read it there rather than from a copy
-here. It runs `/usr/bin/python3` on this script only if the script exists at
+here. It runs `node` on this script (Node's native TypeScript, the same way `scripts/*.ts` run) only if it exists at
 `${CLAUDE_PROJECT_DIR}/.claude/skills/vellum-footguns/hooks/`, and exits 0 otherwise, so a checkout
 without the script (a worktree cut before this merged) is not blocked. Do NOT copy the block to
 `~/.claude/settings.json`: `${CLAUDE_PROJECT_DIR}` would resolve to whatever project is open. Hook
@@ -46,18 +46,19 @@ entries merge across levels, so user-level hooks keep running beside it.
 ## Prove it
 
 ```
-/usr/bin/python3 .claude/skills/vellum-footguns/hooks/footgun-gate.py --selftest
+node .claude/skills/vellum-footguns/hooks/footgun-gate.ts --selftest
 ```
 
 Every fixture prints `ok` or `FAIL` with the decision and the text it expected, and the exit code is
 the number of misses. The five gate texts are asserted non-empty first, so a renamed heading in
 `SKILL.md` fails here rather than shipping an empty injection. This is the implementer's own table,
 not an independent prover run. The once-per-session state lives at
-`$TMPDIR/vellum-footguns-<session_id>.json`; delete it to see a gate again.
+`$TMPDIR/vellum-footguns-<session_id>.json`; delete it to see a gate again. `npm run check` types the file
+through the tsconfig include.
 
 ## Cost
 
-- Per Edit, Write or Bash call: one Python start, measured 2026-09-09 at about 29ms.
+- Per Edit, Write or Bash call: one Node start, measured 2026-09-09 at about 27ms (`node -e 0`, five runs).
 - Per session: each gate text at most once, a few hundred tokens each.
 - Every turn of every session in this repo: the skill's `description` line in the system prompt.
   That is the only permanent term, and the reason the description is kept short.
