@@ -7,7 +7,7 @@ its own issue.**
 
 Where this file names a measured value, a guard pins that value, and **the guard is right if they
 disagree.** Where it names a role, the role is the durable thing and the value behind it may be
-re-ratified on #324. The ruled pixels live under `design/`, one directory per sitting.
+re-ratified on #324. The ruled pixels live under `design/`, one directory per design round.
 
 ## The ground
 
@@ -20,7 +20,9 @@ breath drifting slowly over the walnut, and **the vignettes**, the two fixed edg
 parchment chrome legible when a pale chart fills the frame. Neither is decoration that can be
 dropped: the vignettes are load-bearing contrast.
 
-**This is not a dark mode and there is no theme toggle.** The tokens sit in inverted roles and
+**This is not a dark mode and there is no theme toggle**, a description of the code rather than a
+ruling: there are no `prefers-color-scheme` blocks in the authored sheets. The tokens sit in
+inverted roles and
 `color-scheme: light` still stands, so a reader on an OS dark setting keeps light form controls and
 scrollbars. Do not offer a theme swap as though it were tractable: the page chrome is tokens and
 would swap, but the chart cannot, because the renderer writes literal hex into the SVG it emits. A
@@ -30,7 +32,8 @@ picks a map tint, not a colour scheme.)
 
 ## The case
 
-Three faces, three roles, self-hosted, ratified as the Punchcutter's Case (#228):
+Three faces, three roles, self-hosted, ratified as the Punchcutter's Case (#228). The face files and
+the role variables are declared in `public/fonts.css`:
 
 - **Display: IM Fell English SC.** The wordmark, room names, section heads, the nav, the footer.
 - **Flourish: IM Fell English italic.** Taglines, intros, captions, asides. The voice that speaks
@@ -98,10 +101,11 @@ The charts are the thing the site exists to show, and they are dressed on their 
 same world; only the colours, the paper and the lettering change. Antique is the default and is what
 a bare request draws.
 
-**A new dress replaces one, it does not add a fifth.** The Ribbon's painted plate is the ruling that
-set this: the limner's colour took the place of the antique dress rather than becoming a third
-option, because an Ogilby plate was sold plain or hand-coloured, which is ink and antique already.
-Ask what a proposed dress replaces before proposing it.
+**A new dress replaces one rather than adding another.** Ruled for the Ribbon's painted plate on
+#426 (2026-09-03): the limner's colour took the place of the antique dress rather than becoming a
+third option, because an Ogilby plate was sold plain or hand-coloured, which is ink and antique
+already. Read as a general rule this is a generalization of that one ruling, not itself ratified, so
+treat it as the question to ask (what does this dress replace?) rather than as a refusal.
 
 **A derived plate falls back through the dresses in order**: an ink chart yields an ink plate,
 anything else yields antique. That two-dress rule is why a mixed collection reads honestly, and each
@@ -115,8 +119,8 @@ prospect's pen and ink. A feature that gathers charts inherits that gate whether
 shadow, cast in chart ink. The shadow's depth is deeper than it looks like it should be, and
 deliberately so: it was arrived at from a bug where an armed survey wore the hairline and shadow
 twice in exact register, which read better than the single pass and was ratified at the doubled
-value. The mount is qualified on the marker the renderer stamps on a chart and nothing else carries,
-so keep that qualifier or the doubling comes back.
+value (#367). The mount is qualified on the marker the renderer stamps on a chart and nothing else
+carries, so keep that qualifier or the doubling comes back.
 
 **The chart's lettering ink is not the site's prose ink** and the two are not to be unified: the
 chart side is inside the byte-determinism contract, and the site quotes it as a token instead.
@@ -151,7 +155,7 @@ way.
 **A room's name stands in the corner, not on the sheet.** Exactly one `h1` per page, and it is the
 first heading; the wordmark is the `h1` on home alone, because home is roomless.
 
-**The kit is lifted at second use, never at first.** A piece is written in page CSS where it is first
+**The kit is lifted at second use, never at first** (#487). A piece is written in page CSS where it is first
 needed; when a second room needs it, it moves to the shared sheet and a component in the same change,
 and the first consumer is repointed. Anything still used once stays put. **A page seats a component;
 it does not re-dress it.** A page may give its own element inside a piece a face, and may ink a row
@@ -196,7 +200,8 @@ Rules that catch drift:
 
 ## Colour, contrast and legibility
 
-**The floor is 4.5:1, and it is measured, not judged.** Every contrast miss in this project was found
+**The floor is 4.5:1, and it is measured, not judged** (the plate reads on #458, #461, #464, #465
+and #525 are where the misses below were each found). Every contrast miss in this project was found
 by measuring; none was found by looking. The pattern repeats so often it has a shape: the mockup's
 face is `--ink-faded` or `--line-tan`, and at small sizes on the deep or on a panel that lands
 between 2.8:1 and 4.0:1, so **the shipped face goes up a step, to parchment on the deep or ink-brown
@@ -230,7 +235,8 @@ silent, because an unrecorded one reads to the next session as a defect and gets
 
 ## Gesture
 
-**A hover gesture promises navigation.** A tip on something that goes somewhere is the house's
+**A hover gesture promises navigation** (#289, ratified at #324's post-use feel review). A tip on
+something that goes somewhere is the house's
 gesture; a tip on something that does not is a false affordance, and the glossary term tip was
 removed for exactly that reason. A non-navigating gesture is either a chart instrument, which is its
 own ratified class, or it goes on the list awaiting a ruling. A new tip joins one of those lists
@@ -249,8 +255,8 @@ on absent hover alone: a headless linux runner reports no hover with no pointer 
 Motion is design material here and it is ruled like the rest.
 
 **A ceremony is an arrival, and how often it plays is a ruling.** The homepage's veil plays once per
-sitting and any click or key skips it; a room's landing ceremony plays on every arrival. Both were
-ruled and both were ratified after live use. Neither is a default to reason from: a new surface asks
+sitting and any click or key skips it (#457, ratified at #454 ruling 20); a room's landing ceremony
+plays on every arrival (#461, ratified at #454 ruling 21). Neither is a default to reason from: a new surface asks
 which of the two it is.
 
 **The sheet settles onto the desk, then the chrome inks in.** That is the order, and it is quicker and

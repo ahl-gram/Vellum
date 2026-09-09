@@ -25,7 +25,8 @@ and how a design decision gets made; `specs/ui-design.md` is the look and feel i
 the type case, the palette by role, the chart's dress, the rooms and their furniture, the voice,
 contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting). Read
 `specs/ui-design.md` before any work whose deliverable is an appearance. The ruled pixels those
-specs were decided from are archived under `design/`, one directory per sitting.
+specs were decided from are archived under `design/`, one directory per design round
+(`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting).
 
 These refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project specifically.
 

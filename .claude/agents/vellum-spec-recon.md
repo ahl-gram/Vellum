@@ -27,7 +27,7 @@ gh api repos/ahl-gram/Vellum/issues/N/comments   # decisions, ratifications, re-
 - **Comments supersede the body** unless a comment says otherwise. Newest ratified statement wins. A body written before a big epic landed is historical intent, not current fact.
 - **Never conclude an issue is empty from `gh issue view`.** It silently returns exit 0 with no output for some issues in this repo. That is why both commands above are the `api` form.
 - **Auto-memory is a pointer, not a citation.** `hash-sync.ts` was handed to six subagents as `src/site/shared/`; it is `src/site/explorer/`. The filename was recorded and the directory got filled in by inference. Before you write a path, `ls` it.
-- The live plan is the GitHub Project ("Vellum Roadmap", `gh project item-list 1 --owner ahl-gram`); the durable sequencing rules are pinned issue #193. The `roadmap/` directory is deleted and there is no local plan file.
+- The live plan is the GitHub Project ("Vellum Roadmap", `gh project item-list 1 --owner ahl-gram`); the durable sequencing rules are `specs/rulebook.md` in the repo (they left issue #193's body on 2026-09-09; that issue is now a pointer). The `roadmap/` directory is deleted and there is no local plan file.
 
 ## What you verify
 

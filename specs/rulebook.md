@@ -88,7 +88,7 @@ dressing-level pins lag one live-use cycle, so a re-decision does not rip out fr
 **A reversal after live use is the process working, not scope churn.** Record the new call as a dated
 comment and move on.
 
-**Every ruled design round is archived in the repo** under `design/`, one directory per sitting,
+**Every ruled design round is archived in the repo** under `design/`, one directory per round,
 content only, in its own pull request. That archive is the visual spec; this file and the issue
 ledgers are the words.
 
@@ -186,11 +186,11 @@ byte-identical when off, so it moves neither the committed charts nor world iden
   unscheduled, and the rule above yields to this line. The trigger the epic named for itself was met:
   #376 shipped all five subs and closed, and Alex used the shallow detailed coast in the Explorer and
   confirmed it reads right, then ratified going deeper rather than settling at four bands. **Sub 0 is
-  a spike and it gates the rest**: render the deeper bands with the detailed coast beside today's
-  world-resolution rivers and roads, across several seeds, so the mismatch is seen rather than
+  a spike and it gates the rest**: render band-4 and band-5 windows with the detailed coast beside
+  today's world-resolution rivers and roads, across several seeds, so the mismatch is seen rather than
   imagined, then prototype one layer's re-derivation (rivers first) and measure its schedule.
   **Go or no-go per layer, recorded on #395**, and the epic stops and reports rather than joining the
-  golden tail if the spike moves it out of the cheap tier. The band ceiling is respected, not fought:
+  golden tail if the spike moves it out of the cheap tier. The band 5-6 ceiling is respected, not fought:
   #376 measured the parent-dominated fraction compounding 50% at band 1 to 92% at band 7, and lifting
   that means local guarantee enforcement, which is a separate ratification and not this epic's to
   take. `LOD_BANDS` and the Glass `scaleExtent` move LAST, in Sub 4, only after the layers agree.
@@ -228,23 +228,24 @@ comment. This is a convenience index, not their home.
 
 - **Verso (#116, #174):** the ghost and the voyage track must come from the SAME draw, since a quiet
   mid-drag sea-level redraw freezes both (pinned by e2e W15). The verso track is static, never live:
-  painted only at rest (`syncVersoTrack`), never from the rAF tick. `#status` must be empty at rest,
+  painted only at rest (`paintVersoTrack` in `src/site/explorer/verso.ts`), never from the rAF tick. `#status` must be empty at rest,
   because the draw settle and e2e `waitSettled` both key on it. One ghost object URL is created and revoked per redraw.
-- **Realm labels (#145):** the placement module's first stage stays first and unchanged, or the
+- **Realm labels (#145):** `realm-label-placement.ts` stage 1 stays first and unchanged, or the
   golden-free property dies. The dead `blob.length < 60` gate was removed after measuring that 0 of
   173 realms hit it, which is what lets "always named" survive #113.
 - **Label order (#175):** the range name claims its box BEFORE the realm names, first refusal to the
   label that cannot move. Do not reorder that layer.
 - **Borders (#158):** the border attribute-order invariant is commented at its line; keep it.
-- **Heavy lazy plates (#329):** a page embedding heavyweight lazy images gives each a reserved frame,
-  taking width and height from the SVG root, and marks below-the-fold plates low priority so a clicked
-  navigation wins bandwidth. The home style grid that consumed the priority half retired at #470, so
-  this line is the rule's durable home until a lazy heavyweight embed returns; the atlas keeps
-  reserved frames plus lazy loading.
+- **Heavy lazy plates (#329):** a page embedding heavyweight lazy images gives each a reserved frame
+  (width and height from the SVG root) and marks below-the-fold plates `fetchpriority="low"` so a
+  clicked navigation wins bandwidth. The home style grid that consumed the priority half retired at
+  #470, so this line is the rule's durable home until a lazy heavyweight embed returns; the atlas
+  keeps reserved frames plus `loading="lazy"` in `src/atlas/document.ts`.
 
 ## Retired rules, do not resurrect
 
-- **The nav-tax gotcha is retired.** The shared layout owns nav, footer and meta. The flat versus
+- **The nav-tax gotcha is retired.** The shared `BaseLayout` owns nav, footer and meta; adding a page
+  is one `.astro` file plus one `src/layouts/nav.ts` entry. The flat versus
   grouped question was ratified FLAT in #202's decision doc, modeled once as typed data, to be
   revisited only on a named trigger: an eighth nav-listed surface scheduled, three or more wrapped
   lines at 360px, or any item acquiring children.
