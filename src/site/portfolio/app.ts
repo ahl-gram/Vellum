@@ -2,7 +2,7 @@
 // address and nowhere else, so the page reads it ONCE at load and never rewrites it. One region job
 // per gathered survey, dispatched grouped by world because worldFor is a single-entry cache, and the
 // sheets arrive progressively into a pile whose top sheet stands on the stage.
-import { initWorker, runJob } from "../explorer/worker-client.ts";
+import { initWorker, runJob, usesWorker } from "../explorer/worker-client.ts";
 import { bindRoom } from "../shared/room.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";
 import { createZoomController } from "../shared/zoom-controller.ts";
@@ -13,6 +13,7 @@ import { BARE_LINE, beneathLine, boundLine, draftedLine, gatheredLine, isAwaited
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 const status = $("pf-status");
+const warning = $("pf-warning");
 const bound = $("pf-bound");
 const contents = $("pf-contents");
 const sheetBox = $("pf-sheet");
@@ -220,12 +221,12 @@ const room = bindRoom({
 });
 
 const start = async (): Promise<void> => {
-  if (whereLine && items.length > 0) whereLine.textContent = gatheredLine(items.length);
+  if (whereLine) whereLine.textContent = gatheredLine(items.length);
   layPile();
   rows();
   retitle();
   showTop();
-  if (items.length === 0) {
+  if (drawable().length === 0) {
     // hidden is inert on these: atelier.css sets an author display on .legend-btn, which beats the UA [hidden] rule, so
     // el.hidden = true silently no-ops (the #270 guard-prover's find). The Prospect and the Ribbon hide the same way.
     next.style.display = "none";
@@ -242,6 +243,7 @@ const start = async (): Promise<void> => {
   });
   download.addEventListener("click", () => { const sheet = sheets[top]; if (sheet) takeHome(sheet); });
   await initWorker();
+  if (!usesWorker()) warning.hidden = false;
   await draft();
 };
 

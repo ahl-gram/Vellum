@@ -341,14 +341,16 @@ export async function run(ctx) {
   for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate(`!!window.__vellumPortfolio`)) break; }
   await sleep(400);
   const empty = await evaluate(`(() => ({ bound: (document.getElementById("pf-bound") || {}).textContent || null,
-    explorer: !!document.getElementById("pf-explorer"),
-    // The RECT, never .hidden: atelier.css sets an author display on .legend-btn, which beats the UA [hidden] rule, so
-    // el.hidden = true silently no-ops and a check on that property is a check on its own input (#270's guard-prover find).
+    where: (document.querySelector("#portfolio .card-where") || {}).textContent || null,
+    // The RECT of all three, never .hidden: atelier.css sets an author display on .legend-btn, which beats the UA [hidden] rule, so el.hidden = true silently no-ops and a check on that property is a check on its own input (#270's guard-prover find).
+    // The road takes the same measure as the two presses because it is the same script decision: its mere presence is an Astro literal the page script never touches, and could not go red however the stand-down was written.
+    explorer: (() => { const a = document.getElementById("pf-explorer"); return !!a && a.getBoundingClientRect().width > 0.5; })(),
     next: (() => { const b = document.getElementById("pf-next"); return !!b && b.getBoundingClientRect().width > 0.5; })(),
     download: (() => { const b = document.getElementById("pf-download"); return !!b && b.getBoundingClientRect().width > 0.5; })() }))()`);
   check(
-    "CD20 a Portfolio reached with nothing gathered says so in the room's own voice and keeps only the road that has somewhere to go (ruled 2026-09-08): the two sheet presses have nothing to act on and stand down",
-    !!empty.bound && /table is laid at the Explorer/.test(empty.bound) && empty.explorer && !empty.next && !empty.download,
+    "CD20 a Portfolio reached with nothing gathered says so in the room's own voice, in the slip's where-line as well as the bound line, and keeps only the road that has somewhere to go (ruled 2026-09-08): the two sheet presses have nothing to act on and stand down, and the road is measured by its rect the way they are",
+    !!empty.bound && /table is laid at the Explorer/.test(empty.bound) &&
+      /no sheets gathered at the Explorer/.test(empty.where || "") && empty.explorer && !empty.next && !empty.download,
     JSON.stringify(empty),
   );
   // CD21 (#521): the Portfolio is a chart room, so the kit renders its Glass and the stage's label promises the keys.

@@ -57,4 +57,7 @@ test("PF7 the pile's depth is spelled as a word, the way the mockup writes it, a
 test("PF8 the slip's where-line carries the tally the mockup gives it, and follows the folio rather than standing at six (ruled 2026-09-08)", () => {
   assert.equal(gatheredLine(6), "six sheets gathered at the Explorer");
   assert.equal(gatheredLine(1), "one sheet gathered at the Explorer");
+  // The bare state, which is the DEFAULT way into the room (the Print Room's link carries no table): word(0) is "no", so
+  // the line the page writes over BARE_LINE agrees with it instead of promising sheets nobody gathered.
+  assert.equal(gatheredLine(0), "no sheets gathered at the Explorer");
 });

@@ -28,6 +28,9 @@ const tagline = "the sheets you laid on the table, taken home";
   <div id="pf-sheet" class="pf-sheet"></div>
   <Fragment slot="after">
     <p class="status" id="pf-status" role="status" aria-live="polite"></p>
+    <p id="pf-warning" class="warning" hidden>Your browser could not start the render
+    worker, so the sheets are drafted on the main thread. A gathering may pause the page
+    for a moment.</p>
     <noscript>
       <p class="status">Every sheet here is drafted in your browser from the number in its
       margin, so the Portfolio needs JavaScript. The sheets were gathered in the
