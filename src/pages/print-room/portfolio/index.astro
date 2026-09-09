@@ -1,0 +1,71 @@
+---
+// The Portfolio (#521 Sub 3 of #401): the Print Room's second page, where the sheets gathered at the
+// Chart Table are drafted again from their own numbers. Ruled 2026-09-08: direction C's picture (the
+// pile) with direction A's name and words, so the room is The Portfolio and no line says "sheaf".
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import RoomFolio from "../../../layouts/RoomFolio.astro";
+import Fog from "../../../layouts/Fog.astro";
+import Vignettes from "../../../layouts/Vignettes.astro";
+import ChartStage from "../../../layouts/ChartStage.astro";
+import Glass from "../../../layouts/Glass.astro";
+import ChartFolio from "../../../layouts/ChartFolio.astro";
+import LegendButton from "../../../layouts/LegendButton.astro";
+import Slip from "../../../layouts/Slip.astro";
+
+const room = "The Portfolio";
+const tagline = "the sheets you laid on the table, taken home";
+---
+
+<BaseLayout
+  room={room}
+  description="The atelier's portfolio: the regional surveys you gathered at the Chart Table, drafted again from the numbers in their margins and taken home one engraving at a time."
+  path="/print-room/portfolio/"
+  chartRoom
+>
+<Fog />
+<ChartStage label="The sheet on top. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.">
+  <div id="pf-pile" class="pile" aria-hidden="true"></div>
+  <div id="pf-sheet" class="pf-sheet"></div>
+  <Fragment slot="after">
+    <p class="status" id="pf-status" role="status" aria-live="polite"></p>
+    <p id="pf-warning" class="warning" hidden>Your browser could not start the render
+    worker, so the sheets are drafted on the main thread. A gathering may pause the page
+    for a moment.</p>
+    <noscript>
+      <p class="status">Every sheet here is drafted in your browser from the number in its
+      margin, so the Portfolio needs JavaScript. The sheets were gathered in the
+      <a href="../../explorer/">Explorer</a>.</p>
+    </noscript>
+  </Fragment>
+</ChartStage>
+<Vignettes />
+
+<RoomFolio room={room} tagline={tagline}>
+  <p class="gloss">each sheet downloads on its own, as the engraving; the table rides in this page's address, so the link keeps the gathering</p>
+</RoomFolio>
+
+<Slip id="portfolio" verb="Take home" title="The Portfolio" where="the sheets gathered at the Explorer" fold="Fold the portfolio away">
+  <p class="bound-line" id="pf-bound"></p>
+  <div id="pf-contents"></div>
+  <div class="legend-dock" id="legend-dock"></div>
+  <Fragment slot="foot">
+    <p class="note">Every sheet keeps its own dress, and downloads on its own as the
+    engraving (SVG). There is no bound file of the table; the Bound Atlas is the Print
+    Room's own page.</p>
+  </Fragment>
+</Slip>
+
+<ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "folio-coords"]]} />
+
+<nav class="legend" aria-label="This sheet">
+  <p class="legend-head">This sheet &middot; what it can do next</p>
+  <div class="legend-row">
+    <button id="pf-download" class="legend-btn gold" type="button"><span class="verb">Download</span><span class="room">The Engraving</span></button>
+    <button id="pf-next" class="legend-btn" type="button"><span class="verb">Bring up</span><span class="room">The Next Sheet</span></button>
+    <LegendButton id="pf-explorer" gold href="../../explorer/" verb="Back to" room="The Explorer" />
+  </div>
+</nav>
+
+<Glass />
+<script is:inline type="module" src="./app.bundle.js"></script>
+</BaseLayout>

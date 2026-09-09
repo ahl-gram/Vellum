@@ -4,7 +4,7 @@ import { createServer } from "node:http";
 import http from "node:http";
 import net from "node:net";
 import { readFile, mkdir, mkdtemp, rm } from "node:fs/promises";
-import { existsSync, writeFileSync } from "node:fs";
+import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { stripTypeScriptTypes } from "node:module";
 import { dirname, join, resolve, sep, extname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -148,7 +148,10 @@ export function cleanup() {
   try { ws?.close(); } catch {}
   try { brave?.kill("SIGKILL"); } catch {}
   try { server?.close(); } catch {}
-  try { if (userDataDir) rm(userDataDir, { recursive: true, force: true }); } catch {}
+  // rmSync, not the promise rm: cleanup() is synchronous and every caller exits right after it, so an unawaited promise
+  // never lands and the profile survives. Measured 2026-09-08: 446 leaked profiles, 20GB, which starved the machine until
+  // a full lane stalled mid-suite with no failure to show for it.
+  try { if (userDataDir) rmSync(userDataDir, { recursive: true, force: true }); } catch {}
 }
 
 async function getPageTarget(DPORT) {

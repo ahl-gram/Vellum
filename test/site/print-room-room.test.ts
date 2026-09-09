@@ -198,3 +198,11 @@ test("PRR8 the contents row is the kit's (#487, second use of the dated-row idio
   assert.match(css, /\.contents li\.on/, "the page inks the row whose plate is on the sheet");
   assert.match(css, /\.plates/, "and seats the thumbnails");
 });
+
+test("PRR11 the way to the Portfolio stands in the Bound Atlas slip and not in the room's legend row (#521 ruling 2)", () => {
+  // The slip closes on </Slip> here: Slip.astro renders the <aside>, so a slice bounded on </aside> finds nothing, runs to the end of the file, and carries the whole legend with it.
+  const slip = between('id="atlas"', "</Slip>");
+  assert.match(slip, /<a id="pr-portfolio" href="\.\/portfolio\/">The Portfolio<\/a>/, "the Bound Atlas slip carries the way in");
+  const row = between('class="legend-row"', "</nav>");
+  assert.doesNotMatch(row, /portfolio/, "the legend row keeps the ruled shape: the poster sizes, then the one gold road back to the Explorer");
+});

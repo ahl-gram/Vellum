@@ -58,6 +58,7 @@ test("the press bundles from the src/site TypeScript entries (#260)", async () =
     [
       { entry: "src/site/explorer/app.ts", twin: "explorer/app.bundle.js" },
       { entry: "src/site/print-room/app.ts", twin: "print-room/app.bundle.js" },
+      { entry: "src/site/portfolio/app.ts", twin: "print-room/portfolio/app.bundle.js" },
       { entry: "src/site/seed-of-the-day/app.ts", twin: "seed-of-the-day/app.bundle.js" },
       { entry: "src/site/reading-room/app.ts", twin: "reading-room/app.bundle.js" },
       { entry: "src/site/prospect/app.ts", twin: "prospect/app.bundle.js" },

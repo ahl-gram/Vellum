@@ -1,5 +1,5 @@
 // The Chart Table's state (#520 Sub 2 of #401): what the drawer draws and what the Explorer's address carries are the same array, so this half is pure and holds no DOM. `chart-drawer`, never `drawer`: src/site/shell/drawer.ts is the site's phone nav (#520 ruling 2).
-import { TABLE_CAP, emitTable, tableWindow, type TableItem, type SurveyItem, type Rung } from "../shared/table-address.ts";
+import { TABLE_CAP, TABLE_KEY, emitTable, tableWindow, type TableItem, type SurveyItem, type Rung } from "../shared/table-address.ts";
 import { LOD_BANDS, type LodBand } from "../../world/lod.ts";
 import type { SlipFold } from "../shared/slip.ts";
 import type { UvWindow } from "../../terrain/heightfield.ts";
@@ -130,6 +130,7 @@ export interface ChartDrawerDeps {
   readonly broadside?: () => SlipFold | null;
   /** The phone leaf's tab carries its own tally (#540); the drawer's tab and the leaf's are different sentences. */
   readonly relabelLeaf?: (count: number) => void;
+  readonly folioHref?: string;
 }
 
 export function bindChartDrawer(deps: ChartDrawerDeps) {
@@ -145,6 +146,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
 
   const render = (): void => {
     deps.count.textContent = countLine(items);
+    deps.road.disabled = items.length === 0;
     deps.tab.textContent = tabLine(items);
     deps.relabelLeaf?.(items.length);
     deps.full.hidden = roomOnTable(items) > 0;
@@ -242,6 +244,10 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
 
   deps.tab.addEventListener("click", () => setOpen(true, true));
   deps.shut.addEventListener("click", () => setOpen(false, true));
+  deps.road.addEventListener("click", () => {
+    if (items.length === 0) return;
+    window.location.href = `${deps.folioHref ?? "../print-room/portfolio/"}#${TABLE_KEY}=${emitTable(items)}`;
+  });
 
   return {
     lay(item: TableItem, svg: string | null, title?: string): boolean {

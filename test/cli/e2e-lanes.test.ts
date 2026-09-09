@@ -39,7 +39,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "turn": 6.5,
   "runninghead": 3.9,
   "cluster": 4.7, // measured 2026-08-28, local single-suite run (#480)
-  "chart-drawer": 6.9, // measured 2026-09-07, local single-suite run (#520)
+  "chart-drawer": 37.2, // measured 2026-09-08, local single-suite run (#521): 6.9 at #520 was an 11-check suite; #543, #540 and #521 took it to 23, and six of them draft real region sheets
   "room-drawer": 7.3, // measured 2026-08-28, local single-suite run (#483)
   "document-rooms": 6.0, // measured 2026-08-29, local run (#462)
   "broadside": 3.8,
