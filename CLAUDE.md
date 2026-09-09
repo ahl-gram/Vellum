@@ -24,12 +24,23 @@ readable by anyone with the repo.** `specs/rulebook.md` is the sequencing rules,
 and how a design decision gets made; `specs/ui-design.md` is the look and feel itself (the ground,
 the type case, the palette by role, the chart's dress, the rooms and their furniture, the voice,
 contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting).
-**`specs/rulebook.md` is REQUIRED READING before any change that touches the renderer, a committed
-chart, the golden, a seed, or the order of work**, and `specs/ui-design.md` before any work whose
-deliverable is an appearance. Neither is summarized here; where this file and a spec disagree, the
-spec is right. The ruled pixels those specs were decided from are archived under `design/`, one
-directory per design round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a
-sitting).
+**The rulebook is IMPORTED below, so it is already in your context and you are bound by it**; do not
+go looking for it and do not treat it as optional reading. `specs/ui-design.md` is not imported and
+IS required reading before any work whose deliverable is an appearance. Neither is summarized here;
+where this file and a spec disagree, the spec is right. The ruled pixels those specs were decided
+from are archived under `design/`, one directory per design round (`design/oracle/` is the odd one
+out: a screenshot sweep tool, not a sitting).
+
+The import guarantees the rules are IN CONTEXT. It does not guarantee compliance: Anthropic's own
+memory docs say CLAUDE.md is context rather than enforced configuration, and that a rule which must
+hold at a specific moment belongs in a hook. The footgun hook is this repo's enforcement layer; the
+import is what stops the rules being merely findable. It exists because the goldens and regens rules
+left this file on 2026-09-09 and nothing in `.claude/` gates a session that skips a pointer, so they
+would have moved from a file that always loads into one that never did. Keep this line, and keep it
+out of a code fence, where an import is silently skipped. To check it resolved, run `/context` and
+look for `specs/rulebook.md` under Memory files.
+
+@specs/rulebook.md
 
 These refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project specifically.
 

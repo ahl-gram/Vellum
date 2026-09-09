@@ -36,6 +36,15 @@ rules.
 may additionally leave a dated comment on the issue the change came from, as an audit trail. It must
 never live only in a comment somewhere.
 
+**`CLAUDE.md` imports this file with `@specs/rulebook.md`, so it loads into every session.** That is
+deliberate: prose telling a session to go read a file leaves the rules merely findable, and nothing
+in `.claude/` gates a session that skips a pointer. Being loaded is not the same as being obeyed,
+which is what the footgun hook is for; the import only guarantees no session is working without
+these rules in front of it. It also sets the price of what goes in here. This is a hot
+tier now, paid for on every session, so a rule earns its place by being one a session must not get
+wrong, and anything that is really reference material belongs one hop out, in the issue that ruled
+it. Adding a section here is not free.
+
 **Why the rulebook is a file and not an issue thread**, recorded so nobody moves it back. Everywhere
 else in Vellum the convention is that a body is historical intent and a later comment supersedes it,
 which is right for an epic where the original intent is worth preserving beside the ratification that
