@@ -12,12 +12,24 @@ THREE linked files** (it outgrew one Read on 2026-07-24): `project_vellum.md` is
 `project_vellum_livingchart.md` is everything the Explorer animates (Glass zoom, region
 worlds, overlays, the voyage). Read the core plus whichever companion your work touches.
 The live PLAN is the private GitHub Project "Vellum Roadmap"
-(`gh project item-list 1 --owner ahl-gram`); its durable sequencing RULES are pinned issue
-#193. **The `roadmap/` dir is DELETED (2026-07-24)** and there is no local plan file: the
-Project is the plan and #193 is the rulebook. Its three files were superseded drafts, and
+(`gh project item-list 1 --owner ahl-gram`); its durable sequencing RULES live in
+`specs/rulebook.md`. **The `roadmap/` dir is DELETED (2026-07-24)** and there is no local plan
+file: the Project is the plan and `specs/rulebook.md` is the rulebook. Its three files were superseded drafts, and
 two had gone dangerous (the archive still named checksum `2890117437` and a `{#80, #93}`
 flight-exclusion set; `ROADMAP.md` still said to run `npm run site`). If you ever need them
 they are frozen in the claude-config backup at `home/CodeProjects/Vellum/roadmap/`.
+
+**`specs/` holds the tracked, normative house specs, and unlike everything above it is public and
+readable by anyone with the repo.** `specs/rulebook.md` is the sequencing rules, working agreements
+and how a design decision gets made; `specs/ui-design.md` is the look and feel itself (the ground,
+the type case, the palette by role, the chart's dress, the rooms and their furniture, the voice,
+contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting).
+**`specs/rulebook.md` is REQUIRED READING before any change that touches the renderer, a committed
+chart, the golden, a seed, or the order of work**, and `specs/ui-design.md` before any work whose
+deliverable is an appearance. Neither is summarized here; where this file and a spec disagree, the
+spec is right. The ruled pixels those specs were decided from are archived under `design/`, one
+directory per design round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a
+sitting).
 
 These refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project specifically.
 
@@ -37,8 +49,9 @@ mid-session.
 files, the private "Vellum Roadmap" GitHub Project, the claude-config backup, the workspace rules at
 `~/CodeProjects/CLAUDE.md`, and the gitignored `RESUME-HERE.md` and `session-notes/`. Skip those and
 use the repo itself plus the GitHub issues, which are public and carry the ratified decisions. The
-engineering rules below (goldens and regens, measure before you assert, read the issue before you
-build, test-first) stand on their own and are the part worth having.
+engineering rules below (measure before you assert, read the issue before you build, test-first)
+stand on their own and are the part worth having, as do the two tracked specs under `specs/`, which
+are public and hold the goldens-and-regens rules this file used to carry.
 
 ## Session handoff: keep the roadmap Project current
 
@@ -52,14 +65,13 @@ the board current with `gh`: newly filed issues get added and phased; shipped is
 The global `session-handoff` skill updates SESSION-NOTES (here at
 `session-notes/SESSION-NOTES.md`, not the repo root), RESUME-HERE, and auto-memory
 but does NOT know about the Project, so this is the Vellum-specific extra step. The durable
-sequencing RULES (golden flight-exclusion, land-regens-alone, the cost axis, cross-epic
-coordination) live in pinned issue #193, and **#193 is the one issue here whose BODY is
-normative**: it is the complete current rulebook, its comments are history and never
-authoritative, and new information goes INTO the body. Keep it fresh, editing the body for a
-corrected fact as readily as for a changed rule. Before this was inverted on 2026-08-17 that
-issue carried seventy percent of its content in comments, and two separate sessions read the
-body, restated a rule three comments had already amended, and each labelled the sweep "no rule
-changed".
+sequencing RULES (the golden flight-exclusion set, land-regens-alone, the cost axis, cross-epic
+coordination) live in **`specs/rulebook.md`**, which is normative and complete: a reader who reads
+only that file is correctly informed. It also holds how a design decision is made (mockups, a
+sitting, a provisional ruling, live use, the post-use re-review) and the fidelity rule. **A rule
+change EDITS that file** in a branch and a PR, as readily for a corrected fact as for a changed
+rule, and may leave a dated comment on the originating issue as the audit trail. It lived in issue
+#193's body until 2026-09-09; that issue is now a pointer and takes no new rules.
 
 `gh project` needs the `project` token scope (`gh auth refresh -s project`). Read the plan at
 session start with `gh project item-list 1 --owner ahl-gram`, or open the Project in the browser.
@@ -116,26 +128,18 @@ their siblings, but that convention does not extend anywhere else.
 
 ## Charts, goldens, and regens
 
-`public/charts/chart-42-*.svg`, `public/charts/arms-42-*.svg` and `public/og.png` are
-**committed** content (the homepage embeds them), as are `public/favicon.svg` and
-`public/apple-touch-icon.png` (#489; `npm run icons` is their single writer, and a test pins
-the SVG to the Fell SC woff2). Everything else generated (`public/atlas/`,
-`public/gallery/`, the bundle twins + chunks) is gitignored and rebuilt per deploy. (docs/
-retired at Sub 5 #206; the tsc engine emit retired at Sub 9 #260, its clean-list entry is a
-tombstone; app source is TypeScript in src/site/.)
+**These rules moved to `specs/rulebook.md` (2026-09-09) and this section is a pointer. You MUST read
+`specs/rulebook.md` before any change that touches the renderer, a committed chart, the golden, or a
+seed.** Nothing about goldens, regens, committed content or the re-roll is restated here: a second
+copy is how `PROJECTS.md` and the `roadmap/` archive both went dangerous, the archive still naming a
+retired checksum and a retired flight-exclusion set.
 
-- A **render change that moves any label or path owes a regen**: `npm run charts:regen` + `npm run og` (since Sub 4 #205). charts:regen single-writes public/charts; og writes public/og.png.
-- **Verify a regen by diffing the committed charts old-vs-new** (snapshot them first). The #40
-  hero drift guard compares a fresh render against the committed one, so after a regen it is
-  **circular** and proves nothing. A good regen is small and explicable: name the labels that moved.
-- **Land a regen ALONE.** Bundled with any other chart-changing work, a chart delta cannot be
-  attributed to a cause, and the diff is the only non-circular check you have.
-- **NEVER byte-compare SVGs rendered in different environments** (across OS, or across Node
-  versions, Node-to-Node included). `Math.sin/cos/atan2` are not correctly rounded, so coordinates
-  drift ~1e-13 and a 2-decimal rounding boundary can flip. Compare structure exactly, numbers with a
-  tolerance. A naive byte compare passes on a Mac and fails on linux CI.
-- A **seed re-roll** (terrain reshape, culture/name-template edits) is a different, larger cost: it
-  changes world identity and re-pins the golden checksum. Only one re-roll may be in flight at a time.
+What is over there, so you know when you need it: what is committed against what is generated and the
+one-line rule that decides; the golden checksum and what re-pins it; when a render change owes a
+regen and which commands write what; why a regen lands ALONE and why the drift guard is circular
+after one; why an SVG is never byte-compared across environments; the seed re-roll as the project's
+real cost axis, with the one-in-flight rule and the set it excludes against; and the Chronicle event
+cap.
 
 ## Measure before you assert
 
@@ -211,9 +215,10 @@ So fetch both, every time. Newest ratified statement wins, and **when a comment 
 disagree the comment supersedes** unless it says otherwise. That is the whole point of the
 convention: a body written before a big epic landed is historical intent, not current fact.
 
-**The one exception is the rulebook, #193**, where this is inverted: its body is normative and
-its comments are history. Do not read #193's comments to learn the rules, and put anything new
-into its body. Its own body says so at the top; see the handoff section above.
+**The rulebook is not an issue at all**: it is `specs/rulebook.md` in the repo, normative and
+complete, and a rule change edits that file. Issue #193 held it until 2026-09-09 and is now a
+pointer whose comments are history; do not read them to learn the rules and do not add rules there.
+See the handoff section above.
 
 ```
 gh api repos/ahl-gram/Vellum/issues/N            # the body
