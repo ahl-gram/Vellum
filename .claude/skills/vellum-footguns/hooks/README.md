@@ -1,8 +1,8 @@
 # footgun-gate.ts
 
 A PreToolUse hook that puts the skill's gates in front of the model at the moment it edits a test,
-a browser-driving script, or a stylesheet, creates a file that joins a roster, or pushes; and refuses
-the mechanical never-list outright. It is wired in the repo's `.claude/settings.json`, so it runs in
+a browser-driving script, a stylesheet, or anything that can move a chart or the golden, creates a
+file that joins a roster, or pushes; and refuses the mechanical never-list outright. It is wired in the repo's `.claude/settings.json`, so it runs in
 every session launched from the Vellum root or a worktree. The skill works without it if that block
 is ever removed.
 
@@ -11,7 +11,10 @@ is ever removed.
 - **Injects a gate once per session**, reading the text from `SKILL.md` so the skill stays the single
   source: Gate 1 on `test/**/*.test.ts`; Gate 2 on `scripts/**/*.mjs` and `out/**/*.mjs`; Gate 3 on
   `*.css` and `*.astro`; Gate 4 on a Write that creates a new file under `src/pages/`, `src/site/`,
-  `scripts/e2e/suite-*` or `public/*.css`; Gate 5 on `git push` and `gh pr create` / `gh pr edit`.
+  `scripts/e2e/suite-*` or `public/*.css`; Gate 5 on `git push` and `gh pr create` / `gh pr edit`;
+  Gate 6 on the renderer, `generateWorld`'s transitive closure, the committed artifacts and the
+  modules their writers reach. Gate 6's roster was derived by walking those import graphs, so widen
+  it the same way rather than by adding paths that look related.
 - **Refuses** (the tool call does not run, the reason is shown). A command is read in COMMAND position
   only: quoted strings and heredoc bodies are blanked before segmenting, segments split on shell
   separators and the `then`/`do`/`else` keywords, prefixes like `env X=1`, `command`, `time`, `sudo`
@@ -65,8 +68,13 @@ node .claude/skills/vellum-footguns/hooks/footgun-gate.selftest.ts
 ```
 
 One line per fixture, `ok` or `FAIL` with the decision and the text it expected; the exit code is
-the number of misses. The five gate texts are asserted non-empty first, so a renamed heading in
-`SKILL.md` fails here rather than shipping an empty injection. The last three rows run the exact
+the number of misses. Every gate's text is asserted non-empty first, so a renamed heading in
+`SKILL.md` fails here rather than shipping an empty injection. Gate 6's rows are generated one per
+ARM of its roster regex, because a roster is only as strong as its least-swept alternative: the
+prover found 10 of 19 arms carried no fixture, so a typo in any of them would have shipped silent.
+Two of its rows exist for shapes no relative path can reach, an absolute `file_path` (which is what
+a real tool call passes) and a path matching two gates at once, both of which escaped the first
+table. The last three rows run the exact
 command string from `.claude/settings.json` through `sh` with a real, a symlinked, and a missing
 `CLAUDE_PROJECT_DIR`, so the deployed path is exercised and not only the function.
 `test/repo/footgun-gate.test.ts` runs the whole table under `npm test`, so CI runs it on every PR.
@@ -80,7 +88,8 @@ Measured 2026-09-09 on this Mac, ten runs each, through the deployed `sh -c` com
 
 - a Bash or Edit call that triggers nothing, or a refusal: about 64ms;
 - a Write or Edit into a browser-driving script, which loads the TypeScript parser: about 182ms;
-- gate text, at most once per session each: Gate 1 1973 chars, Gate 2 3108, Gate 3 1631, Gate 4 746,
-  Gate 5 2162, roughly 2400 tokens if all five fire in one session;
+- gate text, at most once per session each, measured 2026-09-09: Gate 1 1973 chars, Gate 2 3108,
+  Gate 3 1631, Gate 4 746, Gate 5 2162, Gate 6 2122, roughly 2900 tokens if every one fires in a
+  single session;
 - every turn of every session in this repo: the skill's `description` line in the system prompt.
   That is the only permanent term, and the reason the description is kept short.

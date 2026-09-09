@@ -261,9 +261,9 @@ are written down because nothing said so, and a session that reinvents them rein
 
 ## Process
 
-**Five gates, one skill: `vellum-footguns`** (`.claude/skills/vellum-footguns/SKILL.md`). Invoke it
+**The gates, one skill: `vellum-footguns`** (`.claude/skills/vellum-footguns/SKILL.md`). Invoke it
 at the moment you are about to write a test or guard, an e2e check or CDP probe, a CSS rule, anything
-that joins a roster, or a PR body. The rules below and the memory doctrine files are the narrative;
+that joins a roster, anything that can move a chart or the golden, or a PR body. The rules below and the memory doctrine files are the narrative;
 the skill is the same doctrine as a checklist read at the moment it applies, because its
 `references/scars.md` shows how narrative read at session start and applied at the push let the same
 guard-that-cannot-red, dead-control and cascade defects reach PRs #524 to #548. Its

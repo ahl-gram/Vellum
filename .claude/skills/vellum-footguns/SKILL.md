@@ -1,12 +1,12 @@
 ---
 name: vellum-footguns
-description: Five checklists keyed to the moment of typing. Read the matching gate before writing a test or guard, an e2e check or CDP probe, CSS, anything that joins a roster, or a push and PR body.
+description: Checklists keyed to the moment of typing. Read the matching gate before writing a test or guard, an e2e check or CDP probe, CSS, anything that joins a roster, anything that can move a chart or the golden, or a push and PR body.
 ---
 
-# Vellum footguns: five gates
+# Vellum footguns: the gates
 
-The doctrine behind every line here already exists, in `CLAUDE.md`, in the four agents, and in the
-auto-memory doctrine files. It keeps failing anyway, and the record says why: it is read at session
+The doctrine behind every line here already exists, in `CLAUDE.md`, in `specs/rulebook.md`, in the
+agents, and in the auto-memory doctrine files. It keeps failing anyway, and the record says why: it is read at session
 start and applied at the push, hours apart, so the first push routinely carries a guard that cannot
 go red, a probe that measured the wrong thing, a cascade rule that loses, or a body claim nobody
 measured. The cold skeptic or the prover then changes the diff, and the lesson is re-learned on the
@@ -140,6 +140,33 @@ Scars: #49, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; calls ma
    you STOP there.
 9. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
    while it runs; three rounds at most, residue named in the body. `references/pr-body.md` is the shape.
+
+## Gate 6: before changing the renderer or a committed chart
+
+Scars: #40 (the drift guard exists because a regen was forgotten), #205 (the regen commands), #309 (a change everyone priced as a re-roll and measured as a regen), #489 (the icons, a committed pair with a single writer), and the 2026-09-09 move of these rules out of `CLAUDE.md`.
+
+The authority is `specs/rulebook.md`, its golden discipline and its flight-exclusion set. This is the
+checklist; the file has the reasoning, the checksum and the set's current membership, none of which
+are copied here.
+
+1. **Decide which cost you are paying.** A render change that moves a label or a path regenerates the
+   committed charts and is checksum-safe. A terrain, culture or name-template change moves world
+   identity and re-pins the golden. Only the second one is scarce, and confusing them is how a cheap
+   change ends up waiting behind a re-roll.
+2. **A regen lands ALONE.** Bundled with any other chart-changing work a chart delta cannot be
+   attributed to a cause, and the diff is the only non-circular check you have.
+3. **Snapshot the committed charts BEFORE you regenerate.** Verification is a diff of old against new
+   and you cannot take it afterwards. Name the labels that moved: a good regen is small and explicable.
+4. **The drift guard is circular once you have regenerated.** `test/site/hero-charts.test.ts` compares
+   a fresh render against the committed one, so it catches a FORGOTTEN regen, never a wrong one. It
+   passing after a regen means nothing.
+5. **Never byte-compare SVGs rendered in different environments.** Trigonometry is not correctly
+   rounded, so coordinates drift and a rounding boundary can flip. Compare structure exactly and
+   numbers with a tolerance. A naive byte compare passes on a Mac and fails on linux CI.
+6. **A re-roll reads the flight-exclusion set first.** Only one may be in flight at a time. The loser
+   rebases, re-pins and regenerates.
+7. **"No regen owed" is a claim like any other.** Name the command whose green output says so, in the
+   PR body, the way every other claim about your own work is named.
 
 ## Defaults this repo has already ruled
 
