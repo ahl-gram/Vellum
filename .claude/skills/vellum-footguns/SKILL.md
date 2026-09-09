@@ -17,6 +17,8 @@ type. Read the gate you are at, do each line, and move on. Provenance is in `ref
 
 ## Gate 1: before writing a test or a guard
 
+Scars: #295, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #546.
+
 1. **Write the mutation before the test.** Name the one-line change to `src/` that must turn this
    test red. If you cannot name one, you are about to write a test that cannot fail.
 2. **Check the fixture is not degenerate where the hazard lives.** A camera on a lattice point, a
@@ -38,6 +40,8 @@ type. Read the gate you are at, do each line, and move on. Provenance is in `ref
    a hole. A guard proved unable to red is deleted, never shipped.
 
 ## Gate 2: before writing an e2e check or a CDP probe
+
+Scars: #368, #474, #520, #526, #529, #533, #535, #536, #537, #540, #542, #545, #546.
 
 1. **A gesture check drives the gesture.** Press and release with the harness's `clickAt` / touch
    helpers at coordinates read from the element's own rect. `element.click()` ignores `pointer-events`
@@ -74,6 +78,8 @@ type. Read the gate you are at, do each line, and move on. Provenance is in `ref
 
 ## Gate 3: before writing CSS or moving layout
 
+Scars: #219, #295, #465, #525, #530, #531, #532, #535, #537, #542, #543, #545, #546.
+
 1. **Compute the specificity of the rule you are overriding, in numbers.** A media query adds none.
    Each arm of a selector list ranks on its own. `:has()` and compound arms outrank a bare class.
    An inline style beats every sheet rule. Author `display` makes `[hidden]` inert.
@@ -94,6 +100,8 @@ type. Read the gate you are at, do each line, and move on. Provenance is in `ref
 
 ## Gate 4: before adding anything that joins a roster
 
+Scars: #401, #542, #546.
+
 A new page, sheet, suite, room, or CSS surface joins lists it does not know about, and most of them
 fail silently (an undeclared CSS variable, a suite the runner never calls, a budget nobody re-measured).
 
@@ -105,6 +113,8 @@ fail silently (an undeclared CSS variable, a suite the runner never calls, a bud
    twenty-three-check one.
 
 ## Gate 5: before the push and the PR body
+
+Scars: #49, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; calls made without a ruling on #519, #542, #546.
 
 1. **Dead code sweep.** Every new export has a second reference. Every new field has a reader that
    produces a STRING on a surface (carries, reads, is wired through describe plumbing; shows, prints,
@@ -133,16 +143,19 @@ fail silently (an undeclared CSS variable, a suite the runner never calls, a bud
 
 ## Defaults this repo has already ruled
 
-- Push the branch at the first commit; eight local commits unpushed was "the wrong default".
-- No draft PRs; the convention does not exist here.
-- Do not stop mid-build to narrate. A status report with no tool call is a stop, and Alex has to
-  type "continue". Report at the gate, not between them.
+- Push the branch at the first commit; eight local commits unpushed was "the wrong default" (#520
+  part 2, 2026-09-08).
+- No draft PRs; the convention does not exist here (#542 was opened as one and asked about,
+  2026-09-08; none of the last hundred PRs is a draft).
+- Do not stop mid-build to narrate. A status report with no tool call is a stop, and Alex had to
+  type "continue" five times on 2026-09-08. Report at the gate, not between them.
 - A mid-build naming or placement choice (a new file, a new stylesheet, a new key) is Alex's when
-  it is visible in the tree; ask with a menu, once, before writing it.
+  it is visible in the tree; ask with a menu, once, before writing it (`drawer.ts` was taken and
+  `chart-drawer` ruled, #519, 2026-09-07; the drawer's own stylesheet, #520).
 
 ## Never
 
-The hook in `hooks/`, wired in `.claude/settings.json`, refuses the first four mechanically; the rest are yours.
+The hook in `hooks/`, wired in `.claude/settings.json`, refuses the first four mechanically; the rest are yours. Provenance: the stash stack (PR #369 and the worktree rules), perl (2026-09-02, twice in one session), CDP escapes (#520, #540), closing keywords (#486, #524), truncation read as absence (2026-07-26), `gh issue view` (CLAUDE.md), the profile leak (#546), counts in durable docs (2026-08, four rulings).
 
 - A bare mutation of the stash stack (`git stash`, `pop`, `clear`, `apply` or `drop` without a ref): it is shared across every worktree. `git stash push -m ... -- <paths>`, `apply <sha>`, or a WIP commit.
 - `perl -pi` with a non-ASCII replacement: it re-encodes every existing non-ASCII byte in the file. Use node or a heredoc, then grep for `Â`.
