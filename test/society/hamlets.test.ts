@@ -26,7 +26,6 @@ const DEEP = 0.125;
 
 const count = (svg: string, needle: string): number => svg.split(needle).length - 1;
 
-// The anchor window: the settlement environs with the richest candidate crop, resolved once and reused (deterministic by construction).
 let cachedRich: UvWindow | null = null;
 function richWindow(): UvWindow {
   if (cachedRich) return cachedRich;
@@ -85,7 +84,6 @@ test("hamletName is deterministic and draws past a taken name", () => {
 test("candidates are deterministic, and stable across a regeneration of the world", () => {
   const win = richWindow();
   assert.deepEqual(hamletCandidates(world, win), hamletCandidates(world, win));
-  // The download-redraw path regenerates the base world from the recovered recipe; hamlets must reproduce identically over that fresh world.
   const regen = generateWorld(defaultRecipe(42, { gridW: 320, gridH: 240 }));
   assert.deepEqual(hamletCandidates(regen, win), hamletCandidates(world, win));
 });
@@ -183,7 +181,7 @@ test("placeHamlets projects candidates onto region land, appended by the region 
 
   assert.deepEqual(placeHamlets(world, win, region.elev, region.seaLevel), hamlets);
 
-  // Verified INDEPENDENTLY (review: the round-trip above runs the same code on the same inputs, so it cannot catch a deterministic scaling bug): each hamlet must land within one snap-cell of this test's own uv->cell math.
+  // Independent uv->cell math: the round-trip above runs the same code on the same inputs and cannot catch a scaling bug.
   const byName = new Map(hamletCandidates(world, win).map((c) => [c.name, c]));
   for (const h of hamlets) {
     const c = byName.get(h.name);
@@ -213,7 +211,6 @@ test("hamlet marks are smaller than the village dot and label at the smallest si
     window: win, gridW: 320, gridH: 240, title: "Hamlet Environs",
   });
   const svg = renderMap(region, { style: "antique" });
-  // each hamlet group's mark radius sits under the village dot's 2.3 * k (k = 1 at 1500px)
   const groups = [...svg.matchAll(/<g class="settlement" data-idx="\d+" data-tier="hamlet"[^>]*>(.*?)<\/g>/gs)];
   assert.ok(groups.length >= 3, "hamlet groups are drawn");
   for (const g of groups) {
@@ -224,14 +221,12 @@ test("hamlet marks are smaller than the village dot and label at the smallest si
 });
 
 test("label pressure drops hamlet labels first and never force-places them (#171)", () => {
-  // The AC "tier order preserved in label pressure": a hamlet may go label-less while capital/seat/town always keep one; the whole rule is one clause in settlementsLayer, and nothing else would catch its reversal.
   const win = richWindow();
   const region = generateRegionWorld(world, {
     window: win, gridW: 320, gridH: 240, title: "Crowded Environs",
   });
   const svg = renderMap(region, { style: "antique" });
 
-  // the settlements layer only (labels of other layers must not leak into the check)
   const layerStart = svg.indexOf('<g id="layer-settlements">');
   assert.ok(layerStart >= 0);
   const nextLayer = svg.indexOf('<g id="layer-', layerStart + 10);
@@ -259,7 +254,6 @@ test("label pressure drops hamlet labels first and never force-places them (#171
 });
 
 test("region sheets set settlement labels larger; world sheets keep their type (readability)", () => {
-  // On a regional survey the labels are the reveal and the inset is viewed near viewport width, so region sheets scale settlement type by REGION_TYPE_SCALE; world sheets keep FONT_SIZE exactly (golden-locked).
   const win = richWindow();
   const region = generateRegionWorld(world, {
     window: win, gridW: 320, gridH: 240, title: "Legible Environs",
@@ -267,7 +261,6 @@ test("region sheets set settlement labels larger; world sheets keep their type (
   const regionSvg = renderMap(region, { style: "antique" });
   const worldSvg = renderMap(world, { style: "antique" });
 
-  // Every labeled settlement is set at its tier's SCALED size, bounded to the settlements layer so the cartouche and feature labels cannot leak into the last slice.
   const layerStart = regionSvg.indexOf('<g id="layer-settlements">');
   assert.ok(layerStart >= 0);
   const nextLayer = regionSvg.indexOf('<g id="layer-', layerStart + 10);
@@ -345,7 +338,7 @@ test("hamlets snap on the band's radius too, not the old 8-neighbour scan (#399)
       return Math.min(gx + OFFSET, 319) + gy * 320;
     }),
   );
-  // Every candidate lands in water with its only land OFFSET cells east: the old scan drops them all.
+  // Every candidate lands in water with its only land OFFSET cells east.
   const elev = createField(320, 240, (x, y) => (shore.has(x + y * 320) ? 1 : -1));
 
   const placed = placeHamlets(world, window, elev, 0);

@@ -6,7 +6,7 @@ import { GALLERY_PAGE_CSS, cardFigureHtml, galleryCards } from "../../src/cli/ga
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
-// #464 (Landfall Sub 9, ruled 2026-09-02 on the issue): the Gallery hangs its twelve plates on the deep as twelve sheets, a chart room without a stage. The room's name and dateline stand in the folio corner with no control, the plates are the roads into their own worlds, the legend row is one gold road back to the Explorer; the interim desk, the RoomHead on the sheet and the intro line retire.
+// The Gallery (#464, ruled 2026-09-02 on the issue): twelve plates on the deep as twelve sheets, a chart room without a stage; the plates are the roads into their own worlds, the legend row the one gold road back to the Explorer.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const page = readFileSync(resolve(REPO, "src/pages/gallery/index.astro"), "utf8");
 const css = GALLERY_PAGE_CSS;
@@ -62,7 +62,7 @@ test("GR5 every plate is a road into its own world: the Explorer at the plate's 
     assert.ok(html.includes(`<a href="/explorer/#seed=${card.seed}&amp;style=antique&amp;legend=0"><img src="${card.file}"`), `the plate links the Explorer at seed ${card.seed} in the plate's dress: ${html}`);
     assert.ok(!html.includes(`href="${card.file}"`), "the raw svg is no longer the road (it had no road back)");
   }
-  // The Explorer's default is the legend on (its checkbox ships checked); the plate is drawn without one, so the road says so (skeptic on PR #501).
+  // The Explorer's default is the legend on, and the plate is drawn without one, so the road says so.
   const world = generateWorld(defaultRecipe(42));
   const plate = renderMap(world, { style: "antique", widthPx: 900 });
   assert.equal(renderMap(world, { style: "antique", widthPx: 900, legend: false }), plate, "legend=0 is the plate's own dress");
@@ -79,7 +79,7 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   const screen = css.slice(0, css.indexOf("@media print"));
   assert.doesNotMatch(screen, /figcaption[^{]*\{[^}]*var\(--ink-(dark|brown|faded)\)/, "no ink lettering on the deep outside print");
   assert.match(css, /(^|\n)\.legend\s*\{\s*left:\s*50%;\s*\}/, "no slip to stand beside: the legend row is centred (placement is the page's, the dress the kit's)");
-  // The pool is the kit's, for the class (a chart room without a stage), not the page's for the cluster alone: the folio corner and the legend row sit over the same pale plates (tagline 2.26:1, rooms 2.0:1 measured under the cluster, plate read 2026-09-02; skeptic on PR #501). Since the 2026-09-03 rulings (#465) the legend row takes home's gradient footing instead and the Glass no pool at all.
+  // The pool is the kit's for the class, not the page's for the cluster alone: without it the corner and the legend row read 2.26:1 and 2.0:1 over the pale plates (plate read 2026-09-02).
   assert.doesNotMatch(css, /header\.chrome/, "the page does not pool its own cluster");
   const pool = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) :is\(header\.chrome, \.corner\.bl\)::before[^{]*)\{([^}]*)\}/);
   assert.ok(pool, "the kit pools the cluster and the chart folio of a stage-less chart room");

@@ -3,8 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-// #302: the engine's overlay dressing is ONE shared sheet, public/living-chart.css, linked by every page that mounts the engine; the CSS twin of the #191 module boundary.
-// Three contracts: the sheet dresses every engine-emitted hook; it is host-agnostic (never names a host's own element); and the dressing has ONE home, because two copies drift apart silently.
+// The engine's overlay dressing is ONE shared sheet, public/living-chart.css (#302), the CSS twin of the #191 boundary: it dresses every engine-emitted hook, names no host's own element, and has ONE home.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => {
@@ -17,8 +16,7 @@ const read = (p: string) => {
 
 const SHEET = "public/living-chart.css";
 
-// A rule is only as good as the LAST block that declares it, and a commented-out assignment
-// reads as code to a substring match; both defeated an earlier cut of the two guards below.
+// A rule is only as good as the LAST block that declares it, and a commented-out assignment reads as code to a substring match.
 const soleRule = (css: string, selector: string): string => {
   const blocks = [...css.matchAll(new RegExp(`${selector.replace(/\./g, "\\.")}\\s*\\{[^}]*\\}`, "g"))];
   assert.equal(blocks.length, 1, `${SHEET} declares ${selector} ${blocks.length} times, so the last one wins`);
@@ -95,7 +93,7 @@ test("the philologist's note is dressed, visible, and named the same on both sid
   }
 });
 
-// A card anchored on the mark's side is shrink-to-fit against the gap it flips AWAY from, so a town near the right edge gets a column, not a card (public/living-chart.css:35 carries the measurement).
+// A card anchored on the mark's side is shrink-to-fit against the gap it flips AWAY from, so a town near the right edge gets a column, not a card (public/living-chart.css carries the measurement).
 test("a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)", () => {
   const css = read(SHEET);
   const flip = soleRule(css, "#place-card.flip-h");
@@ -109,15 +107,14 @@ test("a flipped card is anchored on the side it flips toward, and reads its anch
   for (const prop of ["--pc-nx", "--pc-ny"]) {
     assert.ok(overlay.includes(`setProperty("${prop}"`), `the engine no longer publishes ${prop}`);
   }
-  // The overlay box and the hits keep their inline left; only the CARD's must go, and an inline
-  // left would silently beat the sheet's flip rule and restore the squeeze.
+  // The overlay box and the hits keep their inline left; only the CARD's must go, or it would beat the sheet's flip rule and restore the squeeze.
   const at = overlay.indexOf("function showPlaceCard");
   assert.notEqual(at, -1, "showPlaceCard is gone, so this guard reads an empty slice");
   const body = overlay.slice(at, overlay.indexOf("\n  function ", at + 1));
   assert.doesNotMatch(body, /\.style\.left\s*=/, "the card is positioned with an inline left again");
 });
 
-// The class, not the instance: four declarations position this card, and a variant quietly missing the clamp vars simply never clamps, which no JS test can see because the engine publishes the same two properties either way.
+// A variant missing the clamp vars simply never clamps, which no JS test can see: the engine publishes the same two properties either way.
 test("every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)", () => {
   const css = read(SHEET);
   const variants = ["#place-card", "#place-card.flip-h", "#place-card.flip-v", "#place-card.flip-h.flip-v"];
@@ -182,7 +179,6 @@ test("the Explorer host wires the contract: mount class + sheet link (#302)", ()
 });
 
 test("the Reading Room host wires the sheet-link half of the contract (#302, #221)", () => {
-  // The mount-class half is the frame's (guarded below); the page's half is the extraCss links, and deleting either sheet ships the room live but undressed.
   const page = read("src/pages/reading-room/index.astro");
   assert.ok(page.includes("/living-chart.css"), "the Reading Room page links /living-chart.css");
   assert.ok(page.includes("/reading-frame.css"), "the Reading Room page links /reading-frame.css");

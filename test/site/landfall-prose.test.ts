@@ -132,11 +132,10 @@ test("the panel is a card slip carrying the prose, hidden in the HTML so it stay
 });
 
 test("stage gestures cannot begin on a slip because no slip lives in the stage; the wheel policy rides each slip (#459 skeptic rounds 1 and 2, reshaped at #470; one-finger touch on the fixed sheets is #460's recorded non-provable arm)", () => {
-  // Source pin only; the real-input arms are recorded on #460 for Sub 5's suite.
   const input = read("src/site/home/input.ts");
   const cards = read("src/site/home/cards.ts");
   assert.ok(!input.includes("lf-card"), "input.ts carries no card guard: the slips left the stage, and dead code that LOOKS like a guard is worse than none");
-  // Slice each handler to the NEXT addEventListener registration: an indexOf("});") terminator overshoots the multi-arg wheel listener and reads the following handler's guard as its own (pr-skeptic finding 1 on PR #469).
+  // Slice each handler to the NEXT addEventListener registration: an indexOf("});") terminator overshoots the multi-arg wheel listener and reads the following handler's guard as its own.
   const handlerOf = (source: string, gesture: string): string => {
     const at = source.indexOf(`"${gesture}"`);
     assert.ok(at >= 0, `the ${gesture} binding exists`);

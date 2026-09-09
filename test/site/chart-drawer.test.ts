@@ -54,7 +54,6 @@ test("the room left is what the drawer's head counts down (#520)", () => {
   assert.equal(roomOnTable(fill(TABLE_CAP + 2)), 0, "an over-full table reports no room, never a negative one");
 });
 
-// The writer's half of ruling 1 (#520, 2026-09-07): an EMPTY table writes no key at all, rather than growing `table=` onto every link the Explorer hands out forever. emitLive is the named precedent; writeHash's unconditional params.set for seed/style/legend is the idiom this must not follow.
 test("an empty table writes no key, and a laid one writes the grammar's (#520 ruling 1)", () => {
   const bare = new URLSearchParams("seed=42");
   emitTableKey(bare, []);
@@ -74,7 +73,7 @@ test("an empty table writes no key, and a laid one writes the grammar's (#520 ru
   assert.equal(one.get(TABLE_KEY), emitTable(fill(1)), "ONE sheet is the commonest table and is written like any other: the emptiness gate is exactly zero");
 });
 
-// The drawer's own voice (#518 ruling 6, period voice; the wordings are provisional and ride Sub 5's post-use re-review). Numbers are spelled, as every count in the mock is.
+// #518 ruling 6 (period voice): the wordings are provisional until Sub 5's post-use re-review.
 test("the head counts the table in words, and says when it is bare and when it is full (#520)", () => {
   assert.equal(countLine([]), "the table is bare");
   assert.equal(countLine(fill(1)), "one sheet laid · room for five more");
@@ -89,7 +88,6 @@ test("the tab counts the drawer it is shut over (#520)", () => {
   assert.equal(tabLine(fill(3)), "The Drawer · three sheets");
 });
 
-// Ruled 2026-09-07: a survey already on the table is refused and the drawer says so, rather than spending two of the six seats on one sheet or ignoring the click in silence.
 test("the same survey is refused a second time, and the table is unmoved (#520, ruled)", () => {
   const one = layOnTable([], survey(4)).items;
   const again = layOnTable(one, survey(4));
@@ -111,7 +109,7 @@ test("the cap refuses for want of room, which reads differently from a duplicate
   assert.match(refusalLine("full"), /six/, "the cap's refusal names the six, as #518 ruling 3 wrote it");
 });
 
-// The fixtures above vary only lx, so a sameSheet comparing the SEAT alone passes all of them: two different worlds settling on one lattice seat would be wrongly refused. Every field the address carries gets a one-field-changed twin here, and each must lay.
+// The fixtures above vary only lx, so a sameSheet comparing the seat alone passes all of them.
 test("a sheet differing in ANY field the address carries is a different sheet (#520)", () => {
   const base = survey(4);
   const twins: ReadonlyArray<readonly [string, TableItem]> = [

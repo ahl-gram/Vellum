@@ -11,10 +11,7 @@ import { renderMap, type RenderOptions } from "../../src/render/map-renderer.ts"
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
 import { LOD_BANDS, lodWindowFor, type LodBand } from "../../src/world/lod.ts";
 
-// #400: what the Glass dispatches. The bands are the Explorer's own (lod.ts), and every region
-// job it fires draws the chained field, so these run the real runInline rather than a stand-in.
-// The worker's own branch is not importable here (its module body casts `self`), so its agreement
-// with runInline is read as source at the foot of this file and proved live by e2e R14.
+// What the Glass dispatches (#400): the bands are the Explorer's own (lod.ts), so these run the real runInline; the worker's own branch is not importable (its module body casts self), so its agreement with runInline is read as source at the foot of this file and proved live by e2e R14.
 
 const SEED = 2;
 const CX = 0.5625;
@@ -86,9 +83,7 @@ test("band 0 has no region job at all: the world sheet is what it always was", (
 });
 
 test("the region job actually builds in the HELD cache, which no byte comparison can see", () => {
-  // The cache is transparent by construction (the key is the whole spec, so a hit returns what a
-  // miss would have built), so every digest here passes with it silently dropped. Guard-prover
-  // proved exactly that: deleting the chainCache argument killed nothing. This asks the cache.
+  // The cache is transparent by construction (the key is the whole spec), so every digest here passes with it silently dropped; this asks the cache.
   const deepest = REGION_BANDS[REGION_BANDS.length - 1] as LodBand;
   const touches = (): number => regionChainCache.hits + regionChainCache.misses;
   const before = touches();
@@ -100,9 +95,7 @@ test("the region job actually builds in the HELD cache, which no byte comparison
 });
 
 test("the stamp follows the WINDOW, not the band index the job happened to carry", () => {
-  // At every real band the two agree, so a job that stamped msg.band would look correct to every
-  // other test here. This is the one fixture where they diverge: a deepest-band window carried by
-  // a job announcing band 1, which is what a stale hysteresis step would send.
+  // At every real band the window and the band index agree; this is the one fixture where they diverge, a deepest-band window carried by a job announcing band 1, which is what a stale hysteresis step would send.
   const deepest = REGION_BANDS[REGION_BANDS.length - 1] as LodBand;
   const svg = runInline({ ...jobFor(deepest), band: 1 }).svg;
   assert.equal(recipeFromSvg(svg)?.region?.detail, deepest.index, "the window implies the level");
@@ -122,8 +115,6 @@ test("a chain cache held across jobs cannot move a byte: the same window redraws
 });
 
 test("the worker and its inline twin build the same region spec, so the two cannot drift apart", () => {
-  // worker.ts casts `self` in its module body, so it cannot be imported here; e2e R14 proves the
-  // bytes agree live and this reads the source so a one-sided edit fails before CI gets there.
   const ROOT = resolve(import.meta.dirname, "..", "..");
   const read = (p: string): string => readFileSync(resolve(ROOT, p), "utf8");
   for (const file of ["src/site/explorer/worker.ts", "src/site/explorer/worker-client.ts"]) {

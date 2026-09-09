@@ -1,5 +1,4 @@
-// Glass ceremony e2e (G, #170): the antique voice on the zoom cluster, the voiced glide, and the redraft ink-in; asserts the PLUMBING (classes, tokens, inline dash props, aria), while the choreography itself is eyeballed via out/ screenshots.
-// Measured ground truth at seed 42 (2026-07-19 scan): the world sheet labels 25 of 26 settlements, the band-1 window at (0.5, 0.5) newly labels exactly Lokai, and the k=3.6 hop to band 2 reveals no new name.
+// Glass ceremony e2e (G, #170): the antique voice on the zoom cluster, the voiced glide, and the redraft ink-in; asserts the PLUMBING (classes, tokens, inline dash props, aria) while the choreography is eyeballed via out/ screenshots. Ground truth at seed 42 (2026-07-19 scan): the world sheet labels 25 of 26 settlements, the band-1 window at (0.5, 0.5) newly labels exactly Lokai, and the k=3.6 hop to band 2 reveals no new name.
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled } = ctx;
 
@@ -29,11 +28,7 @@ export async function run(ctx) {
   const enterAt = (k, cu, cv) =>
     evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
   const waitRedraft = async (prev, wantBand) => {
-    // 15s, not the old 4s: see the same note in suite-zoom.mjs. #400's detailed draw outran the
-    // old budget on CI, so the waiter returned before the redraft landed and G6 read band 2.
-    // The waiter also demands the band its caller asserts: a stale in-flight survey (G8's glide
-    // debounce) can commit FIRST and increment redrafts at the wrong band (CI 2026-08-25), so an
-    // any-redraft return hands the check a state its own gesture never requested.
+    // 15s, not 4s (the same note in suite-zoom.mjs): #400's detailed draw outran the old budget on CI and G6 read band 2. The waiter also demands the band its caller asserts: a stale in-flight survey (G8's glide debounce) can commit FIRST and increment redrafts at the wrong band (CI 2026-08-25).
     for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev && s.band === wantBand) return s; await sleep(40); }
     return await rgn();
   };
@@ -146,9 +141,9 @@ export async function run(ctx) {
       g4.dryCount > 0 && g4.dryAllNew && g4.persistingCount > 0 && g4.persistingStill,
     `band=${s4.band} ${JSON.stringify(g4)} (expected dry-in exactly ["Lokai"] at seed 42)`,
   );
-  await shoot("explorer-sub9-redraft-inking.png"); // manual: the finer survey drawing itself in
+  await shoot("explorer-sub9-redraft-inking.png");
   await sleep(600); // into the village wait: the newly revealed name is mid-dry
-  await shoot("explorer-sub9-redraft-dryin.png"); // manual: Lokai drying in while the persisting names stand
+  await shoot("explorer-sub9-redraft-dryin.png");
 
   const g4b = await evaluate(`(async()=>{
     const svg=document.querySelector("#map .region-inset svg");
@@ -162,7 +157,7 @@ export async function run(ctx) {
     !g4b.dash && !g4b.drawLen && g4b.running === 0,
     JSON.stringify(g4b),
   );
-  await shoot("explorer-sub9-redraft-rested.png"); // manual: the committed survey at rest
+  await shoot("explorer-sub9-redraft-rested.png");
 
   const g5 = await evaluate(`(()=>{
     const cs=getComputedStyle(document.documentElement);
@@ -219,10 +214,7 @@ export async function run(ctx) {
   );
 
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-  // G8's voiced glide home passes THROUGH band 2, and its settle debounce can dispatch a survey on
-  // the way. Since #400 that draw is slow enough to still be in flight here, and it commits after
-  // before6 is sampled, so waitRedraft returns on it and G6 reads band 2. Wait for the region state
-  // to go quiet first: two reads a debounce apart with the same count, and nothing on screen.
+  // G8's voiced glide home passes THROUGH band 2 and its settle debounce can dispatch a survey on the way; since #400 that draw is still in flight here and commits after before6 is sampled, so wait for the region state to go quiet first: two reads a debounce apart with the same count, and nothing on screen.
   for (let i = 0; i < 100; i++) {
     const a = await rgn();
     await sleep(300);

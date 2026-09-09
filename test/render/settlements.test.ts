@@ -7,8 +7,6 @@ import { FONT_SIZE } from "../../src/render/layers/settlements.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 import { STYLES, type StyleName } from "../../src/render/style.ts";
 
-// #59: every realm gets a seat on the map. Structural SVG-string tests, written test-first (red against the pre-#59 renderer).
-
 const multi = generateWorld(defaultRecipe(42, { gridW: 160, gridH: 120 }));
 const single = generateWorld(defaultRecipe(3, { gridW: 160, gridH: 120 }));
 
@@ -95,7 +93,6 @@ test("the legend gains a Realm seat key only when multi-realm (decision C)", () 
   assert.ok(!singleLegend.includes("Realm seat"), "single-realm legend omits the seat row");
 });
 
-// #93: each settlement's marks wrap in one addressable <g class="settlement" data-idx="i"> where i is the WORLD index, so the Explorer can reveal real glyphs by founding year; render-only, it regenerates the goldens (an inert wrapper) but never the world.
 const SETTLE_TIER_RANK: Record<string, number> = { capital: 0, seat: 1, town: 2, village: 3 };
 function expectedGroupOrder(w: typeof multi): number[] {
   const seats = new Set(w.realms.seats);
@@ -110,14 +107,11 @@ function expectedGroupOrder(w: typeof multi): number[] {
 
 test("every settlement is wrapped in an addressable g.settlement carrying its WORLD index (#93)", () => {
   const svg = renderMap(multi, { style: "antique" });
-  // Opening tags only (the inner glyph <g>s carry no data-idx), read in document order.
   const seq = [...svg.matchAll(/<g class="settlement" data-idx="(\d+)">/g)].map((m) => Number(m[1]));
   assert.equal(seq.length, multi.settlements.length, "one wrapper per settlement");
-  // The sequence must be the TIER-SORTED world indices, not 0..n-1 positions: proves data-idx is the pre-sort world index (a bijection alone would not).
   assert.deepEqual(seq, expectedGroupOrder(multi), "data-idx follows the world-index space, in tier-sorted document order");
 });
 
-// #162: regional surveys stamp data-tier/data-name on each wrapper (for Sub 9's dry-in); region-only, so a world sheet stays byte-identical and golden-safe.
 test("region sheets stamp data-tier/data-name; world sheets stay golden-clean (#162)", () => {
   const worldSvg = renderMap(multi, { style: "antique" });
   assert.equal(count(worldSvg, "data-tier="), 0, "no data-tier on a world sheet");

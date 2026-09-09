@@ -18,7 +18,7 @@ test("the Explorer wiring carries no download plumbing", () => {
   assert.ok(!controls.includes("downloadBtn"), "controls.ts re-grew the download handler");
 });
 
-// #321: the Explorer is static; the scrubber left the page ENTIRELY (gone from the DOM, not hidden, per the acceptance), and the one checkbox wears the ratified survey label (#317 decision 1, 2026-07-29). Time lives in the Reading Room.
+// #317 decision 1 (2026-07-29) names the survey label; time lives in the Reading Room.
 test("the Explorer page carries no scrubber panel or journal strip (#321)", () => {
   assert.ok(!page.includes('id="scrubber"'), "the #scrubber region regrew in the Explorer page");
   assert.ok(!page.includes('id="scrub-play"'), "the Play button regrew in the Explorer page");

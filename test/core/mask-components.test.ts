@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { labelComponents } from "../../src/core/mask-components.ts";
 
-// #120: the client's landmass labeller over the shipped land mask; a voyage leg whose two ports sit in different components is a genuine sea crossing.
 
 /** '#' set, '.' clear. */
 function mask(rows: string[]) {

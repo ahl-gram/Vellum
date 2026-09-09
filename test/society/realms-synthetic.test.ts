@@ -126,7 +126,7 @@ test("#79 attaches an islet by sea route, not by straight-line across land", () 
 });
 
 test("#79 size wins: a settled but sub-substantial island attaches, it does not self-govern", () => {
-  // Alex's locked decision: size always wins. A settled sub-substantial island attaches by sea route, its town becoming an ordinary settlement (n=5000 -> SUBSTANTIAL_FRACTION*n = 20 cells).
+  // n=5000 -> SUBSTANTIAL_FRACTION*n = 20 cells.
   const W = 100;
   const H = 50;
   const A: Rect = { x0: 0, y0: 0, x1: 40, y1: 49 }; // mainland

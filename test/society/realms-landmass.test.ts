@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
 
-// #79: islands are their own realms. Open water is a hard frontier; a substantial inhabited island self-governs, small or empty islands attach by sea route. Exercised on the 320x240 production grid (archipelago geometry is a full-grid phenomenon); seed 9 "The Kost Archipelago" (47 landmasses) is the headline case.
+// Islands are their own realms, exercised on the 320x240 production grid; seed 9 "The Kost Archipelago" (47 landmasses) is the headline case.
 
 function landmassOf(w: ReturnType<typeof generateWorld>) {
   const { ids, sizes } = labelLandmasses(w.elev, w.seaLevel);

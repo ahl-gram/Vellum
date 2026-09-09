@@ -26,7 +26,7 @@ function hatchId(t: Tincture, suffix: string): string {
 function tile(t: Tincture, w: number, suffix: string, paper: string, ink: string): SvgNode {
   const id = hatchId(t, suffix);
   const s = n(w * 0.13); // line spacing / tile size
-  const sw = n(w * 0.02); // line weight
+  const sw = n(w * 0.02);
   const base = (size: number): SvgNode => el("rect", { x: 0, y: 0, width: size, height: size, fill: paper });
   const line = (d: string): SvgNode => el("path", { d, fill: "none", stroke: ink, "stroke-width": sw });
   const attrs = { id, patternUnits: "userSpaceOnUse", width: s, height: s };

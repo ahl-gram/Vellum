@@ -49,7 +49,7 @@ test("#140 control: without the barrier that same land is realm 0 (the flip is c
   const W = 60, H = 20, ROW = 10;
   const elev = allLand(W, H);
   const settlements = [settle(8, ROW, "capital"), settle(52, ROW, "town")];
-  const realms = partitionRealms(elev, SEA, noRivers(W, H), settlements); // no barrier
+  const realms = partitionRealms(elev, SEA, noRivers(W, H), settlements);
   const r0 = at(realms.labels, 8, ROW, W);
   assert.equal(at(realms.labels, 21, ROW, W), r0, "x=21 is realm 0 under a plain flood");
   assert.equal(at(realms.labels, 29, ROW, W), r0, "x=29 is realm 0 under a plain flood");
@@ -70,7 +70,6 @@ test("#140 a seat sitting on a barrier cell still governs a full realm (seat exe
   const W = 60, H = 20;
   const elev = allLand(W, H);
   const settlements = [settle(8, 10, "capital"), settle(38, 10, "town")];
-  // the barrier runs straight through the town seat's cell
   const realms = partitionRealms(elev, SEA, noRivers(W, H), settlements, { barrier: vBarrier(W, H, 38) });
   const townRealm = at(realms.labels, 38, 10, W);
   const capitalRealm = at(realms.labels, 8, 10, W);
@@ -91,7 +90,6 @@ test("#140 the diagonal-slip guard stops a flood leaking across a diagonal river
   assert.notEqual(townRealm, capitalRealm);
   assert.equal(at(withBarrier.labels, 14, 0, W), townRealm,
     "the slip-guard walls the capital's flood out of the town's triangle");
-  // Control: with no barrier the capital naturally owns (14,0), so the assertion above is caused by the guard, not by geometry.
   const bare = partitionRealms(elev, SEA, noRivers(W, H), settlements);
   assert.equal(at(bare.labels, 14, 0, W), at(bare.labels, 1, 4, W),
     "without the barrier the capital wins (14,0)");

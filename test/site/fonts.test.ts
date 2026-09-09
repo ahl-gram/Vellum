@@ -9,14 +9,13 @@ import { buildGallery } from "../../src/cli/gallery.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
-// The Punchcutter's Case (#228): three self-hosted OFL faces (Fell SC display, Fell italic flourish, EB Garamond body). Guards the wiring end to end and the BOUNDARY: the charts' own SVG lettering is out of scope, so no chart byte moves and no regen is owed.
+// The Punchcutter's Case (#228): three self-hosted OFL faces for the site chrome; the charts' own SVG lettering is out of scope, so no chart byte moves.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const readText = (p: string) => readFile(root(p), "utf8").catch(() => "");
 
 const ROLE_VARS = ["--font-display", "--font-flourish", "--font-body"] as const;
 
-// The woff2 set: exactly the weights and italics the site's chrome asks for.
 const WOFF2 = [
   "im-fell-english-sc-latin-400-normal.woff2",
   "im-fell-english-latin-400-italic.woff2",
@@ -26,7 +25,7 @@ const WOFF2 = [
   "eb-garamond-latin-700-normal.woff2",
 ] as const;
 
-// Since #254 all pages render through BaseLayout, so the one layout IS the folio's shell; the atlas + gallery are generated and guarded through their generators below.
+// Every page renders through BaseLayout, so the one layout is the folio's shell; the atlas and gallery are guarded through their generators below.
 const AUTHORED_PAGES = ["src/layouts/BaseLayout.astro"] as const;
 
 test("fonts.css self-hosts the three Fell/Garamond faces with font-display: swap", async () => {
@@ -45,7 +44,6 @@ test("fonts.css self-hosts the three Fell/Garamond faces with font-display: swap
   assert.match(css, /url\(\s*['"]?\/fonts\/[^)]+\.woff2/, "faces must load from /fonts/");
   assert.doesNotMatch(css, /fonts\.googleapis\.com|fonts\.gstatic\.com/, "no third-party font host");
 
-  // The role vars bake in the Iowan serif fallback so a missing woff2, or a page that never links fonts.css, still reads warm.
   for (const v of ROLE_VARS) {
     assert.ok(css.includes(v), `fonts.css :root should publish ${v}`);
   }
@@ -56,7 +54,6 @@ test("the self-hosted woff2 files and their OFL license ship under public/fonts/
   for (const file of WOFF2) {
     const path = root(`public/fonts/${file}`);
     assert.ok(existsSync(path), `public/fonts/${file} should exist`);
-    // wOF2 magic: prove it is a real WOFF2, not an HTML error page saved as .woff2.
     const sig = readFileSync(path).subarray(0, 4).toString("latin1");
     assert.equal(sig, "wOF2", `${file} should be a real WOFF2 (wOF2 signature)`);
   }
@@ -122,9 +119,7 @@ test("the gallery page css defers the sub's voice to the house intro role (#324)
   try {
     await buildGallery(100, { count: 1, out: dir });
     const css = await readFile(join(dir, "index.css"), "utf8").catch(() => "");
-    // The sub line is an intro since #324 (pinned in house-style.test.ts); the generated css re-binding it would shadow a future re-ratification.
     assert.ok(!/p\.sub[^{]*\{[^}]*font-family/.test(css), "the sub's voice belongs to /house.css, not the generated css");
-    // /gallery/ is a shelled route since #268, so the standalone document retires.
     assert.ok(!existsSync(join(dir, "index.html")), "buildGallery must not write the standalone shell anymore");
   } finally {
     await rm(dir, { recursive: true, force: true });
@@ -136,7 +131,6 @@ test("the e2e harness serves .woff2 with a real font MIME (no false-positive fal
   assert.match(text, /["']\.woff2["']\s*:\s*["']font\/woff2/, "the harness MIME map should serve .woff2 as font/woff2");
 });
 
-// BOUNDARY GUARD, green from the start by design: #228 is site chrome ONLY; the chart SVG lettering is part of the byte-determinism contract, so no chart byte may move.
 test("boundary: the chart SVG lettering is untouched by the site's Punchcutter faces", () => {
   const svg = renderMap(generateWorld(defaultRecipe(42)), { style: "antique", widthPx: 480 });
   assert.doesNotMatch(svg, /IM Fell|EB Garamond/, "chart <text> must not adopt the site chrome faces");

@@ -2,9 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { realWorld, recordingLogPanel, recordingSink, recordingStatus, stackedMount } from "../../test-support/living-chart-hosts.ts";
 
-// #364: what the session builder does to the MOUNT, asserted against a mount that already holds overlays: the wipe of every .voyage-overlay immediately before the unconditional append.
-// Not only e2e because three ways of getting that line wrong were measured to survive SV2g/SV2h (a singular querySelector, the wipe hoisted above the bails, the query widened to document); all three are visible from the mount's own side, via stackedMount's ordered ledger.
-// #371 adds the OTHER side of the same call: what the ENGINE does to the mount when that build bails. No arm path can reach a bailing arm through the UI, so an e2e cannot see this at all.
+// What the session builder does to the MOUNT (#364): the wipe of every .voyage-overlay immediately before the unconditional append, asserted from the mount's own side via stackedMount's ordered ledger (three wrong forms of that line survived e2e SV2g/SV2h); and what the ENGINE does to the mount when that build bails (#371), which no arm path can reach through the UI.
 
 const SUBTITLE = "as surveyed by Taiki the Wayfarer";
 
@@ -38,8 +36,7 @@ test("#364 the wipe runs BEFORE the append, and asks the MOUNT for the nodes", a
 
   sessions.build(manifest, survey, 42, SUBTITLE);
 
-  // Order matters: a wipe placed after the append removes the overlay the builder just added, and the mount ends up with no track at all.
-  // The ask: entry proves the query went to the MOUNT; the document-scoped mutation reds HERE as a THROW (installShim's document carries only factory methods), not as this assertion.
+  // The ask: entry proves the query went to the MOUNT (a document-scoped query reds here as a THROW, since installShim's document carries only factory methods), and the order proves the wipe precedes the append.
   assert.deepEqual(
     mount.ledger,
     ["ask:.voyage-overlay", "remove:first", "remove:second", "append:voyage-overlay"],

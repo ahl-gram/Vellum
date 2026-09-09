@@ -12,11 +12,10 @@ import type { SvgNode } from "../../src/render/svg.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import type { World } from "../../src/world/types.ts";
 
-// #249: on a deepest-band (8x) survey the scale bar picked the smallest round league total (20) and laid it at the zoomed px-per-league, growing to 1505px with the "20" tick at x=1595 on a 1500px sheet; the bar must fit the plot at every zoom, as the world sheet's does.
 
 const WIDTH = 1500;
 const MARGIN = marginFor(WIDTH); // 68
-const PLOT_RIGHT = WIDTH - MARGIN; // 1432 — the inner frame edge
+const PLOT_RIGHT = WIDTH - MARGIN; // 1432, the inner frame edge
 
 const world = generateWorld(defaultRecipe(42, { gridW: 320, gridH: 240 }));
 
@@ -101,7 +100,6 @@ test("#249: region scale-bar tick labels stay whole numbers (no fractional mid t
 
 test("#249 guard: the world sheet scale bar is unchanged (goldens safe)", () => {
   const ticks = numericTicks(world);
-  // The committed world charts render 0 / 10 / 20 leagues; the region fix must not touch the world path, or every golden moves.
   assert.deepEqual(ticks.map((t) => t.value), ["0", "10", "20"]);
   for (let i = 1; i < ticks.length; i++) {
     assert.ok(ticks[i]!.x > ticks[i - 1]!.x, "world ticks must ascend in x");

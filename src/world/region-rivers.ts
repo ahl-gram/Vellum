@@ -127,7 +127,7 @@ export function anchorRegionRivers(
     gridW,
     gridH,
   );
-  const absoluteThreshold = worldRiverThreshold(world) * density; // exponent 1 (see doc above)
+  const absoluteThreshold = worldRiverThreshold(world) * density;
   const extracted = extractRivers(elev, flow, seaLevel, { absoluteThreshold });
 
   const mouthReach = mouthReachCells(gridW, window, world.recipe.gridW);

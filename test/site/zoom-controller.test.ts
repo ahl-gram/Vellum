@@ -2,8 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { zoomTransformToCss, constrainZoom, nextGlideTarget } from "../../src/site/shared/zoom-controller.ts";
 
-// The Glass (#164): d3-zoom handles the gestures, but two pieces are ours and load-bearing, unit-tested in isolation; the live gestures and the clamp in a real browser are proven by e2e suite-zoom Z1-Z4.
-// The translate clamp deliberately mirrors d3-zoom's defaultConstrain (the sheet is the viewport, so the world extent IS the viewport extent), recomputed against a scale itself clamped to the extent.
+// The Glass (#164): d3-zoom handles the gestures; the translate clamp mirrors d3-zoom's defaultConstrain (the sheet is the viewport, so the world extent IS the viewport extent), recomputed against a scale itself clamped to the extent. Live gestures are proven by e2e suite-zoom Z1-Z4.
 
 test("zoomTransformToCss emits a px-suffixed, browser-valid transform (#164)", () => {
   // d3's ZoomTransform.toString() emits translate(x,y) with NO unit, which the CSS transform property silently rejects: a live gesture would set an ignored value and nothing would move.
@@ -22,7 +21,6 @@ test("constrainZoom clamps the scale to the extent [1,8] (#164)", () => {
 });
 
 test("constrainZoom pins the sheet home at k=1: no pan when not zoomed (#164)", () => {
-  // At k=1 the sheet exactly fills the viewport, so any offset is pulled back to 0 0.
   const c = constrainZoom({ x: 50, y: -30, k: 1 }, EXTENT, SCALE);
   assert.deepEqual({ x: c.x, y: c.y, k: c.k }, { x: 0, y: 0, k: 1 });
 });

@@ -78,8 +78,6 @@ function main(): void {
       totals.set(label, { bare: acc.bare + bare, detail: acc.detail + detail, n: acc.n + 1 });
     }
 
-    // What a chain cache LIVING ACROSS region jobs would buy, terrain only. A pan at the
-    // deepest band reaches two kinds of neighbour and they are not the same price.
     const chainSpec = (window: UvWindow, band: LodBand): Parameters<typeof buildChainedField>[0] => ({
       seed: world.recipe.seed,
       mapType: world.recipe.mapType,

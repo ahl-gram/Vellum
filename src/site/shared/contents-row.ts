@@ -1,4 +1,4 @@
-// The kit's contents row (#487 item 3, lifted at #504): the .cr-num / .cr-text pair public/atelier.css dresses under .contents. The host owns the <li>, which carries its own state (on, the row's kind, the plates, the lean).
+// The kit's contents row (#487 item 3): the .cr-num / .cr-text pair public/atelier.css dresses under .contents. The host owns the <li>, which carries its own state (on, the row's kind, the plates, the lean).
 export type RowPart = string | HTMLElement;
 
 /** `textHtml` is html the caller has already escaped (contents-markup.ts escapes every host value). */

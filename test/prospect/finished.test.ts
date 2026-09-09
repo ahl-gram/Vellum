@@ -30,7 +30,7 @@ test("the year resolves the era against the chronicle", () => {
     assert.equal(eraFor(dated, year), era, `dated ruin at An. ${year}`);
   }
   assert.equal(eraFor(makeInput({}), 1400), "standing", "a sound town stands");
-  // The #229 convention (2026-08-10): an undated ruin is ruined at any year after its founding.
+  // Convention (#229): an undated ruin is ruined at any year after its founding.
   const undated = makeInput({ ruined: true, ruinedYear: null });
   assert.equal(eraFor(undated, 1100), "standing");
   assert.equal(eraFor(undated, 1101), "ruined");

@@ -153,7 +153,7 @@ test("composeAtlas is deterministic for a seed", () => {
 const unescape = (s: string): string =>
   s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 
-// The walk the notes are written in IS the printed order (a writer's prose depends on call order), so the order is what keeps the bound atlas's gazetteer byte-stable; the expectation is derived here with the test's own rank map, never read back from the composer (guard-prover on #463 part 4/4).
+// The walk the notes are written in IS the printed order (a writer's prose depends on call order), so the order is what keeps the bound atlas's gazetteer byte-stable; the expectation is derived with the test's own rank map, never read back from the composer.
 test("the gazetteer's rows run capital, then the towns, then the villages, each rank alphabetical", () => {
   const world = generateWorld(defaultRecipe(42));
   const html = composeAtlas(world).gazetteerHtml;

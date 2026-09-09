@@ -339,7 +339,6 @@ export async function run(ctx) {
 
   await shoot("print-room-bound.png");
 
-  // PR20b (the plates' links and hover-lift) retired at #465 ruling 1: the hidden document's plates link nowhere since seat d put the copy off screen; the download's own script links its plates (test/atlas/document.test.ts).
 
   await send("Emulation.setEmulatedMedia", { media: "print" });
   const printView = await evaluate(`(()=>{const disp=(sel)=>{const el=document.querySelector(sel);return el?getComputedStyle(el).display:"absent";};const f=document.querySelector("#pr-atlas figure:not(.banner)");return{stage:disp(".stage"),slip:disp(".slip"),legend:disp(".legend"),folioRoom:disp(".corner.folio-room"),glass:disp(".zoomery"),atlas:disp("#pr-atlas"),hero:disp("#pr-atlas .hero-plate"),breakAfter:f?getComputedStyle(f).breakAfter:"absent"};})()`);
@@ -358,7 +357,7 @@ export async function run(ctx) {
     !!pdf && typeof pdf.data === "string" && pdf.data.length > 20000,
     pdf ? `${pdf.data.length} base64 chars` : "printToPDF failed",
   );
-  await send("Emulation.setEmulatedMedia", { media: "" }); // back to screen for the rest
+  await send("Emulation.setEmulatedMedia", { media: "" });
 
   // hasBlobUrl reads the downloaded FILE's own bytes: no blob: URL may be BAKED IN, though since #368 the file's own script creates them at load. The metadata hook is read instead of the ~20MB string.
   await evaluate(`(()=>{window.__vellumLastAtlasDownload=undefined;document.getElementById("pr-download").click();})()`);

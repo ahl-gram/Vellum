@@ -5,7 +5,7 @@ import { existsSync, mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync
 import { resolve, join } from "node:path";
 import { tmpdir } from "node:os";
 
-// The bindery keeps one press (#208, ratified 2026-07-23): one multi-entry Vite build covers every app page, the worker spawn moves to the static import-URL form Vite rewrites, and esbuild retires.
+// One press (#208): one multi-entry Vite build covers every app page, and the worker spawn is the static import-URL form Vite rewrites.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");

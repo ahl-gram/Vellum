@@ -4,9 +4,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import type { VoyageLogPort } from "../../src/world/voyage-log.ts";
 
-// The Reading Room's frame (#219): host-agnostic, the first non-Explorer host of the #191 engine, which is what proves that API capability-complete.
-// Both open decisions ratified by Alex 2026-07-27 (https://github.com/ahl-gram/Vellum/issues/219#issuecomment-5097366231): no Explorer watch view in this sub (this suite IS the minimal harness), and the log FLOWS at every width, bounded by construction, no scrollbar.
-// The frame BUILDS DOM, so this file installs the element shim; the shim stands in for the ENVIRONMENT, never the module under test.
+// The Reading Room's frame (#219): host-agnostic, the first non-Explorer host of the #191 engine; ratified 2026-07-27 (https://github.com/ahl-gram/Vellum/issues/219#issuecomment-5097366231): no Explorer watch view, and the log FLOWS at every width, bounded by construction. The frame BUILDS DOM, so the element shim stands in for the environment, never the module under test.
 import { El, installShim, walk } from "../../test-support/element-shim.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -92,7 +90,6 @@ test("the frame mounts and hands the engine a complete host (#219, the first non
     );
   }
 
-  // The capability proof: the engine constructs against this host exactly as against the Explorer's, so nothing in its public API is Explorer-shaped.
   const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
   const lc = createLivingChart(host);
   for (const method of ["applyAges", "agesState", "applyScrub", "scrubTo", "applyVoyage", "voyagePaintAt", "scrubState", "destroy"]) {
@@ -217,7 +214,6 @@ test("#442 the mirror takes its SOURCE's voice: roman for an annal, the surveyor
   assert.equal(told.classes.has("prologue"), false, "an annal is the chronicler's, and must not inherit the survey voice");
   frame.setTold(null);
 
-  // The style half too, or the markup could carry a voice the sheet never dresses; a structural test cannot see the rendered mismatch, so this pins the pair.
   const css = read("public/reading-frame.css");
   const toldText = css.match(/\.rf-told \.cr-text\s*\{[^}]*\}/)?.[0] ?? "";
   assert.ok(toldText, "the mirror dresses its text column");
@@ -297,7 +293,6 @@ test("destroy() unmounts the frame (a page host that leaves takes its DOM with i
 test("the log component renders the chronicle's row shape in the shared idiom (#219)", async () => {
   const { createDatedLog } = await import("../../src/site/reading-frame/dated-log.ts");
   const log = createDatedLog({ label: "The chronicle" });
-  // HistoricalEvent's displayed fields (src/society/history.ts): year + text.
   log.render([
     { year: 214, text: "Aldmarch is founded on the strait." },
     { year: 655, text: "The Kelder war ends at the shallows." },
@@ -314,7 +309,6 @@ test("the log component renders the chronicle's row shape in the shared idiom (#
 });
 
 test("the engine's prologue rows carry the #312 manuscript shape: day gutters, an initial on the first line", async () => {
-  // #312 narrowed the #219 parity by design: both still emit the li > .cr-year + .cr-text idiom, but the engine's gutter counts voyage days and its first line opens with an initial.
   const { createVoyageLogPanel } = await import("../../src/site/living-chart/voyage-log-panel.ts");
 
   const ports: VoyageLogPort[] = [
@@ -412,21 +406,14 @@ test("the frame's log never nests a scroller, at any width (#219 acceptance, dec
     /max-height/,
     "no max-height cap: the log is bounded by construction (14 events + ~24 legs), not by a scrollbar",
   );
-  // #219's ratification is about the JOURNAL, and #442 kept it: the one narrow-viewport
-  // rule this file now carries (ruled 2026-08-23) drops the sticky strip's live row on a
-  // phone. An ALLOWLIST, not a search for journal selectors: the strip dresses the very
-  // same .cr-year / .cr-text columns the journal rows use, so rejecting only `.rf-log`
-  // waves through `@media (max-width: 40rem) { .cr-text { display: none } }` and reshapes
-  // the reading unseen. Anything a narrow rule touches must be scoped to the strip.
+  // An ALLOWLIST, not a search for journal selectors: the strip dresses the same .cr-year / .cr-text columns the journal rows use, so rejecting only .rf-log would wave through a narrow rule hiding .cr-text and reshape the reading unseen.
   for (const sel of narrowSelectors(css)) {
     assert.ok(
       STRIP_SCOPED.test(sel),
       `a narrow-viewport rule reaches beyond the sticky strip (${sel}); the journal reads the same at every width`,
     );
   }
-  // Non-vacuity WITHOUT requiring the rule to exist: deleting the narrow rule restores the
-  // ratified pre-#442 state and must stay green, so the scan proves itself on a planted
-  // one instead. Both directions, since a scan that finds nothing proves nothing.
+  // Non-vacuity without requiring the narrow rule to exist: the scan proves itself on a planted rule, both directions.
   const planted = css + "\n@media (max-width: 40rem) { .cr-text { display: none; } }\n";
   assert.ok(
     narrowSelectors(planted).some((s) => !STRIP_SCOPED.test(s)),
@@ -440,11 +427,9 @@ test("the frame's log never nests a scroller, at any width (#219 acceptance, dec
   );
 
   // Measured over CDP at a REAL 320px viewport (Brave's --window-size does not shrink the layout viewport): a flex item's min-width:auto refuses to shrink and a range input's intrinsic width is ~129px, so the row overflowed to scrollWidth 355. Both halves are load-bearing.
-  // #463: the row no longer wraps (the bar keeps Play and the readout beside it on the strip at every width, #462 ruling 6); what still guards the 320px case is the bar shrinking and its neighbours never stretching.
   assert.match(css, /\.rf-play\s*\{[^}]*flex:\s*none/, "Play keeps its own width and never stretches the row");
   assert.match(css, /\.rf-range\s*\{[^}]*min-width:\s*0/, "the slider may shrink below its intrinsic width");
 
-  // The Explorer's ONE journal adopted the same flow at #220: the cap is gone, not raised.
   const explorer = read("public/explorer/index.css");
   assert.equal(
     explorer.match(/max-height:\s*32rem;\s*overflow-y:\s*auto/g)?.length ?? 0,
@@ -455,7 +440,6 @@ test("the frame's log never nests a scroller, at any width (#219 acceptance, dec
 
 test("one canonical row rule covers the one arrived-state (#219; collapsed at #220)", () => {
   const css = read("public/reading-frame.css");
-  // #220 collapsed .inked / .past / .logged onto .inked alone; a leftover selector would quietly resurrect a producer the fusion retired.
   const brighten = css.match(/^[^{]*\.inked[^{]*\{[^}]*\}/m);
   assert.ok(brighten, "the frame css carries the rule keyed on the one .inked state");
   for (const stale of ["past", "logged"]) {

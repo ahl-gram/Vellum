@@ -1,4 +1,4 @@
-// Explorer render core e2e (R): worker active, worker/inline byte-parity, the committed-chart ULP check, the thematic layer, coast warp, Tide Wheel and arms toggle; split from suite-explorer-core.mjs, the A prefix became R.
+// Explorer render core e2e (R): worker active, worker/inline byte-parity, the committed-chart ULP check, the thematic layer, coast warp, Tide Wheel and arms toggle.
 export async function run(ctx) {
   const { evaluate, check, shoot, waitSettled, waitReady } = ctx;
   check("R0 page loaded + initial auto-draw rendered", await waitReady());
@@ -42,7 +42,6 @@ export async function run(ctx) {
   );
   check("R4 worker draw === committed Node chart (normalized, ULP-tolerant)", a4.normEq, `${a4.diffTok}/${a4.tokens} numeric tokens differ by ULP; raw-equal=${a4.rawEq}`);
 
-  // R5/R6/R7 (#199) and R9/R10 are deliberately retired tombstones; the numbers stay gapped so R8+ map 1:1 to the A-era history.
 
   await evaluate(`(()=>{const s=document.getElementById("seed");s.value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="vegetation";document.getElementById("draw").click();})()`);
   await waitSettled("draw-theme");

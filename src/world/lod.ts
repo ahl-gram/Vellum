@@ -126,7 +126,7 @@ export function decideSettle(state: {
   const { cx, cy } = quantizeCenter(state.camera.cx, state.camera.cy, size);
   const window = lodWindowFor(cx, cy, size);
   if (band === state.currentBand && windowsEqual(window, state.currentWindow)) {
-    return { action: "noop" }; // same survey already on screen: skip the redraft
+    return { action: "noop" };
   }
   return { action: "region", band, window };
 }

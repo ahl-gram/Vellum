@@ -24,7 +24,7 @@ const p = (x: number, y: number): Pt => ({ x, y });
 const near = (a: number, b: number, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} !== ${b}`);
 
 test("cumulative arc length runs 0 to total along the polyline", () => {
-  const g = buildLegGeometry([p(0, 0), p(3, 4), p(3, 14)]); // 5 then 10
+  const g = buildLegGeometry([p(0, 0), p(3, 4), p(3, 14)]);
   assert.deepEqual(Array.from(g.cum), [0, 5, 15]);
   assert.equal(g.total, 15);
 });
@@ -36,7 +36,6 @@ test("pointAtDistance hits the endpoints exactly", () => {
 });
 
 test("progress is by DISTANCE, not vertex index (the whole point of arc length)", () => {
-  // One long segment then one short: halfway by distance lands inside the long one, which a vertex-index walk would wrongly place at the joint.
   const g = buildLegGeometry([p(0, 0), p(90, 0), p(100, 0)]);
   assert.equal(g.total, 100);
   assert.deepEqual(pointAtDistance(g, 50), p(50, 0));
@@ -101,7 +100,6 @@ test("the tilt never exceeds MAX_TILT on any bearing", () => {
 });
 
 test("the tilt is monotonic in climb, never the literal bearing (gotcha 1)", () => {
-  // A literal rotate(angleDeg) would return -90 here; the damped tilt returns -24.
   near(tiltFor(0, -1), -MAX_TILT);
   const shallow = tiltFor(10, -1);
   const steep = tiltFor(1, -1);
@@ -119,7 +117,7 @@ test("a decisive east heading faces east, a decisive west heading faces west", (
 
 test("inside the deadband the facing HOLDS (this is the hysteresis)", () => {
   const len = 10;
-  const dx = FACING_DEADBAND * len * 0.5; // clearly inside the band
+  const dx = FACING_DEADBAND * len * 0.5;
   assert.equal(resolveFacing(dx, len, -1), -1, "held west");
   assert.equal(resolveFacing(dx, len, 1), 1, "held east");
 });
@@ -161,7 +159,6 @@ test("headingAt on a shorter-than-window leg spans the whole leg", () => {
   near(hd.x, 5);
 });
 
-/** Walk a leg at a fixed step, applying the real rule, and count facing changes. */
 function facingChanges(points: Pt[], startFacing: Facing = netFacing(points)): number {
   const g = buildLegGeometry(points);
   let facing = startFacing;
@@ -176,7 +173,7 @@ function facingChanges(points: Pt[], startFacing: Facing = netFacing(points)): n
 }
 
 test("a switchbacking road does NOT flip the rider (the bug this sub creates)", () => {
-  // Climbs north while x oscillates 4px per 6px of climb: the RAW per-segment dx flips sign at every vertex, smoothed over LOOKAHEAD it nets ~0, inside the deadband, and the facing holds.
+  // x oscillates 4px per 6px of climb: the raw per-segment dx flips at every vertex, smoothed over LOOKAHEAD it nets ~0.
   const zig: Pt[] = [];
   for (let i = 0; i <= 20; i++) zig.push(p(i % 2 === 0 ? 0 : 4, -6 * i));
   assert.ok(buildLegGeometry(zig).total > LOOKAHEAD * 2, "the leg is long enough to matter");
@@ -237,7 +234,6 @@ test("legDurations floors a tiny hop so it still reads", () => {
 });
 
 test("legDurations caps the whole sweep, scaling every leg down together", () => {
-  // Many long legs would blow past MAX_SWEEP_MS; the total clamps and each leg keeps its relative share.
   const many = new Array(40).fill(1500);
   const d = legDurations(many);
   const total = d.reduce((s, x) => s + x, 0);
@@ -251,7 +247,6 @@ test("legDurations is deterministic and handles the empty case", () => {
 });
 
 test("legDurations anchors the near-town baseline near half a second", () => {
-  // A ~120px near-town leg should run in the ballpark the short legs already felt good at.
   const [near] = legDurations([120]);
   assert.ok(near! > 350 && near! < 750, `near-town leg ran ${near}ms, outside the ~0.5s baseline`);
 });
@@ -290,7 +285,7 @@ test("tAtElapsed clamps outside the schedule and rests an empty one at t=1", () 
 });
 
 test("tAtElapsed skips a zero-duration leg forward, as the tick always did", () => {
-  const cum = [0, 500, 500, 900]; // leg 1 takes no time
+  const cum = [0, 500, 500, 900];
   near(tAtElapsed(cum, 500), 2 / 3, 1e-12);
 });
 

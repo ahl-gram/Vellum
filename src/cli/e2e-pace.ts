@@ -1,12 +1,4 @@
-// RS30's measurement (#526). The sweep's clock is wall-anchored (living-chart/pace.ts), so the
-// years the story covers per page millisecond is a RATE no runner speed can move; what the runner
-// moves is only WHEN frames land. The old check took two years 400 wall ms apart and asked the 4x
-// window to cover three times the 1x one, which measures the rate to one frame's quantization at
-// each end: on unchanged code six CI runs read 2.76 to 4.31 against a bound of 3.
-//
-// So read the rate instead, from the page's own frame clock: each sample pairs a year with the rAF
-// timestamp of the frame that painted it, and the slope of year on that timestamp is the rate. A
-// constant pairing lag is an OFFSET in that fit, not a tilt, so it cancels.
+// The pace measurement (#526): the sweep's clock is wall-anchored (living-chart/pace.ts), so the years the story covers per page millisecond is a RATE no runner speed can move, only WHEN frames land; each sample pairs a year with the rAF timestamp of the frame that painted it, the slope of year on that timestamp is the rate, and a constant pairing lag is an offset in that fit, not a tilt.
 import { SWEEP_MS } from "../render/chronicle-scrubber.ts";
 
 /** One painted frame: the frame's own timestamp, the year it painted, the pace it painted at. */
@@ -64,11 +56,9 @@ export function fitRate(samples: readonly PaceSample[]): number {
   return den > 0 ? num / den : NaN;
 }
 
-/** The years a sweep covers per wall millisecond at a pace: the engine's own contract, from its own constant. */
 export const expectedRate = (span: number, pace: number): number => (pace * span) / SWEEP_MS;
 
 export interface PaceSweepOpts {
-  /** The instrument's year range, as agesState reports it. */
   readonly range: { readonly min: number; readonly max: number };
   /** The paces the sweep was driven through, slowest first. */
   readonly paces: readonly number[];

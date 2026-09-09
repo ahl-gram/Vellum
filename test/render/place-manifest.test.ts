@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 
-// #52: the projected place manifest the Living Chart epic (#51) consumes. The projection MUST match `createProjection` in `src/render/map-renderer.ts`; the expected pixels here are reconstructed BY HAND, independent of it, so a regression in either side is caught (never the tautological nx*widthPx === proj.px).
+// The expected pixels are reconstructed BY HAND, independent of `createProjection` in `src/render/map-renderer.ts`, so a regression on either side is caught (never the tautological nx*widthPx === proj.px).
 
 const world = generateWorld(defaultRecipe(42, { gridW: 160, gridH: 120 }));
 const WIDTH = 1500;
@@ -37,7 +37,6 @@ test("seat flags exactly the settlements in world.realms.seats", () => {
   m.places.forEach((p, i) => {
     assert.equal(p.seat, expected.has(i), `place ${i} (${p.name}) seat flag`);
   });
-  // selectSeats seats the grand capital as realm 0, so the capital is a seat too; the capital-over-seat precedence lives in placeRank, not here.
   const capital = m.places.find((p) => p.kind === "capital")!;
   assert.equal(capital.seat, true, "the grand capital is realm 0's seat");
 });
@@ -89,7 +88,6 @@ test("nx/ny are width-independent fractions: a wider render scales pixels, not f
   });
 });
 
-// #120: the voyage router walks the world GRID, and nx/ny are margin-inset fractions of the RENDERED chart, so inverting them client-side would round-trip an integer the worker already holds exactly; ship the integers instead.
 test("every place carries its raw grid cell as gx/gy", () => {
   const m = buildPlaceManifest(world, WIDTH);
   m.places.forEach((p, i) => {

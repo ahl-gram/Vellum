@@ -5,8 +5,7 @@ import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { CULTURES } from "../../src/society/names.ts";
 
-// Prose facts the pages state about the engine (#289): the culture roster has been ten since tsuren/zoryan/tezcal, but the site kept saying "six invented" in four places; a source-scan guard so the count cannot silently split again.
-// #292: with all ten tongues documented the glossary states the count again; the coverage guard reads the roster from the engine, never a number written down twice.
+// Prose facts the pages state about the engine (#289, #292): the culture count is read from the roster, never a number written down twice.
 
 const pagesDir = fileURLToPath(new URL("../../src/pages", import.meta.url));
 
@@ -18,7 +17,7 @@ const astroSources = (dir: string): string[] =>
 test("no page still counts six: the roster is ten (#289)", () => {
   const sources = astroSources(pagesDir);
   assert.ok(sources.length >= 4, "the src/pages tree should hold the authored pages");
-  // Every phrasing the six-count ever wore: the review caught "the six cultures" surviving one Q&A below the fixed line.
+  // Every phrasing the six-count ever wore.
   for (const path of sources) {
     const text = readFileSync(path, "utf8");
     for (const stale of ["six invented", "six cultures", "six languages", "six tongues"]) {

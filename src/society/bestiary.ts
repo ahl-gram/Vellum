@@ -67,7 +67,6 @@ type Settled = {
 export type BestiaryInput = {
   readonly gridW: number;
   readonly gridH: number;
-  /** Hop distance from the nearest land cell, over water. */
   readonly oceanDist: Float64Array;
   /** 1 = border-connected sea. */
   readonly seaMask: Uint8Array;

@@ -1,14 +1,10 @@
-// Running Head e2e (RH0-RH8, #295; reshaped for the Sub 6 head cluster, #461): the shell's
-// masthead asserted by RESOLVED computed styles, because a rule that is present but LOSES
-// the cascade passes every source-text test (#288); self-contained, restores the Explorer base.
+// Running Head e2e (RH0-RH8, #295; reshaped for the #461 head cluster): the shell's masthead asserted by RESOLVED computed styles, because a rule that is present but LOSES the cascade passes every source-text test (#288); self-contained, restores the Explorer base.
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import { luminance, sampleRow } from "./pixel-support.mjs";
 
-// LITERAL on purpose: home is not a nav item, /ribbon/ and /prospect/ are shelled rooms outside
-// the nav, and a page dropping out of the nav must not silently drop out of this guard; /atlas/
-// is generated and carries no shell.
+// LITERAL on purpose: home is not a nav item, /ribbon/ and /prospect/ are shelled rooms outside the nav, /atlas/ is generated and carries no shell, and a page dropping out of the nav must not silently drop out of this guard.
 const SHELLED = ["/", "/explorer/", "/print-room/", "/reading-room/", "/gallery/", "/faq/", "/glossary/", "/seed-of-the-day/", "/prospect/", "/ribbon/", "/specimen/"];
 
 // MEASURED split: /, /explorer/, /gallery/ leave body leading normal, every other page sets 1.6; RH6 needs PROSE and APP to differ in body leading or it proves nothing.
@@ -19,10 +15,7 @@ const APP = "/explorer/";
 const DISPLAY_FACE = /^"IM Fell English SC",/;
 const FLOURISH_FACE = /^"IM Fell English",/;
 
-// Every constant MEASURED against the built dist/ (out/probe-cluster.mjs, 2026-08-26), never
-// derived; tracking null means the browser reported "normal" and is asserted as such. The
-// cluster is ONE dress on every page (#461 ruling 1): home differs only in the wordmark's tag
-// (h1, #288) and in having no room head to measure.
+// Every constant MEASURED against the built dist/ (out/probe-cluster.mjs, 2026-08-26), never derived; tracking null means the browser reported "normal" and is asserted as such. The cluster is ONE dress on every page (#461 ruling 1): home differs only in the wordmark's tag (h1, #288) and in having no room head to measure.
 const ROOM_HEAD = {
   wordmark: { tag: "P", weight: "400", size: 33.6, tracking: 4.032, face: DISPLAY_FACE },
   tagline: { tag: "P", weight: "400", size: 14.72, tracking: null, face: FLOURISH_FACE },
@@ -49,9 +42,7 @@ const CHART_HEAD = { ...FOLIO_HEAD, footer: null };
 const expectedHead = (route) =>
   route === "/" ? HOME_HEAD : CHART.includes(route) ? CHART_HEAD : FOLIO.includes(route) ? FOLIO_HEAD : ROOM_HEAD;
 const MEMBERS = ["wordmark", "tagline", "rooms", "roomName", "roomTagline", "footer"];
-// The second addendum on #461: the cluster pins its OWN leading (wordmark 1.15, the rest normal)
-// and must never inherit the page's reading 1.6; the room head pins 1.6 and must never inherit
-// an app page's normal. Both polarities are asserted per page in RH5.
+// The second addendum on #461: the cluster pins its OWN leading (wordmark 1.15, the rest normal) and never inherits the page's reading 1.6; the room head pins 1.6 and never inherits an app page's normal. Both polarities are asserted per page in RH5.
 const CLUSTER_NORMAL = ["tagline", "rooms", "footer"];
 const HEAD_LEADED = ["roomName", "roomTagline"];
 
@@ -171,9 +162,7 @@ export async function run(ctx) {
     offenders.join(" | ") || `${pinned} members pinned across ${SHELLED.length} pages`,
   );
 
-  // The band clips the deep at --band-h (121.6px at desktop); home has no band, nothing scrolls
-  // beneath its cluster. The invariant is band >= cluster (ruling 5's "never beneath bare
-  // lettering"), not just the literal clip: nav growth that overflows the band must red here.
+  // The band clips the deep at --band-h (121.6px at desktop); home has no band. The invariant is band >= cluster (ruling 5's "never beneath bare lettering"), not just the literal clip, so nav growth that overflows the band must red here.
   const unfixed = bad((h, r) =>
     (r === "/" ? h.chromePosition === "absolute" && h.bandClip === null
                : CHART.includes(r) ? h.chromePosition === "fixed" && h.bandClip === null
@@ -200,7 +189,6 @@ export async function run(ctx) {
       : "a page was unreachable",
   );
 
-  // Both polarities of the leading addendum (#461): the cluster never inherits the page's 1.6, the room head never inherits an app page's normal.
   const misleaded = SHELLED.flatMap((r) => {
     const h = heads[r];
     if (!h) return [`${r}: unreachable`];
@@ -255,9 +243,7 @@ export async function run(ctx) {
     `producer emits header.atlas-head > h1: ${producerShape}; injected twin: ${JSON.stringify(atlas)}`,
   );
 
-  // The lightest-adjacent-ground measurements behind both pins are the 2026-08-26 plate read
-  // (out/461-plate/contrast-v2.json): line-tan on the deep 4.03 < 4.5, and home's bandless
-  // cluster at 1280x800 over the close-in chart as low as 1.17. Alex's calls same day on #461.
+  // Both pins rest on the 2026-08-26 plate read (out/461-plate/contrast-v2.json): line-tan on the deep 4.03 < 4.5, and home's bandless cluster at 1280x800 over the close-in chart as low as 1.17; Alex's calls the same day on #461.
   const PARCHMENT = "rgb(239, 230, 207)";
   const dimTaglines = bad((h) => h.tagline?.color === PARCHMENT);
   check(

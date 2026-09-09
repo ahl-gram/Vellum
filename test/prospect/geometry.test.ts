@@ -320,7 +320,6 @@ test("before founding the ground is empty", () => {
 });
 
 test("before founding the land wears only its natural dressing", () => {
-  // Guards the era branch's built:false arm (skeptic finding 3): flipping it to true would re-plow the fields and re-stilt the fen.
   const fields = composeProspect(makeInput({}), { era: "before-founding" });
   assert.equal(fields.masses.length, 0);
   assert.equal(els(fields, "fieldRows").length, 0, "no furrows before the plow");
@@ -342,7 +341,7 @@ test("every composition is grounded and in frame", () => {
     makeInput({ kind: "village", foreground: band("marsh") }),
     makeInput({ kind: "town", ruined: true }),
     makeInput({ kind: "hamlet" }),
-    // Unwalled hamlets are where the back-row containment filter actually fires; guard-prover measured these seeds as live witnesses (2026-08-10).
+    // Unwalled hamlets are where the back-row containment filter fires; these seeds are measured live witnesses (2026-08-10).
     makeInput({ kind: "hamlet", seed: 3 }),
     makeInput({ kind: "hamlet", ruined: true, seed: 1 }),
   ];
@@ -358,7 +357,7 @@ test("every composition is grounded and in frame", () => {
       assert.ok(m.base - m.h > 0 && m.base < PLATE_H, "mass inside the plate");
     }
   }
-  // Bite-proof: at seed 3 the hamlet packs TWO back-row masses and the filter must drop exactly one (measured); a deleted filter reds here on the count, an escaping mass reds above in groundingViolations.
+  // At seed 3 the hamlet packs TWO back-row masses and the filter must drop exactly one (measured); a deleted filter reds here on the count.
   const filtered = composeProspect(makeInput({ kind: "hamlet", seed: 3 }));
   assert.equal(
     filtered.masses.filter((m) => m.raise > 0).length,
@@ -368,7 +367,7 @@ test("every composition is grounded and in frame", () => {
 });
 
 test("a ruined skyline shows ruin even when every draw comes up intact", () => {
-  // Measured witness (guard-prover, 2026-08-10): at seed 7321 every per-mass broken draw comes up intact for a ruined hamlet (~1 in 13,500 compositions), so only composeTownscape's insurance breaks the tallest front mass; deleting it goes red exactly here.
+  // Measured 2026-08-10: at seed 7321 every per-mass broken draw comes up intact for a ruined hamlet (~1 in 13,500), so only composeTownscape's insurance breaks the tallest front mass.
   const g = composeProspect(
     makeInput({ kind: "hamlet", ruined: true, ruinedYear: 1361, seed: 7321 }),
   );

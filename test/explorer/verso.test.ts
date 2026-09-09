@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildDocket } from "../../src/site/explorer/verso.ts";
 
-// #116 The Verso: buildDocket() is the pure docket line stamped along the fold (chart number, title, present year, capital), kept DOM-free; renderVerso() (the ghost, the stamp, the flip) is proven by the e2e end-states.
+// buildDocket() is the pure docket line stamped along the fold, kept DOM-free; renderVerso() (the ghost, the stamp, the flip) is the e2e end-states'.
 
 test("the docket reads chart number, title, and year", () => {
   assert.equal(

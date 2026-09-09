@@ -1,7 +1,4 @@
-// The URL hash <-> controls bridge (#183): readHash seeds the controls from a shared
-// link on load; writeHash mirrors the control values back into location.hash on every
-// draw. landTouched (the #55 manual-override gate) stays OWNED by app.ts: readHash only
-// reports whether the link carried a value, and writeHash takes the gate as an argument.
+// The URL hash <-> controls bridge: readHash seeds the controls from a link on load, writeHash mirrors them back on every draw; the touched gates stay OWNED by app.ts (readHash only reports whether the link carried a value).
 import { landToSlider, sliderToLand, updateLandReadout } from "./sea-level.ts";
 import { coastToSlider, sliderToCoast, updateCoastReadout } from "./coast-warp.ts";
 import { parseLive, emitLive, emitTableKey, finalizeHash, seedFromHash, type Live } from "./address.ts";
@@ -59,7 +56,6 @@ export function readHash(controls: Controls): {
       landTouched = true;
     }
   }
-  // #137: coast= carries coastWarp x 100, the same encoding writeHash emits below.
   const coast = params.get("coast");
   let coastTouched = false;
   if (coast !== null) {
@@ -70,7 +66,6 @@ export function readHash(controls: Controls): {
       coastTouched = true;
     }
   }
-  // #165: cx/cy are the world-uv centre (0..1), k the continuous zoom. All three must be present and finite with k in [1, 8]; a partial or nonsensical set is ignored (the chart opens home), so a hand-edited link never throws.
   const cxRaw = params.get("cx");
   const cyRaw = params.get("cy");
   const kRaw = params.get("k");
@@ -105,15 +100,12 @@ export function writeHash(
   params.set("beasts", beastsChk.checked ? "1" : "0");
   if (landTouched) params.set("land", String(Math.round(sliderToLand(landSlider.value) * 1000)));
   if (coastTouched) params.set("coast", String(Math.round(sliderToCoast(coastSlider.value) * 100)));
-  // #192: exactly one live key or neither (the writer's half of the ratified mutual exclusion; the grammar lives in address.ts). Before the camera, so the address reads instrument-then-framing.
   emitLive(params, live);
-  // #165: written ONLY when zoomed. k===1 is home and the controller snaps k to exactly 1 at the min extent and on reset/rebase, so the gate is exact; any draw snaps home first and drops cx/cy/k for free.
   if (camera && camera.k !== 1) {
     params.set("cx", camera.cx.toFixed(4));
     params.set("cy", camera.cy.toFixed(4));
     params.set("k", camera.k.toFixed(4));
   }
   emitTableKey(params, table);
-  // finalizeHash, not params.toString(): it respells `survey=` to the ratified bare flag.
   history.replaceState(null, "", "#" + finalizeHash(params));
 }

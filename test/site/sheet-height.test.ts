@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { SHEET } from "../../src/site/home/camera.ts";
 import { homeStage } from "../../src/site/home/stage-data.ts";
 
-// #476 item 1: the 1157.931 sheet-height literals were hand-copied from the manifest derivation and nothing compared them back, so a chart aspect change would misplace every station with all tests green.
+// The 1157.931 sheet-height literals were hand-copied from the manifest derivation (#476), so a chart aspect change would misplace every station with all tests green unless something compares them back.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
@@ -28,7 +28,7 @@ test("the sheet-height literals match their derivation across every carrier (#47
       .filter((f) => f.endsWith(".mjs"))
       .map((f) => `scripts/e2e/${f}`),
   ];
-  // The sweep is anchored to the derivation's integer part, so a re-derived height reds the witness below instead of matching nothing and passing vacuously. Blind spot, named: a literal carried OUTSIDE these roots escapes (false negative only; the scan never cries wolf).
+  // Anchored to the derivation's integer part, so a re-derived height reds the witness below instead of matching nothing; a literal carried OUTSIDE these roots escapes (false negative only).
   const litRe = new RegExp(String.raw`\b${Math.floor(derived)}\.\d+`, "g");
   const found = new Map<string, number[]>();
   for (const path of carriers) {
@@ -46,7 +46,7 @@ test("the sheet-height literals match their derivation across every carrier (#47
 test("the sheet-width literals match the manifest's build width in every home carrier (#476, guard-prover round 1 hole)", () => {
   const w = homeStage().sheetW;
   assert.equal(SHEET.w, w, `camera SHEET.w ${SHEET.w} is not the width the manifest was built at (${w})`);
-  // Presence-witness anchored to the current width: a re-chosen width reds every carrier still carrying the old one. Scoped to the HOME files because elsewhere bare 1500 means sleeps and unrelated render params; here every occurrence is the sheet width today, so a future non-sheet 1500 in these files reds as a false positive and earns a conscious exclusion (never a silent miss).
+  // Presence-witness anchored to the current width. Scoped to the HOME files because elsewhere bare 1500 means sleeps and unrelated render params; a future non-sheet 1500 in these files reds as a false positive and earns a conscious exclusion.
   const wRe = new RegExp(String.raw`\b${w}(?![\d.])`);
   for (const path of [
     "public/index.css",

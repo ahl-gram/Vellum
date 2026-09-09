@@ -1,5 +1,4 @@
-// Surveyor's Glass e2e (Z): pan/zoom on the Explorer chart via the shared d3-zoom controller, plus the settle-to-region redraft (Z17+).
-// Resolved matrices are asserted on purpose: getComputedStyle returns "none" for a rejected value, so the assertion doubles as proof the px-suffixed transform is valid CSS (d3's own toString() is not).
+// Surveyor's Glass e2e (Z): pan/zoom on the Explorer chart via the shared d3-zoom controller, plus the settle-to-region redraft (Z17+). Resolved matrices are asserted on purpose: getComputedStyle returns "none" for a rejected value, so the assertion doubles as proof the px-suffixed transform is valid CSS (d3's own toString() is not).
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, waitTurned, PORT } = ctx;
 
@@ -16,7 +15,7 @@ export async function run(ctx) {
   await waitSettled("zoom-base");
   // #169: the semantic redraft is OFF for the geometric block (Z1-Z16) and back ON for Z17+; a fresh page defaults it ON, so re-set it after every reload.
   await evaluate(`window.__vellumSetRedraftEnabled(false)`);
-  await shoot("explorer-zoom-k1.png"); // home: the arrival ceremony + drop shadow overflow the frame, exactly as today
+  await shoot("explorer-zoom-k1.png");
 
   const z1 = await evaluate(`(()=>{window.__vellumZoomTo({k:3,x:-20,y:-15});const s=window.__vellumZoomState();const m=document.getElementById("map");const cs=getComputedStyle(m);return{s,matrix:cs.transform,origin:cs.transformOrigin,zoomed:document.getElementById("map-viewport").classList.contains("zoomed")};})()`);
   check(
@@ -32,7 +31,7 @@ export async function run(ctx) {
     z2.s.k === 8 && Math.abs(z2.s.x - z2.ex) < 0.5 && Math.abs(z2.s.y - z2.ey) < 0.5,
     JSON.stringify(z2),
   );
-  await shoot("explorer-zoom-k8.png"); // max magnify (blurrier is expected here; the semantic redraft is Sub 8)
+  await shoot("explorer-zoom-k8.png");
 
   await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:4,x:-(3*W)/2,y:-(3*H)/2});})()`);
   await shoot("explorer-zoom-k4.png");
@@ -58,8 +57,8 @@ export async function run(ctx) {
     JSON.stringify(z6),
   );
   await sleep(700); // let the pinned unfurl (--unfurl 650ms) settle
-  await shoot("explorer-zoom-card.png"); // manual: card anchored to its mark at 2x (edge unfurls clip)
-  await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`); // dismiss the pin
+  await shoot("explorer-zoom-card.png");
+  await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`);
 
   const z8 = await evaluate(`(()=>{
     const vp=document.getElementById("map-viewport");
@@ -88,8 +87,8 @@ export async function run(ctx) {
     JSON.stringify(z8),
   );
   await sleep(700); // let the pinned unfurl (--unfurl 650ms) settle before the shot
-  await shoot("explorer-zoom-card-k8.png"); // the constant-size card at max zoom (cf. the ballooned before)
-  await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`); // dismiss the pin
+  await shoot("explorer-zoom-card-k8.png");
+  await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`);
 
   const z8b = await evaluate(`(()=>{
     const vp=document.getElementById("map-viewport");
@@ -130,7 +129,7 @@ export async function run(ctx) {
       z8b.overlayK === "4" && z8b.mapK === "" && Math.abs(z8b.hitW - 26) <= 1,
     JSON.stringify({ z8b, z8bRing, z8bScale }),
   );
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 }); // park the pointer off the map
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 
   const z9 = await evaluate(`(async()=>{
@@ -221,7 +220,7 @@ export async function run(ctx) {
     z5.versoed && z5.ghost && z5.vis === "visible" && z5.k === 1 && z5.x === 0 && z5.y === 0 && z5.cx === null,
     JSON.stringify(z5),
   );
-  await shoot("explorer-zoom-verso.png"); // manual: the verso reads clean over a now-home recto
+  await shoot("explorer-zoom-verso.png");
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(1300);
 
@@ -244,18 +243,18 @@ export async function run(ctx) {
     r14c.k === 1 && r14c.cx === null && r14c.cy === null && r14c.kp === null,
     JSON.stringify(r14c),
   );
-  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`); // leave the chronicle
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
 
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-  const rmOn = await evaluate(`matchMedia("(prefers-reduced-motion: reduce)").matches`); // precondition
+  const rmOn = await evaluate(`matchMedia("(prefers-reduced-motion: reduce)").matches`);
   const zr = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const r=vp.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;vp.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,view:window,clientX:cx,clientY:cy}));return window.__vellumZoomState().k;})()`);
   check(
     "Zrm reduced motion collapses the double-click zoom to instant (AC5: lands at k=2 in one turn)",
     rmOn === true && zr === 2,
     JSON.stringify({ rmOn, zr }),
   );
-  await send("Emulation.setEmulatedMedia", { features: [] }); // clear the emulation
+  await send("Emulation.setEmulatedMedia", { features: [] });
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 
   const z7a = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
@@ -280,7 +279,7 @@ export async function run(ctx) {
     z13.k === 4 && Math.abs(z13.x - (-1.5 * z13.W)) < 1.5,
     JSON.stringify(z13),
   );
-  await shoot("explorer-zoom-deeplink-k4.png"); // manual: opened straight into a 4x framing from the link
+  await shoot("explorer-zoom-deeplink-k4.png");
 
   // #463: the chart room fits the sheet to the viewport, so a resize refits the box the camera is clamped against; the room holds the FRAMING (cx/cy/k) across the refit, never the raw transform, or a resize walks the camera and the settle re-drafts a different region (the G7 class, found by the harness's own screenshot resize).
   const sheetBefore = await evaluate(`document.getElementById("sheet").getBoundingClientRect().width`);
@@ -363,10 +362,7 @@ export async function run(ctx) {
   const enterAt = (k, cu, cv) =>
     evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
   const waitRedraft = async (prev) => {
-    // 15s, not the old 4s: #400 made a cold band-3 draw cost 1084ms measured locally, and a CI
-    // runner is several times slower than this laptop, so 4s returned BEFORE the redraft landed
-    // and every band downstream read one step off. Long enough for the draw, short enough that a
-    // real hang still fails rather than hanging the lane.
+    // 15s, not the old 4s: #400 made a cold band-3 draw cost 1084ms measured locally and a CI runner is several times slower, so 4s returned BEFORE the redraft landed and every band downstream read one step off; long enough for the draw, short enough that a real hang still fails rather than hanging the lane.
     for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
     return await rgn();
   };
@@ -389,12 +385,7 @@ export async function run(ctx) {
   await enterAt(2, 0.5, 0.5);
   const s17 = await waitRedraft(before17);
   const drawMs17 = await captionMs();
-  // The CAMERA is read at the commit, which is what this check is named for: a settle must not
-  // move it. The inset geometry cannot be, because insetView reads the FIRST .region-inset and
-  // during a crossing that is the OUTGOING sheet; #400's held chain cache took this band-1 draw
-  // to ~300ms, fast enough to land here mid-crossfade, and the outgoing sheet is only torn down
-  // on the incoming's transitionend with a 700ms fallback. So geometry is read once the pair has
-  // resolved, and a pair left mounted for good still fails on the count.
+  // The CAMERA is read at the commit, which is what this check is named for (a settle must not move it); the inset geometry cannot be, because insetView reads the FIRST .region-inset and during a crossing that is the OUTGOING sheet (#400's held chain cache lands this band-1 draw in ~300ms, mid-crossfade, and the outgoing sheet is torn down only on the incoming's transitionend with a 700ms fallback), so geometry is read once the pair has resolved, and a pair left mounted for good still fails on the count.
   const atCommit = await insetView();
   let view17 = atCommit;
   for (let i = 0; i < 50 && view17.insets !== 1; i++) { await sleep(40); view17 = await insetView(); }
@@ -410,10 +401,10 @@ export async function run(ctx) {
       `hits=${view17.hits} camera k=${atCommit.zk} x=${atCommit.zx} (expected ${-W17 / 2}) settle->sheet=${drawMs17}ms (AC3 target ~400ms desktop)`,
   );
   await sleep(400); // let the crossfade land so the artifact shows the committed (opaque) inset
-  await shoot("explorer-sub8-region-band1.png"); // manual: a finer survey pasted over its window
+  await shoot("explorer-sub8-region-band1.png");
   await enterAt(1.35, 0.5, 0.5);
   await sleep(600);
-  await shoot("explorer-sub8-inset-context.png"); // manual: the survey as a detail sheet on the world chart
+  await shoot("explorer-sub8-inset-context.png");
 
   await goHome();
   const before18 = (await rgn()).redrafts;
@@ -529,7 +520,7 @@ export async function run(ctx) {
     chron.band === 0 && chron.committed === false && chron.noStamp && chron.insets === 0 && chron.trackShown,
     JSON.stringify(chron),
   );
-  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`); // clear the survey ink
+  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
 
   await goHome();
   const before20e = (await rgn()).redrafts;
@@ -558,7 +549,7 @@ export async function run(ctx) {
     !!pinnedName && kept.hidden === false && kept.name === pinnedName && kept.zoomK === "3.6",
     `pinned=${JSON.stringify(pinnedName)} afterRedraft=${JSON.stringify(kept)} (zoomK expected "3.6")`,
   );
-  await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`); // dismiss the pin
+  await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`);
 
   await goHome();
   const before20f = (await rgn()).redrafts;
@@ -589,7 +580,7 @@ export async function run(ctx) {
   await enterAt(2, 0.35, 0.35); // a settle while the track is inked: must NOT redraft
   await sleep(600); // past the debounce + any would-be dispatch
   const vsettle = await rgn();
-  await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=false;v.dispatchEvent(new Event("change",{bubbles:true}));})()`); // clear the survey ink
+  await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=false;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   check(
     "Z20g the survey ink drops the inset, homes the camera on arming (ratified 2026-07-26), and blocks the redraft",
     von.band === 0 && von.committed === false && von.insets === 0 && von.track && von.k === 1 &&
@@ -661,7 +652,7 @@ export async function run(ctx) {
     `band=${step21.band} band2Hamlets=${shallow21}`,
   );
 
-  await goHome(); // leave the world sheet for the restore tail below
+  await goHome();
   await evaluate(`window.__vellumSetRedraftEnabled(false)`); // #169: geometric-only again for the suites that follow
 
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);

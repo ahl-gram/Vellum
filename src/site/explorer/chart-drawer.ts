@@ -6,7 +6,6 @@ import type { UvWindow } from "../../terrain/heightfield.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 import type { RenderOptions } from "../../render/map-renderer.ts";
 
-// Compared on the emitted spelling, not a stringified object, whose key order would split one sheet in two.
 const sameSheet = (a: TableItem, b: TableItem): boolean => emitTable([a]) === emitTable([b]);
 
 export type Refusal = "full" | "already";
@@ -103,7 +102,6 @@ export function makeDogEar(label: string, k: number, onLay: () => void): HTMLBut
   b.className = "dog-ear";
   b.setAttribute("aria-label", label);
   b.title = label;
-  // The same four d3 gestures createGlass stops for the zoom cluster, so a rapid double click on the corner never becomes the chart's double-click-to-zoom.
   for (const ev of ["mousedown", "dblclick", "wheel", "touchstart"]) {
     b.addEventListener(ev, (e) => e.stopPropagation());
   }
@@ -111,7 +109,6 @@ export function makeDogEar(label: string, k: number, onLay: () => void): HTMLBut
   return b;
 }
 
-/** The DOM half. The pure state above is what the address carries; this only draws it. */
 export interface ChartDrawerDeps {
   readonly root: HTMLElement;
   readonly tab: HTMLButtonElement;
@@ -120,7 +117,6 @@ export interface ChartDrawerDeps {
   readonly cuttings: HTMLElement;
   readonly full: HTMLElement;
   readonly road: HTMLButtonElement;
-  /** The Explorer's aria-live region, where a refusal is spoken (#520 build item 5). */
   readonly say: (line: string) => void;
   /** Persist: the table lives in the address and nowhere else (#401, no browser storage). */
   readonly onChange: (items: ReadonlyArray<TableItem>) => void;
@@ -128,7 +124,6 @@ export interface ChartDrawerDeps {
   readonly drawThumb?: (item: TableItem) => Promise<{ url: string; title: string } | null>;
   /** The Broadside's fold. Read late: the room is bound after the table (#543, ruled 2026-09-08). */
   readonly broadside?: () => SlipFold | null;
-  /** The phone leaf's tab carries its own tally (#540); the drawer's tab and the leaf's are different sentences. */
   readonly relabelLeaf?: (count: number) => void;
   readonly folioHref?: string;
 }
@@ -213,10 +208,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
   };
 
   const setOpen = (open: boolean, moveFocus = false): void => {
-    // Ruled 2026-09-08: the two never stand open together. Covering the chart's caption and the roads out while leaving the
-    // Broadside standing made no sense to the reader, and every collision #543 measured (the tab under the slip's outline,
-    // the road's stamp behind it, a sixth cutting overhanging it, a row too narrow to hold a sheet) is that pair, not the
-    // drawer. The reader who had the Broadside open gets it back when the table shuts; the one who folded it keeps it folded.
+    // Ruled 2026-09-08 (#543): the drawer and the Broadside never stand open together; the reader who had the Broadside open gets it back when the table shuts, the one who folded it keeps it folded.
     if (open !== deps.root.classList.contains("open")) {
       const broadside = deps.broadside?.() ?? null;
       if (open) broadsideWasOpen = broadside !== null && !broadside.folded();
@@ -238,7 +230,6 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
     const said = going ? titleOf(going) : null;
     if (going) forget(going);
     commit(next);
-    // Taking a cutting off moves the count and the tab silently otherwise: the press that did it is gone from the page by the time focus lands, so the room is announced rather than left to be discovered.
     deps.say(said ? `${said} is off the table · ${countLine(next)}` : countLine(next));
   };
 

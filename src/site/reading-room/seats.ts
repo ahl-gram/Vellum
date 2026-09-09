@@ -1,4 +1,4 @@
-// The Reading Room's chart-room seats (#463): where the reading frame's parts go, the Glass, the fit, the folio and the scale. app.ts stays the conductor.
+// The Reading Room's chart-room seats: where the reading frame's parts go, the Glass, the fit, the folio and the scale. app.ts stays the conductor.
 import type { DrawResult } from "../explorer/worker-client.ts";
 import type { ReadingFrame } from "../reading-frame/index.ts";
 import type { LivingChart } from "../living-chart/index.ts";
@@ -34,7 +34,7 @@ export function seatFrame(frame: ReadingFrame, plate: ProspectStage, f: RoomFurn
   frame.host.scrubber.panel.append(f.strip, f.slip, f.tab);
 }
 
-// #167 the Glass, geometric only (no card to counter-scale: every hit is inert here, RR11b), the kit's keys, and the room's fit; the strip's height seats the chart folio and the Glass above it (--strip-h) and bounds the fit, holding its last value while the panel is down.
+// The Glass, geometric only (no card to counter-scale: every hit is inert here), the kit's keys, and the room's fit; the strip's height seats the chart folio and the Glass above it (--strip-h) and bounds the fit, holding its last value while the panel is down.
 export function bindReadingRoom(frame: ReadingFrame, f: RoomFurniture): { readonly room: Room; readonly rebase: () => void } {
   const zoom = createZoomController({
     viewportEl: f.viewport,

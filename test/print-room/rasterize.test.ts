@@ -8,7 +8,7 @@ import {
   rasterizeSvg,
 } from "../../src/site/lib/rasterize.ts";
 
-// #135 Sub 3: the client-side SVG->PNG rasterizer. The platform half (blob-URL Image + canvas + toBlob) is browser-only, proven by the print-room e2e; the DECISION math is pure, and rasterize.ts keeps every DOM reference inside a function body, so this Node import touches only the pure exports.
+// The platform half (blob-URL Image + canvas + toBlob) is the print-room e2e's; rasterize.ts keeps every DOM reference inside a function body, so this Node import touches only the pure exports.
 
 // A poster-shaped root: width BEFORE height (the engine's order), plus decoy data-vellum-grid-w/h attributes a naive width= regex would wrongly capture as 320x240 instead of 4200x3150.
 const POSTER_SVG =
@@ -23,7 +23,6 @@ test("readSvgSize throws a friendly error when there is no svg root", () => {
   assert.throws(() => readSvgSize("<div>not a chart</div>"), /svg/i);
 });
 
-// A real <svg> root with no width/height: a regression breaking that guard would silently return {width:NaN,height:NaN} while every other test passed.
 test("readSvgSize throws when the svg root has no width/height", () => {
   assert.throws(() => readSvgSize('<svg viewBox="0 0 1 1"></svg>'), /width|height/i);
 });
@@ -63,7 +62,6 @@ test("fitScaleToBudget never returns a scale larger than requested", () => {
   assert.ok(fit.scale <= 2);
 });
 
-// The reuse contract (#123 with arbitrary art): even a request of x1 is fitted BELOW 1 when the source alone busts the budget (8000x6000 = 48 Mpx).
 test("fitScaleToBudget clamps below x1 when the source alone busts the budget", () => {
   const fit = fitScaleToBudget(8000, 6000, 1, MAX_PIXELS);
   assert.equal(fit.clamped, true);
@@ -80,7 +78,6 @@ test("rasterizeErrorMessage gives a distinct, in-voice message per failure kind"
     assert.ok(m.length > 0, "message should be non-empty");
     assert.ok(!m.includes("—"), "published copy is em-dash-free");
   }
-  // Each failure path says something specific, never one generic null-swallowing line.
   assert.notEqual(decode, toBlob);
   assert.notEqual(toBlob, context);
   assert.notEqual(decode, context);
@@ -92,7 +89,6 @@ test("rasterizeErrorMessage falls back to a generic line for an unknown kind", (
   assert.ok(generic.length > 0);
 });
 
-// The one failure path reachable without a DOM: rasterizeSvg reads the svg size BEFORE touching a canvas, so malformed markup REJECTS rather than resolving a silent null; the browser-only paths are the print-room e2e's.
 test("rasterizeSvg rejects on malformed markup instead of resolving a silent null", async () => {
   await assert.rejects(() => rasterizeSvg("<div>not a chart</div>"), /svg/i);
 });

@@ -1,25 +1,13 @@
-// #131 the style turn: a style change turns the sheet over and the SAME world lands
-// re-dressed in the new style; a new world (seed, type, climate) SETTLES per #127. Two
-// faces on one bound leaf: the front is the live #map, the back is the incoming chart as
-// a blob-url <img>, so #map never holds a second <svg> and the "exactly one #map svg"
-// invariant holds structurally through the turn. The 3D context is INERT at rest (idle
-// byte-parity between turns); shouldTurn stays pure and unit-testable under Node.
+// The style turn: a style change turns the sheet over and the SAME world lands re-dressed; the back face is the incoming chart as a blob-url <img>, so #map never holds a second <svg>, and the 3D context is inert at rest.
 
 export interface TurnDecision {
-  /** This draw was triggered by a style change (the only turn trigger in v1). */
   isTurn: boolean;
-  /** prefers-reduced-motion is on (fall back to an instant swap). */
   reduceMotion: boolean;
-  /** The off-thread render worker is live (the fallback path swaps instantly). */
   usesWorker: boolean;
-  /** A chart is already on screen to turn away from. */
   hasChart: boolean;
-  /** #116: the sheet is flipped to its verso (the flip owns the sheet, not the turn). */
   flipped?: boolean;
 }
-// #321 deleted the `chronicle` member (resolving #153). Do not re-add a suppression term without a state that genuinely cannot ride a turn; the sheet-turn unit test pins that a stale chronicle:true no longer suppresses.
 
-/** A style change over a live chart turns; everything else settles, and a flipped sheet rebuilds the verso in place instead (the turn and the flip both drive #sheet-inner's rotateY, so they must never both own it). */
 export function shouldTurn(s: TurnDecision): boolean {
   return !!(s.isTurn && !s.reduceMotion && s.usesWorker && s.hasChart && !s.flipped);
 }
@@ -32,10 +20,8 @@ export function turnTiming(): { ms: number; ease: string } {
   return { ms, ease };
 }
 
-// The single in-flight turn, or null. runTurn cancels any prior turn and every draw resolution cancels a leftover before touching #map, so a superseded turn can never orphan a sheet.
 let active: { abort: () => void } | null = null;
 
-/** Tear down any in-flight turn WITHOUT committing its content (the superseding draw owns the final #map). Idempotent and safe when nothing is turning. */
 export function cancelTurn(): void {
   if (active) active.abort();
   active = null;
@@ -46,12 +32,11 @@ export function runTurn(
   { sheetEl, innerEl, mapEl, newSvg, durationMs, easing }:
   { sheetEl: HTMLElement; innerEl: HTMLElement; mapEl: HTMLElement; newSvg: string; durationMs: number; easing: string },
 ): Promise<void> {
-  cancelTurn(); // never stack turns
+  cancelTurn();
   return new Promise<void>((resolve) => {
     let blobUrl = "";
     let back: HTMLDivElement | null = null;
     try {
-      // The incoming chart as a blob <img>, pre-rotated so it reads un-mirrored at -180deg; kept out of the a11y tree (the recto is the chart).
       blobUrl = URL.createObjectURL(new Blob([newSvg], { type: "image/svg+xml" }));
       back = document.createElement("div");
       back.className = "sheet-back";
@@ -62,7 +47,7 @@ export function runTurn(
       back.appendChild(img);
       innerEl.appendChild(back);
 
-      sheetEl.classList.add("turning"); // light the perspective + preserve-3d for the turn
+      sheetEl.classList.add("turning");
       innerEl.classList.add("turning");
 
       const anim = innerEl.animate(

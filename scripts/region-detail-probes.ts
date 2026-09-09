@@ -12,7 +12,7 @@ import type { World } from "../src/world/types.ts";
 
 const SEEDS = [42, 7, 2, 15, 23];
 const INSET = 0.02; // region.ts's own open-window inset
-const ATLAS_SIZE = 0.38; // src/atlas/compose.ts:149
+const ATLAS_SIZE = 0.38; // `windowAround` in `src/atlas/compose.ts`
 
 /** Does the band-scaled snap radius rescue anything the old radius-1 scan dropped? Bare field only: that is what ships today, so a nonzero answer is a change to sheets Alex can already see. */
 function counterfactual(): void {

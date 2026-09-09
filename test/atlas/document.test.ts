@@ -12,9 +12,7 @@ import {
 import { prospectPlates } from "../../src/atlas/compose.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
-// A minimal, deterministic stand-in for a composed atlas: one plate per section
-// plus the three HTML fragments. Section membership (hero/draughting/theme/region)
-// drives the filename scheme and the document layout, so one plate each is enough.
+// A minimal deterministic stand-in for a composed atlas: one plate per section plus the three HTML fragments; section membership drives the filename scheme and the layout, so one plate each is enough.
 function fixture(): AtlasDocumentData {
   const plate = (key: string, title: string) => ({
     key,
@@ -68,14 +66,8 @@ test("svgToDataUri: a base64 SVG data URI that round-trips Unicode", () => {
 
 test("ATLAS_SHEET_CSS: the shared inner CSS, scoped under .atlas-sheet, is the drift-trap's single source", () => {
   assert.ok(ATLAS_SHEET_CSS.length > 200, "shared atlas CSS should be substantial, not a stub");
-  // Scoped so it can be injected into the Explorer / Print Room without bleeding onto
-  // the host page's own figure/table/h2.
   assert.match(ATLAS_SHEET_CSS, /\.atlas-sheet\s+figure\b/);
-  // The plate lift under the hand, scoped to plates that GO SOMEWHERE (#368 ruling): the
-  // gesture promises a destination (#289), so it may only attach to an anchored plate. All
-  // three hosts qualify after #368, two of them by wrapping their plates at runtime, so this
-  // scoping costs no host its lift; it costs a plate its lift exactly when the link is absent
-  // (scripting off in the download), which is the case the contract exists for.
+  // The lift attaches only to anchored plates (#368 ruling): the gesture promises a destination, and the link is absent exactly when scripting is off in the download.
   assert.match(ATLAS_SHEET_CSS, /\.atlas-sheet\s+figure\s+a\s+img:hover\s*\{[^}]*translateY/);
   assert.doesNotMatch(
     ATLAS_SHEET_CSS,
@@ -84,8 +76,7 @@ test("ATLAS_SHEET_CSS: the shared inner CSS, scoped under .atlas-sheet, is the d
   );
   // A fallback so the self-contained download (no /motion.css) still resolves the timing.
   assert.match(ATLAS_SHEET_CSS, /var\(--paper,\s*\d+ms\)/);
-  // Page chrome (body background, header) is NOT part of the shared inner block: it must
-  // not change the Explorer bind, which lives inside the Explorer's own page.
+  // Page chrome (body background, header) is NOT part of the shared inner block: it must not change the Explorer bind, which lives inside the Explorer's own page.
   assert.doesNotMatch(ATLAS_SHEET_CSS, /\.atlas-sheet\s*\{[^}]*background/);
 });
 
@@ -98,22 +89,17 @@ test("atlasDocument (file-ref mode): a standalone doc that references plate SVG 
   assert.match(html, /<h1>The Isle of Café<\/h1>/);
   assert.match(html, /surveyed in the year of the long tide/);
   assert.match(html, /CHART № 7/);
-  // body carries the shared scope class so ATLAS_SHEET_CSS applies
   assert.match(html, /<body class="atlas-sheet">/);
-  // motion:true links the shared motion desk (folio membership; atlas.test.ts guards it)
   assert.match(html, /<link rel="stylesheet" href="\/motion\.css">/);
   assert.match(html, /ATLAS[_ ]?SHEET|\.atlas-sheet figure/i); // the shared CSS is inlined
-  // file-ref plate srcs, wrapped in anchors when anchor:true
   assert.match(html, /<a href="world-antique\.svg"><img src="world-antique\.svg"/);
   assert.match(html, /world-topographic\.svg/);
   assert.match(html, /theme-vegetation\.svg/);
   assert.match(html, /region-1\.svg/);
   assert.match(html, /<a href="prospect-capital\.svg"><img src="prospect-capital\.svg"/);
-  // fragments flow in
   assert.match(html, /Banners of the Realms/);
   assert.match(html, /<h2>Chronicle<\/h2>/);
   assert.match(html, /<h2>Gazetteer<\/h2>/);
-  // no data URIs in file-ref mode
   assert.doesNotMatch(html, /data:image\/svg\+xml/);
 });
 
@@ -124,7 +110,6 @@ test("plates reserve their frames: img dims from the plate's own svg root, lazy 
     /<img src="world-antique\.svg" width="1500" height="1125" loading="lazy" decoding="async"/,
     "the plate img reserves the frame its own svg root declares",
   );
-  // The waiting frame speaks the drafting voice; the loaded plate paints over it.
   assert.match(ATLAS_SHEET_CSS, /figure\s+a\s*\{[^}]*position:\s*relative/);
   assert.match(ATLAS_SHEET_CSS, /figure\s+a::before\s*\{[^}]*content:\s*"Drafting…"/);
   assert.match(ATLAS_SHEET_CSS, /figure\s+a::before\s*\{[^}]*z-index:\s*-1/);
@@ -137,20 +122,14 @@ test("atlasDocument (data-URI mode): self-contained, with no anchors in the FILE
   // every plate inlined as a base64 data URI: 1 hero + 2 draughtings + 1 theme + 1 region + 1 prospect = 6
   const dataUris = (html.match(/data:image\/svg\+xml;base64,/g) ?? []).length;
   assert.equal(dataUris, 6, "each plate must be inlined exactly once (self-contained, no doubling)");
-  // no anchor wrappers around plates (they would double the ~20MB payload)
   assert.doesNotMatch(html, /<a href="data:/);
-  // self-contained: no external stylesheet (motion:false), no file-ref plate srcs
   assert.doesNotMatch(html, /<link rel="stylesheet" href="\/motion\.css">/);
   assert.doesNotMatch(html, /src="world-antique\.svg"/);
-  // still a complete, styled document
   assert.match(html, /<body class="atlas-sheet">/);
   assert.match(html, /\.atlas-sheet figure/);
 });
 
-// Exactly the browser surface PLATE_LINK_SCRIPT touches, and nothing else. Not a DOM and
-// deliberately not a selector engine (test-support/element-shim.ts's standing rule): the
-// script's own selector is recorded and checked against the real markup separately, and
-// every assertion below reads nodes the script itself rewired.
+// Exactly the browser surface PLATE_LINK_SCRIPT touches: not a DOM and deliberately not a selector engine; the script's own selector is checked against the real markup separately, and every assertion below reads nodes the script itself rewired.
 class StubNode {
   parentNode: StubNode | null = null;
   children: StubNode[] = [];
@@ -208,18 +187,15 @@ test("data-URI mode: running the document's own script really links every plate 
     assert.equal(a.parentNode?.tag, "figure", "the anchor takes the img's place in the figure");
   }
 
-  // The script's reach and the markup must not drift apart: it queries plate imgs as direct
-  // figure children, so plateFigure may not grow a wrapper around them.
+  // The script queries plate imgs as direct figure children, so plateFigure may not grow a wrapper around them.
   assert.equal(queried.length, 1);
   assert.match(queried[0], /figure\s*>\s*img\s*$/, "the plate query must stay a figure > img child match");
-  // Scope derived, not pinned: a consistent rename stays green here (the literal belongs to the
-  // sibling CSS guards), but a script reaching for a class the document never emits reds.
+  // Scope derived, not pinned: a consistent rename stays green here, but a script reaching for a class the document never emits reds.
   const scope = queried[0].match(/^\.([\w-]+)\s/)?.[1];
   assert.ok(scope, "the plate query must be scoped to a class");
   assert.match(html, new RegExp(`<body class="[^"]*\\b${scope}\\b`), "the script's scope must be the class the document emits");
   assert.equal((html.match(/<figure><img /g) ?? []).length, 6, "every plate img is a direct figure child");
 
-  // The reason anchor:false exists in the first place survives: still exactly one copy each.
   assert.equal(
     (html.match(/data:image\/svg\+xml;base64,/g) ?? []).length,
     6,
@@ -253,7 +229,7 @@ test("file-ref mode carries no plate-linking script: its anchors are already rea
   );
 });
 
-// Taken over this file's own fixture at main bc7c405, before the screen dress existed (#464).
+// Taken over this file's own fixture, before the screen dress existed.
 const DOWNLOAD_SHA256 = "0757e8c441fce51fc310af358a3f7295f03c17a00c966d8cbf95375eb37d82f3";
 const served = () => atlasDocument(fixture(), (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
 const download = () => atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
@@ -277,7 +253,7 @@ test("#464 the served page takes the deep with its sections on parchment sheets;
   assert.match(screenDress, /\.atlas-sheet \.styles\s*\{\s*grid-template-columns:\s*repeat\(auto-fit, minmax\(min\(280px, 100%\), 1fr\)\)/, "the draughtings' column floor is capped to the sheet");
   assert.match(screenDress, /\.atlas-sheet \.themes\s*\{\s*grid-template-columns:\s*repeat\(auto-fit, minmax\(min\(360px, 100%\), 1fr\)\)/, "the themes' column floor is capped to the sheet: it measured 405px against a 390 viewport (plate read 2026-09-02, round 2)");
   const screen = page.slice(page.indexOf("--the-deep:"), page.indexOf("</style>"));
-  // The base rule is pinned OUTSIDE the print block: a print-only override would keep the selector's string alive while the deep was never painted (guard-prover, 2026-09-02).
+  // The base rule is pinned OUTSIDE the print block: a print-only override would keep the selector's string alive while the deep was never painted.
   const base = screen.slice(0, screen.indexOf("@media print"));
   assert.match(base, /body::before\s*\{[^}]*position:\s*fixed;[^}]*background:\s*var\(--the-deep\)/, "the deep is painted by the fixed body::before layer, the layout's own mechanism");
   assert.match(screen, /@media print\s*\{[^]*body::before\s*\{[^}]*display:\s*none/, "print is paper: the deep stands down on paper");

@@ -1,14 +1,4 @@
-// The prospect stage (#402, widened at #442): the room's engraved plate for whatever
-// the story is telling, a chronicle beat or the port the survey is visiting. Its own
-// element, never the card path (RR11b keeps every place card dead here); nests inside
-// the instrument panel between the strip and the journal (ruled 2026-08-22), inheriting
-// the panel's hidden teardowns on purpose. The plate is a blob <img>, never inline <svg>
-// (the cross-chart url(#) id rule), and it is a LINK to the full Prospect page, so the
-// picture is an honest doorway (#289/#368). It writes nothing to the status line: the
-// reveal decorates the sweep and must never stall it.
-//
-// #442 made the stage plate-shaped rather than beat-shaped: it is handed a PlateSpec and
-// draws it, and WHICH plate a told row means is told-plate.ts's rule, not the stage's.
+// The prospect stage: the room's engraved plate for whatever the story is telling, a chronicle beat or the port the survey is visiting. Its own element, never the card path; nests inside the instrument panel (ruled 2026-08-22 on #442) and inherits its hidden teardowns on purpose. The plate is a blob <img>, never inline <svg> (the cross-chart url(#) id rule), and a LINK to the full Prospect page. It is handed a PlateSpec and draws it; WHICH plate a told row means is told-plate.ts's rule.
 import { plateKeyOf, type PlateSpec } from "./told-plate.ts";
 
 export interface PlateResult {
@@ -87,7 +77,7 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
     }
   }
 
-  /** The host calls this once the instrument is armed, so the fetches queue off the settle path (#311 forbids a stall). */
+  /** The host calls this once the instrument is armed, so the fetches queue off the settle path. */
   function prefetch(specs: ReadonlyArray<PlateSpec>): void {
     if (world === null) return;
     for (const s of specs) plateFor(world, s);

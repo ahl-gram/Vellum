@@ -45,7 +45,7 @@ import { run as runDocumentRooms } from "./e2e/suite-document-rooms.mjs";
 import { run as runRegionDetail } from "./e2e/suite-region-detail.mjs";
 import { run as runSpecimen } from "./e2e/suite-specimen.mjs";
 
-const HERE = fileURLToPath(new URL(".", import.meta.url)); // scripts/
+const HERE = fileURLToPath(new URL(".", import.meta.url));
 const REPO = resolve(HERE, "..");
 // Serves the built dist/ so the e2e validates exactly what gets published (VELLUM_SITE_DIR overrides; run `npm run build` first).
 const SITE = process.env["VELLUM_SITE_DIR"] ? resolve(process.env["VELLUM_SITE_DIR"]) : join(REPO, "dist");

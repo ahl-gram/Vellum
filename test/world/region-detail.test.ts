@@ -164,7 +164,7 @@ test("mouthReachCells is three parent cells, whatever the band scales that to", 
   assert.equal(mouthReachCells(320, { u0: 0.5, v0: 0.5, u1: 0.5, v1: 0.5 }, 320), 3, "degenerate");
 });
 
-// The two ways this sub reaches sheets Alex can already see, both on the BARE arm; scripts/region-detail-probes.ts sweeps the class these two name.
+// Both on the bare arm; scripts/region-detail-probes.ts sweeps the class these two name.
 test("the band radius rescues a named hamlet on today's sheets (seed 42, Poakoa)", () => {
   const hero = generateWorld(defaultRecipe(42));
   const win = lodWindowFor(0.5625, 0.4375, 0.125);

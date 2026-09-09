@@ -1,11 +1,7 @@
-// The Wayfarer's marks (#119/#120): the ship and the rider, pure glyph data + a DOM
-// builder. Both are drawn in PROFILE pointing +x, with the origin on their ground
-// contact line (the ship's waterline, the horse's hooves), so the mark stands ON its
-// track point and the tilt pivots about that contact. Sized in viewBox pixels against the 1500px chart.
+// The Wayfarer's marks, the ship and the rider: both drawn in PROFILE pointing +x with the origin on the ground contact line (waterline, hooves), so the mark stands ON its track point and the tilt pivots there; sized in viewBox px against the 1500px chart.
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-// One drawn piece of a mark: a path (d) or a circle (cx, cy, r), optionally classed.
 type MarkPart =
   | { readonly d: string; readonly circle?: undefined; readonly cls?: string }
   | { readonly circle: readonly [number, number, number]; readonly d?: undefined; readonly cls?: string };

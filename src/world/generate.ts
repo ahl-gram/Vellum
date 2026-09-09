@@ -52,7 +52,6 @@ function weightedPick<T>(
   return (pairs[pairs.length - 1] as readonly [T, number])[0];
 }
 
-// A world's identity derives from the seed and grid alone, never from which entry point draws it.
 export function defaultRecipe(
   seed: number,
   overrides: Partial<WorldRecipe> = {},

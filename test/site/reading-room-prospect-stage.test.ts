@@ -5,9 +5,7 @@ import { resolve } from "node:path";
 import { installShim } from "../../test-support/element-shim.ts";
 import type { PlateSpec } from "../../src/site/reading-room/told-plate.ts";
 
-// The stage BUILDS DOM, so the shim stands in for the environment; the blob-URL seams
-// are injected so the swap policy runs in Node. #442 made the stage plate-shaped: it
-// draws the PlateSpec it is handed, and which spec a told row means is told-plate.ts's.
+// The stage BUILDS DOM, so the shim stands in for the environment; the blob-URL seams are injected so the swap policy runs in Node. The stage draws the PlateSpec it is handed; which spec a told row means is told-plate.ts's.
 installShim();
 const { createProspectStage } = await import("../../src/site/reading-room/prospect-stage.ts");
 
@@ -69,7 +67,6 @@ test("#442 show(null) hides the plate: the gate is guarded in BOTH directions", 
   assert.equal(stage.root.hidden, true, "nothing told, nothing shown");
   assert.equal(fetched.length, 1, "and hiding pulls no plate");
 
-  // Back again, so the hide is not a one-way trip a plain visit could get stuck in.
   stage.show(LATER);
   await tick();
   assert.equal(stage.root.hidden, false, "the same plate comes back after a hide");
@@ -134,8 +131,7 @@ test("#311 the stage stalls nothing and moves nothing: no status write, no scrol
     "src/site/reading-frame/index.ts",
   ]) {
     const src = readFileSync(resolve(REPO, path), "utf8");
-    // #442 decision 4 (ruled 2026-08-22): Play does not move the reading position, under
-    // reduced motion or otherwise. The sticky row is what follows the story, not a scroll.
+    // #442 decision 4 (ruled 2026-08-22): Play does not move the reading position; the sticky row follows the story, not a scroll.
     assert.doesNotMatch(
       src,
       /scrollIntoView|window\.scrollTo|\.scrollTop\s*=/,
@@ -182,10 +178,8 @@ test("#402 a late fetch from a superseded world is dropped, not painted", async 
   assert.deepEqual(revoked, ["url:svg-old"], "its blob is revoked instead of leaking");
 });
 
-// The #442 top-edge test retired at #463: the plate stands on the slip above the journal, nothing abuts the instrument any more.
 test("#442 the unfurl uses a BACKWARDS fill, so the plate's hover lift survives the reveal", () => {
   const css = readFileSync(resolve(REPO, "public/reading-room/index.css"), "utf8");
-  // Selector-list membership, not a literal anchor: a comma after the selector defeats an anchor and the assertions below then silently stop checking.
   const rule = declarationsFor(css, ".rr-prospect img");
   assert.ok(rule, "the plate carries an image rule");
   const anim = rule.match(/animation:[^;]*;/)?.[0];
@@ -201,9 +195,7 @@ test("#442 the unfurl uses a BACKWARDS fill, so the plate's hover lift survives 
   const keyframes = css.match(new RegExp(`@keyframes ${name}\\s*\\{(?:[^{}]|\\{[^{}]*\\})*\\}`))?.[0];
   assert.ok(keyframes, `the reveal's keyframes (${name}) are here`);
   assert.match(keyframes, /to\s*\{[^}]*transform:\s*none/, "the resting keyframe releases the transform");
-  // Presence of `rotateX(` is not enough: `rotateX(0deg)` in the opening frame satisfies a
-  // presence check while producing a plain fade, which is the ruling's "snapping in" all
-  // over again. The OPENING angle has to be non-zero for the sheet to drop open at all.
+  // rotateX(0deg) in the opening frame satisfies a presence check while producing a plain fade, so the OPENING angle has to be non-zero.
   const from = keyframes.match(/from\s*\{[^}]*\}/)?.[0] ?? "";
   const openingAngle = Number(/rotateX\((-?[\d.]+)deg\)/.exec(from)?.[1] ?? "0");
   assert.notEqual(openingAngle, 0, `the unfurl opens at a real angle, not a fade dressed as one (got ${openingAngle}deg)`);

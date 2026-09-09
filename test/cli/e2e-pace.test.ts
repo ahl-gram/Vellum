@@ -10,17 +10,11 @@ import {
 } from "../../src/cli/e2e-pace.ts";
 import { SWEEP_MS } from "../../src/render/chronicle-scrubber.ts";
 
-// #526: RS30 reads the sweep's RATE off the page's frame clock instead of differencing two years a
-// wall window apart. These pin the reading itself, so the e2e check can be trusted to be about the
-// engine and not about how fast the runner happened to be.
+// The pace reading is taken off the page's frame clock, not two years a wall window apart; these pin the reading itself, so the e2e check is about the engine and not about how fast the runner happened to be.
 const RANGE = { min: 139, max: 395 };
 const SPAN = RANGE.max - RANGE.min;
 
-/**
- * A sweep as the browser would report it: frames at the given wall gaps, the year each one paints
- * rounded exactly as sweepYearAt rounds it. `lag` is how many frames stale the sampled year is,
- * the ordering hazard between the engine's rAF tick and the suite's own.
- */
+/** A sweep as the browser would report it: frames at the given wall gaps, each year rounded exactly as sweepYearAt rounds it; `lag` is how many frames stale the sampled year is, the ordering hazard between the engine's rAF tick and the suite's own. */
 function sweep(legs: readonly { pace: number; gaps: readonly number[] }[], opts: { story?: number; lag?: number; paceOf?: (i: number, pace: number) => number } = {}): PaceSample[] {
   const lag = opts.lag ?? 0;
   let story = opts.story ?? 0;
@@ -66,7 +60,6 @@ test("a clean 1x-then-4x sweep reads ok, at the ratio the paces name", () => {
 });
 
 test("a pace that does not reach the engine fails the leg it belongs to, not the whole reading vaguely", () => {
-  // The 4x button pressed, the sweep still running at 1x: the mutation the guard-prover lands.
   const s = sweep([{ pace: 1, gaps: evenGaps(48, 16.7) }, { pace: 1, gaps: evenGaps(48, 16.7) }]);
   const mislabelled = s.map((x, i) => (i < 48 ? x : { ...x, pace: 4 }));
   const r = readPaceSweep(mislabelled, CLEAN);

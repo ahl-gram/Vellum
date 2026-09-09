@@ -8,7 +8,6 @@ import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { labelComponents } from "../../src/core/mask-components.ts";
 
-// #120: the router. Tiny hand-drawn worlds so every expected cell is exact, plus assertions against a real seed so the synthetic worlds cannot lie.
 // Picture legend: '#' land, '.' sea, '=' land carrying a road.
 
 function survey(rows: string[]): Survey {
@@ -33,7 +32,6 @@ const cellsOf = (l: RoutedLeg) => l.points.map((p) => `${p.x},${p.y}`);
 const isLand = (s: Survey, p: { x: number; y: number }) => s.land[p.x + p.y * s.gridW] === 1;
 
 test("both ports on the road network: mode is road and every vertex is a road cell", () => {
-  // An L of road over solid land, no sea anywhere: there is no coastal shortcut to sail.
   const s = survey([
     "====",
     "###=",
@@ -77,7 +75,6 @@ test("ports on different landmasses: mode is sea and the interior runs over wate
 });
 
 test("a corner-touching pinch is two landmasses, and the 8-connected sea walk threads it", () => {
-  // 4-connected components split at the diagonal; the sea walker must still cross.
   const s = survey([
     "##..",
     ".#..",
@@ -89,7 +86,6 @@ test("a corner-touching pinch is two landmasses, and the 8-connected sea walk th
 });
 
 test("no capital means no roads, so every leg falls back to a straight line", () => {
-  // roads.ts returns [] when the world has no capital; the router must not crash.
   const s = survey(["#####", "#####"]);
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 0), site(1, 4, 1)], s);
   assert.equal(routed[0]!.mode, "straight");
@@ -97,7 +93,6 @@ test("no capital means no roads, so every leg falls back to a straight line", ()
 });
 
 test("a port off the road network takes road-to-nearest, then a straight hop", () => {
-  // The ratified fallback (issue #120). Port A is on the road; port B is inland off it.
   const s = survey([
     "====#",
     "#####",
@@ -108,13 +103,12 @@ test("a port off the road network takes road-to-nearest, then a straight hop", (
   assert.equal(l.mode, "straight", "an off-network endpoint is not an honest road leg");
   assert.deepEqual(l.points[0], { x: 0, y: 0 });
   assert.deepEqual(l.points[l.points.length - 1], { x: 4, y: 2 });
-  // it used the road for the middle stretch rather than cutting straight across
   const roadSet = new Set(s.roads.flat().map(([x, y]) => `${x},${y}`));
   assert.ok(l.points.some((p) => roadSet.has(`${p.x},${p.y}`)), "never touched the road");
 });
 
 test("an off-network port joins the road along the shore, never chording across the bay (#298)", () => {
-  // The splice half of #298: snap finds the road by walking LAND and the leg now keeps that walk. No generated world exercises this branch, so this picture is its only guard; the old endpoint-only chord ran straight down open water.
+  // No generated world exercises this branch, so this picture is its only guard.
   const s = survey([
     "=####",
     "....#",
@@ -222,7 +216,7 @@ const realWorld = (seed: number) => {
 };
 
 test("seed 526413615 sails: it has at least one sea leg and many road legs", () => {
-  // The Isle of Selivelai, straight-line order; per-leg numbers taken before #309 are void, and the census comment on #309 carries the measured mixes.
+  // The Isle of Selivelai; the measured leg mixes are in the census comment on #309.
   const { routed } = realWorld(526413615);
   const modes = routed.map((l) => l.mode);
   assert.ok(modes.filter((m) => m === "sea").length >= 1, `expected a sea leg, got ${modes.join(",")}`);
@@ -301,7 +295,7 @@ test("a simplified leg never strays past the tolerance from terrain of its own k
         } else if (l.mode === "sea") {
           assert.ok(nearest(x, y, (c) => s.land[c] === 0) <= BOUND, `sea leg strays at ${x},${y}`);
         } else {
-          // #298: a straight leg's terrain of kind is LAND; this seed has no straight legs, the fixture with teeth is the seed 430445745 test below.
+          // This seed has no straight legs; the fixture with teeth is the seed 430445745 test below.
           assert.ok(nearest(x, y, (c) => s.land[c] === 1) <= BOUND, `straight leg strays at ${x},${y}`);
         }
       }
@@ -339,7 +333,7 @@ test("a same-landmass coastal shortcut puts to sea over a short OVERLAND stub, n
 });
 
 test("a port whose nearest water is an inland pond still launches into the shared sea", () => {
-  // Regression found by rendering seed 526413615: Thilthoport's nearest water is a 20-cell pond; launching there stranded the walk and a RIDER was drawn across the strait. Ocean = columns 1..4; the pond is the single sealed cell (6,1).
+  // Ocean is columns 1..4; the pond is the single sealed cell (6,1), the Thilthoport case from seed 526413615.
   const s = survey([
     "#....###",
     "#....#.#",
@@ -375,7 +369,7 @@ test("on real worlds, EVERY cross-landmass leg sails, never degrading to a strai
 });
 
 test("a straight fallback leg walks the land, never across open water (#298)", () => {
-  // #309 roads every settled landmass, so no natural fixture still degrades; this U of roadless land forces the fallback the guard walks, with the chord crossing the bay.
+  // No natural fixture degrades since #309 roads every settled landmass; this U of roadless land forces the fallback, with the chord crossing the bay.
   const BOUND = RDP_EPSILON + 0.5;
   const s = survey([
     "............",
@@ -441,8 +435,6 @@ test("a leg naming a site the manifest does not carry fails loudly, not with an 
   );
 });
 
-// Coastal sailing (#120 follow-up, Alex 2026-07-10): two coastal towns road-connected only by a long inland detour should take ship, not ride all the way back.
-
 test("a coastal leg SAILS when its road loops far around a bay", () => {
   // A tall pond walled by a ring road; the ports sit mid-height on opposite shores: the road runs ~2x the long way, the sea cuts straight across.
   const s = survey([
@@ -460,7 +452,6 @@ test("a coastal leg SAILS when its road loops far around a bay", () => {
 });
 
 test("a coastal leg RIDES when the road is direct (no backtrack to shortcut)", () => {
-  // A straight shore road shorter than any sail: the survey rides even though both ports are on the water.
   const s = survey([
     "=====",
     ".....",
@@ -470,7 +461,6 @@ test("a coastal leg RIDES when the road is direct (no backtrack to shortcut)", (
 });
 
 test("an inland port does not sail: only coastal legs take the shortcut", () => {
-  // Port B sits deep inland, so however far its road winds it cannot take a coastal sail.
   const s = survey([
     "=======",
     "=.....#",

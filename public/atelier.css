@@ -2,7 +2,6 @@
 
 :root { --slip-w: 22rem; }
 
-/* The deep's fog: the mockup's parchment breath drifting over the walnut; on a chart room it drifts over the chart at the mockup's depth. */
 .fog { position: fixed; inset: -30%; pointer-events: none; z-index: 0; opacity: 0.4; }
 body.chart-room .fog { z-index: 3; }
 .fog.a { background: radial-gradient(45% 30% at 30% 60%, rgb(from var(--parchment) r g b / 0.1), transparent 70%); animation: fog-drift-a 90s ease-in-out infinite alternate; }
@@ -18,12 +17,10 @@ body.chart-room .stage .status { position: absolute; left: 50%; top: 50%; transf
 body.chart-room .stage .status:empty { display: none; }
 body.chart-room .stage noscript .status { top: calc(50% + 2.8rem); pointer-events: auto; max-width: 30rem; }
 body.chart-room .stage .status a { color: var(--parchment-bright); }
-/* Edge vignettes keep the parchment chrome legible when the pale chart fills the frame (the mockup). */
 .vignette { position: fixed; left: 0; right: 0; height: 11rem; pointer-events: none; z-index: 5; }
 .vignette.top { top: 0; background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.62), transparent); }
 .vignette.bottom { bottom: 0; background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.62), transparent); }
 
-/* Corner chrome: the mockup's floating corners on the head cluster's own idiom, none on the container and auto on what the hand can take. */
 .corner { position: fixed; z-index: 10; line-height: normal; pointer-events: none; }
 .corner :is(a, button, input, select, label) { pointer-events: auto; }
 .corner.tr { right: var(--chrome-x); top: var(--chrome-y); text-align: right; }
@@ -31,11 +28,10 @@ body.chart-room .stage .status a { color: var(--parchment-bright); }
 .corner.br { right: var(--chrome-x); bottom: var(--chrome-y); }
 .corner :is(a, button, input, select):focus-visible { outline-color: var(--parchment-bright); }
 
-/* The room folio, top right: the h1 stands here (#288, re-ratified at #462), the tagline under it, then the room's one control. */
 .folio-room { max-width: 19rem; }
 .folio-room .room-name { font-size: 1.32rem; letter-spacing: 0.14em; line-height: 1.2; color: var(--parchment-bright); }
 .folio-room .room-tagline { font-size: 0.92rem; line-height: normal; color: var(--parchment); margin: 0.1rem 0 0; }
-/* parchment, not the mockup's line-tan and ink-faded: line-tan measured 4.03:1 on the deep at #461 (RH9a), under the 4.5 floor for small text, and ink-faded is darker still. */
+/* parchment, not the mockup's line-tan and ink-faded: line-tan measured 4.03:1 on the deep at #461, under the 4.5 floor for small text, and ink-faded is darker still. */
 .folio-room .dateline { margin: 0.55rem 0 0; font-variant-caps: small-caps; font-size: 0.85rem; letter-spacing: 0.08em; color: var(--parchment); }
 .folio-room .gloss { margin: 0.4rem 0 0; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.76rem; color: var(--parchment); }
 .folio-controls { display: flex; gap: 0.5rem; justify-content: flex-end; margin: 0.55rem 0 0; }
@@ -45,12 +41,10 @@ body.chart-room .stage .status a { color: var(--parchment-bright); }
   padding: 0.32rem 0.6rem; text-align: center; font-variant-numeric: tabular-nums; }
 .folio-controls .control::placeholder { color: var(--line-tan); }
 .folio-controls .control:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 1px; }
-/* The corner's select (the Print Room's style picker, the Ribbon's journey; lifted at the second use, #487): the dark dress with a drawn chevron, its options on the panel's parchment. */
 .folio-controls select.control { appearance: none; -webkit-appearance: none; text-align: left; cursor: pointer; padding-right: 1.6rem;
   background-image: linear-gradient(45deg, transparent 50%, var(--line-tan) 50%), linear-gradient(135deg, var(--line-tan) 50%, transparent 50%);
   background-position: calc(100% - 14px) 55%, calc(100% - 9px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
 .folio-controls select.control option { color: var(--ink-dark); background: var(--parchment-panel); }
-/* The seed row (the mockup's seed-controls; the Explorer at #463): the dice in the corner's dark dress, the primary in the control gold. Four classes deep against the house button dress. */
 .folio-controls .dice { width: 2.4rem; padding: 0.32rem 0; font-size: 1rem; line-height: 1; color: var(--parchment);
   background: rgb(from var(--chart-ink) r g b / 0.45); border: 1px solid var(--line-tan); border-radius: 0; transition: background 0.2s ease, color 0.2s ease; }
 .corner.tr .folio-controls .dice:hover, .corner.tr .folio-controls .dice:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
@@ -58,7 +52,6 @@ body.chart-room .stage .status a { color: var(--parchment-bright); }
   color: var(--ink-dark); background: var(--control-gold); border: 1px solid var(--line-tan); border-radius: 0; padding: 0.32rem 0.9rem; transition: background 0.2s ease; }
 .corner.tr .folio-controls .primary:hover, .corner.tr .folio-controls .primary:focus-visible { background: var(--parchment-bright); color: var(--ink-dark); }
 
-/* The chart's folio, lower left (the mockup): title, survey line, the chart number, the capital's line. */
 .folio { max-width: 24rem; }
 .folio p { margin: 0; }
 .folio-title { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.92rem; letter-spacing: 0.16em; color: var(--parchment); }
@@ -66,7 +59,6 @@ body.chart-room .stage .status a { color: var(--parchment-bright); }
 .folio-coords { font-variant-caps: small-caps; font-size: 0.85rem; letter-spacing: 0.06em; color: var(--line-tan); margin-top: 0.35rem; min-height: 1.2em; }
 .folio-note { font-size: 0.86rem; color: var(--parchment); margin-top: 0.4rem; line-height: 1.45; max-width: 22rem; }
 
-/* The camera, lower right (#462 ruling 2): it hugs the chart's corner, so an open slip pushes it left. Home's shape since #505 (the atelier-map mockup's). */
 .zoomery { display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-end; transition: right 0.32s cubic-bezier(0.2, 0.7, 0.3, 1); }
 .corner.br.zoomery { right: calc(var(--slip-w) + 2rem + 1.4rem); }
 body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); }
@@ -75,7 +67,6 @@ body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); }
 /* Four classes deep on purpose: the house sheets dress every button, and their hover wash outranks a plain .zoom-btn:hover. */
 .zoomery.corner .zoom-btn:hover, .zoomery.corner .zoom-btn:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
 
-/* The legend row, bottom centre (#462 ruling 4): the room's roads out, centred on the chart beside an open slip. */
 .legend { position: fixed; left: calc((100% - var(--slip-w) - 2rem) / 2); bottom: var(--chrome-y); transform: translateX(-50%); z-index: 10; text-align: center;
   transition: left 0.32s cubic-bezier(0.2, 0.7, 0.3, 1); }
 body:has(.slip.folded) .legend { left: 50%; }
@@ -99,7 +90,6 @@ body:has(.slip.folded) .legend { left: 50%; }
 .legend .legend-row .legend-btn:disabled { opacity: 0.45; cursor: default; transform: none; box-shadow: none; background: rgb(from var(--chart-ink) r g b / 0.5); }
 .legend.in-slip { display: none; }
 
-/* The slip: the room's working panel, the mockup's station card grown into a desk. */
 .slip { position: fixed; z-index: 20; right: 2rem; top: 9rem; width: var(--slip-w); max-height: calc(100vh - 11rem);
   box-sizing: border-box; display: flex; flex-direction: column;
   background: var(--parchment-panel); color: var(--ink-dark);
@@ -124,7 +114,6 @@ body:has(.slip.folded) .legend { left: 50%; }
   font-size: 1.05rem; line-height: 1; color: var(--ink-faded); padding: 0.2rem 0.4rem; }
 /* Four classes deep on purpose: the house sheets dress every button, and their hover wash outranks a plain .slip-fold:hover. */
 .slip .slip-head .slip-fold:hover, .slip .slip-head .slip-fold:focus-visible { color: var(--ink-dark); background: none; }
-/* The tab that brings a folded slip back: a bookmark riding the right edge. */
 /* Placed by the individual translate and rotate properties, not transform: the house lift on a button (motion.css) writes transform, and would otherwise replace the tab's seat. */
 .slip-tab { position: fixed; right: 0; top: 50%; translate: 0 -50%; rotate: 180deg; z-index: 19;
   writing-mode: vertical-rl; padding: 0.9rem 0.45rem; cursor: pointer; appearance: none; border-radius: 0;
@@ -135,7 +124,6 @@ body:has(.slip.folded) .legend { left: 50%; }
 button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; background: var(--ink-dark); color: var(--parchment-bright); }
 
 /* Magnified, the sheet spills under the chrome (the mockup's look) and parchment on paper measured 1.1:1 (plate read 2026-08-29): while the Glass is zoomed the cluster, the corners and the legend row stand on home's pool, the #480 blurred box that follows its cluster. At rest they stand on the deep and carry none (RH9b). */
-/* A chart room without a stage (the Gallery, #464) scrolls its sheets under the chrome at every position, so its cluster, corners and legend keep the pool at all times. */
 body:has(#map-viewport.zoomed) :is(header.chrome, .corner.bl, .strip)::before, body.chart-room:not(:has(.stage)) :is(header.chrome, .corner.bl)::before { content: ""; position: absolute; z-index: -1; pointer-events: none;
   inset: var(--pool-top, -1.3rem) var(--pool-right, -1.6rem) var(--pool-bottom, -1.3rem) var(--pool-left, -1.6rem);
   background: rgb(from var(--chart-ink) r g b / 0.92); filter: blur(16px); }
@@ -147,15 +135,12 @@ body.chart-room .strip { --pool-bottom: -4rem; --pool-left: -4rem; --pool-right:
 /* The legend row's footing is home's own (public/index.css .lf-legend, its 0.5rem 1.1rem 0.6rem padding; Alex's 2026-09-03 call from the Specimen Book beside home): the seed box's crisp panel (chart ink 0.85 to 0.72, top to bottom; the fade left at the 2026-09-03 sitting, ruling 23), not the blurred pool. Drawn as the row's own ::before at the padding's insets, so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, e2e BR2); it paints under the same conditions the pool does. #525: the scope is on the PAINTING rule because a docked row goes position:static, so its ::before resolves against the fixed slip and its insets span the whole sheet. */
 body:has(#map-viewport.zoomed) .legend:not(.in-slip)::before, body.chart-room:not(:has(.stage)) .legend:not(.in-slip)::before { content: ""; position: absolute; inset: -0.5rem -1.1rem -0.6rem; z-index: -1; pointer-events: none;
   background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
-/* The room folio's ground is home's seed box (public/index.css .lf-seed, its 0.7rem 0.9rem 0.8rem padding; Alex's 2026-09-03 call): a crisp panel, chart ink 0.85 to 0.72 top to bottom, no blur, drawn as the corner's own ::before at the padding's insets so the corner's box, which the slip's seat reads, never changes; it paints under the pool's conditions. */
 body:has(#map-viewport.zoomed) .corner.tr::before, body.chart-room:not(:has(.stage)) .corner.tr::before { content: ""; position: absolute; inset: -0.7rem -0.9rem -0.8rem; z-index: -1; pointer-events: none;
   background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
 
-/* The landing (#461 ruling 6, the chart room's half): the stage settles onto the deep, the corners, the slip and the legend ink in after; motion.css's reduced-motion blanket collapses both. */
 body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 .corner, .slip, .legend { animation: ink-in 0.5s 0.18s ease-out both; }
 
-/* The index (document-room ruling 1): every section with its questions or its terms, the one being read inked. */
 .index { list-style: none; margin: 0.4rem 0 0; padding: 0; }
 .index > li { padding: 0.45rem 0; border-bottom: 1px solid var(--line-faint); opacity: 0.55; transition: opacity 0.2s; }
 .index > li.inked { opacity: 1; }
@@ -178,7 +163,6 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
 .index .terms a.miss { display: none; }
 .index > li.empty { display: none; }
 
-/* The contents row (#487, the dated-row idiom at its second use: the Print Room's atlas index, #463): a numeral column and the entry, a count in small caps; a page seats what a row turns to. ink-brown, not the mockup's ink-faded, the #458 small-caps miss again. */
 .contents { list-style: none; margin: 0.6rem 0 0; padding: 0; }
 .contents li { display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem; padding: 0.3rem 0; border-bottom: 1px solid var(--line-faint); font-size: 0.92rem; line-height: 1.4; }
 .contents .cr-num { flex: 0 0 2.4rem; text-align: right; font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); font-variant-caps: small-caps; letter-spacing: 0.06em; color: var(--ink-brown); }
@@ -186,7 +170,6 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
 .contents .cr-text em { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; color: var(--ink-brown); }
 .contents .cr-text .n { font-variant-caps: small-caps; letter-spacing: 0.06em; color: var(--ink-brown); font-size: 0.85em; }
 
-/* Narrow sheets: the slip becomes the bottom sheet (the mockup's own card-slip rule), collapsed to its head with a handle, opened on a tap; the tab stands down, the chart's folio too, the Glass seats above the sheet and the legend row docks inside it (room.ts). */
 @media (max-width: 900px) {
   .folio-room { max-width: 12.5rem; }
   .folio-room .room-name { font-size: 0.98rem; }
@@ -200,13 +183,12 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .corner.bl { display: none; }
   .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); bottom: calc(var(--sheet-h, 6rem) + 1rem); }
   body:has(.slip.open) .corner.br.zoomery { display: none; }
-  /* Both arms, or the painting rule above wins at every width: a media query adds no specificity (the .lf-legend lesson in public/index.css). The value is home's seed box at narrow, .lf-seed, as the base inset is its base padding; e2e SB8e and RH10b pin the resolved inset. */
   body:has(#map-viewport.zoomed) .corner.tr::before, body.chart-room:not(:has(.stage)) .corner.tr::before { inset: -0.7rem -0.7rem -0.75rem; }
   .legend { display: none; }
   .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; max-width: none !important; }
   .legend.in-slip .legend-head { display: none; }
   .legend.in-slip .legend-btn { background: var(--ink-dark); }
-  /* #532 (Alex's call, 2026-09-07): the cream fill STAYS, since it is what marks this the road out, but on the sheet's parchment it reads 1.09:1 and the tan hairline 2.00:1, so the box dissolved into the page. Docked, the hairline takes ink-brown: 5.64:1 on the sheet and 5.20:1 against the fill, so the button has an edge again while keeping the gold it was given. */
+  /* #532 (Alex, 2026-09-07): the cream fill stays, but on the sheet's parchment it reads 1.09:1 and the tan hairline 2.00:1; docked, the hairline takes ink-brown, 5.64:1 on the sheet and 5.20:1 against the fill. */
   .legend.in-slip .legend-btn.gold { background: var(--control-gold); border-color: var(--ink-brown); }
   /* #525: a docked row stands on parchment, where the disabled wash (a 0.5 ink over a 0.45 element) reads 1.5:1 and the button all but disappears. Docked, it takes a SOLID faded ink instead, so it reads the same whatever is behind it: 3.93:1 as a box against the sheet, a clear step down from the enabled 9.46:1. */
   .legend.in-slip .legend-row .legend-btn:disabled { background: var(--ink-faded); opacity: 1; }
@@ -225,21 +207,17 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .slip-fold { display: none; }
   .slip-body { padding: 0 1.3rem 1rem; }
   .slip-foot { padding: 0.7rem 1.3rem 0.9rem; }
-  /* The drawer's wash covers the whole stage on a chart room: there is no band for it to start under. */
   body.room.chart-room:has(.rooms-reveal:checked)::after { inset: 0; }
 }
 
-/* Print is paper (#462 chart-room ruling 10, the document-room stand-down): the fog, the corners, the slip, the legend and the Glass print as nothing; a chart room's stage prints in flow. */
 @media print {
   .fog, .corner, .slip, .slip-tab, .vignette, .legend, .zoomery, .folio { display: none !important; }
-  /* The room's name is the page's h1 (#288): it prints in flow at the top, the rest of the corner as nothing. */
   .corner.folio-room { display: block !important; position: static; text-align: left; margin: 0 0 1rem; max-width: none; }
   .folio-room .room-name, .folio-room .room-tagline { color: var(--ink-dark); display: block; }
   .folio-room .room-name { font-size: 1.32rem; }
   .folio-room .dateline, .folio-room .gloss, .folio-controls { display: none; }
   html:has(body.chart-room), body.chart-room { height: auto; overflow: visible; }
   body.chart-room .stage { position: static; animation: none; }
-  /* The markup seats the stage before the folio; on paper the name leads. */
   body.chart-room main { display: flex; flex-direction: column; }
   body.chart-room .corner.folio-room { order: -1; }
 }

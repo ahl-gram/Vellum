@@ -209,7 +209,6 @@ export async function run(ctx) {
     [...errDelta, ...httpDelta].join(" | ") || "clean",
   );
 
-  // The ceremony (#457). Clearing the sitting makes the next arrival first again.
   const errBase2 = consoleErrors.length;
   const httpBase2 = http4xx.length;
   await evaluate(`sessionStorage.clear()`);
@@ -271,7 +270,6 @@ export async function run(ctx) {
     JSON.stringify({ before8, skipped }),
   );
 
-  // The other half of the ratified class: a skip AFTER the sounding, while Landfall is read (the hold or the lift), must also land settled, not mid-flight.
   await evaluate(`sessionStorage.clear()`);
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let at8b = null;
@@ -334,7 +332,6 @@ export async function run(ctx) {
     JSON.stringify({ reduced10, sawVeil10 }),
   );
 
-  // The veil at a REAL narrow viewport (skeptic finding 7 on PR #467): full coverage, no sideways scroll under it, and the narrow landfall after a real-key skip.
   await setMobileViewport(390, 844);
   await evaluate(`sessionStorage.clear()`);
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
@@ -380,7 +377,6 @@ export async function run(ctx) {
     anchored(armed12) && atLandfall(narrowLand) && narrowLand.expected < narrowLand.fit * 1.65,
     JSON.stringify({ armed12, narrowLand }),
   );
-  // #505: the camera's seat is home's own (ruled 2026-09-02), read against the stage at 390 here and at the wide sheet after the viewport clears.
   const camSeat = () => evaluate(`(() => { const c = document.getElementById("lf-controls"); const s = document.getElementById("lf-stage"); if (!c || !s || !c.classList.contains("on")) return null; const r = c.getBoundingClientRect(), sr = s.getBoundingClientRect(); const cs = getComputedStyle(c); return { pos: cs.position, z: cs.zIndex, right: sr.right - r.right, bottom: sr.bottom - r.bottom, pe: cs.pointerEvents, anim: cs.animationName, top: r.top, vw: innerWidth }; })()`);
   const seatOk = (s) => !!s && s.pos === "absolute" && s.z === "auto" && s.anim === "none" && s.pe === "auto" && Math.abs(s.right - 25.6) < 0.6 && Math.abs(s.bottom - 22.4) < 0.6;
   const seat390 = await camSeat();
@@ -475,8 +471,7 @@ export async function run(ctx) {
   );
   await shoot("home-failed-bundle-doors.png");
 
-  // Reduced motion crosses the doors both ways (#470 skeptic round 1: motion.css's prm blanket zeroed the 10s delay, so prm visitors got the failure doors on every HEALTHY load).
-  // Both halves matter: a display:none card still computes visibility:visible, and a pre-reveal card is display:block with visibility:hidden.
+  // Reduced motion crosses the doors both ways (#470 skeptic round 1: motion.css's prm blanket zeroed the 10s delay, so prm visitors got the failure doors on every HEALTHY load); both halves matter, since a display:none card still computes visibility:visible and a pre-reveal card is display:block with visibility:hidden.
   const doorShown = `(() => { const c = document.getElementById("lf-card-explorer"); return c !== null && c.offsetParent !== null && getComputedStyle(c).visibility === "visible"; })()`;
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await send("Network.setBlockedURLs", { urls: ["*app.bundle.js*"] });

@@ -117,7 +117,6 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
   };
 }
 
-/** An absent attribute is every sheet drawn before #376, and a hand-edited one is untrusted file content: both read as the plain field rather than reaching buildHeightfield's RangeError. */
 function detail0(raw: string | null): number {
   if (raw === null) return 0;
   const n = Number(raw);

@@ -4,8 +4,7 @@ import {
   createSurveyArm, afterNextPaint, armOnLanding, wireSurveyToggle, deferLandingArm,
 } from "../../src/site/explorer/survey-arm.ts";
 
-// #300: the survey tick's session build (measured 895-1207ms) ran inside the change handler, blocking the tick's paint; the fix yields a frame first, and this scheduler owns the window that opens.
-// DOM-free on purpose: the yield is an injected afterPaint; the live browser yield is proven by e2e suite-survey SV2/SV2c/SV2d.
+// The survey tick's session build (measured 895-1207ms) ran inside the change handler, blocking the tick's paint (#300); the fix yields a frame first and this scheduler owns the window that opens. DOM-free: the yield is an injected afterPaint, the live browser yield is proven by e2e suite-survey SV2/SV2c/SV2d.
 
 /** A held-open frame: `afterPaint` queues, `paint()` releases everything queued so far. */
 function paintQueue() {
@@ -49,7 +48,7 @@ test("#300 cancel() alone drops the pending arm, with the box left ticked", () =
   h.state.armed = true;
   h.arm.schedule();
   h.arm.cancel(); // the untick branch of the same change handler
-  // The box is deliberately NOT unticked: asserting both let a gutted cancel() pass on isArmed alone (the #140 shape, found by the guard-prover). One mechanism per test.
+  // The box is deliberately NOT unticked: asserting both let a gutted cancel() pass on isArmed alone. One mechanism per test.
   h.paint();
   assert.equal(h.state.builds, 0, "a cancelled arm never builds");
 });
@@ -63,7 +62,6 @@ test("#300 a re-tick supersedes the pending arm: one build, not two", () => {
   h.state.armed = true;
   h.arm.schedule();
   h.paint();
-  // Since #364 the builder drops the overlay it finds, so what this pins is the arm's own supersede rule, not DOM stacking.
   assert.equal(h.state.builds, 1, "exactly one build survives tick/untick/tick");
 });
 
@@ -104,8 +102,7 @@ test("#300 cancel() with no arm pending is a no-op, and does not poison the next
   assert.equal(h.state.builds, 1, "a later arm still runs after a bare cancel");
 });
 
-// #366: the same beat on the other two arm paths (1245ms settle-to-frame before, ~105ms after; tables on #366 and its PR).
-// A landing schedules through the SAME single slot the tick uses: two live arms are two ~1.1s session builds of one world.
+// #366: the same beat on the other two arm paths (1245ms settle-to-frame before, ~105ms after); a landing schedules through the SAME single slot the tick uses.
 
 test("#366 a landing's arm waits for the paint too: the settle's own task builds nothing", () => {
   const h = harness();
@@ -165,7 +162,7 @@ test("#366 a quiet mid-drag landing arms INLINE: the track follows the coastline
   assert.equal(h.state.landings, 1, "and the quiet arm does not run twice");
 });
 
-// The box's own wiring (moved here from app.ts at #366): what the handler does SYNCHRONOUSLY is the #300 acknowledgment, what it defers is the build.
+// The box's own wiring: what the handler does SYNCHRONOUSLY is the acknowledgment, what it defers is the build.
 
 function fakeBox() {
   let handler: (() => void) | null = null;
@@ -179,7 +176,7 @@ function fakeBox() {
 function toggleHarness() {
   const q = paintQueue();
   const calls = { home: 0, arm: 0, exit: 0, syncHash: 0 };
-  // The ORDER of dep calls, not just counts: a guard-prover run moved syncHash to the handler's first line and every count-only test stayed green.
+  // The ORDER of dep calls, not just counts: syncHash moved to the handler's first line left every count-only test green.
   const order: string[] = [];
   const f = fakeBox();
   const slot = wireSurveyToggle({
@@ -256,7 +253,7 @@ test("#366 a landing defers its arm only when the paint it waits for can actuall
   assert.equal(deferLandingArm(true, true), false, "and both at once is still inline");
 });
 
-// The production yield's SHAPE: a bare rAF fires before the render step and a bare setTimeout was green on all 1108 tests, so the frame-then-task hop is pinned here.
+// The production yield's SHAPE: a bare rAF fires before the render step and a bare setTimeout was green on every test, so the frame-then-task hop is pinned here.
 test("#300 afterNextPaint hops a frame AND a task: a bare rAF would block the paint it waits for", () => {
   const hadRaf = "requestAnimationFrame" in globalThis;
   const realRaf = (globalThis as Record<string, unknown>).requestAnimationFrame;

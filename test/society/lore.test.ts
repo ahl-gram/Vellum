@@ -33,7 +33,7 @@ function harbor(i: number): NamedSettlement {
   } as unknown as NamedSettlement;
 }
 
-// Goods that must never follow "smell of": minerals and pelts have no aroma; the reported bug was "Its quays smell of obsidian."
+// Goods that must never follow "smell of": minerals and pelts have no aroma.
 const NON_AROMATIC = [
   "obsidian",
   "black pearls",
@@ -80,7 +80,6 @@ test("lore is deterministic for a given seed", () => {
   }
 });
 
-// Contract pins for the reworked pools (red was verified against the pre-refactor code).
 
 test("gazetteer notes reference the world's history (ruins + dated foundings)", () => {
   const w = generateWorld(defaultRecipe(42));

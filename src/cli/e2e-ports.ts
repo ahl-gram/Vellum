@@ -23,7 +23,7 @@ const PORT_MAX = 65535;
 
 export function resolvePort(env: E2ePortEnv, name: string, fallback: number): number {
   const raw = env[name];
-  if (raw === undefined || raw === "") return fallback; // `FOO=` must not read as set
+  if (raw === undefined || raw === "") return fallback;
   const text = raw.trim();
   const port = /^[0-9]+$/.test(text) ? Number(text) : Number.NaN;
   if (!Number.isInteger(port) || port < PORT_MIN || port > PORT_MAX) {

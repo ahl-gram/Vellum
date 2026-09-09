@@ -1,10 +1,7 @@
-// The Surveyor's Glass (#164): a shared, page-agnostic controller giving an element
-// geometric pan/zoom via d3-zoom. The ONLY file that imports d3-zoom (plus d3-selection
-// to attach it). The live gesture is CSS-only: transforms land on targetEl's
-// style.transform, so the SVG and its overlays ride one composited frame with no redraw.
+// The Surveyor's Glass: a shared, page-agnostic controller giving an element geometric pan/zoom via d3-zoom, and the ONLY file that imports d3-zoom (plus d3-selection to attach it). The live gesture is CSS-only: transforms land on targetEl's style.transform, so the SVG and its overlays ride one composited frame with no redraw.
 import { zoom, zoomIdentity, type D3ZoomEvent, type ZoomBehavior, type ZoomTransform } from "d3-zoom";
 import { select } from "d3-selection";
-// #170: side-effect import for the voiced glide; it patches d3-selection's prototype and was already in the bundle transitively.
+// Side-effect import for the voiced glide; it patches d3-selection's prototype and was already in the bundle transitively.
 import "d3-transition";
 
 export interface ZoomState {
@@ -35,7 +32,7 @@ export function constrainZoom(
   return { x: t.x + k * dx, y: t.y + k * dy, k };
 }
 
-/** #170: the absolute k a glide flies to; compounds against the PENDING target so hammering "+" lands factor^presses, clamped to scaleExtent. */
+/** The absolute k a glide flies to; compounds against the PENDING target so hammering "+" lands factor^presses, clamped to scaleExtent. */
 export function nextGlideTarget(
   baseK: number,
   factor: number,
@@ -61,7 +58,7 @@ export interface ZoomController {
   reset(): void;
   rebase(): void;
   zoomTo(next: ZoomState): void;
-  /** Re-seat the camera against a refitted viewport with no zoom event: no settle, no hash write, no redraft, and a glide in flight is left to land (#463: a refit before the boot wrote an empty seed into the hash, CI R0b). */
+  /** Re-seat the camera against a refitted viewport with no zoom event: no settle, no hash write, no redraft, and a glide in flight is left to land (a refit before the boot wrote an empty seed into the hash, CI R0b). */
   refit(next: ZoomState): void;
   glideBy(factor: number): void;
   glideHome(onDone?: () => void): void;
@@ -85,7 +82,7 @@ export function createZoomController({
   const viewportExtent = (): [[number, number], [number, number]] =>
     [[0, 0], [viewportEl.clientWidth, viewportEl.clientHeight]];
 
-  // #165: reduced motion is read LIVE (boolean, getter, or matchMedia), so an OS toggle and the e2e emulation take effect without a reload.
+  // Reduced motion is read LIVE (boolean, getter, or matchMedia), so an OS toggle and the e2e emulation take effect without a reload.
   const mq =
     typeof globalThis.matchMedia === "function"
       ? globalThis.matchMedia("(prefers-reduced-motion: reduce)")
@@ -96,12 +93,12 @@ export function createZoomController({
     return !!(mq && mq.matches);
   };
   const DBLCLICK_MS = 250;
-  // #170: read live; a getter lets the page hand in a lazy /motion.css token read (the stylesheet may not be applied at construction).
+  // Read live: a getter lets the page hand in a lazy /motion.css token read (the stylesheet may not be applied at construction).
   const glideMsNow = () => {
     const v = typeof glideMs === "function" ? glideMs() : glideMs;
     return Number.isFinite(v) && v >= 0 ? v : 250;
   };
-  // #170: the in-flight glide's absolute target k; glideSeq guards so only the LATEST glide's end/interrupt clears it (a superseding press interrupts its predecessor one frame AFTER setting the new target).
+  // The in-flight glide's absolute target k; glideSeq guards so only the LATEST glide's end/interrupt clears it (a superseding press interrupts its predecessor one frame AFTER setting the new target).
   let glideTargetK: number | null = null;
   let glideSeq = 0;
 
@@ -191,7 +188,7 @@ export function createZoomController({
     /** Adopt the current sheet as a fresh home, no transition: the chart under the camera was replaced. */
     rebase() {
       clearSettle();
-      // #170: a rebase writes __zoom directly (no d3 entry point, so no implicit interrupt); stop any camera transition in flight or its remaining frames would stomp the fresh home.
+      // A rebase writes __zoom directly (no d3 entry point, so no implicit interrupt); stop any camera transition in flight or its remaining frames would stomp the fresh home.
       sel().interrupt();
       (viewportEl as ZoomStoredElement).__zoom = zoomIdentity;
       apply(zoomIdentity);
@@ -211,7 +208,7 @@ export function createZoomController({
       apply(t);
       if (pending !== null) glideTo(pending);
     },
-    /** #170: magnify by `factor` about the viewport centre as a d3 transition through the same zoom pipeline; reduced motion collapses to the instant scaleBy. */
+    /** Magnify by `factor` about the viewport centre as a d3 transition through the same zoom pipeline; reduced motion collapses to the instant scaleBy. */
     glideBy(factor: number) {
       if (prefersReduced()) {
         sel().call(behavior.scaleBy, factor);
@@ -220,7 +217,7 @@ export function createZoomController({
       const base = glideTargetK != null ? glideTargetK : getState().k;
       glideTo(nextGlideTarget(base, factor, scaleExtent));
     },
-    /** #170: glide the camera to k=1; onDone fires at the landing and is skipped on interrupt (the interrupting action owns the camera and the hash). */
+    /** Glide the camera to k=1; onDone fires at the landing and is skipped on interrupt (the interrupting action owns the camera and the hash). */
     glideHome(onDone?: () => void) {
       clearSettle();
       glideTargetK = null;

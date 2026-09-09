@@ -107,6 +107,6 @@ test("#418 a prime that REJECTS still arms: the room falls back to the inline or
   q.paint();
   await Promise.resolve().then(() => {}).then(() => {});
 
-  // A one-sided .then leaves the room bare for good AND raises an unhandled rejection; #371 is the same failure class.
+  // A one-sided .then leaves the room bare for good AND raises an unhandled rejection.
   assert.equal(arms, 1, "a dead source degrades to the inline computation, it does not cancel the room");
 });

@@ -21,7 +21,7 @@ const tagline = "every seed is a world, draw one";
 >
 <Fog />
 <div class="stage">
-  <!-- The sheet stays the Glass's gesture box (#164), so a bookmark's cx/cy stay SHEET fractions and the region survey (#169) reads the camera it always did. Never restructure INSIDE #map: draw() wipes it with innerHTML and re-appends the overlay (#131 turns the leaf; #116's verso is #map-viewport's sibling). -->
+  <!-- The sheet is the Glass's gesture box, so a bookmark's cx/cy are SHEET fractions. Never restructure INSIDE #map: draw() wipes it with innerHTML and re-appends the overlay. -->
   <div class="sheet" id="sheet"><div class="sheet-inner" id="sheet-inner">
   <div id="map-viewport" tabindex="0" role="application" aria-label="Interactive map. Arrow keys pan, plus and minus keys zoom, 0 resets."><div id="map" class="living-chart"></div></div>
   <div id="verso" aria-hidden="true"></div>
@@ -43,7 +43,7 @@ const tagline = "every seed is a world, draw one";
   <p class="gloss">every chart is reproducible from the number in its margin</p>
 </RoomFolio>
 
-<!-- #270 The Broadside, on the slip since #463 (#462 ruling 3): the controls composed as one sheet, grouped by what they do to the WORLD. The Land reshapes the geography (type, climate, the two sliders); The Hand dresses the same world (style turns the sheet, theme/legend/arms redraw the same land, survey inks the resting track). Every input keeps its id, events, and redraw semantics exactly as app.ts/controls.ts wire them. The #270 rulings stand: the ledger alignment (a label column per panel, equal-width controls), the countersigned seals, the four footnote marks. -->
+<!-- The Broadside (#270 rulings): the controls grouped by what they do to the WORLD, The Land reshaping the geography and The Hand dressing the same world. Every input keeps its id, events, and redraw semantics exactly as app.ts/controls.ts wire them. -->
 <Slip id="broadside" verb="Make one" title="The Broadside" where="the land, and the hand that dresses it" fold="Fold the broadside away">
   <Fragment slot="tabs">
     <button id="leaf-broadside" type="button" aria-selected="true">The Broadside</button>
@@ -69,7 +69,6 @@ const tagline = "every seed is a world, draw one";
           <option value="tropical">tropical</option>
           <option value="polar">polar</option>
         </select></span>
-        <!-- The slider rows sit DIRECTLY on the ledger grid (no .l-ctl wrapper): the endpoint words get real columns of their own, so both tracks share one track column and land twin-length whatever the words weigh (Alex's round-3 directive; e2e BR1b pins the twin edges). -->
         <span class="l-label"><label for="land">sea level</label></span>
         <span class="land-end land-end-min">more sea</span>
         <input id="land" type="range" min="100" max="700" step="2">
@@ -103,16 +102,14 @@ const tagline = "every seed is a world, draw one";
         </select></span>
         <span class="l-label"></span>
         <span class="l-ctl seals">
-          <!-- The seals (#270 ruling 4, countersigned): real checkboxes dressed as chips that fill ink-dark AND gain a check mark when pressed, so state never reads by color alone. Ids, events, and focus order untouched. -->
           <label class="check seal">legend <input id="legend" type="checkbox" checked></label>
           <label class="check seal">arms <input id="arms" type="checkbox"></label>
           <label class="check seal">beasts <input id="beasts" type="checkbox"></label>
-          <!-- #321: the survey ink, static chart furniture beside arms (the ratified `survey` label, #317 decision 1, 2026-07-29). Ticked inks the completed survey track onto the sheet at rest; time itself lives in the Reading Room. The element id stays `ages` (smallest diff, per the issue); the box is 1:1 with the bare `survey` hash flag in both directions. -->
+          <!-- The survey ink (#317 decision 1): ticked inks the completed survey track onto the sheet at rest; time itself lives in the Reading Room. The id stays `ages`; the box is 1:1 with the bare `survey` hash flag. -->
           <label class="check seal">survey <input id="ages" type="checkbox"></label><a class="fn" href="/glossary/#survey" data-note="note-survey" aria-describedby="note-survey" aria-label="note on the survey">*</a>
         </span>
       </div>
     </div>
-    <!-- #270 ruling 5: the footnote apparatus. Period marks (the Fell set) on the four opaque controls open these marginalia notes: real text in the DOM, never title attributes, each doubled as the term's back-matter link into /glossary/. Shown through the native popover API (Esc and light dismiss come free); hover/focus on fine pointers, tap-toggle on touch (footnotes.ts). role="tooltip" + aria-describedby per the issue's accessibility contract. -->
     <div class="fn-note" id="note-seeds-choice" role="tooltip" popover="auto">
       <strong class="fn-head">of the seed's choice</strong>
       <span>Left alone, each world decides its own shape and weather from its seed. Pick a value to overrule it.</span>
@@ -134,7 +131,7 @@ const tagline = "every seed is a world, draw one";
       <a href="/glossary/#verso">read more in the glossary</a>
     </div>
   </div>
-  <!-- #540 Sub 2a, #518 ruling 4: the phone's Chart Table is this sheet's second leaf. The gathered sheets are DOCKED here from the drawer at narrow, on dockLegend's precedent, so one set of elements has two homes and neither is a copy. -->
+  <!-- The phone's Chart Table (#518 ruling 4): the gathered sheets are DOCKED here from the drawer at narrow, so one set of elements has two homes and neither is a copy. -->
   <div class="table-leaf" id="table-leaf"></div>
   <div class="legend-dock" id="legend-dock"></div>
 </Slip>
@@ -151,7 +148,7 @@ const tagline = "every seed is a world, draw one";
   </div>
 </nav>
 
-<!-- #520 Sub 2, direction D ruled at the #518 sitting: the tab stands on the right edge while the drawer is shut, and the drawer slides up over the foot of the stage. Authored here, bound by chart-drawer.ts; the cuttings are rendered from the address, which is the table's only memory (#401: no browser storage). -->
+<!-- The Chart Table drawer (direction D at the #518 sitting): authored here, bound by chart-drawer.ts; the cuttings are rendered from the address, which is the table's only memory (no browser storage). -->
 <button id="chart-drawer-tab" class="chart-drawer-tab" type="button" aria-expanded="false" aria-controls="chart-drawer">The Drawer &middot; the table is bare</button>
 <div id="chart-drawer" class="chart-drawer" role="region" aria-label="The Chart Table">
   <div class="chart-drawer-head">

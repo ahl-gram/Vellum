@@ -11,7 +11,6 @@ import { planScalebar } from "../../src/render/layers/scalebar.ts";
 import { planLegend } from "../../src/render/layers/legend.ts";
 import { boxesOverlap } from "../../src/render/geometry.ts";
 
-// The compass, scale bar, and cartouche are pixel-space "furniture"; without coordination the compass landed on the scale bar on ~85% of seeds, so these pin the no-overlap contract.
 
 function ctxFor(seed: number): RenderCtx {
   const world = generateWorld(defaultRecipe(seed, { gridW: 160, gridH: 120 }));
@@ -48,7 +47,6 @@ test("the compass rose clears the scale bar and cartouche", () => {
       `compass overlaps the cartouche for seed ${seed}`,
     );
   }
-  // guard: the fix must reposition the compass, not quietly drop it
   assert.ok(drawn >= 30, `expected most seeds to draw a compass, got ${drawn}/40`);
 });
 

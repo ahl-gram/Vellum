@@ -17,8 +17,7 @@ import { buildVoyagePlan } from "../../src/render/voyage.ts";
 import { buildSurvey } from "../../src/render/survey.ts";
 import { routeVoyage } from "../../src/render/voyage-route.ts";
 
-// #121 (Sub 4 of the Wayfarer's Passage epic #117): the surveyor's margin log, a pure post-world module on the daily-hunt pattern: it forks its own RNG off the recipe seed, adds no World field, and cannot move a chart byte; the panel wiring is covered by the Explorer e2e.
-// The prose consumes #120's leg mode: sea reads as a voyage, road (or the degraded "straight") as a ride, the origin as a departure; flavor draws from small authored pools with no repeat until the pool is exhausted.
+// The surveyor's margin log: a pure post-world module that forks its own RNG off the recipe seed and cannot move a chart byte; the panel wiring is covered by the Explorer e2e.
 
 const SUBTITLE =
   "Being a true & faithful chart of these waters, as surveyed by " +
@@ -188,7 +187,7 @@ test("handoff closings cycle without repeating until the pool is exhausted", () 
   assert.equal(new Set(texts).size, n, "each handoff draws a fresh closing until the pool empties");
 });
 
-// The homecoming (#275, prose shape ratified by Alex 2026-07-24): ONE entry for the closing leg, an arrival at a port already logged; the invariant is entries = legs + 1, and the prose pool is mode-aware with NO fixed closing sentence, "whence we set out" in place of a descriptor.
+// The homecoming (#275, prose shape ratified 2026-07-24): the pool is mode-aware with no fixed closing sentence, "whence we set out" in place of a descriptor.
 
 const homeBySea = { arrivalMode: "sea", inlandHandoff: false, legLength: 40 } as const;
 const homeByRoad = { arrivalMode: "road", inlandHandoff: false, legLength: 40 } as const;
@@ -295,7 +294,6 @@ test("no em-dashes in a log that comes home (house rule)", () => {
 });
 
 test("a one-port survey has no closing leg, so no homecoming is logged", () => {
-  // The capital alone yields no legs, so the caller passes no homecoming and the log is the single departure.
   const log = buildVoyageLog([origin], 1059, 42, SUBTITLE, null);
   assert.equal(log.entries.length, 1);
   assert.ok(log.entries[0]!.text.includes("set out"));
@@ -322,7 +320,6 @@ test("a long leg advances many days: distance drives the count", () => {
 });
 
 test("days are STRICTLY increasing: back-to-back short hops never share a day", () => {
-  // Three one-unit hops all round to the same raw day; the ruling bumps each by one.
   const hops = [
     origin,
     port({ idx: 1, name: "A", legLength: 1 }),
@@ -334,7 +331,6 @@ test("days are STRICTLY increasing: back-to-back short hops never share a day", 
 });
 
 test("the bump never outruns a real distance: a later long leg still lands on its computed day", () => {
-  // A short hop (bumped to day 2) then a long leg: the computed day wins over previous+1, returning to the distance-derived timeline.
   const mixed = [
     origin,
     port({ idx: 1, name: "Near", legLength: 1 }),

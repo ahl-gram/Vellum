@@ -7,8 +7,7 @@ import { seaMask } from "../../src/hydrology/sea-mask.ts";
 import { createProjection, marginFor } from "../../src/render/transform.ts";
 import type { World } from "../../src/world/types.ts";
 
-// #234: the sea caption placed on the deepest water in the window, even a landlocked LAKE (oceanDist cannot tell them apart), and a region-local sea/lake test cannot fix it: cropping reconnects an inland lake to the window edge, so the region's OWN seaMask floods it as sea.
-// The classification must be inherited from the PARENT world; these tests measure the placed caption against the parent's authoritative sea/lake partition and check the parent's named lakes carry into the window.
+// A region-local sea/lake test cannot work: cropping reconnects an inland lake to the window edge, so the region's OWN seaMask floods it as sea; the classification must be inherited from the PARENT world.
 
 function capitalRegion(seed: number, size = 0.38): { world: World; region: World; win: ReturnType<typeof windowAround> } {
   const world = generateWorld(defaultRecipe(seed, { gridW: 320, gridH: 240 }));
@@ -53,7 +52,7 @@ test("region sea caption never lands on a parent-world lake (#234, seed 42)", ()
   const { world, region, win } = capitalRegion(42);
   const svg = renderMap(region, { style: "antique", widthPx: WIDTH });
   const center = seaCaptionCenter(svg, region.names.sea);
-  // EITHER the caption is not drawn OR it sits on genuine parent-sea. On seed 42's capital plate the deepest water is the parent lake "The Mairoa Pool", so pre-fix this fails on the assertion below, not on a missing element.
+  // On seed 42's capital plate the deepest water is the parent lake "The Mairoa Pool", so the gate is exercised on the assertion below, not on a missing element.
   if (center !== null) {
     const { gx, gy } = pxToGrid(region, WIDTH)(center.px, center.py);
     assert.equal(
@@ -64,7 +63,6 @@ test("region sea caption never lands on a parent-world lake (#234, seed 42)", ()
 });
 
 test("a genuinely coastal region still captions its sea, on real ocean (#234 guard)", () => {
-  // Seed 7's capital environs are open coast: the caption must survive the gate and sit on genuine parent-sea, guarding the fix against over-suppression.
   const { world, region, win } = capitalRegion(7);
   const svg = renderMap(region, { style: "antique", widthPx: WIDTH });
   const center = seaCaptionCenter(svg, region.names.sea);

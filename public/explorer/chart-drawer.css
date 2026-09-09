@@ -24,7 +24,6 @@ button.chart-drawer-tab:is(:hover, :focus-visible) { background: var(--ink-dark)
 @keyframes chart-drawer-up { from { transform: translateY(100%); } }
 .chart-drawer.open { display: flex; }
 
-/* Ruled 2026-09-08 (#543): the drawer covers the chart's furniture where it stands, and it folds the Broadside as it opens, because covering the caption and the roads out while leaving the side panel standing made no sense to the reader. Nothing is lifted onto the chart, which is where the lift used to put both of them, and the Broadside's tab goes with it: while the table is open there is no way back onto the edge, and the Shut press is the way out. chart-drawer.ts owns the fold and gives the Broadside back to the reader who had it open. */
 body:has(.chart-drawer.open) .slip-tab { display: none; }
 
 /* An open Broadside holds the camera 26rem clear of the edge, so the tab never meets it; folded, the camera comes home to --chrome-x where the tab is already standing, and the tab's z-19 over the corner's z-10 left each zoom press answering a real pointer over 44% of its face (#543, Alex 2026-09-08). The camera stands inboard of the tab whenever the Broadside is folded, INCLUDING while the drawer is open and the tab is hidden: a seat that moved with the drawer would be one more thing jumping as it opens, which is the complaint #543 was filed about. Not below 901, where the tab is stood down and atelier.css's own narrow seat rules. */
@@ -42,7 +41,6 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
 .cuttings li:is(:hover, :focus-within) { rotate: 0deg; translate: 0 -4px; z-index: 2; }
 .cuttings li.prospect { flex-basis: 9.4rem; }
 .cuttings img { display: block; width: 100%; height: auto; border: 1px solid var(--line-tan); background: var(--chart-paper); box-shadow: 0 8px 22px rgb(from var(--chart-ink) r g b / 0.55); }
-/* A prospect laid before its own page exists (ruled 2026-09-07): the cutting keeps its seat and its label, with the plate's place reserved rather than drawn. */
 .cuttings .awaited { display: grid; place-items: center; aspect-ratio: 420 / 310; border: 1px dashed var(--line-tan); background: var(--chart-paper); color: var(--ink-brown); font-family: var(--font-flourish); font-style: italic; font-size: 0.72rem; }
 .cuttings .label { position: absolute; left: 0.5rem; bottom: -0.85rem; max-width: calc(100% - 1rem); rotate: -1.2deg;
   background: var(--parchment-panel); border: 1px solid var(--line-tan); box-shadow: 0 3px 8px rgb(from var(--chart-ink) r g b / 0.35);
@@ -63,10 +61,10 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
   .chart-drawer-tab { max-height: 8.5rem; font-size: 0.62rem; letter-spacing: 0.1em; padding: 0.6rem 0.35rem; }
 }
 
-/* The dog-ear (#518 ruling 3): the committed survey's own top-right corner turned back. Drawn with a clip-path and a gradient, carrying no element of its own inside, because suite-region-detail reads the survey as [...querySelectorAll("#map .region-inset svg")].pop() and anything with an svg in it would become that element. It sits INSIDE the inset's box and changes none of it, since the place overlay positions by the same rect. */
+/* The dog-ear carries no element of its own inside: suite-region-detail reads the survey as [...querySelectorAll("#map .region-inset svg")].pop(), so anything with an svg in it would become that element. */
 .dog-ear {
   position: absolute; top: 0; right: 0; padding: 0; border: 0; cursor: pointer;
-  /* Restored because the inset box is pointer-events: none (explorer/index.css), the same reason .pc-prospect restores it on the place card. Without this the handle is reachable by keyboard alone: a real click lands on the chart underneath. */
+  /* Restored because .region-inset is pointer-events: none (explorer/index.css); without this the handle is reachable by keyboard alone and a real click lands on the chart underneath. */
   pointer-events: auto;
   width: calc(3.4rem / var(--zoom-k, 1)); height: calc(3.4rem / var(--zoom-k, 1));
   appearance: none; border-radius: 0; z-index: 3;
@@ -78,11 +76,9 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
 .dog-ear:is(:hover, :focus-visible) { width: calc(4.1rem / var(--zoom-k, 1)); height: calc(4.1rem / var(--zoom-k, 1)); }
 .dog-ear:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -2px; }
 
-/* The phone is Sub 2a (#540), where the drawer becomes the bottom sheet's second leaf as #518 ruling 4 ruled it. Until that lands the desktop drawer stands DOWN here rather than shipping broken: measured at a true 390, its rigid head and road leave the cuttings row 4.34px wide, push the road 64px past the edge into body's overflow:hidden where nothing can reach or scroll to it, and paint the translucent walnut over the bottom third of the chart while the Broadside's own sheet paints back over the road. The table is unreachable on a phone in the interval, which is a stopgap and not the ruled design. */
 @media (max-width: 900px) {
   .chart-drawer, .chart-drawer.open, .chart-drawer-tab { display: none; }
 
-  /* #518 ruling 4, built at #540: two tabs in the sheet's head choose which leaf it is open to. z-index 2 is load-bearing and not tidiness: .slip-handle is position:absolute inset:0 over the whole head at narrow (atelier.css), so a tab authored here without its own layer is dead to a real thumb (design/chart-table/mock.css line 230; CD14 pins it). */
   .sheet-tabs { display: flex; gap: 0.4rem; margin: 0.55rem 0 0; position: relative; z-index: 2; }
   .sheet-tabs button { flex: 1 1 0; font-family: var(--font-display); font-size: 0.82rem; letter-spacing: 0.05em; padding: 0.35rem 0.5rem; border: 1.5px solid var(--ink-brown); border-radius: 4px; background: var(--control-cream); color: var(--ink-brown); cursor: pointer; }
   .sheet-tabs button[aria-selected="true"] { background: var(--ink-dark); border-color: var(--ink-dark); color: var(--chart-paper); }
@@ -90,14 +86,12 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
 
   body.leaf-table .slip .card-where, body.leaf-table .slip-body .broadside { display: none; }
   body:not(.leaf-table) .table-leaf { display: none; }
-  /* The sheets lie on the sheet's own parchment here, two across and square to it, not tilted on the drawer's walnut. */
   .table-leaf .cuttings { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem 0.9rem; padding: 0.9rem 0 0.4rem; max-width: none; }
   .table-leaf .cuttings li { rotate: 0deg; margin: 0; flex: none; }
   .table-leaf .cuttings .label { position: static; rotate: 0deg; max-width: none; box-shadow: none; border: 0; background: none; padding: 0.25rem 0 0; font-size: 0.74rem; }
   .table-leaf .cuttings .off { right: -0.3rem; top: -0.3rem; }
   .table-leaf .count { font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.8rem; color: var(--ink-brown); margin: 0.7rem 0 0; }
 
-  /* The table's road stands in the dock beside the sheet's own roads out, and only one set is up at a time: with the table leaf turned to, the sheet's roads stand down and the table's takes their place (#518 ruling 4). Docked, it stands on parchment rather than the drawer's walnut, so its two lines take ink the way #525 and #532 dressed the docked legend row. */
   body:not(.leaf-table) #table-road-band { display: none; }
   body.leaf-table .legend-dock .legend { display: none; }
   .legend-dock #table-road-band { display: flex; flex-direction: column; align-items: stretch; gap: 0.45rem; margin-top: 0.9rem; padding: 0; }

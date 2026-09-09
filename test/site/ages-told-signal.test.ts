@@ -7,13 +7,7 @@ import type { Chronicle } from "../../src/site/living-chart/chronicle.ts";
 import type { Voyage } from "../../src/site/living-chart/voyage.ts";
 import { toldAnnal, type ToldEntry } from "../../src/site/living-chart/told.ts";
 
-// #402 gave the instrument a year signal so a host could decorate the story's beats.
-// #442 WIDENED that one signal rather than adding a second: it now announces whatever
-// the story is telling, a survey day row or a chronicle annal, because a stage holding
-// two channels would have to decide which to trust and could paint a stale one over a
-// live one. The signal rides the ONE paint primitive, so every path (Play, drag,
-// keyboard, jump-to-end, the reduced-motion still frame, a deep-link rest) reports
-// through it; buildAnnals needs a document, hence the shim.
+// One told signal, widened at #442 rather than doubled: it announces whatever the story tells (a survey day row or a chronicle annal) through the one paint primitive; buildAnnals needs a document, hence the shim.
 installShim();
 const { createAges } = await import("../../src/site/living-chart/ages.ts");
 
@@ -115,10 +109,7 @@ test("#442 the signal is ONE message: the payload switches chamber, it never dou
     ["survey", "ages"],
     "crossing the seam re-labels the same signal",
   );
-  // The contract in source: exactly one told-shaped member on the host's scrubber, so a
-  // future sub cannot quietly add the second channel this ruling rejected. Blind spot,
-  // argued: it reads the boundary's TEXT, so a channel added under another name escapes
-  // it; that costs a miss on a rename, never a false alarm on a working one.
+  // Reads the boundary's TEXT, so a second channel added under another name escapes it: a miss on a rename, never a false alarm on a working one.
   const boundary = readFileSync(resolve(REPO, "src/site/living-chart/index.ts"), "utf8");
   const refs = boundary.match(/export interface ScrubberRefs \{[\s\S]*?\n\}/)?.[0];
   assert.ok(refs, "the boundary still declares ScrubberRefs");
@@ -141,10 +132,7 @@ test("#442 the earliest year in range tells the FIRST annal, not a later one", (
   assert.deepEqual(seen[seen.length - 1], { chamber: "ages", year: 451, text: "Alpha was founded." });
 });
 
-// The `last === null` branch, which nothing reached before: the chronicle's range starts
-// at the first event, so no year the bar can reach falls before it and only a world whose
-// annals all postdate the position exercises it. Pure, so it is provable here even though
-// the seam cannot produce it (a cold review flagged the branch as unbacked prose).
+// The chronicle's range starts at its first event, so the seam can never put the bar before every annal; the branch is pure and provable only here.
 test("#442 a position before EVERY annal tells nothing at all, rather than the earliest", () => {
   assert.equal(toldAnnal([{ year: 900, text: "late" }], 800), null, "nothing is told yet");
   assert.equal(toldAnnal([], 800), null, "and an empty chronicle tells nothing either");

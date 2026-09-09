@@ -5,12 +5,7 @@ import type { RibbonEvent } from "../../src/itinerary/events.ts";
 import type { RibbonInput, RibbonSample } from "../../src/itinerary/input.ts";
 import { BIOMES } from "../../src/climate/biomes.ts";
 
-// #427: the ribbon's decorative forks were keyed by `Math.round` of a distance, and every distance
-// here is a cumulative sum of Math.hypot steps, which no platform is obliged to round the same way.
-// A value sitting on a .5 boundary therefore picked a different caption, tilt or glyph set on a
-// different libm, off the same seed. Each test nudges exactly one such distance to the next lower
-// double and demands the bytes hold. The `Math.round` precondition is asserted first, so a nudge
-// too small to cross the boundary fails loudly instead of passing for the wrong reason.
+// Fork keys are Math.round of cumulative Math.hypot distances, which libm rounds differently across platforms at a .5 boundary; each test nudges one such distance to the next lower double and demands the bytes hold, asserting the Math.round precondition first so a nudge too small to cross fails loudly.
 
 /** bridgeMark's parapet, and fordMark's stepping stones: the two crossing glyphs, told apart structurally. */
 const BRIDGE_MARK = "M-6.4 -3.4H6.4M-6.4 3.4H6.4";
@@ -62,10 +57,7 @@ function inputWith(
   };
 }
 
-// Each caption fork picks from a three-entry list, so two different keys land on the same phrase
-// about a third of the time. A single fixture is therefore a coin flip on whether it can see the
-// regression at all, and 12.5 (the first value tried here) is one of the blind ones. These are the
-// boundaries measured to discriminate for BOTH the bridge and the ford list, spread across strips.
+// A caption fork picks from a three-entry list, so about a third of keys are blind to the regression (12.5 is one); these boundaries were measured to discriminate for BOTH the bridge and the ford list.
 const BOUNDARIES = [3.5, 10.5, 13.5, 21.5, 25.5];
 
 test("a named crossing one double below a .5 boundary presses the same scroll (the bridge and tilt forks)", () => {
@@ -91,8 +83,7 @@ test("an unnamed crossing keeps its ford, which no other fixture here reaches", 
     const at = (dist: number): RibbonInput =>
       inputWith([{ kind: "crossing", k: 7, dist, name: null, major: false }], 40, BIOMES.grassland);
     const drawn = ribbonSvgFor(at(boundary), "antique");
-    // Not "something was painted": an unnamed crossing must be painted as a FORD, three stepping
-    // stones, and never as a bridge. Diffing against an empty render cannot tell those apart.
+    // Diffing against an empty render cannot tell a ford from a bridge, so the glyph is pinned by shape.
     assert.equal(fordStones(drawn), 3, `the fixture at ${boundary} draws a ford's three stones`);
     assert.ok(!drawn.includes(BRIDGE_MARK), `and no bridge at ${boundary}`);
     assert.equal(drawn, ribbonSvgFor(at(justBelow(boundary)), "antique"), `the ford holds at ${boundary}`);
@@ -119,8 +110,7 @@ test("a strip boundary one double below .5 keeps its flanking decor (the decor f
   assert.equal(Math.round(lower / 3), 13, "and one double lower it rounds down");
   const at = (totalCells: number): RibbonInput => inputWith([], totalCells, BIOMES.temperateForest);
   const drawn = ribbonSvgFor(at(40.5), "antique");
-  // A bare count is vacuous: the frame, road and league dots already clear any fixed threshold with
-  // no decor at all. Grassland draws no glyph, so the DELTA is the decor and nothing else.
+  // The frame, road and league dots clear any fixed count with no decor at all; grassland draws no glyph, so the delta is the decor alone.
   const bare = ribbonSvgFor(inputWith([], 40.5, BIOMES.grassland), "antique");
   assert.ok(
     drawn.split("<path").length - bare.split("<path").length > 0,

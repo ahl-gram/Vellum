@@ -1,7 +1,4 @@
-// #442 the story's ONE live signal: what the instrument is telling right now, a survey
-// day row or a chronicle annal. One message and never two channels, because a stage that
-// had to reconcile a year against a port could paint a stale one over a live one, which
-// is the class #402's lockstep-with-lastRes rule exists to prevent.
+// #442 the story's ONE live signal, a survey day row or a chronicle annal: one message and never two channels, so a stage never reconciles a year against a port and paints a stale one over a live one.
 import { eventIsPast } from "../../render/chronicle-scrubber.ts";
 
 export type ToldEntry =
@@ -14,7 +11,6 @@ export type ToldEntry =
     }
   | { readonly chamber: "ages"; readonly year: number; readonly text: string };
 
-/** The annal the chronicle half is telling at `year`: the LAST one already inked, and nothing at all before the first crossing. */
 export function toldAnnal(
   annals: ReadonlyArray<{ readonly year: number; readonly text: string }>,
   year: number,

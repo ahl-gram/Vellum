@@ -9,7 +9,6 @@ import { indexCount, roomSections } from "../../layouts/room-sections.ts";
 
 const room = "The Glossary";
 const tagline = "the words on the charts";
-// The index reads this page's own source at build (#462 document-room ruling 1), so it cannot drift from the prose below.
 const sections = roomSections(readFileSync(fileURLToPath(import.meta.url), "utf8"), "term");
 const count = `${indexCount(sections)} terms in ${sections.length} sections`;
 ---
@@ -110,12 +109,7 @@ capital, or one of its smaller provincial seats.</p>
 <p class="def">A straight line of constant compass bearing, radiating from
 the compass rose in the old navigator's style.</p>
 
-<!-- #270: the Broadside's footnote marks land here (each mark on the Explorer's
-     controls links its term's anchor; ruling 6, 2026-08-11: a new section rather
-     than squeezing control terms into the chart-reading ones). The per-term ids
-     in this section and on Verso above ARE that contract; the broadside site
-     test asserts every mark's target id exists on this page. #353 kept this
-     section directly after the chart-reading one, the neighbour it landed on. -->
+<!-- The Broadside's footnote marks land here (#270 ruling 6): the per-term ids in this section and on Verso above ARE that contract. -->
 <h2 id="drafting-table">At the drafting table</h2>
 <p class="intro">The words on the Explorer's own controls.</p>
 

@@ -64,7 +64,6 @@ function rotateToStart(cycle: TourPoint[], startIdx: number): TourPoint[] {
   return [...cycle.slice(at), ...cycle.slice(0, at)];
 }
 
-/** A closed tour and its reverse cost the same, so the sweep direction is CHOSEN: shorter first leg, ties on lower idx. Generic so orderTour and refineTour cannot drift apart on the rule. */
 function orientCycle<T>(
   cycle: ReadonlyArray<T>,
   idxOf: (item: T) => number,
@@ -152,7 +151,6 @@ function twoOpt(path: TourPoint[]): TourPoint[] {
     improved = false;
     for (let i = 1; i < n - 1; i++) {
       for (let j = i + 1; j < n; j++) {
-        // Reversing the whole cycle is cost-identical; orientCycle owns that choice.
         if (i === 1 && j === n - 1) continue;
         const a = t[i - 1]!;
         const b = t[i]!;

@@ -1,8 +1,4 @@
-// Render worker plumbing: the heavy world-gen + SVG render runs in ./worker.ts off the
-// main thread. Best-effort: if the worker cannot be constructed we fall back to the same
-// engine inline on the main thread, and runInline mirrors ./worker.ts exactly (same
-// engine calls, same serializableAtlas) so the worker/inline byte-identity check
-// (e2e R2/R3) stays a clean compare.
+// Render worker plumbing: world-gen + SVG render run in ./worker.ts off the main thread, falling back to the same engine inline; runInline mirrors ./worker.ts exactly so the worker/inline byte-identity check (e2e R2/R3) stays a clean compare.
 import { renderMap, type RenderOptions } from "../../render/map-renderer.ts";
 import { buildPlaceManifest, type PlaceManifest } from "../../render/place-manifest.ts";
 import { buildSurvey, type Survey } from "../../render/survey.ts";
@@ -21,7 +17,6 @@ import type { StyleName } from "../../render/style.ts";
 import type { MapType, UvWindow } from "../../terrain/heightfield.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 
-// The message contract, shared so the two sides cannot drift (./worker.ts imports these shapes with "import type"); the same job/result shapes serve the inline fallback.
 export interface DrawJob {
   readonly kind: "draw";
   readonly seed: number;
@@ -96,7 +91,6 @@ export interface RegionResult {
   readonly svg: string;
   readonly manifest: PlaceManifest;
   readonly window: UvWindow;
-  /** The LOD band index the job carried, echoed for the next hysteresis step. */
   readonly band: number;
   readonly title: string;
   readonly worldTitle: string;
@@ -119,7 +113,6 @@ export interface TourResult {
 
 export type JobResult = DrawResult | RegionResult | AtlasResult | ProspectResult | RibbonResult | TourResult;
 
-/** A job crossing the wire: the client staples on the id the response echoes back. */
 export type WorkerRequest =
   | (DrawJob & { readonly id: number })
   | (RegionJob & { readonly id: number })
@@ -144,7 +137,7 @@ const pending = new Map<number, PendingJob>();
 
 function onJobMessage(e: MessageEvent<WorkerResponse>): void {
   const d = e.data;
-  if (!d || d.id == null) return; // ignore the ready handshake and stray messages
+  if (!d || d.id == null) return;
   const p = pending.get(d.id);
   if (!p) return;
   pending.delete(d.id);
@@ -167,7 +160,7 @@ export function runInline(msg: RenderJob): JobResult {
       ok: true,
       svg: renderMap(world, msg.render),
       manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
-      survey: buildSurvey(world.elev, world.seaLevel, world.roads), // #120, mirrors ./worker.ts
+      survey: buildSurvey(world.elev, world.seaLevel, world.roads),
       title: world.title.title,
       subtitle: world.title.subtitle,
       mapType: world.recipe.mapType,
@@ -175,9 +168,7 @@ export function runInline(msg: RenderJob): JobResult {
     };
   }
   if (msg.kind === "region") {
-    // #168: an EXPLICIT region branch; without it a region job would fall through to the atlas path and silently run the wrong engine in the inline fallback.
     const { world, cached } = worldFor(msg.seed, msg.overrides);
-    // #169: the title derives from (world, window), mirroring ./worker.ts exactly so the inline fallback stays byte-identical; msg.title (if given) is honored for back-compat.
     const title = msg.title ?? regionTitle(world, msg.window);
     const spec = {
       window: msg.window,
@@ -194,7 +185,7 @@ export function runInline(msg: RenderJob): JobResult {
       svg: renderMap(region, { ...msg.render, regionRecipe }),
       manifest: buildPlaceManifest(region, msg.render.widthPx ?? 1500),
       window: msg.window,
-      band: msg.band, // the LOD band index, echoed back
+      band: msg.band,
       title,
       worldTitle: world.title.title,
       cached,
@@ -224,7 +215,6 @@ export function runJob(msg: RenderJob): Promise<JobResult> {
     const id = ++reqId;
     return new Promise((resolve, reject) => {
       pending.set(id, { resolve, reject });
-      // Non-null assertion: the truthy check cannot narrow `worker` inside the closure (the executor runs synchronously, so it still holds).
       worker!.postMessage({ ...msg, id });
     });
   }
@@ -237,12 +227,10 @@ export function runJob(msg: RenderJob): Promise<JobResult> {
   });
 }
 
-/** Whether the off-thread worker is live (false = the inline fallback is in use). */
 export function usesWorker(): boolean {
   return worker !== null;
 }
 
-// Resolves null on any failure (inline fallback); a crash after handshake nulls the worker so later jobs degrade too.
 function connect(): Promise<Worker | null> {
   return new Promise((resolve) => {
     let w: Worker;
@@ -268,7 +256,7 @@ function connect(): Promise<Worker | null> {
       w.onmessage = onJobMessage;
       w.onerror = (ev: { preventDefault?: () => void }) => {
         if (ev.preventDefault) ev.preventDefault();
-        worker = null; // a crashed worker degrades to the inline path
+        worker = null;
         for (const [, p] of pending) p.reject(new Error("the render worker crashed"));
         pending.clear();
       };
@@ -277,7 +265,6 @@ function connect(): Promise<Worker | null> {
   });
 }
 
-/** Connect the worker (best-effort) and record it as the active transport. */
 export async function initWorker(): Promise<void> {
   worker = await connect();
 }

@@ -2,7 +2,6 @@
 /* The Broadside's five-column ledger needs the wider slip: a stated deviation on #462. */
 :root { --slip-w: 24rem; }
 
-/* The stage centres the fitted sheet in what the chrome leaves; room.ts measures the reserves off the chrome rects. */
 body.chart-room .stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
   padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
 #sheet { position: relative; flex: none; width: 0; height: 0; box-shadow: var(--stage-shadow); }
@@ -69,13 +68,13 @@ body.chart-room .stage { display: flex; align-items: center; justify-content: ce
 }
 .sheet-back img { width: 100%; height: 100%; display: block; }
 
-/* #116 Verso: .flip3d lights the 3D context, .versoed holds the rotateY(-180deg) target; the transition is scoped off while .turning so the WAAPI turn and this transition never drive #sheet-inner at once. */
+/* #116: the transition is scoped off while .turning, so the WAAPI turn and this transition never drive #sheet-inner's transform at once. */
 .sheet:not(.turning) .sheet-inner {
   transition: transform var(--verso-turn, 1200ms) var(--ease-turn, ease-in-out);
 }
 .sheet.flip3d { perspective: 2200px; }
 .sheet.flip3d .sheet-inner { transform-style: preserve-3d; }
-.sheet.flip3d #map-viewport { backface-visibility: hidden; } /* #164: retargeted from #map, see the turn rule above */
+.sheet.flip3d #map-viewport { backface-visibility: hidden; }
 .sheet.versoed .sheet-inner { transform: rotateY(-180deg); }
 
 /* Sized to the sheet's box; hidden at rest with visibility (not a 3D trick) so the 3D context can stay off between flips. */
@@ -116,14 +115,12 @@ body.chart-room .stage { display: flex; align-items: center; justify-content: ce
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
-/* The verso's footnote mark rides the legend row beside Turn the sheet. */
 .legend-row a.fn { color: var(--line-tan); align-self: flex-start; margin-left: -0.45rem; }
 .legend-row a.fn:hover, .legend-row a.fn:focus-visible { color: var(--parchment-bright); }
-/* #532: docked, the mark stands on the sheet's parchment, where line-tan reads 2.00:1 and the cream 1.10:1 (the pool that carried both was #525's defect). Scoped on .in-slip alone and NOT in a media query: the docked row only ever renders at narrow, so this wins outright rather than fighting a body:has() arm the way #531's inset does; e2e BR6c pins the resolved colour of all three states. */
+/* #532: docked, the mark stands on the sheet's parchment, where line-tan reads 2.00:1 and the cream 1.10:1 (e2e BR6c pins the resolved colour). */
 .legend.in-slip .legend-row a.fn { color: var(--ink-brown); }
 .legend.in-slip .legend-row a.fn:hover, .legend.in-slip .legend-row a.fn:focus-visible { color: var(--ink-dark); }
 
-/* Print is paper (#462 ruling 10): the chart prints on the page, unzoomed, its recto only. */
 @media print {
   .stage { position: static; padding: 0 !important; display: block; }
   #sheet { width: auto !important; height: auto !important; box-shadow: none; }

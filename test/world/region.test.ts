@@ -49,7 +49,6 @@ test("region projects world realm seats to region indices (no town-dot downgrade
     gridH: 240,
     title: "Seat Environs",
   });
-  // seats stay realm-indexed, with a -1 sentinel for any off-window seat.
   assert.equal(
     region.realms.seats.length,
     bigWorld.realms.seats.length,
@@ -114,7 +113,7 @@ test("region temperature is continuous with the world via the parent elevSpan (A
 });
 
 test("region biomes are continuous with the world via the parent elevSpan (AC #162)", () => {
-  // An inland highland window: under its own local span every hilltop would read snow/alpine. The INTEGRATION check: the climate/biomes unit tests pass even if region.ts forgets to thread elevSpan into classifyBiomes, this does not.
+  // An inland highland window: under its own local span every hilltop would read snow/alpine; the climate unit tests pass even if region.ts forgets to thread elevSpan, this does not.
   const win = { u0: 0.15, v0: 0.22, u1: 0.31, v1: 0.38 };
   const region = generateRegionWorld(bigWorld, {
     window: win, gridW: 320, gridH: 240, title: "Highland Environs",
@@ -177,7 +176,7 @@ test("region rivers match the world's major-river set at the window boundary (AC
     return false;
   };
 
-  // Project every world MAJOR-river cell into the window INDEPENDENTLY (this test owns the uv->cell mapping, so region.ts's projection has to agree, not just echo itself), split into an interior band and an 8%-of-window edge band.
+  // Project every world major-river cell into the window independently (this test owns the uv->cell mapping), split into an interior band and an 8%-of-window edge band.
   const Ww = riverWorld.recipe.gridW, Wh = riverWorld.recipe.gridH;
   const du = win.u1 - win.u0, dv = win.v1 - win.v0, edgeFrac = 0.08;
   let iHit = 0, iMiss = 0, bHit = 0, bMiss = 0;
@@ -281,7 +280,6 @@ test("only the deepest band grows hamlets; they never seat a realm or take a roa
     assert.ok(!hamletCells.has(`${a.x},${a.y}`), "no road departs a hamlet");
     assert.ok(!hamletCells.has(`${b.x},${b.y}`), "no road arrives at a hamlet");
   }
-  // appended after the projected settlements, so world indices stay stable
   const firstHamlet = deep.settlements.findIndex((s) => s.kind === "hamlet");
   assert.ok(
     deep.settlements.slice(firstHamlet).every((s) => s.kind === "hamlet"),
@@ -345,7 +343,6 @@ test("a writer avoids back-to-back template repeats", () => {
   }
 });
 
-// #169: the region title must be a deterministic function of (world, window): the Explorer's live redraft and a downloaded sheet's redraw recover only the window, never the title, and must agree byte-for-byte.
 test("regionTitle names the settlement nearest the window centre (#169)", () => {
   const w = bigWorld;
   const capital = w.settlements.find((s) => s.kind === "capital");
@@ -373,7 +370,6 @@ test("regionTitle names the settlement nearest the window centre (#169)", () => 
 });
 
 test("regionTitle is stable across a regeneration of the same world (#169)", () => {
-  // The download-redraw path regenerates the base world from the recovered flat recipe; regionTitle must return the identical string over that fresh world.
   const win = windowAround(bigWorld, bigWorld.settlements[0], 0.5);
   const regen = generateWorld(defaultRecipe(42, { gridW: 320, gridH: 240 }));
   assert.equal(regionTitle(bigWorld, win), regionTitle(regen, win));

@@ -15,8 +15,7 @@ import {
 
 const UNCERTAIN_LINE = "Of uncertain derivation, even to the philologists.";
 
-// #53: client-side composition of a place's story card from the #52 manifest; pure logic only, the DOM overlay is covered by the Explorer e2e.
-// Load-bearing: a founding and a ruin event carry the same settlement idx (history.ts), so the tale must be found by settlement === idx && kind === "ruin"; filtering on settlement alone surfaces the founding text.
+// Pure logic only; the DOM overlay is covered by the Explorer e2e.
 
 const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   idx: 0,
@@ -27,7 +26,6 @@ const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   seat: false,
   nx: 0.5,
   ny: 0.5,
-  // #120 added the grid cell to PlaceMark; nothing here reads it.
   gx: 0,
   gy: 0,
   ...over,
@@ -48,7 +46,6 @@ test("placeRank labels each kind, and a ruin overrides its kind", () => {
 });
 
 test("placeRank calls a non-capital realm seat a Realm Seat, not a Town", () => {
-  // The card had no notion of a seat: a realm's seat town read plain "Town" while the chart drew it with the seat castle and halo.
   assert.equal(placeRank(mark({ kind: "town", seat: true })), "Realm Seat");
   // realms.ts promotes a village when an inhabited landmass would otherwise be seatless
   assert.equal(placeRank(mark({ kind: "village", seat: true })), "Realm Seat");
@@ -201,7 +198,7 @@ test("integration: every seed 42 place carries a derivation, and the ruin keeps 
   assert.ok(ruinCard.tale && ruinCard.tale.includes(ruin.name), "the ruin's tale survives the new lines");
 });
 
-// #387/#388: one mechanism on two axes, ruled 2026-08-16. cardSide stays pure and undisturbed; this is the nudge applied AFTER it has chosen a side, in screen px because the CSS folds it in after the counter-scale. The spills below are the measured worst cases on seed 42 at 390, Laukuwelua at the bottom edge and Homaitani at the top.
+// Ruled 2026-08-16 (#387/#388): the nudge is applied AFTER cardSide has chosen a side, in screen px because the CSS folds it in after the counter-scale; the spills below are the measured worst cases on seed 42 at 390 (Laukuwelua at the bottom edge, Homaitani at the top).
 const box = { left: 0, top: 0, right: 342, bottom: 266 };
 const at = (left: number, top: number, w: number, h: number) => ({ left, top, right: left + w, bottom: top + h });
 
@@ -227,7 +224,7 @@ test("#388 both axes move at once: the corner case is one call, not two mechanis
 });
 
 test("#387 the accepted cost: a card TALLER than the chart keeps its top edge and overflows the bottom", () => {
-  // Ruled 2026-08-16. Pulling it up by its full overhang would push its own heading off the top, which reads strictly worse.
+  // Ruled 2026-08-16: pulling it up by its full overhang would push its heading off the top.
   assert.deepEqual(clampOffset(at(80, 40, 174, 400), box), { dx: 0, dy: -40 });
 });
 

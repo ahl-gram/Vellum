@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { browserlessAction } from "../../src/cli/browser-policy.ts";
 
-// An UNATTENDED run with no browser must fail loud: before this policy the runner skipped (exit 0) unless the caller remembered VELLUM_REQUIRE_BROWSER, so a cloud or cron run with no Chrome reported green having exercised nothing.
 
 test("unattended run with no browser fails instead of skipping", () => {
   assert.equal(browserlessAction({}, false), "fail");

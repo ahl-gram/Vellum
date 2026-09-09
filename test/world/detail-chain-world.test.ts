@@ -19,7 +19,7 @@ import {
   parentPartitionOnWindow,
 } from "../../test-support/parent-partition.ts";
 
-/** #443's half of the chain's guarantees: measured against the WORLD CHART's own partition, where detail-chain.test.ts measures against the chain's blurred reference. */
+/** Measured against the world chart's own partition, where detail-chain.test.ts measures against the chain's blurred reference. */
 
 const WORLD_ASPECT = 319 / 239;
 
@@ -98,7 +98,7 @@ test("no landmass the world chart draws inside these windows loses all its land 
   }
 });
 
-// Cells over an ancestor's own land are excluded because a nearer band is entitled to hold land the world chart does not; what stranded five river mouths came from an ancestor's resampled SURFACE instead, which no cell of any ancestor backs.
+// Cells over an ancestor's own land are excluded (a nearer band may hold land the world chart does not); the stranded river mouths came from a resampled surface no ancestor cell backs.
 test("the chain raises no cell that every ancestor and the survey alike draw as water (#443)", () => {
   for (const [seed, cx, cy] of WORLD_FUSION_WINDOWS) {
     const r = defaultRecipe(seed);

@@ -21,8 +21,7 @@ import {
 import type { E2eSuiteName } from "../../src/cli/e2e-suites.ts";
 import { E2E_PORT_VAR, E2E_DPORT_VAR, e2eOutSubdir } from "../../src/cli/e2e-ports.ts";
 
-// Seconds per suite, from the runner's own timing table on a 16-core Mac (entries carry their own
-// dates; the undated bulk is 2026-08-14); refresh from that same output when the split is revisited.
+// Seconds per suite, from the runner's own timing table on a 16-core Mac (undated entries measured 2026-08-14); refresh from that same output when the split is revisited.
 const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "survey": 51.4,
   "zoom": 45.8,
@@ -33,27 +32,27 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "render": 13.0,
   "room-voyage-route": 9.0,
   "glass-ceremony": 8.1,
-  "prospect": 5.2, // measured 2026-08-15, local single-suite run (#242)
+  "prospect": 5.2, // measured 2026-08-15, local single-suite run
   "ribbon": 1.9, // measured 2026-08-20, local single-suite run
   "verso": 7.1,
   "turn": 6.5,
   "runninghead": 3.9,
-  "cluster": 4.7, // measured 2026-08-28, local single-suite run (#480)
-  "chart-drawer": 37.2, // measured 2026-09-08, local single-suite run (#521): 6.9 at #520 was an 11-check suite; #543, #540 and #521 took it to 23, and six of them draft real region sheets
-  "room-drawer": 7.3, // measured 2026-08-28, local single-suite run (#483)
-  "document-rooms": 6.0, // measured 2026-08-29, local run (#462)
+  "cluster": 4.7, // measured 2026-08-28, local single-suite run
+  "chart-drawer": 37.2, // measured 2026-09-08, local single-suite run: 6.9 at #520 was an 11-check suite; #543, #540 and #521 took it to 23, and six of them draft real region sheets
+  "room-drawer": 7.3, // measured 2026-08-28, local single-suite run
+  "document-rooms": 6.0, // measured 2026-08-29, local run
   "broadside": 3.8,
   "hunt": 3.4,
   "room-voyage": 3.3,
   "zoom-gestures": 3.1,
-  "home": 99.5, // re-measured 2026-08-25, local run (#460): Subs 3-4a tripled the suite since the 2026-08-14 3.1s
-  "landfall": 23.3, // measured 2026-08-25, local single-suite run (#460)
+  "home": 99.5, // re-measured 2026-08-25, local run: Subs 3-4a tripled the suite since the 2026-08-14 3.1s
+  "landfall": 23.3, // measured 2026-08-25, local single-suite run
   "cards": 2.9,
   "motion": 2.4,
   "room-ink": 2.4,
   "fallback": 2.2,
-  "region-detail": 15.4, // measured 2026-08-23, local run (#400)
-  "specimen": 2.9, // measured 2026-09-03, local single-suite run (#465)
+  "region-detail": 15.4, // measured 2026-08-23, local run
+  "specimen": 2.9, // measured 2026-09-03, local single-suite run
   "health": 0.0,
 };
 
@@ -189,7 +188,6 @@ test("a lane failing fails the run and the line says which lane", () => {
 });
 
 test("a harness error is reported as its own category, not as a failed check", () => {
-  // Telling contention flake from a real regression starts with knowing the browser never came up.
   const crashed = laneOutcome([result({ name: "A" }), result({ name: "B", code: 2 })]);
   assert.equal(crashed.ok, false);
   assert.match(crashed.line, /2/, "exit 2 must survive into the line");
@@ -264,7 +262,6 @@ test("lanes that skipped for want of a browser never read as a pass", () => {
   assert.doesNotMatch(half.line, /ALL LANES PASS/, "a half-skipped run must not read as a pass");
   assert.match(half.line, /SKIP/i);
 
-  // VELLUM_REQUIRE_BROWSER turns the skip into a non-zero exit, which must still fail.
   const required = laneOutcome([result({ name: "A" }), result({ name: "B", code: 1, skipped: true })]);
   assert.equal(required.ok, false, "a lane that exited non-zero must fail even if it printed SKIP");
 });

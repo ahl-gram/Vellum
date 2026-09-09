@@ -1,6 +1,4 @@
-// Sea-level slider (#55): pure conversions + the two DOM writes (the slider value is
-// landFraction x 1000; clampLand keeps every value strictly inside (0, 1) so
-// pickSeaLevel never throws on a crafted hash). The landTouched gate + redraw wiring stay in app.ts.
+// Sea-level slider: the slider value is landFraction x 1000, clamped strictly inside (0, 1) so pickSeaLevel never throws on a crafted hash; the landTouched gate and redraw wiring stay in app.ts.
 import { defaultRecipe } from "../../world/generate.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 

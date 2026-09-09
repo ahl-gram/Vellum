@@ -14,7 +14,6 @@ body { line-height: 1.45; }
 #sheet svg { display: block; width: 100%; height: 100%; user-select: none; }
 #map:not(.solved) svg { cursor: crosshair; }
 
-/* The Daily Hunt on the slip: the clue slips, the warmth line, the reveal, the presses. */
 .clues { margin: 0.7rem 0 0; padding-left: 1.3rem; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; color: var(--ink-dark); line-height: 1.5; }
 .clues li { margin: 0.28rem 0; padding-left: 0.15rem; animation: dryingInk var(--paper) var(--ease-paper) both; animation-delay: calc(var(--i, 0) * 60ms); }
 .clues li::marker { font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: normal; color: var(--ink-faded); font-size: 0.85em; }
@@ -38,7 +37,6 @@ body { line-height: 1.45; }
 .streak { font-size: 0.86rem; color: var(--ink-brown); font-style: italic; }
 .streak.stamp { animation: inkStamp var(--paper) var(--ease-paper) both; }
 
-/* The chart's arrival and the hunt's marks on the sheet. */
 #sheet svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
 #sheet svg.arriving #layer-land path {
   animation: inkDraw var(--ink-draw) var(--ease-paper) both,
@@ -65,7 +63,6 @@ body { line-height: 1.45; }
   0% { opacity: 0; } 8% { opacity: 0.9; } 68% { opacity: 0.9; } 100% { opacity: 0; }
 }
 
-/* The phone's feedback bar mirrors the warmth line above the collapsed sheet (the panel line stays the aria-live region). */
 .hunt-sticky { display: none; }
 .hunt-sticky.rise { animation: stickyRise var(--paper-settle) var(--ease-paper); }
 @keyframes stickyRise {
@@ -81,7 +78,6 @@ body { line-height: 1.45; }
   }
   body:has(.slip.open) .hunt-sticky.active { display: none; }
 }
-/* Print is paper (ruling 10): the bar prints as nothing; the chart prints on the page, unzoomed. */
 @media print {
   .hunt-sticky { display: none !important; }
   #map-viewport { position: static; }

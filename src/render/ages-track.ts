@@ -55,7 +55,6 @@ export function detentStep(drag: DetentDrag, uRaw: number, escapeU: number): { u
   const u = Math.max(0, Math.min(1, uRaw));
   const crossed = drag.side === "survey" ? u > SEAM_U : u < SEAM_U;
   if (!crossed) return { u, drag: { side: drag.side, held: false } };
-  // The 1e-9 keeps the exact band edge an ESCAPE on both sides; without it the detent releases rightward but sticks leftward at the same pull.
   if (Math.abs(u - SEAM_U) < escapeU - 1e-9) {
     return { u: SEAM_U, drag: { side: drag.side, held: true } };
   }

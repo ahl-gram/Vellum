@@ -93,7 +93,7 @@ function pinProjection(p: ProspectInput): unknown {
   };
 }
 
-// Pinned 2026-08-09 from a measured run (the golden-seed42 convention): a deliberate change re-pins these with the cause named in the commit. The five cases span the shape space: a capital, harbor towns, a realm seat, an inland ruined village.
+// Pinned 2026-08-09 from a measured run; a deliberate change re-pins these with the cause named in the commit. The five cases span a capital, harbor towns, a realm seat, an inland ruined village.
 const PINNED: ReadonlyArray<{ seed: number; index: number; sum: number }> = [
   { seed: 42, index: 0, sum: 861063081 }, // Laukuwelua, capital, harbor
   { seed: 42, index: 5, sum: 2958303229 }, // Loatunui, town, harbor

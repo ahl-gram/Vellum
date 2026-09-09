@@ -34,8 +34,7 @@ test("resolveProspectIndex passes a valid index through and falls back to the ca
   assert.equal(resolveProspectIndex(world, null), capital, "no index means the capital");
   assert.equal(resolveProspectIndex(world, world.settlements.length), capital, "past-the-end falls back");
   assert.equal(resolveProspectIndex(world, -1), capital, "negative falls back");
-  // Every generated world seats its capital at index 0 (measured, seeds 1-30), so only a reordered
-  // synthetic fixture can tell the kind lookup from a bare `return 0` (the guard-prover's M4 hole).
+  // Every generated world seats its capital at index 0 (measured, seeds 1-30), so only a reordered synthetic fixture can tell the kind lookup from a bare return 0.
   const shuffled = { ...world, settlements: [world.settlements[1]!, world.settlements[0]!] } as World;
   assert.equal(resolveProspectIndex(shuffled, null), 1, "the capital is found by kind, not by sitting at index 0");
 });
@@ -75,7 +74,7 @@ test("prospectResultFor carries the former name through to the page (#49)", () =
   assert.ok(!("formerName" in plain), "an absent former name should not leave the key behind");
 });
 
-// The note is Today's card's (#494 ruling 4 was made on a preview carrying it): a fresh writer on the seed-of-the-day fork, one call. It is NOT the bound atlas's gazetteer note for the same town, which the same writer only reaches after walking the rows before it (the place-card.ts warning); skeptic round 3 on PR #500 held the ruling to its preview.
+// The note is Today's card's (#494 ruling 4 was made on a preview carrying it), NOT the bound atlas's gazetteer note for the same town, which the same writer only reaches after walking the rows before it.
 test("prospectResultFor carries the engraver's note: the era, the epithet, the founding, the lettered key and Today's card's note for the town", () => {
   const res = prospectResultFor(world, { index: 1, dress: "ink", year: null });
   const e = engravedProspectPlate(world, 1, STYLES.ink, world.title.year);

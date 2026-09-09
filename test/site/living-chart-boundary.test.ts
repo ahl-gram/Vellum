@@ -4,8 +4,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { API, bareEl } from "../../test-support/living-chart-hosts.ts";
 
-// #191: the engine must be hostable by a page that is NOT the Explorer. Guard 1: the modules used to resolve getElementById at MODULE scope, so a second host null-bound at import; the proof is that document-less Node can import and construct. Guard 2: app.ts back under the 400-line guideline.
-// #319 added: the bar is OPTIONAL. The construction half lives here; bar-less BEHAVIOUR lives in living-chart-no-bar.test.ts. This file stays deliberately DOM-free so guard 1 keeps its meaning.
+// The engine must be hostable by a page that is NOT the Explorer (#191) and the bar is OPTIONAL (#319): document-less Node can import and construct it. Bar-less BEHAVIOUR lives in living-chart-no-bar.test.ts; this file stays DOM-free so the import proof keeps its meaning.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const ENGINE_DIR = resolve(REPO, "src/site/living-chart");
@@ -29,7 +28,6 @@ const assertFullApi = (lc: unknown, shape: string): void => {
 };
 
 test("the engine imports without a DOM: no module-scope document access (#191)", async () => {
-  // A contract, not decoration: nothing in THIS file may install the element shim, or the import below stops proving the engine is DOM-free at load.
   assert.equal(typeof (globalThis as { document?: unknown }).document, "undefined", "no DOM is installed here");
   const mod = await import("../../src/site/living-chart/index.ts");
   assert.equal(typeof mod.createLivingChart, "function", "the boundary exports createLivingChart");
@@ -55,9 +53,7 @@ test("createLivingChart constructs against a plain-object host and exposes the f
 
 test("createLivingChart constructs against a host with NO scrubber: the bar is optional (#319)", async () => {
   const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
-  // Before #319 an ABSENT scrubber threw a TypeError reading 'panel' while wiring, so a bar-less host could not be constructed at all.
   const lc = createLivingChart({ mapEl: bareEl(), statusEl: bareEl() });
-  // The SAME surface, not a narrower one: one boundary, one host type (ratified 2026-08-09).
   assertFullApi(lc, "a host with no scrubber");
 });
 

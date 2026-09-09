@@ -9,7 +9,6 @@ import type { NamedSettlement, World } from "./types.ts";
 
 export const NEAR = 4;
 
-/** The middle-quarter band: without it a quarry two cells off dead-center reads as a western reach. */
 const CENTRAL_BAND = 1 / 8;
 
 /** Neighborhood radius and floor: the glyph field samples candidates, so one qualifying cell may draw nothing, while six almost surely shows glyphs. */

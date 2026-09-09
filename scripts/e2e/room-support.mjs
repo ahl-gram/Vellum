@@ -1,6 +1,5 @@
 // Shared helpers for the Reading-Room-hosted suites (#320); suite-reading-room.mjs deliberately keeps its own copies (the double-coverage premise), and the room's settle is NOT the shared waitSettled, which keys on the Explorer's #verso-turn.
 
-/** The chart svg, never the voyage overlay that shares the mount. */
 export const CHART_SVG = ".rf-chart svg:not(.voyage-overlay)";
 
 export const makeRoom = (ctx) => {
@@ -65,7 +64,6 @@ export const makeBar = (ctx) => {
   };
 };
 
-/** The manifest facts a scrubber check needs, read from the page's OWN engine through the shared oracle. */
 export const scrubFacts = (evaluate, seed) =>
   evaluate(`(()=>{
     const r=window.__vellumRunInline({kind:"draw",seed:${seed},overrides:{},render:{style:"antique",widthPx:1500,legend:true}});

@@ -22,8 +22,7 @@ import { finalizeHash } from "../../src/site/explorer/address.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 
-// The two canonical items every round-trip test is built from: one survey wearing every field
-// the grammar has, one prospect wearing every field of its own.
+// The two canonical items every round-trip test is built from: one survey wearing every field the grammar has, one prospect wearing every field of its own.
 const SURVEY = "k-s.seed-42.type-citystate.band-polar.land-350.coast-55.style-antique.legend-1.arms-0.beasts-1.theme-moisture.rung-2.lx-17.ly-13";
 const PROSPECT = "k-p.seed-42.style-ink.i-3.year-814";
 
@@ -58,7 +57,6 @@ test("the key is the ruled one and the cap is the ruled six (#518's sitting, #40
 });
 
 test("the grammar imports without a DOM: three bundles host it (#519, the #191 idiom)", async () => {
-  // A contract, not decoration: nothing in this file may install a DOM shim, or the import stops proving anything.
   assert.equal(typeof (globalThis as { document?: unknown }).document, "undefined", "no DOM is installed here");
   const mod = await import("../../src/site/shared/table-address.ts");
   assert.equal(typeof mod.parseTable, "function");
@@ -230,8 +228,7 @@ test("a lattice index off the lattice drops the item (the centre must name a rea
 
 test("THE LATTICE CONTRACT: a filed survey redraws the very window the Glass committed", () => {
   // On a lattice point Math.round and Math.floor agree, so the nudge is 0.7 of a cell, in the half where they disagree: 0.3 would round down and prove nothing.
-  // A stride that never lands on max leaves the top index unswept, which is exactly where
-  // lodWindowFor's upper clamp is active, so every stride ends at max explicitly.
+  // A stride that never lands on max leaves the top index unswept, where lodWindowFor's upper clamp is active, so every stride ends at max explicitly.
   const steps = (max: number, by: number): number[] => {
     const out: number[] = [];
     for (let i = 0; i <= max; i += by) out.push(i);
@@ -339,8 +336,7 @@ test("chartTarget carries the table home from the Prospect page (#401 ruling 7 d
   assert.deepEqual(parseTable(chartTarget(hash).replace("/explorer/", "")), [survey]);
 });
 
-// Sub 2 (#520) carried finding 4: the address encodes the window as (rung, lattice centre) and there is no honest way back from the window, so the seat has to be taken at the settle. This sweeps the function the controller actually calls, from the SHEET camera the Glass reports, so the space conversion is inside what is under test rather than assembled here.
-// Swept over every seat rather than a chosen camera: an earlier version pinned three cameras and the window-midpoint shortcut passed all three, because at rung 1 lodWindowFor clamps hard enough that neighbouring seats share a window byte for byte.
+// The address encodes the window as (rung, lattice centre) and there is no honest way back from the window, so the seat is taken at the settle; swept from the SHEET camera the Glass reports over EVERY seat, because at rung 1 lodWindowFor clamps hard enough that neighbouring seats share a window byte for byte and three chosen cameras let a window-midpoint shortcut pass.
 test("every lattice seat round-trips through the settle it came from (#520)", () => {
   const m = { mx: 0.045, my: 0.045 };
   const toSheet = (plot: number, margin: number): number => plot * (1 - 2 * margin) + margin;
@@ -374,7 +370,7 @@ test("the sheet-fraction camera names a different seat, which is why the convers
   }
 });
 
-// The witness that makes the guard above bite, and the whole reason the centre is handed over rather than re-derived. Measured 2026-09-07: at rung 3, 1200 of 4225 seats rebuild a DIFFERENT window from their own window's midpoint, which is the count Sub 1 recorded; rungs 1 and 2 have none, so a guard that samples only those two cannot see the hazard at all.
+// The witness that makes the guard above bite. Measured 2026-09-07: at rung 3, 1200 of 4225 seats rebuild a DIFFERENT window from their own window's midpoint; rungs 1 and 2 have none, so a guard sampling only those two cannot see the hazard.
 test("the window's own midpoint is NOT a way back to its seat (#520, the 1200 of 4225)", () => {
   const dress = { kind: "survey", seed: 42, overrides: {}, style: "antique", legend: true, arms: false, beasts: false, theme: null } as const;
   const band = LOD_BANDS[3] as LodBand;

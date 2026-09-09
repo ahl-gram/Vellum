@@ -4,7 +4,7 @@ import { mkdir, readFile, rm } from "node:fs/promises";
 import { main } from "../../src/cli/main.ts";
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
 
-// The chart verb is the covenant's one-command proof and, after the #138 CLI diet, the ONLY verb main.ts carries. Pinned at the STRUCTURE level (the stamped recipe), never bytes: an SVG byte-compare drifts across OS/Node; the --png path stays covered by raster.test.ts.
+// Pinned at the STRUCTURE level (the stamped recipe), never bytes: an SVG byte-compare drifts across OS/Node; the --png path is raster.test.ts's.
 
 const TMP = "out/test-tmp-chart";
 

@@ -24,7 +24,6 @@ test("E2E_SUITE_ORDER is exactly the runner's SUITES map, in the same order", ()
 });
 
 test("each suite name maps to the run function imported from its own file", () => {
-  // A key on the wrong import runs and PASSES: check labels come from the suite, unasserted.
   const aliasFor = new Map(
     [...RUNNER.matchAll(/import \{ run as (\w+) \} from "\.\/e2e\/suite-([\w-]+)\.mjs"/g)].map((m) => [m[2], m[1]]),
   );
@@ -71,8 +70,7 @@ test("the smoke tier covers every page that ships its own bundle", () => {
 });
 
 test("the two worker-bearing surfaces assert the worker is live AND that it degrades", () => {
-  // #266 scope: one worker/fallback check per surface. Booting is not that, which is why
-  // room-address cannot stand in here: it only checks the worker hook EXISTS.
+  // One worker/fallback check per surface; room-address cannot stand in here, it only checks the worker hook EXISTS.
   for (const suite of ["render", "fallback", "reading-room"] as const) {
     assert.ok(SMOKE_SUITES.includes(suite), `smoke must keep ${suite} for worker/fallback coverage`);
   }
@@ -115,10 +113,8 @@ test("the e2e job is bounded, so a hung lane cannot hold a runner for hours", ()
 });
 
 test("every CI trigger gets the same full coverage, so nothing is conditional on the event", () => {
-  // The #266 tier keyed off github.event_name, which is exactly what let a PR prove less than main.
   const at = CI.indexOf("test:e2e:lanes");
-  // slice(-1) is the file's LAST CHARACTER, not the whole file, so a missing anchor would leave both
-  // assertions below passing against nothing at all.
+  // slice(-1) is the file's LAST CHARACTER, not the whole file, so a missing anchor would leave both assertions below passing against nothing.
   assert.notEqual(at, -1, "the e2e step is gone, so this guard would be reading an empty slice");
   const step = CI.slice(at);
   assert.doesNotMatch(step, /github\.event_name/, "the e2e step is conditional on the event again");
@@ -126,8 +122,7 @@ test("every CI trigger gets the same full coverage, so nothing is conditional on
 });
 
 test("the runner actually uses the selection, the timings and the outcome rule it imports", () => {
-  // The runner needs a browser, so behavior is tested in e2e-suites.test.ts and only the CALL
-  // sites are pinned here. Disconnecting any of them escaped every other guard.
+  // The runner needs a browser, so behavior is tested in e2e-suites.test.ts and only the CALL sites are pinned here.
   assert.match(RUNNER, /runSelected\(SELECTED, SUITES, ctx\)/, "the runner does not run the SELECTED suites");
   assert.match(RUNNER, /runOutcome\(results\)/, "the runner does not use the outcome rule, so 0/0 can pass again");
   assert.match(RUNNER, /join\(REPO, "out", e2eOutSubdir\(PORT\)\)/, "the runner's out dir no longer follows the port");

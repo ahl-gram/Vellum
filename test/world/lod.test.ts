@@ -15,7 +15,7 @@ import {
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { windowAround } from "../../src/world/region.ts";
 
-// The Glass LOD schedule (#168): a pure map from camera k to a discrete band, a fixed lattice that snaps nearby settles to one window (so the worker cache and the stamped recipe stay stable), and a window clamped exactly like windowAround.
+// The Glass LOD schedule: camera k to a band, a fixed lattice that snaps nearby settles to one window, and a window clamped exactly like windowAround.
 
 test("LOD_BANDS: four bands, sizeUV = 1/k, grid fixed at 320x240", () => {
   assert.equal(LOD_BANDS.length, 4);
@@ -43,7 +43,6 @@ test("bandFor with no current band picks the nominal band for k", () => {
 });
 
 test("bandFor is hysteretic: the SAME k resolves differently by current band", () => {
-  // Each k sits inside a boundary's deadband, so the resolved band depends on the side you came from: a settle near a boundary must not thrash bands.
   assert.equal(bandFor(1.45, 0), 0, "held below at the 0/1 boundary");
   assert.equal(bandFor(1.45, 1), 1, "held above at the 0/1 boundary");
 
@@ -123,15 +122,12 @@ test("lodWindowFor clamps a centre near the world edge inside the sheet", () => 
   assert.ok(Math.abs(hi.v0 - (0.99 - size)) < 1e-12, "bottom edge clamps to 0.99-size");
 });
 
-// Sub 8 settle + inset math (#169, redesigned after PR #245 review): the camera stays WORLD-relative (no rebase); the committed region mounts as an INSET riding the same transform; the pure math is the sheet-fraction <-> plot-uv conversion and the inset placement rects.
 
 // Margin fractions kept simple for arithmetic-by-eye; the identities hold for any margins, and the real 1500px-sheet values are proven in place-manifest.
 const M = { mx: 0.05, my: 0.06 };
 
 test("plotUvFromSheet maps the sheet-fraction camera into plot-uv, preserving k", () => {
-  // The sheet centre IS the plot centre (margins are symmetric).
   assert.deepEqual(plotUvFromSheet({ cx: 0.5, cy: 0.5, k: 3 }, M), { cx: 0.5, cy: 0.5, k: 3 });
-  // The plot area's own edges map to uv 0 and 1.
   const lo = plotUvFromSheet({ cx: M.mx, cy: M.my, k: 2 }, M);
   assert.ok(Math.abs(lo.cx) < 1e-12 && Math.abs(lo.cy) < 1e-12, "plot top-left is uv (0,0)");
   const hi = plotUvFromSheet({ cx: 1 - M.mx, cy: 1 - M.my, k: 2 }, M);
@@ -154,7 +150,6 @@ test("windowSheetRect places a plot-uv window inside the margined sheet", () => 
 });
 
 test("insetSheetRect: the mounted region sheet's PLOT area lands exactly on the window rect", () => {
-  // The whole point: the region sheet must overhang the window rect by exactly its own scaled margins, so its plot area aligns with the world content it re-surveys, at any window and any margins.
   for (const win of [
     lodWindowFor(0.5, 0.5, 0.5),
     lodWindowFor(0.3, 0.7, 0.25),
@@ -244,7 +239,7 @@ test("decideSettle: zooming back out of a region reverts to the retained world s
 });
 
 test("decideSettle: a partial zoom-out steps down ONE region band (band-by-band, not straight to world)", () => {
-  // Zoom-out is tier-ordered: from band 3, k=4.0 drops one step to band 2 (4.0 < DOWN[2], not DOWN[1]); only the region -> world hop drops the inset with no worker.
+  // From band 3, k=4.0 drops one step to band 2 (4.0 < DOWN[2], not DOWN[1]).
   const win3 = lodWindowFor(0.5, 0.5, 0.125); // band 3
   const d = decideSettle({
     camera: { cx: 0.5, cy: 0.5, k: 4.0 },

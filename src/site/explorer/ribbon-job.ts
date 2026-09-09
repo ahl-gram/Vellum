@@ -1,5 +1,4 @@
-// The ribbon job's engine glue, shared by ./worker.ts and runInline in ./worker-client.ts
-// (the prospect-job.ts pattern) so the two transports cannot drift apart.
+// The ribbon job's engine glue, shared by ./worker.ts and runInline in ./worker-client.ts so the two transports cannot drift apart.
 import { createRng } from "../../core/rng.ts";
 import { buildRibbonInput, type RibbonInput } from "../../itinerary/input.ts";
 import { ribbonSvgFor } from "../../itinerary/finished.ts";

@@ -2,10 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { GESTURE_BREAK_MS, MOMENTUM_ABSORB_MS, createValve } from "../../src/site/home/valve.ts";
 
-// The release valve (#472): the wheel's route between the camera and the page. The three
-// ratified feel rulings (issue comment 2026-08-27) are the spec: the flick that reaches the
-// limit is used up, one finger is the way down on touch (out of scope here), and coming back
-// up the camera takes only a fresh gesture.
+// The release valve (#472): the wheel's route between the camera and the page; the spec is the three feel rulings in the 2026-08-27 comment on #472 (a flick that reaches the limit is used up, and coming back up the camera takes a fresh gesture).
 
 const zoomMoves = () => true;
 const zoomClamped = () => false;

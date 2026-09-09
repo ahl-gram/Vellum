@@ -1,4 +1,4 @@
-// The chronicler's block of the one journal, appended AFTER the prologue rows in the same strip (#312). Lifted from ages.ts at the 2026-09-03 sitting (ruling 8).
+// The chronicler's block of the one journal, appended after the prologue rows in the same strip.
 import type { HistoricalEvent } from "../../society/history.ts";
 
 export interface AnnalRow {
@@ -28,7 +28,7 @@ export function buildAnnals(stripEl: HTMLElement, events: ReadonlyArray<Historic
       dc.textContent = e.text[0]!;
       text.append(dc, document.createTextNode(e.text.slice(1)));
     } else {
-      text.textContent = e.text; // textContent: event prose is plain text
+      text.textContent = e.text;
     }
     li.append(year, text);
     stripEl.appendChild(li);

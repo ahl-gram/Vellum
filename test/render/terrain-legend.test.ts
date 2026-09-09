@@ -11,9 +11,6 @@ import { planLegend } from "../../src/render/layers/legend.ts";
 import { terrainGlyphsPresent } from "../../src/render/layers/glyphs.ts";
 import type { World } from "../../src/world/types.ts";
 
-// #23: hills/marsh/dunes were drawn but missing from the key; the key lists "only the symbols a map carries", so rows appear exactly when those glyphs would be drawn, the same gates glyphsLayer uses.
-
-// A single interior cell (center of a 3x3) at a chosen relief and biome.
 function centerCtx(centerElev: number, centerBiome: number, span = 1): RenderCtx {
   const data = new Float64Array(9); // all 0 == sea, skipped
   data[4] = centerElev;

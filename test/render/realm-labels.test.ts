@@ -3,8 +3,7 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 
-// #145: every realm must carry its name. feature-labels.ts used to drop one silently when the largest blob was under 60 cells, or when all five candidates failed tryClaim (all at the centroid's x, so one crowded settlement column killed the name even with thousands of free cells elsewhere).
-// The two seeds are the charts Alex filed (the chart number IS the seed), each with exactly one silently dropped realm. #235 re-rolled only the name STRINGS (culture is picked AFTER the partition, so realm index i is the same realm); both fixtures re-pinned to the new names.
+// The chart number IS the seed, each with exactly one silently dropped realm; #235 re-rolled only the name STRINGS (culture is picked AFTER the partition, so realm index i is the same realm).
 const CASES = [
   { seed: 1619895893, chart: "The Whispering Reaches of Ciapa", dropped: "The Empire of Non" },
   { seed: 3767410253, chart: "The Verdant Isle of Noca", dropped: "The Niayax Dominion" },

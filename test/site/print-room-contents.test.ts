@@ -6,7 +6,7 @@ import { plateAspect } from "../../src/site/print-room/plate-aspect.ts";
 import { composeAtlas } from "../../src/atlas/compose.ts";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 
-// #463 part 3/4: the slip's contents, string in and string out like plate-markup.ts, so the rows unit-test in Node and the page and the runtime render one shape.
+// The slip's contents (#463): string in and string out like plate-markup.ts, so the rows unit-test in Node and the page and the runtime render one shape.
 const ref = (key: string, title: string) => ({ key, title, href: `blob:http://127.0.0.1:4173/${key}` });
 const DATA: ContentsData = {
   hero: ref("antique", "The world chart, drawn in the antique manner"),
@@ -94,7 +94,7 @@ test("the counts read the atlas's own html: banner figures, chronicle entries, g
   assert.deepEqual(counts, { arms: 2, entries: 3, places: 2 });
 });
 
-// The hand fixtures above are written to the regexes; this one reads the producer, so a changed <li> or <tr> in compose.ts reds here instead of printing "0 entries" (skeptic on PR #496).
+// The hand fixtures above are written to the regexes; this one reads the producer, so a changed <li> or <tr> in compose.ts reds here instead of printing "0 entries".
 test("the counts match the world the atlas was composed from (seed 42): its arms, its chronicle's events, its settlements", () => {
   const world = generateWorld(defaultRecipe(42));
   const atlas = composeAtlas(world, { width: 400 });

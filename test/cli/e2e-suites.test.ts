@@ -11,8 +11,7 @@ import {
   suitesCertifiedByHealth,
 } from "../../src/cli/e2e-suites.ts";
 
-// Selection throws rather than narrowing: `every()` is true for [], so a typo'd name that matched
-// nothing would report ALL PASS (0/0) and exit 0.
+// Selection throws rather than narrowing: `every()` is true for [], so a typo'd name that matched nothing would report ALL PASS (0/0) and exit 0.
 
 const canonical = (names: readonly string[]) => E2E_SUITE_ORDER.filter((s) => names.includes(s));
 

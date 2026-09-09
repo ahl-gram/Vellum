@@ -106,7 +106,7 @@ export function createChainCache(capacity: number = CACHE_CAPACITY): ChainCache 
   };
 }
 
-/** The chain's coarse reference: what it floors against. Since #443 it is NOT what rejectBridges partitions, which is each ancestor's own cells. NaN means a cell no ancestor covers, so it must not win the max and must stay NaN when every ancestor abstains. */
+/** The chain's coarse reference: what it floors against, NOT what rejectBridges partitions (each ancestor's own cells). NaN means a cell no ancestor covers, so it must not win the max and must stay NaN when every ancestor abstains. */
 export function maxOfSurfaces(surfaces: ReadonlyArray<Field>, w: number, h: number): Field {
   const data = new Float64Array(w * h).fill(NaN);
   for (const s of surfaces) {

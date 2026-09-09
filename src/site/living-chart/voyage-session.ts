@@ -1,6 +1,4 @@
-// The voyage session builder: everything that PREPARES a survey before a single frame
-// paints (plan + tour order, routed geometry, projection, the margin log's rows, the
-// overlay svg). Split from voyage.ts at #191: this module builds the session record, voyage.ts animates it.
+// The voyage session builder: everything that PREPARES a survey before a frame paints (plan + tour order, routed geometry, projection, the log rows, the overlay svg); voyage.ts animates the record this builds.
 import {
   applyTourOrder,
   buildVoyagePlan,
@@ -54,25 +52,19 @@ export interface Session {
   shownArrived: number;
 }
 
-/** #373: a host's off-thread answer to the #184 travel matrix, read synchronously; the builder never waits, it takes what is ready. */
 export interface TourOrderSource {
   get(seed: number, survey: Survey, ports: ReadonlyArray<number>): ReadonlyArray<number> | null;
 }
 
 export interface SessionBuilderDeps {
-  /** The chart mount; build drops any overlay already here, then appends its own (#364). */
   mapEl: HTMLElement;
-  /** The margin-log panel instance; build renders the rows. */
   logPanel: VoyageLogPanel;
-  /** Optional (#373): a host with no worker, and every host with no source, computes the order inline as before. */
   tourOrder?: TourOrderSource;
 }
 
 export function createSessionBuilder(deps: SessionBuilderDeps) {
   const { mapEl, logPanel, tourOrder } = deps;
 
-  // #184: the itinerary is ordered on ACTUAL travel (an all-pairs matrix over the prepared router, ~0.9s on a 24-port world), computed only when the walkable world changed: the cache keys on seed + port set + surveyFingerprint.
-  // A QUIET rebuild (a mid-drag sea-level frame) NEVER computes: it reuses a matching cached order or falls back to the straight-line tour for that transient frame; the release redraw is non-quiet, so at rest the order is a pure function of the world, never of the interaction path.
   let travelOrder: { key: string; order: ReadonlyArray<number> } | null = null;
 
   function orderItinerary(
@@ -96,7 +88,6 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     return ordered;
   }
 
-  // Build the plan + routed geometry + overlay and append it into the mount; null = nothing to survey (no capital), so the caller can bail.
   function build(
     manifest: PlaceManifest | null,
     survey: Survey | null,
@@ -122,7 +113,6 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
       geom: buildLegGeometry(leg.points.map((p) => ({ x: proj.px(p.x), y: proj.py(p.y) }))),
     }));
 
-    // Per-leg animation time by length (#120); cumMs has legs+1 entries: cumMs[i] is when leg i begins, cumMs[legs] is the whole sweep.
     const durations = legDurations(legs.map((l) => l.geom.total));
     const cumMs = [0];
     for (const d of durations) cumMs.push(cumMs[cumMs.length - 1] + d);
@@ -132,7 +122,6 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     const origin = byIdx.get(plan.ports[0].idx)!;
     const originPt = { x: proj.px(origin.gx), y: proj.py(origin.gy) };
 
-    // #121 the margin log: each port carries the mode of the leg that ARRIVED at it (the origin has none, so it departs); the seed-forked prose lives in world/voyage-log.ts.
     const logPorts = plan.ports.map((port, i) => {
       const pm = byIdx.get(port.idx)!;
       return {
@@ -143,7 +132,6 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
         legLength: i === 0 ? 0 : buildLegGeometry(routed[i - 1].points).total,
       };
     });
-    // #275: the closing leg is the last routed leg (it carries the survey home) and earns the log's final row; a one-port survey has no closing leg, so it logs its departure and stops.
     const closing = plan.ports.length >= 2 ? routed[routed.length - 1]! : null;
     const { log, rows: logRows } = logPanel.buildLogPanel(
       logPorts,
@@ -166,8 +154,6 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     const riderG = makeMark("voyage-rider", RIDER_PARTS);
     // INVARIANT: the marks are SIBLINGS of trackEl, never inside it; syncRestingTrack feeds the sink trackEl's `points` verbatim, and a mark nested in the track would bleed through to the back of the sheet (#174).
     svg.append(trackEl, shipG, riderG);
-    // INVARIANT (#364): on every path that APPENDS, the mount is left holding exactly ONE overlay, this one; the builder drops whatever overlay is already there rather than trusting the caller to have wiped it (e2e SV2g; test/site/voyage-session-mount.test.ts).
-    // Deliberately HERE and not at the top of build: the builder never owns its caller's teardown, so every bail above returns with the mount exactly as found.
     mapEl.querySelectorAll(".voyage-overlay").forEach((stale) => stale.remove());
     mapEl.appendChild(svg);
 
@@ -185,7 +171,6 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
       riderG,
       activeMark: null,
       shownGlyph: "",
-      // Facing carries across frames and legs so a switchbacking road cannot flip it (voyage-geometry.ts resolveFacing); rebuilt with the session, so no facing leaks between worlds.
       facing: legs.length ? netFacing(legs[0].geom.points) : 1,
       rafId: 0,
       shownArrived: 0,

@@ -1,8 +1,4 @@
-// #270 the Broadside's footnote apparatus: a period mark (<a class="fn">) on each opaque
-// control opens a marginalia note and follows through to the term's /glossary/ anchor.
-// The note is real DOM text shown through the native popover API (Esc and light dismiss
-// come free), wired aria-describedby -> role="tooltip" in the markup. Fine pointers get
-// hover/focus + click-through; touch gets the ratified tap-toggle instead of navigation.
+// #270 the Broadside's footnote apparatus: a period mark (<a class="fn">) opens a marginalia note through the native popover API and follows through to the term's /glossary/ anchor; fine pointers get hover/focus + click-through, touch gets the ratified tap-toggle instead of navigation.
 interface NotePair {
   mark: HTMLAnchorElement;
   note: HTMLElement;
@@ -20,7 +16,6 @@ function pairs(): NotePair[] {
 // Anchor the note under its mark at show time: the note lives in the top layer as a fixed-position box, and static CSS cannot place a top-layer box relative to an in-flow anchor. It clears the whole control ROW, not just the mark's line (the neighboring control may be taller), clamped to the viewport so an edge mark never pushes its note off-screen.
 function place(mark: HTMLElement, note: HTMLElement): void {
   const r = mark.getBoundingClientRect();
-  // A ledger row is the label cell plus every sibling up to the next label cell; elsewhere the mark's own container is the row.
   const cell = mark.closest(".l-label");
   let rowBottom = r.bottom;
   if (cell) {
@@ -37,10 +32,8 @@ function place(mark: HTMLElement, note: HTMLElement): void {
 }
 
 export function wireFootnotes(): void {
-  // A pre-popover engine keeps working marks: they stay plain glossary links.
   if (!("showPopover" in HTMLElement.prototype)) return;
-  // Touch-primary means hover:none AND pointer:coarse: a bare (hover: none) over-matches environments with NO pointer at all (linux headless CI reports hover:none with pointer:none), muting the focus path exactly where a keyboard user needs it (e2e BR4/BR5; the Glass's keys slip hit the same trap before it retired at #505).
-  // Queried at event time, not captured at wire time, so a device-mode flip (or the e2e's emulation) is honored without a reload.
+  // Touch-primary means hover:none AND pointer:coarse: a bare (hover: none) over-matches environments with NO pointer at all (linux headless CI reports hover:none with pointer:none), muting the focus path where a keyboard user needs it (e2e BR4/BR5); queried at event time so a device-mode flip (or the e2e's emulation) is honored without a reload.
   const touchPrimary = (): boolean => window.matchMedia("(hover: none) and (pointer: coarse)").matches;
   for (const { mark, note } of pairs()) {
     const show = (): void => {
@@ -62,7 +55,7 @@ export function wireFootnotes(): void {
       if ((ev as ToggleEvent).newState === "closed") closedAt = performance.now();
     });
     mark.addEventListener("click", (e) => {
-      if (!touchPrimary()) return; // not touch-primary: the click follows the link
+      if (!touchPrimary()) return;
       e.preventDefault();
       if (note.matches(":popover-open")) hide();
       else if (performance.now() - closedAt > 400) show();

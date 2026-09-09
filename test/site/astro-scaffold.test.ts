@@ -7,7 +7,7 @@ import { join, relative } from "node:path";
 import { NAV_ITEMS } from "../../src/layouts/nav.ts";
 import { cleanPublicGenerated } from "../../scripts/clean-public-generated.ts";
 
-// Scriptorium Sub 2 (#203): the Astro scaffold and shared layout. SPEC: the ratified 2026-07-21 comment on #202. Builds once into out/test-astro-build (gitignored) and asserts on the rendered output plus the committed sources.
+// The Astro scaffold and shared layout (#203; SPEC: the ratified 2026-07-21 comment on #202). Builds once into out/test-astro-build (gitignored) and asserts on the rendered output plus the committed sources.
 
 process.env.ASTRO_TELEMETRY_DISABLED = "1";
 
@@ -38,11 +38,11 @@ type PageSpec = {
   scriptSrc?: string;
   /** The one stated content-page script exception (#289): home's seed-form intercept marker. */
   inlineScript?: string;
-  /** #457's pre-paint veil script, home's re-ratified THIRD script (PR #467): must parse before the stage. */
+  /** The pre-paint veil script (#457): must parse before the stage. */
   prePaintScript?: string;
   /** Sub 7 (#462, chart-room rulings 7 and 9): a chart room renders no band and no footer; the chart is the room. */
   chartRoom?: true;
-  /** Sub 7 (#462): a document room's index script, an Astro-processed component script inlined into the page (the #483 shape); the marker must occur only inside it, and it is a pattern because the minifier picks the quote style. */
+  /** A document room's index script, Astro-processed and inlined (#483); a pattern because the minifier picks the quote style. */
   pageScript?: RegExp;
   noindex?: true;
 };
@@ -61,9 +61,7 @@ const PAGES: readonly PageSpec[] = [
     tagline: "an atelier of imaginary cartography",
     // Occurs ONLY inside the script (the form tag's own id would match anywhere): proves the intercept exists, not merely the form.
     inlineScript: 'getElementById("seed-form")',
-    // Landfall Sub 1 (#455): home is an app surface now (the stage camera) AND keeps the #289 intercept exception.
     scriptSrc: "app.bundle.js",
-    // Landfall Sub 2 (#457): the ceremony veil must dress FIRST PAINT, which no deferred module can; ratified at PR #467 after the incognito flash.
     prePaintScript: 'v.id = "lf-veil"',
   },
   {
@@ -440,7 +438,7 @@ test("the layout ships the cluster's ratified pins: leading, weight, the aria-cu
       /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*text-decoration(?:-line)?:\s*underline/,
       "the current label is underlined",
     );
-    // The second addendum on #461: the cluster must NOT inherit the page's reading line-height; page css sets body leading per page and the cluster pins its own.
+    // #461's second addendum: the cluster pins its own line-height rather than inheriting the page's reading leading.
     assert.match(
       css,
       /(?:header\.chrome|\.chrome)\s*\{[^}]*line-height:\s*normal/,
@@ -448,7 +446,6 @@ test("the layout ships the cluster's ratified pins: leading, weight, the aria-cu
     );
     assert.match(css, /\.wordmark\s*\{[^}]*line-height:\s*1\.15/, "the wordmark pins the mockup's 1.15");
     assert.match(css, /\.wordmark\s*\{[^}]*letter-spacing:\s*0?\.12em/, "the wordmark wears the mockup's tracking");
-    // #288's tag swap still means the wordmark is h1 on home and p on rooms, opposite UA weights, no bold cut in the face: both weights stay pinned.
     assert.match(css, /\.wordmark\s*\{[^}]*font-weight:\s*400/, "the wordmark pins the cluster's 400 against the h1 UA bold");
     assert.match(css, /\.room-name\s*\{[^}]*font-weight:\s*400/, "the room name pins 400 against its h1's UA bold");
     assert.ok(!css.includes(".head-rule"), "the folio's double rule retired with the band (#461 ruling 1)");
@@ -458,7 +455,6 @@ test("the layout ships the cluster's ratified pins: leading, weight, the aria-cu
 });
 
 test("the phone doors: EVERY shelled page renders the rooms reveal ahead of its nav (#461, then #483's option-1 ruling)", () => {
-  // The mockup's under-900px nav stand-down stranded four rooms (the legend carries four doors, not seven); the ruled replacement is a no-JS checkbox burger revealing the same nav. Home-only until Sub 6c, when the drawer became the shell's and every room's nav folds down the same way.
   for (const p of PAGES) {
     const html = page(p.route);
     const reveal = html.indexOf('class="rooms-reveal"');
@@ -469,7 +465,6 @@ test("the phone doors: EVERY shelled page renders the rooms reveal ahead of its 
 });
 
 test("a page whose markup carries the survey sheet passes desk open (#461, the interim rule's converse)", () => {
-  // The layout throws on desk without room, but nothing stopped a converted page from forgetting desk="open" and shipping a desk panel wrapped around a full-bleed sheet (skeptic finding 9).
   // The survey sheet is the BARE <div class="sheet">; the Explorer's chart mount is class="sheet" id="sheet", a different animal (sheet-frame.test.ts keys the same way).
   for (const p of PAGES) {
     if (p.route === "index.html") continue;
@@ -518,7 +513,6 @@ test("the head cluster: wordmark, the atelier tagline, then the rooms nav, fixed
         `${p.route} is home: the full-bleed stage needs no band (nothing scrolls beneath the cluster)`,
       );
     }
-    // The cluster's tagline is the SITE line on every page; the per-page flourish moved under the room name.
     assert.ok(
       html.includes('<p class="tagline">an atelier of imaginary cartography</p>'),
       `${p.route} carries the atelier tagline in the cluster`,
@@ -531,7 +525,6 @@ test("the head cluster: wordmark, the atelier tagline, then the rooms nav, fixed
       assert.ok(!html.includes(gone), `${p.route}: the folio ${gone} retired with the cluster (#461)`);
     }
   }
-  // .plate left this list at #472: the shelf revived the survey plates (as .lf-shelf-grid, so grid3 stays a tombstone).
   for (const gone of ['class="lede"', 'class="seedline"', 'class="cartouche"', 'class="banners"', 'class="grid3"']) {
     assert.ok(!page("index.html").includes(gone), `home retired its ${gone} section (#289 hero, then the #470 below-stage removals)`);
   }
@@ -552,7 +545,6 @@ test("every page's h1 names the page: the room on room pages, the wordmark on ho
     const firstHeading = html.search(/<h[1-6]\b/);
     assert.equal(firstHeading, html.search(/<h1\b/), `${p.route} h1 is the first heading on the page`);
     if (p.room) {
-      // #461 ruling 1 keeps #288 in the new form: the room name is the h1, standing in the page (on the sheet or the desk panel), not in the fixed cluster.
       const [mainOpen, mainClose] = [html.search(/<main\b/), html.indexOf("</main>")];
       assert.ok(
         mainOpen > -1 && firstHeading > mainOpen && firstHeading < mainClose,
@@ -593,11 +585,9 @@ test("titles are computed in the layout from the room, never hand-set (#268)", (
       assert.ok(!open[1].includes(gone), `${p.route} must not hand-set ${gone.slice(0, -1)} (the layout computes it)`);
     }
     if (p.room) {
-      // The page hoists the room to a const and hands the SAME value to the layout (the title) and to RoomFolio (the h1), so the two cannot drift.
       assert.ok(source.includes(`const room = "${p.room}"`), `${p.route} hoists its room to a const`);
       assert.ok(open[1].includes("room={room}"), `${p.route} passes the const to the layout`);
       assert.ok(source.includes(`const tagline = "${p.tagline}"`), `${p.route} hoists its tagline to a const`);
-      // #462: a converted room stands its name in the RoomFolio corner; the RoomHead on the sheet retired with the last conversion (#464).
       assert.ok(source.includes("<RoomFolio room={room} tagline={tagline}>"), `${p.route} stands its RoomFolio in the page`);
     } else {
       assert.ok(!open[1].includes("room="), `${p.route} is home and passes no room`);
@@ -623,7 +613,6 @@ test("the footer is constant and appears exactly once per page; a chart room alo
   }
 });
 
-// A guard, green from the start: <main> is load-bearing (page CSS centers via it) and the end-anchored close means nothing can be injected after the footer unseen.
 test("the body skeleton pins the shell order: band, cluster, main, footer on the deep (#461)", () => {
   for (const p of PAGES) {
     const html = page(p.route);
@@ -654,7 +643,7 @@ test("the body skeleton pins the shell order: band, cluster, main, footer on the
 });
 
 test("the shell's own script rides every page, inlined by Astro rather than emitted as a file (#483 ruling, option 1)", () => {
-  // The ruling's preferred form, taken by measurement: the chunk is under Vite's 4096-byte inline limit, so Astro writes it into the html and emits nothing. "the deploy artifact serves no raw app source" below is what reds if it ever crosses.
+  // The chunk is under Vite's 4096-byte inline limit, so Astro inlines it; "the deploy artifact serves no raw app source" below reds if it ever crosses.
   for (const p of PAGES) {
     const html = page(p.route);
     const shell = html.match(SHELL_SCRIPT);
@@ -664,11 +653,9 @@ test("the shell's own script rides every page, inlined by Astro rather than emit
 });
 
 test("each app page keeps its bundle-twin module script, rendered verbatim inside <main>", () => {
-  // The app entry stays the Vite-pressed twin; a module script is deferred by spec, so rendering inside <main> is behavior-identical to the old after-main position. The shell's script is every page's and is taken out first, so these counts stay the page's OWN.
   for (const p of PAGES) {
     const tag = `<script type="module" src="${p.scriptSrc}"></script>`;
     if (p.pageScript !== undefined) {
-      // Inlined, never a file: an emitted _astro/*.js would be raw app source in the artifact (the "no raw app source" audit below is the cliff).
       const html = ownScripts(p.route);
       const scripts = [...html.matchAll(/<script\b[^>]*>/g)].map((m) => m[0]);
       assert.deepEqual(scripts, ['<script type="module">'], `${p.route} carries exactly one script of its own, inlined by Astro`);
@@ -705,7 +692,7 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
   }
 });
 
-// #487 (the Atelier Kit's one PR before #465): the six shapes the rooms pasted are components, and the BUILT html carries each as one shape. Measured 2026-09-02 against the #464 tree's build: home, the FAQ, the Gallery, the Glossary and the atlas byte-identical; the Print Room, the Reading Room and Today identical after collapsing whitespace between tags; the Prospect and the Ribbon the same plus one apostrophe entity each (Astro escapes a prop's text); the Explorer the same plus data-zoom on its three presses, which nothing on that page reads (its glass.ts binds by id).
+// Measured 2026-09-02 against the #464 build: home, the FAQ, the Gallery, the Glossary and the atlas byte-identical; the Print Room, the Reading Room and Today identical after collapsing whitespace between tags; the Prospect and the Ribbon the same plus one apostrophe entity each (Astro escapes a prop's text); the Explorer the same plus data-zoom on its three presses, which nothing on that page reads.
 const KIT_FOG = '<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>';
 const KIT_VIGNETTES = '<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>';
 const KIT_GLASS = (id: string) => `<div class="chrome corner br zoomery"${id} role="group" aria-label="Camera">
@@ -772,7 +759,6 @@ test("the kit's lifted shapes render one shape on every page that wears them: th
 });
 
 test("the seed form floats on the stage as the mockup's corner chrome, its ratified semantics whole (#470, was the #289 cartouche hero)", () => {
-  // normalize: prose markers must not break on source-line reflow.
   const html = normalize(decode(page("index.html")));
   const order = [
     'class="landfall"',
@@ -791,7 +777,6 @@ test("the seed form floats on the stage as the mockup's corner chrome, its ratif
     at = next;
   }
   assert.ok(at < html.indexOf("</section>", html.indexOf('class="landfall"')), "the form rides the landfall section: the map is the page now");
-  // The ratified semantics (#455, restated at #470): digits pattern, GET fallback, the intercept's marker; the PAGES table pins the intercept script itself.
   const form = html.slice(html.indexOf("<form"), html.indexOf("</form>"));
   assert.ok(form.includes('action="explorer/"') && form.includes('method="get"'), "the no-JS GET fallback survives the move");
   assert.ok(form.includes('name="seed"'), "the fallback still names its query");
@@ -800,7 +785,6 @@ test("the seed form floats on the stage as the mockup's corner chrome, its ratif
 });
 
 test("the Notice stamps the deep before the panel's prose; the count is ten (#289, reshaped at #459)", () => {
-  // normalize: prose markers must not break on source-line reflow.
   const html = normalize(decode(page("index.html")));
   const order = [
     "Notice to Mariners",
@@ -862,7 +846,6 @@ test("the support set the pages depend on is committed in public/", () => {
 });
 
 test("the deploy artifact serves no raw app source, no .d.ts, and no engine emit (#260)", async () => {
-  // Since #260 every served .js is a pressed twin or a chunk; the before() clean means this audits exactly what COMMITTED public/ contributes.
   const files: string[] = [];
   const walk = async (dir: string): Promise<void> => {
     for (const entry of await readdir(dir, { withFileTypes: true })) {

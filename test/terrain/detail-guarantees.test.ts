@@ -117,7 +117,7 @@ test("a diagonal touch is not a bridge under 4-connectivity (#397)", () => {
 });
 
 test("two diagonal spurs are two one-touch components, never one bridge (#397)", () => {
-  // guard-prover round 1: labelling the gained mask 8-connected escaped all 1409 tests, because it fuses these two spurs into one two-touch component and drowns both; the other diagonal case (spur to landmass) is pinned above.
+  // An 8-connected labelling of the gained mask fuses these two spurs into one two-touch component and drowns both; the spur-to-landmass diagonal is pinned above.
   const coarse = fieldFromRows([
     "......",
     "......",

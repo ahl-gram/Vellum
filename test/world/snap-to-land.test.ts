@@ -71,7 +71,6 @@ test("the tie-break holds at the radii production uses, not only at radius 1", (
 });
 
 test("at radius 1 the snap agrees with the 8-neighbour scan it replaces, tie-break included", () => {
-  // All 255 neighbour masks: the replacement must pick whichever cell the old inline scan did.
   for (let mask = 1; mask < 256; mask++) {
     const land = new Set<string>();
     NEIGHBORS_8.forEach(([dx, dy], i) => {

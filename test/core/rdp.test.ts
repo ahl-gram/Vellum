@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { simplifyPath, type Pt } from "../../src/core/rdp.ts";
 
-// #120: a BFS path staircases across the grid; RDP turns it back into a drawn line.
 const p = (x: number, y: number): Pt => ({ x, y });
 
 test("collapses a collinear run to its endpoints", () => {

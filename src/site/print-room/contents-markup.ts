@@ -1,4 +1,4 @@
-// The Print Room's slip contents (#463 part 3/4): the atlas's index, string in and string out like plate-markup.ts. The host mints the blob URLs and hands the refs in; a null atlas is the unbound state.
+// The Print Room's slip contents: the atlas's index, string in and string out like plate-markup.ts. The host mints the blob URLs and hands the refs in; a null atlas is the unbound state.
 import { escapeXml } from "../../render/svg.ts";
 import { contentsRowHtml } from "../shared/contents-row.ts";
 import { matterTitle, type MatterKey } from "./matter-markup.ts";

@@ -100,7 +100,7 @@ export const CULTURES: readonly Culture[] = [
     realmTemplates: ["The Vale of %", "The % Compact", "Fair %"],
   },
   {
-    id: "tsuren", // NEW: a Japanese culture - open syllables, -kawa and -shima, the Mandate
+    id: "tsuren", // a Japanese culture: open syllables, -kawa and -shima, the Mandate
     onsets: ["k", "s", "t", "n", "h", "m", "r", "y", "w", "sh", "ch", "ts", "g", "z", "d", "b"],
     nuclei: ["a", "i", "u", "e", "o", "ai", "ou", "ei"],
     codas: ["", "", "", "n"],
@@ -128,8 +128,7 @@ export const CULTURES: readonly Culture[] = [
     realmTemplates: ["The Empire of %", "The % Dominion", "Iron %"],
   },
   {
-    id: "oromi", // a Polynesian culture - atolls, fire peaks, chiefdoms
-    // ^ index 6: the covenant of seed 42 - DO NOT MOVE (see guard test)
+    id: "oromi", // a Polynesian culture (atolls, fire peaks, chiefdoms); index 6 is the covenant of seed 42, pinned by test/world/covenant-seed42.test.ts
     onsets: ["k", "t", "m", "n", "h", "r", "l", "p", "w", "kai", "tau", "moa"],
     nuclei: ["a", "o", "u", "e", "ai", "au", "oa"],
     codas: ["", "", "n", "ng", "ki", "lo"],
@@ -143,7 +142,7 @@ export const CULTURES: readonly Culture[] = [
     realmTemplates: ["The % Atolls", "The Chiefdom of %", "Greater %"],
   },
   {
-    id: "zoryan", // NEW: a Slavic culture - -grad and -ov, limans, birch taigas
+    id: "zoryan", // a Slavic culture: -grad and -ov, limans, birch taigas
     onsets: ["v", "z", "r", "d", "b", "g", "k", "s", "m", "n", "l", "p", "vl", "gr", "dr", "sk", "st", "br", "tr", "kr", "sv", "zv"],
     nuclei: ["a", "o", "e", "i", "u", "y"],
     // Single-consonant codas only: cluster codas met the cluster onsets and stacked into unpronounceable piles.
@@ -158,7 +157,7 @@ export const CULTURES: readonly Culture[] = [
     realmTemplates: ["The Tsardom of %", "The % Voivodeship", "The % Balka"],
   },
   {
-    id: "tezcal", // NEW: a Nahuatl and Maya culture - -tlan and -pec, cenotes, the Fifth Sun
+    id: "tezcal", // a Nahuatl and Maya culture: -tlan and -pec, cenotes, the Fifth Sun
     onsets: ["", "t", "tl", "tz", "x", "ch", "c", "m", "n", "l", "p", "hu", "cu", "y"],
     nuclei: ["a", "e", "i", "o", "ia", "ua"],
     // tl stays an onset and the -tlan suffix but never a coda: as a coda it stacked into Tletltlan-style pile-ups.
@@ -173,7 +172,7 @@ export const CULTURES: readonly Culture[] = [
     realmTemplates: ["The Fifth Sun of %", "The % Dominion", "The Empire of %"],
   },
   {
-    id: "ordai", // NEW: a Mongolic and Turkic steppe culture - khots, kurgans, the horde
+    id: "ordai", // a Mongolic and Turkic steppe culture: khots, kurgans, the horde
     onsets: ["", "k", "kh", "g", "t", "d", "b", "s", "sh", "ch", "m", "n", "l", "r", "y", "gh"],
     nuclei: ["a", "e", "i", "o", "u", "uu", "oo", "ai", "ei"],
     codas: ["", "n", "r", "l", "g", "t", "sh", "ng"],

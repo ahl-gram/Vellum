@@ -117,7 +117,6 @@ test("on-map arms are opt-in and ride above realm labels", () => {
 });
 
 test("a single-realm world still shows its arms beside the seat", () => {
-  // Citystates have one unnamed realm, so there is no realm label to anchor to; the lone arms must still appear on the map.
   const w = generateWorld(defaultRecipe(7, { mapType: "citystate", gridW: 160, gridH: 120 }));
   assert.equal(w.names.realms.length, 0, "citystate is a single, unnamed realm");
   assert.ok(w.arms.length >= 1, "but it still has a coat of arms");
@@ -127,7 +126,6 @@ test("a single-realm world still shows its arms beside the seat", () => {
 });
 
 test("armsPlacements covers every realm: labelled realms keep their anchor, unlabelled fall back to their seat", () => {
-  // The #44 follow-up bug: when only SOME realm labels place, the old code armed only the labelled realms (the seat fallback was gated on zero anchors); armsPlacements must return one placement per realm.
   const world = {
     arms: [{}, {}, {}],
     realms: { seats: [4, 5, 6] },
@@ -146,7 +144,7 @@ test("armsPlacements covers every realm: labelled realms keep their anchor, unla
 });
 
 test("a multi-realm world where a realm's shield is boxed in beside its label still arms it (#44 follow-up repro)", () => {
-  // Seed 40318157 (archipelago): 2 realms, both labelled, but pre-fix one realm's shield was boxed in on all four cardinal sides and silently dropped, so the chart drew 1 shield for 2 realms.
+  // Seed 40318157 (archipelago): 2 realms, both labelled, one shield boxed in on all four cardinal sides.
   const w = generateWorld(defaultRecipe(40318157));
   assert.ok(w.arms.length >= 2, "fixture must stay a multi-realm world to exercise the bug");
   const armed = renderMap(w, { style: "antique", arms: true });
@@ -155,7 +153,6 @@ test("a multi-realm world where a realm's shield is boxed in beside its label st
 });
 
 test("a side-placed shield clears its realm label's all-caps text (no covered letters, #44 follow-up)", () => {
-  // Realm labels render UPPERCASE, wider than spacedTextBox's 0.56 mixed factor; pre-fix the shield anchored to the underestimated width and tucked over the final letters (seed 40318157 covered the last "N" of "...DOMINION").
   const CAPS = 0.72; // serif all-caps advance width, the basis of the fix
   const w = generateWorld(defaultRecipe(40318157));
   const svg = renderMap(w, { style: "antique", arms: true });
@@ -169,7 +166,7 @@ test("a side-placed shield clears its realm label's all-caps text (no covered le
     if (!label) continue;
     const esc = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const lm = new RegExp(`<text\\b([^>]*)>${esc}</text>`).exec(svg);
-    if (!lm) continue; // realm has no placed label (seat fallback) — nothing to clear
+    if (!lm) continue; // realm has no placed label (seat fallback): nothing to clear
     const at = lm[1]!;
     const lx = Number(/\bx="([\d.]+)"/.exec(at)![1]);
     const ly = Number(/\by="([\d.]+)"/.exec(at)![1]);
@@ -194,7 +191,6 @@ test("a side-placed shield clears its realm label's all-caps text (no covered le
   }
 });
 
-// #25: ink-style Petra Sancta tincture hatching (field + divisions only).
 
 const ALL_TINCTURES: Tincture[] = ["or", "argent", "gules", "azure", "sable", "vert", "purpure"];
 
@@ -254,7 +250,6 @@ test("#25 ink hatch marks follow the Petra Sancta engraving convention per tinct
 });
 
 test("#25 every ink hatch tile has an opaque paper base (no bleed-through)", () => {
-  // Divided fields paint one region over the other; without an opaque tile base the lower field's hatch shows through the overlay's gaps (the same guard protects on-map arms from terrain bleed).
   const doc = armsSvgDocument(
     { division: "perBend", field: ["vert", "or"], charge: null },
     SIZE, paletteForStyle(STYLES.ink), "d",
@@ -275,7 +270,6 @@ test("#25 colour styles keep solid field fills, never patterns", () => {
 });
 
 test("#25 multiple ink arms in one document get collision-free, suffix-scoped pattern ids", () => {
-  // Two realms sharing a tincture must not share a <pattern> id; the on-map multi-realm ink+arms path is the only place ink patterns collide, so idSuffix must scope every pattern id.
   const arms: Arms = { division: "plain", field: ["azure"], charge: null };
   const pal = paletteForStyle(STYLES.ink);
   const doc = renderSvg(

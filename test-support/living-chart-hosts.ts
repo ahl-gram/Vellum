@@ -1,12 +1,11 @@
-// Shared hosts and recorders for the living-chart boundary suites; lives outside test/ so node --test does not collect it.
-// The engine is imported DYNAMICALLY inside the functions that need it, so importing this helper cannot smuggle the engine past the #191 no-DOM import guard.
+// Shared hosts and recorders for the living-chart boundary suites; outside test/ so node --test does not collect it. The engine is imported DYNAMICALLY inside the functions that need it, so importing this helper cannot smuggle the engine past the no-DOM import guard.
 import type { LivingChart } from "../src/site/living-chart/index.ts";
 import type { VoyageLogPanel } from "../src/site/living-chart/voyage-log-panel.ts";
 import type { PlaceManifest } from "../src/render/place-manifest.ts";
 import type { Survey } from "../src/render/survey.ts";
 import type { El } from "./element-shim.ts";
 
-/** The engine's whole public surface; #319 pins the SAME list for both host shapes, and the length is asserted from the array, never quoted from a comment. */
+/** The engine's whole public surface; the suites pin the SAME list for both host shapes. */
 export const API = [
   "buildPlaceOverlay", "onDocKeydown", "onDocClick", "reclampCard",
   "applyAges", "rearmAges", "exitAges", "clearAges",
@@ -23,7 +22,7 @@ export const API = [
 /** A plain empty element: construction may only STORE refs, so this is enough for it. */
 export const bareEl = (): HTMLElement => ({}) as unknown as HTMLElement;
 
-/** A status line recording every WRITE, so "the engine posted nothing" is provable: bareEl swallows the assignment, and the host's whole settle signal is this element staying "" (#371). */
+/** A status line recording every WRITE, so "the engine posted nothing" is provable: bareEl swallows the assignment, and the host's whole settle signal is this element staying "". */
 export function recordingStatus(): { el: HTMLElement; writes: string[] } {
   const writes: string[] = [];
   const el = {
@@ -49,7 +48,7 @@ export function emptyMount(): { el: HTMLElement; asked: string[] } {
   return { el: mount as unknown as HTMLElement, asked };
 }
 
-/** A mount pre-holding two voyage overlay stubs (#364), recording an ordered ask/remove/append ledger; deliberately not a selector engine. */
+/** A mount pre-holding two voyage overlay stubs, recording an ordered ask/remove/append ledger; deliberately not a selector engine. */
 export function stackedMount(): { el: HTMLElement; ledger: string[] } {
   const ledger: string[] = [];
   const held = ["first", "second"].map((name) => ({
@@ -73,7 +72,7 @@ export function stackedMount(): { el: HTMLElement; ledger: string[] } {
   return { el: mount as unknown as HTMLElement, ledger };
 }
 
-/** The #121 margin log is a SIBLING of the mount, so no mount ledger can ever see it, and barlessLogPanel's own hideLog records nothing: this call ledger is the only way to prove a bail hid the journal it left behind (#371). */
+/** The margin log is a SIBLING of the mount, so no mount ledger can see it, and barlessLogPanel's own hideLog records nothing: this call ledger is the only way to prove a bail hid the journal it left behind. */
 export async function recordingLogPanel(): Promise<{ panel: VoyageLogPanel; calls: string[] }> {
   const { barlessLogPanel } = await import("../src/site/living-chart/no-bar.ts");
   const base = barlessLogPanel();
@@ -92,7 +91,7 @@ export async function recordingLogPanel(): Promise<{ panel: VoyageLogPanel; call
   return { panel, calls };
 }
 
-/** The host's optional verso surface (#174), recording so a paint or clear is provable. */
+/** The host's optional verso surface, recording so a paint or clear is provable. */
 export function recordingSink(): {
   sink: { paint(p: string, v: string): void; clear(): void };
   calls: string[];
@@ -114,7 +113,7 @@ export function recordingChamber(): { calls: string[]; as<T>(): T } {
   return { calls, as: <T,>() => proxy as T };
 }
 
-/** A scrubber whose elements record writes: enough to tell the REAL instrument and journal from the #319 no-DOM stand-ins. */
+/** A scrubber whose elements record writes: enough to tell the REAL instrument and journal from the no-DOM stand-ins. */
 export function recordingBar(): { bar: Record<string, unknown>; writes: string[] } {
   const writes: string[] = [];
   const node = (name: string) => ({
@@ -144,7 +143,6 @@ export function recordingBar(): { bar: Record<string, unknown>; writes: string[]
 // A REAL seed-42 world: a synthetic grid would route zero legs and pass proving nothing; the ~1.5s generation is paid once, lazily, and the world is never mutated.
 let world42: { manifest: PlaceManifest; survey: Survey } | null = null;
 
-/** The seed-42 manifest + survey, with the element shim installed. Memoized. */
 export async function realWorld(): Promise<{ manifest: PlaceManifest; survey: Survey }> {
   if (world42) return world42;
   const [{ installShim }, { defaultRecipe, generateWorld }, { buildPlaceManifest }, { buildSurvey }] =

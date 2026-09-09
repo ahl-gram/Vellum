@@ -12,7 +12,7 @@ test("the Glass's computed seat beside an open slip is the sheet's own arithmeti
   assert.equal(Number(m[1]) + Number(m[2]), GLASS_GAP_REM, "room-seats.ts's GLASS_GAP_REM drifted from the sheet");
 });
 
-// #463: on a phone the legend row (the room's roads out) docks inside the slip so the bottom sheet carries it (#462 ruling 3); on a wide sheet it stands on the stage. One element moves, because the Explorer's roads carry ids the suites and app.ts read, so a second copy is not an option.
+// On a phone the legend row docks inside the slip so the bottom sheet carries it (#462 ruling 3); on a wide sheet it stands on the stage. One element moves, because the Explorer's roads carry ids the suites and app.ts read, so a second copy is not an option.
 
 test("the legend seats in the slip on a narrow sheet and on the stage on a wide one", () => {
   assert.equal(legendSeat({ narrow: true, hasSlip: true }), "slip");
@@ -61,7 +61,7 @@ test("a seat already held moves nothing (a resize storm must not churn the row)"
 });
 
 // The legend row's width follows the folio's text extent (placeLegendRow), and a narrower row wraps taller; the fit bounds the sheet by the row's top, so the row is seated first or the fit reads a row that is about to grow (plate read 2026-08-30 on #463: the Print Room's sheet over a freshly wrapped row until the next layout).
-// Paper is narrower than the 900px phone query, so the kit's narrow block (the folio clamped to 12.5rem, the tagline hidden) reaches every printed chart room; the print block, later in the sheet, takes both back (skeptic on PR #496).
+// Paper is narrower than the 900px phone query, so the kit's narrow block (the folio clamped to 12.5rem, the tagline hidden) reaches every printed chart room; the print block, later in the sheet, takes both back.
 test("the kit's print block restores the room folio's tagline and width after the phone block has hidden and clamped them", () => {
   const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8");
   const narrow = css.indexOf("@media (max-width: 900px)");

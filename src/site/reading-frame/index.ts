@@ -1,19 +1,12 @@
-// The reading frame (#219): the reading presentation, one chart over one dated log and
-// nothing else, maker chrome collapsed. A framework-free layout module that BUILDS its
-// own DOM and hands back a LivingChartHost (both of #219's open decisions ratified
-// 2026-07-27, issue comment 5097366231). The journal rides INSIDE the panel the engine
-// hides; that nesting is load-bearing: the engine's teardown hides the panel without
-// emptying the strip, so a log mounted as the panel's sibling would keep a dead world's
-// rows on screen. #220 collapsed the frame's two dated-log instances into this ONE
-// document, one arrived-class (`inked`), one dressing rule.
+// The reading frame (#219, both open decisions ratified in issue comment 5097366231): one chart over one dated log, a framework-free layout module that BUILDS its own DOM and hands back a LivingChartHost. The journal rides INSIDE the panel the engine hides: the teardown hides the panel without emptying the strip, so a log mounted as the panel's sibling would keep a dead world's rows on screen.
 import { createDatedLog } from "./dated-log.ts";
 import { DEFAULT_PACE, PACES, type Pace } from "../living-chart/pace.ts";
 import type { LivingChartHost, ScrubberRefs, ToldEntry } from "../living-chart/index.ts";
 
 export interface ReadingFrameOpts {
-  /** #192: forwarded to the chronicle's park seam, so a host with an address writer can record the rest Play's programmatic slider writes announce no event for. Optional. */
+  /** Forwarded to the chronicle's park seam, so a host with an address writer can record the rest Play's programmatic slider writes announce no event for. */
   readonly onPark?: () => void;
-  /** #402/#442: forwarded to the instrument's one told signal, so a host can decorate the entry the story is on. Optional. */
+  /** Forwarded to the instrument's one told signal, so a host can decorate the entry the story is on. */
   readonly onAgesTold?: (told: ToldEntry | null) => void;
 }
 
@@ -34,7 +27,6 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   const reading = document.createElement("div");
   reading.className = "rf-reading";
 
-  // The instrument's apparatus (#220): the bar and the one journal, hidden together.
   const agesPanel = document.createElement("div");
   agesPanel.className = "rf-ages";
   agesPanel.hidden = true;
@@ -58,7 +50,6 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   year.className = "rf-year";
   year.setAttribute("aria-hidden", "true");
 
-  // #442: the bar and the live row travel together in one wrapper; where the wrapper stands is the host's (a bottom strip since #463), and the arrival unfurl transforms .rf-instrument, never the wrapper.
   const strip = document.createElement("div");
   strip.className = "rf-instrument-strip";
 
@@ -75,7 +66,7 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
 
   const log = createDatedLog({ label: "The ages" });
 
-  // #493: the room wires the presses; the engine never sees them.
+  // The room wires the presses; the engine never sees them.
   const pace = document.createElement("div");
   pace.className = "rf-pace";
   pace.setAttribute("role", "group");
@@ -97,7 +88,7 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   root.append(chart, status, reading);
   mount.appendChild(root);
 
-  // #319 made LivingChartHost.scrubber optional; this frame ALWAYS builds one and says so in its own type, so the room's frame.host.scrubber reads need no narrowing.
+  // LivingChartHost.scrubber is optional; this frame ALWAYS builds one and says so in its own type, so the room's frame.host.scrubber reads need no narrowing.
   const host: LivingChartHost & { scrubber: ScrubberRefs } = {
     mapEl: chart,
     statusEl: status,
@@ -113,7 +104,6 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
     },
   };
 
-  /** #442: the live row is a MIRROR of the row the story is on, never a second writer over the journal; it renders from the told payload and touches no li the engine owns. */
   function setTold(t: ToldEntry | null): void {
     if (t === null) {
       told.hidden = true;
@@ -121,20 +111,18 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
       toldText.textContent = "";
       return;
     }
-    // The journal dresses the surveyor's prologue rows in his own hand; the mirror carries the same class so a mirrored row reads in the voice its source is written in.
     told.classList.toggle("prologue", t.chamber === "survey");
     toldGutter.textContent = t.chamber === "survey" ? `day ${t.day}` : String(t.year);
     toldText.textContent = t.text;
     told.hidden = false;
   }
 
-  /** Unmount: a page host that leaves takes its DOM with it; the engine's own destroy() is the host's to call. */
   function destroy(): void {
     log.clear();
     root.remove();
   }
 
-  // The reading column (#318): furniture appended here stands through the engine's hidden teardowns; a host that seats its parts elsewhere (#463) leaves it empty.
+  // The reading column: furniture appended here stands through the engine's hidden teardowns; a host that seats its parts elsewhere leaves it empty.
   function markPace(k: Pace): void {
     for (const [p, b] of paceButtons) b.setAttribute("aria-pressed", String(p === k));
   }

@@ -24,7 +24,6 @@ test("different seeds roll different winds", () => {
   assert.ok(dirs.size >= 3, `winds vary across seeds (got ${dirs.size} distinct)`);
 });
 
-// The seed-42 identity pins that sat here are gone: since #74 the climate CONSUMES the wind, so identity cannot witness fork independence; the provenance assertion above is the durable guard, and identity is pinned in test/world/golden-seed42.test.ts.
 
 test("the nautical arrows read the world's wind", () => {
   const world = generateWorld(defaultRecipe(42));

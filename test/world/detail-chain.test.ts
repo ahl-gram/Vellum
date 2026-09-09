@@ -193,7 +193,7 @@ test("two zoom routes to the same window produce a byte-identical field (#398)",
   const endB = b.at(-1)?.window as UvWindow;
   assert.ok(windowsEqual(endA, endB), "the two routes did not land on the same window");
 
-  // The routes reach that window through DIFFERENT intermediate windows, which is the whole hazard: a parent taken from where the camera came from is not the parent taken from the window.
+  // The routes reach the window through different intermediate windows: the hazard is a parent taken from where the camera came from.
   const routedParent = b.at(-2)?.window as UvWindow;
   const canonical = canonicalParent(endA);
   assert.ok(
@@ -205,7 +205,7 @@ test("two zoom routes to the same window produce a byte-identical field (#398)",
   const fb = buildChainedField(specFor(endB), createChainCache());
   assertSameField(fb.data, fa.data, "the same window drew different terrain by route");
 
-  // What a path-derived parent WOULD have drawn, built with Sub 2's own functions off route B's previous window. It must differ, or this window cannot tell the two constructions apart and the guard above is proving nothing.
+  // What a path-derived parent would have drawn, off route B's previous window; it must differ or the guard above proves nothing.
   const bare = bareFieldFor(endA, fa.w, fa.h);
   const routedSurface = parentSurfaceOnWindow(
     buildChainedField(specFor(routedParent)),
@@ -224,7 +224,6 @@ test("two zoom routes to the same window produce a byte-identical field (#398)",
     "a parent taken from the camera path drew the identical field, so path-independence is untestable here",
   );
 
-  // A cache carrying unrelated ancestry must not leak into the answer either.
   const warmed = createChainCache();
   for (const w of [lodWindowFor(0.125, 0.875, 0.125), lodWindowFor(0.375, 0.125, 0.25)]) {
     buildChainedField(specFor(w), warmed);
@@ -234,7 +233,7 @@ test("two zoom routes to the same window produce a byte-identical field (#398)",
 });
 
 test("the atlas window chains, at the depth its own size implies (#398)", () => {
-  // canonicalParent claims support for a non-LOD window; the atlas plate window is the live one (windowAround(world, anchor, 0.38) in src/atlas/compose.ts), and it is NOT a band, so nothing but the window itself can say how deep its ancestry runs.
+  // The atlas plate window (windowAround(world, anchor, 0.38) in src/atlas/compose.ts) is not a band, so only the window itself says how deep its ancestry runs.
   const atlas = lodWindowFor(0.5, 0.5, 0.38);
   const ancestry = ancestorWindows(atlas);
   assert.equal(ancestry.length, 2, "a 0.38 window doubles to 0.76 and then to the full sheet");
@@ -255,7 +254,7 @@ test("the atlas window chains, at the depth its own size implies (#398)", () => 
 });
 
 test("the detail level never exceeds what buildHeightfield accepts (#398)", () => {
-  // detailForWindow is written for any depth, but #396 caps the offsets table at MAX_DETAIL and throws past it, so the clamp is what keeps a deep window (the Farther Interior's, #395) from throwing rather than drawing.
+  // #396 caps the offsets table at MAX_DETAIL and throws past it, so the clamp is what keeps a deep window from throwing.
   const tiny = { u0: 0.5, v0: 0.5, u1: 0.5 + 2 ** -12, v1: 0.5 + 2 ** -12 };
   assert.equal(detailForWindow(tiny), MAX_DETAIL, "a very small window must clamp to the table's headroom");
   assert.doesNotThrow(() =>
@@ -317,7 +316,7 @@ test("the chain protects every link: no land sinks, band to band and end to end 
 });
 
 test("the chain never fuses two landmasses of its own coarse reference (#398)", () => {
-  // The UNGATED max, which the chain no longer floors against nor partitions by since #443: kept as #398's weaker historical claim, with the world chart's own partition guarded in detail-chain-world.test.ts.
+  // The ungated max, the weaker claim; the world chart's own partition is guarded in detail-chain-world.test.ts.
   const seed = 2;
   const archipelago = defaultRecipe(seed);
   const parentWorld = buildHeightfield({ seed, gridW: 320, gridH: 240, mapType: archipelago.mapType });

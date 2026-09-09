@@ -170,7 +170,6 @@ export async function run(ctx) {
 
   await setYear(sm.present);
 
-  // RS13 is deliberately absent: S11's panel unfurl had no room successor when this ported (RS26/RS27 became that successor at #321), and the label stays unused so the numbering is stable.
 
   const rs14 = await evaluate(`(()=>{
     const g=[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].find((el)=>getComputedStyle(el).display!=="none");

@@ -26,7 +26,6 @@ test("an entry reads only once the line has reached it: above the first entry no
 });
 
 test("across the broadside's columns two entries sit level: the earlier one is the reading, not the later (the IX2 catch, 2026-08-29)", () => {
-  // Column one's first question and column two's first share a top; column one's second sits lower and is still above the line.
   const entries = [{ id: "c1-first", top: 137.6 }, { id: "c1-second", top: 300 }, { id: "c2-first", top: 137.6 }];
   assert.equal(entryAt(entries, 145.6, 90), "c1-first", "level entries fall to the earlier");
   assert.equal(entryAt(entries, 320, 90), "c1-second", "the entry nearest the line from above, not the last in the page's order");

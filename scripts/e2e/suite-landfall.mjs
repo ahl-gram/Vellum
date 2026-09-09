@@ -154,7 +154,6 @@ export async function run(ctx) {
     JSON.stringify({ hintOn, hintOff }),
   );
 
-  // L1k acts on REAL clicks at scrolled-viewport coordinates: the instruments' remnant is exactly what a reader can reach down there.
   const scrollToFloor = async () => {
     for (let i = 0; i < 20; i++) {
       await evaluate(`window.scrollTo(0, document.body.scrollHeight)`);
@@ -679,7 +678,6 @@ export async function run(ctx) {
     JSON.stringify({ debtBefore, debtAfter }),
   );
 
-  // Down to the stand-off clamp the same way.
   let floor9 = await camNow();
   for (let i = 0; i < 14 && stagePt9 !== null; i++) {
     await pinch(stagePt9.x, stagePt9.y, 180, 60);

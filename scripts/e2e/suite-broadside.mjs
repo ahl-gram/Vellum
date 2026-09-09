@@ -60,7 +60,6 @@ export async function run(ctx) {
     JSON.stringify(br1b),
   );
 
-  // #463 plate read: the legend row overlapped the slip's corner at 1280 and the chart folio after a resize (a mid-transition rect read the old seat). The row is placed by measurement now; both widths and the resize are the class.
   const legendRoom = `(()=>{const r=(sel)=>{const el=document.querySelector(sel);if(!el)return null;const b=el.getBoundingClientRect();return{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)};};
     const lg=r(".legend"),bl=r(".corner.bl"),sl=r("#broadside"),gl=r(".corner.br"),sh=r("#sheet");
     const range=document.createRange();let text=0;for(const p of document.querySelectorAll(".corner.bl p")){if(!p.textContent)continue;range.selectNodeContents(p);text=Math.max(text,range.getBoundingClientRect().right);}
@@ -157,7 +156,6 @@ export async function run(ctx) {
   // REAL CDP taps fire the full compat sequence a synthetic .click() skips (which once hid an off-by-one here); device metrics + touch emulation is what actually flips the hover/pointer media in this browser, setEmulatedMedia's feature overrides are a no-op.
   await setMobileViewport(390, 700);
   const emulated = await evaluate(`window.matchMedia("(hover: none)").matches`);
-  // #463: on a phone the Broadside is the bottom sheet, collapsed to its head; the mark lives in its body, so open it first (the handle is the sheet's toggle).
   await sleep(120);
   await evaluate(`(()=>{const h=document.querySelector("#broadside .slip-handle");if(h&&!document.getElementById("broadside").classList.contains("open"))h.click();})()`);
   await sleep(120);
@@ -176,7 +174,6 @@ export async function run(ctx) {
   const probe = () => evaluate(`(()=>{const n=document.getElementById("note-survey");
     return{stayed:location.pathname==="/explorer/",open:!!n&&n.matches(":popover-open"),
       hasLink:!!document.querySelector('#note-survey a[href="/glossary/#survey"]')};})()`);
-  // #463: the roads out dock INSIDE the phone sheet (room.ts seats the one legend row; the stage copy would be display:none at 390), so the Press is reachable from the opened Broadside. The class this guards: a seat decided but never applied leaves a phone with no way to the Print Room or the journal.
   const br6a = await evaluate(`(()=>{const dock=document.querySelector("#broadside .legend.in-slip");const ids=["verso-turn","order-plates","journal-link"].map((id)=>{const el=document.getElementById(id);return{id,inSheet:!!(dock&&dock.contains(el)),shown:!!el&&el.getClientRects().length>0};});return{docked:!!dock,onStage:!!document.querySelector("main > .legend"),ids};})()`);
   check(
     "BR6a on a phone the Press docks inside the opened Broadside: Turn and both roads in the sheet and hit-testable, none left on the stage",
@@ -208,12 +205,7 @@ export async function run(ctx) {
       groundOn:l?getComputedStyle(l,"::before").content:null,
       slipY:b?Math.round(b.y):null,
       rowY:l?Math.round(l.getBoundingClientRect().top+l.getBoundingClientRect().height/2):null};})()`);
-  // The MEDIAN of a wide run: the defect is a full-area wash, so the median moves with it, while a max passes on one bright press under the sample and a min fails on one hairline crossing it.
-  // The row is read at the DOCKED PRESS's own middle, scrolled into view first because the sheet's body scrolls and the row
-  // sits below the fold at 390 (measured 882 in an 844-tall viewport, which sampled the dark outside the page). A fixed
-  // offset from the sheet's top was the old proxy for this place, and #540 put the leaf tabs in the head at exactly that
-  // offset: the selected tab is ink-dark, so the proxy read 59 against a sheet that had not changed. A contrast number
-  // taken beside the ink is about somewhere else.
+  // The MEDIAN of a wide run (a max passes on one bright press under the sample, a min fails on one hairline crossing it), read at the DOCKED PRESS's own middle after scrolling it into view: the row sits below the fold at 390 (measured 882 in an 844-tall viewport), and a fixed offset from the sheet's top landed on #540's ink-dark selected tab and read 59 against a sheet that had not changed.
   const lums = br6b.rowY === null ? null : (await sampleRow(send, 20, br6b.rowY, 16)).map(luminance).sort((a, b) => a - b);
   const br6bGround = lums === null ? null : Math.round(lums[Math.floor(lums.length / 2)]);
   // #532: the mark's contrast is a COMPUTED-STYLE claim and can only be read as one. The declaration that fails here is PRESENT in the stylesheet and simply loses the cascade, so a text match over the CSS passes on the broken code. The three states go through CSS.forcePseudoState, and each asserts its own resolved COLOUR: a floor alone passes when the hover arm is deleted and hover falls back to the resting ink, which still clears it (skeptic on PR #535).

@@ -27,7 +27,7 @@ export function editDistanceWithin1(a: string, b: string): boolean {
     } else {
       if (edited) return false;
       edited = true;
-      j++; // skip the extra character in the longer string
+      j++;
     }
   }
   return true;

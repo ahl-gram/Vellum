@@ -1,6 +1,4 @@
-// DOM element shim for site modules that build DOM: environment only, never the module under test.
-// Queries deliberately answer "nothing here", true of an undrawn mount; never grow this into a selector engine.
-// Lives outside test/ so node --test does not collect it as a phantom 0-test file.
+// DOM element shim for site modules that build DOM: environment only, never the module under test. Queries answer "nothing here", true of an undrawn mount; never grow this into a selector engine. Outside test/ so node --test does not collect it.
 
 /** The two methods are NON-enumerable, so Object.keys of the bag still returns only what something actually wrote. */
 function styleBag() {
@@ -26,10 +24,8 @@ export class El {
   max = "";
   step = "";
   type = "";
-  /** Inline positioning only, custom properties included. A plain bag: nothing here resolves or cascades. */
   style = styleBag();
   dataset: Record<string, string> = {};
-  /** Recorded for the wiring assertions; `handlers` below is what lets a test FIRE one. */
   listeners: string[] = [];
   handlers = new Map<string, ((e?: unknown) => void)[]>();
   /** What getBoundingClientRect answers. The shim does no layout, so a test that measures must say what it is measuring. */
@@ -114,7 +110,6 @@ export class El {
 export const installShim = (): void => {
   (globalThis as { document?: unknown }).document = {
     createElement: (tag: string) => new El(tag),
-    // Namespace discarded: nothing under test reads it back.
     createElementNS: (_ns: string, tag: string) => new El(tag),
     createTextNode: (t: string) => {
       const n = new El("#text");

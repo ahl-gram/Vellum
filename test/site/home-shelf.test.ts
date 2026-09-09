@@ -3,11 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// Landfall Sub 6a (#472): pulled all the way back, the page resumes. One World, Many Charts
-// returns as plain server-rendered flow BELOW the landfall section, on the shell's deep. The
-// scrolljacking contract's static half lives here: the shelf is reachable with no JS and no
-// camera, and no authored sheet locks the document's scroll (the #461 body lock retired with
-// this sub; the 2026-08-27 ratification comment on #472 records the call).
+// Home's shelf (#472, ratified 2026-08-27 on the issue): One World, Many Charts is plain server-rendered flow BELOW the landfall section, reachable with no JS and no camera, and no authored sheet locks the document's scroll.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
@@ -86,7 +82,7 @@ test("the scroll hint pulses only at full pull-back (#472, 2026-08-28 ruling): i
 test("nothing home loads locks the document's scroll (#472 retired the #461 body lock; the class, not the instance: every sheet home links, plus the inline style blocks)", () => {
   const inline = (p: string): string =>
     [...read(p).matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n").replace(/\/\*[\s\S]*?\*\//g, "");
-  // At-rule preludes are stripped first: split("}") alone hands an @media-first rule the prelude as its selector, and the sweep goes blind to it (#481 skeptic finding 4).
+  // At-rule preludes are stripped first: split("}") alone hands an @media-first rule the prelude as its selector, and the sweep goes blind to it.
   const flatten = (cssText: string): string => cssText.replace(/@[^{}]*\{/g, "");
   const sources: ReadonlyArray<readonly [string, string]> = [
     ...["public/index.css", "public/house.css", "public/motion.css", "public/fonts.css"].map(

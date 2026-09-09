@@ -1,14 +1,8 @@
-// #53 story cards: the per-draw DOM layer of invisible hit-targets over the baked chart,
-// positioned by manifest fractions, feeding one reused parchment card. The chronicle
-// coupling crosses the boundary as the injected `isSuppressed` predicate. Card text is
-// composed CLIENT-SIDE from the manifest (composePlaceCard), never createLoreWriter,
-// whose order/rng-dependent prose would diverge from the gazetteer for the same town.
+// The story cards: a per-draw layer of invisible hit-targets over the baked chart feeding one reused parchment card. Card text is composed client-side from the manifest (composePlaceCard), never createLoreWriter, whose order-dependent prose would diverge from the gazetteer for the same town.
 import { composePlaceCard, placeAriaLabel, cardSide, clampOffset, type CardBox, type PlaceCard } from "../../render/place-card.ts";
 import type { PlaceManifest, PlaceMark } from "../../render/place-manifest.ts";
 import type { HistoricalEvent } from "../../society/history.ts";
 
-// Rebuilt every draw (the host's innerHTML swap wipes the mount's children). `pinned` keeps a tapped or Enter/Space card open (touch has no mouseleave).
-// currentIdx and pinnedIdx MUST stay distinct: a genuine click is always preceded by a preview of the same place, so keying the pin toggle off currentIdx would dismiss instead of switch when pinning B after A was pinned.
 interface PlaceOverlayState {
   card: HTMLDivElement;
   places: ReadonlyArray<PlaceMark>;
@@ -18,11 +12,9 @@ interface PlaceOverlayState {
   currentIdx: number;
   pinned: boolean;
   pinnedIdx: number;
-  /** #242: the persistent prospect link, re-appended per show; null when the card carries none. */
   prospectLink: HTMLAnchorElement | null;
 }
 
-/** The manifest slice the chronicle scrubber reads back through the engine's index. */
 export interface OverlayData {
   places: ReadonlyArray<PlaceMark>;
   events: ReadonlyArray<HistoricalEvent>;
@@ -42,13 +34,9 @@ export interface BuildPlaceOverlayOpts {
 }
 
 export interface PlaceOverlayDeps {
-  /** The chart mount; the overlay and the card are appended as its children. */
   mapEl: HTMLElement;
-  /** True while the chronicle scrubber owns the sheet: the hover card is suppressed. */
   isSuppressed: () => boolean;
-  /** #242: builds the shown place's way in to the prospect page from its world settlement index. */
   prospectHref?: (idx: number) => string;
-  /** #387/#388: the box a shown card is clamped into, in client coordinates. */
   clampBox?: () => CardBox | null;
 }
 
@@ -57,7 +45,6 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
 
   let placeOverlay: PlaceOverlayState | null = null;
 
-  // Rebuilt from textContent only (no innerHTML): the fields are plain strings.
   function fillCardInner(inner: HTMLElement, card: PlaceCard, place: PlaceMark): void {
     inner.replaceChildren();
     const name = document.createElement("strong");
@@ -108,10 +95,9 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const side = cardSide(place.nx, place.ny);
     el.classList.toggle("flip-h", side.h === "left");
     el.classList.toggle("flip-v", side.v === "above");
-    // #128: a card pinned to THIS place plays the full unfurl grade; a hover/focus preview runs the short grade.
     el.classList.toggle("pinned", placeOverlay.pinned && placeOverlay.pinnedIdx === idx);
     el.hidden = false;
-    // Restart the unfurl cleanly at the current grade on every show: a CSS animation would not replay while the card stays displayed across a content swap, and a mid-flight grade change would leave a partial roll; the none/reflow/restore reset guarantees a fresh roll.
+    // The none/reflow/restore reset replays the unfurl at the current grade on every show: a CSS animation does not replay while the card stays displayed across a content swap, and a mid-flight grade change would leave a partial roll.
     inner.style.animation = "none";
     void inner.offsetWidth;
     inner.style.animation = "";
@@ -119,13 +105,11 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     placeOverlay.currentIdx = idx;
   }
 
-  // #387/#388: the nudge is arithmetic over a MEASURED box, so anything that moves or rescales the sheet under an open card invalidates it.
   function reclampCard(): void {
     if (!placeOverlay || placeOverlay.card.hidden) return;
     clampIntoView(placeOverlay.card);
   }
 
-  // Only the runtime knows the card's measured box, so the nudge cannot live in the stylesheet.
   function clampIntoView(el: HTMLElement): void {
     if (!clampBox) return;
     el.style.setProperty("--pc-dx", "0px");
@@ -144,9 +128,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     placeOverlay.card.hidden = true;
   }
 
-  // After each draw: lay invisible focusable hit-targets over the baked glyphs (the chart exposes no per-feature ids) and feed one reused parchment card.
-  // #169: preservePinByName re-pins a pinned card to the SAME-NAMED settlement in the new manifest (a region redraft renumbers, so an index-keyed pin would jump or dangle); default draws pass nothing.
-  // #169: opts.box positions the overlay over a region INSET's rect so the region manifest's own nx/ny fractions land on the inset's drawn glyphs; the card lives inside the overlay so its % anchor resolves against the same box.
+  // opts.box positions the overlay over a region inset's rect so the region manifest's own nx/ny fractions land on the inset's drawn glyphs; the card lives inside the overlay so its % anchor resolves against the same box.
   function buildPlaceOverlay(manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts): void {
     if (!manifest || !manifest.places) return;
     const preserveName =
@@ -168,10 +150,8 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     }
     const card = document.createElement("div");
     card.id = "place-card";
-    // role=tooltip + aria-describedby (set per hit below) reads the card as the focused hit's description; no aria-live, which on a populate-while-hidden region announces unreliably and would double up.
     card.setAttribute("role", "tooltip");
     card.hidden = true;
-    // #128: the paper sheet is a persistent inner wrapper; content swaps per place but the element is stable, so the unfurl replays only on a real unhide, not on a content swap.
     const inner = document.createElement("div");
     inner.className = "pc-inner";
     card.appendChild(inner);
@@ -192,12 +172,10 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       hit.setAttribute("aria-describedby", "place-card");
       hit.style.left = `${place.nx * 100}%`;
       hit.style.top = `${place.ny * 100}%`;
-      // A preview can move the open card between places; the pin only governs whether leaving dismisses it.
       hit.addEventListener("mouseenter", () => showPlaceCard(idx));
       hit.addEventListener("focus", () => showPlaceCard(idx));
       hit.addEventListener("mouseleave", () => { if (!placeOverlay!.pinned) placeOverlay!.card.hidden = true; });
       hit.addEventListener("blur", () => { if (!placeOverlay!.pinned) placeOverlay!.card.hidden = true; });
-      // Tap / Enter / Space all fire a button click: pin the card open, or switch the pin; activating the already-pinned place toggles it off.
       hit.addEventListener("click", () => {
         if (placeOverlay!.pinned && placeOverlay!.pinnedIdx === idx) { hidePlaceCard(); return; }
         placeOverlay!.pinned = true;
@@ -206,9 +184,8 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       });
       overlay.appendChild(hit);
     });
-    overlay.appendChild(card); // inside the overlay so its % anchor shares the overlay's box
+    overlay.appendChild(card);
     mapEl.appendChild(overlay);
-    // #169: restore a pinned card onto the same-named settlement if it survived into the new sheet; off the new window, leave it dismissed.
     if (preserveName != null) {
       const idx = manifest.places.findIndex((p) => p.name === preserveName);
       if (idx >= 0) {
@@ -219,7 +196,6 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     }
   }
 
-  // Document-level dismiss, wired once by the host: Escape or a click off any mark closes a pinned card; a click on a hit or the card is ignored here (the hit's own handler owns pinning).
   function onDocKeydown(e: KeyboardEvent): void {
     if (e.key === "Escape" && placeOverlay && !placeOverlay.card.hidden) hidePlaceCard();
   }
@@ -231,13 +207,11 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     hidePlaceCard();
   }
 
-  /** The current manifest slice, for the chronicle scrubber; null before the first build. */
   function data(): OverlayData | null {
     if (!placeOverlay) return null;
     return { places: placeOverlay.places, events: placeOverlay.events, presentYear: placeOverlay.presentYear };
   }
 
-  /** Full removal for an unmounting host: drop the overlay nodes and the state. */
   function teardown(): void {
     for (const stale of mapEl.querySelectorAll(":scope > .place-overlay, :scope > #place-card")) stale.remove();
     placeOverlay = null;

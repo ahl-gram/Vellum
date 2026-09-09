@@ -84,7 +84,6 @@ test("river cells are claimed exactly once (no overlap except junctions)", () =>
   }
 });
 
-// #162: a regional survey anchors its river threshold to the parent world rather than a window-local quantile, so a stream does not gain or lose river status between zoom levels; absoluteThreshold feeds the pre-computed value back in.
 test("riverThreshold is the land-accumulation quantile, floored at minAcc (#162)", () => {
   const acc = [1, 2, 3, 4, 5, 6, 7, 8, 9, 100];
   // quantile(0.985) of 10 sorted values -> index floor(0.985 * 9) = 8 -> value 9

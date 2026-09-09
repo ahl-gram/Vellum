@@ -20,8 +20,7 @@ import {
   sitemapXml,
 } from "../../scripts/generate-discovery.ts";
 
-// #286: sitemap.xml, robots.txt and llms.txt are GENERATED from NAV_ITEMS, so every route assertion iterates NAV_ITEMS; a hardcoded list here would rot like the hand-written files this replaces.
-// The site origin is a PARAMETER, exercised with a non-Vellum domain so a hardcoded www.vellumworlds.com in a generator fails here; that the real origin comes from astro.config.ts is pinned separately.
+// sitemap.xml, robots.txt and llms.txt are GENERATED from NAV_ITEMS, so every route assertion iterates NAV_ITEMS; the origin is a parameter, exercised with a non-Vellum domain so a hardcoded www.vellumworlds.com in a generator fails here.
 
 const root = (p = "") => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 
@@ -131,7 +130,6 @@ test("the real origin comes from astro.config.ts, so a domain move updates all t
   assert.ok(sitemapXml(await configuredSite()).includes(`<loc>${config.site}/</loc>`), "home resolves against it");
 });
 
-// The wiring pins: a correct generator never wired into astro:generate would pass every test above while the live site serves 404s; these close that gap (content correct, step wired, Astro copies public/ verbatim).
 test("astro:generate ends by generating the discovery files into public/", () => {
   const pkg = JSON.parse(readFileSync(root("package.json"), "utf8"));
   assert.ok(

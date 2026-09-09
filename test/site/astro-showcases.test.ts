@@ -48,7 +48,6 @@ test("generateShowcases writes the atlas and gallery a deploy expects", { timeou
   rmSync(tmp, { recursive: true, force: true });
   await generateShowcases(tmp);
 
-  // The atlas stays a self-shelled generated document (out of #268's scope).
   const atlasIndex = join(tmp, "atlas", "index.html");
   assert.ok(existsSync(atlasIndex), "atlas/index.html should exist");
   const atlasHtml = readFileSync(atlasIndex, "utf8");
@@ -57,18 +56,15 @@ test("generateShowcases writes the atlas and gallery a deploy expects", { timeou
   const atlasSvgs = readdirSync(join(tmp, "atlas")).filter((f) => f.endsWith(".svg"));
   assert.equal(atlasSvgs.length, 11, "atlas should hold 11 SVGs (hero + 3 draughtings + 4 themes + 2 regions + the capital's prospect, #412)");
   assert.ok(atlasSvgs.includes("prospect-capital.svg"), "the capital's prospect plate is written (#412)");
-  // Identity pin, green from the start by design: counts alone would pass a wrong-seed showcase; the title carries seed-42's deterministic name.
   assert.ok(
     atlasHtml.includes("The Isle of Rahai: a Vellum atlas"),
     "the atlas must be the seed-42 hero world's bound volume",
   );
 
-  // The gallery is a shelled route since #268: its generated tree is assets alone, never an index.html that would collide with the route in dist/.
   const galleryFiles = readdirSync(join(tmp, "gallery"));
   assert.equal(galleryFiles.filter((f) => f.endsWith(".svg")).length, 12, "gallery should hold 12 SVGs");
   assert.ok(galleryFiles.includes("index.css"), "gallery should hold the generated page css");
   assert.ok(!galleryFiles.includes("index.html"), "the standalone gallery shell retired with the #268 re-shell");
-  // The ratified seed-100, count-12 contact sheet on its prime stride (7919), pinned by the first and last card filenames.
   assert.ok(galleryFiles.includes("chart-100.svg"), "the first card must be seed 100");
   assert.ok(galleryFiles.includes(`chart-${100 + 11 * 7919}.svg`), "the last card must sit 11 prime strides along");
   rmSync(tmp, { recursive: true, force: true });

@@ -14,14 +14,11 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 import { buildVoyagePlan } from "../../src/render/voyage.ts";
 
-// #442 G: the survey half's picture. Ruled 2026-08-22: it changes only for a capital or
-// a realm seat, the places whose plates hang arms, and HOLDS at the last one through
-// towns, villages and hamlets. Pure, so the whole rule is provable without a browser.
+// The survey half's picture (#442 G, ruled 2026-08-22): it changes only for a capital or a realm seat, the places whose plates hang arms, and HOLDS at the last one through towns, villages and hamlets; pure, so provable without a browser.
 
 const PRESENT = 1218;
 
-// Row 0 is the capital the survey sets out from; 7 is a realm seat, a non-capital that
-// still hangs arms, which is the case a kind-only test cannot see.
+// Row 0 is the capital; 7 is a realm seat, a non-capital that still hangs arms, the case a kind-only test cannot see.
 const ARMED = new Set([0, 7]);
 const hasArms = (i: number): boolean => ARMED.has(i);
 
@@ -111,10 +108,7 @@ test("#442 the prefetch set carries BOTH halves, deduped by index AND year", () 
   }
 });
 
-// The witness, without which the seat half of the rule is decoration: a real route
-// carrying a real non-capital seat. Measured 2026-08-23 over seeds 1 to 40: 37 seeds put
-// at least one on the route (seed 1 puts two, idx 1 and 4, both of kind "town"); seeds
-// 3, 13 and 18 put none, so their picture holds the capital the whole survey.
+// The witness for the seat half: measured 2026-08-23 over seeds 1 to 40, 37 seeds put a non-capital seat on the route (seed 1 puts two, idx 1 and 4, both "town"); seeds 3, 13 and 18 put none.
 test("#442 a real survey route swaps the plate at a seat whose KIND is only a town (seed 1)", () => {
   const world = generateWorld(defaultRecipe(1));
   const manifest = buildPlaceManifest(world, 1500);

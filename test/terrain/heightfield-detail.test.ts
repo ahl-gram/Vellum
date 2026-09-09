@@ -9,14 +9,13 @@ const RECIPE = {
   mapType: "island",
 } as const;
 
-// A band-3 sized window (sizeUV 0.125) and a centre window used by the ridge guard below.
 const BAND3_WINDOW = { u0: 0.4, v0: 0.3, u1: 0.525, v1: 0.425 } as const;
 const CENTRE_WINDOW = { u0: 0.4, v0: 0.4, u1: 0.6, v1: 0.6 } as const;
 
 type CellPin = readonly [number, number, number];
 
 test("detail 0 reproduces the plain field byte for byte (#396)", () => {
-  // The absolute pins are the non-circular half of the oracle (pr-skeptic: comparing the new path with itself can never see the default path drift): constants measured against main at f83f1b8, where an old-vs-new probe read max |diff| = 0 over every case; tolerance 1e-9 clears ~1e-13 cross-platform libm drift.
+  // The absolute pins are the non-circular half of the oracle (comparing the new path with itself cannot see the default path drift): constants measured against main at f83f1b8 with max |diff| = 0 old-vs-new; tolerance 1e-9 clears ~1e-13 cross-platform libm drift.
   const cases: ReadonlyArray<{ params: TerrainParams; pins: readonly CellPin[] }> = [
     {
       params: { seed: 42, gridW: 320, gridH: 240, mapType: "island" },
@@ -123,7 +122,7 @@ test("ridged2's octave count is independent of the detail level (#396)", () => {
 });
 
 test("the detail extension and its pinned normalizer are wired at every call site (#396)", () => {
-  // Measured-constant pin covering the base-warp and both coast-warp call sites (guard-prover and pr-skeptic both showed every relative detail assertion blind to a single-site mutation: a deleted normOctaves renormalizes both sides of a comparison, and a deleted + detail still leaves the other field extending). Constants measured at ca2c7c8 on this fixture; each of the six single-site mutations moves every cell below by >= 4.4e-4, five orders above the 1e-9 tolerance, which itself clears ~1e-13 cross-platform libm drift.
+  // Measured-constant pin covering the base-warp and both coast-warp call sites, since every relative detail assertion is blind to a single-site mutation; constants measured at ca2c7c8, and each of the six single-site mutations moves every cell below by >= 4.4e-4, five orders above the 1e-9 tolerance, which itself clears ~1e-13 cross-platform libm drift.
   const f = buildHeightfield({ ...RECIPE, window: BAND3_WINDOW, detail: 3 });
   const PINS: readonly CellPin[] = [
     [14, 19, 0.3799611668863139],

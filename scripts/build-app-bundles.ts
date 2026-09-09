@@ -36,10 +36,10 @@ const pressConfig = (outDir: string): InlineConfig => ({
     // A staging dir, not root itself: writing into root trips Vite's outDir-inside-root guard; the emitted twins are copied into place afterward.
     outDir,
     emptyOutDir: true,
-    target: "esnext", // no syntax downlevel; top-level await survives as authored
+    target: "esnext",
     minify: false,
     sourcemap: false,
-    modulePreload: false, // no polyfill injection; the shells load plain modules
+    modulePreload: false,
     rollupOptions: {
       input: Object.fromEntries(
         BUNDLE_ENTRIES.map(({ entry, twin }) => [twin.replace(/\.bundle\.js$/, ""), join(REPO, entry)]),
@@ -56,7 +56,6 @@ const pressConfig = (outDir: string): InlineConfig => ({
   },
 });
 
-/** Bundle the app surfaces (and the one shared worker) into `root`, the served tree. */
 export async function bundleAppSurfaces(root: string): Promise<void> {
   const staging = await mkdtemp(join(tmpdir(), "vellum-press-"));
   try {
@@ -70,7 +69,6 @@ export async function bundleAppSurfaces(root: string): Promise<void> {
   }
 }
 
-/** Bundle one entry and return the emitted code without writing it (for tests). */
 export async function bundleToString(absEntry: string): Promise<string> {
   const res = await build({
     configFile: false,

@@ -1,11 +1,10 @@
 ---
-// Sub 7 (#462, chart-room ruling 3 and document-room ruling 1; the Atelier Kit, #487): the room's working panel, the mockup's station card grown into a desk; the behaviour is src/site/shared/slip.ts, bound by whichever script the page runs.
+// The room's working panel (#462 chart-room ruling 3; the Atelier Kit, #487): the mockup's station card grown into a desk; the behaviour is src/site/shared/slip.ts, bound by whichever script the page runs.
 interface Props {
   id: string;
   verb: string;
   title: string;
   where: string;
-  /** The fold button's accessible name ("Fold the hunt away"). */
   fold: string;
 }
 const { id, verb, title, where, fold } = Astro.props;

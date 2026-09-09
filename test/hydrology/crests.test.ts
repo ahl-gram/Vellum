@@ -7,7 +7,7 @@ import { pickSeaLevel } from "../../src/terrain/sealevel.ts";
 import { computeFlow } from "../../src/hydrology/flow.ts";
 import { computeBasins, watershedDivides } from "../../src/hydrology/basins.ts";
 
-// #141 LOOSE elevation gate: a watershed divide is a hard realm frontier only where it runs through the top half of land elevation (quantile ~0.5); it does NOT try to select "only the biggest ranges", MAJOR_BASIN_FRACTION already does. Driven from a hand-drawn divides mask + elevation.
+// The LOOSE elevation gate keeps a divide only where it runs through the top half of land elevation (quantile ~0.5); it does NOT select "only the biggest ranges", MAJOR_BASIN_FRACTION already does.
 
 const SEA = 0.5;
 const W = 6, H = 3;
@@ -32,7 +32,6 @@ test("#141 the gate keeps a divide through high terrain and drops one through a 
 });
 
 test("#141 the gate only ever keeps divide cells, never bare high ground", () => {
-  // x=5 is the highest land but carries no divide, so it must stay 0.
   const gated = gateDivideElevation(divideAt([4]), risingLand(), SEA, 0.5);
   for (let y = 0; y < H; y++) assert.equal(at(gated, 5, y), 0, `bare high ground (5,${y}) is not a crest`);
 });
@@ -50,7 +49,7 @@ test("#141 with no land the gate keeps nothing (no threshold to clear)", () => {
 });
 
 test("#141 mountainCrests on a real island: the gate drops below-median divides, keeps the crest", () => {
-  // Seed 16: 213 major divides, 38 below the land median, so crest < divides bites the wiring (a gate-disconnected mutation makes crest == divides). Seed 7, the obvious pick, has EVERY divide above median, so the gate is a no-op there and that mutation slips the whole suite (per the #141 review).
+  // Seed 16: 213 major divides, 38 below the land median, so crest < divides bites the wiring (a gate-disconnected mutation makes crest == divides). Seed 7, the obvious pick, has EVERY divide above median, so the gate is a no-op there and that mutation slips the whole suite.
   const gw = 120, gh = 90;
   const f = buildHeightfield({ seed: 16, gridW: gw, gridH: gh, mapType: "island" });
   const sea = pickSeaLevel(f, 0.35);

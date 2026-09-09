@@ -5,8 +5,7 @@ import { fileURLToPath } from "node:url";
 import { heroChartSvgs } from "../../scripts/hero-charts.ts";
 import { diffSvg, DRIFT_TOL } from "../../scripts/svg-drift.ts";
 
-// Drift guard (#40 part 2): nothing else re-renders the committed public/charts heroes, so a src/render change could leave the homepage stale; this re-renders via heroChartSvgs() (the charts:regen function) and compares via diffSvg, tolerant of cross-platform float noise.
-// On a real drift: run npm run charts:regen and land the regen ALONE. See svg-drift.ts for the tolerance rationale.
+// Drift guard (#40): nothing else re-renders the committed public/charts heroes, so this re-renders via heroChartSvgs() and compares via diffSvg, tolerant of cross-platform float noise; on a real drift run npm run charts:regen and land the regen ALONE.
 
 const chartsDir = fileURLToPath(new URL("../../public/charts/", import.meta.url));
 
@@ -30,7 +29,6 @@ test("committed public/charts heroes match a fresh src/ render (structure exact,
         `(max Δ ${d.maxAbs.toExponential(2)}) — run \`npm run charts:regen\` to regenerate. e.g. ${d.examples.join("; ")}`,
     );
   }
-  // A green run logs the platform float noise, documenting it was ULP, not drift.
   if (worstAbs > 0) {
     console.log(`hero-charts drift guard: max cross-render numeric Δ = ${worstAbs.toExponential(2)}px (tol ${DRIFT_TOL})`);
   }

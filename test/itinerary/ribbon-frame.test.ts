@@ -8,11 +8,7 @@ import { roadMask, roadReachable } from "../../src/itinerary/route.ts";
 import { STYLES } from "../../src/render/style.ts";
 import type { World } from "../../src/world/types.ts";
 
-// #427 item 1. Pre-fix, a flat 0.75-cell overlap against a 16px pad put seed 99's Mialiscove to Con
-// 45.40px past strip 1's frame. Post-fix the worst overshoot over all 1457 connected pairs across
-// seeds 2/15/42/99/123 is 0.60px, the road casing's own half-width leaning on the frame stroke.
-// TOLERANCE is that half-width, written out rather than imported from the renderer: a guard that
-// reads its own tolerance from the module it guards widens silently when that module widens.
+// Measured worst overshoot post-fix: 0.60px over 1457 connected pairs (seeds 2/15/42/99/123), the road casing's half-width leaning on the frame stroke; TOLERANCE is that half-width written out, not imported, so it cannot widen with the module it guards.
 
 const SEEDS = [99, 15, 42];
 const TOLERANCE = 2.3;
@@ -121,9 +117,7 @@ test("seed 99's Mialiscove to Con, the journey that first drew off the sheet, st
 });
 
 test("the three journeys that lean hardest on the frame still hold", () => {
-  // Measured top of the all-pairs sweep. Two of the three set out from their seed's capital
-  // (Taliport is not, Stanbyl and Mialiscove are), so this is not a non-capital sweep; it is the
-  // measured worst cases named outright, including seed 2, which the sweep above does not load.
+  // The measured worst cases of the all-pairs sweep, named outright; seed 2 is not loaded by the sweep above.
   const extremes = [
     { seed: 99, from: "Taliport", to: "Ceasairmere" },
     { seed: 15, from: "Stanbyl", to: "Gistel" },

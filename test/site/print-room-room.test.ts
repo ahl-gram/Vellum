@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// #463 part 3/4: the Print Room is a chart room on the #462 pattern, with the four rulings of 2026-08-30 on #463 (print fixed here, the legend row the posters plus a road back, the corner the mockup plus the dice, the caveat one line under the legend's head) and the #494 ruling (the bound atlas turns on the stage, its thumbnails stay in the slip, the hidden document is the paper source, the post-bind scroll retires).
+// The Print Room is a chart room on the #462 pattern: the four rulings of 2026-08-30 on #463 and the #494 ruling (the bound atlas turns on the stage, its thumbnails stay in the slip, the hidden document is the paper source).
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const page = read("src/pages/print-room/index.astro");

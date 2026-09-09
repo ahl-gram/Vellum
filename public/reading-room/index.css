@@ -1,10 +1,8 @@
 /* #463 (Landfall Sub 8): the Reading Room is a chart room on the #462 pattern. The room furniture is /atelier.css's, the frame's own dress /reading-frame.css's and the engine's /living-chart.css's; this sheet seats the frame's parts: the chart in the stage, the instrument on the bottom strip, the journal in the slip. */
 
-/* The stage centres the fitted sheet in what the chrome leaves; room.ts measures the reserves off the chrome rects, the strip among them. */
 .stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
   padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
 #sheet { position: relative; flex: none; width: 0; height: 0; box-shadow: var(--stage-shadow); }
-/* #164: the Glass's gesture box is the sheet; the frame's chart mount is the transform target, so the engine's overlays ride one frame. transform-origin 0 0 matches d3-zoom's screen-space math. */
 #map-viewport { position: absolute; inset: 0; cursor: grab; }
 #map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
 #map-viewport.zoomable { touch-action: none; }
@@ -22,15 +20,12 @@
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
-/* The chart's folio and the Glass stand above the strip (app.ts measures --strip-h). */
 .corner.bl.folio { bottom: calc(var(--strip-h, 7.6rem) + 1rem); }
 .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { bottom: calc(var(--strip-h, 7.6rem) + 1rem); }
 
-/* The instrument strip (#462 ruling 6), along the bottom edge on the deep's own gradient. */
 .strip { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; padding: 0.55rem var(--chrome-x) 0.9rem;
   background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.9), rgb(from var(--chart-ink) r g b / 0.6) 60%, transparent);
   animation: ink-in 0.5s 0.18s ease-out both; }
-/* The scale lies under the bar: the survey's days on the left in the surveyor's italic, the annals' years on the right in small caps, the compass star at the seam (the bar's midpoint, ages.ts). */
 .scale-well { position: relative; flex: 1 1 8rem; min-width: 0; display: flex; flex-direction: column; margin-top: 0.15rem; }
 /* flex: none, because the well is a column: the row rule's 8rem basis would become the bar's HEIGHT (measured 151px strips, e2e RR34). */
 .scale-well .rf-range { flex: none; width: 100%; }
@@ -47,7 +42,6 @@
 .seam { position: absolute; top: -0.4rem; transform: translateX(-50%); width: 18px; height: 18px; }
 .seam svg { width: 18px; height: 18px; fill: var(--parchment); stroke: var(--chart-ink); stroke-width: 0.6; }
 
-/* #402/#442 the prospect stage, on the slip above the journal since #463 (it keeps the panel's teardowns). hidden toggles display, so prospectUnfurl restarts on every showing; a plate-to-plate swap while visible deliberately does not replay it. */
 .rr-prospect { margin: 0.7rem 0 0.9rem; }
 .rr-prospect a { display: block; }
 /* #442 the plate UNFURLS rather than snapping in: the sheet drops open from its top edge, the house paperUnfurl gesture at the plate's own scale. The fill stays BACKWARDS and the resting keyframe releases the transform, or the final frame would pin at animation-cascade priority and silently kill the hover lift below (measured 2026-08-22, the #402 control probe). */
@@ -71,12 +65,10 @@
   .tick .lbl { display: none; }
   .rf-year { min-width: 4.4rem; font-size: 0.85rem; }
   .rf-play { width: 4.2rem; }
-  /* The bottom sheet sits above the strip; the Glass above the sheet. */
   .slip { bottom: var(--strip-h, 4.6rem); }
   .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { bottom: calc(var(--sheet-h, 6rem) + 1rem); }
 }
 
-/* Print is paper (#462 ruling 10): the strip prints as nothing; the chart prints on the page, unzoomed. */
 @media print {
   .strip { display: none !important; }
   .stage { position: static; padding: 0 !important; display: block; }

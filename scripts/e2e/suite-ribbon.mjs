@@ -5,9 +5,7 @@ export async function run(ctx) {
   const httpBase = http4xx.length;
 
   const page = (hash) => `http://127.0.0.1:${PORT}/ribbon/${hash}`;
-  // A hash-to-hash Page.navigate on one path is a SAME-DOCUMENT navigation that never
-  // re-boots the page, so every fresh address arrives through a real cross-path hop
-  // (the prospect suite's precedent).
+  // A hash-to-hash Page.navigate on one path is a SAME-DOCUMENT navigation that never re-boots the page, so every fresh address arrives through a real cross-path hop (the prospect suite's precedent).
   const goto = async (hash) => {
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/faq/` });
     for (let i = 0; i < 100; i++) {

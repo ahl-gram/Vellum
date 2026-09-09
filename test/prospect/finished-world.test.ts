@@ -1,6 +1,4 @@
-// No byte pins here: world geometry descends from libm (Math.hypot in the transect), so
-// real-seed plate bytes are platform-stable only within one process. Purity and structure
-// are asserted instead; the cross-platform byte pins live on the synthetic fixtures.
+// No byte pins here: world geometry descends from libm (Math.hypot in the transect), so real-seed plate bytes are platform-stable only within one process; the cross-platform byte pins live on the synthetic fixtures.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";

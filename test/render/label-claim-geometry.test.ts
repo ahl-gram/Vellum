@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 import { rotatedSpanBoxes, spacedTextBox, WIDTH_FACTOR, type Box } from "../../src/render/geometry.ts";
 import { createLabelArena } from "../../src/render/context.ts";
 
-// #175: a label must reserve the space it actually draws. Three primitives: a caps-aware width factor, a rotated footprint expressed as a chain of axis-aligned boxes, and an all-or-nothing multi-box claim so a rejected label never leaves half of itself reserved.
 
 test("the caps factor is wider than mixed case, and lives in exactly one place", () => {
   assert.ok(WIDTH_FACTOR.caps > WIDTH_FACTOR.mixed, "capitals are the wider glyphs");

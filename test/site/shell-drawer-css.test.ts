@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// Landfall Sub 6c (#483): the drawer is the SHELL's, so its dress lives once in the layout (#263) and every shelled page wears it. Home keeps only what clears home's own furniture (public/index.css); test/site/home-cluster.test.ts pins that half.
+// The drawer is the SHELL's (#483), so its dress lives once in the layout and every shelled page wears it; home keeps only what clears its own furniture (public/index.css), pinned in test/site/home-cluster.test.ts.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");

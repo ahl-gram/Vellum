@@ -1,7 +1,4 @@
-// The prospect page's address grammar (#242), pure and DOM-free like its #192 sibling in
-// src/site/explorer/address.ts. The page reads the SAME hash keys the Explorer writes
-// (the Print Room's applyHash discipline: presence-gated, allowlisted, clamped, so a
-// crafted hash can never push the engine out of range) plus its own `i` and `year`.
+// The prospect page's address grammar, pure and DOM-free like src/site/explorer/address.ts: the SAME hash keys the Explorer writes (presence-gated, allowlisted, clamped, so a crafted hash can never push the engine out of range) plus its own `i` and `year`.
 import type { StyleName } from "../../render/style.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
