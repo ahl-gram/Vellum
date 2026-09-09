@@ -7,6 +7,10 @@ Two jobs, both at the moment of typing rather than at session start:
      regex class inside a backtick string in scripts/e2e, a PR body with an em-dash or a negated
      closing keyword).
 
+Python rather than TypeScript, stated per CLAUDE.md's one-pipeline rule: this is harness tooling, not
+product code; it runs on every tool call, where /usr/bin/python3 starts in tens of milliseconds; and the
+session hooks in ~/.claude/hooks are Python already.
+
 Reads the hook JSON on stdin, writes a PreToolUse decision on stdout, always exits 0.
 `--selftest` runs the fixtures at the bottom and exits non-zero on any miss.
 """
