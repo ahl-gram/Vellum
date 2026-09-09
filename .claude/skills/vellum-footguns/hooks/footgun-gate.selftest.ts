@@ -4,7 +4,7 @@
  * string from .claude/settings.json through sh with a real, a symlinked, and a missing CLAUDE_PROJECT_DIR.
  */
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
+import { mkdirSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,7 +12,7 @@ import { decide, gateText, statePath, type Decision, type Payload } from "./foot
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, "..", "..", "..", "..");
-const SCRATCH = mkdtempSync(join(tmpdir(), "footgun-selftest-"));
+const SCRATCH = join(tmpdir(), `footgun-selftest-${process.pid}`); // named here, created in run(): FIXTURES needs the path at module scope, and a module that mints a temp dir just by being imported leaks one per import
 const LINK = join(SCRATCH, "linked-root");
 const SETTINGS = JSON.parse(execFileSync("cat", [join(ROOT, ".claude", "settings.json")], { encoding: "utf8" })) as {
   hooks: { PreToolUse: { hooks: { command: string }[] }[] };
@@ -26,14 +26,26 @@ const edit = (tool: string, path: string, text: string): Payload => ({
 });
 const multi = (path: string, text: string): Payload => ({ tool_name: "MultiEdit", tool_input: { file_path: path, edits: [{ new_string: text }] } });
 
-const deployed = (payload: Payload, projectDir: string) => async (): Promise<Decision> => {
-  const out = execFileSync("sh", ["-c", WIRED], {
-    input: JSON.stringify(payload),
-    encoding: "utf8",
-    env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
-  });
+export const readDeployed = (run: () => string): Decision => {
+  let out: string;
+  try {
+    out = run();
+  } catch (err) {
+    const e = err as NodeJS.ErrnoException & { status?: number | null; stdout?: string };
+    if (e.code === "EPIPE" && e.status === 0 && !e.stdout) return null; // the missing-project-dir wrapper runs `exit 0` without reading stdin, so our write races its exit: a clean exit with no output IS "no hook, no decision"
+    throw err;
+  }
   return out.trim() ? (JSON.parse(out) as Decision) : null;
 };
+
+const deployed = (payload: Payload, projectDir: string) => async (): Promise<Decision> =>
+  readDeployed(() =>
+    execFileSync("sh", ["-c", WIRED], {
+      input: JSON.stringify(payload),
+      encoding: "utf8",
+      env: { ...process.env, CLAUDE_PROJECT_DIR: projectDir },
+    }),
+  );
 
 type Kind = "deny" | "context" | null;
 type Fixture = [string, Payload | (() => Promise<Decision>), Kind, string];
@@ -103,6 +115,7 @@ const run = async (): Promise<number> => {
     fails += ok ? 0 : 1;
     console.log(`${ok ? "ok  " : "FAIL"} ${line}`);
   };
+  mkdirSync(SCRATCH, { recursive: true });
   writeFileSync(join(SCRATCH, "body.md"), "a — b\n");
   symlinkSync(ROOT, LINK);
   for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);
@@ -123,4 +136,12 @@ const run = async (): Promise<number> => {
   return fails;
 };
 
-process.exit(await run());
+const isEntry = (): boolean => {
+  try {
+    return process.argv[1] !== undefined && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+};
+
+if (isEntry()) process.exit(await run());
