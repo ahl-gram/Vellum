@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "F=\"${CLAUDE_PROJECT_DIR}/.claude/skills/vellum-footguns/hooks/footgun-gate.ts\"; if [ -f \"$F\" ]; then exec node \"$F\"; fi; exit 0",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
