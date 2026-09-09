@@ -10,6 +10,7 @@ const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const page = read("src/pages/print-room/portfolio/index.astro");
 const app = read("src/site/portfolio/app.ts");
+const css = read("public/print-room/portfolio/index.css");
 
 const between = (from: string, to: string): string => {
   const a = page.indexOf(from);
@@ -25,13 +26,15 @@ const at = (needle: string): number => {
   return i;
 };
 
-test("PFR1 the Portfolio says when the worker did not start: the notice stands in the stage and the page raises it on the inline fallback, the way the Print Room, the Prospect and the Ribbon each do", () => {
+test("PFR1 the Portfolio says when the worker did not start: the notice stands in the stage and the page raises it on the inline fallback, the way the Print Room, the Prospect, the Ribbon and the Reading Room each do", () => {
   const stage = between("<ChartStage", "<Vignettes />");
   assert.match(stage, /<p id="pf-warning" class="warning" hidden>/, "the inline-fallback warning stands in the stage");
   assert.match(app, /import \{[^}]*\busesWorker\b[^}]*\} from "\.\.\/explorer\/worker-client\.ts"/, "the page asks the worker client which path it took");
   assert.match(app, /if \(!usesWorker\(\)\) warning\.hidden = false;/, "and raises the notice when the sheets fell back to the main thread");
   assert.ok(at("await initWorker()") < at("if (!usesWorker())"), "the client knows which path it took only once the worker has been tried");
   assert.ok(at("if (!usesWorker())") < at("await draft()"), "and the notice is up BEFORE the drafting that would freeze the tab, which is the moment it is about");
+  assert.match(css, /\.stage \.warning \{[^}]*position: absolute/, "and the page seats it over the sheet the way the other four do; with no rule of its own it stands beside the sheet as a second flex item and shoves the fitted sheet off centre");
+  assert.match(css, /\.stage \.warning\[hidden\] \{ display: none; \}/, "the four carry this line with it, so a page sheet that seats the notice cannot leave it showing on every load");
 });
 
 test("PFR2 the slip's where-line follows the gathering in both states: a bare Portfolio must not keep the Astro literal promising sheets over a line that says none were gathered", () => {

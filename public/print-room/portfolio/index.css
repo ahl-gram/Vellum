@@ -9,6 +9,8 @@
 #map-viewport.zoomable { touch-action: none; }
 #map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
 #map { position: absolute; inset: 0; transform-origin: 0 0; }
+.stage .warning { position: absolute; left: 50%; top: calc(50% + 2.8rem); transform: translateX(-50%); max-width: 30rem; z-index: 2; margin: 0; }
+.stage .warning[hidden] { display: none; }
 
 /* The pile: papers behind the top sheet, offset a little each, so the stack reads as depth and not as a border. */
 .pile { position: absolute; inset: 0; pointer-events: none; }
