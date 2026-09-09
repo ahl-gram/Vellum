@@ -281,6 +281,7 @@ header.chrome::before {
   font-size: 0.88rem; letter-spacing: 0.14em;
   color: var(--chart-paper); background: var(--ink-dark);
   border: 1px solid var(--chart-ink);
+  /* 0.85rem, not the mockup's 0.45rem: the 44px touch-target ruling (#460, 2026-08-25) is a stated deviation. */
   padding: 0.85rem 1rem;
   text-decoration: none;
   transition: background 0.2s ease;

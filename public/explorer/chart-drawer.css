@@ -26,6 +26,7 @@ button.chart-drawer-tab:is(:hover, :focus-visible) { background: var(--ink-dark)
 
 body:has(.chart-drawer.open) .slip-tab { display: none; }
 
+/* An open Broadside holds the camera 26rem clear of the edge, so the tab never meets it; folded, the camera comes home to --chrome-x where the tab is already standing, and the tab's z-19 over the corner's z-10 left each zoom press answering a real pointer over 44% of its face (#543, Alex 2026-09-08). The camera stands inboard of the tab whenever the Broadside is folded, INCLUDING while the drawer is open and the tab is hidden: a seat that moved with the drawer would be one more thing jumping as it opens, which is the complaint #543 was filed about. Not below 901, where the tab is stood down and atelier.css's own narrow seat rules. */
 @media (min-width: 901px) {
   body:has(.slip.folded) .corner.br.zoomery { right: calc(var(--chrome-x) + var(--chart-drawer-tab-w) + 0.6rem); }
 }

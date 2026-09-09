@@ -48,6 +48,7 @@ body.chart-room .stage { display: flex; align-items: center; justify-content: ce
 #map .region-inset svg.redrafting g.settlement.dry-in text {
   animation: dryingInk var(--redraft-dry, 450ms) var(--ease-paper) var(--redraft-dry-wait, 260ms) both;
 }
+/* The tier-stagger delays sit past the inset's 200ms crossfade so a name never dries onto a still-translucent sheet. */
 #map .region-inset svg.redrafting g.settlement.dry-in[data-tier="village"] text {
   animation-delay: var(--redraft-dry-wait-village, 500ms);
 }
