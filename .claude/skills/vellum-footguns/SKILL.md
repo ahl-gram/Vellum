@@ -1,6 +1,6 @@
 ---
 name: vellum-footguns
-description: The five gates a Vellum change passes through, as checklists to run AT THE MOMENT of typing, not at session start. Invoke before writing a test or guard, before writing an e2e check or a CDP probe, before writing CSS or moving layout, before adding anything that joins a roster, and before every push or PR body. Pass the gate name as the argument (guard, e2e, css, roster, push) or none for all five.
+description: Five checklists keyed to the moment of typing. Read the matching gate before writing a test or guard, an e2e check or CDP probe, CSS, anything that joins a roster, or a push and PR body.
 ---
 
 # Vellum footguns: five gates
@@ -144,7 +144,7 @@ fail silently (an undeclared CSS variable, a suite the runner never calls, a bud
 
 The hook in `hooks/`, wired in `.claude/settings.json`, refuses the first four mechanically; the rest are yours.
 
-- A bare `git stash`: the stash stack is shared across every worktree. `git stash push -m ... -- <paths>`, or a WIP commit.
+- A bare mutation of the stash stack (`git stash`, `pop`, `clear`, `apply` or `drop` without a ref): it is shared across every worktree. `git stash push -m ... -- <paths>`, `apply <sha>`, or a WIP commit.
 - `perl -pi` with a non-ASCII replacement: it re-encodes every existing non-ASCII byte in the file. Use node or a heredoc, then grep for `Â`.
 - A single-escaped `\s`, `\d`, `\w`, `\b` inside a backtick string in `scripts/e2e/`.
 - A PR body with an em-dash, or with "not close #N" / "does not fix #N".

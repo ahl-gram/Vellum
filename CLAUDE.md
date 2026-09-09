@@ -262,8 +262,9 @@ that joins a roster, or a PR body. The rules below and the memory doctrine files
 the skill is the same doctrine as a checklist read at the moment it applies, because its
 `references/scars.md` shows how narrative read at session start and applied at the push let the same
 guard-that-cannot-red, dead-control and cascade defects reach PRs #524 to #548. Its
-`hooks/footgun-gate.py`, wired in `.claude/settings.json`, puts each gate in front of you mechanically
-and refuses four of the never-list items outright (`hooks/README.md`).
+`hooks/footgun-gate.py`, wired in `.claude/settings.json`, puts the matching gate in front of you when
+you touch a test, a browser-driving script, a stylesheet, a new page or suite, or a push, and refuses
+four of the never-list items outright (`hooks/README.md`).
 
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him.
 - **When asking Alex to make an open decision** (on a feature, a bug, a test, anything else),

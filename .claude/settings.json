@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/python3 \"${CLAUDE_PROJECT_DIR}/.claude/skills/vellum-footguns/hooks/footgun-gate.py\"",
+            "command": "F=\"${CLAUDE_PROJECT_DIR}/.claude/skills/vellum-footguns/hooks/footgun-gate.py\"; if [ -f \"$F\" ]; then exec /usr/bin/python3 \"$F\"; fi; exit 0",
             "timeout": 10
           }
         ]
