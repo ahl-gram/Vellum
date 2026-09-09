@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { globSync } from "node:fs";
 import { resolve } from "node:path";
 
-// #487's guard, the #302 precedent's inverse (skeptic on PR #491, finding 2): the kit sheet is linked on every page, so a kit rule on a class HOME also authors leaks onto home unless the rule is scoped to a room. The blocking instance was `.stage`: home's landfall stage wears the class, and the kit's unscoped landing scaled it under the camera.
+// The kit sheet is linked on every page, so a kit rule on a class HOME also wears leaks onto home unless the rule is scoped to a room (the blocking instance was .stage: home's landfall stage wears the class).
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
@@ -22,7 +22,7 @@ const offendersIn = (css: string, home: Set<string>): string[] =>
     return classes.length > 0 && classes.every((c) => home.has(c)) && !SCOPED.test(arm);
   });
 
-/** #487 allows the kit to split ("or a few: slip, legend, chrome"): every atelier*.css on disk is a kit sheet and is swept. */
+/** Every atelier*.css on disk is a kit sheet and is swept (#487 allows the kit to split). */
 const kitSheets = (): string[] => readdirSync(resolve(REPO, "public")).filter((f) => /^atelier.*\.css$/.test(f)).map((f) => `public/${f}`);
 
 /** The pages that do not wear the kit on purpose: home and every room not yet converted (no chartRoom, no open desk); the kit sheet is linked on all of them. */
@@ -52,7 +52,7 @@ test("the guard can see an unscoped collision: the offender loop itself reads a 
 const componentWorn = (astro: string): Set<string> =>
   new Set([...astro.matchAll(/<(Fog|Vignettes|Glass|ChartFolio|ChartStage|LegendButton|Slip|RoomFolio)\b/g)].flatMap((m) => [...classesIn(read(`src/layouts/${m[1]}.astro`))]));
 
-// What a kit arm may set on a class a page wears through a component: dress, which is why the page renders it. A seat, a depth, a ceremony, a pointer policy or a ring must be stood down by the page's own rule for that component, or it is a leak the literal sweep above cannot see (#505, skeptic on PR #508).
+// What a kit arm may set on a class a page wears through a component: dress, which is why the page renders it. A seat, a depth, a ceremony, a pointer policy or a ring must be stood down by the page's own rule for that component, or it is a leak the literal sweep above cannot see.
 const DRESS = new Set(["display", "flex-direction", "gap", "align-items", "transition", "line-height", "width", "height", "font-family", "font-size", "color", "background", "border", "cursor", "text-align"]);
 
 /** Top-level commas only: a comma inside :is() or :where() does not start a new arm. */
@@ -99,7 +99,7 @@ test("the component-worn sweep can see a leak: a planted seat and a planted ring
   assert.deepEqual(leaksIn(".corner { position: fixed; }", worn, new Set(["position"])), [], "and a stood-down property passes");
 });
 
-// #487 item 5 (the #302 precedent, cut at #465): the kit's classes are what atelier.css dresses and no house sheet or the shell dresses too, plus the road's .room (the shell's .room is the body's); the strip is the Reading Room's own instrument, which the kit's pool rule only reaches.
+// The kit's classes are what atelier.css dresses and no house sheet or the shell dresses too, plus the road's .room (the shell's .room is the body's); the strip is the Reading Room's own instrument, which the kit's pool rule only reaches.
 const strip = (css: string): string => css.replace(/\/\*[\s\S]*?\*\//g, "");
 const classesNamed = (css: string): Set<string> => new Set([...strip(css).matchAll(/([^{}]+)\{/g)].flatMap((m) => [...m[1]!.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((x) => x[1]!)));
 const kitClasses = (): Set<string> => {

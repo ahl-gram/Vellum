@@ -126,7 +126,6 @@ function shoresTouched(
   return touched;
 }
 
-/** 4-connectivity throughout, matching labelLandmasses, is what makes anti-merge structural: any new-land path joining two landmasses is one gained component touching both. */
 export function rejectBridges(
   coarse: Field,
   immovable: Field,
@@ -148,7 +147,6 @@ export function rejectBridges(
   const { ids: coarseIds } = labelLandmasses(coarse, seaLevel);
   const gained = new Uint8Array(n);
   for (let i = 0; i < n; i++) {
-    // Negated rather than <=, so a NaN coarse cell counts as not-land and its fine land joins the gained mask; labelLandmasses reads NaN as sea the same way.
     if (
       !((coarse.data[i] as number) > seaLevel) &&
       !((immovable.data[i] as number) > seaLevel) &&

@@ -129,7 +129,6 @@ export function buildHeightfield(params: TerrainParams): Field {
     const dx = (u - 0.5) * 2;
     const dy = (v - 0.5) * 2;
     let d = Math.hypot(dx, dy);
-    // The displacement stays bounded inside the deep-water border guarantee below, so land never clips the frame.
     if (coastWarp !== 0) {
       const wx = fbm2(
         u * COAST_WARP_SCALE * aspect,

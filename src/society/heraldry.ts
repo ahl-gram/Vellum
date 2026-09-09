@@ -4,13 +4,13 @@ import type { Culture } from "./names.ts";
 /** Pure data (the SVG lives in render/layers/heraldry.ts). Arms run on rng.fork("heraldry") and each realm forks its own sub-stream, so a realm's arms never depend on how many realms there are. */
 
 export type Tincture =
-  | "or" // gold (metal)
-  | "argent" // silver / white (metal)
-  | "gules" // red
-  | "azure" // blue
-  | "sable" // black
-  | "vert" // green
-  | "purpure"; // purple
+  | "or"
+  | "argent"
+  | "gules"
+  | "azure"
+  | "sable"
+  | "vert"
+  | "purpure";
 
 export type Division =
   | "plain"

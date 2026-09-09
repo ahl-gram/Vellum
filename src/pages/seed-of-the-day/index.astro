@@ -10,7 +10,7 @@ import Slip from "../../layouts/Slip.astro";
 
 const room = "The Seed of the Day";
 const tagline = "today's date is the seed";
-// The roads out (#462 chart-room ruling 4): the legend row on a wide sheet, docked inside the slip on a phone (room.ts); app.ts stamps today's seed onto them.
+// The roads out: the legend row on a wide sheet, docked inside the slip on a phone (room.ts); app.ts stamps today's seed onto them.
 const roads = [
   { road: "explorer", verb: "Open today's seed in", room: "The Explorer", href: "../explorer/" },
   { road: "reading-room", verb: "Watch today's world in", room: "The Reading Room", href: "../reading-room/" },
@@ -26,7 +26,7 @@ const roads = [
 >
 <Fog />
 <div class="stage">
-  <!-- #167 The Surveyor's Glass, re-seated as the chart room (#462): #map-viewport is the whole stage and the gesture box the shared zoom-controller binds to; the live transform lands on #map, sized to the viewport with the chrome's reserves as padding, so d3's clamp keeps it covering the stage; #sheet inside is the chart's own box (fitted by src/site/shared/room.ts), and the hunt star and the miss soundings ride it. -->
+  <!-- #map-viewport is the whole stage and the gesture box the zoom-controller binds to; the live transform lands on #map, sized to the viewport with the chrome's reserves as padding, so d3's clamp keeps it covering the stage; #sheet inside is the chart's own box, and the hunt star and the miss soundings ride it. -->
   <div id="map-viewport" tabindex="0" role="application" aria-label="Today's chart. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."><div id="map"><div id="sheet" class="sheet"></div></div></div>
   <p class="status" id="status">Drafting today's world&hellip;</p>
   <noscript>

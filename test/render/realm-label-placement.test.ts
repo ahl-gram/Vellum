@@ -7,7 +7,7 @@ import {
   type RealmLabelArena,
 } from "../../src/render/layers/realm-label-placement.ts";
 
-// #145: the placement ladder must never give up on a realm name. Stage 1 is the historical five-candidate vertical ladder and must win whenever it can (so the committed charts do not move); stage 2 searches the realm's own heartland; stage 3 forces the label in and claims its box.
+// Stage 1 is the historical five-candidate vertical ladder and must win whenever it can (so the committed charts do not move); stage 2 searches the realm's heartland; stage 3 forces the label in and claims its box.
 const GRID_W = 40;
 const GRID_H = 30;
 const proj = createProjection(GRID_W, GRID_H, 1500, 68);
@@ -23,7 +23,6 @@ function centroidOfBlob(blob: readonly number[]) {
   return centroidOf(blob.map((i) => ({ x: proj.px(i % GRID_W), y: proj.py((i / GRID_W) | 0) })));
 }
 
-/** An arena that accepts everything, and records what it was handed. */
 function openArena(): RealmLabelArena & { tries: Box[]; forced: Box[] } {
   const tries: Box[] = [];
   const forced: Box[] = [];
@@ -35,7 +34,6 @@ function openArena(): RealmLabelArena & { tries: Box[]; forced: Box[] } {
   };
 }
 
-/** An arena that refuses the first `refusals` claims, then accepts. */
 function stubbornArena(refusals: number): RealmLabelArena & { tries: Box[]; forced: Box[] } {
   const tries: Box[] = [];
   const forced: Box[] = [];

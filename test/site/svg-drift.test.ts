@@ -24,7 +24,6 @@ test("trailing-ULP numeric noise is within tolerance (the cross-platform case)",
 });
 
 test("a 0.01 rounding-boundary flip is tolerated", () => {
-  // a 2-decimal coordinate nudged by one quantum (what a boundary flip looks like)
   const d = expectNumeric(diffSvg("<path d=\"M0.34 0\"/>", "<path d=\"M0.35 0\"/>"));
   assert.equal(d.overTol, 0, "a single rounding-quantum flip must be tolerated");
   assert.ok(Math.abs(d.maxAbs - 0.01) < 1e-9, `expected ~0.01 delta, got ${d.maxAbs}`);

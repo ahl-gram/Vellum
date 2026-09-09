@@ -1,5 +1,4 @@
-// The story's beats (#402): the journal moments that carry an engraved prospect, a
-// founding or a ruin with a settlement to draw. Pure; the stage and the tests share it.
+// The story's beats: the journal moments that carry an engraved prospect, a founding or a ruin with a settlement to draw. Pure; the stage and the tests share it.
 import { eventIsPast } from "../../render/chronicle-scrubber.ts";
 import type { HistoricalEvent } from "../../society/history.ts";
 

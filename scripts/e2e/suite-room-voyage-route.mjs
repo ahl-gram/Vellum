@@ -1,5 +1,4 @@
-// Room voyage-route e2e (RV1-RV12, #320 Sub 3): W17-W28 re-hosted on the Reading Room; Sub 4 retired the Explorer's voyage seams, so this is the only host that can still run them.
-// RV4 is the ONLY numeric guard on MAX_TILT anywhere (a 24 -> 30 mutation leaves all 1058 unit tests green and reds only RV4); RV3/RV9/RV10 guard showMark's #181 wiring, which has no unit coverage.
+// Room voyage-route e2e (RV1-RV12, #320 Sub 3): W17-W28 re-hosted on the Reading Room, the only host that can still run them. RV4 is the ONLY numeric guard on MAX_TILT anywhere (a 24 -> 30 mutation leaves every unit test green and reds only RV4); RV3/RV9/RV10 guard showMark's #181 wiring, which has no unit coverage.
 import { makeRoom, scopedHealth } from "./room-support.mjs";
 
 export async function run(ctx) {
@@ -7,8 +6,7 @@ export async function run(ctx) {
   const room = makeRoom(ctx);
   const gate = scopedHealth(ctx);
 
-  // Seed 526413615 ("The Isle of Selivelai"): 24 ports, a closed 24-leg round trip, exactly one genuine inland handoff.
-  // #418: landed by hand rather than through room.goto, because both guards below have to instrument the page BETWEEN the boot and the arm; this is the room's FIRST arm on this world, the only uncached one, and a later arm takes the held order and would pass either check blind.
+  // Seed 526413615 ("The Isle of Selivelai"): 24 ports, a closed 24-leg round trip, exactly one genuine inland handoff. Landed by hand rather than through room.goto (#418) because both guards below instrument the page BETWEEN the boot and the arm: this is the room's FIRST arm on this world, the only uncached one, and a later arm takes the held order and would pass either check blind.
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=526413615&style=antique&legend=1&survey` });
   const booted = await room.boot();

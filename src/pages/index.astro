@@ -17,7 +17,7 @@ const how = howStation();
   path="/"
 >
 <script is:inline define:vars={{ veilHtml: veilMarkup(), key: ARRIVED_KEY }}>
-// #457 pre-paint exception, third script by re-ratification of the #289/#455 rule (PR #467): the bundle is deferred and fetched, so only a synchronous inline script can dress first paint, and without it every fresh sitting flashed the undressed page. Same predicate as the module; an unadopted veil releases itself so a failed bundle never traps the page.
+// Pre-paint exception to the #289 inline-script rule (#457): the bundle is deferred and fetched, so only a synchronous inline script can dress first paint. Same predicate as the module; an unadopted veil releases itself so a failed bundle never traps the page.
 (() => {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   let first = true;
@@ -192,7 +192,7 @@ const how = howStation();
 
 <script type="module" src="app.bundle.js" is:inline></script>
 <script is:inline>
-// Inline by stated exception (#289, pipeline rule #260): one form intercept does not earn a bundle twin.
+// Inline by stated exception to the one-pipeline rule (#289): one form intercept does not earn a bundle twin.
 // The Explorer reads the HASH; the no-JS GET fallback lands on ?seed=N, which it ignores, degrading to today's world.
 document.getElementById("seed-form").addEventListener("submit", (e) => {
   e.preventDefault();

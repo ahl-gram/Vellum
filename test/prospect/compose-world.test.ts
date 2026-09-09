@@ -69,7 +69,7 @@ function fnv1a(s: string): number {
   return h >>> 0;
 }
 
-// Pinned 2026-08-10 from a measured run (the golden-seed42 convention) over the same five inputs input.test.ts pins; a change to the grammar's frozen mappings re-pins these deliberately, with the cause named in the commit.
+// Pinned 2026-08-10 from a measured run over the same five inputs input.test.ts pins; a deliberate grammar change re-pins these with the cause named in the commit.
 const PINNED: ReadonlyArray<{ seed: number; index: number; sum: number }> = [
   { seed: 42, index: 0, sum: 1146413912 }, // Laukuwelua, capital, harbor
   { seed: 42, index: 5, sum: 532485178 }, // Loatunui, town, harbor

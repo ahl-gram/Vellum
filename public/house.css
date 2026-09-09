@@ -1,5 +1,4 @@
-/* The house style (#324): the ratified type roles, control idiom, and shared slips, linked by BaseLayout on every page; the specs are the 2026-07-30 ledger comment on #324 and test/site/house-style.test.ts pins them, so a change here is a re-ratification, not a refactor. */
-/* Load order is load-bearing: this sheet renders BEFORE extraCss and the page's own index.css, so a page keeps the last word on layout while this sheet owns the voice. */
+/* The house style (#324): the ratified type roles, control idiom and shared slips, linked by BaseLayout on every page BEFORE extraCss and the page's own index.css, so this sheet owns the voice and a page keeps the last word on layout; the specs are the 2026-07-30 ledger comment on #324 and test/site/house-style.test.ts pins them, so a change here is a re-ratification, not a refactor. */
 
 .intro {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
@@ -41,8 +40,7 @@
   color: var(--ink-faded);
 }
 
-/* The control idiom, one dark primary per page; the .place-hit exclusions keep the living-chart hit targets out of it (their reset loads after this sheet and wins ties). */
-/* input.control is the opt-in for inputs the attribute selector cannot see (home's seed input is type=text with inputmode=numeric for the iOS keypad). */
+/* The control idiom, one dark primary per page: the .place-hit exclusions keep the living-chart hit targets out of it (their reset loads after this sheet and wins ties), and input.control is the opt-in for inputs the attribute selector cannot see (home's seed input is type=text with inputmode=numeric for the iOS keypad). */
 input[type="number"], select, button, input.control {
   font-family: inherit;
   font-size: 0.95rem;

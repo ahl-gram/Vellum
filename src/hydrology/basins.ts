@@ -56,7 +56,7 @@ export function watershedDivides(basins: Basins, w: number, h: number, frac: num
   const threshold = frac * landCells;
   const major = new Set<number>();
   for (const [id, size] of sizes) if (size >= threshold) major.add(id);
-  if (major.size < 2) return out; // need at least two major basins to have a divide
+  if (major.size < 2) return out;
 
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {

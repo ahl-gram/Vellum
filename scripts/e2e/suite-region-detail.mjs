@@ -1,7 +1,4 @@
-// The Glass sees it e2e (RD, #400): the detail the epic added arrives at the bands the Explorer already has.
-// Every check reads the COMMITTED inset the user is looking at, never a job result standing in for it.
-// Byte comparisons are same-environment only (one page, one JS engine), which is the only kind lod.ts's
-// byte-identity contract can be checked by; a cross-environment SVG compare is barred project-wide.
+// The Glass sees it e2e (RD, #400): every check reads the COMMITTED inset the user is looking at, never a job result standing in for it; byte comparisons are same-environment only (one page, one JS engine), the only kind lod.ts's byte-identity contract can be checked by, since a cross-environment SVG compare is barred project-wide.
 export async function run(ctx) {
   const { evaluate, check, shoot, sleep, waitSettled, waitReady, PORT } = ctx;
 
@@ -21,11 +18,7 @@ export async function run(ctx) {
       await sleep(40);
     }
   };
-  // A region sheet is ~500KB, far past what a CDP evaluate should carry back; the digest is the byte
-  // comparison in a form that fits in a check message, and it is computed IN the page so both sides
-  // of every compare are hashed by the same engine.
-  // The LAST inset, never the first: during a crossing the outgoing sheet is still mounted, so a
-  // plain querySelector can read the sheet that is on its way off screen.
+  // A region sheet is ~500KB, far past what a CDP evaluate should carry back, so the digest is computed IN the page (both sides of every compare hashed by the same engine); the LAST inset, never the first, because during a crossing the outgoing sheet is still mounted and a plain querySelector reads the one on its way off screen.
   const LAST_INSET = `[...document.querySelectorAll("#map .region-inset svg")].pop()`;
   const insetDigest = () =>
     evaluate(
@@ -44,9 +37,7 @@ export async function run(ctx) {
       `document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`,
   );
   await waitSettled("region-detail-base");
-  // #169: a fresh page defaults the semantic redraft ON, but a suite that ran earlier in this lane
-  // may have left it off (glass-ceremony's tail does). Without it no inset ever commits and every
-  // check here reads band 0, so it is set explicitly rather than inherited.
+  // #169: a fresh page defaults the semantic redraft ON, but a suite that ran earlier in this lane may have left it off (glass-ceremony's tail does), and without it no inset ever commits and every check here reads band 0.
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
 
   const worldSheet = await evaluate(
@@ -58,7 +49,6 @@ export async function run(ctx) {
     JSON.stringify(worldSheet),
   );
 
-  // RD1: the ladder. Each band's committed inset must stamp the level its own window implies.
   const ladder = [];
   let redrafts = (await rgn()).redrafts;
   for (const [band, k] of [[1, 2], [2, 4], [3, 8]]) {
@@ -68,7 +58,7 @@ export async function run(ctx) {
     redrafts = settled.redrafts;
     const seen = await insetDigest();
     ladder.push({ band, reported: settled.band, ...seen, ms: await captionMs() });
-    await shoot(`explorer-region-detail-band${band}.png`); // manual: the coast at each rung of the ladder
+    await shoot(`explorer-region-detail-band${band}.png`);
   }
   check(
     "RD1 the band ladder stamps the detail it drew: bands 1, 2, 3 read 1, 2, 3 on the committed inset (#400 AC1, AC2)",
@@ -78,10 +68,7 @@ export async function run(ctx) {
 
   const deepest = ladder[ladder.length - 1];
 
-  // RD2: the payoff, measured on the sheet the page is SHOWING. Shore LENGTH alone rises when a
-  // coast turns into a staircase (#376), so the drawn ring count carries the claim and length only
-  // corroborates it. Both arms are rendered by this page's own engine and counted the same way as
-  // the live coast, so the comparison is like for like and the drawn sheet has to match one of them.
+  // RD2 is measured on the sheet the page is SHOWING: shore LENGTH alone rises when a coast turns into a staircase (#376), so the drawn ring count carries the claim and length only corroborates it; both arms are rendered by this page's own engine and counted the same way as the live coast.
   const gained = await evaluate(
     `(async()=>{const win={u0:${deepest.u0},v0:${deepest.v0},u1:${deepest.u1},v1:${deepest.v1}};` +
       `const {defaultRecipe,generateWorld}=await import("./engine/world/generate.js");` +
@@ -107,17 +94,14 @@ export async function run(ctx) {
     `drawn ${gained.drawn} rings; bare ${gained.bare} -> detail ${gained.detail}; shore length ${gained.bareLen} -> ${gained.detailLen}`,
   );
 
-  // RD3: path independence at the site level. Two camera routes to one window must commit the same
-  // bytes. The reload is load-bearing and not ceremony: zoom-reset never drops the worker, so the
-  // held chain cache would hand the second descent the FIRST one's own field and the check could
-  // not fail. A fresh page rebuilds the ancestry from nothing.
+  // RD3: two camera routes to one window must commit the same bytes, and the reload is load-bearing: zoom-reset never drops the worker, so the held chain cache would hand the second descent the FIRST one's own field and the check could not fail.
   await ctx.send("Page.navigate", { url: "about:blank" });
   await ctx.send("Page.navigate", { url: LINK.replace(/&cx=[^&]*&cy=[^&]*&k=[^&]*$/, "") });
   await waitReady();
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
   await waitSettled("region-detail-direct");
   redrafts = (await rgn()).redrafts;
-  await enterAt(8, 0.5625, 0.4375); // straight in, skipping the intermediate bands the ladder walked
+  await enterAt(8, 0.5625, 0.4375);
   await waitRedraft(redrafts);
   await waitInset();
   const direct = await insetDigest();
@@ -128,7 +112,6 @@ export async function run(ctx) {
   );
   const directMs = await captionMs();
 
-  // RD4: a pan at the deepest band, which is what the held chain cache exists for. Cost is reported, never asserted.
   redrafts = (await rgn()).redrafts;
   await enterAt(8, 0.5625 - 0.015625, 0.4375);
   const panned = await waitRedraft(redrafts);
@@ -141,7 +124,6 @@ export async function run(ctx) {
     `first descent ${directMs}ms, pan ${panMs}ms, ladder ${ladder.map((r) => r.ms).join("/")}ms`,
   );
 
-  // RD5: the link. A shared #cx&cy&k reopens the page cold and must land on the same detailed sheet.
   const linked = [];
   for (let visit = 0; visit < 2; visit++) {
     await ctx.send("Page.navigate", { url: "about:blank" });
@@ -156,7 +138,7 @@ export async function run(ctx) {
     linked[0] !== null && linked[1] !== null && linked[0].digest === linked[1].digest && linked[0].detail === "3",
     JSON.stringify(linked),
   );
-  await shoot("explorer-region-detail-shared-link.png"); // manual: what the link opens on
+  await shoot("explorer-region-detail-shared-link.png");
 
   await evaluate(`window.__vellumSetRedraftEnabled(false)`);
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);

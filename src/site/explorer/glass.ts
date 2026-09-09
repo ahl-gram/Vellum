@@ -1,7 +1,4 @@
-// The Surveyor's Glass wiring (#164/#165/#169/#170), extracted from app.ts at #191: one
-// factory owns the geometric camera, the semantic redraft, the card counter-scale, and
-// the keyboard + on-screen driving; app.ts keeps only the POLICY calls (when to rebase,
-// reset, or home), which belong to the ceremonies it conducts.
+// The Surveyor's Glass wiring: one factory owns the geometric camera, the semantic redraft, the card counter-scale and the keyboard + on-screen driving; app.ts keeps only the POLICY calls (when to rebase, reset, or home).
 import { createZoomController, type ZoomState } from "../shared/zoom-controller.ts";
 import { createLodController } from "./lod-controller.ts";
 import { cameraFromTransform, transformFromCamera, type Camera } from "./camera.ts";
@@ -12,25 +9,18 @@ const ZOOM_STEP = 1.4;
 const PAN_FRACTION = 0.15;
 
 interface GlassDeps {
-  /** #164: the stable clipping/gesture box wrapping the chart mount. */
   mapViewport: HTMLElement;
-  /** The chart mount the live transform lands on. */
   mapDiv: HTMLElement;
   runJob: Parameters<typeof createLodController>[0]["runJob"];
-  /** The engine's overlay builder; every redraft path rebuilds the overlay through it. */
   buildPlaceOverlay: (manifest: PlaceManifest, opts?: { preservePinByName?: boolean; box?: { x: number; y: number; w: number; h: number } }) => void;
-  /** #387/#388: re-measure an open card against the camera as it now stands. */
   reclampCard: () => void;
   setCaption: (text: string) => void;
   setError: (text: string) => void;
   prefersReduce: () => boolean;
-  /** #169: whether a settle should redraft (style, chronicle/voyage/verso, test seam). */
   regionEligible: () => boolean;
-  /** #165/#169: the conductor's ONE hash writer; settles funnel through it. */
   syncHash: () => void;
   /** #520: the dog-ear rides the committed inset, so the conductor hangs it here rather than on a sibling that would outlive the sheet. */
   decorateInset?: (el: HTMLElement) => void;
-  /** The on-screen camera, draw nearer / stand off / the whole sheet (#165; voiced at #170, home's voice since #505). */
   buttons: { zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement; cluster: HTMLElement };
 }
 
@@ -58,17 +48,16 @@ export function createGlass(deps: GlassDeps) {
     deps.reclampCard();
   }
 
-  // #165: the camera is bookmarkable: a settle mirrors the frame into the hash as cx/cy/k, dropped at home so a home view links clean. reducedMotion is left unset so the controller reads the OS setting LIVE.
+  // reducedMotion is left unset so the controller reads the OS setting LIVE.
   const zoomController = createZoomController({
     viewportEl: mapViewport,
     targetEl: mapDiv,
     scaleExtent: [1, 8],
     onApply: (state) => setCardZoom(state.k),
-    onSettle: () => onCameraSettle(), // #169: hash + (on antique) the region redraft
+    onSettle: () => onCameraSettle(),
     glideMs,
   });
 
-  // #169: the settle redraft, gated by regionEligible so a geometric zoom on any other style still only writes the hash; the lod controller owns band/window state, dispatch, and the inset mount.
   const lodController = createLodController({
     mapDiv,
     runJob: deps.runJob,
@@ -99,7 +88,6 @@ export function createGlass(deps: GlassDeps) {
   // #165: geometric pan/zoom belongs to ALL FOUR styles (the epic's ratified decision); the controller attaches unconditionally, and the reset-home-on-world-change policy lives in the conductor, so no style branch can strand a magnified sheet.
   function syncZoom(): void {
     zoomController.attach();
-    // Re-publish the current zoom onto the card the draw just rebuilt.
     setCardZoom(zoomController.getState().k);
   }
 
@@ -116,10 +104,9 @@ export function createGlass(deps: GlassDeps) {
     zoomController.glideHome(deps.syncHash);
   }
 
-  // The viewport is focusable (tabindex in the HTML), so a keyboard user tabs onto the sheet. Scoped to the viewport, not document, so the arrows never hijack page scroll; preventDefault only for keys we consume, so Escape et al still bubble (card dismiss).
-  // #170: the zoom steps and the home glide; the pan arrows stay instant on purpose (the accessible pan baseline).
+  // Scoped to the focusable viewport, not document, so the arrows never hijack page scroll; preventDefault only for keys we consume, so Escape still bubbles to the card dismiss; the pan arrows stay instant on purpose (the accessible pan baseline).
   mapViewport.addEventListener("keydown", (e) => {
-    if (e.altKey || e.ctrlKey || e.metaKey) return; // leave browser/OS chords alone
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
     const W = mapViewport.clientWidth;
     const H = mapViewport.clientHeight;
     switch (e.key) {
@@ -130,8 +117,8 @@ export function createGlass(deps: GlassDeps) {
       case "ArrowRight": zoomController.panBy(-W * PAN_FRACTION, 0); break;
       case "ArrowUp": zoomController.panBy(0, H * PAN_FRACTION); break;
       case "ArrowDown": zoomController.panBy(0, -H * PAN_FRACTION); break;
-      case "0": goHomeVoiced(); break; // #170: the full sheet, voiced
-      default: return; // not ours: let it through (browse mode, card Escape, tabbing)
+      case "0": goHomeVoiced(); break;
+      default: return;
     }
     e.preventDefault();
   });

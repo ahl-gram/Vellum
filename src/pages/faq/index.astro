@@ -9,7 +9,6 @@ import { indexCount, roomSections } from "../../layouts/room-sections.ts";
 
 const room = "Questions & Answers";
 const tagline = "how the worlds are made";
-// The index reads this page's own source at build (#462 document-room ruling 1), so it cannot drift from the prose below.
 const sections = roomSections(readFileSync(fileURLToPath(import.meta.url), "utf8"), "q");
 const count = `${indexCount(sections)} questions in ${sections.length} sections`;
 ---

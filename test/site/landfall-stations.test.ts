@@ -24,7 +24,7 @@ import {
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const normalize = (s: string) => s.replace(/\s+/g, " ").trim();
-// A commented-out rule still matches a raw-text regex (guard-prover 2026-08-24: the .lf-card[hidden] escape), so the css sweeps read the sheet stripped.
+// A commented-out rule still matches a raw-text regex, so the css sweeps read the sheet stripped.
 const liveCss = (p: string): string => read(p).replace(/\/\*[\s\S]*?\*\//g, "");
 
 const stage = homeStage();

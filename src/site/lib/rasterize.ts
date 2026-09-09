@@ -1,9 +1,4 @@
-// The atelier's rasterizer (#135): SVG string in, PNG Blob out (a blob-URL Image, a
-// canvas, toBlob); the site's first cross-page client library, page-agnostic. PNGs are
-// OUT of the determinism covenant: a canvas PNG bakes the VIEWER's installed serif
-// fonts, so never add a PDF/PNG byte check on the strength of this module (the SVG stays
-// the byte-faithful archival artifact). Every browser reference lives INSIDE
-// rasterizeSvg's body, so the pure decision core imports cleanly into Node for testing.
+// The atelier's rasterizer: SVG string in, PNG Blob out. PNGs are OUT of the determinism covenant (a canvas PNG bakes the VIEWER's installed fonts), so never add a PDF/PNG byte check on the strength of this module; every browser reference lives INSIDE rasterizeSvg's body, so the pure decision core imports into Node.
 
 // Over the budget toBlob can silently return a smaller image or null, so a too-large request is fitted DOWN with a visible notice; older iOS Safari caps well below this.
 export const MAX_PIXELS: number = 24_000_000;
@@ -13,7 +8,6 @@ export interface SvgSize {
   height: number;
 }
 
-// Scoped to the opening tag and anchored on a leading space (`\swidth=`), so the data-vellum-grid-w / grid-h attributes a naive `width=` regex would grab (320x240) are never mistaken for the render size (4200x3150).
 export function readSvgSize(svg: string): SvgSize {
   const root = /<svg\b[^>]*>/i.exec(String(svg));
   if (!root) throw new Error("no <svg> root found in the markup to rasterize");
@@ -25,13 +19,10 @@ export function readSvgSize(svg: string): SvgSize {
 }
 
 export interface ScaleFit {
-  /** The scale to render at: the request if it fits, else the largest that does. */
   scale: number;
-  /** True when the request was reduced to sit under the pixel budget. */
   clamped: boolean;
 }
 
-// Pure: the requested scale untouched when width*height*scale^2 fits, else the largest scale sitting EXACTLY on the budget, flagged clamped so the caller can tell the visitor.
 export function fitScaleToBudget(
   width: number,
   height: number,
@@ -47,7 +38,6 @@ export function fitScaleToBudget(
   return { scale: maxScale, clamped: true };
 }
 
-// In-voice failure copy, one line per path, so a rasterize failure is a legible notice, never a silent null. Survey-office register, em-dash-free (published copy).
 const RASTERIZE_MESSAGES: Record<string, string> = {
   decode: "The proof would not resolve into an image, so the plate could not be pulled as a PNG.",
   toBlob: "The press pulled a blank plate: the browser returned no image data.",
@@ -62,16 +52,13 @@ export function rasterizeErrorMessage(kind: string): string {
 export interface RasterizeOptions {
   /** Requested output scale (x1, x2); fitted down if it busts the budget. */
   scale?: number;
-  /** Pixel budget override; defaults to MAX_PIXELS. */
   maxPixels?: number;
 }
 
 export interface RasterizeResult {
   blob: Blob;
-  /** Actual output pixel dimensions after any budget fit. */
   width: number;
   height: number;
-  /** The scale actually rendered at, and whether it was clamped down. */
   scale: number;
   clamped: boolean;
 }

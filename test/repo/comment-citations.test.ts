@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-// #296: comments in this project get read and trusted, so a citation which no longer resolves is worse than none. Both drift classes came from a MECHANICAL mass change (#260), which is why the fix is a mechanical check rather than a discipline.
+// Comments in this project get read and trusted, so a citation which no longer resolves is worse than none; the check is mechanical because the drift that motivated it was.
 // These guards do NOT check the CLAIM wrapped around a citation: green means the citations resolve, never that the prose is current.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -58,7 +58,7 @@ function commentLines(file: string): ReadonlyArray<readonly [number, string]> {
   return out;
 }
 
-/** Contiguous comment lines joined into one run: a citation long enough to WRAP is invisible to a line-based matcher, and three of this sweep's own citations wrapped, which is how the gap was found. */
+/** Contiguous comment lines joined into one run: a citation long enough to WRAP is invisible to a line-based matcher. */
 function commentRuns(file: string): ReadonlyArray<readonly [number, string]> {
   const lines = commentLines(file);
   const runs: Array<readonly [number, string]> = [];

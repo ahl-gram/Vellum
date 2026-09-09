@@ -1,10 +1,8 @@
-// Independent ground truth for #175 / #178: label geometry derived from the SVG output only.
-// Deliberately does NOT import spacedTextBox: reusing the claim helper would be blind to claim-vs-render disagreement.
+// Independent ground truth for label geometry, derived from the SVG output only; deliberately does NOT import spacedTextBox, which would be blind to claim-vs-render disagreement.
 
 export type Pt = { readonly x: number; readonly y: number };
 export type Poly = ReadonlyArray<Pt>;
 
-/** Caps run wider than the 0.56 mixed-case factor `spacedTextBox` used to assume. */
 export const CAPS_WIDTH_FACTOR = 0.72;
 export const MIXED_WIDTH_FACTOR = 0.56;
 
@@ -29,7 +27,6 @@ const NUM = "([-\\d.]+)";
 
 export function textNodes(svg: string): LabelNode[] {
   const out: LabelNode[] = [];
-  // Non-greedy body: a river label's <tspan> must be captured whole; the old [^<]* match dropped every river name.
   for (const m of svg.matchAll(/<text([^>]*)>([\s\S]*?)<\/text>/g)) {
     const attrs = m[1] as string;
     let text = m[2] as string;
@@ -149,7 +146,7 @@ function convexIntersectionArea(subject: Poly, clip: Poly): number {
   return out.length < 3 ? 0 : polyArea(out);
 }
 
-/** Overlap as a fraction of the SMALLER quad's area (0..1), the metric #178 measured; below ~0.15 reads as sub-visual touching. */
+/** Overlap as a fraction of the SMALLER quad's area (0..1); below ~0.15 reads as sub-visual touching. */
 export function overlapFraction(a: Poly, b: Poly): number {
   const inter = convexIntersectionArea(a, b);
   if (inter <= 0) return 0;

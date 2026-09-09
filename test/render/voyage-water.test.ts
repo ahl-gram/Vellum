@@ -5,7 +5,6 @@ import { routeVoyage, type RoutedLeg } from "../../src/render/voyage-route.ts";
 import { INLAND_STUB_CELLS } from "../../src/render/voyage-water.ts";
 import type { Pt } from "../../src/core/rdp.ts";
 
-// #181 the water span: a sea leg's chain is [fromPort, ...water..., toPort], the span says where the water actually is (arc fractions of the drawn polyline) and flags stubs long enough to narrate; the real-world distribution is pinned in voyage-travel.test.ts.
 // Picture legend: '#' land, '.' sea, '=' land carrying a road.
 
 function survey(rows: string[]): Survey {

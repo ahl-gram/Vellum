@@ -18,7 +18,6 @@ export function labelComponents(
       const i = stack.pop() as number;
       const x = i % w;
       const y = (i / w) | 0;
-      // Land labels 4-connected while the voyage's sea walk is 8-connected, on purpose: the pinch that splits a landmass is the same pinch the sea walker must be able to thread.
       for (let dy = -1; dy <= 1; dy++) {
         for (let dx = -1; dx <= 1; dx++) {
           if (dx === 0 && dy === 0) continue;

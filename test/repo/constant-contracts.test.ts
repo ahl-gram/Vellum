@@ -12,13 +12,11 @@ import { defaultRecipe } from "../../src/world/generate.ts";
 import { POSTER_PRESETS } from "../../src/site/print-room/poster-presets.ts";
 import { MAX_PIXELS, fitScaleToBudget } from "../../src/site/lib/rasterize.ts";
 
-// Constant contracts that span files: each pair must move together, and where the far
-// side is an e2e script or a DOM-bound page module, this suite reads it as source.
+// Constant contracts that span files: each pair must move together; where the far side is an e2e script or a DOM-bound page module, this suite reads it as source.
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
-// Truncate each line at // so no comment, full-line or trailing, can count as code.
-// Naive about strings, which is fine: neither guarded file carries // inside a literal.
+// Truncate each line at // so no comment, full-line or trailing, can count as code; naive about strings, which is fine since neither guarded file carries // inside a literal.
 const codeOnly = (code: string) =>
   code.split("\n").map((l) => { const i = l.indexOf("//"); return i === -1 ? l : l.slice(0, i); }).join("\n");
 const walk = (dir: string): string[] =>
@@ -69,10 +67,7 @@ test("the e2e RV4 tilt ceiling tracks MAX_TILT", () => {
   assert.ok(ceiling > MAX_TILT && ceiling - MAX_TILT < 0.001, `ceiling ${ceiling}, MAX_TILT ${MAX_TILT}`);
 });
 
-// The margin mirrors accept either the duplicated literal (which must equal
-// MARGIN_FRACTION) or the imported constant itself, so the clean fix stays green.
-// The identifier form only counts if it really is transform.ts's constant: the file
-// must import it from render/transform and must not rebind the name anywhere.
+// The margin mirrors accept either the duplicated literal (which must equal MARGIN_FRACTION) or the imported constant itself; the identifier form only counts if the file imports it from render/transform and never rebinds the name.
 const marginMirror = (code: string, re: RegExp, where: string) => {
   const m = codeOnly(code).match(re);
   assert.ok(m, `margin expression not found in ${where}`);

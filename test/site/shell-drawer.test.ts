@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { bindDrawer, type Listens } from "../../src/site/shell/drawer.ts";
 import { HOME_WIRING, NARROW, ROOM_WIRING, wiringFor } from "../../src/site/shell/wiring.ts";
 
-// Landfall Sub 6b (#480) then Sub 6c (#483): the drawer's script-only manners, now the shell's on every page. Escape and a tap on the scrim close it, the page behind it is inert while it is open (skeptic finding 8: Tab walked out of the drawer onto the stage), and home ALONE closes it on a scroll. The burger itself needs no script (the checkbox is the no-JS path).
+// The drawer's script-only manners (#480, #483), the shell's on every page: Escape and a tap on the scrim close it, the page behind it is inert while it is open, and home ALONE closes it on a scroll; the burger needs no script (the checkbox is the no-JS path).
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");

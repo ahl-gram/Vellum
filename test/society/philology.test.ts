@@ -11,8 +11,7 @@ import {
 } from "../../src/society/philology.ts";
 import { composeDerivation } from "../../src/render/place-card.ts";
 
-// #124: a re-parse of a settlement name against the grammar that made it. Pure, no rng, never
-// imported by generate.ts, so it cannot move a world.
+// A re-parse of a settlement name against the grammar that made it: pure, no rng, never imported by generate.ts.
 
 test("segmentName splits a suffixed oromi name at its onsets and lifts the town suffix", () => {
   // oromi has no empty onset, so lauku-we has exactly one syllabification: the consonants ARE the boundaries.
@@ -28,8 +27,7 @@ test("segmentName splits a suffixed oromi name at its onsets and lifts the town 
 });
 
 test("segmentName repairs the elided consonant that a town suffix ate (norden)", () => {
-  // names.ts:240 drops the base's last char when it equals suffix[0]. "Skarg" + "gard" ships as
-  // "Skargard", and the bare remainder "skar" is UNPARSEABLE: "r" is not a norden coda.
+  // names.ts drops the base's last char when it equals suffix[0], so "Skarg" + "gard" ships as "Skargard" and bare "skar" is unparseable ("r" is not a norden coda).
   const seg = segmentName("Skargard", "norden");
   assert.ok(seg, "Skargard must recover through the repair, not fall through");
   assert.equal(seg.suffix, "gard");
@@ -52,7 +50,6 @@ test("segmentName reads a veshari name whose vowel-initial suffix took the base'
 });
 
 test("segmentName strips the overflow tails names.ts appends when it runs out of names", () => {
-  // uniqueBase falls back to "Base II" (ROMAN, names.ts:254) then "Base 7" (names.ts:260).
   const plain = segmentName("Kawa", "oromi");
   assert.ok(plain, "Kawa is grammatical oromi");
   assert.deepEqual(segmentName("Kawa II", "oromi"), plain);
@@ -64,15 +61,12 @@ test("segmentName returns null rather than throwing on a name the grammar cannot
   assert.equal(segmentName("Xyzzy", "oromi"), null);
   assert.equal(segmentName("", "oromi"), null);
   assert.equal(segmentName("Laukuwelua", "no-such-tongue"), null);
-  // The lexicon lookup is a separate early return from the parse, and it is the one an
-  // eleventh culture would hit first; a throw there escapes every card-level fixture.
+  // The lexicon lookup is a separate early return from the parse; a throw there escapes every card-level fixture.
   assert.equal(glossName("Laukuwelua", "no-such-tongue"), null);
 });
 
 test("the repair is a LAST resort: two readings that tie are decided for the letters actually there", () => {
-  // ordai "Deingan" reads as dein + -gan, or as deing + -gan once the g the suffix ate is put
-  // back. Both are one syllable and two roots, so only the no-repair preference separates them,
-  // and it decides which coda the card prints: -n "of that people" or -ng "the sound of it".
+  // Deingan reads as dein + -gan or as deing + -gan (repaired); both are one syllable and two roots, so only the no-repair preference separates them.
   const seg = segmentName("Deingan", "ordai");
   assert.ok(seg, "Deingan is grammatical ordai");
   assert.equal(seg.repair, "");
@@ -80,24 +74,20 @@ test("the repair is a LAST resort: two readings that tie are decided for the let
 });
 
 test("a vowel-initial suffix never leaves a bare consonant standing as a syllable", () => {
-  // The repair letter is truncated back off for display, and when the suffix is vowel-initial
-  // that can strand a vowel-less fragment. Both tongues that take a vowel-initial suffix:
+  // The repair letter is truncated back off for display, which can strand a vowel-less fragment; both tongues that take a vowel-initial suffix:
   assert.deepEqual(segmentName("Trudvitsa", "zoryan")?.chunks.slice(), ["trudv", "itsa"]);
   assert.deepEqual(segmentName("Zaakhir", "veshari")?.chunks.slice(), ["zaakh", "ir"]);
 });
 
 test("a town suffix is read whole, not spelled out as the consonants it happens to contain", () => {
-  // thalassic "mar" is an onset, a coda AND a town suffix. Talamar reads either as tal-a + -mar
-  // (one syllable, the suffix whole) or as tal-a-mar (two syllables, three bare consonants); a
-  // parse ranked on consonants alone takes the second and the card loses "set upon the sea".
+  // thalassic "mar" is an onset, a coda and a town suffix; a parse ranked on consonants alone reads tal-a-mar and loses the suffix.
   const seg = segmentName("Talamar", "thalassic");
   assert.ok(seg, "Talamar is grammatical thalassic");
   assert.equal(seg.suffix, "mar");
   assert.equal(seg.syllables.length, 1);
 });
 
-// One real name per tongue, pinned after measuring. The canonical reading is a five-key ranking:
-// suffix whole, then most roots, then fewest syllables, then no repair, then leftmost-longest.
+// One real name per tongue; the canonical ranking is suffix whole, most roots, fewest syllables, no repair, leftmost-longest.
 const CANONICAL: ReadonlyArray<readonly [string, string, string]> = [
   ["Talanaihaven", "thalassic", "tala|nai|haven"],
   ["Keghjend", "norden", "keg|hjend"],
@@ -166,8 +156,6 @@ test("glossName is pure: the same name reads the same way every time", () => {
 });
 
 test("the world generator never reaches for the glass, so a lexicon edit cannot re-roll a world", () => {
-  // #124 is render-only BY CONSTRUCTION: philology re-parses names the world already carries. An
-  // import here would put 243 hand-written strings on the determinism path and re-pin the golden.
   const src = (p: string) => readFileSync(fileURLToPath(new URL(`../../${p}`, import.meta.url)), "utf8");
   for (const file of ["src/world/generate.ts", "src/society/names.ts"]) {
     assert.doesNotMatch(src(file), /philology/, `${file} imports the philologist's glass`);
@@ -181,16 +169,13 @@ test("tongueName names each of the ten speeches from its culture id", () => {
   assert.equal(tongueName("tezcal"), "Tezcal");
 });
 
-// Sixty worlds cost about half a minute to generate, so the acceptance sweep builds the corpus
-// once and every assertion below reads it.
 const CORPUS = Array.from({ length: 60 }, (_, i) => {
   const world = generateWorld(defaultRecipe(i + 1));
   return { seed: i + 1, cultureId: world.culture.id, names: world.settlements.map((s) => s.name) };
 });
 
 test("no derivation line outruns the card it is printed on", () => {
-  // The card is a 16rem sheet; line length IS card height, and at 390px it is the difference
-  // between a two-line appendix and a column. Measured over 1540 names: median 85, p90 123.
+  // The card is a 16rem sheet, so line length is card height; measured over 1540 names: median 85, p90 123.
   let longest = "";
   for (const world of CORPUS) {
     for (const name of world.names) {

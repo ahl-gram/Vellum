@@ -41,7 +41,7 @@ export async function run(ctx) {
   await armTurnWatch();
   const ghostSrcV3 = await evaluate(`document.querySelector("#verso .verso-ghost").src`);
   await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  await waitRectoAttr("data-vellum-style", "ink", "verso-restyle"); // the rebuild resolved
+  await waitRectoAttr("data-vellum-style", "ink", "verso-restyle");
   await sleep(80); // __turned is sticky: a (wrong) turn would already have flagged it
   const v3 = await evaluate(`(()=>{const sh=document.getElementById("sheet");return{turned:window.__turned,turning:!!document.querySelector(".sheet.turning"),back:document.querySelectorAll(".sheet-back").length,versoed:sh.classList.contains("versoed"),ghostChanged:document.querySelector("#verso .verso-ghost").src!==${JSON.stringify(ghostSrcV3)},rectoStyle:document.querySelector("#map svg").getAttribute("data-vellum-style")};})()`);
   check("V3 a style change while flipped rebuilds in place and never turns (no .turning, no back face, still on the verso)", v3.turned === false && v3.turning === false && v3.back === 0 && v3.versoed && v3.ghostChanged && v3.rectoStyle === "ink", JSON.stringify(v3));

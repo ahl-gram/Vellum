@@ -48,7 +48,6 @@ test("labels three separate islands with correct first-seen ids and sizes", () =
 });
 
 test("ocean cells are -1, not landmass 0 (Int16Array zero-fill trap)", () => {
-  // Catches a missing .fill(-1): an ocean cell reading 0 would silently collide with a real landmass id.
   const rows = [
     "#..",
     "...",

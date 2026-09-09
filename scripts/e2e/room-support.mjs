@@ -65,7 +65,6 @@ export const makeBar = (ctx) => {
   };
 };
 
-/** The manifest facts a scrubber check needs, read from the page's OWN engine through the shared oracle. */
 export const scrubFacts = (evaluate, seed) =>
   evaluate(`(()=>{
     const r=window.__vellumRunInline({kind:"draw",seed:${seed},overrides:{},render:{style:"antique",widthPx:1500,legend:true}});

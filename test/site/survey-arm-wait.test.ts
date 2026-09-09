@@ -4,9 +4,7 @@ import {
   createSurveyArm, armOnLanding, wireSurveyToggle,
 } from "../../src/site/explorer/survey-arm.ts";
 
-// #373: the second wait. The #184 travel matrix moved to the render worker, so between the paint and the arm the slot holds for an off-thread order.
-// What has to survive that wait is every #300/#366 rule in survey-arm.test.ts: the guards are re-read on the far side, never captured, because ~1s is long enough for the box, the world, or both to move.
-// Split from that file rather than added to it: it was at 283 lines and this is a whole second mechanism.
+// The second wait (#373): the #184 travel matrix moved to the render worker, so between the paint and the arm the slot holds for an off-thread order; every #300/#366 guard in survey-arm.test.ts is re-read on the far side, never captured, because ~1s is long enough for the box, the world, or both to move.
 
 /** A held-open frame: `afterPaint` queues, `paint()` releases everything queued so far. */
 function paintQueue() {
@@ -70,7 +68,7 @@ test("#373 the box is still the truth on the FAR side of the wait", async () => 
   h.state.armed = true;
   h.arm.schedule();
   h.paint();
-  h.state.armed = false; // ~1s is long enough to untick, and the guards ran before it
+  h.state.armed = false;
   h.settle();
   await h.flush();
 
@@ -82,7 +80,7 @@ test("#373 a draw that lands during the wait drops the arm", async () => {
   h.state.armed = true;
   h.arm.schedule();
   h.paint();
-  h.state.worldGen++; // a fresh draw: its own settle owns the arm, against its own world
+  h.state.worldGen++;
   h.settle();
   await h.flush();
 
@@ -107,14 +105,14 @@ test("#373 a re-tick INSIDE the wait supersedes too: the generation is read on t
   const h = waitingHarness();
   h.state.armed = true;
   h.arm.schedule();
-  h.paint(); // arm A is now inside its wait, past every near-side guard
+  h.paint();
   h.arm.cancel();
   h.arm.schedule();
-  h.paint(); // arm B joins it there
-  h.settle(); // both orders land together
+  h.paint();
+  h.settle();
   await h.flush();
 
-  // The case above cannot see this: it supersedes BEFORE the paint, so arm A dies near-side and the far-side generation compare is never exercised. Deleting `mine === gen` from the far side left the whole file green (guard-prover run, mutation M11).
+  // The case above supersedes BEFORE the paint, so arm A dies near-side and the far-side generation compare is never exercised; deleting mine === gen from the far side left the whole file green.
   assert.equal(h.calls(), 2, "both arms really did reach the wait");
   assert.equal(h.state.builds, 1, "and only the newer one inks");
 });
@@ -162,7 +160,6 @@ test("#373 with no off-thread source at all, every arm is synchronous", () => {
   arm.schedule();
   q.paint();
 
-  // The Reading Room stopped being this shape at #418: it now passes a source too, through its own slot in reading-room/arm.ts.
   assert.equal(builds, 1, "every host without a worker, and any future one that wires no source");
 });
 

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// #463 part 4/4: the Wayfarer's Ribbon is a chart room on the #462 pattern, ruled on #494 (2026-08-30): the scroll full-bleed at its own aspect, the journey row (setting out from, bound for, Turn about) as the corner's control, the itinerary league by league on the slip with a row leaning the Glass on its stretch, the Explorer and the prospect of the road's end as the roads out, print standing down. #428 (the Ribbon out of the nav) is untouched.
+// The Wayfarer's Ribbon is a chart room on the #462 pattern, ruled on #494 (2026-08-30): the scroll full-bleed at its own aspect, the journey row as the corner's control, the itinerary on the slip with a row leaning the Glass on its stretch, the Explorer and the prospect of the road's end as the roads out. #428 (the Ribbon out of the nav) is untouched.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => (existsSync(resolve(REPO, p)) ? readFileSync(resolve(REPO, p), "utf8") : "");
 const page = read("src/pages/ribbon/index.astro");

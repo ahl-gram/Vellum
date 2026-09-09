@@ -5,8 +5,6 @@ import type { Road } from "../../src/society/roads.ts";
 import { buildSurvey, surveyFingerprint } from "../../src/render/survey.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
-// #120: the world facts the worker ships so the client can route a voyage; integer-only by design, so the A2 worker-vs-inline parity compare is exact.
-
 const field = (w: number, h: number, vals: number[]) => fieldFrom(w, h, Float64Array.from(vals));
 
 test("land is 1 strictly ABOVE sea level, 0 at or below it", () => {
@@ -23,7 +21,7 @@ test("carries the grid dimensions", () => {
 });
 
 test("land is indexed x + y * gridW (row-major), matching the elevation field", () => {
-  const elev = field(2, 2, [1, 0, 0, 1]); // land at (0,0) and (1,1)
+  const elev = field(2, 2, [1, 0, 0, 1]);
   const s = buildSurvey(elev, 0.5, []);
   assert.equal(s.land[0 + 0 * 2], 1);
   assert.equal(s.land[1 + 0 * 2], 0);
@@ -75,8 +73,6 @@ test("does not mutate the elevation field (immutability rule)", () => {
   buildSurvey(elev, 0.5, []);
   assert.deepEqual(Array.from(elev.data), before);
 });
-
-// #184: surveyFingerprint is the cache key for the Explorer's travel order.
 
 const road = (pts: Array<[number, number]>): Road => ({ rank: "lane", points: pts.map(([x, y]) => ({ x, y })) });
 

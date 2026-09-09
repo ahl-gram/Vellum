@@ -41,7 +41,7 @@ export async function run(ctx) {
   await waitSettled("turn-then-settle-base");
   await evaluate(`(()=>{const s=document.getElementById("style");s.value="nautical";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   await sleep(250); // the nautical turn is mid-flight
-  await evaluate(`(()=>{document.getElementById("seed").value="7";document.getElementById("draw").click();})()`); // a settle supersedes the turn
+  await evaluate(`(()=>{document.getElementById("seed").value="7";document.getElementById("draw").click();})()`);
   await waitTurned("settle-supersedes-turn");
   await sleep(200);
   const g5 = await evaluate(`(()=>{const svg=document.querySelector("#map svg");return{seed:svg?svg.getAttribute("data-vellum-seed"):null,svgCount:document.querySelectorAll("#map svg").length,back:document.querySelectorAll(".sheet-back").length,turning:!!document.querySelector(".sheet.turning")};})()`);

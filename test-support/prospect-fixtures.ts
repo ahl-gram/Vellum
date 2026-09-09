@@ -1,4 +1,4 @@
-// Hand-built ProspectInput fixtures (#239): a 609-settlement sweep (seeds 1-24, 2026-08-10) found the fen, stilt, drowned, bridge, and hamlet arms unreachable on real worlds; the weir arm IS real-world reachable.
+// Hand-built ProspectInput fixtures: a 609-settlement sweep (seeds 1-24, 2026-08-10) found the fen, stilt, drowned, bridge, and hamlet arms unreachable on real worlds; the weir arm IS real-world reachable.
 
 import type { ProspectInput } from "../src/prospect/input.ts";
 import { BACKDROP_SAMPLES, FOREGROUND_SAMPLES } from "../src/prospect/transect.ts";

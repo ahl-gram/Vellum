@@ -50,21 +50,18 @@ import {
   type TerrainBand,
 } from "../../test-support/daily-hunt-geometry.ts";
 
-// Mirrors MAX_LINES in src/world/daily-hunt-clues.ts: the cap on a day's total clue lines.
+// Mirrors MAX_LINES in src/world/daily-hunt-clues.ts.
 const MAX_LINES = 8;
 // Ratified narrowing target (#335): villages consistent with all clues.
 const NARROW_TARGET = 3;
 // Mirrors MARGIN in src/site/seed-of-the-day/app.ts (renderMap's default).
 const MARGIN = Math.round(1500 * 0.045);
 
-// Acceptance #5 sweeps ALL 30 June-2026 daily seeds; worlds generate ONCE into a shared pool so the 30 gens are paid a single time.
 const DAILY_SEEDS = Array.from({ length: 30 }, (_, i) => 20260601 + i);
 const DAILY: ReadonlyArray<World> = DAILY_SEEDS.map((s) => generateWorld(defaultRecipe(s)));
-// "a few off-grid seeds": arbitrary, non-date seeds, default recipe.
 const OFFGRID: ReadonlyArray<World> = [1, 7, 12345].map((s) => generateWorld(defaultRecipe(s)));
 const SWEEP: ReadonlyArray<World> = [...DAILY, ...OFFGRID];
 
-// The delivered clue list depends on what the sheet DREW (#335): each world's antique chart renders once, and the findability gates derive from the markup exactly as setupHunt does from the live SVG.
 const SWEEP_SVGS: ReadonlyArray<string> = SWEEP.map((w) =>
   renderMap(w, { style: "antique", legend: true }),
 );
@@ -127,7 +124,6 @@ test("every emitted clue re-verifies true against independent raw geometry", () 
       assert.doesNotMatch(clue.text, /ruin|abandon/i, `clue avoids ruin/abandon: ${clue.text}`);
       assert.doesNotMatch(clue.text, /inland/i, `clue makes no affirmative inland claim: ${clue.text}`);
 
-      // Findability (#335): a cited name must be printed on the sheet, and a terrain claim must have DRAWN glyphs nearby, per the page's own gates.
       if (clue.kind === "river" || clue.kind === "lake" || clue.kind === "near") {
         assert.ok(gates.isLabeled(clue.subject!), `"${clue.subject}" is printed on the sheet`);
       }
@@ -204,7 +200,6 @@ test("every emitted clue re-verifies true against independent raw geometry", () 
         }
       }
 
-      // Never references a range or forest (named, but coordinate-less).
       if (clue.subject) {
         assert.notEqual(clue.subject, world.names.range, "no range reference");
         assert.notEqual(clue.subject, world.names.forest, "no forest reference");
@@ -214,7 +209,7 @@ test("every emitted clue re-verifies true against independent raw geometry", () 
 });
 
 test("buildClues falls to exactly the three-line floor on a featureless quarry", () => {
-  // A bare-floor quarry is vanishingly rare live, so acceptance #2's >=3 floor is proven with a constructed featureless world (single realm, flat, no named features, no roads, one landlocked dry village); buildClues reads only these fields.
+  // A bare-floor quarry is vanishingly rare live, so the floor is proven on a constructed featureless world; buildClues reads only these fields.
   const w = 320;
   const h = 240;
   const quarrySettlement = {
@@ -349,7 +344,6 @@ test("every mirrored constant matches its source (the drift alarm, #335)", () =>
 });
 
 test("chooseQuarry picks are pinned: the #335 pool refactor changed nothing", () => {
-  // Measured before the pool moved to daily-hunt-clue-facts.ts (120-seed equivalence run, 0 mismatches); these two pins keep the class guarded.
   assert.equal(chooseQuarry(DAILY[0]!)!.idx, 11);
   assert.equal(DAILY[0]!.settlements[11]!.name, "Sharakhara");
   assert.equal(chooseQuarry(DAILY[14]!)!.idx, 19);
@@ -357,7 +351,7 @@ test("chooseQuarry picks are pinned: the #335 pool refactor changed nothing", ()
 });
 
 test("a quarry near (not exactly at) the chart's center reads central, not west/south", () => {
-  // Live-play 2026-07-31 (seed 20260731): a near-center quarry read "western/southern" because central fired only on exact midpoint equality; near-center must land in the 1/8 band. Probed through buildClueFacts' compass candidates, which always exist even though selection (#335) emits only ONE compass line.
+  // Probed through buildClueFacts' compass candidates, which always exist even though selection emits only one compass line.
   const w = 320;
   const h = 240;
   const world = {
@@ -446,9 +440,7 @@ test("the leading compass line is never the strictly less decisive axis (#333's 
   assert.equal(leadFor(159, 10), "ns", "central east/west against far north");
   assert.equal(leadFor(10, 119), "ew", "far west against central north/south");
 
-  // The straddle that only the shared normalization survives: x=120 is 39.5 cells off a 319-wide
-  // axis (0.1238, central) and y=89 is 30.5 off a 239-tall one (0.1276, north). Comparing raw
-  // cells makes the CENTRAL axis win, so a directional band would lose to a central one.
+  // x=120 is 39.5 cells off a 319-wide axis (0.1238, central) and y=89 is 30.5 off a 239-tall one (0.1276, north): compared in raw cells the central axis would win.
   assert.equal(leadFor(120, 89), "ns", "a directional band never loses to a central one");
 
   assert.equal(expectedLeadAxis(flat, 0, 0), null, "a corner ties the two axes exactly");
@@ -510,7 +502,6 @@ test("revealLore reports the place, a founding year, and a non-empty secret line
 });
 
 test("revealLore falls back gracefully when a ruined quarry's event has aged out", () => {
-  // The chronicle caps at 14 events (history.ts), so a ruined village's ruin line can be sliced away; the reveal must return a non-empty secret line, driven directly by a constructed no-event world.
   const world = { history: { events: [] } } as unknown as World;
   const quarry: Quarry = {
     idx: 3,
@@ -533,7 +524,7 @@ test("revealLore falls back gracefully when a ruined quarry's event has aged out
 });
 
 test("a ruined quarry reveals its abandonment event verbatim", () => {
-  // ~12% of seeds draw a ruined quarry, so one is virtually certain across the 30 daily worlds; find it and assert the ruined branch explicitly rather than trusting the sweep.
+  // ~12% of seeds draw a ruined quarry, so one is virtually certain across the 30 daily worlds.
   const ruined = SWEEP.find((w) => {
     const q = chooseQuarry(w);
     if (q?.settlement.ruined !== true) return false;
@@ -590,9 +581,7 @@ test("legendExcluded flags settlements under the box and spares those outside it
   assert.equal(legendExcluded(world, null, widthPx).size, 0, "no legend box excludes nothing");
 });
 
-// pruneUnlabeledFeatureClues and its tests are gone (#335): findability now gates candidates BEFORE selection, covered by the gated sweep above.
 
-// classifyClick: a synthetic world gives exact control over the geometry the click reads (settlements + elev + the quarry).
 const clickWorld = {
   elev: { w: 100, h: 100 },
   recipe: { seed: 1 },
@@ -620,7 +609,6 @@ test("classifyClick names the settlement nearest the click on a miss", () => {
 });
 
 test("classifyClick heat reflects the click's distance, not the nearest town's", () => {
-  // The click is far from the quarry but snaps to a town right beside it; the band must read the CLICK's distance, not saturate to Hot like the old nearest-settlement scoring.
   const fb = classifyClick(clickWorld, clickQuarry, { x: 50, y: 95 });
   assert.equal(fb.kind, "miss");
   if (fb.kind === "miss") {

@@ -2,7 +2,6 @@
 
 export type Pt = { readonly x: number; readonly y: number };
 
-/** A placed decoration: position plus the glyph's local scale. */
 export type XYS = { readonly x: number; readonly y: number; readonly s: number };
 
 export const PLATE_W = 520;

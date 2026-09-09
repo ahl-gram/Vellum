@@ -24,7 +24,7 @@ test("the years are the centuries between, plus the present at the right end, li
   for (const y of years) assert.ok(Math.abs(y.u - at(Number(y.label))) < 1e-9, `${y.label} sits at its year`);
 });
 
-// The class the seed-42 fixture is drawn from the safe side of (skeptic on PR #492): a century within LABEL_GAP_U of the present (seed 90: 900 against 901) or of the seam keeps its tick and loses its label.
+// The seed-42 fixture sits on the safe side of this class; seed 90 (900 against 901) is the crowding case.
 test("a century crowding the present or the seam keeps its tick and drops its label", async () => {
   const { LABEL_GAP_U } = await import("../../src/site/shared/instrument-scale.ts");
   const nearPresent = scaleTicks({ days: null, years: { min: 435, max: 901 } });

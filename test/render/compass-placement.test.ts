@@ -11,7 +11,6 @@ import type { Box } from "../../src/render/geometry.ts";
 import type { CartouchePlan } from "../../src/render/layers/cartouche.ts";
 import type { World } from "../../src/world/types.ts";
 
-// The compass sits in open water, nautical-chart style: it must not mistake an inland LAKE for the sea (#103), must prefer the most OPEN water over whatever corner is farthest from the title, and must keep clear of the legend (#104).
 
 const WIDTH = 1500;
 const MARGIN = Math.round(WIDTH * 0.045);
@@ -42,7 +41,7 @@ const cart = (rect: Box): CartouchePlan => ({ rect } as unknown as CartouchePlan
 
 test("#103 the compass sits in the sea, not an inland lake", () => {
   const W = 64, H = 48, sea = 0;
-  // Left band = border-connected sea; the landlocked block is a lake with deeper oceanDist than the thin coastal sea, and it is the water FARTHEST from the cartouche, so the old distance-from-title scoring drops the rose in it.
+  // Left band = border-connected sea; the landlocked block is a lake with deeper oceanDist and the water FARTHEST from the cartouche, where distance-from-title scoring drops the rose.
   const isSea = (x: number) => x <= 10;
   const isLake = (x: number, y: number) => x >= 38 && x <= 58 && y >= 10 && y <= 38;
   const elev = createField(W, H, (x, y) => (isSea(x) || isLake(x, y) ? -1 : 1));

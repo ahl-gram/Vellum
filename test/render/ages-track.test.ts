@@ -16,7 +16,7 @@ import {
 } from "../../src/render/ages-track.ts";
 import type { YearRange } from "../../src/render/chronicle-scrubber.ts";
 
-// #220's pure track math: bar position u <-> chamber position under the ratified 50/50 split, the word-not-a-number readout, and the hard detent's capture/escape machine; the DOM wiring lives in src/site/living-chart/ and is covered by the Explorer e2e.
+// The pure track math; the DOM wiring lives in src/site/living-chart/ and is covered by the Explorer e2e.
 
 const RANGE: YearRange = { min: 312, max: 1112 }; // span 800, so u steps land on years
 

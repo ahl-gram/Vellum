@@ -6,7 +6,7 @@ import { buildDocket } from "../../src/site/explorer/verso.ts";
 import { capitalBlurb } from "../../src/world/seed-of-the-day.ts";
 import type { World } from "../../src/world/types.ts";
 
-// #49 PR 2, ruling 7's remaining three surfaces: the prospect page, the Daily Hunt reveal, and Seed of the Day plus the verso docket.
+// #49 ruling 7: the prospect page, the Daily Hunt reveal, Seed of the Day and the verso docket.
 
 const worlds = new Map<number, World>();
 const worldFor = (seed: number): World => {

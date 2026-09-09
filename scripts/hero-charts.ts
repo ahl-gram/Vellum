@@ -9,7 +9,6 @@ export const HERO_SEED = 42;
 const HERO_STYLES = ["antique", "topographic", "ink", "nautical"] as const;
 const ARMS_SIZE = 150;
 
-/** Every committed hero SVG, keyed by its `public/charts/` filename -> SVG text. */
 export function heroChartSvgs(): Map<string, string> {
   const out = new Map<string, string>();
   const hero = generateWorld(defaultRecipe(HERO_SEED));

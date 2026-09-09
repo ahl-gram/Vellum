@@ -1,15 +1,11 @@
-/* Sub 6 (#461 ruling 1): home goes full bleed; the head cluster is the shell's, the
-   folio-era grander wordmark and footer retired with the folio bar (e2e RH3/RH4 reshaped). */
+/* Home (#461 ruling 1): full bleed, the head cluster the shell's. */
 .underhood {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-style: italic; color: var(--ink-brown); font-size: 0.92rem;
   line-height: 1.6; margin-top: 0.5rem; }
 .underhood a { color: var(--ink-brown); }
-/* Landfall Sub 1 (#455): the survey window. The deep wears existing tokens in inverted roles (ratified provisional on #454); full-bleed and the floating chrome arrive with the ceremony subs. */
 .landfall { margin: 0; position: relative; }
 .landfall .stage {
-  /* Full bleed (#461 ruling 1): the stage IS the viewport; the boxed frame and its own
-     deep retired (the shell's fixed body::before paints the same ground beneath). */
   position: relative; height: 100vh; height: 100dvh;
   overflow: hidden; cursor: grab; touch-action: pan-y;
   display: grid; place-items: center;
@@ -25,7 +21,6 @@
   position: absolute; left: 0; top: 0;
   width: 1500px; height: 1157.931px;
   transform-origin: 0 0; will-change: transform;
-  /* The prototype's dress (out/atelier-map): the enlarged ink shadow over the lighter-centered deep; the lamplight bloom washed the chart out (Alex, PR #456). */
   box-shadow: var(--stage-shadow);
 }
 .landfall .stage.cam .lf-chart { position: static; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; }
@@ -62,7 +57,6 @@
   font-size: 0.85rem; color: var(--line-tan);
 }
 .lf-coords.on { display: block; }
-/* The scroll hint (#472, 2026-08-28 ruling): at full pull-back a pulsing mark in the pip idiom points past the chart; any closer camera stands it down. */
 .lf-more {
   position: absolute; left: 50%; bottom: 6rem; transform: translateX(-50%);
   display: flex; align-items: center; gap: 0.55rem;
@@ -85,13 +79,11 @@
 }
 /* On home the cluster rides the page (#472, Alex's 2026-08-28 call): the chart and its chrome scroll away together, so nothing fixed can ever collide with the shelf; e2e L1i pins the ride, RH9 pins the wash to home alone. body-child specificity because the layout's inline global sheet renders AFTER the page css. */
 body > header.chrome { position: absolute; }
-/* The cluster's wash (#461, Alex's 2026-08-26 call on the plate finding): home is bandless and the close-in camera can leave the full-bleed chart with no letterbox at short desktop heights, so the corner carries its own deep for the lettering; a blurred pool sized by the cluster since #480. */
 header.chrome::before {
   content: ""; position: absolute; inset: -4rem -2.2rem -1.8rem -4rem; z-index: -1; pointer-events: none;
   background: rgb(from var(--chart-ink) r g b / 0.86);
   filter: blur(22px);
 }
-/* Landfall Sub 4a (#470): the seed form is the mockup's top-right corner chrome (design/atelier-map/stage.css), a sub early by ratification 2026-08-24; never .cam-gated (#455: live even when the bundle fails). */
 .lf-seed {
   position: absolute; right: 1.6rem; top: 1.4rem; z-index: 4;
   margin: 0; max-width: 17rem; text-align: right;
@@ -134,7 +126,6 @@ header.chrome::before {
   font-size: 0.76rem; color: var(--parchment);
 }
 
-/* Landfall Sub 3 (#458): the stations, their cards, and the legend; the dress is the mockup's (design/atelier-map/stage.css) with lf- prefixes and tokens. */
 .lf-stations { display: none; position: absolute; inset: 0; }
 .landfall .stage.cam .lf-stations { display: block; }
 .lf-station {
@@ -177,7 +168,6 @@ header.chrome::before {
   background: rgb(from var(--chart-paper) r g b / 0.75);
   padding: 0 6px; white-space: nowrap;
 }
-/* The mockup's exact hover, ratified as a CHART INSTRUMENT gesture (Alex 2026-08-24): a pip's grow promises its slip opening in place, not #289's navigation; the ruling lives at CHART_INSTRUMENTS in tip-affordance.test.ts. */
 .lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph {
   background: var(--parchment-bright); transform: rotate(45deg) scale(1.25);
 }
@@ -205,7 +195,6 @@ header.chrome::before {
   /* max-content: the shrink-to-fit at left 50% capped the row at half the stage and wrapped the Gallery entry into the Reading Room slip (plate-reader, this sub). */
   width: max-content; max-width: calc(100% - 2rem);
   transform: translateX(-50%); text-align: center; z-index: 2;
-  /* The mockup's narrow footing generalized: in the boxed stage the landfall chart reaches the stage foot, so without its own ground the legend reads as text on parchment and a south-shore slip blends straight into it. */
   padding: 0.5rem 1.1rem 0.6rem;
   background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72));
   pointer-events: none;
@@ -292,14 +281,12 @@ header.chrome::before {
   font-size: 0.88rem; letter-spacing: 0.14em;
   color: var(--chart-paper); background: var(--ink-dark);
   border: 1px solid var(--chart-ink);
-  /* 0.85rem, not the mockup's 0.45rem: the 44px touch-target ruling (#460, 2026-08-25) is a stated deviation. */
   padding: 0.85rem 1rem;
   text-decoration: none;
   transition: background 0.2s ease;
 }
 .lf-card-enter:hover, .lf-card-enter:focus-visible { background: var(--chart-ink); }
 
-/* Landfall Sub 4 (#459): the How It Works panel and the Notice stamp; the dress is the mockup's (design/atelier-map/stage.css) with tokens. */
 .lf-card-how {
   max-height: calc(100% - 3rem);
   display: flex; flex-direction: column;
@@ -330,7 +317,6 @@ header.chrome::before {
   font-style: italic;
   font-size: 0.8rem; color: var(--ink-faded); line-height: 1.5;
 }
-/* Landfall Sub 6a (#472): pulled all the way back, the page resumes. The shelf is plain flow on the shell's deep; the wheel's route down to it lives in src/site/home/valve.ts. */
 .lf-shelf { max-width: 72rem; margin: 0 auto; padding: 4.5rem 2rem 5.5rem; text-align: center; }
 .lf-shelf-head {
   margin: 0;
@@ -354,7 +340,6 @@ header.chrome::before {
 }
 
 @media (max-width: 900px) {
-  /* The phone doors' HOME half: the drawer's dress is the shell's (#483); what stays is what clears home's own furniture. */
   body:has(.rooms-reveal:checked) .lf-seed { opacity: 0; pointer-events: none; }
   .lf-seed { transition: opacity 0.32s ease; }
   body:has(.rooms-reveal:checked) .landfall::before {
@@ -363,10 +348,8 @@ header.chrome::before {
   }
   body > header.chrome { max-width: calc(100vw - 15rem); }
   .seed-controls .control { width: 4.6rem; }
-  /* Both legend selectors, or the unconditional .cam show-rule (0,4,0) beats this hide at every width with scripts on (round-3 plate finding; e2e H16c pins the resolved display). */
   .lf-legend, .landfall .stage.cam .lf-legend { display: none; }
   .lf-card {
-    /* The mockup's bottom sheet is FIXED to the viewport; inside the boxed stage the sheet was taller than the stage itself and buried the chart whole (skeptic finding 1). z-index stays under the veil's 50. */
     position: fixed; right: 0; left: 0; top: auto; bottom: 0; margin: 0;
     width: 100%; outline-offset: -8px; z-index: 40;
     padding: 1.2rem 1.3rem 1.1rem;
@@ -384,7 +367,6 @@ header.chrome::before {
   .seed-gloss { display: none; }
   .lf-shelf { padding: 3rem 1.2rem 3.5rem; }
   .lf-shelf-grid { grid-template-columns: 1fr; gap: 2.6rem; }
-  /* The legend band it clears on desktop stands down here. */
   .lf-more { bottom: 1.2rem; }
 }
 @media (max-width: 340px) {
@@ -405,7 +387,6 @@ header.chrome::before {
   animation: lf-doors-reveal 0s linear 10s forwards;
 }
 .landfall .stage:not(.cam) ~ .lf-card .lf-card-close { display: none; }
-/* The no-JS doors' plain nav still wore the light-era ink after #461 inverted the ground (measured 1.06:1 at the #472 plate pass). */
 .lf-noscript-rooms { color: var(--parchment); }
 .lf-noscript-rooms a { color: var(--parchment-bright); }
 @keyframes lf-doors-reveal {
@@ -431,7 +412,6 @@ header.chrome::before {
   }
 }
 
-/* Landfall Sub 2 (#457): the loading ceremony. JS-injected (a no-JS visitor never traps behind it); the dress is the mockup's veil (design/atelier-map/base.css) with its raw hexes as token derivations. */
 .veil {
   position: fixed; inset: 0; z-index: 50;
   display: flex; align-items: center; justify-content: center;

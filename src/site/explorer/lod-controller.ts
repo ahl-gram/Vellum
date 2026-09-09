@@ -1,10 +1,4 @@
-// The Surveyor's Glass redraft (#169, redesigned in PR #245 review): a camera SETTLE on
-// the antique chart dispatches a finer REGIONAL survey of the window, mounted as an INSET
-// inside #map riding the same live transform as the chart. The camera stays
-// WORLD-relative for good: a commit moves NOTHING, and a zoom-out just fades the inset
-// away (the world chart was there all along). The pure settle/inset math lives
-// unit-tested in src/world/lod.ts; this module is the DOM conductor. The antique-only
-// gate lives in app.ts regionEligible.
+// The Surveyor's Glass redraft: a camera settle on the antique chart dispatches a finer regional survey, mounted as an inset inside #map on the chart's own live transform; the camera stays world-relative (a commit moves nothing, a zoom-out fades the inset away). The pure settle/inset math is in src/world/lod.ts; the antique-only gate is app.ts regionEligible.
 import {
   LOD_BANDS,
   decideSettle,
@@ -24,7 +18,6 @@ import { latticeFromSettle } from "../shared/table-address.ts";
 
 const pct = (f: number) => `${(f * 100).toFixed(4)}%`;
 
-/** The region job dispatched on a settle: worker-client runJob's region message. */
 type RegionJobMessage = {
   kind: "region";
   seed: number;
@@ -36,14 +29,12 @@ type RegionJobMessage = {
   render: RenderOptions;
 };
 
-/** The fields of a resolved region survey this controller consumes. */
 type RegionJobResult = {
   svg: string;
   manifest: PlaceManifest;
   title: string;
 };
 
-/** The per-draw world context app.ts hands to setWorld on every world draw. */
 type WorldContext = {
   seed: number;
   overrides: Partial<WorldRecipe> | undefined;
@@ -52,43 +43,33 @@ type WorldContext = {
 };
 
 interface Deps {
-  /** #map, the world sheet's box; insets mount inside it */
   mapDiv: HTMLElement;
   runJob: (msg: RegionJobMessage) => Promise<RegionJobResult>;
   buildPlaceOverlay: (manifest: PlaceManifest, opts?: { preservePinByName?: boolean; box?: SheetRect }) => void;
   setCaption: (text: string) => void;
-  /** Where a failed survey is reported; the caption when the host gives none. */
   setError?: (text: string) => void;
-  /** current world zoom, to counter-scale the pencil border */
   getZoomK: () => number;
   prefersReduce: () => boolean;
-  /** #520: the dog-ear rides the committed inset and dies with it, so it is mounted here rather than as a sibling that would outlive the sheet it belongs to. */
   decorateInset?: (el: HTMLElement) => void;
 }
 
 export function createLodController(deps: Deps) {
   const { mapDiv, runJob, buildPlaceOverlay, setCaption, getZoomK, prefersReduce } = deps;
 
-  // Band 0 is the bare world sheet (FULL_WINDOW, no inset); 1..3 are regional surveys.
   let currentBand = 0;
   let currentWindow = FULL_WINDOW;
 
-  // The retained world context from the last world draw: enough to fire a region job over the SAME base world (cache hit) and to rebuild the world overlay when the inset drops.
   let world: WorldContext | null = null;
 
-  // The committed inset (for the DOM teardown and the e2e's lodState), or null at the bare world sheet.
   let inset: { el: HTMLDivElement; svg: string; band: number; window: UvWindow; title: string; seat: { lx: number; ly: number } | null } | null = null;
 
-  // The drafting indicator: a dashed outline over the window being surveyed, up between dispatch and commit; one element, repositioned per dispatch.
   let pencil: HTMLDivElement | null = null;
 
   let regionGen = 0;
-  // Committed-redraft count, surfaced to the e2e so it can prove one-job-per-settle and last-wins without timing.
   let redrafts = 0;
 
   // marginPx/widthPx differs from marginPx/heightPx (same px inset, different axis lengths), so the conversion carries both; the world manifest is the authority at every band.
   function margins(): SheetMargins {
-    // world! is safe: every caller runs behind a non-null world gate (dispatch and commit).
     const m = world!.manifest;
     return { mx: m.marginPx / m.widthPx, my: m.marginPx / m.heightPx };
   }
@@ -120,7 +101,6 @@ export function createLodController(deps: Deps) {
     }
   }
 
-  // #170: the outgoing composition's PLACED labels, which the dry-in ceremony must never re-animate. World settlement groups carry only data-idx (data-tier/data-name are region-only, #162), so world names resolve through the manifest; a prior inset carries data-name directly.
   function prevLabeledNames(): Set<string> {
     const names = new Set<string>();
     const worldSvg = mapDiv.querySelector(":scope > svg");
@@ -136,7 +116,6 @@ export function createLodController(deps: Deps) {
     return names;
   }
 
-  // #170: label placement is the reveal; a name dries in the moment it first wins a label.
   function labeledNames(svg: SVGSVGElement): string[] {
     const out: string[] = [];
     for (const g of svg.querySelectorAll<SVGElement>("g.settlement[data-name]")) {
@@ -145,10 +124,9 @@ export function createLodController(deps: Deps) {
     return out;
   }
 
-  // Commit: mount the inset aligned over its window and fade it in OVER what it replaces. State, overlay and caption update synchronously at the mount; the outgoing inset is torn down only once the incoming is fully opaque, so the reader never sees a gap frame (the #131 discipline).
+  // The outgoing inset is torn down only once the incoming is fully opaque, so the reader never sees a gap frame.
   function commitInset(band: number, window: UvWindow, seat: { lx: number; ly: number } | null, res: RegionJobResult, ms: string): void {
     const rect = insetSheetRect(window, margins());
-    // #170: capture the outgoing composition's labeled names BEFORE the sheets change hands.
     const reduce = prefersReduce();
     const prevLabeled = reduce ? null : prevLabeledNames();
     const el = document.createElement("div");
@@ -166,7 +144,6 @@ export function createLodController(deps: Deps) {
     currentBand = band;
     currentWindow = window;
     hidePencil();
-    // Positioned to the inset's box so the region's own nx/ny fractions land on its drawn glyphs; pin continuity keys by NAME (region worlds renumber indices).
     buildPlaceOverlay(res.manifest, { preservePinByName: true, box: rect });
     redrafts++;
     setCaption(`${res.title} · regional survey · band ${band} · drawn in ${ms}ms`);
@@ -177,9 +154,7 @@ export function createLodController(deps: Deps) {
     }
     void el.offsetWidth; // force layout so the class add transitions from opacity 0
     el.classList.add("in");
-    // #170 the ceremony: the incoming survey inks itself in and the newly labeled names dry in tier-staggered; every name already labeled on the outgoing sheets stays put (AC1).
     const insetSvg = el.querySelector("svg");
-    // prevLabeled! is non-null here: the reduce path returned above.
     if (insetSvg) startRedraft(insetSvg, dryInNames(prevLabeled!, labeledNames(insetSvg)));
     if (old) {
       let done = false;
@@ -194,7 +169,7 @@ export function createLodController(deps: Deps) {
         if (e.target === el) finish();
       };
       el.addEventListener("transitionend", onEnd);
-      const timer = setTimeout(finish, 700); // fallback if transitionend never fires
+      const timer = setTimeout(finish, 700);
     }
   }
 
@@ -212,8 +187,7 @@ export function createLodController(deps: Deps) {
       gridW: LOD_BANDS[band].gridW,
       gridH: LOD_BANDS[band].gridH,
       band,
-      render: world.render, // same style/legend/arms/theme/width as the world sheet
-      // no title: the worker derives "The Environs of X" from (world, window) so the live redraft and a downloaded sheet's redraw agree byte-for-byte (#169).
+      render: world.render,
     })
       .then((res) => {
         if (myGen !== regionGen) return;
@@ -227,10 +201,9 @@ export function createLodController(deps: Deps) {
       });
   }
 
-  // Zoom-out past the world threshold: the world chart is already on screen around the inset, so the return is just the inset fading away. No worker round-trip.
   function revertToWorld(): void {
     if (!world) return;
-    regionGen++; // cancel any in-flight region so it cannot commit after the revert
+    regionGen++;
     hidePencil();
     const going = inset ? inset.el : null;
     inset = null;
@@ -248,7 +221,7 @@ export function createLodController(deps: Deps) {
           if (going.isConnected) going.remove();
         };
         going.addEventListener("transitionend", drop, { once: true });
-        setTimeout(drop, 700); // fallback, as in commitInset
+        setTimeout(drop, 700);
       }
     }
   }
@@ -267,18 +240,16 @@ export function createLodController(deps: Deps) {
       dispatchRegion(decision.band, decision.window, latticeFromSettle(cam, margins(), decision.band));
     },
 
-    /** Record the world sheet just drawn and reset to band 0; the DOM cleanup here is belt-and-suspenders for elements that survived outside the draw's own wipes. */
     setWorld({ seed, overrides, render, manifest }: WorldContext) {
       world = { seed, overrides, render, manifest };
       currentBand = 0;
       currentWindow = FULL_WINDOW;
       inset = null;
-      regionGen++; // any region in flight from the previous world is now stale
+      regionGen++;
       hidePencil();
       removeInsetsExcept(null);
     },
 
-    /** Drop any in-flight redraft, unmount everything, reset the band state (a new draw is starting). */
     cancel() {
       regionGen++;
       currentBand = 0;
@@ -288,7 +259,6 @@ export function createLodController(deps: Deps) {
       removeInsetsExcept(null);
     },
 
-    /** #170: the voiced home (full-sheet button, the 0 key). A committed inset fades off while the caller glides the camera home; with nothing committed it still cancels an in-flight redraft. The programmatic homes (verso, chronicle, voyage, draw) keep homeToWorld below. */
     easeHome() {
       if (!inset) {
         regionGen++;
@@ -298,7 +268,6 @@ export function createLodController(deps: Deps) {
       revertToWorld();
     },
 
-    // Drop the inset INSTANTLY (no fade) so a world-sheet ceremony (verso flip, chronicle, home/reset) operates on the bare world chart; a region carries no chronicle/realm layers. A no-op at band 0.
     homeToWorld() {
       regionGen++;
       hidePencil();
@@ -318,7 +287,6 @@ export function createLodController(deps: Deps) {
       return { seed: world.seed, overrides: world.overrides, render: world.render, band: inset.band, seat: inset.seat, title: inset.title, svg: inset.svg };
     },
 
-    /** Observable state for the e2e (band, window, title, redraft count). */
     state() {
       return {
         band: currentBand,

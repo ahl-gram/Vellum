@@ -9,7 +9,7 @@ import { renderMap } from "../../src/render/map-renderer.ts";
 import { editDistanceWithin1 } from "../../src/core/text.ts";
 import type { World } from "../../src/world/types.ts";
 
-// #49 rescoped 2026-08-16: a few living towns carry a former name, a DIFFERENT word from the same tongue (not an older phonetic form, which is #282's ground). Drawn on rng.fork("renames"), so no current name moves.
+// A few living towns carry a former name, a different word from the same tongue, drawn on rng.fork("renames") so no current name moves.
 
 const SEEDS = [1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 42, 99];
 
@@ -104,7 +104,6 @@ test("each seed renames exactly this many", () => {
   }
 });
 
-// The per-seed counts above cannot reach MAX or MIN: no seed has enough living settlements to exceed the cap, and none has few enough to hit the floor. Drive the bounds directly.
 test("the cap holds however many places are eligible", () => {
   const many = Array.from({ length: 120 }, (_, i) => ({ name: `Many${i}`, ruined: false }));
   const got = assignFormerNames(many, CULTURES[0] as Culture, createRng(3).fork("renames"), new Set());
@@ -172,7 +171,6 @@ test("a former name reserves the word against hamlet naming", () => {
   }
 });
 
-// Ruling 1: the former name never prints on the chart. The empty byte diff on seed 42's committed charts is one instance, not the class.
 test("no former name reaches the rendered chart, in any style", () => {
   for (const seed of [42, 3, 7]) {
     const w = worldFor(seed);

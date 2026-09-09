@@ -1,8 +1,4 @@
-// #116 the Verso: the chart's back face (mirrored bleed-through ghost, docket line,
-// surveyor's attribution, survey-office stamp). The flip REUSES #131's shared .sheet /
-// #sheet-inner wrapper but owns a SEPARATE, persistent state (a held rotateY(-180) rest);
-// the turn (#131) and the flip (#116) must never both own #sheet-inner's rotateY at once,
-// and app.ts enforces it. Kept free of top-level DOM so buildDocket stays unit-testable.
+// The Verso: the chart's back face (bleed-through ghost, docket line, attribution, survey-office stamp). The style turn and the flip must never both own #sheet-inner's rotateY at once; app.ts enforces it.
 
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 
@@ -14,7 +10,6 @@ export interface DocketFields {
   capitalFormerName?: string;
 }
 
-/** The docket line stamped along the fold. Pure so it is unit-testable; the rest of the verso is DOM. */
 export function buildDocket({ seed, title, presentYear, capital, capitalFormerName }: DocketFields): string {
   const parts = [`CHART № ${seed}`, title, `Year ${presentYear}`];
   if (capital) parts.push(capitalFormerName ? `${capital} (once ${capitalFormerName})` : capital);
@@ -68,7 +63,6 @@ export function renderVerso(
   versoEl.replaceChildren(ghost, docketEl, surveyEl, buildStamp());
 }
 
-/** #116: refresh the verso for the chart that just drew. Rebuilt on every draw, flipped or not, so a flip always shows the current world; renderVerso revokes the prior ghost URL. */
 export function rebuildVerso(
   versoEl: HTMLElement,
   res: { svg: string; title: string; subtitle: string; manifest: PlaceManifest },
@@ -88,11 +82,7 @@ export function rebuildVerso(
   });
 }
 
-// #174: the ghost is a snapshot of the chart as the WORKER drew it, so the client voyage track gets its only path onto the back face here: a mirrored <polyline> sharing the ghost's box, fed the very same points string the recto carries.
-// INVARIANT: never rebuild the ghost Blob to refresh the track; renderVerso is the only place allowed to churn one (writing points is free, re-blobbing costs ~1 MB per redraw).
-// The layer is inserted directly AFTER the ghost, so it paints over the bleed-through but under the docket, attribution and stamp (all positioned, so DOM order decides); it carries no ship, keeping this glyph-agnostic.
-
-/** Paint (or refresh) the verso's bleed-through track; creates the layer on first use. viewBox is the recto overlay's, so the two faces share a space. */
+// INVARIANT: never rebuild the ghost Blob to refresh the track (renderVerso is the only place allowed to churn one; re-blobbing costs ~1 MB per redraw); the layer sits directly after the ghost so it paints over the bleed-through but under the docket, attribution and stamp.
 export function paintVersoTrack(versoEl: HTMLElement, points: string, viewBox: string): void {
   if (!points) { clearVersoTrack(versoEl); return; }
   let layer = versoEl.querySelector(".verso-track-layer");
@@ -110,21 +100,15 @@ export function paintVersoTrack(versoEl: HTMLElement, points: string, viewBox: s
   (layer.firstChild as SVGElement).setAttribute("points", points);
 }
 
-/** Remove the bleed-through track from the verso. Safe when there is none. */
 export function clearVersoTrack(versoEl: HTMLElement): void {
   const layer = versoEl.querySelector(".verso-track-layer");
   if (layer) layer.remove();
 }
 
-/** Whether the sheet is currently resting on (or turning toward) its verso. */
 export function isFlipped(sheetEl: HTMLElement): boolean {
   return sheetEl.classList.contains("versoed");
 }
 
-// The flip toggles two classes on .sheet: .flip3d (lights the 3D context + reveals #verso; stripped only when the leaf lands FLAT on the recto again, restoring idle byte-parity) and .versoed (the held rotateY(-180deg) target).
-// A superseding re-flip leaves .flip3d alone via the !versoed guard, so a reversal never tears the 3D context down mid-turn.
-
-/** Toggle the sheet between recto and verso; returns true if now showing the verso. */
 export function toggleFlip(sheetEl: HTMLElement): boolean {
   if (isFlipped(sheetEl)) { flipToRecto(sheetEl); return false; }
   flipToVerso(sheetEl);

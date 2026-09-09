@@ -17,8 +17,7 @@ import {
   sweepElapsedAt,
 } from "../../src/render/chronicle-scrubber.ts";
 
-// #54 (Chronicle year-scrubber): only the pure core; the DOM wiring lives in src/site/living-chart/chronicle.ts, covered by the Explorer e2e.
-// Load-bearing: a ruined place is LIVING between founding and abandonment and only a RUIN once its ruin year passes; a ruin event sliced off the 14-event chronicle still crumbles at the present year, rather than never.
+// The pure core only; the DOM wiring lives in src/site/living-chart/chronicle.ts, covered by the Explorer e2e.
 
 const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   idx: 0,
@@ -29,7 +28,6 @@ const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   seat: false,
   nx: 0.5,
   ny: 0.5,
-  // #120 added the grid cell to PlaceMark; nothing here reads it.
   gx: 0,
   gy: 0,
   ...over,
@@ -85,7 +83,6 @@ test("placeStateAt: a place is hidden before its founding, then living", () => {
 });
 
 test("placeStateAt: a ruin is LIVING between founding and abandonment, RUIN after", () => {
-  // The discriminator: a naive ruined && year >= founded rule would mark the town a ruin from its founding on, never showing the centuries it thrived.
   const places = [mark({ idx: 0, kind: "village", founded: 400, ruined: true })];
   const events = [ev({ kind: "ruin", settlement: 0, year: 650, text: "Abandoned." })];
   const m = buildScrubMarks(places, events, 800)[0]!;
@@ -113,7 +110,6 @@ test("glyphVisibleAt: a ruined town follows state-begins - hidden through its li
   assert.equal(glyphVisibleAt(mark, 800), true, "and stays a ruin");
 });
 
-// #155 ink-in: the scrubber must know WHICH marks crossed into view between the last painted year and this one, and WHICH grade each plays; both pure, the plumbing lives in the Explorer.
 
 test("glyphRevealedBetween: true only on the frame that crosses a founding (#155)", () => {
   const m = { idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null };
@@ -131,13 +127,11 @@ test("glyphRevealedBetween: a park (fromYear === toYear) reveals nothing (#155)"
 });
 
 test("glyphRevealedBetween: scrubbing BACKWARDS is not a reveal (#155)", () => {
-  // Hiding stays a hard cut: only the appearance carries a ceremony.
   const m = { idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null };
   assert.equal(glyphRevealedBetween(m, 400, 299), false, "shown -> hidden is not a reveal");
 });
 
 test("glyphRevealedBetween: a ruin's beat is its FALL year, not its founding (#155)", () => {
-  // state-begins (#93): an eventually-ruined town has no living glyph baked, so its ruin glyph is what appears.
   const m = { idx: 1, nx: 0.5, ny: 0.5, founded: 400, ruinYear: 650 };
   assert.equal(glyphRevealedBetween(m, 399, 400), false, "its founding draws nothing, so it is no beat");
   assert.equal(glyphRevealedBetween(m, 649, 650), true, "the fall year is where the ruin inks in");
@@ -155,7 +149,7 @@ test("eventIsPast is inclusive of the current year", () => {
   assert.equal(eventIsPast(500, 501), true);
 });
 
-// #54 shipped an event-proportional sweep; Alex reversed it on PR #311 (2026-07-28): the bar moves uniformly in years over the fixed SWEEP_MS and events no longer shape the pacing (the API takes no event years to consult).
+// Ruled on PR #311 (2026-07-28): the sweep is uniform in years over SWEEP_MS; events do not shape the pacing.
 
 test("sweepYearAt is linear: elapsed fractions map straight onto year fractions", () => {
   const range = { min: 0, max: 100 };
@@ -180,7 +174,6 @@ test("the sweep never goes backwards and covers the whole range", () => {
 });
 
 test("every interior year gets the same screen time: no beat-year plateaus", () => {
-  // The 1ms tally that once proved the dwells now proves their absence.
   const range = { min: 0, max: 100 };
   const tally = new Map<number, number>();
   for (let t = 0; t <= SWEEP_MS; t++) {
@@ -243,7 +236,6 @@ test("integration: over seed 42's whole timeline every mark inks in exactly once
   assert.deepEqual([...grades].sort(), ["founding", "ruin"]);
 });
 
-// sweepElapsedAt is the inverse #220's fused Play resumes from.
 
 test("sweepElapsedAt round-trips every year through sweepYearAt exactly", () => {
   const range = { min: 300, max: 1100 };

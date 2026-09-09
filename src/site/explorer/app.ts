@@ -1,5 +1,4 @@
-// Explorer UI conductor: wires the controls to the render worker, runs draw(), and keeps
-// the URL hash in sync. #321: the Explorer is STATIC; no code path here starts an animation clock.
+// Explorer UI conductor: wires the controls to the render worker, runs draw(), keeps the URL hash in sync. #321: the Explorer is STATIC; no code path here starts an animation clock.
 import { runJob, runInline, usesWorker, initWorker } from "./worker-client.ts";
 import { shouldTurn, runTurn, cancelTurn, turnTiming } from "./sheet-turn.ts";
 import { toggleFlip, isFlipped, rebuildVerso, paintVersoTrack, clearVersoTrack } from "./verso.ts";
@@ -39,11 +38,10 @@ let lastSvg = "";
 let lastTitle = "";
 let lastSubtitle = "";
 let lastSeed = 0;
-let lastManifest: PlaceManifest | null = null; // the on-screen chart's manifest; feeds a voyage toggled on without a redraw
+let lastManifest: PlaceManifest | null = null;
 // #120: assigned beside lastManifest from the SAME draw; a mismatched pair would route this world's ports over another world's roads.
 let lastSurvey: Survey | null = null;
 
-// #55/#137: shared BY REFERENCE with controls.ts; until touched, a draw is the natural world.
 const touched = { land: false, coast: false };
 
 let pendingCamera: Camera | null = null;
@@ -55,14 +53,12 @@ function prefersReduce(): boolean {
   return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 }
 
-// #373: the #184 travel matrix runs in the render worker, so the arm no longer blocks the #127 arrival ceremony.
 const tourOrder = createTourOrder({ runJob });
 
 const lc = createLivingChart({
   mapEl: mapDiv,
   statusEl: status,
   tourOrder,
-  // #242: read at show time, so the card's link always carries the hash on screen.
   prospectHref: (idx) => prospectTarget(location.hash, idx),
   // #387/#388: at k=1 this rect IS the chart box, and under the Glass it is the room actually on screen, which is why one box serves both errata.
   clampBox: () => mapViewport.getBoundingClientRect(),
@@ -77,7 +73,6 @@ let redraftEnabled = true;
 function regionEligible(): boolean {
   return redraftEnabled && styleSel.value === "antique" && !agesChk.checked && !isFlipped(sheetEl) && !!lastSvg;
 }
-// #520: the Chart Table rides in the address and in no browser storage (ruled 2026-09-05), so the drawer holds it between writes and hands it to the one writer.
 // What the handle SAYS depends on the table, which changes under it, so the label is recomputed rather than baked once at the commit.
 const earLabel = (item: TableItem): string =>
   chartTable.holds(item) ? refusalLine("already") : chartTable.isFull() ? refusalLine("full") : "lay this survey on the table";
@@ -97,7 +92,6 @@ const chartTable = bindChartDrawer({
   broadside: () => room.broadside,
   relabelLeaf: (count) => leaf.relabel(count),
   say: (line) => { status.textContent = line; },
-  // Deferred to the first opening, never to load (ruled 2026-09-07): a recovered link opens at the page's usual pace and nothing competes with the chart the reader came for.
   drawThumb: async (item) => {
     const job = thumbJobFor(item);
     if (!job) return null;
@@ -126,7 +120,6 @@ const glass = createGlass({
   prefersReduce,
   regionEligible,
   syncHash,
-  // #520: the dog-ear rides the committed inset. Rebuilt at each commit because draw() wipes #map and the controller unmounts insets on cancel, home and the verso flip, so a handle mounted anywhere else would outlive its sheet.
   decorateInset: (el: HTMLElement) => {
     const committed = glass.committedSurvey();
     const item = committed ? surveyItemFrom(committed) : null;
@@ -137,10 +130,8 @@ const glass = createGlass({
   buttons: { zoomIn: $("zoom-in"), zoomOut: $("zoom-out"), reset: $("zoom-reset"), cluster: $("zoom-controls") },
 });
 
-// #463: the chart room round the Glass; the sheet is refitted once each chart lands (the folio's lines are chrome the fit measures) and re-clamped against the refitted stage.
 const room = bindRoom({ frame: stageEl, sheet: sheetEl, camera: { hold: () => glass.cameraNow(), restore: (cam) => glass.refitCamera(cam) } });
 
-// #540 Sub 2a: on a phone the table is the sheet's second leaf, so the cuttings and their count dock out of the drawer and into it.
 const leaf = bindTableLeaf({
   leaf: tableLeaf, cuttings, count: chartDrawerCount, road: tableRoadBand, dock: legendDock,
   broadsideTab: leafBroadsideTab, tableTab: leafTableTab, slip: broadsideSlip,
@@ -148,7 +139,6 @@ const leaf = bindTableLeaf({
   onLayout: () => room.layout(),
 });
 
-// The chart's folio, lower left: the world's name and number, its survey line, then the caption the suites and the region survey write.
 // The mockup's survey line is the subtitle's tail ("surveyed in the year 1059 of the Cedar Age"), not the cartouche's whole sentence: the folio stays short and leaves the legend row its room.
 function writeFolio(res: { title: string; subtitle: string }, seed: number): void {
   folioTitle.textContent = `${res.title} · Chart № ${seed}`;
@@ -211,7 +201,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       writeFolio(res, seed);
       caption.textContent = `${res.mapType} · ${res.band} · drawn in ${ms}ms`;
       const flipped = isFlipped(sheetEl);
-      const deferArm = deferLandingArm(quiet, flipped); // #366: survey-arm.ts carries the why
+      const deferArm = deferLandingArm(quiet, flipped);
       if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, flipped })) {
         const t = turnTiming();
         runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => {
@@ -225,12 +215,10 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
           syncHash();
         });
       } else {
-        // Settle (#127): when flipped this updates the hidden recto beneath the verso; rebuildVerso refreshes the visible face.
         mapDiv.innerHTML = res.svg;
         lc.buildPlaceOverlay(res.manifest);
         room.layout();
         if (!quiet) startArrival(mapDiv.querySelector("svg"));
-        // #120: re-arm from THIS draw's survey, never lastSurvey; a sea-level drag moved the waterline the router walks.
         armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
           rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
         glass.syncZoom();
@@ -270,14 +258,14 @@ wireFootnotes();
 versoBtn.addEventListener("click", () => {
   if (!lastSvg || drawing || sheetEl.classList.contains("turning")) return;
   // #165: reset(), not rebase(): the SAME chart stays, it is only re-homed before the flip.
-  glass.homeToWorld(); // #169: drop a committed region inset before the flip
+  glass.homeToWorld();
   glass.reset();
   syncHash();
   const flipped = toggleFlip(sheetEl);
   (versoBtn.querySelector(".room") ?? versoBtn).textContent = flipped ? "Back" : "The Sheet";
 });
 
-// #300/#366: survey-arm.ts owns the box's wiring AND the one slot every arm goes through; rearmVoyage, never applyVoyage (the settle discipline).
+// rearmVoyage, never applyVoyage (the settle discipline); survey-arm.ts owns the one slot every arm goes through.
 const surveyArm = wireSurveyToggle({
   box: agesChk,
   worldGen: () => drawGen,
@@ -298,7 +286,6 @@ if (fwd) {
     setRedraftEnabled: (v) => { redraftEnabled = !!v; },
   });
 
-  // A bare visit lands on today's seed-of-the-day (UTC); readHash presence-gates the seed key, so a seedless link cannot clobber this down to 0.
   seedInput.value = String(seedForDate(new Date()));
   const hashed = readHash(hashControls);
   if (hashed.land) touched.land = true;

@@ -1,7 +1,4 @@
-// Glass gestures e2e (#166): suite-zoom's behaviour re-proven through REAL CDP input (mouse wheel, touch, device metrics); runs right after suite-zoom and restores its clean desktop home before suite-cards.
-// d3-zoom binds its touch listeners ONLY when the page BOOTS as a touch device (defaultTouchable reads navigator.maxTouchPoints at attach time), so the touch block enables emulation and then RELOADS.
-// NEVER dispatch a real touch while touch emulation is off: it wedges Chrome's touch input pipeline for the WHOLE session (every later touch is silently dropped, even after emulation is enabled); a real mouse wheel is safe, only touch poisons.
-// NEVER change the emulation config after dispatching a real touch: later touches route to native page pinch-zoom instead of the DOM and a clear+reload does NOT recover it, so ALL touch checks run under ONE phone-metric emulation set once and left alone.
+// Glass gestures e2e (#166): suite-zoom's behaviour re-proven through REAL CDP input (mouse wheel, touch, device metrics); runs right after suite-zoom and restores its clean desktop home before suite-cards. d3-zoom binds its touch listeners ONLY when the page BOOTS as a touch device (defaultTouchable reads navigator.maxTouchPoints at attach time), so the touch block enables emulation and then RELOADS. NEVER dispatch a real touch while touch emulation is off (it wedges Chrome's touch input pipeline for the WHOLE session; a real mouse wheel is safe, only touch poisons), and NEVER change the emulation config after a real touch (later touches route to native page pinch-zoom and a clear+reload does NOT recover it), so ALL touch checks run under ONE phone-metric emulation set enabled once and left alone.
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitReady, waitSettled, wheel, pinch, touchPan, setMobileViewport, clearMobile, PORT } = ctx;
 
@@ -26,7 +23,7 @@ export async function run(ctx) {
     zg1.k > 1.05 && Math.abs(zg1.x - px * (1 - zg1.k)) < 1 && Math.abs(zg1.y - py * (1 - zg1.k)) < 1,
     JSON.stringify({ zg1, predictedX: px * (1 - zg1.k), predictedY: py * (1 - zg1.k) }),
   );
-  await shoot("explorer-gesture-wheel.png"); // manual: a real wheel-zoom framed on the cursor
+  await shoot("explorer-gesture-wheel.png");
 
   r = await vpRect();
   await wheel(r.L + px, r.T + py, 600);
@@ -56,7 +53,7 @@ export async function run(ctx) {
     Math.abs(zg2.k - 170 / 70) < 0.15,
     JSON.stringify(zg2),
   );
-  await shoot("explorer-gesture-pinch.png"); // manual: a real pinch magnify on a phone-sized sheet
+  await shoot("explorer-gesture-pinch.png");
 
   const before = await state();
   await touchPan(cx, cy, cx - 80, cy - 60);
@@ -83,7 +80,7 @@ export async function run(ctx) {
     touchAction === "none" && Math.abs(scaleAtBoot - 1) < 0.01 && zg4.k > 1.3 && Math.abs(page.vs - 1) < 0.01,
     JSON.stringify({ touchAction, scaleAtBoot, k: zg4.k, page }),
   );
-  await shoot("explorer-gesture-mobile-pinch.png"); // manual: a pinch on a phone-sized sheet
+  await shoot("explorer-gesture-mobile-pinch.png");
 
   await clearMobile();
   await reloadHome("gesture-restore");

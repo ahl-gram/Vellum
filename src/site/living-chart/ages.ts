@@ -1,13 +1,4 @@
-// #220 the fused instrument: one scrubber drives the world from the founding survey
-// through its recorded ages. Left half is the SURVEY chamber (voyage t), right half the
-// AGES chamber (the chronicle's years), an even 50/50 split with a HARD DETENT at the
-// seam for drags only (ratified 2026-07-28; the pure math is src/render/ages-track.ts).
-// This module owns the one clock, the one bar, and the one journal; the chronicle and
-// voyage modules stay the two chamber painters it drives through internal seams. The
-// journal is ONE document (the Overture framing): prologue rows then dated annals, one
-// `inked` class lighting both. Play at EITHER chamber-end rest opens the whole story from
-// the survey's first leg (Alex's PR #311 ruling); a running Play crosses the seam
-// without pausing (the detent governs drags only).
+// The fused instrument: one scrubber whose left half is the survey chamber (voyage t) and right half the ages chamber (the chronicle's years), with a hard detent at the seam for drags only (ratified 2026-07-28). Owns the one clock, bar and journal; the chronicle and voyage modules are the two chamber painters it drives through their internal seams.
 import {
   SEAM_U,
   posAt,
@@ -42,34 +33,23 @@ import { buildAnnals, type AnnalRow } from "./annals.ts";
 interface AgesSession {
   pos: AgesPos;
   drag: DetentDrag | null;
-  /** The active drag's escape band, derived from the real track width at pointer down. */
   dragEscapeU: number;
   playing: boolean;
   rafId: number;
   anchor: SweepAnchor;
   annals: AnnalRow[];
-  /** Which chamber's paint currently holds the chart, so a crossing repaints the other chamber's rest exactly once, never per frame. */
   chamberShown: Chamber;
-  /** The bar's value domain is [0, 2 * yearSpan]: the seam lands at the midpoint and an arrow key steps exactly one year inside the ages half. */
   barMax: number;
 }
 
 export interface AgesDeps {
-  /** The instrument panel (hidden while the instrument is off). */
   panel: HTMLElement;
-  /** The Play/Pause button (label swap IS the state for AT). */
   playBtn: HTMLButtonElement;
-  /** The one bar. */
   range: HTMLInputElement;
-  /** The readout span: a word in the survey half, the year in the ages half. */
   readout: HTMLElement;
-  /** The journal strip the annal rows append into (after the prologue rows). */
   strip: HTMLElement;
-  /** #192: invoked when Play parks, the one rest no input event announces. */
   onPark?: () => void;
-  /** #402/#442: invoked on every instrument paint with the entry the story is telling, a survey day row or a chronicle annal; null when nothing is told yet and on teardown. */
   onAgesTold?: (told: ToldEntry | null) => void;
-  /** The place overlay's data (events + presentYear for the annals and the plan). */
   overlay: { data(): OverlayData | null };
   chronicle: Chronicle;
   voyage: Voyage;
@@ -117,14 +97,13 @@ export function createAges(deps: AgesDeps) {
     setPlayLabel(false);
   }
 
-  // #174: the sink is rest-only. A survey-chamber rest mirrors the recto track; an ages-chamber rest shows no track, so the sink clears rather than bleeding ink the recto does not carry.
   function syncSinkAtRest(): void {
     if (!ages) return;
     if (ages.pos.chamber === "survey") voyage.syncRestingTrack();
     else voyage.internals.clearRestingTrack();
   }
 
-  // The one paint primitive: land the instrument on a chamber position. A chamber CROSSING settles the chamber being left exactly once, never per frame. Writes NO sink (rest sites call syncSinkAtRest themselves, #174).
+  // The one paint primitive: a chamber crossing settles the chamber being left exactly once, never per frame, and it writes no sink (rest sites call syncSinkAtRest themselves).
   function paintPos(pos: AgesPos, opts: { silent?: boolean; postLog?: boolean } = {}): void {
     if (!ages) return;
     const silent = opts.silent === true;
@@ -132,23 +111,22 @@ export function createAges(deps: AgesDeps) {
     const range = rangeOf();
     if (pos.chamber === "survey") {
       if (ages.chamberShown !== "survey") {
-        chronicle.paintYear(range.max, true); // the present world, silently restored
+        chronicle.paintYear(range.max, true);
         voyage.internals.setOverlayVisible(true);
-        for (const r of ages.annals) r.li.classList.remove("inked"); // annals untold again
+        for (const r of ages.annals) r.li.classList.remove("inked");
         ages.chamberShown = "survey";
       }
-      voyage.internals.paintLive(pos.t, postLog); // also reveals the prologue rows
+      voyage.internals.paintLive(pos.t, postLog);
     } else {
       if (ages.chamberShown !== "ages") {
-        voyage.internals.paintLive(1, postLog); // the prologue completes (summary may post)
-        voyage.internals.setOverlayVisible(false); // the surveyor's ink leaves the sheet
+        voyage.internals.paintLive(1, postLog);
+        voyage.internals.setOverlayVisible(false);
         ages.chamberShown = "ages";
       }
       chronicle.paintYear(pos.year, silent);
       for (const r of ages.annals) r.li.classList.toggle("inked", eventIsPast(r.year, pos.year));
     }
     ages.pos = pos;
-    // #442: read AFTER the chamber painted, so the survey half reports the arrival this paint just landed.
     onAgesTold?.(pos.chamber === "survey" ? voyage.internals.toldEntry() : toldAnnal(ages.annals, pos.year));
     rangeEl.value = String(Math.round(uFor(pos, range) * ages.barMax));
     const text = readoutFor(pos);
@@ -157,7 +135,6 @@ export function createAges(deps: AgesDeps) {
     readoutEl.textContent = text;
   }
 
-  // Arm (or re-arm after a redraw). Never sweeps: a first arm parks at the present, a re-arm keeps the reader's CHAMBER normalized to its rest, and a hash restore parks at the addressed rest. Play is the story's one entry.
   function armAges(
     manifest: PlaceManifest | null,
     survey: Survey | null,
@@ -173,7 +150,6 @@ export function createAges(deps: AgesDeps) {
       clearAges();
       return;
     }
-    // The quiet flag passes THROUGH, never pinned on (test/site/voyage-tour-order.test.ts pins what a pinned flag would ship); a non-quiet rearm's sink paint is settled by syncSinkAtRest below (#174).
     voyage.rearmVoyage(manifest, survey, seed, subtitle, { quiet: !!opts.quiet });
     const range = rangeOf();
     const barMax = 2 * Math.max(1, range.max - range.min);
@@ -193,7 +169,6 @@ export function createAges(deps: AgesDeps) {
     };
     panel.hidden = false;
     setPlayLabel(false);
-    // The adopted rest CLAMPS against this world's range: parseLive only gates "integer > 0", so an unclamped hand-edited year=999999 would paint a blank chart and write itself back into the hash forever (the internal paintYear seam is deliberately unclamped; this is its boundary).
     const rawRest: AgesPos =
       opts.rest ??
       (priorChamber === "survey" ? { chamber: "survey", t: 1 } : { chamber: "ages", year: range.max });
@@ -208,14 +183,13 @@ export function createAges(deps: AgesDeps) {
   function exitAges(): void {
     pause();
     chronicle.exitScrub();
-    voyage.exitVoyage(); // clears the status, empties + hides the journal, clears the sink
+    voyage.exitVoyage();
     panel.hidden = true;
     rangeEl.removeAttribute("aria-valuetext");
     ages = null;
     onAgesTold?.(null);
   }
 
-  // Drop the session after a redraw with the toggle off (the host's innerHTML swap already replaced the baked layers; the journal is a sibling and hides explicitly).
   function clearAges(): void {
     cancelRaf();
     chronicle.clearScrub();
@@ -225,7 +199,6 @@ export function createAges(deps: AgesDeps) {
     onAgesTold?.(null);
   }
 
-  // A pointer drag rides the detent; a keyboard step crosses freely (a discrete press is already deliberate). Manual input pauses a running Play, the house idiom.
   function onBarInput(): void {
     if (!ages) return;
     if (ages.playing) pause();
@@ -239,17 +212,16 @@ export function createAges(deps: AgesDeps) {
       side = step.drag.side;
     }
     paintPos(posAt(u, rangeOf(), side), { postLog: true });
-    if (!ages.drag) syncSinkAtRest(); // a keyboard step is a rest; a drag rests on release
+    if (!ages.drag) syncSinkAtRest();
   }
 
-  /** Pointer down on the bar: the detent arms against the grabbed side; the escape band derives from the real track width (16 is the .ages-range thumb width, living-chart.css). */
+  /** 16 is the .ages-range thumb width in living-chart.css, so the escape band derives from the real track. */
   function dragStart(): void {
     if (!ages) return;
     ages.drag = detentStart(Number(rangeEl.value) / ages.barMax);
     ages.dragEscapeU = detentEscapeU(rangeEl.getBoundingClientRect().width - 16);
   }
 
-  /** Pointer up or cancel: the drag rests where it stands. */
   function dragEnd(): void {
     if (!ages || !ages.drag) return;
     ages.drag = null;
@@ -266,7 +238,6 @@ export function createAges(deps: AgesDeps) {
       onPark?.();
       return;
     }
-    // At a chamber-end rest, open the whole story (see the module header).
     const pos = playStart(ages.pos, range);
     const sched = voyage.internals.schedule();
     const cumMs = sched ? sched.cumMs : [0];
@@ -282,9 +253,9 @@ export function createAges(deps: AgesDeps) {
       const elapsed = storyAt(ages.anchor, now, pace);
       if (elapsed >= totalMs) {
         paintPos({ chamber: "ages", year: range.max }, { postLog: true });
-        pause(); // auto-park at the present, button back to "Play"
+        pause();
         syncSinkAtRest();
-        onPark?.(); // #192: the parked present must reach the address
+        onPark?.();
         return;
       }
       if (elapsed < surveyMs) {
@@ -307,7 +278,7 @@ export function createAges(deps: AgesDeps) {
     if (ages.playing) {
       pause();
       syncSinkAtRest();
-      onPark?.(); // #192: the mid-story park must reach the address
+      onPark?.();
     } else play();
   }
 
@@ -321,7 +292,6 @@ export function createAges(deps: AgesDeps) {
     syncSinkAtRest();
   }
 
-  /** Paint a year directly (the roster's scrubTo under the fused instrument). */
   function scrubToYear(year: number): void {
     if (!ages) return;
     if (ages.playing) pause();
@@ -333,7 +303,6 @@ export function createAges(deps: AgesDeps) {
     syncSinkAtRest();
   }
 
-  /** The live instrument for a read (address writer, e2e), or null when off. */
   function agesState() {
     if (!ages) return null;
     const range = rangeOf();

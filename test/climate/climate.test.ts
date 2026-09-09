@@ -14,7 +14,6 @@ function flatIsland(w: number, h: number, elevation = 0.15) {
   });
 }
 
-// #162: a regional survey normalizes lapse-rate against the PARENT world's elevation span, not the window's own max, so a locally-tall-but-globally-modest summit does not read colder in the region (a snow seam at the window boundary); an explicit elevSpan overrides the local max.
 test("computeClimate honors an explicit elevSpan (region temperature continuity, #162)", () => {
   const w = 20, h = 20, sea = 0.2;
   // local max is 0.6 (span 0.4); the parent world's span is larger.

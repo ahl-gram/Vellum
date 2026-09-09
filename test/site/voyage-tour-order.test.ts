@@ -8,8 +8,7 @@ import { createTourOrder } from "../../src/site/explorer/tour-order.ts";
 import type { PlaceManifest } from "../../src/render/place-manifest.ts";
 import type { Survey } from "../../src/render/survey.ts";
 
-// #373: the #184 travel matrix is 96.7-98.0% of the ~0.9-1.2s the arm blocks the main thread for (measured across five seeds), and that block lands on the #127 arrival ceremony.
-// It moves to the render worker. The engine keeps ONE routing path and asks an injected source for the order; a source with nothing ready leaves every non-Explorer host computing it inline exactly as before.
+// The #184 travel matrix is 96.7-98.0% of the ~0.9-1.2s the arm blocks the main thread for (measured across five seeds), so it moves to the render worker (#373): the engine keeps ONE routing path and asks an injected source for the order, and a source with nothing ready leaves every host computing it inline.
 
 const SUBTITLE = "as surveyed by Taiki the Wayfarer";
 const SEED = 42;
@@ -130,7 +129,6 @@ test("#373 the off-thread job returns the order the inline computation would hav
 
   const order = tourOrderFor({ sites: sitesOf(manifest), survey, ports: portsOf(manifest) });
 
-  // The Explorer would otherwise sail a different itinerary from the Reading Room and from every unit suite, for the same world.
   assert.deepEqual([...order], travelOrderOf(manifest, survey), "one tour, whichever thread computed it");
 });
 
@@ -160,7 +158,7 @@ test("#373 the adopted order is CACHED, so a later quiet rebuild still sails it"
   const again = sessions.build(manifest, survey, SEED, SUBTITLE, true);
 
   assert.ok(again);
-  // Dropping the builder's own cache write escaped every other case here, because they all re-read a live source (guard-prover run, mutation M4). A quiet rebuild is the one that cannot fall back and recompute.
+  // Dropping the builder's own cache write escaped every other case here, because they all re-read a live source; a quiet rebuild is the one that cannot fall back and recompute.
   assert.deepEqual(again.plan.ports.map((p) => p.idx), wanted, "the order outlives the source that supplied it");
 });
 
@@ -278,7 +276,7 @@ test("#373 a held order answers ONLY for the world it was computed for", async (
   const ports = portsOf(manifest);
 
   assert.ok(h.orders.get(SEED, survey, ports), "the world it was asked for");
-  // All three components of the key, swept: a get() that ignored the key entirely passed every other case in this file (guard-prover run, mutation M5). Handing one world's order to another throws out of applyTourOrder.
+  // All three components of the key, swept: a get() that ignored the key entirely passed every other case in this file. Handing one world's order to another throws out of applyTourOrder.
   assert.equal(h.orders.get(SEED + 1, survey, ports), null, "another seed");
   assert.equal(h.orders.get(SEED, { ...survey, gridW: survey.gridW + 1 }, ports), null, "another survey");
   assert.equal(h.orders.get(SEED, survey, ports.slice(0, -1)), null, "another port set");

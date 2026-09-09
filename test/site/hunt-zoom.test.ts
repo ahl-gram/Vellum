@@ -3,8 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// The Daily Hunt takes the Glass (#167): the seed-of-the-day page adopts the shared zoom controller, geometric-only. This guards the STATIC wiring shape; the behaviour is proven by scripts/e2e/suite-hunt.mjs.
-// BOUNDARY (#161 ratified): the Hunt is a FIXED world and must never import the LOD schedule or the region worker, since revealing new places mid-game would change the clue difficulty.
+// The Daily Hunt takes the Glass (#167), geometric-only; the behaviour is proven by scripts/e2e/suite-hunt.mjs. BOUNDARY (#161): the Hunt is a FIXED world and must never import the LOD schedule or the region worker, since revealing new places mid-game would change the clue difficulty.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
@@ -49,7 +48,6 @@ test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)
   for (const p of importPaths) {
     assert.doesNotMatch(p, /lod|region|worker/i, `the Hunt must not import a semantic-redraft path (${p})`);
   }
-  // Extract just the call's argument literal, so a comment cannot trip the match.
   const opts = js.match(/createZoomController\(\{([\s\S]*?)\}\)/);
   assert.ok(opts, "app.js should construct the controller with an options literal");
   assert.doesNotMatch(opts[1], /onSettle|onApply/, "the Hunt controller is geometric-only (no redraft/counter-scale hooks)");
@@ -57,13 +55,11 @@ test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)
 
 test("HZ5 index.css gives #map-viewport the clip + touch-action wiring and #map a top-left pivot (#167)", () => {
   const css = read("public/seed-of-the-day/index.css");
-  // #462: the stage is the viewport and #map covers it, so d3's clamp (the viewport extent) keeps the padded, fitted sheet on the stage; the stage rule is the kit's since #463.
   assert.match(read("public/atelier.css"), /\.stage\s*\{[^}]*position:\s*fixed;\s*inset:\s*0/, "the stage is the viewport");
   assert.match(css, /#map\s*\{[^}]*inset:\s*0/, "#map covers the stage, so the clamp's extent is the stage");
   assert.match(css, /#map\s*\{[^}]*padding:\s*var\(--reserve-top/, "#map reserves the chrome's edges as padding, measured by room.ts");
   // Clip ONLY while zoomed, so the idle DOM (arrival ceremony overflow, drop shadow) stays byte-identical at home (k=1).
   assert.match(css, /#map-viewport\.zoomed\s*\{[^}]*overflow:\s*hidden/s, "#map-viewport.zoomed should clip");
-  // touch-action:none (added via .zoomable by the controller) is REQUIRED for pinch/drag.
   assert.match(css, /#map-viewport\.zoomable\s*\{[^}]*touch-action:\s*none/s, "#map-viewport.zoomable should set touch-action:none");
   // transform-origin 0 0 makes the CSS scale pivot match d3-zoom's screen-space math.
   assert.match(css, /#map\s*\{[^}]*transform-origin:\s*0\s+0/s, "#map should pivot at the top-left (transform-origin: 0 0)");

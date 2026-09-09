@@ -118,15 +118,11 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
     "the seed input opts into the idiom (type=text for the iOS numeric keypad, so the attribute selector cannot see it)");
   wears("src/pages/gallery/index.astro", /<p class="dateline">\{dateline\}<\/p>/, "the gallery's count is the folio corner's line");
   wears("src/pages/seed-of-the-day/index.astro", /class="[^"]*hunt-intro intro/, "the hunt intro is an intro");
-  // #462: the dateline stands in the room folio's corner in its small caps, and the roads out are the legend row; the archivist head and the a.control idiom left Today with the desk.
   wears("src/pages/seed-of-the-day/index.astro", /<p class="dateline" id="dateline">/, "the dateline is the folio corner's line");
   wears("src/pages/seed-of-the-day/index.astro", /<LegendButton road=\{r\.road\}/, "the roads out are legend buttons (the kit's, #487)");
-  // #463: the desk left with the conversion; the plates are legend buttons and Pull a proof is the folio corner's primary.
   wears("src/pages/print-room/index.astro", /<button class="legend-btn" type="button" data-poster=/, "the poster plates are legend buttons");
   wears("src/pages/print-room/index.astro", /<button id="pr-draw" class="primary"/, "Pull a proof is the room's primary");
-  // #270 promoted the Explorer's group heads from the inline tier to the standing tier, the print-room desk-head precedent.
   wears("src/pages/explorer/index.astro", /class="panel-head archivist-head"/, "the Broadside group heads are standing heads");
-  // #462: the TOC (and the #324 2026-08-26 archivist-label exception it carried) retired for the index slip; the room's one control stands in the folio corner.
   wears("src/pages/faq/index.astro", /<p class="dateline">\{count\}<\/p>/, "the question count is the folio corner's line");
   wears("src/pages/glossary/index.astro", /<input class="control" type="search"/, "the find box opts into the control idiom");
 });
@@ -192,7 +188,7 @@ test("no token value smuggled past the guards in rgb() form (#324)", async () =>
 });
 
 test("the chart quotations equal the render constants they quote (#324)", async () => {
-  // The --chart-* namespace exists so a site-side value BORROWED from the chart renderer can never silently drift; the render side is byte-identity domain, read here, never changed.
+  // The render side is byte-identity domain: read here, never changed.
   const { SITE_PALETTE } = await import("../../src/atlas/palette.ts");
   const { STYLES } = await import("../../src/render/style.ts");
   assert.equal(SITE_PALETTE["--chart-paper"], STYLES.antique.paper,

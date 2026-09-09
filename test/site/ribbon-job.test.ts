@@ -11,8 +11,7 @@ import { eventSeat, layoutRibbon, RIBBON_H, RIBBON_W } from "../../src/itinerary
 import { CELLS_PER_LEAGUE } from "../../src/render/layers/scalebar.ts";
 import type { World } from "../../src/world/types.ts";
 
-// A hash a visitor can type is the untrusted boundary here: every way of asking for a journey that
-// does not exist has to land somewhere sensible rather than throw a stack at the page.
+// A hash a visitor can type is the untrusted boundary: every way of asking for a journey that does not exist has to land somewhere sensible rather than throw.
 
 const world = generateWorld(defaultRecipe(42));
 const mask = roadMask(world);
@@ -34,7 +33,7 @@ test("ribbonResultFor renders through ribbonSvgFor byte-for-byte and reports the
   assert.deepEqual(res.reachable, reachable);
 });
 
-// A departure no road leaves is offered nowhere: picking it would fall back to the capital's road under the wrong name (skeptic on PR #500; #494: "the two selects filled from the road-reachable places").
+// #494: "the two selects filled from the road-reachable places"; picking a road-orphan would fall back to the capital's road under the wrong name.
 test("every option says whether a road leaves it, and seed 42's one road-orphan says no", () => {
   const res = ribbonResultFor(world, { from: capital, to: null, dress: "antique" });
   assert.ok(stranded >= 0, "premise: seed 42 strands a settlement off the network");
@@ -134,7 +133,7 @@ test("ribbonResultFor carries the itinerary: every drawn event with its league m
   assert.ok(seats.size > 1, "the rows do not all lean on one spot");
 });
 
-// A crossing can fall at the road's very end, past the arrival waypoint; the plate's strip filter drops it, so the slip must too, or it lists a bridge the scroll never drew (skeptic on PR #500: 53 of 902 roads over seeds 1 to 40). The oracle is the SVG's own text, not the seat function.
+// A crossing can fall at the road's very end, past the arrival waypoint (53 of 902 roads over seeds 1 to 40); the oracle is the SVG's own text, not the seat function.
 test("the itinerary lists only what the scroll drew: every row's caption words stand in the plate's text, and an undrawn end-of-road crossing gets no row", () => {
   const res = ribbonResultFor(world, { from: 0, to: 2, dress: "antique" });
   const input = buildRibbonInput(world, 0, 2)!;

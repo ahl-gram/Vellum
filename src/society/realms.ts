@@ -82,7 +82,7 @@ function selectSeats(
   const seats: number[] = [];
 
   if (capitalIdx >= 0) {
-    seats.push(capitalIdx); // realm 0
+    seats.push(capitalIdx);
     const budget = Math.min(budgetOf(capitalLm), overallCap);
     for (const idx of pickTownSeats(settlements, lmOf, capitalLm, budget, [capitalIdx])) {
       if (!seats.includes(idx)) seats.push(idx);

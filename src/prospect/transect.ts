@@ -32,7 +32,6 @@ export function sampleBilinear(f: Field, x: number, y: number): number {
 
 const VIEW_FROM_SOUTH: ProspectView = { dx: 0, dy: -1 };
 
-/** Flatten -0 to 0: JSON.stringify(-0) is "0", which would break the byte-identity round trip. */
 const z = (v: number): number => (v === 0 ? 0 : v);
 
 function normalize(dx: number, dy: number): ProspectView | null {

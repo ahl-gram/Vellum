@@ -62,7 +62,6 @@ test("#388 a card measured off the side of the viewport publishes the nudge on t
   assert.deepEqual(nudge, { dx: "194px", dy: "0px" });
 });
 
-// The card element is REUSED across places (#128 keeps it stable so the unfurl replays cleanly).
 test("#387/#388 the nudge is recomputed per show, never inherited from the card before it", async () => {
   const { card, hits } = await overlayOver(() => CHART);
 
@@ -86,7 +85,6 @@ test("#387/#388 a box the host cannot supply yet is not treated as an empty box 
 
   const nudge = shownWith(card, hits[0]!, { left: 80, top: 200, right: 254, bottom: 390 });
 
-  // Clamping into a 0x0 box at (0,0) would drag every card to the top-left corner of the page.
   assert.deepEqual(nudge, { dx: "0px", dy: "0px" });
 });
 

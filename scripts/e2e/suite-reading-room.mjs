@@ -35,13 +35,7 @@ export async function run(ctx) {
     }
     return null;
   };
-  // #442 the NEGATIVE half of the arrival rule, and it needs its own dwell: a test that
-  // only waits for a plate to appear cannot see one appearing when it should not, so this
-  // holds for the same window plateShown polls and fails on the first frame it is shown.
-  // Returns null ONLY when the stage stood there hidden for the whole window. A missing
-  // .rr-prospect is reported as a failure, not as quiet success: stageRead yields null for
-  // an absent element, so treating null as "stayed hidden" would pass with the stage
-  // deleted outright, which is the shape a negative check has to refuse.
+  // The NEGATIVE half of the arrival rule (#442) needs its own dwell: this holds for the window plateShown polls and fails on the first frame a plate is shown. A missing .rr-prospect is a failure, not quiet success: stageRead yields null for an absent element, and a negative check that read null as "stayed hidden" would pass with the stage deleted outright.
   const plateStaysHidden = async (ms = 2500) => {
     let saw = 0;
     for (let i = 0; i < ms / 50; i++) {
@@ -54,8 +48,7 @@ export async function run(ctx) {
     }
     return null;
   };
-  // #442 the sticky strip and the live row it carries.
-  // #463 (#462 ruling 6): the strip is fixed along the bottom; the frame's wrapper inside it stacks the told row ABOVE the bar.
+  // The strip (#442; fixed along the bottom since #463): the frame's wrapper inside it stacks the told row ABOVE the bar.
   const stripRead = `(()=>{const w=document.querySelector(".rf-instrument-strip");const s=w&&w.closest(".strip");const t=document.querySelector(".rf-told");const b=document.querySelector(".rf-instrument");if(!s||!t||!b)return null;const cs=getComputedStyle(s);const r=s.getBoundingClientRect();const tr=t.getBoundingClientRect();const br=b.getBoundingClientRect();return{position:cs.position,top:Math.round(r.top),bottom:Math.round(innerHeight-r.bottom),h:s.offsetHeight,toldAbove:t.hidden||getComputedStyle(t).display==="none"?null:tr.bottom<=br.top+1,toldHidden:t.hidden,toldDisplay:getComputedStyle(t).display,gutter:(t.querySelector(".cr-year")||{}).textContent,text:(t.querySelector(".cr-text")||{}).textContent};})()`
 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
@@ -98,9 +91,7 @@ export async function run(ctx) {
     JSON.stringify(journal),
   );
 
-  // Seed 42's beats, measured 2026-08-22: foundings 451/552/597 (i=0/4/6), twin ruins 1039 (i=19/22; the LAST told holds the stage, ruled 2026-08-22), present 1059.
-  // #442 reverses what #402 shipped here: this hash carries no live key, so it is a PLAIN
-  // visit, and a plain visit opens with no plate at all. RR29 below shows Play bringing one.
+  // Seed 42's beats, measured 2026-08-22: foundings 451/552/597 (i=0/4/6), twin ruins 1039 (i=19/22; the LAST told holds the stage), present 1059. This hash carries no live key, so it is a PLAIN visit and opens with no plate (#442 reversing #402); RR29 shows Play bringing one.
   const noPlate = await plateStaysHidden();
   check(
     "RR26 a plain visit opens BARE: no plate until the reader asks for one (#442)",
@@ -108,7 +99,6 @@ export async function run(ctx) {
     noPlate === null ? "stayed hidden" : JSON.stringify(noPlate),
   );
 
-  // #442 the live row: the strip carries the entry the story is on, in the chronicle half here.
   const strip = await evaluate(stripRead);
   const lastAnnal = await evaluate(`(()=>{const rows=[...document.querySelectorAll(".rf-log-strip li")].filter(r=>!r.classList.contains("annals-head")&&r.classList.contains("inked"));const li=rows[rows.length-1];return li?{year:li.querySelector(".cr-year").textContent,text:li.querySelector(".cr-text").textContent}:null;})()`);
   check(
@@ -118,11 +108,7 @@ export async function run(ctx) {
     JSON.stringify({ strip, lastAnnal }),
   );
 
-  // The harness window is 1280x2400 (harness.mjs), and at 2400 tall this page has only a
-  // few hundred px of scroll, so the strip could never reach the top there and the check
-  // would pass or fail for the wrong reason. #442's governing viewport is 1440x900, so
-  // this one override says so out loud. mobile:false: this is a desktop reading, and
-  // mobile:true changes layout semantics as well as size.
+  // The harness window is 1280x2400, where this page has only a few hundred px of scroll and the strip could never reach the top, so this reading pins #442's governing 1440x900 viewport; mobile:false because mobile:true changes layout semantics as well as size.
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
   await sleep(200);
   const deskRest = await evaluate(stripRead);
@@ -136,21 +122,10 @@ export async function run(ctx) {
       !!room && room.page <= room.vh,
     JSON.stringify({ rest: deskRest, stuck: afterScroll, room }),
   );
-  // #442: the strip is what the reader gives up to keep the scrubber and the told row on
-  // screen, so its height is pinned against measured constants, never a relative read.
-  // Measured 2026-08-23 (plate-reader, seed 42, worst-case row in BOTH halves): 1440 -> 100,
-  // 900 -> 100 chronicle / 126 survey, 768 -> 126, 700 -> 126, then the live row is dropped
-  // at 40rem so 640 -> 59, 560 -> 59, 390 -> 98 (the bar itself wraps there). The ruling
-  // budgeted ~104 against a 1440x900 viewport and that holds exactly; between 640 and 900
-  // the told row takes a second line and the strip runs to 126. Both numbers are pinned so
-  // neither can grow unnoticed, and the 126 is flagged on the PR as a miss against the
-  // quoted figure rather than smoothed over.
-  // #463 re-measured for the bottom strip (the told row above the bar, the scale under it; seed 42, 2026-08-29), pinned with headroom.
+  // The strip's height is pinned against measured constants (plate-reader 2026-08-23, seed 42, worst-case row in BOTH halves: 1440 -> 100, 900 -> 100 chronicle / 126 survey, 768 and 700 -> 126, the live row dropped at 40rem so 640 and 560 -> 59, 390 -> 98 where the bar itself wraps; re-measured 2026-08-29 for the bottom strip and pinned with headroom). The ruling budgeted ~104 at 1440x900; between 640 and 900 the told row takes a second line and the strip runs to 126, flagged on the PR as a miss rather than smoothed over.
   const GOVERNING_BUDGET = 120;
   const WIDE_WORST = 135;
-  // BOTH halves at the governing width. deskRest alone is the chronicle half's short last
-  // annal, which reads 100 at every width and would pin the budget against the case that
-  // cannot exceed it; the survey half carries the long prose and is the one that can.
+  // BOTH halves at the governing width: deskRest alone is the chronicle half's short last annal, which reads 100 at every width and cannot exceed the budget; the survey half carries the long prose and can.
   await evaluate(`(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));return null;})()`);
   await sleep(150);
   const deskSurvey = await evaluate(stripRead);
@@ -165,9 +140,7 @@ export async function run(ctx) {
       /^day \d+$/.test(deskSurvey.gutter || "") && /^\d+$/.test(deskChron.gutter || ""),
     JSON.stringify({ survey: deskSurvey, chronicle: deskChron, budget: GOVERNING_BUDGET, rest: deskRest }),
   );
-  // The SURVEY half carries the long prose (its day rows run to ~153 chars against an
-  // annal's ~105), so the bar is driven there first: measuring the chronicle half's short
-  // last annal reports 100 at every width and the envelope passes vacuously.
+  // The SURVEY half carries the long prose (its day rows run to ~153 chars against an annal's ~105), so the bar is driven there first: the chronicle half's short last annal reports 100 at every width and the envelope passes vacuously.
   await evaluate(`(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));return null;})()`);
   await sleep(120);
   const byWidth = [];
@@ -188,11 +161,7 @@ export async function run(ctx) {
       byWidth[0].h > deskSurvey.h,
     JSON.stringify({ byWidth, envelope: WIDE_WORST, budget: GOVERNING_BUDGET }),
   );
-  // The chart does not shrink: the constraint set alongside the layout ruling. Pinned as
-  // the COLUMN plus the source aspect rather than a height constant, because the rect is
-  // the border box and the chart's 1px hairline puts it 2px above the 1100x849 the ruling
-  // quotes (measured 2026-08-23 at 1440x900: 1100x851). A rule that shrank, cropped or
-  // scaled the chart moves one of these two; the hairline moves neither.
+  // The chart does not shrink: pinned as the COLUMN plus the source aspect rather than a height constant, because the rect is the border box and the chart's 1px hairline puts it 2px above the ruling's 1100x849 (measured 2026-08-23 at 1440x900: 1100x851); a rule that shrank, cropped or scaled the chart moves one of these two, the hairline moves neither.
   const SOURCE_RATIO = 1158 / 1500;
   check(
     "RR36 the chart fills its fitted sheet at its source aspect and clears the folio above and the strip below by room.ts's 14px (#442; the chart room's fit since #463)",
@@ -204,7 +173,6 @@ export async function run(ctx) {
   await send("Emulation.clearDeviceMetricsOverride");
   await sleep(200);
 
-  // #442 Play is a gesture, and a gesture is what asks for a picture.
   await evaluate(`(()=>{document.querySelector(".rf-play").click();return null;})()`);
   const played = await plateShown();
   check(
@@ -225,9 +193,7 @@ export async function run(ctx) {
     JSON.stringify(survey),
   );
 
-  // #442 ruled 2026-08-22: a bare `survey` link parks at t=1, the return to the capital,
-  // so it shows the CAPITAL's plate on arrival, at the present year (a link is the reader
-  // asking for that moment). Seed 42's capital is i=0 Laukuwelua, present year 1059.
+  // #442 ruled 2026-08-22: a bare `survey` link parks at t=1, the return to the capital, so it shows the CAPITAL's plate at the present year; seed 42's capital is i=0 Laukuwelua, present year 1059.
   const surveyPlate = await plateShown();
   check(
     "RR32 a bare `survey` link arrives showing the capital's plate, at the present (#442)",
@@ -267,9 +233,7 @@ export async function run(ctx) {
     JSON.stringify(scrubbed),
   );
 
-  // #442 G reverses #402 here: crossing into the survey half no longer stows the picture,
-  // it swaps the SOURCE. The slider went to its minimum, so the survey is at its first
-  // leg, out of the capital: i=0 Laukuwelua at the present, not the year-650 beat plate.
+  // #442 G reverses #402 here: crossing into the survey half swaps the plate's SOURCE rather than stowing it; the slider at its minimum is the first leg out of the capital, i=0 Laukuwelua at the present, not the year-650 beat plate.
   const crossed = await plateShown("i=0&year=1059");
   check(
     "RR27b crossing into the survey half SWAPS the plate's source with no gap, never hiding it (#442)",
@@ -327,17 +291,12 @@ export async function run(ctx) {
     await sleep(50);
   }
   check("RR17b the counter draw replays the arrival ceremony and clears its coast dasharray (no residue)", reInked);
-  // #442: a counter draw is a fresh ARRIVAL (#418), so the room goes back to bare rather
-  // than restaging. The old world's plate must be GONE, which is the half #402 cared about,
-  // and no new one may appear unasked, which is the half #442 adds.
   const restaged = await plateStaysHidden();
   check(
     "RR28 the counter draw clears the old world's plate and stages no new one unasked (#442)",
     restaged === null,
     restaged === null ? "stayed hidden" : JSON.stringify(restaged),
   );
-  // The positive control this negative needs: without it RR28 also passes on a room where
-  // the plate can no longer appear at all. Play asks, a plate arrives for the NEW world.
   await evaluate(`(()=>{document.querySelector(".rf-play").click();return null;})()`);
   const restagedByPlay = await plateShown();
   check(
@@ -550,8 +509,7 @@ export async function run(ctx) {
     JSON.stringify({ glassSamples, preArm, glassOff }),
   );
   const mobile = await evaluate(`({w:document.body.scrollWidth,vw:window.innerWidth})`);
-  // #442 ruled 2026-08-23: on a phone the CONTROLS stick and the live row does not, so the
-  // strip stays the bar's own height. Read after the same dwell, at the same viewport.
+  // #442 ruled 2026-08-23: on a phone the CONTROLS stick and the live row does not, so the strip stays the bar's own height; read after the same dwell, at the same viewport.
   const mobileStrip = await evaluate(stripRead);
   // #462 ruling 6's phone half: the scale loses its LABELS, not its star.
   const mobileScale = await evaluate(`(()=>{const sc=document.querySelector(".scale");const lbl=[...sc.querySelectorAll(".tick .lbl")];const seam=sc.querySelector(".seam");return{labelsHidden:lbl.length>0&&lbl.every((l)=>getComputedStyle(l).display==="none"),seamShown:!!seam&&seam.getBoundingClientRect().width>0};})()`);
@@ -568,10 +526,7 @@ export async function run(ctx) {
     mobileSettled && mobile.w === 390,
     JSON.stringify(mobile),
   );
-  // The compact form MEASURED, not merely observed to exist: at 390 the bar itself wraps
-  // to two lines, so the strip is 98 there even with the live row gone (plate-reader
-  // 2026-08-23). Collecting the height and never asserting it is how the criterion's
-  // "measured at that width" gets gathered and discarded.
+  // The compact form MEASURED, not merely observed to exist: at 390 the bar itself wraps to two lines, so the strip is 98 even with the live row gone (plate-reader 2026-08-23); collecting the height and never asserting it is how a "measured at that width" criterion gets gathered and discarded.
   const PHONE_STRIP_MAX = 72; // measured 63 at 390 (2026-08-29): the bar, its scale under it, no told row
   check(
     "RR34 at 390px the live row is dropped, the strip stays fixed on the bottom edge, and its height is measured (#442, ruled 2026-08-23; the bottom strip since #463)",
@@ -581,9 +536,7 @@ export async function run(ctx) {
     JSON.stringify({ rest: mobileStrip, stuck: mobileStuck, scale: mobileScale, phoneMax: PHONE_STRIP_MAX }),
   );
 
-  // #124: the room builds the same overlay the Explorer does, so it LOOKS like it should card.
-  // It does not: the ages chamber is armed on every draw, so the overlay is permanently .scrub
-  // and every hit is inert. Pinned because reading the call site alone says the opposite.
+  // #124: the room builds the same overlay the Explorer does, so it LOOKS like it should card; it does not, since the ages chamber is armed on every draw and the overlay is permanently .scrub with every hit inert. Pinned because reading the call site alone says the opposite.
   const rrCard = await evaluate(`(()=>{
     const hits=[...document.querySelectorAll(".place-hit")];
     const card=document.getElementById("place-card");

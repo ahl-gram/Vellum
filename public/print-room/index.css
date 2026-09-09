@@ -1,10 +1,8 @@
 /* #463 (Landfall Sub 8): the Print Room is a chart room on the #462 pattern. The room furniture is /atelier.css's; this sheet seats the proof and a turned plate in the fitted sheet, the atlas on the slip, the poster plates on the legend row, and the hidden document for paper. */
 
-/* The stage centres the fitted sheet in what the chrome leaves; room.ts measures the reserves off the chrome rects. */
 .stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
   padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
 #sheet { position: relative; flex: none; width: 0; height: 0; box-shadow: var(--stage-shadow); }
-/* The Glass's gesture box is the sheet; #map is the transform target, so the proof and a turned plate ride one frame. transform-origin 0 0 matches d3-zoom's screen-space math. */
 #map-viewport { position: absolute; inset: 0; cursor: grab; }
 #map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
 #map-viewport.zoomable { touch-action: none; }
@@ -24,7 +22,6 @@
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
-/* The back matter's page face (#497, seat p), fitted by the room at the measured aspect. */
 #pr-page { position: absolute; inset: 0; overflow: hidden; background: var(--parchment-bright); }
 #pr-page[hidden] { display: none; }
 #pr-page .page-inner { width: 900px; font-size: 16px; transform-origin: 0 0; }
@@ -48,8 +45,7 @@
 .matter-page td.name .former { display: block; white-space: normal; font-weight: 400; font-size: 0.86em; color: var(--ink-brown); text-transform: none; letter-spacing: normal; }
 .matter-page td.note { font-style: italic; color: var(--ink-brown); }
 
-/* The corner's four controls (ruled 2026-08-30: the mockup plus the dice): the seed narrower; the style picker's dress is the kit's (lifted at #463 part 4/4, the Ribbon its second use) and its width stays this room's at every width, since the kit's phone clamp would leave "topographic" 4.6rem of box beside the chevron. */
-/* Wide sheets only: an unscoped 25rem beat the kit's 12.5rem phone clamp and the corner never wrapped (plate read 2026-08-30, round 2). */
+/* The style picker's width stays this room's at every width (the kit's phone clamp would leave "topographic" 4.6rem of box beside the chevron), scoped to wide sheets: an unscoped 25rem beat the kit's 12.5rem phone clamp and the corner never wrapped (plate read 2026-08-30). */
 @media (min-width: 901px) { .folio-room { max-width: 25rem; } }
 .folio-controls input.control { width: 5.6rem; }
 .folio-controls select.control { width: 7.4rem; }
@@ -82,7 +78,6 @@ body.has-atlas .slip .intro { display: none; }
 .plates figure.here figcaption { color: var(--ink-dark); font-weight: 600; }
 .atlas-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
-/* The legend row: Pressed-as in the head in the corner's dark dress, the caveat one line under it (ruled 2026-08-30), the sizes as the verb in small caps. */
 .legend-head .pressed { display: inline-flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
 .legend-head select { appearance: none; -webkit-appearance: none; cursor: pointer; font-size: 0.86rem; color: var(--parchment-bright); border-radius: 0;
   background: rgb(from var(--chart-ink) r g b / 0.45); border: 1px solid var(--line-tan); padding: 0.2rem 1.6rem 0.2rem 0.55rem;
@@ -97,7 +92,6 @@ body.has-atlas .slip .intro { display: none; }
 @media screen { #pr-atlas { display: none; } #pr-atlas .print-only { display: none; } }
 #pr-atlas { max-width: 1100px; margin: 0 auto; }
 #pr-atlas .atlas-head { text-align: center; margin: 0 0 1.5rem; }
-/* Carries its display face explicitly since #288 (the shell binds .wordmark, not h1, and nothing else in the cascade sets a family here); losing the face would surface only in a printed or downloaded atlas (e2e RH7). */
 #pr-atlas .atlas-head h1 { font-size: 2.2rem; letter-spacing: 0.04em; margin: 0 0 0.4rem;
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); }
 #pr-atlas .atlas-head .subtitle { font-style: italic; color: var(--ink-brown); margin: 0; }
@@ -115,7 +109,6 @@ body.has-atlas .slip .intro { display: none; }
   .plates { margin-left: 0; }
 }
 
-/* Print is paper, fixed in this sub (ruled 2026-08-30 on #463): unbound, the proof prints in flow, unzoomed; bound, the stage and the room's name print as nothing and the document prints, one plate per page. */
 @media print {
   .stage { position: static; padding: 0 !important; display: block; }
   #sheet { width: auto !important; height: auto !important; box-shadow: none; }

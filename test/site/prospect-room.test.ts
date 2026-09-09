@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// #463 part 4/4: the Prospect is a chart room on the #462 pattern, ruled on #494 (2026-08-30): the engraving full-bleed at the plate's own aspect, the year as the room's one control (viewed in the year N, Engrave), the engraver's note on the slip (the gazetteer's note, the plate's lettered key, the era line), the Explorer and the Ribbon as the roads out, print standing down.
+// The Prospect is a chart room on the #462 pattern, ruled on #494 (2026-08-30): the engraving full-bleed at the plate's own aspect, the year as the room's one control, the engraver's note on the slip, the Explorer and the Ribbon as the roads out, print standing down.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => (existsSync(resolve(REPO, p)) ? readFileSync(resolve(REPO, p), "utf8") : "");
 const page = read("src/pages/prospect/index.astro");

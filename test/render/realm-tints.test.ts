@@ -100,14 +100,12 @@ test("realmAdjacency links bordering realms and not sea-separated ones", () => {
 });
 
 test("realmAdjacency ignores out-of-range labels instead of throwing", () => {
-  // Defense-in-depth: a label >= count must be skipped, not indexed into the adjacency array (a TypeError).
   const adj = realmAdjacency(Int16Array.from([0, 5]), 2, 1, 2);
   assert.equal(adj.length, 2);
   assert.equal(adj[0]!.size, 0, "the in-range realm borders no valid neighbour");
 });
 
 test("realmTintIndices is identity within the base palette (byte-stable)", () => {
-  // <= 5 realms must map realm r -> tint r, matching the committed charts.
   const labels = new Int16Array(4).fill(0);
   assert.deepEqual(realmTintIndices(labels, 2, 2, 3, STYLES.antique), [0, 1, 2]);
   assert.deepEqual(realmTintIndices(labels, 2, 2, 5, STYLES.topographic), [0, 1, 2, 3, 4]);

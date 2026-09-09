@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-// #270 The Broadside: controls grouped by what they do to the WORLD (The Land = generation, The Hand = dressing). Since #463 the Broadside rides the slip; the seed row stands in the room's folio (#462 ruling 8) and the rest of the Press is the legend row (ruling 4). Moving a control across a hairline is a re-ratification, not a tidy.
+// The Broadside (#270): controls grouped by what they do to the WORLD (The Land = generation, The Hand = dressing); moving a control across a hairline is a re-ratification, not a tidy.
 const here = (p: string): string => readFileSync(new URL(p, import.meta.url), { encoding: "utf8" });
 const page = here("../../src/pages/explorer/index.astro");
 const glossary = here("../../src/pages/glossary/index.astro");
@@ -73,7 +73,6 @@ test("The Press is the legend row: Turn the sheet, then the Print Room and the j
     assert.ok(!press.includes(id), `${id} sits under The Press but is not an action`);
   }
   assert.match(press, /<button id="verso-turn" class="legend-btn" type="button">/, "Turn the sheet is the row's one button");
-  // #487: a road out is the kit's LegendButton; the rendered <a class="legend-btn gold"> is pinned in astro-scaffold.test.ts.
   assert.match(press, /<LegendButton id="order-plates" gold /, "the Print Room road stopped being the gold legend road");
   assert.match(press, /<LegendButton id="journal-link" gold /, "the journal road stopped being the gold legend road");
 });
@@ -85,7 +84,7 @@ test("the journal pointer is the always-visible gold road, not the old caption (
   assert.ok(!app.includes("journalLine"), "app.ts still gates a caption wrapper that no longer exists");
 });
 
-// The seals (ratified 2026-08-11, decision 4 on #270, variant B countersigned): the overlay checkboxes wear the seal dressing but stay REAL checkboxes with ids and label text untouched.
+// Decision 4 on #270 (2026-08-11): the seals stay REAL checkboxes, ids and label text untouched.
 test("the overlay checkboxes wear the seal dressing with ids untouched (#270)", () => {
   for (const [label, id] of [["legend", "legend"], ["arms", "arms"], ["beasts", "beasts"], ["survey", "ages"]]) {
     const re = new RegExp(`<label class="[^"]*seal[^"]*">${label} <input id="${id}" type="checkbox"`);

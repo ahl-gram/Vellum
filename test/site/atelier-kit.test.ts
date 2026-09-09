@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync, globSync } from "node:fs";
 import { resolve } from "node:path";
 
-// #487 (the Atelier Kit), the 2026-09-02 ledger's one PR: the five markup shapes the rooms pasted verbatim are components in src/layouts/, and no page carries a copy. The dress stays the kit sheet's (no css change); the built html is pinned in astro-scaffold.test.ts.
+// The Atelier Kit (#487): the markup shapes the rooms pasted are components in src/layouts/ and no page carries a copy; the built html is pinned in astro-scaffold.test.ts.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const pages = globSync("src/pages/**/index.astro", { cwd: REPO }).sort();

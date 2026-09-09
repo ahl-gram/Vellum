@@ -154,7 +154,7 @@ export function cleanup() {
 async function getPageTarget(DPORT) {
   let lastErr = "";
   for (let i = 0; i < 160; i++) {
-    if (browserExit) break; // browser died — stop polling, report below
+    if (browserExit) break;
     try {
       const list = JSON.parse(await httpGet(`http://127.0.0.1:${DPORT}/json`));
       const page = list.find((t) => t.type === "page" && t.webSocketDebuggerUrl);
@@ -360,7 +360,7 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
   await send("Log.enable");
   await send("Network.enable");
   await send("DOM.enable");
-  await send("Accessibility.enable"); // #53: read the computed AX description of a hit
+  await send("Accessibility.enable");
   // Treat the headless page as focused so element.focus() fires real events and :focus-visible applies; without this the keyboard-focus card path silently no-ops under --headless. Best-effort: older builds may not support it.
   try { await send("Emulation.setFocusEmulationEnabled", { enabled: true }); } catch {}
   await send("Page.navigate", { url: PAGE });

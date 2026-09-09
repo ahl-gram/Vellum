@@ -11,7 +11,6 @@ import {
 } from "../../src/terrain/contours.ts";
 import type { World } from "../../src/world/types.ts";
 
-// #223 root fix: closing the coast against the zoom window let plain Chaikin round the frame corners inward, carving real land into "phantom sea"; the fix pins the frame vertices so only the true shore rounds.
 // The metric is self-consistent in GRID space (no rasterizer, no golden): a small residual survives even with no smoothing (the half-cell iso quantization), so the contract is that pinning lands near that floor.
 
 /** Even-odd point-in-polygon over a set of rings, matching the SVG land fill. */
@@ -84,7 +83,7 @@ test("pinned region coast recovers the smoothing-induced phantom sea (#223)", ()
 test("pinned region coast holds across seeds and an edge-clamped window (#223)", () => {
   const cases: Array<[string, World]> = [
     ["seed 100 capital", capitalRegion(100)],
-    // A large window clamps against the world edge: long frame runs with real land hard against the corners, #223's worst case.
+    // A large window clamps against the world edge: long frame runs with real land hard against the corners, the worst case.
     ["seed 42 wide/clamped", capitalRegion(42, 0.7)],
   ];
   for (const [label, region] of cases) {
@@ -115,7 +114,6 @@ test("world charts carry no region clip, keeping goldens byte-identical (#223)",
 });
 
 test("world coast is unpinned: region gate does not touch world charts (#223)", () => {
-  // A standalone world has no region window, so coastRingsGrid must return the exact plain smooth (byte-identity of the committed goldens).
   const world = generateWorld(defaultRecipe(42));
   assert.equal(world.region, undefined);
   assert.deepEqual(coastRingsGrid(world, COAST_ITERS), plainRings(world, COAST_ITERS));

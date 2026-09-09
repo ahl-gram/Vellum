@@ -1,4 +1,4 @@
-// Independent ground-truth mirrors for the daily-hunt suite; lives outside test/ so node --test does not collect it as a test file.
+// Independent ground-truth mirrors for the daily-hunt suite: constants are MIRRORED from engine/render, never imported, so drift turns the sweep red by design; outside test/ so node --test does not collect it.
 
 import assert from "node:assert/strict";
 import { BIOMES } from "../src/climate/biomes.ts";
@@ -94,13 +94,10 @@ export function villagePoolSize(world: World): number {
   return world.settlements.filter((s, i) => s.kind === "village" && !seats.has(i)).length;
 }
 
-// #335 mirrors: thresholds below are MIRRORED from engine/render constants, not imported; drift turns the sweep red by design.
 
-/** Mirrors GLYPH_MTN_REL in src/render/layers/glyphs.ts. */
+// Mirrors GLYPH_MTN_REL and GLYPH_HILL_REL in src/render/layers/glyphs.ts, and CELLS_PER_LEAGUE in src/render/layers/scalebar.ts.
 export const MIRROR_MTN_REL = 0.5;
-/** Mirrors GLYPH_HILL_REL in src/render/layers/glyphs.ts. */
 export const MIRROR_HILL_REL = 0.34;
-/** Mirrors CELLS_PER_LEAGUE in src/render/layers/scalebar.ts. */
 export const MIRROR_CELLS_PER_LEAGUE = 2.2;
 /** Mirrors TERRAIN_RADIUS / TERRAIN_MIN / ROAD_NEAR / LEAGUE_LADDER in src/world/daily-hunt-clue-facts.ts. */
 export const TERRAIN_RADIUS = 4;
@@ -205,7 +202,6 @@ export function quarryPoolMirror(
   return villages.length > 0 ? villages : nonCapital.length > 0 ? nonCapital : indexed;
 }
 
-/** Whether clue holds at (s, idx), from mirrors only: the narrowing test's ground truth. */
 export function clueHoldsAt(
   world: World,
   clue: Clue,
@@ -266,9 +262,8 @@ function namedFeatureWithin(
   return d <= NEAR + 1e-9;
 }
 
-// Page-equivalent findability gates: mirror setupHunt in src/site/seed-of-the-day/app.ts, built from the rendered SVG string.
 
-/** A label emits as ">Name<"; capital and seat labels render .toUpperCase(), so both spellings count as printed. */
+/** Mirrors setupHunt in src/site/seed-of-the-day/app.ts: a label emits as ">Name<", and capital and seat labels render .toUpperCase(), so both spellings count as printed. */
 export function labelGate(markup: string): (name: string) => boolean {
   return (name) => markup.includes(`>${name}<`) || markup.includes(`>${name.toUpperCase()}<`);
 }
@@ -357,7 +352,6 @@ export function expectedClueText(clue: Clue): string {
   }
 }
 
-/** Every truthful candidate clue the quarry could have drawn, re-derived from mirrors; feeds the exhaustion check. */
 export function truthfulCandidates(
   world: World,
   q: Quarry,

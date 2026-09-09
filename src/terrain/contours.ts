@@ -169,12 +169,13 @@ export function closeChainsOnBoundary(
   const P = 2 * W + 2 * H;
   const eps = 1e-4;
 
+  // Boundary parameter t: left edge walking down, bottom edge right, right edge up, top edge left.
   const tOf = (p: Point): number => {
     const [x, y] = p;
-    if (x <= eps) return y; // left edge, walking down
-    if (y >= H - eps) return H + x; // bottom edge, walking right
-    if (x >= W - eps) return H + W + (H - y); // right edge, walking up
-    if (y <= eps) return 2 * H + W + (W - x); // top edge, walking left
+    if (x <= eps) return y;
+    if (y >= H - eps) return H + x;
+    if (x >= W - eps) return H + W + (H - y);
+    if (y <= eps) return 2 * H + W + (W - x);
     throw new RangeError(`open chain endpoint not on boundary: ${x},${y}`);
   };
 

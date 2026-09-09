@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-// #217 Part 1: the order desk speaks in the period voice (ratified 2026-07-29 on #217); source-text assertions here, the behavior is proven in the print-room e2e. Since #463 the desk is the legend row and the slip.
+// The order desk speaks in the period voice (ratified 2026-07-29 on #217); source-text assertions here, the behavior is proven in the print-room e2e.
 const page = readFileSync(new URL("../../src/pages/print-room/index.astro", import.meta.url), "utf8");
 
 // The option VALUES are the contract app.ts keys on (svg/png1/png2): the labels may move, the values may not.

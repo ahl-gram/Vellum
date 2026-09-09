@@ -7,8 +7,7 @@ import { GALLERY_PAGE_CSS } from "../../src/cli/gallery.ts";
 import { atlasDocument } from "../../src/atlas/document.ts";
 import { OG_FONT_FACES, fontFaceCss } from "../../src/render/og-card.ts";
 
-// Two contracts over every authored sheet the site has, public/ and src/ alike (#289, #356, #358, #360): what tips must go somewhere or be a ratified chart instrument, and an inline-block link must pin its bullet or be recorded as living outside a marker-bearing list.
-// A tip is defined by the shape `rotate(`, so a hover lift written as translate alone is not swept: motion.css's .rooms a lifts with translateY and no rotate (#461's addendum). It is not a false affordance today (an anchor), and widening the definition is a #289 question; so is the bare `rotate:` individual-transform property, which this fingerprint cannot see (guard-prover round 3, 2026-08-26).
+// Two contracts over every authored sheet the site has (#289, #356, #358, #360): what tips must go somewhere or be a ratified chart instrument, and an inline-block link must pin its bullet or be recorded as living outside a marker-bearing list. A tip is the shape rotate(, so a translate-only lift and the bare rotate: property are not swept (a #289 question).
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
@@ -105,17 +104,15 @@ const TIPPING_LINKS = new Set([
   "motion.css :: body:has(.room-name) .wordmark a:hover, body:has(.room-name) .wordmark a:focus-visible",
   // #270 ruling 7: the footnote marks follow through to /glossary/ anchors, so the ruling extended the tipping surface to them.
   "explorer/broadside.css :: a.fn:hover",
-  // #360, measured 2026-08-12: `cardFigureHtml` in `src/cli/gallery.ts` wraps every contact-sheet plate in a link; since #464 the link is the Explorer at the plate's seed (gallery-room.test.ts GR5 pins it).
+  // `cardFigureHtml` in `src/cli/gallery.ts` wraps every contact-sheet plate in a link to the Explorer at the plate's seed (gallery-room.test.ts GR5 pins it).
   "src/cli/gallery.ts :: figure img:hover",
-  // #368, ruled 2026-08-12 and measured after: the lift is scoped to `figure a img`, so where no link is made no lift applies; two hosts of ATLAS_SHEET_CSS anchor their plates (the CLI page, the download's own script), and the Print Room's hidden copy carries no link since #465 ruling 1.
+  // The lift is scoped to figure a img, so where no link is made no lift applies (the Print Room's hidden copy carries no link).
   "src/atlas/document.ts :: .atlas-sheet figure a img:hover",
-  // #242: the place card's "View the prospect" slip navigates to /prospect/, so it tips (#289's promise).
   "living-chart.css :: .pc-prospect:hover, .pc-prospect:focus-visible",
-  // #402: the Reading Room's beat plate links to /prospect/, so it carries the atlas plates' lift.
   "reading-room/index.css :: .rr-prospect a:hover img, .rr-prospect a:focus-visible img",
 ]);
 
-/** Chart instruments, ratified by Alex 2026-08-24 (in session, PR #468 live review): the lift-or-grow gesture still promises navigation everywhere else, but a station pip is a different thing altogether with its own rule. A pip is the chart's own instrument, and its grow promises "this opens the station's slip in place"; the slip's Enter link is what leaves the page. Kept apart from TIPPING_LINKS so that set stays true when it says a surface goes somewhere. */
+/** Chart instruments (ratified 2026-08-24, PR #468 live review): a station pip's grow promises "this opens the station's slip in place" and the slip's Enter link is what leaves the page; kept apart from TIPPING_LINKS so that set stays true when it says a surface goes somewhere. */
 const CHART_INSTRUMENTS = new Set<string>([
   "index.css :: .lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph",
 ]);
@@ -123,7 +120,7 @@ const CHART_INSTRUMENTS = new Set<string>([
 /** A tip whose surface does not navigate, held on the record until Alex rules: kept apart from TIPPING_LINKS so that set stays true when it says a surface goes somewhere. */
 // Explicitly Set<string>: while the set is empty an inferred Set<never> reds every `.has(key)` below rather than accepting a parked line.
 const TIPS_AWAITING_A_RULING = new Set<string>([
-  // Empty again on purpose: the station glyph parked here 2026-08-24 and graduated the same day to CHART_INSTRUMENTS on Alex's ruling. Park a line here only with the measurement written under it.
+  // Park a line here only with the measurement written under it.
 ]);
 
 /** A flat matcher over `rotate(` hover rules, not a css parser: fine while tips live in top-level rules. */
@@ -192,7 +189,7 @@ const settled = (css: string, selector: string): Readonly<Record<string, string>
   return out;
 };
 
-// Hand-measured (#356, #353): an inline-block takes its baseline from its LAST line box, so a wrapped tipping slip drops its bullet 26.00px to line two (measured on the FAQ and glossary TOCs, retired at #462; the class outlives its first instances), and vertical-align: top pins it back. Nothing overflows and a ::marker is not reachable from the DOM, so the bullet's position exists only in paint: no structural test can see it, which is why the rule is guarded as text.
+// Hand-measured (#356): an inline-block takes its baseline from its LAST line box, so a wrapped tipping slip drops its bullet 26.00px to line two and vertical-align: top pins it back; a ::marker is not reachable from the DOM, so the rule is guarded as text.
 /** Each entry is a MEASUREMENT of the markup taken 2026-08-12, not a rule: it says these boxes are not list items on the pages that use them today, so re-take it when you touch one. */
 const INLINE_BLOCKS_OUTSIDE_MARKER_LISTS = new Set([
   // Inside <p class="wordmark"> or <h1 class="wordmark"> in BaseLayout's head cluster (#461; the rooms nav pins vertical-align itself).

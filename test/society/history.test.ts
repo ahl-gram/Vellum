@@ -45,7 +45,6 @@ test("history invariants hold across a seed sweep", () => {
 });
 
 test("single-realm worlds still get a chronicle and never index empty realms", () => {
-  // seed 3 is a citystate (one realm, names.realms === [])
   const w = generateWorld(defaultRecipe(3));
   assert.equal(w.recipe.mapType, "citystate");
   assert.deepEqual(w.names.realms, []);

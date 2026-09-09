@@ -140,7 +140,6 @@ test("pinned chaikin with everything pinned is the ring itself (#223)", () => {
 });
 
 test("pinned chaikin with nothing pinned equals plain chaikin (#223)", () => {
-  // The free-point arithmetic must be the exact 0.75/0.25 form plain uses, so a no-pin ring renders byte-identically (the ULP invariant).
   const ring: Pt[] = [[1, 0], [5, 1], [4, 6], [0, 5]];
   const plain = chaikinSmooth(ring, true, 2);
   const pinned = chaikinSmoothPinned(ring, 2, () => false);

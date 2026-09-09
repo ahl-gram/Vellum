@@ -4,7 +4,7 @@ export async function run(ctx) {
   try {
     await send("Network.clearBrowserCache"); // so the now-404 worker.js isn't served from cache
     await send("Network.setCacheDisabled", { cacheDisabled: true });
-    await evaluate(`window.__preReload = true`); // sentinel: cleared once the fresh doc loads
+    await evaluate(`window.__preReload = true`);
     serverState.blockWorker = true;
     await send("Page.reload", { ignoreCache: true });
     // Wait for the POST-reload document (the sentinel gone), so nothing asserts against the pre-reload page still present during navigation.

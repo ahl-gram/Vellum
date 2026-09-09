@@ -1,7 +1,4 @@
-// #442 which plate a told journal row shows. The chronicle half resolves through the
-// story's beats (#402). The survey half holds the last port whose plate carries arms,
-// the capital-or-seat distinction finished.ts already draws, so the picture changes four
-// to six times over a survey rather than once a port.
+// Which plate a told journal row shows: the chronicle half resolves through the story's beats; the survey half holds the last port whose plate carries arms, so the picture changes four to six times over a survey rather than once a port.
 import { latestBeatAt, type StoryBeat } from "./beats.ts";
 import type { ToldEntry } from "../living-chart/told.ts";
 import type { PlaceMark } from "../../render/place-manifest.ts";
@@ -11,7 +8,6 @@ export interface PlateSpec {
   readonly year: number;
 }
 
-/** A realm seat is an INDEX in world.realms.seats, not a SettlementKind, so a kind-only read misses every seat that is nominally a town. Exported so the guard calls the shipped rule rather than a copy of it. */
 export function armsBearing(places: ReadonlyArray<PlaceMark>): (index: number) => boolean {
   const armed = new Set(places.filter((p) => p.kind === "capital" || p.seat).map((p) => p.idx));
   return (index: number) => armed.has(index);
@@ -44,7 +40,7 @@ export function plateForTold(
   return surveyRows[told.row] ?? null;
 }
 
-/** Every plate the room will need, deduped: the arm pulls them all, so no reveal can stall the sweep (#311). */
+/** Every plate the room will need, deduped: the arm pulls them all, so no reveal can stall the sweep. */
 export function plateSpecsFor(
   beats: ReadonlyArray<StoryBeat>,
   surveyRows: ReadonlyArray<PlateSpec | null>,

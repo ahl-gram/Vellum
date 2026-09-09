@@ -28,7 +28,7 @@ export function attachSeatlessLandmasses(
   for (let lm = 0; lm < landmassCount; lm++) {
     const cells = cellsByLm[lm] as number[];
     if (cells.length === 0) continue;
-    if ((frozen[cells[0] as number] as number) >= 0) continue; // seated
+    if ((frozen[cells[0] as number] as number) >= 0) continue;
 
     visited.fill(0);
     let head = 0;

@@ -3,8 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-// The glossary's shape, guarded structurally (#353): sections cap at 5-8 terms; Zoryan and Ordai run over cap by ratified exception; homographs take Smyth's (1867) period form, one headword with its senses run together.
-// The coverage test is deliberately a written-down spot-check pinning the words that prompted #353; the TOC guard exists because the TOC is hand-authored while the sections are not.
+// The glossary's shape (#353): sections cap at 5-8 terms, Zoryan and Ordai run over by ratified exception, homographs take Smyth's (1867) period form, one headword with its senses run together.
 
 const glossaryPath = fileURLToPath(new URL("../../src/pages/glossary/index.astro", import.meta.url));
 const source = readFileSync(glossaryPath, "utf8");
@@ -29,7 +28,7 @@ const sections = (html: string): readonly Section[] => {
     const level = Number(parts[i]);
     const heading = parts[i + 1].replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").trim();
     const body = parts[i + 2] ?? "";
-    // Tolerate attributes on the term: #270's per-term ids made an exact-tag match silently skip every such entry.
+    // Tolerate attributes on the term: an exact-tag match silently skips every entry carrying an id.
     const terms = [...body.matchAll(/<p class="term"[^>]*>([\s\S]*?)<\/p>/g)].map((m) =>
       m[1].replace(/<[^>]*>/g, "").trim(),
     );
@@ -116,7 +115,6 @@ test("no headword is defined twice: homographs run their senses together (#353)"
 });
 
 test("the index slip replaced the hand-authored TOC: the sections are read from the page itself (#353, then #462 ruling 1)", () => {
-  // The old guard existed because the TOC was hand-authored while the sections were not; room-sections.test.ts now pins that every h2 and every term reaches the index.
   assert.ok(!source.includes('class="toc"'), "the dot-row TOC is gone");
   assert.ok(source.includes('<IndexSlip sections={sections} kind="terms" />'), "the index slip stands in its place, fed from the page's own sections");
   assert.ok(source.indexOf("<IndexSlip") < source.indexOf('<div class="sheet">'), "and precedes the prose it indexes, so the tab and a reader reach it first");
@@ -147,10 +145,8 @@ test("the broadside stands beside the index at 22rem columns, and no TOC dress s
   }
 });
 
-// The wrapped-slip bullet rule moved at #358: one sweep in test/site/tip-affordance.test.ts now holds every authored sheet, this one included.
 
 test("every term carries a definition (#353)", () => {
-  // Terms and defs alternate, so a dropped def silently orphans the headword above; counting per section catches the drift where it happens.
   const bodies = source.split(/<h([23])[^>]*>([\s\S]*?)<\/h\1>/);
   for (let i = 1; i + 2 < bodies.length + 1; i += 3) {
     const heading = (bodies[i + 1] ?? "").replace(/<[^>]*>/g, "").trim();

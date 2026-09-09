@@ -111,7 +111,7 @@ function fusedCells(wc: WindowCase, field: Field): number {
   return parentFusion(field, wc.partition, wc.sea).strayCells;
 }
 
-// Narrowed by #443. The floor covers a cell where the parent's OWN cell is land AND its interpolated surface still stands above the waterline; where only the interpolation rises, the parent charts water and the child may draw water. The landmass guard below is what bounds that narrowing.
+// The floor covers a cell where the parent's OWN cell is land AND its interpolated surface still stands above the waterline; where only the interpolation rises, the parent charts water and the child may draw water.
 test("monotone floor: parent land never sinks in the adjusted child, and the guard is not vacuous (#397, narrowed by #443)", () => {
   for (const seed of SWEEP_SEEDS) {
     let drownedNoFloor = 0;
@@ -131,7 +131,7 @@ test("monotone floor: parent land never sinks in the adjusted child, and the gua
         }
       }
     }
-    // Re-measured on this fixture 2026-08-23, after #443 changed what counts as parent land: seed 42 drowns 333 of 59189 parent-land cells without the floor, seed 23 drowns 255 of 42779. Was 478 of 59855 and 381 of 43318 against the blurred surface.
+    // Measured 2026-08-23: seed 42 drowns 333 of 59189 parent-land cells without the floor, seed 23 drowns 255 of 42779.
     assert.ok(parentLandCells > 20000, `seed ${seed}: only ${parentLandCells} parent-land cells checked`);
     assert.ok(
       drownedNoFloor >= 150,
@@ -211,7 +211,7 @@ test("the gate and the rejection each do real work on real terrain, and neither 
 });
 
 test("saddle census: the seed-42 world chart's three hairline picture-fuses, drawn-bridged in the real contours (#397)", () => {
-  // Ratified 2026-08-22 (Alex, accept-and-pin): the drawn coast may fuse landmasses the array splits only at these measured hairline saddles; growth of the census is a regression. The epic's "0 saddles currently fuse" predates this measurement and is corrected on the issue.
+  // Ratified 2026-08-22 (accept-and-pin): the drawn coast may fuse landmasses the array splits only at these measured hairline saddles; growth of the census is a regression.
   const c = worldCtx(42);
   const { fusing } = fusingSaddles(c.parent, c.sea);
   assert.deepEqual(
@@ -254,7 +254,7 @@ test("saddle census: hairline picture-fuses in adjusted band-3 windows stay with
       }
     }
   }
-  // Measured on this exact fixture 2026-08-23: 19 fusing saddles across the two 16-window sweeps, 11 of them with both corners on parent land; the bands leave room for single-cell float drift but trip on growth. Was 17 and 3 on 2026-08-22. The 3 to 11 is the ORACLE, not the terrain: counted against the blurred parent surface this same field still reads 3, and the parent's own cells simply call more cells land.
+  // Measured on this exact fixture 2026-08-23: 19 fusing saddles across the two 16-window sweeps, 11 of them with both corners on parent land; the bands leave room for single-cell float drift but trip on growth.
   assert.ok(fusingTotal >= 8 && fusingTotal <= 26, `fusing saddle census moved: ${fusingTotal}, measured 19`);
   assert.ok(bothParent <= 16, `both-parent hairline fuses grew: ${bothParent}, measured 11`);
 });

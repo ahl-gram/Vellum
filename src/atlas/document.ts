@@ -1,16 +1,11 @@
-// The atlas document: the standalone-page wrapper plus the shared inner CSS, the ONE
-// source the CLI deploy path and the Print Room's bound atlas both draw from. Browser-safe
-// by construction: no node: imports, no disk, no DOM (buildAtlas keeps the filesystem work).
+// The atlas document: the standalone wrapper plus the shared inner CSS, the one source the CLI deploy path and the Print Room's bound atlas draw from; browser-safe by construction (no node: imports, no disk, no DOM).
 import { escapeXml } from "../render/svg.ts";
 import { paletteRootCss } from "./palette.ts";
 import type { AtlasPlate } from "./compose.ts";
 
-// Drives the filename scheme and the page layout.
 export type PlateSection = "hero" | "draughting" | "theme" | "region" | "prospect";
 
-// Exactly the shape `serializableAtlas` in `src/site/explorer/serializable-atlas.ts`
-// produces. No `world` on purpose: the worker strips it (Fields are not
-// structured-cloneable), so the document must never need it.
+// Exactly the shape `serializableAtlas` in `src/site/explorer/serializable-atlas.ts` produces; no `world` on purpose, since the worker strips it (Fields are not structured-cloneable).
 export type AtlasDocumentData = {
   readonly title: string;
   readonly subtitle: string;
@@ -25,11 +20,7 @@ export type AtlasDocumentData = {
   readonly gazetteerHtml: string;
 };
 
-/**
- * The shared inner atlas CSS, scoped under `.atlas-sheet` so any host can inject it without
- * bleeding. Carries no page chrome, so each host keeps its own. Transition timings fall back
- * to literals (var(--paper, 260ms)): the download links no /motion.css and must still ease.
- */
+/** Scoped under `.atlas-sheet` so any host can inject it without bleeding, with no page chrome; transition timings fall back to literals (var(--paper, 260ms)) because the download links no /motion.css and must still ease. */
 export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
 .atlas-sheet figure a { display: block; position: relative; }
 /* The waiting frame (#329) sits BEHIND the img (negative z-index), so the opaque plate
@@ -73,8 +64,7 @@ export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
 .atlas-sheet ol.chronicle .year { flex: 0 0 3.2rem; text-align: right; font-variant-numeric: tabular-nums;
   font-weight: 600; color: var(--ink-faded); }`;
 
-// STANDALONE documents only, never injected into a host page: h2 margin-top sits here,
-// off the shared block, so each host keeps its own spacing.
+// STANDALONE documents only, never injected into a host page: h2 margin-top sits here, off the shared block, so each host keeps its own spacing.
 const PAGE_CHROME_CSS = `:root { color-scheme: light; }
 ${paletteRootCss()}
 body {
@@ -130,16 +120,14 @@ footer { color: var(--line-tan); }
   footer { color: var(--ink-faded); }
 }`;
 
-// Style plates carry the world- prefix the CLI has always written; theme/region keys
-// already read theme-* / region-*, so they stand alone.
+// Style plates carry the world- prefix the CLI has always written; theme/region keys already read theme-* / region-*, so they stand alone.
 export function atlasPlateFilename(plate: { key: string }, section: PlateSection): string {
   return section === "hero" || section === "draughting"
     ? `world-${plate.key}.svg`
     : `${plate.key}.svg`;
 }
 
-// Base64 over a UTF-8 byte view (not btoa(svg)) so a non-ASCII world title survives, and
-// chunked so a multi-megabyte plate never overflows the argument stack.
+// Base64 over a UTF-8 byte view (not btoa(svg)) so a non-ASCII world title survives, chunked so a multi-megabyte plate never overflows the argument stack.
 export function svgToDataUri(svg: string): string {
   const bytes = new TextEncoder().encode(svg);
   let binary = "";
@@ -150,16 +138,7 @@ export function svgToDataUri(svg: string): string {
   return `data:image/svg+xml;base64,${btoa(binary)}`;
 }
 
-/**
- * The self-contained download's plates, linked at load (#368, ratified 2026-08-13).
- *
- * A plain `<a href="data:...">` is refused: measured in Brave 151 from a file:// origin the
- * tab lands on about:blank with "Not allowed to navigate top frame to data URL". Wrapping
- * server-side would instead double a ~20MB file, which is why `anchor:false` exists. So each
- * plate is wrapped here in a real link to a blob built from the data URI the img already
- * carries. The blobs are held for the page's life (~16MB on a 22.5MB atlas), the accepted
- * cost of a genuine anchor over a click handler: focus, middle-click and new-tab all behave.
- */
+/** The download's plates are linked at load through blob URLs: a plain `<a href="data:...">` is refused (measured in Brave 151 from a file:// origin: "Not allowed to navigate top frame to data URL"), wrapping server-side would double a ~20MB file (why `anchor:false` exists), and a real anchor over a click handler keeps focus, middle-click and new-tab honest, at ~16MB of blobs held for the page's life. */
 const PLATE_LINK_SCRIPT = `<script>
 for (const img of document.querySelectorAll(".atlas-sheet figure > img")) {
   fetch(img.src)
@@ -187,8 +166,7 @@ function plateFigure(
 ): string {
   const src = plateSrc(plate, section);
   const alt = escapeXml(plate.title);
-  // #329: reserve the frame from the svg root's own dims so the document lays out before
-  // a byte of chart arrives; graceful when a plate carries none.
+  // Reserve the frame from the svg root's own dims so the document lays out before a byte of chart arrives; graceful when a plate carries none.
   const dims = plate.svg.match(/width="(\d+)" height="(\d+)"/);
   const frame = dims ? ` width="${dims[1]}" height="${dims[2]}"` : "";
   const img = `<img src="${src}"${frame} loading="lazy" decoding="async" alt="${alt}">`;
@@ -196,11 +174,7 @@ function plateFigure(
   return `<figure>${linked}<figcaption>${alt}</figcaption></figure>`;
 }
 
-/**
- * `plateSrc` decides how a plate is embedded: a filename (CLI, with anchor:true) or a data
- * URI (download, anchor:false). `motion` links /fonts.css and /motion.css and wears the screen
- * dress (#464); the offline download omits all three and relies on the CSS fallbacks above.
- */
+/** `plateSrc` decides how a plate is embedded: a filename (CLI, anchor:true) or a data URI (download, anchor:false); `motion` links /fonts.css and /motion.css and wears the screen dress, the offline download omits all three and relies on the CSS fallbacks above. */
 export function atlasDocument(
   data: AtlasDocumentData,
   plateSrc: (plate: AtlasPlate, section: PlateSection) => string,

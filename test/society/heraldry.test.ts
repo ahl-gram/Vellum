@@ -70,7 +70,6 @@ test("obeysTinctureRule rejects same-class divisions and charged divisions", () 
   assert.equal(obeysTinctureRule(chargedDivision), false);
 });
 
-// Single-realm worlds have one seat and an empty names.realms, but must still produce exactly one valid coat of arms.
 test("a single-realm world still gets one valid coat of arms", () => {
   for (const culture of CULTURES) {
     const arms = blazonRealms(culture, 1, createRng(42).fork("heraldry"));
@@ -85,7 +84,6 @@ test("blazonRealms is deterministic for a given seed, culture, and count", () =>
   assert.deepEqual(a, b);
 });
 
-// Per-realm forking: realm i's arms never depend on the total count, so adding realms never re-rolls the existing ones.
 test("each realm's arms is independent of the total realm count", () => {
   const three = blazonRealms(CULTURES[1]!, 3, createRng(7).fork("heraldry"));
   const five = blazonRealms(CULTURES[1]!, 5, createRng(7).fork("heraldry"));

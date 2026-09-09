@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { FOLD_SETTLE_MS, bindSlip, type Listens } from "../../src/site/shared/slip.ts";
 
-// #462 chart-room ruling 3: the slip folds to a bookmark tab and comes back from it; on a phone a button covering its head is the bottom sheet's handle (skeptic finding 3, PR #488: a keyboard needs a toggle too).
+// #462 chart-room ruling 3: the slip folds to a bookmark tab and comes back from it; on a phone a button covering its head is the bottom sheet's handle (a keyboard needs a toggle too).
 
 type Handler = (e: Event) => void;
 const listener = () => {

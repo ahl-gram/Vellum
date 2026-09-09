@@ -137,7 +137,7 @@ test("isStandaloneSlot classifies template slots by letter-adjacency", () => {
 });
 
 test("a settlement keeps a blocklisted base when a town suffix fuses onto it", () => {
-  // The headline of #65: a blockword base must be KEPT, not re-rolled, when a town suffix fuses it ("bra" + "vik" -> "Bravik"). Scoped to norden, whose phonemes cannot regenerate fused forms as a single base, so a match can ONLY come from fusion (verified red-green).
+  // Scoped to norden, whose phonemes cannot regenerate fused forms as a single base, so a match can only come from fusion.
   const norden = CULTURES.find((c) => c.id === "norden")!;
   const fused = new Set<string>();
   for (const w of ENGLISH_BLOCKLIST) {
@@ -160,7 +160,6 @@ test("a settlement keeps a blocklisted base when a town suffix fuses onto it", (
 });
 
 test("the near-dup screen rarely forces the Roman-numeral fallback", () => {
-  // A real world draws ~40 names from one namer; an over-aggressive screen degrades output to "Xxx II/III", so the fallback must stay well under 5%.
   const isFallback = (n: string) => / (II|III|IV|V|VI|VII|VIII|IX|X)$/.test(n);
   for (const culture of CULTURES) {
     let fallbacks = 0;

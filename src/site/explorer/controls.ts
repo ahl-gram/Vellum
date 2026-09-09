@@ -1,13 +1,9 @@
-// The Explorer's control-row wiring (#191): every listener that just funnels a control
-// into draw(); the conductor keeps the handlers that arbitrate CEREMONIES. The `touched`
-// gates are shared BY REFERENCE with the conductor: handlers here set them, draw()/syncHash read them.
+// The Explorer's control-row wiring: the listeners that funnel a control into draw(); the `touched` gates are shared BY REFERENCE with the conductor (set here, read by draw()/syncHash).
 import { updateLandReadout } from "./sea-level.ts";
 import { updateCoastReadout } from "./coast-warp.ts";
 
 export interface TouchedGates {
-  /** #55: until the user moves the sea-level slider, it auto-tracks each world's waterline. */
   land: boolean;
-  /** #137: sibling gate; until touched, draw() sends no coastWarp override. */
   coast: boolean;
 }
 
@@ -26,7 +22,6 @@ interface ControlsDeps {
   randomBtn: HTMLElement;
   touched: TouchedGates;
   draw: (opts?: { quiet?: boolean; turn?: boolean }) => void;
-  /** #53 doc-level dismiss pair: Escape or a click/tap off any mark closes a pinned card. */
   onDocKeydown: (e: KeyboardEvent) => void;
   onDocClick: (e: MouseEvent) => void;
 }
@@ -38,14 +33,13 @@ function randomSeed(): number {
 export function wireControls(deps: ControlsDeps): void {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider, touched, draw } = deps;
 
-  // Sea-level drag redraw throttle (#55); the release (change) redraw is authoritative.
   let landDebounce: ReturnType<typeof setTimeout> | 0 = 0;
 
   deps.drawBtn.addEventListener("click", draw as unknown as EventListener);
   deps.randomBtn.addEventListener("click", () => {
     seedInput.value = String(randomSeed());
     touched.land = false;
-    touched.coast = false; // #137: a fresh world starts from its natural coastline
+    touched.coast = false;
     draw();
   });
   seedInput.addEventListener("keydown", (e) => {
@@ -59,7 +53,6 @@ export function wireControls(deps: ControlsDeps): void {
     sel.addEventListener("change", draw as unknown as EventListener);
   }
   styleSel.addEventListener("change", () => draw({ turn: true }));
-  // A reshaped terrain invalidates a manual tide and warp: reset both to auto so the sliders re-derive from the new world.
   typeSel.addEventListener("change", () => {
     touched.land = false;
     touched.coast = false;

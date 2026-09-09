@@ -347,9 +347,7 @@ export async function run(ctx) {
   );
   check(
     "SV2r the #127 arrival ceremony RUNS while the survey is being prepared: inkDraw advances instead of stalling (#373)",
-    // The ratified acceptance, on the ruled path (a Draw with the box ticked), and the only check here that watches the ceremony itself rather than the arm. stroke-dashoffset is not compositable, so a matrix left on the main thread starves it.
-    // TWO clauses, because the frame COUNT is environment-scaled and the gap is not: 104 steps on the authoring laptop against 39 on the CI runner, both healthy, where an arm put back on the main thread reads 3. A count threshold sized to the laptop red CI at 39, which is how the gap clause got here.
-    // dashSeen DOES move with runner load (104 here, 35 to 39 on CI), but not the way a wall clock does: a slower runner delivers fewer ceremony frames while a BLOCKED one delivers almost none, so 3 with the matrix put back sits an order of magnitude below the slowest healthy reading. The gap is the loose second opinion, capped well clear of the 383.3 a loaded CI runner reported and well under the 1066.6 the mutant reads.
+    // The ratified acceptance on the ruled path (a Draw with the box ticked), the only check here that watches the ceremony itself: stroke-dashoffset is not compositable, so a matrix left on the main thread starves it. TWO clauses, because the frame COUNT is environment-scaled (104 steps on the authoring laptop, 35 to 39 on CI, both healthy; 3 with the matrix put back) and the gap is not (capped well clear of the 383.3 a loaded CI runner reported and well under the 1066.6 the mutant reads).
     sv2p.dashSeen >= 12 && sv2p.gap > 0 && sv2p.gap < 900,
     JSON.stringify({ dashSteps: sv2p.dashSteps, dashSeen: sv2p.dashSeen, gap: sv2p.gap, frames: sv2p.frames }),
   );
@@ -426,7 +424,7 @@ export async function run(ctx) {
       settledAgree:!!back&&!!recto&&back.getAttribute("points")===recto.getAttribute("points"),
       versoed:document.getElementById("sheet").classList.contains("versoed"),
       status:document.getElementById("status").textContent};})()`);
-  await evaluate(`document.getElementById("verso-turn").click()`); // back to the recto for what follows
+  await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(1500);
   check(
     "SV2o a Draw taken while resting on the verso changes the visible back face whole: ghost and track from the same draw, never a bare new ghost (#174/#366)",

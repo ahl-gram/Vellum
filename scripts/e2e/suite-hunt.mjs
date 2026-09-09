@@ -117,7 +117,7 @@ export async function run(ctx) {
 
   // The 5px station tolerance covers the synthesized click's integer clientX/Y quantization amplified by the sheet-to-screen scale (~2-3px measured), yet stays 20x below any grid-vs-pixel coord-space mismatch.
   const d = disp.svg || "";
-  const g = d.slice(d.indexOf("data-vellum-dispatch")); // scope the style/leak checks to the added <g>
+  const g = d.slice(d.indexOf("data-vellum-dispatch"));
   const stations = (d.match(/data-dispatch-station/g) || []).length;
   const st1 = g.match(/data-dispatch-station[^>]*?cx="([-\d.]+)"[^>]*?cy="([-\d.]+)"/);
   const cx = st1 ? parseFloat(st1[1]) : NaN;
@@ -211,8 +211,7 @@ export async function run(ctx) {
     JSON.stringify(hg1),
   );
 
-  // The MISS tap frames the CAPITAL, never a viewport corner: classifyClick snaps to the nearest settlement with no distance cap, and the old farthest-corner scan was a per-day lottery that solved the hunt on linux CI (#304). Do not bring it back.
-  // Since #462 the sheet is fitted inside the stage (letterboxed by the chrome's reserves), so the point is read off the svg's OWN rect at home and centred from there, never as a fraction of the viewport.
+  // The MISS tap frames the CAPITAL, never a viewport corner: classifyClick snaps to the nearest settlement with no distance cap, and the old farthest-corner scan was a per-day lottery that solved the hunt on linux CI (#304). Since #462 the sheet is fitted inside the stage, so the point is read off the svg's OWN rect at home, never as a fraction of the viewport.
   const framePoint = (k, fx, fy) => evaluate(`(()=>{
     const vp=document.getElementById("map-viewport"),W=vp.clientWidth,H=vp.clientHeight,k=${k};
     window.__vellumZoomTo({k:1,x:0,y:0});
@@ -254,8 +253,8 @@ export async function run(ctx) {
     hg4.solved === true && /found it/i.test(hg4.status) && hg4.star === true,
     JSON.stringify({ hg4, state: fr2.state }),
   );
-  await shoot("hunt-seed-of-the-day-zoomed.png"); // manual: the win star pinned true on the magnified sheet
-  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`); // leave the map home for the checks that follow
+  await shoot("hunt-seed-of-the-day-zoomed.png");
+  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 
   check("H9 the hunt run logged no JS exceptions or console errors", consoleErrors.length === huntErrBase, consoleErrors.slice(huntErrBase).join(" | ") || "clean");
 

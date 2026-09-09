@@ -91,7 +91,7 @@ test("a single-realm world still produces a population plate", () => {
 });
 
 test("each theme's fill palette differs between two distinct styles", () => {
-  // Acceptance #5: antique and ink are the universal pair (ink is a monochrome wash for every theme, antique a chromatic ramp); across the colored styles vegetation is shared by design, pinned in the next test.
+  // Antique and ink are the universal pair (ink a monochrome wash for every theme, antique a chromatic ramp); vegetation is shared across the colored styles, pinned in the next test.
   for (const theme of THEME_NAMES) {
     const spec = THEMES[theme];
     const samples = theme === "vegetation"
@@ -104,7 +104,6 @@ test("each theme's fill palette differs between two distinct styles", () => {
 });
 
 test("colored styles differ for scalar themes but share the vegetation palette", () => {
-  // Scalar themes derive a distinct ramp per style; vegetation shares one earthy biome palette across the three colored styles and only rebins to a monochrome wash for ink.
   for (const theme of ["climate", "moisture", "population"] as ThemeName[]) {
     const s = THEMES[theme];
     assert.notDeepEqual(
@@ -122,7 +121,7 @@ test("colored styles differ for scalar themes but share the vegetation palette",
 });
 
 test("antique theme palettes stay byte-identical (full interpolated ramps pinned)", () => {
-  // No committed artifact exercises a theme plate, so this literal pin (computed from the verified pre-#71 ramps) is the antique ramps' only regression guard.
+  // No committed artifact exercises a theme plate, so this literal pin is the antique ramps' only regression guard.
   const fills = (theme: ThemeName, n: number) =>
     Array.from({ length: n }, (_, i) => THEMES[theme].color(i, STYLES.antique));
   assert.deepEqual(fills("climate", 12), [
@@ -153,7 +152,6 @@ test("every style yields 6-digit hex legend swatches for every theme", () => {
 });
 
 test("the ink theme palette reads as monochrome, not a chromatic ramp", () => {
-  // Under ink every swatch is a near-neutral light-to-dark wash: RGB channels sit close together, unlike the antique green-to-blue ramps.
   const world = generateWorld(defaultRecipe(42));
   for (const theme of THEME_NAMES) {
     for (const r of THEMES[theme].legendRows(world, STYLES.ink)) {

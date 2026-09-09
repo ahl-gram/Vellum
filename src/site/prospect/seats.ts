@@ -1,4 +1,4 @@
-// The Prospect's chart-room seats (#463 part 4/4): the plate as the sheet's one face, the Glass on it, the fit at the plate's own aspect, the folio's lines and the engraver's note on the slip. app.ts stays the conductor.
+// The Prospect's chart-room seats: the plate as the sheet's one face, the Glass on it, the fit at the plate's own aspect, the folio's lines and the engraver's note on the slip. app.ts stays the conductor.
 import { createZoomController } from "../shared/zoom-controller.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";
 import { bindRoom, type Room } from "../shared/room.ts";

@@ -1,29 +1,28 @@
 /* Paper & Ink, the shared motion desk (#126, epic #125): one motion language for every page linking /motion.css; styles the LIVE DOM only, so the determinism contract (SVG strings, committed files, goldens) is untouched. */
 
 :root {
-  --paper-quick: 180ms;   /* press, lift, nav underline, term tip */
-  --paper: 260ms;         /* standard settle */
-  --paper-settle: 340ms;  /* larger arrivals */
-  --unfurl: 650ms;        /* the long rolled map opening (pinned cards, panels) */
-  --unfurl-quick: 400ms;  /* the same curve at ~60%, for hover previews */
-  --ink-draw: 1200ms;     /* a stroke drawing itself (the coastline) */
-  --ink-dry: 1200ms;      /* a wash or ink drying in */
+  --paper-quick: 180ms;
+  --paper: 260ms;
+  --paper-settle: 340ms;
+  --unfurl: 650ms;
+  --unfurl-quick: 400ms;
+  --ink-draw: 1200ms;
+  --ink-dry: 1200ms;
   --turn: 900ms;          /* the sheet turn (#131); read by sheet-turn.js's WAAPI */
   --verso-turn: 1200ms;   /* the ceremonial flip (#116); slower than a re-dress on purpose */
 
   /* #170 redraft grade: deliberately SHORTER than the once-per-draw arrival because a redraft fires on every settle; the dry waits stagger names by tier, past the inset's 200ms crossfade. */
-  --redraft-draw: 600ms;           /* the region coastline inking in */
-  --redraft-dry: 450ms;            /* the wash + a newly labeled name drying */
+  --redraft-draw: 600ms;
+  --redraft-dry: 450ms;
   --redraft-dry-wait: 260ms;       /* towns (and any rarer higher tier) start here */
-  --redraft-dry-wait-village: 500ms; /* villages follow the towns */
-  --redraft-dry-wait-hamlet: 740ms;  /* #171 hamlets, the smallest places, dry in last */
+  --redraft-dry-wait-village: 500ms;
+  --redraft-dry-wait-hamlet: 740ms;
   --glide: 300ms;         /* #170 zoom glide; read lazily by app.js, bypassed under reduced motion */
 
   --ease-paper: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-unfurl: cubic-bezier(0.66, 0, 0.2, 1.03);
-  --ease-turn: cubic-bezier(0.62, 0, 0.34, 1);  /* weighty ease-in-out, slow at both edges */
+  --ease-turn: cubic-bezier(0.62, 0, 0.34, 1);
 
-  /* #405 the house lift and press */
   --raise: -2px;
   --press: 1px;
   --raise-shadow: 0 6px 16px rgb(from var(--chart-ink) r g b / 0.2);
@@ -71,7 +70,6 @@
   to   { opacity: 0; transform: scale(1); }
 }
 
-/* .place-hit and .lf-station MUST stay excluded: each is a <button> living on its own load-bearing transform (the place card's invisible hit target, suite-cards P2/P2c; the home stage's counter-scaled station anchor, #458), so the house lift would replace that transform and the house transition would lag the counter-scale a beat behind every zoom. */
 button:not(.lf-station):not(.place-hit),
 .actions a,
 .action-link {
@@ -90,9 +88,6 @@ button:not(.lf-station):not(.place-hit):active,
   transform: translateY(var(--press));
   box-shadow: var(--press-shadow);
 }
-/* Sub 6 (#461 addendum 1): the head cluster's rooms nav takes the mockup's lift on the
-   house timing: a raise, not a tip (no rotate: the color shift + underline carry the
-   you-are-here language; the iron-red scaleX underline retired with the folio band). */
 .rooms a {
   display: inline-block;
   vertical-align: top;

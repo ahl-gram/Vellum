@@ -1,5 +1,4 @@
 // Room address e2e (RA1-RA8, #320 Sub 3): the #192 A-suite's year-restore checks re-hosted; the Explorer-hosted A* originals stay green beside them.
-// Did NOT port (named for Sub 4 to consume): A2/A4 (camera keys, no cx/cy/k here), A6/A7 (the #ages writer gestures, the room is always armed; RR8 holds the release half), A8 (the room is never disarmed, RR4 pins its converged address).
 import { makeRoom } from "./room-support.mjs";
 
 export async function run(ctx) {

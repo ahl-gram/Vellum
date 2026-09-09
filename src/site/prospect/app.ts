@@ -1,4 +1,4 @@
-// The Prospect room's controller (#242, a chart room since #463 part 4/4): resolves the address, pulls the plate through the SHARED render worker as a blob <img> (never inline <svg>: the cross-chart url(#) id rule), and re-engraves in place when the year control asks; the world itself never changes on this page.
+// The Prospect room's controller: resolves the address, pulls the plate through the SHARED render worker as a blob <img> (never inline <svg>: the cross-chart url(#) id rule), and re-engraves in place when the year control asks; the world itself never changes on this page.
 import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
 import { plateDressFor, type PlateDress } from "../explorer/prospect-job.ts";
 import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } from "./address.ts";
@@ -67,7 +67,6 @@ let drawGen = 0;
 window.__vellumProspectUsesWorker = usesWorker;
 window.__vellumProspectState = () => last;
 
-// display, since the kit's .legend-btn display makes the hidden attribute inert.
 function writeRoads(res: { readonly index: number; readonly name: string; readonly roads: boolean }): void {
   chartLink.href = chartTarget(location.hash);
   ribbonLink.href = ribbonTarget(location.hash, res.index);

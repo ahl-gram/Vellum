@@ -13,7 +13,6 @@ export const FONT_SIZE: Record<SettlementTier, number> = {
   hamlet: 8.5,
 };
 
-/** Regional sheets only; world sheets keep FONT_SIZE exactly (golden-locked, a change owes a regen). */
 export const REGION_FONT_SIZE: Record<SettlementTier, number> = {
   capital: 24,
   seat: 20,

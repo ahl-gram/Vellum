@@ -1,7 +1,4 @@
-// The Wayfarer's Passage overlay (#117/#119/#120): a per-draw DOM layer over the baked
-// chart animating the survey that drew it. The honest geometry is prepared in
-// voyage-session.ts and the deterministic math lives in src/render/; this file is only
-// frame paint, the rAF clock, and the arm/step/paint/reset API. Host-agnostic since #191.
+// The Wayfarer's Passage overlay: the per-draw DOM layer animating the survey that drew the chart; the geometry is prepared in voyage-session.ts and the math lives in src/render/, so this file is only frame paint, the rAF clock, and the arm/step/paint/reset API.
 import { frameAt, logEntryCount, toldRow, type VoyageFrame } from "../../render/voyage.ts";
 import {
   pointAtDistance,
@@ -26,7 +23,6 @@ export interface RestingTrackSink {
 }
 
 export interface VoyageDeps {
-  /** The chart mount; it holds at most ONE overlay svg child, the builder's (#364). */
   mapEl: HTMLElement;
   statusEl: HTMLElement;
   logPanel: VoyageLogPanel;
@@ -48,7 +44,6 @@ export function createVoyage(deps: VoyageDeps) {
     ...(deps.tourOrder ? { tourOrder: deps.tourOrder } : {}),
   });
 
-  // null when the toggle is off; rebuilt every draw (the host's innerHTML swap wipes the mount's children).
   let voyage: Session | null = null;
 
   function cancelVoyageRaf(): void {
@@ -68,7 +63,6 @@ export function createVoyage(deps: VoyageDeps) {
     voyage = null;
   }
 
-  /** Prepare a fresh session (voyage-session.ts) and adopt it; false = nothing to survey. */
   function buildVoyage(
     manifest: PlaceManifest | null,
     survey: Survey | null,
@@ -80,13 +74,12 @@ export function createVoyage(deps: VoyageDeps) {
     return voyage !== null;
   }
 
-  /** The track drawn so far: every vertex of every completed leg, plus the partial one. */
   function trackString(session: Session, f: VoyageFrame): string {
     if (session.legs.length === 0) return fmt(session.originPt);
     const out: string[] = [];
     const push = (p: Pt) => {
       const s = fmt(p);
-      if (out[out.length - 1] !== s) out.push(s); // a leg starts where the last one ended
+      if (out[out.length - 1] !== s) out.push(s);
     };
     for (let i = 0; i < f.legIndex; i++) for (const p of session.legs[i].geom.points) push(p);
 
@@ -98,7 +91,6 @@ export function createVoyage(deps: VoyageDeps) {
     return out.join(" ");
   }
 
-  /** #181: markGlyphAt decides by the leg's water span, so the swap lands at the water's edge; the DOM is toggled only on change. */
   function showMark(session: Session, glyph: MarkGlyph): void {
     if (glyph === session.shownGlyph) return;
     const useShip = glyph === "ship";
@@ -123,7 +115,6 @@ export function createVoyage(deps: VoyageDeps) {
       const { geom, mode, water } = session.legs[f.legIndex];
       const s = f.legT * geom.total;
       pos = pointAtDistance(geom, s);
-      // The heading is a chord across a lookahead window, not the raw segment under the mark, so a switchbacking road cannot flip the rider every few frames.
       const hd = headingAt(geom, s);
       tiltDeg = tiltFor(hd.x, hd.y);
       session.facing = resolveFacing(hd.x, Math.hypot(hd.x, hd.y), session.facing);
@@ -148,7 +139,6 @@ export function createVoyage(deps: VoyageDeps) {
     }
   }
 
-  // #174: mirrors the very same points string paintFrame wrote, so the faces can never disagree (e2e SV6); rest-only per the sink contract above, glyph-agnostic, posts nothing to the status.
   function syncRestingTrack(): void {
     if (!restingTrackSink) return;
     if (!voyage) { restingTrackSink.clear(); return; }
@@ -160,7 +150,6 @@ export function createVoyage(deps: VoyageDeps) {
 
   function play(session: Session): void {
     const legCount = session.legs.length;
-    // A one-port survey (no legs) has nothing to sweep: rest at the origin at once.
     if (legCount <= 0 || session.totalMs <= 0) {
       paintFrame(session, 1);
       syncRestingTrack();
@@ -168,15 +157,14 @@ export function createVoyage(deps: VoyageDeps) {
     }
     const begin = performance.now();
     const tick = (now: number) => {
-      if (!voyage || voyage !== session || !session.rafId) return; // superseded or cancelled
+      if (!voyage || voyage !== session || !session.rafId) return;
       const elapsed = now - begin;
       if (elapsed >= session.totalMs) {
         paintFrame(session, 1);
-        session.rafId = 0; // the full track now rests on the chart
-        syncRestingTrack(); // #174: at rest, so the ink may bleed through to the back
+        session.rafId = 0;
+        syncRestingTrack();
         return;
       }
-      // tAtElapsed converts to the equal-split global t frameAt expects, so paintFrame, the step hooks, and #220's fused clock share one timeline.
       paintFrame(session, tAtElapsed(session.cumMs, elapsed));
       session.rafId = requestAnimationFrame(tick);
     };
@@ -202,7 +190,6 @@ export function createVoyage(deps: VoyageDeps) {
     play(voyage!);
   }
 
-  // Re-arm after a redraw with the toggle still on: rebuild against the new world and rest on the full track; only an explicit toggle-ON animates the sweep.
   function rearmVoyage(
     manifest: PlaceManifest | null,
     survey: Survey | null,
@@ -213,12 +200,11 @@ export function createVoyage(deps: VoyageDeps) {
     cancelVoyageRaf();
     voyage = null;
     if (buildVoyage(manifest, survey, seed, subtitle, opts.quiet)) {
-      paintFrame(voyage!, 1, false); // silent: the draw's settle needs the status to stay ""
+      paintFrame(voyage!, 1, false);
     } else {
       dropOverlays();
       logPanel.hideLog();
     }
-    // #366: a DEFERRED arm runs after rebuildVerso and is the one that inks the back face; the conductor's repaint comment in ../explorer/app.ts is the authority.
     // #174 INVARIANT: the sink's ghost and its track come from the SAME draw; a quiet mid-drag redraw freezes the whole back face (re-blobbing the ghost per frame is the ~1 MB leak #116 exists to avoid).
     if (!opts.quiet) syncRestingTrack();
   }
@@ -227,9 +213,9 @@ export function createVoyage(deps: VoyageDeps) {
     cancelVoyageRaf();
     dropOverlays();
     if (voyage) statusEl.textContent = "";
-    logPanel.hideLog(); // #121: the margin log is a sibling of the mount, so remove it explicitly
+    logPanel.hideLog();
     voyage = null;
-    restingTrackSink?.clear(); // #174: the ink leaves the back of the sheet with the front
+    restingTrackSink?.clear();
   }
 
   // #174: snap a running sweep to its resting track, both faces (a flip must never wait out a 10-16s sweep); the shownArrived diff fires once, so only the final port's line posts.
@@ -248,7 +234,7 @@ export function createVoyage(deps: VoyageDeps) {
     const clampedPort = Math.max(0, Math.min(portIndex, legCount));
     const t = legCount > 0 ? clampedPort / legCount : 0;
     paintFrame(voyage, t);
-    syncRestingTrack(); // #174: a step lands the survey at rest, so the two faces agree
+    syncRestingTrack();
   }
 
   // #120 e2e hook and #220's timeline seam: paint an arbitrary t in [0,1]; voyageStepTo can only land ON a port and can never sample the MID-leg frames where tilt and facing vary.
@@ -259,7 +245,6 @@ export function createVoyage(deps: VoyageDeps) {
     syncRestingTrack();
   }
 
-  // e2e read hook: the current plan (or null); legs carry the router's mode alongside the logical port pair.
   function voyagePlan() {
     if (!voyage) return null;
     return {
@@ -268,20 +253,17 @@ export function createVoyage(deps: VoyageDeps) {
     };
   }
 
-  /** The survey's first and last days, for a host's own instrument (#463: the strip's scale); null before the arm. */
   function voyageDays(): { first: number; last: number } | null {
     if (!voyage || voyage.log.entries.length === 0) return null;
     const entries = voyage.log.entries;
     return { first: entries[0].day, last: entries[entries.length - 1].day };
   }
 
-  // #121 e2e read hook: the margin-log snapshot, assembled by voyage-log-panel.ts.
   function voyageLog() {
     if (!voyage) return null;
     return logPanel.logSnapshot(voyage.log, voyage.logRows);
   }
 
-  // e2e read hook: per-leg mode, water span + handoff flag (#181), and PROJECTED vertices, so a suite can find the leg that exhibits what it needs.
   function voyageLegGeometry() {
     if (!voyage) return null;
     return voyage.legs.map((l) => ({
@@ -304,7 +286,6 @@ export function createVoyage(deps: VoyageDeps) {
       if (voyage) voyage.svg.style.display = visible ? "" : "none";
     },
     clearRestingTrack: (): void => restingTrackSink?.clear(),
-    // #442: the day row the survey has reached, read from the same shownArrived count revealLog brightens against, so the live row and the ink can never disagree. Positional like revealLog, since the homecoming row shares the capital's idx.
     toldEntry: (): ToldEntry | null => {
       if (!voyage) return null;
       const entries = voyage.log.entries;

@@ -34,7 +34,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   const { window, gridW, gridH } = spec;
   const worldAspect = (recipe.gridW - 1) / (recipe.gridH - 1);
 
-  const seaLevel = world.seaLevel; // absolute — same waterline as the world chart
+  const seaLevel = world.seaLevel; // absolute: the same waterline as the world chart
   const elev = spec.detail === true
     ? buildChainedField(
         {
@@ -175,7 +175,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     recipe: { ...recipe, gridW, gridH },
     elev,
     seaLevel,
-    winds: world.winds, // the same wind blows over a region of the same world
+    winds: world.winds,
     flow,
     rivers,
     riverCells,

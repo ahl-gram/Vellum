@@ -26,7 +26,7 @@ function convexHull(points: ReadonlyArray<TourPoint>): TourPoint[] {
       while (h.length >= 2 && cross(h[h.length - 2]!, h[h.length - 1]!, p) <= 0) h.pop();
       h.push(p);
     }
-    h.pop(); // drop the endpoint; it opens the other half
+    h.pop();
     return h;
   };
   return [...half(pts), ...half([...pts].reverse())];
@@ -60,17 +60,16 @@ function insertInterior(hull: TourPoint[], all: ReadonlyArray<TourPoint>): TourP
 
 function rotateToStart(cycle: TourPoint[], startIdx: number): TourPoint[] {
   const at = cycle.findIndex((p) => p.idx === startIdx);
-  if (at <= 0) return [...cycle]; // already first, or absent (a caller bug, left as-is)
+  if (at <= 0) return [...cycle];
   return [...cycle.slice(at), ...cycle.slice(0, at)];
 }
 
-/** A closed tour and its reverse cost the same, so the sweep direction is CHOSEN: shorter first leg, ties on lower idx. Generic so orderTour and refineTour cannot drift apart on the rule. */
 function orientCycle<T>(
   cycle: ReadonlyArray<T>,
   idxOf: (item: T) => number,
   d: (a: T, b: T) => number,
 ): T[] {
-  if (cycle.length < 3) return [...cycle]; // one way round only
+  if (cycle.length < 3) return [...cycle];
   const forward = [...cycle];
   const reversed = [forward[0]!, ...forward.slice(1).reverse()];
   const df = d(forward[0]!, forward[1]!);
@@ -152,7 +151,6 @@ function twoOpt(path: TourPoint[]): TourPoint[] {
     improved = false;
     for (let i = 1; i < n - 1; i++) {
       for (let j = i + 1; j < n; j++) {
-        // Reversing the whole cycle is cost-identical; orientCycle owns that choice.
         if (i === 1 && j === n - 1) continue;
         const a = t[i - 1]!;
         const b = t[i]!;

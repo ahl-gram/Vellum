@@ -1,6 +1,4 @@
-// The prospect job's engine glue (#242), shared by ./worker.ts and runInline in
-// ./worker-client.ts (the serializable-atlas.ts pattern) so the two transports cannot
-// drift apart.
+// The prospect job's engine glue, shared by ./worker.ts and runInline in ./worker-client.ts so the two transports cannot drift apart.
 import { type ProspectDress, plateDressFor } from "../../prospect/dress/context.ts";
 import { engravedProspectPlate } from "../../prospect/finished.ts";
 import { createRng } from "../../core/rng.ts";
@@ -10,7 +8,6 @@ import type { PlateEra } from "../../prospect/caption.ts";
 import { STYLES } from "../../render/style.ts";
 import type { World } from "../../world/types.ts";
 
-/** The two engraved dresses a prospect renders in (the #237 contract). */
 export type PlateDress = ProspectDress;
 export { plateDressFor };
 
@@ -49,7 +46,6 @@ export interface ProspectPlateResult {
   readonly roads: boolean;
 }
 
-// Today's card's writer and fork (src/site/seed-of-the-day/app.ts), the prose the #494 mockup was ruled on; a writer's prose depends on call order, so a first call on a fresh writer is what both rooms read.
 const settlementNote = (world: World, index: number): string =>
   createLoreWriter(world, createRng(world.recipe.seed).fork("seed-of-the-day")).settlementNote(world.settlements[index]!);
 

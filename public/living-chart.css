@@ -1,16 +1,13 @@
 /* Living-chart engine overlay dressing (#302), host-agnostic. HOST CONTRACT, both halves or the overlays render undressed: link /living-chart.css AND put class="living-chart" on the chart mount handed to the engine. */
 
-/* The .place-hit reset is load-bearing: a host's own button styling would otherwise paint opaque boxes over each map glyph, breaking idle parity. */
 .place-overlay { position: absolute; inset: 0; pointer-events: none; }
 .place-hit {
   position: absolute;
-  /* #331: the WHOLE hit divides by --zoom-k (published on .place-overlay, never the mount, the #164 jiggle rule) so the target holds its designed 26px at every depth; the (,1) fallback keeps non-zooming hosts untouched. */
   transform: translate(-50%, -50%) scale(calc(1 / var(--zoom-k, 1)));
   width: 26px; height: 26px; box-sizing: border-box;
   background: transparent; border: 0; border-radius: 0; padding: 0;
   pointer-events: auto; cursor: pointer;
 }
-/* The ring rides ::after (the scrub dot is ::before) so the .place-hit ELEMENT keeps the zero-transition reset e2e P2/P2c guard and idle parity holds. */
 .place-hit::after {
   content: ""; position: absolute; inset: 0; margin: auto;
   width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box;
@@ -19,11 +16,9 @@
   transition: opacity var(--paper-quick) var(--ease-paper),
               transform var(--paper-quick) var(--ease-paper);
 }
-/* The ring needs NO zoom division of its own: its element carries it (#331), and a second division would shrink the ring k-fold below its 20px design. */
 .place-hit:hover::after, .place-hit:focus-visible::after {
   opacity: 1; transform: scale(1);
 }
-/* #164: --zoom-k is published on THIS card element, never the mount (that would re-rasterize the baked labels every frame and jiggle); the origin sits on whichever corner the card is ANCHORED by, which #124 moved to the right edge for the flipped variants, so the gap at the mark holds a constant screen distance at every depth. */
 /* #387/#388: the clamp rides INSIDE the counter-scaled translate. The mount carries the Glass's own scale(k), so a nudge placed ahead of scale(1/k) composes as k times itself, which no unit test can catch because it is exactly right at k=1. */
 #place-card {
   position: absolute; z-index: 5; max-width: 16rem; pointer-events: none;
@@ -76,7 +71,6 @@
   font-style: italic; color: var(--ink-tale); }
 
 .place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
-/* #155 ink-in: animations ride the CHILDREN, never the group (its box spans halo+glyph+label, so scaling the group drags the name with the mark); the origin is per-element data written inline by chronicle.ts because a PROFILE glyph stands ON its point while a PLAN glyph centres on it (e2e S26 measures the town point staying fixed). */
 .living-chart g.settlement[data-ink="founding"] > :not(text) {
   animation: inkStamp var(--paper) var(--ease-paper) both;
 }
@@ -87,8 +81,7 @@
   animation: dryingInk var(--paper-quick) var(--ease-paper) var(--paper-quick) both;
 }
 
-/* #119 voyage overlay: a SIBLING svg, never inside the chart (Download stays byte-identical); the rAF sweep's reduced-motion twin is the prefersReduce() gate in voyage.ts, nothing here for /motion.css to collapse. */
-/* #367: deliberately says nothing about a shadow; the double-shadow fix lives in the hosts' qualified mount rules, and an opt-out here would lose every cascade it entered (bare .voyage-overlay is 0,1,0 against 1,0,1). */
+/* #119 voyage overlay: a SIBLING svg, never inside the chart (Download stays byte-identical); its reduced-motion twin is the prefersReduce() gate in voyage.ts. #367: deliberately no shadow rule here, the double-shadow fix lives in the hosts' qualified mount rules, and an opt-out would lose every cascade it entered (bare .voyage-overlay is 0,1,0 against 1,0,1). */
 .voyage-overlay { position: absolute; inset: 0; width: 100%; height: 100%;
   pointer-events: none; z-index: 3; overflow: visible; }
 .voyage-track { fill: none; stroke: var(--ink-dark); stroke-width: 3;

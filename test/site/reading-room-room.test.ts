@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// #463 (Landfall Sub 8): the Reading Room is a chart room on the #462 pattern. The chart full-bleed on the deep, the room's name and its one control (seed + Read, ruling 2) top right, the Journal on a slip that scrolls (ruling 5), the one dated log's instrument as a bottom strip (ruling 6), the Glass at the chart's corner, no band, no footer, no roads out (the strip owns the bottom), print standing down.
+// The Reading Room is a chart room on the #462 pattern (#463): the chart full-bleed on the deep, the name and its one control top right, the Journal on a slip that scrolls, the dated log's instrument as a bottom strip, no band, no footer, no roads out.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const page = read("src/pages/reading-room/index.astro");
@@ -70,7 +70,7 @@ test("RR-room 5 seats.ts seats the frame's parts: chart and status in the stage;
   assert.match(seats, /import\s*\{\s*createZoomController\s*\}\s*from\s*"\.\.\/shared\/zoom-controller\.ts"/, "the Glass is the shared controller");
   assert.match(seats, /import\s*\{\s*bindGlassKeys\s*\}\s*from\s*"\.\.\/shared\/glass-keys\.ts"/, "its keys and buttons are the kit's");
   assert.match(app, /seatFrame\(frame, stage, furniture\)/, "app.ts seats the frame once, before binding the room");
-  // All three slip-side nodes in the ONE append, and none appended anywhere else: a part seated outside the panel stands through every teardown (guard-prover: `document.body.append(slipEl)`; skeptic: the tab).
+  // All three slip-side nodes in the ONE append, and none appended anywhere else: a part seated outside the panel stands through every teardown.
   assert.match(seats, /scrubber\.panel\.append\(f\.strip, f\.slip, f\.tab\)/, "the strip, the slip and its tab move INTO the panel together");
   for (const node of ["f.strip", "f.slip", "f.tab"]) {
     const found = [...(seats + app).matchAll(new RegExp(String.raw`\.(?:append|appendChild|insertBefore|prepend)\([^)]*${node.replace(".", "\\.")}\b`, "g"))];
@@ -85,7 +85,6 @@ test("RR-room 6 the css: the strip fixed at the bottom, the sheet at the chart-r
   assert.match(css, /\.strip\s*\{[^}]*position:\s*fixed;[^}]*bottom:\s*0/, "the strip is fixed at the bottom");
   assert.match(css, /#sheet\s*\{[^}]*box-shadow:\s*var\(--stage-shadow\)/, "the sheet rests at the chart-room depth, via the token");
   assert.match(css, /\.stage\s*\{[^}]*padding:\s*var\(--reserve-top/, "the stage reserves the chrome's edges as padding, measured by room.ts");
-  // #219's 320px scar, on the rule that now carries it: the bar's well is the shrinking flex item (the range inside it is flex: none).
   assert.match(css, /\.scale-well\s*\{[^}]*flex:\s*1 1[^}]*min-width:\s*0/, "the scale well may shrink below the bar's intrinsic width");
   assert.match(css, /\.scale\s*\{[^}]*margin:\s*0 8px/, "the scale runs the thumb's travel (8px in from each end)");
   assert.doesNotMatch(frameCss, /position:\s*sticky/, "the #442 sticky wrapper retires (ruling 6)");
@@ -108,9 +107,7 @@ test("RR-room 8 under reduced motion the pace group hides (#493, ruled 2026-09-0
   assert.doesNotMatch(frameCss, /prefers-reduced-motion/, "and not the frame's (motion.css owns the collapse)");
 });
 
-// #520, ruled 2026-09-07 (option B on the Reading Room clobber): the room's writers each build a FRESH URLSearchParams and finalize it, so any key they do not know dies on a copied link. The Chart Table rides in on every road in and must ride out again.
-// Two structural sweeps, because the first version of this guard filtered writers by the literal text `.toString()` or `finalizeHash(`, and a writer serializing through `String(p)` left the census entirely without ever reaching the per-writer assertion. A FRESH bag is the writer's structural mark (a reader builds one from the incoming hash), and every place a hash is actually emitted must sit inside a known writer, which is what catches a writer that never builds a bag at all.
-// The second sweep is every string literal carrying a '#', which this file affords because it has exactly two and both are the writers' own; a room that grows a '#id' selector would need it on the exemption list, and that is the deliberate cost. The blind spot that remains, named and its direction argued: a writer that emits through a helper in another module. That costs a false PASS at worst, where sweeping across modules would false-FAIL on every unrelated href in the site. Behavioural survival, which the ruling also asks for, is part 2's e2e: this file cannot run the room.
+// #520 ruling B (2026-09-07): the room's writers each build a FRESH URLSearchParams and finalize it, so any key they do not know dies on a copied link. A FRESH bag is the writer's structural mark and every emitted hash must sit inside a known writer (a writer serializing through String(p) escaped a text filter); the blind spot, a writer emitting through a helper in another module, costs a false pass at worst. Behavioural survival is part 2's e2e.
 test("every hash writer in the Reading Room carries the Chart Table through (#520 ruling B)", () => {
   const src = read("src/site/reading-room/app.ts");
   const decls = [

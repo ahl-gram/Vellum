@@ -30,7 +30,6 @@ test("recipeFromSvg returns null for an SVG with no recipe", () => {
   assert.equal(recipeFromSvg("<svg><title>not vellum</title></svg>"), null);
 });
 
-// #137: coastWarp is an OPTIONAL identity field, stamped only for an explicit warp; a default world omits it, keeping the committed charts and the golden byte-unchanged.
 test("a warped chart stamps and round-trips its coastWarp (#137)", () => {
   const world = generateWorld(defaultRecipe(7, { coastWarp: 0.8 }));
   const svg = renderMap(world, { style: "antique" });
@@ -64,13 +63,11 @@ test("a region without a regionRecipe omits the recipe but stays labelled", () =
     title: "Environs of the Capital",
   });
   const svg = renderMap(region, { style: "antique" });
-  // A region NOT opted in (no regionRecipe, e.g. the atlas plates) must not embed a recipe: a flat recipe alone would mislead, and this keeps the atlas bytes fixed.
   assert.equal(recipeFromSvg(svg), null, "an un-opted region must not embed a recipe");
   assert.match(svg, /role="img"/, "but they stay labelled for a11y");
   assert.ok(/<title>.+<\/title>/.test(svg));
 });
 
-// #168: a region opts into self-description by passing regionRecipe; then the flat recipe AND the window are stamped, and recipeFromSvg round-trips both.
 test("a region with a regionRecipe stamps and round-trips its window (#168)", () => {
   const world = generateWorld(defaultRecipe(42));
   const capital = world.settlements.find((s) => s.kind === "capital");
@@ -136,7 +133,7 @@ test("a region sheet stamps the detail it was drawn at, and an unstamped sheet r
 });
 
 test("a stamped region redraws byte-for-byte with a title RE-DERIVED from the window (#169)", () => {
-  // Sub 7 stamps only GEOMETRY, never the title; Sub 8 makes the title a deterministic function of (world, window), so the redraw recomputes the SAME cartouche with no title stamp to lean on. This is the real title-completeness proof: the #168 test reused a title constant on both sides.
+  // Only geometry is stamped, never the title, so the redraw must recompute the same cartouche from (world, window); the #168 test above reused a title constant on both sides and cannot prove this.
   const world = generateWorld(defaultRecipe(7, { mapType: "continent" }));
   const capital = world.settlements.find((s) => s.kind === "capital");
   assert.ok(capital);

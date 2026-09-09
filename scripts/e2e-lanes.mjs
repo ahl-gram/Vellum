@@ -1,5 +1,4 @@
-// e2e lane driver (npm run test:e2e:lanes): spawns one e2e-explorer per lane on its own port, streams both outputs line-prefixed, and fails if either lane does. Two processes in ONE CI job, so there is no build-once-and-upload artifact plumbing a job matrix would need.
-// .mjs, the reason CLAUDE.md's one-language rule asks for at the file head: sibling of scripts/e2e-explorer.mjs, and scripts/ is outside tsconfig's include so a .ts here would be unchecked. Every decision it makes lives in the checked, unit-tested src/cli/e2e-lanes.ts.
+// e2e lane driver (npm run test:e2e:lanes): spawns one e2e-explorer per lane on its own port, streams both outputs line-prefixed, and fails if either lane does (two processes in ONE CI job, no artifact plumbing). .mjs because scripts/ is outside tsconfig's include, so a .ts here would be unchecked; every decision it makes lives in the unit-tested src/cli/e2e-lanes.ts.
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";

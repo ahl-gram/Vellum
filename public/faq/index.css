@@ -4,10 +4,6 @@ body {
 h2 {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
 }
-/* The survey sheet at full bleed (#461 ruling 3): parchment panel edge to edge (the shell's
-   2.2rem body margins), border plus double outline, the 26px corner L brackets, the
-   chart-ink shadow; the running head, nav, and footer stay OFF the sheet on the deep.
-   Twin rule in glossary/index.css; guarded by test/site/sheet-frame.test.ts. */
 .sheet {
   background: var(--parchment-panel);
   background-image:
@@ -30,11 +26,9 @@ h2 {
 @keyframes sheet-settle {
   from { box-shadow: 0 30px 80px rgb(from var(--chart-ink) r g b / 0.75); }
 }
-/* The document room's layout beside the index slip (#462 document-room rulings 1 to 3): the sheet is the room, 22rem columns beside the open index, and the sheet takes the width in one settle when the index folds. */
 :root { --slip-w: 16rem; }
 body.room main { margin: 0 calc(var(--slip-w) + 2.4rem) 0 0; position: relative; transition: margin-right 0.5s cubic-bezier(0.2, 0.7, 0.3, 1); }
 body.room:has(.slip.folded) main { margin-right: 0; }
-/* The landing (#461 ruling 6): the layout's settle rides the desk panel, and this room hosts fixed furniture in main, so the sheet lands itself and its shadow tightens as it does. */
 body.room .sheet { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both, sheet-settle 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 /* The broadside (#461 ruling 4) beside a slip: 22rem columns, the ruled deviation from 26rem; two columns at 1280 open and folded alike (the mockup's own still, re-ruled 2026-08-29), three from about 1350px wide. */
 .columns { column-width: 22rem; column-gap: 3.4rem; column-rule: 1px solid var(--line-faint); }

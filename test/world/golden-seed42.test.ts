@@ -2,8 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 
-// Golden snapshot of seed 42's IDENTITY (names + geography): any reshuffle of a generation stream re-rolls it, so a checksum change here means world identity moved.
-// The label checksum alone has been legitimately re-pinned by frontier changes (#79, #80, #140, #141) that reshaped only the realm partition; the roster, title, capital, and sea stayed put each time.
+// Seed 42's identity: a checksum change here means world identity moved (the label checksum alone re-pins legitimately when only the realm partition reshapes).
 
 function labelsChecksum(labels: Int16Array): number {
   let h = 0x811c9dc5 >>> 0;

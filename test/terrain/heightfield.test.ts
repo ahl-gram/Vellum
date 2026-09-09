@@ -44,7 +44,6 @@ test("map border is deeply depressed (ocean guarantee)", () => {
 test("coast warp is on by default and reshapes the landmass", () => {
   const warped = buildHeightfield(RECIPE);
   const plain = buildHeightfield({ ...RECIPE, coastWarp: 0 });
-  // default must differ from the un-warped radial dome (the on-by-default guard)
   assert.notDeepEqual(warped.data, plain.data);
 });
 
@@ -59,7 +58,7 @@ test("coast warp still honors the deep-water border guarantee", () => {
 });
 
 test("coast warp honors the deep-water border across the full slider range (#137)", () => {
-  // The Explorer slider reaches coastWarp 1.0, bolder than the 0.55 default; the hard edge sink is warp-independent, so every edge cell stays ocean at any dialable warp.
+  // The Explorer slider reaches coastWarp 1.0, bolder than the 0.55 default.
   for (const coastWarp of [0.55, 0.8, 1.0]) {
     const f = buildHeightfield({ ...RECIPE, coastWarp });
     for (let x = 0; x < f.w; x++) {
@@ -137,8 +136,6 @@ test("slope of a flat field is zero; tilted plane is uniform", () => {
   // interior central difference: d/dx = 2
   assert.ok(Math.abs(tilted.at(3, 3) - 2) < 1e-9);
 });
-
-// #55 Tide Wheel: landFraction is an additive recipe override that only moves the waterline; characterization (green on first write) exercising the FULL pipeline the worker runs, unlike the quantile-layer test above.
 
 const MAP_TYPES: MapType[] = ["island", "archipelago", "continent", "citystate"];
 

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cameraFromTransform, transformFromCamera } from "../../src/site/explorer/camera.ts";
 
-// The Glass Sub 4 (#165): the camera <-> transform bridge a shared link stores as cx/cy/k. Storing the centre in uv is the whole point (viewport-size independent), so the round-trip is asserted across two viewport sizes; the live hash restore is proven by e2e suite-zoom.
+// The camera <-> transform bridge a shared link stores as cx/cy/k; the centre is in uv (viewport-size independent), so the round-trip is asserted across two viewport sizes; the live hash restore is the e2e suite-zoom's.
 
 test("cameraFromTransform reads the world-uv centre a transform is framing (#165)", () => {
   // A centred 4x: the sheet point at the viewport centre is the sheet centre, so cx/cy are 0.5 regardless of k.

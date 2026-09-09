@@ -2,7 +2,7 @@ import type { Field } from "../src/core/grid.ts";
 import type { UvWindow } from "../src/terrain/heightfield.ts";
 import { labelLandmasses } from "../src/world/landmass.ts";
 
-// Independent of the INTERPOLATION, which is #443's defect class, and NOT of the nearest-cell choice: the land and water verdict is bit-identical to parentCellsOnWindow and has to be, since there is one right answer to which parent cell lies under a child cell (the rounding itself is pinned by hand against the parent grid in detail-guarantees.test.ts).
+// Independent of the INTERPOLATION (the defect class), NOT of the nearest-cell choice: the land/water verdict is bit-identical to parentCellsOnWindow and has to be, one parent cell lies under a child cell; the rounding itself is pinned by hand in detail-guarantees.test.ts.
 /** Labelled on the parent's WHOLE grid, so one landmass entering the window twice stays one. */
 export function parentPartitionOnWindow(
   parent: Field,

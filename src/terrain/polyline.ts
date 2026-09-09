@@ -82,7 +82,6 @@ export function chaikinSmoothPinned(
   return cur;
 }
 
-/** 2 iterations at or below 1500px keeps charts, the atlas, and the committed goldens byte-identical; larger outputs earn more, capped and monotonic in width. */
 export function coastSmoothingIterations(widthPx: number): number {
   if (widthPx <= 1500) return 2;
   return Math.min(4, 2 + Math.floor((widthPx - 1500) / 1300));

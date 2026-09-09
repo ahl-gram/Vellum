@@ -6,7 +6,6 @@ const ANTIQUE_PAPER = "#f2e8cf";
 const TOPO_PAPER = "#f7f4ee";
 
 test("frozen antique slate & mauve collapse under CVD as 0.11 washes", () => {
-  // Distinct in normal vision but a deuteranope cannot tell them apart: exactly why the assignment must be CVD-aware, not just spatial.
   assert.ok(
     washesConfusable("#7a8aa6", "#a97ba6", ANTIQUE_PAPER, 0.11),
     "slate vs mauve should register as confusable",
@@ -37,6 +36,5 @@ test("washConflictMatrix is symmetric with a false diagonal", () => {
       assert.equal(m[i]![j], m[j]![i], `not symmetric at ${i},${j}`);
     }
   }
-  // slate (idx 3) and mauve (idx 4) are the known confusable frozen pair.
   assert.equal(m[3]![4], true, "slate/mauve should be flagged confusable");
 });

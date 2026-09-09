@@ -18,8 +18,7 @@ import { windsLayer } from "../../src/render/layers/winds.ts";
 import type { SvgNode } from "../../src/render/svg.ts";
 import type { World } from "../../src/world/types.ts";
 
-// #251: sea furniture placed via oceanDist / region-local seaMask could sit in an inland lake on a regional survey (the crop reconnects the lake to the window edge); region.seaGate (#234's parent partition) gates it to genuine sea.
-// The compass, ratified with Alex, additionally falls back to a shrunk rose on open LAND when a window has no qualifying sea, rather than vanishing.
+// region.seaGate (#234's parent partition) gates sea furniture to genuine sea; the compass, ratified with Alex, falls back to a shrunk rose on open LAND when a window has no qualifying sea.
 
 const WIDTH = 1500;
 const FULL_R = 47 * (WIDTH / 1500); // the compass radius at chart width

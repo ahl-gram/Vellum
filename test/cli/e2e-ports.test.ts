@@ -9,8 +9,6 @@ import {
   resolvePort,
 } from "../../src/cli/e2e-ports.ts";
 
-// Both ports must be overridable (two checkouts, one machine), and a bad override must THROW: a silent fallback puts both lanes back on the same port, which is the bug.
-// The dangerous half (#339): a stray browser already holding the debug port means getPageTarget attaches to whatever answers /json; on 2026-07-29 a whole run reported results from an OLD browser and an OLD build with no error anywhere.
 
 test("unset env keeps today's defaults, so every existing invocation is unchanged", () => {
   assert.equal(resolvePort({}, "VELLUM_E2E_PORT", DEFAULT_E2E_PORT), DEFAULT_E2E_PORT);
@@ -32,7 +30,6 @@ test("each port can be overridden alone", () => {
   });
 });
 
-// process.env yields "" for `FOO=` rather than undefined (the browser-policy rule).
 test("empty-string env vars count as unset", () => {
   assert.equal(resolvePort({ VELLUM_E2E_PORT: "" }, "VELLUM_E2E_PORT", DEFAULT_E2E_PORT), DEFAULT_E2E_PORT);
 });
@@ -55,7 +52,6 @@ test("surrounding whitespace is tolerated", () => {
   assert.equal(resolvePort({ VELLUM_E2E_PORT: " 8790 " }, "VELLUM_E2E_PORT", DEFAULT_E2E_PORT), 8790);
 });
 
-// Setting one port onto the other's default fails deep inside the browser launch rather than at the setting, so it must throw here instead.
 test("the two ports may not collide, including against the other's default", () => {
   assert.throws(() => resolveE2ePorts({ VELLUM_E2E_PORT: "9333", VELLUM_E2E_DPORT: "9333" }), /9333/);
   assert.throws(() => resolveE2ePorts({ VELLUM_E2E_PORT: String(DEFAULT_E2E_DPORT) }), /9222/);
@@ -78,7 +74,6 @@ test("the conflict message names the stray browser when it identified itself", (
   assert.match(msg, /Chrome\/141\.0\.0\.0/);
 });
 
-// Attaching to a live browser is worse than colliding with one: the run stays green while reporting on a build that is not this one.
 test("the conflict message explains that the run would otherwise use a stale build", () => {
   const msg = debugPortConflictMessage(9222, { listening: true });
   assert.ok(msg);
@@ -86,9 +81,7 @@ test("the conflict message explains that the run would otherwise use a stale bui
 });
 
 test("the screenshot directory follows a non-default port, so lanes cannot overwrite each other", () => {
-  // Sweep the class: EVERY non-default port must get its own directory, not just one sampled port.
-  // shoot() output is diagnostic, so a collision silently overwrites an image rather than failing,
-  // which is exactly the kind of loss no other check would report.
+  // Sweep the class, EVERY non-default port: shoot() output is diagnostic, so a collision silently overwrites an image and no other check would report it.
   assert.equal(e2eOutSubdir(DEFAULT_E2E_PORT), "e2e", "the default port keeps the familiar path");
   const seen = new Set([e2eOutSubdir(DEFAULT_E2E_PORT)]);
   for (const port of [1, 8080, 8764, 8766, 8790, 9222, 65535]) {

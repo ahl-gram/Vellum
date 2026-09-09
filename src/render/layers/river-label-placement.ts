@@ -40,7 +40,7 @@ export function reachPlacements(
   const toPlacement = (lo: number, hi: number): RiverLabelPlacement => {
     let a = pts[lo]!;
     let b = pts[hi]!;
-    if (b[0] < a[0]) [a, b] = [b, a]; // read left → right, never inverted
+    if (b[0] < a[0]) [a, b] = [b, a];
     const angleDeg = clamp((Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI, -50, 50);
     const midLen = ((cum[lo] as number) + (cum[hi] as number)) / 2;
     let s = 0;

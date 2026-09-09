@@ -1,4 +1,4 @@
-// The Print Room's chart-room seats (#463 part 3/4): the Glass on the sheet, the fit with the turned plate's own aspect, the folio's lines and the sheet's two faces (the proof, a bound plate turned onto it). app.ts stays the conductor.
+// The Print Room's chart-room seats: the Glass on the sheet, the fit with the turned plate's own aspect, the folio's lines and the sheet's two faces (the proof, a bound plate turned onto it). app.ts stays the conductor.
 import { createZoomController } from "../shared/zoom-controller.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";
 import { bindRoom, type Room } from "../shared/room.ts";

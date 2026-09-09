@@ -69,7 +69,6 @@ test("later roads reuse existing corridors (trunk roads emerge)", () => {
   const towns = settlements.filter((s) => s.kind !== "village");
   if (towns.length < 3) return;
   const roads = buildRoads(elev, sea, riverCells, settlements, realms);
-  // Cells used by 2+ roads: the reuse discount should produce overlap.
   const counts = new Map<string, number>();
   for (const road of roads) {
     for (const p of road.points) {

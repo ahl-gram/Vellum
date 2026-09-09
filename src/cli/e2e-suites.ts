@@ -36,7 +36,7 @@ export const E2E_SUITE_ORDER = [
 
 export type E2eSuiteName = (typeof E2E_SUITE_ORDER)[number];
 
-// A local tier since #381 took its CI wiring out (125 of 331 checks, ~1m10s), and the retreat rung.
+// The local smoke tier (not wired into CI) and the retreat rung.
 export const SMOKE_SUITES: readonly E2eSuiteName[] = [
   "render",
   "health",
@@ -61,8 +61,7 @@ export interface E2eSuiteEnv {
   readonly [key: string]: string | undefined;
 }
 
-// waitSettled resolves on ANY settled page, so these non-navigating suites can settle on the boot
-// auto-draw instead of their own; render is what consumes that boot draw.
+// waitSettled resolves on ANY settled page, so these non-navigating suites can settle on the boot auto-draw instead of their own; render is what consumes that boot draw.
 const INHERITS_HARNESS_PAGE: readonly E2eSuiteName[] = [
   "motion",
   "turn",

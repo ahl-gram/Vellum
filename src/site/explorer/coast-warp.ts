@@ -1,9 +1,4 @@
-// Coastline warp slider (#137), sibling of sea-level.ts: pure conversions + the two DOM
-// writes (the slider integer is coastWarp x 100; clampCoast keeps a crafted hash inside
-// [0, 1]). The natural default is SHAPES[mapType].coastWarp, uniformly 0.55 across every
-// map type; until the visitor moves the slider app.ts sends NO coastWarp override, so an
-// untouched draw stays byte-identical (the covenant charts and the golden are untouched).
-// If map types ever get different warp defaults, heightfield.test.ts's additive guard and this constant are the two places to revisit.
+// Coastline warp slider (#137), sibling of sea-level.ts; the slider integer is coastWarp x 100. DEFAULT_COAST_WARP mirrors SHAPES[mapType].coastWarp, uniformly 0.55 today: if map types ever get different warp defaults, heightfield.test.ts's additive guard and this constant are the two places to revisit.
 const coastSlider = document.getElementById("coast") as HTMLInputElement;
 const coastReadout = document.getElementById("coast-readout") as HTMLElement;
 
@@ -24,7 +19,6 @@ export function updateCoastReadout(): void {
   coastSlider.setAttribute("aria-valuetext", `coastline warp ${w.toFixed(2)}`);
 }
 
-// Park the slider at the natural coastline WITHOUT touching the overrides, exactly as the sea-level slider parks at the natural waterline without forcing landFraction.
 export function parkCoastDefault(): void {
   coastSlider.value = String(coastToSlider(DEFAULT_COAST_WARP));
 }

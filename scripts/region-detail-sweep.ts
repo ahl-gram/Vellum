@@ -334,8 +334,7 @@ function report(rows: ReadonlyArray<WindowResult>): string {
       const land = sum(rs, (r) => r.landCells);
       const shared = sum(rs, (r) => r.sharedLandCells);
       const parentLand = sum(rs, (r) => r.parentLandCells);
-      // Both halves weighted by their own land, or the parent's reads 1.21% against a true 3.13%
-      // at band 3, where 107 of 320 windows hold no parent land at all and average in as zero.
+      // Both halves weighted by their own land, or the parent's reads 1.21% against a true 3.13% at band 3, where 107 of 320 windows hold no parent land and average in as zero.
       const snow = rs.reduce((a, r) => a + r.snowAlpineFraction * r.landCells, 0);
       const psnow = rs.reduce((a, r) => a + r.parentSnowAlpineFraction * r.parentLandCells, 0);
       lines.push(

@@ -168,7 +168,7 @@ function seaCrossing(
       bestBody = body;
     }
   }
-  if (bestBody === -1) return null; // no water body touches both shores
+  if (bestBody === -1) return null;
 
   const start = (fromLaunches.get(bestBody) as Launch).cell;
   const goal = (toLaunches.get(bestBody) as Launch).cell;
@@ -201,7 +201,7 @@ function launchesByWaterBody(
     if (isSea(i)) {
       const body = seaComp[i] as number;
       if (!found.has(body)) found.set(body, { cell: i, hops: hops[i] as number });
-      continue; // a body's nearest cell is enough; do not flood the whole ocean
+      continue;
     }
     const x = i % w;
     const y = (i / w) | 0;

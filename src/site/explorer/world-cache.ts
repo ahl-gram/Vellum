@@ -1,10 +1,4 @@
-// Single-entry base-world cache, shared by the render worker and its inline fallback:
-// the Glass fires a fresh region job on every settle over the SAME base world, so
-// memoizing the last (seed, overrides) world lets a pan/zoom re-survey without
-// regenerating. Single entry ON PURPOSE: a sea-level or coast drag changes the key,
-// correctly MISSES, and the cache never serves a stale waterline. Fully deterministic:
-// hit or miss, worldFor returns exactly what generateWorld(defaultRecipe(...)) would,
-// so worker/inline byte-parity is unaffected.
+// Single-entry base-world cache shared by the render worker and its inline fallback; single entry ON PURPOSE, so a sea-level or coast drag changes the key, misses, and never serves a stale waterline.
 import { defaultRecipe, generateWorld } from "../../world/generate.ts";
 import type { World, WorldRecipe } from "../../world/types.ts";
 
@@ -18,7 +12,7 @@ function keyOf(seed: number, overrides: Overrides | undefined): string {
   return seed + "|" + JSON.stringify(o, Object.keys(o).sort());
 }
 
-/** The base world for (seed, overrides), memoized single-entry; `cached` is true exactly when this call SKIPPED generateWorld, which is the flag the region-cache e2e asserts instead of a flaky timing measurement. */
+/** `cached` is true exactly when this call SKIPPED generateWorld: the flag the region-cache e2e asserts instead of a timing measurement. */
 export function worldFor(
   seed: number,
   overrides?: Overrides,

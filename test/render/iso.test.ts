@@ -40,7 +40,6 @@ test("isolines: a radial bump yields closed rings; a flat field yields nothing",
   assert.deepEqual(isolines(createField(8, 8, () => 0.5), 9), [], "flat field, no lines");
 });
 
-/** The larger of a ring's grid-space width and height, in cells. */
 function maxExtent(points: ReadonlyArray<readonly [number, number]>): number {
   let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
   for (const [x, y] of points) {
@@ -117,7 +116,6 @@ test("the temperature plate carries coastline-clipped isotherms in every style",
     const strokes = layer.match(/stroke="#[0-9a-f]{6}"/gi) ?? [];
     assert.equal(strokes.length, 9, `${style}: nine visibly stroked levels`);
     if (style === "antique") {
-      // antique has no contourStroke; the fallback must be its soft ink
       assert.ok(
         layer.includes(`stroke="${STYLES.antique.inkSoft}"`),
         "antique falls back to inkSoft",
@@ -141,7 +139,6 @@ test("the rainfall plate carries coastline-clipped isohyets in every style", () 
     );
     const strokes = layer.match(/stroke="#[0-9a-f]{6}"/gi) ?? [];
     assert.equal(strokes.length, 9, `${style}: nine visibly stroked levels`);
-    // #73's wind streaks and the isohyets share the plate; lines draw above streaks
     const streamsAt = svg.indexOf('id="layer-wind-streams"');
     const isoAt = svg.indexOf('id="layer-iso"');
     assert.ok(streamsAt >= 0, `${style}: wind streamlines still on the plate`);

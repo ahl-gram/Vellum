@@ -1,4 +1,4 @@
-// The bound atlas's back matter as a page of the atlas (#497, seat p): pure strings like plate-markup.ts. The host measures the page at the 900px/16px reference and the room fits the sheet to pageAspect.
+// The bound atlas's back matter as a page of the atlas: pure strings like plate-markup.ts. The host measures the page at the 900px/16px reference and the room fits the sheet to pageAspect.
 import { escapeXml } from "../../render/svg.ts";
 import { MATTER_ROW, numeralOf } from "./plate-numbers.ts";
 

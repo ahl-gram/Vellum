@@ -45,7 +45,6 @@ export function placeRealmLabel({
 }: Args): RealmLabelPlacement {
   const boxAt = (x: number, y: number) => spacedTextBox(x, y, name, fs, ls, WIDTH_FACTOR.caps);
 
-  // Stage 1 is the historical ladder, unfiltered by withinChart on purpose: filtering it would move existing labels and force a regen.
   for (const y of yCandidates) {
     const box = boxAt(centroid.x, y);
     if (arena.tryClaim(box, CLAIM_PAD)) {

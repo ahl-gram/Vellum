@@ -1,7 +1,4 @@
-// The Print Room controller (#133, epic #132): takes a world by URL hash or manual seed
-// entry and pulls a modest proof through the SHARED render worker. Since the fold (#208)
-// this page is bundled like the Explorer: worker-client is inlined into this bundle and
-// initWorker takes no URL here.
+// The Print Room controller: takes a world by URL hash or seed entry and pulls a modest proof through the SHARED render worker; worker-client is inlined into this bundle, so initWorker takes no URL here.
 import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
@@ -66,11 +63,11 @@ const furniture: RoomFurniture = {
 const sheet = bindPrintRoom(furniture, () => matterAspect(furniture) ?? sheetAspect());
 const posterStatus = $("pr-poster-status");
 const plateButtons = [...document.querySelectorAll<HTMLButtonElement>("[data-poster]")];
-const formatSel = $<HTMLSelectElement>("pr-format"); // the "Pressed as" select (#135); greyed out during a draw (#212)
-// #217: the chart plate rides the same order path as the posters; its divergences branch inside orderPoster.
+const formatSel = $<HTMLSelectElement>("pr-format"); // the "Pressed as" select; greyed out during a draw
+// The chart plate rides the same order path as the posters; its divergences branch inside orderPoster.
 const presetByKey = new Map([...POSTER_PRESETS, CHART_PRESET].map((p): [string, PosterPreset] => [p.key, p]));
 
-// Recipe params with no visible control here: carried from a deep link and re-serialized on every draw, so the URL stays a shareable Explorer link (#137 added coast: a warped world must print warped).
+// Recipe params with no visible control here: carried from a deep link and re-serialized on every draw, so the URL stays a shareable Explorer link (a warped world must print warped).
 const carried: {
   type: MapType | "";
   band: ClimateBand | "";
@@ -83,12 +80,12 @@ const carried: {
 } = { type: "", band: "", theme: "", legend: true, arms: false, beasts: false, land: null, coast: null };
 
 let drawGen = 0;
-// True from a draw's synchronous start until its own settle (#212): pairs with `ordering` so the order surface stays closed for the whole round-trip.
+// True from a draw's synchronous start until its own settle: pairs with `ordering` so the order surface stays closed for the whole round-trip.
 let drawing = false;
 let lastSeed = 0;
 let lastTitle = "";
 
-// #134: the world of the CURRENT proof, snapshotted on every successful draw so an order reproduces the sheet on screen, not the live controls at click time; null until the first proof lands (the plate buttons start disabled in the HTML).
+// The world of the CURRENT proof, snapshotted on every successful draw so an order reproduces the sheet on screen, not the live controls at click time; null until the first proof lands (the plate buttons start disabled in the HTML).
 let posterBasis: PosterBasis | null = null;
 let ordering = false; // an order is at the press; the plates are disabled meanwhile
 let posterGen = 0; // drawGen-style stale guard; the button-disable is the operative guard
@@ -97,15 +94,13 @@ function randomSeed(): number {
   return Math.floor(Math.random() * 0xffffffff);
 }
 
-// #212: the single gate for the order surface. Consulting BOTH `drawing` and `ordering` closes the race in both directions: a redraw finishing during an order, and an order finishing during a redraw, each leave the counter closed until the world settles.
-// The #pr-format select greys out for the draw round-trip only; its value is snapshotted at order time.
+// The single gate for the order surface: consulting BOTH `drawing` and `ordering` closes the race in both directions (a redraw finishing during an order, an order finishing during a redraw); the format select greys out for the draw round-trip only, its value snapshotted at order time.
 function refreshOrderControls(): void {
   const platesReady = posterBasis != null && !drawing && !ordering;
   for (const b of plateButtons) b.disabled = !platesReady;
   if (formatSel) formatSel.disabled = drawing;
 }
 
-// Read the same hash keys the Explorer writes, applying only present + valid values.
 function applyHash(): void {
   const p = new URLSearchParams(location.hash.slice(1));
   const seedRaw = p.get("seed");
@@ -131,7 +126,7 @@ function applyHash(): void {
     const f = Number(land) / 1000;
     if (Number.isFinite(f)) carried.land = Math.min(0.7, Math.max(0.1, f));
   }
-  // #137: coast= carries coastWarp x 100, the Explorer's encoding; clamp so a crafted hash can never push the engine out of range.
+  // coast= carries coastWarp x 100, the Explorer's encoding; clamp so a crafted hash can never push the engine out of range.
   const coast = p.get("coast");
   if (coast !== null) {
     const w = Number(coast) / 100;
@@ -139,7 +134,6 @@ function applyHash(): void {
   }
 }
 
-// Mirror the current recipe into location.hash in the Explorer's exact format, so a Print Room link opens the same world in either page.
 function writeHash(seed: number, style: string): void {
   const p = new URLSearchParams();
   p.set("seed", String(seed));
@@ -162,7 +156,7 @@ function draw(): void {
   const myGen = ++drawGen;
   drawing = true;
   status.textContent = "Pulling a proof…";
-  // #212/#136: a fresh proof supersedes any bound atlas AND any pending poster order; close the whole order surface SYNCHRONOUSLY before the async render, or a plate clicked mid-redraw presses the previous world's poster.
+  // A fresh proof supersedes any bound atlas AND any pending poster order; close the whole order surface SYNCHRONOUSLY before the async render, or a plate clicked mid-redraw presses the previous world's poster.
   clearBoundAtlas();
   refreshOrderControls();
   posterStatus.textContent = ""; // a new proof clears any stale poster-order status
@@ -210,12 +204,12 @@ $("pr-draw").addEventListener("click", draw);
 seedInput.addEventListener("keydown", (e) => { if (e.key === "Enter") draw(); });
 styleSel.addEventListener("change", draw);
 $("pr-random").addEventListener("click", () => { seedInput.value = String(randomSeed()); draw(); });
-// #217: a fresh Pressed-as choice makes a pulled plate's status stale, so dismiss it; an in-flight order keeps its line (its completion rewrites it either way).
+// A fresh Pressed-as choice makes a pulled plate's status stale, so dismiss it; an in-flight order keeps its line (its completion rewrites it either way).
 formatSel.addEventListener("change", () => {
   if (!ordering) posterStatus.textContent = "";
 });
 
-// #134: a wide poster SVG goes STRAIGHT to a Blob download, NEVER injected into the live DOM (a multi-MB innerHTML swap is the epic's one hard warning).
+// A wide poster SVG goes STRAIGHT to a Blob download, NEVER injected into the live DOM (a multi-MB innerHTML swap is the #132 epic's one hard warning).
 function downloadBlob(blob: Blob, filename: string): void {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -236,11 +230,11 @@ function selectedFormat(): string {
 
 function orderPoster(key: string): void {
   const preset = presetByKey.get(key);
-  // #212: the plates are disabled during a draw, so a real click cannot land mid-redraw, but a programmatic call must not press the stale, about-to-change posterBasis either.
+  // The plates are disabled during a draw, so a real click cannot land mid-redraw, but a programmatic call must not press the stale, about-to-change posterBasis either.
   if (!preset || ordering || drawing || !posterBasis) return;
   // Snapshot synchronously: the preview controls stay live during a render, so a style change could redraw and reassign posterBasis mid-flight.
   const basis = posterBasis;
-  // #217: the chart IGNORES the format select rather than pinning it (the plates are instant-order buttons), and its width skips clampPosterWidth (the 2400 poster floor would silently raise 1500).
+  // The chart IGNORES the format select rather than pinning it (the plates are instant-order buttons), and its width skips clampPosterWidth (the 2400 poster floor would silently raise 1500).
   const isChart = preset.key === CHART_PRESET.key;
   const format = isChart ? "svg" : selectedFormat(); // snapshot alongside the basis; a later click can change it
   const width = isChart ? CHART_PRESET.width : clampPosterWidth(preset.width);
@@ -262,7 +256,6 @@ function orderPoster(key: string): void {
           ? chartFilename(basis.seed, basis.style, res.title)
           : posterFilename(basis.seed, basis.style, width);
         downloadSvg(res.svg, filename);
-        // e2e observation point: the poster the press pulled, which never touches the DOM.
         window.__vellumLastPoster = { svg: res.svg, filename, width, seed: basis.seed, style: basis.style };
         posterStatus.textContent = isChart
           ? `The chart is pulled as the engraving: ${filename}`
@@ -282,7 +275,6 @@ function orderPoster(key: string): void {
       if (myGen !== posterGen) return; // a newer order landed while rasterizing
       const filename = posterPngFilename(basis.seed, basis.style, png.width);
       downloadBlob(png.blob, filename);
-      // e2e observation point: dimensions + blob size, never the bytes.
       window.__vellumLastPng = {
         filename, type: png.blob.type, size: png.blob.size,
         width: png.width, height: png.height, scale: png.scale, clamped: png.clamped,
@@ -297,7 +289,7 @@ function orderPoster(key: string): void {
       posterStatus.textContent = "The press jammed: " + err.message;
     })
     .finally(() => {
-      // #212: re-open ONLY if no draw is now in flight; a redraw started while this order rolled must keep the plates closed until its own proof settles.
+      // Re-open ONLY if no draw is now in flight; a redraw started while this order rolled must keep the plates closed until its own proof settles.
       ordering = false;
       refreshOrderControls();
     });
@@ -306,7 +298,7 @@ function orderPoster(key: string): void {
 for (const b of plateButtons) b.addEventListener("click", () => orderPoster(b.dataset.poster as string));
 
 await initWorker();
-// #136: getBasis reads the LIVE posterBasis at click time, the same snapshot the poster order uses.
+// getBasis reads the LIVE posterBasis at click time, the same snapshot the poster order uses.
 initBoundAtlas(() => posterBasis, {
   showProof: () => { showProof(furniture); sheet.rebase(); sheet.room.layout(); },
   showPlate: (plate) => { showPlate(furniture, plate); sheet.rebase(); sheet.room.layout(); },

@@ -146,7 +146,7 @@ test("the sea band wears the style's water tokens", () => {
   assert.ok(ink.includes(`stroke="${STYLES.ink.coastStroke}"`), "ink keeps the coast stroke");
 });
 
-// Silhouette-specific on purpose: a whole-plate notEqual was satisfied by the foot rubble alone, so a broken tower rendering intact escaped every test until vellum-guard-prover proved it; guard each form family's silhouette through massNodes, the class, not the instance.
+// Silhouette-specific on purpose: a whole-plate notEqual is satisfied by the foot rubble alone, so each form family's silhouette is guarded through massNodes, the class, not the instance.
 test("a broken mass loses its intact silhouette, form by form", () => {
   const c = dressContext(STYLES.ink);
   const render = (m: Mass): string => massNodes(c, m, 1.2).map(renderSvg).join("");

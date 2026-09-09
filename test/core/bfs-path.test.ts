@@ -2,9 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { bfsPath } from "../../src/core/bfs-path.ts";
 
-// #120: the one path-finder behind both voyage leg kinds (road legs walk the road mask, sea legs the sea mask), so every property here is proven for both; grids are hand-drawn so the expected chain is exact.
+// One path-finder behind both voyage leg kinds (road legs walk the road mask, sea legs the sea mask); grids are hand-drawn so the expected chain is exact.
 
-/** Parse a picture grid: '.' passable, '#' blocked. Returns {w,h,passable}. */
+/** Picture grid: '.' passable, '#' blocked. */
 function pic(rows: string[]) {
   const h = rows.length;
   const w = rows[0]!.length;

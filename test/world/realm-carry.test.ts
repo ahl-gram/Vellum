@@ -101,7 +101,7 @@ test("a realm-less island's land stays bare even inside another realm's reach (#
 test("the parent rings and their window mapping are deterministic and non-empty (#423)", () => {
   const world = worldFor(42);
   const a = realmCarryRings(world);
-  // A fresh world, not the cached one: realmCarryRings memoizes per world object, so same-object comparison is a tautology (the skeptic's finding 2).
+  // A fresh world, not the cached one: realmCarryRings memoizes per world object, so same-object comparison is a tautology.
   const b = realmCarryRings(generateWorld(defaultRecipe(42)));
   assert.deepEqual(a, b, "two computations of the parent rings must be identical");
   assert.ok(a.length > 0, "seed 42 has 3 realms; the carry must produce rings");
@@ -112,7 +112,7 @@ test("the parent rings and their window mapping are deterministic and non-empty 
   const m2 = mapRingsToWindow(b, window, world.recipe.gridW, world.recipe.gridH, 320, 240);
   assert.deepEqual(m1, m2, "the same window must map to identical rings, whatever path reached it");
 
-  // The affine pinned exactly at the corners: a sub-cell offset otherwise hides inside the collar guard's seam-jitter tolerance (guard-prover finding).
+  // The affine pinned exactly at the corners: a sub-cell offset otherwise hides inside the collar guard's seam-jitter tolerance.
   const pw = world.recipe.gridW;
   const ph = world.recipe.gridH;
   const cornerRing = [
@@ -127,7 +127,7 @@ test("the parent rings and their window mapping are deterministic and non-empty 
 });
 
 test("the sea floor holds everywhere: a grown shore cell sits inside its realm's parent ring (#423)", () => {
-  // Window-independent contract of the owned-sea iso floor: without it a thin grown finger's blur dips below the iso and the finer shoreline inside it goes bare, which the window sweep can miss when no sampled window sits over a finger (guard-prover finding).
+  // Window-independent contract: without the floor a thin grown finger's blur dips below the iso and its shoreline goes bare, which the window sweep can miss.
   for (const seed of [42, 2, 15]) {
     const world = worldFor(seed);
     const { w, h } = world.elev;
@@ -240,7 +240,7 @@ const collarSweep = (seed: number, name: string, window: NonNullable<ReturnType<
   const pw = world.recipe.gridW;
   const ph = world.recipe.gridH;
   const isSea = isSeaOf(world);
-  // The oracle's cap is the LITERAL ratified 8, never the exported constant, or the guard moves with a nerfed production cap (guard-prover finding).
+  // The oracle's cap is the literal ratified 8, never the exported constant, or the guard moves with a nerfed production cap.
   const grown = growRealmLabels(world.realms.labels, isSea, pw, ph, 8);
   const du = window.u1 - window.u0;
   const dv = window.v1 - window.v0;
@@ -286,7 +286,7 @@ const collarSweep = (seed: number, name: string, window: NonNullable<ReturnType<
         else if (boundaryAdjacent(wx, wy, owner)) seamJitter++;
         else interiorMiss++;
       } else if (!insideOwn || insideOther) {
-        // Tinted, but not exactly by the owner: within a cell of a boundary that is dash-covered seam jitter (misattribution across the sea divide is arbitrary ground the world sheet never rules on); in an interior it is a mapping or growth defect.
+        // Tinted, but not by the owner: within a cell of a boundary that is dash-covered seam jitter; in an interior it is a mapping or growth defect.
         if (boundaryAdjacent(wx, wy, owner)) seamJitter++;
         else interiorMiss++;
       }

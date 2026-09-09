@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// Landfall Sub 6b (#480): the head cluster's cleanup on home. SPEC: the four screenshots on #480 and their captions; the measured baseline and every number cited below are on PR #482. The drawer's own dress became the shell's at Sub 6c (#483) and is pinned against the layout in test/site/shell-drawer-css.test.ts; what stays here is what clears home's own furniture.
+// Home's head cluster (#480; SPEC: the four screenshots on #480 and their captions, the measured baseline on PR #482). The drawer's dress is the shell's, pinned in test/site/shell-drawer-css.test.ts; what stays here is what clears home's own furniture.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
@@ -42,14 +42,12 @@ const narrow = mediaBodies(css, "(max-width: 900px)");
 const topLevel = css.replace(/@media[^{]*\{[\s\S]*?\n\}/g, "");
 
 test("the stage never yields its lettering to a drag: user-select none on the whole stage, so a pip drag selects nothing (#480, screenshot 4)", () => {
-  // Measured 2026-08-28 (PR #482): a mouse drag from a station name selected every place name on the sheet; the chart image alone was opted out.
   const stage = rule(topLevel, ".landfall .stage");
   assert.match(stage, /user-select:\s*none/, "the stage opts its lettering out of selection");
   assert.match(stage, /-webkit-user-select:\s*none/, "iOS Safari reads the prefixed form");
 });
 
 test("the cluster's wash is a soft pool sized by the cluster, not the 46rem slab (#480, screenshot 3)", () => {
-  // Measured 2026-08-28: the slab was 736x272 with the nav ending at x=510, y=102, and both clipped edges were visible over the chart.
   const wash = rule(topLevel, "header.chrome::before");
   assert.doesNotMatch(wash, /radial-gradient|46rem|17rem|width:|height:/, "no fixed-size gradient box remains");
   const inset = wash.match(/inset:\s*(-?[\d.]+)rem\s+(-?[\d.]+)rem\s+(-?[\d.]+)rem\s+(-?[\d.]+)rem/);

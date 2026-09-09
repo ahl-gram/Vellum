@@ -22,7 +22,7 @@ const PAGE_CSS = [
   "public/ribbon/index.css",
 ] as const;
 
-// Host-agnostic sheets (#219 reading frame, #302 living-chart engine dressing): linked by whichever page mounts them, and answering to the same palette discipline.
+// Host-agnostic sheets: linked by whichever page mounts them, and answering to the same palette discipline.
 const SHARED_CSS = ["public/reading-frame.css", "public/living-chart.css"] as const;
 
 // house.css (#324) and atelier.css (#487, the room furniture) are linked by BaseLayout on every page; the role specs are pinned in test/site/house-style.test.ts.
@@ -30,7 +30,7 @@ const ROOT_CSS = ["public/house.css", "public/atelier.css"] as const;
 
 const AUTHORED_CSS = [...PAGE_CSS, ...SHARED_CSS, ...ROOT_CSS] as const;
 
-// The ratified token set: #263, extended by the PR #269 review (item 4) and the Specimen Book (#324).
+// The ratified token set (#263, the PR #269 review item 4, #324).
 const TOKENS: Record<string, string> = {
   "--ink-dark": "#4a3826",
   "--ink-brown": "#6b5a40",
@@ -54,7 +54,7 @@ const TOKENS: Record<string, string> = {
   "--chart-ink": "#3d2f1f",
 };
 
-// Near-miss inks merged into --ink-dark (#269 item 4). #3d2f1f has ONE sanctioned home since #324, the --chart-ink declaration; #5a4326 is banned outright.
+// Near-miss inks merged into --ink-dark: #3d2f1f has ONE sanctioned home, the --chart-ink declaration; #5a4326 is banned outright.
 const RETIRED_INKS = ["#3d2f1f", "#5a4326"] as const;
 
 const layoutStyle = () => {
@@ -98,8 +98,6 @@ test("the retired near-miss inks never reappear (#269 review, item 4)", () => {
       assert.ok(!text.includes(hex), `${source} carries retired ink ${hex}; use var(--ink-dark)`);
     }
   }
-  // The layout: #5a4326 stays banned outright; #3d2f1f may appear EXACTLY once,
-  // as the --chart-ink token declaration (#324), never as a bare value.
   const layout = read("src/layouts/BaseLayout.astro").toLowerCase();
   assert.ok(!layout.includes("#5a4326"), "the layout carries retired ink #5a4326");
   assert.equal(
@@ -177,7 +175,7 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
 });
 
 test("the walnut deep: one declaration, the vignette over the lit walnut, consumed by ground and band alike (#461 ruling 2)", () => {
-  // The daylight wash's dark successor (ruled 2026-08-25): the atelier-map mockup's own body deep, token-derived (the #55402a center is the SAME color-mix Act I ratified for the stage), declared ONCE as --the-deep so the fixed ground layer and the running band can never drift apart.
+  // The deep (ruled 2026-08-25): the mockup's own body deep, token-derived, declared ONCE as --the-deep so the fixed ground layer and the running band can never drift apart.
   const css = layoutStyle();
   const deep = css.match(/--the-deep:\s*([\s\S]*?);/);
   assert.ok(deep, "the layout style should declare --the-deep once");
@@ -207,7 +205,7 @@ test("the interim desk panel: an unconverted room's main stands on parchment, no
 });
 
 test("the chrome passes the hand through: drags over the fixed cluster reach the chart, links stay live (#461, skeptic finding 2)", () => {
-  // A 485x79 dead drag zone under the cluster on home; the mockup's own idiom (stage.css uses it five times) is none-on-container, auto-on-interactive.
+  // The mockup's idiom (stage.css): pointer-events none on the container, auto on the interactive children.
   const css = layoutStyle();
   const chrome = css.match(/header\.chrome\s*\{([\s\S]*?)\}/);
   assert.ok(chrome && /pointer-events:\s*none/.test(chrome[1]), "the chrome container passes pointer events through");
@@ -221,13 +219,12 @@ test("print is paper all the way down: the dark ground resets with the chrome it
 });
 
 test("the deep's focus ring: the chrome on the walnut brightens the ring, paper keeps ink-dark (#324 decision 6, re-ratified at #461)", () => {
-  // Guard-prover round 1 (2026-08-26) proved this override unguarded: reverting it ships an invisible ink-dark ring on the deep and nothing reds. house-style.test.ts keeps pinning the paper side.
   const ring = layoutStyle().match(/header\.chrome a:focus-visible,\s*footer a:focus-visible\s*\{([\s\S]*?)\}/);
   assert.ok(ring, "the layout style should carry the deep-chrome focus override");
   assert.match(ring[1], /outline-color:\s*var\(--parchment-bright\)/, "the ring on the deep is parchment-bright (#455's precedent for controls on the walnut)");
 });
 
-// #367: the sheet's lift is ONE token now. Ratified at 0.4 (Alex, 2026-08-12): the armed Explorer's two coincident 0.2 shadows measured as a single 0.385, rounded to a value a stylesheet can own.
+// The sheet's lift is ONE token (#367), ratified at 0.4 (2026-08-12): two coincident 0.2 shadows measured as a single 0.385.
 const SHEET_SHADOW_GEOMETRY = "0 12px 34px";
 const STAGE_SHADOW_GEOMETRY = "0 18px 60px";
 
@@ -345,7 +342,6 @@ test("no mount dresses a BARE svg: the engine's overlays are not sheets (#367)",
 });
 
 test("the chart marker is real: the renderer stamps it on every committed chart (#367)", () => {
-  // A typo'd qualifier matches nothing and silently removes the shadow from every sheet, so pin the marker to the real committed charts.
   for (const chart of ["chart-42-antique.svg", "chart-42-ink.svg", "chart-42-nautical.svg", "chart-42-topographic.svg"]) {
     assert.match(
       read(`public/charts/${chart}`).slice(0, 4000),
@@ -355,7 +351,7 @@ test("the chart marker is real: the renderer stamps it on every committed chart 
   }
 });
 
-// #405: the hover raise and press are house values, named in motion.css's :root (the one sheet both the site pages and the standalone atlas page load; BaseLayout cannot reach the atlas).
+// The hover raise and press are house values (#405), named in motion.css's :root, the one sheet both the site pages and the standalone atlas page load.
 const RAISE_TOKENS = [
   ["--raise", "-2px"],
   ["--press", "1px"],
@@ -378,7 +374,6 @@ test("motion.css declares each raise/press token once, at its ratified value (#4
 });
 
 test("--raise-grand is retired: no declaration, no consumer (#470 ratified 2026-08-24, the #405 table update)", () => {
-  // Its last consumer, Go Deeper's .card:hover, left at #459; Act II re-ratifies a grand lift if its dark-room cards want one.
   for (const sheet of [...AUTHORED_CSS, "public/motion.css", "public/house.css"]) {
     assert.ok(!read(sheet).includes("--raise-grand"), `${sheet} must not declare or consume the retired --raise-grand`);
   }
@@ -396,7 +391,6 @@ test("the plate dress rests flat and tips on hover (#130, the consumer is now pr
   );
 });
 
-// The #289 ratified call, moved here from homepage-plates.test.ts when #470 retired that file with home's plates: the guard is about motion.css's scoping, not the plates.
 test("the wordmark tips under the hand on room pages, and stays still on home (#289)", () => {
   const css = read("public/motion.css");
   // Keyed on .wordmark, not h1 (#288): on a room page the h1 is the room name with no link to tip, so keying on h1 would silently select nothing.
@@ -480,7 +474,7 @@ test("#402 the prospect reveal releases its transform: fill backwards, never bot
   );
 });
 
-// #405 identity, not presence: the sweep proves a lift is SOME token; this pins WHICH one each consumer uses. broadside's a.fn and the faq/glossary .toc tips are pinned by tip-affordance's re-pins.
+// Identity, not presence: the sweep proves a lift is SOME token; this pins WHICH one each consumer uses.
 const TOKEN_CONSUMERS: ReadonlyArray<{ file: string; arm: string; lift: string; shadow?: string }> = [
   { file: "public/motion.css", arm: "button:not(.lf-station):not(.place-hit):hover", lift: "--raise", shadow: "--raise-shadow" },
   { file: "public/motion.css", arm: "button:not(.lf-station):not(.place-hit):active", lift: "--press", shadow: "--press-shadow" },
@@ -511,7 +505,7 @@ test("each lifting surface consumes ITS token, not just a token (#405)", () => {
 });
 
 test("the engine's own sheet states no shadow it could not win (#367)", () => {
-  // Host-agnostic (#302): a shadow written here loses every cascade it enters, which is how the first attempt at #367 was written.
+  // Host-agnostic: a shadow written here loses every cascade it enters.
   const rule = findRule(read("public/living-chart.css"), ".voyage-overlay");
   assert.ok(rule, "living-chart.css should still carry the .voyage-overlay layout rule");
   assert.ok(

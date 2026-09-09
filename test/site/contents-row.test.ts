@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { El, installShim } from "../../test-support/element-shim.ts";
 import { contentsRow, contentsRowHtml } from "../../src/site/shared/contents-row.ts";
 
-// #504 (#487 item 3). Skeptic on PR #506: nothing else reads a BUILT row from the two DOM hosts, and the Ribbon's summit glyph hangs on the em nesting inside .cr-text (public/ribbon/index.css), so the hosts are run here.
+// The Ribbon's summit glyph hangs on the em nesting inside .cr-text (public/ribbon/index.css), so both DOM hosts are run here, not the pure builder alone.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 

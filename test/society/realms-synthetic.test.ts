@@ -112,8 +112,8 @@ test("#79 attaches an islet by sea route, not by straight-line across land", () 
   const realms = partitionRealms(elev, SEA, noRivers(W, H), settlements);
 
   assert.equal(realms.seats.length, 2, "A and B are the two realms");
-  const realmOfA = realms.labels[70 + 20 * W] as number; // capital's cell
-  const realmOfB = realms.labels[3 + 20 * W] as number; // town's cell
+  const realmOfA = realms.labels[70 + 20 * W] as number;
+  const realmOfB = realms.labels[3 + 20 * W] as number;
   assert.notEqual(realmOfA, realmOfB);
 
   const ic = { x: 19.5, y: 20 };
@@ -126,7 +126,7 @@ test("#79 attaches an islet by sea route, not by straight-line across land", () 
 });
 
 test("#79 size wins: a settled but sub-substantial island attaches, it does not self-govern", () => {
-  // Alex's locked decision: size always wins. A settled sub-substantial island attaches by sea route, its town becoming an ordinary settlement (n=5000 -> SUBSTANTIAL_FRACTION*n = 20 cells).
+  // n=5000 -> SUBSTANTIAL_FRACTION*n = 20 cells.
   const W = 100;
   const H = 50;
   const A: Rect = { x0: 0, y0: 0, x1: 40, y1: 49 }; // mainland

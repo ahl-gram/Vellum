@@ -1,7 +1,4 @@
-// The ribbon page's address grammar, pure and DOM-free like its prospect sibling in
-// src/site/prospect/address.ts: presence-gated, allowlisted, clamped, so a crafted hash
-// can never push the engine out of range. Reads the Explorer's world keys plus its own
-// `a` (setting out from) and `b` (bound for).
+// The ribbon page's address grammar, pure and DOM-free like src/site/prospect/address.ts (presence-gated, allowlisted, clamped): the Explorer's world keys plus its own `a` (setting out from) and `b` (bound for).
 import type { StyleName } from "../../render/style.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";

@@ -102,7 +102,7 @@ test("the world sheet's realm layers are untouched: no clip wrapper, label-deriv
 });
 
 test("the tint index is the PARENT's, proven where recomputation would disagree (#423)", () => {
-  // No natural seed exceeds 5 realms, so paint six stripes onto seed 42's land: above BASE_TINTS the assignment runs graph colouring, where a cropped window computes different centroids and adjacency (the #162 hazard #113 will make live).
+  // No natural seed exceeds 5 realms, so paint six stripes onto seed 42's land: above BASE_TINTS the assignment runs graph colouring, where a cropped window computes different centroids and adjacency.
   const { w, h } = world42.elev;
   const REALMS = 6;
   const labels = new Int16Array(w * h).fill(-1);

@@ -61,7 +61,6 @@ export async function run(ctx) {
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
-  // CD1: the handle rides the committed survey, inside its box, and leaves the inset's own svg the last one.
   await go(`${DRESS}&${DEEP}`);
   const armed = await settle(READ, atInset, "chart-drawer-inset", DRAWN);
   const why = {
@@ -81,7 +80,6 @@ export async function run(ctx) {
     JSON.stringify({ ear: armed.ear, earSize: [armed.ear && armed.ear.rect.w, armed.ear && armed.ear.rect.h], insetSvgs: armed.insetSvgs, lastSvgIsSurvey: armed.lastSvgIsSurvey, inset: armed.insetRect, open: armed.open, tab: armed.tabText, tabShown: armed.tabShown, cuttings: armed.cuttings, why }),
   );
 
-  // CD2: a click lays it, opens the drawer and leaves it open (ruled 2026-09-07), and the address carries it.
   const earAt = await clickEar();
   const laid = await settle(READ, (d) => d.open && d.cuttings === 1, "chart-drawer-laid");
   check(
@@ -100,7 +98,6 @@ export async function run(ctx) {
     JSON.stringify({ clickedAt: earAt }),
   );
 
-  // #520 build item 2 names this one: Z10b pins it for the zoom cluster ONLY, so the handle owes the same check.
   const beforeDbl = await evaluate(`(() => ({ k: window.__vellumZoomState().k, band: window.__vellumRegion ? window.__vellumRegion().band : null }))()`);
   const dblAt = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
   if (dblAt) {
@@ -117,7 +114,6 @@ export async function run(ctx) {
     JSON.stringify({ before: beforeDbl, after: afterDbl }),
   );
 
-  // CD3: the same survey twice is refused in its own voice, and the table is unmoved (ruled 2026-09-07).
   await evaluate(`document.getElementById("chart-drawer-shut").click()`);
   await clickEar();
   const twice = await settle(READ, (d) => d.open, "chart-drawer-twice");
@@ -127,7 +123,6 @@ export async function run(ctx) {
     JSON.stringify({ cuttings: twice.cuttings, status: twice.status }),
   );
 
-  // CD4: the address is the only memory, and a recovered sheet fills when the drawer is OPENED, not on load.
   const carried = laid.hashTable;
   await go(`${DRESS}&table=${carried}`);
   const cold = await evaluate(READ);
@@ -140,7 +135,6 @@ export async function run(ctx) {
     JSON.stringify({ cold: { cuttings: cold.cuttings, imgs: cold.imgs, frames: cold.frames, titles: cold.titles }, filled: { imgs: filled.imgs, titles: filled.titles, decoded: filled.decoded } }),
   );
 
-  // CD5: a cutting comes off, and an empty table writes NO key (#520 ruling 1).
   await evaluate(`document.querySelector("#cuttings .off").click()`);
   const bare = await settle(READ, (d) => d.cuttings === 0, "chart-drawer-bare");
   check(
@@ -150,7 +144,6 @@ export async function run(ctx) {
     JSON.stringify({ cuttings: bare.cuttings, count: bare.count, hashTable: bare.hashTable, status: bare.status }),
   );
 
-  // #520 Process names both of these: "the cap refuses" and "home and the verso flip drop the handle".
   const SIX = ["rung-1.lx-4.ly-4", "rung-1.lx-3.ly-3", "rung-2.lx-5.ly-5", "rung-2.lx-6.ly-6", "rung-3.lx-11.ly-11", "rung-3.lx-12.ly-12"]
     .map((seat) => `k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.${seat}`).join("_");
   await go(`${DRESS}&${DEEP}&table=${SIX}`);
@@ -171,7 +164,6 @@ export async function run(ctx) {
     JSON.stringify({ cuttings: refused.cuttings, offs: refused.offs, reachable: refused.offsReachable, open: refused.open }),
   );
 
-  // Home drops the inset, and the handle must go with it rather than outliving the sheet it belongs to.
   await evaluate(`window.__vellumZoomTo({ x: 0, y: 0, k: 1 })`);
   const home = await settle(READ, (d) => !d.ear, "chart-drawer-home");
   check(
@@ -180,10 +172,7 @@ export async function run(ctx) {
     JSON.stringify({ ear: home.ear, insetSvgs: home.insetSvgs, cuttings: home.cuttings }),
   );
 
-  // CD9 / CD11 / CD12 (#543 Sub 2b, ruled by Alex 2026-09-08): the Broadside and the Chart Table are never open together,
-  // and nothing is lifted onto the chart. The ruling was one sentence: the drawer covers the chart's caption and the roads
-  // out, and it makes no sense to cover those and leave the side panel standing. Everything #543 measured follows from it,
-  // because two surfaces that are never open together cannot fight for the edge, the band or the reader's eye.
+  // CD9 / CD11 / CD12 (#543, Alex 2026-09-08): the Broadside and the Chart Table are never open together and nothing is lifted onto the chart, because covering the caption and the roads out while leaving the side panel standing made no sense to the reader.
   const SURFACES = `(() => {
     const slip = document.querySelector(".slip");
     const tab = document.querySelector(".slip-tab");
@@ -215,7 +204,6 @@ export async function run(ctx) {
   await evaluate(`document.getElementById("chart-drawer-shut").click()`);
   await sleep(900);
   const afterShut = await evaluate(SURFACES);
-  // The reader who folded the Broadside themselves gets it back folded, not opened for them.
   await go(`${DRESS}&table=${SIX}`);
   await evaluate(`document.querySelector(".slip-fold").click()`);
   await sleep(600);
@@ -235,8 +223,7 @@ export async function run(ctx) {
     !afterShut.open && !afterShut.folded && !afterShutFolded.open && afterShutFolded.folded,
     JSON.stringify({ hadItOpen: afterShut, hadItFolded: afterShutFolded }),
   );
-  // Both readings are taken with the Broadside ALREADY folded, so the drawer's own fold is a no-op and the only thing
-  // that could move the furniture is the drawer.
+  // Both readings are taken with the Broadside ALREADY folded, so the drawer's own fold is a no-op and only the drawer could move the furniture.
   await go(`${DRESS}&table=${SIX}`);
   await evaluate(`document.querySelector(".slip-fold").click()`);
   await sleep(600);
@@ -252,10 +239,7 @@ export async function run(ctx) {
   );
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
-  // CD13 (#543, Alex 2026-09-08): the tab and the camera share the right edge once the Broadside is folded.
-  // The Broadside used to hold the camera 26rem clear of the edge, so the tab never met it; folded, the camera comes
-  // home to --chrome-x and the tab is the thing already standing there. z-19 over the corner's z-10 means the tab wins
-  // the pointer, so this is a reachability check and not a tidiness one.
+  // CD13 (#543): folded, the camera comes home to --chrome-x where the tab already stands, and the tab's z-19 over the corner's z-10 wins the pointer, so this is a reachability check.
   const EDGE = `(() => {
     const tab = document.getElementById("chart-drawer-tab");
     const zoom = document.querySelector(".corner.br.zoomery");
@@ -293,11 +277,7 @@ export async function run(ctx) {
   );
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
-  // CD6 (#540 Sub 2a): the phone's own door into the table. The desktop drawer must never paint at 390, and the check
-  // has to try the door that opens it: `lay()` calls setOpen(true) on both its branches with no width term, so reading
-  // the SHUT state at 390 (which this check used to do) says nothing about whether the drawer can appear. It could, and
-  // it did: `.chart-drawer.open` is (0,2,0) against the stand-down's (0,1,0), and specificity resolves before source
-  // order, so once .open landed the drawer displayed at 390 over a reader who could not shut it again.
+  // CD6 (#540 Sub 2a): the desktop drawer must never paint at 390, and the check has to try the door that opens it: `lay()` calls setOpen(true) with no width term, and `.chart-drawer.open` (0,2,0) beat the stand-down's (0,1,0), so once .open landed the drawer displayed at 390 over a reader who could not shut it.
   await setMobileViewport(390, 844);
   await go(`${DRESS}&${DEEP}`);
   const phoneArmed = await settle(READ, atInset, "chart-drawer-phone-inset", DRAWN);
@@ -313,7 +293,6 @@ export async function run(ctx) {
     JSON.stringify({ tapped: phoneEar, drawerDisplay: phoneDrawer, open: phone.open, shutPress: phoneShut, scrollW: phone.scrollW, innerW: phone.innerW }),
   );
 
-  // CD14 / CD15 / CD16 (#540, #518 ruling 4): the phone's table is the sheet's second leaf, chosen by two tabs in its head.
   const LEAF = `(() => {
     const tabs = [...document.querySelectorAll(".slip-head .sheet-tabs button")];
     const name = (e) => (e ? (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\\s+/).join(".")) : null);
@@ -349,8 +328,7 @@ export async function run(ctx) {
   const leafShut = await evaluate(LEAF);
   const tableTab = await evaluate(`(() => { const b = [...document.querySelectorAll(".slip-head .sheet-tabs button")].find((x) => /table/i.test(x.textContent || "")); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
   if (tableTab) { await touch("touchStart", [{ x: tableTab.x, y: tableTab.y, id: 0 }]); await touch("touchEnd", []); }
-  // A bounded wait that RETURNS its last reading rather than throwing: a settle that gives up kills the lane instead of
-  // failing a named check (#534), and these three checks are the record of what the leaf does, not the wait.
+  // A bounded wait that RETURNS its last reading rather than throwing: a settle that gives up kills the lane instead of failing a named check (#534).
   let leafOpen = await evaluate(LEAF);
   for (let i = 0; i < DRAWN && !(leafOpen.leafShown && leafOpen.cuttings === 6); i++) { await sleep(50); leafOpen = await evaluate(LEAF); }
   check(

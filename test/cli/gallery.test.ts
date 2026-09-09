@@ -53,7 +53,6 @@ test("the gallery stays in the motion folio: its tiles tip under the hand on the
   await rm(dir, { recursive: true, force: true });
   try {
     await buildGallery(100, { count: 1, out: dir });
-    // Since #268 the composer writes the page css; the shelled /gallery/ route links /motion.css through BaseLayout, so that link left with the shell.
     const css = await readFile(join(dir, "index.css"), "utf8").catch(() => "");
     assert.match(
       css,

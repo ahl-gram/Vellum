@@ -10,9 +10,6 @@ import {
   reorderPlanByTravel,
 } from "../../src/render/voyage.ts";
 
-// #118 (Sub 1 of the Wayfarer's Passage epic #117): the pure itinerary core; the animated overlay is Sub 2, covered by the Explorer e2e.
-// Load-bearing: the plan starts at the single capital and a CLOSED round trip visits every living town/village exactly once (#275: legs.length === ports.length); and every selection keys on idx, never array position, so a shuffled input yields a byte-identical plan.
-
 const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   idx: 0,
   name: "Aelmoor",
@@ -43,7 +40,6 @@ test("plan starts at the capital", () => {
 });
 
 test("collinear ports sweep along the line in order, no backtrack", () => {
-  // The sorted line: 0 -> 1 (0.1) -> 3 (0.2) -> 2 (0.3); idx 3 rides before 2 because C sits between A and B.
   const plan = buildVoyagePlan(lineWorld, 1059);
   assert.deepEqual(
     plan.ports.map((p) => p.idx),
@@ -52,7 +48,6 @@ test("collinear ports sweep along the line in order, no backtrack", () => {
 });
 
 test("the tour does not cross itself on a ring layout nearest-neighbour would tangle", () => {
-  // A ring with one inland town near the centre: greedy NN dives inland then jumps back, crossing its own track.
   const ringWorld = [
     mark({ idx: 0, name: "Cap", kind: "capital", nx: 0.5, ny: 0.9 }),
     mark({ idx: 1, name: "W", kind: "town", nx: 0.1, ny: 0.5 }),
@@ -70,7 +65,7 @@ test("the tour does not cross itself on a ring layout nearest-neighbour would ta
   const legs = plan.legs.map((l) => [at.get(l.fromIdx)!, at.get(l.toIdx)!] as const);
   for (let i = 0; i < legs.length; i++) {
     for (let j = i + 2; j < legs.length; j++) {
-      // #275: the closing leg is real and checked too; it shares a port with leg 0, the one adjacent-pair exclusion.
+      // leg 0 and the closing leg share a port, the one adjacent-pair exclusion
       if (i === 0 && j === legs.length - 1) continue;
       assert.ok(!crosses(legs[i]![0], legs[i]![1], legs[j]![0], legs[j]![1]),
         `legs ${i} and ${j} cross`);
@@ -79,7 +74,6 @@ test("the tour does not cross itself on a ring layout nearest-neighbour would ta
 });
 
 test("legs close the tour into a round trip: the last leg sails home to the capital", () => {
-  // #275 reverses #120's "the survey does not sail home". legs = ports now, not ports - 1.
   const plan = buildVoyagePlan(lineWorld, 1059);
   assert.equal(plan.legs.length, plan.ports.length, "one leg per port once the tour closes");
   for (let i = 1; i < plan.ports.length; i++) {
@@ -105,7 +99,6 @@ test("a two-port survey sails out and back, not out alone", () => {
 });
 
 test("no port is visited twice even though the survey comes home (the capital is one port)", () => {
-  // The homecoming is an ARRIVAL at a port already in the itinerary, never a second port.
   const plan = buildVoyagePlan(lineWorld, 1059);
   const idxs = plan.ports.map((p) => p.idx);
   assert.equal(new Set(idxs).size, idxs.length, "the capital must not appear twice as a port");
@@ -150,7 +143,7 @@ test("deterministic for a fixed input", () => {
 });
 
 test("stable under shuffled input order (idx tiebreaks, not array position)", () => {
-  // Two candidates equidistant from the capital: a position-keyed tiebreak flips when the array reverses; an idx-keyed one always visits idx 1 first.
+  // West and East are equidistant from the capital, so only the idx tiebreak decides.
   const cap = mark({ idx: 0, kind: "capital", nx: 0, ny: 0 });
   const west = mark({ idx: 1, name: "West", kind: "town", nx: -0.1, ny: 0 });
   const east = mark({ idx: 2, name: "East", kind: "town", nx: 0.1, ny: 0 });
@@ -260,10 +253,7 @@ test("reorderPlanByTravel: empty and one-port plans come back unchanged", () => 
 });
 
 test("#442 toldRow is the LAST row revealLog inks, which is arrived - 1 at every position", () => {
-  // Tied to revealLog's own contract (voyage-log-panel.ts): it brightens [0, arrived), so
-  // the row the story is ON is the last of those. Swept across the whole sweep rather than
-  // sampled at the ends, because at t=1 arrived reaches the row COUNT and the clamp makes
-  // an off-by-one read the same last row either way (guard-prover flagged this unproven).
+  // revealLog brightens [0, arrived), so the told row is the last of those; swept over the whole sweep because at t=1 the clamp makes an off-by-one read the same last row.
   const plan = buildVoyagePlan(lineWorld, 1059);
   const legCount = plan.legs.length;
   const rows = logEntryCount(plan);
@@ -294,7 +284,6 @@ test("logEntryCount: one departure plus one entry per leg, so a round trip logs 
 });
 
 test("logEntryCount: the sweep reaches it exactly at t=1, and NOT at the last port", () => {
-  // Comparing arrived against ports.length posts the survey's one #status summary a leg early and again at the homecoming; against logEntryCount it fires once, at completion.
   const plan = buildVoyagePlan(lineWorld, 1059);
   const legCount = plan.legs.length;
   const entries = logEntryCount(plan);
@@ -354,7 +343,7 @@ test("frameAt: arrived never decreases as t advances", () => {
 });
 
 test("origin, arrival, and village/town use distinct log templates", () => {
-  // Structural, not literal: assert the branches DIFFER without pinning the prose Sub 4 (#121) owns; same name + founded isolates the template difference.
+  // Structural, not literal: the prose belongs to the log writer; same name + founded isolates the template difference.
   const cap = mark({ idx: 0, name: "Same", kind: "capital", founded: 500, nx: 0, ny: 0 });
   const town = mark({ idx: 1, name: "Same", kind: "town", founded: 500, nx: 0.1, ny: 0 });
   const village = mark({ idx: 2, name: "Same", kind: "village", founded: 500, nx: 0.2, ny: 0 });

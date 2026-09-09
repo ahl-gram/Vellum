@@ -132,8 +132,7 @@ export async function run(ctx) {
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5, buttons: 0 });
   check("P15 hover keeps the hit transparent + borderless (no button:hover box) and grows the ring", p15.bg === "rgba(0, 0, 0, 0)" && p15.bw === "0px" && p15.ringOp === "1.00", JSON.stringify(p15));
 
-  // #124 the philologist's glass. Seed 42 speaks oromi (the seed-42 covenant pins that), so the
-  // tongue line is checkable by name and not merely by shape.
+  // #124 the philologist's glass: seed 42 speaks oromi (the seed-42 covenant pins that), so the tongue line is checkable by name and not merely by shape.
   const p16 = await evaluate(`(()=>{
     if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
     const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');

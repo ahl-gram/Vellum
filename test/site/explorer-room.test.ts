@@ -91,7 +91,7 @@ test("ER6 the page css fits the sheet to what the chrome leaves and stands print
 
 test("ER7 app.ts fits the room after the chart lands on BOTH draw paths and writes the folio's lines", () => {
   assert.match(app, /import\s*\{\s*bindRoom\s*\}\s*from\s*"\.\.\/shared\/room\.ts"/, "app.ts binds the shared room");
-  // The turn lands the chart in runTurn's then; a settle writes #map directly. Each path must refit once the chart is in the DOM, or the room fits an empty sheet on that path (guard-prover hole A: one call satisfied a whole-file grep).
+  // Both paths must refit once the chart is in the DOM (one call satisfied a whole-file grep), so each is sliced and checked apart.
   const turnPath = app.slice(app.indexOf("runTurn({"), app.indexOf("} else {", app.indexOf("runTurn({")));
   const settlePath = app.slice(app.indexOf("mapDiv.innerHTML = res.svg;"), app.indexOf("if (pendingCamera)"));
   assert.ok(turnPath.includes("room.layout()"), "the turn path refits once the leaf lands");
