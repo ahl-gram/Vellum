@@ -49,6 +49,7 @@ test("the smoke tier covers every page that ships its own bundle", () => {
   const covers: Readonly<Record<string, readonly E2eSuiteName[]>> = {
     "explorer": ["render"],
     "print-room": ["print-room"],
+    "print-room/portfolio": ["chart-drawer"],
     "seed-of-the-day": ["hunt"],
     "reading-room": ["reading-room"],
     "prospect": ["prospect"],

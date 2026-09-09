@@ -91,6 +91,7 @@ const chartTable = bindChartDrawer({
   cuttings, full: chartDrawerFull, road: tableRoad,
   broadside: () => room.broadside,
   relabelLeaf: (count) => leaf.relabel(count),
+  folioHref: "../print-room/portfolio/",
   say: (line) => { status.textContent = line; },
   drawThumb: async (item) => {
     const job = thumbJobFor(item);

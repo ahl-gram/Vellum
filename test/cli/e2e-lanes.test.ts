@@ -38,14 +38,14 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "turn": 6.5,
   "runninghead": 3.9,
   "cluster": 4.7, // measured 2026-08-28, local single-suite run
-  "chart-drawer": 6.9, // measured 2026-09-07, local single-suite run
+  "chart-drawer": 37.2, // measured 2026-09-08, local single-suite run: 6.9 at #520 was an 11-check suite; #543, #540 and #521 took it to 23, and six of them draft real region sheets
   "room-drawer": 7.3, // measured 2026-08-28, local single-suite run
   "document-rooms": 6.0, // measured 2026-08-29, local run
   "broadside": 3.8,
   "hunt": 3.4,
   "room-voyage": 3.3,
   "zoom-gestures": 3.1,
-  "home": 99.5, // measured 2026-08-25, local run
+  "home": 99.5, // re-measured 2026-08-25, local run: Subs 3-4a tripled the suite since the 2026-08-14 3.1s
   "landfall": 23.3, // measured 2026-08-25, local single-suite run
   "cards": 2.9,
   "motion": 2.4,

@@ -1,0 +1,57 @@
+/* The Portfolio (#521 Sub 3 of #401): the pile, and the index that reads it. Direction C's picture with direction A's words (ruled 2026-09-08), so the room's own sheet dresses the stack, the contents rows and the bare state; the room furniture is the Atelier Kit's. */
+
+/* The stage centres the fitted sheet in what the chrome leaves; room.ts measures the reserves off the chrome rects. Every chart room carries this block in its OWN sheet (the kit's atelier.css fixes the stage and stops there), and a page that omits it draws its chart at the full viewport, under the nav and under the slip. */
+.stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
+#sheet { position: relative; flex: none; width: 0; height: 0; box-shadow: var(--stage-shadow); }
+#map-viewport { position: absolute; inset: 0; cursor: grab; }
+/* #164: d3-zoom does NOT set touch-action, so without none the browser's native pan and pinch preempt the gesture and the Glass is dead to a real thumb. zoom-controller.ts adds .zoomable on attach(); every chart room carries this rule in its own sheet. */
+#map-viewport.zoomable { touch-action: none; }
+#map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
+#map { position: absolute; inset: 0; transform-origin: 0 0; }
+.stage .warning { position: absolute; left: 50%; top: calc(50% + 2.8rem); transform: translateX(-50%); max-width: 30rem; z-index: 2; margin: 0; }
+.stage .warning[hidden] { display: none; }
+
+/* The pile: papers behind the top sheet, offset a little each, so the stack reads as depth and not as a border. */
+.pile { position: absolute; inset: 0; pointer-events: none; }
+.pile .leaf {
+  position: absolute; inset: 0; --depth: 1;
+  translate: calc(var(--depth) * -0.7%) calc(var(--depth) * 0.9%);
+  rotate: calc(var(--depth) * -0.35deg);
+  background: var(--chart-paper); border: 1px solid var(--line-tan);
+  box-shadow: 0 6px 18px rgb(from var(--chart-ink) r g b / 0.35);
+  z-index: -1;
+}
+.pf-sheet { position: absolute; inset: 0; }
+.pf-sheet svg { width: 100%; height: 100%; display: block; }
+
+.bound-line { font-size: 0.95rem; line-height: 1.5; margin: 0.7rem 0 0; }
+.bound-line .stamp { display: block; font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.82rem; color: var(--ink-brown); margin-top: 0.4rem; }
+
+.group-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin: 1.2rem 0 0.2rem;
+  font-family: var(--font-display); font-size: 0.86rem; letter-spacing: 0.06em; color: var(--ink-dark); }
+.group-head .gloss { font-family: var(--font-flourish); font-style: italic; letter-spacing: 0; font-size: 0.78rem; color: var(--ink-faded); text-align: right; }
+
+.contents { list-style: none; margin: 0; padding: 0; }
+.contents .row { display: grid; grid-template-columns: 1.6rem 4.6rem 1fr; grid-template-areas: "num thumb title" "num thumb band" "num thumb dl"; gap: 0.1rem 0.7rem; align-items: start; padding: 0.55rem 0; border-bottom: 1px solid var(--line-faint); }
+.contents .row:last-child { border-bottom: 0; }
+.contents .numeral { grid-area: num; font-variant-caps: small-caps; letter-spacing: 0.06em; color: var(--ink-faded); font-size: 0.82rem; }
+.contents .thumb { grid-area: thumb; display: block; border: 1px solid var(--line-tan); background: var(--chart-paper); }
+.contents .thumb img { display: block; width: 100%; height: auto; }
+.contents .thumb.awaited { display: grid; place-items: center; aspect-ratio: 4 / 3; border-style: dashed; font-family: var(--font-flourish); font-style: italic; font-size: 0.66rem; color: var(--ink-brown); text-align: center; }
+.contents .row-title { grid-area: title; appearance: none; border: 0; background: none; padding: 0; text-align: left; cursor: pointer;
+  font-family: var(--font-body); font-size: 0.95rem; color: var(--ink-dark); }
+.contents .row-title:is(:hover, :focus-visible) { text-decoration: underline; }
+.contents .row.up .row-title { font-weight: 600; text-decoration: underline; }
+.contents .row-band { grid-area: band; font-family: var(--font-flourish); font-size: 0.82rem; color: var(--ink-brown); }
+/* A press, not a link: an <a href="#"> kept its tab stop while disabled, and Enter on it replaced the hash that IS the folio. Four classes deep because the house sheets dress every button, and the mockup reads this as a quiet line and not a box. */
+.contents .row .row-download { grid-area: dl; justify-self: start; appearance: none; background: none; border: 0; border-radius: 0; padding: 0; box-shadow: none;
+  font-variant-caps: small-caps; letter-spacing: 0.06em; font-size: 0.76rem; color: var(--ink-brown); cursor: pointer; text-decoration: underline; }
+.contents .row .row-download:is(:hover, :focus-visible) { color: var(--ink-dark); background: none; transform: none; box-shadow: none; }
+.contents .row .row-download:disabled { color: var(--ink-faded); cursor: default; text-decoration: none; }
+
+@media (max-width: 900px) {
+  .contents .row { grid-template-columns: 1.4rem 3.8rem 1fr; }
+  .group-head { flex-direction: column; align-items: flex-start; gap: 0.1rem; }
+  .group-head .gloss { text-align: left; }
+}

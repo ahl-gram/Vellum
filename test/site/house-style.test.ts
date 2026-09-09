@@ -37,6 +37,7 @@ test("no page sheet re-binds the intro voice (#324)", () => {
     "public/index.css", "public/explorer/index.css", "public/explorer/broadside.css", "public/explorer/chart-drawer.css",
     "public/faq/index.css",
     "public/glossary/index.css", "public/print-room/index.css",
+  "public/print-room/portfolio/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
     "public/prospect/index.css", "public/ribbon/index.css", "public/specimen/index.css",
     "public/atelier.css",
@@ -150,6 +151,7 @@ test("the old page-local skins are gone (#324)", () => {
   for (const page of [
     "public/explorer/index.css", "public/explorer/broadside.css", "public/explorer/chart-drawer.css",
     "public/print-room/index.css",
+  "public/print-room/portfolio/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
     "public/prospect/index.css", "public/ribbon/index.css", "public/specimen/index.css",
   ]) {
@@ -167,6 +169,7 @@ test("no token value smuggled past the guards in rgb() form (#324)", async () =>
     "public/index.css", "public/explorer/index.css", "public/explorer/broadside.css", "public/explorer/chart-drawer.css",
     "public/faq/index.css",
     "public/glossary/index.css", "public/print-room/index.css",
+  "public/print-room/portfolio/index.css",
     "public/reading-room/index.css", "public/seed-of-the-day/index.css",
     "public/prospect/index.css", "public/ribbon/index.css", "public/specimen/index.css",
     "public/reading-frame.css", "public/living-chart.css", "public/motion.css",

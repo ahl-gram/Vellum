@@ -93,6 +93,7 @@ export interface RegionResult {
   readonly window: UvWindow;
   readonly band: number;
   readonly title: string;
+  readonly worldTitle: string;
   readonly cached: boolean;
 }
 
@@ -186,6 +187,7 @@ export function runInline(msg: RenderJob): JobResult {
       window: msg.window,
       band: msg.band,
       title,
+      worldTitle: world.title.title,
       cached,
     };
   }

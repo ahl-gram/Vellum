@@ -28,6 +28,7 @@ const AUTHORED_CSS = [
   "public/living-chart.css",
   "public/motion.css",
   "public/print-room/index.css",
+  "public/print-room/portfolio/index.css",
   "public/prospect/index.css",
   "public/specimen/index.css",
   "public/ribbon/index.css",
