@@ -22,7 +22,9 @@ the rooms, the voice, motion and ceremony.
 **This file is normative and complete.** A reader who reads only this file is correctly informed
 about the rules. That property is the whole point, and it is worth what it costs to keep.
 
-**Nothing here is duplicated in `CLAUDE.md`, and where the two overlap this file wins.** The goldens,
+**Where this file and `CLAUDE.md` overlap, this file wins**, and the overlap is now small and known:
+the #378 comment doctrine is stated in both because it governs writing code, which is `CLAUDE.md`'s
+half, as well as reading these rules. The goldens,
 regens, committed content and re-roll rules lived in `CLAUDE.md`'s own section until 2026-09-09; that
 section is now a pointer at this file and restates none of them, because by then the two copies had
 already drifted apart in five places (the regen command list, the byte-compare rule's mechanism, the
@@ -140,10 +142,16 @@ items that unlock the most downstream value, then the re-roll tail.
 `public/charts/arms-42-*.svg`, `public/og.png`, and `public/favicon.svg` plus
 `public/apple-touch-icon.png` (#489; `npm run icons` is their single writer, and a test pins the SVG
 to the Fell SC woff2). Everything else generated is gitignored and rebuilt per deploy:
-`public/atlas/`, `public/gallery/`, the bundle twins and their chunks. **The decision rule is the
-one line**: referenced by a hand-authored page means commit, everything else means gitignore and
-rebuild. Two tombstones so nobody goes looking: `docs/` retired at #206, and the tsc engine emit
-retired at #260 with its clean-list entry kept deliberately.
+`public/atlas/`, `public/gallery/`, the bundle twins and their chunks.
+
+**The committed list above is the rule; there is no shorter procedure that derives it.** "Referenced
+by a hand-authored page" is the family resemblance, not a test: `src/pages/specimen/index.astro`
+embeds `/gallery/chart-<seed>.svg` and `public/gallery/` is gitignored with nothing tracked in it.
+What separates the two halves is that the committed four are stable across deploys and the generated
+trees are re-derived per deploy from a seed that moves. **Adding to the committed list is a
+deliberate decision, not the output of applying a line**, so make it deliberately and add the file
+here. Two tombstones so nobody goes looking: `docs/` retired at #206, and the tsc engine emit retired
+at #260 with its clean-list entry kept deliberately.
 
 **The golden checksum is `1792806240`** (seed 42 realm labels), pinned by
 `test/world/golden-seed42.test.ts`. A seed re-roll re-pins it.
@@ -166,7 +174,7 @@ retired at #260 with its clean-list entry kept deliberately.
 - **A seed re-roll** (terrain reshape, culture or name-template edits) is a different, larger cost:
   it changes world identity and re-pins the golden checksum. **Only one may be in flight at a time**,
   and the set that rule excludes against is the next section.
-- Watch the **Chronicle 14-event cap** in `src/society/history.ts`, which starts dropping a line at a
+- Watch the **Chronicle 14-event cap** (`events.slice(0, 14)` in `src/society/history.ts`), which starts dropping a line at a
   realm count of eight or more. The cap drops the LATEST events, because the slice runs after a sort
   by year and ruins are late by construction, so a ruin can silently lose its dated event and its
   place card its abandonment tale. Relevant whenever realm counts rise (#113) or new dated events are
@@ -187,10 +195,10 @@ one:
 - 2026-07-28: **#309 joined**, making `{#113, #49, #309}`, with a ratified ordering of #309 before
   #113 so new island realms would be born with roads rather than churning the same worlds twice.
 - 2026-08-16: **#49 left.** Rescoped to renamings only, its former-borders half moved to #122.
-  Measured, not argued: the golden hashes only `w.realms.labels` from `partitionRealms`, which
-  takes no rng, and Alex ruled the former name never prints on the chart. #49 was therefore cheap tier and
+  Measured, not argued: the golden hashes only `w.realms.labels` from `partitionRealms`
+  (`src/society/realms.ts`), which takes no rng, and Alex ruled the former name never prints on the chart. #49 was therefore cheap tier and
   has since closed.
-- 2026-08-16: **#309 left**, shipped as PR #410. Its blast-radius spike measured a regen, not a
+- 2026-08-16: **#309 left**, shipped as PR #410 (squash `359f359`). Its blast-radius spike measured a regen, not a
   re-roll: the golden held. The "#309 before #113" ordering is discharged.
 
 **#122 does not join this set.** It sits behind an opt-in `annals?: boolean` render option and is
@@ -229,7 +237,7 @@ byte-identical when off, so it moves neither the committed charts nor world iden
 ## Cross-epic coordination
 
 - **The shared Explorer substrate:** the voyage overlay, the chronicle scrubber, the zoom epic and the
-  delight queue all touch the Explorer's controls row and the living-chart overlay substrate.
+  delight queue all touch the Explorer's controls row and the living-chart overlay-over-`#map` substrate.
   Whoever lands second reconciles. #191 extracted this into one importable module, so epics import it
   rather than fork it.
 - **The `#sheet-inner` transform is shared** by the WAAPI style turn (#131) and the CSS verso flip
