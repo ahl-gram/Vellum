@@ -5,8 +5,8 @@ import { n } from "./geom.ts";
 type Mark = "plain" | "dots" | "horizontal" | "vertical" | "crosshatch" | "bend" | "bendSinister";
 
 const MARK: Record<Tincture, Mark> = {
-  argent: "plain",
-  or: "dots",
+  argent: "plain", // metal
+  or: "dots", // metal
   azure: "horizontal",
   gules: "vertical",
   sable: "crosshatch",
@@ -25,7 +25,7 @@ function hatchId(t: Tincture, suffix: string): string {
 
 function tile(t: Tincture, w: number, suffix: string, paper: string, ink: string): SvgNode {
   const id = hatchId(t, suffix);
-  const s = n(w * 0.13);
+  const s = n(w * 0.13); // line spacing / tile size
   const sw = n(w * 0.02);
   const base = (size: number): SvgNode => el("rect", { x: 0, y: 0, width: size, height: size, fill: paper });
   const line = (d: string): SvgNode => el("path", { d, fill: "none", stroke: ink, "stroke-width": sw });
@@ -49,7 +49,7 @@ function tile(t: Tincture, w: number, suffix: string, paper: string, ink: string
     }
     case "bend": // "\": the main corner-to-corner line tiles seamlessly; two neighbours fill the corners
       return el("pattern", attrs, [base(s), line(`M0 0L${s} ${s}`), line(`M${n(-s)} 0L0 ${s}`), line(`M0 ${n(-s)}L${s} 0`)]);
-    case "bendSinister":
+    case "bendSinister": // "/"
       return el("pattern", attrs, [base(s), line(`M0 ${s}L${s} 0`), line(`M0 0L${n(-s)} ${s}`), line(`M${s} ${s}L${n(2 * s)} 0`)]);
   }
 }

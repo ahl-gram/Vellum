@@ -169,7 +169,7 @@ export function createLodController(deps: Deps) {
         if (e.target === el) finish();
       };
       el.addEventListener("transitionend", onEnd);
-      const timer = setTimeout(finish, 700);
+      const timer = setTimeout(finish, 700); // fallback if transitionend never fires
     }
   }
 
@@ -221,7 +221,7 @@ export function createLodController(deps: Deps) {
           if (going.isConnected) going.remove();
         };
         going.addEventListener("transitionend", drop, { once: true });
-        setTimeout(drop, 700);
+        setTimeout(drop, 700); // fallback, as in commitInset
       }
     }
   }

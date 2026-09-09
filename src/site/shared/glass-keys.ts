@@ -1,7 +1,7 @@
-// The Surveyor's Glass on a plain controller (#167, the Hunt; lifted at #463 for the rooms whose camera is purely geometric): keys and buttons enter d3-zoom's own pipeline through the controller, the Explorer's wiring (#165/#170). The Explorer keeps its own in glass.ts, where the home glide also eases the LOD camera.
+// The Surveyor's Glass on a plain controller, the Hunt's and every room whose camera is purely geometric: keys and buttons enter d3-zoom's own pipeline through the controller, the Explorer's wiring. The Explorer keeps its own in glass.ts, where the home glide also eases the LOD camera.
 import type { ZoomController } from "./zoom-controller.ts";
 
-// The Explorer's own steps (src/site/explorer/glass.ts), not imported: that module carries the LOD schedule the Hunt must never bundle (#161).
+// The Explorer's own steps (src/site/explorer/glass.ts), not imported: that module carries the LOD schedule the Hunt must never bundle.
 const ZOOM_STEP = 1.4;
 const PAN_FRACTION = 0.15;
 

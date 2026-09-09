@@ -175,7 +175,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     recipe: { ...recipe, gridW, gridH },
     elev,
     seaLevel,
-    winds: world.winds,
+    winds: world.winds, // the same wind blows over a region of the same world
     flow,
     rivers,
     riverCells,

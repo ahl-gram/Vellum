@@ -91,7 +91,7 @@ test("atlasDocument (file-ref mode): a standalone doc that references plate SVG 
   assert.match(html, /CHART № 7/);
   assert.match(html, /<body class="atlas-sheet">/);
   assert.match(html, /<link rel="stylesheet" href="\/motion\.css">/);
-  assert.match(html, /ATLAS[_ ]?SHEET|\.atlas-sheet figure/i);
+  assert.match(html, /ATLAS[_ ]?SHEET|\.atlas-sheet figure/i); // the shared CSS is inlined
   assert.match(html, /<a href="world-antique\.svg"><img src="world-antique\.svg"/);
   assert.match(html, /world-topographic\.svg/);
   assert.match(html, /theme-vegetation\.svg/);

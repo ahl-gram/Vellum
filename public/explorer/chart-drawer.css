@@ -62,8 +62,10 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
   .chart-drawer-tab { max-height: 8.5rem; font-size: 0.62rem; letter-spacing: 0.1em; padding: 0.6rem 0.35rem; }
 }
 
+/* The dog-ear carries no element of its own inside: suite-region-detail reads the survey as [...querySelectorAll("#map .region-inset svg")].pop(), so anything with an svg in it would become that element. */
 .dog-ear {
   position: absolute; top: 0; right: 0; padding: 0; border: 0; cursor: pointer;
+  /* Restored because .region-inset is pointer-events: none (explorer/index.css); without this the handle is reachable by keyboard alone and a real click lands on the chart underneath. */
   pointer-events: auto;
   width: calc(3.4rem / var(--zoom-k, 1)); height: calc(3.4rem / var(--zoom-k, 1));
   appearance: none; border-radius: 0; z-index: 3;

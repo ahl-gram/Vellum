@@ -62,7 +62,7 @@ test("#418 a draw that lands INSIDE the wait drops the arm", async () => {
   const h = harness();
   h.schedule();
   h.paint();
-  h.state.worldGen++;
+  h.state.worldGen++; // a counter read: its own settle owns the arm, against its own world
   h.settle();
   await h.flush();
 
@@ -84,11 +84,11 @@ test("#418 a draw that lands BEFORE the paint drops the arm on the near side", a
 test("#418 two draws in flight: only the newer one arms", async () => {
   const h = harness();
   h.schedule();
-  h.paint();
+  h.paint(); // arm A is inside its wait, past every near-side guard
   h.state.worldGen++;
   h.schedule();
-  h.paint();
-  h.settle();
+  h.paint(); // arm B joins it there
+  h.settle(); // both orders land together
   await h.flush();
 
   assert.equal(h.calls(), 2, "both arms really did reach the wait");

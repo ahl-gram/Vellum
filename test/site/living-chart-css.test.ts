@@ -79,6 +79,7 @@ test("the hit divides by --zoom-k once, on the element; the ring pseudos stay pl
   }
 });
 
+// ENGINE_RULES matches a bare selector as a SUBSTRING, so it cannot see a rule gutted to display:none, nor a rename to .pc-tongue-note.
 test("the philologist's note is dressed, visible, and named the same on both sides (#124)", () => {
   const css = read(SHEET);
   const tongue = soleRule(css, ".pc-tongue");
@@ -92,7 +93,7 @@ test("the philologist's note is dressed, visible, and named the same on both sid
   }
 });
 
-// A card anchored on the mark's side is shrink-to-fit against the gap it flips AWAY from, so a town near the right edge gets a column, not a card (public/living-chart.css:35 carries the measurement).
+// A card anchored on the mark's side is shrink-to-fit against the gap it flips AWAY from, so a town near the right edge gets a column, not a card (public/living-chart.css carries the measurement).
 test("a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)", () => {
   const css = read(SHEET);
   const flip = soleRule(css, "#place-card.flip-h");

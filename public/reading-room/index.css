@@ -10,6 +10,7 @@
 .stage .warning { position: absolute; left: 50%; top: calc(50% + 2.8rem); transform: translateX(-50%); max-width: 30rem; z-index: 2; margin: 0; }
 .stage .warning[hidden] { display: none; }
 
+/* Without these mount-scoped rules the #127 arrival ceremony never plays AND startArrival's inline stroke-dasharray is never cleaned off the live coastline. */
 .rf-chart svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
 .rf-chart svg.arriving #layer-land path {
   animation: inkDraw var(--ink-draw) var(--ease-paper) both,

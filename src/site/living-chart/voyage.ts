@@ -79,7 +79,7 @@ export function createVoyage(deps: VoyageDeps) {
     const out: string[] = [];
     const push = (p: Pt) => {
       const s = fmt(p);
-      if (out[out.length - 1] !== s) out.push(s);
+      if (out[out.length - 1] !== s) out.push(s); // a leg starts where the last one ended
     };
     for (let i = 0; i < f.legIndex; i++) for (const p of session.legs[i].geom.points) push(p);
 
@@ -213,7 +213,7 @@ export function createVoyage(deps: VoyageDeps) {
     cancelVoyageRaf();
     dropOverlays();
     if (voyage) statusEl.textContent = "";
-    logPanel.hideLog();
+    logPanel.hideLog(); // #121: the margin log is a sibling of the mount, so remove it explicitly
     voyage = null;
     restingTrackSink?.clear();
   }

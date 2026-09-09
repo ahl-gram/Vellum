@@ -1,8 +1,4 @@
-// The window.__vellum* seams every LivingChart HOST publishes (#320), extracted from
-// explorer/hooks.ts so the Explorer and the Reading Room register ONE surface between
-// them (ratified 2026-08-10, decision B: a shared installer, not prefixed twins). The
-// seams are deterministic and harmless in prod: the suites drive the sweep through them
-// rather than racing rAF loops, and nothing here is reachable from the page's own UI.
+// The window.__vellum* seams every LivingChart HOST publishes, ONE shared installer rather than prefixed twins (ratified 2026-08-10, decision B): deterministic and harmless in prod, so the suites drive the sweep through them rather than racing rAF loops, and nothing here is reachable from the page's own UI.
 // Explorer-only seams (camera, region state, redraft flag, worker plumbing) stay in explorer/hooks.ts.
 import type { runInline } from "../explorer/worker-client.ts";
 import type { LivingChart } from "../living-chart/index.ts";
@@ -43,13 +39,13 @@ export function installHostHooks({ livingChart: lc, runInline: inline }: HostHoo
   const seams: Record<HostHookName, unknown> = {
     // The oracle every ported check needs: a suite reads world facts off this rather than hardcoding a seed's, so a re-roll moves the expectations with the world.
     __vellumRunInline: inline,
-    __vellumVoyageStepTo: lc.voyageStepTo, // #119: drive the sweep by port
-    // #120: voyageStepTo can only land ON a port; voyagePaintAt is the mid-leg seam, where tilt and facing vary.
+    __vellumVoyageStepTo: lc.voyageStepTo, // drive the sweep by port
+    // voyageStepTo can only land ON a port; voyagePaintAt is the mid-leg seam, where tilt and facing vary.
     __vellumVoyagePaintAt: lc.voyagePaintAt,
     __vellumVoyagePlan: lc.voyagePlan,
-    __vellumVoyageLog: lc.voyageLog, // #121: the margin log (entries, summary, reveal state)
-    __vellumVoyageLegGeometry: lc.voyageLegGeometry, // #120: projected leg points, for W20b
-    // #220: the fused instrument's read hook (chamber, t, u, held, playing, min, max).
+    __vellumVoyageLog: lc.voyageLog, // the margin log (entries, summary, reveal state)
+    __vellumVoyageLegGeometry: lc.voyageLegGeometry, // projected leg points, the voyage suites' mid-leg read
+    // the fused instrument's read hook (chamber, t, u, held, playing, min, max).
     __vellumAgesState: lc.agesState,
   };
   const w = window as unknown as Record<string, unknown>;

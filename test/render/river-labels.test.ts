@@ -41,7 +41,7 @@ test("returns null for a degenerate single-point river", () => {
 });
 
 test("reachPlacements offers several spread candidates along a long river", () => {
-  const pts = Array.from({ length: 31 }, (_, i) => [i * 10, 100] as const);
+  const pts = Array.from({ length: 31 }, (_, i) => [i * 10, 100] as const); // x 0..300
   const places = reachPlacements(pts, 40);
   assert.ok(places.length >= 2, `expected multiple candidates, got ${places.length}`);
   assert.deepEqual(places[0], straightestReach(pts, 40));

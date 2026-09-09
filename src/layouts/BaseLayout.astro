@@ -93,9 +93,6 @@ const cardDescription = ogDescription ?? description;
 <link rel="stylesheet" href="/atelier.css">
 {extraCss.map((href) => <link rel="stylesheet" href={href} />)}
 <link rel="stylesheet" href="index.css">
-{/* #329: prefetch the sibling shells so a first click commits instantly even while this
-    page's plates are still streaming; derived from NAV_ITEMS plus home so the list can
-    never rot; self is skipped. */}
 {["/", ...NAV_ITEMS.map((item) => item.href)]
   .filter((href) => href !== Astro.url.pathname)
   .map((href) => <link rel="prefetch" href={href} />)}
@@ -271,15 +268,10 @@ footer a { color: inherit; }
 <body class={room ? (chartRoom ? "room chart-room" : "room") : undefined}>
 {room && !chartRoom && <div class="band" aria-hidden="true"></div>}
 <header class="chrome">
-  {/* #288: the room's h1 stands in the page (RoomFolio.astro), so home alone keeps the
-      wordmark as its h1 (roomless, there is nothing else its h1 could be). Exactly one
-      h1 either way, and the masthead still links home. Fell SC sets the small caps, so
-      the wordmark stays a mixed-case string. */}
   {room
     ? <p class="wordmark"><a href="/">Vellum</a></p>
     : <h1 class="wordmark"><a href="/">Vellum</a></h1>}
   <p class="tagline">{SITE_TAGLINE}</p>
-  {/* The phone reveal (#461, sitewide at #483): the burger that opens the drawer, on every shelled page. */}
   <input type="checkbox" class="rooms-reveal" aria-label="Reveal the rooms nav" />
   <nav class="rooms" aria-label="The rooms">
     {NAV_ITEMS.map((item, i) => (
@@ -300,7 +292,7 @@ footer a { color: inherit; }
 {!chartRoom && <footer>
   Vellum · an atelier of imaginary cartography
 </footer>}
-{/* Astro-processed, not is:inline, so it can import the binder: measured 2026-08-28 at 905 bytes against Vite's 4096 inline limit, so Astro writes it into the html and emits no file (#483). */}
+{/* Astro-processed, not is:inline, so it can import the binder: measured 2026-08-28 at 905 bytes against Vite's 4096 inline limit, so Astro writes it into the html and emits no file. */}
 <script>
 import "../site/shell/app.ts";
 </script>

@@ -47,7 +47,7 @@ test("#300 cancel() alone drops the pending arm, with the box left ticked", () =
   const h = harness();
   h.state.armed = true;
   h.arm.schedule();
-  h.arm.cancel();
+  h.arm.cancel(); // the untick branch of the same change handler
   // The box is deliberately NOT unticked: asserting both let a gutted cancel() pass on isArmed alone. One mechanism per test.
   h.paint();
   assert.equal(h.state.builds, 0, "a cancelled arm never builds");
@@ -69,7 +69,7 @@ test("#300 a draw that landed in the window owns the arm: the stale schedule bui
   const h = harness();
   h.state.armed = true;
   h.arm.schedule();
-  h.state.worldGen++;
+  h.state.worldGen++; // a draw started: its settle re-arms the track against the new chart
   h.paint();
   assert.equal(h.state.builds, 0, "the superseded world never builds from the old tick");
 });
@@ -78,7 +78,7 @@ test("#300 the box is the truth at fire time, not at schedule time", () => {
   const h = harness();
   h.state.armed = true;
   h.arm.schedule();
-  h.state.armed = false;
+  h.state.armed = false; // unticked by a path that did not route through cancel()
   h.paint();
   assert.equal(h.state.builds, 0, "an unticked box builds nothing even with the generations agreeing");
 });
@@ -125,7 +125,7 @@ test("#366 an unticked box at the landing clears instead of arming", () => {
 test("#366 a landing supersedes a tick still waiting on its frame: exactly one arm survives", () => {
   const h = harness();
   h.state.armed = true;
-  h.arm.schedule();
+  h.arm.schedule(); // a tick made while this draw was already in flight, holding the OLD world
   h.land();
   h.paint();
   assert.equal(h.state.builds, 0, "the tick's arm never fires: this landing owns the arm");
@@ -136,7 +136,7 @@ test("#366 the box is still the truth at fire time for a landing's arm", () => {
   const h = harness();
   h.state.armed = true;
   h.land();
-  h.state.armed = false;
+  h.state.armed = false; // unticked inside the beat
   h.paint();
   assert.equal(h.state.landings, 0, "an arm scheduled by the settle answers to the box, like the tick's");
 });
@@ -145,7 +145,7 @@ test("#366 a draw that starts inside the landing's beat drops it", () => {
   const h = harness();
   h.state.armed = true;
   h.land();
-  h.state.worldGen++;
+  h.state.worldGen++; // a fresh Draw: its own settle will arm the chart that lands
   h.paint();
   assert.equal(h.state.landings, 0, "the superseded world never arms from the outgoing landing");
 });
@@ -153,7 +153,7 @@ test("#366 a draw that starts inside the landing's beat drops it", () => {
 test("#366 a quiet mid-drag landing arms INLINE: the track follows the coastline live", () => {
   const h = harness();
   h.state.armed = true;
-  h.arm.schedule();
+  h.arm.schedule(); // a pending tick the landing must still supersede
   h.land({ defer: false });
   // A quiet settle skips the #184 matrix (23-36ms), and deferring would let each throttled redraw drop the one before it: the track would lag the coastline.
   assert.equal(h.state.landings, 1, "the quiet arm runs in the settle's own task");
@@ -222,7 +222,7 @@ test("#192 the hash is written in BOTH directions, in the handler's own turn", (
 test("#366 the slot it hands back is the one the landings arm through", () => {
   const h = toggleHarness();
   let landed = 0;
-  h.change(true);
+  h.change(true); // a tick still waiting on its frame
   armOnLanding({ arm: h.slot, armed: true, rearm: () => { landed++; }, clear: () => {} });
   h.paint();
   // A fresh scheduler here would let both arms fire; app.ts leans on this when it passes the slot to both landing paths.

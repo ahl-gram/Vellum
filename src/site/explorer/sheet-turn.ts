@@ -61,7 +61,7 @@ export function runTurn(
         if (settled) return;
         settled = true;
         if (commit) mapEl.innerHTML = newSvg;
-        try { anim.cancel(); } catch {}
+        try { anim.cancel(); } catch {} // drop the forwards-fill; leaf returns to rotateY(0)
         sheetEl.classList.remove("turning");
         innerEl.classList.remove("turning");
         innerEl.style.transform = "";

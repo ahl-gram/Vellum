@@ -1,4 +1,4 @@
-// Explorer render core e2e (R): worker active, worker/inline byte-parity, the committed-chart ULP check, the thematic layer, coast warp, Tide Wheel and arms toggle; split from suite-explorer-core.mjs, the A prefix became R.
+// Explorer render core e2e (R): worker active, worker/inline byte-parity, the committed-chart ULP check, the thematic layer, coast warp, Tide Wheel and arms toggle.
 export async function run(ctx) {
   const { evaluate, check, shoot, waitSettled, waitReady } = ctx;
   check("R0 page loaded + initial auto-draw rendered", await waitReady());

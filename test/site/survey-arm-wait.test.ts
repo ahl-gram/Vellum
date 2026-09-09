@@ -68,7 +68,7 @@ test("#373 the box is still the truth on the FAR side of the wait", async () => 
   h.state.armed = true;
   h.arm.schedule();
   h.paint();
-  h.state.armed = false;
+  h.state.armed = false; // ~1s is long enough to untick, and the guards ran before it
   h.settle();
   await h.flush();
 
@@ -80,7 +80,7 @@ test("#373 a draw that lands during the wait drops the arm", async () => {
   h.state.armed = true;
   h.arm.schedule();
   h.paint();
-  h.state.worldGen++;
+  h.state.worldGen++; // a fresh draw: its own settle owns the arm, against its own world
   h.settle();
   await h.flush();
 
@@ -105,11 +105,11 @@ test("#373 a re-tick INSIDE the wait supersedes too: the generation is read on t
   const h = waitingHarness();
   h.state.armed = true;
   h.arm.schedule();
-  h.paint();
+  h.paint(); // arm A is now inside its wait, past every near-side guard
   h.arm.cancel();
   h.arm.schedule();
-  h.paint();
-  h.settle();
+  h.paint(); // arm B joins it there
+  h.settle(); // both orders land together
   await h.flush();
 
   // The case above supersedes BEFORE the paint, so arm A dies near-side and the far-side generation compare is never exercised; deleting mine === gen from the far side left the whole file green.

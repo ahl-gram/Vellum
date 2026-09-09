@@ -14,7 +14,7 @@
   /* #170 redraft grade: deliberately SHORTER than the once-per-draw arrival because a redraft fires on every settle; the dry waits stagger names by tier, past the inset's 200ms crossfade. */
   --redraft-draw: 600ms;
   --redraft-dry: 450ms;
-  --redraft-dry-wait: 260ms;       /* towns (and any rarer higher tier) start here */
+  --redraft-dry-wait: 260ms;
   --redraft-dry-wait-village: 500ms;
   --redraft-dry-wait-hamlet: 740ms;
   --glide: 300ms;         /* #170 zoom glide; read lazily by app.js, bypassed under reduced motion */
@@ -70,6 +70,7 @@
   to   { opacity: 0; transform: scale(1); }
 }
 
+/* .place-hit and .lf-station MUST stay excluded: each is a <button> on its own load-bearing transform (the place card's hit target, e2e P2/P2c; the home stage's counter-scaled station anchor, #458), so the house lift would replace that transform and the house transition would lag the counter-scale a beat behind every zoom. */
 button:not(.lf-station):not(.place-hit),
 .actions a,
 .action-link {

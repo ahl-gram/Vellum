@@ -79,7 +79,7 @@ function instrument(
 test("#442 the ages chamber announces the annal being told, not merely its year", () => {
   const seen: (ToldEntry | null)[] = [];
   const ages = instrument((t) => seen.push(t));
-  ages.armAges(null, null, 42, "sub");
+  ages.armAges(null, null, 42, "sub"); // a first arm parks at the present
   assert.deepEqual(
     seen[0],
     { chamber: "ages", year: 900, text: "Gamma fell to ruin." },

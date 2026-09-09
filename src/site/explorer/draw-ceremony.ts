@@ -26,7 +26,7 @@ function dashCoastForInk(svg: SVGSVGElement): void {
   coast.style.setProperty("--draw-len", String(len));
   coast.style.strokeDasharray = String(len);
   coast.addEventListener("animationend", function onDrawn(e: AnimationEvent) {
-    if (e.animationName !== "inkDraw") return;
+    if (e.animationName !== "inkDraw") return; // ignore the wash (washDry)
     coast.style.strokeDasharray = "";
     coast.style.strokeDashoffset = "";
     coast.style.removeProperty("--draw-len");

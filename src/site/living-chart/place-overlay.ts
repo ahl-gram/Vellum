@@ -83,7 +83,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   }
 
   function showPlaceCard(idx: number): void {
-    if (!placeOverlay || isSuppressed()) return;
+    if (!placeOverlay || isSuppressed()) return; // the hover card is suppressed while scrubbing
     const place = placeOverlay.places[idx];
     if (!place) return;
     const card = composePlaceCard(place, placeOverlay.events, placeOverlay.cultureId);

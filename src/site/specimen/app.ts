@@ -1,4 +1,4 @@
-// The Specimen Book's conductor (#487 item 4, cut at #465): the kit's own binders fit the sheet, bind the slip and run the Glass, so every state the page shows is reached the way a room reaches it. The corner's select names the state, the dice rolls one, the primary rests the room, and the foot's button empties and refills the status pill.
+// The Specimen Book's conductor (#487 item 4): the kit's own binders fit the sheet, bind the slip and run the Glass, so every state the page shows is reached the way a room reaches it. The corner's select names the state, the dice rolls one, the primary rests the room, and the foot's button empties and refills the status pill.
 import { createZoomController } from "../shared/zoom-controller.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";
 import { bindRoom } from "../shared/room.ts";

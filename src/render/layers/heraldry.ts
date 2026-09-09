@@ -112,8 +112,8 @@ export function heraldryLayer(
     const dx = a.halfW + gap + size / 2;
     const dy = a.halfH + gap + sh / 2;
     const dirs: ReadonlyArray<readonly [number, number]> = [
-      [0, -1], [-1, 0], [1, 0], [0, 1],
-      [-1, -1], [1, -1], [-1, 1], [1, 1],
+      [0, -1], [-1, 0], [1, 0], [0, 1], // N, W, E, S
+      [-1, -1], [1, -1], [-1, 1], [1, 1], // NW, NE, SW, SE
     ];
     const candidates: Array<readonly [number, number]> = [];
     for (const reach of [1, 1.9, 2.8]) {

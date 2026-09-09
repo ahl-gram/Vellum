@@ -101,7 +101,7 @@ export async function run(ctx) {
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
   await waitSettled("region-detail-direct");
   redrafts = (await rgn()).redrafts;
-  await enterAt(8, 0.5625, 0.4375);
+  await enterAt(8, 0.5625, 0.4375); // straight in, skipping the intermediate bands the ladder walked
   await waitRedraft(redrafts);
   await waitInset();
   const direct = await insetDigest();

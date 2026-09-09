@@ -269,7 +269,7 @@ test("markGlyphAt: a spanless sea leg keeps the whole-leg ship; land modes alway
 });
 
 test("tAtElapsed maps the schedule onto equal-split t exactly as the tick's walk", () => {
-  const cum = [0, 400, 1000, 1600];
+  const cum = [0, 400, 1000, 1600]; // three legs: 400ms, 600ms, 600ms
   near(tAtElapsed(cum, 0), 0);
   near(tAtElapsed(cum, 200), (0 + 200 / 400) / 3);
   near(tAtElapsed(cum, 400), 1 / 3, 1e-12); // a boundary lands the NEXT leg at legT 0

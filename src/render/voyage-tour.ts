@@ -26,7 +26,7 @@ function convexHull(points: ReadonlyArray<TourPoint>): TourPoint[] {
       while (h.length >= 2 && cross(h[h.length - 2]!, h[h.length - 1]!, p) <= 0) h.pop();
       h.push(p);
     }
-    h.pop();
+    h.pop(); // drop the endpoint; it opens the other half
     return h;
   };
   return [...half(pts), ...half([...pts].reverse())];
@@ -60,7 +60,7 @@ function insertInterior(hull: TourPoint[], all: ReadonlyArray<TourPoint>): TourP
 
 function rotateToStart(cycle: TourPoint[], startIdx: number): TourPoint[] {
   const at = cycle.findIndex((p) => p.idx === startIdx);
-  if (at <= 0) return [...cycle];
+  if (at <= 0) return [...cycle]; // already first, or absent (a caller bug, left as-is)
   return [...cycle.slice(at), ...cycle.slice(0, at)];
 }
 
@@ -69,7 +69,7 @@ function orientCycle<T>(
   idxOf: (item: T) => number,
   d: (a: T, b: T) => number,
 ): T[] {
-  if (cycle.length < 3) return [...cycle];
+  if (cycle.length < 3) return [...cycle]; // one way round only
   const forward = [...cycle];
   const reversed = [forward[0]!, ...forward.slice(1).reverse()];
   const df = d(forward[0]!, forward[1]!);

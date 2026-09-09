@@ -1,4 +1,5 @@
 /* #463 (Landfall Sub 8): the Explorer is a chart room on the #462 pattern. The room furniture is /atelier.css's; this sheet keeps the stage's own layout, the Glass's clip, the region inset, the turn and the verso. */
+/* The Broadside's five-column ledger needs the wider slip: a stated deviation on #462. */
 :root { --slip-w: 24rem; }
 
 body.chart-room .stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
@@ -67,6 +68,7 @@ body.chart-room .stage { display: flex; align-items: center; justify-content: ce
 }
 .sheet-back img { width: 100%; height: 100%; display: block; }
 
+/* #116: the transition is scoped off while .turning, so the WAAPI turn and this transition never drive #sheet-inner's transform at once. */
 .sheet:not(.turning) .sheet-inner {
   transition: transform var(--verso-turn, 1200ms) var(--ease-turn, ease-in-out);
 }
@@ -115,6 +117,7 @@ body.chart-room .stage { display: flex; align-items: center; justify-content: ce
 
 .legend-row a.fn { color: var(--line-tan); align-self: flex-start; margin-left: -0.45rem; }
 .legend-row a.fn:hover, .legend-row a.fn:focus-visible { color: var(--parchment-bright); }
+/* #532: docked, the mark stands on the sheet's parchment, where line-tan reads 2.00:1 and the cream 1.10:1 (e2e BR6c pins the resolved colour). */
 .legend.in-slip .legend-row a.fn { color: var(--ink-brown); }
 .legend.in-slip .legend-row a.fn:hover, .legend.in-slip .legend-row a.fn:focus-visible { color: var(--ink-dark); }
 

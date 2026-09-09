@@ -21,7 +21,7 @@ test("carries the grid dimensions", () => {
 });
 
 test("land is indexed x + y * gridW (row-major), matching the elevation field", () => {
-  const elev = field(2, 2, [1, 0, 0, 1]);
+  const elev = field(2, 2, [1, 0, 0, 1]); // land at (0,0) and (1,1)
   const s = buildSurvey(elev, 0.5, []);
   assert.equal(s.land[0 + 0 * 2], 1);
   assert.equal(s.land[1 + 0 * 2], 0);

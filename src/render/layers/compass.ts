@@ -25,7 +25,7 @@ export function planCompass(
   const { world, proj } = ctx;
   const k = proj.widthPx / 1500;
   const fullR = 47 * k;
-  const landR = 32 * k;
+  const landR = 32 * k; // a region rose over land is a shade smaller, to sit in a clearing
   const { w, h } = world.elev;
 
   const sea = seaMask(world.elev, world.seaLevel);

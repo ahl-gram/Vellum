@@ -56,7 +56,7 @@ ctx.onmessage = (e) => {
         window: msg.window,
         band: msg.band,
         title,
-        cached,
+        cached, // whether worldFor skipped generateWorld this call (the cache-timing AC's flag)
       });
     } else if (msg.kind === "atlas") {
       const { world } = worldFor(msg.seed, msg.overrides);

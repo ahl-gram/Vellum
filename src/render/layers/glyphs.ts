@@ -4,7 +4,7 @@ import { prunePoints } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 
 type Glyph = {
-  x: number;
+  x: number; // px
   y: number;
   symbol: string;
   scale: number;

@@ -23,7 +23,7 @@ function crossings(order: number[], byIdx: Map<number, TourPoint>): number {
   let n = 0;
   for (let i = 0; i < legs.length; i++) {
     for (let j = i + 2; j < legs.length; j++) {
-      if (i === 0 && j === legs.length - 1) continue;
+      if (i === 0 && j === legs.length - 1) continue; // the closing leg touches leg 0
       if (properlyCross(legs[i]![0], legs[i]![1], legs[j]![0], legs[j]![1])) n++;
     }
   }
@@ -34,9 +34,9 @@ const index = (pts: TourPoint[]) => new Map(pts.map((q) => [q.idx, q]));
 
 const diamond: TourPoint[] = [
   p(0, 0.5, 0.9), // capital, top
-  p(1, 0.1, 0.5),
-  p(2, 0.9, 0.5),
-  p(3, 0.5, 0.1),
+  p(1, 0.1, 0.5), // left
+  p(2, 0.9, 0.5), // right
+  p(3, 0.5, 0.1), // bottom
   p(4, 0.5, 0.45), // the centre trap
 ];
 

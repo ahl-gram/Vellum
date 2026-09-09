@@ -1,4 +1,4 @@
-// Living Chart story-card overlay e2e (P1-P15, #53); split from e2e-explorer.mjs, behavior and check order unchanged.
+// Living Chart story-card overlay e2e (P1-P15, #53).
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
   await evaluate(`(()=>{

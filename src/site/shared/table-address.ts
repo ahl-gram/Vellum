@@ -1,9 +1,4 @@
-// The Chart Table's grammar (#519, Sub 1 of #401): one key, two hosts. It rides in the
-// Explorer's hash while the table is being gathered and it IS the Portfolio page's address once
-// the button is pressed, so the folio survives a reload and a round trip to the Prospect page.
-// Pure and DOM-free like its siblings in src/site/{explorer,prospect,ribbon}/address.ts, because
-// three bundles import it. The key is `table` (ruled at #518's sitting, 2026-09-07; `plates` is
-// taken by the Explorer's order button and the poster/atlas plates).
+// The Chart Table's grammar (Sub 1 of #401): one key, two hosts. It rides in the Explorer's hash while the table is being gathered and it IS the Portfolio page's address once the button is pressed, so the folio survives a reload and a round trip to the Prospect page. Pure and DOM-free like its siblings in src/site/{explorer,prospect,ribbon}/address.ts, because three bundles import it. The key is `table` (ruled at #518's sitting, 2026-09-07; `plates` is taken by the Explorer's order button and the poster/atlas plates).
 import { LATTICE_DIVISIONS, LOD_BANDS, lodWindowFor, plotUvFromSheet, type LodBand, type SheetMargins, type UvCamera } from "../../world/lod.ts";
 import { parseYear } from "./year.ts";
 import type { UvWindow, MapType } from "../../terrain/heightfield.ts";

@@ -205,7 +205,7 @@ test("the interim desk panel: an unconverted room's main stands on parchment, no
 });
 
 test("the chrome passes the hand through: drags over the fixed cluster reach the chart, links stay live (#461, skeptic finding 2)", () => {
-  // The mockup's idiom (stage.css): pointer-events none on the container, auto on the interactive children.
+  // The defect measured on home: a 485x79 dead drag zone under the cluster. The mockup's idiom (stage.css) is the fix: pointer-events none on the container, auto on the interactive children.
   const css = layoutStyle();
   const chrome = css.match(/header\.chrome\s*\{([\s\S]*?)\}/);
   assert.ok(chrome && /pointer-events:\s*none/.test(chrome[1]), "the chrome container passes pointer events through");
@@ -432,7 +432,7 @@ const atlasStyleBlocks = async (): Promise<string> => {
 };
 
 test("no hover or active rule states a lift as a px literal: the raise is a token (#405)", async () => {
-  // Scoped to :hover/:active selectors, so keyframe steps pass by construction (their selectors are waypoints like "70%": the paperSettle trap at motion.css:30); translateY(0) is a return to rest, not a lift.
+  // Scoped to :hover/:active selectors, so keyframe steps pass by construction (their selectors are waypoints like "70%": the paperSettle trap in motion.css); translateY(0) is a return to rest, not a lift.
   const { GALLERY_PAGE_CSS } = await import("../../src/cli/gallery.ts");
   const sheets: Array<[string, string]> = [
     ...AUTHORED_CSS.map((p): [string, string] => [p, read(p)]),

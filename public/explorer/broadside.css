@@ -49,7 +49,7 @@
 a.fn { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
   text-decoration: none; color: var(--ink-brown);
   font-size: 0.95em; vertical-align: super; line-height: 0; padding: 0 0.15em;
-  display: inline-block; }
+  display: inline-block; } /* a transformable box, for the tip below: an inline box takes no transform */
 a.fn:hover, a.fn:focus-visible { color: var(--ink-dark); }
 a.fn:hover { transform: translateY(var(--raise)) rotate(-0.6deg); }
 /* Native popover (the UA [popover] rule keeps it display:none until shown); fixed-position because static CSS cannot place a top-layer box relative to an anchor, so footnotes.ts anchors it at show time. */

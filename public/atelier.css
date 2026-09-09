@@ -31,6 +31,7 @@ body.chart-room .stage .status a { color: var(--parchment-bright); }
 .folio-room { max-width: 19rem; }
 .folio-room .room-name { font-size: 1.32rem; letter-spacing: 0.14em; line-height: 1.2; color: var(--parchment-bright); }
 .folio-room .room-tagline { font-size: 0.92rem; line-height: normal; color: var(--parchment); margin: 0.1rem 0 0; }
+/* parchment, not the mockup's line-tan and ink-faded: line-tan measured 4.03:1 on the deep at #461, under the 4.5 floor for small text, and ink-faded is darker still. */
 .folio-room .dateline { margin: 0.55rem 0 0; font-variant-caps: small-caps; font-size: 0.85rem; letter-spacing: 0.08em; color: var(--parchment); }
 .folio-room .gloss { margin: 0.4rem 0 0; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.76rem; color: var(--parchment); }
 .folio-controls { display: flex; gap: 0.5rem; justify-content: flex-end; margin: 0.55rem 0 0; }
@@ -187,6 +188,7 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; max-width: none !important; }
   .legend.in-slip .legend-head { display: none; }
   .legend.in-slip .legend-btn { background: var(--ink-dark); }
+  /* #532 (Alex, 2026-09-07): the cream fill stays, but on the sheet's parchment it reads 1.09:1 and the tan hairline 2.00:1; docked, the hairline takes ink-brown, 5.64:1 on the sheet and 5.20:1 against the fill. */
   .legend.in-slip .legend-btn.gold { background: var(--control-gold); border-color: var(--ink-brown); }
   /* #525: a docked row stands on parchment, where the disabled wash (a 0.5 ink over a 0.45 element) reads 1.5:1 and the button all but disappears. Docked, it takes a SOLID faded ink instead, so it reads the same whatever is behind it: 3.93:1 as a box against the sheet, a clear step down from the enabled 9.46:1. */
   .legend.in-slip .legend-row .legend-btn:disabled { background: var(--ink-faded); opacity: 1; }

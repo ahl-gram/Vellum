@@ -111,15 +111,15 @@ export function createAges(deps: AgesDeps) {
     const range = rangeOf();
     if (pos.chamber === "survey") {
       if (ages.chamberShown !== "survey") {
-        chronicle.paintYear(range.max, true);
+        chronicle.paintYear(range.max, true); // the present world, silently restored
         voyage.internals.setOverlayVisible(true);
         for (const r of ages.annals) r.li.classList.remove("inked");
         ages.chamberShown = "survey";
       }
-      voyage.internals.paintLive(pos.t, postLog);
+      voyage.internals.paintLive(pos.t, postLog); // also reveals the prologue rows
     } else {
       if (ages.chamberShown !== "ages") {
-        voyage.internals.paintLive(1, postLog);
+        voyage.internals.paintLive(1, postLog); // the prologue completes (summary may post)
         voyage.internals.setOverlayVisible(false);
         ages.chamberShown = "ages";
       }
@@ -212,7 +212,7 @@ export function createAges(deps: AgesDeps) {
       side = step.drag.side;
     }
     paintPos(posAt(u, rangeOf(), side), { postLog: true });
-    if (!ages.drag) syncSinkAtRest();
+    if (!ages.drag) syncSinkAtRest(); // a keyboard step is a rest; a drag rests on release
   }
 
   /** 16 is the .ages-range thumb width in living-chart.css, so the escape band derives from the real track. */

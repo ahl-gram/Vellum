@@ -258,7 +258,7 @@ wireFootnotes();
 versoBtn.addEventListener("click", () => {
   if (!lastSvg || drawing || sheetEl.classList.contains("turning")) return;
   // #165: reset(), not rebase(): the SAME chart stays, it is only re-homed before the flip.
-  glass.homeToWorld();
+  glass.homeToWorld(); // #169: drop a committed region inset before the flip
   glass.reset();
   syncHash();
   const flipped = toggleFlip(sheetEl);

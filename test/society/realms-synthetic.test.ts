@@ -112,8 +112,8 @@ test("#79 attaches an islet by sea route, not by straight-line across land", () 
   const realms = partitionRealms(elev, SEA, noRivers(W, H), settlements);
 
   assert.equal(realms.seats.length, 2, "A and B are the two realms");
-  const realmOfA = realms.labels[70 + 20 * W] as number;
-  const realmOfB = realms.labels[3 + 20 * W] as number;
+  const realmOfA = realms.labels[70 + 20 * W] as number; // capital's cell
+  const realmOfB = realms.labels[3 + 20 * W] as number; // town's cell
   assert.notEqual(realmOfA, realmOfB);
 
   const ic = { x: 19.5, y: 20 };

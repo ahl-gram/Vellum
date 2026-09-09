@@ -205,7 +205,7 @@ function connectToNetwork(
       }
     }
   }
-  if (found === -1) return;
+  if (found === -1) return; // unreachable (another island): no road
 
   const points: RoadPoint[] = [];
   let cur = found;

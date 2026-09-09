@@ -409,7 +409,7 @@ export async function run(ctx) {
   await goHome();
   const before18 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
-  const enter18 = await waitRedraft(before18);
+  const enter18 = await waitRedraft(before18); // window A, band 1, centred 0.5
   await enterAt(2.2, 0.5, 0.5);
   await sleep(500); // well past the 250ms settle debounce; assert NO new commit
   const same18 = await rgn();
@@ -446,7 +446,7 @@ export async function run(ctx) {
   const before19b = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   await sleep(350); // past the debounce: the region job is now in flight in the worker
-  await goHome();
+  await goHome(); // bumps regionGen mid-flight; the job's commit must be dropped
   await sleep(1200); // the worker resolved long since; assert the result went nowhere
   const after19b = await rgn();
   const insets19b = await evaluate(`document.querySelectorAll("#map .region-inset").length`);
@@ -461,7 +461,7 @@ export async function run(ctx) {
   await enterAt(2, 0.5, 0.5);
   const reg20 = await waitRedraft(before20);
   const regionCommitted = reg20.committed === true && reg20.band === 1 && /^The Environs of .+/.test(reg20.title || "");
-  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`); // under the 0/1 down-cross
   let world20 = reg20;
   for (let i = 0; i < 100; i++) { world20 = await rgn(); if (world20.band === 0) break; await sleep(40); }
   let gone20 = -1; // the inset teardown trails the revert by the fade; poll it to zero
@@ -537,7 +537,7 @@ export async function run(ctx) {
     const nm=document.querySelector("#place-card .pc-name");
     return nm?nm.textContent:null;
   })()`);
-  await enterAt(3.6, 0.5, 0.5);
+  await enterAt(3.6, 0.5, 0.5); // past the 1/2 up-cross: the next finer band, same centre
   await waitRedraft(e20e1.redrafts);
   await sleep(80);
   const kept = await evaluate(
@@ -577,7 +577,7 @@ export async function run(ctx) {
       `insets:document.querySelectorAll("#map .region-inset").length,track:!!document.querySelector("#map .voyage-overlay"),` +
       `k:window.__vellumZoomState().k};})()`,
   );
-  await enterAt(2, 0.35, 0.35);
+  await enterAt(2, 0.35, 0.35); // a settle while the track is inked: must NOT redraft
   await sleep(600); // past the debounce + any would-be dispatch
   const vsettle = await rgn();
   await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=false;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);

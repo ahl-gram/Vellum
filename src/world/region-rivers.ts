@@ -44,7 +44,7 @@ function worldRiverThreshold(world: World): number {
     if ((data[i] as number) > world.seaLevel) landAcc.push(acc[i] as number);
   }
   if (landAcc.length === 0) return Infinity;
-  return riverThreshold(landAcc);
+  return riverThreshold(landAcc); // default quantile 0.985, minAcc 8 (matches generateWorld)
 }
 
 function projectWorldMajors(

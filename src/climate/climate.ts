@@ -52,7 +52,7 @@ export function computeClimate(
   const elevSpan = Math.max(1e-9, span);
 
   const temperature = createField(w, h, (x, y) => {
-    const lat = toV(y);
+    const lat = toV(y); // south (high v) is warm
     const u = toU(x);
     const wobble =
       fbm2(u * 3 * aspect, lat * 3, (seed ^ TEMP_SEED_SALT) >>> 0, {

@@ -147,7 +147,7 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     svg.setAttribute("class", "voyage-overlay");
     svg.setAttribute("viewBox", `0 0 ${wPx} ${manifest.heightPx}`);
     svg.setAttribute("preserveAspectRatio", "none");
-    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("aria-hidden", "true"); // #121: the margin-log panel + one status summary carry the a11y payload
     const trackEl = document.createElementNS(SVG_NS, "polyline") as SVGPolylineElement;
     trackEl.setAttribute("class", "voyage-track");
     const shipG = makeMark("voyage-ship", SHIP_PARTS);

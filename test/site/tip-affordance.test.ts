@@ -117,7 +117,7 @@ const CHART_INSTRUMENTS = new Set<string>([
   "index.css :: .lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph",
 ]);
 
-/** A tip whose surface does not navigate, held on the record until Alex rules: kept apart from TIPPING_LINKS so that set stays true when it says a surface goes somewhere. */
+/** A tip whose surface does not navigate, held on the record until Alex rules. */
 // Explicitly Set<string>: while the set is empty an inferred Set<never> reds every `.has(key)` below rather than accepting a parked line.
 const TIPS_AWAITING_A_RULING = new Set<string>([
   // Park a line here only with the measurement written under it.

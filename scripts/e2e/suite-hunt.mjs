@@ -1,4 +1,4 @@
-// Daily Hunt e2e (H1-H12, HD, HG) on the seed-of-the-day page; split from e2e-explorer.mjs, behavior and check order unchanged.
+// Daily Hunt e2e (H1-H12, HD, HG) on the seed-of-the-day page.
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
   // Click targets are derived from the browser's OWN world via dynamic import, immune to any node-side date assumption; this is the only coverage of the click -> projection-inversion -> nearest-settlement snap.

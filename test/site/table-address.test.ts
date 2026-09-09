@@ -144,19 +144,19 @@ test("a malformed item is dropped on its own; the rest of the folio survives", (
   }
   for (const bad of [
     "seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1", // no kind, and NOTHING else missing
-    "k-x.seed-42.style-antique",
-    "k-s.-junk.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1",
-    "k-s.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1",
-    "k-s.seed-4.2.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1",
-    "k-s.seed-42.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1",
-    "k-s.seed-42.style-antique.legend-1.arms-0.lx-1.ly-1",
-    "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.ly-1",
-    "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1",
+    "k-x.seed-42.style-antique", // an unknown kind
+    "k-s.-junk.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1", // a field with an empty key
+    "k-s.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1", // no seed
+    "k-s.seed-4.2.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1", // a seed that is not digits
+    "k-s.seed-42.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1", // no style
+    "k-s.seed-42.style-antique.legend-1.arms-0.lx-1.ly-1", // no rung
+    "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.ly-1", // half a centre, the lx half
+    "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1", // and the ly half
     "k-s.seed-42.style-antique.arms-0.beasts-0.rung-2.lx-1.ly-1", // a seal left unstated: the dress must be whole
     "k-s.seed-42.style-antique.legend-1.beasts-0.rung-2.lx-1.ly-1",
     "k-s.seed-42.style-antique.legend-1.arms-0.rung-2.lx-1.ly-1",
-    "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1.lx-2",
-    "k-p.seed-42",
+    "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1.lx-2", // one field, stated twice
+    "k-p.seed-42", // a prospect with no style has no dress
   ]) {
     assert.deepEqual(parseTable(hashOf(bad)), [], `a required field missing drops the item: ${bad}`);
   }

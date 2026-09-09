@@ -10,10 +10,10 @@ import type { CompassPlan } from "./compass.ts";
 type Vec = readonly [number, number];
 
 const FREQ = 0.02; // gyre scale: lower = broader sweeps
-const STEP = 1.5;
-const HALF_STEPS = 16;
-const MIN_OCEAN_DIST = 4;
-const START_OCEAN_DIST = 7;
+const STEP = 1.5; // grid units advanced per integration step
+const HALF_STEPS = 16; // steps traced each way from the seed
+const MIN_OCEAN_DIST = 4; // a streamline stays this many hops off any coast
+const START_OCEAN_DIST = 7; // seeds sit well offshore so lines have room
 
 function flowAt(x: number, y: number, seed: number): Vec | null {
   const eps = 0.6;
@@ -36,7 +36,7 @@ export function traceStreamline(
 ): Array<[number, number]> {
   const { w, h } = world.elev;
   const od = world.oceanDist;
-  const gate = world.region?.seaGate;
+  const gate = world.region?.seaGate; // #251: parent's genuine-sea partition, if a region
   const inWater = (x: number, y: number): boolean => {
     const ix = Math.round(x);
     const iy = Math.round(y);
@@ -127,7 +127,7 @@ export function currentsLayer(
   const strokes: SvgNode[] = [];
   for (const s of picked) {
     const grid = traceStreamline(world, s.gx, s.gy, seed);
-    if (grid.length < 9) continue;
+    if (grid.length < 9) continue; // drop stubs that hit land at once
     const px: Array<[number, number]> = grid.map(([x, y]) => [
       proj.px(x),
       proj.py(y),

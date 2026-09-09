@@ -350,6 +350,7 @@ header.chrome::before {
   body > header.chrome { max-width: calc(100vw - 15rem); }
   .seed-controls .control { width: 4.6rem; }
   .lf-legend, .landfall .stage.cam .lf-legend { display: none; }
+  /* The mockup's bottom sheet is FIXED to the viewport: inside the boxed stage the sheet was taller than the stage itself and buried the chart whole (skeptic finding 1). z-index stays under the veil's 50. */
   .lf-card {
     position: fixed; right: 0; left: 0; top: auto; bottom: 0; margin: 0;
     width: 100%; outline-offset: -8px; z-index: 40;
@@ -388,6 +389,7 @@ header.chrome::before {
   animation: lf-doors-reveal 0s linear 10s forwards;
 }
 .landfall .stage:not(.cam) ~ .lf-card .lf-card-close { display: none; }
+/* The no-JS doors' plain nav still wore the light-era ink after #461 inverted the ground: measured 1.06:1 at the #472 plate pass. */
 .lf-noscript-rooms { color: var(--parchment); }
 .lf-noscript-rooms a { color: var(--parchment-bright); }
 @keyframes lf-doors-reveal {

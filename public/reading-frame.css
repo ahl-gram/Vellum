@@ -8,6 +8,7 @@
 
 .rf-ages[hidden], .rf-log[hidden] { display: none; }
 
+/* #321: keyed on the host-applied .rf-arrival, never [hidden]: the engine toggles hidden on every counter read, and display:none terminates an animation while restoring display starts it AFRESH, so a [hidden]-gated rule would replay the unfurl as a flash. */
 .rf-arrival .rf-instrument, .rf-arrival .rf-log { transform-origin: top center; }
 .rf-arrival .rf-instrument { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) both; }
 .rf-arrival .rf-log { animation: paperUnfurl var(--unfurl) var(--ease-unfurl) var(--paper-quick) both; }
