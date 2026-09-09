@@ -22,6 +22,14 @@ the rooms, the voice, motion and ceremony.
 **This file is normative and complete.** A reader who reads only this file is correctly informed
 about the rules. That property is the whole point, and it is worth what it costs to keep.
 
+**Nothing here is duplicated in `CLAUDE.md`, and where the two overlap this file wins.** The goldens,
+regens, committed content and re-roll rules lived in `CLAUDE.md`'s own section until 2026-09-09; that
+section is now a pointer at this file and restates none of them, because by then the two copies had
+already drifted apart in five places (the regen command list, the byte-compare rule's mechanism, the
+drift guard's issue number, the committed-content list, and whether a reader learned the
+flight-exclusion set existed at all). `CLAUDE.md` keeps process at the keyboard; this file keeps the
+rules.
+
 **A rule change edits this file**, in a branch and a pull request like any other tracked change. It
 may additionally leave a dated comment on the issue the change came from, as an audit trail. It must
 never live only in a comment somewhere.
@@ -128,22 +136,36 @@ items that unlock the most downstream value, then the re-roll tail.
 
 ## Golden and committed-chart discipline
 
-- **Committed content**, because a hand-authored page embeds it: the seed-42 hero charts and arms
-  under `public/charts/`, the OG card, the favicon and the apple touch icon. Everything else generated
-  is gitignored and rebuilt per deploy. The decision rule is that one line: referenced by a
-  hand-authored page means commit, everything else means gitignore and rebuild.
-- **The golden checksum is `1792806240`** (seed 42 realm labels), pinned by
-  `test/world/golden-seed42.test.ts`. A seed re-roll re-pins it.
-- **Render-only regens land ALONE.** A render change that moves any label or path regenerates the
-  committed charts but is checksum-safe, so it never occupies a re-roll slot. It still lands alone
-  and is verified by **diffing the committed charts old against new**, naming the labels that moved.
-  The hero drift guard compares a fresh render against the committed one, so after a regen it is
-  **circular and proves nothing**.
-- **The regen commands are `npm run charts:regen` and `npm run og`**, plus `npm run icons` if a font
-  subset changed. There is no `site` script.
-- **Never byte-compare SVGs rendered in different environments**, across operating systems or across
-  Node versions. Trigonometry is not correctly rounded, so coordinates drift and a rounding boundary
-  can flip. Compare structure exactly and numbers with a tolerance.
+**Committed content, because a hand-authored page embeds it:** `public/charts/chart-42-*.svg`,
+`public/charts/arms-42-*.svg`, `public/og.png`, and `public/favicon.svg` plus
+`public/apple-touch-icon.png` (#489; `npm run icons` is their single writer, and a test pins the SVG
+to the Fell SC woff2). Everything else generated is gitignored and rebuilt per deploy:
+`public/atlas/`, `public/gallery/`, the bundle twins and their chunks. **The decision rule is the
+one line**: referenced by a hand-authored page means commit, everything else means gitignore and
+rebuild. Two tombstones so nobody goes looking: `docs/` retired at #206, and the tsc engine emit
+retired at #260 with its clean-list entry kept deliberately.
+
+**The golden checksum is `1792806240`** (seed 42 realm labels), pinned by
+`test/world/golden-seed42.test.ts`. A seed re-roll re-pins it.
+
+- **A render change that moves any label or path owes a regen**: `npm run charts:regen` and
+  `npm run og` (since #205). `charts:regen` single-writes `public/charts`; `og` writes
+  `public/og.png`. A font-subset change additionally owes `npm run icons`. **There is no `site`
+  script**; it went at #206.
+- **Verify a regen by diffing the committed charts old against new**, snapshotting them first. The
+  **#40 hero drift guard** compares a fresh render against the committed one, so after a regen it is
+  **circular and proves nothing**. A good regen is small and explicable: name the labels that moved.
+- **Land a regen ALONE.** Bundled with any other chart-changing work a chart delta cannot be
+  attributed to a cause, and the diff is the only non-circular check you have. A regen is
+  checksum-safe, so it never occupies a re-roll slot.
+- **NEVER byte-compare SVGs rendered in different environments**, across operating systems or across
+  Node versions, Node to Node included. `Math.sin`, `Math.cos` and `Math.atan2` are not correctly
+  rounded, so coordinates drift about 1e-13 and a 2-decimal rounding boundary can flip. Compare
+  structure exactly and numbers with a tolerance. **A naive byte compare passes on a Mac and fails
+  on linux CI.**
+- **A seed re-roll** (terrain reshape, culture or name-template edits) is a different, larger cost:
+  it changes world identity and re-pins the golden checksum. **Only one may be in flight at a time**,
+  and the set that rule excludes against is the next section.
 - Watch the **Chronicle 14-event cap** in `src/society/history.ts`, which starts dropping a line at a
   realm count of eight or more. The cap drops the LATEST events, because the slice runs after a sort
   by year and ruins are late by construction, so a ruin can silently lose its dated event and its

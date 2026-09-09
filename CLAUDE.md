@@ -23,10 +23,13 @@ they are frozen in the claude-config backup at `home/CodeProjects/Vellum/roadmap
 readable by anyone with the repo.** `specs/rulebook.md` is the sequencing rules, working agreements
 and how a design decision gets made; `specs/ui-design.md` is the look and feel itself (the ground,
 the type case, the palette by role, the chart's dress, the rooms and their furniture, the voice,
-contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting). Read
-`specs/ui-design.md` before any work whose deliverable is an appearance. The ruled pixels those
-specs were decided from are archived under `design/`, one directory per design round
-(`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting).
+contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting).
+**`specs/rulebook.md` is REQUIRED READING before any change that touches the renderer, a committed
+chart, the golden, a seed, or the order of work**, and `specs/ui-design.md` before any work whose
+deliverable is an appearance. Neither is summarized here; where this file and a spec disagree, the
+spec is right. The ruled pixels those specs were decided from are archived under `design/`, one
+directory per design round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a
+sitting).
 
 These refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project specifically.
 
@@ -46,8 +49,9 @@ mid-session.
 files, the private "Vellum Roadmap" GitHub Project, the claude-config backup, the workspace rules at
 `~/CodeProjects/CLAUDE.md`, and the gitignored `RESUME-HERE.md` and `session-notes/`. Skip those and
 use the repo itself plus the GitHub issues, which are public and carry the ratified decisions. The
-engineering rules below (goldens and regens, measure before you assert, read the issue before you
-build, test-first) stand on their own and are the part worth having.
+engineering rules below (measure before you assert, read the issue before you build, test-first)
+stand on their own and are the part worth having, as do the two tracked specs under `specs/`, which
+are public and hold the goldens-and-regens rules this file used to carry.
 
 ## Session handoff: keep the roadmap Project current
 
@@ -61,7 +65,7 @@ the board current with `gh`: newly filed issues get added and phased; shipped is
 The global `session-handoff` skill updates SESSION-NOTES (here at
 `session-notes/SESSION-NOTES.md`, not the repo root), RESUME-HERE, and auto-memory
 but does NOT know about the Project, so this is the Vellum-specific extra step. The durable
-sequencing RULES (golden flight-exclusion, land-regens-alone, the cost axis, cross-epic
+sequencing RULES (the golden flight-exclusion set, land-regens-alone, the cost axis, cross-epic
 coordination) live in **`specs/rulebook.md`**, which is normative and complete: a reader who reads
 only that file is correctly informed. It also holds how a design decision is made (mockups, a
 sitting, a provisional ruling, live use, the post-use re-review) and the fidelity rule. **A rule
@@ -124,26 +128,18 @@ their siblings, but that convention does not extend anywhere else.
 
 ## Charts, goldens, and regens
 
-`public/charts/chart-42-*.svg`, `public/charts/arms-42-*.svg` and `public/og.png` are
-**committed** content (the homepage embeds them), as are `public/favicon.svg` and
-`public/apple-touch-icon.png` (#489; `npm run icons` is their single writer, and a test pins
-the SVG to the Fell SC woff2). Everything else generated (`public/atlas/`,
-`public/gallery/`, the bundle twins + chunks) is gitignored and rebuilt per deploy. (docs/
-retired at Sub 5 #206; the tsc engine emit retired at Sub 9 #260, its clean-list entry is a
-tombstone; app source is TypeScript in src/site/.)
+**These rules moved to `specs/rulebook.md` (2026-09-09) and this section is a pointer. You MUST read
+`specs/rulebook.md` before any change that touches the renderer, a committed chart, the golden, or a
+seed.** Nothing about goldens, regens, committed content or the re-roll is restated here: a second
+copy is how `PROJECTS.md` and the `roadmap/` archive both went dangerous, the archive still naming a
+retired checksum and a retired flight-exclusion set.
 
-- A **render change that moves any label or path owes a regen**: `npm run charts:regen` + `npm run og` (since Sub 4 #205). charts:regen single-writes public/charts; og writes public/og.png.
-- **Verify a regen by diffing the committed charts old-vs-new** (snapshot them first). The #40
-  hero drift guard compares a fresh render against the committed one, so after a regen it is
-  **circular** and proves nothing. A good regen is small and explicable: name the labels that moved.
-- **Land a regen ALONE.** Bundled with any other chart-changing work, a chart delta cannot be
-  attributed to a cause, and the diff is the only non-circular check you have.
-- **NEVER byte-compare SVGs rendered in different environments** (across OS, or across Node
-  versions, Node-to-Node included). `Math.sin/cos/atan2` are not correctly rounded, so coordinates
-  drift ~1e-13 and a 2-decimal rounding boundary can flip. Compare structure exactly, numbers with a
-  tolerance. A naive byte compare passes on a Mac and fails on linux CI.
-- A **seed re-roll** (terrain reshape, culture/name-template edits) is a different, larger cost: it
-  changes world identity and re-pins the golden checksum. Only one re-roll may be in flight at a time.
+What is over there, so you know when you need it: what is committed against what is generated and the
+one-line rule that decides; the golden checksum and what re-pins it; when a render change owes a
+regen and which commands write what; why a regen lands ALONE and why the drift guard is circular
+after one; why an SVG is never byte-compared across environments; the seed re-roll as the project's
+real cost axis, with the one-in-flight rule and the set it excludes against; and the Chronicle event
+cap.
 
 ## Measure before you assert
 
