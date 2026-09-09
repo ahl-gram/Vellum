@@ -255,6 +255,14 @@ are written down because nothing said so, and a session that reinvents them rein
 
 ## Process
 
+**Five gates, one skill: `vellum-footguns`** (`.claude/skills/vellum-footguns/SKILL.md`). Invoke it
+at the moment you are about to write a test or guard, an e2e check or CDP probe, a CSS rule, anything
+that joins a roster, or a PR body. The rules below and the memory doctrine files are the narrative;
+the skill is the same doctrine as a checklist read at the moment it applies, because its
+`references/scars.md` shows how narrative read at session start and applied at the push let the same
+guard-that-cannot-red, dead-control and cascade defects reach PRs #524 to #548. Its
+`hooks/footgun-gate.py` puts each gate in front of you mechanically once wired (`hooks/README.md`).
+
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him.
 - **When asking Alex to make an open decision** (on a feature, a bug, a test, anything else),
   explain the context and what you need from him in simple terms, so he can have a good
