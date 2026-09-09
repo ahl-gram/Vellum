@@ -1,8 +1,9 @@
 # footgun-gate.py
 
 A PreToolUse hook that puts the skill's gates in front of the model at the moment it edits a test,
-an e2e suite, or a stylesheet, and refuses the four mechanical never-list items outright. It is NOT
-wired by default; the skill works without it. Wiring it is a one-block change to a settings file.
+an e2e suite, or a stylesheet, and refuses the four mechanical never-list items outright. It is wired
+in the repo's `.claude/settings.json`, so it runs in every session launched from the Vellum root or a
+worktree; the skill works without it if that block is ever removed.
 
 ## What it does
 
@@ -20,10 +21,12 @@ wired by default; the skill works without it. Wiring it is a one-block change to
 - **Warns** (context only, the call runs): `.click()` in an e2e fragment; a punctuation escape inside
   a backtick string in e2e; `pkill` aimed at the browser.
 
-## Wire it
+## How it is wired
 
-Project-wide and committed, in `.claude/settings.json`; or personal, in `.claude/settings.local.json`
-or `~/.claude/settings.json`. Hook entries merge across levels.
+The block below lives in `.claude/settings.json` (shared, committed). Do NOT copy it to
+`~/.claude/settings.json`: `${CLAUDE_PROJECT_DIR}` would resolve to whatever project is open, the
+script would not exist there, and every Edit, Write and Bash call in other projects would print a
+hook error. Hook entries merge across levels, so user-level hooks keep running beside it.
 
 ```json
 {

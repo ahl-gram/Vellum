@@ -26,7 +26,8 @@ These refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project 
 **This file is TRACKED in the repo as of 2026-08-08** (it was local-only before, backed up out of
 band). It is project instructions, so it belongs with the project. `RESUME-HERE.md`, `session-notes/`
 and `.claude/settings.local.json` stay gitignored: those are per-session state and personal
-settings, not instructions. `.claude/agents/` is tracked.
+settings, not instructions. `.claude/agents/`, `.claude/skills/` and `.claude/settings.json` (the
+footgun hook) are tracked.
 
 Because it is tracked, **editing it now costs a branch and a PR** like any other tracked file (main
 requires both CI checks and enforces them for admins). Budget for that before adding a rule
@@ -261,7 +262,8 @@ that joins a roster, or a PR body. The rules below and the memory doctrine files
 the skill is the same doctrine as a checklist read at the moment it applies, because its
 `references/scars.md` shows how narrative read at session start and applied at the push let the same
 guard-that-cannot-red, dead-control and cascade defects reach PRs #524 to #548. Its
-`hooks/footgun-gate.py` puts each gate in front of you mechanically once wired (`hooks/README.md`).
+`hooks/footgun-gate.py`, wired in `.claude/settings.json`, puts each gate in front of you mechanically
+and refuses four of the never-list items outright (`hooks/README.md`).
 
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him.
 - **When asking Alex to make an open decision** (on a feature, a bug, a test, anything else),

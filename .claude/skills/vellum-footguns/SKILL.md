@@ -142,7 +142,7 @@ fail silently (an undeclared CSS variable, a suite the runner never calls, a bud
 
 ## Never
 
-The hook in `hooks/` refuses the first four mechanically when it is wired; the rest are yours.
+The hook in `hooks/`, wired in `.claude/settings.json`, refuses the first four mechanically; the rest are yours.
 
 - A bare `git stash`: the stash stack is shared across every worktree. `git stash push -m ... -- <paths>`, or a WIP commit.
 - `perl -pi` with a non-ASCII replacement: it re-encodes every existing non-ASCII byte in the file. Use node or a heredoc, then grep for `Â`.
