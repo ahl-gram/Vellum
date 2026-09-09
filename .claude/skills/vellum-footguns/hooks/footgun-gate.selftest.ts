@@ -108,9 +108,12 @@ const FIXTURES: Fixture[] = [
   ["world generation gets gate 6", edit("Edit", "src/world/generate.ts", "const seed = 42;"), "context", "## Gate 6"],
   ["society generation gets gate 6", edit("Edit", "src/society/history.ts", "events.slice(0, 14);"), "context", "## Gate 6"],
   ["a regen writer gets gate 6", edit("Edit", "scripts/regen-hero-charts.ts", "await writeHeroes();"), "context", "## Gate 6"],
-  ["a render TEST keeps gate 1: writing a test is a test problem first", edit("Edit", "test/render/style.test.ts", "assert.ok(1);"), "context", "## Gate 1"],
+  ["a render TEST keeps gate 1: writing a test is a test problem first", edit("Edit", "test/render/ages-track.test.ts", "assert.ok(1);"), "context", "## Gate 1"],
   ["site source is not chart work", edit("Edit", "src/site/explorer/app.ts", "const x = 1;"), null, ""],
-  ["the CLI is not chart work", edit("Edit", "src/cli/e2e-suites.ts", "x"), null, ""],
+  ["the e2e CLI is not chart work", edit("Edit", "src/cli/e2e-suites.ts", "x"), null, ""],
+  ["the rasterizer the committed PNGs go through gets gate 6", edit("Edit", "src/cli/raster.ts", "x"), "context", "## Gate 6"],
+  ["the module that decides what the heroes ARE gets gate 6", edit("Edit", "scripts/hero-charts.ts", "x"), "context", "## Gate 6"],
+  ["a committed raster gets gate 6", edit("Edit", "public/favicon.svg", "<svg/>"), "context", "## Gate 6"],
   ["a generation dependency gets gate 6 too", edit("Edit", "src/terrain/heightfield.ts", "x"), "context", "## Gate 6"],
   ["deployed: real project dir denies stash pop", deployed(STASH_POP, ROOT), "deny", "shared"],
   ["deployed: symlinked project dir denies stash pop", deployed(STASH_POP, LINK), "deny", "shared"],
@@ -126,7 +129,7 @@ const run = async (): Promise<number> => {
   mkdirSync(SCRATCH, { recursive: true });
   writeFileSync(join(SCRATCH, "body.md"), "a — b\n");
   symlinkSync(ROOT, LINK);
-  for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);
+  for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);
   for (const [name, subject, want, needle] of FIXTURES) {
     const sessionId = `selftest-${process.pid}-${name}`;
     const got = typeof subject === "function" ? await subject() : await decide({ ...subject, session_id: sessionId });

@@ -28,7 +28,7 @@ const EDIT_GATES: [string, RegExp, string][] = [
   ["guard", /(^|\/)test\/.*\.test\.ts$/, "Gate 1"],
   ["e2e", /(^|\/)(scripts|out)\/.*\.mjs$/, "Gate 2"],
   ["css", /\.(css|astro)$/, "Gate 3"],
-  ["render", /(^|\/)(src\/(render|world|society|core|noise|terrain|climate|hydrology)\/|public\/charts\/|scripts\/(regen-hero-charts|build-og|build-icons)\.ts$)/, "Gate 6"], // the seven dirs are generateWorld's transitive import graph, derived not guessed, so any of them can re-pin the golden. It sits last but nothing depends on that today: the patterns are disjoint, so a render test takes Gate 1 on its own pattern and only a widening that drops the src/ prefix AND a move above "guard" would steal it (proved: each half alone escapes, the pair reds)
+  ["render", /(^|\/)(src\/(render|world|society|core|noise|terrain|climate|hydrology)\/|src\/(atlas\/palette|cli\/raster)\.ts$|public\/(charts\/|og\.png$|favicon\.svg$|apple-touch-icon\.png$)|scripts\/(hero-charts|regen-hero-charts|build-og|build-icons|glyph-outline)\.ts$)/, "Gate 6"], // derived by walking imports, not guessed: src/render, generateWorld's seven-dir closure, the committed artifacts, and every module their writers reach
 ];
 const ROSTER_NEW_FILE = /(^|\/)(src\/pages\/|src\/site\/|scripts\/e2e\/suite-|public\/[^/]+\.css$)/;
 const BROWSER_SCRIPT = /(^|\/)(scripts|out)\/.*\.mjs$/;

@@ -143,7 +143,7 @@ Scars: #49, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; calls ma
 
 ## Gate 6: before changing the renderer or a committed chart
 
-Scars: #40, #205, #309, #412, and the 2026-09-09 move of these rules out of `CLAUDE.md`.
+Scars: #40 (the drift guard exists because a regen was forgotten), #205 (the regen commands), #309 (a change everyone priced as a re-roll and measured as a regen), #489 (the icons, a committed pair with a single writer), and the 2026-09-09 move of these rules out of `CLAUDE.md`.
 
 The authority is `specs/rulebook.md`, its golden discipline and its flight-exclusion set. This is the
 checklist; the file has the reasoning, the checksum and the set's current membership, none of which
