@@ -50,6 +50,18 @@ const deployed = (payload: Payload, projectDir: string) => async (): Promise<Dec
 type Kind = "deny" | "context" | null;
 type Fixture = [string, Payload | (() => Promise<Decision>), Kind, string];
 const STASH_POP = bash("git stash pop");
+const GATE6_ARMS: [string, string][] = [
+  ["render", "src/render/style.ts"], ["world", "src/world/generate.ts"], ["society", "src/society/history.ts"],
+  ["core", "src/core/grid.ts"], ["noise", "src/noise/simplex.ts"], ["terrain", "src/terrain/heightfield.ts"],
+  ["climate", "src/climate/wind.ts"], ["hydrology", "src/hydrology/rivers.ts"],
+  ["atlas/palette", "src/atlas/palette.ts"], ["cli/raster", "src/cli/raster.ts"],
+  ["charts/", "public/charts/chart-42-antique.svg"], ["og.png", "public/og.png"],
+  ["favicon.svg", "public/favicon.svg"], ["apple-touch-icon.png", "public/apple-touch-icon.png"],
+  ["hero-charts", "scripts/hero-charts.ts"], ["regen-hero-charts", "scripts/regen-hero-charts.ts"],
+  ["build-og", "scripts/build-og.ts"], ["build-icons", "scripts/build-icons.ts"],
+  ["glyph-outline", "scripts/glyph-outline.ts"],
+];
+
 const FIXTURES: Fixture[] = [
   ["bare stash denied", bash("git stash"), "deny", "shared"],
   ["stash pop denied", STASH_POP, "deny", "shared"],
@@ -103,18 +115,12 @@ const FIXTURES: Fixture[] = [
   ["unit test file gets gate 1", edit("Edit", "test/site/thing.test.ts", "assert.ok(1);"), "context", "## Gate 1"],
   ["stylesheet gets gate 3", edit("Edit", "public/atelier.css", ".a { color: red }"), "context", "## Gate 3"],
   ["new page gets gate 4", edit("Write", "src/pages/never-exists-zz/index.astro", "---\n---"), "context", "## Gate 4"],
-  ["renderer gets gate 6", edit("Edit", "src/render/style.ts", "const paper = \"#f2e8cf\";"), "context", "## Gate 6"],
-  ["a committed chart gets gate 6", edit("Edit", "public/charts/chart-42-antique.svg", "<svg/>"), "context", "## Gate 6"],
-  ["world generation gets gate 6", edit("Edit", "src/world/generate.ts", "const seed = 42;"), "context", "## Gate 6"],
-  ["society generation gets gate 6", edit("Edit", "src/society/history.ts", "events.slice(0, 14);"), "context", "## Gate 6"],
-  ["a regen writer gets gate 6", edit("Edit", "scripts/regen-hero-charts.ts", "await writeHeroes();"), "context", "## Gate 6"],
-  ["a render TEST keeps gate 1: writing a test is a test problem first", edit("Edit", "test/render/ages-track.test.ts", "assert.ok(1);"), "context", "## Gate 1"],
+  // One fixture per ARM of the Gate 6 regex, because a roster is only as good as its least-swept alternative: the prover found 10 of 19 arms had no fixture, so a typo in any of them shipped silent.
+  ...GATE6_ARMS.map(([arm, path]): Fixture => [`gate 6 arm: ${arm}`, edit("Edit", path, "x"), "context", "## Gate 6"]),
+  ["gate 6 on the ABSOLUTE path a real tool call passes", edit("Edit", join(ROOT, "src/render/style.ts"), "x"), "context", "## Gate 6"],
+  ["an earlier gate still wins a path that matches BOTH", edit("Edit", "src/render/x.css", ".a{}"), "context", "## Gate 3"],
   ["site source is not chart work", edit("Edit", "src/site/explorer/app.ts", "const x = 1;"), null, ""],
   ["the e2e CLI is not chart work", edit("Edit", "src/cli/e2e-suites.ts", "x"), null, ""],
-  ["the rasterizer the committed PNGs go through gets gate 6", edit("Edit", "src/cli/raster.ts", "x"), "context", "## Gate 6"],
-  ["the module that decides what the heroes ARE gets gate 6", edit("Edit", "scripts/hero-charts.ts", "x"), "context", "## Gate 6"],
-  ["a committed raster gets gate 6", edit("Edit", "public/favicon.svg", "<svg/>"), "context", "## Gate 6"],
-  ["a generation dependency gets gate 6 too", edit("Edit", "src/terrain/heightfield.ts", "x"), "context", "## Gate 6"],
   ["deployed: real project dir denies stash pop", deployed(STASH_POP, ROOT), "deny", "shared"],
   ["deployed: symlinked project dir denies stash pop", deployed(STASH_POP, LINK), "deny", "shared"],
   ["deployed: missing project dir exits 0 with no output", deployed(STASH_POP, "/nonexistent"), null, ""],

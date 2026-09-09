@@ -69,7 +69,12 @@ node .claude/skills/vellum-footguns/hooks/footgun-gate.selftest.ts
 
 One line per fixture, `ok` or `FAIL` with the decision and the text it expected; the exit code is
 the number of misses. Every gate's text is asserted non-empty first, so a renamed heading in
-`SKILL.md` fails here rather than shipping an empty injection. The last three rows run the exact
+`SKILL.md` fails here rather than shipping an empty injection. Gate 6's rows are generated one per
+ARM of its roster regex, because a roster is only as strong as its least-swept alternative: the
+prover found 10 of 19 arms carried no fixture, so a typo in any of them would have shipped silent.
+Two of its rows exist for shapes no relative path can reach, an absolute `file_path` (which is what
+a real tool call passes) and a path matching two gates at once, both of which escaped the first
+table. The last three rows run the exact
 command string from `.claude/settings.json` through `sh` with a real, a symlinked, and a missing
 `CLAUDE_PROJECT_DIR`, so the deployed path is exercised and not only the function.
 `test/repo/footgun-gate.test.ts` runs the whole table under `npm test`, so CI runs it on every PR.
