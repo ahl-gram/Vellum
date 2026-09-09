@@ -12,12 +12,20 @@ THREE linked files** (it outgrew one Read on 2026-07-24): `project_vellum.md` is
 `project_vellum_livingchart.md` is everything the Explorer animates (Glass zoom, region
 worlds, overlays, the voyage). Read the core plus whichever companion your work touches.
 The live PLAN is the private GitHub Project "Vellum Roadmap"
-(`gh project item-list 1 --owner ahl-gram`); its durable sequencing RULES are pinned issue
-#193. **The `roadmap/` dir is DELETED (2026-07-24)** and there is no local plan file: the
-Project is the plan and #193 is the rulebook. Its three files were superseded drafts, and
+(`gh project item-list 1 --owner ahl-gram`); its durable sequencing RULES live in
+`specs/rulebook.md`. **The `roadmap/` dir is DELETED (2026-07-24)** and there is no local plan
+file: the Project is the plan and `specs/rulebook.md` is the rulebook. Its three files were superseded drafts, and
 two had gone dangerous (the archive still named checksum `2890117437` and a `{#80, #93}`
 flight-exclusion set; `ROADMAP.md` still said to run `npm run site`). If you ever need them
 they are frozen in the claude-config backup at `home/CodeProjects/Vellum/roadmap/`.
+
+**`specs/` holds the tracked, normative house specs, and unlike everything above it is public and
+readable by anyone with the repo.** `specs/rulebook.md` is the sequencing rules, working agreements
+and how a design decision gets made; `specs/ui-design.md` is the look and feel itself (the ground,
+the type case, the palette by role, the chart's dress, the rooms and their furniture, the voice,
+contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting). Read
+`specs/ui-design.md` before any work whose deliverable is an appearance. The ruled pixels those
+specs were decided from are archived under `design/`, one directory per sitting.
 
 These refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project specifically.
 
@@ -53,13 +61,12 @@ The global `session-handoff` skill updates SESSION-NOTES (here at
 `session-notes/SESSION-NOTES.md`, not the repo root), RESUME-HERE, and auto-memory
 but does NOT know about the Project, so this is the Vellum-specific extra step. The durable
 sequencing RULES (golden flight-exclusion, land-regens-alone, the cost axis, cross-epic
-coordination) live in pinned issue #193, and **#193 is the one issue here whose BODY is
-normative**: it is the complete current rulebook, its comments are history and never
-authoritative, and new information goes INTO the body. Keep it fresh, editing the body for a
-corrected fact as readily as for a changed rule. Before this was inverted on 2026-08-17 that
-issue carried seventy percent of its content in comments, and two separate sessions read the
-body, restated a rule three comments had already amended, and each labelled the sweep "no rule
-changed".
+coordination) live in **`specs/rulebook.md`**, which is normative and complete: a reader who reads
+only that file is correctly informed. It also holds how a design decision is made (mockups, a
+sitting, a provisional ruling, live use, the post-use re-review) and the fidelity rule. **A rule
+change EDITS that file** in a branch and a PR, as readily for a corrected fact as for a changed
+rule, and may leave a dated comment on the originating issue as the audit trail. It lived in issue
+#193's body until 2026-09-09; that issue is now a pointer and takes no new rules.
 
 `gh project` needs the `project` token scope (`gh auth refresh -s project`). Read the plan at
 session start with `gh project item-list 1 --owner ahl-gram`, or open the Project in the browser.
@@ -211,9 +218,10 @@ So fetch both, every time. Newest ratified statement wins, and **when a comment 
 disagree the comment supersedes** unless it says otherwise. That is the whole point of the
 convention: a body written before a big epic landed is historical intent, not current fact.
 
-**The one exception is the rulebook, #193**, where this is inverted: its body is normative and
-its comments are history. Do not read #193's comments to learn the rules, and put anything new
-into its body. Its own body says so at the top; see the handoff section above.
+**The rulebook is not an issue at all**: it is `specs/rulebook.md` in the repo, normative and
+complete, and a rule change edits that file. Issue #193 held it until 2026-09-09 and is now a
+pointer whose comments are history; do not read them to learn the rules and do not add rules there.
+See the handoff section above.
 
 ```
 gh api repos/ahl-gram/Vellum/issues/N            # the body
