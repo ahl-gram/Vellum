@@ -191,15 +191,13 @@ at #260 with its clean-list entry kept deliberately.
   `partitionRealms` takes no rng and runs before the culture fork, so `w.realms.labels` and the
   checksum above are untouched by any culture change; what goes red is the title, the capital, the
   realm names and the sea name, which `test/world/golden-seed42.test.ts` asserts beside the checksum.
-  Read a red there for which assertion failed before pricing the change, and expect a second red:
-  `blazonRealms` takes the culture too, so a moved draw redresses the arms, and `heroChartSvgs`
-  re-renders the committed `chart-42-*` AND `arms-42-*` families, which the #40 drift guard in
+  Expect a second red as well: `blazonRealms` takes the culture too, so a moved draw redresses the arms, and `heroChartSvgs`
+  re-renders the committed `chart-42-*` AND `arms-42-*` families, which the drift guard in
   `test/site/hero-charts.test.ts` diffs against what is on disk. **A culture change is still a
   re-roll**: it rewrites committed content and moves world identity, which is what the tier is for.
   What it does not do is move the checksum, so read the red for which assertion failed rather than
   assuming the checksum needs re-pinning. Adding or reordering a culture is not the append-only edit
-  the roster looks like: Names: Second Edition added four cultures and placed `oromi` so the draw was
-  unmoved, which is why that work moved no names.
+  the roster looks like.
   `test/world/covenant-seed42.test.ts` pins the draw and the index separately, so a future
   re-derivation of the index still has to keep the draw.
 - Watch the **Chronicle 14-event cap** (`events.slice(0, 14)` in `src/society/history.ts`), which starts dropping a line at a
@@ -293,7 +291,7 @@ comment. This is a convenience index, not their home.
   173 realms hit it, which is what lets "always named" survive #113.
 - **Label order (#175):** the range name claims its box BEFORE the realm names, first refusal to the
   label that cannot move. Do not reorder that layer.
-- **Mixed projections (#290):** the chart plants profile marks on a plan view, which is the period
+- **Mixed projections:** the chart plants profile marks on a plan view, which is the period
   convention. `glyphSymbolDefs` (`src/render/layers/glyph-symbols.ts`) draws the terrain glyphs
   standing on a baseline, and `castleGlyph` (`src/render/layers/settlements.ts`) stands a capital on
   its point the same way, while the plan circles beside it are centred on that point and the seat
