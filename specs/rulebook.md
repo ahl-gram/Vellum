@@ -25,9 +25,8 @@ about the rules. That property is the whole point, and it is worth what it costs
 **Where this file and `CLAUDE.md` overlap, this file wins**, and the overlap is now small and known:
 the #378 comment doctrine is stated in both because it governs writing code, which is `CLAUDE.md`'s
 half, as well as reading these rules. The goldens, regens, committed content and re-roll rules are
-this file's alone: they were stated in both until 2026-09-09, and the two copies had drifted apart in
-five places by the time the duplicate went. `CLAUDE.md` keeps process at the keyboard; this file
-keeps the rules.
+not stated in `CLAUDE.md` at all, the two copies having drifted apart in five places before the
+duplicate went. `CLAUDE.md` keeps process at the keyboard; this file keeps the rules.
 
 **A rule change edits this file**, in a branch and a pull request like any other tracked change. It
 may additionally leave a dated comment on the issue the change came from, as an audit trail. It must
