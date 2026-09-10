@@ -17,7 +17,7 @@ type. Read the gate you are at, do each line, and move on. Provenance is in `ref
 
 ## Gate 1: before writing a test or a guard
 
-Scars: #295, #360, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #546.
+Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #546.
 
 1. **Write the mutation before the test.** Name the one-line change to `src/` that must turn this
    test red. If you cannot name one, you are about to write a test that cannot fail.
@@ -144,10 +144,12 @@ Scars: #49, #101, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; ca
    The skeptic diffs against the newest ratified statement. A recon that falsifies an older comment
    says so in a new comment; the old one is never edited. Open decisions go to Alex as a menu, and
    you STOP there.
-9. **Do not open a PR onto another branch that is going to be squash-merged.** Squashing the base
-   deletes it, and a PR whose base branch is gone is closed and cannot be reopened or retargeted:
-   the review record goes with it. Open onto `main`, or land the base first and rebase. If it has
-   already happened, rebase onto `main` and open a fresh successor that cross-references the closed one.
+9. **A stacked PR lands BEFORE its base does.** Squashing a base deletes the branch, and a PR whose
+   base is gone is closed and can be neither reopened nor retargeted: the review record goes with it.
+   Stacking itself is fine and is how the integration epics ship, every child merging into the epic
+   branch before the epic merges to `main`. What kills a PR is its base landing while the child is
+   still open, so check for open children before merging any branch that has them. If it has already
+   happened, rebase onto `main` and open a fresh successor that cross-references the closed one.
 10. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
     while it runs; three rounds at most, residue named in the body. `references/pr-body.md` is the shape.
 

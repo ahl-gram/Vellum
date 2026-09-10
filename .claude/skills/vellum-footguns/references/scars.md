@@ -1,7 +1,7 @@
 # The ledger behind the gates
 
 Compiled 2026-09-09 from the bodies, commits and verification comments of PRs #524 to #548 and
-their issues (#378, #518 to #521, #525, #526, #529, #531, #532, #539, #540, #543, epic #401).
+their issues, with older scars added beneath when a gate needs one (#378, #518 to #521, #525, #526, #529, #531, #532, #539, #540, #543, epic #401).
 Every row was found by a cold skeptic, a prover, a plate-reader, CI, or Alex live, after the
 implementing session had already reported the work done. Ranked by how many PRs in that window
 carried it. The long form of each lesson, with the earlier scars, is in the auto-memory doctrine
@@ -99,8 +99,8 @@ left open and the session failed to write down).
 - #528: the epic's proposed `~` separator would ride as `%7E`; measured, not taste.
 - Earlier, #101: opened onto `feat/72-isotherms`; squashing that base deleted it and closed this PR
   un-reopenably, review record and all. Every PR in the run after it went onto `main`.
-- Earlier, #360: searched `test/` for a non-`.test.ts` precedent, found none, concluded the repo had
-  no convention and abandoned a correct file split. `test-support/` already held the helpers.
+- Earlier, #363: searched `test/` for a non-`.test.ts` precedent, found none, concluded the repo had
+  no convention and reverted a correct file split. `test-support/` already held six helpers.
 
 ## Where the long form lives
 
