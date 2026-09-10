@@ -240,10 +240,12 @@ guard-that-cannot-red, dead-control and cascade defects reach PRs #524 to #548. 
 you touch a test, a browser-driving script, a stylesheet, a new page or suite, or a push, and refuses
 four of the never-list items outright (`hooks/README.md`).
 
-- Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him. The whole order of
-  operations, and which of the agents below runs at which step, is `specs/development-workflow.md`.
+- Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks you to
+  (ruled 2026-09-10). The whole order of operations, and which of the agents below runs at which
+  step, is `specs/development-workflow.md`.
 - **Run the `vellum-plan-skeptic` subagent on the plan, before the decisions go to Alex.** Dispatch
-  it with the issue number and the plan and nothing else. A plan's claims are predictions, which are
+  it with the issue number, the plan, and `vellum-spec-recon`'s ledger if recon ran this session
+  (ruled 2026-09-10), and nothing else. A plan's claims are predictions, which are
   the claims no command is ever run against, and a wrong assumption in a plan becomes the shape of
   the code, after which the tests are written to fit it. Its findings can change what Alex is asked,
   which is why it runs before the menu and not after.

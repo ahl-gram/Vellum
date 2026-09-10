@@ -11,9 +11,9 @@ Four other places carry what this one deliberately does not:
 - **The roadmap Project** ("Vellum Roadmap", `gh project item-list 1 --owner ahl-gram`) is the
   backlog of record: what is open, its status, its phase, its order.
 - **`CLAUDE.md`** holds process at the keyboard: feature to branch to PR, Alex merges, test first,
-  no em-dashes, measure before you assert.
-- **`specs/development-workflow.md`** holds the order of operations from a filed issue to a pull
-  request, and which subagent runs at which step.
+  no em-dashes, measure before you assert, and what each subagent is for.
+- **`specs/development-workflow.md`** holds the order those steps happen in, from a filed issue to a
+  pull request, and which subagent runs at which point in it.
 - **`RESUME-HERE.md`** (local, per-session, gitignored) is the hot pointer to where we are right now.
 
 Its siblings under `specs/` hold what this file is not about: `ui-design.md` the look and feel

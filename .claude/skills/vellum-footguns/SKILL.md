@@ -42,7 +42,11 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
    and the importers.
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
    `vellum-guard-prover` for the whole guard set (10 minutes, unit tests only, name the mutations you
-   did NOT try). Its restore is `git checkout --`, so uncommitted work under it is gone. Zero red is
+   did NOT try). It mutates in its OWN detached worktree at HEAD, so uncommitted work is not in the
+   tree it proves unless carried across by hand: commit first, or you prove something about a
+   different tree than the one you are shipping (corrected 2026-09-10 against the agent's own recipe,
+   `git worktree add --detach "$WT" HEAD`; the earlier "restore is `git checkout --`" described a
+   loop it no longer runs). Zero red is
    a hole. A guard proved unable to red is deleted, never shipped.
 
 ## Gate 2: before writing an e2e check or a CDP probe
@@ -140,10 +144,14 @@ Scars: #49, #101, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; ca
 6. `grep -n '—'` over the body and the diff returns nothing.
 7. **A sibling defect found on the way is filed, not folded**, unless it is an accessibility failure
    this PR itself caused.
-8. **Any call you made that the issue did not rule on gets a dated issue comment BEFORE the push.**
+8. **Any call you made that the issue did not rule on gets a dated issue comment before the PR is
+   opened.** (It read "before the push" until 2026-09-10, written when a branch went up once at the
+   end; the branch now goes up at the first commit, so the deadline that matters is the review.)
    The skeptic diffs against the newest ratified statement. A recon that falsifies an older comment
-   says so in a new comment; the old one is never edited. Open decisions go to Alex as a menu, and
-   you STOP there.
+   says so in a new comment; the old one is never edited. **A ruling of Alex's goes there too, and
+   you are the one who records it**: he rules in the session, which leaves the issue reading unruled
+   to everyone after. Where there is no issue, the PR body and a PR comment are the record. Open
+   decisions go to Alex as a menu, and you STOP there.
 9. **A stacked PR lands BEFORE its base does.** Squashing a base deletes the branch, and a PR whose
    base is gone is closed and can be neither reopened nor retargeted: the review record goes with it.
    Stacking itself is fine and is how the integration epics ship, every child merging into the epic

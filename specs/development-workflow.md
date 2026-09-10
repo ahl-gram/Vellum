@@ -17,14 +17,9 @@ Three other places carry what this one deliberately does not:
 
 ## The sequence
 
-**1. Read the issue: the body AND its comments.**
-
-```
-gh api repos/ahl-gram/Vellum/issues/N            # the body
-gh api repos/ahl-gram/Vellum/issues/N/comments   # decisions, ratifications, re-baselines
-```
-
-The comments usually win, and the body will typically not tell you a superseding comment exists.
+**1. Read the issue: the body AND its comments**, through the two `gh api` calls `CLAUDE.md` gives
+under "Read the issue before you build". The comments usually win, and the body will typically not
+tell you a superseding comment exists.
 `gh issue view` silently returns empty for some issues here, so it is never evidence that an issue
 or a thread is empty. An empty result from the `api` form is a claim like any other: count it
 (`| jq length`) rather than reading silence as absence.
@@ -60,10 +55,9 @@ one most often skipped: on #534 the issue offered three options and ruled none, 
 (both of them, in one go) roughly tripled the work from what the session would have defaulted to.
 Do not begin step 8 until he has answered.
 
-**7. Worktree, then rename the branch.** `EnterWorktree` branches from `origin/main`, so the tree is
-current without a pull. It turns any `/` in the name into `+` and prefixes the branch with
-`worktree-`, so rename the branch before the first commit or the PR carries the harness's name
-instead of yours.
+**7. Worktree, then rename the branch**, before the first commit, or the PR carries the harness's
+name instead of yours. The rest of the worktree rules, including why the branch needs renaming at
+all, are `CLAUDE.md`'s Worktrees section.
 
 **8. Implement.** Four things the word hides, each of which has its own scar:
 
@@ -80,10 +74,11 @@ instead of yours.
   buried.
 
 **9. Push at the first commit**, per the ruled default in `vellum-footguns` ("Defaults this repo has
-already ruled"), where eight local commits unpushed was called the wrong default on #520 part 2. The
-footgun hook fires Gate 5 on any push, and at this one none of that gate's body checks apply yet;
-they apply at step 13, where the PR body is written. Read the gate then rather than dismissing it
-twice.
+already ruled"), where eight local commits unpushed was called the wrong default on #520 part 2.
+**Read Gate 5 here, in full, even though half of it is not due yet.** The hook shows a gate's text at
+most once a session and keys the push and the PR write to the same gate, so this is the only time it
+will be put in front of you; its body checks are yours to remember at step 13. That is the cost of
+pushing early, and it is not a reason to defer the read.
 
 **10. Verify locally, and name the command for every claim.** The unit suite, the type check, the
 e2e suites the change touches, and the evidence run that demonstrates the acceptance. "Delivered",
@@ -92,9 +87,10 @@ claim genuinely cannot be run down, mark it UNVERIFIABLE, the word `vellum-spec-
 and do not coin a second one.
 
 **11. Run the companion agents the work owes.** `vellum-guard-prover` on every new or strengthened
-guard, and it requires step 8's commits to already exist because its restore is `git checkout --`.
-`vellum-plate-reader` when the deliverable is an appearance. Zero red from the prover is a hole, not
-a pass, and a guard proved unable to bite is deleted rather than shipped.
+guard, and step 8's commits have to exist first: it mutates in its own detached worktree at HEAD, so
+anything uncommitted is simply not in the tree it proves, and it proves the wrong tree without ever
+saying so. `vellum-plate-reader` when the deliverable is an appearance. Zero red from the prover is a
+hole, not a pass, and a guard proved unable to bite is deleted rather than shipped.
 
 **12. Record every call the issue did not rule on, as a dated comment on the issue, before the PR
 is opened.** `vellum-footguns` Gate 5 says "before the push", written when a branch was pushed once,
@@ -107,6 +103,11 @@ that says what it supersedes.
 trace on the issue, and the next reader (or the cold skeptic) sees an issue whose options are still
 marked unruled. That happened on #534.
 
+**Not every change has an issue.** A docs or tooling change often opens straight to a PR, which is
+the house norm rather than an omission. The record still has to exist: with no issue, the PR body
+carries the calls and a PR comment carries any ruling of Alex's. "It was decided in chat" is not a
+record, because the cold skeptic at step 14 cannot read chat, and neither can the next session.
+
 **13. Open the PR.** `references/pr-body.md` in the footguns skill is the shape. Every line is a
 claim the skeptic will check.
 
@@ -117,7 +118,7 @@ NOTHING else: no summary, no claims about tests, no rationale. Make no edits whi
 not seen, so it goes back through step 11. Residue that will not be fixed is named in the PR body
 with the reason.
 
-**16. Leave the PR open. Alex reviews and merges.** Never merge for him.
+**16. Leave the PR open. Alex reviews and merges.** Never merge for him unless he asks you to.
 
 **17. Hand off.** The roadmap Project first, since the global `session-handoff` skill does not know
 it exists: newly filed issues added and phased, shipped issues closed. Then the session ritual.
