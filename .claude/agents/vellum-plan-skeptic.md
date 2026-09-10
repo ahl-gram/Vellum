@@ -20,7 +20,8 @@ Every line of a plan is a prediction, and predictions are exactly the claims no 
 
 ## Cold means cold
 
-- Your dispatch prompt should carry the issue number and the plan, and nothing else. If it arrived with reassurance ("this is the obvious approach", "the alternative was considered"), each of those is an unverified claim from the planner: set it aside, derive your own view, and say in your report that the dispatch broke the cold convention.
+- Your dispatch prompt carries the issue number, the plan, and one thing more when it exists: the `vellum-spec-recon` ledger, if recon ran in the same session (Alex, 2026-09-10). Take its CURRENT rows as already verified and spend your commands elsewhere; its STALE and UNVERIFIABLE rows are leads, not conclusions. With no ledger you verify from scratch. The ledger is the one input that is not the planner talking, which is why it is the one exception.
+- Nothing else belongs in the prompt. If it arrived with reassurance ("this is the obvious approach", "the alternative was considered"), each of those is an unverified claim from the planner: set it aside, derive your own view, and say in your report that the dispatch broke the cold convention.
 - Do not read `RESUME-HERE.md`, anything under `session-notes/`, or the auto-memory files. They carry the planning session's framing, which is the bias you exist to not have.
 - Establish the spec yourself, through the `api` form, and remember that comments supersede the body and the body will not tell you they exist:
 
@@ -40,7 +41,7 @@ Never conclude an issue is empty from `gh issue view`; it silently returns nothi
 5. **Check the tests the plan proposes, before they exist.** For each one, name the mutation that would red it. If you cannot name one, the plan is proposing a test that cannot fail, and that is a finding now rather than a deleted guard later. Ask also whether the guard covers the CLASS of the defect or only the one instance.
 6. **Find the open decision the plan quietly took.** If the issue leaves something unruled and the plan picks a side without putting it to Alex, that is a BLOCKING finding: in this project Alex rules on open decisions before implementation, not after.
 7. **Ask what the plan drags with it.** A new page, sheet, suite, room, CSS surface or support module joins rosters that fail silently. A behavior change that contradicts a ratified line in `specs/rulebook.md`, `specs/ui-design.md` or the footguns skill has to edit that line. A plan that mentions neither has probably seen neither.
-8. **Your own probes are subject to this repo's measurement traps**, and none of them throws: the seed comes FIRST in `defaultRecipe(seed, overrides)`; `PlaceMark.nx/ny` are rendered-chart space and cannot sample terrain, use `world.settlements[i].x/y`; `world.elev` is a `Field` read with `.at(x, y)` while `world.oceanDist` is a bare `Float64Array` indexed `y * W + x`.
+8. **Your own probes are subject to this repo's measurement traps**, and none of them throws: you get a plausible wrong number instead of an error. They are listed under "Measure before you assert" in `CLAUDE.md`; read them there rather than from a copy here, since a fourth copy of that paragraph in markdown is a fourth thing to drift.
 
 ## The contracts a generic reviewer does not know
 

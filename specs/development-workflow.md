@@ -29,20 +29,27 @@ The comments usually win, and the body will typically not tell you a superseding
 or a thread is empty. An empty result from the `api` form is a claim like any other: count it
 (`| jq length`) rather than reading silence as absence.
 
-**2. Run `vellum-spec-recon`.** It returns a CURRENT / STALE / UNVERIFIABLE ledger and the open
-decisions awaiting Alex. Skipping it is a choice to be made deliberately and said out loud, and it
-is only defensible for an issue small enough that you verify every claim in it by hand instead. It
-exists because #132 (six of seven subs stale) and #190 (seventy three stale claims) each cost a
-twelve to thirteen agent audit built from scratch.
+**2. Run `vellum-spec-recon` at the start of any sub or epic**, as `CLAUDE.md` requires. It returns a
+CURRENT / STALE / UNVERIFIABLE ledger and the open decisions awaiting Alex, and it exists because
+#132 (six of seven subs stale) and #190 (seventy three stale claims) each cost a twelve to thirteen
+agent audit built from scratch. This file does not carve out an exception, and neither does
+`CLAUDE.md`: a session that departs from it is departing from a rule, and says so in its reply.
 
 **3. Write the plan. No code.** The plan names the design, the files, the tests with the mutation
 that reds each one, the evidence that will say it works, and the rosters and doctrine the change
-drags with it.
+drags with it. The required reading is due before the plan, not after it: `specs/rulebook.md` before
+any change that touches the renderer, a committed chart, the golden, a regen, a seed or the order of
+work, and `specs/ui-design.md` before any work whose deliverable is an appearance.
 
-**4. Get a COLD read on the plan: `vellum-plan-skeptic`.** Not `vellum-pr-skeptic`, which reviews a
+**4. Get a cold read on the plan: `vellum-plan-skeptic`.** Not `vellum-pr-skeptic`, which reviews a
 diff and has none to read at this point. The plan skeptic attacks the plan's assumptions, its
 sizing, its evidence and its silences, and it is where a wrong approach is cheapest to kill. This
 step is why the file exists: it was the missing one.
+
+**Hand it step 2's ledger when step 2 ran in this session, and nothing else when it did not**
+(Alex, 2026-09-10). Re-verifying what recon already checked is waste, not independence; what the
+plan skeptic must never inherit is the planning session's framing, which the ledger does not carry.
+With no ledger it runs truly cold, on the issue number and the plan alone.
 
 **5. Fold in what survives.** A finding you reject is rejected in writing, with the reason.
 
@@ -72,7 +79,11 @@ instead of yours.
 - **Bold delight is welcome**, per `CLAUDE.md`, but flagged in the reply and in the PR body, never
   buried.
 
-**9. Push at the first commit.** Local commits held back are the wrong default here.
+**9. Push at the first commit**, per the ruled default in `vellum-footguns` ("Defaults this repo has
+already ruled"), where eight local commits unpushed was called the wrong default on #520 part 2. The
+footgun hook fires Gate 5 on any push, and at this one none of that gate's body checks apply yet;
+they apply at step 13, where the PR body is written. Read the gate then rather than dismissing it
+twice.
 
 **10. Verify locally, and name the command for every claim.** The unit suite, the type check, the
 e2e suites the change touches, and the evidence run that demonstrates the acceptance. "Delivered",
@@ -85,10 +96,16 @@ guard, and it requires step 8's commits to already exist because its restore is 
 `vellum-plate-reader` when the deliverable is an appearance. Zero red from the prover is a hole, not
 a pass, and a guard proved unable to bite is deleted rather than shipped.
 
-**12. Record every call the issue did not rule on, as a dated comment on the issue, BEFORE the
-push.** The skeptic in the next step diffs against the newest ratified statement, so reasoning that
-lives only in your head becomes a finding. The old comment is never edited; a correction is a new
-comment that says what it supersedes.
+**12. Record every call the issue did not rule on, as a dated comment on the issue, before the PR
+is opened.** `vellum-footguns` Gate 5 says "before the push", written when a branch was pushed once,
+at the end; with step 9 the first push comes early, so the deadline that matters is the review. The
+cold skeptic at step 14 diffs against the newest ratified statement, so reasoning that lives only in
+your head reaches it as a finding. The old comment is never edited; a correction is a new comment
+that says what it supersedes.
+
+**A ruling of Alex's is recorded here too, and by you.** He rules in the session, which leaves no
+trace on the issue, and the next reader (or the cold skeptic) sees an issue whose options are still
+marked unruled. That happened on #534.
 
 **13. Open the PR.** `references/pr-body.md` in the footguns skill is the shape. Every line is a
 claim the skeptic will check.

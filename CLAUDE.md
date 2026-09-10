@@ -22,8 +22,9 @@ including which subagent runs at which step and the one place the work stops for
 **`specs/rulebook.md` is REQUIRED READING before any change that touches the renderer, a committed
 chart, the golden, a regen, a seed, or the order of work**, `specs/ui-design.md` before any work
 whose deliverable is an appearance, and `specs/development-workflow.md` before starting a sub or an
-epic, since its early steps are the ones a session cannot go back and take later. Neither is summarized here; where this file and a spec disagree,
-the spec is right. The ruled pixels those specs were decided from are archived under `design/`, one
+epic, since its early steps are the ones a session cannot go back and take later. None of the three
+is summarized here; where this file and a spec disagree, the spec is right. The ruled pixels those
+specs were decided from are archived under `design/`, one
 directory per design round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a
 sitting).
 

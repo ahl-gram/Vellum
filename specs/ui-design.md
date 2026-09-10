@@ -1,9 +1,9 @@
 # The look and feel of Vellum
 
 What Vellum looks like, how it sounds, how it moves, and how to build a new piece of it so that it
-belongs. This is the record of the idiom itself, not of how a decision gets made: **process lives in
-`specs/rulebook.md` and in `CLAUDE.md`, and a ruling about one feature lives as a dated comment on
-its own issue.**
+belongs. This is the record of the idiom itself, not of how a decision gets made: **the rules live in
+`specs/rulebook.md`, the order of operations in `specs/development-workflow.md`, process at the
+keyboard in `CLAUDE.md`, and a ruling about one feature as a dated comment on its own issue.**
 
 Where this file names a measured value, a guard pins that value, and **the guard is right if they
 disagree.** Where it names a role, the role is the durable thing and the value behind it may be
