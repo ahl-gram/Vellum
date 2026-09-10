@@ -12,9 +12,12 @@ const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
 const RUNNER = src("scripts/e2e-explorer.mjs");
 const CI = src(".github/workflows/ci.yml");
+// A source scan reads the CODE, not the file: commenting a line out in place leaves its literal behind, and a raw match cannot tell the two apart. Blind spots, both of which cost a false red rather than a miss: a `//` inside a string literal reads as a comment, and a /* */ block is not seen at all.
+const uncommented = (source: string) => source.split("\n").filter((line) => !line.trim().startsWith("//")).join("\n");
+const RUNNER_CODE = uncommented(RUNNER);
 
 const runnerSuiteKeys = (): string[] => {
-  const block = RUNNER.match(/const SUITES = \{([\s\S]*?)\n\};/);
+  const block = RUNNER_CODE.match(/const SUITES = \{([\s\S]*?)\n\};/);
   assert.ok(block, "the runner's SUITES map was not found; this guard is reading the wrong shape");
   return [...block[1].matchAll(/^\s*"([\w-]+)":/gm)].map((m) => m[1]);
 };
@@ -25,9 +28,9 @@ test("E2E_SUITE_ORDER is exactly the runner's SUITES map, in the same order", ()
 
 test("each suite name maps to the run function imported from its own file", () => {
   const aliasFor = new Map(
-    [...RUNNER.matchAll(/import \{ run as (\w+) \} from "\.\/e2e\/suite-([\w-]+)\.mjs"/g)].map((m) => [m[2], m[1]]),
+    [...RUNNER_CODE.matchAll(/import \{ run as (\w+) \} from "\.\/e2e\/suite-([\w-]+)\.mjs"/g)].map((m) => [m[2], m[1]]),
   );
-  const block = RUNNER.match(/const SUITES = \{([\s\S]*?)\n\};/);
+  const block = RUNNER_CODE.match(/const SUITES = \{([\s\S]*?)\n\};/);
   if (!block) throw new Error("the runner's SUITES map was not found");
   const body = block[1];
   for (const name of E2E_SUITE_ORDER) {
@@ -41,7 +44,7 @@ test("every named suite has a suite file the runner imports", () => {
   for (const name of E2E_SUITE_ORDER) {
     const file = `scripts/e2e/suite-${name}.mjs`;
     assert.ok(existsSync(join(ROOT, file)), `${name} has no ${file}`);
-    assert.match(RUNNER, new RegExp(`from "\\./e2e/suite-${name}\\.mjs"`), `${name} is not imported`);
+    assert.match(RUNNER_CODE, new RegExp(`from "\\./e2e/suite-${name}\\.mjs"`), `${name} is not imported`);
   }
 });
 
@@ -122,26 +125,24 @@ test("every CI trigger gets the same full coverage, so nothing is conditional on
 });
 
 test("the runner actually uses the selection, the timings and the outcome rule it imports", () => {
-  // The runner needs a browser, so behavior is tested in e2e-suites.test.ts and only the CALL sites are pinned here.
-  assert.match(RUNNER, /runSelected\(SELECTED, SUITES, ctx, \{/, "the runner does not run the SELECTED suites");
-  // The hooks are optional in runSelected, since a caller without them keeps the old rethrow; a runner without them is the #534 defect back, and no unit test of runSelected can see that. Matched INSIDE the call's own argument block, never against the file: a whole-file match is satisfied by a comment anywhere, which is how the first form of this guard passed with the real wiring deleted (prover, 2026-09-10).
-  const hooks = RUNNER.match(/runSelected\(SELECTED, SUITES, ctx, \{([\s\S]*?)\n  \}\);/);
+  // The runner needs a browser, so behavior is tested in e2e-suites.test.ts and only the CALL sites are pinned here, against the CODE and never the raw file: a line commented out in place leaves its literal behind and satisfies a raw match, which beat this test's .catch assertion and its formatSuiteTimings one when the prover tried it (2026-09-10).
+  assert.match(RUNNER_CODE, /runSelected\(SELECTED, SUITES, ctx, \{/, "the runner does not run the SELECTED suites");
+  // The hooks are optional in runSelected, since a caller without them keeps the old rethrow; a runner without them is the #534 defect back, and no unit test of runSelected can see that.
+  const hooks = RUNNER_CODE.match(/runSelected\(SELECTED, SUITES, ctx, \{([\s\S]*?)\n  \}\);/);
   assert.ok(hooks, "the runSelected call's argument block was not found, so the two assertions below would read an empty string");
-  // Comment lines are dropped before matching: commenting the wiring OUT in place leaves the literal inside the block, which passed both assertions when they were written (prover, 2026-09-10). This reads a `//` inside a string literal as a comment, and does not see a /* */ block, both of which cost a false red rather than a miss.
-  const wiring = hooks[1].split("\n").filter((line) => !line.trim().startsWith("//")).join("\n");
-  assert.match(wiring, /onSuiteError:/, "the runner passes no per-suite handler, so one suite giving up kills the whole lane again (#534)");
-  assert.match(wiring, /alive: ctx\.alive/, "the runner passes no liveness probe, so a browser that died mid-lane is reported as a lane full of product failures (#534)");
-  assert.match(RUNNER, /suitesCertifiedByHealth\(SELECTED, aborted\)/, "the runner certifies suites that stopped early, a clean bill the run never earned (#534)");
+  assert.match(hooks[1], /onSuiteError:/, "the runner passes no per-suite handler, so one suite giving up kills the whole lane again (#534)");
+  assert.match(hooks[1], /alive: ctx\.alive/, "the runner passes no liveness probe, so a browser that died mid-lane is reported as a lane full of product failures (#534)");
+  assert.match(RUNNER_CODE, /suitesCertifiedByHealth\(SELECTED, aborted\)/, "the runner certifies suites that stopped early, a clean bill the run never earned (#534)");
   // The call site alone is not the behavior: computing `certified` and never printing it passes every assertion above.
-  assert.match(RUNNER, /certified\.length > 0/, "the runner computes the certified list and never reads it, so no suite is reported as certified at all (#534)");
+  assert.match(RUNNER_CODE, /certified\.length > 0/, "the runner computes the certified list and never reads it, so no suite is reported as certified at all (#534)");
   // The breaker's own exit is a HARNESS ERROR, so the door it leaves by must print the score, or it does the thing it exists to prevent.
-  const onError = RUNNER.match(/\.catch\(\(e\) => \{([\s\S]*?)\n  \}\);/);
+  const onError = RUNNER_CODE.match(/\.catch\(\(e\) => \{([\s\S]*?)\n  \}\);/);
   assert.ok(onError, "the runner's error path was not found, so the assertion below would read an empty string");
   assert.match(onError[1], /runOutcome\(results\)/, "the harness-error path prints no tally, so a run that dies mid-lane reports none of the checks that did run (#534)");
-  assert.match(RUNNER, /runOutcome\(results\)/, "the runner does not use the outcome rule, so 0/0 can pass again");
-  assert.match(RUNNER, /join\(REPO, "out", e2eOutSubdir\(PORT\)\)/, "the runner's out dir no longer follows the port");
+  assert.match(RUNNER_CODE, /runOutcome\(results\)/, "the runner does not use the outcome rule, so 0/0 can pass again");
+  assert.match(RUNNER_CODE, /join\(REPO, "out", e2eOutSubdir\(PORT\)\)/, "the runner's out dir no longer follows the port");
   assert.match(
-    RUNNER,
+    RUNNER_CODE,
     /formatSuiteTimings\(timings\)/,
     "the runner measures per-suite time and then drops it, so no future split can be measured",
   );
@@ -172,7 +173,7 @@ test("every check group that waits is still inside its own step, by name (#534)"
 });
 
 test("the lane driver spawns the runner itself and refuses an ambient selection", () => {
-  const DRIVER = src("scripts/e2e-lanes.mjs");
+  const DRIVER = uncommented(src("scripts/e2e-lanes.mjs"));
   assert.match(DRIVER, /spawn\(process\.execPath, \[RUNNER\]/, "a lane must spawn the runner directly, so its exit code survives");
   assert.match(DRIVER, /ambientSelectionRefusal\(process\.env\)/, "the driver no longer refuses a narrowing selection");
   assert.match(DRIVER, /laneOutcome\(results\)/, "the driver does not aggregate the lanes, so one could fail unnoticed");
