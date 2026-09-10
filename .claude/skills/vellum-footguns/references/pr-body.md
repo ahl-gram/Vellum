@@ -21,6 +21,7 @@ not from expectation. Promote to `.github/PULL_REQUEST_TEMPLATE.md` if it earns 
 
 ## Records
 
+- vellum-plan-skeptic: <ran at step 4, with or without the recon ledger> / not run (say why)
 - vellum-guard-prover: <link to comment> / in flight / not owed (no new guard)
 - vellum-plate-reader: <link to comment> / in flight / not owed (no presentation change)
 - vellum-pr-skeptic: round <n> of 3, <link to its ledger on the PR, or "relayed in chat <date>" since CLAUDE.md leaves what lands on the PR to Alex>; residue: <what was not fixed and why>

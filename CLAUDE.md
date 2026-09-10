@@ -16,11 +16,15 @@ plan, and there is no local plan file.
 readable by anyone with the repo.** `specs/rulebook.md` is the sequencing rules, working agreements
 and how a design decision gets made; `specs/ui-design.md` is the look and feel itself (the ground,
 the type case, the palette by role, the chart's dress, the rooms and their furniture, the voice,
-contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting).
+contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting);
+`specs/development-workflow.md` is the order of operations from a filed issue to a pull request,
+including which subagent runs at which step and the one place the work stops for Alex's ruling.
 **`specs/rulebook.md` is REQUIRED READING before any change that touches the renderer, a committed
-chart, the golden, a regen, a seed, or the order of work**, and `specs/ui-design.md` before any work
-whose deliverable is an appearance. Neither is summarized here; where this file and a spec disagree,
-the spec is right. The ruled pixels those specs were decided from are archived under `design/`, one
+chart, the golden, a regen, a seed, or the order of work**, `specs/ui-design.md` before any work
+whose deliverable is an appearance, and `specs/development-workflow.md` before starting a sub or an
+epic, since its early steps are the ones a session cannot go back and take later. None of the three
+is summarized here; where this file and a spec disagree, the spec is right. The ruled pixels those
+specs were decided from are archived under `design/`, one
 directory per design round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a
 sitting).
 
@@ -43,7 +47,7 @@ files, the private "Vellum Roadmap" GitHub Project, the claude-config backup, th
 `~/CodeProjects/CLAUDE.md`, and the gitignored `RESUME-HERE.md` and `session-notes/`. Skip those and
 use the repo itself plus the GitHub issues, which are public and carry the ratified decisions. The
 engineering rules below (measure before you assert, read the issue before you build, test-first)
-stand on their own and are the part worth having, as do the two tracked specs under `specs/`.
+stand on their own and are the part worth having, as do the tracked specs under `specs/`.
 
 ## Session handoff: keep the roadmap Project current
 
@@ -236,7 +240,15 @@ guard-that-cannot-red, dead-control and cascade defects reach PRs #524 to #548. 
 you touch a test, a browser-driving script, a stylesheet, a new page or suite, or a push, and refuses
 four of the never-list items outright (`hooks/README.md`).
 
-- Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him.
+- Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks you to
+  (ruled 2026-09-10). The whole order of operations, and which of the agents below runs at which
+  step, is `specs/development-workflow.md`.
+- **Run the `vellum-plan-skeptic` subagent on the plan, before the decisions go to Alex.** Dispatch
+  it with the issue number, the plan, and `vellum-spec-recon`'s ledger if recon ran this session
+  (ruled 2026-09-10), and nothing else. A plan's claims are predictions, which are
+  the claims no command is ever run against, and a wrong assumption in a plan becomes the shape of
+  the code, after which the tests are written to fit it. Its findings can change what Alex is asked,
+  which is why it runs before the menu and not after.
 - **When asking Alex to make an open decision** (on a feature, a bug, a test, anything else),
   explain the context and what you need from him in simple terms, so he can have a good
   understanding of what he is deciding: no jargon, no overly technical language, no acronyms.
