@@ -2,6 +2,7 @@
 import { scopedHealth } from "./room-support.mjs";
 import { luminance, sampleRow } from "./pixel-support.mjs";
 import { makeSettle } from "./settle-support.mjs";
+import { makeStep } from "./step-support.mjs";
 
 const PAGE = "/specimen/";
 const CHART_ASPECT = 1500 / 1157.931;
@@ -45,6 +46,8 @@ const READ = `(() => {
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, PORT } = ctx;
   const settle = makeSettle(ctx);
+  // SB4 is the one group here that waits on a transition, so it is the one that is stepped (#534).
+  const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
   const read = () => evaluate(READ);
   const setState = (s) => evaluate(`(()=>{const sel=document.getElementById("sb-state");sel.value=${JSON.stringify(s)};sel.dispatchEvent(new Event("change",{bubbles:true}));return sel.value;})()`);
@@ -85,14 +88,16 @@ export async function run(ctx) {
   );
   await shoot("specimen-1280.png", { x: 0, y: 0, width: 1280, height: 800, scale: 1 });
 
-  await setState("folded");
-  const folded = await settle(READ, atFolded(rest), "specimen-folded");
-  check(
-    "SB4 folded, through the slip's own fold: the slip is gone and its tab shown, the Glass moves out to the chrome's inset, the legend row re-centres rightward",
-    !!folded && folded.st.folded && folded.slipVis === "hidden" && folded.tabVis === "visible" &&
-      Math.abs(folded.innerW - folded.glass.right - folded.chromeX * folded.rem) < 2 && folded.legend.x > rest.legend.x,
-    JSON.stringify(folded && { st: folded.st, slip: folded.slipVis, tab: folded.tabVis, glass: folded.glass, legendX: [rest && rest.legend.x, folded.legend.x] }),
-  );
+  await step("SB4", async () => {
+    await setState("folded");
+    const folded = await settle(READ, atFolded(rest), "specimen-folded");
+    check(
+      "SB4 folded, through the slip's own fold: the slip is gone and its tab shown, the Glass moves out to the chrome's inset, the legend row re-centres rightward",
+      !!folded && folded.st.folded && folded.slipVis === "hidden" && folded.tabVis === "visible" &&
+        Math.abs(folded.innerW - folded.glass.right - folded.chromeX * folded.rem) < 2 && folded.legend.x > rest.legend.x,
+      JSON.stringify(folded && { st: folded.st, slip: folded.slipVis, tab: folded.tabVis, glass: folded.glass, legendX: [rest && rest.legend.x, folded.legend.x] }),
+    );
+  });
 
   await setState("leaned");
   await sleep(900);

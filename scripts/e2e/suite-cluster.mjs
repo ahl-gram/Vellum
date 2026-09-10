@@ -2,6 +2,7 @@
 import { makeStage, readCam, atLandfall } from "./home-support.mjs";
 import { sampleRow, luminance } from "./pixel-support.mjs";
 import { makeSettle } from "./settle-support.mjs";
+import { makeStep } from "./step-support.mjs";
 
 const REM = 16;
 const rectOf = (sel) => `(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom }; })()`;
@@ -43,6 +44,8 @@ const brightest = (strip) => Math.max(...strip.map(luminance));
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
+  // The drawer groups are stepped (#534): a settle that gives up inside one fails THAT check by name and the groups after it still run. CL1, CL2, CL3 and CL6 are not, since settleHome returns null rather than throwing and their checks already guard on it.
+  const step = makeStep(ctx);
   const { pressKey, clickAt, settleHome } = makeStage(ctx);
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
@@ -107,65 +110,71 @@ export async function run(ctx) {
   );
 
   const burger = closed?.burger ?? null;
-  if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
-  const open = await settle(DRAWER_READ, atOpen, "open");
-  const firstDoor = open?.doors[0] ?? null;
-  await evaluate(`[...document.querySelectorAll("header.chrome nav.rooms a")].pop().focus()`);
-  await pressKey("Tab", "Tab", 9);
-  await sleep(400);
-  const tabbedOut = await evaluate(`(() => { const a = document.activeElement; return { inMain: !!(a && a.closest(".landfall")), tag: a ? a.tagName + (a.id ? "#" + a.id : "") : null, checked: document.querySelector(".rooms-reveal").checked, scrollY: window.scrollY }; })()`);
-  for (let i = 0; i < 20; i++) { await evaluate(`window.scrollTo(0, 0)`); await sleep(150); if ((await evaluate(`window.scrollY`)) === 0) break; }
-  check(
-    "CL4 a real tap on the burger slides the drawer home: anchored to the viewport corner, full height, seven doors stacked one per row at 44px or taller below the cluster and each one hit-testable (the first sticky cap sat over three of them), the burger still on top, the seed panel faded and untappable, the scrim riding in the survey section with the chrome raised above the cards, the stage and the seed form inert (never the chrome, and never the shelf or footer the scrim does not cover) so Tab past the last door never lands in the survey section but on the shelf below, and the scroll that brings the shelf into view closes the drawer (skeptic findings 5 and 8, round 2 finding 2), nothing scrolling sideways (#480 screenshot 2)",
-    !!open && open.checked && open.scrollW === 390 && open.nav.visibility === "visible" && open.nav.transform === "none" && open.nav.pointer === "auto"
-      && open.nav.rect.x === 0 && open.nav.rect.y === 0 && open.nav.rect.h >= 800 && open.nav.rect.w <= 16 * REM + 0.5
-      && stacked(open.doors) && open.doors.every((d) => d.h >= 44 && d.tappable) && firstDoor !== null && open.burger !== null && firstDoor.y >= open.burger.bottom + 8
-      && open.burgerReachable && open.seedOpacity === "0" && open.seedPointer === "none"
-      && open.scrim.position === "absolute" && open.scrim.pointer === "auto" && Number(open.scrim.z) === 41 && open.chromeZ === "45"
-      && open.stageInert && open.seedInert && !open.shelfInert && !open.footerInert && !open.chromeInert
-      && !tabbedOut.inMain && !tabbedOut.checked && tabbedOut.scrollY > 0 && /transform/.test(open.nav.transition),
-    JSON.stringify({ open, tabbedOut }),
-  );
-  await shoot("cluster-drawer-open-390.png");
+  await step("CL4", async () => {
+    if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
+    const open = await settle(DRAWER_READ, atOpen, "open");
+    const firstDoor = open?.doors[0] ?? null;
+    await evaluate(`[...document.querySelectorAll("header.chrome nav.rooms a")].pop().focus()`);
+    await pressKey("Tab", "Tab", 9);
+    await sleep(400);
+    const tabbedOut = await evaluate(`(() => { const a = document.activeElement; return { inMain: !!(a && a.closest(".landfall")), tag: a ? a.tagName + (a.id ? "#" + a.id : "") : null, checked: document.querySelector(".rooms-reveal").checked, scrollY: window.scrollY }; })()`);
+    for (let i = 0; i < 20; i++) { await evaluate(`window.scrollTo(0, 0)`); await sleep(150); if ((await evaluate(`window.scrollY`)) === 0) break; }
+    check(
+      "CL4 a real tap on the burger slides the drawer home: anchored to the viewport corner, full height, seven doors stacked one per row at 44px or taller below the cluster and each one hit-testable (the first sticky cap sat over three of them), the burger still on top, the seed panel faded and untappable, the scrim riding in the survey section with the chrome raised above the cards, the stage and the seed form inert (never the chrome, and never the shelf or footer the scrim does not cover) so Tab past the last door never lands in the survey section but on the shelf below, and the scroll that brings the shelf into view closes the drawer (skeptic findings 5 and 8, round 2 finding 2), nothing scrolling sideways (#480 screenshot 2)",
+      !!open && open.checked && open.scrollW === 390 && open.nav.visibility === "visible" && open.nav.transform === "none" && open.nav.pointer === "auto"
+        && open.nav.rect.x === 0 && open.nav.rect.y === 0 && open.nav.rect.h >= 800 && open.nav.rect.w <= 16 * REM + 0.5
+        && stacked(open.doors) && open.doors.every((d) => d.h >= 44 && d.tappable) && firstDoor !== null && open.burger !== null && firstDoor.y >= open.burger.bottom + 8
+        && open.burgerReachable && open.seedOpacity === "0" && open.seedPointer === "none"
+        && open.scrim.position === "absolute" && open.scrim.pointer === "auto" && Number(open.scrim.z) === 41 && open.chromeZ === "45"
+        && open.stageInert && open.seedInert && !open.shelfInert && !open.footerInert && !open.chromeInert
+        && !tabbedOut.inMain && !tabbedOut.checked && tabbedOut.scrollY > 0 && /transform/.test(open.nav.transition),
+      JSON.stringify({ open, tabbedOut }),
+    );
+    await shoot("cluster-drawer-open-390.png");
+  });
 
-  if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
-  const openForEscape = await settle(DRAWER_READ, atOpen, "openForEscape");
-  await pressKey("Escape", "Escape", 27);
-  const afterEscape = await settle(DRAWER_READ, atClosed, "afterEscape");
-  if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
-  const reopened = await settle(DRAWER_READ, atOpen, "reopened");
-  await clickAt(370, 500);
-  const afterScrim = await settle(DRAWER_READ, atClosed, "afterScrim");
-  check(
-    "CL5 Escape closes the drawer, the burger reopens it, and a real tap on the scrim closes it again: each close is a slide back off the left edge, doors hidden, and each script close releases the page from inert (prover round 3, C6) (#480)",
-    !!openForEscape && openForEscape.checked && openForEscape.scrollY === 0
-      && !!afterEscape && !afterEscape.checked && offLeft(afterEscape.nav) && afterEscape.seedOpacity === "1" && !afterEscape.stageInert
-      && !!reopened && reopened.checked && reopened.nav.visibility === "visible" && reopened.stageInert
-      && !!afterScrim && !afterScrim.checked && offLeft(afterScrim.nav) && !afterScrim.stageInert,
-    JSON.stringify({ openForEscape: openForEscape && { checked: openForEscape.checked, scrollY: openForEscape.scrollY }, afterEscape: afterEscape && { checked: afterEscape.checked, nav: afterEscape.nav }, reopened: reopened && reopened.checked, afterScrim: afterScrim && { checked: afterScrim.checked, nav: afterScrim.nav } }),
-  );
+  await step("CL5", async () => {
+    if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
+    const openForEscape = await settle(DRAWER_READ, atOpen, "openForEscape");
+    await pressKey("Escape", "Escape", 27);
+    const afterEscape = await settle(DRAWER_READ, atClosed, "afterEscape");
+    if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
+    const reopened = await settle(DRAWER_READ, atOpen, "reopened");
+    await clickAt(370, 500);
+    const afterScrim = await settle(DRAWER_READ, atClosed, "afterScrim");
+    check(
+      "CL5 Escape closes the drawer, the burger reopens it, and a real tap on the scrim closes it again: each close is a slide back off the left edge, doors hidden, and each script close releases the page from inert (prover round 3, C6) (#480)",
+      !!openForEscape && openForEscape.checked && openForEscape.scrollY === 0
+        && !!afterEscape && !afterEscape.checked && offLeft(afterEscape.nav) && afterEscape.seedOpacity === "1" && !afterEscape.stageInert
+        && !!reopened && reopened.checked && reopened.nav.visibility === "visible" && reopened.stageInert
+        && !!afterScrim && !afterScrim.checked && offLeft(afterScrim.nav) && !afterScrim.stageInert,
+      JSON.stringify({ openForEscape: openForEscape && { checked: openForEscape.checked, scrollY: openForEscape.scrollY }, afterEscape: afterEscape && { checked: afterEscape.checked, nav: afterEscape.nav }, reopened: reopened && reopened.checked, afterScrim: afterScrim && { checked: afterScrim.checked, nav: afterScrim.nav } }),
+    );
+  });
 
-  if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
-  const openAgain = await settle(DRAWER_READ, atOpen, "openAgain");
-  await touch("touchStart", [{ x: 330, y: 600, id: 0 }]);
-  for (let i = 1; i <= 6; i++) await touch("touchMove", [{ x: 330, y: 600 - 60 * i, id: 0 }]);
-  await touch("touchEnd", []);
-  const swiped = await settle(DRAWER_READ, atClosed, "swiped");
-  // The fling keeps scrolling after the read; hold the top until two reads agree it is still.
-  await sleep(900);
-  for (let i = 0, still = 0; i < 30 && still < 2; i++) { await evaluate(`window.scrollTo(0, 0)`); await sleep(150); still = (await evaluate(`window.scrollY`)) === 0 ? still + 1 : 0; }
-  const burgerBack = await evaluate(rectOf(".rooms-reveal"));
-  if (burgerBack) await clickAt(burgerBack.x + burgerBack.w / 2, burgerBack.y + burgerBack.h / 2);
-  const reopenedAtTop = await settle(DRAWER_READ, atOpen, "reopenedAtTop");
-  await pressKey("Escape", "Escape", 27);
-  await sleep(400);
-  check(
-    "CL8 a real swipe on the scrim scrolls the page and the scroll CLOSES the drawer: no open drawer, burger or scrim ever rides off-screen as an orphaned state (plate round 2 C, skeptic findings 4 and round 2 finding 2), the point that hit the scrim before the swipe hits the live shelf after it, the page is released, and back at the top the burger opens it again",
-    !!openAgain && openAgain.checked && openAgain.scrimHitAt400 === "SECTION.landfall"
-      && !!swiped && !swiped.checked && swiped.scrollY > 100 && swiped.scrimHitAt400 !== "SECTION.landfall" && !swiped.stageInert && !swiped.shelfInert && offLeft(swiped.nav)
-      && !!reopenedAtTop && reopenedAtTop.checked && reopenedAtTop.scrollY === 0,
-    JSON.stringify({ openAgain: openAgain && { checked: openAgain.checked, hit: openAgain.scrimHitAt400 }, swiped: swiped && { checked: swiped.checked, scrollY: swiped.scrollY, hit: swiped.scrimHitAt400, stageInert: swiped.stageInert, shelfInert: swiped.shelfInert, navVisibility: swiped.nav.visibility }, reopenedAtTop: reopenedAtTop && { checked: reopenedAtTop.checked, scrollY: reopenedAtTop.scrollY } }),
-  );
+  await step("CL8", async () => {
+    if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
+    const openAgain = await settle(DRAWER_READ, atOpen, "openAgain");
+    await touch("touchStart", [{ x: 330, y: 600, id: 0 }]);
+    for (let i = 1; i <= 6; i++) await touch("touchMove", [{ x: 330, y: 600 - 60 * i, id: 0 }]);
+    await touch("touchEnd", []);
+    const swiped = await settle(DRAWER_READ, atClosed, "swiped");
+    // The fling keeps scrolling after the read; hold the top until two reads agree it is still.
+    await sleep(900);
+    for (let i = 0, still = 0; i < 30 && still < 2; i++) { await evaluate(`window.scrollTo(0, 0)`); await sleep(150); still = (await evaluate(`window.scrollY`)) === 0 ? still + 1 : 0; }
+    const burgerBack = await evaluate(rectOf(".rooms-reveal"));
+    if (burgerBack) await clickAt(burgerBack.x + burgerBack.w / 2, burgerBack.y + burgerBack.h / 2);
+    const reopenedAtTop = await settle(DRAWER_READ, atOpen, "reopenedAtTop");
+    await pressKey("Escape", "Escape", 27);
+    await sleep(400);
+    check(
+      "CL8 a real swipe on the scrim scrolls the page and the scroll CLOSES the drawer: no open drawer, burger or scrim ever rides off-screen as an orphaned state (plate round 2 C, skeptic findings 4 and round 2 finding 2), the point that hit the scrim before the swipe hits the live shelf after it, the page is released, and back at the top the burger opens it again",
+      !!openAgain && openAgain.checked && openAgain.scrimHitAt400 === "SECTION.landfall"
+        && !!swiped && !swiped.checked && swiped.scrollY > 100 && swiped.scrimHitAt400 !== "SECTION.landfall" && !swiped.stageInert && !swiped.shelfInert && offLeft(swiped.nav)
+        && !!reopenedAtTop && reopenedAtTop.checked && reopenedAtTop.scrollY === 0,
+      JSON.stringify({ openAgain: openAgain && { checked: openAgain.checked, hit: openAgain.scrimHitAt400 }, swiped: swiped && { checked: swiped.checked, scrollY: swiped.scrollY, hit: swiped.scrimHitAt400, stageInert: swiped.stageInert, shelfInert: swiped.shelfInert, navVisibility: swiped.nav.visibility }, reopenedAtTop: reopenedAtTop && { checked: reopenedAtTop.checked, scrollY: reopenedAtTop.scrollY } }),
+    );
+  });
 
   const narrows = [];
   for (const w of [360, 320]) {
@@ -180,48 +189,50 @@ export async function run(ctx) {
     JSON.stringify(narrows),
   );
 
-  await setMobileViewport(844, 390);
-  const camWide = await settleHome();
-  const wideClosed = await evaluate(DRAWER_READ);
-  const pip = await evaluate(`(() => { const b = document.querySelector('.lf-station[data-station="explorer"]'); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
-  if (pip) { await touch("touchStart", [{ x: pip.x, y: pip.y, id: 0 }]); await touch("touchEnd", []); }
-  let cardOpen = false;
-  for (let i = 0; i < 40 && !cardOpen; i++) { await sleep(100); cardOpen = await evaluate(`(() => { const c = document.getElementById("lf-card-explorer"); return !!c && !c.hidden; })()`); }
-  if (wideClosed?.burger) await clickAt(wideClosed.burger.x + wideClosed.burger.w / 2, wideClosed.burger.y + wideClosed.burger.h / 2);
-  const overCard = await settle(DRAWER_READ, atOpen, "overCard");
-  const cardInert = await evaluate(`document.getElementById("lf-card-explorer").inert`);
-  const shownRun = await evaluate(glyphRun("Explorer"));
-  const shownStrip = shownRun ? await sampleRow(send, Math.round(shownRun.x + shownRun.w / 2), Math.round(shownRun.y + shownRun.h / 2), 12) : [];
-  const scrollBefore = await evaluate(`window.scrollY`);
-  for (let i = 0; i < 8; i++) await send("Input.dispatchMouseEvent", { type: "mouseWheel", x: 120, y: 250, deltaX: 0, deltaY: 200 });
-  await sleep(400);
-  const cappedRun = await evaluate(glyphRun("Explorer"));
-  const cappedStrip = cappedRun ? await sampleRow(send, Math.round(cappedRun.x + cappedRun.w / 2), Math.round(cappedRun.y + cappedRun.h / 2), 12) : [];
-  const landscape = await evaluate(`(() => {
-    const nav = document.querySelector("header.chrome nav.rooms");
-    const cluster = document.querySelector("header.chrome").getBoundingClientRect();
-    const doors = [...nav.querySelectorAll("a, [aria-current]")].map((a) => a.getBoundingClientRect());
-    const last = doors[doors.length - 1];
-    const probe = document.elementFromPoint(cluster.left + 20, cluster.bottom + 12);
-    const runEl = [...nav.querySelectorAll("a, [aria-current]")].find((a) => a.textContent === "Explorer");
-    const rg = new Range(); rg.selectNodeContents(runEl); const rb = rg.getBoundingClientRect();
-    const stripHit = document.elementFromPoint(Math.round(rb.x + rb.width / 2) + 6, Math.round(rb.y + rb.height / 2));
-    const lastEl = [...nav.querySelectorAll("a, [aria-current]")].pop();
-    const lastHit = document.elementFromPoint(last.x + 20, last.y + last.height / 2);
-    return { overflow: nav.scrollHeight - nav.clientHeight, scrollTop: nav.scrollTop, lastBottom: last.bottom, clientH: nav.clientHeight, lastTappable: lastHit === lastEl,
-      firstTop: doors[0].top, clusterBottom: cluster.bottom, pageScrollY: window.scrollY,
-      capHit: probe === nav, hitTag: probe ? probe.tagName : null, stripOnCap: stripHit === nav };
-  })()`);
-  check(
-    "CL7 landscape 844x390: the drawer overflows its box, a real wheel scrolls it to the last door with the page unmoved, with a station card OPEN beneath it every door in view is still hit-testable, the last one once scrolled to, and the card inert (the card's z 40 outranked the drawer, skeptic finding 5), and the doors scrolled up under the cluster are hidden beneath the sticky cap, never showing through the lettering: the cap wins the hit-test AND a pixel strip through a scrolled door's glyphs, sampled at page scroll 0 so viewport and clip coordinates agree and hit-tested onto the cap, reads chart ink where the same strip read parchment unscrolled (plate finding G on PR #482; the pixel half closes prover round 2's A4, a transparent cap that still won the hit-test)",
-    !!camWide && cardOpen && !!overCard && overCard.checked && cardInert === true
-      && overCard.doors.filter((d) => d.bottom <= 390).length >= 5 && overCard.doors.filter((d) => d.bottom <= 390).every((d) => d.tappable)
-      && !!landscape && landscape.overflow > 0 && landscape.lastTappable && landscape.scrollTop > 0 && landscape.lastBottom <= landscape.clientH + 0.5
-      && scrollBefore === 0 && landscape.pageScrollY === 0 && landscape.firstTop < landscape.clusterBottom && landscape.capHit && landscape.stripOnCap
-      && shownStrip.length === 12 && brightest(shownStrip) > 150 && cappedStrip.length === 12 && brightest(cappedStrip) < 100,
-    JSON.stringify({ camWide: !!camWide, cardOpen, cardInert, doorsTappable: overCard?.doors.map((d) => d.tappable), scrollBefore, landscape, shownRun, shownBrightest: shownStrip.length ? brightest(shownStrip) : null, cappedRun, cappedBrightest: cappedStrip.length ? brightest(cappedStrip) : null }),
-  );
-  await shoot("cluster-drawer-landscape-scrolled.png");
+  await step("CL7", async () => {
+    await setMobileViewport(844, 390);
+    const camWide = await settleHome();
+    const wideClosed = await evaluate(DRAWER_READ);
+    const pip = await evaluate(`(() => { const b = document.querySelector('.lf-station[data-station="explorer"]'); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
+    if (pip) { await touch("touchStart", [{ x: pip.x, y: pip.y, id: 0 }]); await touch("touchEnd", []); }
+    let cardOpen = false;
+    for (let i = 0; i < 40 && !cardOpen; i++) { await sleep(100); cardOpen = await evaluate(`(() => { const c = document.getElementById("lf-card-explorer"); return !!c && !c.hidden; })()`); }
+    if (wideClosed?.burger) await clickAt(wideClosed.burger.x + wideClosed.burger.w / 2, wideClosed.burger.y + wideClosed.burger.h / 2);
+    const overCard = await settle(DRAWER_READ, atOpen, "overCard");
+    const cardInert = await evaluate(`document.getElementById("lf-card-explorer").inert`);
+    const shownRun = await evaluate(glyphRun("Explorer"));
+    const shownStrip = shownRun ? await sampleRow(send, Math.round(shownRun.x + shownRun.w / 2), Math.round(shownRun.y + shownRun.h / 2), 12) : [];
+    const scrollBefore = await evaluate(`window.scrollY`);
+    for (let i = 0; i < 8; i++) await send("Input.dispatchMouseEvent", { type: "mouseWheel", x: 120, y: 250, deltaX: 0, deltaY: 200 });
+    await sleep(400);
+    const cappedRun = await evaluate(glyphRun("Explorer"));
+    const cappedStrip = cappedRun ? await sampleRow(send, Math.round(cappedRun.x + cappedRun.w / 2), Math.round(cappedRun.y + cappedRun.h / 2), 12) : [];
+    const landscape = await evaluate(`(() => {
+      const nav = document.querySelector("header.chrome nav.rooms");
+      const cluster = document.querySelector("header.chrome").getBoundingClientRect();
+      const doors = [...nav.querySelectorAll("a, [aria-current]")].map((a) => a.getBoundingClientRect());
+      const last = doors[doors.length - 1];
+      const probe = document.elementFromPoint(cluster.left + 20, cluster.bottom + 12);
+      const runEl = [...nav.querySelectorAll("a, [aria-current]")].find((a) => a.textContent === "Explorer");
+      const rg = new Range(); rg.selectNodeContents(runEl); const rb = rg.getBoundingClientRect();
+      const stripHit = document.elementFromPoint(Math.round(rb.x + rb.width / 2) + 6, Math.round(rb.y + rb.height / 2));
+      const lastEl = [...nav.querySelectorAll("a, [aria-current]")].pop();
+      const lastHit = document.elementFromPoint(last.x + 20, last.y + last.height / 2);
+      return { overflow: nav.scrollHeight - nav.clientHeight, scrollTop: nav.scrollTop, lastBottom: last.bottom, clientH: nav.clientHeight, lastTappable: lastHit === lastEl,
+        firstTop: doors[0].top, clusterBottom: cluster.bottom, pageScrollY: window.scrollY,
+        capHit: probe === nav, hitTag: probe ? probe.tagName : null, stripOnCap: stripHit === nav };
+    })()`);
+    check(
+      "CL7 landscape 844x390: the drawer overflows its box, a real wheel scrolls it to the last door with the page unmoved, with a station card OPEN beneath it every door in view is still hit-testable, the last one once scrolled to, and the card inert (the card's z 40 outranked the drawer, skeptic finding 5), and the doors scrolled up under the cluster are hidden beneath the sticky cap, never showing through the lettering: the cap wins the hit-test AND a pixel strip through a scrolled door's glyphs, sampled at page scroll 0 so viewport and clip coordinates agree and hit-tested onto the cap, reads chart ink where the same strip read parchment unscrolled (plate finding G on PR #482; the pixel half closes prover round 2's A4, a transparent cap that still won the hit-test)",
+      !!camWide && cardOpen && !!overCard && overCard.checked && cardInert === true
+        && overCard.doors.filter((d) => d.bottom <= 390).length >= 5 && overCard.doors.filter((d) => d.bottom <= 390).every((d) => d.tappable)
+        && !!landscape && landscape.overflow > 0 && landscape.lastTappable && landscape.scrollTop > 0 && landscape.lastBottom <= landscape.clientH + 0.5
+        && scrollBefore === 0 && landscape.pageScrollY === 0 && landscape.firstTop < landscape.clusterBottom && landscape.capHit && landscape.stripOnCap
+        && shownStrip.length === 12 && brightest(shownStrip) > 150 && cappedStrip.length === 12 && brightest(cappedStrip) < 100,
+      JSON.stringify({ camWide: !!camWide, cardOpen, cardInert, doorsTappable: overCard?.doors.map((d) => d.tappable), scrollBefore, landscape, shownRun, shownBrightest: shownStrip.length ? brightest(shownStrip) : null, cappedRun, cappedBrightest: cappedStrip.length ? brightest(cappedStrip) : null }),
+    );
+    await shoot("cluster-drawer-landscape-scrolled.png");
+  });
 
   await clearMobile();
   await send("Emulation.clearDeviceMetricsOverride");

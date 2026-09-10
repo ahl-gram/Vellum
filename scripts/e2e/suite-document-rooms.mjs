@@ -1,6 +1,7 @@
 // The document rooms' index slip (#462 Landfall Sub 7, document-room rulings 1 to 4): the index is server-rendered from the page's own sections, inks the section being read, folds to hand the sheet the width, is the bottom sheet on a phone, and on the Glossary narrows to the term names typed. Every geometry is MEASURED; the scripts-off arm carries its control.
 import { scopedHealth } from "./room-support.mjs";
 import { makeSettle } from "./settle-support.mjs";
+import { makeStep } from "./step-support.mjs";
 
 const FAQ = "/faq/";
 const GLOSSARY = "/glossary/";
@@ -36,6 +37,8 @@ const READ = `(() => {
 export async function run(ctx) {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
+  // IX3 is the one group here that waits on a transition, so it is the one that is stepped (#534).
+  const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
 
   // A room's readiness is its own shell (waitReady keys on the Explorer's members); the index script runs at parse, so the slip's inline top is the boot signal.
@@ -84,17 +87,19 @@ export async function run(ctx) {
     `at the head #${target}: inked ${JSON.stringify(atHead.inked)}, now ${JSON.stringify(atHead.now)}; at its first question #${firstEntryOf}: inked ${JSON.stringify(atEntry.inked)}, now ${JSON.stringify(atEntry.now)}`,
   );
 
-  await evaluate(`document.querySelector("#index .slip-fold").click()`);
-  const folded = await settle(READ, atFolded(faq), "index-folded");
-  await evaluate(`document.querySelector(".slip-tab").click()`);
-  const back = await settle(READ, atUnfolded(folded), "index-unfolded");
-  check(
-    "IX3 folding the index hands the sheet the width in one settle and stands the bookmark tab on the right edge; the tab brings the index back and the sheet shrinks the same way (#462 ruling 2, Alex's own wording)",
-    folded.folded && folded.slipVisibility === "hidden" && folded.tabVisibility === "visible" && folded.tab.right >= folded.innerW - 1 &&
-      folded.main.right > faq.main.right + 200 && folded.sheet.right > faq.sheet.right + 200 &&
-      !back.folded && back.slipVisibility === "visible" && back.tabVisibility === "hidden" && Math.abs(back.main.right - faq.main.right) < 1,
-    `folded: slip ${folded.slipVisibility} tab ${folded.tabVisibility} right=${folded.tab && folded.tab.right}, main right ${faq.main.right.toFixed(1)} -> ${folded.main.right.toFixed(1)} -> ${back.main.right.toFixed(1)}, sheet right ${faq.sheet.right.toFixed(1)} -> ${folded.sheet.right.toFixed(1)}`,
-  );
+  await step("IX3", async () => {
+    await evaluate(`document.querySelector("#index .slip-fold").click()`);
+    const folded = await settle(READ, atFolded(faq), "index-folded");
+    await evaluate(`document.querySelector(".slip-tab").click()`);
+    const back = await settle(READ, atUnfolded(folded), "index-unfolded");
+    check(
+      "IX3 folding the index hands the sheet the width in one settle and stands the bookmark tab on the right edge; the tab brings the index back and the sheet shrinks the same way (#462 ruling 2, Alex's own wording)",
+      folded.folded && folded.slipVisibility === "hidden" && folded.tabVisibility === "visible" && folded.tab.right >= folded.innerW - 1 &&
+        folded.main.right > faq.main.right + 200 && folded.sheet.right > faq.sheet.right + 200 &&
+        !back.folded && back.slipVisibility === "visible" && back.tabVisibility === "hidden" && Math.abs(back.main.right - faq.main.right) < 1,
+      `folded: slip ${folded.slipVisibility} tab ${folded.tabVisibility} right=${folded.tab && folded.tab.right}, main right ${faq.main.right.toFixed(1)} -> ${folded.main.right.toFixed(1)} -> ${back.main.right.toFixed(1)}, sheet right ${faq.sheet.right.toFixed(1)} -> ${folded.sheet.right.toFixed(1)}`,
+    );
+  });
 
   await goto(GLOSSARY);
   const glossary = await evaluate(READ);
