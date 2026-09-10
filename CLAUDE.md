@@ -1,23 +1,16 @@
 # Vellum: Project Instructions
 
-Procedural fantasy-atlas generator (TypeScript, Node 24+ native type-stripping; the engine
-tree has no runtime deps, the site carries three d3 ones, see "Zero runtime dependencies"
-below). Working context lives in `RESUME-HERE.md` (start here) and
-`session-notes/SESSION-NOTES.md` (history; its rotated `SESSION-NOTES-ARCHIVE-*`
-files sit beside it in `session-notes/`, moved off the repo root 2026-07-31),
-both gitignored. **Durable facts and gotchas live in auto-memory, split across
-THREE linked files** (it outgrew one Read on 2026-07-24): `project_vellum.md` is the core
-(identity, the golden / re-roll contract, engine + render gotchas, process),
-`project_vellum_site.md` is the delivery layer (pages, shell, bundles, CI, deploy), and
-`project_vellum_livingchart.md` is everything the Explorer animates (Glass zoom, region
-worlds, overlays, the voyage). Read the core plus whichever companion your work touches.
-The live PLAN is the private GitHub Project "Vellum Roadmap"
-(`gh project item-list 1 --owner ahl-gram`); its durable sequencing RULES live in
-`specs/rulebook.md`. **The `roadmap/` dir is DELETED (2026-07-24)** and there is no local plan
-file: the Project is the plan and `specs/rulebook.md` is the rulebook. Its three files were superseded drafts, and
-two had gone dangerous (the archive still named checksum `2890117437` and a `{#80, #93}`
-flight-exclusion set; `ROADMAP.md` still said to run `npm run site`). If you ever need them
-they are frozen in the claude-config backup at `home/CodeProjects/Vellum/roadmap/`.
+Procedural fantasy-atlas generator (TypeScript, Node 24+ native type-stripping). Working context
+lives in `RESUME-HERE.md` (start here) and `session-notes/SESSION-NOTES.md` (history; its rotated
+`SESSION-NOTES-ARCHIVE-*` files sit beside it), both gitignored. **Durable facts and gotchas live in
+auto-memory, split across linked files**: `project_vellum.md` is the core (identity, the golden /
+re-roll contract, engine + render gotchas, process), `project_vellum_site.md` is the delivery layer
+(pages, shell, bundles, CI, deploy), `project_vellum_livingchart.md` is everything the Explorer
+animates (Glass zoom, region worlds, overlays, the voyage), and `project_vellum_landfall.md` is the
+Landfall epic (#454), the full-site redesign around the atelier-map mockup and the process that
+shipped it. Read the core plus whichever companion your work touches. The live PLAN is the private
+GitHub Project "Vellum Roadmap" (`gh project item-list 1 --owner ahl-gram`): the Project is the
+plan, and there is no local plan file.
 
 **`specs/` holds the tracked, normative house specs, and unlike everything above it is public and
 readable by anyone with the repo.** `specs/rulebook.md` is the sequencing rules, working agreements
@@ -25,9 +18,9 @@ and how a design decision gets made; `specs/ui-design.md` is the look and feel i
 the type case, the palette by role, the chart's dress, the rooms and their furniture, the voice,
 contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting).
 **`specs/rulebook.md` is REQUIRED READING before any change that touches the renderer, a committed
-chart, the golden, a seed, or the order of work**, and `specs/ui-design.md` before any work whose
-deliverable is an appearance. Neither is summarized here; where this file and a spec disagree, the
-spec is right. The ruled pixels those specs were decided from are archived under `design/`, one
+chart, the golden, a regen, a seed, or the order of work**, and `specs/ui-design.md` before any work
+whose deliverable is an appearance. Neither is summarized here; where this file and a spec disagree,
+the spec is right. The ruled pixels those specs were decided from are archived under `design/`, one
 directory per design round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a
 sitting).
 
@@ -50,8 +43,7 @@ files, the private "Vellum Roadmap" GitHub Project, the claude-config backup, th
 `~/CodeProjects/CLAUDE.md`, and the gitignored `RESUME-HERE.md` and `session-notes/`. Skip those and
 use the repo itself plus the GitHub issues, which are public and carry the ratified decisions. The
 engineering rules below (measure before you assert, read the issue before you build, test-first)
-stand on their own and are the part worth having, as do the two tracked specs under `specs/`, which
-are public and hold the goldens-and-regens rules this file used to carry.
+stand on their own and are the part worth having, as do the two tracked specs under `specs/`.
 
 ## Session handoff: keep the roadmap Project current
 
@@ -64,14 +56,9 @@ a PR to update and sits beside the command that replaces it earns nothing. At ev
 the board current with `gh`: newly filed issues get added and phased; shipped issues get closed.
 The global `session-handoff` skill updates SESSION-NOTES (here at
 `session-notes/SESSION-NOTES.md`, not the repo root), RESUME-HERE, and auto-memory
-but does NOT know about the Project, so this is the Vellum-specific extra step. The durable
-sequencing RULES (the golden flight-exclusion set, land-regens-alone, the cost axis, cross-epic
-coordination) live in **`specs/rulebook.md`**, which is normative and complete: a reader who reads
-only that file is correctly informed. It also holds how a design decision is made (mockups, a
-sitting, a provisional ruling, live use, the post-use re-review) and the fidelity rule. **A rule
-change EDITS that file** in a branch and a PR, as readily for a corrected fact as for a changed
-rule, and may leave a dated comment on the originating issue as the audit trail. It lived in issue
-#193's body until 2026-09-09; that issue is now a pointer and takes no new rules.
+but does NOT know about the Project, so this is the Vellum-specific extra step. **A rule change
+EDITS `specs/rulebook.md`** in a branch and a PR, as readily for a corrected fact as for a changed
+rule, and may leave a dated comment on the originating issue as the audit trail.
 
 `gh project` needs the `project` token scope (`gh auth refresh -s project`). Read the plan at
 session start with `gh project item-list 1 --owner ahl-gram`, or open the Project in the browser.
@@ -101,20 +88,15 @@ This relaxes scope-minimalism ONLY. It does NOT relax correctness, determinism, 
 re-roll discipline, the test-first requirement, or security. Delight that breaks the byte-identity
 contract or skips tests is not delight.
 
-## "Zero runtime dependencies" describes the present, it is not a constraint
+## Dependencies are a normal choice, not a constraint
 
-**The present already moved.** `dependencies` in package.json holds `d3-zoom`,
-`d3-selection` and `d3-transition`, taken on for the Surveyor's Glass and bundled into the
-site by Vite (#163, then #208). What remains true is the narrower claim the README now makes
-(rewritten at Sub 6, #207): the **engine** tree that Node runs directly has no runtime deps,
-while the **site** takes them where they earn their keep. Neither half is a design goal or a
-rule to preserve; both are just descriptions of where things stand. When you design or
-build something, treat an external dependency like any other choice: reach for a good,
-well-maintained library when it genuinely helps, weighed on its own merits in normal review
-(bundle size, supply-chain surface, and the "Node runs the TypeScript directly, no build step"
-property it might cost). Do NOT reject or contort a design just to keep the dependency count at
-zero, and do not present zero-dep as a requirement it is not. If a dependency is the right tool,
-propose it plainly with its tradeoffs and let Alex decide.
+The **engine** tree that Node runs directly has no runtime deps; the **site** takes them where they
+earn their keep, bundled by Vite (`dependencies` in package.json is the live list, so read it rather
+than a copy). Neither half is a design goal or a rule to preserve. Treat an external dependency like
+any other choice, weighed on its own merits in normal review (bundle size, supply-chain surface, and
+the "Node runs the TypeScript directly, no build step" property it might cost). Do NOT reject or
+contort a design just to keep the count at zero, and do not present zero-dep as a requirement it is
+not. If a dependency is the right tool, propose it plainly with its tradeoffs and let Alex decide.
 
 ## One language, one pipeline (post-#260)
 
@@ -125,21 +107,6 @@ assets only (goldens, fonts, CSS, the icons), and a hand-authored script anywher
 very good, stated reason (record it in the issue or a comment at the file head). The one
 grandfathered corner is the e2e harness and suites (`scripts/e2e/*.mjs`); new suites may match
 their siblings, but that convention does not extend anywhere else.
-
-## Charts, goldens, and regens
-
-**These rules moved to `specs/rulebook.md` (2026-09-09) and this section is a pointer. You MUST read
-`specs/rulebook.md` before any change that touches the renderer, a committed chart, the golden, or a
-seed.** Nothing about goldens, regens, committed content or the re-roll is restated here: a second
-copy is how `PROJECTS.md` and the `roadmap/` archive both went dangerous, the archive still naming a
-retired checksum and a retired flight-exclusion set.
-
-What is over there, so you know when you need it: what is committed against what is generated and the
-one-line rule that decides; the golden checksum and what re-pins it; when a render change owes a
-regen and which commands write what; why a regen lands ALONE and why the drift guard is circular
-after one; why an SVG is never byte-compared across environments; the seed re-roll as the project's
-real cost axis, with the one-in-flight rule and the set it excludes against; and the Chronicle event
-cap.
 
 ## Measure before you assert
 
@@ -215,10 +182,8 @@ So fetch both, every time. Newest ratified statement wins, and **when a comment 
 disagree the comment supersedes** unless it says otherwise. That is the whole point of the
 convention: a body written before a big epic landed is historical intent, not current fact.
 
-**The rulebook is not an issue at all**: it is `specs/rulebook.md` in the repo, normative and
-complete, and a rule change edits that file. Issue #193 held it until 2026-09-09 and is now a
-pointer whose comments are history; do not read them to learn the rules and do not add rules there.
-See the handoff section above.
+**The rulebook is not an issue at all**: it is `specs/rulebook.md`. Issue #193 is a pointer whose
+comments are history; do not read them to learn the rules and do not add rules there.
 
 ```
 gh api repos/ahl-gram/Vellum/issues/N            # the body
@@ -328,15 +293,13 @@ worktree costs when both go wrong.
 
 ## The e2e harness leaves a browser profile behind if you do not let it finish
 
-Every local run mints a throwaway Brave profile under `tmpdir()` (`mkdtemp` in `scripts/e2e/harness.mjs`)
-and `cleanup()` removes it. Two things defeat that, and both are invisible until the machine is full:
-
-- **`cleanup()` is synchronous**, so it must delete synchronously. It called the PROMISE `rm` without
-  awaiting until 2026-09-08, and every caller exits immediately after it, so no run ever deleted its
-  own profile. Measured that day: **446 leaked profiles, 20GB**.
-- **An ad-hoc script that drives the harness owes the same discipline.** `cleanup(); process.exit(0)`
-  is the shape every probe in this repo uses, and it only works while cleanup stays synchronous. If
-  you add async teardown, await it before exiting, and never `pkill` a run you intend to repeat.
+Every local run mints a throwaway Brave profile under `tmpdir()` (`mkdtemp` in
+`scripts/e2e/harness.mjs`) and `cleanup()` removes it. **`cleanup()` is synchronous, so it must
+delete synchronously**: it called the PROMISE `rm` without awaiting until 2026-09-08, and every
+caller exits immediately after it, so no run ever deleted its own profile (measured that day: 446
+leaked profiles, 20GB). An ad-hoc script driving the harness owes the same discipline, since
+`cleanup(); process.exit(0)` is the shape every probe here uses; if you add async teardown, await it
+before exiting, and never `pkill` a run you intend to repeat.
 
 **The tell is a lane that STALLS rather than fails**: a suite you did not touch stops writing to the
 log, the process stays alive, and there is no failing check to read. That is a starved machine, not a
@@ -365,3 +328,9 @@ vs clientWidth, resolved computed styles, bounding boxes) plus named files in `o
 scale and 1:1 crop, since glance properties only exist at full scale (#75). It also carries the
 traps: headless Brave `--window-size` does not set the layout viewport, so narrow-width checks
 must go through CDP.
+
+## Tombstone: the `roadmap/` dir
+
+**Deleted 2026-07-24.** Its three files were superseded drafts and two had gone dangerous, naming a
+retired checksum and a retired flight-exclusion set. They are frozen in the claude-config backup at
+`home/CodeProjects/Vellum/roadmap/` if they are ever wanted.
