@@ -128,11 +128,13 @@ carries, so keep that qualifier or the doubling comes back.
 chart side is inside the byte-determinism contract, and the site quotes it as a token instead.
 
 **A river keeps its name over a graze.** Ratified at #194, which reworked a stricter first version
-after review: a river yields only where it would truly bury another label, never where it merely
-touches one. The bar is the fifteen percent "substantial collision" figure the original defect report
-argued from, measured on the river's true rotated ink against the smaller of the two boxes. Terrain
-glyphs reserve no space in the arena, so a river only ever yields to TEXT and grazing a stand of trees
-costs nothing. A residual graze just under the bar is the ruling working, not a defect.
+after review: a river yields only where it would truly bury a neighbour, never where it merely touches
+one. The bar is the fifteen percent "substantial collision" figure #178 measured the defect with,
+tested against the river's true rotated ink rather than an upright box. **What it yields to is
+everything already claimed in the arena**, which is more than the labels: the cartouche and the
+scalebar are claimed before any label layer runs, and the legend and compass are claimed too when
+they are drawn. Terrain glyphs are the exception that reserve nothing, so grazing a stand of trees
+costs a river nothing at all. A residual graze just under the bar is the ruling working, not a defect.
 
 ## The room and its furniture
 
@@ -335,11 +337,13 @@ A text search over the CSS passes on the broken code; pin the resolved value ins
 - **A transform on a container re-anchors every fixed descendant to it** for the length of the
   animation, so a landing settle applied to the wrong element throws the corner furniture across the
   page.
-- **Touch primary is `(hover: none) and (pointer: coarse)`, never `(hover: none)` on its own**,
-  wherever the query is written, a sheet or a `matchMedia` call. A machine with no pointing device at
-  all reports `hover: none` together with `pointer: none`, so the bare query matches it too and stands
-  the affordance down exactly where a keyboard user needs it. Linux headless CI is such a machine,
-  which is how this ships green on a laptop and red on the runner.
+- **An affordance gate is `(hover: none) and (pointer: coarse)`, never `(hover: none)` on its own**,
+  in a sheet or in a `matchMedia` call. A machine with no pointing device at all reports `hover: none`
+  together with `pointer: none`, so the bare query matches it too and stands the affordance down
+  exactly where a keyboard user needs it. Linux headless CI is such a machine, which is how this ships
+  green on a laptop and red on the runner (e2e BR4 and BR5 hold the line). The bare query is still the
+  right tool for **asking what the environment reports**, which is why an e2e probe uses it to detect
+  whether emulation took effect; the rule is about gating an affordance, not about the query.
 
 These are about looking rather than the cascade, and belong beside them:
 

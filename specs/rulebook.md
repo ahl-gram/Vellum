@@ -174,17 +174,17 @@ at #260 with its clean-list entry kept deliberately.
 - **A seed re-roll** (terrain reshape, culture or name-template edits) is a different, larger cost:
   it changes world identity and re-pins the golden checksum. **Only one may be in flight at a time**,
   and the set that rule excludes against is the next section.
-- **An optional recipe field is conditional-spread wherever the stamp writes or reads it**, never a
-  key that can hold `undefined`. Both sites sit in `src/render/recipe-meta.ts`, and the parse is the
-  dangerous half: an absent attribute reads back as `null`, `Number(null)` is `0`, and an absent
-  `coastWarp` means the 0.55 default rather than 0, so an unconditional key rebuilds a real value
-  where the chart recorded none. That is a different world for the same seed, which is the property
-  that lets the `chart` verb, the deploy builders and the Print Room agree on a seed. The emit half
-  is cheaper and still costs a regen, because an always-present attribute moves the bytes of every
-  committed chart. `test/render/recipe-meta.test.ts` guards the current fields with a `deepEqual`
-  that an `undefined` key breaks, and a new field owes its own case there. **`defaultRecipe`
+- **An optional recipe field is guarded at every place the stamp touches it**, never written as a
+  key that can hold `undefined`. `src/render/recipe-meta.ts` has the emit and the parse, both
+  conditional spreads, and a third that is not a spread at all: the human-readable metadata summary
+  builds its fragment with a ternary. Patch the two spreads and the summary silently goes incomplete.
+  The parse is the dangerous one: an absent attribute reads back as `null`, `Number(null)` is `0`, and
+  an absent `coastWarp` means the 0.55 default rather than 0, so an unconditional key rebuilds a real
+  value where the chart recorded none, which is a different world for the same seed. The emit side is
+  cheaper and still costs a regen. `test/render/recipe-meta.test.ts` guards the current fields with a
+  `deepEqual` an `undefined` key breaks, and a new field owes its own case there. **`defaultRecipe`
   (`src/world/generate.ts`) solves the same problem the other way**, with `stripUndefined` over the
-  overrides rather than a spread per field; pick one mechanism per field and do not mix them.
+  overrides; pick one mechanism per field and do not mix them.
 - **Seed 42's culture draw is a covenant.** A world's culture is picked with
   `rng.fork("culture").pick(CULTURES)`, and `pick` indexes `floor(u * length)`, so both the ORDER and
   the LENGTH of `CULTURES` in `src/society/names.ts` are load-bearing: seed 42's draw lands on
@@ -192,9 +192,12 @@ at #260 with its clean-list entry kept deliberately.
   `partitionRealms` takes no rng and runs before the culture fork, so `w.realms.labels` and the
   checksum above are untouched by any culture change; what goes red is the title, the capital, the
   realm names and the sea name, which `test/world/golden-seed42.test.ts` asserts beside the checksum.
-  Read a red there for which assertion failed before pricing the change. Adding or reordering a
-  culture is not the append-only edit the roster looks like: Names: Second Edition added four
-  cultures and placed `oromi` so the draw was unmoved, which is why that work moved no names.
+  Read a red there for which assertion failed before pricing the change, and know that the test
+  does not see all of it: `blazonRealms` takes the culture too, so a moved draw redresses the arms
+  and moves the committed `arms-42-*` and `chart-42-*` files with no test going red at all. Only a
+  regen diff shows that half. Adding or reordering a culture is not the append-only edit the roster
+  looks like: Names: Second Edition added four cultures and placed `oromi` so the draw was unmoved,
+  which is why that work moved no names.
   `test/world/covenant-seed42.test.ts` pins the draw and the index separately, so a future
   re-derivation of the index still has to keep the draw.
 - Watch the **Chronicle 14-event cap** (`events.slice(0, 14)` in `src/society/history.ts`), which starts dropping a line at a
@@ -297,15 +300,14 @@ comment. This is a convenience index, not their home.
   point from the place manifest (`buildPlaceManifest` in `src/render/place-manifest.ts`); the
   invariant is carried as a comment at the press-origin assignment in
   `src/site/living-chart/chronicle.ts`.
-- **Prospect byte pins (#229):** the plate pins hold only while all of `src/prospect/` stays
-  **libm-free and clock-free**, which is the guard's own name in `test/prospect/dress.test.ts`. The
-  ban is wider than trigonometry: the logarithms and exponentials, `pow`, `cbrt`, `hypot` and
-  `random` are banned beside `sin`, `cos` and `atan2`, and so are `Date.now` and `new Date`.
-  `Math.sqrt` is exempt, since IEEE requires it correctly rounded. The guard scans that tree with
-  comments stripped, because two of its modules state the contract in prose, and it carries a file
-  count floor so moving a file out of the layer reds it rather than shrinking its reach. Its
-  companion rule is that world-sourced geometry is quantized to three decimals before hashing, far
-  above the drift and far below any real composition change.
+- **Prospect byte pins:** the plate pins hold only while all of `src/prospect/` stays **libm-free and
+  clock-free**, which is the name of the guard in `test/prospect/dress.test.ts`. **That guard's regex
+  is the list**, and it is longer than the trigonometric calls: do not keep a copy of it here or in
+  your head, read it. `Math.sqrt` is exempt, since IEEE requires it correctly rounded. The guard
+  scans the tree with comments stripped, because two of its modules state the contract in prose, and
+  it asserts a floor on the file count so it cannot pass over an empty scan. Its companion rule is
+  that world-sourced geometry is quantized to three decimals before hashing, far above the
+  cross-platform drift and far below any real composition change.
 - **Borders (#158):** the border attribute-order invariant is commented at its line; keep it.
 - **Heavy lazy plates (#329):** a page embedding heavyweight lazy images gives each a reserved frame
   (width and height from the SVG root) and marks below-the-fold plates `fetchpriority="low"` so a
