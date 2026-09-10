@@ -129,7 +129,8 @@ chart side is inside the byte-determinism contract, and the site quotes it as a 
 
 **A river keeps its name over a graze.** Ratified at #194, which reworked a stricter first version
 after review: a river yields only where it would truly bury a neighbour, never where it merely touches
-one. The bar is the fifteen percent "substantial collision" figure #178 measured the defect with,
+one. The bar is `RIVER_MAX_OVERLAP` in `src/render/layers/feature-labels.ts`, the fifteen percent
+"substantial collision" figure #178 measured the defect with,
 tested against the river's true rotated ink rather than an upright box. **What it yields to is
 everything already claimed in the arena**, which is more than the labels: the cartouche and the
 scalebar are claimed before any label layer runs, and the legend and compass are claimed too when
@@ -338,7 +339,7 @@ A text search over the CSS passes on the broken code; pin the resolved value ins
   animation, so a landing settle applied to the wrong element throws the corner furniture across the
   page.
 - **An affordance gate is `(hover: none) and (pointer: coarse)`, never `(hover: none)` on its own**,
-  in a sheet or in a `matchMedia` call. A machine with no pointing device at all reports `hover: none`
+  wherever it is asked, which today is a `matchMedia` call rather than a sheet. A machine with no pointing device at all reports `hover: none`
   together with `pointer: none`, so the bare query matches it too and stands the affordance down
   exactly where a keyboard user needs it. Linux headless CI is such a machine, which is how this ships
   green on a laptop and red on the runner (e2e BR4 and BR5 hold the line). The bare query is still the

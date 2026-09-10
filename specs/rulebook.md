@@ -171,26 +171,19 @@ at #260 with its clean-list entry kept deliberately.
   rounded, so coordinates drift about 1e-13 and a 2-decimal rounding boundary can flip. Compare
   structure exactly and numbers with a tolerance. **A naive byte compare passes on a Mac and fails
   on linux CI.**
-- **A seed re-roll is a TERRAIN-level change.** Reshaping the heightfield, or moving the sea level,
-  the river cells or the settlement positions, re-pins the golden checksum, because those are the
-  inputs `partitionRealms` reads. **Only one may be in flight at a time**, and the set that rule
-  excludes against is the next section. **Culture and name-template edits are NOT re-rolls.** They
-  rename everything and move every committed chart, so they owe a regen and land alone under the rule
-  above, but a settlement is not named until after the partition has run, so no naming change can
-  reach the checksum and none of them takes a re-roll slot. This line read "terrain reshape, culture
-  or name-template edits" until 2026-09-10, which priced naming work at the scarce tier it does not
-  belong in.
+- **A seed re-roll** (terrain reshape, culture or name-template edits) is a different, larger cost:
+  it changes world identity and re-pins the golden checksum. **Only one may be in flight at a time**,
+  and the set that rule excludes against is the next section.
 - **An optional recipe field is guarded at every place the stamp touches it**, never written as a
-  key that can hold `undefined`. `src/render/recipe-meta.ts` has the emit and the parse, both
-  conditional spreads, and a third that is not a spread at all: the human-readable metadata summary
-  builds its fragment with a ternary. Patch the two spreads and the summary silently goes incomplete.
-  The parse is the dangerous one: an absent attribute reads back as `null`, `Number(null)` is `0`, and
-  an absent `coastWarp` means the 0.55 default rather than 0, so an unconditional key rebuilds a real
-  value where the chart recorded none, which is a different world for the same seed. The emit side is
-  cheaper and still costs a regen. `test/render/recipe-meta.test.ts` guards the current fields with a
-  `deepEqual` an `undefined` key breaks, and a new field owes its own case there. **`defaultRecipe`
-  (`src/world/generate.ts`) solves the same problem the other way**, with `stripUndefined` over the
-  overrides; pick one mechanism per field and do not mix them.
+  key that can hold `undefined`. Read `src/render/recipe-meta.ts` whole before adding one: the emit
+  and the parse are conditional spreads, the human-readable metadata summary builds its fragment with
+  a ternary, and the optional region is handled by a helper that returns an empty object. Patch only
+  the spreads and the rest goes silently incomplete. The parse is the dangerous one: an absent
+  attribute reads back as `null`, `Number(null)` is `0`, and an absent `coastWarp` means the 0.55
+  default rather than 0, so an unconditional key rebuilds a real value where the chart recorded none,
+  which is a different world for the same seed. The emit side is cheaper and still costs a regen.
+  `test/render/recipe-meta.test.ts` guards the current fields with a `deepEqual` an `undefined` key
+  breaks, and a new field owes its own case there.
 - **Seed 42's culture draw is a covenant.** A world's culture is picked with
   `rng.fork("culture").pick(CULTURES)`, and `pick` indexes `floor(u * length)`, so both the ORDER and
   the LENGTH of `CULTURES` in `src/society/names.ts` are load-bearing: seed 42's draw lands on
@@ -198,12 +191,15 @@ at #260 with its clean-list entry kept deliberately.
   `partitionRealms` takes no rng and runs before the culture fork, so `w.realms.labels` and the
   checksum above are untouched by any culture change; what goes red is the title, the capital, the
   realm names and the sea name, which `test/world/golden-seed42.test.ts` asserts beside the checksum.
-  Read a red there for which assertion failed before pricing the change, and know that the test
-  does not see all of it: `blazonRealms` takes the culture too, so a moved draw redresses the arms
-  and moves the committed `arms-42-*` and `chart-42-*` files with no test going red at all. Only a
-  regen diff shows that half. Adding or reordering a culture is not the append-only edit the roster
-  looks like: Names: Second Edition added four cultures and placed `oromi` so the draw was unmoved,
-  which is why that work moved no names.
+  Read a red there for which assertion failed before pricing the change, and expect a second red:
+  `blazonRealms` takes the culture too, so a moved draw redresses the arms, and `heroChartSvgs`
+  re-renders the committed `chart-42-*` AND `arms-42-*` families, which the #40 drift guard in
+  `test/site/hero-charts.test.ts` diffs against what is on disk. **A culture change is still a
+  re-roll**: it rewrites committed content and moves world identity, which is what the tier is for.
+  What it does not do is move the checksum, so read the red for which assertion failed rather than
+  assuming the checksum needs re-pinning. Adding or reordering a culture is not the append-only edit
+  the roster looks like: Names: Second Edition added four cultures and placed `oromi` so the draw was
+  unmoved, which is why that work moved no names.
   `test/world/covenant-seed42.test.ts` pins the draw and the index separately, so a future
   re-derivation of the index still has to keep the draw.
 - Watch the **Chronicle 14-event cap** (`events.slice(0, 14)` in `src/society/history.ts`), which starts dropping a line at a
