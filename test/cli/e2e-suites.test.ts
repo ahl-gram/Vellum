@@ -157,6 +157,20 @@ test("a suite that gives up is contained: the runner is handed the suite's name 
   assert.deepEqual(timings.map((t) => t.aborted === true), [true, false, false], "the timings do not say which suite stopped early, so nothing downstream can withhold its clean bill");
 });
 
+test("a caller that passes NO hooks keeps the old contract: the throw comes straight back out", async () => {
+  const ran: string[] = [];
+  const suites = {
+    "cluster": async () => { ran.push("cluster"); throw new Error("gave up with nobody to hand it to"); },
+    "specimen": async () => { ran.push("specimen"); },
+  };
+  await assert.rejects(
+    () => runSelected(["cluster", "specimen"], suites, {}),
+    /nobody to hand it to/,
+    "a caller with no handler had its error swallowed, or turned into a TypeError by the containment path",
+  );
+  assert.deepEqual(ran, ["cluster"], "a caller with no handler had the rest of its lane run anyway");
+});
+
 test("a suite that gives up with the browser GONE is still a harness error, so that string keeps meaning infrastructure", async () => {
   const ran: string[] = [];
   const handed: string[] = [];

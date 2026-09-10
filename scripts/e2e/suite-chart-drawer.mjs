@@ -43,7 +43,7 @@ const READ = `(() => {
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, PORT } = ctx;
   const settle = makeSettle(ctx);
-  // Every group that waits is stepped (#534): a wait that gives up fails THAT check by name with its last read, and the groups after it still run.
+  // The groups from CD9 on are deliberately not stepped: they navigate through go(), whose own bounded loop returns rather than throwing.
   const step = makeStep(ctx);
   // A REAL press and release at the handle's own coordinates, never element.click(): a synthetic click dispatches straight at the node and ignores pointer-events, so it files a handle no reader could reach. The inset box is pointer-events: none, and that is exactly the defect this drives.
   const { clickAt } = makeStage(ctx);

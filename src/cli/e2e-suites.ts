@@ -127,7 +127,7 @@ export interface E2eRunHooks {
   readonly alive?: () => boolean | Promise<boolean>;
 }
 
-// Three in a row is a broken machine, not three defects: every aborted suite still burns its own waits before it throws, and ci.yml caps the job at 25 minutes against a measured 7m05s worst case, so an unbounded cascade is killed at the cap with no tally printed at all, which is worse than the exit 2 this degrades to.
+// A policy bound, not a measurement (Alex ruled it stays, 2026-09-10): every aborted suite still burns its own waits before it throws, and ci.yml's `timeout-minutes: 25` sits against the 7m05s worst case test/repo/e2e-tiers.test.ts cites, so a cascade with no stop can be killed at the cap with no tally at all. 3 is a judgment about where a cascade stops being news; nothing measured picks it.
 const ABORTED_STREAK_LIMIT = 3;
 
 const errorText = (err: unknown): string => (err instanceof Error ? err.message : String(err));
@@ -157,9 +157,11 @@ export async function runSelected(
       streak = [...streak, name];
       if (streak.length >= ABORTED_STREAK_LIMIT) {
         throw new Error(
-          `${streak.length} suites in a row stopped early (${streak.join(", ")}), so this run is being ` +
-            `treated as a broken machine rather than ${streak.length} product failures. The last was ` +
-            `${name}: ${errorText(err)}`,
+          `${streak.length} suites in a row stopped early (${streak.join(", ")}), so this run is ` +
+            `stopping rather than carrying on: past that many, one broken machine explains a cascade ` +
+            `more often than ${streak.length} separate defects do, and every suite after this one ` +
+            `would wait out its full budget before failing too. Read the named reds above first; ` +
+            `they are checks, not infrastructure. The last was ${name}: ${errorText(err)}`,
         );
       }
       stoppedEarly = true;

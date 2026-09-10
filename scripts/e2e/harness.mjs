@@ -192,7 +192,7 @@ async function evaluate(expression, awaitPromise = false) {
   return r.result.value;
 }
 
-// The ONE liveness notion both containments share (#534): a check that gives up and a suite that gives up are recorded as red, but a BROWSER that has gone away is infrastructure and still leaves by the HARNESS ERROR door. A settle polls evaluate every 50ms right up to the moment it throws, so a page that just failed a wait has been answering within 50ms and 5s is 100x that headroom; the direction it errs is toward calling a WEDGED page dead, which is the exit 2 such a page already produced before any of this.
+// 5s is 100x the headroom a settle leaves: it polls evaluate every 50ms right up to the moment it throws, so a page that just failed a wait has been answering within 50ms. The direction it errs is toward calling a WEDGED page dead, which is the exit 2 such a page already produced.
 const ALIVE_TIMEOUT_MS = 5000;
 function alive() {
   const answered = evaluate("1").then(() => true, () => false);

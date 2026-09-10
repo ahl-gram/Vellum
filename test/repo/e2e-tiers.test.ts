@@ -134,6 +134,10 @@ test("the runner actually uses the selection, the timings and the outcome rule i
   assert.match(RUNNER, /suitesCertifiedByHealth\(SELECTED, aborted\)/, "the runner certifies suites that stopped early, a clean bill the run never earned (#534)");
   // The call site alone is not the behavior: computing `certified` and never printing it passes every assertion above.
   assert.match(RUNNER, /certified\.length > 0/, "the runner computes the certified list and never reads it, so no suite is reported as certified at all (#534)");
+  // The breaker's own exit is a HARNESS ERROR, so the door it leaves by must print the score, or it does the thing it exists to prevent.
+  const onError = RUNNER.match(/\.catch\(\(e\) => \{([\s\S]*?)\n  \}\);/);
+  assert.ok(onError, "the runner's error path was not found, so the assertion below would read an empty string");
+  assert.match(onError[1], /runOutcome\(results\)/, "the harness-error path prints no tally, so a run that dies mid-lane reports none of the checks that did run (#534)");
   assert.match(RUNNER, /runOutcome\(results\)/, "the runner does not use the outcome rule, so 0/0 can pass again");
   assert.match(RUNNER, /join\(REPO, "out", e2eOutSubdir\(PORT\)\)/, "the runner's out dir no longer follows the port");
   assert.match(
@@ -144,12 +148,26 @@ test("the runner actually uses the selection, the timings and the outcome rule i
 });
 
 // The helper is proved in isolation by test/repo/step-support.test.ts; what no test could see is a suite quietly going back to a bare await, which is the #534 defect returning one suite at a time.
-test("every suite that contains its checks in steps still reaches for makeStep (#534)", () => {
-  for (const suite of ["cluster", "room-drawer", "chart-drawer", "document-rooms", "specimen"]) {
+// The GROUPS by name, never "at least one step": an import plus a single `await step(` left five of room-drawer's six groups unwrappable with this sweep still green (skeptic, 2026-09-10), which is a guard shaped like one instance of the class it claims to cover.
+const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
+  "cluster": ["CL4", "CL5", "CL8", "CL7"],
+  "room-drawer": ["DR2, DR3", "DR4", "DR5", "DR6", "DR7", "DR8"],
+  "chart-drawer": ["CD1", "CD2, CD2b, CD2c", "CD3", "CD4", "CD5", "CD7, CD7b", "CD8", "CD6", "CD15, CD17"],
+  "document-rooms": ["IX3"],
+  "specimen": ["SB4"],
+};
+
+test("every check group that waits is still inside its own step, by name (#534)", () => {
+  for (const [suite, groups] of Object.entries(STEPPED_GROUPS)) {
     const file = src(`scripts/e2e/suite-${suite}.mjs`);
     assert.match(file, /from "\.\/step-support\.mjs"/, `suite-${suite} no longer imports step-support`);
     assert.match(file, /const step = makeStep\(ctx\)/, `suite-${suite} no longer builds a step, so a wait that gives up there takes the suite with it again`);
-    assert.match(file, /await step\("/, `suite-${suite} imports makeStep and steps nothing`);
+    const stepped = [...file.matchAll(/await step\("([^"]+)"/g)].map((m) => m[1]);
+    assert.deepEqual(
+      stepped,
+      groups.slice(),
+      `suite-${suite}'s stepped groups are not the ones this roster names: one was unwrapped, renamed, reordered or added without joining the roster`,
+    );
   }
 });
 

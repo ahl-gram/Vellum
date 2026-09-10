@@ -38,7 +38,6 @@ const atClosed = (d) => !!d.nav && offLeft(d.nav);
 export async function run(ctx) {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
-  // Every group past DR1 taps and waits, so each is stepped (#534): a tap that never lands fails THAT check by name and the groups after it still run.
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
 
@@ -167,7 +166,8 @@ export async function run(ctx) {
   // The acceptance floor, and the one no sheet-text assertion can see: the resolved cascade across house.css, motion.css, the page sheet and the layout sheet, with the binder gone.
   await setMobileViewport(390, 844);
   await send("Emulation.setScriptExecutionDisabled", { value: true });
-  // The re-enable sits OUTSIDE the step and after it, never inside: a wait that gives up between the two would otherwise leave the whole lane running against a browser with page scripts switched off. check() itself needs no page script.
+  // The re-enable rides the step's own promise, not a line after it: outside-and-after covers a wait that gives up, but a step RETHROWS when the browser stops answering, and then the next line never runs and the rest of the lane meets a browser with page scripts switched off. check() itself needs no page script.
+  const scriptsBackOn = async () => { try { await send("Emulation.setScriptExecutionDisabled", { value: false }); } catch {} };
   await step("DR8", async () => {
     await goto("/glossary/");
     const noJsShut = await evaluate(READ);
@@ -183,8 +183,7 @@ export async function run(ctx) {
         !noJsShutAgain.checked && offLeft(noJsShutAgain.nav) && noJsOpen.scrollW <= noJsOpen.innerW,
       `closed ${noJsShut.checked}/${noJsShut.nav.visibility}, opened ${noJsOpen.checked} with ${noJsOpen.doors.filter((d) => d.tappable).length}/${noJsOpen.doors.length} doors reachable, main inert ${noJsOpen.mainInert} (the CONTROL: the binder sets it true, so false is what says script really was off), closed again ${noJsShutAgain.checked}/${noJsShutAgain.nav.visibility}`,
     );
-  });
-  await send("Emulation.setScriptExecutionDisabled", { value: false });
+  }).finally(scriptsBackOn);
 
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });

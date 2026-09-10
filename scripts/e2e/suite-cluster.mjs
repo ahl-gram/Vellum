@@ -44,7 +44,7 @@ const brightest = (strip) => Math.max(...strip.map(luminance));
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
-  // The drawer groups are stepped (#534): a settle that gives up inside one fails THAT check by name and the groups after it still run. CL1, CL2, CL3 and CL6 are not, since settleHome returns null rather than throwing and their checks already guard on it.
+  // CL1, CL2, CL3 and CL6 are deliberately not stepped: settleHome returns null rather than throwing, and their checks already guard on it.
   const step = makeStep(ctx);
   const { pressKey, clickAt, settleHome } = makeStage(ctx);
 
