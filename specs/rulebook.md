@@ -174,6 +174,32 @@ at #260 with its clean-list entry kept deliberately.
 - **A seed re-roll** (terrain reshape, culture or name-template edits) is a different, larger cost:
   it changes world identity and re-pins the golden checksum. **Only one may be in flight at a time**,
   and the set that rule excludes against is the next section.
+- **An optional recipe field is guarded at every place the stamp touches it**, never written as a
+  key that can hold `undefined`. Read `src/render/recipe-meta.ts` whole before adding one: the emit
+  and the parse are conditional spreads, the human-readable metadata summary builds its fragment with
+  a ternary, and the optional region is handled by a helper that returns an empty object. Patch only
+  the spreads and the rest goes silently incomplete. The parse is the dangerous one: an absent
+  attribute reads back as `null`, `Number(null)` is `0`, and an absent `coastWarp` means the 0.55
+  default rather than 0, so an unconditional key rebuilds a real value where the chart recorded none,
+  which is a different world for the same seed. The emit side is cheaper and still costs a regen.
+  `test/render/recipe-meta.test.ts` guards the current fields with a `deepEqual` an `undefined` key
+  breaks, and a new field owes its own case there.
+- **Seed 42's culture draw is a covenant.** A world's culture is picked with
+  `rng.fork("culture").pick(CULTURES)`, and `pick` indexes `floor(u * length)`, so both the ORDER and
+  the LENGTH of `CULTURES` in `src/society/names.ts` are load-bearing: seed 42's draw lands on
+  `oromi` and must keep landing there. **What a moved draw breaks is names, not the checksum.**
+  `partitionRealms` takes no rng and runs before the culture fork, so `w.realms.labels` and the
+  checksum above are untouched by any culture change; what goes red is the title, the capital, the
+  realm names and the sea name, which `test/world/golden-seed42.test.ts` asserts beside the checksum.
+  Expect a second red as well: `blazonRealms` takes the culture too, so a moved draw redresses the arms, and `heroChartSvgs`
+  re-renders the committed `chart-42-*` AND `arms-42-*` families, which the drift guard in
+  `test/site/hero-charts.test.ts` diffs against what is on disk. **A culture change is still a
+  re-roll**: it rewrites committed content and moves world identity, which is what the tier is for.
+  What it does not do is move the checksum, so read the red for which assertion failed rather than
+  assuming the checksum needs re-pinning. Adding or reordering a culture is not the append-only edit
+  the roster looks like.
+  `test/world/covenant-seed42.test.ts` pins the draw and the index separately, so a future
+  re-derivation of the index still has to keep the draw.
 - Watch the **Chronicle 14-event cap** (`events.slice(0, 14)` in `src/society/history.ts`), which starts dropping a line at a
   realm count of eight or more. The cap drops the LATEST events, because the slice runs after a sort
   by year and ruins are late by construction, so a ruin can silently lose its dated event and its
@@ -265,6 +291,23 @@ comment. This is a convenience index, not their home.
   173 realms hit it, which is what lets "always named" survive #113.
 - **Label order (#175):** the range name claims its box BEFORE the realm names, first refusal to the
   label that cannot move. Do not reorder that layer.
+- **Mixed projections:** the chart plants profile marks on a plan view, which is the period
+  convention. `glyphSymbolDefs` (`src/render/layers/glyph-symbols.ts`) draws the terrain glyphs
+  standing on a baseline, and `castleGlyph` (`src/render/layers/settlements.ts`) stands a capital on
+  its point the same way, while the plan circles beside it are centred on that point and the seat
+  halo sits above it. One settlement therefore carries several different centres, and **no bounding
+  box centre is the town.** Anything anchoring geometry or a DOM transform to a settlement takes the
+  point from the place manifest (`buildPlaceManifest` in `src/render/place-manifest.ts`); the
+  invariant is carried as a comment at the press-origin assignment in
+  `src/site/living-chart/chronicle.ts`.
+- **Prospect byte pins:** the plate pins hold only while all of `src/prospect/` stays **libm-free and
+  clock-free**, which is the name of the guard in `test/prospect/dress.test.ts`. **That guard's regex
+  is the list**, and it is longer than the trigonometric calls: do not keep a copy of it here or in
+  your head, read it. `Math.sqrt` is exempt, since IEEE requires it correctly rounded. The guard
+  scans the tree with comments stripped, because two of its modules state the contract in prose, and
+  it asserts a floor on the file count so it cannot pass over an empty scan. Its companion rule is
+  that world-sourced geometry is quantized to three decimals before hashing, far above the
+  cross-platform drift and far below any real composition change.
 - **Borders (#158):** the border attribute-order invariant is commented at its line; keep it.
 - **Heavy lazy plates (#329):** a page embedding heavyweight lazy images gives each a reserved frame
   (width and height from the SVG root) and marks below-the-fold plates `fetchpriority="low"` so a

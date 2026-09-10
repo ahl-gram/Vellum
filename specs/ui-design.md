@@ -127,6 +127,13 @@ carries, so keep that qualifier or the doubling comes back.
 **The chart's lettering ink is not the site's prose ink** and the two are not to be unified: the
 chart side is inside the byte-determinism contract, and the site quotes it as a token instead.
 
+**A river keeps its name over a graze.** A river yields only where it would truly bury a neighbour, never where it merely touches
+one. The bar is `RIVER_MAX_OVERLAP` in `src/render/layers/feature-labels.ts`, tested against the river's true rotated ink rather than an upright box. **What it yields to is
+everything already claimed in the arena**, which is more than the labels: the cartouche and the
+scalebar are claimed before any label layer runs, and the legend and compass are claimed too when
+they are drawn. Terrain glyphs are the exception that reserve nothing, so grazing a stand of trees
+costs a river nothing at all. A residual graze just under the bar is correct behaviour, not a defect.
+
 ## The room and its furniture
 
 Two room patterns, both ratified whole after live use (#462, ratified at #454).
@@ -328,6 +335,12 @@ A text search over the CSS passes on the broken code; pin the resolved value ins
 - **A transform on a container re-anchors every fixed descendant to it** for the length of the
   animation, so a landing settle applied to the wrong element throws the corner furniture across the
   page.
+- **An affordance gate is `(hover: none) and (pointer: coarse)`, never `(hover: none)` on its own**,
+  wherever it is asked, which today is a `matchMedia` call rather than a sheet. A machine with no pointing device at all reports `hover: none`
+  together with `pointer: none`, so the bare query matches it too and stands the affordance down
+  exactly where a keyboard user needs it. Linux headless CI is such a machine (e2e BR4 and BR5 hold the line). The bare query is still the
+  right tool for **asking what the environment reports**, which is why an e2e probe uses it to detect
+  whether emulation took effect; the rule is about gating an affordance, not about the query.
 
 These are about looking rather than the cascade, and belong beside them:
 
