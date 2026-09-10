@@ -127,6 +127,14 @@ carries, so keep that qualifier or the doubling comes back.
 **The chart's lettering ink is not the site's prose ink** and the two are not to be unified: the
 chart side is inside the byte-determinism contract, and the site quotes it as a token instead.
 
+**A river keeps its name over a graze.** Ratified at #194, which reworked a stricter first version
+after review: a river yields only where it would truly bury another label, never where it merely
+touches one. The bar is the fifteen percent "substantial collision" figure the original defect report
+argued from, measured on the river's true rotated ink against the smaller of the two boxes. Terrain
+glyphs reserve no space in the arena, so a river only ever yields to TEXT and grazing a stand of trees
+costs nothing. **Residual near misses at the bar are kept on purpose: do not tighten the threshold to
+clear them**, and do not read one as a defect.
+
 ## The room and its furniture
 
 Two room patterns, both ratified whole after live use (#462, ratified at #454).
@@ -328,6 +336,11 @@ A text search over the CSS passes on the broken code; pin the resolved value ins
 - **A transform on a container re-anchors every fixed descendant to it** for the length of the
   animation, so a landing settle applied to the wrong element throws the corner furniture across the
   page.
+- **Touch primary is `(hover: none) and (pointer: coarse)`, never `(hover: none)` on its own.** A
+  machine with no pointing device at all reports `hover: none` together with `pointer: none`, so the
+  bare query matches it too and stands the affordance down exactly where a keyboard user needs it.
+  Linux headless CI is such a machine, which is how this ships green on a laptop and red on the
+  runner. Assert an environment-dependent visibility only under the matching `matchMedia` condition.
 
 These are about looking rather than the cascade, and belong beside them:
 
