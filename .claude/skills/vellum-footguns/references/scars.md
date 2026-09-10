@@ -97,6 +97,10 @@ left open and the session failed to write down).
 - #536/#542: `decorateInset` ran before the inset was assigned; a singular `querySelector` hit the
   outgoing inset and worked only on the first commit. Both found by driving, not by tests.
 - #528: the epic's proposed `~` separator would ride as `%7E`; measured, not taste.
+- Earlier, #101: opened onto `feat/72-isotherms`; squashing that base deleted it and closed this PR
+  un-reopenably, review record and all. Every PR in the run after it went onto `main`.
+- Earlier, #360: searched `test/` for a non-`.test.ts` precedent, found none, concluded the repo had
+  no convention and abandoned a correct file split. `test-support/` already held the helpers.
 
 ## Where the long form lives
 
