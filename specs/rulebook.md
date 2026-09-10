@@ -174,23 +174,27 @@ at #260 with its clean-list entry kept deliberately.
 - **A seed re-roll** (terrain reshape, culture or name-template edits) is a different, larger cost:
   it changes world identity and re-pins the golden checksum. **Only one may be in flight at a time**,
   and the set that rule excludes against is the next section.
-- **An optional recipe field is conditional-spread at every site that writes it**, never a key that
-  can hold `undefined`. There are three: the recipe build in `defaultRecipe` (`src/world/generate.ts`),
-  and the stamp emit and stamp parse (both `src/render/recipe-meta.ts`). The parse is the dangerous
-  half. An absent attribute reads back as `null` and `Number(null)` is `0`, so an unconditional key
-  reconstructs a real value where the chart recorded none, and an absent `coastWarp` means the 0.55
-  default rather than 0. That is a different world for the same seed, which breaks the
-  entry-point independence above. The emit half is cheaper and still costs a regen, because an
-  always-present attribute moves the bytes of every committed chart. Every optional field added so
-  far has had to learn this; `test/render/recipe-meta.test.ts` guards the current ones with a
-  `deepEqual` that an `undefined` key breaks, and a new field owes its own case there.
+- **An optional recipe field is conditional-spread wherever the stamp writes or reads it**, never a
+  key that can hold `undefined`. Both sites sit in `src/render/recipe-meta.ts`, and the parse is the
+  dangerous half: an absent attribute reads back as `null`, `Number(null)` is `0`, and an absent
+  `coastWarp` means the 0.55 default rather than 0, so an unconditional key rebuilds a real value
+  where the chart recorded none. That is a different world for the same seed, which is the property
+  that lets the `chart` verb, the deploy builders and the Print Room agree on a seed. The emit half
+  is cheaper and still costs a regen, because an always-present attribute moves the bytes of every
+  committed chart. `test/render/recipe-meta.test.ts` guards the current fields with a `deepEqual`
+  that an `undefined` key breaks, and a new field owes its own case there. **`defaultRecipe`
+  (`src/world/generate.ts`) solves the same problem the other way**, with `stripUndefined` over the
+  overrides rather than a spread per field; pick one mechanism per field and do not mix them.
 - **Seed 42's culture draw is a covenant.** A world's culture is picked with
   `rng.fork("culture").pick(CULTURES)`, and `pick` indexes `floor(u * length)`, so both the ORDER and
-  the LENGTH of `CULTURES` in `src/society/names.ts` are load-bearing. Seed 42's draw lands on
-  `oromi` and must keep landing there, or the golden re-pins and every seed-42 name changes with it.
-  **Adding or reordering a culture is a golden-affecting change until measured otherwise**, which is
-  not obvious from the diff: the roster looks like an append-only list. Names: Second Edition added
-  four cultures and placed `oromi` so the draw was unmoved, which is why that work owed no re-pin.
+  the LENGTH of `CULTURES` in `src/society/names.ts` are load-bearing: seed 42's draw lands on
+  `oromi` and must keep landing there. **What a moved draw breaks is names, not the checksum.**
+  `partitionRealms` takes no rng and runs before the culture fork, so `w.realms.labels` and the
+  checksum above are untouched by any culture change; what goes red is the title, the capital, the
+  realm names and the sea name, which `test/world/golden-seed42.test.ts` asserts beside the checksum.
+  Read a red there for which assertion failed before pricing the change. Adding or reordering a
+  culture is not the append-only edit the roster looks like: Names: Second Edition added four
+  cultures and placed `oromi` so the draw was unmoved, which is why that work moved no names.
   `test/world/covenant-seed42.test.ts` pins the draw and the index separately, so a future
   re-derivation of the index still has to keep the draw.
 - Watch the **Chronicle 14-event cap** (`events.slice(0, 14)` in `src/society/history.ts`), which starts dropping a line at a
@@ -284,19 +288,24 @@ comment. This is a convenience index, not their home.
   173 realms hit it, which is what lets "always named" survive #113.
 - **Label order (#175):** the range name claims its box BEFORE the realm names, first refusal to the
   label that cannot move. Do not reorder that layer.
-- **Mixed projections (#155):** the chart plants profile glyphs on a plan view, which is the period
-  convention, and `glyphSymbolDefs` (`src/render/layers/glyph-symbols.ts`) draws every mountain, hill
-  and tree standing on a baseline with its origin at its FOOT rather than its middle. One settlement
-  therefore carries several different centres: the profile glyph stands on its point, the plan circles
-  are centred on it, the seat halo sits above it. **No bounding box centre is the town.** Anything
-  anchoring geometry or a DOM transform to a settlement takes the point from the place manifest
-  (`buildPlaceManifest` in `src/render/place-manifest.ts`), never a box read back off the drawn chart.
-- **Prospect byte pins (#229):** the plate pins hold only while all of `src/prospect/` stays free of
-  the trigonometric libm calls, which are not correctly rounded and drift between a Mac and linux CI.
-  The guard in `test/prospect/dress.test.ts` scans that tree with comments stripped, because two of
-  its modules state the contract in prose; `Math.sqrt` is exempt, since IEEE requires it correctly
-  rounded. Its companion rule is that world-sourced geometry is quantized to three decimals before
-  hashing, which sits far above the drift and far below any real composition change.
+- **Mixed projections (#290):** the chart plants profile marks on a plan view, which is the period
+  convention. `glyphSymbolDefs` (`src/render/layers/glyph-symbols.ts`) draws the terrain glyphs
+  standing on a baseline, and `castleGlyph` (`src/render/layers/settlements.ts`) stands a capital on
+  its point the same way, while the plan circles beside it are centred on that point and the seat
+  halo sits above it. One settlement therefore carries several different centres, and **no bounding
+  box centre is the town.** Anything anchoring geometry or a DOM transform to a settlement takes the
+  point from the place manifest (`buildPlaceManifest` in `src/render/place-manifest.ts`); the
+  invariant is carried as a comment at the press-origin assignment in
+  `src/site/living-chart/chronicle.ts`.
+- **Prospect byte pins (#229):** the plate pins hold only while all of `src/prospect/` stays
+  **libm-free and clock-free**, which is the guard's own name in `test/prospect/dress.test.ts`. The
+  ban is wider than trigonometry: the logarithms and exponentials, `pow`, `cbrt`, `hypot` and
+  `random` are banned beside `sin`, `cos` and `atan2`, and so are `Date.now` and `new Date`.
+  `Math.sqrt` is exempt, since IEEE requires it correctly rounded. The guard scans that tree with
+  comments stripped, because two of its modules state the contract in prose, and it carries a file
+  count floor so moving a file out of the layer reds it rather than shrinking its reach. Its
+  companion rule is that world-sourced geometry is quantized to three decimals before hashing, far
+  above the drift and far below any real composition change.
 - **Borders (#158):** the border attribute-order invariant is commented at its line; keep it.
 - **Heavy lazy plates (#329):** a page embedding heavyweight lazy images gives each a reserved frame
   (width and height from the SVG root) and marks below-the-fold plates `fetchpriority="low"` so a
