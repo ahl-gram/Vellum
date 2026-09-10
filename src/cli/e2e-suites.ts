@@ -118,21 +118,57 @@ export type E2eSuiteRunners = Readonly<Record<string, (ctx: unknown) => Promise<
 export interface E2eSuiteTiming {
   readonly name: E2eSuiteName;
   readonly ms: number;
+  readonly aborted?: boolean;
 }
+
+export interface E2eRunHooks {
+  readonly now?: () => number;
+  readonly onSuiteError?: (name: E2eSuiteName, err: unknown) => void | Promise<void>;
+  readonly alive?: () => boolean | Promise<boolean>;
+}
+
+// A policy bound, not a measurement (Alex ruled it stays, 2026-09-10): every aborted suite still burns its own waits before it throws, and ci.yml's `timeout-minutes: 25` sits against the 7m05s worst case test/repo/e2e-tiers.test.ts cites, so a cascade with no stop can be killed at the cap with no tally at all. 3 is a judgment about where a cascade stops being news; nothing measured picks it.
+const ABORTED_STREAK_LIMIT = 3;
+
+const errorText = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
 export async function runSelected(
   names: readonly E2eSuiteName[],
   suites: E2eSuiteRunners,
   ctx: unknown,
-  now: () => number = () => performance.now(),
+  hooks: E2eRunHooks = {},
 ): Promise<readonly E2eSuiteTiming[]> {
+  const now = hooks.now ?? (() => performance.now());
+  const { onSuiteError, alive } = hooks;
   const timings: E2eSuiteTiming[] = [];
+  let streak: E2eSuiteName[] = [];
   for (const name of names) {
     const run = suites[name];
     if (!run) throw new Error(`the runner has no suite named ${name}`);
     const started = now();
-    await run(ctx);
-    timings.push({ name, ms: now() - started });
+    let stoppedEarly = false;
+    try {
+      await run(ctx);
+      streak = [];
+    } catch (err) {
+      // No handler is the old contract, and a browser that no longer answers is infrastructure: both leave by the same door they always did, so HARNESS ERROR keeps meaning what a reader has learned it means.
+      if (!onSuiteError) throw err;
+      if (alive && !(await alive())) throw err;
+      streak = [...streak, name];
+      if (streak.length >= ABORTED_STREAK_LIMIT) {
+        throw new Error(
+          `${streak.length} suites in a row stopped early (${streak.join(", ")}), so this run is ` +
+            `stopping rather than carrying on: past that many, one broken machine explains a cascade ` +
+            `more often than ${streak.length} separate defects do, and every suite after this one ` +
+            `would wait out its full budget before failing too. Read the named reds above first; ` +
+            `they are checks, not infrastructure. The last was ${name}: ${errorText(err)}`,
+        );
+      }
+      stoppedEarly = true;
+      await onSuiteError(name, err);
+    }
+    const ms = now() - started;
+    timings.push(stoppedEarly ? { name, ms, aborted: true } : { name, ms });
   }
   return timings;
 }
@@ -159,7 +195,10 @@ export function runOutcome(results: readonly E2eCheckResult[]): E2eOutcome {
   return { ok: passed === results.length, line: `${passed === results.length ? "ALL PASS" : "SOME FAILED"}  (${passed}/${results.length})` };
 }
 
-export function suitesCertifiedByHealth(names: readonly E2eSuiteName[]): readonly E2eSuiteName[] {
+export function suitesCertifiedByHealth(
+  names: readonly E2eSuiteName[],
+  aborted: readonly E2eSuiteName[] = [],
+): readonly E2eSuiteName[] {
   const at = names.indexOf("health");
-  return at === -1 ? [] : names.slice(0, at);
+  return at === -1 ? [] : names.slice(0, at).filter((name) => !aborted.includes(name));
 }

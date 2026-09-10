@@ -192,6 +192,14 @@ async function evaluate(expression, awaitPromise = false) {
   return r.result.value;
 }
 
+// 5s is 100x the headroom a settle leaves: it polls evaluate every 50ms right up to the moment it throws, so a page that just failed a wait has been answering within 50ms. The direction it errs is toward calling a WEDGED page dead, which is the exit 2 such a page already produced.
+const ALIVE_TIMEOUT_MS = 5000;
+function alive() {
+  const answered = evaluate("1").then(() => true, () => false);
+  const gaveUp = new Promise((resolve) => setTimeout(() => resolve(false), ALIVE_TIMEOUT_MS).unref());
+  return Promise.race([answered, gaveUp]);
+}
+
 async function axDescription(selector) {
   const doc = await send("DOM.getDocument", { depth: -1 });
   const { nodeId } = await send("DOM.querySelector", { nodeId: doc.root.nodeId, selector });
@@ -374,7 +382,7 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
   };
 
   return {
-    evaluate, send, check, shoot, sleep,
+    evaluate, send, check, shoot, sleep, alive,
     waitSettled, waitReady, waitTurned, armTurnWatch, axDescription,
     wheel, touch, touchPan, pinch, setTouch, setMobileViewport, clearMobile,
     serverState, cleanup, consoleErrors, http4xx, PORT,

@@ -1,5 +1,6 @@
 // The Chart Table's drawer (#520 Sub 2 of #401, direction D ruled at the #518 sitting): the dog-ear on the committed survey, the drawer it fills, the cap, and the address that is the table's only memory. `chart-drawer` and never `drawer`: suite-room-drawer is the site's phone nav (#520 ruling 2).
 import { makeSettle } from "./settle-support.mjs";
+import { makeStep } from "./step-support.mjs";
 import { makeStage } from "./home-support.mjs";
 
 const SEED = 42;
@@ -42,6 +43,8 @@ const READ = `(() => {
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, PORT } = ctx;
   const settle = makeSettle(ctx);
+  // The groups from CD9 on are deliberately not stepped: they navigate through go(), whose own bounded loop returns rather than throwing.
+  const step = makeStep(ctx);
   // A REAL press and release at the handle's own coordinates, never element.click(): a synthetic click dispatches straight at the node and ignores pointer-events, so it files a handle no reader could reach. The inset box is pointer-events: none, and that is exactly the defect this drives.
   const { clickAt } = makeStage(ctx);
   // A settle that waits on a REGION JOB is not waiting on a transition: the worker draws a whole survey, which is real work that scales with the runner. The default 120 tries is 6s, sized on a laptop, and CI ran this lane 2.7x slower than local on the run that timed out. 400 tries is 20s, the same order as TOUR_TIMEOUT_MS, which is itself sized at roughly 10x the slowest matrix measured on CI.
@@ -61,116 +64,133 @@ export async function run(ctx) {
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
-  await go(`${DRESS}&${DEEP}`);
-  const armed = await settle(READ, atInset, "chart-drawer-inset", DRAWN);
-  const why = {
-    ear: !!armed.ear, label: armed.ear && armed.ear.label === "lay this survey on the table",
-    svgs: armed.insetSvgs === 1, isSurvey: armed.lastSvgIsSurvey, rect: !!armed.insetRect,
-    top: !!armed.ear && !!armed.insetRect && armed.ear.rect.y >= armed.insetRect.y - 0.5,
-    right: !!armed.ear && !!armed.insetRect && armed.ear.rect.right <= armed.insetRect.right + 0.5,
-    shut: !armed.open, bare: armed.cuttings === 0, tab: armed.tabShown,
-  };
-  check(
-    "CD1 the dog-ear rides the committed survey: labelled, inside the inset's own box so the place overlay's rect is untouched, and the inset still holds exactly ONE svg, which is what keeps suite-region-detail's .pop() on the survey (#518 ruling 3, #520)",
-    !!armed.ear && armed.ear.label === "lay this survey on the table" && armed.insetSvgs === 1 && armed.lastSvgIsSurvey &&
-      !!armed.insetRect && armed.ear.rect.y >= armed.insetRect.y - 0.5 && armed.ear.rect.right <= armed.insetRect.right + 0.5 &&
-      // The size, not just the containment: the handle sits inside #map and is scaled by the live transform unless it counter-scales, and at k=8 it measured 435px for a 3.4rem box. Containment alone cannot see that, since an ear anchored top-right balloons DOWN and LEFT and stays inside. 54.4px is 3.4rem at a 16px root, and holds at every k by construction.
-      Math.abs(armed.ear.rect.w - 54.4) <= 1.5 && Math.abs(armed.ear.rect.h - 54.4) <= 1.5 &&
-      !armed.open && armed.cuttings === 0 && armed.tabShown,
-    JSON.stringify({ ear: armed.ear, earSize: [armed.ear && armed.ear.rect.w, armed.ear && armed.ear.rect.h], insetSvgs: armed.insetSvgs, lastSvgIsSurvey: armed.lastSvgIsSurvey, inset: armed.insetRect, open: armed.open, tab: armed.tabText, tabShown: armed.tabShown, cuttings: armed.cuttings, why }),
-  );
+  await step("CD1", async () => {
+    await go(`${DRESS}&${DEEP}`);
+    const armed = await settle(READ, atInset, "chart-drawer-inset", DRAWN);
+    const why = {
+      ear: !!armed.ear, label: armed.ear && armed.ear.label === "lay this survey on the table",
+      svgs: armed.insetSvgs === 1, isSurvey: armed.lastSvgIsSurvey, rect: !!armed.insetRect,
+      top: !!armed.ear && !!armed.insetRect && armed.ear.rect.y >= armed.insetRect.y - 0.5,
+      right: !!armed.ear && !!armed.insetRect && armed.ear.rect.right <= armed.insetRect.right + 0.5,
+      shut: !armed.open, bare: armed.cuttings === 0, tab: armed.tabShown,
+    };
+    check(
+      "CD1 the dog-ear rides the committed survey: labelled, inside the inset's own box so the place overlay's rect is untouched, and the inset still holds exactly ONE svg, which is what keeps suite-region-detail's .pop() on the survey (#518 ruling 3, #520)",
+      !!armed.ear && armed.ear.label === "lay this survey on the table" && armed.insetSvgs === 1 && armed.lastSvgIsSurvey &&
+        !!armed.insetRect && armed.ear.rect.y >= armed.insetRect.y - 0.5 && armed.ear.rect.right <= armed.insetRect.right + 0.5 &&
+        // The size, not just the containment: the handle sits inside #map and is scaled by the live transform unless it counter-scales, and at k=8 it measured 435px for a 3.4rem box. Containment alone cannot see that, since an ear anchored top-right balloons DOWN and LEFT and stays inside. 54.4px is 3.4rem at a 16px root, and holds at every k by construction.
+        Math.abs(armed.ear.rect.w - 54.4) <= 1.5 && Math.abs(armed.ear.rect.h - 54.4) <= 1.5 &&
+        !armed.open && armed.cuttings === 0 && armed.tabShown,
+      JSON.stringify({ ear: armed.ear, earSize: [armed.ear && armed.ear.rect.w, armed.ear && armed.ear.rect.h], insetSvgs: armed.insetSvgs, lastSvgIsSurvey: armed.lastSvgIsSurvey, inset: armed.insetRect, open: armed.open, tab: armed.tabText, tabShown: armed.tabShown, cuttings: armed.cuttings, why }),
+    );
+  });
 
-  const earAt = await clickEar();
-  const laid = await settle(READ, (d) => d.open && d.cuttings === 1, "chart-drawer-laid");
-  check(
-    "CD2 a click on the dog-ear lays the survey and ENDS with the drawer open (ruled 2026-09-07): one cutting with its own remove press, the count in period voice, the road to the Portfolio LIVE from the first sheet (it shipped disabled at #520 and #521 bound it), and the table written into the address",
-    laid.open && laid.cuttings === 1 && laid.offs === 1 && laid.imgs === 1 &&
-      laid.count === "one sheet laid · room for five more" && !laid.roadDisabled && !laid.fullShown &&
-      typeof laid.hashTable === "string" && laid.hashTable.startsWith("k-s.seed-42") &&
-      /lies on the table/.test(laid.status) && laid.scrollW === laid.innerW,
-    JSON.stringify({ open: laid.open, cuttings: laid.cuttings, count: laid.count, road: laid.roadDisabled, hash: laid.hashTable, status: laid.status }),
-  );
-  await shoot("chart-drawer-1280-open.png");
+  // The one read that crosses a step: CD4 reloads the address CD2 wrote, so if CD2 never laid a sheet, CD4 fails as CD4 rather than passing against a table nobody filled.
+  let laid = null;
+  await step("CD2, CD2b, CD2c", async () => {
+    const earAt = await clickEar();
+    laid = await settle(READ, (d) => d.open && d.cuttings === 1, "chart-drawer-laid");
+    check(
+      "CD2 a click on the dog-ear lays the survey and ENDS with the drawer open (ruled 2026-09-07): one cutting with its own remove press, the count in period voice, the road to the Portfolio LIVE from the first sheet (it shipped disabled at #520 and #521 bound it), and the table written into the address",
+      laid.open && laid.cuttings === 1 && laid.offs === 1 && laid.imgs === 1 &&
+        laid.count === "one sheet laid · room for five more" && !laid.roadDisabled && !laid.fullShown &&
+        typeof laid.hashTable === "string" && laid.hashTable.startsWith("k-s.seed-42") &&
+        /lies on the table/.test(laid.status) && laid.scrollW === laid.innerW,
+      JSON.stringify({ open: laid.open, cuttings: laid.cuttings, count: laid.count, road: laid.roadDisabled, hash: laid.hashTable, status: laid.status }),
+    );
+    await shoot("chart-drawer-1280-open.png");
 
-  check(
-    "CD2b the handle answers a REAL pointer: the inset box is pointer-events: none, so the corner must restore it or the survey files for a synthetic click and for nobody else (#520 goal: with a click or a tap, everywhere)",
-    !!earAt && (await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return "no-ear"; const b = e.getBoundingClientRect(); const hit = document.elementFromPoint(Math.round(b.x + b.width * 0.72), Math.round(b.y + b.height * 0.28)); return hit === e ? "ear" : (hit ? hit.tagName + "." + String(hit.className.baseVal ?? hit.className).split(" ")[0] : "none"); })()`)) === "ear",
-    JSON.stringify({ clickedAt: earAt }),
-  );
+    check(
+      "CD2b the handle answers a REAL pointer: the inset box is pointer-events: none, so the corner must restore it or the survey files for a synthetic click and for nobody else (#520 goal: with a click or a tap, everywhere)",
+      !!earAt && (await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return "no-ear"; const b = e.getBoundingClientRect(); const hit = document.elementFromPoint(Math.round(b.x + b.width * 0.72), Math.round(b.y + b.height * 0.28)); return hit === e ? "ear" : (hit ? hit.tagName + "." + String(hit.className.baseVal ?? hit.className).split(" ")[0] : "none"); })()`)) === "ear",
+      JSON.stringify({ clickedAt: earAt }),
+    );
 
-  const beforeDbl = await evaluate(`(() => ({ k: window.__vellumZoomState().k, band: window.__vellumRegion ? window.__vellumRegion().band : null }))()`);
-  const dblAt = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
-  if (dblAt) {
-    for (const clickCount of [1, 2]) {
-      await send("Input.dispatchMouseEvent", { type: "mousePressed", x: dblAt.x, y: dblAt.y, button: "left", clickCount });
-      await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: dblAt.x, y: dblAt.y, button: "left", clickCount });
+    const beforeDbl = await evaluate(`(() => ({ k: window.__vellumZoomState().k, band: window.__vellumRegion ? window.__vellumRegion().band : null }))()`);
+    const dblAt = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
+    if (dblAt) {
+      for (const clickCount of [1, 2]) {
+        await send("Input.dispatchMouseEvent", { type: "mousePressed", x: dblAt.x, y: dblAt.y, button: "left", clickCount });
+        await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: dblAt.x, y: dblAt.y, button: "left", clickCount });
+      }
     }
-  }
-  await sleep(900);
-  const afterDbl = await evaluate(`(() => ({ k: window.__vellumZoomState().k, band: window.__vellumRegion ? window.__vellumRegion().band : null }))()`);
-  check(
-    "CD2c a rapid double click on the handle does not become d3's double-click-to-zoom, the same rule Z10b pins for the zoom cluster (#520 build item 2)",
-    !!dblAt && afterDbl.k === beforeDbl.k && afterDbl.band === beforeDbl.band,
-    JSON.stringify({ before: beforeDbl, after: afterDbl }),
-  );
+    await sleep(900);
+    const afterDbl = await evaluate(`(() => ({ k: window.__vellumZoomState().k, band: window.__vellumRegion ? window.__vellumRegion().band : null }))()`);
+    check(
+      "CD2c a rapid double click on the handle does not become d3's double-click-to-zoom, the same rule Z10b pins for the zoom cluster (#520 build item 2)",
+      !!dblAt && afterDbl.k === beforeDbl.k && afterDbl.band === beforeDbl.band,
+      JSON.stringify({ before: beforeDbl, after: afterDbl }),
+    );
+  });
 
-  await evaluate(`document.getElementById("chart-drawer-shut").click()`);
-  await clickEar();
-  const twice = await settle(READ, (d) => d.open, "chart-drawer-twice");
-  check(
-    "CD3 the same survey is refused a second time, in the drawer's own voice, and the table is unmoved (ruled 2026-09-07)",
-    twice.cuttings === 1 && twice.status === "this survey is already on the table" && twice.open,
-    JSON.stringify({ cuttings: twice.cuttings, status: twice.status }),
-  );
+  await step("CD3", async () => {
+    await evaluate(`document.getElementById("chart-drawer-shut").click()`);
+    await clickEar();
+    const twice = await settle(READ, (d) => d.open, "chart-drawer-twice");
+    check(
+      "CD3 the same survey is refused a second time, in the drawer's own voice, and the table is unmoved (ruled 2026-09-07)",
+      twice.cuttings === 1 && twice.status === "this survey is already on the table" && twice.open,
+      JSON.stringify({ cuttings: twice.cuttings, status: twice.status }),
+    );
+  });
 
-  const carried = laid.hashTable;
-  await go(`${DRESS}&table=${carried}`);
-  const cold = await evaluate(READ);
-  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
-  const filled = await settle(READ, (d) => d.imgs >= 1 && d.decoded.every(Boolean), "chart-drawer-filled", DRAWN);
-  check(
-    "CD4 a reload restores the table from the address alone, showing a reserved frame named from the chart number, and the picture is drawn when the drawer is OPENED rather than on load (ruled 2026-09-07)",
-    cold.cuttings === 1 && cold.imgs === 0 && cold.frames === 1 && cold.titles[0] === "Chart № 42" && !cold.open &&
-      filled.imgs === 1 && filled.frames === 0 && filled.decoded[0] === true && filled.titles[0] !== "Chart № 42",
-    JSON.stringify({ cold: { cuttings: cold.cuttings, imgs: cold.imgs, frames: cold.frames, titles: cold.titles }, filled: { imgs: filled.imgs, titles: filled.titles, decoded: filled.decoded } }),
-  );
+  await step("CD4", async () => {
+    if (!laid) throw new Error("CD2 never laid a sheet, so this reload has no table to restore");
+    const carried = laid.hashTable;
+    await go(`${DRESS}&table=${carried}`);
+    const cold = await evaluate(READ);
+    await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+    const filled = await settle(READ, (d) => d.imgs >= 1 && d.decoded.every(Boolean), "chart-drawer-filled", DRAWN);
+    check(
+      "CD4 a reload restores the table from the address alone, showing a reserved frame named from the chart number, and the picture is drawn when the drawer is OPENED rather than on load (ruled 2026-09-07)",
+      cold.cuttings === 1 && cold.imgs === 0 && cold.frames === 1 && cold.titles[0] === "Chart № 42" && !cold.open &&
+        filled.imgs === 1 && filled.frames === 0 && filled.decoded[0] === true && filled.titles[0] !== "Chart № 42",
+      JSON.stringify({ cold: { cuttings: cold.cuttings, imgs: cold.imgs, frames: cold.frames, titles: cold.titles }, filled: { imgs: filled.imgs, titles: filled.titles, decoded: filled.decoded } }),
+    );
+  });
 
-  await evaluate(`document.querySelector("#cuttings .off").click()`);
-  const bare = await settle(READ, (d) => d.cuttings === 0, "chart-drawer-bare");
-  check(
-    "CD5 a cutting comes off by its own press and the room is ANNOUNCED, since the press that did it leaves the page with it, and an EMPTY table writes no key at all rather than growing table= onto every link forever (#520 ruling 1)",
-    bare.cuttings === 0 && bare.count === "the table is bare" && bare.hashTable === null && bare.rawHash.indexOf("table=") === -1 &&
-      /is off the table/.test(bare.status),
-    JSON.stringify({ cuttings: bare.cuttings, count: bare.count, hashTable: bare.hashTable, status: bare.status }),
-  );
+  await step("CD5", async () => {
+    await evaluate(`document.querySelector("#cuttings .off").click()`);
+    const bare = await settle(READ, (d) => d.cuttings === 0, "chart-drawer-bare");
+    check(
+      "CD5 a cutting comes off by its own press and the room is ANNOUNCED, since the press that did it leaves the page with it, and an EMPTY table writes no key at all rather than growing table= onto every link forever (#520 ruling 1)",
+      bare.cuttings === 0 && bare.count === "the table is bare" && bare.hashTable === null && bare.rawHash.indexOf("table=") === -1 &&
+        /is off the table/.test(bare.status),
+      JSON.stringify({ cuttings: bare.cuttings, count: bare.count, hashTable: bare.hashTable, status: bare.status }),
+    );
+  });
 
   const SIX = ["rung-1.lx-4.ly-4", "rung-1.lx-3.ly-3", "rung-2.lx-5.ly-5", "rung-2.lx-6.ly-6", "rung-3.lx-11.ly-11", "rung-3.lx-12.ly-12"]
     .map((seat) => `k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.${seat}`).join("_");
-  await go(`${DRESS}&${DEEP}&table=${SIX}`);
-  const atSix = await settle(READ, atInset, "chart-drawer-six", DRAWN);
-  await clickEar();
-  await sleep(700);
-  const refused = await evaluate(READ);
-  check(
-    "CD7 at the cap the handle refuses in the voice #518 ruling 3 wrote, lays nothing, and says so where the reader is told everything else (#520 build item 5)",
-    atSix.cuttings === 6 && !!atSix.ear && atSix.ear.label === "the table is full: six sheets lie on it" &&
-      refused.cuttings === 6 && refused.status === "the table is full: six sheets lie on it" && refused.fullShown,
-    JSON.stringify({ before: atSix.cuttings, label: atSix.ear && atSix.ear.label, after: refused.cuttings, status: refused.status, full: refused.fullShown }),
-  );
+  await step("CD7, CD7b", async () => {
+    await go(`${DRESS}&${DEEP}&table=${SIX}`);
+    const atSix = await settle(READ, atInset, "chart-drawer-six", DRAWN);
+    await clickEar();
+    await sleep(700);
+    const refused = await evaluate(READ);
+    check(
+      "CD7 at the cap the handle refuses in the voice #518 ruling 3 wrote, lays nothing, and says so where the reader is told everything else (#520 build item 5)",
+      atSix.cuttings === 6 && !!atSix.ear && atSix.ear.label === "the table is full: six sheets lie on it" &&
+        refused.cuttings === 6 && refused.status === "the table is full: six sheets lie on it" && refused.fullShown,
+      JSON.stringify({ before: atSix.cuttings, label: atSix.ear && atSix.ear.label, after: refused.cuttings, status: refused.status, full: refused.fullShown }),
+    );
 
-  check(
-    "CD7b with the drawer open at a FULL table every remove press answers a real pointer: the Broadside is fixed above this drawer and reaches into its band, and the cuttings overlap each other by design, so three of six once hit-tested to the form behind them and to a neighbour's paper label",
-    refused.cuttings === 6 && refused.offs === 6 && refused.offsReachable === 6,
-    JSON.stringify({ cuttings: refused.cuttings, offs: refused.offs, reachable: refused.offsReachable, open: refused.open }),
-  );
+    check(
+      "CD7b with the drawer open at a FULL table every remove press answers a real pointer: the Broadside is fixed above this drawer and reaches into its band, and the cuttings overlap each other by design, so three of six once hit-tested to the form behind them and to a neighbour's paper label",
+      refused.cuttings === 6 && refused.offs === 6 && refused.offsReachable === 6,
+      JSON.stringify({ cuttings: refused.cuttings, offs: refused.offs, reachable: refused.offsReachable, open: refused.open }),
+    );
+  });
 
-  await evaluate(`window.__vellumZoomTo({ x: 0, y: 0, k: 1 })`);
-  const home = await settle(READ, (d) => !d.ear, "chart-drawer-home");
-  check(
-    "CD8 going home drops the inset and the dog-ear with it: the handle never outlives the survey it belongs to, and the table it filled is untouched (#520 build item 2)",
-    home.ear === null && home.insetSvgs === 0 && home.cuttings === 6,
-    JSON.stringify({ ear: home.ear, insetSvgs: home.insetSvgs, cuttings: home.cuttings }),
-  );
+  await step("CD8", async () => {
+    await evaluate(`window.__vellumZoomTo({ x: 0, y: 0, k: 1 })`);
+    const home = await settle(READ, (d) => !d.ear, "chart-drawer-home");
+    check(
+      "CD8 going home drops the inset and the dog-ear with it: the handle never outlives the survey it belongs to, and the table it filled is untouched (#520 build item 2)",
+      home.ear === null && home.insetSvgs === 0 && home.cuttings === 6,
+      JSON.stringify({ ear: home.ear, insetSvgs: home.insetSvgs, cuttings: home.cuttings }),
+    );
+  });
 
   // CD9 / CD11 / CD12 (#543, Alex 2026-09-08): the Broadside and the Chart Table are never open together and nothing is lifted onto the chart, because covering the caption and the roads out while leaving the side panel standing made no sense to the reader.
   const SURFACES = `(() => {
@@ -357,19 +377,21 @@ export async function run(ctx) {
 
   // CD6 (#540 Sub 2a): the desktop drawer must never paint at 390, and the check has to try the door that opens it: `lay()` calls setOpen(true) with no width term, and `.chart-drawer.open` (0,2,0) beat the stand-down's (0,1,0), so once .open landed the drawer displayed at 390 over a reader who could not shut it.
   await setMobileViewport(390, 844);
-  await go(`${DRESS}&${DEEP}`);
-  const phoneArmed = await settle(READ, atInset, "chart-drawer-phone-inset", DRAWN);
-  const phoneEar = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
-  if (phoneEar) { await touch("touchStart", [{ x: phoneEar.x, y: phoneEar.y, id: 0 }]); await touch("touchEnd", []); }
-  await sleep(1600);
-  const phone = await evaluate(READ);
-  const phoneDrawer = await evaluate(`getComputedStyle(document.getElementById("chart-drawer")).display`);
-  const phoneShut = await evaluate(`(() => { const b = document.getElementById("chart-drawer-shut"); const r = b.getBoundingClientRect(); if (r.width < 1) return "no-box"; const h = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2)); return h === b || b.contains(h) ? "reachable" : "eclipsed"; })()`);
-  check(
-    "CD6 at 390 the desktop drawer never paints, not even after a real tap on the dog-ear: the handle is the phone's own door into the table and it opens the drawer with no width term, so the stand-down has to cover the OPEN state and not just the resting one (#540)",
-    !!phoneEar && !phoneArmed.open && phoneDrawer === "none" && phone.scrollW === phone.innerW && !phone.tabShown,
-    JSON.stringify({ tapped: phoneEar, drawerDisplay: phoneDrawer, open: phone.open, shutPress: phoneShut, scrollW: phone.scrollW, innerW: phone.innerW }),
-  );
+  await step("CD6", async () => {
+    await go(`${DRESS}&${DEEP}`);
+    const phoneArmed = await settle(READ, atInset, "chart-drawer-phone-inset", DRAWN);
+    const phoneEar = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
+    if (phoneEar) { await touch("touchStart", [{ x: phoneEar.x, y: phoneEar.y, id: 0 }]); await touch("touchEnd", []); }
+    await sleep(1600);
+    const phone = await evaluate(READ);
+    const phoneDrawer = await evaluate(`getComputedStyle(document.getElementById("chart-drawer")).display`);
+    const phoneShut = await evaluate(`(() => { const b = document.getElementById("chart-drawer-shut"); const r = b.getBoundingClientRect(); if (r.width < 1) return "no-box"; const h = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2)); return h === b || b.contains(h) ? "reachable" : "eclipsed"; })()`);
+    check(
+      "CD6 at 390 the desktop drawer never paints, not even after a real tap on the dog-ear: the handle is the phone's own door into the table and it opens the drawer with no width term, so the stand-down has to cover the OPEN state and not just the resting one (#540)",
+      !!phoneEar && !phoneArmed.open && phoneDrawer === "none" && phone.scrollW === phone.innerW && !phone.tabShown,
+      JSON.stringify({ tapped: phoneEar, drawerDisplay: phoneDrawer, open: phone.open, shutPress: phoneShut, scrollW: phone.scrollW, innerW: phone.innerW }),
+    );
+  });
 
   const LEAF = `(() => {
     const tabs = [...document.querySelectorAll(".slip-head .sheet-tabs button")];
@@ -406,29 +428,30 @@ export async function run(ctx) {
   const leafShut = await evaluate(LEAF);
   const tableTab = await evaluate(`(() => { const b = [...document.querySelectorAll(".slip-head .sheet-tabs button")].find((x) => /table/i.test(x.textContent || "")); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
   if (tableTab) { await touch("touchStart", [{ x: tableTab.x, y: tableTab.y, id: 0 }]); await touch("touchEnd", []); }
-  // A bounded wait that RETURNS its last reading rather than throwing: a settle that gives up kills the lane instead of failing a named check (#534).
-  let leafOpen = await evaluate(LEAF);
-  for (let i = 0; i < DRAWN && !(leafOpen.leafShown && leafOpen.cuttings === 6); i++) { await sleep(50); leafOpen = await evaluate(LEAF); }
   check(
     "CD14 the sheet's head carries the two leaf tabs and BOTH answer a real thumb: at narrow .slip-handle is inset:0 over the whole head, so a tab authored there is dead unless it takes its own layer (mock.css 230), and a tab nobody can press is the #520 dog-ear again",
     leafShut.tabs.length === 2 && leafShut.tabs.every((t) => t.press === "self") &&
       /broadside/i.test(leafShut.tabs[0].text) && /^the table( · \d+)?$/i.test(leafShut.tabs[1].text),
     JSON.stringify({ tabs: leafShut.tabs }),
   );
-  check(
-    "CD15 pressing The Table turns the sheet to its second leaf: the Broadside's form goes, the gathered sheets come up two across on the sheet's own parchment, and the count comes with them (#518 ruling 4)",
-    leafOpen.leafShown && !leafOpen.formShown && leafOpen.cuttingsInLeaf && leafOpen.cuttings === 6 && leafOpen.columns === 2 && !!leafOpen.countText,
-    JSON.stringify({ leaf: leafOpen.leafShown, form: leafOpen.formShown, inLeaf: leafOpen.cuttingsInLeaf, cuttings: leafOpen.cuttings, columns: leafOpen.columns, count: leafOpen.countText }),
-  );
+  // Was a hand-rolled loop that returned its last read BECAUSE a settle that gives up killed the lane. The step is what that comment was waiting for (#534), so the wait is a settle again and its timeout is CD15 and CD17 going red by name.
+  await step("CD15, CD17", async () => {
+    const leafOpen = await settle(LEAF, (d) => d.leafShown && d.cuttings === 6, "chart-drawer-leaf", DRAWN);
+    check(
+      "CD15 pressing The Table turns the sheet to its second leaf: the Broadside's form goes, the gathered sheets come up two across on the sheet's own parchment, and the count comes with them (#518 ruling 4)",
+      leafOpen.leafShown && !leafOpen.formShown && leafOpen.cuttingsInLeaf && leafOpen.cuttings === 6 && leafOpen.columns === 2 && !!leafOpen.countText,
+      JSON.stringify({ leaf: leafOpen.leafShown, form: leafOpen.formShown, inLeaf: leafOpen.cuttingsInLeaf, cuttings: leafOpen.cuttings, columns: leafOpen.columns, count: leafOpen.countText }),
+    );
+    check(
+      "CD17 with the table leaf up the road out is the TABLE's road, docked in the sheet's legend where every other road out lives, and it answers a real thumb (#518 ruling 4)",
+      leafOpen.roadInSlip && leafOpen.roadPress === "self" && leafOpen.otherRoads === 0,
+      JSON.stringify({ inSlip: leafOpen.roadInSlip, press: leafOpen.roadPress, others: leafOpen.otherRoads }),
+    );
+  });
   const broadsideTab = await evaluate(`(() => { const b = [...document.querySelectorAll(".slip-head .sheet-tabs button")].find((x) => /broadside/i.test(x.textContent || "")); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
   if (broadsideTab) { await touch("touchStart", [{ x: broadsideTab.x, y: broadsideTab.y, id: 0 }]); await touch("touchEnd", []); }
   await sleep(700);
   const backToForm = await evaluate(LEAF);
-  check(
-    "CD17 with the table leaf up the road out is the TABLE's road, docked in the sheet's legend where every other road out lives, and it answers a real thumb (#518 ruling 4)",
-    leafOpen.roadInSlip && leafOpen.roadPress === "self" && leafOpen.otherRoads === 0,
-    JSON.stringify({ inSlip: leafOpen.roadInSlip, press: leafOpen.roadPress, others: leafOpen.otherRoads }),
-  );
   check(
     "CD16 the leaf turns back: pressing The Broadside returns the form and puts the table away, so the reader is never one-way into either leaf",
     backToForm.tabs.length === 2 && backToForm.formShown && !backToForm.leafShown && backToForm.tabs[0].selected === "true" && backToForm.tabs[1].selected === "false",

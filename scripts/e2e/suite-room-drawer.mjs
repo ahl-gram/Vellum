@@ -1,6 +1,7 @@
 // The drawer on a ROOM (#483 Landfall Sub 6c): the cluster suite covers home, whose chrome rides the page; a room's chrome is fixed, which changes what the scrim must be and whether a scroll closes anything. Every geometry is MEASURED and every door HIT-TESTED, since the sticky cap once sat over three doors with every rect green.
 import { scopedHealth } from "./room-support.mjs";
 import { makeSettle } from "./settle-support.mjs";
+import { makeStep } from "./step-support.mjs";
 
 const DOCUMENT_ROOM = "/faq/";
 const APP_ROOM = "/explorer/";
@@ -37,6 +38,7 @@ const atClosed = (d) => !!d.nav && offLeft(d.nav);
 export async function run(ctx) {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
+  const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
 
   // waitReady() keys on the Explorer's own members, which no room renders, so awaiting it here spends the full 15s budget and returns false: a room's readiness is its own shell (the siblings navigate to rooms bare for the same reason). waitReady is kept for the final /explorer/ restore, where it means something.
@@ -73,102 +75,115 @@ export async function run(ctx) {
     `nav ${closed.nav.visibility} right=${closed.nav.rect && closed.nav.rect.right.toFixed(1)}, burger ${closed.burgerDisplay} reachable=${closed.burgerReachable}, cluster bottom ${closed.cluster.bottom.toFixed(1)} vs band ${closed.bandH.toFixed(1)}, scrollW ${closed.scrollW}/${closed.innerW}`,
   );
 
-  await tapBurger(atOpen, "open");
-  const open = await evaluate(READ);
-  const current = open.doors.find((d) => d.current);
-  check(
-    "DR2 a real tap on a room's burger slides the drawer home: every door stacked one per row at 44px or taller and hit-testable, the current room's door among them as a block whose underline clears the deepest descender the nav has (the capital Q's flourish, measured 4.22px at this face), main and footer inert while the chrome stays live, and nothing scrolling sideways (#483)",
-    open.checked && open.nav.visibility === "visible" && stacked(open.doors) &&
-      open.doors.every((d) => d.tappable && d.h >= 44) &&
-      !!current && current.display === "block" && parseFloat(current.offset) > 4.22 &&
-      open.mainInert && open.footerInert && !open.chromeInert && open.scrollW <= open.innerW,
-    `checked=${open.checked} doors ${open.doors.filter((d) => d.tappable).length}/${open.doors.length} tappable, min h ${Math.min(...open.doors.map((d) => d.h)).toFixed(1)}, current=${current ? current.t + " " + current.display + " " + current.offset : "MISSING"}, inert main/footer/chrome ${open.mainInert}/${open.footerInert}/${open.chromeInert}, scrollW ${open.scrollW}/${open.innerW}`,
-  );
-  check(
-    "DR3 the scrim a room's drawer stands on is FIXED below the band, so it can never desynchronise from a chrome that is fixed too, it dims the page rather than the lit cluster, and a page point lands on it and not on the live page (#483; #482 finding 4 is home's, whose chrome rides the page)",
-    open.chromePosition === "fixed" && open.scrim.position === "fixed" &&
-      Math.abs(parseFloat(open.scrim.top) - open.bandH) < 1 && open.scrim.z === "41" &&
-      open.hitMidPage === "BODY.room",
-    `chrome ${open.chromePosition}, scrim ${open.scrim.position} top ${open.scrim.top} (band ${open.bandH.toFixed(1)}) z ${open.scrim.z}, a page point hits ${open.hitMidPage}`,
-  );
+  await step("DR2, DR3", async () => {
+    await tapBurger(atOpen, "open");
+    const open = await evaluate(READ);
+    const current = open.doors.find((d) => d.current);
+    check(
+      "DR2 a real tap on a room's burger slides the drawer home: every door stacked one per row at 44px or taller and hit-testable, the current room's door among them as a block whose underline clears the deepest descender the nav has (the capital Q's flourish, measured 4.22px at this face), main and footer inert while the chrome stays live, and nothing scrolling sideways (#483)",
+      open.checked && open.nav.visibility === "visible" && stacked(open.doors) &&
+        open.doors.every((d) => d.tappable && d.h >= 44) &&
+        !!current && current.display === "block" && parseFloat(current.offset) > 4.22 &&
+        open.mainInert && open.footerInert && !open.chromeInert && open.scrollW <= open.innerW,
+      `checked=${open.checked} doors ${open.doors.filter((d) => d.tappable).length}/${open.doors.length} tappable, min h ${Math.min(...open.doors.map((d) => d.h)).toFixed(1)}, current=${current ? current.t + " " + current.display + " " + current.offset : "MISSING"}, inert main/footer/chrome ${open.mainInert}/${open.footerInert}/${open.chromeInert}, scrollW ${open.scrollW}/${open.innerW}`,
+    );
+    check(
+      "DR3 the scrim a room's drawer stands on is FIXED below the band, so it can never desynchronise from a chrome that is fixed too, it dims the page rather than the lit cluster, and a page point lands on it and not on the live page (#483; #482 finding 4 is home's, whose chrome rides the page)",
+      open.chromePosition === "fixed" && open.scrim.position === "fixed" &&
+        Math.abs(parseFloat(open.scrim.top) - open.bandH) < 1 && open.scrim.z === "41" &&
+        open.hitMidPage === "BODY.room",
+      `chrome ${open.chromePosition}, scrim ${open.scrim.position} top ${open.scrim.top} (band ${open.bandH.toFixed(1)}) z ${open.scrim.z}, a page point hits ${open.hitMidPage}`,
+    );
+  });
 
-  await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
-  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
-  const escaped = await settle(READ, atClosed, "escaped");
-  await tapBurger(atOpen, "reopened");
-  const reopened = await evaluate(READ);
-  await tapAt(Math.round(reopened.innerW * 0.8), Math.round(reopened.innerH * 0.65), atClosed, "tappedOut");
-  const tappedOut = await evaluate(READ);
-  check(
-    "DR4 Escape closes a room's drawer and releases the page, the burger reopens it, and a real tap on the scrim closes it again: each close slides the doors back off the left edge and takes main and footer out of inert (#483)",
-    !escaped.checked && offLeft(escaped.nav) && !escaped.mainInert && !escaped.footerInert &&
-      reopened.checked && reopened.nav.visibility === "visible" &&
-      !tappedOut.checked && offLeft(tappedOut.nav) && !tappedOut.mainInert,
-    `escape checked=${escaped.checked} inert=${escaped.mainInert}, reopen checked=${reopened.checked}, scrim tap checked=${tappedOut.checked} inert=${tappedOut.mainInert}`,
-  );
+  await step("DR4", async () => {
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+    const escaped = await settle(READ, atClosed, "escaped");
+    await tapBurger(atOpen, "reopened");
+    const reopened = await evaluate(READ);
+    await tapAt(Math.round(reopened.innerW * 0.8), Math.round(reopened.innerH * 0.65), atClosed, "tappedOut");
+    const tappedOut = await evaluate(READ);
+    check(
+      "DR4 Escape closes a room's drawer and releases the page, the burger reopens it, and a real tap on the scrim closes it again: each close slides the doors back off the left edge and takes main and footer out of inert (#483)",
+      !escaped.checked && offLeft(escaped.nav) && !escaped.mainInert && !escaped.footerInert &&
+        reopened.checked && reopened.nav.visibility === "visible" &&
+        !tappedOut.checked && offLeft(tappedOut.nav) && !tappedOut.mainInert,
+      `escape checked=${escaped.checked} inert=${escaped.mainInert}, reopen checked=${reopened.checked}, scrim tap checked=${tappedOut.checked} inert=${tappedOut.mainInert}`,
+    );
+  });
 
-  await tapBurger(atOpen, "beforeSwipe");
-  const beforeSwipe = await evaluate(READ);
-  await touch("touchStart", [{ x: 300, y: 700 }]);
-  for (const y of [640, 560, 470, 380, 320]) await touch("touchMove", [{ x: 300, y }]);
-  await touch("touchEnd", []);
-  await sleep(700);
-  const afterSwipe = await evaluate(READ);
-  check(
-    "DR5 a real swipe with a room's drawer open scrolls the page beneath it while the drawer, its burger and its scrim stay exactly where they were and the drawer stays OPEN: nothing rides away, so a room needs no scroll-to-close the way home does (#483, ruling item 2)",
-    beforeSwipe.checked && afterSwipe.checked && afterSwipe.scrollY > beforeSwipe.scrollY &&
-      Math.abs(afterSwipe.nav.rect.y - beforeSwipe.nav.rect.y) < 1 &&
-      Math.abs(afterSwipe.burger.y - beforeSwipe.burger.y) < 1 &&
-      afterSwipe.hitMidPage === "BODY.room" && afterSwipe.mainInert,
-    `scrollY ${beforeSwipe.scrollY} to ${afterSwipe.scrollY}, drawer y ${beforeSwipe.nav.rect.y.toFixed(1)} to ${afterSwipe.nav.rect.y.toFixed(1)}, burger y ${beforeSwipe.burger.y.toFixed(1)} to ${afterSwipe.burger.y.toFixed(1)}, still open=${afterSwipe.checked}, page point hits ${afterSwipe.hitMidPage}`,
-  );
+  await step("DR5", async () => {
+    await tapBurger(atOpen, "beforeSwipe");
+    const beforeSwipe = await evaluate(READ);
+    await touch("touchStart", [{ x: 300, y: 700 }]);
+    for (const y of [640, 560, 470, 380, 320]) await touch("touchMove", [{ x: 300, y }]);
+    await touch("touchEnd", []);
+    await sleep(700);
+    const afterSwipe = await evaluate(READ);
+    check(
+      "DR5 a real swipe with a room's drawer open scrolls the page beneath it while the drawer, its burger and its scrim stay exactly where they were and the drawer stays OPEN: nothing rides away, so a room needs no scroll-to-close the way home does (#483, ruling item 2)",
+      beforeSwipe.checked && afterSwipe.checked && afterSwipe.scrollY > beforeSwipe.scrollY &&
+        Math.abs(afterSwipe.nav.rect.y - beforeSwipe.nav.rect.y) < 1 &&
+        Math.abs(afterSwipe.burger.y - beforeSwipe.burger.y) < 1 &&
+        afterSwipe.hitMidPage === "BODY.room" && afterSwipe.mainInert,
+      `scrollY ${beforeSwipe.scrollY} to ${afterSwipe.scrollY}, drawer y ${beforeSwipe.nav.rect.y.toFixed(1)} to ${afterSwipe.nav.rect.y.toFixed(1)}, burger y ${beforeSwipe.burger.y.toFixed(1)} to ${afterSwipe.burger.y.toFixed(1)}, still open=${afterSwipe.checked}, page point hits ${afterSwipe.hitMidPage}`,
+    );
+  });
 
-  await goto(APP_ROOM);
-  await tapBurger(atOpen, "app");
-  const app = await evaluate(READ);
-  check(
-    "DR6 an app room wears the same drawer as a document room: every door hit-testable over a page that paints its own furniture, its main inert beneath the scrim with a point over that furniture landing on the scrim's host and not on the live page, and nothing scrolling sideways (#483)",
-    app.checked && app.doors.every((d) => d.tappable) && app.mainInert && !app.chromeInert &&
-      app.scrim.position === "fixed" && app.hitMidPage === "BODY.room" && app.scrollW <= app.innerW,
-    `doors ${app.doors.filter((d) => d.tappable).length}/${app.doors.length} tappable, main inert ${app.mainInert}, scrim ${app.scrim.position} z ${app.scrim.z}, a point over the app room's own furniture hits ${app.hitMidPage}, scrollW ${app.scrollW}/${app.innerW}`,
-  );
+  await step("DR6", async () => {
+    await goto(APP_ROOM);
+    await tapBurger(atOpen, "app");
+    const app = await evaluate(READ);
+    check(
+      "DR6 an app room wears the same drawer as a document room: every door hit-testable over a page that paints its own furniture, its main inert beneath the scrim with a point over that furniture landing on the scrim's host and not on the live page, and nothing scrolling sideways (#483)",
+      app.checked && app.doors.every((d) => d.tappable) && app.mainInert && !app.chromeInert &&
+        app.scrim.position === "fixed" && app.hitMidPage === "BODY.room" && app.scrollW <= app.innerW,
+      `doors ${app.doors.filter((d) => d.tappable).length}/${app.doors.length} tappable, main inert ${app.mainInert}, scrim ${app.scrim.position} z ${app.scrim.z}, a point over the app room's own furniture hits ${app.hitMidPage}, scrollW ${app.scrollW}/${app.innerW}`,
+    );
+  });
 
-  await setMobileViewport(844, 390);
-  await goto(DOCUMENT_ROOM);
-  await tapBurger(atOpen, "land");
-  const land = await evaluate(READ);
-  const scrolledDoor = await evaluate(`(() => {
-    const nav = document.querySelector("header.chrome nav.rooms");
-    nav.scrollTop = nav.scrollHeight;
-    const doors = [...nav.querySelectorAll("a, [aria-current]")];
-    const last = doors[doors.length - 1].getBoundingClientRect();
-    const hit = document.elementFromPoint(last.x + 20, last.y + last.height / 2);
-    return { pageScrollY: window.scrollY, lastReached: hit === doors[doors.length - 1], navScrolled: nav.scrollTop > 0 };
-  })()`);
-  check(
-    "DR7 at landscape 844x390 a room's drawer overflows its own box and scrolls to the last door with the PAGE unmoved, that door still hit-testable under the sticky cap (#483; the cap once sat over three doors with every rect green)",
-    land.checked && scrolledDoor.navScrolled && scrolledDoor.lastReached && scrolledDoor.pageScrollY === 0 && land.scrollW <= land.innerW,
-    `nav scrolled=${scrolledDoor.navScrolled}, last door reached=${scrolledDoor.lastReached}, page scrollY=${scrolledDoor.pageScrollY}, scrollW ${land.scrollW}/${land.innerW}`,
-  );
+  await step("DR7", async () => {
+    await setMobileViewport(844, 390);
+    await goto(DOCUMENT_ROOM);
+    await tapBurger(atOpen, "land");
+    const land = await evaluate(READ);
+    const scrolledDoor = await evaluate(`(() => {
+      const nav = document.querySelector("header.chrome nav.rooms");
+      nav.scrollTop = nav.scrollHeight;
+      const doors = [...nav.querySelectorAll("a, [aria-current]")];
+      const last = doors[doors.length - 1].getBoundingClientRect();
+      const hit = document.elementFromPoint(last.x + 20, last.y + last.height / 2);
+      return { pageScrollY: window.scrollY, lastReached: hit === doors[doors.length - 1], navScrolled: nav.scrollTop > 0 };
+    })()`);
+    check(
+      "DR7 at landscape 844x390 a room's drawer overflows its own box and scrolls to the last door with the PAGE unmoved, that door still hit-testable under the sticky cap (#483; the cap once sat over three doors with every rect green)",
+      land.checked && scrolledDoor.navScrolled && scrolledDoor.lastReached && scrolledDoor.pageScrollY === 0 && land.scrollW <= land.innerW,
+      `nav scrolled=${scrolledDoor.navScrolled}, last door reached=${scrolledDoor.lastReached}, page scrollY=${scrolledDoor.pageScrollY}, scrollW ${land.scrollW}/${land.innerW}`,
+    );
+  });
 
   // The acceptance floor, and the one no sheet-text assertion can see: the resolved cascade across house.css, motion.css, the page sheet and the layout sheet, with the binder gone.
   await setMobileViewport(390, 844);
   await send("Emulation.setScriptExecutionDisabled", { value: true });
-  await goto("/glossary/");
-  const noJsShut = await evaluate(READ);
-  await tapBurger(atOpen, "noJsOpen");
-  const noJsOpen = await evaluate(READ);
-  await tapBurger(atClosed, "noJsShutAgain");
-  const noJsShutAgain = await evaluate(READ);
-  await send("Emulation.setScriptExecutionDisabled", { value: false });
-  check(
-    "DR8 with SCRIPT EXECUTION DISABLED the burger alone still opens and closes a room's drawer, doors reachable both times, and the page behind it does NOT go inert: that last one is the control, since every other term here is equally true with scripts on and would pass a flag that silently did nothing (#483 ruling item 3)",
-    !noJsShut.checked && offLeft(noJsShut.nav) &&
-      noJsOpen.checked && noJsOpen.nav.visibility === "visible" && noJsOpen.doors.every((d) => d.tappable) &&
-      !noJsOpen.mainInert && !noJsOpen.footerInert &&
-      !noJsShutAgain.checked && offLeft(noJsShutAgain.nav) && noJsOpen.scrollW <= noJsOpen.innerW,
-    `closed ${noJsShut.checked}/${noJsShut.nav.visibility}, opened ${noJsOpen.checked} with ${noJsOpen.doors.filter((d) => d.tappable).length}/${noJsOpen.doors.length} doors reachable, main inert ${noJsOpen.mainInert} (the CONTROL: the binder sets it true, so false is what says script really was off), closed again ${noJsShutAgain.checked}/${noJsShutAgain.nav.visibility}`,
-  );
+  // The re-enable rides the step's own promise, not a line after it: outside-and-after covers a wait that gives up, but a step RETHROWS when the browser stops answering, and then the next line never runs and the rest of the lane meets a browser with page scripts switched off. check() itself needs no page script.
+  const scriptsBackOn = async () => { try { await send("Emulation.setScriptExecutionDisabled", { value: false }); } catch {} };
+  await step("DR8", async () => {
+    await goto("/glossary/");
+    const noJsShut = await evaluate(READ);
+    await tapBurger(atOpen, "noJsOpen");
+    const noJsOpen = await evaluate(READ);
+    await tapBurger(atClosed, "noJsShutAgain");
+    const noJsShutAgain = await evaluate(READ);
+    check(
+      "DR8 with SCRIPT EXECUTION DISABLED the burger alone still opens and closes a room's drawer, doors reachable both times, and the page behind it does NOT go inert: that last one is the control, since every other term here is equally true with scripts on and would pass a flag that silently did nothing (#483 ruling item 3)",
+      !noJsShut.checked && offLeft(noJsShut.nav) &&
+        noJsOpen.checked && noJsOpen.nav.visibility === "visible" && noJsOpen.doors.every((d) => d.tappable) &&
+        !noJsOpen.mainInert && !noJsOpen.footerInert &&
+        !noJsShutAgain.checked && offLeft(noJsShutAgain.nav) && noJsOpen.scrollW <= noJsOpen.innerW,
+      `closed ${noJsShut.checked}/${noJsShut.nav.visibility}, opened ${noJsOpen.checked} with ${noJsOpen.doors.filter((d) => d.tappable).length}/${noJsOpen.doors.length} doors reachable, main inert ${noJsOpen.mainInert} (the CONTROL: the binder sets it true, so false is what says script really was off), closed again ${noJsShutAgain.checked}/${noJsShutAgain.nav.visibility}`,
+    );
+  }).finally(scriptsBackOn);
 
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });

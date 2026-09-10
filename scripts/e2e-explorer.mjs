@@ -129,21 +129,47 @@ if (missing.length > 0) {
 
 async function main() {
   const ctx = await start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx });
-  return runSelected(SELECTED, SUITES, ctx);
+  return runSelected(SELECTED, SUITES, ctx, {
+    alive: ctx.alive,
+    onSuiteError: async (name, err) => {
+      // The WHOLE error, not just its message: a mid-suite TypeError's stack is what HARNESS ERROR used to print, and a report that drops it would be worse reading than the crash it replaces.
+      console.error(`  ${name} stopped early:`, err);
+      ctx.check(
+        `${name} stopped early, so the checks after this one in that suite never ran (#534)`,
+        false,
+        err && err.message ? err.message : String(err),
+      );
+      // clearMobile() is a trailing statement in the phone suites, not a finally (suite-cluster.mjs, suite-room-drawer.mjs, suite-chart-drawer.mjs), so a suite that stops at 390x844 hands every later suite in the lane a phone viewport and a cascade of reds that are not defects.
+      // Bounded, because a browser that dies AFTER the liveness probe leaves this send pending forever: the harness settles a waiter only on the matching reply, so an unbounded reset here is a lane that stalls with nothing to read rather than one that fails.
+      await Promise.race([
+        ctx.clearMobile().catch(() => {}),
+        new Promise((resolve) => setTimeout(resolve, 5000).unref()),
+      ]);
+    },
+  });
 }
 
 main()
   .then((timings) => {
     console.log("");
     for (const line of formatSuiteTimings(timings)) console.log(line);
-    const certified = suitesCertifiedByHealth(SELECTED);
+    const aborted = timings.filter((t) => t.aborted).map((t) => t.name);
+    const certified = suitesCertifiedByHealth(SELECTED, aborted);
+    if (aborted.length > 0) {
+      console.log(
+        `\n${aborted.length} suite${aborted.length > 1 ? "s" : ""} stopped early: ${aborted.join(", ")}. ` +
+          `The checks after the failure in each never ran, so this run proves less than a whole one.`,
+      );
+    }
     if (TIER !== "full") {
       console.log(`\ntier: ${TIER} (${SELECTED.length}/${E2E_SUITE_ORDER.length} suites): ${SELECTED.join(", ")}`);
       console.log(
         certified.length > 0
           ? `  N1/N2 certified the console/network state of: ${certified.join(", ")}`
           : SELECTED.includes("health")
-            ? `  N1/N2 ran, but nothing preceded them, so they certify no suite.`
+            ? SELECTED.indexOf("health") === 0
+              ? `  N1/N2 ran, but nothing preceded them, so they certify no suite.`
+              : `  N1/N2 ran, but no suite before them ran to its end, so they certify no suite.`
             : `  N1/N2 did not run, so nothing here carries a console/network clean bill.`,
       );
     }
@@ -154,6 +180,8 @@ main()
   })
   .catch((e) => {
     console.error("HARNESS ERROR:", e);
+    // The checks that DID run still get their tally: exiting 2 with no score is the thing the streak breaker exists to prevent, and this is the door the breaker itself leaves by.
+    if (results.length > 0) console.log(`\n${runOutcome(results).line}`);
     cleanup();
     process.exit(2);
   });

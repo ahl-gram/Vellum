@@ -48,7 +48,8 @@ body while the plate-reader was still running.
 **e2e timing.** #527: six CI runs on unchanged code read 2.76 to 4.31 against a fixed bound of 3.
 #528: four CI attempts, about 45 minutes; SV2c missed a wall cap by 10ms. #536: the blind sleep's
 defect moved one layer up, caught by its own CI. #542: "#529's own lesson landing on my own new
-suite". #537, #535: the #529 class again. #545: a settle that gave up killed the lane (#534). #529
+suite". #537, #535: the #529 class again. #545: a settle that gave up killed the lane (#534, since fixed:
+the step contains it and the named check goes red). #529
 round three: stillness at the START read as stillness at the END. Same-URL `Page.navigate` returns
 on the stale document.
 
