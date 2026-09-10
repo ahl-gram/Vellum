@@ -3,12 +3,14 @@
 Procedural fantasy-atlas generator (TypeScript, Node 24+ native type-stripping). Working context
 lives in `RESUME-HERE.md` (start here) and `session-notes/SESSION-NOTES.md` (history; its rotated
 `SESSION-NOTES-ARCHIVE-*` files sit beside it), both gitignored. **Durable facts and gotchas live in
-auto-memory, split across THREE linked files**: `project_vellum.md` is the core (identity, the golden
-/ re-roll contract, engine + render gotchas, process), `project_vellum_site.md` is the delivery layer
-(pages, shell, bundles, CI, deploy), and `project_vellum_livingchart.md` is everything the Explorer
-animates (Glass zoom, region worlds, overlays, the voyage). Read the core plus whichever companion
-your work touches. The live PLAN is the private GitHub Project "Vellum Roadmap"
-(`gh project item-list 1 --owner ahl-gram`): the Project is the plan, and there is no local plan file.
+auto-memory, split across linked files**: `project_vellum.md` is the core (identity, the golden /
+re-roll contract, engine + render gotchas, process), `project_vellum_site.md` is the delivery layer
+(pages, shell, bundles, CI, deploy), `project_vellum_livingchart.md` is everything the Explorer
+animates (Glass zoom, region worlds, overlays, the voyage), and `project_vellum_landfall.md` is the
+Landfall epic (#454), the full-site redesign around the atelier-map mockup and the process that
+shipped it. Read the core plus whichever companion your work touches. The live PLAN is the private
+GitHub Project "Vellum Roadmap" (`gh project item-list 1 --owner ahl-gram`): the Project is the
+plan, and there is no local plan file.
 
 **`specs/` holds the tracked, normative house specs, and unlike everything above it is public and
 readable by anyone with the repo.** `specs/rulebook.md` is the sequencing rules, working agreements
