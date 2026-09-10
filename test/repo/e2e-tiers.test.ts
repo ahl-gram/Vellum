@@ -124,10 +124,16 @@ test("every CI trigger gets the same full coverage, so nothing is conditional on
 test("the runner actually uses the selection, the timings and the outcome rule it imports", () => {
   // The runner needs a browser, so behavior is tested in e2e-suites.test.ts and only the CALL sites are pinned here.
   assert.match(RUNNER, /runSelected\(SELECTED, SUITES, ctx, \{/, "the runner does not run the SELECTED suites");
-  // The hooks are optional in runSelected, since a caller without them keeps the old rethrow; a runner without them is the #534 defect back, and no unit test of runSelected can see that.
-  assert.match(RUNNER, /onSuiteError:/, "the runner passes no per-suite handler, so one suite giving up kills the whole lane again (#534)");
-  assert.match(RUNNER, /alive: ctx\.alive/, "the runner passes no liveness probe, so a browser that died mid-lane is reported as a lane full of product failures (#534)");
+  // The hooks are optional in runSelected, since a caller without them keeps the old rethrow; a runner without them is the #534 defect back, and no unit test of runSelected can see that. Matched INSIDE the call's own argument block, never against the file: a whole-file match is satisfied by a comment anywhere, which is how the first form of this guard passed with the real wiring deleted (prover, 2026-09-10).
+  const hooks = RUNNER.match(/runSelected\(SELECTED, SUITES, ctx, \{([\s\S]*?)\n  \}\);/);
+  assert.ok(hooks, "the runSelected call's argument block was not found, so the two assertions below would read an empty string");
+  // Comment lines are dropped before matching: commenting the wiring OUT in place leaves the literal inside the block, which passed both assertions when they were written (prover, 2026-09-10). This reads a `//` inside a string literal as a comment, and does not see a /* */ block, both of which cost a false red rather than a miss.
+  const wiring = hooks[1].split("\n").filter((line) => !line.trim().startsWith("//")).join("\n");
+  assert.match(wiring, /onSuiteError:/, "the runner passes no per-suite handler, so one suite giving up kills the whole lane again (#534)");
+  assert.match(wiring, /alive: ctx\.alive/, "the runner passes no liveness probe, so a browser that died mid-lane is reported as a lane full of product failures (#534)");
   assert.match(RUNNER, /suitesCertifiedByHealth\(SELECTED, aborted\)/, "the runner certifies suites that stopped early, a clean bill the run never earned (#534)");
+  // The call site alone is not the behavior: computing `certified` and never printing it passes every assertion above.
+  assert.match(RUNNER, /certified\.length > 0/, "the runner computes the certified list and never reads it, so no suite is reported as certified at all (#534)");
   assert.match(RUNNER, /runOutcome\(results\)/, "the runner does not use the outcome rule, so 0/0 can pass again");
   assert.match(RUNNER, /join\(REPO, "out", e2eOutSubdir\(PORT\)\)/, "the runner's out dir no longer follows the port");
   assert.match(
@@ -135,6 +141,16 @@ test("the runner actually uses the selection, the timings and the outcome rule i
     /formatSuiteTimings\(timings\)/,
     "the runner measures per-suite time and then drops it, so no future split can be measured",
   );
+});
+
+// The helper is proved in isolation by test/repo/step-support.test.ts; what no test could see is a suite quietly going back to a bare await, which is the #534 defect returning one suite at a time.
+test("every suite that contains its checks in steps still reaches for makeStep (#534)", () => {
+  for (const suite of ["cluster", "room-drawer", "chart-drawer", "document-rooms", "specimen"]) {
+    const file = src(`scripts/e2e/suite-${suite}.mjs`);
+    assert.match(file, /from "\.\/step-support\.mjs"/, `suite-${suite} no longer imports step-support`);
+    assert.match(file, /const step = makeStep\(ctx\)/, `suite-${suite} no longer builds a step, so a wait that gives up there takes the suite with it again`);
+    assert.match(file, /await step\("/, `suite-${suite} imports makeStep and steps nothing`);
+  }
 });
 
 test("the lane driver spawns the runner itself and refuses an ambient selection", () => {
