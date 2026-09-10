@@ -10,6 +10,7 @@ import {
   runSelected,
   suitesCertifiedByHealth,
 } from "../../src/cli/e2e-suites.ts";
+import type { E2eRunHooks } from "../../src/cli/e2e-suites.ts";
 
 // Selection throws rather than narrowing: `every()` is true for [], so a typo'd name that matched nothing would report ALL PASS (0/0) and exit 0.
 
@@ -141,10 +142,11 @@ test("a suite that gives up is contained: the runner is handed the suite's name 
     "room-drawer": async () => { ran.push("room-drawer"); },
     "specimen": async () => { ran.push("specimen"); },
   };
-  const timings = await runSelected(["cluster", "room-drawer", "specimen"], suites, {}, {
+  const hooks: E2eRunHooks = {
     onSuiteError: (name, err) => { handed.push([name, (err as Error).message] as const); },
     alive: () => true,
-  });
+  };
+  const timings = await runSelected(["cluster", "room-drawer", "specimen"], suites, {}, hooks);
   assert.deepEqual(ran, ["cluster", "room-drawer", "specimen"], "one suite giving up took the rest of the lane with it, which is the defect");
   assert.deepEqual(
     handed,
