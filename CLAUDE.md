@@ -18,7 +18,7 @@ and how a design decision gets made; `specs/ui-design.md` is the look and feel i
 the type case, the palette by role, the chart's dress, the rooms and their furniture, the voice,
 contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting).
 **`specs/rulebook.md` is REQUIRED READING before any change that touches the renderer, a committed
-chart, the golden, a seed, or the order of work**, and `specs/ui-design.md` before any work whose
+chart, the golden, a regen, a seed, or the order of work**, and `specs/ui-design.md` before any work whose
 deliverable is an appearance. Neither is summarized here; where this file and a spec disagree, the
 spec is right. The ruled pixels those specs were decided from are archived under `design/`, one
 directory per design round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a
@@ -331,6 +331,6 @@ must go through CDP.
 
 ## Tombstone: the `roadmap/` dir
 
-**Deleted 2026-07-24**, and there is no local plan file. Its three files were superseded drafts and
+**Deleted 2026-07-24.** Its three files were superseded drafts and
 two had gone dangerous, naming a retired checksum and a retired flight-exclusion set. They are frozen
 in the claude-config backup at `home/CodeProjects/Vellum/roadmap/` if they are ever wanted.
