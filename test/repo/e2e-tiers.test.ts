@@ -123,7 +123,11 @@ test("every CI trigger gets the same full coverage, so nothing is conditional on
 
 test("the runner actually uses the selection, the timings and the outcome rule it imports", () => {
   // The runner needs a browser, so behavior is tested in e2e-suites.test.ts and only the CALL sites are pinned here.
-  assert.match(RUNNER, /runSelected\(SELECTED, SUITES, ctx\)/, "the runner does not run the SELECTED suites");
+  assert.match(RUNNER, /runSelected\(SELECTED, SUITES, ctx, \{/, "the runner does not run the SELECTED suites");
+  // The hooks are optional in runSelected, since a caller without them keeps the old rethrow; a runner without them is the #534 defect back, and no unit test of runSelected can see that.
+  assert.match(RUNNER, /onSuiteError:/, "the runner passes no per-suite handler, so one suite giving up kills the whole lane again (#534)");
+  assert.match(RUNNER, /alive: ctx\.alive/, "the runner passes no liveness probe, so a browser that died mid-lane is reported as a lane full of product failures (#534)");
+  assert.match(RUNNER, /suitesCertifiedByHealth\(SELECTED, aborted\)/, "the runner certifies suites that stopped early, a clean bill the run never earned (#534)");
   assert.match(RUNNER, /runOutcome\(results\)/, "the runner does not use the outcome rule, so 0/0 can pass again");
   assert.match(RUNNER, /join\(REPO, "out", e2eOutSubdir\(PORT\)\)/, "the runner's out dir no longer follows the port");
   assert.match(

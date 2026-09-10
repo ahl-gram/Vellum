@@ -129,21 +129,41 @@ if (missing.length > 0) {
 
 async function main() {
   const ctx = await start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx });
-  return runSelected(SELECTED, SUITES, ctx);
+  return runSelected(SELECTED, SUITES, ctx, {
+    alive: ctx.alive,
+    onSuiteError: async (name, err) => {
+      // The WHOLE error, not just its message: a mid-suite TypeError's stack is what HARNESS ERROR used to print, and a report that drops it would be worse reading than the crash it replaces.
+      console.error(`  ${name} stopped early:`, err);
+      ctx.check(
+        `${name} stopped early, so the checks after this one in that suite never ran (#534)`,
+        false,
+        err && err.message ? err.message : String(err),
+      );
+      // clearMobile() is a trailing statement in the phone suites, not a finally (suite-cluster.mjs, suite-room-drawer.mjs, suite-chart-drawer.mjs), so a suite that stops at 390x844 hands every later suite in the lane a phone viewport and a cascade of reds that are not defects.
+      try { await ctx.clearMobile(); } catch {}
+    },
+  });
 }
 
 main()
   .then((timings) => {
     console.log("");
     for (const line of formatSuiteTimings(timings)) console.log(line);
-    const certified = suitesCertifiedByHealth(SELECTED);
+    const aborted = timings.filter((t) => t.aborted).map((t) => t.name);
+    const certified = suitesCertifiedByHealth(SELECTED, aborted);
+    if (aborted.length > 0) {
+      console.log(
+        `\n${aborted.length} suite${aborted.length > 1 ? "s" : ""} stopped early: ${aborted.join(", ")}. ` +
+          `The checks after the failure in each never ran, so this run proves less than a whole one.`,
+      );
+    }
     if (TIER !== "full") {
       console.log(`\ntier: ${TIER} (${SELECTED.length}/${E2E_SUITE_ORDER.length} suites): ${SELECTED.join(", ")}`);
       console.log(
         certified.length > 0
           ? `  N1/N2 certified the console/network state of: ${certified.join(", ")}`
           : SELECTED.includes("health")
-            ? `  N1/N2 ran, but nothing preceded them, so they certify no suite.`
+            ? `  N1/N2 ran, but no suite before them ran to its end, so they certify no suite.`
             : `  N1/N2 did not run, so nothing here carries a console/network clean bill.`,
       );
     }
