@@ -171,9 +171,15 @@ at #260 with its clean-list entry kept deliberately.
   rounded, so coordinates drift about 1e-13 and a 2-decimal rounding boundary can flip. Compare
   structure exactly and numbers with a tolerance. **A naive byte compare passes on a Mac and fails
   on linux CI.**
-- **A seed re-roll** (terrain reshape, culture or name-template edits) is a different, larger cost:
-  it changes world identity and re-pins the golden checksum. **Only one may be in flight at a time**,
-  and the set that rule excludes against is the next section.
+- **A seed re-roll is a TERRAIN-level change.** Reshaping the heightfield, or moving the sea level,
+  the river cells or the settlement positions, re-pins the golden checksum, because those are the
+  inputs `partitionRealms` reads. **Only one may be in flight at a time**, and the set that rule
+  excludes against is the next section. **Culture and name-template edits are NOT re-rolls.** They
+  rename everything and move every committed chart, so they owe a regen and land alone under the rule
+  above, but a settlement is not named until after the partition has run, so no naming change can
+  reach the checksum and none of them takes a re-roll slot. This line read "terrain reshape, culture
+  or name-template edits" until 2026-09-10, which priced naming work at the scarce tier it does not
+  belong in.
 - **An optional recipe field is guarded at every place the stamp touches it**, never written as a
   key that can hold `undefined`. `src/render/recipe-meta.ts` has the emit and the parse, both
   conditional spreads, and a third that is not a spread at all: the human-readable metadata summary
