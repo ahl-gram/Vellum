@@ -17,7 +17,7 @@ type. Read the gate you are at, do each line, and move on. Provenance is in `ref
 
 ## Gate 1: before writing a test or a guard
 
-Scars: #295, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #546.
+Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #546.
 
 1. **Write the mutation before the test.** Name the one-line change to `src/` that must turn this
    test red. If you cannot name one, you are about to write a test that cannot fail.
@@ -34,7 +34,13 @@ Scars: #295, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #546.
    that carries its own sheet, every seat of the lattice) and sweep them. Two samples is the instance.
 7. **A transparent component (cache, memo, fast path) is guarded by its own counters**, never by an
    output compare. Ask what "delete it entirely" does to the assertion; if nothing, rewrite.
-8. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
+8. **A shared helper goes in `test-support/`, never in `test/`, and never in a sibling.** `node
+   --test` collects every file under `test/`, so a bare helper module there is reported as a passing
+   test of its own, and a `.test.ts` that imports a sibling `.test.ts` runs that sibling's tests a
+   second time. Neither fails; both inflate the count. If `test-support/` has no precedent for the
+   shape you need, that is not evidence the repo lacks the convention: it already holds the helpers
+   and the importers.
+9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
    `vellum-guard-prover` for the whole guard set (10 minutes, unit tests only, name the mutations you
    did NOT try). Its restore is `git checkout --`, so uncommitted work under it is gone. Zero red is
    a hole. A guard proved unable to red is deleted, never shipped.
@@ -114,7 +120,7 @@ fail silently (an undeclared CSS variable, a suite the runner never calls, a bud
 
 ## Gate 5: before the push and the PR body
 
-Scars: #49, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; calls made without a ruling on #519, #542, #546.
+Scars: #49, #101, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; calls made without a ruling on #519, #542, #546.
 
 1. **Dead code sweep.** Every new export has a second reference. Every new field has a reader that
    produces a STRING on a surface (carries, reads, is wired through describe plumbing; shows, prints,
@@ -138,8 +144,14 @@ Scars: #49, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; calls ma
    The skeptic diffs against the newest ratified statement. A recon that falsifies an older comment
    says so in a new comment; the old one is never edited. Open decisions go to Alex as a menu, and
    you STOP there.
-9. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
-   while it runs; three rounds at most, residue named in the body. `references/pr-body.md` is the shape.
+9. **A stacked PR lands BEFORE its base does.** Squashing a base deletes the branch, and a PR whose
+   base is gone is closed and can be neither reopened nor retargeted: the review record goes with it.
+   Stacking itself is fine and is how the integration epics ship, every child merging into the epic
+   branch before the epic merges to `main`. What kills a PR is its base landing while the child is
+   still open, so check for open children before merging any branch that has them. If it has already
+   happened, rebase onto `main` and open a fresh successor that cross-references the closed one.
+10. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
+    while it runs; three rounds at most, residue named in the body. `references/pr-body.md` is the shape.
 
 ## Gate 6: before changing the renderer or a committed chart
 
