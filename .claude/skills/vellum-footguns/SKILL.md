@@ -61,9 +61,11 @@ Scars: #368, #474, #520, #526, #529, #533, #535, #536, #537, #540, #542, #545, #
    it) or a min (one hairline fails it). Give the sample a control that legitimately paints.
 5. **A regex inside a CDP `evaluate` template literal loses its backslashes.** Write `\\s`, or build
    the payload with `String.raw`. It never throws: `/\s+/` arrives as `/s+/` and splits on the letter.
-6. **No blind sleeps.** A settle polls to rest, THROWS on timeout (a settle that gives up kills the
-   lane), requires the geometry to have LEFT where it began (stillness at the start looks like
-   stillness at the end), and never carries the check's own claim. See `references/settle-doctrine.md`.
+6. **No blind sleeps.** A settle polls to rest, THROWS on timeout, requires the geometry to have
+   LEFT where it began (stillness at the start looks like stillness at the end), and never carries
+   the check's own claim. **The throw belongs inside a `step`**: wrap the gestures, waits and checks
+   of one numbered check in `step("CL5", async () => ...)` and a timeout fails that check by name
+   instead of taking the suite with it (#534). See `references/settle-doctrine.md`.
 7. **A wait's break condition demands every conjunct the check asserts.** Navigation commits before
    the document parses; a same-URL `Page.navigate` returns on the stale document; any redraft is not
    the redraft the gesture requested.

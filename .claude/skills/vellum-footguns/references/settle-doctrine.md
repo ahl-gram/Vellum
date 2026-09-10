@@ -9,8 +9,15 @@ it lives only in issue comments.
    quantization and read 2.76 to 4.31 on unchanged code against a fixed 3.
 2. **Read the engine's own clock.** A pace is a rate over the engine's ticks, never a wall window.
 3. **A blind sleep becomes a poll to rest.** Poll a geometry or a counter until it stops moving.
-4. **The settle THROWS on timeout.** A settle that returns its last read hands the check a stale
-   snapshot that passes; a settle that gives up quietly kills the lane (#534).
+4. **The settle THROWS on timeout, and a `step` catches it.** A settle that returns its last read
+   hands the check a stale snapshot that passes, so the throw stays; what #534 changed is where it
+   lands. Wrap the gestures, waits and checks that make up one numbered check in
+   `step("CL5", async () => ...)` (`makeStep` in `scripts/e2e/step-support.mjs`), and a timeout
+   fails THAT check by its own code, with the wait's label and last read as the payload, while the
+   groups after it still run. A throw outside every step is contained one level up by `runSelected`,
+   which records it as that suite's own red and runs the rest of the lane. Only a browser that has
+   gone away still reaches `HARNESS ERROR` and exit 2, which is what keeps that string meaning
+   infrastructure.
 5. **The predicate requires the geometry to have LEFT where it began.** Stillness at the start is
    indistinguishable from stillness at the end. Record the starting rect and demand a departure
    before demanding rest.
