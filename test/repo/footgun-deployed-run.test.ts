@@ -38,6 +38,7 @@ test("bounded hands the spawn BOUND_MS by default, and an explicit cap when give
   bounded("exit 0", "x", undefined, probe);
   bounded("exit 0", "x", 5, probe);
   assert.deepEqual(seen, [BOUND_MS, 5]);
+  assert.ok(BOUND_MS > 0, "node reads timeout: 0 as no bound at all");
 });
 
 // Node reads `timeout: 0` as no bound at all, so the cap is derived from BOUND_MS rather than written out: a zeroed BOUND_MS then reds here instead of silently uncapping the file.
