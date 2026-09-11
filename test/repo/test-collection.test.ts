@@ -15,16 +15,31 @@ const walk = (dir: string): string[] =>
     e.isDirectory() ? (pruned(e.name) ? [] : walk(join(dir, e.name))) : [join(dir, e.name)],
   );
 
-const rel = (p: string) => relative(ROOT, p);
-const repoFiles = walk(ROOT).map(rel);
-const testDirFiles = repoFiles.filter((f) => f.startsWith("test/"));
-const suiteFiles = repoFiles.filter((f) => f.endsWith(".test.ts"));
+const filesUnder = (root: string) => walk(root).map((p) => relative(root, p));
 
-// Node's own kDefaultPattern (lib/internal/test_runner/utils in the node source) ends .{js,mjs,cjs,ts,mts,cts}; measured 2026-09-10 on v26.8.2 under this package's "type": "module": dot segments, node_modules, .tsx and .json are skipped, and .TS is matched on macOS only, then refused by the loader as a loud red, so it is no phantom.
+// Node's own kDefaultPattern (lib/internal/test_runner/utils in the node source) ends .{js,mjs,cjs,ts,mts,cts}; measured 2026-09-10 on v26.8.2 under this package's "type": "module": .TS is matched on macOS only, then refused by the loader as a loud red, so it is no phantom.
 const COLLECTED = new Set([".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"]);
 const loadedByNode = (f: string) =>
   !f.split("/").some((s) => s.startsWith(".") || s === "node_modules") && COLLECTED.has(extname(f));
 const isPhantom = (f: string) => loadedByNode(f) && !f.endsWith(".test.ts");
+const straysUnder = (root: string) => filesUnder(root).filter((f) => f.startsWith("test/") && isPhantom(f));
+
+const repoFiles = filesUnder(ROOT);
+const testDirFiles = repoFiles.filter((f) => f.startsWith("test/"));
+const suiteFiles = repoFiles.filter((f) => f.endsWith(".test.ts"));
+
+const withSeededTree = (files: string[], run: (dir: string) => void) => {
+  const dir = mkdtempSync(join(tmpdir(), "vellum-walk-"));
+  try {
+    for (const f of files) {
+      mkdirSync(join(dir, dirname(f)), { recursive: true });
+      writeFileSync(join(dir, f), "");
+    }
+    run(dir);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+};
 
 // Comments are stripped before matching because this file names ".test.ts" in its own prose; a match still needs an import/export/require keyword, so a bare mention in a string cannot trip it. It errs toward a false positive and never toward a miss.
 const importsOf = (src: string): string[] => {
@@ -60,27 +75,21 @@ test("a stray is a file node --test would load that is not a .test.ts, never a f
 });
 
 test("the walk prunes node_modules and dot dirs at every depth and nothing else, so it sees the tree node sees", () => {
-  const dir = mkdtempSync(join(tmpdir(), "vellum-walk-"));
-  try {
-    const seeded = [
-      "src/f.ts",
-      "test/out/x.ts",
-      "test/design/y.ts",
-      "out/a.ts",
-      "dist/b.ts",
-      "public/c.ts",
-      "design/d.ts",
-      "node_modules/e.ts",
-      "test/node_modules/g.ts",
-      ".cache/h.ts",
-      "test/.cache/i.ts",
-    ];
-    for (const f of seeded) {
-      mkdirSync(join(dir, dirname(f)), { recursive: true });
-      writeFileSync(join(dir, f), "");
-    }
-    const found = walk(dir).map((p) => relative(dir, p)).sort();
-    assert.deepEqual(found, [
+  const seeded = [
+    "src/f.ts",
+    "test/out/x.ts",
+    "test/design/y.ts",
+    "out/a.ts",
+    "dist/b.ts",
+    "public/c.ts",
+    "design/d.ts",
+    "node_modules/e.ts",
+    "test/node_modules/g.ts",
+    ".cache/h.ts",
+    "test/.cache/i.ts",
+  ];
+  withSeededTree(seeded, (dir) => {
+    assert.deepEqual(filesUnder(dir).sort(), [
       "design/d.ts",
       "dist/b.ts",
       "out/a.ts",
@@ -89,9 +98,14 @@ test("the walk prunes node_modules and dot dirs at every depth and nothing else,
       "test/design/y.ts",
       "test/out/x.ts",
     ]);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
+  });
+});
+
+test("over a real tree the guard names the helper and passes the Finder artifact, the defect #561 reported", () => {
+  const seeded = ["test/helper.ts", "test/.DS_Store", "test/fixtures/data.json", "test/real.test.ts", "src/stray.ts"];
+  withSeededTree(seeded, (dir) => {
+    assert.deepEqual(straysUnder(dir), ["test/helper.ts"]);
+  });
 });
 
 test("every file node --test loads under test/ is a .test.ts, so none is a phantom pass or an unseen suite", () => {
@@ -99,7 +113,7 @@ test("every file node --test loads under test/ is a .test.ts, so none is a phant
     testDirFiles.length > 100,
     `walked only ${testDirFiles.length} files under test/; this guard is reading the wrong tree`,
   );
-  const strays = testDirFiles.filter(isPhantom);
+  const strays = straysUnder(ROOT);
   assert.deepEqual(
     strays,
     [],
