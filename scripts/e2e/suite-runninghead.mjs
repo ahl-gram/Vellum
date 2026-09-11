@@ -297,6 +297,15 @@ export async function run(ctx) {
     !!gFolio && gFolio.content !== "none" && JSON.stringify(gFolio.inset) === JSON.stringify(gWant),
     JSON.stringify({ ...gFolio, want: gWant }),
   );
+  await send("Emulation.setEmulatedMedia", { media: "print" });
+  const gPrint = galleryNarrow ? await evaluate(`(()=>{const e=document.querySelector(".corner.tr");if(!e)return null;const c=getComputedStyle(e,"::before");const d=document.documentElement;
+    return{content:c.content,folioPos:getComputedStyle(e).position,armed:document.body.classList.contains("chart-room")&&!document.querySelector(".stage"),scrollW:d.scrollWidth,clientW:d.clientWidth};})()`) : null;
+  await send("Emulation.setEmulatedMedia", { media: "" });
+  check(
+    "RH10c printed at 390, the Gallery's room folio stands in flow with NO panel (#538): the corner goes static on paper and the panel's absolute box resolved against the whole page (401 wide on the unfixed tree); the stage-less arm still matches under print, read in the same payload, so the none is the stand-down and not a lapsed arm. The width is logged, not asserted: the plates run 2px off the page on their own (#565)",
+    !!gPrint && gPrint.armed && gPrint.folioPos === "static" && gPrint.content === "none",
+    JSON.stringify(gPrint),
+  );
   await send("Emulation.clearDeviceMetricsOverride");
 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });

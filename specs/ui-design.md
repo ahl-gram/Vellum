@@ -304,7 +304,9 @@ own mount, or the ceremony is silently inert and its cleanup never runs.
 
 **Print is paper.** The band, the head cluster, the slips, the instruments, the fog and the vignettes
 print as nothing. The chart prints, the sheet prints as paper in one column, and the folio stands in
-flow at full width. Each room stands its own furniture down as it converts. The take-home artifacts
+flow at full width, on the paper and not on its panel (the panel is a screen thing, painted
+screen-only; in flow on paper an absolute panel resolved against the whole page, #538). Each room
+stands its own furniture down as it converts. The take-home artifacts
 are the atlas download and the Print Room's own output; the rest of the site is a screen.
 
 **A state expressed as a `:checked` or an open class needs its own print stand-down**, because state

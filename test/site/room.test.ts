@@ -73,6 +73,16 @@ test("the kit's print block restores the room folio's tagline and width after th
   assert.match(block, /\.folio-room \.room-name\s*\{[^}]*font-size:\s*1\.32rem/, "and the name prints at the corner's own size, not the phone's");
 });
 
+test("the room folio's panel is painted screen-only (#538): on paper the corner goes static and in flow, and an absolute panel on a static corner resolved against the whole page (e2e RH10c and SB9b pin the resolved value)", () => {
+  const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const screen = css.indexOf("@media screen {");
+  const close = css.indexOf("\n}", screen);
+  assert.ok(screen >= 0 && close > screen, "the kit carries a screen-only block");
+  const block = css.slice(screen, close);
+  assert.match(block, /\.corner\.tr::before[^{]*\{[^}]*content:\s*""/, "the painting rule that gives the folio panel its content sits inside it");
+  assert.equal((css.match(/\.corner\.tr::before[^{]*\{[^}]*content:/g) || []).length, 1, "and no second rule gives it content outside the wrap");
+});
+
 test("bindRoom seats the legend row before it fits the sheet", () => {
   const room = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/shared/room.ts"), "utf8");
   const layout = room.slice(room.indexOf("const layout = () => {"), room.indexOf("camera.restore(held);"));
