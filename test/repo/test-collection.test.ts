@@ -60,6 +60,18 @@ test("a stray is a file node --test would load that is not a .test.ts, never a f
   assert.deepEqual([...loaded, ...skipped].filter(isPhantom), loaded);
 });
 
+test("the walk prunes node_modules and dot dirs at every depth, and out/dist/public/design at the root only", () => {
+  for (const name of ["out", "dist", "public", "design"]) {
+    assert.equal(pruned(name, true), true, name);
+    assert.equal(pruned(name, false), false, `${name} nested under test/ is loaded by node, so the walk must reach it`);
+  }
+  for (const name of ["node_modules", ".git", ".claude"]) {
+    assert.equal(pruned(name, true), true, name);
+    assert.equal(pruned(name, false), true, name);
+  }
+  assert.equal(pruned("src", true), false);
+});
+
 test("every file node --test loads under test/ is a .test.ts, so none is a phantom pass or an unseen suite", () => {
   assert.ok(
     testDirFiles.length > 100,
