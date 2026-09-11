@@ -17,7 +17,7 @@ type. Read the gate you are at, do each line, and move on. Provenance is in `ref
 
 ## Gate 1: before writing a test or a guard
 
-Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #546.
+Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #546, #561.
 
 1. **Write the mutation before the test.** Name the one-line change to `src/` that must turn this
    test red. If you cannot name one, you are about to write a test that cannot fail.
