@@ -10,6 +10,7 @@ const ROOT = resolve(import.meta.dirname, "..", "..");
 
 const pruned = (name: string) => name === "node_modules" || name.startsWith(".");
 
+// Sibling suites build and remove 19 scratch trees under out/ during the same npm test run, racing this walk, so tolerating ENOENT errs toward MISSING a collectible name in a tree that vanished mid-walk; it is the one place this file errs toward a miss rather than a false positive.
 const entriesOf = (dir: string) => {
   try {
     return readdirSync(dir, { withFileTypes: true });
@@ -128,7 +129,7 @@ test("over a real tree the guard names the helper and passes the Finder artifact
   });
 });
 
-test("the collection predicate mirrors node's pattern: the test/ directory and the four by-name arms, folded only where node folds", () => {
+test("the collection predicate mirrors what node --test LOADS: the test/ directory and the four by-name arms, folded only where node folds", () => {
   const matched = [
     "src/test.ts",
     "src/a/test.ts",
@@ -188,7 +189,6 @@ test("the guard's outside-test/ composition names a nested test/ module and a by
   });
 });
 
-// Sibling suites build and remove 19 scratch trees under out/ during the same npm test run (grep -rho 'out/test-[a-z-]*' test/), racing this file's walk, so a directory readdirSync listed can be gone before the recursion reaches it; tolerating ENOENT therefore errs toward MISSING a collectible name inside a tree that vanished mid-walk, which is the one place this guard errs toward a miss rather than a false positive.
 test("the walk's recursion returns empty for a directory that is already gone, and still throws on any other failure", () => {
   withSeededTree(["keep/y.ts", "vanish/x.ts"], (dir) => {
     assert.deepEqual(filesUnder(dir).sort(), ["keep/y.ts", "vanish/x.ts"]);
