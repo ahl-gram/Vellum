@@ -12,6 +12,12 @@ test("#565 the sweep selects the shorthand and the longhand spellings of a horiz
   assert.deepEqual(selectors(`.d { width: 100%; border-inline-start: 2px solid red; }`), [".d"]);
   assert.deepEqual(selectors(`.e { width: 100%; padding-left: 1rem; }`), [".e"]);
   assert.deepEqual(selectors(`.f { width: 50%; padding-inline: 1rem; }`), [".f"]);
+  assert.deepEqual(selectors(`.g { inline-size: 100%; border: 1px solid red; }`), [".g"], "the logical spelling of the width is read beside the physical one");
+});
+
+test("#565 a rule inside an at-rule block is swept too, since a print-only widener would live in exactly one of those", () => {
+  assert.deepEqual(selectors(`@media print { .a { width: 100%; border: 1px solid red; } }`), [".a"]);
+  assert.deepEqual(selectors(`@media (max-width: 900px) { .b { width: 100%; padding-right: 1rem; } }\n.c { color: red; }`), [".b"]);
 });
 
 test("#565 the sweep passes over what cannot reach a page's right edge: a vertical border, a zeroed one, a width that is not a percentage", () => {
@@ -29,6 +35,7 @@ test("#565 a comment between the width and the widener does not hide the widener
   assert.deepEqual(selectors(`/* .b { width: 100%; border: 1px solid red; } */ .c { color: red; }`), []);
 });
 
+// Documentation rather than a guard: it pins the ABSENCE of rule merging, so no deletion mutation can red it (pr-skeptic round 2). It is here because the direction matters, a false positive rather than a miss, and public/index.css's .lf-card is a live instance of it.
 test("#565 the sweep reads one rule at a time, so a widener declared in a sibling rule is a false positive and never a silent miss", () => {
   assert.deepEqual(selectors(`.a { box-sizing: border-box; }\n.a { width: 100%; border: 1px solid red; }`), [".a"]);
 });
