@@ -43,6 +43,14 @@ const READ = `(() => {
   };
 })()`;
 
+const NOSCRIPT_READ = `(() => {
+  const n = document.querySelector(".stage noscript .status");
+  const p = document.getElementById("sb-status");
+  const box = (e) => { const b = e.getBoundingClientRect(); return { disp: getComputedStyle(e).display, w: Math.round(b.width * 100) / 100 }; };
+  if (!n) return { present: false, pill: p ? box(p) : null };
+  return { present: true, ...box(n), text: n.textContent.trim().length, pill: p ? box(p) : null };
+})()`;
+
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, PORT } = ctx;
   const settle = makeSettle(ctx);
@@ -238,13 +246,36 @@ export async function run(ctx) {
     JSON.stringify(printed && { fog: printed.fog, vignette: printed.vignette, slip: printed.slipDisp, legend: printed.legendDisp, glass: printed.glassDisp, folio: printed.folioRoomPos }),
   );
   check(
-    "SB9c the status pill prints as nothing (#566, ruled 2026-09-11): on screen the Book's pill stands filled over the chart, the same-run control, and on paper it is gone, box and all, where its absolute seat resolved against the page box and laid a 2.6:1 grey slab across the printed chart at letter width; the width is read beside the display because a visibility stand-down would leave the box reserved; the Book is the only room whose pill carries text at rest, so it is the only witness here that is not vacuous, and the scripts-off notice the same arm covers cannot be reached with scripting on (test/site/room.test.ts pins the arm's scope)",
+    "SB9c the status pill prints as nothing (#566, ruled 2026-09-11): on screen the Book's pill stands filled over the chart, the same-run control, and on paper it is gone, box and all, where its absolute seat resolved against the page box and laid a grey slab on it, 2.6:1 below the chart at this width and about 3.0:1 across the chart itself at letter width; the width is read beside the display because a visibility stand-down would leave the box reserved; the Book is the only room whose pill carries text at rest, so it is the only witness here that is not vacuous, and the scripts-off notice the same arm covers cannot be reached with scripting on (test/site/room.test.ts pins the arm's scope)",
     !!restScreen && restScreen.pillDisp !== "none" && !!restScreen.pill && restScreen.pill.w > 0 && !!restScreen.pillText && restScreen.pillText.trim().length > 0 &&
       !!printed && printed.pillDisp === "none" && !!printed.pill && printed.pill.w === 0,
     JSON.stringify({ screen: restScreen && { disp: restScreen.pillDisp, w: restScreen.pill && restScreen.pill.w, text: restScreen.pillText && restScreen.pillText.trim().length }, print: printed && { disp: printed.pillDisp, w: printed.pill && printed.pill.w } }),
   );
   await send("Emulation.setEmulatedMedia", { media: "" });
   await send("Emulation.clearDeviceMetricsOverride");
+
+  // The scripts-off notice is in the DOM only with scripting off, so the other half of #566's ruling needs its own navigate; the boot hook never arrives here, so the poll waits on the notice itself rather than on goto()'s state read.
+  await send("Emulation.setScriptExecutionDisabled", { value: true });
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${PAGE}` });
+  let noJsScreen = null;
+  for (let i = 0; i < 200; i++) {
+    let s = null;
+    try { s = await evaluate(NOSCRIPT_READ); } catch {}
+    if (s && s.present && s.w > 0) { noJsScreen = s; break; }
+    await sleep(50);
+  }
+  await send("Emulation.setEmulatedMedia", { media: "print" });
+  const noJsPrint = await evaluate(NOSCRIPT_READ);
+  await send("Emulation.setEmulatedMedia", { media: "" });
+  await send("Emulation.setScriptExecutionDisabled", { value: false });
+  check(
+    "SB9d with SCRIPT EXECUTION DISABLED, the other half of #566's ruling: the scripts-off notice is in the DOM at all only here, and on paper it goes with the pill, both of them gone, box and all; on screen in the same state both stand filled, which is the control that says scripting really was off and the notice really rendered",
+    !!noJsScreen && noJsScreen.present && noJsScreen.disp !== "none" && noJsScreen.w > 0 && noJsScreen.text > 0 && !!noJsScreen.pill && noJsScreen.pill.w > 0 &&
+      !!noJsPrint && noJsPrint.present && noJsPrint.disp === "none" && noJsPrint.w === 0 && !!noJsPrint.pill && noJsPrint.pill.disp === "none" && noJsPrint.pill.w === 0,
+    JSON.stringify({ screen: noJsScreen, print: noJsPrint }),
+  );
+  await goto();
 
   gate.check("SB health: the Specimen Book raised no console error and no 4xx across every state at both widths");
 }
