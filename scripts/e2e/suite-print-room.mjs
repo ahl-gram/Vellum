@@ -485,6 +485,20 @@ export async function run(ctx) {
     printProof.stage !== "none" && printProof.stagePos === "static" && printProof.map === "none" && printProof.svg === true && printProof.atlasEmpty === true && printProof.slip === "none",
     JSON.stringify(printProof),
   );
+  // The warning is hidden until the worker fails, so the check unhides it the way app.ts does (warning.hidden = false) and puts the attribute back; reading it while hidden would assert the attribute's own display: none and prove nothing.
+  const warnRead = `(()=>{const w=document.getElementById("pr-warning");if(!w)return null;const b=w.getBoundingClientRect();return{disp:getComputedStyle(w).display,pos:getComputedStyle(w).position,w:Math.round(b.width*100)/100,hidden:w.hidden};})()`;
+  await evaluate(`(()=>{document.getElementById("pr-warning").hidden=false;return true;})()`);
+  await send("Emulation.setEmulatedMedia", { media: "" });
+  const warnScreen = await evaluate(warnRead);
+  await send("Emulation.setEmulatedMedia", { media: "print" });
+  const warnPrint = await evaluate(warnRead);
+  await evaluate(`(()=>{document.getElementById("pr-warning").hidden=true;return true;})()`);
+  check(
+    "PR21d the render-worker warning prints as nothing (#566, ruled 2026-09-11): it stands on the scripts-off notice's own seat, absolute at top calc(50% + 2.8rem), so on paper its box resolved against the page box and landed on the chart exactly as the status pill's did; unhidden the way a failed worker unhides it, it shows on screen in the same run and is gone, box and all, on paper",
+    !!warnScreen && warnScreen.hidden === false && warnScreen.disp !== "none" && warnScreen.w > 0 && warnScreen.pos === "absolute" &&
+      !!warnPrint && warnPrint.hidden === false && warnPrint.disp === "none" && warnPrint.w === 0,
+    JSON.stringify({ screen: warnScreen, print: warnPrint }),
+  );
   // Paper lays out under the 900px query (test/site/room.test.ts pins the taking-back).
   await send("Emulation.setDeviceMetricsOverride", { width: 816, height: 1056, deviceScaleFactor: 1, mobile: false });
   const paper = await evaluate(`(()=>{const cs=(sel)=>getComputedStyle(document.querySelector(sel));return{w:window.innerWidth,tagline:cs(".folio-room .room-tagline").display,name:cs(".folio-room .room-name").display,nameSize:cs(".folio-room .room-name").fontSize,folioMax:cs(".corner.folio-room").maxWidth,stagePos:cs(".stage").position,corner:cs(".corner.bl").display};})()`);

@@ -52,7 +52,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "room-ink": 2.4,
   "fallback": 2.2,
   "region-detail": 15.4, // measured 2026-08-23, local run
-  "specimen": 7.3, // measured 2026-09-10, local single-suite run: SB8b to SB8e and SB9b since the 2026-09-03 2.9s
+  "specimen": 8.3, // measured 2026-09-11, local single-suite run: SB9d's scripts-off navigate and its re-boot, over the 7.2 to 7.5 three runs read that day with SB9c alone (SB8b to SB8e and SB9b were the 2026-09-10 7.3)
   "health": 0.0,
 };
 
