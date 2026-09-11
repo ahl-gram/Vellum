@@ -308,6 +308,9 @@ flow at full width, on the paper and not on its panel (the panel is a screen thi
 screen-only; in flow on paper an absolute panel resolved against the whole page, #538). Each room
 stands its own furniture down as it converts. The take-home artifacts
 are the atlas download and the Print Room's own output; the rest of the site is a screen.
+On screen a stray edge hides inside a room's own side padding, but on paper the page box IS the
+container, so a full-width bordered box counts its border inside its width or it prints past the
+edge (#565, the Gallery's plates 2px over at a phone page and at Letter alike).
 
 **A state expressed as a `:checked` or an open class needs its own print stand-down**, because state
 survives the print stylesheet unless something says otherwise.

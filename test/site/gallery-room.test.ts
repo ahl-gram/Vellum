@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { GALLERY_PAGE_CSS, cardFigureHtml, galleryCards } from "../../src/cli/gallery.ts";
+import { fullWidthWideningRules } from "../../test-support/css-box-sweep.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
@@ -104,4 +105,12 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   assert.ok(print, "the page css ends with its print stand-down");
   assert.match(print[1], /figure img\s*\{[^}]*box-shadow:\s*none/, "print is paper: no depth");
   assert.match(print[1], /figcaption\s*\{[^}]*color:\s*var\(--ink-dark\)/, "captions print in ink");
+});
+
+test("GR7 a plate prints inside its page: every full-width bordered box in the sheet counts its border inside its width, since at print main's padding goes and the page box is the container (#565, measured 392 on 390 at 390x844 and 818 on 816 at Letter)", () => {
+  const swept = fullWidthWideningRules(css);
+  assert.ok(swept.some((rule) => rule.selector === "figure img"), `the plates are the rule this sweep is for; it selected ${JSON.stringify(swept.map((r) => r.selector))}`);
+  for (const rule of swept) {
+    assert.equal(rule.declarations["box-sizing"], "border-box", `${rule.selector} takes a percentage width and a border or side padding, so on paper it runs past the page box unless its border counts inside its width`);
+  }
 });

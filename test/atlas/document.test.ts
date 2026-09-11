@@ -10,6 +10,7 @@ import {
   type AtlasDocumentData,
 } from "../../src/atlas/document.ts";
 import { prospectPlates } from "../../src/atlas/compose.ts";
+import { fullWidthWideningRules } from "../../test-support/css-box-sweep.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
 // A minimal deterministic stand-in for a composed atlas: one plate per section plus the three HTML fragments; section membership drives the filename scheme and the layout, so one plate each is enough.
@@ -78,6 +79,14 @@ test("ATLAS_SHEET_CSS: the shared inner CSS, scoped under .atlas-sheet, is the d
   assert.match(ATLAS_SHEET_CSS, /var\(--paper,\s*\d+ms\)/);
   // Page chrome (body background, header) is NOT part of the shared inner block: it must not change the Explorer bind, which lives inside the Explorer's own page.
   assert.doesNotMatch(ATLAS_SHEET_CSS, /\.atlas-sheet\s*\{[^}]*background/);
+});
+
+test("#565 the atlas plates count their border inside their width, so a host that hands the sheet the whole page box prints them inside it: measured in the Print Room's bound atlas under print emulation on 2026-09-11, 818 on 816 and 392 on 390 with main and #pr-atlas both at padding 0", () => {
+  const swept = fullWidthWideningRules(ATLAS_SHEET_CSS);
+  assert.ok(swept.some((rule) => rule.selector === ".atlas-sheet figure img"), `the plates are the rule this sweep is for; it selected ${JSON.stringify(swept.map((r) => r.selector))}`);
+  for (const rule of swept) {
+    assert.equal(rule.declarations["box-sizing"], "border-box", `${rule.selector} takes a percentage width and a border or side padding, so it runs past its host's page box unless its border counts inside its width`);
+  }
 });
 
 test("atlasDocument (file-ref mode): a standalone doc that references plate SVG files with anchors", () => {
@@ -229,8 +238,8 @@ test("file-ref mode carries no plate-linking script: its anchors are already rea
   );
 });
 
-// Taken over this file's own fixture, before the screen dress existed.
-const DOWNLOAD_SHA256 = "0757e8c441fce51fc310af358a3f7295f03c17a00c966d8cbf95375eb37d82f3";
+// Taken over this file's own fixture, before the screen dress existed; re-taken 2026-09-11 for the plates' box-sizing (#565), a paper correction and so one the download is meant to carry.
+const DOWNLOAD_SHA256 = "50f2dd5a529f36542caf0a88e390fb32f8bb2d87d59b50bb3ad10a9eb9a323f0";
 const served = () => atlasDocument(fixture(), (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
 const download = () => atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
 

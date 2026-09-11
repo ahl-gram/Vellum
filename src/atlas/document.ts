@@ -31,7 +31,7 @@ export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
   background: var(--parchment-panel); color: var(--ink-faded); }
 .atlas-sheet h2 { letter-spacing: 0.06em; border-bottom: 1px solid var(--line-tan); padding-bottom: 0.3rem;
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); }
-.atlas-sheet figure img { width: 100%; height: auto; display: block;
+.atlas-sheet figure img { width: 100%; height: auto; display: block; box-sizing: border-box;
   border: 1px solid var(--line-tan); box-shadow: 0 10px 30px rgb(from var(--chart-ink) r g b / 0.18);
   transition: transform var(--paper, 260ms) var(--ease-paper, cubic-bezier(0.22, 0.61, 0.36, 1)),
               box-shadow var(--paper, 260ms) var(--ease-paper, cubic-bezier(0.22, 0.61, 0.36, 1)); }
