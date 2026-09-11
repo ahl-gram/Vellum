@@ -155,12 +155,140 @@ test("the runner actually uses the selection, the timings and the outcome rule i
 // The helper is proved in isolation by test/repo/step-support.test.ts; what no test could see is a suite quietly going back to a bare await, which is the #534 defect returning one suite at a time.
 // The GROUPS by name, never "at least one step": an import plus a single `await step(` left five of room-drawer's six groups unwrappable with this sweep still green (skeptic, 2026-09-10), which is a guard shaped like one instance of the class it claims to cover.
 const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
+  "render": ["R8", "R11a", "R11b", "R11c", "R12a", "R12b", "R15a", "R15b", "R13a", "R13b", "R13c", "R13e", "R restore"],
+  "motion": ["D1, D2", "D3"],
+  "turn": ["T1, T1b", "T2", "T3, T4", "T5", "T6", "T6b"],
+  "verso": ["V setup", "V0", "V2", "V3", "V4b", "V5, V5b", "V restore"],
+  "zoom-gestures": ["ZG2, ZG3, ZG4", "ZG restore"],
+  "glass-ceremony": ["G setup", "G restore"],
+  "cards": ["P setup"],
+  "fallback": ["B3"],
+  "region-detail": ["RD setup", "RD3, RD4", "RD5", "RD restore"],
+  "ribbon": ["RB1 to RB5e", "RB7", "RB8", "RB8b", "RB8c"],
+  "prospect": ["PB2 to PB5", "PB6", "PB7 to PB7d", "PB7e", "PB8", "PB9"],
+  "broadside": ["BR1 to BR1c", "BR2", "BR6b to BR6d setup", "BR7"],
+  "zoom": ["Z setup", "Z11", "Z12", "Z14a", "Z14b", "Z7", "Z13", "Z20d", "Z20g", "Z restore"],
+  "survey": [
+    "SV1", "SV2 to SV2c", "SV2d", "SV2e", "SV2g", "SV2h", "SV2i", "SV2j", "SV2p", "SV2m", "SV2o",
+    "SV3", "SV4", "SV5c", "SV5d", "SV6", "SV9", "SV10", "SV2n",
+  ],
   "cluster": ["CL4", "CL5", "CL8", "CL7"],
   "room-drawer": ["DR2, DR3", "DR4", "DR5", "DR6", "DR7", "DR8"],
   "chart-drawer": ["CD1", "CD2, CD2b, CD2c", "CD3", "CD4", "CD5", "CD7, CD7b", "CD8", "CD6", "CD15, CD17"],
   "document-rooms": ["IX3"],
   "specimen": ["SB4"],
 };
+
+const SUITE_FILES = E2E_SUITE_ORDER.map((name) => [name, `scripts/e2e/suite-${name}.mjs`] as const);
+
+// A block is [open, close] by line index, read off the house's own two shapes; a shape this cannot read is skipped, which the block-count anchor below turns into a red rather than a silent pass.
+const blocksOf = (lines: readonly string[], open: RegExp, closer: (indent: string) => RegExp) => {
+  const out: Array<{ name: string; from: number; to: number }> = [];
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i]!.match(open);
+    if (!m) continue;
+    const close = closer(m[1]!);
+    let j = i + 1;
+    while (j < lines.length && !close.test(lines[j]!)) j++;
+    if (j < lines.length) out.push({ name: m[2]!, from: i, to: j });
+  }
+  return out;
+};
+// `}).finally(scriptsBackOn);` closes a step too (suite-room-drawer's DR8).
+const stepBlocks = (lines: readonly string[]) =>
+  blocksOf(lines, /^(\s*)await step\("([^"]+)", async \(\) => \{$/, (indent) => new RegExp(`^${indent}\\}\\)(\\.\\w+\\([^)]*\\))?;$`));
+const helperBlocks = (lines: readonly string[]) => [
+  ...blocksOf(lines, /^(\s*)const (\w+) = async \([^)]*\) => \{$/, (indent) => new RegExp(`^${indent}\\};$`)),
+  ...blocksOf(lines, /^(\s*)async function (\w+)\([^)]*\) \{$/, (indent) => new RegExp(`^${indent}\\}$`)),
+];
+
+// The waits a suite gets from outside itself. Everything else that throws is DERIVED below rather than listed, so a new local wait cannot escape by not joining a roster.
+const CTX_THROWING_WAITS = ["waitSettled", "waitTurned", "settle"];
+const bodyOf = (lines: readonly string[], b: { from: number; to: number }) => lines.slice(b.from + 1, b.to).join("\n");
+const throwingWaitsIn = (lines: readonly string[], helpers: ReturnType<typeof helperBlocks>) => {
+  const set = new Set(CTX_THROWING_WAITS);
+  for (const h of helpers) if (/\bthrow new Error\(/.test(bodyOf(lines, h))) set.add(h.name);
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const h of helpers) {
+      if (set.has(h.name)) continue;
+      if (![...set].some((n) => new RegExp(`await ${n}\\(`).test(bodyOf(lines, h)))) continue;
+      set.add(h.name);
+      grew = true;
+    }
+  }
+  return set;
+};
+const waitCallSites = (lines: readonly string[], throwing: ReadonlySet<string>) => {
+  const out: Array<{ at: number; name: string }> = [];
+  for (let i = 0; i < lines.length; i++) {
+    for (const name of throwing) if (new RegExp(`await ${name}\\(`).test(lines[i]!)) out.push({ at: i, name });
+  }
+  return out;
+};
+
+test("the harness hands out exactly the two throwing waits the scan below seeds from, so a third one cannot arrive unread", () => {
+  const harness = src("scripts/e2e/harness.mjs").split("\n");
+  const found = harness
+    .map((line, i) => ({ line, i }))
+    .filter(({ line }) => /^async function wait\w+\(/.test(line))
+    .filter(({ i }) => harness.slice(i, i + 12).some((l) => /throw new Error\("wait/.test(l)))
+    .map(({ line }) => line.replace(/^async function (wait\w+)\(.*$/, "$1"));
+  assert.deepEqual(found, ["waitSettled", "waitTurned"], "the harness's throwing waits are not the two CTX_THROWING_WAITS seeds this file's scan starts from");
+});
+
+test("every suite with a wait that THROWS steps its groups, so one wait giving up cannot take the whole suite (#560)", () => {
+  const unstepped: string[] = [];
+  for (const [name, file] of SUITE_FILES) {
+    const lines = src(file).split("\n");
+    const throwing = throwingWaitsIn(lines, helperBlocks(lines));
+    if (waitCallSites(lines, throwing).length === 0) continue;
+    if (!(name in STEPPED_GROUPS)) unstepped.push(name);
+  }
+  assert.deepEqual(
+    unstepped,
+    [],
+    `these suites call a wait that throws and step nothing, so a wait that gives up there records the SUITE as red, loses every check after it, and three such suites in a row trip the streak breaker into a HARNESS ERROR (#560)`,
+  );
+});
+
+test("a suite that builds a step is named in the roster, so adopting one without joining cannot pass unread", () => {
+  const adopters = SUITE_FILES.filter(([, file]) => /from "\.\/step-support\.mjs"/.test(src(file))).map(([name]) => name);
+  assert.ok(adopters.length > 0, "no suite imports step-support at all, so the assertion below would read an empty list");
+  assert.deepEqual(
+    adopters.filter((name) => !(name in STEPPED_GROUPS)),
+    [],
+    "a suite adopted step and never joined STEPPED_GROUPS, so its groups are unpinned and one can be unwrapped silently",
+  );
+});
+
+// The guard the roster cannot be: STEPPED_GROUPS pins the step NAMES, and a wait moved out of its step keeps every one of them. Blind spot, named because a scanner cannot enumerate its own: this reads an `await waitSettled(` inside a comment or a string literal as a call site, which costs a false red and never a miss.
+test("every call of a wait that throws is INSIDE a step, in every suite that steps (#560)", () => {
+  for (const [suite, groups] of Object.entries(STEPPED_GROUPS)) {
+    const lines = src(`scripts/e2e/suite-${suite}.mjs`).split("\n");
+    const steps = stepBlocks(lines);
+    assert.equal(steps.length, groups.length, `suite-${suite}: this scan read ${steps.length} step blocks against ${groups.length} in the roster, so the ranges below cover the wrong part of the file`);
+    const helpers = helperBlocks(lines);
+    const throwing = throwingWaitsIn(lines, helpers);
+    const sites = waitCallSites(lines, throwing);
+    assert.ok(sites.length > 0, `suite-${suite} is in the roster but this scan found no throwing wait in it at all, so it proves nothing there`);
+    const inside = (ranges: ReadonlyArray<{ from: number; to: number }>, at: number) => ranges.some((r) => at > r.from && at < r.to);
+    const throwingHelpers = helpers.filter((h) => throwing.has(h.name));
+    for (const site of sites) {
+      assert.ok(
+        inside(steps, site.at) || inside(throwingHelpers, site.at),
+        `scripts/e2e/suite-${suite}.mjs:${site.at + 1} calls ${site.name} outside every step, so a timeout there fails the SUITE rather than the numbered check, and the checks after it never run (#560)`,
+      );
+    }
+    for (let i = 0; i < lines.length; i++) {
+      if (!/\bthrow new Error\(/.test(lines[i]!) || inside(steps, i)) continue;
+      assert.ok(
+        inside(throwingHelpers, i),
+        `scripts/e2e/suite-${suite}.mjs:${i + 1} throws outside every step and outside every wait this scan knows, so the sweep above is reading an incomplete list of that suite's waits`,
+      );
+    }
+  }
+});
 
 test("every check group that waits is still inside its own step, by name (#534)", () => {
   for (const [suite, groups] of Object.entries(STEPPED_GROUPS)) {
