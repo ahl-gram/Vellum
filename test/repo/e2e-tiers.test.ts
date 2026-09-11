@@ -237,7 +237,8 @@ test("the harness hands out exactly the two throwing waits the scan below seeds 
   assert.deepEqual(found, ["waitSettled", "waitTurned"], "the harness's throwing waits are not the two CTX_THROWING_WAITS seeds this file's scan starts from");
 });
 
-test("every suite with a wait that THROWS steps its groups, so one wait giving up cannot take the whole suite (#560)", () => {
+// Membership only: that a rostered suite still BUILDS its steps is the next test's deepEqual, and that every wait sits inside one is the sweep below it. The prover's 2026-09-11 finding is why this title says "is named in the roster" rather than "steps its groups".
+test("every suite with a wait that THROWS is named in the step roster, so one wait giving up cannot take the whole suite (#560)", () => {
   const unstepped: string[] = [];
   for (const [name, file] of SUITE_FILES) {
     const lines = src(file).split("\n");
