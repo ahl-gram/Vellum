@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, extname, join, relative, resolve } from "node:path";
+import { basename, dirname, extname, join, relative, resolve } from "node:path";
 
 // Node's --test collects every test/ directory anywhere in the tree AND every file named test, test-*, *-test, *_test or *.test (its six extensions, outside dot segments and node_modules; #562 covers the by-name arm), so all three defects below report as passes rather than failures: a bare module under test/ becomes a phantom pass, a .test.ts outside test/ is collected where nobody looks for it, and an imported sibling re-registers its own tests. None is visible in a green run, only in the total.
 
@@ -23,6 +23,12 @@ const loadedByNode = (f: string) =>
   !f.split("/").some((s) => s.startsWith(".") || s === "node_modules") && COLLECTED.has(extname(f));
 const isStray = (f: string) => loadedByNode(f) && !f.endsWith(".test.ts");
 const straysUnder = (root: string) => filesUnder(root).filter((f) => f.startsWith("test/") && isStray(f));
+
+const collectedByNode = loadedByNode;
+const collectedOutside = (root: string) =>
+  filesUnder(root)
+    .filter((f) => collectedByNode(f) && !f.startsWith("test/"))
+    .sort();
 
 const repoFiles = filesUnder(ROOT);
 const testDirFiles = repoFiles.filter((f) => f.startsWith("test/"));
@@ -108,6 +114,77 @@ test("over a real tree the guard names the helper and passes the Finder artifact
   });
 });
 
+test("the collection predicate mirrors node's pattern: the test/ directory and the four by-name arms, folded only where node folds", () => {
+  const matched = [
+    "src/test.ts",
+    "src/a/test.ts",
+    "src/foo.test.ts",
+    "src/foo_test.ts",
+    "src/foo-test.ts",
+    "src/_test.ts",
+    "src/test-foo.ts",
+    "test-support/test-helpers.ts",
+    "src/x/test/helper.ts",
+    "src/a/b/test/deep/helper.ts",
+    "dist/x/test/a.ts",
+    "out/y_test.mjs",
+    "test/repo/test-collection.test.ts",
+    "src/TEST-foo.ts",
+    "src/foo_TEST.ts",
+    "src/Foo.Test.ts",
+  ];
+  const unmatched = [
+    "src/testfoo.ts",
+    "src/footest.ts",
+    "src/plain.ts",
+    "tests/helper.ts",
+    "src/testing/helper.ts",
+    "test-support/helpers.ts",
+    "src/test.d.ts",
+    "src/test.config.ts",
+    "src/foo_test.tsx",
+    "src/x/test/h.json",
+    "src/foo_test.TS",
+    "src/.test.ts",
+    "src/.hidden/test.ts",
+    "src/x/test/.dotfile.ts",
+    "node_modules/pkg/test.ts",
+    "src/x/test/node_modules/y.ts",
+    "src/TEST.ts",
+    "src/TEST/helper.ts",
+    "src/Test/other.ts",
+  ];
+  assert.deepEqual([...matched, ...unmatched].filter(collectedByNode), matched);
+});
+
+test("the guard's outside-test/ composition names a nested test/ module and a by-name file, and passes a suite under the root test/", () => {
+  const seeded = [
+    "src/x/test/helper.ts",
+    "src/foo_test.ts",
+    "test-support/test-helpers.ts",
+    "test/real.test.ts",
+    "test/helper.ts",
+    "test/repo/test-foo.test.ts",
+    "src/plain.ts",
+    "src/x/test/.dotfile.ts",
+    "node_modules/p/test.ts",
+  ];
+  withSeededTree(seeded, (dir) => {
+    assert.deepEqual(collectedOutside(dir), ["src/foo_test.ts", "src/x/test/helper.ts", "test-support/test-helpers.ts"]);
+  });
+});
+
+// test/site/astro-scaffold.test.ts rm -rf's and rebuilds out/test-astro-build on every run, concurrently with this file's module-load walk of the same tree, so a directory listed by readdirSync can be gone by the time the recursion reaches it.
+test("the walk survives a directory that vanished after it was listed, and still throws on any other failure", () => {
+  withSeededTree(["keep/y.ts", "vanish/x.ts"], (dir) => {
+    assert.deepEqual(filesUnder(dir).sort(), ["keep/y.ts", "vanish/x.ts"]);
+    rmSync(join(dir, "vanish"), { recursive: true, force: true });
+    assert.deepEqual(walk(join(dir, "vanish")), []);
+    assert.deepEqual(filesUnder(dir), ["keep/y.ts"]);
+    assert.throws(() => walk(join(dir, "keep", "y.ts")), { code: "ENOTDIR" });
+  });
+});
+
 test("every file node --test loads under test/ is a .test.ts, so none is a phantom pass or an unseen suite", () => {
   assert.ok(
     testDirFiles.length > 100,
@@ -121,13 +198,15 @@ test("every file node --test loads under test/ is a .test.ts, so none is a phant
   );
 });
 
-test("every .test.ts in the repo lives under test/, where node --test is aimed", () => {
-  assert.ok(suiteFiles.length > 100, `found only ${suiteFiles.length} suites; this guard is reading the wrong tree`);
-  const outside = suiteFiles.filter((f) => !f.startsWith("test/"));
+test("every file node --test collects lives under test/, where the runner is aimed", () => {
+  assert.ok(repoFiles.includes("package.json"), "the walk did not reach the repo root; this guard is reading the wrong tree");
+  const matched = repoFiles.filter(collectedByNode);
+  assert.ok(matched.length > 100, `matched only ${matched.length} files; this guard is reading the wrong tree`);
+  const outside = collectedOutside(ROOT);
   assert.deepEqual(
     outside,
     [],
-    "node --test collects *.test.ts by name anywhere, so one outside test/ runs where nobody looks for it",
+    `${outside.length} file(s) node --test collects outside test/ (${outside.join(", ")}): it collects any directory named test at any depth and any file named test, test-*, *-test, *_test or *.test, so a module there is reported as a passing test of its own and a suite there escapes the .test.ts guards in this file; move a real suite under test/, rename a helper out of that family (test-support/ is its home), and keep generated output from carrying one of those names`,
   );
 });
 
