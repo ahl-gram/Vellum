@@ -21,7 +21,7 @@ const repoFiles = walk(ROOT, true).map(rel);
 const testDirFiles = repoFiles.filter((f) => f.startsWith("test/"));
 const suiteFiles = repoFiles.filter((f) => f.endsWith(".test.ts"));
 
-// Node's kDefaultPattern (lib/internal/test_runner/utils.js) ends .{js,mjs,cjs,ts,mts,cts}; measured 2026-09-10 on v26.8.2: dot segments, node_modules, .tsx and .json are skipped, and .TS is loaded on macOS.
+// Node's own kDefaultPattern (lib/internal/test_runner/utils in the node source) ends .{js,mjs,cjs,ts,mts,cts}; measured 2026-09-10 on v26.8.2: dot segments, node_modules, .tsx and .json are skipped, and .TS is loaded on macOS.
 const COLLECTED = new Set([".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"]);
 const loadedByNode = (f: string) =>
   !f.split("/").some((s) => s.startsWith(".") || s === "node_modules") && COLLECTED.has(extname(f).toLowerCase());
