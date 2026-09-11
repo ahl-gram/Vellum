@@ -36,7 +36,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "ribbon": 1.9, // measured 2026-08-20, local single-suite run
   "verso": 7.1,
   "turn": 6.5,
-  "runninghead": 6.6, // measured 2026-09-11, two local single-suite runs at 5.1 and 6.6 with RH10d and RH10e added (#565, a Letter resize and a settle on an already-open Gallery); the higher taken, a lane budget erring upward
+  "runninghead": 6.6, // measured 2026-09-11, three local single-suite runs at 4.9, 5.1 and 6.6 with RH10d and RH10e added (#565, a Letter resize and a settle on an already-open Gallery); the highest taken, a lane budget erring upward, which leaves lane B 3.46s under its 0.6 ceiling
   "cluster": 4.7, // measured 2026-08-28, local single-suite run
   "chart-drawer": 37.2, // measured 2026-09-08, local single-suite run: 6.9 at #520 was an 11-check suite; #543, #540 and #521 took it to 23, and six of them draft real region sheets
   "room-drawer": 7.3, // measured 2026-08-28, local single-suite run

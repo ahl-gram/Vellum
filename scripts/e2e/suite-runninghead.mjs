@@ -298,15 +298,16 @@ export async function run(ctx) {
     JSON.stringify({ ...gFolio, want: gWant }),
   );
   await send("Emulation.setEmulatedMedia", { media: "print" });
-  const gPrint = galleryNarrow ? await evaluate(`(()=>{const e=document.querySelector(".corner.tr");if(!e)return null;const c=getComputedStyle(e,"::before");const d=document.documentElement;
-    return{content:c.content,folioPos:getComputedStyle(e).position,armed:document.body.classList.contains("chart-room")&&!document.querySelector(".stage"),scrollW:d.scrollWidth,clientW:d.clientWidth};})()`) : null;
+  const gPrint = galleryNarrow ? await evaluate(`(()=>{const e=document.querySelector(".corner.tr");if(!e)return null;const c=getComputedStyle(e,"::before");
+    return{content:c.content,folioPos:getComputedStyle(e).position,armed:document.body.classList.contains("chart-room")&&!document.querySelector(".stage")};})()`) : null;
   const FIT_READ = `(()=>{const d=document.documentElement;const m=document.querySelector("main");const imgs=[...document.querySelectorAll(".grid img")];
     return{scrollW:d.scrollWidth,clientW:d.clientWidth,plates:imgs.length,maxRight:imgs.length?Math.round(Math.max(...imgs.map((el)=>el.getBoundingClientRect().right))):-1,mainPadL:m?getComputedStyle(m).paddingLeft:"absent"};})()`;
   // The poll breaks on the resize landing, never on the geometry the check asserts, and on exhaustion hands its last read to the check so a viewport that never resized reds RH10e by name instead of taking the suite.
   const fitAt = async (want) => {
+    if (!galleryNarrow) return null;
     let read = null;
     for (let i = 0; i < 40; i++) {
-      read = galleryNarrow ? await evaluate(FIT_READ) : null;
+      read = await evaluate(FIT_READ);
       if (read && read.clientW === want) return read;
       await sleep(50);
     }
@@ -317,7 +318,7 @@ export async function run(ctx) {
   const gFitLetter = await fitAt(816);
   await send("Emulation.setEmulatedMedia", { media: "" });
   check(
-    "RH10c printed at 390, the Gallery's room folio stands in flow with NO panel (#538): the corner goes static on paper and the panel's absolute box resolved against the whole page (401 wide on the unfixed tree); the stage-less arm still matches under print, read in the same payload, so the none is the stand-down and not a lapsed arm. The width it logs is asserted by RH10d, which is where the plates' own 2px lives (#565)",
+    "RH10c printed at 390, the Gallery's room folio stands in flow with NO panel (#538): the corner goes static on paper and the panel's absolute box resolved against the whole page (401 wide on the unfixed tree); the stage-less arm still matches under print, read in the same payload, so the none is the stand-down and not a lapsed arm. The page's own width moved to RH10d, which is where the plates' 2px lives (#565)",
     !!gPrint && gPrint.armed && gPrint.folioPos === "static" && gPrint.content === "none",
     JSON.stringify(gPrint),
   );
