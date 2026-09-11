@@ -223,7 +223,7 @@ export async function run(ctx) {
   const leanedBack = await read();
   check(
     "SB9b leaned and then printed, the room folio's panel stands down (#538): the zoomed class survives the print sheet, so the arm still matches on paper (read under print) while the corner is static and in flow, where the panel's absolute box resolved against the whole page; the same read under screen paints it before and after, the same-run control that the emulation took; and with the panel gone the printed page carries no sideways overflow",
-    !!leanedScreen && leanedScreen.st.zoomed && leanedScreen.pool === '""' && !!leanedPrint && leanedPrint.st.zoomed && leanedPrint.folioRoomPos === "static" && leanedPrint.pool === "none" && leanedPrint.noX && !!leanedBack && leanedBack.pool === '""',
+    !!leanedScreen && !!leanedScreen.st && leanedScreen.st.zoomed && leanedScreen.pool === '""' && !!leanedPrint && !!leanedPrint.st && leanedPrint.st.zoomed && leanedPrint.folioRoomPos === "static" && leanedPrint.pool === "none" && leanedPrint.noX && !!leanedBack && leanedBack.pool === '""',
     JSON.stringify({ before: leanedScreen && leanedScreen.pool, printedZoomed: leanedPrint && leanedPrint.st && leanedPrint.st.zoomed, folio: leanedPrint && leanedPrint.folioRoomPos, printed: leanedPrint && leanedPrint.pool, after: leanedBack && leanedBack.pool, noX: leanedPrint && leanedPrint.noX }),
   );
   await setState("rest");

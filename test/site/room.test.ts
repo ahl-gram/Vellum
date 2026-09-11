@@ -74,16 +74,21 @@ test("the kit's print block restores the room folio's tagline and width after th
 });
 
 test("the room folio's panel is painted screen-only (#538): on paper the corner goes static and in flow, and an absolute panel on a static corner resolved against the whole page (e2e RH10c and SB9b pin the resolved value)", () => {
-  const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const REPO = resolve(import.meta.dirname, "..", "..");
+  const strip = (p: string) => readFileSync(resolve(REPO, p), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  // The sweep errs toward flagging: any tr or folio-room word in a content-giving before or after selector, any case, any spelling; the wrap's window ends at the first column-zero brace, so it can only be too narrow, never too wide. What it cannot see, named: native nesting (no sheet uses it) and a selector reaching the folio by a shared class or by structure; RH10c and SB9b read the resolved content.
+  const paints = (css: string) => [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, sel, decls]) => /:{1,2}(before|after)/i.test(sel) && /\b(tr|folio-room)\b/i.test(sel) && /content\s*:/i.test(decls));
+  const css = strip("public/atelier.css");
   const screen = css.indexOf("@media screen {");
   const close = css.indexOf("\n}", screen);
   assert.ok(screen >= 0 && close > screen, "the kit carries a screen-only block");
-  const block = css.slice(screen, close);
-  assert.match(block, /\.corner\.tr::before[^{]*\{[^}]*content\s*:\s*""/i, "the painting rule that gives the folio panel its content sits inside it");
-  // The sweep errs toward flagging (any tr or folio-room word in a content-giving before selector, any case, any spelling, a second screen block included) and names what it cannot see: native nesting (the kit uses none) and a selector reaching the folio by a shared class or by structure; RH10c and SB9b read the resolved content.
-  const paints = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, sel, decls]) => /:{1,2}before/i.test(sel) && /\b(tr|folio-room)\b/i.test(sel) && /content\s*:/i.test(decls));
-  assert.ok(paints.length >= 1, "at least one rule gives the folio's ::before content");
-  for (const m of paints) assert.ok(m.index > screen && m.index < close, `a rule giving the folio's ::before content sits outside the screen-only wrap: ${m[1].trim().slice(0, 80)}`);
+  assert.match(css.slice(screen, close), /\.corner\.tr::before[^{]*\{[^}]*content\s*:\s*""/i, "the painting rule that gives the folio panel its content sits inside it");
+  const kit = paints(css);
+  assert.ok(kit.length >= 1, "at least one rule gives the folio's pseudo content");
+  for (const m of kit) assert.ok(m.index > screen && m.index < close, `a rule giving the folio's pseudo content sits outside the screen-only wrap: ${m[1].trim().slice(0, 80)}`);
+  const sheets = [...globSync("public/**/*.css", { cwd: REPO }), ...globSync("src/**/*.astro", { cwd: REPO }), ...globSync("src/cli/*.ts", { cwd: REPO })].filter((p) => p !== "public/atelier.css").sort();
+  assert.ok(sheets.includes("src/cli/gallery.ts") && sheets.includes("src/layouts/BaseLayout.astro"), "the sweep reaches the generated Gallery sheet and the layout's style block");
+  for (const p of sheets) assert.deepEqual(paints(strip(p)).map((m) => m[1].trim().slice(0, 80)), [], `${p} paints the folio's pseudo itself; the panel belongs to the kit`);
 });
 
 test("bindRoom seats the legend row before it fits the sheet", () => {
