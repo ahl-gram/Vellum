@@ -35,7 +35,7 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
 7. **A transparent component (cache, memo, fast path) is guarded by its own counters**, never by an
    output compare. Ask what "delete it entirely" does to the assertion; if nothing, rewrite.
 8. **A shared helper goes in `test-support/`, never in `test/`, and never in a sibling.** `node
-   --test` collects every file under `test/`, so a bare helper module there is reported as a passing
+   --test` collects every `.ts`/`.js` module under `test/`, so a bare helper there is reported as a passing
    test of its own, and a `.test.ts` that imports a sibling `.test.ts` runs that sibling's tests a
    second time. Neither fails; both inflate the count. If `test-support/` has no precedent for the
    shape you need, that is not evidence the repo lacks the convention: it already holds the helpers
