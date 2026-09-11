@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
-import { extname, join, relative, resolve } from "node:path";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, extname, join, relative, resolve } from "node:path";
 
 // Node's --test collects a directory AND every *.test.ts by name anywhere in the tree, so all three defects below report as passes rather than failures: a bare module under test/ becomes a phantom pass, a .test.ts outside test/ is collected where nobody looks for it, and an imported sibling re-registers its own tests. None is visible in a green run, only in the total.
 
@@ -61,15 +62,30 @@ test("a stray is a file node --test would load that is not a .test.ts, never a f
 });
 
 test("the walk prunes node_modules and dot dirs at every depth, and out/dist/public/design at the root only", () => {
-  for (const name of ["out", "dist", "public", "design"]) {
-    assert.equal(pruned(name, true), true, name);
-    assert.equal(pruned(name, false), false, `${name} nested under test/ is loaded by node, so the walk must reach it`);
+  const dir = mkdtempSync(join(tmpdir(), "vellum-walk-"));
+  try {
+    const seeded = [
+      "src/f.ts",
+      "test/out/x.ts",
+      "test/design/y.ts",
+      "out/a.ts",
+      "dist/b.ts",
+      "public/c.ts",
+      "design/d.ts",
+      "node_modules/e.ts",
+      "test/node_modules/g.ts",
+      ".cache/h.ts",
+      "test/.cache/i.ts",
+    ];
+    for (const f of seeded) {
+      mkdirSync(join(dir, dirname(f)), { recursive: true });
+      writeFileSync(join(dir, f), "");
+    }
+    const found = walk(dir, true).map((p) => relative(dir, p)).sort();
+    assert.deepEqual(found, ["src/f.ts", "test/design/y.ts", "test/out/x.ts"]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
   }
-  for (const name of ["node_modules", ".git", ".claude"]) {
-    assert.equal(pruned(name, true), true, name);
-    assert.equal(pruned(name, false), true, name);
-  }
-  assert.equal(pruned("src", true), false);
 });
 
 test("every file node --test loads under test/ is a .test.ts, so none is a phantom pass or an unseen suite", () => {
