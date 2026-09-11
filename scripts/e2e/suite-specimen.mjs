@@ -254,21 +254,25 @@ export async function run(ctx) {
   await send("Emulation.setEmulatedMedia", { media: "" });
   await send("Emulation.clearDeviceMetricsOverride");
 
-  // The scripts-off notice is in the DOM only with scripting off, so the other half of #566's ruling needs its own navigate; the boot hook never arrives here, so the poll waits on the notice itself rather than on goto()'s state read.
-  await send("Emulation.setScriptExecutionDisabled", { value: true });
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${PAGE}` });
+  // The boot hook never arrives with scripting off, so the poll waits on the notice itself rather than on goto()'s state read; the restore is a finally because a throw between here and it would hand the next suite a browser with no JavaScript, which runSelected keeps running into.
   let noJsScreen = null;
-  for (let i = 0; i < 200; i++) {
-    let s = null;
-    try { s = await evaluate(NOSCRIPT_READ); } catch {}
-    if (s && s.present && s.w > 0) { noJsScreen = s; break; }
-    await sleep(50);
+  let noJsPrint = null;
+  try {
+    await send("Emulation.setScriptExecutionDisabled", { value: true });
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${PAGE}` });
+    for (let i = 0; i < 200; i++) {
+      let s = null;
+      try { s = await evaluate(NOSCRIPT_READ); } catch {}
+      if (s && s.present && s.w > 0) { noJsScreen = s; break; }
+      await sleep(50);
+    }
+    await send("Emulation.setEmulatedMedia", { media: "print" });
+    noJsPrint = await evaluate(NOSCRIPT_READ);
+  } finally {
+    await send("Emulation.setEmulatedMedia", { media: "" });
+    await send("Emulation.setScriptExecutionDisabled", { value: false });
   }
-  await send("Emulation.setEmulatedMedia", { media: "print" });
-  const noJsPrint = await evaluate(NOSCRIPT_READ);
-  await send("Emulation.setEmulatedMedia", { media: "" });
-  await send("Emulation.setScriptExecutionDisabled", { value: false });
   check(
     "SB9d with SCRIPT EXECUTION DISABLED, the other half of #566's ruling: the scripts-off notice is in the DOM at all only here, and on paper it goes with the pill, both of them gone, box and all; on screen in the same state both stand filled, which is the control that says scripting really was off and the notice really rendered",
     !!noJsScreen && noJsScreen.present && noJsScreen.disp !== "none" && noJsScreen.w > 0 && noJsScreen.text > 0 && !!noJsScreen.pill && noJsScreen.pill.w > 0 &&

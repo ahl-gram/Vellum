@@ -106,7 +106,7 @@ test("the kit's print block stands the stage's status pill down (#566, ruled 202
   assert.ok(stood.length >= 1, "the print block stands the stage's status down");
   for (const arm of stood) {
     assert.match(arm, /\.stage\b/i, `a status stand-down that is not scoped to a chart room's stage: ${arm.slice(0, 80)}`);
-    assert.doesNotMatch(arm, /[>+~]/, `a status stand-down on a combinator, which cannot reach the scripts-off notice: it sits inside <noscript>, one level deeper than the pill (${arm.slice(0, 80)})`);
+    assert.doesNotMatch(arm.replace(/\[[^\]]*\]/g, ""), /[>+~]/, `a status stand-down on a combinator, which cannot reach the scripts-off notice: it sits inside <noscript>, one level deeper than the pill (${arm.slice(0, 80)})`);
     const subject = arm.split(/\s+/).filter(Boolean).at(-1) ?? "";
     assert.match(subject, /^\.status$/i, `a status stand-down whose subject is not the kit's class alone, so it reaches one room's own element or a compound no element wears, and six of the seven rooms' pills and all seven scripts-off notices keep printing: ${arm.slice(0, 80)}`);
   }
