@@ -32,7 +32,7 @@ const READ = `(() => {
 
     folioInset: (() => { const e = document.querySelector(".corner.tr"); if (!e) return null; const c = getComputedStyle(e, "::before"); return [c.top, c.right, c.bottom, c.left]; })(),
     pool: cs(".corner.tr", "content", "::before"), poolChrome: cs("header.chrome", "content", "::before"), poolGlass: cs(".corner.br", "content", "::before"), folioPanel: cs(".corner.tr", "backgroundImage", "::before"), folioFilter: cs(".corner.tr", "filter", "::before"),
-    pillDisp: cs("#sb-status", "display"), pillText: (document.getElementById("sb-status") || { textContent: null }).textContent,
+    pillDisp: cs("#sb-status", "display"), pillText: (document.getElementById("sb-status") || { textContent: null }).textContent, pill: r("#sb-status"),
     folioLines: [...document.querySelectorAll(".corner.bl p")].map((p) => p.textContent.length > 0),
     crNum: cs(".contents .cr-num", "color"), inked: cs(".index li.inked", "opacity"), unInked: cs(".index > li:not(.inked)", "opacity"),
     gold: cs(".legend-btn.gold", "background-color"), disabled: cs(".legend-btn:disabled", "opacity"), missDisp: cs(".index .terms a.miss", "display"),
@@ -229,12 +229,19 @@ export async function run(ctx) {
   await setState("rest");
   await sleep(400);
 
+  const restScreen = await read();
   await send("Emulation.setEmulatedMedia", { media: "print" });
   const printed = await read();
   check(
     "SB9 print is paper: the fog, the vignettes, the slip, the legend and the Glass print as nothing; the room's folio prints in flow",
     !!printed && printed.fog === "none" && printed.vignette === "none" && printed.slipDisp === "none" && printed.legendDisp === "none" && printed.glassDisp === "none" && printed.folioRoomPos === "static",
     JSON.stringify(printed && { fog: printed.fog, vignette: printed.vignette, slip: printed.slipDisp, legend: printed.legendDisp, glass: printed.glassDisp, folio: printed.folioRoomPos }),
+  );
+  check(
+    "SB9c the status pill prints as nothing (#566, ruled 2026-09-11): on screen the Book's pill stands filled over the chart, the same-run control, and on paper it is gone, box and all, where its absolute seat resolved against the page box and laid a 2.6:1 grey slab across the printed chart at letter width; the width is read beside the display because a visibility stand-down would leave the box reserved; the Book is the only room whose pill carries text at rest, so it is the only witness here that is not vacuous, and the scripts-off notice the same arm covers cannot be reached with scripting on (test/site/room.test.ts pins the arm's scope)",
+    !!restScreen && restScreen.pillDisp !== "none" && !!restScreen.pill && restScreen.pill.w > 0 && !!restScreen.pillText && restScreen.pillText.trim().length > 0 &&
+      !!printed && printed.pillDisp === "none" && !!printed.pill && printed.pill.w === 0,
+    JSON.stringify({ screen: restScreen && { disp: restScreen.pillDisp, w: restScreen.pill && restScreen.pill.w, text: restScreen.pillText && restScreen.pillText.trim().length }, print: printed && { disp: printed.pillDisp, w: printed.pill && printed.pill.w } }),
   );
   await send("Emulation.setEmulatedMedia", { media: "" });
   await send("Emulation.clearDeviceMetricsOverride");

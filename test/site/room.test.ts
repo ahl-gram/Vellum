@@ -92,6 +92,21 @@ test("the room folio's panel is painted screen-only (#538): on paper the corner 
   for (const p of sheets) assert.deepEqual(paints(strip(p)).map((m) => m[1].trim().slice(0, 80)), [], `${p} paints the folio's pseudo itself; the panel belongs to the kit`);
 });
 
+test("the kit's print block stands the stage's status pill down (#566, ruled 2026-09-11), and the arm is scoped to the stage so it takes the scripts-off notice with it and leaves every other status alone", () => {
+  const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8").replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\/\*[\s\S]*?\*\//g, (m) => (m.startsWith("/*") ? "" : m));
+  const open = css.indexOf("@media print");
+  assert.notEqual(open, -1, "the kit carries a print block");
+  let depth = 0, close = -1;
+  for (let i = css.indexOf("{", open); i < css.length && close < 0; i++) { if (css[i] === "{") depth++; else if (css[i] === "}" && --depth === 0) close = i; }
+  assert.ok(close > open, "the print block's own brace-matched close, so a block appended after it can never widen the window");
+  // Every comma arm is read on its own, in any case or spacing; the sweep errs toward flagging, since \bstatus\b also matches .legend-status, which costs a false red and never a miss. What it cannot see, named: native nesting (no sheet here uses it) and a stand-down written in a page sheet instead, which e2e SB9c reads as the resolved value.
+  const stood = [...css.slice(open, close).matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+    .filter(([, , decls]) => /display\s*:\s*none/i.test(decls))
+    .flatMap(([, sel]) => sel.split(",").map((arm) => arm.trim()).filter((arm) => /\bstatus\b/i.test(arm)));
+  assert.ok(stood.length >= 1, "the print block stands the stage's status down");
+  for (const arm of stood) assert.match(arm, /\.stage\b/i, `a status stand-down that is not scoped to a chart room's stage: ${arm.slice(0, 80)}`);
+});
+
 test("bindRoom seats the legend row before it fits the sheet", () => {
   const room = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/shared/room.ts"), "utf8");
   const layout = room.slice(room.indexOf("const layout = () => {"), room.indexOf("camera.restore(held);"));

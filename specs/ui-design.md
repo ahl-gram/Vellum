@@ -308,6 +308,9 @@ flow at full width, on the paper and not on its panel (the panel is a screen thi
 screen-only; in flow on paper an absolute panel resolved against the whole page, #538). Each room
 stands its own furniture down as it converts. The take-home artifacts
 are the atlas download and the Print Room's own output; the rest of the site is a screen.
+The stage's status pill prints as nothing too, in every chart room and with its scripts-off notice
+(#566, ruled 2026-09-11): it reports a draw that is over by the time the page is paper, and its
+absolute seat resolved against the page box, laying a 2.6:1 grey slab across the printed chart.
 
 **A state expressed as a `:checked` or an open class needs its own print stand-down**, because state
 survives the print stylesheet unless something says otherwise.
