@@ -27,7 +27,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "zoom": 45.8,
   "reading-room": 27.1,
   "room-instrument": 22.0,
-  "print-room": 21.9,
+  "print-room": 24.8, // measured 2026-09-11, local single-suite run: PR35 and its two page-box resizes (#565) since the 2026-08-14 21.9s
   "room-address": 19.3,
   "render": 13.0,
   "room-voyage-route": 9.0,
@@ -36,7 +36,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "ribbon": 1.9, // measured 2026-08-20, local single-suite run
   "verso": 7.1,
   "turn": 6.5,
-  "runninghead": 5.1, // measured 2026-09-10, local single-suite run: RH10, RH10b and RH10c (two Gallery visits, one under print) since the 2026-08-14 3.9s
+  "runninghead": 6.6, // measured 2026-09-11, three local single-suite runs at 4.9, 5.1 and 6.6 with RH10d and RH10e added (#565, a Letter resize and a settle on an already-open Gallery); the highest taken, a lane budget erring upward
   "cluster": 4.7, // measured 2026-08-28, local single-suite run
   "chart-drawer": 37.2, // measured 2026-09-08, local single-suite run: 6.9 at #520 was an 11-check suite; #543, #540 and #521 took it to 23, and six of them draft real region sheets
   "room-drawer": 7.3, // measured 2026-08-28, local single-suite run

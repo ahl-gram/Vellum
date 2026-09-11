@@ -17,7 +17,7 @@ type. Read the gate you are at, do each line, and move on. Provenance is in `ref
 
 ## Gate 1: before writing a test or a guard
 
-Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #546, #561.
+Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #546, #561, #562, #564.
 
 1. **Write the mutation before the test.** Name the one-line change to `src/` that must turn this
    test red. If you cannot name one, you are about to write a test that cannot fail.
@@ -35,12 +35,13 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
 7. **A transparent component (cache, memo, fast path) is guarded by its own counters**, never by an
    output compare. Ask what "delete it entirely" does to the assertion; if nothing, rewrite.
 8. **A shared helper goes in `test-support/`, never in `test/`, and never in a sibling.** `node
-   --test` collects every `.ts`/`.js` module under `test/` (its six extensions, outside dot segments
-   and `node_modules`), so a bare helper there is reported as a passing test of its own, and a
-   `.test.ts` that imports a sibling `.test.ts` runs that sibling's tests a second time. Neither
-   fails; both inflate the count. It also collects, ANYWHERE in the tree, a file named `test`,
-   `test-*`, `*-test`, `*_test` or `*.test`, so a helper in `test-support/` must not carry one of
-   those names either (#562 is the guard that does not yet see this). If `test-support/` has no precedent for the
+   --test` collects every `.ts`/`.js` module under ANY directory named `test`, at any depth (its six
+   extensions, outside dot segments and `node_modules`), so a bare helper there is reported as a
+   passing test of its own, and a `.test.ts` that imports a sibling `.test.ts` runs that sibling's
+   tests a second time. Neither fails; both inflate the count. It also collects, ANYWHERE in the
+   tree, a file named `test`, `test-*`, `*-test`, `*_test` or `*.test`, so a helper in
+   `test-support/` must not carry one of those names either; `test/repo/test-collection.test.ts`
+   reds on both arms since #562. If `test-support/` has no precedent for the
    shape you need, that is not evidence the repo lacks the convention: it already holds the helpers
    and the importers.
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
@@ -51,6 +52,20 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
    `git worktree add --detach "$WT" HEAD`; the earlier "restore is `git checkout --`" described a
    loop it no longer runs). Zero red is
    a hole. A guard proved unable to red is deleted, never shipped.
+10. **A test that spawns a child gives it its own time limit.** `execFileSync` takes a `timeout`;
+    with none, a wedged child hangs the unit lane forever with no red to read, and `--test-timeout`
+    cannot save it, because the block is synchronous and the runner's own timer never gets the event
+    loop (measured: a test running `execFileSync("sh", ["-c", "sleep 8"])` under
+    `--test-timeout=1000` PASSED at 8012ms). The shape that wedges is a large `input` to a child
+    that DRAINS it: at 200000 bytes, 2 unbounded runs in 2000 hung outright and 12 capped runs in
+    12000 came back as ETIMEDOUT; at 1024 bytes, 0 in 12000 (#564). The limit is a
+    cap on a hang, not a performance budget, so set it far above the worst real run; and a cap
+    nothing ever reaches cannot bite, so keep one child that deliberately outlives it, written as a
+    SINGLE command (`sh -c 'sleep 5'`), since killing a multi-command child orphans its grandchild
+    and the cap then leaks a process every time it fires (measured 2026-09-11: 10 orphans in 10
+    runs for `sleep 5; printf x`, 0 for the single-command form). Pin what reaches the spawn, not
+    what the option builder returns: the seam between them is where a default cap goes missing with
+    every child still green.
 
 ## Gate 2: before writing an e2e check or a CDP probe
 

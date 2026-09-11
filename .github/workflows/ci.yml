@@ -14,6 +14,8 @@ jobs:
   check-and-test:
     name: check & test
     runs-on: ubuntu-latest
+    # An uncapped job inherits GitHub's 360-minute default, and npm test can hang with no red to read (#564); measured 2026-09-11 over the last 20 successful runs, worst 8m12s.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,7 +31,7 @@ jobs:
   build-and-e2e:
     name: build & e2e
     runs-on: ubuntu-latest
-    # A hung lane is the one failure the outcome rule cannot catch; measured worst case is 7m05s.
+    # A hung lane is the one failure the outcome rule cannot catch; re-measured 2026-09-11 over the last 20 successful runs, worst 13m14s (the 7m05s this line carried was from an older, shorter suite).
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
