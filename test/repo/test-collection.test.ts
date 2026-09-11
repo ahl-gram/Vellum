@@ -31,9 +31,9 @@ const COLLECTED = new Set([".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"]);
 const loadedByNode = (f: string) =>
   !f.split("/").some((s) => s.startsWith(".") || s === "node_modules") && COLLECTED.has(extname(f));
 const isStray = (f: string) => loadedByNode(f) && !f.endsWith(".test.ts");
-const straysUnder = (root: string) => filesUnder(root).filter((f) => f.startsWith("test/") && isStray(f));
+const straysUnder = (files: string[]) => files.filter((f) => f.startsWith("test/") && isStray(f));
 
-// Node folds case only on pattern segments that contain a wildcard, and only on macOS and Windows; measured 2026-09-11 on v26.8.2 under this package's "type": "module", one case variant per scratch tree because two in one tree are a single file on this disk.
+// Node folds case only on pattern segments that contain a wildcard, and only on macOS and Windows; measured 2026-09-11 on v26.8.2 under this package's "type": "module".
 const inTestDir = (f: string) => f.split("/").some((s) => s === "test");
 const namedTest = (f: string) => {
   const stem = basename(f, extname(f));
@@ -41,10 +41,8 @@ const namedTest = (f: string) => {
   return stem === "test" || folded.startsWith("test-") || /[._-]test$/.test(folded);
 };
 const collectedByNode = (f: string) => loadedByNode(f) && (inTestDir(f) || namedTest(f));
-const collectedOutside = (root: string) =>
-  filesUnder(root)
-    .filter((f) => collectedByNode(f) && !f.startsWith("test/"))
-    .sort();
+const collectedOutside = (files: string[]) =>
+  files.filter((f) => collectedByNode(f) && !f.startsWith("test/")).sort();
 
 const repoFiles = filesUnder(ROOT);
 const testDirFiles = repoFiles.filter((f) => f.startsWith("test/"));
@@ -126,7 +124,7 @@ test("the walk prunes node_modules and dot dirs at every depth and nothing else,
 test("over a real tree the guard names the helper and passes the Finder artifact, the defect #561 reported", () => {
   const seeded = ["test/helper.ts", "test/.DS_Store", "test/fixtures/data.json", "test/real.test.ts", "src/stray.ts"];
   withSeededTree(seeded, (dir) => {
-    assert.deepEqual(straysUnder(dir), ["test/helper.ts"]);
+    assert.deepEqual(straysUnder(filesUnder(dir)), ["test/helper.ts"]);
   });
 });
 
@@ -186,12 +184,12 @@ test("the guard's outside-test/ composition names a nested test/ module and a by
     "node_modules/p/test.ts",
   ];
   withSeededTree(seeded, (dir) => {
-    assert.deepEqual(collectedOutside(dir), ["src/foo_test.ts", "src/x/test/helper.ts", "test-support/test-helpers.ts"]);
+    assert.deepEqual(collectedOutside(filesUnder(dir)), ["src/foo_test.ts", "src/x/test/helper.ts", "test-support/test-helpers.ts"]);
   });
 });
 
-// test/site/astro-scaffold.test.ts rm -rf's and rebuilds out/test-astro-build on every run, concurrently with this file's module-load walk of the same tree, so a directory listed by readdirSync can be gone by the time the recursion reaches it.
-test("the walk survives a directory that vanished after it was listed, and still throws on any other failure", () => {
+// Sibling suites build and remove 19 scratch trees under out/ during the same npm test run (grep -rho 'out/test-[a-z-]*' test/), racing this file's walk, so a directory readdirSync listed can be gone before the recursion reaches it; tolerating ENOENT therefore errs toward MISSING a collectible name inside a tree that vanished mid-walk, which is the one place this guard errs toward a miss rather than a false positive.
+test("the walk's recursion returns empty for a directory that is already gone, and still throws on any other failure", () => {
   withSeededTree(["keep/y.ts", "vanish/x.ts"], (dir) => {
     assert.deepEqual(filesUnder(dir).sort(), ["keep/y.ts", "vanish/x.ts"]);
     rmSync(join(dir, "vanish"), { recursive: true, force: true });
@@ -206,7 +204,7 @@ test("every file node --test loads under test/ is a .test.ts, so none is a phant
     testDirFiles.length > 100,
     `walked only ${testDirFiles.length} files under test/; this guard is reading the wrong tree`,
   );
-  const strays = straysUnder(ROOT);
+  const strays = straysUnder(repoFiles);
   assert.deepEqual(
     strays,
     [],
@@ -218,7 +216,7 @@ test("every file node --test collects lives under test/, where the runner is aim
   assert.ok(repoFiles.includes("package.json"), "the walk did not reach the repo root; this guard is reading the wrong tree");
   const matched = repoFiles.filter(collectedByNode);
   assert.ok(matched.length > 100, `matched only ${matched.length} files; this guard is reading the wrong tree`);
-  const outside = collectedOutside(ROOT);
+  const outside = collectedOutside(repoFiles);
   assert.deepEqual(
     outside,
     [],
@@ -227,6 +225,7 @@ test("every file node --test collects lives under test/, where the runner is aim
 });
 
 test("no .test.ts imports another .test.ts, which would run that file's tests twice", () => {
+  assert.ok(suiteFiles.length > 100, `found only ${suiteFiles.length} suites; this guard is reading the wrong tree`);
   const offenders = suiteFiles.flatMap((f) => importsOf(readFileSync(join(ROOT, f), "utf8")).map((s) => `${f} -> ${s}`));
   assert.deepEqual(offenders, [], "share through test-support/ instead; an imported sibling re-registers its tests");
 });
