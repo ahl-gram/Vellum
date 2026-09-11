@@ -99,16 +99,16 @@ test("the kit's print block stands the stage's status pill down (#566, ruled 202
   let depth = 0, close = -1;
   for (let i = css.indexOf("{", open); i < css.length && close < 0; i++) { if (css[i] === "{") depth++; else if (css[i] === "}" && --depth === 0) close = i; }
   assert.ok(close > open, "the print block's own brace-matched close, so a block appended after it can never widen the window");
-  // Every comma arm is read on its own, in any case or spacing, and the sweep errs toward flagging three ways that each cost a false red and never a miss: \bstatus\b also matches .legend-status, only the FIRST print block is windowed, and a compound subject like p.status reds. What it cannot see, named: native nesting (no sheet here uses it) and a stand-down written in a page sheet instead, which e2e SB9c reads as the resolved value.
+  // This pin is the fast lane and it reads TEXT, so it is blind to anything the cascade decides: a later rule re-showing the pill (in this block, in a second print block, or in a page sheet) passes here and reds e2e SB9c, which reads the resolved value and is the guard (measured 2026-09-11 against a display: block !important arm appended after this one: SB9c red at disp block, w 195). It errs toward flagging where it does read: \bstatus\b also matches .legend-status.
   const stood = [...css.slice(open, close).matchAll(/([^{}]+)\{([^{}]*)\}/g)]
     .filter(([, , decls]) => /display\s*:\s*none/i.test(decls))
     .flatMap(([, sel]) => sel.split(",").map((arm) => arm.trim()).filter((arm) => /\bstatus\b/i.test(arm)));
   assert.ok(stood.length >= 1, "the print block stands the stage's status down");
   for (const arm of stood) {
     assert.match(arm, /\.stage\b/i, `a status stand-down that is not scoped to a chart room's stage: ${arm.slice(0, 80)}`);
-    const subject = arm.split(/\s+|>|\+|~/).filter(Boolean).at(-1) ?? "";
-    assert.match(subject, /\.status\b/i, `a status stand-down whose subject is one room's own element rather than the kit's class, so six of the seven rooms' pills and all seven scripts-off notices keep printing: ${arm.slice(0, 80)}`);
-    assert.doesNotMatch(subject, /#/, `the same, by id: ${arm.slice(0, 80)}`);
+    assert.doesNotMatch(arm, /[>+~]/, `a status stand-down on a combinator, which cannot reach the scripts-off notice: it sits inside <noscript>, one level deeper than the pill (${arm.slice(0, 80)})`);
+    const subject = arm.split(/\s+/).filter(Boolean).at(-1) ?? "";
+    assert.match(subject, /^\.status$/i, `a status stand-down whose subject is not the kit's class alone, so it reaches one room's own element or a compound no element wears, and six of the seven rooms' pills and all seven scripts-off notices keep printing: ${arm.slice(0, 80)}`);
   }
 });
 
