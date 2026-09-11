@@ -5,7 +5,8 @@ export async function run(ctx) {
   const { evaluate, check, shoot, sleep, waitSettled, waitTurned, armTurnWatch } = ctx;
   const step = makeStep(ctx);
 
-  let vTitle = "";
+  // null, never "": V1b below is outside every step and reads this, and `docket.includes("")` is TRUE, so an empty hoist would let a skipped "V setup" pass V1b's title clause vacuously.
+  let vTitle = null;
   await step("V setup", async () => {
     await evaluate(`(()=>{const chk=document.getElementById("ages");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
     await waitSettled("verso-base");
