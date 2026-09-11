@@ -4,7 +4,8 @@ export interface WideningRule {
   readonly declarations: Readonly<Record<string, string>>;
 }
 
-const WIDENS = /^(border|border-(left|right|inline|inline-start|inline-end)|padding|padding-(left|right|inline|inline-start|inline-end))$/;
+// Only the properties that widen a box HORIZONTALLY: border-top and its kin are left out on purpose, since they move nothing toward a page's right edge. The longhand spellings are here because border-style alone widens a box (border-width defaults to medium), which escaped the first cut of this regex (guard-prover, 2026-09-11).
+const WIDENS = /^(border|border-(width|style)|border-(left|right|inline|inline-start|inline-end)(-(width|style))?|padding|padding-(left|right|inline|inline-start|inline-end))$/;
 
 const declarationsIn = (body: string): Record<string, string> =>
   Object.fromEntries(
