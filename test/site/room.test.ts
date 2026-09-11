@@ -80,7 +80,10 @@ test("the room folio's panel is painted screen-only (#538): on paper the corner 
   assert.ok(screen >= 0 && close > screen, "the kit carries a screen-only block");
   const block = css.slice(screen, close);
   assert.match(block, /\.corner\.tr::before[^{]*\{[^}]*content:\s*""/, "the painting rule that gives the folio panel its content sits inside it");
-  assert.equal((css.match(/\.corner\.tr:{1,2}before[^{]*\{[^}]*content:/g) || []).length, 1, "and no second rule gives it content outside the wrap, in either colon form");
+  // Blind spot, named: a selector reaching the folio by a class it shares (.corner, .chrome) or by structure passes here; RH10c and SB9b read the resolved content.
+  const paints = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, sel, decls]) => /:{1,2}before/.test(sel) && /\.(tr|folio-room)(?![\w-])/.test(sel) && /content:/.test(decls));
+  assert.ok(paints.length >= 1, "at least one rule gives the folio's ::before content");
+  for (const m of paints) assert.ok(m.index > screen && m.index < close, `a rule giving the folio's ::before content sits outside the screen-only wrap: ${m[1].trim().slice(0, 80)}`);
 });
 
 test("bindRoom seats the legend row before it fits the sheet", () => {
