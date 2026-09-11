@@ -1,7 +1,7 @@
 # The ledger behind the gates
 
 Compiled 2026-09-09 from the bodies, commits and verification comments of PRs #524 to #548 and
-their issues, with older scars added beneath when a gate needs one (#378, #518 to #521, #525, #526, #529, #531, #532, #539, #540, #543, epic #401).
+their issues, with older and later scars added beneath when a gate needs one (#378, #518 to #521, #525, #526, #529, #531, #532, #539, #540, #543, epic #401).
 Every row was found by a cold skeptic, a prover, a plate-reader, CI, or Alex live, after the
 implementing session had already reported the work done. Ranked by how many PRs in that window
 carried it. The long form of each lesson, with the earlier scars, is in the auto-memory doctrine
@@ -107,6 +107,13 @@ left open and the session failed to write down).
   for two months unseen by CI, and the gate's own line taught the same over-broad rule. The first
   fix was measured in a scratch tree without `"type": "module"` and was wrong about `.TS`; the cold
   skeptic re-measured under the package's own type and found a loud red where a phantom was claimed.
+- Later, #564: a 200 KB `input` to a child that DRAINS it wedged `spawnSync` on darwin and hung the
+  unit lane with no red, twice on 2026-09-10 and 12 times in 12000 reproduction runs on 2026-09-11.
+  The payload had been delivered in full (the child's `/dev/null` offset read 200000) and the parent
+  still held the write end of the socketpair, so the child's `read()` never saw EOF while the parent
+  sat in `uv__io_poll`; the issue's own hypothesis, a write blocked into a full pipe, was wrong, and
+  the lost-completion mechanism behind it stays UNVERIFIABLE. `--test-timeout` cannot bound a
+  synchronous block. Now Gate 1 line 10.
 
 ## Where the long form lives
 

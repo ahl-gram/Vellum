@@ -17,7 +17,7 @@ type. Read the gate you are at, do each line, and move on. Provenance is in `ref
 
 ## Gate 1: before writing a test or a guard
 
-Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #546, #561.
+Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #546, #561, #564.
 
 1. **Write the mutation before the test.** Name the one-line change to `src/` that must turn this
    test red. If you cannot name one, you are about to write a test that cannot fail.
@@ -51,6 +51,14 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
    `git worktree add --detach "$WT" HEAD`; the earlier "restore is `git checkout --`" described a
    loop it no longer runs). Zero red is
    a hole. A guard proved unable to red is deleted, never shipped.
+10. **A test that spawns a child gives it its own time limit.** `execFileSync` takes a `timeout`;
+    with none, a wedged child hangs the unit lane forever with no red to read, and `--test-timeout`
+    cannot save it, because the block is synchronous and the runner's own timer never gets the event
+    loop (measured: a test running `execFileSync("sh", ["-c", "sleep 8"])` under
+    `--test-timeout=1000` PASSED at 8012ms). The shape that wedges is a large `input` to a child
+    that DRAINS it: 12 hangs in 12000 runs at 200000 bytes, 0 in 8000 at 1024 (#564). The limit is a
+    cap on a hang, not a performance budget, so set it far above the worst real run; and a cap
+    nothing ever reaches cannot bite, so keep one child that deliberately outlives it.
 
 ## Gate 2: before writing an e2e check or a CDP probe
 
