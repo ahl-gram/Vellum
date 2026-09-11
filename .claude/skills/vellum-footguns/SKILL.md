@@ -38,7 +38,9 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
    --test` collects every `.ts`/`.js` module under `test/` (its six extensions, outside dot segments
    and `node_modules`), so a bare helper there is reported as a passing test of its own, and a
    `.test.ts` that imports a sibling `.test.ts` runs that sibling's tests a second time. Neither
-   fails; both inflate the count. If `test-support/` has no precedent for the
+   fails; both inflate the count. It also collects, ANYWHERE in the tree, a file named `test`,
+   `test-*`, `*-test`, `*_test` or `*.test`, so a helper in `test-support/` must not carry one of
+   those names either (#562 is the guard that does not yet see this). If `test-support/` has no precedent for the
    shape you need, that is not evidence the repo lacks the convention: it already holds the helpers
    and the importers.
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch

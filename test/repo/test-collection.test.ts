@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSyn
 import { tmpdir } from "node:os";
 import { dirname, extname, join, relative, resolve } from "node:path";
 
-// Node's --test collects a directory AND every *.test.ts by name anywhere in the tree, so all three defects below report as passes rather than failures: a bare module under test/ becomes a phantom pass, a .test.ts outside test/ is collected where nobody looks for it, and an imported sibling re-registers its own tests. None is visible in a green run, only in the total.
+// Node's --test collects every test/ directory anywhere in the tree AND every file named test, test-*, *-test, *_test or *.test (its six extensions, outside dot segments and node_modules; #562 covers the by-name arm), so all three defects below report as passes rather than failures: a bare module under test/ becomes a phantom pass, a .test.ts outside test/ is collected where nobody looks for it, and an imported sibling re-registers its own tests. None is visible in a green run, only in the total.
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 
@@ -17,12 +17,12 @@ const walk = (dir: string): string[] =>
 
 const filesUnder = (root: string) => walk(root).map((p) => relative(root, p));
 
-// Node's own kDefaultPattern (lib/internal/test_runner/utils in the node source) ends .{js,mjs,cjs,ts,mts,cts}; measured 2026-09-10 on v26.8.2 under this package's "type": "module": .TS is matched on macOS only, then refused by the loader as a loud red, so it is no phantom.
+// Node's own kDefaultPattern (its test runner's internal utils module) ends .{js,mjs,cjs,ts,mts,cts}; measured 2026-09-10 on v26.8.2 under this package's "type": "module": .TS is matched case-insensitively on macOS and Windows, then refused by the loader as a loud red, so it is no phantom anywhere.
 const COLLECTED = new Set([".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"]);
 const loadedByNode = (f: string) =>
   !f.split("/").some((s) => s.startsWith(".") || s === "node_modules") && COLLECTED.has(extname(f));
-const isPhantom = (f: string) => loadedByNode(f) && !f.endsWith(".test.ts");
-const straysUnder = (root: string) => filesUnder(root).filter((f) => f.startsWith("test/") && isPhantom(f));
+const isStray = (f: string) => loadedByNode(f) && !f.endsWith(".test.ts");
+const straysUnder = (root: string) => filesUnder(root).filter((f) => f.startsWith("test/") && isStray(f));
 
 const repoFiles = filesUnder(ROOT);
 const testDirFiles = repoFiles.filter((f) => f.startsWith("test/"));
@@ -71,7 +71,7 @@ test("a stray is a file node --test would load that is not a .test.ts, never a f
     "test/foo.TS",
     "test/real.test.ts",
   ];
-  assert.deepEqual([...stray, ...notStray].filter(isPhantom), stray);
+  assert.deepEqual([...stray, ...notStray].filter(isStray), stray);
 });
 
 test("the walk prunes node_modules and dot dirs at every depth and nothing else, so it sees the tree node sees", () => {
