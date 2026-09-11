@@ -1,15 +1,20 @@
 // Living Chart story-card overlay e2e (P1-P15, #53).
+import { makeStep } from "./step-support.mjs";
+
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
-  await evaluate(`(()=>{
-    document.getElementById("seed").value="42";
-    document.getElementById("style").value="antique";
-    document.getElementById("theme").value="";
-    document.getElementById("type").value="";
-    document.getElementById("arms").checked=false;
-    document.getElementById("draw").click();
-  })()`);
-  await waitSettled("place-cards-draw");
+  const step = makeStep(ctx);
+  await step("P setup", async () => {
+    await evaluate(`(()=>{
+      document.getElementById("seed").value="42";
+      document.getElementById("style").value="antique";
+      document.getElementById("theme").value="";
+      document.getElementById("type").value="";
+      document.getElementById("arms").checked=false;
+      document.getElementById("draw").click();
+    })()`);
+    await waitSettled("place-cards-draw");
+  });
 
   const pm = await evaluate(`(()=>{
     const r=window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});

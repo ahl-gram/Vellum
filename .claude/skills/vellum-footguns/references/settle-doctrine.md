@@ -17,7 +17,10 @@ it lives only in issue comments.
    groups after it still run. A throw outside every step is contained one level up by `runSelected`,
    which records it as that suite's own red and runs the rest of the lane. Only a browser that has
    gone away still reaches `HARNESS ERROR` and exit 2, which is what keeps that string meaning
-   infrastructure.
+   infrastructure. **Since #560 every throwing wait in every suite is inside a step**, pinned by
+   `STEPPED_GROUPS` and the containment sweep in `test/repo/e2e-tiers.test.ts`, so a new wait joins
+   that roster or the sweep reds. A suite that skips a group is no longer certified by N1/N2 either:
+   it ran to its end having exercised fewer interactions, which is not the clean bill health gives.
 5. **The predicate requires the geometry to have LEFT where it began.** Stillness at the start is
    indistinguishable from stillness at the end. Record the starting rect and demand a departure
    before demanding rest.

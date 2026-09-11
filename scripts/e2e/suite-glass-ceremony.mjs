@@ -1,11 +1,16 @@
 // Glass ceremony e2e (G, #170): the antique voice on the zoom cluster, the voiced glide, and the redraft ink-in; asserts the PLUMBING (classes, tokens, inline dash props, aria) while the choreography is eyeballed via out/ screenshots. Ground truth at seed 42 (2026-07-19 scan): the world sheet labels 25 of 26 settlements, the band-1 window at (0.5, 0.5) newly labels exactly Lokai, and the k=3.6 hop to band 2 reveals no new name.
+import { makeStep } from "./step-support.mjs";
+
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled } = ctx;
+  const step = makeStep(ctx);
 
-  await evaluate(`(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
-  await waitSettled("glass-ceremony-base");
-  await evaluate(`window.__vellumSetRedraftEnabled(false)`);
-  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+  await step("G setup", async () => {
+    await evaluate(`(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+    await waitSettled("glass-ceremony-base");
+    await evaluate(`window.__vellumSetRedraftEnabled(false)`);
+    await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+  });
 
   const st = () => evaluate(`window.__vellumZoomState()`);
   const settleK = async (target) => {
@@ -239,9 +244,11 @@ export async function run(ctx) {
   );
   await send("Emulation.setEmulatedMedia", { features: [] });
 
-  await evaluate(`document.getElementById("zoom-reset").click()`);
-  await settleHome();
-  await evaluate(`window.__vellumSetRedraftEnabled(false)`);
-  await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
-  await waitSettled("glass-ceremony-restore");
+  await step("G restore", async () => {
+    await evaluate(`document.getElementById("zoom-reset").click()`);
+    await settleHome();
+    await evaluate(`window.__vellumSetRedraftEnabled(false)`);
+    await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+    await waitSettled("glass-ceremony-restore");
+  });
 }

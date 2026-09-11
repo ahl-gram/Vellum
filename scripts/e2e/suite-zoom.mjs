@@ -1,6 +1,10 @@
 // Surveyor's Glass e2e (Z): pan/zoom on the Explorer chart via the shared d3-zoom controller, plus the settle-to-region redraft (Z17+). Resolved matrices are asserted on purpose: getComputedStyle returns "none" for a rejected value, so the assertion doubles as proof the px-suffixed transform is valid CSS (d3's own toString() is not).
+import { makeStep } from "./step-support.mjs";
+
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, waitTurned, PORT } = ctx;
+  // The geometric checks between the steps below are deliberately not stepped: they read the camera and the CSSOM, with nothing to wait on.
+  const step = makeStep(ctx);
 
   // Fixed sleeps only outlasted the #300 deferred ink because a CDP evaluate sent mid-build queues behind the blocked main thread; wait for the ink itself.
   const waitInked = async (label) => {
@@ -11,11 +15,13 @@ export async function run(ctx) {
     throw new Error("waitInked timeout " + label);
   };
 
-  await evaluate(`(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
-  await waitSettled("zoom-base");
-  // #169: the semantic redraft is OFF for the geometric block (Z1-Z16) and back ON for Z17+; a fresh page defaults it ON, so re-set it after every reload.
-  await evaluate(`window.__vellumSetRedraftEnabled(false)`);
-  await shoot("explorer-zoom-k1.png");
+  await step("Z setup", async () => {
+    await evaluate(`(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+    await waitSettled("zoom-base");
+    // #169: the semantic redraft is OFF for the geometric block (Z1-Z16) and back ON for Z17+; a fresh page defaults it ON, so re-set it after every reload.
+    await evaluate(`window.__vellumSetRedraftEnabled(false)`);
+    await shoot("explorer-zoom-k1.png");
+  });
 
   const z1 = await evaluate(`(()=>{window.__vellumZoomTo({k:3,x:-20,y:-15});const s=window.__vellumZoomState();const m=document.getElementById("map");const cs=getComputedStyle(m);return{s,matrix:cs.transform,origin:cs.transformOrigin,zoomed:document.getElementById("map-viewport").classList.contains("zoomed")};})()`);
   check(
@@ -183,33 +189,37 @@ export async function run(ctx) {
     JSON.stringify(z10b),
   );
 
-  for (const style of ["topographic", "ink", "nautical"]) {
-    await evaluate(`(()=>{window.__vellumZoomTo({k:1,x:0,y:0});const s=document.getElementById("style");s.value=${JSON.stringify(style)};s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-    await waitTurned("zoom-style-" + style);
-    const zs = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:3,x:-W,y:-H});const m=document.getElementById("map");return{matrix:getComputedStyle(m).transform,zoomed:vp.classList.contains("zoomed"),touch:getComputedStyle(vp).touchAction,hits:document.querySelectorAll("#map .place-hit").length};})()`);
-    check(
-      "Z11 " + style + " pans/zooms identically (AC1: matrix lands, .zoomed, touch-action:none, marks present)",
-      zs.matrix.startsWith("matrix(3, 0, 0, 3,") && zs.zoomed === true && zs.touch === "none" && zs.hits > 0,
-      style + " " + JSON.stringify(zs),
-    );
-    if (style === "topographic") await shoot("explorer-zoom-topographic-k3.png");
-  }
-  await evaluate(`(()=>{window.__vellumZoomTo({k:1,x:0,y:0});const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  await waitTurned("zoom-styles-restore-antique");
+  await step("Z11", async () => {
+    for (const style of ["topographic", "ink", "nautical"]) {
+      await evaluate(`(()=>{window.__vellumZoomTo({k:1,x:0,y:0});const s=document.getElementById("style");s.value=${JSON.stringify(style)};s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+      await waitTurned("zoom-style-" + style);
+      const zs = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:3,x:-W,y:-H});const m=document.getElementById("map");return{matrix:getComputedStyle(m).transform,zoomed:vp.classList.contains("zoomed"),touch:getComputedStyle(vp).touchAction,hits:document.querySelectorAll("#map .place-hit").length};})()`);
+      check(
+        "Z11 " + style + " pans/zooms identically (AC1: matrix lands, .zoomed, touch-action:none, marks present)",
+        zs.matrix.startsWith("matrix(3, 0, 0, 3,") && zs.zoomed === true && zs.touch === "none" && zs.hits > 0,
+        style + " " + JSON.stringify(zs),
+      );
+      if (style === "topographic") await shoot("explorer-zoom-topographic-k3.png");
+    }
+  });
+  await step("Z12", async () => {
+    await evaluate(`(()=>{window.__vellumZoomTo({k:1,x:0,y:0});const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    await waitTurned("zoom-styles-restore-antique");
 
-  await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:2,x:-0.2*W,y:-0.3*H});})()`);
-  // Poll the 250ms settle debounce: the assertion below is strict string equality, and a deferred timer under #381's second lane can land after any fixed wait.
-  const readZ12 = () => evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k")};})()`);
-  let z12 = await readZ12();
-  for (let i = 0; i < 60 && z12.k !== "2.0000"; i++) {
-    await sleep(50);
-    z12 = await readZ12();
-  }
-  check(
-    "Z12 a settled zoom writes cx/cy/k to the hash (AC3 write: uv centre + zoom, 4dp)",
-    z12.cx === "0.3500" && z12.cy === "0.4000" && z12.k === "2.0000",
-    JSON.stringify(z12),
-  );
+    await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:2,x:-0.2*W,y:-0.3*H});})()`);
+    // Poll the 250ms settle debounce: the assertion below is strict string equality, and a deferred timer under #381's second lane can land after any fixed wait.
+    const readZ12 = () => evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k")};})()`);
+    let z12 = await readZ12();
+    for (let i = 0; i < 60 && z12.k !== "2.0000"; i++) {
+      await sleep(50);
+      z12 = await readZ12();
+    }
+    check(
+      "Z12 a settled zoom writes cx/cy/k to the hash (AC3 write: uv centre + zoom, 4dp)",
+      z12.cx === "0.3500" && z12.cy === "0.4000" && z12.k === "2.0000",
+      JSON.stringify(z12),
+    );
+  });
 
   await evaluate(`window.__vellumZoomTo({k:3,x:-40,y:-30})`);
   await evaluate(`document.getElementById("verso-turn").click()`);
@@ -224,17 +234,21 @@ export async function run(ctx) {
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(1300);
 
-  await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
-  const r14a = await evaluate(`(()=>{document.getElementById("draw").click();return window.__vellumZoomState().k;})()`);
-  await waitSettled("reset-on-draw");
-  check("Z14a reset-on-draw: Draw snaps the camera home first (AC4)", r14a === 1, String(r14a));
+  await step("Z14a", async () => {
+    await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
+    const r14a = await evaluate(`(()=>{document.getElementById("draw").click();return window.__vellumZoomState().k;})()`);
+    await waitSettled("reset-on-draw");
+    check("Z14a reset-on-draw: Draw snaps the camera home first (AC4)", r14a === 1, String(r14a));
+  });
 
-  await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
-  const r14b = await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));return window.__vellumZoomState().k;})()`);
-  await waitTurned("reset-on-turn");
-  check("Z14b reset-on-style-turn: a style change homes the camera before the turn (AC4)", r14b === 1, String(r14b));
-  await evaluate(`(()=>{const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  await waitTurned("reset-on-turn-back-antique");
+  await step("Z14b", async () => {
+    await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
+    const r14b = await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));return window.__vellumZoomState().k;})()`);
+    await waitTurned("reset-on-turn");
+    check("Z14b reset-on-style-turn: a style change homes the camera before the turn (AC4)", r14b === 1, String(r14b));
+    await evaluate(`(()=>{const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    await waitTurned("reset-on-turn-back-antique");
+  });
 
   await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
   const r14c = await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));const st=window.__vellumZoomState();const p=new URLSearchParams(location.hash.slice(1));return{k:st.k,cx:p.get("cx"),cy:p.get("cy"),kp:p.get("k")};})()`);
@@ -257,29 +271,33 @@ export async function run(ctx) {
   await send("Emulation.setEmulatedMedia", { features: [] });
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 
-  const z7a = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
-  await evaluate(`(()=>{const s=document.getElementById("style");s.value="nautical";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  await waitTurned("zoom-touch-nautical");
-  const z7b = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
-  check(
-    "Z7 touch-action:none holds on every style now that all four zoom (AC1 touch; Sub 3 revert superseded)",
-    z7a === "none" && z7b === "none",
-    JSON.stringify({ z7a, z7b }),
-  );
+  await step("Z7", async () => {
+    const z7a = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
+    await evaluate(`(()=>{const s=document.getElementById("style");s.value="nautical";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    await waitTurned("zoom-touch-nautical");
+    const z7b = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
+    check(
+      "Z7 touch-action:none holds on every style now that all four zoom (AC1 touch; Sub 3 revert superseded)",
+      z7a === "none" && z7b === "none",
+      JSON.stringify({ z7a, z7b }),
+    );
+  });
 
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique&cx=0.5&cy=0.5&k=4` });
-  await waitReady();
-  await evaluate(`window.__vellumSetRedraftEnabled(false)`); // #169: a fresh page defaults ON; keep the geometric block clean before the deep-link settle fires
-  await waitSettled("zoom-deeplink-load");
-  await sleep(80);
-  const z13 = await evaluate(`(()=>{const s=window.__vellumZoomState();const vp=document.getElementById("map-viewport");return{k:s.k,x:s.x,W:vp.clientWidth};})()`);
-  check(
-    "Z13 a deep link #cx&cy&k restores the framing on load (AC3 load: k=4 and centre)",
-    z13.k === 4 && Math.abs(z13.x - (-1.5 * z13.W)) < 1.5,
-    JSON.stringify(z13),
-  );
-  await shoot("explorer-zoom-deeplink-k4.png");
+  await step("Z13", async () => {
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique&cx=0.5&cy=0.5&k=4` });
+    await waitReady();
+    await evaluate(`window.__vellumSetRedraftEnabled(false)`); // #169: a fresh page defaults ON; keep the geometric block clean before the deep-link settle fires
+    await waitSettled("zoom-deeplink-load");
+    await sleep(80);
+    const z13 = await evaluate(`(()=>{const s=window.__vellumZoomState();const vp=document.getElementById("map-viewport");return{k:s.k,x:s.x,W:vp.clientWidth};})()`);
+    check(
+      "Z13 a deep link #cx&cy&k restores the framing on load (AC3 load: k=4 and centre)",
+      z13.k === 4 && Math.abs(z13.x - (-1.5 * z13.W)) < 1.5,
+      JSON.stringify(z13),
+    );
+    await shoot("explorer-zoom-deeplink-k4.png");
+  });
 
   // #463: the chart room fits the sheet to the viewport, so a resize refits the box the camera is clamped against; the room holds the FRAMING (cx/cy/k) across the refit, never the raw transform, or a resize walks the camera and the settle re-drafts a different region (the G7 class, found by the harness's own screenshot resize).
   const sheetBefore = await evaluate(`document.getElementById("sheet").getBoundingClientRect().width`);
@@ -504,23 +522,25 @@ export async function run(ctx) {
     `drawn in ${perfMs}ms under 4x throttle (target ~1.5s; 4000ms ceiling is a flake guard, not the target)`,
   );
 
-  await goHome();
-  const before20d = (await rgn()).redrafts;
-  await enterAt(2, 0.5, 0.5);
-  await waitRedraft(before20d);
-  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  await waitInked("z20d-survey-ink"); // #300: the ink lands a beat after the tick, so wait for it rather than sleeping
-  const chron = await evaluate(
-    `(()=>{const s=window.__vellumRegion();const svg=document.querySelector("#map > svg");` +
-      `return{band:s.band,committed:s.committed,noStamp:!!svg&&!svg.hasAttribute("data-vellum-region-u0"),` +
-      `insets:document.querySelectorAll("#map .region-inset").length,trackShown:!!document.querySelector("#map .voyage-overlay .voyage-track")};})()`,
-  );
-  check(
-    "Z20d inking the survey drops the inset back to the bare world sheet (mutual exclusion, no region while the track is inked)",
-    chron.band === 0 && chron.committed === false && chron.noStamp && chron.insets === 0 && chron.trackShown,
-    JSON.stringify(chron),
-  );
-  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await step("Z20d", async () => {
+    await goHome();
+    const before20d = (await rgn()).redrafts;
+    await enterAt(2, 0.5, 0.5);
+    await waitRedraft(before20d);
+    await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    await waitInked("z20d-survey-ink"); // #300: the ink lands a beat after the tick, so wait for it rather than sleeping
+    const chron = await evaluate(
+      `(()=>{const s=window.__vellumRegion();const svg=document.querySelector("#map > svg");` +
+        `return{band:s.band,committed:s.committed,noStamp:!!svg&&!svg.hasAttribute("data-vellum-region-u0"),` +
+        `insets:document.querySelectorAll("#map .region-inset").length,trackShown:!!document.querySelector("#map .voyage-overlay .voyage-track")};})()`,
+    );
+    check(
+      "Z20d inking the survey drops the inset back to the bare world sheet (mutual exclusion, no region while the track is inked)",
+      chron.band === 0 && chron.committed === false && chron.noStamp && chron.insets === 0 && chron.trackShown,
+      JSON.stringify(chron),
+    );
+    await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  });
 
   await goHome();
   const before20e = (await rgn()).redrafts;
@@ -566,27 +586,29 @@ export async function run(ctx) {
     `band ${deep20f.band}->${step20f.band} insets=${view20f.insets} world=${view20f.worldMounted} k=${view20f.zk} (expected 4)`,
   );
 
-  await goHome();
-  const before20g = (await rgn()).redrafts;
-  await enterAt(2, 0.5, 0.5);
-  const reg20g = await waitRedraft(before20g);
-  await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=true;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  await waitInked("z20g-survey-ink"); // #300: as Z20d, the ink is a beat behind the tick
-  const von = await evaluate(
-    `(()=>{const s=window.__vellumRegion();return{band:s.band,committed:s.committed,` +
-      `insets:document.querySelectorAll("#map .region-inset").length,track:!!document.querySelector("#map .voyage-overlay"),` +
-      `k:window.__vellumZoomState().k};})()`,
-  );
-  await enterAt(2, 0.35, 0.35); // a settle while the track is inked: must NOT redraft
-  await sleep(600); // past the debounce + any would-be dispatch
-  const vsettle = await rgn();
-  await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=false;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  check(
-    "Z20g the survey ink drops the inset, homes the camera on arming (ratified 2026-07-26), and blocks the redraft",
-    von.band === 0 && von.committed === false && von.insets === 0 && von.track && von.k === 1 &&
-      vsettle.redrafts === reg20g.redrafts && vsettle.band === 0,
-    `on-toggle ${JSON.stringify(von)} settleWhileInked redrafts=${vsettle.redrafts}(==${reg20g.redrafts}) band=${vsettle.band}`,
-  );
+  await step("Z20g", async () => {
+    await goHome();
+    const before20g = (await rgn()).redrafts;
+    await enterAt(2, 0.5, 0.5);
+    const reg20g = await waitRedraft(before20g);
+    await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=true;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    await waitInked("z20g-survey-ink"); // #300: as Z20d, the ink is a beat behind the tick
+    const von = await evaluate(
+      `(()=>{const s=window.__vellumRegion();return{band:s.band,committed:s.committed,` +
+        `insets:document.querySelectorAll("#map .region-inset").length,track:!!document.querySelector("#map .voyage-overlay"),` +
+        `k:window.__vellumZoomState().k};})()`,
+    );
+    await enterAt(2, 0.35, 0.35); // a settle while the track is inked: must NOT redraft
+    await sleep(600); // past the debounce + any would-be dispatch
+    const vsettle = await rgn();
+    await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=false;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+    check(
+      "Z20g the survey ink drops the inset, homes the camera on arming (ratified 2026-07-26), and blocks the redraft",
+      von.band === 0 && von.committed === false && von.insets === 0 && von.track && von.k === 1 &&
+        vsettle.redrafts === reg20g.redrafts && vsettle.band === 0,
+      `on-toggle ${JSON.stringify(von)} settleWhileInked redrafts=${vsettle.redrafts}(==${reg20g.redrafts}) band=${vsettle.band}`,
+    );
+  });
 
   await goHome();
   const target21 = await evaluate(
@@ -652,10 +674,12 @@ export async function run(ctx) {
     `band=${step21.band} band2Hamlets=${shallow21}`,
   );
 
-  await goHome();
-  await evaluate(`window.__vellumSetRedraftEnabled(false)`); // #169: geometric-only again for the suites that follow
+  await step("Z restore", async () => {
+    await goHome();
+    await evaluate(`window.__vellumSetRedraftEnabled(false)`); // #169: geometric-only again for the suites that follow
 
-  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
-  await evaluate(`(()=>{const c=document.getElementById("ages");if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
-  await waitSettled("post-zoom-restore");
+    await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+    await evaluate(`(()=>{const c=document.getElementById("ages");if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+    await waitSettled("post-zoom-restore");
+  });
 }

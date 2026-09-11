@@ -1,6 +1,10 @@
 // Glass gestures e2e (#166): suite-zoom's behaviour re-proven through REAL CDP input (mouse wheel, touch, device metrics); runs right after suite-zoom and restores its clean desktop home before suite-cards. d3-zoom binds its touch listeners ONLY when the page BOOTS as a touch device (defaultTouchable reads navigator.maxTouchPoints at attach time), so the touch block enables emulation and then RELOADS. NEVER dispatch a real touch while touch emulation is off (it wedges Chrome's touch input pipeline for the WHOLE session; a real mouse wheel is safe, only touch poisons), and NEVER change the emulation config after a real touch (later touches route to native page pinch-zoom and a clear+reload does NOT recover it), so ALL touch checks run under ONE phone-metric emulation set enabled once and left alone.
+import { makeStep } from "./step-support.mjs";
+
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitReady, waitSettled, wheel, pinch, touchPan, setMobileViewport, clearMobile, PORT } = ctx;
+  // ZG1 and ZG1b are deliberately not stepped: nothing in them throws, the wheel and the state read both return.
+  const step = makeStep(ctx);
 
   async function reloadHome(label) {
     await send("Page.navigate", { url: "about:blank" });
@@ -36,55 +40,60 @@ export async function run(ctx) {
   );
 
   await setMobileViewport(390, 780);
-  await reloadHome("gesture-mobile-boot");
-  const touchAction = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
-  const scaleAtBoot = await evaluate(`visualViewport.scale`);
-  const scrollToMap = () => evaluate(`document.getElementById("map-viewport").scrollIntoView({block:"center"})`);
-  await scrollToMap();
-  await sleep(60);
+  await step("ZG2, ZG3, ZG4", async () => {
+    await reloadHome("gesture-mobile-boot");
+    const touchAction = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
+    const scaleAtBoot = await evaluate(`visualViewport.scale`);
+    const scrollToMap = () => evaluate(`document.getElementById("map-viewport").scrollIntoView({block:"center"})`);
+    await scrollToMap();
+    await sleep(60);
 
-  r = await vpRect();
-  let cx = Math.round(r.L + r.W * 0.5), cy = Math.round(r.T + r.H * 0.5);
-  await pinch(cx, cy, 70, 170);
-  await sleep(100);
-  const zg2 = await state();
-  check(
-    "ZG2 a real two-finger pinch zooms the map (AC1: k = start_k * spread ratio, 70->170 ≈ 2.43)",
-    Math.abs(zg2.k - 170 / 70) < 0.15,
-    JSON.stringify(zg2),
-  );
-  await shoot("explorer-gesture-pinch.png");
+    r = await vpRect();
+    let cx = Math.round(r.L + r.W * 0.5), cy = Math.round(r.T + r.H * 0.5);
+    await pinch(cx, cy, 70, 170);
+    await sleep(100);
+    const zg2 = await state();
+    check(
+      "ZG2 a real two-finger pinch zooms the map (AC1: k = start_k * spread ratio, 70->170 ≈ 2.43)",
+      Math.abs(zg2.k - 170 / 70) < 0.15,
+      JSON.stringify(zg2),
+    );
+    await shoot("explorer-gesture-pinch.png");
 
-  const before = await state();
-  await touchPan(cx, cy, cx - 80, cy - 60);
-  await sleep(100);
-  const after = await state();
-  check(
-    "ZG3 a real one-finger drag pans by the screen delta (AC1)",
-    Math.abs(after.x - before.x - -80) < 2 && Math.abs(after.y - before.y - -60) < 2 && after.k === before.k,
-    JSON.stringify({ before, after }),
-  );
+    const before = await state();
+    await touchPan(cx, cy, cx - 80, cy - 60);
+    await sleep(100);
+    const after = await state();
+    check(
+      "ZG3 a real one-finger drag pans by the screen delta (AC1)",
+      Math.abs(after.x - before.x - -80) < 2 && Math.abs(after.y - before.y - -60) < 2 && after.k === before.k,
+      JSON.stringify({ before, after }),
+    );
 
-  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
-  await scrollToMap();
-  await sleep(60);
-  r = await vpRect();
-  cx = Math.round(r.L + r.W * 0.5), cy = Math.round(r.T + r.H * 0.5);
-  const scrollBefore = await evaluate(`window.scrollY`);
-  await pinch(cx, cy, 70, 180);
-  await sleep(100);
-  const zg4 = await state();
-  const page = await evaluate(`({scrolled:(window.scrollY - ${scrollBefore}), vs:visualViewport.scale})`);
-  check(
-    "ZG4 a pinch under mobile viewport zooms the map without page pinch-zoom (AC2 touch-action wiring)",
-    touchAction === "none" && Math.abs(scaleAtBoot - 1) < 0.01 && zg4.k > 1.3 && Math.abs(page.vs - 1) < 0.01,
-    JSON.stringify({ touchAction, scaleAtBoot, k: zg4.k, page }),
-  );
-  await shoot("explorer-gesture-mobile-pinch.png");
+    await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+    await scrollToMap();
+    await sleep(60);
+    r = await vpRect();
+    cx = Math.round(r.L + r.W * 0.5), cy = Math.round(r.T + r.H * 0.5);
+    const scrollBefore = await evaluate(`window.scrollY`);
+    await pinch(cx, cy, 70, 180);
+    await sleep(100);
+    const zg4 = await state();
+    const page = await evaluate(`({scrolled:(window.scrollY - ${scrollBefore}), vs:visualViewport.scale})`);
+    check(
+      "ZG4 a pinch under mobile viewport zooms the map without page pinch-zoom (AC2 touch-action wiring)",
+      touchAction === "none" && Math.abs(scaleAtBoot - 1) < 0.01 && zg4.k > 1.3 && Math.abs(page.vs - 1) < 0.01,
+      JSON.stringify({ touchAction, scaleAtBoot, k: zg4.k, page }),
+    );
+    await shoot("explorer-gesture-mobile-pinch.png");
+  });
 
+  // clearMobile stays OUTSIDE every step: the runner compensates for a suite left at phone metrics in onSuiteError, which a contained step no longer reaches.
   await clearMobile();
-  await reloadHome("gesture-restore");
-  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
-  await evaluate(`(()=>{const c=document.getElementById("ages");if(c&&c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
-  await waitSettled("post-gesture-restore");
+  await step("ZG restore", async () => {
+    await reloadHome("gesture-restore");
+    await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+    await evaluate(`(()=>{const c=document.getElementById("ages");if(c&&c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+    await waitSettled("post-gesture-restore");
+  });
 }

@@ -9,6 +9,7 @@ import {
   runOutcome,
   runSelected,
   suitesCertifiedByHealth,
+  suitesNotWhole,
 } from "../../src/cli/e2e-suites.ts";
 import type { E2eRunHooks } from "../../src/cli/e2e-suites.ts";
 
@@ -213,6 +214,36 @@ test("the breaker counts suites IN A ROW: a suite that passes between two that g
   const timings = await runSelected(names, suites, {}, { onSuiteError: (name) => { handed.push(name); }, alive: () => true });
   assert.deepEqual(handed, [names[0], names[2], names[4]], "three scattered failures tripped a breaker that is meant to catch three in a row");
   assert.deepEqual(timings.map((t) => t.aborted === true), [true, false, true, false, true]);
+});
+
+test("a suite that RAN TO ITS END with a check group skipped is recorded as such, and only the suite the skip happened in", async () => {
+  const skipped: string[] = [];
+  const suites = {
+    "render": async () => {},
+    "motion": async () => { skipped.push("D1, D2"); },
+    "turn": async () => {},
+  };
+  const timings = await runSelected(["render", "motion", "turn"], suites, {}, { skippedGroups: () => skipped });
+  assert.deepEqual(
+    timings.map((t) => t.skipped ?? []),
+    [[], ["D1, D2"], []],
+    "the skip was read as a running total rather than this suite's own delta, so every suite after the first skip inherits it (or none is recorded at all)",
+  );
+  assert.deepEqual(timings.map((t) => t.aborted === true), [false, false, false], "a suite that ran to its end was recorded as having stopped early");
+});
+
+test("a run that did not run whole is every suite that stopped early AND every suite that skipped a check group", () => {
+  const timings = [
+    { name: "render" as const, ms: 1, skipped: ["R8"] as readonly string[] },
+    { name: "motion" as const, ms: 1, aborted: true },
+    { name: "turn" as const, ms: 1 },
+    { name: "verso" as const, ms: 1, skipped: [] as readonly string[] },
+  ];
+  assert.deepEqual(
+    suitesNotWhole(timings),
+    ["render", "motion"],
+    "a suite that skipped a check group is counted as whole, so health certifies a run that exercised fewer interactions than it claims (#560)",
+  );
 });
 
 test("health certifies no suite that stopped early, since a suite that gave up half way never earned the clean bill", () => {
