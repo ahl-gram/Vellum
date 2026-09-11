@@ -119,12 +119,14 @@ export interface E2eSuiteTiming {
   readonly name: E2eSuiteName;
   readonly ms: number;
   readonly aborted?: boolean;
+  readonly skipped?: readonly string[];
 }
 
 export interface E2eRunHooks {
   readonly now?: () => number;
   readonly onSuiteError?: (name: E2eSuiteName, err: unknown) => void | Promise<void>;
   readonly alive?: () => boolean | Promise<boolean>;
+  readonly skippedGroups?: () => readonly string[];
 }
 
 // A policy bound, not a measurement (Alex ruled it stays, 2026-09-10): every aborted suite still burns its own waits before it throws, and ci.yml's `timeout-minutes: 25` sits against the 7m05s worst case test/repo/e2e-tiers.test.ts cites, so a cascade with no stop can be killed at the cap with no tally at all. 3 is a judgment about where a cascade stops being news; nothing measured picks it.
@@ -139,12 +141,13 @@ export async function runSelected(
   hooks: E2eRunHooks = {},
 ): Promise<readonly E2eSuiteTiming[]> {
   const now = hooks.now ?? (() => performance.now());
-  const { onSuiteError, alive } = hooks;
+  const { onSuiteError, alive, skippedGroups } = hooks;
   const timings: E2eSuiteTiming[] = [];
   let streak: E2eSuiteName[] = [];
   for (const name of names) {
     const run = suites[name];
     if (!run) throw new Error(`the runner has no suite named ${name}`);
+    const skippedBefore = skippedGroups ? skippedGroups().length : 0;
     const started = now();
     let stoppedEarly = false;
     try {
@@ -168,7 +171,13 @@ export async function runSelected(
       await onSuiteError(name, err);
     }
     const ms = now() - started;
-    timings.push(stoppedEarly ? { name, ms, aborted: true } : { name, ms });
+    const skipped = skippedGroups ? skippedGroups().slice(skippedBefore) : [];
+    timings.push({
+      name,
+      ms,
+      ...(stoppedEarly ? { aborted: true } : {}),
+      ...(skipped.length > 0 ? { skipped } : {}),
+    });
   }
   return timings;
 }
@@ -195,10 +204,14 @@ export function runOutcome(results: readonly E2eCheckResult[]): E2eOutcome {
   return { ok: passed === results.length, line: `${passed === results.length ? "ALL PASS" : "SOME FAILED"}  (${passed}/${results.length})` };
 }
 
+export function suitesNotWhole(timings: readonly E2eSuiteTiming[]): readonly E2eSuiteName[] {
+  return timings.filter((t) => t.aborted || (t.skipped !== undefined && t.skipped.length > 0)).map((t) => t.name);
+}
+
 export function suitesCertifiedByHealth(
   names: readonly E2eSuiteName[],
-  aborted: readonly E2eSuiteName[] = [],
+  incomplete: readonly E2eSuiteName[] = [],
 ): readonly E2eSuiteName[] {
   const at = names.indexOf("health");
-  return at === -1 ? [] : names.slice(0, at).filter((name) => !aborted.includes(name));
+  return at === -1 ? [] : names.slice(0, at).filter((name) => !incomplete.includes(name));
 }

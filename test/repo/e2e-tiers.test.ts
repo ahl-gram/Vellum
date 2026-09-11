@@ -132,7 +132,11 @@ test("the runner actually uses the selection, the timings and the outcome rule i
   assert.ok(hooks, "the runSelected call's argument block was not found, so the two assertions below would read an empty string");
   assert.match(hooks[1], /onSuiteError:/, "the runner passes no per-suite handler, so one suite giving up kills the whole lane again (#534)");
   assert.match(hooks[1], /alive: ctx\.alive/, "the runner passes no liveness probe, so a browser that died mid-lane is reported as a lane full of product failures (#534)");
-  assert.match(RUNNER_CODE, /suitesCertifiedByHealth\(SELECTED, aborted\)/, "the runner certifies suites that stopped early, a clean bill the run never earned (#534)");
+  assert.match(hooks[1], /skippedGroups: \(\) => skippedGroups/, "the runner reads no skipped-group sink, so a suite that skipped a check group is indistinguishable from a whole one (#560)");
+  assert.match(RUNNER_CODE, /suitesCertifiedByHealth\(SELECTED, incomplete\)/, "the runner certifies suites that stopped early, a clean bill the run never earned (#534)");
+  // Both halves, or the rename narrows this to "some second argument is passed": the list has to be the one that counts a skipped group too.
+  assert.match(RUNNER_CODE, /const incomplete = suitesNotWhole\(timings\)/, "the runner builds its own incomplete list, so a suite that skipped a check group is still certified (#560)");
+  assert.match(RUNNER_CODE, /t\.skipped\.join\("; "\)/, "the runner records which groups were skipped and never prints them, so the reader cannot tell what the run did not do (#560)");
   // The call site alone is not the behavior: computing `certified` and never printing it passes every assertion above.
   assert.match(RUNNER_CODE, /certified\.length > 0/, "the runner computes the certified list and never reads it, so no suite is reported as certified at all (#534)");
   // The breaker's own exit is a HARNESS ERROR, so the door it leaves by must print the score, or it does the thing it exists to prevent.

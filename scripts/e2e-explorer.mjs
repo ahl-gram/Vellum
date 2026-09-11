@@ -10,6 +10,7 @@ import {
   formatSuiteTimings,
   runSelected,
   runOutcome,
+  suitesNotWhole,
   E2E_SUITE_ORDER,
 } from "../src/cli/e2e-suites.ts";
 import { start, cleanup } from "./e2e/harness.mjs";
@@ -85,6 +86,7 @@ if (!browser) {
 const results = [];
 const consoleErrors = [];
 const http4xx = [];
+const skippedGroups = [];
 
 // Key order IS the run order, and it is load-bearing: render asserts the pristine bare-visit boot, and the health checkpoint (N1/N2) asserts accumulated console/network state from everything before it. A selection is filtered to this order, never run in the order it was requested.
 const SUITES = {
@@ -128,9 +130,10 @@ if (missing.length > 0) {
 }
 
 async function main() {
-  const ctx = await start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx });
+  const ctx = await start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx, skippedGroups });
   return runSelected(SELECTED, SUITES, ctx, {
     alive: ctx.alive,
+    skippedGroups: () => skippedGroups,
     onSuiteError: async (name, err) => {
       // The WHOLE error, not just its message: a mid-suite TypeError's stack is what HARNESS ERROR used to print, and a report that drops it would be worse reading than the crash it replaces.
       console.error(`  ${name} stopped early:`, err);
@@ -154,11 +157,20 @@ main()
     console.log("");
     for (const line of formatSuiteTimings(timings)) console.log(line);
     const aborted = timings.filter((t) => t.aborted).map((t) => t.name);
-    const certified = suitesCertifiedByHealth(SELECTED, aborted);
+    const incomplete = suitesNotWhole(timings);
+    const certified = suitesCertifiedByHealth(SELECTED, incomplete);
     if (aborted.length > 0) {
       console.log(
         `\n${aborted.length} suite${aborted.length > 1 ? "s" : ""} stopped early: ${aborted.join(", ")}. ` +
           `The checks after the failure in each never ran, so this run proves less than a whole one.`,
+      );
+    }
+    const partial = timings.filter((t) => !t.aborted && t.skipped !== undefined && t.skipped.length > 0);
+    if (partial.length > 0) {
+      console.log(
+        `\n${partial.length} suite${partial.length > 1 ? "s" : ""} skipped a check group: ` +
+          `${partial.map((t) => `${t.name} (${t.skipped.join("; ")})`).join(", ")}. ` +
+          `Each ran to its end, so the checks after the skip are real, but it exercised fewer interactions than a whole run.`,
       );
     }
     if (TIER !== "full") {

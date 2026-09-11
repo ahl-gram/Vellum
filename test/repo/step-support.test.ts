@@ -53,3 +53,24 @@ test("a step that runs to its end records nothing of its own, so the checks insi
   await step("DR2", async () => { check("DR2 the drawer slides home", true, "checked=true"); });
   assert.deepEqual(results, [["DR2 the drawer slides home", true, "checked=true"]]);
 });
+
+test("a step that skips its group NAMES that group where the run can see it, and a clean step names nothing", async () => {
+  const { results, check } = recorder();
+  const skippedGroups: string[] = [];
+  const step = makeStep({ check, alive: () => true, skippedGroups });
+  await step("CL5", async () => { throw new Error("settle timeout afterEscape: {}"); });
+  await step("CL8", async () => { check("CL8 the next check in the suite", true); });
+  assert.deepEqual(
+    skippedGroups,
+    ["CL5"],
+    "the skipped group is not named where the runner can read it, so a suite that exercised fewer interactions is still handed N1/N2's clean bill (#560)",
+  );
+  assert.equal(results.filter((r) => !r[1]).length, 1, "the sink was filled at the cost of the red the reader actually sees");
+});
+
+test("a step built WITHOUT a sink still contains its group, so a caller that predates the sink cannot crash inside the catch", async () => {
+  const { results, check } = recorder();
+  const step = makeStep({ check, alive: () => true });
+  await step("DR4", async () => { throw new Error("settle timeout open: {}"); });
+  assert.deepEqual(results.map((r) => r[1]), [false], "a sink-less caller threw out of the containment path instead of recording its red");
+});
