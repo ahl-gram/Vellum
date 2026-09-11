@@ -102,6 +102,11 @@ left open and the session failed to write down).
   un-reopenably, review record and all. Every PR in the run after it went onto `main`.
 - Earlier, #363: searched `test/` for a non-`.test.ts` precedent, found none, concluded the repo had
   no convention and reverted a correct file split. `test-support/` already held six helpers.
+- Later, #561: the guard behind Gate 1 line 8 measured "not a `.test.ts`" where node loads six
+  extensions outside dot segments and `node_modules`, so a gitignored `.DS_Store` reddened `main`
+  for two months unseen by CI, and the gate's own line taught the same over-broad rule. The first
+  fix was measured in a scratch tree without `"type": "module"` and was wrong about `.TS`; the cold
+  skeptic re-measured under the package's own type and found a loud red where a phantom was claimed.
 
 ## Where the long form lives
 

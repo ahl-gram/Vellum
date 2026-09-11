@@ -1,22 +1,45 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, extname, join, relative, resolve } from "node:path";
 
-// Node's --test collects a directory AND every *.test.ts by name anywhere in the tree, so all three defects below report as passes rather than failures: a bare module under test/ becomes a phantom pass, a .test.ts outside test/ is collected where nobody looks for it, and an imported sibling re-registers its own tests. None is visible in a green run, only in the total.
+// Node's --test collects every test/ directory anywhere in the tree AND every file named test, test-*, *-test, *_test or *.test (its six extensions, outside dot segments and node_modules; #562 covers the by-name arm), so all three defects below report as passes rather than failures: a bare module under test/ becomes a phantom pass, a .test.ts outside test/ is collected where nobody looks for it, and an imported sibling re-registers its own tests. None is visible in a green run, only in the total.
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const SKIP = new Set(["node_modules", ".git", ".claude", "dist", "out", "public", "design"]);
+
+const pruned = (name: string) => name === "node_modules" || name.startsWith(".");
 
 const walk = (dir: string): string[] =>
   readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
-    e.isDirectory() ? (SKIP.has(e.name) ? [] : walk(join(dir, e.name))) : [join(dir, e.name)],
+    e.isDirectory() ? (pruned(e.name) ? [] : walk(join(dir, e.name))) : [join(dir, e.name)],
   );
 
-const rel = (p: string) => relative(ROOT, p);
-const repoFiles = walk(ROOT);
-const testDirFiles = repoFiles.filter((f) => rel(f).startsWith("test/"));
+const filesUnder = (root: string) => walk(root).map((p) => relative(root, p));
+
+// Node's own kDefaultPattern (its test runner's internal utils module) ends .{js,mjs,cjs,ts,mts,cts}; measured 2026-09-10 on v26.8.2 under this package's "type": "module": .TS is matched case-insensitively on macOS and Windows, then refused by the loader as a loud red, so it is no phantom anywhere.
+const COLLECTED = new Set([".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"]);
+const loadedByNode = (f: string) =>
+  !f.split("/").some((s) => s.startsWith(".") || s === "node_modules") && COLLECTED.has(extname(f));
+const isStray = (f: string) => loadedByNode(f) && !f.endsWith(".test.ts");
+const straysUnder = (root: string) => filesUnder(root).filter((f) => f.startsWith("test/") && isStray(f));
+
+const repoFiles = filesUnder(ROOT);
+const testDirFiles = repoFiles.filter((f) => f.startsWith("test/"));
 const suiteFiles = repoFiles.filter((f) => f.endsWith(".test.ts"));
+
+const withSeededTree = (files: string[], run: (dir: string) => void) => {
+  const dir = mkdtempSync(join(tmpdir(), "vellum-walk-"));
+  try {
+    for (const f of files) {
+      mkdirSync(join(dir, dirname(f)), { recursive: true });
+      writeFileSync(join(dir, f), "");
+    }
+    run(dir);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+};
 
 // Comments are stripped before matching because this file names ".test.ts" in its own prose; a match still needs an import/export/require keyword, so a bare mention in a string cannot trip it. It errs toward a false positive and never toward a miss.
 const importsOf = (src: string): string[] => {
@@ -25,18 +48,82 @@ const importsOf = (src: string): string[] => {
   return [...bare.matchAll(pat)].map((m) => m[1]!);
 };
 
-test("every file under test/ is a .test.ts, so none is collected as a phantom pass", () => {
+test("a stray is a file node --test would load that is not a .test.ts, never a fixture or a Finder artifact", () => {
+  const stray = [
+    "test/helper.ts",
+    "test/a.mjs",
+    "test/b.js",
+    "test/c.cts",
+    "test/d.mts",
+    "test/e.cjs",
+    "test/out/x.ts",
+    "test/x.test.mjs",
+    "test/foo_test.ts",
+  ];
+  const notStray = [
+    "test/.DS_Store",
+    "test/.hidden.ts",
+    "test/.cache/x.ts",
+    "test/node_modules/z.ts",
+    "test/fixtures/data.json",
+    "test/pic.png",
+    "test/x.tsx",
+    "test/foo.TS",
+    "test/real.test.ts",
+  ];
+  assert.deepEqual([...stray, ...notStray].filter(isStray), stray);
+});
+
+test("the walk prunes node_modules and dot dirs at every depth and nothing else, so it sees the tree node sees", () => {
+  const seeded = [
+    "src/f.ts",
+    "test/out/x.ts",
+    "test/design/y.ts",
+    "out/a.ts",
+    "dist/b.ts",
+    "public/c.ts",
+    "design/d.ts",
+    "node_modules/e.ts",
+    "test/node_modules/g.ts",
+    ".cache/h.ts",
+    "test/.cache/i.ts",
+  ];
+  withSeededTree(seeded, (dir) => {
+    assert.deepEqual(filesUnder(dir).sort(), [
+      "design/d.ts",
+      "dist/b.ts",
+      "out/a.ts",
+      "public/c.ts",
+      "src/f.ts",
+      "test/design/y.ts",
+      "test/out/x.ts",
+    ]);
+  });
+});
+
+test("over a real tree the guard names the helper and passes the Finder artifact, the defect #561 reported", () => {
+  const seeded = ["test/helper.ts", "test/.DS_Store", "test/fixtures/data.json", "test/real.test.ts", "src/stray.ts"];
+  withSeededTree(seeded, (dir) => {
+    assert.deepEqual(straysUnder(dir), ["test/helper.ts"]);
+  });
+});
+
+test("every file node --test loads under test/ is a .test.ts, so none is a phantom pass or an unseen suite", () => {
   assert.ok(
     testDirFiles.length > 100,
     `walked only ${testDirFiles.length} files under test/; this guard is reading the wrong tree`,
   );
-  const strays = testDirFiles.filter((f) => !f.endsWith(".test.ts")).map(rel);
-  assert.deepEqual(strays, [], "a shared helper belongs in test-support/, which node --test does not collect");
+  const strays = straysUnder(ROOT);
+  assert.deepEqual(
+    strays,
+    [],
+    `${strays.length} file(s) under test/ that node --test loads yet are not .test.ts suites (${strays.join(", ")}): a helper here counts as a passing test of its own, and a suite under any other name escapes the .test.ts guards in this file; helpers belong in test-support/`,
+  );
 });
 
 test("every .test.ts in the repo lives under test/, where node --test is aimed", () => {
   assert.ok(suiteFiles.length > 100, `found only ${suiteFiles.length} suites; this guard is reading the wrong tree`);
-  const outside = suiteFiles.map(rel).filter((f) => !f.startsWith("test/"));
+  const outside = suiteFiles.filter((f) => !f.startsWith("test/"));
   assert.deepEqual(
     outside,
     [],
@@ -45,6 +132,6 @@ test("every .test.ts in the repo lives under test/, where node --test is aimed",
 });
 
 test("no .test.ts imports another .test.ts, which would run that file's tests twice", () => {
-  const offenders = suiteFiles.flatMap((f) => importsOf(readFileSync(f, "utf8")).map((s) => `${rel(f)} -> ${s}`));
+  const offenders = suiteFiles.flatMap((f) => importsOf(readFileSync(join(ROOT, f), "utf8")).map((s) => `${f} -> ${s}`));
   assert.deepEqual(offenders, [], "share through test-support/ instead; an imported sibling re-registers its tests");
 });
