@@ -69,7 +69,7 @@ main { max-width: 1500px; box-sizing: border-box; padding: calc(var(--band-h) + 
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 2.4rem 2rem;
   animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 figure { margin: 0; }
-figure img { width: 100%; height: auto; display: block; border: 1px solid var(--line-tan);
+figure img { width: 100%; height: auto; display: block; box-sizing: border-box; border: 1px solid var(--line-tan);
   box-shadow: var(--sheet-shadow); transform-origin: bottom left;
   transition: transform var(--paper) var(--ease-paper),
               box-shadow var(--paper) var(--ease-paper); }

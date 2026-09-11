@@ -7,9 +7,11 @@ import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const SELFTEST = resolve(import.meta.dirname, "..", "..", ".claude", "skills", "vellum-footguns", "hooks", "footgun-gate.selftest.ts");
+// The cap reaches the selftest's own three deployed rows, which pipe input to a child that drains it and so share the shape #564 wedged on; a cap here bounds that whole subtree in one place. Measured 2026-09-11: the selftest runs in 0.34s, so this is about 90x.
+const BOUND_MS = 30_000;
 
 test("the footgun hook's fixture table passes, including the deployed settings.json command", () => {
-  const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8" });
+  const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
   assert.doesNotMatch(out, /^FAIL/m, out);
   assert.match(out, /^ok +deployed: symlinked project dir denies stash pop/m, out);
 });
