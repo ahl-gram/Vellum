@@ -1,7 +1,7 @@
 # The ledger behind the gates
 
 Compiled 2026-09-09 from the bodies, commits and verification comments of PRs #524 to #548 and
-their issues, with older scars added beneath when a gate needs one (#378, #518 to #521, #525, #526, #529, #531, #532, #539, #540, #543, epic #401).
+their issues, with older and later scars added beneath when a gate needs one (#378, #518 to #521, #525, #526, #529, #531, #532, #539, #540, #543, epic #401).
 Every row was found by a cold skeptic, a prover, a plate-reader, CI, or Alex live, after the
 implementing session had already reported the work done. Ranked by how many PRs in that window
 carried it. The long form of each lesson, with the earlier scars, is in the auto-memory doctrine
@@ -115,6 +115,15 @@ left open and the session failed to write down).
   nested `test/` directory as uncollected; and "err toward a false positive" was applied to node's
   literal pattern segments, where it prevents no miss on any platform and only makes the message
   false, the reasoning that had withdrawn #561's extension fold eight hours earlier.
+- Later, #564: a 200 KB `input` to a child that DRAINS it wedged `spawnSync` on darwin and hung the
+  unit lane with no red, twice on 2026-09-10 and twice more in 2000 reproduction runs on 2026-09-11
+  (a further 12 in 12000 came back as ETIMEDOUT rather than hanging, because those runs were capped,
+  which is what showed the cap is a remedy and not a hope).
+  The payload had been delivered in full (the child's `/dev/null` offset read 200000) and the parent
+  still held the write end of the socketpair, so the child's `read()` never saw EOF while the parent
+  sat in `uv__io_poll`; the issue's own hypothesis, a write blocked into a full pipe, was wrong, and
+  the lost-completion mechanism behind it stays UNVERIFIABLE. `--test-timeout` cannot bound a
+  synchronous block. Now the Gate 1 line on bounding a spawned child.
 
 ## Where the long form lives
 
