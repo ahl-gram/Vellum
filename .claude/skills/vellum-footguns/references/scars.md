@@ -108,7 +108,9 @@ left open and the session failed to write down).
   fix was measured in a scratch tree without `"type": "module"` and was wrong about `.TS`; the cold
   skeptic re-measured under the package's own type and found a loud red where a phantom was claimed.
 - Later, #564: a 200 KB `input` to a child that DRAINS it wedged `spawnSync` on darwin and hung the
-  unit lane with no red, twice on 2026-09-10 and 12 times in 12000 reproduction runs on 2026-09-11.
+  unit lane with no red, twice on 2026-09-10 and twice more in 2000 reproduction runs on 2026-09-11
+  (a further 12 in 12000 came back as ETIMEDOUT rather than hanging, because those runs were capped,
+  which is what showed the cap is a remedy and not a hope).
   The payload had been delivered in full (the child's `/dev/null` offset read 200000) and the parent
   still held the write end of the socketpair, so the child's `read()` never saw EOF while the parent
   sat in `uv__io_poll`; the issue's own hypothesis, a write blocked into a full pipe, was wrong, and

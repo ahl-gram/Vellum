@@ -56,7 +56,8 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
     cannot save it, because the block is synchronous and the runner's own timer never gets the event
     loop (measured: a test running `execFileSync("sh", ["-c", "sleep 8"])` under
     `--test-timeout=1000` PASSED at 8012ms). The shape that wedges is a large `input` to a child
-    that DRAINS it: 12 hangs in 12000 runs at 200000 bytes, 0 in 8000 at 1024 (#564). The limit is a
+    that DRAINS it: at 200000 bytes, 2 unbounded runs in 2000 hung outright and 12 capped runs in
+    12000 came back as ETIMEDOUT; at 1024 bytes, 0 in 12000 (#564). The limit is a
     cap on a hang, not a performance budget, so set it far above the worst real run; and a cap
     nothing ever reaches cannot bite, so keep one child that deliberately outlives it.
 
