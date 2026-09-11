@@ -4,14 +4,23 @@ import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSyn
 import { tmpdir } from "node:os";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 
-// Node's --test collects every test/ directory anywhere in the tree AND every file named test, test-*, *-test, *_test or *.test (its six extensions, outside dot segments and node_modules; #562 covers the by-name arm), so all three defects below report as passes rather than failures: a bare module under test/ becomes a phantom pass, a .test.ts outside test/ is collected where nobody looks for it, and an imported sibling re-registers its own tests. None is visible in a green run, only in the total.
+// Node's --test collects every test/ directory anywhere in the tree AND every file named test, test-*, *-test, *_test or *.test (its six extensions, outside dot segments and node_modules), so all three defects below report as passes rather than failures: a bare module under test/ becomes a phantom pass, a .test.ts outside test/ is collected where nobody looks for it, and an imported sibling re-registers its own tests. None is visible in a green run, only in the total.
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 
 const pruned = (name: string) => name === "node_modules" || name.startsWith(".");
 
+const entriesOf = (dir: string) => {
+  try {
+    return readdirSync(dir, { withFileTypes: true });
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw e;
+  }
+};
+
 const walk = (dir: string): string[] =>
-  readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+  entriesOf(dir).flatMap((e) =>
     e.isDirectory() ? (pruned(e.name) ? [] : walk(join(dir, e.name))) : [join(dir, e.name)],
   );
 
@@ -24,7 +33,14 @@ const loadedByNode = (f: string) =>
 const isStray = (f: string) => loadedByNode(f) && !f.endsWith(".test.ts");
 const straysUnder = (root: string) => filesUnder(root).filter((f) => f.startsWith("test/") && isStray(f));
 
-const collectedByNode = loadedByNode;
+// Node folds case only on pattern segments that contain a wildcard, and only on macOS and Windows; measured 2026-09-11 on v26.8.2 under this package's "type": "module", one case variant per scratch tree because two in one tree are a single file on this disk.
+const inTestDir = (f: string) => f.split("/").some((s) => s === "test");
+const namedTest = (f: string) => {
+  const stem = basename(f, extname(f));
+  const folded = stem.toLowerCase();
+  return stem === "test" || folded.startsWith("test-") || /[._-]test$/.test(folded);
+};
+const collectedByNode = (f: string) => loadedByNode(f) && (inTestDir(f) || namedTest(f));
 const collectedOutside = (root: string) =>
   filesUnder(root)
     .filter((f) => collectedByNode(f) && !f.startsWith("test/"))

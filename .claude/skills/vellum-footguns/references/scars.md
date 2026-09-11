@@ -107,6 +107,14 @@ left open and the session failed to write down).
   for two months unseen by CI, and the gate's own line taught the same over-broad rule. The first
   fix was measured in a scratch tree without `"type": "module"` and was wrong about `.TS`; the cold
   skeptic re-measured under the package's own type and found a loud red where a phantom was claimed.
+- Later, #562: the same guard's second clause saw only `*.test.ts` under the ROOT `test/`, while
+  node collects any directory named `test` at any depth and the whole by-name family anywhere, so a
+  `src/x/test/helper.ts` or the `test-support/test-helpers.ts` the gate's own line warns about would
+  have run as a silent passing test. Two measurement traps on the way: the first case probe put both
+  case variants of a path in ONE scratch tree, which macOS folds onto a single file, and reported a
+  nested `test/` directory as uncollected; and "err toward a false positive" was applied to node's
+  literal pattern segments, where it prevents no miss on any platform and only makes the message
+  false, the reasoning that had withdrawn #561's extension fold eight hours earlier.
 
 ## Where the long form lives
 
