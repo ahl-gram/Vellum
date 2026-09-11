@@ -36,7 +36,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "ribbon": 1.9, // measured 2026-08-20, local single-suite run
   "verso": 7.1,
   "turn": 6.5,
-  "runninghead": 3.9,
+  "runninghead": 5.1, // measured 2026-09-10, local single-suite run: RH10, RH10b and RH10c (two Gallery visits, one under print) since the 2026-08-14 3.9s
   "cluster": 4.7, // measured 2026-08-28, local single-suite run
   "chart-drawer": 37.2, // measured 2026-09-08, local single-suite run: 6.9 at #520 was an 11-check suite; #543, #540 and #521 took it to 23, and six of them draft real region sheets
   "room-drawer": 7.3, // measured 2026-08-28, local single-suite run
@@ -52,7 +52,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "room-ink": 2.4,
   "fallback": 2.2,
   "region-detail": 15.4, // measured 2026-08-23, local run
-  "specimen": 2.9, // measured 2026-09-03, local single-suite run
+  "specimen": 7.3, // measured 2026-09-10, local single-suite run: SB8b to SB8e and SB9b since the 2026-09-03 2.9s
   "health": 0.0,
 };
 

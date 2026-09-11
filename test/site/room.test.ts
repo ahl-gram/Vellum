@@ -73,6 +73,25 @@ test("the kit's print block restores the room folio's tagline and width after th
   assert.match(block, /\.folio-room \.room-name\s*\{[^}]*font-size:\s*1\.32rem/, "and the name prints at the corner's own size, not the phone's");
 });
 
+test("the room folio's panel is painted screen-only (#538): on paper the corner goes static and in flow, and an absolute panel on a static corner resolved against the whole page (e2e RH10c and SB9b pin the resolved value)", () => {
+  const REPO = resolve(import.meta.dirname, "..", "..");
+  const strip = (p: string) => readFileSync(resolve(REPO, p), "utf8").replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\/\*[\s\S]*?\*\//g, (m) => (m.startsWith("/*") ? "" : m));
+  // The sweep errs toward flagging: any tr or folio-room word in a content-giving before or after selector, any case, any spelling; the wrap's window is its own brace-matched close, and a brace inside a string can only close it early or never, so the window is never too wide; a quoted string passes the comment stripper whole, so a "/*" in a content value hides nothing. What it cannot see, named: native nesting (no sheet uses it) and a selector reaching the folio by a shared class or by structure; RH10c and SB9b read the resolved content.
+  const paints = (css: string) => [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, sel, decls]) => /:{1,2}(before|after)/i.test(sel) && /\b(tr|folio-room)\b/i.test(sel) && /content\s*:/i.test(decls));
+  const css = strip("public/atelier.css");
+  const screen = css.indexOf("@media screen {");
+  const closeOf = (open: number) => { let depth = 0; for (let i = open; i < css.length; i++) { if (css[i] === "{") depth++; else if (css[i] === "}" && --depth === 0) return i; } return -1; };
+  const close = screen >= 0 ? closeOf(screen) : -1;
+  assert.ok(screen >= 0 && close > screen, "the kit carries a screen-only block");
+  assert.match(css.slice(screen, close), /\.corner\.tr::before[^{]*\{[^}]*content\s*:\s*""/i, "the painting rule that gives the folio panel its content sits inside it");
+  const kit = paints(css);
+  assert.ok(kit.length >= 1, "at least one rule gives the folio's pseudo content");
+  for (const m of kit) assert.ok(m.index > screen && m.index < close, `a rule giving the folio's pseudo content sits outside the screen-only wrap: ${m[1].trim().slice(0, 80)}`);
+  const sheets = [...globSync("public/**/*.css", { cwd: REPO }), ...globSync("src/**/*.astro", { cwd: REPO }), ...globSync("src/cli/*.ts", { cwd: REPO })].filter((p) => p !== "public/atelier.css").sort();
+  assert.ok(sheets.includes("src/cli/gallery.ts") && sheets.includes("src/layouts/BaseLayout.astro"), "the sweep reaches the generated Gallery sheet and the layout's style block");
+  for (const p of sheets) assert.deepEqual(paints(strip(p)).map((m) => m[1].trim().slice(0, 80)), [], `${p} paints the folio's pseudo itself; the panel belongs to the kit`);
+});
+
 test("bindRoom seats the legend row before it fits the sheet", () => {
   const room = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/shared/room.ts"), "utf8");
   const layout = room.slice(room.indexOf("const layout = () => {"), room.indexOf("camera.restore(held);"));
