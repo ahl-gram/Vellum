@@ -370,7 +370,7 @@ export async function run(ctx) {
   })();
   await send("Emulation.clearDeviceMetricsOverride");
   check(
-    "PR21b a bound atlas fits the page it prints on, at a Letter box and a phone one (#565: 818 on 816 and 392 on 390 before the plates counted their border inside their width; #pr-atlas takes padding 0 at print, so the sheet IS the page box and the plates' own 2px was the whole overflow)",
+    "PR35 a bound atlas fits the page it prints on, at a Letter box and a phone one (#565: 818 on 816 and 392 on 390 before the plates counted their border inside their width; #pr-atlas takes padding 0 at print, so the sheet IS the page box and the plates' own 2px was the whole overflow)",
     !!fitLetter && !!fitNarrow && fitLetter.atlasPadL === "0px" && fitLetter.plates > 0 &&
       fitLetter.clientW === 816 && fitLetter.scrollW === 816 && fitLetter.maxRight === 816 &&
       fitNarrow.clientW === 390 && fitNarrow.scrollW === 390 && fitNarrow.maxRight === 390,

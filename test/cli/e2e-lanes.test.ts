@@ -27,7 +27,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "zoom": 45.8,
   "reading-room": 27.1,
   "room-instrument": 22.0,
-  "print-room": 24.8, // measured 2026-09-11, local single-suite run: PR21b and its two page-box resizes (#565) since the 2026-08-14 21.9s
+  "print-room": 24.8, // measured 2026-09-11, local single-suite run: PR35 and its two page-box resizes (#565) since the 2026-08-14 21.9s
   "room-address": 19.3,
   "render": 13.0,
   "room-voyage-route": 9.0,
