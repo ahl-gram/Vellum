@@ -213,7 +213,7 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
 }
 
 @media print {
-  .fog, .corner, .slip, .slip-tab, .vignette, .legend, .zoomery, .folio, body.chart-room .stage .status { display: none !important; }
+  .fog, .corner, .slip, .slip-tab, .vignette, .legend, .zoomery, .folio, body.chart-room .stage .status, body.chart-room .stage .warning { display: none !important; }
   .corner.folio-room { display: block !important; position: static; text-align: left; margin: 0 0 1rem; max-width: none; }
   .folio-room .room-name, .folio-room .room-tagline { color: var(--ink-dark); display: block; }
   .folio-room .room-name { font-size: 1.32rem; }

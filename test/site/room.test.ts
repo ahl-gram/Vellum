@@ -92,23 +92,23 @@ test("the room folio's panel is painted screen-only (#538): on paper the corner 
   for (const p of sheets) assert.deepEqual(paints(strip(p)).map((m) => m[1].trim().slice(0, 80)), [], `${p} paints the folio's pseudo itself; the panel belongs to the kit`);
 });
 
-test("the kit's print block stands the stage's status pill down (#566, ruled 2026-09-11), and the arm is scoped to the stage so it takes the scripts-off notice with it and leaves every other status alone", () => {
+test("the kit's print block stands the stage's message boxes down (#566, ruled 2026-09-11): the status pill with its scripts-off notice, and the render-worker warning that stands on the notice's own seat, each scoped to the stage so no other status or warning goes with them", () => {
   const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8").replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\/\*[\s\S]*?\*\//g, (m) => (m.startsWith("/*") ? "" : m));
   const open = css.indexOf("@media print");
   assert.notEqual(open, -1, "the kit carries a print block");
   let depth = 0, close = -1;
   for (let i = css.indexOf("{", open); i < css.length && close < 0; i++) { if (css[i] === "{") depth++; else if (css[i] === "}" && --depth === 0) close = i; }
   assert.ok(close > open, "the print block's own brace-matched close, so a block appended after it can never widen the window");
-  // This pin is the fast lane and it reads TEXT, so it is blind to anything the cascade decides: a later rule re-showing the pill (in this block, in a second print block, or in a page sheet) passes here and reds e2e SB9c, which reads the resolved value and is the guard (measured 2026-09-11 against a display: block !important arm appended after this one: SB9c red at disp block, w 195). It errs toward flagging where it does read: \bstatus\b also matches .legend-status.
+  // This pin is the fast lane and it reads TEXT, so it is blind to anything the cascade decides: a later rule re-showing the pill (in this block, in a second print block, or in a page sheet) passes here and reds e2e SB9c, which reads the resolved value and is the guard (measured 2026-09-11 against a display: block !important arm appended after this one: SB9c red at disp block, w 195). It errs toward flagging where it does read: \bstatus\b also matches .legend-status. SB9c, SB9d and PR21d are the resolved reads for the pill, the scripts-off notice and the warning.
   const stood = [...css.slice(open, close).matchAll(/([^{}]+)\{([^{}]*)\}/g)]
     .filter(([, , decls]) => /display\s*:\s*none/i.test(decls))
-    .flatMap(([, sel]) => sel.split(",").map((arm) => arm.trim()).filter((arm) => /\bstatus\b/i.test(arm)));
-  assert.ok(stood.length >= 1, "the print block stands the stage's status down");
+    .flatMap(([, sel]) => sel.split(",").map((arm) => arm.trim()).filter((arm) => /\b(status|warning)\b/i.test(arm)));
+  const subjectOf = (arm: string): string => (arm.split(/\s+/).filter(Boolean).at(-1) ?? "").toLowerCase();
+  for (const box of [".status", ".warning"]) assert.ok(stood.some((arm) => subjectOf(arm) === box), `the print block stands the stage's ${box} down`);
   for (const arm of stood) {
-    assert.match(arm, /\.stage\b/i, `a status stand-down that is not scoped to a chart room's stage: ${arm.slice(0, 80)}`);
-    assert.doesNotMatch(arm.replace(/\[[^\]]*\]/g, ""), /[>+~]/, `a status stand-down on a combinator, which cannot reach the scripts-off notice: it sits inside <noscript>, one level deeper than the pill (${arm.slice(0, 80)})`);
-    const subject = arm.split(/\s+/).filter(Boolean).at(-1) ?? "";
-    assert.match(subject, /^\.status$/i, `a status stand-down whose subject is not the kit's class alone, so it reaches one room's own element or a compound no element wears, and six of the seven rooms' pills and all seven scripts-off notices keep printing: ${arm.slice(0, 80)}`);
+    assert.match(arm, /\.stage\b/i, `a message-box stand-down that is not scoped to a chart room's stage: ${arm.slice(0, 80)}`);
+    assert.doesNotMatch(arm.replace(/\[[^\]]*\]/g, ""), /[>+~]/, `a message-box stand-down on a combinator, which cannot reach the scripts-off notice: it sits inside <noscript>, one level deeper than the pill (${arm.slice(0, 80)})`);
+    assert.match(subjectOf(arm), /^\.(status|warning)$/, `a message-box stand-down whose subject is not the kit's class alone, so it reaches one room's own element or a compound no element wears, and the other rooms' boxes keep printing: ${arm.slice(0, 80)}`);
   }
 });
 
