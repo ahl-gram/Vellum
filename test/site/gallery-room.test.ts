@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { GALLERY_PAGE_CSS, cardFigureHtml, galleryCards } from "../../src/cli/gallery.ts";
+import { fullWidthWideningRules } from "../../test-support/css-box-sweep.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
@@ -106,19 +107,8 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   assert.match(print[1], /figcaption\s*\{[^}]*color:\s*var\(--ink-dark\)/, "captions print in ink");
 });
 
-// Blind spots, and the direction each errs: a width written through calc() or a var, a border added by a rule other than the one carrying the width (this sweep is per-rule), and any sheet but this one. Each costs a miss, never a false positive, and RH10d and RH10e read the resolved page at both paper sizes.
 test("GR7 a plate prints inside its page: every full-width bordered box in the sheet counts its border inside its width, since at print main's padding goes and the page box is the container (#565, measured 392 on 390 at 390x844 and 818 on 816 at Letter)", () => {
-  const declarationsIn = (body: string): Record<string, string> =>
-    Object.fromEntries(
-      body.split(";").map((d) => d.split(":")).filter((p) => p.length >= 2)
-        .map(([k, ...v]) => [k!.trim().toLowerCase(), v.join(":").trim()]),
-    );
-  // A third local copy on purpose: shell-css.test.ts and kit-scope.test.ts each carry their own rule splitter in a different shape, and a sweep fix is not the place to refactor two unrelated guards into test-support.
-  const WIDENS = /^(border|border-(left|right|inline|inline-start|inline-end)|padding|padding-(left|right|inline|inline-start|inline-end))$/;
-  const swept = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
-    .map((m) => ({ selector: m[1]!.trim().replace(/\s+/g, " "), declarations: declarationsIn(m[2]!) }))
-    .filter((rule) => /^[0-9.]+%$/.test(rule.declarations["width"] ?? "")
-      && Object.entries(rule.declarations).some(([prop, value]) => WIDENS.test(prop) && !/^(0|none|0px|0rem|0%)$/.test(value)));
+  const swept = fullWidthWideningRules(css);
   assert.ok(swept.some((rule) => rule.selector === "figure img"), `the plates are the rule this sweep is for; it selected ${JSON.stringify(swept.map((r) => r.selector))}`);
   for (const rule of swept) {
     assert.equal(rule.declarations["box-sizing"], "border-box", `${rule.selector} takes a percentage width and a border or side padding, so on paper it runs past the page box unless its border counts inside its width`);
