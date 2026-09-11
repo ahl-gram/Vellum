@@ -80,7 +80,7 @@ test("the room folio's panel is painted screen-only (#538): on paper the corner 
   assert.ok(screen >= 0 && close > screen, "the kit carries a screen-only block");
   const block = css.slice(screen, close);
   assert.match(block, /\.corner\.tr::before[^{]*\{[^}]*content:\s*""/, "the painting rule that gives the folio panel its content sits inside it");
-  assert.equal((css.match(/\.corner\.tr::before[^{]*\{[^}]*content:/g) || []).length, 1, "and no second rule gives it content outside the wrap");
+  assert.equal((css.match(/\.corner\.tr:{1,2}before[^{]*\{[^}]*content:/g) || []).length, 1, "and no second rule gives it content outside the wrap, in either colon form");
 });
 
 test("bindRoom seats the legend row before it fits the sheet", () => {
