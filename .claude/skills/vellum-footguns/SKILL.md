@@ -59,7 +59,12 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
     that DRAINS it: at 200000 bytes, 2 unbounded runs in 2000 hung outright and 12 capped runs in
     12000 came back as ETIMEDOUT; at 1024 bytes, 0 in 12000 (#564). The limit is a
     cap on a hang, not a performance budget, so set it far above the worst real run; and a cap
-    nothing ever reaches cannot bite, so keep one child that deliberately outlives it.
+    nothing ever reaches cannot bite, so keep one child that deliberately outlives it, written as a
+    SINGLE command (`sh -c 'sleep 5'`), since killing a multi-command child orphans its grandchild
+    and the cap then leaks a process every time it fires (measured 2026-09-11: 10 orphans in 10
+    runs for `sleep 5; printf x`, 0 for the single-command form). Pin what reaches the spawn, not
+    what the option builder returns: the seam between them is where a default cap goes missing with
+    every child still green.
 
 ## Gate 2: before writing an e2e check or a CDP probe
 
