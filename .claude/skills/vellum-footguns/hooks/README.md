@@ -88,8 +88,11 @@ Measured 2026-09-09 on this Mac, ten runs each, through the deployed `sh -c` com
 
 - a Bash or Edit call that triggers nothing, or a refusal: about 64ms;
 - a Write or Edit into a browser-driving script, which loads the TypeScript parser: about 182ms;
-- gate text, at most once per session each, measured 2026-09-10: Gate 1 2496 chars, Gate 2 3108,
-  Gate 3 1631, Gate 4 746, Gate 5 2569, Gate 6 2122, roughly 3200 tokens if every one fires in a
-  single session;
+- gate text, at most once per session each, re-measured 2026-09-11: Gate 1 4417 chars, Gate 2 3288,
+  Gate 3 1631, Gate 4 746, Gate 5 3198, Gate 6 2122, roughly 3900 tokens if every one fires in a
+  single session. Three of the six were already stale when this line was first corrected, and the
+  correction itself then went stale inside the same branch when Gate 1 grew again, which is the
+  standing hazard: nothing sweeps markdown, so re-run
+  `gateText` for all six whenever a gate's text changes;
 - every turn of every session in this repo: the skill's `description` line in the system prompt.
   That is the only permanent term, and the reason the description is kept short.
