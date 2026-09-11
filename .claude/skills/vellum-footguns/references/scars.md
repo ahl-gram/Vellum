@@ -113,7 +113,7 @@ left open and the session failed to write down).
   still held the write end of the socketpair, so the child's `read()` never saw EOF while the parent
   sat in `uv__io_poll`; the issue's own hypothesis, a write blocked into a full pipe, was wrong, and
   the lost-completion mechanism behind it stays UNVERIFIABLE. `--test-timeout` cannot bound a
-  synchronous block. Now Gate 1 line 10.
+  synchronous block. Now the Gate 1 line on bounding a spawned child.
 
 ## Where the long form lives
 
