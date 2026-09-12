@@ -19,27 +19,41 @@ Rules already exist for this (`feedback_guard_the_class_not_the_bug`, and CLAUDE
 
 ## Your sandbox
 
-Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. Build your own worktree from the current HEAD instead, which is what you want whatever that setting later becomes. This recipe is verified working in this repo:
+Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. Build your own worktree from the DISPATCH tree's HEAD instead, which is the code under review. Run the block below as ONE Bash call: shell variables do not survive between calls, so anything later that needs `$ROOT` or `$WT` re-derives them. This recipe is verified working in this repo:
 
 ```bash
-cd /Users/ahl/CodeProjects/Vellum
-git status --porcelain                      # record the baseline first
-WT=.claude/worktrees/guard-<topic>          # .claude/worktrees/ is gitignored
-git worktree add --detach "$WT" HEAD
+find . -path ./.git -prune -o -path ./node_modules -prune -o -path ./.claude/worktrees -prune -o -print | sort > /tmp/guard-<topic>-before.txt
+SHA=$(git rev-parse HEAD)                   # the code under review, read in cwd BEFORE any -C
+ROOT=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
+WT="$ROOT/.claude/worktrees/guard-<topic>-<round>"
+git -C "$ROOT" worktree add --detach "$WT" "$SHA"
 ln -s ../../../node_modules "$WT/node_modules"
 cd "$WT" && node --test test/path/to/target.test.ts
 ```
 
-Teardown, always, even when you fail or run out of room:
+Four things in that block are load bearing, and getting any of them wrong is the #575 defect or worse:
+
+- **`SHA` is read in cwd, before any `git -C`.** Dispatched from a worktree, the dispatch tree's HEAD and the main checkout's HEAD are different commits, and the hardcoded `cd` this recipe used until #575 silently proved the main checkout's. Measured 2026-09-12 in a throwaway repo: the old recipe built its sandbox at the main commit and mutated the pre-change file while the code under review sat in the worktree it was dispatched from.
+- **`WT` is anchored to `$ROOT`, never relative.** Left relative it nests inside the dispatch worktree, and `../../../node_modules` then resolves outside the repository altogether (measured the same day).
+- **The `node_modules` link stays RELATIVE.** `$WT` sits at the same depth under `$ROOT` as it always did, so `../../../` still resolves to `$ROOT/node_modules`, and `CLAUDE.md`'s Worktrees section cites that depth.
+- **The name carries the round.** Step 15 of `specs/development-workflow.md` sends a changed guard back through step 11, and a fixed name fails the second time with `fatal: ... already exists`.
+
+Teardown, always, even when you fail or run out of room. It re-derives, because the setup block's variables are gone:
 
 ```bash
+ROOT=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
+WT="$ROOT/.claude/worktrees/guard-<topic>-<round>"
 rm -f "$WT/node_modules"
-git worktree remove --force "$WT" && git worktree prune
+git -C "$ROOT" worktree remove --force "$WT"
 ```
 
-If the code under test is uncommitted in the parent checkout, the worktree will not have it. Carry it across with `git diff HEAD > /tmp/wip.patch` plus `git apply` inside the worktree, and copy any untracked new test files by hand. If you cannot carry it faithfully, say so plainly and stop rather than proving something about the wrong tree.
+**Never move or restore the tree you were dispatched from.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against it, and never remove a worktree you did not create. You are the only review agent with Edit, so the rule matters most here; it already binds you through `specs/development-workflow.md` step 14 and the footguns Never list, and is repeated because an agent reads its own file.
 
-You have Edit access, which review agents in this project normally must not have (a verify agent once left `// MUTATION:` edits in Vellum source). The worktree is the entire reason that is safe here. **Never edit a file under the parent checkout.** Before you report, run `git status --porcelain` in the parent and confirm it matches the baseline you recorded.
+`git worktree prune` is never yours to run. Measured 2026-09-12: with no `--expire` it deregisters every worktree whose directory is momentarily absent, another session's included, and restoring the directory does NOT bring the registration back. `remove` deregisters its own tree by itself.
+
+If the code under test is uncommitted in the dispatch tree, the worktree will not have it. Carry it across with `git diff HEAD > /tmp/wip.patch` plus `git apply` inside the worktree, and copy any untracked new test files by hand. If you cannot carry it faithfully, say so plainly and stop rather than proving something about the wrong tree.
+
+You have Edit access, which review agents in this project normally must not have (a verify agent once left `// MUTATION:` edits in Vellum source). The worktree is the entire reason that is safe here. **Never edit a file under the dispatch tree.** Prove it with the listing, not with `git status --porcelain`: that command is blind to ignored paths and, worse, to DELETIONS of them, which is how a suite run removed 51 generated files under `public/` while it stayed silent (#573).
 
 **Never `git add` from your worktree, and never commit from it.** It is a scratch tree for mutating and running, nothing else. The `node_modules` symlink above is the specific hazard: git sees a symlink as a FILE, so it slipped past the old `node_modules/` ignore pattern (trailing slash matches directories only) and a `git add -A` committed a link whose contents were one machine's absolute path. The ignore is fixed, but the rule stands on its own: your output is a ledger, not a commit.
 
@@ -106,7 +120,17 @@ Return a ledger, one row per mutation:
 
 Verdicts are BITES (exactly the claimed test went red), HOLE (nothing went red), or IMPRECISE (something red, but not the test claiming the guard). For every HOLE, propose the specific assertion that would close it, and say which existing test file it belongs in.
 
-State the count of mutations you ran and the count you intended to run. If you stopped early, say so. **"Tests still pass" and "all green" are failure reports here, not success.** End with the parent-checkout `git status --porcelain` output proving you left nothing behind.
+State the count of mutations you ran and the count you intended to run. If you stopped early, say so. **"Tests still pass" and "all green" are failure reports here, not success.** End with the proof that you left the dispatch tree as you found it, taken AFTER teardown so your own sandbox is not reported as your own residue:
+
+```bash
+find . -path ./.git -prune -o -path ./node_modules -prune -o -path ./.claude/worktrees -prune -o -print | sort > /tmp/guard-<topic>-after.txt
+diff /tmp/guard-<topic>-before.txt /tmp/guard-<topic>-after.txt
+git -C "$ROOT" worktree list
+```
+
+Paste both. The `diff` is the residue check and empty is the pass; the `worktree list` is the separate check that your sandbox is gone, since the listing prunes `.claude/worktrees` to stay fast and to keep other sessions' trees out of your proof.
+
+**Name the commit you proved, in every ledger.** Print the `SHA` the sandbox was built at. If you carried uncommitted work across by hand, the bare sha is a false attribution: say so, and give the sha PLUS the fact that a patch was applied and how many files it touched. What you proved then belongs to no commit that exists, and a reader who takes the sha at face value will look at the wrong code (Alex, 2026-09-12).
 
 ## Conventions
 

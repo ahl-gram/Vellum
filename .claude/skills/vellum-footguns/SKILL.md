@@ -46,11 +46,12 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
    and the importers.
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
    `vellum-guard-prover` for the whole guard set (10 minutes, unit tests only, name the mutations you
-   did NOT try). It mutates in its OWN detached worktree at HEAD, so uncommitted work is not in the
-   tree it proves unless carried across by hand: commit first, or you prove something about a
-   different tree than the one you are shipping (corrected 2026-09-10 against the agent's own recipe,
-   `git worktree add --detach "$WT" HEAD`; the earlier "restore is `git checkout --`" described a
-   loop it no longer runs). Zero red is
+   did NOT try). It mutates in its OWN detached worktree, built at the DISPATCH tree's HEAD since
+   #575 (`git -C "$ROOT" worktree add --detach "$WT" "$SHA"`, the sha read in cwd before any `-C`;
+   until then a hardcoded `cd` sent it to the main checkout's HEAD and it proved the wrong commit in
+   silence). Uncommitted work is still not in the tree it proves unless carried across by hand:
+   commit first, or you prove something about a different tree than the one you are shipping, and
+   the sha it reports is then a false attribution it has to declare. Zero red is
    a hole. A guard proved unable to red is deleted, never shipped.
 10. **A test that spawns a child gives it its own time limit.** `execFileSync` takes a `timeout`;
     with none, a wedged child hangs the unit lane forever with no red to read, and `--test-timeout`
