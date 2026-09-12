@@ -22,11 +22,9 @@ export const validateName = (name: string): string => {
   return name;
 };
 
-// --git-common-dir, never --show-toplevel: from a linked worktree the latter returns the worktree itself, which is the anchoring half of #575.
 export const resolveRoot = (cwd: string = process.cwd()): string =>
   dirname(git(["rev-parse", "--path-format=absolute", "--git-common-dir"], cwd));
 
-// --show-toplevel is right HERE and wrong in resolveRoot: the residue proof is about the tree the agent was dispatched into, not the checkout the sandbox hangs off.
 export const resolveTree = (cwd: string = process.cwd()): string => git(["rev-parse", "--show-toplevel"], cwd);
 
 export const sandboxPath = (root: string, name: string): string => join(root, ".claude", "worktrees", validateName(name));
@@ -35,7 +33,8 @@ export const readHead = (cwd: string = process.cwd()): string => git(["rev-parse
 
 const haveCommit = (root: string, sha: string): boolean => {
   try {
-    git(["cat-file", "-e", `${sha}^{commit}`], root);
+    // stderr swallowed, not inherited: a missing commit is the skeptic's NORMAL path, and git's `fatal:` on it trains an agent to read fatal lines as noise.
+    execFileSync("git", ["cat-file", "-e", `${sha}^{commit}`], { cwd: root, encoding: "utf8", timeout: GIT_TIMEOUT_MS, stdio: ["ignore", "ignore", "ignore"] });
     return true;
   } catch {
     return false;
@@ -76,10 +75,10 @@ export const teardown = (name: string, cwd: string = process.cwd()): void => {
 export const listing = (dir: string): string[] => {
   const out: string[] = [];
   const walk = (at: string): void => {
-    for (const entry of readdirSync(at, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    for (const entry of readdirSync(at, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))) {
       if (SKIP.has(entry.name)) continue;
       const full = join(at, entry.name);
-      if (entry.isDirectory() && !entry.isSymbolicLink()) walk(full);
+      if (entry.isDirectory()) walk(full);
       else out.push(relative(dir, full));
     }
   };

@@ -29,18 +29,15 @@ cd "$WT" && node --test test/path/to/target.test.ts
 
 `create` reads the dispatch tree's HEAD before it resolves anything else and builds the sandbox there, which is the code under review. That ordering was #575: a hardcoded path sent an earlier version of this recipe to the main checkout's HEAD, and it proved the wrong commit in silence. The script also refuses any name outside `guard-*` and `skeptic-*`, so it cannot address a worktree it did not create.
 
-Four things in that block are load bearing, and getting any of them wrong is the #575 defect or worse:
-
-- **`SHA` is read in cwd, before any `git -C`.** Dispatched from a worktree, the dispatch tree's HEAD and the main checkout's HEAD are different commits, and the hardcoded `cd` this recipe used until #575 silently proved the main checkout's. Measured 2026-09-12 in a throwaway repo: the old recipe built its sandbox at the main commit and mutated the pre-change file while the code under review sat in the worktree it was dispatched from.
-- **`WT` is anchored to `$ROOT`, never relative.** Left relative it nests inside the dispatch worktree, and `../../../node_modules` then resolves outside the repository altogether (measured the same day).
-- **The `node_modules` link stays RELATIVE.** `$WT` sits at the same depth under `$ROOT` as it always did, so `../../../` still resolves to `$ROOT/node_modules`, and `CLAUDE.md`'s Worktrees section cites that depth.
-- **The name carries the round.** Step 15 of `specs/development-workflow.md` sends a changed guard back through step 11, and a fixed name fails the second time with `fatal: ... already exists`.
+One thing in that block is yours to get right: **the name carries the round.** Step 15 of `specs/development-workflow.md` sends a changed guard back through step 11, and a fixed name fails the second time with `fatal: ... already exists`. Everything else the old recipe asked you to remember (the sha read before any `-C`, the anchor to the main checkout, the relative `node_modules` depth) is the script's job now and is pinned by `test/repo/agent-sandbox.test.ts`. Do not hand-write that shell: retyping it in four places is what #575 was.
 
 Teardown, always, even when you fail or run out of room, and from the dispatch tree rather than from inside the sandbox:
 
 ```bash
 node scripts/agent-sandbox.ts teardown guard-<topic>-<round>
 ```
+
+If a round ended early and left a sandbox behind, `git worktree list` names it and `node scripts/agent-sandbox.ts teardown <name>` clears it. If its DIRECTORY survives but its registration is gone, which is the state a bare prune leaves, `teardown` cannot help: `git worktree remove --force` exits 128 on an unregistered path, so delete the directory by hand and say so in your report.
 
 **Never move or restore the tree you were dispatched from.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against it, and never remove a worktree you did not create. You are the only review agent with Edit, so the rule matters most here; it already binds you through `specs/development-workflow.md` step 14 and the footguns Never list, and is repeated because an agent reads its own file.
 

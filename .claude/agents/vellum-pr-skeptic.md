@@ -49,8 +49,6 @@ You are dispatched from whatever directory the caller happened to be in, and tha
 
 Resolve the PR's head sha from `gh api` at the start of EVERY round, not once: you get three rounds and the implementer pushes between them, so a sha resolved in an earlier round builds a worktree at code no longer under review and every result you report is attributed to a commit you never ran.
 
-Anchor the worktree to the MAIN checkout rather than to cwd: dispatched from a worktree, a relative path nests inside that worktree and the `node_modules` depth is then wrong.
-
 ```bash
 WT=$(node scripts/agent-sandbox.ts create skeptic-<pr>-<round> <sha resolved this round>)
 cd "$WT" && npm test
@@ -61,6 +59,8 @@ Then, always, even when you fail or run out of room, and from the tree you were 
 ```bash
 node scripts/agent-sandbox.ts teardown skeptic-<pr>-<round>
 ```
+
+If a round ended early and left a sandbox behind, `git worktree list` names it and `node scripts/agent-sandbox.ts teardown <name>` clears it. If its DIRECTORY survives but its registration is gone, which is the state a bare prune leaves, `teardown` cannot help: `git worktree remove --force` exits 128 on an unregistered path, so delete the directory by hand and say so in your report.
 
 `scripts/agent-sandbox.ts` owns the rest: it resolves the main checkout the one correct way, fetches if the sha is not local yet, links `node_modules`, and refuses any name outside `guard-*` and `skeptic-*` so it cannot touch a worktree it did not create. It requires the sha explicitly for a `skeptic-*` sandbox, precisely because defaulting it to this tree's HEAD is how a report gets attributed to a commit that was never run. The name carries the round because you get three of them, and a fixed name collides on the second. Never `git add` and never commit from the sandbox.
 

@@ -145,7 +145,6 @@ test("listing returns its rows in a stable sorted order", () => {
   });
 });
 
-// The CLI, not the exported functions, is what every agent file invokes, and `WT=$(...)` depends on the path being the only thing on stdout.
 const cli = (args: string[], cwd: string): { status: number; out: string; err: string } => {
   const r = spawnSync(process.execPath, [SCRIPT, ...args], { cwd, encoding: "utf8", timeout: BOUND_MS });
   return { status: r.status ?? -1, out: r.stdout ?? "", err: r.stderr ?? "" };
@@ -191,7 +190,7 @@ test("the CLI snapshot lists the dispatch tree even when run from a subdirectory
   });
 });
 
-// Holes 8a and 8b: the *Plan tests pin the argv as DATA. These pin what teardown and create actually DO, which is where a command injected outside the plan would hide.
+// The *Plan tests pin the argv as DATA. These two pin what teardown and create actually DO, which is where a command injected outside the plan would hide.
 test("teardown leaves a worktree it does not own registered, even one whose directory is absent", () => {
   withRepo((main, linked) => {
     // "bystander", never "decoy": vellum-guard-prover found the earlier name a substring of the sandbox's own guard-decoy, so worktree list printing the sandbox satisfied the match and the test passed for the wrong reason.
@@ -262,7 +261,7 @@ test("snapshot lists the tree it is given, not the process cwd", () => {
   });
 });
 
-// The fetch arm was only ever checked as returned DATA: a runner that silently dropped every fetch left all 20 tests green, and that is the skeptic's real case (a PR head not yet fetched). This fixture gives the clone a real origin holding a commit it does not have.
+// A runner that silently dropped every fetch stayed green against the *Plan data alone, and an unfetched PR head is the skeptic's normal case, so this fixture gives the clone a real origin holding a commit it does not have.
 const withRemote = (body: (clone: string, sha: string) => void): void => {
   const made = mkdtempSync(join(tmpdir(), "agent-sandbox-remote-"));
   const dir = realpathSync(made);
