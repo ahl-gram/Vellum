@@ -1,10 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { create, readHead, resolveRoot, sandboxPath, validateName } from "../../scripts/agent-sandbox.ts";
+import { create, listing, readHead, resolveRoot, sandboxPath, teardown, validateName } from "../../scripts/agent-sandbox.ts";
 
 const BOUND_MS = 30_000;
 const git = (args: string[], cwd: string): string => execFileSync("git", args, { cwd, encoding: "utf8", timeout: BOUND_MS }).trim();
@@ -74,5 +74,32 @@ test("create requires an explicit commit for a skeptic sandbox and defaults one 
     } finally {
       git(["-C", main, "worktree", "remove", "--force", wt], main);
     }
+  });
+});
+
+test("teardown removes the sandbox and its registration, and leaves the dispatch tree alone", () => {
+  withRepo((main, linked) => {
+    const before = listing(linked);
+    const wt = create("guard-teardown", undefined, linked);
+    assert.ok(existsSync(wt), "the sandbox was never created, so teardown proves nothing");
+    assert.match(git(["worktree", "list"], main), /guard-teardown/, "the sandbox was not registered");
+    teardown("guard-teardown", linked);
+    assert.equal(existsSync(wt), false, "the sandbox directory survived teardown");
+    assert.doesNotMatch(git(["worktree", "list"], main), /guard-teardown/, "the registration survived teardown, which is what a leaked sandbox looks like");
+    assert.deepEqual(listing(linked), before, "teardown changed the dispatch tree");
+  });
+});
+
+test("listing skips the directories the residue proof must not walk, and sees the rest", () => {
+  withRepo((main, linked) => {
+    mkdirSync(join(linked, "node_modules"), { recursive: true });
+    writeFileSync(join(linked, "node_modules", "dep.js"), "x\n");
+    mkdirSync(join(linked, "sub"), { recursive: true });
+    writeFileSync(join(linked, "sub", "kept.txt"), "x\n");
+    const found = listing(linked);
+    assert.ok(found.includes(join("sub", "kept.txt")), "listing missed a real file, so the residue proof would miss real residue");
+    assert.ok(found.includes("f.txt"), "listing missed a tracked file at the root");
+    assert.equal(found.some((f) => f.startsWith("node_modules")), false, "listing walked node_modules, which makes the residue diff enormous and useless");
+    assert.equal(found.some((f) => f.startsWith(".git")), false, "listing walked .git, whose churn is not residue");
   });
 });
