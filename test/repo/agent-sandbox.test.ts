@@ -1,12 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { execFileSync, spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { create, listing, readHead, resolveRoot, sandboxPath, teardown, validateName } from "../../scripts/agent-sandbox.ts";
+import { join, resolve } from "node:path";
+import { create, createPlan, listing, readHead, resolveRoot, resolveTree, sandboxPath, teardown, teardownPlan, validateName } from "../../scripts/agent-sandbox.ts";
 
 const BOUND_MS = 30_000;
+const SCRIPT = resolve(import.meta.dirname, "..", "..", "scripts", "agent-sandbox.ts");
 const git = (args: string[], cwd: string): string => execFileSync("git", args, { cwd, encoding: "utf8", timeout: BOUND_MS }).trim();
 
 // resolveRoot's whole point is invisible in a plain checkout, where --show-toplevel and the root of --git-common-dir are the same path; they diverge only from a linked worktree, and CI's unit lane is a plain clone. So the fixture builds the divergence rather than asserting into it.
@@ -101,5 +102,91 @@ test("listing skips the directories the residue proof must not walk, and sees th
     assert.ok(found.includes("f.txt"), "listing missed a tracked file at the root");
     assert.equal(found.some((f) => f.startsWith("node_modules")), false, "listing walked node_modules, which makes the residue diff enormous and useless");
     assert.equal(found.some((f) => f.startsWith(".git")), false, "listing walked .git, whose churn is not residue");
+  });
+});
+
+test("createPlan fetches only when the commit is absent, and links node_modules three levels up", () => {
+  const local = createPlan("/r/.claude/worktrees/guard-1", "abc", true);
+  const remote = createPlan("/r/.claude/worktrees/guard-1", "abc", false);
+  assert.deepEqual(local.git.filter((c) => c[0] === "fetch"), [], "a fetch was issued for a commit already present, which reaches the network on every guard run");
+  assert.deepEqual(remote.git.filter((c) => c[0] === "fetch"), [["fetch", "origin"]], "no fetch was issued for a commit that is not local yet, so worktree add fails on a sha the skeptic just resolved");
+  assert.ok(
+    local.git.some((c) => c[0] === "worktree" && c[1] === "add" && c.includes("--detach") && c.includes("abc")),
+    "the plan does not build a detached worktree at the requested sha",
+  );
+  assert.equal(local.link, join("..", "..", "..", "node_modules"), "the node_modules link is missing or not the three-levels-up relative form that a sandbox at root/.claude/worktrees/<name> needs");
+});
+
+test("teardownPlan removes its own worktree and never prunes", () => {
+  const plan = teardownPlan("/r/.claude/worktrees/guard-1");
+  assert.ok(
+    plan.git.some((c) => c[0] === "worktree" && c[1] === "remove" && c.includes("--force")),
+    "teardown does not remove the worktree, so every round leaks a sandbox and its registration",
+  );
+  assert.equal(
+    plan.git.some((c) => c.includes("prune")),
+    false,
+    "teardown prunes: with no --expire that deregisters every worktree whose directory is momentarily absent, another session's included, and restoring the directory does not bring it back (#575)",
+  );
+});
+
+test("resolveTree is the tree you are standing in, not the main checkout", () => {
+  withRepo((main, linked) => {
+    assert.equal(resolveTree(linked), linked, "resolveTree returned the main checkout, so a residue snapshot taken from a worktree would list the wrong tree");
+    assert.equal(resolveRoot(linked), main, "resolveRoot and resolveTree must differ from inside a linked worktree, or one of them is wrong");
+  });
+});
+
+test("listing returns its rows in a stable sorted order", () => {
+  withRepo((main, linked) => {
+    for (const n of ["c.txt", "a.txt", "b.txt"]) writeFileSync(join(linked, n), "x\n");
+    const found = listing(linked);
+    assert.deepEqual([...found].sort((x, y) => x.localeCompare(y)), found, "listing is unsorted, so a residue diff reports spurious reorderings as residue");
+  });
+});
+
+// The CLI, not the exported functions, is what every agent file invokes, and `WT=$(...)` depends on the path being the only thing on stdout.
+const cli = (args: string[], cwd: string): { status: number; out: string; err: string } => {
+  const r = spawnSync(process.execPath, [SCRIPT, ...args], { cwd, encoding: "utf8", timeout: BOUND_MS });
+  return { status: r.status ?? -1, out: r.stdout ?? "", err: r.stderr ?? "" };
+};
+
+test("the CLI prints the sandbox path alone on stdout, so WT=$(...) captures a usable path", () => {
+  withRepo((main, linked) => {
+    const made = cli(["create", "guard-cli"], linked);
+    try {
+      assert.equal(made.status, 0, `create exited ${made.status}: ${made.err}`);
+      const printed = made.out.trim();
+      assert.equal(printed.split("\n").length, 1, `stdout carried ${made.out.split("\n").length} lines, so WT=$(...) captures something that is not a path`);
+      assert.ok(existsSync(printed), `the printed path ${printed} does not exist`);
+      assert.equal(printed, join(main, ".claude", "worktrees", "guard-cli"));
+    } finally {
+      cli(["teardown", "guard-cli"], linked);
+    }
+    assert.equal(existsSync(join(main, ".claude", "worktrees", "guard-cli")), false, "the CLI teardown left the sandbox behind");
+  });
+});
+
+test("the CLI reports a refused name and a missing argument as a failure, not silently", () => {
+  withRepo((main, linked) => {
+    const bad = cli(["create", "other-session"], linked);
+    assert.equal(bad.status, 1, "a refused sandbox name exited 0, so a caller would read failure as success");
+    assert.match(bad.err, /namespace/, "the refusal reached stdout or was swallowed instead of being explained on stderr");
+    const none = cli([], linked);
+    assert.equal(none.status, 1, "no arguments exited 0");
+    assert.match(none.err, /usage/, "no usage line was printed");
+  });
+});
+
+test("the CLI snapshot lists the dispatch tree even when run from a subdirectory", () => {
+  withRepo((main, linked) => {
+    mkdirSync(join(linked, "deep", "er"), { recursive: true });
+    writeFileSync(join(linked, "deep", "er", "kept.txt"), "x\n");
+    const out = join(linked, "snap.txt");
+    const r = cli(["snapshot", out], join(linked, "deep", "er"));
+    assert.equal(r.status, 0, `snapshot exited ${r.status}: ${r.err}`);
+    const rows = readFileSync(out, "utf8").trim().split("\n");
+    assert.ok(rows.includes("f.txt"), "the snapshot did not reach the dispatch tree root, so it listed the subdirectory it was run from");
+    assert.ok(rows.includes(join("deep", "er", "kept.txt")), "the snapshot missed a nested file");
   });
 });

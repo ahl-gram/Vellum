@@ -1,20 +1,23 @@
 import { execFileSync } from "node:child_process";
-import { readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { readdirSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
-/** The sandbox lifecycle a dispatched review agent needs, in one reviewed place: #575 is what four hand-retyped copies of it cost. Prefix decides the role, so the script can enforce what each role owes. */
+/** The sandbox lifecycle a dispatched review agent needs, in one reviewed place: #575 is what four hand-retyped copies of it cost. The git argv is returned as data by the *Plan functions so a test can pin which commands run, which is the only way to pin the absence of one. */
 
-export const SANDBOX_NAME = /^(guard|skeptic)-[A-Za-z0-9._-]+$/;
+const SANDBOX_NAME = /^(guard|skeptic)-[A-Za-z0-9._-]+$/;
 const GIT_TIMEOUT_MS = 120_000;
 const SKIP = new Set([".git", "node_modules", "worktrees"]);
+const LINK = join("..", "..", "..", "node_modules");
+
+export type Plan = { git: string[][]; link?: string };
 
 const git = (args: string[], cwd: string): string =>
   execFileSync("git", args, { cwd, encoding: "utf8", timeout: GIT_TIMEOUT_MS }).trim();
 
 export const validateName = (name: string): string => {
   if (!SANDBOX_NAME.test(name)) {
-    throw new Error(`sandbox name ${JSON.stringify(name)} is not a guard-* or skeptic-* name, so this script will not address it: it may only touch sandboxes it created, never another session's worktree`);
+    throw new Error(`sandbox name ${JSON.stringify(name)} is outside the guard-* and skeptic-* namespace this script may address. Note what that does and does not buy: it keeps the script inside the sandbox namespace, so it cannot reach a session's own worktree, but it is a namespace and not provenance, so a concurrent review agent's sandbox of the same shape is still addressable.`);
   }
   return name;
 };
@@ -22,6 +25,9 @@ export const validateName = (name: string): string => {
 // --git-common-dir, never --show-toplevel: from a linked worktree the latter returns the worktree itself, which is the anchoring half of #575.
 export const resolveRoot = (cwd: string = process.cwd()): string =>
   dirname(git(["rev-parse", "--path-format=absolute", "--git-common-dir"], cwd));
+
+// --show-toplevel is right HERE and wrong in resolveRoot: the residue proof is about the tree the agent was dispatched into, not the checkout the sandbox hangs off.
+export const resolveTree = (cwd: string = process.cwd()): string => git(["rev-parse", "--show-toplevel"], cwd);
 
 export const sandboxPath = (root: string, name: string): string => join(root, ".claude", "worktrees", validateName(name));
 
@@ -36,6 +42,19 @@ const haveCommit = (root: string, sha: string): boolean => {
   }
 };
 
+export const createPlan = (wt: string, sha: string, hasCommit: boolean): Plan => ({
+  git: [...(hasCommit ? [] : [["fetch", "origin"]]), ["worktree", "add", "--detach", wt, sha]],
+  link: LINK,
+});
+
+// No prune. With no --expire it deregisters every worktree whose directory is momentarily absent, another session's included, and restoring the directory does not bring it back (measured 2026-09-12). `remove` deregisters its own tree, and takes the node_modules symlink with the directory.
+export const teardownPlan = (wt: string): Plan => ({ git: [["worktree", "remove", "--force", wt]] });
+
+const run = (plan: Plan, root: string, wt: string): void => {
+  for (const args of plan.git) git(args, root);
+  if (plan.link) symlinkSync(plan.link, join(wt, "node_modules"));
+};
+
 export const create = (name: string, sha?: string, cwd: string = process.cwd()): string => {
   validateName(name);
   if (name.startsWith("skeptic-") && !sha) {
@@ -44,18 +63,14 @@ export const create = (name: string, sha?: string, cwd: string = process.cwd()):
   const at = sha ?? readHead(cwd);
   const root = resolveRoot(cwd);
   const wt = sandboxPath(root, name);
-  if (!haveCommit(root, at)) git(["fetch", "origin"], root);
-  git(["worktree", "add", "--detach", wt, at], root);
-  symlinkSync(join("..", "..", "..", "node_modules"), join(wt, "node_modules"));
+  run(createPlan(wt, at, haveCommit(root, at)), root, wt);
   return wt;
 };
 
-// No prune, ever: with no --expire it deregisters every worktree whose directory is momentarily absent, another session's included, and restoring the directory does not bring it back (measured 2026-09-12).
 export const teardown = (name: string, cwd: string = process.cwd()): void => {
   const root = resolveRoot(cwd);
   const wt = sandboxPath(root, name);
-  rmSync(join(wt, "node_modules"), { force: true });
-  git(["worktree", "remove", "--force", wt], root);
+  run(teardownPlan(wt), root, wt);
 };
 
 export const listing = (dir: string): string[] => {
@@ -72,9 +87,15 @@ export const listing = (dir: string): string[] => {
   return out;
 };
 
-const usage = "usage: agent-sandbox create <name> [sha] | teardown <name> | snapshot <outfile>";
+export const snapshot = (out: string, cwd: string = process.cwd()): number => {
+  const rows = listing(resolveTree(cwd));
+  writeFileSync(out, rows.join("\n") + "\n");
+  return rows.length;
+};
 
-const main = (argv: string[]): number => {
+const USAGE = "usage: agent-sandbox create <name> [sha] | teardown <name> | snapshot <outfile>";
+
+export const main = (argv: string[]): number => {
   const [command, first, second] = argv;
   if (command === "create" && first) {
     console.log(create(first, second));
@@ -85,10 +106,10 @@ const main = (argv: string[]): number => {
     return 0;
   }
   if (command === "snapshot" && first) {
-    writeFileSync(first, listing(process.cwd()).join("\n") + "\n");
+    console.log(snapshot(first));
     return 0;
   }
-  console.error(usage);
+  console.error(USAGE);
   return 1;
 };
 
