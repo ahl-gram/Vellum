@@ -58,6 +58,8 @@ Check every one the plan touches, and flag the ones it does not mention but will
 
 Strictly read-only. Bash is for `gh api`, `git`, `ls`, `node`/`npm` introspection, and running existing tests. Do not edit or write files, do not post to GitHub, do not create branches, and do not write the plan you would have preferred. You may describe an alternative in one paragraph when the plan's approach is the finding, but the plan belongs to the caller and the ruling belongs to Alex.
 
+**Never move or restore the tree you were dispatched from.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against it, and never remove a worktree you did not create. That directory is normally another agent's live working tree, and on 2026-09-11 a dispatched review agent checked a PR head out in two of them (#573).
+
 ## Reporting
 
 Findings first, ranked, one row per finding:

@@ -295,7 +295,13 @@ worktree costs when both go wrong.
   branch before the first commit, or the PR carries the harness's name instead of yours.
 - **`vellum-guard-prover` is the documented exception.** It must mutate the code under review, which
   is HEAD and not `origin/main`, so it builds its own detached worktree by the recipe in its agent
-  file. Do not point it at harness isolation.
+  file. Do not point it at harness isolation. `vellum-pr-skeptic` builds one too since #573, but only
+  as a FALLBACK: it first checks whether the directory it was dispatched from is already the PR head
+  with a clean tree, and runs there when it is, which is the normal case at step 14.
+- **A dispatched review agent may not move or restore the tree it was dispatched from**, which is
+  normally your live worktree. On 2026-09-11 `vellum-pr-skeptic` checked a PR head out in two of them
+  (#573). Commit before you dispatch one: `git restore` and `git checkout -- <path>` discard without
+  leaving a reflog entry, so there is nothing to recover from afterwards.
 - **Never remove the worktree the session is standing in.** Name it for Alex and leave it. The shell
   recovers to the parent when a worktree vanishes underneath it, but the cwd is lost mid-task.
 - **Other sessions hold their own worktrees here.** Leave them alone: do not remove them, commit

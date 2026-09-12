@@ -114,6 +114,12 @@ claim the skeptic will check.
 **14. Run `vellum-pr-skeptic`, dispatched COLD.** The prompt is the PR number or branch name and
 NOTHING else: no summary, no claims about tests, no rationale. Make no edits while it runs.
 
+**Commit anything in progress before you dispatch it**, and before any dispatched review agent. It runs
+in the directory you launched it from, which is your worktree, and on 2026-09-11 this one checked a PR
+head out in two live ones (#573). No dispatched review agent may move or restore the tree it was
+dispatched from, and none needs to: reading a PR needs no working tree at all, and the tree it is
+standing in is normally already the PR head.
+
 **15. Fix, re-prove, repeat, at most three rounds.** A guard you change is a guard the prover has
 not seen, so it goes back through step 11. Residue that will not be fixed is named in the PR body
 with the reason.

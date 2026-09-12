@@ -49,6 +49,8 @@ Pick server and debugger ports distinct from the ones the existing drivers use (
 
 Write only into `out/`. Never edit source, tests, or committed charts. If you believe a fix is needed, describe it; do not apply it.
 
+**Never move or restore the tree you were dispatched from.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against it, and never remove a worktree you did not create. That directory is normally another agent's live working tree, and on 2026-09-11 a dispatched review agent checked a PR head out in two of them (#573).
+
 ## Reporting
 
 Lead with what you measured and what it says, then the file list. For every acceptance criterion you were asked about, give one of: MET with the number that proves it, NOT MET with the number that disproves it, or NOT OBSERVABLE with the reason. If a criterion is a glance property, say which full-scale render you judged it from.

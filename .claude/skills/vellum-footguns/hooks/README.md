@@ -47,9 +47,12 @@ is ever removed.
   `node -e` write) is not scanned. Silence, not refusal.
 - A body passed through a shell variable or a pipe is not read.
 - A gate spent on a call the user then rejects is not shown again that session.
-- The once-per-session state is keyed on the hook payload's `session_id`. Whether a subagent shares
-  its parent's id (and so never sees a gate the parent already spent) or has its own (and pays the
-  full gate cost again) has not been measured in a live multi-agent session.
+- The once-per-session state is keyed on the hook payload's `session_id`. Measured 2026-09-11 in a
+  live dispatch, replacing the note that said this had never been measured: a subagent's Bash DOES
+  reach this hook (a dispatched agent's `perl -i` came back refused with `PERL_REASON` verbatim), and
+  it SHARES the parent's `session_id`, so that agent's `git push --dry-run` spent the parent session's
+  Gate 5 and the parent never saw it. Only `gateNote` is once-per-session; `deny` and
+  `additionalContext` fire on every call, so a refusal is unaffected.
 
 ## How it is wired
 
