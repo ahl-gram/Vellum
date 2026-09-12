@@ -1,10 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readlinkSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { create, createPlan, listing, readHead, resolveRoot, resolveTree, sandboxPath, teardown, teardownPlan, validateName } from "../../scripts/agent-sandbox.ts";
+import { create, createPlan, listing, readHead, resolveRoot, resolveTree, sandboxPath, snapshot, teardown, teardownPlan, validateName } from "../../scripts/agent-sandbox.ts";
 
 const BOUND_MS = 30_000;
 const SCRIPT = resolve(import.meta.dirname, "..", "..", "scripts", "agent-sandbox.ts");
@@ -114,6 +114,7 @@ test("createPlan fetches only when the commit is absent, and links node_modules 
     local.git.some((c) => c[0] === "worktree" && c[1] === "add" && c.includes("--detach") && c.includes("abc")),
     "the plan does not build a detached worktree at the requested sha",
   );
+  assert.deepEqual(remote.git.map((c) => c[0]), ["fetch", "worktree"], "the fetch must come BEFORE the worktree add, or add runs against a sha that is not local yet");
   assert.equal(local.link, join("..", "..", "..", "node_modules"), "the node_modules link is missing or not the three-levels-up relative form that a sandbox at root/.claude/worktrees/<name> needs");
 });
 
@@ -140,8 +141,7 @@ test("resolveTree is the tree you are standing in, not the main checkout", () =>
 test("listing returns its rows in a stable sorted order", () => {
   withRepo((main, linked) => {
     for (const n of ["c.txt", "a.txt", "b.txt"]) writeFileSync(join(linked, n), "x\n");
-    const found = listing(linked);
-    assert.deepEqual([...found].sort((x, y) => x.localeCompare(y)), found, "listing is unsorted, so a residue diff reports spurious reorderings as residue");
+    assert.deepEqual(listing(linked), ["a.txt", "b.txt", "c.txt", "f.txt"], "listing is unsorted or missed a file, so a residue diff reports spurious reorderings as residue");
   });
 });
 
@@ -188,5 +188,72 @@ test("the CLI snapshot lists the dispatch tree even when run from a subdirectory
     const rows = readFileSync(out, "utf8").trim().split("\n");
     assert.ok(rows.includes("f.txt"), "the snapshot did not reach the dispatch tree root, so it listed the subdirectory it was run from");
     assert.ok(rows.includes(join("deep", "er", "kept.txt")), "the snapshot missed a nested file");
+  });
+});
+
+// Holes 8a and 8b: the *Plan tests pin the argv as DATA. These pin what teardown and create actually DO, which is where a command injected outside the plan would hide.
+test("teardown leaves a worktree it does not own registered, even one whose directory is absent", () => {
+  withRepo((main, linked) => {
+    const decoy = join(main, "decoy");
+    git(["worktree", "add", "-q", "--detach", decoy, "HEAD"], main);
+    renameSync(decoy, `${decoy}-moved`);
+    try {
+      create("guard-decoy", undefined, linked);
+      teardown("guard-decoy", linked);
+      assert.match(
+        git(["worktree", "list"], main),
+        /decoy/,
+        "teardown deregistered a worktree it does not own: a prune with no --expire takes every worktree whose directory is momentarily absent, another session's included, and restoring the directory does not bring it back (#575)",
+      );
+    } finally {
+      renameSync(`${decoy}-moved`, decoy);
+    }
+  });
+});
+
+test("create leaves a node_modules symlink that actually resolves", () => {
+  withRepo((main, linked) => {
+    mkdirSync(join(main, "node_modules"), { recursive: true });
+    writeFileSync(join(main, "node_modules", "dep.js"), "x\n");
+    const wt = create("guard-link", undefined, linked);
+    try {
+      assert.equal(readlinkSync(join(wt, "node_modules")), join("..", "..", "..", "node_modules"), "the symlink is missing or not the relative form");
+      assert.ok(statSync(join(wt, "node_modules", "dep.js")).isFile(), "the symlink does not resolve to the root's node_modules, so every suite run in the sandbox fails on missing dependencies");
+    } finally {
+      teardown("guard-link", linked);
+    }
+  });
+});
+
+test("listing skips the worktrees directory, so a sandbox is never its own residue", () => {
+  withRepo((main, linked) => {
+    mkdirSync(join(linked, "worktrees", "guard-x"), { recursive: true });
+    writeFileSync(join(linked, "worktrees", "guard-x", "f.txt"), "x\n");
+    assert.equal(listing(linked).some((f) => f.startsWith("worktrees")), false, "listing walked the worktrees directory, so an agent's own sandbox shows up as residue in its own proof");
+  });
+});
+
+test("create refuses a bad name before it touches git at all", () => {
+  assert.throws(
+    () => create("other-session", undefined, "/nonexistent-path-for-this-test"),
+    /namespace/,
+    "the failure came from git or the filesystem rather than the name check, so create ran before validating and its own validateName call is doing nothing",
+  );
+});
+
+test("the CLI refuses a skeptic sandbox with no sha and says why", () => {
+  withRepo((main, linked) => {
+    const r = cli(["create", "skeptic-1"], linked);
+    assert.equal(r.status, 1, "a skeptic sandbox with no sha exited 0, so a whole report would be attributed to a commit never run (#575)");
+    assert.match(r.err, /sha/, "the refusal did not explain that the sha is required");
+  });
+});
+
+test("snapshot lists the tree it is given, not the process cwd", () => {
+  withRepo((main, linked) => {
+    const out = join(main, "snap-explicit.txt");
+    const rows = snapshot(out, linked);
+    assert.ok(rows > 0, "snapshot listed nothing");
+    assert.deepEqual(readFileSync(out, "utf8").trim().split("\n"), listing(linked), "snapshot wrote a listing of some other tree than the cwd it was handed");
   });
 });
