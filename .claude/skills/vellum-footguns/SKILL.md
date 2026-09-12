@@ -233,7 +233,7 @@ The hook in `hooks/`, wired in `.claude/settings.json`, refuses the first four m
 - A negative claim built from `head`, `tail`, `--limit`, or a jq slice. Count against the true total or query the item.
 - `gh issue view` as evidence an issue is empty. It silently returns nothing for some issues here; use `gh api`.
 - `pkill` on a run you intend to repeat; the harness leaves a browser profile behind for every kill.
-- Removing the worktree you stand in, or any worktree another session holds; and, dispatched as a review agent, moving or restoring the tree you were dispatched from at all. `git restore` and `git checkout -- <path>` are the silent ones: a plain checkout aborts instead of overwriting, and neither of those two leaves a reflog entry to find the loss by.
+- Removing the worktree you stand in, or any worktree another session holds; and, dispatched as a review agent, moving or restoring the tree you were dispatched from at all. `git restore` and `git checkout -- <path>` are the silent ones: they leave no reflog entry at all, while `checkout -f` does. A plain checkout aborts when the modified file differs between the two commits and carries the edit forward when it does not, so it is not the one that eats work.
 - A test count, a phase count, or an e2e total in `CLAUDE.md`, memory, or `RESUME-HERE.md`.
 - A compound `write the body && gh ...` call; auto mode refuses it as one action. Write the body,
   then one plain `gh` per call.
