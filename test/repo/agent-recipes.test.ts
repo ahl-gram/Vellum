@@ -7,10 +7,10 @@ const AGENTS = resolve(import.meta.dirname, "..", "..", ".claude", "agents");
 
 // Code blocks only, never prose: the rule forbidding a bare prune has to be able to quote it (vellum-pr-skeptic.md), and a scanner that read prose would red on the prohibition itself. The cost is a defect written as prose rather than as a recipe, which this cannot see.
 // Indent-tolerant and tilde-tolerant because markdown renders both as real code blocks: vellum-guard-prover.md is almost all bulleted prose, so a recipe fragment in a nested fence is the likely place for this defect to reappear. The indent is uncapped rather than capped at 3, because a fence's indent is measured from its enclosing list item and not from column 0, so a nested bullet puts a real fence past any absolute cap (confirmed against a CommonMark parse, 2026-09-12). The closing marker is a backreference because an opener paired with a different closer desynchronizes every later match and swallows prose into a block, which red the prune scan on the sentence forbidding it.
-const FENCE = /^[ \t]*(`{3,}|~{3,})[^\n]*\n([\s\S]*?)^[ \t]*\1/gm;
+const FENCE = /^(?:[ \t]*>)*[ \t]*(`{3,}|~{3,})[^\n]*\n([\s\S]*?)^(?:[ \t]*>)*[ \t]*\1[ \t]*$/gm;
 const ANCHORS = [
   [/\/Users\/[A-Za-z0-9._-]+/, "an absolute home path"],
-  [/\bcd\s+~\//, "a cd to a home-anchored path"], // same defect in a different spelling: it pins the recipe to one checkout. Scoped to cd so a legitimate read of ~/.claude/... does not red.
+  [/(?:\bcd\s+|-C\s+|\b[A-Za-z_][A-Za-z0-9_]*=)["']?~[A-Za-z0-9_-]*\//, "a home-anchored path used as an anchor"], // every spelling the recipe itself uses, not just cd: the anchoring lines are ROOT=, WT= and git -C. Scoped to those so a legitimate read of ~/.claude/... does not red.
 ] as const;
 const BARE_PRUNE = /\bworktree\s+prune\b(?!\s+--expire)/;
 
@@ -51,6 +51,7 @@ test("the fence extractor reads the block shapes markdown actually renders", () 
     ["indented under a bullet", "- a bullet\n\n  ```bash\n  PAYLOAD\n  ```\n"],
     ["tilde fence", "~~~bash\nPAYLOAD\n~~~\n"],
     ["fence at column four, nested two bullets deep", "- outer\n  - inner\n\n    ```bash\n    PAYLOAD\n    ```\n"],
+    ["fence inside a blockquote", "> aside\n>\n> ```bash\n> PAYLOAD\n> ```\n"],
   ];
   for (const [shape, md] of shapes) {
     const blocks = [...md.matchAll(FENCE)].map((m) => m[2] ?? "");
@@ -69,6 +70,19 @@ test("a closing marker of the wrong kind does not desynchronize the extractor", 
   assert.ok(
     !blocks.some((b) => /\bworktree\s+prune\b/.test(b)),
     "prose was swallowed into a captured block, which reds the prune scan on the very sentence that forbids a bare prune",
+  );
+});
+
+test("the extractor captures real block bodies, not empty ones", () => {
+  const prover = agents().find((a) => a.name === "vellum-guard-prover.md");
+  assert.ok(prover, "vellum-guard-prover.md is the file whose recipe both scans exist for");
+  assert.ok(
+    prover.blocks.every((b) => b.trim().length > 0),
+    "a captured block has an empty body, so both scans below would run against nothing and pass",
+  );
+  assert.ok(
+    prover.blocks.some((b) => b.includes("worktree add")),
+    "the prover's own sandbox recipe was not among the captured bodies, so the scans are not reading the thing they exist to read",
   );
 });
 
