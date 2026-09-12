@@ -194,19 +194,23 @@ test("the CLI snapshot lists the dispatch tree even when run from a subdirectory
 // Holes 8a and 8b: the *Plan tests pin the argv as DATA. These pin what teardown and create actually DO, which is where a command injected outside the plan would hide.
 test("teardown leaves a worktree it does not own registered, even one whose directory is absent", () => {
   withRepo((main, linked) => {
-    const decoy = join(main, "decoy");
-    git(["worktree", "add", "-q", "--detach", decoy, "HEAD"], main);
-    renameSync(decoy, `${decoy}-moved`);
+    // "bystander", never "decoy": vellum-guard-prover found the earlier name a substring of the sandbox's own guard-decoy, so worktree list printing the sandbox satisfied the match and the test passed for the wrong reason.
+    const bystander = join(main, "bystander");
+    git(["worktree", "add", "-q", "--detach", bystander, "HEAD"], main);
+    renameSync(bystander, `${bystander}-moved`);
     try {
-      create("guard-decoy", undefined, linked);
-      teardown("guard-decoy", linked);
-      assert.match(
-        git(["worktree", "list"], main),
-        /decoy/,
-        "teardown deregistered a worktree it does not own: a prune with no --expire takes every worktree whose directory is momentarily absent, another session's included, and restoring the directory does not bring it back (#575)",
+      create("guard-teardown-decoy", undefined, linked);
+      teardown("guard-teardown-decoy", linked);
+      const registered = git(["worktree", "list", "--porcelain"], main)
+        .split("\n")
+        .filter((l) => l.startsWith("worktree "))
+        .map((l) => l.slice("worktree ".length));
+      assert.ok(
+        registered.includes(bystander),
+        `teardown deregistered a worktree it does not own. A prune with no --expire takes every worktree whose directory is momentarily absent, another session's included, and restoring the directory does not bring it back (#575). Registered after teardown: ${registered.join(", ")}`,
       );
     } finally {
-      renameSync(`${decoy}-moved`, decoy);
+      renameSync(`${bystander}-moved`, bystander);
     }
   });
 });
@@ -255,5 +259,50 @@ test("snapshot lists the tree it is given, not the process cwd", () => {
     const rows = snapshot(out, linked);
     assert.ok(rows > 0, "snapshot listed nothing");
     assert.deepEqual(readFileSync(out, "utf8").trim().split("\n"), listing(linked), "snapshot wrote a listing of some other tree than the cwd it was handed");
+  });
+});
+
+// The fetch arm was only ever checked as returned DATA: a runner that silently dropped every fetch left all 20 tests green, and that is the skeptic's real case (a PR head not yet fetched). This fixture gives the clone a real origin holding a commit it does not have.
+const withRemote = (body: (clone: string, sha: string) => void): void => {
+  const made = mkdtempSync(join(tmpdir(), "agent-sandbox-remote-"));
+  const dir = realpathSync(made);
+  try {
+    const origin = join(dir, "origin");
+    mkdirSync(origin);
+    git(["init", "-q", "-b", "main", "."], origin);
+    git(["config", "user.email", "t@t"], origin);
+    git(["config", "user.name", "t"], origin);
+    writeFileSync(join(origin, "f.txt"), "one\n");
+    git(["add", "-A"], origin);
+    git(["commit", "-qm", "c1"], origin);
+    const clone = join(dir, "clone");
+    git(["clone", "-q", origin, clone], dir);
+    writeFileSync(join(origin, "f.txt"), "two\n");
+    git(["add", "-A"], origin);
+    git(["commit", "-qm", "c2"], origin);
+    body(clone, git(["rev-parse", "HEAD"], origin));
+  } finally {
+    rmSync(made, { recursive: true, force: true });
+  }
+};
+
+const hasCommit = (cwd: string, sha: string): boolean => {
+  try {
+    git(["cat-file", "-e", `${sha}^{commit}`], cwd);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+test("create fetches a commit that is not local yet, then builds the sandbox at it", () => {
+  withRemote((clone, sha) => {
+    assert.equal(hasCommit(clone, sha), false, "the fixture already has the commit, so this asserts nothing about fetching");
+    const wt = create("skeptic-fetch", sha, clone);
+    try {
+      assert.equal(git(["rev-parse", "HEAD"], wt), sha, "the sandbox was not built at the requested commit, so a runner that drops the fetch would leave the skeptic reviewing whatever it could reach");
+    } finally {
+      teardown("skeptic-fetch", clone);
+    }
   });
 });
