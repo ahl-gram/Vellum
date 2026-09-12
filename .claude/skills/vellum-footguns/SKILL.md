@@ -183,7 +183,7 @@ Scars: #49, #101, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; ca
 10. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
     while it runs; three rounds at most, residue named in the body. **Commit before you dispatch it**,
     and before any review agent: it runs in the directory you launched it from, and a suite run there
-    DELETES 51 generated files under `public/` that neither `git status` nor `git status --ignored`
+    DELETES the generated assets under `public/`, which neither `git status` nor `git status --ignored`
     reports (#573). `references/pr-body.md` is the shape.
 
 ## Gate 6: before changing the renderer or a committed chart

@@ -299,7 +299,7 @@ each agent's prose (#575). PR #369 is what committing from a worktree costs when
   is the DISPATCH tree's HEAD and not `origin/main`, so it builds its own detached worktree with
   `node scripts/agent-sandbox.ts create guard-<topic>-<round>`. Do not point it at harness isolation.
   `vellum-pr-skeptic` builds one too since #573, and since Alex's ruling of 2026-09-12 it does so for
-  EVERY run rather than as a fallback: `npm test` deletes 51 generated files under `public/` and
+  EVERY run rather than as a fallback: `npm test` deletes the generated assets under `public/` and
   neither `git status` nor `git status --ignored` reports it, so no reviewer runs a suite in a tree it
   does not own. It passes the sha explicitly, which that script requires of a `skeptic-*` sandbox.
 - **A dispatched review agent may not move or restore the tree it was dispatched from**, which is
