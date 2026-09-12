@@ -285,9 +285,10 @@ four of the never-list items outright (`hooks/README.md`).
 ## Worktrees
 
 Worktrees live in `.claude/worktrees/`, which `.gitignore` ignores as a directory. Anywhere else is
-NOT ignored, and the throwaway recipe's `ln -s ../../../node_modules` depth in
-`.claude/agents/vellum-guard-prover.md` assumes that location; PR #369 is what committing from a
-worktree costs when both go wrong.
+NOT ignored, and `scripts/agent-sandbox.ts` assumes that location: it links `node_modules` three
+levels up, which resolves only for a sandbox at `<root>/.claude/worktrees/<name>`. That script owns
+the sandbox for both review agents that build one, so the depth lives in one place rather than in
+each agent's prose (#575). PR #369 is what committing from a worktree costs when both go wrong.
 
 - **EnterWorktree is the normal way in.** It branches from `origin/main` rather than local HEAD, so
   the tree is current without a pull. One thing needs fixing by hand: any `/` in the name becomes
@@ -295,11 +296,12 @@ worktree costs when both go wrong.
   for `chore/x` here gave the directory `chore+x` and the branch `worktree-chore+x`. Rename the
   branch before the first commit, or the PR carries the harness's name instead of yours.
 - **`vellum-guard-prover` is the documented exception.** It must mutate the code under review, which
-  is HEAD and not `origin/main`, so it builds its own detached worktree by the recipe in its agent
-  file. Do not point it at harness isolation. `vellum-pr-skeptic` builds one too since #573, and
-  since Alex's ruling of 2026-09-12 it does so for EVERY run rather than as a fallback: `npm test`
-  deletes 51 generated files under `public/` and neither `git status` nor `git status --ignored`
-  reports it, so no reviewer runs a suite in a tree it does not own.
+  is the DISPATCH tree's HEAD and not `origin/main`, so it builds its own detached worktree with
+  `node scripts/agent-sandbox.ts create guard-<topic>-<round>`. Do not point it at harness isolation.
+  `vellum-pr-skeptic` builds one too since #573, and since Alex's ruling of 2026-09-12 it does so for
+  EVERY run rather than as a fallback: `npm test` deletes the generated assets under `public/` and
+  neither `git status` nor `git status --ignored` reports it, so no reviewer runs a suite in a tree it
+  does not own. It passes the sha explicitly, which that script requires of a `skeptic-*` sandbox.
 - **A dispatched review agent may not move or restore the tree it was dispatched from**, which is
   normally your live worktree. On 2026-09-11 `vellum-pr-skeptic` checked a PR head out in two of them
   (#573). Commit before you dispatch one: `git restore` and `git checkout -- <path>` discard without

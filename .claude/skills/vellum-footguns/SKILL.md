@@ -46,11 +46,13 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
    and the importers.
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
    `vellum-guard-prover` for the whole guard set (10 minutes, unit tests only, name the mutations you
-   did NOT try). It mutates in its OWN detached worktree at HEAD, so uncommitted work is not in the
-   tree it proves unless carried across by hand: commit first, or you prove something about a
-   different tree than the one you are shipping (corrected 2026-09-10 against the agent's own recipe,
-   `git worktree add --detach "$WT" HEAD`; the earlier "restore is `git checkout --`" described a
-   loop it no longer runs). Zero red is
+   did NOT try). It mutates in its OWN detached worktree, built by `scripts/agent-sandbox.ts` at the
+   DISPATCH tree's HEAD since #575; before that a hardcoded path in its agent file sent it to the
+   main checkout's HEAD and it proved the wrong commit in silence, which is why the recipe is now one
+   reviewed script instead of prose in four places. Uncommitted work is still not in the tree it
+   proves unless carried across by hand:
+   commit first, or you prove something about a different tree than the one you are shipping, and
+   the sha it reports is then a false attribution it has to declare. Zero red is
    a hole. A guard proved unable to red is deleted, never shipped.
 10. **A test that spawns a child gives it its own time limit.** `execFileSync` takes a `timeout`;
     with none, a wedged child hangs the unit lane forever with no red to read, and `--test-timeout`
@@ -181,7 +183,7 @@ Scars: #49, #101, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; ca
 10. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
     while it runs; three rounds at most, residue named in the body. **Commit before you dispatch it**,
     and before any review agent: it runs in the directory you launched it from, and a suite run there
-    DELETES 51 generated files under `public/` that neither `git status` nor `git status --ignored`
+    DELETES the generated assets under `public/`, which neither `git status` nor `git status --ignored`
     reports (#573). `references/pr-body.md` is the shape.
 
 ## Gate 6: before changing the renderer or a committed chart

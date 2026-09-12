@@ -19,27 +19,36 @@ Rules already exist for this (`feedback_guard_the_class_not_the_bug`, and CLAUDE
 
 ## Your sandbox
 
-Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. Build your own worktree from the current HEAD instead, which is what you want whatever that setting later becomes. This recipe is verified working in this repo:
+Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. `scripts/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, as ONE Bash call, since shell variables do not survive between calls:
 
 ```bash
-cd /Users/ahl/CodeProjects/Vellum
-git status --porcelain                      # record the baseline first
-WT=.claude/worktrees/guard-<topic>          # .claude/worktrees/ is gitignored
-git worktree add --detach "$WT" HEAD
-ln -s ../../../node_modules "$WT/node_modules"
-cd "$WT" && node --test test/path/to/target.test.ts
+node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-before.txt
+git status --porcelain > /tmp/guard-<topic>-status-before.txt
+WT=$(node scripts/agent-sandbox.ts create guard-<topic>-<round>)
+cd "${WT:?create failed}" && git rev-parse HEAD && node --test test/path/to/target.test.ts
 ```
 
-Teardown, always, even when you fail or run out of room:
+`${WT:?}` is load bearing. If `create` fails (a reused name, a bad sha, a directory already at that path) it prints nothing, `$WT` is empty, and a bare `cd ""` is a silent no-op that returns 0 in bash and zsh alike, so the suite would run in the tree you were dispatched from, which is #573 exactly. The `:?` form aborts the line instead. The `git rev-parse HEAD` that follows is the sha you report: it is read INSIDE the sandbox, so it cannot name a run that never entered one.
+
+`create` builds the sandbox at the dispatch tree's HEAD, which is the code under review. The property that protects that is not an ordering but an argument: the two reads that decide WHAT to build (`readHead`, `resolveRoot`) take the dispatch tree's `cwd`, nothing in the script changes directory, and the calls that then build it run in the main checkout, which shares the object database. #575 was a hardcoded path that sent an earlier version of this recipe to the main checkout's HEAD, where it proved the wrong commit in silence. The script also refuses any name outside `guard-*` and `skeptic-*`: that keeps it out of any session's own worktree, but it is a namespace and not provenance, so a concurrent review agent's sandbox of the same shape is still addressable.
+
+One thing in that block is yours to get right: **the name carries the round.** Step 15 of `specs/development-workflow.md` sends a changed guard back through step 11, and a fixed name fails the second time with `fatal: ... already exists`. Everything else the old recipe asked you to remember (the dispatch `cwd` on every git call, the anchor to the main checkout, the relative `node_modules` depth) is the script's job now and is pinned by `test/repo/agent-sandbox.test.ts`. Do not hand-write that shell: retyping it in four places is what #575 was.
+
+Teardown, always, even when you fail or run out of room, and from the dispatch tree rather than from inside the sandbox:
 
 ```bash
-rm -f "$WT/node_modules"
-git worktree remove --force "$WT" && git worktree prune
+node scripts/agent-sandbox.ts teardown guard-<topic>-<round>
 ```
 
-If the code under test is uncommitted in the parent checkout, the worktree will not have it. Carry it across with `git diff HEAD > /tmp/wip.patch` plus `git apply` inside the worktree, and copy any untracked new test files by hand. If you cannot carry it faithfully, say so plainly and stop rather than proving something about the wrong tree.
+If a round ended early and left a sandbox behind, `git worktree list` names it and `node scripts/agent-sandbox.ts teardown <name>` clears it. If its DIRECTORY survives but its registration is gone, which is the state a bare prune leaves, `teardown` cannot help: `git worktree remove --force` exits 128 on an unregistered path, so delete the directory by hand and say so in your report.
 
-You have Edit access, which review agents in this project normally must not have (a verify agent once left `// MUTATION:` edits in Vellum source). The worktree is the entire reason that is safe here. **Never edit a file under the parent checkout.** Before you report, run `git status --porcelain` in the parent and confirm it matches the baseline you recorded.
+**Never move or restore the tree you were dispatched from.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against it, and never remove a worktree you did not create. You are the only review agent with Edit, so the rule matters most here; it already binds you through `specs/development-workflow.md` step 14 and the footguns Never list, and is repeated because an agent reads its own file.
+
+`git worktree prune` is never yours to run. Measured 2026-09-12: with no `--expire` it deregisters every worktree whose directory is momentarily absent, another session's included, and restoring the directory does NOT bring the registration back. `remove` deregisters its own tree by itself.
+
+If the code under test is uncommitted in the dispatch tree, the worktree will not have it. Carry it across with `git diff HEAD > /tmp/wip.patch` plus `git apply` inside the worktree, and copy any untracked new test files by hand. If you cannot carry it faithfully, say so plainly and stop rather than proving something about the wrong tree.
+
+You have Edit access, which review agents in this project normally must not have (a verify agent once left `// MUTATION:` edits in Vellum source). The worktree is the entire reason that is safe here. **Never edit a file under the dispatch tree.** Prove it with BOTH instruments, because each is blind where the other sees (Alex, 2026-09-12). The listing catches a file appearing or disappearing, ignored paths included, which is how a suite run emptied the generated assets under `public/` with `git status` silent (#573). `git status --porcelain` catches a TRACKED file edited in place, which the listing cannot see at all, since names are unchanged: that is the residue the `// MUTATION:` scar was made of.
 
 **Never `git add` from your worktree, and never commit from it.** It is a scratch tree for mutating and running, nothing else. The `node_modules` symlink above is the specific hazard: git sees a symlink as a FILE, so it slipped past the old `node_modules/` ignore pattern (trailing slash matches directories only) and a `git add -A` committed a link whose contents were one machine's absolute path. The ignore is fixed, but the rule stands on its own: your output is a ledger, not a commit.
 
@@ -106,7 +115,19 @@ Return a ledger, one row per mutation:
 
 Verdicts are BITES (exactly the claimed test went red), HOLE (nothing went red), or IMPRECISE (something red, but not the test claiming the guard). For every HOLE, propose the specific assertion that would close it, and say which existing test file it belongs in.
 
-State the count of mutations you ran and the count you intended to run. If you stopped early, say so. **"Tests still pass" and "all green" are failure reports here, not success.** End with the parent-checkout `git status --porcelain` output proving you left nothing behind.
+State the count of mutations you ran and the count you intended to run. If you stopped early, say so. **"Tests still pass" and "all green" are failure reports here, not success.** End with the proof that you left the dispatch tree as you found it, taken AFTER teardown so your own sandbox is not reported as your own residue:
+
+```bash
+node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-after.txt
+diff /tmp/guard-<topic>-before.txt /tmp/guard-<topic>-after.txt
+git status --porcelain | diff /tmp/guard-<topic>-status-before.txt -
+git worktree list
+node scripts/agent-sandbox.ts list
+```
+
+Paste all four. The two `diff`s are the residue check and empty is the pass for both: the first catches anything created or deleted, ignored paths included; the second catches a tracked file edited in place, which the first cannot see because the name did not change. Both are diffs against a baseline taken before you started, because the dispatch tree may already be dirty when you arrive, and line 48 tells you to carry that dirt into the sandbox by hand, so a bare "status is empty" pass would be unreachable exactly when you follow your own instructions. The last two are the sandbox check, and they see different orphans: `git worktree list` sees a REGISTRATION whose directory is gone (marked `prunable`, the state an `rm -rf` in place of `teardown` leaves, and the state a later bare prune by anyone silently erases); `list` sees a DIRECTORY whose registration is gone (the state a bare prune leaves). Your own name must be absent from both. `list` also prints other sessions' worktrees, since it lists the whole sandbox root; those are not findings. The listings go to `/tmp` and not `out/` because `out/` is inside the tree being listed, and a file written there would make the diff non-empty by construction.
+
+**Name the commit you proved, in every ledger.** It is the `git rev-parse HEAD` the setup block printed from inside the sandbox. If you carried uncommitted work across by hand, the bare sha is a false attribution: say so, and give the sha PLUS the fact that a patch was applied and how many files it touched. What you proved then belongs to no commit that exists, and a reader who takes the sha at face value will look at the wrong code (Alex, 2026-09-12).
 
 ## Conventions
 
