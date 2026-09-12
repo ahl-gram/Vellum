@@ -19,17 +19,15 @@ Rules already exist for this (`feedback_guard_the_class_not_the_bug`, and CLAUDE
 
 ## Your sandbox
 
-Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. Build your own worktree from the DISPATCH tree's HEAD instead, which is the code under review. Run the block below as ONE Bash call: shell variables do not survive between calls, so anything later that needs `$ROOT` or `$WT` re-derives them. This recipe is verified working in this repo:
+Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. `scripts/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, as ONE Bash call, since shell variables do not survive between calls:
 
 ```bash
-find . -path ./.git -prune -o -path ./node_modules -prune -o -path ./.claude/worktrees -prune -o -print | sort > /tmp/guard-<topic>-before.txt
-SHA=$(git rev-parse HEAD)                   # the code under review, read in cwd BEFORE any -C
-ROOT=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
-WT="$ROOT/.claude/worktrees/guard-<topic>-<round>"
-git -C "$ROOT" worktree add --detach "$WT" "$SHA"
-ln -s ../../../node_modules "$WT/node_modules"
+node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-before.txt
+WT=$(node scripts/agent-sandbox.ts create guard-<topic>-<round>)
 cd "$WT" && node --test test/path/to/target.test.ts
 ```
+
+`create` reads the dispatch tree's HEAD before it resolves anything else and builds the sandbox there, which is the code under review. That ordering was #575: a hardcoded path sent an earlier version of this recipe to the main checkout's HEAD, and it proved the wrong commit in silence. The script also refuses any name outside `guard-*` and `skeptic-*`, so it cannot address a worktree it did not create.
 
 Four things in that block are load bearing, and getting any of them wrong is the #575 defect or worse:
 
@@ -38,13 +36,10 @@ Four things in that block are load bearing, and getting any of them wrong is the
 - **The `node_modules` link stays RELATIVE.** `$WT` sits at the same depth under `$ROOT` as it always did, so `../../../` still resolves to `$ROOT/node_modules`, and `CLAUDE.md`'s Worktrees section cites that depth.
 - **The name carries the round.** Step 15 of `specs/development-workflow.md` sends a changed guard back through step 11, and a fixed name fails the second time with `fatal: ... already exists`.
 
-Teardown, always, even when you fail or run out of room. It re-derives, because the setup block's variables are gone:
+Teardown, always, even when you fail or run out of room, and from the dispatch tree rather than from inside the sandbox:
 
 ```bash
-ROOT=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
-WT="$ROOT/.claude/worktrees/guard-<topic>-<round>"
-rm -f "$WT/node_modules"
-git -C "$ROOT" worktree remove --force "$WT"
+node scripts/agent-sandbox.ts teardown guard-<topic>-<round>
 ```
 
 **Never move or restore the tree you were dispatched from.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against it, and never remove a worktree you did not create. You are the only review agent with Edit, so the rule matters most here; it already binds you through `specs/development-workflow.md` step 14 and the footguns Never list, and is repeated because an agent reads its own file.
@@ -123,12 +118,12 @@ Verdicts are BITES (exactly the claimed test went red), HOLE (nothing went red),
 State the count of mutations you ran and the count you intended to run. If you stopped early, say so. **"Tests still pass" and "all green" are failure reports here, not success.** End with the proof that you left the dispatch tree as you found it, taken AFTER teardown so your own sandbox is not reported as your own residue:
 
 ```bash
-find . -path ./.git -prune -o -path ./node_modules -prune -o -path ./.claude/worktrees -prune -o -print | sort > /tmp/guard-<topic>-after.txt
+node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-after.txt
 diff /tmp/guard-<topic>-before.txt /tmp/guard-<topic>-after.txt
-git -C "$ROOT" worktree list
+git worktree list
 ```
 
-Paste both. The `diff` is the residue check and empty is the pass; the `worktree list` is the separate check that your sandbox is gone, since the listing prunes `.claude/worktrees` to stay fast and to keep other sessions' trees out of your proof.
+Paste both. The `diff` is the residue check and empty is the pass; the `worktree list` is the separate check that your sandbox is gone, since `snapshot` skips `worktrees` to stay fast and to keep other sessions' trees out of your proof.
 
 **Name the commit you proved, in every ledger.** Print the `SHA` the sandbox was built at. If you carried uncommitted work across by hand, the bare sha is a false attribution: say so, and give the sha PLUS the fact that a patch was applied and how many files it touched. What you proved then belongs to no commit that exists, and a reader who takes the sha at face value will look at the wrong code (Alex, 2026-09-12).
 

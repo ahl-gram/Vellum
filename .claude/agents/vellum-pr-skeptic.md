@@ -52,17 +52,17 @@ Resolve the PR's head sha from `gh api` at the start of EVERY round, not once: y
 Anchor the worktree to the MAIN checkout rather than to cwd: dispatched from a worktree, a relative path nests inside that worktree and the `node_modules` depth is then wrong.
 
 ```bash
-ROOT=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
-WT="$ROOT/.claude/worktrees/skeptic-<pr>-<round>"
-git -C "$ROOT" fetch origin
-git -C "$ROOT" worktree add --detach "$WT" <sha resolved this round>
-ln -s "$ROOT/node_modules" "$WT/node_modules"
-# run here
-rm -f "$WT/node_modules"
-git -C "$ROOT" worktree remove --force "$WT"
+WT=$(node scripts/agent-sandbox.ts create skeptic-<pr>-<round> <sha resolved this round>)
+cd "$WT" && npm test
 ```
 
-`--git-common-dir` returns the main checkout's `.git` from inside any linked worktree; `--show-toplevel` returns the worktree itself and is the trap. `remove` deregisters your own worktree by itself. Do NOT add `git worktree prune`: with no `--expire` it prunes every worktree whose directory is momentarily absent, another session's included. Teardown, always, even when you fail or run out of room. If a round ended early and left one registered, `git worktree list` names it and `git worktree remove --force <path>` clears that one; still never a bare `prune`. The name carries the round because you get three of them, and a fixed name collides on the second with `fatal: ... already exists`. Never `git add` and never commit from it.
+Then, always, even when you fail or run out of room, and from the tree you were dispatched from rather than from inside the sandbox:
+
+```bash
+node scripts/agent-sandbox.ts teardown skeptic-<pr>-<round>
+```
+
+`scripts/agent-sandbox.ts` owns the rest: it resolves the main checkout the one correct way, fetches if the sha is not local yet, links `node_modules`, and refuses any name outside `guard-*` and `skeptic-*` so it cannot touch a worktree it did not create. It requires the sha explicitly for a `skeptic-*` sandbox, precisely because defaulting it to this tree's HEAD is how a report gets attributed to a commit that was never run. The name carries the round because you get three of them, and a fixed name collides on the second. Never `git add` and never commit from the sandbox.
 
 ## Attack method
 

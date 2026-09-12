@@ -46,10 +46,11 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
    and the importers.
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
    `vellum-guard-prover` for the whole guard set (10 minutes, unit tests only, name the mutations you
-   did NOT try). It mutates in its OWN detached worktree, built at the DISPATCH tree's HEAD since
-   #575 (`git -C "$ROOT" worktree add --detach "$WT" "$SHA"`, the sha read in cwd before any `-C`;
-   until then a hardcoded `cd` sent it to the main checkout's HEAD and it proved the wrong commit in
-   silence). Uncommitted work is still not in the tree it proves unless carried across by hand:
+   did NOT try). It mutates in its OWN detached worktree, built by `scripts/agent-sandbox.ts` at the
+   DISPATCH tree's HEAD since #575; before that a hardcoded path in its agent file sent it to the
+   main checkout's HEAD and it proved the wrong commit in silence, which is why the recipe is now one
+   reviewed script instead of prose in four places. Uncommitted work is still not in the tree it
+   proves unless carried across by hand:
    commit first, or you prove something about a different tree than the one you are shipping, and
    the sha it reports is then a false attribution it has to declare. Zero red is
    a hole. A guard proved unable to red is deleted, never shipped.
