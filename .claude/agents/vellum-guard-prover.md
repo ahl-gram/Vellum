@@ -24,12 +24,14 @@ Do NOT set up isolation through the harness. `worktree.baseRef` is not set in th
 ```bash
 node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-before.txt
 WT=$(node scripts/agent-sandbox.ts create guard-<topic>-<round>)
-cd "$WT" && node --test test/path/to/target.test.ts
+cd "${WT:?create failed}" && git rev-parse HEAD && node --test test/path/to/target.test.ts
 ```
 
-`create` reads the dispatch tree's HEAD before it resolves anything else and builds the sandbox there, which is the code under review. That ordering was #575: a hardcoded path sent an earlier version of this recipe to the main checkout's HEAD, and it proved the wrong commit in silence. The script also refuses any name outside `guard-*` and `skeptic-*`, so it cannot address a worktree it did not create.
+`${WT:?}` is load bearing. If `create` fails (a reused name, a bad sha, a directory already at that path) it prints nothing, `$WT` is empty, and a bare `cd ""` is a silent no-op that returns 0 in bash and zsh alike, so the suite would run in the tree you were dispatched from, which is #573 exactly. The `:?` form aborts the line instead. The `git rev-parse HEAD` that follows is the sha you report: it is read INSIDE the sandbox, so it cannot name a run that never entered one.
 
-One thing in that block is yours to get right: **the name carries the round.** Step 15 of `specs/development-workflow.md` sends a changed guard back through step 11, and a fixed name fails the second time with `fatal: ... already exists`. Everything else the old recipe asked you to remember (the sha read before any `-C`, the anchor to the main checkout, the relative `node_modules` depth) is the script's job now and is pinned by `test/repo/agent-sandbox.test.ts`. Do not hand-write that shell: retyping it in four places is what #575 was.
+`create` builds the sandbox at the dispatch tree's HEAD, which is the code under review. The property that protects that is not an ordering but an argument: every git call in the script takes the dispatch tree's `cwd`, and none of them changes directory. #575 was a hardcoded path that sent an earlier version of this recipe to the main checkout's HEAD, where it proved the wrong commit in silence. The script also refuses any name outside `guard-*` and `skeptic-*`: that keeps it out of any session's own worktree, but it is a namespace and not provenance, so a concurrent review agent's sandbox of the same shape is still addressable.
+
+One thing in that block is yours to get right: **the name carries the round.** Step 15 of `specs/development-workflow.md` sends a changed guard back through step 11, and a fixed name fails the second time with `fatal: ... already exists`. Everything else the old recipe asked you to remember (the dispatch `cwd` on every git call, the anchor to the main checkout, the relative `node_modules` depth) is the script's job now and is pinned by `test/repo/agent-sandbox.test.ts`. Do not hand-write that shell: retyping it in four places is what #575 was.
 
 Teardown, always, even when you fail or run out of room, and from the dispatch tree rather than from inside the sandbox:
 
@@ -118,12 +120,12 @@ State the count of mutations you ran and the count you intended to run. If you s
 node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-after.txt
 diff /tmp/guard-<topic>-before.txt /tmp/guard-<topic>-after.txt
 git status --porcelain
-git worktree list
+node scripts/agent-sandbox.ts list
 ```
 
-Paste all three, and empty is the pass for the first two. The `diff` catches anything created or deleted, ignored paths included. `git status --porcelain` catches a tracked file edited in place, which the `diff` cannot see because the name did not change. The `worktree list` is the separate check that your sandbox is gone, since `snapshot` skips `worktrees` to stay fast and to keep other sessions' trees out of your proof.
+Paste all three, and empty is the pass for the first two. The `diff` catches anything created or deleted, ignored paths included. `git status --porcelain` catches a tracked file edited in place, which the `diff` cannot see because the name did not change. `list` prints every directory under the sandbox root, registered or not: `snapshot` skips that directory to stay fast and to keep other sessions' trees out of your proof, `git worktree list` sees only REGISTERED trees, and an orphaned directory is invisible to both, so `list` is the one check that sees it. Your own name must be absent from it. The listings go to `/tmp` and not `out/` because `out/` is inside the tree being listed, and a file written there would make the diff non-empty by construction.
 
-**Name the commit you proved, in every ledger.** Print the `SHA` the sandbox was built at. If you carried uncommitted work across by hand, the bare sha is a false attribution: say so, and give the sha PLUS the fact that a patch was applied and how many files it touched. What you proved then belongs to no commit that exists, and a reader who takes the sha at face value will look at the wrong code (Alex, 2026-09-12).
+**Name the commit you proved, in every ledger.** It is the `git rev-parse HEAD` the setup block printed from inside the sandbox. If you carried uncommitted work across by hand, the bare sha is a false attribution: say so, and give the sha PLUS the fact that a patch was applied and how many files it touched. What you proved then belongs to no commit that exists, and a reader who takes the sha at face value will look at the wrong code (Alex, 2026-09-12).
 
 ## Conventions
 

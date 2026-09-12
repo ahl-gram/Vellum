@@ -7,7 +7,8 @@ import { fileURLToPath } from "node:url";
 
 const SANDBOX_NAME = /^(guard|skeptic)-[A-Za-z0-9._-]+$/;
 const GIT_TIMEOUT_MS = 120_000;
-const SKIP = new Set([".git", "node_modules", "worktrees"]);
+const SKIP = new Set([".git", "node_modules"]);
+const SANDBOX_ROOT = join(".claude", "worktrees");
 const LINK = join("..", "..", "..", "node_modules");
 
 export type Plan = { git: string[][]; link?: string };
@@ -46,7 +47,7 @@ export const createPlan = (wt: string, sha: string, hasCommit: boolean): Plan =>
   link: LINK,
 });
 
-// No prune. With no --expire it deregisters every worktree whose directory is momentarily absent, another session's included, and restoring the directory does not bring it back (measured 2026-09-12). `remove` deregisters its own tree, and takes the node_modules symlink with the directory.
+// A bare prune deregisters every worktree whose directory is momentarily absent, and restoring the directory does not bring it back (measured 2026-09-12).
 export const teardownPlan = (wt: string): Plan => ({ git: [["worktree", "remove", "--force", wt]] });
 
 const run = (plan: Plan, root: string, wt: string): void => {
@@ -78,6 +79,7 @@ export const listing = (dir: string): string[] => {
     for (const entry of readdirSync(at, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))) {
       if (SKIP.has(entry.name)) continue;
       const full = join(at, entry.name);
+      if (relative(dir, full) === SANDBOX_ROOT) continue;
       if (entry.isDirectory()) walk(full);
       else out.push(relative(dir, full));
     }
@@ -86,13 +88,24 @@ export const listing = (dir: string): string[] => {
   return out;
 };
 
+export const sandboxes = (cwd: string = process.cwd()): string[] => {
+  try {
+    return readdirSync(join(resolveRoot(cwd), SANDBOX_ROOT), { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .sort();
+  } catch {
+    return [];
+  }
+};
+
 export const snapshot = (out: string, cwd: string = process.cwd()): number => {
   const rows = listing(resolveTree(cwd));
   writeFileSync(out, rows.join("\n") + "\n");
   return rows.length;
 };
 
-const USAGE = "usage: agent-sandbox create <name> [sha] | teardown <name> | snapshot <outfile>";
+const USAGE = "usage: agent-sandbox create <name> [sha] | teardown <name> | snapshot <outfile> | list";
 
 export const main = (argv: string[]): number => {
   const [command, first, second] = argv;
@@ -106,6 +119,10 @@ export const main = (argv: string[]): number => {
   }
   if (command === "snapshot" && first) {
     console.log(snapshot(first));
+    return 0;
+  }
+  if (command === "list") {
+    for (const name of sandboxes()) console.log(name);
     return 0;
   }
   console.error(USAGE);

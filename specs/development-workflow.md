@@ -87,9 +87,10 @@ claim genuinely cannot be run down, mark it UNVERIFIABLE, the word `vellum-spec-
 and do not coin a second one.
 
 **11. Run the companion agents the work owes.** `vellum-guard-prover` on every new or strengthened
-guard, and step 8's commits have to exist first: it mutates in its own detached worktree at HEAD, so
-anything uncommitted is simply not in the tree it proves, and it proves the wrong tree without ever
-saying so. `vellum-plate-reader` when the deliverable is an appearance. Zero red from the prover is a
+guard, and step 8's commits have to exist first: it mutates in its own detached worktree at the DISPATCH
+tree's HEAD (built by `scripts/agent-sandbox.ts` since #575; before that a hardcoded path sent it to
+the main checkout's HEAD and it proved the wrong tree without saying so), and anything uncommitted is
+simply not in the tree it proves. It now names the sha it proved in every ledger. `vellum-plate-reader` when the deliverable is an appearance. Zero red from the prover is a
 hole, not a pass, and a guard proved unable to bite is deleted rather than shipped.
 
 **12. Record every call the issue did not rule on, as a dated comment on the issue, before the PR

@@ -4,7 +4,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readlinkSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { create, createPlan, listing, readHead, resolveRoot, resolveTree, sandboxPath, snapshot, teardown, teardownPlan, validateName } from "../../scripts/agent-sandbox.ts";
+import { create, createPlan, listing, readHead, resolveRoot, resolveTree, sandboxPath, sandboxes, snapshot, teardown, teardownPlan, validateName } from "../../scripts/agent-sandbox.ts";
 
 const BOUND_MS = 30_000;
 const SCRIPT = resolve(import.meta.dirname, "..", "..", "scripts", "agent-sandbox.ts");
@@ -190,10 +190,8 @@ test("the CLI snapshot lists the dispatch tree even when run from a subdirectory
   });
 });
 
-// The *Plan tests pin the argv as DATA. These two pin what teardown and create actually DO, which is where a command injected outside the plan would hide.
 test("teardown leaves a worktree it does not own registered, even one whose directory is absent", () => {
   withRepo((main, linked) => {
-    // "bystander", never "decoy": vellum-guard-prover found the earlier name a substring of the sandbox's own guard-decoy, so worktree list printing the sandbox satisfied the match and the test passed for the wrong reason.
     const bystander = join(main, "bystander");
     git(["worktree", "add", "-q", "--detach", bystander, "HEAD"], main);
     renameSync(bystander, `${bystander}-moved`);
@@ -225,14 +223,15 @@ test("create leaves a node_modules symlink that actually resolves", () => {
     } finally {
       teardown("guard-link", linked);
     }
+    assert.ok(statSync(join(main, "node_modules", "dep.js")).isFile(), "teardown followed the symlink and removed the root's real node_modules, which is the hazard the old rm -f line existed for");
   });
 });
 
-test("listing skips the worktrees directory, so a sandbox is never its own residue", () => {
+test("listing skips the sandbox root, so a sandbox is never its own residue", () => {
   withRepo((main, linked) => {
-    mkdirSync(join(linked, "worktrees", "guard-x"), { recursive: true });
-    writeFileSync(join(linked, "worktrees", "guard-x", "f.txt"), "x\n");
-    assert.equal(listing(linked).some((f) => f.startsWith("worktrees")), false, "listing walked the worktrees directory, so an agent's own sandbox shows up as residue in its own proof");
+    mkdirSync(join(linked, ".claude", "worktrees", "guard-x"), { recursive: true });
+    writeFileSync(join(linked, ".claude", "worktrees", "guard-x", "f.txt"), "x\n");
+    assert.equal(listing(linked).some((f) => f.startsWith(join(".claude", "worktrees"))), false, "listing walked the sandbox root, so an agent's own sandbox shows up as residue in its own proof");
   });
 });
 
@@ -303,5 +302,28 @@ test("create fetches a commit that is not local yet, then builds the sandbox at 
     } finally {
       teardown("skeptic-fetch", clone);
     }
+  });
+});
+
+test("sandboxes lists an orphaned sandbox directory that neither snapshot nor worktree list can see", () => {
+  withRepo((main, linked) => {
+    mkdirSync(join(main, ".claude", "worktrees", "guard-orphan"), { recursive: true });
+    assert.doesNotMatch(git(["worktree", "list"], main), /guard-orphan/, "the fixture orphan is registered, so this asserts nothing about the gap");
+    assert.ok(sandboxes(linked).includes("guard-orphan"), "an unregistered sandbox directory is invisible to the residue proof, so a bare prune's aftermath would pass as clean");
+    const wt = create("guard-listed", undefined, linked);
+    try {
+      assert.ok(sandboxes(linked).includes("guard-listed"));
+    } finally {
+      teardown("guard-listed", linked);
+    }
+    assert.equal(sandboxes(linked).includes("guard-listed"), false, "a torn-down sandbox is still listed");
+  });
+});
+
+test("listing skips only the sandbox root, not any directory that happens to be named worktrees", () => {
+  withRepo((main, linked) => {
+    mkdirSync(join(linked, "src", "worktrees"), { recursive: true });
+    writeFileSync(join(linked, "src", "worktrees", "real.ts"), "x\n");
+    assert.ok(listing(linked).includes(join("src", "worktrees", "real.ts")), "a source directory named worktrees was skipped, so residue there would be invisible");
   });
 });
