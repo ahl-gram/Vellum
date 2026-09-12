@@ -45,7 +45,7 @@ If a round ended early and left a sandbox behind, `git worktree list` names it a
 
 If the code under test is uncommitted in the dispatch tree, the worktree will not have it. Carry it across with `git diff HEAD > /tmp/wip.patch` plus `git apply` inside the worktree, and copy any untracked new test files by hand. If you cannot carry it faithfully, say so plainly and stop rather than proving something about the wrong tree.
 
-You have Edit access, which review agents in this project normally must not have (a verify agent once left `// MUTATION:` edits in Vellum source). The worktree is the entire reason that is safe here. **Never edit a file under the dispatch tree.** Prove it with the listing, not with `git status --porcelain`: that command is blind to ignored paths and, worse, to DELETIONS of them, which is how a suite run removed 51 generated files under `public/` while it stayed silent (#573).
+You have Edit access, which review agents in this project normally must not have (a verify agent once left `// MUTATION:` edits in Vellum source). The worktree is the entire reason that is safe here. **Never edit a file under the dispatch tree.** Prove it with BOTH instruments, because each is blind where the other sees (Alex, 2026-09-12). The listing catches a file appearing or disappearing, ignored paths included, which is how a suite run removed 51 generated files under `public/` with `git status` silent (#573). `git status --porcelain` catches a TRACKED file edited in place, which the listing cannot see at all, since names are unchanged: that is the residue the `// MUTATION:` scar was made of.
 
 **Never `git add` from your worktree, and never commit from it.** It is a scratch tree for mutating and running, nothing else. The `node_modules` symlink above is the specific hazard: git sees a symlink as a FILE, so it slipped past the old `node_modules/` ignore pattern (trailing slash matches directories only) and a `git add -A` committed a link whose contents were one machine's absolute path. The ignore is fixed, but the rule stands on its own: your output is a ledger, not a commit.
 
@@ -117,10 +117,11 @@ State the count of mutations you ran and the count you intended to run. If you s
 ```bash
 node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-after.txt
 diff /tmp/guard-<topic>-before.txt /tmp/guard-<topic>-after.txt
+git status --porcelain
 git worktree list
 ```
 
-Paste both. The `diff` is the residue check and empty is the pass; the `worktree list` is the separate check that your sandbox is gone, since `snapshot` skips `worktrees` to stay fast and to keep other sessions' trees out of your proof.
+Paste all three, and empty is the pass for the first two. The `diff` catches anything created or deleted, ignored paths included. `git status --porcelain` catches a tracked file edited in place, which the `diff` cannot see because the name did not change. The `worktree list` is the separate check that your sandbox is gone, since `snapshot` skips `worktrees` to stay fast and to keep other sessions' trees out of your proof.
 
 **Name the commit you proved, in every ledger.** Print the `SHA` the sandbox was built at. If you carried uncommitted work across by hand, the bare sha is a false attribution: say so, and give the sha PLUS the fact that a patch was applied and how many files it touched. What you proved then belongs to no commit that exists, and a reader who takes the sha at face value will look at the wrong code (Alex, 2026-09-12).
 
