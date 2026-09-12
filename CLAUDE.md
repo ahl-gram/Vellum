@@ -268,8 +268,9 @@ four of the never-list items outright (`hooks/README.md`).
   Dispatch it COLD: the prompt is the PR number or branch name and NOTHING else, no summary of the
   work and no claims about it. It is agnostic (a fresh context that reconstructs the spec from the
   issue and the diff, never from the implementing session) and adversarial (it returns ranked
-  findings or a documented failed attack, never approval). It is read-only and never posts to
-  GitHub; relay its report in your reply and let Alex decide what lands on the PR.
+  findings or a documented failed attack, never approval). It never posts to GitHub, and it writes
+  nothing outside the scratch worktree it builds and tears down itself; relay its report in your
+  reply and let Alex decide what lands on the PR.
 - **No em-dashes** in issue bodies, PR bodies, published copy, or new code comments.
 - **Comments are the exception, not the rule.** A behavior a test already pins needs no comment:
   the test is the record, delete the prose. A local invariant (byte-identity, an ordering
@@ -295,7 +296,14 @@ worktree costs when both go wrong.
   branch before the first commit, or the PR carries the harness's name instead of yours.
 - **`vellum-guard-prover` is the documented exception.** It must mutate the code under review, which
   is HEAD and not `origin/main`, so it builds its own detached worktree by the recipe in its agent
-  file. Do not point it at harness isolation.
+  file. Do not point it at harness isolation. `vellum-pr-skeptic` builds one too since #573, and
+  since Alex's ruling of 2026-09-12 it does so for EVERY run rather than as a fallback: `npm test`
+  deletes 51 generated files under `public/` and neither `git status` nor `git status --ignored`
+  reports it, so no reviewer runs a suite in a tree it does not own.
+- **A dispatched review agent may not move or restore the tree it was dispatched from**, which is
+  normally your live worktree. On 2026-09-11 `vellum-pr-skeptic` checked a PR head out in two of them
+  (#573). Commit before you dispatch one: `git restore` and `git checkout -- <path>` discard without
+  leaving a reflog entry, so there is nothing to recover from afterwards.
 - **Never remove the worktree the session is standing in.** Name it for Alex and leave it. The shell
   recovers to the parent when a worktree vanishes underneath it, but the cwd is lost mid-task.
 - **Other sessions hold their own worktrees here.** Leave them alone: do not remove them, commit
