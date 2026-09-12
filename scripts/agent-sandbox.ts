@@ -34,7 +34,6 @@ export const readHead = (cwd: string = process.cwd()): string => git(["rev-parse
 
 const haveCommit = (root: string, sha: string): boolean => {
   try {
-    // stderr swallowed, not inherited: a missing commit is the skeptic's NORMAL path, and git's `fatal:` on it trains an agent to read fatal lines as noise.
     execFileSync("git", ["cat-file", "-e", `${sha}^{commit}`], { cwd: root, encoding: "utf8", timeout: GIT_TIMEOUT_MS, stdio: ["ignore", "ignore", "ignore"] });
     return true;
   } catch {
@@ -47,7 +46,6 @@ export const createPlan = (wt: string, sha: string, hasCommit: boolean): Plan =>
   link: LINK,
 });
 
-// A bare prune deregisters every worktree whose directory is momentarily absent, and restoring the directory does not bring it back (measured 2026-09-12).
 export const teardownPlan = (wt: string): Plan => ({ git: [["worktree", "remove", "--force", wt]] });
 
 const run = (plan: Plan, root: string, wt: string): void => {
@@ -89,13 +87,15 @@ export const listing = (dir: string): string[] => {
 };
 
 export const sandboxes = (cwd: string = process.cwd()): string[] => {
+  const dir = join(resolveRoot(cwd), SANDBOX_ROOT);
   try {
-    return readdirSync(join(resolveRoot(cwd), SANDBOX_ROOT), { withFileTypes: true })
+    return readdirSync(dir, { withFileTypes: true })
       .filter((e) => e.isDirectory())
       .map((e) => e.name)
       .sort();
-  } catch {
-    return [];
+  } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw err;
   }
 };
 

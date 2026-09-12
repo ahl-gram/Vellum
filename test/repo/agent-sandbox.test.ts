@@ -10,7 +10,6 @@ const BOUND_MS = 30_000;
 const SCRIPT = resolve(import.meta.dirname, "..", "..", "scripts", "agent-sandbox.ts");
 const git = (args: string[], cwd: string): string => execFileSync("git", args, { cwd, encoding: "utf8", timeout: BOUND_MS }).trim();
 
-// resolveRoot's whole point is invisible in a plain checkout, where --show-toplevel and the root of --git-common-dir are the same path; they diverge only from a linked worktree, and CI's unit lane is a plain clone. So the fixture builds the divergence rather than asserting into it.
 const withRepo = (body: (main: string, linked: string) => void): void => {
   const made = mkdtempSync(join(tmpdir(), "agent-sandbox-"));
   const dir = realpathSync(made); // git reports realpaths, and on macOS tmpdir() is /var, a symlink to /private/var, so an unresolved fixture path never equals what resolveRoot returns
@@ -260,7 +259,6 @@ test("snapshot lists the tree it is given, not the process cwd", () => {
   });
 });
 
-// A runner that silently dropped every fetch stayed green against the *Plan data alone, and an unfetched PR head is the skeptic's normal case, so this fixture gives the clone a real origin holding a commit it does not have.
 const withRemote = (body: (clone: string, sha: string) => void): void => {
   const made = mkdtempSync(join(tmpdir(), "agent-sandbox-remote-"));
   const dir = realpathSync(made);
@@ -325,5 +323,33 @@ test("listing skips only the sandbox root, not any directory that happens to be 
     mkdirSync(join(linked, "src", "worktrees"), { recursive: true });
     writeFileSync(join(linked, "src", "worktrees", "real.ts"), "x\n");
     assert.ok(listing(linked).includes(join("src", "worktrees", "real.ts")), "a source directory named worktrees was skipped, so residue there would be invisible");
+  });
+});
+
+test("sandboxes throws outside a repository instead of reporting an empty, clean-looking list", () => {
+  const made = mkdtempSync(join(tmpdir(), "agent-sandbox-notgit-"));
+  try {
+    assert.throws(() => sandboxes(made), "sandboxes returned a list from a directory that is not a repository, so a broken run would pass the residue proof as clean");
+  } finally {
+    rmSync(made, { recursive: true, force: true });
+  }
+});
+
+test("sandboxes reports an empty list when the sandbox root simply does not exist yet", () => {
+  withRepo((main, linked) => {
+    rmSync(join(main, ".claude"), { recursive: true, force: true });
+    assert.deepEqual(sandboxes(linked), []);
+  });
+});
+
+test("the CLI does not print a fatal line on the success path when the sha must be fetched first", () => {
+  withRemote((clone, sha) => {
+    const r = cli(["create", "skeptic-quiet", sha], clone);
+    try {
+      assert.equal(r.status, 0, `create exited ${r.status}: ${r.err}`);
+      assert.doesNotMatch(r.err, /fatal/, "git's fatal: from the missing-commit probe reached stderr on a run that then succeeded, which trains an agent to read fatal lines as noise");
+    } finally {
+      cli(["teardown", "skeptic-quiet"], clone);
+    }
   });
 });
