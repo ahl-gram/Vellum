@@ -51,8 +51,9 @@ is ever removed.
   live dispatch, replacing the note that said this had never been measured: a subagent's Bash DOES
   reach this hook (a dispatched agent's `perl -i` came back refused with `PERL_REASON` verbatim), and
   it SHARES the parent's `session_id`, so that agent's `git push --dry-run` spent the parent session's
-  Gate 5 and the parent never saw it. Only `gateNote` is once-per-session; `deny` and
-  `additionalContext` fire on every call, so a refusal is unaffected.
+  Gate 5 and the parent never saw it. The once-per-session limit lives in `gateNote` alone, so a
+  subagent cannot re-show a gate the parent spent; `deny` carries no such state and fires on every
+  matching call, so refusals reach a subagent unaffected.
 
 ## How it is wired
 
