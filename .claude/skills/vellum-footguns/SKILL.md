@@ -179,7 +179,9 @@ Scars: #49, #101, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; ca
    still open, so check for open children before merging any branch that has them. If it has already
    happened, rebase onto `main` and open a fresh successor that cross-references the closed one.
 10. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
-    while it runs; three rounds at most, residue named in the body. `references/pr-body.md` is the shape.
+    while it runs; three rounds at most, residue named in the body. **Commit before you dispatch it**,
+    and before any review agent: it runs in the directory you launched it from and writes build output
+    into it (#573). `references/pr-body.md` is the shape.
 
 ## Gate 6: before changing the renderer or a committed chart
 
