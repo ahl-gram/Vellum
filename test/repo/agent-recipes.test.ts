@@ -6,8 +6,9 @@ import { join, resolve } from "node:path";
 const AGENTS = resolve(import.meta.dirname, "..", "..", ".claude", "agents");
 
 // Code blocks only, never prose: the rule forbidding a bare prune has to be able to quote it (vellum-pr-skeptic.md), and a scanner that read prose would red on the prohibition itself. The cost is a defect written as prose rather than as a recipe, which this cannot see.
-const FENCE = /^```[^\n]*\n([\s\S]*?)^```/gm;
-const ABSOLUTE_HOME = /\/Users\/[A-Za-z0-9._-]+\//;
+// Indent-tolerant and tilde-tolerant because markdown renders both as real code blocks: vellum-guard-prover.md is almost all bulleted prose, so a recipe fragment in a nested fence is the likely place for this defect to reappear. vellum-guard-prover found the column-0 version blind to exactly that, 2026-09-12.
+const FENCE = /^[ \t]{0,3}(?:```|~~~)[^\n]*\n([\s\S]*?)^[ \t]{0,3}(?:```|~~~)/gm;
+const ABSOLUTE_HOME = /\/Users\/[A-Za-z0-9._-]+/;
 const BARE_PRUNE = /\bworktree\s+prune\b(?!\s+--expire)/;
 
 const ROSTER = [
@@ -39,6 +40,19 @@ test("the scanner reads every agent file, so neither scan below can pass vacuous
     CARRY_RECIPES,
     "the fence extractor found no blocks where it should have, so the scans below are reading nothing",
   );
+});
+
+test("the fence extractor reads the block shapes markdown actually renders", () => {
+  const shapes: [string, string][] = [
+    ["column-zero backtick", "```bash\nPAYLOAD\n```\n"],
+    ["indented under a bullet", "- a bullet\n\n  ```bash\n  PAYLOAD\n  ```\n"],
+    ["tilde fence", "~~~bash\nPAYLOAD\n~~~\n"],
+  ];
+  for (const [shape, md] of shapes) {
+    const blocks = [...md.matchAll(FENCE)].map((m) => m[1] ?? "");
+    assert.equal(blocks.length, 1, `${shape}: extractor found ${blocks.length} blocks, so a defect in this shape would be invisible to both scans below`);
+    assert.match(blocks[0] ?? "", /PAYLOAD/, `${shape}: block captured but its body was not`);
+  }
 });
 
 test("no agent recipe hardcodes an absolute home path", () => {
