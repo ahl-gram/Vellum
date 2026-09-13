@@ -52,10 +52,10 @@ Resolve the PR's head sha from `gh api` at the start of EVERY round, not once: y
 
 ```bash
 WT=$(node scripts/agent-sandbox.ts create skeptic-<pr>-<round> <sha resolved this round>)
-cd "${WT:?create failed}" && git rev-parse HEAD && npm test
+cd "${WT:?create failed}" && cat "$(sed 's/^gitdir: //' .git)/HEAD" && npm test
 ```
 
-`${WT:?}` is load bearing: if `create` fails it prints nothing, and a bare `cd ""` is a silent no-op that returns 0 in bash and zsh alike, so the suite would run in the tree you were dispatched from, which is #573 exactly. The `:?` form aborts the line. The `git rev-parse HEAD` is the sha your numbers came from, read inside the sandbox.
+`${WT:?}` is load bearing: if `create` fails it prints nothing, and a bare `cd ""` is a silent no-op that returns 0 in bash and zsh alike, so the suite would run in the tree you were dispatched from, which is #573 exactly. The `:?` form aborts the line. The `cat` prints the sandbox's detached HEAD, which is the sha your numbers came from, read inside the sandbox; it is spelled without the `git` token because a dispatching session standing in a harness-isolated worktree (a `vellum-implementer` lane) has that token refused in any compound command, and `git rev-parse` there aborts the whole line.
 
 Then, always, even when you fail or run out of room, and from the tree you were dispatched from rather than from inside the sandbox:
 
