@@ -245,13 +245,14 @@ the mechanical never-list items outright, the ones `hooks/README.md` enumerates.
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks you to
   (ruled 2026-09-10). The whole order of operations, and which of the agents below runs at which
   step, is `specs/development-workflow.md`.
-- **`vellum-implementer` runs one issue end to end in its own worktree** (Opus, xhigh): the workflow's
-  steps 1 to 6, a STOP with Alex's decisions as a plain-words menu returned to the dispatching
-  session, then steps 7 to 15 on his relayed rulings. It never merges. Use it one lane per issue
+- **`vellum-implementer` runs one issue through that sequence in its own worktree** (Opus, xhigh),
+  stopping where the sequence stops for Alex's ruling and handing the menu to the dispatching
+  session, which puts it to him and relays his answer; it never merges. Use it one lane per issue
   when a session orchestrates several at once, or for a single issue the session wants run without
   its own context in it. Every project agent under `.claude/agents/` sets `effort: xhigh` in its
-  frontmatter (Alex, 2026-09-13); a subagent without one inherits the session's level, not the one
-  saved for its model.
+  frontmatter (Alex, 2026-09-13), because the sub-agents docs' frontmatter table says an agent
+  without one inherits the session's level; `echo $CLAUDE_EFFORT` inside a dispatched agent is the
+  check.
 - **Run the `vellum-plan-skeptic` subagent on the plan, before the decisions go to Alex.** Dispatch
   it with the issue number, the plan, and `vellum-spec-recon`'s ledger if recon ran this session
   (ruled 2026-09-10), and nothing else. A plan's claims are predictions, which are

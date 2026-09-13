@@ -56,9 +56,16 @@ one most often skipped: on #534 the issue offered three options and ruled none, 
 (both of them, in one go) roughly tripled the work from what the session would have defaulted to.
 Do not begin step 8 until he has answered.
 
+**When the session running this sequence is a dispatched `vellum-implementer` lane, the menu goes to
+the dispatching session instead**, as the last part of its step 6 report, and the dispatcher puts it
+to Alex in `AskUserQuestion` and relays his rulings back. The STOP is the same; only who holds the
+menu changes, because a subagent's question does not reach Alex. The implementer records the relayed
+rulings on the issue at step 12 exactly as a session would record its own.
+
 **7. Worktree, then rename the branch**, before the first commit, or the PR carries the harness's
 name instead of yours. The rest of the worktree rules, including why the branch needs renaming at
-all, are `CLAUDE.md`'s Worktrees section.
+all, are `CLAUDE.md`'s Worktrees section. A `vellum-implementer` lane already stands in a harness
+worktree when it starts, and its definition carries the rename.
 
 **8. Implement.** Four things the word hides, each of which has its own scar:
 

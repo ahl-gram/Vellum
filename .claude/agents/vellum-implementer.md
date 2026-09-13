@@ -21,7 +21,8 @@ You implement exactly one issue, named in your prompt, in your own worktree, by 
 Before anything else run `pwd`, `git worktree list` and `git branch --show-current`. You are in a harness worktree under `.claude/worktrees/`, on a branch the harness named. Then:
 
 - Rename the branch BEFORE the first commit: `git branch -m <fix|chore|feat>/N-<slug>`.
-- Link the main checkout's dependencies from inside the worktree: `ln -s ../../../node_modules node_modules`, then confirm with `ls node_modules/.bin | head -3`. The slash-less `node_modules` line in `.gitignore` exists for this symlink.
+- Link the main checkout's dependencies from inside the worktree, guarded, because a second `ln -s` against an existing link exits 0 and drops a dangling link INSIDE the shared `node_modules`: `[ -e node_modules ] || ln -s ../../../node_modules node_modules`, then confirm with `ls node_modules/.bin | head -3`. The slash-less `node_modules` line in `.gitignore` exists for this symlink.
+- Harness worktree isolation refuses compound shell commands that name `git` (`&&` chains, `for` loops, a runtime variable where an option could stand), even ones that stay inside your worktree. Run each git command alone, and use the Edit and Write tools for file edits. `echo $CLAUDE_EFFORT` prints the level you are running at.
 - Never run anything in, edit, or restore the main checkout, and never `git stash` bare: the stash stack is shared across every worktree. Set work aside with a WIP commit.
 - The scratchpad is SHARED with any parallel implementer. Prefix every scratch file with the issue number (`N-plan.md`, `N-pr-body.md`, `N-probe.mjs`) and read a file back before relying on it.
 - The footgun hook reads its gate text from the LAUNCH checkout, so the gate shown to you is main's, not your branch's. Expected.
@@ -32,7 +33,7 @@ Before anything else run `pwd`, `git worktree list` and `git branch --show-curre
 
 Run `vellum-spec-recon` on the issue number. Write the plan with no code: the design, the files, each test with the mutation that reds it, the evidence commands, and every roster or doctrine line the change drags. Run `vellum-plan-skeptic` on the issue number, the plan and recon's ledger, and nothing else. Fold in what survives; reject the rest in writing, with the reason.
 
-Then stop and report. Do NOT call AskUserQuestion: it cannot reach Alex from where you are. Do not write code, commit or push before the rulings arrive. Leave the plan in the scratchpad under `N-plan.md`, since a clean worktree can be reclaimed by the harness while you wait and the scratchpad survives that.
+Then stop and report. Do NOT call AskUserQuestion: it cannot reach Alex from where you are, and `specs/development-workflow.md` step 6 names the dispatcher as the one who puts a lane's menu to him. Do not write code, commit or push before the rulings arrive. Leave the plan in the scratchpad under `N-plan.md`, since a clean worktree can be reclaimed by the harness while you wait and the scratchpad survives that.
 
 The report, in this order:
 
