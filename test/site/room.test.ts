@@ -112,6 +112,19 @@ test("the kit's print block stands the stage's message boxes down (#566, ruled 2
   }
 });
 
+// #547 ruling 4 (Alex, 2026-09-13): the Explorer's #status and the Portfolio's #pf-status are the same kit furniture on the same kit stage, so the fade that takes an announcement off the chart is ONE kit rule and neither page carries a copy. The resolved duration is pinned in e2e CD23; this reads the text.
+test("the kit gives the stage's status pill its fade, keyed to the class so every chart room's pill wears it (#547)", () => {
+  const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const base = css.match(/body\.chart-room \.stage \.status\s*\{([^}]*)\}/);
+  assert.ok(base, "the kit dresses the stage's pill");
+  assert.match(base[1], /transition:\s*opacity\s+0\.45s/, "the pill carries the fade's own duration, the one src/site/shared/announce.ts waits out before it clears the text");
+  const fade = css.match(/([^{}]*\.status\.fading[^{}]*)\{([^}]*)\}/);
+  assert.ok(fade, "and the kit carries the arm the announcer turns on");
+  assert.match(fade[2], /opacity:\s*0/, "which is what fading means");
+  assert.match(fade[1], /body\.chart-room \.stage\b/, "scoped to a chart room's stage like every other rule on this pill, so no other status goes with it");
+  assert.doesNotMatch(fade[1], /#/, "and keyed to the class and never to one page's id, or the Portfolio's #pf-status never fades");
+});
+
 test("bindRoom seats the legend row before it fits the sheet", () => {
   const room = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/shared/room.ts"), "utf8");
   const layout = room.slice(room.indexOf("const layout = () => {"), room.indexOf("camera.restore(held);"));
