@@ -14,11 +14,14 @@ Four other places carry what this one deliberately does not:
   no em-dashes, measure before you assert, and what each subagent is for.
 - **`specs/development-workflow.md`** holds the order those steps happen in, from a filed issue to a
   pull request, and which subagent runs at which point in it.
+- **`specs/flake-record.md`** holds every CI red believed to be a flake, one row per failure, with
+  the run id, the payload and what was done about it.
 - **`RESUME-HERE.md`** (local, per-session, gitignored) is the hot pointer to where we are right now.
 
 Its siblings under `specs/` hold what this file is not about: `ui-design.md` the look and feel
-itself (the ground, the case, the palette, the rooms, the voice, motion and ceremony), and
-`development-workflow.md` the sequence a change moves through.
+itself (the ground, the case, the palette, the rooms, the voice, motion and ceremony),
+`development-workflow.md` the sequence a change moves through, and `flake-record.md` the dated
+ledger of CI reds believed to be flakes.
 
 ## How to read and update this file
 
@@ -329,5 +332,6 @@ comment. This is a convenience index, not their home.
 ---
 
 *Companion to the roadmap Project (status, order, phase), to `CLAUDE.md` (process at the keyboard),
-to `specs/ui-design.md` (the look and feel), and to `specs/development-workflow.md` (the order of
-operations). Rules change rarely; when one does, edit this file.*
+to `specs/ui-design.md` (the look and feel), to `specs/development-workflow.md` (the order of
+operations), and to `specs/flake-record.md` (the CI reds believed to be flakes). Rules change
+rarely; when one does, edit this file.*

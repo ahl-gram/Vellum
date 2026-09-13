@@ -18,7 +18,9 @@ and how a design decision gets made; `specs/ui-design.md` is the look and feel i
 the type case, the palette by role, the chart's dress, the rooms and their furniture, the voice,
 contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting);
 `specs/development-workflow.md` is the order of operations from a filed issue to a pull request,
-including which subagent runs at which step and the one place the work stops for Alex's ruling.
+including which subagent runs at which step and the one place the work stops for Alex's ruling;
+`specs/flake-record.md` is the dated ledger of every CI red believed to be a flake, one row per
+failure, which is what you consult instead of pressing re-run (#578).
 **`specs/rulebook.md` is REQUIRED READING before any change that touches the renderer, a committed
 chart, the golden, a regen, a seed, or the order of work**, `specs/ui-design.md` before any work
 whose deliverable is an appearance, and `specs/development-workflow.md` before starting a sub or an
