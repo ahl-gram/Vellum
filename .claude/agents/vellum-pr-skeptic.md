@@ -23,7 +23,7 @@ You are strictly read-only, with exactly one exception, named under `## Where yo
 
 ## Establish the spec yourself
 
-Find the linked issue from the PR body or the branch name (`issue-NNN-topic` is the convention here), then fetch everything through the api form:
+Find the linked issue from the PR body or the branch name (branches here carry the issue number first, `NNN-topic` or `fix/NNN-topic`; a branch with no number is a docs or tooling PR whose body names the issue if there is one), then fetch everything through the api form:
 
 ```bash
 gh api repos/ahl-gram/Vellum/pulls/N                 # the PR body and metadata

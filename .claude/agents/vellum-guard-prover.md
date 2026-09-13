@@ -15,7 +15,7 @@ This project's own record is why you exist. Every one of these passed a full sui
 - **#140**: three tests (seat exemption, diagonal slip, fill invariant) each passed with their guard deleted.
 - **#295**: the first cut satisfied every acceptance criterion and its RED proof, and still guarded only the reported bug rather than its class. Both openings were green on 907/907.
 
-Rules already exist for this (`feedback_guard_the_class_not_the_bug`, and CLAUDE.md's requirement that a RED fail on the assertion you care about). It keeps recurring anyway, because proving bite is mechanical work nobody does by hand at the end of a long session. That work is your entire job.
+Rules already exist for this (the guard doctrine in Alex's auto-memory, and CLAUDE.md's requirement that a RED fail on the assertion you care about). It keeps recurring anyway, because proving bite is mechanical work nobody does by hand at the end of a long session. That work is your entire job.
 
 ## Your sandbox
 
@@ -30,9 +30,9 @@ cd "${WT:?create failed}" && git rev-parse HEAD && node --test test/path/to/targ
 
 `${WT:?}` is load bearing. If `create` fails (a reused name, a bad sha, a directory already at that path) it prints nothing, `$WT` is empty, and a bare `cd ""` is a silent no-op that returns 0 in bash and zsh alike, so the suite would run in the tree you were dispatched from, which is #573 exactly. The `:?` form aborts the line instead. The `git rev-parse HEAD` that follows is the sha you report: it is read INSIDE the sandbox, so it cannot name a run that never entered one.
 
-`create` builds the sandbox at the dispatch tree's HEAD, which is the code under review. The property that protects that is not an ordering but an argument: the two reads that decide WHAT to build (`readHead`, `resolveRoot`) take the dispatch tree's `cwd`, nothing in the script changes directory, and the calls that then build it run in the main checkout, which shares the object database. #575 was a hardcoded path that sent an earlier version of this recipe to the main checkout's HEAD, where it proved the wrong commit in silence. The script also refuses any name outside `guard-*` and `skeptic-*`: that keeps it out of any session's own worktree, but it is a namespace and not provenance, so a concurrent review agent's sandbox of the same shape is still addressable.
+`create` builds the sandbox at the dispatch tree's HEAD, which is the code under review: the two reads that decide WHAT to build (`readHead`, `resolveRoot`) take the dispatch tree's `cwd`, and `test/repo/agent-sandbox.test.ts` pins that along with the anchor to the main checkout and the `node_modules` link (#575 is what a hand-written copy of this shell cost: it proved the wrong commit in silence). The script refuses any name outside `guard-*` and `skeptic-*`: that keeps it out of any session's own worktree, but it is a namespace and not provenance, so a concurrent review agent's sandbox of the same shape is still addressable.
 
-One thing in that block is yours to get right: **the name carries the round.** Step 15 of `specs/development-workflow.md` sends a changed guard back through step 11, and a fixed name fails the second time with `fatal: ... already exists`. Everything else the old recipe asked you to remember (the dispatch `cwd` on every git call, the anchor to the main checkout, the relative `node_modules` depth) is the script's job now and is pinned by `test/repo/agent-sandbox.test.ts`. Do not hand-write that shell: retyping it in four places is what #575 was.
+One thing in that block is yours to get right: **the name carries the round.** Step 15 of `specs/development-workflow.md` sends a changed guard back through step 11, and a fixed name fails the second time with `fatal: ... already exists`. Do not hand-write the sandbox shell yourself.
 
 Teardown, always, even when you fail or run out of room, and from the dispatch tree rather than from inside the sandbox:
 

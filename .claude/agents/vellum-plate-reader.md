@@ -37,7 +37,7 @@ Falsifiable checks this project's history hands you:
 
 ## Plumbing
 
-Do not hand-roll a CDP client. `scripts/e2e/harness.mjs` already exports `start()` returning `{ evaluate, send, check, shoot, sleep, waitSettled, waitReady, wheel, touch, touchPan, pinch, setTouch, setMobileViewport, clearMobile, axDescription, consoleErrors, http4xx }`, plus `cleanup()`.
+Do not hand-roll a CDP client. `start()` in `scripts/e2e/harness.mjs` returns the whole driver surface, evaluate and shoot through to the touch, viewport and settle helpers; its `return {...}` is the list, so read it there rather than from a copy.
 
 `out/324-audit-shoot.mjs` is a working template for a multi-page shot driver built on it. Others worth cribbing: `out/shoot-shell.mjs`, `out/220-shoot-live.mjs`, `out/probe-runninghead.mjs`.
 

@@ -88,16 +88,16 @@ and do not coin a second one.
 
 **11. Run the companion agents the work owes.** `vellum-guard-prover` on every new or strengthened
 guard, and step 8's commits have to exist first: it mutates in its own detached worktree at the DISPATCH
-tree's HEAD (built by `scripts/agent-sandbox.ts` since #575; before that a hardcoded path sent it to
-the main checkout's HEAD and it proved the wrong tree without saying so), and anything uncommitted is
-simply not in the tree it proves. It now names the sha it proved in every ledger. `vellum-plate-reader` when the deliverable is an appearance. Zero red from the prover is a
-hole, not a pass, and a guard proved unable to bite is deleted rather than shipped.
+tree's HEAD (built by `scripts/agent-sandbox.ts`, #575), so anything uncommitted is simply not in
+the tree it proves, and its ledger names the sha it proved. `vellum-plate-reader` when the
+deliverable is an appearance. Zero red from the prover is a hole, not a pass, and a guard proved
+unable to bite is deleted rather than shipped.
 
 **12. Record every call the issue did not rule on, as a dated comment on the issue, before the PR
-is opened.** `vellum-footguns` Gate 5 says "before the push", written when a branch was pushed once,
-at the end; with step 9 the first push comes early, so the deadline that matters is the review. The
-cold skeptic at step 14 diffs against the newest ratified statement, so reasoning that lives only in
-your head reaches it as a finding. The old comment is never edited; a correction is a new comment
+is opened.** Not before the push: with step 9 the first push comes early, so the deadline that
+matters is the review, which is what `vellum-footguns` Gate 5 says too. The cold skeptic at step 14
+diffs against the newest ratified statement, so reasoning that lives only in your head reaches it as
+a finding. The old comment is never edited; a correction is a new comment
 that says what it supersedes.
 
 **A ruling of Alex's is recorded here too, and by you.** He rules in the session, which leaves no
