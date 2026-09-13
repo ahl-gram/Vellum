@@ -2,6 +2,7 @@
 import { makeSettle } from "./settle-support.mjs";
 import { makeStep } from "./step-support.mjs";
 import { makeStage } from "./home-support.mjs";
+import { slideRested, foldRested } from "../../src/cli/e2e-slide.ts";
 
 const SEED = 42;
 // A camera settled deep enough to commit a band-3 inset, the same descent suite-region-detail drives.
@@ -25,6 +26,12 @@ const READ = `(() => {
     decoded: [...document.querySelectorAll("#cuttings img")].map((i) => i.naturalWidth > 0),
     offs: document.querySelectorAll("#cuttings .off").length,
     offsReachable: [...document.querySelectorAll("#cuttings .off")].filter((b) => { const r = b.getBoundingClientRect(); return document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2)) === b; }).length,
+    offRects: [...document.querySelectorAll("#cuttings .off")].map((b) => { const r = b.getBoundingClientRect(); return { y: +r.y.toFixed(2), h: +r.height.toFixed(2) }; }),
+    lowestOff: (() => { const r = [...document.querySelectorAll("#cuttings .off")].map((b) => b.getBoundingClientRect().y); return r.length ? Math.max(...r) : null; })(),
+    minOffH: (() => { const r = [...document.querySelectorAll("#cuttings .off")].map((b) => b.getBoundingClientRect().height); return r.length ? Math.min(...r) : 0; })(),
+    drawerAnims: (() => { const d = document.getElementById("chart-drawer"); return d && d.getAnimations ? d.getAnimations().map((a) => a.playState) : []; })(),
+    slideMs: (() => { const d = document.getElementById("chart-drawer"); return d ? getComputedStyle(d).animationDuration : null; })(),
+    innerH: window.innerHeight,
     fullShown: (() => { const f = document.getElementById("chart-drawer-full"); return !!f && !f.hidden; })(),
     roadDisabled: (() => { const b = document.getElementById("table-road"); return !!b && b.disabled; })(),
     ear: ear ? { label: ear.getAttribute("aria-label"), rect: r("#map .region-inset .dog-ear") } : null,
@@ -43,7 +50,7 @@ const READ = `(() => {
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, PORT } = ctx;
   const settle = makeSettle(ctx);
-  // The groups from CD9 on are deliberately not stepped: they navigate through go(), whose own bounded loop returns rather than throwing.
+  // A group that only navigates needs no step: go()'s bounded loop returns rather than throwing.
   const step = makeStep(ctx);
   // A REAL press and release at the handle's own coordinates, never element.click(): a synthetic click dispatches straight at the node and ignores pointer-events, so it files a handle no reader could reach. The inset box is pointer-events: none, and that is exactly the defect this drives.
   const { clickAt } = makeStage(ctx);
@@ -61,6 +68,12 @@ export async function run(ctx) {
     await sleep(400);
   };
   const atInset = (d) => !!d.ear && d.insetSvgs === 1;
+  // No buttons at all reports pos at the viewport edge, not 0: 0 is inside the fold and would leave `size` alone rejecting a shut drawer.
+  const asSlide = (d) => (d ? { pos: d.lowestOff === null ? d.innerH : d.lowestOff, size: d.minOffH, anims: d.drawerAnims, viewportH: d.innerH } : null);
+  const drawerUp = (d, last) => slideRested(asSlide(d), asSlide(last));
+  const asFold = (d) => (d ? { pos: d.slipX, size: d.slipW, anims: d.slipAnims } : null);
+  const slipTravelled = (from) => (d, last) => foldRested(asFold(d), asFold(last), asFold(from));
+  const both = (a, b) => (d, last) => a(d, last) && b(d, last);
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
@@ -162,12 +175,11 @@ export async function run(ctx) {
 
   const SIX = ["rung-1.lx-4.ly-4", "rung-1.lx-3.ly-3", "rung-2.lx-5.ly-5", "rung-2.lx-6.ly-6", "rung-3.lx-11.ly-11", "rung-3.lx-12.ly-12"]
     .map((seat) => `k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.${seat}`).join("_");
-  await step("CD7, CD7b", async () => {
+  await step("CD7, CD7b, CD7c", async () => {
     await go(`${DRESS}&${DEEP}&table=${SIX}`);
     const atSix = await settle(READ, atInset, "chart-drawer-six", DRAWN);
     await clickEar();
-    await sleep(700);
-    const refused = await evaluate(READ);
+    const refused = await settle(READ, drawerUp, "chart-drawer-open");
     check(
       "CD7 at the cap the handle refuses in the voice #518 ruling 3 wrote, lays nothing, and says so where the reader is told everything else (#520 build item 5)",
       atSix.cuttings === 6 && !!atSix.ear && atSix.ear.label === "the table is full: six sheets lie on it" &&
@@ -178,7 +190,13 @@ export async function run(ctx) {
     check(
       "CD7b with the drawer open at a FULL table every remove press answers a real pointer: the Broadside is fixed above this drawer and reaches into its band, and the cuttings overlap each other by design, so three of six once hit-tested to the form behind them and to a neighbour's paper label",
       refused.cuttings === 6 && refused.offs === 6 && refused.offsReachable === 6,
-      JSON.stringify({ cuttings: refused.cuttings, offs: refused.offs, reachable: refused.offsReachable, open: refused.open }),
+      JSON.stringify({ cuttings: refused.cuttings, offs: refused.offs, reachable: refused.offsReachable, open: refused.open, rects: refused.offRects, innerH: refused.innerH, slideMs: refused.slideMs, anims: refused.drawerAnims }),
+    );
+
+    check(
+      "CD7c the drawer's slide is pinned at the 0.32s the settle above waits out, so a regression that leaves the reader looking at an empty band for three seconds cannot sit inside a generous budget and pass (#578)",
+      refused.slideMs === "0.32s",
+      JSON.stringify({ slideMs: refused.slideMs, anims: refused.drawerAnims }),
     );
   });
 
@@ -208,55 +226,63 @@ export async function run(ctx) {
     // the furniture, so a lifted piece can end up clear of a chart that shrank to accommodate it. The seat cannot lie.
     const seats = Object.fromEntries([...document.querySelectorAll(".corner.bl.folio, .legend:not(.in-slip)")]
       .map((e) => [name(e), +(window.innerHeight - e.getBoundingClientRect().bottom).toFixed(1)]));
+    const drawer = document.getElementById("chart-drawer");
+    const sb = slip.getBoundingClientRect();
+    const offs = [...document.querySelectorAll("#cuttings .off")].map((b) => b.getBoundingClientRect());
     return {
-      open: document.getElementById("chart-drawer").classList.contains("open"),
+      open: drawer.classList.contains("open"),
       folded: slip.classList.contains("folded"),
       tabShown: !!tab && getComputedStyle(tab).display !== "none",
       lifted, seats,
+      slipX: +sb.x.toFixed(2), slipW: +sb.width.toFixed(2), slipAnims: slip.getAnimations().map((a) => a.playState),
+      lowestOff: offs.length ? Math.max(...offs.map((o) => o.y)) : null,
+      minOffH: offs.length ? Math.min(...offs.map((o) => o.height)) : 0,
+      drawerAnims: drawer.getAnimations().map((a) => a.playState),
+      innerH: window.innerHeight,
     };
   })()`;
-  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  await go(`${DRESS}&table=${SIX}`);
-  const beforeOpen = await evaluate(SURFACES);
-  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
-  await sleep(900);
-  const withOpen = await evaluate(SURFACES);
-  await evaluate(`document.getElementById("chart-drawer-shut").click()`);
-  await sleep(900);
-  const afterShut = await evaluate(SURFACES);
-  await go(`${DRESS}&table=${SIX}`);
-  await evaluate(`document.querySelector(".slip-fold").click()`);
-  await sleep(600);
-  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
-  await sleep(900);
-  await evaluate(`document.getElementById("chart-drawer-shut").click()`);
-  await sleep(900);
-  const afterShutFolded = await evaluate(SURFACES);
+  await step("CD9, CD11, CD12", async () => {
+    await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+    await go(`${DRESS}&table=${SIX}`);
+    const beforeOpen = await evaluate(SURFACES);
+    await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+    const withOpen = await settle(SURFACES, both(drawerUp, slipTravelled(beforeOpen)), "chart-drawer-tab-open");
+    await evaluate(`document.getElementById("chart-drawer-shut").click()`);
+    const afterShut = await settle(SURFACES, slipTravelled(withOpen), "chart-drawer-slip-back");
+    await go(`${DRESS}&table=${SIX}`);
+    const beforeFold = await evaluate(SURFACES);
+    await evaluate(`document.querySelector(".slip-fold").click()`);
+    await settle(SURFACES, slipTravelled(beforeFold), "chart-drawer-slip-folded");
+    await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+    await settle(SURFACES, drawerUp, "chart-drawer-tab-open-folded");
+    await evaluate(`document.getElementById("chart-drawer-shut").click()`);
+    // Measured 2026-09-13: onto an ALREADY folded slip the shut press animates nothing at all, leaving display:none and an empty getAnimations() in the same frame, so there is no rest here to poll for.
+    const afterShutFolded = await evaluate(SURFACES);
 
-  check(
-    "CD9 opening the Chart Table folds the Broadside and takes its tab off the edge: the two are never open together, which is what stops them fighting for the right edge, the drawer's band and the chart's foot (#543, ruled 2026-09-08)",
-    !beforeOpen.folded && withOpen.open && withOpen.folded && !withOpen.tabShown,
-    JSON.stringify({ before: beforeOpen, open: withOpen }),
-  );
-  check(
-    "CD11 shutting the Chart Table gives the Broadside back to the reader who had it, and leaves it folded for the reader who did not",
-    !afterShut.open && !afterShut.folded && !afterShutFolded.open && afterShutFolded.folded,
-    JSON.stringify({ hadItOpen: afterShut, hadItFolded: afterShutFolded }),
-  );
-  // Both readings are taken with the Broadside ALREADY folded, so the drawer's own fold is a no-op and only the drawer could move the furniture.
-  await go(`${DRESS}&table=${SIX}`);
-  await evaluate(`document.querySelector(".slip-fold").click()`);
-  await sleep(600);
-  const seatsShut = (await evaluate(SURFACES)).seats;
-  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
-  await sleep(900);
-  const seatsOpen = (await evaluate(SURFACES)).seats;
-  const names = Object.keys(seatsShut);
-  check(
-    "CD12 opening the drawer does not move the chart's furniture: the caption and the roads out keep the seat they had and the drawer covers them, rather than being lifted onto the sheet where they cannot be read (#543 Fault 1, ruled 2026-09-08)",
-    names.length === 2 && names.every((k) => Math.abs(seatsOpen[k] - seatsShut[k]) < 1) && withOpen.lifted.length === 0,
-    JSON.stringify({ shut: seatsShut, open: seatsOpen, lifted: withOpen.lifted }),
-  );
+    check(
+      "CD9 opening the Chart Table folds the Broadside and takes its tab off the edge: the two are never open together, which is what stops them fighting for the right edge, the drawer's band and the chart's foot (#543, ruled 2026-09-08)",
+      !beforeOpen.folded && withOpen.open && withOpen.folded && !withOpen.tabShown,
+      JSON.stringify({ before: beforeOpen, open: withOpen }),
+    );
+    check(
+      "CD11 shutting the Chart Table gives the Broadside back to the reader who had it, and leaves it folded for the reader who did not",
+      !afterShut.open && !afterShut.folded && !afterShutFolded.open && afterShutFolded.folded,
+      JSON.stringify({ hadItOpen: afterShut, hadItFolded: afterShutFolded }),
+    );
+    // Both readings are taken with the Broadside ALREADY folded, so the drawer's own fold is a no-op and only the drawer could move the furniture.
+    await go(`${DRESS}&table=${SIX}`);
+    const beforeSeats = await evaluate(SURFACES);
+    await evaluate(`document.querySelector(".slip-fold").click()`);
+    const seatsShut = (await settle(SURFACES, slipTravelled(beforeSeats), "chart-drawer-seats-folded")).seats;
+    await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+    const seatsOpen = (await settle(SURFACES, drawerUp, "chart-drawer-seats-open")).seats;
+    const names = Object.keys(seatsShut);
+    check(
+      "CD12 opening the drawer does not move the chart's furniture: the caption and the roads out keep the seat they had and the drawer covers them, rather than being lifted onto the sheet where they cannot be read (#543 Fault 1, ruled 2026-09-08)",
+      names.length === 2 && names.every((k) => Math.abs(seatsOpen[k] - seatsShut[k]) < 1) && withOpen.lifted.length === 0,
+      JSON.stringify({ shut: seatsShut, open: seatsOpen, lifted: withOpen.lifted }),
+    );
+  });
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
   // CD13 (#543): folded, the camera comes home to --chrome-x where the tab already stands, and the tab's z-19 over the corner's z-10 wins the pointer, so this is a reachability check.
@@ -282,33 +308,39 @@ export async function run(ctx) {
       buttons: [...zoom.querySelectorAll(".zoom-btn")].map((b) => reach(b)) };
   })()`;
   const edge = {};
-  for (const [w, h] of [[1520, 872], [1280, 800], [901, 800]]) {
-    await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
-    await go(DRESS);
-    await evaluate(`document.querySelector(".slip-fold").click()`);
-    await sleep(800);
-    edge[`${w}x${h}`] = await evaluate(EDGE);
-  }
-  const edges = Object.keys(edge);
-  check(
-    "CD13 with the Broadside folded the drawer's tab does not stand on the camera: the tab is z-19 over the corner's z-10, so an overlap is not untidiness, it is the + and the home press answering the tab instead (#543, Alex 2026-09-08)",
-    edges.every((k) => edge[k].folded && edge[k].tabShown && edge[k].overlap === 0 && edge[k].buttons.length === 3 && edge[k].buttons.every((r) => r === 100)),
-    JSON.stringify(edge),
-  );
+  await step("CD13", async () => {
+    for (const [w, h] of [[1520, 872], [1280, 800], [901, 800]]) {
+      await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+      await go(DRESS);
+      const beforeFold = await evaluate(SURFACES);
+      await evaluate(`document.querySelector(".slip-fold").click()`);
+      await settle(SURFACES, slipTravelled(beforeFold), `chart-drawer-edge-fold-${w}x${h}`);
+      edge[`${w}x${h}`] = await evaluate(EDGE);
+    }
+    const edges = Object.keys(edge);
+    check(
+      "CD13 with the Broadside folded the drawer's tab does not stand on the camera: the tab is z-19 over the corner's z-10, so an overlap is not untidiness, it is the + and the home press answering the tab instead (#543, Alex 2026-09-08)",
+      edges.length === 3 && edges.every((k) => edge[k].folded && edge[k].tabShown && edge[k].overlap === 0 && edge[k].buttons.length === 3 && edge[k].buttons.every((r) => r === 100)),
+      JSON.stringify(edge),
+    );
+  });
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
   // CD18 / CD19 / CD20 (#521 Sub 3): the road the table has carried disabled since #520 turns on, and the Portfolio
   // drafts what it carries. The page reads the table from its OWN address once at load and never rewrites it.
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await go(`${DRESS}&table=${SIX}`);
-  await evaluate(`document.getElementById("chart-drawer-tab").click()`);
-  await sleep(600);
-  const roadOn = await evaluate(`(() => { const b = document.getElementById("table-road"); return { disabled: b.disabled, stamp: (document.getElementById("table-road-stamp") || {}).textContent || null }; })()`);
-  check(
-    "CD18 with sheets on the table the road to the Portfolio turns on: #520 shipped it disabled with the stamp saying the portfolio is not yet bound, and this sub is what binds it (#521)",
-    roadOn.disabled === false,
-    JSON.stringify(roadOn),
-  );
+  await step("CD18", async () => {
+    const beforeRoad = await evaluate(SURFACES);
+    await evaluate(`document.getElementById("chart-drawer-tab").click()`);
+    await settle(SURFACES, both(drawerUp, slipTravelled(beforeRoad)), "chart-drawer-road-open");
+    const roadOn = await evaluate(`(() => { const b = document.getElementById("table-road"); return { disabled: b.disabled, stamp: (document.getElementById("table-road-stamp") || {}).textContent || null }; })()`);
+    check(
+      "CD18 with sheets on the table the road to the Portfolio turns on: #520 shipped it disabled with the stamp saying the portfolio is not yet bound, and this sub is what binds it (#521)",
+      roadOn.disabled === false,
+      JSON.stringify(roadOn),
+    );
+  });
   const roadBefore = await evaluate(`document.getElementById("table-road").disabled`);
   const roadAt = await evaluate(`(() => { const b = document.getElementById("table-road"); const r = b.getBoundingClientRect();
     const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2);

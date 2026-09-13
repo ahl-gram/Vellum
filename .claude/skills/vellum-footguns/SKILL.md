@@ -94,8 +94,10 @@ Scars: #368, #474, #520, #526, #529, #533, #535, #536, #537, #540, #542, #545, #
    `top` makes `undefined >= n` quietly false) are the first suspects when a probe surprises you.
 10. **A red is yours until proven a flake.** Re-run ONCE, alone, never two PRs concurrently; a
     second red is a defect. Put the payload and what to capture next in a PR comment; never re-run it
-    away. A flaky check biting a content-only PR keeps measuring and logging but stops asserting, with
-    the issue number at the line.
+    away. **Give it a row in `specs/flake-record.md` BEFORE you re-run**, one row per failure with the
+    run id, the payload and the disposition: #578 found CD7b had failed this way three times and that
+    reconstructing even that cost a forty-run dig. A flaky check biting a content-only PR keeps
+    measuring and logging but stops asserting, with the issue number at the line.
 11. **A run whose log has not moved in ten minutes is hung, not slow.** Before reporting "still
     running", check `ls -d /var/folders/*/*/T/vellum-e2e-* | wc -l` and
     `ps aux | grep '[r]emote-debugging-port'`; a starved machine stalls a lane you did not touch.
