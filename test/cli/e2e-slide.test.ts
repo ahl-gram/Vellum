@@ -121,11 +121,30 @@ test("a collapsed panel is not rest, however finished and however far it has tra
   assert.equal(foldRested({ pos: 1289.6, size: 0, anims: ["finished"] }, FOLDED_A, UNFOLDED), false);
 });
 
+// The three below pin the BOUNDS themselves rather than a browser state, and their numbers are deliberately hard coded
+// rather than derived from the constants: vellum-guard-prover's round 2 found that a test spelling its fixture as
+// `UNFOLDED.pos + MOTION_MOVED_PX` is a circular oracle, green at 1 and green at 100, so it can only ever pin the
+// comparison's shape and never the constant's size.
+
 test("departure is measured at the bound itself: exactly MOTION_MOVED_PX has not left where it began", () => {
-  // Not a browser read but a contract on the constant, which is what the prover could not settle either way: every
-  // measured fixture sits at 0px or at 425.6px, so the boundary's shape is pinned here rather than left to a mutation.
   const atTheBound = fold(UNFOLDED.pos + MOTION_MOVED_PX, ["finished"]);
   const justPast = fold(UNFOLDED.pos + MOTION_MOVED_PX + 0.01, ["finished"]);
   assert.equal(foldRested(atTheBound, atTheBound, UNFOLDED), false);
   assert.equal(foldRested(justPast, justPast, UNFOLDED), true);
+});
+
+test("the departure bound is about a PIXEL, so a two pixel travel has left where it began", () => {
+  // 866 against the slip's measured 864. A bound loose enough to swallow this would let the fold's own start state pass.
+  assert.equal(foldRested(fold(866, ["finished"]), fold(866, ["finished"]), UNFOLDED), true);
+});
+
+test("the stillness bound is about half a pixel, so a two pixel step is still travelling", () => {
+  // Against the 0.01px of jitter two at-rest reads of the same panel actually show, measured 2026-09-13.
+  assert.equal(slideRested(slide(586.59, 22.39, ["finished"]), slide(584.59, 22.39, ["finished"])), false);
+});
+
+test("the viewport bound excludes exactly the start pixel, which is where translateY(100%) parks the panel", () => {
+  // The doc comment claims `>=` excludes the start state and nothing else; at 1280x800 the parked drawer's own top edge
+  // IS the viewport height, so this is the one value that separates `>=` from `>`.
+  assert.equal(slideRested(slide(800, 22.39, ["finished"]), slide(800, 22.39, ["finished"])), false);
 });
