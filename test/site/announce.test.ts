@@ -49,6 +49,7 @@ const fixture = () => {
 
 const LINE = "The Environs of Loatunui lies on the table · one sheet laid · room for five more";
 
+// The ONLY assertion in this file that can see a change to either constant: every other test reads the delays back against the imported values, so they move with the mutation.
 test("the hold and the fade are the ruled lengths (#547, Alex 2026-09-13: eight seconds, then it fades)", () => {
   assert.equal(SAY_HOLD_MS, 8000);
   assert.equal(SAY_FADE_MS, 450);
@@ -142,24 +143,25 @@ test("an empty line written mid-fade takes the fade off with it (#547 ruling 4)"
   assert.equal(f.timers.waiting(), 0);
 });
 
-// Both pages, because one page wired and the other not is exactly the shape #547 was filed about (the Chart Table's guards all ran at 390 and nowhere else). Blind spot, named with its direction: this reads the SOURCE, so a page that builds an announcer and never calls it passes here. e2e CD23 is the Explorer's resolved read; the Portfolio has no behavioural read in this suite's time budget, which the PR body names as residue.
-test("every room that announces on a status pill announces through the one announcer, and no page keeps its own bare write (#547 ruling 4)", () => {
+// Both pages, because one page wired and the other not is exactly the shape #547 was filed about (the Chart Table's guards all ran at 390 and nowhere else). Read against the source with whitespace COLLAPSED: the prover reverted the Explorer to a multi-line bare write and a line-bounded pattern could not see across the break (2026-09-13). Blind spot, named with its direction: this reads the source and not the running page, so it errs toward a miss, and e2e CD23 is the Explorer's resolved read; the Portfolio has no behavioural read inside this suite's measured time budget, which the PR body carries as residue.
+test("every room that announces on a status pill announces through the one announcer, uses what it built, and keeps no bare write of its own (#547 ruling 4)", () => {
   const REPO = resolve(import.meta.dirname, "..", "..");
   const pages = [
     ["src/site/explorer/app.ts", "status"],
     ["src/site/portfolio/app.ts", "status"],
   ] as const;
   for (const [path, pill] of pages) {
-    const src = readFileSync(resolve(REPO, path), "utf8");
-    assert.match(src, /from "\.\.\/shared\/announce\.ts"/, `${path} does not reach the shared announcer at all`);
-    assert.match(
-      src,
-      new RegExp(`makeAnnouncer\\(\\{\\s*pill: ${pill}`),
-      `${path} imports the announcer and builds nothing from it, so its announcements never leave the chart`,
+    const flat = readFileSync(resolve(REPO, path), "utf8").replace(/\s+/g, " ");
+    assert.match(flat, /from "\.\.\/shared\/announce\.ts"/, `${path} does not reach the shared announcer at all`);
+    const built = flat.match(new RegExp(`const (\\w+) = makeAnnouncer\\(\\{ pill: ${pill},`));
+    assert.ok(built, `${path} imports the announcer and builds nothing over its pill, so its announcements never leave the chart`);
+    assert.ok(
+      built[1] === "say" || new RegExp(`say: ${built[1]}\\b`).test(flat),
+      `${path} builds an announcer called ${built[1]} and never hands it over as the say, which passes every other assertion here and leaves the line standing`,
     );
     assert.doesNotMatch(
-      src,
-      new RegExp(`say(:|\\s*=)[^\\n]*${pill}\\.textContent`),
+      flat,
+      new RegExp(`say(: |\\s*= )[^;]*${pill}\\.textContent`),
       `${path} still writes its announcement straight onto the pill, which is the defect #547 named`,
     );
   }
