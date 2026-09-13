@@ -316,9 +316,12 @@ each agent's prose (#575). PR #369 is what committing from a worktree costs when
   requires of a `skeptic-*` sandbox.
 - **`vellum-implementer` gets its worktree a third way**: `isolation: worktree` in its frontmatter,
   so the harness builds and locks one at dispatch, with neither EnterWorktree nor the sandbox script
-  involved; its definition carries the branch rename. Inside such a tree the harness refuses any
-  compound shell command that names `git`, which is why the two sandbox recipes below read the
-  sandbox's sha from its `.git` file rather than with `git rev-parse`.
+  involved; its definition carries the branch rename. Inside such a tree, and inside any
+  EnterWorktree tree, the harness is a fence: it refuses a compound command whose `cd` goes to a
+  shell variable, any `git` run in a directory other than that worktree, and some quoted `jq` or
+  `sed` constructs it cannot parse, while a plain single command passes (measured 2026-09-13, PR
+  #582). That is why the two sandbox recipes below take `create`'s printed path literally and read
+  the sandbox's sha from its `.git` file rather than with `git rev-parse`.
 - **A dispatched review agent may not move or restore the tree it was dispatched from**, which is
   normally your live worktree. On 2026-09-11 `vellum-pr-skeptic` checked a PR head out in two of them
   (#573). Commit before you dispatch one: `git restore` and `git checkout -- <path>` discard without

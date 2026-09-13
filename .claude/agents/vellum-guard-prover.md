@@ -20,16 +20,21 @@ Rules already exist for this (the guard doctrine in Alex's auto-memory, and CLAU
 
 ## Your sandbox
 
-Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. `scripts/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, as ONE Bash call, since shell variables do not survive between calls:
+Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. `scripts/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, ONE Bash call per line. A dispatching session standing in a harness-isolated worktree (a `vellum-implementer` lane, or any session that came in through EnterWorktree) is fenced: the harness refuses a compound command whose `cd` goes to a shell variable, any `git` run in a directory other than that worktree, and some quoted `jq` or `sed` constructs it cannot parse, while a plain single command passes (measured 2026-09-13, PR #582). So `$WT` and `git rev-parse` inside the sandbox are both out.
 
 ```bash
 node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-before.txt
 git status --porcelain > /tmp/guard-<topic>-status-before.txt
-WT=$(node scripts/agent-sandbox.ts create guard-<topic>-<round>)
-cd "${WT:?create failed}" && cat "$(sed 's/^gitdir: //' .git)/HEAD" && node --test test/path/to/target.test.ts
+node scripts/agent-sandbox.ts create guard-<topic>-<round>
 ```
 
-`${WT:?}` is load bearing. If `create` fails (a reused name, a bad sha, a directory already at that path) it prints nothing, `$WT` is empty, and a bare `cd ""` is a silent no-op that returns 0 in bash and zsh alike, so the suite would run in the tree you were dispatched from, which is #573 exactly. The `:?` form aborts the line instead. The `cat` that follows prints the sandbox's detached HEAD, the sha you report: it is read INSIDE the sandbox, so it cannot name a run that never entered one, and it is spelled without the `git` token because a dispatching session standing in a harness-isolated worktree (a `vellum-implementer` lane) has that token refused in any compound command.
+`create` prints the sandbox's absolute path and nothing else. **Read that line and type it literally into the next call; if it printed nothing (a reused name, a bad sha, a directory already at that path), STOP**, because a `cd` into an empty or guessed path lands you in the tree you were dispatched from, which is #573 exactly.
+
+```bash
+cd /the/path/create/printed && cat "$(sed 's/^gitdir: //' .git)/HEAD" && node --test test/path/to/target.test.ts
+```
+
+The `cat` prints the sandbox's detached HEAD, the sha you report: it is read INSIDE the sandbox, so it cannot name a run that never entered one. It reads the `.git` FILE every worktree carries (against a `.git` directory it fails closed with `cat: /HEAD`), and it is spelled without `git` because the fence refuses `git` there.
 
 `create` builds the sandbox at the dispatch tree's HEAD, which is the code under review: the two reads that decide WHAT to build (`readHead`, `resolveRoot`) take the dispatch tree's `cwd`, and `test/repo/agent-sandbox.test.ts` pins that along with the anchor to the main checkout and the `node_modules` link (#575 is what a hand-written copy of this shell cost: it proved the wrong commit in silence). The script refuses any name outside `guard-*` and `skeptic-*`: that keeps it out of any session's own worktree, but it is a namespace and not provenance, so a concurrent review agent's sandbox of the same shape is still addressable.
 
