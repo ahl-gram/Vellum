@@ -51,6 +51,38 @@ test("the rested drawer IS rest, jitter and all, so the clauses above cannot all
   assert.ok(Math.abs(RESTED_B.pos - RESTED_A.pos) <= MOTION_STILL_PX, "the fixture pair must sit inside the tolerance it is pinning");
 });
 
+// The three below were added after vellum-guard-prover found their clauses unexercised: every earlier fixture that could
+// have reached them was rejected first by a "running" entry or by a zero size. Each state was produced in a real browser
+// on 2026-09-13 by ONE named perturbation, which is exactly the regression its clause defends against, and then measured.
+
+// Produced with `.chart-drawer { animation: none !important }`, the drawer open.
+const NO_ANIMATION = slide(584.59, 22.39, []);
+
+test("a panel with a real box and NO animation is never rest, however still it looks", () => {
+  // [].every() is vacuously TRUE, so without the length conjunct a panel that simply has no slide reads as arrived.
+  assert.equal(slideRested(NO_ANIMATION, NO_ANIMATION), false);
+  assert.ok(NO_ANIMATION.size > 0, "the fixture must clear the size clause, or it proves nothing about the animation one");
+});
+
+// Produced with a keyframe whose `to` is translateY(100%), so the slide finishes with the panel still parked.
+const FINISHED_BELOW_FOLD = slide(832.59, 22.39, ["finished"]);
+
+test("a slide that FINISHED with the panel still below the fold is not rest", () => {
+  // This is the clause that makes doctrine item 5 literal for a slide, and the only one that still rejects the CD7b
+  // window if a regression ever lets the animation finish down there.
+  assert.equal(slideRested(FINISHED_BELOW_FOLD, FINISHED_BELOW_FOLD), false);
+  assert.ok(FINISHED_BELOW_FOLD.anims.every((s) => s === "finished"), "the fixture must clear the animation clause, or it proves nothing about the viewport one");
+});
+
+// Produced by moving the drawer with `bottom: 40px !important` AFTER its slide had finished: both reads are all-finished, 40px apart.
+const MOVED_WHILE_FINISHED_A = slide(584.59, 22.39, ["finished"]);
+const MOVED_WHILE_FINISHED_B = slide(544.59, 22.39, ["finished"]);
+
+test("a panel still travelling under something that is not an animation is not rest", () => {
+  assert.equal(slideRested(MOVED_WHILE_FINISHED_B, MOVED_WHILE_FINISHED_A), false);
+  assert.ok(Math.abs(MOVED_WHILE_FINISHED_B.pos - MOVED_WHILE_FINISHED_A.pos) > MOTION_STILL_PX, "the fixture pair must sit outside the tolerance it is pinning");
+});
+
 const fold = (pos: number, anims: readonly string[]): MotionRead => ({ pos, size: 384, anims });
 
 // The slip UNFOLDED, which is where every fold gesture in suite-chart-drawer.mjs starts.
@@ -87,4 +119,13 @@ test("the folded panel at rest IS rest", () => {
 
 test("a collapsed panel is not rest, however finished and however far it has travelled", () => {
   assert.equal(foldRested({ pos: 1289.6, size: 0, anims: ["finished"] }, FOLDED_A, UNFOLDED), false);
+});
+
+test("departure is measured at the bound itself: exactly MOTION_MOVED_PX has not left where it began", () => {
+  // Not a browser read but a contract on the constant, which is what the prover could not settle either way: every
+  // measured fixture sits at 0px or at 425.6px, so the boundary's shape is pinned here rather than left to a mutation.
+  const atTheBound = fold(UNFOLDED.pos + MOTION_MOVED_PX, ["finished"]);
+  const justPast = fold(UNFOLDED.pos + MOTION_MOVED_PX + 0.01, ["finished"]);
+  assert.equal(foldRested(atTheBound, atTheBound, UNFOLDED), false);
+  assert.equal(foldRested(justPast, justPast, UNFOLDED), true);
 });
