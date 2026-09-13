@@ -23,6 +23,7 @@ export type Decision = { hookSpecificOutput: Output } | null;
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SKILL = resolve(HERE, "..", "SKILL.md");
+const TEMPLATE = resolve(HERE, "..", "..", "..", "..", ".github", "PULL_REQUEST_TEMPLATE.md");
 
 const EDIT_GATES: [string, RegExp, string][] = [
   ["guard", /(^|\/)test\/.*\.test\.ts$/, "Gate 1"],
@@ -47,6 +48,9 @@ const BODY_FILE = /(?:--body-file|-F)[=\s]+["']?([^\s"'=]+)(?=[\s"']|$)/g;
 const BODY_SUBSHELL = /\$\(\s*(?:cat\s+|<\s*)([^\s)"']+)\s*\)/g;
 const NEGATED_CLOSE = /(\bnot|\bnever|n't|\bno|\bwithout)\s+(clos(e|es|ed|ing)|fix(es|ed|ing)?|resolv(e|es|ed|ing))\s+(?:[\w.-]+\/[\w.-]+)?#\d+/i;
 const EM_DASH = "—";
+const INLINE_BODY = /(^|\s)(--body|-b)(=|\s)/;
+const UNRESOLVED_EXPANSION = /\$(?!\(\s*(?:cat\s|<))/;
+const SINGLE_QUOTED = /'[^']*'/g;
 
 export const gateText = (label: string): string => {
   const section = readFileSync(SKILL, "utf8").split("\n## ").slice(1).find((s) => s.startsWith(label));
@@ -206,25 +210,59 @@ const readRelative = (name: string, cwd: string): string => {
   return readFileSync(isAbsolute(expanded) ? expanded : join(cwd || ".", expanded), "utf8");
 };
 
-const bodyText = (command: string, cwd: string): { body: string; unread: string[] } => {
+const bodyText = (command: string, cwd: string): { body: string; unread: string[]; fromBodyFlag: string[] } => {
   let body = command;
   const unread: string[] = [];
+  const fromBodyFlag: string[] = [];
   for (const pattern of [BODY_FILE, BODY_SUBSHELL]) {
     for (const match of command.matchAll(pattern)) {
       const name = match[1] ?? "";
       try {
         body += "\n" + readRelative(name, cwd);
+        if (pattern === BODY_FILE) fromBodyFlag.push(name);
       } catch {
         unread.push(name);
       }
     }
   }
-  return { body, unread };
+  return { body, unread, fromBodyFlag };
+};
+
+export const requiredHeadings = (file: string = TEMPLATE): string[] | null => {
+  let text: string;
+  try {
+    text = readFileSync(file, "utf8");
+  } catch {
+    return null;
+  }
+  const headings = text.split("\n").map((line) => line.trim()).filter((line) => line.startsWith("## "));
+  return headings.length ? headings : null;
+};
+
+const NO_TEMPLATE = (file: string, why: string): string =>
+  `vellum-footguns: ${why} (${file}), so the PR body's section check did NOT run on this call; the em-dash and closing-keyword checks still did. ` +
+  `Nothing is blocked, but nothing checked the body's shape either: restore the template, or read the sections off \`vellum-footguns\` Gate 5 yourself.`;
+
+export const headingCheck = (body: string, file: string = TEMPLATE): { deny: string | null; warn: string | null } => {
+  const need = requiredHeadings(file);
+  if (!need) {
+    return { deny: null, warn: NO_TEMPLATE(file, existsSync(file) ? "the PR template carries no `## ` heading" : "there is no PR template") };
+  }
+  const lines = new Set(body.split("\n").map((line) => line.trim()));
+  const missing = need.filter((heading) => !lines.has(heading));
+  if (!missing.length) return { deny: null, warn: null };
+  return {
+    deny:
+      `vellum-footguns: the PR body skips ${missing.map((h) => `"${h}"`).join(", ")}. The shape in ${file} is the house record of what a PR claims, ` +
+      `and a section that is absent is a claim never made rather than made and wrong. Presence is the whole check: ` +
+      `"## Guards" followed by "None. This PR carries no test." is a valid section.`,
+    warn: null,
+  };
 };
 
 const ghRefusal = (segment: string, command: string, cwd: string): [Decision, string | null] => {
   if (!GH_BODY_WRITE.test(segment)) return [null, null];
-  const { body, unread } = bodyText(command, cwd);
+  const { body, unread, fromBodyFlag } = bodyText(command, cwd);
   if (body.includes(EM_DASH)) {
     return [deny("vellum-footguns: the body carries an em-dash; the house forbids them in issue and PR bodies."), null];
   }
@@ -238,11 +276,23 @@ const ghRefusal = (segment: string, command: string, cwd: string): [Decision, st
       null,
     ];
   }
-  const warning = unread.length
-    ? `vellum-footguns could not read the body file(s) ${unread.join(", ")} from ${cwd || "the cwd"}, so the em-dash and ` +
-      `closing-keyword checks did not run on them. Grep them yourself.`
-    : null;
-  return [null, warning];
+  const warnings: string[] = [];
+  if (unread.length) {
+    warnings.push(
+      `vellum-footguns could not read the body file(s) ${unread.join(", ")} from ${cwd || "the cwd"}, so the em-dash, ` +
+        `closing-keyword and PR section checks did not run on them. Grep them yourself.`,
+    );
+  }
+  const inline = INLINE_BODY.test(segment);
+  // `$(cat f)` is read from ANY flag, which is right for the em-dash scan and wrong here: without the body-flag narrowing, `gh pr edit N --add-label "$(cat notes.md)"` reads as a PR body and is refused for skipping sections it was never meant to carry.
+  const supplied = inline || fromBodyFlag.length > 0;
+  const readable = !unread.length && !(inline && UNRESOLVED_EXPANSION.test(command.replace(SINGLE_QUOTED, "''")));
+  if (GH_PR_WRITE.test(segment) && supplied && readable) {
+    const { deny: missing, warn } = headingCheck(body);
+    if (missing) return [deny(missing), null];
+    if (warn) warnings.push(warn);
+  }
+  return [null, warnings.length ? warnings.join("\n\n") : null];
 };
 
 const PKILL_WARNING =

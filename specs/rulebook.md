@@ -6,7 +6,7 @@ made before any of it is scheduled.
 
 It replaces the body of issue #193, which is now a pointer to this file.
 
-Four other places carry what this one deliberately does not:
+Five other places carry what this one deliberately does not:
 
 - **The roadmap Project** ("Vellum Roadmap", `gh project item-list 1 --owner ahl-gram`) is the
   backlog of record: what is open, its status, its phase, its order.
@@ -20,8 +20,8 @@ Four other places carry what this one deliberately does not:
 
 Its siblings under `specs/` hold what this file is not about: `ui-design.md` the look and feel
 itself (the ground, the case, the palette, the rooms, the voice, motion and ceremony),
-`development-workflow.md` the sequence a change moves through, and `flake-record.md` the dated
-ledger of CI reds believed to be flakes.
+`development-workflow.md` the sequence a change moves through, `settle-doctrine.md` how an e2e
+wait is written, and `flake-record.md` the dated ledger of CI reds believed to be flakes.
 
 ## How to read and update this file
 
@@ -333,5 +333,6 @@ comment. This is a convenience index, not their home.
 
 *Companion to the roadmap Project (status, order, phase), to `CLAUDE.md` (process at the keyboard),
 to `specs/ui-design.md` (the look and feel), to `specs/development-workflow.md` (the order of
-operations), and to `specs/flake-record.md` (the CI reds believed to be flakes). Rules change
-rarely; when one does, edit this file.*
+operations), to `specs/settle-doctrine.md` (how an e2e wait is written), and to
+`specs/flake-record.md` (the CI reds believed to be flakes). Rules change rarely; when one does,
+edit this file.*

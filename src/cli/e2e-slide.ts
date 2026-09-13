@@ -19,7 +19,7 @@ export interface SlideRead extends MotionRead {
 /** Measured 2026-09-13: two at-rest reads of the same drawer differ by 0.01px, and the 0.32s ease-out's last 50ms covers about 1px. */
 export const MOTION_STILL_PX = 0.5;
 
-/** Measured 2026-09-13: the slip's fold travels 425.6px and the drawer's slide 248px, so a pixel is departure rather than rounding. */
+/** Measured 2026-09-13: the fold this governs travels 425.6px, from the slip's 864 to 1289.6, so a pixel is departure rather than rounding. */
 export const MOTION_MOVED_PX = 1;
 
 function atRest(d: MotionRead, last: MotionRead | null): boolean {

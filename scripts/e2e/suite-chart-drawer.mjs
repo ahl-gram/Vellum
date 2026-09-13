@@ -50,7 +50,7 @@ const READ = `(() => {
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, PORT } = ctx;
   const settle = makeSettle(ctx);
-  // Every group that WAITS is stepped, since #578 gave the six drawer and fold waits settles that throw; go()'s own bounded loop returns rather than throwing, so a group that only navigates needs no step.
+  // Every group that WAITS is stepped, since #578 replaced this suite's ten blind drawer and fold waits with nine settles that throw and one deletion; go()'s own bounded loop returns rather than throwing, so a group that only navigates needs no step.
   const step = makeStep(ctx);
   // A REAL press and release at the handle's own coordinates, never element.click(): a synthetic click dispatches straight at the node and ignores pointer-events, so it files a handle no reader could reach. The inset box is pointer-events: none, and that is exactly the defect this drives.
   const { clickAt } = makeStage(ctx);
@@ -69,7 +69,8 @@ export async function run(ctx) {
   };
   const atInset = (d) => !!d.ear && d.insetSvgs === 1;
   // The drawer's slide, read off the SIX REMOVE BUTTONS' own rects rather than the drawer's, because those are what the hit tests below reach for and the cuttings carry their own tilt the ancestor box cannot see.
-  const asSlide = (d) => (d ? { pos: d.lowestOff === null ? 0 : d.lowestOff, size: d.minOffH, anims: d.drawerAnims, viewportH: d.innerH } : null);
+  // A drawer with no buttons at all reports pos at the viewport edge, not 0: 0 is inside the fold and would leave `size` the only thing rejecting a shut drawer.
+  const asSlide = (d) => (d ? { pos: d.lowestOff === null ? d.innerH : d.lowestOff, size: d.minOffH, anims: d.drawerAnims, viewportH: d.innerH } : null);
   const drawerUp = (d, last) => slideRested(asSlide(d), asSlide(last));
   // The slip's fold, which is what the shut press and the fold press actually make move: the folded class flips on the gesture, so only the panel's own travel says it arrived.
   const asFold = (d) => (d ? { pos: d.slipX, size: d.slipW, anims: d.slipAnims } : null);

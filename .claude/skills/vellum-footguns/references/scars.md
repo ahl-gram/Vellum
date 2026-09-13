@@ -27,9 +27,10 @@ files named at the end.
 - *Synthetic input over a control nobody can press.* #542: `element.click()` ignores
   `pointer-events`; a dead dog-ear reported as working and an eleven-check suite green over it.
   #545: the shut press 0% reachable, "the #520 dog-ear again". #546: the Glass bound but dead to
-  touch, "the same defect one layer down"; CD7b read `reachable: 0` and passed on re-run THREE times
-  (runs 34305242149, 34411380228 and 34678766918), which #578 settled and `specs/flake-record.md` now
-  records; it was the drawer's slide not yet painted, leaving all six controls below the viewport.
+  touch, "the same defect one layer down"; CD7b read `reachable: 0` THREE times (runs 34305242149,
+  34411380228 and 34678766918), the first re-run away and the other two left unexplained on main,
+  which #578 settled and `specs/flake-record.md` now records; it was the drawer's slide not yet
+  painted, leaving all six controls below the viewport.
   #543: the tab took 56% of every zoom press, found by Alex live.
 - *The probe itself was wrong.* #545: `getComputedStyle(child).display` on a child of a hidden
   ancestor counted three hidden roads as up; `elementFromPoint` at y=882 in an 844 viewport; BR6b's

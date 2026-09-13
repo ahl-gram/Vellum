@@ -4,11 +4,12 @@
 the thing worth knowing is never "this is flaky", it is how often, on what shas, with what payload,
 and whether anyone did anything about it.
 
-This file exists because #578 found CD7b had failed on `main` twice in forty runs, been re-run away
-each time, and that reconstructing even that much cost a forty-run archaeology dig through CI
-history plus three closed issues. A third occurrence, older than both, was sitting in a comment on
-#546 that nothing pointed at. `vellum-footguns` Gate 2 item 10 says a red is yours until proven a
-flake and must never be silently re-run away; this is where the proof goes.
+This file exists because #578 found CD7b had failed on `main` twice in forty runs with nobody
+recording either, and that reconstructing even that much cost a forty-run archaeology dig through CI
+history plus three closed issues. A third occurrence, older than both and the only one actually
+re-run away, was sitting in a comment on #546 that nothing pointed at. `vellum-footguns` Gate 2
+item 10 says a red is yours until proven a flake and must never be silently re-run away; this is
+where the proof goes.
 
 ## How to use it
 
@@ -32,10 +33,10 @@ flake and must never be silently re-run away; this is where the proof goes.
 | 2026-09-07 | SV2c | not recorded in #529 | #528's CI attempts | `{"firstInkMs":3097,"reInkMs":810}` against an 800ms cap | settled, #529 and PR #533: an absolute wall-clock cap where the ratio clause was the real claim |
 | 2026-09-07 | CL4 | not recorded in #529 | #528's CI attempts | `transform "matrix(1, 0, 0, 1, -0.762884, 0)"`, `seedOpacity "0.00754649"` | settled, #529 and PR #533: exact equality on values still animating, 0.76px from home |
 | 2026-09-08 | RS30 | 34238487802 | `4a2f512`, main | the pace-1 leg took 6 samples against `minSamples: 8`; `ratio 4.03`, `jump 25` of 26.4 allowed | open. Named flaky in #529 and flaked again after that issue closed |
-| 2026-09-09 | CD7b | 34305242149, attempt 1 | `ba73669`, `521-portfolio` | `{"cuttings":6,"offs":6,"reachable":0,"open":true}` | settled, #578 and PR #580. Re-run green at the time; recorded in a comment on #546 that nothing pointed at |
-| 2026-09-09 | CD7b | 34411380228 | `49a9527`, main | identical | settled, #578 and PR #580. Never re-run; the next main run was green with the drawer untouched |
+| 2026-09-09 | CD7b | 34305242149, attempt 1 | `ba73669`, `521-portfolio` | `{"cuttings":6,"offs":6,"reachable":0,"open":true}` | settled, #578 and PR #581. Re-run green at the time; recorded in a comment on #546 that nothing pointed at |
+| 2026-09-09 | CD7b | 34411380228 | `49a9527`, main | identical | settled, #578 and PR #581. Never re-run; the next main run was green with the drawer untouched |
 | 2026-09-10 | SV2r | 34526874952 | `dd2d01e`, main | `{"dashSteps":11,"dashSeen":11,"gap":250,"frames":75}` | open, no issue |
-| 2026-09-12 | CD7b | 34678766918 | `ab5b064`, main | identical | settled, #578 and PR #580. Never re-run |
+| 2026-09-12 | CD7b | 34678766918 | `ab5b064`, main | identical | settled, #578 and PR #581. Never re-run |
 
 ## What the CD7b rows turned out to be
 
