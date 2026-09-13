@@ -9,9 +9,7 @@ import {
   type SlideRead,
 } from "../../src/cli/e2e-slide.ts";
 
-// Every fixture below is a read MEASURED through CDP on 2026-09-13 at 1280x800, seed 42, the CD7 hash, and named
-// with the moment it was taken from, so no case here is a state the browser cannot produce (the trap #578's first
-// plan walked into: a "finished" animation parked off screen cannot happen under animation-fill-mode: both).
+// Every fixture below is a read measured through CDP on 2026-09-13 at 1280x800, seed 42, the CD7 hash, named with the moment it came from.
 const slide = (pos: number, size: number, anims: readonly string[]): SlideRead => ({ pos, size, anims, viewportH: 800 });
 
 // The drawer SHUT: display:none, so every rect is zero and getAnimations() is empty.
@@ -26,7 +24,6 @@ const RESTED_A = slide(584.59, 22.39, ["finished"]);
 const RESTED_B = slide(584.6, 22.39, ["finished"]);
 
 test("the shut drawer is not rest, so an empty animation list cannot wave the settle through", () => {
-  // [].every() is TRUE and 0 is inside an 800 viewport, so without the size clause a pair of pre-open reads IS a rest.
   assert.equal(slideRested(SHUT, SHUT), false);
 });
 
@@ -51,9 +48,7 @@ test("the rested drawer IS rest, jitter and all, so the clauses above cannot all
   assert.ok(Math.abs(RESTED_B.pos - RESTED_A.pos) <= MOTION_STILL_PX, "the fixture pair must sit inside the tolerance it is pinning");
 });
 
-// The three below were added after vellum-guard-prover found their clauses unexercised: every earlier fixture that could
-// have reached them was rejected first by a "running" entry or by a zero size. Each state was produced in a real browser
-// on 2026-09-13 by ONE named perturbation, which is exactly the regression its clause defends against, and then measured.
+// The three below were produced in a real browser on 2026-09-13 by the one named perturbation each clause defends against, then measured.
 
 // Produced with `.chart-drawer { animation: none !important }`, the drawer open.
 const NO_ANIMATION = slide(584.59, 22.39, []);
@@ -68,8 +63,6 @@ test("a panel with a real box and NO animation is never rest, however still it l
 const FINISHED_BELOW_FOLD = slide(832.59, 22.39, ["finished"]);
 
 test("a slide that FINISHED with the panel still below the fold is not rest", () => {
-  // This is the clause that makes doctrine item 5 literal for a slide, and the only one that still rejects the CD7b
-  // window if a regression ever lets the animation finish down there.
   assert.equal(slideRested(FINISHED_BELOW_FOLD, FINISHED_BELOW_FOLD), false);
   assert.ok(FINISHED_BELOW_FOLD.anims.every((s) => s === "finished"), "the fixture must clear the animation clause, or it proves nothing about the viewport one");
 });
@@ -100,7 +93,6 @@ test("the fold has not left where it began at the instant of the gesture, though
 });
 
 test("a panel that never moved is not rest, which is the whole point of carrying the pre-gesture read", () => {
-  // Stillness at the start is indistinguishable from stillness at the end without this.
   assert.equal(foldRested(UNFOLDED, UNFOLDED, UNFOLDED), false);
   assert.ok(Math.abs(UNFOLDED.pos - UNFOLDED.pos) <= MOTION_MOVED_PX, "the fixture must sit inside the departure bound it is pinning");
 });
@@ -121,10 +113,7 @@ test("a collapsed panel is not rest, however finished and however far it has tra
   assert.equal(foldRested({ pos: 1289.6, size: 0, anims: ["finished"] }, FOLDED_A, UNFOLDED), false);
 });
 
-// The three below pin the BOUNDS themselves rather than a browser state, and their numbers are deliberately hard coded
-// rather than derived from the constants: vellum-guard-prover's round 2 found that a test spelling its fixture as
-// `UNFOLDED.pos + MOTION_MOVED_PX` is a circular oracle, green at 1 and green at 100, so it can only ever pin the
-// comparison's shape and never the constant's size.
+// The three below hard code their numbers rather than derive them from the constants: a fixture spelled `UNFOLDED.pos + MOTION_MOVED_PX` is green at 1 and at 100.
 
 test("departure is measured at the bound itself: exactly MOTION_MOVED_PX has not left where it began", () => {
   const atTheBound = fold(UNFOLDED.pos + MOTION_MOVED_PX, ["finished"]);
@@ -144,7 +133,5 @@ test("the stillness bound is about half a pixel, so a two pixel step is still tr
 });
 
 test("the viewport bound excludes exactly the start pixel, which is where translateY(100%) parks the panel", () => {
-  // The doc comment claims `>=` excludes the start state and nothing else; at 1280x800 the parked drawer's own top edge
-  // IS the viewport height, so this is the one value that separates `>=` from `>`.
   assert.equal(slideRested(slide(800, 22.39, ["finished"]), slide(800, 22.39, ["finished"])), false);
 });
