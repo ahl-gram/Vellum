@@ -18,6 +18,7 @@ import { wireSurveyToggle, armOnLanding, deferLandingArm } from "./survey-arm.ts
 import { createTourOrder } from "./tour-order.ts";
 import { createLivingChart } from "../living-chart/index.ts";
 import { bindRoom } from "../shared/room.ts";
+import { makeAnnouncer } from "../shared/announce.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
@@ -86,13 +87,20 @@ const relabelEar = (): void => {
   ear.title = label;
 };
 
+// #status has several owners here (the draw path, the survey errors and the voyage's log summary all write it), which is why the announcer clears only the text it wrote and the other four writers below keep writing the element straight.
+const announce = makeAnnouncer({
+  pill: status,
+  after: (run, ms) => window.setTimeout(run, ms),
+  cancel: (timer) => { window.clearTimeout(timer); },
+});
+
 const chartTable = bindChartDrawer({
   root: chartDrawer, tab: chartDrawerTab, shut: chartDrawerShut, count: chartDrawerCount,
   cuttings, full: chartDrawerFull, road: tableRoad,
   broadside: () => room.broadside,
   relabelLeaf: (count) => leaf.relabel(count),
   folioHref: "../print-room/portfolio/",
-  say: (line) => { status.textContent = line; },
+  say: announce,
   drawThumb: async (item) => {
     const job = thumbJobFor(item);
     if (!job) return null;

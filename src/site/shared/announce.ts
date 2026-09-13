@@ -18,7 +18,28 @@ export interface AnnounceDeps<T> {
 }
 
 export function makeAnnouncer<T>(deps: AnnounceDeps<T>): (line: string) => void {
+  const hold = deps.holdMs ?? SAY_HOLD_MS;
+  const fade = deps.fadeMs ?? SAY_FADE_MS;
+  let booked: T | null = null;
+  const unbook = (): void => {
+    if (booked !== null) deps.cancel(booked);
+    booked = null;
+  };
   return (line: string): void => {
+    unbook();
+    deps.pill.classList.remove(FADING);
     deps.pill.textContent = line;
+    if (line === "") return;
+    booked = deps.after(() => {
+      booked = null;
+      if (deps.pill.textContent !== line) return;
+      deps.pill.classList.add(FADING);
+      booked = deps.after(() => {
+        booked = null;
+        // Cleared BEFORE the class comes off: the pill is display:none while :empty (public/atelier.css), so this hides the box in the same tick, where taking the fade off first repaints the whole line at full opacity on its way out.
+        if (deps.pill.textContent === line) deps.pill.textContent = "";
+        deps.pill.classList.remove(FADING);
+      }, fade);
+    }, hold);
   };
 }

@@ -76,6 +76,9 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
 .dog-ear:is(:hover, :focus-visible) { width: calc(4.1rem / var(--zoom-k, 1)); height: calc(4.1rem / var(--zoom-k, 1)); }
 .dog-ear:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -2px; }
 
+/* The leaf tabs are the PHONE's way into the table and Slip.astro renders the slot at every width, so they are stood down here and raised in the block below; declared first because both arms are one class and the later one wins (#547, the line design/chart-table/mock.css carried and the #540 port dropped). */
+.sheet-tabs { display: none; }
+
 @media (max-width: 900px) {
   .chart-drawer, .chart-drawer.open, .chart-drawer-tab { display: none; }
 
