@@ -245,6 +245,15 @@ the mechanical never-list items outright, the ones `hooks/README.md` enumerates.
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks you to
   (ruled 2026-09-10). The whole order of operations, and which of the agents below runs at which
   step, is `specs/development-workflow.md`.
+- **`vellum-implementer` runs one issue through that sequence in its own worktree** (Opus, xhigh),
+  stopping where the sequence stops for Alex's ruling and handing the menu to the dispatching
+  session, which puts it to him and relays his answer; it never merges. Use it one lane per issue
+  when a session orchestrates several at once, or for a single issue the session wants run without
+  its own context in it. Every project agent under `.claude/agents/` sets `effort: xhigh` in its
+  frontmatter (Alex, 2026-09-13), because the sub-agents docs' frontmatter table says an agent
+  without one inherits the session's level. The check is `echo $CLAUDE_EFFORT` inside a dispatched
+  agent, run from a session at a level OTHER than xhigh: it prints the effective level, so a session
+  already at xhigh cannot tell the frontmatter from inheritance.
 - **Run the `vellum-plan-skeptic` subagent on the plan, before the decisions go to Alex.** Dispatch
   it with the issue number, the plan, and `vellum-spec-recon`'s ledger if recon ran this session
   (ruled 2026-09-10), and nothing else. A plan's claims are predictions, which are
@@ -256,7 +265,8 @@ the mechanical never-list items outright, the ones `hooks/README.md` enumerates.
   understanding of what he is deciding: no jargon, no overly technical language, no acronyms.
   Put it in the AskUserQuestion menu rather than in prose, so he picks an option and reads its
   consequence instead of answering paragraphs, and STOP there. A decision that is his is not one
-  to default your way and mention afterwards.
+  to default your way and mention afterwards. A dispatched `vellum-implementer` lane cannot reach
+  him, so it hands the menu to its dispatcher at the same STOP and the dispatcher asks.
 - **Write the failing test first.** It must fail on the assertion you care about, not on a missing
   module.
 - **Run the `vellum-guard-prover` subagent on new or strengthened guards before opening the PR.** It
@@ -304,6 +314,14 @@ each agent's prose (#575). PR #369 is what committing from a worktree costs when
   assets under `public/` and neither `git status` nor `git status --ignored` reports it, so no
   reviewer runs a suite in a tree it does not own. It passes the sha explicitly, which that script
   requires of a `skeptic-*` sandbox.
+- **`vellum-implementer` gets its worktree a third way**: `isolation: worktree` in its frontmatter,
+  so the harness builds and locks one at dispatch, with neither EnterWorktree nor the sandbox script
+  involved; its definition carries the branch rename. Inside such a tree, and inside any
+  EnterWorktree tree, the harness is a fence: it refuses a compound command whose `cd` goes to a
+  shell variable, any `git` run in a directory other than that worktree, and some quoted `jq` or
+  `sed` constructs it cannot parse, while a plain single command passes (measured 2026-09-13, PR
+  #582). That is why the two sandbox recipes below take `create`'s printed path literally and read
+  the sandbox's sha from its `.git` file rather than with `git rev-parse`.
 - **A dispatched review agent may not move or restore the tree it was dispatched from**, which is
   normally your live worktree. On 2026-09-11 `vellum-pr-skeptic` checked a PR head out in two of them
   (#573). Commit before you dispatch one: `git restore` and `git checkout -- <path>` discard without

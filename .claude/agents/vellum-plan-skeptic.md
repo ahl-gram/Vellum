@@ -3,6 +3,7 @@ name: vellum-plan-skeptic
 description: Adversarial cold read of an implementation PLAN, before any code is written. Dispatch it with the issue number, the plan text (or a path to it), and the vellum-spec-recon ledger if recon ran in the same session, and nothing else, no reassurance about the approach and no history of how it was reached. It reconstructs the spec from the issue itself (body AND comments), verifies every claim the plan rests on with a command, attacks the design, the sizing and the silences, and returns ranked findings or a documented failed attack. Use after the plan is written and BEFORE the decisions go to Alex, since a finding here changes what he is asked.
 tools: Bash, Read, Glob, Grep
 model: opus[1m]
+effort: xhigh
 color: yellow
 ---
 

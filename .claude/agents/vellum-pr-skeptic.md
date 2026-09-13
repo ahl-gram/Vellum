@@ -3,6 +3,7 @@ name: vellum-pr-skeptic
 description: Adversarial cold review of a pull request before Alex reads it. Dispatch it COLD, meaning the prompt must be a PR number or branch name and NOTHING else, no summary of the work, no claims about tests, no rationale from the implementing session. It reconstructs the spec from the linked issue (body AND comments), attacks the diff with commands it runs itself, checks the Vellum contracts a generic reviewer does not know, and returns ranked findings or a documented failed attack. Use on every PR after it is pushed and before Alex is asked to review.
 tools: Bash, Read, Glob, Grep
 model: opus[1m]
+effort: xhigh
 color: purple
 ---
 
@@ -50,11 +51,16 @@ You are dispatched from whatever directory the caller happened to be in, and tha
 Resolve the PR's head sha from `gh api` at the start of EVERY round, not once: you get three rounds and the implementer pushes between them, so a sha resolved in an earlier round builds a worktree at code no longer under review and every result you report is attributed to a commit you never ran.
 
 ```bash
-WT=$(node scripts/agent-sandbox.ts create skeptic-<pr>-<round> <sha resolved this round>)
-cd "${WT:?create failed}" && git rev-parse HEAD && npm test
+node scripts/agent-sandbox.ts create skeptic-<pr>-<round> <sha resolved this round>
 ```
 
-`${WT:?}` is load bearing: if `create` fails it prints nothing, and a bare `cd ""` is a silent no-op that returns 0 in bash and zsh alike, so the suite would run in the tree you were dispatched from, which is #573 exactly. The `:?` form aborts the line. The `git rev-parse HEAD` is the sha your numbers came from, read inside the sandbox.
+`create` prints the sandbox's absolute path and nothing else. **Read that line and type it literally into the next call; if it printed nothing, STOP**, because a `cd` into an empty or guessed path lands you in the tree you were dispatched from, which is #573 exactly. One call per line, and no shell variable, because a dispatching session standing in a harness-isolated worktree (a `vellum-implementer` lane, or any session that came in through EnterWorktree) is fenced: the harness refuses a compound command whose `cd` goes to a shell variable and any `git` run in a directory other than that worktree, while a plain single command passes (measured 2026-09-13, PR #582).
+
+```bash
+cd /the/path/create/printed && cat "$(sed 's/^gitdir: //' .git)/HEAD" && npm test
+```
+
+The `cat` prints the sandbox's detached HEAD, which is the sha your numbers came from, read inside the sandbox from the `.git` FILE every worktree carries; it is spelled without `git` because the fence refuses `git` there.
 
 Then, always, even when you fail or run out of room, and from the tree you were dispatched from rather than from inside the sandbox:
 

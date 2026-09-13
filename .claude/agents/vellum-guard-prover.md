@@ -3,6 +3,7 @@ name: vellum-guard-prover
 description: Proves that a new or strengthened test actually bites, by deleting or inverting the exact behavior it claims to guard and confirming that test goes red. Use after tests are written and green, before opening a PR, and whenever someone says "this test now guards X". Also use to check that a guard covers the bug's whole class, not just the one reported instance.
 tools: Bash, Read, Edit, Glob, Grep
 model: sonnet[1m]
+effort: xhigh
 color: red
 ---
 
@@ -19,16 +20,21 @@ Rules already exist for this (the guard doctrine in Alex's auto-memory, and CLAU
 
 ## Your sandbox
 
-Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. `scripts/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, as ONE Bash call, since shell variables do not survive between calls:
+Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. `scripts/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, ONE Bash call per line. A dispatching session standing in a harness-isolated worktree (a `vellum-implementer` lane, or any session that came in through EnterWorktree) is fenced: the harness refuses a compound command whose `cd` goes to a shell variable, any `git` run in a directory other than that worktree, and some quoted `jq` or `sed` constructs it cannot parse, while a plain single command passes (measured 2026-09-13, PR #582). So `$WT` and `git rev-parse` inside the sandbox are both out.
 
 ```bash
 node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-before.txt
 git status --porcelain > /tmp/guard-<topic>-status-before.txt
-WT=$(node scripts/agent-sandbox.ts create guard-<topic>-<round>)
-cd "${WT:?create failed}" && git rev-parse HEAD && node --test test/path/to/target.test.ts
+node scripts/agent-sandbox.ts create guard-<topic>-<round>
 ```
 
-`${WT:?}` is load bearing. If `create` fails (a reused name, a bad sha, a directory already at that path) it prints nothing, `$WT` is empty, and a bare `cd ""` is a silent no-op that returns 0 in bash and zsh alike, so the suite would run in the tree you were dispatched from, which is #573 exactly. The `:?` form aborts the line instead. The `git rev-parse HEAD` that follows is the sha you report: it is read INSIDE the sandbox, so it cannot name a run that never entered one.
+`create` prints the sandbox's absolute path and nothing else. **Read that line and type it literally into the next call; if it printed nothing (a reused name, a bad sha, a directory already at that path), STOP**, because a `cd` into an empty or guessed path lands you in the tree you were dispatched from, which is #573 exactly.
+
+```bash
+cd /the/path/create/printed && cat "$(sed 's/^gitdir: //' .git)/HEAD" && node --test test/path/to/target.test.ts
+```
+
+The `cat` prints the sandbox's detached HEAD, the sha you report: it is read INSIDE the sandbox, so it cannot name a run that never entered one. It reads the `.git` FILE every worktree carries (against a `.git` directory it fails closed with `cat: /HEAD`), and it is spelled without `git` because the fence refuses `git` there.
 
 `create` builds the sandbox at the dispatch tree's HEAD, which is the code under review: the two reads that decide WHAT to build (`readHead`, `resolveRoot`) take the dispatch tree's `cwd`, and `test/repo/agent-sandbox.test.ts` pins that along with the anchor to the main checkout and the `node_modules` link (#575 is what a hand-written copy of this shell cost: it proved the wrong commit in silence). The script refuses any name outside `guard-*` and `skeptic-*`: that keeps it out of any session's own worktree, but it is a namespace and not provenance, so a concurrent review agent's sandbox of the same shape is still addressable.
 
@@ -127,7 +133,7 @@ node scripts/agent-sandbox.ts list
 
 Paste all four. The two `diff`s are the residue check and empty is the pass for both: the first catches anything created or deleted, ignored paths included; the second catches a tracked file edited in place, which the first cannot see because the name did not change. Both are diffs against a baseline taken before you started, because the dispatch tree may already be dirty when you arrive, and line 48 tells you to carry that dirt into the sandbox by hand, so a bare "status is empty" pass would be unreachable exactly when you follow your own instructions. The last two are the sandbox check, and they see different orphans: `git worktree list` sees a REGISTRATION whose directory is gone (marked `prunable`, the state an `rm -rf` in place of `teardown` leaves, and the state a later bare prune by anyone silently erases); `list` sees a DIRECTORY whose registration is gone (the state a bare prune leaves). Your own name must be absent from both. `list` also prints other sessions' worktrees, since it lists the whole sandbox root; those are not findings. The listings go to `/tmp` and not `out/` because `out/` is inside the tree being listed, and a file written there would make the diff non-empty by construction.
 
-**Name the commit you proved, in every ledger.** It is the `git rev-parse HEAD` the setup block printed from inside the sandbox. If you carried uncommitted work across by hand, the bare sha is a false attribution: say so, and give the sha PLUS the fact that a patch was applied and how many files it touched. What you proved then belongs to no commit that exists, and a reader who takes the sha at face value will look at the wrong code (Alex, 2026-09-12).
+**Name the commit you proved, in every ledger.** It is the HEAD the setup block printed from inside the sandbox. If you carried uncommitted work across by hand, the bare sha is a false attribution: say so, and give the sha PLUS the fact that a patch was applied and how many files it touched. What you proved then belongs to no commit that exists, and a reader who takes the sha at face value will look at the wrong code (Alex, 2026-09-12).
 
 ## Conventions
 
