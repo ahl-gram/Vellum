@@ -4,16 +4,17 @@
  * string from .claude/settings.json through sh with a real, a symlinked, and a missing CLAUDE_PROJECT_DIR.
  */
 import { execFileSync } from "node:child_process";
-import { mkdirSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { decide, gateText, statePath, type Decision, type Payload } from "./footgun-gate.ts";
+import { decide, gateText, headingCheck, requiredHeadings, statePath, type Decision, type Payload } from "./footgun-gate.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, "..", "..", "..", "..");
 const SCRATCH = join(tmpdir(), `footgun-selftest-${process.pid}`); // named here, created in run(): FIXTURES needs the path at module scope, and a module that mints a temp dir just by being imported leaks one per import
 const LINK = join(SCRATCH, "linked-root");
+const TEMPLATE_PATH = join(ROOT, ".github", "PULL_REQUEST_TEMPLATE.md");
 const SETTINGS = JSON.parse(execFileSync("cat", [join(ROOT, ".claude", "settings.json")], { encoding: "utf8" })) as {
   hooks: { PreToolUse: { hooks: { command: string }[] }[] };
 };
@@ -50,6 +51,26 @@ const deployed = (payload: Payload, projectDir: string) => async (): Promise<Dec
 type Kind = "deny" | "context" | null;
 type Fixture = [string, Payload | (() => Promise<Decision>), Kind, string];
 const STASH_POP = bash("git stash pop");
+// The five section names are written out HERE and derived in the hook. That asymmetry is the guard: a heading renamed in the template changes only one side, so these rows red instead of the hook silently enforcing yesterday's shape.
+const SECTIONS = ["## Guards", "## Ran", "## Records", "## Rulings", "## Look for these when you use it"];
+const bodyWith = (sections: string[]): string => `#577 a title\n\nwhat changed.\n\n${sections.join("\n\nprose under it\n\n")}\n\nprose under it\n`;
+const WHOLE_BODY = bodyWith(SECTIONS);
+const prBody = (text: string): Payload => bash(`gh pr create --body '${text}'`);
+const headingRows = (): Fixture[] =>
+  SECTIONS.map((heading): Fixture => [
+    `pr body missing ${heading} denied`,
+    prBody(bodyWith(SECTIONS.filter((s) => s !== heading))),
+    "deny",
+    heading,
+  ]);
+const asContext = (text: string): Decision => ({ hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text } });
+// Returns a deny when the check denied, so a row wanting context reds on the channel itself rather than on the text: warn and deny are different slots and only one of them stops the call.
+const templateCheck = (file: string) => async (): Promise<Decision> => {
+  const { deny: reason, warn } = headingCheck(WHOLE_BODY, file);
+  return reason
+    ? { hookSpecificOutput: { hookEventName: "PreToolUse", permissionDecision: "deny", permissionDecisionReason: reason } }
+    : asContext(warn ?? "");
+};
 const GATE6_ARMS: [string, string][] = [
   ["render", "src/render/style.ts"], ["world", "src/world/generate.ts"], ["society", "src/society/history.ts"],
   ["core", "src/core/grid.ts"], ["noise", "src/noise/simplex.ts"], ["terrain", "src/terrain/heightfield.ts"],
@@ -97,7 +118,20 @@ const FIXTURES: Fixture[] = [
   ["pr body via subshell cat read", bash('gh pr create --body "$(cat body.md)"', SCRATCH), "deny", "em-dash"],
   ["relative body-file resolved against cwd", bash("gh pr create --body-file body.md", SCRATCH), "deny", "em-dash"],
   ["unreadable body-file warns", bash("gh pr create --body-file nope.md", "/"), "context", "could not read"],
-  ["pr body clean gets gate 5 once", bash("gh pr create --body 'Closes #519. #518 stays open.'"), "context", "## Gate 5"],
+  ["pr body clean and whole gets gate 5 once", prBody(`Closes #519. #518 stays open.\n\n${WHOLE_BODY}`), "context", "## Gate 5"],
+  ...headingRows(),
+  ["a section named mid-line does not count as the section", prBody(bodyWith(["see the ## Guards section above", ...SECTIONS.slice(1)])), "deny", "## Guards"],
+  ["short -b body carrying every section allowed", bash(`gh pr create -b '${WHOLE_BODY}'`), "context", "## Gate 5"],
+  ["pr edit with no body at all is not held to the shape", bash("gh pr edit 5 --add-label chore"), "context", "## Gate 5"],
+  ["--fill builds the body inside gh and is not checked", bash("gh pr create --fill"), "context", "## Gate 5"],
+  ["an inline body in a shell variable is not checked", bash('gh pr create --body "$BODY"'), "context", "## Gate 5"],
+  ["an inline body from an unreadable file is not checked", bash('gh pr create --body "$(cat nope.md)"', "/"), "context", "could not read"],
+  ["pr comment is not held to the PR body shape", bash("gh pr comment 5 --body 'a note'"), null, ""],
+  ["issue create is not held to the PR body shape", bash("gh issue create --title t --body 'a note'"), null, ""],
+  ["a missing template warns and never denies", templateCheck("/nonexistent/PULL_REQUEST_TEMPLATE.md"), "context", "there is no PR template"],
+  ["a headingless template says so rather than missing", templateCheck(join(SCRATCH, "headingless.md")), "context", "carries no `## ` heading"],
+  // The same payload as the row above it, with the other needle: a warning returned in ghRefusal's DECISION slot short-circuits checkBash before the Gate 5 note is pushed, and every row that asserts only the warning's own text passes while the gate is gone.
+  ["a warning does not swallow the gate 5 note", bash("gh pr create --body-file nope.md", "/"), "context", "## Gate 5"],
   ["git push gets gate 5 once", bash("git push -u origin footguns-skill"), "context", "## Gate 5"],
   ["git status gets nothing", bash("git status"), null, ""],
   ["heredoc into e2e denied", bash("cat > scripts/e2e/suite-x.mjs <<'EOF'\nconst R = `x.split(/\\s+/)`;\nEOF"), "deny", "backtick"],
@@ -134,8 +168,11 @@ const run = async (): Promise<number> => {
   };
   mkdirSync(SCRATCH, { recursive: true });
   writeFileSync(join(SCRATCH, "body.md"), "a — b\n");
+  writeFileSync(join(SCRATCH, "headingless.md"), "# a template with no sections\n\nprose only.\n");
   symlinkSync(ROOT, LINK);
   for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);
+  report(requiredHeadings() !== null, "section names found in .github/PULL_REQUEST_TEMPLATE.md");
+  report(!readFileSync(TEMPLATE_PATH, "utf8").includes("—"), "the PR template carries no em-dash to prefill a body with");
   for (const [name, subject, want, needle] of FIXTURES) {
     const sessionId = `selftest-${process.pid}-${name}`;
     const got = typeof subject === "function" ? await subject() : await decide({ ...subject, session_id: sessionId });

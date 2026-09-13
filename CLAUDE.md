@@ -18,13 +18,16 @@ and how a design decision gets made; `specs/ui-design.md` is the look and feel i
 the type case, the palette by role, the chart's dress, the rooms and their furniture, the voice,
 contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting);
 `specs/development-workflow.md` is the order of operations from a filed issue to a pull request,
-including which subagent runs at which step and the one place the work stops for Alex's ruling.
+including which subagent runs at which step and the one place the work stops for Alex's ruling; and
+`specs/settle-doctrine.md` is how an e2e wait is written, ratified across #526 and #529 and pointed
+at by the footguns skill's Gate 2.
 **`specs/rulebook.md` is REQUIRED READING before any change that touches the renderer, a committed
 chart, the golden, a regen, a seed, or the order of work**, `specs/ui-design.md` before any work
-whose deliverable is an appearance, and `specs/development-workflow.md` before starting a sub or an
-epic, since its early steps are the ones a session cannot go back and take later. None of the three
-is summarized here; where this file and a spec disagree, the spec is right. The ruled pixels those
-specs were decided from are archived under `design/`, one
+whose deliverable is an appearance, `specs/development-workflow.md` before starting a sub or an
+epic, since its early steps are the ones a session cannot go back and take later, and
+`specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe. None of
+them is summarized here; where this file and a spec disagree, the spec is right. The ruled pixels
+those specs were decided from are archived under `design/`, one
 directory per design round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a
 sitting).
 
@@ -236,7 +239,7 @@ the skill is the same doctrine as a checklist read at the moment it applies, bec
 guard-that-cannot-red, dead-control and cascade defects reach PRs #524 to #548. Its
 `hooks/footgun-gate.ts`, wired in `.claude/settings.json`, puts the matching gate in front of you when
 you touch a test, a browser-driving script, a stylesheet, a new page or suite, or a push, and refuses
-four of the never-list items outright (`hooks/README.md`).
+the mechanical never-list items outright, the ones `hooks/README.md` enumerates.
 
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks you to
   (ruled 2026-09-10). The whole order of operations, and which of the agents below runs at which

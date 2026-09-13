@@ -34,7 +34,17 @@ is ever removed.
     negated closing keyword such as "does not close #N" or "does not fix owner/repo#N". The body is
     read inline, from `--body-file` (resolved against the call's cwd), and from `$(cat file)`; a body
     file it cannot read is named in a warning instead of skipped. A `-F name=value` typed field is
-    not read as a body file.
+    not read as a body file, though `-F file.md` on `gh pr create` / `gh pr edit` is the short
+    `--body-file` and is read as one;
+  - `gh pr create` / `gh pr edit` whose body skips one of the `## ` sections of
+    `.github/PULL_REQUEST_TEMPLATE.md`. The sections are READ from that file on every call, never
+    copied here, so renaming one there reds the selftest rather than shipping a hook that checks
+    yesterday's shape. Presence of the heading is the check, never its content. It fires only on a
+    body the hook can actually read: an inline `-b` / `--body`, or a body file it read. It does not
+    fire when no body is supplied at all, nor when the body text cannot be resolved, and a template
+    that is missing or carries no `## ` heading WARNS and lets the call run rather than blocking it
+    (#577). The warning travels in the warning channel, because a decision returned in the refusal
+    slot would take the Gate 5 injection with it.
 - **Warns** (context only, the call runs): `.click()` in a browser-script fragment; a punctuation
   escape inside a template literal; `pkill` aimed at the browser; an unreadable body file; a
   `typescript` package that could not be loaded, which skips the escape scan.
@@ -45,7 +55,13 @@ is ever removed.
   scanned: an apostrophe in prose would open a false span, so the scanner errs toward silence there.
 - A script written by anything other than a shell redirect or heredoc (a `python3 -c` write, a
   `node -e` write) is not scanned. Silence, not refusal.
-- A body passed through a shell variable or a pipe is not read.
+- A body passed through a shell variable or a pipe is not read. For the em-dash and closing-keyword
+  checks that is silence; for the section check it would be a false REFUSAL, since the body flag is
+  present and no heading is readable, so a command carrying an expansion the hook cannot resolve
+  skips the section check instead. Silence again, at the cost of a `--body "$BODY"` going unchecked.
+- `--fill` / `-f`, `--fill-first`, `--fill-verbose`, `--editor` / `-e`, `--template` / `-T` and
+  `--web` build the body inside `gh` or in an editor, so no section check runs on them. Silence,
+  not refusal.
 - A gate spent on a call the user then rejects is not shown again that session.
 - The once-per-session state is keyed on the hook payload's `session_id`. Measured 2026-09-11 in a
   live dispatch: a subagent's Bash DOES
@@ -73,7 +89,10 @@ node .claude/skills/vellum-footguns/hooks/footgun-gate.selftest.ts
 
 One line per fixture, `ok` or `FAIL` with the decision and the text it expected; the exit code is
 the number of misses. Every gate's text is asserted non-empty first, so a renamed heading in
-`SKILL.md` fails here rather than shipping an empty injection. Gate 6's rows are generated one per
+`SKILL.md` fails here rather than shipping an empty injection, and the PR template is asserted to
+carry sections and no em-dash, so a template that would prefill an unusable body fails here too.
+The five section names are written out in the fixture table and derived in the hook; that asymmetry
+is deliberate, since fixtures built by reading the template would follow a rename and red nothing. Gate 6's rows are generated one per
 ARM of its roster regex, because a roster is only as strong as its least-swept alternative: the
 prover found 10 of 19 arms carried no fixture, so a typo in any of them would have shipped silent.
 Two of its rows exist for shapes no relative path can reach, an absolute `file_path` (which is what

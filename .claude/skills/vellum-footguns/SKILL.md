@@ -82,7 +82,7 @@ Scars: #368, #474, #520, #526, #529, #533, #535, #536, #537, #540, #542, #545, #
    LEFT where it began (stillness at the start looks like stillness at the end), and never carries
    the check's own claim. **The throw belongs inside a `step`**: wrap the gestures, waits and checks
    of one numbered check in `step("CL5", async () => ...)` and a timeout fails that check by name
-   instead of taking the suite with it (#534). See `references/settle-doctrine.md`.
+   instead of taking the suite with it (#534). See `specs/settle-doctrine.md`.
 7. **A wait's break condition demands every conjunct the check asserts.** Navigation commits before
    the document parses; a same-URL `Page.navigate` returns on the stale document; any redraft is not
    the redraft the gesture requested.
@@ -176,7 +176,7 @@ Scars: #49, #101, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; ca
     while it runs; three rounds at most, residue named in the body. **Commit before you dispatch it**,
     and before any review agent: it runs in the directory you launched it from, and a suite run there
     DELETES the generated assets under `public/`, which neither `git status` nor `git status --ignored`
-    reports (#573). `references/pr-body.md` is the shape.
+    reports (#573). `.github/PULL_REQUEST_TEMPLATE.md` is the shape, and the hook refuses a body that skips one of its sections.
 
 ## Gate 6: before changing the renderer or a committed chart
 
@@ -219,12 +219,13 @@ are copied here.
 
 ## Never
 
-The hook in `hooks/`, wired in `.claude/settings.json`, refuses the first four mechanically; the rest are yours. Provenance: the stash stack (PR #369 and the worktree rules), perl (2026-09-02, twice in one session), CDP escapes (#520, #540), closing keywords (#486, #524), truncation read as absence (2026-07-26), `gh issue view` (CLAUDE.md), the profile leak (#546), counts in durable docs (2026-08, four rulings).
+The hook in `hooks/`, wired in `.claude/settings.json`, refuses the mechanical ones outright, enumerated in `hooks/README.md`; the rest are yours. Provenance: the stash stack (PR #369 and the worktree rules), perl (2026-09-02, twice in one session), CDP escapes (#520, #540), closing keywords (#486, #524), truncation read as absence (2026-07-26), `gh issue view` (CLAUDE.md), the profile leak (#546), counts in durable docs (2026-08, four rulings), the PR body shape (#577).
 
 - A bare mutation of the stash stack (`git stash`, `pop`, `clear`, `apply` or `drop` without a ref): it is shared across every worktree. `git stash push -m ... -- <paths>`, `apply <sha>`, or a WIP commit.
 - `perl -pi` with a non-ASCII replacement: it re-encodes every existing non-ASCII byte in the file. Use node or a heredoc, then grep for `Â`.
 - A single-escaped `\s`, `\d`, `\w`, `\b` inside a backtick string in `scripts/e2e/`.
 - A PR body with an em-dash, or with "not close #N" / "does not fix #N".
+- A PR body that skips one of `.github/PULL_REQUEST_TEMPLATE.md`'s `## ` sections. Presence is the check, not content: a section with nothing to report says so and stays.
 - A negative claim built from `head`, `tail`, `--limit`, or a jq slice. Count against the true total or query the item.
 - `gh issue view` as evidence an issue is empty. It silently returns nothing for some issues here; use `gh api`.
 - `pkill` on a run you intend to repeat; the harness leaves a browser profile behind for every kill.

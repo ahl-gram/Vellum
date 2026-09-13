@@ -34,7 +34,8 @@ agent audit built from scratch. This file does not carve out an exception, and n
 that reds each one, the evidence that will say it works, and the rosters and doctrine the change
 drags with it. The required reading is due before the plan, not after it: `specs/rulebook.md` before
 any change that touches the renderer, a committed chart, the golden, a regen, a seed or the order of
-work, and `specs/ui-design.md` before any work whose deliverable is an appearance.
+work, `specs/ui-design.md` before any work whose deliverable is an appearance, and
+`specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe.
 
 **4. Get a cold read on the plan: `vellum-plan-skeptic`.** Not `vellum-pr-skeptic`, which reviews a
 diff and has none to read at this point. The plan skeptic attacks the plan's assumptions, its
@@ -109,8 +110,8 @@ the house norm rather than an omission. The record still has to exist: with no i
 carries the calls and a PR comment carries any ruling of Alex's. "It was decided in chat" is not a
 record, because the cold skeptic at step 14 cannot read chat, and neither can the next session.
 
-**13. Open the PR.** `references/pr-body.md` in the footguns skill is the shape. Every line is a
-claim the skeptic will check.
+**13. Open the PR.** `.github/PULL_REQUEST_TEMPLATE.md` is the shape, and the footgun hook refuses a
+body that skips one of its sections. Every line is a claim the skeptic will check.
 
 **14. Run `vellum-pr-skeptic`, dispatched COLD.** The prompt is the PR number or branch name and
 NOTHING else: no summary, no claims about tests, no rationale. Make no edits while it runs.
