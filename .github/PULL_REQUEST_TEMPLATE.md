@@ -1,4 +1,4 @@
-<!-- Every line here is a claim the cold skeptic will verify against GitHub and the diff. Fill it from logs, not from expectation. A section with nothing to report still stays: "None. This PR carries no test." is a valid Guards section. EDITING THIS FILE: every `## ` line in it is enforced on `gh pr create` and `gh pr edit`, so guidance goes in a comment like this one and never in a heading. -->
+<!-- Every line here is a claim the cold skeptic will verify against GitHub and the diff. Fill it from logs, not from expectation. A section with nothing to report still stays: "None. This PR carries no test." is a valid Guards section. EDITING THIS FILE: every `## ` line in it is enforced on `gh pr create` and `gh pr edit`, so guidance goes in a comment like this one and never in a heading; and adding a section is RETROACTIVE, since the next `gh pr edit` against a PR opened under the old shape is refused for skipping it, which is the routine edit that folds a skeptic ledger into a body at workflow step 15. -->
 
 #NNN `<title>`
 

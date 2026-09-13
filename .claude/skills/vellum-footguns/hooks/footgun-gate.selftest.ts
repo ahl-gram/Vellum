@@ -4,7 +4,7 @@
  * string from .claude/settings.json through sh with a real, a symlinked, and a missing CLAUDE_PROJECT_DIR.
  */
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, readFileSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,6 +15,9 @@ const ROOT = resolve(HERE, "..", "..", "..", "..");
 const SCRATCH = join(tmpdir(), `footgun-selftest-${process.pid}`); // named here, created in run(): FIXTURES needs the path at module scope, and a module that mints a temp dir just by being imported leaks one per import
 const LINK = join(SCRATCH, "linked-root");
 const TEMPLATE_PATH = join(ROOT, ".github", "PULL_REQUEST_TEMPLATE.md");
+// A checkout of the hook with no .github/ beside it. TEMPLATE resolves from the hook file's own directory, so this is the only way to drive decide() down the no-template path: an env override would be a seam that exists for the test, and calling headingCheck directly skips ghRefusal, which is where the warning could be returned in the wrong tuple slot.
+const ROOTLESS = join(SCRATCH, "rootless");
+const ROOTLESS_HOOK = join(ROOTLESS, ".claude", "skills", "vellum-footguns", "hooks", "footgun-gate.ts");
 const SETTINGS = JSON.parse(execFileSync("cat", [join(ROOT, ".claude", "settings.json")], { encoding: "utf8" })) as {
   hooks: { PreToolUse: { hooks: { command: string }[] }[] };
 };
@@ -61,9 +64,22 @@ const headingRows = (): Fixture[] =>
     `pr body missing ${heading} denied`,
     prBody(bodyWith(SECTIONS.filter((s) => s !== heading))),
     "deny",
-    heading,
+    `"${heading}"`,
   ]);
 const asContext = (text: string): Decision => ({ hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text } });
+// Its own session_id per row: the gate is once per session and these two rows share a payload, so a shared id would hand the second one no Gate 5 and make it look like the warning had swallowed it.
+const inRootlessCheckout = (payload: Payload, tag: string) => async (): Promise<Decision> => {
+  const session = `rootless-${process.pid}-${tag}`;
+  try {
+    return readDeployed(() => execFileSync(process.execPath, [ROOTLESS_HOOK], { input: JSON.stringify({ ...payload, session_id: session }), encoding: "utf8" }));
+  } finally {
+    try {
+      unlinkSync(statePath(session));
+    } catch {
+      /* nothing was written when no gate fired */
+    }
+  }
+};
 // Returns a deny when the check denied, so a row wanting context reds on the channel itself rather than on the text: warn and deny are different slots and only one of them stops the call.
 const templateCheck = (file: string) => async (): Promise<Decision> => {
   const { deny: reason, warn } = headingCheck(WHOLE_BODY, file);
@@ -129,6 +145,13 @@ const FIXTURES: Fixture[] = [
   ["pr comment is not held to the PR body shape", bash("gh pr comment 5 --body 'a note'"), null, ""],
   ["issue create is not held to the PR body shape", bash("gh issue create --title t --body 'a note'"), null, ""],
   ["a missing template warns and never denies", templateCheck("/nonexistent/PULL_REQUEST_TEMPLATE.md"), "context", "there is no PR template"],
+  ["a readable --body-file missing a section is denied", bash("gh pr create --body-file no-ran.md", SCRATCH), "deny", '"## Ran"'],
+  ["a readable --body-file carrying every section is allowed", bash("gh pr create --body-file whole.md", SCRATCH), "context", "## Gate 5"],
+  ["a $(cat file) on a non-body flag is not a PR body", bash("gh pr edit 5 --add-label \"$(cat no-ran.md)\"", SCRATCH), "context", "## Gate 5"],
+  ["a literal $ in a single-quoted body does not disarm the check", prBody(`${bodyWith(SECTIONS.filter((x) => x !== "## Ran"))}\nit cost $5\n`), "deny", '"## Ran"'],
+  // decide() down the real no-template path, not headingCheck in isolation: these two are the only rows that can see a warning returned through ghRefusal's DECISION slot, which short-circuits checkBash before the Gate 5 note is pushed.
+  ["a checkout with no template warns through the deployed path", inRootlessCheckout(bash(`gh pr create --body '${WHOLE_BODY}'`), "warn"), "context", "there is no PR template"],
+  ["a checkout with no template still shows gate 5", inRootlessCheckout(bash(`gh pr create --body '${WHOLE_BODY}'`), "gate"), "context", "## Gate 5"],
   ["a headingless template says so rather than missing", templateCheck(join(SCRATCH, "headingless.md")), "context", "carries no `## ` heading"],
   // The same payload as the row above it, with the other needle: a warning returned in ghRefusal's DECISION slot short-circuits checkBash before the Gate 5 note is pushed, and every row that asserts only the warning's own text passes while the gate is gone.
   ["a warning does not swallow the gate 5 note", bash("gh pr create --body-file nope.md", "/"), "context", "## Gate 5"],
@@ -169,6 +192,11 @@ const run = async (): Promise<number> => {
   mkdirSync(SCRATCH, { recursive: true });
   writeFileSync(join(SCRATCH, "body.md"), "a — b\n");
   writeFileSync(join(SCRATCH, "headingless.md"), "# a template with no sections\n\nprose only.\n");
+  writeFileSync(join(SCRATCH, "no-ran.md"), bodyWith(SECTIONS.filter((x) => x !== "## Ran")));
+  writeFileSync(join(SCRATCH, "whole.md"), WHOLE_BODY);
+  mkdirSync(dirname(ROOTLESS_HOOK), { recursive: true });
+  cpSync(join(HERE, "footgun-gate.ts"), ROOTLESS_HOOK);
+  cpSync(join(HERE, "..", "SKILL.md"), join(ROOTLESS, ".claude", "skills", "vellum-footguns", "SKILL.md"));
   symlinkSync(ROOT, LINK);
   for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);
   report(requiredHeadings() !== null, "section names found in .github/PULL_REQUEST_TEMPLATE.md");

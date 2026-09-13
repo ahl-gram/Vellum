@@ -44,7 +44,12 @@ is ever removed.
     fire when no body is supplied at all, nor when the body text cannot be resolved, and a template
     that is missing or carries no `## ` heading WARNS and lets the call run rather than blocking it
     (#577). The warning travels in the warning channel, because a decision returned in the refusal
-    slot would take the Gate 5 injection with it.
+    slot would take the Gate 5 injection with it. Adding a section to the template is RETROACTIVE:
+    the next `gh pr edit --body-file` against a PR opened under the old shape is refused for skipping
+    it, and folding a review ledger into a body that way is what workflow step 15 asks for.
+    A body file is a body only when a body FLAG named it: `$(cat f)` is read from any flag for the
+    em-dash scan, and counting it here would refuse `gh pr edit N --add-label "$(cat notes.md)"` as a
+    PR body skipping sections it was never meant to carry.
 - **Warns** (context only, the call runs): `.click()` in a browser-script fragment; a punctuation
   escape inside a template literal; `pkill` aimed at the browser; an unreadable body file; a
   `typescript` package that could not be loaded, which skips the escape scan.
@@ -59,6 +64,8 @@ is ever removed.
   checks that is silence; for the section check it would be a false REFUSAL, since the body flag is
   present and no heading is readable, so a command carrying an expansion the hook cannot resolve
   skips the section check instead. Silence again, at the cost of a `--body "$BODY"` going unchecked.
+  Single-quoted spans are stripped before that test, so a literal `$5` in a body does not disarm it,
+  but an unquoted `$HOME` anywhere in the same command still does. Silence, not refusal.
 - `--fill` / `-f`, `--fill-first`, `--fill-verbose`, `--editor` / `-e`, `--template` / `-T` and
   `--web` build the body inside `gh` or in an editor, so no section check runs on them. Silence,
   not refusal.

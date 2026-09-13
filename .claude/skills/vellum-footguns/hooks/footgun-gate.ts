@@ -50,6 +50,7 @@ const NEGATED_CLOSE = /(\bnot|\bnever|n't|\bno|\bwithout)\s+(clos(e|es|ed|ing)|f
 const EM_DASH = "—";
 const INLINE_BODY = /(^|\s)(--body|-b)(=|\s)/;
 const UNRESOLVED_EXPANSION = /\$(?!\(\s*(?:cat\s|<))/;
+const SINGLE_QUOTED = /'[^']*'/g;
 
 export const gateText = (label: string): string => {
   const section = readFileSync(SKILL, "utf8").split("\n## ").slice(1).find((s) => s.startsWith(label));
@@ -209,22 +210,22 @@ const readRelative = (name: string, cwd: string): string => {
   return readFileSync(isAbsolute(expanded) ? expanded : join(cwd || ".", expanded), "utf8");
 };
 
-const bodyText = (command: string, cwd: string): { body: string; unread: string[]; read: string[] } => {
+const bodyText = (command: string, cwd: string): { body: string; unread: string[]; fromBodyFlag: string[] } => {
   let body = command;
   const unread: string[] = [];
-  const read: string[] = [];
+  const fromBodyFlag: string[] = [];
   for (const pattern of [BODY_FILE, BODY_SUBSHELL]) {
     for (const match of command.matchAll(pattern)) {
       const name = match[1] ?? "";
       try {
         body += "\n" + readRelative(name, cwd);
-        read.push(name);
+        if (pattern === BODY_FILE) fromBodyFlag.push(name);
       } catch {
         unread.push(name);
       }
     }
   }
-  return { body, unread, read };
+  return { body, unread, fromBodyFlag };
 };
 
 export const requiredHeadings = (file: string = TEMPLATE): string[] | null => {
@@ -252,7 +253,7 @@ export const headingCheck = (body: string, file: string = TEMPLATE): { deny: str
   if (!missing.length) return { deny: null, warn: null };
   return {
     deny:
-      `vellum-footguns: the PR body skips ${missing.join(", ")}. The shape in ${file} is the house record of what a PR claims, ` +
+      `vellum-footguns: the PR body skips ${missing.map((h) => `"${h}"`).join(", ")}. The shape in ${file} is the house record of what a PR claims, ` +
       `and a section that is absent is a claim never made rather than made and wrong. Presence is the whole check: ` +
       `"## Guards" followed by "None. This PR carries no test." is a valid section.`,
     warn: null,
@@ -261,7 +262,7 @@ export const headingCheck = (body: string, file: string = TEMPLATE): { deny: str
 
 const ghRefusal = (segment: string, command: string, cwd: string): [Decision, string | null] => {
   if (!GH_BODY_WRITE.test(segment)) return [null, null];
-  const { body, unread, read } = bodyText(command, cwd);
+  const { body, unread, fromBodyFlag } = bodyText(command, cwd);
   if (body.includes(EM_DASH)) {
     return [deny("vellum-footguns: the body carries an em-dash; the house forbids them in issue and PR bodies."), null];
   }
@@ -283,8 +284,9 @@ const ghRefusal = (segment: string, command: string, cwd: string): [Decision, st
     );
   }
   const inline = INLINE_BODY.test(segment);
-  const supplied = inline || read.length > 0;
-  const readable = !unread.length && !(inline && UNRESOLVED_EXPANSION.test(command));
+  // `$(cat f)` is read from ANY flag, which is right for the em-dash scan and wrong here: without the body-flag narrowing, `gh pr edit N --add-label "$(cat notes.md)"` reads as a PR body and is refused for skipping sections it was never meant to carry.
+  const supplied = inline || fromBodyFlag.length > 0;
+  const readable = !unread.length && !(inline && UNRESOLVED_EXPANSION.test(command.replace(SINGLE_QUOTED, "''")));
   if (GH_PR_WRITE.test(segment) && supplied && readable) {
     const { deny: missing, warn } = headingCheck(body);
     if (missing) return [deny(missing), null];
