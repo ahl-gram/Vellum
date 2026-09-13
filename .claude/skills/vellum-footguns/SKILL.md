@@ -41,33 +41,26 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
    tests a second time. Neither fails; both inflate the count. It also collects, ANYWHERE in the
    tree, a file named `test`, `test-*`, `*-test`, `*_test` or `*.test`, so a helper in
    `test-support/` must not carry one of those names either; `test/repo/test-collection.test.ts`
-   reds on both arms since #562. If `test-support/` has no precedent for the
+   reds on both arms. If `test-support/` has no precedent for the
    shape you need, that is not evidence the repo lacks the convention: it already holds the helpers
    and the importers.
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
    `vellum-guard-prover` for the whole guard set (10 minutes, unit tests only, name the mutations you
    did NOT try). It mutates in its OWN detached worktree, built by `scripts/agent-sandbox.ts` at the
-   DISPATCH tree's HEAD since #575; before that a hardcoded path in its agent file sent it to the
-   main checkout's HEAD and it proved the wrong commit in silence, which is why the recipe is now one
-   reviewed script instead of prose in four places. Uncommitted work is still not in the tree it
-   proves unless carried across by hand:
-   commit first, or you prove something about a different tree than the one you are shipping, and
-   the sha it reports is then a false attribution it has to declare. Zero red is
-   a hole. A guard proved unable to red is deleted, never shipped.
+   DISPATCH tree's HEAD (#575), so uncommitted work is not in the tree it proves unless carried
+   across by hand: commit first, or you prove something about a different tree than the one you are
+   shipping, and the sha it reports is then a false attribution it has to declare. Zero red is a
+   hole. A guard proved unable to red is deleted, never shipped.
 10. **A test that spawns a child gives it its own time limit.** `execFileSync` takes a `timeout`;
     with none, a wedged child hangs the unit lane forever with no red to read, and `--test-timeout`
     cannot save it, because the block is synchronous and the runner's own timer never gets the event
-    loop (measured: a test running `execFileSync("sh", ["-c", "sleep 8"])` under
-    `--test-timeout=1000` PASSED at 8012ms). The shape that wedges is a large `input` to a child
-    that DRAINS it: at 200000 bytes, 2 unbounded runs in 2000 hung outright and 12 capped runs in
-    12000 came back as ETIMEDOUT; at 1024 bytes, 0 in 12000 (#564). The limit is a
-    cap on a hang, not a performance budget, so set it far above the worst real run; and a cap
-    nothing ever reaches cannot bite, so keep one child that deliberately outlives it, written as a
-    SINGLE command (`sh -c 'sleep 5'`), since killing a multi-command child orphans its grandchild
-    and the cap then leaks a process every time it fires (measured 2026-09-11: 10 orphans in 10
-    runs for `sleep 5; printf x`, 0 for the single-command form). Pin what reaches the spawn, not
-    what the option builder returns: the seam between them is where a default cap goes missing with
-    every child still green.
+    loop. The shape that wedges is a large `input` to a child that DRAINS it (#564, measured in
+    `references/scars.md`). The limit is a cap on a hang, not a performance budget, so set it far
+    above the worst real run; and a cap nothing ever reaches cannot bite, so keep one child that
+    deliberately outlives it, written as a SINGLE command (`sh -c 'sleep 5'`), since killing a
+    multi-command child orphans its grandchild and the cap then leaks a process every time it fires.
+    Pin what reaches the spawn, not what the option builder returns: the seam between them is where
+    a default cap goes missing with every child still green.
 
 ## Gate 2: before writing an e2e check or a CDP probe
 
@@ -167,13 +160,12 @@ Scars: #49, #101, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; ca
 7. **A sibling defect found on the way is filed, not folded**, unless it is an accessibility failure
    this PR itself caused.
 8. **Any call you made that the issue did not rule on gets a dated issue comment before the PR is
-   opened.** (It read "before the push" until 2026-09-10, written when a branch went up once at the
-   end; the branch now goes up at the first commit, so the deadline that matters is the review.)
-   The skeptic diffs against the newest ratified statement. A recon that falsifies an older comment
-   says so in a new comment; the old one is never edited. **A ruling of Alex's goes there too, and
-   you are the one who records it**: he rules in the session, which leaves the issue reading unruled
-   to everyone after. Where there is no issue, the PR body and a PR comment are the record. Open
-   decisions go to Alex as a menu, and you STOP there.
+   opened.** The branch goes up at the first commit, so the review is the deadline that matters, not
+   the push. The skeptic diffs against the newest ratified statement. A recon that falsifies an
+   older comment says so in a new comment; the old one is never edited. **A ruling of Alex's goes
+   there too, and you are the one who records it**: he rules in the session, which leaves the issue
+   reading unruled to everyone after. Where there is no issue, the PR body and a PR comment are the
+   record. Open decisions go to Alex as a menu, and you STOP there.
 9. **A stacked PR lands BEFORE its base does.** Squashing a base deletes the branch, and a PR whose
    base is gone is closed and can be neither reopened nor retargeted: the review record goes with it.
    Stacking itself is fine and is how the integration epics ship, every child merging into the epic

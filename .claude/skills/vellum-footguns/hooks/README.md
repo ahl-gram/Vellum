@@ -48,7 +48,7 @@ is ever removed.
 - A body passed through a shell variable or a pipe is not read.
 - A gate spent on a call the user then rejects is not shown again that session.
 - The once-per-session state is keyed on the hook payload's `session_id`. Measured 2026-09-11 in a
-  live dispatch, replacing the note that said this had never been measured: a subagent's Bash DOES
+  live dispatch: a subagent's Bash DOES
   reach this hook (a dispatched agent's `perl -i` came back refused with `PERL_REASON` verbatim), and
   it SHARES the parent's `session_id`, so that agent's `git push --dry-run` spent the parent session's
   Gate 5 and the parent never saw it. The once-per-session limit lives in `gateNote` alone, so a
@@ -92,11 +92,9 @@ Measured 2026-09-09 on this Mac, ten runs each, through the deployed `sh -c` com
 
 - a Bash or Edit call that triggers nothing, or a refusal: about 64ms;
 - a Write or Edit into a browser-driving script, which loads the TypeScript parser: about 182ms;
-- gate text, at most once per session each, re-measured 2026-09-11: Gate 1 4417 chars, Gate 2 3288,
-  Gate 3 1631, Gate 4 746, Gate 5 3198, Gate 6 2122, roughly 3900 tokens if every one fires in a
-  single session. Three of the six were already stale when this line was first corrected, and the
-  correction itself then went stale inside the same branch when Gate 1 grew again, which is the
-  standing hazard: nothing sweeps markdown, so re-run
-  `gateText` for all six whenever a gate's text changes;
+- gate text, at most once per session each, on the order of 4000 tokens if every one fires in a
+  single session. The per-gate figure is a pointer, not a copy, since nothing sweeps markdown and
+  the copy here went stale twice; measure it with
+  `node --input-type=module -e 'const {gateText}=await import("./.claude/skills/vellum-footguns/hooks/footgun-gate.ts");for(const g of ["Gate 1","Gate 2","Gate 3","Gate 4","Gate 5","Gate 6"])console.log(g,gateText(g).length)'`;
 - every turn of every session in this repo: the skill's `description` line in the system prompt.
   That is the only permanent term, and the reason the description is kept short.

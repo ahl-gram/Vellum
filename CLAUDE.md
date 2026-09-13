@@ -32,11 +32,10 @@ These refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project 
 
 ## What is tracked, and who this file assumes
 
-**This file is TRACKED in the repo as of 2026-08-08** (it was local-only before, backed up out of
-band). It is project instructions, so it belongs with the project. `RESUME-HERE.md`, `session-notes/`
-and `.claude/settings.local.json` stay gitignored: those are per-session state and personal
-settings, not instructions. `.claude/agents/`, `.claude/skills/` and `.claude/settings.json` (the
-footgun hook) are tracked.
+**This file is TRACKED in the repo.** It is project instructions, so it belongs with the project.
+`RESUME-HERE.md`, `session-notes/` and `.claude/settings.local.json` stay gitignored: those are
+per-session state and personal settings, not instructions. `.claude/agents/`, `.claude/skills/` and
+`.claude/settings.json` (the footgun hook) are tracked.
 
 Because it is tracked, **editing it now costs a branch and a PR** like any other tracked file (main
 requires both CI checks and enforces them for admins). Budget for that before adding a rule
@@ -53,10 +52,9 @@ stand on their own and are the part worth having, as do the tracked specs under 
 
 The live roadmap is the private GitHub Project "Vellum Roadmap" (project number 1 under
 `ahl-gram`), grouped by a single-select "Roadmap" field. **Read the phase options from the board,
-never from here**: `gh project field-list 1 --owner ahl-gram`. This file used to carry a copy of
-the list as a convenience and it went stale TWICE (missing four options for weeks, then two more),
-which is the same failure that retired the workspace's `PROJECTS.md` in 2026-08. A copy that costs
-a PR to update and sits beside the command that replaces it earns nothing. At every handoff, keep
+never from here**: `gh project field-list 1 --owner ahl-gram`. A copy here would cost a PR to
+update and sit beside the command that replaces it, and every such convenience copy in this
+workspace has drifted (the workspace's `PROJECTS.md` was retired for it). At every handoff, keep
 the board current with `gh`: newly filed issues get added and phased; shipped issues get closed.
 The global `session-handoff` skill updates SESSION-NOTES (here at
 `session-notes/SESSION-NOTES.md`, not the repo root), RESUME-HERE, and auto-memory
@@ -102,7 +100,7 @@ the "Node runs the TypeScript directly, no build step" property it might cost). 
 contort a design just to keep the count at zero, and do not present zero-dep as a requirement it is
 not. If a dependency is the right tool, propose it plainly with its tradeoffs and let Alex decide.
 
-## One language, one pipeline (post-#260)
+## One language, one pipeline
 
 New code is **TypeScript under `src/`**, covered by `npm run check`, and reaches the browser
 only through the existing build (the Vite press bundles `src/site/` + engine; Node runs the
@@ -125,9 +123,9 @@ caught by a prediction failing to match data, never by a test.
   leaving to review is that **none of them throws**: you get a plausible number instead of an
   error, so nothing downstream tells you the measurement was broken.
   - **Argument order: the seed comes FIRST.** Build a world with `defaultRecipe(seed, overrides)`
-    from `src/world/generate.ts`. The old `recipeForCommand(command, seed, ...)` took the COMMAND
-    first and was deleted at #138, so a script copied from that era calling `recipeForCommand(42)`
-    silently generates the DEFAULT world. The tell is that every "seed" yields identical counts.
+    from `src/world/generate.ts`. Swapped arguments do not throw: `createRng` coerces a recipe
+    object to seed 0 (measured 2026-09-12: `defaultRecipe({...}, 7)` and `defaultRecipe({...}, 99)`
+    return identical recipes), so the tell is that every "seed" yields identical counts.
   - **Chart space is not grid space.** `PlaceMark.nx/ny` (`buildPlaceManifest` in
     `src/render/place-manifest.ts`) are 0..1 fractions of the RENDERED chart, with the frame margin
     baked in (`MARGIN_FRACTION` in `src/render/transform.ts`, 0.045). They cannot be used to sample
@@ -136,8 +134,8 @@ caught by a prediction failing to match data, never by a test.
     and is read with `.at(x, y)`. `world.oceanDist` is a bare `Float64Array`, indexed `y * W + x`.
     Calling `.at(x, y)` on the latter silently resolves to `TypedArray.at(x)`, which ignores the
     second argument and returns an unrelated cell.
-- **The chart number IS the seed** (`cartouche.ts:146`), so any screenshot identifies its world
-  exactly. Reproduce before theorising.
+- **The chart number IS the seed** (the `CHART №` line in `src/render/layers/cartouche.ts`), so
+  any screenshot identifies its world exactly. Reproduce before theorising.
 
 **Check rather than reason.** The same discipline governs claims about the REPO and the TOOLING, not
 just numbers. A claim that sounds like architecture ("comments are not on the read path", "that
@@ -298,10 +296,10 @@ each agent's prose (#575). PR #369 is what committing from a worktree costs when
 - **`vellum-guard-prover` is the documented exception.** It must mutate the code under review, which
   is the DISPATCH tree's HEAD and not `origin/main`, so it builds its own detached worktree with
   `node scripts/agent-sandbox.ts create guard-<topic>-<round>`. Do not point it at harness isolation.
-  `vellum-pr-skeptic` builds one too since #573, and since Alex's ruling of 2026-09-12 it does so for
-  EVERY run rather than as a fallback: `npm test` deletes the generated assets under `public/` and
-  neither `git status` nor `git status --ignored` reports it, so no reviewer runs a suite in a tree it
-  does not own. It passes the sha explicitly, which that script requires of a `skeptic-*` sandbox.
+  `vellum-pr-skeptic` builds one for EVERY run (Alex, 2026-09-12): `npm test` deletes the generated
+  assets under `public/` and neither `git status` nor `git status --ignored` reports it, so no
+  reviewer runs a suite in a tree it does not own. It passes the sha explicitly, which that script
+  requires of a `skeptic-*` sandbox.
 - **A dispatched review agent may not move or restore the tree it was dispatched from**, which is
   normally your live worktree. On 2026-09-11 `vellum-pr-skeptic` checked a PR head out in two of them
   (#573). Commit before you dispatch one: `git restore` and `git checkout -- <path>` discard without
