@@ -335,6 +335,6 @@ comment. This is a convenience index, not their home.
 *Companion to the roadmap Project (status, order, phase), to `CLAUDE.md` (process at the keyboard),
 to `specs/ui-design.md` (the look and feel), to `specs/development-workflow.md` (the order of
 operations), to `specs/settle-doctrine.md` (how an e2e wait is written, and what the harness
-environment does), and to
-`specs/flake-record.md` (the CI reds believed to be flakes). Rules change rarely; when one does,
+environment does), and to `specs/flake-record.md` (the CI reds believed to be flakes). Rules change
+rarely; when one does,
 edit this file.*

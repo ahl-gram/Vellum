@@ -18,11 +18,14 @@ out of a private file and into the repo; Alex ruled the split in that session.
    value settles and asserts on the last sample, never on the first, because the first sample that is
    merely non-null is whatever was still in flight. `makeSettle` in `scripts/e2e/settle-support.mjs`
    is both at once, and is the shape to copy: it hands the previous sample to the predicate as
-   `settled(d, last)`, and it throws with that last read as the payload. A predicate that RETURNS
-   false instead of throwing is a readiness wait in the wrong shape, so its caller asserts on the
-   answer; a discarded false burns the whole budget and passes having tested nothing. What #534
-   changed is where the throw lands. Wrap the gestures, waits and checks that make up one numbered
-   check in
+   `settled(d, last)`, and it throws with that last read as the payload. **Judging the last sample is
+   not the same as RETURNING it**: a poll that runs out of tries and falls through to its last read
+   hands back an unsettled value with nothing marking it as such, which reintroduces the flake
+   silently, and one mutation run proved it. The last sample is what the throw CARRIES, so the
+   failure names the value it gave up on. A predicate that RETURNS false instead of throwing is a
+   readiness wait in the wrong shape, so its caller asserts on the answer; a discarded false burns
+   the whole budget and passes having tested nothing. What #534 changed is where the throw lands.
+   Wrap the gestures, waits and checks that make up one numbered check in
    `step("CL5", async () => ...)` (`makeStep` in `scripts/e2e/step-support.mjs`), and a timeout
    fails THAT check by its own code, with the wait's label and last read as the payload, while the
    groups after it still run. A throw outside every step is contained one level up by `runSelected`,
