@@ -141,3 +141,18 @@ section points there rather than restating it.
   `clearMobile` in `scripts/e2e/harness.mjs`. The figure is not written down here because no command
   in this repo demonstrates it. Gate 3 already carries the typing-moment half, that a window size
   does not set the layout viewport.
+- **A run deletes its own browser profile only if it is allowed to finish.** Each local run mints a
+  throwaway profile under `tmpdir()` (`mkdtemp` in `scripts/e2e/harness.mjs`) and `cleanup()` removes
+  it with `rmSync` rather than the promise `rm`, which is not a style choice: `cleanup()` is
+  synchronous and every caller exits immediately after it, so an unawaited promise there never runs
+  and no run ever deletes anything. An ad-hoc script driving the harness owes the same discipline,
+  since `cleanup(); process.exit(0)` is the shape every probe here uses, and async teardown added to
+  one is awaited before the exit or it is decoration. A killed run leaves its profile and often its
+  browser, and that debt is not paid by a failure: it starves the machine, and the symptom is a lane
+  that STALLS rather than fails, its log going quiet with the process alive and no red check to read.
+  CI never sees this, since the runner is thrown away each time, so it accrues locally across a long
+  session. Gate 2 item 11 carries the typing-moment half, the two commands that count the strays
+  before a quiet run is reported as still running, and the Never list refuses `pkill` on a run you
+  intend to repeat. Sweep what earlier runs left with
+  `find /var/folders/*/T -maxdepth 1 -name 'vellum-e2e-*' -type d -mmin +30 -print0 | xargs -0 rm -rf`,
+  whose age filter is what keeps it from deleting the profile of the run you are watching.

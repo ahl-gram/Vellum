@@ -1,4 +1,4 @@
-// The wait a CSS slide or fold is owed; the cause is in specs/flake-record.md under CD7b (#578).
+// The wait a CSS slide or fold is owed; the cause is in .claude/skills/vellum-footguns/references/flake-record.md under CD7b (#578).
 
 export interface MotionRead {
   /** The edge the gesture moves: the lowest top edge among the controls a check reaches for, or the panel's own left edge. */
