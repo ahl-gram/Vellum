@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-/** #208 Sub 7: one multi-entry Vite press bundles the app surfaces into their gitignored .bundle.js twins under public/; the worker is emitted ONCE at explorer/worker.bundle.js (both pages spawn it), shared chunks land in explorer/chunks/ with fixed names, and every knob keeps the emitted code behaviorally identical to the source (no minify, no downlevel, no preload polyfill). */
+/** #208 Sub 7: one multi-entry Vite press bundles the app surfaces into their gitignored .bundle.js twins under public/; the worker is emitted ONCE at explorer/worker.bundle.js and every surface that runs a job through `initWorker` in `src/site/explorer/worker-client.ts` shares it, shared chunks land in explorer/chunks/ with fixed names, and every knob keeps the emitted code behaviorally identical to the source (no minify, no downlevel, no preload polyfill). */
 
 const REPO = fileURLToPath(new URL("..", import.meta.url));
 
