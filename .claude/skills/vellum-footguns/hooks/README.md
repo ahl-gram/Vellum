@@ -23,7 +23,23 @@ is ever removed.
   worktree> stash pop` does not.
   - any bare mutation of the shared stash stack: `git stash`, `push` without `-m`, `pop`, `apply` or
     `drop` without an explicit `stash@{n}` or sha, `clear`;
-  - `perl -i` / `-pi` / `-0pi` when the command carries a non-ASCII character or a `\x{...}` escape;
+  - `perl -i` / `-pi` / `-0pi` when the command carries a non-ASCII character or a `\x{...}` escape,
+    or when it carries a `|`-delimited `s|...|...|` whose PATTERN half contains `\|`. That reads as an
+    escaped DELIMITER, so the pattern unescapes to an alternation with an empty branch and matches at
+    offset zero of every input: the replacement lands at the head of the file, the target is
+    untouched, and it exits 0. The pipe is the only delimiter checked because it is the only one
+    measured to do this; under `+`, `!` and `#` the same shape leaves the input unchanged. An escaped
+    pipe in the REPLACEMENT half is correct perl and is not refused;
+  - `gh api` on a bare issue or pull-request endpoint (`repos/O/R/issues/N` or `repos/O/R/pulls/N`,
+    with nothing after the number but an optional trailing slash) carrying any data field (`-f`,
+    `-F`, `--raw-field`, `--field`, `--input`) and no explicit method other than POST. Any data field
+    switches the call to POST, and a POST to that endpoint UPDATES the item rather than commenting on
+    it: the fields sent overwrite what is there, nothing is created, and it exits 0 (#193, PR #550).
+    `/comments` and every other sub-path are untouched, so the remedy the Never list names still
+    runs, and `-X PATCH` in any of its spellings is the way through when editing IS the intent. Read
+    from the SEGMENT only, never the raw command, so that reading an issue and then commenting on it
+    in one call is not refused. Pull requests are covered on Alex's ruling of 2026-09-14, which
+    widened #607's filed scope;
   - a Write, Edit or MultiEdit into `scripts/**/*.mjs` or `out/**/*.mjs`, or a shell redirect or
     heredoc into one, whose template literal contains a single-escaped `\s \S \d \D \w \W \b \B` or
     `\.`. Template literals are found with the TypeScript parser (`ts.createSourceFile`), never a
@@ -69,6 +85,20 @@ is ever removed.
 - `--fill` / `-f`, `--fill-first`, `--fill-verbose`, `--editor` / `-e`, `--template` / `-T` and
   `--web` build the body inside `gh` or in an editor, so no section check runs on them. Silence,
   not refusal.
+- The perl pipe payload is read from the RAW command while the `-i` shape is read from the segment,
+  so a compound `perl -pi -e 's/a/b/' f.ts; grep -n 's|x\|y|z|' notes.md` is a false REFUSAL. The
+  non-ASCII condition beside it has exactly this shape already, so it is no new class, and the remedy
+  is one call each. Refusal, not silence.
+- The same substitution with no `-i`, and `m|...|` or `tr|...|` rather than `s`, are not checked.
+  Silence, not refusal.
+- The `gh api` path is read after quoted spans are blanked, so a quoted path (`gh api
+  "repos/O/R/issues/193" -f body=x`), one built from shell variables (`repos/$O/$R/issues/$N`) or one
+  built by a subshell is not seen at all. The house idiom is the literal unquoted form. Silence, not
+  refusal.
+- A non-body data field on a bare issue path (`-f state=closed`, `-f title=...`) is refused too. That
+  is the rule rather than an overreach, since the refusal is about the implicit POST and not about
+  the body in particular, and `-X PATCH` or the purpose-built `gh issue` subcommand is the way
+  through. Refusal, stated.
 - A gate spent on a call the user then rejects is not shown again that session.
 - The once-per-session state is keyed on the hook payload's `session_id`. Measured 2026-09-11 in a
   live dispatch: a subagent's Bash DOES

@@ -141,3 +141,20 @@ section points there rather than restating it.
   `clearMobile` in `scripts/e2e/harness.mjs`. The figure is not written down here because no command
   in this repo demonstrates it. Gate 3 already carries the typing-moment half, that a window size
   does not set the layout viewport.
+- **The harness ASKS for a window far taller than a screen**, `--window-size=1280,2400` in
+  `scripts/e2e/harness.mjs`. What it lays out at is a different question and this repo answers it
+  nowhere: a window size does not set the layout viewport, and the nearest instrument is the
+  `innerHeight` carried in `legendRoom` in `scripts/e2e/suite-broadside.mjs`, which is captured and
+  printed on failure but never asserted. So the height is stated here as the REQUEST and no
+  effective figure is claimed. What the suites do establish is the consequence: a page that would
+  need scrolling on a laptop can sit whole inside that window, and then a check whose fixture IS the
+  scroll never reaches its own fixture, because the late section it meant to bring up to the reading
+  line was on screen the whole time, so it passes having exercised nothing. A suite that depends on
+  scrolling sizes its OWN viewport with `Emulation.setDeviceMetricsOverride`, at whatever its
+  fixture needs and with the reason at the line; `scripts/e2e/suite-document-rooms.mjs` and
+  `scripts/e2e/suite-reading-room.mjs` both do, at different sizes, which is why the rule is size
+  your own fixture and not any one figure. It is the raw call rather than `setMobileViewport`
+  because that wrapper sets `mobile: true`, which changes layout semantics as well as size. **This
+  is not the case clause 14 governs**: there the VIEWPORT is the runner's job because the reset on
+  the ERROR path decides what the NEXT suite inherits, while here a suite sizes its own fixture
+  inside its own run, and leaving that to the runner is what loses the fixture.
