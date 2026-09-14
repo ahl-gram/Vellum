@@ -111,6 +111,7 @@ const FIXTURES: Fixture[] = [
   ["stash pop under time denied", bash("time git stash pop"), "deny", "shared"],
   ["stash pop inside if denied", bash("if true; then git stash pop; fi"), "deny", "shared"],
   ["stash pop inside for denied", bash("for f in a; do git stash pop; done"), "deny", "shared"],
+  ["stash pop across a line continuation denied", bash("git \\\n  stash pop"), "deny", "shared"],
   ["stash apply with sha allowed", bash("git stash apply 0123abcd"), null, ""],
   ["stash drop by ref allowed", bash("git stash drop stash@{2}"), null, ""],
   ["named stash allowed", bash("git stash push -u -m 'tag' -- src/a.ts"), null, ""],
@@ -144,13 +145,15 @@ const FIXTURES: Fixture[] = [
   ["pr body em-dash denied", bash("gh pr edit 5 --body 'a — b'"), "deny", "em-dash"],
   ["issue body em-dash denied", bash("gh issue create --title t --body 'a — b'"), "deny", "em-dash"],
   ["pr comment em-dash denied", bash("gh pr comment 5 --body 'a — b'"), "deny", "em-dash"],
+  // The line-continuation join reaches these two refusals as well as the gh api one, and the join is what puts the body on the same segment as the command that carries it.
+  ["pr body em-dash across a line continuation denied", bash("gh pr create --title t \\\n  --body 'a — b'"), "deny", "em-dash"],
+  ["pr body negated close across a line continuation denied", bash("gh pr create --title t \\\n  --body 'this does not close #518'"), "deny", "CLOSING"],
   ["issue comment negated close allowed", bash("gh issue comment 5 --body 'does not close #3'"), null, ""],
   ["typed -F field is not a body file", bash("gh issue comment 549 -F body=hello"), null, ""],
   ["gh api issue body overwrite denied", bash("gh api repos/o/r/issues/193 -f body='new text'"), "deny", "bare issue or pull-request endpoint"],
   ["gh api combined short flags denied", bash("gh api repos/o/r/issues/193 -if body=x"), "deny", "bare issue or pull-request endpoint"],
   ["gh api across a line continuation denied", bash("gh api repos/o/r/issues/193 \\\n  -f body=x"), "deny", "bare issue or pull-request endpoint"],
   ["gh api a continuation still does not fuse the read-then-comment pair", bash("gh api repos/o/r/issues/193 \\\n  --jq .title; gh api repos/o/r/issues/193/comments -f body='x'"), null, ""],
-  // The third leg of the trio: a BARE newline is two separate commands, so joining any newline rather than a continuation would fuse them. Without this row that widening reds nothing.
   ["gh api a bare newline is two commands, not one", bash("gh api repos/o/r/issues/193 --jq .title\ngh api repos/o/r/issues/193/comments -f body='x'"), null, ""],
   ["gh api two methods takes the LAST, as gh does", bash("gh api --method GET repos/o/r/issues/193 -f q=1 -X POST -f body=y"), "deny", "bare issue or pull-request endpoint"],
   ["gh api quoted body assignment denied", bash('gh api repos/o/r/issues/193 -f "body=new text"'), "deny", "bare issue or pull-request endpoint"],
@@ -187,7 +190,6 @@ const FIXTURES: Fixture[] = [
   ["gh api an item path inside a field VALUE is not the endpoint", bash("gh api repos/o/r/issues -f body=see-repos/o/r/issues/193"), null, ""],
   ["gh api bare read allowed", bash("gh api repos/o/r/issues/193"), null, ""],
   ["gh api read with jq allowed", bash("gh api repos/o/r/issues/193 --jq .body"), null, ""],
-  // Not a boundary but a recorded MISS: the segmenter blanks quoted spans, so a quoted or variable-built path hides the endpoint and the destructive call goes through. README argues the direction; these two rows are what make the hole visible instead of theoretical.
   ["gh api a QUOTED path is a known miss, not a boundary", bash('gh api "repos/o/r/issues/193" -f body=x'), null, ""],
   ["gh api a variable-built path is a known miss, not a boundary", bash("gh api repos/$OWNER/$REPO/issues/$N -f body=x"), null, ""],
   ["gh api read then comment in one call allowed", bash("gh api repos/o/r/issues/193 --jq .title; gh api repos/o/r/issues/193/comments -f body='x'"), null, ""],

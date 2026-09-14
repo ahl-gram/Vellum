@@ -47,7 +47,6 @@ const PERL_META_DELIMITER = /\bs([|+*?.$])(?:(?!\1)[\s\S])*\\\1/;
 const GH_BODY_WRITE = /^gh (pr|issue) (create|edit|comment)\b/;
 const GH_API_CALL = /^gh api\b/;
 const GH_API_BARE_ITEM = /(?:^|\s)(?:https:\/\/[^\s/]+\/)?\/?repos\/[^\s/]+\/[^\s/]+\/(?:issues|pulls)\/\d+\/?(?=\s|$)/;
-// The short arm reads a whole cluster because pflag combines them, so `-if body=x` and the glued `-fbody=x` both carry a live field flag.
 const GH_API_FIELD = /(?:^|\s)(?:-[A-Za-z]*[fF]|--(?:raw-field|field|input)\b)/;
 const GH_API_METHOD = /(?:^|\s)(?:-X|--method)[=\s]*"?(\w*)/g;
 const GH_PR_WRITE = /^gh pr (create|edit)\b/;
@@ -232,7 +231,6 @@ const GH_API_WRITE_REASON =
   "<file>`, or say `-X PATCH` when editing the item IS the intent. The tell afterwards is a response `html_url` ending " +
   "`/issues/N` instead of `#issuecomment-<id>`.";
 
-// gh takes the LAST --method on the line, so reading the first would let `--method GET ... -X POST` through as harmless. null is no flag at all; "" is a flag whose value the quote blanking ate, which exempts rather than refusing so that a quoted spelling of the remedy this very refusal recommends is not itself refused.
 const lastMethod = (segment: string): string | null => {
   const seen = [...segment.matchAll(GH_API_METHOD)];
   return seen.length ? (seen.at(-1)?.[1] ?? "") : null;
