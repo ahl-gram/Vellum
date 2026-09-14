@@ -212,8 +212,13 @@ at #260 with its clean-list entry kept deliberately.
 - **A seed re-roll** (terrain reshape, culture or name-template edits) is a different, larger cost:
   it changes world identity and re-pins the golden checksum. **Only one may be in flight at a time**,
   and the set that rule excludes against is the next section. **It also has a hand-fixed tail that no
-  script covers**: hand-authored copy quotes the hero world by name, in `src/pages/index.astro` and
-  in `README.md`, and a re-roll makes both wrong silently. Edit them in the same change as the regen.
+  script covers**: hand-authored prose quotes the hero world by name, and the regen commands rewrite
+  none of it. Find the tail with a grep for the hero world's own title rather than from a list, which
+  is what this rule is for, because the prose is spread across pages and nothing sweeps it. The
+  failure is SILENT wherever no test reads the prose, which today is every page carrying it. Where a
+  hand-authored value happens to be pinned, the re-roll fails loudly instead: `README.md` names seed
+  42's culture, and `test/world/covenant-seed42.test.ts` reds on it. Treat a loud red there as the
+  lucky case, not the shape of the problem.
 - **Some levers are golden-safe by construction, and a change behind one of them owes no regen and
   no golden re-pin.** The named ones are worth knowing before paying for a regen.
   - **A render gate that only region sheets pass.** `world.region !== undefined` selects

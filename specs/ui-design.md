@@ -391,7 +391,7 @@ afterwards. A shadow escapes if the keyframes do not own it. Only a rendered pro
 
 **A one-shot ceremony needs its own guard rather than an end event.** Hiding an element mid-animation
 fires no animation event at all in Chrome, so a ceremony that must not replay cannot record that it
-ran by listening for its own end. Two rules follow, and together they are the recipe:
+ran by listening for its own end. The recipe is a pair of rules:
 
 - **The trigger is a class the host applies, never the hidden attribute.** Restoring display starts
   an animation afresh, so a rule gated on hidden replays the ceremony every time the element is shown
