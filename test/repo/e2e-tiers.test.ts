@@ -154,10 +154,10 @@ test("ci.yml runs one job per lane, and its matrix is exactly E2E_LANES", () => 
     /run: npm run test:e2e:lanes -- --lane \$\{\{ matrix\.lane \}\}/,
     "the e2e step does not pass its matrix lane to the driver, so each job runs every lane",
   );
-  // Branch protection matches a required check by JOB NAME, and two matrix jobs sharing one name is the same failure as a rename.
+  // Branch protection matches a required check by JOB NAME, and two matrix jobs sharing one name is the same failure as a rename. Anchored to the JOB's own four-space line: a step carries a name: field too, so an unanchored match is satisfied by the step name while both jobs report one check (prover, 2026-09-14).
   assert.match(
     body,
-    /name: build & e2e lane \$\{\{ matrix\.lane \}\}/,
+    /^ {4}name: build & e2e lane \$\{\{ matrix\.lane \}\}$/m,
     "the e2e job's name no longer carries its lane, so the two jobs report one check name and main's required checks no longer match",
   );
   assert.match(
