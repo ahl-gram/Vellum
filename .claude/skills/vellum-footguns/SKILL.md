@@ -78,10 +78,13 @@ Scars: #368, #474, #520, #526, #529, #533, #535, #536, #537, #540, #542, #545, #
    it) or a min (one hairline fails it). Give the sample a control that legitimately paints.
 5. **A regex inside a CDP `evaluate` template literal loses its backslashes.** Write `\\s`, or build
    the payload with `String.raw`. It never throws: `/\s+/` arrives as `/s+/` and splits on the letter.
-6. **No blind sleeps.** A settle polls to rest, THROWS on timeout, requires the geometry to have
-   LEFT where it began (stillness at the start looks like stillness at the end), and never carries
-   the check's own claim. **The throw belongs inside a `step`**: wrap the gestures, waits and checks
-   of one numbered check in `step("CL5", async () => ...)` and a timeout fails that check by name
+6. **No blind sleeps.** A settle polls to rest, requires the geometry to have LEFT where it began
+   (stillness at the start looks like stillness at the end), and never carries the check's own claim.
+   **A readiness wait THROWS on timeout; a measurement poll keeps reading and asserts on its LAST
+   sample, never its first**, which is whatever was still in flight, and it throws too rather than
+   handing back that last read (ruled 2026-09-13, #589). **The throw belongs inside a `step`**: wrap
+   the gestures, waits and checks of one numbered check in `step("CL5", async () => ...)` and a
+   timeout fails that check by name
    instead of taking the suite with it (#534). See `specs/settle-doctrine.md`.
 7. **A wait's break condition demands every conjunct the check asserts.** Navigation commits before
    the document parses; a same-URL `Page.navigate` returns on the stale document; any redraft is not

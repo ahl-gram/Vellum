@@ -15,8 +15,9 @@ how it is mounted, scaled or torn down is there and not here.
 
 Its other siblings hold what this file is not about: `specs/rulebook.md` the golden, the regen and
 the order of work, `specs/ui-design.md` how any of this looks, `specs/settle-doctrine.md` how a wait
-on it is written, and `.claude/skills/vellum-footguns/SKILL.md` the imperatives keyed to the moment
-of typing a check. Where this file and the rulebook disagree about a rule, the rulebook wins.
+on it is written and what the harness environment does, and `.claude/skills/vellum-footguns/SKILL.md`
+the imperatives keyed to the moment of typing a check. Where this file and the rulebook disagree
+about a rule, the rulebook wins.
 
 ## Region worlds and level of detail
 
@@ -175,4 +176,5 @@ of typing a check. Where this file and the rulebook disagree about a rule, the r
 
 *Companion to `specs/explorer-doctrine.md` (the living chart the reader touches),
 `specs/rulebook.md` (the golden, the regen, the order of work), `specs/ui-design.md` (how all of this
-looks), and `specs/settle-doctrine.md` (how a wait on it is written).*
+looks), and `specs/settle-doctrine.md` (how a wait on it is written, and what the harness
+environment does).*
