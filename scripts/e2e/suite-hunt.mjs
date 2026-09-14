@@ -1,4 +1,5 @@
 // Daily Hunt e2e (H1-H12, HD, HG) on the seed-of-the-day page.
+import { dropExpectedCancellations } from "./console-support.mjs";
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
   // Click targets are derived from the browser's OWN world via dynamic import, immune to any node-side date assumption; this is the only coverage of the click -> projection-inversion -> nearest-settlement snap.
@@ -256,7 +257,8 @@ export async function run(ctx) {
   await shoot("hunt-seed-of-the-day-zoomed.png");
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 
-  check("H9 the hunt run logged no JS exceptions or console errors", consoleErrors.length === huntErrBase, consoleErrors.slice(huntErrBase).join(" | ") || "clean");
+  const huntErrs = dropExpectedCancellations(consoleErrors.slice(huntErrBase));
+  check("H9 the hunt run logged no JS exceptions or console errors", huntErrs.length === 0, huntErrs.join(" | ") || "clean");
 
   const hitInLegend =
     !!tgt.legFrac &&

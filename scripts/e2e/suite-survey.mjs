@@ -1,5 +1,6 @@
 // Survey Ink e2e (SV1-SV11, #321): the static Explorer's survey surface; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 import { makeRoom } from "./room-support.mjs";
+import { dropExpectedCancellations } from "./console-support.mjs";
 
 import { makeStep } from "./step-support.mjs";
 
@@ -693,10 +694,7 @@ export async function run(ctx) {
   const sv8 = await evaluate(`location.hash.includes("year=")`);
   check("SV8 the Explorer's writer never emitted year= across every path this suite drove", sv8 === false, `hash=${await evaluate(`location.hash`)}`);
 
-  // "AbortError: Transition was skipped" is the #130 view-transition's expected cancellation when navigations chain fast, not an app error.
-  const errDelta = consoleErrors
-    .slice(errBase)
-    .filter((e) => !e.includes("AbortError: Transition was skipped"));
+  const errDelta = dropExpectedCancellations(consoleErrors.slice(errBase));
   check(
     "SV11 the survey flow is clean (no console errors, no 4xx)",
     errDelta.length === 0 && http4xx.length === httpBase,

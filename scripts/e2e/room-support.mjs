@@ -1,4 +1,5 @@
 // Shared helpers for the Reading-Room-hosted suites (#320); suite-reading-room.mjs deliberately keeps its own copies (the double-coverage premise), and the room's settle is NOT the shared waitSettled, which keys on the Explorer's #verso-turn.
+import { dropExpectedCancellations } from "./console-support.mjs";
 
 export const CHART_SVG = ".rf-chart svg:not(.voyage-overlay)";
 
@@ -89,9 +90,7 @@ export const scopedHealth = (ctx) => {
   const httpBase = http4xx.length;
   return {
     check: (label) => {
-      const errDelta = consoleErrors
-        .slice(errBase)
-        .filter((e) => !e.includes("AbortError: Transition was skipped"));
+      const errDelta = dropExpectedCancellations(consoleErrors.slice(errBase));
       const httpDelta = http4xx.slice(httpBase).filter((u) => !/favicon/i.test(u));
       check(
         label,
