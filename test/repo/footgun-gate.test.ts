@@ -40,7 +40,7 @@ test("a bare import of the fixture table runs nothing and mints nothing", () => 
   }
 });
 
-// Both guards below read the TEMPLATE, so neither can red when a PR body ships with no closing reference: a body reaches GitHub through `gh pr create --body-file` and never passes through this repo, so #597's own defect, a merged PR leaving its issue open, is not guardable from a test here and the template line is a prompt rather than a mechanism. The `#\d+` scan errs toward a false positive, since a number deliberately written as an example would red it, and never toward a miss.
+// Both guards below read the TEMPLATE, so neither can red when a PR body ships with no closing reference: the hook that reads a body off disk checks the sections and denies a negated keyword but never requires one, and a body written by hand rather than seeded from this file carries whatever its author typed, so #597's own defect, a merged PR leaving its issue open, is not guardable from a test here and the template line is a prompt rather than a mechanism. The number scan errs toward a false positive, since a number deliberately written as an example would red it, and never toward a miss.
 test("the PR template prompts for a closing reference above its first section, with a note beside it", () => {
   const lines = readFileSync(TEMPLATE, "utf8").split("\n");
   const firstSection = lines.findIndex((l) => l.trim().startsWith("## "));
@@ -48,13 +48,12 @@ test("the PR template prompts for a closing reference above its first section, w
   const closing = lines.findIndex((l) => l.trim().startsWith("Closes #"));
   assert.notEqual(closing, -1, "the template carries no `Closes #` line, so nothing prompts the author for the closing reference");
   assert.ok(closing < firstSection, `the closing line is at ${closing}, at or past the first \`## \` section at ${firstSection}, where the hook would enforce whatever heading precedes it`);
-  assert.ok(
-    lines.slice(closing + 1, firstSection).some((l) => l.trim().startsWith("<!--")),
-    "the closing line carries no note between it and the first section, so nothing says what to write when the PR has no issue",
-  );
+  const note = lines.slice(closing + 1, firstSection).filter((l) => l.trim().startsWith("<!--")).join("\n");
+  assert.notEqual(note, "", "the closing line carries no note between it and the first section");
+  assert.match(note, /No issue:/, "the note beside the closing line does not say what a PR with no issue writes in its place, which is the half of the prompt an author without an issue needs");
 });
 
 test("the PR template names no literal issue number", () => {
-  const hits = readFileSync(TEMPLATE, "utf8").match(/#\d+/g);
-  assert.equal(hits, null, `the template names ${hits?.join(", ")}, and its text is copied into every PR body: a number beside a negated close keyword is denied by the hook, and any number at all cross-references that issue from every PR opened afterwards`);
+  const hits = readFileSync(TEMPLATE, "utf8").match(/#\d+|issues\/\d+/g);
+  assert.equal(hits, null, `the template names ${hits?.join(", ")}, and a body opened from it carries that text: a number beside a negated close keyword is denied by the hook, and any reference at all cross-references that issue from every PR opened from the template afterwards`);
 });

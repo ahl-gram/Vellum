@@ -145,8 +145,9 @@ record, because the cold skeptic at step 14 cannot read chat, and neither can th
 body that skips one of its sections. Every line is a claim the skeptic will check. **The body carries
 that template's closing-reference line too**, which nothing enforces: the hook checks the sections and
 denies a negated keyword, but never requires one, so `gh pr view <N> --json closingIssuesReferences`
-is read before the PR is handed over, and a PR with no issue writes the template's no-issue line in
-its place rather than dropping it.
+is read before the PR is handed over. The grammar that read depends on, and what a PR with no issue
+writes instead, are `vellum-footguns` Gate 5 item 5 and the template's own note; neither is restated
+here.
 
 **14. Run `vellum-pr-skeptic`, dispatched COLD.** The prompt is the PR number or branch name and
 NOTHING else: no summary, no claims about tests, no rationale. Make no edits while it runs.
