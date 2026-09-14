@@ -17,13 +17,40 @@ is ever removed.
   it the same way rather than by adding paths that look related.
 - **Refuses** (the tool call does not run, the reason is shown). A command is read in COMMAND position
   only: quoted strings and heredoc bodies are blanked before segmenting, segments split on shell
-  separators and the `then`/`do`/`else` keywords, prefixes like `env X=1`, `command`, `time`, `sudo`
-  are stripped, and `git`'s global options (`-C dir`, `-c k=v`, `--git-dir=`) are skipped before the
-  subcommand is read. So a grep or a comment that mentions a rule passes, and `git -C <other
-  worktree> stash pop` does not.
+  separators and the `then`/`do`/`else` keywords, a backslash-newline line continuation is joined back
+  into one line first so a command split across lines is still read as one, prefixes like `env X=1`,
+  `command`, `time`, `sudo` are stripped, and `git`'s global options (`-C dir`, `-c k=v`,
+  `--git-dir=`) are skipped before the subcommand is read. So a grep or a comment that mentions a
+  rule passes, and `git -C <other worktree> stash pop` does not.
   - any bare mutation of the shared stash stack: `git stash`, `push` without `-m`, `pop`, `apply` or
     `drop` without an explicit `stash@{n}` or sha, `clear`;
-  - `perl -i` / `-pi` / `-0pi` when the command carries a non-ASCII character or a `\x{...}` escape;
+  - `perl -i` / `-pi` / `-0pi` when the command carries a non-ASCII character or a `\x{...}` escape,
+    or when it carries an `s` whose delimiter is one of `| + * ? . $` and whose PATTERN half escapes
+    that same delimiter, tied together by a backreference so that escaping a DIFFERENT metacharacter
+    (`s|a\+b|c|`, which real perl leaves alone) is not refused. Perl strips the backslash before ANY
+    delimiter, so the literal the author wrote is lost and the bare metacharacter goes live.
+    Measured 2026-09-14 on `hello world`:
+    `s|world\||PLANET|` prints `PLANEThello world`, because the pipe unescapes to an alternation with
+    an empty branch that matches at offset zero, while `s+world\++`, `s*world\**`, `s?world\??` and
+    `s$world\$$` each REPLACE a target their literal pattern does not contain. `s.world\..` does the
+    same whenever a character follows the match (`hello worldX` gives `hello PLANET`) and is inert
+    only at a line end, where the dot has nothing to consume. All exit 0, and with `-i` they land in
+    the file. `#` and `!` were measured to leave the input unchanged at every position, which is why
+    the class is the metacharacters and not every delimiter. An escaped delimiter in the REPLACEMENT
+    half is correct perl and is not refused;
+  - `gh api` on a bare issue or pull-request endpoint (`repos/O/R/issues/N` or `repos/O/R/pulls/N`,
+    with nothing after the number but an optional trailing slash) carrying any data field (`-f`,
+    `-F`, `--raw-field`, `--field`, `--input`, including inside a combined short-flag cluster such as
+    `-if`) and no explicit method other than POST, the method read from the LAST `-X` / `--method` on
+    the line because that is the one gh uses. ANY explicit non-POST verb exempts the call, not
+    `PATCH` alone. Any data field switches the call to POST, and a POST to that endpoint UPDATES the
+    item rather than commenting on it: the fields sent overwrite what is there, nothing is created,
+    and it exits 0 (Issue #193, PR #550).
+    `/comments` and every other sub-path are untouched, so the remedy the Never list names still
+    runs, and `-X PATCH` in any of its spellings is the way through when editing IS the intent. Read
+    from the SEGMENT only, never the raw command, so that reading an issue and then commenting on it
+    in one call is not refused. Pull requests are covered on Alex's ruling of 2026-09-14, which
+    widened #607's filed scope;
   - a Write, Edit or MultiEdit into `scripts/**/*.mjs` or `out/**/*.mjs`, or a shell redirect or
     heredoc into one, whose template literal contains a single-escaped `\s \S \d \D \w \W \b \B` or
     `\.`. Template literals are found with the TypeScript parser (`ts.createSourceFile`), never a
@@ -69,6 +96,55 @@ is ever removed.
 - `--fill` / `-f`, `--fill-first`, `--fill-verbose`, `--editor` / `-e`, `--template` / `-T` and
   `--web` build the body inside `gh` or in an editor, so no section check runs on them. Silence,
   not refusal.
+- The perl pipe payload is read from the RAW command while the `-i` shape is read from the segment,
+  so a compound `perl -pi -e 's/a/b/' f.ts; grep -n 's|x\|y|z|' notes.md` is a false REFUSAL. The
+  non-ASCII condition beside it has exactly this shape already, so it is no new class, and the remedy
+  is one call each. Refusal, not silence.
+- The same substitution with no `-i`, and `m` or `tr` rather than `s`, are not checked. Silence, not
+  refusal.
+- **Paired delimiters are a real member of the bug's family and are NOT covered**, because they need a
+  different regex shape: perl's `s(pattern)(replacement)` escapes the CLOSING character rather than a
+  repeated single one, so a capture-and-backreference cannot see it. Measured 2026-09-14:
+  `echo 'hello (world)X' | perl -pe 's(world\))(PLANET)'` prints `hello (PLANETX`. Silence, not
+  refusal, and named rather than left out quietly.
+- `^` is excluded on measurement rather than on taste: as a delimiter it is a zero-width start
+  assertion that cannot be satisfied once the pattern has consumed anything, so `s^world\^^PLANET^`
+  silently does nothing instead of mis-editing. A different failure shape from the one this guard is
+  about.
+- `$` and `.` are in the class, and each costs a false refusal. `$` bites when `s` sits directly
+  before a `$` in ordinary shell text (a variable or a filename) and a `\$` appears later in the same
+  command; `.` bites on the commoner shape still, a standalone `s` before a dot plus any later `\.`,
+  so `perl -pi -e 's/a/b/' src/s.ts && grep -n '\.mjs' out.txt` is refused. That direction was chosen
+  deliberately for both: on a refusal a false positive is visible and one edit away, while a miss is a
+  silent corruption of the file. `.` is the one to re-judge first if this proves annoying in practice.
+- A method flag whose VALUE the quote blanking ate (`-X "PATCH"`) exempts the call rather than
+  refusing it, which is what stops the hook refusing the quoted spelling of the very remedy its own
+  message recommends. The cost is that a quoted `-X "POST"` is exempt too. Silence on a shape nobody
+  types by accident, bought to keep the remedy usable.
+- **Three misses are inherited from the segmenter itself**, so they apply to every refusal that reads
+  a segment, not only the newest ones. Each is silence rather than a false refusal, and each is a
+  shape a person would have to go out of their way to type, which is the whole of the argument for
+  leaving them: the segmenter is deliberately crude, and tightening it risks the false refusals that
+  crudeness buys away.
+  - A shell keyword in `SEPARATORS` inside an owner or repo NAME splits the call in two, because the
+    split is textual and a hyphen is a word boundary. `gh api repos/my-do-org/Vellum/issues/1 -f
+    body=x` passes, and so do `-then-`, `-else-` and `-elif-` in either the owner or the repo.
+  - A prefix `PREFIX` does not strip leaves the segment starting with the wrong word. `xargs gh api
+    repos/o/r/issues/1 -f body=x` passes, where the same call under `env X=1` is refused.
+  - A trailing shell COMMENT is read as part of the command, so it can supply a method the call does
+    not have: `gh api repos/o/r/issues/1 -f body=x # -X PATCH` passes, where the same call without
+    the comment is refused.
+- The `gh api` path is read after quoted spans are blanked, so a quoted path (`gh api
+  "repos/O/R/issues/193" -f body=x`), one built from shell variables (`repos/$O/$R/issues/$N`) or one
+  built by a subshell is not seen at all, and the destructive call goes through. **This is a MISS, not
+  benign silence**: on a refusal the silent direction is the footgun reaching the tool, and the only
+  thing bounding it is that the literal unquoted form is what this house types, which is a habit
+  rather than a guarantee. It is not closed because the fix, scanning the raw command, false-refuses
+  the ordinary read-then-comment pair the fixture table pins. Fixture rows record both halves.
+- A non-body data field on a bare issue path (`-f state=closed`, `-f title=...`) is refused too. That
+  is the rule rather than an overreach, since the refusal is about the implicit POST and not about
+  the body in particular, and `-X PATCH` or the purpose-built `gh issue` subcommand is the way
+  through. Refusal, stated.
 - A gate spent on a call the user then rejects is not shown again that session.
 - The once-per-session state is keyed on the hook payload's `session_id`. Measured 2026-09-11 in a
   live dispatch: a subagent's Bash DOES
