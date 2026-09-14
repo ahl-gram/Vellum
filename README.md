@@ -27,6 +27,9 @@ rose, a sea serpent, and a title cartouche.
 | **[Gallery](https://www.vellumworlds.com/gallery/)** | A twelve-world contact sheet |
 | **[Q & A](https://www.vellumworlds.com/faq/)** · **[Glossary](https://www.vellumworlds.com/glossary/)** | How it all works; the vocabulary printed on the charts |
 
+The Atlas is drawn into the site at build time rather than authored as a page,
+and the Gallery's charts are generated the same way.
+
 The daily seed is the current UTC date read as an integer `YYYYMMDD`, so
 everyone sees the same world on the same calendar day, and the page never
 needs a rebuild: it draws itself in your browser when you load it.
@@ -161,45 +164,6 @@ attribution required.
 
 ## For contributors
 
-The repository is two things: a dependency-light world engine, and the Astro
-site that serves it.
-
-- **The engine** (the `src/` world/render/atlas tree) has zero runtime
-  dependencies. Node 24+ runs its TypeScript directly (`erasableSyntaxOnly`),
-  no build step, and the CLI and tests run the same way.
-- **The site** takes dependencies where they earn their keep. All eight pages
-  (home, Q & A, Glossary, Explorer, Reading Room, Print Room, Seed of the Day, Gallery) are
-  Astro pages rendered through one shared layout (`src/pages/` + `src/layouts/`); the app
-  surfaces' code is TypeScript in `src/site/`, one language with the engine it
-  imports. One bundler, Vite, compiles the app and engine graph together into
-  the four app entries and the shared render worker, which is where the
-  runtime deps (`d3-selection`, `d3-transition`, `d3-zoom`) ship. `public/`
-  holds only static assets (goldens, fonts, per-page CSS, the icons). Dev deps:
-  `astro`, `typescript`, `@types/node`, `@types/d3-*`, `vite`, and `fontkit`
-  (with `@types/fontkit`), which reads the shipped Fell face for `npm run icons`.
-- **The build** (`npm run build`): `astro:generate` first writes the generated
-  trees into `public/` (the Vite app bundles, the atlas and gallery
-  showcases), then `astro build` assembles `dist/`, which GitHub Actions
-  publishes to Pages on every push to main.
-
-Day to day: `npm test` (unit), `npm run check` (typecheck), `npm run test:e2e`
-(headless-browser suite against a built `dist/`; needs a Chromium-family
-browser), `npm run dev` (local site). CI runs the e2e as
-`npm run test:e2e:lanes`, which is the same 22 suites split across two
-concurrent browsers on their own ports; either lane failing fails the job.
-`VELLUM_E2E_SUITES` narrows a serial run to one suite, a comma list, or
-`smoke`, which is a local debugging tier and no longer wired to CI.
-
-### Committed goldens
-
-The homepage's seven hero charts (`public/charts/*.svg`) and the social
-card (`public/og.png`, 1200x630, rebuilt by `npm run og` with an installed
-browser) are committed rather than generated at deploy time, because CI has no
-browser and the homepage pins its heroes. `npm run charts:regen` is their only
-writer; land a regen alone, with the label moves named in the PR.
-`public/favicon.svg` and `public/apple-touch-icon.png` (180x180) are the
-Punchcutter's Mark, the Fell SC small-cap v cut from the shipped
-`public/fonts/im-fell-english-sc-latin-400-normal.woff2` and linked from every
-page; `npm run icons` is their only writer (the PNG needs an installed browser),
-and a test pins the committed SVG to the font byte for byte, so any change to
-that file re-runs it.
+The house rules live in [`specs/`](specs/), one file per area and every one of
+them normative. Read them rather than a summary here, since the summary is the
+thing that goes stale.

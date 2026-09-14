@@ -286,23 +286,13 @@ at #260 with its clean-list entry kept deliberately.
 world identity. The loser rebases, re-pins, regenerates, then re-runs the regen commands.
 
 **Current membership: `{#113}`** (more seats on empty islands, so realm counts can exceed five). It
-is the only member, so the rule has nothing to exclude against today and #113 is clear to run.
+is the only member, so the rule has nothing to exclude against today.
 
-How the set reached one member, since a reader checking this line deserves to see it was not always
-one:
-
-- Originally `{#113, #49}`.
-- 2026-07-28: **#309 joined**, making `{#113, #49, #309}`, with a ratified ordering of #309 before
-  #113 so new island realms would be born with roads rather than churning the same worlds twice.
-- 2026-08-16: **#49 left.** Rescoped to renamings only, its former-borders half moved to #122.
-  Measured, not argued: the golden hashes only `w.realms.labels` from `partitionRealms`
-  (`src/society/realms.ts`), which takes no rng, and Alex ruled the former name never prints on the chart. #49 was therefore cheap tier and
-  has since closed.
-- 2026-08-16: **#309 left**, shipped as PR #410 (squash `359f359`). Its blast-radius spike measured a regen, not a
-  re-roll: the golden held. The "#309 before #113" ordering is discharged.
-
-**#122 does not join this set.** It sits behind an opt-in `annals?: boolean` render option and is
-byte-identical when off, so it moves neither the committed charts nor world identity.
+**#122 does not join this set, on the posture it is specced to take**: an opt-in `RenderOptions`
+member (`src/render/map-renderer.ts`) off by default, plus an additive, draw-free field on
+`HistoricalEvent` (`src/society/history.ts`). Built so, it moves neither the committed charts nor
+world identity. **Re-judge the tier unless the golden holds on the pinned checksum, annals-off is
+byte-identical, and the drift guard is green.**
 
 ## Scheduling rules
 
