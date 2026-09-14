@@ -24,8 +24,9 @@ READING before the work its row names.
 | `specs/settle-doctrine.md` | how an e2e wait is written, and what the harness environment it runs in actually does | any e2e wait, settle or CDP probe, and any screenshot, focus state or narrow viewport read in the harness |
 
 The ruled pixels those specs were decided from are archived under `design/`, one directory per design
-round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting). These refine the
-workspace rules in `~/CodeProjects/CLAUDE.md` for this project specifically.
+round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting).
+
+The rules below refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project.
 
 ## What is tracked, and who this file assumes
 
@@ -168,11 +169,13 @@ session already at xhigh cannot tell the frontmatter from inheritance.
 - **Zero red from the prover is a hole, not a pass.** A guard proved unable to bite is deleted rather
   than shipped; a mutation not reached inside the budget is unproven, and is named as such.
 - **A guard proves it can fail; a scanner proves which way it errs.** A guard that could pass
-  vacuously names the witness that makes it bite, at the test. A scanner cannot enumerate its own
-  blind spots, so it names them and argues the direction instead, and an unnamed blind spot with no
-  direction argued is the bug.
+  vacuously names the witness that makes it bite, at the test (`test/terrain/heightfield-detail.test.ts`
+  keeps the one seed that does). A scanner cannot enumerate its own blind spots, so it names them and
+  argues the direction instead, and an unnamed blind spot with no direction argued is the bug.
 - **A bound is derived, and where no principle gives the number, sweep first and set it above the
-  worst case with the headroom named.** Do not fix a sample size in advance: a bound fitted to the
+  worst case with the headroom named.** Where a principle does give it, the principle IS the bound and
+  the sweep only confirms it holds (`BOUND = RDP_EPSILON + 0.5` in `test/render/voyage-route.test.ts`
+  is half-cell geometry). Do not fix a sample size in advance: a bound fitted to the
   samples you happened to take breaks on the next one, and a handful of local runs is the shape that
   passes on a Mac and flakes on linux CI. The provenance is ONE dated line at the constant naming the
   range swept and the worst case (`test/prospect/input.test.ts` carries the form), which is the

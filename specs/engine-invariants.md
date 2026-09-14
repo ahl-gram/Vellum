@@ -230,8 +230,8 @@ says the measurement was broken, and the analysis built on it reads as confident
 **The seed comes FIRST.** Build a world with `defaultRecipe(seed, overrides)` and then
 `generateWorld`, both in `src/world/generate.ts`. Swapped arguments do not throw: `createRng` in
 `src/core/rng.ts` takes a number, so a recipe object passed where the seed belongs coerces to seed 0
-and every "seed" returns the same recipe. **Identical counts across different seeds is the tell**,
-and it is the only one you get.
+and every "seed" returns the same recipe. **Identical counts across different seeds is the tell**, and
+in a script under a type-checked root `npm run check` is the other, since the parameter is a number.
 
 **Chart space is not grid space.** `nx` and `ny` on the marks `buildPlaceManifest` returns
 (`src/render/place-manifest.ts`) are 0..1 fractions of the RENDERED chart with the frame margin baked
