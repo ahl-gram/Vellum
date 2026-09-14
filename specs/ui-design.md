@@ -137,11 +137,11 @@ written at the layer.** A border is tokenized whole, its ink and its geometry al
 how a border is drawn and not only what colour it is. A realm name takes its ink and its halo from
 tokens too, but its type size, tracking, weight, opacity and halo width sit inline in
 `featureLabelsLayer` (`src/render/layers/feature-labels.ts`): that treatment is what keeps the name
-legible over any dress, so it is one decision rather than four. Do not promote such a literal to a
+legible over any dress, so it is one decision rather than a handful. Do not promote such a literal to a
 token to look tidy, and do not add a style-varying value to a layer.
 
 **Ink arms hatch the FIELD, after Petra Sancta, and the charges keep the grey value ladder.** One
-pattern per field tincture, built by `inkHatch` in `src/render/layers/heraldry/hatch.ts`. Three
+pattern per field tincture, built by `inkHatch` in `src/render/layers/heraldry/hatch.ts`. These
 things about it are load bearing. Every pattern id is scoped by the document's existing suffix, so
 many arms sharing one sheet cannot collide. Every tile opens on an opaque paper rect, so nothing
 below bleeds through. And the charges stay on the grey ladder rather than joining the hatching,
@@ -150,8 +150,8 @@ outright. `armsNode` (`src/render/layers/heraldry.ts`) emits the pattern defs on
 carries a hatch, which is what keeps every colour dress byte-identical to a chart drawn before the
 hatching existed.
 
-**The realm tint is one dress decision, not three.** Where a dress wears it, the wash, the seat halo
-and the legend swatch are all drawn; where it does not, all three go together. A dress that shows one
+**The realm tint is ONE dress decision, not several.** Where a dress wears it, the wash, the seat halo
+and the legend swatch are all drawn; where it does not, they go together. A dress that shows one
 without the others is the defect. Whether the layer draws at all is the style's own flag
 (`politicalTints` in `src/render/style.ts`); what that means for the world underneath is
 `specs/engine-invariants.md`'s.

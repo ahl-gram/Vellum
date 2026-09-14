@@ -129,7 +129,7 @@ comment and move on.
 content only, in its own pull request. That archive is the visual spec; this file and the issue
 ledgers are the words.
 
-Two things a design round owes that the six steps above do not cover:
+Things a design round owes that the steps above do not cover:
 
 - **The archive pull request gets the cold skeptic, and the mock pages get the plate-reader.** An
   archive is content rather than code, which makes it look like neither is owed; both have found real
@@ -214,8 +214,8 @@ at #260 with its clean-list entry kept deliberately.
   and the set that rule excludes against is the next section. **It also has a hand-fixed tail that no
   script covers**: hand-authored copy quotes the hero world by name, in `src/pages/index.astro` and
   in `README.md`, and a re-roll makes both wrong silently. Edit them in the same change as the regen.
-- **Three levers are golden-safe by construction, and a change behind any of them owes no regen and
-  no golden re-pin.** They are worth knowing before paying for one.
+- **Some levers are golden-safe by construction, and a change behind one of them owes no regen and
+  no golden re-pin.** The named ones are worth knowing before paying for a regen.
   - **A render gate that only region sheets pass.** `world.region !== undefined` selects
     `REGION_FONT_SIZE` in `src/render/layers/settlements.ts`, so a region-only render edit changes
     region sheets while every committed chart and the golden stand still. Growing a WORLD sheet's
@@ -369,7 +369,7 @@ comment. This is a convenience index, not their home.
   exactly when a citation should fail, while a line number drifts silently onto unrelated code. Use
   the FULL repo-relative path even for a sibling in the same directory, because basenames repeat
   under `src/` and the ambiguity is day one rather than drift.
-  `test/repo/comment-citations.test.ts` enforces it, and two of its behaviours are deliberate rather
+  `test/repo/comment-citations.test.ts` enforces it, and these behaviours of it are deliberate rather
   than rough edges: it matches a symbol that APPEARS in the file, not one declared there, because a
   citation properly points at a call site; and it matches JOINED runs of comment lines, not single
   lines, because a citation long enough to wrap is invisible to a line matcher and the guard would
@@ -398,7 +398,7 @@ non-mechanical failure mode, so it is run and PROVEN in a particular way.
   near-identical fixture, a state poke, the units on a bare constant, a coordinate convention, a
   sentinel's decode.
 - **The proof that a sweep changed no code is an AST token-stream comparison against the base, per
-  file.** Three things it must handle or it lies. Exclude the JSDoc kind range, because TypeScript
+  file.** These things it must handle or it lies. Exclude the JSDoc kind range, because TypeScript
   models JSDoc as real syntax and a reworded doc block otherwise reads as a code change. Strip
   Astro's markup comment form, which no comment counter inventories and the comparison reads as
   text. And never build it on `ts.createScanner`, which mis-lexes regular-expression literals and
