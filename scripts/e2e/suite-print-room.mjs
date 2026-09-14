@@ -1,4 +1,6 @@
 // Print Room e2e (PRL, PR0-PR29, PRC, PRB, PRW; #133/#134/#135/#136/#137/#212/#217): the shell and inline fallback, the poster plates, the PNG rasterizer and the bound atlas; hand-authored like its sibling suites and self-contained (navigates itself, carries scoped no-4xx and console-error deltas).
+import { dropExpectedCancellations } from "./console-support.mjs";
+
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, serverState, consoleErrors, http4xx, PORT } = ctx;
 
@@ -595,7 +597,7 @@ export async function run(ctx) {
   );
 
   // PR6/PR7 must stay ahead of the inline-fallback block below, which 404s the worker on purpose.
-  const newErrs = consoleErrors.slice(prErrBase);
+  const newErrs = dropExpectedCancellations(consoleErrors.slice(prErrBase));
   check("PR6 the print-room run logged no JS exceptions or console errors", newErrs.length === 0, newErrs.join(" | ") || "clean");
   const new4xx = http4xx.slice(prHttpBase).filter((u) => !/favicon/i.test(u));
   check("PR7 no new missing resources (no worker/engine/asset 4xx from /print-room/)", new4xx.length === 0, new4xx.join(", ") || "none");

@@ -1,5 +1,6 @@
 // Ribbon e2e (the RB checks; the chart room since #463 part 4/4): the strip-chart page boots from the shared worker, defaults to the capital's farthest road, the itinerary fills the slip and a row leans the Glass, a picked journey redraws in place and writes the address and the roads out, the phone docks the journey into the sheet, and the same address presses byte-identical scrolls; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 import { makeStep } from "./step-support.mjs";
+import { dropExpectedCancellations } from "./console-support.mjs";
 
 export async function run(ctx) {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
@@ -148,6 +149,7 @@ export async function run(ctx) {
     check("RB8c back on a wide sheet the journey stands in the corner again", /folio-controls/.test(wide.journeyIn) && !wide.inSlip, JSON.stringify(wide));
   });
 
-  check("RB9 no console errors across the ribbon checks", consoleErrors.length === errBase, consoleErrors.slice(errBase).join(" | "));
+  const errDelta = dropExpectedCancellations(consoleErrors.slice(errBase));
+  check("RB9 no console errors across the ribbon checks", errDelta.length === 0, errDelta.join(" | "));
   check("RB10 no HTTP 4xx across the ribbon checks", http4xx.length === httpBase, http4xx.slice(httpBase).join(" | "));
 }

@@ -1,5 +1,6 @@
 // Broadside e2e (BR1-BR8, #270): the regrouped controls, seals, journal button, and footnote apparatus on the built running page (the unit pins in test/site/broadside.test.ts hold the SOURCE to this shape); self-contained with scoped deltas.
 import { luminance, sampleRow } from "./pixel-support.mjs";
+import { dropExpectedCancellations } from "./console-support.mjs";
 
 import { makeStep } from "./step-support.mjs";
 
@@ -307,8 +308,8 @@ export async function run(ctx) {
     );
   });
 
-  // "AbortError: Transition was skipped" is the cross-document view-transition's expected cancellation when navigations chain fast, not an app error; this suite chains Page.navigate hops from its first goto.
-  const errDelta = consoleErrors.slice(errBase).filter((e) => !e.includes("AbortError: Transition was skipped"));
+  // This suite chains Page.navigate hops from its first goto, which is the condition the shared drop exists for.
+  const errDelta = dropExpectedCancellations(consoleErrors.slice(errBase));
   check(
     "BR8 the broadside flow is clean (no console errors, no 4xx)",
     errDelta.length === 0 && http4xx.length === httpBase,

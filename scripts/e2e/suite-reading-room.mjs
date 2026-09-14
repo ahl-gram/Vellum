@@ -1,5 +1,6 @@
 // Reading Room e2e (RR0-RR34; #221 plus #318 colophon dice, #418 pre-arm window, #402 prospect stage and #442 the sticky strip): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
 import { seedForDate } from "../../src/world/seed-of-the-day.ts";
+import { dropExpectedCancellations } from "./console-support.mjs";
 
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, serverState, consoleErrors, http4xx, PORT } = ctx;
@@ -551,7 +552,7 @@ export async function run(ctx) {
     JSON.stringify(rrCard),
   );
 
-  const newErrs = consoleErrors.slice(rrErrBase).filter((e) => !e.includes("AbortError: Transition was skipped"));
+  const newErrs = dropExpectedCancellations(consoleErrors.slice(rrErrBase));
   check("RR12 the reading-room run logged no JS exceptions or console errors", newErrs.length === 0, newErrs.join(" | ") || "clean");
   const new4xx = http4xx.slice(rrHttpBase).filter((u) => !/favicon/i.test(u));
   check("RR13 no new missing resources (no worker/asset 4xx from /reading-room/)", new4xx.length === 0, new4xx.join(", ") || "none");

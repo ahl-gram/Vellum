@@ -1,5 +1,6 @@
 // The floating seed chrome (H0-H6, #289 semantics relanded at #470), the ceremony (H7-H13, #457), the failed-bundle doors (H13c, #470), and the stations, cards, and idle drift (H14-H17, #458): the homepage frame at desktop and a real 390px viewport, the corner form, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion and narrow-viewport stories, and the station flights driven by REAL dispatched input; deltas scoped per flow, plumbing shared via home-support.mjs (#460).
 import { readCam, atLandfall, readXform, buttonPoint, makeStage } from "./home-support.mjs";
+import { dropExpectedCancellations } from "./console-support.mjs";
 
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
@@ -198,10 +199,7 @@ export async function run(ctx) {
     `landed at ${degraded}`,
   );
 
-  // "AbortError: Transition was skipped": motion.css opts the site into cross-document view transitions, and a navigation landing while a prior one settles surfaces this stock abort as an unhandled rejection; the folio's expected cancellation, not an app error.
-  const errDelta = consoleErrors
-    .slice(errBase)
-    .filter((e) => !e.includes("AbortError: Transition was skipped"));
+  const errDelta = dropExpectedCancellations(consoleErrors.slice(errBase));
   const httpDelta = http4xx.slice(httpBase).filter((u) => !/favicon/i.test(u));
   check(
     "H6 the home flow is clean (no console errors, no new 4xx)",
@@ -395,7 +393,7 @@ export async function run(ctx) {
     JSON.stringify({ seatWide, seat390, camScrolled }),
   );
 
-  const errDelta2 = consoleErrors.slice(errBase2).filter((e) => !e.includes("AbortError: Transition was skipped"));
+  const errDelta2 = dropExpectedCancellations(consoleErrors.slice(errBase2));
   const httpDelta2 = http4xx.slice(httpBase2).filter((u) => !/favicon/i.test(u));
   check(
     "H11 the ceremony flow is clean (no console errors, no new 4xx)",
@@ -821,7 +819,7 @@ export async function run(ctx) {
   );
   await clearMobile();
 
-  const errDelta3 = consoleErrors.slice(errBase3).filter((e) => !e.includes("AbortError: Transition was skipped"));
+  const errDelta3 = dropExpectedCancellations(consoleErrors.slice(errBase3));
   const httpDelta3 = http4xx.slice(httpBase3).filter((u) => !/favicon/i.test(u));
   check(
     "H17 the station and drift flow is clean (no console errors, no new 4xx)",
