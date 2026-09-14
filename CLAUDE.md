@@ -42,10 +42,9 @@ adding or restructuring a page, a stylesheet, a bundle or an inlined script,
 `specs/development-workflow.md` before starting a sub or an epic, since its early steps are the ones
 a session cannot go back and take later, and `specs/settle-doctrine.md` before any work that writes
 an e2e wait, settle, or CDP probe, or that reads a screenshot, a focus state or a narrow viewport in
-the harness. None of them
-is summarized here; where this file and a spec disagree, the spec is right. The ruled pixels those
-specs were decided from are archived under `design/`, one directory per design
-round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting).
+the harness. None of them is summarized here; where this file and a spec disagree, the spec is
+right. The ruled pixels those specs were decided from are archived under `design/`, one directory
+per design round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting).
 
 These refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project specifically.
 

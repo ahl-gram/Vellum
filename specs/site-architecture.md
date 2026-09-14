@@ -48,9 +48,12 @@ symbol and path so the reader goes and looks.
 - **The rosters are found by grepping, never by reading a list.** The mechanism is the footguns
   Gate 4 one: grep the nearest sibling's name across `src/`, `scripts/`, `test/` and `.github/`, and
   join every list it appears in. A list written in prose is a starting point and goes stale; the
-  grep does not. **A sheet roster that closes itself**: "the authored roster covers every stylesheet
-  under `public/`" in `test/site/tip-affordance.test.ts` walks the tree, so an unlisted sheet reds
-  there. The rest are hand-kept and silent when missed, which is why the grep comes first.
+  grep does not. **Some rosters close themselves and some do not, so learn which before you rely on
+  a red.** Both sheet rosters in `test/site/tip-affordance.test.ts` close: one walks `public/` and
+  reds on an unlisted sheet, and the other is a `deepEqual` between `SRC_CSS` and a fingerprint walk
+  of `src/`, which reds by name and tells you what to add. A discovery route closes too, at build
+  time, by throwing when it has no blurb. The page, bundle, cleaning and lane rosters are hand-kept
+  and silent when missed, which is why the grep comes first.
 - **The rosters a page or a sheet joins**, by symbol: `PAGE_CSS`, `SHARED_CSS`, `ROOT_CSS` and
   `TOKENS` in `test/site/shell-css.test.ts`; `PAGES` in `test/site/astro-scaffold.test.ts`;
   `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`; `GENERATED_SUBTREES` in
@@ -135,12 +138,13 @@ SVG remains the byte-faithful artifact.
   where a page's data supplies it through an expression and raw where it is authored as prose, in
   one built page. Where byte identity matters, hand the text through as literal markup rather than
   through an expression.
-- **CSS a script writes rather than the build inlines keeps its comments, and they ship as public
-  page bytes.** The distinction is which path the CSS took: the layout's global block is minified
-  into the page and its comments are stripped, while `ATLAS_SHEET_CSS` in `src/atlas/document.ts` is
-  written verbatim into every atlas host by a node script the build never touches, so prose there is
-  visible in the live page source and greppable by anyone. A placeholder string in such a comment
-  reads to a stranger like a rendering defect.
+- **CSS that travels as a STRING keeps its comments, and they ship as public page bytes.** The
+  distinction is whether the build's CSS pipeline ever sees it. The layout's global block is
+  minified into the page and its comments are stripped. `ATLAS_SHEET_CSS` in `src/atlas/document.ts`
+  is a string: interpolated into the generated atlas document, and assigned to a style element's
+  text content at runtime by the Print Room's bundled code. Neither path is minified, so prose
+  written there is visible in the live page source and greppable by anyone, and a placeholder string
+  in such a comment reads to a stranger like a rendering defect.
 
 ## The two contractual forms
 
