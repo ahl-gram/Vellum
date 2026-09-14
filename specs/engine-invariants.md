@@ -225,4 +225,5 @@ than inventing a seat.
 
 *Companion to `specs/rulebook.md` (the golden, the regen and the re-roll discipline) and
 `specs/ui-design.md` (how a world is drawn). This file sits upstream of both: it is the world
-itself.*
+itself. Every rule about a FINER view of that world, and what resampling does and does not preserve,
+is `specs/region-and-voyage.md`'s.*

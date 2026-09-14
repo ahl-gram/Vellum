@@ -95,6 +95,10 @@ anchors through them.
 a custom property: there is no honest stylesheet default for one settlement's coordinates, so
 per-element values go inline on the element.
 
+**That join is stated here for colours, and the tokens it does not reach are
+`specs/site-architecture.md`'s**, under tokens outside the palette join. The boundary is a
+derivation rather than a list, so check it there before assuming a token has a remembered home.
+
 ## The chart's own dress
 
 The charts are the thing the site exists to show, and they are dressed on their own terms.
@@ -127,6 +131,31 @@ carries, so keep that qualifier or the doubling comes back.
 **The chart's lettering ink is not the site's prose ink** and the two are not to be unified: the
 chart side is inside the byte-determinism contract, and the site quotes it as a token instead.
 
+**A value that changes with the dress is a style token; a value that holds across every dress is
+written at the layer.** A border is tokenized whole, its ink and its geometry alike (`borderStroke`,
+`borderWidth`, `borderDash` and `borderOpacity` in `src/render/style.ts`), because a dress changes
+how a border is drawn and not only what colour it is. A realm name takes its ink and its halo from
+tokens too, but its type size, tracking, weight, opacity and halo width sit inline in
+`featureLabelsLayer` (`src/render/layers/feature-labels.ts`): that treatment is what keeps the name
+legible over any dress, so it is one decision rather than a handful. Do not promote such a literal to a
+token to look tidy, and do not add a style-varying value to a layer.
+
+**Ink arms hatch the FIELD, after Petra Sancta, and the charges keep the grey value ladder.** One
+pattern per field tincture, built by `inkHatch` in `src/render/layers/heraldry/hatch.ts`. These
+things about it are load bearing. Every pattern id is scoped by the document's existing suffix, so
+many arms sharing one sheet cannot collide. Every tile opens on an opaque paper rect, so nothing
+below bleeds through. And the charges stay on the grey ladder rather than joining the hatching,
+because a stroke-drawn device shatters into dashes at small sizes and an argent charge disappears
+outright. `armsNode` (`src/render/layers/heraldry.ts`) emits the pattern defs only where the palette
+carries a hatch, which is what keeps every colour dress byte-identical to a chart drawn before the
+hatching existed.
+
+**The realm tint is ONE dress decision, not several.** Where a dress wears it, the wash, the seat halo
+and the legend swatch are all drawn; where it does not, they go together. A dress that shows one
+without the others is the defect. Whether the layer draws at all is the style's own flag
+(`politicalTints` in `src/render/style.ts`); what that means for the world underneath is
+`specs/engine-invariants.md`'s.
+
 **A river keeps its name over a graze.** A river yields only where it would truly bury a neighbour, never where it merely touches
 one. The bar is `RIVER_MAX_OVERLAP` in `src/render/layers/feature-labels.ts`, tested against the river's true rotated ink rather than an upright box. **What it yields to is
 everything already claimed in the arena**, which is more than the labels: the cartouche and the
@@ -134,14 +163,27 @@ scalebar are claimed before any label layer runs, and the legend and compass are
 they are drawn. Terrain glyphs are the exception that reserve nothing, so grazing a stand of trees
 costs a river nothing at all. A residual graze just under the bar is correct behaviour, not a defect.
 
+**A sea beast is drawn last and yields to everything.** `beastsLayer`
+(`src/render/layers/beasts.ts`) claims the arena after the settlements and the feature labels, keeps
+its ink off the land, and escalates as the sheet fills: the full label, then the name alone, then the
+glyph alone. It searches near its haunt first and then the whole sheet before it drops, so a legend
+drawn over the haunt moves the beast rather than losing it. What a beast is, and what it does to the
+anonymous sea decor, is `specs/engine-invariants.md`'s.
+
 ## The room and its furniture
 
 Two room patterns, both ratified whole after live use (#462, ratified at #454).
 
 **A chart room.** The chart is the room: full bleed on the deep, pannable and zoomable, fitted to
 what the chrome leaves and **measured off the chrome's own rects, never guessed** (and measured after
-the chrome has its text, or the fit reads an empty box). No band, no footer: a chart room does not
-scroll. Four corners, each a named piece of the kit:
+the chrome has its text, or the fit reads an empty box). **The stage is the fixed full-viewport box
+the chart is mounted in**, declared as `body.chart-room .stage` in `public/atelier.css`; a room that
+hangs its plates on the deep rather than mounting one chart has none, and the Gallery is that room
+today. No band, no footer: a chart room with a
+stage does not scroll. **A chart room without a stage is the exception and it does scroll**, its
+content passing under the fixed chrome, which is why it pools every piece of that chrome rather than
+the cluster alone, and why **it wears no vignettes**: a vignette is a fixed darkening band, and on a
+scrolling page it washes out whatever passes through it. Four corners, each a named piece of the kit:
 
 - **The head cluster**, top left: wordmark, flourish tagline, dot-separated rooms nav, directly on
   the deep. Fixed in a room, riding the page on home.
@@ -149,8 +191,8 @@ scroll. Four corners, each a named piece of the kit:
   under them. One control. The rest of the press is the legend row.
 - **The chart folio**, bottom left: the lines the room's script fills at the draw, the chart's title,
   survey line and coordinates.
-- **The Surveyor's Glass**, bottom right of the chart: three presses, the camera. It is a sibling of
-  the stage so it never rides the chart's own zoom.
+- **The Surveyor's Glass**, bottom right of the chart: the camera's presses. Where it is seated and
+  why is `specs/explorer-doctrine.md`'s, under the camera, the gesture and the fit.
 
 Between them: **the slip**, the working panel on the right, which is the mockup's station card grown
 into a desk. It folds away to a bookmark tab on the right edge, and on a phone it is the bottom
@@ -164,6 +206,17 @@ way.
 **A room's name stands in the corner, not on the sheet.** Exactly one `h1` per page, and it is the
 first heading; the wordmark is the `h1` on home alone, because home is roomless.
 
+**When an overlay takes the room, every member of the inert set sits INSIDE the scrim host's
+subtree.** That is the whole of what the set owes. A click over an inert subtree retargets to its
+nearest live ancestor, so a member outside the host retargets to something that is not the scrim and
+is dead with no way out. Painted extent is a separate, visual question: a fixed wash may sit off an
+inert region the page has scrolled without any harm, because the body is that region's host too. The
+wirings are `HOME_WIRING` and `ROOM_WIRING` in `src/site/shell/wiring.ts`.
+
+**Which scrim shape belongs where follows the chrome.** Where the chrome rides the page, a fixed
+scrim is the defect, because an open overlay scrolls away from it; where the chrome is fixed, the
+mirror defect is an absolutely positioned one. Read the chrome first, then choose.
+
 **The kit is lifted at second use, never at first** (#487). A piece is written in page CSS where it is first
 needed; when a second room needs it, it moves to the shared sheet and a component in the same change,
 and the first consumer is repointed. Anything still used once stays put. **A page seats a component;
@@ -171,11 +224,35 @@ it does not re-dress it.** A page may give its own element inside a piece a face
 under its own state, but an arm made only of kit classes may set no colour, border, shadow, font or
 tracking. A guard sweeps for exactly that.
 
-**When the reader is zoomed in, or the room does not scroll under its chrome, the furniture stands on
+**When the reader is zoomed in, or the room has no stage, the furniture stands on
 a pool**: a blurred box that follows the cluster, running well past the viewport edge on its
 edge-facing sides so the fade never lands on screen. At rest on a chart, the chrome carries none. The
 legend row and the room folio take home's crisp panel instead of the blurred pool, so that a chart
 room's corners read the same as home's, corner for corner.
+
+**The legend row never takes a real padding.** Its seat gives it its width, and the footing that
+looks like padding is the row's own pseudo-element drawn at those insets, so the row's box, which the
+seat and the fit both read, never changes. A real padding on it wraps the roads.
+
+**On a phone the Glass stands down while the bottom sheet is open**, and that is a kit rule rather
+than a page one, so a new chart room inherits it instead of discovering it. Written anywhere else it
+is a copy, and the sweep that looks for copies has to reach every authored sheet, a page's own style
+block and the generated sheets alike.
+
+**A new component's CSS goes in its own sheet.** Fold it into an existing one only if a separate
+sheet breaks something or costs performance; the rosters a new sheet joins are never the reason,
+and what those rosters are and what each costs is `specs/site-architecture.md`'s.
+
+**Derive a clearance from the token, never from either literal.** The panel-width token is redeclared
+per page by design, so a clearance computed from a remembered value is right on one page and wrong on
+the next.
+
+**A multi-column index puts its entries level across columns**, so a reading spy that takes the last
+entry above the line in document order marks the wrong column. Take the entry nearest the line from
+above, break a tie to the earlier, and bound it below the section head, which is what `entryAt` in
+`src/site/shared/index-ink.ts` does. The same geometry is why such a list is allowed to FLOW in
+columns rather than being sized as a grid: a flowing list rebalances itself when an entry is added,
+where a grid sized for today's entries spills.
 
 ## The voice
 
@@ -206,6 +283,15 @@ Rules that catch drift:
 - **Do not invent a fact for flavour.** A first draft of the glossary claimed a Japanese place name
   was voiced when it is not, and every glossed word must be traceable to a culture's own name
   templates, or no world can print it.
+- **A glossed section runs to a small band of terms**, and a section that runs over is named as an
+  exception rather than left to look like drift. A section under the floor is fine: the floor binds
+  only the sections that introduced it. `test/site/glossary-sections.test.ts` holds the cap and the
+  named exceptions.
+- **A homograph takes the period form**: one headword whose senses run together, rather than a second
+  entry under the same word.
+- **Culture sections are ordered alphabetically**, not in the order of the roster that generates
+  them. The roster's own order is load bearing elsewhere, so the page may not be reordered to match
+  it and the roster may not be reordered to match the page.
 
 ## Colour, contrast and legibility
 
@@ -219,6 +305,12 @@ on a panel.** Assume a small label taken from a mockup needs this until you have
 **Sample a ground with the median of a wide run**, never a single point, and never a maximum or a
 minimum: a maximum passes on one bright control sitting under the sample, a minimum fails on one
 hairline crossing it, and the point you assumed was dark may be the parchment chart.
+
+**Sample the ground UNDER the ink, not beside it.** Isolate the glyph pixels by rendering the ground
+without the copy and diffing the two, sample the ground in a small halo around those pixels, take the
+worst case, and make the guard model that same ground. A number measured beside the text is a number
+about a different place, and the error runs both ways: a ratio taken from the bright outer edge of a
+radial ground overstates the margin, and one taken from a dark neighbour understates it.
 
 **Removing or changing a ground owes the whole surface a sweep.** When a fix changes what a surface's
 background *is*, re-measure everything standing on it, not just the element the issue named. A dark
@@ -259,6 +351,13 @@ bullet beside line two: such a box pins `vertical-align: top`. Never "fix" that 
 **Touch and hover are branched on the full predicate**, coarse pointer and no hover together, never
 on absent hover alone: a headless linux runner reports no hover with no pointer at all.
 
+**A real tap fires the compatibility hover and focus events BEFORE its click**, and the tap's own
+press light-dismisses an open auto popover first. So a press that toggles a popover needs the hover
+and focus paths standing down on a touch-primary machine, and it needs the dismissal recorded
+SYNCHRONOUSLY: the popover's `toggle` event is queued and lands after the click, while `beforetoggle`
+is its synchronous twin. Without that record the closing half of a tap reads as an opening one and
+the note re-shows. The working shape is `src/site/explorer/footnotes.ts`.
+
 ## Motion and ceremony
 
 Motion is design material here and it is ruled like the rest.
@@ -295,10 +394,23 @@ afterwards. A shadow escapes if the keyframes do not own it. Only a rendered pro
 
 **A one-shot ceremony needs its own guard rather than an end event.** Hiding an element mid-animation
 fires no animation event at all in Chrome, so a ceremony that must not replay cannot record that it
-ran by listening for its own end.
+ran by listening for its own end. The recipe is a pair of rules:
+
+- **The trigger is a class the host applies, never the hidden attribute.** Restoring display starts
+  an animation afresh, so a rule gated on hidden replays the ceremony every time the element is shown
+  again. `.rf-arrival` in `public/reading-frame.css` is the shape to copy.
+- **The class retires when nothing is animating**, on the animation end plus a check that no
+  animation is still running, AND deterministically at the top of the host's own draw. The second
+  half is not belt and braces: it is the only path that runs when the first event never fires.
 
 **A host that plays an arrival carries the arrival rules in its own page stylesheet**, scoped to its
 own mount, or the ceremony is silently inert and its cleanup never runs.
+
+**The voyage ship is the only plan-view object on the sheet**, top down solely so that turning it to
+its heading works. That is why every other moving mark is a profile glyph that FLIPS east to west and
+tilts, rather than rotating: a profile glyph has an up, and a full rotation lays it on its beam ends
+on a northward leg. The tilt's own constant, and what moving it costs, are
+`specs/region-and-voyage.md`'s.
 
 ## Print
 
@@ -320,6 +432,21 @@ width.
 
 **A state expressed as a `:checked` or an open class needs its own print stand-down**, because state
 survives the print stylesheet unless something says otherwise.
+
+**A plate on a page the reader is meant to save as PDF carries no `loading="lazy"`.** A lazy plate
+below the fold snapshots blank, so the page takes the eager default and authors nothing: this is a
+prohibition, not an instruction to add an attribute. It is scoped to the printed page. The atlas
+download is a heavyweight embed a reader scrolls rather than prints, and `specs/rulebook.md` ratifies
+reserved frames plus lazy loading for it; that rule stands and this one does not reach it.
+
+**Save-as-PDF fidelity is not automatable headlessly.** An e2e may assert that a file came out
+non-empty with a plausible page count, and no further. Page breaks, margins and clipping owe a manual
+pass in two browsers before a printing change is called done.
+
+**A plain data-URI link is refused from a real file origin**, so a self-contained document links its
+plates to a blob built by script at load instead. A link to a blob also never doubles the file the
+way wrapping the data server-side would. `PLATE_LINK_SCRIPT` in `src/atlas/document.ts` is the live
+form, and a plate whose link fails is left a plain image rather than a dead one.
 
 ## How the cascade breaks here
 
@@ -343,6 +470,29 @@ A text search over the CSS passes on the broken code; pin the resolved value ins
   display, setting the `hidden` attribute does nothing at all. Hide it through style.
 - **A docked piece reparents and goes static**, so an absolutely positioned pseudo-element on it
   resolves against whatever fixed ancestor it lands in and can span a whole sheet.
+- **A flex item defaults to `min-width: auto` and refuses to shrink below its content width**, so a
+  control row overflows a narrow viewport while every rule in it reads as correct. Zero the item's
+  own minimum; where the row still cannot fit, let it wrap as well. A range input is the usual
+  culprit, because its intrinsic width is far wider than it looks.
+- **A percentage max-height dies inside an auto grid track.** Containment without script is an
+  absolutely positioned box with auto margins against a definite one, never a viewport formula,
+  which crops the moment the chrome above it changes height.
+- **A sticky box is clamped inside its containing block.** Pulling a sticky cap into a scroll
+  container's padding with a negative margin does not stick it at the top; the browser slides it to
+  the content-box top, over the first items. Make the cap the spacer itself, with no padding above
+  it, and hit-test the items rather than reading their rects, because the rects still look right.
+- **A full-bleed absolutely positioned handle kills anything authored beneath it.** A handle laid
+  over a whole sheet head is dead to a real touch for every control in that head, so such a control
+  takes its own stacking layer.
+- **A shown popover renders in the TOP LAYER, which no z-index reaches**, so a scrim cannot dim one.
+  Popovers stand down with the scrim instead.
+- **The head cluster pins its own line-height**, because a page sheet sets the body's for reading and
+  the cluster must not inherit it.
+- **An absolutely positioned box wider than a phone viewport makes the browser widen the LAYOUT
+  viewport to fit it**, and clipping overflow at the root does not stop that sizing. Cap the box.
+- **When an engine-dressing rule is the one losing, the opt-out may not be written in the host's own
+  sheet.** `specs/explorer-doctrine.md` rules that engine dressing is edited in the one shared sheet
+  and never in a host's, so the repair belongs to the rule that is losing.
 - **A transform on a container re-anchors every fixed descendant to it** for the length of the
   animation, so a landing settle applied to the wrong element throws the corner furniture across the
   page.

@@ -34,7 +34,12 @@ agent audit built from scratch. This file does not carve out an exception, and n
 that reds each one, the evidence that will say it works, and the rosters and doctrine the change
 drags with it. The required reading is due before the plan, not after it: `specs/rulebook.md` before
 any change that touches the renderer, a committed chart, the golden, a regen, a seed or the order of
-work, `specs/ui-design.md` before any work whose deliverable is an appearance, and
+work, `specs/ui-design.md` before any work whose deliverable is an appearance,
+`specs/engine-invariants.md` before any change to world generation or to a surface that quotes
+generated output, `specs/explorer-doctrine.md` before any work on the Explorer or on a chart camera,
+gesture or overlay, `specs/region-and-voyage.md` before any work on a region sheet, level of detail,
+or the voyage, `specs/site-architecture.md` before adding or restructuring a page, a stylesheet, a
+bundle or an inlined script, and
 `specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe, or that
 reads a screenshot, a focus state or a narrow viewport in the harness.
 
@@ -89,11 +94,29 @@ most once a session and keys the push and the PR write to the same gate, so this
 will be put in front of you; its body checks are yours to remember at step 13. That is the cost of
 pushing early, and it is not a reason to defer the read.
 
+**The hook reads its gate text from the LAUNCH checkout, not from your worktree.** Its command in
+`.claude/settings.json` resolves under `${CLAUDE_PROJECT_DIR}`, and the PR template it checks a body
+against comes from the same place. So a session standing in a worktree is shown main's gates and
+main's template, not its branch's: a branch that EDITS a gate or the template is not the version
+being enforced while you work on it.
+
 **10. Verify locally, and name the command for every claim.** The unit suite, the type check, the
 e2e suites the change touches, and the evidence run that demonstrates the acceptance. "Delivered",
 "one line" and "that will be fast" are predictions until a command's output says otherwise. Where a
 claim genuinely cannot be run down, mark it UNVERIFIABLE, the word `vellum-spec-recon` already uses,
 and do not coin a second one.
+
+**Name which checks ran.** CI is the full-suite gate and runs everything on the pull request
+regardless, so the local run is the targeted one this step already describes. Say so plainly in the
+report and in the body, because "tests pass" is otherwise read as "the whole suite passed locally",
+and the gap between those two is exactly where a reviewer's trust is spent. The time this saves does
+not transfer to skipping step 11.
+
+**A clean mergeable verdict is about text.** When main moves under a branch whose tests pin measured
+values, no file needs to overlap for the merged state to behave differently, and the branch's own
+green CI ran against the old main. Merge main locally, run the suite, abort the merge so the branch
+stays clean for review, and put the combined-state result in the body, because a reviewer reading
+only the branch's CI cannot see it.
 
 **11. Run the companion agents the work owes.** `vellum-guard-prover` on every new or strengthened
 guard, and step 8's commits have to exist first: it mutates in its own detached worktree at the DISPATCH
@@ -137,10 +160,44 @@ their own (#575). The other three keep their documented work in the dispatch tre
 not seen, so it goes back through step 11. Residue that will not be fixed is named in the PR body
 with the reason.
 
+**An integration pull request takes no review commits.** When a long-lived epic branch finally
+merges to main, every commit on it has already run this whole sequence on its own sub, and new
+commits at integration time re-open reviewed work and muddy what the merge represents. Dispatch the
+cold skeptic as usual, then treat its report as documentation rather than a fix queue: list every
+finding in a comment with its disposition, which is one of already recorded on a sub, parked on a
+ratified future sub, or new and worth its own issue.
+
 **16. Leave the PR open. Alex reviews and merges.** Never merge for him unless he asks you to.
 
 **17. Hand off.** The roadmap Project first, since the global `session-handoff` skill does not know
 it exists: newly filed issues added and phased, shipped issues closed. Then the session ritual.
+
+## Sweeps the per-sub recon does not reach
+
+Step 2 catches staleness one sub at a time, at the moment that sub is built. Some situations go stale
+wholesale instead, and those are owed a sweep rather than a reading.
+
+**After a big epic lands, re-recon every open epic and sub written before it.** Issues written
+against the old shape do not decay one at a time; they decay together, and the ones that hurt are the
+instructions that would now introduce the defect they were written to prevent. Dispatch
+`vellum-spec-recon` once per issue, in parallel, each prompt naming the epic that just closed and
+what it changed. Post each result as a dated re-baseline COMMENT, leaving the body as written, then
+put the open decisions to Alex as a set, because the sequencing between them is usually the real
+question. Anything the sweep itself makes stale is fixed before the comments go up: a pull request
+merging mid-sweep will otherwise leave drafts saying a spec is not on main.
+
+**A review sitting's own ledger owes a recon too.** The items a sitting must rule on are scattered
+across every issue and pull request that deferred something to it, so a docket built from one
+issue's comments is a sample rather than the population. Build it by grepping the epic's subs and
+pull requests for the deferral words ("provisional", "re-judge", "post-use", the review's own
+number), and once the ledger is posted, run the recon against the LEDGER and put whatever it
+surfaces to Alex in the same sitting. A completeness claim in a ledger's preamble is exactly the
+confidence with no command behind it that this file exists to refuse.
+
+**An epic links its subs in prose, never with native sub-issues.** A body checklist, a shared label
+and membership of the roadmap Project are the mechanism, so the board shows an epic and its subs as
+flat peers and nothing on it records that one subsumes another. Trust the prose over the flat board,
+and when a later decision changes what an epic subsumes, say so in a dated comment on both ends.
 
 ## The gates are not a step
 
