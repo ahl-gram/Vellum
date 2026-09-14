@@ -89,6 +89,9 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
 15. **A scan is keyed on what the DEFECT looks like, never on what the rule says.** The
     hyphenated-property cut skipped the unhyphenated properties the contract policed, so the sources
     that could hold the defect were exactly the ones it did not select, and it passed (#360).
+16. **A roster a guard checks is exported DATA the guard imports, never a list the guard restates.** A
+    hand-copied roster is one-sided by construction: it catches a member removed from the thing it
+    checks and can never catch one added and asserted nowhere, and the arithmetic still closes (#320).
 
 ## Gate 2: before writing an e2e check or a CDP probe
 
@@ -175,7 +178,7 @@ Scars: #219, #295, #465, #525, #530, #531, #532, #535, #537, #542, #543, #545, #
 
 ## Gate 4: before adding anything that joins a roster
 
-Scars: #320, #401, #542, #546.
+Scars: #401, #542, #546.
 
 A new page, sheet, suite, room, or CSS surface joins lists it does not know about, and most of them
 fail silently (an undeclared CSS variable, a suite the runner never calls, a budget nobody re-measured).
@@ -183,14 +186,10 @@ fail silently (an undeclared CSS variable, a suite the runner never calls, a bud
 1. `grep -rn` the nearest sibling's name across `src/`, `scripts/`, `test/`, `.github/` and join
    every list it appears in: the runner's `SUITES` map, `PAGE_CSS`, `MEASURED_SECONDS`, the tiers
    test, the tip-affordance roster, the discovery files.
-2. Name in the PR body which rosters self-check and which were joined by hand.
+2. Name in the PR body which rosters self-check and which were joined by hand;
+   `specs/site-architecture.md` names the rosters a page or a sheet joins, and which close themselves.
 3. Re-measure any budget the roster carries; a number measured on an eleven-check suite is wrong on a
    twenty-three-check one.
-4. **A roster a guard checks is exported DATA the guard imports, never a list the guard restates.** A
-   hand-copied roster is one-sided by construction: it catches a member removed from the thing it
-   checks and can never catch one added and asserted nowhere, and the arithmetic still closes (#320).
-   `specs/site-architecture.md` names the rosters a page or a sheet joins, and which of them close
-   themselves.
 
 ## Gate 5: before the push and the PR body
 
