@@ -5,6 +5,7 @@
 import { initWorker, runJob, usesWorker } from "../explorer/worker-client.ts";
 import { bindRoom } from "../shared/room.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";
+import { makeAnnouncer } from "../shared/announce.ts";
 import { createZoomController } from "../shared/zoom-controller.ts";
 import { chartFilename } from "../print-room/poster-presets.ts";
 import { thumbJobFor } from "../explorer/chart-drawer.ts";
@@ -41,7 +42,12 @@ let top = 0;
 const drawnCount = (): number => sheets.filter((s) => s.svg !== null).length;
 const drawable = (): ReadonlyArray<Drawn> => sheets.filter((s) => !isAwaited(s.item));
 
-const say = (line: string): void => { status.textContent = line; };
+const say = makeAnnouncer({
+  pill: status,
+  after: (run, ms) => window.setTimeout(run, ms),
+  cancel: (timer) => { window.clearTimeout(timer); },
+});
+const tell = (line: string): void => { status.textContent = line; };
 
 /** The pile's depth, as papers behind the top sheet; the mockup shows the stack and not a count. */
 const layPile = (): void => {
@@ -196,7 +202,7 @@ const draft = async (): Promise<void> => {
       rows();
       retitle();
       if (at === top || drawnCount() === 1) { if (sheets[top]?.svg === null) top = at; showTop(); }
-      say(draftedLine(drawnCount(), drawable().length));
+      tell(draftedLine(drawnCount(), drawable().length));
     }
   }
   say("");
