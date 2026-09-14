@@ -153,7 +153,7 @@ export async function run(ctx) {
     const gone = await settle(READ, (d) => d.status === "", "chart-drawer-said-gone", SAID_GONE);
     const waited = Date.now() - saidAt;
     check(
-      "CD23 the Chart Table's announcement leaves the chart by itself: the LAY line #547 was filed about, which sat over the middle of the sheet until the reader drew another world, since shutting the drawer never took it away (Alex 2026-09-08). The removal press above is wiring and not the gesture under test, which is CD5's and CD7b's. The table is untouched as the line goes, so this is the LINE leaving and not the page resetting; the hold is floored at the eight seconds Alex ruled, which a slower runner can only lengthen and never shorten; and the fade is read twice, as the declared duration the way CD7c pins the drawer's slide, and as the opacity the cascade actually resolves under the class",
+      "CD23 the Chart Table's announcement leaves the chart by itself: the LAY line #547 was filed about, which sat over the middle of the sheet until the reader drew another world, since shutting the drawer never took it away (Alex 2026-09-08). The removal press above is wiring and not the gesture under test, which is CD5's and CD7b's. The table is untouched as the line goes, so this is the LINE leaving and not the page resetting; the hold is floored a second under the eight Alex ruled, a floor and never a ceiling since a slower runner can only lengthen it, with the literal 8000 pinned in test/site/announce.test.ts; and the fade is read twice, as the declared duration the way CD7c pins the drawer's slide, and as the opacity the cascade actually resolves under the class",
       /lies on the table/.test(said.status) && gone.status === "" &&
         gone.cuttings === said.cuttings && gone.open === said.open &&
         said.statusFadeMs === "0.45s" && fadeProbe.rest === "1" && fadeProbe.faded === "0" &&
@@ -410,7 +410,7 @@ export async function run(ctx) {
   const pfNext = await evaluate(`(() => { const b = document.getElementById("pf-next"); if (!b) return null; b.scrollIntoView({ block: "center" }); const r = b.getBoundingClientRect(); if (r.width < 1) return null; const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2); const h = document.elementFromPoint(x, y); return { x, y, reachable: h === b || b.contains(h) }; })()`);
   if (pfNext) await clickAt(pfNext.x, pfNext.y);
   const PF_SAID = `(() => { const s = document.getElementById("pf-status"); if (!s) return null; const was = s.style.transition; s.style.transition = "none"; const rest = getComputedStyle(s).opacity; s.classList.add("fading"); const faded = getComputedStyle(s).opacity; s.classList.remove("fading"); s.style.transition = was; return { line: s.textContent || "", fadeMs: getComputedStyle(s).transitionDuration, rest, faded }; })()`;
-  // A bounded poll and not a settle, so a Portfolio that never announces fails CD24 by name rather than throwing outside every step the way its four siblings here already run unstepped.
+  // A bounded poll and not a settle, so a Portfolio that never announces fails CD24 by name rather than throwing outside every step the way its four siblings here already run unstepped. 40 tries is 2s: bringUp says synchronously inside the click handler's own task, so the first or second read has it (measured 2026-09-13, every local run read it on the first).
   let pfSaid = await evaluate(PF_SAID);
   for (let i = 0; i < 40 && (!pfSaid || pfSaid.line === ""); i++) { await sleep(50); pfSaid = await evaluate(PF_SAID); }
   check(

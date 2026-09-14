@@ -38,7 +38,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "turn": 6.5,
   "runninghead": 6.6, // measured 2026-09-11, three local single-suite runs at 4.9, 5.1 and 6.6 with RH10d and RH10e added (#565, a Letter resize and a settle on an already-open Gallery); the highest taken, a lane budget erring upward
   "cluster": 4.7, // measured 2026-08-28, local single-suite run
-  "chart-drawer": 44.9, // 37.2 (2026-09-08) raised by the 7.7s #547 added, measured 2026-09-13 as 32.5s before and 40.2s after on one machine: the standing budget is raised by a measured delta and never lowered to a single faster run. 6.9 at #520 was an 11-check suite; #543, #540 and #521 took it to 23, and six of them draft real region sheets
+  "chart-drawer": 45.7, // 37.2 (2026-09-08) plus the floor #547 added: CD23 waits out SAY_HOLD_MS + SAY_FADE_MS, 8.45s of setTimeout that no machine can undercut, so the PRINCIPLE is the bound and the local 32.5s/40.1s pair only corroborates it. 6.9 at #520 was an 11-check suite; #543, #540 and #521 took it to 23, and six of them draft real region sheets
   "room-drawer": 7.3, // measured 2026-08-28, local single-suite run
   "document-rooms": 6.0, // measured 2026-08-29, local run
   "broadside": 3.8,

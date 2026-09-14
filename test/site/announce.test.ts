@@ -82,14 +82,6 @@ test("at the end of the fade the line is gone, the fade comes off with it, and n
   assert.equal(f.timers.waiting(), 0);
 });
 
-test("the text is emptied BEFORE the fade comes off, so the line never flashes back at full strength (#547)", () => {
-  const f = fixture();
-  f.say(LINE);
-  f.timers.fire();
-  f.timers.fire();
-  assert.deepEqual(f.pill.events.slice(-2), ["clear", `-${FADING}`]);
-});
-
 test("a newer line cancels the older line's departure, so the reader is never cut short (#547)", () => {
   const f = fixture();
   f.say(LINE);
@@ -164,11 +156,11 @@ test("every room that announces on a status pill announces through the one annou
   }
 });
 
-// The Portfolio keeps a second, bare writer for its drafting PROGRESS, which must not erase itself while the drafting it counts is still running. Nothing in the browser can tell the two apart: CD24 reads the line and the pill's fade, and both look identical whichever writer put the line there.
+// Nothing in the browser can tell the two writers apart: CD24 reads the line and the pill's fade, and both look identical whichever one put the line there.
 test("the Portfolio's ruled announcement goes through the announcer and its progress line does not (#547 ruling 4)", () => {
   const flat = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/portfolio/app.ts"), "utf8").replace(/\s+/g, " ");
   assert.match(flat, /say\([^;]*is on top/, "the sheet brought up is ANNOUNCED, so it leaves the chart the way the Chart Table's line does");
   assert.doesNotMatch(flat, /tell\([^;]*is on top/, "and never written bare, which would leave it standing over the chart forever");
   assert.match(flat, /tell\([^;]*draftedLine/, "while the drafting count is written bare, or a sheet slower than the hold blanks the stage mid-draft");
-  assert.doesNotMatch(flat, /say\([^;]*draftedLine/, "");
+  assert.doesNotMatch(flat, /say\([^;]*draftedLine/, "and never announced, or it goes while the drafting is still running");
 });

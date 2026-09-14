@@ -112,14 +112,13 @@ test("the kit's print block stands the stage's message boxes down (#566, ruled 2
   }
 });
 
-// #547 ruling 4 (Alex, 2026-09-13): the Explorer's #status and the Portfolio's #pf-status are the same kit furniture on the same kit stage, so the fade that takes an announcement off the chart is ONE kit rule and neither page carries a copy. The resolved duration is pinned in e2e CD23; this reads the text.
+// This reads public/atelier.css alone, so a page sheet re-raising the opacity would pass it: extraCss links after the kit and wins on equal specificity. CD23 and CD24 read the resolved value and are the guard for that (#547).
 test("the kit gives the stage's status pill its fade, keyed to the class so every chart room's pill wears it (#547)", () => {
   const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   const base = css.match(/body\.chart-room \.stage \.status\s*\{([^}]*)\}/);
   assert.ok(base, "the kit dresses the stage's pill");
   assert.match(base[1], /transition:\s*opacity\s+0\.45s/, "the pill carries the fade's own duration, the one src/site/shared/announce.ts waits out before it clears the text");
-  // EVERY arm and not the first (skeptic round 2 on PR #584).
-  // Keyed on the bare class: `.status.fading` as the anchor misses `#pf-status.fading`, which is exactly the arm that would leave one page's announcement standing, and is the spelling the round-2 mutation used.
+  // Every arm, keyed on the bare class: `.status.fading` as the anchor misses `#pf-status.fading`, the one spelling that leaves a page's announcement standing (skeptic round 2 on PR #584).
   const fades = [...css.matchAll(/([^{}]*\.fading[^{}]*)\{([^}]*)\}/g)];
   assert.ok(fades.length > 0, "and the kit carries the arm the announcer turns on");
   for (const fade of fades) {

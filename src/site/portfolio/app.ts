@@ -47,7 +47,6 @@ const say = makeAnnouncer({
   after: (run, ms) => window.setTimeout(run, ms),
   cancel: (timer) => { window.clearTimeout(timer); },
 });
-// Progress, not an announcement: #547 gave the announcement a hold and a fade, and a count of what is drafted so far must not erase itself while the drafting it reports is still running.
 const tell = (line: string): void => { status.textContent = line; };
 
 /** The pile's depth, as papers behind the top sheet; the mockup shows the stack and not a count. */
