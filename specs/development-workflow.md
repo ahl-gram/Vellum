@@ -35,7 +35,8 @@ that reds each one, the evidence that will say it works, and the rosters and doc
 drags with it. The required reading is due before the plan, not after it: `specs/rulebook.md` before
 any change that touches the renderer, a committed chart, the golden, a regen, a seed or the order of
 work, `specs/ui-design.md` before any work whose deliverable is an appearance, and
-`specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe.
+`specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe, or that
+reads a screenshot, a focus state or a narrow viewport in the harness.
 
 **4. Get a cold read on the plan: `vellum-plan-skeptic`.** Not `vellum-pr-skeptic`, which reviews a
 diff and has none to read at this point. The plan skeptic attacks the plan's assumptions, its

@@ -28,9 +28,10 @@ model and the rosters a page joins, what the build does to authored markup and w
 test, the two forms that fail silently when written any other way, and the deploy model;
 `specs/development-workflow.md` is the order of operations from a filed issue to a pull request,
 including which subagent runs at which step and the one place the work stops for Alex's ruling;
-`specs/settle-doctrine.md` is how an e2e wait is written, ratified across #526 and #529 and pointed
-at by the footguns skill's Gate 2; and `specs/flake-record.md` is the dated ledger of every CI red
-believed to be a flake, one row per failure, which is what you consult instead of pressing re-run.
+`specs/settle-doctrine.md` is how an e2e wait is written and what the harness environment it runs in
+actually does, ratified across #526, #529 and #589 and pointed at by the footguns skill's Gate 2;
+and `specs/flake-record.md` is the dated ledger of every CI red believed to be a flake, one row per
+failure, which is what you consult instead of pressing re-run.
 **`specs/rulebook.md` is REQUIRED READING before any change that touches the renderer, a committed
 chart, the golden, a regen, a seed, or the order of work**, `specs/ui-design.md` before any work
 whose deliverable is an appearance, `specs/engine-invariants.md` before any change to world
@@ -41,8 +42,9 @@ adding or restructuring a page, a stylesheet, a bundle or an inlined script,
 `specs/development-workflow.md` before starting a sub or an epic, since its early steps are the ones
 a session cannot go back and take
 later, and `specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP
-probe. None of them is summarized here; where this file and a spec disagree, the spec is right. The
-ruled pixels those specs were decided from are archived under `design/`, one directory per design
+probe, or that reads a screenshot, a focus state or a narrow viewport in the harness. None of them
+is summarized here; where this file and a spec disagree, the spec is right. The ruled pixels those
+specs were decided from are archived under `design/`, one directory per design
 round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting).
 
 These refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project specifically.
