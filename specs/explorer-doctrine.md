@@ -26,11 +26,14 @@ make an unqualified rule false. Read the surface, not just the rule.
 
 - **The engine is host-agnostic and takes its elements from the host.** `createLivingChart` in
   `src/site/living-chart/index.ts` is the only way in, and construction only stores the references it
-  is given. **IDS ARE THE HOST'S NAMESPACE**: the engine never looks an element up in the document,
-  which is what `test/site/living-chart-boundary.test.ts` pins by refusing `getElementById` anywhere
-  under `src/site/living-chart/`. Inside an element the host handed in, the engine may address ids it
-  or the renderer owns, which is how the chronicle reaches the chart's own layer groups and how the
-  overlay reaches the card it assigned. The line is where the id comes from, not whether one appears.
+  is given. **IDS ARE THE HOST'S NAMESPACE**: the engine never reaches into the document for one.
+  Inside an element the host handed in, it may address ids it or the renderer owns, which is how the
+  chronicle reaches the chart's own layer groups and how the overlay reaches the card it assigned.
+  The line is where the id comes from, not whether one appears.
+  - **The guard is narrower than the rule, so hold the rule yourself.**
+    `test/site/living-chart-boundary.test.ts` refuses `getElementById` in the `.ts` files sitting
+    DIRECTLY in `src/site/living-chart/`. It does not read a subdirectory, and it does not catch a
+    document-scoped `querySelector`. A new engine module in a nested directory is outside it.
 - **A page that mounts the engine owes the sheet and the class**: link `/living-chart.css` through
   `BaseLayout`'s `extraCss` prop (`src/layouts/BaseLayout.astro`), and put `class="living-chart"` on
   the chart mount it hands in. A page that skips either renders its overlays undressed. **The order
@@ -59,17 +62,16 @@ make an unqualified rule false. Read the surface, not just the rule.
   entry: it posts to the status line and hangs the settle.
 - **A room's stage binds its world in LOCKSTEP with the last draw result**, never only in a
   droppable arm callback, or one world's plate paints over another's chart.
-- **The journal's day count is GRID-space**, so render width never moves a day, and each day is the
-  later of the computed day and one past its predecessor (`nextDay` in `src/world/voyage-log.ts`).
-  The chronicler's heading row is furniture and is never inked.
-- **What may be mounted inside the chart mount:**
-  - **Chart furniture is CSS-drawn and carries no inline `<svg>` of its own.** A suite reads the
-    committed survey as the last `#map .region-inset svg` and hashes it, so anything mounted there
-    with an inline svg inside BECOMES that element and takes the suite's reads with it. This is
-    decided by the markup choice and cannot be caught afterwards.
-  - **`.region-inset` is `pointer-events: none`**, so anything mounted in it restores its own or it
-    is reachable by keyboard alone and a real click lands on the chart underneath. The precedent is
-    `.dog-ear` in `public/explorer/chart-drawer.css`.
+- **What may be mounted inside the chart mount** (what a region inset DRAWS once mounted is
+  `specs/region-and-voyage.md`'s):
+  - **Furniture mounted INSIDE A REGION INSET is CSS-drawn and carries no inline `<svg>` of its
+    own.** A suite reads the committed survey as the last `#map .region-inset svg` and hashes it, so
+    anything mounted there with an inline svg inside BECOMES that element and takes the suite's reads
+    with it. This is decided by the markup choice and cannot be caught afterwards. Elsewhere in the
+    mount a sibling `<svg>` is fine, and the voyage track is one.
+  - **`.region-inset` is `pointer-events: none`** (`public/explorer/index.css`), so anything mounted
+    in it restores its own or it is reachable by keyboard alone and a real click lands on the chart
+    underneath. The precedent is `.dog-ear` in `public/explorer/chart-drawer.css`.
   - **A hook that asks the controller what is committed runs AFTER the inset assignment**, or it
     describes the outgoing sheet. The type check is clean either way and no unit test sees it.
   - **The voyage track is a SIBLING `<svg>` inside the mount, never inside the chart's own svg**,
@@ -117,8 +119,6 @@ make an unqualified rule false. Read the surface, not just the rule.
   is the gesture box's own client box, which includes padding, so a sub-viewport transform target
   lets the sheet pan off-stage. Which element is the frame follows the room's shape: `bindRoom`'s
   `frame` argument is the map element on the Daily Hunt and the stage in the Explorer.
-- **A fit measures chrome rects, so it runs after the chrome has its text**, again on fonts ready
-  and on resize. A fit taken before the lines are written measures an empty box.
 - **A non-SVG plate gives the room's aspect scan nothing, so a chart room showing an image passes
   its aspect explicitly.**
 - **Ambient drift is not user input.** A wheel measured against the drifted scale reads the snap-back
@@ -206,7 +206,8 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   arms, and deferring an arm past the paint lets a style change landing inside the beat paint the
   previous world's track onto the new world's ghost.
 - **A quiet rebuild never computes the travel matrix.** The quiet flag does double duty, sink and
-  matrix, so pinning it true on an arm path ships an unordered itinerary.
+  matrix, so pinning it true on an arm path ships an unordered itinerary. What the order itself
+  guarantees is `specs/region-and-voyage.md`'s; this is the arm's half of the same flag.
 - **A park is silent.** A silent apply clears every pending grade and reveals nothing; without it,
   arming mass-stamps the whole world and a flip re-inks a century as the sheet swings away.
 - **No hide, reflow and restore dance is owed on the chronicle's marks**, because every paint drives
@@ -222,7 +223,8 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   box keeps its LEADING edge, because clamping fits a card and does not shrink one. The pure half is
   `clampOffset` in `src/render/place-card.ts`.
 - **A place link is world-sheet only.** A region inset renumbers its places and its smallest tier has
-  no world index, so an inset card is deliberately linkless.
+  no world index, so an inset card is deliberately linkless. Why an inset renumbers is
+  `specs/region-and-voyage.md`'s.
 - **A card is chart furniture, not an instrument**, so it stays live while the resting track is
   inked. But **a host that arms its instrument every draw has no live place cards**, which makes any
   card-side feature Explorer-only by construction. The builder is called on both hosts, so the call

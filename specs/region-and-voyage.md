@@ -14,8 +14,9 @@ and the overlay lifecycle. The redraft that mounts a region sheet is an overlay,
 how it is mounted, scaled or torn down is there and not here.
 
 Its other siblings hold what this file is not about: `specs/rulebook.md` the golden, the regen and
-the order of work, `specs/ui-design.md` how any of this looks, and `specs/settle-doctrine.md` how a
-wait on it is written. Where this file and the rulebook disagree about a rule, the rulebook wins.
+the order of work, `specs/ui-design.md` how any of this looks, `specs/settle-doctrine.md` how a wait
+on it is written, and `.claude/skills/vellum-footguns/SKILL.md` the imperatives keyed to the moment
+of typing a check. Where this file and the rulebook disagree about a rule, the rulebook wins.
 
 ## Region worlds and level of detail
 
@@ -76,7 +77,8 @@ wait on it is written. Where this file and the rulebook disagree about a rule, t
   grandparent. The mechanism is the elementwise maximum over every ancestor surface (`maxOfSurfaces`
   in `src/world/detail-chain.ts`, then `floorToParent` in `src/terrain/detail-guarantees.ts`).
 - **The parent's CELL decides whether it floors; its interpolated surface decides how high**
-  (`gateToParentLand`). Ungated, the surface rises over a one-cell strait and fills a one-cell basin,
+  (`gateToParentLand` in `src/terrain/detail-guarantees.ts`). Ungated, the surface rises over a
+  one-cell strait and fills a one-cell basin,
   inventing land the parent never had.
 - **State which guarantee a new level-of-detail layer enforces, per-link or transitive.** The
   guarantees are not interchangeable and `rejectBridges` in `src/terrain/detail-guarantees.ts`
@@ -137,7 +139,11 @@ wait on it is written. Where this file and the rulebook disagree about a rule, t
     exact-order fixture is ambiguous.
 - **The order at rest is a pure function of the world.** A quiet mid-drag rebuild reuses the cached
   order or falls back to a straight line for that frame rather than recomputing the matrix per drag
-  frame.
+  frame. The arm's half of that same quiet flag is `specs/explorer-doctrine.md`'s: pinning it true
+  on an arm path ships an unordered itinerary.
+- **The journal's day count is GRID-space**, so render width never moves a day, and each day is the
+  later of the computed day and one past its predecessor (`nextDay` in `src/world/voyage-log.ts`).
+  The chronicler's heading row is furniture and is never inked.
 - **A sea leg carries a WATER SPAN**, stored as arc FRACTIONS of the simplified polyline so the
   uniform grid-to-pixel projection preserves them and the drawn geometry stays byte-identical. The
   overlay swaps rider and ship per frame inside the span, a spanless sea leg degrades to a whole-leg
@@ -168,5 +174,5 @@ wait on it is written. Where this file and the rulebook disagree about a rule, t
 ---
 
 *Companion to `specs/explorer-doctrine.md` (the living chart the reader touches),
-`specs/rulebook.md` (the golden, the regen, the order of work), and `specs/ui-design.md` (how all of
-this looks).*
+`specs/rulebook.md` (the golden, the regen, the order of work), `specs/ui-design.md` (how all of this
+looks), and `specs/settle-doctrine.md` (how a wait on it is written).*
