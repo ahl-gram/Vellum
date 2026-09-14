@@ -37,7 +37,6 @@ test("the family the filter already knew is still dropped, with a reason and bar
 });
 
 test("a reason NOBODY has seen yet, under an opening we have, is dropped too: the filter is fitted to the opening, not to one whole sentence", () => {
-  // The defect this file guards is #613 recurring one level down: the browser composes the message as one of three openings plus one of eighteen reasons, so an entry fitted to opening-plus-reason leaves seventeen siblings to red a green check.
   assert.deepEqual(
     dropExpectedCancellations([UNSEEN_REASON, TIMEOUT_OPENING]),
     [],
@@ -52,7 +51,6 @@ test("every opening in the roster is exercised by a fixture above, and every fix
       `${prefix} was added to CANCELLATION_PREFIXES with no literal fixture exercising it, so nothing here would red if it stopped being dropped`,
     );
   }
-  // Round 2 hole: naming a prefix in a fixture is TEXT, so a new opening could ship beside a witness the filter actually keeps and this still passed.
   assert.deepEqual(dropExpectedCancellations(DROPPED), [], "a fixture that names an opening is not dropped by the filter, so the coverage above is satisfied by a witness that proves nothing");
 });
 
@@ -107,9 +105,32 @@ test("no suite carries a cancellation opening of its own: one roster, swept from
   }
   const adopters = files.filter((f) => src(f).includes('from "./console-support.mjs"'));
   assert.ok(adopters.length > 0, "no file imports console-support at all, so the sweep above is reading an empty claim");
-  // Prover round 1 hole: the at-least-one adopter check above is satisfied by any other suite, so deleting ONE file's import while keeping its call red nothing, and that file throws a ReferenceError the first time its check runs.
+  // The at-least-one adopter check above is satisfied by any other file, which is what left this gap (prover round 1).
   const uncited = files.filter(
     (f) => f !== "console-support.mjs" && src(f).includes("dropExpectedCancellations(") && !src(f).includes('from "./console-support.mjs"'),
   );
   assert.deepEqual(uncited, [], `${uncited.join(", ")} call the shared drop without the house import spelling; a genuinely missing import is a ReferenceError the first time that check runs, and an unusual spelling reds here too, which is the safe direction`);
+});
+
+test("every read of the console accumulator goes through the shared drop, so a call site cannot quietly stop filtering (cold skeptic on PR #619)", () => {
+  // harness.mjs FILLS the accumulator and is the one file that reads it for something other than a check.
+  const files = readdirSync(E2E).filter((f) => f.endsWith(".mjs") && f !== "console-support.mjs" && f !== "harness.mjs");
+  assert.ok(files.length > 20, `read only ${files.length} .mjs files; this sweep is looking at the wrong tree`);
+  const offenders: string[] = [];
+  let reads = 0;
+  for (const f of files) {
+    readFileSync(join(E2E, f), "utf8").split("\n").forEach((raw, i) => {
+      const line = raw.trim();
+      if (!line.includes("consoleErrors") || line.startsWith("//")) return;
+      if (line.startsWith("const {") || /=\s*consoleErrors\.length;?$/.test(line)) return;
+      reads += 1;
+      if (!line.includes("dropExpectedCancellations")) offenders.push(`${f}:${i + 1}`);
+    });
+  }
+  assert.ok(reads > 10, `only ${reads} accumulator reads classified; the exclusions above have eaten the sweep`);
+  assert.deepEqual(
+    offenders,
+    [],
+    `${offenders.join(", ")} read the console accumulator without passing it through the shared drop, so that check silently stopped filtering. BLIND SPOT, declared: this reads scripts/e2e/*.mjs only, so scripts/e2e-explorer.mjs and scripts/e2e-lanes.mjs are outside it (both clean today, neither takes a delta), and it reads one LINE, so a read split across lines would escape; every one of the reads it classifies today is single-line`,
+  );
 });
