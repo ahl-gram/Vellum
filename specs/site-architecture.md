@@ -17,9 +17,9 @@ file and the rulebook disagree about a rule, the rulebook wins, with ONE known e
 rulebook's retired-rules line that a page is one `.astro` file plus one nav entry describes a
 reading page, and what a working page costs is this file's rule below. #590 scopes that line.
 
-**No counts live here.** Not the number of pages, sheets, bundles or suites. Every count in the
-private notes this file replaces had rotted, in the same way, in every place it appeared. The
-rosters below are named by symbol and path so the reader goes and looks.
+**No counts live here.** Not the number of pages, sheets, bundles or suites. A count in a durable
+document rots silently, because nothing in this repo sweeps markdown. The rosters below are named by
+symbol and path so the reader goes and looks.
 
 ## How a page is authored
 
@@ -82,8 +82,7 @@ rosters below are named by symbol and path so the reader goes and looks.
   neighbours use, and expect a test to hold you to it.
 - **The room name and its card twin are TWO props, never one.** The layout takes the room and its
   open-graph twin separately, with the page title computed from the room, and the same split exists
-  for the description. Alex probed this and kept them apart, so do not collapse them or derive one
-  from the other.
+  for the description. They are ratified apart, so do not collapse them or derive one from the other.
 
 **What a working page's surface owes beyond its files.** The surfaces that draw share ONE render
 worker, first in first out, with no job cancellation, so an ordered plate that is then redrawn
@@ -118,9 +117,10 @@ SVG remains the byte-faithful artifact.
 
 - **Authored markup is NOT minified, and that is a contract.** `compressHTML` is set false in
   `astro.config.ts` with its reason stated there, and `test/site/astro-scaffold.test.ts` pins the
-  setting, because the migrated pages' markup has to stay near-verbatim. What the build DOES minify
-  is the Astro-processed script and the inlined shell CSS. Every rule below is about those, not
-  about your markup.
+  setting, because the migrated pages' markup has to stay near-verbatim. **Not minified is not the
+  same as untouched**: the build still adds slot whitespace, entity-encodes expressions and expands
+  self-closing SVG children, which is what the two bullets below are about. What it MINIFIES is the
+  Astro-processed script and the inlined shell CSS, which is what the quote-style bullet is about.
 - **The minifier picks the quote style**, so a marker matching an inlined page script is written as
   a quote-agnostic pattern accepting backtick, double and single quotes, never as a quoted literal.
   The `pageScript` patterns in `test/site/astro-scaffold.test.ts` are the shape to copy.
@@ -131,13 +131,16 @@ SVG remains the byte-faithful artifact.
   and `decode` helpers exist for.
 - **The escaping rule is about EXPRESSIONS, not about props versus slots.** Text that reaches the
   page through an expression is entity-encoded, whether it arrived as a prop or was interpolated into
-  a slot; literal markup you authored passes through as written. Measured on a build: the same
-  possessive appears escaped where a page's data supplies it through an expression and raw where it
-  is authored as prose. Where byte identity matters, hand the text through as literal markup rather
-  than through an expression.
-- **Comments inside inlined CSS ship as public page bytes.** `ATLAS_SHEET_CSS` is inlined into every
-  atlas host, so prose written there is visible in the live page source and greppable by anyone. A
-  placeholder string in such a comment reads to a stranger like a rendering defect.
+  a slot; literal markup you authored passes through as written. The same possessive ships escaped
+  where a page's data supplies it through an expression and raw where it is authored as prose, in
+  one built page. Where byte identity matters, hand the text through as literal markup rather than
+  through an expression.
+- **CSS a script writes rather than the build inlines keeps its comments, and they ship as public
+  page bytes.** The distinction is which path the CSS took: the layout's global block is minified
+  into the page and its comments are stripped, while `ATLAS_SHEET_CSS` in `src/atlas/document.ts` is
+  written verbatim into every atlas host by a node script the build never touches, so prose there is
+  visible in the live page source and greppable by anyone. A placeholder string in such a comment
+  reads to a stranger like a rendering defect.
 
 ## The two contractual forms
 
@@ -153,14 +156,16 @@ other way, which is what earns them a section of their own.
   static form Vite's build analysis requires" in `test/repo/constant-contracts.test.ts`, which walks
   the tree, compares static spawns to total spawns per file, and asserts a floor so it cannot pass
   over an empty scan.
-- **The trap that shaped it**: a bare relative worker URL resolves against the DOCUMENT base rather
-  than the module URL, so it does not throw. It 404s, and the client falls back to running the job
-  inline, which looks like a slow page rather than a broken one.
+- **A bare relative worker URL resolves against the DOCUMENT base**, not the module URL, so it does
+  not throw. It 404s, and the client falls back to running the job inline, which looks like a slow
+  page rather than a broken one. That is the failure the literal form above exists to prevent.
 - **`is:inline` on a working page's bundle-twin script tag is contractual.** Without it the build
   routes that script through its own pass, which the ratified #204 analysis rejects for these
-  surfaces. **Its guard names its pages by literal path and does not cover the class**, so a NEW
-  working page that omits `is:inline` reds nothing and ships wrong. Until that widens, the discipline
-  at authoring time is yours: copy a sibling page's script tag whole.
+  surfaces. **The guards name their pages by literal path, so the class is covered only indirectly**:
+  the source-level pins list their pages, while the built-output assertion that each app page keeps
+  its bundle-twin script tag rendered verbatim runs over `PAGES` in
+  `test/site/astro-scaffold.test.ts`, which a new working page joins. A page that omits `is:inline`
+  AND skips that roster reds nothing. Copy a sibling page's script tag whole, and join the roster.
 
 ## Discovery and indexes
 
@@ -200,8 +205,8 @@ precisely, because a token that falls outside it looks identical at the point of
   `ui-design.md`'s wording for the colour rule.
 - **The rule for what is outside is a DERIVATION, not a list.** `SITE_PALETTE` carries flat
   name-to-hex colours only, so a token whose value is not a flat hex is not in the join. Where it
-  lives is then wherever declares it: the layout's global style holds the deep, the two depth
-  shadows and the room-furniture lengths; `public/fonts.css` and `public/motion.css` declare their
+  lives is then wherever declares it: the layout's global style holds the deep, the depth shadows
+  and the room-furniture lengths; `public/fonts.css` and `public/motion.css` declare their
   own; and a page sheet may declare one in its own `:root`, where the SAME token name legitimately
   holds a different value on different pages. Check the declaration, not a remembered home.
 - **A self-contained generated document declares its own copy, in one of two shapes.** The atlas
