@@ -222,7 +222,7 @@ at #260 with its clean-list entry kept deliberately.
   alone finds only some of it. Take the strings from the failing tests and search the authored
   surfaces for each. Known homes today, and this list is deliberately NOT closed, because nothing
   sweeps prose and the next page to quote the world will not appear in it: `src/pages/index.astro`
-  (the atlas road and three arms captions naming realms), `src/pages/faq/index.astro`,
+  (the atlas road, and the arms captions, which name realms), `src/pages/faq/index.astro`,
   `src/site/home/stations.ts` (mooring names and the station title) and `README.md`.
 - **Some levers are golden-safe by construction, and a change behind one of them owes no regen and
   no golden re-pin.** The named ones are worth knowing before paying for a regen.
