@@ -286,15 +286,15 @@ at #260 with its clean-list entry kept deliberately.
 world identity. The loser rebases, re-pins, regenerates, then re-runs the regen commands.
 
 **Current membership: `{#113}`** (more seats on empty islands, so realm counts can exceed five). It
-is the only member, so the rule has nothing to exclude against today, and no ordering constrains it.
+is the only member, so the rule has nothing to exclude against today.
 
-**#122 does not join this set, on the posture it is specced to take.** None of that posture is built.
-Its marks would sit behind an opt-in render option, byte-identical when off, and its generation side,
-the war-event field in `src/society/history.ts` and the predecessor partition its 2026-08-16 scope
-brings over from #49, would be additive and draw-free. The check is #122's own acceptance: the golden
-test green on the pinned checksum, and annals-off byte-identical. **Re-judge the tier if any part of
-that fails**, and do not take a grep for `annals` as that check, since no hit today is a render
-option.
+**#122 does not join this set, on the posture it is specced to take**, which as of 2026-09-14 is
+unbuilt in every part. Its marks would sit behind an opt-in render option, byte-identical when off,
+and the former-frontier half its 2026-08-16 scope brings from #49 sits behind that same option. Only
+its new field on `HistoricalEvent` (`src/society/history.ts`) is generation side, and #122 has that
+additive and draw-free. Built to that spec it moves neither the committed charts nor world identity.
+The proof is #122's acceptance: golden green on the pinned checksum, annals-off byte-identical, the
+drift guard green. **Re-judge the tier if any part of that fails.**
 
 ## Scheduling rules
 
