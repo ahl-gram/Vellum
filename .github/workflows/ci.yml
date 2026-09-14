@@ -38,8 +38,8 @@ jobs:
       matrix:
         # Lane NAMES only, never their suite lists: E2E_LANES in src/cli/e2e-lanes.ts stays the one roster, and test/repo/e2e-tiers.test.ts reds if this list and that roster disagree.
         lane: ["A", "B"]
-    # A hung lane is the one failure the outcome rule cannot catch; re-measured 2026-09-11 over the last 20 successful runs, worst 13m14s (the 7m05s this line carried was from an older, shorter suite).
-    timeout-minutes: 25
+    # A hung lane is the one failure the outcome rule cannot catch, and this cap kills a hang rather than budgeting a run, so it sits at about twice the worst real one; re-measured 2026-09-14 over 6 runs of this shape, one lane per runner, worst lane JOB 10m05s and worst e2e step 9m16s (the 13m14s it carried before was two lanes sharing four cores).
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
