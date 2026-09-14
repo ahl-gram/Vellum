@@ -23,6 +23,9 @@ guarantees silently, and what a surface that quotes generated output may not ass
 a host page owes it, the camera and gesture contracts, counter-scale, and the overlay lifecycle;
 `specs/region-and-voyage.md` is its other half: what a region sheet may do that a world sheet may
 not, how a finer view is built and what it guarantees, and how the voyage splits worker from client;
+`specs/site-architecture.md` is how the site is authored, bundled, discovered and shipped: the page
+model and the rosters a page joins, what the build does to authored markup and what that costs a
+test, the two forms that fail silently when written any other way, and the deploy model;
 `specs/development-workflow.md` is the order of operations from a filed issue to a pull request,
 including which subagent runs at which step and the one place the work stops for Alex's ruling;
 `specs/settle-doctrine.md` is how an e2e wait is written and what the harness environment it runs in
@@ -34,13 +37,14 @@ chart, the golden, a regen, a seed, or the order of work**, `specs/ui-design.md`
 whose deliverable is an appearance, `specs/engine-invariants.md` before any change to world
 generation or to a surface that quotes generated output, `specs/explorer-doctrine.md` before any
 work on the Explorer or on a chart camera, gesture or overlay, `specs/region-and-voyage.md` before
-any work on a region sheet, level of detail, or the voyage, `specs/development-workflow.md` before
-starting a sub or an epic, since its early steps are the ones a session cannot go back and take
-later, and `specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP
-probe, or that reads a screenshot, a focus state or a narrow viewport in the harness. None of them
-is summarized here; where this file and a spec disagree, the spec is right. The ruled pixels those
-specs were decided from are archived under `design/`, one directory per design
-round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting).
+any work on a region sheet, level of detail, or the voyage, `specs/site-architecture.md` before
+adding or restructuring a page, a stylesheet, a bundle or an inlined script,
+`specs/development-workflow.md` before starting a sub or an epic, since its early steps are the ones
+a session cannot go back and take later, and `specs/settle-doctrine.md` before any work that writes
+an e2e wait, settle, or CDP probe, or that reads a screenshot, a focus state or a narrow viewport in
+the harness. None of them is summarized here; where this file and a spec disagree, the spec is
+right. The ruled pixels those specs were decided from are archived under `design/`, one directory
+per design round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting).
 
 These refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project specifically.
 

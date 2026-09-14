@@ -38,6 +38,7 @@ where the proof goes.
 | 2026-09-10 | SV2r | 34526874952 | `dd2d01e`, main | `{"dashSteps":11,"dashSeen":11,"gap":250,"frames":75}` | open, no issue |
 | 2026-09-12 | CD7b | 34678766918 | `ab5b064`, main | identical | settled, #578 and PR #581. Never re-run |
 | 2026-09-14 | RS30 | 34795676910 | `3879d43`, `chore/586-engine-invariants` | the pace-4 leg took 6 samples against `minSamples: 8`; both legs fit their rate to 0.6 and -0.1 percent, `ratio 3.97`, `jump 15` of 16.6 allowed, `backward 0`, `parked false` | open. Second recorded RS30, same sample-count shape as 2026-09-08 on the other leg. First on a diff that cannot cause it: PR #593 changes two markdown files. Not re-run; the next run on that branch (`fc5ba36`, two more markdown edits) was green. Payload and what to capture next are in a comment on that PR |
+| 2026-09-14 | lane A launch | 34823116661 | `aff6082`, `chore/588-site-architecture` | `no devtools page target (browser exited code=null signal=SIGKILL)` after three launch attempts, 20.7s in, no check run; summary `LANE A FAILED (303/303 checks; A HARNESS ERROR (exit 2) 20.7s, B ok 565.5s)` | open, no issue. The first `HARNESS ERROR` row here, and the first row that is not a check at all: both lanes lost their browser to SIGKILL in the same second as they launched together, lane B recovered on its third attempt and passed 303/303 on that sha, and the diff is two markdown files, which no suite reads. Recorded before the branch was pushed again, which is the only re-run it got |
 
 ## What the CD7b rows turned out to be
 
