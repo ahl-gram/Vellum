@@ -176,7 +176,10 @@ Two room patterns, both ratified whole after live use (#462, ratified at #454).
 
 **A chart room.** The chart is the room: full bleed on the deep, pannable and zoomable, fitted to
 what the chrome leaves and **measured off the chrome's own rects, never guessed** (and measured after
-the chrome has its text, or the fit reads an empty box). No band, no footer: a chart room with a
+the chrome has its text, or the fit reads an empty box). **The stage is the fixed full-viewport box
+the chart is mounted in**, declared as `body.chart-room .stage` in `public/atelier.css`; a room that
+hangs its plates on the deep rather than mounting one chart has none, and the Gallery is that room
+today. No band, no footer: a chart room with a
 stage does not scroll. **A chart room without a stage is the exception and it does scroll**, its
 content passing under the fixed chrome, which is why it pools every piece of that chrome rather than
 the cluster alone, and why its vignettes may not ride the scrolling page: a fixed darkening band

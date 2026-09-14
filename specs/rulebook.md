@@ -212,13 +212,18 @@ at #260 with its clean-list entry kept deliberately.
 - **A seed re-roll** (terrain reshape, culture or name-template edits) is a different, larger cost:
   it changes world identity and re-pins the golden checksum. **Only one may be in flight at a time**,
   and the set that rule excludes against is the next section. **It also has a hand-fixed tail that no
-  script covers**: hand-authored prose quotes the hero world by name, and the regen commands rewrite
-  none of it. Find the tail with a grep for the hero world's own title rather than from a list, which
-  is what this rule is for, because the prose is spread across pages and nothing sweeps it. The
-  failure is SILENT wherever no test reads the prose, which today is every page carrying it. Where a
-  hand-authored value happens to be pinned, the re-roll fails loudly instead: `README.md` names seed
-  42's culture, and `test/world/covenant-seed42.test.ts` reds on it. Treat a loud red there as the
-  lucky case, not the shape of the problem.
+  script covers**: hand-authored prose quotes the hero world, and the regen commands rewrite none of
+  it. **The reds will tell you a re-roll happened; nothing tells you which prose to edit.** Expect
+  `test/world/golden-seed42.test.ts` and `test/world/covenant-seed42.test.ts` to go red, plus a
+  deliberate throw in `mooring` (`src/site/home/stations.ts`) and the home e2e's title assertion, so
+  loudness is not the problem. The problem is the prose those reds do not enumerate.
+  **Sweep for the world's strings, plural, not for one of them.** The tail quotes the world's title,
+  its realm names, its settlement names and its culture, in different places, so a grep for the title
+  alone finds only some of it. Take the strings from the failing tests and search the authored
+  surfaces for each. Known homes today, and this list is deliberately NOT closed, because nothing
+  sweeps prose and the next page to quote the world will not appear in it: `src/pages/index.astro`
+  (the atlas road and three arms captions naming realms), `src/pages/faq/index.astro`,
+  `src/site/home/stations.ts` (mooring names and the station title) and `README.md`.
 - **Some levers are golden-safe by construction, and a change behind one of them owes no regen and
   no golden re-pin.** The named ones are worth knowing before paying for a regen.
   - **A render gate that only region sheets pass.** `world.region !== undefined` selects
@@ -374,7 +379,10 @@ comment. This is a convenience index, not their home.
   exactly when a citation should fail, while a line number drifts silently onto unrelated code. Use
   the FULL repo-relative path even for a sibling in the same directory, because basenames repeat
   under `src/` and the ambiguity is day one rather than drift.
-  `test/repo/comment-citations.test.ts` enforces it, and these behaviours of it are deliberate rather
+  `test/repo/comment-citations.test.ts` enforces it **for code comments only**: it reads `.ts` and
+  `.mjs` under the code roots plus `.css` under `public/`, and reaches neither `specs/` nor
+  `.claude/`, so a citation written in prose like this one is checked by hand or not at all. These
+  behaviours of the guard are deliberate rather
   than rough edges: it matches a symbol that APPEARS in the file, not one declared there, because a
   citation properly points at a call site; and it matches JOINED runs of comment lines, not single
   lines, because a citation long enough to wrap is invisible to a line matcher and the guard would
@@ -420,9 +428,9 @@ non-mechanical failure mode, so it is run and PROVEN in a particular way.
   pins why a rule is written the way it is, and a stated deviation from a ruled mockup is the most
   dangerous single loss: without the line the next reader "fixes" the value back.
 - **Every deletion made on the ground that a test already pins the behaviour NAMES that test**, in a
-  ledger written while the grep is still open, because it cannot be reconstructed afterwards. The
-  requirement is not bookkeeping: the one confirmed keeper loss came from a group that did file a
-  ledger and named a test that turned out not to pin the behaviour at all.
+  ledger written while the grep is still open, because it cannot be reconstructed afterwards. Naming
+  a test is not enough by itself: check that the named test actually pins the behaviour the comment
+  stated, since a citation to a test that merely touches the same code reads identically in a ledger.
 - **When a sweep and a feature branch collide, the FEATURE merges first.** Then merge main into the
   sweep and re-run its token verifier before merging that. A comment-only branch absorbing feature
   work is re-provable mechanically; a feature branch absorbing a sweep costs a full e2e run and can
