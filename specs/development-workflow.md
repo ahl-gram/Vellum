@@ -147,9 +147,10 @@ record, because the cold skeptic at step 14 cannot read chat, and neither can th
 body that skips one of its sections. Every line is a claim the skeptic will check. **The body carries
 that template's closing-reference line too**, which nothing enforces: the hook checks the sections and
 denies a negated keyword, but never requires one, so `gh pr view <N> --json closingIssuesReferences`
-is read before the PR is handed over. The grammar that read depends on, and what a PR with no issue
-writes instead, are `vellum-footguns` Gate 5 item 5 and the template's own note; neither is restated
-here.
+is read before the PR is handed over. The grammar that read depends on, and the two other forms the
+line takes (a PR with no issue, and a PR that HAS one and deliberately leaves it open, which is the
+first of a pair on one issue), are `vellum-footguns` Gate 5 item 5 and the template's own note;
+neither is restated here.
 
 **14. Run `vellum-pr-skeptic`, dispatched COLD.** The prompt is the PR number or branch name and
 NOTHING else: no summary, no claims about tests, no rationale. Make no edits while it runs.
@@ -168,8 +169,11 @@ On PR #576 the cold skeptic reported that its loaded instructions were the pre-P
 dispatch worktree stood at that branch's head. **WHY is UNVERIFIABLE**: that pull request's own body
 says the question was never run down, and nothing since has measured where a dispatched agent's
 definition is read from or when. So do not read that agent's report as evidence the new definition
-works. Say in the body which version reviewed the change, and prove the new one from a session
-started after the merge rather than from the one that wrote it.
+works. Say in the body which version reviewed the change. **Proving the new definition is the NEXT
+session's step 2**: the session that launches after the merge runs the cold skeptic once on the
+merged agent and records the result as a comment on the issue, because only a session started after
+the merge can load it. An obligation with no owner and no moment is not discharged, so if that
+handoff is not wanted, the pull request says so and the claim goes unproven by name.
 
 **15. Fix, re-prove, repeat, at most three rounds.** A guard you change is a guard the prover has
 not seen, so it goes back through step 11. Residue that will not be fixed is named in the PR body

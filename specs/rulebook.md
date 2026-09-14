@@ -72,11 +72,12 @@ trimmed as each is touched, not swept separately.
 **Write `Issue #N` or `PR #N` in prose, never a bare `#N`**, because issues and pull requests share
 one numbering sequence here and interleave, so a bare number does not say which kind of thing it
 points at. It governs replies, pull request bodies, issue comments, commit message bodies and the
-prose in these specs. **It never governs a form a tool parses**: a commit SUBJECT keeps the house's
-leading `#N`, a closing reference stays `Closes #N` exactly (a word between the keyword and the
-number closes nothing, `vellum-footguns` Gate 5 item 5), a pull request body's title line keeps `#N`,
-and a field label such as the template's `Issue: #N` is already unambiguous. Existing bare references
-are trimmed as each line is touched, not swept separately, the same way the narrative above is.
+prose in these specs. **It never governs a form a tool parses, or one that already carries the
+word**: a commit SUBJECT keeps the house's leading `#N`, a closing reference stays `Closes #N`
+exactly (a word between the keyword and the number closes nothing, `vellum-footguns` Gate 5 item 5),
+a pull request body's title line keeps `#N`, and a field label such as the template's `Issue: #N`
+already says which it is. Existing bare references are trimmed as each line is touched, not swept
+separately, the same way the narrative above is.
 
 **Why the rulebook is a file and not an issue thread**, recorded so nobody moves it back. Everywhere
 else in Vellum the convention is that a body is historical intent and a later comment supersedes it,
