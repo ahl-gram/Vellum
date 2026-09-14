@@ -81,7 +81,7 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
     commas and tests the SUBJECT, the last compound; otherwise an `:is()` arm, an ancestor's
     pseudo-class and a colon inside an attribute value each drop rules from the sweep (#358). A
     markup regex allows trailing attributes, and an empty parse never SKIPS a section unless every
-    companion parse is empty too (#353).
+    companion parse is empty too (#353, whose guards went blind when #270 added per-term ids).
 14. **A test file that imports a module which can exit at import is reported as a PASS.** It dies
     before any `test()` registers and its assertions are simply gone from the tally, with nothing
     saying so, which is the zero-red alarm inverted. A guard for "importing this does no work" SPAWNS
@@ -98,8 +98,10 @@ Scars: #300, #366, #368, #442, #474, #520, #526, #529, #533, #535, #536, #537, #
    in `scripts/e2e/home-support.mjs`) and the harness's touch helpers, at coordinates read from the
    element's own rect. `element.click()` ignores `pointer-events`
    and every element painted over the target; use it only for wiring, with the reason at the check.
-   A two-point `touchMove` can still reach the page as two ordered half-steps and read as a
-   one-finger pan, so a multi-touch claim needs evidence beyond a before-and-after read (PR #474).
+   A multi-touch gesture can hand back the artifact you hoped to see: with no touch-pan path, two
+   fingers reached only the pinch handler and the apparent pan was two zoom half-steps whose factors
+   cancel unless one is clamped, which a before-and-after read cannot tell from the real thing
+   (PR #474's review, fixed in PR #477). A multi-touch claim owes evidence of both fingers.
 2. **Reachability is its own assertion**: `document.elementFromPoint(x, y) === el`, taken with the
    thing OPEN and after `scrollIntoView({block: "center"})`. Off-viewport returns null, not "hidden".
 3. **Visible means `getBoundingClientRect().width > 0`.** `getComputedStyle(child).display` is not
@@ -138,15 +140,16 @@ Scars: #300, #366, #368, #442, #474, #520, #526, #529, #533, #535, #536, #537, #
     When you kill a run, kill the shell waiting on it too. Run local suites one at a time.
 12. **Measure the instant you mean, and say at the check why that is the instant.** An arrival taken
     from the first frame a diff predicate fires on is the OLD chart LEAVING an emptied mount, so
-    measure ink as a fraction of the settled frame against a control run. Where the window you need
-    is unreachable by a naturally written check, reach it deliberately: block the page's own main
-    thread, queue a marker behind the code's own hop, or dispatch from inside a `MutationObserver`
-    callback, which lands in a gap a wall clock cannot hit (#366).
+    measure ink as a fraction of the settled frame against a control run (#366).
 13. **A capture is a measurement, and it fails by handing back a plausible picture.**
     `Page.captureScreenshot`'s `clip` is in DOCUMENT coordinates, so a viewport rect fed to it on a
     scrolled page photographs empty margin, and a uniformly coloured crop is the tell (#442). It also
     cannot photograph a blocked main thread at all: it waits for the next commit and returns the
     frame after the block, so an unchanged result is not evidence a frame failed to paint (#300).
+14. **Where the window you need is unreachable by a naturally written check, reach it deliberately.**
+    Block the page's own main thread, queue a marker behind the code's own hop, or dispatch from
+    inside a `MutationObserver` callback, which lands in a gap a wall clock cannot hit. Say at the
+    check why the instrument is artificial (#366).
 
 ## Gate 3: before writing CSS or moving layout
 
@@ -191,7 +194,7 @@ fail silently (an undeclared CSS variable, a suite the runner never calls, a bud
 
 ## Gate 5: before the push and the PR body
 
-Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #530, #541, #542, #546, #548, #559, #582, #593, #596; calls made without a ruling on #519, #542, #546.
+Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #530, #541, #542, #546, #548, #582, #593, #596; calls made without a ruling on #519, #542, #546.
 
 1. **Dead code sweep.** Every new export has a second reference. Every new field has a reader that
    produces a STRING on a surface (carries, reads, is wired through describe plumbing; shows, prints,
@@ -233,8 +236,8 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    child retargeted after its base SQUASH-merged reads CONFLICTING against a byte-identical tree,
    because it carries the base's own commits while main carries one squash: replay only the child's
    with `git rebase --onto origin/main <base-head> <child>`, then read `git log --oneline` over the
-   replayed range. Do NOT merge main in: that is the repair for a squashed base only, and the
-   opposite case is the next sentence (PR #491, PR #492). **Two branches that must edit the same
+   replayed range. The replay is the whole repair for a squashed base: do NOT merge main in there.
+   The opposite case is the next sentence (PR #491, PR #492). **Two branches that must edit the same
    roster lines state the insertion order UP FRONT, and the lower-numbered PR merges before the
    higher one opens**; there the higher one DOES bring its branch current with `git merge
    origin/main` and take the stated position (#593, #596).
