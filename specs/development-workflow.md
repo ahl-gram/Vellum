@@ -163,15 +163,13 @@ suite run there deletes the generated assets under `public/` (Alex, 2026-09-12);
 their own (#575). The other three keep their documented work in the dispatch tree, `vellum-plate-reader`'s
 `out/` samples included, since that is where Alex looks for them.
 
-**An agent whose own DEFINITION this pull request changes cannot review the change.** The project
-agent roster is read once, and a session that was running before the edit keeps the definitions it
-started with, so the reviewer you dispatch is the pre-edit agent wearing the new name. On PR #576 the
-cold skeptic reported that its loaded instructions were the pre-PR version while its dispatch
-worktree stood at that branch's head. **WHY is UNVERIFIABLE**: that pull request's own body says the
-question was never run down, and nothing since has measured whether the definitions come from the
-main checkout, from a cache, or from the launch directory. So when a pull request edits
-`.claude/agents/*.md`, its report is evidence about the OLD definition: say so in the body, and prove
-the new one from a session started after the merge rather than from the one that wrote it.
+**An agent whose own DEFINITION this pull request changes cannot be trusted to review the change.**
+On PR #576 the cold skeptic reported that its loaded instructions were the pre-PR version while its
+dispatch worktree stood at that branch's head. **WHY is UNVERIFIABLE**: that pull request's own body
+says the question was never run down, and nothing since has measured where a dispatched agent's
+definition is read from or when. So do not read that agent's report as evidence the new definition
+works. Say in the body which version reviewed the change, and prove the new one from a session
+started after the merge rather than from the one that wrote it.
 
 **15. Fix, re-prove, repeat, at most three rounds.** A guard you change is a guard the prover has
 not seen, so it goes back through step 11. Residue that will not be fixed is named in the PR body
