@@ -17,7 +17,7 @@ type. Read the gate you are at, do each line, and move on. Provenance is in `ref
 
 ## Gate 1: before writing a test or a guard
 
-Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #387, #388, #400, #412, #423, #510, #528, #533, #535, #536, #542, #544, #545, #546, #554, #561, #562, #564.
+Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #387, #388, #400, #412, #423, #510, #528, #533, #535, #536, #542, #544, #545, #546, #551, #561, #562, #564.
 
 1. **Write the mutation before the test.** Name the one-line change to `src/` that must turn this
    test red. If you cannot name one, you are about to write a test that cannot fail.
@@ -72,9 +72,9 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
     Pin what reaches the spawn, not what the option builder returns: the seam between them is where
     a default cap goes missing with every child still green.
 11. **Narrow-width or column-width work owes a sweep across seeds, never the seed-42 fixture.** Seed
-    42's widest cell means a longer name fits under the existing floor, so nothing moves and every
-    test stays green while other seeds scroll sideways. Pin the declaration by regex, so flipping its
-    value fails too (#49).
+    42 is one of the few clean seeds, which is why a sideways-scroll defect left the suite green
+    while other seeds overflowed. Pin the declaration by regex, so flipping its value fails too and
+    not only deleting it (#49, PR #406).
 12. **`test-support/element-shim.ts` does no layout.** Every rect it reports is the one the test
     STATED, so a box computed from it measures the shim and not the code (#387, #388).
 13. **A hand-rolled reader is a guard's blind spot.** A CSS selector reader splits on TOP-LEVEL
@@ -85,7 +85,7 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
 14. **A test file that imports a module which can exit at import is reported as a PASS.** It dies
     before any `test()` registers and its assertions are simply gone from the tally, with nothing
     saying so, which is the zero-red alarm inverted. A guard for "importing this does no work" SPAWNS
-    the module as a child and asserts on stdout (PR #554).
+    the module as a child and asserts on stdout (#551, PR #552).
 15. **A scan is keyed on what the DEFECT looks like, never on what the rule says.** The
     hyphenated-property cut skipped the unhyphenated properties the contract policed, so the sources
     that could hold the defect were exactly the ones it did not select, and it passed (#360).
@@ -95,7 +95,7 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
 
 ## Gate 2: before writing an e2e check or a CDP probe
 
-Scars: #300, #366, #368, #442, #474, #520, #526, #529, #533, #535, #536, #537, #540, #542, #545, #546.
+Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #540, #542, #545, #546.
 
 1. **A gesture check drives the gesture.** Press and release with the suites' `clickAt` (`makeStage`
    in `scripts/e2e/home-support.mjs`) and the harness's touch helpers, at coordinates read from the
@@ -146,9 +146,9 @@ Scars: #300, #366, #368, #442, #474, #520, #526, #529, #533, #535, #536, #537, #
     measure ink as a fraction of the settled frame against a control run (#366).
 13. **A capture is a measurement, and it fails by handing back a plausible picture.**
     `Page.captureScreenshot`'s `clip` is in DOCUMENT coordinates, so a viewport rect fed to it on a
-    scrolled page photographs empty margin, and a uniformly coloured crop is the tell (#442). It also
-    cannot photograph a blocked main thread at all: it waits for the next commit and returns the
-    frame after the block, so an unchanged result is not evidence a frame failed to paint (#300).
+    scrolled page photographs empty margin rather than the thing you meant, and a uniformly coloured
+    crop is the tell; `sampleRow` in `scripts/e2e/pixel-support.mjs` adds the scroll for you (plate
+    read on PR #501, ruling 6 of the 2026-09-03 sitting on #454, fixed in PR #510).
 14. **Where the window you need is unreachable by a naturally written check, reach it deliberately.**
     Block the page's own main thread, queue a marker behind the code's own hop, or dispatch from
     inside a `MutationObserver` callback, which lands in a gap a wall clock cannot hit. Say at the
@@ -235,11 +235,11 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    child retargeted after its base SQUASH-merged reads CONFLICTING against a byte-identical tree,
    because it carries the base's own commits while main carries one squash: replay only the child's
    with `git rebase --onto origin/main <base-head> <child>`, then read `git log --oneline` over the
-   replayed range. The replay is the whole repair for a squashed base: do NOT merge main in there.
-   The opposite case is the next sentence (PR #491, PR #492). **Two branches that must edit the same
-   roster lines state the insertion order UP FRONT, and the lower-numbered PR merges before the
-   higher one opens**; there the higher one DOES bring its branch current with `git merge
-   origin/main` and take the stated position (#593, #596).
+   replayed range. The replay is the whole repair for a squashed base: do NOT merge main in for that
+   one (PR #491, PR #492). **Two branches that must edit the same roster lines state the insertion
+   order UP FRONT, and the lower-numbered PR merges first** (ruled on epic #585); there, and only
+   there, the higher one DOES bring its branch current with `git merge origin/main` and take the
+   stated position, which is what resolved #593 against #596 with both already open.
 10. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
     while it runs; three rounds at most, residue named in the body. **Commit before you dispatch it**,
     and before any review agent: it runs in the directory you launched it from, and a suite run there
