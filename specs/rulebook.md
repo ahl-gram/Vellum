@@ -54,6 +54,13 @@ the repo entirely. **Exactly one home is normative, and every other copy points 
 because two copies of a rule are two rules the moment either is edited. Apply this when adding a rule
 and when finding one in two places; the second case is a defect to fix, not a redundancy to keep.
 
+**A code comment is not a second copy, and the routing rule does not evict one.** The comment
+doctrine governs there instead: a comment survives where no test can practically pin the thing, which
+is the same carve-out that lets a hand-measured browser quirk keep its line. So a spec stating a rule
+and a comment stating it at the line that breaks are both correct, and moving a rule into a spec is
+not by itself a reason to delete the comment. What the routing rule forbids is a second NORMATIVE
+home: another spec, or a gate re-explaining the contract rather than pointing at it.
+
 **Specs are prescriptive. State the rule and drop the provenance.** Write each entry in the
 imperative, as the thing a future session must do or must not do. Cut "ratified at", "reworked after
 review", "this line read X until", and the story of how a set reached its membership: git, the issues
@@ -214,15 +221,17 @@ at #260 with its clean-list entry kept deliberately.
   and the set that rule excludes against is the next section. **It also has a hand-fixed tail that no
   script covers**: hand-authored prose quotes the hero world, and the regen commands rewrite none of
   it. **The reds will tell you a re-roll happened; nothing tells you which prose to edit.** Expect
-  `test/world/golden-seed42.test.ts` and `test/world/covenant-seed42.test.ts` to go red, plus a
-  deliberate throw in `mooring` (`src/site/home/stations.ts`) and the home e2e's title assertion, so
-  loudness is not the problem. The problem is the prose those reds do not enumerate.
+  `test/world/golden-seed42.test.ts` and `test/world/covenant-seed42.test.ts` to go red, a deliberate
+  throw from `mooring` (`src/site/home/stations.ts`), and a spread of e2e suites that hard-assert the
+  hero world's own strings. Do not size that last group from memory or from this line: it is most of
+  the suites, and `git grep -l` for the world's title across `scripts/e2e/` is the only honest count.
+  Loudness is not the problem. The problem is the prose those reds do not enumerate.
   **Sweep for the world's strings, plural, not for one of them.** The tail quotes the world's title,
   its realm names, its settlement names and its culture, in different places, so a grep for the title
   alone finds only some of it. Take the strings from the failing tests and search the authored
   surfaces for each. Known homes today, and this list is deliberately NOT closed, because nothing
   sweeps prose and the next page to quote the world will not appear in it: `src/pages/index.astro`
-  (the atlas road, and the arms captions, which name realms), `src/pages/faq/index.astro`,
+  (the atlas road, and the arms images' `alt` text, which names realms), `src/pages/faq/index.astro`,
   `src/site/home/stations.ts` (mooring names and the station title) and `README.md`.
 - **Some levers are golden-safe by construction, and a change behind one of them owes no regen and
   no golden re-pin.** The named ones are worth knowing before paying for a regen.

@@ -182,8 +182,8 @@ hangs its plates on the deep rather than mounting one chart has none, and the Ga
 today. No band, no footer: a chart room with a
 stage does not scroll. **A chart room without a stage is the exception and it does scroll**, its
 content passing under the fixed chrome, which is why it pools every piece of that chrome rather than
-the cluster alone, and why its vignettes may not ride the scrolling page: a fixed darkening band
-washes out whatever passes through it. Four corners, each a named piece of the kit:
+the cluster alone, and why **it wears no vignettes**: a vignette is a fixed darkening band, and on a
+scrolling page it washes out whatever passes through it. Four corners, each a named piece of the kit:
 
 - **The head cluster**, top left: wordmark, flourish tagline, dot-separated rooms nav, directly on
   the deep. Fixed in a room, riding the page on home.
