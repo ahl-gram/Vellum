@@ -19,6 +19,10 @@ the type case, the palette by role, the chart's dress, the rooms and their furni
 contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting);
 `specs/engine-invariants.md` is what the generator guarantees about a world, what breaks those
 guarantees silently, and what a surface that quotes generated output may not assume about it;
+`specs/explorer-doctrine.md` is the living chart over the baked sheet: the engine boundary and what
+a host page owes it, the camera and gesture contracts, counter-scale, and the overlay lifecycle;
+`specs/region-and-voyage.md` is its other half: what a region sheet may do that a world sheet may
+not, how a finer view is built and what it guarantees, and how the voyage splits worker from client;
 `specs/development-workflow.md` is the order of operations from a filed issue to a pull request,
 including which subagent runs at which step and the one place the work stops for Alex's ruling;
 `specs/settle-doctrine.md` is how an e2e wait is written, ratified across #526 and #529 and pointed
@@ -27,14 +31,14 @@ believed to be a flake, one row per failure, which is what you consult instead o
 **`specs/rulebook.md` is REQUIRED READING before any change that touches the renderer, a committed
 chart, the golden, a regen, a seed, or the order of work**, `specs/ui-design.md` before any work
 whose deliverable is an appearance, `specs/engine-invariants.md` before any change to world
-generation or to a surface that quotes generated output,
-`specs/development-workflow.md` before starting a sub or an
-epic, since its early steps are the ones a session cannot go back and take later, and
-`specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe. None of
-them is summarized here; where this file and a spec disagree, the spec is right. The ruled pixels
-those specs were decided from are archived under `design/`, one
-directory per design round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a
-sitting).
+generation or to a surface that quotes generated output, `specs/explorer-doctrine.md` before any
+work on the Explorer or on a chart camera, gesture or overlay, `specs/region-and-voyage.md` before
+any work on a region sheet, level of detail, or the voyage, `specs/development-workflow.md` before
+starting a sub or an epic, since its early steps are the ones a session cannot go back and take
+later, and `specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP
+probe. None of them is summarized here; where this file and a spec disagree, the spec is right. The
+ruled pixels those specs were decided from are archived under `design/`, one directory per design
+round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting).
 
 These refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project specifically.
 
