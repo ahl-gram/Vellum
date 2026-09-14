@@ -45,13 +45,15 @@ test("a reason NOBODY has seen yet, under an opening we have, is dropped too: th
   );
 });
 
-test("every opening in the roster is exercised by a fixture above, so the roster cannot GROW past its guard (prover round 1 hole)", () => {
+test("every opening in the roster is exercised by a fixture above, and every fixture is really dropped (prover rounds 1 and 2)", () => {
   for (const prefix of CANCELLATION_PREFIXES) {
     assert.ok(
       DROPPED.some((e) => e.includes(prefix)),
       `${prefix} was added to CANCELLATION_PREFIXES with no literal fixture exercising it, so nothing here would red if it stopped being dropped`,
     );
   }
+  // Round 2 hole: naming a prefix in a fixture is TEXT, so a new opening could ship beside a witness the filter actually keeps and this still passed.
+  assert.deepEqual(dropExpectedCancellations(DROPPED), [], "a fixture that names an opening is not dropped by the filter, so the coverage above is satisfied by a witness that proves nothing");
 });
 
 test("a reason that names OUR OWN stylesheet is KEPT, under both openings: the filter may not hide a defect of ours", () => {
@@ -109,5 +111,5 @@ test("no suite carries a cancellation opening of its own: one roster, swept from
   const uncited = files.filter(
     (f) => f !== "console-support.mjs" && src(f).includes("dropExpectedCancellations(") && !src(f).includes('from "./console-support.mjs"'),
   );
-  assert.deepEqual(uncited, [], `${uncited.join(", ")} call the shared drop without importing it, which is a ReferenceError the first time that check runs`);
+  assert.deepEqual(uncited, [], `${uncited.join(", ")} call the shared drop without the house import spelling; a genuinely missing import is a ReferenceError the first time that check runs, and an unusual spelling reds here too, which is the safe direction`);
 });
