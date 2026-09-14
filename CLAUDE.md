@@ -222,6 +222,11 @@ the sandbox for both review agents that build one, so the depth lives in one pla
   without leaving a reflog entry, so there is nothing to recover from afterwards.
 - **Never remove the worktree the session is standing in.** Name it for Alex and leave it; the shell
   recovers to the parent when a worktree vanishes underneath it, but the cwd is lost mid-task.
+- **Do not switch worktrees while a dispatched agent is still running.** `EnterWorktree` and
+  `ExitWorktree` in the parent silently disable that agent's commands for the rest of its life, and
+  it goes on reporting what it can rather than failing, so the loss reaches you as a thin report and
+  not as an error. Wait for the agent before you move. No command here demonstrates the mechanism, so
+  treat the instruction as the rule and the cause as unverified.
 - **Other sessions hold their own worktrees here.** Leave them alone, and never `git stash` bare: the
   stash stack is shared across every worktree and a parallel session can pop yours. Set work aside
   with a WIP commit instead.

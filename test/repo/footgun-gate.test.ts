@@ -51,6 +51,7 @@ test("the PR template prompts for a closing reference above its first section, w
   const note = lines.slice(closing + 1, firstSection).filter((l) => l.trim().startsWith("<!--")).join("\n");
   assert.notEqual(note, "", "the closing line carries no note between it and the first section");
   assert.match(note, /No issue:/, "the note beside the closing line does not say what a PR with no issue writes in its place, which is the half of the prompt an author without an issue needs");
+  assert.match(note, /stays open/, "the note beside the closing line does not say what a PR that HAS an issue and deliberately leaves it open writes in its place, which is the third form: the first of a pair of PRs on one issue has an issue number to name and no closing keyword to name it with");
 });
 
 test("the PR template names no literal issue number", () => {
