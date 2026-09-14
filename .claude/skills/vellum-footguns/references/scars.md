@@ -15,12 +15,19 @@ files named at the end.
   where `Math.round` and `Math.floor` agree; a stride of 3 that never lands on 16/32/64, so the edge
   gate could never be false. #536: the window-midpoint shortcut, the exact hazard the finding exists
   for, passed all three checks. #533: a settle returning its last read on timeout kept CL4 green.
+  #423: the collar guard's first cut fitted its jitter ceiling to the windows it happened to sample;
+  the cold skeptic found border windows failing elsewhere, and the close was a window-independent
+  contract plus an exact corner pin rather than a wider sweep. Proves Gate 1 item 2's derived-bound
+  clause.
 - *The assertion read its own input or the fallback.* #546: CD20 asserted `.hidden`, the property it
   had just set, green over two visible dead presses; CD19 satisfied by the "this world" fallback;
   PRR11's `slice` ran to EOF. #542: CD1 checked only that the dog-ear was CONTAINED, 8x oversized.
   #544: CD10 could not go red and was deleted; CD12's first form was green with the lift restored.
   #535: three states against one 4.5 floor, "it pinned one number three times". #545: old CD6 never
-  fired `lay()`. #548: a comment deleted against a cited test that did not pin it.
+  fired `lay()`. #548: a comment deleted against a cited test that did not pin it. #124: the
+  reading's ranking keys were invisible to a test that only asserts a name PARSED, since almost any
+  ranking still produces a parse; the prover found the leftmost-longest key guarded nowhere and
+  inverting it moved corpus names with the suite green. Proves Gate 1 item 3.
 - *The instance, not the class.* #533: two siblings the first sweep missed. #536: three cameras
   pinned, the lattice unswept. #544: the clamp fixed on the road's button and not the stamp line.
   #530: one arm scoped of a selector list. #545: one child clamped.
@@ -46,7 +53,10 @@ tab and false of the drawer. #546: the commit that broke the download press clai
 `MEASURED_SECONDS` 6.9 from an eleven-check suite carried into a twenty-three-check one (37.2).
 #548: "every surviving comment is a single line", false when written. #542: 30 guessed, 6.9
 measured. #524 and earlier #486: "does not close #N" closed N. #507/#508: a record claimed in the
-body while the plate-reader was still running.
+body while the plate-reader was still running. PR #582 round 2: the worktree fence was diagnosed from
+reasoning rather than a probe, the child recipe written on that diagnosis was still refused verbatim,
+and the body's "proved to run under the fence" had been measured on a fragment with a literal path
+rather than on the prescribed block; round 3's cold skeptic withdrew the claim. Proves Gate 5 item 3.
 
 **e2e timing.** #527: six CI runs on unchanged code read 2.76 to 4.31 against a fixed bound of 3.
 #528: four CI attempts, about 45 minutes; SV2c missed a wall cap by 10ms. #536: the blind sleep's
@@ -130,7 +140,7 @@ left open and the session failed to write down).
 
 ## Where the long form lives
 
-Auto-memory, `/Users/ahl/.claude/projects/-Users-ahl-CodeProjects/memory/`:
+Auto-memory, in the private per-project memory directory, which is Alex's machine only:
 `feedback_guard_doctrine.md` (whether a guard bites), `feedback_measurement_doctrine.md` (whether
 a measurement is true), `feedback_drive_real_input_not_synthetic.md`, `feedback_look_at_visual_work.md`,
 `feedback_pr_discipline_doctrine.md`, `feedback_verification_budget_doctrine.md`,

@@ -17,15 +17,21 @@ type. Read the gate you are at, do each line, and move on. Provenance is in `ref
 
 ## Gate 1: before writing a test or a guard
 
-Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #546, #561, #562, #564.
+Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #387, #388, #400, #412, #423, #510, #528, #533, #535, #536, #542, #544, #545, #546, #551, #561, #562, #564.
 
 1. **Write the mutation before the test.** Name the one-line change to `src/` that must turn this
    test red. If you cannot name one, you are about to write a test that cannot fail.
 2. **Check the fixture is not degenerate where the hazard lives.** A camera on a lattice point, a
    window at the clamp edge, a stride that never lands on the case, a world that takes the fallback:
    each has passed a RED step. Assert the precondition that makes the case non-trivial in the same test.
+   **A differential guard's second world is a MEASUREMENT**: sweep for the seed whose asserted
+   quantities actually differ, and pick the fixture on the metric the assertion uses, not a proxy for
+   it (#320, #275). A bound is DERIVED and the sweep only corroborates it; a ceiling fitted to the
+   windows you happened to sample is not a bound (#423).
 3. **Never assert a value the test just set or a value the fallback also yields.** `.hidden` you set,
-   a "this world" default, a `slice` that ran to EOF: a check on its own input is not a guard.
+   a "this world" default, a `slice` that ran to EOF: a check on its own input is not a guard. A
+   DEFAULT is a fallback too: a guard that exercises a threaded value only at its default cannot tell
+   threading from a hardcode, so assert once through the top-level API at a non-default value (#412).
 4. **Narrowing before asserting owes an anchor check.** `indexOf`, `slice`, `match`, `find`: assert
    the anchor was found (`notEqual(at, -1)`) before the negative assertion runs against the remainder.
 5. **N states or N siblings need N pins, not one floor.** Assert each state's own resolved value
@@ -33,7 +39,9 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
 6. **Guard the class.** List every instance the rule binds (every arm of a selector list, every page
    that carries its own sheet, every seat of the lattice) and sweep them. Two samples is the instance.
 7. **A transparent component (cache, memo, fast path) is guarded by its own counters**, never by an
-   output compare. Ask what "delete it entirely" does to the assertion; if nothing, rewrite.
+   output compare. Ask what "delete it entirely" does to the assertion; if nothing, rewrite. A
+   determinism oracle builds a FRESH subject for the second run: a per-object memo makes a
+   same-object compare a tautology that passes however broken the computation is (#423).
 8. **A shared helper goes in `test-support/`, never in `test/`, and never in a sibling.** `node
    --test` collects every `.ts`/`.js` module under ANY directory named `test`, at any depth (its six
    extensions, outside dot segments and `node_modules`), so a bare helper there is reported as a
@@ -50,7 +58,9 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
    DISPATCH tree's HEAD (#575), so uncommitted work is not in the tree it proves unless carried
    across by hand: commit first, or you prove something about a different tree than the one you are
    shipping, and the sha it reports is then a false attribution it has to declare. Zero red is a
-   hole. A guard proved unable to red is deleted, never shipped.
+   hole. A guard proved unable to red is deleted, never shipped. Mutate BY LINE, never by text:
+   several wearers can share one declaration, so a substitution changes them all at once and the red
+   names nothing (PR #510).
 10. **A test that spawns a child gives it its own time limit.** `execFileSync` takes a `timeout`;
     with none, a wedged child hangs the unit lane forever with no red to read, and `--test-timeout`
     cannot save it, because the block is synchronous and the runner's own timer never gets the event
@@ -61,14 +71,40 @@ Scars: #295, #363, #380, #383, #400, #528, #533, #535, #536, #542, #544, #545, #
     multi-command child orphans its grandchild and the cap then leaks a process every time it fires.
     Pin what reaches the spawn, not what the option builder returns: the seam between them is where
     a default cap goes missing with every child still green.
+11. **Narrow-width or column-width work owes a sweep across seeds, never the seed-42 fixture.** Seed
+    42 is one of the few clean seeds, which is why a sideways-scroll defect left the suite green
+    while other seeds overflowed. Pin the declaration by regex, so flipping its value fails too and
+    not only deleting it (#49, PR #406).
+12. **`test-support/element-shim.ts` does no layout.** Every rect it reports is the one the test
+    STATED, so a box computed from it measures the shim and not the code (#387, #388).
+13. **A hand-rolled reader is a guard's blind spot.** A CSS selector reader splits on TOP-LEVEL
+    commas and tests the SUBJECT, the last compound; otherwise an `:is()` arm, an ancestor's
+    pseudo-class and a colon inside an attribute value each drop rules from the sweep (#358). A
+    markup regex allows trailing attributes, and an empty parse never SKIPS a section unless every
+    companion parse is empty too (#353, whose guards went blind when #270 added per-term ids).
+14. **A test file that imports a module which can exit at import is reported as a PASS.** It dies
+    before any `test()` registers and its assertions are simply gone from the tally, with nothing
+    saying so, which is the zero-red alarm inverted. A guard for "importing this does no work" SPAWNS
+    the module as a child and asserts on stdout (#551, PR #552).
+15. **A scan is keyed on what the DEFECT looks like, never on what the rule says.** The
+    hyphenated-property cut skipped the unhyphenated properties the contract policed, so the sources
+    that could hold the defect were exactly the ones it did not select, and it passed (#360).
+16. **A roster a guard checks is exported DATA the guard imports, never a list the guard restates.** A
+    hand-copied roster is one-sided by construction: it catches a member removed from the thing it
+    checks and can never catch one added and asserted nowhere, and the arithmetic still closes (#320).
 
 ## Gate 2: before writing an e2e check or a CDP probe
 
-Scars: #368, #474, #520, #526, #529, #533, #535, #536, #537, #540, #542, #545, #546.
+Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #540, #542, #545, #546.
 
-1. **A gesture check drives the gesture.** Press and release with the harness's `clickAt` / touch
-   helpers at coordinates read from the element's own rect. `element.click()` ignores `pointer-events`
+1. **A gesture check drives the gesture.** Press and release with the suites' `clickAt` (`makeStage`
+   in `scripts/e2e/home-support.mjs`) and the harness's touch helpers, at coordinates read from the
+   element's own rect. `element.click()` ignores `pointer-events`
    and every element painted over the target; use it only for wiring, with the reason at the check.
+   A multi-touch gesture can hand back the artifact you hoped to see: with no touch-pan path, two
+   fingers reached only the pinch handler and the apparent pan was two zoom half-steps whose factors
+   cancel unless one is clamped, which a before-and-after read cannot tell from the real thing
+   (PR #474's review, fixed in PR #477). A multi-touch claim owes evidence of both fingers.
 2. **Reachability is its own assertion**: `document.elementFromPoint(x, y) === el`, taken with the
    thing OPEN and after `scrollIntoView({block: "center"})`. Off-viewport returns null, not "hidden".
 3. **Visible means `getBoundingClientRect().width > 0`.** `getComputedStyle(child).display` is not
@@ -105,6 +141,18 @@ Scars: #368, #474, #520, #526, #529, #533, #535, #536, #537, #540, #542, #545, #
     running", check `ls -d /var/folders/*/*/T/vellum-e2e-* | wc -l` and
     `ps aux | grep '[r]emote-debugging-port'`; a starved machine stalls a lane you did not touch.
     When you kill a run, kill the shell waiting on it too. Run local suites one at a time.
+12. **Measure the instant you mean, and say at the check why that is the instant.** An arrival taken
+    from the first frame a diff predicate fires on is the OLD chart LEAVING an emptied mount, so
+    measure ink as a fraction of the settled frame against a control run (#366).
+13. **A capture is a measurement, and it fails by handing back a plausible picture.**
+    `Page.captureScreenshot`'s `clip` is in DOCUMENT coordinates, so a viewport rect fed to it on a
+    scrolled page photographs empty margin rather than the thing you meant, and a uniformly coloured
+    crop is the tell; `sampleRow` in `scripts/e2e/pixel-support.mjs` adds the scroll for you (plate
+    read on PR #501, ruling 6 of the 2026-09-03 sitting on #454, fixed in PR #510).
+14. **Where the window you need is unreachable by a naturally written check, reach it deliberately.**
+    Block the page's own main thread, queue a marker behind the code's own hop, or dispatch from
+    inside a `MutationObserver` callback, which lands in a gap a wall clock cannot hit. Say at the
+    check why the instrument is artificial (#366).
 
 ## Gate 3: before writing CSS or moving layout
 
@@ -138,13 +186,14 @@ fail silently (an undeclared CSS variable, a suite the runner never calls, a bud
 1. `grep -rn` the nearest sibling's name across `src/`, `scripts/`, `test/`, `.github/` and join
    every list it appears in: the runner's `SUITES` map, `PAGE_CSS`, `MEASURED_SECONDS`, the tiers
    test, the tip-affordance roster, the discovery files.
-2. Name in the PR body which rosters self-check and which were joined by hand.
+2. Name in the PR body which rosters self-check and which were joined by hand;
+   `specs/site-architecture.md` names the rosters a page or a sheet joins, and which close themselves.
 3. Re-measure any budget the roster carries; a number measured on an eleven-check suite is wrong on a
    twenty-three-check one.
 
 ## Gate 5: before the push and the PR body
 
-Scars: #49, #101, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; calls made without a ruling on #519, #542, #546.
+Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #530, #541, #542, #546, #548, #582, #593, #596; calls made without a ruling on #519, #542, #546.
 
 1. **Dead code sweep.** Every new export has a second reference. Every new field has a reader that
    produces a STRING on a surface (carries, reads, is wired through describe plumbing; shows, prints,
@@ -160,10 +209,16 @@ Scars: #49, #101, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; ca
 4. **Say which suites ran and which did not.** A record exists (link it) or is "in flight"; it is
    never "in the comments" before it lands there.
 5. `gh pr view <N> --json closingIssuesReferences` lists exactly the issue you mean. GitHub reads
-   "does not close #N" as closing #N.
+   "does not close #N" as closing #N. The grammar is one KEYWORD immediately followed by one
+   reference: `Closes #a, #b` closes only `#a`, a word between the keyword and the number closes
+   nothing, and a verb that is not on GitHub's list closes nothing either, which is how PR #255's
+   "implements #203" left #203 to be shut by hand an hour after the merge. It is also inert while the
+   base is a feature branch, so the keyword goes on the last PR to land and is re-checked after the
+   retarget (PR #408).
 6. `grep -n '—'` over the body and the diff returns nothing.
-7. **A sibling defect found on the way is filed, not folded**, unless it is an accessibility failure
-   this PR itself caused.
+7. **A sibling defect found on the way is filed, not folded.** The exceptions: an accessibility
+   failure this PR itself caused, and an orchestrated batch whose dispatcher has relayed Alex's
+   ruling to fold for that batch (ruled 2026-09-14, #591).
 8. **Any call you made that the issue did not rule on gets a dated issue comment before the PR is
    opened.** The branch goes up at the first commit, so the review is the deadline that matters, not
    the push. The skeptic diffs against the newest ratified statement. A recon that falsifies an
@@ -176,7 +231,15 @@ Scars: #49, #101, #486, #507, #508, #524, #528, #530, #541, #542, #546, #548; ca
    Stacking itself is fine and is how the integration epics ship, every child merging into the epic
    branch before the epic merges to `main`. What kills a PR is its base landing while the child is
    still open, so check for open children before merging any branch that has them. If it has already
-   happened, rebase onto `main` and open a fresh successor that cross-references the closed one.
+   happened, rebase onto `main` and open a fresh successor that cross-references the closed one. A
+   child retargeted after its base SQUASH-merged reads CONFLICTING against a byte-identical tree,
+   because it carries the base's own commits while main carries one squash: replay only the child's
+   with `git rebase --onto origin/main <base-head> <child>`, then read `git log --oneline` over the
+   replayed range. The replay is the whole repair for a squashed base: do NOT merge main in for that
+   one (PR #491, PR #492). **Two branches that must edit the same roster lines state the insertion
+   order UP FRONT, and the lower-numbered PR merges first** (ruled on epic #585); there, and only
+   there, the higher one DOES bring its branch current with `git merge origin/main` and take the
+   stated position, which is what resolved #593 against #596 with both already open.
 10. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
     while it runs; three rounds at most, residue named in the body. **Commit before you dispatch it**,
     and before any review agent: it runs in the directory you launched it from, and a suite run there
@@ -221,10 +284,12 @@ are copied here.
 - A mid-build naming or placement choice (a new file, a new stylesheet, a new key) is Alex's when
   it is visible in the tree; ask with a menu, once, before writing it (`drawer.ts` was taken and
   `chart-drawer` ruled, #519, 2026-09-07; the drawer's own stylesheet, #520).
+- A trivial one-line edit made after the cold skeptic has finished does not earn another round; name
+  it in the PR body and push (Alex, 2026-09-10, on PR #559).
 
 ## Never
 
-The hook in `hooks/`, wired in `.claude/settings.json`, refuses the mechanical ones outright, enumerated in `hooks/README.md`; the rest are yours. Provenance: the stash stack (PR #369 and the worktree rules), perl (2026-09-02, twice in one session), CDP escapes (#520, #540), closing keywords (#486, #524), truncation read as absence (2026-07-26), `gh issue view` (CLAUDE.md), the profile leak (#546), counts in durable docs (2026-08, four rulings), the PR body shape (#577).
+The hook in `hooks/`, wired in `.claude/settings.json`, refuses the mechanical ones outright, enumerated in `hooks/README.md`; the rest are yours. Provenance: the stash stack (PR #369 and the worktree rules), perl (2026-09-02, twice in one session), CDP escapes (#520, #540), closing keywords (#486, #524), truncation read as absence (2026-07-26), `gh issue view` (CLAUDE.md), the issue-body overwrite (#193, PR #550), the profile leak (#546), counts in durable docs (2026-08, four rulings), the PR body shape (#577).
 
 - A bare mutation of the stash stack (`git stash`, `pop`, `clear`, `apply` or `drop` without a ref): it is shared across every worktree. `git stash push -m ... -- <paths>`, `apply <sha>`, or a WIP commit.
 - `perl -pi` with a non-ASCII replacement: it re-encodes every existing non-ASCII byte in the file. Use node or a heredoc, then grep for `Â`.
@@ -233,6 +298,7 @@ The hook in `hooks/`, wired in `.claude/settings.json`, refuses the mechanical o
 - A PR body that skips one of `.github/PULL_REQUEST_TEMPLATE.md`'s `## ` sections. Presence is the check, not content: a section with nothing to report says so and stays.
 - A negative claim built from `head`, `tail`, `--limit`, or a jq slice. Count against the true total or query the item.
 - `gh issue view` as evidence an issue is empty. It silently returns nothing for some issues here; use `gh api`.
+- `gh api repos/O/R/issues/N -f body=...` with `/comments` left off. Any `-f` switches the call to POST, the issue endpoint treats that as an update, so the BODY is replaced, no comment is created, and it exits 0. Use `gh issue comment N --body-file <file>`, or `.../issues/N/comments -f body=...`, and `-X PATCH` when a body edit IS the intent; the tell is a response `html_url` ending `/issues/N` instead of `#issuecomment-<id>` (#193, PR #550).
 - `pkill` on a run you intend to repeat; the harness leaves a browser profile behind for every kill.
 - Removing the worktree you stand in, or any worktree another session holds; and, dispatched as a review agent, moving or restoring the tree you were dispatched from at all. `git restore` and `git checkout -- <path>` are the silent ones: they leave no reflog entry at all, while `checkout -f` does. A plain checkout aborts when the modified file differs between the two commits and carries the edit forward when it does not, so it is not the one that eats work.
 - A test count, a phase count, or an e2e total in `CLAUDE.md`, memory, or `RESUME-HERE.md`.
