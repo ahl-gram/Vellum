@@ -286,7 +286,8 @@ test("no lanes at all fails instead of reporting a vacuous pass", () => {
 test("a selection of no lanes fails, and a lane nobody selected cannot report into the run", () => {
   const nothingAsked = laneOutcome([result({ name: E2E_LANES[0]!.name })], []);
   assert.equal(nothingAsked.ok, false, "a run asked for no lanes at all reported a pass");
-  assert.match(nothingAsked.line, /FAIL/);
+  // Its own message, not just ok false: every result is a stray when nothing was selected, so the stray refusal below would catch this case too and a test reading only the verdict cannot tell which fired.
+  assert.match(nothingAsked.line, /no lanes were selected/, "an empty selection is reported as something other than an empty selection");
   assert.doesNotMatch(nothingAsked.line, /0 of/, "the line offers a count where it should refuse the run");
 
   const stray = laneOutcome(everyLane(), [E2E_LANES[1]!]);
