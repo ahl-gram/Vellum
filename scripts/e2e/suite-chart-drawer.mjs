@@ -3,6 +3,7 @@ import { makeSettle } from "./settle-support.mjs";
 import { makeStep } from "./step-support.mjs";
 import { makeStage } from "./home-support.mjs";
 import { slideRested, foldRested } from "../../src/cli/e2e-slide.ts";
+import { SAY_HOLD_MS } from "../../src/site/shared/announce.ts";
 
 const SEED = 42;
 // A camera settled deep enough to commit a band-3 inset, the same descent suite-region-detail drives.
@@ -40,6 +41,7 @@ const READ = `(() => {
     insetSvgs: document.querySelectorAll("#map .region-inset svg").length,
     lastSvgIsSurvey: (() => { const s = [...document.querySelectorAll("#map .region-inset svg")].pop(); return !!s && s.hasAttribute("data-vellum-region-u0"); })(),
     status: (document.getElementById("status") || {}).textContent || "",
+    statusFadeMs: (() => { const s = document.getElementById("status"); return s ? getComputedStyle(s).transitionDuration : null; })(),
     hashTable: (new URLSearchParams(location.hash.slice(1))).get("table"),
     rawHash: location.hash,
     scrollW: document.documentElement.scrollWidth,
@@ -133,6 +135,30 @@ export async function run(ctx) {
       "CD2c a rapid double click on the handle does not become d3's double-click-to-zoom, the same rule Z10b pins for the zoom cluster (#520 build item 2)",
       !!dblAt && afterDbl.k === beforeDbl.k && afterDbl.band === beforeDbl.band,
       JSON.stringify({ before: beforeDbl, after: afterDbl }),
+    );
+  });
+
+  // Derived 2026-09-13: SAY_HOLD_MS + SAY_FADE_MS is 8.45s (src/site/shared/announce.ts), which is 169 polls of pure sleep before a single evaluate round-trip is counted; 400 tries is 20s of sleep alone, the same order of headroom DRAWN carries for the CI runner measured 2.7x slower than local.
+  const SAID_GONE = 400;
+  // A FLOOR, never a ceiling: a slow runner delays the clear and can only push this up, where a wall-clock ceiling on a runner-dependent measurement is RS30's own scar. 1s under the ruled hold covers the press, the read and the probe that stand between the announcement and the clock starting; the number moves with the constant, and the literal 8000 is pinned in test/site/announce.test.ts.
+  const HOLD_FLOOR = SAY_HOLD_MS - 1000;
+  await step("CD23", async () => {
+    // The sheet comes off and goes back on, so what is timed is the LAY line the issue was filed about and not the refusal CD2c happened to leave, and the clock starts at a known press (skeptic rounds 1 and 2 on PR #584). The table is back to the one cutting CD2 laid, which is the state CD3, CD4 and CD5 read.
+    await evaluate(`document.querySelector("#cuttings .off").click()`);
+    await clickEar();
+    const saidAt = Date.now();
+    const said = await evaluate(READ);
+    // The rule's resolved answer, not the app's timing: the class is put on with the transition suppressed inline, so the value read is the one the CASCADE gives and a later arm re-raising opacity cannot hide behind the JS clearing the text anyway (skeptic on PR #584).
+    const fadeProbe = await evaluate(`(() => { const s = document.getElementById("status"); const was = s.style.transition; s.style.transition = "none"; const rest = getComputedStyle(s).opacity; s.classList.add("fading"); const faded = getComputedStyle(s).opacity; s.classList.remove("fading"); s.style.transition = was; return { rest, faded }; })()`);
+    const gone = await settle(READ, (d) => d.status === "", "chart-drawer-said-gone", SAID_GONE);
+    const waited = Date.now() - saidAt;
+    check(
+      "CD23 the Chart Table's announcement leaves the chart by itself: the LAY line #547 was filed about, which sat over the middle of the sheet until the reader drew another world, since shutting the drawer never took it away (Alex 2026-09-08). The removal press above is wiring and not the gesture under test, which is CD5's and CD7b's. The table is untouched as the line goes, so this is the LINE leaving and not the page resetting; the hold is floored a second under the eight Alex ruled, a floor and never a ceiling since a slower runner can only lengthen it, with the literal 8000 pinned in test/site/announce.test.ts; and the fade is read twice, as the declared duration the way CD7c pins the drawer's slide, and as the opacity the cascade actually resolves under the class",
+      /lies on the table/.test(said.status) && gone.status === "" &&
+        gone.cuttings === said.cuttings && gone.open === said.open &&
+        said.statusFadeMs === "0.45s" && fadeProbe.rest === "1" && fadeProbe.faded === "0" &&
+        waited >= HOLD_FLOOR,
+      JSON.stringify({ said: said.status, after: gone.status, waitedMs: waited, floor: HOLD_FLOOR, cuttings: [said.cuttings, gone.cuttings], open: [said.open, gone.open], fadeMs: said.statusFadeMs, opacity: fadeProbe }),
     );
   });
 
@@ -239,9 +265,12 @@ export async function run(ctx) {
       minOffH: offs.length ? Math.min(...offs.map((o) => o.height)) : 0,
       drawerAnims: drawer.getAnimations().map((a) => a.playState),
       innerH: window.innerHeight,
+      // leafTabs*, never tabShown: this payload's tabShown is the Broadside's bookmark tab and READ's is the drawer's edge tab, so a third "tab" would be read as one of those two within the week (#547).
+      leafTabsDisplay: (() => { const t = document.querySelector(".slip-head .sheet-tabs"); return t ? getComputedStyle(t).display : null; })(),
+      leafTabBoxes: [...document.querySelectorAll(".slip-head .sheet-tabs button")].filter((b) => b.getBoundingClientRect().height > 0.5).length,
     };
   })()`;
-  await step("CD9, CD11, CD12", async () => {
+  await step("CD9, CD11, CD12, CD22", async () => {
     await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
     await go(`${DRESS}&table=${SIX}`);
     const beforeOpen = await evaluate(SURFACES);
@@ -263,6 +292,11 @@ export async function run(ctx) {
       "CD9 opening the Chart Table folds the Broadside and takes its tab off the edge: the two are never open together, which is what stops them fighting for the right edge, the drawer's band and the chart's foot (#543, ruled 2026-09-08)",
       !beforeOpen.folded && withOpen.open && withOpen.folded && !withOpen.tabShown,
       JSON.stringify({ before: beforeOpen, open: withOpen }),
+    );
+    check(
+      "CD22 at 1280 the sheet's head carries NO leaf tabs: they are the phone's way into the table, .sheet-tabs was dressed only inside the 900px block, and the Broadside is open here, so a folded sheet cannot be what is hiding them (#547, and the desktop arm CD14/CD15/CD16 never had)",
+      !beforeOpen.folded && beforeOpen.leafTabsDisplay === "none" && beforeOpen.leafTabBoxes === 0,
+      JSON.stringify({ folded: beforeOpen.folded, display: beforeOpen.leafTabsDisplay, boxes: beforeOpen.leafTabBoxes, slipW: beforeOpen.slipW }),
     );
     check(
       "CD11 shutting the Chart Table gives the Broadside back to the reader who had it, and leaves it folded for the reader who did not",
@@ -372,6 +406,19 @@ export async function run(ctx) {
       pf.heads.length === 1 && pf.heads[0] === "From The Isle of Rahai · chart № 42",
     JSON.stringify(pf),
   );
+  // CD24 (#547 ruling 4, Alex 2026-09-13): the Portfolio's "is on top" was the Explorer's defect on a second page, so one shared announcer and ONE kit rule take both lines away. Named blind spot, with its direction: this does not wait the hold out, so it does not watch THIS line go. The going is the shared module (test/site/announce.test.ts) and CD23's resolved read; a second eight-second wait is what the lane's measured budget cannot buy, and the PR body carries it as residue.
+  const pfNext = await evaluate(`(() => { const b = document.getElementById("pf-next"); if (!b) return null; b.scrollIntoView({ block: "center" }); const r = b.getBoundingClientRect(); if (r.width < 1) return null; const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2); const h = document.elementFromPoint(x, y); return { x, y, reachable: h === b || b.contains(h) }; })()`);
+  if (pfNext) await clickAt(pfNext.x, pfNext.y);
+  const PF_SAID = `(() => { const s = document.getElementById("pf-status"); if (!s) return null; const was = s.style.transition; s.style.transition = "none"; const rest = getComputedStyle(s).opacity; s.classList.add("fading"); const faded = getComputedStyle(s).opacity; s.classList.remove("fading"); s.style.transition = was; return { line: s.textContent || "", fadeMs: getComputedStyle(s).transitionDuration, rest, faded }; })()`;
+  // A bounded poll and not a settle, so a Portfolio that never announces fails CD24 by name rather than throwing outside every step the way its four siblings here already run unstepped. 40 tries is 2s: bringUp says synchronously inside the click handler's own task, so the first or second read has it (measured 2026-09-13, every local run read it on the first).
+  let pfSaid = await evaluate(PF_SAID);
+  for (let i = 0; i < 40 && (!pfSaid || pfSaid.line === ""); i++) { await sleep(50); pfSaid = await evaluate(PF_SAID); }
+  check(
+    "CD24 the Portfolio announces the sheet it brought up on a pill that wears the SAME fade the Explorer's does, read as the declared duration AND as the opacity the cascade resolves under the class: a rule keyed to #status alone, or a later arm re-raising THIS page's opacity, would leave this announcement standing over the chart forever and every other guard green (#547 ruling 4)",
+    !!pfNext && pfNext.reachable && !!pfSaid && /is on top/.test(pfSaid.line) &&
+      pfSaid.fadeMs === "0.45s" && pfSaid.rest === "1" && pfSaid.faded === "0",
+    JSON.stringify({ press: pfNext, said: pfSaid }),
+  );
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/portfolio/` });
   for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate(`!!window.__vellumPortfolio`)) break; }
@@ -435,6 +482,7 @@ export async function run(ctx) {
     const cut = document.getElementById("cuttings");
     return {
       tabs: tabs.map((b) => ({ text: (b.textContent || "").replace(/\\s+/g, " ").trim(), selected: b.getAttribute("aria-selected"), press: press(b) })),
+      leafTabsDisplay: (() => { const t = document.querySelector(".slip-head .sheet-tabs"); return t ? getComputedStyle(t).display : null; })(),
       leafShown: !!leaf && getComputedStyle(leaf).display !== "none",
       formShown: (() => { const f = document.querySelector(".slip-body .broadside"); return !!f && getComputedStyle(f).display !== "none"; })(),
       cuttingsInLeaf: !!leaf && !!cut && leaf.contains(cut),
@@ -461,10 +509,11 @@ export async function run(ctx) {
   const tableTab = await evaluate(`(() => { const b = [...document.querySelectorAll(".slip-head .sheet-tabs button")].find((x) => /table/i.test(x.textContent || "")); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
   if (tableTab) { await touch("touchStart", [{ x: tableTab.x, y: tableTab.y, id: 0 }]); await touch("touchEnd", []); }
   check(
-    "CD14 the sheet's head carries the two leaf tabs and BOTH answer a real thumb: at narrow .slip-handle is inset:0 over the whole head, so a tab authored there is dead unless it takes its own layer (mock.css 230), and a tab nobody can press is the #520 dog-ear again",
+    "CD14 the sheet's head carries the two leaf tabs and BOTH answer a real thumb: at narrow .slip-handle is inset:0 over the whole head, so a tab authored there is dead unless it takes its own layer (mock.css 230), and a tab nobody can press is the #520 dog-ear again. The row DRESSED as a row (#547): CD22 reads display none at 1280, and a stand-down written after the phone block would win everywhere and red here",
     leafShut.tabs.length === 2 && leafShut.tabs.every((t) => t.press === "self") &&
-      /broadside/i.test(leafShut.tabs[0].text) && /^the table( · \d+)?$/i.test(leafShut.tabs[1].text),
-    JSON.stringify({ tabs: leafShut.tabs }),
+      /broadside/i.test(leafShut.tabs[0].text) && /^the table( · \d+)?$/i.test(leafShut.tabs[1].text) &&
+      leafShut.leafTabsDisplay === "flex",
+    JSON.stringify({ tabs: leafShut.tabs, display: leafShut.leafTabsDisplay }),
   );
   // Was a hand-rolled loop that returned its last read BECAUSE a settle that gives up killed the lane. The step is what that comment was waiting for (#534), so the wait is a settle again and its timeout is CD15 and CD17 going red by name.
   await step("CD15, CD17", async () => {
