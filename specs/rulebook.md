@@ -14,8 +14,8 @@ Five other places carry what this one deliberately does not:
   no em-dashes, measure before you assert, and what each subagent is for.
 - **`specs/development-workflow.md`** holds the order those steps happen in, from a filed issue to a
   pull request, and which subagent runs at which point in it.
-- **`specs/flake-record.md`** holds every CI red believed to be a flake, one row per failure, with
-  the run id, the payload and what was done about it.
+- **`.claude/skills/vellum-footguns/references/flake-record.md`** holds every CI red believed to be a
+  flake, one row per failure, with the run id, the payload and what was done about it.
 - **`RESUME-HERE.md`** (local, per-session, gitignored) is the hot pointer to where we are right now.
 
 Its siblings under `specs/` hold what this file is not about: `ui-design.md` the look and feel
@@ -25,9 +25,8 @@ not assume, `explorer-doctrine.md` the living chart over the baked sheet (the en
 host contract, the camera and gesture, counter-scale, the overlay lifecycle),
 `region-and-voyage.md` its other half (region sheets, level of detail, the voyage),
 `site-architecture.md` how the site is authored, bundled, discovered and shipped,
-`development-workflow.md` the sequence a change moves through, `settle-doctrine.md` how an e2e
-wait is written and what the harness environment does, and `flake-record.md` the dated ledger of CI
-reds believed to be flakes.
+`development-workflow.md` the sequence a change moves through, and `settle-doctrine.md` how an e2e
+wait is written and what the harness environment does.
 
 ## How to read and update this file
 
@@ -286,23 +285,13 @@ at #260 with its clean-list entry kept deliberately.
 world identity. The loser rebases, re-pins, regenerates, then re-runs the regen commands.
 
 **Current membership: `{#113}`** (more seats on empty islands, so realm counts can exceed five). It
-is the only member, so the rule has nothing to exclude against today and #113 is clear to run.
+is the only member, so the rule has nothing to exclude against today.
 
-How the set reached one member, since a reader checking this line deserves to see it was not always
-one:
-
-- Originally `{#113, #49}`.
-- 2026-07-28: **#309 joined**, making `{#113, #49, #309}`, with a ratified ordering of #309 before
-  #113 so new island realms would be born with roads rather than churning the same worlds twice.
-- 2026-08-16: **#49 left.** Rescoped to renamings only, its former-borders half moved to #122.
-  Measured, not argued: the golden hashes only `w.realms.labels` from `partitionRealms`
-  (`src/society/realms.ts`), which takes no rng, and Alex ruled the former name never prints on the chart. #49 was therefore cheap tier and
-  has since closed.
-- 2026-08-16: **#309 left**, shipped as PR #410 (squash `359f359`). Its blast-radius spike measured a regen, not a
-  re-roll: the golden held. The "#309 before #113" ordering is discharged.
-
-**#122 does not join this set.** It sits behind an opt-in `annals?: boolean` render option and is
-byte-identical when off, so it moves neither the committed charts nor world identity.
+**#122 does not join this set, on the posture it is specced to take**: an opt-in `RenderOptions`
+member (`src/render/map-renderer.ts`) off by default, plus an additive, draw-free field on
+`HistoricalEvent` (`src/society/history.ts`). Built so, it moves neither the committed charts nor
+world identity. **Re-judge the tier unless the golden holds on the pinned checksum, annals-off is
+byte-identical, and the drift guard is green.**
 
 ## Scheduling rules
 
@@ -471,5 +460,6 @@ guarantees), to `specs/explorer-doctrine.md` (the living chart, its camera and i
 `specs/region-and-voyage.md` (region sheets, level of detail, the voyage), to
 `specs/site-architecture.md` (how the site is authored and shipped), to
 `specs/development-workflow.md` (the order of operations), to `specs/settle-doctrine.md` (how an e2e
-wait is written, and what the harness environment does), and to `specs/flake-record.md` (the CI reds
-believed to be flakes). Rules change rarely; when one does, edit this file.*
+wait is written, and what the harness environment does), and to the flake record at
+`.claude/skills/vellum-footguns/references/flake-record.md` (the CI reds believed to be flakes).
+Rules change rarely; when one does, edit this file.*

@@ -221,6 +221,29 @@ filter drops it. `stripFor` in `src/itinerary/dress/layout.ts` tests a half-open
 `eventSeat` answers null there and the itinerary skips it. A seating surface answers null too rather
 than inventing a seat.
 
+## Measuring a world in a script
+
+A script that measures a world is an instrument, and these three traps are what silently break it.
+None of them throws. Each hands back a plausible number instead of an error, so nothing downstream
+says the measurement was broken, and the analysis built on it reads as confident and is wrong.
+
+**The seed comes FIRST.** Build a world with `defaultRecipe(seed, overrides)` and then
+`generateWorld`, both in `src/world/generate.ts`. Swapped arguments do not throw: `createRng` in
+`src/core/rng.ts` takes a number, so a recipe object passed where the seed belongs coerces to seed 0
+and every "seed" returns the same recipe. **Identical counts across different seeds is the tell**, and
+in a script under a type-checked root `npm run check` is the other, since the parameter is a number.
+
+**Chart space is not grid space.** `nx` and `ny` on the marks `buildPlaceManifest` returns
+(`src/render/place-manifest.ts`) are 0..1 fractions of the RENDERED chart with the frame margin baked
+in (`MARGIN_FRACTION` in `src/render/transform.ts`), so they cannot be used to sample terrain. Sample
+with `world.settlements[i].x` and `.y`, which are grid space. The projection between the two is
+affine, so a chart fraction looks like a grid fraction and is off by the margin.
+
+**A `Field` is not a `Float64Array`.** `world.elev` is a `Field` (`Field` in `src/core/grid.ts`) and
+is read with `.at(x, y)`. `world.oceanDist` is a bare `Float64Array` (`src/world/types.ts`), indexed
+`y * W + x`. Calling `.at(x, y)` on that one resolves to `TypedArray.at(x)`, which ignores the second
+argument and returns an unrelated cell rather than failing.
+
 ---
 
 *Companion to `specs/rulebook.md` (the golden, the regen and the re-roll discipline) and

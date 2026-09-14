@@ -36,8 +36,10 @@ drags with it. The required reading is due before the plan, not after it: `specs
 any change that touches the renderer, a committed chart, the golden, a regen, a seed or the order of
 work, `specs/ui-design.md` before any work whose deliverable is an appearance,
 `specs/engine-invariants.md` before any change to world generation or to a surface that quotes
-generated output, `specs/explorer-doctrine.md` before any work on the Explorer or on a chart camera,
-gesture or overlay, `specs/region-and-voyage.md` before any work on a region sheet, level of detail,
+generated output, and before any script that measures a world, since the traps that make such a
+script return a plausible wrong number are there, `specs/explorer-doctrine.md` before any work on the
+Explorer or on a chart camera, gesture or overlay, `specs/region-and-voyage.md` before any work on a
+region sheet, level of detail,
 or the voyage, `specs/site-architecture.md` before adding or restructuring a page, a stylesheet, a
 bundle or an inlined script, and
 `specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe, or that
@@ -142,7 +144,12 @@ carries the calls and a PR comment carries any ruling of Alex's. "It was decided
 record, because the cold skeptic at step 14 cannot read chat, and neither can the next session.
 
 **13. Open the PR.** `.github/PULL_REQUEST_TEMPLATE.md` is the shape, and the footgun hook refuses a
-body that skips one of its sections. Every line is a claim the skeptic will check.
+body that skips one of its sections. Every line is a claim the skeptic will check. **The body carries
+that template's closing-reference line too**, which nothing enforces: the hook checks the sections and
+denies a negated keyword, but never requires one, so `gh pr view <N> --json closingIssuesReferences`
+is read before the PR is handed over. The grammar that read depends on, and what a PR with no issue
+writes instead, are `vellum-footguns` Gate 5 item 5 and the template's own note; neither is restated
+here.
 
 **14. Run `vellum-pr-skeptic`, dispatched COLD.** The prompt is the PR number or branch name and
 NOTHING else: no summary, no claims about tests, no rationale. Make no edits while it runs.

@@ -2,6 +2,10 @@
 
 #NNN `<title>`
 
+Closes #NNN
+
+<!-- The closing reference is what lets the merge close the issue instead of leaving it open for someone to shut by hand: on a PR whose base is `main`, `gh pr view <N> --json closingIssuesReferences` has to list exactly the issue this PR is for. Read it again after the body rewrite at workflow step 15, because `gh pr edit --body-file` does not start from this file and nothing refuses a body that dropped the line. A PR with no issue writes `No issue:` and the reason in its place rather than deleting the line, with no issue number in that sentence, since a negation beside a close keyword and a number is read as closing that number anyway and the hook denies the call. The rest of the grammar, one keyword per reference and what a feature-branch base does to it, is `vellum-footguns` Gate 5 item 5. -->
+
 `<what changed, in a paragraph; what was NOT asked for and why it rode along>`
 
 ## Guards

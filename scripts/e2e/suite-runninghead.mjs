@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import { luminance, sampleRow } from "./pixel-support.mjs";
+import { dropExpectedCancellations } from "./console-support.mjs";
 
 // LITERAL on purpose: home is not a nav item, /ribbon/ and /prospect/ are shelled rooms outside the nav, /atlas/ is generated and carries no shell, and a page dropping out of the nav must not silently drop out of this guard.
 const SHELLED = ["/", "/explorer/", "/print-room/", "/reading-room/", "/gallery/", "/faq/", "/glossary/", "/seed-of-the-day/", "/prospect/", "/ribbon/", "/specimen/"];
@@ -337,8 +338,8 @@ export async function run(ctx) {
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
   const restored = await waitReady();
 
-  // "AbortError: Transition was skipped" is the cross-document view-transition's expected cancellation when navigations chain fast, not an app error; this suite is the sole visitor to /gallery/, /glossary/, /faq/ and /ribbon/.
-  const errDelta = consoleErrors.slice(errBase).filter((e) => !e.includes("AbortError: Transition was skipped"));
+  // This suite is the sole visitor to /gallery/, /glossary/, /faq/ and /ribbon/, so a console error it drops is dropped nowhere else.
+  const errDelta = dropExpectedCancellations(consoleErrors.slice(errBase));
   const httpDelta = http4xx.slice(httpBase).filter((u) => !/favicon/i.test(u));
   check(
     "RH8 the running-head sweep is clean (no console errors, no new 4xx) and the Explorer base is restored",
