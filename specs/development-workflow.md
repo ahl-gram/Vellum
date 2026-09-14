@@ -38,8 +38,8 @@ work, `specs/ui-design.md` before any work whose deliverable is an appearance,
 `specs/engine-invariants.md` before any change to world generation or to a surface that quotes
 generated output, and before any script that measures a world, since the traps that make such a
 script return a plausible wrong number are there, `specs/explorer-doctrine.md` before any work on the
-Explorer or on a chart camera,
-gesture or overlay, `specs/region-and-voyage.md` before any work on a region sheet, level of detail,
+Explorer or on a chart camera, gesture or overlay, `specs/region-and-voyage.md` before any work on a
+region sheet, level of detail,
 or the voyage, `specs/site-architecture.md` before adding or restructuring a page, a stylesheet, a
 bundle or an inlined script, and
 `specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe, or that
