@@ -225,8 +225,10 @@ the sandbox for both review agents that build one, so the depth lives in one pla
 - **Do not switch worktrees while a dispatched agent is still running.** `EnterWorktree` and
   `ExitWorktree` in the parent silently disable that agent's commands for the rest of its life, and
   it goes on reporting what it can rather than failing, so the loss reaches you as a thin report and
-  not as an error. Wait for the agent before you move. No command here demonstrates the mechanism, so
-  treat the instruction as the rule and the cause as unverified.
+  not as an error. Observed 2026-09-10: a cold skeptic finished its round with no tools left to it
+  and handed the parent a list of probes to run instead of results. Wait for the agent before you
+  move. No command here demonstrates the mechanism, so treat the instruction as the rule and the
+  cause as unverified.
 - **Other sessions hold their own worktrees here.** Leave them alone, and never `git stash` bare: the
   stash stack is shared across every worktree and a parallel session can pop yours. Set work aside
   with a WIP commit instead.

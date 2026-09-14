@@ -308,7 +308,7 @@ const ghRefusal = (segment: string, command: string, cwd: string): [Decision, st
     return [
       deny(
         `vellum-footguns: GitHub reads "${hit[0]}" as a CLOSING reference (the keyword beside the number wins, the negation is ` +
-          `ignored; #486 and #524 both closed an issue this way). Say it without the keyword, in the template's form: "Issue: #N, stays open because ...".`,
+          `ignored; #486 and #524 both closed an issue this way). Say it without the keyword, in the form the PR template's note beside the closing line gives.`,
       ),
       null,
     ];

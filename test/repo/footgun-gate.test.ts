@@ -52,7 +52,7 @@ test("the PR template prompts for a closing reference above its first section, w
   assert.notEqual(note, "", "the closing line carries no note between it and the first section");
   assert.match(note, /No issue:/, "the note beside the closing line does not say what a PR with no issue writes in its place, which is the half of the prompt an author without an issue needs");
   assert.match(note, /stays open/, "the note beside the closing line does not say what a PR that HAS an issue and deliberately leaves it open writes in its place, which is the third form: the first of a pair of PRs on one issue has an issue number to name and no closing keyword to name it with");
-  // The phrase alone survives both deletions that matter and survives the advice being inverted into #597's defect, so the clauses carrying the hazard are asserted on their own.
+  // Presence only: a note keeping every phrase below and adding guidance that contradicts them stays green, which costs a miss on self-contradiction and never a false red on a rewording, the direction a prompt the hook does not enforce should err in.
   assert.match(note, /no closing keyword/, "the third form does not say to keep every closing keyword away from the number, which is the whole of it: GitHub reads a keyword beside a number as closing it however the sentence is worded");
   assert.match(note, /closingIssuesReferences` is then empty by intent/, "the third form does not say how to tell a deliberately open issue from a dropped closing line, which is the only check that distinguishes them");
   assert.match(note, /Issue: #N/, "the third form names no worked shape, so an author following it can write `Closes #N, stays open because ...`, which reads as the rule and closes the issue on merge");
