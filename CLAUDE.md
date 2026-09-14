@@ -25,8 +25,8 @@ a host page owes it, the camera and gesture contracts, counter-scale, and the ov
 not, how a finer view is built and what it guarantees, and how the voyage splits worker from client;
 `specs/development-workflow.md` is the order of operations from a filed issue to a pull request,
 including which subagent runs at which step and the one place the work stops for Alex's ruling;
-`specs/settle-doctrine.md` is how an e2e wait is written, ratified across #526 and #529 and pointed
-at by the footguns skill's Gate 2; and `specs/flake-record.md` is the dated ledger of every CI red
+`specs/settle-doctrine.md` is how an e2e wait is written and what the harness environment it runs in
+actually does, ratified across #526, #529 and #589 and pointed at by the footguns skill's Gate 2; and `specs/flake-record.md` is the dated ledger of every CI red
 believed to be a flake, one row per failure, which is what you consult instead of pressing re-run.
 **`specs/rulebook.md` is REQUIRED READING before any change that touches the renderer, a committed
 chart, the golden, a regen, a seed, or the order of work**, `specs/ui-design.md` before any work
@@ -36,7 +36,8 @@ work on the Explorer or on a chart camera, gesture or overlay, `specs/region-and
 any work on a region sheet, level of detail, or the voyage, `specs/development-workflow.md` before
 starting a sub or an epic, since its early steps are the ones a session cannot go back and take
 later, and `specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP
-probe. None of them is summarized here; where this file and a spec disagree, the spec is right. The
+probe, or that reads a screenshot, a focus state or a narrow viewport in the harness. None of them
+is summarized here; where this file and a spec disagree, the spec is right. The
 ruled pixels those specs were decided from are archived under `design/`, one directory per design
 round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting).
 
