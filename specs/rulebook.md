@@ -286,13 +286,15 @@ at #260 with its clean-list entry kept deliberately.
 world identity. The loser rebases, re-pins, regenerates, then re-runs the regen commands.
 
 **Current membership: `{#113}`** (more seats on empty islands, so realm counts can exceed five). It
-is the only member, so the rule has nothing to exclude against today.
+is the only member, so the rule has nothing to exclude against today, and no ordering constrains it.
 
-**#122 does not join this set, on the posture it is specced to take.** Two properties would carry
-that and neither is built: the annalist's marks would sit behind an opt-in render option,
-byte-identical when off, and the field #122 adds to war events in `src/society/history.ts` would be
-additive and draw-free. #122's acceptance owes a proof of each. **Re-judge the tier if either
-fails.** Grepping `annals` is not that check: no hit today is a render option.
+**#122 does not join this set, on the posture it is specced to take.** None of that posture is built.
+Its marks would sit behind an opt-in render option, byte-identical when off, and its generation side,
+the war-event field in `src/society/history.ts` and the predecessor partition its 2026-08-16 scope
+brings over from #49, would be additive and draw-free. The check is #122's own acceptance: the golden
+test green on the pinned checksum, and annals-off byte-identical. **Re-judge the tier if any part of
+that fails**, and do not take a grep for `annals` as that check, since no hit today is a render
+option.
 
 ## Scheduling rules
 
