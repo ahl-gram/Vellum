@@ -157,10 +157,12 @@ section points there rather than restating it.
   `find /var/folders/*/T -maxdepth 1 -name 'vellum-e2e-*' -type d -mmin +30 -print0 | xargs -0 rm -rf`,
   whose age filter is what keeps it from deleting the profile of the run you are watching.
 - **The harness ASKS for a window far taller than a screen**, `--window-size=1280,2400` in
-  `scripts/e2e/harness.mjs`. What it lays out at is a different question and this repo answers it
-  nowhere: a window size does not set the layout viewport, and the nearest instrument is the
-  `innerHeight` carried in `legendRoom` in `scripts/e2e/suite-broadside.mjs`, which is captured and
-  printed on failure but never asserted. So the height is stated here as the REQUEST and no
+  `scripts/e2e/harness.mjs`. What it lays out at is a different question, and no CHECK in this repo
+  asserts the answer: a window size does not set the layout viewport, and the nearest instrument is
+  the `innerHeight` carried in `legendRoom` in `scripts/e2e/suite-broadside.mjs`, which is captured
+  and printed on failure but never asserted. `scripts/e2e/suite-reading-room.mjs` does reason from
+  the requested figure in a comment at its own override, which is a suite explaining its choice and
+  not a measurement of the effective height. So the height is stated here as the REQUEST and no
   effective figure is claimed. What the suites do establish is the consequence: a page that would
   need scrolling on a laptop can sit whole inside that window, and then a check whose fixture IS the
   scroll never reaches its own fixture, because the late section it meant to bring up to the reading

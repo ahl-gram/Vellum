@@ -39,6 +39,7 @@ const NOISY_ESCAPE = /(?<!\\)\\[()[\]{}+*?|^/]/;
 const QUOTED = /'[^']*'|"(?:[^"\\]|\\.)*"/g;
 const HEREDOC = /<<-?\s*['"]?(\w+)['"]?\n([\s\S]*?)\n\1(?=\n|$)/g;
 const SEPARATORS = /\n|;|&&|\|\||\||\$\(|\(|\{\s|\s\}|\bthen\b|\bdo\b|\belse\b|\belif\b/;
+const LINE_CONTINUATION = /\\\n/g;
 const PREFIX = /^(?:(?:env|command|time|exec|sudo|nohup|nice|builtin)\s+|[A-Za-z_][A-Za-z0-9_]*=\S*\s+)+/;
 const GIT_GLOBAL_WITH_VALUE = new Set(["-C", "-c", "--git-dir", "--work-tree", "--namespace", "--exec-path"]);
 const PERL_INPLACE = /^perl\b.*\s-[0a-zA-Z]*i\b/;
@@ -46,9 +47,9 @@ const PERL_META_DELIMITER = /\bs([|+*?.$])(?:(?!\1)[\s\S])*\\\1/;
 const GH_BODY_WRITE = /^gh (pr|issue) (create|edit|comment)\b/;
 const GH_API_CALL = /^gh api\b/;
 const GH_API_BARE_ITEM = /(?:^|\s)(?:https:\/\/[^\s/]+\/)?\/?repos\/[^\s/]+\/[^\s/]+\/(?:issues|pulls)\/\d+\/?(?=\s|$)/;
-// The short arm reads a whole cluster because pflag combines them, so `-if body=x` and the glued `-fbody=x` both carry a live field flag; the long names keep `\b` so a longer flag cannot match one of them as a prefix.
+// The short arm reads a whole cluster because pflag combines them, so `-if body=x` and the glued `-fbody=x` both carry a live field flag.
 const GH_API_FIELD = /(?:^|\s)(?:-[A-Za-z]*[fF]|--(?:raw-field|field|input)\b)/;
-const GH_API_METHOD = /(?:^|\s)(?:-X|--method)[=\s]*(\w+)/g;
+const GH_API_METHOD = /(?:^|\s)(?:-X|--method)[=\s]*"?(\w*)/g;
 const GH_PR_WRITE = /^gh pr (create|edit)\b/;
 const BODY_FILE = /(?:--body-file|-F)[=\s]+["']?([^\s"'=]+)(?=[\s"']|$)/g;
 const BODY_SUBSHELL = /\$\(\s*(?:cat\s+|<\s*)([^\s)"']+)\s*\)/g;
@@ -101,6 +102,7 @@ const commandSegments = (command: string): string[] =>
   command
     .replace(HEREDOC, "")
     .replace(QUOTED, '""')
+    .replace(LINE_CONTINUATION, " ")
     .split(SEPARATORS)
     .map((s) => s.replace(PREFIX, "").trim().replace(/\s+/g, " "))
     .filter(Boolean);
@@ -212,9 +214,10 @@ const PERL_META_REASON =
   "vellum-footguns: perl strips the backslash before ANY delimiter, so an `s` whose delimiter is a regex METACHARACTER and whose " +
   "PATTERN escapes that delimiter silently loses the literal and leaves the metacharacter live. Measured 2026-09-14 on " +
   "`hello world`: `s|world\\||PLANET|` gives `PLANEThello world`, because the pipe unescapes to an alternation with an empty " +
-  "branch that matches at offset zero; `s+world\\++`, `s*world\\**`, `s?world\\??`, `s.world\\..` and `s$world\\$$` each REPLACE a " +
-  "target the literal pattern does not contain. All exit 0. Delimit with a character that is not a metacharacter (`#` and `!` were " +
-  "measured safe), or do the edit with a node script or a heredoc.";
+  "branch that matches at offset zero; `s+world\\++`, `s*world\\**`, `s?world\\??` and `s$world\\$$` each REPLACE a target the " +
+  "literal pattern does not contain; `s.world\\..` does the same whenever a character follows the match, and is inert only at a " +
+  "line end, where the dot has nothing to consume. All exit 0. Delimit with a character that is not a metacharacter (`#` and `!` " +
+  "were measured safe), or do the edit with a node script or a heredoc.";
 
 const perlRefusal = (segment: string, command: string): Decision => {
   if (!PERL_INPLACE.test(segment)) return null;
@@ -229,13 +232,16 @@ const GH_API_WRITE_REASON =
   "<file>`, or say `-X PATCH` when editing the item IS the intent. The tell afterwards is a response `html_url` ending " +
   "`/issues/N` instead of `#issuecomment-<id>`.";
 
-// gh takes the LAST --method on the line, so reading the first would let `--method GET ... -X POST` through as harmless.
-const lastMethod = (segment: string): string => [...segment.matchAll(GH_API_METHOD)].at(-1)?.[1] ?? "";
+// gh takes the LAST --method on the line, so reading the first would let `--method GET ... -X POST` through as harmless. null is no flag at all; "" is a flag whose value the quote blanking ate, which exempts rather than refusing so that a quoted spelling of the remedy this very refusal recommends is not itself refused.
+const lastMethod = (segment: string): string | null => {
+  const seen = [...segment.matchAll(GH_API_METHOD)];
+  return seen.length ? (seen.at(-1)?.[1] ?? "") : null;
+};
 
 const ghApiWriteRefusal = (segment: string): Decision => {
   if (!GH_API_CALL.test(segment) || !GH_API_BARE_ITEM.test(segment) || !GH_API_FIELD.test(segment)) return null;
   const method = lastMethod(segment);
-  return method === "" || method.toUpperCase() === "POST" ? deny(GH_API_WRITE_REASON) : null;
+  return method === null || method.toUpperCase() === "POST" ? deny(GH_API_WRITE_REASON) : null;
 };
 
 const readRelative = (name: string, cwd: string): string => {

@@ -17,9 +17,10 @@ is ever removed.
   it the same way rather than by adding paths that look related.
 - **Refuses** (the tool call does not run, the reason is shown). A command is read in COMMAND position
   only: quoted strings and heredoc bodies are blanked before segmenting, segments split on shell
-  separators and the `then`/`do`/`else` keywords, prefixes like `env X=1`, `command`, `time`, `sudo`
-  are stripped, and `git`'s global options (`-C dir`, `-c k=v`, `--git-dir=`) are skipped before the
-  subcommand is read. So a grep or a comment that mentions a rule passes, and `git -C <other
+  separators and the `then`/`do`/`else` keywords, a backslash-newline line continuation is joined back
+  into one line first so a command split across lines is still read as one, prefixes like `env X=1`,
+  `command`, `time`, `sudo` are stripped, and `git`'s global options (`-C dir`, `-c k=v`,
+  `--git-dir=`) are skipped before the subcommand is read. So a grep or a comment that mentions a rule passes, and `git -C <other
   worktree> stash pop` does not.
   - any bare mutation of the shared stash stack: `git stash`, `push` without `-m`, `pop`, `apply` or
     `drop` without an explicit `stash@{n}` or sha, `clear`;
@@ -29,11 +30,13 @@ is ever removed.
     (`s|a\+b|c|`, which real perl leaves alone) is not refused. Perl strips the backslash before ANY delimiter, so the literal the author wrote
     is lost and the bare metacharacter goes live. Measured 2026-09-14 on `hello world`:
     `s|world\||PLANET|` prints `PLANEThello world`, because the pipe unescapes to an alternation with
-    an empty branch that matches at offset zero, while `s+world\++`, `s*world\**` and `s?world\??`
-    each REPLACE a target their literal pattern does not contain. All exit 0, and with `-i` they land
-    in the file. `#` and `!` were measured to leave the input unchanged, which is why the class is the
-    metacharacters and not every delimiter. An escaped delimiter in the REPLACEMENT half is correct
-    perl and is not refused;
+    an empty branch that matches at offset zero, while `s+world\++`, `s*world\**`, `s?world\??` and
+    `s$world\$$` each REPLACE a target their literal pattern does not contain. `s.world\..` does the
+    same whenever a character follows the match (`hello worldX` gives `hello PLANET`) and is inert
+    only at a line end, where the dot has nothing to consume. All exit 0, and with `-i` they land in
+    the file. `#` and `!` were measured to leave the input unchanged at every position, which is why
+    the class is the metacharacters and not every delimiter. An escaped delimiter in the REPLACEMENT
+    half is correct perl and is not refused;
   - `gh api` on a bare issue or pull-request endpoint (`repos/O/R/issues/N` or `repos/O/R/pulls/N`,
     with nothing after the number but an optional trailing slash) carrying any data field (`-f`,
     `-F`, `--raw-field`, `--field`, `--input`, including inside a combined short-flag cluster such as
@@ -107,10 +110,16 @@ is ever removed.
   assertion that cannot be satisfied once the pattern has consumed anything, so `s^world\^^PLANET^`
   silently does nothing instead of mis-editing. A different failure shape from the one this guard is
   about.
-- `$` IS in the class, which costs a false refusal when `s` sits directly before a `$` in ordinary
-  shell text (a variable or a filename) and a `\$` appears later in the same command. That direction
-  was chosen deliberately: on a refusal a false positive is visible and one edit away, while a miss
-  is a silent corruption of the file.
+- `$` and `.` are in the class, and each costs a false refusal. `$` bites when `s` sits directly
+  before a `$` in ordinary shell text (a variable or a filename) and a `\$` appears later in the same
+  command; `.` bites on the commoner shape still, a standalone `s` before a dot plus any later `\.`,
+  so `perl -pi -e 's/a/b/' src/s.ts && grep -n '\.mjs' out.txt` is refused. That direction was chosen
+  deliberately for both: on a refusal a false positive is visible and one edit away, while a miss is a
+  silent corruption of the file. `.` is the one to re-judge first if this proves annoying in practice.
+- A method flag whose VALUE the quote blanking ate (`-X "PATCH"`) exempts the call rather than
+  refusing it, which is what stops the hook refusing the quoted spelling of the very remedy its own
+  message recommends. The cost is that a quoted `-X "POST"` is exempt too. Silence on a shape nobody
+  types by accident, bought to keep the remedy usable.
 - The `gh api` path is read after quoted spans are blanked, so a quoted path (`gh api
   "repos/O/R/issues/193" -f body=x`), one built from shell variables (`repos/$O/$R/issues/$N`) or one
   built by a subshell is not seen at all, and the destructive call goes through. **This is a MISS, not
