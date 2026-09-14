@@ -188,21 +188,19 @@ export function laneOutcome(
   const tally = sumTallies(results);
   const checks = tally ? `${tally.passed}/${tally.total} checks; ` : "";
   const detail = `${checks}${results.map(laneDetail).join(", ")}`;
+  const whole = selected.length === E2E_LANES.length && E2E_LANES.every((lane) => reported.has(lane.name));
+  const scope = whole ? "" : `${selected.length} of ${E2E_LANES.length} lanes, not the full suite; `;
   const failed = results.filter((r) => r.code !== 0);
   if (failed.length > 0) {
     const which = failed.map((r) => r.name).join(" and ");
-    return { ok: false, line: `LANE ${which} FAILED  (${detail})` };
+    return { ok: false, line: `LANE ${which} FAILED  (${scope}${detail})` };
   }
   const skipped = results.filter((r) => r.skipped);
   if (skipped.length > 0) {
     const which = skipped.map((r) => r.name).join(" and ");
-    return { ok: true, line: `LANE ${which} SKIPPED, so this run proves less than a pass  (${detail})` };
+    return { ok: true, line: `LANE ${which} SKIPPED, so this run proves less than a pass  (${scope}${detail})` };
   }
-  const whole = selected.length === E2E_LANES.length && E2E_LANES.every((lane) => reported.has(lane.name));
   if (whole) return { ok: true, line: `ALL LANES PASS  (${detail})` };
   const which = selected.map((l) => l.name).join(" and ");
-  return {
-    ok: true,
-    line: `LANE ${which} PASS  (${selected.length} of ${E2E_LANES.length} lanes, not the full suite; ${detail})`,
-  };
+  return { ok: true, line: `LANE ${which} PASS  (${scope}${detail})` };
 }

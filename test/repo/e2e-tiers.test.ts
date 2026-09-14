@@ -112,7 +112,8 @@ test("the smoke tier stays materially cheaper than the full suite", () => {
   }
 });
 
-test("ci.yml runs the lane driver, and nothing in it can narrow what the lanes cover", () => {
+// The NAME says what it enforces and no more: since #623 ci.yml does narrow each job to one lane, deliberately and by flag, and what stays forbidden is a suite selection, which narrows a lane from underneath.
+test("ci.yml runs the lane driver, and never sets a suite selection under it", () => {
   assert.match(CI, /run: npm run test:e2e:lanes/, "ci.yml no longer runs the lane driver");
   // Presence of the driver is not enough: a VELLUM_E2E_SUITES line beside it still narrows coverage.
   assert.doesNotMatch(
@@ -128,11 +129,18 @@ test("every ci.yml job is bounded, so no hung job can hold a runner for hours", 
   const jobs = ciJobBlocks();
   assert.equal(jobs.length, 2, `this sweep read ${jobs.length} job blocks in ci.yml, so it is covering the wrong part of the file; a job added here joins the sweep deliberately`);
   for (const job of jobs) {
-    const bound = ciUncommented(job.lines).match(/^ {4}timeout-minutes: (\d+)$/m);
+    const body = ciUncommented(job.lines);
+    const bound = body.match(/^ {4}timeout-minutes: (\d+)$/m);
     assert.ok(bound, `ci.yml's ${job.id} job has no timeout-minutes, so a hang there runs to GitHub's 6-hour default`);
     const minutes = Number(bound[1]);
-    assert.ok(minutes >= 15, `${job.id}'s timeout-minutes is ${minutes}, under the worst case the line's own dated comment measures, plus headroom`);
+    // Both jobs here run a browser suite or the whole unit suite, so the floor is theirs; a cheap job added later reds on it and is meant to, since the count anchor above already forces a visit.
+    assert.ok(minutes >= 15, `${job.id}'s timeout-minutes is ${minutes}, under the worst case its own dated comment measures, plus headroom`);
     assert.ok(minutes <= 60, `${job.id}'s timeout-minutes is ${minutes}, long enough that a hang still costs an hour`);
+    assert.doesNotMatch(
+      body,
+      /continue-on-error:\s*true/,
+      `ci.yml's ${job.id} job swallows its own failure, so a red there reports green and the merge gate stops meaning anything`,
+    );
   }
 });
 
@@ -148,13 +156,12 @@ test("ci.yml runs one job per lane, and its matrix is exactly E2E_LANES", () => 
     E2E_LANES.map((l) => l.name),
     "ci.yml's lane matrix and E2E_LANES name different lanes, so a lane either runs nowhere or runs a job with no lane",
   );
-  // The matrix naming a lane is not the same as the job RUNNING it: without the flag both jobs run every lane and the roster check above still passes.
   assert.match(
     body,
     /run: npm run test:e2e:lanes -- --lane \$\{\{ matrix\.lane \}\}/,
     "the e2e step does not pass its matrix lane to the driver, so each job runs every lane",
   );
-  // Branch protection matches a required check by JOB NAME, and two matrix jobs sharing one name is the same failure as a rename. Anchored to the JOB's own four-space line: a step carries a name: field too, so an unanchored match is satisfied by the step name while both jobs report one check (prover, 2026-09-14).
+  // Anchored to the JOB's own four-space line: a step carries a name: field too, so an unanchored match is satisfied by the step name while both jobs still report one check (prover, 2026-09-14).
   assert.match(
     body,
     /^ {4}name: build & e2e lane \$\{\{ matrix\.lane \}\}$/m,
@@ -371,6 +378,13 @@ test("the lane driver spawns the runner itself and refuses an ambient selection"
   // All three, or the lock moves rather than holding: laneOutcome refuses a result set short of SELECTED at runtime, which is worth nothing if SELECTED is not what ran or is not what the argv asked for.
   assert.match(DRIVER, /SELECTED = resolveLaneSelection\(process\.argv\.slice\(2\)\)/, "the driver's lane selection no longer comes from its own argv");
   assert.match(DRIVER, /SELECTED\.map\(runLane\)/, "the driver runs some other set of lanes than the one it selected");
+  const resolveAt = DRIVER.indexOf("resolveLaneSelection(process.argv");
+  const probeAt = DRIVER.indexOf("findBrowser()");
+  assert.notEqual(probeAt, -1, "the driver no longer probes for a browser, so the ordering assertion below would compare against -1");
+  assert.ok(
+    resolveAt < probeAt,
+    "the driver resolves its lane AFTER probing for a browser, so on a machine with none a misspelled lane prints SKIP and exits 0 instead of being refused",
+  );
   assert.match(DRIVER, /browserlessAction\(process\.env, Boolean\(process\.stdout\.isTTY\)\)/, "the driver no longer decides the browserless policy against its own TTY");
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
   assert.equal(pkg.scripts["test:e2e:lanes"], "node scripts/e2e-lanes.mjs");

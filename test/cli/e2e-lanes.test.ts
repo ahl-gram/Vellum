@@ -156,7 +156,6 @@ test("--lane names one lane and no flag names every lane", () => {
     assert.deepEqual(resolveLaneSelection([LANE_FLAG, lane.name]).map((l) => l.name), [lane.name]);
     assert.deepEqual(resolveLaneSelection([`${LANE_FLAG}=${lane.name}`]).map((l) => l.name), [lane.name]);
   }
-  // The lane OBJECT, not a name: a selection that rebuilt a lane from its name would hand the child the wrong port and the wrong suites.
   const picked = resolveLaneSelection([LANE_FLAG, E2E_LANES[1]!.name])[0]!;
   assert.equal(picked, E2E_LANES[1], "the selected lane is not the roster's own entry");
 });
@@ -203,6 +202,18 @@ test("the only selected lane failing still fails, and the line names that lane",
   const red = laneOutcome([result({ name: lane.name, code: 1 })], [lane]);
   assert.equal(red.ok, false, "a failed lane must fail its own job");
   assert.match(red.line, new RegExp(`LANE ${lane.name} FAILED`), "the line does not name the failing lane");
+});
+
+// EVERY line a one-lane run can print, not just the one the pass test reads: a skip exits 0 too, so a skipped shard whose line is indistinguishable from a full run's is the same defect wearing the other branch.
+test("every line a one-lane run can print says how much of the suite it was", () => {
+  const lane = E2E_LANES[0]!;
+  const alone = (over: Partial<LaneResult>) => laneOutcome([result({ name: lane.name, ...over })], [lane]).line;
+  const both = (over: Partial<LaneResult>) => laneOutcome(everyLane(over)).line;
+  const qualifier = new RegExp(`1 of ${E2E_LANES.length} lanes`);
+  for (const [what, over] of [["passed", {}], ["skipped", { skipped: true }], ["failed", { code: 1 }]] as const) {
+    assert.match(alone(over), qualifier, `a one-lane run that ${what} does not say it ran one lane of ${E2E_LANES.length}`);
+    assert.doesNotMatch(both(over), qualifier, `a run of every lane that ${what} claims to be a single shard`);
+  }
 });
 
 test("a SELECTED lane that never reported still fails, so a driver that lost one cannot pass", () => {

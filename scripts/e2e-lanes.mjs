@@ -17,7 +17,6 @@ import {
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const RUNNER = join(HERE, "e2e-explorer.mjs");
 
-// Resolved above every probe below it, the way the ambient refusal already sits above findBrowser(): a typo resolved after the probe prints SKIP and exits 0 on a browserless machine, so the typo never surfaces.
 let SELECTED;
 try {
   SELECTED = resolveLaneSelection(process.argv.slice(2));
