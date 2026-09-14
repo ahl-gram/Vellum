@@ -15,7 +15,6 @@ body.chart-room .stage { position: fixed; inset: 0; z-index: 1; overflow: hidden
 body.chart-room .stage .status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 0.3rem 0.9rem;
   color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.55); z-index: 2; pointer-events: none;
   transition: opacity 0.45s var(--ease-paper); }
-/* Turned on and off by src/site/shared/announce.ts (#547). */
 body.chart-room .stage .status.fading { opacity: 0; }
 body.chart-room .stage .status:empty { display: none; }
 body.chart-room .stage noscript .status { top: calc(50% + 2.8rem); pointer-events: auto; max-width: 30rem; }

@@ -118,11 +118,14 @@ test("the kit gives the stage's status pill its fade, keyed to the class so ever
   const base = css.match(/body\.chart-room \.stage \.status\s*\{([^}]*)\}/);
   assert.ok(base, "the kit dresses the stage's pill");
   assert.match(base[1], /transition:\s*opacity\s+0\.45s/, "the pill carries the fade's own duration, the one src/site/shared/announce.ts waits out before it clears the text");
-  const fade = css.match(/([^{}]*\.status\.fading[^{}]*)\{([^}]*)\}/);
-  assert.ok(fade, "and the kit carries the arm the announcer turns on");
-  assert.match(fade[2], /opacity:\s*0/, "which is what fading means");
-  assert.match(fade[1], /body\.chart-room \.stage\b/, "scoped to a chart room's stage like every other rule on this pill, so no other status goes with it");
-  assert.doesNotMatch(fade[1], /#/, "and keyed to the class and never to one page's id, or the Portfolio's #pf-status never fades");
+  // EVERY arm and not the first (skeptic round 2 on PR #584).
+  const fades = [...css.matchAll(/([^{}]*\.status\.fading[^{}]*)\{([^}]*)\}/g)];
+  assert.ok(fades.length > 0, "and the kit carries the arm the announcer turns on");
+  for (const fade of fades) {
+    assert.match(fade[2], /opacity:\s*0/, `which is what fading means: ${fade[1].trim()}`);
+    assert.match(fade[1], /body\.chart-room \.stage\b/, `scoped to a chart room's stage like every other rule on this pill: ${fade[1].trim()}`);
+    assert.doesNotMatch(fade[1], /#/, `keyed to the class and never to one page's id, or that page's pill never fades: ${fade[1].trim()}`);
+  }
 });
 
 test("bindRoom seats the legend row before it fits the sheet", () => {

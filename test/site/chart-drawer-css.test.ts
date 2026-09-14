@@ -21,7 +21,7 @@ test("the Chart Table's sheet stands the leaf tabs down at every width its phone
     stood < narrow,
     "the stand-down is declared BEFORE the phone block: both arms are one class, so the later one wins and a stand-down written after it would take the tabs off the phone instead (the shape test/site/shell-drawer-css.test.ts pins for .rooms-reveal)",
   );
-  // The block's own brace-matched close, never just "later in the file": the prover moved the flex rule to just AFTER the closing brace, which puts the leaf tabs back on the desktop at every width, and an offset comparison alone stayed green (2026-09-13).
+  // The block's own brace-matched close, never just "later in the file" (prover, 2026-09-13).
   let depth = 0;
   let close = -1;
   for (let i = css.indexOf("{", narrow); i < css.length && close < 0; i++) {

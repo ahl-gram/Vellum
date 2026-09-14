@@ -87,7 +87,6 @@ const relabelEar = (): void => {
   ear.title = label;
 };
 
-// #status has several owners here (the draw path, the survey errors and the voyage's log summary all write it), which is why the announcer clears only the text it wrote and the other four writers below keep writing the element straight.
 const announce = makeAnnouncer({
   pill: status,
   after: (run, ms) => window.setTimeout(run, ms),

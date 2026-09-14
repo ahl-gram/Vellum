@@ -4,7 +4,6 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { FADING, SAY_FADE_MS, SAY_HOLD_MS, makeAnnouncer } from "../../src/site/shared/announce.ts";
 
-// #547: the chart room's status pill is one aria-live region with several owners (the Explorer's draw path, its errors and the voyage's log summary all write it), so the fixture's foreign-write cases are the point and not an edge.
 
 const fakePill = () => {
   const events: string[] = [];
@@ -101,7 +100,6 @@ test("a newer line cancels the older line's departure, so the reader is never cu
   assert.equal(f.pill.textContent, "this survey is already on the table", "the newer line is what fades");
 });
 
-// The Explorer's draw path writes "Drafting…" into this same pill, and the voyage writes its log summary there; neither goes through this module, which is why the guard is the TEXT and not a counter this module keeps.
 test("a line written by another hand is never cleared by this one, and no fade is started over it (#547)", () => {
   const f = fixture();
   f.say(LINE);
@@ -164,4 +162,13 @@ test("every room that announces on a status pill announces through the one annou
       `${path} still writes its announcement straight onto the pill, which is the defect #547 named`,
     );
   }
+});
+
+// The Portfolio keeps a second, bare writer for its drafting PROGRESS, which must not erase itself while the drafting it counts is still running. Nothing in the browser can tell the two apart: CD24 reads the line and the pill's fade, and both look identical whichever writer put the line there.
+test("the Portfolio's ruled announcement goes through the announcer and its progress line does not (#547 ruling 4)", () => {
+  const flat = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/portfolio/app.ts"), "utf8").replace(/\s+/g, " ");
+  assert.match(flat, /say\([^;]*is on top/, "the sheet brought up is ANNOUNCED, so it leaves the chart the way the Chart Table's line does");
+  assert.doesNotMatch(flat, /tell\([^;]*is on top/, "and never written bare, which would leave it standing over the chart forever");
+  assert.match(flat, /tell\([^;]*draftedLine/, "while the drafting count is written bare, or a sheet slower than the hold blanks the stage mid-draft");
+  assert.doesNotMatch(flat, /say\([^;]*draftedLine/, "");
 });
