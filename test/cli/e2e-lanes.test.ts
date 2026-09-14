@@ -213,6 +213,12 @@ test("every line a one-lane run can print says how much of the suite it was", ()
   for (const [what, over] of [["passed", {}], ["skipped", { skipped: true }], ["failed", { code: 1 }]] as const) {
     assert.match(alone(over), qualifier, `a one-lane run that ${what} does not say it ran one lane of ${E2E_LANES.length}`);
     assert.doesNotMatch(both(over), qualifier, `a run of every lane that ${what} claims to be a single shard`);
+    // Beside the count and not instead of it: the count is blind to a whole run claiming "2 of 2 lanes, not the full suite", which is the shape the prover reached by making the scope phrase unconditional (2026-09-14).
+    assert.doesNotMatch(
+      both(over),
+      /not the full suite/,
+      `a run of every lane that ${what} says it covered less than the full suite`,
+    );
   }
 });
 
