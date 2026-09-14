@@ -20,14 +20,21 @@ Five other places carry what this one deliberately does not:
 
 Its siblings under `specs/` hold what this file is not about: `ui-design.md` the look and feel
 itself (the ground, the case, the palette, the rooms, the voice, motion and ceremony),
+`engine-invariants.md` what the generator guarantees about a world and what a surface quoting it may
+not assume, `explorer-doctrine.md` the living chart over the baked sheet (the engine boundary and the
+host contract, the camera and gesture, counter-scale, the overlay lifecycle),
+`region-and-voyage.md` its other half (region sheets, level of detail, the voyage),
+`site-architecture.md` how the site is authored, bundled, discovered and shipped,
 `development-workflow.md` the sequence a change moves through, `settle-doctrine.md` how an e2e
 wait is written and what the harness environment does, and `flake-record.md` the dated ledger of CI
 reds believed to be flakes.
 
 ## How to read and update this file
 
-**This file is normative and complete.** A reader who reads only this file is correctly informed
-about the rules. That property is the whole point, and it is worth what it costs to keep.
+**This file is normative and complete on the rules it owns.** A reader who reads only this file is
+correctly informed about them. That property is the whole point, and it is worth what it costs to
+keep. Where a sibling spec is the normative home, this file POINTS at it by name and section rather
+than carrying a second copy, which is the routing rule below applied to this file itself.
 
 **Where this file and `CLAUDE.md` overlap, this file wins**, and the overlap is now small and known:
 the #378 comment doctrine is stated in both because it governs writing code, which is `CLAUDE.md`'s
@@ -38,6 +45,23 @@ duplicate went. `CLAUDE.md` keeps process at the keyboard; this file keeps the r
 **A rule change edits this file**, in a branch and a pull request like any other tracked change. It
 may additionally leave a dated comment on the issue the change came from, as an audit trail. It must
 never live only in a comment somewhere.
+
+**Where a rule lives: the routing rule.** Anything Vellum-specific AND normative AND slow-changing is
+a spec under `specs/`. An imperative keyed to the moment of typing a particular kind of line is a
+`vellum-footguns` gate. An incident whose value is proving that a gate bites is a row in that skill's
+`references/scars.md`. Fast-changing empirical traps, private infrastructure and status stay out of
+the repo entirely. **Exactly one home is normative, and every other copy points at it by name**,
+because two copies of a rule are two rules the moment either is edited. Apply this when adding a rule
+and when finding one in two places; the second case is a defect to fix, not a redundancy to keep.
+
+**Specs are prescriptive. State the rule and drop the provenance.** Write each entry in the
+imperative, as the thing a future session must do or must not do. Cut "ratified at", "reworked after
+review", "this line read X until", and the story of how a set reached its membership: git, the issues
+and the pull requests hold that history and are better at it, and a reader who is ABOUT to do the
+work needs the rule rather than the road to it. **Keep the `` `symbol` in `repo/relative/path` ``
+citations**, which are not history but what makes a rule checkable in one command, and keep naming a
+constant wherever the rule is about its value. The older entries here still carry narrative; that is
+trimmed as each is touched, not swept separately.
 
 **Why the rulebook is a file and not an issue thread**, recorded so nobody moves it back. Everywhere
 else in Vellum the convention is that a body is historical intent and a later comment supersedes it,
@@ -104,6 +128,17 @@ comment and move on.
 **Every ruled design round is archived in the repo** under `design/`, one directory per round,
 content only, in its own pull request. That archive is the visual spec; this file and the issue
 ledgers are the words.
+
+Two things a design round owes that the six steps above do not cover:
+
+- **The archive pull request gets the cold skeptic, and the mock pages get the plate-reader.** An
+  archive is content rather than code, which makes it look like neither is owed; both have found real
+  defects in one, and the mocks are the only place a ruling is made from pixels nobody measured.
+- **A mock inherits the live kit's defects unless it says otherwise.** A mock page linking the house
+  sheets wears whatever is wrong with them that day, so a still can show a defect the round did not
+  invent and a round can rule on a picture that is wrong for a reason outside it. Where a mock
+  neutralises such a defect to show the intended dress, that override says so at its line and the
+  defect is filed.
 
 ## The fidelity rule
 
@@ -176,7 +211,24 @@ at #260 with its clean-list entry kept deliberately.
   on linux CI.**
 - **A seed re-roll** (terrain reshape, culture or name-template edits) is a different, larger cost:
   it changes world identity and re-pins the golden checksum. **Only one may be in flight at a time**,
-  and the set that rule excludes against is the next section.
+  and the set that rule excludes against is the next section. **It also has a hand-fixed tail that no
+  script covers**: hand-authored copy quotes the hero world by name, in `src/pages/index.astro` and
+  in `README.md`, and a re-roll makes both wrong silently. Edit them in the same change as the regen.
+- **Three levers are golden-safe by construction, and a change behind any of them owes no regen and
+  no golden re-pin.** They are worth knowing before paying for one.
+  - **A render gate that only region sheets pass.** `world.region !== undefined` selects
+    `REGION_FONT_SIZE` in `src/render/layers/settlements.ts`, so a region-only render edit changes
+    region sheets while every committed chart and the golden stand still. Growing a WORLD sheet's
+    lettering is the opposite case: a full regen, landed alone.
+  - **A DOM attribute whose scope is the whole idle-parity question.** The chronicle's reveal writes
+    and removes `data-ink` in `src/site/living-chart/chronicle.ts` and nothing else writes it, the
+    grading predicates behind it are pure (`glyphRevealedBetween` and `inkGradeFor` in
+    `src/render/chronicle-scrubber.ts`), and the baked sheet string `lastSvg` in
+    `src/site/explorer/app.ts` is never touched. An attribute with a second writer is not this lever.
+  - **A module that is render-only by construction.** `src/society/philology.ts` is reached only at
+    read time, holds no rng, and is imported by neither `src/world/generate.ts` nor
+    `src/society/names.ts`, so it can neither re-roll a world nor move a chart. The property is the
+    absence of those imports, so a new import into the generator is what breaks it.
 - **An optional recipe field is guarded at every place the stamp touches it**, never written as a
   key that can hold `undefined`. Read `src/render/recipe-meta.ts` whole before adding one: the emit
   and the parse are conditional spreads, the human-readable metadata summary builds its fragment with
@@ -285,10 +337,10 @@ is the record. An invariant earns a test first; only one no test can practically
 line at the line that breaks. The constraints below are each either guard-tested or carried as such a
 comment. This is a convenience index, not their home.
 
-- **Verso (#116, #174):** the ghost and the voyage track must come from the SAME draw, since a quiet
-  mid-drag sea-level redraw freezes both (pinned by e2e W15). The verso track is static, never live:
-  painted only at rest (`paintVersoTrack` in `src/site/explorer/verso.ts`), never from the rAF tick. `#status` must be empty at rest,
-  because the draw settle and e2e `waitSettled` both key on it. One ghost object URL is created and revoked per redraw.
+- **Verso (#116, #174):** `#status` must be empty at rest, because the draw settle and e2e
+  `waitSettled` both key on it. The back face's own rules (the ghost and its overlay from one draw,
+  the overlay static and never live, one ghost object URL minted and revoked per redraw) are
+  `specs/explorer-doctrine.md`'s, under the overlay lifecycle.
 - **Realm labels (#145):** `realm-label-placement.ts` stage 1 stays first and unchanged, or the
   golden-free property dies. The dead `blob.length < 60` gate was removed after measuring that 0 of
   173 realms hit it, which is what lets "always named" survive #113.
@@ -312,16 +364,71 @@ comment. This is a convenience index, not their home.
   that world-sourced geometry is quantized to three decimals before hashing, far above the
   cross-platform drift and far below any real composition change.
 - **Borders (#158):** the border attribute-order invariant is commented at its line; keep it.
+- **The comment citation convention:** cite code as `` `symbol` in `repo/relative/path` ``, never as
+  a file and a line. A symbol survives code moving and breaks on a rename or a deletion, which is
+  exactly when a citation should fail, while a line number drifts silently onto unrelated code. Use
+  the FULL repo-relative path even for a sibling in the same directory, because basenames repeat
+  under `src/` and the ambiguity is day one rather than drift.
+  `test/repo/comment-citations.test.ts` enforces it, and two of its behaviours are deliberate rather
+  than rough edges: it matches a symbol that APPEARS in the file, not one declared there, because a
+  citation properly points at a call site; and it matches JOINED runs of comment lines, not single
+  lines, because a citation long enough to wrap is invisible to a line matcher and the guard would
+  report green. Do not simplify either away. The guard checks the citation and never the claim
+  wrapped around it, which stays the business of the invariant at the line that breaks.
+- **A parameter property is refused by the type check, not by Node.** Node's type stripping accepts
+  no enums, no namespaces and no parameter properties, but here `erasableSyntaxOnly` in
+  `tsconfig.json` means `npm run check` rejects one before Node is ever involved. Read a red about it
+  as a type-check result, not a runtime discovery.
 - **Heavy lazy plates (#329):** a page embedding heavyweight lazy images gives each a reserved frame
   (width and height from the SVG root) and marks below-the-fold plates `fetchpriority="low"` so a
   clicked navigation wins bandwidth. The home style grid that consumed the priority half retired at
   #470, so this line is the rule's durable home until a lazy heavyweight embed returns; the atlas
   keeps reserved frames plus `loading="lazy"` in `src/atlas/document.ts`.
 
+## The comment sweep
+
+A sweep deletes comments the doctrine above says are not owed. It is a mechanical change with a
+non-mechanical failure mode, so it is run and PROVEN in a particular way.
+
+- **Sweep trailing comments last and most conservatively, and never audit a sweep from a whole-line
+  scan.** The trailing comment is the highest-value keeper class and a whole-line diff cannot see it:
+  stripping a comment off the end of a code line that survives shows up as a CHANGED CODE LINE, so an
+  audit built from removed comment-marker lines misses every one. A trailing comment is also doing
+  the most work, because it labels a line that is otherwise indistinguishable from its neighbours: a
+  near-identical fixture, a state poke, the units on a bare constant, a coordinate convention, a
+  sentinel's decode.
+- **The proof that a sweep changed no code is an AST token-stream comparison against the base, per
+  file.** Three things it must handle or it lies. Exclude the JSDoc kind range, because TypeScript
+  models JSDoc as real syntax and a reworded doc block otherwise reads as a code change. Strip
+  Astro's markup comment form, which no comment counter inventories and the comparison reads as
+  text. And never build it on `ts.createScanner`, which mis-lexes regular-expression literals and
+  backticks and reports drift that is not there; `ts.createSourceFile` and a leaf walk are the shape
+  that works. Prove the verifier itself on fixtures before trusting it, including a changed
+  identifier, a changed string, a dropped type annotation, a deleted CSS declaration and an edited
+  Astro expression. Pure reindentation is its one acceptable blind spot, and a comment inside a
+  template literal is string data rather than a comment, so it is out of scope by construction.
+- **A keeper scan is a separate step, and token identity cannot do it.** Proving no code changed says
+  nothing about whether the sweep deleted the trap that cost someone a debugging session. Scan the
+  DELETED text for keeper signals (a measured number with a unit, a hand measurement, a named
+  browser, a ratified deviation, a byte-identity or golden claim) and check whether the fact survives
+  anywhere in its file. **CSS is the weakest ground for the whole doctrine**, because no unit test
+  pins why a rule is written the way it is, and a stated deviation from a ruled mockup is the most
+  dangerous single loss: without the line the next reader "fixes" the value back.
+- **Every deletion made on the ground that a test already pins the behaviour NAMES that test**, in a
+  ledger written while the grep is still open, because it cannot be reconstructed afterwards. The
+  requirement is not bookkeeping: the one confirmed keeper loss came from a group that did file a
+  ledger and named a test that turned out not to pin the behaviour at all.
+- **When a sweep and a feature branch collide, the FEATURE merges first.** Then merge main into the
+  sweep and re-run its token verifier before merging that. A comment-only branch absorbing feature
+  work is re-provable mechanically; a feature branch absorbing a sweep costs a full e2e run and can
+  silently revert a measured value on the strength of a comment cleanup.
+
 ## Retired rules, do not resurrect
 
-- **The nav-tax gotcha is retired.** The shared `BaseLayout` owns nav, footer and meta; adding a page
-  is one `.astro` file plus one `src/layouts/nav.ts` entry. The flat versus
+- **The nav-tax gotcha is retired.** The shared `BaseLayout` owns nav, footer and meta; adding a
+  READING page is one `.astro` file plus one `src/layouts/nav.ts` entry. That prices the reading-page
+  kind only; a working page that mounts a bundle owes a good deal more, and
+  `specs/site-architecture.md` writes both kinds out. The flat versus
   grouped question was ratified FLAT in #202's decision doc, modeled once as typed data, to be
   revisited only on a named trigger: an eighth nav-listed surface scheduled, three or more wrapped
   lines at 360px, or any item acquiring children.
@@ -329,12 +436,18 @@ comment. This is a convenience index, not their home.
   migration only. #201 closed 2026-07-23 and the agreement is discharged.
 - **The old comment rule** ("a local invariant belongs in a code comment at the line that breaks") was
   superseded at #378; see the doctrine above.
+- **Do not import this file into `CLAUDE.md`.** An `@` import line was tried and reverted the same
+  day: it loads the whole file into every session, against the documented target for how long a
+  `CLAUDE.md` should be, for a file only some sessions need. If it is ever revisited, trim this file
+  to what every session needs BEFORE importing it, rather than importing it and trimming after.
 
 ---
 
 *Companion to the roadmap Project (status, order, phase), to `CLAUDE.md` (process at the keyboard),
-to `specs/ui-design.md` (the look and feel), to `specs/development-workflow.md` (the order of
-operations), to `specs/settle-doctrine.md` (how an e2e wait is written, and what the harness
-environment does), and to `specs/flake-record.md` (the CI reds believed to be flakes). Rules change
-rarely; when one does,
-edit this file.*
+to `specs/ui-design.md` (the look and feel), to `specs/engine-invariants.md` (what the generator
+guarantees), to `specs/explorer-doctrine.md` (the living chart, its camera and its overlays), to
+`specs/region-and-voyage.md` (region sheets, level of detail, the voyage), to
+`specs/site-architecture.md` (how the site is authored and shipped), to
+`specs/development-workflow.md` (the order of operations), to `specs/settle-doctrine.md` (how an e2e
+wait is written, and what the harness environment does), and to `specs/flake-record.md` (the CI reds
+believed to be flakes). Rules change rarely; when one does, edit this file.*
