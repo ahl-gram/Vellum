@@ -42,7 +42,13 @@ const SEPARATORS = /\n|;|&&|\|\||\||\$\(|\(|\{\s|\s\}|\bthen\b|\bdo\b|\belse\b|\
 const PREFIX = /^(?:(?:env|command|time|exec|sudo|nohup|nice|builtin)\s+|[A-Za-z_][A-Za-z0-9_]*=\S*\s+)+/;
 const GIT_GLOBAL_WITH_VALUE = new Set(["-C", "-c", "--git-dir", "--work-tree", "--namespace", "--exec-path"]);
 const PERL_INPLACE = /^perl\b.*\s-[0a-zA-Z]*i\b/;
+const PERL_PIPE_PATTERN = /\bs\|[^|]*\\\|/;
 const GH_BODY_WRITE = /^gh (pr|issue) (create|edit|comment)\b/;
+const GH_API_CALL = /^gh api\b/;
+const GH_API_BARE_ITEM = /(?:^|\s)(?:https:\/\/[^\s/]+\/)?\/?repos\/[^\s/]+\/[^\s/]+\/(?:issues|pulls)\/\d+\/?(?=\s|$)/;
+// `gh api` has no short flag other than -f and -F starting with either letter, so those take no trailing boundary and catch the glued `-fbody=x`, while the long names keep `\b` so a longer flag cannot match one of them as a prefix.
+const GH_API_FIELD = /(?:^|\s)(?:-[fF]|--(?:raw-field|field|input)\b)/;
+const GH_API_METHOD = /(?:^|\s)(?:-X|--method)[=\s]*(\w+)/;
 const GH_PR_WRITE = /^gh pr (create|edit)\b/;
 const BODY_FILE = /(?:--body-file|-F)[=\s]+["']?([^\s"'=]+)(?=[\s"']|$)/g;
 const BODY_SUBSHELL = /\$\(\s*(?:cat\s+|<\s*)([^\s)"']+)\s*\)/g;
@@ -202,8 +208,30 @@ const PERL_REASON =
   "vellum-footguns: `perl -i` with a non-ASCII replacement re-encodes every existing non-ASCII byte in the file (· becomes " +
   "Â·) and only an unrelated test notices. Do the edit with a node script or a heredoc, then grep the file for Â.";
 
-const perlRefusal = (segment: string, command: string): Decision =>
-  PERL_INPLACE.test(segment) && (/[^\x00-\x7f]/.test(command) || command.includes("\\x{")) ? deny(PERL_REASON) : null;
+const PERL_PIPE_REASON =
+  "vellum-footguns: a `|`-delimited `s|...|...|` whose PATTERN carries `\\|` reads it as an escaped DELIMITER, so the pattern " +
+  "unescapes to an alternation with an EMPTY BRANCH, matches at offset zero of every input, and the replacement lands at the head " +
+  "of the file with the target untouched, exit 0. Measured 2026-09-14: the same shape under `+`, `!` and `#` delimiters leaves the " +
+  "input unchanged, so the pipe is the one delimiter that does this. Use another delimiter, or a node script or a heredoc.";
+
+const perlRefusal = (segment: string, command: string): Decision => {
+  if (!PERL_INPLACE.test(segment)) return null;
+  if (/[^\x00-\x7f]/.test(command) || command.includes("\\x{")) return deny(PERL_REASON);
+  return PERL_PIPE_PATTERN.test(command) ? deny(PERL_PIPE_REASON) : null;
+};
+
+const GH_API_WRITE_REASON =
+  "vellum-footguns: a data field (`-f`, `-F`, `--raw-field`, `--field`, `--input`) switches `gh api` to POST, and a POST to the " +
+  "bare issue or pull-request endpoint UPDATES that item rather than commenting on it: the fields you send overwrite what is " +
+  "there, nothing is created, and it exits 0 (#193, PR #550). Put `/comments` on the path, use `gh issue comment N --body-file " +
+  "<file>`, or say `-X PATCH` when editing the item IS the intent. The tell afterwards is a response `html_url` ending " +
+  "`/issues/N` instead of `#issuecomment-<id>`.";
+
+const ghApiWriteRefusal = (segment: string): Decision => {
+  if (!GH_API_CALL.test(segment) || !GH_API_BARE_ITEM.test(segment) || !GH_API_FIELD.test(segment)) return null;
+  const method = GH_API_METHOD.exec(segment)?.[1] ?? "";
+  return method === "" || method.toUpperCase() === "POST" ? deny(GH_API_WRITE_REASON) : null;
+};
 
 const readRelative = (name: string, cwd: string): string => {
   const expanded = name.startsWith("~/") ? join(process.env.HOME ?? "", name.slice(2)) : name;
@@ -306,7 +334,7 @@ const checkBash = async (payload: Payload, sessionId: string): Promise<Decision>
   const parts = commandSegments(command);
 
   for (const segment of parts) {
-    const refusal = stashRefusal(segment) ?? perlRefusal(segment, command);
+    const refusal = stashRefusal(segment) ?? perlRefusal(segment, command) ?? ghApiWriteRefusal(segment);
     if (refusal) return refusal;
     const [ghDeny, warning] = ghRefusal(segment, command, cwd);
     if (ghDeny) return ghDeny;
