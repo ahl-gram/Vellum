@@ -21,8 +21,12 @@ make an unqualified rule false. Read the surface, not just the rule.
 ## The engine boundary and the host contract
 
 - **The engine is host-agnostic and takes its elements from the host.** `createLivingChart` in
-  `src/site/living-chart/index.ts` is the only way in, construction only stores the references it is
-  given, and nothing under `src/site/living-chart/` may reach for an element by id.
+  `src/site/living-chart/index.ts` is the only way in, and construction only stores the references it
+  is given. **IDS ARE THE HOST'S NAMESPACE**: the engine never looks an element up in the document,
+  which is what `test/site/living-chart-boundary.test.ts` pins by refusing `getElementById` anywhere
+  under `src/site/living-chart/`. Inside an element the host handed in, the engine may address ids it
+  or the renderer owns, which is how the chronicle reaches the chart's own layer groups and how the
+  overlay reaches the card it assigned. The line is where the id comes from, not whether one appears.
 - **A page that mounts the engine owes the sheet and the class**: link `/living-chart.css` through
   `BaseLayout`'s `extraCss` prop (`src/layouts/BaseLayout.astro`), and put `class="living-chart"` on
   the chart mount it hands in. A page that skips either renders its overlays undressed. **The order
@@ -30,8 +34,6 @@ make an unqualified rule false. Read the surface, not just the rule.
   and `test/site/living-chart-boundary.test.ts` pins that by constructing against bare objects.
 - **Engine dressing is edited in `public/living-chart.css`, never in a host's own sheet.** The
   dressing keys on the mount class and never on a host's id.
-- **`#place-card` is an id selector on purpose**: `src/site/living-chart/place-overlay.ts` assigns
-  that id, so it is an engine name rather than a host name.
 - **A seam roster is DATA the guard imports, never a list the guard restates.** `HOST_HOOK_NAMES` in
   `src/site/shared/host-hooks.ts` is the source of truth and the seam map is typed against it, so
   the type checker rejects a name with no implementation and an implementation with no name. A
@@ -41,28 +43,21 @@ make an unqualified rule false. Read the surface, not just the rule.
   `LivingChartHost.scrubber` is optional and `src/site/living-chart/no-bar.ts` supplies the
   stand-ins, each typed as the real module's `ReturnType` alias so the type checker breaks that file
   when the real one grows a member.
-  - The split is instrument-silent and chart-live, and `exitAges` and `clearAges` are the
-    exceptions: both keep their chronicle and voyage teardowns, because a blanket no-op leaks the
-    voyage overlay and the verso ink once per redraw.
-  - The composed entries in `src/site/living-chart/index.ts` stay as they are. The no-op belongs to
-    the instrument, not to the composed entry; making the entry inert deletes chart-side capability
-    from the very hosts a bar-less mode serves.
-  - A stand-in builds the REAL work and skips only the DOM. A hollow sink type-checks and silently
-    removes the one announcement a bar-less host can still make.
+  - **The split is instrument-silent and chart-live**, so a stand-in builds the REAL work and skips
+    only the DOM, and the teardown paths keep their chronicle and voyage work. A blanket no-op leaks
+    the voyage overlay and the verso ink once per redraw; a hollow sink type-checks and silently
+    removes the one announcement a bar-less host can still make. The no-op belongs to the
+    INSTRUMENT, never to the composed entry, which still serves the chart.
   - **A host that DOES supply a scrubber declares the intersection type** (`LivingChartHost & {
     scrubber: ScrubberRefs }`, as `src/site/reading-frame/index.ts` does), or dropping its scrubber
     block type-checks clean and silently takes the stand-ins.
 - **The instrument-less arm-at-rest entry is `rearmVoyage`.** `applyVoyage` is the wrong static
   entry: it posts to the status line and hangs the settle.
-- **A component written for a host-driven path stays inert over engine-written rows.** The engine
-  owns its own path; wiring the component over it puts two hands on one switch and detaches the
-  nodes the voyage holds. This has been "fixed" by reviewers more than once.
 - **A room's stage binds its world in LOCKSTEP with the last draw result**, never only in a
   droppable arm callback, or one world's plate paints over another's chart.
 - **The journal's day count is GRID-space**, so render width never moves a day, and each day is the
   later of the computed day and one past its predecessor (`nextDay` in `src/world/voyage-log.ts`).
-  The chronicler's heading row is furniture and is never inked, so an every-row-inked assertion
-  excludes it.
+  The chronicler's heading row is furniture and is never inked.
 - **What may be mounted inside the chart mount:**
   - **Chart furniture is CSS-drawn and carries no inline `<svg>` of its own.** A suite reads the
     committed survey as the last `#map .region-inset svg` and hashes it, so anything mounted there
@@ -146,17 +141,17 @@ make an unqualified rule false. Read the surface, not just the rule.
 - **The camera is world-relative at every band and NEVER rebases.** A camera rebased to identity at
   each committed band leaves pan dead at that band, because the reader's transform no longer
   addresses the world.
-- **A rebase writes the stored transform directly with no library entry point, so it interrupts the
-  selection first**, or an in-flight camera transition's remaining frames stomp the fresh home.
 - **The draw rebases at its top**, which covers the sea-level and coast drags for free; the flip and
-  the instrument arms reset explicitly.
+  the instrument arms reset explicitly. A rebase writes the stored transform directly with no library
+  entry point, so it INTERRUPTS the selection first, or an in-flight camera transition's remaining
+  frames stomp the fresh home.
 - **The address is a photograph.** A restore draws, arms the addressed instrument, then applies the
   camera, and never fires the interactive arming ceremonies. The camera is written only while
   zoomed, and a deep-linked camera is strictly ONE-SHOT, cleared as it is applied, because the draw
   rebases every draw and a live camera would re-frame every one. Record the world sheet BEFORE
-  applying it, so the settle it triggers redrafts over the same base world.
-- **The address grammar is pure** in `src/site/explorer/address.ts`. Two keys at once are ignored
-  whole, and a forwarded hash is passed verbatim and never re-serialized.
+  applying it, so the settle it triggers redrafts over the same base world. The grammar itself is
+  pure in `src/site/explorer/address.ts`: two keys at once are ignored whole, and a forwarded hash is
+  passed verbatim and never re-serialized.
 - **Backface rules target the CLIP BOX, not the transformed mount**, whose overflow and default
   transform style flatten it. A backface bleed is invisible to an end-state assertion.
 
@@ -190,9 +185,8 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   look far apart, so a hover near one town rings its neighbour.
 - **A published nudge rides INSIDE the counter-scaled translate.** Placed ahead of the division it
   composes with the live scale, which is exactly right at rest and wrong by the depth factor under
-  magnification. The guard COUNTS the translates and scales per variant rather than pattern-matching,
-  because a second leading translate satisfies any "scale then translate" regex while restoring the
-  bug.
+  magnification. The guard matches the leading counter-scale AND COUNTS the translates and scales per
+  variant, because the match alone passes on a second leading translate that restores the bug.
 - **A card is measured AFTER the counter-scale is published, never before**, or a fresh card is
   measured by the depth factor too large.
 
@@ -217,27 +211,26 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   on the next timer tick, so an unguarded end or interrupt handler clears state the newer transition
   just set. Guard with a monotonic generation counter, the `drawGen` idiom in
   `src/site/prospect/app.ts`.
-- **A place card's width comes from the side it is anchored on**, not from a maximum width. The
-  engine publishes the anchor fractions and the SHEET owns the anchor side; a flipped card anchors
-  from the far edge.
-- **The flip stays pure and the clamp is the host's seam.** The side is chosen from chart space, and
-  a shown card is measured and nudged back inside a host-injected box, which a host without one
-  omits. A card larger than the box keeps its LEADING edge, because clamping fits a card and does not
-  shrink one. The pure half is `clampOffset` in `src/render/place-card.ts`.
+- **A place card's width comes from the side it is anchored on**, not from a maximum width, so the
+  engine publishes the anchor fractions and the SHEET owns the anchor side. **The flip stays pure and
+  the clamp is the host's seam**: the side is chosen from chart space, and a shown card is measured
+  and nudged back inside a host-injected box, which a host without one omits. A card larger than the
+  box keeps its LEADING edge, because clamping fits a card and does not shrink one. The pure half is
+  `clampOffset` in `src/render/place-card.ts`.
 - **A place link is world-sheet only.** A region inset renumbers its places and its smallest tier has
   no world index, so an inset card is deliberately linkless.
-- **A host that arms its instrument every draw has no live place cards**, so any card-side feature is
-  Explorer-only by construction. The builder is called on both hosts, so the call site does not say
-  this and the suppression rule does.
-- **Place cards stay live while the resting track is inked.** A card is chart furniture, not an
-  instrument.
+- **A card is chart furniture, not an instrument**, so it stays live while the resting track is
+  inked. But **a host that arms its instrument every draw has no live place cards**, which makes any
+  card-side feature Explorer-only by construction. The builder is called on both hosts, so the call
+  site says the opposite and the suppression rule is the one to read.
 - **The verso ghost is a snapshot of the chart as the WORKER drew it, never as the client is
   manipulating it.** Render options reach the back face; client DOM overlays do not. The ghost is
   glyph-agnostic by decision: the ink the surveyor laid on the recto bleeds through, the survey
   moving over the world does not.
   - **Never rebuild the ghost blob to refresh an overlay.** That is an object-URL leak per redraw.
-    Write attributes on a sibling node instead. `renderVerso` in `src/site/explorer/verso.ts` is the
-    only place allowed to churn an object URL, and it revokes the prior one.
+    Write attributes on a sibling node instead. **The ghost's url has exactly one owner**,
+    `renderVerso` in `src/site/explorer/verso.ts`, which revokes the prior one as it mints the next.
+    Other surfaces mint their own blobs; this rule is about the ghost.
   - **The verso repaints past the wipe.** `renderVerso` replaces the children on every draw, so any
     verso overlay is wiped with them and must be repainted on the far side of that wipe.
   - **The ghost and its overlay come from the SAME draw.** A quiet mid-drag redraw does not rebuild
@@ -309,10 +302,11 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
 - **State which guarantee a new level-of-detail layer enforces, per-link or transitive.** The
   guarantees are not interchangeable and `rejectBridges` in `src/terrain/detail-guarantees.ts`
   partitions against each ancestor's own cells rather than against what the chain floors to.
-- **The promise, in its CORRECTED form**: rejection carries the world chart as an immovable field, so
-  no cell the world charts as land is ever taken. The withdrawn form, that no landmass loses all its
-  land inside a window, is NOT the promise. Some landmasses do lose every cell inside a window, at a
-  rate the undetailed arm also shows.
+- **The promise is that rejection carries the world chart as an immovable field**, so no cell the
+  world charts as land is ever taken. **It is not the stronger claim it is often read as**: a
+  landmass may lose every cell inside a window, at a rate the undetailed arm also shows, so a
+  guarantee written as "no landmass loses all its land in a window" is false and must not be
+  asserted.
 - **Hold ONE chain cache across region jobs** (`src/site/explorer/region-chain-cache.ts`), the way
   the base world is held (`worldFor` in `src/site/explorer/world-cache.ts`), because the chain
   builder defaults to a fresh cache per top-level call and without one a pan costs what the first
@@ -320,9 +314,7 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   key, misses, and never serves a stale waterline. A chain cache is transparent by construction, so
   no byte comparison can guard it.
 - **The redraft is an INSET mounted inside the chart mount**, aligned so its plot area lands on the
-  window it re-surveys. It is not a sheet replacement. Zoom is tier-ordered both ways: band by band,
-  swapped in place on the way out, and only the final region-to-world hop drops the inset with no
-  worker round trip.
+  window it re-surveys. It is not a sheet replacement.
 - **What a finer survey reveals is LABELS.** A region sheet's settlement set is a crop of the world's
   until the smallest tier appears, so a reveal ceremony keys on placed labels and never on place
   presence.
@@ -382,8 +374,10 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
     move.
   - `SAIL_WHEN_ROAD_EXCEEDS` (`src/render/voyage-route.ts`) is capped from ABOVE for the same reason,
     and its declaration carries the cap.
-  - The sweep ceiling never binds, so the linear pace knob is the only pacing constant that reaches
-    the screen (`src/render/voyage-geometry.ts`).
+  - The sweep ceiling is a safety valve that has never bitten, so tune the PACE rather than raise it.
+    The pace is not one constant: `legDurations` in `src/render/voyage-geometry.ts` composes the
+    linear knob, the exponent and the per-leg floor in one expression, and all three reach the
+    screen.
   - `MAX_TILT` (`src/render/voyage-geometry.ts`) is the one constant with NO metric. It is a ruled
     look rather than a tail clamp, and moving it re-pins a bound in the voyage e2e that
     `test/repo/constant-contracts.test.ts` holds to it.

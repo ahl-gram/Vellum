@@ -30,10 +30,9 @@ chart, the golden, a regen, a seed, or the order of work**, `specs/ui-design.md`
 whose deliverable is an appearance, `specs/explorer-doctrine.md` before any work on the Explorer, a
 region sheet, the voyage, or a chart camera or gesture, `specs/development-workflow.md` before
 starting a sub or an epic, since its early steps are the ones a session cannot go back and take
-later, and
-`specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe. None of
-them is summarized here; where this file and a spec disagree, the spec is right. The ruled pixels
-those specs were decided from are archived under `design/`, one
+later, and `specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe.
+None of them is summarized here; where this file and a spec disagree, the spec is right. The ruled
+pixels those specs were decided from are archived under `design/`, one
 directory per design round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a
 sitting).
 
