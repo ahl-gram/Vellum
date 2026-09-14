@@ -288,13 +288,11 @@ world identity. The loser rebases, re-pins, regenerates, then re-runs the regen 
 **Current membership: `{#113}`** (more seats on empty islands, so realm counts can exceed five). It
 is the only member, so the rule has nothing to exclude against today.
 
-**#122 does not join this set, on the posture it is specced to take**, which as of 2026-09-14 is
-unbuilt in every part. Its marks would sit behind an opt-in render option, byte-identical when off,
-and the former-frontier half its 2026-08-16 scope brings from #49 sits behind that same option. Only
-its new field on `HistoricalEvent` (`src/society/history.ts`) is generation side, and #122 has that
-additive and draw-free. Built to that spec it moves neither the committed charts nor world identity.
-The proof is #122's acceptance: golden green on the pinned checksum, annals-off byte-identical, the
-drift guard green. **Re-judge the tier if any part of that fails.**
+**#122 does not join this set, on the posture it is specced to take**: an opt-in `RenderOptions`
+member (`src/render/map-renderer.ts`) off by default, plus an additive, draw-free field on
+`HistoricalEvent` (`src/society/history.ts`). Built so, it moves neither the committed charts nor
+world identity. **Re-judge the tier unless the golden holds on the pinned checksum, annals-off is
+byte-identical, and the drift guard is green.**
 
 ## Scheduling rules
 
