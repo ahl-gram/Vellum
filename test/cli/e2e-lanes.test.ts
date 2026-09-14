@@ -4,11 +4,13 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   E2E_LANES,
+  LANE_FLAG,
   ambientSelectionRefusal,
   laneCheckTally,
   laneChildEnv,
   laneLineIsSkip,
   laneOutcome,
+  resolveLaneSelection,
   splitLaneChunk,
 } from "../../src/cli/e2e-lanes.ts";
 import type { LaneResult } from "../../src/cli/e2e-lanes.ts";
@@ -142,6 +144,72 @@ test("a lane's child env carries its own suites and ports, and inherits the rest
   assert.notEqual(envs[0][E2E_PORT_VAR], envs[1][E2E_PORT_VAR], "both lanes were handed the same port");
   assert.notEqual(envs[0][E2E_DPORT_VAR], envs[1][E2E_DPORT_VAR], "both lanes were handed the same debug port");
   assert.notEqual(envs[0][E2E_SUITES_VAR], envs[1][E2E_SUITES_VAR], "both lanes were handed the same suites");
+});
+
+test("--lane names one lane and no flag names every lane", () => {
+  assert.deepEqual(
+    resolveLaneSelection([]).map((l) => l.name),
+    E2E_LANES.map((l) => l.name),
+    "a driver run with no flag no longer runs every lane",
+  );
+  for (const lane of E2E_LANES) {
+    assert.deepEqual(resolveLaneSelection([LANE_FLAG, lane.name]).map((l) => l.name), [lane.name]);
+    assert.deepEqual(resolveLaneSelection([`${LANE_FLAG}=${lane.name}`]).map((l) => l.name), [lane.name]);
+  }
+  // The lane OBJECT, not a name: a selection that rebuilt a lane from its name would hand the child the wrong port and the wrong suites.
+  const picked = resolveLaneSelection([LANE_FLAG, E2E_LANES[1]!.name])[0]!;
+  assert.equal(picked, E2E_LANES[1], "the selected lane is not the roster's own entry");
+});
+
+test("a --lane the roster does not carry is refused, never widened to every lane", () => {
+  for (const bad of ["Q", "a", "A,B", "AB"]) {
+    assert.throws(
+      () => resolveLaneSelection([LANE_FLAG, bad]),
+      /names a lane that does not exist/,
+      `${LANE_FLAG} ${bad} was accepted, so a misspelling runs some other amount of the suite`,
+    );
+  }
+  for (const empty of [[LANE_FLAG], [LANE_FLAG, ""], [`${LANE_FLAG}=`]]) {
+    assert.throws(
+      () => resolveLaneSelection(empty),
+      /was given no lane name/,
+      `${JSON.stringify(empty)} ran instead of refusing`,
+    );
+  }
+  assert.throws(() => resolveLaneSelection(["--lanes", "A"]), /does not take/, "an unknown argument was ignored");
+  assert.throws(
+    () => resolveLaneSelection([LANE_FLAG, "A", LANE_FLAG, "B"]),
+    /more than once/,
+    "a repeated flag silently kept one of the two lanes",
+  );
+});
+
+test("one selected lane passes on its own, and its line never reads as the whole suite", () => {
+  const lane = E2E_LANES[0]!;
+  const alone = laneOutcome([result({ name: lane.name, tally: { passed: 284, total: 284 } })], [lane]);
+  assert.equal(alone.ok, true, "a one-lane job that passed must exit 0, or no matrix shard can ever be green");
+  assert.match(alone.line, new RegExp(`LANE ${lane.name} PASS`), "the line does not say which lane passed");
+  assert.match(
+    alone.line,
+    new RegExp(`1 of ${E2E_LANES.length} lanes`),
+    "the line does not say how much of the suite this run was",
+  );
+  assert.doesNotMatch(alone.line, /ALL LANES PASS/, "one lane reads as every lane");
+  assert.match(alone.line, /284\/284 checks/, "the lane's own tally is dropped");
+});
+
+test("the only selected lane failing still fails, and the line names that lane", () => {
+  const lane = E2E_LANES[1]!;
+  const red = laneOutcome([result({ name: lane.name, code: 1 })], [lane]);
+  assert.equal(red.ok, false, "a failed lane must fail its own job");
+  assert.match(red.line, new RegExp(`LANE ${lane.name} FAILED`), "the line does not name the failing lane");
+});
+
+test("a SELECTED lane that never reported still fails, so a driver that lost one cannot pass", () => {
+  const partial = laneOutcome([result({ name: E2E_LANES[0]!.name })], E2E_LANES);
+  assert.equal(partial.ok, false, "a short result set passed against its own selection");
+  assert.match(partial.line, /never reported/);
+  assert.match(partial.line, new RegExp(`lane .*${E2E_LANES[1]!.name}`), "the line does not name the absent lane");
 });
 
 test("an ambient suite selection is refused, since the lanes ARE the selection", () => {

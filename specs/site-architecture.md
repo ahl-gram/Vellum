@@ -61,7 +61,9 @@ symbol and path so the reader goes and looks.
   `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
   (`src/cli/e2e-suites.ts`), the runner's `SUITES` map (`scripts/e2e-explorer.mjs`), `E2E_LANES`
   (`src/cli/e2e-lanes.ts`), `MEASURED_SECONDS` (`test/cli/e2e-lanes.test.ts`) and the containment
-  sweep in `test/repo/e2e-tiers.test.ts`.
+  sweep in `test/repo/e2e-tiers.test.ts`. A new LANE joins two more: `ci.yml`'s job matrix, where
+  `test/repo/e2e-tiers.test.ts` reds if the matrix and `E2E_LANES` disagree, and `main`'s required
+  checks, which no test can see at all.
 - **The shell dresses once.** Every shared shell rule lives in `BaseLayout.astro`'s
   `<style is:global>` block, and a page's own sheet carries page-specific rules only.
 - **Sheet order is a contract.** The layout links the root sheets, then the shared sheets a page
@@ -248,14 +250,17 @@ precisely, because a token that falls outside it looks identical at the point of
   strips types from `src/*.ts` on demand, which is how a suite computes an expected value in-browser
   and dodges cross-engine float drift. It is e2e only; the deploy artifact carries none of it, and a
   test that proves the artifact carries none of it exists.
-- **CI is two jobs in parallel on the same triggers**, one running the typecheck and the unit suite
-  and the other building and running the browser lanes. A pull request therefore waits for the
-  LONGER half, not the sum, and the duplicated install is the price of that. The browser lanes run
-  one runner per lane on its own port INSIDE one job, so a pull request keeps every check without a
-  matrix.
-- **Required checks are matched by JOB NAME.** Renaming a job in the workflow looks cosmetic and
-  blocks EVERY merge, because the required context never reports again until branch protection is
-  updated to match. Rename one only as a deliberate two-part change.
+- **CI is parallel jobs on the same triggers**, one running the typecheck and the unit suite, and one
+  per browser lane, each of which builds `dist/` and runs that single lane on a runner of its own. A
+  pull request therefore waits for the LONGEST job, not the sum, and the repeated install and build
+  are the price of that. Every shard rebuilds rather than downloading a shared artifact, and prints a
+  hash of its own `dist/` so a disagreement between two shards is visible instead of silent.
+- **Required checks are matched by JOB NAME, and that roster lives outside the tree.** Renaming a job
+  in the workflow looks cosmetic and blocks EVERY merge, because the required context never reports
+  again until branch protection is updated to match; ADDING a job that ought to be required is the
+  same two-part change with the failure inverted, since the new job is simply not required and
+  nothing in the repo can red. Nothing here can read branch protection, so both directions are
+  deliberate, and the pull request that changes the job list names the exact check names in its body.
 - **Deploy is a workflow, not a branch.** Pages builds from `.github/workflows/deploy.yml`, which
   installs, runs the build and publishes the built tree on a push to `main` or on demand. What is
   committed rather than rebuilt is the rulebook's rule and is not restated here.

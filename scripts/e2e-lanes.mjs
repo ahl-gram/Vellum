@@ -1,21 +1,30 @@
-// e2e lane driver (npm run test:e2e:lanes): spawns one e2e-explorer per lane on its own port, streams both outputs line-prefixed, and fails if either lane does (two processes in ONE CI job, no artifact plumbing). .mjs because scripts/ is outside tsconfig's include, so a .ts here would be unchecked; every decision it makes lives in the unit-tested src/cli/e2e-lanes.ts.
+// e2e lane driver (npm run test:e2e:lanes): spawns one e2e-explorer per SELECTED lane on its own port, streams the outputs line-prefixed, and fails if any selected lane does. No argument runs every lane, which is the local full run; `--lane A` runs exactly one, which is what each CI job does since #623 put one lane on each runner. .mjs because scripts/ is outside tsconfig's include, so a .ts here would be unchecked; every decision it makes lives in the unit-tested src/cli/e2e-lanes.ts.
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { findBrowser } from "../src/cli/raster.ts";
 import { browserlessAction } from "../src/cli/browser-policy.ts";
 import {
-  E2E_LANES,
   ambientSelectionRefusal,
   laneCheckTally,
   laneChildEnv,
   laneLineIsSkip,
   laneOutcome,
+  resolveLaneSelection,
   splitLaneChunk,
 } from "../src/cli/e2e-lanes.ts";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const RUNNER = join(HERE, "e2e-explorer.mjs");
+
+// Resolved above every probe below it, the way the ambient refusal already sits above findBrowser(): a typo resolved after the probe prints SKIP and exits 0 on a browserless machine, so the typo never surfaces.
+let SELECTED;
+try {
+  SELECTED = resolveLaneSelection(process.argv.slice(2));
+} catch (err) {
+  console.error(`FAIL: ${err.message}`);
+  process.exit(1);
+}
 
 const refusal = ambientSelectionRefusal(process.env);
 if (refusal) {
@@ -81,13 +90,13 @@ function runLane(lane) {
   });
 }
 
-for (const lane of E2E_LANES) {
+for (const lane of SELECTED) {
   console.log(
     `lane ${lane.name}: ${lane.suites.length} suites on port ${lane.port}/${lane.dport}: ${lane.suites.join(", ")}`,
   );
 }
 
-const results = await Promise.all(E2E_LANES.map(runLane));
-const outcome = laneOutcome(results);
+const results = await Promise.all(SELECTED.map(runLane));
+const outcome = laneOutcome(results, SELECTED);
 console.log(`\n${outcome.line}`);
 process.exit(outcome.ok ? 0 : 1);
