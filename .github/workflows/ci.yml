@@ -33,10 +33,8 @@ jobs:
     name: build & e2e lane ${{ matrix.lane }}
     runs-on: ubuntu-latest
     strategy:
-      # A red lane must not cancel the other one. Merge safety never needed this (a cancelled job is not a pass either), but reading BOTH lanes' verdicts after a red does, which is what #381's retreat ladder asks for.
       fail-fast: false
       matrix:
-        # Lane NAMES only, never their suite lists: E2E_LANES in src/cli/e2e-lanes.ts stays the one roster, and test/repo/e2e-tiers.test.ts reds if this list and that roster disagree.
         lane: ["A", "B"]
     # A hung lane is the one failure the outcome rule cannot catch, and this cap kills a hang rather than budgeting a run, so it sits at about twice the worst real one; re-measured 2026-09-14 over 6 runs of this shape, one lane per runner, worst lane JOB 10m05s and worst e2e step 9m16s (the 13m14s it carried before was two lanes sharing four cores).
     timeout-minutes: 20
@@ -53,9 +51,6 @@ jobs:
       # bundles, showcases), then `astro build` assembles dist/.
       - name: Build site into dist/
         run: npm run build
-      # Every shard rebuilds dist/ rather than downloading one (#623, ruled 2026-09-14), so the hash
-      # here is what makes a disagreement between the shards visible instead of silent. nproc and
-      # free print the runner shape the matrix is bought for, which nothing here had ever measured.
       - name: Runner shape and dist/ hash
         run: |
           echo "cores: $(nproc)"

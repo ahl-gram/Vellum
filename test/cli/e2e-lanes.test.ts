@@ -204,7 +204,6 @@ test("the only selected lane failing still fails, and the line names that lane",
   assert.match(red.line, new RegExp(`LANE ${lane.name} FAILED`), "the line does not name the failing lane");
 });
 
-// EVERY line a one-lane run can print, not just the one the pass test reads: a skip exits 0 too, so a skipped shard whose line is indistinguishable from a full run's is the same defect wearing the other branch.
 test("every line a one-lane run can print says how much of the suite it was", () => {
   const lane = E2E_LANES[0]!;
   const alone = (over: Partial<LaneResult>) => laneOutcome([result({ name: lane.name, ...over })], [lane]).line;
@@ -244,10 +243,10 @@ test("the split is balanced against measured cost, not check counts", () => {
   const total = laneSeconds(E2E_SUITE_ORDER);
   for (const lane of E2E_LANES) {
     const share = laneSeconds(lane.suites) / total;
-    // The rejected naive seam puts a lane at 65%, so the ceiling sits below it.
+    // Since #623 put one job on each runner the wall clock IS max(A, B), so an unbalanced pair wastes the parallelism it was split for and balance matters more here than it did inside one job, not less (Alex, 2026-09-14).
     assert.ok(
       share <= 0.6,
-      `lane ${lane.name} is ${(share * 100).toFixed(1)}% of measured serial cost, so the lanes buy little`,
+      `lane ${lane.name} is ${(share * 100).toFixed(1)}% of measured serial cost, so that shard alone sets the wall clock while the other idles`,
     );
   }
 });
@@ -282,6 +281,18 @@ test("a harness error is reported as its own category, not as a failed check", (
 test("no lanes at all fails instead of reporting a vacuous pass", () => {
   assert.equal(laneOutcome([]).ok, false);
   assert.match(laneOutcome([]).line, /FAIL/);
+});
+
+test("a selection of no lanes fails, and a lane nobody selected cannot report into the run", () => {
+  const nothingAsked = laneOutcome([result({ name: E2E_LANES[0]!.name })], []);
+  assert.equal(nothingAsked.ok, false, "a run asked for no lanes at all reported a pass");
+  assert.match(nothingAsked.line, /FAIL/);
+  assert.doesNotMatch(nothingAsked.line, /0 of/, "the line offers a count where it should refuse the run");
+
+  const stray = laneOutcome(everyLane(), [E2E_LANES[1]!]);
+  assert.equal(stray.ok, false, "a lane outside the selection reported into the run and it passed anyway");
+  assert.match(stray.line, /never selected/, "the line does not say the run is not the one that was asked for");
+  assert.match(stray.line, new RegExp(E2E_LANES[0]!.name), "the line does not name the lane that was not asked for");
 });
 
 test("a lane that never reported fails the run, so half the suite cannot pass as all of it", () => {

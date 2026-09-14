@@ -177,7 +177,17 @@ export function laneOutcome(
   selected: readonly E2eLane[] = E2E_LANES,
 ): E2eOutcome {
   if (results.length === 0) return { ok: false, line: "FAIL: no lanes ran, so this run proves nothing." };
+  if (selected.length === 0) {
+    return { ok: false, line: "FAIL: no lanes were selected, so this run was asked to prove nothing." };
+  }
   const reported = new Set(results.map((r) => r.name));
+  const stray = results.filter((r) => !selected.some((lane) => lane.name === r.name)).map((r) => r.name);
+  if (stray.length > 0) {
+    return {
+      ok: false,
+      line: `FAIL: lane ${stray.join(" and ")} reported but was never selected, so this is not the run that was asked for and its verdict belongs to some other job.`,
+    };
+  }
   const absent = selected.filter((lane) => !reported.has(lane.name)).map((l) => l.name);
   if (absent.length > 0) {
     return {

@@ -20,6 +20,7 @@ const RUNNER_CODE = uncommented(RUNNER);
 // YAML's own comment leader, for the same reason: this pass rewrote ci.yml's prose, and a sentence about fail-fast would otherwise satisfy the guard that fail-fast is SET.
 const ciUncommented = (lines: readonly string[]) => lines.filter((l) => !l.trim().startsWith("#")).join("\n");
 // A ci.yml job block is a two-space key under `jobs:`, read to the next one. Blind spot, named because a scanner cannot enumerate its own: a workflow indented any other way yields NO blocks, which the job-count anchor below turns into a red rather than a silent pass.
+// Second blind spot, same direction: the continue-on-error refusal reads the literal `true` alone, so `${{ }}`, `True` and `yes` slip past it, which costs a miss and never a false red, and the job-count anchor still forces a reader through this sweep whenever a job is added.
 const ciJobBlocks = (): ReadonlyArray<{ id: string; lines: readonly string[] }> => {
   const lines = CI.split("\n");
   const at = lines.indexOf("jobs:");
@@ -112,7 +113,6 @@ test("the smoke tier stays materially cheaper than the full suite", () => {
   }
 });
 
-// The NAME says what it enforces and no more: since #623 ci.yml does narrow each job to one lane, deliberately and by flag, and what stays forbidden is a suite selection, which narrows a lane from underneath.
 test("ci.yml runs the lane driver, and never sets a suite selection under it", () => {
   assert.match(CI, /run: npm run test:e2e:lanes/, "ci.yml no longer runs the lane driver");
   // Presence of the driver is not enough: a VELLUM_E2E_SUITES line beside it still narrows coverage.
@@ -124,7 +124,6 @@ test("ci.yml runs the lane driver, and never sets a suite selection under it", (
   assert.doesNotMatch(CI, /run: npm run test:e2e\s*$/m, "ci.yml still runs the serial single-lane e2e too");
 });
 
-// EVERY job, not the first one a whole-file match happens to land on: that non-global match read check-and-test's number while claiming to read the e2e job's, so re-pointing it at the e2e job alone would have swapped which one was covered rather than covering both (#623).
 test("every ci.yml job is bounded, so no hung job can hold a runner for hours", () => {
   const jobs = ciJobBlocks();
   assert.equal(jobs.length, 2, `this sweep read ${jobs.length} job blocks in ci.yml, so it is covering the wrong part of the file; a job added here joins the sweep deliberately`);
@@ -161,7 +160,6 @@ test("ci.yml runs one job per lane, and its matrix is exactly E2E_LANES", () => 
     /run: npm run test:e2e:lanes -- --lane \$\{\{ matrix\.lane \}\}/,
     "the e2e step does not pass its matrix lane to the driver, so each job runs every lane",
   );
-  // Anchored to the JOB's own four-space line: a step carries a name: field too, so an unanchored match is satisfied by the step name while both jobs still report one check (prover, 2026-09-14).
   assert.match(
     body,
     /^ {4}name: build & e2e lane \$\{\{ matrix\.lane \}\}$/m,
