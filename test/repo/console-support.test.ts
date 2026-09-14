@@ -13,6 +13,12 @@ const E2E = resolve(REPO, "scripts", "e2e");
 // Every fixture below is a literal rather than a loop over the exported list: a list-driven case deletes itself along with the behaviour when an entry is removed, so it would pass on an empty list and could never red on the defect this file exists for (#613).
 const H6_MEASURED =
   "EXCEPTION: InvalidStateError: Transition was aborted because of invalid state. ViewTransition opt-in disabled";
+const SKIPPED_WITH_REASON = "EXCEPTION: AbortError: Transition was skipped. Document hidden";
+const SKIPPED_BARE = "EXCEPTION: AbortError: Transition was skipped";
+const UNSEEN_REASON = "EXCEPTION: InvalidStateError: Transition was aborted because of invalid state. Navigation aborted";
+const TIMEOUT_OPENING =
+  "EXCEPTION: TimeoutError: Transition was aborted because of timeout in DOM update. DOM update timed out";
+const DROPPED = [H6_MEASURED, SKIPPED_WITH_REASON, SKIPPED_BARE, UNSEEN_REASON, TIMEOUT_OPENING];
 
 test("the cancellation measured on this browser is dropped: #613's whole point, and the arm the tree did not have", () => {
   assert.deepEqual(
@@ -23,20 +29,29 @@ test("the cancellation measured on this browser is dropped: #613's whole point, 
 });
 
 test("the family the filter already knew is still dropped, with a reason and bare", () => {
-  const withReason = "EXCEPTION: AbortError: Transition was skipped. Document hidden";
-  const bare = "EXCEPTION: AbortError: Transition was skipped";
-  assert.deepEqual(dropExpectedCancellations([withReason, bare]), [], "the arm that predates #613 stopped biting");
+  assert.deepEqual(
+    dropExpectedCancellations([SKIPPED_WITH_REASON, SKIPPED_BARE]),
+    [],
+    "the arm that predates #613 stopped biting",
+  );
 });
 
 test("a reason NOBODY has seen yet, under an opening we have, is dropped too: the filter is fitted to the opening, not to one whole sentence", () => {
   // The defect this file guards is #613 recurring one level down: the browser composes the message as one of three openings plus one of eighteen reasons, so an entry fitted to opening-plus-reason leaves seventeen siblings to red a green check.
-  const unseen = "EXCEPTION: InvalidStateError: Transition was aborted because of invalid state. Navigation aborted";
-  const timeout = "EXCEPTION: TimeoutError: Transition was aborted because of timeout in DOM update. DOM update timed out";
   assert.deepEqual(
-    dropExpectedCancellations([unseen, timeout]),
+    dropExpectedCancellations([UNSEEN_REASON, TIMEOUT_OPENING]),
     [],
     "an unseen reason under a known opening counted as an app error, which is exactly how #613 happened",
   );
+});
+
+test("every opening in the roster is exercised by a fixture above, so the roster cannot GROW past its guard (prover round 1 hole)", () => {
+  for (const prefix of CANCELLATION_PREFIXES) {
+    assert.ok(
+      DROPPED.some((e) => e.includes(prefix)),
+      `${prefix} was added to CANCELLATION_PREFIXES with no literal fixture exercising it, so nothing here would red if it stopped being dropped`,
+    );
+  }
 });
 
 test("a reason that names OUR OWN stylesheet is KEPT, under both openings: the filter may not hide a defect of ours", () => {
@@ -90,4 +105,9 @@ test("no suite carries a cancellation opening of its own: one roster, swept from
   }
   const adopters = files.filter((f) => src(f).includes('from "./console-support.mjs"'));
   assert.ok(adopters.length > 0, "no file imports console-support at all, so the sweep above is reading an empty claim");
+  // Prover round 1 hole: the at-least-one adopter check above is satisfied by any other suite, so deleting ONE file's import while keeping its call red nothing, and that file throws a ReferenceError the first time its check runs.
+  const uncited = files.filter(
+    (f) => f !== "console-support.mjs" && src(f).includes("dropExpectedCancellations(") && !src(f).includes('from "./console-support.mjs"'),
+  );
+  assert.deepEqual(uncited, [], `${uncited.join(", ")} call the shared drop without importing it, which is a ReferenceError the first time that check runs`);
 });
