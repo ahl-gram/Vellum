@@ -164,7 +164,6 @@ attribution required.
 
 ## For contributors
 
-The house rules live in `specs/`: what the generator guarantees about a world,
-how the site is authored and shipped, the look and feel, the order of operations
-from a filed issue to a pull request, and the sequencing rules themselves. They
-are normative and kept current, which is more than a summary here could promise.
+The house rules live in [`specs/`](specs/), one file per area and every one of
+them normative. Read them rather than a summary here, since the summary is the
+thing that goes stale.
