@@ -136,7 +136,8 @@ gh api repos/ahl-gram/Vellum/issues/N/comments   # decisions, ratifications, re-
 
 **`gh issue view N` silently returns EMPTY for some issues here** (exit 0, no output), which is why
 both are the `api` form. **The rulebook is not an issue at all**: it is `specs/rulebook.md`, and #193
-is a pointer whose comments are history. **Remind Alex of any open decision and get his call before implementing it**, and **run
+is a pointer whose comments are history. **Remind Alex of any open decision and get his call before
+implementing it**, and **run
 `vellum-spec-recon` at the start of any sub or epic**: it verifies every cited path, symbol, test name
 and count with a command and returns a CURRENT / STALE / UNVERIFIABLE ledger plus what awaits Alex.
 
@@ -148,7 +149,7 @@ that joins a roster, anything that can move a chart or the golden, or a PR body.
 specs are the narrative; the skill is the same doctrine as a checklist read at the moment it applies,
 which is the difference that stopped the same defects reaching PR after PR. Its
 `hooks/footgun-gate.ts`, wired in `.claude/settings.json`, puts the matching gate in front of you and
-refuses the mechanical never-list items outright.
+refuses the mechanical never-list items outright, the ones `hooks/README.md` enumerates.
 
 **The order of operations is `specs/development-workflow.md`**, and it names which subagent runs at
 which step: `vellum-spec-recon` at the start, `vellum-plan-skeptic` on the plan before the decisions
@@ -156,9 +157,10 @@ go to Alex, `vellum-guard-prover` on every new or strengthened guard before the 
 `vellum-plate-reader` when the deliverable is an appearance, and `vellum-pr-skeptic` COLD on every
 pushed PR. A review agent never posts to GitHub: relay its report in your reply and **let Alex decide
 what lands on the PR**. `vellum-implementer` runs one issue through that sequence in its own tree.
-Every
-project agent under `.claude/agents/` sets `effort: xhigh` in its frontmatter (Alex, 2026-09-13),
-because an agent without one inherits the session's level.
+Every project agent under `.claude/agents/` sets `effort: xhigh` in its frontmatter (Alex,
+2026-09-13), because an agent without one inherits the session's level; the check is
+`echo $CLAUDE_EFFORT` inside a dispatched agent, run from a session at some OTHER level, since a
+session already at xhigh cannot tell the frontmatter from inheritance.
 
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks.
 - **Write the failing test first.** It must fail on the assertion you care about, not on a missing
@@ -169,6 +171,12 @@ because an agent without one inherits the session's level.
   vacuously names the witness that makes it bite, at the test. A scanner cannot enumerate its own
   blind spots, so it names them and argues the direction instead, and an unnamed blind spot with no
   direction argued is the bug.
+- **A bound is derived, and where no principle gives the number, sweep first and set it above the
+  worst case with the headroom named.** Do not fix a sample size in advance: a bound fitted to the
+  samples you happened to take breaks on the next one, and a handful of local runs is the shape that
+  passes on a Mac and flakes on linux CI. The provenance is ONE dated line at the constant naming the
+  range swept and the worst case (`test/prospect/input.test.ts` carries the form), which is the
+  comment rule's "no test can practically pin it" carve-out rather than an exemption from it.
 - **When asking Alex to make an open decision**, explain it in plain words, no jargon and no acronyms,
   in an `AskUserQuestion` menu rather than in prose, and STOP there. A decision that is his is not one
   to default your way and mention afterwards. A dispatched `vellum-implementer` lane cannot reach him,
@@ -177,9 +185,10 @@ because an agent without one inherits the session's level.
 - **Comments are the exception, not the rule.** A behavior a test pins needs no comment: the test is
   the record, delete the prose. A local invariant earns a test first; only where no test can
   practically pin it (cross-platform float drift, hand-measured browser quirks) does it keep a single
-  line at the line that breaks. NO test enforces this and `vellum-pr-skeptic` runs after the code is
-  written, so the discipline at authoring time is yours. The house writes a comment as ONE long line:
-  a wrapped block mid-file is the tell that the prose restates what a test already pins.
+  line at the line that breaks. NO test enforces this (#384 built one and withdrew it; PR #385 holds
+  the design and the measurements if it is ever worth another try) and `vellum-pr-skeptic` runs after
+  the code is written, so the discipline at authoring time is yours. The house writes a comment as
+  ONE long line: a wrapped block mid-file is the tell that the prose restates what a test pins.
 
 ## Worktrees
 
