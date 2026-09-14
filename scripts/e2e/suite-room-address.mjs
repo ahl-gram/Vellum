@@ -1,5 +1,6 @@
 // Room address e2e (RA1-RA8, #320 Sub 3): the #192 A-suite's year-restore checks re-hosted; the Explorer-hosted A* originals stay green beside them.
 import { makeRoom } from "./room-support.mjs";
+import { dropExpectedCancellations } from "./console-support.mjs";
 
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, consoleErrors, http4xx } = ctx;
@@ -134,7 +135,7 @@ export async function run(ctx) {
     JSON.stringify({ ra7pre, ra7 }),
   );
 
-  const errDelta = consoleErrors.slice(errBase).filter((e) => !e.includes("AbortError: Transition was skipped"));
+  const errDelta = dropExpectedCancellations(consoleErrors.slice(errBase));
   const httpDelta = http4xx.slice(httpBase).filter((u) => !/favicon/i.test(u));
   check(
     "RA8 the room's address flow is clean (no console errors, no new 4xx)",
