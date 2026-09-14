@@ -17,7 +17,7 @@ type. Read the gate you are at, do each line, and move on. Provenance is in `ref
 
 ## Gate 1: before writing a test or a guard
 
-Scars: #49, #124, #275, #295, #320, #353, #358, #360, #363, #380, #383, #387, #388, #400, #412, #423, #510, #528, #533, #535, #536, #542, #544, #545, #546, #554, #561, #562, #564.
+Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #387, #388, #400, #412, #423, #510, #528, #533, #535, #536, #542, #544, #545, #546, #554, #561, #562, #564.
 
 1. **Write the mutation before the test.** Name the one-line change to `src/` that must turn this
    test red. If you cannot name one, you are about to write a test that cannot fail.
@@ -79,15 +79,16 @@ Scars: #49, #124, #275, #295, #320, #353, #358, #360, #363, #380, #383, #387, #3
     STATED, so a box computed from it measures the shim and not the code (#387, #388).
 13. **A hand-rolled reader is a guard's blind spot.** A CSS selector reader splits on TOP-LEVEL
     commas and tests the SUBJECT, the last compound; otherwise an `:is()` arm, an ancestor's
-    pseudo-class and a colon inside an attribute value each drop rules from the sweep (#358). A markup regex
-    allows trailing attributes, and an empty parse never SKIPS a section unless every companion parse
-    is empty too (#353). And a scan is keyed on what the DEFECT looks like, never on what the rule
-    says: the hyphenated-property cut skipped the unhyphenated properties the contract policed, and
-    passed (#360).
+    pseudo-class and a colon inside an attribute value each drop rules from the sweep (#358). A
+    markup regex allows trailing attributes, and an empty parse never SKIPS a section unless every
+    companion parse is empty too (#353).
 14. **A test file that imports a module which can exit at import is reported as a PASS.** It dies
     before any `test()` registers and its assertions are simply gone from the tally, with nothing
     saying so, which is the zero-red alarm inverted. A guard for "importing this does no work" SPAWNS
     the module as a child and asserts on stdout (PR #554).
+15. **A scan is keyed on what the DEFECT looks like, never on what the rule says.** The
+    hyphenated-property cut skipped the unhyphenated properties the contract policed, so the sources
+    that could hold the defect were exactly the ones it did not select, and it passed (#360).
 
 ## Gate 2: before writing an e2e check or a CDP probe
 
@@ -190,7 +191,7 @@ fail silently (an undeclared CSS variable, a suite the runner never calls, a bud
 
 ## Gate 5: before the push and the PR body
 
-Scars: #49, #101, #193, #203, #255, #408, #486, #491, #507, #508, #524, #528, #530, #541, #542, #546, #548, #559, #582, #593, #596; calls made without a ruling on #519, #542, #546.
+Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #530, #541, #542, #546, #548, #559, #582, #593, #596; calls made without a ruling on #519, #542, #546.
 
 1. **Dead code sweep.** Every new export has a second reference. Every new field has a reader that
    produces a STRING on a surface (carries, reads, is wired through describe plumbing; shows, prints,
@@ -206,12 +207,14 @@ Scars: #49, #101, #193, #203, #255, #408, #486, #491, #507, #508, #524, #528, #5
 4. **Say which suites ran and which did not.** A record exists (link it) or is "in flight"; it is
    never "in the comments" before it lands there.
 5. `gh pr view <N> --json closingIssuesReferences` lists exactly the issue you mean. GitHub reads
-   "does not close #N" as closing #N. A keyword binds to ONE reference and must sit immediately
-   beside it: a bare list closes only the first (PR #255 left #203 open), and a word between the
-   keyword and the number closes nothing. It is also inert while the base is a feature branch, so it
-   goes on the last PR to land and is re-checked after the retarget (PR #408).
+   "does not close #N" as closing #N. The grammar is one KEYWORD immediately followed by one
+   reference: `Closes #a, #b` closes only `#a`, a word between the keyword and the number closes
+   nothing, and a verb that is not on GitHub's list closes nothing either, which is how PR #255's
+   "implements #203" left #203 to be shut by hand an hour after the merge. It is also inert while the
+   base is a feature branch, so the keyword goes on the last PR to land and is re-checked after the
+   retarget (PR #408).
 6. `grep -n '—'` over the body and the diff returns nothing.
-7. **A sibling defect found on the way is filed, not folded.** Two exceptions: an accessibility
+7. **A sibling defect found on the way is filed, not folded.** The exceptions: an accessibility
    failure this PR itself caused, and an orchestrated batch whose dispatcher has relayed Alex's
    ruling to fold for that batch (ruled 2026-09-14, #591).
 8. **Any call you made that the issue did not rule on gets a dated issue comment before the PR is
@@ -230,10 +233,11 @@ Scars: #49, #101, #193, #203, #255, #408, #486, #491, #507, #508, #524, #528, #5
    child retargeted after its base SQUASH-merged reads CONFLICTING against a byte-identical tree,
    because it carries the base's own commits while main carries one squash: replay only the child's
    with `git rebase --onto origin/main <base-head> <child>`, then read `git log --oneline` over the
-   replayed range, and never merge main in (PR #491, PR #492). **Two branches that must edit the same
+   replayed range. Do NOT merge main in: that is the repair for a squashed base only, and the
+   opposite case is the next sentence (PR #491, PR #492). **Two branches that must edit the same
    roster lines state the insertion order UP FRONT, and the lower-numbered PR merges before the
-   higher one opens**; otherwise the higher brings its branch current with `git merge origin/main`
-   and takes the stated position (#593, #596).
+   higher one opens**; there the higher one DOES bring its branch current with `git merge
+   origin/main` and take the stated position (#593, #596).
 10. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
     while it runs; three rounds at most, residue named in the body. **Commit before you dispatch it**,
     and before any review agent: it runs in the directory you launched it from, and a suite run there

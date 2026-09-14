@@ -27,7 +27,7 @@ files named at the end.
   fired `lay()`. #548: a comment deleted against a cited test that did not pin it. #124: the
   reading's ranking keys were invisible to a test that only asserts a name PARSED, since almost any
   ranking still produces a parse; the prover found the leftmost-longest key guarded nowhere and
-  inverting it moved corpus names with the suite green. Proves Gate 1 item 5.
+  inverting it moved corpus names with the suite green. Proves Gate 1 item 3.
 - *The instance, not the class.* #533: two siblings the first sweep missed. #536: three cameras
   pinned, the lattice unswept. #544: the clamp fixed on the road's button and not the stamp line.
   #530: one arm scoped of a selector list. #545: one child clamped.
