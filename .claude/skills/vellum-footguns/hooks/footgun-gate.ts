@@ -42,7 +42,7 @@ const SEPARATORS = /\n|;|&&|\|\||\||\$\(|\(|\{\s|\s\}|\bthen\b|\bdo\b|\belse\b|\
 const PREFIX = /^(?:(?:env|command|time|exec|sudo|nohup|nice|builtin)\s+|[A-Za-z_][A-Za-z0-9_]*=\S*\s+)+/;
 const GIT_GLOBAL_WITH_VALUE = new Set(["-C", "-c", "--git-dir", "--work-tree", "--namespace", "--exec-path"]);
 const PERL_INPLACE = /^perl\b.*\s-[0a-zA-Z]*i\b/;
-const PERL_META_DELIMITER = /\bs([|+*?.])(?:(?!\1)[\s\S])*\\\1/;
+const PERL_META_DELIMITER = /\bs([|+*?.$])(?:(?!\1)[\s\S])*\\\1/;
 const GH_BODY_WRITE = /^gh (pr|issue) (create|edit|comment)\b/;
 const GH_API_CALL = /^gh api\b/;
 const GH_API_BARE_ITEM = /(?:^|\s)(?:https:\/\/[^\s/]+\/)?\/?repos\/[^\s/]+\/[^\s/]+\/(?:issues|pulls)\/\d+\/?(?=\s|$)/;
@@ -212,9 +212,9 @@ const PERL_META_REASON =
   "vellum-footguns: perl strips the backslash before ANY delimiter, so an `s` whose delimiter is a regex METACHARACTER and whose " +
   "PATTERN escapes that delimiter silently loses the literal and leaves the metacharacter live. Measured 2026-09-14 on " +
   "`hello world`: `s|world\\||PLANET|` gives `PLANEThello world`, because the pipe unescapes to an alternation with an empty " +
-  "branch that matches at offset zero; `s+world\\++`, `s*world\\**` and `s?world\\??` each REPLACE the target the literal pattern " +
-  "does not contain. All exit 0. Delimit with a character that is not a metacharacter (`#` and `!` were measured safe), or do the " +
-  "edit with a node script or a heredoc.";
+  "branch that matches at offset zero; `s+world\\++`, `s*world\\**`, `s?world\\??`, `s.world\\..` and `s$world\\$$` each REPLACE a " +
+  "target the literal pattern does not contain. All exit 0. Delimit with a character that is not a metacharacter (`#` and `!` were " +
+  "measured safe), or do the edit with a node script or a heredoc.";
 
 const perlRefusal = (segment: string, command: string): Decision => {
   if (!PERL_INPLACE.test(segment)) return null;

@@ -24,8 +24,9 @@ is ever removed.
   - any bare mutation of the shared stash stack: `git stash`, `push` without `-m`, `pop`, `apply` or
     `drop` without an explicit `stash@{n}` or sha, `clear`;
   - `perl -i` / `-pi` / `-0pi` when the command carries a non-ASCII character or a `\x{...}` escape,
-    or when it carries an `s` whose delimiter is one of `| + * ? .` and whose PATTERN half escapes
-    that delimiter. Perl strips the backslash before ANY delimiter, so the literal the author wrote
+    or when it carries an `s` whose delimiter is one of `| + * ? . $` and whose PATTERN half escapes
+    that same delimiter, tied together by a backreference so that escaping a DIFFERENT metacharacter
+    (`s|a\+b|c|`, which real perl leaves alone) is not refused. Perl strips the backslash before ANY delimiter, so the literal the author wrote
     is lost and the bare metacharacter goes live. Measured 2026-09-14 on `hello world`:
     `s|world\||PLANET|` prints `PLANEThello world`, because the pipe unescapes to an alternation with
     an empty branch that matches at offset zero, while `s+world\++`, `s*world\**` and `s?world\??`
@@ -95,10 +96,21 @@ is ever removed.
   so a compound `perl -pi -e 's/a/b/' f.ts; grep -n 's|x\|y|z|' notes.md` is a false REFUSAL. The
   non-ASCII condition beside it has exactly this shape already, so it is no new class, and the remedy
   is one call each. Refusal, not silence.
-- The same substitution with no `-i`, and `m` or `tr` rather than `s`, are not checked. So are the
-  paired delimiters (`s{a\}b}{c}` and its kin), which unescape the same way but bracket rather than
-  repeat, and `^` and `$`, left out because both are common enough in shell text to false-refuse.
-  Silence, not refusal.
+- The same substitution with no `-i`, and `m` or `tr` rather than `s`, are not checked. Silence, not
+  refusal.
+- **Paired delimiters are a real member of the bug's family and are NOT covered**, because they need a
+  different regex shape: perl's `s(pattern)(replacement)` escapes the CLOSING character rather than a
+  repeated single one, so a capture-and-backreference cannot see it. Measured 2026-09-14:
+  `echo 'hello (world)X' | perl -pe 's(world\))(PLANET)'` prints `hello (PLANETX`. Silence, not
+  refusal, and named rather than left out quietly.
+- `^` is excluded on measurement rather than on taste: as a delimiter it is a zero-width start
+  assertion that cannot be satisfied once the pattern has consumed anything, so `s^world\^^PLANET^`
+  silently does nothing instead of mis-editing. A different failure shape from the one this guard is
+  about.
+- `$` IS in the class, which costs a false refusal when `s` sits directly before a `$` in ordinary
+  shell text (a variable or a filename) and a `\$` appears later in the same command. That direction
+  was chosen deliberately: on a refusal a false positive is visible and one edit away, while a miss
+  is a silent corruption of the file.
 - The `gh api` path is read after quoted spans are blanked, so a quoted path (`gh api
   "repos/O/R/issues/193" -f body=x`), one built from shell variables (`repos/$O/$R/issues/$N`) or one
   built by a subshell is not seen at all, and the destructive call goes through. **This is a MISS, not
