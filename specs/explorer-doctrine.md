@@ -1,7 +1,7 @@
 # The living chart over the baked sheet
 
 **The chart the reader touches is a baked SVG with a camera over it and overlays beside it.** This
-file holds the contracts that join those three: what a host page owes the engine, what the camera
+file holds the contracts that join them: what a host page owes the engine, what the camera
 and the gestures guarantee, what chart furniture owes the live transform, how an overlay is created
 and torn down, what a region sheet may do that a world sheet may not, and how the voyage divides
 work between the worker and the client.
@@ -14,9 +14,9 @@ order of work, `specs/ui-design.md` how any of this looks, `specs/settle-doctrin
 it is written, and `.claude/skills/vellum-footguns/SKILL.md` the imperatives keyed to the moment of
 typing a check. Where this file and the rulebook disagree about a rule, the rulebook wins.
 
-**Sections two and three name the surface each rule governs.** The camera contracts are shared by
-the home stage, the Explorer and every chart room, and those surfaces differ in ways that make an
-unqualified rule false. Read the surface, not just the rule.
+**The camera and counter-scale sections name the surface each rule governs.** Those contracts are
+shared by the home stage, the Explorer and every chart room, and those surfaces differ in ways that
+make an unqualified rule false. Read the surface, not just the rule.
 
 ## The engine boundary and the host contract
 
@@ -178,10 +178,11 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
 - **Publish the counter-scale to ALL the leaves, not the first one found.** The outgoing inset stays
   mounted until its fade ends, so a singular query hands the counter-scale to the sheet on its way
   out and leaves the arriving one oversized until the next zoom.
-- **There are two write paths and both are required**: the per-camera-apply publisher (`setCardZoom`
-  in `src/site/explorer/glass.ts`) reaches every leaf already mounted, and any leaf BUILT between two
-  applies sets it at creation (`makeDogEar` in `src/site/explorer/chart-drawer.ts`), because a
-  commit never touches the camera and nothing else will publish to it.
+- **Publishing on camera apply is not enough on its own.** The per-camera-apply publisher
+  (`setCardZoom` in `src/site/explorer/glass.ts`) reaches every leaf already mounted, and any leaf
+  BUILT between applies sets the counter-scale at creation (`makeDogEar` in
+  `src/site/explorer/chart-drawer.ts`), because a commit never touches the camera and nothing else
+  will publish to it.
 - **One division, on the hit element itself.** The translate pins the scale's fixed point to the
   mark so anchors never move, and a second division on a ring pseudo-element would shrink the ring
   with the depth. The target and its ring hold their designed size at every depth.
@@ -283,7 +284,7 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   redraw breaks byte identity. The derivation is the engine's, so a live redraft and a downloaded
   sheet's redraw agree.
 - **`band` means the level-of-detail index in a region message, not a draw's climate band.** One
-  field name, two meanings across worker kinds.
+  field name carrying a different meaning in each worker kind.
 - **The detail level is a function of the WINDOW, not of the band index the job carries.** They
   coincide at every real band, which is exactly why a guard has to use a fixture where they diverge
   (`regionDetailLevel` in `src/world/region.ts`, over `detailForWindow` in
@@ -340,7 +341,7 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   LOAD-BEARING.** `bfsPath` in `src/core/bfs-path.ts` walks the fixed eight-neighbour order for both
   leg kinds; `src/world/landmass.ts` floods four-neighbour. A corner pinch therefore splits two
   landmasses under the labelling while the walker threads it. Do not "fix" the asymmetry: it is
-  between two different questions, not between the two leg kinds.
+  between two different questions, not between the leg kinds.
 - **Determinism rests on integer hops, a FIFO frontier and a fixed neighbour order.** A float-cost
   search would reintroduce cross-engine float ordering.
 - **A sea leg launches into a water body BOTH ports can reach**, not into each port's nearest water,
