@@ -24,15 +24,21 @@ is ever removed.
   - any bare mutation of the shared stash stack: `git stash`, `push` without `-m`, `pop`, `apply` or
     `drop` without an explicit `stash@{n}` or sha, `clear`;
   - `perl -i` / `-pi` / `-0pi` when the command carries a non-ASCII character or a `\x{...}` escape,
-    or when it carries a `|`-delimited `s|...|...|` whose PATTERN half contains `\|`. That reads as an
-    escaped DELIMITER, so the pattern unescapes to an alternation with an empty branch and matches at
-    offset zero of every input: the replacement lands at the head of the file, the target is
-    untouched, and it exits 0. The pipe is the only delimiter checked because it is the only one
-    measured to do this; under `+`, `!` and `#` the same shape leaves the input unchanged. An escaped
-    pipe in the REPLACEMENT half is correct perl and is not refused;
+    or when it carries an `s` whose delimiter is one of `| + * ? .` and whose PATTERN half escapes
+    that delimiter. Perl strips the backslash before ANY delimiter, so the literal the author wrote
+    is lost and the bare metacharacter goes live. Measured 2026-09-14 on `hello world`:
+    `s|world\||PLANET|` prints `PLANEThello world`, because the pipe unescapes to an alternation with
+    an empty branch that matches at offset zero, while `s+world\++`, `s*world\**` and `s?world\??`
+    each REPLACE a target their literal pattern does not contain. All exit 0, and with `-i` they land
+    in the file. `#` and `!` were measured to leave the input unchanged, which is why the class is the
+    metacharacters and not every delimiter. An escaped delimiter in the REPLACEMENT half is correct
+    perl and is not refused;
   - `gh api` on a bare issue or pull-request endpoint (`repos/O/R/issues/N` or `repos/O/R/pulls/N`,
     with nothing after the number but an optional trailing slash) carrying any data field (`-f`,
-    `-F`, `--raw-field`, `--field`, `--input`) and no explicit method other than POST. Any data field
+    `-F`, `--raw-field`, `--field`, `--input`, including inside a combined short-flag cluster such as
+    `-if`) and no explicit method other than POST, the method read from the LAST `-X` / `--method` on
+    the line because that is the one gh uses. ANY explicit non-POST verb exempts the call, not `PATCH`
+    alone. Any data field
     switches the call to POST, and a POST to that endpoint UPDATES the item rather than commenting on
     it: the fields sent overwrite what is there, nothing is created, and it exits 0 (#193, PR #550).
     `/comments` and every other sub-path are untouched, so the remedy the Never list names still
@@ -89,12 +95,17 @@ is ever removed.
   so a compound `perl -pi -e 's/a/b/' f.ts; grep -n 's|x\|y|z|' notes.md` is a false REFUSAL. The
   non-ASCII condition beside it has exactly this shape already, so it is no new class, and the remedy
   is one call each. Refusal, not silence.
-- The same substitution with no `-i`, and `m|...|` or `tr|...|` rather than `s`, are not checked.
+- The same substitution with no `-i`, and `m` or `tr` rather than `s`, are not checked. So are the
+  paired delimiters (`s{a\}b}{c}` and its kin), which unescape the same way but bracket rather than
+  repeat, and `^` and `$`, left out because both are common enough in shell text to false-refuse.
   Silence, not refusal.
 - The `gh api` path is read after quoted spans are blanked, so a quoted path (`gh api
   "repos/O/R/issues/193" -f body=x`), one built from shell variables (`repos/$O/$R/issues/$N`) or one
-  built by a subshell is not seen at all. The house idiom is the literal unquoted form. Silence, not
-  refusal.
+  built by a subshell is not seen at all, and the destructive call goes through. **This is a MISS, not
+  benign silence**: on a refusal the silent direction is the footgun reaching the tool, and the only
+  thing bounding it is that the literal unquoted form is what this house types, which is a habit
+  rather than a guarantee. It is not closed because the fix, scanning the raw command, false-refuses
+  the ordinary read-then-comment pair the fixture table pins. Fixture rows record both halves.
 - A non-body data field on a bare issue path (`-f state=closed`, `-f title=...`) is refused too. That
   is the rule rather than an overreach, since the refusal is about the implicit POST and not about
   the body in particular, and `-X PATCH` or the purpose-built `gh issue` subcommand is the way
