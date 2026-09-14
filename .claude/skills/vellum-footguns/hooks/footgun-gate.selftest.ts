@@ -130,6 +130,8 @@ const FIXTURES: Fixture[] = [
   ["perl pipe delimiter with nothing escaped allowed", bash("perl -pi -e 's|/usr/local|/opt|' f.ts"), null, ""],
   ["perl pipe substitution without -i allowed", bash("perl -pe 's|a\\|b|c|' f.ts"), null, ""],
   ["grep quoting a pipe-delimited substitution allowed", bash("grep -n 's|a\\|b|c|' notes.md"), null, ""],
+  // The documented over-reach, pinned rather than left to drift: the pipe branch scans the RAW command because the segmenter blanks the payload, so a safe perl -i beside an unrelated quoted pipe substitution is refused. README names it as refusal-not-silence; the non-ASCII branch beside it has the same shape.
+  ["perl -i beside an unrelated pipe substitution is refused, by design", bash("perl -pi -e 's/a/b/' f.ts && echo 's|x\\|y|z|'"), "deny", "EMPTY BRANCH"],
   ["pr body negated close denied", bash("gh pr create --body 'this PR does not close #518'"), "deny", "CLOSING"],
   ["pr body qualified negated close denied", bash("gh pr create --body 'does not close ahl-gram/Vellum#518'"), "deny", "CLOSING"],
   ["pr body em-dash denied", bash("gh pr edit 5 --body 'a — b'"), "deny", "em-dash"],
@@ -165,6 +167,9 @@ const FIXTURES: Fixture[] = [
   ["gh api -X GET with query params allowed", bash("gh api -X GET search/issues -f q=foo"), null, ""],
   ["gh api issue create allowed", bash("gh api repos/o/r/issues -f title=t -f body=b"), null, ""],
   ["gh api pull-request create allowed", bash("gh api repos/o/r/pulls -f title=t"), null, ""],
+  // The prover's one escape: with the number quantifier relaxed to \d*, every mutation-visible row still passed, so the digits were dead precision. This row is what makes them load-bearing, and it is an over-refusal that is being pinned out, not a footgun being let in.
+  ["gh api issue create with a trailing slash allowed", bash("gh api repos/o/r/issues/ -f title=t"), null, ""],
+  ["gh api an item path inside a field VALUE is not the endpoint", bash("gh api repos/o/r/issues -f body=see-repos/o/r/issues/193"), null, ""],
   ["gh api bare read allowed", bash("gh api repos/o/r/issues/193"), null, ""],
   ["gh api read with jq allowed", bash("gh api repos/o/r/issues/193 --jq .body"), null, ""],
   // The shape a raw-command scan would have false-refused: the first segment is a bare issue path while the whole command carries -f body=.
