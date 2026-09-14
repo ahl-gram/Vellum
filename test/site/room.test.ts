@@ -119,7 +119,8 @@ test("the kit gives the stage's status pill its fade, keyed to the class so ever
   assert.ok(base, "the kit dresses the stage's pill");
   assert.match(base[1], /transition:\s*opacity\s+0\.45s/, "the pill carries the fade's own duration, the one src/site/shared/announce.ts waits out before it clears the text");
   // EVERY arm and not the first (skeptic round 2 on PR #584).
-  const fades = [...css.matchAll(/([^{}]*\.status\.fading[^{}]*)\{([^}]*)\}/g)];
+  // Keyed on the bare class: `.status.fading` as the anchor misses `#pf-status.fading`, which is exactly the arm that would leave one page's announcement standing, and is the spelling the round-2 mutation used.
+  const fades = [...css.matchAll(/([^{}]*\.fading[^{}]*)\{([^}]*)\}/g)];
   assert.ok(fades.length > 0, "and the kit carries the arm the announcer turns on");
   for (const fade of fades) {
     assert.match(fade[2], /opacity:\s*0/, `which is what fading means: ${fade[1].trim()}`);
