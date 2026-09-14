@@ -13,7 +13,9 @@ including the cascade traps; `specs/rulebook.md` the golden, the committed set, 
 order of work; `specs/explorer-doctrine.md` and `specs/region-and-voyage.md` what an app surface
 draws once it is mounted; `specs/settle-doctrine.md` how a wait on it is written; and
 `.claude/skills/vellum-footguns/SKILL.md` the imperatives keyed to the moment of typing. Where this
-file and the rulebook disagree about a rule, the rulebook wins.
+file and the rulebook disagree about a rule, the rulebook wins, with ONE known exception: the
+rulebook's retired-rules line that a page is one `.astro` file plus one nav entry describes a
+reading page, and what a working page costs is this file's rule below. #590 scopes that line.
 
 **No counts live here.** Not the number of pages, sheets, bundles or suites. Every count in the
 private notes this file replaces had rotted, in the same way, in every place it appeared. The
@@ -25,11 +27,15 @@ rosters below are named by symbol and path so the reader goes and looks.
   `src/pages/<route>/index.astro`, home being `src/pages/index.astro`, and the layout is
   `src/layouts/BaseLayout.astro`, which owns the nav, the head cluster, the footer and the page
   meta. The tree is the roster of pages; no list of them is kept anywhere, including here.
-- **There are THREE kinds of page, and which kind decides what the page joins.** A nav-listed room
-  has its entry in `NAV_ITEMS` in `src/layouts/nav.ts`. A destination is off the nav but inside the
-  discovery routes, which is how `/prospect/` and `/atlas/` are reached. A page may also be
-  deliberately off BOTH, carrying the layout's `noindex` prop, which is what `/specimen/` is. A page
-  that is off a list is a decision with a mechanism behind it, so do not "fix" one by adding it.
+- **Two INDEPENDENT questions decide what a page joins, and mixing them up is how a page gets
+  mis-budgeted.** The first is how the page is reached, which decides its place in the nav and the
+  discovery files. The second is whether it mounts a bundle, which decides everything in the rule
+  below. A page can be any combination of the two.
+- **How a page is reached comes in three kinds.** A nav-listed room has its entry in `NAV_ITEMS` in
+  `src/layouts/nav.ts`. A destination is off the nav but inside the discovery routes, which is how
+  `/prospect/` and `/atlas/` are reached. A page may also be deliberately off BOTH, carrying the
+  layout's `noindex` prop, which is what `/specimen/` is. A page that is off a list is a decision
+  with a mechanism behind it, so do not "fix" one by adding it.
 - **Placement is ratified (#202): the nav lists ROOMS**, world-agnostic and shell-wearing, and the
   atlas stays permanently out of it with the home card as its way in. **The home cards are modes of
   encounter**, one to a mode, and a page deliberately without a card is not an oversight.
@@ -42,7 +48,7 @@ rosters below are named by symbol and path so the reader goes and looks.
 - **The rosters are found by grepping, never by reading a list.** The mechanism is the footguns
   Gate 4 one: grep the nearest sibling's name across `src/`, `scripts/`, `test/` and `.github/`, and
   join every list it appears in. A list written in prose is a starting point and goes stale; the
-  grep does not. **One sheet roster closes itself**: "the authored roster covers every stylesheet
+  grep does not. **A sheet roster that closes itself**: "the authored roster covers every stylesheet
   under `public/`" in `test/site/tip-affordance.test.ts` walks the tree, so an unlisted sheet reds
   there. The rest are hand-kept and silent when missed, which is why the grep comes first.
 - **The rosters a page or a sheet joins**, by symbol: `PAGE_CSS`, `SHARED_CSS`, `ROOT_CSS` and
@@ -61,10 +67,13 @@ rosters below are named by symbol and path so the reader goes and looks.
   root-absolute. The layout's inline `<style>` renders after the page sheet's link, which is why a
   page override of a shell rule needs higher specificity; that trap belongs to `specs/ui-design.md`
   and is not restated here.
-- **Authored CSS hides in more places than `public/`.** A sweep must reach the sheets under
-  `public/`, `BaseLayout.astro`'s global block, `GALLERY_PAGE_CSS` in `src/cli/gallery.ts`, and
-  `ATLAS_SHEET_CSS` with `PAGE_CHROME_CSS` in `src/atlas/document.ts`. One written against `public/`
-  alone misses the rest and passes. Grep for the shape before trusting any list, this one included.
+- **Authored CSS hides in more places than `public/`.** A sweep written against `public/` alone
+  misses every source in `src/` and passes. **The repo keeps its own roster of those**, `SRC_CSS` in
+  `test/site/tip-affordance.test.ts`, which pairs each source with a way to get its CSS as a string,
+  including a page that carries its own style block and a card whose faces are built rather than
+  authored. Read that roster rather than any list written in prose, this one included: the sources
+  are of several shapes (a layout's global block, a constant written verbatim to a generated sheet,
+  constants that only exist once the document is composed) and each needs its own way in.
 - **Link form is scoped, and the flat rule is false.** Root-absolute is the form for the links the
   SHELL owns: the `NAV_ITEMS` hrefs, which are root-absolute trailing-slash directory form by their
   own interface contract, the root and shared sheets, the icons and fonts, and the discovery routes.
@@ -139,8 +148,8 @@ other way, which is what earns them a section of their own.
   `new Worker(new URL("./worker.ts", import.meta.url), { type: "module" })`, written out in full at
   the call. The bundler rewrites only the statically analyzable form, so hoisting the target into a
   variable or a parameter emits no worker chunk and kills the worker at runtime for every surface
-  that runs a job through that client. Two guards hold it: a file-specific pin in
-  `test/site/app-bundles.test.ts`, and the sweep "every worker spawn under `src/site` keeps the
+  that runs a job through that client. It is held by a file-specific pin in
+  `test/site/app-bundles.test.ts` and by the sweep "every worker spawn under `src/site` keeps the
   static form Vite's build analysis requires" in `test/repo/constant-contracts.test.ts`, which walks
   the tree, compares static spawns to total spawns per file, and asserts a floor so it cannot pass
   over an empty scan.
@@ -160,7 +169,7 @@ other way, which is what earns them a section of their own.
   routes that are not nav items, and every origin resolves against the `site` value in
   `astro.config.ts`. A domain move therefore updates all of them at once, which is exactly why
   `robots.txt` is generated rather than hand-written: a hand-written sitemap line survives such a
-  move still pointing at the retired domain, and once did.
+  move still pointing at the retired domain, which is what a domain move here would have stranded.
 - **A route with no blurb is a build error.** Adding a route without its `ROUTE_ENTRIES` line throws
   by name, and the generator also throws if `site` is unset.
 - **The sitemap carries locations only, deliberately.** The only timestamp it could honestly carry
@@ -186,8 +195,9 @@ precisely, because a token that falls outside it looks identical at the point of
 - **A colour goes in BOTH places, which is `ui-design.md`'s own wording**: declared once in
   `BaseLayout.astro`'s global style and mirrored in `SITE_PALETTE` in `src/atlas/palette.ts`. The
   guard is a `deepEqual` against `TOKENS` in `test/site/shell-css.test.ts`, so the ratified roster is
-  a third place the pair is measured against. "The three-place join" is that test's phrase for the
-  arrangement below, not `ui-design.md`'s phrase for the colour rule.
+  a third place the pair is measured against. The phrase "the three-place join" belongs to
+  `test/atlas/document.test.ts`, which uses it in its own title for the arrangement below, and is not
+  `ui-design.md`'s wording for the colour rule.
 - **The rule for what is outside is a DERIVATION, not a list.** `SITE_PALETTE` carries flat
   name-to-hex colours only, so a token whose value is not a flat hex is not in the join. Where it
   lives is then wherever declares it: the layout's global style holds the deep, the two depth
@@ -195,13 +205,15 @@ precisely, because a token that falls outside it looks identical at the point of
   own; and a page sheet may declare one in its own `:root`, where the SAME token name legitimately
   holds a different value on different pages. Check the declaration, not a remembered home.
 - **A self-contained generated document declares its own copy, in one of two shapes.** The atlas
-  declares the deep and the sheet depth in `SCREEN_DRESS_CSS` in `src/atlas/document.ts`, and
-  `test/atlas/document.test.ts` pins them EQUAL to the layout's. For the motion timings it uses the
-  other shape, an inline `var()` fallback carrying a literal, because the standalone download links
-  no motion sheet. **Nothing pins those literals, so that shape drifts silently**; prefer the pinned
-  one, and if you use the fallback shape, know that a change to the sheet will not reach it.
-- **The atlas is the only standalone generated document.** The gallery writes a sheet that is
-  consumed through the layout, so it declares none of these and is not an example of the rule.
+  declares the deep and the sheet depth in a screen-dress constant inside `src/atlas/document.ts`,
+  which is module-local and reached by composing the document rather than by importing a symbol, and
+  `test/atlas/document.test.ts` pins those declarations EQUAL to the layout's. For the motion timings
+  it uses the other shape, an inline `var()` fallback carrying a literal, because the standalone
+  download links no motion sheet. **Nothing pins those literals, so that shape drifts silently**;
+  prefer the pinned one, and if you use the fallback shape, know that a change to the sheet will not
+  reach it.
+- **The rule is about a document that stands alone**, which the atlas download does. The gallery
+  writes a sheet consumed through the layout, so it declares none of these and is not an example.
 
 ## Build, check and deploy
 
@@ -216,8 +228,8 @@ precisely, because a token that falls outside it looks identical at the point of
   working, not a break, but budget the edits.
 - **Clean before regenerate.** The generators overwrite and never delete, so without the clean a
   renamed module leaves an importable orphan that masks a missing file locally while CI, always a
-  fresh checkout, stays fine. `GENERATED_SUBTREES` is that list; it may grow and may not shrink, one
-  entry is a deliberate tombstone for a tree nothing generates any more, and a test assertion of its
+  fresh checkout, stays fine. `GENERATED_SUBTREES` is that list; it may grow and may not shrink, it
+  carries a deliberate tombstone for a tree nothing generates any more, and a test assertion of its
   floor stays LITERAL rather than derived from the constant the code iterates.
 - **The dev server needs its dev-only middleware.** `astro.config.ts` registers a middleware that
   serves the surfaces' canonical trailing-slash URLs in dev, because the dev public middleware serves
