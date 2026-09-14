@@ -37,6 +37,7 @@ where the proof goes.
 | 2026-09-09 | CD7b | 34411380228 | `49a9527`, main | identical | settled, #578 and PR #581. Never re-run; the next main run was green with the drawer untouched |
 | 2026-09-10 | SV2r | 34526874952 | `dd2d01e`, main | `{"dashSteps":11,"dashSeen":11,"gap":250,"frames":75}` | open, no issue |
 | 2026-09-12 | CD7b | 34678766918 | `ab5b064`, main | identical | settled, #578 and PR #581. Never re-run |
+| 2026-09-14 | RS30 | 34795676910 | `3879d43`, `chore/586-engine-invariants` | the pace-4 leg took 6 samples against `minSamples: 8`; both legs fit their rate to 0.6 and -0.1 percent, `ratio 3.97`, `jump 15` of 16.6 allowed, `backward 0`, `parked false` | open. Second recorded RS30, same sample-count shape as 2026-09-08 on the other leg. First on a diff that cannot cause it: PR #593 changes two markdown files. Payload and what to capture next are in a comment on that PR |
 
 ## What the CD7b rows turned out to be
 

@@ -5,9 +5,10 @@ surface quoting generated output may not assume.** This file is upstream of how 
 is about the world itself: what belongs to its identity, what order the pipeline settles it in, and
 which engine outputs a consuming surface has to respect.
 
-Two siblings hold what this one deliberately does not. `specs/rulebook.md` owns the golden, the
-regen and the re-roll discipline, and keeps it; where this file touches that, it states the engine
-fact and points there for what the fact costs. `specs/ui-design.md` owns how a world is drawn.
+Its siblings under `specs/` hold what this one deliberately does not. `specs/rulebook.md` owns the
+golden, the regen and the re-roll discipline, and keeps it; where this file touches that, it states
+the engine fact and points there for what the fact costs. `specs/ui-design.md` owns how a world is
+drawn.
 
 **Counts and seed-specific measurements are not here.** They live at the guards named throughout,
 which is where a wrong number goes red. Nothing in this repo sweeps markdown, so a number written
@@ -25,16 +26,26 @@ pull request.
 
 **A view option is byte-identical when off, or it is not a view option.**
 
-**No guard holds this split. It is a discipline held by review.** `recipeFromSvg` rebuilds the
+**No guard holds this split, and the red you do get does not name it.** `recipeFromSvg` rebuilds the
 recipe from its own fixed field list, so a view option stamped as an extra attribute is read back by
-nobody and every test stays green. What `test/render/recipe-meta.test.ts` does hold is that every
+nobody and `test/render/recipe-meta.test.ts` stays green. What that file holds is that every
 `WorldRecipe` field round-trips, and that an absent optional recipe field leaves a chart's bytes
-unchanged. Both are adjacent to the rule and neither is the rule. Treat a new option's
-classification as a review question, because nothing else will catch it.
+unchanged. Both are adjacent to the rule and neither is the rule.
 
-**Generating a thing is not the same as stamping it.** Every world conjures its sea beast whether or
-not any chart draws one: `conjureBestiary` in `src/society/bestiary.ts` runs on its own named fork,
-and `beasts` is a field of `World` in `src/world/types.ts`. What makes the bestiary a view option is
+**What does go red is the hero drift guard, structurally, and its message points somewhere else.** A
+new root attribute changes the committed charts' skeleton, so `test/site/hero-charts.test.ts` fails
+and tells you to run the chart regen. A session that reads that red as unrelated drift will regen,
+go green, and ship a view option stamped into world identity. **Read a structural drift red as a
+question about what you just stamped, before you treat it as a regen**, and see `specs/rulebook.md`
+for why a regen bundled into a feature branch is the wrong move regardless.
+
+Treat a new option's classification as a review question, because nothing else will name it for you.
+
+**Generating a thing is not the same as stamping it.** A world conjures its sea beast whether or not
+any chart draws one: `conjureBestiary` in `src/society/bestiary.ts` runs on its own named fork, and
+`beasts` is a field of `World` in `src/world/types.ts`. A world with no true deep sea conjures none,
+so that field can be empty and a consumer checks rather than assumes. What makes the bestiary a view
+option is
 that it is absent from the recipe and its drawing is gated by an option of `renderMap` in
 `src/render/map-renderer.ts`. The render options on that function are the live examples to copy.
 
@@ -158,10 +169,12 @@ sides.** Lake and sea detection, drainage, sea naming and compass placement all 
 `src/hydrology/sea-mask.ts` are two of the leaners. Breaking the border guarantee breaks all of them
 at once, which is why true off-edge land is a rework of the edge treatment rather than an option.
 
-**Do not cite the border tests as covering the land fraction.** `test/terrain/heightfield.test.ts`
-holds one recipe and sweeps the coast warp; it never varies the land fraction, and the test whose
-name most suggests the guarantee asserts only that the border sits below the interior. The guarantee
-rests on the edge sink and the falloff, corroborated by measurement. State it that way.
+**Do not cite the border tests as covering the land fraction.** The border tests in
+`test/terrain/heightfield.test.ts` hold one recipe and sweep the coast warp, and none of them varies
+the land fraction. Other tests in that same file do vary it, for other claims, so cite the border
+tests and not the file. The strongest of them asserts the land mask is zero along all four borders,
+at a single land fraction. The guarantee itself rests on the edge sink and the falloff, corroborated
+by measurement. State it that way.
 
 **The candidate path if the deferral is ever revisited** is the regional survey, which generates an
 edge-spanning window as a `World` in its own right: `generateRegionWorld` in `src/world/region.ts`.
@@ -189,15 +202,19 @@ assume they agree. `src/render/place-card.ts` is the worked case.
 
 **The gazetteer's row order is what keeps the bound atlas byte-stable.** `gazetteerOrder` in
 `src/atlas/compose.ts` sorts by settlement rank and then by name with `localeCompare`, so that
-stability rests on the runtime's default collation rather than on a fixed one. It is pinned in
-`test/atlas/compose.test.ts` by a test that derives its expectation rather than reading the composer
-back to itself.
+stability rests on the runtime's default collation rather than on a fixed one. **The order is
+pinned; the collation is not.** `test/atlas/compose.test.ts` derives its expectation rather than
+reading the composer back to itself, which is what makes it a real pin on rank-then-alphabetical,
+but it derives that expectation with `localeCompare` too, so both sides would move together under a
+different collation and the pin cannot see it.
 
-**A ribbon result falls back to the capital's road, with no notice.** `ribbonResultFor` in
+**A ribbon result substitutes the capital's departure without announcing it.** `ribbonResultFor` in
 `src/site/explorer/ribbon-job.ts` reassigns the departure to the capital when `roadReachable` in
-`src/itinerary/route.ts` returns nothing. **So any surface offering "the road from X" owes a check
-that X has a road, and carries that answer.** A non-empty result is not evidence that the asked-for
-departure was honoured.
+`src/itinerary/route.ts` returns nothing. The substitution is detectable in the result, which
+carries the resolved departure index and name and a per-option road flag, but nothing raises it and
+nothing fails. **So any surface offering "the road from X" owes a check that X has a road, and
+carries that answer.** A non-empty result is not evidence that the asked-for departure was honoured;
+compare the resolved departure against the one you asked for.
 
 **A ribbon event can sit at a road's exact end**, past the arrival waypoint, where a half-open strip
 filter drops it. `stripFor` in `src/itinerary/dress/layout.ts` tests a half-open interval, so
