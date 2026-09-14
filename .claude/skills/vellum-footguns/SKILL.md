@@ -133,7 +133,7 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
    `top` makes `undefined >= n` quietly false) are the first suspects when a probe surprises you.
 10. **A red is yours until proven a flake.** Re-run ONCE, alone, never two PRs concurrently; a
     second red is a defect. Put the payload and what to capture next in a PR comment; never re-run it
-    away. **Give it a row in `specs/flake-record.md` BEFORE you re-run**, one row per failure with the
+    away. **Give it a row in `references/flake-record.md` BEFORE you re-run**, one row per failure with the
     run id, the payload and the disposition: #578 found CD7b had failed this way three times and that
     reconstructing even that cost a forty-run dig. A flaky check biting a content-only PR keeps
     measuring and logging but stops asserting, with the issue number at the line.

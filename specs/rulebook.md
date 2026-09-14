@@ -14,8 +14,8 @@ Five other places carry what this one deliberately does not:
   no em-dashes, measure before you assert, and what each subagent is for.
 - **`specs/development-workflow.md`** holds the order those steps happen in, from a filed issue to a
   pull request, and which subagent runs at which point in it.
-- **`specs/flake-record.md`** holds every CI red believed to be a flake, one row per failure, with
-  the run id, the payload and what was done about it.
+- **`.claude/skills/vellum-footguns/references/flake-record.md`** holds every CI red believed to be a
+  flake, one row per failure, with the run id, the payload and what was done about it.
 - **`RESUME-HERE.md`** (local, per-session, gitignored) is the hot pointer to where we are right now.
 
 Its siblings under `specs/` hold what this file is not about: `ui-design.md` the look and feel
@@ -25,9 +25,8 @@ not assume, `explorer-doctrine.md` the living chart over the baked sheet (the en
 host contract, the camera and gesture, counter-scale, the overlay lifecycle),
 `region-and-voyage.md` its other half (region sheets, level of detail, the voyage),
 `site-architecture.md` how the site is authored, bundled, discovered and shipped,
-`development-workflow.md` the sequence a change moves through, `settle-doctrine.md` how an e2e
-wait is written and what the harness environment does, and `flake-record.md` the dated ledger of CI
-reds believed to be flakes.
+`development-workflow.md` the sequence a change moves through, and `settle-doctrine.md` how an e2e
+wait is written and what the harness environment does.
 
 ## How to read and update this file
 
@@ -471,5 +470,6 @@ guarantees), to `specs/explorer-doctrine.md` (the living chart, its camera and i
 `specs/region-and-voyage.md` (region sheets, level of detail, the voyage), to
 `specs/site-architecture.md` (how the site is authored and shipped), to
 `specs/development-workflow.md` (the order of operations), to `specs/settle-doctrine.md` (how an e2e
-wait is written, and what the harness environment does), and to `specs/flake-record.md` (the CI reds
-believed to be flakes). Rules change rarely; when one does, edit this file.*
+wait is written, and what the harness environment does), and to the flake record at
+`.claude/skills/vellum-footguns/references/flake-record.md` (the CI reds believed to be flakes).
+Rules change rarely; when one does, edit this file.*

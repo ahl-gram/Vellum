@@ -1,209 +1,133 @@
 # Vellum: Project Instructions
 
 Procedural fantasy-atlas generator (TypeScript, Node 24+ native type-stripping). Working context
-lives in `RESUME-HERE.md` (start here) and `session-notes/SESSION-NOTES.md` (history; its rotated
-`SESSION-NOTES-ARCHIVE-*` files sit beside it), both gitignored. **Durable facts and gotchas live in
-auto-memory, split across linked files**: `project_vellum.md` is the core (identity, the golden /
-re-roll contract, engine + render gotchas, process), `project_vellum_site.md` is the delivery layer
-(pages, shell, bundles, CI, deploy), `project_vellum_livingchart.md` is everything the Explorer
-animates (Glass zoom, region worlds, overlays, the voyage), and `project_vellum_landfall.md` is the
-Landfall epic (#454), the full-site redesign around the atelier-map mockup and the process that
-shipped it. Read the core plus whichever companion your work touches. The live PLAN is the private
-GitHub Project "Vellum Roadmap" (`gh project item-list 1 --owner ahl-gram`): the Project is the
-plan, and there is no local plan file.
+lives in `RESUME-HERE.md` (start here) and `session-notes/SESSION-NOTES.md` (history), both
+gitignored. **Durable facts and gotchas live in auto-memory**, split across `project_vellum.md` (the
+core), `project_vellum_site.md` (the delivery layer), `project_vellum_livingchart.md` (everything the
+Explorer animates) and `project_vellum_landfall.md` (the Landfall epic, #454): read the core plus
+whichever companion your work touches. The live PLAN is the private GitHub Project "Vellum Roadmap"
+(`gh project item-list 1 --owner ahl-gram`), and there is no local plan file.
 
-**`specs/` holds the tracked, normative house specs, and unlike everything above it is public and
-readable by anyone with the repo.** `specs/rulebook.md` is the sequencing rules, working agreements
-and how a design decision gets made; `specs/ui-design.md` is the look and feel itself (the ground,
-the type case, the palette by role, the chart's dress, the rooms and their furniture, the voice,
-contrast, gesture, motion and ceremony, and the cascade traps this codebase keeps hitting);
-`specs/engine-invariants.md` is what the generator guarantees about a world, what breaks those
-guarantees silently, and what a surface that quotes generated output may not assume about it;
-`specs/explorer-doctrine.md` is the living chart over the baked sheet: the engine boundary and what
-a host page owes it, the camera and gesture contracts, counter-scale, and the overlay lifecycle;
-`specs/region-and-voyage.md` is its other half: what a region sheet may do that a world sheet may
-not, how a finer view is built and what it guarantees, and how the voyage splits worker from client;
-`specs/site-architecture.md` is how the site is authored, bundled, discovered and shipped: the page
-model and the rosters a page joins, what the build does to authored markup and what that costs a
-test, the two forms that fail silently when written any other way, and the deploy model;
-`specs/development-workflow.md` is the order of operations from a filed issue to a pull request,
-including which subagent runs at which step and the one place the work stops for Alex's ruling;
-`specs/settle-doctrine.md` is how an e2e wait is written and what the harness environment it runs in
-actually does, ratified across #526, #529 and #589 and pointed at by the footguns skill's Gate 2;
-and `specs/flake-record.md` is the dated ledger of every CI red believed to be a flake, one row per
-failure, which is what you consult instead of pressing re-run.
-**`specs/rulebook.md` is REQUIRED READING before any change that touches the renderer, a committed
-chart, the golden, a regen, a seed, or the order of work**, `specs/ui-design.md` before any work
-whose deliverable is an appearance, `specs/engine-invariants.md` before any change to world
-generation or to a surface that quotes generated output, `specs/explorer-doctrine.md` before any
-work on the Explorer or on a chart camera, gesture or overlay, `specs/region-and-voyage.md` before
-any work on a region sheet, level of detail, or the voyage, `specs/site-architecture.md` before
-adding or restructuring a page, a stylesheet, a bundle or an inlined script,
-`specs/development-workflow.md` before starting a sub or an epic, since its early steps are the ones
-a session cannot go back and take later, and `specs/settle-doctrine.md` before any work that writes
-an e2e wait, settle, or CDP probe, or that reads a screenshot, a focus state or a narrow viewport in
-the harness. None of them is summarized here; where this file and a spec disagree, the spec is
-right. The ruled pixels those specs were decided from are archived under `design/`, one directory
-per design round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting).
+**`specs/` holds the tracked, normative house specs, and unlike everything above they are public.**
+None is summarized here; where this file and a spec disagree, the spec is right. Each is REQUIRED
+READING before the work its row names.
 
-These refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project specifically.
+| spec | what it holds | read it before |
+|---|---|---|
+| `specs/rulebook.md` | the sequencing rules, working agreements, and how a design decision gets made | any change touching the renderer, a committed chart, the golden, a regen, a seed, or the order of work |
+| `specs/ui-design.md` | the look and feel itself: the ground, the type case, the palette by role, the chart's dress, the rooms, the voice, contrast, gesture, motion, and the cascade traps this codebase keeps hitting | any work whose deliverable is an appearance |
+| `specs/engine-invariants.md` | what the generator guarantees about a world, what breaks those guarantees silently, and what a surface quoting generated output may not assume | any change to world generation, any surface that quotes it, and any script that measures a world |
+| `specs/explorer-doctrine.md` | the living chart over the baked sheet: the engine boundary and what a host page owes it, the camera and gesture contracts, counter-scale, the overlay lifecycle | any work on the Explorer or on a chart camera, gesture or overlay |
+| `specs/region-and-voyage.md` | its other half: what a region sheet may do that a world sheet may not, how a finer view is built and what it guarantees, how the voyage splits worker from client | any work on a region sheet, a level of detail, or the voyage |
+| `specs/site-architecture.md` | how the site is authored, bundled, discovered and shipped: the page model, the rosters a page joins, what the build does to authored markup, the two forms that fail silently | adding or restructuring a page, a stylesheet, a bundle or an inlined script |
+| `specs/development-workflow.md` | the order of operations from a filed issue to a pull request, which subagent runs at which step, and the one place the work stops for Alex's ruling | starting a sub or an epic, since its early steps are the ones a session cannot go back and take later |
+| `specs/settle-doctrine.md` | how an e2e wait is written, and what the harness environment it runs in actually does | any e2e wait, settle or CDP probe, and any screenshot, focus state or narrow viewport read in the harness |
+
+The ruled pixels those specs were decided from are archived under `design/`, one directory per design
+round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting). These refine the
+workspace rules in `~/CodeProjects/CLAUDE.md` for this project specifically.
 
 ## What is tracked, and who this file assumes
 
-**This file is TRACKED in the repo.** It is project instructions, so it belongs with the project.
-`RESUME-HERE.md`, `session-notes/` and `.claude/settings.local.json` stay gitignored: those are
-per-session state and personal settings, not instructions. `.claude/agents/`, `.claude/skills/` and
-`.claude/settings.json` (the footgun hook) are tracked.
-
-Because it is tracked, **editing it now costs a branch and a PR** like any other tracked file (main
-requires both CI checks and enforces them for admins). Budget for that before adding a rule
-mid-session.
+**This file is TRACKED in the repo.** `RESUME-HERE.md`, `session-notes/` and
+`.claude/settings.local.json` stay gitignored: per-session state and personal settings, not
+instructions. `.claude/agents/`, `.claude/skills/` and `.claude/settings.json` (the footgun hook) are
+tracked. Because it is tracked, **editing it costs a branch and a PR** (main requires both CI checks
+and enforces them for admins); budget for that before adding a rule mid-session.
 
 **If you are not Alex, several things this file points at are not yours to read**: the auto-memory
-files, the private "Vellum Roadmap" GitHub Project, the claude-config backup, the workspace rules at
-`~/CodeProjects/CLAUDE.md`, and the gitignored `RESUME-HERE.md` and `session-notes/`. Skip those and
-use the repo itself plus the GitHub issues, which are public and carry the ratified decisions. The
-engineering rules below (measure before you assert, read the issue before you build, test-first)
-stand on their own and are the part worth having, as do the tracked specs under `specs/`.
+files, the private roadmap Project, the claude-config backup, `~/CodeProjects/CLAUDE.md`, and the
+gitignored `RESUME-HERE.md` and `session-notes/`. Skip those and use the repo plus the GitHub issues,
+which are public and carry the ratified decisions. The rules below and the specs stand on their own.
 
 ## Session handoff: keep the roadmap Project current
 
-The live roadmap is the private GitHub Project "Vellum Roadmap" (project number 1 under
-`ahl-gram`), grouped by a single-select "Roadmap" field. **Read the phase options from the board,
-never from here**: `gh project field-list 1 --owner ahl-gram`. A copy here would cost a PR to
-update and sit beside the command that replaces it, and every such convenience copy in this
-workspace has drifted (the workspace's `PROJECTS.md` was retired for it). At every handoff, keep
-the board current with `gh`: newly filed issues get added and phased; shipped issues get closed.
-The global `session-handoff` skill updates SESSION-NOTES (here at
-`session-notes/SESSION-NOTES.md`, not the repo root), RESUME-HERE, and auto-memory
-but does NOT know about the Project, so this is the Vellum-specific extra step. **A rule change
-EDITS `specs/rulebook.md`** in a branch and a PR, as readily for a corrected fact as for a changed
-rule, and may leave a dated comment on the originating issue as the audit trail.
+The live roadmap is the private Project "Vellum Roadmap" (number 1 under `ahl-gram`), grouped by a
+single-select "Roadmap" field. **Read the phase options from the board, never from here**. At every
+handoff keep it current: newly filed issues added and phased, shipped issues closed. The global
+`session-handoff` skill updates SESSION-NOTES (at `session-notes/SESSION-NOTES.md`, not the repo
+root), RESUME-HERE and auto-memory but does NOT know about the Project, so this is the Vellum extra
+step. **A rule change EDITS `specs/rulebook.md`** in a branch and a PR, as readily for a corrected
+fact as for a changed rule, and may leave a dated comment on the originating issue as the audit trail.
 
-`gh project` needs the `project` token scope (`gh auth refresh -s project`). Read the plan at
-session start with `gh project item-list 1 --owner ahl-gram`, or open the Project in the browser.
-Adding + phasing an item: `gh project item-add 1 --owner ahl-gram --url <issue-url> --format json`
-gives the item id. The project, field and phase-option ids are NOT written down here (the board is
-private, this file is public); look them up once per session, they are stable:
+`gh project` needs the `project` token scope (`gh auth refresh -s project`). The project, field and
+phase-option ids are NOT written here (the board is private, this file is public); look them up once
+per session, they are stable:
 
 ```
+gh project item-list 1 --owner ahl-gram                    # the plan, at session start
 gh project view 1 --owner ahl-gram --format json           # .id -> the project id
-gh project field-list 1 --owner ahl-gram --format json     # the "Roadmap" field's .id, and its
-                                                           # .options[].id for each phase
+gh project field-list 1 --owner ahl-gram --format json     # "Roadmap" .id, and .options[].id per phase
+gh project item-add 1 --owner ahl-gram --url <issue-url> --format json   # -> the item id
 gh project item-edit --id <item> --project-id <project-id> \
   --field-id <field-id> --single-select-option-id <phase-option-id>
 ```
 
 ## Bold delight is welcome: relax "touch only what you're asked"
 
-The workspace non-negotiable "touch only what you're asked to touch" is **relaxed here when a
-change adds fun or delight to the user experience**: the charts, the Explorer, the site, the
-generated worlds. If you spot a chance to make the output more beautiful, more surprising, or
-more polished, take it: go **bold** rather than minimal.
-
-The one requirement: **flag it clearly for Alex's follow-up** so he is aware of what changed and
-why, especially when it was not asked for. Call it out explicitly in your reply (do not bury it).
-
-This relaxes scope-minimalism ONLY. It does NOT relax correctness, determinism, the golden /
-re-roll discipline, the test-first requirement, or security. Delight that breaks the byte-identity
-contract or skips tests is not delight.
+The workspace non-negotiable "touch only what you're asked to touch" is **relaxed here when a change
+adds fun or delight to the user experience**: the charts, the Explorer, the site, the generated
+worlds. If you spot a chance to make the output more beautiful, more surprising or more polished,
+take it: go **bold** rather than minimal. The one requirement: **flag it clearly for Alex** in your
+reply and in the PR body, never buried. This relaxes scope-minimalism ONLY, never correctness,
+determinism, the golden and re-roll discipline, the test-first requirement, or security. Delight that
+breaks the byte-identity contract or skips tests is not delight.
 
 ## Dependencies are a normal choice, not a constraint
 
-The **engine** tree that Node runs directly has no runtime deps; the **site** takes them where they
-earn their keep, bundled by Vite (`dependencies` in package.json is the live list, so read it rather
-than a copy). Neither half is a design goal or a rule to preserve. Treat an external dependency like
-any other choice, weighed on its own merits in normal review (bundle size, supply-chain surface, and
-the "Node runs the TypeScript directly, no build step" property it might cost). Do NOT reject or
-contort a design just to keep the count at zero, and do not present zero-dep as a requirement it is
-not. If a dependency is the right tool, propose it plainly with its tradeoffs and let Alex decide.
+The **engine** tree Node runs directly has no runtime deps; the **site** takes them where they earn
+their keep, bundled by Vite (`dependencies` in package.json is the live list, so read it rather than a
+copy). Neither half is a design goal. Weigh a dependency on its merits in normal review (bundle size,
+supply-chain surface, and the "Node runs the TypeScript directly, no build step" property it might
+cost). Do NOT reject or contort a design to keep the count at zero, and do not present zero-dep as a
+requirement it is not. If a dependency is the right tool, propose it plainly and let Alex decide.
 
 ## One language, one pipeline
 
-New code is **TypeScript under `src/`**, covered by `npm run check`, and reaches the browser
-only through the existing build (the Vite press bundles `src/site/` + engine; Node runs the
-engine/CLI/scripts natively). Do NOT add `.js` files outside `src/`: `public/` is static
-assets only (goldens, fonts, CSS, the icons), and a hand-authored script anywhere else needs a
-very good, stated reason (record it in the issue or a comment at the file head). The one
-grandfathered corner is the e2e harness and suites (`scripts/e2e/*.mjs`); new suites may match
-their siblings, but that convention does not extend anywhere else.
+New code is **TypeScript under `src/`**, covered by `npm run check`, and reaches the browser only
+through the existing build (the Vite press bundles `src/site/` + engine; Node runs the
+engine/CLI/scripts natively). Do NOT add `.js` files outside `src/`: `public/` is static assets only
+(goldens, fonts, CSS, the icons), and a hand-authored script anywhere else needs a very good, stated
+reason, recorded in the issue or in a comment at the file head. The grandfathered corner is the e2e
+harness and suites (`scripts/e2e/*.mjs`); new suites may match their siblings, and that convention
+extends nowhere else.
 
 ## Measure before you assert
 
-Numbers in this project are cheap to compute and easy to get wrong. Every wrong number so far was
-caught by a prediction failing to match data, never by a test.
+Numbers here are cheap to compute and easy to get wrong, and every wrong one so far was caught by a
+prediction failing to match data, never by a test.
 
-- **Before writing a number down, sanity-check it against a prediction.** If every seed yields an
+- **Sanity-check a number against a prediction before writing it down.** If every seed yields an
   identical count, if a ship sails over dry land, if two labels "overlap" without touching: the
   measurement is broken, not the world.
-- **Before writing any world-analysis scratch script, read these three traps.** Each has already
-  produced a confident wrong analysis, and the reason they are worth stating here rather than
-  leaving to review is that **none of them throws**: you get a plausible number instead of an
-  error, so nothing downstream tells you the measurement was broken.
-  - **Argument order: the seed comes FIRST.** Build a world with `defaultRecipe(seed, overrides)`
-    from `src/world/generate.ts`. Swapped arguments do not throw: `createRng` coerces a recipe
-    object to seed 0 (measured 2026-09-12: `defaultRecipe({...}, 7)` and `defaultRecipe({...}, 99)`
-    return identical recipes), so the tell is that every "seed" yields identical counts.
-  - **Chart space is not grid space.** `PlaceMark.nx/ny` (`buildPlaceManifest` in
-    `src/render/place-manifest.ts`) are 0..1 fractions of the RENDERED chart, with the frame margin
-    baked in (`MARGIN_FRACTION` in `src/render/transform.ts`, 0.045). They cannot be used to sample
-    terrain. For that use `world.settlements[i].x/y`, which is grid space; the projection is affine.
-  - **A `Field` is not a `Float64Array`.** `world.elev` is a `Field` (`Field` in `src/core/grid.ts`)
-    and is read with `.at(x, y)`. `world.oceanDist` is a bare `Float64Array`, indexed `y * W + x`.
-    Calling `.at(x, y)` on the latter silently resolves to `TypedArray.at(x)`, which ignores the
-    second argument and returns an unrelated cell.
-- **The chart number IS the seed** (the `CHART №` line in `src/render/layers/cartouche.ts`), so
-  any screenshot identifies its world exactly. Reproduce before theorising.
+- **A script that measures a world reads `specs/engine-invariants.md` first**, for the traps that
+  hand back a plausible wrong number instead of throwing.
+- **The chart number IS the seed** (the `CHART №` line in `src/render/layers/cartouche.ts`), so any
+  screenshot identifies its world exactly. Reproduce before theorising.
 
-**Check rather than reason.** The same discipline governs claims about the REPO and the TOOLING, not
-just numbers. A claim that sounds like architecture ("comments are not on the read path", "that
-helper lives in `shared/`", "no test enforces this") is a fact with a command behind it, and the
-command is almost always one line. Reasoning that feels airtight is not evidence, and the cost of
-being wrong is not a bad number, it is a confident recommendation built on sand.
+**Check rather than reason.** The same discipline governs claims about the repo and the tooling: a
+claim that sounds like architecture ("that helper lives in `shared/`", "no test enforces this") is a
+fact with a one-line command behind it.
 
-- **Your own tool call is not evidence about the system.** The 2026-07-25 miss: `gh api
-  repos/ahl-gram/Vellum/issues/N` was used to read six issue bodies, no comment came back, and that
-  hardened into "a future session will never see a comment, so corrections must be edited into the
-  bodies." Comments are simply a different endpoint. They are read here routinely: **#202 carries a
-  25,872-character ratified decision doc as a COMMENT**, and `test/site/astro-scaffold.test.ts`
-  names that comment as its spec. An entire recommendation rested on the shape of one query that
-  never asked. One `gh api .../issues/N/comments` would have ended it.
-- **Auto-memory is a pointer, not a citation.** In the same session `hash-sync.ts` was handed to six
-  subagents as `src/site/shared/`; it is `src/site/explorer/`. Memory recorded the filename and the
-  directory got filled in by inference. Before writing a path, `ls` it.
-- **The tell is confidence with no command behind it.** Before asserting what a tool returns, where
-  a file lives, what a test enforces, or what a future session will see, name the command whose
-  output you actually read. If you cannot name one, you are reasoning, and the fix is to go run it.
-- **It pays in both directions.** The same pass rejected a subagent's claim that the 400-line file
-  guideline had disappeared (it is in `.claude/rules/coding-style.md`, not this file) and its count
-  of 7 `window.__vellum*` hooks (there are 12). Both would otherwise have shipped into a planning
-  document as fact.
-- **A claim about your own work is a claim like any other.** "Delivered", "one line", "that will
-  be fast" are predictions, and they are the ones no command ever gets run against. Before
-  reporting a feature done, name the command whose green output says so; before sizing a fix, make
-  the edit or read the call sites. When you must state something you have not run, prefix it
-  UNVERIFIABLE, the word `vellum-spec-recon` already uses for a claim with no command behind it.
-  Do not coin a second token for it: one vocabulary, used the way the agent that owns it uses it.
+- **Your own tool call is not evidence about the system.** A query that did not ask (the issue body
+  endpoint, which carries no comments) settles nothing about what exists.
+- **Auto-memory is a pointer, not a citation.** Before writing a path, `ls` it.
+- **The tell is confidence with no command behind it.** Before asserting what a tool returns, where a
+  file lives or what a test enforces, name the command whose output you read.
+- **A claim about your own work is a claim like any other.** "Delivered", "one line", "that will be
+  fast" are predictions. Name the command whose green output says so, and where you genuinely cannot
+  run one, write UNVERIFIABLE, the word `vellum-spec-recon` uses. Do not coin a second one.
 
 ## Read the issue before you build
 
-Epics and their subs carry their ratified decisions, architecture, and gotchas **in the issue
-itself**, not in this file and not in the roadmap. Read the epic, then the sub, before writing code.
+Epics and their subs carry their ratified decisions, architecture and gotchas **in the issue itself**,
+not in this file and not in the roadmap. Read the epic, then the sub, before writing code.
 
-**"The issue" means the body AND its comments, and the comments usually win.** A ratified decision
-doc or a re-baseline is routinely posted as a COMMENT, with the body deliberately left as written so
-the original intent survives. **The body will typically not tell you that comment exists.** #203's
-body never mentions one, yet the spec that sub was built and tested against is the 2026-07-21
-comment on #202 (25,872 characters), which `test/site/astro-scaffold.test.ts:12` names as its spec.
-The Reading Room works the same way: the 2026-07-25 re-baseline, correcting 73 stale claims across
-#190 and its five subs, exists ONLY as comments.
-
-So fetch both, every time. Newest ratified statement wins, and **when a comment and the body
-disagree the comment supersedes** unless it says otherwise. That is the whole point of the
-convention: a body written before a big epic landed is historical intent, not current fact.
-
-**The rulebook is not an issue at all**: it is `specs/rulebook.md`. Issue #193 is a pointer whose
-comments are history; do not read them to learn the rules and do not add rules there.
+**"The issue" means the body AND its comments, and the comments usually win.** A ratified decision doc
+or a re-baseline is routinely posted as a COMMENT, with the body deliberately left as written so the
+original intent survives, and **the body will typically not tell you that comment exists**. Fetch
+both, every time; where a comment and the body disagree the comment supersedes unless it says
+otherwise.
 
 ```
 gh api repos/ahl-gram/Vellum/issues/N            # the body
@@ -211,116 +135,63 @@ gh api repos/ahl-gram/Vellum/issues/N/comments   # decisions, ratifications, re-
 ```
 
 **`gh issue view N` silently returns EMPTY for some issues here** (exit 0, no output), which is why
-both of those are the `api` form. Never conclude an issue is empty from `gh issue view`.
-
-**Remind Alex of any open decision in an issue and get his call before implementing it.**
-
-**Run the `vellum-spec-recon` subagent at the start of any sub or epic.** It fetches body AND comments,
-verifies every cited path, symbol, test name and count with a command, and returns a
-CURRENT / STALE / UNVERIFIABLE ledger plus the open decisions awaiting Alex. It exists because
-#132 (6 of 7 subs stale) and #190 (73 stale claims, 20 blocking) each cost a 12 to 13-agent
-audit built from scratch.
-
-## Thresholds and test guards
-
-A bound taken from one run is a bound that fits one machine. Neither rule here is new practice; they
-are written down because nothing said so, and a session that reinvents them reinvents them smaller.
-
-- **Derive the bound, then sweep to corroborate it.** Where a principle gives the number, the
-  principle IS the bound and the sweep only confirms it holds: `BOUND = RDP_EPSILON + 0.5` in
-  `test/render/voyage-route.test.ts` is half-cell geometry, and the worst case over seeds 1..40 is
-  what shows the geometry was right, not what the bound was fitted to. Where no principle exists,
-  sweep first and set the bound above the worst case with the headroom named. Either way do not fix
-  a sample size in advance, and treat a handful of local runs as the shape that passes on a Mac and
-  flakes on linux CI. A bound fitted to 40 samples with nothing behind it breaks on the 41st.
-- **The provenance goes in ONE line at the constant**, dated, naming the range swept and the worst
-  case: `test/prospect/input.test.ts` carries the form, "measured 2026-08-09: 305/307 settlements,
-  seeds 1-12". This is the "no test can practically pin it" carve-out of the comment rule below,
-  not an exemption from it: a wrapped block listing individual runs is the exact tell that names.
-- **A guard proves it can fail; a scanner proves which way it errs.** A guard that could pass
-  vacuously carries the witness that makes it bite, named at the test (`heightfield-detail.test.ts`
-  keeps the one seed of 120 that does). A scanner cannot enumerate its own blind spots, so it names
-  them and argues the direction instead: `test/repo/comment-citations.test.ts` reads a `//` inside a
-  string literal as a comment and says so, because that costs a false positive at worst and never a
-  miss. An unnamed blind spot with no direction argued is the bug.
+both are the `api` form. **The rulebook is not an issue at all**: it is `specs/rulebook.md`, and #193
+is a pointer whose comments are history. **Remind Alex of any open decision and get his call before implementing it**, and **run
+`vellum-spec-recon` at the start of any sub or epic**: it verifies every cited path, symbol, test name
+and count with a command and returns a CURRENT / STALE / UNVERIFIABLE ledger plus what awaits Alex.
 
 ## Process
 
-**The gates, one skill: `vellum-footguns`** (`.claude/skills/vellum-footguns/SKILL.md`). Invoke it
-at the moment you are about to write a test or guard, an e2e check or CDP probe, a CSS rule, anything
-that joins a roster, anything that can move a chart or the golden, or a PR body. The rules below and the memory doctrine files are the narrative;
-the skill is the same doctrine as a checklist read at the moment it applies, because its
-`references/scars.md` shows how narrative read at session start and applied at the push let the same
-guard-that-cannot-red, dead-control and cascade defects reach PRs #524 to #548. Its
-`hooks/footgun-gate.ts`, wired in `.claude/settings.json`, puts the matching gate in front of you when
-you touch a test, a browser-driving script, a stylesheet, a new page or suite, or a push, and refuses
-the mechanical never-list items outright, the ones `hooks/README.md` enumerates.
+**The gates, one skill: `vellum-footguns`** (`.claude/skills/vellum-footguns/SKILL.md`). Invoke it at
+the moment you are about to write a test or guard, an e2e check or CDP probe, a CSS rule, anything
+that joins a roster, anything that can move a chart or the golden, or a PR body. This file and the
+specs are the narrative; the skill is the same doctrine as a checklist read at the moment it applies,
+which is the difference that stopped the same defects reaching PR after PR. Its
+`hooks/footgun-gate.ts`, wired in `.claude/settings.json`, puts the matching gate in front of you and
+refuses the mechanical never-list items outright.
 
-- Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks you to
-  (ruled 2026-09-10). The whole order of operations, and which of the agents below runs at which
-  step, is `specs/development-workflow.md`.
-- **`vellum-implementer` runs one issue through that sequence in its own worktree** (Opus, xhigh),
-  stopping where the sequence stops for Alex's ruling and handing the menu to the dispatching
-  session, which puts it to him and relays his answer; it never merges. Use it one lane per issue
-  when a session orchestrates several at once, or for a single issue the session wants run without
-  its own context in it. Every project agent under `.claude/agents/` sets `effort: xhigh` in its
-  frontmatter (Alex, 2026-09-13), because the sub-agents docs' frontmatter table says an agent
-  without one inherits the session's level. The check is `echo $CLAUDE_EFFORT` inside a dispatched
-  agent, run from a session at a level OTHER than xhigh: it prints the effective level, so a session
-  already at xhigh cannot tell the frontmatter from inheritance.
-- **Run the `vellum-plan-skeptic` subagent on the plan, before the decisions go to Alex.** Dispatch
-  it with the issue number, the plan, and `vellum-spec-recon`'s ledger if recon ran this session
-  (ruled 2026-09-10), and nothing else. A plan's claims are predictions, which are
-  the claims no command is ever run against, and a wrong assumption in a plan becomes the shape of
-  the code, after which the tests are written to fit it. Its findings can change what Alex is asked,
-  which is why it runs before the menu and not after.
-- **When asking Alex to make an open decision** (on a feature, a bug, a test, anything else),
-  explain the context and what you need from him in simple terms, so he can have a good
-  understanding of what he is deciding: no jargon, no overly technical language, no acronyms.
-  Put it in the AskUserQuestion menu rather than in prose, so he picks an option and reads its
-  consequence instead of answering paragraphs, and STOP there. A decision that is his is not one
-  to default your way and mention afterwards. A dispatched `vellum-implementer` lane cannot reach
-  him, so it hands the menu to its dispatcher at the same STOP and the dispatcher asks.
+**The order of operations is `specs/development-workflow.md`**, and it names which subagent runs at
+which step: `vellum-spec-recon` at the start, `vellum-plan-skeptic` on the plan before the decisions
+go to Alex, `vellum-guard-prover` on every new or strengthened guard before the PR,
+`vellum-plate-reader` when the deliverable is an appearance, and `vellum-pr-skeptic` COLD on every
+pushed PR. A review agent never posts to GitHub: relay its report in your reply and **let Alex decide
+what lands on the PR**. `vellum-implementer` runs one issue through that sequence in its own tree.
+Every
+project agent under `.claude/agents/` sets `effort: xhigh` in its frontmatter (Alex, 2026-09-13),
+because an agent without one inherits the session's level.
+
+- Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks.
 - **Write the failing test first.** It must fail on the assertion you care about, not on a missing
   module.
-- **Run the `vellum-guard-prover` subagent on new or strengthened guards before opening the PR.** It
-  mutates one behavior at a time in its own throwaway worktree and reports which single test went
-  red. A green suite is not evidence: #73's fork mutant escaped all 340 tests, #141's gate mutation
-  escaped all 409, and #140 shipped three guards that were deletable. Zero red is a hole, not a pass.
-  A guard PROVED unable to bite is absent rather than weak, so delete it instead of shipping it. A
-  mutation you merely did not reach inside the budget is unproven, not dead: name it in the report,
-  the way that agent already asks, and never read a timed-out run as a licence to drop coverage.
-- **Run the `vellum-pr-skeptic` subagent on every PR after it is pushed, before asking Alex to review.**
-  Dispatch it COLD: the prompt is the PR number or branch name and NOTHING else, no summary of the
-  work and no claims about it. It is agnostic (a fresh context that reconstructs the spec from the
-  issue and the diff, never from the implementing session) and adversarial (it returns ranked
-  findings or a documented failed attack, never approval). It never posts to GitHub, and it writes
-  nothing outside the scratch worktree it builds and tears down itself; relay its report in your
-  reply and let Alex decide what lands on the PR.
-- **No em-dashes** in issue bodies, PR bodies, published copy, or new code comments.
-- **Comments are the exception, not the rule.** A behavior a test already pins needs no comment:
-  the test is the record, delete the prose. A local invariant (byte-identity, an ordering
-  contract) earns a test first; only when no test can practically pin it (cross-platform float
-  drift, hand-measured browser quirks) does it keep a single-line comment at the line that breaks.
-  **NO test enforces this** (#384 built one and withdrew it; see PR #385 for the design and the
-  measurements if it is ever worth another try). `vellum-pr-skeptic` is the only gate, and it runs
-  after the code is written, so the discipline at authoring time is still yours. The house writes a
-  comment as ONE long line, not a wrapped block: a wrapped multi-line comment mid-file is the
-  reliable tell that the prose is restating something a test already pins.
+- **Zero red from the prover is a hole, not a pass.** A guard proved unable to bite is deleted rather
+  than shipped; a mutation not reached inside the budget is unproven, and is named as such.
+- **A guard proves it can fail; a scanner proves which way it errs.** A guard that could pass
+  vacuously names the witness that makes it bite, at the test. A scanner cannot enumerate its own
+  blind spots, so it names them and argues the direction instead, and an unnamed blind spot with no
+  direction argued is the bug.
+- **When asking Alex to make an open decision**, explain it in plain words, no jargon and no acronyms,
+  in an `AskUserQuestion` menu rather than in prose, and STOP there. A decision that is his is not one
+  to default your way and mention afterwards. A dispatched `vellum-implementer` lane cannot reach him,
+  so it hands the menu to its dispatcher at the same STOP.
+- **No em-dashes** in issue bodies, PR bodies, published copy or new code comments.
+- **Comments are the exception, not the rule.** A behavior a test pins needs no comment: the test is
+  the record, delete the prose. A local invariant earns a test first; only where no test can
+  practically pin it (cross-platform float drift, hand-measured browser quirks) does it keep a single
+  line at the line that breaks. NO test enforces this and `vellum-pr-skeptic` runs after the code is
+  written, so the discipline at authoring time is yours. The house writes a comment as ONE long line:
+  a wrapped block mid-file is the tell that the prose restates what a test already pins.
 
 ## Worktrees
 
 Worktrees live in `.claude/worktrees/`, which `.gitignore` ignores as a directory. Anywhere else is
 NOT ignored, and `scripts/agent-sandbox.ts` assumes that location: it links `node_modules` three
 levels up, which resolves only for a sandbox at `<root>/.claude/worktrees/<name>`. That script owns
-the sandbox for both review agents that build one, so the depth lives in one place rather than in
-each agent's prose (#575). PR #369 is what committing from a worktree costs when both go wrong.
+the sandbox for both review agents that build one, so the depth lives in one place (#575).
 
 - **EnterWorktree is the normal way in.** It branches from `origin/main` rather than local HEAD, so
-  the tree is current without a pull. One thing needs fixing by hand: any `/` in the name becomes
-  `+`, in the branch AND the directory, and the branch takes a `worktree-` prefix on top. Asking
-  for `chore/x` here gave the directory `chore+x` and the branch `worktree-chore+x`. Rename the
-  branch before the first commit, or the PR carries the harness's name instead of yours.
+  the tree is current without a pull. One thing needs fixing by hand: any `/` in the name becomes `+`,
+  in the branch AND the directory, and the branch takes a `worktree-` prefix on top. Rename the branch
+  before the first commit, or the PR carries the harness's name instead of yours.
 - **`vellum-guard-prover` is the documented exception.** It must mutate the code under review, which
   is the DISPATCH tree's HEAD and not `origin/main`, so it builds its own detached worktree with
   `node scripts/agent-sandbox.ts create guard-<topic>-<round>`. Do not point it at harness isolation.
@@ -328,65 +199,30 @@ each agent's prose (#575). PR #369 is what committing from a worktree costs when
   assets under `public/` and neither `git status` nor `git status --ignored` reports it, so no
   reviewer runs a suite in a tree it does not own. It passes the sha explicitly, which that script
   requires of a `skeptic-*` sandbox.
-- **`vellum-implementer` gets its worktree a third way**: `isolation: worktree` in its frontmatter,
-  so the harness builds and locks one at dispatch, with neither EnterWorktree nor the sandbox script
-  involved; its definition carries the branch rename. Inside such a tree, and inside any
-  EnterWorktree tree, the harness is a fence: it refuses a compound command whose `cd` goes to a
-  shell variable, any `git` run in a directory other than that worktree, and some quoted `jq` or
-  `sed` constructs it cannot parse, while a plain single command passes (measured 2026-09-13, PR
-  #582). That is why the two sandbox recipes below take `create`'s printed path literally and read
-  the sandbox's sha from its `.git` file rather than with `git rev-parse`.
-- **A dispatched review agent may not move or restore the tree it was dispatched from**, which is
-  normally your live worktree. On 2026-09-11 `vellum-pr-skeptic` checked a PR head out in two of them
-  (#573). Commit before you dispatch one: `git restore` and `git checkout -- <path>` discard without
-  leaving a reflog entry, so there is nothing to recover from afterwards.
-- **Never remove the worktree the session is standing in.** Name it for Alex and leave it. The shell
+- **`vellum-implementer` gets its worktree a third way**: `isolation: worktree` in its frontmatter, so
+  the harness builds and locks one at dispatch. Inside such a tree, and inside any EnterWorktree tree,
+  the harness is a fence: it refuses a compound command whose `cd` goes to a shell variable, any `git`
+  run in a directory other than that worktree, and some quoted `jq` or `sed` constructs it cannot
+  parse, while a plain single command passes (measured 2026-09-13). That is why the sandbox recipes
+  take `create`'s printed path literally and read the sandbox's sha from its `.git` file.
+- **A dispatched review agent may not move or restore the tree it was dispatched from**, normally your
+  live worktree. Commit before you dispatch one: `git restore` and `git checkout -- <path>` discard
+  without leaving a reflog entry, so there is nothing to recover from afterwards.
+- **Never remove the worktree the session is standing in.** Name it for Alex and leave it; the shell
   recovers to the parent when a worktree vanishes underneath it, but the cwd is lost mid-task.
-- **Other sessions hold their own worktrees here.** Leave them alone: do not remove them, commit
-  from them, or tidy them away as housekeeping. And never `git stash` bare, since the stash stack is
-  shared across every worktree in the repo and a parallel session can pop yours. Set work aside with
-  a WIP commit instead.
-
-## The e2e harness leaves a browser profile behind if you do not let it finish
-
-Every local run mints a throwaway Brave profile under `tmpdir()` (`mkdtemp` in
-`scripts/e2e/harness.mjs`) and `cleanup()` removes it. **`cleanup()` is synchronous, so it must
-delete synchronously**: it called the PROMISE `rm` without awaiting until 2026-09-08, and every
-caller exits immediately after it, so no run ever deleted its own profile (measured that day: 446
-leaked profiles, 20GB). An ad-hoc script driving the harness owes the same discipline, since
-`cleanup(); process.exit(0)` is the shape every probe here uses; if you add async teardown, await it
-before exiting, and never `pkill` a run you intend to repeat.
-
-**The tell is a lane that STALLS rather than fails**: a suite you did not touch stops writing to the
-log, the process stays alive, and there is no failing check to read. That is a starved machine, not a
-bad diff. Before hunting the diff:
-
-```
-ls -d /var/folders/*/*/T/vellum-e2e-* | wc -l          # should be 0 or 1, not hundreds
-ps aux | grep '[r]emote-debugging-port'                 # orphaned browsers from killed runs
-find /var/folders/*/T -maxdepth 1 -name 'vellum-e2e-*' -type d -mmin +30 -print0 | xargs -0 rm -rf
-```
-
-CI never sees this: the runner is thrown away each time, so the leak is local-only and accrues across
-a long session of many runs.
+- **Other sessions hold their own worktrees here.** Leave them alone, and never `git stash` bare: the
+  stash stack is shared across every worktree and a parallel session can pop yours. Set work aside
+  with a WIP commit instead.
+- **Let every local e2e run finish.** A killed run leaves its browser profile behind, and a starved
+  machine then STALLS a lane you did not touch rather than failing it; the cause, the tell and the
+  commands that clear it are `specs/settle-doctrine.md`'s environment section and Gate 2.
 
 ## Write visual samples to out/
 
-Any chart, diagnostic overlay, before/after image, or other visual artifact you write to the
-filesystem goes in the **`out/`** directory (the CLI's default output location; gitignored). That
-is where Alex looks. Name the files in your reply so they are easy to open. Do not scatter samples
-in `/tmp`, scratchpad, or other dirs he will not find.
-
-**For a presentation sub, run the `vellum-plate-reader` subagent before the PR.** Structural tests cannot
-see layout: #219's 320px sideways scroll survived 902 unit tests, 254 e2e checks and a 22-agent
-review that found nothing. vellum-plate-reader renders through CDP and returns MEASUREMENTS (scrollWidth
-vs clientWidth, resolved computed styles, bounding boxes) plus named files in `out/`, at both full
-scale and 1:1 crop, since glance properties only exist at full scale (#75). It also carries the
-traps: headless Brave `--window-size` does not set the layout viewport, so narrow-width checks
-must go through CDP.
-
-## Tombstone: the `roadmap/` dir
-
-**Deleted 2026-07-24.** Its three files were superseded drafts and two had gone dangerous, naming a
-retired checksum and a retired flight-exclusion set. They are frozen in the claude-config backup at
-`home/CodeProjects/Vellum/roadmap/` if they are ever wanted.
+Any chart, diagnostic overlay, before/after image or other visual artifact you write to the filesystem
+goes in **`out/`** (the CLI's default output location; gitignored). That is where Alex looks: name the
+files in your reply so they are easy to open, and do not scatter samples in `/tmp`, the scratchpad or
+anywhere else he will not find. **For a presentation sub, run `vellum-plate-reader` before the PR**:
+structural tests cannot see layout, and #219's sideways scroll at 320px is what got through when one
+was trusted to. It renders through CDP and returns MEASUREMENTS plus named files in `out/`, at both
+full scale and 1:1 crop, since glance properties only exist at full scale.

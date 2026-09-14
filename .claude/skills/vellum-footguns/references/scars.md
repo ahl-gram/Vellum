@@ -36,7 +36,7 @@ files named at the end.
   #545: the shut press 0% reachable, "the #520 dog-ear again". #546: the Glass bound but dead to
   touch, "the same defect one layer down"; CD7b read `reachable: 0` THREE times (runs 34305242149,
   34411380228 and 34678766918), the first re-run away and the other two left unexplained on main,
-  which #578 settled and `specs/flake-record.md` now records; it was the drawer's slide not yet
+  which #578 settled and `flake-record.md` beside this file now records; it was the drawer's slide not yet
   painted, leaving all six controls below the viewport.
   #543: the tab took 56% of every zoom press, found by Alex live.
 - *The probe itself was wrong.* #545: `getComputedStyle(child).display` on a child of a hidden
@@ -103,7 +103,8 @@ left open and the session failed to write down).
 ## Once, and expensive
 
 - #546: `cleanup()` called the promise `rm` unawaited; 446 leaked profiles, 20GB, two hours; the
-  tell is a lane that STALLS rather than fails. Now in `CLAUDE.md`.
+  tell is a lane that STALLS rather than fails. Now in `specs/settle-doctrine.md` under "The
+  environment".
 - #548: three of six sweep agents stopped before their ledger; the keeper scan found eleven
   stylesheet invariants; `ts.createScanner` reported 11 false drifts, only the full parser compares.
 - #533: a mutation that looked right and was wrong (nulling `get()` made the arm faster and the
