@@ -150,6 +150,8 @@ const FIXTURES: Fixture[] = [
   ["gh api combined short flags denied", bash("gh api repos/o/r/issues/193 -if body=x"), "deny", "bare issue or pull-request endpoint"],
   ["gh api across a line continuation denied", bash("gh api repos/o/r/issues/193 \\\n  -f body=x"), "deny", "bare issue or pull-request endpoint"],
   ["gh api a continuation still does not fuse the read-then-comment pair", bash("gh api repos/o/r/issues/193 \\\n  --jq .title; gh api repos/o/r/issues/193/comments -f body='x'"), null, ""],
+  // The third leg of the trio: a BARE newline is two separate commands, so joining any newline rather than a continuation would fuse them. Without this row that widening reds nothing.
+  ["gh api a bare newline is two commands, not one", bash("gh api repos/o/r/issues/193 --jq .title\ngh api repos/o/r/issues/193/comments -f body='x'"), null, ""],
   ["gh api two methods takes the LAST, as gh does", bash("gh api --method GET repos/o/r/issues/193 -f q=1 -X POST -f body=y"), "deny", "bare issue or pull-request endpoint"],
   ["gh api quoted body assignment denied", bash('gh api repos/o/r/issues/193 -f "body=new text"'), "deny", "bare issue or pull-request endpoint"],
   ["gh api glued short field denied", bash("gh api repos/o/r/issues/193 -fbody=x"), "deny", "bare issue or pull-request endpoint"],
