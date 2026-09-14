@@ -118,7 +118,9 @@ test("each lane runs its suites in the runner's canonical order", () => {
   }
 });
 
-test("the lanes never share a port, a debug port, or an output directory", () => {
+test("the lanes never share a name, a port, a debug port, or an output directory", () => {
+  const names = E2E_LANES.map((l) => l.name);
+  assert.equal(new Set(names).size, names.length, `two lanes share a name (${names.join(", ")}), so --lane picks one of them and the other runs in no job at all`);
   const ports = E2E_LANES.map((l) => l.port);
   const dports = E2E_LANES.map((l) => l.dport);
   const outs = ports.map(e2eOutSubdir);

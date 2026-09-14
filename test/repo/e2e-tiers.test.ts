@@ -132,7 +132,7 @@ test("every ci.yml job is bounded, so no hung job can hold a runner for hours", 
     const bound = body.match(/^ {4}timeout-minutes: (\d+)$/m);
     assert.ok(bound, `ci.yml's ${job.id} job has no timeout-minutes, so a hang there runs to GitHub's 6-hour default`);
     const minutes = Number(bound[1]);
-    // Both jobs here run a browser suite or the whole unit suite, so the floor is theirs; a cheap job added later reds on it and is meant to, since the count anchor above already forces a visit.
+    // The floor is these two jobs' own, measured 2026-09-14: worst lane job 10m05s over 12 runs of the matrix shape, worst unit job 9m00s over 18 on main. A cheaper job added later reds here deliberately, since the count anchor above already forces a visit.
     assert.ok(minutes >= 15, `${job.id}'s timeout-minutes is ${minutes}, under the worst case its own dated comment measures, plus headroom`);
     assert.ok(minutes <= 60, `${job.id}'s timeout-minutes is ${minutes}, long enough that a hang still costs an hour`);
     assert.doesNotMatch(
@@ -169,6 +169,11 @@ test("ci.yml runs one job per lane, and its matrix is exactly E2E_LANES", () => 
     body,
     /fail-fast: false/,
     "fail-fast is back on, so a red lane cancels the other one and takes its verdict with it",
+  );
+  const parallel = body.match(/^ {6}max-parallel: (\d+)$/m);
+  assert.ok(
+    parallel === null || Number(parallel[1]) >= E2E_LANES.length,
+    `ci.yml caps the lane matrix at ${parallel?.[1]} concurrent jobs against ${E2E_LANES.length} lanes, so the lanes queue behind each other and the wall clock goes back to their sum`,
   );
   assert.match(
     body,

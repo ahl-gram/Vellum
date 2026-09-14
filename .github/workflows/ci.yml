@@ -36,7 +36,7 @@ jobs:
       fail-fast: false
       matrix:
         lane: ["A", "B"]
-    # A hung lane is the one failure the outcome rule cannot catch, and this cap kills a hang rather than budgeting a run, so it sits at about twice the worst real one; re-measured 2026-09-14 over 6 runs of this shape, one lane per runner, worst lane JOB 10m05s and worst e2e step 9m16s (the 13m14s it carried before was two lanes sharing four cores).
+    # A hung lane is the one failure the outcome rule cannot catch, and this cap kills a hang rather than budgeting a run, so it sits at about twice the worst real one; re-measured 2026-09-14 over 12 runs of this shape, one lane per runner, worst lane JOB 10m05s and worst e2e step 9m16s (the 13m14s it carried before was two lanes sharing four cores).
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
