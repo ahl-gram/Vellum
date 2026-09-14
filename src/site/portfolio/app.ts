@@ -42,7 +42,6 @@ let top = 0;
 const drawnCount = (): number => sheets.filter((s) => s.svg !== null).length;
 const drawable = (): ReadonlyArray<Drawn> => sheets.filter((s) => !isAwaited(s.item));
 
-// #547 ruling 4: the same announcer the Explorer's Chart Table uses, so "is on top" leaves this chart the way a laid sheet's line leaves that one. say("") still means gone NOW, which is what the two clears below rely on.
 const say = makeAnnouncer({
   pill: status,
   after: (run, ms) => window.setTimeout(run, ms),

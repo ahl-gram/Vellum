@@ -3,6 +3,7 @@ import { makeSettle } from "./settle-support.mjs";
 import { makeStep } from "./step-support.mjs";
 import { makeStage } from "./home-support.mjs";
 import { slideRested, foldRested } from "../../src/cli/e2e-slide.ts";
+import { SAY_HOLD_MS } from "../../src/site/shared/announce.ts";
 
 const SEED = 42;
 // A camera settled deep enough to commit a band-3 inset, the same descent suite-region-detail drives.
@@ -139,15 +140,24 @@ export async function run(ctx) {
 
   // Derived 2026-09-13: SAY_HOLD_MS + SAY_FADE_MS is 8.45s (src/site/shared/announce.ts), which is 169 polls of pure sleep before a single evaluate round-trip is counted; 400 tries is 20s of sleep alone, the same order of headroom DRAWN carries for the CI runner measured 2.7x slower than local.
   const SAID_GONE = 400;
+  // A FLOOR, never a ceiling: a slow runner delays the clear and can only push this up, where a wall-clock ceiling on a runner-dependent measurement is RS30's own scar. 1s under the ruled hold covers the press, the read and the probe that stand between the announcement and the clock starting; the number moves with the constant, and the literal 8000 is pinned in test/site/announce.test.ts.
+  const HOLD_FLOOR = SAY_HOLD_MS - 1000;
   await step("CD23", async () => {
+    // The line is re-announced HERE so the clock below starts at a known press: read off whatever CD2c happened to leave, the elapsed floor measures the gap since that check instead of the hold (skeptic on PR #584).
+    await clickEar();
+    const saidAt = Date.now();
     const said = await evaluate(READ);
+    // The rule's resolved answer, not the app's timing: the class is put on with the transition suppressed inline, so the value read is the one the CASCADE gives and a later arm re-raising opacity cannot hide behind the JS clearing the text anyway (skeptic on PR #584).
+    const fadeProbe = await evaluate(`(() => { const s = document.getElementById("status"); const was = s.style.transition; s.style.transition = "none"; const rest = getComputedStyle(s).opacity; s.classList.add("fading"); const faded = getComputedStyle(s).opacity; s.classList.remove("fading"); s.style.transition = was; return { rest, faded }; })()`);
     const gone = await settle(READ, (d) => d.status === "", "chart-drawer-said-gone", SAID_GONE);
+    const waited = Date.now() - saidAt;
     check(
-      "CD23 the Chart Table's announcement leaves the chart by itself: it sat over the middle of the sheet until the reader drew another world, and shutting the drawer never took it away (#547, Alex 2026-09-08). The table is untouched as it goes, so this is the LINE leaving and not the page resetting, and the fade's own length is pinned here the way CD7c pins the drawer's slide, or a fade that regressed to five seconds would sit inside this settle's budget and pass",
+      "CD23 the Chart Table's announcement leaves the chart by itself: it sat over the middle of the sheet until the reader drew another world, and shutting the drawer never took it away (#547, Alex 2026-09-08). The table is untouched as it goes, so this is the LINE leaving and not the page resetting; the hold is floored at the eight seconds Alex ruled, which a slower runner can only lengthen and never shorten; and the fade is read twice, as the declared duration the way CD7c pins the drawer's slide, and as the opacity the cascade actually resolves under the class",
       /on the table/.test(said.status) && gone.status === "" &&
         gone.cuttings === said.cuttings && gone.open === said.open &&
-        said.statusFadeMs === "0.45s",
-      JSON.stringify({ said: said.status, after: gone.status, cuttings: [said.cuttings, gone.cuttings], open: [said.open, gone.open], fadeMs: said.statusFadeMs }),
+        said.statusFadeMs === "0.45s" && fadeProbe.rest === "1" && fadeProbe.faded === "0" &&
+        waited >= HOLD_FLOOR,
+      JSON.stringify({ said: said.status, after: gone.status, waitedMs: waited, floor: HOLD_FLOOR, cuttings: [said.cuttings, gone.cuttings], open: [said.open, gone.open], fadeMs: said.statusFadeMs, opacity: fadeProbe }),
     );
   });
 
@@ -398,8 +408,10 @@ export async function run(ctx) {
   // CD24 (#547 ruling 4, Alex 2026-09-13): the Portfolio's "is on top" was the Explorer's defect on a second page, so one shared announcer and ONE kit rule take both lines away. Named blind spot, with its direction: this does not wait the hold out, so it does not watch THIS line go. The going is the shared module (test/site/announce.test.ts) and CD23's resolved read; a second eight-second wait is what the lane's measured budget cannot buy, and the PR body carries it as residue.
   const pfNext = await evaluate(`(() => { const b = document.getElementById("pf-next"); if (!b) return null; b.scrollIntoView({ block: "center" }); const r = b.getBoundingClientRect(); if (r.width < 1) return null; const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2); const h = document.elementFromPoint(x, y); return { x, y, reachable: h === b || b.contains(h) }; })()`);
   if (pfNext) await clickAt(pfNext.x, pfNext.y);
-  await sleep(300);
-  const pfSaid = await evaluate(`(() => { const s = document.getElementById("pf-status"); return s ? { line: s.textContent || "", fadeMs: getComputedStyle(s).transitionDuration } : null; })()`);
+  const PF_SAID = `(() => { const s = document.getElementById("pf-status"); return s ? { line: s.textContent || "", fadeMs: getComputedStyle(s).transitionDuration } : null; })()`;
+  // A bounded poll and not a settle, so a Portfolio that never announces fails CD24 by name rather than throwing outside every step the way its four siblings here already run unstepped.
+  let pfSaid = await evaluate(PF_SAID);
+  for (let i = 0; i < 40 && (!pfSaid || pfSaid.line === ""); i++) { await sleep(50); pfSaid = await evaluate(PF_SAID); }
   check(
     "CD24 the Portfolio announces the sheet it brought up on a pill that wears the SAME fade the Explorer's does: its line is written by the shared announcer and the kit's one rule is keyed to the class, so a rule written against #status alone would leave this page's announcement standing over the chart forever (#547 ruling 4)",
     !!pfNext && pfNext.reachable && !!pfSaid && /is on top/.test(pfSaid.line) && pfSaid.fadeMs === "0.45s",

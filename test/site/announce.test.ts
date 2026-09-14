@@ -83,7 +83,6 @@ test("at the end of the fade the line is gone, the fade comes off with it, and n
   assert.equal(f.timers.waiting(), 0);
 });
 
-// No e2e check can see one frame. The pill is display:none while :empty (public/atelier.css), so clearing FIRST hides the box in the same tick; taking the fade off first repaints the full line at full opacity on its way out.
 test("the text is emptied BEFORE the fade comes off, so the line never flashes back at full strength (#547)", () => {
   const f = fixture();
   f.say(LINE);

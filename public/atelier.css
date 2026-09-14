@@ -15,7 +15,7 @@ body.chart-room .stage { position: fixed; inset: 0; z-index: 1; overflow: hidden
 body.chart-room .stage .status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 0.3rem 0.9rem;
   color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.55); z-index: 2; pointer-events: none;
   transition: opacity 0.45s var(--ease-paper); }
-/* An announcement leaves the chart on its own (#547): src/site/shared/announce.ts turns this on, waits this duration out, and then clears the text, so the :empty rule below takes the box out of the layout. Keyed to the class, so the Explorer's #status and the Portfolio's #pf-status both wear it. */
+/* Turned on and off by src/site/shared/announce.ts (#547). */
 body.chart-room .stage .status.fading { opacity: 0; }
 body.chart-room .stage .status:empty { display: none; }
 body.chart-room .stage noscript .status { top: calc(50% + 2.8rem); pointer-events: auto; max-width: 30rem; }
