@@ -57,6 +57,51 @@ export const E2E_LANES: readonly E2eLane[] = [
   },
 ];
 
+export const LANE_FLAG = "--lane";
+
+export function resolveLaneSelection(argv: readonly string[]): readonly E2eLane[] {
+  const names = E2E_LANES.map((l) => l.name).join(", ");
+  const asked: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i]!;
+    if (arg === LANE_FLAG) {
+      asked.push(argv[i + 1] ?? "");
+      i++;
+    } else if (arg.startsWith(`${LANE_FLAG}=`)) {
+      asked.push(arg.slice(LANE_FLAG.length + 1));
+    } else {
+      throw new Error(
+        `the lane driver does not take ${JSON.stringify(arg)}. Its only argument is ` +
+          `\`${LANE_FLAG} <name>\`, one of ${names}; with no argument it runs every lane.`,
+      );
+    }
+  }
+  if (asked.length === 0) return E2E_LANES;
+  if (asked.length > 1) {
+    throw new Error(
+      `${LANE_FLAG} was given more than once (${asked.map((a) => JSON.stringify(a)).join(", ")}). ` +
+        `One job runs one lane, so name a single lane out of ${names}, or drop the flag to run every lane.`,
+    );
+  }
+  const wanted = asked[0]!;
+  if (wanted === "") {
+    throw new Error(
+      `${LANE_FLAG} was given no lane name. Name one of ${names}, or drop the flag to run every lane.`,
+    );
+  }
+  const lane = E2E_LANES.find((l) => l.name === wanted);
+  if (!lane) {
+    throw new Error(
+      `${LANE_FLAG} ${JSON.stringify(wanted)} names a lane that does not exist. The lanes are ` +
+        `${names}, and E2E_LANES here is the only roster of them. A misspelling is refused rather ` +
+        `than run as the full set, since widening silently would spend this runner on work the ` +
+        `other job already did, and narrowing silently would report a green shard that covered ` +
+        `less than its job claims.`,
+    );
+  }
+  return [lane];
+}
+
 export interface LaneResult {
   readonly name: string;
   readonly code: number;
@@ -127,28 +172,45 @@ const laneDetail = (r: LaneResult): string => {
   return `${r.name} ${r.skipped ? "SKIPPED" : "ok"} ${took}`;
 };
 
-export function laneOutcome(results: readonly LaneResult[]): E2eOutcome {
+export function laneOutcome(
+  results: readonly LaneResult[],
+  selected: readonly E2eLane[] = E2E_LANES,
+): E2eOutcome {
   if (results.length === 0) return { ok: false, line: "FAIL: no lanes ran, so this run proves nothing." };
+  if (selected.length === 0) {
+    return { ok: false, line: "FAIL: no lanes were selected, so this run was asked to prove nothing." };
+  }
   const reported = new Set(results.map((r) => r.name));
-  const absent = E2E_LANES.filter((lane) => !reported.has(lane.name)).map((l) => l.name);
+  const stray = results.filter((r) => !selected.some((lane) => lane.name === r.name)).map((r) => r.name);
+  if (stray.length > 0) {
+    return {
+      ok: false,
+      line: `FAIL: lane ${stray.join(" and ")} reported but was never selected, so this is not the run that was asked for and its verdict belongs to some other job.`,
+    };
+  }
+  const absent = selected.filter((lane) => !reported.has(lane.name)).map((l) => l.name);
   if (absent.length > 0) {
     return {
       ok: false,
-      line: `FAIL: lane ${absent.join(" and ")} never reported, so ${results.length} of ${E2E_LANES.length} lanes ran and this run covers less than the full suite.`,
+      line: `FAIL: lane ${absent.join(" and ")} never reported, so ${results.length} of ${selected.length} lanes ran and this run covers less than the full suite.`,
     };
   }
   const tally = sumTallies(results);
   const checks = tally ? `${tally.passed}/${tally.total} checks; ` : "";
   const detail = `${checks}${results.map(laneDetail).join(", ")}`;
+  const whole = selected.length === E2E_LANES.length && E2E_LANES.every((lane) => reported.has(lane.name));
+  const scope = whole ? "" : `${selected.length} of ${E2E_LANES.length} lanes, not the full suite; `;
   const failed = results.filter((r) => r.code !== 0);
   if (failed.length > 0) {
     const which = failed.map((r) => r.name).join(" and ");
-    return { ok: false, line: `LANE ${which} FAILED  (${detail})` };
+    return { ok: false, line: `LANE ${which} FAILED  (${scope}${detail})` };
   }
   const skipped = results.filter((r) => r.skipped);
   if (skipped.length > 0) {
     const which = skipped.map((r) => r.name).join(" and ");
-    return { ok: true, line: `LANE ${which} SKIPPED, so this run proves less than a pass  (${detail})` };
+    return { ok: true, line: `LANE ${which} SKIPPED, so this run proves less than a pass  (${scope}${detail})` };
   }
-  return { ok: true, line: `ALL LANES PASS  (${detail})` };
+  if (whole) return { ok: true, line: `ALL LANES PASS  (${detail})` };
+  const which = selected.map((l) => l.name).join(" and ");
+  return { ok: true, line: `LANE ${which} PASS  (${scope}${detail})` };
 }

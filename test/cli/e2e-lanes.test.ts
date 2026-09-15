@@ -4,11 +4,13 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   E2E_LANES,
+  LANE_FLAG,
   ambientSelectionRefusal,
   laneCheckTally,
   laneChildEnv,
   laneLineIsSkip,
   laneOutcome,
+  resolveLaneSelection,
   splitLaneChunk,
 } from "../../src/cli/e2e-lanes.ts";
 import type { LaneResult } from "../../src/cli/e2e-lanes.ts";
@@ -116,7 +118,9 @@ test("each lane runs its suites in the runner's canonical order", () => {
   }
 });
 
-test("the lanes never share a port, a debug port, or an output directory", () => {
+test("the lanes never share a name, a port, a debug port, or an output directory", () => {
+  const names = E2E_LANES.map((l) => l.name);
+  assert.equal(new Set(names).size, names.length, `two lanes share a name (${names.join(", ")}), so --lane picks one of them and the other runs in no job at all`);
   const ports = E2E_LANES.map((l) => l.port);
   const dports = E2E_LANES.map((l) => l.dport);
   const outs = ports.map(e2eOutSubdir);
@@ -144,6 +148,88 @@ test("a lane's child env carries its own suites and ports, and inherits the rest
   assert.notEqual(envs[0][E2E_SUITES_VAR], envs[1][E2E_SUITES_VAR], "both lanes were handed the same suites");
 });
 
+test("--lane names one lane and no flag names every lane", () => {
+  assert.deepEqual(
+    resolveLaneSelection([]).map((l) => l.name),
+    E2E_LANES.map((l) => l.name),
+    "a driver run with no flag no longer runs every lane",
+  );
+  for (const lane of E2E_LANES) {
+    assert.deepEqual(resolveLaneSelection([LANE_FLAG, lane.name]).map((l) => l.name), [lane.name]);
+    assert.deepEqual(resolveLaneSelection([`${LANE_FLAG}=${lane.name}`]).map((l) => l.name), [lane.name]);
+  }
+  const picked = resolveLaneSelection([LANE_FLAG, E2E_LANES[1]!.name])[0]!;
+  assert.equal(picked, E2E_LANES[1], "the selected lane is not the roster's own entry");
+});
+
+test("a --lane the roster does not carry is refused, never widened to every lane", () => {
+  for (const bad of ["Q", "a", "A,B", "AB"]) {
+    assert.throws(
+      () => resolveLaneSelection([LANE_FLAG, bad]),
+      /names a lane that does not exist/,
+      `${LANE_FLAG} ${bad} was accepted, so a misspelling runs some other amount of the suite`,
+    );
+  }
+  for (const empty of [[LANE_FLAG], [LANE_FLAG, ""], [`${LANE_FLAG}=`]]) {
+    assert.throws(
+      () => resolveLaneSelection(empty),
+      /was given no lane name/,
+      `${JSON.stringify(empty)} ran instead of refusing`,
+    );
+  }
+  assert.throws(() => resolveLaneSelection(["--lanes", "A"]), /does not take/, "an unknown argument was ignored");
+  assert.throws(
+    () => resolveLaneSelection([LANE_FLAG, "A", LANE_FLAG, "B"]),
+    /more than once/,
+    "a repeated flag silently kept one of the two lanes",
+  );
+});
+
+test("one selected lane passes on its own, and its line never reads as the whole suite", () => {
+  const lane = E2E_LANES[0]!;
+  const alone = laneOutcome([result({ name: lane.name, tally: { passed: 284, total: 284 } })], [lane]);
+  assert.equal(alone.ok, true, "a one-lane job that passed must exit 0, or no matrix shard can ever be green");
+  assert.match(alone.line, new RegExp(`LANE ${lane.name} PASS`), "the line does not say which lane passed");
+  assert.match(
+    alone.line,
+    new RegExp(`1 of ${E2E_LANES.length} lanes`),
+    "the line does not say how much of the suite this run was",
+  );
+  assert.doesNotMatch(alone.line, /ALL LANES PASS/, "one lane reads as every lane");
+  assert.match(alone.line, /284\/284 checks/, "the lane's own tally is dropped");
+});
+
+test("the only selected lane failing still fails, and the line names that lane", () => {
+  const lane = E2E_LANES[1]!;
+  const red = laneOutcome([result({ name: lane.name, code: 1 })], [lane]);
+  assert.equal(red.ok, false, "a failed lane must fail its own job");
+  assert.match(red.line, new RegExp(`LANE ${lane.name} FAILED`), "the line does not name the failing lane");
+});
+
+test("every line a one-lane run can print says how much of the suite it was", () => {
+  const lane = E2E_LANES[0]!;
+  const alone = (over: Partial<LaneResult>) => laneOutcome([result({ name: lane.name, ...over })], [lane]).line;
+  const both = (over: Partial<LaneResult>) => laneOutcome(everyLane(over)).line;
+  const qualifier = new RegExp(`1 of ${E2E_LANES.length} lanes`);
+  for (const [what, over] of [["passed", {}], ["skipped", { skipped: true }], ["failed", { code: 1 }]] as const) {
+    assert.match(alone(over), qualifier, `a one-lane run that ${what} does not say it ran one lane of ${E2E_LANES.length}`);
+    assert.doesNotMatch(both(over), qualifier, `a run of every lane that ${what} claims to be a single shard`);
+    // Beside the count and not instead of it: the count is blind to a whole run claiming "2 of 2 lanes, not the full suite", which is the shape the prover reached by making the scope phrase unconditional (2026-09-14).
+    assert.doesNotMatch(
+      both(over),
+      /not the full suite/,
+      `a run of every lane that ${what} says it covered less than the full suite`,
+    );
+  }
+});
+
+test("a SELECTED lane that never reported still fails, so a driver that lost one cannot pass", () => {
+  const partial = laneOutcome([result({ name: E2E_LANES[0]!.name })], E2E_LANES);
+  assert.equal(partial.ok, false, "a short result set passed against its own selection");
+  assert.match(partial.line, /never reported/);
+  assert.match(partial.line, new RegExp(`lane .*${E2E_LANES[1]!.name}`), "the line does not name the absent lane");
+});
+
 test("an ambient suite selection is refused, since the lanes ARE the selection", () => {
   for (const raw of ["smoke", "render", "full"]) {
     const refusal = ambientSelectionRefusal({ [E2E_SUITES_VAR]: raw });
@@ -159,10 +245,10 @@ test("the split is balanced against measured cost, not check counts", () => {
   const total = laneSeconds(E2E_SUITE_ORDER);
   for (const lane of E2E_LANES) {
     const share = laneSeconds(lane.suites) / total;
-    // The rejected naive seam puts a lane at 65%, so the ceiling sits below it.
+    // Since #623 put one job on each runner the wall clock IS max(A, B), so an unbalanced pair wastes the parallelism it was split for and balance matters more here than it did inside one job, not less (Alex, 2026-09-14).
     assert.ok(
       share <= 0.6,
-      `lane ${lane.name} is ${(share * 100).toFixed(1)}% of measured serial cost, so the lanes buy little`,
+      `lane ${lane.name} is ${(share * 100).toFixed(1)}% of measured serial cost, so that shard alone sets the wall clock while the other idles`,
     );
   }
 });
@@ -197,6 +283,19 @@ test("a harness error is reported as its own category, not as a failed check", (
 test("no lanes at all fails instead of reporting a vacuous pass", () => {
   assert.equal(laneOutcome([]).ok, false);
   assert.match(laneOutcome([]).line, /FAIL/);
+});
+
+test("a selection of no lanes fails, and a lane nobody selected cannot report into the run", () => {
+  const nothingAsked = laneOutcome([result({ name: E2E_LANES[0]!.name })], []);
+  assert.equal(nothingAsked.ok, false, "a run asked for no lanes at all reported a pass");
+  // Its own message, not just ok false: every result is a stray when nothing was selected, so the stray refusal below would catch this case too and a test reading only the verdict cannot tell which fired.
+  assert.match(nothingAsked.line, /no lanes were selected/, "an empty selection is reported as something other than an empty selection");
+  assert.doesNotMatch(nothingAsked.line, /0 of/, "the line offers a count where it should refuse the run");
+
+  const stray = laneOutcome(everyLane(), [E2E_LANES[1]!]);
+  assert.equal(stray.ok, false, "a lane outside the selection reported into the run and it passed anyway");
+  assert.match(stray.line, /never selected/, "the line does not say the run is not the one that was asked for");
+  assert.match(stray.line, new RegExp(E2E_LANES[0]!.name), "the line does not name the lane that was not asked for");
 });
 
 test("a lane that never reported fails the run, so half the suite cannot pass as all of it", () => {

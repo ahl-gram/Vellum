@@ -6,10 +6,11 @@ on:
   pull_request:
   workflow_dispatch:
 
-# Two independent jobs run in parallel: check-and-test never builds, so it
-# returns fast; build-and-e2e carries the slow half (build + headless e2e).
-# PR wall-clock is the longer half, not the sum. Both jobs run on every trigger,
-# so push-to-main and PRs cover exactly what the old single serial job covered.
+# Independent jobs run in parallel: check-and-test never builds, so it returns
+# fast; one build-and-e2e job per lane in E2E_LANES builds dist/ and runs that
+# one lane on a runner of its own. PR wall-clock is the longest job, not the sum,
+# and every job runs on every trigger, so push-to-main and PRs cover exactly what
+# the old single serial job covered.
 jobs:
   check-and-test:
     name: check & test
@@ -29,10 +30,14 @@ jobs:
         run: npm test
 
   build-and-e2e:
-    name: build & e2e
+    name: build & e2e lane ${{ matrix.lane }}
     runs-on: ubuntu-latest
-    # A hung lane is the one failure the outcome rule cannot catch; re-measured 2026-09-11 over the last 20 successful runs, worst 13m14s (the 7m05s this line carried was from an older, shorter suite).
-    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: ["A", "B"]
+    # A hung lane is the one failure the outcome rule cannot catch, and this cap kills a hang rather than budgeting a run, so it sits at about twice the worst real one; re-measured 2026-09-14 over 12 runs of this shape, one lane per runner, worst lane JOB 10m05s and worst e2e step 9m16s (the 13m14s it carried before was two lanes sharing four cores).
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -46,10 +51,17 @@ jobs:
       # bundles, showcases), then `astro build` assembles dist/.
       - name: Build site into dist/
         run: npm run build
-      # Two lanes in THIS job (#381), never a matrix: a matrix would need build-once-and-upload
-      # artifact plumbing first, which is what #266 priced and treated as the blocker.
-      - name: Explorer e2e (headless browser, against dist/, two lanes)
-        run: npm run test:e2e:lanes
+      - name: Runner shape and dist/ hash
+        run: |
+          echo "cores: $(nproc)"
+          free -m
+          echo "dist/ files: $(find dist -type f | wc -l)"
+          find dist -type f -exec sha256sum {} + | LC_ALL=C sort | sha256sum
+      # One job per lane on its own runner (#623), which retires "two lanes in THIS job, never a
+      # matrix" (#381): #266 wanted the matrix and deferred it only on build-once-and-upload artifact
+      # plumbing, and the per-shard rebuild above is the ruling that means that plumbing is never built.
+      - name: Explorer e2e lane ${{ matrix.lane }} (headless browser, against dist/)
+        run: npm run test:e2e:lanes -- --lane ${{ matrix.lane }}
         env:
           # ubuntu-latest ships a real (non-snap) Google Chrome here. Point at it
           # explicitly: findBrowser() would otherwise pick /usr/bin/chromium first,

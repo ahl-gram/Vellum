@@ -4,6 +4,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { E2E_SUITE_ORDER, SMOKE_SUITES, E2E_SUITES_VAR } from "../../src/cli/e2e-suites.ts";
 import type { E2eSuiteName } from "../../src/cli/e2e-suites.ts";
+import { E2E_LANES } from "../../src/cli/e2e-lanes.ts";
 import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
 
 // The runner is a .mjs script and ci.yml is YAML, neither importable here, so both are read as source.
@@ -15,6 +16,22 @@ const CI = src(".github/workflows/ci.yml");
 // A source scan reads the CODE, not the file: commenting a line out in place leaves its literal behind, and a raw match cannot tell the two apart. Blind spots, both of which cost a false red rather than a miss: a `//` inside a string literal reads as a comment, and a /* */ block is not seen at all.
 const uncommented = (source: string) => source.split("\n").filter((line) => !line.trim().startsWith("//")).join("\n");
 const RUNNER_CODE = uncommented(RUNNER);
+
+// YAML's own comment leader, for the same reason: this pass rewrote ci.yml's prose, and a sentence about fail-fast would otherwise satisfy the guard that fail-fast is SET.
+const ciUncommented = (lines: readonly string[]) => lines.filter((l) => !l.trim().startsWith("#")).join("\n");
+// A ci.yml job block is a two-space key under `jobs:`, read to the next one. Blind spot, named because a scanner cannot enumerate its own: a workflow indented any other way yields NO blocks, which the job-count anchor below turns into a red rather than a silent pass.
+// Second blind spot, same direction: the continue-on-error refusal reads the literal `true` alone, so `${{ }}`, `True` and `yes` slip past it, which costs a miss and never a false red, and the job-count anchor still forces a reader through this sweep whenever a job is added.
+const ciJobBlocks = (): ReadonlyArray<{ id: string; lines: readonly string[] }> => {
+  const lines = CI.split("\n");
+  const at = lines.indexOf("jobs:");
+  assert.notEqual(at, -1, "ci.yml has no top-level `jobs:` key, so this reader is looking at the wrong shape");
+  const heads: Array<{ id: string; from: number }> = [];
+  for (let i = at + 1; i < lines.length; i++) {
+    const head = lines[i]!.match(/^ {2}([A-Za-z0-9_-]+):\s*$/);
+    if (head) heads.push({ id: head[1]!, from: i });
+  }
+  return heads.map((h, n) => ({ id: h.id, lines: lines.slice(h.from, heads[n + 1]?.from ?? lines.length) }));
+};
 
 const runnerSuiteKeys = (): string[] => {
   const block = RUNNER_CODE.match(/const SUITES = \{([\s\S]*?)\n\};/);
@@ -96,7 +113,7 @@ test("the smoke tier stays materially cheaper than the full suite", () => {
   }
 });
 
-test("ci.yml runs the lane driver, and nothing in it can narrow what the lanes cover", () => {
+test("ci.yml runs the lane driver, and never sets a suite selection under it", () => {
   assert.match(CI, /run: npm run test:e2e:lanes/, "ci.yml no longer runs the lane driver");
   // Presence of the driver is not enough: a VELLUM_E2E_SUITES line beside it still narrows coverage.
   assert.doesNotMatch(
@@ -107,12 +124,62 @@ test("ci.yml runs the lane driver, and nothing in it can narrow what the lanes c
   assert.doesNotMatch(CI, /run: npm run test:e2e\s*$/m, "ci.yml still runs the serial single-lane e2e too");
 });
 
-test("the e2e job is bounded, so a hung lane cannot hold a runner for hours", () => {
-  const bound = CI.match(/timeout-minutes:\s*(\d+)/);
-  assert.ok(bound, "the build & e2e job has no timeout-minutes, so a hung lane runs to GitHub's 6-hour default");
-  const minutes = Number(bound[1]);
-  assert.ok(minutes >= 15, `timeout-minutes is ${minutes}, under the measured 7m05s worst case plus headroom`);
-  assert.ok(minutes <= 60, `timeout-minutes is ${minutes}, long enough that a hang still costs an hour`);
+test("every ci.yml job is bounded, so no hung job can hold a runner for hours", () => {
+  const jobs = ciJobBlocks();
+  assert.equal(jobs.length, 2, `this sweep read ${jobs.length} job blocks in ci.yml, so it is covering the wrong part of the file; a job added here joins the sweep deliberately`);
+  for (const job of jobs) {
+    const body = ciUncommented(job.lines);
+    const bound = body.match(/^ {4}timeout-minutes: (\d+)$/m);
+    assert.ok(bound, `ci.yml's ${job.id} job has no timeout-minutes, so a hang there runs to GitHub's 6-hour default`);
+    const minutes = Number(bound[1]);
+    // The floor is these two jobs' own, measured 2026-09-14: worst lane job 10m05s over 12 runs of the matrix shape, worst unit job 9m00s over 18 on main. A cheaper job added later reds here deliberately, since the count anchor above already forces a visit.
+    assert.ok(minutes >= 15, `${job.id}'s timeout-minutes is ${minutes}, under the worst case its own dated comment measures, plus headroom`);
+    assert.ok(minutes <= 60, `${job.id}'s timeout-minutes is ${minutes}, long enough that a hang still costs an hour`);
+    assert.doesNotMatch(
+      body,
+      /continue-on-error:\s*true/,
+      `ci.yml's ${job.id} job swallows its own failure, so a red there reports green and the merge gate stops meaning anything`,
+    );
+  }
+});
+
+test("ci.yml runs one job per lane, and its matrix is exactly E2E_LANES", () => {
+  const lane = ciJobBlocks().find((j) => j.id === "build-and-e2e");
+  assert.ok(lane, "ci.yml has no build-and-e2e job at all, so every assertion below would read an empty block");
+  const body = ciUncommented(lane.lines);
+  const matrix = body.match(/^ {8}lane: \[([^\]]*)\]$/m);
+  assert.ok(matrix, "the lane matrix was not found in ci.yml's e2e job, so the roster comparison below would read nothing");
+  const named = matrix[1].split(",").map((s) => s.trim().replace(/^"|"$/g, "")).filter((s) => s !== "");
+  assert.deepEqual(
+    named,
+    E2E_LANES.map((l) => l.name),
+    "ci.yml's lane matrix and E2E_LANES name different lanes, so a lane either runs nowhere or runs a job with no lane",
+  );
+  assert.match(
+    body,
+    /run: npm run test:e2e:lanes -- --lane \$\{\{ matrix\.lane \}\}/,
+    "the e2e step does not pass its matrix lane to the driver, so each job runs every lane",
+  );
+  assert.match(
+    body,
+    /^ {4}name: build & e2e lane \$\{\{ matrix\.lane \}\}$/m,
+    "the e2e job's name no longer carries its lane, so the two jobs report one check name and main's required checks no longer match",
+  );
+  assert.match(
+    body,
+    /fail-fast: false/,
+    "fail-fast is back on, so a red lane cancels the other one and takes its verdict with it",
+  );
+  const parallel = body.match(/^ {6}max-parallel: (\d+)$/m);
+  assert.ok(
+    parallel === null || Number(parallel[1]) >= E2E_LANES.length,
+    `ci.yml caps the lane matrix at ${parallel?.[1]} concurrent jobs against ${E2E_LANES.length} lanes, so the lanes queue behind each other and the wall clock goes back to their sum`,
+  );
+  assert.match(
+    body,
+    /find dist -type f -exec sha256sum \{\} \+ \| LC_ALL=C sort \| sha256sum/,
+    "the lane job no longer hashes its own dist/, so two shards building different trees is silent (ruled 2026-09-14 on #623)",
+  );
 });
 
 test("every CI trigger gets the same full coverage, so nothing is conditional on the event", () => {
@@ -309,10 +376,18 @@ test("the lane driver spawns the runner itself and refuses an ambient selection"
   const DRIVER = uncommented(src("scripts/e2e-lanes.mjs"));
   assert.match(DRIVER, /spawn\(process\.execPath, \[RUNNER\]/, "a lane must spawn the runner directly, so its exit code survives");
   assert.match(DRIVER, /ambientSelectionRefusal\(process\.env\)/, "the driver no longer refuses a narrowing selection");
-  assert.match(DRIVER, /laneOutcome\(results\)/, "the driver does not aggregate the lanes, so one could fail unnoticed");
+  assert.match(DRIVER, /laneOutcome\(results, SELECTED\)/, "the driver does not aggregate the lanes it was asked to run, so one could fail unnoticed");
   assert.match(DRIVER, /process\.exit\(outcome\.ok \? 0 : 1\)/, "the driver's exit code is not the lanes' outcome");
-  // Second lock on the subset hole; laneOutcome refuses a short result set at runtime.
-  assert.match(DRIVER, /E2E_LANES\.map\(runLane\)/, "the driver runs a subset of the lanes, not every lane");
+  // All three, or the lock moves rather than holding: laneOutcome refuses a result set short of SELECTED at runtime, which is worth nothing if SELECTED is not what ran or is not what the argv asked for.
+  assert.match(DRIVER, /SELECTED = resolveLaneSelection\(process\.argv\.slice\(2\)\)/, "the driver's lane selection no longer comes from its own argv");
+  assert.match(DRIVER, /SELECTED\.map\(runLane\)/, "the driver runs some other set of lanes than the one it selected");
+  const resolveAt = DRIVER.indexOf("resolveLaneSelection(process.argv");
+  const probeAt = DRIVER.indexOf("findBrowser()");
+  assert.notEqual(probeAt, -1, "the driver no longer probes for a browser, so the ordering assertion below would compare against -1");
+  assert.ok(
+    resolveAt < probeAt,
+    "the driver resolves its lane AFTER probing for a browser, so on a machine with none a misspelled lane prints SKIP and exits 0 instead of being refused",
+  );
   assert.match(DRIVER, /browserlessAction\(process\.env, Boolean\(process\.stdout\.isTTY\)\)/, "the driver no longer decides the browserless policy against its own TTY");
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
   assert.equal(pkg.scripts["test:e2e:lanes"], "node scripts/e2e-lanes.mjs");
