@@ -136,7 +136,8 @@ test("each resolution rule has a live witness, and each finding class has one", 
 
   absent("references/scars.md");
   assert.equal(verdict(skill, "references/scars.md"), null, "relative to the citing directory");
-  assert.equal(verdict("specs", "CLAUDE.md"), null, "from the repo root");
+  absent("specs/test/repo/comment-citations.test.ts");
+  assert.equal(verdict("specs", "test/repo/comment-citations.test.ts"), null, "from the repo root, a slashed path no basename rule can save");
   assert.equal(byBasename.get("comment-citations.test.ts")?.length, 1);
   absent("specs/comment-citations.test.ts");
   assert.equal(verdict("specs", "comment-citations.test.ts"), null, "a unique basename");
