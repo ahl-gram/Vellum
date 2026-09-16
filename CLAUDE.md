@@ -149,8 +149,8 @@ the moment you are about to write a test or guard, an e2e check or CDP probe, a 
 that joins a roster, anything that can move a chart or the golden, or a PR body. This file and the
 specs are the narrative; the skill is the same doctrine as a checklist read at the moment it applies,
 which is the difference that stopped the same defects reaching PR after PR. Its
-`hooks/footgun-gate.ts`, wired in `.claude/settings.json`, puts the matching gate in front of you and
-refuses the mechanical never-list items outright, the ones `hooks/README.md` enumerates.
+`.claude/skills/vellum-footguns/hooks/footgun-gate.ts`, wired in `.claude/settings.json`, puts the matching gate in front of you and
+refuses the mechanical never-list items outright, the ones `.claude/skills/vellum-footguns/hooks/README.md` enumerates.
 
 **The order of operations is `specs/development-workflow.md`**, and it names which subagent runs at
 which step: `vellum-spec-recon` at the start, `vellum-plan-skeptic` on the plan before the decisions

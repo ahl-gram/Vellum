@@ -48,7 +48,7 @@ never live only in a comment somewhere.
 **Where a rule lives: the routing rule.** Anything Vellum-specific AND normative AND slow-changing is
 a spec under `specs/`. An imperative keyed to the moment of typing a particular kind of line is a
 `vellum-footguns` gate. An incident whose value is proving that a gate bites is a row in that skill's
-`references/scars.md`. Fast-changing empirical traps, private infrastructure and status stay out of
+`.claude/skills/vellum-footguns/references/scars.md`. Fast-changing empirical traps, private infrastructure and status stay out of
 the repo entirely. **Exactly one home is normative, and every other copy points at it by name**,
 because two copies of a rule are two rules the moment either is edited. Apply this when adding a rule
 and when finding one in two places; the second case is a defect to fix, not a redundancy to keep.
@@ -68,6 +68,13 @@ work needs the rule rather than the road to it. **Keep the `` `symbol` in `repo/
 citations**, which are not history but what makes a rule checkable in one command, and keep naming a
 constant wherever the rule is about its value. The older entries here still carry narrative; that is
 trimmed as each is touched, not swept separately.
+
+**A backticked file path in prose is scanned.** `test/repo/prose-paths.test.ts` reads every one under
+`specs/`, `.claude/`, `CLAUDE.md`, `README.md` and `.github/` and reds when it resolves neither from
+the repo root, nor from the citing file's directory, nor as a unique tracked basename. Backticks on a
+path claim the file is in the repo or deliberately kept out of it (a generated or gitignored file
+cited with its directory, a served address, an auto-memory name); write a retired file, an example
+name or a file outside this repo without them. The test is the list of what passes; do not copy it here.
 
 **Write `Issue #N` or `PR #N` in prose, never a bare `#N`**, because issues and pull requests share
 one numbering sequence here and interleave, so a bare number does not say which kind of thing it
@@ -95,9 +102,9 @@ has no comments to drift into.
 
 **Do not copy volatile state into this file.** Phase names, board membership and issue status belong
 to the Project and are read from it. Counts, rosters and file line numbers rot without any guard
-noticing, and **nothing in this repo sweeps markdown**, so a wrong claim here is silent. Name a live
+noticing, and **nothing in this repo sweeps a claim in markdown** (only a backticked path is scanned, above), so a wrong claim here is silent. Name a live
 issue number only where the number is itself part of a rule. This discipline retired the workspace's
-`PROJECTS.md` and the copied phase-option list in `CLAUDE.md`, both of which drifted precisely
+PROJECTS.md and the copied phase-option list in `CLAUDE.md`, both of which drifted precisely
 because they were convenience copies, and it is why the `roadmap/` directory was deleted rather than
 repaired.
 
@@ -391,7 +398,8 @@ comment. This is a convenience index, not their home.
   under `src/` and the ambiguity is day one rather than drift.
   `test/repo/comment-citations.test.ts` enforces it **for code comments only**: it reads `.ts` and
   `.mjs` under the code roots plus `.css` under `public/`, and reaches neither `specs/` nor
-  `.claude/`, so a citation written in prose like this one is checked by hand or not at all. These
+  `.claude/`, so of a citation written in prose like this one only the PATH half is checked, by
+  `test/repo/prose-paths.test.ts`, and the symbol half by hand or not at all. These
   behaviours of the guard are deliberate rather
   than rough edges: it matches a symbol that APPEARS in the file, not one declared there, because a
   citation properly points at a call site; and it matches JOINED runs of comment lines, not single

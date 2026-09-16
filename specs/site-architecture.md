@@ -67,7 +67,7 @@ symbol and path so the reader goes and looks.
 - **The shell dresses once.** Every shared shell rule lives in `BaseLayout.astro`'s
   `<style is:global>` block, and a page's own sheet carries page-specific rules only.
 - **Sheet order is a contract.** The layout links the root sheets, then the shared sheets a page
-  opts into through its `extraCss` prop, then the page's own relative `index.css`, so a page keeps
+  opts into through its `extraCss` prop, then the page's own relative `public/**/index.css`, so a page keeps
   the last word on its own layout. An `extraCss` href is validated at render and THROWS unless it is
   root-absolute. The layout's inline `<style>` renders after the page sheet's link, which is why a
   page override of a shell rule needs higher specificity; that trap belongs to `specs/ui-design.md`
@@ -179,7 +179,7 @@ other way, which is what earns them a section of their own.
   `scripts/generate-discovery.ts` writes them from `DISCOVERY_ROUTES`, which is the nav plus the
   routes that are not nav items, and every origin resolves against the `site` value in
   `astro.config.ts`. A domain move therefore updates all of them at once, which is exactly why
-  `robots.txt` is generated rather than hand-written: a hand-written sitemap line survives such a
+  `public/robots.txt` is generated rather than hand-written: a hand-written sitemap line survives such a
   move still pointing at the retired domain, which is what a domain move here would have stranded.
 - **A route with no blurb is a build error.** Adding a route without its `ROUTE_ENTRIES` line throws
   by name, and the generator also throws if `site` is unset.

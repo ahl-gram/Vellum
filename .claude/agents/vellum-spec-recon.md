@@ -36,7 +36,7 @@ For every claim in the issue and its comments, name the command whose output you
 
 - **Paths and symbols**: `ls` the path, Grep the symbol. Note that `file:line` citations drift constantly; convert to `` `symbol` in `repo/relative/path` `` when you report a correction.
 - **Test names and e2e check ids**: Grep `test/` and `scripts/e2e/`. Check ids get renamed wholesale during reorgs.
-- **Counts** (tests, layers, lines, open issues, hooks): re-derive them. A subagent once reported 7 `window.__vellum*` hooks when there are 12, and another claimed the 400-line file guideline had disappeared when it lives in `.claude/rules/coding-style.md`.
+- **Counts** (tests, layers, lines, open issues, hooks): re-derive them. A subagent once reported 7 `window.__vellum*` hooks when there are 12, and another claimed the 400-line file guideline had disappeared when it lives in `~/CodeProjects/.claude/rules/coding-style.md`.
 - **npm scripts and build steps**: read `package.json`. `npm run site` and the `--pdf` / `poster` / `atlas` / `gallery` CLI verbs no longer exist; `astro:generate` is the current chain and three suites pin its exact string.
 - **Claims about what a test enforces**: read the test. "No test enforces this" is a fact with a command behind it.
 - **Stated dependencies and sequencing**: check whether the blocking issue actually closed, and whether a later comment re-baselined the order.
