@@ -1,8 +1,9 @@
 # The Vellum rulebook
 
 **This is the rulebook, not the task list.** It holds the durable sequencing rules, invariants,
-working agreements and rationale that a task board has no field for, plus how a design decision gets
-made before any of it is scheduled.
+working agreements and rationale that a task board has no field for. How a design decision gets
+made before any of it is scheduled, and how a rule is written down once made, are
+`specs/conventions.md`'s.
 
 It replaces the body of issue #193, which is now a pointer to this file.
 
@@ -18,8 +19,12 @@ Five other places carry what this one deliberately does not:
   flake, one row per failure, with the run id, the payload and what was done about it.
 - **`RESUME-HERE.md`** (local, per-session, gitignored) is the hot pointer to where we are right now.
 
-Its siblings under `specs/` hold what this file is not about: `ui-design.md` the look and feel
+Its siblings under `specs/` hold what this file is not about: `conventions.md` how a design decision
+is made and how a rule is written down (where it lives, the voice, the citation form, the comment
+sweep), `ui-design.md` the look and feel
 itself (the ground, the case, the palette, the rooms, the voice, motion and ceremony),
+`chart-dress.md` how a chart itself is dressed, `cascade-traps.md` what the browser does to a
+declaration that reads as correct,
 `engine-invariants.md` what the generator guarantees about a world and what a surface quoting it may
 not assume, `explorer-doctrine.md` the living chart over the baked sheet (the engine boundary and the
 host contract, the camera and gesture, counter-scale, the overlay lifecycle),
@@ -33,7 +38,8 @@ wait is written and what the harness environment does.
 **This file is normative and complete on the rules it owns.** A reader who reads only this file is
 correctly informed about them. That property is the whole point, and it is worth what it costs to
 keep. Where a sibling spec is the normative home, this file POINTS at it by name and section rather
-than carrying a second copy, which is the routing rule below applied to this file itself.
+than carrying a second copy, which is the routing rule (`specs/conventions.md`) applied to this file
+itself.
 
 **Where this file and `CLAUDE.md` overlap, this file wins**, and the overlap is now small and known:
 the #378 comment doctrine is stated in both because it governs writing code, which is `CLAUDE.md`'s
@@ -45,41 +51,10 @@ duplicate went. `CLAUDE.md` keeps process at the keyboard; this file keeps the r
 may additionally leave a dated comment on the issue the change came from, as an audit trail. It must
 never live only in a comment somewhere.
 
-**Where a rule lives: the routing rule.** Anything Vellum-specific AND normative AND slow-changing is
-a spec under `specs/`. An imperative keyed to the moment of typing a particular kind of line is a
-`vellum-footguns` gate. An incident whose value is proving that a gate bites is a row in that skill's
-`references/scars.md`. Fast-changing empirical traps, private infrastructure and status stay out of
-the repo entirely. **Exactly one home is normative, and every other copy points at it by name**,
-because two copies of a rule are two rules the moment either is edited. Apply this when adding a rule
-and when finding one in two places; the second case is a defect to fix, not a redundancy to keep.
-
-**A code comment is not a second copy, and the routing rule does not evict one.** The comment
-doctrine governs there instead: a comment survives where no test can practically pin the thing, which
-is the same carve-out that lets a hand-measured browser quirk keep its line. So a spec stating a rule
-and a comment stating it at the line that breaks are both correct, and moving a rule into a spec is
-not by itself a reason to delete the comment. What the routing rule forbids is a second NORMATIVE
-home: another spec, or a gate re-explaining the contract rather than pointing at it.
-
-**Specs are prescriptive. State the rule and drop the provenance.** Write each entry in the
-imperative, as the thing a future session must do or must not do. Cut "ratified at", "reworked after
-review", "this line read X until", and the story of how a set reached its membership: git, the issues
-and the pull requests hold that history and are better at it, and a reader who is ABOUT to do the
-work needs the rule rather than the road to it. **Keep the `` `symbol` in `repo/relative/path` ``
-citations**, which are not history but what makes a rule checkable in one command, and keep naming a
-constant wherever the rule is about its value. The older entries here still carry narrative; that is
-trimmed as each is touched, not swept separately.
-
-**Write `Issue #N` or `PR #N` in prose, never a bare `#N`**, because issues and pull requests share
-one numbering sequence here and interleave, so a bare number does not say which kind of thing it
-points at. It governs replies, pull request bodies, issue comments, commit message bodies, and prose
-anywhere in the repo: these specs, `CLAUDE.md`, and the files under `.claude/agents/` and
-`.claude/skills/`. The word may be lowercase where the sentence wants it; what it may not be is
-absent. **It never governs a form a tool parses, or one that already carries the
-word**: a commit SUBJECT keeps the house's leading `#N`, a closing reference stays `Closes #N`
-exactly (a word between the keyword and the number closes nothing, `vellum-footguns` Gate 5 item 5),
-a pull request body's title line keeps `#N`, and a field label such as the template's `Issue: #N`
-already says which it is. Existing bare references are trimmed as each line is touched, not swept
-separately, the same way the narrative above is.
+**Where a rule lives, how a spec is written, how code is cited and how a comment sweep is proven
+are `specs/conventions.md`'s**, together with how a design decision is made and the fidelity rule
+for building to one. This file keeps the rules it owns and points there for the conventions
+behind them.
 
 **Why the rulebook is a file and not an issue thread**, recorded so nobody moves it back. Everywhere
 else in Vellum the convention is that a body is historical intent and a later comment supersedes it,
@@ -92,14 +67,6 @@ set as current, and each self-labelled "no rule changed". Append-only made a sta
 default outcome for anyone who did not replay the whole timeline. Inverting the convention on that
 one issue fixed it; moving the rulebook into the repo removes the exception entirely, because a file
 has no comments to drift into.
-
-**Do not copy volatile state into this file.** Phase names, board membership and issue status belong
-to the Project and are read from it. Counts, rosters and file line numbers rot without any guard
-noticing, and **nothing in this repo sweeps markdown**, so a wrong claim here is silent. Name a live
-issue number only where the number is itself part of a rule. This discipline retired the workspace's
-`PROJECTS.md` and the copied phase-option list in `CLAUDE.md`, both of which drifted precisely
-because they were convenience copies, and it is why the `roadmap/` directory was deleted rather than
-repaired.
 
 ## Product direction
 
@@ -116,69 +83,8 @@ page of the Print Room (#521). The rule stands for everything else.
 
 ## How a design decision is made
 
-Every significant piece of Vellum's look has gone through the same six steps, and skipping to the
-middle has hurt the project before.
-
-1. **Mockups, drawn from real content.** Two to four directions, built from real engine output at the
-   seed the sitting will look at, never lorem or a sketch.
-2. **A sitting.** Alex looks at the rendered stills and rules. The rulings are recorded the same day
-   as a dated comment on the issue.
-3. **Provisional.** A ruling about how something *feels* is provisional the moment it is made,
-   because it was ruled from a picture and has not been used.
-4. **Build to the ruled stills**, under the fidelity rule below.
-5. **Live use.**
-6. **The post-use re-review**, scheduled into the epic as its own sub, which ratifies, amends or
-   reverses each provisional ruling.
-
-**Feel decisions are provisional. Contract decisions are not.** Architecture, the address grammar,
-determinism and sequencing are ratified once and guarded immediately. Which surface owns a
-capability, how a control reads, what a gesture does, where a panel sits: those are hypotheses until
-they have been used, and they are where nearly every reversal has landed.
-
-**Do not state a provisional ruling in the same voice as a ratified one.** A pull request
-implementing a feel ruling names which of its choices are awaiting the re-review, so they land on the
-docket rather than being discovered later. Pin correctness-level tests immediately; let
-dressing-level pins lag one live-use cycle, so a re-decision does not rip out fresh test investment.
-
-**A reversal after live use is the process working, not scope churn.** Record the new call as a dated
-comment and move on.
-
-**Every ruled design round is archived in the repo** under `design/`, one directory per round,
-content only, in its own pull request. That archive is the visual spec; this file and the issue
-ledgers are the words.
-
-Things a design round owes that the steps above do not cover:
-
-- **The archive pull request gets the cold skeptic, and the mock pages get the plate-reader.** An
-  archive is content rather than code, which makes it look like neither is owed; both have found real
-  defects in one, and the mocks are the only place a ruling is made from pixels nobody measured.
-- **A mock inherits the live kit's defects unless it says otherwise.** A mock page linking the house
-  sheets wears whatever is wrong with them that day, so a still can show a defect the round did not
-  invent and a round can rule on a picture that is wrong for a reason outside it. Where a mock
-  neutralises such a defect to show the intended dress, that override says so at its line and the
-  defect is filed.
-
-## The fidelity rule
-
-> Be as faithful to the mockup as possible; deviate only where something genuinely clashes with
-> Vellum's look and feel, and say why in the pull request.
-
-Ratified during Landfall (#454) and stated independently in every mockup archive since. Four
-consequences, each paid for at least once:
-
-- **The deviation is stated, not silent.** A deviation with its reason in the pull request is part of
-  the design record. One nobody wrote down reads to the next session as a defect and gets "fixed"
-  back.
-- **The fidelity arrow points one way.** The archive is never edited to match the site. If the build
-  has moved past the mockup, the mockup is still the record of what was ruled.
-- **An invented improvement is not an improvement.** Landfall's first proof: a lamplight bloom nobody
-  had ruled washed the chart out, and the repair was the mockup's own dress.
-- **A ruling made on a rendered preview is a ruling on exactly what the preview showed.**
-  Substituting a better source, string or value afterwards, however good the reason, is a decision
-  taken on Alex's behalf. Ship what he saw and record the alternative as his option.
-
-**Record Alex's own wording.** When he answers a menu in his own sentence rather than picking an
-option, his sentence is the ruling.
+**The six steps, the fidelity rule for building to a ruled still, and what a design round owes are
+`specs/conventions.md`'s.** A ruling about one feature stays a dated comment on its own issue.
 
 ## The cost axis and ordering principle
 
@@ -384,20 +290,7 @@ comment. This is a convenience index, not their home.
   that world-sourced geometry is quantized to three decimals before hashing, far above the
   cross-platform drift and far below any real composition change.
 - **Borders (#158):** the border attribute-order invariant is commented at its line; keep it.
-- **The comment citation convention:** cite code as `` `symbol` in `repo/relative/path` ``, never as
-  a file and a line. A symbol survives code moving and breaks on a rename or a deletion, which is
-  exactly when a citation should fail, while a line number drifts silently onto unrelated code. Use
-  the FULL repo-relative path even for a sibling in the same directory, because basenames repeat
-  under `src/` and the ambiguity is day one rather than drift.
-  `test/repo/comment-citations.test.ts` enforces it **for code comments only**: it reads `.ts` and
-  `.mjs` under the code roots plus `.css` under `public/`, and reaches neither `specs/` nor
-  `.claude/`, so a citation written in prose like this one is checked by hand or not at all. These
-  behaviours of the guard are deliberate rather
-  than rough edges: it matches a symbol that APPEARS in the file, not one declared there, because a
-  citation properly points at a call site; and it matches JOINED runs of comment lines, not single
-  lines, because a citation long enough to wrap is invisible to a line matcher and the guard would
-  report green. Do not simplify either away. The guard checks the citation and never the claim
-  wrapped around it, which stays the business of the invariant at the line that breaks.
+- **The comment citation convention** is `specs/conventions.md`'s, under how code is cited.
 - **A parameter property is refused by the type check, not by Node.** Node's type stripping accepts
   no enums, no namespaces and no parameter properties, but here `erasableSyntaxOnly` in
   `tsconfig.json` means `npm run check` rejects one before Node is ever involved. Read a red about it
@@ -410,41 +303,8 @@ comment. This is a convenience index, not their home.
 
 ## The comment sweep
 
-A sweep deletes comments the doctrine above says are not owed. It is a mechanical change with a
-non-mechanical failure mode, so it is run and PROVEN in a particular way.
-
-- **Sweep trailing comments last and most conservatively, and never audit a sweep from a whole-line
-  scan.** The trailing comment is the highest-value keeper class and a whole-line diff cannot see it:
-  stripping a comment off the end of a code line that survives shows up as a CHANGED CODE LINE, so an
-  audit built from removed comment-marker lines misses every one. A trailing comment is also doing
-  the most work, because it labels a line that is otherwise indistinguishable from its neighbours: a
-  near-identical fixture, a state poke, the units on a bare constant, a coordinate convention, a
-  sentinel's decode.
-- **The proof that a sweep changed no code is an AST token-stream comparison against the base, per
-  file.** These things it must handle or it lies. Exclude the JSDoc kind range, because TypeScript
-  models JSDoc as real syntax and a reworded doc block otherwise reads as a code change. Strip
-  Astro's markup comment form, which no comment counter inventories and the comparison reads as
-  text. And never build it on `ts.createScanner`, which mis-lexes regular-expression literals and
-  backticks and reports drift that is not there; `ts.createSourceFile` and a leaf walk are the shape
-  that works. Prove the verifier itself on fixtures before trusting it, including a changed
-  identifier, a changed string, a dropped type annotation, a deleted CSS declaration and an edited
-  Astro expression. Pure reindentation is its one acceptable blind spot, and a comment inside a
-  template literal is string data rather than a comment, so it is out of scope by construction.
-- **A keeper scan is a separate step, and token identity cannot do it.** Proving no code changed says
-  nothing about whether the sweep deleted the trap that cost someone a debugging session. Scan the
-  DELETED text for keeper signals (a measured number with a unit, a hand measurement, a named
-  browser, a ratified deviation, a byte-identity or golden claim) and check whether the fact survives
-  anywhere in its file. **CSS is the weakest ground for the whole doctrine**, because no unit test
-  pins why a rule is written the way it is, and a stated deviation from a ruled mockup is the most
-  dangerous single loss: without the line the next reader "fixes" the value back.
-- **Every deletion made on the ground that a test already pins the behaviour NAMES that test**, in a
-  ledger written while the grep is still open, because it cannot be reconstructed afterwards. Naming
-  a test is not enough by itself: check that the named test actually pins the behaviour the comment
-  stated, since a citation to a test that merely touches the same code reads identically in a ledger.
-- **When a sweep and a feature branch collide, the FEATURE merges first.** Then merge main into the
-  sweep and re-run its token verifier before merging that. A comment-only branch absorbing feature
-  work is re-provable mechanically; a feature branch absorbing a sweep costs a full e2e run and can
-  silently revert a measured value on the strength of a comment cleanup.
+**How a sweep is run and proven is `specs/conventions.md`'s**, beside the citation convention it
+checks against.
 
 ## Retired rules, do not resurrect
 
@@ -467,7 +327,9 @@ non-mechanical failure mode, so it is run and PROVEN in a particular way.
 ---
 
 *Companion to the roadmap Project (status, order, phase), to `CLAUDE.md` (process at the keyboard),
-to `specs/ui-design.md` (the look and feel), to `specs/engine-invariants.md` (what the generator
+to `specs/conventions.md` (how a design decision is made, and how a rule is written down), to
+`specs/ui-design.md` (the look and feel), to `specs/chart-dress.md` (how a chart itself is dressed),
+to `specs/cascade-traps.md` (how the cascade breaks here), to `specs/engine-invariants.md` (what the generator
 guarantees), to `specs/explorer-doctrine.md` (the living chart, its camera and its overlays), to
 `specs/region-and-voyage.md` (region sheets, level of detail, the voyage), to
 `specs/site-architecture.md` (how the site is authored and shipped), to

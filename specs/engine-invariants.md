@@ -7,7 +7,7 @@ which engine outputs a consuming surface has to respect.
 
 Its siblings under `specs/` hold what this one deliberately does not. `specs/rulebook.md` owns the
 golden, the regen and the re-roll discipline, and keeps it; where this file touches that, it states
-the engine fact and points there for what the fact costs. `specs/ui-design.md` owns how a world is
+the engine fact and points there for what the fact costs. `specs/chart-dress.md` owns how a world is
 drawn.
 
 **Counts and seed-specific measurements are not here.** They live at the guards named throughout,
@@ -247,6 +247,6 @@ argument and returns an unrelated cell rather than failing.
 ---
 
 *Companion to `specs/rulebook.md` (the golden, the regen and the re-roll discipline) and
-`specs/ui-design.md` (how a world is drawn). This file sits upstream of both: it is the world
+`specs/chart-dress.md` (how a world is drawn). This file sits upstream of both: it is the world
 itself. Every rule about a FINER view of that world, and what resampling does and does not preserve,
 is `specs/region-and-voyage.md`'s.*

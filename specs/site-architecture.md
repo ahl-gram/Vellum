@@ -9,7 +9,8 @@ It carries rules that bind future work. A detail that applies to exactly one pie
 that code beside its test.
 
 Its siblings hold what this file deliberately does not: `specs/ui-design.md` how any of it looks,
-including the cascade traps; `specs/rulebook.md` the golden, the committed set, the regen and the
+and `specs/cascade-traps.md` what the browser does to a declaration that reads as correct;
+`specs/rulebook.md` the golden, the committed set, the regen and the
 order of work; `specs/explorer-doctrine.md` and `specs/region-and-voyage.md` what an app surface
 draws once it is mounted; `specs/settle-doctrine.md` how a wait on it is written; and
 `.claude/skills/vellum-footguns/SKILL.md` the imperatives keyed to the moment of typing. Where this
@@ -70,7 +71,7 @@ symbol and path so the reader goes and looks.
   opts into through its `extraCss` prop, then the page's own relative `index.css`, so a page keeps
   the last word on its own layout. An `extraCss` href is validated at render and THROWS unless it is
   root-absolute. The layout's inline `<style>` renders after the page sheet's link, which is why a
-  page override of a shell rule needs higher specificity; that trap belongs to `specs/ui-design.md`
+  page override of a shell rule needs higher specificity; that trap belongs to `specs/cascade-traps.md`
   and is not restated here.
 - **Authored CSS hides in more places than `public/`.** A sweep written against `public/` alone
   misses every source in `src/` and passes. **The repo keeps its own roster of those**, `SRC_CSS` in
@@ -267,7 +268,8 @@ precisely, because a token that falls outside it looks identical at the point of
 
 ---
 
-*Companion to `specs/ui-design.md` (how it looks), `specs/rulebook.md` (the golden, the committed
+*Companion to `specs/ui-design.md` (how it looks), `specs/cascade-traps.md` (how the cascade breaks
+here), `specs/rulebook.md` (the golden, the committed
 set, the order of work), `specs/explorer-doctrine.md` and `specs/region-and-voyage.md` (what a
 mounted surface draws), `specs/settle-doctrine.md` (how a wait on it is written), and
 `specs/development-workflow.md` (the order a change moves through).*

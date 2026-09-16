@@ -158,6 +158,9 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
 
 Scars: #219, #295, #465, #525, #530, #531, #532, #535, #537, #542, #543, #545, #546.
 
+The traps themselves are `specs/cascade-traps.md`'s, and the look they break is `specs/ui-design.md`'s.
+This is the checklist; the reasons are not copied here.
+
 1. **Compute the specificity of the rule you are overriding, in numbers.** A media query adds none.
    Each arm of a selector list ranks on its own. `:has()` and compound arms outrank a bare class.
    An inline style beats every sheet rule. Author `display` makes `[hidden]` inert.
