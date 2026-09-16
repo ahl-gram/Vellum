@@ -20,8 +20,8 @@ lacked.
 
 **Provenance.** Moved from Issue #611 (its body and its comment of 2026-09-14) by Issue #626 on
 2026-09-16, word for word, with three stated departures. First, every bare number is written
-`Issue #N` or `PR #N` per the house naming rule (`specs/rulebook.md`, How to read and update this
-file): four occurrences changed, `Issue #585`, `Issue #591` and `Issue #607` twice. Second, a line
+`Issue #N` or `PR #N` per the house naming rule, which `specs/rulebook.md` states or points at:
+four occurrences changed, `Issue #585`, `Issue #591` and `Issue #607` twice. Second, a line
 beginning "Noted" beneath a moved line is the repo having overtaken that line before the move, dated,
 and is not part of the moved text. Third, the comment's item (1) restated the Never list's first
 bullet, and is replaced below by a cross-reference to it (Alex's ruling of 2026-09-16, relayed on
@@ -88,4 +88,4 @@ Noted 2026-09-16, overtaken before the move: the harness window height now lives
 
 ## From Issue #611's comment of 2026-09-14
 
-Two more for this holder, from PR #608's third round (2026-09-14): (1) the conflicted rebase that strips a number-sign-leading subject is the Never list's first bullet above, which carries it; the comment's own wording of it is replaced by this cross-reference (Alex's ruling of 2026-09-16, relayed on Issue #626). (2) A screenshot cannot photograph a blocked main thread: withdrawn from Gate 2 item 13 as unverifiable (no command in the repo demonstrates it); earns its line when a capture taken during a blocked thread is shown to be the cause of a wrong read.
+Two more for this holder, from PR #608's third round (2026-09-14): (1) the conflicted rebase that strips a number-sign-leading subject is the Never list's first bullet above, which carries it and sits beside Gate 5 item 9's rebase --onto recipe; the comment's own wording of it is replaced by this cross-reference (Alex's ruling of 2026-09-16, relayed on Issue #626). (2) A screenshot cannot photograph a blocked main thread: withdrawn from Gate 2 item 13 as unverifiable (no command in the repo demonstrates it); earns its line when a capture taken during a blocked thread is shown to be the cause of a wrong read.
