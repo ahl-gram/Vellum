@@ -10,9 +10,9 @@ const REPO = resolve(import.meta.dirname, "..", "..");
 const PROSE_ROOTS = ["specs", ".claude/skills", ".claude/agents", "CLAUDE.md", "README.md", ".github"];
 const SERVED_ROOT = "public";
 const MEMORY_PREFIX = /^(project_|feedback_|reference_)/;
-// A cap on a hang, never a budget: spawnSync's timeout is the mechanism test/repo/footgun-deployed-run.test.ts pins with a child that outlives it, and a check-ignore batch on stdin is the draining-child shape Issue #564 measured.
+// A cap on a hang, never a budget (2026-09-16: the whole sweep with both git calls ran in 13 to 15 ms on a Mac and in CI's Linux checkout, so 30 s is three orders above the worst case): spawnSync's timeout is the mechanism test/repo/footgun-deployed-run.test.ts pins with a child that outlives it, and a check-ignore batch on stdin is the draining-child shape Issue #564 measured.
 const GIT_TIMEOUT_MS = 30_000;
-// Issue #624's seven, restated on purpose under the derived set as a deliberate Gate 1 item 16 departure: a ratchet, so a set derived from the tree cannot shrink unnoticed.
+// Issue #624's seven, restated on purpose under the derived set: a deliberate Gate 1 item 16 departure.
 const EXTENSION_FLOOR = ["md", "ts", "mjs", "astro", "css", "yml", "json"];
 
 type Citation = { readonly file: string; readonly line: number; readonly path: string };
@@ -21,7 +21,9 @@ type Verdict = { readonly citation: Citation; readonly finding: string | null };
 const git = (args: string[], input?: string) =>
   spawnSync("git", args, { cwd: REPO, encoding: "utf8", input, timeout: GIT_TIMEOUT_MS });
 
-const tracked: ReadonlyArray<string> = git(["ls-files", "-z"]).stdout.split("\0").filter(Boolean);
+const listing = git(["ls-files", "-z"]);
+if (listing.status !== 0) throw new Error(`git ls-files failed (${listing.status}, ${listing.error ?? listing.stderr}): the tracked set would be empty or partial`);
+const tracked: ReadonlyArray<string> = listing.stdout.split("\0").filter(Boolean);
 const extensions: ReadonlySet<string> = new Set(tracked.map((f) => extname(f).slice(1)).filter(Boolean));
 const byBasename: ReadonlyMap<string, ReadonlyArray<string>> = new Map(
   [...new Set(tracked.map((f) => basename(f)))].map((name) => [name, tracked.filter((f) => basename(f) === name)]),

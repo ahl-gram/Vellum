@@ -69,13 +69,10 @@ citations**, which are not history but what makes a rule checkable in one comman
 constant wherever the rule is about its value. The older entries here still carry narrative; that is
 trimmed as each is touched, not swept separately.
 
-**A backticked file path in prose is scanned.** `test/repo/prose-paths.test.ts` reads every one in
-the house's markdown (these specs, the skill, the agents, `CLAUDE.md`, the README and the pull request
-template) and reds when it does not resolve. Backticks on a path claim the file is in the repo or
-deliberately kept out of it (a generated or gitignored file cited with its directory, a served
-address, an auto-memory name); write a retired file or an example name without them, and a file
-outside this repo at its real home under `~`, which the scanner does not read as a repo path. The
-test is the list of what it reads and what passes; do not copy either here.
+**A backticked file path in prose is scanned.** `test/repo/prose-paths.test.ts` reads the house's
+markdown and reds when a backticked path does not resolve: backticks on a path claim the file is in
+the repo or deliberately kept out of it, so write a retired file or an example name without them, and
+a file outside this repo at its real home under `~`. The test is the list of what it reads and what passes.
 
 **Write `Issue #N` or `PR #N` in prose, never a bare `#N`**, because issues and pull requests share
 one numbering sequence here and interleave, so a bare number does not say which kind of thing it
