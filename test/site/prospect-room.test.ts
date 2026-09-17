@@ -135,6 +135,8 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
   assert.ok(slip.includes(`>${LAY_ON_PAGE}</button>`), `the authored face is not ${JSON.stringify(LAY_ON_PAGE)}, so the press changes wording the instant the script paints it`);
   assert.match(app, /\bLAY_ON_PAGE\b/, "the script paints from the constant rather than its own literal");
   assert.doesNotMatch(app, /"Lay (this|the) prospect on the table"/, "and writes no second copy of the wording");
-  assert.match(css, /\.pp-lay\.dim\s*\{[^}]*opacity/, "the refusing face dims rather than disappearing");
+  // Measured 2026-09-17, the same reason as the card's press: opacity composites the ink toward the ground and takes the face to 2.76:1 against the ratified 4.5:1 floor.
+  assert.match(css, /\.pp-lay\.dim\s*\{[^}]*background:\s*var\(--control-cream\)/, "the refusing face dims by losing the featured gold, keeping its ink at full strength");
+  assert.doesNotMatch(css, /\.pp-lay\.dim\s*\{[^}]*opacity/, "and never by opacity, which fails the measured contrast floor");
   assert.doesNotMatch(app, /layPress\.disabled/, "and it is never disabled: that drops it out of the tab order");
 });

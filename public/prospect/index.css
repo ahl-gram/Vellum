@@ -29,7 +29,9 @@
   border: 1px solid var(--line-tan); border-radius: 4px; }
 /* house.css's `button:not(.lf-station):not(.place-hit):hover` is (0,3,1) and would flash this press bright cream, losing the gold the sitting ruled; the slip's own id carries the hold to (1,2,0). */
 #note .pp-lay:hover, #note .pp-lay:focus-visible { background: var(--control-gold); border-color: var(--ink-brown); }
-.pp-lay.dim { opacity: 0.55; }
+/* The same measured reason as the card's press: opacity composites the ink toward the ground and took this face to 2.76:1 against the ratified 4.5:1 floor, where the standard cream holds 9.89:1. */
+.pp-lay.dim { background: var(--control-cream); border-color: var(--line-faint); }
+#note .pp-lay.dim:hover, #note .pp-lay.dim:focus-visible { background: var(--control-cream); }
 .pp-lay-count { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.8rem; color: var(--ink-brown); margin: 0; text-align: left; }
 
 @media (max-width: 900px) {

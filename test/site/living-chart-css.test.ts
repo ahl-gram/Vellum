@@ -94,6 +94,10 @@ test("the card's action row and its filing press are dressed by a rule of their 
   assert.match(lay, /pointer-events:\s*auto/, "and without this it is dead to a real pointer, since #place-card is pointer-events: none");
   // The press acts on the sheet and goes nowhere, so it must NOT wear the navigation tip; tip-affordance.test.ts sweeps the class, this names the piece.
   assert.doesNotMatch(css.slice(css.indexOf(".pc-lay")), /^\.pc-lay[^{]*:hover[^{]*\{[^}]*rotate\(/m, "the press took the navigation tip, which promises it goes somewhere");
+  // Measured 2026-09-17: opacity composites the INK toward the ground, taking this face from 8.72:1 to 2.76:1 against the ratified 4.5:1 floor. Dimming by ground keeps the ink at full strength, at 9.89:1.
+  const dim = soleRule(css, ".pc-lay.dim");
+  assert.doesNotMatch(dim, /opacity/, "the refusing press dims by OPACITY, which fails the measured contrast floor; it dims by losing the gold for the standard cream");
+  assert.match(dim, /background:\s*var\(--control-cream\)/, "and it must actually change ground, or it does not read as refusing at all");
 });
 
 // ENGINE_RULES matches a bare selector as a SUBSTRING, so it cannot see a rule gutted to display:none, nor a rename to .pc-tongue-note.

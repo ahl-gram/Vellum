@@ -78,7 +78,10 @@
   border: 1px solid var(--line-tan); border-radius: 4px; }
 /* The house wash at `button:not(.lf-station):not(.place-hit):hover` in house.css is (0,3,1) and would flash this press bright cream, losing the ruled gold; #place-card is engine-created, so (1,2,0) holds the ground without keying on a host's id. */
 #place-card .pc-lay:hover, #place-card .pc-lay:focus-visible { background: var(--control-gold); border-color: var(--ink-brown); }
-.pc-lay.dim { opacity: 0.55; }
+/* The hover hold above is (1,2,0) and would restore the gold on a refusing press, undoing the dim the moment the pointer arrives, so the dim is re-asserted one class deeper. */
+#place-card .pc-lay.dim:hover, #place-card .pc-lay.dim:focus-visible { background: var(--control-cream); }
+/* A refusing press dims by losing the FEATURED gold for the standard cream, never by opacity: opacity composites the ink toward the ground, and measured 2026-09-17 it took this face from 8.72:1 to 2.76:1 against the ratified 4.5:1 floor, where cream holds 9.89:1. A deviation from the still's "dims", stated because the floor is measured and ratified. */
+.pc-lay.dim { background: var(--control-cream); border-color: var(--line-faint); }
 .pc-tongue { display: block; margin: 0.45rem 0 0; padding-top: 0.4rem;
   border-top: 1px solid rgb(from var(--ink-dark) r g b / 0.22);
   font-size: 0.8rem; color: var(--ink-brown); }
