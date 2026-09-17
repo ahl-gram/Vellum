@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { layOnTable, takeOffTable, roomOnTable, countLine, tabLine, refusalLine } from "../../src/site/explorer/chart-drawer.ts";
-import { TABLE_CAP, TABLE_KEY, emitTable, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
+import { layOnTable, takeOffTable, roomOnTable, countLine, tabLine, refusalLine, subOf, thumbJobFor, thumbNames, layPressFace } from "../../src/site/explorer/chart-drawer.ts";
+import { TABLE_CAP, TABLE_KEY, emitTable, type ProspectItem, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 import { emitTableKey } from "../../src/site/explorer/address.ts";
+import type { ProspectJob, ProspectResult, RegionResult } from "../../src/site/explorer/worker-client.ts";
 
 // The Chart Table's state (#520 Sub 2), pure and apart from the DOM: what the drawer draws and what the address carries are both this array. The surface is `chart-drawer` and never `drawer`, which src/site/shell/drawer.ts already spends on the site's phone nav (#520 ruling 2).
 const survey = (lx: number): SurveyItem => ({
@@ -149,4 +150,72 @@ test("a full table refusing a sheet it ALREADY holds says so, not that it is ful
   const again = layOnTable(full, target);
   assert.equal(again.refused, true);
   assert.equal(again.reason, "already", "the more useful of the two true things");
+});
+
+// #522 Sub 4: a prospect draws its own plate, which is what #518 ruling 7 calls "the plate itself in its own dress".
+const prospect = (over: Partial<ProspectItem> = {}): ProspectItem => ({
+  kind: "prospect", seed: 42, overrides: {}, style: "ink", index: 3, year: 1059, ...over,
+});
+
+test("CT1 thumbJobFor hands a prospect its own job, dressed as the ADDRESS states, so an ink chart's cutting is an ink plate (#522, #237)", () => {
+  const ink = thumbJobFor(prospect());
+  assert.equal(ink.kind, "prospect");
+  assert.equal((ink as ProspectJob).dress, "ink", "an ink prospect draws the ink plate");
+  const antique = thumbJobFor(prospect({ style: "antique" }));
+  assert.equal((antique as ProspectJob).dress, "antique");
+  assert.deepEqual(
+    { index: (ink as ProspectJob).index, year: (ink as ProspectJob).year, seed: ink.seed },
+    { index: 3, year: 1059, seed: 42 },
+    "the place, the year and the world ride verbatim: they ARE the plate's identity",
+  );
+});
+
+test("CT2 thumbJobFor hands EVERY table item a job, so no kind can be left drafting forever (#522; a prospect returned null until this sub and read 'drawing…' for good)", () => {
+  for (const item of [survey(2), prospect(), prospect({ style: "antique", year: 300 })] as TableItem[]) {
+    const job = thumbJobFor(item);
+    assert.ok(job, `${item.kind} has no job, so its cutting never fills`);
+    assert.equal(job.kind, item.kind === "prospect" ? "prospect" : "region");
+  }
+});
+
+test("CT3 thumbNames takes a prospect's name from the TOWN and its world line from the job's own title, which is the world's (#522)", () => {
+  const prospectRes = { ok: true, name: "Paukilua", title: "The Isle of Rahai", svg: "" } as unknown as ProspectResult;
+  assert.deepEqual(thumbNames(prospectRes), { title: "The Prospect of Paukilua", worldTitle: "The Isle of Rahai" });
+  const regionRes = { ok: true, title: "The Environs of Nurunui", worldTitle: "The Isle of Rahai", svg: "" } as unknown as RegionResult;
+  assert.deepEqual(
+    thumbNames(regionRes),
+    { title: "The Environs of Nurunui", worldTitle: "The Isle of Rahai" },
+    "a region keeps the pair it already carries",
+  );
+});
+
+test("CT4 a prospect's cutting names the dress the PLATE is drawn in, so a hand-typed style the plate cannot wear does not label the picture beside it (#522)", () => {
+  assert.equal(subOf(prospect()), "a prospect, pen & ink, 1059");
+  assert.equal(subOf(prospect({ style: "antique" })), "a prospect, antique, 1059");
+  // parseTable accepts all four chart styles, and plateDressFor sends these two to the antique plate.
+  assert.equal(subOf(prospect({ style: "nautical" })), "a prospect, antique, 1059", "nautical draws antique, so it reads antique");
+  assert.equal(subOf(prospect({ style: "topographic" })), "a prospect, antique, 1059");
+  assert.equal(subOf(survey(1)), "band 2, antique", "a survey's line is unchanged");
+});
+
+test("CT6 the card's press wears the two ruled faces, and a table that is BOTH full and already holding this plate says the more useful of the two true things (#518 ruling 7, Alex 2026-09-17, and #520's own precedence scar)", () => {
+  assert.deepEqual(layPressFace({ holds: false, full: false }), { label: "Lay the prospect on the table", refuses: false });
+  assert.deepEqual(layPressFace({ holds: false, full: true }), { label: "No room on the table", refuses: true });
+  assert.deepEqual(layPressFace({ holds: true, full: false }), { label: "Already on the table", refuses: true });
+  // layOnTable answers "already" before "full" for exactly this reason: the reader can act on the first and not on the second.
+  assert.deepEqual(
+    layPressFace({ holds: true, full: true }),
+    { label: "Already on the table", refuses: true },
+    "a full table holding this very plate tells the reader it is already there, not that there is no room for it",
+  );
+  const held = layOnTable(fill(TABLE_CAP - 1).concat([prospect()]), prospect());
+  assert.equal(held.reason, "already", "and that is the order layOnTable itself takes");
+});
+
+test("CT5 a prospect refused as a duplicate is refused in its OWN noun, and the survey line stays byte-identical (#522; e2e CD and announce.test pin the survey wording)", () => {
+  assert.equal(refusalLine("already"), "this survey is already on the table", "the survey line is unchanged");
+  assert.equal(refusalLine("already", "survey"), "this survey is already on the table");
+  assert.equal(refusalLine("already", "prospect"), "this prospect is already on the table");
+  assert.equal(refusalLine("full"), "the table is full: six sheets lie on it", "the cap line names no kind and is unchanged");
+  assert.equal(refusalLine("full", "prospect"), "the table is full: six sheets lie on it");
 });

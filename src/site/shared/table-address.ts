@@ -1,5 +1,6 @@
 // The Chart Table's grammar (Sub 1 of #401): one key, two hosts. It rides in the Explorer's hash while the table is being gathered and it IS the Portfolio page's address once the button is pressed, so the folio survives a reload and a round trip to the Prospect page. Pure and DOM-free like its siblings in src/site/{explorer,prospect,ribbon}/address.ts, because three bundles import it. The key is `table` (ruled at #518's sitting, 2026-09-07; `plates` is taken by the Explorer's order button and the poster/atlas plates).
 import { LATTICE_DIVISIONS, LOD_BANDS, lodWindowFor, plotUvFromSheet, type LodBand, type SheetMargins, type UvCamera } from "../../world/lod.ts";
+import { plateDressFor } from "../../prospect/dress/context.ts";
 import { parseYear } from "./year.ts";
 import type { UvWindow, MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
@@ -236,6 +237,21 @@ export function tableWindow(item: SurveyItem): UvWindow {
   const band = LOD_BANDS[item.rung] as LodBand;
   const step = latticeStep(band);
   return lodWindowFor(item.lx * step, item.ly * step, band.sizeUV);
+}
+
+/** The ONE builder both capture points use (#522). It lives here rather than beside `surveyItemFrom` in ../explorer/chart-drawer.ts because two bundles build a prospect item where only the Explorer builds a survey one, and `sameSheet` is byte equality on the emitted item: a card spelling the dress and a page spelling the chart's style would make one plate two sheets, defeating the cap and the dedupe. */
+export function prospectItemFrom(c: {
+  readonly seed: number;
+  readonly overrides: TableOverrides;
+  readonly style: StyleName;
+  readonly index: number | null;
+  readonly year: number | null;
+}): ProspectItem | null {
+  if (!Number.isInteger(c.seed) || c.seed < 0) return null;
+  // Both doors hold a RESOLVED index and a drawn year, and a null index emits no `i` at all, which would collide with a hand-typed address for the same capital.
+  if (c.index === null || !Number.isInteger(c.index) || c.index < 0) return null;
+  if (c.year === null || !Number.isInteger(c.year) || c.year <= 0) return null;
+  return { kind: "prospect", seed: c.seed, overrides: c.overrides, style: plateDressFor(c.style), index: c.index, year: c.year };
 }
 
 /** Sub 3's drafting order: one run per world, first-seen. Keyed on the world the ADDRESS states, never a stringified overrides object, whose key order would split one world in two and regenerate the parent twice through the single-entry `worldFor` cache. */

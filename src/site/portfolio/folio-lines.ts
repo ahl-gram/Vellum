@@ -1,7 +1,7 @@
 // The Portfolio's period voice (#521 Sub 3 of #401), pure and DOM-free so the wording is unit-testable
 // the way the Chart Table's countLine is. Ruled 2026-09-08: direction C's picture with direction A's
 // words, so nothing here says "sheaf".
-import type { TableGroup, TableItem } from "../shared/table-address.ts";
+import type { TableGroup } from "../shared/table-address.ts";
 
 const NUMERALS = ["i", "ii", "iii", "iv", "v", "vi"] as const;
 
@@ -43,8 +43,4 @@ export function beneathLine(beneath: number): string {
 /** The slip's where-line, which the mockup writes with the tally: "six sheets gathered at the Explorer". */
 export function gatheredLine(count: number): string {
   return `${sheets(count)} gathered at the Explorer`;
-}
-
-export function isAwaited(item: TableItem): boolean {
-  return item.kind === "prospect";
 }

@@ -43,7 +43,17 @@ test("PFR2 the slip's where-line follows the gathering in both states: a bare Po
   assert.doesNotMatch(app, /whereLine && items\.length/, "no length guard: gatheredLine(0) already carries the bare voice, 'no sheets gathered at the Explorer'");
 });
 
-test("PFR3 the two sheet presses stand down on what can be DRAFTED, not on what was gathered: a table of nothing but prospects leaves both presses a silent no-op", () => {
-  assert.match(app, /if \(drawable\(\)\.length === 0\) \{/, "the stand-down asks whether any gathered sheet can be drafted at all");
-  assert.doesNotMatch(app, /if \(items\.length === 0\) \{/, "the gathered tally is the wrong predicate: a prospect keeps its seat and never drafts, so it can never answer either press");
+// PFR3 replaced at #522. It pinned a stand-down on what could be DRAFTED, which was the right predicate only while a
+// prospect never drafted; now that every gathered sheet does, that predicate and `items.length === 0` coincide and the
+// old guard could not red. What CAN red is a kind-based skip creeping back into the drafting loop or the index.
+test("PFR3 every gathered sheet drafts, so nothing in the page skips a sheet by KIND and the presses stand down only on a bare portfolio (#522, superseding #521 ruling 3)", () => {
+  assert.match(app, /if \(sheets\.length === 0\) \{/, "the stand-down asks whether anything was gathered at all");
+  assert.doesNotMatch(app, /\bisAwaited\b/, "the reserved-place predicate is gone, not merely unused");
+  assert.doesNotMatch(app, /\bdrawable\b/, "and so is the drawable filter it fed");
+  // The loop that draws them: a `continue` or an early return keyed on the item's kind is the shape that leaves one kind forever drafting.
+  const from = at("const draft = async");
+  const loop = app.slice(from, app.indexOf("\n};", from));
+  assert.ok(loop.length > 100, "the drafting loop was not found, so the assertions below read an empty slice");
+  assert.doesNotMatch(loop, /if \(!job\)/, "a falsy-job skip is how a prospect was held back; thumbJobFor now answers for every kind");
+  assert.doesNotMatch(loop, /kind === "survey"|kind !== "prospect"/, "the loop may not draft one kind and skip the other");
 });

@@ -13,6 +13,8 @@ interface PlaceOverlayState {
   pinned: boolean;
   pinnedIdx: number;
   prospectLink: HTMLAnchorElement | null;
+  acts: HTMLElement | null;
+  layPress: HTMLButtonElement | null;
 }
 
 export interface OverlayData {
@@ -33,15 +35,22 @@ export interface BuildPlaceOverlayOpts {
   box?: OverlayBox;
 }
 
+/** #522: the card's second action, injected the way `prospectHref` is so the engine stays host-agnostic and a host with no table (the Reading Room) grows no press. `state` is asked on every card show AND on every table change, because what the press says depends on a table that moves under the card. */
+export interface LayProspectHost {
+  state: (idx: number) => { label: string; refuses: boolean };
+  lay: (idx: number) => void;
+}
+
 export interface PlaceOverlayDeps {
   mapEl: HTMLElement;
   isSuppressed: () => boolean;
   prospectHref?: (idx: number) => string;
+  layProspect?: LayProspectHost;
   clampBox?: () => CardBox | null;
 }
 
 export function createPlaceOverlay(deps: PlaceOverlayDeps) {
-  const { mapEl, isSuppressed, prospectHref, clampBox } = deps;
+  const { mapEl, isSuppressed, prospectHref, layProspect, clampBox } = deps;
 
   let placeOverlay: PlaceOverlayState | null = null;
 
@@ -63,9 +72,15 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       former.textContent = card.formerLine;
       inner.append(former);
     }
-    if (placeOverlay!.prospectLink) {
-      placeOverlay!.prospectLink.href = prospectHref!(place.idx);
-      inner.append(placeOverlay!.prospectLink);
+    const acts = placeOverlay!.acts;
+    if (acts) {
+      if (placeOverlay!.prospectLink) {
+        placeOverlay!.prospectLink.href = prospectHref!(place.idx);
+        acts.append(placeOverlay!.prospectLink);
+      }
+      if (placeOverlay!.layPress) acts.append(placeOverlay!.layPress);
+      paintLay(place.idx);
+      inner.append(acts);
     }
     if (card.tale) {
       const tale = document.createElement("p");
@@ -108,6 +123,21 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   function reclampCard(): void {
     if (!placeOverlay || placeOverlay.card.hidden) return;
     clampIntoView(placeOverlay.card);
+  }
+
+  function paintLay(idx: number): void {
+    const press = placeOverlay && placeOverlay.layPress;
+    if (!press || !layProspect || idx < 0) return;
+    const face = layProspect.state(idx);
+    press.textContent = face.label;
+    press.dataset["idx"] = String(idx);
+    // Ruled 2026-09-17: it DIMS and keeps answering, the dog-ear's shape, because `disabled` leaves the tab order and a keyboard reader would meet the card with no account of the missing action.
+    press.classList.toggle("dim", face.refuses);
+  }
+
+  /** Re-asked when the TABLE changes rather than when the card does: a successful press never re-shows the card, so a press labelled only at show time keeps offering an action it has just spent. */
+  function relabelLay(): void {
+    if (placeOverlay) paintLay(placeOverlay.currentIdx);
   }
 
   function clampIntoView(el: HTMLElement): void {
@@ -155,14 +185,37 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const inner = document.createElement("div");
     inner.className = "pc-inner";
     card.appendChild(inner);
+    // Both card actions are world-sheet only: a region manifest renumbers its places (#242), so an inset's index names a different settlement.
+    const onWorldSheet = !(opts && opts.box);
     let prospectLink: HTMLAnchorElement | null = null;
-    if (prospectHref && !(opts && opts.box)) {
+    if (prospectHref && onWorldSheet) {
       prospectLink = document.createElement("a");
       prospectLink.className = "pc-prospect";
       prospectLink.textContent = "View the prospect";
-      inner.appendChild(prospectLink);
     }
-    placeOverlay = { card, places: manifest.places, events: manifest.events, cultureId: manifest.cultureId, presentYear: manifest.presentYear, currentIdx: -1, pinned: false, pinnedIdx: -1, prospectLink };
+    let layPress: HTMLButtonElement | null = null;
+    if (layProspect && onWorldSheet) {
+      layPress = document.createElement("button");
+      layPress.type = "button";
+      layPress.className = "pc-lay";
+      // The card sits INSIDE the zoom-bound gesture box, so a rapid double-press on a control that does not navigate away bubbles into d3's double-click-to-zoom and the chart lurches under the reader's hand; makeDogEar in ../explorer/chart-drawer.ts carries the same list.
+      for (const ev of ["mousedown", "dblclick", "wheel", "touchstart"]) {
+        layPress.addEventListener(ev, (e) => e.stopPropagation());
+      }
+      layPress.addEventListener("click", () => {
+        const at = Number(layPress!.dataset["idx"]);
+        if (Number.isInteger(at) && at >= 0) layProspect.lay(at);
+      });
+    }
+    // One row for both, so Issue #428's third action joins a row rather than re-laying the card out.
+    const acts = prospectLink || layPress ? document.createElement("div") : null;
+    if (acts) {
+      acts.className = "pc-acts";
+      if (prospectLink) acts.appendChild(prospectLink);
+      if (layPress) acts.appendChild(layPress);
+      inner.appendChild(acts);
+    }
+    placeOverlay = { card, places: manifest.places, events: manifest.events, cultureId: manifest.cultureId, presentYear: manifest.presentYear, currentIdx: -1, pinned: false, pinnedIdx: -1, prospectLink, acts, layPress };
     manifest.places.forEach((place, idx) => {
       const hit = document.createElement("button");
       hit.type = "button";
@@ -217,7 +270,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     placeOverlay = null;
   }
 
-  return { buildPlaceOverlay, onDocKeydown, onDocClick, hideCard: hidePlaceCard, reclampCard, data, teardown };
+  return { buildPlaceOverlay, onDocKeydown, onDocClick, hideCard: hidePlaceCard, reclampCard, relabelLay, data, teardown };
 }
 
 export type PlaceOverlay = ReturnType<typeof createPlaceOverlay>;

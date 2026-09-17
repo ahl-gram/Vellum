@@ -6,8 +6,8 @@ import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts"
 import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
-import { type TableItem } from "../shared/table-address.ts";
-import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor } from "./chart-drawer.ts";
+import { prospectItemFrom, type TableItem, type TableOverrides } from "../shared/table-address.ts";
+import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace } from "./chart-drawer.ts";
 import { bindTableLeaf } from "./table-leaf.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
@@ -42,6 +42,8 @@ let lastSeed = 0;
 let lastManifest: PlaceManifest | null = null;
 // #120: assigned beside lastManifest from the SAME draw; a mismatched pair would route this world's ports over another world's roads.
 let lastSurvey: Survey | null = null;
+// #522: the DRAWN world, assigned in lockstep with glass.setWorld. The card files from this and never from the controls, because a seed or a style typed without pressing Draw describes a chart nobody has drawn.
+let lastWorld: { seed: number; overrides: TableOverrides; style: StyleName } | null = null;
 
 const touched = { land: false, coast: false };
 
@@ -56,11 +58,30 @@ function prefersReduce(): boolean {
 
 const tourOrder = createTourOrder({ runJob });
 
+// The card's filing press files the DRAWN world's prospect of this place, at the Explorer's present year (the Explorer has no ages instrument, so its present is the manifest's).
+const prospectAt = (idx: number): TableItem | null =>
+  !lastWorld || !lastManifest
+    ? null
+    : prospectItemFrom({ seed: lastWorld.seed, overrides: lastWorld.overrides, style: lastWorld.style, index: idx, year: lastManifest.presentYear });
+
 const lc = createLivingChart({
   mapEl: mapDiv,
   statusEl: status,
   tourOrder,
   prospectHref: (idx) => prospectTarget(location.hash, idx),
+  layProspect: {
+    state: (idx) => {
+      const item = prospectAt(idx);
+      return item ? layPressFace({ holds: chartTable.holds(item), full: chartTable.isFull() }) : { label: "Lay the prospect on the table", refuses: true };
+    },
+    lay: (idx) => {
+      const item = prospectAt(idx);
+      if (!item) return;
+      // Nothing is handed over as art: the plate crosses no navigation, so the drawer's own deferred draw fetches it through one prospect job.
+      if (!chartTable.lay(item, null)) return;
+      lc.reclampCard();
+    },
+  },
   // #387/#388: at k=1 this rect IS the chart box, and under the Glass it is the room actually on screen, which is why one box serves both errata.
   clampBox: () => mapViewport.getBoundingClientRect(),
   restingTrackSink: {
@@ -102,12 +123,12 @@ const chartTable = bindChartDrawer({
   say: announce,
   drawThumb: async (item) => {
     const job = thumbJobFor(item);
-    if (!job) return null;
-    const res = await runJob(job).catch(() => null);
+    // Narrowed on the job's own kind: a union argument resolves to runJob's catch-all overload, whose result union carries no svg.
+    const res = job.kind === "prospect" ? await runJob(job).catch(() => null) : await runJob(job).catch(() => null);
     if (!res) return null;
-    return { url: URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" })), title: res.title };
+    return { url: URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" })), title: thumbNames(res).title };
   },
-  onChange: () => { syncHash(); relabelEar(); },
+  onChange: () => { syncHash(); relabelEar(); lc.relabelLay(); },
 });
 // #165/#169/#192: the ONE hash writer, every trigger funnels through here; #321: the box IS the flag and the Explorer never authors year=.
 function syncHash(): void {
@@ -220,6 +241,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
             rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
           glass.syncZoom();
           glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined }, manifest: res.manifest });
+          lastWorld = { seed, overrides, style };
           syncHash();
         });
       } else {
@@ -232,6 +254,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         glass.syncZoom();
         // #169: record this world sheet BEFORE a deep-link camera is applied, so the settle that camera triggers redrafts over the SAME base world.
         glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined }, manifest: res.manifest });
+        lastWorld = { seed, overrides, style };
         syncHash();
         if (pendingCamera) {
           const cam = pendingCamera;
