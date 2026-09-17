@@ -85,7 +85,7 @@ worktree when it starts, and its definition carries the rename.
   uncommitted work silently and with no diff to recover from.
 - **Doctrine and rosters move with the code.** A new file joins lists it does not know about, and a
   behavior change that contradicts a ratified line has to edit that line in the same PR. Nothing in
-  this repo sweeps markdown, so a doctrine file left stale stays stale silently.
+  this repo sweeps a claim in markdown (`test/repo/prose-paths.test.ts` checks only that a backticked path resolves), so a doctrine file left stale stays stale silently.
 - **Bold delight is welcome**, per `CLAUDE.md`, but flagged in the reply and in the PR body, never
   buried.
 

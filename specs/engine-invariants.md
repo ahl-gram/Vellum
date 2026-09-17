@@ -11,7 +11,7 @@ the engine fact and points there for what the fact costs. `specs/ui-design.md` o
 drawn.
 
 **Counts and seed-specific measurements are not here.** They live at the guards named throughout,
-which is where a wrong number goes red. Nothing in this repo sweeps markdown, so a number written
+which is where a wrong number goes red. Nothing in this repo sweeps a claim in markdown, so a number written
 here would be wrong silently and for good.
 
 ## Identity versus view
