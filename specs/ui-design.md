@@ -285,8 +285,8 @@ And an inline-block takes its baseline from its last line box, so a wrapping lis
 bullet beside line two: such a box pins `vertical-align: top`. Never "fix" that by going back to
 `display: inline`, which kills the tip.
 
-**Touch and hover are branched on the full predicate**, coarse pointer and no hover together, never
-on absent hover alone: a headless linux runner reports no hover with no pointer at all.
+**How an affordance gate is written**, and why never on absent hover alone, is
+`specs/cascade-traps.md`'s.
 
 **A real tap fires the compatibility hover and focus events BEFORE its click**, and the tap's own
 press light-dismisses an open auto popover first. So a press that toggles a popover needs the hover

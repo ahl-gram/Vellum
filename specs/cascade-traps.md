@@ -4,10 +4,10 @@ The craft half of `specs/ui-design.md`. This class of defect has shipped repeate
 in the source every time, because **the failing declaration is present in the file and merely loses.**
 A text search over the CSS passes on the broken code; pin the resolved value instead.
 
-Read it before writing or moving CSS, and before reading a rendered frame after a change; that
-file rules what the site looks like, and this one is what the browser does to the declaration you
-write to get there. The checklist form of the same lines is `vellum-footguns` Gate 3, which points
-here rather than copying the reasons.
+Read this file before writing or moving CSS, and before reading a rendered frame after a change:
+`specs/ui-design.md` rules what the site looks like, and this file is what the browser does to the
+declaration you write to get there. The checklist form of the same lines is `vellum-footguns` Gate
+3, which points here rather than copying the reasons.
 
 - **A media query adds no specificity.** A narrow-width override written at a bare class loses to any
   wider-specificity rule outside the block, however far above it that rule sits.

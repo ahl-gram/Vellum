@@ -21,10 +21,9 @@ Five other places carry what this one deliberately does not:
 
 Its siblings under `specs/` hold what this file is not about: `conventions.md` how a design decision
 is made and how a rule is written down (where it lives, the voice, the citation form, the comment
-sweep), `ui-design.md` the look and feel
-itself (the ground, the case, the palette, the rooms, the voice, motion and ceremony),
-`chart-dress.md` how a chart itself is dressed, `cascade-traps.md` what the browser does to a
-declaration that reads as correct,
+sweep), `ui-design.md` the look and feel itself (the ground, the case, the palette, the rooms, the
+voice, motion and ceremony), `chart-dress.md` how a chart itself is dressed, `cascade-traps.md` what
+the browser does to a declaration that reads as correct,
 `engine-invariants.md` what the generator guarantees about a world and what a surface quoting it may
 not assume, `explorer-doctrine.md` the living chart over the baked sheet (the engine boundary and the
 host contract, the camera and gesture, counter-scale, the overlay lifecycle),
@@ -48,9 +47,8 @@ not stated in `CLAUDE.md` at all, the two copies having drifted apart in five pl
 duplicate went. `CLAUDE.md` keeps process at the keyboard; this file keeps the rules.
 
 **A rule change edits the spec that owns the rule**, this file for the rules it owns, in a branch and
-a pull request like any other tracked change. It
-may additionally leave a dated comment on the issue the change came from, as an audit trail. It must
-never live only in a comment somewhere.
+a pull request like any other tracked change. It may additionally leave a dated comment on the issue
+the change came from, as an audit trail. It must never live only in a comment somewhere.
 
 **Where a rule lives, how a spec is written, how code is cited and how a comment sweep is proven
 are `specs/conventions.md`'s**, together with how a design decision is made and the fidelity rule
@@ -85,7 +83,7 @@ page of the Print Room (#521). The rule stands for everything else.
 ## How a design decision is made
 
 **The six steps, the fidelity rule for building to a ruled still, and what a design round owes are
-`specs/conventions.md`'s.** A ruling about one feature stays a dated comment on its own issue.
+`specs/conventions.md`'s.**
 
 ## The cost axis and ordering principle
 
@@ -330,8 +328,9 @@ checks against.
 *Companion to the roadmap Project (status, order, phase), to `CLAUDE.md` (process at the keyboard),
 to `specs/conventions.md` (how a design decision is made, and how a rule is written down), to
 `specs/ui-design.md` (the look and feel), to `specs/chart-dress.md` (how a chart itself is dressed),
-to `specs/cascade-traps.md` (how the cascade breaks here), to `specs/engine-invariants.md` (what the generator
-guarantees), to `specs/explorer-doctrine.md` (the living chart, its camera and its overlays), to
+to `specs/cascade-traps.md` (how the cascade breaks here), to `specs/engine-invariants.md` (what
+the generator guarantees), to `specs/explorer-doctrine.md` (the living chart, its camera and its
+overlays), to
 `specs/region-and-voyage.md` (region sheets, level of detail, the voyage), to
 `specs/site-architecture.md` (how the site is authored and shipped), to
 `specs/development-workflow.md` (the order of operations), to `specs/settle-doctrine.md` (how an e2e

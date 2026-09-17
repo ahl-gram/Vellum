@@ -11,9 +11,8 @@ and the order of work, and where it and this file disagree about a rule of the p
 `specs/development-workflow.md` holds the order of operations from a filed issue to a pull
 request. `CLAUDE.md` holds process at the keyboard, including its copy of the comment doctrine,
 whose binding statement is the rulebook's and which this file's last section says how to enforce.
-`.claude/skills/vellum-footguns/SKILL.md` holds the
-gates keyed to the moment of typing, and its `references/` directory the dated records that serve
-them.
+`.claude/skills/vellum-footguns/SKILL.md` holds the gates keyed to the moment of typing, and its
+`references/` directory the dated records that serve them.
 
 ## How a design decision is made
 
@@ -45,8 +44,8 @@ dressing-level pins lag one live-use cycle, so a re-decision does not rip out fr
 comment and move on.
 
 **Every ruled design round is archived in the repo** under `design/`, one directory per round,
-content only, in its own pull request. That archive is the visual spec; `specs/ui-design.md` and the
-issue ledgers are the words.
+content only, in its own pull request. That archive is the visual spec; these specs and the issue
+ledgers are the words.
 
 Things a design round owes that the steps above do not cover:
 
@@ -86,8 +85,8 @@ option, his sentence is the ruling.
 **Where a rule lives: the routing rule.** Anything Vellum-specific AND normative AND slow-changing is
 a spec under `specs/`. An imperative keyed to the moment of typing a particular kind of line is a
 `vellum-footguns` gate. An incident whose value is proving that a gate bites is a row in that skill's
-`.claude/skills/vellum-footguns/references/scars.md`. A gate candidate declined under the strict filter (a line joins a gate only
-with its own incident number or a ruling of Alex's) is a row in
+`.claude/skills/vellum-footguns/references/scars.md`. A gate candidate declined under the strict
+filter (a line joins a gate only with its own incident number or a ruling of Alex's) is a row in
 `.claude/skills/vellum-footguns/references/held-lines.md`, each with the incident that would earn it
 its line. Fast-changing empirical traps, private infrastructure and status stay out of
 the repo entirely. **Exactly one home is normative, and every other copy points at it by name**,
@@ -101,7 +100,13 @@ and a comment stating it at the line that breaks are both correct, and moving a 
 not by itself a reason to delete the comment. What the routing rule forbids is a second NORMATIVE
 home: another spec, or a gate re-explaining the contract rather than pointing at it.
 
-## How a spec is written
+**A new spec file joins its reading lists by hand, and none of them checks itself**: the table in
+`CLAUDE.md`, step 3 of `specs/development-workflow.md`, the reading list in
+`.claude/agents/vellum-implementer.md`, and the sibling paragraph and companion footer of
+`specs/rulebook.md`. The other specs name only the siblings they lean on, so a new file joins those
+where a citation of its parent pointed into the text it took.
+
+## How a spec, and the rest of the house's prose, is written
 
 **Specs are prescriptive. State the rule and drop the provenance.** Write each entry in the
 imperative, as the thing a future session must do or must not do. Cut "ratified at", "reworked after
@@ -196,10 +201,10 @@ is run and PROVEN in a particular way.
 
 ---
 
-*Companion to `specs/rulebook.md` (the rules this file says how to write down),
-`specs/development-workflow.md` (the order of operations), `CLAUDE.md` (process at the keyboard,
-and the comment doctrine), `specs/ui-design.md` (the look a design decision decides), and the
-footguns skill's dated records beside its gates,
+*Companion to `specs/rulebook.md` (the rules this file says how to write down, and the comment
+doctrine's binding statement), `specs/development-workflow.md` (the order of operations),
+`CLAUDE.md` (process at the keyboard), `specs/ui-design.md` (the look a design decision decides),
+and the footguns skill's dated records beside its gates,
 `.claude/skills/vellum-footguns/references/scars.md`,
 `.claude/skills/vellum-footguns/references/flake-record.md` and
 `.claude/skills/vellum-footguns/references/held-lines.md`.*
