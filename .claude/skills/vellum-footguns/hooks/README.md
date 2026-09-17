@@ -195,7 +195,7 @@ Measured 2026-09-09 on this Mac, ten runs each, through the deployed `sh -c` com
 - a Bash or Edit call that triggers nothing, or a refusal: about 64ms;
 - a Write or Edit into a browser-driving script, which loads the TypeScript parser: about 182ms;
 - gate text, at most once per session each, and the aggregate if every one fires in a single session.
-  Neither figure is written here: they move whenever a gate gains a line, nothing sweeps markdown,
+  Neither figure is written here: they move whenever a gate gains a line, nothing sweeps a claim in markdown,
   and the copy that used to sit here went stale twice. This prints each gate's characters and their
   total, which is the aggregate term; divide by about four for tokens:
   `node --input-type=module -e 'const {gateText}=await import("./.claude/skills/vellum-footguns/hooks/footgun-gate.ts");let t=0;for(const g of ["Gate 1","Gate 2","Gate 3","Gate 4","Gate 5","Gate 6"]){const n=gateText(g).length;t+=n;console.log(g,n);}console.log("TOTAL",t)'`;

@@ -19,7 +19,7 @@ rulebook's retired-rules line that a page is one `.astro` file plus one nav entr
 reading page, and what a working page costs is this file's rule below. #590 scopes that line.
 
 **No counts live here.** Not the number of pages, sheets, bundles or suites. A count in a durable
-document rots silently, because nothing in this repo sweeps markdown. The rosters below are named by
+document rots silently, because nothing in this repo sweeps a claim in markdown (only a backticked path is scanned). The rosters below are named by
 symbol and path so the reader goes and looks.
 
 ## How a page is authored
@@ -68,7 +68,7 @@ symbol and path so the reader goes and looks.
 - **The shell dresses once.** Every shared shell rule lives in `BaseLayout.astro`'s
   `<style is:global>` block, and a page's own sheet carries page-specific rules only.
 - **Sheet order is a contract.** The layout links the root sheets, then the shared sheets a page
-  opts into through its `extraCss` prop, then the page's own relative `index.css`, so a page keeps
+  opts into through its `extraCss` prop, then the page's own `public/**/index.css`, so a page keeps
   the last word on its own layout. An `extraCss` href is validated at render and THROWS unless it is
   root-absolute. The layout's inline `<style>` renders after the page sheet's link, which is why a
   page override of a shell rule needs higher specificity; that trap belongs to `specs/cascade-traps.md`
@@ -180,7 +180,7 @@ other way, which is what earns them a section of their own.
   `scripts/generate-discovery.ts` writes them from `DISCOVERY_ROUTES`, which is the nav plus the
   routes that are not nav items, and every origin resolves against the `site` value in
   `astro.config.ts`. A domain move therefore updates all of them at once, which is exactly why
-  `robots.txt` is generated rather than hand-written: a hand-written sitemap line survives such a
+  `public/robots.txt` is generated rather than hand-written: a hand-written sitemap line survives such a
   move still pointing at the retired domain, which is what a domain move here would have stranded.
 - **A route with no blurb is a build error.** Adding a route without its `ROUTE_ENTRIES` line throws
   by name, and the generator also throws if `site` is unset.
