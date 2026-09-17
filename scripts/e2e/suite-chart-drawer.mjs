@@ -658,8 +658,10 @@ export async function run(ctx) {
       };
     })()`;
     const opened = await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); return true; })()`);
-    await sleep(600);
-    let pp = await evaluate(PP);
+    // The slip's fold is a transition, and CD28 derives a real pointer target from this press's rect: a fixed sleep either
+    // measures a box still moving or waits longer than it needs. Poll it to REST instead, and throw naming the last read.
+    let pp = await settle(PP, (d, last) => !!d.press && d.press.shown && !!last && !!last.press && d.press.centre && last.press.centre &&
+      d.press.centre.x === last.press.centre.x && d.press.centre.y === last.press.centre.y, "prospect-note-open");
     check(
       "CD28 the Prospect page's press sits on the engraver's note where the room's desk actions belong, answers a real pointer, and does NOT join the roads out, which go somewhere (ruled 2026-09-17, seat C)",
       !!opened && !!pp.press && pp.press.shown && pp.press.hit === "self" && pp.inNote &&
@@ -668,16 +670,14 @@ export async function run(ctx) {
       JSON.stringify({ press: pp.press, count: pp.count, inNote: pp.inNote, roads: pp.roads }),
     );
     if (pp.press && pp.press.centre) await clickAt(pp.press.centre.x, pp.press.centre.y);
-    await sleep(350);
-    const one = await evaluate(PP);
+    const one = await settle(PP, (d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 1, "prospect-filed-one");
     // The same town at a second year: the year IS part of the sheet's identity, which is the case that won "press and stay".
     // The form is submitted synthetically because the claim here is about the FILING, not about the year control, whose own gesture PB6 already drives.
     await evaluate(`(() => { const y = document.getElementById("pp-year"); y.value = String(Math.max(1, Number(y.value) - 300)); document.getElementById("pp-year-form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); })()`);
     for (let i = 0; i < 300; i++) { await sleep(100); const s = await evaluate(`(() => { const st = window.__vellumProspectState(); return st ? st.year : null; })()`); if (s !== null && s !== one.state.year) break; }
     let two = await evaluate(PP);
     if (two.press && two.press.centre) await clickAt(two.press.centre.x, two.press.centre.y);
-    await sleep(350);
-    two = await evaluate(PP);
+    two = await settle(PP, (d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 2, "prospect-filed-two");
     check(
       "CD29 the page files and STAYS, writing the gathering into its OWN address so a reload keeps it, and the same town at a second year is a SECOND sheet rather than one deduped away (ruled 2026-09-17; the year rides in the item, which is what lets a reader gather a run of one place across the centuries)",
       typeof one.hashTable === "string" && one.hashTable.split("_").length === 1 && /one sheet laid/.test(one.count || "") &&
@@ -701,11 +701,12 @@ export async function run(ctx) {
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3&table=${SIX}` });
     for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
     await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); })()`);
-    await sleep(600);
-    const atCapPage = await evaluate(PP);
+    const atCapPage = await settle(PP, (d, last) => !!d.press && d.press.shown && !!last && !!last.press && d.press.centre && last.press.centre &&
+      d.press.centre.x === last.press.centre.x && d.press.centre.y === last.press.centre.y, "prospect-note-open-full");
     if (atCapPage.press && atCapPage.press.centre) await clickAt(atCapPage.press.centre.x, atCapPage.press.centre.y);
-    await sleep(350);
-    const stillFull = await evaluate(PP);
+    // A refusal changes nothing, so there is no state to poll TO: the poll is for the table still holding six once the
+    // press has been answered, and it asserts on its last read rather than its first.
+    const stillFull = await settle(PP, (d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 6, "prospect-refused-at-cap");
     check(
       "CD35 at the cap the page's press wears the FULL refusal, stays pressable, and lays nothing: the page inherits the table's six from the address it was handed, which is the cap #522 says applies here too",
       !!atCapPage.press && atCapPage.press.text === "No room on the table" && atCapPage.press.dim &&

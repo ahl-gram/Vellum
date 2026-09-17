@@ -7,7 +7,7 @@ import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-war
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
 import { type TableItem, type TableOverrides } from "../shared/table-address.ts";
-import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD } from "./chart-drawer.ts";
+import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD, type FilingSheet } from "./chart-drawer.ts";
 import { bindTableLeaf } from "./table-leaf.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
@@ -42,8 +42,8 @@ let lastSeed = 0;
 let lastManifest: PlaceManifest | null = null;
 // #120: assigned beside lastManifest from the SAME draw; a mismatched pair would route this world's ports over another world's roads.
 let lastSurvey: Survey | null = null;
-// #522: the DRAWN world, assigned in lockstep with glass.setWorld. The card files from this and never from the controls, because a seed or a style typed without pressing Draw describes a chart nobody has drawn.
-let lastWorld: { seed: number; overrides: TableOverrides; style: StyleName } | null = null;
+// #522: the sheet the card files FROM, assigned beside the overlay whose hit targets name its places. Never from the controls, because a seed or a style typed without pressing Draw describes a chart nobody has drawn.
+let lastSheet: FilingSheet | null = null;
 
 const touched = { land: false, coast: false };
 
@@ -58,14 +58,8 @@ function prefersReduce(): boolean {
 
 const tourOrder = createTourOrder({ runJob });
 
-// The card files the DRAWN world's prospect of this place, at that world's present year, and files nothing while the sheet is mid-turn; `filingAt` holds the whole decision and says why.
 const prospectAt = (idx: number): TableItem | null =>
-  filingAt({
-    turning: sheetEl.classList.contains("turning"),
-    world: lastWorld,
-    presentYear: lastManifest ? lastManifest.presentYear : null,
-    index: idx,
-  });
+  filingAt({ turning: sheetEl.classList.contains("turning"), sheet: lastSheet, index: idx });
 
 const lc = createLivingChart({
   mapEl: mapDiv,
@@ -239,17 +233,18 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => {
           if (myGen !== drawGen) return;
           lc.buildPlaceOverlay(res.manifest);
+          lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
           room.layout();
           armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
             rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
           glass.syncZoom();
           glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined }, manifest: res.manifest });
-          lastWorld = { seed, overrides, style };
           syncHash();
         });
       } else {
         mapDiv.innerHTML = res.svg;
         lc.buildPlaceOverlay(res.manifest);
+        lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
         room.layout();
         if (!quiet) startArrival(mapDiv.querySelector("svg"));
         armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
@@ -257,7 +252,6 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         glass.syncZoom();
         // #169: record this world sheet BEFORE a deep-link camera is applied, so the settle that camera triggers redrafts over the SAME base world.
         glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined }, manifest: res.manifest });
-        lastWorld = { seed, overrides, style };
         syncHash();
         if (pendingCamera) {
           const cam = pendingCamera;

@@ -35,7 +35,7 @@ export interface BuildPlaceOverlayOpts {
   box?: OverlayBox;
 }
 
-/** #522: the card's second action, injected the way `prospectHref` is so the engine stays host-agnostic and a host with no table (the Reading Room) grows no press. `state` is asked on every card show AND on every table change, because what the press says depends on a table that moves under the card. */
+/** The card's second action, injected the way `prospectHref` is. */
 export interface LayProspectHost {
   state: (idx: number) => { label: string; refuses: boolean };
   lay: (idx: number) => void;
@@ -53,7 +53,6 @@ function makeLayPress(host: LayProspectHost): HTMLButtonElement {
   const press = document.createElement("button");
   press.type = "button";
   press.className = "pc-lay";
-  // The card sits INSIDE the zoom-bound gesture box, so a rapid double-press on a control that does not navigate away bubbles into d3's double-click-to-zoom and the chart lurches under the reader's hand; makeDogEar in ../explorer/chart-drawer.ts carries the same list.
   for (const ev of ["mousedown", "dblclick", "wheel", "touchstart"]) {
     press.addEventListener(ev, (e) => e.stopPropagation());
   }
@@ -207,7 +206,6 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       prospectLink.textContent = "View the prospect";
     }
     const layPress = layProspect && onWorldSheet ? makeLayPress(layProspect) : null;
-    // One row for both, so Issue #428's third action joins a row rather than re-laying the card out.
     const acts = prospectLink || layPress ? document.createElement("div") : null;
     if (acts) {
       acts.className = "pc-acts";

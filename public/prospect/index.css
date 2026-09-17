@@ -31,7 +31,7 @@
 #note .pp-lay:hover, #note .pp-lay:focus-visible { background: var(--control-gold); border-color: var(--ink-brown); }
 /* Dims by ground and never by opacity, for the measured reason written once at `.pc-lay.dim` in public/living-chart.css. */
 .pp-lay.dim { background: var(--control-cream); border-color: var(--line-faint); }
-#note .pp-lay.dim:hover, #note .pp-lay.dim:focus-visible { background: var(--control-cream); }
+#note .pp-lay.dim:hover, #note .pp-lay.dim:focus-visible { background: var(--control-cream); border-color: var(--line-faint); }
 .pp-lay-count { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.8rem; color: var(--ink-brown); margin: 0; text-align: left; }
 
 @media (max-width: 900px) {

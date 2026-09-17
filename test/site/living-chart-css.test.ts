@@ -97,6 +97,14 @@ test("the card's action row and its filing press are dressed by a rule of their 
   const dim = soleRule(css, ".pc-lay.dim");
   assert.doesNotMatch(dim, /opacity/, "the refusing press dims by OPACITY, which fails the measured contrast floor; it dims by losing the gold for the standard cream");
   assert.match(dim, /background:\s*var\(--control-cream\)/, "and it must actually change ground, or it does not read as refusing at all");
+  // A soleRule read cannot see a HIGHER-specificity rule elsewhere in the sheet taking a property back, and one did: the
+  // (1,2,0) hover hold restored the full-strength border on a refusing press under pointer AND keyboard focus, which is
+  // the half ruling 3's reasoning turns on. So every property the dim sets is re-asserted in the deeper rule.
+  const held = css.match(/#place-card \.pc-lay\.dim:hover[^{]*\{[^}]*\}/);
+  assert.ok(held, "the dim has no hold against the hover rule above it, so a pointer undoes it");
+  for (const prop of [...dim.matchAll(/(\b[a-z-]+):/g)].map((m) => m[1]).filter((p) => p !== "dim")) {
+    assert.ok(held[0].includes(`${prop}:`), `the dim sets ${prop} and the hover hold does not re-assert it, so hovering or focusing a refusing press restores it`);
+  }
 });
 
 // ENGINE_RULES matches a bare selector as a SUBSTRING, so it cannot see a rule gutted to display:none, nor a rename to .pc-tongue-note.

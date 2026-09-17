@@ -42,15 +42,18 @@ export function refusalLine(why: Refusal, kind: TableItem["kind"] = "survey"): s
   return `this ${kind} is already on the table`;
 }
 
-/** What the card may file right now, or null when it may file nothing. Pure so the one window that makes it wrong is testable: `runTurn` in ./sheet-turn.ts writes the incoming chart into the mount only in `finish`, so for the whole turn the OUTGOING chart's hit targets are live over an already-incoming `presentYear`, and a press then pairs one world's town with another world's present. Moving the world forward does not close it, because the overlay on screen is still the outgoing one and its indices name different towns. */
-export function filingAt(at: {
-  readonly turning: boolean;
-  readonly world: { readonly seed: number; readonly overrides: TableOverrides; readonly style: StyleName } | null;
-  readonly presentYear: number | null;
-  readonly index: number;
-}): ProspectItem | null {
-  if (at.turning || !at.world || at.presentYear === null) return null;
-  return prospectItemFrom({ seed: at.world.seed, overrides: at.world.overrides, style: at.world.style, index: at.index, year: at.presentYear });
+/** The sheet a filing is made FROM: the drawn world and the present year of that same world, in one value because they may never disagree. */
+export interface FilingSheet {
+  readonly seed: number;
+  readonly overrides: TableOverrides;
+  readonly style: StyleName;
+  readonly presentYear: number;
+}
+
+// The skew this shape forbids is not hypothetical: a world and a year passed as two arguments went out of step for the length of a sheet turn, and again indefinitely after an ABORTED one, because `finish` in ./sheet-turn.ts drops the `turning` class on both paths and resolves on only one. Gating on that class caught the first and not the second; one value cannot skew on any path.
+export function filingAt(at: { readonly turning: boolean; readonly sheet: FilingSheet | null; readonly index: number }): ProspectItem | null {
+  if (at.turning || !at.sheet) return null;
+  return prospectItemFrom({ seed: at.sheet.seed, overrides: at.sheet.overrides, style: at.sheet.style, index: at.index, year: at.sheet.presentYear });
 }
 
 /** The card's resting face, ruled from the still `design/chart-table/stills/explorer-1280-card.png`. */
@@ -81,7 +84,6 @@ const DRESS: Record<string, string> = { antique: "antique", ink: "pen & ink" };
 const dressOf = (style: string): string => DRESS[style] ?? style;
 export const placeholderTitle = (item: TableItem): string => `Chart \u2116 ${item.seed}`;
 export function subOf(item: TableItem): string {
-  // A prospect's label names the dress the PLATE is drawn in, never the address's raw style: `prospectItemFrom` normalises what the doors file, but a hand-typed k-p.style-nautical still parses and still draws the antique plate, so the label would otherwise contradict the picture beside it.
   if (item.kind === "prospect") {
     const dress = dressOf(plateDressFor(item.style));
     return item.year === null ? `a prospect, ${dress}` : `a prospect, ${dress}, ${item.year}`;
@@ -89,7 +91,6 @@ export function subOf(item: TableItem): string {
   return `band ${item.rung}, ${dressOf(item.style)}`;
 }
 
-/** The sheet's own name, which a prospect job does not carry: its `title` is the WORLD's (`prospectResultFor` in ./prospect-job.ts), and `res.name` is the town. */
 export function thumbNames(res: RegionResult | ProspectResult): { readonly title: string; readonly worldTitle: string } {
   return "name" in res ? { title: prospectTitle(res.name), worldTitle: res.title } : { title: res.title, worldTitle: res.worldTitle };
 }

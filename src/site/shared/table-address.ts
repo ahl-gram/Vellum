@@ -248,7 +248,6 @@ export function prospectItemFrom(c: {
   readonly year: number | null;
 }): ProspectItem | null {
   if (!Number.isInteger(c.seed) || c.seed < 0) return null;
-  // Both doors hold a RESOLVED index and a drawn year, and a null index emits no `i` at all, which would collide with a hand-typed address for the same capital.
   if (c.index === null || !Number.isInteger(c.index) || c.index < 0) return null;
   if (c.year === null || !Number.isInteger(c.year) || c.year <= 0) return null;
   return { kind: "prospect", seed: c.seed, overrides: c.overrides, style: plateDressFor(c.style), index: c.index, year: c.year };

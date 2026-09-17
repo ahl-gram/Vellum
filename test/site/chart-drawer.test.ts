@@ -220,23 +220,36 @@ test("CT6 the card's press wears the two ruled faces, and a table that is BOTH f
   assert.equal(held.reason, "already", "and that is the order layOnTable itself takes");
 });
 
-test("CT7 the card files NOTHING while the sheet is mid-turn, which is the one window where the world on screen and the present year on record belong to different charts (#522, found by the cold review on PR #631)", () => {
-  const world = { seed: 42, overrides: {}, style: "ink" } as const;
-  const still = filingAt({ turning: false, world, presentYear: 1059, index: 3 });
-  assert.ok(still, "a settled sheet files");
-  assert.equal(still.year, 1059);
-  assert.equal(still.seed, 42);
-  // runTurn writes the incoming chart into the mount only in `finish`, so for the whole turn the OUTGOING chart's hit
-  // targets are live while lastManifest already holds the INCOMING world's present year. A press then files a legal,
-  // silently wrong sheet: this world's town at that world's year.
-  assert.equal(filingAt({ turning: true, world, presentYear: 1059, index: 3 }), null, "mid-turn it files nothing at all");
-  assert.equal(filingAt({ turning: true, world, presentYear: 1300, index: 3 }), null, "including when the year has already moved on, which is the defect itself");
-  assert.equal(filingAt({ turning: false, world: null, presentYear: 1059, index: 3 }), null, "and nothing before the first draw lands");
-  assert.equal(filingAt({ turning: false, world, presentYear: null, index: 3 }), null);
-  // The skew is a DIFFERENT sheet, not a near miss, which is why refusing is the only safe answer.
-  const skewed = filingAt({ turning: false, world, presentYear: 1300, index: 3 });
-  assert.ok(skewed);
-  assert.notEqual(emitTable([skewed]), emitTable([still]), "the two years emit two distinct addresses");
+// The first version of this guarded the INSTANCE, a mid-turn press, and asserted that a world paired with another
+// chart's year still produced an item, which pinned the defect as correct. The class is that the two may never disagree
+// at all, on any path: an ABORTED turn drops the `turning` class without running the continuation that moved the world,
+// so a gate on that class left the skew reachable indefinitely. `filingAt` now takes ONE value, so no caller can express
+// the skew and no test needs to assert what happens when it does.
+test("CT7 the sheet a filing is made from carries its own present year, so a world and a year can never be paired from different charts (#522, both cold review rounds on PR #631)", () => {
+  const sheet = { seed: 42, overrides: {}, style: "ink", presentYear: 1059 } as const;
+  const filed = filingAt({ turning: false, sheet, index: 3 });
+  assert.ok(filed, "a settled sheet files");
+  assert.deepEqual([filed.seed, filed.year, filed.index], [42, 1059, 3], "and it files that sheet's world at that sheet's year");
+  assert.equal(filingAt({ turning: false, sheet: null, index: 3 }), null, "nothing before the first draw lands");
+  assert.equal(filingAt({ turning: true, sheet, index: 3 }), null, "and nothing while the sheet is mid-flip");
+  // The type is the guard: `presentYear` is reachable only through the same object as the world, so the shape below is
+  // the ONLY way to file and a second, independently-moving year has nowhere to live.
+  const shape = Object.keys(sheet).sort();
+  assert.deepEqual(shape, ["overrides", "presentYear", "seed", "style"], "the year travels WITH the world or this guard is measuring nothing");
+  const other = filingAt({ turning: false, sheet: { ...sheet, presentYear: 809 }, index: 3 });
+  assert.ok(other);
+  assert.notEqual(emitTable([other]), emitTable([filed]), "two charts' presents are two distinct sheets, which is why they may not be mixed");
+});
+
+test("CT7c the Explorer assigns that sheet beside the OVERLAY it describes, which is what keeps an aborted turn consistent rather than skewed (#631 round 3)", () => {
+  const src = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
+  const builds = [...src.matchAll(/lc\.buildPlaceOverlay\(res\.manifest\);\n(\s*)([^\n]*)/g)].map((m) => m[2]);
+  assert.ok(builds.length >= 2, "both draw paths build the overlay, or this guard reads fewer than it thinks");
+  for (const next of builds) {
+    assert.match(next, /^lastSheet = \{/, "the line after an overlay build is not the sheet assignment, so the hit targets on screen and the world the card files from can drift apart");
+  }
+  assert.match(src, /presentYear: res\.manifest\.presentYear/, "and the year comes from the SAME manifest the overlay was built from");
+  assert.doesNotMatch(src, /\blastManifest\.presentYear\b/, "a year read from the module's own lastManifest is the second, independently-moving source this shape exists to remove");
 });
 
 test("CT7b the Explorer passes the REAL turn flag into the gate, so the pure refusal above cannot be fed a constant (#631)", () => {

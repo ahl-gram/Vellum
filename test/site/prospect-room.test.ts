@@ -147,6 +147,9 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
   assert.doesNotMatch(app, /"Lay (this|the) prospect on the table"/, "and writes no second copy of the wording");
   assert.match(css, /\.pp-lay\.dim\s*\{[^}]*background:\s*var\(--control-cream\)/, "the refusing face dims by losing the featured gold, keeping its ink at full strength");
   assert.doesNotMatch(css, /\.pp-lay\.dim\s*\{[^}]*opacity/, "and never by opacity, which fails the measured contrast floor");
+  const dimHold = css.match(/#note \.pp-lay\.dim:hover[^{]*\{[^}]*\}/);
+  assert.ok(dimHold, "the dim has no hold against the hover rule above it, so a pointer undoes it");
+  assert.match(dimHold[0], /border-color:/, "the (1,2,0) hover rule restores the full-strength border on a refusing press under pointer AND keyboard focus unless the deeper rule re-asserts it");
   // The press's OWN rule, not merely its dim: the card's side took this guard at #631 round 1 because a bare-substring
   // roster could not see the primary block deleted, and this is the same class on the mirror surface. Without it the
   // ruled featured gold can be removed here with every markup and e2e assertion still green.
