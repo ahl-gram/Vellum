@@ -81,6 +81,21 @@ test("the hit divides by --zoom-k once, on the element; the ring pseudos stay pl
   }
 });
 
+// ENGINE_RULES matches a bare selector as a SUBSTRING, and a compound selector sharing it keeps the substring alive: the
+// guard-prover deleted the whole `.pc-lay { ... }` block and the roster passed, because `.pc-lay:hover` and `.pc-lay.dim`
+// still spelled it. The card's two actions are the row's load-bearing pair, so each takes a soleRule read of its own.
+test("the card's action row and its filing press are dressed by a rule of their OWN, not merely spelled somewhere in the sheet (#522)", () => {
+  const css = read(SHEET);
+  const acts = soleRule(css, ".pc-acts");
+  assert.match(acts, /display:\s*flex/, ".pc-acts is not laid out as a row, so the two actions stack on the cascade's default");
+  assert.match(acts, /gap:/, "and it owns the gap between them; its members set none, or the flex gap doubles the space above the prose");
+  const lay = soleRule(css, ".pc-lay");
+  assert.match(lay, /background:\s*var\(--control-gold\)/, "the press loses the ruled gold the sitting drew (#518 ruling 7)");
+  assert.match(lay, /pointer-events:\s*auto/, "and without this it is dead to a real pointer, since #place-card is pointer-events: none");
+  // The press acts on the sheet and goes nowhere, so it must NOT wear the navigation tip; tip-affordance.test.ts sweeps the class, this names the piece.
+  assert.doesNotMatch(css.slice(css.indexOf(".pc-lay")), /^\.pc-lay[^{]*:hover[^{]*\{[^}]*rotate\(/m, "the press took the navigation tip, which promises it goes somewhere");
+});
+
 // ENGINE_RULES matches a bare selector as a SUBSTRING, so it cannot see a rule gutted to display:none, nor a rename to .pc-tongue-note.
 test("the philologist's note is dressed, visible, and named the same on both sides (#124)", () => {
   const css = read(SHEET);

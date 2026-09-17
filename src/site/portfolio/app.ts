@@ -1,7 +1,8 @@
 // The Portfolio (#521 Sub 3 of #401): the Print Room's second page. The table rides in this page's
-// address and nowhere else, so the page reads it ONCE at load and never rewrites it. One region job
-// per gathered survey, dispatched grouped by world because worldFor is a single-entry cache, and the
-// sheets arrive progressively into a pile whose top sheet stands on the stage.
+// address and nowhere else, so the page reads it ONCE at load and never rewrites it. One job per
+// gathered sheet, a region for a survey and a plate for a prospect since #522, dispatched grouped by
+// world because worldFor is a single-entry cache, and the sheets arrive progressively into a pile
+// whose top sheet stands on the stage.
 import { initWorker, runJob, usesWorker } from "../explorer/worker-client.ts";
 import { bindRoom } from "../shared/room.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";
@@ -139,8 +140,7 @@ const rows = (): void => {
     const head = document.createElement("p");
     head.className = "group-head";
     const name = document.createElement("span");
-    // The first entry may be a prospect, which never drafts and so never learns the world's name; the first DRAFTED one does.
-    // Any drafted entry names the world: since #522 a prospect job reports it too, through thumbNames.
+    // Any DRAFTED entry names the world, prospects included since #522: thumbNames takes a prospect's world line from the job's own title.
     const named = group.entries.map((e) => sheets[e.at]).find((sheet) => !!sheet?.worldTitle);
     name.textContent = `From ${named?.worldTitle || "this world"} · chart № ${group.seed}`;
     head.append(name);
@@ -177,7 +177,7 @@ const retitle = (): void => {
   }
 };
 
-/** One job per survey, grouped by world: worldFor is a single-entry cache, so interleaving seeds regenerates the parent every time. */
+/** One job per gathered SHEET since #522, grouped by world: worldFor is a single-entry cache, so interleaving seeds regenerates the parent every time. */
 const draft = async (): Promise<void> => {
   for (const group of groupByWorld(items)) {
     for (const { at } of group.entries) {
