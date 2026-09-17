@@ -47,7 +47,8 @@ half, as well as reading these rules. The goldens, regens, committed content and
 not stated in `CLAUDE.md` at all, the two copies having drifted apart in five places before the
 duplicate went. `CLAUDE.md` keeps process at the keyboard; this file keeps the rules.
 
-**A rule change edits this file**, in a branch and a pull request like any other tracked change. It
+**A rule change edits the spec that owns the rule**, this file for the rules it owns, in a branch and
+a pull request like any other tracked change. It
 may additionally leave a dated comment on the issue the change came from, as an audit trail. It must
 never live only in a comment somewhere.
 
@@ -336,4 +337,4 @@ guarantees), to `specs/explorer-doctrine.md` (the living chart, its camera and i
 `specs/development-workflow.md` (the order of operations), to `specs/settle-doctrine.md` (how an e2e
 wait is written, and what the harness environment does), and to the flake record at
 `.claude/skills/vellum-footguns/references/flake-record.md` (the CI reds believed to be flakes).
-Rules change rarely; when one does, edit this file.*
+Rules change rarely; when one does, edit the spec that owns it, this file for the rules here.*

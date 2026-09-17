@@ -70,5 +70,5 @@ These are about looking rather than the cascade, and belong beside them:
 
 *Companion to `specs/ui-design.md` (the look these traps break), `specs/site-architecture.md`
 (where the authored CSS lives and what the build does to it), `specs/explorer-doctrine.md` (the
-engine dressing the last cascade trap defers to), and `specs/settle-doctrine.md` (how a rendered
-frame is read in the harness).*
+engine dressing one of these traps defers to), and `specs/settle-doctrine.md` (how a rendered frame
+is read in the harness).*

@@ -5,8 +5,8 @@ The charts are the thing the site exists to show, and they are dressed on their 
 This file holds how a chart is dressed, in the renderer and in what the site does with a drawn
 sheet. The world the chart draws is `specs/engine-invariants.md`'s; what a change to the dress
 costs (a regen, the golden, a re-roll) is `specs/rulebook.md`'s; the site's own look around the
-chart is `specs/ui-design.md`'s. Where this file names a measured value, a guard pins that value,
-and the guard is right if they disagree. Read it before any change to a chart's dress: a style, a
+chart is `specs/ui-design.md`'s, and its preamble's rule that the guard pinning a named value is
+right if the two disagree holds here too. Read it before any change to a chart's dress: a style, a
 layer's ink, a label's treatment, or how the site mounts a sheet.
 
 **A style is a palette over identical geometry.** Antique, topographic, ink and nautical draw the

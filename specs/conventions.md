@@ -9,8 +9,9 @@ editing a spec, and before writing, citing or sweeping a comment.
 The rules themselves live elsewhere. `specs/rulebook.md` holds the sequencing rules, the golden
 and the order of work, and where it and this file disagree about a rule of the product, it wins.
 `specs/development-workflow.md` holds the order of operations from a filed issue to a pull
-request. `CLAUDE.md` holds process at the keyboard, including the comment doctrine itself, which
-this file's last section says how to enforce. `.claude/skills/vellum-footguns/SKILL.md` holds the
+request. `CLAUDE.md` holds process at the keyboard, including its copy of the comment doctrine,
+whose binding statement is the rulebook's and which this file's last section says how to enforce.
+`.claude/skills/vellum-footguns/SKILL.md` holds the
 gates keyed to the moment of typing, and its `references/` directory the dated records that serve
 them.
 
@@ -44,8 +45,8 @@ dressing-level pins lag one live-use cycle, so a re-decision does not rip out fr
 comment and move on.
 
 **Every ruled design round is archived in the repo** under `design/`, one directory per round,
-content only, in its own pull request. That archive is the visual spec; this file and the issue
-ledgers are the words.
+content only, in its own pull request. That archive is the visual spec; `specs/ui-design.md` and the
+issue ledgers are the words.
 
 Things a design round owes that the steps above do not cover:
 
@@ -108,8 +109,8 @@ review", "this line read X until", and the story of how a set reached its member
 and the pull requests hold that history and are better at it, and a reader who is ABOUT to do the
 work needs the rule rather than the road to it. **Keep the `` `symbol` in `repo/relative/path` ``
 citations**, which are not history but what makes a rule checkable in one command, and keep naming a
-constant wherever the rule is about its value. The older entries here still carry narrative; that is
-trimmed as each is touched, not swept separately.
+constant wherever the rule is about its value. The older entries across these specs still carry
+narrative; that is trimmed as each is touched, not swept separately.
 
 **Write `Issue #N` or `PR #N` in prose, never a bare `#N`**, because issues and pull requests share
 one numbering sequence here and interleave, so a bare number does not say which kind of thing it
@@ -121,7 +122,7 @@ word**: a commit SUBJECT keeps the house's leading `#N`, a closing reference sta
 exactly (a word between the keyword and the number closes nothing, `vellum-footguns` Gate 5 item 5),
 a pull request body's title line keeps `#N`, and a field label such as the template's `Issue: #N`
 already says which it is. Existing bare references are trimmed as each line is touched, not swept
-separately, the same way the narrative above is.
+separately, the same way the older narrative is.
 
 **Do not copy volatile state into a spec.** Phase names, board membership and issue status belong
 to the Project and are read from it. Counts, rosters and file line numbers rot without any guard
@@ -150,8 +151,9 @@ wrapped around it, which stays the business of the invariant at the line that br
 
 ## The comment sweep
 
-A sweep deletes comments the comment doctrine (`CLAUDE.md`, Process) says are not owed. It is a mechanical change with a
-non-mechanical failure mode, so it is run and PROVEN in a particular way.
+A sweep deletes comments the comment doctrine (`specs/rulebook.md`, under the durable engineering
+constraints) says are not owed. It is a mechanical change with a non-mechanical failure mode, so it
+is run and PROVEN in a particular way.
 
 - **Sweep trailing comments last and most conservatively, and never audit a sweep from a whole-line
   scan.** The trailing comment is the highest-value keeper class and a whole-line diff cannot see it:
@@ -191,6 +193,7 @@ non-mechanical failure mode, so it is run and PROVEN in a particular way.
 *Companion to `specs/rulebook.md` (the rules this file says how to write down),
 `specs/development-workflow.md` (the order of operations), `CLAUDE.md` (process at the keyboard,
 and the comment doctrine), `specs/ui-design.md` (the look a design decision decides), and the
-footguns skill's dated records beside its gates, `.claude/skills/vellum-footguns/references/scars.md`,
+footguns skill's dated records beside its gates,
+`.claude/skills/vellum-footguns/references/scars.md`,
 `.claude/skills/vellum-footguns/references/flake-record.md` and
 `.claude/skills/vellum-footguns/references/held-lines.md`.*

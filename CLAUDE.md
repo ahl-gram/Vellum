@@ -51,9 +51,9 @@ single-select "Roadmap" field. **Read the phase options from the board, never fr
 handoff keep it current: newly filed issues added and phased, shipped issues closed. The global
 `session-handoff` skill updates SESSION-NOTES (at `session-notes/SESSION-NOTES.md`, not the repo
 root), RESUME-HERE and auto-memory but does NOT know about the Project, so this is the Vellum extra
-step. **A rule change EDITS the spec that owns the rule** (`specs/conventions.md` says which) in a
-branch and a PR, as readily for a corrected fact as for a changed rule, and may leave a dated comment
-on the originating issue as the audit trail.
+step. **A rule change EDITS the spec that owns the rule** (the table above names each, and
+`specs/conventions.md` says where a rule lives) in a branch and a PR, as readily for a corrected fact
+as for a changed rule, and may leave a dated comment on the originating issue as the audit trail.
 
 `gh project` needs the `project` token scope (`gh auth refresh -s project`). The project, field and
 phase-option ids are NOT written here (the board is private, this file is public); look them up once
