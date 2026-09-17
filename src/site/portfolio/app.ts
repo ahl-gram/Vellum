@@ -183,10 +183,8 @@ const draft = async (): Promise<void> => {
     for (const { at } of group.entries) {
       const sheet = sheets[at];
       if (!sheet) continue;
-      const job = thumbJobFor(sheet.item);
       try {
-        // Narrowed on the job's own kind: a union argument resolves to runJob's catch-all overload, whose result union carries no svg.
-        const res = job.kind === "prospect" ? await runJob(job) : await runJob(job);
+        const res = await runJob(thumbJobFor(sheet.item));
         const named = thumbNames(res);
         sheet.svg = res.svg;
         sheet.title = named.title;

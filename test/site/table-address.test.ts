@@ -353,9 +353,16 @@ test("TP1 prospectItemFrom normalises the dress through plateDressFor, so the pl
 test("TP2 both capture points route through prospectItemFrom rather than building a literal: sameSheet is byte equality on the emitted item, so a second builder would seat one plate twice and miscount the cap (#522)", () => {
   const strip = (p: string): string =>
     readFileSync(resolve(REPO, p), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  // The Explorer reaches the builder THROUGH `filingAt`, which also holds the mid-turn refusal (CT7); the page reaches it
+  // directly. Either route is fine, a third spelling is not.
+  assert.match(
+    strip("src/site/explorer/chart-drawer.ts").slice(strip("src/site/explorer/chart-drawer.ts").indexOf("export function filingAt")),
+    /\bprospectItemFrom\b/,
+    "filingAt no longer ends at the one builder, so the Explorer's door has a spelling of its own again",
+  );
   for (const door of ["src/site/explorer/app.ts", "src/site/prospect/app.ts"]) {
     const src = strip(door);
-    assert.match(src, /\bprospectItemFrom\b/, `${door} does not reach the one builder, so its spelling of a prospect can drift from the other door's`);
+    assert.match(src, /\b(prospectItemFrom|filingAt)\b/, `${door} does not reach the one builder, so its spelling of a prospect can drift from the other door's`);
     // Keyed on what the DEFECT looks like, not on the words: a table ITEM literal pairs the kind with the item's own
     // `style`, where the prospect JOB literal both doors legitimately write pairs it with `dress`.
     assert.doesNotMatch(

@@ -209,6 +209,8 @@ export function runJob(msg: AtlasJob): Promise<AtlasResult>;
 export function runJob(msg: ProspectJob): Promise<ProspectResult>;
 export function runJob(msg: RibbonJob): Promise<RibbonResult>;
 export function runJob(msg: TourJob): Promise<TourResult>;
+/** The Chart Table's two sheet kinds as one argument: `thumbJobFor` in ./chart-drawer.ts answers with either, and without this the union falls to the catch-all below, whose result union carries no `svg`. */
+export function runJob(msg: RegionJob | ProspectJob): Promise<RegionResult | ProspectResult>;
 export function runJob(msg: RenderJob): Promise<JobResult>;
 export function runJob(msg: RenderJob): Promise<JobResult> {
   if (worker) {

@@ -1,11 +1,12 @@
 // The Chart Table's state (#520 Sub 2 of #401): what the drawer draws and what the Explorer's address carries are the same array, so this half is pure and holds no DOM. `chart-drawer`, never `drawer`: src/site/shell/drawer.ts is the site's phone nav (#520 ruling 2).
-import { TABLE_CAP, TABLE_KEY, emitTable, tableWindow, type TableItem, type SurveyItem, type Rung } from "../shared/table-address.ts";
+import { TABLE_CAP, TABLE_KEY, emitTable, prospectItemFrom, tableWindow, type TableItem, type SurveyItem, type ProspectItem, type Rung, type TableOverrides } from "../shared/table-address.ts";
 import { LOD_BANDS, type LodBand } from "../../world/lod.ts";
 import { plateDressFor, prospectTitle } from "./prospect-job.ts";
 import type { SlipFold } from "../shared/slip.ts";
 import type { UvWindow } from "../../terrain/heightfield.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 import type { RenderOptions } from "../../render/map-renderer.ts";
+import type { StyleName } from "../../render/style.ts";
 import type { ProspectJob, RegionJob, RegionResult, ProspectResult } from "./worker-client.ts";
 
 const sameSheet = (a: TableItem, b: TableItem): boolean => emitTable([a]) === emitTable([b]);
@@ -39,6 +40,17 @@ export function tabLine(items: ReadonlyArray<TableItem>): string {
 export function refusalLine(why: Refusal, kind: TableItem["kind"] = "survey"): string {
   if (why === "full") return "the table is full: six sheets lie on it";
   return `this ${kind} is already on the table`;
+}
+
+/** What the card may file right now, or null when it may file nothing. Pure so the one window that makes it wrong is testable: `runTurn` in ./sheet-turn.ts writes the incoming chart into the mount only in `finish`, so for the whole turn the OUTGOING chart's hit targets are live over an already-incoming `presentYear`, and a press then pairs one world's town with another world's present. Moving the world forward does not close it, because the overlay on screen is still the outgoing one and its indices name different towns. */
+export function filingAt(at: {
+  readonly turning: boolean;
+  readonly world: { readonly seed: number; readonly overrides: TableOverrides; readonly style: StyleName } | null;
+  readonly presentYear: number | null;
+  readonly index: number;
+}): ProspectItem | null {
+  if (at.turning || !at.world || at.presentYear === null) return null;
+  return prospectItemFrom({ seed: at.world.seed, overrides: at.world.overrides, style: at.world.style, index: at.index, year: at.presentYear });
 }
 
 /** The card's resting face, ruled from the still `design/chart-table/stills/explorer-1280-card.png`. */
@@ -287,6 +299,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
     },
     restore(next: ReadonlyArray<TableItem>): void {
       // Through the same gate a filing takes: a hand-typed or shared link can carry one sheet twice, and parseTable does not dedupe. Two twins would also share ONE blob url, keyed by the item, so removing either would revoke the survivor's picture.
+      // The gate is byte equality on the emitted item, so it does NOT catch one prospect spelled two ways: `k-p...style-nautical` and `...style-antique` at one seat draw the same plate (plateDressFor sends both to antique) yet seat twice and spend two of the six. Both DOORS normalise through prospectItemFrom, so only a hand-typed or hand-edited link reaches it; closing it here would rewrite the address the reader shared, which is Alex's call and not a one-liner (#631's cold review, residue).
       let kept: ReadonlyArray<TableItem> = [];
       for (const item of next) kept = layOnTable(kept, item).items;
       items = kept;

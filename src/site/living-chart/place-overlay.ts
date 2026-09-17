@@ -49,6 +49,21 @@ export interface PlaceOverlayDeps {
   clampBox?: () => CardBox | null;
 }
 
+function makeLayPress(host: LayProspectHost): HTMLButtonElement {
+  const press = document.createElement("button");
+  press.type = "button";
+  press.className = "pc-lay";
+  // The card sits INSIDE the zoom-bound gesture box, so a rapid double-press on a control that does not navigate away bubbles into d3's double-click-to-zoom and the chart lurches under the reader's hand; makeDogEar in ../explorer/chart-drawer.ts carries the same list.
+  for (const ev of ["mousedown", "dblclick", "wheel", "touchstart"]) {
+    press.addEventListener(ev, (e) => e.stopPropagation());
+  }
+  press.addEventListener("click", () => {
+    const at = Number(press.dataset["idx"]);
+    if (Number.isInteger(at) && at >= 0) host.lay(at);
+  });
+  return press;
+}
+
 export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   const { mapEl, isSuppressed, prospectHref, layProspect, clampBox } = deps;
 
@@ -193,20 +208,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       prospectLink.className = "pc-prospect";
       prospectLink.textContent = "View the prospect";
     }
-    let layPress: HTMLButtonElement | null = null;
-    if (layProspect && onWorldSheet) {
-      layPress = document.createElement("button");
-      layPress.type = "button";
-      layPress.className = "pc-lay";
-      // The card sits INSIDE the zoom-bound gesture box, so a rapid double-press on a control that does not navigate away bubbles into d3's double-click-to-zoom and the chart lurches under the reader's hand; makeDogEar in ../explorer/chart-drawer.ts carries the same list.
-      for (const ev of ["mousedown", "dblclick", "wheel", "touchstart"]) {
-        layPress.addEventListener(ev, (e) => e.stopPropagation());
-      }
-      layPress.addEventListener("click", () => {
-        const at = Number(layPress!.dataset["idx"]);
-        if (Number.isInteger(at) && at >= 0) layProspect.lay(at);
-      });
-    }
+    const layPress = layProspect && onWorldSheet ? makeLayPress(layProspect) : null;
     // One row for both, so Issue #428's third action joins a row rather than re-laying the card out.
     const acts = prospectLink || layPress ? document.createElement("div") : null;
     if (acts) {

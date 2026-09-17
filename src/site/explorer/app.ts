@@ -6,8 +6,8 @@ import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts"
 import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
-import { prospectItemFrom, type TableItem, type TableOverrides } from "../shared/table-address.ts";
-import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, LAY_ON_CARD } from "./chart-drawer.ts";
+import { type TableItem, type TableOverrides } from "../shared/table-address.ts";
+import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD } from "./chart-drawer.ts";
 import { bindTableLeaf } from "./table-leaf.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
@@ -58,11 +58,14 @@ function prefersReduce(): boolean {
 
 const tourOrder = createTourOrder({ runJob });
 
-// The card's filing press files the DRAWN world's prospect of this place, at the Explorer's present year (the Explorer has no ages instrument, so its present is the manifest's).
+// The card files the DRAWN world's prospect of this place, at that world's present year, and files nothing while the sheet is mid-turn; `filingAt` holds the whole decision and says why.
 const prospectAt = (idx: number): TableItem | null =>
-  !lastWorld || !lastManifest
-    ? null
-    : prospectItemFrom({ seed: lastWorld.seed, overrides: lastWorld.overrides, style: lastWorld.style, index: idx, year: lastManifest.presentYear });
+  filingAt({
+    turning: sheetEl.classList.contains("turning"),
+    world: lastWorld,
+    presentYear: lastManifest ? lastManifest.presentYear : null,
+    index: idx,
+  });
 
 const lc = createLivingChart({
   mapEl: mapDiv,
@@ -122,9 +125,7 @@ const chartTable = bindChartDrawer({
   folioHref: "../print-room/portfolio/",
   say: announce,
   drawThumb: async (item) => {
-    const job = thumbJobFor(item);
-    // Narrowed on the job's own kind: a union argument resolves to runJob's catch-all overload, whose result union carries no svg.
-    const res = job.kind === "prospect" ? await runJob(job).catch(() => null) : await runJob(job).catch(() => null);
+    const res = await runJob(thumbJobFor(item)).catch(() => null);
     if (!res) return null;
     return { url: URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" })), title: thumbNames(res).title };
   },

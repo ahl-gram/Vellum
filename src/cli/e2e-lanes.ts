@@ -27,7 +27,7 @@ export const E2E_LANES: readonly E2eLane[] = [
       "print-room",
       "landfall",
       "survey",
-      // Moved from lane B at #522, when the drawer suite's re-measured budget took B to 60.2% and the balance assertion below reds at 0.6. It is appended AFTER `health`, so the prefix that suite certifies is unchanged, and it boots its own page through about:blank, so it inherits nothing from whatever ran before it.
+      // Moved from lane B at #522, when the drawer suite's re-measured budget took B to 60.2% and the balance assertion below reds at 0.6. It is appended at the END of this lane, which is after `health`, so the prefix that suite certifies is unchanged, and it boots its own page through about:blank, so it inherits nothing from whatever ran before it.
       "specimen",
     ],
     port: DEFAULT_E2E_PORT,

@@ -1,6 +1,6 @@
 // The Prospect room's controller: resolves the address, pulls the plate through the SHARED render worker as a blob <img> (never inline <svg>: the cross-chart url(#) id rule), and re-engraves in place when the year control asks; the world itself never changes on this page.
 import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
-import { plateDressFor, prospectTitle, type PlateDress } from "../explorer/prospect-job.ts";
+import { plateDressFor, type PlateDress } from "../explorer/prospect-job.ts";
 import { countLine, layOnTable, layPressFace, LAY_ON_PAGE } from "../explorer/chart-drawer.ts";
 import { emitTable, parseTable, prospectItemFrom, type TableItem, type TableOverrides } from "../shared/table-address.ts";
 import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, tableHash, yearHash } from "./address.ts";
@@ -58,7 +58,8 @@ const addr = parseProspectAddress(location.hash);
 // A bare visit lands on today's seed-of-the-day (UTC) and its capital, the same default world as every other surface.
 const seed = (addr.seed ?? seedForDate(new Date())) >>> 0;
 const dress = plateDressFor(addr.style ?? "antique");
-const overrides: Partial<WorldRecipe> = {
+// ONE object for the job and for the filed item: two copies of this literal is how the page and the card come to spell one plate two ways, which is what TP2's single builder exists to prevent and what a divergent INPUT to it would defeat.
+const overrides: TableOverrides = {
   ...(addr.type ? { mapType: addr.type } : {}),
   ...(addr.band ? { band: addr.band } : {}),
   ...(addr.land != null ? { landFraction: addr.land } : {}),
@@ -71,20 +72,13 @@ let drawGen = 0;
 window.__vellumProspectUsesWorker = usesWorker;
 window.__vellumProspectState = () => last;
 
-// #522, ruled 2026-09-17: the page files and STAYS, so the gathering lives in this page's own address and a reload keeps it.
-const tableOverrides: TableOverrides = {
-  ...(addr.type ? { mapType: addr.type } : {}),
-  ...(addr.band ? { band: addr.band } : {}),
-  ...(addr.land != null ? { landFraction: addr.land } : {}),
-  ...(addr.coast != null ? { coastWarp: addr.coast } : {}),
-};
 let table: ReadonlyArray<TableItem> = parseTable(location.hash) ?? [];
 
 /** Built from the DRAWN plate, never the address: `addr.index` may be null and would emit no `i`, colliding with a hand-typed capital, and the year is the one actually pressed. */
 function filedItem(): TableItem | null {
   return last === null
     ? null
-    : prospectItemFrom({ seed, overrides: tableOverrides, style: addr.style ?? "antique", index: last.index, year: last.year });
+    : prospectItemFrom({ seed, overrides, style: addr.style ?? "antique", index: last.index, year: last.year });
 }
 
 function paintLay(): void {
@@ -175,7 +169,6 @@ yearForm.addEventListener("submit", (e) => {
 
 chartLink.href = chartTarget(location.hash);
 ribbonLink.style.display = "none";
-// The press has nothing to file until a plate is drawn; `hidden` is inert on a piece with an author display, which is the #270 guard-prover's find.
 layPress.style.display = "none";
 await initWorker();
 if (!usesWorker()) warning.hidden = false;

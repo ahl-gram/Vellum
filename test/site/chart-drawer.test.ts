@@ -1,8 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { layOnTable, takeOffTable, roomOnTable, countLine, tabLine, refusalLine, subOf, thumbJobFor, thumbNames, layPressFace, LAY_ON_CARD, LAY_ON_PAGE } from "../../src/site/explorer/chart-drawer.ts";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { layOnTable, takeOffTable, roomOnTable, countLine, tabLine, refusalLine, subOf, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD, LAY_ON_PAGE } from "../../src/site/explorer/chart-drawer.ts";
 import { TABLE_CAP, TABLE_KEY, emitTable, type ProspectItem, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 import { emitTableKey } from "../../src/site/explorer/address.ts";
+
+const REPO = resolve(import.meta.dirname, "..", "..");
 import type { ProspectJob, ProspectResult, RegionResult } from "../../src/site/explorer/worker-client.ts";
 
 // The Chart Table's state (#520 Sub 2), pure and apart from the DOM: what the drawer draws and what the address carries are both this array. The surface is `chart-drawer` and never `drawer`, which src/site/shell/drawer.ts already spends on the site's phone nav (#520 ruling 2).
@@ -214,6 +218,35 @@ test("CT6 the card's press wears the two ruled faces, and a table that is BOTH f
   );
   const held = layOnTable(fill(TABLE_CAP - 1).concat([prospect()]), prospect());
   assert.equal(held.reason, "already", "and that is the order layOnTable itself takes");
+});
+
+test("CT7 the card files NOTHING while the sheet is mid-turn, which is the one window where the world on screen and the present year on record belong to different charts (#522, found by the cold review on PR #631)", () => {
+  const world = { seed: 42, overrides: {}, style: "ink" } as const;
+  const still = filingAt({ turning: false, world, presentYear: 1059, index: 3 });
+  assert.ok(still, "a settled sheet files");
+  assert.equal(still.year, 1059);
+  assert.equal(still.seed, 42);
+  // runTurn writes the incoming chart into the mount only in `finish`, so for the whole turn the OUTGOING chart's hit
+  // targets are live while lastManifest already holds the INCOMING world's present year. A press then files a legal,
+  // silently wrong sheet: this world's town at that world's year.
+  assert.equal(filingAt({ turning: true, world, presentYear: 1059, index: 3 }), null, "mid-turn it files nothing at all");
+  assert.equal(filingAt({ turning: true, world, presentYear: 1300, index: 3 }), null, "including when the year has already moved on, which is the defect itself");
+  assert.equal(filingAt({ turning: false, world: null, presentYear: 1059, index: 3 }), null, "and nothing before the first draw lands");
+  assert.equal(filingAt({ turning: false, world, presentYear: null, index: 3 }), null);
+  // The skew is a DIFFERENT sheet, not a near miss, which is why refusing is the only safe answer.
+  const skewed = filingAt({ turning: false, world, presentYear: 1300, index: 3 });
+  assert.ok(skewed);
+  assert.notEqual(emitTable([skewed]), emitTable([still]), "the two years emit two distinct addresses");
+});
+
+test("CT7b the Explorer passes the REAL turn flag into the gate, so the pure refusal above cannot be fed a constant (#631)", () => {
+  const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const at = app.indexOf("filingAt({");
+  assert.notEqual(at, -1, "the Explorer no longer reaches the gate, so nothing decides whether it may file");
+  const call = app.slice(at, app.indexOf("})", at));
+  assert.match(call, /turning:\s*sheetEl\.classList\.contains\("turning"\)/, "the gate is fed a literal or a stale flag instead of the sheet's own state; `turning` is the class runTurn brackets the window with");
+  assert.doesNotMatch(call, /turning:\s*(false|true)\b/, "a constant here disables the refusal while every unit assertion above stays green");
 });
 
 test("CT5 a prospect refused as a duplicate is refused in its OWN noun, and the survey line stays byte-identical (#522; e2e CD and announce.test pin the survey wording)", () => {
