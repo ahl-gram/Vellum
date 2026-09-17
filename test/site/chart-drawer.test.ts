@@ -234,11 +234,13 @@ test("CT7 the sheet a filing is made from carries its own present year, so a wor
   assert.equal(filingAt({ turning: true, sheet, index: 3 }), null, "and nothing while the sheet is mid-flip");
   const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer.ts"), "utf8");
   const iface = src.slice(src.indexOf("interface FilingSheet {"), src.indexOf("}", src.indexOf("interface FilingSheet {")));
-  const members = [...iface.matchAll(/readonly\s+([A-Za-z]+)/g)].map((m) => m[1]).sort();
+  const members = [...iface.matchAll(/^\s*(?:readonly\s+)?([A-Za-z]+)\??:/gm)].map((m) => m[1]).sort();
   assert.deepEqual(members, ["overrides", "presentYear", "seed", "style"], "the filing sheet grew a member, and a second field is a second place a year can live");
   assert.equal(members.filter((m) => /year/i.test(m)).length, 1, "two year-ish members are two independently-assignable years, which is the skew this shape exists to make unrepresentable");
   const call = src.slice(src.indexOf("prospectItemFrom({", src.indexOf("export function filingAt")), src.indexOf("});", src.indexOf("export function filingAt")));
-  for (const [, field, value] of call.matchAll(/(\w+):\s*([^,}]+)/g)) {
+  const fields = [...call.matchAll(/(\w+):\s*([^,}]+)/g)];
+  assert.equal(fields.length, 5, "the gate's call no longer reads as the five fields a prospect item takes, so the loop below is sweeping nothing");
+  for (const [, field, value] of fields) {
     assert.match(value.trim(), field === "index" ? /^at\.index$/ : /^at\.sheet\.\w+$/, `${field} reaches past the one sheet, so the filing no longer describes a single chart`);
   }
   const other = filingAt({ turning: false, sheet: { ...sheet, presentYear: 809 }, index: 3 });
