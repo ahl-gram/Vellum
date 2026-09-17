@@ -69,13 +69,13 @@ citations**, which are not history but what makes a rule checkable in one comman
 constant wherever the rule is about its value. The older entries here still carry narrative; that is
 trimmed as each is touched, not swept separately.
 
-**A backticked file path in prose is scanned.** `test/repo/prose-paths.test.ts` reads every one under
-`specs/`, `.claude/skills/`, `.claude/agents/`, `CLAUDE.md`, `README.md` and `.github/` and reds when
-it resolves neither from the repo root, nor from the citing file's directory, nor as a unique tracked
-basename. Backticks on a path claim the file is in the repo or deliberately kept out of it (a
-generated or gitignored file cited with its directory, a served address, an auto-memory name); write
-a retired file or an example name without them, and a file outside this repo at its real home under
-`~`, which the scanner does not read as a repo path. The test is the list of what passes; do not copy it here.
+**A backticked file path in prose is scanned.** `test/repo/prose-paths.test.ts` reads every one in
+the house's markdown (these specs, the skill, the agents, `CLAUDE.md`, the README and the pull request
+template) and reds when it does not resolve. Backticks on a path claim the file is in the repo or
+deliberately kept out of it (a generated or gitignored file cited with its directory, a served
+address, an auto-memory name); write a retired file or an example name without them, and a file
+outside this repo at its real home under `~`, which the scanner does not read as a repo path. The
+test is the list of what it reads and what passes; do not copy either here.
 
 **Write `Issue #N` or `PR #N` in prose, never a bare `#N`**, because issues and pull requests share
 one numbering sequence here and interleave, so a bare number does not say which kind of thing it
@@ -401,7 +401,7 @@ comment. This is a convenience index, not their home.
   `.mjs` under the code roots plus `.css` under `public/`, and reaches neither `specs/` nor
   `.claude/`, so of a citation written in prose like this one only the PATH half is checked, by
   `test/repo/prose-paths.test.ts`, and the symbol half by hand or not at all. These
-  behaviours of the guard are deliberate rather
+  behaviours of the comment guard are deliberate rather
   than rough edges: it matches a symbol that APPEARS in the file, not one declared there, because a
   citation properly points at a call site; and it matches JOINED runs of comment lines, not single
   lines, because a citation long enough to wrap is invisible to a line matcher and the guard would

@@ -67,7 +67,7 @@ symbol and path so the reader goes and looks.
 - **The shell dresses once.** Every shared shell rule lives in `BaseLayout.astro`'s
   `<style is:global>` block, and a page's own sheet carries page-specific rules only.
 - **Sheet order is a contract.** The layout links the root sheets, then the shared sheets a page
-  opts into through its `extraCss` prop, then the page's own relative `public/**/index.css`, so a page keeps
+  opts into through its `extraCss` prop, then the page's own `public/**/index.css`, so a page keeps
   the last word on its own layout. An `extraCss` href is validated at render and THROWS unless it is
   root-absolute. The layout's inline `<style>` renders after the page sheet's link, which is why a
   page override of a shell rule needs higher specificity; that trap belongs to `specs/ui-design.md`

@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 
-// A backticked file path in prose claims the file is in the repo or deliberately kept out of it (Issue #624). Like its sibling comment-citations.test.ts this guard checks the path and never the claim around it, and it errs toward a miss or a reword, never a silent wrong directory: a path written without backticks or with a ~ $ @ < { or * segment is never extracted, and a directory with a trailing slash has no extension (misses); a backticked path inside a fenced block IS extracted like any other (a false positive when it is an example, reworded then); a placeholder that happens to exist, a memory-prefixed name that is not a memory file, a gitignored path nobody has on disk, and a relative or unique-basename hit that is the wrong file of that name all pass (misses); a unique basename becomes a finding the day a namesake lands (a reword then); a span wrapped across a line is not joined and code files under the prose roots are read by neither guard (misses).
+// A backticked file path in prose claims the file is in the repo or deliberately kept out of it (Issue #624). Like its sibling comment-citations.test.ts this guard checks the path and never the claim around it, and it errs toward a miss or a reword, never a silent wrong directory. Misses: the forms the extraction test pins as never extracted; a placeholder that happens to exist, a memory-prefixed name that is not a memory file, a gitignored path nobody has on disk, and a relative or unique-basename hit that is the wrong file of that name; a span wrapped across a line, which is not joined; code files under the prose roots, read by neither guard; and a wrong-case or untracked-draft citation, which existsSync accepts on a Mac and CI's Linux checkout does not (green here, red there, never silent). False positives, reworded when they land: a backticked path inside a fenced block, extracted like any other; a unique basename the day a namesake lands; a dotted word whose extension some tracked file happens to carry (`index.html`, an extension tracked only under design/), read as a citation.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const PROSE_ROOTS = ["specs", ".claude/skills", ".claude/agents", "CLAUDE.md", "README.md", ".github"];
@@ -96,7 +96,7 @@ test("every backticked file path in the prose roots resolves", () => {
     const files = walkMarkdown(root);
     return { root, files: files.length, citations: files.flatMap(citationsIn) };
   });
-  for (const { root, files } of perRoot) assert.ok(files > 0, `${root} yielded no markdown: the walk is broken`);
+  for (const { root, files } of perRoot) assert.ok(files > 0, `${root} yielded no markdown: the walk is broken, or the root has none and leaves PROSE_ROOTS`);
   const citations = perRoot.flatMap((r) => r.citations);
   assert.ok(citations.length > 0, "no backticked path in any root: the extraction or the reader is broken");
   for (const ext of EXTENSION_FLOOR) assert.ok(extensions.has(ext), `no tracked .${ext} file: the derived extension set shrank`);
@@ -154,6 +154,6 @@ test("each resolution rule has a live witness, and each finding class has one", 
 test("extraction reads a backticked path with a tracked extension and nothing else", () => {
   const prose =
     "see `src/a.ts` and `hash-sync.ts`, not `Math.sin`, `public/<page>/index.css`, `public/**/index.css`, " +
-    "`~/CodeProjects/CLAUDE.md`, `docs/`, `.js` or src/plain.ts";
+    "`~/CodeProjects/CLAUDE.md`, `${dir}/x.ts`, `@scope/pkg.js`, `{a,b}.ts`, `docs/`, `.js` or src/plain.ts";
   assert.deepEqual(extractPaths(prose), ["src/a.ts", "hash-sync.ts"]);
 });
