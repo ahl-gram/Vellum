@@ -70,11 +70,12 @@ constant wherever the rule is about its value. The older entries here still carr
 trimmed as each is touched, not swept separately.
 
 **A backticked file path in prose is scanned.** `test/repo/prose-paths.test.ts` reads every one under
-`specs/`, `.claude/`, `CLAUDE.md`, `README.md` and `.github/` and reds when it resolves neither from
-the repo root, nor from the citing file's directory, nor as a unique tracked basename. Backticks on a
-path claim the file is in the repo or deliberately kept out of it (a generated or gitignored file
-cited with its directory, a served address, an auto-memory name); write a retired file, an example
-name or a file outside this repo without them. The test is the list of what passes; do not copy it here.
+`specs/`, `.claude/skills/`, `.claude/agents/`, `CLAUDE.md`, `README.md` and `.github/` and reds when
+it resolves neither from the repo root, nor from the citing file's directory, nor as a unique tracked
+basename. Backticks on a path claim the file is in the repo or deliberately kept out of it (a
+generated or gitignored file cited with its directory, a served address, an auto-memory name); write
+a retired file or an example name without them, and a file outside this repo at its real home under
+`~`, which the scanner does not read as a repo path. The test is the list of what passes; do not copy it here.
 
 **Write `Issue #N` or `PR #N` in prose, never a bare `#N`**, because issues and pull requests share
 one numbering sequence here and interleave, so a bare number does not say which kind of thing it

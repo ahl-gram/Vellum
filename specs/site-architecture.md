@@ -18,7 +18,7 @@ rulebook's retired-rules line that a page is one `.astro` file plus one nav entr
 reading page, and what a working page costs is this file's rule below. #590 scopes that line.
 
 **No counts live here.** Not the number of pages, sheets, bundles or suites. A count in a durable
-document rots silently, because nothing in this repo sweeps markdown. The rosters below are named by
+document rots silently, because nothing in this repo sweeps a claim in markdown (only a backticked path is scanned). The rosters below are named by
 symbol and path so the reader goes and looks.
 
 ## How a page is authored

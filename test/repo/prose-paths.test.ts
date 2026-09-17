@@ -4,15 +4,15 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 
-// A backticked file path in prose claims the file is in the repo or deliberately kept out of it (Issue #624). Like its sibling comment-citations.test.ts this guard checks the path and never the claim around it, and it errs toward a miss: a path written without backticks, in a fenced block, or with a ~ $ @ < { or * segment is never extracted; a directory with a trailing slash has no extension; a placeholder that happens to exist, a memory-prefixed name that is not a memory file, a gitignored path nobody has on disk, and a relative or unique-basename hit that is the wrong file of that name all pass; a unique basename becomes a finding the day a namesake lands, which is a reword then; a span wrapped across a line is not joined; code files under the prose roots are read by neither guard.
+// A backticked file path in prose claims the file is in the repo or deliberately kept out of it (Issue #624). Like its sibling comment-citations.test.ts this guard checks the path and never the claim around it, and it errs toward a miss or a reword, never a silent wrong directory: a path written without backticks or with a ~ $ @ < { or * segment is never extracted, and a directory with a trailing slash has no extension (misses); a backticked path inside a fenced block IS extracted like any other (a false positive when it is an example, reworded then); a placeholder that happens to exist, a memory-prefixed name that is not a memory file, a gitignored path nobody has on disk, and a relative or unique-basename hit that is the wrong file of that name all pass (misses); a unique basename becomes a finding the day a namesake lands (a reword then); a span wrapped across a line is not joined and code files under the prose roots are read by neither guard (misses).
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const PROSE_ROOTS = ["specs", ".claude/skills", ".claude/agents", "CLAUDE.md", "README.md", ".github"];
 const SERVED_ROOT = "public";
-const MEMORY_PREFIX = /^(project_|feedback_|reference_|user_)/;
-// A cap on a hang, never a budget: its bite is proven by `bounded` in test/repo/footgun-deployed-run.test.ts, and a check-ignore batch on stdin is the draining-child shape Issue #564 measured.
+const MEMORY_PREFIX = /^(project_|feedback_|reference_)/;
+// A cap on a hang, never a budget: spawnSync's timeout is the mechanism test/repo/footgun-deployed-run.test.ts pins with a child that outlives it, and a check-ignore batch on stdin is the draining-child shape Issue #564 measured.
 const GIT_TIMEOUT_MS = 30_000;
-// Issue #624's measured set, restated on purpose under the derived one (a deliberate Gate 1 item 16 departure): a set derived from the tree can SHRINK, and without this ratchet deleting the last .yml would silently stop ci.yml-shaped citations being checked with every other floor green.
+// Issue #624's seven, restated on purpose under the derived set as a deliberate Gate 1 item 16 departure: a ratchet, so a set derived from the tree cannot shrink unnoticed.
 const EXTENSION_FLOOR = ["md", "ts", "mjs", "astro", "css", "yml", "json"];
 
 type Citation = { readonly file: string; readonly line: number; readonly path: string };
@@ -23,9 +23,8 @@ const git = (args: string[], input?: string) =>
 
 const tracked: ReadonlyArray<string> = git(["ls-files", "-z"]).stdout.split("\0").filter(Boolean);
 const extensions: ReadonlySet<string> = new Set(tracked.map((f) => extname(f).slice(1)).filter(Boolean));
-const byBasename: ReadonlyMap<string, ReadonlyArray<string>> = tracked.reduce(
-  (m, f) => m.set(basename(f), [...(m.get(basename(f)) ?? []), f]),
-  new Map<string, ReadonlyArray<string>>(),
+const byBasename: ReadonlyMap<string, ReadonlyArray<string>> = new Map(
+  [...new Set(tracked.map((f) => basename(f)))].map((name) => [name, tracked.filter((f) => basename(f) === name)]),
 );
 const PATH = new RegExp("`([A-Za-z0-9_./-]+\\.(?:" + [...extensions].join("|") + "))`", "g");
 
@@ -51,7 +50,6 @@ function citationsIn(file: string): ReadonlyArray<Citation> {
     .flatMap((text, i) => extractPaths(text).map((path) => ({ file: rel(file), line: i + 1, path })));
 }
 
-/** Everything git is not needed for; null means "ask git", a string is the finding, true is a pass. */
 function localVerdict(dir: string, path: string): string | true | null {
   if (isPlaceholder(path) || MEMORY_PREFIX.test(basename(path))) return true;
   if (!insideRepo(resolve(REPO, path)) || !insideRepo(resolve(REPO, dir, path))) return `\`${path}\`, which leaves the repo`;
@@ -60,7 +58,7 @@ function localVerdict(dir: string, path: string): string | true | null {
 }
 
 function gitIgnored(paths: ReadonlyArray<string>): ReadonlySet<string> {
-  // git check-ignore is fatal (128) on EMPTY stdin as well as on a path outside the repo, and exits 1 when nothing on stdin is ignored, so the empty batch never runs and only 0 and 1 are clean exits.
+  // git check-ignore exits 1 when nothing on stdin is ignored, and is fatal (128) on a path outside the repo and on a BLANK line, which the join below would send for an empty batch (measured on git 2.55: empty stdin exits 1, "\n" exits 128), so the empty batch never runs and only 0 and 1 are clean exits.
   if (paths.length === 0) return new Set();
   const out = git(["check-ignore", "--stdin", "--no-index"], paths.join("\n") + "\n");
   if (out.status !== 0 && out.status !== 1) throw new Error(`git check-ignore failed (${out.status}): ${out.stderr}`);
@@ -107,8 +105,8 @@ test("every backticked file path in the prose roots resolves", () => {
     findings,
     [],
     `${findings.length} backticked path(s) in prose do not resolve. A backticked path claims the file is in the repo or ` +
-      `deliberately kept out of it: fix the path, cite a generated file with its directory, or write a retired file, ` +
-      `an example name or a file outside this repo without backticks.\n  ` + findings.join("\n  "),
+      `deliberately kept out of it: fix the path, cite a generated file with its directory, write a retired file or ` +
+      `an example name without backticks, and a file outside this repo at its real home under ~.\n  ` + findings.join("\n  "),
   );
 });
 
