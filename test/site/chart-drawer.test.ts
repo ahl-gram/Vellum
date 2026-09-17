@@ -247,6 +247,13 @@ test("CT7b the Explorer passes the REAL turn flag into the gate, so the pure ref
   const call = app.slice(at, app.indexOf("})", at));
   assert.match(call, /turning:\s*sheetEl\.classList\.contains\("turning"\)/, "the gate is fed a literal or a stale flag instead of the sheet's own state; `turning` is the class runTurn brackets the window with");
   assert.doesNotMatch(call, /turning:\s*(false|true)\b/, "a constant here disables the refusal while every unit assertion above stays green");
+  // The window is closed upstream too, and that line had no reader until a mutation deleted it and shipped green: the
+  // card belongs to the chart being replaced, so a draw drops it BEFORE it rebases and swaps the sheet under it.
+  const at2 = app.indexOf("function draw(opts");
+  assert.notEqual(at2, -1, "draw() is gone, so the ordering assertion below reads an empty slice");
+  const draw = app.slice(at2, app.indexOf("\n}", at2));
+  assert.match(draw, /lc\.hideCard\(\);/, "a pinned card outlives the chart it names, and its hit targets then point at the OUTGOING world's places for the length of the turn");
+  assert.ok(draw.indexOf("lc.hideCard();") < draw.indexOf("glass.rebase();"), "and it is dropped before the rebase, so nothing reads it in between");
 });
 
 test("CT5 a prospect refused as a duplicate is refused in its OWN noun, and the survey line stays byte-identical (#522; e2e CD and announce.test pin the survey wording)", () => {

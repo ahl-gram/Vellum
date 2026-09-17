@@ -63,4 +63,10 @@ test("PFR3 every gathered sheet drafts, so nothing in the page skips a sheet by 
     "the drafting loop skips a sheet for exactly one reason, a seat the index does not hold; a kind-based skip in any spelling is the bug #521 ruling 3 held open and this sub closes",
   );
   assert.doesNotMatch(loop, /\bitem\.kind\s*(===|!==)/, "and the loop never branches on the ITEM's kind at all; the narrowing it does need is on the JOB's");
+  // The slice above is the DRAFTING loop only, and the prover put the same bug in `bringUp` and shipped it green: a
+  // kind-gated early exit anywhere in the page keeps a prospect out of the pile just as effectively. So the whole file is
+  // swept for that one shape. `showTop`, `rowFor` and `nameOf` legitimately branch on kind for their label text and are
+  // untouched by this, because none of them returns on it.
+  const kindExits = (app.match(/\n\s*if \([^)]*\bkind\b[^)]*\)\s*(return|continue)\b/g) ?? []).map((s) => s.trim());
+  assert.deepEqual(kindExits, [], "a kind-gated early return or continue anywhere in the page holds one sheet kind out of the pile, which is the reserved place #521 ruling 3 kept and this sub closes");
 });

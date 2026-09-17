@@ -134,6 +134,16 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
   // Astro markup cannot import, so the authored literal and the constant the script paints with are pinned EQUAL here or they drift silently.
   assert.ok(slip.includes(`>${LAY_ON_PAGE}</button>`), `the authored face is not ${JSON.stringify(LAY_ON_PAGE)}, so the press changes wording the instant the script paints it`);
   assert.match(app, /\bLAY_ON_PAGE\b/, "the script paints from the constant rather than its own literal");
+  // The filing handler itself, which no unit test read until the prover deleted half of it and shipped green.
+  const from = app.indexOf('layPress.addEventListener("click"');
+  assert.notEqual(from, -1, "the press is no longer wired, so the assertions below read an empty slice");
+  const handler = app.slice(from, app.indexOf("\n});", from));
+  assert.match(handler, /\blayOnTable\(/, "a raw append would drop the seventh sheet silently, since emitTable and parseTable both slice at the cap");
+  assert.match(handler, /chartLink\.href = chartTarget\(/, "the way home carries the table it just gained");
+  assert.match(handler, /ribbonLink\.href = ribbonTarget\(/, "and so does the road to the Ribbon: each href is built once per draw, so a road left unrefreshed carries the table as it stood BEFORE this filing");
+  // The boot table, likewise unread until a mutation removed the gate and shipped green.
+  const prologue = app.slice(app.indexOf("const addr = parseProspectAddress"), app.indexOf("function filedItem"));
+  assert.match(prologue, /let table[^;]*layOnTable\(/, "the page's boot table skips the dedupe gate restore() runs, so a shared link carrying one sheet twice leaves this page's tally and cap disagreeing with the Explorer's over one address");
   assert.doesNotMatch(app, /"Lay (this|the) prospect on the table"/, "and writes no second copy of the wording");
   assert.match(css, /\.pp-lay\.dim\s*\{[^}]*background:\s*var\(--control-cream\)/, "the refusing face dims by losing the featured gold, keeping its ink at full strength");
   assert.doesNotMatch(css, /\.pp-lay\.dim\s*\{[^}]*opacity/, "and never by opacity, which fails the measured contrast floor");

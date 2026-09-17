@@ -365,9 +365,12 @@ test("TP2 both capture points route through prospectItemFrom rather than buildin
     assert.match(src, /\b(prospectItemFrom|filingAt)\b/, `${door} does not reach the one builder, so its spelling of a prospect can drift from the other door's`);
     // Keyed on what the DEFECT looks like, not on the words: a table ITEM literal pairs the kind with the item's own
     // `style`, where the prospect JOB literal both doors legitimately write pairs it with `dress`.
+    // Tolerates ONE level of nested braces between the two fields: the first version stopped at any `}`, so a literal
+    // carrying `overrides: {}` between them evaded it entirely while the exact-variable form was caught. A bare closer
+    // still ends the match, which is what keeps the prospect JOB literal (no `style`) out of it.
     assert.doesNotMatch(
       src,
-      /kind:\s*"prospect"[^}]*\bstyle:/,
+      /kind:\s*"prospect"(?:[^{}]|\{[^}]*\})*\bstyle:/,
       `${door} writes its own prospect ITEM literal beside the builder, which is the second spelling this guard exists to refuse`,
     );
   }
