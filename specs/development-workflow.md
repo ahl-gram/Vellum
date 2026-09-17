@@ -5,11 +5,12 @@ itself: what happens, in what order, and which step may not be skipped. It exist
 were spread across `CLAUDE.md`, four agent files and a skill, and no one place said what came after
 what, so sessions improvised the order and improvised it differently each time.
 
-Three other places carry what this one deliberately does not:
+Four other places carry what this one deliberately does not:
 
-- **`specs/rulebook.md`** holds the durable rules, invariants and working agreements, and how a
-  design decision is made. Where that file and this one disagree about a rule, it wins. This file
-  sequences; it does not legislate.
+- **`specs/rulebook.md`** holds the durable rules, invariants and working agreements. Where that
+  file and this one disagree about a rule, it wins. This file sequences; it does not legislate.
+- **`specs/conventions.md`** holds how a design decision is made, and how a rule is written down
+  once made: where it lives, the voice, the citation form, the comment sweep.
 - **`.claude/skills/vellum-footguns/SKILL.md`** holds the gates, which are keyed to the moment of
   typing rather than to a step here. They are not a phase of this workflow and cannot be turned into
   one; see "The gates are not a step" below.
@@ -34,14 +35,18 @@ agent audit built from scratch. This file does not carve out an exception, and n
 that reds each one, the evidence that will say it works, and the rosters and doctrine the change
 drags with it. The required reading is due before the plan, not after it: `specs/rulebook.md` before
 any change that touches the renderer, a committed chart, the golden, a regen, a seed or the order of
-work, `specs/ui-design.md` before any work whose deliverable is an appearance,
+work, `specs/ui-design.md` before any work whose deliverable is an appearance, `specs/chart-dress.md`
+before any change to a chart's dress, in the renderer or in how the site mounts a sheet,
+`specs/cascade-traps.md` before writing or moving CSS or reading a rendered frame after a change,
 `specs/engine-invariants.md` before any change to world generation or to a surface that quotes
 generated output, and before any script that measures a world, since the traps that make such a
 script return a plausible wrong number are there, `specs/explorer-doctrine.md` before any work on the
 Explorer or on a chart camera, gesture or overlay, `specs/region-and-voyage.md` before any work on a
 region sheet, level of detail,
 or the voyage, `specs/site-architecture.md` before adding or restructuring a page, a stylesheet, a
-bundle or an inlined script, and
+bundle or an inlined script, `specs/conventions.md` before starting a design round or building to
+ruled stills, and before adding or moving a rule, editing a spec, or writing, citing or sweeping a
+comment, and
 `specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe, or that
 reads a screenshot, a focus state or a narrow viewport in the harness.
 

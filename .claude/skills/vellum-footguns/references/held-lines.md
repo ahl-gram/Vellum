@@ -20,7 +20,7 @@ lacked.
 
 **Provenance.** Moved from Issue #611 (its body and its comment of 2026-09-14) by Issue #626 on
 2026-09-16, word for word, with three stated departures. First, every bare number is written
-`Issue #N` or `PR #N` per the house naming rule, which `specs/rulebook.md` states or points at:
+`Issue #N` or `PR #N` per the house naming rule, which `specs/conventions.md` states:
 four occurrences changed, `Issue #585`, `Issue #591` and `Issue #607` twice. Second, a line
 beginning "Noted" beneath a moved line is the repo having overtaken that line before the move, dated,
 and is not part of the moved text. Third, the comment's item (1) restated the Never list's first

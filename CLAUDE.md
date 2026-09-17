@@ -14,13 +14,16 @@ READING before the work its row names.
 
 | spec | what it holds | read it before |
 |---|---|---|
-| `specs/rulebook.md` | the sequencing rules, working agreements, and how a design decision gets made | any change touching the renderer, a committed chart, the golden, a regen, a seed, or the order of work |
-| `specs/ui-design.md` | the look and feel itself: the ground, the type case, the palette by role, the chart's dress, the rooms, the voice, contrast, gesture, motion, and the cascade traps this codebase keeps hitting | any work whose deliverable is an appearance |
+| `specs/rulebook.md` | the sequencing rules and working agreements: product direction, the cost axis, the golden and committed-chart discipline, the re-roll set, scheduling, cross-epic coordination, and the index of durable engineering constraints from shipped work | any change touching the renderer, a committed chart, the golden, a regen, a seed, or the order of work |
+| `specs/ui-design.md` | the look and feel itself: the ground, the type case, the palette by role, the rooms, the voice, contrast, gesture, motion and print | any work whose deliverable is an appearance |
+| `specs/chart-dress.md` | how a chart itself is dressed: a style as a palette over identical geometry, what is a style token and what is a layer literal, the mount, the hatching, the tint, the river names and the sea beasts | any change to a chart's dress, in the renderer or in how the site mounts a drawn sheet |
+| `specs/cascade-traps.md` | how the cascade breaks here: the declaration that is present in the file and loses, and the two habits of looking that catch it | writing or moving CSS, and reading a rendered frame after a change |
 | `specs/engine-invariants.md` | what the generator guarantees about a world, what breaks those guarantees silently, and what a surface quoting generated output may not assume | any change to world generation, any surface that quotes it, and any script that measures a world |
 | `specs/explorer-doctrine.md` | the living chart over the baked sheet: the engine boundary and what a host page owes it, the camera and gesture contracts, counter-scale, the overlay lifecycle | any work on the Explorer or on a chart camera, gesture or overlay |
 | `specs/region-and-voyage.md` | its other half: what a region sheet may do that a world sheet may not, how a finer view is built and what it guarantees, how the voyage splits worker from client | any work on a region sheet, a level of detail, or the voyage |
 | `specs/site-architecture.md` | how the site is authored, bundled, discovered and shipped: the page model, the rosters a page joins, what the build does to authored markup, the two forms that fail silently | adding or restructuring a page, a stylesheet, a bundle or an inlined script |
 | `specs/development-workflow.md` | the order of operations from a filed issue to a pull request, which subagent runs at which step, and the one place the work stops for Alex's ruling | starting a sub or an epic, since its early steps are the ones a session cannot go back and take later |
+| `specs/conventions.md` | how the house decides, and how it writes a rule down: how a design decision is made and built to, where a rule lives and what a new spec joins, how a spec and the rest of the house's prose are written, how code is cited, and how a comment sweep is run and proven | starting a design round or building to ruled stills; adding or moving a rule, adding a spec, editing a spec, or writing, citing or sweeping a comment |
 | `specs/settle-doctrine.md` | how an e2e wait is written, and what the harness environment it runs in actually does | any e2e wait, settle or CDP probe, and any screenshot, focus state or narrow viewport read in the harness |
 
 The ruled pixels those specs were decided from are archived under `design/`, one directory per design
@@ -48,8 +51,9 @@ single-select "Roadmap" field. **Read the phase options from the board, never fr
 handoff keep it current: newly filed issues added and phased, shipped issues closed. The global
 `session-handoff` skill updates SESSION-NOTES (at `session-notes/SESSION-NOTES.md`, not the repo
 root), RESUME-HERE and auto-memory but does NOT know about the Project, so this is the Vellum extra
-step. **A rule change EDITS `specs/rulebook.md`** in a branch and a PR, as readily for a corrected
-fact as for a changed rule, and may leave a dated comment on the originating issue as the audit trail.
+step. **A rule change EDITS the spec that owns the rule** (the table above names each, and
+`specs/conventions.md` says where a rule lives) in a branch and a PR, as readily for a corrected fact
+as for a changed rule, and may leave a dated comment on the originating issue as the audit trail.
 
 `gh project` needs the `project` token scope (`gh auth refresh -s project`). The project, field and
 phase-option ids are NOT written here (the board is private, this file is public); look them up once

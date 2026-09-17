@@ -1,9 +1,12 @@
 # The look and feel of Vellum
 
 What Vellum looks like, how it sounds, how it moves, and how to build a new piece of it so that it
-belongs. This is the record of the idiom itself, not of how a decision gets made: **the rules live in
-`specs/rulebook.md`, the order of operations in `specs/development-workflow.md`, process at the
-keyboard in `CLAUDE.md`, and a ruling about one feature as a dated comment on its own issue.**
+belongs. This is the record of the idiom itself, not of how a decision gets made: **how a decision
+gets made lives in `specs/conventions.md`, the rules in `specs/rulebook.md`, the order of operations
+in `specs/development-workflow.md`, process at the keyboard in `CLAUDE.md`, and a ruling about one
+feature as a dated comment on its own issue.** Two halves of the look stand beside this file:
+`specs/chart-dress.md` is how a chart itself is dressed, and `specs/cascade-traps.md` is what the
+browser does to the declaration you write to get the look ruled here.
 
 Where this file names a measured value, a guard pins that value, and **the guard is right if they
 disagree.** Where it names a role, the role is the durable thing and the value behind it may be
@@ -101,74 +104,8 @@ derivation rather than a list, so check it there before assuming a token has a r
 
 ## The chart's own dress
 
-The charts are the thing the site exists to show, and they are dressed on their own terms.
-
-**A style is a palette over identical geometry.** Antique, topographic, ink and nautical draw the
-same world; only the colours, the paper and the lettering change. Antique is the default and is what
-a bare request draws.
-
-**A new dress replaces one rather than adding another.** Ruled for the Ribbon's painted plate on
-#426 (2026-09-03): the limner's colour took the place of the antique dress rather than becoming a
-third option, because an Ogilby plate was sold plain or hand-coloured, which is ink and antique
-already. Read as a general rule this is a generalization of that one ruling, not itself ratified, so
-treat it as the question to ask (what does this dress replace?) rather than as a refusal.
-
-**A derived plate falls back through the dresses in order**: an ink chart yields an ink plate,
-anything else yields antique. That two-dress rule is why a mixed collection reads honestly, and each
-sheet keeps the dress it was drawn in rather than being harmonized to its neighbours.
-
-**The dress gates what the engine will do.** The finer redraft is enabled on the antique dress alone,
-so every collectible survey is antique and the only other dress that can reach a gathered sheet is a
-prospect's pen and ink. A feature that gathers charts inherits that gate whether it means to or not.
-
-**A sheet stands on the desk in one dressing**: a single hairline in the pale tan and the house sheet
-shadow, cast in chart ink. The shadow's depth is deeper than it looks like it should be, and
-deliberately so: it was arrived at from a bug where an armed survey wore the hairline and shadow
-twice in exact register, which read better than the single pass and was ratified at the doubled
-value (#367). The mount is qualified on the marker the renderer stamps on a chart and nothing else
-carries, so keep that qualifier or the doubling comes back.
-
-**The chart's lettering ink is not the site's prose ink** and the two are not to be unified: the
-chart side is inside the byte-determinism contract, and the site quotes it as a token instead.
-
-**A value that changes with the dress is a style token; a value that holds across every dress is
-written at the layer.** A border is tokenized whole, its ink and its geometry alike (`borderStroke`,
-`borderWidth`, `borderDash` and `borderOpacity` in `src/render/style.ts`), because a dress changes
-how a border is drawn and not only what colour it is. A realm name takes its ink and its halo from
-tokens too, but its type size, tracking, weight, opacity and halo width sit inline in
-`featureLabelsLayer` (`src/render/layers/feature-labels.ts`): that treatment is what keeps the name
-legible over any dress, so it is one decision rather than a handful. Do not promote such a literal to a
-token to look tidy, and do not add a style-varying value to a layer.
-
-**Ink arms hatch the FIELD, after Petra Sancta, and the charges keep the grey value ladder.** One
-pattern per field tincture, built by `inkHatch` in `src/render/layers/heraldry/hatch.ts`. These
-things about it are load bearing. Every pattern id is scoped by the document's existing suffix, so
-many arms sharing one sheet cannot collide. Every tile opens on an opaque paper rect, so nothing
-below bleeds through. And the charges stay on the grey ladder rather than joining the hatching,
-because a stroke-drawn device shatters into dashes at small sizes and an argent charge disappears
-outright. `armsNode` (`src/render/layers/heraldry.ts`) emits the pattern defs only where the palette
-carries a hatch, which is what keeps every colour dress byte-identical to a chart drawn before the
-hatching existed.
-
-**The realm tint is ONE dress decision, not several.** Where a dress wears it, the wash, the seat halo
-and the legend swatch are all drawn; where it does not, they go together. A dress that shows one
-without the others is the defect. Whether the layer draws at all is the style's own flag
-(`politicalTints` in `src/render/style.ts`); what that means for the world underneath is
-`specs/engine-invariants.md`'s.
-
-**A river keeps its name over a graze.** A river yields only where it would truly bury a neighbour, never where it merely touches
-one. The bar is `RIVER_MAX_OVERLAP` in `src/render/layers/feature-labels.ts`, tested against the river's true rotated ink rather than an upright box. **What it yields to is
-everything already claimed in the arena**, which is more than the labels: the cartouche and the
-scalebar are claimed before any label layer runs, and the legend and compass are claimed too when
-they are drawn. Terrain glyphs are the exception that reserve nothing, so grazing a stand of trees
-costs a river nothing at all. A residual graze just under the bar is correct behaviour, not a defect.
-
-**A sea beast is drawn last and yields to everything.** `beastsLayer`
-(`src/render/layers/beasts.ts`) claims the arena after the settlements and the feature labels, keeps
-its ink off the land, and escalates as the sheet fills: the full label, then the name alone, then the
-glyph alone. It searches near its haunt first and then the whole sheet before it drops, so a legend
-drawn over the haunt moves the beast rather than losing it. What a beast is, and what it does to the
-anonymous sea decor, is `specs/engine-invariants.md`'s.
+**How the chart itself is dressed is `specs/chart-dress.md`'s**, from the style as a palette over
+identical geometry to the sea beasts; this file is the site around it.
 
 ## The room and its furniture
 
@@ -348,8 +285,8 @@ And an inline-block takes its baseline from its last line box, so a wrapping lis
 bullet beside line two: such a box pins `vertical-align: top`. Never "fix" that by going back to
 `display: inline`, which kills the tip.
 
-**Touch and hover are branched on the full predicate**, coarse pointer and no hover together, never
-on absent hover alone: a headless linux runner reports no hover with no pointer at all.
+**How an affordance gate is written**, and why never on absent hover alone, is
+`specs/cascade-traps.md`'s.
 
 **A real tap fires the compatibility hover and focus events BEFORE its click**, and the tap's own
 press light-dismisses an open auto popover first. So a press that toggles a popover needs the hover
@@ -450,63 +387,5 @@ form, and a plate whose link fails is left a plain image rather than a dead one.
 
 ## How the cascade breaks here
 
-The craft half of everything above. This class of defect has shipped repeatedly and reads as correct
-in the source every time, because **the failing declaration is present in the file and merely loses.**
-A text search over the CSS passes on the broken code; pin the resolved value instead.
-
-- **A media query adds no specificity.** A narrow-width override written at a bare class loses to any
-  wider-specificity rule outside the block, however far above it that rule sits.
-- **The arms of a selector list rank independently.** Scoping one arm of a two-arm painting rule is
-  scoping neither, and a repair that carries one arm will pass a guard written for the other.
-- **The best fix is often no media query at all.** Ask whether the state you are dressing already
-  implies the width. An override scoped on the docked state alone wins outright and fights nothing.
-- **The layout's inline style block renders after the page stylesheet**, so a page override of a shell
-  rule needs higher specificity or it silently does nothing. Equal specificity is not enough.
-- **A rule carrying an id cannot be beaten by a plain class.** Change that rule's own variables.
-- **The house sheets dress every button.** Their hover wash sits three classes deep, so a chrome hover
-  is written four classes deep or the piece flashes bright cream on hover. A button on a load-bearing
-  transform joins the exclusions or reuses the excluded class.
-- **An author `display` beats the user-agent `[hidden]` rule**, so on a piece that declares its own
-  display, setting the `hidden` attribute does nothing at all. Hide it through style.
-- **A docked piece reparents and goes static**, so an absolutely positioned pseudo-element on it
-  resolves against whatever fixed ancestor it lands in and can span a whole sheet.
-- **A flex item defaults to `min-width: auto` and refuses to shrink below its content width**, so a
-  control row overflows a narrow viewport while every rule in it reads as correct. Zero the item's
-  own minimum; where the row still cannot fit, let it wrap as well. A range input is the usual
-  culprit, because its intrinsic width is far wider than it looks.
-- **A percentage max-height dies inside an auto grid track.** Containment without script is an
-  absolutely positioned box with auto margins against a definite one, never a viewport formula,
-  which crops the moment the chrome above it changes height.
-- **A sticky box is clamped inside its containing block.** Pulling a sticky cap into a scroll
-  container's padding with a negative margin does not stick it at the top; the browser slides it to
-  the content-box top, over the first items. Make the cap the spacer itself, with no padding above
-  it, and hit-test the items rather than reading their rects, because the rects still look right.
-- **A full-bleed absolutely positioned handle kills anything authored beneath it.** A handle laid
-  over a whole sheet head is dead to a real touch for every control in that head, so such a control
-  takes its own stacking layer.
-- **A shown popover renders in the TOP LAYER, which no z-index reaches**, so a scrim cannot dim one.
-  Popovers stand down with the scrim instead.
-- **The head cluster pins its own line-height**, because a page sheet sets the body's for reading and
-  the cluster must not inherit it.
-- **An absolutely positioned box wider than a phone viewport makes the browser widen the LAYOUT
-  viewport to fit it**, and clipping overflow at the root does not stop that sizing. Cap the box.
-- **When an engine-dressing rule is the one losing, the opt-out may not be written in the host's own
-  sheet.** `specs/explorer-doctrine.md` rules that engine dressing is edited in the one shared sheet
-  and never in a host's, so the repair belongs to the rule that is losing.
-- **A transform on a container re-anchors every fixed descendant to it** for the length of the
-  animation, so a landing settle applied to the wrong element throws the corner furniture across the
-  page.
-- **An affordance gate is `(hover: none) and (pointer: coarse)`, never `(hover: none)` on its own**,
-  wherever it is asked, which today is a `matchMedia` call rather than a sheet. A machine with no pointing device at all reports `hover: none`
-  together with `pointer: none`, so the bare query matches it too and stands the affordance down
-  exactly where a keyboard user needs it. Linux headless CI is such a machine (e2e BR4 and BR5 hold the line). The bare query is still the
-  right tool for **asking what the environment reports**, which is why an e2e probe uses it to detect
-  whether emulation took effect; the rule is about gating an affordance, not about the query.
-
-These are about looking rather than the cascade, and belong beside them:
-
-- **Structural tests cannot see layout.** A stylesheet that scrolled a 320px phone sideways passed the
-  full unit suite, the full e2e suite and a twenty-two agent adversarial review, because every
-  assertion read file text or DOM shape. Render it and measure it.
-- **Read the whole frame of an after-shot**, not the piece you changed. A row that wrapped, a seat that
-  moved, a control that fell off the edge: the eye goes to the target and reads past them.
+**The craft half of this file is `specs/cascade-traps.md`**: what the browser does to the declaration
+you write to get the look above, read before writing or moving CSS.
