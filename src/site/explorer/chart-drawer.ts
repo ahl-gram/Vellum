@@ -58,12 +58,10 @@ export const LAY_ON_CARD = "Lay the prospect on the table";
 /** The Prospect page's, ruled 2026-09-17 from the rendered variant: THIS plate, the one the page is showing, rather than a place on a chart. */
 export const LAY_ON_PAGE = "Lay this prospect on the table";
 
-/** A filing press's face. The two refusing faces are shared, because both surfaces refuse for the same two reasons (#518 ruling 7 and Alex 2026-09-17); the resting one is the surface's own, and both spellings are the constants above so neither door invents one. It DIMS rather than taking `disabled`, so a keyboard reader still meets it and hears why. */
 export function layPressFace(
   at: { readonly holds: boolean; readonly full: boolean },
   resting: string,
 ): { readonly label: string; readonly refuses: boolean } {
-  // `already` before `full`, the precedence layOnTable takes: a reader can act on the first and cannot on the second.
   if (at.holds) return { label: "Already on the table", refuses: true };
   if (at.full) return { label: "No room on the table", refuses: true };
   return { label: resting, refuses: false };
@@ -119,7 +117,7 @@ export function surveyItemFrom(c: {
   };
 }
 
-/** The job that redraws one filed sheet, so a recovered table can fill its frames. Built from the ADDRESS alone, since that is all a recovered sheet has: `tableWindow` rebuilds the exact window the settle committed. Since #522 a prospect draws its own plate here too, which is what the Chart Table's cutting and the Portfolio's row both show. */
+/** The job that redraws one filed sheet, so a recovered table can fill its frames. Built from the ADDRESS alone, since that is all a recovered sheet has: `tableWindow` rebuilds the exact window the settle committed. */
 export function thumbJobFor(item: TableItem): RegionJob | ProspectJob {
   if (item.kind === "prospect") {
     return {

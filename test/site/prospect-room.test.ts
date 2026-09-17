@@ -135,8 +135,17 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
   assert.ok(slip.includes(`>${LAY_ON_PAGE}</button>`), `the authored face is not ${JSON.stringify(LAY_ON_PAGE)}, so the press changes wording the instant the script paints it`);
   assert.match(app, /\bLAY_ON_PAGE\b/, "the script paints from the constant rather than its own literal");
   assert.doesNotMatch(app, /"Lay (this|the) prospect on the table"/, "and writes no second copy of the wording");
-  // Measured 2026-09-17, the same reason as the card's press: opacity composites the ink toward the ground and takes the face to 2.76:1 against the ratified 4.5:1 floor.
   assert.match(css, /\.pp-lay\.dim\s*\{[^}]*background:\s*var\(--control-cream\)/, "the refusing face dims by losing the featured gold, keeping its ink at full strength");
   assert.doesNotMatch(css, /\.pp-lay\.dim\s*\{[^}]*opacity/, "and never by opacity, which fails the measured contrast floor");
+  // The press's OWN rule, not merely its dim: the card's side took this guard at #631 round 1 because a bare-substring
+  // roster could not see the primary block deleted, and this is the same class on the mirror surface. Without it the
+  // ruled featured gold can be removed here with every markup and e2e assertion still green.
+  const rule = css.match(/(^|\n)\.pp-lay\s*\{[^}]*\}/g) ?? [];
+  assert.equal(rule.length, 1, "public/prospect/index.css declares .pp-lay's own rule once, or the last one wins");
+  assert.match(rule[0], /background:\s*var\(--control-gold\)/, "the page's press loses the featured gold the sitting ruled");
+  assert.match(rule[0], /font-family:\s*var\(--font-display/, "and the display face that makes it read as a press rather than prose");
+  const file = css.match(/(^|\n)\.pp-file\s*\{[^}]*\}/g) ?? [];
+  assert.equal(file.length, 1);
+  assert.match(file[0], /display:\s*flex/, "the press and its tally stack as a column, which is what the ruled variant showed");
   assert.doesNotMatch(app, /layPress\.disabled/, "and it is never disabled: that drops it out of the tab order");
 });

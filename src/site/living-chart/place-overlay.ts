@@ -146,11 +146,9 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const face = layProspect.state(idx);
     press.textContent = face.label;
     press.dataset["idx"] = String(idx);
-    // Ruled 2026-09-17: it DIMS and keeps answering, the dog-ear's shape, because `disabled` leaves the tab order and a keyboard reader would meet the card with no account of the missing action.
     press.classList.toggle("dim", face.refuses);
   }
 
-  /** Re-asked when the TABLE changes rather than when the card does: a successful press never re-shows the card, so a press labelled only at show time keeps offering an action it has just spent. */
   function relabelLay(): void {
     if (placeOverlay) paintLay(placeOverlay.currentIdx);
   }

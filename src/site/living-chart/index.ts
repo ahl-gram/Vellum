@@ -93,6 +93,8 @@ export function createLivingChart(host: LivingChartHost) {
     onDocClick: overlay.onDocClick,
     reclampCard: overlay.reclampCard,
     relabelLay: overlay.relabelLay,
+    /** The host's way to dismiss a pinned card when it is about to replace the chart under it. */
+    hideCard: overlay.hideCard,
     applyAges: (manifest: PlaceManifest | null, survey: Survey | null, seed: number, subtitle: string) =>
       ages.armAges(manifest, survey, seed, subtitle),
     rearmAges: (

@@ -183,6 +183,8 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
   const seed = Number(seedInput.value) >>> 0;
   const myGen = ++drawGen;
   cancelTurn();
+  // The card belongs to the chart being replaced: left pinned it hangs over the turn with hit targets that name the OUTGOING world's places, which is the window `filingAt` refuses in. Dropping it closes the window rather than dressing it.
+  lc.hideCard();
   // #165: rebase(), not reset(): the chart under the camera is being replaced, so drop to home with no spurious settle.
   glass.rebase();
   glass.cancelRedraft();

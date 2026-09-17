@@ -72,7 +72,8 @@ let drawGen = 0;
 window.__vellumProspectUsesWorker = usesWorker;
 window.__vellumProspectState = () => last;
 
-let table: ReadonlyArray<TableItem> = parseTable(location.hash) ?? [];
+// Through the same gate a filing takes, for the reason `restore()` in ../explorer/chart-drawer.ts gives: parseTable does not dedupe, so a shared link carrying one sheet twice would leave this page's tally and cap disagreeing with the Explorer's over the same address.
+let table: ReadonlyArray<TableItem> = (parseTable(location.hash) ?? []).reduce<ReadonlyArray<TableItem>>((kept, item) => layOnTable(kept, item).items, []);
 
 /** Built from the DRAWN plate, never the address: `addr.index` may be null and would emit no `i`, colliding with a hand-typed capital, and the year is the one actually pressed. */
 function filedItem(): TableItem | null {
@@ -106,7 +107,9 @@ layPress.addEventListener("click", () => {
   }
   table = laid.items;
   history.replaceState(null, "", tableHash(location.hash, emitTable(table)));
+  // BOTH roads, not just the way home: each caches an href built from the hash at its last draw, so a road left unrefreshed carries the table as it stood before this filing and silently drops the sheet just laid.
   chartLink.href = chartTarget(location.hash);
+  if (last) ribbonLink.href = ribbonTarget(location.hash, last.index);
   paintLay();
 });
 

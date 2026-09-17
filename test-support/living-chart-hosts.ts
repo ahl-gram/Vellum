@@ -7,7 +7,7 @@ import type { El } from "./element-shim.ts";
 
 /** The engine's whole public surface; the suites pin the SAME list for both host shapes. */
 export const API = [
-  "buildPlaceOverlay", "onDocKeydown", "onDocClick", "reclampCard", "relabelLay",
+  "buildPlaceOverlay", "onDocKeydown", "onDocClick", "reclampCard", "relabelLay", "hideCard",
   "applyAges", "rearmAges", "exitAges", "clearAges",
   "agesSnapToRest", "agesState", "agesDragStart", "agesDragEnd",
   "applyScrub", "exitScrub", "clearScrub", "cancelScrubRaf",

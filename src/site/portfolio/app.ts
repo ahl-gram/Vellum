@@ -227,7 +227,6 @@ const start = async (): Promise<void> => {
   rows();
   retitle();
   showTop();
-  // Since #522 every gathered sheet drafts, so the only table neither press can act on is a bare one.
   if (sheets.length === 0) {
     // hidden is inert on these: atelier.css sets an author display on .legend-btn, which beats the UA [hidden] rule, so
     // el.hidden = true silently no-ops (the #270 guard-prover's find). The Prospect and the Ribbon hide the same way.

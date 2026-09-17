@@ -35,10 +35,6 @@ test("PF4 a sheet names its place in the pile in the mockup's lower-case numeral
   assert.equal(roman(7), "7");
 });
 
-// PF5 retired at #522: it pinned `isAwaited`, the predicate that held a prospect's place reserved until this sub.
-// With every gathered sheet drafting, that predicate is gone and the rule it carried is now PFR3 in
-// test/site/portfolio-room.test.ts, where the source it governs is read.
-
 test("PF6 the bare line sends the reader where sheets are gathered, since neither sheet press has anything to act on (ruled 2026-09-08)", () => {
   assert.match(BARE_LINE, /table is laid at the Explorer/);
 });

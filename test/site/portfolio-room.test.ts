@@ -43,9 +43,6 @@ test("PFR2 the slip's where-line follows the gathering in both states: a bare Po
   assert.doesNotMatch(app, /whereLine && items\.length/, "no length guard: gatheredLine(0) already carries the bare voice, 'no sheets gathered at the Explorer'");
 });
 
-// PFR3 replaced at #522. It pinned a stand-down on what could be DRAFTED, which was the right predicate only while a
-// prospect never drafted; now that every gathered sheet does, that predicate and `items.length === 0` coincide and the
-// old guard could not red. What CAN red is a kind-based skip creeping back into the drafting loop or the index.
 test("PFR3 every gathered sheet drafts, so nothing in the page skips a sheet by KIND and the presses stand down only on a bare portfolio (#522, superseding #521 ruling 3)", () => {
   assert.match(app, /if \(sheets\.length === 0\) \{/, "the stand-down asks whether anything was gathered at all");
   assert.doesNotMatch(app, /\bisAwaited\b/, "the reserved-place predicate is gone, not merely unused");
