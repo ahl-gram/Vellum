@@ -1,6 +1,6 @@
 # How the house decides, and how it writes a rule down
 
-**This file holds the conventions behind the rules, not the rules themselves.** How a design
+**This file holds the house's conventions, not the rules of the product.** How a design
 decision is made and built to, where a rule lives once it is made, how a spec states it, how code
 is cited in prose and in a comment, and how a comment sweep is run and proven. Read it before
 starting a design round or building to ruled stills, before adding or moving a rule, before
