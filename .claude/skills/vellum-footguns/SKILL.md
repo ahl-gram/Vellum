@@ -11,6 +11,7 @@ start and applied at the push, hours apart, so the first push routinely carries 
 go red, a probe that measured the wrong thing, a cascade rule that loses, or a body claim nobody
 measured. The cold skeptic or the prover then changes the diff, and the lesson is re-learned on the
 next sub. `references/scars.md` is the dated ledger.
+`references/held-lines.md` holds the candidates that did not earn a line, each with the incident that would.
 
 So this file is not doctrine. It is the checklist form of it, keyed to the moment you are about to
 type. Read the gate you are at, do each line, and move on. Provenance is in `references/`.
