@@ -356,10 +356,12 @@ test("TP2 both capture points route through prospectItemFrom rather than buildin
   for (const door of ["src/site/explorer/app.ts", "src/site/prospect/app.ts"]) {
     const src = strip(door);
     assert.match(src, /\bprospectItemFrom\b/, `${door} does not reach the one builder, so its spelling of a prospect can drift from the other door's`);
+    // Keyed on what the DEFECT looks like, not on the words: a table ITEM literal pairs the kind with the item's own
+    // `style`, where the prospect JOB literal both doors legitimately write pairs it with `dress`.
     assert.doesNotMatch(
       src,
-      /kind:\s*"prospect"/,
-      `${door} writes its own prospect item literal beside the builder, which is the second spelling this guard exists to refuse`,
+      /kind:\s*"prospect"[^}]*\bstyle:/,
+      `${door} writes its own prospect ITEM literal beside the builder, which is the second spelling this guard exists to refuse`,
     );
   }
 });

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { layOnTable, takeOffTable, roomOnTable, countLine, tabLine, refusalLine, subOf, thumbJobFor, thumbNames, layPressFace } from "../../src/site/explorer/chart-drawer.ts";
+import { layOnTable, takeOffTable, roomOnTable, countLine, tabLine, refusalLine, subOf, thumbJobFor, thumbNames, layPressFace, LAY_ON_CARD, LAY_ON_PAGE } from "../../src/site/explorer/chart-drawer.ts";
 import { TABLE_CAP, TABLE_KEY, emitTable, type ProspectItem, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 import { emitTableKey } from "../../src/site/explorer/address.ts";
 import type { ProspectJob, ProspectResult, RegionResult } from "../../src/site/explorer/worker-client.ts";
@@ -199,12 +199,16 @@ test("CT4 a prospect's cutting names the dress the PLATE is drawn in, so a hand-
 });
 
 test("CT6 the card's press wears the two ruled faces, and a table that is BOTH full and already holding this plate says the more useful of the two true things (#518 ruling 7, Alex 2026-09-17, and #520's own precedence scar)", () => {
-  assert.deepEqual(layPressFace({ holds: false, full: false }), { label: "Lay the prospect on the table", refuses: false });
-  assert.deepEqual(layPressFace({ holds: false, full: true }), { label: "No room on the table", refuses: true });
-  assert.deepEqual(layPressFace({ holds: true, full: false }), { label: "Already on the table", refuses: true });
+  assert.deepEqual(layPressFace({ holds: false, full: false }, LAY_ON_CARD), { label: "Lay the prospect on the table", refuses: false });
+  assert.deepEqual(layPressFace({ holds: false, full: false }, LAY_ON_PAGE), { label: "Lay this prospect on the table", refuses: false },
+    "the page's resting face is its own, ruled from the rendered variant: THIS plate rather than a place on a chart");
+  assert.deepEqual(layPressFace({ holds: false, full: true }, LAY_ON_CARD), { label: "No room on the table", refuses: true });
+  assert.deepEqual(layPressFace({ holds: false, full: true }, LAY_ON_PAGE), { label: "No room on the table", refuses: true },
+    "and both surfaces refuse in the SAME words, since they refuse for the same reason");
+  assert.deepEqual(layPressFace({ holds: true, full: false }, LAY_ON_CARD), { label: "Already on the table", refuses: true });
   // layOnTable answers "already" before "full" for exactly this reason: the reader can act on the first and not on the second.
   assert.deepEqual(
-    layPressFace({ holds: true, full: true }),
+    layPressFace({ holds: true, full: true }, LAY_ON_CARD),
     { label: "Already on the table", refuses: true },
     "a full table holding this very plate tells the reader it is already there, not that there is no room for it",
   );

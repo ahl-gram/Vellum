@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { LAY_ON_PAGE } from "../../src/site/explorer/chart-drawer.ts";
 
 // The Prospect is a chart room on the #462 pattern, ruled on #494 (2026-08-30): the engraving full-bleed at the plate's own aspect, the year as the room's one control, the engraver's note on the slip, the Explorer and the Ribbon as the roads out, print standing down.
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -122,4 +123,18 @@ test("PPR7 the css: the sheet fitted to what the chrome leaves, the plate as the
   assert.match(print[1], /\.stage\s*\{[^}]*position:\s*static/, "the plate prints in flow");
   assert.match(print[1], /#map\s*\{[^}]*transform:\s*none\s*!important/, "unzoomed");
   assert.match(print[1], /#pp-plate\s*\{[^}]*position:\s*static;[^}]*height:\s*auto/, "at its own proportion");
+});
+
+test("PR-lay the page's filing press sits ON the engraver's note and not among the roads out, and its authored face is the ONE constant the script paints with (#522, seat C ruled 2026-09-17)", () => {
+  const slip = between('<Slip id="note"', "</Slip>");
+  assert.match(slip, /<button id="pp-lay" class="pp-lay" type="button">/, "the press stands inside the note, where the room's desk actions belong");
+  assert.ok(slip.indexOf('id="pp-lay"') < slip.indexOf('class="legend-dock"'), "above the docked roads rather than among them");
+  const roads = between('<nav class="legend"', "</nav>");
+  assert.doesNotMatch(roads, /pp-lay/, "and NOT in the roads out, which go somewhere; a press that acts on the sheet wears the button dress instead");
+  // Astro markup cannot import, so the authored literal and the constant the script paints with are pinned EQUAL here or they drift silently.
+  assert.ok(slip.includes(`>${LAY_ON_PAGE}</button>`), `the authored face is not ${JSON.stringify(LAY_ON_PAGE)}, so the press changes wording the instant the script paints it`);
+  assert.match(app, /\bLAY_ON_PAGE\b/, "the script paints from the constant rather than its own literal");
+  assert.doesNotMatch(app, /"Lay (this|the) prospect on the table"/, "and writes no second copy of the wording");
+  assert.match(css, /\.pp-lay\.dim\s*\{[^}]*opacity/, "the refusing face dims rather than disappearing");
+  assert.doesNotMatch(app, /layPress\.disabled/, "and it is never disabled: that drops it out of the tab order");
 });

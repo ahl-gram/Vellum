@@ -41,12 +41,20 @@ export function refusalLine(why: Refusal, kind: TableItem["kind"] = "survey"): s
   return `this ${kind} is already on the table`;
 }
 
-/** The place card's filing press: its two refusing faces are #518 ruling 7's and Alex's 2026-09-17 ruling, and it DIMS rather than taking `disabled`, so a keyboard reader still meets it and hears why. */
-export function layPressFace(at: { readonly holds: boolean; readonly full: boolean }): { readonly label: string; readonly refuses: boolean } {
+/** The card's resting face, ruled from the still `design/chart-table/stills/explorer-1280-card.png`. */
+export const LAY_ON_CARD = "Lay the prospect on the table";
+/** The Prospect page's, ruled 2026-09-17 from the rendered variant: THIS plate, the one the page is showing, rather than a place on a chart. */
+export const LAY_ON_PAGE = "Lay this prospect on the table";
+
+/** A filing press's face. The two refusing faces are shared, because both surfaces refuse for the same two reasons (#518 ruling 7 and Alex 2026-09-17); the resting one is the surface's own, and both spellings are the constants above so neither door invents one. It DIMS rather than taking `disabled`, so a keyboard reader still meets it and hears why. */
+export function layPressFace(
+  at: { readonly holds: boolean; readonly full: boolean },
+  resting: string,
+): { readonly label: string; readonly refuses: boolean } {
   // `already` before `full`, the precedence layOnTable takes: a reader can act on the first and cannot on the second.
   if (at.holds) return { label: "Already on the table", refuses: true };
   if (at.full) return { label: "No room on the table", refuses: true };
-  return { label: "Lay the prospect on the table", refuses: false };
+  return { label: resting, refuses: false };
 }
 
 export function takeOffTable(items: ReadonlyArray<TableItem>, seat: number): ReadonlyArray<TableItem> {

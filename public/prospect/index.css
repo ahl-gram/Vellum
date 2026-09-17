@@ -22,6 +22,16 @@
 .era { margin: 1rem 0 0; font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.82rem; color: var(--ink-brown); }
 .era-gloss { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.85rem; color: var(--ink-brown); line-height: 1.45; margin: 0.2rem 0 0; text-align: left; }
 
+/* #522, ruled 2026-09-17 (seat C): the page's own capture point onto the Chart Table, seated on the engraver's note where the room's desk actions belong rather than in the roads out, which go somewhere. */
+.pp-file { display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem; margin: 0.9rem 0 0; }
+.pp-lay { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); letter-spacing: 0.05em; font-size: 0.86rem;
+  padding: 0.3rem 0.7rem; text-align: left; color: var(--ink-dark); background: var(--control-gold);
+  border: 1px solid var(--line-tan); border-radius: 4px; }
+/* house.css's `button:not(.lf-station):not(.place-hit):hover` is (0,3,1) and would flash this press bright cream, losing the gold the sitting ruled; the slip's own id carries the hold to (1,2,0). */
+#note .pp-lay:hover, #note .pp-lay:focus-visible { background: var(--control-gold); border-color: var(--ink-brown); }
+.pp-lay.dim { opacity: 0.55; }
+.pp-lay-count { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.8rem; color: var(--ink-brown); margin: 0; text-align: left; }
+
 @media (max-width: 900px) {
   .year-label { display: none; }
 }

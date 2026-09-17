@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } from "../../src/site/prospect/address.ts";
+import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, tableHash, yearHash } from "../../src/site/prospect/address.ts";
 
 test("parseProspectAddress reads the Explorer's world keys plus i and year", () => {
   const a = parseProspectAddress("#seed=42&style=ink&type=citystate&band=polar&land=350&coast=55&i=3&year=814");
@@ -72,6 +72,24 @@ test("parseYear reads a typed year: digits making a positive whole number, or no
   assert.equal(parseYear("0300"), 300, "leading zeros read as the number");
   assert.equal(parseYear("999999999"), 999999999, "nine digits is the ceiling");
   assert.equal(parseYear("1000000000000000000000"), null, "past it the number would write itself as 1e+21, which the address cannot read back (skeptic on PR #500)");
+});
+
+test("PA1 tableHash replaces the table key in place and keeps every other key verbatim, so filing on this page never re-serializes the world (#522, the #321 rule)", () => {
+  const SHEET = "k-p.seed-42.style-ink.i-3.year-814";
+  assert.equal(tableHash("#seed=7&i=4&year=300", SHEET), `#seed=7&i=4&year=300&table=${SHEET}`);
+  assert.equal(
+    tableHash(`#seed=7&table=${SHEET}&i=4`, `${SHEET}_k-p.seed-7.style-antique.i-0.year-9`),
+    `#seed=7&i=4&table=${SHEET}_k-p.seed-7.style-antique.i-0.year-9`,
+    "a second filing replaces the key rather than appending a second one",
+  );
+  assert.equal(tableHash("#note=a%20b&flag", SHEET), `#note=a%20b&flag&table=${SHEET}`, "a valueless key and an encoded value survive verbatim");
+  assert.equal(tableHash("", SHEET), `#table=${SHEET}`);
+});
+
+test("PA2 an emptied table writes NO key at all, the rule emitTableKey already keeps, so a bare address stays bare (#522)", () => {
+  assert.equal(tableHash("#table=k-p.seed-42.style-ink.i-3.year-814", ""), "", "the last sheet leaving takes the key with it");
+  assert.equal(tableHash("#seed=7&table=k-p.seed-42.style-ink.i-3.year-814", ""), "#seed=7");
+  assert.equal(tableHash("", ""), "");
 });
 
 test("yearHash replaces or adds the year and keeps every other key, i included, untouched", () => {

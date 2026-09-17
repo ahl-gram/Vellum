@@ -540,4 +540,218 @@ export async function run(ctx) {
   );
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+
+  // #522 Sub 4: the two capture points for a prospect, and the mixed folio they make.
+  const CARD = `(() => {
+    const press = document.querySelector("#place-card .pc-lay");
+    const link = document.querySelector("#place-card .pc-prospect");
+    const acts = document.querySelector("#place-card .pc-acts");
+    const box = (e) => { if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2), w: +b.width.toFixed(2), h: +b.height.toFixed(2) }; };
+    const hit = (e) => { const b = box(e); if (!b || b.w < 1) return "no-box"; const h = document.elementFromPoint(b.x, b.y); return h === e || e.contains(h) ? "self" : (h ? (h.id || String(h.className)) : "none"); };
+    return {
+      hits: document.querySelectorAll(".place-overlay .place-hit").length,
+      shown: !!document.getElementById("place-card") && !document.getElementById("place-card").hidden,
+      name: (document.querySelector("#place-card .pc-name") || {}).textContent || null,
+      press: press ? { text: press.textContent, dim: press.classList.contains("dim"), idx: press.dataset.idx, box: box(press), hit: hit(press), disabled: press.hasAttribute("disabled") } : null,
+      link: link ? { hit: hit(link), inActs: !!acts && acts.contains(link) } : null,
+      actsRow: acts ? acts.children.length : 0,
+      pressInActs: !!acts && !!press && acts.contains(press),
+      cuttings: document.querySelectorAll("#cuttings li").length,
+      prospects: document.querySelectorAll("#cuttings li.prospect").length,
+      titles: [...document.querySelectorAll("#cuttings .label b")].map((b) => b.textContent),
+      subs: [...document.querySelectorAll("#cuttings .label i")].map((i) => i.textContent),
+      imgs: document.querySelectorAll("#cuttings img").length,
+      decoded: [...document.querySelectorAll("#cuttings img")].map((i) => i.naturalWidth > 0),
+      frames: document.querySelectorAll("#cuttings .awaited").length,
+      hashTable: new URLSearchParams(location.hash.slice(1)).get("table"),
+      seedBox: (document.getElementById("seed") || {}).value || null,
+      scrollW: document.documentElement.scrollWidth,
+      innerW: window.innerWidth,
+    };
+  })()`;
+
+  // A card is pinned by a REAL press on its hit target, and at a NONZERO index, because a filing that always names place 0
+  // passes every shape check (#428's own hard-coded-index trap, and PB1b's).
+  const pinCard = async (at) => {
+    const r = await evaluate(`(() => { const h = document.querySelector('.place-overlay .place-hit[data-idx="${at}"]'); if (!h) return null; const b = h.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; })()`);
+    if (r) await clickAt(r.x, r.y);
+    await sleep(250);
+    return r;
+  };
+  const pressCard = async (d) => { if (d && d.press && d.press.box) await clickAt(d.press.box.x, d.press.box.y); await sleep(250); };
+
+  await step("CD25, CD26, CD30", async () => {
+    await go(DRESS);
+    const at = await settle(CARD, (d) => d.hits > 1, "chart-drawer-card");
+    await pinCard(1);
+    const armed = await settle(CARD, (d) => d.shown && !!d.press, "chart-drawer-card-press");
+    check(
+      "CD25 the place card's two actions stand in ONE row and BOTH answer a real pointer: #place-card is pointer-events: none, so a press that forgets to restore it passes element.click() and is dead to every reader, which is the #520 dog-ear scar exactly (#518 ruling 7)",
+      at.hits > 1 && armed.shown && !!armed.press && armed.press.hit === "self" &&
+        !!armed.link && armed.link.hit === "self" && armed.link.inActs && armed.pressInActs && armed.actsRow === 2 &&
+        armed.press.text === "Lay the prospect on the table" && !armed.press.dim && !armed.press.disabled && armed.press.idx === "1",
+      JSON.stringify({ hits: at.hits, press: armed.press, link: armed.link, actsRow: armed.actsRow }),
+    );
+    await pressCard(armed);
+    const filed = await settle(CARD, (d) => d.cuttings === 1 && d.imgs === 1, "chart-drawer-prospect-drawn", DRAWN);
+    check(
+      "CD26 the filed prospect DRAWS its own plate rather than keeping a reserved frame, named for the TOWN and not for the world, and the press it was filed from relabels in place (#518 ruling 7; a prospect read 'drawing…' for good until this sub, and a press labelled only at card-show keeps offering an action it has spent)",
+      filed.cuttings === 1 && filed.prospects === 1 && filed.imgs === 1 && filed.frames === 0 &&
+        filed.decoded.every(Boolean) && /^The Prospect of \S/.test(filed.titles[0] || "") &&
+        filed.titles[0] !== "The Isle of Rahai" && /^a prospect, antique, \d+$/.test(filed.subs[0] || "") &&
+        !!filed.press && filed.press.text === "Already on the table" && filed.press.dim && !filed.press.disabled &&
+        typeof filed.hashTable === "string" && filed.hashTable.indexOf("k-p.") === 0,
+      JSON.stringify({ cuttings: filed.cuttings, prospects: filed.prospects, imgs: filed.imgs, frames: filed.frames, decoded: filed.decoded, titles: filed.titles, subs: filed.subs, press: filed.press, table: filed.hashTable }),
+    );
+    // The DRAWN world and not the controls: a seed typed without pressing Draw is the reachable way to file a chart nobody drew.
+    await evaluate(`(() => { const s = document.getElementById("seed"); s.value = "7"; })()`);
+    await pinCard(2);
+    const other = await settle(CARD, (d) => d.shown && !!d.press && d.press.idx === "2", "chart-drawer-card-other");
+    await pressCard(other);
+    const second = await settle(CARD, (d) => d.cuttings === 2, "chart-drawer-prospect-second");
+    check(
+      "CD30 the card files the world on the SHEET, never the one in the seed box: a seed typed and not drawn leaves the chart alone, so an item built from the control would file a plate the reader has never seen (the lodController exposes no drawn world, which is what makes this reachable)",
+      second.seedBox === "7" && second.cuttings === 2 &&
+        typeof second.hashTable === "string" && second.hashTable.split("_").every((s) => s.indexOf("seed-42") !== -1) &&
+        second.hashTable.indexOf("seed-7") === -1,
+      JSON.stringify({ seedBox: second.seedBox, cuttings: second.cuttings, table: second.hashTable }),
+    );
+  });
+
+  // A full table costs no worker job, because the drawer fills its frames only when OPENED (#520's ruling), so this boot is cheap.
+  await step("CD27", async () => {
+    await go(`${DRESS}&table=${SIX}`);
+    await settle(CARD, (d) => d.hits > 1, "chart-drawer-card-full");
+    await pinCard(1);
+    const atCap = await settle(CARD, (d) => d.shown && !!d.press, "chart-drawer-card-cap");
+    await pressCard(atCap);
+    const after = await evaluate(CARD);
+    check(
+      "CD27 at the cap the card's press wears the ruled refusal and stays PRESSABLE, so a keyboard reader still meets it and hears why, and pressing lays nothing (#518 ruling 7; disabled would drop it out of the tab order, which is why the dog-ear's ruled shape keeps answering)",
+      !!atCap.press && atCap.press.text === "No room on the table" && atCap.press.dim && !atCap.press.disabled &&
+        atCap.press.hit === "self" && after.cuttings === 6,
+      JSON.stringify({ press: atCap.press, before: atCap.cuttings, after: after.cuttings }),
+    );
+  });
+
+  // The page's own capture point (seat C, ruled 2026-09-17): it files and STAYS, and the year is part of a sheet's identity.
+  await step("CD28, CD29, CD31", async () => {
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3` });
+    for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
+    const PP = `(() => {
+      const p = document.getElementById("pp-lay");
+      const b = p ? p.getBoundingClientRect() : null;
+      const centre = b && b.width > 1 ? { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) } : null;
+      const h = centre ? document.elementFromPoint(centre.x, centre.y) : null;
+      return {
+        state: window.__vellumProspectState ? window.__vellumProspectState() : null,
+        press: p ? { text: p.textContent, dim: p.classList.contains("dim"), shown: !!b && b.width > 1, centre, hit: h === p || (p.contains(h)) ? "self" : (h ? (h.id || String(h.className)) : "none"), disabled: p.hasAttribute("disabled") } : null,
+        count: (document.getElementById("pp-lay-count") || {}).textContent || null,
+        inNote: !!document.querySelector("#note #pp-lay"),
+        roads: [...document.querySelectorAll("#note .legend-dock .legend-btn, .legend .legend-row .legend-btn")].length,
+        chartHref: (document.getElementById("pp-chart-link") || {}).getAttribute("href"),
+        hashTable: new URLSearchParams(location.hash.slice(1)).get("table"),
+      };
+    })()`;
+    const opened = await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); return true; })()`);
+    await sleep(600);
+    let pp = await evaluate(PP);
+    check(
+      "CD28 the Prospect page's press sits on the engraver's note where the room's desk actions belong, answers a real pointer, and does NOT join the roads out, which go somewhere (ruled 2026-09-17, seat C)",
+      !!opened && !!pp.press && pp.press.shown && pp.press.hit === "self" && pp.inNote &&
+        pp.press.text === "Lay this prospect on the table" && !pp.press.dim && !pp.press.disabled &&
+        /table is bare/.test(pp.count || ""),
+      JSON.stringify({ press: pp.press, count: pp.count, inNote: pp.inNote, roads: pp.roads }),
+    );
+    if (pp.press && pp.press.centre) await clickAt(pp.press.centre.x, pp.press.centre.y);
+    await sleep(350);
+    const one = await evaluate(PP);
+    // The same town at a second year: the year IS part of the sheet's identity, which is the case that won "press and stay".
+    // The form is submitted synthetically because the claim here is about the FILING, not about the year control, whose own gesture PB6 already drives.
+    await evaluate(`(() => { const y = document.getElementById("pp-year"); y.value = String(Math.max(1, Number(y.value) - 300)); document.getElementById("pp-year-form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); })()`);
+    for (let i = 0; i < 300; i++) { await sleep(100); const s = await evaluate(`(() => { const st = window.__vellumProspectState(); return st ? st.year : null; })()`); if (s !== null && s !== one.state.year) break; }
+    let two = await evaluate(PP);
+    if (two.press && two.press.centre) await clickAt(two.press.centre.x, two.press.centre.y);
+    await sleep(350);
+    two = await evaluate(PP);
+    check(
+      "CD29 the page files and STAYS, writing the gathering into its OWN address so a reload keeps it, and the same town at a second year is a SECOND sheet rather than one deduped away (ruled 2026-09-17; the year rides in the item, which is what lets a reader gather a run of one place across the centuries)",
+      typeof one.hashTable === "string" && one.hashTable.split("_").length === 1 && /one sheet laid/.test(one.count || "") &&
+        typeof two.hashTable === "string" && two.hashTable.split("_").length === 2 && /two sheets laid/.test(two.count || "") &&
+        new Set(two.hashTable.split("_")).size === 2 &&
+        typeof two.chartHref === "string" && two.chartHref.indexOf("table=") !== -1,
+      JSON.stringify({ oneTable: one.hashTable, oneCount: one.count, twoTable: two.hashTable, twoCount: two.count, chartHref: two.chartHref }),
+    );
+    // Home through chartTarget, the way the page offers: the Explorer restores the table with both sheets on it.
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/${two.chartHref.slice(two.chartHref.indexOf("#"))}` });
+    for (let i = 0; i < 200; i++) { await sleep(150); if (await evaluate(`!!document.querySelector("#map svg") && !!document.getElementById("chart-drawer")`)) break; }
+    const home = await settle(CARD, (d) => d.cuttings === 2, "chart-drawer-round-trip");
+    check(
+      "CD31 the round trip closes: what the Prospect page filed comes home through chartTarget and the Explorer restores BOTH sheets, which is the epic's core insight working across a real cross-path navigation",
+      home.cuttings === 2 && home.prospects === 2 &&
+        home.subs.every((s) => /^a prospect, /.test(s || "")) && new Set(home.subs).size === 2,
+      JSON.stringify({ cuttings: home.cuttings, prospects: home.prospects, subs: home.subs, titles: home.titles }),
+    );
+  });
+
+  // A MIXED folio, kept to three sheets because each one is a real worker job and lane B's measured budget is the constraint.
+  await step("CD32", async () => {
+    const MIXED = [
+      "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-5.ly-5",
+      "k-p.seed-42.style-ink.i-3.year-1059",
+      "k-p.seed-42.style-antique.i-1.year-1059",
+    ].join("_");
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/portfolio/#table=${MIXED}` });
+    for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate(`!!window.__vellumPortfolio`)) break; }
+    const PFM = `(() => { const s = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return s ? { ...s,
+      rows: document.querySelectorAll("#pf-contents .row").length,
+      thumbs: document.querySelectorAll("#pf-contents .thumb img").length,
+      awaited: document.querySelectorAll("#pf-contents .thumb.awaited").length,
+      bands: [...document.querySelectorAll("#pf-contents .row-band")].map((e) => e.textContent),
+      titles: [...document.querySelectorAll("#pf-contents .row-title")].map((e) => e.textContent),
+      downloads: [...document.querySelectorAll("#pf-contents .row-download")].filter((b) => !b.disabled).length,
+      bound: (document.getElementById("pf-bound") || {}).textContent || null } : null; })()`;
+    let pfm = await evaluate(PFM);
+    for (let i = 0; i < DRAWN && (!pfm || pfm.drawn < 3); i++) { await sleep(50); pfm = await evaluate(PFM); }
+    check(
+      "CD32 a MIXED folio drafts every sheet in its OWN dress: the prospects draw beside the survey instead of holding a reserved place, each row names its dress and offers its own engraving, and no row is left reading 'a prospect' (#401 ruling 8, and #521 ruling 3 held the place only until this sub)",
+      !!pfm && pfm.items === 3 && pfm.drawn === 3 && pfm.rows === 3 && pfm.thumbs === 3 && pfm.awaited === 0 &&
+        pfm.downloads === 3 &&
+        pfm.bands.filter((b) => /^a prospect, pen & ink, \d+$/.test(b || "")).length === 1 &&
+        pfm.bands.filter((b) => /^a prospect, antique, \d+$/.test(b || "")).length === 1 &&
+        pfm.bands.filter((b) => /^band \d+, antique$/.test(b || "")).length === 1 &&
+        !pfm.bands.some((b) => /awaiting its page/.test(b || "")) &&
+        pfm.titles.filter((t) => /^The Prospect of \S/.test(t || "")).length === 2 &&
+        /three sheets drafted/i.test(pfm.bound || ""),
+      JSON.stringify(pfm),
+    );
+  });
+
+  // The phone, where the drawer is stood down and the only feedback is the leaf tab and the status pill.
+  await step("CD33", async () => {
+    await setMobileViewport(390, 844);
+    await go(DRESS);
+    await settle(CARD, (d) => d.hits > 1, "chart-drawer-card-390");
+    await pinCard(1);
+    const narrow = await settle(CARD, (d) => d.shown && !!d.press, "chart-drawer-card-press-390");
+    await pressCard(narrow);
+    const said = await settle(
+      `(() => ({ ...${CARD}, leafTab: (() => { const b = document.getElementById("leaf-table"); return b ? b.textContent : null; })(), status: (document.getElementById("status") || {}).textContent || "" }))()`,
+      (d) => d.cuttings === 1,
+      "chart-drawer-filed-390",
+      DRAWN,
+    );
+    check(
+      "CD33 at the ruled phone width BOTH card actions answer a real thumb, the card does not scroll the page sideways, and a successful press is ANSWERED where a phone reader can see it: the drawer is stood down at narrow, so the leaf tab's tally and the status pill are the whole of the feedback and a press that changed neither would read as nothing happening",
+      narrow.press.hit === "self" && narrow.link.hit === "self" &&
+        said.scrollW === said.innerW && said.cuttings === 1 && said.prospects === 1 &&
+        /^The Table · 1$/.test(said.leafTab || "") && /lies on the table/.test(said.status || ""),
+      JSON.stringify({ press: narrow.press, link: narrow.link, scrollW: said.scrollW, innerW: said.innerW, leafTab: said.leafTab, status: said.status, cuttings: said.cuttings }),
+    );
+    await clearMobile();
+    await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  });
 }

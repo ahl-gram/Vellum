@@ -7,7 +7,7 @@ import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-war
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
 import { prospectItemFrom, type TableItem, type TableOverrides } from "../shared/table-address.ts";
-import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace } from "./chart-drawer.ts";
+import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, LAY_ON_CARD } from "./chart-drawer.ts";
 import { bindTableLeaf } from "./table-leaf.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
@@ -72,7 +72,7 @@ const lc = createLivingChart({
   layProspect: {
     state: (idx) => {
       const item = prospectAt(idx);
-      return item ? layPressFace({ holds: chartTable.holds(item), full: chartTable.isFull() }) : { label: "Lay the prospect on the table", refuses: true };
+      return item ? layPressFace({ holds: chartTable.holds(item), full: chartTable.isFull() }, LAY_ON_CARD) : { label: LAY_ON_CARD, refuses: true };
     },
     lay: (idx) => {
       const item = prospectAt(idx);
