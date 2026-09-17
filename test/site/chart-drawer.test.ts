@@ -232,10 +232,15 @@ test("CT7 the sheet a filing is made from carries its own present year, so a wor
   assert.deepEqual([filed.seed, filed.year, filed.index], [42, 1059, 3], "and it files that sheet's world at that sheet's year");
   assert.equal(filingAt({ turning: false, sheet: null, index: 3 }), null, "nothing before the first draw lands");
   assert.equal(filingAt({ turning: true, sheet, index: 3 }), null, "and nothing while the sheet is mid-flip");
-  // The type is the guard: `presentYear` is reachable only through the same object as the world, so the shape below is
-  // the ONLY way to file and a second, independently-moving year has nowhere to live.
-  const shape = Object.keys(sheet).sort();
-  assert.deepEqual(shape, ["overrides", "presentYear", "seed", "style"], "the year travels WITH the world or this guard is measuring nothing");
+  const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer.ts"), "utf8");
+  const iface = src.slice(src.indexOf("interface FilingSheet {"), src.indexOf("}", src.indexOf("interface FilingSheet {")));
+  const members = [...iface.matchAll(/readonly\s+([A-Za-z]+)/g)].map((m) => m[1]).sort();
+  assert.deepEqual(members, ["overrides", "presentYear", "seed", "style"], "the filing sheet grew a member, and a second field is a second place a year can live");
+  assert.equal(members.filter((m) => /year/i.test(m)).length, 1, "two year-ish members are two independently-assignable years, which is the skew this shape exists to make unrepresentable");
+  const call = src.slice(src.indexOf("prospectItemFrom({", src.indexOf("export function filingAt")), src.indexOf("});", src.indexOf("export function filingAt")));
+  for (const [, field, value] of call.matchAll(/(\w+):\s*([^,}]+)/g)) {
+    assert.match(value.trim(), field === "index" ? /^at\.index$/ : /^at\.sheet\.\w+$/, `${field} reaches past the one sheet, so the filing no longer describes a single chart`);
+  }
   const other = filingAt({ turning: false, sheet: { ...sheet, presentYear: 809 }, index: 3 });
   assert.ok(other);
   assert.notEqual(emitTable([other]), emitTable([filed]), "two charts' presents are two distinct sheets, which is why they may not be mixed");
@@ -247,16 +252,17 @@ test("CT7c the Explorer assigns that sheet beside the OVERLAY it describes, whic
   assert.ok(builds.length >= 2, "both draw paths build the overlay, or this guard reads fewer than it thinks");
   for (const next of builds) {
     assert.match(next, /^lastSheet = \{/, "the line after an overlay build is not the sheet assignment, so the hit targets on screen and the world the card files from can drift apart");
+    assert.doesNotMatch(next, /lastManifest/, "a year read from the module's own lastManifest is the second, independently-moving source this shape exists to remove, and a `!` defeats a check that spells the whole path");
   }
-  assert.match(src, /presentYear: res\.manifest\.presentYear/, "and the year comes from the SAME manifest the overlay was built from");
-  assert.doesNotMatch(src, /\blastManifest\.presentYear\b/, "a year read from the module's own lastManifest is the second, independently-moving source this shape exists to remove");
+  assert.equal((src.match(/presentYear: res\.manifest\.presentYear/g) ?? []).length, builds.length, "one build's year is read from the manifest it was built from and another's is not, which is the drift with one of the two doors left open");
 });
 
 test("CT7b the Explorer passes the REAL turn flag into the gate, so the pure refusal above cannot be fed a constant (#631)", () => {
   const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-  const at = app.indexOf("filingAt({");
-  assert.notEqual(at, -1, "the Explorer no longer reaches the gate, so nothing decides whether it may file");
+  const sites = [...app.matchAll(/filingAt\(/g)].map((m) => m.index);
+  assert.equal(sites.length, 1, "a second call site is a second answer to the same question, and reading only the first leaves it unguarded");
+  const at = sites[0];
   const call = app.slice(at, app.indexOf("})", at));
   assert.match(call, /turning:\s*sheetEl\.classList\.contains\("turning"\)/, "the gate is fed a literal or a stale flag instead of the sheet's own state; `turning` is the class runTurn brackets the window with");
   assert.doesNotMatch(call, /turning:\s*(false|true)\b/, "a constant here disables the refusal while every unit assertion above stays green");

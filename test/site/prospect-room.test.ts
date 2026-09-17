@@ -139,6 +139,9 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
   assert.notEqual(from, -1, "the press is no longer wired, so the assertions below read an empty slice");
   const handler = app.slice(from, app.indexOf("\n});", from));
   assert.match(handler, /\blayOnTable\(/, "a raw append would drop the seventh sheet silently, since emitTable and parseTable both slice at the cap");
+  // A dead call satisfies the token above: the gate earns its place only if its ANSWER is what the page keeps, and only if a refusal stops the write.
+  assert.match(handler, /\btable = laid\.items\b/, "the gate's answer is discarded and the table is built some other way, so the dedupe and the cap decide nothing here");
+  assert.ok(handler.indexOf("laid.refused") < handler.indexOf("table = laid.items"), "the refusal is read after the table has already moved, so a refused filing still writes");
   assert.match(handler, /chartLink\.href = chartTarget\(/, "the way home carries the table it just gained");
   assert.match(handler, /ribbonLink\.href = ribbonTarget\(/, "and so does the road to the Ribbon: each href is built once per draw, so a road left unrefreshed carries the table as it stood BEFORE this filing");
   // The boot table, likewise unread until a mutation removed the gate and shipped green.
@@ -149,7 +152,11 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
   assert.doesNotMatch(css, /\.pp-lay\.dim\s*\{[^}]*opacity/, "and never by opacity, which fails the measured contrast floor");
   const dimHold = css.match(/#note \.pp-lay\.dim:hover[^{]*\{[^}]*\}/);
   assert.ok(dimHold, "the dim has no hold against the hover rule above it, so a pointer undoes it");
-  assert.match(dimHold[0], /border-color:/, "the (1,2,0) hover rule restores the full-strength border on a refusing press under pointer AND keyboard focus unless the deeper rule re-asserts it");
+  const dimRule = css.match(/\.pp-lay\.dim\s*\{[^}]*\}/)?.[0] ?? "";
+  const heldDecls = dimHold[0].slice(dimHold[0].indexOf("{") + 1).split(";").map((d) => d.trim());
+  for (const prop of [...dimRule.matchAll(/(\b[a-z-]+):/g)].map((m) => m[1])) {
+    assert.ok(heldDecls.some((d) => d.startsWith(`${prop}:`)), `the dim sets ${prop} and the (1,2,0) hover rule does not re-assert it, so a pointer or a keyboard focus restores it on a refusing press`);
+  }
   // The press's OWN rule, not merely its dim: the card's side took this guard at #631 round 1 because a bare-substring
   // roster could not see the primary block deleted, and this is the same class on the mirror surface. Without it the
   // ruled featured gold can be removed here with every markup and e2e assertion still green.

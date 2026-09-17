@@ -102,8 +102,10 @@ test("the card's action row and its filing press are dressed by a rule of their 
   // the half ruling 3's reasoning turns on. So every property the dim sets is re-asserted in the deeper rule.
   const held = css.match(/#place-card \.pc-lay\.dim:hover[^{]*\{[^}]*\}/);
   assert.ok(held, "the dim has no hold against the hover rule above it, so a pointer undoes it");
+  // A bare `includes` reads one declaration's name inside another's: "border-color:" already contains "color:", so a `color` added to the dim and forgotten in the hold measured as held.
+  const heldDecls = held[0].slice(held[0].indexOf("{") + 1).split(";").map((d) => d.trim());
   for (const prop of [...dim.matchAll(/(\b[a-z-]+):/g)].map((m) => m[1]).filter((p) => p !== "dim")) {
-    assert.ok(held[0].includes(`${prop}:`), `the dim sets ${prop} and the hover hold does not re-assert it, so hovering or focusing a refusing press restores it`);
+    assert.ok(heldDecls.some((d) => d.startsWith(`${prop}:`)), `the dim sets ${prop} and the hover hold does not re-assert it, so hovering or focusing a refusing press restores it`);
   }
 });
 
