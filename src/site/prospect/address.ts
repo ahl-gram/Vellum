@@ -3,6 +3,7 @@ import type { StyleName } from "../../render/style.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import { parseYear } from "../shared/year.ts";
+import { TABLE_KEY } from "../shared/table-address.ts";
 
 export { parseYear };
 
@@ -67,4 +68,11 @@ export function ribbonTarget(hash: string, index: number): string {
 
 export function yearHash(hash: string, year: number): string {
   return "#" + [...kept(hash, /^year(=|$)/), `year=${year}`].join("&");
+}
+
+/** #522: the page files onto the Chart Table and STAYS (ruled 2026-09-17), so its own address carries the gathering and a reload keeps it. An empty table writes no key at all, the rule `emitTableKey` in ../explorer/address.ts already keeps. */
+export function tableHash(hash: string, table: string): string {
+  const keys = kept(hash, new RegExp(`^${TABLE_KEY}(=|$)`));
+  const all = table === "" ? keys : [...keys, `${TABLE_KEY}=${table}`];
+  return all.length === 0 ? "" : "#" + all.join("&");
 }

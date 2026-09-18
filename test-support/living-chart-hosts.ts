@@ -7,7 +7,7 @@ import type { El } from "./element-shim.ts";
 
 /** The engine's whole public surface; the suites pin the SAME list for both host shapes. */
 export const API = [
-  "buildPlaceOverlay", "onDocKeydown", "onDocClick", "reclampCard",
+  "buildPlaceOverlay", "onDocKeydown", "onDocClick", "reclampCard", "relabelLay", "hideCard",
   "applyAges", "rearmAges", "exitAges", "clearAges",
   "agesSnapToRest", "agesState", "agesDragStart", "agesDragEnd",
   "applyScrub", "exitScrub", "clearScrub", "cancelScrubRaf",
@@ -162,7 +162,10 @@ export async function realWorld(): Promise<{ manifest: PlaceManifest; survey: Su
 }
 
 export async function barlessHost(
-  opts?: { prospectHref?: (idx: number) => string },
+  opts?: {
+    prospectHref?: (idx: number) => string;
+    layProspect?: { state: (idx: number) => { label: string; refuses: boolean }; lay: (idx: number) => void };
+  },
 ): Promise<{ lc: LivingChart; mount: El; calls: string[] }> {
   const [{ El }, { createLivingChart }] = await Promise.all([
     import("./element-shim.ts"),
@@ -176,6 +179,7 @@ export async function barlessHost(
     statusEl: new El("p") as unknown as HTMLElement,
     restingTrackSink: sink,
     ...(opts && opts.prospectHref ? { prospectHref: opts.prospectHref } : {}),
+    ...(opts && opts.layProspect ? { layProspect: opts.layProspect } : {}),
   });
   return { lc, mount, calls };
 }

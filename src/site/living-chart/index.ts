@@ -1,5 +1,5 @@
 // The Living Chart engine: everything the site animates over a baked chart (story cards, the chronicle scrubber, the voyage), behind one host-agnostic boundary. The host hands its elements in and construction only stores the refs; the baked chart string is never mutated for export.
-import { createPlaceOverlay, type BuildPlaceOverlayOpts } from "./place-overlay.ts";
+import { createPlaceOverlay, type BuildPlaceOverlayOpts, type LayProspectHost } from "./place-overlay.ts";
 import { createChronicle } from "./chronicle.ts";
 import { createVoyage, type RestingTrackSink } from "./voyage.ts";
 import type { TourOrderSource } from "./voyage-session.ts";
@@ -35,6 +35,7 @@ export interface LivingChartHost {
   scrubber?: ScrubberRefs;
   restingTrackSink?: RestingTrackSink;
   prospectHref?: (idx: number) => string;
+  layProspect?: LayProspectHost;
   clampBox?: () => CardBox | null;
   tourOrder?: TourOrderSource;
 }
@@ -45,6 +46,7 @@ export function createLivingChart(host: LivingChartHost) {
     mapEl: host.mapEl,
     isSuppressed: () => chronicle.isActive(),
     ...(host.prospectHref ? { prospectHref: host.prospectHref } : {}),
+    ...(host.layProspect ? { layProspect: host.layProspect } : {}),
     ...(host.clampBox ? { clampBox: host.clampBox } : {}),
   });
   const chronicle = createChronicle({
@@ -90,6 +92,9 @@ export function createLivingChart(host: LivingChartHost) {
     onDocKeydown: overlay.onDocKeydown,
     onDocClick: overlay.onDocClick,
     reclampCard: overlay.reclampCard,
+    relabelLay: overlay.relabelLay,
+    /** The host's way to dismiss a pinned card when it is about to replace the chart under it. */
+    hideCard: overlay.hideCard,
     applyAges: (manifest: PlaceManifest | null, survey: Survey | null, seed: number, subtitle: string) =>
       ages.armAges(manifest, survey, seed, subtitle),
     rearmAges: (

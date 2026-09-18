@@ -1,16 +1,17 @@
 // The Portfolio (#521 Sub 3 of #401): the Print Room's second page. The table rides in this page's
-// address and nowhere else, so the page reads it ONCE at load and never rewrites it. One region job
-// per gathered survey, dispatched grouped by world because worldFor is a single-entry cache, and the
-// sheets arrive progressively into a pile whose top sheet stands on the stage.
+// address and nowhere else, so the page reads it ONCE at load and never rewrites it. One job per
+// gathered sheet, a region for a survey and a plate for a prospect since #522, dispatched grouped by
+// world because worldFor is a single-entry cache, and the sheets arrive progressively into a pile
+// whose top sheet stands on the stage.
 import { initWorker, runJob, usesWorker } from "../explorer/worker-client.ts";
 import { bindRoom } from "../shared/room.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";
 import { makeAnnouncer } from "../shared/announce.ts";
 import { createZoomController } from "../shared/zoom-controller.ts";
 import { chartFilename } from "../print-room/poster-presets.ts";
-import { thumbJobFor } from "../explorer/chart-drawer.ts";
+import { thumbJobFor, thumbNames, subOf } from "../explorer/chart-drawer.ts";
 import { parseTable, groupByWorld, TABLE_KEY, type TableItem } from "../shared/table-address.ts";
-import { BARE_LINE, beneathLine, boundLine, draftedLine, gatheredLine, isAwaited, roman, sheetLine } from "./folio-lines.ts";
+import { BARE_LINE, beneathLine, boundLine, draftedLine, gatheredLine, roman, sheetLine } from "./folio-lines.ts";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 const status = $("pf-status");
@@ -40,7 +41,6 @@ const sheets: Drawn[] = items.map((item, at) => ({ item, at, title: `Chart № $
 let top = 0;
 
 const drawnCount = (): number => sheets.filter((s) => s.svg !== null).length;
-const drawable = (): ReadonlyArray<Drawn> => sheets.filter((s) => !isAwaited(s.item));
 
 const say = makeAnnouncer({
   pill: status,
@@ -68,7 +68,7 @@ const showTop = (): void => {
   folioTitle.textContent = sheetLine(sheet.title, top + 1, sheets.length);
   folioSub.textContent = sheet.item.kind === "survey"
     ? `a regional survey at band ${sheet.item.rung}, ${sheet.item.style} · from ${sheet.worldTitle || `chart № ${sheet.item.seed}`}, chart № ${sheet.item.seed}`
-    : `a prospect · from chart № ${sheet.item.seed}`;
+    : `${subOf(sheet.item)} · from ${sheet.worldTitle || `chart № ${sheet.item.seed}`}, chart № ${sheet.item.seed}`;
   folioCoords.textContent = beneathLine(sheets.length - 1 - top);
   download.disabled = sheet.svg === null;
   for (const row of contents.querySelectorAll(".row")) row.classList.toggle("up", Number((row as HTMLElement).dataset["at"]) === top);
@@ -76,9 +76,6 @@ const showTop = (): void => {
 
 const bringUp = (at: number): void => {
   if (at < 0 || at >= sheets.length) return;
-  // A prospect keeps its seat in the index and never drafts (ruling 3), so it can never BE the top sheet: putting one
-  // there would blank the stage with nothing to say for it.
-  if (isAwaited(sheets[at]!.item)) return;
   top = at;
   showTop();
   const sheet = sheets[top];
@@ -116,7 +113,7 @@ const rowFor = (sheet: Drawn, at: number): HTMLLIElement => {
     thumb.append(img);
   } else {
     thumb.classList.add("awaited");
-    thumb.textContent = isAwaited(sheet.item) ? "a prospect" : "drafting…";
+    thumb.textContent = "drafting…";
   }
   const title = document.createElement("button");
   title.type = "button";
@@ -125,7 +122,7 @@ const rowFor = (sheet: Drawn, at: number): HTMLLIElement => {
   title.addEventListener("click", () => bringUp(at));
   const band = document.createElement("i");
   band.className = "row-band";
-  band.textContent = sheet.item.kind === "survey" ? `band ${sheet.item.rung}, ${sheet.item.style}` : "a prospect, awaiting its page";
+  band.textContent = sheet.item.kind === "survey" ? `band ${sheet.item.rung}, ${sheet.item.style}` : subOf(sheet.item);
   const own = document.createElement("button");
   own.type = "button";
   own.className = "row-download";
@@ -143,7 +140,7 @@ const rows = (): void => {
     const head = document.createElement("p");
     head.className = "group-head";
     const name = document.createElement("span");
-    // The first entry may be a prospect, which never drafts and so never learns the world's name; the first DRAFTED one does.
+    // Any DRAFTED entry names the world, prospects included since #522: thumbNames takes a prospect's world line from the job's own title.
     const named = group.entries.map((e) => sheets[e.at]).find((sheet) => !!sheet?.worldTitle);
     name.textContent = `From ${named?.worldTitle || "this world"} · chart № ${group.seed}`;
     head.append(name);
@@ -171,7 +168,7 @@ const retitle = (): void => {
         name: g.entries.map((e) => sheets[e.at]).find((sheet) => !!sheet?.worldTitle)?.worldTitle || `chart № ${g.seed}`,
         count: g.entries.length,
       })));
-  const stamp = draftedLine(drawnCount(), drawable().length);
+  const stamp = draftedLine(drawnCount(), sheets.length);
   if (items.length > 0 && stamp) {
     const el = document.createElement("span");
     el.className = "stamp";
@@ -180,29 +177,27 @@ const retitle = (): void => {
   }
 };
 
-/** One job per survey, grouped by world: worldFor is a single-entry cache, so interleaving seeds regenerates the parent every time. */
+/** One job per gathered SHEET since #522, grouped by world: worldFor is a single-entry cache, so interleaving seeds regenerates the parent every time. */
 const draft = async (): Promise<void> => {
   for (const group of groupByWorld(items)) {
     for (const { at } of group.entries) {
       const sheet = sheets[at];
       if (!sheet) continue;
-      const job = thumbJobFor(sheet.item);
-      // A prospect keeps its seat with the plate's place reserved until Sub 4 (#522) builds its page.
-      if (!job) continue;
       try {
-        const res = await runJob(job);
+        const res = await runJob(thumbJobFor(sheet.item));
+        const named = thumbNames(res);
         sheet.svg = res.svg;
-        sheet.title = res.title;
-        sheet.worldTitle = res.worldTitle;
+        sheet.title = named.title;
+        sheet.worldTitle = named.worldTitle;
         if (sheet.url) URL.revokeObjectURL(sheet.url);
-      sheet.url = URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" }));
+        sheet.url = URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" }));
       } catch {
         sheet.title = `Chart № ${sheet.item.seed}`;
       }
       rows();
       retitle();
       if (at === top || drawnCount() === 1) { if (sheets[top]?.svg === null) top = at; showTop(); }
-      tell(draftedLine(drawnCount(), drawable().length));
+      tell(draftedLine(drawnCount(), sheets.length));
     }
   }
   say("");
@@ -232,7 +227,7 @@ const start = async (): Promise<void> => {
   rows();
   retitle();
   showTop();
-  if (drawable().length === 0) {
+  if (sheets.length === 0) {
     // hidden is inert on these: atelier.css sets an author display on .legend-btn, which beats the UA [hidden] rule, so
     // el.hidden = true silently no-ops (the #270 guard-prover's find). The Prospect and the Ribbon hide the same way.
     next.style.display = "none";
@@ -240,13 +235,7 @@ const start = async (): Promise<void> => {
     say("");
     return;
   }
-  // The next DRAWABLE sheet, so the cycle never lands on a reserved prospect and stalls there.
-  next.addEventListener("click", () => {
-    for (let i = 1; i <= sheets.length; i++) {
-      const at = (top + i) % sheets.length;
-      if (!isAwaited(sheets[at]!.item)) { bringUp(at); return; }
-    }
-  });
+  next.addEventListener("click", () => { bringUp((top + 1) % sheets.length); });
   download.addEventListener("click", () => { const sheet = sheets[top]; if (sheet) takeHome(sheet); });
   await initWorker();
   if (!usesWorker()) warning.hidden = false;

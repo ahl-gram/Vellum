@@ -27,6 +27,8 @@ export const E2E_LANES: readonly E2eLane[] = [
       "print-room",
       "landfall",
       "survey",
+      // Moved from lane B at #522, when the drawer suite's re-measured budget took B to 60.2% and the balance assertion below reds at 0.6. It is appended at the END of this lane, which is after `health`, so the prefix that suite certifies is unchanged, and it boots its own page through about:blank, so it inherits nothing from whatever ran before it.
+      "specimen",
     ],
     port: DEFAULT_E2E_PORT,
     dport: DEFAULT_E2E_DPORT,
@@ -50,7 +52,6 @@ export const E2E_LANES: readonly E2eLane[] = [
       "chart-drawer",
       "document-rooms",
       "region-detail",
-      "specimen",
     ],
     port: DEFAULT_E2E_PORT + 1,
     dport: DEFAULT_E2E_DPORT + 1,

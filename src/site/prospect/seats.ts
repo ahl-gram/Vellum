@@ -6,6 +6,7 @@ import { contentsRow } from "../shared/contents-row.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
 import { PLATE_W, PLATE_H } from "../../prospect/geometry.ts";
 import { eraLine, subLine, whereLine } from "./note-lines.ts";
+import { prospectTitle } from "../explorer/prospect-job.ts";
 import type { PlateDress, ProspectPlateResult } from "../explorer/prospect-job.ts";
 
 export interface RoomFurniture {
@@ -56,7 +57,7 @@ export function showPlate(f: RoomFurniture, res: Pick<Facts, "name">, seed: numb
 }
 
 export function writeFolio(f: RoomFurniture, res: Facts, seed: number, dress: PlateDress, ms: number): void {
-  f.folioTitle.textContent = `The Prospect of ${res.name} · Chart № ${seed}`;
+  f.folioTitle.textContent = `${prospectTitle(res.name)} · Chart № ${seed}`;
   f.folioSub.textContent = subLine(res);
   f.pressed.textContent = `pressed in ${ms}ms · ${dress}`;
 }

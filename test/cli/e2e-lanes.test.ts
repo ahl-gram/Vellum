@@ -40,7 +40,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "turn": 6.5,
   "runninghead": 6.6, // measured 2026-09-11, three local single-suite runs at 4.9, 5.1 and 6.6 with RH10d and RH10e added (#565, a Letter resize and a settle on an already-open Gallery); the highest taken, a lane budget erring upward
   "cluster": 4.7, // measured 2026-08-28, local single-suite run
-  "chart-drawer": 45.7, // 37.2 (2026-09-08) plus the floor #547 added: CD23 waits out SAY_HOLD_MS + SAY_FADE_MS, 8.45s of setTimeout that no machine can undercut, so the PRINCIPLE is the bound and the local 32.5s/40.1s pair only corroborates it. 6.9 at #520 was an 11-check suite; #543, #540 and #521 took it to 23, and six of them draft real region sheets
+  "chart-drawer": 54.0, // re-measured 2026-09-17 with #522's eleven checks (39 total): five local single-suite runs read 48.7, 48.5, 48.8 at 37 checks and 50.3, 50.2 once #631's review added CD34 and CD35, so 54.0 is the worst case plus about 7%. CD23's 8.45s of SAY_HOLD_MS + SAY_FADE_MS is still a floor no machine can undercut, so the PRINCIPLE bounds it from below and the sweep sets the budget above. 45.7 was the 23-check suite at #547; 6.9 at #520 was 11 checks
   "room-drawer": 7.3, // measured 2026-08-28, local single-suite run
   "document-rooms": 6.0, // measured 2026-08-29, local run
   "broadside": 3.8,

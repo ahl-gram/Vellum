@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { LAY_ON_PAGE } from "../../src/site/explorer/chart-drawer.ts";
 
 // The Prospect is a chart room on the #462 pattern, ruled on #494 (2026-08-30): the engraving full-bleed at the plate's own aspect, the year as the room's one control, the engraver's note on the slip, the Explorer and the Ribbon as the roads out, print standing down.
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -122,4 +123,50 @@ test("PPR7 the css: the sheet fitted to what the chrome leaves, the plate as the
   assert.match(print[1], /\.stage\s*\{[^}]*position:\s*static/, "the plate prints in flow");
   assert.match(print[1], /#map\s*\{[^}]*transform:\s*none\s*!important/, "unzoomed");
   assert.match(print[1], /#pp-plate\s*\{[^}]*position:\s*static;[^}]*height:\s*auto/, "at its own proportion");
+});
+
+test("PR-lay the page's filing press sits ON the engraver's note and not among the roads out, and its authored face is the ONE constant the script paints with (#522, seat C ruled 2026-09-17)", () => {
+  const slip = between('<Slip id="note"', "</Slip>");
+  assert.match(slip, /<button id="pp-lay" class="pp-lay" type="button">/, "the press stands inside the note, where the room's desk actions belong");
+  assert.ok(slip.indexOf('id="pp-lay"') < slip.indexOf('class="legend-dock"'), "above the docked roads rather than among them");
+  const roads = between('<nav class="legend"', "</nav>");
+  assert.doesNotMatch(roads, /pp-lay/, "and NOT in the roads out, which go somewhere; a press that acts on the sheet wears the button dress instead");
+  // Astro markup cannot import, so the authored literal and the constant the script paints with are pinned EQUAL here or they drift silently.
+  assert.ok(slip.includes(`>${LAY_ON_PAGE}</button>`), `the authored face is not ${JSON.stringify(LAY_ON_PAGE)}, so the press changes wording the instant the script paints it`);
+  assert.match(app, /\bLAY_ON_PAGE\b/, "the script paints from the constant rather than its own literal");
+  // The filing handler itself, which no unit test read until the prover deleted half of it and shipped green.
+  const from = app.indexOf('layPress.addEventListener("click"');
+  assert.notEqual(from, -1, "the press is no longer wired, so the assertions below read an empty slice");
+  const handler = app.slice(from, app.indexOf("\n});", from));
+  assert.match(handler, /\blayOnTable\(/, "a raw append would drop the seventh sheet silently, since emitTable and parseTable both slice at the cap");
+  // A dead call satisfies the token above: the gate earns its place only if its ANSWER is what the page keeps, and only if a refusal stops the write.
+  assert.match(handler, /\btable = laid\.items\b/, "the gate's answer is discarded and the table is built some other way, so the dedupe and the cap decide nothing here");
+  assert.ok(handler.indexOf("laid.refused") < handler.indexOf("table = laid.items"), "the refusal is read after the table has already moved, so a refused filing still writes");
+  assert.match(handler, /chartLink\.href = chartTarget\(/, "the way home carries the table it just gained");
+  assert.match(handler, /ribbonLink\.href = ribbonTarget\(/, "and so does the road to the Ribbon: each href is built once per draw, so a road left unrefreshed carries the table as it stood BEFORE this filing");
+  // The boot table, likewise unread until a mutation removed the gate and shipped green.
+  const prologue = app.slice(app.indexOf("const addr = parseProspectAddress"), app.indexOf("function filedItem"));
+  assert.match(prologue, /let table[^;]*layOnTable\(/, "the page's boot table skips the dedupe gate restore() runs, so a shared link carrying one sheet twice leaves this page's tally and cap disagreeing with the Explorer's over one address");
+  assert.doesNotMatch(app, /"Lay (this|the) prospect on the table"/, "and writes no second copy of the wording");
+  assert.match(css, /\.pp-lay\.dim\s*\{[^}]*background:\s*var\(--control-cream\)/, "the refusing face dims by losing the featured gold, keeping its ink at full strength");
+  assert.doesNotMatch(css, /\.pp-lay\.dim\s*\{[^}]*opacity/, "and never by opacity, which fails the measured contrast floor");
+  const dimHold = css.match(/#note \.pp-lay\.dim:hover[^{]*\{[^}]*\}/);
+  assert.ok(dimHold, "the dim has no hold against the hover rule above it, so a pointer undoes it");
+  assert.match(dimHold[0].slice(0, dimHold[0].indexOf("{")), /:focus-visible/, "the hold covers the pointer and not the keyboard, and ruling 3 turns on the reader who arrives by Tab meeting the press and hearing why");
+  const dimRule = css.match(/\.pp-lay\.dim\s*\{[^}]*\}/)?.[0] ?? "";
+  const heldDecls = dimHold[0].slice(dimHold[0].indexOf("{") + 1).split(";").map((d) => d.trim());
+  for (const prop of [...dimRule.matchAll(/(\b[a-z-]+):/g)].map((m) => m[1])) {
+    assert.ok(heldDecls.some((d) => d.startsWith(`${prop}:`)), `the dim sets ${prop} and the (1,2,0) hover rule does not re-assert it, so a pointer or a keyboard focus restores it on a refusing press`);
+  }
+  // The press's OWN rule, not merely its dim: the card's side took this guard at #631 round 1 because a bare-substring
+  // roster could not see the primary block deleted, and this is the same class on the mirror surface. Without it the
+  // ruled featured gold can be removed here with every markup and e2e assertion still green.
+  const rule = css.match(/(^|\n)\.pp-lay\s*\{[^}]*\}/g) ?? [];
+  assert.equal(rule.length, 1, "public/prospect/index.css declares .pp-lay's own rule once, or the last one wins");
+  assert.match(rule[0], /background:\s*var\(--control-gold\)/, "the page's press loses the featured gold the sitting ruled");
+  assert.match(rule[0], /font-family:\s*var\(--font-display/, "and the display face that makes it read as a press rather than prose");
+  const file = css.match(/(^|\n)\.pp-file\s*\{[^}]*\}/g) ?? [];
+  assert.equal(file.length, 1);
+  assert.match(file[0], /display:\s*flex/, "the press and its tally stack as a column, which is what the ruled variant showed");
+  assert.doesNotMatch(app, /layPress\.disabled/, "and it is never disabled: that drops it out of the tab order");
 });

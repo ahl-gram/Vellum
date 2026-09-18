@@ -43,7 +43,30 @@ test("PFR2 the slip's where-line follows the gathering in both states: a bare Po
   assert.doesNotMatch(app, /whereLine && items\.length/, "no length guard: gatheredLine(0) already carries the bare voice, 'no sheets gathered at the Explorer'");
 });
 
-test("PFR3 the two sheet presses stand down on what can be DRAFTED, not on what was gathered: a table of nothing but prospects leaves both presses a silent no-op", () => {
-  assert.match(app, /if \(drawable\(\)\.length === 0\) \{/, "the stand-down asks whether any gathered sheet can be drafted at all");
-  assert.doesNotMatch(app, /if \(items\.length === 0\) \{/, "the gathered tally is the wrong predicate: a prospect keeps its seat and never drafts, so it can never answer either press");
+test("PFR3 every gathered sheet drafts, so nothing in the page skips a sheet by KIND and the presses stand down only on a bare portfolio (#522, superseding #521 ruling 3)", () => {
+  assert.match(app, /if \(sheets\.length === 0\) \{/, "the stand-down asks whether anything was gathered at all");
+  assert.doesNotMatch(app, /\bisAwaited\b/, "the reserved-place predicate is gone, not merely unused");
+  assert.doesNotMatch(app, /\bdrawable\b/, "and so is the drawable filter it fed");
+  // The loop that draws them: a `continue` or an early return keyed on the item's kind is the shape that leaves one kind forever drafting.
+  const from = at("const draft = async");
+  const loop = app.slice(from, app.indexOf("\n};", from));
+  assert.ok(loop.length > 100, "the drafting loop was not found, so the assertions below read an empty slice");
+  // Not a word list. The first version of this enumerated two spellings of the comparison and the guard-prover walked
+  // straight past it with a third; the second version caught the loop's own legitimate type narrowing. So the skips are
+  // ENUMERATED instead: after this sub there is exactly one reason to skip a sheet, and it is not the sheet's kind.
+  // Named blind spot, with its direction: a skip hoisted into a variable first (`const k = sheet.item.kind;`) reads as no
+  // skip at all here, which costs a miss and never a false red. What the loop CANNOT do unread is guard on the item.
+  const skips = (loop.match(/\n\s*if \([^)]*\)\s*(continue|return)[;\s]/g) ?? []).map((s) => s.trim());
+  assert.deepEqual(
+    skips,
+    ["if (!sheet) continue;"],
+    "the drafting loop skips a sheet for exactly one reason, a seat the index does not hold; a kind-based skip in any spelling is the bug #521 ruling 3 held open and this sub closes",
+  );
+  assert.doesNotMatch(loop, /\bitem\.kind\s*(===|!==)/, "and the loop never branches on the ITEM's kind at all; the narrowing it does need is on the JOB's");
+  // The slice above is the DRAFTING loop only, and the prover put the same bug in `bringUp` and shipped it green: a
+  // kind-gated early exit anywhere in the page keeps a prospect out of the pile just as effectively. So the whole file is
+  // swept for that one shape. `showTop`, `rowFor` and `nameOf` legitimately branch on kind for their label text and are
+  // untouched by this, because none of them returns on it.
+  const kindExits = (app.match(/\n\s*if \([^)]*\bkind\b[^)]*\)\s*(return|continue)\b/g) ?? []).map((s) => s.trim());
+  assert.deepEqual(kindExits, [], "a kind-gated early return or continue anywhere in the page holds one sheet kind out of the pile, which is the reserved place #521 ruling 3 kept and this sub closes");
 });

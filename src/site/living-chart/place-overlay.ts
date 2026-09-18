@@ -13,6 +13,8 @@ interface PlaceOverlayState {
   pinned: boolean;
   pinnedIdx: number;
   prospectLink: HTMLAnchorElement | null;
+  acts: HTMLElement | null;
+  layPress: HTMLButtonElement | null;
 }
 
 export interface OverlayData {
@@ -33,15 +35,36 @@ export interface BuildPlaceOverlayOpts {
   box?: OverlayBox;
 }
 
+/** The card's second action, injected the way `prospectHref` is. */
+export interface LayProspectHost {
+  state: (idx: number) => { label: string; refuses: boolean };
+  lay: (idx: number) => void;
+}
+
 export interface PlaceOverlayDeps {
   mapEl: HTMLElement;
   isSuppressed: () => boolean;
   prospectHref?: (idx: number) => string;
+  layProspect?: LayProspectHost;
   clampBox?: () => CardBox | null;
 }
 
+function makeLayPress(host: LayProspectHost): HTMLButtonElement {
+  const press = document.createElement("button");
+  press.type = "button";
+  press.className = "pc-lay";
+  for (const ev of ["mousedown", "dblclick", "wheel", "touchstart"]) {
+    press.addEventListener(ev, (e) => e.stopPropagation());
+  }
+  press.addEventListener("click", () => {
+    const at = Number(press.dataset["idx"]);
+    if (Number.isInteger(at) && at >= 0) host.lay(at);
+  });
+  return press;
+}
+
 export function createPlaceOverlay(deps: PlaceOverlayDeps) {
-  const { mapEl, isSuppressed, prospectHref, clampBox } = deps;
+  const { mapEl, isSuppressed, prospectHref, layProspect, clampBox } = deps;
 
   let placeOverlay: PlaceOverlayState | null = null;
 
@@ -63,9 +86,15 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       former.textContent = card.formerLine;
       inner.append(former);
     }
-    if (placeOverlay!.prospectLink) {
-      placeOverlay!.prospectLink.href = prospectHref!(place.idx);
-      inner.append(placeOverlay!.prospectLink);
+    const acts = placeOverlay!.acts;
+    if (acts) {
+      if (placeOverlay!.prospectLink) {
+        placeOverlay!.prospectLink.href = prospectHref!(place.idx);
+        acts.append(placeOverlay!.prospectLink);
+      }
+      if (placeOverlay!.layPress) acts.append(placeOverlay!.layPress);
+      paintLay(place.idx);
+      inner.append(acts);
     }
     if (card.tale) {
       const tale = document.createElement("p");
@@ -108,6 +137,19 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   function reclampCard(): void {
     if (!placeOverlay || placeOverlay.card.hidden) return;
     clampIntoView(placeOverlay.card);
+  }
+
+  function paintLay(idx: number): void {
+    const press = placeOverlay && placeOverlay.layPress;
+    if (!press || !layProspect || idx < 0) return;
+    const face = layProspect.state(idx);
+    press.textContent = face.label;
+    press.dataset["idx"] = String(idx);
+    press.classList.toggle("dim", face.refuses);
+  }
+
+  function relabelLay(): void {
+    if (placeOverlay) paintLay(placeOverlay.currentIdx);
   }
 
   function clampIntoView(el: HTMLElement): void {
@@ -155,14 +197,23 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const inner = document.createElement("div");
     inner.className = "pc-inner";
     card.appendChild(inner);
+    // Both card actions are world-sheet only: a region manifest renumbers its places (#242), so an inset's index names a different settlement.
+    const onWorldSheet = !(opts && opts.box);
     let prospectLink: HTMLAnchorElement | null = null;
-    if (prospectHref && !(opts && opts.box)) {
+    if (prospectHref && onWorldSheet) {
       prospectLink = document.createElement("a");
       prospectLink.className = "pc-prospect";
       prospectLink.textContent = "View the prospect";
-      inner.appendChild(prospectLink);
     }
-    placeOverlay = { card, places: manifest.places, events: manifest.events, cultureId: manifest.cultureId, presentYear: manifest.presentYear, currentIdx: -1, pinned: false, pinnedIdx: -1, prospectLink };
+    const layPress = layProspect && onWorldSheet ? makeLayPress(layProspect) : null;
+    const acts = prospectLink || layPress ? document.createElement("div") : null;
+    if (acts) {
+      acts.className = "pc-acts";
+      if (prospectLink) acts.appendChild(prospectLink);
+      if (layPress) acts.appendChild(layPress);
+      inner.appendChild(acts);
+    }
+    placeOverlay = { card, places: manifest.places, events: manifest.events, cultureId: manifest.cultureId, presentYear: manifest.presentYear, currentIdx: -1, pinned: false, pinnedIdx: -1, prospectLink, acts, layPress };
     manifest.places.forEach((place, idx) => {
       const hit = document.createElement("button");
       hit.type = "button";
@@ -217,7 +268,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     placeOverlay = null;
   }
 
-  return { buildPlaceOverlay, onDocKeydown, onDocClick, hideCard: hidePlaceCard, reclampCard, data, teardown };
+  return { buildPlaceOverlay, onDocKeydown, onDocClick, hideCard: hidePlaceCard, reclampCard, relabelLay, data, teardown };
 }
 
 export type PlaceOverlay = ReturnType<typeof createPlaceOverlay>;

@@ -42,7 +42,9 @@ const ENGINE_RULES = [
   ".pc-tongue",
   ".pc-roots",
   ".pc-tale",
+  ".pc-acts",
   ".pc-prospect",
+  ".pc-lay",
   ".place-overlay.scrub .place-hit",
   '.living-chart g.settlement[data-ink="founding"]',
   '.living-chart g.settlement[data-ink="ruin"]',
@@ -76,6 +78,36 @@ test("the hit divides by --zoom-k once, on the element; the ring pseudos stay pl
   assert.ok(pseudos.length >= 2, "the ring's rest and shown rules exist");
   for (const rule of pseudos) {
     assert.doesNotMatch(rule, /--zoom-k/, "a ring pseudo must not divide again; its element already does");
+  }
+});
+
+// ENGINE_RULES matches a bare selector as a SUBSTRING, and a compound selector sharing it keeps the substring alive: the
+// guard-prover deleted the whole `.pc-lay { ... }` block and the roster passed, because `.pc-lay:hover` and `.pc-lay.dim`
+// still spelled it. The card's two actions are the row's load-bearing pair, so each takes a soleRule read of its own.
+test("the card's action row and its filing press are dressed by a rule of their OWN, not merely spelled somewhere in the sheet (#522)", () => {
+  const css = read(SHEET);
+  const acts = soleRule(css, ".pc-acts");
+  assert.match(acts, /display:\s*flex/, ".pc-acts is not laid out as a row, so the two actions stack on the cascade's default");
+  assert.match(acts, /gap:/, "and it owns the gap between them; its members set none, or the flex gap doubles the space above the prose");
+  const lay = soleRule(css, ".pc-lay");
+  assert.match(lay, /background:\s*var\(--control-gold\)/, "the press loses the ruled gold the sitting drew (#518 ruling 7)");
+  assert.match(lay, /pointer-events:\s*auto/, "and without this it is dead to a real pointer, since #place-card is pointer-events: none");
+  // The press acts on the sheet and goes nowhere, so it must NOT wear the navigation tip; tip-affordance.test.ts sweeps the class, this names the piece.
+  assert.doesNotMatch(css.slice(css.indexOf(".pc-lay")), /^\.pc-lay[^{]*:hover[^{]*\{[^}]*rotate\(/m, "the press took the navigation tip, which promises it goes somewhere");
+  const dim = soleRule(css, ".pc-lay.dim");
+  assert.doesNotMatch(dim, /opacity/, "the refusing press dims by OPACITY, which fails the measured contrast floor; it dims by losing the gold for the standard cream");
+  assert.match(dim, /background:\s*var\(--control-cream\)/, "and it must actually change ground, or it does not read as refusing at all");
+  // A soleRule read cannot see a HIGHER-specificity rule elsewhere in the sheet taking a property back, and one did: the
+  // (1,2,0) hover hold restored the full-strength border on a refusing press under pointer AND keyboard focus, which is
+  // the half ruling 3's reasoning turns on. So every property the dim sets is re-asserted in the deeper rule.
+  const held = css.match(/#place-card \.pc-lay\.dim:hover[^{]*\{[^}]*\}/);
+  assert.ok(held, "the dim has no hold against the hover rule above it, so a pointer undoes it");
+  // Keying the hold on :hover alone left the KEYBOARD half unguarded, and `#place-card .pc-lay:focus-visible` at (1,2,0) beats `.pc-lay.dim` at (0,2,0), so a focused refusing press would light back up.
+  assert.match(held[0].slice(0, held[0].indexOf("{")), /:focus-visible/, "the hold covers the pointer and not the keyboard, and ruling 3 turns on the reader who arrives by Tab meeting the press and hearing why");
+  // A bare `includes` reads one declaration's name inside another's: "border-color:" already contains "color:", so a `color` added to the dim and forgotten in the hold measured as held.
+  const heldDecls = held[0].slice(held[0].indexOf("{") + 1).split(";").map((d) => d.trim());
+  for (const prop of [...dim.matchAll(/(\b[a-z-]+):/g)].map((m) => m[1]).filter((p) => p !== "dim")) {
+    assert.ok(heldDecls.some((d) => d.startsWith(`${prop}:`)), `the dim sets ${prop} and the hover hold does not re-assert it, so hovering or focusing a refusing press restores it`);
   }
 });
 

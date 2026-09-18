@@ -1,10 +1,13 @@
 // The Chart Table's state (#520 Sub 2 of #401): what the drawer draws and what the Explorer's address carries are the same array, so this half is pure and holds no DOM. `chart-drawer`, never `drawer`: src/site/shell/drawer.ts is the site's phone nav (#520 ruling 2).
-import { TABLE_CAP, TABLE_KEY, emitTable, tableWindow, type TableItem, type SurveyItem, type Rung } from "../shared/table-address.ts";
+import { TABLE_CAP, TABLE_KEY, emitTable, prospectItemFrom, tableWindow, type TableItem, type SurveyItem, type ProspectItem, type Rung, type TableOverrides } from "../shared/table-address.ts";
 import { LOD_BANDS, type LodBand } from "../../world/lod.ts";
+import { plateDressFor, prospectTitle } from "./prospect-job.ts";
 import type { SlipFold } from "../shared/slip.ts";
 import type { UvWindow } from "../../terrain/heightfield.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 import type { RenderOptions } from "../../render/map-renderer.ts";
+import type { StyleName } from "../../render/style.ts";
+import type { ProspectJob, RegionJob, RegionResult, ProspectResult } from "./worker-client.ts";
 
 const sameSheet = (a: TableItem, b: TableItem): boolean => emitTable([a]) === emitTable([b]);
 
@@ -34,8 +37,37 @@ export function tabLine(items: ReadonlyArray<TableItem>): string {
   return `The Drawer · ${items.length === 0 ? "the table is bare" : sheets(items.length)}`;
 }
 
-export function refusalLine(why: Refusal): string {
-  return why === "full" ? "the table is full: six sheets lie on it" : "this survey is already on the table";
+export function refusalLine(why: Refusal, kind: TableItem["kind"] = "survey"): string {
+  if (why === "full") return "the table is full: six sheets lie on it";
+  return `this ${kind} is already on the table`;
+}
+
+/** The sheet a filing is made FROM: the drawn world and the present year of that same world, in one value because they may never disagree. */
+export interface FilingSheet {
+  readonly seed: number;
+  readonly overrides: TableOverrides;
+  readonly style: StyleName;
+  readonly presentYear: number;
+}
+
+// The skew this shape forbids is not hypothetical: a world and a year passed as two arguments went out of step for the length of a sheet turn, and again indefinitely after an ABORTED one, because `finish` in ./sheet-turn.ts drops the `turning` class on both paths and resolves on only one. Gating on that class caught the first and not the second; one value cannot skew on any path.
+export function filingAt(at: { readonly turning: boolean; readonly sheet: FilingSheet | null; readonly index: number }): ProspectItem | null {
+  if (at.turning || !at.sheet) return null;
+  return prospectItemFrom({ seed: at.sheet.seed, overrides: at.sheet.overrides, style: at.sheet.style, index: at.index, year: at.sheet.presentYear });
+}
+
+/** The card's resting face, ruled from the still `design/chart-table/stills/explorer-1280-card.png`. */
+export const LAY_ON_CARD = "Lay the prospect on the table";
+/** The Prospect page's, ruled 2026-09-17 from the rendered variant: THIS plate, the one the page is showing, rather than a place on a chart. */
+export const LAY_ON_PAGE = "Lay this prospect on the table";
+
+export function layPressFace(
+  at: { readonly holds: boolean; readonly full: boolean },
+  resting: string,
+): { readonly label: string; readonly refuses: boolean } {
+  if (at.holds) return { label: "Already on the table", refuses: true };
+  if (at.full) return { label: "No room on the table", refuses: true };
+  return { label: resting, refuses: false };
 }
 
 export function takeOffTable(items: ReadonlyArray<TableItem>, seat: number): ReadonlyArray<TableItem> {
@@ -52,8 +84,15 @@ const DRESS: Record<string, string> = { antique: "antique", ink: "pen & ink" };
 const dressOf = (style: string): string => DRESS[style] ?? style;
 export const placeholderTitle = (item: TableItem): string => `Chart \u2116 ${item.seed}`;
 export function subOf(item: TableItem): string {
-  if (item.kind === "prospect") return item.year === null ? `a prospect, ${dressOf(item.style)}` : `a prospect, ${dressOf(item.style)}, ${item.year}`;
+  if (item.kind === "prospect") {
+    const dress = dressOf(plateDressFor(item.style));
+    return item.year === null ? `a prospect, ${dress}` : `a prospect, ${dress}, ${item.year}`;
+  }
   return `band ${item.rung}, ${dressOf(item.style)}`;
+}
+
+export function thumbNames(res: RegionResult | ProspectResult): { readonly title: string; readonly worldTitle: string } {
+  return "name" in res ? { title: prospectTitle(res.name), worldTitle: res.title } : { title: res.title, worldTitle: res.worldTitle };
 }
 
 export function surveyItemFrom(c: {
@@ -79,12 +118,14 @@ export function surveyItemFrom(c: {
   };
 }
 
-/** The region job that redraws one filed survey, so a recovered table can fill its frames. Built from the ADDRESS alone, since that is all a recovered sheet has: `tableWindow` rebuilds the exact window the settle committed. A prospect is Sub 4's to draw and keeps its reserved frame (ruled 2026-09-07). */
-export function thumbJobFor(item: TableItem): {
-  kind: "region"; seed: number; overrides: Partial<WorldRecipe> | undefined; window: UvWindow;
-  gridW: number; gridH: number; band: number; render: RenderOptions;
-} | null {
-  if (item.kind !== "survey") return null;
+/** The job that redraws one filed sheet, so a recovered table can fill its frames. Built from the ADDRESS alone, since that is all a recovered sheet has: `tableWindow` rebuilds the exact window the settle committed. */
+export function thumbJobFor(item: TableItem): RegionJob | ProspectJob {
+  if (item.kind === "prospect") {
+    return {
+      kind: "prospect", seed: item.seed, overrides: item.overrides as Partial<WorldRecipe>,
+      index: item.index, dress: plateDressFor(item.style), year: item.year,
+    };
+  }
   const band = LOD_BANDS[item.rung] as LodBand;
   return {
     kind: "region", seed: item.seed, overrides: item.overrides as Partial<WorldRecipe>,
@@ -244,7 +285,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
     lay(item: TableItem, svg: string | null, title?: string): boolean {
       const laid = layOnTable(items, item);
       if (laid.refused) {
-        deps.say(refusalLine(laid.reason ?? "full"));
+        deps.say(refusalLine(laid.reason ?? "full", item.kind));
         setOpen(true);
         return false;
       }
@@ -257,6 +298,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
     },
     restore(next: ReadonlyArray<TableItem>): void {
       // Through the same gate a filing takes: a hand-typed or shared link can carry one sheet twice, and parseTable does not dedupe. Two twins would also share ONE blob url, keyed by the item, so removing either would revoke the survivor's picture.
+      // The gate is byte equality on the emitted item, so it does NOT catch one prospect spelled two ways: `k-p...style-nautical` and `...style-antique` at one seat draw the same plate (plateDressFor sends both to antique) yet seat twice and spend two of the six. Both DOORS normalise through prospectItemFrom, so only a hand-typed or hand-edited link reaches it; closing it here would rewrite the address the reader shared, which is Alex's call and not a one-liner (#631's cold review, residue).
       let kept: ReadonlyArray<TableItem> = [];
       for (const item of next) kept = layOnTable(kept, item).items;
       items = kept;

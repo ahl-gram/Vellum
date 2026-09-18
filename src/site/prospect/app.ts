@@ -1,7 +1,9 @@
 // The Prospect room's controller: resolves the address, pulls the plate through the SHARED render worker as a blob <img> (never inline <svg>: the cross-chart url(#) id rule), and re-engraves in place when the year control asks; the world itself never changes on this page.
 import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
 import { plateDressFor, type PlateDress } from "../explorer/prospect-job.ts";
-import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } from "./address.ts";
+import { countLine, layOnTable, layPressFace, LAY_ON_PAGE } from "../explorer/chart-drawer.ts";
+import { emitTable, parseTable, prospectItemFrom, type TableItem, type TableOverrides } from "../shared/table-address.ts";
+import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, tableHash, yearHash } from "./address.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindProspectRoom, showPlate, writeFolio, writeNote, type RoomFurniture } from "./seats.ts";
 import type { WorldRecipe } from "../../world/types.ts";
@@ -32,6 +34,8 @@ const ribbonLink = $<HTMLAnchorElement>("pp-ribbon-link");
 const ribbonVerb = $("pp-ribbon-verb");
 const yearForm = $<HTMLFormElement>("pp-year-form");
 const yearInput = $<HTMLInputElement>("pp-year");
+const layPress = $<HTMLButtonElement>("pp-lay");
+const layCount = $("pp-lay-count");
 const furniture: RoomFurniture = {
   stage: document.querySelector<HTMLElement>(".stage")!,
   sheet: $("sheet"),
@@ -54,7 +58,8 @@ const addr = parseProspectAddress(location.hash);
 // A bare visit lands on today's seed-of-the-day (UTC) and its capital, the same default world as every other surface.
 const seed = (addr.seed ?? seedForDate(new Date())) >>> 0;
 const dress = plateDressFor(addr.style ?? "antique");
-const overrides: Partial<WorldRecipe> = {
+// ONE object for the job and for the filed item: two copies of this literal is how the page and the card come to spell one plate two ways, which is what TP2's single builder exists to prevent and what a divergent INPUT to it would defeat.
+const overrides: TableOverrides = {
   ...(addr.type ? { mapType: addr.type } : {}),
   ...(addr.band ? { band: addr.band } : {}),
   ...(addr.land != null ? { landFraction: addr.land } : {}),
@@ -66,6 +71,44 @@ let lastUrl: string | null = null;
 let drawGen = 0;
 window.__vellumProspectUsesWorker = usesWorker;
 window.__vellumProspectState = () => last;
+
+let table: ReadonlyArray<TableItem> = (parseTable(location.hash) ?? []).reduce<ReadonlyArray<TableItem>>((kept, item) => layOnTable(kept, item).items, []);
+
+/** Built from the DRAWN plate, never the address: `addr.index` may be null and would emit no `i`, colliding with a hand-typed capital, and the year is the one actually pressed. */
+function filedItem(): TableItem | null {
+  return last === null
+    ? null
+    : prospectItemFrom({ seed, overrides, style: addr.style ?? "antique", index: last.index, year: last.year });
+}
+
+function paintLay(): void {
+  const item = filedItem();
+  if (!item) {
+    layPress.style.display = "none";
+    return;
+  }
+  layPress.style.display = "";
+  const trial = layOnTable(table, item);
+  const face = layPressFace({ holds: trial.reason === "already", full: trial.reason === "full" }, LAY_ON_PAGE);
+  layPress.textContent = face.label;
+  layPress.classList.toggle("dim", face.refuses);
+  layCount.textContent = countLine(table);
+}
+
+layPress.addEventListener("click", () => {
+  const item = filedItem();
+  if (!item) return;
+  const laid = layOnTable(table, item);
+  if (laid.refused) {
+    paintLay();
+    return;
+  }
+  table = laid.items;
+  history.replaceState(null, "", tableHash(location.hash, emitTable(table)));
+  chartLink.href = chartTarget(location.hash);
+  if (last) ribbonLink.href = ribbonTarget(location.hash, last.index);
+  paintLay();
+});
 
 function writeRoads(res: { readonly index: number; readonly name: string; readonly roads: boolean }): void {
   chartLink.href = chartTarget(location.hash);
@@ -104,6 +147,8 @@ function draw(year: number | null, writeAddress: boolean): void {
         roads: res.roads,
         svgLength: res.svg.length,
       };
+      // AFTER `last`, never before it: the press files what `last` names, and painted a beat early it reads the previous plate or none at all.
+      paintLay();
     })
     .catch((err: Error) => {
       if (myGen !== drawGen) return;
@@ -124,6 +169,7 @@ yearForm.addEventListener("submit", (e) => {
 
 chartLink.href = chartTarget(location.hash);
 ribbonLink.style.display = "none";
+layPress.style.display = "none";
 await initWorker();
 if (!usesWorker()) warning.hidden = false;
 draw(addr.year, false);

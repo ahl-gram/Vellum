@@ -6,8 +6,8 @@ import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts"
 import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
-import { type TableItem } from "../shared/table-address.ts";
-import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor } from "./chart-drawer.ts";
+import { type TableItem, type TableOverrides } from "../shared/table-address.ts";
+import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD, type FilingSheet } from "./chart-drawer.ts";
 import { bindTableLeaf } from "./table-leaf.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
@@ -42,6 +42,8 @@ let lastSeed = 0;
 let lastManifest: PlaceManifest | null = null;
 // #120: assigned beside lastManifest from the SAME draw; a mismatched pair would route this world's ports over another world's roads.
 let lastSurvey: Survey | null = null;
+// #522: the sheet the card files FROM, assigned beside the overlay whose hit targets name its places. Never from the controls, because a seed or a style typed without pressing Draw describes a chart nobody has drawn.
+let lastSheet: FilingSheet | null = null;
 
 const touched = { land: false, coast: false };
 
@@ -56,11 +58,27 @@ function prefersReduce(): boolean {
 
 const tourOrder = createTourOrder({ runJob });
 
+const prospectAt = (idx: number): TableItem | null =>
+  filingAt({ turning: sheetEl.classList.contains("turning"), sheet: lastSheet, index: idx });
+
 const lc = createLivingChart({
   mapEl: mapDiv,
   statusEl: status,
   tourOrder,
   prospectHref: (idx) => prospectTarget(location.hash, idx),
+  layProspect: {
+    state: (idx) => {
+      const item = prospectAt(idx);
+      return item ? layPressFace({ holds: chartTable.holds(item), full: chartTable.isFull() }, LAY_ON_CARD) : { label: LAY_ON_CARD, refuses: true };
+    },
+    lay: (idx) => {
+      const item = prospectAt(idx);
+      if (!item) return;
+      // Nothing is handed over as art: the plate crosses no navigation, so the drawer's own deferred draw fetches it through one prospect job.
+      if (!chartTable.lay(item, null)) return;
+      lc.reclampCard();
+    },
+  },
   // #387/#388: at k=1 this rect IS the chart box, and under the Glass it is the room actually on screen, which is why one box serves both errata.
   clampBox: () => mapViewport.getBoundingClientRect(),
   restingTrackSink: {
@@ -101,13 +119,11 @@ const chartTable = bindChartDrawer({
   folioHref: "../print-room/portfolio/",
   say: announce,
   drawThumb: async (item) => {
-    const job = thumbJobFor(item);
-    if (!job) return null;
-    const res = await runJob(job).catch(() => null);
+    const res = await runJob(thumbJobFor(item)).catch(() => null);
     if (!res) return null;
-    return { url: URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" })), title: res.title };
+    return { url: URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" })), title: thumbNames(res).title };
   },
-  onChange: () => { syncHash(); relabelEar(); },
+  onChange: () => { syncHash(); relabelEar(); lc.relabelLay(); },
 });
 // #165/#169/#192: the ONE hash writer, every trigger funnels through here; #321: the box IS the flag and the Explorer never authors year=.
 function syncHash(): void {
@@ -161,6 +177,8 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
   const seed = Number(seedInput.value) >>> 0;
   const myGen = ++drawGen;
   cancelTurn();
+  // The card belongs to the chart being replaced: left pinned it hangs over the turn with hit targets that name the OUTGOING world's places, which is the window `filingAt` refuses in. Dropping it closes the window rather than dressing it.
+  lc.hideCard();
   // #165: rebase(), not reset(): the chart under the camera is being replaced, so drop to home with no spurious settle.
   glass.rebase();
   glass.cancelRedraft();
@@ -215,6 +233,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => {
           if (myGen !== drawGen) return;
           lc.buildPlaceOverlay(res.manifest);
+          lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
           room.layout();
           armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
             rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
@@ -225,6 +244,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       } else {
         mapDiv.innerHTML = res.svg;
         lc.buildPlaceOverlay(res.manifest);
+        lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
         room.layout();
         if (!quiet) startArrival(mapDiv.querySelector("svg"));
         armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
