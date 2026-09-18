@@ -704,16 +704,18 @@ export async function run(ctx) {
     const atCapPage = await settle(PP, (d, last) => !!d.press && d.press.shown && !!last && !!last.press && d.press.centre && last.press.centre &&
       d.press.centre.x === last.press.centre.x && d.press.centre.y === last.press.centre.y, "prospect-note-open-full");
     if (atCapPage.press && atCapPage.press.centre) await clickAt(atCapPage.press.centre.x, atCapPage.press.centre.y);
-    // A refusal changes nothing, so there is no state to poll TO: the poll is for the table still holding six once the
-    // press has been answered, and it asserts on its last read rather than its first.
-    const stillFull = await settle(PP, (d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 6, "prospect-refused-at-cap");
+    // A refusal changes nothing, so there is no state to poll TO, and a settle here proves nothing: it returns on its FIRST satisfying read and this predicate is already true when the press is answered, so it read once and waited 0ms. What is real for "nothing happened" is a DWELL, held past the moment a wrongly accepted filing would have written the hash.
+    const dwell = [];
+    for (let i = 0; i < 8; i++) { dwell.push(await evaluate(PP)); await sleep(50); }
+    const stillFull = dwell[dwell.length - 1];
+    const heldSix = dwell.every((d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 6);
     check(
       "CD35 at the cap the page's press wears the FULL refusal, stays pressable, and lays nothing: the page inherits the table's six from the address it was handed, which is the cap #522 says applies here too",
       !!atCapPage.press && atCapPage.press.text === "No room on the table" && atCapPage.press.dim &&
         !atCapPage.press.disabled && atCapPage.press.hit === "self" &&
         /the table is full/.test(atCapPage.count || "") &&
-        (stillFull.hashTable || "").split("_").length === 6,
-      JSON.stringify({ press: atCapPage.press, count: atCapPage.count, after: (stillFull.hashTable || "").split("_").length }),
+        heldSix && (stillFull.hashTable || "").split("_").length === 6,
+      JSON.stringify({ press: atCapPage.press, count: atCapPage.count, after: (stillFull.hashTable || "").split("_").length, heldSix, reads: dwell.length }),
     );
     // Home through chartTarget, the way the page offers: the Explorer restores the table with both sheets on it.
     await send("Page.navigate", { url: "about:blank" });

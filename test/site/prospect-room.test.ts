@@ -152,6 +152,7 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
   assert.doesNotMatch(css, /\.pp-lay\.dim\s*\{[^}]*opacity/, "and never by opacity, which fails the measured contrast floor");
   const dimHold = css.match(/#note \.pp-lay\.dim:hover[^{]*\{[^}]*\}/);
   assert.ok(dimHold, "the dim has no hold against the hover rule above it, so a pointer undoes it");
+  assert.match(dimHold[0].slice(0, dimHold[0].indexOf("{")), /:focus-visible/, "the hold covers the pointer and not the keyboard, and ruling 3 turns on the reader who arrives by Tab meeting the press and hearing why");
   const dimRule = css.match(/\.pp-lay\.dim\s*\{[^}]*\}/)?.[0] ?? "";
   const heldDecls = dimHold[0].slice(dimHold[0].indexOf("{") + 1).split(";").map((d) => d.trim());
   for (const prop of [...dimRule.matchAll(/(\b[a-z-]+):/g)].map((m) => m[1])) {

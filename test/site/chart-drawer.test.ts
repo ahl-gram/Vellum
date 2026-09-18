@@ -255,6 +255,9 @@ test("CT7c the Explorer assigns that sheet beside the OVERLAY it describes, whic
   for (const next of builds) {
     assert.match(next, /^lastSheet = \{/, "the line after an overlay build is not the sheet assignment, so the hit targets on screen and the world the card files from can drift apart");
     assert.doesNotMatch(next, /lastManifest/, "a year read from the module's own lastManifest is the second, independently-moving source this shape exists to remove, and a `!` defeats a check that spells the whole path");
+    // The YEAR axis was guarded and the WORLD axis was not, so a hard-coded `style` in the turn branch (reached only by the style-change path) filed an antique-dressed prospect over an ink chart with the suite green. Every field is pinned, not merely the year.
+    const fields = next.slice(next.indexOf("{") + 1, next.lastIndexOf("}")).split(",").map((f) => f.trim()).filter(Boolean);
+    assert.deepEqual(fields, ["seed", "overrides", "style", "presentYear: res.manifest.presentYear"], "the sheet is built from something other than the drawn world's own seed, overrides and style and that same manifest's year, so a filing can name a different chart than the one the reader is looking at");
   }
   assert.equal((src.match(/presentYear: res\.manifest\.presentYear/g) ?? []).length, builds.length, "one build's year is read from the manifest it was built from and another's is not, which is the drift with one of the two doors left open");
 });
