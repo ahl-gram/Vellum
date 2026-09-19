@@ -6,7 +6,8 @@ import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts"
 import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
-import { type TableItem, type TableOverrides } from "../shared/table-address.ts";
+import { emitTable, parseTable, type TableItem, type TableOverrides } from "../shared/table-address.ts";
+import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable, TRAVERSAL } from "../shared/table-store.ts";
 import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD, type FilingSheet } from "./chart-drawer.ts";
 import { bindTableLeaf } from "./table-leaf.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
@@ -123,13 +124,26 @@ const chartTable = bindChartDrawer({
     if (!res) return null;
     return { url: URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" })), title: thumbNames(res).title };
   },
-  onChange: () => { syncHash(); relabelEar(); lc.relabelLay(); },
+  onChange: (laid) => { writeStoredTable(store, laid); syncHash(); relabelEar(); lc.relabelLay(); },
+});
+
+// The one road no boot code can see: a page served from the browser's back/forward cache runs none at all (#634, measured 2026-09-19).
+window.addEventListener("pageshow", (e) => {
+  if (!e.persisted) return;
+  const held = tableOnArrival(parseTable(location.hash), readStoredTable(store), TRAVERSAL);
+  if (emitTable(held) === emitTable(chartTable.state())) return;
+  chartTable.restore(held);
+  syncHash();
+  relabelEar();
+  lc.relabelLay();
 });
 // #165/#169/#192: the ONE hash writer, every trigger funnels through here; #321: the box IS the flag and the Explorer never authors year=.
 function syncHash(): void {
   writeHash(hashControls, touched.land, touched.coast, glass.cameraNow(),
     agesChk.checked ? { kind: "survey" } : null, chartTable.state());
   journalLink.href = "/reading-room/" + (location.hash || "");
+  // Rebuilt HERE and not in draw(): laying, taking and a cached return all move the address without drawing anything, and a road left behind hands on the table as it stood at the last draw (measured resurrecting a sheet the reader had taken off, the cold review's round 3 on PR #635).
+  if (orderLink) orderLink.href = "../print-room/" + (location.hash || "");
 }
 
 const glass = createGlass({
@@ -187,8 +201,6 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
   status.textContent = "Drafting…";
   caption.textContent = "";
   syncHash();
-  // #133: syncHash just wrote location.hash, so this link always opens the CURRENT world, never the one from page load.
-  if (orderLink) orderLink.href = "../print-room/" + (location.hash || "");
   const overrides: { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number } = {};
   if (typeSel.value) overrides.mapType = typeSel.value as MapType;
   if (bandSel.value) overrides.band = bandSel.value as ClimateBand;
@@ -319,7 +331,7 @@ if (fwd) {
   if (hashed.land) touched.land = true;
   if (hashed.coast) touched.coast = true;
   pendingCamera = hashed.camera;
-  chartTable.restore(hashed.table ?? []);
+  chartTable.restore(tableOnArrival(hashed.table, readStoredTable(store), navigationTypeNow()));
   if (hashed.live) agesChk.checked = true;
   draw();
 }

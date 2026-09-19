@@ -58,7 +58,13 @@ out of a private file and into the repo; Alex ruled the split in that session.
    or wait on a token the new document sets. **A hash-to-hash navigation on one path is quieter and
    worse**: it is a same-document navigation, so the page never re-boots and nothing throws, it just
    serves the state it already had. No page here installs a `hashchange` listener, so every room
-   reads its address once at boot and this is every page, not a subset. Reach a new address by
+   reads its address once at boot and this is every page, not a subset. **One consequence of that
+   has an exception since #634**: going BACK to a page no longer serves state nothing re-reads. The
+   Explorer and the Prospect page re-seat the Chart Table from the device on a cached restore, through
+   `pageshow` with `persisted`, so a check that drives Back and reads the drawer is reading the
+   device's table and not the address's. `specs/explorer-doctrine.md` carries the rule; a suite that
+   wants a bare arrival clears `vellum.table.v1` before it navigates, which is what
+   `scripts/e2e/suite-chart-drawer.mjs` does in its own `go`. Reach a new address by
    re-bootstrapping through `about:blank` and then the target, then poll for the boot committing:
    that is what `goto` does in `scripts/e2e/room-support.mjs`, and a fixed sleep in its place is the
    flake.
