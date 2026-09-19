@@ -4,6 +4,8 @@ import { makeStep } from "./step-support.mjs";
 import { makeStage } from "./home-support.mjs";
 import { slideRested, foldRested } from "../../src/cli/e2e-slide.ts";
 import { SAY_HOLD_MS } from "../../src/site/shared/announce.ts";
+// Imported and never restated: a key spelled twice is a clear that silently stops clearing the day the app's own key moves.
+import { TABLE_STORE_KEY } from "../../src/site/shared/table-store.ts";
 
 const SEED = 42;
 // A camera settled deep enough to commit a band-3 inset, the same descent suite-region-detail drives.
@@ -44,6 +46,7 @@ const READ = `(() => {
     statusFadeMs: (() => { const s = document.getElementById("status"); return s ? getComputedStyle(s).transitionDuration : null; })(),
     hashTable: (new URLSearchParams(location.hash.slice(1))).get("table"),
     rawHash: location.hash,
+    path: location.pathname,
     scrollW: document.documentElement.scrollWidth,
     innerW: window.innerWidth,
   };
@@ -63,7 +66,13 @@ export async function run(ctx) {
     if (r) await clickAt(r.x, r.y);
     return r;
   };
+  // Since #634 the table has a second home on the DEVICE, and this suite fills it on nearly every group: every arrival
+  // below that carries no table key would otherwise inherit whatever the group before it laid, which is a bleed inside
+  // one suite and not only across a lane. So an arrival is bare unless it says otherwise, and the four checks that are
+  // ABOUT the device seed it themselves. about:blank has no storage of its own, so the clear rides on the site's origin.
+  const forget = async () => { try { await evaluate(`localStorage.removeItem(${JSON.stringify(TABLE_STORE_KEY)})`); } catch {} };
   const go = async (hash) => {
+    await forget();
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#${hash}` });
     for (let i = 0; i < 200; i++) { await sleep(150); if (await evaluate(`!!document.querySelector("#map svg") && !!document.getElementById("chart-drawer")`)) break; }
@@ -419,6 +428,8 @@ export async function run(ctx) {
       pfSaid.fadeMs === "0.45s" && pfSaid.rest === "1" && pfSaid.faded === "0",
     JSON.stringify({ press: pfNext, said: pfSaid }),
   );
+  // BARE means bare on both homes since #634: a Portfolio the address names no folio for now shows what the device holds (ruling 4), so the six this group just laid would arrive here as a full pile.
+  await forget();
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/portfolio/` });
   for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate(`!!window.__vellumPortfolio`)) break; }
@@ -639,6 +650,7 @@ export async function run(ctx) {
 
   // The page's own capture point (seat C, ruled 2026-09-17): it files and STAYS, and the year is part of a sheet's identity.
   await step("CD28, CD29, CD34, CD35, CD31", async () => {
+    await forget();
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3` });
     for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
@@ -696,7 +708,8 @@ export async function run(ctx) {
         /two sheets laid/.test(held.count || ""),
       JSON.stringify({ press: held.press, count: held.count }),
     );
-    // A boot with the cap already spent: the same press, the OTHER refusal.
+    // A boot with the cap already spent: the same press, the OTHER refusal. The six come from the ADDRESS, so the device is cleared first or the two sources are indistinguishable here.
+    await forget();
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3&table=${SIX}` });
     for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
@@ -787,5 +800,172 @@ export async function run(ctx) {
     );
     await clearMobile();
     await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  });
+
+  // #634: the table's second home, and the four roads the two homes exist for. ONE and TWO are addresses rather than
+  // gestures because every check below is about WHERE the table came from, not about the handle that filed it.
+  const ONE = "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-17.ly-13";
+  const TWO = `${ONE}_k-p.seed-42.style-antique.i-0.year-1059`;
+  const STORE = `(() => { try { return localStorage.getItem(${JSON.stringify(TABLE_STORE_KEY)}); } catch { return "THREW"; } })()`;
+  // Two shapes on purpose (specs/settle-doctrine.md clause 4). Where arriving is a PRECONDITION the wait throws;
+  // where arriving is the CHECK's own claim it keeps reading and hands back its last read, and the caller asserts
+  // on that, so a press that navigated nowhere reds by naming the page it is still standing on.
+  const reachedExplorer = async () => {
+    let last = null;
+    for (let i = 0; i < 200; i++) {
+      await sleep(150);
+      last = await evaluate(`(() => ({ href: location.href, svg: !!document.querySelector("#map svg"), drawer: !!document.getElementById("chart-drawer") }))()`);
+      if (last.svg && last.drawer) return { ...last, reached: true };
+    }
+    return { ...(last ?? { href: null, svg: false, drawer: false }), reached: false };
+  };
+  const atExplorer = async () => {
+    const at = await reachedExplorer();
+    if (!at.reached) throw new Error(`the Explorer never booted; still at ${at.href}`);
+    return at;
+  };
+  const openDrawer = async () => {
+    // Wiring, not a gesture claim: CD2 and CD14 own whether the tab answers a real pointer. Here it is the door to the road.
+    await evaluate(`(() => { const t = document.getElementById("chart-drawer-tab"); if (t && getComputedStyle(t).display !== "none") t.click(); })()`);
+    await sleep(400);
+  };
+  const pressById = async (id) => {
+    const at = await evaluate(`(() => { const e = document.getElementById(${JSON.stringify(id)}); if (!e) return null; e.scrollIntoView({ block: "center" }); const b = e.getBoundingClientRect(); if (b.width < 1) return null; const c = { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; return { ...c, hit: document.elementFromPoint(c.x, c.y) === e || e.contains(document.elementFromPoint(c.x, c.y)) }; })()`);
+    if (!at) throw new Error(`${id} has no box to press`);
+    await clickAt(at.x, at.y);
+    return at;
+  };
+
+  await step("CD36", async () => {
+    await go(`${DRESS}&table=${ONE}`);
+    await openDrawer();
+    const road = await pressById("table-road");
+    for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate(`!!window.__vellumPortfolio`)) break; }
+    // Wait out the folio's own drafting before pressing home. The press is not racing it, but the worker drawing a
+    // region sheet is real work on this machine, and on 2026-09-19 the arrival at the other end of this press took
+    // longer than its 30s poll exactly once, with nothing else in the suite slow (flake-record.md carries the row).
+    // Pressing from a finished page removes the contention rather than widening a budget against it.
+    for (let i = 0; i < DRAWN; i++) { await sleep(50); const s = await evaluate(`(() => { const p = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return p ? p.drawn : -1; })()`); if (s >= 1) break; }
+    // The HREF is the measurement, taken before the press: once the table has a second home, pressing a bare
+    // ../../explorer/ ALSO lands on a populated drawer, so a check that only counted cuttings afterwards would pass
+    // for the wrong reason forever. What the address carries is the only thing that reaches a reader on another device.
+    const home = await evaluate(`(() => { const a = document.getElementById("pf-explorer"); return a ? { href: a.getAttribute("href"), hash: location.hash } : null; })()`);
+    const back = await pressById("pf-explorer");
+    const arrived = await reachedExplorer();
+    const landed = arrived.reached ? await evaluate(READ) : { cuttings: -1, rawHash: "", hashTable: null };
+    check(
+      "CD36 the Portfolio's gold press back carries the gathering AND the world it was gathered from: the road in hands over the Explorer's whole address, so the press home names the seed and the sheets rather than dropping the reader on the seed of the day with a bare table (#634 defect 1, ruled 2026-09-19)",
+      road.hit && back.hit && arrived.reached &&
+        !!home && home.hash.indexOf(`table=${ONE}`) !== -1 && home.hash.indexOf("seed=42") !== -1 &&
+        typeof home.href === "string" && home.href.indexOf(`table=${ONE}`) !== -1 && home.href.indexOf("seed=42") !== -1 &&
+        landed.cuttings === 1 && landed.rawHash.indexOf("seed=42") !== -1 && landed.hashTable === ONE,
+      JSON.stringify({ road, back, home, arrived, landedHash: landed.rawHash, cuttings: landed.cuttings }),
+    );
+  });
+
+  await step("CD37", async () => {
+    await go(`${DRESS}&table=${ONE}`);
+    // Planted so the check can say WHICH road it measured: a page served from the browser's cache comes back with this
+    // marker alive and runs no boot code at all, which is the road no load-time rule can reach.
+    await evaluate(`window.__cd634 = "warm"`);
+    await evaluate(`location.href = "/prospect/" + location.hash + "&i=0"`);
+    for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
+    await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); })()`);
+    await sleep(400);
+    const lay = await pressById("pp-lay");
+    const filed = await settle(
+      `(() => ({ table: new URLSearchParams(location.hash.slice(1)).get("table"), stored: ${STORE} }))()`,
+      (d) => typeof d.table === "string" && d.table.split("_").length === 2,
+      "prospect-filed-for-back",
+    );
+    await evaluate(`history.back()`);
+    const home = await settle(
+      `(() => ({ ...${READ}, marker: window.__cd634 || null }))()`,
+      (d) => d.path === "/explorer/" && d.cuttings === 2,
+      "chart-drawer-back-button",
+      DRAWN,
+    );
+    check(
+      "CD37 the browser's own BACK button brings the filed prospect home: the page comes back from the browser's cache with no boot code running at all, so the drawer is re-seated from the device and the address is written back to agree (#634 defect 2, ruled 2026-09-19)",
+      lay.hit && filed.stored === filed.table && home.marker === "warm" &&
+        home.cuttings === 2 && typeof home.hashTable === "string" && home.hashTable.split("_").length === 2,
+      JSON.stringify({ lay, filedTable: filed.table, stored: filed.stored, marker: home.marker, cuttings: home.cuttings, hashTable: home.hashTable }),
+    );
+  });
+
+  await step("CD38", async () => {
+    await go(`${DRESS}&table=${ONE}`);
+    // The same road with the cache REFUSED, which is the other half and needs a deliberately artificial instrument
+    // (Gate 2 item 14): desktop Chrome will not cache a page carrying an unload listener. The check asserts its own
+    // premise, that the document really was re-created, so a browser that caches it anyway reds here instead of
+    // quietly measuring CD37 a second time.
+    await evaluate(`(() => { window.__cd634 = "cold"; window.addEventListener("unload", () => {}); })()`);
+    await evaluate(`location.href = "/prospect/" + location.hash + "&i=0"`);
+    for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
+    await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); })()`);
+    await sleep(400);
+    await pressById("pp-lay");
+    await settle(
+      `(() => ({ table: new URLSearchParams(location.hash.slice(1)).get("table") }))()`,
+      (d) => typeof d.table === "string" && d.table.split("_").length === 2,
+      "prospect-filed-for-cold-back",
+    );
+    await evaluate(`history.back()`);
+    await atExplorer();
+    const home = await settle(
+      `(() => ({ ...${READ}, marker: window.__cd634 || null, navType: (performance.getEntriesByType("navigation")[0] || {}).type || null }))()`,
+      (d) => d.path === "/explorer/" && d.cuttings === 2,
+      "chart-drawer-back-button-cold",
+      DRAWN,
+    );
+    check(
+      "CD38 the same road with the browser's cache refused: the document is REBUILT and reads the stale address, so the table comes back from the device by the navigation type instead, and the sheet filed on the Prospect page survives either way (#634, both roads measured)",
+      home.marker === null && home.navType === "back_forward" &&
+        home.cuttings === 2 && typeof home.hashTable === "string" && home.hashTable.split("_").length === 2,
+      JSON.stringify({ marker: home.marker, navType: home.navType, cuttings: home.cuttings, hashTable: home.hashTable }),
+    );
+  });
+
+  await step("CD39", async () => {
+    // Seeded on the site's own origin: about:blank has no storage to seed, so this write happens before the hop.
+    await evaluate(`localStorage.setItem(${JSON.stringify(TABLE_STORE_KEY)}, ${JSON.stringify(TWO)})`);
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#${DRESS}&table=${ONE}` });
+    await atExplorer();
+    const arrived = await settle(
+      `(() => ({ ...${READ}, stored: ${STORE} }))()`,
+      (d) => d.cuttings > 0,
+      "chart-drawer-link-beats-device",
+      DRAWN,
+    );
+    check(
+      "CD39 a link beats the device, and a visit does not become the reader's own: an address naming ONE sheet shows exactly that sheet over two held here, and what this browser was gathering is still untouched afterwards (#634 rulings 1 and 2, 2026-09-19)",
+      arrived.cuttings === 1 && arrived.hashTable === ONE && arrived.stored === TWO,
+      JSON.stringify({ cuttings: arrived.cuttings, hashTable: arrived.hashTable, stored: arrived.stored }),
+    );
+  });
+
+  await step("CD40", async () => {
+    await go(`${DRESS}&table=${ONE}`);
+    await openDrawer();
+    await evaluate(`document.querySelector("#cuttings .off").click()`);
+    const emptied = await settle(
+      `(() => ({ ...${READ}, stored: ${STORE} }))()`,
+      (d) => d.cuttings === 0,
+      "chart-drawer-emptied",
+    );
+    // The key is read directly because a bare table alone cannot tell an ABSENT key from an empty one, and the empty
+    // one is exactly what would hand the table back on the next keyless arrival.
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/${emptied.rawHash}` });
+    await atExplorer();
+    const still = await evaluate(`(() => ({ ...${READ}, stored: ${STORE} }))()`);
+    check(
+      "CD40 emptying the table STICKS: taking the last sheet off removes the device's key rather than storing an empty one, so the address that carries no table and the device that holds none agree, and a reload comes back bare instead of resurrecting the sheet (#634)",
+      emptied.cuttings === 0 && emptied.hashTable === null && emptied.stored === null &&
+        still.cuttings === 0 && still.stored === null && still.rawHash.indexOf("table=") === -1,
+      JSON.stringify({ emptied: { cuttings: emptied.cuttings, hashTable: emptied.hashTable, stored: emptied.stored }, still: { cuttings: still.cuttings, stored: still.stored, hash: still.rawHash } }),
+    );
+    await forget();
   });
 }
