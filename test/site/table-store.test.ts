@@ -79,6 +79,20 @@ test("TS5 a back arrival with NOTHING on the device still takes the address it l
   assert.equal(readStoredTable(shut), null, "and the unreadable store this stands for reads as null, not as an empty table");
 });
 
+test("TS15 a traversal takes the device WHOSEVER folio the entry carries, which is ruled and not incidental (#634, ruled 2026-09-19)", () => {
+  // The cell where two rulings collide and only one can be obeyed: a Back or Forward INTO a page carrying someone
+  // else's folio. Alex ruled the device wins there, with the cost stated: their folio leaves that tab and the entry's
+  // address is rewritten. TS4's fixture cannot tell this apart, because the table its address carries is a subset of
+  // the device's, which is the stale-snapshot shape that the rejected alternative would also have answered this way.
+  // The fixture here is DISJOINT on purpose: the alternative returns the address's folio and this test reds.
+  const theirs = [survey(7), survey(8)];
+  const mine = [survey(1), survey(2)];
+  assert.equal(emitTable(tableOnArrival(theirs, mine, TRAVERSAL)), emitTable(mine), "a traversal into someone else's folio shows their folio, which is the rejected reading of ruling 2 and not what was ruled");
+  assert.equal(new Set([...theirs, ...mine].map((i) => emitTable([i]))).size, 4, "the two tables share a sheet, so this fixture no longer tells the ruling from the alternative");
+  // And the ordinary arrival at that same link is untouched by the ruling: theirs, exactly as sent.
+  assert.equal(emitTable(tableOnArrival(theirs, mine, "navigate")), emitTable(theirs));
+});
+
 test("TS14 a page whose ADDRESS is its content takes the same precedence WITHOUT the traversal term (#634, the Portfolio)", () => {
   const carried = fill(1);
   const stored = fill(2);

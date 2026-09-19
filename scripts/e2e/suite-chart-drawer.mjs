@@ -967,7 +967,7 @@ export async function run(ctx) {
     );
   });
 
-  await step("CD41", async () => {
+  await step("CD41, CD42", async () => {
     // The road the first draft of this fix BROKE, and which nothing here could reach: every other Back check files a sheet on the Prospect page first, so the device is never empty at a restore. A reader whose storage is blocked, and anyone who opened a folio someone shared with them, comes back to exactly this: sheets in the address, none on the device. The first draft emptied the drawer and then wrote an address with no table key at all, losing them from both homes in one gesture (the cold review on PR #635).
     await go(`${DRESS}&table=${ONE}`);
     await evaluate(`window.__cd634 = "bare"`);
@@ -983,6 +983,26 @@ export async function run(ctx) {
       before.cuttings === 1 && before.stored === null && home.marker === "bare" &&
         home.cuttings === 1 && home.hashTable === ONE && home.stored === null,
       JSON.stringify({ before: { cuttings: before.cuttings, stored: before.stored }, home: { marker: home.marker, cuttings: home.cuttings, hashTable: home.hashTable, stored: home.stored } }),
+    );
+
+    // The cell where two of the rulings collide, RULED on 2026-09-19 and pinned so nobody restores the other reading on
+    // finding it surprising: a traversal into a page carrying someone ELSE'S folio takes the device's table, and rewrites
+    // that page's address with it. The fixture is a device holding sheets the address names none of, which is what tells
+    // the ruling from the rejected alternative; CD41's own leg above cannot, since its device is empty. It reuses this
+    // Explorer rather than booting another, because lane B has 3.95s of headroom and a second boot would spend it.
+    // DISJOINT from ONE, which the address is still carrying: TWO would not do, since it contains ONE and is therefore
+    // the stale-snapshot shape that the rejected alternative answers the same way.
+    const OTHERS = ["k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-4.ly-4", "k-p.seed-42.style-antique.i-3.year-1059"].join("_");
+    await evaluate(`localStorage.setItem(${JSON.stringify(TABLE_STORE_KEY)}, ${JSON.stringify(OTHERS)})`);
+    await evaluate(`location.href = "/faq/"`);
+    for (let i = 0; i < 200; i++) { await sleep(50); if (await evaluate(`location.pathname === "/faq/" && document.readyState === "complete"`)) break; }
+    await evaluate(`history.back()`);
+    const theirs = await restedAtExplorer();
+    check(
+      "CD42 a traversal into a page carrying someone ELSE'S folio takes what this device holds, and rewrites that page's address with it: ruling 1 read literally, which narrows ruling 2's 'exactly as sent' to an arrival by link (ruled 2026-09-19, with the cost that the sender's link leaves that tab)",
+      theirs.marker === "bare" && theirs.cuttings === 2 && theirs.stored === OTHERS && theirs.hashTable === OTHERS &&
+        OTHERS.split("_").every((sheet) => ONE.indexOf(sheet) === -1),
+      JSON.stringify({ marker: theirs.marker, cuttings: theirs.cuttings, hashTable: theirs.hashTable, stored: theirs.stored }),
     );
   });
 

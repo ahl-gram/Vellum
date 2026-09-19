@@ -165,8 +165,17 @@ make an unqualified rule false. Read the surface, not just the rule.
   a snapshot taken before the reader gathered more. That qualifier is load bearing and not a detail:
   a device holding nothing, because storage is blocked or because the reader arrived on someone
   else's link, leaves the address it landed on still speaking, and a restore that reads the device
-  unqualified empties the table by the very gesture meant to keep it. **A page whose address IS its
-  content takes no traversal term at all**: the Portfolio shows the folio its address names, else
+  unqualified empties the table by the very gesture meant to keep it. **The traversal takes the
+  device WHOSEVER folio the entry is carrying**, which narrows "a shared folio shows exactly as sent
+  until the reader touches it" to an arrival by link and not to a traversal into that page (ruled
+  2026-09-19 against the alternative, which was to let the address win whenever it named sheets the
+  device does not hold). The cost is chosen and not overlooked: stepping forward into a page carrying
+  someone else's folio replaces it with the reader's own sheets and rewrites that page's address, so
+  the sender's link leaves that tab and cannot be recovered there. The two rulings collide in that
+  one cell and only one of them can be obeyed; **do not quietly restore the other on finding this
+  surprising**, because it is pinned deliberately (`TS15` in `test/site/table-store.test.ts` and
+  `CD42`, whose fixture is a folio holding none of the sheets this device does). **A page whose
+  address IS its content takes no traversal term at all**: the Portfolio shows the folio its address names, else
   what the device holds, and answers a Back the same way whether or not the browser cached it. The
   rule is pure in `src/site/shared/table-store.ts`, and the two
   roads back need two instruments, which is the part no reasoning supplies: a cached page runs NO

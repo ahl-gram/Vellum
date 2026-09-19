@@ -245,7 +245,7 @@ const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
     "CD1", "CD2, CD2b, CD2c", "CD23", "CD3", "CD4", "CD5", "CD7, CD7b, CD7c", "CD8",
     "CD9, CD11, CD12, CD22", "CD13", "CD18", "CD6", "CD15, CD17",
     "CD25, CD26, CD30", "CD27", "CD28, CD29, CD34, CD35, CD31", "CD32", "CD33",
-    "CD36", "CD37", "CD38", "CD39", "CD40", "CD41",
+    "CD36", "CD37", "CD38", "CD39", "CD40", "CD41, CD42",
   ],
   "document-rooms": ["IX3"],
   "specimen": ["SB4"],
