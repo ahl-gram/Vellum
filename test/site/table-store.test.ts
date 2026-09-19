@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readStoredTable, writeStoredTable, tableOnArrival, navigationType, navigationTypeNow, deviceStorage, TABLE_STORE_KEY } from "../../src/site/shared/table-store.ts";
+import { readStoredTable, writeStoredTable, tableOnArrival, folioOnArrival, navigationType, navigationTypeNow, deviceStorage, TABLE_STORE_KEY, TRAVERSAL } from "../../src/site/shared/table-store.ts";
 import { emitTable, parseTable, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 
 // The Chart Table's second home (#634, ruled 2026-09-18 and 2026-09-19): the address decides an ARRIVAL and the device decides a RETURN. The store is injected rather than reached for, the way firstArrival/markArrival take theirs in src/site/home/ceremony.ts, so the precedence is provable here instead of only in a browser.
@@ -74,6 +74,27 @@ test("TS4 a BACK or FORWARD arrival takes the device's table over the stale addr
 test("TS5 a back arrival with NOTHING on the device still takes the address it landed on (#634)", () => {
   const carried = fill(1);
   assert.equal(emitTable(tableOnArrival(carried, null, "back_forward")), emitTable(carried));
+  // The case the cold review on PR #635 found shipped as a total loss: the two restore paths hand-rolled this rule
+  // without its qualifier, so a reader whose device holds nothing had the drawer EMPTIED by the gesture meant to keep
+  // it. Driven here at the rule, whose hosts are pinned to it by name in chart-drawer.test.ts and prospect-room.test.ts.
+  assert.equal(tableOnArrival(carried, null, TRAVERSAL).length, 1, "a traversal with an empty device seats nothing, which empties the table of every reader whose storage is blocked and of everyone who arrived on a shared link");
+  assert.equal(readStoredTable(shut), null, "and the unreadable store this stands for reads as null, not as an empty table");
+});
+
+test("TS14 a page whose ADDRESS is its content takes the same precedence WITHOUT the traversal term (#634, the Portfolio)", () => {
+  const carried = fill(1);
+  const stored = fill(2);
+  assert.equal(emitTable(folioOnArrival(carried, stored)), emitTable(carried), "a folio the address names is that folio, whatever this device holds");
+  assert.equal(emitTable(folioOnArrival(null, stored)), emitTable(stored), "and a page arrived at with no folio named shows what the device holds");
+  assert.deepEqual(folioOnArrival(null, null), []);
+  assert.deepEqual(folioOnArrival([], stored), [], "a present but empty key is a bare folio here too");
+  // The whole point of the second entry point: one gesture, one answer, whether or not the browser cached the page.
+  assert.equal(
+    emitTable(folioOnArrival(carried, stored)),
+    emitTable(tableOnArrival(carried, stored, "navigate")),
+    "the folio rule and an ordinary arrival must agree, or the Portfolio answers a Back differently from a fresh open",
+  );
+  assert.notEqual(emitTable(folioOnArrival(carried, stored)), emitTable(tableOnArrival(carried, stored, TRAVERSAL)), "and it is genuinely the traversal term that is being left out, not a synonym for the same call");
 });
 
 test("TS6 a RELOAD is an arrival and not a traversal, so the address wins (#634 ruling 1: a link, a bookmark, a typed address and a reload all take the address)", () => {

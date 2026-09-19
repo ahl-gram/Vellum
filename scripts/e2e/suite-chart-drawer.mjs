@@ -829,6 +829,23 @@ export async function run(ctx) {
     await evaluate(`(() => { const t = document.getElementById("chart-drawer-tab"); if (t && getComputedStyle(t).display !== "none") t.click(); })()`);
     await sleep(400);
   };
+  // A measurement poll, not a readiness wait (specs/settle-doctrine.md clause 4), and deliberately NOT keyed on the
+  // number the check is about (clause 6): it reads until the count stops moving and hands back its LAST read, which the
+  // caller asserts on. The first version of CD37 and CD38 put `cuttings === 2` in the settle instead, and the mutations
+  // that were supposed to prove them killed the predicate, so the checks' own booleans were never evaluated at all
+  // (the cold review on PR #635).
+  const restedAtExplorer = async () => {
+    let last = null;
+    let same = 0;
+    for (let i = 0; i < DRAWN; i++) {
+      const d = await evaluate(`(() => ({ ...${READ}, marker: window.__cd634 || null, navType: (performance.getEntriesByType("navigation")[0] || {}).type || null, stored: ${STORE} }))()`);
+      same = last && d.path === last.path && d.cuttings === last.cuttings ? same + 1 : 0;
+      last = d;
+      if (last.path === "/explorer/" && same >= 2) return last;
+      await sleep(50);
+    }
+    return last;
+  };
   const pressById = async (id) => {
     const at = await evaluate(`(() => { const e = document.getElementById(${JSON.stringify(id)}); if (!e) return null; e.scrollIntoView({ block: "center" }); const b = e.getBoundingClientRect(); if (b.width < 1) return null; const c = { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; return { ...c, hit: document.elementFromPoint(c.x, c.y) === e || e.contains(document.elementFromPoint(c.x, c.y)) }; })()`);
     if (!at) throw new Error(`${id} has no box to press`);
@@ -879,12 +896,7 @@ export async function run(ctx) {
       "prospect-filed-for-back",
     );
     await evaluate(`history.back()`);
-    const home = await settle(
-      `(() => ({ ...${READ}, marker: window.__cd634 || null }))()`,
-      (d) => d.path === "/explorer/" && d.cuttings === 2,
-      "chart-drawer-back-button",
-      DRAWN,
-    );
+    const home = await restedAtExplorer();
     check(
       "CD37 the browser's own BACK button brings the filed prospect home: the page comes back from the browser's cache with no boot code running at all, so the drawer is re-seated from the device and the address is written back to agree (#634 defect 2, ruled 2026-09-19)",
       lay.hit && filed.stored === filed.table && home.marker === "warm" &&
@@ -912,12 +924,7 @@ export async function run(ctx) {
     );
     await evaluate(`history.back()`);
     await atExplorer();
-    const home = await settle(
-      `(() => ({ ...${READ}, marker: window.__cd634 || null, navType: (performance.getEntriesByType("navigation")[0] || {}).type || null }))()`,
-      (d) => d.path === "/explorer/" && d.cuttings === 2,
-      "chart-drawer-back-button-cold",
-      DRAWN,
-    );
+    const home = await restedAtExplorer();
     check(
       "CD38 the same road with the browser's cache refused: the document is REBUILT and reads the stale address, so the table comes back from the device by the navigation type instead, and the sheet filed on the Prospect page survives either way (#634, both roads measured)",
       home.marker === null && home.navType === "back_forward" &&
@@ -966,6 +973,33 @@ export async function run(ctx) {
         still.cuttings === 0 && still.stored === null && still.rawHash.indexOf("table=") === -1,
       JSON.stringify({ emptied: { cuttings: emptied.cuttings, hashTable: emptied.hashTable, stored: emptied.stored }, still: { cuttings: still.cuttings, stored: still.stored, hash: still.rawHash } }),
     );
-    await forget();
   });
+
+  await step("CD41", async () => {
+    // The road the first draft of this fix BROKE, and which nothing here could reach: every other Back check files a
+    // sheet on the Prospect page first, so the device is never empty at a restore. A reader whose storage is blocked,
+    // and anyone who opened a folio someone shared with them, comes back to exactly this: sheets in the address, none
+    // on the device. The first draft emptied the drawer and then wrote an address with no table key at all, losing them
+    // from both homes in one gesture (the cold review on PR #635).
+    await go(`${DRESS}&table=${ONE}`);
+    await evaluate(`window.__cd634 = "bare"`);
+    const before = await evaluate(`(() => ({ ...${READ}, stored: ${STORE} }))()`);
+    // Any same-origin page away and back makes the entry: the claim is about the RESTORE, and the Prospect page's own
+    // plate render would buy nothing here and cost the lane its remaining budget. The FAQ is the cheapest door out.
+    await evaluate(`location.href = "/faq/"`);
+    for (let i = 0; i < 200; i++) { await sleep(50); if (await evaluate(`location.pathname === "/faq/" && document.readyState === "complete"`)) break; }
+    await evaluate(`history.back()`);
+    const home = await restedAtExplorer();
+    check(
+      "CD41 a cached return with NOTHING on the device keeps the table the ADDRESS is carrying: the reader whose storage is blocked, and the reader who opened a folio someone shared, meet this road and the restore must leave them exactly where they were (#634, the cold review's finding on PR #635)",
+      before.cuttings === 1 && before.stored === null && home.marker === "bare" &&
+        home.cuttings === 1 && home.hashTable === ONE && home.stored === null,
+      JSON.stringify({ before: { cuttings: before.cuttings, stored: before.stored }, home: { marker: home.marker, cuttings: home.cuttings, hashTable: home.hashTable, stored: home.stored } }),
+    );
+  });
+
+  // OUTSIDE every step, which is the whole point: `makeStep` swallows a throw from anywhere in a step's body, so a
+  // clear that sits after a check inside one is skipped exactly when a check gave up early and leaks the key into
+  // document-rooms and region-detail. suite-hunt.mjs brackets its own key at start and end for the same reason.
+  await forget();
 }

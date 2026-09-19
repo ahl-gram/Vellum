@@ -161,8 +161,14 @@ make an unqualified rule false. Read the surface, not just the rule.
   address decides an ARRIVAL and the device decides a RETURN (#634, 2026-09-19, superseding #401's
   ruling that the address was its only memory). A link, a bookmark, a typed address and a reload all
   take the table the address names, so a folio someone shares reproduces exactly; a Back or Forward
-  takes the table this device holds, because the address in a history entry is a snapshot taken
-  before the reader gathered more. The rule is pure in `src/site/shared/table-store.ts`, and the two
+  takes the table this device holds **when it holds one**, because the address in a history entry is
+  a snapshot taken before the reader gathered more. That qualifier is load bearing and not a detail:
+  a device holding nothing, because storage is blocked or because the reader arrived on someone
+  else's link, leaves the address it landed on still speaking, and a restore that reads the device
+  unqualified empties the table by the very gesture meant to keep it. **A page whose address IS its
+  content takes no traversal term at all**: the Portfolio shows the folio its address names, else
+  what the device holds, and answers a Back the same way whether or not the browser cached it. The
+  rule is pure in `src/site/shared/table-store.ts`, and the two
   roads back need two instruments, which is the part no reasoning supplies: a cached page runs NO
   boot code and is reachable only through `pageshow` with `persisted`, while a re-created one reads
   `back_forward` from its own navigation entry. A page that shows the table writes it to the device

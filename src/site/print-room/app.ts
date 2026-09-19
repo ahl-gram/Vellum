@@ -135,7 +135,6 @@ function applyHash(): void {
     const w = Number(coast) / 100;
     if (Number.isFinite(w)) carried.coast = Math.min(1, Math.max(0, w));
   }
-  // #634: the Explorer's gold road here carries its whole address, this page's own table key included, and every draw rewrites that address. Carrying it is what keeps a gathering alive through a visit to the Print Room, in the reader's hands and in a link they share.
   carried.table = p.get(TABLE_KEY);
 }
 
@@ -154,7 +153,7 @@ function writeHash(seed: number, style: string): void {
   if (carried.table !== null) p.set(TABLE_KEY, carried.table);
   history.replaceState(null, "", "#" + p.toString());
   road.href = "../explorer/#" + p.toString();
-  if (folioRoad) folioRoad.href = "./portfolio/" + (carried.table === null ? "" : `#${TABLE_KEY}=${carried.table}`);
+  if (folioRoad) folioRoad.href = "./portfolio/#" + p.toString();
 }
 
 function draw(): void {

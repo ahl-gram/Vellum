@@ -1,5 +1,6 @@
 // The Portfolio (#521 Sub 3 of #401): the Print Room's second page. The table rides in this page's
-// address and nowhere else, so the page reads it ONCE at load and never rewrites it. One job per
+// address, and since #634 falls back to the device when the address names no folio; either way the
+// page reads it ONCE at load and never rewrites it. One job per
 // gathered sheet, a region for a survey and a plate for a prospect since #522, dispatched grouped by
 // world because worldFor is a single-entry cache, and the sheets arrive progressively into a pile
 // whose top sheet stands on the stage.
@@ -11,7 +12,7 @@ import { createZoomController } from "../shared/zoom-controller.ts";
 import { chartFilename } from "../print-room/poster-presets.ts";
 import { thumbJobFor, thumbNames, subOf } from "../explorer/chart-drawer.ts";
 import { parseTable, groupByWorld, emitTable, tableHash, TABLE_KEY, type TableItem } from "../shared/table-address.ts";
-import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival } from "../shared/table-store.ts";
+import { deviceStorage as store, folioOnArrival, readStoredTable } from "../shared/table-store.ts";
 import { BARE_LINE, beneathLine, boundLine, draftedLine, gatheredLine, roman, sheetLine } from "./folio-lines.ts";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
@@ -37,9 +38,7 @@ interface Drawn {
   url: string | null;
 }
 
-// #634 ruling 4 (2026-09-19): a folio the address NAMES is that folio, exactly as sent; a Portfolio opened with none named shows what this device holds, which is what makes the Print Room's own road to this page reach a gathering rather than a bare pile.
-const items = tableOnArrival(parseTable(location.hash), readStoredTable(store), navigationTypeNow());
-// The road home is the address this page is SHOWING, so the reader returns to the chart they gathered from and not to the seed of the day (#634 defect 1). The authored href stays as it is: test/site/astro-scaffold.test.ts pins the built markup.
+const items = folioOnArrival(parseTable(location.hash), readStoredTable(store));
 const roadHome = document.getElementById("pf-explorer") as HTMLAnchorElement | null;
 if (roadHome) roadHome.href = "../../explorer/" + tableHash(location.hash, emitTable(items));
 const sheets: Drawn[] = items.map((item, at) => ({ item, at, title: `Chart № ${item.seed}`, worldTitle: "", svg: null, url: null }));

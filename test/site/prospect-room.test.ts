@@ -192,7 +192,8 @@ test("PR-table this page keeps the table's SECOND home too, on both roads the Ex
   assert.notEqual(showAt, -1, "this page has no pageshow listener, and a page served from the browser's cache runs NO boot code, so nothing at all would bring its table up to date");
   const show = app.slice(showAt, app.indexOf("\n});", showAt));
   assert.match(show, /if \(!e\.persisted\) return;/, "the listener acts on a fresh load as well as a cached one, so it fights the boot's own precedence instead of being the restore's only reader");
-  assert.match(show, /const held = seated\(readStoredTable\(store\) \?\? \[\]\);/, "the cached return reads something other than the device, through something other than the gate every other seat here goes through");
+  // The SHARED rule, for the reason the Explorer's own guard gives: the first version of this pinned the rule with its qualifier dropped (the cold review on PR #635).
+  assert.match(show, /const held = seated\(tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), TRAVERSAL\)\);/, "the cached return re-seats this page from something other than the ruled precedence, or through something other than the gate every other seat here goes through");
   assert.match(show, /if \(emitTable\(held\) === emitTable\(table\)\) return;/, "the no-op skip is gone or inverted, and inverted it does nothing exactly when the device and this page disagree");
   assert.match(show, /table = held;/, "the listener reads the device and never keeps what it read");
   assert.match(show, /history\.replaceState\(null, "", tableHash\(location\.hash, emitTable\(table\)\)\)/, "and it leaves this page's own address disagreeing with the table it just took");

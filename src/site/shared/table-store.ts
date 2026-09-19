@@ -3,7 +3,7 @@ import { emitTable, parseTableValue, type TableItem } from "./table-address.ts";
 
 export const TABLE_STORE_KEY = "vellum.table.v1";
 
-/** The device, in one place. Three hosts hand-rolled this line and two of them were wired to nothing a test could see: a guard that reads `readStoredTable(store)` as text cannot tell what `store` was bound to one line earlier (guard-prover round 3). */
+/** The device, in one place, so no host names its own. */
 export const deviceStorage = (): Storage => localStorage;
 
 /** The device's table, or null when it holds none, which is the reading `tableOnArrival` treats as "the address decides". A store that refuses to answer reads the same way. */
@@ -43,11 +43,22 @@ export const navigationTypeNow = (): string =>
     (typeof performance === "undefined" ? [] : performance.getEntriesByType("navigation")) as ReadonlyArray<{ type?: string }>,
   );
 
+/** The browser's own word for a history traversal, and what a CACHED return is even though its navigation entry still reads `navigate`, which is why a restore passes it rather than reading it. */
+export const TRAVERSAL = "back_forward";
+
+/** The precedence for a page whose ADDRESS is its content, the Portfolio: no traversal term, or a Back there would answer one way when the browser cached the page and another when it did not. */
+export function folioOnArrival(
+  carried: ReadonlyArray<TableItem> | null,
+  stored: ReadonlyArray<TableItem> | null,
+): ReadonlyArray<TableItem> {
+  return carried !== null ? carried : (stored ?? []);
+}
+
 export function tableOnArrival(
   carried: ReadonlyArray<TableItem> | null,
   stored: ReadonlyArray<TableItem> | null,
   how: string,
 ): ReadonlyArray<TableItem> {
-  if (how === "back_forward" && stored !== null) return stored;
-  return carried !== null ? carried : (stored ?? []);
+  if (how === TRAVERSAL && stored !== null) return stored;
+  return folioOnArrival(carried, stored);
 }

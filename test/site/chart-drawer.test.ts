@@ -315,7 +315,8 @@ test("CT9 the table is written to the device when the reader CHANGES it and re-s
   assert.match(show, /if \(!e\.persisted\) return;/, "the listener acts on a fresh load as well as a cached one, so it fights the boot's own precedence instead of being the restore's only reader");
   // What `held` is BUILT FROM, not only what happens to it: the prover's round 1 set it to the drawer's own current
   // state, which re-seats the drawer with what it already holds and reads as a restore while restoring nothing.
-  assert.match(show, /const held = readStoredTable\(store\) \?\? \[\];/, "the cached return no longer reads the DEVICE, so the drawer is re-seated from something that cannot have changed while the page sat in the cache");
+  // The SHARED rule and not a hand-rolled one. The first version of this guard pinned `readStoredTable(store) ?? []`, which is the rule with its qualifier dropped: a device holding nothing then emptied the drawer on the very gesture meant to keep it, and this assertion cemented the defect (the cold review on PR #635).
+  assert.match(show, /const held = tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), TRAVERSAL\);/, "the cached return re-seats the drawer from something other than the ruled precedence, and a hand-rolled one drops the qualifier that keeps a reader with nothing stored from losing their table");
   // The skip is pinned BY ITS OPERATOR: inverting it reads as a harmless optimisation and skips precisely when a restore is owed, which is the feature inverted with nothing else in the file changed (guard-prover round 2).
   assert.match(show, /if \(emitTable\(held\) === emitTable\(chartTable\.state\(\)\)\) return;/, "the no-op skip on a cached return is gone or inverted, and inverted it does nothing exactly when the device and the drawer disagree");
   assert.match(show, /chartTable\.restore\(held\)/, "and it never re-seats the drawer with what it read");

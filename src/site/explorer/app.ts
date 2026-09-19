@@ -6,8 +6,8 @@ import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts"
 import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
-import { emitTable, type TableItem, type TableOverrides } from "../shared/table-address.ts";
-import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable } from "../shared/table-store.ts";
+import { emitTable, parseTable, type TableItem, type TableOverrides } from "../shared/table-address.ts";
+import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable, TRAVERSAL } from "../shared/table-store.ts";
 import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD, type FilingSheet } from "./chart-drawer.ts";
 import { bindTableLeaf } from "./table-leaf.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
@@ -127,10 +127,10 @@ const chartTable = bindChartDrawer({
   onChange: (laid) => { writeStoredTable(store, laid); syncHash(); relabelEar(); lc.relabelLay(); },
 });
 
-// The one road no boot code can see: a page served from the browser's back/forward cache runs none at all, so the drawer would go on showing the snapshot it froze before the reader gathered more (#634, measured 2026-09-19).
+// The one road no boot code can see: a page served from the browser's back/forward cache runs none at all (#634, measured 2026-09-19).
 window.addEventListener("pageshow", (e) => {
   if (!e.persisted) return;
-  const held = readStoredTable(store) ?? [];
+  const held = tableOnArrival(parseTable(location.hash), readStoredTable(store), TRAVERSAL);
   if (emitTable(held) === emitTable(chartTable.state())) return;
   chartTable.restore(held);
   syncHash();

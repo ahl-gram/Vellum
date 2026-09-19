@@ -216,7 +216,8 @@ test("PRR-table the Print Room carries a gathering THROUGH rather than dropping 
   assert.ok(writer.length > 100, "writeHash was not found, so the assertions below read an empty slice");
   assert.match(writer, /if \(carried\.table !== null\) p\.set\(TABLE_KEY, carried\.table\)/, "the one address writer here drops the table again, and it runs on EVERY draw including the boot one");
   assert.match(writer, /road\.href = "\.\.\/explorer\/#" \+ p\.toString\(\)/, "and the road back is no longer built from that same address, so the two can disagree");
-  assert.match(writer, /folioRoad\.href = "\.\/portfolio\/" \+ \(carried\.table === null \? "" : `#\$\{TABLE_KEY\}=\$\{carried\.table\}`\)/, "the road on to The Portfolio no longer carries the gathering, so it always reaches a bare folio");
+  // The same whole address the road back to the Explorer is built from, and for the same reason: handing the folio page the sheets alone sends the reader's press BACK from it to the seed of the day, which is #634 defect 1 one room over (the cold review on PR #635).
+  assert.match(writer, /folioRoad\.href = "\.\/portfolio\/#" \+ p\.toString\(\)/, "the road on to The Portfolio carries less than this page's own address, so the gathering or the world is dropped on the way");
   assert.equal((app.match(/folioRoad\.href\s*=/g) ?? []).length, 1, "the folio road is written in more than one place, and the last write is the one the reader presses");
   // The BINDING, checked against the page rather than restated here: the script can look up an id this page does not
   // author, `folioRoad` is then null, and the `if (folioRoad)` guard swallows every write in silence with the assertions
