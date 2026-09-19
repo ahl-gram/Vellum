@@ -77,11 +77,12 @@ test("PFR4 the Portfolio's road home is built from the address it is SHOWING, an
   const road = at("pf-explorer");
   const hrefAt = app.indexOf("href", road);
   assert.ok(hrefAt > road, "nothing assigns the road's href after it is looked up, so the press back is the Astro literal and loses the whole gathering (#634 defect 1)");
+  // Both calls are anchored WHOLE rather than by their tokens. The guard-prover's round 1 on this branch put the
+  // address and the device the wrong way round as arguments and put "" in place of the sheets, and two unordered
+  // assert.match calls passed both mutations while the ruled precedence was inverted and the gathering dropped.
   const line = app.slice(road, app.indexOf("\n", hrefAt));
-  assert.match(line, /tableHash\(location\.hash/, "the road home no longer carries the address this page was handed, so a reader who presses it loses the chart they gathered from");
-  assert.match(line, /explorer/, "and it still goes to the Explorer");
+  assert.match(line, /roadHome\.href = "\.\.\/\.\.\/explorer\/" \+ tableHash\(location\.hash, emitTable\(items\)\)/, "the road home is no longer this page's own address plus the sheets it is showing, so a reader who presses it loses the chart they gathered from, the sheets, or both");
   const arrival = at("tableOnArrival(");
-  const call = app.slice(arrival, app.indexOf(")", app.indexOf("navigationTypeNow", arrival)));
-  assert.match(call, /parseTable\(location\.hash\)/, "the address is no longer the first word on what this folio holds, which is what keeps a shared link reproducing exactly");
-  assert.match(call, /readStoredTable/, "and a Portfolio whose address names no folio no longer falls back to the device, so the Print Room's own road here reaches a bare pile (#634 ruling 4)");
+  const call = app.slice(arrival, app.indexOf("\n", arrival));
+  assert.match(call, /tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(\(\) => localStorage\), navigationTypeNow\(\)\)/, "this folio's contents no longer come from the address FIRST and the device second (#634 rulings 1 and 4): swapped, a shared link stops reproducing exactly; dropped, the Print Room's own road here reaches a bare pile");
 });

@@ -113,5 +113,7 @@ test("TS11 the navigation type is read from the browser's own entry, and default
   assert.equal(navigationType(() => [{ type: "back_forward" }]), "back_forward");
   assert.equal(navigationType(() => [{ type: "reload" }]), "reload");
   assert.equal(navigationType(() => []), "navigate", "a browser that reports no navigation entry must fall back to the address, never to the device");
+  assert.equal(navigationType(() => [{ type: "" }]), "navigate", "an entry whose type is the empty string is not a navigation type, and reading it as one would compare it against back_forward forever");
+  assert.equal(navigationType(() => [{}]), "navigate", "nor is an entry with no type at all");
   assert.equal(navigationType(() => { throw new Error("no performance entries here"); }), "navigate");
 });

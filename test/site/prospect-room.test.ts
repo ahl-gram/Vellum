@@ -149,7 +149,9 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
   // #634 gave the boot table a second source, so the gate moved one hop into `seated` and is asserted in two steps rather than one: that the boot table is built by it, and that it IS the gate.
   assert.match(prologue, /let table[^;]*=\s*seated\(/, "the page's boot table skips the dedupe gate restore() runs, so a shared link carrying one sheet twice leaves this page's tally and cap disagreeing with the Explorer's over one address");
   const seated = prologue.slice(prologue.indexOf("const seated ="), prologue.indexOf(";", prologue.indexOf("const seated =")));
-  assert.match(seated, /\blayOnTable\(/, "the boot table's own builder no longer runs the dedupe gate, which is the same defect one hop further out");
+  // The gate's ANSWER, not a call to it: the prover's round 1 discarded the return inside this reduce and appended
+  // unconditionally, which keeps the token and defeats the dedupe and the cap exactly as deleting it would.
+  assert.match(seated, /\(kept, item\) => layOnTable\(kept, item\)\.items/, "the boot table's own builder calls the dedupe gate and throws its answer away, which is the same defect one hop further out");
   assert.match(prologue, /tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), navigationTypeNow\(\)\)/, "the page's boot table no longer asks the ruled precedence (#634, 2026-09-19), so this page and the Explorer can disagree about the same gathering");
   assert.doesNotMatch(app, /"Lay (this|the) prospect on the table"/, "and writes no second copy of the wording");
   assert.match(css, /\.pp-lay\.dim\s*\{[^}]*background:\s*var\(--control-cream\)/, "the refusing face dims by losing the featured gold, keeping its ink at full strength");

@@ -285,9 +285,14 @@ test("CT8 the road to the Portfolio carries the Explorer's WHOLE address, not th
   const at = src.indexOf("deps.road.addEventListener");
   assert.notEqual(at, -1, "the road's own handler is gone, so this guard would be reading the whole file");
   const handler = src.slice(at, src.indexOf("});", at));
-  assert.match(handler, /tableHash\(window\.location\.hash/, "the road hands the Portfolio the sheets and nothing else, so the press back lands the reader on the seed of the day instead of the chart they gathered from");
+  // The ASSIGNMENT is anchored, not the tokens: the guard-prover's round 1 left the whole-address expression standing
+  // as a dead local and navigated with `deps.folioHref` alone, and a token-wise guard passed that with the road broken.
+  assert.match(
+    handler,
+    /window\.location\.href = `\$\{deps\.folioHref[^`]*\$\{tableHash\(window\.location\.hash, emitTable\(items\)\)\}`;/,
+    "the road no longer NAVIGATES to this page's own address plus the table: computing it and going somewhere else is the same defect as never computing it, and it is what #634 measured losing the world",
+  );
   assert.doesNotMatch(handler, /#\$\{TABLE_KEY\}=/, "the key-only form is back; it is what #634 defect 1 measured losing the world");
-  assert.match(handler, /emitTable\(items\)/, "and the sheets it carries are still the table's own, in the one grammar");
 });
 
 test("CT9 the table is written to the device when the reader CHANGES it and re-seated on a cached return, which are the only two roads #634 leaves (ruled 2026-09-19)", () => {
@@ -304,7 +309,10 @@ test("CT9 the table is written to the device when the reader CHANGES it and re-s
   const show = app.slice(app.indexOf('addEventListener("pageshow"'), app.indexOf("\n});", app.indexOf('addEventListener("pageshow"')));
   assert.ok(show.length > 40, "the pageshow listener is gone, and with it the ONLY road into a page the browser served from its cache: no boot code runs there at all");
   assert.match(show, /if \(!e\.persisted\) return;/, "the listener acts on a fresh load as well as a cached one, so it fights the boot's own precedence instead of being the restore's only reader");
-  assert.match(show, /chartTable\.restore\(held\)/, "the listener reads the device and never re-seats the drawer with it");
+  // What `held` is BUILT FROM, not only what happens to it: the prover's round 1 set it to the drawer's own current
+  // state, which re-seats the drawer with what it already holds and reads as a restore while restoring nothing.
+  assert.match(show, /const held = readStoredTable\(store\) \?\? \[\];/, "the cached return no longer reads the DEVICE, so the drawer is re-seated from something that cannot have changed while the page sat in the cache");
+  assert.match(show, /chartTable\.restore\(held\)/, "and it never re-seats the drawer with what it read");
   assert.match(show, /syncHash\(\)/, "and it leaves the address disagreeing with the drawer it just changed");
 });
 
