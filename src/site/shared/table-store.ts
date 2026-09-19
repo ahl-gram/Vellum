@@ -3,6 +3,9 @@ import { emitTable, parseTableValue, type TableItem } from "./table-address.ts";
 
 export const TABLE_STORE_KEY = "vellum.table.v1";
 
+/** The device, in one place. Three hosts hand-rolled this line and two of them were wired to nothing a test could see: a guard that reads `readStoredTable(store)` as text cannot tell what `store` was bound to one line earlier (guard-prover round 3). */
+export const deviceStorage = (): Storage => localStorage;
+
 /** The device's table, or null when it holds none, which is the reading `tableOnArrival` treats as "the address decides". A store that refuses to answer reads the same way. */
 export function readStoredTable(getStorage: () => Storage): ReadonlyArray<TableItem> | null {
   try {

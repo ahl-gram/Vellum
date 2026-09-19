@@ -79,6 +79,12 @@ export function roomOnTable(items: ReadonlyArray<TableItem>): number {
   return Math.max(0, TABLE_CAP - items.length);
 }
 
+/** The sheets a re-seat drops, whose pictures go with them. Pure and here rather than inline in `restore`, because the set it is built from is the whole hazard: built from the OUTGOING table instead of the incoming one it answers "nothing left" for every possible re-seat, and a guard reading the line's text cannot see the difference (guard-prover round 3). */
+export function sheetsThatLeft(before: ReadonlyArray<TableItem>, after: ReadonlyArray<TableItem>): ReadonlyArray<TableItem> {
+  const staying = new Set(after.map((item) => emitTable([item])));
+  return before.filter((item) => !staying.has(emitTable([item])));
+}
+
 // The address carries the seat and the dress but not the drawn TITLE, which the worker derives from (world, window), so a recovered sheet is named from what the address does state: the chart number IS the seed (cartouche.ts), which names the world exactly even before its survey is drawn again.
 const DRESS: Record<string, string> = { antique: "antique", ink: "pen & ink" };
 const dressOf = (style: string): string => DRESS[style] ?? style;
@@ -309,8 +315,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
       let kept: ReadonlyArray<TableItem> = [];
       for (const item of next) kept = layOnTable(kept, item).items;
       // Since #634 this runs again on every cached return, so a sheet that left takes its blob url with it rather than accumulating one per re-seat, and a drawer standing OPEN draws what just arrived instead of holding an empty frame.
-      const staying = new Set(kept.map(keyOf));
-      for (const item of items) if (!staying.has(keyOf(item))) forget(item);
+      for (const gone of sheetsThatLeft(items, kept)) forget(gone);
       items = kept;
       render();
       if (deps.root.classList.contains("open")) void fill();

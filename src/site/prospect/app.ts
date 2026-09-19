@@ -3,7 +3,7 @@ import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
 import { plateDressFor, type PlateDress } from "../explorer/prospect-job.ts";
 import { countLine, layOnTable, layPressFace, LAY_ON_PAGE } from "../explorer/chart-drawer.ts";
 import { emitTable, parseTable, prospectItemFrom, tableHash, type TableItem, type TableOverrides } from "../shared/table-address.ts";
-import { navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable } from "../shared/table-store.ts";
+import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable } from "../shared/table-store.ts";
 import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } from "./address.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindProspectRoom, showPlate, writeFolio, writeNote, type RoomFurniture } from "./seats.ts";
@@ -73,8 +73,7 @@ let drawGen = 0;
 window.__vellumProspectUsesWorker = usesWorker;
 window.__vellumProspectState = () => last;
 
-const store = (): Storage => localStorage;
-const seated = (items: ReadonlyArray<TableItem>): ReadonlyArray<TableItem> =>
+const seated =(items: ReadonlyArray<TableItem>): ReadonlyArray<TableItem> =>
   items.reduce<ReadonlyArray<TableItem>>((kept, item) => layOnTable(kept, item).items, []);
 
 let table: ReadonlyArray<TableItem> = seated(tableOnArrival(parseTable(location.hash), readStoredTable(store), navigationTypeNow()));

@@ -7,7 +7,7 @@ import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-war
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
 import { emitTable, type TableItem, type TableOverrides } from "../shared/table-address.ts";
-import { navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable } from "../shared/table-store.ts";
+import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable } from "../shared/table-store.ts";
 import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD, type FilingSheet } from "./chart-drawer.ts";
 import { bindTableLeaf } from "./table-leaf.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
@@ -111,8 +111,6 @@ const announce = makeAnnouncer({
   after: (run, ms) => window.setTimeout(run, ms),
   cancel: (timer) => { window.clearTimeout(timer); },
 });
-
-const store = (): Storage => localStorage;
 
 const chartTable = bindChartDrawer({
   root: chartDrawer, tab: chartDrawerTab, shut: chartDrawerShut, count: chartDrawerCount,

@@ -181,6 +181,8 @@ test("PR-table this page keeps the table's SECOND home too, on both roads the Ex
   // The whole of this check exists because the wiring is DUPLICATED at two hosts and only the Explorer's half was
   // guarded: the guard-prover's round 2 deleted this page's device write, and then its entire pageshow listener, with
   // every other test in the set green. That is #634's own defect recurring one level down, in the tests.
+  // `store` is the SHARED binding, which table-store.test.ts drives against the real global (guard-prover round 3).
+  assert.match(app, /import \{ deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/, "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green");
   const from = app.indexOf('layPress.addEventListener("click"');
   assert.notEqual(from, -1, "the filing press has no handler, so this guard reads the whole file");
   const handler = app.slice(from, app.indexOf("\n});", from));

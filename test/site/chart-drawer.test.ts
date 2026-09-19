@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { layOnTable, takeOffTable, roomOnTable, countLine, tabLine, refusalLine, subOf, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD, LAY_ON_PAGE } from "../../src/site/explorer/chart-drawer.ts";
+import { layOnTable, takeOffTable, roomOnTable, countLine, tabLine, refusalLine, subOf, thumbJobFor, thumbNames, layPressFace, filingAt, sheetsThatLeft, LAY_ON_CARD, LAY_ON_PAGE } from "../../src/site/explorer/chart-drawer.ts";
 import { TABLE_CAP, TABLE_KEY, emitTable, type ProspectItem, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 import { emitTableKey } from "../../src/site/explorer/address.ts";
 
@@ -299,6 +299,8 @@ test("CT8 the road to the Portfolio carries the Explorer's WHOLE address, not th
 
 test("CT9 the table is written to the device when the reader CHANGES it and re-seated on a cached return, which are the only two roads #634 leaves (ruled 2026-09-19)", () => {
   const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
+  // `store` is the SHARED binding, not one this file rolled for itself: table-store.test.ts drives that binding against the real global, which is what makes every `readStoredTable(store)` below mean something a test has seen (guard-prover round 3).
+  assert.match(app, /import \{ deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/, "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green");
   const onChange = app.slice(app.indexOf("onChange:"), app.indexOf("\n", app.indexOf("onChange:")));
   assert.match(onChange, /writeStoredTable\(store, laid\)/, "a lay or a take no longer reaches the device, so the gathering exists only in the address again and the Back button loses it");
   // Two restore sites by design, the boot and the cached return, so each is anchored on its own input rather than on whichever comes first in the file.
@@ -328,7 +330,13 @@ test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that
   assert.match(fill, /do \{[\s\S]*\} while \(refill\)/, "and the flag is set but never acted on, which is the same thing one step later");
   const restore = src.slice(src.indexOf("restore(next:"), src.indexOf("\n    },", src.indexOf("restore(next:")));
   assert.ok(restore.length > 60, "restore was not found, so the assertions below read an empty slice");
-  assert.match(restore, /for \(const item of items\) if \(!staying\.has\(keyOf\(item\)\)\) forget\(item\);/, "a sheet that leaves on a cached return keeps its blob url, and this path now runs on every return rather than once at boot, so they accumulate one per re-seat");
+  assert.match(restore, /for \(const gone of sheetsThatLeft\(items, kept\)\) forget\(gone\);/, "a sheet that leaves on a cached return keeps its blob url, and this path now runs on every return rather than once at boot, so they accumulate one per re-seat");
+  // The set it is built from is the hazard, so it is BEHAVIOUR here and not a regex: built from the outgoing table it answers "nothing left" for every re-seat, and the line's text is identical.
+  const before = [survey(1), survey(2), survey(3)];
+  assert.deepEqual(sheetsThatLeft(before, [survey(1), survey(3)]).map((i) => emitTable([i])), [emitTable([survey(2)])], "the middle sheet left and was not named, so its picture is never revoked");
+  assert.deepEqual(sheetsThatLeft(before, before), [], "nothing left, so nothing is forgotten and a redraw does not churn the urls it already made");
+  assert.deepEqual(sheetsThatLeft(before, []).length, 3, "an emptied table drops every picture");
+  assert.deepEqual(sheetsThatLeft([], before), [], "and an arrival into a bare drawer forgets nothing");
   assert.match(restore, /if \(deps\.root\.classList\.contains\("open"\)\) void fill\(\);/, "a drawer standing OPEN when the table is re-seated never draws what arrived");
 });
 

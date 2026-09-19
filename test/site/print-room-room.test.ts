@@ -218,4 +218,11 @@ test("PRR-table the Print Room carries a gathering THROUGH rather than dropping 
   assert.match(writer, /road\.href = "\.\.\/explorer\/#" \+ p\.toString\(\)/, "and the road back is no longer built from that same address, so the two can disagree");
   assert.match(writer, /folioRoad\.href = "\.\/portfolio\/" \+ \(carried\.table === null \? "" : `#\$\{TABLE_KEY\}=\$\{carried\.table\}`\)/, "the road on to The Portfolio no longer carries the gathering, so it always reaches a bare folio");
   assert.equal((app.match(/folioRoad\.href\s*=/g) ?? []).length, 1, "the folio road is written in more than one place, and the last write is the one the reader presses");
+  // The BINDING, checked against the page rather than restated here: the script can look up an id this page does not
+  // author, `folioRoad` is then null, and the `if (folioRoad)` guard swallows every write in silence with the assertions
+  // above all green (guard-prover round 3). The id is read out of the script and looked for in the markup, so the two
+  // cannot drift apart in either direction.
+  const bind = app.match(/const folioRoad = document\.getElementById\("([^"]+)"\)/);
+  assert.ok(bind, "the folio road is no longer looked up by id at all, so this check has nothing to compare against the page");
+  assert.match(page, new RegExp(`<a id="${bind[1]}"`), `the script binds the folio road to id ${JSON.stringify(bind[1])} and this page authors no such anchor, so the road is bound to null and every href write is swallowed`);
 });

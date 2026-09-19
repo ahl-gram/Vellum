@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readStoredTable, writeStoredTable, tableOnArrival, navigationType, navigationTypeNow, TABLE_STORE_KEY } from "../../src/site/shared/table-store.ts";
+import { readStoredTable, writeStoredTable, tableOnArrival, navigationType, navigationTypeNow, deviceStorage, TABLE_STORE_KEY } from "../../src/site/shared/table-store.ts";
 import { emitTable, parseTable, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 
 // The Chart Table's second home (#634, ruled 2026-09-18 and 2026-09-19): the address decides an ARRIVAL and the device decides a RETURN. The store is injected rather than reached for, the way firstArrival/markArrival take theirs in src/site/home/ceremony.ts, so the precedence is provable here instead of only in a browser.
@@ -116,6 +116,23 @@ test("TS11 the navigation type is read from the browser's own entry, and default
   assert.equal(navigationType(() => [{ type: "" }]), "navigate", "an entry whose type is the empty string is not a navigation type, and reading it as one would compare it against back_forward forever");
   assert.equal(navigationType(() => [{}]), "navigate", "nor is an entry with no type at all");
   assert.equal(navigationType(() => { throw new Error("no performance entries here"); }), "navigate");
+});
+
+test("TS13 the device every host reaches for is THE device, named once (#634, guard-prover round 3)", () => {
+  // Three hosts hand-rolled this one line and two of them could be wired to a stub with every guard in the set green,
+  // because a guard that reads `readStoredTable(store)` as text cannot see what `store` was bound to a line earlier.
+  // One exported binding, driven here, is what takes that out of each host's reach.
+  const real = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  const fake = new FakeStore();
+  try {
+    Object.defineProperty(globalThis, "localStorage", { value: fake, configurable: true, writable: true });
+    assert.equal(deviceStorage(), fake as unknown as Storage, "the device binding does not resolve to this browser's own localStorage, so every host could be reading and writing something no reader will ever see again");
+    writeStoredTable(deviceStorage, fill(1));
+    assert.ok(fake.calls.includes(`set ${TABLE_STORE_KEY}`), "and a write through it reaches nothing");
+  } finally {
+    if (real) Object.defineProperty(globalThis, "localStorage", real);
+    else Reflect.deleteProperty(globalThis, "localStorage");
+  }
 });
 
 test("TS12 the browser SEAM reads the real navigation entry, so the reading every host actually takes is exercised once (#634)", () => {

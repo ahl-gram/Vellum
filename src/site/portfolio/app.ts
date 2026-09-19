@@ -11,7 +11,7 @@ import { createZoomController } from "../shared/zoom-controller.ts";
 import { chartFilename } from "../print-room/poster-presets.ts";
 import { thumbJobFor, thumbNames, subOf } from "../explorer/chart-drawer.ts";
 import { parseTable, groupByWorld, emitTable, tableHash, TABLE_KEY, type TableItem } from "../shared/table-address.ts";
-import { navigationTypeNow, readStoredTable, tableOnArrival } from "../shared/table-store.ts";
+import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival } from "../shared/table-store.ts";
 import { BARE_LINE, beneathLine, boundLine, draftedLine, gatheredLine, roman, sheetLine } from "./folio-lines.ts";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
@@ -38,7 +38,7 @@ interface Drawn {
 }
 
 // #634 ruling 4 (2026-09-19): a folio the address NAMES is that folio, exactly as sent; a Portfolio opened with none named shows what this device holds, which is what makes the Print Room's own road to this page reach a gathering rather than a bare pile.
-const items = tableOnArrival(parseTable(location.hash), readStoredTable(() => localStorage), navigationTypeNow());
+const items = tableOnArrival(parseTable(location.hash), readStoredTable(store), navigationTypeNow());
 // The road home is the address this page is SHOWING, so the reader returns to the chart they gathered from and not to the seed of the day (#634 defect 1). The authored href stays as it is: test/site/astro-scaffold.test.ts pins the built markup.
 const roadHome = document.getElementById("pf-explorer") as HTMLAnchorElement | null;
 if (roadHome) roadHome.href = "../../explorer/" + tableHash(location.hash, emitTable(items));

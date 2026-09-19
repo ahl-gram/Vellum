@@ -84,7 +84,9 @@ test("PFR4 the Portfolio's road home is built from the address it is SHOWING, an
   assert.match(line, /roadHome\.href = "\.\.\/\.\.\/explorer\/" \+ tableHash\(location\.hash, emitTable\(items\)\)/, "the road home is no longer this page's own address plus the sheets it is showing, so a reader who presses it loses the chart they gathered from, the sheets, or both");
   // COUNTED, because an anchored slice ends where it ends: a second assignment just past this line overwrites the first with the bare fallback and every regex above still passes (guard-prover round 2).
   assert.equal((app.match(/roadHome\.href\s*=/g) ?? []).length, 1, "the road home is written in more than one place, and the last write is the one the reader presses");
+  // The shared binding, which table-store.test.ts drives against the real global (guard-prover round 3).
+  assert.match(app, /import \{ deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/, "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green");
   const arrival = at("tableOnArrival(");
   const call = app.slice(arrival, app.indexOf("\n", arrival));
-  assert.match(call, /tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(\(\) => localStorage\), navigationTypeNow\(\)\)/, "this folio's contents no longer come from the address FIRST and the device second (#634 rulings 1 and 4): swapped, a shared link stops reproducing exactly; dropped, the Print Room's own road here reaches a bare pile");
+  assert.match(call, /tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), navigationTypeNow\(\)\)/,"this folio's contents no longer come from the address FIRST and the device second (#634 rulings 1 and 4): swapped, a shared link stops reproducing exactly; dropped, the Print Room's own road here reaches a bare pile");
 });
