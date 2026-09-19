@@ -1,4 +1,4 @@
-// The Chart Table's drawer (#520 Sub 2 of #401, direction D ruled at the #518 sitting): the dog-ear on the committed survey, the drawer it fills, the cap, and the address that is the table's only memory. `chart-drawer` and never `drawer`: suite-room-drawer is the site's phone nav (#520 ruling 2).
+// The Chart Table's drawer (#520 Sub 2 of #401, direction D ruled at the #518 sitting): the dog-ear on the committed survey, the drawer it fills, the cap, and since #634 the table's two homes, the address deciding an arrival and the device a return. `chart-drawer` and never `drawer`: suite-room-drawer is the site's phone nav (#520 ruling 2).
 import { makeSettle } from "./settle-support.mjs";
 import { makeStep } from "./step-support.mjs";
 import { makeStage } from "./home-support.mjs";
@@ -66,10 +66,7 @@ export async function run(ctx) {
     if (r) await clickAt(r.x, r.y);
     return r;
   };
-  // Since #634 the table has a second home on the DEVICE, and this suite fills it on nearly every group: every arrival
-  // below that carries no table key would otherwise inherit whatever the group before it laid, which is a bleed inside
-  // one suite and not only across a lane. So an arrival is bare unless it says otherwise, and the four checks that are
-  // ABOUT the device seed it themselves. about:blank has no storage of its own, so the clear rides on the site's origin.
+  // Since #634 the table has a second home on the DEVICE, and this suite fills it on nearly every group: every arrival below that carries no table key would otherwise inherit whatever the group before it laid, which is a bleed inside one suite and not only across a lane. So an arrival is bare unless it says otherwise, and the four checks that are ABOUT the device seed it themselves. about:blank has no storage of its own, so the clear rides on the site's origin.
   const forget = async () => { try { await evaluate(`localStorage.removeItem(${JSON.stringify(TABLE_STORE_KEY)})`); } catch {} };
   const go = async (hash) => {
     await forget();
@@ -802,8 +799,7 @@ export async function run(ctx) {
     await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   });
 
-  // #634: the table's second home, and the four roads the two homes exist for. ONE and TWO are addresses rather than
-  // gestures because every check below is about WHERE the table came from, not about the handle that filed it.
+  // #634: the table's second home, and the four roads the two homes exist for. ONE and TWO are addresses rather than gestures because every check below is about WHERE the table came from, not about the handle that filed it.
   const ONE = "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-17.ly-13";
   const TWO = `${ONE}_k-p.seed-42.style-antique.i-0.year-1059`;
   const STORE = `(() => { try { return localStorage.getItem(${JSON.stringify(TABLE_STORE_KEY)}); } catch { return "THREW"; } })()`;
@@ -829,11 +825,7 @@ export async function run(ctx) {
     await evaluate(`(() => { const t = document.getElementById("chart-drawer-tab"); if (t && getComputedStyle(t).display !== "none") t.click(); })()`);
     await sleep(400);
   };
-  // A measurement poll, not a readiness wait (specs/settle-doctrine.md clause 4), and deliberately NOT keyed on the
-  // number the check is about (clause 6): it reads until the count stops moving and hands back its LAST read, which the
-  // caller asserts on. The first version of CD37 and CD38 put `cuttings === 2` in the settle instead, and the mutations
-  // that were supposed to prove them killed the predicate, so the checks' own booleans were never evaluated at all
-  // (the cold review on PR #635).
+  // A measurement poll, not a readiness wait (specs/settle-doctrine.md clause 4), and deliberately NOT keyed on the number the check is about (clause 6): it reads until the count stops moving and hands back its LAST read, which the caller asserts on. The first version of CD37 and CD38 put `cuttings === 2` in the settle instead, and the mutations that were supposed to prove them killed the predicate, so the checks' own booleans were never evaluated at all (the cold review on PR #635).
   const restedAtExplorer = async () => {
     let last = null;
     let same = 0;
@@ -976,11 +968,7 @@ export async function run(ctx) {
   });
 
   await step("CD41", async () => {
-    // The road the first draft of this fix BROKE, and which nothing here could reach: every other Back check files a
-    // sheet on the Prospect page first, so the device is never empty at a restore. A reader whose storage is blocked,
-    // and anyone who opened a folio someone shared with them, comes back to exactly this: sheets in the address, none
-    // on the device. The first draft emptied the drawer and then wrote an address with no table key at all, losing them
-    // from both homes in one gesture (the cold review on PR #635).
+    // The road the first draft of this fix BROKE, and which nothing here could reach: every other Back check files a sheet on the Prospect page first, so the device is never empty at a restore. A reader whose storage is blocked, and anyone who opened a folio someone shared with them, comes back to exactly this: sheets in the address, none on the device. The first draft emptied the drawer and then wrote an address with no table key at all, losing them from both homes in one gesture (the cold review on PR #635).
     await go(`${DRESS}&table=${ONE}`);
     await evaluate(`window.__cd634 = "bare"`);
     const before = await evaluate(`(() => ({ ...${READ}, stored: ${STORE} }))()`);

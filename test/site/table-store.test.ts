@@ -74,9 +74,7 @@ test("TS4 a BACK or FORWARD arrival takes the device's table over the stale addr
 test("TS5 a back arrival with NOTHING on the device still takes the address it landed on (#634)", () => {
   const carried = fill(1);
   assert.equal(emitTable(tableOnArrival(carried, null, "back_forward")), emitTable(carried));
-  // The case the cold review on PR #635 found shipped as a total loss: the two restore paths hand-rolled this rule
-  // without its qualifier, so a reader whose device holds nothing had the drawer EMPTIED by the gesture meant to keep
-  // it. Driven here at the rule, whose hosts are pinned to it by name in chart-drawer.test.ts and prospect-room.test.ts.
+  // The case the cold review on PR #635 found shipped as a total loss: the two restore paths hand-rolled this rule without its qualifier, so a reader whose device holds nothing had the drawer EMPTIED by the gesture meant to keep it. Driven here at the rule, whose hosts are pinned to it by name in chart-drawer.test.ts and prospect-room.test.ts.
   assert.equal(tableOnArrival(carried, null, TRAVERSAL).length, 1, "a traversal with an empty device seats nothing, which empties the table of every reader whose storage is blocked and of everyone who arrived on a shared link");
   assert.equal(readStoredTable(shut), null, "and the unreadable store this stands for reads as null, not as an empty table");
 });
@@ -157,8 +155,7 @@ test("TS13 the device every host reaches for is THE device, named once (#634, gu
 });
 
 test("TS12 the browser SEAM reads the real navigation entry, so the reading every host actually takes is exercised once (#634)", () => {
-  // Without this the injectable above is the only thing proved, and the wrapper could hand back a constant while every
-  // other test here stayed green and back/forward detection quietly died on all four hosts at once (guard-prover round 2).
+  // Without this the injectable above is the only thing proved, and the wrapper could hand back a constant while every other test here stayed green and back/forward detection quietly died on all four hosts at once (guard-prover round 2).
   const real = Object.getOwnPropertyDescriptor(globalThis, "performance");
   const stub = (entries: ReadonlyArray<{ type?: string }>): void => {
     Object.defineProperty(globalThis, "performance", { value: { getEntriesByType: () => entries }, configurable: true, writable: true });

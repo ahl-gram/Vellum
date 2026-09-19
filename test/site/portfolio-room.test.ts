@@ -3,9 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// #521 Sub 3: the three guards the cold review on PR #546 found missing on the Portfolio. This is not the room's
-// full test (the kit sweep, the css, the folio lines): it is the inline-fallback notice every other worker-driven
-// room carries, the slip's where-line in the bare state, and what the two sheet presses actually stand down on.
+// #521 Sub 3: the three guards the cold review on PR #546 found missing on the Portfolio. This is not the room's full test (the kit sweep, the css, the folio lines): it is the inline-fallback notice every other worker-driven room carries, the slip's where-line in the bare state, and what the two sheet presses actually stand down on.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const page = read("src/pages/print-room/portfolio/index.astro");
@@ -51,11 +49,7 @@ test("PFR3 every gathered sheet drafts, so nothing in the page skips a sheet by 
   const from = at("const draft = async");
   const loop = app.slice(from, app.indexOf("\n};", from));
   assert.ok(loop.length > 100, "the drafting loop was not found, so the assertions below read an empty slice");
-  // Not a word list. The first version of this enumerated two spellings of the comparison and the guard-prover walked
-  // straight past it with a third; the second version caught the loop's own legitimate type narrowing. So the skips are
-  // ENUMERATED instead: after this sub there is exactly one reason to skip a sheet, and it is not the sheet's kind.
-  // Named blind spot, with its direction: a skip hoisted into a variable first (`const k = sheet.item.kind;`) reads as no
-  // skip at all here, which costs a miss and never a false red. What the loop CANNOT do unread is guard on the item.
+  // Not a word list. The first version of this enumerated two spellings of the comparison and the guard-prover walked straight past it with a third; the second version caught the loop's own legitimate type narrowing. So the skips are ENUMERATED instead: after this sub there is exactly one reason to skip a sheet, and it is not the sheet's kind. Named blind spot, with its direction: a skip hoisted into a variable first (`const k = sheet.item.kind;`) reads as no skip at all here, which costs a miss and never a false red. What the loop CANNOT do unread is guard on the item.
   const skips = (loop.match(/\n\s*if \([^)]*\)\s*(continue|return)[;\s]/g) ?? []).map((s) => s.trim());
   assert.deepEqual(
     skips,
@@ -77,9 +71,7 @@ test("PFR4 the Portfolio's road home is built from the address it is SHOWING, an
   const road = at("pf-explorer");
   const hrefAt = app.indexOf("href", road);
   assert.ok(hrefAt > road, "nothing assigns the road's href after it is looked up, so the press back is the Astro literal and loses the whole gathering (#634 defect 1)");
-  // Both calls are anchored WHOLE rather than by their tokens. The guard-prover's round 1 on this branch put the
-  // address and the device the wrong way round as arguments and put "" in place of the sheets, and two unordered
-  // assert.match calls passed both mutations while the ruled precedence was inverted and the gathering dropped.
+  // Both calls are anchored WHOLE rather than by their tokens. The guard-prover's round 1 on this branch put the address and the device the wrong way round as arguments and put "" in place of the sheets, and two unordered assert.match calls passed both mutations while the ruled precedence was inverted and the gathering dropped.
   const line = app.slice(road, app.indexOf("\n", hrefAt));
   assert.match(line, /roadHome\.href = "\.\.\/\.\.\/explorer\/" \+ tableHash\(location\.hash, emitTable\(items\)\)/, "the road home is no longer this page's own address plus the sheets it is showing, so a reader who presses it loses the chart they gathered from, the sheets, or both");
   // COUNTED, because an anchored slice ends where it ends: a second assignment just past this line overwrites the first with the bare fallback and every regex above still passes (guard-prover round 2).
