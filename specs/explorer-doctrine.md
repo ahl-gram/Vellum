@@ -176,7 +176,12 @@ make an unqualified rule false. Read the surface, not just the rule.
   surprising**, because it is pinned deliberately (`TS15` in `test/site/table-store.test.ts` and
   `CD42`, whose fixture is a folio holding none of the sheets this device does). **A page whose
   address IS its content takes no traversal term at all**: the Portfolio shows the folio its address names, else
-  what the device holds, and answers a Back the same way whether or not the browser cached it. The
+  what the device holds. It has no restore arm either, so a cached Back into it shows the pile the
+  reader left, which is the folio they were looking at; the one cell where that differs from a fresh
+  open is a Portfolio whose address named NO folio, where a fresh open re-reads a device that has
+  changed since and the cached return does not. Measured rather than reasoned, and stated because an
+  earlier draft of this sentence claimed the two agree and the cold review's round 3 on PR #635
+  measured that they do not. The
   rule is pure in `src/site/shared/table-store.ts`, and the two
   roads back need two instruments, which is the part no reasoning supplies: a cached page runs NO
   boot code and is reachable only through `pageshow` with `persisted`, while a re-created one reads

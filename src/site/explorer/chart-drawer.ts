@@ -79,7 +79,6 @@ export function roomOnTable(items: ReadonlyArray<TableItem>): number {
   return Math.max(0, TABLE_CAP - items.length);
 }
 
-/** The sheets a re-seat drops, whose pictures go with them. */
 export function sheetsThatLeft(before: ReadonlyArray<TableItem>, after: ReadonlyArray<TableItem>): ReadonlyArray<TableItem> {
   const staying = new Set(after.map((item) => emitTable([item])));
   return before.filter((item) => !staying.has(emitTable([item])));

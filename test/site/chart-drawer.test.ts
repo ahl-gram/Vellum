@@ -326,6 +326,8 @@ test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that
   assert.ok(fill.length > 60, "the fill was not found, so the assertions below read an empty slice");
   assert.match(fill, /if \(drawing\) \{ refill = true; return; \}/, "a re-seat that lands while a thumbnail is in flight is DROPPED again, and its sheets keep a drawing frame until the reader shuts the drawer and opens it, which is the whole reason the flag exists");
   assert.match(fill, /do \{[\s\S]*\} while \(refill\)/, "and the flag is set but never acted on, which is the same thing one step later");
+  // The other half of that window, which nothing claimed until the cold review's round 3: the sheet can LEAVE while its picture is being drawn, and the url then lands under a key no cutting carries, so nothing ever revokes it.
+  assert.match(fill, /if \(!items\.some\(\(live\) => keyOf\(live\) === keyOf\(item\)\)\) \{ URL\.revokeObjectURL\(drawn\.url\); continue; \}/, "a picture that finishes drawing for a sheet that already left is filed rather than revoked, which leaks one blob url per departed sheet per re-seat mid-draw");
   const restore = src.slice(src.indexOf("restore(next:"), src.indexOf("\n    },", src.indexOf("restore(next:")));
   assert.ok(restore.length > 60, "restore was not found, so the assertions below read an empty slice");
   assert.match(restore, /for \(const gone of sheetsThatLeft\(items, kept\)\) forget\(gone\);/, "a sheet that leaves on a cached return keeps its blob url, and this path now runs on every return rather than once at boot, so they accumulate one per re-seat");
@@ -336,6 +338,22 @@ test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that
   assert.deepEqual(sheetsThatLeft(before, []).length, 3, "an emptied table drops every picture");
   assert.deepEqual(sheetsThatLeft([], before), [], "and an arrival into a bare drawer forgets nothing");
   assert.match(restore, /if \(deps\.root\.classList\.contains\("open"\)\) void fill\(\);/, "a drawer standing OPEN when the table is re-seated never draws what arrived");
+});
+
+test("CT11 EVERY road out that carries this page's address is rebuilt by the one hash writer, never by the draw (#634, the cold review's round 3 on PR #635)", () => {
+  // Guarded as a CLASS, and derived rather than restated: the roads are read out of the file. Laying a sheet, taking
+  // one off and a cached return all move the address WITHOUT drawing, so a road rebuilt in draw() hands on the table as
+  // it stood at the last draw. Measured doing exactly that: a reader who took their only sheet off still pressed a road
+  // carrying it, and the Print Room, which since this branch carries the table through, passed it on to the folio.
+  const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
+  const at = app.indexOf("function syncHash()");
+  assert.notEqual(at, -1, "the one hash writer is gone, so this guard has nothing to check the roads against");
+  const sync = app.slice(at, app.indexOf("\n}", at));
+  const roads = [...app.matchAll(/^\s*(?:if \([^)]*\) )?(\w+)\.href = [^\n]*location\.hash[^\n]*$/gm)].map((m) => m[1]);
+  assert.ok(roads.length >= 2, `this scan found ${roads.length} address-carrying roads in app.ts and the page has at least the Reading Room's and the Print Room's, so it is reading the wrong shape`);
+  for (const road of new Set(roads)) {
+    assert.match(sync, new RegExp(`\\b${road}\\.href = `), `${road} carries this page's address but is not rebuilt when the address changes, so it points at the table as it stood at the last draw`);
+  }
 });
 
 test("CT5 a prospect refused as a duplicate is refused in its OWN noun, and the survey line stays byte-identical (#522; e2e CD and announce.test pin the survey wording)", () => {

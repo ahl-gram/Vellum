@@ -81,6 +81,6 @@ test("PFR4 the Portfolio's road home is built from the address it is SHOWING, an
   const arrival = at("folioOnArrival(");
   const call = app.slice(arrival, app.indexOf("\n", arrival));
   assert.match(call, /folioOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\)\)/, "this folio's contents no longer come from the address FIRST and the device second (#634 rulings 1 and 4): swapped, a shared link stops reproducing exactly; dropped, the Print Room's own road here reaches a bare pile");
-  // The ABSENCE is the claim: this page's address IS its content, so it takes the precedence without the traversal term, or a Back answers one way when the browser cached the page and another when it did not, from one gesture (the cold review on PR #635).
-  assert.doesNotMatch(app, /tableOnArrival\(|navigationTypeNow\(/, "the folio page took the gathering surfaces' rule, whose traversal term makes a Back here depend on whether the browser happened to cache it");
+  // The ABSENCE is the claim: this page's address IS its content, so it takes the precedence WITHOUT the traversal term. The message says what the term would do here and not what a cached Back does, which is a separate thing this page has no arm for at all (the cold review's round 3 on PR #635 caught the first wording claiming more than it could).
+  assert.doesNotMatch(app, /tableOnArrival\(|navigationTypeNow\(/, "the folio page took the gathering surfaces' rule, whose traversal term would hand a reader arriving at a shared folio by Back or Forward their OWN table in place of the folio the address names");
 });

@@ -157,7 +157,6 @@ function readItem(chunk: string): TableItem | null {
   return null;
 }
 
-/** The key's value as items, for a host that holds the value alone rather than a whole address. */
 export function parseTableValue(raw: string): ReadonlyArray<TableItem> {
   return raw
     .split(ITEMS)

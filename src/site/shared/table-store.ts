@@ -10,7 +10,6 @@ export function readStoredTable(getStorage: () => Storage): ReadonlyArray<TableI
     const raw = getStorage().getItem(TABLE_STORE_KEY);
     return raw === null ? null : parseTableValue(raw);
   } catch {
-    /* private mode or storage disabled: the address is still the table's home */
     return null;
   }
 }
@@ -21,7 +20,6 @@ export function writeStoredTable(getStorage: () => Storage, items: ReadonlyArray
     if (items.length === 0) store.removeItem(TABLE_STORE_KEY);
     else store.setItem(TABLE_STORE_KEY, emitTable(items));
   } catch {
-    /* unwritable storage: the gathering still rides in the address */
   }
 }
 
@@ -42,7 +40,6 @@ export const navigationTypeNow = (): string =>
 /** The browser's own word for a history traversal, and what a CACHED return is even though its navigation entry still reads `navigate`, which is why a restore passes it rather than reading it. */
 export const TRAVERSAL = "back_forward";
 
-/** The precedence for a page whose ADDRESS is its content, the Portfolio. */
 export function folioOnArrival(
   carried: ReadonlyArray<TableItem> | null,
   stored: ReadonlyArray<TableItem> | null,

@@ -142,6 +142,8 @@ function syncHash(): void {
   writeHash(hashControls, touched.land, touched.coast, glass.cameraNow(),
     agesChk.checked ? { kind: "survey" } : null, chartTable.state());
   journalLink.href = "/reading-room/" + (location.hash || "");
+  // Rebuilt HERE and not in draw(): laying, taking and a cached return all move the address without drawing anything, and a road left behind hands on the table as it stood at the last draw (measured resurrecting a sheet the reader had taken off, the cold review's round 3 on PR #635).
+  if (orderLink) orderLink.href = "../print-room/" + (location.hash || "");
 }
 
 const glass = createGlass({
@@ -199,8 +201,6 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
   status.textContent = "Drafting…";
   caption.textContent = "";
   syncHash();
-  // #133: syncHash just wrote location.hash, so this link always opens the CURRENT world, never the one from page load.
-  if (orderLink) orderLink.href = "../print-room/" + (location.hash || "");
   const overrides: { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number } = {};
   if (typeSel.value) overrides.mapType = typeSel.value as MapType;
   if (bandSel.value) overrides.band = bandSel.value as ClimateBand;
