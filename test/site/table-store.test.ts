@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readStoredTable, writeStoredTable, tableOnArrival, navigationType, TABLE_STORE_KEY } from "../../src/site/shared/table-store.ts";
+import { readStoredTable, writeStoredTable, tableOnArrival, navigationType, navigationTypeNow, TABLE_STORE_KEY } from "../../src/site/shared/table-store.ts";
 import { emitTable, parseTable, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 
 // The Chart Table's second home (#634, ruled 2026-09-18 and 2026-09-19): the address decides an ARRIVAL and the device decides a RETURN. The store is injected rather than reached for, the way firstArrival/markArrival take theirs in src/site/home/ceremony.ts, so the precedence is provable here instead of only in a browser.
@@ -116,4 +116,23 @@ test("TS11 the navigation type is read from the browser's own entry, and default
   assert.equal(navigationType(() => [{ type: "" }]), "navigate", "an entry whose type is the empty string is not a navigation type, and reading it as one would compare it against back_forward forever");
   assert.equal(navigationType(() => [{}]), "navigate", "nor is an entry with no type at all");
   assert.equal(navigationType(() => { throw new Error("no performance entries here"); }), "navigate");
+});
+
+test("TS12 the browser SEAM reads the real navigation entry, so the reading every host actually takes is exercised once (#634)", () => {
+  // Without this the injectable above is the only thing proved, and the wrapper could hand back a constant while every
+  // other test here stayed green and back/forward detection quietly died on all four hosts at once (guard-prover round 2).
+  const real = Object.getOwnPropertyDescriptor(globalThis, "performance");
+  const stub = (entries: ReadonlyArray<{ type?: string }>): void => {
+    Object.defineProperty(globalThis, "performance", { value: { getEntriesByType: () => entries }, configurable: true, writable: true });
+  };
+  try {
+    stub([{ type: "back_forward" }]);
+    assert.equal(navigationTypeNow(), "back_forward", "the seam does not read the browser's own navigation entry, so a return is indistinguishable from an arrival on every page");
+    stub([{ type: "reload" }]);
+    assert.equal(navigationTypeNow(), "reload", "and it hands back a constant rather than what the browser said");
+    stub([]);
+    assert.equal(navigationTypeNow(), "navigate");
+  } finally {
+    if (real) Object.defineProperty(globalThis, "performance", real);
+  }
 });

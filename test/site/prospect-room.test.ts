@@ -176,3 +176,23 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
   assert.match(file[0], /display:\s*flex/, "the press and its tally stack as a column, which is what the ruled variant showed");
   assert.doesNotMatch(app, /layPress\.disabled/, "and it is never disabled: that drops it out of the tab order");
 });
+
+test("PR-table this page keeps the table's SECOND home too, on both roads the Explorer keeps it on (#634, ruled 2026-09-19)", () => {
+  // The whole of this check exists because the wiring is DUPLICATED at two hosts and only the Explorer's half was
+  // guarded: the guard-prover's round 2 deleted this page's device write, and then its entire pageshow listener, with
+  // every other test in the set green. That is #634's own defect recurring one level down, in the tests.
+  const from = app.indexOf('layPress.addEventListener("click"');
+  assert.notEqual(from, -1, "the filing press has no handler, so this guard reads the whole file");
+  const handler = app.slice(from, app.indexOf("\n});", from));
+  assert.match(handler, /writeStoredTable\(store, table\)/, "a sheet filed here never reaches the device, so the Explorer's own Back button loses it, which is the defect #634 was filed for");
+  assert.ok(handler.indexOf("writeStoredTable") < handler.indexOf("history.replaceState"), "the device is written after the address, which is a second order to keep in step for no reason");
+  const showAt = app.indexOf('window.addEventListener("pageshow"');
+  assert.notEqual(showAt, -1, "this page has no pageshow listener, and a page served from the browser's cache runs NO boot code, so nothing at all would bring its table up to date");
+  const show = app.slice(showAt, app.indexOf("\n});", showAt));
+  assert.match(show, /if \(!e\.persisted\) return;/, "the listener acts on a fresh load as well as a cached one, so it fights the boot's own precedence instead of being the restore's only reader");
+  assert.match(show, /const held = seated\(readStoredTable\(store\) \?\? \[\]\);/, "the cached return reads something other than the device, through something other than the gate every other seat here goes through");
+  assert.match(show, /if \(emitTable\(held\) === emitTable\(table\)\) return;/, "the no-op skip is gone or inverted, and inverted it does nothing exactly when the device and this page disagree");
+  assert.match(show, /table = held;/, "the listener reads the device and never keeps what it read");
+  assert.match(show, /history\.replaceState\(null, "", tableHash\(location\.hash, emitTable\(table\)\)\)/, "and it leaves this page's own address disagreeing with the table it just took");
+  assert.match(show, /paintLay\(\)/, "and the press's own face is left saying what was true before the return");
+});

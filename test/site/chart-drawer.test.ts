@@ -293,6 +293,8 @@ test("CT8 the road to the Portfolio carries the Explorer's WHOLE address, not th
     "the road no longer NAVIGATES to this page's own address plus the table: computing it and going somewhere else is the same defect as never computing it, and it is what #634 measured losing the world",
   );
   assert.doesNotMatch(handler, /#\$\{TABLE_KEY\}=/, "the key-only form is back; it is what #634 defect 1 measured losing the world");
+  // The fallback literal sits inside the wildcard above, so it needs its own pin: dropped to "../print-room/portfolio" it resolves one directory up and the road reaches the Print Room's own page (guard-prover round 2).
+  assert.match(handler, /deps\.folioHref \?\? "\.\.\/print-room\/portfolio\/"/, "the road's fallback destination changed, and a relative path without its trailing slash resolves somewhere else entirely");
 });
 
 test("CT9 the table is written to the device when the reader CHANGES it and re-seated on a cached return, which are the only two roads #634 leaves (ruled 2026-09-19)", () => {
@@ -312,8 +314,22 @@ test("CT9 the table is written to the device when the reader CHANGES it and re-s
   // What `held` is BUILT FROM, not only what happens to it: the prover's round 1 set it to the drawer's own current
   // state, which re-seats the drawer with what it already holds and reads as a restore while restoring nothing.
   assert.match(show, /const held = readStoredTable\(store\) \?\? \[\];/, "the cached return no longer reads the DEVICE, so the drawer is re-seated from something that cannot have changed while the page sat in the cache");
+  // The skip is pinned BY ITS OPERATOR: inverting it reads as a harmless optimisation and skips precisely when a restore is owed, which is the feature inverted with nothing else in the file changed (guard-prover round 2).
+  assert.match(show, /if \(emitTable\(held\) === emitTable\(chartTable\.state\(\)\)\) return;/, "the no-op skip on a cached return is gone or inverted, and inverted it does nothing exactly when the device and the drawer disagree");
   assert.match(show, /chartTable\.restore\(held\)/, "and it never re-seats the drawer with what it read");
   assert.match(show, /syncHash\(\)/, "and it leaves the address disagreeing with the drawer it just changed");
+});
+
+test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that leaves takes its picture with it (#634, the two behaviours restore() gained when it stopped running once at boot)", () => {
+  const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer.ts"), "utf8");
+  const fill = src.slice(src.indexOf("const fill = async"), src.indexOf("\n  };", src.indexOf("const fill = async")));
+  assert.ok(fill.length > 60, "the fill was not found, so the assertions below read an empty slice");
+  assert.match(fill, /if \(drawing\) \{ refill = true; return; \}/, "a re-seat that lands while a thumbnail is in flight is DROPPED again, and its sheets keep a drawing frame until the reader shuts the drawer and opens it, which is the whole reason the flag exists");
+  assert.match(fill, /do \{[\s\S]*\} while \(refill\)/, "and the flag is set but never acted on, which is the same thing one step later");
+  const restore = src.slice(src.indexOf("restore(next:"), src.indexOf("\n    },", src.indexOf("restore(next:")));
+  assert.ok(restore.length > 60, "restore was not found, so the assertions below read an empty slice");
+  assert.match(restore, /for \(const item of items\) if \(!staying\.has\(keyOf\(item\)\)\) forget\(item\);/, "a sheet that leaves on a cached return keeps its blob url, and this path now runs on every return rather than once at boot, so they accumulate one per re-seat");
+  assert.match(restore, /if \(deps\.root\.classList\.contains\("open"\)\) void fill\(\);/, "a drawer standing OPEN when the table is re-seated never draws what arrived");
 });
 
 test("CT5 a prospect refused as a duplicate is refused in its OWN noun, and the survey line stays byte-identical (#522; e2e CD and announce.test pin the survey wording)", () => {
